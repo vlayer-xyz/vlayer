@@ -10,3 +10,7 @@ opt-level = 3
 [profile.release]
 debug = 1
 lto = true
+
+
+[workspace.dependencies]
+risc0-zkvm = { version = "1.0.1"}
