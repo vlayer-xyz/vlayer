@@ -23,12 +23,12 @@ jobs:
           version: nightly
 
       - name: Run Forge build
+        working-directory: ./examples/simple
         run: |
           forge --version
           forge build --sizes
-        id: build
 
       - name: Run Forge tests
+        working-directory: ./examples/simple
         run: |
           forge test -vvv
-        id: test
