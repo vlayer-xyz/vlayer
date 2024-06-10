@@ -1,7 +1,7 @@
 [workspace]
 resolver = "2"
 # members = ["host", "methods", "template/guest"]
-members = ["host"]
+members = ["host", "guest_wrapper" ]
 
 # Always optimize; building and running the guest takes much longer without optimization.
 [profile.dev]
@@ -13,4 +13,6 @@ lto = true
 
 
 [workspace.dependencies]
-risc0-zkvm = { version = "1.0.1"}
+risc0-zkvm = "1.0.1"
+risc0-build = "1.0.1"
+serde = "1.0"
