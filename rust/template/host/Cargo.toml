@@ -7,3 +7,5 @@ edition = "2021"
 risc0-zkvm = { workspace = true }
 serde = { workspace = true }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+alloy-sol-types = "0.7.5"
+alloy-primitives = "0.7.5"
