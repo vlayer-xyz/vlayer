@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 risc0-zkvm = { workspace = true, feature = ["prove"] }
+risc0-steel = { git = "https://github.com/risc0/risc0-ethereum", branch = "main", features = ["host"]}
 serde = { workspace = true }
 guest_wrapper = { path = "../guest_wrapper" }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }

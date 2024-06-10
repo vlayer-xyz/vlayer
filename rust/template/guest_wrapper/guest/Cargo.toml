@@ -9,5 +9,6 @@ edition = "2021"
 
 [dependencies]
 risc0-zkvm = "1.0.1"
+risc0-steel = { git = "https://github.com/risc0/risc0-ethereum", branch = "main" }
 alloy-sol-types = "0.7.5"
 alloy-primitives = "0.7.5"
