@@ -1,6 +1,6 @@
 name: test
 
-on: workflow_dispatch
+on: [push, merge_group]
 
 env:
   FOUNDRY_PROFILE: ci
