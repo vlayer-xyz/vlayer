@@ -5,3 +5,5 @@ edition = "2021"
 
 [dependencies]
 risc0-zkvm = { workspace = true }
+serde = { workspace = true }
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }
