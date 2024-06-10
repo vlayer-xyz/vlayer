@@ -9,16 +9,9 @@ contract SimpleTest is Test {
 
     function setUp() public {
         simple = new Simple();
-        simple.setNumber(0);
     }
 
-    function test_Increment() public {
-        simple.increment();
-        assertEq(simple.number(), 1);
-    }
-
-    function testFuzz_SetNumber(uint256 x) public {
-        simple.setNumber(x);
-        assertEq(simple.number(), x);
+    function test_Sum() public view {
+        assertEq(simple.sum(2, 2), 4);
     }
 }

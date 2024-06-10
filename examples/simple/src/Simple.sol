@@ -2,13 +2,7 @@
 pragma solidity ^0.8.13;
 
 contract Simple {
-    uint256 public number;
-
-    function setNumber(uint256 newNumber) public {
-        number = newNumber;
-    }
-
-    function increment() public {
-        number++;
+    function sum(uint256 lhs, uint256 rhs) public pure returns (uint256) {
+        return lhs + rhs;
     }
 }
