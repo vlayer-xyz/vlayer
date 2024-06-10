@@ -1,0 +1,24 @@
+name: Rust Build and Run
+
+on: [push, merge_group]
+
+jobs:
+    build:
+        runs-on: ubuntu-latest
+
+        steps:
+          - name: Checkout repository
+            uses: actions/checkout@v2
+
+          - name: Set up Rust
+            uses: actions-rs/toolchain@v1
+            with:
+                toolchain: stable
+
+          - name: Run guest
+            working-directory: rust/template/guest
+            run: cargo run
+
+          - name: Run host
+            working-directory: rust/template/host
+            run: cargo run
