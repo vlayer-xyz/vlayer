@@ -1,0 +1,6 @@
+{
+    "rust-analyzer.linkedProjects": [
+        "rust/template/Cargo.toml",
+        "rust/template/guest/Cargo.toml",
+    ]
+}
