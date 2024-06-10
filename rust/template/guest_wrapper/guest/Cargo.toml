@@ -9,3 +9,5 @@ edition = "2021"
 
 [dependencies]
 risc0-zkvm = { version = "1.0.1"}
+alloy-sol-types = "0.7.5"
+alloy-primitives = "0.7.5"
