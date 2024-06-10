@@ -16,7 +16,7 @@ jobs:
                 toolchain: stable
 
           - name: Run guest
-            working-directory: rust/template/guest
+            working-directory: rust/template/guest_wrapper/guest
             run: cargo run
 
           - name: Run host
