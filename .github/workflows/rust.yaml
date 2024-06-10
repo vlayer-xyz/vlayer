@@ -21,7 +21,7 @@ jobs:
             run: cargo run
 
           - name: Install risc0 instaler
-            run: cargo binstall cargo-risczero
+            run: cargo binstall -y cargo-risczero
 
           - name: Install risc0 toolchain
             run: cargo risczero install
