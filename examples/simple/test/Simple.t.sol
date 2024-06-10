@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import {Test, console} from "forge-std/Test.sol";
-import {Simple} from "../src/Simple.sol";
+import {Simple} from "../src/vlayer/Simple.v.sol";
 
 contract SimpleTest is Test {
     Simple public simple;
