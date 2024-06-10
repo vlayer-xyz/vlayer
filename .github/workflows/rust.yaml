@@ -19,6 +19,12 @@ jobs:
             working-directory: rust/template/guest_wrapper/guest
             run: cargo run
 
+          - name: Install risc0 instaler
+            run: cargo binstall cargo-risczero
+
+          - name: Install risc0 toolchain
+            run: cargo risczero install
+    
           - name: Run host
             working-directory: rust/template/host
             run: cargo run
