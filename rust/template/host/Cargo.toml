@@ -4,8 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-risc0-zkvm = { workspace = true }
+risc0-zkvm = { workspace = true, feature = ["prove"] }
 serde = { workspace = true }
+guest_wrapper = { path = "../guest_wrapper" }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
 alloy-sol-types = "0.7.5"
 alloy-primitives = "0.7.5"
+anyhow = "1.0.86"

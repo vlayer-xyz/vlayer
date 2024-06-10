@@ -1,6 +1,7 @@
-use risc0_zkvm::{default_prover, ExecutorEnv};
-
 use alloy_sol_types::sol;
+use anyhow::Context;
+use guest_wrapper::GUEST_ELF;
+use risc0_zkvm::{default_prover, ExecutorEnv};
 
 sol! {
     interface Simple {
@@ -9,19 +10,17 @@ sol! {
 
 }
 
-fn main() {
+fn main() -> anyhow::Result<()> {
     // Initialize tracing. In order to view logs, run `RUST_LOG=info cargo run`
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
         .init();
 
-    let input: u32 = 42;
-    let _env = ExecutorEnv::builder()
-        .write(&input)
-        .unwrap()
-        .build()
-        .unwrap();
+    let env = ExecutorEnv::builder().build().unwrap();
 
-    // Obtain the default prover.
-    let _prover = default_prover();
+    let prover = default_prover();
+    prover
+        .prove(env, GUEST_ELF)
+        .context("failed to run prover")?;
+    Ok(())
 }
