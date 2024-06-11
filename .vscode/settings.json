@@ -1,7 +1,6 @@
 {
     "rust-analyzer.linkedProjects": [
-        "rust/vlayer/steel/Cargo.toml",
-        "rust/template/Cargo.toml",
+        "rust/Cargo.toml",
         "rust/template/guest_wrapper/guest/Cargo.toml",
     ]
 }
