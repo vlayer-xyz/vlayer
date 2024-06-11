@@ -8,6 +8,7 @@ jobs:
 
         steps:
           - uses: cargo-bins/cargo-binstall@main
+
           - name: Checkout repository
             uses: actions/checkout@v2
 
@@ -15,10 +16,6 @@ jobs:
             uses: actions-rs/toolchain@v1
             with:
                 toolchain: stable
-
-          - name: Run guest
-            working-directory: rust/template/guest_wrapper/guest
-            run: cargo run
 
           - name: Install risc0 instaler
             run: cargo binstall -y cargo-risczero
