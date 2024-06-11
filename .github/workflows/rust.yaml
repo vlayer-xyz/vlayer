@@ -54,6 +54,8 @@ jobs:
           - name: Run host
             working-directory: rust/template/host
             run: cargo run
+            env:
+              RUST_LOG: info
           
           - name: Stop Anvil
             if: always()
