@@ -2,8 +2,8 @@ use alloy_primitives::{address, Address, U256};
 use alloy_sol_types::sol;
 use anyhow::Context;
 use guest_wrapper::GUEST_ELF;
-use risc0_steel::{config::ETH_SEPOLIA_CHAIN_SPEC, ethereum::EthEvmEnv, Contract};
 use risc0_zkvm::{default_prover, ExecutorEnv};
+use vlayer_steel::{config::ETH_SEPOLIA_CHAIN_SPEC, ethereum::EthEvmEnv, Contract};
 
 sol! {
     interface Simple {

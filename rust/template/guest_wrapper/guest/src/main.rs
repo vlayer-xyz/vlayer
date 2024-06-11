@@ -4,8 +4,8 @@ risc0_zkvm::guest::entry!(main);
 
 use alloy_primitives::{address, Address, U256};
 use alloy_sol_types::sol;
-use risc0_steel::{config::ETH_SEPOLIA_CHAIN_SPEC, ethereum::EthEvmInput, Contract};
 use risc0_zkvm::guest::env;
+use vlayer_steel::{config::ETH_SEPOLIA_CHAIN_SPEC, ethereum::EthEvmInput, Contract};
 
 sol! {
     interface Simple {
