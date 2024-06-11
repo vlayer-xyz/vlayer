@@ -12,23 +12,21 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 pub mod call_builder;
+pub mod contract;
 pub mod db;
 
 #[cfg(feature = "host")]
 use crate::host::{provider::Provider, HostEvmEnv};
-use crate::{EvmBlockHeader, GuestEvmEnv};
+use crate::EvmBlockHeader;
 use alloy_primitives::{Address, Sealed, U256};
 use alloy_sol_types::{SolCall, SolType};
-use call_builder::CallBuilder;
 use revm::{
     primitives::{
-        CfgEnvWithHandlerCfg, ExecutionResult, ResultAndState,
-        SuccessReason, TransactTo,
+        CfgEnvWithHandlerCfg, ExecutionResult, ResultAndState, SuccessReason, TransactTo,
     },
     Database, Evm,
 };
 use std::{fmt::Debug, marker::PhantomData, mem};
-
 
 /// Represents a contract that is initialized with a specific environment and contract address.
 ///
@@ -79,48 +77,6 @@ use std::{fmt::Debug, marker::PhantomData, mem};
 /// [EvmInput::into_env]: crate::EvmInput::into_env
 /// [EvmEnv::new]: crate::EvmEnv::new
 /// [EthEvmEnv::from_rpc]: crate::ethereum::EthEvmEnv::from_rpc
-pub struct Contract<E> {
-    address: Address,
-    env: E,
-}
-
-impl<'a, H> Contract<&'a GuestEvmEnv<H>> {
-    /// Constructor for executing calls to an Ethereum contract in the guest.
-    pub fn new(address: Address, env: &'a GuestEvmEnv<H>) -> Self {
-        Self { address, env }
-    }
-
-    /// Initializes a call builder to execute a call on the contract.
-    pub fn call_builder<C: SolCall>(&self, call: &C) -> CallBuilder<C, &GuestEvmEnv<H>> {
-        CallBuilder::new(self.env, self.address, call)
-    }
-}
-
-#[cfg(feature = "host")]
-impl<'a, P, H> Contract<&'a mut HostEvmEnv<P, H>>
-where
-    P: Provider,
-{
-    /// Constructor for preflighting calls to an Ethereum contract on the host.
-    ///
-    /// Initializes the environment for calling functions on the Ethereum contract, fetching
-    /// necessary data via the [Provider], and generating a storage proof for any accessed
-    /// elements using [EvmEnv::into_input].
-    ///
-    /// [Provider]: crate::host::provider::Provider
-    /// [EvmEnv::into_input]: crate::EvmEnv::into_input
-    /// [EvmEnv]: crate::EvmEnv
-    pub fn preflight(address: Address, env: &'a mut HostEvmEnv<P, H>) -> Self {
-        Self { address, env }
-    }
-
-    /// Initializes a call builder to execute a call on the contract.
-    pub fn call_builder<C: SolCall>(&mut self, call: &C) -> CallBuilder<C, &mut HostEvmEnv<P, H>> {
-        CallBuilder::new(self.env, self.address, call)
-    }
-}
-
-
 
 /// Transaction data to be used with [CallBuilder] for an execution.
 #[derive(Debug, Clone)]
