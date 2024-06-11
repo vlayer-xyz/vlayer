@@ -13,7 +13,7 @@ sol! {
     }
 }
 
-const CONTRACT: Address = address!("e7f1725e7734ce288f8367e1bb143e90bb3f0512");
+const CONTRACT: Address = address!("5fbdb2315678afecb367f032d93f642f64180aa3");
 
 fn main() {
     let input: EthEvmInput = env::read();
