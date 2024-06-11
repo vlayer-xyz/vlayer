@@ -1,4 +1,4 @@
-use super::{new_evm, CallTxData, WrapStateDb};
+use super::{new_evm, CallTxData, db::WrapStateDb};
 
 #[cfg(feature = "host")]
 use crate::host::{provider::Provider, HostEvmEnv};
