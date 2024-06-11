@@ -16,7 +16,7 @@ const CONTRACT: Address = address!("5fbdb2315678afecb367f032d93f642f64180aa3");
 
 fn main() -> anyhow::Result<()> {
     let call: Simple::sumCall = Simple::sumCall {
-        lhs: U256::from(2),
+        lhs: U256::from(1),
         rhs: U256::from(2),
     };
     // Initialize tracing. In order to view logs, run `RUST_LOG=info cargo run`

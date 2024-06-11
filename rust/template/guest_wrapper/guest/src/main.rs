@@ -19,11 +19,11 @@ fn main() {
     let input: EthEvmInput = env::read();
     let env = input.into_env().with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC);
 
-    let lhs = U256::from(2);
+    let lhs = U256::from(1);
     let rhs = U256::from(2);
     let call = Simple::sumCall { lhs, rhs };
 
     let returns = Contract::new(CONTRACT, &env).call_builder(&call).call();
 
-    assert!(returns._0 == U256::from(4));
+    assert!(returns._0 == U256::from(3));
 }
