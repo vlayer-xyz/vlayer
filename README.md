@@ -113,6 +113,8 @@ class StateAccount {
 
 ```
 
+#### Environments
+
 ```mermaid
 classDiagram
 
@@ -124,8 +126,6 @@ class EvmInput {
     ancestors
     into_env(): EvmEnv<StateDb, H>
 }
-
-#### Environments
 
 class EvmEnv {
     db: D,
