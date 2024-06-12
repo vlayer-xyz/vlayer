@@ -49,6 +49,6 @@ To deliver all necessary proofs steps are performed:
 Hence, we have two different databases run in two different places. Each is a composite database:
 - **host** - runs ProofDb, which proxies queries to ProviderDb. ProviderDb, in turn, forwards the call to Ethereum RPC provider.
 Finally, ProofDb stores results to be passed to guest.
-- **guest** - runs WrapStateDb, which proxies calls to StateDb. StateDb consist of state passed form the host and have only the content required to be used by deterministic execution of solidity code in guest.
+- **guest** - runs WrapStateDb, which proxies calls to StateDb. StateDb consist of state passed form the host and have only the content required to be used by deterministic execution of solidity code in guest. WrapStateDb is an [adapter](https://en.wikipedia.org/wiki/Adapter_pattern) for StateDb that implements Database trait.
 
 ![Schema](./schema.png)
