@@ -51,3 +51,37 @@ Note that solidity execution is deterministic, hence database in the guest has e
 We have two different databases run in two different places. Each is a composite database:
 - **host** - runs ProofDb, which proxies queries to ProviderDb. In turn, ProviderDb forwards the call to Ethereum RPC provider. Finally, ProofDb stores results to be passed to guest, later.
 - **guest** - runs WrapStateDb, which proxies calls to StateDb. StateDb consists of state passed from the host and has only the content required to be used by deterministic execution of solidity code in guest. WrapStateDb is an [adapter](https://en.wikipedia.org/wiki/Adapter_pattern) for StateDb that implements Database trait.
+
+```mermaid
+classDiagram
+
+class EvmInput {
+    header
+    state_trie
+    storage_tries
+    contracts
+    ancestors
+    into_env(): EvmEnv<StateDb, H>
+}
+
+class EvmEnv {
+    db: D,
+    cfg_env: CfgEnvWithHandlerCfg
+    header: Sealed<H>
+}
+
+EvmEnv <|-- EthEvmEnv  
+EvmInput <|-- EthEvmInput
+EvmEnv *-- CfgEnvWithHandlerCfg
+
+
+class CfgEnvWithHandlerCfg {
+    pub cfg_env: CfgEnv 
+    pub handler_cfg: HandlerCfg 
+}
+```
+
+```
+Black diamond <> composition
+Hollow arrow <> trait implementation
+```
