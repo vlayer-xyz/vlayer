@@ -44,13 +44,74 @@ To deliver all necessary proofs, following steps are performed:
 
 Note that solidity execution is deterministic, hence database in the guest has exactly the data it requires. 
 
-![Schema](./schema.png)
+![Schema](./docs/images/schema.png)
 
 #### Databases
 
 We have two different databases run in two different places. Each is a composite database:
 - **host** - runs ProofDb, which proxies queries to ProviderDb. In turn, ProviderDb forwards the call to Ethereum RPC provider. Finally, ProofDb stores results to be passed to guest, later.
 - **guest** - runs WrapStateDb, which proxies calls to StateDb. StateDb consists of state passed from the host and has only the content required to be used by deterministic execution of solidity code in guest. WrapStateDb is an [adapter](https://en.wikipedia.org/wiki/Adapter_pattern) for StateDb that implements Database trait.
+
+```mermaid
+classDiagram
+
+class Database {
+    basic(address): AccountInfo?
+    code_by_hash(code_hash) Bytecode?
+    storage(address, index) U256?
+    block_hash(number) B256?
+}
+
+class StateDb {   
+    state_trie: MerkleTrie
+    storage_tries: HashMap
+    contracts: HashMap
+    block_hashes: HashMap
+    account(address: Address) StateAccount?
+    code_by_hash(hash: B256) Bytes? 
+    block_hash(number: U256) B256 
+    storage_trie(root: &B256) MerkleTrie?
+}
+
+class ProviderDb {
+    provider
+}
+
+class WrapStateDb {
+    stateDb
+}
+
+class ProofDb {
+    accounts: HashMap
+    contracts: HashMap
+    block_hash_numbers: HashSet    
+    providerDb
+}
+
+Database <|-- WrapStateDb
+Database <|-- ProviderDb
+Database <|-- ProofDb
+WrapStateDb *-- StateDb
+ProviderDb *-- Provider
+ProofDb *-- ProviderDb
+Database..AccountInfo
+StateDb..StateAccount
+
+class AccountInfo {
+    balance: U256
+    nonce: u64
+    code_hash: B256
+    code: Bytecode?
+}
+
+class StateAccount {
+    balance: U256   
+    nonce: TxNumber
+    code_hash: B256
+    storage_root: B256
+}
+
+```
 
 ```mermaid
 classDiagram
@@ -64,6 +125,8 @@ class EvmInput {
     into_env(): EvmEnv<StateDb, H>
 }
 
+#### Environments
+
 class EvmEnv {
     db: D,
     cfg_env: CfgEnvWithHandlerCfg
@@ -72,6 +135,7 @@ class EvmEnv {
 
 EvmEnv <|-- EthEvmEnv  
 EvmInput <|-- EthEvmInput
+
 EvmEnv *-- CfgEnvWithHandlerCfg
 
 
