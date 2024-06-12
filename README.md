@@ -39,3 +39,17 @@ Therefore - we execute Solidity first on host as preflight, and collect proofs f
 Later host passes this data to guest and guest executes on it. If some data is missing - guest fails.
 
 We have two types of databases that we run revm on. One is host DB that is connected to RPC and collects proofs and another is guest DB that reads in those proofs and later answers only queries that have proofs and fails if another query is received.
+
+#### Databases
+
+#### ProofDb
+
+ProofDb is a database used inside `host` during preflight contract call execution, which implements `Database` trait, so that it can be used by `evm`. ProofDb's implementation acts as proxy to provided RPC url and records its responses. Simply speaking, our mental model can treat `ProofDb` as a cache, which either returns a cached value or retrieves a value from a provided RPC on cache-miss.
+
+
+#### StateDb
+
+
+#### WrapStateDb
+
+****
