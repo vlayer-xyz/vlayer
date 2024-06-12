@@ -28,3 +28,14 @@ Host passes arguments to guest via standard input/output like functionality.
 
 In ZK terms - all inputs are **private**, all outputs are **public**. If you need public inputs - copy them to the output.
 
+### Steel
+
+Our architecture is inspired by risc0 [steel](https://github.com/risc0/risc0-ethereum/tree/main/steel)
+
+When executing Solidity code on guest - it needs access to ethereum state (balances, contract code) and storage (smart contract variables).
+
+Therefore - we execute Solidity first on host as preflight, and collect proofs for this data as a sparse merkle tree.
+
+Later host passes this data to guest and guest executes on it. If some data is missing - guest fails.
+
+We have two types of databases that we run revm on. One is host DB that is connected to RPC and collects proofs and another is guest DB that reads in those proofs and later answers only queries that have proofs and fails if another query is received.
