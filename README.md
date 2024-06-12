@@ -17,7 +17,7 @@ To run an example - go to specific example directory (e.g. `example/simple`) and
 
 
 ## Architecture
-On the high level, vlayer runs zkEVM that produces proof of proper execution. Under the hood, vlayer is written in Rust that is complied to zero knowledge proofs. Currently, Rust is complied with RISC-0, but we aim to build vendor-lock free solutions working on multiple zk stack, like [sp-1](https://github.com/succinctlabs/sp1) or [Jolt](https://github.com/a16z/jolt). Inside rust [revm](https://github.com/bluealloy/revm) is executed. 
+On the high level, vlayer runs zkEVM that produces proof of proper execution. Under the hood, vlayer is written in Rust that is complied to zero knowledge proofs. Currently, Rust is complied with [RISC-0](https://www.risczero.com/), but we aim to build vendor-lock free solutions working on multiple zk stacks, like [sp-1](https://github.com/succinctlabs/sp1) or [Jolt](https://github.com/a16z/jolt). Inside rust [revm](https://github.com/bluealloy/revm) is executed.
 
 Architecture is inspired by RISC-0 steel, with 3 main components, that can be found in `rust/template/` subdirectories:
 - host - (in `host`) - Collects all data required by guest and runs guest execution and proving
@@ -52,4 +52,5 @@ ProofDb is a database used inside `host` during preflight contract call executio
 
 #### WrapStateDb
 
-****
+### Schema
+![Schema](./schema.png)

@@ -5,8 +5,10 @@
     ],
     "cSpell.words": [
         "merkle",
+        "ommers",
         "revm",
         "SEPOLIA",
+        "thiserror",
         "vlayer",
         "zkvm"
     ]
