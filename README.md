@@ -1,7 +1,7 @@
 # vlayer
 
 
-Vlayer allows you to run EVM smart contracts off-chain and use results of their execution in on-chain smart contracts. Off-chain smart contracts have extra capabilities, like access to historical state of many chains, user emails and web data.
+Vlayer allows you to run EVM smart contracts off-chain and use results of their execution on-chain. Off-chain smart contracts have extra capabilities, like access to historical state of many chains, user emails and web data.
 
 ## Off-chain smart contracts
 
@@ -17,12 +17,12 @@ To run an example - go to specific example directory (e.g. `example/simple`) and
 
 
 ## Architecture
-On the high level, vlayer runs zkEVM that produces proof of proper execution. Under the hood, vlayer is written in Rust that is complied to zero knowledge proofs. Currently, Rust is complied with [RISC-0](https://www.risczero.com/), but we aim to build vendor-lock free solutions working on multiple zk stacks, like [sp-1](https://github.com/succinctlabs/sp1) or [Jolt](https://github.com/a16z/jolt). Inside rust [revm](https://github.com/bluealloy/revm) is executed.
+On the high level, vlayer runs zkEVM that produces proof of proper execution. Under the hood, vlayer is written in Rust that is compiled to zero knowledge proofs. Currently, Rust is compiled with [RISC Zero](https://www.risczero.com/), but we aim to build vendor-lock free solutions working on multiple zk stacks, like [sp-1](https://github.com/succinctlabs/sp1) or [Jolt](https://github.com/a16z/jolt). Inside rust [revm](https://github.com/bluealloy/revm) is executed.
 
-Architecture is inspired by RISC-0 steel, with 3 main components, that can be found in `rust/template/` subdirectories:
+Our architecture is inspired by RISC Zero [steel](https://github.com/risc0/risc0-ethereum/tree/main/steel), with 3 main components, that can be found in `rust/template/` subdirectories:
 - host - (in `host`) - Collects all data required by guest and runs guest execution and proving
 - guest - (in `guest_wrapper/guest`) - Contains the code to be run inside zkvm
-- guest-wrapper - (in `guest_wrapper`) - Compiles guest to [risc-0](https://doc.rust-lang.org/rustc/platform-support/riscv32im-risc0-zkvm-elf.html) target and makes it available to be run inside host
+- guest-wrapper - (in `guest_wrapper`) - Compiles guest to [RISC Zero](https://doc.rust-lang.org/rustc/platform-support/riscv32im-risc0-zkvm-elf.html) target and makes it available to be run inside host
 
 Host passes arguments to guest via standard input like functionality and similarly guests returns values by standard output like functionality.
 
@@ -30,19 +30,19 @@ In ZK terms, all inputs are **private** and all outputs are **public**. If you n
 
 ### Steel
 
-Our architecture is inspired by risc0 [steel](https://github.com/risc0/risc0-ethereum/tree/main/steel)
+When executing Solidity code in guest - it needs access to ethereum state and storage, which includes: balances, contracts code and smart contract variables. 
 
-When executing Solidity code in guest - it needs access to ethereum state and storage, which includes: balances, contract code and smart contract variables. 
+**Note:** In off-chain execution the notion of the current block doesn't exist, hence we always access Ethereum at specific historical block. The block number can be the latest mined block available on the network. This is different than the current block inside on-chain execution, which can access the state at the moment of execution of the given transaction. 
 
-**Note:** In off-chain the notion of the current block don't exist, hence we always access Ethereum at specific historical block. The block number can be latest, but it is important to differentiate from the current block.
+As zkvm works in isolation, every access to state needs to be proven. 
 
-As zero-knowledge virtual machine works in the isolation, every access to state needs to be proven. 
+To deliver all necessary proofs, following steps are performed:
+- In preflight, we execute Solidity code on the host. Each time the db is called the value is fetched via Ethereum JSON RPC. Then, the proof is stored in the local database called ProofDb.
+- Serialized content of ProofDb is passed via stdin to guest.
+- Guest deserializes content into a local database StateDb.
+- Solidity code is executed inside revm using local copy of StateDb.
 
-To deliver all necessary proofs steps are performed:
-- preflight: we execute Solidity code on the host, each time the db is called the value is fetched via Ethereum JSONRpc and the proof is stored in the local database called ProofDb
-- serialized content of ProofDb is passed via stdin to guest
-- guest deserializes content into a local database StateDb
-- solidity code is executed inside revm using local copy of StateDb
+Note that solidity execution is deterministic, hence database in the guest has exactly the data it requires. 
 
 #### Databases
 
