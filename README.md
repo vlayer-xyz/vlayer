@@ -24,33 +24,31 @@ Architecture is inspired by RISC-0 steel, with 3 main components, that can be fo
 - guest - (in `guest_wrapper/guest`) - Contains the code to be run inside zkvm
 - guest-wrapper - (in `guest_wrapper`) - Compiles guest to [risc-0](https://doc.rust-lang.org/rustc/platform-support/riscv32im-risc0-zkvm-elf.html) target and makes it available to be run inside host
 
-Host passes arguments to guest via standard input/output like functionality.
+Host passes arguments to guest via standard input like functionality and similarly guests returns values by standard output like functionality.
 
-In ZK terms - all inputs are **private**, all outputs are **public**. If you need public inputs - copy them to the output.
+In ZK terms, all inputs are **private** and all outputs are **public**. If you need public inputs - copy them to the output.
 
 ### Steel
 
 Our architecture is inspired by risc0 [steel](https://github.com/risc0/risc0-ethereum/tree/main/steel)
 
-When executing Solidity code on guest - it needs access to ethereum state (balances, contract code) and storage (smart contract variables).
+When executing Solidity code in guest - it needs access to ethereum state and storage, which includes: balances, contract code and smart contract variables. 
 
-Therefore - we execute Solidity first on host as preflight, and collect proofs for this data as a sparse merkle tree.
+**Note:** In off-chain the notion of the current block don't exist, hence we always access Ethereum at specific historical block. The block number can be latest, but it is important to differentiate from the current block.
 
-Later host passes this data to guest and guest executes on it. If some data is missing - guest fails.
+As zero-knowledge virtual machine works in the isolation, every access to state needs to be proven. 
 
-We have two types of databases that we run revm on. One is host DB that is connected to RPC and collects proofs and another is guest DB that reads in those proofs and later answers only queries that have proofs and fails if another query is received.
+To deliver all necessary proofs steps are performed:
+- preflight: we execute Solidity code on the host, each time the db is called the value is fetched via Ethereum JSONRpc and the proof is stored in the local database called ProofDb
+- serialized content of ProofDb is passed via stdin to guest
+- guest deserializes content into a local database StateDb
+- solidity code is executed inside revm using local copy of StateDb
 
 #### Databases
 
-#### ProofDb
+Hence, we have two different databases run in two different places. Each is a composite database:
+- **host** - runs ProofDb, which proxies queries to ProviderDb. ProviderDb, in turn, forwards the call to Ethereum RPC provider.
+Finally, ProofDb stores results to be passed to guest.
+- **guest** - runs WrapStateDb, which proxies calls to StateDb. StateDb consist of state passed form the host and have only the content required to be used by deterministic execution of solidity code in guest.
 
-ProofDb is a database used inside `host` during preflight contract call execution, which implements `Database` trait, so that it can be used by `evm`. ProofDb's implementation acts as proxy to provided RPC url and records its responses. Simply speaking, our mental model can treat `ProofDb` as a cache, which either returns a cached value or retrieves a value from a provided RPC on cache-miss.
-
-
-#### StateDb
-
-
-#### WrapStateDb
-
-### Schema
 ![Schema](./schema.png)
