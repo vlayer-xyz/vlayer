@@ -4,6 +4,8 @@
         "rust/template/guest_wrapper/guest/Cargo.toml",
     ],
     "cSpell.words": [
-        "vlayer"
+        "SEPOLIA",
+        "vlayer",
+        "zkvm"
     ]
 }
