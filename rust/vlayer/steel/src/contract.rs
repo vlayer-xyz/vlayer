@@ -141,7 +141,7 @@ impl<C: SolCall> CallTxData<C> {
     }
 }
 
-fn new_evm<'a, DB, H>(db: DB, cfg: CfgEnvWithHandlerCfg, header: &Sealed<H>) -> Evm<'a, (), DB>
+pub fn new_evm<'a, DB, H>(db: DB, cfg: CfgEnvWithHandlerCfg, header: &Sealed<H>) -> Evm<'a, (), DB>
 where
     DB: Database,
     H: EvmBlockHeader,

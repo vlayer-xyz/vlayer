@@ -25,7 +25,7 @@ use serde::{Deserialize, Serialize};
 use std::{fmt::Debug, rc::Rc};
 
 pub mod config;
-mod contract;
+pub mod contract;
 pub mod ethereum;
 #[cfg(feature = "host")]
 pub mod host;
@@ -99,9 +99,9 @@ pub(crate) type GuestEvmEnv<H> = EvmEnv<StateDb, H>;
 
 /// The environment to execute the contract calls in.
 pub struct EvmEnv<D, H> {
-    db: D,
-    cfg_env: CfgEnvWithHandlerCfg,
-    header: Sealed<H>,
+    pub db: D,
+    pub cfg_env: CfgEnvWithHandlerCfg,
+    pub header: Sealed<H>,
 }
 
 impl<D, H: EvmBlockHeader> EvmEnv<D, H> {

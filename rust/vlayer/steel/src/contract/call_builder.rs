@@ -93,12 +93,7 @@ where
     /// Executes the call with a [EvmEnv] constructed with [Contract::new].
     ///
     /// [EvmEnv]: crate::EvmEnv
-    pub fn call(self) -> C::Return {
-        let evm = new_evm(
-            WrapStateDb::new(&self.env.db),
-            self.env.cfg_env.clone(),
-            &self.env.header,
-        );
+    pub fn call(self, evm: revm::Evm<(), WrapStateDb>) -> C::Return {
         self.tx.transact(evm).unwrap()
     }
 }

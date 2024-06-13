@@ -13,7 +13,7 @@ pub struct WrapStateDb<'a> {
 
 impl<'a> WrapStateDb<'a> {
     /// Creates a new [Database] from the given [StateDb].
-    pub(crate) fn new(inner: &'a StateDb) -> Self {
+    pub fn new(inner: &'a StateDb) -> Self {
         Self {
             inner,
             account_storage: HashMap::new(),

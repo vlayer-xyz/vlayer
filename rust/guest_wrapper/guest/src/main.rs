@@ -5,7 +5,7 @@ risc0_zkvm::guest::entry!(main);
 use alloy_primitives::{address, Address, U256};
 use alloy_sol_types::sol;
 use risc0_zkvm::guest::env;
-use vlayer_steel::{config::ETH_SEPOLIA_CHAIN_SPEC, ethereum::EthEvmInput, Contract};
+use vlayer_steel::{config::ETH_SEPOLIA_CHAIN_SPEC, ethereum::EthEvmInput, Contract, contract::new_evm, contract::db::WrapStateDb};  
 
 sol! {
     interface Simple {
@@ -23,7 +23,13 @@ fn main() {
     let rhs = U256::from(2);
     let call = Simple::sumCall { lhs, rhs };
 
-    let returns = Contract::new(CONTRACT, &env).call_builder(&call).call();
+    let evm = new_evm(
+        WrapStateDb::new(&env.db),
+        env.cfg_env.clone(),
+        &env.header,
+    );
+
+    let returns = Contract::new(CONTRACT, &env).call_builder(&call).call(evm);
 
     assert!(returns._0 == U256::from(3));
 }
