@@ -132,6 +132,15 @@ class StateAccount {
 
 #### Environments
 
+The environment in which execution will happen is stored in the generic type `EvmEnv<D, EthBlockHeader>`, where `D` is a connected database and `EthBlockHeader` represents the type of block header. 
+
+##### Block header
+The block header type might vary on different sidechains and L2s. Currently, `EthBlockHeader` implemented by Steel is used. Whether we can reuse the type from Reth instead is an open question.
+
+##### Life cycle
+The environment is created in the host and converted into `EthEvmInput`, which is easy to serialize. Serialized data is then sent over standard input to the guest and deserialized on the guest. 
+`EthEvmInput` is a specialization of `EvmInput<EthBlockHeader>`.
+
 ```mermaid
 classDiagram
 
@@ -162,7 +171,10 @@ class CfgEnvWithHandlerCfg {
 }
 ```
 
-```
-Black diamond <> composition
-Hollow arrow <> trait implementation
-```
+
+#### Notes on future development
+To support multichain, we will need to introduce a new structure in place of EvmEnv and EthEvmInput. Each will contain multiple fields: EvmInput and EvmEnv, each with appropriate generic parameters, such as block type.
+
+To support calls from multiple different blocks, we will need to introduce one more layer in between, which will store sub-environments for various blocks.
+
+This will introduce significant complexity.
