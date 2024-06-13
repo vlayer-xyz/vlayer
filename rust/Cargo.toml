@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["template/host", "template/guest_wrapper", "vlayer/steel"]
+members = ["host", "guest_wrapper", "vlayer/steel", "common"]
 
 # Always optimize; building and running the guest takes much longer without optimization.
 [profile.dev]

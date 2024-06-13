@@ -27,3 +27,11 @@ fn main() {
 
     assert!(returns._0 == U256::from(3));
 }
+
+mod test {
+
+    #[test]
+    fn test() {
+        assert!(1 == 1);
+    }
+}
