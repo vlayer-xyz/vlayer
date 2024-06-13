@@ -1,5 +1,22 @@
 # vlayer
 
+## Contributing
+
+
+### Prerequisites
+
+You will need install following software to start working with repository:
+- [Rust](https://www.rust-lang.org/tools/install) compiler
+- Rust risc-0 [toolchain](https://dev.risczero.com/api/zkvm/quickstart)
+
+### Building
+
+To build project navigate to `rust` directory and type:
+```sh
+cargo build
+```
+
+## Architecture
 
 Vlayer allows you to run EVM smart contracts off-chain and use results of their execution on-chain. Off-chain smart contracts have extra capabilities, like access to historical state of many chains, user emails and web data.
 
@@ -49,7 +66,7 @@ Note that solidity execution is deterministic, hence database in the guest has e
 #### Databases
 
 We have two different databases run in two different places. Each is a composite database:
-- **host** - runs ProofDb, which proxies queries to ProviderDb. In turn, ProviderDb forwards the call to Ethereum RPC provider. Finally, ProofDb stores results to be passed to guest, later.
+- **host** - runs ProofDb, which proxies queries to ProviderDb. In turn, ProviderDb forwards the call to Ethereum RPC provider. Finally, ProofDb stores information about what proofs will need to be generated for the guest.
 - **guest** - runs WrapStateDb, which proxies calls to StateDb. StateDb consists of state passed from the host and has only the content required to be used by deterministic execution of solidity code in guest. WrapStateDb is an [adapter](https://en.wikipedia.org/wiki/Adapter_pattern) for StateDb that implements Database trait.
 
 ```mermaid
