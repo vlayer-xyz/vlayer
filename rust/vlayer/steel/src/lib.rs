@@ -25,12 +25,11 @@ use serde::{Deserialize, Serialize};
 use std::{fmt::Debug, rc::Rc};
 
 pub mod config;
-mod contract;
+pub mod contract;
 pub mod ethereum;
 #[cfg(feature = "host")]
 pub mod host;
 mod mpt;
-
 
 pub use contract::{call_builder::CallBuilder, contract::Contract};
 pub use mpt::MerkleTrie;

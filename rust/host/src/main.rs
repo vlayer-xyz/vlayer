@@ -1,10 +1,11 @@
-use alloy_primitives::{address, Address, U256};
-use alloy_sol_types::sol;
+use alloy_primitives::{address, Address};
 use anyhow::Context;
 use guest_wrapper::GUEST_ELF;
 use risc0_zkvm::{default_prover, ExecutorEnv};
 use vlayer_common::CallBuilder;
-use vlayer_steel::{config::ETH_SEPOLIA_CHAIN_SPEC, ethereum::EthEvmEnv, Contract};
+use vlayer_steel::{
+    config::ETH_SEPOLIA_CHAIN_SPEC, contract::call_builder::evm_call, ethereum::EthEvmEnv, Contract,
+};
 
 const CONTRACT: Address = address!("5fbdb2315678afecb367f032d93f642f64180aa3");
 const CALLER: Address = address!("f39Fd6e51aad88F6F4ce6aB8827279cffFb92266");
@@ -17,11 +18,10 @@ fn main() -> anyhow::Result<()> {
 
     let mut env = EthEvmEnv::from_rpc("http://localhost:8545", None)?;
     env = env.with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC);
-    let mut contract = Contract::preflight(CONTRACT, &mut env);
-
+    let contract = Contract::preflight(CONTRACT);
     let call = CallBuilder::build();
-
-    let returns = contract.call_builder(&call).from(CALLER).call()?;
+    let call_builder = contract.call_builder(&call).from(CALLER);
+    let _returns = evm_call(call_builder, &mut env)?;
 
     let input = env.into_input()?;
 
