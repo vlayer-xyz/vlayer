@@ -15,7 +15,7 @@ echo ${DEPLOYMENT_SCRIPT}
 function deploy_contract() {
   results_file=$(
     forge script ${DEPLOYMENT_SCRIPT} \
-      --rpc-url 127.0.0.1:8545 \
+      --rpc-url http://127.0.0.1:8545 \
       --broadcast 2>/dev/null \
     | grep "Transactions saved to" \
     | sed "s/^Transactions saved to: //"
