@@ -5,10 +5,11 @@ edition = "2021"
 
 [dependencies]
 risc0-zkvm = { workspace = true, feature = ["prove"] }
-vlayer-steel = { path = "../../vlayer/steel", features = ["host"]}
+vlayer-steel = { path = "../vlayer/steel", features = ["host"]}
 serde = { workspace = true }
 guest_wrapper = { path = "../guest_wrapper" }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
-alloy-sol-types = "0.7.5"
-alloy-primitives = "0.7.5"
+alloy-sol-types = { workspace = true }
+alloy-primitives = { workspace = true }
 anyhow = "1.0.86"
+vlayer-common = { path = "../common" }

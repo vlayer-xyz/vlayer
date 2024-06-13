@@ -31,7 +31,8 @@ pub mod ethereum;
 pub mod host;
 mod mpt;
 
-pub use contract::{contract::Contract, call_builder::CallBuilder};
+
+pub use contract::{call_builder::CallBuilder, contract::Contract};
 pub use mpt::MerkleTrie;
 
 /// The serializable input to derive and validate a [EvmEnv].
