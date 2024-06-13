@@ -21,7 +21,7 @@ impl<C> CallBuilder<C> {
     const DEFAULT_GAS_LIMIT: u64 = 30_000_000;
 
     /// Creates a new builder for the given contract call.
-    pub(crate) fn new(address: Address, call: &C) -> Self
+    pub fn new(address: Address, call: &C) -> Self
     where
         C: SolCall,
     {
@@ -85,18 +85,11 @@ where
         .map_err(|err| anyhow::anyhow!(err))
 }
 
-pub fn guest_evm_call<'a, C, H>(
-    call_builder: CallBuilder<C>,
-    env: &'a GuestEvmEnv<H>,
-) -> C::Return
+pub fn guest_evm_call<'a, C, H>(call_builder: CallBuilder<C>, env: &'a GuestEvmEnv<H>) -> C::Return
 where
     C: SolCall,
     H: EvmBlockHeader,
 {
-    let evm = new_evm(
-        WrapStateDb::new(&env.db),
-        env.cfg_env.clone(),
-        &env.header,
-    );
+    let evm = new_evm(WrapStateDb::new(&env.db), env.cfg_env.clone(), &env.header);
     call_builder.tx.transact(evm).unwrap()
 }

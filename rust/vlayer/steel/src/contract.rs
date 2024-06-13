@@ -40,7 +40,7 @@ use std::{fmt::Debug, marker::PhantomData, mem};
 ///
 /// ### Examples
 /// ```rust no_run
-/// # use vlayer_steel::{ethereum::EthEvmEnv, Contract};
+/// # use vlayer_steel::{ethereum::EthEvmEnv, Contract, contract::call_builder::{guest_evm_call, evm_call}};
 /// # use alloy_primitives::{address};
 /// # use alloy_sol_types::sol;
 ///
@@ -58,15 +58,15 @@ use std::{fmt::Debug, marker::PhantomData, mem};
 ///
 /// // Host:
 /// let mut env = EthEvmEnv::from_rpc("https://ethereum-rpc.publicnode.com", None)?;
-/// let mut contract = Contract::preflight(contract_address, &mut env);
-/// contract.call_builder(&get_balance).call()?;
+/// let mut contract = Contract::preflight(contract_address);
+/// evm_call(contract.call_builder(&get_balance), &mut env)?;
 ///
 /// let evm_input = env.into_input()?;
 ///
 /// // Guest:
 /// let evm_env = evm_input.into_env();
-/// let contract = Contract::new(contract_address, &evm_env);
-/// contract.call_builder(&get_balance).call();
+/// let contract = Contract::new(contract_address);
+/// guest_evm_call(contract.call_builder(&get_balance), &evm_env);
 ///
 /// # Ok(())
 /// # }

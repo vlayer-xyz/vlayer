@@ -7,8 +7,9 @@ use alloy_sol_types::sol;
 use risc0_zkvm::guest::env;
 use vlayer_common::CallBuilder;
 use vlayer_steel::{
-    config::ETH_SEPOLIA_CHAIN_SPEC, contract::call_builder::guest_evm_call, ethereum::EthEvmInput,
-    Contract,
+    config::ETH_SEPOLIA_CHAIN_SPEC,
+    contract::call_builder::{guest_evm_call, CallBuilder as SteelCallBuilder},
+    ethereum::EthEvmInput,
 };
 
 sol! {
@@ -25,7 +26,7 @@ fn main() {
 
     let call = CallBuilder::build();
 
-    let call_builder = Contract::new(CONTRACT).call_builder(&call);
+    let call_builder = SteelCallBuilder::new(CONTRACT, &call);
     let returns = guest_evm_call(call_builder, &env);
 
     assert!(returns._0 == U256::from(3));
