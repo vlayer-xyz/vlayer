@@ -1,4 +1,4 @@
-use super::{db::WrapStateDb, new_evm, CallTxData};
+use super::{db::WrapStateDb, new_evm, transact, CallTxData};
 
 #[cfg(feature = "host")]
 use crate::host::{provider::Provider, HostEvmEnv};
@@ -79,10 +79,8 @@ where
     );
 
     let evm = new_evm(&mut env.db, env.cfg_env.clone(), &env.header);
-    call_builder
-        .tx
-        .transact(evm)
-        .map_err(|err| anyhow::anyhow!(err))
+
+    transact(evm, call_builder.tx).map_err(|err| anyhow::anyhow!(err))
 }
 
 pub fn guest_evm_call<'a, C, H>(call_builder: CallBuilder<C>, env: &'a GuestEvmEnv<H>) -> C::Return
@@ -91,5 +89,5 @@ where
     H: EvmBlockHeader,
 {
     let evm = new_evm(WrapStateDb::new(&env.db), env.cfg_env.clone(), &env.header);
-    call_builder.tx.transact(evm).unwrap()
+    transact(evm, call_builder.tx).unwrap()
 }

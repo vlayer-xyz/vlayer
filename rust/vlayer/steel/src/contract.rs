@@ -94,49 +94,50 @@ impl<C: SolCall> CallTxData<C> {
         mem::size_of::<C::Return>() > 0,
         "Function call must have a return value"
     );
+}
 
-    /// Executes the call in the provided [Evm].
-    fn transact<DB>(self, mut evm: Evm<'_, (), DB>) -> Result<C::Return, String>
-    where
-        DB: Database,
-        <DB as Database>::Error: Debug,
-    {
-        #[allow(clippy::let_unit_value)]
-        let _ = Self::RETURNS;
+/// Executes the call in the provided [Evm].
+fn transact<C, DB>(mut evm: Evm<'_, (), DB>, tx: CallTxData<C>) -> Result<C::Return, String>
+where
+    C: SolCall,
+    DB: Database,
+    <DB as Database>::Error: Debug,
+{
+    #[allow(clippy::let_unit_value)]
+    let _ = CallTxData::<C>::RETURNS;
 
-        let tx_env = evm.tx_mut();
-        tx_env.caller = self.caller;
-        tx_env.gas_limit = self.gas_limit;
-        tx_env.gas_price = self.gas_price;
-        tx_env.transact_to = TransactTo::call(self.to);
-        tx_env.value = self.value;
-        tx_env.data = self.data.into();
+    let tx_env = evm.tx_mut();
+    tx_env.caller = tx.caller;
+    tx_env.gas_limit = tx.gas_limit;
+    tx_env.gas_price = tx.gas_price;
+    tx_env.transact_to = TransactTo::call(tx.to);
+    tx_env.value = tx.value;
+    tx_env.data = tx.data.into();
 
-        let ResultAndState { result, .. } = evm
-            .transact_preverified()
-            .map_err(|err| format!("Call '{}' failed: {:?}", C::SIGNATURE, err))?;
-        let ExecutionResult::Success { reason, output, .. } = result else {
-            return Err(format!("Call '{}' failed", C::SIGNATURE));
-        };
-        // there must be a return value to decode
-        if reason != SuccessReason::Return {
-            return Err(format!(
-                "Call '{}' did not return: {:?}",
-                C::SIGNATURE,
-                reason
-            ));
-        }
-        let returns = C::abi_decode_returns(&output.into_data(), true).map_err(|err| {
-            format!(
-                "Call '{}' returned invalid type; expected '{}': {:?}",
-                C::SIGNATURE,
-                <C::ReturnTuple<'_> as SolType>::SOL_NAME,
-                err
-            )
-        })?;
-
-        Ok(returns)
+    let ResultAndState { result, .. } = evm
+        .transact_preverified()
+        .map_err(|err| format!("Call '{}' failed: {:?}", C::SIGNATURE, err))?;
+    let ExecutionResult::Success { reason, output, .. } = result else {
+        return Err(format!("Call '{}' failed", C::SIGNATURE));
+    };
+    // there must be a return value to decode
+    if reason != SuccessReason::Return {
+        return Err(format!(
+            "Call '{}' did not return: {:?}",
+            C::SIGNATURE,
+            reason
+        ));
     }
+    let returns = C::abi_decode_returns(&output.into_data(), true).map_err(|err| {
+        format!(
+            "Call '{}' returned invalid type; expected '{}': {:?}",
+            C::SIGNATURE,
+            <C::ReturnTuple<'_> as SolType>::SOL_NAME,
+            err
+        )
+    })?;
+
+    Ok(returns)
 }
 
 fn new_evm<'a, DB, H>(db: DB, cfg: CfgEnvWithHandlerCfg, header: &Sealed<H>) -> Evm<'a, (), DB>
