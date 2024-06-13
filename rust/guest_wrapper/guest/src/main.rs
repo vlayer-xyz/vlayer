@@ -5,6 +5,7 @@ risc0_zkvm::guest::entry!(main);
 use alloy_primitives::{address, Address, U256};
 use alloy_sol_types::sol;
 use risc0_zkvm::guest::env;
+use vlayer_common::CallBuilder;
 use vlayer_steel::{
     config::ETH_SEPOLIA_CHAIN_SPEC, contract::call_builder::guest_evm_call, ethereum::EthEvmInput,
     Contract,
@@ -22,9 +23,7 @@ fn main() {
     let input: EthEvmInput = env::read();
     let env = input.into_env().with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC);
 
-    let lhs = U256::from(1);
-    let rhs = U256::from(2);
-    let call = Simple::sumCall { lhs, rhs };
+    let call = CallBuilder::build();
 
     let call_builder = Contract::new(CONTRACT).call_builder(&call);
     let returns = guest_evm_call(call_builder, &env);
