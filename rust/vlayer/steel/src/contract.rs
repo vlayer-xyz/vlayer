@@ -15,8 +15,6 @@ pub mod call_builder;
 pub mod contract;
 pub mod db;
 
-#[cfg(feature = "host")]
-use crate::host::{provider::Provider, HostEvmEnv};
 use crate::EvmBlockHeader;
 use alloy_primitives::{Address, Sealed, U256};
 use alloy_sol_types::{SolCall, SolType};

@@ -1,5 +1,5 @@
-use alloy_primitives::{address, Address, U256};
-use alloy_sol_types::{sol, SolCall};
+use alloy_primitives::U256;
+use alloy_sol_types::sol;
 
 sol! {
   interface Simple {

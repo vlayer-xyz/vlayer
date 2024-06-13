@@ -12,17 +12,16 @@ use std::marker::PhantomData;
 /// Once configured, call with [CallBuilder::call].
 #[derive(Debug, Clone)]
 #[must_use]
-pub struct CallBuilder<C, E> {
+pub struct CallBuilder<C> {
     tx: CallTxData<C>,
-    env: E,
 }
 
-impl<C, E> CallBuilder<C, E> {
+impl<C> CallBuilder<C> {
     /// The default gas limit for function calls.
     const DEFAULT_GAS_LIMIT: u64 = 30_000_000;
 
     /// Creates a new builder for the given contract call.
-    pub(crate) fn new(env: E, address: Address, call: &C) -> Self
+    pub(crate) fn new(address: Address, call: &C) -> Self
     where
         C: SolCall,
     {
@@ -35,7 +34,7 @@ impl<C, E> CallBuilder<C, E> {
             data: call.abi_encode(),
             phantom: PhantomData,
         };
-        Self { tx, env }
+        Self { tx }
     }
 
     /// Sets the caller of the function call.
@@ -64,41 +63,40 @@ impl<C, E> CallBuilder<C, E> {
 }
 
 #[cfg(feature = "host")]
-impl<'a, C, P, H> CallBuilder<C, &'a mut HostEvmEnv<P, H>>
+pub fn evm_call<'a, C, P, H>(
+    call_builder: CallBuilder<C>,
+    env: &'a mut HostEvmEnv<P, H>,
+) -> anyhow::Result<C::Return>
 where
     C: SolCall,
     P: Provider,
     H: EvmBlockHeader,
 {
-    /// Executes the call with a [EvmEnv] constructed with [Contract::preflight].
-    ///
-    /// [EvmEnv]: crate::EvmEnv
-    pub fn call(self) -> anyhow::Result<C::Return> {
-        log::info!(
-            "Executing preflight for '{}' on contract {}",
-            C::SIGNATURE,
-            self.tx.to
-        );
+    log::info!(
+        "Executing preflight for '{}' on contract {}",
+        C::SIGNATURE,
+        call_builder.tx.to
+    );
 
-        let evm = new_evm(&mut self.env.db, self.env.cfg_env.clone(), &self.env.header);
-        self.tx.transact(evm).map_err(|err| anyhow::anyhow!(err))
-    }
+    let evm = new_evm(&mut env.db, env.cfg_env.clone(), &env.header);
+    call_builder
+        .tx
+        .transact(evm)
+        .map_err(|err| anyhow::anyhow!(err))
 }
 
-impl<'a, C, H> CallBuilder<C, &'a GuestEvmEnv<H>>
+pub fn guest_evm_call<'a, C, H>(
+    call_builder: CallBuilder<C>,
+    env: &'a GuestEvmEnv<H>,
+) -> C::Return
 where
     C: SolCall,
     H: EvmBlockHeader,
 {
-    /// Executes the call with a [EvmEnv] constructed with [Contract::new].
-    ///
-    /// [EvmEnv]: crate::EvmEnv
-    pub fn call(self) -> C::Return {
-        let evm = new_evm(
-            WrapStateDb::new(&self.env.db),
-            self.env.cfg_env.clone(),
-            &self.env.header,
-        );
-        self.tx.transact(evm).unwrap()
-    }
+    let evm = new_evm(
+        WrapStateDb::new(&env.db),
+        env.cfg_env.clone(),
+        &env.header,
+    );
+    call_builder.tx.transact(evm).unwrap()
 }
