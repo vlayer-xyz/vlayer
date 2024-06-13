@@ -20,8 +20,9 @@ use std::fmt::Debug;
 use test_log::test;
 use vlayer_steel::{
     config::{ChainSpec, ETH_MAINNET_CHAIN_SPEC, ETH_SEPOLIA_CHAIN_SPEC},
+    contract::call_builder::{evm_call, guest_evm_call},
     ethereum::EthEvmEnv,
-    host, CallBuilder, Contract,
+    host, CallBuilder,
 };
 
 macro_rules! provider {
@@ -83,16 +84,17 @@ fn erc20_multi_balance_of() {
     let mut env = EthEvmEnv::from_provider(provider!(), ERC20_TEST_BLOCK)
         .unwrap()
         .with_chain_spec(&ETH_MAINNET_CHAIN_SPEC);
-    let mut contract = Contract::preflight(ERC20_TEST_CONTRACT, &mut env);
-    contract.call_builder(&call1).call().unwrap();
-    contract.call_builder(&call2).call().unwrap();
+    let call_builder1 = CallBuilder::new(ERC20_TEST_CONTRACT, &call1);
+    evm_call(call_builder1, &mut env).unwrap();
+    let call_builder2 = CallBuilder::new(ERC20_TEST_CONTRACT, &call2);
+    evm_call(call_builder2, &mut env).unwrap();
     let input = env.into_input().unwrap();
 
     // execute the call
     let env = input.into_env().with_chain_spec(&ETH_MAINNET_CHAIN_SPEC);
-    let contract = Contract::new(ERC20_TEST_CONTRACT, &env);
-    let result1 = contract.call_builder(&call1).call();
-    let result2 = contract.call_builder(&call2).call();
+    let result1 = guest_evm_call(CallBuilder::new(ERC20_TEST_CONTRACT, &call1), &env);
+    let result2 = guest_evm_call(CallBuilder::new(ERC20_TEST_CONTRACT, &call2), &env);
+
     assert_eq!(result1._0, uint!(3000000000000000_U256));
     assert_eq!(result2._0, uint!(0x38d7ea4c68000_U256));
 }
@@ -291,11 +293,11 @@ fn call_eoa() {
     let mut env = EthEvmEnv::from_provider(provider!(), VIEW_CALL_TEST_BLOCK)
         .unwrap()
         .with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC);
-    let mut contract = Contract::preflight(Address::ZERO, &mut env);
-    contract
-        .call_builder(&ViewCallTest::testBlockhashCall {})
-        .call()
-        .expect_err("calling an EOA should fail");
+    evm_call(
+        CallBuilder::new(Address::ZERO, &ViewCallTest::testBlockhashCall {}),
+        &mut env,
+    )
+    .expect_err("calling an EOA should fail");
 }
 
 /// Simple struct to operate over different [CallBuilder] types.
@@ -306,7 +308,7 @@ struct BuilderOverrides {
 }
 
 impl BuilderOverrides {
-    fn override_builder<E, C>(&self, mut builder: CallBuilder<E, C>) -> CallBuilder<E, C> {
+    fn override_builder<C>(&self, mut builder: CallBuilder<C>) -> CallBuilder<C> {
         if let Some(gas_price) = self.gas_price {
             builder = builder.gas_price(gas_price);
         }
@@ -325,26 +327,20 @@ fn eth_call<C>(
     chain_spec: &ChainSpec,
 ) -> C::Return
 where
-    C: SolCall,
+    C: SolCall + Clone,
     <C as SolCall>::Return: PartialEq + Debug,
 {
     let mut env = EthEvmEnv::from_provider(provider!(), block)
         .unwrap()
         .with_chain_spec(chain_spec);
 
-    let mut preflight = Contract::preflight(address, &mut env);
-    let preflight_result = call_overrides
-        .override_builder(preflight.call_builder(&call))
-        .call()
-        .unwrap();
+    let call_builder = call_overrides.override_builder(CallBuilder::new(address, &call));
 
+    let preflight_result = evm_call(call_builder.clone(), &mut env).unwrap();
     let input = env.into_input().unwrap();
 
     let env = input.into_env().with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC);
-    let contract = Contract::new(address, &env);
-    let result = call_overrides
-        .override_builder(contract.call_builder(&call))
-        .call();
+    let result = guest_evm_call(call_builder, &env);
     assert_eq!(
         result, preflight_result,
         "mismatch in preflight and execution"
