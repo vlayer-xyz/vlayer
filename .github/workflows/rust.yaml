@@ -3,60 +3,60 @@ name: Rust Build and Run
 on: [push, merge_group]
 
 jobs:
-    build:
-        runs-on: ubuntu-latest
+  build:
+    runs-on: ubuntu-latest
 
-        steps:
-          - uses: cargo-bins/cargo-binstall@main
+    steps:
+      - uses: cargo-bins/cargo-binstall@main
 
-          - name: Checkout repository
-            uses: actions/checkout@v2
-          
-          - name: Set up cargo cache
-            uses: actions/cache@v3
-            continue-on-error: false
-            with:
-              path: |
-                ~/.cargo/bin/
-                ~/.cargo/registry/index/
-                ~/.cargo/registry/cache/
-                ~/.cargo/git/db/
-                rust/template/target/
-              key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-              restore-keys: ${{ runner.os }}-cargo-
+      - name: Checkout repository
+        uses: actions/checkout@v2
 
-          - name: Set up Rust
-            uses: actions-rs/toolchain@v1
-            with:
-                toolchain: stable
+      - name: Set up cargo cache
+        uses: actions/cache@v3
+        continue-on-error: false
+        with:
+          path: |
+            ~/.cargo/bin/
+            ~/.cargo/registry/index/
+            ~/.cargo/registry/cache/
+            ~/.cargo/git/db/
+            rust/target/
+          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
+          restore-keys: ${{ runner.os }}-cargo-
 
-          - name: Install risc0 instaler
-            run: cargo binstall -y cargo-risczero
+      - name: Set up Rust
+        uses: actions-rs/toolchain@v1
+        with:
+          toolchain: stable
 
-          - name: Install risc0 toolchain
-            run: cargo risczero install
+      - name: Install risc0 instaler
+        run: cargo binstall -y cargo-risczero
 
-          - name: Install Foundry
-            uses: foundry-rs/foundry-toolchain@v1
-            with:
-              version: nightly-5ac78a9cd4b94dc53d1fe5e0f42372b28b5a7559 # 2024-06-02
+      - name: Install risc0 toolchain
+        run: cargo risczero install
 
-          - name: Start Anvil
-            run: |
-              anvil &
-              ANVIL_SERVER_PID=$!
-              echo "ANVIL_SERVER_PID=$ANVIL_SERVER_PID" >> $GITHUB_ENV
-          
-          - name: Deploy simple example contract
-            working-directory: examples/simple
-            run: ../../bash/vlayer-deploy.sh
-    
-          - name: Run host
-            working-directory: rust/template/host
-            run: cargo run
-            env:
-              RUST_LOG: info
-          
-          - name: Stop Anvil
-            if: always()
-            run: kill $ANVIL_SERVER_PID
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly-5ac78a9cd4b94dc53d1fe5e0f42372b28b5a7559 # 2024-06-02
+
+      - name: Start Anvil
+        run: |
+          anvil &
+          ANVIL_SERVER_PID=$!
+          echo "ANVIL_SERVER_PID=$ANVIL_SERVER_PID" >> $GITHUB_ENV
+
+      - name: Deploy simple example contract
+        working-directory: examples/simple
+        run: ../../bash/vlayer-deploy.sh
+
+      - name: Run host
+        working-directory: rust/host
+        run: cargo run
+        env:
+          RUST_LOG: info
+
+      - name: Stop Anvil
+        if: always()
+        run: kill $ANVIL_SERVER_PID
