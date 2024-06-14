@@ -12,7 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 pub mod call_builder;
-pub mod contract;
 pub mod db;
 
 use crate::EvmBlockHeader;
@@ -32,11 +31,9 @@ use std::{fmt::Debug, marker::PhantomData, mem};
 /// address matches the ABI used for making calls.
 ///
 /// ### Usage
-/// - **Preflight calls on the Host:** To prepare calls on the host environment and build the
-///   necessary proof, use [Contract::preflight]. The environment can be initialized using
+/// - **Preflight calls on the Host:** The environment can be initialized using
 ///   [EthEvmEnv::from_rpc] or [EvmEnv::new].
-/// - **Calls in the Guest:** To initialize the contract in the guest environment, use
-///   [Contract::new]. The environment should be constructed using [EvmInput::into_env].
+/// - **Calls in the Guest:** The environment should be constructed using [EvmInput::into_env].
 ///
 /// ### Examples
 /// ```rust no_run
