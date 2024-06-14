@@ -21,7 +21,7 @@ use test_log::test;
 use vlayer_steel::{
     config::{ChainSpec, ETH_MAINNET_CHAIN_SPEC, ETH_SEPOLIA_CHAIN_SPEC},
     contract::{
-        call_builder::{evm_call, guest_evm_call},
+        call::{evm_call, guest_evm_call},
         CallTxData,
     },
     ethereum::EthEvmEnv,
@@ -303,7 +303,6 @@ fn call_eoa() {
     .expect_err("calling an EOA should fail");
 }
 
-/// Simple struct to operate over different [CallBuilder] types.
 #[derive(Debug, Default)]
 struct CallOverrides {
     gas_price: Option<U256>,

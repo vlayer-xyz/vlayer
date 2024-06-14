@@ -181,16 +181,7 @@ class CfgEnvWithHandlerCfg {
 
 ### Contract calls
 
-```mermaid
-classDiagram
-
-class CallBuilder {
-    tx: CallTxData
-    new(env, address, call)
-}
-
-
-```
+// TODO: describe `guest_evm_call` and `evm_call`
 
 #### Notes on future development
 

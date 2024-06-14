@@ -8,7 +8,7 @@ use risc0_zkvm::guest::env;
 use vlayer_common::Simple::sumCall;
 use vlayer_steel::{
     config::ETH_SEPOLIA_CHAIN_SPEC,
-    contract::{call_builder::guest_evm_call, CallTxData},
+    contract::{call::guest_evm_call, CallTxData},
     ethereum::EthEvmInput,
 };
 

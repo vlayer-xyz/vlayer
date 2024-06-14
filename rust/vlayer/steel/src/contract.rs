@@ -11,7 +11,7 @@
 // WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 // See the License for the specific language governing permissions and
 // limitations under the License.
-pub mod call_builder;
+pub mod call;
 pub mod db;
 
 use crate::EvmBlockHeader;
@@ -73,7 +73,6 @@ use std::{fmt::Debug, marker::PhantomData, mem};
 /// [EvmEnv::new]: crate::EvmEnv::new
 /// [EthEvmEnv::from_rpc]: crate::ethereum::EthEvmEnv::from_rpc
 
-/// Transaction data to be used with [CallBuilder] for an execution.
 #[derive(Debug, Clone)]
 pub struct CallTxData<C> {
     pub caller: Address,
