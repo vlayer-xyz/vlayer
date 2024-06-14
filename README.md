@@ -192,15 +192,11 @@ Contract..CallBuilder
 
 class Contract {
     address: Address
-    env: E
-    call_builder() CallBuilder
 }
 
 class CallBuilder {
     tx: CallTxData
-    env: E
     new(env, address, call)
-    call()
 }
 
 
