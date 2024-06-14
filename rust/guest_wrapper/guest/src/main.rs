@@ -3,8 +3,9 @@
 risc0_zkvm::guest::entry!(main);
 
 use alloy_primitives::{address, Address, U256};
+use alloy_sol_types::SolCall;
 use risc0_zkvm::guest::env;
-use vlayer_common::CallBuilder;
+use vlayer_common::Simple::sumCall;
 use vlayer_steel::{
     config::ETH_SEPOLIA_CHAIN_SPEC,
     contract::call_builder::{guest_evm_call, CallBuilder as SteelCallBuilder},
@@ -17,7 +18,12 @@ fn main() {
     let input: EthEvmInput = env::read();
     let env = input.into_env().with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC);
 
-    let call = CallBuilder::build();
+    let call_data: Vec<u8> = vec![
+        202, 208, 137, 155, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+        0, 0, 0, 0, 0, 0, 0, 0, 0, 2,
+    ];
+    let call = <sumCall as SolCall>::abi_decode(&call_data, true).unwrap();
 
     let call_builder = SteelCallBuilder::new(CONTRACT, &call);
     let returns = guest_evm_call(call_builder, &env);
