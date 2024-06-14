@@ -8,7 +8,7 @@ use risc0_zkvm::guest::env;
 use vlayer_common::Simple::sumCall;
 use vlayer_steel::{
     config::ETH_SEPOLIA_CHAIN_SPEC,
-    contract::call_builder::{guest_evm_call, CallBuilder as SteelCallBuilder},
+    contract::{call_builder::guest_evm_call, CallTxData},
     ethereum::EthEvmInput,
 };
 
@@ -21,7 +21,7 @@ fn main() {
     let call_data: Vec<u8> = env::read();
     let call = <sumCall as SolCall>::abi_decode(&call_data, true).unwrap();
 
-    let call_builder = SteelCallBuilder::new(CONTRACT, &call);
+    let call_builder = CallTxData::new(CONTRACT, &call);
     let returns = guest_evm_call(call_builder.into(), &env);
 
     assert!(returns._0 == U256::from(3));

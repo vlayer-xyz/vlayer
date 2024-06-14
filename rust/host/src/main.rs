@@ -6,7 +6,7 @@ use risc0_zkvm::{default_prover, ExecutorEnv};
 use vlayer_common::Simple::sumCall;
 use vlayer_steel::{
     config::ETH_SEPOLIA_CHAIN_SPEC,
-    contract::call_builder::{evm_call, CallBuilder as SteelCallBuilder},
+    contract::{call_builder::evm_call, CallTxData},
     ethereum::EthEvmEnv,
 };
 
@@ -23,22 +23,23 @@ fn main() -> anyhow::Result<()> {
     env = env.with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC);
 
     // This is the abi encoded call data (lhs = 1, rhs = 2) for the sum function in the Simple contract.
-    let call_data: Vec<u8> = vec![
+    let raw_call_data: Vec<u8> = vec![
         202, 208, 137, 155, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 2,
     ];
-    let call = <sumCall as SolCall>::abi_decode(&call_data, true).unwrap();
+    let call = <sumCall as SolCall>::abi_decode(&raw_call_data, true).unwrap();
 
-    let call_builder = SteelCallBuilder::new(CONTRACT, &call).from(CALLER);
-    let _returns = evm_call(call_builder.into(), &mut env)?;
+    let mut call_data = CallTxData::new(CONTRACT, &call);
+    call_data.caller = CALLER;
+    let _returns = evm_call(call_data, &mut env)?;
 
     let input = env.into_input()?;
 
     let env = ExecutorEnv::builder()
         .write(&input)
         .unwrap()
-        .write(&call_data)
+        .write(&raw_call_data)
         .unwrap()
         .build()
         .unwrap();

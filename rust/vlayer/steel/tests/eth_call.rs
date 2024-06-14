@@ -25,7 +25,7 @@ use vlayer_steel::{
         CallTxData,
     },
     ethereum::EthEvmEnv,
-    host, CallBuilder,
+    host,
 };
 
 macro_rules! provider {
@@ -87,16 +87,16 @@ fn erc20_multi_balance_of() {
     let mut env = EthEvmEnv::from_provider(provider!(), ERC20_TEST_BLOCK)
         .unwrap()
         .with_chain_spec(&ETH_MAINNET_CHAIN_SPEC);
-    let call_builder1 = CallBuilder::new(ERC20_TEST_CONTRACT, &call1);
-    evm_call(call_builder1.into(), &mut env).unwrap();
-    let call_builder2 = CallBuilder::new(ERC20_TEST_CONTRACT, &call2);
-    evm_call(call_builder2.into(), &mut env).unwrap();
+    let call_data1 = CallTxData::new(ERC20_TEST_CONTRACT, &call1);
+    evm_call(call_data1, &mut env).unwrap();
+    let call_data2 = CallTxData::new(ERC20_TEST_CONTRACT, &call2);
+    evm_call(call_data2, &mut env).unwrap();
     let input = env.into_input().unwrap();
 
     // execute the call
     let env = input.into_env().with_chain_spec(&ETH_MAINNET_CHAIN_SPEC);
-    let result1 = guest_evm_call(CallBuilder::new(ERC20_TEST_CONTRACT, &call1).into(), &env);
-    let result2 = guest_evm_call(CallBuilder::new(ERC20_TEST_CONTRACT, &call2).into(), &env);
+    let result1 = guest_evm_call(CallTxData::new(ERC20_TEST_CONTRACT, &call1), &env);
+    let result2 = guest_evm_call(CallTxData::new(ERC20_TEST_CONTRACT, &call2), &env);
 
     assert_eq!(result1._0, uint!(3000000000000000_U256));
     assert_eq!(result2._0, uint!(0x38d7ea4c68000_U256));
@@ -297,7 +297,7 @@ fn call_eoa() {
         .unwrap()
         .with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC);
     evm_call(
-        CallBuilder::new(Address::ZERO, &ViewCallTest::testBlockhashCall {}).into(),
+        CallTxData::new(Address::ZERO, &ViewCallTest::testBlockhashCall {}),
         &mut env,
     )
     .expect_err("calling an EOA should fail");
@@ -337,7 +337,7 @@ where
         .unwrap()
         .with_chain_spec(chain_spec);
 
-    let call_tx_data = call_overrides.apply(CallBuilder::new(address, &call).into());
+    let call_tx_data = call_overrides.apply(CallTxData::new(address, &call));
 
     let preflight_result = evm_call(call_tx_data.clone().into(), &mut env).unwrap();
     let input = env.into_input().unwrap();
