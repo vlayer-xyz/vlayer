@@ -31,7 +31,7 @@ fn main() -> anyhow::Result<()> {
     let call = <sumCall as SolCall>::abi_decode(&call_data, true).unwrap();
 
     let call_builder = SteelCallBuilder::new(CONTRACT, &call).from(CALLER);
-    let _returns = evm_call(call_builder, &mut env)?;
+    let _returns = evm_call(call_builder.into(), &mut env)?;
 
     let input = env.into_input()?;
 
