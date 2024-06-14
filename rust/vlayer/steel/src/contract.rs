@@ -37,7 +37,7 @@ use std::{fmt::Debug, marker::PhantomData, mem};
 ///
 /// ### Examples
 /// ```rust no_run
-/// # use vlayer_steel::{ethereum::EthEvmEnv, Contract, contract::call_builder::{guest_evm_call, evm_call}};
+/// # use vlayer_steel::{ethereum::EthEvmEnv, contract::{call_builder::{guest_evm_call, evm_call}, CallTxData}};
 /// # use alloy_primitives::{address};
 /// # use alloy_sol_types::sol;
 ///
@@ -55,14 +55,14 @@ use std::{fmt::Debug, marker::PhantomData, mem};
 ///
 /// // Host:
 /// let mut env = EthEvmEnv::from_rpc("https://ethereum-rpc.publicnode.com", None)?;
-/// let call_builder = CallBuilder::new(contract_address, &get_balance);
+/// let call_builder = CallTxData::new(contract_address, &get_balance);
 /// evm_call(call_builder, &mut env)?;
 ///
 /// let evm_input = env.into_input()?;
 ///
 /// // Guest:
 /// let evm_env = evm_input.into_env();
-/// let call_builder = CallBuilder::new(contract_address, &get_balance);
+/// let call_builder = CallTxData::new(contract_address, &get_balance);
 /// guest_evm_call(call_builder, &evm_env);
 ///
 /// # Ok(())
@@ -83,6 +83,39 @@ pub struct CallTxData<C> {
     pub value: U256,
     pub data: Vec<u8>,
     phantom: PhantomData<C>,
+}
+
+// We can't derive `Default` for `CallTxData` as it would require `C: Default`
+impl<C> Default for CallTxData<C> {
+    fn default() -> Self {
+        Self {
+            phantom: PhantomData,
+            // We can't use `..Default::default()` here as it would cause recursion
+            caller: Default::default(),
+            gas_limit: Default::default(),
+            gas_price: Default::default(),
+            to: Default::default(),
+            value: Default::default(),
+            data: Default::default(),
+        }
+    }
+}
+
+impl<C> CallTxData<C> {
+    const DEFAULT_GAS_LIMIT: u64 = 30_000_000;
+
+    pub fn new(address: Address, call: &C) -> Self
+    where
+        C: SolCall,
+    {
+        Self {
+            caller: address, // by default the contract calls itself
+            to: address,
+            data: call.abi_encode(),
+            gas_limit: Self::DEFAULT_GAS_LIMIT,
+            ..Default::default()
+        }
+    }
 }
 
 impl<C: SolCall> CallTxData<C> {

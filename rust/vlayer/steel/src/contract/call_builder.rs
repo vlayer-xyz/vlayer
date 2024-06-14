@@ -5,7 +5,6 @@ use crate::host::{provider::Provider, HostEvmEnv};
 use crate::{EvmBlockHeader, GuestEvmEnv};
 use alloy_primitives::{Address, U256};
 use alloy_sol_types::SolCall;
-use std::marker::PhantomData;
 
 /// A builder for calling an Ethereum contract.
 ///
@@ -27,12 +26,10 @@ impl<C> CallBuilder<C> {
     {
         let tx = CallTxData {
             caller: address, // by default the contract calls itself
-            gas_limit: Self::DEFAULT_GAS_LIMIT,
-            gas_price: U256::ZERO,
             to: address,
-            value: U256::ZERO,
             data: call.abi_encode(),
-            phantom: PhantomData,
+            gas_limit: Self::DEFAULT_GAS_LIMIT,
+            ..Default::default()
         };
         Self { tx }
     }
