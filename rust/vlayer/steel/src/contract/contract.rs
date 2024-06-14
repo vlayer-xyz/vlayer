@@ -1,6 +1,4 @@
-use super::call_builder::CallBuilder;
 use alloy_primitives::Address;
-use alloy_sol_types::SolCall;
 
 pub struct Contract {
     address: Address,
@@ -10,11 +8,6 @@ impl Contract {
     /// Constructor for executing calls to an Ethereum contract in the guest.
     pub fn new(address: Address) -> Self {
         Self { address }
-    }
-
-    /// Initializes a call builder to execute a call on the contract.
-    pub fn call_builder<C: SolCall>(&self, call: &C) -> CallBuilder<C> {
-        CallBuilder::new(self.address, call)
     }
 }
 
