@@ -181,18 +181,8 @@ class CfgEnvWithHandlerCfg {
 
 ### Contract calls
 
-To perform contract calls inside revm, Steel introduces `Contract` abstraction.
-Contract can be used to make calls in two contexts: host and guest.
-Call can be performed by using `call` function by CallBuilder, that is created for a Contract. `call` creates revm instance.
-
 ```mermaid
 classDiagram
-
-Contract..CallBuilder
-
-class Contract {
-    address: Address
-}
 
 class CallBuilder {
     tx: CallTxData
