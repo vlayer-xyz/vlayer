@@ -181,7 +181,8 @@ class CfgEnvWithHandlerCfg {
 
 ### Contract calls
 
-// TODO: describe `guest_evm_call` and `evm_call`
+To perform the call you'll need to use the respective `evm_call` or `guest_evm_call` function.
+Both accept call data and evm environment. Consult code for exact types.
 
 #### Notes on future development
 
