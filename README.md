@@ -90,7 +90,9 @@ Note that solidity execution is deterministic, hence database in the guest has e
 We have two different databases run in two different places. Each is a composite database:
 
 - **host** - runs ProofDb, which proxies queries to ProviderDb. In turn, ProviderDb forwards the call to Ethereum RPC provider. Finally, ProofDb stores information about what proofs will need to be generated for the guest.
-- **guest** - runs WrapStateDb, which proxies calls to StateDb. StateDb consists of state passed from the host and has only the content required to be used by deterministic execution of solidity code in guest. WrapStateDb is an [adapter](https://en.wikipedia.org/wiki/Adapter_pattern) for StateDb that implements Database trait.
+- **guest** - runs WrapStateDb, which proxies calls to StateDb. 
+  - StateDb consists of state passed from the host and has only the content required to be used by deterministic execution of solidity code in guest. Data in the StateDb is stored as sparse Ethereum Merkle Patricia Tries, hence access to accounts and storage serves as veryfication of state and storage proofs.
+  -  WrapStateDb is an [adapter](https://en.wikipedia.org/wiki/Adapter_pattern) for StateDb that implements Database trait. It additionally do caching of accounts, for quering storage, so that account is only fetched once for multiple storage queries.
 
 ```mermaid
 classDiagram
@@ -166,6 +168,13 @@ The block header type might vary on different sidechains and L2s. Currently, `Et
 The environment is created in the host and converted into `EvmInput`, which is easy to serialize. Serialized data is then sent over standard input to the guest and deserialized in the guest. `EthEvmInput` is an `EvmInput` specialized by `EthBlockHeader`.
 
 `EvmInput` stores state and storage trees as sparse Ethereum Merkle Patricia Trie implemented by `MPT` structures witch is a wrapped Node. Sparse tree is very similar to standard MPT in that it includes four standard node types, however it only data necessary to execution and in place of unused nodes uses special node called `Digest`.
+
+Data is deserialized by host with `EVMInput.into_env()` function. Additonally, this method verifies header hashes (current and ancestors). `StateDb::new` calculates bytecodes hashes and storage roots.
+
+Hence, validation of data corectness is split between:
+- `MPT` function calls - merkle proofs of state and storage
+- `EVMInput.into_env()` - blocks hashes
+- `StateDb::new ` - bytecodes hashes and storage roots
 
 ```mermaid
 classDiagram
