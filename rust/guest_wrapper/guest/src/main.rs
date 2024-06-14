@@ -18,11 +18,11 @@ fn main() {
     let input: EthEvmInput = env::read();
     let env = input.into_env().with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC);
 
-    let call_data: Vec<u8> = env::read();
-    let call = <sumCall as SolCall>::abi_decode(&call_data, true).unwrap();
+    let raw_call_data: Vec<u8> = env::read();
+    let call = <sumCall as SolCall>::abi_decode(&raw_call_data, true).unwrap();
 
-    let call_builder = CallTxData::new(CONTRACT, &call);
-    let returns = guest_evm_call(call_builder.into(), &env);
+    let call_data = CallTxData::new(CONTRACT, &call);
+    let returns = guest_evm_call(call_data, &env);
 
     assert!(returns._0 == U256::from(3));
 }
