@@ -76,7 +76,7 @@ impl<C> From<CallBuilder<C>> for CallTxData<C> {
 
 #[cfg(feature = "host")]
 pub fn evm_call<'a, C, P, H>(
-    call_builder: CallBuilder<C>,
+    tx: CallTxData<C>,
     env: &'a mut HostEvmEnv<P, H>,
 ) -> anyhow::Result<C::Return>
 where
@@ -87,19 +87,19 @@ where
     log::info!(
         "Executing preflight for '{}' on contract {}",
         C::SIGNATURE,
-        call_builder.tx.to
+        tx.to
     );
 
     let evm = new_evm(&mut env.db, env.cfg_env.clone(), &env.header);
 
-    transact(evm, call_builder.tx).map_err(|err| anyhow::anyhow!(err))
+    transact(evm, tx).map_err(|err| anyhow::anyhow!(err))
 }
 
-pub fn guest_evm_call<'a, C, H>(call_builder: CallBuilder<C>, env: &'a GuestEvmEnv<H>) -> C::Return
+pub fn guest_evm_call<'a, C, H>(tx: CallTxData<C>, env: &'a GuestEvmEnv<H>) -> C::Return
 where
     C: SolCall,
     H: EvmBlockHeader,
 {
     let evm = new_evm(WrapStateDb::new(&env.db), env.cfg_env.clone(), &env.header);
-    transact(evm, call_builder.tx).unwrap()
+    transact(evm, tx).unwrap()
 }

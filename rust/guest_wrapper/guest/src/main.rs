@@ -22,7 +22,7 @@ fn main() {
     let call = <sumCall as SolCall>::abi_decode(&call_data, true).unwrap();
 
     let call_builder = SteelCallBuilder::new(CONTRACT, &call);
-    let returns = guest_evm_call(call_builder, &env);
+    let returns = guest_evm_call(call_builder.into(), &env);
 
     assert!(returns._0 == U256::from(3));
 }

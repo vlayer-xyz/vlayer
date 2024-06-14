@@ -88,15 +88,15 @@ fn erc20_multi_balance_of() {
         .unwrap()
         .with_chain_spec(&ETH_MAINNET_CHAIN_SPEC);
     let call_builder1 = CallBuilder::new(ERC20_TEST_CONTRACT, &call1);
-    evm_call(call_builder1, &mut env).unwrap();
+    evm_call(call_builder1.into(), &mut env).unwrap();
     let call_builder2 = CallBuilder::new(ERC20_TEST_CONTRACT, &call2);
-    evm_call(call_builder2, &mut env).unwrap();
+    evm_call(call_builder2.into(), &mut env).unwrap();
     let input = env.into_input().unwrap();
 
     // execute the call
     let env = input.into_env().with_chain_spec(&ETH_MAINNET_CHAIN_SPEC);
-    let result1 = guest_evm_call(CallBuilder::new(ERC20_TEST_CONTRACT, &call1), &env);
-    let result2 = guest_evm_call(CallBuilder::new(ERC20_TEST_CONTRACT, &call2), &env);
+    let result1 = guest_evm_call(CallBuilder::new(ERC20_TEST_CONTRACT, &call1).into(), &env);
+    let result2 = guest_evm_call(CallBuilder::new(ERC20_TEST_CONTRACT, &call2).into(), &env);
 
     assert_eq!(result1._0, uint!(3000000000000000_U256));
     assert_eq!(result2._0, uint!(0x38d7ea4c68000_U256));
@@ -297,7 +297,7 @@ fn call_eoa() {
         .unwrap()
         .with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC);
     evm_call(
-        CallBuilder::new(Address::ZERO, &ViewCallTest::testBlockhashCall {}),
+        CallBuilder::new(Address::ZERO, &ViewCallTest::testBlockhashCall {}).into(),
         &mut env,
     )
     .expect_err("calling an EOA should fail");
