@@ -68,7 +68,7 @@ fn erc20_balance_of() {
     let result = eth_call(
         call,
         ERC20_TEST_CONTRACT,
-        BuilderOverrides::default(),
+        CallOverrides::default(),
         ERC20_TEST_BLOCK,
         &ETH_MAINNET_CHAIN_SPEC,
     );
@@ -142,7 +142,7 @@ fn uniswap_exact_output_single() {
     let result = eth_call(
         call,
         contract,
-        BuilderOverrides {
+        CallOverrides {
             from: Some(caller),
             ..Default::default()
         },
@@ -202,7 +202,7 @@ fn precompile() {
     let result = eth_call(
         ViewCallTest::testPrecompileCall {},
         VIEW_CALL_TEST_CONTRACT,
-        BuilderOverrides::default(),
+        CallOverrides::default(),
         VIEW_CALL_TEST_BLOCK,
         &ETH_SEPOLIA_CHAIN_SPEC,
     );
@@ -217,7 +217,7 @@ fn nonexistent_account() {
     let result = eth_call(
         ViewCallTest::testNonexistentAccountCall {},
         VIEW_CALL_TEST_CONTRACT,
-        BuilderOverrides::default(),
+        CallOverrides::default(),
         VIEW_CALL_TEST_BLOCK,
         &ETH_SEPOLIA_CHAIN_SPEC,
     );
@@ -229,7 +229,7 @@ fn eoa_account() {
     let result = eth_call(
         ViewCallTest::testEoaAccountCall {},
         VIEW_CALL_TEST_CONTRACT,
-        BuilderOverrides::default(),
+        CallOverrides::default(),
         VIEW_CALL_TEST_BLOCK,
         &ETH_SEPOLIA_CHAIN_SPEC,
     );
@@ -241,7 +241,7 @@ fn blockhash() {
     let result = eth_call(
         ViewCallTest::testBlockhashCall {},
         VIEW_CALL_TEST_CONTRACT,
-        BuilderOverrides::default(),
+        CallOverrides::default(),
         VIEW_CALL_TEST_BLOCK,
         &ETH_SEPOLIA_CHAIN_SPEC,
     );
@@ -256,7 +256,7 @@ fn chainid() {
     let result = eth_call(
         ViewCallTest::testChainidCall {},
         VIEW_CALL_TEST_CONTRACT,
-        BuilderOverrides::default(),
+        CallOverrides::default(),
         VIEW_CALL_TEST_BLOCK,
         &ETH_SEPOLIA_CHAIN_SPEC,
     );
@@ -269,7 +269,7 @@ fn gasprice() {
     let result = eth_call(
         ViewCallTest::testGaspriceCall {},
         VIEW_CALL_TEST_CONTRACT,
-        BuilderOverrides {
+        CallOverrides {
             gas_price: Some(gas_price),
             ..Default::default()
         },
@@ -284,7 +284,7 @@ fn multi_contract_calls() {
     let result = eth_call(
         ViewCallTest::testMuliContractCallsCall {},
         VIEW_CALL_TEST_CONTRACT,
-        BuilderOverrides::default(),
+        CallOverrides::default(),
         VIEW_CALL_TEST_BLOCK,
         &ETH_SEPOLIA_CHAIN_SPEC,
     );
@@ -305,13 +305,13 @@ fn call_eoa() {
 
 /// Simple struct to operate over different [CallBuilder] types.
 #[derive(Debug, Default)]
-struct BuilderOverrides {
+struct CallOverrides {
     gas_price: Option<U256>,
     from: Option<Address>,
 }
 
-impl BuilderOverrides {
-    fn override_builder<C>(&self, mut tx_data: CallTxData<C>) -> CallTxData<C> {
+impl CallOverrides {
+    fn apply<C>(&self, mut tx_data: CallTxData<C>) -> CallTxData<C> {
         if let Some(gas_price) = self.gas_price {
             tx_data.gas_price = gas_price;
         }
@@ -325,7 +325,7 @@ impl BuilderOverrides {
 fn eth_call<C>(
     call: C,
     address: Address,
-    call_overrides: BuilderOverrides,
+    call_overrides: CallOverrides,
     block: u64,
     chain_spec: &ChainSpec,
 ) -> C::Return
@@ -337,7 +337,7 @@ where
         .unwrap()
         .with_chain_spec(chain_spec);
 
-    let call_tx_data = call_overrides.override_builder(CallBuilder::new(address, &call).into());
+    let call_tx_data = call_overrides.apply(CallBuilder::new(address, &call).into());
 
     let preflight_result = evm_call(call_tx_data.clone().into(), &mut env).unwrap();
     let input = env.into_input().unwrap();
