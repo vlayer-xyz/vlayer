@@ -146,8 +146,9 @@ The block header type might vary on different sidechains and L2s. Currently, `Et
 
 ##### Life cycle
 
-The environment is created in the host and converted into `EvmInput`, which is easy to serialize. Serialized data is then sent over standard input to the guest and deserialized in the guest.
-`EthEvmInput` is an `EvmInput` specialized by `EthBlockHeader`.
+The environment is created in the host and converted into `EvmInput`, which is easy to serialize. Serialized data is then sent over standard input to the guest and deserialized in the guest. `EthEvmInput` is an `EvmInput` specialized by `EthBlockHeader`.
+
+`EvmInput` stores state and storage trees as sparse Ethereum Merkle Patricia Trie implemented by `MPT` structures witch is a wrapped Node. Sparse tree is very similar to standard MPT in that it includes four standard node types, however it only data necessary to execution and in place of unused nodes uses special node called `Digest`.
 
 ```mermaid
 classDiagram
@@ -168,15 +169,26 @@ class EvmEnv {
 }
 
 EvmEnv <|-- EthEvmEnv
-EvmInput <|-- EthEvmInput
-
 EvmEnv *-- CfgEnvWithHandlerCfg
 
+EvmInput <|-- EthEvmInput
+EvmInput -- MPT
+MPT -- Node
 
 class CfgEnvWithHandlerCfg {
     pub cfg_env: CfgEnv
     pub handler_cfg: HandlerCfg
 }
+
+class Node {
+    <<enumeration>>
+    Null
+    Leaf
+    Extension
+    Branch
+    Digest
+}
+
 ```
 
 ### Contract calls
