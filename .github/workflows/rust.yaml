@@ -32,7 +32,7 @@ jobs:
 
       - name: Install risc0 instaler
         run: cargo binstall -y cargo-risczero
-  
+ 
       - name: Install risc0 toolchain
         run: cargo risczero install
   
