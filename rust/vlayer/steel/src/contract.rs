@@ -37,7 +37,7 @@ use std::{fmt::Debug, marker::PhantomData, mem};
 ///
 /// ### Examples
 /// ```rust no_run
-/// # use vlayer_steel::{ethereum::EthEvmEnv, contract::{call_builder::{guest_evm_call, evm_call}, CallTxData}};
+/// # use vlayer_steel::{ethereum::EthEvmEnv, contract::{call::{guest_evm_call, evm_call}, CallTxData}};
 /// # use alloy_primitives::{address};
 /// # use alloy_sol_types::sol;
 ///
@@ -55,15 +55,15 @@ use std::{fmt::Debug, marker::PhantomData, mem};
 ///
 /// // Host:
 /// let mut env = EthEvmEnv::from_rpc("https://ethereum-rpc.publicnode.com", None)?;
-/// let call_builder = CallTxData::new(contract_address, &get_balance);
-/// evm_call(call_builder, &mut env)?;
+/// let call_data = CallTxData::new(contract_address, &get_balance);
+/// evm_call(call_data, &mut env)?;
 ///
 /// let evm_input = env.into_input()?;
 ///
 /// // Guest:
 /// let evm_env = evm_input.into_env();
-/// let call_builder = CallTxData::new(contract_address, &get_balance);
-/// guest_evm_call(call_builder, &evm_env);
+/// let call_data = CallTxData::new(contract_address, &get_balance);
+/// guest_evm_call(call_data, &evm_env);
 ///
 /// # Ok(())
 /// # }
