@@ -3,7 +3,6 @@
 risc0_zkvm::guest::entry!(main);
 
 use alloy_primitives::{address, Address, U256};
-use alloy_sol_types::sol;
 use risc0_zkvm::guest::env;
 use vlayer_common::CallBuilder;
 use vlayer_steel::{
@@ -11,12 +10,6 @@ use vlayer_steel::{
     contract::call_builder::{guest_evm_call, CallBuilder as SteelCallBuilder},
     ethereum::EthEvmInput,
 };
-
-sol! {
-    interface Simple {
-        function sum(uint256 lhs, uint256 rhs) public pure returns (uint256);
-    }
-}
 
 const CONTRACT: Address = address!("5fbdb2315678afecb367f032d93f642f64180aa3");
 
