@@ -6,7 +6,7 @@ use risc0_zkvm::{default_prover, ExecutorEnv};
 use vlayer_common::Simple::sumCall;
 use vlayer_steel::{
     config::ETH_SEPOLIA_CHAIN_SPEC,
-    contract::{call_builder::evm_call, CallTxData},
+    contract::{call::evm_call, CallTxData},
     ethereum::EthEvmEnv,
 };
 
