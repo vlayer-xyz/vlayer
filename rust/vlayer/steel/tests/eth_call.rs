@@ -20,7 +20,10 @@ use std::fmt::Debug;
 use test_log::test;
 use vlayer_steel::{
     config::{ChainSpec, ETH_MAINNET_CHAIN_SPEC, ETH_SEPOLIA_CHAIN_SPEC},
-    contract::call_builder::{evm_call, guest_evm_call},
+    contract::{
+        call_builder::{evm_call, guest_evm_call},
+        CallTxData,
+    },
     ethereum::EthEvmEnv,
     host, CallBuilder,
 };
@@ -308,14 +311,14 @@ struct BuilderOverrides {
 }
 
 impl BuilderOverrides {
-    fn override_builder<C>(&self, mut builder: CallBuilder<C>) -> CallBuilder<C> {
+    fn override_builder<C>(&self, mut tx_data: CallTxData<C>) -> CallTxData<C> {
         if let Some(gas_price) = self.gas_price {
-            builder = builder.gas_price(gas_price);
+            tx_data.gas_price = gas_price;
         }
         if let Some(from) = self.from {
-            builder = builder.from(from);
+            tx_data.caller = from;
         }
-        builder
+        tx_data
     }
 }
 
@@ -334,13 +337,13 @@ where
         .unwrap()
         .with_chain_spec(chain_spec);
 
-    let call_builder = call_overrides.override_builder(CallBuilder::new(address, &call));
+    let call_tx_data = call_overrides.override_builder(CallBuilder::new(address, &call).into());
 
-    let preflight_result = evm_call(call_builder.clone(), &mut env).unwrap();
+    let preflight_result = evm_call(call_tx_data.clone().into(), &mut env).unwrap();
     let input = env.into_input().unwrap();
 
     let env = input.into_env().with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC);
-    let result = guest_evm_call(call_builder, &env);
+    let result = guest_evm_call(call_tx_data.into(), &env);
     assert_eq!(
         result, preflight_result,
         "mismatch in preflight and execution"
