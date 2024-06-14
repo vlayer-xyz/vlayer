@@ -19,7 +19,7 @@ cargo build
 
 ### Running
 
-To deploy contract firstly install `jq`:
+To deploy contract first install `jq`:
 
 ```sh
 brew install jq
