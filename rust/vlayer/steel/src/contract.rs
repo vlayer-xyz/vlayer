@@ -58,15 +58,15 @@ use std::{fmt::Debug, marker::PhantomData, mem};
 ///
 /// // Host:
 /// let mut env = EthEvmEnv::from_rpc("https://ethereum-rpc.publicnode.com", None)?;
-/// let mut contract = Contract::preflight(contract_address);
-/// evm_call(contract.call_builder(&get_balance), &mut env)?;
+/// let call_builder = CallBuilder::new(contract_address, &get_balance);
+/// evm_call(call_builder, &mut env)?;
 ///
 /// let evm_input = env.into_input()?;
 ///
 /// // Guest:
 /// let evm_env = evm_input.into_env();
-/// let contract = Contract::new(contract_address);
-/// guest_evm_call(contract.call_builder(&get_balance), &evm_env);
+/// let call_builder = CallBuilder::new(contract_address, &get_balance);
+/// guest_evm_call(call_builder, &evm_env);
 ///
 /// # Ok(())
 /// # }
