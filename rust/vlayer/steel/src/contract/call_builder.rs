@@ -62,6 +62,18 @@ impl<C> CallBuilder<C> {
     }
 }
 
+impl<C> From<CallTxData<C>> for CallBuilder<C> {
+    fn from(tx: CallTxData<C>) -> Self {
+        Self { tx }
+    }
+}
+
+impl<C> From<CallBuilder<C>> for CallTxData<C> {
+    fn from(builder: CallBuilder<C>) -> Self {
+        builder.tx
+    }
+}
+
 #[cfg(feature = "host")]
 pub fn evm_call<'a, C, P, H>(
     call_builder: CallBuilder<C>,
