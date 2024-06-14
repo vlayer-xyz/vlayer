@@ -75,13 +75,13 @@ use std::{fmt::Debug, marker::PhantomData, mem};
 
 /// Transaction data to be used with [CallBuilder] for an execution.
 #[derive(Debug, Clone)]
-struct CallTxData<C> {
-    caller: Address,
-    gas_limit: u64,
-    gas_price: U256,
-    to: Address,
-    value: U256,
-    data: Vec<u8>,
+pub struct CallTxData<C> {
+    pub caller: Address,
+    pub gas_limit: u64,
+    pub gas_price: U256,
+    pub to: Address,
+    pub value: U256,
+    pub data: Vec<u8>,
     phantom: PhantomData<C>,
 }
 
