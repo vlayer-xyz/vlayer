@@ -1,5 +1,6 @@
 use alloy_primitives::{address, Address};
 use anyhow::Context;
+use ethers_providers::{Http, Provider, RetryClient};
 use guest_wrapper::GUEST_ELF;
 use risc0_zkvm::{default_prover, ExecutorEnv, ProveInfo};
 use vlayer_steel::{
@@ -7,24 +8,33 @@ use vlayer_steel::{
     contract::{call::evm_call, CallTxData},
     ethereum::EthEvmEnv,
     guest_input::GuestInput,
+    host::{db::ProofDb, provider::EthersProvider},
 };
+
+pub type EthersClient = Provider<RetryClient<Http>>;
 
 const CONTRACT: Address = address!("5fbdb2315678afecb367f032d93f642f64180aa3");
 const CALLER: Address = address!("f39Fd6e51aad88F6F4ce6aB8827279cffFb92266");
 
-struct Host {}
+struct Host {
+    env: EthEvmEnv<ProofDb<EthersProvider<EthersClient>>>,
+}
 
 impl Host {
-    pub fn build_and_run(
-        &self,
+    fn try_new() -> anyhow::Result<Self> {
+        let env = EthEvmEnv::from_rpc("http://localhost:8545", None)?
+            .with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC)?;
+        Ok(Host { env })
+    }
+
+    pub fn run(
+        mut self,
         raw_call_data: Vec<u8>,
         call_data: CallTxData<()>,
-    ) -> anyhow::Result<()> {
-        let mut env = EthEvmEnv::from_rpc("http://localhost:8545", None)?;
-        env = env.with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC)?;
-        let _returns = evm_call(call_data, &mut env)?;
+    ) -> anyhow::Result<Vec<u8>> {
+        let _returns = evm_call(call_data, &mut self.env)?;
 
-        let evm_input = env.into_input()?;
+        let evm_input = self.env.into_input()?;
         let input = GuestInput {
             evm_input,
             call_data: raw_call_data,
@@ -35,9 +45,9 @@ impl Host {
             .build()
             .unwrap();
 
-        let _prove_info = Host::prove(env)?;
+        let prove_info = Host::prove(env)?;
 
-        Ok(())
+        Ok(prove_info.receipt.journal.bytes)
     }
 
     fn prove(env: ExecutorEnv) -> anyhow::Result<ProveInfo> {
@@ -62,8 +72,7 @@ fn main() -> anyhow::Result<()> {
     let mut call_data = CallTxData::<()>::new_from_bytes(CONTRACT, raw_call_data.clone());
     call_data.caller = CALLER;
 
-    let host = Host {};
-    host.build_and_run(raw_call_data, call_data)?;
+    let _return_data = Host::try_new()?.run(raw_call_data, call_data)?;
 
     Ok(())
 }

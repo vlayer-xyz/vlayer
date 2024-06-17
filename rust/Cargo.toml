@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["host", "guest_wrapper", "vlayer/steel",]
+members = ["host", "guest_wrapper", "vlayer/steel"]
 default-members = ["host"]
 
 # Always optimize; building and running the guest takes much longer without optimization.
@@ -18,3 +18,4 @@ risc0-build = "1.0.1"
 serde = "1.0"
 alloy-sol-types = "0.7.5"
 alloy-primitives = "0.7.5"
+ethers-providers = "2.0"
