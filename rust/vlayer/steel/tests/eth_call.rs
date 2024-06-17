@@ -71,7 +71,8 @@ fn erc20_balance_of() {
         CallOverrides::default(),
         ERC20_TEST_BLOCK,
         &ETH_MAINNET_CHAIN_SPEC,
-    );
+    )
+    .unwrap();
     assert_eq!(result._0, uint!(3000000000000000_U256));
 }
 
@@ -86,7 +87,8 @@ fn erc20_multi_balance_of() {
 
     let mut env = EthEvmEnv::from_provider(provider!(), ERC20_TEST_BLOCK)
         .unwrap()
-        .with_chain_spec(&ETH_MAINNET_CHAIN_SPEC);
+        .with_chain_spec(&ETH_MAINNET_CHAIN_SPEC)
+        .unwrap();
     let call_data1 = CallTxData::new(ERC20_TEST_CONTRACT, &call1);
     evm_call(call_data1, &mut env).unwrap();
     let call_data2 = CallTxData::new(ERC20_TEST_CONTRACT, &call2);
@@ -94,7 +96,10 @@ fn erc20_multi_balance_of() {
     let input = env.into_input().unwrap();
 
     // execute the call
-    let env = input.into_env().with_chain_spec(&ETH_MAINNET_CHAIN_SPEC);
+    let env = input
+        .into_env()
+        .with_chain_spec(&ETH_MAINNET_CHAIN_SPEC)
+        .unwrap();
     let result1 = guest_evm_call(CallTxData::new(ERC20_TEST_CONTRACT, &call1), &env);
     let result2 = guest_evm_call(CallTxData::new(ERC20_TEST_CONTRACT, &call2), &env);
 
@@ -148,7 +153,8 @@ fn uniswap_exact_output_single() {
         },
         block,
         &ETH_MAINNET_CHAIN_SPEC,
-    );
+    )
+    .unwrap();
     assert_eq!(result.amountIn, uint!(112537714517_U256));
 }
 
@@ -205,7 +211,8 @@ fn precompile() {
         CallOverrides::default(),
         VIEW_CALL_TEST_BLOCK,
         &ETH_SEPOLIA_CHAIN_SPEC,
-    );
+    )
+    .unwrap();
     assert_eq!(
         result._0,
         b256!("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
@@ -220,7 +227,8 @@ fn nonexistent_account() {
         CallOverrides::default(),
         VIEW_CALL_TEST_BLOCK,
         &ETH_SEPOLIA_CHAIN_SPEC,
-    );
+    )
+    .unwrap();
     assert_eq!(result.size, uint!(0_U256));
 }
 
@@ -232,7 +240,8 @@ fn eoa_account() {
         CallOverrides::default(),
         VIEW_CALL_TEST_BLOCK,
         &ETH_SEPOLIA_CHAIN_SPEC,
-    );
+    )
+    .unwrap();
     assert_eq!(result.size, uint!(0_U256));
 }
 
@@ -244,7 +253,8 @@ fn blockhash() {
         CallOverrides::default(),
         VIEW_CALL_TEST_BLOCK,
         &ETH_SEPOLIA_CHAIN_SPEC,
-    );
+    )
+    .unwrap();
     assert_eq!(
         result._0,
         b256!("7703fe4a3d6031a579d52ce9e493e7907d376cfc3b41f9bc7710b0dae8c67f68")
@@ -259,7 +269,8 @@ fn chainid() {
         CallOverrides::default(),
         VIEW_CALL_TEST_BLOCK,
         &ETH_SEPOLIA_CHAIN_SPEC,
-    );
+    )
+    .unwrap();
     assert_eq!(result._0, uint!(11155111_U256));
 }
 
@@ -275,7 +286,8 @@ fn gasprice() {
         },
         VIEW_CALL_TEST_BLOCK,
         &ETH_SEPOLIA_CHAIN_SPEC,
-    );
+    )
+    .unwrap();
     assert_eq!(result._0, gas_price);
 }
 
@@ -287,7 +299,8 @@ fn multi_contract_calls() {
         CallOverrides::default(),
         VIEW_CALL_TEST_BLOCK,
         &ETH_SEPOLIA_CHAIN_SPEC,
-    );
+    )
+    .unwrap();
     assert_eq!(result._0, uint!(84_U256));
 }
 
@@ -295,7 +308,8 @@ fn multi_contract_calls() {
 fn call_eoa() {
     let mut env = EthEvmEnv::from_provider(provider!(), VIEW_CALL_TEST_BLOCK)
         .unwrap()
-        .with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC);
+        .with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC)
+        .unwrap();
     evm_call(
         CallTxData::new(Address::ZERO, &ViewCallTest::testBlockhashCall {}),
         &mut env,
@@ -327,26 +341,24 @@ fn eth_call<C>(
     call_overrides: CallOverrides,
     block: u64,
     chain_spec: &ChainSpec,
-) -> C::Return
+) -> anyhow::Result<C::Return>
 where
     C: SolCall + Clone,
     <C as SolCall>::Return: PartialEq + Debug,
 {
-    let mut env = EthEvmEnv::from_provider(provider!(), block)
-        .unwrap()
-        .with_chain_spec(chain_spec);
+    let mut env = EthEvmEnv::from_provider(provider!(), block)?.with_chain_spec(chain_spec)?;
 
     let call_tx_data = call_overrides.apply(CallTxData::new(address, &call));
 
-    let preflight_result = evm_call(call_tx_data.clone(), &mut env).unwrap();
-    let input = env.into_input().unwrap();
+    let preflight_result = evm_call(call_tx_data.clone(), &mut env)?;
+    let input = env.into_input()?;
 
-    let env = input.into_env().with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC);
+    let env = input.into_env().with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC)?;
     let result = guest_evm_call(call_tx_data, &env);
     assert_eq!(
         result, preflight_result,
         "mismatch in preflight and execution"
     );
 
-    C::abi_decode_returns(&result, false).unwrap()
+    Ok(C::abi_decode_returns(&result, false)?)
 }

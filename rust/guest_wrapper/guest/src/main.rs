@@ -14,7 +14,10 @@ const CONTRACT: Address = address!("5fbdb2315678afecb367f032d93f642f64180aa3");
 
 fn main() {
     let input: EthEvmInput = env::read();
-    let env = input.into_env().with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC);
+    let env = input
+        .into_env()
+        .with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC)
+        .unwrap();
 
     let raw_call_data: Vec<u8> = env::read();
 

@@ -16,7 +16,7 @@
 use std::collections::BTreeMap;
 
 use alloy_primitives::{BlockNumber, ChainId};
-use anyhow::bail;
+use anyhow::{bail, Context};
 use once_cell::sync::Lazy;
 use revm::primitives::SpecId;
 use serde::{Deserialize, Serialize};
@@ -114,7 +114,7 @@ impl ChainSpec {
     }
     /// Validates a [SpecId].
     pub fn validate_spec_id(&self, spec_id: SpecId) -> anyhow::Result<()> {
-        let (min_spec_id, _) = self.hard_forks.first_key_value().unwrap();
+        let (min_spec_id, _) = self.hard_forks.first_key_value().context("no hard forks")?;
         if spec_id < *min_spec_id {
             bail!("expected >= {:?}, got {:?}", min_spec_id, spec_id);
         }

@@ -42,3 +42,6 @@ host = [
     "dep:tokio",
     "revm/ethersdb",
 ]
+
+[lints.clippy]
+unwrap_used = "deny"

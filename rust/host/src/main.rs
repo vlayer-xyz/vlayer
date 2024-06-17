@@ -18,7 +18,7 @@ fn main() -> anyhow::Result<()> {
         .init();
 
     let mut env = EthEvmEnv::from_rpc("http://localhost:8545", None)?;
-    env = env.with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC);
+    env = env.with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC)?;
 
     // This is the abi encoded call data (lhs = 1, rhs = 2) for the sum function in the Simple contract.
     let raw_call_data: Vec<u8> = vec![
