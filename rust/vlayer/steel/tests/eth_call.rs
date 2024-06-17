@@ -338,11 +338,11 @@ where
 
     let call_tx_data = call_overrides.apply(CallTxData::new(address, &call));
 
-    let preflight_result = evm_call(call_tx_data.clone().into(), &mut env).unwrap();
+    let preflight_result = evm_call(call_tx_data.clone(), &mut env).unwrap();
     let input = env.into_input().unwrap();
 
     let env = input.into_env().with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC);
-    let result = guest_evm_call(call_tx_data.into(), &env);
+    let result = guest_evm_call(call_tx_data, &env);
     assert_eq!(
         result, preflight_result,
         "mismatch in preflight and execution"
