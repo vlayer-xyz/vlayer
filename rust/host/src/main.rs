@@ -12,14 +12,43 @@ use vlayer_steel::{
 const CONTRACT: Address = address!("5fbdb2315678afecb367f032d93f642f64180aa3");
 const CALLER: Address = address!("f39Fd6e51aad88F6F4ce6aB8827279cffFb92266");
 
+struct Host {}
+
+impl Host {
+    pub fn build_and_run(
+        &self,
+        raw_call_data: Vec<u8>,
+        call_data: CallTxData<()>,
+    ) -> anyhow::Result<()> {
+        let mut env = EthEvmEnv::from_rpc("http://localhost:8545", None)?;
+        env = env.with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC)?;
+        let _returns = evm_call(call_data, &mut env)?;
+
+        let evm_input = env.into_input()?;
+        let input = GuestInput {
+            evm_input,
+            call_data: raw_call_data,
+        };
+        let env = ExecutorEnv::builder()
+            .write(&input)
+            .unwrap()
+            .build()
+            .unwrap();
+
+        let prover = default_prover();
+        prover
+            .prove(env, GUEST_ELF)
+            .context("failed to run prover")?;
+
+        Ok(())
+    }
+}
+
 fn main() -> anyhow::Result<()> {
     // Initialize tracing. In order to view logs, run `RUST_LOG=info cargo run`
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
         .init();
-
-    let mut env = EthEvmEnv::from_rpc("http://localhost:8545", None)?;
-    env = env.with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC)?;
 
     // This is the abi encoded call data (lhs = 1, rhs = 2) for the sum function in the Simple contract.
     let raw_call_data: Vec<u8> = vec![
@@ -30,22 +59,9 @@ fn main() -> anyhow::Result<()> {
 
     let mut call_data = CallTxData::<()>::new_from_bytes(CONTRACT, raw_call_data.clone());
     call_data.caller = CALLER;
-    let _returns = evm_call(call_data, &mut env)?;
 
-    let evm_input = env.into_input()?;
-    let input = GuestInput {
-        evm_input,
-        call_data: raw_call_data,
-    };
-    let env = ExecutorEnv::builder()
-        .write(&input)
-        .unwrap()
-        .build()
-        .unwrap();
+    let host = Host {};
+    host.build_and_run(raw_call_data, call_data)?;
 
-    let prover = default_prover();
-    prover
-        .prove(env, GUEST_ELF)
-        .context("failed to run prover")?;
     Ok(())
 }
