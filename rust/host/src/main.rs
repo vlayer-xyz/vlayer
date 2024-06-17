@@ -1,7 +1,7 @@
 use alloy_primitives::{address, Address};
 use anyhow::Context;
 use guest_wrapper::GUEST_ELF;
-use risc0_zkvm::{default_prover, ExecutorEnv};
+use risc0_zkvm::{default_prover, ExecutorEnv, ProveInfo};
 use vlayer_steel::{
     config::ETH_SEPOLIA_CHAIN_SPEC,
     contract::{call::evm_call, CallTxData},
@@ -35,12 +35,14 @@ impl Host {
             .build()
             .unwrap();
 
-        let prover = default_prover();
-        prover
-            .prove(env, GUEST_ELF)
-            .context("failed to run prover")?;
+        let _prove_info = Host::prove(env)?;
 
         Ok(())
+    }
+
+    fn prove(env: ExecutorEnv) -> anyhow::Result<ProveInfo> {
+        let prover = default_prover();
+        prover.prove(env, GUEST_ELF).context("failed to run prover")
     }
 }
 
