@@ -171,7 +171,7 @@ The environment is created in the host and converted into `EvmInput`, which is e
 
 Data is deserialized by host with `EVMInput.into_env()` function. Additionally, this method verifies header hashes (current and ancestors). `StateDb::new` calculates bytecodes hashes and storage roots.
 
-##### Verifictaion of input data
+##### Verification of input data
 
 The guest is required to verify all data provided by the host. Validation of data correctness is split between multiple functions:
 - `EVMInput.into_env` verifies:
