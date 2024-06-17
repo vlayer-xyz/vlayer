@@ -25,6 +25,7 @@ use serde::{Deserialize, Serialize};
 use std::{fmt::Debug, rc::Rc};
 
 pub mod config;
+pub mod guest_input;
 pub mod contract;
 pub mod ethereum;
 #[cfg(feature = "host")]

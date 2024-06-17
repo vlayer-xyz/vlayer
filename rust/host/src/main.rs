@@ -6,6 +6,7 @@ use vlayer_steel::{
     config::ETH_SEPOLIA_CHAIN_SPEC,
     contract::{call::evm_call, CallTxData},
     ethereum::EthEvmEnv,
+    guest_input::GuestInput,
 };
 
 const CONTRACT: Address = address!("5fbdb2315678afecb367f032d93f642f64180aa3");
@@ -31,12 +32,13 @@ fn main() -> anyhow::Result<()> {
     call_data.caller = CALLER;
     let _returns = evm_call(call_data, &mut env)?;
 
-    let input = env.into_input()?;
-
+    let evm_input = env.into_input()?;
+    let input = GuestInput {
+        evm_input,
+        call_data: raw_call_data,
+    };
     let env = ExecutorEnv::builder()
         .write(&input)
-        .unwrap()
-        .write(&raw_call_data)
         .unwrap()
         .build()
         .unwrap();

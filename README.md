@@ -31,7 +31,7 @@ If `VLAYER_CONTRACT_ADDRESS` is displayed, contract was deployed successfully.
 Finally run:
 
 ```sh
-cargo run
+RUST_LOG=info RISC0_DEV_MODE=1 cargo run
 ```
 
 ## Architecture
