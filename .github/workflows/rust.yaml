@@ -41,6 +41,12 @@ jobs:
         working-directory: rust
         run: cargo build
       
+      - name: Run Clippy
+        working-directory: rust
+        run: cargo clippy --all-targets --all-features
+        env:
+          RUSTFLAGS: "-Dwarnings"
+      
       - name: Run workspace rust tests
         working-directory: rust
         run: cargo test --workspace
