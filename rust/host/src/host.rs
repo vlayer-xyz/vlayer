@@ -1,4 +1,5 @@
-use anyhow::Context;
+use anyhow::{anyhow, Error};
+
 use ethers_providers::{Http, Provider, RetryClient};
 use guest_wrapper::GUEST_ELF;
 use risc0_zkvm::{default_prover, ExecutorEnv, ProveInfo};
@@ -14,6 +15,19 @@ pub type EthersClient = Provider<RetryClient<Http>>;
 
 pub struct Host {
     env: EthEvmEnv<ProofDb<EthersProvider<EthersClient>>>,
+}
+
+#[derive(Debug)]
+pub enum HostError {
+    ProveFailed(Error),
+}
+
+impl std::fmt::Display for HostError {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self {
+            Self::ProveFailed(err) => write!(f, "HostError: {}", err),
+        }
+    }
 }
 
 impl Host {
@@ -41,13 +55,15 @@ impl Host {
             .build()
             .unwrap();
 
-        let prove_info = Host::prove(env)?;
+        let prove_info = Host::prove(env).map_err(|err| anyhow!(err))?;
 
         Ok(prove_info.receipt.journal.bytes)
     }
 
-    fn prove(env: ExecutorEnv) -> anyhow::Result<ProveInfo> {
+    fn prove(env: ExecutorEnv) -> Result<ProveInfo, HostError> {
         let prover = default_prover();
-        prover.prove(env, GUEST_ELF).context("failed to run prover")
+        prover
+            .prove(env, GUEST_ELF)
+            .map_err(|err| HostError::ProveFailed(err))
     }
 }
