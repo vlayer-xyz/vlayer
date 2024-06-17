@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["host", "guest_wrapper",  "common", "vlayer/steel",]
+members = ["host", "guest_wrapper", "vlayer/steel",]
 default-members = ["host"]
 
 # Always optimize; building and running the guest takes much longer without optimization.
