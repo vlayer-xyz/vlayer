@@ -40,6 +40,7 @@ impl<M: Middleware> EthersProvider<M> {
         let runtime_handle = match Handle::try_current() {
             Ok(handle) => (handle, None),
             Err(_) => {
+                #[allow(clippy::unwrap_used)]
                 let runtime = Runtime::new().unwrap();
                 (runtime.handle().clone(), Some(runtime))
             }
@@ -206,8 +207,8 @@ impl<T> TryFrom<Block<T>> for EthBlockHeader {
                     .ok_or("base_fee_per_gas is missing")?,
             ),
             withdrawals_root: block.withdrawals_root.map(from_ethers_h256),
-            blob_gas_used: block.blob_gas_used.map(|x| x.try_into().unwrap()),
-            excess_blob_gas: block.excess_blob_gas.map(|x| x.try_into().unwrap()),
+            blob_gas_used: block.blob_gas_used.map(|x| x.try_into()).transpose()?,
+            excess_blob_gas: block.excess_blob_gas.map(|x| x.try_into()).transpose()?,
             parent_beacon_block_root: block.parent_beacon_block_root.map(from_ethers_h256),
         })
     }

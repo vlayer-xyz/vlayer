@@ -65,7 +65,7 @@ Here is a snippet to the [relevant code](../examples/erc20/host/src/main.rs) on 
 // provided, the latest block is used.
 let mut env = EthViewCallEnv::from_rpc(&args.rpc_url, None)?;
 //  The `with_chain_spec` method is used to specify the chain configuration.
-env = env.with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC);
+env = env.with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC)?;
 
 // Preflight the call to construct the input that is required to execute the function in
 // the guest. It also returns the result of the call.

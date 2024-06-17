@@ -116,12 +116,11 @@ impl<D, H: EvmBlockHeader> EvmEnv<D, H> {
     }
 
     /// Sets the chain ID and specification ID from the given chain spec.
-    pub fn with_chain_spec(mut self, chain_spec: &config::ChainSpec) -> Self {
+    pub fn with_chain_spec(mut self, chain_spec: &config::ChainSpec) -> anyhow::Result<Self> {
         self.cfg_env.chain_id = chain_spec.chain_id();
-        self.cfg_env.handler_cfg.spec_id = chain_spec
-            .active_fork(self.header.number(), self.header.timestamp())
-            .unwrap();
-        self
+        self.cfg_env.handler_cfg.spec_id =
+            chain_spec.active_fork(self.header.number(), self.header.timestamp())?;
+        Ok(self)
     }
 
     /// Returns the [SolCommitment] used to validate the environment.
