@@ -64,6 +64,6 @@ impl Host {
         let prover = default_prover();
         prover
             .prove(env, GUEST_ELF)
-            .map_err(|err| HostError::ProveFailed(err))
+            .map_err(HostError::ProveFailed)
     }
 }
