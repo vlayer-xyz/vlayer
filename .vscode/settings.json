@@ -4,10 +4,13 @@
         "rust/guest_wrapper/guest/Cargo.toml",
     ],
     "cSpell.words": [
+        "bytecodes",
         "merkle",
+        "multichain",
         "ommers",
         "revm",
         "SEPOLIA",
+        "sidechains",
         "thiserror",
         "vlayer",
         "zkvm"
