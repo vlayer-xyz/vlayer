@@ -1,9 +1,7 @@
 use alloy_primitives::{address, Address};
-use alloy_sol_types::SolCall;
 use anyhow::Context;
 use guest_wrapper::GUEST_ELF;
 use risc0_zkvm::{default_prover, ExecutorEnv};
-use vlayer_common::Simple::sumCall;
 use vlayer_steel::{
     config::ETH_SEPOLIA_CHAIN_SPEC,
     contract::{call::evm_call, CallTxData},
@@ -28,9 +26,8 @@ fn main() -> anyhow::Result<()> {
         0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
         0, 0, 0, 0, 0, 0, 0, 0, 0, 2,
     ];
-    let call = <sumCall as SolCall>::abi_decode(&raw_call_data, true).unwrap();
 
-    let mut call_data = CallTxData::new(CONTRACT, &call);
+    let mut call_data = CallTxData::<()>::new_from_bytes(CONTRACT, raw_call_data.clone());
     call_data.caller = CALLER;
     let _returns = evm_call(call_data, &mut env)?;
 
