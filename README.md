@@ -171,10 +171,20 @@ The environment is created in the host and converted into `EvmInput`, which is e
 
 Data is deserialized by host with `EVMInput.into_env()` function. Additionally, this method verifies header hashes (current and ancestors). `StateDb::new` calculates bytecodes hashes and storage roots.
 
-Hence, validation of data correctness is split between:
-- `MPT` function calls - merkle proofs of state and storage
-- `EVMInput.into_env()` - blocks hashes
-- `StateDb::new ` - bytecodes hashes and storage roots
+##### Verifictaion of input data
+
+The guest is required to verify all data provided by the host. Validation of data correctness is split between multiple functions:
+- `EVMInput.into_env` verifies:
+    - equality of subsequent ancestor block hashes
+    - equality of header.state_root and actual state_root
+- `StateDb::new` calculates:
+    - smart contracts bytecode hashes
+    - storage roots
+- `MerkleTrie::from_rlp_nodes` effectively verifies merkle proofs by:
+    - Calculating the hash of each node
+    - Reconstructing the tree in `MerkleTrie::resolve_trie`
+
+And ofcourse 
 
 ```mermaid
 classDiagram
