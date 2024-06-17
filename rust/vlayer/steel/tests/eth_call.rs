@@ -98,8 +98,8 @@ fn erc20_multi_balance_of() {
     let result1 = guest_evm_call(CallTxData::new(ERC20_TEST_CONTRACT, &call1), &env);
     let result2 = guest_evm_call(CallTxData::new(ERC20_TEST_CONTRACT, &call2), &env);
 
-    assert_eq!(result1._0, uint!(3000000000000000_U256));
-    assert_eq!(result2._0, uint!(0x38d7ea4c68000_U256));
+    assert_eq!(result1, uint!(3000000000000000_U256).to_be_bytes::<32>());
+    assert_eq!(result2, uint!(0x38d7ea4c68000_U256).to_be_bytes::<32>());
 }
 
 #[test]
@@ -348,5 +348,5 @@ where
         "mismatch in preflight and execution"
     );
 
-    result
+    C::abi_decode_returns(&result, false).unwrap()
 }

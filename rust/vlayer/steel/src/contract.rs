@@ -16,14 +16,14 @@ pub mod db;
 
 use crate::EvmBlockHeader;
 use alloy_primitives::{Address, Sealed, U256};
-use alloy_sol_types::{SolCall, SolType};
+use alloy_sol_types::SolCall;
 use revm::{
     primitives::{
         CfgEnvWithHandlerCfg, ExecutionResult, ResultAndState, SuccessReason, TransactTo,
     },
     Database, Evm,
 };
-use std::{fmt::Debug, marker::PhantomData, mem};
+use std::{fmt::Debug, marker::PhantomData};
 
 /// Represents a contract that is initialized with a specific environment and contract address.
 ///
@@ -115,26 +115,24 @@ impl<C> CallTxData<C> {
             ..Default::default()
         }
     }
-}
 
-impl<C: SolCall> CallTxData<C> {
-    /// Compile-time assertion that the call C has a return value.
-    const RETURNS: () = assert!(
-        mem::size_of::<C::Return>() > 0,
-        "Function call must have a return value"
-    );
+    pub fn new_from_bytes(address: Address, call: Vec<u8>) -> Self {
+        Self {
+            caller: address, // by default the contract calls itself
+            to: address,
+            data: call,
+            gas_limit: Self::DEFAULT_GAS_LIMIT,
+            ..Default::default()
+        }
+    }
 }
 
 /// Executes the call in the provided [Evm].
-fn transact<C, DB>(mut evm: Evm<'_, (), DB>, tx: CallTxData<C>) -> Result<C::Return, String>
+fn transact<C, DB>(mut evm: Evm<'_, (), DB>, tx: CallTxData<C>) -> Result<Vec<u8>, String>
 where
-    C: SolCall,
     DB: Database,
     <DB as Database>::Error: Debug,
 {
-    #[allow(clippy::let_unit_value)]
-    let _ = CallTxData::<C>::RETURNS;
-
     let tx_env = evm.tx_mut();
     tx_env.caller = tx.caller;
     tx_env.gas_limit = tx.gas_limit;
@@ -145,28 +143,17 @@ where
 
     let ResultAndState { result, .. } = evm
         .transact_preverified()
-        .map_err(|err| format!("Call '{}' failed: {:?}", C::SIGNATURE, err))?;
+        .map_err(|err| format!("Call failed: {:?}", err))?;
     let ExecutionResult::Success { reason, output, .. } = result else {
-        return Err(format!("Call '{}' failed", C::SIGNATURE));
+        return Err("Call failed".into());
     };
+
     // there must be a return value to decode
     if reason != SuccessReason::Return {
-        return Err(format!(
-            "Call '{}' did not return: {:?}",
-            C::SIGNATURE,
-            reason
-        ));
+        return Err(format!("Call did not return: {:?}", reason));
     }
-    let returns = C::abi_decode_returns(&output.into_data(), true).map_err(|err| {
-        format!(
-            "Call '{}' returned invalid type; expected '{}': {:?}",
-            C::SIGNATURE,
-            <C::ReturnTuple<'_> as SolType>::SOL_NAME,
-            err
-        )
-    })?;
 
-    Ok(returns)
+    Ok(output.into_data().into())
 }
 
 fn new_evm<'a, DB, H>(db: DB, cfg: CfgEnvWithHandlerCfg, header: &Sealed<H>) -> Evm<'a, (), DB>
