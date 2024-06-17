@@ -184,7 +184,7 @@ The guest is required to verify all data provided by the host. Validation of dat
     - Calculating the hash of each node
     - Reconstructing the tree in `MerkleTrie::resolve_trie`
 
-And ofcourse 
+And of course 
 
 ```mermaid
 classDiagram
