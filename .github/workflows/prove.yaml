@@ -1,5 +1,4 @@
-name: Run local prover
-
+name: Local prover
 on: [push, merge_group]
 
 jobs:

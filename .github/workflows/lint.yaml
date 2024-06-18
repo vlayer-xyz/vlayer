@@ -1,0 +1,29 @@
+name: Lint
+on: [push, merge_group]
+
+jobs:
+  rust:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: cargo-bins/cargo-binstall@main
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      
+      - name: Set up Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache-workspaces: rust
+
+      - name: Install risc0 instaler
+        run: cargo binstall -y cargo-risczero --force
+ 
+      - name: Install risc0 toolchain
+        run: cargo risczero install
+      
+      - name: Run Clippy
+        working-directory: rust
+        run: cargo clippy --all-targets --all-features
+        env:
+          RUSTFLAGS: "-Dwarnings"
