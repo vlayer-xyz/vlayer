@@ -2,12 +2,12 @@ use anyhow::{anyhow, Error};
 
 use ethers_providers::{Http, Provider, RetryClient};
 use guest_wrapper::GUEST_ELF;
-use risc0_zkvm::{default_prover, ExecutorEnv, ProveInfo};
+use risc0_zkvm::{default_prover, ExecutorEnv};
 use vlayer_steel::{
     config::ETH_SEPOLIA_CHAIN_SPEC,
     contract::engine::Engine,
     ethereum::EthEvmEnv,
-    guest::{Call, Input},
+    guest::{Call, Input, Output},
     host::{db::ProofDb, provider::EthersProvider},
 };
 
@@ -37,8 +37,10 @@ impl Host {
         Ok(Host { env })
     }
 
-    pub fn run(mut self, call_data: Call) -> anyhow::Result<Vec<u8>> {
-        let call = call_data.clone();
+    pub fn run(mut self, call_tx_data: Call) -> anyhow::Result<Output> {
+        let Call {
+            caller, to, data, ..
+        } = call_tx_data.clone();
         let _returns = Engine::evm_call(call_data, &mut self.env)?;
 
         let evm_input = self.env.into_input()?;
@@ -52,13 +54,14 @@ impl Host {
             .build()
             .unwrap();
 
-        let prove_info = Host::prove(env).map_err(|err| anyhow!(err))?;
-
-        Ok(prove_info.receipt.journal.bytes)
+        Host::prove(env).map_err(|err| anyhow!(err))
     }
 
-    fn prove(env: ExecutorEnv) -> Result<ProveInfo, HostError> {
+    fn prove(env: ExecutorEnv) -> Result<Output, HostError> {
         let prover = default_prover();
-        prover.prove(env, GUEST_ELF).map_err(HostError::ProveFailed)
+        prover
+            .prove(env, GUEST_ELF)
+            .map(|p| p.receipt.journal.into())
+            .map_err(HostError::ProveFailed)
     }
 }

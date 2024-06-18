@@ -1,3 +1,3 @@
 mod io;
 
-pub use io::Input;
+pub use io::{Call, Input, Output};

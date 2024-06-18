@@ -6,7 +6,7 @@ use guest::Guest;
 use risc0_zkvm::guest::env;
 use vlayer_steel::{
     contract::CallTxData,
-    guest::{Call, Input},
+    guest::{Call, Input, Output},
 };
 
 pub mod guest;
@@ -19,6 +19,9 @@ fn main() {
 
     let call_data = CallTxData::new_from_bytes(caller, to, data);
     let returns = Guest::new(evm_input).run(call_data);
+    let output = Output {
+        evm_call_result: returns,
+    };
 
-    env::commit(&returns);
+    env::commit(&output);
 }
