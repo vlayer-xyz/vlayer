@@ -6,7 +6,12 @@ use crate::ethereum::EthEvmInput;
 #[derive(Deserialize, Serialize, Debug)]
 pub struct GuestInput {
     pub evm_input: EthEvmInput,
-    pub call_data: Vec<u8>,
+    pub call: Call,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct Call {
     pub caller: Address,
     pub to: Address,
+    pub data: Vec<u8>,
 }
