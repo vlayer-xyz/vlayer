@@ -9,15 +9,15 @@ use vlayer_steel::{contract::CallTxData, guest_input::GuestInput};
 
 pub mod guest;
 
-const CONTRACT: Address = address!("5fbdb2315678afecb367f032d93f642f64180aa3");
-
 fn main() {
     let GuestInput {
         evm_input,
         call_data,
+        caller,
+        to,
     } = env::read();
 
-    let call_data = CallTxData::<()>::new_from_bytes(CONTRACT, call_data);
+    let call_data = CallTxData::<()>::new_from_bytes(caller, to, call_data);
 
     let returns = Guest::new(evm_input).run(call_data);
     env::commit(&returns);

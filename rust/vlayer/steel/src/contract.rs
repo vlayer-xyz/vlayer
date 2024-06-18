@@ -116,10 +116,10 @@ impl<C> CallTxData<C> {
         }
     }
 
-    pub fn new_from_bytes(address: Address, data: Vec<u8>) -> Self {
+    pub fn new_from_bytes(caller: Address, to: Address, data: Vec<u8>) -> Self {
         Self {
-            caller: address, // by default the contract calls itself
-            to: address,
+            caller,
+            to,
             data,
             gas_limit: Self::DEFAULT_GAS_LIMIT,
             ..Default::default()
