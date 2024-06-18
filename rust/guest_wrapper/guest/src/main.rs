@@ -9,13 +9,8 @@ use vlayer_steel::guest_input::{Call, GuestInput};
 pub mod guest;
 
 fn main() {
-    let GuestInput {
-        evm_input,
-        call: Call { caller, to, data },
-    } = env::read();
+    let GuestInput { evm_input, call } = env::read();
 
-    let call_data = Call { caller, to, data };
-
-    let returns = Guest::new(evm_input).run(call_data);
+    let returns = Guest::new(evm_input).run(call);
     env::commit(&returns);
 }
