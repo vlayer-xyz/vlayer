@@ -1,5 +1,7 @@
 export async function middleware(req) {
+    console.log("*****");
     const basicAuth = req.headers.get('authorization');
+    console.log(basicAuth);
 
     if (basicAuth) {
         const auth = basicAuth.split(' ')[1];
