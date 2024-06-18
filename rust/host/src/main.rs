@@ -1,6 +1,6 @@
 use alloy_primitives::{address, Address};
 use host::Host;
-use vlayer_steel::contract::CallTxData;
+use vlayer_steel::guest_input::Call;
 
 pub mod host;
 
@@ -20,7 +20,11 @@ fn main() -> anyhow::Result<()> {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 2,
     ];
 
-    let call_tx_data = CallTxData::new_from_bytes(CALLER, CONTRACT, raw_call_data.clone());
+    let call_tx_data = Call {
+        caller: CALLER,
+        to: CONTRACT,
+        data: raw_call_data.clone(),
+    };
 
     let _return_data = Host::try_new()?.run(call_tx_data)?;
 

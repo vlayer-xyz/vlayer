@@ -1,8 +1,6 @@
 use vlayer_steel::{
-    config::ETH_SEPOLIA_CHAIN_SPEC,
-    contract::{call::guest_evm_call, CallTxData},
-    ethereum::EthBlockHeader,
-    EvmEnv, EvmInput, StateDb,
+    config::ETH_SEPOLIA_CHAIN_SPEC, contract::call::guest_evm_call, ethereum::EthBlockHeader,
+    guest_input::Call, EvmEnv, EvmInput, StateDb,
 };
 
 pub struct Guest {
@@ -19,7 +17,7 @@ impl Guest {
         Guest { env }
     }
 
-    pub fn run(self, call_data: CallTxData) {
-        guest_evm_call(call_data, &self.env);
+    pub fn run(self, call: Call) {
+        guest_evm_call(call, &self.env);
     }
 }
