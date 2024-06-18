@@ -25,7 +25,7 @@ To deploy contract first install `jq`:
 brew install jq
 ```
 
-Deploy contract by going to its directory (e.g. `examples/simple`) and run `../../bash/vlayer-build.sh`.  
+Deploy contract by going to its directory (e.g. `examples/simple`) and run `../../bash/vlayer-build.sh`.
 If `VLAYER_CONTRACT_ADDRESS` is displayed, contract was deployed successfully.
 
 Finally run:
@@ -90,7 +90,7 @@ Note that solidity execution is deterministic, hence database in the guest has e
 We have two different databases run in two different places. Each is a composite database:
 
 - **host** - runs ProofDb, which proxies queries to ProviderDb. In turn, ProviderDb forwards the call to Ethereum RPC provider. Finally, ProofDb stores information about what proofs will need to be generated for the guest.
-- **guest** - runs WrapStateDb, which proxies calls to StateDb. 
+- **guest** - runs WrapStateDb, which proxies calls to StateDb.
   - StateDb consists of state passed from the host and has only the content required to be used by deterministic execution of solidity code in guest. Data in the StateDb is stored as sparse Ethereum Merkle Patricia Tries, hence access to accounts and storage serves as verification of state and storage proofs.
   -  WrapStateDb is an [adapter](https://en.wikipedia.org/wiki/Adapter_pattern) for StateDb that implements Database trait. It additionally do caching of accounts, for querying storage, so that account is only fetched once for multiple storage queries.
 
@@ -184,7 +184,6 @@ The guest is required to verify all data provided by the host. Validation of dat
     - Calculating the hash of each node
     - Reconstructing the tree in `MerkleTrie::resolve_trie`
 
-And of course 
 
 ```mermaid
 classDiagram
@@ -232,8 +231,96 @@ class Node {
 To perform the call you'll need to use the respective `evm_call` or `guest_evm_call` function.
 Both accept call data and evm environment. Consult code for exact types.
 
-#### Notes on future development
+### Components
+There are two main entry creates to the system: `risk_host` and `risk_guest`. Each of them should be a few simple lines of code and they should implement no logic. They depend on `Host` and `Guest` crates respectively.
+The part of code shared between is host and guest is stored in separate component `Engine`.
+In the future, there might be more entry points i.e. `Sp1Host` and `Sp1Guest`.
 
-To support multichain, we will need to introduce a new structure in place of `EthEvmEnv` and `EthEvmInput`. Each will contain multiple fields: `EvmInput` and `EvmEnv`, each with appropriate generic parameters, such as block type.
+Below is a short description of components:
 
-To support calls from multiple different blocks, we will need to introduce one more layer in between, which will store sub-environments for various blocks. This will introduce significant complexity.
+- Host is a http server. Host main purpose is to parse http request and execute logic and convert result to http response.
+
+- Guest is a program communicates via reading input and writing to output. For simplicity, all input is deserialized into `GuestInput` and all output is serialized into `GuestOutput`. Guest main purpose is to parse input and run logic from `Engine`.
+
+- Engine consist of share logic between `Host` and `Guest`. In host, it is used to run preflight and in guest it is used to perform proving. It mainly do two things:
+    - run rust preprocessing of call (e.g. mail signature verification)
+    - run solidity contracts inside revm
+
+```mermaid
+classDiagram
+
+RiscGuest --> Guest
+RiscHost --> Server
+Sp1Guest --> Guest
+Sp1Host --> Server
+Server --> Host
+Guest --> Engine
+Host --> Engine
+
+class Engine {
+    revm
+    rust_hooks
+    new(db)
+    run(call)
+}
+
+class Host {
+    new(out)
+    run(call)
+}
+
+class Guest {
+    new(in, out)
+    run(call)
+}
+
+class RiscGuest {
+    main()
+}
+
+class RiscHost {
+    main()
+}
+
+class Sp1Guest {
+    main()
+}
+
+class Sp1Host {
+    main()
+}
+
+class Server {
+    host
+    new(host)
+}
+
+```
+
+
+#### Error handling
+Error handling is done via custom semantic `HostError` enum type, which is converted into http code and human readable string by the server.
+
+Instead of returning a result, to handle errors, guest panics. It does need to panic with human readable error, which should be convert on host to semantic `HostError` type. As execution on guest is deterministic and should never fail after successful preflight, panic message should be informative for dev team.
+
+#### Dependency injection
+All components should follow dependency injection pattern, which means all dependencies should be passed via constructors. Hence, components should not need to touch members of members. There should be one build function per component, with accepts add it's dependencies.
+
+#### Testing
+
+Test types:
+- unit tests
+- integration tests for components `Engine`, `Host`, `Guest`
+- integration test of HttpServer, with:
+    - single happy path test per http end point
+    - single test per error code (no need to do per-error-per-end point test)
+- end-to-end test, running a server and settle result on-chain
+
+#### Security audit
+
+We will be auditing 100% of guest code, which consist of: `RiscGuest`, `Guest`, `Engine`.
+
+We should minimize amount of dependencies to all three of them. Especially, there should be no code in `Engine` used by host only.
+
+
+
