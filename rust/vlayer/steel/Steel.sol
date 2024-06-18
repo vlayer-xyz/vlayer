@@ -13,13 +13,13 @@
 // limitations under the License.
 //
 // SPDX-License-Identifier: Apache-2.0
-
-pragma solidity ^0.8.9;
+pragma solidity ^0.8.13;
 
 /// @title Steel Library
 /// @notice This library provides a collection of utilities to work with Steel commitments in Solidity.
 library Steel {
     /// @notice A Commitment struct representing a block number and its block hash.
+    #[derive(serde::Deserialize, serde::Serialize, Debug)]
     struct Commitment {
         uint256 blockNumber; // Block number at which the commitment was made.
         bytes32 blockHash; // Hash of the block at the specified block number.

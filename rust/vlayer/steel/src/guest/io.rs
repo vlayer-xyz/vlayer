@@ -3,6 +3,7 @@ use risc0_zkvm::Journal;
 use serde::{Deserialize, Serialize};
 
 use crate::ethereum::EthEvmInput;
+use crate::SolCommitment;
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Input {
@@ -17,8 +18,9 @@ pub struct Call {
     pub data: Vec<u8>,
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize)]
 pub struct Output {
+    pub block_commitment: SolCommitment,
     pub evm_call_result: Vec<u8>,
 }
 
