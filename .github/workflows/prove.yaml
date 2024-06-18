@@ -18,7 +18,7 @@ jobs:
           cache-workspaces: "rust -> target"
 
       - name: Install risc0 instaler
-        run: cargo binstall -y cargo-risczero
+        run: cargo binstall -y cargo-risczero --force
 
       - name: Install risc0 toolchain
         run: cargo risczero install
