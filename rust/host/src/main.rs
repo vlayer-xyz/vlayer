@@ -20,10 +20,10 @@ fn main() -> anyhow::Result<()> {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 2,
     ];
 
-    let mut call_data = CallTxData::<()>::new_from_bytes(CONTRACT, raw_call_data.clone());
-    call_data.caller = CALLER;
+    let mut call_tx_data = CallTxData::<()>::new_from_bytes(CONTRACT, raw_call_data.clone());
+    call_tx_data.caller = CALLER;
 
-    let _return_data = Host::try_new()?.run(raw_call_data, call_data)?;
+    let _return_data = Host::try_new()?.run(call_tx_data)?;
 
     Ok(())
 }
