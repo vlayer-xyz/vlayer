@@ -37,7 +37,7 @@ impl Host {
         Ok(Host { env })
     }
 
-    pub fn run(mut self, call_tx_data: CallTxData<()>) -> anyhow::Result<Vec<u8>> {
+    pub fn run(mut self, call_tx_data: CallTxData) -> anyhow::Result<Vec<u8>> {
         let CallTxData {
             caller, to, data, ..
         } = call_tx_data.clone();

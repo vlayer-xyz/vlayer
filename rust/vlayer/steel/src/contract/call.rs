@@ -5,7 +5,7 @@ use crate::host::{provider::Provider, HostEvmEnv};
 use crate::{EvmBlockHeader, GuestEvmEnv};
 
 #[cfg(feature = "host")]
-pub fn evm_call<C, P, H>(tx: CallTxData<C>, env: &mut HostEvmEnv<P, H>) -> anyhow::Result<Vec<u8>>
+pub fn evm_call<P, H>(tx: CallTxData, env: &mut HostEvmEnv<P, H>) -> anyhow::Result<Vec<u8>>
 where
     P: Provider,
     H: EvmBlockHeader,
@@ -17,7 +17,7 @@ where
     transact(evm, tx).map_err(|err| anyhow::anyhow!(err))
 }
 
-pub fn guest_evm_call<C, H>(tx: CallTxData<C>, env: &GuestEvmEnv<H>) -> Vec<u8>
+pub fn guest_evm_call<H>(tx: CallTxData, env: &GuestEvmEnv<H>) -> Vec<u8>
 where
     H: EvmBlockHeader,
 {

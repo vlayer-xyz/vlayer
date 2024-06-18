@@ -23,7 +23,7 @@ use revm::{
     },
     Database, Evm,
 };
-use std::{fmt::Debug, marker::PhantomData};
+use std::fmt::Debug;
 
 /// Represents a contract that is initialized with a specific environment and contract address.
 ///
@@ -73,37 +73,20 @@ use std::{fmt::Debug, marker::PhantomData};
 /// [EvmEnv::new]: crate::EvmEnv::new
 /// [EthEvmEnv::from_rpc]: crate::ethereum::EthEvmEnv::from_rpc
 
-#[derive(Debug, Clone)]
-pub struct CallTxData<C> {
+#[derive(Debug, Clone, Default)]
+pub struct CallTxData {
     pub caller: Address,
     pub gas_limit: u64,
     pub gas_price: U256,
     pub to: Address,
     pub value: U256,
     pub data: Vec<u8>,
-    phantom: PhantomData<C>,
 }
 
-// We can't derive `Default` for `CallTxData` as it would require `C: Default`
-impl<C> Default for CallTxData<C> {
-    fn default() -> Self {
-        Self {
-            phantom: PhantomData,
-            // We can't use `..Default::default()` here as it would cause recursion
-            caller: Default::default(),
-            gas_limit: Default::default(),
-            gas_price: Default::default(),
-            to: Default::default(),
-            value: Default::default(),
-            data: Default::default(),
-        }
-    }
-}
-
-impl<C> CallTxData<C> {
+impl CallTxData {
     const DEFAULT_GAS_LIMIT: u64 = 30_000_000;
 
-    pub fn new(address: Address, call: &C) -> Self
+    pub fn new<C>(address: Address, call: &C) -> Self
     where
         C: SolCall,
     {
@@ -128,7 +111,7 @@ impl<C> CallTxData<C> {
 }
 
 /// Executes the call in the provided [Evm].
-fn transact<C, DB>(mut evm: Evm<'_, (), DB>, tx: CallTxData<C>) -> Result<Vec<u8>, String>
+fn transact<DB>(mut evm: Evm<'_, (), DB>, tx: CallTxData) -> Result<Vec<u8>, String>
 where
     DB: Database,
     <DB as Database>::Error: Debug,
