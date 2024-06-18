@@ -37,17 +37,14 @@ impl Host {
         Ok(Host { env })
     }
 
-    pub fn run(
-        mut self,
-        raw_call_data: Vec<u8>,
-        call_data: CallTxData<()>,
-    ) -> anyhow::Result<Vec<u8>> {
-        let _returns = evm_call(call_data, &mut self.env)?;
+    pub fn run(mut self, call_tx_data: CallTxData<()>) -> anyhow::Result<Vec<u8>> {
+        let call_data = call_tx_data.data.clone();
+        let _returns = evm_call(call_tx_data, &mut self.env)?;
 
         let evm_input = self.env.into_input()?;
         let input = GuestInput {
             evm_input,
-            call_data: raw_call_data,
+            call_data,
         };
         let env = ExecutorEnv::builder()
             .write(&input)
@@ -62,8 +59,6 @@ impl Host {
 
     fn prove(env: ExecutorEnv) -> Result<ProveInfo, HostError> {
         let prover = default_prover();
-        prover
-            .prove(env, GUEST_ELF)
-            .map_err(HostError::ProveFailed)
+        prover.prove(env, GUEST_ELF).map_err(HostError::ProveFailed)
     }
 }
