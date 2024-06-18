@@ -14,8 +14,8 @@
 pub mod call;
 pub mod db;
 
-use crate::EvmBlockHeader;
-use alloy_primitives::{Address, Sealed, U256};
+use crate::{guest_input::Call, EvmBlockHeader};
+use alloy_primitives::Sealed;
 use revm::{
     primitives::{
         CfgEnvWithHandlerCfg, ExecutionResult, ResultAndState, SuccessReason, TransactTo,
@@ -24,42 +24,15 @@ use revm::{
 };
 use std::fmt::Debug;
 
-#[derive(Debug, Clone, Default)]
-pub struct CallTxData {
-    pub caller: Address,
-    pub gas_limit: u64,
-    pub gas_price: U256,
-    pub to: Address,
-    pub value: U256,
-    pub data: Vec<u8>,
-}
-
-impl CallTxData {
-    const DEFAULT_GAS_LIMIT: u64 = 30_000_000;
-
-    pub fn new_from_bytes(caller: Address, to: Address, data: Vec<u8>) -> Self {
-        Self {
-            caller,
-            to,
-            data,
-            gas_limit: Self::DEFAULT_GAS_LIMIT,
-            ..Default::default()
-        }
-    }
-}
-
 /// Executes the call in the provided [Evm].
-fn transact<DB>(mut evm: Evm<'_, (), DB>, tx: CallTxData) -> Result<Vec<u8>, String>
+fn transact<DB>(mut evm: Evm<'_, (), DB>, tx: Call) -> Result<Vec<u8>, String>
 where
     DB: Database,
     <DB as Database>::Error: Debug,
 {
     let tx_env = evm.tx_mut();
     tx_env.caller = tx.caller;
-    tx_env.gas_limit = tx.gas_limit;
-    tx_env.gas_price = tx.gas_price;
     tx_env.transact_to = TransactTo::call(tx.to);
-    tx_env.value = tx.value;
     tx_env.data = tx.data.into();
 
     let ResultAndState { result, .. } = evm

@@ -9,7 +9,7 @@ pub struct GuestInput {
     pub call: Call,
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Call {
     pub caller: Address,
     pub to: Address,

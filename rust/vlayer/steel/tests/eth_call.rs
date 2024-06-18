@@ -20,11 +20,9 @@ use std::fmt::Debug;
 use test_log::test;
 use vlayer_steel::{
     config::{ChainSpec, ETH_MAINNET_CHAIN_SPEC, ETH_SEPOLIA_CHAIN_SPEC},
-    contract::{
-        call::{evm_call, guest_evm_call},
-        CallTxData,
-    },
+    contract::call::{evm_call, guest_evm_call},
     ethereum::EthEvmEnv,
+    guest_input::Call,
     host,
 };
 
@@ -89,11 +87,17 @@ fn erc20_multi_balance_of() {
         .unwrap()
         .with_chain_spec(&ETH_MAINNET_CHAIN_SPEC)
         .unwrap();
-    let call_data1 =
-        CallTxData::new_from_bytes(ERC20_TEST_CONTRACT, ERC20_TEST_CONTRACT, call1.abi_encode());
+    let call_data1 = Call {
+        caller: ERC20_TEST_CONTRACT,
+        to: ERC20_TEST_CONTRACT,
+        data: call1.abi_encode(),
+    };
     evm_call(call_data1, &mut env).unwrap();
-    let call_data2 =
-        CallTxData::new_from_bytes(ERC20_TEST_CONTRACT, ERC20_TEST_CONTRACT, call2.abi_encode());
+    let call_data2 = Call {
+        caller: ERC20_TEST_CONTRACT,
+        to: ERC20_TEST_CONTRACT,
+        data: call2.abi_encode(),
+    };
     evm_call(call_data2, &mut env).unwrap();
     let input = env.into_input().unwrap();
 
@@ -103,11 +107,19 @@ fn erc20_multi_balance_of() {
         .with_chain_spec(&ETH_MAINNET_CHAIN_SPEC)
         .unwrap();
     let result1 = guest_evm_call(
-        CallTxData::new_from_bytes(ERC20_TEST_CONTRACT, ERC20_TEST_CONTRACT, call1.abi_encode()),
+        Call {
+            caller: ERC20_TEST_CONTRACT,
+            to: ERC20_TEST_CONTRACT,
+            data: call1.abi_encode(),
+        },
         &env,
     );
     let result2 = guest_evm_call(
-        CallTxData::new_from_bytes(ERC20_TEST_CONTRACT, ERC20_TEST_CONTRACT, call2.abi_encode()),
+        Call {
+            caller: ERC20_TEST_CONTRACT,
+            to: ERC20_TEST_CONTRACT,
+            data: call2.abi_encode(),
+        },
         &env,
     );
 
@@ -283,23 +295,6 @@ fn chainid() {
 }
 
 #[test]
-fn gasprice() {
-    let gas_price = uint!(42_U256);
-    let result = eth_call(
-        ViewCallTest::testGaspriceCall {},
-        VIEW_CALL_TEST_CONTRACT,
-        CallOverrides {
-            gas_price: Some(gas_price),
-            ..Default::default()
-        },
-        VIEW_CALL_TEST_BLOCK,
-        &ETH_SEPOLIA_CHAIN_SPEC,
-    )
-    .unwrap();
-    assert_eq!(result._0, gas_price);
-}
-
-#[test]
 fn multi_contract_calls() {
     let result = eth_call(
         ViewCallTest::testMuliContractCallsCall {},
@@ -319,11 +314,11 @@ fn call_eoa() {
         .with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC)
         .unwrap();
     evm_call(
-        CallTxData::new_from_bytes(
-            Address::ZERO,
-            Address::ZERO,
-            (ViewCallTest::testBlockhashCall {}).abi_encode(),
-        ),
+        Call {
+            caller: Address::ZERO,
+            to: Address::ZERO,
+            data: (ViewCallTest::testBlockhashCall {}).abi_encode(),
+        },
         &mut env,
     )
     .expect_err("calling an EOA should fail");
@@ -331,15 +326,11 @@ fn call_eoa() {
 
 #[derive(Debug, Default)]
 struct CallOverrides {
-    gas_price: Option<U256>,
     from: Option<Address>,
 }
 
 impl CallOverrides {
-    fn apply(&self, mut tx_data: CallTxData) -> CallTxData {
-        if let Some(gas_price) = self.gas_price {
-            tx_data.gas_price = gas_price;
-        }
+    fn apply(&self, mut tx_data: Call) -> Call {
         if let Some(from) = self.from {
             tx_data.caller = from;
         }
@@ -360,11 +351,11 @@ where
 {
     let mut env = EthEvmEnv::from_provider(provider!(), block)?.with_chain_spec(chain_spec)?;
 
-    let call_tx_data = call_overrides.apply(CallTxData::new_from_bytes(
-        address,
-        address,
-        call.abi_encode(),
-    ));
+    let call_tx_data = call_overrides.apply(Call {
+        caller: address,
+        to: address,
+        data: call.abi_encode(),
+    });
 
     let preflight_result = evm_call(call_tx_data.clone(), &mut env)?;
     let input = env.into_input()?;
