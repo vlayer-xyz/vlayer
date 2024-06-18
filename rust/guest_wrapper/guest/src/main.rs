@@ -3,12 +3,11 @@
 risc0_zkvm::guest::entry!(main);
 
 use alloy_primitives::{address, Address};
+use guest::Guest;
 use risc0_zkvm::guest::env;
-use vlayer_steel::{
-    config::ETH_SEPOLIA_CHAIN_SPEC,
-    contract::{call::guest_evm_call, CallTxData},
-    guest_input::GuestInput,
-};
+use vlayer_steel::{contract::CallTxData, guest_input::GuestInput};
+
+pub mod guest;
 
 const CONTRACT: Address = address!("5fbdb2315678afecb367f032d93f642f64180aa3");
 
@@ -18,12 +17,8 @@ fn main() {
         call_data,
     } = env::read();
 
-    let env = evm_input
-        .into_env()
-        .with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC)
-        .unwrap();
     let call_data = CallTxData::<()>::new_from_bytes(CONTRACT, call_data);
-    let returns = guest_evm_call(call_data, &env);
 
+    let returns = Guest::new(evm_input).run(call_data);
     env::commit(&returns);
 }
