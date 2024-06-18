@@ -1,6 +1,6 @@
 use alloy_primitives::{address, Address};
 use host::Host;
-use vlayer_steel::guest_input::Call;
+use vlayer_steel::guest::Call;
 
 pub mod host;
 

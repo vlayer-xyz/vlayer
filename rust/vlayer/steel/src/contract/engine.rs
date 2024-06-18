@@ -2,7 +2,7 @@ use super::{db::WrapStateDb, new_evm, transact};
 
 #[cfg(feature = "host")]
 use crate::host::{provider::Provider, HostEvmEnv};
-use crate::{guest_input::Call, EvmBlockHeader, GuestEvmEnv};
+use crate::{guest::Call, EvmBlockHeader, GuestEvmEnv};
 
 pub struct Engine {}
 

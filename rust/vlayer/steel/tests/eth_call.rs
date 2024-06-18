@@ -22,7 +22,7 @@ use vlayer_steel::{
     config::{ChainSpec, ETH_MAINNET_CHAIN_SPEC, ETH_SEPOLIA_CHAIN_SPEC},
     contract::engine::Engine,
     ethereum::EthEvmEnv,
-    guest_input::Call,
+    guest::Call,
     host,
 };
 

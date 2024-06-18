@@ -4,13 +4,21 @@ risc0_zkvm::guest::entry!(main);
 
 use guest::Guest;
 use risc0_zkvm::guest::env;
-use vlayer_steel::guest_input::GuestInput;
+use vlayer_steel::{
+    contract::CallTxData,
+    guest::{Call, Input},
+};
 
 pub mod guest;
 
 fn main() {
-    let GuestInput { evm_input, call } = env::read();
+    let Input {
+        evm_input,
+        call: Call { caller, to, data },
+    } = env::read();
 
-    let returns = Guest::new(evm_input).run(call);
+    let call_data = CallTxData::new_from_bytes(caller, to, data);
+    let returns = Guest::new(evm_input).run(call_data);
+
     env::commit(&returns);
 }
