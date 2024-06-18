@@ -21,7 +21,7 @@ use test_log::test;
 use vlayer_steel::{
     config::{ChainSpec, ETH_MAINNET_CHAIN_SPEC, ETH_SEPOLIA_CHAIN_SPEC},
     contract::{
-        call::{evm_call, guest_evm_call},
+        engine::{evm_call, guest_evm_call},
         CallTxData,
     },
     ethereum::EthEvmEnv,
