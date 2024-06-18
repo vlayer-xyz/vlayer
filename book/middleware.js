@@ -5,8 +5,7 @@ export async function middleware(req) {
         const auth = basicAuth.split(' ')[1];
         const [user, pwd] = Buffer.from(auth, 'base64').toString().split(':');
 
-        // Replace 'username' and 'password' with your actual credentials
-        if (user === 'vlayer' && pwd === 'layerv') {
+        if (user === 'vlayer' && pwd === 'czeczota24') {
             return new Response('Authorized', {
                 status: 200,
             });
