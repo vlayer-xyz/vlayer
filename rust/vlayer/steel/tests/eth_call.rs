@@ -324,7 +324,7 @@ struct CallOverrides {
 }
 
 impl CallOverrides {
-    fn apply<C>(&self, mut tx_data: CallTxData<C>) -> CallTxData<C> {
+    fn apply(&self, mut tx_data: CallTxData) -> CallTxData {
         if let Some(gas_price) = self.gas_price {
             tx_data.gas_price = gas_price;
         }

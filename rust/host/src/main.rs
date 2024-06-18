@@ -20,7 +20,7 @@ fn main() -> anyhow::Result<()> {
         0, 0, 0, 0, 0, 0, 0, 0, 0, 2,
     ];
 
-    let call_tx_data = CallTxData::<()>::new_from_bytes(CALLER, CONTRACT, raw_call_data.clone());
+    let call_tx_data = CallTxData::new_from_bytes(CALLER, CONTRACT, raw_call_data.clone());
 
     let _return_data = Host::try_new()?.run(call_tx_data)?;
 

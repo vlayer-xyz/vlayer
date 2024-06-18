@@ -19,7 +19,7 @@ impl Guest {
         Guest { env }
     }
 
-    pub fn run(self, call_data: CallTxData<()>) {
+    pub fn run(self, call_data: CallTxData) {
         guest_evm_call(call_data, &self.env);
     }
 }

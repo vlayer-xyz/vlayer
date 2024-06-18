@@ -17,7 +17,7 @@ fn main() {
         call: Call { caller, to, data },
     } = env::read();
 
-    let call_data = CallTxData::<()>::new_from_bytes(caller, to, data);
+    let call_data = CallTxData::new_from_bytes(caller, to, data);
 
     let returns = Guest::new(evm_input).run(call_data);
     env::commit(&returns);
