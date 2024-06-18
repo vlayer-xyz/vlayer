@@ -89,9 +89,11 @@ fn erc20_multi_balance_of() {
         .unwrap()
         .with_chain_spec(&ETH_MAINNET_CHAIN_SPEC)
         .unwrap();
-    let call_data1 = CallTxData::new(ERC20_TEST_CONTRACT, &call1);
+    let call_data1 =
+        CallTxData::new_from_bytes(ERC20_TEST_CONTRACT, ERC20_TEST_CONTRACT, call1.abi_encode());
     evm_call(call_data1, &mut env).unwrap();
-    let call_data2 = CallTxData::new(ERC20_TEST_CONTRACT, &call2);
+    let call_data2 =
+        CallTxData::new_from_bytes(ERC20_TEST_CONTRACT, ERC20_TEST_CONTRACT, call2.abi_encode());
     evm_call(call_data2, &mut env).unwrap();
     let input = env.into_input().unwrap();
 
@@ -100,8 +102,14 @@ fn erc20_multi_balance_of() {
         .into_env()
         .with_chain_spec(&ETH_MAINNET_CHAIN_SPEC)
         .unwrap();
-    let result1 = guest_evm_call(CallTxData::new(ERC20_TEST_CONTRACT, &call1), &env);
-    let result2 = guest_evm_call(CallTxData::new(ERC20_TEST_CONTRACT, &call2), &env);
+    let result1 = guest_evm_call(
+        CallTxData::new_from_bytes(ERC20_TEST_CONTRACT, ERC20_TEST_CONTRACT, call1.abi_encode()),
+        &env,
+    );
+    let result2 = guest_evm_call(
+        CallTxData::new_from_bytes(ERC20_TEST_CONTRACT, ERC20_TEST_CONTRACT, call2.abi_encode()),
+        &env,
+    );
 
     assert_eq!(result1, uint!(3000000000000000_U256).to_be_bytes::<32>());
     assert_eq!(result2, uint!(0x38d7ea4c68000_U256).to_be_bytes::<32>());
@@ -311,7 +319,11 @@ fn call_eoa() {
         .with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC)
         .unwrap();
     evm_call(
-        CallTxData::new(Address::ZERO, &ViewCallTest::testBlockhashCall {}),
+        CallTxData::new_from_bytes(
+            Address::ZERO,
+            Address::ZERO,
+            (ViewCallTest::testBlockhashCall {}).abi_encode(),
+        ),
         &mut env,
     )
     .expect_err("calling an EOA should fail");
@@ -348,7 +360,11 @@ where
 {
     let mut env = EthEvmEnv::from_provider(provider!(), block)?.with_chain_spec(chain_spec)?;
 
-    let call_tx_data = call_overrides.apply(CallTxData::new(address, &call));
+    let call_tx_data = call_overrides.apply(CallTxData::new_from_bytes(
+        address,
+        address,
+        call.abi_encode(),
+    ));
 
     let preflight_result = evm_call(call_tx_data.clone(), &mut env)?;
     let input = env.into_input()?;
