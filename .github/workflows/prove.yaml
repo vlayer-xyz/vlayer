@@ -10,25 +10,12 @@ jobs:
       - uses: cargo-bins/cargo-binstall@main
 
       - name: Checkout repository
-        uses: actions/checkout@v2
-
-      - name: Set up cargo cache
-        uses: actions/cache@v3
-        continue-on-error: false
-        with:
-          path: |
-            ~/.cargo/bin/
-            ~/.cargo/registry/index/
-            ~/.cargo/registry/cache/
-            ~/.cargo/git/db/
-            rust/target/
-          key: ${{ runner.os }}-cargo-${{ hashFiles('**/Cargo.lock') }}
-          restore-keys: ${{ runner.os }}-cargo-
+        uses: actions/checkout@v4
 
       - name: Set up Rust
-        uses: actions-rs/toolchain@v1
+        uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          toolchain: stable
+          cache-workspaces: "rust -> target"
 
       - name: Install risc0 instaler
         run: cargo binstall -y cargo-risczero
