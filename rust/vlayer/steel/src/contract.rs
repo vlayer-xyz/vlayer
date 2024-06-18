@@ -14,7 +14,7 @@
 pub mod engine;
 pub mod db;
 
-use crate::{guest_input::Call, EvmBlockHeader};
+use crate::{guest::Call, EvmBlockHeader};
 use alloy_primitives::Sealed;
 use revm::{
     primitives::{

@@ -7,7 +7,7 @@ use vlayer_steel::{
     config::ETH_SEPOLIA_CHAIN_SPEC,
     contract::engine::Engine,
     ethereum::EthEvmEnv,
-    guest_input::{Call, GuestInput},
+    guest::{Call, Input},
     host::{db::ProofDb, provider::EthersProvider},
 };
 
@@ -42,7 +42,10 @@ impl Host {
         let _returns = Engine::evm_call(call_data, &mut self.env)?;
 
         let evm_input = self.env.into_input()?;
-        let input = GuestInput { evm_input, call };
+        let input = Input {
+            evm_input,
+            call: Call { caller, to, data },
+        };
         let env = ExecutorEnv::builder()
             .write(&input)
             .unwrap()
