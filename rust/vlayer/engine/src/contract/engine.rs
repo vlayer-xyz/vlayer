@@ -63,14 +63,15 @@ impl Engine {
 
         let ResultAndState { result, .. } = evm
             .transact_preverified()
-            .map_err(|_err| anyhow!("Transact error"))?;
-        let ExecutionResult::Success { reason, output, .. } = result else {
+            .map_err(|_| anyhow!("Transact error"))?;
+        let ExecutionResult::Success {
+            reason: SuccessReason::Return,
+            output,
+            ..
+        } = result
+        else {
             return Err(anyhow!("Call did not return: "));
         };
-
-        if reason != SuccessReason::Return {
-            return Err(anyhow!("Call did not return: "));
-        }
 
         Ok(output.into_data().into())
     }
