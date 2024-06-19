@@ -23,7 +23,7 @@ impl Guest {
     pub fn run(&self, call: Call) -> Output {
         Output {
             block_commitment: self.env.block_commitment(),
-            evm_call_result: Engine::guest_evm_call(call_data, &self.env),
+            evm_call_result: Engine::guest_evm_call(&call, &self.env),
         }
     }
 }
