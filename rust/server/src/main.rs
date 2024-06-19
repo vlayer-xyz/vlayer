@@ -4,6 +4,7 @@ use tracing::info;
 
 mod app;
 mod handlers;
+mod layers;
 mod trace;
 
 #[tokio::main]
