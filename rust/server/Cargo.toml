@@ -4,8 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-anyhow = "1.0.86"
+anyhow = { workspace = true }
 axum = "0.7.5"
 http-body-util = "0.1.2"
-tokio = { version = "1.38.0", default-features = false, features = ["rt-multi-thread"] }
+tokio = { workspace = true }
 tower = "0.4.13"
