@@ -3,7 +3,7 @@ use anyhow::{anyhow, Error};
 use ethers_providers::{Http, Provider, RetryClient};
 use guest_wrapper::GUEST_ELF;
 use risc0_zkvm::{default_prover, ExecutorEnv};
-use vlayer_steel::{
+use vlayer_engine::{
     config::ETH_SEPOLIA_CHAIN_SPEC,
     contract::engine::Engine,
     ethereum::EthEvmEnv,

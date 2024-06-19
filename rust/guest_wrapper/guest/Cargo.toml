@@ -9,5 +9,5 @@ edition = "2021"
 
 [dependencies]
 risc0-zkvm = "1.0.1"
-vlayer-steel = { path = "../../vlayer/steel" }
+vlayer-engine = { path = "../../vlayer/engine" }
 alloy-primitives = "0.7.5"
