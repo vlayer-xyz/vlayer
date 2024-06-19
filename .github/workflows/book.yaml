@@ -1,5 +1,9 @@
 name: Book
-on: [push, merge_group]
+on:
+  pull_request:
+    branches:
+      - '**'  # Run on pull requests to any branch
+
 
 jobs:
   rust:
@@ -28,6 +32,8 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  
+          PR_NUMBER: ${{ github.event.number }}        
         run: |
           npm install -g vercel
           # Determine the alias for the current branch or PR
@@ -36,5 +42,11 @@ jobs:
           else
             ALIAS="$(echo ${{ github.ref }} | sed 's/refs\/heads\///' | sed 's/\//-/g')"
           fi
-          
-          vercel --prod --token $VERCEL_TOKEN --confirm --cwd ./book --scope $VERCEL_ORG_ID 
+              
+          DEPLOYMENT_URL=$(vercel --prod --token $VERCEL_TOKEN --yes --cwd ./book  --scope $VERCEL_ORG_ID | tail -1)
+                    COMMENT_BODY="The preview of this PR is available at: $DEPLOYMENT_URL"
+          curl -s -H "Authorization: token $GITHUB_TOKEN" \
+              -X POST \
+              -d "{\"body\":\"$COMMENT_BODY\"}" \
+              "https://api.github.com/repos/${{ github.repository }}/issues/$PR_NUMBER/comments"
+
