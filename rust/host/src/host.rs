@@ -1,5 +1,3 @@
-use anyhow::anyhow;
-
 use ethers_providers::{Http, Provider, RetryClient};
 use guest_wrapper::GUEST_ELF;
 use risc0_zkvm::{default_prover, ExecutorEnv};
@@ -20,6 +18,7 @@ pub struct Host {
 #[derive(Debug, PartialEq)]
 pub enum HostError {
     ElfParseError,
+    InvalidInput,
     Unknown(String),
 }
 
@@ -37,6 +36,7 @@ impl std::fmt::Display for HostError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
             Self::ElfParseError => write!(f, "ElfParseError"),
+            Self::InvalidInput => write!(f, "InvalidInput"),
             Self::Unknown(err) => write!(f, "HostError::Unknown {:?}", err),
         }
     }
@@ -49,7 +49,7 @@ impl Host {
         Ok(Host { env })
     }
 
-    pub fn run(mut self, call: Call) -> anyhow::Result<Output> {
+    pub fn run(mut self, call: Call) -> Result<Output, HostError> {
         let _returns = Engine::evm_call(&call, &mut self.env)?;
 
         let input = Input {
@@ -59,11 +59,11 @@ impl Host {
 
         let env = ExecutorEnv::builder()
             .write(&input)
-            .unwrap()
+            .map_err(|_| HostError::InvalidInput)?
             .build()
-            .unwrap();
+            .map_err(|_| HostError::InvalidInput)?;
 
-        Host::prove(env, GUEST_ELF).map_err(|err| anyhow!(err))
+        Host::prove(env, GUEST_ELF)
     }
 
     pub(crate) fn prove(env: ExecutorEnv, guest_elf: &[u8]) -> Result<Output, HostError> {
