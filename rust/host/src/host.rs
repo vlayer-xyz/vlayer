@@ -1,15 +1,19 @@
-use ethers_providers::{Http, Provider, RetryClient};
+use alloy_primitives::Sealable;
+use anyhow::{anyhow, Error};
+use ethers_providers::Provider as OGEthersProvider;
+use ethers_providers::{Http, RetryClient};
 use guest_wrapper::GUEST_ELF;
 use risc0_zkvm::{default_prover, ExecutorEnv};
+use vlayer_engine::guest::{Call, Input, Output};
 use vlayer_engine::{
     config::ETH_SEPOLIA_CHAIN_SPEC,
     contract::engine::Engine,
     ethereum::EthEvmEnv,
-    guest::{Call, Input, Output},
-    host::{db::ProofDb, provider::EthersProvider},
+    host::{db::ProofDb, provider::{EthersProvider, Provider}},
+    EvmEnv,
 };
 
-pub type EthersClient = Provider<RetryClient<Http>>;
+pub type EthersClient = OGEthersProvider<RetryClient<Http>>;
 
 pub struct Host {
     env: EthEvmEnv<ProofDb<EthersProvider<EthersClient>>>,
@@ -42,8 +46,13 @@ impl From<anyhow::Error> for HostError {
 }
 
 impl Host {
-    pub fn try_new(rpc_url: &str) -> Result<Self, HostError> {
-        let env = EthEvmEnv::from_rpc(rpc_url, None)?.with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC)?;
+    pub fn try_new(url: &str) -> anyhow::Result<Self> {
+        let client = EthersClient::new_client(url, 3, 500)?;
+        let provider = EthersProvider::new(client);
+        let block_number = provider.get_block_number()?;
+        let header = provider.get_block_header(block_number).unwrap().unwrap();
+        let db = ProofDb::new(provider, block_number);
+        let env = EvmEnv::new(db, header.seal_slow()).with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC)?;
         Ok(Host { env })
     }
 
