@@ -18,7 +18,7 @@ pub struct Call {
     pub data: Vec<u8>,
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct Output {
     pub block_commitment: SolCommitment,
     pub evm_call_result: Vec<u8>,

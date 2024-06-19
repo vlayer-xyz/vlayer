@@ -1,4 +1,4 @@
-use anyhow::{anyhow, Error};
+use anyhow::anyhow;
 
 use ethers_providers::{Http, Provider, RetryClient};
 use guest_wrapper::GUEST_ELF;
@@ -17,15 +17,27 @@ pub struct Host {
     env: EthEvmEnv<ProofDb<EthersProvider<EthersClient>>>,
 }
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub enum HostError {
-    ProveFailed(Error),
+    ElfParseError,
+    Unknown(String),
+}
+
+impl From<anyhow::Error> for HostError {
+    fn from(error: anyhow::Error) -> Self {
+        if error.to_string().contains("Elf parse error") {
+            HostError::ElfParseError
+        } else {
+            HostError::Unknown(error.to_string())
+        }
+    }
 }
 
 impl std::fmt::Display for HostError {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
-            Self::ProveFailed(err) => write!(f, "HostError: {}", err),
+            Self::ElfParseError => write!(f, "ElfParseError"),
+            Self::Unknown(err) => write!(f, "HostError::Unknown {:?}", err),
         }
     }
 }
@@ -51,14 +63,14 @@ impl Host {
             .build()
             .unwrap();
 
-        Host::prove(env).map_err(|err| anyhow!(err))
+        Host::prove(env, GUEST_ELF).map_err(|err| anyhow!(err))
     }
 
-    fn prove(env: ExecutorEnv) -> Result<Output, HostError> {
+    pub(crate) fn prove(env: ExecutorEnv, guest_elf: &[u8]) -> Result<Output, HostError> {
         let prover = default_prover();
         prover
-            .prove(env, GUEST_ELF)
+            .prove(env, guest_elf)
             .map(|p| p.receipt.journal.into())
-            .map_err(HostError::ProveFailed)
+            .map_err(HostError::from)
     }
 }
