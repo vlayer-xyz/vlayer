@@ -8,6 +8,7 @@ anyhow = { workspace = true }
 axum = { version = "0.7.5", features = ["macros"] }
 http-body-util = "0.1.2"
 serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
 thiserror = "1.0.61"
 tokio = { workspace = true }
 tower = "0.4.13"

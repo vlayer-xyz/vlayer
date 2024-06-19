@@ -16,6 +16,7 @@ lto = true
 risc0-zkvm = "1.0.1"
 risc0-build = "1.0.1"
 serde = "1.0"
+serde_json = "1.0.117"
 alloy-sol-types = "0.7.5"
 alloy-primitives = "0.7.5"
 ethers-providers = "2.0"

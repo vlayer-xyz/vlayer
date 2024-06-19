@@ -16,16 +16,24 @@ mod tests {
     use core::str;
 
     use super::app;
+    use crate::handlers::hello::UserParams;
     use axum::{
         body::Body,
-        http::{Request, Response, StatusCode},
+        http::{header::CONTENT_TYPE, Request, Response, StatusCode},
         Router,
     };
     use http_body_util::BodyExt;
+    use serde::Serialize;
+    use serde_json::to_string;
     use tower::ServiceExt;
 
-    async fn get(app: Router, url: &str) -> anyhow::Result<Response<Body>> {
-        let request = Request::get(url).body(Body::empty())?;
+    async fn post<T>(app: Router, url: &str, body: &T) -> anyhow::Result<Response<Body>>
+    where
+        T: Serialize,
+    {
+        let request = Request::post(url)
+            .header(CONTENT_TYPE, "application/json")
+            .body(Body::from(to_string(body)?))?;
         Ok(app.oneshot(request).await?)
     }
 
@@ -38,10 +46,11 @@ mod tests {
     async fn hello() -> anyhow::Result<()> {
         let app = app();
 
-        let response = get(app, "/hello").await?;
+        let user: UserParams = "Name".into();
+        let response = post(app, "/hello", &user).await?;
 
         assert_eq!(response.status(), StatusCode::OK);
-        assert_eq!(body_to_string(response.into_body()).await?, "Hello, World!");
+        assert_eq!(body_to_string(response.into_body()).await?, "Hello, Name!");
 
         Ok(())
     }
