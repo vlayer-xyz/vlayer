@@ -92,13 +92,13 @@ fn erc20_multi_balance_of() {
         to: ERC20_TEST_CONTRACT,
         data: call1.abi_encode(),
     };
-    Engine::evm_call(call_data1, &mut env).unwrap();
+    Engine::evm_call(&call_data1, &mut env).unwrap();
     let call_data2 = Call {
         caller: ERC20_TEST_CONTRACT,
         to: ERC20_TEST_CONTRACT,
         data: call2.abi_encode(),
     };
-    Engine::evm_call(call_data2, &mut env).unwrap();
+    Engine::evm_call(&call_data2, &mut env).unwrap();
     let input = env.into_input().unwrap();
 
     // execute the call
@@ -107,7 +107,7 @@ fn erc20_multi_balance_of() {
         .with_chain_spec(&ETH_MAINNET_CHAIN_SPEC)
         .unwrap();
     let result1 = Engine::guest_evm_call(
-        Call {
+        &Call {
             caller: ERC20_TEST_CONTRACT,
             to: ERC20_TEST_CONTRACT,
             data: call1.abi_encode(),
@@ -115,7 +115,7 @@ fn erc20_multi_balance_of() {
         &env,
     );
     let result2 = Engine::guest_evm_call(
-        Call {
+        &Call {
             caller: ERC20_TEST_CONTRACT,
             to: ERC20_TEST_CONTRACT,
             data: call2.abi_encode(),
@@ -314,7 +314,7 @@ fn call_eoa() {
         .with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC)
         .unwrap();
     Engine::evm_call(
-        Call {
+        &Call {
             caller: Address::ZERO,
             to: Address::ZERO,
             data: (ViewCallTest::testBlockhashCall {}).abi_encode(),
@@ -357,11 +357,11 @@ where
         data: call.abi_encode(),
     });
 
-    let preflight_result = Engine::evm_call(call_tx_data.clone(), &mut env)?;
+    let preflight_result = Engine::evm_call(&call_tx_data, &mut env)?;
     let input = env.into_input()?;
 
     let env = input.into_env().with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC)?;
-    let result = Engine::guest_evm_call(call_tx_data, &env);
+    let result = Engine::guest_evm_call(&call_tx_data, &env);
     assert_eq!(
         result, preflight_result,
         "mismatch in preflight and execution"

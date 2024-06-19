@@ -37,17 +37,14 @@ impl Host {
         Ok(Host { env })
     }
 
-    pub fn run(mut self, call_tx_data: Call) -> anyhow::Result<Output> {
-        let Call {
-            caller, to, data, ..
-        } = call_tx_data.clone();
-        let _returns = Engine::evm_call(call_data, &mut self.env)?;
+    pub fn run(mut self, call: Call) -> anyhow::Result<Output> {
+        let _returns = Engine::evm_call(&call, &mut self.env)?;
 
-        let evm_input = self.env.into_input()?;
         let input = Input {
-            evm_input,
-            call: Call { caller, to, data },
+            call,
+            evm_input: self.env.into_input()?,
         };
+
         let env = ExecutorEnv::builder()
             .write(&input)
             .unwrap()

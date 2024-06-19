@@ -25,7 +25,7 @@ use revm::{
 use std::fmt::Debug;
 
 /// Executes the call in the provided [Evm].
-fn transact<DB>(mut evm: Evm<'_, (), DB>, tx: Call) -> Result<Vec<u8>, String>
+fn transact<DB>(mut evm: Evm<'_, (), DB>, tx: &Call) -> Result<Vec<u8>, String>
 where
     DB: Database,
     <DB as Database>::Error: Debug,
@@ -33,7 +33,7 @@ where
     let tx_env = evm.tx_mut();
     tx_env.caller = tx.caller;
     tx_env.transact_to = TransactTo::call(tx.to);
-    tx_env.data = tx.data.into();
+    tx_env.data = tx.data.clone().into();
 
     let ResultAndState { result, .. } = evm
         .transact_preverified()
