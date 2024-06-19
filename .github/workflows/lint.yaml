@@ -22,8 +22,14 @@ jobs:
       - name: Install risc0 toolchain
         run: cargo risczero install
       
-      - name: Run Clippy
+      - name: Run Clippy Host
         working-directory: rust
+        run: cargo clippy --all-targets --all-features
+        env:
+          RUSTFLAGS: "-Dwarnings"
+
+      - name: Run Clippy Guest
+        working-directory: rust/guest_wrapper/guest
         run: cargo clippy --all-targets --all-features
         env:
           RUSTFLAGS: "-Dwarnings"
