@@ -20,11 +20,7 @@ use std::fmt::Debug;
 use test_log::test;
 use vlayer_steel::{
     config::{ChainSpec, ETH_MAINNET_CHAIN_SPEC, ETH_SEPOLIA_CHAIN_SPEC},
-    contract::call::{evm_call, guest_evm_call},
-    contract::{
-        engine::{evm_call, guest_evm_call},
-        CallTxData,
-    },
+    contract::engine::Engine,
     ethereum::EthEvmEnv,
     guest_input::Call,
     host,
@@ -96,13 +92,13 @@ fn erc20_multi_balance_of() {
         to: ERC20_TEST_CONTRACT,
         data: call1.abi_encode(),
     };
-    evm_call(call_data1, &mut env).unwrap();
+    Engine::evm_call(call_data1, &mut env).unwrap();
     let call_data2 = Call {
         caller: ERC20_TEST_CONTRACT,
         to: ERC20_TEST_CONTRACT,
         data: call2.abi_encode(),
     };
-    evm_call(call_data2, &mut env).unwrap();
+    Engine::evm_call(call_data2, &mut env).unwrap();
     let input = env.into_input().unwrap();
 
     // execute the call
@@ -110,7 +106,7 @@ fn erc20_multi_balance_of() {
         .into_env()
         .with_chain_spec(&ETH_MAINNET_CHAIN_SPEC)
         .unwrap();
-    let result1 = guest_evm_call(
+    let result1 = Engine::guest_evm_call(
         Call {
             caller: ERC20_TEST_CONTRACT,
             to: ERC20_TEST_CONTRACT,
@@ -118,7 +114,7 @@ fn erc20_multi_balance_of() {
         },
         &env,
     );
-    let result2 = guest_evm_call(
+    let result2 = Engine::guest_evm_call(
         Call {
             caller: ERC20_TEST_CONTRACT,
             to: ERC20_TEST_CONTRACT,
@@ -317,7 +313,7 @@ fn call_eoa() {
         .unwrap()
         .with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC)
         .unwrap();
-    evm_call(
+    Engine::evm_call(
         Call {
             caller: Address::ZERO,
             to: Address::ZERO,
@@ -361,11 +357,11 @@ where
         data: call.abi_encode(),
     });
 
-    let preflight_result = evm_call(call_tx_data.clone(), &mut env)?;
+    let preflight_result = Engine::evm_call(call_tx_data.clone(), &mut env)?;
     let input = env.into_input()?;
 
     let env = input.into_env().with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC)?;
-    let result = guest_evm_call(call_tx_data, &env);
+    let result = Engine::guest_evm_call(call_tx_data, &env);
     assert_eq!(
         result, preflight_result,
         "mismatch in preflight and execution"
