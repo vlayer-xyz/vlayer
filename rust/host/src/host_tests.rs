@@ -21,4 +21,11 @@ mod test {
 
         assert_eq!(res.unwrap_err(), HostError::InvalidInput);
     }
+
+    #[test]
+    fn try_new_invalid_rpc_url() {
+        let res = Host::try_new("http://localhost:123");
+
+        assert_eq!(res.map(|_| ()).unwrap_err(), HostError::RpcConnectionError);
+    }
 }

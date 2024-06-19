@@ -20,27 +20,30 @@ pub enum HostError {
     ElfParseError,
     ExecutorEnvBuilderError,
     InvalidInput,
+    RpcConnectionError,
     Unknown(String),
 }
 
 impl From<anyhow::Error> for HostError {
     fn from(error: anyhow::Error) -> Self {
-        if error.to_string().contains("Elf parse error") {
-            HostError::ElfParseError
-        } else if error.to_string().contains(
+        let error_str = error.to_string();
+        if error_str.contains("Elf parse error") {
+            Self::ElfParseError
+        } else if error_str.contains(
             "Guest panicked: called `Result::unwrap()` on an `Err` value: DeserializeUnexpectedEnd",
         ) {
-            HostError::InvalidInput
+            Self::InvalidInput
+        } else if error_str.contains("tcp connect error: Connection refused") {
+            Self::RpcConnectionError
         } else {
-            HostError::Unknown(error.to_string())
+            Self::Unknown(error_str)
         }
     }
 }
 
 impl Host {
-    pub fn try_new() -> Result<Self, HostError> {
-        let env = EthEvmEnv::from_rpc("http://localhost:8545", None)?
-            .with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC)?;
+    pub fn try_new(rpc_url: &str) -> Result<Self, HostError> {
+        let env = EthEvmEnv::from_rpc(rpc_url, None)?.with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC)?;
         Ok(Host { env })
     }
 
