@@ -18,12 +18,16 @@ jobs:
 
       - name: Run Clippy Host
         working-directory: rust
-        run: cargo clippy --all-targets --all-features
         env:
           RUSTFLAGS: "-Dwarnings"
+        run: |
+          cargo fmt --check
+          cargo clippy --all-targets --all-features
 
       - name: Run Clippy Guest
         working-directory: rust/guest_wrapper/guest
-        run: cargo clippy --all-targets --all-features
         env:
           RUSTFLAGS: "-Dwarnings"
+        run: |
+          cargo fmt --check
+          cargo clippy --all-targets --all-features
