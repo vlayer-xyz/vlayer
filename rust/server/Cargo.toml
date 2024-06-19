@@ -5,8 +5,10 @@ edition = "2021"
 
 [dependencies]
 anyhow = { workspace = true }
-axum = "0.7.5"
+axum = { version = "0.7.5", features = ["macros"] }
 http-body-util = "0.1.2"
+serde = { workspace = true, features = ["derive"] }
+thiserror = "1.0.61"
 tokio = { workspace = true }
 tower = "0.4.13"
 tower-http = { version = "0.5.2", features = ["trace"] }
