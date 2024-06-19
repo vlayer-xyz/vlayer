@@ -10,5 +10,6 @@ http-body-util = "0.1.2"
 tokio = { workspace = true }
 tower = "0.4.13"
 tower-http = { version = "0.5.2", features = ["trace"] }
+tower-request-id = "0.3.0"
 tracing = "0.1.40"
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }

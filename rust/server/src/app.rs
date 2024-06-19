@@ -1,14 +1,14 @@
 use crate::handlers::hello::hello;
-use axum::{http::Request, routing::get, Router};
-use tower_http::trace::TraceLayer;
-use tracing::info_span;
+use crate::layers::request_id::RequestIdLayer;
+use crate::layers::trace::init_trace_layer;
+use axum::{routing::get, Router};
 
 pub fn app() -> Router {
-    let trace_layer = TraceLayer::new_for_http().make_span_with(
-        |request: &Request<_>| info_span!("http", method = ?request.method(), uri = ?request.uri()),
-    );
-
-    Router::new().route("/hello", get(hello)).layer(trace_layer)
+    Router::new()
+        .route("/hello", get(hello))
+        .layer(init_trace_layer())
+        // NOTE: it should be added after the Trace layer
+        .layer(RequestIdLayer)
 }
 
 #[cfg(test)]
