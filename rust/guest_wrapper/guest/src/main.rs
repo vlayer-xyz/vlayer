@@ -4,7 +4,7 @@ risc0_zkvm::guest::entry!(main);
 
 use guest::Guest;
 use risc0_zkvm::guest::env;
-use vlayer_steel::guest_input::{Call, GuestInput};
+use vlayer_steel::guest_input::GuestInput;
 
 pub mod guest;
 

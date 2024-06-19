@@ -1,17 +1,14 @@
-use super::{db::WrapStateDb, new_evm, transact, CallTxData};
+use super::{db::WrapStateDb, new_evm, transact};
 
 #[cfg(feature = "host")]
 use crate::host::{provider::Provider, HostEvmEnv};
-use crate::{EvmBlockHeader, GuestEvmEnv};
+use crate::{guest_input::Call, EvmBlockHeader, GuestEvmEnv};
 
 pub struct Engine {}
 
 impl Engine {
     #[cfg(feature = "host")]
-    pub fn evm_call<C, P, H>(
-        tx: CallTxData<C>,
-        env: &mut HostEvmEnv<P, H>,
-    ) -> anyhow::Result<Vec<u8>>
+    pub fn evm_call<P, H>(tx: Call, env: &mut HostEvmEnv<P, H>) -> anyhow::Result<Vec<u8>>
     where
         P: Provider,
         H: EvmBlockHeader,
@@ -23,7 +20,7 @@ impl Engine {
         transact(evm, tx).map_err(|err| anyhow::anyhow!(err))
     }
 
-    pub fn guest_evm_call<C, H>(tx: CallTxData<C>, env: &GuestEvmEnv<H>) -> Vec<u8>
+    pub fn guest_evm_call<H>(tx: Call, env: &GuestEvmEnv<H>) -> Vec<u8>
     where
         H: EvmBlockHeader,
     {

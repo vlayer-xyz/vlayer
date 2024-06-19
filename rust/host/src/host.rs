@@ -5,7 +5,7 @@ use guest_wrapper::GUEST_ELF;
 use risc0_zkvm::{default_prover, ExecutorEnv, ProveInfo};
 use vlayer_steel::{
     config::ETH_SEPOLIA_CHAIN_SPEC,
-    contract::{engine::Engine, CallTxData},
+    contract::engine::Engine,
     ethereum::EthEvmEnv,
     guest_input::{Call, GuestInput},
     host::{db::ProofDb, provider::EthersProvider},
@@ -37,18 +37,12 @@ impl Host {
         Ok(Host { env })
     }
 
-    pub fn run(
-        mut self,
-        raw_call_data: Vec<u8>,
-        call_data: CallTxData<()>,
-    ) -> anyhow::Result<Vec<u8>> {
+    pub fn run(mut self, call_data: Call) -> anyhow::Result<Vec<u8>> {
+        let call = call_data.clone();
         let _returns = Engine::evm_call(call_data, &mut self.env)?;
 
         let evm_input = self.env.into_input()?;
-        let input = GuestInput {
-            evm_input,
-            call: Call { caller, to, data },
-        };
+        let input = GuestInput { evm_input, call };
         let env = ExecutorEnv::builder()
             .write(&input)
             .unwrap()
