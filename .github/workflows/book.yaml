@@ -22,9 +22,18 @@ jobs:
         run: |
           bin/mdbook build
 
-      - name: Deploy to Vercel
-        env:
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-        run: |
-          npm install -g vercel
-          vercel --prod --token $VERCEL_TOKEN --confirm --cwd ./book
+    - name: Deploy to Vercel
+      env:
+        VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+        VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+        VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+      run: |
+        npm install -g vercel
+        # Determine the alias for the current branch or PR
+        if [ "${{ github.event_name }}" == "pull_request" ]; then
+          ALIAS="pr-${{ github.event.number }}-$(echo ${{ github.head_ref }} | sed 's/\//-/g')"
+        else
+          ALIAS="$(echo ${{ github.ref }} | sed 's/refs\/heads\///' | sed 's/\//-/g')"
+        fi
+        
+        vercel --prod --token $VERCEL_TOKEN --project-id $VERCEL_PROJECT_ID --org-id $VERCEL_ORG_ID --confirm --cwd ./book --scope $VERCEL_ORG_ID --alias $ALIAS
