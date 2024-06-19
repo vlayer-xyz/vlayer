@@ -2,15 +2,24 @@ use axum::{
     extract::rejection::JsonRejection,
     response::{IntoResponse, Response},
 };
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 use crate::json::AppJson;
 
 // Format in which errors are returned to the user
-#[derive(Serialize)]
-struct ErrorResponse {
+#[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
+pub struct ErrorResponse {
     message: String,
+}
+
+#[cfg(test)]
+impl ErrorResponse {
+    pub fn new(message: &str) -> Self {
+        Self {
+            message: message.to_string(),
+        }
+    }
 }
 
 #[derive(Debug, Error)]

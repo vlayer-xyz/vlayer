@@ -7,14 +7,14 @@ pub struct UserParams {
     name: String,
 }
 
-impl From<&str> for UserParams {
-    fn from(name: &str) -> Self {
-        UserParams {
+#[cfg(test)]
+impl UserParams {
+    pub fn new(name: &str) -> Self {
+        Self {
             name: name.to_string(),
         }
     }
 }
-
 pub(crate) async fn hello(AppJson(params): AppJson<UserParams>) -> String {
     format!("Hello, {}!", params.name).into()
 }
