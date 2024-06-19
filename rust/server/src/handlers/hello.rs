@@ -1,3 +1,3 @@
-pub async fn hello() -> String {
+pub(crate) async fn hello() -> String {
     "Hello, World!".into()
 }
