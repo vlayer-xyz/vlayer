@@ -18,7 +18,7 @@ use alloy_primitives::{address, b256, uint, Address, U256};
 use alloy_sol_types::{sol, SolCall};
 use std::fmt::Debug;
 use test_log::test;
-use vlayer_steel::{
+use vlayer_engine::{
     config::{ChainSpec, ETH_MAINNET_CHAIN_SPEC, ETH_SEPOLIA_CHAIN_SPEC},
     contract::engine::Engine,
     ethereum::EthEvmEnv,
