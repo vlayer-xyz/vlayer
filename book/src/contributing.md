@@ -38,3 +38,17 @@ Finally run:
 ```sh
 RUST_LOG=info RISC0_DEV_MODE=1 cargo run
 ```
+
+## Book
+
+To build book you will need mdbook installed:
+```sh
+cargo install mdbook
+```
+
+To build book navigate to `book/` and type:
+```
+mdbook serve
+```
+
+Book is available at `http://localhost:3000/`.
