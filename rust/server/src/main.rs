@@ -3,7 +3,9 @@ use trace::init_tracing;
 use tracing::info;
 
 mod app;
+mod error;
 mod handlers;
+mod json;
 mod layers;
 mod trace;
 
