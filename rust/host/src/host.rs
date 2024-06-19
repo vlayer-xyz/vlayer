@@ -18,6 +18,7 @@ pub struct Host {
 #[derive(Debug, PartialEq)]
 pub enum HostError {
     ElfParseError,
+    ExecutorEnvBuilderError,
     InvalidInput,
     Unknown(String),
 }
@@ -26,24 +27,18 @@ impl From<anyhow::Error> for HostError {
     fn from(error: anyhow::Error) -> Self {
         if error.to_string().contains("Elf parse error") {
             HostError::ElfParseError
+        } else if error.to_string().contains(
+            "Guest panicked: called `Result::unwrap()` on an `Err` value: DeserializeUnexpectedEnd",
+        ) {
+            HostError::InvalidInput
         } else {
             HostError::Unknown(error.to_string())
         }
     }
 }
 
-impl std::fmt::Display for HostError {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        match self {
-            Self::ElfParseError => write!(f, "ElfParseError"),
-            Self::InvalidInput => write!(f, "InvalidInput"),
-            Self::Unknown(err) => write!(f, "HostError::Unknown {:?}", err),
-        }
-    }
-}
-
 impl Host {
-    pub fn try_new() -> anyhow::Result<Self> {
+    pub fn try_new() -> Result<Self, HostError> {
         let env = EthEvmEnv::from_rpc("http://localhost:8545", None)?
             .with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC)?;
         Ok(Host { env })
@@ -59,9 +54,9 @@ impl Host {
 
         let env = ExecutorEnv::builder()
             .write(&input)
-            .map_err(|_| HostError::InvalidInput)?
+            .map_err(|_| HostError::ExecutorEnvBuilderError)?
             .build()
-            .map_err(|_| HostError::InvalidInput)?;
+            .map_err(|_| HostError::ExecutorEnvBuilderError)?;
 
         Host::prove(env, GUEST_ELF)
     }
