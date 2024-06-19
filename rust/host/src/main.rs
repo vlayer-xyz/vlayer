@@ -3,6 +3,7 @@ use host::Host;
 use vlayer_engine::guest::Call;
 
 pub mod host;
+pub mod host_tests;
 
 const CONTRACT: Address = address!("5fbdb2315678afecb367f032d93f642f64180aa3");
 const CALLER: Address = address!("f39Fd6e51aad88F6F4ce6aB8827279cffFb92266");
