@@ -7,6 +7,7 @@ edition = "2021"
 anyhow = { workspace = true }
 axum = { version = "0.7.5", features = ["macros"] }
 http-body-util = "0.1.2"
+mime = "0.3.17"
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 thiserror = "1.0.61"
