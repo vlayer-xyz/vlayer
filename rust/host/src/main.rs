@@ -7,6 +7,7 @@ pub mod host_tests;
 
 const CONTRACT: Address = address!("5fbdb2315678afecb367f032d93f642f64180aa3");
 const CALLER: Address = address!("f39Fd6e51aad88F6F4ce6aB8827279cffFb92266");
+const LOCALHOST_RPC_URL: &str = "http://localhost:8545";
 
 fn main() -> Result<(), HostError> {
     // Initialize tracing. In order to view logs, run `RUST_LOG=info cargo run`
@@ -27,7 +28,7 @@ fn main() -> Result<(), HostError> {
         data: raw_call_data.clone(),
     };
 
-    let _return_data = Host::try_new()?.run(call_tx_data)?;
+    let _return_data = Host::try_new(LOCALHOST_RPC_URL)?.run(call_tx_data)?;
 
     Ok(())
 }
