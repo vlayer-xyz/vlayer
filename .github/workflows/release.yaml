@@ -1,0 +1,29 @@
+name: Release binaries
+on: 
+  schedule:
+    - cron: '0 22 * * 1-5'
+
+jobs:
+  release:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: cargo-bins/cargo-binstall@main
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache-workspaces: "rust -> target"
+
+      - name: Install risc0 instaler
+        run: cargo binstall -y cargo-risczero --force
+
+      - name: Install risc0 toolchain
+        run: cargo risczero install
+
+      - name: Build package
+        working-directory: rust/host
+        run: cargo build
