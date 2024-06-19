@@ -47,7 +47,7 @@ impl From<anyhow::Error> for HostError {
 
 impl Host {
     pub fn try_new(url: &str) -> anyhow::Result<Self> {
-        let client = EthersClient::new_client(url, 3, 500)?;
+        let client = EthersClient::new_client(url, MAX_RETRY, INITIAL_BACKOFF)?;
         let provider = EthersProvider::new(client);
         let block_number = provider.get_block_number()?;
         let header = provider.get_block_header(block_number).unwrap().unwrap();
