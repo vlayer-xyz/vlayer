@@ -30,7 +30,7 @@ To deliver all necessary proofs, following steps are performed:
 
 Note that solidity execution is deterministic, hence database in the guest has exactly the data it requires.
 
-![Schema](./docs/images/schema.png)
+![Schema](./schema.png)
 
 ### Databases
 
