@@ -11,3 +11,4 @@ tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"], defaul
 alloy-primitives = { workspace = true }
 ethers-providers = { workspace = true }
 anyhow = { version = "1.0.86", default-features = false }
+thiserror = { workspace = true }
