@@ -8,12 +8,13 @@ use revm::{
 
 use crate::{guest::Call, EvmBlockHeader, EvmEnv};
 
-pub struct Engine {}
+pub struct Engine<D> {
+    db: D,
+}
 
-impl Engine {
-    pub fn call<DB, H>(tx: &Call, env: &mut EvmEnv<DB, H>) -> anyhow::Result<Vec<u8>>
+impl<D: Database> Engine<D> {
+    pub fn call<H>(tx: &Call, env: &mut EvmEnv<D, H>) -> anyhow::Result<Vec<u8>>
     where
-        DB: Database,
         H: EvmBlockHeader,
     {
         let cfg: CfgEnvWithHandlerCfg = env.cfg_env.clone();
@@ -27,10 +28,7 @@ impl Engine {
         Self::transact(evm, tx)
     }
 
-    fn transact<DB>(mut evm: Evm<'_, (), DB>, tx: &Call) -> anyhow::Result<Vec<u8>>
-    where
-        DB: Database,
-    {
+    fn transact(mut evm: Evm<'_, (), &mut D>, tx: &Call) -> anyhow::Result<Vec<u8>> {
         let tx_env = evm.tx_mut();
         tx_env.caller = tx.caller;
         tx_env.transact_to = TransactTo::call(tx.to);
