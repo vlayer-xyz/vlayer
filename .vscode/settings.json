@@ -11,6 +11,7 @@
         "ommers",
         "oneshot",
         "preverified",
+        "opentelemetry",
         "revm",
         "SEPOLIA",
         "sidechains",
