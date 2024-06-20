@@ -73,7 +73,7 @@ impl Host {
     }
 
     pub fn run(mut self, call: Call) -> Result<Output, HostError> {
-        let _returns = Engine::call(&call, &mut self.env)?;
+        let _returns = Engine::new(&mut self.env).call(&call)?;
 
         let input = Input {
             call,

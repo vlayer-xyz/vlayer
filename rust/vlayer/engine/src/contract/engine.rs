@@ -10,7 +10,7 @@ use thiserror::Error;
 use crate::{guest::Call, EvmBlockHeader, EvmEnv};
 
 pub struct Engine<'a, D, H> {
-    env: &'a mut EvmEnv<D, H>
+    env: &'a mut EvmEnv<D, H>,
 }
 
 #[derive(Error, Debug, PartialEq)]
@@ -21,19 +21,23 @@ pub enum EngineError {
     TransactError(String),
 }
 
-impl<D, H> Engine<'_, D, H> {
-    pub fn call(tx: &Call, env: &mut EvmEnv<D, H>) -> Result<Vec<u8>, EngineError>
-    where
-        D: Database,
-        D::Error: Debug,
-        H: EvmBlockHeader,
-    {
-        let cfg: CfgEnvWithHandlerCfg = env.cfg_env.clone();
+impl<'a, D, H> Engine<'a, D, H>
+where
+    D: Database,
+    D::Error: Debug,
+    H: EvmBlockHeader,
+{
+    pub fn new(env: &'a mut EvmEnv<D, H>) -> Self {
+        Engine { env }
+    }
+
+    pub fn call(self, tx: &Call) -> anyhow::Result<Vec<u8>> {
+        let cfg: CfgEnvWithHandlerCfg = self.env.cfg_env.clone();
 
         let evm = Evm::builder()
-            .with_db(&mut env.db)
+            .with_db(&mut self.env.db)
             .with_cfg_env_with_handler_cfg(cfg)
-            .modify_block_env(|blk_env| env.header.fill_block_env(blk_env))
+            .modify_block_env(|blk_env| self.env.header.fill_block_env(blk_env))
             .build();
 
         Self::transact(evm, tx)
