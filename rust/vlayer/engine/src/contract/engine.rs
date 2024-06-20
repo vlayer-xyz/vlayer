@@ -1,3 +1,4 @@
+use alloy_primitives::Sealed;
 use anyhow::anyhow;
 use revm::{
     primitives::{
@@ -6,23 +7,23 @@ use revm::{
     Database, Evm,
 };
 
-use crate::{guest::Call, EvmBlockHeader, EvmEnv};
+use crate::{ethereum::EthBlockHeader, guest::Call, EvmBlockHeader};
 
 pub struct Engine<'a, D> {
     db: &'a mut D,
 }
 
 impl<'a, D: Database + 'a> Engine<'a, D> {
-    pub fn call<H>(tx: &Call, env: &mut EvmEnv<D, H>) -> anyhow::Result<Vec<u8>>
+    pub fn call<H>(tx: &Call, db: &mut D, cfg_env: &CfgEnvWithHandlerCfg, header: &Sealed<EthBlockHeader>) -> anyhow::Result<Vec<u8>>
     where
         H: EvmBlockHeader,
     {
-        let cfg: CfgEnvWithHandlerCfg = env.cfg_env.clone();
+        let cfg: CfgEnvWithHandlerCfg = cfg_env.clone();
 
         let evm = Evm::builder()
-            .with_db(&mut env.db)
+            .with_db(db)
             .with_cfg_env_with_handler_cfg(cfg)
-            .modify_block_env(|blk_env| env.header.fill_block_env(blk_env))
+            .modify_block_env(|blk_env| header.fill_block_env(blk_env))
             .build();
 
         Self::transact(evm, tx)

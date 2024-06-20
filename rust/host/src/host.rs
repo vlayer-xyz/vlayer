@@ -8,7 +8,7 @@ use vlayer_engine::guest::{Call, Input, Output};
 use vlayer_engine::{
     config::ETH_SEPOLIA_CHAIN_SPEC,
     contract::engine::Engine,
-    ethereum::EthEvmEnv,
+    ethereum::{EthBlockHeader, EthEvmEnv},
     host::{
         db::ProofDb,
         provider::{EthersProvider, Provider},
@@ -64,7 +64,12 @@ impl Host {
     }
 
     pub fn run(mut self, call: Call) -> Result<Output, HostError> {
-        let _returns = Engine::call(&call, &mut self.env)?;
+        let _returns = Engine::call::<EthBlockHeader>(
+            &call,
+            &mut self.env.db,
+            &self.env.cfg_env,
+            &self.env.header,
+        )?;
 
         let input = Input {
             call,

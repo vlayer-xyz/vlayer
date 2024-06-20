@@ -100,8 +100,8 @@ pub(crate) type GuestEvmEnv<H> = EvmEnv<WrapStateDb, H>;
 /// The environment to execute the contract calls in.
 pub struct EvmEnv<D, H> {
     pub db: D,
-    cfg_env: CfgEnvWithHandlerCfg,
-    header: Sealed<H>,
+    pub cfg_env: CfgEnvWithHandlerCfg,
+    pub header: Sealed<H>,
 }
 
 impl<D, H: EvmBlockHeader> EvmEnv<D, H> {
