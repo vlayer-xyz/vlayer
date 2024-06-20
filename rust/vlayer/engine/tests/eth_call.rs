@@ -92,13 +92,17 @@ fn erc20_multi_balance_of() {
         to: ERC20_TEST_CONTRACT,
         data: call1.abi_encode(),
     };
-    Engine::call::<EthBlockHeader>(&call_data1, &mut env.db, &env.cfg_env, &env.header).unwrap();
+    Engine::new(&mut env.db)
+        .call::<EthBlockHeader>(&call_data1, &env.cfg_env, &env.header)
+        .unwrap();
     let call_data2 = Call {
         caller: ERC20_TEST_CONTRACT,
         to: ERC20_TEST_CONTRACT,
         data: call2.abi_encode(),
     };
-    Engine::call::<EthBlockHeader>(&call_data2, &mut env.db, &env.cfg_env, &env.header).unwrap();
+    Engine::new(&mut env.db)
+        .call::<EthBlockHeader>(&call_data2, &env.cfg_env, &env.header)
+        .unwrap();
     let input = env.into_input().unwrap();
 
     // execute the call
@@ -106,28 +110,28 @@ fn erc20_multi_balance_of() {
         .into_env()
         .with_chain_spec(&ETH_MAINNET_CHAIN_SPEC)
         .unwrap();
-    let result1 = Engine::call::<EthBlockHeader>(
-        &Call {
-            caller: ERC20_TEST_CONTRACT,
-            to: ERC20_TEST_CONTRACT,
-            data: call1.abi_encode(),
-        },
-        &mut env.db,
-        &env.cfg_env,
-        &env.header,
-    )
-    .unwrap();
-    let result2 = Engine::call::<EthBlockHeader>(
-        &Call {
-            caller: ERC20_TEST_CONTRACT,
-            to: ERC20_TEST_CONTRACT,
-            data: call2.abi_encode(),
-        },
-        &mut env.db,
-        &env.cfg_env,
-        &env.header,
-    )
-    .unwrap();
+    let result1 = Engine::new(&mut env.db)
+        .call::<EthBlockHeader>(
+            &Call {
+                caller: ERC20_TEST_CONTRACT,
+                to: ERC20_TEST_CONTRACT,
+                data: call1.abi_encode(),
+            },
+            &env.cfg_env,
+            &env.header,
+        )
+        .unwrap();
+    let result2 = Engine::new(&mut env.db)
+        .call::<EthBlockHeader>(
+            &Call {
+                caller: ERC20_TEST_CONTRACT,
+                to: ERC20_TEST_CONTRACT,
+                data: call2.abi_encode(),
+            },
+            &env.cfg_env,
+            &env.header,
+        )
+        .unwrap();
 
     assert_eq!(result1, uint!(3000000000000000_U256).to_be_bytes::<32>());
     assert_eq!(result2, uint!(0x38d7ea4c68000_U256).to_be_bytes::<32>());
@@ -316,15 +320,17 @@ fn call_eoa() {
         .unwrap()
         .with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC)
         .unwrap();
-    Engine::call::<EthBlockHeader>(
-        &Call {
-            caller: Address::ZERO,
-            to: Address::ZERO,
-            data: (ViewCallTest::testBlockhashCall {}).abi_encode(),
-        },
-        &mut env.db, &env.cfg_env, &env.header
-    )
-    .expect_err("calling an EOA should fail");
+    Engine::new(&mut env.db)
+        .call::<EthBlockHeader>(
+            &Call {
+                caller: Address::ZERO,
+                to: Address::ZERO,
+                data: (ViewCallTest::testBlockhashCall {}).abi_encode(),
+            },
+            &env.cfg_env,
+            &env.header,
+        )
+        .expect_err("calling an EOA should fail");
 }
 
 #[derive(Debug, Default)]
@@ -360,11 +366,19 @@ where
         data: call.abi_encode(),
     });
 
-    let preflight_result = Engine::call::<EthBlockHeader>(&call_tx_data, &mut env.db, &env.cfg_env, &env.header)?;
+    let preflight_result = Engine::new(&mut env.db).call::<EthBlockHeader>(
+        &call_tx_data,
+        &env.cfg_env,
+        &env.header,
+    )?;
     let input = env.into_input()?;
 
     let mut env = input.into_env().with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC)?;
-    let result = Engine::call::<EthBlockHeader>(&call_tx_data, &mut env.db, &env.cfg_env, &env.header)?;
+    let result = Engine::new(&mut env.db).call::<EthBlockHeader>(
+        &call_tx_data,
+        &env.cfg_env,
+        &env.header,
+    )?;
     assert_eq!(
         result, preflight_result,
         "mismatch in preflight and execution"

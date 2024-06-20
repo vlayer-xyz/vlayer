@@ -64,9 +64,8 @@ impl Host {
     }
 
     pub fn run(mut self, call: Call) -> Result<Output, HostError> {
-        let _returns = Engine::call::<EthBlockHeader>(
+        let _returns = Engine::new(&mut self.env.db).call::<EthBlockHeader>(
             &call,
-            &mut self.env.db,
             &self.env.cfg_env,
             &self.env.header,
         )?;

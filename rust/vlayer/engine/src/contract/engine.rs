@@ -14,14 +14,23 @@ pub struct Engine<'a, D> {
 }
 
 impl<'a, D: Database + 'a> Engine<'a, D> {
-    pub fn call<H>(tx: &Call, db: &mut D, cfg_env: &CfgEnvWithHandlerCfg, header: &Sealed<EthBlockHeader>) -> anyhow::Result<Vec<u8>>
+    pub fn new(db: &'a mut D) -> Self {
+        Engine { db }
+    }
+
+    pub fn call<H>(
+        self,
+        tx: &Call,
+        cfg_env: &CfgEnvWithHandlerCfg,
+        header: &Sealed<EthBlockHeader>,
+    ) -> anyhow::Result<Vec<u8>>
     where
         H: EvmBlockHeader,
     {
         let cfg: CfgEnvWithHandlerCfg = cfg_env.clone();
 
         let evm = Evm::builder()
-            .with_db(db)
+            .with_db(self.db)
             .with_cfg_env_with_handler_cfg(cfg)
             .modify_block_env(|blk_env| header.fill_block_env(blk_env))
             .build();
