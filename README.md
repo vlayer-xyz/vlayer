@@ -167,7 +167,7 @@ The block header type might vary on different sidechains and L2s. Currently, `Et
 
 The environment is created in the host and converted into `EvmInput`, which is easy to serialize. Serialized data is then sent over standard input to the guest and deserialized in the guest. `EthEvmInput` is an `EvmInput` specialized by `EthBlockHeader`.
 
-`EvmInput` stores state and storage trees as sparse Ethereum Merkle Patricia Trie implemented by `MPT` structures witch is a wrapped Node. Sparse tree is very similar to standard MPT in that it includes four standard node types, however it only data necessary to execution and in place of unused nodes uses special node called `Digest`.
+`EvmInput` stores state and storage trees as sparse Ethereum Merkle Patricia Trie implemented by `MPT` structures which is a wrapped Node. Sparse tree is very similar to standard MPT in that it includes four standard node types, however it only data necessary to execution and in place of unused nodes uses special node called `Digest`.
 
 Data is deserialized by host with `EVMInput.into_env()` function. Additionally, this method verifies header hashes (current and ancestors). `StateDb::new` calculates bytecodes hashes and storage roots.
 
