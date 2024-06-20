@@ -6,14 +6,14 @@ use revm::{
 };
 use std::{convert::Infallible, rc::Rc};
 
-pub struct WrapStateDb<'a> {
-    inner: &'a StateDb,
+pub struct WrapStateDb {
+    inner: StateDb,
     account_storage: HashMap<Address, Option<Rc<MerkleTrie>>>,
 }
 
-impl<'a> WrapStateDb<'a> {
+impl WrapStateDb {
     /// Creates a new [Database] from the given [StateDb].
-    pub(crate) fn new(inner: &'a StateDb) -> Self {
+    pub(crate) fn new(inner: StateDb) -> Self {
         Self {
             inner,
             account_storage: HashMap::new(),
@@ -21,7 +21,7 @@ impl<'a> WrapStateDb<'a> {
     }
 }
 
-impl Database for WrapStateDb<'_> {
+impl Database for WrapStateDb {
     /// The database does not return any errors.
     type Error = Infallible;
 

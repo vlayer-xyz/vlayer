@@ -20,6 +20,7 @@ use alloy_primitives::{
 };
 use alloy_rlp_derive::{RlpDecodable, RlpEncodable};
 
+use contract::db::WrapStateDb;
 use revm::primitives::{BlockEnv, CfgEnvWithHandlerCfg, HashMap, SpecId};
 use serde::{Deserialize, Serialize};
 use std::{fmt::Debug, rc::Rc};
@@ -74,12 +75,12 @@ impl<H: EvmBlockHeader> EvmInput<H> {
             previous_header = ancestor;
         }
 
-        let db = StateDb::new(
+        let db = WrapStateDb::new(StateDb::new(
             self.state_trie,
             self.storage_tries,
             self.contracts,
             block_hashes,
-        );
+        ));
 
         EvmEnv::new(db, header)
     }
@@ -94,11 +95,11 @@ mod private {
 pub use private::Steel::Commitment as SolCommitment;
 
 /// Alias for readability, do not make public.
-pub(crate) type GuestEvmEnv<H> = EvmEnv<StateDb, H>;
+pub(crate) type GuestEvmEnv<H> = EvmEnv<WrapStateDb, H>;
 
 /// The environment to execute the contract calls in.
 pub struct EvmEnv<D, H> {
-    db: D,
+    pub db: D,
     cfg_env: CfgEnvWithHandlerCfg,
     header: Sealed<H>,
 }
