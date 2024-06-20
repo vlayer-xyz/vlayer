@@ -3,7 +3,13 @@ on:
   pull_request:
     branches:
       - '**'  # Run on pull requests to any branch
+  push:
+    branches:
+      - main  # Run on push to main branch
 
+defaults:
+  run:
+    working-directory: book
 
 jobs:
   book:
@@ -16,43 +22,46 @@ jobs:
         uses: actions/checkout@v4
       
       - name: Install mdbook
-        working-directory: book
         run: |
           mkdir bin
           curl -sSL https://github.com/rust-lang/mdBook/releases/download/v0.4.40/mdbook-v0.4.40-x86_64-unknown-linux-gnu.tar.gz | tar -xz --directory=bin
 
       - name: Install mdbook-mermaid
-        working-directory: book
         run: |
           cargo install cargo-binstall
           cargo binstall --no-confirm mdbook-mermaid
 
       - name: Build book
-        working-directory: book
         run: |
           bin/mdbook build
 
-      - name: Deploy to Vercel
-        working-directory: book
+      - name: Deploy to Vercel (production)
+        if: github.ref == 'refs/heads/main'
         env:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  
-          PR_NUMBER: ${{ github.event.number }}        
         run: |
           npm install -g vercel
-          # Determine the alias for the current branch or PR
-          if [ "${{ github.event_name }}" == "pull_request" ]; then
-            ALIAS="pr-${{ github.event.number }}-$(echo ${{ github.head_ref }} | sed 's/\//-/g')"
-          else
-            ALIAS="$(echo ${{ github.ref }} | sed 's/refs\/heads\///' | sed 's/\//-/g')"
-          fi
-              
-          DEPLOYMENT_URL=$(vercel --prod --token $VERCEL_TOKEN --yes --cwd ./book  --scope $VERCEL_ORG_ID | tail -1)
-                    COMMENT_BODY="The preview of this PR is available at: $DEPLOYMENT_URL"
+          DEPLOYMENT_URL=$(vercel --token $VERCEL_TOKEN --prod --yes --cwd ./book --scope $VERCEL_ORG_ID | tail -1)
+          echo "Production deployment URL: $DEPLOYMENT_URL"
+
+      - name: Deploy to Vercel (PR Preview)
+        if: github.event_name == 'pull_request'
+        env:
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.number }}
+        run: |
+          npm install -g vercel
+          ALIAS="pr-${{ github.event.number }}-$(echo ${{ github.head_ref }} | sed 's/\//-/g')"
+          DEPLOYMENT_URL=$(vercel --token $VERCEL_TOKEN --yes --cwd ./book --scope $VERCEL_ORG_ID --alias $ALIAS | tail -1)
+          COMMENT_BODY="The preview of this PR is available at: $DEPLOYMENT_URL"
           curl -s -H "Authorization: token $GITHUB_TOKEN" \
               -X POST \
               -d "{\"body\":\"$COMMENT_BODY\"}" \
               "https://api.github.com/repos/${{ github.repository }}/issues/$PR_NUMBER/comments"
-
+              
