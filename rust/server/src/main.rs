@@ -11,10 +11,14 @@ mod trace;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
-    init_tracing();
+    init_tracing()?;
 
     let listener = tokio::net::TcpListener::bind("127.0.0.1:3000").await?;
 
     info!("listening on {}", listener.local_addr()?);
-    Ok(axum::serve(listener, app()).await?)
+    axum::serve(listener, app()).await?;
+
+    opentelemetry::global::shutdown_tracer_provider();
+
+    Ok(())
 }

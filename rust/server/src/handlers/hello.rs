@@ -1,8 +1,9 @@
 use serde::{Deserialize, Serialize};
+use tracing::instrument;
 
 use crate::json::Json;
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct UserParams {
     name: String,
 }
@@ -15,6 +16,8 @@ impl UserParams {
         }
     }
 }
+
+#[instrument(level = "debug")]
 pub(crate) async fn hello(Json(params): Json<UserParams>) -> String {
     format!("Hello, {}!", params.name)
 }
