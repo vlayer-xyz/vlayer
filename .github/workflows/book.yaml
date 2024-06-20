@@ -6,7 +6,7 @@ on:
 
 
 jobs:
-  rust:
+  book:
     runs-on: ubuntu-latest
 
     steps:
