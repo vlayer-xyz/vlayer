@@ -1,7 +1,10 @@
+use alloy_primitives::hex::FromHexError;
 use axum::{
     extract::rejection::JsonRejection,
+    http::StatusCode,
     response::{IntoResponse, Response},
 };
+use derivative::Derivative;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
@@ -22,10 +25,17 @@ impl ErrorResponse {
     }
 }
 
-#[derive(Debug, Error)]
+#[derive(Debug, Error, Derivative)]
+#[derivative(PartialEq)]
 pub enum AppError {
     #[error("The request body contained invalid JSON")]
-    JsonRejection(#[from] JsonRejection),
+    JsonRejection(
+        #[from]
+        #[derivative(PartialEq = "ignore")]
+        JsonRejection,
+    ),
+    #[error("Invalid address: {field} -> {error}")]
+    InvalidAddress { field: String, error: FromHexError },
 }
 
 // Tell axum how `AppError` should be converted into a response
@@ -34,10 +44,10 @@ pub enum AppError {
 impl IntoResponse for AppError {
     fn into_response(self) -> Response {
         let (status, message) = match self {
-            AppError::JsonRejection(rejection) => {
-                // This error is caused by bad user input so don't log it
-                (rejection.status(), rejection.body_text())
-            }
+            // Our fault
+            // User fault - these errors are caused by bad user input so don't log it
+            AppError::JsonRejection(rejection) => (rejection.status(), rejection.body_text()),
+            AppError::InvalidAddress { .. } => (StatusCode::BAD_REQUEST, self.to_string()),
         };
 
         (status, AppJson(ErrorResponse { message })).into_response()

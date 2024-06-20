@@ -9,7 +9,7 @@ use crate::error::AppError;
 // rejection and provide our own which formats errors to match our application.
 //
 // `axum::Json` responds with plain text if the input is invalid.
-#[derive(FromRequest)]
+#[derive(FromRequest, Debug)]
 #[from_request(via(axum::Json), rejection(AppError))]
 pub struct AppJson<T>(pub T);
 

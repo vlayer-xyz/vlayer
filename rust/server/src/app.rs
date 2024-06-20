@@ -1,4 +1,4 @@
-use crate::handlers::hello::hello;
+use crate::handlers::{hello::hello, prove::prove};
 use crate::layers::request_id::RequestIdLayer;
 use crate::layers::trace::init_trace_layer;
 use axum::{routing::post, Router};
@@ -6,6 +6,7 @@ use axum::{routing::post, Router};
 pub fn app() -> Router {
     Router::new()
         .route("/hello", post(hello))
+        .route("/prove", post(prove))
         .layer(init_trace_layer())
         // NOTE: it should be added after the Trace layer
         .layer(RequestIdLayer)
