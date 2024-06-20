@@ -9,7 +9,9 @@ use thiserror::Error;
 
 use crate::{guest::Call, EvmBlockHeader, EvmEnv};
 
-pub struct Engine {}
+pub struct Engine<'a, D, H> {
+    env: &'a mut EvmEnv<D, H>
+}
 
 #[derive(Error, Debug, PartialEq)]
 pub enum EngineError {
@@ -19,11 +21,11 @@ pub enum EngineError {
     TransactError(String),
 }
 
-impl Engine {
-    pub fn call<DB, H>(tx: &Call, env: &mut EvmEnv<DB, H>) -> Result<Vec<u8>, EngineError>
+impl<D, H> Engine<'_, D, H> {
+    pub fn call(tx: &Call, env: &mut EvmEnv<D, H>) -> Result<Vec<u8>, EngineError>
     where
-        DB: Database,
-        DB::Error: Debug,
+        D: Database,
+        D::Error: Debug,
         H: EvmBlockHeader,
     {
         let cfg: CfgEnvWithHandlerCfg = env.cfg_env.clone();
@@ -37,10 +39,10 @@ impl Engine {
         Self::transact(evm, tx)
     }
 
-    fn transact<DB>(mut evm: Evm<'_, (), DB>, tx: &Call) -> Result<Vec<u8>, EngineError>
+    fn transact(mut evm: Evm<'_, (), &mut D>, tx: &Call) -> Result<Vec<u8>, EngineError>
     where
-        DB: Database,
-        DB::Error: Debug,
+        D: Database,
+        D::Error: Debug,
     {
         let tx_env = evm.tx_mut();
         tx_env.caller = tx.caller;
