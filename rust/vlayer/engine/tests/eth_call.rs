@@ -92,13 +92,13 @@ fn erc20_multi_balance_of() {
         to: ERC20_TEST_CONTRACT,
         data: call1.abi_encode(),
     };
-    Engine::call(&call_data1, &mut env).unwrap();
+    Engine::new(&mut env).call(&call_data1).unwrap();
     let call_data2 = Call {
         caller: ERC20_TEST_CONTRACT,
         to: ERC20_TEST_CONTRACT,
         data: call2.abi_encode(),
     };
-    Engine::call(&call_data2, &mut env).unwrap();
+    Engine::new(&mut env).call(&call_data2).unwrap();
     let input = env.into_input().unwrap();
 
     // execute the call
@@ -106,24 +106,20 @@ fn erc20_multi_balance_of() {
         .into_env()
         .with_chain_spec(&ETH_MAINNET_CHAIN_SPEC)
         .unwrap();
-    let result1 = Engine::call(
-        &Call {
+    let result1 = Engine::new(&mut env)
+        .call(&Call {
             caller: ERC20_TEST_CONTRACT,
             to: ERC20_TEST_CONTRACT,
             data: call1.abi_encode(),
-        },
-        &mut env,
-    )
-    .unwrap();
-    let result2 = Engine::call(
-        &Call {
+        })
+        .unwrap();
+    let result2 = Engine::new(&mut env)
+        .call(&Call {
             caller: ERC20_TEST_CONTRACT,
             to: ERC20_TEST_CONTRACT,
             data: call2.abi_encode(),
-        },
-        &mut env,
-    )
-    .unwrap();
+        })
+        .unwrap();
 
     assert_eq!(result1, uint!(3000000000000000_U256).to_be_bytes::<32>());
     assert_eq!(result2, uint!(0x38d7ea4c68000_U256).to_be_bytes::<32>());
@@ -312,15 +308,13 @@ fn call_eoa() {
         .unwrap()
         .with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC)
         .unwrap();
-    Engine::call(
-        &Call {
+    Engine::new(&mut env)
+        .call(&Call {
             caller: Address::ZERO,
             to: Address::ZERO,
             data: (ViewCallTest::testBlockhashCall {}).abi_encode(),
-        },
-        &mut env,
-    )
-    .expect_err("calling an EOA should fail");
+        })
+        .expect_err("calling an EOA should fail");
 }
 
 #[derive(Debug, Default)]
@@ -356,11 +350,11 @@ where
         data: call.abi_encode(),
     });
 
-    let preflight_result = Engine::call(&call_tx_data, &mut env)?;
+    let preflight_result = Engine::new(&mut env).call(&call_tx_data)?;
     let input = env.into_input()?;
 
     let mut env = input.into_env().with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC)?;
-    let result = Engine::call(&call_tx_data, &mut env)?;
+    let result = Engine::new(&mut env).call(&call_tx_data)?;
     assert_eq!(
         result, preflight_result,
         "mismatch in preflight and execution"

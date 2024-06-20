@@ -23,7 +23,7 @@ impl Guest {
     pub fn run(&mut self, call: Call) -> Output {
         Output {
             block_commitment: self.env.block_commitment(),
-            evm_call_result: Engine::call(&call, &mut self.env).unwrap(),
+            evm_call_result: Engine::new(&mut self.env).call(&call).unwrap(),
         }
     }
 }
