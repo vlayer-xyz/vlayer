@@ -2,7 +2,7 @@ name: Lint
 on: [push, merge_group]
 
 jobs:
-  rust:
+  rust-lint:
     runs-on: ubuntu-latest
 
     steps:

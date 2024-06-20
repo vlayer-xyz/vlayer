@@ -3,7 +3,7 @@ name: Test
 on: [push, merge_group]
 
 jobs:
-  rust:
+  rust-test:
     runs-on: ubuntu-latest
 
     steps:
