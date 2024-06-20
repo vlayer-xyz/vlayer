@@ -33,7 +33,7 @@ anvil
 Deploy contract by going to its directory (e.g. `examples/simple`) and run `../../bash/vlayer-deploy.sh`.
 If `VLAYER_CONTRACT_ADDRESS` is displayed, contract was deployed successfully.
 
-Finally run:
+Finally, run:
 
 ```sh
 RUST_LOG=info RISC0_DEV_MODE=1 cargo run
