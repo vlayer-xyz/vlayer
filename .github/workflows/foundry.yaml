@@ -1,4 +1,4 @@
-name: test
+name: Forge test
 
 on: [push, merge_group]
 
@@ -6,7 +6,7 @@ env:
   FOUNDRY_PROFILE: ci
 
 jobs:
-  check:
+  forge-test:
     strategy:
       fail-fast: true
 

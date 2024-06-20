@@ -2,7 +2,7 @@ name: Local prover
 on: [push, merge_group]
 
 jobs:
-  prove:
+  rust-prove:
     runs-on: ubuntu-latest
 
     steps:
