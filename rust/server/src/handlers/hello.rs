@@ -16,5 +16,5 @@ impl UserParams {
     }
 }
 pub(crate) async fn hello(AppJson(params): AppJson<UserParams>) -> String {
-    format!("Hello, {}!", params.name).into()
+    format!("Hello, {}!", params.name)
 }

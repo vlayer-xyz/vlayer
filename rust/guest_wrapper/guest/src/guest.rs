@@ -1,13 +1,13 @@
 use vlayer_engine::{
     config::ETH_SEPOLIA_CHAIN_SPEC,
-    contract::engine::Engine,
+    contract::{db::WrapStateDb, engine::Engine},
     ethereum::EthBlockHeader,
     guest::{Call, Output},
-    EvmEnv, EvmInput, StateDb,
+    EvmEnv, EvmInput,
 };
 
 pub struct Guest {
-    env: EvmEnv<StateDb, EthBlockHeader>,
+    env: EvmEnv<WrapStateDb, EthBlockHeader>,
 }
 
 impl Guest {
@@ -20,10 +20,10 @@ impl Guest {
         Guest { env }
     }
 
-    pub fn run(&self, call: Call) -> Output {
+    pub fn run(&mut self, call: Call) -> Output {
         Output {
             block_commitment: self.env.block_commitment(),
-            evm_call_result: Engine::guest_evm_call(&call, &self.env),
+            evm_call_result: Engine::call(&call, &mut self.env).unwrap(),
         }
     }
 }

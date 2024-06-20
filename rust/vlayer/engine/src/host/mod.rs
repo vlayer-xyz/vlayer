@@ -28,9 +28,6 @@ use revm::primitives::HashMap;
 pub mod db;
 pub mod provider;
 
-/// Alias for readability, do not make public.
-pub(crate) type HostEvmEnv<P, H> = EvmEnv<ProofDb<P>, H>;
-
 /// The Ethers client type.
 pub type EthersClient = ethers_providers::Provider<RetryClient<Http>>;
 
