@@ -24,7 +24,7 @@ revm = { version = "9.0", default-features = false, features = ["serde", "std"] 
 rlp = "0.5.2"
 serde = "1.0"
 serde_json = { version = "1.0", optional = true}
-thiserror = "1.0"
+thiserror = { workspace = true }
 tokio = { workspace = true, optional = true }
 
 

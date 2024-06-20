@@ -10,7 +10,7 @@ http-body-util = "0.1.2"
 mime = "0.3.17"
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
-thiserror = "1.0.61"
+thiserror = { workspace = true }
 tokio = { workspace = true }
 tower = "0.4.13"
 tower-http = { version = "0.5.2", features = ["trace"] }

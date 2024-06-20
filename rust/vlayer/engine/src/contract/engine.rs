@@ -1,19 +1,29 @@
-use anyhow::anyhow;
 use revm::{
     primitives::{
         CfgEnvWithHandlerCfg, ExecutionResult, ResultAndState, SuccessReason, TransactTo,
     },
     Database, Evm,
 };
+use std::fmt::Debug;
+use thiserror::Error;
 
 use crate::{guest::Call, EvmBlockHeader, EvmEnv};
 
 pub struct Engine {}
 
+#[derive(Error, Debug, PartialEq)]
+pub enum EngineError {
+    #[error("EVM transact preverified error: {0}")]
+    TransactPreverifiedError(String),
+    #[error("EVM transact error: {0}")]
+    TransactError(String),
+}
+
 impl Engine {
-    pub fn call<DB, H>(tx: &Call, env: &mut EvmEnv<DB, H>) -> anyhow::Result<Vec<u8>>
+    pub fn call<DB, H>(tx: &Call, env: &mut EvmEnv<DB, H>) -> Result<Vec<u8>, EngineError>
     where
         DB: Database,
+        DB::Error: Debug,
         H: EvmBlockHeader,
     {
         let cfg: CfgEnvWithHandlerCfg = env.cfg_env.clone();
@@ -27,9 +37,10 @@ impl Engine {
         Self::transact(evm, tx)
     }
 
-    fn transact<DB>(mut evm: Evm<'_, (), DB>, tx: &Call) -> anyhow::Result<Vec<u8>>
+    fn transact<DB>(mut evm: Evm<'_, (), DB>, tx: &Call) -> Result<Vec<u8>, EngineError>
     where
         DB: Database,
+        DB::Error: Debug,
     {
         let tx_env = evm.tx_mut();
         tx_env.caller = tx.caller;
@@ -38,16 +49,17 @@ impl Engine {
 
         let ResultAndState { result, .. } = evm
             .transact_preverified()
-            .map_err(|_| anyhow!("Transact error"))?;
-        let ExecutionResult::Success {
+            .map_err(|err| EngineError::TransactPreverifiedError(format!("{:?}", err)))?;
+
+        if let ExecutionResult::Success {
             reason: SuccessReason::Return,
             output,
             ..
         } = result
-        else {
-            return Err(anyhow!("Call did not return: "));
-        };
-
-        Ok(output.into_data().into())
+        {
+            Ok(output.into_data().into())
+        } else {
+            Err(EngineError::TransactError(format!("{:?}", result)))
+        }
     }
 }

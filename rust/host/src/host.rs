@@ -4,9 +4,11 @@ use ethers_providers::Provider as OGEthersProvider;
 use ethers_providers::{Http, RetryClient};
 use guest_wrapper::GUEST_ELF;
 use risc0_zkvm::{default_prover, ExecutorEnv};
+use thiserror::Error;
 use vlayer_engine::guest::{Call, Input, Output};
 use vlayer_engine::{
     config::ETH_SEPOLIA_CHAIN_SPEC,
+    contract::engine,
     contract::engine::Engine,
     ethereum::EthEvmEnv,
     host::{
@@ -25,12 +27,19 @@ pub struct Host {
     env: EthEvmEnv<ProofDb<EthersProvider<EthersClient>>>,
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Error, Debug, PartialEq)]
 pub enum HostError {
+    #[error("Elf parse error")]
     ElfParseError,
+    #[error("ExecutorEnv builder error")]
     ExecutorEnvBuilderError,
+    #[error("Invalid input")]
     InvalidInput,
+    #[error("Rpc connection error")]
     RpcConnectionError,
+    #[error("Engine error")]
+    EngineError(#[from] engine::EngineError),
+    #[error("Unknown error: {0}")]
     Unknown(String),
 }
 
