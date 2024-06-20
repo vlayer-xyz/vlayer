@@ -8,6 +8,7 @@ You will need to install following software to start working with repository:
 
 - [Rust](https://www.rust-lang.org/tools/install) compiler
 - Rust risc-0 [toolchain](https://dev.risczero.com/api/zkvm/quickstart)
+- [Foundry](https://book.getfoundry.sh/getting-started/installation)
 
 ### Building
 
@@ -25,7 +26,12 @@ To deploy contract first install `jq`:
 brew install jq
 ```
 
-Deploy contract by going to its directory (e.g. `examples/simple`) and run `../../bash/vlayer-build.sh`.
+Run anvil in the background: 
+```sh
+anvil
+```
+
+Deploy contract by going to its directory (e.g. `examples/simple`) and run `../../bash/vlayer-deploy.sh`.
 If `VLAYER_CONTRACT_ADDRESS` is displayed, contract was deployed successfully.
 
 Finally run:
