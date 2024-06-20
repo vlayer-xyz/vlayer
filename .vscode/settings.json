@@ -4,6 +4,7 @@
         "rust/guest_wrapper/guest/Cargo.toml",
     ],
     "cSpell.words": [
+        "binstall",
         "bytecodes",
         "merkle",
         "multichain",
