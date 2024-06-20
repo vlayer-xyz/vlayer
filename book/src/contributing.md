@@ -46,6 +46,11 @@ To build book you will need mdbook installed:
 cargo install mdbook
 ```
 
+To compile diagrams in the book, you need to install [mdbook-mermaid](https://github.com/badboy/mdbook-mermaid) preprocessor:
+```sh
+cargo install mdbook-mermaid
+```
+
 To build book navigate to `book/` and type:
 ```
 mdbook serve
