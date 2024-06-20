@@ -8,11 +8,11 @@ use revm::{
 
 use crate::{guest::Call, EvmBlockHeader, EvmEnv};
 
-pub struct Engine<D> {
-    db: D,
+pub struct Engine<'a, D> {
+    db: &'a mut D,
 }
 
-impl<D: Database> Engine<D> {
+impl<'a, D: Database + 'a> Engine<'a, D> {
     pub fn call<H>(tx: &Call, env: &mut EvmEnv<D, H>) -> anyhow::Result<Vec<u8>>
     where
         H: EvmBlockHeader,
