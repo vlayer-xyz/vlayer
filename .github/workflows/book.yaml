@@ -57,8 +57,7 @@ jobs:
           PR_NUMBER: ${{ github.event.number }}
         run: |
           npm install -g vercel
-          ALIAS="pr-${{ github.event.number }}-$(echo ${{ github.head_ref }} | sed 's/\//-/g')"
-          DEPLOYMENT_URL=$(vercel --token $VERCEL_TOKEN --yes --cwd ./book --scope $VERCEL_ORG_ID --alias $ALIAS | tail -1)
+          DEPLOYMENT_URL=$(vercel --token $VERCEL_TOKEN --yes --cwd ./book --scope $VERCEL_ORG_ID | tail -1)
           COMMENT_BODY="The preview of this PR is available at: $DEPLOYMENT_URL"
           curl -s -H "Authorization: token $GITHUB_TOKEN" \
               -X POST \
