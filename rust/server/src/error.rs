@@ -25,6 +25,12 @@ impl ErrorResponse {
     }
 }
 
+#[derive(Debug, Error, PartialEq)]
+pub enum FieldValidationError {
+    #[error("{1} `{0}`")]
+    InvalidHex(String, FromHexError),
+}
+
 #[derive(Debug, Error, Derivative)]
 #[derivative(PartialEq)]
 pub enum AppError {
@@ -34,8 +40,11 @@ pub enum AppError {
         #[derivative(PartialEq = "ignore")]
         JsonRejection,
     ),
-    #[error("Invalid address: {field} -> {error}")]
-    InvalidAddress { field: String, error: FromHexError },
+    #[error("Invalid field `{field}`: {error}")]
+    FieldValidationError {
+        field: String,
+        error: FieldValidationError,
+    },
 }
 
 // Tell axum how `AppError` should be converted into a response
@@ -47,7 +56,7 @@ impl IntoResponse for AppError {
             // Our fault
             // User fault - these errors are caused by bad user input so don't log it
             AppError::JsonRejection(rejection) => (rejection.status(), rejection.body_text()),
-            AppError::InvalidAddress { .. } => (StatusCode::BAD_REQUEST, self.to_string()),
+            AppError::FieldValidationError { .. } => (StatusCode::BAD_REQUEST, self.to_string()),
         };
 
         (status, Json(ErrorResponse { message })).into_response()
