@@ -1,10 +1,10 @@
-use alloy_primitives::hex::FromHexError;
 use axum::{
     extract::rejection::JsonRejection,
     http::StatusCode,
     response::{IntoResponse, Response},
 };
 use derivative::Derivative;
+use hex::FromHexError;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
