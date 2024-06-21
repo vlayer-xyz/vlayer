@@ -40,11 +40,8 @@ pub enum AppError {
         #[derivative(PartialEq = "ignore")]
         JsonRejection,
     ),
-    #[error("Invalid field `{field}`: {error}")]
-    FieldValidationError {
-        field: String,
-        error: FieldValidationError,
-    },
+    #[error("Invalid field `{0}`: {1}")]
+    FieldValidationError(String, FieldValidationError),
 }
 
 // Tell axum how `AppError` should be converted into a response

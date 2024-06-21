@@ -45,9 +45,11 @@ fn parse_address_field(field_name: &str, address: String) -> Result<Address, App
     address
         .parse()
         .map_err(|err| alloy_hex_error_to_standard_hex_error(err))
-        .map_err(|err| AppError::FieldValidationError {
-            field: field_name.to_string(),
-            error: FieldValidationError::InvalidHex(address, err),
+        .map_err(|err| {
+            AppError::FieldValidationError(
+                field_name.to_string(),
+                FieldValidationError::InvalidHex(address, err),
+            )
         })
 }
 
