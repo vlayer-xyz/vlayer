@@ -33,7 +33,7 @@ anvil
 Deploy contract by going to its directory (e.g. `examples/simple`) and run `../../bash/vlayer-deploy.sh`.
 If `VLAYER_CONTRACT_ADDRESS` is displayed, contract was deployed successfully.
 
-Finally run:
+Finally, run:
 
 ```sh
 RUST_LOG=info RISC0_DEV_MODE=1 cargo run
@@ -44,6 +44,11 @@ RUST_LOG=info RISC0_DEV_MODE=1 cargo run
 To build book you will need mdbook installed:
 ```sh
 cargo install mdbook
+```
+
+To compile diagrams in the book, you need to install [mdbook-mermaid](https://github.com/badboy/mdbook-mermaid) preprocessor:
+```sh
+cargo install mdbook-mermaid
 ```
 
 To build book navigate to `book/` and type:
