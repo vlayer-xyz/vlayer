@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 
-use crate::json::AppJson;
+use crate::json::Json;
 
 #[derive(Deserialize, Serialize)]
 pub struct UserParams {
@@ -15,6 +15,6 @@ impl UserParams {
         }
     }
 }
-pub(crate) async fn hello(AppJson(params): AppJson<UserParams>) -> String {
+pub(crate) async fn hello(Json(params): Json<UserParams>) -> String {
     format!("Hello, {}!", params.name)
 }
