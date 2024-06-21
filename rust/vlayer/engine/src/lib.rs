@@ -45,11 +45,11 @@ pub struct EvmInput<H> {
     pub ancestors: Vec<H>,
 }
 
-impl<H: EvmBlockHeader> EvmInput<H> {
+impl<H: EvmBlockHeader + Clone> EvmInput<H> {
     /// Converts the input into a [EvmEnv] for execution.
     ///
     /// This method verifies that the state matches the state root in the header and panics if not.
-    pub fn into_env(self) -> GuestEvmEnv<H> {
+    pub fn into_db_and_header(self) -> (WrapStateDb, H) {
         // verify that the state root matches the state trie
         let state_root = self.state_trie.hash_slow();
         assert_eq!(self.header.state_root(), &state_root, "State root mismatch");
@@ -82,7 +82,7 @@ impl<H: EvmBlockHeader> EvmInput<H> {
             block_hashes,
         ));
 
-        EvmEnv::new(db, header)
+        (db, header.inner().clone())
     }
 }
 
@@ -94,12 +94,9 @@ mod private {
 /// Solidity struct representing the committed block used for validation.
 pub use private::Steel::Commitment as SolCommitment;
 
-/// Alias for readability, do not make public.
-pub(crate) type GuestEvmEnv<H> = EvmEnv<WrapStateDb, H>;
-
 /// The environment to execute the contract calls in.
 pub struct EvmEnv<D, H> {
-    pub db: D,
+    db: D,
     cfg_env: CfgEnvWithHandlerCfg,
     header: Sealed<H>,
 }
@@ -123,14 +120,6 @@ impl<D, H: EvmBlockHeader> EvmEnv<D, H> {
         self.cfg_env.handler_cfg.spec_id =
             chain_spec.active_fork(self.header.number(), self.header.timestamp())?;
         Ok(self)
-    }
-
-    /// Returns the [SolCommitment] used to validate the environment.
-    pub fn block_commitment(&self) -> SolCommitment {
-        SolCommitment {
-            blockHash: self.header.seal(),
-            blockNumber: U256::from(self.header.number()),
-        }
     }
 
     /// Returns the header of the environment.
@@ -241,6 +230,8 @@ pub trait EvmBlockHeader: Sealable {
     /// Returns the state root hash.
     fn state_root(&self) -> &B256;
 
+    /// Returns the [SolCommitment] used to validate the environment.
+    fn block_commitment(&self) -> SolCommitment;
     /// Fills the EVM block environment with the header's data.
     fn fill_block_env(&self, blk_env: &mut BlockEnv);
 }
