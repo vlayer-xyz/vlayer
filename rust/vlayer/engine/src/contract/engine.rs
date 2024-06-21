@@ -19,13 +19,18 @@ pub enum EngineError {
     TransactError(String),
 }
 
-impl<D: Database, H: EvmBlockHeader> Engine<D, H> {
+impl<D, H> Engine<D, H>
+where
+    D: Database,
+    D::Error: std::fmt::Debug,
+    H: EvmBlockHeader,
+{
     pub fn try_new(db: D, header: H, chain_spec: &ChainSpec) -> anyhow::Result<Self> {
         let env = EvmEnv::new(db, header.seal_slow()).with_chain_spec(chain_spec)?;
         Ok(Engine { env })
     }
 
-    pub fn call(mut self, tx: &Call) -> anyhow::Result<Vec<u8>> {
+    pub fn call(mut self, tx: &Call) -> Result<Vec<u8>, EngineError> {
         let evm = Evm::builder()
             .with_db(&mut self.env.db)
             .with_cfg_env_with_handler_cfg(self.env.cfg_env)
