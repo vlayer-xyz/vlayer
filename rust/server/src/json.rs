@@ -11,9 +11,9 @@ use crate::error::AppError;
 // `axum::Json` responds with plain text if the input is invalid.
 #[derive(FromRequest, Debug)]
 #[from_request(via(axum::Json), rejection(AppError))]
-pub struct AppJson<T>(pub T);
+pub struct Json<T>(pub T);
 
-impl<T> IntoResponse for AppJson<T>
+impl<T> IntoResponse for Json<T>
 where
     axum::Json<T>: IntoResponse,
 {

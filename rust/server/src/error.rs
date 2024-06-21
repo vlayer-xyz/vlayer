@@ -8,7 +8,7 @@ use derivative::Derivative;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-use crate::json::AppJson;
+use crate::json::Json;
 
 // Format in which errors are returned to the user
 #[derive(Serialize, Deserialize, Debug, Eq, PartialEq)]
@@ -50,6 +50,6 @@ impl IntoResponse for AppError {
             AppError::InvalidAddress { .. } => (StatusCode::BAD_REQUEST, self.to_string()),
         };
 
-        (status, AppJson(ErrorResponse { message })).into_response()
+        (status, Json(ErrorResponse { message })).into_response()
     }
 }
