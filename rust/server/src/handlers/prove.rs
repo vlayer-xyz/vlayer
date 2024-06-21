@@ -8,9 +8,34 @@ use crate::{
 
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
-pub struct ProveArgs {
+pub struct ProveArgsRpc {
     from: String,
     to: String,
+}
+
+pub struct ProveArgs {
+    from: Address,
+    to: Address,
+}
+
+impl TryFrom<ProveArgsRpc> for ProveArgs {
+    type Error = AppError;
+
+    fn try_from(value: ProveArgsRpc) -> Result<Self, Self::Error> {
+        Ok(Self {
+            from: parse_address_field("from", value.from)?,
+            to: parse_address_field("to", value.to)?,
+        })
+    }
+}
+
+fn parse_address_field(field_name: &str, address: String) -> Result<Address, AppError> {
+    address
+        .parse()
+        .map_err(|err| AppError::FieldValidationError {
+            field: field_name.to_string(),
+            error: FieldValidationError::InvalidHex(address, err),
+        })
 }
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -18,33 +43,19 @@ pub struct ProveResult {
     pub result: String,
 }
 
-pub(crate) async fn prove(Json(params): Json<ProveArgs>) -> Result<Json<ProveResult>, AppError> {
-    let from: Address = params
-        .from
-        .parse()
-        .map_err(|err| AppError::FieldValidationError {
-            field: "from".to_string(),
-            error: FieldValidationError::InvalidHex(params.from, err),
-        })?;
-
-    let to: Address = params
-        .to
-        .parse()
-        .map_err(|err| AppError::FieldValidationError {
-            field: "to".to_string(),
-            error: FieldValidationError::InvalidHex(params.to, err),
-        })?;
+pub(crate) async fn prove(Json(params): Json<ProveArgsRpc>) -> Result<Json<ProveResult>, AppError> {
+    let params: ProveArgs = params.try_into()?;
 
     Ok(Json(ProveResult {
-        result: format!("Call: from {from} to {to}!"),
+        result: format!("Call: from {} to {}!", params.from, params.to),
     }))
 }
 
 #[cfg(test)]
 mod test {
-    use crate::json::Json;
+    use crate::{handlers::prove::ProveArgsRpc, json::Json};
 
-    use super::{prove, ProveArgs};
+    use super::prove;
 
     const FROM: &str = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f";
     const TO: &str = "0x7Ad53bbA1004e46dd456316912D55dBc5D311a03";
@@ -52,7 +63,7 @@ mod test {
 
     #[tokio::test]
     async fn success() -> anyhow::Result<()> {
-        let actual = prove(Json(ProveArgs {
+        let actual = prove(Json(ProveArgsRpc {
             from: FROM.to_string(),
             to: TO.to_string(),
         }))
@@ -69,7 +80,7 @@ mod test {
 
     #[tokio::test]
     async fn invalid_from_address() -> anyhow::Result<()> {
-        let actual_err = prove(Json(ProveArgs {
+        let actual_err = prove(Json(ProveArgsRpc {
             from: INVALID_ADDRESS.to_string(),
             to: TO.to_string(),
         }))
@@ -86,7 +97,7 @@ mod test {
 
     #[tokio::test]
     async fn invalid_to_address() -> anyhow::Result<()> {
-        let actual_err = prove(Json(ProveArgs {
+        let actual_err = prove(Json(ProveArgsRpc {
             from: FROM.to_string(),
             to: INVALID_ADDRESS.to_string(),
         }))
