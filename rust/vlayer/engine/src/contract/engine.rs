@@ -1,16 +1,14 @@
 use revm::{
-    primitives::{
-        CfgEnvWithHandlerCfg, ExecutionResult, ResultAndState, SuccessReason, TransactTo,
-    },
+    primitives::{ExecutionResult, ResultAndState, SuccessReason, TransactTo},
     Database, Evm,
 };
 use std::fmt::Debug;
 use thiserror::Error;
 
-use crate::{guest::Call, EvmBlockHeader, EvmEnv};
+use crate::{config::ChainSpec, guest::Call, EvmBlockHeader, EvmEnv};
 
-pub struct Engine<'a, D, H> {
-    env: &'a mut EvmEnv<D, H>,
+pub struct Engine<D, H> {
+    env: EvmEnv<D, H>,
 }
 
 #[derive(Error, Debug, PartialEq)]
@@ -21,22 +19,16 @@ pub enum EngineError {
     TransactError(String),
 }
 
-impl<'a, D, H> Engine<'a, D, H>
-where
-    D: Database,
-    D::Error: Debug,
-    H: EvmBlockHeader,
-{
-    pub fn new(env: &'a mut EvmEnv<D, H>) -> Self {
-        Engine { env }
+impl<D: Database, H: EvmBlockHeader> Engine<D, H> {
+    pub fn try_new(db: D, header: H, chain_spec: &ChainSpec) -> anyhow::Result<Self> {
+        let env = EvmEnv::new(db, header.seal_slow()).with_chain_spec(chain_spec)?;
+        Ok(Engine { env })
     }
 
-    pub fn call(self, tx: &Call) -> anyhow::Result<Vec<u8>> {
-        let cfg: CfgEnvWithHandlerCfg = self.env.cfg_env.clone();
-
+    pub fn call(mut self, tx: &Call) -> anyhow::Result<Vec<u8>> {
         let evm = Evm::builder()
             .with_db(&mut self.env.db)
-            .with_cfg_env_with_handler_cfg(cfg)
+            .with_cfg_env_with_handler_cfg(self.env.cfg_env)
             .modify_block_env(|blk_env| self.env.header.fill_block_env(blk_env))
             .build();
 

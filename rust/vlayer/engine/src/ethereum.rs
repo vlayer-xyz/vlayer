@@ -13,7 +13,7 @@
 // limitations under the License.
 
 //! Type aliases for Ethereum.
-use crate::EvmEnv;
+use crate::{EvmEnv, SolCommitment};
 
 use super::{EvmBlockHeader, EvmInput};
 use alloy_primitives::{
@@ -98,6 +98,15 @@ impl EvmBlockHeader for EthBlockHeader {
     #[inline]
     fn state_root(&self) -> &B256 {
         &self.state_root
+    }
+
+    #[inline]
+    /// Returns the [SolCommitment] used to validate the environment.
+    fn block_commitment(&self) -> SolCommitment {
+        SolCommitment {
+            blockHash: self.clone().seal_slow().seal(),
+            blockNumber: U256::from(self.number()),
+        }
     }
 
     #[inline]

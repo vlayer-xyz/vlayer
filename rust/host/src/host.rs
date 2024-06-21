@@ -5,17 +5,17 @@ use ethers_providers::{Http, RetryClient};
 use guest_wrapper::GUEST_ELF;
 use risc0_zkvm::{default_prover, ExecutorEnv};
 use thiserror::Error;
+use vlayer_engine::ethereum::EthBlockHeader;
 use vlayer_engine::guest::{Call, Input, Output};
+use vlayer_engine::host::into_input;
 use vlayer_engine::{
     config::ETH_SEPOLIA_CHAIN_SPEC,
     contract::engine,
     contract::engine::Engine,
-    ethereum::EthEvmEnv,
     host::{
         db::ProofDb,
         provider::{EthersProvider, Provider},
     },
-    EvmEnv,
 };
 
 const MAX_RETRY: u32 = 3;
@@ -24,7 +24,8 @@ const INITIAL_BACKOFF: u64 = 500;
 pub type EthersClient = OGEthersProvider<RetryClient<Http>>;
 
 pub struct Host {
-    env: EthEvmEnv<ProofDb<EthersProvider<EthersClient>>>,
+    db: ProofDb<EthersProvider<EthersClient>>,
+    header: EthBlockHeader,
 }
 
 #[derive(Error, Debug, PartialEq)]
@@ -68,16 +69,17 @@ impl Host {
         let block_number = provider.get_block_number().map_err(|err| anyhow!(err))?;
         let header = provider.get_block_header(block_number).unwrap().unwrap();
         let db = ProofDb::new(provider, block_number);
-        let env = EvmEnv::new(db, header.seal_slow()).with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC)?;
-        Ok(Host { env })
+
+        Ok(Host { db, header })
     }
 
     pub fn run(mut self, call: Call) -> Result<Output, HostError> {
-        let _returns = Engine::new(&mut self.env).call(&call)?;
+        let _returns = Engine::try_new(&mut self.db, self.header.clone(), &ETH_SEPOLIA_CHAIN_SPEC)?
+            .call(&call)?;
 
         let input = Input {
             call,
-            evm_input: self.env.into_input()?,
+            evm_input: into_input(self.db, self.header.seal_slow())?,
         };
 
         let env = ExecutorEnv::builder()

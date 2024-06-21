@@ -14,16 +14,15 @@
 
 #![cfg(feature = "host")]
 
-use alloy_primitives::{address, b256, uint, Address, U256};
+use alloy_primitives::{address, b256, uint, Address, Sealable, U256};
 use alloy_sol_types::{sol, SolCall};
 use std::fmt::Debug;
 use test_log::test;
 use vlayer_engine::{
     config::{ChainSpec, ETH_MAINNET_CHAIN_SPEC, ETH_SEPOLIA_CHAIN_SPEC},
     contract::engine::Engine,
-    ethereum::EthEvmEnv,
     guest::Call,
-    host,
+    host::{self, from_provider, into_input},
 };
 
 macro_rules! provider {
@@ -83,37 +82,39 @@ fn erc20_multi_balance_of() {
         account: address!("5a52E96BAcdaBb82fd05763E25335261B270Efcb"),
     };
 
-    let mut env = EthEvmEnv::from_provider(provider!(), ERC20_TEST_BLOCK)
-        .unwrap()
-        .with_chain_spec(&ETH_MAINNET_CHAIN_SPEC)
-        .unwrap();
+    let (mut db, header) = from_provider(provider!(), ERC20_TEST_BLOCK).unwrap();
     let call_data1 = Call {
         caller: ERC20_TEST_CONTRACT,
         to: ERC20_TEST_CONTRACT,
         data: call1.abi_encode(),
     };
-    Engine::new(&mut env).call(&call_data1).unwrap();
+    Engine::try_new(&mut db, header.clone(), &ETH_MAINNET_CHAIN_SPEC)
+        .unwrap()
+        .call(&call_data1)
+        .unwrap();
     let call_data2 = Call {
         caller: ERC20_TEST_CONTRACT,
         to: ERC20_TEST_CONTRACT,
         data: call2.abi_encode(),
     };
-    Engine::new(&mut env).call(&call_data2).unwrap();
-    let input = env.into_input().unwrap();
+    Engine::try_new(&mut db, header.clone(), &ETH_MAINNET_CHAIN_SPEC)
+        .unwrap()
+        .call(&call_data2)
+        .unwrap();
+    let input = into_input(db, header.seal_slow()).unwrap();
 
     // execute the call
-    let mut env = input
-        .into_env()
-        .with_chain_spec(&ETH_MAINNET_CHAIN_SPEC)
-        .unwrap();
-    let result1 = Engine::new(&mut env)
+    let (mut db, header) = input.into_db_and_header();
+    let result1 = Engine::try_new(&mut db, header.clone(), &ETH_MAINNET_CHAIN_SPEC)
+        .unwrap()
         .call(&Call {
             caller: ERC20_TEST_CONTRACT,
             to: ERC20_TEST_CONTRACT,
             data: call1.abi_encode(),
         })
         .unwrap();
-    let result2 = Engine::new(&mut env)
+    let result2 = Engine::try_new(&mut db, header.clone(), &ETH_MAINNET_CHAIN_SPEC)
+        .unwrap()
         .call(&Call {
             caller: ERC20_TEST_CONTRACT,
             to: ERC20_TEST_CONTRACT,
@@ -304,11 +305,9 @@ fn multi_contract_calls() {
 
 #[test]
 fn call_eoa() {
-    let mut env = EthEvmEnv::from_provider(provider!(), VIEW_CALL_TEST_BLOCK)
+    let (db, header) = from_provider(provider!(), VIEW_CALL_TEST_BLOCK).unwrap();
+    Engine::try_new(db, header, &ETH_SEPOLIA_CHAIN_SPEC)
         .unwrap()
-        .with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC)
-        .unwrap();
-    Engine::new(&mut env)
         .call(&Call {
             caller: Address::ZERO,
             to: Address::ZERO,
@@ -342,7 +341,7 @@ where
     C: SolCall + Clone,
     <C as SolCall>::Return: PartialEq + Debug,
 {
-    let mut env = EthEvmEnv::from_provider(provider!(), block)?.with_chain_spec(chain_spec)?;
+    let (mut db, header) = from_provider(provider!(), block)?;
 
     let call_tx_data = call_overrides.apply(Call {
         caller: address,
@@ -350,11 +349,12 @@ where
         data: call.abi_encode(),
     });
 
-    let preflight_result = Engine::new(&mut env).call(&call_tx_data)?;
-    let input = env.into_input()?;
+    let preflight_result =
+        Engine::try_new(&mut db, header.clone(), chain_spec)?.call(&call_tx_data)?;
+    let input = into_input(db, header.seal_slow())?;
 
-    let mut env = input.into_env().with_chain_spec(&ETH_SEPOLIA_CHAIN_SPEC)?;
-    let result = Engine::new(&mut env).call(&call_tx_data)?;
+    let (mut db, header) = input.into_db_and_header();
+    let result = Engine::try_new(&mut db, header, &ETH_SEPOLIA_CHAIN_SPEC)?.call(&call_tx_data)?;
     assert_eq!(
         result, preflight_result,
         "mismatch in preflight and execution"
