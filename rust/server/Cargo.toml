@@ -22,3 +22,4 @@ opentelemetry = "0.16"
 tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 alloy-primitives = { workspace = true }
 derivative = "2.2.0"
+hex = "0.4.3"

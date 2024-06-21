@@ -5,6 +5,8 @@ use crate::{
     error::{AppError, FieldValidationError},
     json::Json,
 };
+use alloy_primitives::hex::FromHexError as AlloyFromHexError;
+use hex::FromHexError;
 
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
@@ -29,9 +31,20 @@ impl TryFrom<ProveArgsRpc> for ProveArgs {
     }
 }
 
+fn alloy_hex_error_to_standard_hex_error(err: AlloyFromHexError) -> FromHexError {
+    match err {
+        AlloyFromHexError::InvalidHexCharacter { c, index } => {
+            FromHexError::InvalidHexCharacter { c, index }
+        }
+        AlloyFromHexError::InvalidStringLength => FromHexError::InvalidStringLength,
+        AlloyFromHexError::OddLength => FromHexError::OddLength,
+    }
+}
+
 fn parse_address_field(field_name: &str, address: String) -> Result<Address, AppError> {
     address
         .parse()
+        .map_err(|err| alloy_hex_error_to_standard_hex_error(err))
         .map_err(|err| AppError::FieldValidationError {
             field: field_name.to_string(),
             error: FieldValidationError::InvalidHex(address, err),
@@ -89,7 +102,7 @@ mod test {
 
         assert_eq!(
             actual_err.to_string(),
-            "Invalid field `from`: invalid string length `0x`"
+            "Invalid field `from`: Invalid string length `0x`"
         );
 
         Ok(())
@@ -106,7 +119,7 @@ mod test {
 
         assert_eq!(
             actual_err.to_string(),
-            "Invalid field `to`: invalid string length `0x`"
+            "Invalid field `to`: Invalid string length `0x`"
         );
 
         Ok(())
