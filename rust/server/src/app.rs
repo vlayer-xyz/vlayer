@@ -8,7 +8,7 @@ pub fn app() -> Router {
         .route("/hello", post(hello))
         .route("/prove", post(prove))
         .layer(init_trace_layer())
-        // NOTE: it should be added after the Trace layer
+        // NOTE: RequestIdLayer should be added after the Trace layer
         .layer(RequestIdLayer)
 }
 
