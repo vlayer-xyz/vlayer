@@ -5,9 +5,9 @@ vlayer exposes one RPC endpoint under `/` with the following structure of the re
  {
     "method": "v_call",
     "params": [
-        object,
-        context,
-        extras
+        "<arg_object>",
+        "<context>",
+        "<extras>"
     ]
  }
 ```
