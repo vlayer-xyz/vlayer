@@ -1,8 +1,28 @@
 # JSON Rpc Api
 
-# v_call
+vlayer exposes one RPC endpoint under `/` with the following structure of the request:
+```json
+ {
+    "method": "v_call",
+    "params": [
+        object,
+        context,
+        extras
+    ]
+ }
+```
 
-vlayer exposes one RPC endpoint under `/` with the following structure of the call:
+and response:
+```json
+{
+    "result": "..."
+}
+```
+
+
+# v_call
+`v_call` is the core endpoint that vlayer provides, with following format request:
+
 ```json
  {
     "method": "v_call",
@@ -19,3 +39,14 @@ vlayer exposes one RPC endpoint under `/` with the following structure of the ca
     ]
  }
 ```
+
+and response:
+
+```json
+{
+    "result": "...",
+    "proof": "..."
+}
+```
+
+Where `result` is abi encoded result of function execution and `proof` is solidity `Proof` structure prepended.
