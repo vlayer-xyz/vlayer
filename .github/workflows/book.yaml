@@ -20,7 +20,7 @@ jobs:
 
       - name: Checkout repository
         uses: actions/checkout@v4
-      
+
       - name: Install mdbook
         run: |
           mkdir bin
@@ -41,11 +41,11 @@ jobs:
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_PROJECT_ID }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}  
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
           npm install -g vercel
           DEPLOYMENT_URL=$(vercel --token $VERCEL_TOKEN --prod --yes --cwd ./book --scope $VERCEL_ORG_ID | tail -1)
-          echo "Production deployment URL: $DEPLOYMENT_URL"
+          echo "Book production deployment available at: $DEPLOYMENT_URL"
 
       - name: Deploy to Vercel (PR Preview)
         if: github.event_name == 'pull_request'
@@ -58,9 +58,8 @@ jobs:
         run: |
           npm install -g vercel
           DEPLOYMENT_URL=$(vercel --token $VERCEL_TOKEN --yes --cwd ./book --scope $VERCEL_ORG_ID | tail -1)
-          COMMENT_BODY="The preview of this PR is available at: $DEPLOYMENT_URL"
+          COMMENT_BODY="The preview of the vlayer book is available at: $DEPLOYMENT_URL"
           curl -s -H "Authorization: token $GITHUB_TOKEN" \
               -X POST \
               -d "{\"body\":\"$COMMENT_BODY\"}" \
               "https://api.github.com/repos/${{ github.repository }}/issues/$PR_NUMBER/comments"
-              
