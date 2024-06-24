@@ -20,6 +20,17 @@ use anyhow::{bail, Context};
 use once_cell::sync::Lazy;
 use revm::primitives::SpecId;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
+
+pub static CHAIN_MAP: Lazy<HashMap<u64, &'static Lazy<ChainSpec>>> = Lazy::new(|| {
+    HashMap::from([
+        (MAINNET_ID, &ETH_MAINNET_CHAIN_SPEC),
+        (SEPOLIA_ID, &ETH_SEPOLIA_CHAIN_SPEC),
+    ])
+});
+
+pub const MAINNET_ID: u64 = 1;
+pub const SEPOLIA_ID: u64 = 11155111;
 
 /// The Ethereum Mainnet specification.
 pub static ETH_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| ChainSpec {
