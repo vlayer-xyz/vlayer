@@ -23,19 +23,19 @@ chmod +x "$BIN_PATH"
 # Store the correct profile file (i.e. .profile for bash or .zshenv for ZSH).
 case $SHELL in
 */zsh)
-    PROFILE="${ZDOTDIR-"$HOME"}/.zshenv"
+    PROFILE="${ZDOTDIR-"$BASE_DIR"}/.zshenv"
     PREF_SHELL=zsh
     ;;
 */bash)
-    PROFILE=$HOME/.bashrc
+    PROFILE=$BASE_DIR/.bashrc
     PREF_SHELL=bash
     ;;
 */fish)
-    PROFILE=$HOME/.config/fish/config.fish
+    PROFILE=$BASE_DIR/.config/fish/config.fish
     PREF_SHELL=fish
     ;;
 */ash)
-    PROFILE=$HOME/.profile
+    PROFILE=$BASE_DIR/.profile
     PREF_SHELL=ash
     ;;
 *)

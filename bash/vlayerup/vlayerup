@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-set -eo pipefail
+set -ueo pipefail
 
 # What this script will do: 
 # - download latest or specifc binary from vlayer 
@@ -19,13 +19,11 @@ main() {
     PLATFORM=$(tolower "$(uname -s)")
     EXT="tar.gz"
     case $PLATFORM in
-      linux) ;;
+      linux) 
+        PLATFORM="linux"
+        ;;
       darwin|mac*)
         PLATFORM="darwin"
-        ;;
-      mingw*|win*)
-        EXT="zip"
-        PLATFORM="win32"
         ;;
       *)
         err "unsupported platform: $PLATFORM"
@@ -48,7 +46,7 @@ main() {
 
 
   # TODO: Provide right name convention for the releases
-  RELEASE_URL="https://install.vlayer.xyz/vlayer-$PLATFORM-$ARCHITECTURE.$EXT"
+  RELEASE_URL="https://install.vlayer.xyz/vlayer-${PLATFORM}-${ARCHITECTURE}.${EXT}"
 
   say "Downloading vlayer..."
   ensure download "$RELEASE_URL" | ensure tar -xzC "$VLAYER_DIR"
