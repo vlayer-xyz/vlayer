@@ -1,0 +1,108 @@
+#!/usr/bin/env bash
+set -ueo pipefail
+
+# What this script will do: 
+# - download latest or specifc binary from vlayer 
+# - sanity checks like curl/git/foundry/anvil installed 
+# - chmod +x the binary
+
+BASE_DIR=${XDG_CONFIG_HOME:-$HOME}
+VLAYER_DIR=${VLAYER_DIR:-"$BASE_DIR/.vlayer"}
+VLAYER_BIN_DIR="$VLAYER_DIR/bin"
+
+main() {
+  need_cmd git
+  need_cmd curl
+
+  # Compute the URL of the release tarball in the Vlayer repository (will work with public repo)
+  # TODO: Add support for different platforms/architectures
+    PLATFORM=$(tolower "$(uname -s)")
+    EXT="tar.gz"
+    case $PLATFORM in
+      linux) 
+        PLATFORM="linux"
+        ;;
+      darwin|mac*)
+        PLATFORM="darwin"
+        ;;
+      *)
+        err "unsupported platform: $PLATFORM"
+        ;;
+    esac
+
+    ARCHITECTURE=$(uname -m)
+    if [ "${ARCHITECTURE}" = "x86_64" ]; then
+      # Redirect stderr to /dev/null to avoid printing errors if non Rosetta.
+      if [ "$(sysctl -n sysctl.proc_translated 2>/dev/null)" = "1" ]; then
+        ARCHITECTURE="arm64" # Rosetta.
+      else
+        ARCHITECTURE="amd64" # Intel.
+      fi
+    elif [ "${ARCHITECTURE}" = "arm64" ] ||[ "${ARCHITECTURE}" = "aarch64" ] ; then
+      ARCHITECTURE="arm64" # Arm.
+    else
+      ARCHITECTURE="amd64" # Amd.
+    fi
+
+
+  # TODO: Provide right name convention for the releases
+  RELEASE_URL="https://install.vlayer.xyz/nightly-latest-${PLATFORM}-${ARCHITECTURE}.${EXT}"
+
+  say "Downloading vlayer..."
+  ensure download "$RELEASE_URL" | ensure tar -xzC "$VLAYER_DIR"
+  # TODO: replace with the right binary name
+  BIN_PATH="$VLAYER_BIN_DIR/vlayer" 
+  say "Unpacking"
+  chmod +x "$BIN_PATH" 
+  say "done!"
+}
+
+need_cmd() {
+  if ! check_cmd "$1"; then
+    err "need '$1' (command not found)"
+  fi
+}
+
+tolower() {
+  echo "$1" | awk '{print tolower($0)}'
+}
+
+check_cmd() {
+  command -v "$1" &>/dev/null
+}
+
+# Run a command that should never fail. If the command fails execution
+# will immediately terminate with an error showing the failing command.
+ensure() {
+  if ! "$@"; then err "command failed: $*"; fi
+}
+
+# Downloads $1 into $2 or stdout
+download() {
+  if [ -n "$2" ]; then
+    # output into $2
+    if check_cmd curl; then
+      curl -#o "$2" -L "$1"
+    else
+      wget --show-progress -qO "$2" "$1"
+    fi
+  else
+    # output to stdout
+    if check_cmd curl; then
+      curl -#L "$1"
+    else
+      wget --show-progress -qO- "$1"
+    fi
+  fi
+}
+
+say() {
+  printf "vlayerup: %s\n" "$1"
+}
+
+err() {
+  say "$1" >&2
+  exit 1
+}
+
+main "$@"
