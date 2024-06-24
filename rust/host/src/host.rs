@@ -5,11 +5,11 @@ use ethers_providers::{Http, RetryClient};
 use guest_wrapper::GUEST_ELF;
 use risc0_zkvm::{default_prover, ExecutorEnv};
 use thiserror::Error;
+use vlayer_engine::config::SEPOLIA_ID;
 use vlayer_engine::ethereum::EthBlockHeader;
 use vlayer_engine::guest::{Call, Input, Output};
 use vlayer_engine::host::into_input;
 use vlayer_engine::{
-    config::ETH_SEPOLIA_CHAIN_SPEC,
     contract::engine,
     contract::engine::Engine,
     host::{
@@ -74,8 +74,8 @@ impl Host {
     }
 
     pub fn run(mut self, call: Call) -> Result<Output, HostError> {
-        let _returns = Engine::try_new(&mut self.db, self.header.clone(), &ETH_SEPOLIA_CHAIN_SPEC)?
-            .call(&call)?;
+        let _returns =
+            Engine::try_new(&mut self.db, self.header.clone(), SEPOLIA_ID)?.call(&call)?;
 
         let input = Input {
             call,

@@ -19,7 +19,7 @@ use alloy_sol_types::{sol, SolCall};
 use std::fmt::Debug;
 use test_log::test;
 use vlayer_engine::{
-    config::{ChainSpec, ETH_MAINNET_CHAIN_SPEC, ETH_SEPOLIA_CHAIN_SPEC},
+    config::{ChainSpec, ETH_MAINNET_CHAIN_SPEC, ETH_SEPOLIA_CHAIN_SPEC, MAINNET_ID, SEPOLIA_ID},
     contract::engine::Engine,
     guest::Call,
     host::{self, from_provider, into_input},
@@ -88,7 +88,7 @@ fn erc20_multi_balance_of() {
         to: ERC20_TEST_CONTRACT,
         data: call1.abi_encode(),
     };
-    Engine::try_new(&mut db, header.clone(), &ETH_MAINNET_CHAIN_SPEC)
+    Engine::try_new(&mut db, header.clone(), MAINNET_ID)
         .unwrap()
         .call(&call_data1)
         .unwrap();
@@ -97,7 +97,7 @@ fn erc20_multi_balance_of() {
         to: ERC20_TEST_CONTRACT,
         data: call2.abi_encode(),
     };
-    Engine::try_new(&mut db, header.clone(), &ETH_MAINNET_CHAIN_SPEC)
+    Engine::try_new(&mut db, header.clone(), MAINNET_ID)
         .unwrap()
         .call(&call_data2)
         .unwrap();
@@ -105,7 +105,7 @@ fn erc20_multi_balance_of() {
 
     // execute the call
     let (mut db, header) = input.into_db_and_header();
-    let result1 = Engine::try_new(&mut db, header.clone(), &ETH_MAINNET_CHAIN_SPEC)
+    let result1 = Engine::try_new(&mut db, header.clone(), MAINNET_ID)
         .unwrap()
         .call(&Call {
             caller: ERC20_TEST_CONTRACT,
@@ -113,7 +113,7 @@ fn erc20_multi_balance_of() {
             data: call1.abi_encode(),
         })
         .unwrap();
-    let result2 = Engine::try_new(&mut db, header.clone(), &ETH_MAINNET_CHAIN_SPEC)
+    let result2 = Engine::try_new(&mut db, header.clone(), MAINNET_ID)
         .unwrap()
         .call(&Call {
             caller: ERC20_TEST_CONTRACT,
@@ -306,7 +306,7 @@ fn multi_contract_calls() {
 #[test]
 fn call_eoa() {
     let (db, header) = from_provider(provider!(), VIEW_CALL_TEST_BLOCK).unwrap();
-    Engine::try_new(db, header, &ETH_SEPOLIA_CHAIN_SPEC)
+    Engine::try_new(db, header, SEPOLIA_ID)
         .unwrap()
         .call(&Call {
             caller: Address::ZERO,
@@ -350,11 +350,11 @@ where
     });
 
     let preflight_result =
-        Engine::try_new(&mut db, header.clone(), chain_spec)?.call(&call_tx_data)?;
+        Engine::try_new(&mut db, header.clone(), chain_spec.chain_id())?.call(&call_tx_data)?;
     let input = into_input(db, header.seal_slow())?;
 
     let (mut db, header) = input.into_db_and_header();
-    let result = Engine::try_new(&mut db, header, &ETH_SEPOLIA_CHAIN_SPEC)?.call(&call_tx_data)?;
+    let result = Engine::try_new(&mut db, header, SEPOLIA_ID)?.call(&call_tx_data)?;
     assert_eq!(
         result, preflight_result,
         "mismatch in preflight and execution"

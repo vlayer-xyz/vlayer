@@ -1,5 +1,5 @@
 use vlayer_engine::{
-    config::ETH_SEPOLIA_CHAIN_SPEC,
+    config::SEPOLIA_ID,
     contract::{db::WrapStateDb, engine::Engine},
     ethereum::EthBlockHeader,
     guest::{Call, Output},
@@ -20,14 +20,10 @@ impl Guest {
     pub fn run(&mut self, call: Call) -> Output {
         Output {
             block_commitment: self.header.block_commitment(),
-            evm_call_result: Engine::try_new(
-                &mut self.db,
-                self.header.clone(),
-                &ETH_SEPOLIA_CHAIN_SPEC,
-            )
-            .unwrap()
-            .call(&call)
-            .unwrap(),
+            evm_call_result: Engine::try_new(&mut self.db, self.header.clone(), SEPOLIA_ID)
+                .unwrap()
+                .call(&call)
+                .unwrap(),
         }
     }
 }

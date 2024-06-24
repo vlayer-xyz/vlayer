@@ -5,7 +5,7 @@ use revm::{
 use std::fmt::Debug;
 use thiserror::Error;
 
-use crate::{config::ChainSpec, guest::Call, EvmBlockHeader, EvmEnv};
+use crate::{config::CHAIN_MAP, guest::Call, EvmBlockHeader, EvmEnv};
 
 pub struct Engine<D, H> {
     env: EvmEnv<D, H>,
@@ -25,7 +25,10 @@ where
     D::Error: std::fmt::Debug,
     H: EvmBlockHeader,
 {
-    pub fn try_new(db: D, header: H, chain_spec: &ChainSpec) -> anyhow::Result<Self> {
+    pub fn try_new(db: D, header: H, chain_id: u64) -> anyhow::Result<Self> {
+        let chain_spec = CHAIN_MAP.get(&chain_id).ok_or_else(|| {
+            anyhow::Error::msg(format!("Error: chain with id {chain_id} is not supported"))
+        })?;
         let env = EvmEnv::new(db, header.seal_slow()).with_chain_spec(chain_spec)?;
         Ok(Engine { env })
     }
