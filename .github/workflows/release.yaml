@@ -1,10 +1,15 @@
 name: Release binaries
 on: 
   schedule:
-    - cron: '0 22 * * 1-5'
+    - cron: '0 22 * * 1-5' # Mon-Fri at 22:00 UTC
+
+defaults:
+  run:
+    working-directory: rust
 
 jobs:
   release:
+    name: Release nightly
     runs-on: ubuntu-latest
 
     steps:
@@ -16,7 +21,7 @@ jobs:
       - name: Set up Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
-          cache-workspaces: "rust -> target"
+          cache-workspaces: rust
 
       - name: Install risc0 instaler
         run: cargo binstall -y cargo-risczero --force
@@ -24,6 +29,26 @@ jobs:
       - name: Install risc0 toolchain
         run: cargo risczero install
 
-      - name: Build package
-        working-directory: rust/host
-        run: cargo build
+      - name: Build binaries
+        run: cargo build --release
+
+      - name: Package release
+        run: |
+          mkdir -p target/bin
+          cd target
+          mv release/host bin/
+          tar -czvf nightly-linux-amd64.tar.gz bin
+
+      - name: Release tagged nightly
+        uses: ncipollo/release-action@v1
+        with:
+          tag: nightly-${{ github.sha }}
+          artifacts: 'rust/target/nightly-*.tar.gz'
+
+      - name: Release nightly-latest
+        uses: ncipollo/release-action@v1
+        with:
+          tag: nightly-latest
+          latest: true
+          allowUpdates: true
+          artifacts: 'rust/target/nightly-*.tar.gz'
