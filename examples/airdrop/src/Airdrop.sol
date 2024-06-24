@@ -14,7 +14,7 @@ contract Airdrop is ERC721("GameItem", "ITM") {
     mapping(uint256 => bool) public claimed;
 
     constructor (address _targetNftAddr) {
-        targetNftAddr = _targetNftAddr;
+        targetNftAddr = _targetNftAddr; // provide here address of the NFT contract that we are checking, ie. Upcade contract
     } 
 
     function claim(uint tokenId) public {
