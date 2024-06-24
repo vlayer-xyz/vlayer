@@ -46,7 +46,7 @@ main() {
 
 
   # TODO: Provide right name convention for the releases
-  RELEASE_URL="https://install.vlayer.xyz/vlayer-${PLATFORM}-${ARCHITECTURE}.${EXT}"
+  RELEASE_URL="https://install.vlayer.xyz/nightly-latest-${PLATFORM}-${ARCHITECTURE}.${EXT}"
 
   say "Downloading vlayer..."
   ensure download "$RELEASE_URL" | ensure tar -xzC "$VLAYER_DIR"
