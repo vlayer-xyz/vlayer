@@ -49,6 +49,28 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           tag: nightly-latest
-          latest: true
+          makeLatest: true
           allowUpdates: true
           artifacts: 'rust/target/nightly-*.tar.gz'
+
+      - name: Push tagged binaries to AWS S3
+        uses: mostlytyped/s3-put-action@v1.0.0
+        env:
+          LOCAL_FILE: rust/target/nightly-linux-amd64.tar.gz
+          REMOTE_FILE: nightly-${{ github.sha }}-linux-amd64.tar.gz
+          AWS_ENDPOINT: ${{ vars.AWS_ENDPOINT }}
+          AWS_BUCKET: ${{ vars.AWS_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ vars.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          INCLUDE_SHA256: true
+
+      - name: Push latest binaries to AWS S3
+        uses: mostlytyped/s3-put-action@v1.0.0
+        env:
+          LOCAL_FILE: rust/target/nightly-linux-amd64.tar.gz
+          REMOTE_FILE: nightly-latest-linux-amd64.tar.gz
+          AWS_ENDPOINT: ${{ vars.AWS_ENDPOINT }}
+          AWS_BUCKET: ${{ vars.AWS_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ vars.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+          INCLUDE_SHA256: true
