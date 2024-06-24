@@ -44,7 +44,7 @@ fn alloy_hex_error_to_standard_hex_error(err: AlloyFromHexError) -> FromHexError
 fn parse_address_field(field_name: &str, address: String) -> Result<Address, AppError> {
     address
         .parse()
-        .map_err(|err| alloy_hex_error_to_standard_hex_error(err))
+        .map_err(alloy_hex_error_to_standard_hex_error)
         .map_err(|err| {
             AppError::FieldValidationError(
                 field_name.to_string(),
