@@ -48,7 +48,7 @@ main() {
 
 
   # TODO: Provide right name convention for the releases
-  RELEASE_URL="https://vlayer-releases.s3.eu-north-1.amazonaws.com/vlayer-darwin-arm.tar.gz"
+  RELEASE_URL="https://install.vlayer.xyz/vlayer-$PLATFORM-$ARCHITECTURE.$EXT"
 
   say "Downloading vlayer..."
   ensure download "$RELEASE_URL" | ensure tar -xzC "$VLAYER_DIR"

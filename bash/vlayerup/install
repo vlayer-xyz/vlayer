@@ -12,7 +12,7 @@ VLAYER_BIN_DIR="$VLAYER_DIR/bin"
 VLAYER_MAN_DIR="$VLAYER_DIR/share/man/man1"
 
 # It won't work when repo is private
-BIN_URL="https://vlayer-bin.s3.eu-central-1.amazonaws.com/vlayerup"
+BIN_URL="https://install.vlayer.xyz/vlayerup"
 BIN_PATH="$VLAYER_BIN_DIR/vlayerup"
 
 # Create the .vlayer bin directory and vlayerup binary if it doesn't exist.
@@ -55,6 +55,6 @@ if [[ ":$PATH:" != *":${VLAYER_BIN_DIR}:"* ]]; then
 fi
 
 echo
-echo "Detected your preferred shell is $PREF_SHELL and added foundryup to PATH."
+echo "Detected your preferred shell is $PREF_SHELL and added vlayerup to PATH."
 echo "Run 'source $PROFILE' or start a new terminal session to use vlayerup."
 echo "Then, simply run 'vlayerup' to install vlayer."
