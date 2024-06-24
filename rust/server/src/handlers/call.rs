@@ -10,20 +10,20 @@ use hex::FromHexError;
 
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
-pub struct ProveArgsRpc {
+pub struct CallArgsRpc {
     from: String,
     to: String,
 }
 
-pub struct ProveArgs {
+pub struct CallArgs {
     from: Address,
     to: Address,
 }
 
-impl TryFrom<ProveArgsRpc> for ProveArgs {
+impl TryFrom<CallArgsRpc> for CallArgs {
     type Error = AppError;
 
-    fn try_from(value: ProveArgsRpc) -> Result<Self, Self::Error> {
+    fn try_from(value: CallArgsRpc) -> Result<Self, Self::Error> {
         Ok(Self {
             from: parse_address_field("from", value.from)?,
             to: parse_address_field("to", value.to)?,
@@ -54,23 +54,23 @@ fn parse_address_field(field_name: &str, address: String) -> Result<Address, App
 }
 
 #[derive(Deserialize, Serialize, Debug)]
-pub struct ProveResult {
+pub struct CallResult {
     pub result: String,
 }
 
-pub(crate) async fn prove(Json(params): Json<ProveArgsRpc>) -> Result<Json<ProveResult>, AppError> {
-    let params: ProveArgs = params.try_into()?;
+pub(crate) async fn call(Json(params): Json<CallArgsRpc>) -> Result<Json<CallResult>, AppError> {
+    let params: CallArgs = params.try_into()?;
 
-    Ok(Json(ProveResult {
+    Ok(Json(CallResult {
         result: format!("Call: from {} to {}!", params.from, params.to),
     }))
 }
 
 #[cfg(test)]
 mod test {
-    use crate::{handlers::prove::ProveArgsRpc, json::Json};
+    use crate::{handlers::call::CallArgsRpc, json::Json};
 
-    use super::prove;
+    use super::call;
 
     const FROM: &str = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f";
     const TO: &str = "0x7Ad53bbA1004e46dd456316912D55dBc5D311a03";
@@ -78,7 +78,7 @@ mod test {
 
     #[tokio::test]
     async fn success() -> anyhow::Result<()> {
-        let actual = prove(Json(ProveArgsRpc {
+        let actual = call(Json(CallArgsRpc {
             from: FROM.to_string(),
             to: TO.to_string(),
         }))
@@ -95,7 +95,7 @@ mod test {
 
     #[tokio::test]
     async fn invalid_from_address() -> anyhow::Result<()> {
-        let actual_err = prove(Json(ProveArgsRpc {
+        let actual_err = call(Json(CallArgsRpc {
             from: INVALID_ADDRESS.to_string(),
             to: TO.to_string(),
         }))
@@ -112,7 +112,7 @@ mod test {
 
     #[tokio::test]
     async fn invalid_to_address() -> anyhow::Result<()> {
-        let actual_err = prove(Json(ProveArgsRpc {
+        let actual_err = call(Json(CallArgsRpc {
             from: FROM.to_string(),
             to: INVALID_ADDRESS.to_string(),
         }))
