@@ -19,7 +19,7 @@ impl Guest {
 
     pub fn run(&mut self, call: Call) -> Output {
         Output {
-            block_commitment: self.header.block_commitment(),
+            block_commitment: self.header.block_commitment(SEPOLIA_ID),
             evm_call_result: Engine::try_new(&mut self.db, self.header.clone(), SEPOLIA_ID)
                 .unwrap()
                 .call(&call)

@@ -1,4 +1,5 @@
 use alloy_primitives::Address;
+use alloy_rlp_derive::RlpEncodable;
 use risc0_zkvm::Journal;
 use serde::{Deserialize, Serialize};
 
@@ -18,7 +19,7 @@ pub struct Call {
     pub data: Vec<u8>,
 }
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Debug, RlpEncodable)]
 pub struct Output {
     pub block_commitment: SolCommitment,
     pub evm_call_result: Vec<u8>,
