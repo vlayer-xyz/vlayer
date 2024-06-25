@@ -13,12 +13,16 @@ contract PrivateAirdrop is ERC721("GameItem", "ITM"), VlayerVerifier {
     uint256 public lastClaimedId = 0;
 
     constructor (address _targetNftAddr) {
-        targetNftAddr = _targetNftAddr; // provide address of the ERC721 NFT contract that we are checking, ie. Upcade contract
+        // Address of the NFT contract that we are checking, ie. Upcade contract
+        targetNftAddr = _targetNftAddr; 
     } 
 
     function claim(VProof calldata proof, address receiver) public onlyVerified() {
+        // will revert if proof is invalid
         // add extra sanity checks here
+        
         lastClaimedId += 1;
-        _mint(receiver, lastClaimedId); // deliver Airdrop NFT as reward
+        // deliver Airdrop NFT as reward
+        _mint(receiver, lastClaimedId); 
     }
 }

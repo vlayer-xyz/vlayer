@@ -13,12 +13,15 @@ interface IERC721 {
 
 contract NftOwnership is VlayerProver  {
     function main(address targetNftAddr, uint tokenId, address receiver) public returns (address,address) {  
-      setChainId(1); // teleport to chain on which the verification is happening
-      setBlockNumber(latestBlock() - 1); // time travel to specific block number
+      // 🔥 Teleport to chain on which the verification is happening
+      setChainId(1); 
+      // 🔥 Time travel to specific block number
+      setBlockNumber(latestBlock() - 1); 
       
-      // Terminate if NFT is not owned by the prover
+      // Terminate proving if NFT is not owned by the prover
       require(IERC721(targetNftAddr).ownerOf(tokenId) == msg.sender, "You are not the owner of the given NFT");
 
-      return (targetNftAddr, receiver); // anything returned here would be visible to the public
+      // anything returned here would be visible to the public
+      return (targetNftAddr, receiver); 
     }
 }

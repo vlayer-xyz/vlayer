@@ -7,8 +7,10 @@ interface IERC721 {
     function ownerOf(uint256 tokenId) external view returns (address owner);
 }
 
-// NaiveAirdrop contract is a simple implementation of an airdrop contract that rewards users with an NFT for owning a specific NFT.
-// No privacy is provided... as the contract is public and anyone can see who claimed the airdrop and which TargetNFT was owned.
+// NaiveAirdrop contract is a simple implementation of an airdrop contract.
+// It rewards users with an NFT for owning a specific NFT.
+// No privacy is provided... 
+// Contract is public and anyone can see who claimed which TargetNFT was owned.
 
 contract NaiveAirdrop is ERC721("GameItem", "ITM") {
     address public targetNftAddr;
@@ -17,19 +19,24 @@ contract NaiveAirdrop is ERC721("GameItem", "ITM") {
     mapping(uint256 => bool) public claimed;
 
     constructor (address _targetNftAddr) {
-        targetNftAddr = _targetNftAddr; // provide here address of the ERC721 NFT contract that we are checking, ie. Upcade contract
+        // address of the ERC721 NFT contract that we are checking, ie. Upcade contract
+        targetNftAddr = _targetNftAddr; 
     } 
 
     function claim(uint tokenId) public {
+        // check if caller is the owner of the given NFT
         require(
             IERC721(targetNftAddr).ownerOf(tokenId) == msg.sender, 
             "You are not the owner of the given NFT"
-        ); // check if caller is the owner of the given NFT
-        require(!claimed[tokenId], "NFT already claimed"); // check if given NFT is already claimed
+        ); 
+       // check if given NFT is already claimed
+       require(!claimed[tokenId], "NFT already claimed"); 
 
 
         claimed[tokenId] = true;
         lastClaimedId += 1;
-        _mint(msg.sender, lastClaimedId); // deliver Airdrop NFT as reward
+
+        // deliver Airdrop NFT as reward
+        _mint(msg.sender, lastClaimedId); 
     }
 }
