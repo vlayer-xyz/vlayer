@@ -13,10 +13,8 @@ pub fn server() -> Router {
 
 #[cfg(test)]
 mod tests {
-    use core::str;
-
-    use crate::handlers::v_call::CallArgsRpc;
     use crate::test_helpers::{body_to_json, body_to_string, post};
+    use core::str;
 
     use super::server;
     use axum::http::StatusCode;
@@ -65,59 +63,64 @@ mod tests {
         Ok(())
     }
 
-    #[tokio::test]
-    async fn v_call_field_validation_error() -> anyhow::Result<()> {
-        let app = server();
+    mod v_call {
+        use super::*;
+        use crate::handlers::v_call::CallArgsRpc;
 
-        let params = CallArgsRpc::new("I am not a valid address!", TO);
-        let req = JsonRpcRequest {
-            method: "v_call".to_string(),
-            params: serde_json::to_value(params)?,
-            id: 1.into(),
-        };
-        let response = post(app, "/", &req).await?;
+        #[tokio::test]
+        async fn v_call_field_validation_error() -> anyhow::Result<()> {
+            let app = server();
 
-        assert_eq!(response.status(), StatusCode::OK);
-        assert_eq!(
-            body_to_json::<Value>(response.into_body()).await?,
-            json!({
-                "jsonrpc": "2.0",
-                "id": 1,
-                "error": {
-                    "code": -32602,
-                    "message": "Invalid field `from`: Odd number of digits `I am not a valid address!`",
-                    "data": null
-                }
-            })
-        );
+            let params = CallArgsRpc::new("I am not a valid address!", TO);
+            let req = JsonRpcRequest {
+                method: "v_call".to_string(),
+                params: serde_json::to_value(params)?,
+                id: 1.into(),
+            };
+            let response = post(app, "/", &req).await?;
 
-        Ok(())
-    }
+            assert_eq!(response.status(), StatusCode::OK);
+            assert_eq!(
+                body_to_json::<Value>(response.into_body()).await?,
+                json!({
+                    "jsonrpc": "2.0",
+                    "id": 1,
+                    "error": {
+                        "code": -32602,
+                        "message": "Invalid field `from`: Odd number of digits `I am not a valid address!`",
+                        "data": null
+                    }
+                })
+            );
 
-    #[tokio::test]
-    async fn v_call_success() -> anyhow::Result<()> {
-        let app = server();
+            Ok(())
+        }
 
-        let params = CallArgsRpc::new(FROM, TO);
-        let req = JsonRpcRequest {
-            method: "v_call".to_string(),
-            params: serde_json::to_value(params)?,
-            id: 1.into(),
-        };
-        let response = post(app, "/", &req).await?;
+        #[tokio::test]
+        async fn v_call_success() -> anyhow::Result<()> {
+            let app = server();
 
-        assert_eq!(response.status(), StatusCode::OK);
-        assert_eq!(
-            body_to_json::<Value>(response.into_body()).await?,
-            json!({
-                "jsonrpc": "2.0",
-                "id": 1,
-                "result": {
-                    "result": "Call: from 0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f to 0x7Ad53bbA1004e46dd456316912D55dBc5D311a03!"
-                }
-            })
-        );
+            let params = CallArgsRpc::new(FROM, TO);
+            let req = JsonRpcRequest {
+                method: "v_call".to_string(),
+                params: serde_json::to_value(params)?,
+                id: 1.into(),
+            };
+            let response = post(app, "/", &req).await?;
 
-        Ok(())
+            assert_eq!(response.status(), StatusCode::OK);
+            assert_eq!(
+                body_to_json::<Value>(response.into_body()).await?,
+                json!({
+                    "jsonrpc": "2.0",
+                    "id": 1,
+                    "result": {
+                        "result": "Call: from 0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f to 0x7Ad53bbA1004e46dd456316912D55dBc5D311a03!"
+                    }
+                })
+            );
+
+            Ok(())
+        }
     }
 }
