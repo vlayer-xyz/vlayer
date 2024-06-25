@@ -5,7 +5,7 @@ use tracing::info;
 mod app;
 mod error;
 mod handlers;
-mod json;
+mod json_rpc;
 mod layers;
 mod trace;
 
