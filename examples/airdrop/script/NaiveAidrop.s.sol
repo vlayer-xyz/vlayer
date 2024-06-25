@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 
 import {Script, console} from "forge-std/Script.sol";
 
-contract AirdropScript is Script {
+contract NaiveAirdropScript is Script {
     function setUp() public {}
 
     function run() public {
