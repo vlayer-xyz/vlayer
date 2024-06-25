@@ -32,7 +32,7 @@ mod tests {
         Ok(())
     }
 
-    const FROM: &str = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f";
+    const CALLER: &str = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f";
     const TO: &str = "0x7Ad53bbA1004e46dd456316912D55dBc5D311a03";
 
     #[tokio::test]
@@ -65,18 +65,17 @@ mod tests {
 
     mod v_call {
         use super::*;
-        use crate::handlers::v_call::CallArgsRpc;
 
         #[tokio::test]
-        async fn v_call_field_validation_error() -> anyhow::Result<()> {
+        async fn field_validation_error() -> anyhow::Result<()> {
             let app = server();
 
-            let params = CallArgsRpc::new("I am not a valid address!", TO);
-            let req = JsonRpcRequest {
-                method: "v_call".to_string(),
-                params: serde_json::to_value(params)?,
-                id: 1.into(),
-            };
+            let req = json!({
+                "method": "v_call",
+                "params": {"caller": "I am not a valid address!", "to": TO},
+                "id": 1,
+                "jsonrpc": "2.0",
+            });
             let response = post(app, "/", &req).await?;
 
             assert_eq!(response.status(), StatusCode::OK);
@@ -87,7 +86,7 @@ mod tests {
                     "id": 1,
                     "error": {
                         "code": -32602,
-                        "message": "Invalid field `from`: Odd number of digits `I am not a valid address!`",
+                        "message": "Invalid field `caller`: Odd number of digits `I am not a valid address!`",
                         "data": null
                     }
                 })
@@ -97,15 +96,15 @@ mod tests {
         }
 
         #[tokio::test]
-        async fn v_call_success() -> anyhow::Result<()> {
+        async fn success() -> anyhow::Result<()> {
             let app = server();
 
-            let params = CallArgsRpc::new(FROM, TO);
-            let req = JsonRpcRequest {
-                method: "v_call".to_string(),
-                params: serde_json::to_value(params)?,
-                id: 1.into(),
-            };
+            let req = json!({
+                "method": "v_call",
+                "params": {"caller": CALLER, "to": TO},
+                "id": 1,
+                "jsonrpc": "2.0",
+            });
             let response = post(app, "/", &req).await?;
 
             assert_eq!(response.status(), StatusCode::OK);
@@ -115,7 +114,7 @@ mod tests {
                     "jsonrpc": "2.0",
                     "id": 1,
                     "result": {
-                        "result": "Call: from 0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f to 0x7Ad53bbA1004e46dd456316912D55dBc5D311a03!"
+                        "result": "Call: caller 0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f to 0x7Ad53bbA1004e46dd456316912D55dBc5D311a03!"
                     }
                 })
             );

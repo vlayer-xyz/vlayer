@@ -10,6 +10,7 @@ mod server;
 #[cfg(test)]
 mod test_helpers;
 mod trace;
+mod utils;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
