@@ -62,6 +62,9 @@ mod tests {
         Ok(())
     }
 
+    const FROM: &str = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f";
+    const TO: &str = "0x7Ad53bbA1004e46dd456316912D55dBc5D311a03";
+
     #[tokio::test]
     async fn json_rpc_not_found() -> anyhow::Result<()> {
         let app = app();
@@ -94,10 +97,7 @@ mod tests {
     async fn v_call_field_validation_error() -> anyhow::Result<()> {
         let app = app();
 
-        let params = CallArgsRpc::new(
-            "I am not a valid address!",
-            "0x7Ad53bbA1004e46dd456316912D55dBc5D311a03",
-        );
+        let params = CallArgsRpc::new("I am not a valid address!", TO);
         let req = JsonRpcRequest {
             method: "v_call".to_string(),
             params: serde_json::to_value(params)?,
@@ -126,10 +126,7 @@ mod tests {
     async fn v_call_success() -> anyhow::Result<()> {
         let app = app();
 
-        let params = CallArgsRpc::new(
-            "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f",
-            "0x7Ad53bbA1004e46dd456316912D55dBc5D311a03",
-        );
+        let params = CallArgsRpc::new(FROM, TO);
         let req = JsonRpcRequest {
             method: "v_call".to_string(),
             params: serde_json::to_value(params)?,
