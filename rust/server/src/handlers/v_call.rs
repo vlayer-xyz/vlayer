@@ -1,10 +1,7 @@
 use alloy_primitives::Address;
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    error::{AppError, FieldValidationError},
-    json::Json,
-};
+use crate::error::{AppError, FieldValidationError};
 use alloy_primitives::hex::FromHexError as AlloyFromHexError;
 use hex::FromHexError;
 
@@ -13,6 +10,16 @@ use hex::FromHexError;
 pub struct CallArgsRpc {
     from: String,
     to: String,
+}
+
+#[cfg(test)]
+impl CallArgsRpc {
+    pub fn new(from: &str, to: &str) -> Self {
+        Self {
+            from: from.to_string(),
+            to: to.to_string(),
+        }
+    }
 }
 
 pub struct CallArgs {
@@ -58,17 +65,17 @@ pub struct CallResult {
     pub result: String,
 }
 
-pub(crate) async fn call(Json(params): Json<CallArgsRpc>) -> Result<Json<CallResult>, AppError> {
+pub(crate) async fn call(params: CallArgsRpc) -> Result<CallResult, AppError> {
     let params: CallArgs = params.try_into()?;
 
-    Ok(Json(CallResult {
+    Ok(CallResult {
         result: format!("Call: from {} to {}!", params.from, params.to),
-    }))
+    })
 }
 
 #[cfg(test)]
 mod test {
-    use crate::{handlers::call::CallArgsRpc, json::Json};
+    use crate::handlers::v_call::CallArgsRpc;
 
     use super::call;
 
@@ -78,12 +85,11 @@ mod test {
 
     #[tokio::test]
     async fn success() -> anyhow::Result<()> {
-        let actual = call(Json(CallArgsRpc {
+        let actual = call(CallArgsRpc {
             from: FROM.to_string(),
             to: TO.to_string(),
-        }))
-        .await?
-        .0;
+        })
+        .await?;
 
         assert_eq!(
             actual.result,
@@ -95,10 +101,10 @@ mod test {
 
     #[tokio::test]
     async fn invalid_from_address() -> anyhow::Result<()> {
-        let actual_err = call(Json(CallArgsRpc {
+        let actual_err = call(CallArgsRpc {
             from: INVALID_ADDRESS.to_string(),
             to: TO.to_string(),
-        }))
+        })
         .await
         .unwrap_err();
 
@@ -112,10 +118,10 @@ mod test {
 
     #[tokio::test]
     async fn invalid_to_address() -> anyhow::Result<()> {
-        let actual_err = call(Json(CallArgsRpc {
+        let actual_err = call(CallArgsRpc {
             from: FROM.to_string(),
             to: INVALID_ADDRESS.to_string(),
-        }))
+        })
         .await
         .unwrap_err();
 
