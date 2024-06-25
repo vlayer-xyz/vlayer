@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod test {
 
-    use crate::host::{Host, HostError};
+    use crate::host::{Host, HostConfig, HostError};
     use guest_wrapper::GUEST_ELF;
     use risc0_zkvm::ExecutorEnv;
 
@@ -30,7 +30,7 @@ mod test {
 
     #[test]
     fn try_new_invalid_rpc_url() {
-        let res = Host::try_new("http://localhost:123");
+        let res = Host::try_new(HostConfig::new("http://localhost:123"));
 
         assert!(matches!(
             res.map(|_| ()).unwrap_err(),
