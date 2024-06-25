@@ -15,8 +15,15 @@ pub struct Engine<D, H> {
 pub enum EngineError {
     #[error("EVM transact preverified error: {0}")]
     TransactPreverifiedError(String),
+
     #[error("EVM transact error: {0}")]
     TransactError(String),
+
+    #[error("Unsupported chain id: {0}")]
+    UnsupportedChainId(u64),
+
+    #[error("Chain spec error: {0}")]
+    ChainSpecError(String),
 }
 
 impl<D, H> Engine<D, H>
@@ -25,11 +32,14 @@ where
     D::Error: std::fmt::Debug,
     H: EvmBlockHeader,
 {
-    pub fn try_new(db: D, header: H, chain_id: u64) -> anyhow::Result<Self> {
-        let chain_spec = CHAIN_MAP.get(&chain_id).ok_or_else(|| {
-            anyhow::Error::msg(format!("Error: chain with id {chain_id} is not supported"))
-        })?;
-        let env = EvmEnv::new(db, header.seal_slow()).with_chain_spec(chain_spec)?;
+    pub fn try_new(db: D, header: H, chain_id: u64) -> Result<Self, EngineError> {
+        let chain_spec = CHAIN_MAP
+            .get(&chain_id)
+            .ok_or(EngineError::UnsupportedChainId(chain_id))?;
+
+        let env = EvmEnv::new(db, header.seal_slow())
+            .with_chain_spec(chain_spec)
+            .map_err(|err| EngineError::ChainSpecError(err.to_string()))?;
         Ok(Engine { env })
     }
 
