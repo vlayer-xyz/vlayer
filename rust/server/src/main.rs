@@ -1,12 +1,12 @@
-use app::app;
+use server::app;
 use trace::init_tracing;
 use tracing::info;
 
-mod app;
 mod error;
 mod handlers;
 mod json_rpc;
 mod layers;
+mod server;
 mod trace;
 
 #[tokio::main]
