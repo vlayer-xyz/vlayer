@@ -13,4 +13,4 @@ command = "mdbook-mermaid"
 [output]
 
 [output.html]
-additional-js = ["mermaid.min.js", "mermaid-init.js"]
+additional-js = ["mermaid.min.js", "mermaid-init.js", "src/static/solidity.min.js"]
