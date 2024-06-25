@@ -3,7 +3,7 @@ use crate::layers::request_id::RequestIdLayer;
 use crate::layers::trace::init_trace_layer;
 use axum::{routing::post, Router};
 
-pub fn app() -> Router {
+pub fn server() -> Router {
     Router::new()
         .route("/", post(json_rpc))
         .layer(init_trace_layer())
@@ -17,7 +17,7 @@ mod tests {
 
     use crate::handlers::v_call::CallArgsRpc;
 
-    use super::app;
+    use super::server;
     use axum::{
         body::Body,
         http::{header::CONTENT_TYPE, Request, Response, StatusCode},
@@ -53,7 +53,7 @@ mod tests {
 
     #[tokio::test]
     async fn http_not_found() -> anyhow::Result<()> {
-        let app = app();
+        let app = server();
         let response = post(app, "/non_existent_http_path", &()).await?;
 
         assert_eq!(response.status(), StatusCode::NOT_FOUND);
@@ -67,7 +67,7 @@ mod tests {
 
     #[tokio::test]
     async fn json_rpc_not_found() -> anyhow::Result<()> {
-        let app = app();
+        let app = server();
 
         let req = JsonRpcRequest {
             method: "non_existent_json_rpc_method".to_string(),
@@ -95,7 +95,7 @@ mod tests {
 
     #[tokio::test]
     async fn v_call_field_validation_error() -> anyhow::Result<()> {
-        let app = app();
+        let app = server();
 
         let params = CallArgsRpc::new("I am not a valid address!", TO);
         let req = JsonRpcRequest {
@@ -124,7 +124,7 @@ mod tests {
 
     #[tokio::test]
     async fn v_call_success() -> anyhow::Result<()> {
-        let app = app();
+        let app = server();
 
         let params = CallArgsRpc::new(FROM, TO);
         let req = JsonRpcRequest {

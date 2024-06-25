@@ -1,4 +1,4 @@
-use server::app;
+use server::server;
 use trace::init_tracing;
 use tracing::info;
 
@@ -16,7 +16,7 @@ async fn main() -> anyhow::Result<()> {
     let listener = tokio::net::TcpListener::bind("127.0.0.1:3000").await?;
 
     info!("listening on {}", listener.local_addr()?);
-    axum::serve(listener, app()).await?;
+    axum::serve(listener, server()).await?;
 
     opentelemetry::global::shutdown_tracer_provider();
 
