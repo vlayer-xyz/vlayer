@@ -55,9 +55,22 @@ pub enum HostError {
     Prover(String),
 }
 
+pub struct HostConfig {
+    url: String,
+}
+
+impl HostConfig {
+    pub fn new(url: &str) -> Self {
+        HostConfig {
+            url: url.to_string(),
+        }
+    }
+}
+
 impl Host<EthersProvider<EthersClient>> {
-    pub fn try_new(url: &str) -> Result<Self, HostError> {
-        let client = EthersClient::new_client(url, MAX_RETRY, INITIAL_BACKOFF)?;
+    pub fn try_new(config: HostConfig) -> Result<Self, HostError> {
+        let client = EthersClient::new_client(&config.url, MAX_RETRY, INITIAL_BACKOFF)?;
+
         let provider = EthersProvider::new(client);
         let block_number = provider.get_block_number()?;
 
