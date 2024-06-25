@@ -98,6 +98,9 @@ jobs:
     runs-on: ubuntu-latest
     needs: build-release 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
       - run: mkdir -p dist/latest
       - uses: actions/download-artifact@v4
         with:
@@ -129,4 +132,17 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
           LOCAL_FILE: ./dist/latest
+          REMOTE_FILE: "" 
+
+      - name: Push vlayerup scripts to AWS S3
+        uses: mostlytyped/s3-put-action@v1.0.0
+        with:
+          args: --recursive
+        env:
+          AWS_ENDPOINT: ${{ vars.AWS_ENDPOINT }}
+          AWS_BUCKET: ${{ vars.AWS_BUCKET }}
+          AWS_ACCESS_KEY_ID: ${{ vars.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+          LOCAL_FILE: ./bash/vlayerup
           REMOTE_FILE: "" 
