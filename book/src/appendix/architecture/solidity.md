@@ -4,7 +4,7 @@
 
 On-chain verification is implemented by using a customized function with the following arguments
 - `VProof proof`
-- list of arguments in the same order as returned  
+- list of arguments in the same order as returned  by the prover
 - user defined additional params
 
 The verification function should then use `onlyVerified()` modifier, which takes `VProof` and `ProverOutput` from the calldata and does the actual proof verification.
