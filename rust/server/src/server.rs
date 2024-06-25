@@ -72,7 +72,7 @@ mod tests {
 
             let req = json!({
                 "method": "v_call",
-                "params": {"caller": "I am not a valid address!", "to": TO},
+                "params": [{"caller": "I am not a valid address!", "to": TO}, {"block_no": 0}],
                 "id": 1,
                 "jsonrpc": "2.0",
             });
@@ -101,7 +101,7 @@ mod tests {
 
             let req = json!({
                 "method": "v_call",
-                "params": {"caller": CALLER, "to": TO},
+                "params": [{"caller": CALLER, "to": TO}, {"block_no": 0, "chain_id": 1}],
                 "id": 1,
                 "jsonrpc": "2.0",
             });
@@ -114,7 +114,7 @@ mod tests {
                     "jsonrpc": "2.0",
                     "id": 1,
                     "result": {
-                        "result": "Call: caller 0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f to 0x7Ad53bbA1004e46dd456316912D55dBc5D311a03!"
+                        "result": "Call: caller 0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f to 0x7Ad53bbA1004e46dd456316912D55dBc5D311a03. Context: block 0 chain 1."
                     }
                 })
             );
