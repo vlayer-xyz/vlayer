@@ -9,6 +9,6 @@ edition = "2021"
 
 [dependencies]
 clap = { version = "4.5.7", features = ["derive"] }
-tokio = { version = "1.38.0", features = ["full"] }
+tokio = { workspace = true }
 anyhow = {workspace = true }
 server = { path = "../server" }
