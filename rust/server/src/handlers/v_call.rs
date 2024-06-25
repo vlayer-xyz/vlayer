@@ -1,63 +1,35 @@
-use alloy_primitives::Address;
 use serde::{Deserialize, Serialize};
+use vlayer_engine::guest::Call as EngineCall;
 
-use crate::error::{AppError, FieldValidationError};
-use alloy_primitives::hex::FromHexError as AlloyFromHexError;
-use hex::FromHexError;
+use crate::{error::AppError, utils::parse_address_field};
 
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
-pub struct CallArgsRpc {
-    from: String,
+pub struct Call {
+    caller: String,
     to: String,
 }
 
 #[cfg(test)]
-impl CallArgsRpc {
+impl Call {
     pub fn new(from: &str, to: &str) -> Self {
         Self {
-            from: from.to_string(),
+            caller: from.to_string(),
             to: to.to_string(),
         }
     }
 }
 
-pub struct CallArgs {
-    from: Address,
-    to: Address,
-}
-
-impl TryFrom<CallArgsRpc> for CallArgs {
+impl TryFrom<Call> for EngineCall {
     type Error = AppError;
 
-    fn try_from(value: CallArgsRpc) -> Result<Self, Self::Error> {
+    fn try_from(value: Call) -> Result<Self, Self::Error> {
         Ok(Self {
-            from: parse_address_field("from", value.from)?,
+            caller: parse_address_field("caller", value.caller)?,
             to: parse_address_field("to", value.to)?,
+            data: Vec::new(),
         })
     }
-}
-
-fn alloy_hex_error_to_standard_hex_error(err: AlloyFromHexError) -> FromHexError {
-    match err {
-        AlloyFromHexError::InvalidHexCharacter { c, index } => {
-            FromHexError::InvalidHexCharacter { c, index }
-        }
-        AlloyFromHexError::InvalidStringLength => FromHexError::InvalidStringLength,
-        AlloyFromHexError::OddLength => FromHexError::OddLength,
-    }
-}
-
-fn parse_address_field(field_name: &str, address: String) -> Result<Address, AppError> {
-    address
-        .parse()
-        .map_err(alloy_hex_error_to_standard_hex_error)
-        .map_err(|err| {
-            AppError::FieldValidationError(
-                field_name.to_string(),
-                FieldValidationError::InvalidHex(address, err),
-            )
-        })
 }
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -65,17 +37,17 @@ pub struct CallResult {
     pub result: String,
 }
 
-pub(crate) async fn call(params: CallArgsRpc) -> Result<CallResult, AppError> {
-    let params: CallArgs = params.try_into()?;
+pub(crate) async fn call(params: Call) -> Result<CallResult, AppError> {
+    let params: EngineCall = params.try_into()?;
 
     Ok(CallResult {
-        result: format!("Call: from {} to {}!", params.from, params.to),
+        result: format!("Call: caller {} to {}!", params.caller, params.to),
     })
 }
 
 #[cfg(test)]
 mod test {
-    use crate::handlers::v_call::CallArgsRpc;
+    use crate::handlers::v_call::Call;
 
     use super::call;
 
@@ -85,15 +57,15 @@ mod test {
 
     #[tokio::test]
     async fn success() -> anyhow::Result<()> {
-        let actual = call(CallArgsRpc {
-            from: FROM.to_string(),
+        let actual = call(Call {
+            caller: FROM.to_string(),
             to: TO.to_string(),
         })
         .await?;
 
         assert_eq!(
             actual.result,
-            format!("Call: from {FROM} to {TO}!").to_string()
+            format!("Call: caller {FROM} to {TO}!").to_string()
         );
 
         Ok(())
@@ -101,8 +73,8 @@ mod test {
 
     #[tokio::test]
     async fn invalid_from_address() -> anyhow::Result<()> {
-        let actual_err = call(CallArgsRpc {
-            from: INVALID_ADDRESS.to_string(),
+        let actual_err = call(Call {
+            caller: INVALID_ADDRESS.to_string(),
             to: TO.to_string(),
         })
         .await
@@ -110,7 +82,7 @@ mod test {
 
         assert_eq!(
             actual_err.to_string(),
-            "Invalid field `from`: Invalid string length `0x`"
+            "Invalid field `caller`: Invalid string length `0x`"
         );
 
         Ok(())
@@ -118,8 +90,8 @@ mod test {
 
     #[tokio::test]
     async fn invalid_to_address() -> anyhow::Result<()> {
-        let actual_err = call(CallArgsRpc {
-            from: FROM.to_string(),
+        let actual_err = call(Call {
+            caller: FROM.to_string(),
             to: INVALID_ADDRESS.to_string(),
         })
         .await
