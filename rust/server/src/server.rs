@@ -34,6 +34,7 @@ mod tests {
 
     const CALLER: &str = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f";
     const TO: &str = "0x7Ad53bbA1004e46dd456316912D55dBc5D311a03";
+    const DATA: &str = "0x0000";
 
     #[tokio::test]
     async fn json_rpc_not_found() -> anyhow::Result<()> {
@@ -72,7 +73,7 @@ mod tests {
 
             let req = json!({
                 "method": "v_call",
-                "params": [{"caller": "I am not a valid address!", "to": TO}, {"block_no": 0}],
+                "params": [{"caller": "I am not a valid address!", "to": TO, "data": DATA}, {"block_no": 0}],
                 "id": 1,
                 "jsonrpc": "2.0",
             });
@@ -101,7 +102,7 @@ mod tests {
 
             let req = json!({
                 "method": "v_call",
-                "params": [{"caller": CALLER, "to": TO}, {"block_no": 0, "chain_id": 1}],
+                "params": [{"caller": CALLER, "to": TO, "data": DATA}, {"block_no": 0, "chain_id": 1}],
                 "id": 1,
                 "jsonrpc": "2.0",
             });
@@ -114,7 +115,7 @@ mod tests {
                     "jsonrpc": "2.0",
                     "id": 1,
                     "result": {
-                        "result": "Call: caller 0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f to 0x7Ad53bbA1004e46dd456316912D55dBc5D311a03. Context: block 0 chain 1."
+                        "result": "Call: caller 0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f to 0x7Ad53bbA1004e46dd456316912D55dBc5D311a03 with data [0, 0]. Context: block 0 chain 1."
                     }
                 })
             );
