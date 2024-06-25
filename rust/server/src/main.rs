@@ -7,6 +7,8 @@ mod handlers;
 mod json_rpc;
 mod layers;
 mod server;
+#[cfg(test)]
+mod test_helpers;
 mod trace;
 
 #[tokio::main]
