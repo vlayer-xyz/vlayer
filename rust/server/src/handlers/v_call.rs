@@ -1,8 +1,8 @@
 use crate::{error::AppError, utils::parse_address_field};
 use alloy_chains::Chain;
 use alloy_primitives::{BlockNumber, ChainId};
+use host::Call as HostCall;
 use serde::{Deserialize, Serialize};
-use vlayer_engine::guest::Call as EngineCall;
 
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
@@ -23,7 +23,7 @@ fn mainnet_chain_id() -> ChainId {
     Chain::mainnet().id()
 }
 
-impl TryFrom<Call> for EngineCall {
+impl TryFrom<Call> for HostCall {
     type Error = AppError;
 
     fn try_from(value: Call) -> Result<Self, Self::Error> {
@@ -41,7 +41,7 @@ pub struct CallResult {
 }
 
 pub(crate) async fn call(params: (Call, CallContext)) -> Result<CallResult, AppError> {
-    let call: EngineCall = params.0.try_into()?;
+    let call: HostCall = params.0.try_into()?;
     let context = params.1;
 
     Ok(CallResult {
