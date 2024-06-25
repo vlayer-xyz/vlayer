@@ -15,7 +15,7 @@ pub fn app() -> Router {
 mod tests {
     use core::str;
 
-    use crate::handlers::v_call::CallArgsRpc;
+    use crate::handlers::v_call::Call;
 
     use super::app;
     use axum::{
@@ -62,7 +62,7 @@ mod tests {
         Ok(())
     }
 
-    const FROM: &str = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f";
+    const CALLER: &str = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f";
     const TO: &str = "0x7Ad53bbA1004e46dd456316912D55dBc5D311a03";
 
     #[tokio::test]
@@ -97,7 +97,7 @@ mod tests {
     async fn v_call_field_validation_error() -> anyhow::Result<()> {
         let app = app();
 
-        let params = CallArgsRpc::new("I am not a valid address!", TO);
+        let params = Call::new("I am not a valid address!", TO);
         let req = JsonRpcRequest {
             method: "v_call".to_string(),
             params: serde_json::to_value(params)?,
@@ -113,7 +113,7 @@ mod tests {
                 "id": 1,
                 "error": {
                     "code": -32602,
-                    "message": "Invalid field `from`: Odd number of digits `I am not a valid address!`",
+                    "message": "Invalid field `caller`: Odd number of digits `I am not a valid address!`",
                     "data": null
                 }
             })
@@ -126,7 +126,7 @@ mod tests {
     async fn v_call_success() -> anyhow::Result<()> {
         let app = app();
 
-        let params = CallArgsRpc::new(FROM, TO);
+        let params = Call::new(CALLER, TO);
         let req = JsonRpcRequest {
             method: "v_call".to_string(),
             params: serde_json::to_value(params)?,
@@ -141,7 +141,7 @@ mod tests {
                 "jsonrpc": "2.0",
                 "id": 1,
                 "result": {
-                    "result": "Call: from 0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f to 0x7Ad53bbA1004e46dd456316912D55dBc5D311a03!"
+                    "result": "Call: caller 0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f to 0x7Ad53bbA1004e46dd456316912D55dBc5D311a03!"
                 }
             })
         );

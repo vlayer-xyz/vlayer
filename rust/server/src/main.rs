@@ -8,6 +8,7 @@ mod handlers;
 mod json_rpc;
 mod layers;
 mod trace;
+mod utils;
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
