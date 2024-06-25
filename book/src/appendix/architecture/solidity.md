@@ -21,7 +21,7 @@ struct VProof {
 ```
 }
 
-Therefore, user-defined verification functions can look like the following example:
+As a result, a customized verification function can look like the following example:
 ```solidity
 
 contract Airdrop is VlayerVerifier {
