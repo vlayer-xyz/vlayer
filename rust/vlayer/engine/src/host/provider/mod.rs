@@ -22,7 +22,7 @@ use std::{convert::Infallible, error::Error as StdError, fmt::Debug, marker::Pha
 mod ethers;
 mod file;
 
-pub use ethers::EthersProvider;
+pub use ethers::{EthersProvider, EthersProviderError};
 pub use file::{CachedProvider, EthFileProvider, FileProvider};
 
 /// A trait for providers that fetch data from the Ethereum blockchain.

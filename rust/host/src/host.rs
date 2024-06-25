@@ -1,7 +1,6 @@
 use alloy_primitives::Sealable;
-use anyhow::anyhow;
 use ethers_providers::Provider as OGEthersProvider;
-use ethers_providers::{Http, RetryClient};
+use ethers_providers::{Http, ProviderError, RetryClient};
 use guest_wrapper::GUEST_ELF;
 use risc0_zkvm::{default_prover, ExecutorEnv};
 use thiserror::Error;
@@ -14,7 +13,7 @@ use vlayer_engine::{
     contract::engine::Engine,
     host::{
         db::ProofDb,
-        provider::{EthersProvider, Provider},
+        provider::{EthersProvider, EthersProviderError, Provider},
     },
 };
 
@@ -28,46 +27,45 @@ pub struct Host {
     header: EthBlockHeader,
 }
 
-#[derive(Error, Debug, PartialEq)]
+#[derive(Error, Debug)]
 pub enum HostError {
-    #[error("Elf parse error")]
-    ElfParseError,
     #[error("ExecutorEnv builder error")]
-    ExecutorEnvBuilderError,
-    #[error("Invalid input")]
-    InvalidInput,
-    #[error("Rpc connection error")]
-    RpcConnectionError,
-    #[error("Engine error")]
-    EngineError(#[from] engine::EngineError),
-    #[error("Unknown error: {0}")]
-    Unknown(String),
-}
+    ExecutorEnvBuilder(String),
 
-impl From<anyhow::Error> for HostError {
-    fn from(error: anyhow::Error) -> Self {
-        let error_str = error.to_string();
-        if error_str.contains("Elf parse error") {
-            Self::ElfParseError
-        } else if error_str.contains(
-            "Guest panicked: called `Result::unwrap()` on an `Err` value: DeserializeUnexpectedEnd",
-        ) {
-            Self::InvalidInput
-        } else if error_str.contains("tcp connect error: Connection refused") {
-            Self::RpcConnectionError
-        } else {
-            Self::Unknown(error_str)
-        }
-    }
+    #[error("Invalid input")]
+    CreatingInput(String),
+
+    #[error("Engine error")]
+    Engine(#[from] engine::EngineError),
+
+    #[error("Ethers provider error: {0}")]
+    EthersProvider(#[from] EthersProviderError<ProviderError>),
+
+    #[error("Provider error: {0}")]
+    Provider(#[from] ProviderError),
+
+    #[error("Block not found: {0}")]
+    BlockNotFound(u64),
+
+    #[error("Error creating client: {0}")]
+    NewClient(#[from] url::ParseError),
+
+    #[error("Prover error: {0}")]
+    Prover(String),
 }
 
 impl Host {
     pub fn try_new(url: &str) -> Result<Self, HostError> {
-        let client = EthersClient::new_client(url, MAX_RETRY, INITIAL_BACKOFF)
-            .map_err(|err| anyhow!(err))?;
+        let client = EthersClient::new_client(url, MAX_RETRY, INITIAL_BACKOFF)?;
+
         let provider = EthersProvider::new(client);
-        let block_number = provider.get_block_number().map_err(|err| anyhow!(err))?;
-        let header = provider.get_block_header(block_number).unwrap().unwrap();
+
+        let block_number = provider.get_block_number()?;
+
+        let header = provider
+            .get_block_header(block_number)?
+            .ok_or(HostError::BlockNotFound(block_number))?;
+
         let db = ProofDb::new(provider, block_number);
 
         Ok(Host { db, header })
@@ -79,14 +77,15 @@ impl Host {
 
         let input = Input {
             call,
-            evm_input: into_input(self.db, self.header.seal_slow())?,
+            evm_input: into_input(self.db, self.header.seal_slow())
+                .map_err(|err| HostError::CreatingInput(err.to_string()))?,
         };
 
         let env = ExecutorEnv::builder()
             .write(&input)
-            .map_err(|_| HostError::ExecutorEnvBuilderError)?
+            .map_err(|err| HostError::ExecutorEnvBuilder(err.to_string()))?
             .build()
-            .map_err(|_| HostError::ExecutorEnvBuilderError)?;
+            .map_err(|err| HostError::ExecutorEnvBuilder(err.to_string()))?;
 
         Host::prove(env, GUEST_ELF)
     }
@@ -96,6 +95,6 @@ impl Host {
         prover
             .prove(env, guest_elf)
             .map(|p| p.receipt.journal.into())
-            .map_err(HostError::from)
+            .map_err(|err| HostError::Prover(err.to_string()))
     }
 }
