@@ -7,7 +7,7 @@ On-chain verification is implemented by using a customized function with the fol
 - list of arguments in the same order as returned  by the prover
 - user defined additional params
 
-The verification function should then use `onlyVerified()` modifier, which takes `VProof` and `ProverOutput` from the calldata and does the actual proof verification.
+The verification function should then use `onlyVerified()` modifier, which takes `VProof` and user arguments from the calldata and does the actual proof verification.
 
 ```solidity
 struct VProof {
