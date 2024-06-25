@@ -1,7 +1,22 @@
 use crate::handlers::{call::call, hello::hello};
 use crate::layers::request_id::RequestIdLayer;
 use crate::layers::trace::init_trace_layer;
+use crate::trace::init_tracing;
 use axum::{routing::post, Router};
+use tracing::info;
+
+pub async fn server() -> anyhow::Result<()> {
+    init_tracing()?;
+
+    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000").await?;
+
+    info!("listening on {}", listener.local_addr()?);
+    axum::serve(listener, app()).await?;
+
+    opentelemetry::global::shutdown_tracer_provider();
+
+    Ok(())
+}
 
 pub fn app() -> Router {
     Router::new()

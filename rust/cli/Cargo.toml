@@ -1,0 +1,14 @@
+[[bin]]
+name = "vlayer"
+path = "src/main.rs"
+
+[package]
+name = "cli"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+clap = { version = "4.5.7", features = ["derive"] }
+tokio = { version = "1.38.0", features = ["full"] }
+anyhow = {workspace = true }
+server = { path = "../server" }
