@@ -25,3 +25,4 @@ derivative = "2.2.0"
 hex = "0.4.3"
 axum-jrpc = "0.7.0"
 vlayer-engine = { path = "../vlayer/engine" }
+alloy-chains = "0.1.22"

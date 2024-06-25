@@ -1,7 +1,8 @@
+use crate::{error::AppError, utils::parse_address_field};
+use alloy_chains::Chain;
+use alloy_primitives::{BlockNumber, ChainId};
 use serde::{Deserialize, Serialize};
 use vlayer_engine::guest::Call as EngineCall;
-
-use crate::{error::AppError, utils::parse_address_field};
 
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
@@ -10,14 +11,16 @@ pub struct Call {
     to: String,
 }
 
-#[cfg(test)]
-impl Call {
-    pub fn new(from: &str, to: &str) -> Self {
-        Self {
-            caller: from.to_string(),
-            to: to.to_string(),
-        }
-    }
+#[derive(Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct CallContext {
+    block_no: BlockNumber,
+    #[serde(default = "mainnet_chain_id")]
+    chain_id: ChainId,
+}
+
+fn mainnet_chain_id() -> ChainId {
+    Chain::mainnet().id()
 }
 
 impl TryFrom<Call> for EngineCall {
@@ -37,17 +40,21 @@ pub struct CallResult {
     pub result: String,
 }
 
-pub(crate) async fn call(params: Call) -> Result<CallResult, AppError> {
-    let params: EngineCall = params.try_into()?;
+pub(crate) async fn call(params: (Call, CallContext)) -> Result<CallResult, AppError> {
+    let call: EngineCall = params.0.try_into()?;
+    let context = params.1;
 
     Ok(CallResult {
-        result: format!("Call: caller {} to {}!", params.caller, params.to),
+        result: format!(
+            "Call: caller {} to {}. Context: block {} chain {}.",
+            call.caller, call.to, context.block_no, context.chain_id
+        ),
     })
 }
 
 #[cfg(test)]
 mod test {
-    use crate::handlers::v_call::Call;
+    use crate::handlers::v_call::{mainnet_chain_id, Call, CallContext};
 
     use super::call;
 
@@ -57,15 +64,21 @@ mod test {
 
     #[tokio::test]
     async fn success() -> anyhow::Result<()> {
-        let actual = call(Call {
-            caller: FROM.to_string(),
-            to: TO.to_string(),
-        })
+        let actual = call((
+            Call {
+                caller: FROM.to_string(),
+                to: TO.to_string(),
+            },
+            CallContext {
+                block_no: 0,
+                chain_id: mainnet_chain_id(),
+            },
+        ))
         .await?;
 
         assert_eq!(
             actual.result,
-            format!("Call: caller {FROM} to {TO}!").to_string()
+            format!("Call: caller {FROM} to {TO}. Context: block 0 chain 1.").to_string()
         );
 
         Ok(())
@@ -73,10 +86,16 @@ mod test {
 
     #[tokio::test]
     async fn invalid_from_address() -> anyhow::Result<()> {
-        let actual_err = call(Call {
-            caller: INVALID_ADDRESS.to_string(),
-            to: TO.to_string(),
-        })
+        let actual_err = call((
+            Call {
+                caller: INVALID_ADDRESS.to_string(),
+                to: TO.to_string(),
+            },
+            CallContext {
+                block_no: 0,
+                chain_id: mainnet_chain_id(),
+            },
+        ))
         .await
         .unwrap_err();
 
@@ -90,10 +109,16 @@ mod test {
 
     #[tokio::test]
     async fn invalid_to_address() -> anyhow::Result<()> {
-        let actual_err = call(Call {
-            caller: FROM.to_string(),
-            to: INVALID_ADDRESS.to_string(),
-        })
+        let actual_err = call((
+            Call {
+                caller: FROM.to_string(),
+                to: INVALID_ADDRESS.to_string(),
+            },
+            CallContext {
+                block_no: 0,
+                chain_id: mainnet_chain_id(),
+            },
+        ))
         .await
         .unwrap_err();
 
