@@ -2,7 +2,7 @@
 
 ### On-chain proving
 
-On-chain verification should be done using a user-defined function with the following arguments:
+On-chain verification is implemented by using a customized function with the following arguments
 - `VProof proof`
 - list of arguments in the same order as returned  
 - user defined additional params
