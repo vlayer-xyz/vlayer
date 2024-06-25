@@ -6,4 +6,4 @@ vlayer consist of four main components:
 - **on-chain smart contracts** used to verify proofs [[docs](./solidity.md)]
 - **browser plugin** used for notarization of TLS Connections
 
-All above elements can be found in a [monorepo](https://github.com/vlayer-xyz/vlayer). It also contains sources of of this book.
+All above elements can be found in a [monorepo](https://github.com/vlayer-xyz/vlayer). It also contains [sources](https://github.com/vlayer-xyz/vlayer/tree/main/book) of of this book.
