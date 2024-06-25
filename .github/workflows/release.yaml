@@ -3,14 +3,26 @@ on:
   schedule:
     - cron: '0 22 * * 1-5' # Mon-Fri at 22:00 UTC
 
-defaults:
-  run:
-    working-directory: rust
 
 jobs:
-  release:
-    name: Release nightly
-    runs-on: ubuntu-latest
+  build-release:
+    defaults:
+      run:
+        working-directory: rust
+    name: Release nightly for ${{ matrix.platform }} ${{ matrix.arch }}
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 30 
+    strategy:
+      matrix:
+        include:
+          - target: x86_64-unknown-linux-gnu
+            platform: linux
+            arch: amd64
+            runner: ubuntu-latest
+          - target: aarch64-apple-darwin
+            platform: darwin
+            arch: arm64
+            runner: macos-latest
 
     steps:
       - uses: cargo-bins/cargo-binstall@main
@@ -29,16 +41,31 @@ jobs:
       - name: Install risc0 toolchain
         run: cargo risczero install
 
-      - name: Build binaries
-        run: cargo build --release
+      - name: "Build binaries"
+        run: cargo build --release --target ${{ matrix.target }}
 
       - name: Package release
+        id: package-release
+        env:
+          OUTPUT_FILE_SUFFIX: "${{ matrix.platform }}-${{ matrix.arch }}.tar.gz"
         run: |
-          mkdir -p target/bin
-          cd target
-          mv release/host bin/
-          tar -czvf nightly-linux-amd64.tar.gz bin
+          bins=(host)
+          mkdir -p target/${{ matrix.target }}/bin
+          cd target/${{ matrix.target }}
 
+          for name in "${bins[@]}" ; do
+            mv "release/${name}" bin/
+          done
+
+          tar -czvf "nightly-${OUTPUT_FILE_SUFFIX}" bin
+          echo "output_file=rust/target/${{ matrix.target }}/nightly-${OUTPUT_FILE_SUFFIX}" >> $GITHUB_OUTPUT
+          echo "output_file_suffix=${OUTPUT_FILE_SUFFIX}" >> $GITHUB_OUTPUT
+
+      - name: Push artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.target }}
+          path: ${{ steps.package-release.outputs.output_file }}
       - name: Release tagged nightly
         uses: ncipollo/release-action@v1
         with:
