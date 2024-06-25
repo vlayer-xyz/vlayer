@@ -15,8 +15,6 @@ pub fn app() -> Router {
 mod tests {
     use core::str;
 
-    use crate::handlers::v_call::Call;
-
     use super::app;
     use axum::{
         body::Body,
@@ -97,12 +95,12 @@ mod tests {
     async fn v_call_field_validation_error() -> anyhow::Result<()> {
         let app = app();
 
-        let params = Call::new("I am not a valid address!", TO);
-        let req = JsonRpcRequest {
-            method: "v_call".to_string(),
-            params: serde_json::to_value(params)?,
-            id: 1.into(),
-        };
+        let req = json!({
+            "method": "v_call",
+            "params": [{"caller": "I am not a valid address!", "to": TO}, {"block_no": 0}],
+            "id": 1,
+            "jsonrpc": "2.0",
+        });
         let response = post(app, "/", &req).await?;
 
         assert_eq!(response.status(), StatusCode::OK);
@@ -125,13 +123,12 @@ mod tests {
     #[tokio::test]
     async fn v_call_success() -> anyhow::Result<()> {
         let app = app();
-
-        let params = Call::new(CALLER, TO);
-        let req = JsonRpcRequest {
-            method: "v_call".to_string(),
-            params: serde_json::to_value(params)?,
-            id: 1.into(),
-        };
+        let req = json!({
+            "method": "v_call",
+            "params": [{"caller": CALLER, "to": TO}, {"block_no": 0, "chain_id": 1}],
+            "id": 1,
+            "jsonrpc": "2.0",
+        });
         let response = post(app, "/", &req).await?;
 
         assert_eq!(response.status(), StatusCode::OK);
@@ -141,7 +138,7 @@ mod tests {
                 "jsonrpc": "2.0",
                 "id": 1,
                 "result": {
-                    "result": "Call: caller 0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f to 0x7Ad53bbA1004e46dd456316912D55dBc5D311a03!"
+                    "result": "Call: caller 0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f to 0x7Ad53bbA1004e46dd456316912D55dBc5D311a03. Context: block 0 chain 1."
                 }
             })
         );
