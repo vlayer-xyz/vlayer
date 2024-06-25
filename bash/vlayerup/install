@@ -2,7 +2,7 @@
 set -eo pipefail
 
 # Content of this script will be downloaded and executed on clients machine.
-# for example "curl -sSf https://install.vlayer.xyz | bash"
+# for example "curl -SL http://install.vlayer.xyz | bash"
 
 echo "Installing vlayerup..."
 
@@ -11,8 +11,8 @@ VLAYER_DIR="${VLAYER_DIR-"$BASE_DIR/.vlayer"}"
 VLAYER_BIN_DIR="$VLAYER_DIR/bin"
 VLAYER_MAN_DIR="$VLAYER_DIR/share/man/man1"
 
-# It won't work when repo is private
-BIN_URL="https://install.vlayer.xyz/vlayerup"
+# Temp URL, will be replaced with github url once the repo is public.
+BIN_URL="https://vlayer-releases.s3.eu-north-1.amazonaws.com/vlayerup"
 BIN_PATH="$VLAYER_BIN_DIR/vlayerup"
 
 # Create the .vlayer bin directory and vlayerup binary if it doesn't exist.
