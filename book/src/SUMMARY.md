@@ -14,3 +14,4 @@
   - [Prover](./appendix/architecture/prover.md)
   - [Solidity](./appendix/architecture/solidity.md)
 - [JSON-RPC API](./appendix/api.md)
+- [Features](./appendix/features.md)
