@@ -12,3 +12,8 @@ alloy-primitives = { workspace = true }
 ethers-providers = { workspace = true }
 thiserror = { workspace = true }
 url = { version = "2.4", default-features = false }
+
+[dev-dependencies]
+alloy-sol-types = "0.7.6"
+test-log = "0.2.15"
+anyhow = "1.0"
