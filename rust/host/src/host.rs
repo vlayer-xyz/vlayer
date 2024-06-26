@@ -4,7 +4,6 @@ use ethers_providers::{Http, ProviderError, RetryClient};
 use guest_wrapper::GUEST_ELF;
 use risc0_zkvm::{default_prover, ExecutorEnv};
 use thiserror::Error;
-use vlayer_engine::config::SEPOLIA_ID;
 use vlayer_engine::ethereum::EthBlockHeader;
 use vlayer_engine::guest::{Call, Input, Output};
 use vlayer_engine::host::into_input;
@@ -26,6 +25,7 @@ pub type EthersClient = OGEthersProvider<RetryClient<Http>>;
 pub struct Host<P: Provider<Header = EthBlockHeader>> {
     db: ProofDb<P>,
     header: EthBlockHeader,
+    config: HostConfig,
 }
 
 #[derive(Error, Debug)]
@@ -88,12 +88,12 @@ impl<P: Provider<Header = EthBlockHeader, Error = EthersProviderError<ProviderEr
 
         let db = ProofDb::new(provider, block_number);
 
-        Ok(Host { db, header })
+        Ok(Host { db, header, config })
     }
 
     pub fn run(mut self, call: Call) -> Result<Output, HostError> {
-        let _returns =
-            Engine::try_new(&mut self.db, self.header.clone(), SEPOLIA_ID)?.call(&call)?;
+        let _returns = Engine::try_new(&mut self.db, self.header.clone(), self.config.chain_id)?
+            .call(&call)?;
 
         let input = Input {
             call,
