@@ -1,33 +1,51 @@
 #!/usr/bin/env bash
-set -uexo pipefail
+set -ueo pipefail
 
-DEPLOYABLE_CONTRACT="Simple"
-export STABLE_DEPLOYER_PRIV="0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+STABLE_DEPLOYER_PRIV="0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+DEPLOYER_PRIV=${DEPLOYER_PRIV:-${STABLE_DEPLOYER_PRIV}}
 
 ROOT_PATH=$(pwd)
 
 DEPLOY_CONTRACTS_BASE=${ROOT_PATH}/script
 DEPLOYMENT_SCRIPT=${DEPLOY_CONTRACTS_BASE}/DeployVlayer.s.sol
 
+DEPLOYABLE_CONTRACTS=("SimpleVerification" "Simple")
 
-echo ${DEPLOYMENT_SCRIPT}
+function to_upper(){
+  echo $1 | sed 's/\([^A-Z]\)\([A-Z0-9]\)/\1_\2/g' | tr '[:lower:]' '[:upper:]'
+}
 
-function deploy_contract() {
-  results_file=$(
+
+function deploy_contracts() {
+    DEPLOYER_PRIV=${DEPLOYER_PRIV} \
     forge script ${DEPLOYMENT_SCRIPT} \
       --rpc-url http://127.0.0.1:8545 \
       --broadcast 2>/dev/null \
     | grep "Transactions saved to" \
     | sed "s/^Transactions saved to: //"
-  )
-
-  jq -r ".transactions[] | select(.transactionType == \"CREATE\" and .contractName == \"${DEPLOYABLE_CONTRACT}\").contractAddress" \
-    <${results_file}
-
 }
 
-result_address=$(deploy_contract)
+function retrieve_address(){
+  results_file="$1"
+  contract=$2
 
-echo Finished deploying contracts.
+  address=$(jq -r ".transactions[] | select(.transactionType == \"CREATE\" and .contractName == \"${contract}\").contractAddress" \
+    <${results_file})
+
+  echo "$(to_upper ${contract})_ADDRESS=${address}"
+    
+}
+
+
+echo
+echo "Running deployment script: ${DEPLOYMENT_SCRIPT}"
+
 echo 
-echo VLAYER_CONTRACT_ADDRESS=${result_address}
+echo Deploying contracts...
+results_file=$(deploy_contracts)
+echo Contracts has been deployed ✅
+echo
+
+for contract in "${DEPLOYABLE_CONTRACTS[@]}" ; do
+  retrieve_address "${results_file}" "${contract}"
+done
