@@ -1,7 +1,7 @@
 # First Steps
 
 ## Off-chain execution
-Vlayer contracts are just like regular on-chain contracts written in  [Solidity](https://soliditylang.org). The only difference is the execution model, as bytecode is executed on the vlayer zkEVM infrastructure. 
+Vlayer contracts are just like regular on-chain contracts written in [Solidity](https://soliditylang.org). The main difference is the execution model, as bytecode is executed on the vlayer zkEVM infrastructure. 
 
 Compared to regular contracts, vlayer smart contracts have additional features such as:
 * [teleport]() (cross-chain verification)
