@@ -32,11 +32,13 @@ mod test {
 
     #[test]
     fn try_new_invalid_rpc_url() {
-        let res = Host::try_new(HostConfig::new("http://localhost:123", MAINNET_ID));
+        let res = Host::try_new(HostConfig::new("http://localhost:123", MAINNET_ID, 0));
 
         assert!(matches!(
             res.map(|_| ()).unwrap_err(),
-            HostError::Provider(ref msg) if msg.to_string().contains("error sending request for url (http://localhost:123/): error trying to connect: tcp connect error: Connection refused")
+            HostError::EthersProvider(ref msg) if msg.to_string().contains(
+                "(http://localhost:123/): error trying to connect: tcp connect error: Connection refused"
+            )
         ));
     }
 }
