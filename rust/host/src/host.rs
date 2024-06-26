@@ -57,12 +57,14 @@ pub enum HostError {
 
 pub struct HostConfig {
     url: String,
+    chain_id: u64,
 }
 
 impl HostConfig {
-    pub fn new(url: &str) -> Self {
+    pub fn new(url: &str, chain_id: u64) -> Self {
         HostConfig {
             url: url.to_string(),
+            chain_id,
         }
     }
 }
