@@ -8,7 +8,7 @@ $ vlayer init
 ```
 which should be run inside a foundry-based project.
 
-Above command will add all necessary dependencies and sample vlayer contracts.
+The command above will add all necessary dependencies and sample vlayer contracts.
 
 ## Testing
 
