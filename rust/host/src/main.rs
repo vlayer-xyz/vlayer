@@ -1,6 +1,6 @@
 use alloy_primitives::{address, Address};
 use host::{Host, HostConfig, HostError};
-use vlayer_engine::guest::Call;
+use vlayer_engine::{config::SEPOLIA_ID, guest::Call};
 
 pub mod host;
 pub mod host_tests;
@@ -28,7 +28,8 @@ fn main() -> Result<(), HostError> {
         data: raw_call_data.clone(),
     };
 
-    let _return_data = Host::try_new(HostConfig::new(LOCALHOST_RPC_URL))?.run(call_tx_data)?;
+    let _return_data =
+        Host::try_new(HostConfig::new(LOCALHOST_RPC_URL, SEPOLIA_ID))?.run(call_tx_data)?;
 
     Ok(())
 }

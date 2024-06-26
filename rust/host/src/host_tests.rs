@@ -4,6 +4,7 @@ mod test {
     use crate::host::{EthersClient, Host, HostConfig, HostError};
     use guest_wrapper::GUEST_ELF;
     use risc0_zkvm::ExecutorEnv;
+    use vlayer_engine::config::MAINNET_ID;
     use vlayer_engine::host::provider::EthersProvider;
 
     #[test]
@@ -31,7 +32,7 @@ mod test {
 
     #[test]
     fn try_new_invalid_rpc_url() {
-        let res = Host::try_new(HostConfig::new("http://localhost:123"));
+        let res = Host::try_new(HostConfig::new("http://localhost:123", MAINNET_ID));
 
         assert!(matches!(
             res.map(|_| ()).unwrap_err(),
