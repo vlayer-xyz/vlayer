@@ -22,8 +22,8 @@ const INITIAL_BACKOFF: u64 = 500;
 
 pub type EthersClient = OGEthersProvider<RetryClient<Http>>;
 
-pub struct Host {
-    db: ProofDb<EthersProvider<EthersClient>>,
+pub struct Host<P: Provider> {
+    db: ProofDb<P>,
     header: EthBlockHeader,
 }
 
@@ -54,7 +54,7 @@ pub enum HostError {
     Prover(String),
 }
 
-impl Host {
+impl Host<EthersProvider<EthersClient>> {
     pub fn try_new(url: &str) -> Result<Self, HostError> {
         let client = EthersClient::new_client(url, MAX_RETRY, INITIAL_BACKOFF)?;
 
@@ -70,12 +70,14 @@ impl Host {
 
         Ok(Host { db, header })
     }
+}
 
+impl<P: Provider<Header = EthBlockHeader>> Host<P> {
     pub fn run(mut self, call: Call) -> Result<Output, HostError> {
         let _returns =
             Engine::try_new(&mut self.db, self.header.clone(), SEPOLIA_ID)?.call(&call)?;
 
-        let input = Input {
+        let input: Input = Input {
             call,
             evm_input: into_input(self.db, self.header.seal_slow())
                 .map_err(|err| HostError::CreatingInput(err.to_string()))?,
@@ -87,7 +89,7 @@ impl Host {
             .build()
             .map_err(|err| HostError::ExecutorEnvBuilder(err.to_string()))?;
 
-        Host::prove(env, GUEST_ELF)
+        Host::<P>::prove(env, GUEST_ELF)
     }
 
     pub(crate) fn prove(env: ExecutorEnv, guest_elf: &[u8]) -> Result<Output, HostError> {
