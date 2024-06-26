@@ -10,5 +10,5 @@ guest_wrapper = { path = "../guest_wrapper" }
 tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"], default-features = false }
 alloy-primitives = { workspace = true }
 ethers-providers = { workspace = true }
-anyhow = { version = "1.0.86", default-features = false }
 thiserror = { workspace = true }
+url = { version = "2.4", default-features = false }

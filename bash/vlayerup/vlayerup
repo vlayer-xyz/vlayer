@@ -44,9 +44,7 @@ main() {
       ARCHITECTURE="amd64" # Amd.
     fi
 
-
-  # TODO: Provide right name convention for the releases
-  RELEASE_URL="https://install.vlayer.xyz/nightly-latest-${PLATFORM}-${ARCHITECTURE}.${EXT}"
+  RELEASE_URL="https://vlayer-releases.s3.eu-north-1.amazonaws.com/latest/nightly-${PLATFORM}-${ARCHITECTURE}.${EXT}"
 
   say "Downloading vlayer..."
   ensure download "$RELEASE_URL" | ensure tar -xzC "$VLAYER_DIR"

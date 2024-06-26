@@ -1,4 +1,4 @@
-# Architecture
+# Prover architecture
 
 On the high level, vlayer runs zkEVM that produces proof of proper execution. Under the hood, vlayer is written in Rust that is compiled to zero knowledge proofs. Currently, Rust is compiled with [RISC Zero](https://www.risczero.com/), but we aim to build vendor-lock free solutions working on multiple zk stacks, like [sp-1](https://github.com/succinctlabs/sp1) or [Jolt](https://github.com/a16z/jolt). Inside rust [revm](https://github.com/bluealloy/revm) is executed.
 
@@ -33,7 +33,7 @@ To deliver all necessary proofs, following steps are performed:
 
 Note that solidity execution is deterministic, hence database in the guest has exactly the data it requires.
 
-![Schema](/images/schema.png)
+![Schema](/images/architecture/prover.png)
 
 ### Databases
 
@@ -267,38 +267,3 @@ We will be auditing 100% of guest code, which consist of: `RiscGuest`, `Guest`, 
 
 We should minimize amount of dependencies to all three of them. Especially, there should be no code in `Engine` used by host only.
 
-## Solidty
-
-### On-chain proving
-
-On-chain verification should be done using a user-defined function with the following arguments:
-- `VProof proof`
-- list of arguments in the same order as returned  
-- user defined additional params
-
-The verification function should then use `onlyVerified()` modifier, which takes `VProof` and `ProverOutput` from the calldata and does the actual proof verification.
-
-```solidity
-struct VProof {
-    uint16 offset;
-    uint32 length;
-    uint16 version;
-    uint32 chainId;
-    uint128 blockNumber;
-    bytes32 blockHash;
-    bytes seal;
-```
-}
-
-Therefore, user-defined verification functions can look like the following example:
-```solidity
-
-contract Airdrop is VlayerVerifier {
-
-    function claim(VProof proof, address tokenAddress) public returns (uint) onlyVerified() {
-
-    }
-
-}
-
-```

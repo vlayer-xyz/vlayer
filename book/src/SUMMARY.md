@@ -9,5 +9,7 @@
 - [book](./contributing/book.md)
 
 # Appendix
-- [Architecture](./appendix/architecture.md)
-- [JSON Rpc Api](./appendix/api.md)
+- [Architecture](./appendix/architecture/overview.md)
+  - [Prover](./appendix/architecture/prover.md)
+  - [Solidity](./appendix/architecture/solidity.md)
+- [JSON-RPC API](./appendix/api.md)

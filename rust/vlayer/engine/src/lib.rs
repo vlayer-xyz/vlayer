@@ -231,7 +231,7 @@ pub trait EvmBlockHeader: Sealable {
     fn state_root(&self) -> &B256;
 
     /// Returns the [SolCommitment] used to validate the environment.
-    fn block_commitment(&self) -> SolCommitment;
+    fn block_commitment(&self, chain_id: u64) -> SolCommitment;
     /// Fills the EVM block environment with the header's data.
     fn fill_block_env(&self, blk_env: &mut BlockEnv);
 }

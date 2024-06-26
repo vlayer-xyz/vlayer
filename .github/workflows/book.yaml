@@ -1,9 +1,13 @@
 name: Book
 on:
   pull_request:
+    paths:
+      - 'book/**'    
     branches:
       - '**'  # Run on pull requests to any branch
   push:
+    paths:
+      - 'book/**'    
     branches:
       - main  # Run on push to main branch
 

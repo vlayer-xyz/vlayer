@@ -102,10 +102,15 @@ impl EvmBlockHeader for EthBlockHeader {
 
     #[inline]
     /// Returns the [SolCommitment] used to validate the environment.
-    fn block_commitment(&self) -> SolCommitment {
+    fn block_commitment(&self, chain_id: u64) -> SolCommitment {
         SolCommitment {
+            offset: 0,
+            length: 0,
+            version: 1,
+            chainId: chain_id,
             blockHash: self.clone().seal_slow().seal(),
             blockNumber: U256::from(self.number()),
+            seal: Bytes::default(),
         }
     }
 
