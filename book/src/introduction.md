@@ -1,3 +1,5 @@
+<img src="images/cover.jpg" style="border-radius: 20px">
+
 # Introduction
 
 vlayer give smart-contracts super powers like time travel to blocks in the past, teleport to different chains and access real-life data from web and emails.
