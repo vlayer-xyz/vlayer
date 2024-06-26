@@ -1,15 +1,16 @@
 #[cfg(test)]
 mod test {
 
-    use crate::host::{Host, HostError};
+    use crate::host::{EthersClient, Host, HostError};
     use guest_wrapper::GUEST_ELF;
     use risc0_zkvm::ExecutorEnv;
+    use vlayer_engine::host::provider::EthersProvider;
 
     #[test]
     fn host_prove_invalid_guest_elf() {
         let env = ExecutorEnv::default();
         let invalid_guest_elf = &[];
-        let res = Host::prove(env, invalid_guest_elf);
+        let res = Host::<EthersProvider<EthersClient>>::prove(env, invalid_guest_elf);
 
         assert!(matches!(
             res.map(|_| ()).unwrap_err(),
@@ -20,7 +21,7 @@ mod test {
     #[test]
     fn host_prove_invalid_input() {
         let env = ExecutorEnv::default();
-        let res = Host::prove(env, GUEST_ELF);
+        let res = Host::<EthersProvider<EthersClient>>::prove(env, GUEST_ELF);
 
         assert!(matches!(
             res.map(|_| ()).unwrap_err(),
