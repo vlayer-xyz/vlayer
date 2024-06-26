@@ -8,12 +8,13 @@ use vlayer_engine::config::SEPOLIA_ID;
 use vlayer_engine::ethereum::EthBlockHeader;
 use vlayer_engine::guest::{Call, Input, Output};
 use vlayer_engine::host::into_input;
+use vlayer_engine::host::provider::EthersProviderError;
 use vlayer_engine::{
     contract::engine,
     contract::engine::Engine,
     host::{
         db::ProofDb,
-        provider::{EthersProvider, EthersProviderError, Provider},
+        provider::{EthersProvider, Provider},
     },
 };
 
@@ -22,7 +23,7 @@ const INITIAL_BACKOFF: u64 = 500;
 
 pub type EthersClient = OGEthersProvider<RetryClient<Http>>;
 
-pub struct Host<P: Provider> {
+pub struct Host<P: Provider<Header = EthBlockHeader>> {
     db: ProofDb<P>,
     header: EthBlockHeader,
 }
@@ -57,11 +58,15 @@ pub enum HostError {
 impl Host<EthersProvider<EthersClient>> {
     pub fn try_new(url: &str) -> Result<Self, HostError> {
         let client = EthersClient::new_client(url, MAX_RETRY, INITIAL_BACKOFF)?;
-
         let provider = EthersProvider::new(client);
-
         let block_number = provider.get_block_number()?;
 
+        Host::try_new_with_provider(provider, block_number)
+    }
+}
+
+impl<P: Provider<Header = EthBlockHeader, Error = EthersProviderError<ProviderError>>> Host<P> {
+    pub fn try_new_with_provider(provider: P, block_number: u64) -> Result<Self, HostError> {
         let header = provider
             .get_block_header(block_number)?
             .ok_or(HostError::BlockNotFound(block_number))?;
@@ -70,9 +75,7 @@ impl Host<EthersProvider<EthersClient>> {
 
         Ok(Host { db, header })
     }
-}
 
-impl<P: Provider<Header = EthBlockHeader>> Host<P> {
     pub fn run(mut self, call: Call) -> Result<Output, HostError> {
         let _returns =
             Engine::try_new(&mut self.db, self.header.clone(), SEPOLIA_ID)?.call(&call)?;
