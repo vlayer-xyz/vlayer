@@ -49,7 +49,7 @@ jobs:
         env:
           OUTPUT_FILE_SUFFIX: "${{ matrix.platform }}-${{ matrix.arch }}.tar.gz"
         run: |
-          bins=(host)
+          bins=(vlayer)
           mkdir -p target/${{ matrix.target }}/bin
           cd target/${{ matrix.target }}
 
