@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import {Script, console} from "forge-std/Script.sol";
-import {Simple} from "../src/vlayer/Simple.v.sol";
+import {Simple, SimpleVerification} from "../src/vlayer/Simple.v.sol";
 
 contract SimpleScript is Script {
     function setUp() public {}
@@ -11,8 +11,7 @@ contract SimpleScript is Script {
 
         uint256 deployerPrivateKey = vm.envUint("STABLE_DEPLOYER_PRIV");
         vm.startBroadcast(deployerPrivateKey);
-        Simple simple = new Simple();
-
+        SimpleVerification simpleVerifier = new SimpleVerification(Simple(address(0)));
 
     }
 }

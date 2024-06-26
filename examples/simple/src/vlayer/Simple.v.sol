@@ -1,20 +1,18 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-contract Simple {
+import {Simple} from "../Simple.sol";
 
-    uint256 public latestSum;
+contract SimpleVerification {
 
-    function sum(uint256 lhs, uint256 rhs) public pure returns (uint256) {
-        return lhs + rhs;
+    Simple public simple;
+
+    constructor(Simple _simple){
+        simple = _simple;
     }
 
-
-    function updateSum(bytes calldata _proof, uint256 _sum, bytes32 _journalHash) public {
-
-        assert(keccak256(_proof) == _journalHash);
-        
-        latestSum = _sum;
+    function sum(uint256 lhs, uint256 rhs) public view returns (uint256) {
+        return lhs + rhs + simple.latestSum();
     }
 
 }
