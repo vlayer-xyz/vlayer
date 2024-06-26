@@ -1,17 +1,26 @@
 # First Steps
 
 ## Off-chain execution
+Vlayer contracts are just like regular on-chain contracts written in  [Solidity](https://soliditylang.org). The only difference is the execution model, as bytecode is executed on the vlayer zkEVM infrastructure. 
 
-By convention, our off-chain smart contracts have a `.v.sol` extension. 
-These contracts are written in [Solidity](https://soliditylang.org) and their bytecode is executed on vlayer zkEVM infrastructure. 
+Compared to regular contracts, vlayer smart contracts have additional features such as:
+* [teleport]() (cross-chain verification)
+* [time machine]() (verifying data at a specific block number)
+* built-in privacy
+* helpers for parsing web/email payloads 
+* no gas fees and transaction size limitation 
 
-Off-chain execution allows cryptographic proofs to be generated. Once the proving is done, you can take the generated proof and then use it for on-chain verification.
-Such a setup allows developers to use Solidity for generating zero-knowledge proofs. 
+Off-chain execution allows cryptographic proofs to be generated. Once the proving is done, you can take the generated proof and use it for on-chain settlement.
 
-In addition, we introduce additional features such as [teleport]() (cross-chain verification) or [time machine]() (verifying data at a specific block number). 
+Below diagram ilustrates this flow:
+1. App sends private inputs to vlayer contract executed off-chain. 
+1. Contract runs at zkEVM and returns proof of proper execution with public inputs
+1. App sends & settles transaction to regular on-chain smart contract
+
+![Off-chain execution simplified diagram](/images/offchain-execution.png)
 
 All arguments passed to the contract functions are **private by default**.
-In case you need to return some data (public inputs), just return them. 
+If you need public inputs, just return them.
 
 Example use cases: 
 - Alice can get airdrop by sending proof of some NFT ownership. She can do this without exposing her wallet address to the public. 
