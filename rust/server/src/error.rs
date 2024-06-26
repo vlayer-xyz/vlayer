@@ -10,8 +10,8 @@ use thiserror::Error;
 pub enum FieldValidationError {
     #[error("{1} `{0}`")]
     InvalidHex(String, FromHexError),
-    #[error("Invalid prefix `{0}`")]
-    InvalidPrefix(String),
+    #[error("Invalid hex prefix `{0}`")]
+    InvalidHexPrefix(String),
 }
 
 #[derive(Debug, Error, Derivative)]
