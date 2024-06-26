@@ -158,7 +158,7 @@ mod test {
 
         assert_eq!(
             actual_err.to_string(),
-            "Invalid field `data`: Invalid prefix `xx`"
+            "Invalid field `data`: Invalid hex prefix `xx`"
         );
 
         Ok(())

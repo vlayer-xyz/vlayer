@@ -19,7 +19,7 @@ pub(crate) fn parse_hex_field(field_name: &str, hex: String) -> Result<Vec<u8>, 
     if !hex.starts_with("0x") {
         return Err(AppError::FieldValidationError(
             field_name.to_string(),
-            FieldValidationError::InvalidPrefix(hex),
+            FieldValidationError::InvalidHexPrefix(hex),
         ));
     }
     hex::decode(&hex[2..]).map_err(|err| {
