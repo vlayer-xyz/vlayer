@@ -11,17 +11,24 @@ interface IERC721 {
     function ownerOf(uint256 tokenId) external view returns (address owner);
 }
 
+
+address public constant BYAC_NFT_ADDR = 0xb123123123;
+
 contract NftOwnership is VlayerProver  {
-    function main(address targetNftAddr, uint tokenId, address receiver) public returns (address,address) {  
+
+    function main() public returns (address) {  
       // 🔥 Teleport to chain on which the verification is happening
       setChainId(1); 
-      // 🔥 Time travel to specific block number
-      setBlockNumber(latestBlock() - 1); 
+      // some block no in future 
+      setBlockNumber(21_000_000); 
       
       // Terminate proving if NFT is not owned by the prover
-      require(IERC721(targetNftAddr).ownerOf(tokenId) == msg.sender, "You are not the owner of the given NFT");
+      require(
+        IERC721(BYAC_NFT_ADDR).balanceOf(msg.sender) > 0, 
+        "You are not owning any specified NFT"
+      );
 
       // anything returned here would be visible to the public
-      return (targetNftAddr, receiver); 
+      return (msg.sender); 
     }
 }

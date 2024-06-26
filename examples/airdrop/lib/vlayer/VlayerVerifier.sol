@@ -4,7 +4,7 @@ pragma solidity ^0.8.13;
 // Below contract is executed on-chain. Verification may happen on any EVM chain.
 
 contract VlayerVerifier {
-  struct VProof {
+  struct Proof {
     uint16 offset;
     uint32 length;
     uint16 version;
@@ -14,7 +14,7 @@ contract VlayerVerifier {
     bytes seal;    
   }
 
-  modifier onlyVerified() {
+  modifier onlyVerified(address contractAddr) {
     // TODO: Check if msg.calldata contains a valid VProof
     _;
   }
