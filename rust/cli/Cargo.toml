@@ -11,4 +11,5 @@ edition = "2021"
 clap = { version = "4.5.7", features = ["derive"] }
 tokio = { workspace = true }
 anyhow = { workspace = true }
+
 server = { path = "../server" }

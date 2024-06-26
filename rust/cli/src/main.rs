@@ -1,5 +1,6 @@
 use clap::{Parser, Subcommand};
 use server::server::serve;
+
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
 #[command(propagate_version = true)]
