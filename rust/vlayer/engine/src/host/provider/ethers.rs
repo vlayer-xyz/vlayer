@@ -22,7 +22,7 @@ use tokio::runtime::{Handle, Runtime};
 /// An error that can occur when interacting with the provider.
 #[derive(Error, Debug)]
 pub enum EthersProviderError<M: MiddlewareError> {
-    #[error("middleware error")]
+    #[error("middleware error: {0}")]
     MiddlewareError(#[from] M),
     #[error("block conversion error: {0}")]
     BlockConversionError(String),
