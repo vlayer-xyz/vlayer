@@ -5,6 +5,11 @@
 - [Installation](./getting-started/installation.md)
 - [First Steps](./getting-started/first-steps.md)
 - [How it works](./getting-started/how-it-works.md)
+
+# Features
+- [Time travel](./features/time-travel.md)
+- [Teleport](./features/teleport.md)
+
 # Contributing
 - [vlayer](./contributing/vlayer.md)
 - [book](./contributing/book.md)
@@ -14,4 +19,4 @@
   - [Prover](./appendix/architecture/prover.md)
   - [Solidity](./appendix/architecture/solidity.md)
 - [JSON-RPC API](./appendix/api.md)
-- [Features](./appendix/features.md)
+
