@@ -18,7 +18,7 @@ pub async fn serve() -> anyhow::Result<()> {
     Ok(())
 }
 
-pub fn server() -> Router {
+fn server() -> Router {
     Router::new()
         .route("/", post(json_rpc))
         .layer(init_trace_layer())
