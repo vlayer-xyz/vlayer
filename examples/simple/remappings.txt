@@ -1,0 +1,5 @@
+ds-test/=lib/risc0-ethereum/lib/openzeppelin-contracts/lib/forge-std/lib/ds-test/src/
+erc4626-tests/=lib/risc0-ethereum/lib/openzeppelin-contracts/lib/erc4626-tests/
+forge-std/=lib/forge-std/src/
+openzeppelin-contracts/=lib/risc0-ethereum/lib/openzeppelin-contracts/
+risc0-ethereum/=lib/risc0-ethereum/contracts/src/
