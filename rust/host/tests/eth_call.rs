@@ -12,8 +12,6 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-#![cfg(feature = "host")]
-
 use alloy_primitives::{address, b256, uint, Address, Sealable, U256};
 use alloy_sol_types::{sol, SolCall};
 use std::fmt::Debug;
