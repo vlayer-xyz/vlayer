@@ -5,7 +5,7 @@ use crate::trace::init_tracing;
 use axum::{routing::post, Router};
 use tracing::info;
 
-pub async fn server() -> anyhow::Result<()> {
+pub async fn serve() -> anyhow::Result<()> {
     init_tracing()?;
 
     let listener = tokio::net::TcpListener::bind("127.0.0.1:3000").await?;
@@ -18,7 +18,7 @@ pub async fn server() -> anyhow::Result<()> {
     Ok(())
 }
 
-pub fn app() -> Router {
+fn app() -> Router {
     Router::new()
         .route("/hello", post(hello))
         .route("/call", post(call))

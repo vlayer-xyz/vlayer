@@ -1,5 +1,5 @@
 use clap::{Parser, Subcommand};
-use server::app::server;
+use server::app::serve;
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
 #[command(propagate_version = true)]
@@ -21,7 +21,7 @@ async fn main() -> anyhow::Result<()> {
     match &cli.command {
         Commands::Serve => {
             println!("running 'vlayer serve'");
-            server().await
+            serve().await
         }
         Commands::Init => {
             println!("running 'vlayer init'");
