@@ -12,8 +12,8 @@ VLAYER_BIN_DIR="$VLAYER_DIR/bin"
 VLAYER_MAN_DIR="$VLAYER_DIR/share/man/man1"
 
 # Temp URL, will be replaced with github url once the repo is public.
-BIN_URL="https://vlayer-releases.s3.eu-north-1.amazonaws.com/vlayerup"
 BIN_PATH="$VLAYER_BIN_DIR/vlayerup"
+BIN_URL="https://install.vlayer.xyz/vlayerup"
 
 # Create the .vlayer bin directory and vlayerup binary if it doesn't exist.
 mkdir -p "$VLAYER_BIN_DIR"

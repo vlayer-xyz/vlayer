@@ -4,7 +4,7 @@ Simplest way to install vlayer is to use vlayerup, the vlayer toolchain installe
 
 To install vlayerup, run the following command in your terminal, then follow the onscreen instructions.
 ```sh
-curl -SL  http://install.vlayer.xyz | bash
+curl -SL  https://install.vlayer.xyz/install | bash
 ```
 
 This will install `vlayerup` and make it available in your CLI.
