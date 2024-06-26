@@ -1,9 +1,5 @@
 # First Steps
 
-## Off-chain smart contracts
-
-By convention off-chain smart contracts have the `.v.sol` extension.
-
 ## Initialisation
 
 To initialise a vlayer project run:
@@ -12,7 +8,7 @@ $ vlayer init
 ```
 which should be run inside a foundry-based project.
 
-This will add vlayer dependencies and sample vlayer contracts.
+The command above will add all necessary dependencies and sample vlayer contracts.
 
 ## Testing
 
