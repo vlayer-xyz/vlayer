@@ -70,7 +70,7 @@ struct Proof {
 
 To verify zero-knowledge proof vlayer uses `verify` function delivered by Risc-0.
 
-```rust
+```solidity
 function verify(bytes calldata seal, bytes32 imageId, bytes32 journalDigest)
 ```
 
