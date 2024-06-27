@@ -1,6 +1,8 @@
 use clap::{Parser, Subcommand};
 use server::server::serve;
 use std::path::{Path, PathBuf};
+use std::process::Command;
+use std::str::from_utf8;
 use thiserror::Error;
 
 #[derive(Parser)]
@@ -19,13 +21,12 @@ enum Commands {
 
 #[derive(Error, Debug)]
 pub enum CLIError {
-    #[error("Couldn't find git repository {err:?}")]
-    CantFindGitRepository {
-        #[from]
-        err: std::io::Error,
-    },
-    #[error("Couldn't convert path to string {0}")]
-    PathConversionError(#[from] std::str::Utf8Error),
+    #[error("Command execution failed: {0}")]
+    CommandExecutionError(#[from] std::io::Error),
+    #[error("Invalid UTF-8 sequence: {0}")]
+    Utf8Error(#[from] std::str::Utf8Error),
+    #[error("Git command failed: {0}")]
+    GitError(String),
 }
 
 #[tokio::main]
@@ -45,17 +46,20 @@ async fn main() -> anyhow::Result<()> {
 }
 
 /// https://github.com/foundry-rs/foundry/blob/fbd225194dff17352ba740cb3d6f2ad082030dd1/crates/config/src/utils.rs
-/// Returns the path of the top-level directory of the working git tree. If there is no working
-/// tree, an error is returned.
 pub fn find_git_root_path(relative_to: impl AsRef<Path>) -> Result<PathBuf, CLIError> {
     let path = relative_to.as_ref();
-    let path = std::process::Command::new("git")
+    let output = Command::new("git")
         .args(["rev-parse", "--show-toplevel"])
         .current_dir(path)
-        .output()?
-        .stdout;
+        .output()?;
 
-    let path = std::str::from_utf8(&path)?.trim_end_matches('\n');
+    if !output.status.success() {
+        return Err(CLIError::GitError(
+            String::from_utf8_lossy(&output.stderr).to_string(),
+        ));
+    }
+
+    let path = from_utf8(&output.stdout)?.trim_end_matches('\n');
     Ok(PathBuf::from(path))
 }
 
@@ -63,30 +67,54 @@ pub fn find_git_root_path(relative_to: impl AsRef<Path>) -> Result<PathBuf, CLIE
 mod tests {
     use super::*;
 
-    fn get_examples_path() -> PathBuf {
-        let cwd = &std::env::current_dir().unwrap();
-        let mut examples_path = PathBuf::from(cwd.parent().unwrap().parent().unwrap());
-        examples_path.push("examples/simple");
-        examples_path
+    fn create_temp_repo() -> tempfile::TempDir {
+        // Create a new temporary directory
+        let temp_dir = tempfile::tempdir().unwrap();
+
+        // Initialize a new Git repository in the temp directory
+        let repo_path = temp_dir.path();
+        Command::new("git")
+            .arg("init")
+            .arg(repo_path)
+            .output()
+            .unwrap();
+
+        let file_path = repo_path.join("test_file.txt");
+        std::fs::File::create(file_path).unwrap();
+
+        temp_dir
     }
 
     #[test]
     fn test_find_git_root_path() {
-        // searches from current directory
-        let cwd = &std::env::current_dir().unwrap();
-        let result = find_git_root_path(cwd);
+        let temp_dir = create_temp_repo();
+        let result = find_git_root_path(temp_dir.path());
         let root_path = result.unwrap();
         assert!(root_path.is_dir());
-        assert!(root_path.ends_with("vlayer"));
     }
 
     #[test]
-    fn test_find_git_root_path_from_examples() {
-        // searches from examples directory
-        let path = get_examples_path();
-        let result = find_git_root_path(path);
-        let root_path = result.unwrap();
-        assert!(root_path.is_dir());
-        assert!(root_path.ends_with("vlayer"));
+    fn test_find_git_root_subdirectories() {
+        let temp_dir = create_temp_repo();
+        let sub_dir1 = temp_dir.path().join("dir1");
+        let sub_dir2 = sub_dir1.join("dir2");
+        std::fs::create_dir_all(&sub_dir2).unwrap();
+        let root_path1 = find_git_root_path(&sub_dir1).unwrap();
+        let root_path2 = find_git_root_path(&sub_dir2).unwrap();
+        assert!(root_path1.is_dir());
+        assert!(root_path2.is_dir());
+        assert_eq!(root_path1, root_path2);
+    }
+
+    #[test]
+    fn test_find_git_root_path_fail() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let result = find_git_root_path(temp_dir.path());
+
+        let expected_error_msg =
+            "fatal: not a git repository (or any of the parent directories): .git\n".to_string();
+
+        let error = result.unwrap_err();
+        assert!(matches!(error, CLIError::GitError(msg) if msg == expected_error_msg));
     }
 }
