@@ -5,8 +5,8 @@ Vlayer contracts are just like regular on-chain contracts written in [Solidity](
 ## Features
 
 Compared to regular contracts, vlayer smart contracts have additional features such as:
-* **time travel** - ability to execute smart contracts on historaical data
-* **teleport** - ability to execute smart contracts in the context of different chains
+* **[time travel](/features/time-travel.html)** - ability to execute smart contracts on historaical data
+* **[teleport](/features/teleport.html)** - ability to execute smart contracts in the context of different chains
 * **web content** - access to verified web content (APIs and websites)
 * **emails** - access to verfied content of email
 

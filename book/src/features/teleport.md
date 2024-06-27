@@ -1,7 +1,7 @@
 # Teleport
-As you may know, blockchain ecosystem is fragmented. There are EVM chains like: Arbitrum, Optimism, Base and many more. Building applications that use multiple chains is tricky.
+As you may know, the blockchain ecosystem is fragmented. There are EVM chains such as: Arbitrum, Optimism, Base and many more. Building applications that use multiple chains is difficult.
 
-That's where Teleport functionality helps. It allows proving stuff from various chains:
+That's where the **Teleport** feature helps. It allows to prove things from different chains:
 
 ```solidity
 contract NftOwnership is VlayerProver {
