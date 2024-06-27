@@ -28,7 +28,7 @@ Proving data flow is somewhat complex. It starts at guest, which returns `GuestO
 
 ```rust
 pub struct GuestOutput {
-    pub block_commitment: ExecutionCommitment,
+    pub execution_commitment: ExecutionCommitment,
     pub evm_call_result: Vec<u8>,
 }
 ```
