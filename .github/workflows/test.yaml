@@ -16,7 +16,10 @@ jobs:
         id: changed-files-rust
         uses: tj-actions/changed-files@v44
         with:
-          files: rust/**      
+          files: |
+            **.rs
+            */Cargo.toml
+            **.sol      
      
       - name: Set up Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1

@@ -14,7 +14,9 @@ jobs:
         uses: tj-actions/changed-files@v44
         with:
           files: |
-             **.rs
+            **.rs
+            */Cargo.toml
+            **.sol
 
       - uses: cargo-bins/cargo-binstall@main
         if: steps.changed-rust-files.outputs.any_changed == 'true'
