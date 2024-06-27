@@ -1,4 +1,4 @@
-use super::{EIP1186Proof, Provider, StorageProof};
+use super::{EIP1186Proof, Provider};
 use alloy_primitives::{B256, U256};
 use ethers_core::types::Block;
 use ethers_providers::{Middleware, MiddlewareError};
@@ -145,15 +145,7 @@ where
                 .into_iter()
                 .map(from_ethers_bytes)
                 .collect(),
-            storage_proof: proof
-                .storage_proof
-                .into_iter()
-                .map(|p| StorageProof {
-                    key: from_ethers_u256(p.key).to_be_bytes().into(),
-                    proof: p.proof.into_iter().map(from_ethers_bytes).collect(),
-                    value: from_ethers_u256(p.value),
-                })
-                .collect(),
+            storage_proof: proof.storage_proof.into_iter().map(Into::into).collect(),
         })
     }
 }

@@ -1,6 +1,8 @@
 use alloy_primitives::{
     Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, B256, U256,
 };
+use ethers::{from_ethers_bytes, from_ethers_u256};
+use ethers_core::types::StorageProof as EthersStorageProof;
 use serde::{Deserialize, Serialize};
 use std::{convert::Infallible, error::Error as StdError, fmt::Debug, marker::PhantomData};
 use vlayer_engine::evm::block_header::EvmBlockHeader;
@@ -48,6 +50,16 @@ pub struct StorageProof {
     pub key: StorageKey,
     pub proof: Vec<Bytes>,
     pub value: StorageValue,
+}
+
+impl From<EthersStorageProof> for StorageProof {
+    fn from(proof: EthersStorageProof) -> Self {
+        StorageProof {
+            key: from_ethers_u256(proof.key).to_be_bytes().into(),
+            proof: proof.proof.into_iter().map(from_ethers_bytes).collect(),
+            value: from_ethers_u256(proof.value),
+        }
+    }
 }
 
 /// Response for EIP-1186 account proof `eth_getProof`
