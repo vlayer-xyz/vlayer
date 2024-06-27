@@ -32,7 +32,7 @@ fn main() -> Result<(), HostError> {
     };
 
     let _return_data =
-        Host::try_new(HostConfig::new(LOCALHOST_RPC_URL, SEPOLIA_ID, 1))?.run(call_tx_data)?;
+        Host::try_new(HostConfig::new(LOCALHOST_RPC_URL, SEPOLIA_ID, 2))?.run(call_tx_data)?;
 
     Ok(())
 }
