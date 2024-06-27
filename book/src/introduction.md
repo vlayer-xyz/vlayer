@@ -21,5 +21,3 @@ Help us improve [vlayer](./contributing/vlayer.md) and [vlayer book](./contribut
 References for:
 - [Architecture](./appendix/architecture.md)
 - [JSON-RPC API](./appendix/api.md)
-
-
