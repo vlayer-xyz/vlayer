@@ -6,17 +6,27 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: cargo-bins/cargo-binstall@main
-
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Get all changed Rust files
+        id: changed-rust-files
+        uses: tj-actions/changed-files@v44
+        with:
+          files: |
+             **.rs
+
+      - uses: cargo-bins/cargo-binstall@main
+        if: steps.changed-rust-files.outputs.any_changed == 'true'
       
       - name: Set up Rust
+        if: steps.changed-rust-files.outputs.any_changed == 'true'
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
           cache-workspaces: rust
 
       - name: Run Clippy Host
+        if: steps.changed-rust-files.outputs.any_changed == 'true'
         working-directory: rust
         env:
           RUSTFLAGS: "-Dwarnings"
@@ -25,6 +35,7 @@ jobs:
           cargo clippy --all-targets --all-features
 
       - name: Run Clippy Guest
+        if: steps.changed-rust-files.outputs.any_changed == 'true'
         working-directory: rust/guest_wrapper/guest
         env:
           RUSTFLAGS: "-Dwarnings"

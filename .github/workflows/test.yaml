@@ -12,17 +12,27 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       
+      - name: Get changed files in the rust folder
+        id: changed-files-rust
+        uses: tj-actions/changed-files@v44
+        with:
+          files: rust/**      
+     
       - name: Set up Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
+        if: steps.changed-files-rust.outputs.any_changed == 'true'
         with:
           cache-workspaces: rust
 
       - name: Install risc0 instaler
+        if: steps.changed-files-rust.outputs.any_changed == 'true'
         run: cargo binstall -y cargo-risczero --force
  
       - name: Install risc0 toolchain
+        if: steps.changed-files-rust.outputs.any_changed == 'true'
         run: cargo risczero install
       
       - name: Run workspace rust tests
+        if: steps.changed-files-rust.outputs.any_changed == 'true'
         working-directory: rust
         run: cargo test --workspace

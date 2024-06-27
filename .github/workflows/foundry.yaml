@@ -10,6 +10,7 @@ jobs:
     strategy:
       fail-fast: true
 
+
     name: Foundry project
     runs-on: ubuntu-latest
     steps:
@@ -17,18 +18,28 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Get all changed Solidity files
+        id: changed-sol-files
+        uses: tj-actions/changed-files@v44
+        with:
+          files: |
+              **.sol
+
       - name: Install Foundry
+        if: steps.changed-sol-files.outputs.any_changed == 'true'
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: nightly-5ac78a9cd4b94dc53d1fe5e0f42372b28b5a7559 # 2024-06-02
 
       - name: Run Forge build
+        if: steps.changed-sol-files.outputs.any_changed == 'true'
         working-directory: ./examples/simple
         run: |
           forge --version
           forge build --sizes
 
       - name: Run Forge tests
+        if: steps.changed-sol-files.outputs.any_changed == 'true'      
         working-directory: ./examples/simple
         run: |
           forge test -vvv

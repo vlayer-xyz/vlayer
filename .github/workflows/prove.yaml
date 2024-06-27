@@ -13,29 +13,41 @@ jobs:
         with:
           submodules: 'true'
 
+      - name: Get changed files in the rust folder
+        id: changed-files-rust
+        uses: tj-actions/changed-files@v44
+        with:
+          files: rust/** 
+
       - name: Set up Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
+        if: steps.changed-files-rust.outputs.any_changed == 'true'
         with:
           cache-workspaces: "rust -> target"
 
       - name: Install risc0 instaler
+        if: steps.changed-files-rust.outputs.any_changed == 'true'
         run: cargo binstall -y cargo-risczero --force
 
       - name: Install risc0 toolchain
+        if: steps.changed-files-rust.outputs.any_changed == 'true'
         run: cargo risczero install
 
       - name: Install Foundry
+        if: steps.changed-files-rust.outputs.any_changed == 'true'
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: nightly-5ac78a9cd4b94dc53d1fe5e0f42372b28b5a7559 # 2024-06-02
 
       - name: Start Anvil
+        if: steps.changed-files-rust.outputs.any_changed == 'true'
         run: |
           anvil &
           ANVIL_SERVER_PID=$!
           echo "ANVIL_SERVER_PID=$ANVIL_SERVER_PID" >> $GITHUB_ENV
 
       - name: Deploy simple example contract
+        if: steps.changed-files-rust.outputs.any_changed == 'true'
         working-directory: examples/simple
         run: |
           output=$(mktemp)
@@ -45,6 +57,7 @@ jobs:
           grep '[A-Z0-9_]\+=[a-zA-Z0-9]\+' <${output} >>${GITHUB_ENV}
 
       - name: Run host
+        if: steps.changed-files-rust.outputs.any_changed == 'true'
         working-directory: rust/host
         run: cargo run
         env:
@@ -52,5 +65,5 @@ jobs:
           RISC0_DEV_MODE: 1
 
       - name: Stop Anvil
-        if: always()
+        if: steps.changed-files-rust.outputs.any_changed == 'true'
         run: kill $ANVIL_SERVER_PID
