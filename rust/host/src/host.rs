@@ -80,7 +80,7 @@ impl<P: Provider<Header = EthBlockHeader, Error = EthersProviderError<ProviderEr
         let _returns =
             Engine::try_new(&mut self.db, self.header.clone(), SEPOLIA_ID)?.call(&call)?;
 
-        let input: Input = Input {
+        let input = Input {
             call,
             evm_input: into_input(self.db, self.header.seal_slow())
                 .map_err(|err| HostError::CreatingInput(err.to_string()))?,
