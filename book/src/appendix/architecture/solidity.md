@@ -27,7 +27,7 @@ contract Example is Verifier {
 Proving data flow is somewhat complex. It starts at guest, which returns `GuestOutput`. GuestOutput consist of two fields: `execution_commitment` and `evm_call_result`. See the code snippets below for pseudocode:
 
 ```rust
-pub struct Output {
+pub struct GuestOutput {
     pub block_commitment: ExecutionCommitment,
     pub evm_call_result: Vec<u8>,
 }
