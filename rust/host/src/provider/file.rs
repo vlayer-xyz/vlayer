@@ -10,7 +10,7 @@ use std::{
     marker::PhantomData,
     path::PathBuf,
 };
-use vlayer_engine::{ethereum::EthBlockHeader, EvmBlockHeader};
+use vlayer_engine::{ethereum::EthBlockHeader, evm::block_header::EvmBlockHeader};
 
 /// A provider that caches responses from an underlying provider in a JSON file.
 /// Queries are first checked against the cache, and if not found, the provider is invoked.

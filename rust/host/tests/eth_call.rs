@@ -8,8 +8,8 @@ use std::fmt::Debug;
 use test_log::test;
 use vlayer_engine::{
     config::{ChainSpec, ETH_MAINNET_CHAIN_SPEC, ETH_SEPOLIA_CHAIN_SPEC, MAINNET_ID, SEPOLIA_ID},
-    contract::engine::Engine,
-    guest::Call,
+    engine::Engine,
+    io::Call,
 };
 
 macro_rules! provider {

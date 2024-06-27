@@ -8,9 +8,9 @@ use ethers_providers::{Http, ProviderError, RetryClient};
 use guest_wrapper::GUEST_ELF;
 use risc0_zkvm::{default_prover, ExecutorEnv};
 use thiserror::Error;
+use vlayer_engine::engine::{Engine, EngineError};
 use vlayer_engine::ethereum::EthBlockHeader;
-use vlayer_engine::guest::{Call, Input, Output};
-use vlayer_engine::{contract::engine, contract::engine::Engine};
+use vlayer_engine::io::{Call, Input, Output};
 
 const MAX_RETRY: u32 = 3;
 const INITIAL_BACKOFF: u64 = 500;
@@ -32,7 +32,7 @@ pub enum HostError {
     CreatingInput(String),
 
     #[error("Engine error")]
-    Engine(#[from] engine::EngineError),
+    Engine(#[from] EngineError),
 
     #[error("Ethers provider error: {0}")]
     EthersProvider(#[from] EthersProviderError<ProviderError>),

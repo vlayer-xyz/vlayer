@@ -1,9 +1,10 @@
 use vlayer_engine::{
     config::SEPOLIA_ID,
-    contract::{db::WrapStateDb, engine::Engine},
+    db::wrap_state::WrapStateDb,
+    engine::Engine,
     ethereum::EthBlockHeader,
-    guest::{Call, Output},
-    EvmBlockHeader, EvmInput,
+    evm::{block_header::EvmBlockHeader, input::EvmInput},
+    io::{Call, Output},
 };
 
 pub struct Guest {
