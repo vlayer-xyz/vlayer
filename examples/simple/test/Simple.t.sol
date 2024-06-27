@@ -4,6 +4,7 @@ pragma solidity ^0.8.13;
 import {Test, console} from "forge-std/Test.sol";
 import {Simple} from "../src/Simple.sol";
 import {RiscZeroMockVerifier} from "risc0-ethereum/test/RiscZeroMockVerifier.sol";
+import {Steel} from "vlayer/Steel.sol";
 
 contract SimpleTest is Test {
 
@@ -17,14 +18,11 @@ contract SimpleTest is Test {
 
     function test_updateSum() public {
 
-        Simple.Commitment memory commitment = Simple.Commitment({
-            offset: 0,
-            length: 0,
-            version: 1,
-            chainId: 11155111,
-            blockNumber: 2,
-            blockHash: bytes32(0xcbbeae20657c38f6ae82403a1c5d4e7b27142af11b02bde8bf1e3e93878e451f),
-            seal: new bytes(0)
+        Steel.ExecutionCommitment memory commitment = Steel.ExecutionCommitment({
+            startContractAddress: address(0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512),
+            functionSelector: bytes4(0xcad0899b),
+            settleBlockNumber: 2,
+            settleBlockHash: bytes32(0xcbbeae20657c38f6ae82403a1c5d4e7b27142af11b02bde8bf1e3e93878e451f)
         });
         uint256 sum = 3;
       
