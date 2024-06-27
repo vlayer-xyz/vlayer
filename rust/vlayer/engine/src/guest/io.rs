@@ -1,6 +1,4 @@
 use alloy_primitives::Address;
-use alloy_rlp::Decodable;
-use alloy_rlp_derive::{RlpDecodable, RlpEncodable};
 use risc0_zkvm::Journal;
 use serde::{Deserialize, Serialize};
 
@@ -20,7 +18,7 @@ pub struct Call {
     pub data: Vec<u8>,
 }
 
-#[derive(Deserialize, Serialize, Debug, RlpEncodable, RlpDecodable)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct Output {
     pub execution_commitment: SolCommitment,
     pub evm_call_result: Vec<u8>,
@@ -28,10 +26,8 @@ pub struct Output {
 
 impl From<Journal> for Output {
     fn from(value: Journal) -> Self {
-        let rlp_output: Vec<u8> = value
+        value
             .decode()
-            .expect("Could not decode Journal into Vec<u8>");
-
-        Output::decode(&mut rlp_output.as_slice()).expect("Could not decode Vec<u8> to Output")
+            .expect("Could not decode Journal into Vec<u8>")
     }
 }

@@ -10,4 +10,3 @@ edition = "2021"
 [dependencies]
 risc0-zkvm = "1.0.1"
 vlayer-engine = { path = "../../vlayer/engine" }
-alloy-rlp = { version = "0.3.4", default-features = false }
