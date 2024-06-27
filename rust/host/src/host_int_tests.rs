@@ -21,7 +21,7 @@ mod test {
 
     #[cfg(test)]
     #[ctor::ctor]
-    fn init() {
+    fn before_all() {
         use std::env::set_var;
         set_var("RISC0_DEV_MODE", "1")
     }
