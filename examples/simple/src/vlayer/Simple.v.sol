@@ -12,7 +12,7 @@ contract SimpleVerification {
     }
 
     function sum(uint256 lhs, uint256 rhs) public view returns (uint256) {
-        return lhs + rhs + simple.latestSum();
+        return lhs + rhs;
     }
 
 }
