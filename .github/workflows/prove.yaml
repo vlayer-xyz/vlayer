@@ -65,5 +65,5 @@ jobs:
           RISC0_DEV_MODE: 1
 
       - name: Stop Anvil
-        if: steps.changed-files-rust.outputs.any_changed == 'true'
+        if: always() && env.ANVIL_SERVER_PID != ''
         run: kill $ANVIL_SERVER_PID
