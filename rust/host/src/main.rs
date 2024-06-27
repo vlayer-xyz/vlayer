@@ -4,6 +4,7 @@ use vlayer_engine::{config::SEPOLIA_ID, io::Call};
 
 pub mod db;
 pub mod host;
+pub mod host_int_tests;
 pub mod host_tests;
 pub mod into_input;
 pub mod provider;

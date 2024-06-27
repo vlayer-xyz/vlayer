@@ -24,3 +24,4 @@ tokio = { workspace = true}
 alloy-sol-types = "0.7.6"
 test-log = "0.2.15"
 anyhow = "1.0"
+ctor = "0.2.8"
