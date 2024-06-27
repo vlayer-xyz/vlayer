@@ -14,7 +14,8 @@
 
 use alloy_primitives::{address, b256, uint, Address, Sealable, U256};
 use alloy_sol_types::{sol, SolCall};
-use host::old_engine::{from_provider, into_input};
+use anyhow::Context;
+use host::old_engine::{db::ProofDb, into_input, provider::Provider};
 use std::fmt::Debug;
 use test_log::test;
 use vlayer_engine::{
@@ -52,6 +53,20 @@ sol! {
     interface IERC20 {
         function balanceOf(address account) external view returns (uint);
     }
+}
+
+pub fn from_provider<P: Provider>(
+    provider: P,
+    block_number: u64,
+) -> anyhow::Result<(ProofDb<P>, P::Header)> {
+    let header = provider
+        .get_block_header(block_number)?
+        .with_context(|| format!("block {block_number} not found"))?;
+
+    // create a new database backed by the provider
+    let db = ProofDb::new(provider, block_number);
+
+    Ok((db, header))
 }
 
 #[test]
