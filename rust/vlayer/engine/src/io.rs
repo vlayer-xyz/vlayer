@@ -27,19 +27,16 @@ impl Default for Call {
     }
 }
 
-#[derive(Deserialize, Serialize, Debug)]
 pub struct Output {
     pub execution_commitment: SolCommitment,
     pub evm_call_result: Vec<u8>,
 }
 
-#[derive(Debug)]
 pub struct GuestOutput {
     pub execution_commitment: SolCommitment,
     pub evm_call_result: Vec<u8>,
 }
 
-#[derive(Debug)]
 pub struct HostOutput {
     pub raw_abi: Vec<u8>,
     pub guest_output: GuestOutput,
