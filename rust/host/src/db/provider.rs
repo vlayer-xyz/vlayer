@@ -1,21 +1,7 @@
-// Copyright 2024 RISC Zero, Inc.
-//
-// Licensed under the Apache License, Version 2.0 (the "License");
-// you may not use this file except in compliance with the License.
-// You may obtain a copy of the License at
-//
-//     http://www.apache.org/licenses/LICENSE-2.0
-//
-// Unless required by applicable law or agreed to in writing, software
-// distributed under the License is distributed on an "AS IS" BASIS,
-// WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-// See the License for the specific language governing permissions and
-// limitations under the License.
-
-use super::provider::Provider;
-use alloy_primitives::{Address, Bytes, Sealable, B256, U256};
+use crate::provider::Provider;
+use alloy_primitives::{Address, Sealable, B256, U256};
 use revm::{
-    primitives::{AccountInfo, Bytecode, HashMap, HashSet, KECCAK_EMPTY},
+    primitives::{AccountInfo, Bytecode, HashMap, KECCAK_EMPTY},
     Database,
 };
 use std::fmt::Debug;
@@ -34,8 +20,8 @@ pub enum ProviderDbError<E: std::error::Error> {
 
 /// A revm [Database] backed by a [Provider].
 pub struct ProviderDb<P> {
-    provider: P,
-    block_number: u64,
+    pub provider: P,
+    pub block_number: u64,
 
     /// Cache for code hashes to contract addresses.
     code_hashes: HashMap<B256, Address>,
@@ -115,73 +101,5 @@ impl<P: Provider> Database for ProviderDb<P> {
             .ok_or(ProviderDbError::InvalidBlockNumber(number))?;
 
         Ok(header.hash_slow())
-    }
-}
-
-/// A revm [Database] backed by a [Provider] that caches all queries needed for a state proof.
-pub struct ProofDb<P> {
-    accounts: HashMap<Address, HashSet<U256>>,
-    contracts: HashMap<B256, Bytes>,
-    block_hash_numbers: HashSet<U256>,
-
-    db: ProviderDb<P>,
-}
-
-impl<P: Provider> ProofDb<P> {
-    pub fn new(provider: P, block_number: u64) -> Self {
-        Self {
-            accounts: HashMap::new(),
-            contracts: HashMap::new(),
-            block_hash_numbers: HashSet::new(),
-            db: ProviderDb::new(provider, block_number),
-        }
-    }
-
-    pub fn provider(&self) -> &P {
-        &self.db.provider
-    }
-    pub fn block_number(&self) -> u64 {
-        self.db.block_number
-    }
-    pub fn accounts(&self) -> &HashMap<Address, HashSet<U256>> {
-        &self.accounts
-    }
-    pub fn contracts(&self) -> &HashMap<B256, Bytes> {
-        &self.contracts
-    }
-    pub fn block_hash_numbers(&self) -> &HashSet<U256> {
-        &self.block_hash_numbers
-    }
-}
-
-impl<P: Provider> Database for ProofDb<P> {
-    type Error = <ProviderDb<P> as Database>::Error;
-
-    fn basic(&mut self, address: Address) -> Result<Option<AccountInfo>, Self::Error> {
-        let basic = self.db.basic(address)?;
-        self.accounts.entry(address).or_default();
-
-        Ok(basic)
-    }
-
-    fn code_by_hash(&mut self, code_hash: B256) -> Result<Bytecode, Self::Error> {
-        let code = self.db.code_by_hash(code_hash)?;
-        self.contracts.insert(code_hash, code.original_bytes());
-
-        Ok(code)
-    }
-
-    fn storage(&mut self, address: Address, index: U256) -> Result<U256, Self::Error> {
-        let storage = self.db.storage(address, index)?;
-        self.accounts.entry(address).or_default().insert(index);
-
-        Ok(storage)
-    }
-
-    fn block_hash(&mut self, number: U256) -> Result<B256, Self::Error> {
-        let block_hash = self.db.block_hash(number)?;
-        self.block_hash_numbers.insert(number);
-
-        Ok(block_hash)
     }
 }

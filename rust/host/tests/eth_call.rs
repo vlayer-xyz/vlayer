@@ -15,7 +15,9 @@
 use alloy_primitives::{address, b256, uint, Address, Sealable, U256};
 use alloy_sol_types::{sol, SolCall};
 use anyhow::Context;
-use host::old_engine::{db::ProofDb, into_input, provider::Provider};
+use host::db::proof::ProofDb;
+use host::into_input::into_input;
+use host::provider::Provider;
 use std::fmt::Debug;
 use test_log::test;
 use vlayer_engine::{
@@ -37,10 +39,10 @@ const RPC_CACHE_FILE: &str = "testdata/rpc_cache.json";
 // Create a file provider or a cached Ethers provider when an URL is specified.
 macro_rules! test_provider {
     () => {
-        host::old_engine::provider::EthFileProvider::from_file(&RPC_CACHE_FILE.into()).unwrap()
+        host::provider::EthFileProvider::from_file(&RPC_CACHE_FILE.into()).unwrap()
     };
     ($url:tt) => {{
-        let client = host::EthersClient::new_client($url, 3, 500).unwrap();
+        let client = host::provider::EthersClient::new_client($url, 3, 500).unwrap();
         let provider = host::provider::EthersProvider::new(client);
         host::provider::CachedProvider::new(RPC_CACHE_FILE.into(), provider).unwrap()
     }};
