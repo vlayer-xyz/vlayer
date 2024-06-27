@@ -1,21 +1,21 @@
 # Solidity
 
-## On-chain proving
+## Proving
 
 On-chain verification is implemented by using a customized function with the following arguments:
 - `Proof` structure, which contains data required to verify arguments from the point below
 - list of arguments in the same order as returned by the prover (public output)
 - optionally, user defined additional arguments
 
-The verification function should use `onlyVerified()` modifier, which takes a single argument, the address of a smart contract that was executed off-chain.
+The verification function should use `onlyVerified()` modifier, which takes two arguments, the address of a smart contract and selector of function that was executed in prover contract.
 
-Example verification function:
+See example verification function below:
 
 ```solidity
 contract Example is Verifier {
 
     function claim(Proof proof, address verifiedArg1, uint verifiedArg2, bytes extraArg) public returns (uint)
-        onlyVerified(PROVER_ADDRESS) {
+        onlyVerified(PROVER_ADDRESS, FUNCTION_SIGNATURE) {
         //...
     }
 
@@ -66,9 +66,21 @@ struct Proof {
 }
 ```
 
+## Zero-knowledge proof verification
+
+To verify zero-knowledge proof vlayer uses `verify` function delivered by Risc-0.
+
+```rust
+function verify(bytes calldata seal, bytes32 imageId, bytes32 journalDigest)
+```
+
 `length` represents the length of journal data, which is located in `msg.data`, starting at byte 0 of `executionCommitment` and ends with last byte of last verified arg.
 
-`onlyVerified` gets `seal` and Journal from `msg.data` and use them to verify computations.
+`onlyVerified` gets `seal` and `journalDigest` by slicing it out of `msg.data`. This is where `length` is used. 
+
+`imageId` is fixed on blockchain and updated on each new version of vlayer.
+
+## Summary
 
 Below is a schema of how block of data is encoded in different structures at different stages.
 
