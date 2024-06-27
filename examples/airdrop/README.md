@@ -1,17 +1,9 @@
-## Foundry
+## Airdrop Example
 
-**Foundry is a blazing fast, portable and modular toolkit for Ethereum application development written in Rust.**
+In this example Foundry project you may see how to implement simple Aidrop. 
+Caller may receive Airdrop only when valid proof of NFT ownership is provided. 
 
-Foundry consists of:
-
--   **Forge**: Ethereum testing framework (like Truffle, Hardhat and DappTools).
--   **Cast**: Swiss army knife for interacting with EVM smart contracts, sending transactions and getting chain data.
--   **Anvil**: Local Ethereum node, akin to Ganache, Hardhat Network.
--   **Chisel**: Fast, utilitarian, and verbose solidity REPL.
-
-## Documentation
-
-https://book.getfoundry.sh/
+We are utilizing here Prover (proof of NFT ownership) and Verifier (Airdrop for valid proofs) from vlayer SDK. 
 
 ## Usage
 
