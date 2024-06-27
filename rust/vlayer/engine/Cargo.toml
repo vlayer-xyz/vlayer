@@ -27,6 +27,7 @@ thiserror = { workspace = true }
 [dev-dependencies]
 alloy-trie = "0.4.0"
 test-log = "0.2.15"
+serde_json = { version = "1.0"}
 
 [lints.clippy]
 unwrap_used = "deny"
