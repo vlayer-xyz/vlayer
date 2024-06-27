@@ -2,7 +2,7 @@
 mod test {
 
     use crate::host::{EthersClient, Host, HostConfig, HostError};
-    use crate::old_engine::provider::EthersProvider;
+    use crate::provider::EthersProvider;
     use guest_wrapper::GUEST_ELF;
     use risc0_zkvm::ExecutorEnv;
     use vlayer_engine::config::MAINNET_ID;

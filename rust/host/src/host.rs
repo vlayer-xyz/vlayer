@@ -1,9 +1,7 @@
-use crate::old_engine::into_input;
-use crate::old_engine::provider::EthersProviderError;
-use crate::old_engine::{
-    db::ProofDb,
-    provider::{EthersProvider, Provider},
-};
+use crate::db::proof::ProofDb;
+use crate::into_input::into_input;
+use crate::provider::EthersProviderError;
+use crate::provider::{EthersProvider, Provider};
 use alloy_primitives::Sealable;
 use ethers_providers::Provider as OGEthersProvider;
 use ethers_providers::{Http, ProviderError, RetryClient};
