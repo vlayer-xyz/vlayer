@@ -29,8 +29,6 @@ pub mod config;
 pub mod contract;
 pub mod ethereum;
 pub mod guest;
-#[cfg(feature = "host")]
-pub mod host;
 mod mpt;
 
 pub use mpt::MerkleTrie;

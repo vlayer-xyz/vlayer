@@ -13,11 +13,13 @@
 // limitations under the License.
 
 use super::{EIP1186Proof, Provider, StorageProof};
-use crate::ethereum::EthBlockHeader;
-use ethers_core::types::{Block, Bytes, H160, H256, U256};
 use ethers_providers::{Middleware, MiddlewareError};
 use thiserror::Error;
 use tokio::runtime::{Handle, Runtime};
+use vlayer_engine::ethereum::{
+    from_ethers_bytes, from_ethers_h256, from_ethers_u256, to_ethers_h160, to_ethers_h256,
+    EthBlockHeader,
+};
 
 /// An error that can occur when interacting with the provider.
 #[derive(Error, Debug)]
@@ -171,65 +173,4 @@ where
                 .collect(),
         })
     }
-}
-
-impl<T> TryFrom<Block<T>> for EthBlockHeader {
-    type Error = String;
-
-    fn try_from(block: Block<T>) -> Result<Self, Self::Error> {
-        Ok(EthBlockHeader {
-            parent_hash: from_ethers_h256(block.parent_hash),
-            ommers_hash: from_ethers_h256(block.uncles_hash),
-            beneficiary: block.author.ok_or("author missing")?.0.into(),
-            state_root: from_ethers_h256(block.state_root),
-            transactions_root: from_ethers_h256(block.transactions_root),
-            receipts_root: from_ethers_h256(block.receipts_root),
-            logs_bloom: alloy_primitives::Bloom::from_slice(
-                block.logs_bloom.ok_or("bloom missing")?.as_bytes(),
-            ),
-            difficulty: from_ethers_u256(block.difficulty),
-            number: block.number.ok_or("number is missing")?.as_u64(),
-            gas_limit: block
-                .gas_limit
-                .try_into()
-                .map_err(|_| "invalid gas limit")?,
-            gas_used: block.gas_used.try_into().map_err(|_| "invalid gas used")?,
-            timestamp: block
-                .timestamp
-                .try_into()
-                .map_err(|_| "invalid timestamp")?,
-            extra_data: block.extra_data.0.into(),
-            mix_hash: from_ethers_h256(block.mix_hash.ok_or("mix_hash is missing")?),
-            nonce: block.nonce.ok_or("nonce is missing")?.0.into(),
-            base_fee_per_gas: from_ethers_u256(
-                block
-                    .base_fee_per_gas
-                    .ok_or("base_fee_per_gas is missing")?,
-            ),
-            withdrawals_root: block.withdrawals_root.map(from_ethers_h256),
-            blob_gas_used: block.blob_gas_used.map(|x| x.try_into()).transpose()?,
-            excess_blob_gas: block.excess_blob_gas.map(|x| x.try_into()).transpose()?,
-            parent_beacon_block_root: block.parent_beacon_block_root.map(from_ethers_h256),
-        })
-    }
-}
-
-fn from_ethers_bytes(v: Bytes) -> alloy_primitives::Bytes {
-    v.0.into()
-}
-
-fn to_ethers_h256(v: alloy_primitives::B256) -> H256 {
-    v.0.into()
-}
-
-fn from_ethers_h256(v: H256) -> alloy_primitives::B256 {
-    v.0.into()
-}
-
-fn from_ethers_u256(v: U256) -> alloy_primitives::U256 {
-    alloy_primitives::U256::from_limbs(v.0)
-}
-
-fn to_ethers_h160(v: alloy_primitives::Address) -> H160 {
-    v.into_array().into()
 }

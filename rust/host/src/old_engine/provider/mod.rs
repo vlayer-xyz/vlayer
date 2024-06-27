@@ -12,12 +12,12 @@
 // See the License for the specific language governing permissions and
 // limitations under the License.
 
-use crate::EvmBlockHeader;
 use alloy_primitives::{
     Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, B256, U256,
 };
 use serde::{Deserialize, Serialize};
 use std::{convert::Infallible, error::Error as StdError, fmt::Debug, marker::PhantomData};
+use vlayer_engine::EvmBlockHeader;
 
 mod ethers;
 mod file;

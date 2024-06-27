@@ -14,13 +14,13 @@
 
 use alloy_primitives::{address, b256, uint, Address, Sealable, U256};
 use alloy_sol_types::{sol, SolCall};
+use host::old_engine::{from_provider, into_input};
 use std::fmt::Debug;
 use test_log::test;
 use vlayer_engine::{
     config::{ChainSpec, ETH_MAINNET_CHAIN_SPEC, ETH_SEPOLIA_CHAIN_SPEC, MAINNET_ID, SEPOLIA_ID},
     contract::engine::Engine,
     guest::Call,
-    host::{self, from_provider, into_input},
 };
 
 macro_rules! provider {
@@ -36,7 +36,7 @@ const RPC_CACHE_FILE: &str = "testdata/rpc_cache.json";
 // Create a file provider or a cached Ethers provider when an URL is specified.
 macro_rules! test_provider {
     () => {
-        host::provider::EthFileProvider::from_file(&RPC_CACHE_FILE.into()).unwrap()
+        host::old_engine::provider::EthFileProvider::from_file(&RPC_CACHE_FILE.into()).unwrap()
     };
     ($url:tt) => {{
         let client = host::EthersClient::new_client($url, 3, 500).unwrap();

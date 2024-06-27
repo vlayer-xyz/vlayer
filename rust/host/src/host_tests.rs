@@ -2,10 +2,10 @@
 mod test {
 
     use crate::host::{EthersClient, Host, HostConfig, HostError};
+    use crate::old_engine::provider::EthersProvider;
     use guest_wrapper::GUEST_ELF;
     use risc0_zkvm::ExecutorEnv;
     use vlayer_engine::config::MAINNET_ID;
-    use vlayer_engine::host::provider::EthersProvider;
 
     #[test]
     fn host_prove_invalid_guest_elf() {

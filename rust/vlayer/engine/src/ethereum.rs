@@ -20,6 +20,7 @@ use alloy_primitives::{
     keccak256, Address, BlockHash, BlockNumber, Bloom, Bytes, Sealable, B256, B64, U256,
 };
 use alloy_rlp_derive::RlpEncodable;
+use ethers_core::types::Block;
 use revm::primitives::BlockEnv;
 use serde::{Deserialize, Serialize};
 
@@ -124,4 +125,65 @@ impl EvmBlockHeader for EthBlockHeader {
         blk_env.basefee = self.base_fee_per_gas;
         blk_env.gas_limit = U256::from(self.gas_limit);
     }
+}
+
+impl<T> TryFrom<Block<T>> for EthBlockHeader {
+    type Error = String;
+
+    fn try_from(block: Block<T>) -> Result<Self, Self::Error> {
+        Ok(EthBlockHeader {
+            parent_hash: from_ethers_h256(block.parent_hash),
+            ommers_hash: from_ethers_h256(block.uncles_hash),
+            beneficiary: block.author.ok_or("author missing")?.0.into(),
+            state_root: from_ethers_h256(block.state_root),
+            transactions_root: from_ethers_h256(block.transactions_root),
+            receipts_root: from_ethers_h256(block.receipts_root),
+            logs_bloom: alloy_primitives::Bloom::from_slice(
+                block.logs_bloom.ok_or("bloom missing")?.as_bytes(),
+            ),
+            difficulty: from_ethers_u256(block.difficulty),
+            number: block.number.ok_or("number is missing")?.as_u64(),
+            gas_limit: block
+                .gas_limit
+                .try_into()
+                .map_err(|_| "invalid gas limit")?,
+            gas_used: block.gas_used.try_into().map_err(|_| "invalid gas used")?,
+            timestamp: block
+                .timestamp
+                .try_into()
+                .map_err(|_| "invalid timestamp")?,
+            extra_data: block.extra_data.0.into(),
+            mix_hash: from_ethers_h256(block.mix_hash.ok_or("mix_hash is missing")?),
+            nonce: block.nonce.ok_or("nonce is missing")?.0.into(),
+            base_fee_per_gas: from_ethers_u256(
+                block
+                    .base_fee_per_gas
+                    .ok_or("base_fee_per_gas is missing")?,
+            ),
+            withdrawals_root: block.withdrawals_root.map(from_ethers_h256),
+            blob_gas_used: block.blob_gas_used.map(|x| x.try_into()).transpose()?,
+            excess_blob_gas: block.excess_blob_gas.map(|x| x.try_into()).transpose()?,
+            parent_beacon_block_root: block.parent_beacon_block_root.map(from_ethers_h256),
+        })
+    }
+}
+
+pub fn from_ethers_bytes(v: ethers_core::types::Bytes) -> alloy_primitives::Bytes {
+    v.0.into()
+}
+
+pub fn to_ethers_h256(v: alloy_primitives::B256) -> ethers_core::types::H256 {
+    v.0.into()
+}
+
+pub fn from_ethers_h256(v: ethers_core::types::H256) -> B256 {
+    v.0.into()
+}
+
+pub fn from_ethers_u256(v: ethers_core::types::U256) -> U256 {
+    alloy_primitives::U256::from_limbs(v.0)
+}
+
+pub fn to_ethers_h160(v: alloy_primitives::Address) -> ethers_core::types::H160 {
+    v.into_array().into()
 }

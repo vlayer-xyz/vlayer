@@ -13,7 +13,6 @@
 // limitations under the License.
 
 use super::{EIP1186Proof, NullProvider, Provider};
-use crate::{ethereum::EthBlockHeader, EvmBlockHeader};
 use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256};
 use anyhow::Context;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
@@ -25,6 +24,7 @@ use std::{
     marker::PhantomData,
     path::PathBuf,
 };
+use vlayer_engine::{ethereum::EthBlockHeader, EvmBlockHeader};
 
 /// A provider that caches responses from an underlying provider in a JSON file.
 /// Queries are first checked against the cache, and if not found, the provider is invoked.

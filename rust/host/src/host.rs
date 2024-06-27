@@ -1,3 +1,9 @@
+use crate::old_engine::into_input;
+use crate::old_engine::provider::EthersProviderError;
+use crate::old_engine::{
+    db::ProofDb,
+    provider::{EthersProvider, Provider},
+};
 use alloy_primitives::Sealable;
 use ethers_providers::Provider as OGEthersProvider;
 use ethers_providers::{Http, ProviderError, RetryClient};
@@ -6,16 +12,7 @@ use risc0_zkvm::{default_prover, ExecutorEnv};
 use thiserror::Error;
 use vlayer_engine::ethereum::EthBlockHeader;
 use vlayer_engine::guest::{Call, Input, Output};
-use vlayer_engine::host::into_input;
-use vlayer_engine::host::provider::EthersProviderError;
-use vlayer_engine::{
-    contract::engine,
-    contract::engine::Engine,
-    host::{
-        db::ProofDb,
-        provider::{EthersProvider, Provider},
-    },
-};
+use vlayer_engine::{contract::engine, contract::engine::Engine};
 
 const MAX_RETRY: u32 = 3;
 const INITIAL_BACKOFF: u64 = 500;
