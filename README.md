@@ -2,7 +2,7 @@
 
 ## Getting started
 
-Read the 📖 [vlayer book](https://book.vlayer.xyz/getting_started.html) to get started.
+Read the 📖 [vlayer book](https://book.vlayer.xyz/introduction.html) to get started.
 
 ## Contributing
 
