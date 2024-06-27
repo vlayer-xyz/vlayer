@@ -3,7 +3,7 @@ use alloy_primitives::{
 };
 use serde::{Deserialize, Serialize};
 use std::{convert::Infallible, error::Error as StdError, fmt::Debug, marker::PhantomData};
-use vlayer_engine::EvmBlockHeader;
+use vlayer_engine::evm::block_header::EvmBlockHeader;
 
 mod ethers;
 mod file;

@@ -5,7 +5,11 @@ use revm::{
 use std::fmt::Debug;
 use thiserror::Error;
 
-use crate::{config::CHAIN_MAP, guest::Call, EvmBlockHeader, EvmEnv};
+use crate::{
+    config::CHAIN_MAP,
+    evm::{block_header::EvmBlockHeader, env::EvmEnv},
+    io::Call,
+};
 
 pub struct Engine<D, H> {
     env: EvmEnv<D, H>,

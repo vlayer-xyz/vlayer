@@ -1,7 +1,9 @@
 //! Type aliases for Ethereum.
-use crate::{EvmEnv, SolCommitment};
+use crate::{
+    evm::{block_header::EvmBlockHeader, env::EvmEnv, input::EvmInput},
+    SolCommitment,
+};
 
-use super::{EvmBlockHeader, EvmInput};
 use alloy_primitives::{
     keccak256, Address, BlockHash, BlockNumber, Bloom, Bytes, Sealable, B256, B64, U256,
 };

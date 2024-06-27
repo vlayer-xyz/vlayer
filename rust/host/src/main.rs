@@ -1,6 +1,6 @@
 use alloy_primitives::{address, Address};
 use host::{Host, HostConfig, HostError};
-use vlayer_engine::{config::SEPOLIA_ID, guest::Call};
+use vlayer_engine::{config::SEPOLIA_ID, io::Call};
 
 pub mod db;
 pub mod host;

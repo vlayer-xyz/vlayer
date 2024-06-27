@@ -4,7 +4,8 @@ use alloy_primitives::{Sealed, B256};
 use anyhow::{ensure, Context};
 use log::debug;
 use revm::primitives::HashMap;
-use vlayer_engine::{EvmBlockHeader, EvmInput, MerkleTrie};
+use vlayer_engine::evm::block_header::EvmBlockHeader;
+use vlayer_engine::{evm::input::EvmInput, MerkleTrie};
 
 pub fn into_input<P: Provider>(
     db: ProofDb<P>,
