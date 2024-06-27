@@ -35,7 +35,7 @@ pub struct GuestOutput {
 
 ```solidity
 struct ExecutionCommitment {
-    startContractAddress: Address;
+    address startContractAddress;
     functionSelector: bytes4;
     uint256 settleBlockNumber;
     bytes32 settleBlockHash;
