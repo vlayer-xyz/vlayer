@@ -1,6 +1,8 @@
-use super::v_call_types::{Call, CallContext, CallResult};
 use crate::error::AppError;
 use host::Call as HostCall;
+use types::{Call, CallContext, CallResult};
+
+pub mod types;
 
 pub(crate) async fn call(params: (Call, CallContext)) -> Result<CallResult, AppError> {
     let call: HostCall = params.0.try_into()?;
