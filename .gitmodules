@@ -1,5 +1,5 @@
-[submodule "simple/lib/forge-std"]
-	path = simple/lib/forge-std
+[submodule "examples/simple/lib/forge-std"]
+	path = examples/simple/lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
 [submodule "examples/simple/lib/risc0-ethereum"]
 	path = examples/simple/lib/risc0-ethereum
