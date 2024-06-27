@@ -24,7 +24,7 @@ contract Example is Verifier {
 
 ## Data flow
 
-Proving data flow is somewhat complex. It starts at guest, which returns `GuestOutput`. GuestOutput consist of two fields: `execution_commitment` and `evm_call_result`. See the code snippets below for pseudocode:
+Proving data flow is composed of three steps. It starts at guest, which returns `GuestOutput`. GuestOutput consist of two fields: `execution_commitment` and `evm_call_result`. See the code snippets below for pseudocode:
 
 ```rust
 pub struct GuestOutput {
