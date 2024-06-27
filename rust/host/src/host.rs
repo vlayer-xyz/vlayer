@@ -77,14 +77,13 @@ impl Host<EthersProvider<EthersClient>> {
 
         let provider = EthersProvider::new(client);
 
-        let block_number = config.block_number;
-
-        Host::try_new_with_provider(provider, block_number)
+        Host::try_new_with_provider(provider, config)
     }
 }
 
 impl<P: Provider<Header = EthBlockHeader, Error = EthersProviderError<ProviderError>>> Host<P> {
-    pub fn try_new_with_provider(provider: P, block_number: u64) -> Result<Self, HostError> {
+    pub fn try_new_with_provider(provider: P, config: HostConfig) -> Result<Self, HostError> {
+        let block_number = config.block_number;
         let header = provider
             .get_block_header(block_number)?
             .ok_or(HostError::BlockNotFound(block_number))?;
