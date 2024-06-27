@@ -1,4 +1,3 @@
-use crate::MerkleTrie;
 use alloy_primitives::{keccak256, Address, B256, U256};
 use revm::{
     primitives::{AccountInfo, Bytecode, HashMap},
@@ -7,6 +6,7 @@ use revm::{
 use std::{convert::Infallible, rc::Rc};
 
 use super::state::StateDb;
+use crate::MerkleTrie;
 
 pub struct WrapStateDb {
     inner: StateDb,
