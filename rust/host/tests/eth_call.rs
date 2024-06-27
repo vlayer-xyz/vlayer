@@ -35,7 +35,7 @@ macro_rules! test_provider {
 }
 
 const ERC20_TEST_CONTRACT: Address = address!("dAC17F958D2ee523a2206206994597C13D831ec7"); // USDT
-const ERC20_TEST_BLOCK: u64 = 19493153;
+const ERC20_TEST_BLOCK_NO: u64 = 19493153;
 sol! {
     #[derive(Debug, PartialEq, Eq)]
     interface IERC20 {
@@ -67,7 +67,7 @@ fn erc20_balance_of() {
         call,
         ERC20_TEST_CONTRACT,
         CallOverrides::default(),
-        ERC20_TEST_BLOCK,
+        ERC20_TEST_BLOCK_NO,
         &ETH_MAINNET_CHAIN_SPEC,
     )
     .unwrap();
@@ -83,7 +83,7 @@ fn erc20_multi_balance_of() {
         account: address!("5a52E96BAcdaBb82fd05763E25335261B270Efcb"),
     };
 
-    let (mut db, header) = from_provider(provider!(), ERC20_TEST_BLOCK).unwrap();
+    let (mut db, header) = from_provider(provider!(), ERC20_TEST_BLOCK_NO).unwrap();
     let call_data1 = Call {
         caller: ERC20_TEST_CONTRACT,
         to: ERC20_TEST_CONTRACT,
