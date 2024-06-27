@@ -1,6 +1,7 @@
 use clap::{Parser, Subcommand};
 use server::server::serve;
 use std::path::{Path, PathBuf};
+use thiserror::Error;
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -14,6 +15,17 @@ struct Cli {
 enum Commands {
     Init,
     Serve,
+}
+
+#[derive(Error, Debug)]
+pub enum CLIError {
+    #[error("Couldn't find git repository {err:?}")]
+    CantFindGitRepository {
+        #[from]
+        err: std::io::Error,
+    },
+    #[error("Couldn't convert path to string {0}")]
+    PathConversionError(#[from] std::str::Utf8Error),
 }
 
 #[tokio::main]
@@ -35,13 +47,12 @@ async fn main() -> anyhow::Result<()> {
 /// https://github.com/foundry-rs/foundry/blob/fbd225194dff17352ba740cb3d6f2ad082030dd1/crates/config/src/utils.rs
 /// Returns the path of the top-level directory of the working git tree. If there is no working
 /// tree, an error is returned.
-pub fn find_git_root_path(relative_to: impl AsRef<Path>) -> anyhow::Result<PathBuf> {
+pub fn find_git_root_path(relative_to: impl AsRef<Path>) -> Result<PathBuf, CLIError> {
     let path = relative_to.as_ref();
     let path = std::process::Command::new("git")
         .args(["rev-parse", "--show-toplevel"])
         .current_dir(path)
-        .output()
-        .map_err(|e| anyhow::anyhow!("Failed to run git: {}", e))?
+        .output()?
         .stdout;
 
     let path = std::str::from_utf8(&path)?.trim_end_matches('\n');
@@ -67,7 +78,6 @@ mod tests {
         let root_path = result.unwrap();
         assert!(root_path.is_dir());
         assert!(root_path.ends_with("vlayer"));
-        println!("Git root path: {}", root_path.display());
     }
 
     #[test]
@@ -78,6 +88,5 @@ mod tests {
         let root_path = result.unwrap();
         assert!(root_path.is_dir());
         assert!(root_path.ends_with("vlayer"));
-        println!("Git root path: {}", root_path.display());
     }
 }
