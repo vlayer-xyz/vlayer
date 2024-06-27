@@ -3,10 +3,10 @@ mod test {
     use alloy_primitives::{address, uint, Address};
     use alloy_sol_types::{sol, SolCall};
     use host::Call;
-    use vlayer_engine::host::provider::EthFileProvider;
+    use vlayer_engine::{config::SEPOLIA_ID, host::provider::EthFileProvider};
     use IERC20::balanceOfCall;
 
-    use crate::host::Host;
+    use crate::host::{Host, HostConfig};
 
     const RPC_CACHE_FILE: &str = "testdata/rpc_cache.json";
 
@@ -38,7 +38,11 @@ mod test {
         };
 
         let test_provider = EthFileProvider::from_file(&RPC_CACHE_FILE.into()).unwrap();
-        let host = Host::try_new_with_provider(test_provider, ERC20_TEST_BLOCK_NO).unwrap();
+        let host = Host::try_new_with_provider(
+            test_provider,
+            HostConfig::new("", SEPOLIA_ID, ERC20_TEST_BLOCK_NO),
+        )
+        .unwrap();
         let host_result =
             balanceOfCall::abi_decode_returns(&host.run(call).unwrap().evm_call_result, false)
                 .unwrap();

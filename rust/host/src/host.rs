@@ -76,7 +76,7 @@ impl Host<EthersProvider<EthersClient>> {
     }
 }
 
-impl<P: Provider<Header = EthBlockHeader, Error = EthersProviderError<ProviderError>>> Host<P> {
+impl<P: Provider<Header = EthBlockHeader>> Host<P> {
     pub fn try_new_with_provider(provider: P, config: HostConfig) -> Result<Self, HostError> {
         let block_number = config.block_number;
         let header = provider

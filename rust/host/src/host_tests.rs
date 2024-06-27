@@ -36,7 +36,7 @@ mod test {
 
         assert!(matches!(
             res.map(|_| ()).unwrap_err(),
-            HostError::EthersProvider(ref msg) if msg.to_string().contains(
+            HostError::Provider(ref msg) if msg.to_string().contains(
                 "(http://localhost:123/): error trying to connect: tcp connect error: Connection refused"
             )
         ));
