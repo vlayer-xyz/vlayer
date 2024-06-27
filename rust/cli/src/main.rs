@@ -73,8 +73,8 @@ mod tests {
     #[test]
     fn test_find_git_root_path() {
         // searches from current directory
-        let path = Path::new(".");
-        let result = find_git_root_path(path);
+        let cwd = &std::env::current_dir().unwrap();
+        let result = find_git_root_path(cwd);
         let root_path = result.unwrap();
         assert!(root_path.is_dir());
         assert!(root_path.ends_with("vlayer"));
