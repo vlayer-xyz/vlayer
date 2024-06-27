@@ -28,19 +28,7 @@ pub mod provider;
 /// The Ethers client type.
 pub type EthersClient = ethers_providers::Provider<RetryClient<Http>>;
 
-pub fn from_provider<P: Provider>(
-    provider: P,
-    block_number: u64,
-) -> anyhow::Result<(ProofDb<P>, P::Header)> {
-    let header = provider
-        .get_block_header(block_number)?
-        .with_context(|| format!("block {block_number} not found"))?;
 
-    // create a new database backed by the provider
-    let db = ProofDb::new(provider, block_number);
-
-    Ok((db, header))
-}
 
 pub fn into_input<P: Provider>(
     db: ProofDb<P>,
