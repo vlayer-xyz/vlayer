@@ -4,6 +4,7 @@ use vlayer_engine::{config::SEPOLIA_ID, guest::Call};
 
 pub mod host;
 pub mod host_tests;
+pub mod old_engine;
 
 const CONTRACT: Address = address!("e7f1725E7734CE288F8367e1Bb143E90bb3F0512");
 const CALLER: Address = address!("f39Fd6e51aad88F6F4ce6aB8827279cffFb92266");

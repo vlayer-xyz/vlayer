@@ -15,12 +15,12 @@
 //! Functionality that is only needed for the host and not the guest.
 
 use self::{db::ProofDb, provider::Provider};
-use crate::{EvmBlockHeader, EvmInput, MerkleTrie};
 use alloy_primitives::{Sealed, B256};
 use anyhow::{ensure, Context};
 use ethers_providers::{Http, RetryClient};
 use log::debug;
 use revm::primitives::HashMap;
+use vlayer_engine::{EvmBlockHeader, EvmInput, MerkleTrie};
 
 pub mod db;
 pub mod provider;

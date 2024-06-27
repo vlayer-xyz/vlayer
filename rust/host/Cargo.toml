@@ -5,13 +5,26 @@ edition = "2021"
 
 [dependencies]
 risc0-zkvm = { workspace = true, feature = ["prove"] }
-vlayer-engine = { path = "../vlayer/engine", features = ["host"] }
+vlayer-engine = { path = "../vlayer/engine" }
 guest_wrapper = { path = "../guest_wrapper" }
 tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"], default-features = false }
-alloy-primitives = { workspace = true }
+alloy-primitives = { workspace = true, features = ["rlp", "serde"] }
 ethers-providers = { workspace = true }
 thiserror = { workspace = true }
 url = { version = "2.4", default-features = false }
+alloy-rlp = { version = "0.3.4", default-features = false }
+alloy-rlp-derive = { version = "0.3.4", default-features = false }
+alloy-sol-types = "0.7"
+anyhow = "1.0"
+ethers-core = {version="2.0"}
+log = {version="0.4"}
+nybbles = { version = "0.2.1", features = ["serde"] }
+once_cell = "1.19"
+revm = { version = "9.0", default-features = false, features = ["serde", "std"] }
+rlp = "0.5.2"
+serde = "1.0"
+serde_json = { version = "1.0"}
+tokio = { workspace = true}
 
 [dev-dependencies]
 alloy-sol-types = "0.7.6"
