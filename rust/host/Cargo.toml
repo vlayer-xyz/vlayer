@@ -10,6 +10,7 @@ guest_wrapper = { path = "../guest_wrapper" }
 tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"], default-features = false }
 alloy-primitives = { workspace = true, features = ["rlp", "serde"] }
 ethers-providers = { workspace = true }
+ethers-core = {version="2.0"}
 thiserror = { workspace = true }
 url = { version = "2.4", default-features = false }
 alloy-sol-types = "0.7"
