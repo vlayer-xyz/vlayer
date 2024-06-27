@@ -18,8 +18,13 @@ impl Guest {
     }
 
     pub fn run(&mut self, call: Call) -> Output {
+        let function_selector: [u8; 4] = call.data[0..4]
+            .try_into()
+            .expect("cannot extract function selector from call data");
+
         Output {
-            block_commitment: self.header.block_commitment(SEPOLIA_ID),
+            execution_commitment: self.header.block_commitment(call.to, function_selector),
+
             evm_call_result: Engine::try_new(&mut self.db, self.header.clone(), SEPOLIA_ID)
                 .unwrap()
                 .call(&call)

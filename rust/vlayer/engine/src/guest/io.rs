@@ -22,7 +22,7 @@ pub struct Call {
 
 #[derive(Deserialize, Serialize, Debug, RlpEncodable, RlpDecodable)]
 pub struct Output {
-    pub block_commitment: SolCommitment,
+    pub execution_commitment: SolCommitment,
     pub evm_call_result: Vec<u8>,
 }
 

@@ -76,7 +76,7 @@ mod private {
 }
 
 /// Solidity struct representing the committed block used for validation.
-pub use private::Steel::Commitment as SolCommitment;
+pub use private::Steel::ExecutionCommitment as SolCommitment;
 
 /// The environment to execute the contract calls in.
 pub struct EvmEnv<D, H> {
@@ -215,7 +215,11 @@ pub trait EvmBlockHeader: Sealable {
     fn state_root(&self) -> &B256;
 
     /// Returns the [SolCommitment] used to validate the environment.
-    fn block_commitment(&self, chain_id: u64) -> SolCommitment;
+    fn block_commitment(
+        &self,
+        start_contract_address: Address,
+        function_selector: [u8; 4],
+    ) -> SolCommitment;
     /// Fills the EVM block environment with the header's data.
     fn fill_block_env(&self, blk_env: &mut BlockEnv);
 }

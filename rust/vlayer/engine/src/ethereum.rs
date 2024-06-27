@@ -89,15 +89,16 @@ impl EvmBlockHeader for EthBlockHeader {
 
     #[inline]
     /// Returns the [SolCommitment] used to validate the environment.
-    fn block_commitment(&self, chain_id: u64) -> SolCommitment {
+    fn block_commitment(
+        &self,
+        start_contract_address: Address,
+        function_selector: [u8; 4],
+    ) -> SolCommitment {
         SolCommitment {
-            offset: 0,
-            length: 0,
-            version: 1,
-            chainId: chain_id,
-            blockHash: self.clone().seal_slow().seal(),
-            blockNumber: U256::from(self.number()),
-            seal: Bytes::default(),
+            startContractAddress: start_contract_address,
+            functionSelector: function_selector.into(),
+            settleBlockHash: self.clone().seal_slow().seal(),
+            settleBlockNumber: U256::from(self.number()),
         }
     }
 
