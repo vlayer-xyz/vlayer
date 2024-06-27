@@ -14,12 +14,9 @@
 
 //! Functionality that is only needed for the host and not the guest.
 
-use self::{
-    db::ProofDb,
-    provider::{EthersProvider, Provider},
-};
-use crate::{ethereum::EthEvmEnv, EvmBlockHeader, EvmEnv, EvmInput, MerkleTrie};
-use alloy_primitives::{Sealable, Sealed, B256};
+use self::{db::ProofDb, provider::Provider};
+use crate::{EvmBlockHeader, EvmInput, MerkleTrie};
+use alloy_primitives::{Sealed, B256};
 use anyhow::{ensure, Context};
 use ethers_providers::{Http, RetryClient};
 use log::debug;
@@ -30,23 +27,6 @@ pub mod provider;
 
 /// The Ethers client type.
 pub type EthersClient = ethers_providers::Provider<RetryClient<Http>>;
-
-impl EthEvmEnv<ProofDb<EthersProvider<EthersClient>>> {
-    /// Creates a new provable [EvmEnv] for Ethereum from an RPC endpoint.
-    pub fn from_rpc(url: &str, block_number: Option<u64>) -> anyhow::Result<Self> {
-        let client = EthersClient::new_client(url, 3, 500)?;
-        let provider = EthersProvider::new(client);
-
-        // get the latest block number if none is provided
-        let block_number = match block_number {
-            Some(n) => n,
-            None => provider.get_block_number()?,
-        };
-        let (db, header) = from_provider(provider, block_number)?;
-
-        Ok(EvmEnv::new(db, header.seal_slow()))
-    }
-}
 
 pub fn from_provider<P: Provider>(
     provider: P,
