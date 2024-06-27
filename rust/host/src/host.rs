@@ -38,7 +38,7 @@ pub enum HostError {
     EthersProvider(#[from] EthersProviderError<ProviderError>),
 
     #[error("Provider error: {0}")]
-    Provider(#[from] ProviderError),
+    Provider(String),
 
     #[error("Block not found: {0}")]
     BlockNotFound(u64),
@@ -80,7 +80,7 @@ impl<P: Provider<Header = EthBlockHeader, Error = EthersProviderError<ProviderEr
     pub fn try_new_with_provider(provider: P, config: HostConfig) -> Result<Self, HostError> {
         let block_number = config.block_number;
         let header = provider
-            .get_block_header(block_number)?
+            .get_block_header(block_number).map_err(|err| HostError::Provider(err.to_string()))?
             .ok_or(HostError::BlockNotFound(block_number))?;
 
         let db = ProofDb::new(provider, block_number);
