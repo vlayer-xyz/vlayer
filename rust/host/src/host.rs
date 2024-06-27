@@ -80,7 +80,8 @@ impl<P: Provider<Header = EthBlockHeader, Error = EthersProviderError<ProviderEr
     pub fn try_new_with_provider(provider: P, config: HostConfig) -> Result<Self, HostError> {
         let block_number = config.block_number;
         let header = provider
-            .get_block_header(block_number).map_err(|err| HostError::Provider(err.to_string()))?
+            .get_block_header(block_number)
+            .map_err(|err| HostError::Provider(err.to_string()))?
             .ok_or(HostError::BlockNotFound(block_number))?;
 
         let db = ProofDb::new(provider, block_number);
@@ -89,7 +90,7 @@ impl<P: Provider<Header = EthBlockHeader, Error = EthersProviderError<ProviderEr
     }
 
     pub fn run(mut self, call: Call) -> Result<Output, HostError> {
-        let _returns = Engine::try_new(&mut self.db, self.header.clone(), self.config.chain_id)?
+        let returns = Engine::try_new(&mut self.db, self.header.clone(), self.config.chain_id)?
             .call(&call)?;
 
         let input = Input {
@@ -104,7 +105,10 @@ impl<P: Provider<Header = EthBlockHeader, Error = EthersProviderError<ProviderEr
             .build()
             .map_err(|err| HostError::ExecutorEnvBuilder(err.to_string()))?;
 
-        Host::<P>::prove(env, GUEST_ELF)
+        let guest_returns = Host::<P>::prove(env, GUEST_ELF)?;
+        assert_eq!(&returns, &guest_returns.evm_call_result);
+
+        Ok(guest_returns)
     }
 
     pub(crate) fn prove(env: ExecutorEnv, guest_elf: &[u8]) -> Result<Output, HostError> {
