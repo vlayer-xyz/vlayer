@@ -1,9 +1,11 @@
 use clap::{Parser, Subcommand};
+use errors::CLIError;
 use server::server::serve;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::str::from_utf8;
-use thiserror::Error;
+
+pub mod errors;
 
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
@@ -17,16 +19,6 @@ struct Cli {
 enum Commands {
     Init,
     Serve,
-}
-
-#[derive(Error, Debug)]
-pub enum CLIError {
-    #[error("Command execution failed: {0}")]
-    CommandExecutionError(#[from] std::io::Error),
-    #[error("Invalid UTF-8 sequence: {0}")]
-    Utf8Error(#[from] std::str::Utf8Error),
-    #[error("Git command failed: {0}")]
-    GitError(String),
 }
 
 #[tokio::main]
