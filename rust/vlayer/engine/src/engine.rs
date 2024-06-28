@@ -1,5 +1,6 @@
+use alloy_primitives::TxKind;
 use revm::{
-    primitives::{ExecutionResult, ResultAndState, SuccessReason, TransactTo},
+    primitives::{ExecutionResult, ResultAndState, SuccessReason},
     Database, Evm,
 };
 use std::fmt::Debug;
@@ -64,7 +65,7 @@ where
     {
         let tx_env = evm.tx_mut();
         tx_env.caller = tx.caller;
-        tx_env.transact_to = TransactTo::call(tx.to);
+        tx_env.transact_to = TxKind::Call(tx.to);
         tx_env.data = tx.data.clone().into();
 
         let ResultAndState { result, .. } = evm

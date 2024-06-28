@@ -2,12 +2,11 @@
 #![cfg_attr(docsrs, feature(doc_cfg, doc_auto_cfg))]
 
 pub mod config;
-pub mod db;
 pub mod engine;
 pub mod ethereum;
 pub mod evm;
 pub mod io;
-mod mpt;
+pub mod mpt;
 
 pub use mpt::MerkleTrie;
 

@@ -9,7 +9,10 @@ edition = "2021"
 
 [dependencies]
 alloy-primitives = "0.7.6"
+alloy-rlp = "0.3.5"
+alloy-rlp-derive = "0.3.5"
 revm = "10.0.0"
+revm-primitives = "5.0.0"
 risc0-zkvm = "1.0.1"
 vlayer-engine = { path = "../../vlayer/engine" }
 alloy-sol-types = "0.7.5"
