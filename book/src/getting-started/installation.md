@@ -1,8 +1,8 @@
 # Installation
 
-Simplest way to install vlayer is to use vlayerup, the vlayer toolchain installer.
+The simplest way to install vlayer is to use `vlayerup`, the vlayer toolchain installer.
 
-To install vlayerup, run the following command in your terminal, then follow the onscreen instructions.
+To install `vlayerup`, run the following command in your terminal, then follow the onscreen instructions.
 ```sh
 curl -SL  https://install.vlayer.xyz/install | bash
 ```

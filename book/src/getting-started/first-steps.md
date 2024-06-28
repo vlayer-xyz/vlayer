@@ -1,12 +1,12 @@
 # First Steps
 
-## Initialisation
+## Initialization
 
-To initialise a vlayer project run:
+To initialize a vlayer project run:
 ```bash
 $ vlayer init
 ```
-which should be run inside a foundry-based project.
+which should be run inside your foundry-based project.
 
 The command above will add all necessary dependencies and sample vlayer contracts.
 
