@@ -2,6 +2,7 @@
 
 risc0_zkvm::guest::entry!(main);
 
+use alloy_sol_types::SolValue;
 use guest::Guest;
 use risc0_zkvm::guest::env;
 use vlayer_engine::io::Input;
@@ -13,5 +14,9 @@ fn main() {
 
     let output = Guest::new(evm_input).run(call);
 
-    env::commit(&output);
+    let mut result: Vec<u8> = Vec::new();
+    result.extend(&output.execution_commitment.abi_encode());
+    result.extend(&output.evm_call_result);
+
+    env::commit(&result);
 }
