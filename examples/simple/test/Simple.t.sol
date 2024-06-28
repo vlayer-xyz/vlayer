@@ -64,4 +64,18 @@ contract SimpleTest is Test {
         assertEq(simple.latestSum(), 3);
     }
 
+    function test_updateSum_revertsForInvalidGuestId() public {
+        bytes memory seal = verifier.mockProve(bytes32(0), journalHash).seal;
+
+        vm.expectRevert();
+        simple.updateSum(seal, fixture_commitment(), fixture_sum());
+    }
+
+    function test_updateSum_revertsForInvalidCalldata() public {
+        bytes memory seal = verifier.mockProve(GUEST_ID, journalHash).seal;
+
+        vm.expectRevert();
+        simple.updateSum(seal, fixture_commitment(), 4);
+    }
+
 }
