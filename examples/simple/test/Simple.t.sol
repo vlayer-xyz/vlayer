@@ -2,14 +2,19 @@
 pragma solidity ^0.8.13;
 
 import {Test, console} from "forge-std/Test.sol";
-import {Simple} from "../src/Simple.sol";
+
+import {Receipt} from "risc0-ethereum/IRiscZeroVerifier.sol";
 import {RiscZeroMockVerifier} from "risc0-ethereum/test/RiscZeroMockVerifier.sol";
+
 import {Steel} from "vlayer/Steel.sol";
+import {Simple} from "../src/Simple.sol";
 
 contract SimpleTest is Test {
 
     Simple public simple;
     RiscZeroMockVerifier public verifier;
+
+    bytes32 public constant GUEST_ID = bytes32(0xb7079f57c71b4e1d95b8b1254303e13f78914599a8c119534c4c947c996b4d7d);
 
     // journal value should be taken from host execution
     uint8[160] journal = [
