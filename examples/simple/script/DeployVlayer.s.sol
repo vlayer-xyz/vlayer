@@ -12,12 +12,10 @@ contract SimpleScript is Script {
     function setUp() public {}
 
     function run() public {
-
         uint256 deployerPrivateKey = vm.envUint("DEPLOYER_PRIV");
         vm.startBroadcast(deployerPrivateKey);
 
         Simple simple = new Simple(IRiscZeroVerifier(address(0)));
         SimpleVerification simpleVerifier = new SimpleVerification(simple);
-
     }
 }
