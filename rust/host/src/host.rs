@@ -10,7 +10,7 @@ use risc0_zkvm::{default_prover, ExecutorEnv};
 use thiserror::Error;
 use vlayer_engine::engine::{Engine, EngineError};
 use vlayer_engine::ethereum::EthBlockHeader;
-use vlayer_engine::io::{Call, Input, Output};
+use vlayer_engine::io::{Call, Input};
 
 const MAX_RETRY: u32 = 3;
 const INITIAL_BACKOFF: u64 = 500;
@@ -89,7 +89,7 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
         Ok(Host { db, header, config })
     }
 
-    pub fn run(mut self, call: Call) -> Result<Output, HostError> {
+    pub fn run(mut self, call: Call) -> Result<Vec<u8>, HostError> {
         let returns = Engine::try_new(&mut self.db, self.header.clone(), self.config.chain_id)?
             .call(&call)?;
 
@@ -106,16 +106,19 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
             .map_err(|err| HostError::ExecutorEnvBuilder(err.to_string()))?;
 
         let guest_returns = Host::<P>::prove(env, GUEST_ELF)?;
-        assert_eq!(&returns, &guest_returns.evm_call_result);
+        assert_eq!(
+            &returns,
+            &guest_returns[guest_returns.len() - returns.len()..]
+        );
 
         Ok(guest_returns)
     }
 
-    pub(crate) fn prove(env: ExecutorEnv, guest_elf: &[u8]) -> Result<Output, HostError> {
+    pub(crate) fn prove(env: ExecutorEnv, guest_elf: &[u8]) -> Result<Vec<u8>, HostError> {
         let prover = default_prover();
         prover
             .prove(env, guest_elf)
-            .map(|p| p.receipt.journal.into())
+            .map(|p| p.receipt.journal.decode().expect("Cannot decode journal"))
             .map_err(|err| HostError::Prover(err.to_string()))
     }
 }

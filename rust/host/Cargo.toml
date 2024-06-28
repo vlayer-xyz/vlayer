@@ -13,7 +13,7 @@ ethers-providers = { workspace = true }
 ethers-core = {version="2.0"}
 thiserror = { workspace = true }
 url = { version = "2.4", default-features = false }
-alloy-sol-types = "0.7"
+alloy-sol-types = { workspace = true }
 anyhow = "1.0"
 log = {version="0.4"}
 revm = { version = "9.0", default-features = false, features = ["serde", "std"] }
