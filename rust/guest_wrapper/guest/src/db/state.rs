@@ -2,8 +2,7 @@ use alloy_primitives::{b256, keccak256, Address, Bytes, TxNumber, B256, U256};
 use alloy_rlp_derive::{RlpDecodable, RlpEncodable};
 use revm::primitives::HashMap;
 use std::rc::Rc;
-
-use crate::{mpt, MerkleTrie};
+use vlayer_engine::{mpt, MerkleTrie};
 
 /// Hash of an empty byte array, i.e. `keccak256([])`.
 pub const KECCAK_EMPTY: B256 =

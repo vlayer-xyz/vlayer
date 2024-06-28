@@ -1,8 +1,8 @@
-use revm::primitives::HashMap;
+use crate::db::{state::StateDb, wrap_state::WrapStateDb};
 use alloy_primitives::Sealable;
+use revm::primitives::HashMap;
 use vlayer_engine::{
     config::SEPOLIA_ID,
-    db::{state::StateDb, wrap_state::WrapStateDb},
     engine::Engine,
     ethereum::EthBlockHeader,
     evm::{block_header::EvmBlockHeader, input::EvmInput},
@@ -66,10 +66,7 @@ impl Guest {
         GuestOutput {
             execution_commitment: self.header.execution_commitment(call.to, function_selector),
 
-            evm_call_result: Engine::try_new(&mut self.db, self.header.clone(), SEPOLIA_ID)
-                .unwrap()
-                .call(&call)
-                .unwrap(),
+            evm_call_result,
         }
     }
 }
