@@ -9,12 +9,17 @@ use vlayer_engine::config::{MAINNET_ID, SEPOLIA_ID};
 
 const RPC_CACHE_FILE: &str = "testdata/rpc_cache.json";
 
-fn run(call: Call, chain_id: u64, block_number: u64) -> anyhow::Result<Vec<u8>> {
+fn run<C>(call: Call, chain_id: u64, block_number: u64) -> anyhow::Result<C::Return>
+where
+    C: SolCall,
+{
     let test_provider = EthFileProvider::from_file(&RPC_CACHE_FILE.into())?;
     let null_rpc_url = "a null url value as url is not needed in tests";
     let config = HostConfig::new(null_rpc_url, chain_id, block_number);
     let host = Host::try_new_with_provider(test_provider, config)?;
-    Ok(host.run(call)?.evm_call_result)
+    let raw_return_value = host.run(call)?.evm_call_result;
+    let return_value = C::abi_decode_returns(&raw_return_value, false)?;
+    Ok(return_value)
 }
 
 #[cfg(test)]
@@ -38,18 +43,15 @@ mod usdt {
 
     #[test]
     fn erc20_balance_of() -> anyhow::Result<()> {
-        let call = IERC20::balanceOfCall {
+        let sol_call = IERC20::balanceOfCall {
             account: address!("F977814e90dA44bFA03b6295A0616a897441aceC"), // Binance 8
         };
         let call = Call {
             caller: USDT,
             to: USDT,
-            data: call.abi_encode(),
+            data: sol_call.abi_encode(),
         };
-        let result = IERC20::balanceOfCall::abi_decode_returns(
-            &run(call, SEPOLIA_ID, USDT_BLOCK_NO)?,
-            false,
-        )?;
+        let result = run::<IERC20::balanceOfCall>(call, SEPOLIA_ID, USDT_BLOCK_NO)?;
         assert_eq!(result._0, uint!(3_000_000_000_000_000_U256));
         Ok(())
     }
@@ -83,7 +85,7 @@ mod uniswap {
     #[test] // mimic tx 0x241c81c3aa4c68cd07ae03a756050fc47fd91918a710250453d34c6db9d11997
     fn uniswap_exact_output_single() -> anyhow::Result<()> {
         // swap USDT for 34.1973 WETH
-        let call = ISwapRouter::exactOutputSingleCall {
+        let sol_call = ISwapRouter::exactOutputSingleCall {
             params: ISwapRouter::ExactOutputSingleParams {
                 tokenIn: USDT,
                 tokenOut: WETH,
@@ -98,12 +100,9 @@ mod uniswap {
         let call = Call {
             caller: UNISWAP_USER,
             to: UNISWAP,
-            data: call.abi_encode(),
+            data: sol_call.abi_encode(),
         };
-        let result = ISwapRouter::exactOutputSingleCall::abi_decode_returns(
-            &run(call, MAINNET_ID, BLOCK_NO)?,
-            false,
-        )?;
+        let result = run::<ISwapRouter::exactOutputSingleCall>(call, MAINNET_ID, BLOCK_NO)?;
         assert_eq!(result.amountIn, uint!(112_537_714_517_U256));
         Ok(())
     }
@@ -159,16 +158,13 @@ mod view {
 
     #[test]
     fn precompile() -> anyhow::Result<()> {
-        let call = ViewCallTest::testPrecompileCall {};
+        let sol_call = ViewCallTest::testPrecompileCall {};
         let call = Call {
             caller: VIEW_CALL,
             to: VIEW_CALL,
-            data: call.abi_encode(),
+            data: sol_call.abi_encode(),
         };
-        let result = ViewCallTest::testPrecompileCall::abi_decode_returns(
-            &run(call, SEPOLIA_ID, VIEW_CALL_BLOCK_NO)?,
-            false,
-        )?;
+        let result = run::<ViewCallTest::testPrecompileCall>(call, SEPOLIA_ID, VIEW_CALL_BLOCK_NO)?;
         assert_eq!(
             result._0,
             b256!("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
@@ -178,48 +174,40 @@ mod view {
 
     #[test]
     fn nonexistent_account() -> anyhow::Result<()> {
-        let call = ViewCallTest::testNonexistentAccountCall {};
+        let sol_call = ViewCallTest::testNonexistentAccountCall {};
         let call = Call {
             caller: VIEW_CALL,
             to: VIEW_CALL,
-            data: call.abi_encode(),
+            data: sol_call.abi_encode(),
         };
-        let result = ViewCallTest::testNonexistentAccountCall::abi_decode_returns(
-            &run(call, SEPOLIA_ID, VIEW_CALL_BLOCK_NO)?,
-            false,
-        )?;
+        let result =
+            run::<ViewCallTest::testNonexistentAccountCall>(call, SEPOLIA_ID, VIEW_CALL_BLOCK_NO)?;
         assert_eq!(result.size, uint!(0_U256));
         Ok(())
     }
 
     #[test]
     fn eoa_account() -> anyhow::Result<()> {
-        let call = ViewCallTest::testEoaAccountCall {};
+        let sol_call = ViewCallTest::testEoaAccountCall {};
         let call = Call {
             caller: VIEW_CALL,
             to: VIEW_CALL,
-            data: call.abi_encode(),
+            data: sol_call.abi_encode(),
         };
-        let result = ViewCallTest::testEoaAccountCall::abi_decode_returns(
-            &run(call, SEPOLIA_ID, VIEW_CALL_BLOCK_NO)?,
-            false,
-        )?;
+        let result = run::<ViewCallTest::testEoaAccountCall>(call, SEPOLIA_ID, VIEW_CALL_BLOCK_NO)?;
         assert_eq!(result.size, uint!(0_U256));
         Ok(())
     }
 
     #[test]
     fn blockhash() -> anyhow::Result<()> {
-        let call = ViewCallTest::testBlockhashCall {};
+        let sol_call = ViewCallTest::testBlockhashCall {};
         let call = Call {
             caller: VIEW_CALL,
             to: VIEW_CALL,
-            data: call.abi_encode(),
+            data: sol_call.abi_encode(),
         };
-        let result = ViewCallTest::testBlockhashCall::abi_decode_returns(
-            &run(call, SEPOLIA_ID, VIEW_CALL_BLOCK_NO)?,
-            false,
-        )?;
+        let result = run::<ViewCallTest::testBlockhashCall>(call, SEPOLIA_ID, VIEW_CALL_BLOCK_NO)?;
         assert_eq!(
             result._0,
             b256!("7703fe4a3d6031a579d52ce9e493e7907d376cfc3b41f9bc7710b0dae8c67f68")
@@ -229,32 +217,27 @@ mod view {
 
     #[test]
     fn chainid() -> anyhow::Result<()> {
-        let call = ViewCallTest::testChainidCall {};
+        let sol_call = ViewCallTest::testChainidCall {};
         let call = Call {
             caller: VIEW_CALL,
             to: VIEW_CALL,
-            data: call.abi_encode(),
+            data: sol_call.abi_encode(),
         };
-        let result = ViewCallTest::testChainidCall::abi_decode_returns(
-            &run(call, SEPOLIA_ID, VIEW_CALL_BLOCK_NO)?,
-            false,
-        )?;
+        let result = run::<ViewCallTest::testChainidCall>(call, SEPOLIA_ID, VIEW_CALL_BLOCK_NO)?;
         assert_eq!(result._0, uint!(11_155_111_U256));
         Ok(())
     }
 
     #[test]
     fn multi_contract_calls() -> anyhow::Result<()> {
-        let call = ViewCallTest::testMuliContractCallsCall {};
+        let sol_call = ViewCallTest::testMuliContractCallsCall {};
         let call = Call {
             caller: VIEW_CALL,
             to: VIEW_CALL,
-            data: call.abi_encode(),
+            data: sol_call.abi_encode(),
         };
-        let result = ViewCallTest::testMuliContractCallsCall::abi_decode_returns(
-            &run(call, SEPOLIA_ID, VIEW_CALL_BLOCK_NO)?,
-            false,
-        )?;
+        let result =
+            run::<ViewCallTest::testMuliContractCallsCall>(call, SEPOLIA_ID, VIEW_CALL_BLOCK_NO)?;
         assert_eq!(result._0, uint!(84_U256));
         Ok(())
     }
@@ -265,7 +248,8 @@ mod view {
             to: address!("d8dA6BF26964aF9D7eEd9e03E53415D37aA96045"), // vitalik.eth
             ..Default::default()
         };
-        run(call, SEPOLIA_ID, VIEW_CALL_BLOCK_NO).expect_err("calling an EOA should fail");
+        run::<ViewCallTest::testEoaAccountCall>(call, SEPOLIA_ID, VIEW_CALL_BLOCK_NO)
+            .expect_err("calling an EOA should fail");
 
         Ok(())
     }
