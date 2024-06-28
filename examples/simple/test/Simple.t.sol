@@ -42,20 +42,25 @@ contract SimpleTest is Test {
         }
 
         journalHash = keccak256(journalBytes);
-        
     }
 
-    function test_updateSum() public {
+    function fixture_sum() private pure returns (uint256) {
+        return 3;        
+    }
 
-        Steel.ExecutionCommitment memory commitment = Steel.ExecutionCommitment({
-            startContractAddress: address(0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512),
-            functionSelector: bytes4(0xcad0899b),
-            settleBlockNumber: 2,
-            settleBlockHash: bytes32(0xcbbeae20657c38f6ae82403a1c5d4e7b27142af11b02bde8bf1e3e93878e451f)
-        });
-        uint256 sum = 3;
-      
-        simple.updateSum(commitment, sum, journalHash);
+    function fixture_commitment() private pure returns (Steel.ExecutionCommitment memory) {
+        return Steel.ExecutionCommitment({
+                    startContractAddress: address(0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512),
+                    functionSelector: bytes4(0xcad0899b),
+                    settleBlockNumber: 2,
+                    settleBlockHash: bytes32(0xcbbeae20657c38f6ae82403a1c5d4e7b27142af11b02bde8bf1e3e93878e451f)
+                });
+    }
+
+    function test_updateSum_validProof() public {
+
+        bytes memory seal = verifier.mockProve(GUEST_ID, journalHash).seal;
+        simple.updateSum(seal, fixture_commitment(), fixture_sum());
         assertEq(simple.latestSum(), 3);
     }
 
