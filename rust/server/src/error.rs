@@ -2,8 +2,8 @@ use axum_jrpc::{
     error::{JsonRpcError, JsonRpcErrorReason},
     Value,
 };
-use derivative::Derivative;
 use hex::FromHexError;
+use host::host::HostError;
 use thiserror::Error;
 
 #[derive(Debug, Error, PartialEq)]
@@ -14,11 +14,12 @@ pub enum FieldValidationError {
     InvalidHexPrefix(String),
 }
 
-#[derive(Debug, Error, Derivative)]
-#[derivative(PartialEq)]
+#[derive(Debug, Error)]
 pub enum AppError {
     #[error("Invalid field `{0}`: {1}")]
     FieldValidationError(String, FieldValidationError),
+    #[error("Host error: {0}")]
+    HostError(#[from] HostError),
 }
 
 impl From<AppError> for JsonRpcError {
@@ -26,6 +27,11 @@ impl From<AppError> for JsonRpcError {
         match error {
             AppError::FieldValidationError(..) => JsonRpcError::new(
                 JsonRpcErrorReason::InvalidParams,
+                error.to_string(),
+                Value::Null,
+            ),
+            AppError::HostError(..) => JsonRpcError::new(
+                JsonRpcErrorReason::InternalError,
                 error.to_string(),
                 Value::Null,
             ),
