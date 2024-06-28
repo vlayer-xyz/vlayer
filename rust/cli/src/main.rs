@@ -4,6 +4,9 @@ use server::server::serve;
 pub mod errors;
 pub mod misc;
 
+#[cfg(test)]
+mod test_utils;
+
 #[derive(Parser)]
 #[command(version, about, long_about = None)]
 #[command(propagate_version = true)]

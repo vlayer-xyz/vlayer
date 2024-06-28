@@ -24,24 +24,7 @@ pub fn find_git_root_path(relative_to: impl AsRef<Path>) -> Result<PathBuf, CLIE
 #[cfg(test)]
 mod tests {
     use super::*;
-
-    fn create_temp_repo() -> tempfile::TempDir {
-        // Create a new temporary directory
-        let temp_dir = tempfile::tempdir().unwrap();
-
-        // Initialize a new Git repository in the temp directory
-        let repo_path = temp_dir.path();
-        Command::new("git")
-            .arg("init")
-            .arg(repo_path)
-            .output()
-            .unwrap();
-
-        let file_path = repo_path.join("test_file.txt");
-        std::fs::File::create(file_path).unwrap();
-
-        temp_dir
-    }
+    use crate::test_utils::create_temp_repo;
 
     #[test]
     fn test_find_git_root_path() {
