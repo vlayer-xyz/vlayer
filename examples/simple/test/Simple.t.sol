@@ -11,9 +11,33 @@ contract SimpleTest is Test {
     Simple public simple;
     RiscZeroMockVerifier public verifier;
 
+    // journal value should be taken from host execution
+    uint8[160] journal = [
+            // address
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0xe7, 0xf1, 0x72, 0x5e, 0x77, 0x34, 0xce, 0x28, 0x8f, 0x83, 0x67, 0xe1, 0xbb, 0x14, 0x3e, 0x90, 0xbb, 0x3f, 0x05, 0x12,
+            // selector
+            0xca, 0xd0, 0x89, 0x9b, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 
+            // blockNo
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x02,
+            // blockHash
+            0xcb, 0xbe, 0xae, 0x20, 0x65, 0x7c, 0x38, 0xf6, 0xae, 0x82, 0x40, 0x3a, 0x1c, 0x5d, 0x4e, 0x7b, 0x27, 0x14, 0x2a, 0xf1, 0x1b, 0x02, 0xbd, 0xe8, 0xbf, 0x1e, 0x3e, 0x93, 0x87, 0x8e, 0x45, 0x1f,
+            // sum
+            0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03
+    ];
+
+    bytes journalBytes;
+    bytes32 journalHash;
+
     function setUp() public {
         verifier = new RiscZeroMockVerifier(bytes4(0));
         simple = new Simple(verifier);
+
+        for (uint32 i = 0; i < journal.length; i++){
+            journalBytes.push(bytes1(journal[i]));
+        }
+
+        journalHash = keccak256(journalBytes);
+        
     }
 
     function test_updateSum() public {
@@ -26,10 +50,6 @@ contract SimpleTest is Test {
         });
         uint256 sum = 3;
       
-        // journal value taken from host execution
-        uint8[316] memory journal = [78, 0, 0, 0, 248, 0, 0, 0, 76, 0, 0, 0, 234, 0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 1, 0, 0, 0, 131, 0, 0, 0, 170, 0, 0, 0, 54, 0, 0, 0, 167, 0, 0, 0, 2, 0, 0, 0, 160, 0, 0, 0, 203, 0, 0, 0, 190, 0, 0, 0, 174, 0, 0, 0, 32, 0, 0, 0, 101, 0, 0, 0, 124, 0, 0, 0, 56, 0, 0, 0, 246, 0, 0, 0, 174, 0, 0, 0, 130, 0, 0, 0, 64, 0, 0, 0, 58, 0, 0, 0, 28, 0, 0, 0, 93, 0, 0, 0, 78, 0, 0, 0, 123, 0, 0, 0, 39, 0, 0, 0, 20, 0, 0, 0, 42, 0, 0, 0, 241, 0, 0, 0, 27, 0, 0, 0, 2, 0, 0, 0, 189, 0, 0, 0, 232, 0, 0, 0, 191, 0, 0, 0, 30, 0, 0, 0, 62, 0, 0, 0, 147, 0, 0, 0, 135, 0, 0, 0, 142, 0, 0, 0, 69, 0, 0, 0, 31, 0, 0, 0, 128, 0, 0, 0, 224, 0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 128, 0, 0, 0, 3, 0, 0, 0];
-        bytes32 journalHash = keccak256(abi.encode(journal));
-
         simple.updateSum(commitment, sum, journalHash);
         assertEq(simple.latestSum(), 3);
     }
