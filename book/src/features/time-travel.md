@@ -1,14 +1,20 @@
 # Time travel 
-The block number is a unique identifier for each block in the Ethereum blockchain, starting at 0 for the genesis block and increasing by one for each subsequent block.
 
-Smart contracts use block numbers to schedule events such as token releases, voting periods, the start/end of auctions, etc. By knowing the average block time, developers can estimate when these events will occur. Unfortunately, direct access to historical blocks from within smart contracts is limited. 
+## Primer on blocks
+The block number is a unique identifier assigned to each block in the Ethereum blockchain, starting from 0 for the genesis block and incrementing by one for each subsequent block. Smart contracts utilize block numbers to schedule events such as token releases, voting periods, and the start or end of auctions. By knowing the average block time, developers can estimate when these events will occur.
 
-To overcome this limitation, we have introduced `setBlockNumber(uint blockNo)` function which is available in our Provers. It switches your next call context to the desired block number. 
+Unfortunately, direct access to historical blocks from within smart contracts is limited. This restriction means that smart contracts cannot easily reference past block data for decision-making or verification purposes.
 
-This allows you to aggregate and review data collected over multiple block numbers:
+## Handling historical data in vlayer 
+To overcome the limitation of accessing historical blocks within smart contracts, we have introduced the `setBlockNumber(uint blockNo)` function, available in our `Prover` contracts. This function allows you to switch your next call context to the desired block number.
+
+This allows you to aggregate and review data collected over multiple block numbers. 
+
+## Example
+Below is an example Prover code, that checks USDT balance of `msg.sender` at the begining and end of specific period.
 
 ```solidity
-contract NftOwnership is Prover {
+contract USDTOwnership is Prover {
   function require_usdt_balance() {
     require(
       IERC20(USDT_ADDR).balanceOf(msg.sender) > 100000000, "must own at least $100"
