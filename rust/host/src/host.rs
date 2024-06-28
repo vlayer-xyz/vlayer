@@ -92,8 +92,9 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
     }
 
     pub fn run(mut self, call: Call) -> Result<HostOutput, HostError> {
-        let returns = Engine::try_new(&mut self.db, self.header.clone(), self.config.chain_id)?
-            .call(&call)?;
+        let preflight_returns =
+            Engine::try_new(&mut self.db, self.header.clone(), self.config.chain_id)?
+                .call(&call)?;
 
         let input = Input {
             call,
@@ -108,19 +109,22 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
             .map_err(|err| HostError::ExecutorEnvBuilder(err.to_string()))?;
 
         let guest_returns = Host::<P>::prove(env, GUEST_ELF)?;
-        assert_eq!(
-            &returns,
-            &guest_returns[guest_returns.len() - returns.len()..]
-        );
+
+        let execution_commitment_len = guest_returns.len() - preflight_returns.len();
+
+        let execution_commitment_abi_encoded = &guest_returns[..execution_commitment_len];
+        let evm_call_result_abi_encoded = &guest_returns[execution_commitment_len..];
+
+        assert_eq!(&preflight_returns, evm_call_result_abi_encoded);
 
         Ok(HostOutput {
             guest_output: GuestOutput {
                 execution_commitment: SolCommitment::abi_decode(
-                    &guest_returns[..(guest_returns.len() - returns.len())],
+                    execution_commitment_abi_encoded,
                     true,
                 )
                 .expect("Cannot decode execution commitment"),
-                evm_call_result: guest_returns[guest_returns.len() - returns.len()..].to_vec(),
+                evm_call_result: evm_call_result_abi_encoded.to_vec(),
             },
             raw_abi: guest_returns,
         })
