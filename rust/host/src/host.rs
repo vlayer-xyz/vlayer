@@ -134,7 +134,7 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
         let prover = default_prover();
         prover
             .prove(env, guest_elf)
-            .map(|p| p.receipt.journal.decode().expect("Cannot decode journal"))
+            .map(|p| p.receipt.journal.bytes)
             .map_err(|err| HostError::Prover(err.to_string()))
     }
 }

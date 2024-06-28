@@ -14,9 +14,6 @@ fn main() {
 
     let output = Guest::new(evm_input).run(call);
 
-    let mut result: Vec<u8> = Vec::new();
-    result.extend(&output.execution_commitment.abi_encode());
-    result.extend(&output.evm_call_result);
-
-    env::commit(&result);
+    env::commit_slice(&output.execution_commitment.abi_encode());
+    env::commit_slice(&output.evm_call_result);
 }
