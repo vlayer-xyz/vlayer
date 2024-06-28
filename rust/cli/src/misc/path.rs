@@ -6,6 +6,7 @@ use std::str::from_utf8;
 /// https://github.com/foundry-rs/foundry/blob/fbd225194dff17352ba740cb3d6f2ad082030dd1/crates/config/src/utils.rs
 pub fn find_git_root_path(relative_to: impl AsRef<Path>) -> Result<PathBuf, CLIError> {
     let path = relative_to.as_ref();
+    let path = &path.canonicalize()?;
     let output = Command::new("git")
         .args(["rev-parse", "--show-toplevel"])
         .current_dir(path)
@@ -24,11 +25,11 @@ pub fn find_git_root_path(relative_to: impl AsRef<Path>) -> Result<PathBuf, CLIE
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::test_utils::create_temp_repo;
+    use crate::test_utils::create_temp_git_repo;
 
     #[test]
     fn test_find_git_root_path() {
-        let temp_dir = create_temp_repo();
+        let temp_dir = create_temp_git_repo();
         let result = find_git_root_path(temp_dir.path());
         let root_path = result.unwrap();
         assert!(root_path.is_dir());
@@ -36,7 +37,7 @@ mod tests {
 
     #[test]
     fn test_find_git_root_path_deep() {
-        let temp_dir = create_temp_repo();
+        let temp_dir = create_temp_git_repo();
         let sub_dir1 = temp_dir.path().join("dir1");
         let sub_dir2 = sub_dir1.join("dir2");
         std::fs::create_dir_all(&sub_dir2).unwrap();
@@ -57,5 +58,17 @@ mod tests {
 
         let error = result.unwrap_err();
         assert!(matches!(error, CLIError::GitError(msg) if msg == expected_error_msg));
+    }
+
+    #[test]
+    fn test_find_git_root_path_nonexistent_path() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let nonexistent_path = temp_dir.path().join("not_a_real_dir");
+        let result = find_git_root_path(nonexistent_path);
+
+        assert!(matches!(
+            result.unwrap_err(),
+            CLIError::CommandExecutionError(err) if err.kind() == std::io::ErrorKind::NotFound
+        ));
     }
 }
