@@ -4,11 +4,11 @@
 The Ethereum ecosystem is fragmented, consisting of various EVM chains such as Arbitrum, Optimism, Base, and many more. Developing applications that interact with multiple chains used to be challenging, but Teleport makes it easy.
 
 ## Teleporting betweens chains
-`setChainId(uint chainId)` function, availble in Prover contracts, allows to switch context of execution to another chain (teleport).  It takes a single argument `chainId`, which specifies the chain in the context of which the next function call will be executed.
+`setChainId(uint chainId)` function, availble in Prover contracts, allows to switch the context of execution to another chain (teleport).  It takes a single argument `chainId`, which specifies the chain in the context of which the next function call will be executed.
 
 ## Example 
 
-Example below ilustrates checking NFT balances on two different chains.
+The example below ilustrates checking NFT balances on two different chains:
 
 ```solidity
 contract NftOwnership is Prover {
