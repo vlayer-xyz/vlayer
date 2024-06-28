@@ -28,30 +28,42 @@ enum Commands {
 }
 
 #[tokio::main]
-async fn main() -> anyhow::Result<()> {
+async fn main() {
+    match run().await {
+        Ok(_) => (),
+        Err(e) => {
+            eprintln!("Error: {}", e);
+            std::process::exit(1);
+        }
+    }
+}
+
+async fn run() -> Result<(), CLIError> {
     let cli = Cli::parse();
 
     match &cli.command {
         Commands::Serve => {
             println!("running 'vlayer serve'");
-            serve().await
+            serve().await?;
         }
         Commands::Init => {
-            println!("running 'vlayer init'");
-            // get current directory
-            let current_dir = std::env::current_dir()?;
-            println!("current directory: {:?}", current_dir);
-            Ok(())
+            println!(
+                "running 'vlayer init' from directory: {:?}",
+                std::env::current_dir()?
+            );
+            let root = find_foundry_root()?;
+            println!("foundry root: {:?}", root);
         }
     }
+    Ok(())
 }
 
-pub fn find_foundry_root() -> Result<PathBuf, CLIError> {
+fn find_foundry_root() -> Result<PathBuf, CLIError> {
     let current_dir = std::env::current_dir()?;
     find_foundry_root_from(&current_dir)
 }
 
-pub fn find_foundry_root_from(start: &PathBuf) -> Result<PathBuf, CLIError> {
+fn find_foundry_root_from(start: &PathBuf) -> Result<PathBuf, CLIError> {
     let git_root = find_git_root(start)?;
 
     let mut current = start.as_path().canonicalize()?;
