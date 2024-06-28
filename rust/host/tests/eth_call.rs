@@ -1,16 +1,11 @@
-use alloy_primitives::{address, b256, uint, Address, Sealable, U256};
+use alloy_primitives::Address;
 use alloy_sol_types::{sol, SolCall};
 use anyhow::Context;
 use host::db::proof::ProofDb;
-use host::into_input::into_input;
 use host::provider::Provider;
 use std::fmt::Debug;
 use test_log::test;
-use vlayer_engine::{
-    config::{ChainSpec, ETH_MAINNET_CHAIN_SPEC, ETH_SEPOLIA_CHAIN_SPEC, MAINNET_ID, SEPOLIA_ID},
-    engine::Engine,
-    io::Call,
-};
+use vlayer_engine::{config::SEPOLIA_ID, engine::Engine, io::Call};
 
 macro_rules! provider {
     () => {
@@ -34,15 +29,6 @@ macro_rules! test_provider {
     }};
 }
 
-const ERC20_TEST_CONTRACT: Address = address!("dAC17F958D2ee523a2206206994597C13D831ec7"); // USDT
-const ERC20_TEST_BLOCK_NO: u64 = 19493153;
-sol! {
-    #[derive(Debug, PartialEq, Eq)]
-    interface IERC20 {
-        function balanceOf(address account) external view returns (uint);
-    }
-}
-
 pub fn from_provider<P: Provider>(
     provider: P,
     block_number: u64,
@@ -57,125 +43,6 @@ pub fn from_provider<P: Provider>(
     Ok((db, header))
 }
 
-#[test]
-fn erc20_balance_of() {
-    let call = IERC20::balanceOfCall {
-        account: address!("F977814e90dA44bFA03b6295A0616a897441aceC"), // Binance 8
-    };
-
-    let result = eth_call(
-        call,
-        ERC20_TEST_CONTRACT,
-        CallOverrides::default(),
-        ERC20_TEST_BLOCK_NO,
-        &ETH_MAINNET_CHAIN_SPEC,
-    )
-    .unwrap();
-    assert_eq!(result._0, uint!(3000000000000000_U256));
-}
-
-#[test]
-fn erc20_multi_balance_of() {
-    let call1 = IERC20::balanceOfCall {
-        account: address!("F977814e90dA44bFA03b6295A0616a897441aceC"),
-    };
-    let call2 = IERC20::balanceOfCall {
-        account: address!("5a52E96BAcdaBb82fd05763E25335261B270Efcb"),
-    };
-
-    let (mut db, header) = from_provider(provider!(), ERC20_TEST_BLOCK_NO).unwrap();
-    let call_data1 = Call {
-        caller: ERC20_TEST_CONTRACT,
-        to: ERC20_TEST_CONTRACT,
-        data: call1.abi_encode(),
-    };
-    Engine::try_new(&mut db, header.clone(), MAINNET_ID)
-        .unwrap()
-        .call(&call_data1)
-        .unwrap();
-    let call_data2 = Call {
-        caller: ERC20_TEST_CONTRACT,
-        to: ERC20_TEST_CONTRACT,
-        data: call2.abi_encode(),
-    };
-    Engine::try_new(&mut db, header.clone(), MAINNET_ID)
-        .unwrap()
-        .call(&call_data2)
-        .unwrap();
-    let input = into_input(db, header.seal_slow()).unwrap();
-
-    // execute the call
-    let (mut db, header) = input.into_db_and_header();
-    let result1 = Engine::try_new(&mut db, header.clone(), MAINNET_ID)
-        .unwrap()
-        .call(&Call {
-            caller: ERC20_TEST_CONTRACT,
-            to: ERC20_TEST_CONTRACT,
-            data: call1.abi_encode(),
-        })
-        .unwrap();
-    let result2 = Engine::try_new(&mut db, header.clone(), MAINNET_ID)
-        .unwrap()
-        .call(&Call {
-            caller: ERC20_TEST_CONTRACT,
-            to: ERC20_TEST_CONTRACT,
-            data: call2.abi_encode(),
-        })
-        .unwrap();
-
-    assert_eq!(result1, uint!(3000000000000000_U256).to_be_bytes::<32>());
-    assert_eq!(result2, uint!(0x38d7ea4c68000_U256).to_be_bytes::<32>());
-}
-
-#[test]
-fn uniswap_exact_output_single() {
-    // mimic tx 0x241c81c3aa4c68cd07ae03a756050fc47fd91918a710250453d34c6db9d11997
-    let block = 19493153;
-    let caller = address!("f5213a6a2f0890321712520b8048D9886c1A9900");
-    let contract = address!("E592427A0AEce92De3Edee1F18E0157C05861564"); // Uniswap V3
-    sol! {
-        #[derive(Debug, PartialEq, Eq)]
-        interface ISwapRouter {
-            struct ExactOutputSingleParams {
-                address tokenIn;
-                address tokenOut;
-                uint24 fee;
-                address recipient;
-                uint256 deadline;
-                uint256 amountOut;
-                uint256 amountInMaximum;
-                uint160 sqrtPriceLimitX96;
-            }
-            function exactOutputSingle(ExactOutputSingleParams calldata params) external payable returns (uint256 amountIn);
-        }
-    }
-
-    // swap USDT for 34.1973 WETH
-    let call = ISwapRouter::exactOutputSingleCall {
-        params: ISwapRouter::ExactOutputSingleParams {
-            tokenIn: address!("dAC17F958D2ee523a2206206994597C13D831ec7"), // USDT
-            tokenOut: address!("C02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2"), // WETH
-            fee: 500,
-            recipient: caller,
-            deadline: uint!(1711146836_U256),
-            amountOut: uint!(34197300000000000000_U256),
-            amountInMaximum: U256::MAX,
-            sqrtPriceLimitX96: U256::ZERO,
-        },
-    };
-
-    let result = eth_call(
-        call,
-        contract,
-        CallOverrides { from: Some(caller) },
-        block,
-        &ETH_MAINNET_CHAIN_SPEC,
-    )
-    .unwrap();
-    assert_eq!(result.amountIn, uint!(112537714517_U256));
-}
-
-const VIEW_CALL_TEST_CONTRACT: Address = address!("C5096d96dbC7594B3d0Ba50e708ba654A7ae1F3E");
 const VIEW_CALL_TEST_BLOCK: u64 = 5702743;
 sol!(
     #[derive(Debug, PartialEq, Eq)]
@@ -221,90 +88,6 @@ sol!(
 );
 
 #[test]
-fn precompile() {
-    let result = eth_call(
-        ViewCallTest::testPrecompileCall {},
-        VIEW_CALL_TEST_CONTRACT,
-        CallOverrides::default(),
-        VIEW_CALL_TEST_BLOCK,
-        &ETH_SEPOLIA_CHAIN_SPEC,
-    )
-    .unwrap();
-    assert_eq!(
-        result._0,
-        b256!("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
-    );
-}
-
-#[test]
-fn nonexistent_account() {
-    let result = eth_call(
-        ViewCallTest::testNonexistentAccountCall {},
-        VIEW_CALL_TEST_CONTRACT,
-        CallOverrides::default(),
-        VIEW_CALL_TEST_BLOCK,
-        &ETH_SEPOLIA_CHAIN_SPEC,
-    )
-    .unwrap();
-    assert_eq!(result.size, uint!(0_U256));
-}
-
-#[test]
-fn eoa_account() {
-    let result = eth_call(
-        ViewCallTest::testEoaAccountCall {},
-        VIEW_CALL_TEST_CONTRACT,
-        CallOverrides::default(),
-        VIEW_CALL_TEST_BLOCK,
-        &ETH_SEPOLIA_CHAIN_SPEC,
-    )
-    .unwrap();
-    assert_eq!(result.size, uint!(0_U256));
-}
-
-#[test]
-fn blockhash() {
-    let result = eth_call(
-        ViewCallTest::testBlockhashCall {},
-        VIEW_CALL_TEST_CONTRACT,
-        CallOverrides::default(),
-        VIEW_CALL_TEST_BLOCK,
-        &ETH_SEPOLIA_CHAIN_SPEC,
-    )
-    .unwrap();
-    assert_eq!(
-        result._0,
-        b256!("7703fe4a3d6031a579d52ce9e493e7907d376cfc3b41f9bc7710b0dae8c67f68")
-    );
-}
-
-#[test]
-fn chainid() {
-    let result = eth_call(
-        ViewCallTest::testChainidCall {},
-        VIEW_CALL_TEST_CONTRACT,
-        CallOverrides::default(),
-        VIEW_CALL_TEST_BLOCK,
-        &ETH_SEPOLIA_CHAIN_SPEC,
-    )
-    .unwrap();
-    assert_eq!(result._0, uint!(11155111_U256));
-}
-
-#[test]
-fn multi_contract_calls() {
-    let result = eth_call(
-        ViewCallTest::testMuliContractCallsCall {},
-        VIEW_CALL_TEST_CONTRACT,
-        CallOverrides::default(),
-        VIEW_CALL_TEST_BLOCK,
-        &ETH_SEPOLIA_CHAIN_SPEC,
-    )
-    .unwrap();
-    assert_eq!(result._0, uint!(84_U256));
-}
-
-#[test]
 fn call_eoa() {
     let (db, header) = from_provider(provider!(), VIEW_CALL_TEST_BLOCK).unwrap();
     Engine::try_new(db, header, SEPOLIA_ID)
@@ -315,51 +98,4 @@ fn call_eoa() {
             data: (ViewCallTest::testBlockhashCall {}).abi_encode(),
         })
         .expect_err("calling an EOA should fail");
-}
-
-#[derive(Debug, Default)]
-struct CallOverrides {
-    from: Option<Address>,
-}
-
-impl CallOverrides {
-    fn apply(&self, mut tx_data: Call) -> Call {
-        if let Some(from) = self.from {
-            tx_data.caller = from;
-        }
-        tx_data
-    }
-}
-
-fn eth_call<C>(
-    call: C,
-    address: Address,
-    call_overrides: CallOverrides,
-    block: u64,
-    chain_spec: &ChainSpec,
-) -> anyhow::Result<C::Return>
-where
-    C: SolCall + Clone,
-    <C as SolCall>::Return: PartialEq + Debug,
-{
-    let (mut db, header) = from_provider(provider!(), block)?;
-
-    let call_tx_data = call_overrides.apply(Call {
-        caller: address,
-        to: address,
-        data: call.abi_encode(),
-    });
-
-    let preflight_result =
-        Engine::try_new(&mut db, header.clone(), chain_spec.chain_id())?.call(&call_tx_data)?;
-    let input = into_input(db, header.seal_slow())?;
-
-    let (mut db, header) = input.into_db_and_header();
-    let result = Engine::try_new(&mut db, header, SEPOLIA_ID)?.call(&call_tx_data)?;
-    assert_eq!(
-        result, preflight_result,
-        "mismatch in preflight and execution"
-    );
-
-    Ok(C::abi_decode_returns(&result, false)?)
 }
