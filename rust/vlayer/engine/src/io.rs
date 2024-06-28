@@ -22,7 +22,7 @@ impl Default for Call {
         Self {
             caller: Address::ZERO,
             to: Address::ZERO,
-            data: vec![]
+            data: vec![],
         }
     }
 }
