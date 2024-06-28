@@ -1,5 +1,5 @@
 # How it works?
-Vlayer contracts are just like regular on-chain contracts written in [Solidity](https://soliditylang.org). The main difference is the execution model, as bytecode is executed on the vlayer zkEVM infrastructure. 
+vlayer introduces two new types of contracts: Prover and Verifier. Prover code runs on the vlayer zkEVM infrastructure and Verifier can be executed on EVM-compatible chains. Both types of contracts have to be developed using [Solidity](https://soliditylang.org) programming language.
 
 ## Features
 
@@ -29,7 +29,7 @@ If you need to make certain arguments public outside of the validator contract, 
 Example Prover code: 
 
 ```solidity
-contract NftOwnership is VlayerProver  {
+contract NftOwnership is Prover  {
 
     function require_byac_nft() public view {
       require(
@@ -59,7 +59,7 @@ Verification logic is immutable once deployed on the blockchain, ensuring consis
 Example contract with proof verification: 
 
 ```solidity
-contract Airdrop is VlayerVerifier {
+contract Airdrop is Verifier {
   mapping (address => bool) public withdrawn;
 
   function claim(Proof calldata proof, address sender) public 
