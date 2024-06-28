@@ -6,6 +6,8 @@ import {Steel} from "vlayer/Steel.sol";
 
 contract Simple {
 
+    bytes32 public constant GUEST_ID = bytes32(0xb7079f57c71b4e1d95b8b1254303e13f78914599a8c119534c4c947c996b4d7d);
+
     IRiscZeroVerifier verifier;
     uint256 public latestSum;
     
@@ -13,19 +15,18 @@ contract Simple {
         verifier = _verifier;
     }
 
-    function updateSum(Steel.ExecutionCommitment memory commitment, uint256 sum, bytes32 journalHash) public {
-        _verify(commitment, sum, journalHash);
+    function updateSum(bytes calldata seal, Steel.ExecutionCommitment memory commitment, uint256 sum) public {
+        _verify(seal, commitment, sum);
 
         latestSum = sum;
     }
 
-    function _verify(Steel.ExecutionCommitment memory commitment, uint256 sum, bytes32 journalHash) private pure {
+    function _verify(bytes calldata seal, Steel.ExecutionCommitment memory commitment, uint256 sum) private view {
 
         bytes32 computedJournalHash = keccak256(abi.encode(commitment, sum));
 
-        // assert(journalHash == computedJournalHash);
-        assert(journalHash == computedJournalHash);
-       
+        verifier.verify(seal, GUEST_ID, computedJournalHash);
+    
     }
 
 }
