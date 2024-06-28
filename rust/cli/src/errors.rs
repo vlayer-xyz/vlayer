@@ -8,4 +8,6 @@ pub enum CLIError {
     Utf8Error(#[from] std::str::Utf8Error),
     #[error("Git command failed: {0}")]
     GitError(String),
+    #[error("No foundry.toml file found")]
+    NoFoundryError,
 }

@@ -1,6 +1,6 @@
 use std::process::Command;
 
-pub fn create_temp_repo() -> tempfile::TempDir {
+pub fn create_temp_git_repo() -> tempfile::TempDir {
     // Create a new temporary directory
     let temp_dir = tempfile::tempdir().unwrap();
 
