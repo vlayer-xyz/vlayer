@@ -24,6 +24,7 @@ contract Simple {
         bytes32 computedJournalHash = keccak256(abi.encode(commitment, sum));
 
         // assert(journalHash == computedJournalHash);
+        assert(journalHash == computedJournalHash);
        
     }
 
