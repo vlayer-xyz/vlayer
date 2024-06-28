@@ -10,7 +10,6 @@ import {Steel} from "vlayer/Steel.sol";
 import {Simple} from "../src/Simple.sol";
 
 contract SimpleTest is Test {
-
     Simple public simple;
     RiscZeroMockVerifier public verifier;
 
