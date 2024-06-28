@@ -4,7 +4,7 @@ use std::process::Command;
 use std::str::from_utf8;
 
 /// https://github.com/foundry-rs/foundry/blob/fbd225194dff17352ba740cb3d6f2ad082030dd1/crates/config/src/utils.rs
-pub fn find_git_root_path(relative_to: impl AsRef<Path>) -> Result<PathBuf, CLIError> {
+pub fn find_git_root(relative_to: impl AsRef<Path>) -> Result<PathBuf, CLIError> {
     let path = relative_to.as_ref();
     let path = &path.canonicalize()?;
     let output = Command::new("git")
@@ -28,30 +28,30 @@ mod tests {
     use crate::test_utils::create_temp_git_repo;
 
     #[test]
-    fn test_find_git_root_path() {
+    fn test_find_git_root() {
         let temp_dir = create_temp_git_repo();
-        let result = find_git_root_path(temp_dir.path());
+        let result = find_git_root(temp_dir.path());
         let root_path = result.unwrap();
         assert!(root_path.is_dir());
     }
 
     #[test]
-    fn test_find_git_root_path_deep() {
+    fn test_find_git_root_deep() {
         let temp_dir = create_temp_git_repo();
         let sub_dir1 = temp_dir.path().join("dir1");
         let sub_dir2 = sub_dir1.join("dir2");
         std::fs::create_dir_all(&sub_dir2).unwrap();
-        let root_path1 = find_git_root_path(&sub_dir1).unwrap();
-        let root_path2 = find_git_root_path(&sub_dir2).unwrap();
+        let root_path1 = find_git_root(&sub_dir1).unwrap();
+        let root_path2 = find_git_root(&sub_dir2).unwrap();
         assert!(root_path1.is_dir());
         assert!(root_path2.is_dir());
         assert_eq!(root_path1, root_path2);
     }
 
     #[test]
-    fn test_find_git_root_path_fail() {
+    fn test_find_git_root_fail() {
         let temp_dir = tempfile::tempdir().unwrap();
-        let result = find_git_root_path(temp_dir.path());
+        let result = find_git_root(temp_dir.path());
 
         let expected_error_msg =
             "fatal: not a git repository (or any of the parent directories): .git\n".to_string();
@@ -61,10 +61,10 @@ mod tests {
     }
 
     #[test]
-    fn test_find_git_root_path_nonexistent_path() {
+    fn test_find_git_root_nonexistent_path() {
         let temp_dir = tempfile::tempdir().unwrap();
         let nonexistent_path = temp_dir.path().join("not_a_real_dir");
-        let result = find_git_root_path(nonexistent_path);
+        let result = find_git_root(nonexistent_path);
 
         assert!(matches!(
             result.unwrap_err(),
