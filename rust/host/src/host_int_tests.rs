@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod test {
-    use alloy_primitives::{address, Address};
+    use alloy_primitives::{address, uint, Address};
     use alloy_sol_types::{sol, SolCall};
     use host::Call;
     use vlayer_engine::config::SEPOLIA_ID;
@@ -46,8 +46,11 @@ mod test {
             test_provider,
             HostConfig::new(NULL_RPC_URL, SEPOLIA_ID, ERC20_TEST_BLOCK_NO),
         )?;
-        let _host_result = balanceOfCall::abi_decode_returns(&host.run(call)?, false)?;
-        // assert_eq!(host_result._0, uint!(3_000_000_000_000_000_U256));
+        let host_result = balanceOfCall::abi_decode_returns(
+            &host.run(call)?.guest_output.evm_call_result,
+            false,
+        )?;
+        assert_eq!(host_result._0, uint!(3_000_000_000_000_000_U256));
         Ok(())
     }
 }

@@ -3,6 +3,7 @@ use crate::into_input::into_input;
 use crate::provider::EthersProviderError;
 use crate::provider::{EthersProvider, Provider};
 use alloy_primitives::Sealable;
+use alloy_sol_types::SolValue;
 use ethers_providers::Provider as OGEthersProvider;
 use ethers_providers::{Http, ProviderError, RetryClient};
 use guest_wrapper::GUEST_ELF;
@@ -10,7 +11,8 @@ use risc0_zkvm::{default_prover, ExecutorEnv};
 use thiserror::Error;
 use vlayer_engine::engine::{Engine, EngineError};
 use vlayer_engine::ethereum::EthBlockHeader;
-use vlayer_engine::io::{Call, Input};
+use vlayer_engine::io::{Call, GuestOutput, HostOutput, Input};
+use vlayer_engine::SolCommitment;
 
 const MAX_RETRY: u32 = 3;
 const INITIAL_BACKOFF: u64 = 500;
@@ -89,7 +91,7 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
         Ok(Host { db, header, config })
     }
 
-    pub fn run(mut self, call: Call) -> Result<Vec<u8>, HostError> {
+    pub fn run(mut self, call: Call) -> Result<HostOutput, HostError> {
         let returns = Engine::try_new(&mut self.db, self.header.clone(), self.config.chain_id)?
             .call(&call)?;
 
@@ -111,7 +113,17 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
             &guest_returns[guest_returns.len() - returns.len()..]
         );
 
-        Ok(guest_returns)
+        Ok(HostOutput {
+            guest_output: GuestOutput {
+                execution_commitment: SolCommitment::abi_decode(
+                    &guest_returns[..(guest_returns.len() - returns.len())],
+                    true,
+                )
+                .expect("Cannot decode execution commitment"),
+                evm_call_result: guest_returns[guest_returns.len() - returns.len()..].to_vec(),
+            },
+            raw_abi: guest_returns,
+        })
     }
 
     pub(crate) fn prove(env: ExecutorEnv, guest_elf: &[u8]) -> Result<Vec<u8>, HostError> {

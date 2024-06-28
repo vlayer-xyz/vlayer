@@ -4,7 +4,7 @@ use vlayer_engine::{
     engine::Engine,
     ethereum::EthBlockHeader,
     evm::{block_header::EvmBlockHeader, input::EvmInput},
-    io::{Call, Output},
+    io::{Call, GuestOutput},
 };
 
 pub struct Guest {
@@ -18,13 +18,13 @@ impl Guest {
         Guest { db, header }
     }
 
-    pub fn run(&mut self, call: Call) -> Output {
+    pub fn run(&mut self, call: Call) -> GuestOutput {
         let function_selector: [u8; 4] = call.data[0..4]
             .try_into()
             .expect("cannot extract function selector from call data");
 
-        Output {
-            execution_commitment: self.header.block_commitment(call.to, function_selector),
+        GuestOutput {
+            execution_commitment: self.header.execution_commitment(call.to, function_selector),
 
             evm_call_result: Engine::try_new(&mut self.db, self.header.clone(), SEPOLIA_ID)
                 .unwrap()
