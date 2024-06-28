@@ -248,4 +248,15 @@ mod test {
         assert_eq!(result._0, uint!(84_U256));
         Ok(())
     }
+
+    #[test]
+    fn call_eoa() -> anyhow::Result<()> {
+        let call = Call {
+            to: address!("d8dA6BF26964aF9D7eEd9e03E53415D37aA96045"), // vitalik.eth
+            ..Default::default()
+        };
+        run(call, SEPOLIA_ID, VIEW_CALL_TEST_BLOCK_NO).expect_err("calling an EOA should fail");
+
+        Ok(())
+    }
 }

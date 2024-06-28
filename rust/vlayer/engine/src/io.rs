@@ -17,8 +17,18 @@ pub struct Call {
     pub data: Vec<u8>,
 }
 
-#[derive(Debug)]
-pub struct GuestOutput {
+impl Default for Call {
+    fn default() -> Self {
+        Self {
+            caller: Address::ZERO,
+            to: Address::ZERO,
+            data: vec![]
+        }
+    }
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct Output {
     pub execution_commitment: SolCommitment,
     pub evm_call_result: Vec<u8>,
 }
