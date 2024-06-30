@@ -37,7 +37,12 @@ jobs:
 
       - name: Deploy simple example contract
         working-directory: examples/simple
-        run: ../../bash/vlayer-deploy.sh
+        run: |
+          output=$(mktemp)
+          ../../bash/vlayer-deploy.sh | tee ${output}
+          
+          # filter-out env variables and pass them to next steps
+          grep '[A-Z0-9_]\+=[a-zA-Z0-9]\+' <${output} >>${GITHUB_ENV}
 
       - name: Run host
         working-directory: rust/host
