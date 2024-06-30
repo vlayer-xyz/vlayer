@@ -11,7 +11,7 @@ To overcome the limitation of accessing historical blocks within smart contracts
 This allows you to aggregate and review data collected over multiple block numbers. 
 
 ## Example
-Below is an example Prover code, that checks USDT balance of `msg.sender` at the begining and end of specific period.
+Below is example Prover code which checks USDT balance of `msg.sender` at the begining and end of the specific period.
 
 ```solidity
 contract USDTOwnership is Prover {

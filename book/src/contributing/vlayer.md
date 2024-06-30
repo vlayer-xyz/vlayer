@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-You will need to install following software to start working with repository:
+To start working with this repository, you will need to install following software:
 
 - [Rust](https://www.rust-lang.org/tools/install) compiler
 - Rust risc-0 [toolchain](https://dev.risczero.com/api/zkvm/quickstart)
@@ -10,7 +10,7 @@ You will need to install following software to start working with repository:
 
 ## Building
 
-To build project navigate to `rust` directory and type:
+To build this project, navigate to the `rust` directory and type:
 
 ```sh
 cargo build
@@ -18,7 +18,7 @@ cargo build
 
 ## Running
 
-To deploy contract first install `jq`:
+To deploy contract, first install `jq`:
 
 ```sh
 brew install jq
@@ -29,7 +29,7 @@ Run anvil in the background:
 anvil
 ```
 
-Deploy contract by going to its directory (e.g. `examples/simple`) and run `../../bash/vlayer-deploy.sh`.
+Deploy the contract by going to its directory (e.g. `examples/simple`) and running `../../bash/vlayer-deploy.sh`.
 If `VLAYER_CONTRACT_ADDRESS` is displayed, contract was deployed successfully.
 
 Finally, run:
@@ -38,4 +38,4 @@ Finally, run:
 RUST_LOG=info RISC0_DEV_MODE=1 cargo run
 ```
 
-For guides about project structure, check out [architecture appendix](/appendix/architecture.md).
+For guides about the project structure, check out [architecture appendix](/appendix/architecture.md).

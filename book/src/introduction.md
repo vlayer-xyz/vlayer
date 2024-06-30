@@ -2,7 +2,7 @@
 
 # Introduction
 
-vlayer gives smart contracts superpowers like [time travel](/features/time-travel.html) to past blocks, [teleport](/features/teleport.html) to different chains and access real data from web and email.
+vlayer gives smart contracts superpowers, such as [time travel](/features/time-travel.html) to past blocks, [teleport](/features/teleport.html) to different chains and access real data from web and email.
 
 vlayer smart contracts are [executed off-chain](/getting-started/how-it-works.html) and their results can then be used in on-chain transactions.
 

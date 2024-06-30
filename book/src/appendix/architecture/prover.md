@@ -1,35 +1,35 @@
 # Prover architecture
 
-On the high level, vlayer runs zkEVM that produces proof of proper execution. Under the hood, vlayer is written in Rust that is compiled to zero knowledge proofs. Currently, Rust is compiled with [RISC Zero](https://www.risczero.com/), but we aim to build vendor-lock free solutions working on multiple zk stacks, like [sp-1](https://github.com/succinctlabs/sp1) or [Jolt](https://github.com/a16z/jolt). Inside rust [revm](https://github.com/bluealloy/revm) is executed.
+On the high level, vlayer runs zkEVM that produces a proof of proper execution. Under the hood, vlayer is written in Rust that is compiled to zero knowledge proofs. Currently, Rust is compiled with [RISC Zero](https://www.risczero.com/), but we aim to build vendor-lock free solutions working on multiple zk stacks, like [sp-1](https://github.com/succinctlabs/sp1) or [Jolt](https://github.com/a16z/jolt). Inside rust [revm](https://github.com/bluealloy/revm) is executed.
 
-Our architecture is inspired by RISC Zero [steel](https://github.com/risc0/risc0-ethereum/tree/main/steel), with 3 main components, that can be found in `rust/` subdirectories:
+Our architecture is inspired by RISC Zero [steel](https://github.com/risc0/risc0-ethereum/tree/main/steel), with 3 main components that can be found in `rust/` subdirectories:
 
-- host - (in `host`) - accepts the request, runs a preflight during which it collects all data required by the guest. Then, guest proving is triggered.
-- guest - (in `guest_wrapper/guest`) - performs execution of code inside zkevm.
-- guest-wrapper - (in `guest_wrapper`) - Compiles guest to [RISC Zero](https://doc.rust-lang.org/rustc/platform-support/riscv32im-risc0-zkvm-elf.html) target and makes it available to be run inside host. It can be considered Rust equivalent of code generation script.
+- host - (in `host`) - accepts the request, runs a preflight, during which it collects all data required by the guest. Then, guest proving is triggered.
+- guest - (in `guest_wrapper/guest`) - performs execution of the code inside zkEVM.
+- guest-wrapper - (in `guest_wrapper`) - Compiles the guest to [RISC Zero](https://doc.rust-lang.org/rustc/platform-support/riscv32im-risc0-zkvm-elf.html) target and makes it available to be run inside the host. It can be considered Rust equivalent of a code generation script.
 
-Host passes arguments to guest via standard input like functionality and similarly guests returns values by standard output like functionality.
+The host passes arguments to the guest via standard input, like functionality, and similarly, the guest returns values by standard output, like functionality.
 
-> In ZK terms, all inputs are **private** and all outputs are **public**. If you need public inputs - return them as the part of output.
+> In ZK terms, all inputs are **private** and all outputs are **public**. If you need public inputs - return them as a part of output.
 
 ## Execution and proving
 
-zkVM works in isolation, without access to disk or network.
+zkVM works in isolation, without access to a disk or network.
 
-On the other hand, when executing Solidity code in guest - it needs access to ethereum state and storage. State consist of ethereum accounts (i.e. balances, contracts code and nonces) and storage consist of smart contract variables.
+On the other hand, when executing Solidity code in the guest, it needs access to the Ethereum state and storage. The state consist of Ethereum accounts (i.e. balances, contracts code and nonces) and the storage consist of smart contract variables.
 
-Hence, all state and storage needs to be passed via input.
+Hence, all the state and storage needs to be passed via input.
 
-However, all input should be considered insecure. Therefore, validity of all state and storage needs to be proven.
+However, all input should be considered insecure. Therefore, validity of all the state and storage needs to be proven.
 
-> **Note:** In off-chain execution the notion of the current block doesn't exist, hence we always access Ethereum at specific historical block. The block number can be the latest mined block available on the network. This is different than the current block inside on-chain execution, which can access the state at the moment of execution of the given transaction.
+> **Note:** In off-chain execution, the notion of the current block doesn't exist, hence we always access Ethereum at a specific historical block. The block number can be the latest mined block available on the network. This is different than the current block inside on-chain execution, which can access the state at the moment of execution of the given transaction.
 
-To deliver all necessary proofs, following steps are performed:
+To deliver all necessary proofs, the following steps are performed:
 
-- In preflight, we execute Solidity code on the host. Each time the db is called the value is fetched via Ethereum JSON RPC. Then, the proof is stored in the local database called ProofDb.
-- Serialized content of ProofDb is passed via stdin to guest.
-- Guest deserializes content into a local database StateDb.
-- Solidity code is executed inside revm using local copy of StateDb.
+- In preflight, we execute Solidity code on the host. Each time the db is called, the value is fetched via Ethereum JSON RPC. Then, the proof is stored in the local database called ProofDb.
+- The serialized content of ProofDb is passed via stdin to the guest.
+- The guest deserializes content into a local database StateDb.
+- Solidity code is executed inside revm using a local copy of StateDb.
 
 Note that solidity execution is deterministic, hence database in the guest has exactly the data it requires.
 
@@ -41,8 +41,8 @@ We have two different databases run in two different places. Each is a composite
 
 - **host** - runs `ProofDb`, which proxies queries to `ProviderDb`. In turn, `ProviderDb` forwards the call to Ethereum RPC provider. Finally, `ProofDb` stores information about what proofs will need to be generated for the guest.
 - **guest** - runs WrapStateDb, which proxies calls to `StateDb`.
-  - `StateDb` consists of state passed from the host and has only the content required to be used by deterministic execution of solidity code in guest. Data in the `StateDb` is stored as sparse Ethereum Merkle Patricia Tries, hence access to accounts and storage serves as verification of state and storage proofs.
-  -  `WrapStateDb` is an [adapter](https://en.wikipedia.org/wiki/Adapter_pattern) for `StateDb` that implements Database trait. It additionally do caching of accounts, for querying storage, so that account is only fetched once for multiple storage queries.
+  - `StateDb` consists of state passed from the host and has only the content required to be used by deterministic execution of the Solidity code in the guest. Data in the `StateDb` is stored as sparse Ethereum Merkle Patricia Tries, hence access to accounts and storage serves as verification of state and storage proofs.
+  -  `WrapStateDb` is an [adapter](https://en.wikipedia.org/wiki/Adapter_pattern) for `StateDb` that implements Database trait. It additionally do caching of the accounts, for querying storage, so that the account is only fetched once for multiple storage queries.
 
 ```mermaid
 classDiagram

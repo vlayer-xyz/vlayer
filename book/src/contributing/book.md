@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-To build book you will need mdbook installed:
+To build this book, you will need `mdbook` installed:
 ```sh
 cargo install mdbook
 ```
@@ -14,9 +14,9 @@ cargo install mdbook-mermaid
 
 ## Building
 
-Book source is available in vlayer monorepo. To build the book navigate to `book/` and type:
+Book source is available in the vlayer monorepo. To build the book navigate to `book/` and type:
 ```
 mdbook serve
 ```
 
-Now, preview of the book is available at `http://localhost:3000/`.
+Now, the preview of the book is available at `http://localhost:3000/`.
