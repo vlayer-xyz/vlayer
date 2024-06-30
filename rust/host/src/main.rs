@@ -1,5 +1,8 @@
+use std::env;
+
 use alloy_primitives::{address, Address};
 use host::{Host, HostConfig, HostError};
+use tracing::info;
 use vlayer_engine::{config::SEPOLIA_ID, io::Call};
 
 pub mod db;
@@ -12,11 +15,20 @@ const CONTRACT: Address = address!("e7f1725E7734CE288F8367e1Bb143E90bb3F0512");
 const CALLER: Address = address!("f39Fd6e51aad88F6F4ce6aB8827279cffFb92266");
 const LOCALHOST_RPC_URL: &str = "http://localhost:8545";
 
+#[derive(Debug)]
+struct Config {
+    block_no: u64,
+}
+
 fn main() -> Result<(), HostError> {
     // Initialize tracing. In order to view logs, run `RUST_LOG=info cargo run`
     tracing_subscriber::fmt()
         .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
         .init();
+
+    let config = config();
+
+    info!("Running proving on block number: {}", config.block_no);
 
     // This is the abi encoded call data (lhs = 1, rhs = 2) for the sum function in the Simple contract.
     let raw_call_data: Vec<u8> = vec![
@@ -31,8 +43,21 @@ fn main() -> Result<(), HostError> {
         data: raw_call_data.clone(),
     };
 
-    let _return_data =
-        Host::try_new(HostConfig::new(LOCALHOST_RPC_URL, SEPOLIA_ID, 2))?.run(call_tx_data)?;
+    let _return_data = Host::try_new(HostConfig::new(
+        LOCALHOST_RPC_URL,
+        SEPOLIA_ID,
+        config.block_no,
+    ))?
+    .run(call_tx_data)?;
 
     Ok(())
+}
+
+fn config() -> Config {
+    let block_no = env::var("BLOCK_NO")
+        .ok()
+        .and_then(|v| v.parse().ok())
+        .unwrap_or(2);
+
+    Config { block_no }
 }

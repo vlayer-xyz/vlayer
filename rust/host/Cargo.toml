@@ -18,8 +18,9 @@ anyhow = "1.0"
 log = {version="0.4"}
 revm = { version = "9.0", default-features = false, features = ["serde", "std"] }
 serde = "1.0"
-serde_json = { version = "1.0"}
-tokio = { workspace = true}
+serde_json = { version = "1.0" }
+tokio = { workspace = true }
+tracing = { workspace = true }
 
 [dev-dependencies]
 alloy-sol-types = "0.7.6"
