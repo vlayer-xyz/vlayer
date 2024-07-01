@@ -17,4 +17,4 @@ mod private {
 }
 
 /// Solidity struct representing the committed block used for validation.
-pub use private::Steel::ExecutionCommitment as SolCommitment;
+pub use private::Steel::ExecutionCommitment;
