@@ -3,9 +3,9 @@ use crate::{
     MerkleTrie,
 };
 use alloy_primitives::Bytes;
-use log::debug;
 use revm::primitives::HashMap;
 use serde::{Deserialize, Serialize};
+use tracing::debug;
 
 use super::block_header::EvmBlockHeader;
 
