@@ -9,26 +9,19 @@ use std::collections::BTreeMap;
 
 use super::node::Node;
 
-// TODO: Import StateAccount from guest in the next PR
 /// Hash of an empty byte array, i.e. `keccak256([])`.
 pub const KECCAK_EMPTY: B256 =
     b256!("c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470");
 
-/// Represents an account within the state trie.
 #[derive(Debug, Clone, PartialEq, Eq, RlpEncodable, RlpDecodable)]
 pub struct StateAccount {
-    /// The number of transactions sent from this account's address.
     pub nonce: TxNumber,
-    /// The number of Wei owned by this account's address.
     pub balance: U256,
-    /// The root of the account's storage trie.
     pub storage_root: B256,
-    /// The hash of the EVM code of this account.
     pub code_hash: B256,
 }
 
 impl Default for StateAccount {
-    /// Provides default values for a [StateAccount].
     fn default() -> Self {
         Self {
             nonce: 0,
