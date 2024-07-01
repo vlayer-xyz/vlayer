@@ -1,5 +1,10 @@
 name: Local prover
-on: [push, merge_group]
+on:
+  push:
+    paths:
+      - 'rust/**'
+      - 'examples/**'
+  merge_group:
 
 jobs:
   rust-prove:
