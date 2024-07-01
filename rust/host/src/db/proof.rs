@@ -12,6 +12,7 @@ use vlayer_engine::MerkleTrie;
 pub struct ProofDb<P> {
     accounts: HashMap<Address, HashSet<U256>>,
     contracts: HashMap<B256, Bytes>,
+    // Numbers of all block hashes requested by `blockhash(number)` calls.
     block_hash_numbers: HashSet<U256>,
 
     db: ProviderDb<P>,
@@ -58,6 +59,7 @@ impl<P: Provider> ProofDb<P> {
             db: ProviderDb::new(provider, block_number),
         }
     }
+
     pub fn contracts(&self) -> Vec<Bytes> {
         self.contracts.values().cloned().collect()
     }
