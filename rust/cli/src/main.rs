@@ -1,5 +1,5 @@
 use crate::errors::CLIError;
-use crate::misc::path::find_foundry_root;
+use crate::misc::path::find_foundry_toml;
 use clap::{Parser, Subcommand};
 use server::server::serve;
 
@@ -47,8 +47,8 @@ async fn run() -> Result<(), CLIError> {
                 "running 'vlayer init' from directory: {:?}",
                 std::env::current_dir()?
             );
-            let root = find_foundry_root()?;
-            println!("foundry root: {:?}", root);
+            let toml_path = find_foundry_toml()?;
+            println!("foundry.toml path: {:?}", toml_path);
         }
     }
     Ok(())
