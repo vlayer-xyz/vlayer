@@ -55,15 +55,15 @@ pub enum HostError {
 pub struct HostConfig {
     url: String,
     chain_id: u64,
-    block_number: u64,
+    start_block_number: u64,
 }
 
 impl HostConfig {
-    pub fn new(url: &str, chain_id: u64, block_number: u64) -> Self {
+    pub fn new(url: &str, chain_id: u64, start_block_number: u64) -> Self {
         HostConfig {
             url: url.to_string(),
             chain_id,
-            block_number,
+            start_block_number,
         }
     }
 }
@@ -80,13 +80,13 @@ impl Host<EthersProvider<EthersClient>> {
 
 impl<P: Provider<Header = EthBlockHeader>> Host<P> {
     pub fn try_new_with_provider(provider: P, config: HostConfig) -> Result<Self, HostError> {
-        let block_number = config.block_number;
+        let start_block_number = config.start_block_number;
         let header = provider
-            .get_block_header(block_number)
+            .get_block_header(start_block_number)
             .map_err(|err| HostError::Provider(err.to_string()))?
-            .ok_or(HostError::BlockNotFound(block_number))?;
+            .ok_or(HostError::BlockNotFound(start_block_number))?;
 
-        let db = ProofDb::new(provider, block_number);
+        let db = ProofDb::new(provider, start_block_number);
 
         Ok(Host { db, header, config })
     }
