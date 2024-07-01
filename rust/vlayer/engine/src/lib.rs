@@ -6,9 +6,6 @@ pub mod engine;
 pub mod ethereum;
 pub mod evm;
 pub mod io;
-pub mod mpt;
-
-pub use mpt::MerkleTrie;
 
 // Keep everything in the Steel library private except the commitment.
 mod private {

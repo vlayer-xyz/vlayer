@@ -1,4 +1,4 @@
-use crate::MerkleTrie;
+use mpt::MerkleTrie;
 use alloy_primitives::Bytes;
 use serde::{Deserialize, Serialize};
 use tracing::debug;
