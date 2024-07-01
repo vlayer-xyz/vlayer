@@ -5,7 +5,7 @@ import {IRiscZeroVerifier} from "risc0-ethereum/IRiscZeroVerifier.sol";
 import {Steel} from "vlayer/Steel.sol";
 
 contract Simple {
-    bytes32 public constant GUEST_ID = bytes32(0xb7079f57c71b4e1d95b8b1254303e13f78914599a8c119534c4c947c996b4d7d);
+    bytes32 public constant GUEST_ID = bytes32(0xb8d08f84d65bc7aadd17445d52f12be026dce5b26587534860b8a7660e8741b4);
 
     IRiscZeroVerifier verifier;
     uint256 public latestSum;
@@ -21,7 +21,7 @@ contract Simple {
     }
 
     function _verify(bytes calldata seal, Steel.ExecutionCommitment memory commitment, uint256 sum) private view {
-        bytes32 computedJournalHash = keccak256(abi.encode(commitment, sum));
+        bytes32 computedJournalHash = sha256(abi.encode(commitment, sum));
 
         verifier.verify(seal, GUEST_ID, computedJournalHash);
     }

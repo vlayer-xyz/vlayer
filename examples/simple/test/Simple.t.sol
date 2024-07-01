@@ -14,7 +14,7 @@ contract SimpleTest is Test {
     Simple public simple;
     RiscZeroMockVerifier public verifier;
 
-    bytes32 public constant GUEST_ID = bytes32(0xb7079f57c71b4e1d95b8b1254303e13f78914599a8c119534c4c947c996b4d7d);
+    bytes32 public constant GUEST_ID = bytes32(0xb8d08f84d65bc7aadd17445d52f12be026dce5b26587534860b8a7660e8741b4);
 
     // journal value should be taken from host execution
     uint8[160] journal = [
@@ -30,8 +30,14 @@ contract SimpleTest is Test {
             0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x03
     ];
 
+    uint8[256] s = [
+         9, 109, 139, 231, 39, 228, 37, 99, 40, 137, 123, 196, 183, 205, 137, 50, 0, 242, 62, 35, 180, 103, 60, 70, 118, 151, 14, 103, 242, 112, 248, 96, 45, 132, 134, 1, 212, 1, 184, 176, 231, 12, 23, 190, 76, 66, 106, 92, 243, 206, 151, 24, 172, 245, 80, 102, 54, 102, 188, 88, 91, 250, 88, 52, 36, 96, 70, 164, 94, 62, 46, 132, 146, 80, 83, 92, 229, 56, 204, 48, 128, 114, 150, 4, 76, 122, 137, 23, 108, 244, 229, 29, 109, 87, 177, 216, 5, 23, 254, 192, 97, 29, 177, 180, 172, 95, 44, 166, 130, 57, 189, 76, 171, 233, 166, 142, 132, 100, 170, 122, 21, 174, 145, 140, 128, 190, 31, 117, 9, 215, 59, 46, 5, 132, 69, 12, 191, 128, 247, 199, 117, 182, 158, 126, 15, 154, 80, 45, 25, 81, 154, 4, 165, 173, 160, 252, 236, 79, 174, 197, 18, 219, 236, 82, 55, 203, 12, 191, 100, 215, 142, 201, 139, 218, 62, 103, 219, 22, 168, 40, 178, 19, 32, 105, 233, 50, 176, 101, 119, 22, 160, 42, 5, 179, 171, 126, 108, 40, 185, 197, 35, 41, 49, 15, 120, 118, 98, 128, 168, 214, 59, 109, 68, 212, 181, 168, 161, 224, 156, 11, 199, 106, 5, 163, 24, 108, 73, 37, 109, 3, 65, 116, 73, 215, 43, 197, 142, 36, 209, 97, 123, 11, 171, 52, 150, 46, 64, 238, 148, 174, 114, 200, 93, 96, 106, 23
+    ];
+
     bytes journalBytes;
     bytes32 journalHash;
+
+    bytes seal;
 
     function setUp() public {
         verifier = new RiscZeroMockVerifier(bytes4(0));
@@ -83,7 +89,11 @@ contract SimpleTest is Test {
         RiscZeroGroth16Verifier groth16Verifier = new RiscZeroGroth16Verifier(ControlID.CONTROL_ROOT, ControlID.BN254_CONTROL_ID);
         simple = new Simple(groth16Verifier);
 
-        bytes memory seal = new bytes(0);
+        for(uint i = 0; i < s.length; i++){
+            seal.push(bytes1(s[i]));
+        }
+
+        emit logs(seal);
 
         simple.updateSum(seal, fixture_commitment(), fixture_sum());
         assertEq(simple.latestSum(), 3);
