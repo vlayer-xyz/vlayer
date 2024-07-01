@@ -16,7 +16,7 @@ url = { version = "2.4", default-features = false }
 alloy-sol-types = { workspace = true }
 anyhow = "1.0"
 log = {version="0.4"}
-revm = { version = "9.0", default-features = false, features = ["serde", "std"] }
+revm = { version = "10.0", default-features = false, features = ["serde", "std"] }
 serde = "1.0"
 serde_json = { version = "1.0" }
 tokio = { workspace = true }
