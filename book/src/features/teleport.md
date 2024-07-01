@@ -34,4 +34,8 @@ contract NftOwnership is Prover {
   }
 }
 ```
+First call to `setChainId(1)` configures the desired chain to the Ethereum mainnet (`chainId = 1`). Function named `check_byac_ownership()` would check ownership of NFT in Ethereum Mainnet. In case caller doesn't have balance of specified NFT, contract would abort execution and throw error (thanks to `require()` check).
 
+Next call `setChainId(42161)` switches the context to the Arbitrum chain. Then the `check_sandbox_ownership` function checks the ownership of NFT, but this time on a different chain (Arbitrum).
+
+Chain ids can be taken from the documentation of the given network or from [chainlist.org](https://chainlist.org/).
