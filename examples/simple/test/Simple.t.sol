@@ -5,6 +5,7 @@ import {Test, console} from "forge-std/Test.sol";
 
 import {Receipt, VerificationFailed} from "risc0-ethereum/IRiscZeroVerifier.sol";
 import {RiscZeroMockVerifier} from "risc0-ethereum/test/RiscZeroMockVerifier.sol";
+import {ControlID, RiscZeroGroth16Verifier} from "risc0-ethereum/groth16/RiscZeroGroth16Verifier.sol";
 
 import {Steel} from "vlayer/Steel.sol";
 import {Simple} from "../src/Simple.sol";
@@ -75,6 +76,17 @@ contract SimpleTest is Test {
 
         vm.expectRevert(VerificationFailed.selector);
         simple.updateSum(seal, fixture_commitment(), 4);
+    }
+
+    function test_updateSum_validatesActualGroth16Proof() public {
+
+        RiscZeroGroth16Verifier groth16Verifier = new RiscZeroGroth16Verifier(ControlID.CONTROL_ROOT, ControlID.BN254_CONTROL_ID);
+        simple = new Simple(groth16Verifier);
+
+        bytes memory seal = new bytes(0);
+
+        simple.updateSum(seal, fixture_commitment(), fixture_sum());
+        assertEq(simple.latestSum(), 3);
     }
 
 }
