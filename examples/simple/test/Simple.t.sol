@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 
 import {Test, console} from "forge-std/Test.sol";
 
-import {Receipt} from "risc0-ethereum/IRiscZeroVerifier.sol";
+import {Receipt, VerificationFailed} from "risc0-ethereum/IRiscZeroVerifier.sol";
 import {RiscZeroMockVerifier} from "risc0-ethereum/test/RiscZeroMockVerifier.sol";
 
 import {Steel} from "vlayer/Steel.sol";
@@ -66,14 +66,14 @@ contract SimpleTest is Test {
     function test_updateSum_revertsForInvalidGuestId() public {
         bytes memory seal = verifier.mockProve(bytes32(0), journalHash).seal;
 
-        vm.expectRevert();
+        vm.expectRevert(VerificationFailed.selector);
         simple.updateSum(seal, fixture_commitment(), fixture_sum());
     }
 
     function test_updateSum_revertsForInvalidCalldata() public {
         bytes memory seal = verifier.mockProve(GUEST_ID, journalHash).seal;
 
-        vm.expectRevert();
+        vm.expectRevert(VerificationFailed.selector);
         simple.updateSum(seal, fixture_commitment(), 4);
     }
 
