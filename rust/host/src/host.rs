@@ -52,7 +52,7 @@ pub enum HostError {
 
 pub struct HostConfig {
     url: String,
-    chain_id: u64,
+    start_chain_id: u64,
     start_block_number: u64,
 }
 
@@ -60,7 +60,7 @@ impl HostConfig {
     pub fn new(url: &str, chain_id: u64, start_block_number: u64) -> Self {
         HostConfig {
             url: url.to_string(),
-            chain_id,
+            start_chain_id: chain_id,
             start_block_number,
         }
     }
@@ -90,7 +90,11 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
     }
 
     pub fn run(mut self, call: Call) -> Result<HostOutput, HostError> {
-        let engine = Engine::try_new(&mut self.db, self.header.clone(), self.config.chain_id)?;
+        let engine = Engine::try_new(
+            &mut self.db,
+            self.header.clone(),
+            self.config.start_chain_id,
+        )?;
         let host_output = engine.call(&call)?;
 
         let evm_input = into_input(self.db, self.header.seal_slow())
