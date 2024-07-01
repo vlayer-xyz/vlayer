@@ -1,6 +1,11 @@
 name: Forge test
 
-on: [push, merge_group]
+on:
+  push:
+    paths:
+      - 'rust/**'
+      - 'examples/**'
+  merge_group:
 
 env:
   FOUNDRY_PROFILE: ci

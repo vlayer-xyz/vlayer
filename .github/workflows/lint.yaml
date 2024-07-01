@@ -1,5 +1,10 @@
 name: Lint
-on: [push, merge_group]
+
+on:
+  push:
+    paths:
+      - 'rust/**'
+  merge_group:
 
 jobs:
   rust-lint:

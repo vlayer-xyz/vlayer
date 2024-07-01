@@ -9,7 +9,7 @@ vlayer allows to execute smart contracts [off-chain](/getting-started/first-step
 ### Sections
 **[Getting Started](./getting-started/installation.md)**
 
-To get started with, [install vlayer]((./getting-started/installation.md)) and set up your first project.
+To get started with xoxo, [install vlayer]((./getting-started/installation.md)) and set up your first project.
 
 
 **Contributing**
