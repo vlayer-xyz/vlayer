@@ -21,6 +21,7 @@ risc0-zkvm = { workspace = true}
 revm = { version = "9.0", default-features = false, features = ["serde", "std"] }
 rlp = "0.5.2"
 serde = "1.0"
+log = {version="0.4"}
 thiserror = { workspace = true }
 
 

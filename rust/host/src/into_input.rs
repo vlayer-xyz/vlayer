@@ -65,21 +65,15 @@ pub fn into_input<P: Provider>(
         }
     }
 
-    debug!("state size: {}", state_trie.size());
-    debug!("storage tries: {}", storage_tries.len());
-    debug!(
-        "total storage size: {}",
-        storage_tries.iter().map(|t| t.size()).sum::<usize>()
-    );
-    debug!("contracts: {}", contracts.len());
-    debug!("blocks: {}", ancestors.len());
-
     let header = header.into_inner();
-    Ok(EvmInput {
+    let evm_input = EvmInput {
         header,
         state_trie,
         storage_tries,
         contracts,
         ancestors,
-    })
+    };
+    evm_input.print_sizes();
+
+    Ok(evm_input)
 }

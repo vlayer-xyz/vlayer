@@ -3,13 +3,14 @@ use crate::{
     MerkleTrie,
 };
 use alloy_primitives::Bytes;
+use log::debug;
 use revm::primitives::HashMap;
 use serde::{Deserialize, Serialize};
 
 use super::block_header::EvmBlockHeader;
 
 /// The serializable input to derive and validate a [EvmEnv].
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Serialize, Deserialize)]
 pub struct EvmInput<H> {
     pub header: H,
     pub state_trie: MerkleTrie,
@@ -56,5 +57,15 @@ impl<H: EvmBlockHeader + Clone> EvmInput<H> {
         ));
 
         (db, header.inner().clone())
+    }
+
+    pub fn print_sizes(&self) {
+        let total_storage_size: usize = self.storage_tries.iter().map(|t| t.size()).sum();
+
+        debug!("state size: {}", self.state_trie.size());
+        debug!("storage tries: {}", self.storage_tries.len());
+        debug!("total storage size: {}", total_storage_size);
+        debug!("contracts: {}", self.contracts.len());
+        debug!("blocks: {}", self.ancestors.len());
     }
 }
