@@ -7,7 +7,7 @@ vlayer gives smart contracts superpowers, such as [time travel](/features/time-t
 vlayer allows to execute smart contracts [off-chain](/getting-started/first-steps.html#off-chain-execution). The result of the execution can be then used by on-chain contracts.
 
 ### Sections
-**[Getting Started](./getting-started/installation.md)**
+**Getting Started**
 
 To get started with vlayer, [install vlayer]((./getting-started/installation.md)), set up your [first project](/getting-started/first-steps.html) and check out the explainer section to learn [how vlayer works]((/getting-started/how-it-works.html)).
 
