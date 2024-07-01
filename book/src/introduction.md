@@ -9,7 +9,11 @@ vlayer allows to execute smart contracts [off-chain](/getting-started/first-step
 ### Sections
 **[Getting Started](./getting-started/installation.md)**
 
-To get started with xoxo, [install vlayer]((./getting-started/installation.md)) and set up your first project.
+To get started with vlayer, [install vlayer]((./getting-started/installation.md)), set up your [first project](/getting-started/first-steps.html) and check out the explainer section to learn [how vlayer works]((/getting-started/how-it-works.html)).
+
+**Features**
+
+See how to [time travel](/features/time-travel.html) across block numbers and [teleport](/features/teleport.html) from one chain to another.
 
 
 **Contributing**
