@@ -10,6 +10,7 @@ use risc0_zkvm::{default_prover, ExecutorEnv};
 use thiserror::Error;
 use vlayer_engine::engine::{Engine, EngineError};
 use vlayer_engine::ethereum::EthBlockHeader;
+use vlayer_engine::io::GuestOutputError;
 use vlayer_engine::io::{Call, GuestOutput, HostOutput, Input};
 
 const MAX_RETRY: u32 = 3;
@@ -48,6 +49,12 @@ pub enum HostError {
 
     #[error("Prover error: {0}")]
     Prover(String),
+
+    #[error("Guest output error: {0}")]
+    GuestOutput(#[from] GuestOutputError),
+
+    #[error("Host output does not match guest output: {0:?} {1:?}")]
+    HostGuestOutputMismatch(Vec<u8>, Vec<u8>),
 }
 
 pub struct HostConfig {
@@ -102,11 +109,19 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
         let input = Input { call, evm_input };
         let env = Self::build_executor_env(&input)?;
 
-        let guest_output = Self::prove(env, GUEST_ELF)?;
+        let raw_guest_output = Self::prove(env, GUEST_ELF)?;
+        let guest_output = GuestOutput::from_outputs(&host_output, &raw_guest_output)?;
+
+        if guest_output.evm_call_result != host_output {
+            return Err(HostError::HostGuestOutputMismatch(
+                host_output,
+                guest_output.evm_call_result,
+            ));
+        }
 
         Ok(HostOutput {
-            guest_output: GuestOutput::from_outputs(&host_output, &guest_output),
-            raw_abi: guest_output,
+            guest_output,
+            raw_abi: raw_guest_output,
         })
     }
 
