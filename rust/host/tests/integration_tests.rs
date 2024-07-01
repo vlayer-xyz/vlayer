@@ -17,7 +17,7 @@ where
     let null_rpc_url = "a null url value as url is not needed in tests";
     let config = HostConfig::new(null_rpc_url, chain_id, block_number);
     let host = Host::try_new_with_provider(test_provider, config)?;
-    let raw_return_value = host.run(call)?.evm_call_result;
+    let raw_return_value = host.run(call)?.guest_output.evm_call_result;
     let return_value = C::abi_decode_returns(&raw_return_value, false)?;
     Ok(return_value)
 }
