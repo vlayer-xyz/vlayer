@@ -19,6 +19,18 @@ pub struct EvmInput<H> {
     pub ancestors: Vec<H>,
 }
 
+impl<H> EvmInput<H> {
+    pub fn print_sizes(&self) {
+        let total_storage_size: usize = self.storage_tries.iter().map(|t| t.size()).sum();
+
+        debug!("state size: {}", self.state_trie.size());
+        debug!("storage tries: {}", self.storage_tries.len());
+        debug!("total storage size: {}", total_storage_size);
+        debug!("contracts: {}", self.contracts.len());
+        debug!("blocks: {}", self.ancestors.len());
+    }
+}
+
 impl<H: EvmBlockHeader + Clone> EvmInput<H> {
     /// Converts the input into a [EvmEnv] for execution.
     ///
@@ -57,15 +69,5 @@ impl<H: EvmBlockHeader + Clone> EvmInput<H> {
         ));
 
         (db, header.inner().clone())
-    }
-
-    pub fn print_sizes(&self) {
-        let total_storage_size: usize = self.storage_tries.iter().map(|t| t.size()).sum();
-
-        debug!("state size: {}", self.state_trie.size());
-        debug!("storage tries: {}", self.storage_tries.len());
-        debug!("total storage size: {}", total_storage_size);
-        debug!("contracts: {}", self.contracts.len());
-        debug!("blocks: {}", self.ancestors.len());
     }
 }
