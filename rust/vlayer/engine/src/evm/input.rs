@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use tracing::debug;
 
 /// The serializable input to derive and validate a [EvmEnv].
-#[derive(Clone, Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize)]
 pub struct EvmInput<H> {
     pub header: H,
     pub state_trie: MerkleTrie,
