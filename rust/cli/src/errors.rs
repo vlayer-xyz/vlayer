@@ -12,4 +12,6 @@ pub enum CLIError {
     NoFoundryError,
     #[error("{0}")]
     AnyhowError(#[from] anyhow::Error),
+    #[error("Error parsing TOML:\n {0}")]
+    TomlError(String),
 }

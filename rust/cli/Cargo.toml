@@ -12,6 +12,7 @@ clap = { version = "4.5.7", features = ["derive"] }
 tokio = { workspace = true }
 anyhow = { workspace = true }
 thiserror = { workspace = true }
+toml = "0.8.14"
 
 server = { path = "../server" }
 
