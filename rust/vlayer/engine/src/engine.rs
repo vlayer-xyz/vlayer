@@ -71,15 +71,14 @@ where
             .transact_preverified()
             .map_err(|err| EngineError::TransactPreverifiedError(format!("{:?}", err)))?;
 
-        if let ExecutionResult::Success {
+        let ExecutionResult::Success {
             reason: SuccessReason::Return,
             output,
             ..
         } = result
-        {
-            Ok(output.into_data().into())
-        } else {
-            Err(EngineError::TransactError(format!("{:?}", result)))
-        }
+        else {
+            return Err(EngineError::TransactError(format!("{:?}", result)));
+        };
+        Ok(output.into_data().into())
     }
 }
