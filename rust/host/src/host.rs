@@ -3,7 +3,6 @@ use crate::into_input::into_input;
 use crate::provider::EthersProviderError;
 use crate::provider::{EthersProvider, Provider};
 use alloy_primitives::Sealable;
-use alloy_sol_types::SolValue;
 use ethers_providers::Provider as OGEthersProvider;
 use ethers_providers::{Http, ProviderError, RetryClient};
 use guest_wrapper::GUEST_ELF;
@@ -12,7 +11,6 @@ use thiserror::Error;
 use vlayer_engine::engine::{Engine, EngineError};
 use vlayer_engine::ethereum::EthBlockHeader;
 use vlayer_engine::io::{Call, GuestOutput, HostOutput, Input};
-use vlayer_engine::ExecutionCommitment;
 
 const MAX_RETRY: u32 = 3;
 const INITIAL_BACKOFF: u64 = 500;
@@ -92,41 +90,19 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
     }
 
     pub fn run(mut self, call: Call) -> Result<HostOutput, HostError> {
-        let preflight_returns =
-            Engine::try_new(&mut self.db, self.header.clone(), self.config.chain_id)?
-                .call(&call)?;
+        let engine = Engine::try_new(&mut self.db, self.header.clone(), self.config.chain_id)?;
+        let host_output = engine.call(&call)?;
 
-        let input = Input {
-            call,
-            evm_input: into_input(self.db, self.header.seal_slow())
-                .map_err(|err| HostError::CreatingInput(err.to_string()))?,
-        };
+        let evm_input = into_input(self.db, self.header.seal_slow())
+            .map_err(|err| HostError::CreatingInput(err.to_string()))?;
+        let input = Input { call, evm_input };
+        let env = Self::build_executor_env(&input)?;
 
-        let env = ExecutorEnv::builder()
-            .write(&input)
-            .map_err(|err| HostError::ExecutorEnvBuilder(err.to_string()))?
-            .build()
-            .map_err(|err| HostError::ExecutorEnvBuilder(err.to_string()))?;
-
-        let guest_returns = Host::<P>::prove(env, GUEST_ELF)?;
-
-        let execution_commitment_len = guest_returns.len() - preflight_returns.len();
-
-        let execution_commitment_abi_encoded = &guest_returns[..execution_commitment_len];
-        let evm_call_result_abi_encoded = &guest_returns[execution_commitment_len..];
-
-        assert_eq!(&preflight_returns, evm_call_result_abi_encoded);
+        let guest_output = Self::prove(env, GUEST_ELF)?;
 
         Ok(HostOutput {
-            guest_output: GuestOutput {
-                execution_commitment: ExecutionCommitment::abi_decode(
-                    execution_commitment_abi_encoded,
-                    true,
-                )
-                .expect("Cannot decode execution commitment"),
-                evm_call_result: evm_call_result_abi_encoded.to_vec(),
-            },
-            raw_abi: guest_returns,
+            guest_output: GuestOutput::from_outputs(&host_output, &guest_output),
+            raw_abi: guest_output,
         })
     }
 
@@ -136,5 +112,14 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
             .prove(env, guest_elf)
             .map(|p| p.receipt.journal.bytes)
             .map_err(|err| HostError::Prover(err.to_string()))
+    }
+
+    fn build_executor_env(input: &Input) -> Result<ExecutorEnv, HostError> {
+        let env = ExecutorEnv::builder()
+            .write(&input)
+            .map_err(|err| HostError::ExecutorEnvBuilder(err.to_string()))?
+            .build()
+            .map_err(|err| HostError::ExecutorEnvBuilder(err.to_string()))?;
+        Ok(env)
     }
 }
