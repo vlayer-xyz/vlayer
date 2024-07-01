@@ -2,7 +2,7 @@ use alloy_primitives::{Address, BlockNumber, Sealable, B256};
 
 use revm::primitives::BlockEnv;
 
-use crate::SolCommitment;
+use crate::ExecutionCommitment;
 
 /// An EVM abstraction of a block header.
 pub trait EvmBlockHeader: Sealable {
@@ -15,12 +15,12 @@ pub trait EvmBlockHeader: Sealable {
     /// Returns the state root hash.
     fn state_root(&self) -> &B256;
 
-    /// Returns the [SolCommitment] used to validate the environment.
+    /// Returns the [ExecutionCommitment] used to validate the environment.
     fn execution_commitment(
         &self,
         start_contract_address: Address,
         function_selector: [u8; 4],
-    ) -> SolCommitment;
+    ) -> ExecutionCommitment;
     /// Fills the EVM block environment with the header's data.
     fn fill_block_env(&self, blk_env: &mut BlockEnv);
 }

@@ -12,7 +12,7 @@ use thiserror::Error;
 use vlayer_engine::engine::{Engine, EngineError};
 use vlayer_engine::ethereum::EthBlockHeader;
 use vlayer_engine::io::{Call, GuestOutput, HostOutput, Input};
-use vlayer_engine::SolCommitment;
+use vlayer_engine::ExecutionCommitment;
 
 const MAX_RETRY: u32 = 3;
 const INITIAL_BACKOFF: u64 = 500;
@@ -119,7 +119,7 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
 
         Ok(HostOutput {
             guest_output: GuestOutput {
-                execution_commitment: SolCommitment::abi_decode(
+                execution_commitment: ExecutionCommitment::abi_decode(
                     execution_commitment_abi_encoded,
                     true,
                 )

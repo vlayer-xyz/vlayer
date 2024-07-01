@@ -1,7 +1,7 @@
 //! Type aliases for Ethereum.
 use crate::{
     evm::{block_header::EvmBlockHeader, env::EvmEnv, input::EvmInput},
-    SolCommitment,
+    ExecutionCommitment,
 };
 
 use alloy_primitives::{
@@ -94,8 +94,8 @@ impl EvmBlockHeader for EthBlockHeader {
         &self,
         start_contract_address: Address,
         function_selector: [u8; 4],
-    ) -> SolCommitment {
-        SolCommitment {
+    ) -> ExecutionCommitment {
+        ExecutionCommitment {
             startContractAddress: start_contract_address,
             functionSelector: function_selector.into(),
             settleBlockHash: self.clone().seal_slow().seal(),

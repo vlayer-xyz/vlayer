@@ -2,7 +2,7 @@ use alloy_primitives::Address;
 use serde::{Deserialize, Serialize};
 
 use crate::ethereum::EthEvmInput;
-use crate::SolCommitment;
+use crate::ExecutionCommitment;
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Input {
@@ -27,13 +27,8 @@ impl Default for Call {
     }
 }
 
-pub struct Output {
-    pub execution_commitment: SolCommitment,
-    pub evm_call_result: Vec<u8>,
-}
-
 pub struct GuestOutput {
-    pub execution_commitment: SolCommitment,
+    pub execution_commitment: ExecutionCommitment,
     pub evm_call_result: Vec<u8>,
 }
 
