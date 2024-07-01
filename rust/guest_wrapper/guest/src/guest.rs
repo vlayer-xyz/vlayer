@@ -41,7 +41,10 @@ impl Guest {
         GuestOutput {
             execution_commitment: self.header.execution_commitment(call.to, function_selector),
 
-            evm_call_result,
+            evm_call_result: Engine::try_new(&mut self.db, self.header.clone(), SEPOLIA_ID)
+                .unwrap()
+                .call(&call)
+                .unwrap(),
         }
     }
 }
