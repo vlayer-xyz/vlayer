@@ -10,22 +10,25 @@ pub(crate) fn find_foundry_root() -> Result<PathBuf, CLIError> {
 
 fn find_foundry_root_from(start: &PathBuf) -> Result<PathBuf, CLIError> {
     let git_root = find_git_root(start)?;
+    find_foundry_root_from_rec(start, &git_root)
+}
 
-    let mut current = start.as_path().canonicalize()?;
-
-    // traverse as long as we're in the current git repository
-    while current.starts_with(&git_root) {
-        let file_path = current.join("foundry.toml");
-        if file_path.is_file() {
-            return Ok(current.to_path_buf());
-        }
-        if let Some(parent) = current.parent() {
-            current = parent.to_path_buf();
-        } else {
-            break;
-        }
+fn find_foundry_root_from_rec(cwd: &Path, git_root: &PathBuf) -> Result<PathBuf, CLIError> {
+    // recursive version
+    if !cwd.starts_with(git_root) {
+        return Err(CLIError::NoFoundryError);
     }
-    Err(CLIError::NoFoundryError)
+
+    let path = cwd.join("foundry.toml");
+
+    if path.is_file() {
+        return Ok(cwd.to_path_buf());
+    }
+    if let Some(parent) = cwd.parent() {
+        find_foundry_root_from_rec(parent, git_root)
+    } else {
+        Err(CLIError::NoFoundryError)
+    }
 }
 
 /// https://github.com/foundry-rs/foundry/blob/fbd225194dff17352ba740cb3d6f2ad082030dd1/crates/config/src/utils.rs
