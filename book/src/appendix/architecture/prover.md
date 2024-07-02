@@ -111,7 +111,7 @@ The environment in which the execution will take place is stored in the generic 
 
 #### Block header
 
-The block header type might vary on different sidechains and L2s. Currently, `EthBlockHeader`, originally implemented by Steel, is used. Whether we can reuse the type from Reth instead is an open question.
+The block header type might vary on different sidechains and L2s. 
 
 #### Life cycle
 
