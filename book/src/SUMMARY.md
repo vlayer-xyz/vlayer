@@ -10,6 +10,7 @@
 - [Time travel](./features/time-travel.md)
 - [Teleport](./features/teleport.md)
 - [Email](./features/email.md)
+- [Web](./features/web.md)
 
 # Contributing
 - [vlayer](./contributing/vlayer.md)

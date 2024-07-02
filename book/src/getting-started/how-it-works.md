@@ -5,8 +5,8 @@ vlayer introduces two new types of contracts: Prover and Verifier. The Prover co
 Compared to regular contracts, vlayer smart contracts introdcues new features such as:
 * **[time travel](/features/time-travel.html)** - ability to execute smart contracts on historical data
 * **[teleport](/features/teleport.html)** - ability to execute smart contracts in the context of different chains
-* **web content** - access to verified web content (APIs and websites)
-* **emails** - access to verfied content of emails
+* **[emails](/features/email.html)** - access to verfied content of emails
+* **[web](/features/web.html)** - access to verified web content (APIs and websites)
 
 ## vlayer contract execution
 A typical vlayer execution flow has three steps:
