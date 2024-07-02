@@ -55,11 +55,11 @@ See the example Verifer contract below:
 
 ```solidity
 address NFT_OWNERSHIP_VLAYER_CONTRACT = 0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d;
-bytes4 constant FUNCTION_SELECTOR = bytes4(keccak256(abi.encodePacked("main()")));
 
 contract Airdrop is Verifier {
-  function claimOnce(Proof calldata proof, address owner) public 
-    onlyVerified(NFT_OWNERSHIP_VLAYER_CONTRACT, FUNCTION_SELECTOR) 
+  function claimOnce(Proof calldata proof, address owner) 
+    public 
+    onlyVerified(NFT_OWNERSHIP_VLAYER_CONTRACT, NftOwnership.main.selector) 
   {
     IAwesomeToken(TOKEN_ADDR).transfer(sender, 1000);
   }
