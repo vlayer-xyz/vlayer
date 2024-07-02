@@ -1,17 +1,43 @@
 # Email
 
 ## Significance of the mail
-Many online services, from social media platforms to e-commerce sites, require an email address for account creation. According to recent surveys, over 80% of businesses consider email to be their primary communication channel, both internally and with customers.  
+Many online services, from social media platforms to e-commerce sites, require an email address to create an account. According to recent surveys, more than 80% of businesses consider email to be their primary communication channel, both internally and with customers. 
 
 All of this means that our inboxes are full of data that can be leveraged.
 
 ## Proof of Email
-With vlayer, you can access emails data from smart contracts and utilize it on-chain. The email authenticity is automatically proven under the hood. Moreover, you can generate claims on-chain without revealing detail content of the mail. 
+With vlayer, you can access email data from smart contracts and use it on-chain. Email authenticity is automatically proven under the hood. In addition, you can settle claims on-chain without exposing the details or private content of an email.
 
-## Mail structure
+## Example
+Let's say someone wants to prove they've been a Github user since 2020. One way to do this is to take a screenshot and send it to the verifier. However, this is not very reliable as screenshot images can be easily manipulated. The second idea could be to use the Github API, but let's assume that it is not available at the moment.
+
+Another option is to prove that Github mail servers sent a welcome email on a certain date. Below is an example `Prover` contract that verifies that the caller (`msg.sender`) created a Github account before 2020.
 
 ```solidity
-struct {
+contract GithubEmail is Prover {
+    function main() public returns (bool) {      
+      require(mail.subject.compare("Welcome to Github"), "incorrect subject")
+      require(mail.from.compare("notifications@github.com"), "incorrect sender")
+      require(mail.to[0].compare("john.prover@gmail.com"), "wrong recipient")
+      
+      // Wed Jan 01 2020 00:00:00 GMT+0100
+      require(mail.received_at < 1577833200, "email received after 2020") 
+
+      return true;
+    }
+}
+```
+The `mail` structure is automatically injected into the contract context of the mail prover by the vlayer SDK. Then we have a series of assertions (regular Solidity `require()`) that check the mail details. 
+
+String comparison is handled by our `StringUtils` library (described in more [details below](/features/mail.html#stringutils)). Date values are formatted in the [Unix time](https://en.wikipedia.org/wiki/Unix_time) notation, which allows them to be compared as integer values.
+
+> Comparisons with false results or forged data will abort execution and prevent the generation of a valid proof.
+
+## Mail structure
+The `mail` structure of type `Mail` is injected into the `Prover` and can be used in a `main()` function.
+
+```solidity
+struct Mail {
   string subject;
   string body;
   string from;
@@ -19,36 +45,58 @@ struct {
   uint received_at;
 }
 ```
-
-The `mail` structure of type `Mail` is injected into the `Prover` and can be used in a function. A `Mail` consists of the following fields:
+A `Mail` consists of the following fields
 - `subject` - a string with the subject of the mail
-- `body` - a string consisting of the entire email body
-- `from` -  a string consisting of the email address of the sender (no name is available). 
+- `body` - a string consisting of the entire body of the mail
+- `from` - a string consisting of the sender's email address (no name is available) 
 - `to` - an array of strings containing the list of emails of the intended recipients (no names available)
-- `received_at` - `uint` representing a timestamp when the email arrived at the destination mail server.
+- `received_at` - `uint` representing a timestamp of when the email arrived at the destination mail server.
 
-By inspecting and parsing email payload elements, we can generate a claim to be leveraged on-chain.
+By inspecting and parsing the email payload elements, we can generate a claim to be used on-chain.
 
 ## StringUtils
-For convenient manipulation of strings, vlayer provides `StringUtils` library, which consists of functions like:
+For convenient manipulation of strings, vlayer provides StringUtils library, which consists of functions like:
 * `toAddress` - converts a string to an address if properly formatted, otherwise reverts
 * `match` - matches RegExp pattern groups and returns them as a string
+* `compare` - compares the contents of two strings. Returns true if both are equal, false otherwise.
 
-## Example
-Below is an example of a `Prover` smart contract parsing a mail. It assumes the mail is in predefined format and it extracts data required to recover an access to a multisig wallet.
+## Wallet Recovery Example
+Below is another example of a `Prover` smart contract parsing an email. However, this time the use case is a bit more advanced and allows the caller to recover access to a MultiSig wallet (a smart contract that allows multiple wallets to authorize transactions).  
+
+The following implementation assumes that the recovery mail is in a predefined format and it extracts data required to recover access to a MultiSig wallet. 
+
+To change the authorized account (recovery procedure), the user just needs to send the following email: 
+
+```
+Date: 02 Jul 24 14:52:18+0300 GMT
+From: john.prover@example.com
+To: <any email we trust>
+Subject: Wallet recovery of {old account address}
+Body: New wallet address {new account address}
+```
+Then such email content is extracted using the vlayer SDK (browser extension or local application) and passed to the `Prover` contract that parses it off-chain:
 
 ```solidity
 contract RecoveryEmail is Prover {
     using StringUtils for string;
+
+    address MULTISIG_ADDR = 0xfcF784b9525D2cbfdF77AbBE61e43b082369f17E;
+    MultiSigWallet wallet = MultiSigWallet(MULTISIG_ADDR);
 
     function main() public returns (string, string, address) {      
       string[] subjectMatches = mail.subject.match(
         "^Wallet recovery of (0x[a-fA-F0-9]{40})$"
       );
       require(subjectMatches.length == 1, "Invalid subject");
-      address contractAddress = subjectMatches[0].toAddress();
 
+      address lostWallet = subjectMatches[0].toAddress();
       string mailHash = keccak256(abi.encodePacked(mail.sender);
+      string recoveryMailHash = wallet.recoveryEmail(lostWallet);
+
+      require(
+        recoveryMailHash.compare(mailHash),
+        "wrong recovery email"
+      )
 
       string[] bodyMatches = mail.body.match(
         "^New wallet address: (0x[a-fA-F0-9]{40})$"
@@ -56,7 +104,23 @@ contract RecoveryEmail is Prover {
       require(bodyMatches.length == 1, "Invalid body");
       address newAddress = newbodyMatches[0].toAddress();
       
-      return (contractAddress, mailHash, newAddress, mail.received_at); 
+      return (lostWallet, mailHash, newAddress, mail.received_at); 
     }
 }
 ```
+
+What happens step by step in the above snippet? 
+* `RecoveryEmail` inherits from `Prover` to have special powers for off-chain proving. 
+* `MULTISIG_ADDR` stores the hardcoded address of the Multisig Wallet smart contract. 
+* `mail.subject.match` returns strings matching the regular expression for the subject, which must contain the correct wallet address to be recovered.
+* The `subjectMatches.length == 1` condition ensures that the subject is not malformed.
+* `recoveryMailHash.compare(mailHash)` check if correct email was used for recovery 
+* `mail.body.match` get new wallet address from body
+
+On successful execution, proof of computation is returned. It also returns the recovered wallet address, the email address hash, the new wallet address, and the email timestamp as public input.
+
+Now we can use the proof and public inputs for on-chain verification. 
+
+
+
+
