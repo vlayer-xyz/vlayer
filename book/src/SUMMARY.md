@@ -18,6 +18,7 @@
 # Appendix
 - [Architecture](./appendix/architecture/overview.md)
   - [Prover](./appendix/architecture/prover.md)
+  - [Multichain](./appendix/architecture/multi.md)
   - [Solidity](./appendix/architecture/solidity.md)
 - [JSON-RPC API](./appendix/api.md)
 
