@@ -1,5 +1,5 @@
-use mpt::MerkleTrie;
 use alloy_primitives::Bytes;
+use mpt::MerkleTrie;
 use serde::{Deserialize, Serialize};
 use tracing::debug;
 

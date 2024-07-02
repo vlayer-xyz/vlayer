@@ -7,6 +7,7 @@ edition = "2021"
 risc0-zkvm = { workspace = true }
 vlayer-engine = { path = "../vlayer/engine" }
 guest_wrapper = { path = "../guest_wrapper" }
+mpt = { path = "../mpt" }
 tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"], default-features = false }
 alloy-primitives = { workspace = true, features = ["rlp", "serde"] }
 ethers-providers = { workspace = true }
