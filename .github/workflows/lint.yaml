@@ -4,6 +4,8 @@ on:
   push:
     paths:
       - 'rust/**'
+    branches:
+      - '**' 
   merge_group:
 
 jobs:
