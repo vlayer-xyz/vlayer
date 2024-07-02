@@ -251,7 +251,7 @@ Instead of returning a result, to handle errors, `Guest` panics. It does need to
 ### Dependency injection
 All components should follow the dependency injection pattern, which means all dependencies should be passed via constructors. Hence, components should not need to touch nested members.
 
-There should be one build function per component, with accepts add its dependencies. <-- FIX ME
+There should be one build function per component. 
 
 ### Testing
 
