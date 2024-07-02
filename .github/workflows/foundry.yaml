@@ -5,6 +5,7 @@ on:
     paths:
       - 'rust/**'
       - 'examples/**'
+      - '.github/workflows/**'
     branches:
       - '**' 
   merge_group:

@@ -2,7 +2,8 @@ name: Book
 on:
   pull_request:
     paths:
-      - 'book/**'    
+      - 'book/**' 
+      - '.github/workflows/**'  
     branches:
       - '**'  # Run on pull requests to any branch
   push:

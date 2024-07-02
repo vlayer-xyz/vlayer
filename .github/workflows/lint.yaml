@@ -4,6 +4,7 @@ on:
   push:
     paths:
       - 'rust/**'
+      - '.github/workflows/**'
     branches:
       - '**' 
   merge_group:
