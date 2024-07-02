@@ -3,11 +3,11 @@
 ## Proving
 
 On-chain verification is implemented by using a customized function with the following arguments:
-- `Proof` structure, which contains data required to verify arguments from the point below
-- list of arguments in the same order as returned by the prover (public output)
+- the `Proof` structure, which contains data required to verify arguments from the point below
+- a list of arguments in the same order as returned by the `Prover` (public output)
 - optionally, user defined additional arguments
 
-The verification function should use `onlyVerified()` modifier, which takes two arguments, the address of a smart contract and selector of function that was executed in prover contract.
+The verification function should use the `onlyVerified()` modifier, which takes two arguments, the address of a smart contract and a selector of function that was executed in the `Prover` contract.
 
 See example verification function below:
 
@@ -24,7 +24,9 @@ contract Example is Verifier {
 
 ## Data flow
 
-Proving data flow is composed of three steps. It starts at guest, which returns `GuestOutput`. GuestOutput consist of two fields: `execution_commitment` and `evm_call_result`. See the code snippets below for pseudocode:
+Proving data flow is composed of three steps. It starts at `Guest`, which returns `GuestOutput`. `GuestOutput` consist of two fields: `execution_commitment` and `evm_call_result`. 
+
+See the code snippets below for pseudocode:
 
 ```rust
 pub struct GuestOutput {
@@ -42,13 +44,13 @@ struct ExecutionCommitment {
 }
 ```
 
-> Note that ExecutionCommitment structure is generated based on solidity code from `Steel::Commitment`, with `sol!` macro.
+> Note that `ExecutionCommitment` structure is generated based on Solidity code from `Steel::Commitment`, with `sol!` macro.
 
-Then data is prepended on the Host with two additional fields `length` and `seal`. Host returns it via JSON RPC `v_call` method, as string of bytes, in `result` field.
+Then the data is prepended on the `Host` with two additional fields `length` and `seal`. The `Host` returns it via JSON-RPC `v_call` method, as a string of bytes, in the `result` field.
 
-Finally, the method on on-chain smart-contract is called. For that purpose it is prepended with function selector and might be additionally appended with custom user arguments.
+Finally, the method on the on-chain smart contract is called. For that purpose, it is prepended with a function selector and might be additionally appended with custom user arguments.
 
-The `Proof` structure looks as follows and benefits from the
+The `Proof` structure looks as follows and benefits from the:
 
 
 ```solidity
@@ -68,13 +70,13 @@ struct Proof {
 
 ## Zero-knowledge proof verification
 
-To verify zero-knowledge proof vlayer uses `verify` function delivered by Risc-0.
+To verify a zero-knowledge proof, vlayer uses a `verify` function, delivered by Risc-0.
 
 ```solidity
 function verify(bytes calldata seal, bytes32 imageId, bytes32 journalDigest)
 ```
 
-`length` represents the length of journal data, which is located in `msg.data`, starting at byte 0 of `executionCommitment` and ends with last byte of last verified arg.
+`length` represents the length of journal data, which is located in `msg.data`, starting at byte 0 of `executionCommitment` and ends with the last byte of the last verified argument.
 
 `onlyVerified` gets `seal` and `journalDigest` by slicing it out of `msg.data`. This is where `length` is used. 
 
@@ -87,4 +89,4 @@ Below is a schema of how block of data is encoded in different structures at dif
 ![Schema](/images/architecture/transaction-data.png)
 
 
-> Thanks to clever slicing of data, there is no need for additional repackaging or recoding. The smart contracts, can be called with arguments, that can be easily manipulated, without extra deserialization process. JavaScript client which calls JSON RPC API, have easy access to the variables as well.
+> Thanks to clever slicing of data, there is no need for additional repackaging or recoding. The smart contracts, can be called with arguments, that can be easily manipulated, without extra deserialization process. JavaScript client which calls JSON-RPC API, have easy access to the variables as well.

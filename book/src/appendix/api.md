@@ -12,7 +12,7 @@ vlayer exposes one RPC endpoint under `/` with the following structure of the re
  }
 ```
 
-and response:
+and the response:
 ```json
 {
     "result": "..."
@@ -21,7 +21,7 @@ and response:
 
 
 # v_call
-`v_call` is the core endpoint that vlayer provides, with following format request:
+`v_call` is the core endpoint that vlayer provides, with the following format request:
 
 ```json
  {
@@ -40,7 +40,7 @@ and response:
  }
 ```
 
-and response:
+and the response:
 
 ```json
 {
@@ -49,4 +49,4 @@ and response:
 }
 ```
 
-Where `result` is abi encoded result of function execution and `proof` is solidity `Proof` structure prepended.
+Where `result` is an ABI encoded result of the function execution and `proof` is a Solidity `Proof` structure prepended.
