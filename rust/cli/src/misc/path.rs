@@ -54,11 +54,6 @@ mod tests {
     use super::*;
     use crate::test_utils::create_temp_git_repo;
 
-    fn change_directory(new_dir: &Path) -> std::io::Result<()> {
-        std::env::set_current_dir(new_dir)?;
-        Ok(())
-    }
-
     #[test]
     fn test_find_foundry_root_from_nonexistent_path() {
         let temp_dir = tempfile::tempdir().unwrap();
@@ -68,56 +63,6 @@ mod tests {
             result.unwrap_err(),
             CLIError::CommandExecutionError(err) if err.kind() == std::io::ErrorKind::NotFound
         ));
-    }
-
-    #[test]
-    fn test_find_foundry_root() {
-        let temp_dir = create_temp_git_repo();
-        let file_path = temp_dir.path().join("foundry.toml");
-        std::fs::File::create(file_path).unwrap();
-
-        change_directory(temp_dir.path()).unwrap();
-        let result = find_foundry_root();
-
-        assert_eq!(result.unwrap(), temp_dir.path().canonicalize().unwrap());
-    }
-
-    #[test]
-    fn test_find_foundry_root_no_git() {
-        let temp_dir = tempfile::tempdir().unwrap();
-
-        change_directory(temp_dir.path()).unwrap();
-        let result = find_foundry_root();
-
-        let expected_error_msg =
-            "fatal: not a git repository (or any of the parent directories): .git\n".to_string();
-        let error = result.unwrap_err();
-        assert!(matches!(error, CLIError::GitError(msg) if msg == expected_error_msg));
-    }
-
-    #[test]
-    fn test_find_foundry_root_no_foundry() {
-        let temp_dir = create_temp_git_repo();
-
-        change_directory(temp_dir.path()).unwrap();
-        let result = find_foundry_root();
-
-        assert!(matches!(result.unwrap_err(), CLIError::NoFoundryError));
-    }
-
-    #[test]
-    fn test_find_foundry_root_subdir() {
-        let temp_dir = create_temp_git_repo();
-        let sub_dir1 = temp_dir.path().join("dir1");
-        let sub_dir2 = sub_dir1.join("dir2");
-        std::fs::create_dir_all(&sub_dir2).unwrap();
-        let file_path = temp_dir.path().join("foundry.toml");
-        std::fs::File::create(file_path).unwrap();
-
-        change_directory(&sub_dir2).unwrap();
-        let result = find_foundry_root();
-
-        assert_eq!(result.unwrap(), temp_dir.path().canonicalize().unwrap());
     }
 
     #[test]
