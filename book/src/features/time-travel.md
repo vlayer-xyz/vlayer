@@ -35,8 +35,8 @@ contract USDTOwnership is Prover {
 }
 ```
 
-The first call to the `setBlockNumber(15181682)` function sets the `Prover` context for the 15181682 block. This means that the next call to the `require_usdt_balance` function will check if the caller owns at least $100 at this point in history. 
+First, the call to the `setBlockNumber(15181682)` function sets the `Prover` context for the `15181682` block. This means that the next call to the `require_usdt_balance' function will be executed in the context of the 15181682 block. As a result, the function will ensure that the caller owns at least $100 at this point in history.
 
-Second call to `setBlockNumber(20175401)` sets the `Prover` context to block numbered 20175401. The next call to `require_usdt_balance` would again check if the caller owns at least $100, but this time in a different timestamp. Having less than $100 would result in an error (no proof would be generated).
+Second call to `setBlockNumber(20175401)` sets the `Prover` context to block numbered `20175401`. The next call to `require_usdt_balance` checks if the caller owned at least $100, but this time in block `20175401`. Having less than $100 will result in an error (no proof will be generated).
 
-The two `require_usdt_balance` checks may have different results because the balance may change over time due to transfers of this token. 
+The two `require_usdt_balance` calls return different results if the account balance has changed due to token transfers. 
