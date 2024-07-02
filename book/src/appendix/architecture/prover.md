@@ -107,26 +107,26 @@ class StateAccount {
 
 ### Environments
 
-The environment in which execution will happen is stored in the generic type `EvmEnv<D, H>`, where `D` is a connected database and `H` represents the type of block header. Database connected to Engine vary between Guest, Host and testing environment.
+The environment in which the execution will take place is stored in the generic type `EvmEnv<D, H>`, where `D` is a connected database and `H` represents the type of the block header. The database connected to Engine varies between the Guest, Host and testing environment.
 
 #### Block header
 
-The block header type might vary on different sidechains and L2s. Currently, `EthBlockHeader` originally implemented by Steel is used. Whether we can reuse the type from Reth instead is an open question.
+The block header type might vary on different sidechains and L2s. 
 
 #### Life cycle
 
-The environment is created in the host and converted into `EvmInput` and serialized. Data is then sent over standard input to the guest and deserialized in the guest. `EthEvmInput` is an `EvmInput` specialized by `EthBlockHeader`.
+The environment is created in the host and converted into `EvmInput` and serialized. The data is then sent over standard input to the guest and deserialized in the guest. `EthEvmInput` is an `EvmInput` specialized by `EthBlockHeader`.
 
-`EvmInput` stores state and storage trees as sparse Ethereum Merkle Patricia Trie implemented by `MPT` structures witch is a wrapped Node. Sparse tree is very similar to standard MPT in that it includes four standard node types, however it only data necessary to execution and in place of unused nodes uses special node called `Digest`.
+`EvmInput` stores state and storage trees as sparse Ethereum Merkle Patricia Trie implemented by `MPT` structures, which is a wrapped Node. The sparse tree is very similar to the standard MPT in that it includes four standard node types. However, it only keeps data necessary to execution and in place of unused nodes it uses a special node called `Digest`.
 
-Data is deserialized by host with `EVMInput.into_env()` function. Additionally, this method verifies header hashes (current and ancestors). `StateDb::new` calculates bytecodes hashes and storage roots.
+The data is deserialized by host with the `EVMInput.into_env()` function. Additionally, this method verifies header hashes (current and ancestors). `StateDb::new` calculates bytecodes hashes and storage roots.
 
 ### Verification of input data
 
 The guest is required to verify all data provided by the host. Validation of data correctness is split between multiple functions:
 - `EVMInput.into_env` verifies:
     - equality of subsequent ancestor block hashes
-    - equality of header.state_root and actual state_root
+    - equality of `header.state_root` and actual `state_root`
 - `StateDb::new` calculates:
     - smart contracts bytecode hashes
     - storage roots
@@ -177,19 +177,19 @@ class Node {
 ```
 
 ### Components
-There are two main entry creates to the system: `risk_host` and `risk_guest`. Each of them should be a few simple lines of code and they should implement no logic. They depend on `Host` and `Guest` crates respectively.
-The part of code shared between is host and guest is stored in separate component `Engine`.
+There are two main entry crates to the system: `risk_host` and `risk_guest`. Each of them should be a few simple lines of code and they should implement no logic. They depend on `Host` and `Guest` crates respectively.
+The part of code shared between the host and guest is stored in a separate component - `Engine`.
 In the future, there might be more entry points i.e. `Sp1Host` and `Sp1Guest`.
 
-Below is a short description of components:
+Below is a short description of the components:
 
-- Host is a http server. Host main purpose is to parse http request and execute logic and convert result to http response.
+- The `Host` is an http server. The `Host`'s main purpose is to parse an http request and execute logic and convert the result to an http response.
 
-- Guest is a program communicates via reading input and writing to output. For simplicity, all input is deserialized into `GuestInput` and all output is serialized into `GuestOutput`. Guest main purpose is to parse input and run logic from `Engine`.
+- The `Guest` is a program which communicates via reading input and writing to output. For simplicity, all input is deserialized into `GuestInput` and all output is serialized into `GuestOutput`. The `Guest`'s main purpose is to parse input and run logic from `Engine`.
 
-- Engine consist of share logic between `Host` and `Guest`. In host, it is used to run preflight and in guest it is used to perform proving. It mainly do two things:
-    - run rust preprocessing of call (e.g. mail signature verification)
-    - run solidity contracts inside revm
+- The `Engine` consists of share logic between the `Host` and the `Guest`. In the `Host`, it is used to run preflight and in the `Guest` it is used to perform proving. It mainly does two things:
+    - runs Rust preprocessing of a call (e.g. mail signature verification)
+    - runs Solidity contracts inside revm
 
 ```mermaid
 classDiagram
@@ -244,26 +244,28 @@ class Server {
 
 
 ### Error handling
-Error handling is done via custom semantic `HostError` enum type, which is converted into http code and human readable string by the server.
+Error handling is done via custom semantic `HostError` enum type, which is converted into http code and a human-readable string by the server.
 
-Instead of returning a result, to handle errors, guest panics. It does need to panic with human readable error, which should be convert on host to semantic `HostError` type. As execution on guest is deterministic and should never fail after successful preflight, panic message should be informative for dev team.
+Instead of returning a result, to handle errors, `Guest` panics. It does need to panic with a human-readable error, which should be converted on `Host` to a semantic `HostError` type. As execution on `Guest` is deterministic and should never fail after a successful preflight, the panic message should be informative for developers.
 
 ### Dependency injection
-All components should follow dependency injection pattern, which means all dependencies should be passed via constructors. Hence, components should not need to touch members of members. There should be one build function per component, with accepts add it's dependencies.
+All components should follow the dependency injection pattern, which means all dependencies should be passed via constructors. Hence, components should not need to touch nested members.
+
+There should be one build function per component. 
 
 ### Testing
 
 Test types:
 - unit tests
 - integration tests for components `Engine`, `Host`, `Guest`
-- integration test of HttpServer, with:
-    - single happy path test per http end point
+- integration test of `HttpServer`, with:
+    - single happy path test per http endpoint
     - single test per error code (no need to do per-error-per-end point test)
 - end-to-end test, running a server and settle result on-chain
 
 ### Security audit
 
-We will be auditing 100% of guest code, which consist of: `RiscGuest`, `Guest`, `Engine`.
+We will be auditing 100% of guest code, which consists of: `RiscGuest`, `Guest` and `Engine`.
 
-We should minimize amount of dependencies to all three of them. Especially, there should be no code in `Engine` used by host only.
+We should minimize amount of dependencies to all three of them. Especially, there should be no code in `Engine` used by `Host` only.
 

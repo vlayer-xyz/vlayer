@@ -6,7 +6,7 @@ Many online services, from social media platforms to e-commerce sites, require a
 All of this means that our inboxes are full of data that can be leveraged.
 
 ## Proof of Email
-With vlayer, you can access emails data from smart contracts and utilize it on-chain. The email authenticity is automatically proven under the hood. Moreover, you can generate claims on-chain without revealing detail content of a mail. 
+With vlayer, you can access emails data from smart contracts and utilize it on-chain. The email authenticity is automatically proven under the hood. Moreover, you can generate claims on-chain without revealing detail content of the mail. 
 
 ## Mail structure
 
@@ -20,22 +20,22 @@ struct {
 }
 ```
 
-The `mail` structure of type `Mail` is injected into the prover and can be used in a function. A `Mail` consists of the following fields:
+The `mail` structure of type `Mail` is injected into the `Prover` and can be used in a function. A `Mail` consists of the following fields:
 - `subject` - a string with the subject of the mail
 - `body` - a string consisting of the entire email body
-- `from` -  a string consisting of email address of sender (no name is available). 
-- `to` - an array of strings containing the list of to emails of the intended recipients (no names available)
-- `received_at` - uint representing a timestamp when the email arrived at the destination mail server.
+- `from` -  a string consisting of the email address of the sender (no name is available). 
+- `to` - an array of strings containing the list of emails of the intended recipients (no names available)
+- `received_at` - `uint` representing a timestamp when the email arrived at the destination mail server.
 
 By inspecting and parsing email payload elements, we can generate a claim to be leveraged on-chain.
 
 ## StringUtils
-For convenient manipulation of strings, vlayer provides StringUtils library, which consists of functions like:
-`toAddress` - converts a string to an address if properly formatted, otherwise reverts
-`match` - matches RegExp pattern groups and returns them as a string
+For convenient manipulation of strings, vlayer provides `StringUtils` library, which consists of functions like:
+* `toAddress` - converts a string to an address if properly formatted, otherwise reverts
+* `match` - matches RegExp pattern groups and returns them as a string
 
 ## Example
-Below is an example of a `Prover` smart contract parsing a mail. It assumes mail is in predefined format and it extracts data required to recover an access to a multisig wallet.
+Below is an example of a `Prover` smart contract parsing a mail. It assumes the mail is in predefined format and it extracts data required to recover an access to a multisig wallet.
 
 ```solidity
 contract RecoveryEmail is Prover {
