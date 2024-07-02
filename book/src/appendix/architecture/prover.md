@@ -249,7 +249,7 @@ Error handling is done via custom semantic `HostError` enum type, which is conve
 Instead of returning a result, to handle errors, `Guest` panics. It does need to panic with a human-readable error, which should be converted on `Host` to a semantic `HostError` type. As execution on `Guest` is deterministic and should never fail after a successful preflight, the panic message should be informative for developers.
 
 ### Dependency injection
-All components should follow the dependency injection pattern, which means all dependencies should be passed via constructors. Hence, components should not need to touch members of members. <--- FIX ME
+All components should follow the dependency injection pattern, which means all dependencies should be passed via constructors. Hence, components should not need to touch nested members.
 
 There should be one build function per component, with accepts add its dependencies. <-- FIX ME
 
