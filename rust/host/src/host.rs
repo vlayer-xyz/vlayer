@@ -32,7 +32,7 @@ pub enum HostError {
     #[error("Invalid input")]
     CreatingInput(String),
 
-    #[error("Engine error")]
+    #[error("Engine error: {0}")]
     Engine(#[from] EngineError),
 
     #[error("Ethers provider error: {0}")]

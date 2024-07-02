@@ -46,7 +46,7 @@ impl<M: Middleware> EthersProvider<M> {
 
     /// internal utility function to call tokio feature and wait for output
     fn block_on<F: core::future::Future>(&self, f: F) -> F::Output {
-        self.runtime_handle.0.block_on(f)
+        tokio::task::block_in_place(|| self.runtime_handle.0.block_on(f))
     }
 }
 

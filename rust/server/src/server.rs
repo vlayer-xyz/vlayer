@@ -111,7 +111,7 @@ mod tests {
             Ok(())
         }
 
-        #[tokio::test]
+        #[tokio::test(flavor = "multi_thread")]
         async fn success() -> anyhow::Result<()> {
             let app = server();
 
