@@ -1,7 +1,6 @@
 use crate::db::{state::StateDb, wrap_state::WrapStateDb};
-use alloy_primitives::{Sealable, Sealed};
+use alloy_primitives::{FixedBytes, Sealable, Sealed};
 use revm::primitives::HashMap;
-use revm_primitives::FixedBytes;
 use vlayer_engine::{
     config::SEPOLIA_ID,
     engine::Engine,

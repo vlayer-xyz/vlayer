@@ -1,8 +1,8 @@
 use alloy_primitives::{keccak256, Address, B256, U256};
+use mpt::MerkleTrie;
 use revm::primitives::{AccountInfo, Bytecode, HashMap};
 use revm::Database;
 use std::{convert::Infallible, rc::Rc};
-use vlayer_engine::MerkleTrie;
 
 use super::state::StateDb;
 

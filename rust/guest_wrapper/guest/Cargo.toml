@@ -16,3 +16,4 @@ revm = { version = "10.0.0", default-features = false }
 revm-primitives = { version = "5.0.0", default-features = false }
 risc0-zkvm = { version = "1.0.1", default-features = false }
 vlayer-engine = { path = "../../vlayer/engine" }
+mpt = { path = "../../mpt" }

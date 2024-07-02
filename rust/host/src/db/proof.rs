@@ -2,11 +2,11 @@ use super::provider::ProviderDb;
 use crate::provider::{EIP1186Proof, Provider};
 use alloy_primitives::{Address, Bytes, B256, U256};
 use anyhow::Context;
+use mpt::MerkleTrie;
 use revm::{
     primitives::{AccountInfo, Bytecode, HashMap, HashSet},
     Database,
 };
-use vlayer_engine::MerkleTrie;
 
 /// A revm [Database] backed by a [Provider] that caches all queries needed for a state proof.
 pub struct ProofDb<P> {

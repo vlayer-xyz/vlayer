@@ -2,10 +2,9 @@ use alloy_primitives::{b256, keccak256, B256};
 use alloy_rlp::Decodable;
 use node::Node;
 use nybbles::Nibbles;
-use revm::primitives::HashMap;
 use rlp as legacy_rlp;
 use serde::{Deserialize, Serialize};
-use std::fmt::Debug;
+use std::{collections::HashMap, fmt::Debug};
 use thiserror::Error as ThisError;
 
 mod node;
