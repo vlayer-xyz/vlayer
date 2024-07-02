@@ -6,7 +6,7 @@ import {Test, console} from "forge-std/Test.sol";
 import {Receipt, VerificationFailed} from "risc0-ethereum/IRiscZeroVerifier.sol";
 import {RiscZeroMockVerifier} from "risc0-ethereum/test/RiscZeroMockVerifier.sol";
 
-import {Steel} from "vlayer/Steel.sol";
+import {Steel} from "vlayer-engine/Steel.sol";
 import {Simple} from "../src/Simple.sol";
 
 contract SimpleTest is Test {
