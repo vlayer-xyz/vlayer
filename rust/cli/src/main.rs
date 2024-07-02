@@ -1,6 +1,5 @@
 use crate::errors::CLIError;
-use crate::misc::parse_toml::get_src_from_string;
-use crate::misc::path::find_foundry_root;
+use crate::misc::init::find_src;
 use clap::{Parser, Subcommand};
 use server::server::serve;
 
@@ -48,11 +47,7 @@ async fn run() -> Result<(), CLIError> {
                 "running 'vlayer init' from directory: {:?}",
                 std::env::current_dir()?
             );
-            let root_path = find_foundry_root()?;
-            println!("Found Foundry root -- path: {:?}", root_path);
-            let toml_path = root_path.join("foundry.toml");
-            let contents = std::fs::read_to_string(toml_path)?;
-            let src = get_src_from_string(contents)?;
+            let src = find_src()?;
             println!("src = {}", src)
         }
     }
