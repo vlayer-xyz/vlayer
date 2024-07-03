@@ -11,7 +11,7 @@ use thiserror::Error;
 use vlayer_engine::chain::spec::ChainSpec;
 use vlayer_engine::engine::{Engine, EngineError};
 use vlayer_engine::ethereum::EthBlockHeader;
-use vlayer_engine::evm::env::EvmEnv;
+use vlayer_engine::evm::env::{EvmEnv, ExecutionLocation};
 use vlayer_engine::io::GuestOutputError;
 use vlayer_engine::io::{Call, GuestOutput, HostOutput, Input};
 
@@ -61,16 +61,14 @@ pub enum HostError {
 
 pub struct HostConfig {
     url: String,
-    start_chain_id: u64,
-    start_block_number: u64,
+    start_execution_location: ExecutionLocation,
 }
 
 impl HostConfig {
-    pub fn new(url: &str, chain_id: u64, start_block_number: u64) -> Self {
+    pub fn new(url: &str, start_execution_location: ExecutionLocation) -> Self {
         HostConfig {
             url: url.to_string(),
-            start_chain_id: chain_id,
-            start_block_number,
+            start_execution_location,
         }
     }
 }
@@ -87,7 +85,7 @@ impl Host<EthersProvider<EthersClient>> {
 
 impl<P: Provider<Header = EthBlockHeader>> Host<P> {
     pub fn try_new_with_provider(provider: P, config: HostConfig) -> Result<Self, HostError> {
-        let start_block_number = config.start_block_number;
+        let start_block_number = config.start_execution_location.block_number();
         let header = provider
             .get_block_header(start_block_number)
             .map_err(|err| HostError::Provider(err.to_string()))?
@@ -99,7 +97,8 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
     }
 
     pub fn run(mut self, call: Call) -> Result<HostOutput, HostError> {
-        let chain_spec = ChainSpec::try_from_config(self.config.start_chain_id)?;
+        let chain_spec =
+            ChainSpec::try_from_config(self.config.start_execution_location.chain_id())?;
         let env = EvmEnv::new(&mut self.db, self.header.clone().seal_slow())
             .with_chain_spec(&chain_spec)?;
         let engine = Engine::try_new(env)?;

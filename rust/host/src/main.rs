@@ -3,7 +3,7 @@ use std::env;
 use alloy_primitives::{address, Address};
 use host::{Host, HostConfig, HostError};
 use tracing::info;
-use vlayer_engine::{config::SEPOLIA_ID, io::Call};
+use vlayer_engine::{config::SEPOLIA_ID, evm::env::ExecutionLocation, io::Call};
 
 pub mod db;
 pub mod host;
@@ -43,12 +43,9 @@ fn main() -> Result<(), HostError> {
         data: raw_call_data.clone(),
     };
 
-    let _return_data = Host::try_new(HostConfig::new(
-        LOCALHOST_RPC_URL,
-        SEPOLIA_ID,
-        config.block_no,
-    ))?
-    .run(call_tx_data)?;
+    let execution_location = ExecutionLocation::new(config.block_no, SEPOLIA_ID);
+    let _return_data =
+        Host::try_new(HostConfig::new(LOCALHOST_RPC_URL, execution_location))?.run(call_tx_data)?;
 
     Ok(())
 }
