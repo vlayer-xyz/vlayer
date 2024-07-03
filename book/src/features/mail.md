@@ -58,7 +58,7 @@ By inspecting and parsing the email payload elements, we can generate a claim to
 For convenient manipulation of strings, vlayer provides StringUtils library, which consists of functions like:
 * `toAddress` - converts a string to an address if properly formatted, otherwise reverts
 * `match` - matches RegExp pattern groups and returns them as a string
-* `compare` - compares the contents of two strings. Returns true if both are equal, false otherwise.
+* `equal` - checks the contents of two strings for equality. Returns true if both are equal, false otherwise.
 
 ## Wallet Recovery Example
 Below is another example of a `Prover` smart contract parsing an email. However, this time the use case is a bit more advanced and allows the caller to recover access to a MultiSig wallet (a smart contract that allows multiple wallets to authorize transactions).  
