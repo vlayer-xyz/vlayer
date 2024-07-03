@@ -11,7 +11,7 @@ use thiserror::Error;
 use vlayer_engine::chain::spec::ChainSpec;
 use vlayer_engine::engine::{Engine, EngineError};
 use vlayer_engine::ethereum::EthBlockHeader;
-use vlayer_engine::evm::env::{EvmEnv, ExecutionLocation};
+use vlayer_engine::evm::env::{EvmEnv, ExecutionLocation, MultiEnv};
 use vlayer_engine::io::GuestOutputError;
 use vlayer_engine::io::{Call, GuestOutput, HostOutput, Input};
 
@@ -21,7 +21,8 @@ const INITIAL_BACKOFF: u64 = 500;
 pub type EthersClient = OGEthersProvider<RetryClient<Http>>;
 
 pub struct Host<P: Provider<Header = EthBlockHeader>> {
-    env: EvmEnv<ProofDb<P>, EthBlockHeader>,
+    start_execution_location: ExecutionLocation,
+    envs: MultiEnv<ProofDb<P>, EthBlockHeader>,
 }
 
 #[derive(Error, Debug)]
@@ -92,15 +93,21 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
         let db = ProofDb::new(provider, start_block_number);
         let chain_spec = ChainSpec::try_from_config(config.start_execution_location.chain_id())?;
         let env = EvmEnv::new(db, header.seal_slow()).with_chain_spec(&chain_spec)?;
+        let mut envs = MultiEnv::new();
+        envs.insert(config.start_execution_location, env);
 
-        Ok(Host { env })
+        Ok(Host {
+            envs,
+            start_execution_location: config.start_execution_location,
+        })
     }
 
     pub fn run(mut self, call: Call) -> Result<HostOutput, HostError> {
+        let mut env = self.envs.get_mut(&self.start_execution_location)?;
         let engine = Engine::new();
-        let host_output = engine.call(&call, &mut self.env)?;
+        let host_output = engine.call(&call, &mut env)?;
 
-        let evm_input = into_input(self.env.db, self.env.header)
+        let evm_input = into_input(&env.db, env.header.clone())
             .map_err(|err| HostError::CreatingInput(err.to_string()))?;
         let input = Input { call, evm_input };
         let env = Self::build_executor_env(&input)?;
