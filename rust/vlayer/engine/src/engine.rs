@@ -7,8 +7,10 @@ use std::fmt::Debug;
 use thiserror::Error;
 
 use crate::{
-    config::CHAIN_MAP,
-    evm::{block_header::EvmBlockHeader, env::EvmEnv},
+    evm::{
+        block_header::EvmBlockHeader,
+        env::{EvmEnv, ExecutionLocation},
+    },
     io::Call,
 };
 
@@ -37,14 +39,7 @@ where
     D::Error: std::fmt::Debug,
     H: EvmBlockHeader,
 {
-    pub fn try_new(env: EvmEnv<D, H>, chain_id: u64) -> Result<Self, EngineError> {
-        let chain_spec = CHAIN_MAP
-            .get(&chain_id)
-            .ok_or(EngineError::UnsupportedChainId(chain_id))?;
-
-        let env = env
-            .with_chain_spec(chain_spec)
-            .map_err(|err| EngineError::ChainSpecError(err.to_string()))?;
+    pub fn try_new(env: EvmEnv<D, H>) -> Result<Self, EngineError> {
         Ok(Engine { env })
     }
 
