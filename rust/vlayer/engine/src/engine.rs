@@ -37,12 +37,12 @@ where
     D::Error: std::fmt::Debug,
     H: EvmBlockHeader,
 {
-    pub fn try_new(db: D, header: H, chain_id: u64) -> Result<Self, EngineError> {
+    pub fn try_new(env: EvmEnv<D, H>, chain_id: u64) -> Result<Self, EngineError> {
         let chain_spec = CHAIN_MAP
             .get(&chain_id)
             .ok_or(EngineError::UnsupportedChainId(chain_id))?;
 
-        let env = EvmEnv::new(db, header.seal_slow())
+        let env = env
             .with_chain_spec(chain_spec)
             .map_err(|err| EngineError::ChainSpecError(err.to_string()))?;
         Ok(Engine { env })

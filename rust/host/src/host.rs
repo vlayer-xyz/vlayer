@@ -10,6 +10,7 @@ use risc0_zkvm::{default_prover, ExecutorEnv};
 use thiserror::Error;
 use vlayer_engine::engine::{Engine, EngineError};
 use vlayer_engine::ethereum::EthBlockHeader;
+use vlayer_engine::evm::env::EvmEnv;
 use vlayer_engine::io::GuestOutputError;
 use vlayer_engine::io::{Call, GuestOutput, HostOutput, Input};
 
@@ -97,11 +98,8 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
     }
 
     pub fn run(mut self, call: Call) -> Result<HostOutput, HostError> {
-        let engine = Engine::try_new(
-            &mut self.db,
-            self.header.clone(),
-            self.config.start_chain_id,
-        )?;
+        let env = EvmEnv::new(&mut self.db, self.header.clone().seal_slow());
+        let engine = Engine::try_new(env, self.config.start_chain_id)?;
         let host_output = engine.call(&call)?;
 
         let evm_input = into_input(self.db, self.header.seal_slow())
