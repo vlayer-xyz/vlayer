@@ -7,13 +7,14 @@ use serde::{Deserialize, Serialize};
 use std::{error::Error as StdError, fmt::Debug};
 use vlayer_engine::evm::block_header::EvmBlockHeader;
 
+mod cache;
 mod ethers;
 mod file;
 mod null;
 
 pub use ethers::{EthersProvider, EthersProviderError};
 use ethers_providers::{Http, RetryClient};
-pub use file::{CachedProvider, EthFileProvider, FileProvider};
+pub use file::{EthFileProvider, FileProvider};
 
 /// The Ethers client type.
 pub type EthersClient = ethers_providers::Provider<RetryClient<Http>>;
