@@ -33,7 +33,7 @@ impl From<AppError> for JsonRpcError {
                 error.to_string(),
                 Value::Null,
             ),
-            _ => JsonRpcError::new(
+            AppError::Host(..) | AppError::Join(..) => JsonRpcError::new(
                 JsonRpcErrorReason::InternalError,
                 error.to_string(),
                 Value::Null,
