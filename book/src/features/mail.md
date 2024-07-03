@@ -27,7 +27,7 @@ contract GithubEmail is Prover {
     }
 }
 ```
-The `mail` structure is automatically injected into the contract context of the mail prover by the vlayer SDK. Then we have a series of assertions (regular Solidity `require()`) that check the mail details. 
+The `mail` structure is automatically injected into the contract context of the mail prover by the vlayer. Then we have a series of assertions (regular Solidity `require()`) that check the mail details. 
 
 String comparison is handled by our `StringUtils` library (described in more [details below](/features/mail.html#stringutils)). Date values are formatted in the [Unix time](https://en.wikipedia.org/wiki/Unix_time) notation, which allows them to be compared as integer values.
 
