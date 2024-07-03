@@ -5,6 +5,7 @@ use axum_jrpc::{
 use hex::FromHexError;
 use host::host::HostError;
 use thiserror::Error;
+use tokio::task::JoinError;
 
 #[derive(Debug, Error, PartialEq)]
 pub enum FieldValidationError {
@@ -17,20 +18,22 @@ pub enum FieldValidationError {
 #[derive(Debug, Error)]
 pub enum AppError {
     #[error("Invalid field `{0}`: {1}")]
-    FieldValidationError(String, FieldValidationError),
+    FieldValidation(String, FieldValidationError),
     #[error("Host error: {0}")]
-    HostError(#[from] HostError),
+    Host(#[from] HostError),
+    #[error("Join error: {0}")]
+    Join(#[from] JoinError),
 }
 
 impl From<AppError> for JsonRpcError {
     fn from(error: AppError) -> Self {
         match error {
-            AppError::FieldValidationError(..) => JsonRpcError::new(
+            AppError::FieldValidation(..) => JsonRpcError::new(
                 JsonRpcErrorReason::InvalidParams,
                 error.to_string(),
                 Value::Null,
             ),
-            AppError::HostError(..) => JsonRpcError::new(
+            _ => JsonRpcError::new(
                 JsonRpcErrorReason::InternalError,
                 error.to_string(),
                 Value::Null,
