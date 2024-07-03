@@ -70,20 +70,17 @@ To change the authorized account (recovery procedure), the user just needs to se
 ```
 Date: 02 Jul 24 14:52:18+0300 GMT
 From: john.prover@example.com
-To: <any email we trust>
+To: <any email with trusted provider>
 Subject: Wallet recovery of {old account address}
 Body: New wallet address {new account address}
 ```
-Then such email content is extracted using the vlayer SDK (browser extension or local application) and passed to the `Prover` contract that parses it off-chain:
+Now, we you can access the mail from the `Prover` contract:
 
 ```solidity
 contract RecoveryEmail is Prover {
     using StringUtils for string;
 
-    address MULTISIG_ADDR = 0xfcF784b9525D2cbfdF77AbBE61e43b082369f17E;
-    MultiSigWallet wallet = MultiSigWallet(MULTISIG_ADDR);
-
-    function main() public returns (string, string, address) {      
+    function main(address multisigAddr) public returns (string, string, address) {      
       string[] subjectMatches = mail.subject.match(
         "^Wallet recovery of (0x[a-fA-F0-9]{40})$"
       );
@@ -91,6 +88,7 @@ contract RecoveryEmail is Prover {
 
       address lostWallet = subjectMatches[0].toAddress();
       string mailHash = keccak256(abi.encodePacked(mail.sender);
+      MultiSigWallet wallet = MultiSigWallet(multisigAddr);
       string recoveryMailHash = wallet.recoveryEmail(lostWallet);
 
       require(
@@ -111,7 +109,7 @@ contract RecoveryEmail is Prover {
 
 What happens step by step in the above snippet? 
 * `RecoveryEmail` inherits from `Prover` to have special powers for off-chain proving. 
-* `MULTISIG_ADDR` stores the hardcoded address of the Multisig Wallet smart contract. 
+* `main()` function takes `multisigAddr` argument to access Multisig Wallet smart contract data. 
 * `mail.subject.match` returns strings matching the regular expression for the subject, which must contain the correct wallet address to be recovered.
 * The `subjectMatches.length == 1` condition ensures that the subject is not malformed.
 * `recoveryMailHash.compare(mailHash)` check if correct email was used for recovery 
