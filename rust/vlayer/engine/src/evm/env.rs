@@ -68,13 +68,15 @@ pub struct MultiEnv<D, H> {
     pub envs: HashMap<ExecutionLocation, EvmEnv<D, H>>,
 }
 
-impl<D, H: EvmBlockHeader> MultiEnv<D, H> {
-    pub fn new() -> Self {
+impl<D, H> Default for MultiEnv<D, H> {
+    fn default() -> Self {
         Self {
             envs: HashMap::new(),
         }
     }
+}
 
+impl<D, H: EvmBlockHeader> MultiEnv<D, H> {
     pub fn insert(&mut self, location: ExecutionLocation, env: EvmEnv<D, H>) {
         self.envs.insert(location, env);
     }
