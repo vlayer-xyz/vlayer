@@ -21,9 +21,7 @@ const INITIAL_BACKOFF: u64 = 500;
 pub type EthersClient = OGEthersProvider<RetryClient<Http>>;
 
 pub struct Host<P: Provider<Header = EthBlockHeader>> {
-    db: ProofDb<P>,
-    header: EthBlockHeader,
-    config: HostConfig,
+    env: EvmEnv<ProofDb<P>, EthBlockHeader>,
 }
 
 #[derive(Error, Debug)]
@@ -92,19 +90,17 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
             .ok_or(HostError::BlockNotFound(start_block_number))?;
 
         let db = ProofDb::new(provider, start_block_number);
+        let chain_spec = ChainSpec::try_from_config(config.start_execution_location.chain_id())?;
+        let env = EvmEnv::new(db, header.seal_slow()).with_chain_spec(&chain_spec)?;
 
-        Ok(Host { db, header, config })
+        Ok(Host { env })
     }
 
     pub fn run(mut self, call: Call) -> Result<HostOutput, HostError> {
-        let chain_spec =
-            ChainSpec::try_from_config(self.config.start_execution_location.chain_id())?;
-        let mut env = EvmEnv::new(&mut self.db, self.header.clone().seal_slow())
-            .with_chain_spec(&chain_spec)?;
         let engine = Engine::new();
-        let host_output = engine.call(&call, &mut env)?;
+        let host_output = engine.call(&call, &mut self.env)?;
 
-        let evm_input = into_input(self.db, self.header.seal_slow())
+        let evm_input = into_input(self.env.db, self.env.header)
             .map_err(|err| HostError::CreatingInput(err.to_string()))?;
         let input = Input { call, evm_input };
         let env = Self::build_executor_env(&input)?;
