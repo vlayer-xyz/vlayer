@@ -1,5 +1,6 @@
 use alloy_primitives::TxKind;
 use revm::{
+    inspector_handle_register,
     primitives::{ExecutionResult, ResultAndState, SuccessReason},
     Database, Evm,
 };
@@ -9,7 +10,7 @@ use thiserror::Error;
 use crate::{
     config::CHAIN_MAP,
     evm::{block_header::EvmBlockHeader, env::EvmEnv},
-    io::Call,
+    io::Call, spike_inspector::CustomPrintTracer,
 };
 
 pub struct Engine<D, H> {
@@ -51,14 +52,16 @@ where
     pub fn call(mut self, tx: &Call) -> Result<Vec<u8>, EngineError> {
         let evm = Evm::builder()
             .with_db(&mut self.env.db)
-            .with_cfg_env_with_handler_cfg(self.env.cfg_env)
+            .with_external_context(CustomPrintTracer::default())
+            .append_handler_register(inspector_handle_register)
+            // .with_cfg_env_with_handler_cfg(self.env.cfg_env)
             .modify_block_env(|blk_env| self.env.header.fill_block_env(blk_env))
             .build();
 
         Self::transact(evm, tx)
     }
 
-    fn transact(mut evm: Evm<'_, (), &mut D>, tx: &Call) -> Result<Vec<u8>, EngineError>
+    fn transact<I>(mut evm: Evm<'_, I, &mut D>, tx: &Call) -> Result<Vec<u8>, EngineError>
     where
         D: Database,
         D::Error: Debug,
