@@ -2,6 +2,7 @@ use crate::db::{state::StateDb, wrap_state::WrapStateDb};
 use alloy_primitives::{FixedBytes, Sealable, Sealed};
 use revm::primitives::HashMap;
 use vlayer_engine::{
+    chain::spec::ChainSpec,
     config::SEPOLIA_ID,
     engine::Engine,
     ethereum::EthBlockHeader,
@@ -37,15 +38,15 @@ impl Guest {
             .try_into()
             .expect("cannot extract function selector from call data");
 
-        let env = EvmEnv::new(&mut self.db, self.header.clone().seal_slow());
+        let chain_spec = ChainSpec::try_from_config(SEPOLIA_ID).expect("cannot get chain spec");
+        let env = EvmEnv::new(&mut self.db, self.header.clone().seal_slow())
+            .with_chain_spec(&chain_spec)
+            .expect("cannot set chain spec");
 
         GuestOutput {
             execution_commitment: self.header.execution_commitment(call.to, function_selector),
 
-            evm_call_result: Engine::try_new(env, SEPOLIA_ID)
-                .unwrap()
-                .call(&call)
-                .unwrap(),
+            evm_call_result: Engine::try_new(env).unwrap().call(&call).unwrap(),
         }
     }
 }

@@ -1,7 +1,7 @@
-use alloy_primitives::Sealed;
+use alloy_primitives::{BlockNumber, ChainId, Sealed};
 use revm::primitives::{CfgEnvWithHandlerCfg, SpecId};
 
-use crate::chain::spec::ChainSpec;
+use crate::{chain::spec::ChainSpec, engine::EngineError};
 
 use super::block_header::EvmBlockHeader;
 
@@ -26,10 +26,11 @@ impl<D, H: EvmBlockHeader> EvmEnv<D, H> {
     }
 
     /// Sets the chain ID and specification ID from the given chain spec.
-    pub fn with_chain_spec(mut self, chain_spec: &ChainSpec) -> anyhow::Result<Self> {
+    pub fn with_chain_spec(mut self, chain_spec: &ChainSpec) -> Result<Self, EngineError> {
         self.cfg_env.chain_id = chain_spec.chain_id();
-        self.cfg_env.handler_cfg.spec_id =
-            chain_spec.active_fork(self.header.number(), self.header.timestamp())?;
+        self.cfg_env.handler_cfg.spec_id = chain_spec
+            .active_fork(self.header.number(), self.header.timestamp())
+            .map_err(|err| EngineError::ChainSpecError(err.to_string()))?;
         Ok(self)
     }
 
