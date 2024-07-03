@@ -65,7 +65,7 @@ Below is another example of a `Prover` smart contract parsing an email. However,
 
 The following implementation assumes that the recovery mail is in a predefined format and it extracts data required to recover access to a MultiSig wallet. 
 
-To change the authorized account (recovery procedure), the user just needs to send the following email: 
+To change the authorized account (recovery procedure), the user just needs to send the email in the following format: 
 
 ```
 Date: 02 Jul 24 14:52:18+0300 GMT
