@@ -1,3 +1,4 @@
+use std::path::PathBuf;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -14,4 +15,6 @@ pub enum CLIError {
     AnyhowError(#[from] anyhow::Error),
     #[error("Error parsing TOML:\n {0}")]
     TomlError(String),
+    #[error("Project directory not found: {0}")]
+    SrcDirNotFound(PathBuf),
 }

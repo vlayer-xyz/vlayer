@@ -3,8 +3,8 @@ use crate::errors::CLIError;
 pub(crate) fn get_src_from_string(contents: String) -> Result<String, CLIError> {
     let config = toml::from_str(&contents).map_err(|e| CLIError::TomlError(e.to_string()))?;
 
-    let src = get_src_from_toml(config);
-    match src {
+    let result = get_src_from_toml(config);
+    match result {
         Some(src) => Ok(src),
         None => Err(CLIError::TomlError(
             "No source found in foundry.toml".to_string(),
@@ -48,7 +48,7 @@ mod tests {
     }
 
     #[test]
-    fn test_invalid_toml() {
+    fn test_get_src_from_string_invalid_toml() {
         let invalid_toml = r#"
             [profile.default]
             src = "src"aaa
