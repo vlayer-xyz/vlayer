@@ -5,7 +5,7 @@ use vlayer_engine::{
     config::SEPOLIA_ID,
     engine::Engine,
     ethereum::EthBlockHeader,
-    evm::{block_header::EvmBlockHeader, input::EvmInput},
+    evm::{block_header::EvmBlockHeader, env::EvmEnv, input::EvmInput},
     io::{Call, GuestOutput},
 };
 
@@ -37,10 +37,12 @@ impl Guest {
             .try_into()
             .expect("cannot extract function selector from call data");
 
+        let env = EvmEnv::new(&mut self.db, self.header.clone().seal_slow());
+
         GuestOutput {
             execution_commitment: self.header.execution_commitment(call.to, function_selector),
 
-            evm_call_result: Engine::try_new(&mut self.db, self.header.clone(), SEPOLIA_ID)
+            evm_call_result: Engine::try_new(env, SEPOLIA_ID)
                 .unwrap()
                 .call(&call)
                 .unwrap(),
