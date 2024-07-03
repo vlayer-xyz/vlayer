@@ -47,9 +47,9 @@ mod tests {
         Ok(())
     }
 
-    const CALLER: &str = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f";
-    const TO: &str = "0x7Ad53bbA1004e46dd456316912D55dBc5D311a03";
-    const DATA: &str = "0x0000";
+    const CALLER: &str = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266";
+    const TO: &str = "e7f1725E7734CE288F8367e1Bb143E90bb3F0512";
+    const DATA: &str = "0xcad0899b00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000002";
 
     #[tokio::test]
     async fn json_rpc_not_found() -> anyhow::Result<()> {
@@ -117,7 +117,7 @@ mod tests {
 
             let req = json!({
                 "method": "v_call",
-                "params": [{"caller": CALLER, "to": TO, "data": DATA}, {"block_no": 0, "chain_id": 1}],
+                "params": [{"caller": CALLER, "to": TO, "data": DATA}, {"block_no": 2, "chain_id": 11155111}],
                 "id": 1,
                 "jsonrpc": "2.0",
             });
@@ -130,7 +130,7 @@ mod tests {
                     "jsonrpc": "2.0",
                     "id": 1,
                     "result": {
-                        "result": "Call: caller 0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f to 0x7Ad53bbA1004e46dd456316912D55dBc5D311a03 with data [0, 0]. Context: block 0 chain 1."
+                        "result": "start_contract_address: 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512, function_selector: 0xcad0899b, evm_call_result: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3]"
                     }
                 })
             );
