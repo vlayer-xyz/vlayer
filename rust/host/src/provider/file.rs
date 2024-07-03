@@ -1,4 +1,4 @@
-use super::{EIP1186Proof, NullProvider, Provider};
+use super::{null::NullProvider, EIP1186Proof, Provider};
 use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256};
 use anyhow::Context;
 use serde::{de::DeserializeOwned, Deserialize, Serialize};
