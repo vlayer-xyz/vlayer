@@ -18,6 +18,14 @@ pub struct Engine<D, H> {
     phantom: PhantomData<(D, H)>,
 }
 
+impl<D, H> Default for Engine<D, H> {
+    fn default() -> Self {
+        Self {
+            phantom: PhantomData,
+        }
+    }
+}
+
 #[derive(Error, Debug, PartialEq)]
 pub enum EngineError {
     #[error("EVM transact preverified error: {0}")]
@@ -42,12 +50,6 @@ where
     D::Error: std::fmt::Debug,
     H: EvmBlockHeader,
 {
-    pub fn new() -> Self {
-        Engine {
-            phantom: PhantomData,
-        }
-    }
-
     pub fn call(self, tx: &Call, env: &mut EvmEnv<D, H>) -> Result<Vec<u8>, EngineError> {
         let evm = Evm::builder()
             .with_db(&mut env.db)
