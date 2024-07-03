@@ -16,7 +16,7 @@ Another option is to prove that Github mail servers sent a welcome email on a ce
 ```solidity
 contract GithubEmail is Prover {
     function main() public returns (bool) {      
-      require(mail.subject.compare("Welcome to Github"), "incorrect subject")
+      require(mail.subject.equal("Welcome to Github"), "incorrect subject")
       require(mail.from.equal("notifications@github.com"), "incorrect sender")
       require(mail.to[0].compare("john.prover@gmail.com"), "wrong recipient")
       
