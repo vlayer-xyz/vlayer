@@ -48,7 +48,7 @@ struct Mail {
 A `Mail` consists of the following fields
 - `subject` - a string with the subject of the mail
 - `body` - a string consisting of the entire body of the mail
-- `from` - a string consisting of the sender's email address (no name is available) 
+- `from` - a string consisting of the sender's mail address (no name is available) 
 - `to` - an array of strings containing the list of emails of the intended recipients (no names available)
 - `received_at` - `uint` representing a timestamp of when the email arrived at the destination mail server.
 
