@@ -2,6 +2,7 @@ use crate::errors::CLIError;
 use crate::misc::init::find_src;
 use clap::{Parser, Subcommand};
 use server::server::serve;
+use tracing::{error, info};
 
 pub mod errors;
 mod misc;
@@ -25,10 +26,15 @@ enum Commands {
 
 #[tokio::main]
 async fn main() {
+    // Initialize tracing. In order to view logs, run `RUST_LOG=info cargo run`
+    tracing_subscriber::fmt()
+        .with_env_filter(tracing_subscriber::filter::EnvFilter::from_default_env())
+        .init();
+
     match run().await {
         Ok(_) => (),
         Err(e) => {
-            eprintln!("Error: {}", e);
+            error!("Error: {}", e);
             std::process::exit(1);
         }
     }
@@ -39,16 +45,16 @@ async fn run() -> Result<(), CLIError> {
 
     match &cli.command {
         Commands::Serve => {
-            println!("running 'vlayer serve'");
+            info!("Running vlayer serve...");
             serve().await?;
         }
         Commands::Init => {
-            println!(
-                "running 'vlayer init' from directory: {:?}",
+            info!(
+                "Running vlayer init from directory: {:?}",
                 std::env::current_dir()?
             );
             let src = find_src()?;
-            println!("src = {}", src)
+            info!("Foundry source path = {}", src);
         }
     }
     Ok(())
