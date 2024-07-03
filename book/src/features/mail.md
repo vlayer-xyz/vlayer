@@ -18,7 +18,7 @@ contract GithubEmail is Prover {
     function main() public returns (bool) {      
       require(mail.subject.equal("Welcome to Github"), "incorrect subject")
       require(mail.from.equal("notifications@github.com"), "incorrect sender")
-      require(mail.to[0].compare("john.prover@gmail.com"), "wrong recipient")
+      require(mail.to[0].equal("john.prover@gmail.com"), "wrong recipient")
       
       // Wed Jan 01 2020 00:00:00 GMT+0100
       require(mail.received_at < 1577833200, "email received after 2020") 
@@ -92,7 +92,7 @@ contract RecoveryEmail is Prover {
       string recoveryMailHash = wallet.recoveryEmail(lostWallet);
 
       require(
-        recoveryMailHash.compare(mailHash),
+        recoveryMailHash.equal(mailHash),
         "wrong recovery email"
       )
 
@@ -112,7 +112,7 @@ What happens step by step in the above snippet?
 * `main()` function takes `multisigAddr` argument to access Multisig Wallet smart contract data. 
 * `mail.subject.match` returns strings matching the regular expression for the subject, which must contain the correct wallet address to be recovered.
 * The `subjectMatches.length == 1` condition ensures that the subject is not malformed.
-* `recoveryMailHash.compare(mailHash)` check if correct email was used for recovery 
+* `recoveryMailHash.equal(mailHash)` check if correct email was used for recovery 
 * `mail.body.match` get new wallet address from body
 
 On successful execution, proof of computation is returned. It also returns the recovered wallet address, the email address hash, the new wallet address, and the email timestamp as public input.
