@@ -3,7 +3,7 @@ use revm::{
     primitives::{ExecutionResult, ResultAndState, SuccessReason},
     Database, Evm,
 };
-use std::fmt::Debug;
+use std::{fmt::Debug, marker::PhantomData};
 use thiserror::Error;
 
 use crate::{
@@ -15,7 +15,7 @@ use crate::{
 };
 
 pub struct Engine<D, H> {
-    env: EvmEnv<D, H>,
+    phantom: PhantomData<(D, H)>,
 }
 
 #[derive(Error, Debug, PartialEq)]
@@ -42,15 +42,17 @@ where
     D::Error: std::fmt::Debug,
     H: EvmBlockHeader,
 {
-    pub fn try_new(env: EvmEnv<D, H>) -> Result<Self, EngineError> {
-        Ok(Engine { env })
+    pub fn new() -> Self {
+        Engine {
+            phantom: PhantomData,
+        }
     }
 
-    pub fn call(mut self, tx: &Call) -> Result<Vec<u8>, EngineError> {
+    pub fn call(self, tx: &Call, env: &mut EvmEnv<D, H>) -> Result<Vec<u8>, EngineError> {
         let evm = Evm::builder()
-            .with_db(&mut self.env.db)
-            .with_cfg_env_with_handler_cfg(self.env.cfg_env)
-            .modify_block_env(|blk_env| self.env.header.fill_block_env(blk_env))
+            .with_db(&mut env.db)
+            .with_cfg_env_with_handler_cfg(env.cfg_env.clone())
+            .modify_block_env(|blk_env| env.header.fill_block_env(blk_env))
             .build();
 
         Self::transact(evm, tx)
