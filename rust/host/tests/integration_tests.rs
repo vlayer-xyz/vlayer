@@ -5,7 +5,10 @@ use host::{
     provider::EthFileProvider,
     Call,
 };
-use vlayer_engine::config::{MAINNET_ID, SEPOLIA_ID};
+use vlayer_engine::{
+    config::{MAINNET_ID, SEPOLIA_ID},
+    evm::env::ExecutionLocation,
+};
 
 const RPC_CACHE_FILE: &str = "testdata/rpc_cache.json";
 
@@ -15,7 +18,8 @@ where
 {
     let test_provider = EthFileProvider::from_file(&RPC_CACHE_FILE.into())?;
     let null_rpc_url = "a null url value as url is not needed in tests";
-    let config = HostConfig::new(null_rpc_url, chain_id, block_number);
+    let execution_location = ExecutionLocation::new(block_number, chain_id);
+    let config = HostConfig::new(null_rpc_url, execution_location);
     let host = Host::try_new_with_provider(test_provider, config)?;
     let raw_return_value = host.run(call)?.guest_output.evm_call_result;
     let return_value = C::abi_decode_returns(&raw_return_value, false)?;

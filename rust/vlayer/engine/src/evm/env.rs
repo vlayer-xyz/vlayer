@@ -1,5 +1,6 @@
 use alloy_primitives::{BlockNumber, ChainId, Sealed};
 use revm::primitives::{CfgEnvWithHandlerCfg, SpecId};
+use std::collections::HashMap;
 
 use crate::{chain::spec::ChainSpec, engine::EngineError};
 
@@ -37,5 +38,53 @@ impl<D, H: EvmBlockHeader> EvmEnv<D, H> {
     /// Returns the header of the environment.
     pub fn header(&self) -> &H {
         self.header.inner()
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+pub struct ExecutionLocation {
+    block_number: BlockNumber,
+    chain_id: ChainId,
+}
+
+impl ExecutionLocation {
+    pub fn new(block_number: BlockNumber, chain_id: ChainId) -> Self {
+        Self {
+            block_number,
+            chain_id,
+        }
+    }
+
+    pub fn block_number(&self) -> BlockNumber {
+        self.block_number
+    }
+
+    pub fn chain_id(&self) -> ChainId {
+        self.chain_id
+    }
+}
+
+pub struct MultiEnv<D, H> {
+    pub envs: HashMap<ExecutionLocation, EvmEnv<D, H>>,
+}
+
+impl<D, H: EvmBlockHeader> MultiEnv<D, H> {
+    pub fn new() -> Self {
+        Self {
+            envs: HashMap::new(),
+        }
+    }
+
+    pub fn insert(&mut self, location: ExecutionLocation, env: EvmEnv<D, H>) {
+        self.envs.insert(location, env);
+    }
+
+    pub fn get_mut(
+        &mut self,
+        location: &ExecutionLocation,
+    ) -> Result<&mut EvmEnv<D, H>, EngineError> {
+        self.envs
+            .get_mut(location)
+            .ok_or(EngineError::EvmNotFound(*location))
     }
 }

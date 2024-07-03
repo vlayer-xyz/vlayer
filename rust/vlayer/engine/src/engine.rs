@@ -31,6 +31,9 @@ pub enum EngineError {
 
     #[error("Chain spec error: {0}")]
     ChainSpecError(String),
+
+    #[error("EVM not found for location")]
+    EvmNotFound(ExecutionLocation),
 }
 
 impl<D, H> Engine<D, H>
