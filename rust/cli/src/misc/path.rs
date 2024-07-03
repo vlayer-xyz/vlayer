@@ -8,23 +8,25 @@ pub(crate) fn find_foundry_root() -> Result<PathBuf, CLIError> {
     find_foundry_root_from(&current_dir)
 }
 
-fn find_foundry_root_from(start: &PathBuf) -> Result<PathBuf, CLIError> {
-    let git_root = find_git_root(start)?;
-    find_foundry_root_from_rec(start, &git_root)
+fn find_foundry_root_from(start: &Path) -> Result<PathBuf, CLIError> {
+    let start = start.canonicalize()?;
+    let git_root = find_git_root(&start)?;
+    do_find_foundry_root_from(&start, &git_root)
 }
 
-fn find_foundry_root_from_rec(cwd: &Path, git_root: &PathBuf) -> Result<PathBuf, CLIError> {
-    if !cwd.starts_with(git_root) {
+fn do_find_foundry_root_from(current: &Path, git_root: &PathBuf) -> Result<PathBuf, CLIError> {
+    if !current.starts_with(git_root) {
         return Err(CLIError::NoFoundryError);
     }
 
-    let path = cwd.join("foundry.toml");
+    let path = current.join("foundry.toml");
 
     if path.is_file() {
-        return Ok(cwd.to_path_buf());
+        return Ok(current.to_path_buf());
     }
-    if let Some(parent) = cwd.parent() {
-        find_foundry_root_from_rec(parent, git_root)
+
+    if let Some(parent) = current.parent() {
+        do_find_foundry_root_from(parent, git_root)
     } else {
         Err(CLIError::NoFoundryError)
     }
@@ -53,17 +55,6 @@ pub fn find_git_root(relative_to: impl AsRef<Path>) -> Result<PathBuf, CLIError>
 mod tests {
     use super::*;
     use crate::test_utils::create_temp_git_repo;
-
-    #[test]
-    fn test_find_foundry_root_from_nonexistent_path() {
-        let temp_dir = tempfile::tempdir().unwrap();
-        let nonexistent_path = temp_dir.path().join("not_a_real_dir");
-        let result = find_foundry_root_from(&nonexistent_path);
-        assert!(matches!(
-            result.unwrap_err(),
-            CLIError::CommandExecutionError(err) if err.kind() == std::io::ErrorKind::NotFound
-        ));
-    }
 
     #[test]
     fn test_find_git_root() {
@@ -107,6 +98,56 @@ mod tests {
         let nonexistent_path = temp_dir.path().join("not_a_real_dir");
         let result = find_git_root(nonexistent_path);
 
+        assert!(matches!(
+            result.unwrap_err(),
+            CLIError::CommandExecutionError(err) if err.kind() == std::io::ErrorKind::NotFound
+        ));
+    }
+
+    #[test]
+    fn test_find_foundry_root_from_no_git() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let result = find_foundry_root_from(temp_dir.path());
+
+        let expected_error_msg =
+            "fatal: not a git repository (or any of the parent directories): .git\n".to_string();
+
+        let error = result.unwrap_err();
+        assert!(matches!(error, CLIError::GitError(msg) if msg == expected_error_msg));
+    }
+
+    #[test]
+    fn test_find_foundry_root_from_no_foundry() {
+        let temp_dir = create_temp_git_repo();
+        let result = find_foundry_root_from(temp_dir.path());
+        assert!(matches!(result.unwrap_err(), CLIError::NoFoundryError));
+    }
+
+    #[test]
+    fn test_find_foundry_root_from() {
+        let temp_dir = create_temp_git_repo();
+        let file_path = temp_dir.path().join("foundry.toml");
+        std::fs::File::create(file_path).unwrap();
+        let result = find_foundry_root_from(temp_dir.path());
+        assert_eq!(result.unwrap(), temp_dir.path().canonicalize().unwrap());
+    }
+
+    #[test]
+    fn test_find_foundry_root_from_subdir() {
+        let temp_dir = create_temp_git_repo();
+        let sub_dir = temp_dir.path().join("dir1").join("dir2");
+        std::fs::create_dir_all(&sub_dir).unwrap();
+        let file_path = temp_dir.path().join("foundry.toml");
+        std::fs::File::create(file_path).unwrap();
+        let result = find_foundry_root_from(&sub_dir);
+        assert_eq!(result.unwrap(), temp_dir.path().canonicalize().unwrap());
+    }
+
+    #[test]
+    fn test_find_foundry_root_from_nonexistent_path() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let nonexistent_path = temp_dir.path().join("not_a_real_dir");
+        let result = find_foundry_root_from(&nonexistent_path);
         assert!(matches!(
             result.unwrap_err(),
             CLIError::CommandExecutionError(err) if err.kind() == std::io::ErrorKind::NotFound
