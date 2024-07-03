@@ -3,12 +3,7 @@ use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::str::from_utf8;
 
-pub(crate) fn find_foundry_root() -> Result<PathBuf, CLIError> {
-    let current_dir = std::env::current_dir()?;
-    find_foundry_root_from(&current_dir)
-}
-
-fn find_foundry_root_from(start: &Path) -> Result<PathBuf, CLIError> {
+pub(crate) fn find_foundry_root(start: &Path) -> Result<PathBuf, CLIError> {
     let start = start.canonicalize()?;
     let git_root = find_git_root(&start)?;
     do_find_foundry_root_from(&start, &git_root)
@@ -107,7 +102,7 @@ mod tests {
     #[test]
     fn test_find_foundry_root_from_no_git() {
         let temp_dir = tempfile::tempdir().unwrap();
-        let result = find_foundry_root_from(temp_dir.path());
+        let result = find_foundry_root(temp_dir.path());
 
         let expected_error_msg =
             "fatal: not a git repository (or any of the parent directories): .git\n".to_string();
@@ -119,7 +114,7 @@ mod tests {
     #[test]
     fn test_find_foundry_root_from_no_foundry() {
         let temp_dir = create_temp_git_repo();
-        let result = find_foundry_root_from(temp_dir.path());
+        let result = find_foundry_root(temp_dir.path());
         assert!(matches!(result.unwrap_err(), CLIError::NoFoundryError));
     }
 
@@ -128,7 +123,7 @@ mod tests {
         let temp_dir = create_temp_git_repo();
         let file_path = temp_dir.path().join("foundry.toml");
         std::fs::File::create(file_path).unwrap();
-        let result = find_foundry_root_from(temp_dir.path());
+        let result = find_foundry_root(temp_dir.path());
         assert_eq!(result.unwrap(), temp_dir.path().canonicalize().unwrap());
     }
 
@@ -139,7 +134,7 @@ mod tests {
         std::fs::create_dir_all(&sub_dir).unwrap();
         let file_path = temp_dir.path().join("foundry.toml");
         std::fs::File::create(file_path).unwrap();
-        let result = find_foundry_root_from(&sub_dir);
+        let result = find_foundry_root(&sub_dir);
         assert_eq!(result.unwrap(), temp_dir.path().canonicalize().unwrap());
     }
 
@@ -147,7 +142,7 @@ mod tests {
     fn test_find_foundry_root_from_nonexistent_path() {
         let temp_dir = tempfile::tempdir().unwrap();
         let nonexistent_path = temp_dir.path().join("not_a_real_dir");
-        let result = find_foundry_root_from(&nonexistent_path);
+        let result = find_foundry_root(&nonexistent_path);
         assert!(matches!(
             result.unwrap_err(),
             CLIError::CommandExecutionError(err) if err.kind() == std::io::ErrorKind::NotFound

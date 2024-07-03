@@ -1,8 +1,9 @@
 use crate::errors::CLIError;
-use crate::misc::init::find_src;
+use crate::misc::init::find_src_path;
 use clap::{Parser, Subcommand};
+use misc::{init::create_vlayer_dir, path::find_foundry_root};
 use server::server::serve;
-use tracing::{error, info};
+use tracing::{error, info, warn};
 
 pub mod errors;
 mod misc;
@@ -49,12 +50,20 @@ async fn run() -> Result<(), CLIError> {
             serve().await?;
         }
         Commands::Init => {
-            info!(
-                "Running vlayer init from directory: {:?}",
-                std::env::current_dir()?
-            );
-            let src = find_src()?;
-            info!("Foundry source path = {}", src);
+            let cwd = std::env::current_dir()?;
+            info!("Running vlayer init from directory {:?}", cwd.display());
+
+            let root_path = find_foundry_root(&cwd)?;
+            let src_path = find_src_path(root_path)?;
+            info!("Found foundry project root in \"{}\"", &src_path.display());
+
+            match create_vlayer_dir(&src_path)? {
+                true => info!("Created vlayer directory in \"{}\"", src_path.display()),
+                false => warn!(
+                    "vlayer directory already exists in \"{}\". Skipping creation.",
+                    &src_path.display()
+                ),
+            }
         }
     }
     Ok(())
