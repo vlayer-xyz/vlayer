@@ -103,9 +103,9 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
     }
 
     pub fn run(mut self, call: Call) -> Result<HostOutput, HostError> {
-        let mut env = self.envs.get_mut(&self.start_execution_location)?;
+        let env = self.envs.get_mut(&self.start_execution_location)?;
         let engine = Engine::default();
-        let host_output = engine.call(&call, &mut env)?;
+        let host_output = engine.call(&call, env)?;
 
         let evm_input = into_input(&env.db, env.header.clone())
             .map_err(|err| HostError::CreatingInput(err.to_string()))?;

@@ -46,7 +46,7 @@ impl Guest {
         GuestOutput {
             execution_commitment: self.header.execution_commitment(call.to, function_selector),
 
-            evm_call_result: Engine::new().call(&call, &mut env).unwrap(),
+            evm_call_result: Engine::default().call(&call, &mut env).unwrap(),
         }
     }
 }
