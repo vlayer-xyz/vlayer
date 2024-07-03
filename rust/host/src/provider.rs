@@ -4,11 +4,12 @@ use alloy_primitives::{
 use ethers::{from_ethers_bytes, from_ethers_u256};
 use ethers_core::types::StorageProof as EthersStorageProof;
 use serde::{Deserialize, Serialize};
-use std::{convert::Infallible, error::Error as StdError, fmt::Debug, marker::PhantomData};
+use std::{error::Error as StdError, fmt::Debug};
 use vlayer_engine::evm::block_header::EvmBlockHeader;
 
 mod ethers;
 mod file;
+mod null;
 
 pub use ethers::{EthersProvider, EthersProviderError};
 use ethers_providers::{Http, RetryClient};
@@ -72,41 +73,4 @@ pub struct EIP1186Proof {
     pub storage_hash: B256,
     pub account_proof: Vec<Bytes>,
     pub storage_proof: Vec<StorageProof>,
-}
-
-/// A simple provider that panics on all queries.
-pub struct NullProvider<H>(PhantomData<H>);
-
-impl<H: EvmBlockHeader> Provider for NullProvider<H> {
-    type Error = Infallible;
-    type Header = H;
-
-    fn get_block_header(&self, _: BlockNumber) -> Result<Option<Self::Header>, Self::Error> {
-        panic!("Unexpected provider call")
-    }
-    fn get_transaction_count(&self, _: Address, _: BlockNumber) -> Result<TxNumber, Self::Error> {
-        panic!("Unexpected provider call")
-    }
-    fn get_balance(&self, _: Address, _: BlockNumber) -> Result<U256, Self::Error> {
-        panic!("Unexpected provider call")
-    }
-    fn get_code(&self, _: Address, _: BlockNumber) -> Result<Bytes, Self::Error> {
-        panic!("Unexpected provider call")
-    }
-    fn get_storage_at(
-        &self,
-        _: Address,
-        _: StorageKey,
-        _: BlockNumber,
-    ) -> Result<StorageValue, Self::Error> {
-        panic!("Unexpected provider call")
-    }
-    fn get_proof(
-        &self,
-        _: Address,
-        _: Vec<StorageKey>,
-        _: BlockNumber,
-    ) -> Result<EIP1186Proof, Self::Error> {
-        panic!("Unexpected provider call")
-    }
 }
