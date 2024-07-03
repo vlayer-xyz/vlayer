@@ -99,10 +99,10 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
     pub fn run(mut self, call: Call) -> Result<HostOutput, HostError> {
         let chain_spec =
             ChainSpec::try_from_config(self.config.start_execution_location.chain_id())?;
-        let env = EvmEnv::new(&mut self.db, self.header.clone().seal_slow())
+        let mut env = EvmEnv::new(&mut self.db, self.header.clone().seal_slow())
             .with_chain_spec(&chain_spec)?;
-        let engine = Engine::try_new(env)?;
-        let host_output = engine.call(&call)?;
+        let engine = Engine::new();
+        let host_output = engine.call(&call, &mut env)?;
 
         let evm_input = into_input(self.db, self.header.seal_slow())
             .map_err(|err| HostError::CreatingInput(err.to_string()))?;
