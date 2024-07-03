@@ -5,7 +5,7 @@ use vlayer_engine::evm::block_header::EvmBlockHeader;
 use vlayer_engine::evm::input::EvmInput;
 
 pub fn into_input<P: Provider>(
-    db: ProofDb<P>,
+    db: &ProofDb<P>,
     header: Sealed<P::Header>,
 ) -> anyhow::Result<EvmInput<P::Header>> {
     let (state_trie, storage_tries) = db.prepare_state_storage_tries()?;
