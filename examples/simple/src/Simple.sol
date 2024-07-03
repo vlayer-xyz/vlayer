@@ -13,9 +13,7 @@ contract Simple is VlayerVerifiable {
 
     }
 
-    function updateSum(bytes calldata seal, Steel.ExecutionCommitment memory commitment, uint256 sum) public {
-        _verify(seal, commitment, sum);
-
+    function updateSum(bytes calldata seal, Steel.ExecutionCommitment calldata commitment, uint256 sum) public  onlyVerified(seal, commitment, sum) {
         latestSum = sum;
     }
 

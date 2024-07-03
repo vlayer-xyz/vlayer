@@ -13,10 +13,13 @@ contract VlayerVerifiable {
     constructor(IRiscZeroVerifier verifier){
         _verifier = verifier;
     }
-    
-    function _verify(bytes calldata seal, Steel.ExecutionCommitment memory commitment, uint256 sum) internal virtual {
+
+
+    modifier onlyVerified(bytes calldata seal, Steel.ExecutionCommitment calldata commitment, uint256 sum) {
         bytes32 computedJournalHash = keccak256(abi.encode(commitment, sum));
         _verifier.verify(seal, GUEST_ID, computedJournalHash);
-    }
 
+        _;
+    }
+    
 }
