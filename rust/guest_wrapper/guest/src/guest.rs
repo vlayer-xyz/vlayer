@@ -3,10 +3,13 @@ use alloy_primitives::{FixedBytes, Sealable, Sealed};
 use revm::primitives::HashMap;
 use vlayer_engine::{
     chain::spec::ChainSpec,
-    config::SEPOLIA_ID,
     engine::Engine,
     ethereum::EthBlockHeader,
-    evm::{block_header::EvmBlockHeader, env::EvmEnv, input::EvmInput},
+    evm::{
+        block_header::EvmBlockHeader,
+        env::{EvmEnv, ExecutionLocation},
+        input::EvmInput,
+    },
     io::{Call, GuestOutput},
 };
 
@@ -33,8 +36,9 @@ impl Guest {
         }
     }
 
-    pub fn run(&mut self, call: Call) -> GuestOutput {
-        let chain_spec = ChainSpec::try_from_config(SEPOLIA_ID).expect("cannot get chain spec");
+    pub fn run(&mut self, call: Call, start_execution_location: ExecutionLocation) -> GuestOutput {
+        let chain_spec = ChainSpec::try_from_config(start_execution_location.chain_id)
+            .expect("cannot get chain spec");
         let mut env = EvmEnv::new(&mut self.db, self.header.clone().seal_slow())
             .with_chain_spec(&chain_spec)
             .expect("cannot set chain spec");
