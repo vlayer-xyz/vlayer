@@ -30,11 +30,19 @@ fn server() -> Router {
 mod tests {
     use crate::test_helpers::{body_to_json, body_to_string, post};
     use core::str;
+    use std::env;
 
     use super::server;
     use axum::http::StatusCode;
     use axum_jrpc::{JsonRpcRequest, Value};
     use serde_json::json;
+
+    fn deployed_contracts_block_no() -> u32 {
+        env::var("BLOCK_NO")
+            .ok()
+            .and_then(|v| v.parse().ok())
+            .unwrap_or(2)
+    }
 
     #[tokio::test]
     async fn http_not_found() -> anyhow::Result<()> {
@@ -117,7 +125,7 @@ mod tests {
 
             let req = json!({
                 "method": "v_call",
-                "params": [{"caller": CALLER, "to": TO, "data": DATA}, {"block_no": 2, "chain_id": 11155111}],
+                "params": [{"caller": CALLER, "to": TO, "data": DATA}, {"block_no": deployed_contracts_block_no(), "chain_id": 11155111}],
                 "id": 1,
                 "jsonrpc": "2.0",
             });

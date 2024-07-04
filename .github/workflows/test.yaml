@@ -46,9 +46,15 @@ jobs:
 
       - name: Deploy simple example contract
         working-directory: examples/simple
+        env:
+          ETH_RPC_URL: http://127.0.0.1:8545
         run: |
-          ../../bash/vlayer-deploy.sh
-
+          output=$(mktemp)
+          ../../bash/vlayer-deploy.sh | tee ${output}
+          
+          # filter-out env variables and pass them to next steps
+          grep '[A-Z0-9_]\+=[a-zA-Z0-9]\+' <${output} >>${GITHUB_ENV}
+          
       - name: Run workspace rust tests
         working-directory: rust
         run: cargo test --workspace
