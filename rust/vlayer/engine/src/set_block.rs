@@ -18,13 +18,8 @@ impl<DB: Database> Inspector<DB> for SetBlockInspector {
         inputs: &mut CallInputs,
     ) -> Option<CallOutcome> {
         println!(
-            "Address: {:?}, caller:{:?},target:{:?} is_static:{:?}, transfer:{:?}, input_size:{:?}",
-            inputs.bytecode_address,
-            inputs.caller,
-            inputs.target_address,
-            inputs.is_static,
-            inputs.value,
-            inputs.input.len(),
+            "Address: {:?}, caller:{:?}, input:{:?}",
+            inputs.bytecode_address, inputs.caller, inputs.input,
         );
 
         if self.set_block {
