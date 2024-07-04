@@ -43,8 +43,8 @@ impl<D, H: EvmBlockHeader> EvmEnv<D, H> {
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
 pub struct ExecutionLocation {
-    block_number: BlockNumber,
-    chain_id: ChainId,
+    pub block_number: BlockNumber,
+    pub chain_id: ChainId,
 }
 
 impl ExecutionLocation {
@@ -53,14 +53,6 @@ impl ExecutionLocation {
             block_number,
             chain_id,
         }
-    }
-
-    pub fn block_number(&self) -> BlockNumber {
-        self.block_number
-    }
-
-    pub fn chain_id(&self) -> ChainId {
-        self.chain_id
     }
 }
 
