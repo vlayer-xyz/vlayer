@@ -84,14 +84,14 @@ impl Host<EthersProvider<EthersClient>> {
 
 impl<P: Provider<Header = EthBlockHeader>> Host<P> {
     pub fn try_new_with_provider(provider: P, config: HostConfig) -> Result<Self, HostError> {
-        let start_block_number = config.start_execution_location.block_number();
+        let start_block_number = config.start_execution_location.block_number;
         let header = provider
             .get_block_header(start_block_number)
             .map_err(|err| HostError::Provider(err.to_string()))?
             .ok_or(HostError::BlockNotFound(start_block_number))?;
 
         let db = ProofDb::new(provider, start_block_number);
-        let chain_spec = ChainSpec::try_from_config(config.start_execution_location.chain_id())?;
+        let chain_spec = ChainSpec::try_from_config(config.start_execution_location.chain_id)?;
         let env = EvmEnv::new(db, header.seal_slow()).with_chain_spec(&chain_spec)?;
         let mut envs = MultiEnv::default();
         envs.insert(config.start_execution_location, env);
