@@ -115,7 +115,7 @@ What happens step by step in the above snippet?
 * `email.subject.match` returns strings matching the regular expression for the subject, which must contain the correct wallet address to be recovered.
 * The `subjectMatches.length == 1` condition ensures that the subject is not malformed.
 * `recoveryMailHash.equal(emailHash)` check if correct email was used for recovery 
-* `email.body.match` get new wallet address from body
+* `email.body.match` retrieves new wallet address from the email body
 
 On successful execution, proof of computation is returned. It also returns the recovered wallet address, the email address hash, the new wallet address, and the email timestamp as public input.
 
