@@ -11,7 +11,9 @@ pub mod db;
 pub mod guest;
 
 fn main() {
-    let Input { evm_input, call } = env::read();
+    let Input {
+        evm_input, call, ..
+    } = env::read();
 
     let output = Guest::new(evm_input).run(call);
 

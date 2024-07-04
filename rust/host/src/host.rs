@@ -107,7 +107,11 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
 
         let evm_input = into_input(&env.db, env.header.clone())
             .map_err(|err| HostError::CreatingInput(err.to_string()))?;
-        let input = Input { call, evm_input };
+        let input = Input {
+            call,
+            evm_input,
+            start_execution_location: self.start_execution_location,
+        };
         let env = Self::build_executor_env(&input)?;
 
         let raw_guest_output = Self::prove(env, GUEST_ELF)?;
