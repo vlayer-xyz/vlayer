@@ -12,7 +12,7 @@ contract Simple is Verifier {
     constructor(IRiscZeroVerifier verifier) Verifier(verifier) {
     }
 
-    function updateSum(bytes calldata seal, Steel.ExecutionCommitment calldata commitment, uint256 sum) public  onlyVerified(seal, commitment, sum) {
+    function updateSum(Steel.ExecutionCommitment calldata, uint256 sum, bytes calldata) public  onlyVerified() {
         latestSum = sum;
     }
 

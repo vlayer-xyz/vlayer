@@ -59,7 +59,7 @@ contract SimpleTest is Test {
     function test_updateSum_validProof() public {
 
         bytes memory seal = verifier.mockProve(GUEST_ID, journalHash).seal;
-        simple.updateSum(seal, fixture_commitment(), fixture_sum());
+        simple.updateSum(fixture_commitment(), fixture_sum(), seal);
         assertEq(simple.latestSum(), 3);
     }
 
@@ -67,14 +67,14 @@ contract SimpleTest is Test {
         bytes memory seal = verifier.mockProve(bytes32(0), journalHash).seal;
 
         vm.expectRevert(VerificationFailed.selector);
-        simple.updateSum(seal, fixture_commitment(), fixture_sum());
+        simple.updateSum(fixture_commitment(), fixture_sum(), seal);
     }
 
     function test_updateSum_revertsForInvalidCalldata() public {
         bytes memory seal = verifier.mockProve(GUEST_ID, journalHash).seal;
 
         vm.expectRevert(VerificationFailed.selector);
-        simple.updateSum(seal, fixture_commitment(), 4);
+        simple.updateSum(fixture_commitment(), 4, seal);
     }
 
 }
