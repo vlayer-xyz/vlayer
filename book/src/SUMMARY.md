@@ -9,7 +9,7 @@
 # Features
 - [Time travel](./features/time-travel.md)
 - [Teleport](./features/teleport.md)
-- [Mail](./features/mail.md)
+- [Email](./features/email.md)
 
 # Contributing
 - [vlayer](./contributing/vlayer.md)

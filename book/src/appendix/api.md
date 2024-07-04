@@ -33,7 +33,7 @@ and the response:
         },
         {"chainId": 1, "blockNo": "latest"},
         {
-            "mail": "<base64? encoded raw mail>",
+            "email": "<base64? encoded raw email>",
             "web": "<encoded web artifacts>",
         }
     ]
