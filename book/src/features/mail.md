@@ -56,7 +56,7 @@ By inspecting and parsing the email payload elements, we can generate a claim to
 
 ## StringUtils
 For convenient manipulation of strings, vlayer provides StringUtils library, which consists of functions like:
-* `toAddress` - converts a string to an address if properly formatted, otherwise reverts
+* `toAddress` - converts a string to an address if properly formatted, reverts otherwise
 * `match` - matches RegExp pattern groups and returns them as a string
 * `equal` - checks the contents of two strings for equality. Returns true if both are equal, false otherwise.
 
