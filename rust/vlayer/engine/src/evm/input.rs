@@ -3,6 +3,8 @@ use mpt::MerkleTrie;
 use serde::{Deserialize, Serialize};
 use tracing::debug;
 
+use super::env::ExecutionLocation;
+
 /// The serializable input to derive and validate a [EvmEnv].
 #[derive(Debug, Serialize, Deserialize)]
 pub struct EvmInput<H> {

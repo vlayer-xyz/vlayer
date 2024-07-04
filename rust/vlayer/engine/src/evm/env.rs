@@ -1,5 +1,6 @@
 use alloy_primitives::{BlockNumber, ChainId, Sealed};
 use revm::primitives::{CfgEnvWithHandlerCfg, SpecId};
+use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
 use crate::{chain::spec::ChainSpec, engine::EngineError};
@@ -41,7 +42,7 @@ impl<D, H: EvmBlockHeader> EvmEnv<D, H> {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct ExecutionLocation {
     pub block_number: BlockNumber,
     pub chain_id: ChainId,
