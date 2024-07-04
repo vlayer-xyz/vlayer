@@ -188,7 +188,7 @@ Below is a short description of the components:
 - The `Guest` is a program which communicates via reading input and writing to output. For simplicity, all input is deserialized into `GuestInput` and all output is serialized into `GuestOutput`. The `Guest`'s main purpose is to parse input and run logic from `Engine`.
 
 - The `Engine` consists of share logic between the `Host` and the `Guest`. In the `Host`, it is used to run preflight and in the `Guest` it is used to perform proving. It mainly does two things:
-    - runs Rust preprocessing of a call (e.g. mail signature verification)
+    - runs Rust preprocessing of a call (e.g. email signature verification)
     - runs Solidity contracts inside revm
 
 ```mermaid
