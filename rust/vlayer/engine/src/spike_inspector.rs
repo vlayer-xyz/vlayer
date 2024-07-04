@@ -1,13 +1,11 @@
 use alloy_primitives::address;
 use revm::{
-    inspectors::GasInspector,
     interpreter::{CallInputs, CallOutcome},
     Database, EvmContext, Inspector,
 };
 
 #[derive(Clone, Debug, Default)]
 pub struct CustomPrintTracer {
-    gas_inspector: GasInspector,
     set_block: bool,
 }
 
@@ -37,14 +35,5 @@ impl<DB: Database> Inspector<DB> for CustomPrintTracer {
             self.set_block = false;
         }
         None
-    }
-
-    fn call_end(
-        &mut self,
-        context: &mut EvmContext<DB>,
-        inputs: &CallInputs,
-        outcome: CallOutcome,
-    ) -> CallOutcome {
-        self.gas_inspector.call_end(context, inputs, outcome)
     }
 }
