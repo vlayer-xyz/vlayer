@@ -11,8 +11,8 @@ use crate::{
         block_header::EvmBlockHeader,
         env::{EvmEnv, ExecutionLocation},
     },
+    inspector::SetInspector,
     io::Call,
-    set_block::SetBlockInspector,
 };
 
 #[derive(Default)]
@@ -45,7 +45,7 @@ impl Engine {
     {
         let evm = Evm::builder()
             .with_db(&mut env.db)
-            .with_external_context(SetBlockInspector::default())
+            .with_external_context(SetInspector::default())
             .with_cfg_env_with_handler_cfg(env.cfg_env.clone())
             .append_handler_register(inspector_handle_register)
             .modify_block_env(|blk_env| env.header.fill_block_env(blk_env))
