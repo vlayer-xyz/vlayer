@@ -7,6 +7,7 @@ pub mod engine;
 pub mod ethereum;
 pub mod evm;
 pub mod io;
+pub mod set_block;
 
 // Keep everything in the Steel library private except the commitment.
 mod private {
