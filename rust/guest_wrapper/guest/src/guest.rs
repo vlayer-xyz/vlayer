@@ -34,21 +34,26 @@ impl Guest {
     }
 
     pub fn run(&mut self, call: Call) -> GuestOutput {
-        let function_selector: [u8; 4] = call.data[0..4]
-            .try_into()
-            .expect("cannot extract function selector from call data");
-
         let chain_spec = ChainSpec::try_from_config(SEPOLIA_ID).expect("cannot get chain spec");
         let mut env = EvmEnv::new(&mut self.db, self.header.clone().seal_slow())
             .with_chain_spec(&chain_spec)
             .expect("cannot set chain spec");
 
-        GuestOutput {
-            execution_commitment: self.header.execution_commitment(call.to, function_selector),
+        let evm_call_result = Engine::default().call(&call, &mut env).unwrap();
+        let function_selector = get_selector(&call);
+        let execution_commitment = self.header.execution_commitment(call.to, function_selector);
 
-            evm_call_result: Engine::default().call(&call, &mut env).unwrap(),
+        GuestOutput {
+            evm_call_result,
+            execution_commitment,
         }
     }
+}
+
+fn get_selector(call: &Call) -> [u8; 4] {
+    call.data[0..4]
+        .try_into()
+        .expect("cannot extract function selector from call data")
 }
 
 fn validate_evm_input(evm_input: &EvmInput<EthBlockHeader>) {
