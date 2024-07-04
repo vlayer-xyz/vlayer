@@ -1,7 +1,8 @@
 use alloy_primitives::TxKind;
 use revm::{
+    inspector_handle_register,
     primitives::{ExecutionResult, ResultAndState, SuccessReason},
-    Database, Evm,
+    Database, Evm, Inspector,
 };
 use thiserror::Error;
 
@@ -11,6 +12,7 @@ use crate::{
         env::{EvmEnv, ExecutionLocation},
     },
     io::Call,
+    set_block::SetBlockInspector,
 };
 
 #[derive(Default)]
@@ -43,17 +45,20 @@ impl Engine {
     {
         let evm = Evm::builder()
             .with_db(&mut env.db)
+            .with_external_context(SetBlockInspector::default())
             .with_cfg_env_with_handler_cfg(env.cfg_env.clone())
+            .append_handler_register(inspector_handle_register)
             .modify_block_env(|blk_env| env.header.fill_block_env(blk_env))
             .build();
 
         Self::transact(evm, tx)
     }
 
-    fn transact<D>(mut evm: Evm<'_, (), &mut D>, tx: &Call) -> Result<Vec<u8>, EngineError>
+    fn transact<D, I>(mut evm: Evm<'_, I, &mut D>, tx: &Call) -> Result<Vec<u8>, EngineError>
     where
         D: Database,
         D::Error: std::fmt::Debug,
+        I: Inspector<D>,
     {
         let tx_env = evm.tx_mut();
         tx_env.caller = tx.caller;
