@@ -9,7 +9,7 @@ All of this means that our inboxes are full of data that can be leveraged.
 With vlayer, you can access email data from smart contracts and use it on-chain. Email authenticity is automatically proven under the hood. In addition, you can settle claims on-chain without exposing the details or private content of an email.
 
 ## Example
-Let's say someone wants to prove they've been a Github user since 2020. One way to do this is to take a screenshot and send it to the verifier. However, this is not very reliable as screenshot images can be easily manipulated and obviously such image can't be verified on-chain. The second idea could be to use the Github API, but let's assume that it is not available at the moment (and also not usable in the context of on-chain smart contracts).
+Let's say someone wants to prove they've been a GitHub user since 2020. One way to do this is to take a screenshot and send it to the verifier. However, this is not very reliable as screenshot images can be easily manipulated and obviously such image can't be verified on-chain. The second idea could be to use the Github API, but let's assume that it is not available at the moment (and also not usable in the context of on-chain smart contracts).
 
 Another option is to prove that Github mail servers sent a welcome email on a certain date. Below is an example `Prover` contract that verifies that the caller (`msg.sender`) created a Github account before 2020.
 
