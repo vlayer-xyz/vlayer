@@ -110,7 +110,7 @@ contract RecoveryEmail is Prover {
 ```
 
 What happens step by step in the above snippet? 
-* `RecoveryEmail` inherits from `Prover` to have special powers for off-chain proving. 
+* `RecoveryEmail` inherits from `Prover` to obtain super powers of off-chain proving. 
 * `main()` function takes `multisigAddr` argument to access Multisig Wallet smart contract data. 
 * `email.subject.match` returns strings matching the regular expression for the subject, which must contain the correct wallet address to be recovered.
 * The `subjectMatches.length == 1` condition ensures that the subject is not malformed.
