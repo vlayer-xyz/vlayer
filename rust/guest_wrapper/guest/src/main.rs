@@ -12,10 +12,12 @@ pub mod guest;
 
 fn main() {
     let Input {
-        evm_input, call, ..
+        evm_input,
+        call,
+        start_execution_location,
     } = env::read();
 
-    let output = Guest::new(evm_input).run(call);
+    let output = Guest::new(evm_input).run(call, start_execution_location);
 
     env::commit_slice(&output.execution_commitment.abi_encode());
     env::commit_slice(&output.evm_call_result);
