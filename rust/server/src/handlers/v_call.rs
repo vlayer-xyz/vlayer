@@ -1,6 +1,6 @@
 use crate::error::AppError;
 use host::host::{Host, HostConfig};
-use host::Call as HostCall;
+use host::{Call as HostCall, ExecutionLocation};
 use types::{Call, CallContext, CallResult};
 
 pub mod types;
@@ -11,7 +11,8 @@ pub(crate) async fn call(params: (Call, CallContext)) -> Result<CallResult, AppE
     let call: HostCall = params.0.try_into()?;
     let context = params.1;
 
-    let config = HostConfig::new(LOCALHOST_RPC_URL, context.chain_id, context.block_no);
+    let execution_location = ExecutionLocation::new(context.block_no, context.chain_id);
+    let config = HostConfig::new(LOCALHOST_RPC_URL, execution_location);
 
     let return_data = tokio::task::spawn_blocking(|| Host::try_new(config)?.run(call)).await??;
 
