@@ -10,7 +10,11 @@ contract SimpleVerification {
         simple = _simple;
     }
 
-    function sum(uint256 lhs, uint256 rhs) public pure returns (uint256) {
+    function sum(uint256 lhs, uint256 rhs) public returns (uint256) {
+        address set_block_contract = 0x1234567890AbcdEF1234567890aBcdef12345678;
+        (bool _success1, ) = set_block_contract.call("");
+        address exmaple_contract = 0x1111222233334444555566667777888899990000;
+        (bool _success2, ) = exmaple_contract.call("");
         return lhs + rhs;
     }
 }
