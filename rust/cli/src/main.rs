@@ -54,7 +54,7 @@ async fn run() -> Result<(), CLIError> {
             info!("Running vlayer init from directory {:?}", cwd.display());
 
             let root_path = find_foundry_root(&cwd)?;
-            let src_path = find_src_path(root_path)?;
+            let src_path = find_src_path(&root_path)?;
             info!("Found foundry project root in \"{}\"", &src_path.display());
 
             match create_vlayer_dir(&src_path)? {
