@@ -1,8 +1,10 @@
-use alloy_primitives::address;
+use alloy_primitives::{address, Address};
 use revm::{
     interpreter::{CallInputs, CallOutcome},
     Database, EvmContext, Inspector,
 };
+
+const SET_BLOCK_CONTRACT_ADDR: Address = address!("1234567890AbcdEF1234567890aBcdef12345678");
 
 #[derive(Clone, Debug, Default)]
 pub struct CustomPrintTracer {
@@ -29,7 +31,7 @@ impl<DB: Database> Inspector<DB> for CustomPrintTracer {
             println!("Need to change block!");
         }
 
-        if inputs.bytecode_address == address!("1234567890AbcdEF1234567890aBcdef12345678") {
+        if inputs.bytecode_address == SET_BLOCK_CONTRACT_ADDR {
             self.set_block = true;
         } else {
             self.set_block = false;
