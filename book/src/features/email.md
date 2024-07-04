@@ -33,7 +33,7 @@ The `email` structure is automatically injected into the contract context of the
 
 String comparison is handled by our `StringUtils` library (described in more [details below](/features/email.html#stringutils)). Date values are formatted in the [Unix time](https://en.wikipedia.org/wiki/Unix_time) notation, which allows them to be compared as integers.
 
-> Comparisons with false results or forged data will abort execution and prevent the generation of a valid proof.
+> If one of the string comparisons fails, require will revert the execution, and as a result, proof generation will fail.
 
 ## Email structure
 The `email` structure of type `Email` is injected into the `Prover` and can be used in a `main()` function.
