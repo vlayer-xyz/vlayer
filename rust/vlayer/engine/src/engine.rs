@@ -3,7 +3,6 @@ use revm::{
     primitives::{ExecutionResult, ResultAndState, SuccessReason},
     Database, Evm,
 };
-use std::{fmt::Debug, marker::PhantomData};
 use thiserror::Error;
 
 use crate::{
@@ -14,17 +13,8 @@ use crate::{
     io::Call,
 };
 
-pub struct Engine<D, H> {
-    phantom: PhantomData<(D, H)>,
-}
-
-impl<D, H> Default for Engine<D, H> {
-    fn default() -> Self {
-        Self {
-            phantom: PhantomData,
-        }
-    }
-}
+#[derive(Default)]
+pub struct Engine {}
 
 #[derive(Error, Debug, PartialEq)]
 pub enum EngineError {
@@ -44,13 +34,13 @@ pub enum EngineError {
     EvmNotFound(ExecutionLocation),
 }
 
-impl<D, H> Engine<D, H>
-where
-    D: Database,
-    D::Error: std::fmt::Debug,
-    H: EvmBlockHeader,
-{
-    pub fn call(self, tx: &Call, env: &mut EvmEnv<D, H>) -> Result<Vec<u8>, EngineError> {
+impl Engine {
+    pub fn call<D, H>(self, tx: &Call, env: &mut EvmEnv<D, H>) -> Result<Vec<u8>, EngineError>
+    where
+        D: Database,
+        D::Error: std::fmt::Debug,
+        H: EvmBlockHeader,
+    {
         let evm = Evm::builder()
             .with_db(&mut env.db)
             .with_cfg_env_with_handler_cfg(env.cfg_env.clone())
@@ -60,10 +50,10 @@ where
         Self::transact(evm, tx)
     }
 
-    fn transact(mut evm: Evm<'_, (), &mut D>, tx: &Call) -> Result<Vec<u8>, EngineError>
+    fn transact<D>(mut evm: Evm<'_, (), &mut D>, tx: &Call) -> Result<Vec<u8>, EngineError>
     where
         D: Database,
-        D::Error: Debug,
+        D::Error: std::fmt::Debug,
     {
         let tx_env = evm.tx_mut();
         tx_env.caller = tx.caller;
