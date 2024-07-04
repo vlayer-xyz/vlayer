@@ -62,7 +62,7 @@ echo "Running deployment script: ${DEPLOYMENT_SCRIPT}"
 echo 
 echo Deploying contracts...
 results_file=$(deploy_contracts)
-echo Contracts has been deployed ✅
+echo Contracts have been deployed ✅
 echo
 
 for contract in "${DEPLOYABLE_CONTRACTS[@]}" ; do
