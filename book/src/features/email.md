@@ -121,7 +121,7 @@ On successful execution, proof of computation is returned. It also returns the r
 
 ## Verifier 
 
-Now we are ready to use the proof and public inputs from the previous step for on-chain verification. Valid proof allows us to restore access to `MultiSigWallet` by adding new address to authorized list in smart contract. 
+Now we are ready to use the proof and results from the previous step for on-chain verification. Valid proof allows us to restore access to `MultiSigWallet` by adding new address to authorized list in smart contract. 
 
 Below is a sample implementation of this:
 
