@@ -60,11 +60,11 @@ pub struct MultiEnv<D, H> {
     pub envs: HashMap<ExecutionLocation, EvmEnv<D, H>>,
 }
 
-impl<D, H> Default for MultiEnv<D, H> {
-    fn default() -> Self {
-        Self {
-            envs: HashMap::new(),
-        }
+impl<D, H> MultiEnv<D, H> {
+    pub fn from_single(env: EvmEnv<D, H>, location: ExecutionLocation) -> Self {
+        let mut envs = HashMap::new();
+        envs.insert(location, env);
+        Self { envs }
     }
 }
 
