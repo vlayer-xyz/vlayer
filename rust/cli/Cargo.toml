@@ -13,13 +13,8 @@ tokio = { workspace = true }
 anyhow = { workspace = true }
 thiserror = { workspace = true }
 toml = "0.8.14"
-log = { version = "0.4" }
-tracing-subscriber = { version = "0.3", features = [
-    "env-filter",
-    "fmt",
-], default-features = false }
+tracing-subscriber = { workspace = true }
 tracing = { workspace = true }
-
 
 server = { path = "../server" }
 

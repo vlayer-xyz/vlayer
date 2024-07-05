@@ -21,6 +21,12 @@ alloy-sol-types = "0.7.5"
 alloy-primitives = "0.7.5"
 ethers-providers = "2.0"
 anyhow = "1.0.86"
-tokio = { version = "1.38.0", default-features = false, features = ["rt-multi-thread"] }
+tokio = { version = "1.38.0", default-features = false, features = [
+    "rt-multi-thread",
+] }
 thiserror = "1.0.61"
 tracing = { version = "0.1", default-features = false }
+tracing-subscriber = { version = "0.3", features = [
+    "env-filter",
+    "fmt",
+], default-features = false }
