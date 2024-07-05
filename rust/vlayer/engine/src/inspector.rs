@@ -33,13 +33,17 @@ impl<DB: Database> Inspector<DB> for SetInspector {
             let function = &input[..4];
             let argument = U256::from_big_endian(&input[4..]);
 
-            if function == decode(SET_BLOCK_FUNCTION).unwrap() {
+            if function
+                == decode(SET_BLOCK_FUNCTION).expect("Error decoding set_block function call")
+            {
                 info!(
                     "Travel contract called with function: setBlock and argument: {:?}!",
                     argument
                 );
                 self.set_block = Some(argument);
-            } else if function == decode(SET_CHAIN_FUNCTION).unwrap() {
+            } else if function
+                == decode(SET_CHAIN_FUNCTION).expect("Error decoding set_block function call")
+            {
                 info!(
                     "Travel contract called with function: setChain and argument: {:?}!",
                     argument
