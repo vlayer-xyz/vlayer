@@ -3,13 +3,13 @@ use alloy_sol_types::SolValue;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-use crate::ethereum::EthEvmInput;
+use crate::ethereum::MultiEthEvmInput;
 use crate::evm::env::ExecutionLocation;
 use crate::ExecutionCommitment;
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Input {
-    pub evm_input: EthEvmInput,
+    pub evm_input: MultiEthEvmInput,
     pub call: Call,
     pub start_execution_location: ExecutionLocation,
 }

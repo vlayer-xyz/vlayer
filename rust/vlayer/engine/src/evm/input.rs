@@ -1,12 +1,13 @@
 use alloy_primitives::Bytes;
 use mpt::MerkleTrie;
 use serde::{Deserialize, Serialize};
+use std::collections::HashMap;
 use tracing::debug;
 
 use super::env::ExecutionLocation;
 
 /// The serializable input to derive and validate a [EvmEnv].
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct EvmInput<H> {
     pub header: H,
     pub state_trie: MerkleTrie,
@@ -24,5 +25,20 @@ impl<H> EvmInput<H> {
         debug!("total storage size: {}", total_storage_size);
         debug!("contracts: {}", self.contracts.len());
         debug!("blocks: {}", self.ancestors.len());
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone)]
+pub struct MultiEvmInput<H>(HashMap<ExecutionLocation, EvmInput<H>>);
+
+impl<H> MultiEvmInput<H> {
+    pub fn get(&self, location: &ExecutionLocation) -> Option<&EvmInput<H>> {
+        self.0.get(location)
+    }
+}
+
+impl<H> FromIterator<(ExecutionLocation, EvmInput<H>)> for MultiEvmInput<H> {
+    fn from_iter<T: IntoIterator<Item = (ExecutionLocation, EvmInput<H>)>>(iter: T) -> Self {
+        MultiEvmInput(iter.into_iter().collect())
     }
 }
