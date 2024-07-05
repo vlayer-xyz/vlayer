@@ -16,12 +16,7 @@ tower = "0.4.13"
 tower-http = { version = "0.5.2", features = ["trace"] }
 tower-request-id = "0.3.0"
 tracing = "0.1.40"
-tracing-opentelemetry = "0.16.0"
-opentelemetry-jaeger = "0.15.0"
-opentelemetry = "0.16"
-tracing-subscriber = { version = "0.3.18", features = ["env-filter"] }
 alloy-primitives = { workspace = true }
-derivative = "2.2.0"
 hex = "0.4.3"
 axum-jrpc = "0.7.0"
 host = { path = "../host" }

@@ -4,7 +4,6 @@ mod error;
 mod handlers;
 mod json_rpc;
 mod layers;
-mod trace;
 mod utils;
 
 #[cfg(test)]
