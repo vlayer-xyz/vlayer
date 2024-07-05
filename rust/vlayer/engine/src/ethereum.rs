@@ -1,6 +1,6 @@
 //! Type aliases for Ethereum.
 use crate::{
-    evm::{block_header::EvmBlockHeader, env::EvmEnv, input::EvmInput},
+    evm::{block_header::EvmBlockHeader, env::EvmEnv, input::MultiEvmInput},
     ExecutionCommitment,
 };
 
@@ -15,7 +15,7 @@ use serde::{Deserialize, Serialize};
 pub type EthEvmEnv<D> = EvmEnv<D, EthBlockHeader>;
 
 /// [EvmInput] for Ethereum.
-pub type EthEvmInput = EvmInput<EthBlockHeader>;
+pub type MultiEthEvmInput = MultiEvmInput<EthBlockHeader>;
 
 /// Ethereum post-merge block header.
 #[derive(Debug, Clone, Serialize, Deserialize, RlpEncodable)]
