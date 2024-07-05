@@ -42,7 +42,7 @@ impl<DB: Database> Inspector<DB> for SetInspector {
                 );
                 self.set_block = Some(argument);
             } else if function
-                == decode(SET_CHAIN_FUNCTION).expect("Error decoding set_block function call")
+                == decode(SET_CHAIN_FUNCTION).expect("Error decoding set_chain function call")
             {
                 info!(
                     "Travel contract called with function: setChain and argument: {:?}!",
