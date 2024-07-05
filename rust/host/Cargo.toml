@@ -8,16 +8,19 @@ risc0-zkvm = { workspace = true }
 vlayer-engine = { path = "../vlayer/engine" }
 guest_wrapper = { path = "../guest_wrapper" }
 mpt = { path = "../mpt" }
-tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"], default-features = false }
+tracing-subscriber = { workspace = true }
 alloy-primitives = { workspace = true, features = ["rlp", "serde"] }
 ethers-providers = { workspace = true }
-ethers-core = {version="2.0"}
+ethers-core = { version = "2.0" }
 thiserror = { workspace = true }
 url = { version = "2.4", default-features = false }
 alloy-sol-types = { workspace = true }
 anyhow = "1.0"
-log = {version="0.4"}
-revm = { version = "10.0", default-features = false, features = ["serde", "std"] }
+log = { version = "0.4" }
+revm = { version = "10.0", default-features = false, features = [
+    "serde",
+    "std",
+] }
 serde = "1.0"
 serde_json = { version = "1.0" }
 tokio = { workspace = true }
