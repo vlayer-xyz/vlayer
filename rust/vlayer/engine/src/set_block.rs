@@ -95,10 +95,10 @@ mod test {
     #[test]
     fn set_block() {
         let mut mock_db = CacheDB::new(EmptyDB::default());
-        let not_set_block_contract = address!("1234567890AbcdEF1234567890aBcdef12345678");
-        mock_db.insert_account_info(not_set_block_contract, AccountInfo::default());
+        let set_block_contract = address!("1234567890AbcdEF1234567890aBcdef12345678");
+        mock_db.insert_account_info(set_block_contract, AccountInfo::default());
         let mut evm_context = create_cache_db_evm_context(Box::new(Env::default()), mock_db);
-        let mut call_inputs = create_mock_call_inputs(not_set_block_contract);
+        let mut call_inputs = create_mock_call_inputs(set_block_contract);
 
         let mut set_block_inspector = SetBlockInspector::default();
         set_block_inspector.call(&mut evm_context, &mut call_inputs);
