@@ -24,3 +24,4 @@ alloy-chains = "0.1.23"
 
 [dev-dependencies]
 reqwest = "0.12.5"
+lazy_static = "1.5.0"
