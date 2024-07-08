@@ -11,7 +11,7 @@ use thiserror::Error;
 use vlayer_engine::chain::spec::ChainSpec;
 use vlayer_engine::engine::{Engine, EngineError};
 use vlayer_engine::ethereum::EthBlockHeader;
-use vlayer_engine::evm::env::{EvmEnv, ExecutionLocation, MultiEnv};
+use vlayer_engine::evm::env::{EvmEnv, ExecutionLocation, MultiEvmEnv};
 use vlayer_engine::evm::input::MultiEvmInput;
 use vlayer_engine::io::GuestOutputError;
 use vlayer_engine::io::{Call, GuestOutput, HostOutput, Input};
@@ -23,7 +23,7 @@ pub type EthersClient = OGEthersProvider<RetryClient<Http>>;
 
 pub struct Host<P: Provider<Header = EthBlockHeader>> {
     start_execution_location: ExecutionLocation,
-    envs: MultiEnv<ProofDb<P>, EthBlockHeader>,
+    envs: MultiEvmEnv<ProofDb<P>, EthBlockHeader>,
 }
 
 #[derive(Error, Debug)]
@@ -94,7 +94,7 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
         let db = ProofDb::new(provider, start_block_number);
         let chain_spec = ChainSpec::try_from_config(config.start_execution_location.chain_id)?;
         let env = EvmEnv::new(db, header.seal_slow()).with_chain_spec(&chain_spec)?;
-        let envs = MultiEnv::from_single(env, config.start_execution_location);
+        let envs = MultiEvmEnv::from_single(env, config.start_execution_location);
 
         Ok(Host {
             envs,
