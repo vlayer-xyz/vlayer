@@ -44,8 +44,8 @@ fn main() -> Result<(), HostError> {
     };
 
     let execution_location = ExecutionLocation::new(config.block_no, SEPOLIA_ID);
-    let _return_data =
-        Host::try_new(HostConfig::new(LOCALHOST_RPC_URL, execution_location))?.run(call_tx_data)?;
+    let config = HostConfig::new(LOCALHOST_RPC_URL, execution_location);
+    let _return_data = Host::try_new(config)?.run(call_tx_data)?;
 
     Ok(())
 }
