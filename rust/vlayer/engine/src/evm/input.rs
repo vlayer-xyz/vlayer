@@ -1,10 +1,10 @@
-use alloy_primitives::Bytes;
+use alloy_primitives::{Bytes, B256};
 use mpt::MerkleTrie;
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use tracing::debug;
 
-use super::env::ExecutionLocation;
+use super::{block_header::EvmBlockHeader, env::ExecutionLocation};
 
 /// The serializable input to derive and validate a [EvmEnv].
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -25,6 +25,21 @@ impl<H> EvmInput<H> {
         debug!("total storage size: {}", total_storage_size);
         debug!("contracts: {}", self.contracts.len());
         debug!("blocks: {}", self.ancestors.len());
+    }
+}
+
+impl<H: EvmBlockHeader + Clone> EvmInput<H> {
+    pub fn block_hashes(&self) -> HashMap<u64, B256> {
+        let mut block_hashes = HashMap::with_capacity(self.ancestors.len() + 1);
+        for ancestor in &self.ancestors {
+            let ancestor_hash = ancestor.hash_slow();
+            block_hashes.insert(ancestor.number(), ancestor_hash);
+        }
+
+        let header = self.header.clone().seal_slow();
+        block_hashes.insert(self.header.number(), header.seal());
+
+        block_hashes
     }
 }
 
