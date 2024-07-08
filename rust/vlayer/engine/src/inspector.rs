@@ -35,8 +35,7 @@ impl<DB: Database> Inspector<DB> for SetInspector {
 
         match inputs.bytecode_address {
             TRAVEL_CONTRACT_ADDR => {
-                let input = &inputs.input;
-                let (selector, argument_bytes) = input.split_at(SELECTOR_LEN);
+                let (selector, argument_bytes) = inputs.input.split_at(SELECTOR_LEN);
                 let argument = U256::from_big_endian(argument_bytes);
 
                 if selector == *SET_BLOCK_SELECTOR {
@@ -54,14 +53,12 @@ impl<DB: Database> Inspector<DB> for SetInspector {
                 }
             }
             _ => {
-                if let Some(number) = &self.set_block {
+                if let Some(number) = &self.set_block.take() {
                     info!("Need to change block to {:?}!", number);
                 }
-                if let Some(number) = &self.set_chain {
+                if let Some(number) = &self.set_chain.take() {
                     info!("Need to change chain to {:?}!", number);
                 }
-                self.set_block = None;
-                self.set_chain = None;
             }
         }
 
