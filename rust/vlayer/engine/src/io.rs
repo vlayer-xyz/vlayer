@@ -31,8 +31,10 @@ impl Default for Call {
     }
 }
 
+pub type CallSelector = [u8; 4];
+
 impl Call {
-    pub fn selector(&self) -> [u8; 4] {
+    pub fn selector(&self) -> CallSelector {
         self.data[0..4]
             .try_into()
             .expect("cannot extract function selector from call data")
