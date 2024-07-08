@@ -21,3 +21,6 @@ hex = "0.4.3"
 axum-jrpc = "0.7.0"
 host = { path = "../host" }
 alloy-chains = "0.1.22"
+
+[dev-dependencies]
+reqwest = "0.12.5"

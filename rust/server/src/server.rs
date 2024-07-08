@@ -76,6 +76,30 @@ mod tests {
 
     mod v_call {
         use super::*;
+        const LOCALHOST_RPC_URL: &str = "http://localhost:8545";
+
+        async fn get_block_nr() -> u32 {
+            let req = json!({
+                "jsonrpc": "2.0",
+                "method": "eth_blockNumber",
+                "params": [],
+                "id": 0
+            });
+
+            let response = reqwest::Client::new()
+                .post(LOCALHOST_RPC_URL)
+                .json(&req)
+                .send()
+                .await
+                .unwrap();
+
+            let body = response.text().await.unwrap();
+            let json: serde_json::Value = serde_json::from_str(&body).unwrap();
+            let result = json["result"].clone();
+            let result = result.as_str().unwrap();
+            let result = u32::from_str_radix(&result[2..], 16).unwrap();
+            result
+        }
 
         #[tokio::test]
         async fn field_validation_error() -> anyhow::Result<()> {
@@ -108,11 +132,12 @@ mod tests {
 
         #[tokio::test]
         async fn success() -> anyhow::Result<()> {
+            let block_nr = get_block_nr().await;
             let app = server();
 
             let req = json!({
                 "method": "v_call",
-                "params": [{"caller": CALLER, "to": TO, "data": DATA}, {"block_no": 2, "chain_id": 11155111}],
+                "params": [{"caller": CALLER, "to": TO, "data": DATA}, {"block_no": block_nr, "chain_id": 11155111}],
                 "id": 1,
                 "jsonrpc": "2.0",
             });
