@@ -28,34 +28,41 @@ contract ExampleVerifier is VerifierUnderTest {
         PROVER = address(new ExampleProver());
     }
 
-    function verifySomething(
-        Proof calldata
-    ) external onlyVerified(PROVER, SIMPLE_PROVER_SELECTOR) returns (bool) {
+    function verifySomething(Proof calldata) external onlyVerified(PROVER, SIMPLE_PROVER_SELECTOR) returns (bool) {
         return true;
     }
 }
 
 contract Verifier_OnlyVerified_Modifier_Tests is Test {
-    function test_verify_something() public {
-        ExampleVerifier exampleVerifier = new ExampleVerifier();
-        RiscZeroMockVerifier mockVerifier = new RiscZeroMockVerifier(bytes4(0));
+    ExampleVerifier exampleVerifier = new ExampleVerifier();
+    RiscZeroMockVerifier mockVerifier = new RiscZeroMockVerifier(bytes4(0));
+    Steel.ExecutionCommitment commitment;
 
-        Steel.ExecutionCommitment memory commitment = Steel.ExecutionCommitment(
+    function setUp() public {
+        commitment = Steel.ExecutionCommitment(
             exampleVerifier.PROVER(),
             ExampleVerifier.verifySomething.selector,
             block.number - 1,
             blockhash(block.number - 1)
         );
-
-        bytes memory seal = mockVerifier
-            .mockProve(
-                exampleVerifier.GUEST_ID(),
-                sha256(abi.encode(commitment))
-            )
-            .seal;
-
         exampleVerifier.setVerifier(mockVerifier);
-        Proof memory proof = Proof(128, SealLib.encodeSeal(seal), commitment);
+    }
+
+    function createProof() public view returns (Proof memory) {
+        bytes memory seal = mockVerifier.mockProve(exampleVerifier.GUEST_ID(), sha256(abi.encode(commitment))).seal;
+        return Proof(128, SealLib.encodeSeal(seal), commitment);
+    }
+
+    function test_verifySuccess() public {
+        Proof memory proof = createProof();
+        exampleVerifier.verifySomething(proof);
+    }
+
+    function test_invalidProver() public {
+        commitment.startContractAddress = address(exampleVerifier);
+        Proof memory proof = createProof();
+
+        vm.expectRevert("Invalid prover");
         exampleVerifier.verifySomething(proof);
     }
 }
