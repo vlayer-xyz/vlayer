@@ -82,4 +82,14 @@ impl<D, H: EvmBlockHeader> MultiEnv<D, H> {
             .get_mut(location)
             .ok_or(EngineError::EvmNotFound(*location))
     }
+
+    pub fn with_chain_spec(self, chain_spec: &ChainSpec) -> Result<Self, EngineError> {
+        let envs = self
+            .envs
+            .into_iter()
+            .map(|(location, env)| Ok((location, env.with_chain_spec(chain_spec)?)))
+            .collect::<Result<_, _>>()?;
+
+        Ok(Self { envs })
+    }
 }
