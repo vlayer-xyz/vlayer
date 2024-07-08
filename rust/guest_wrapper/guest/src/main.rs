@@ -20,7 +20,7 @@ fn main() {
         .get(&start_execution_location)
         .expect("cannot get start evm input")
         .to_owned(); // TODO: Remove clone and convert this object into MultiEnv
-    let output = Guest::new(start_evm_input).run(call, start_execution_location);
+    let output = Guest::new(start_evm_input, start_execution_location).run(call);
 
     env::commit_slice(&output.execution_commitment.abi_encode());
     env::commit_slice(&output.evm_call_result);

@@ -15,12 +15,14 @@ use vlayer_engine::{
 };
 
 pub struct Guest {
-    db: WrapStateDb,
-    header: EthBlockHeader,
+    env: EvmEnv<WrapStateDb, EthBlockHeader>,
 }
 
 impl Guest {
-    pub fn new(evm_input: EvmInput<EthBlockHeader>) -> Self {
+    pub fn new(
+        evm_input: EvmInput<EthBlockHeader>,
+        start_execution_location: ExecutionLocation,
+    ) -> Self {
         validate_evm_input(&evm_input);
         let header = evm_input.header.clone().seal_slow();
         let block_hashes = get_block_hashes(&evm_input, &header);
@@ -31,21 +33,19 @@ impl Guest {
             block_hashes,
         ));
 
-        Guest {
-            db,
-            header: header.inner().clone(),
-        }
-    }
-
-    pub fn run(&mut self, call: Call, start_execution_location: ExecutionLocation) -> GuestOutput {
         let chain_spec = ChainSpec::try_from_config(start_execution_location.chain_id)
             .expect("cannot get chain spec");
-        let mut env = EvmEnv::new(&mut self.db, self.header.clone().seal_slow())
+        let env = EvmEnv::new(db, header)
             .with_chain_spec(&chain_spec)
             .expect("cannot set chain spec");
 
-        let evm_call_result = Engine::default().call(&call, &mut env).unwrap();
-        let execution_commitment = ExecutionCommitment::new(&self.header, call.to, call.selector());
+        Guest { env }
+    }
+
+    pub fn run(&mut self, call: Call) -> GuestOutput {
+        let evm_call_result = Engine::default().call(&call, &mut self.env).unwrap();
+        let execution_commitment =
+            ExecutionCommitment::new(self.env.header(), call.to, call.selector());
 
         GuestOutput {
             evm_call_result,
