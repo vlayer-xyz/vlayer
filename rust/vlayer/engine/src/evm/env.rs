@@ -57,11 +57,11 @@ impl ExecutionLocation {
     }
 }
 
-pub struct MultiEnv<D, H> {
+pub struct MultiEvmEnv<D, H> {
     pub envs: HashMap<ExecutionLocation, EvmEnv<D, H>>,
 }
 
-impl<D, H> MultiEnv<D, H> {
+impl<D, H> MultiEvmEnv<D, H> {
     pub fn from_single(env: EvmEnv<D, H>, location: ExecutionLocation) -> Self {
         let mut envs = HashMap::new();
         envs.insert(location, env);
@@ -69,7 +69,7 @@ impl<D, H> MultiEnv<D, H> {
     }
 }
 
-impl<D, H: EvmBlockHeader> MultiEnv<D, H> {
+impl<D, H: EvmBlockHeader> MultiEvmEnv<D, H> {
     pub fn insert(&mut self, location: ExecutionLocation, env: EvmEnv<D, H>) {
         self.envs.insert(location, env);
     }
