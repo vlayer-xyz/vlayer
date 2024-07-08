@@ -31,6 +31,14 @@ impl Default for Call {
     }
 }
 
+impl Call {
+    pub fn selector(&self) -> [u8; 4] {
+        self.data[0..4]
+            .try_into()
+            .expect("cannot extract function selector from call data")
+    }
+}
+
 #[derive(Error, Debug)]
 pub enum GuestOutputError {
     #[error("Cannot decode execution commitment: {0}")]

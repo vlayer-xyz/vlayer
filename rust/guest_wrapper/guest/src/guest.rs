@@ -44,20 +44,13 @@ impl Guest {
             .expect("cannot set chain spec");
 
         let evm_call_result = Engine::default().call(&call, &mut env).unwrap();
-        let function_selector = get_selector(&call);
-        let execution_commitment = self.header.execution_commitment(call.to, function_selector);
+        let execution_commitment = self.header.execution_commitment(call.to, call.selector());
 
         GuestOutput {
             evm_call_result,
             execution_commitment,
         }
     }
-}
-
-fn get_selector(call: &Call) -> [u8; 4] {
-    call.data[0..4]
-        .try_into()
-        .expect("cannot extract function selector from call data")
 }
 
 fn validate_evm_input(evm_input: &EvmInput<EthBlockHeader>) {
