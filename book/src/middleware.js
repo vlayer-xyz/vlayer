@@ -4,7 +4,8 @@ const {
   NOTION_DATABASE_ID,
   NOTION_API_KEY,
   NOTION_API_VERSION,
-  NOTION_API_URL
+  NOTION_API_URL,
+  RESEND_API_KEY
 } = process.env;
 
 const NOTION_API_HEADERS = {
@@ -92,6 +93,25 @@ const addCredsVisitLog = async (row) => {
   await fetch(`${NOTION_API_URL}/pages/${row.id}`, options);
 }
 
+const deliverEmailNotification = async (login) => {
+  await fetch('https://api.resend.com/emails', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      'Authorization': `Bearer ${RESEND_API_KEY}`
+    },
+    body: JSON.stringify({
+      "from": "vlayer Notifier <no_reply@vlayer.xyz>",
+      "to": [
+        "marek@vlayer.xyz", 
+        "artur@vlayer.xyz"
+      ],
+      "subject": "New vlayer docs visit",
+      "html": `${login} just visited the docs! 🎉 <br/><br/> See stats and manage access <a href="https://www.notion.so/vlayer/Docs-Allowlist-746a3a5f651d45c189717cb2ffb938fe>here</a>`
+    })
+  })
+}
+
 export default async function middleware(request) {
   const url = new URL(request.url);
 
@@ -111,9 +131,15 @@ export default async function middleware(request) {
     console.log("Docs Auth Login attempt: ", [url.toString(), login]);
 
     const credsRow = await checkCreds(login, password);
+    
     if(process.env.VERCEL_ENV === 'production') {
       await addCredsVisitLog(credsRow);
     }
+
+    if(login.includes('@') && !login.includes('@vlayer.xyz')) {
+      await deliverEmailNotification(login);
+    }
+    
     console.log("Docs Auth Login successful: ", [url.toString(), login]);
 
     return next();
