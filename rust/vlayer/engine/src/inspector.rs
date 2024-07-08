@@ -8,8 +8,8 @@ use revm::{
 use tracing::info;
 
 const TRAVEL_CONTRACT_ADDR: Address = address!("1234567890AbcdEF1234567890aBcdef12345678");
-const SET_BLOCK_FUNCTION: &str = "768d130e";
-const SET_CHAIN_FUNCTION: &str = "5852cc0c";
+const SET_BLOCK_SELECTOR: &str = "87cea3ae";
+const SET_CHAIN_SELECTOR: &str = "1b44fd15";
 
 #[derive(Clone, Debug, Default)]
 pub struct SetInspector {
@@ -28,45 +28,40 @@ impl<DB: Database> Inspector<DB> for SetInspector {
             inputs.bytecode_address, inputs.caller, inputs.input,
         );
 
-        if inputs.bytecode_address == TRAVEL_CONTRACT_ADDR {
-            let input = &inputs.input;
-            let function = &input[..4];
-            let argument = U256::from_big_endian(&input[4..]);
+        match inputs.bytecode_address {
+            TRAVEL_CONTRACT_ADDR => {
+                let input = &inputs.input;
+                let (selector, argument_bytes) = input.split_at(4);
+                let argument = U256::from_big_endian(argument_bytes);
 
-            if function
-                == decode(SET_BLOCK_FUNCTION).expect("Error decoding set_block function call")
-            {
-                info!(
-                    "Travel contract called with function: setBlock and argument: {:?}!",
-                    argument
-                );
-                self.set_block = Some(argument);
-            } else if function
-                == decode(SET_CHAIN_FUNCTION).expect("Error decoding set_chain function call")
-            {
-                info!(
-                    "Travel contract called with function: setChain and argument: {:?}!",
-                    argument
-                );
-                self.set_chain = Some(argument);
+                if selector
+                    == decode(SET_BLOCK_SELECTOR).expect("Error decoding set_block function call")
+                {
+                    info!(
+                        "Travel contract called with function: setBlock and argument: {:?}!",
+                        argument
+                    );
+                    self.set_block = Some(argument);
+                } else if selector
+                    == decode(SET_CHAIN_SELECTOR).expect("Error decoding set_chain function call")
+                {
+                    info!(
+                        "Travel contract called with function: setChain and argument: {:?}!",
+                        argument
+                    );
+                    self.set_chain = Some(argument);
+                }
             }
-        } else {
-            match &self.set_block {
-                Some(number) => {
+            _ => {
+                if let Some(number) = &self.set_block {
                     info!("Need to change block to {:?}!", number);
                 }
-                None => (),
-            };
-
-            match &self.set_chain {
-                Some(number) => {
+                if let Some(number) = &self.set_chain {
                     info!("Need to change chain to {:?}!", number);
                 }
-                None => (),
-            };
-
-            self.set_block = None;
-            self.set_chain = None;
+                self.set_block = None;
+                self.set_chain = None;
+            }
         }
 
         None
