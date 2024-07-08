@@ -11,6 +11,7 @@ use vlayer_engine::{
         input::EvmInput,
     },
     io::{Call, GuestOutput},
+    ExecutionCommitment,
 };
 
 pub struct Guest {
@@ -44,7 +45,7 @@ impl Guest {
             .expect("cannot set chain spec");
 
         let evm_call_result = Engine::default().call(&call, &mut env).unwrap();
-        let execution_commitment = self.header.execution_commitment(call.to, call.selector());
+        let execution_commitment = ExecutionCommitment::new(&self.header, call.to, call.selector());
 
         GuestOutput {
             evm_call_result,

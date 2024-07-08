@@ -8,11 +8,5 @@ pub mod ethereum;
 pub mod evm;
 pub mod io;
 pub mod set_block;
-
-// Keep everything in the Steel library private except the commitment.
-mod private {
-    alloy_sol_types::sol!("./Steel.sol");
-}
-
-/// Solidity struct representing the committed block used for validation.
-pub use private::Steel::ExecutionCommitment;
+pub mod steel;
+pub use steel::ExecutionCommitment;

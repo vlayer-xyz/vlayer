@@ -1,8 +1,5 @@
 //! Type aliases for Ethereum.
-use crate::{
-    evm::{block_header::EvmBlockHeader, env::EvmEnv, input::MultiEvmInput},
-    ExecutionCommitment,
-};
+use crate::evm::{block_header::EvmBlockHeader, env::EvmEnv, input::MultiEvmInput};
 
 use alloy_primitives::{
     keccak256, Address, BlockHash, BlockNumber, Bloom, Bytes, Sealable, B256, B64, U256,
@@ -86,21 +83,6 @@ impl EvmBlockHeader for EthBlockHeader {
     #[inline]
     fn state_root(&self) -> &B256 {
         &self.state_root
-    }
-
-    #[inline]
-    /// Returns the [SolCommitment] used to validate the environment.
-    fn execution_commitment(
-        &self,
-        start_contract_address: Address,
-        function_selector: [u8; 4],
-    ) -> ExecutionCommitment {
-        ExecutionCommitment {
-            startContractAddress: start_contract_address,
-            functionSelector: function_selector.into(),
-            settleBlockHash: self.clone().seal_slow().seal(),
-            settleBlockNumber: U256::from(self.number()),
-        }
     }
 
     #[inline]
