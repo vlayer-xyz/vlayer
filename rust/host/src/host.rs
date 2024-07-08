@@ -12,6 +12,7 @@ use vlayer_engine::chain::spec::ChainSpec;
 use vlayer_engine::engine::{Engine, EngineError};
 use vlayer_engine::ethereum::EthBlockHeader;
 use vlayer_engine::evm::env::{EvmEnv, ExecutionLocation, MultiEnv};
+use vlayer_engine::evm::input::MultiEvmInput;
 use vlayer_engine::io::GuestOutputError;
 use vlayer_engine::io::{Call, GuestOutput, HostOutput, Input};
 
@@ -110,12 +111,7 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
         let multi_evm_input = [(self.start_execution_location, evm_input)]
             .into_iter()
             .collect();
-        let input = Input {
-            call,
-            multi_evm_input,
-            start_execution_location: self.start_execution_location,
-        };
-        let env = Self::build_executor_env(&input)?;
+        let env = self.build_executor_env(multi_evm_input, call)?;
 
         let raw_guest_output = Self::prove(env, GUEST_ELF)?;
         let guest_output = GuestOutput::from_outputs(&host_output, &raw_guest_output)?;
@@ -141,7 +137,16 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
             .map_err(|err| HostError::Prover(err.to_string()))
     }
 
-    fn build_executor_env(input: &Input) -> Result<ExecutorEnv, HostError> {
+    fn build_executor_env(
+        &self,
+        multi_evm_input: MultiEvmInput<P::Header>,
+        call: Call,
+    ) -> Result<ExecutorEnv, HostError> {
+        let input = Input {
+            call,
+            multi_evm_input,
+            start_execution_location: self.start_execution_location,
+        };
         let env = ExecutorEnv::builder()
             .write(&input)
             .map_err(|err| HostError::ExecutorEnvBuilder(err.to_string()))?
