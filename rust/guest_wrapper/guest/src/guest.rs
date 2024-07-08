@@ -1,14 +1,11 @@
-use crate::db::{state::StateDb, wrap_state::WrapStateDb};
-use alloy_primitives::{FixedBytes, Sealable, Sealed};
-use revm::primitives::HashMap;
+use crate::{db::wrap_state::WrapStateDb, input::ValidatedEvmInput};
 use vlayer_engine::{
     chain::spec::ChainSpec,
     engine::Engine,
     ethereum::EthBlockHeader,
     evm::{
-        block_header::EvmBlockHeader,
         env::{EvmEnv, ExecutionLocation},
-        input::{EvmInput, MultiEvmInput},
+        input::MultiEvmInput,
     },
     io::{Call, GuestOutput},
     ExecutionCommitment,
@@ -28,23 +25,14 @@ impl Guest {
             .expect("cannot get start evm input")
             .to_owned(); // TODO: Remove clone and convert this object into MultiEnv
 
-        start_evm_input.validate();
-
-        let header = start_evm_input.header.clone().seal_slow();
-        let block_hashes = get_block_hashes(&start_evm_input, &header);
-        let db = WrapStateDb::new(StateDb::new(
-            start_evm_input.state_trie,
-            start_evm_input.storage_tries,
-            start_evm_input.contracts,
-            block_hashes,
-        ));
+        let validated_start_evm_input: ValidatedEvmInput<_> = start_evm_input.into();
+        let env: EvmEnv<_, _> = validated_start_evm_input.into();
 
         let chain_spec = ChainSpec::try_from_config(start_execution_location.chain_id)
             .expect("cannot get chain spec");
-        let env = EvmEnv::new(db, header)
+        let env = env
             .with_chain_spec(&chain_spec)
             .expect("cannot set chain spec");
-
         Guest { env }
     }
 
@@ -58,18 +46,4 @@ impl Guest {
             execution_commitment,
         }
     }
-}
-
-fn get_block_hashes(
-    evm_input: &EvmInput<EthBlockHeader>,
-    header: &Sealed<EthBlockHeader>,
-) -> HashMap<u64, FixedBytes<32>> {
-    let mut block_hashes = HashMap::with_capacity(evm_input.ancestors.len() + 1);
-    block_hashes.insert(header.number(), header.seal());
-    for ancestor in &evm_input.ancestors {
-        let ancestor_hash = ancestor.hash_slow();
-        block_hashes.insert(ancestor.number(), ancestor_hash);
-    }
-
-    block_hashes
 }

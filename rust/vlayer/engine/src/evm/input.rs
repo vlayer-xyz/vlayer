@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use tracing::debug;
 
-use super::{block_header::EvmBlockHeader, env::ExecutionLocation};
+use super::env::ExecutionLocation;
 
 /// The serializable input to derive and validate a [EvmEnv].
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -25,30 +25,6 @@ impl<H> EvmInput<H> {
         debug!("total storage size: {}", total_storage_size);
         debug!("contracts: {}", self.contracts.len());
         debug!("blocks: {}", self.ancestors.len());
-    }
-}
-
-impl<H: EvmBlockHeader + Clone> EvmInput<H> {
-    pub fn validate(&self) {
-        // verify that the state root matches the state trie
-        let state_root = self.state_trie.hash_slow();
-        assert_eq!(self.header.state_root(), &state_root, "State root mismatch");
-
-        // seal the header to compute its block hash
-        let header = self.header.clone().seal_slow();
-        // validate that ancestor headers form a valid chain
-        let mut previous_header = header.inner();
-        for ancestor in &self.ancestors {
-            let ancestor_hash = ancestor.hash_slow();
-            assert_eq!(
-                previous_header.parent_hash(),
-                &ancestor_hash,
-                "Invalid chain: block {} is not the parent of block {}",
-                ancestor.number(),
-                previous_header.number()
-            );
-            previous_header = ancestor;
-        }
     }
 }
 

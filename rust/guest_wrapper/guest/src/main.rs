@@ -9,6 +9,7 @@ use vlayer_engine::io::Input;
 
 pub mod db;
 pub mod guest;
+pub mod input;
 
 fn main() {
     let Input {
@@ -16,7 +17,7 @@ fn main() {
         call,
         start_execution_location,
     } = env::read();
-    
+
     let output = Guest::new(multi_evm_input, start_execution_location).run(call);
 
     env::commit_slice(&output.execution_commitment.abi_encode());
