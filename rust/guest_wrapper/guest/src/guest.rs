@@ -8,7 +8,7 @@ use vlayer_engine::{
     evm::{
         block_header::EvmBlockHeader,
         env::{EvmEnv, ExecutionLocation},
-        input::EvmInput,
+        input::{EvmInput, MultiEvmInput},
     },
     io::{Call, GuestOutput},
     ExecutionCommitment,
@@ -20,16 +20,21 @@ pub struct Guest {
 
 impl Guest {
     pub fn new(
-        evm_input: EvmInput<EthBlockHeader>,
+        multi_evm_input: MultiEvmInput<EthBlockHeader>,
         start_execution_location: ExecutionLocation,
     ) -> Self {
-        validate_evm_input(&evm_input);
-        let header = evm_input.header.clone().seal_slow();
-        let block_hashes = get_block_hashes(&evm_input, &header);
+        let start_evm_input = multi_evm_input
+            .get(&start_execution_location)
+            .expect("cannot get start evm input")
+            .to_owned(); // TODO: Remove clone and convert this object into MultiEnv
+
+        validate_evm_input(&start_evm_input);
+        let header = start_evm_input.header.clone().seal_slow();
+        let block_hashes = get_block_hashes(&start_evm_input, &header);
         let db = WrapStateDb::new(StateDb::new(
-            evm_input.state_trie,
-            evm_input.storage_tries,
-            evm_input.contracts,
+            start_evm_input.state_trie,
+            start_evm_input.storage_tries,
+            start_evm_input.contracts,
             block_hashes,
         ));
 
