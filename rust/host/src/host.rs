@@ -112,7 +112,7 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
             .collect();
         let input = Input {
             call,
-            evm_input: multi_evm_input,
+            multi_evm_input,
             start_execution_location: self.start_execution_location,
         };
         let env = Self::build_executor_env(&input)?;

@@ -9,7 +9,7 @@ use crate::ExecutionCommitment;
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Input {
-    pub evm_input: MultiEthEvmInput,
+    pub multi_evm_input: MultiEthEvmInput,
     pub call: Call,
     pub start_execution_location: ExecutionLocation,
 }
