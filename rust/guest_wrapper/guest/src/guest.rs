@@ -28,7 +28,8 @@ impl Guest {
             .expect("cannot get start evm input")
             .to_owned(); // TODO: Remove clone and convert this object into MultiEnv
 
-        validate_evm_input(&start_evm_input);
+        start_evm_input.validate();
+
         let header = start_evm_input.header.clone().seal_slow();
         let block_hashes = get_block_hashes(&start_evm_input, &header);
         let db = WrapStateDb::new(StateDb::new(
@@ -56,32 +57,6 @@ impl Guest {
             evm_call_result,
             execution_commitment,
         }
-    }
-}
-
-fn validate_evm_input(evm_input: &EvmInput<EthBlockHeader>) {
-    // verify that the state root matches the state trie
-    let state_root = evm_input.state_trie.hash_slow();
-    assert_eq!(
-        evm_input.header.state_root(),
-        &state_root,
-        "State root mismatch"
-    );
-
-    // seal the header to compute its block hash
-    let header = evm_input.header.clone().seal_slow();
-    // validate that ancestor headers form a valid chain
-    let mut previous_header = header.inner();
-    for ancestor in &evm_input.ancestors {
-        let ancestor_hash = ancestor.hash_slow();
-        assert_eq!(
-            previous_header.parent_hash(),
-            &ancestor_hash,
-            "Invalid chain: block {} is not the parent of block {}",
-            ancestor.number(),
-            previous_header.number()
-        );
-        previous_header = ancestor;
     }
 }
 
