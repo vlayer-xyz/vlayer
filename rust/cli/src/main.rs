@@ -2,7 +2,7 @@ use crate::errors::CLIError;
 use crate::misc::init::find_src_path;
 use clap::{Parser, Subcommand};
 use misc::{init::create_vlayer_dir, path::find_foundry_root};
-use server::server::serve;
+use server::server::{serve, Config};
 use tracing::{error, info, warn};
 
 pub mod errors;
@@ -47,7 +47,10 @@ async fn run() -> Result<(), CLIError> {
     match &cli.command {
         Commands::Serve => {
             info!("Running vlayer serve...");
-            serve().await?;
+            let config = Config {
+                url: "http://localhost:8545".to_string(),
+            };
+            serve(config).await?;
         }
         Commands::Init => {
             let cwd = std::env::current_dir()?;
