@@ -40,10 +40,7 @@ contract Verifier_OnlyVerified_Modifier_Tests is Test {
 
     function setUp() public {
         commitment = Steel.ExecutionCommitment(
-            exampleVerifier.PROVER(),
-            ExampleVerifier.verifySomething.selector,
-            block.number - 1,
-            blockhash(block.number - 1)
+            exampleVerifier.PROVER(), ExampleProver.doSomething.selector, block.number - 1, blockhash(block.number - 1)
         );
         exampleVerifier.setVerifier(mockVerifier);
     }
@@ -59,10 +56,18 @@ contract Verifier_OnlyVerified_Modifier_Tests is Test {
     }
 
     function test_invalidProver() public {
-        commitment.startContractAddress = address(exampleVerifier);
+        commitment.startContractAddress = address(0x0000000000000000000000000000000000deadbeef);
         Proof memory proof = createProof();
 
         vm.expectRevert("Invalid prover");
+        exampleVerifier.verifySomething(proof);
+    }
+
+    function test_invalidSelector() public {
+        commitment.functionSelector = 0xdeadbeef;
+        Proof memory proof = createProof();
+
+        vm.expectRevert("Invalid selector");
         exampleVerifier.verifySomething(proof);
     }
 }

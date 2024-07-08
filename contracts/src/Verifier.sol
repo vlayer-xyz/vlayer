@@ -16,10 +16,11 @@ contract VerifierBase {
         _;
     }
 
-    function _verify(address prover, bytes4) internal virtual {
+    function _verify(address prover, bytes4 selector) internal virtual {
         Proof memory proof = abi.decode(msg.data[4:], (Proof));
 
         require(prover == proof.commitment.startContractAddress, "Invalid prover");
+        require(selector == proof.commitment.functionSelector, "Invalid selector");
     }
 }
 
