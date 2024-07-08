@@ -23,9 +23,8 @@ pub(crate) fn create_vlayer_dir(src_path: &Path) -> Result<bool, CLIError> {
     let vlayer_dir = src_path.join(VLAYER_DIR_NAME);
     if vlayer_dir.exists() {
         return Ok(false);
-    } else {
-        std::fs::create_dir_all(&vlayer_dir)?;
     }
+    std::fs::create_dir_all(&vlayer_dir)?;
     Ok(true)
 }
 
