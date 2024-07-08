@@ -1,18 +1,22 @@
+use std::sync::Arc;
+
 use crate::error::AppError;
+use crate::server::Config;
 use host::host::{Host, HostConfig};
 use host::{Call as HostCall, ExecutionLocation};
 use types::{Call, CallContext, CallResult};
 
 pub mod types;
 
-const LOCALHOST_RPC_URL: &str = "http://localhost:8545";
-
-pub(crate) async fn call(params: (Call, CallContext)) -> Result<CallResult, AppError> {
+pub(crate) async fn call(
+    params: (Call, CallContext),
+    config: Arc<Config>,
+) -> Result<CallResult, AppError> {
     let call: HostCall = params.0.try_into()?;
     let context = params.1;
 
     let execution_location = ExecutionLocation::new(context.block_no, context.chain_id);
-    let config = HostConfig::new(LOCALHOST_RPC_URL, execution_location);
+    let config = HostConfig::new(&config.url, execution_location);
 
     let return_data = tokio::task::spawn_blocking(|| Host::try_new(config)?.run(call)).await??;
 

@@ -1,26 +1,35 @@
+use std::sync::Arc;
+
 use crate::json_rpc::json_rpc;
 use crate::layers::request_id::RequestIdLayer;
 use crate::layers::trace::init_trace_layer;
 use crate::trace::init_tracing;
 use axum::{routing::post, Router};
+use serde::{Deserialize, Serialize};
 use tracing::info;
 
-pub async fn serve() -> anyhow::Result<()> {
+#[derive(Debug, Default, Clone, Deserialize, Serialize)]
+pub struct Config {
+    pub url: String,
+}
+
+pub async fn serve(config: Config) -> anyhow::Result<()> {
     init_tracing()?;
 
     let listener = tokio::net::TcpListener::bind("127.0.0.1:3000").await?;
 
     info!("listening on {}", listener.local_addr()?);
-    axum::serve(listener, server()).await?;
+    axum::serve(listener, server(config)).await?;
 
     opentelemetry::global::shutdown_tracer_provider();
 
     Ok(())
 }
 
-fn server() -> Router {
+fn server(config: Config) -> Router {
+    let config = Arc::new(config);
     Router::new()
-        .route("/", post(json_rpc))
+        .route("/", post(move |req| json_rpc(config, req)))
         .layer(init_trace_layer())
         // NOTE: RequestIdLayer should be added after the Trace layer
         .layer(RequestIdLayer)
@@ -28,17 +37,27 @@ fn server() -> Router {
 
 #[cfg(test)]
 mod tests {
-    use crate::test_helpers::{body_to_json, body_to_string, post};
+    use crate::{
+        server::Config,
+        test_helpers::{body_to_json, body_to_string, post},
+    };
     use core::str;
+    use lazy_static::lazy_static;
 
     use super::server;
     use axum::http::StatusCode;
     use axum_jrpc::{JsonRpcRequest, Value};
     use serde_json::json;
 
+    lazy_static! {
+        static ref CONFIG: Config = Config {
+            url: "http://localhost:8545".to_string(),
+        };
+    }
+
     #[tokio::test]
     async fn http_not_found() -> anyhow::Result<()> {
-        let app = server();
+        let app = server(CONFIG.clone());
         let response = post(app, "/non_existent_http_path", &()).await?;
 
         assert_eq!(response.status(), StatusCode::NOT_FOUND);
@@ -53,7 +72,7 @@ mod tests {
 
     #[tokio::test]
     async fn json_rpc_not_found() -> anyhow::Result<()> {
-        let app = server();
+        let app = server(CONFIG.clone());
 
         let req = JsonRpcRequest {
             method: "non_existent_json_rpc_method".to_string(),
@@ -84,7 +103,7 @@ mod tests {
 
         #[tokio::test]
         async fn field_validation_error() -> anyhow::Result<()> {
-            let app = server();
+            let app = server(CONFIG.clone());
 
             let req = json!({
                 "method": "v_call",
@@ -113,7 +132,7 @@ mod tests {
 
         #[tokio::test]
         async fn success() -> anyhow::Result<()> {
-            let app = server();
+            let app = server(CONFIG.clone());
 
             let req = json!({
                 "method": "v_call",
