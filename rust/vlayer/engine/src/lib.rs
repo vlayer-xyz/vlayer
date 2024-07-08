@@ -8,6 +8,5 @@ pub mod ethereum;
 pub mod evm;
 pub mod inspector;
 pub mod io;
-pub mod set_block;
 pub mod steel;
 pub use steel::ExecutionCommitment;
