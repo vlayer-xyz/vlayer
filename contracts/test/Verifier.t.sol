@@ -8,9 +8,9 @@ import {Steel} from "vlayer-engine/Steel.sol";
 import {Seal} from "../src/Seal.sol";
 import {Proof} from "../src/Proof.sol";
 
-import {VlayerVerifiable} from "../src/VlayerVerifiable.sol";
+import {Verifier} from "../src/Verifier.sol";
 
-contract ExampleVerifier is VlayerVerifiable {
+contract ExampleVerifier is Verifier {
     event Increment(uint256 count);
 
     struct Counter {
@@ -20,7 +20,7 @@ contract ExampleVerifier is VlayerVerifiable {
 
     uint256 public counter;
 
-    constructor(IRiscZeroVerifier verifier) VlayerVerifiable(verifier) {
+    constructor(IRiscZeroVerifier verifier) Verifier(verifier) {
         counter = 0;
     }
 
