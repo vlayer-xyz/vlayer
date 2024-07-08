@@ -1,8 +1,10 @@
+use std::collections::HashMap;
+
 use crate::db::proof::ProofDb;
 use crate::into_input::into_input;
 use crate::provider::EthersProviderError;
 use crate::provider::{EthersProvider, Provider};
-use alloy_primitives::Sealable;
+use alloy_primitives::{ChainId, Sealable};
 use ethers_providers::Provider as OGEthersProvider;
 use ethers_providers::{Http, ProviderError, RetryClient};
 use guest_wrapper::GUEST_ELF;
@@ -56,17 +58,23 @@ pub enum HostError {
 
     #[error("Host output does not match guest output: {0:?} {1:?}")]
     HostGuestOutputMismatch(Vec<u8>, Vec<u8>),
+
+    #[error("No rpc url for chain: {0}")]
+    NoRpcUrl(ChainId),
 }
 
 pub struct HostConfig {
-    url: String,
+    rpc_urls: HashMap<ChainId, String>,
     start_execution_location: ExecutionLocation,
 }
 
 impl HostConfig {
     pub fn new(url: &str, start_execution_location: ExecutionLocation) -> Self {
+        let rpc_urls = [(start_execution_location.chain_id, url.to_string())]
+            .into_iter()
+            .collect();
         HostConfig {
-            url: url.to_string(),
+            rpc_urls,
             start_execution_location,
         }
     }
@@ -74,7 +82,13 @@ impl HostConfig {
 
 impl Host<EthersProvider<EthersClient>> {
     pub fn try_new(config: HostConfig) -> Result<Self, HostError> {
-        let client = EthersClient::new_client(&config.url, MAX_RETRY, INITIAL_BACKOFF)?;
+        let chain_id = config.start_execution_location.chain_id;
+        let url = config
+            .rpc_urls
+            .get(&chain_id)
+            .ok_or(HostError::NoRpcUrl(chain_id))?;
+
+        let client = EthersClient::new_client(&url, MAX_RETRY, INITIAL_BACKOFF)?;
 
         let provider = EthersProvider::new(client);
 
