@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {Script, console} from "forge-std/Script.sol";
+import {Script} from "forge-std/Script.sol";
+import {console2} from "forge-std/console2.sol";
 
 import {IRiscZeroVerifier} from "risc0-ethereum/IRiscZeroVerifier.sol";
 
@@ -15,7 +16,7 @@ contract SimpleScript is Script {
         uint256 deployerPrivateKey = vm.envUint("DEPLOYER_PRIV");
         vm.startBroadcast(deployerPrivateKey);
 
-        Simple simple = new Simple(IRiscZeroVerifier(address(0)));
-        SimpleVerification simpleVerifier = new SimpleVerification(simple);
+        SimpleVerification simpleVerifier = new SimpleVerification();
+        console2.log("SimpleVerification contract deployed to:", address(simpleVerifier));
     }
 }

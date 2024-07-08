@@ -11,7 +11,7 @@ ROOT_PATH=$(pwd)
 DEPLOY_CONTRACTS_BASE=${ROOT_PATH}/script
 DEPLOYMENT_SCRIPT=${DEPLOY_CONTRACTS_BASE}/DeployVlayer.s.sol
 
-DEPLOYABLE_CONTRACTS=("SimpleVerification" "Simple")
+DEPLOYABLE_CONTRACTS=("SimpleVerification")
 
 function to_upper(){
   echo $1 | sed 's/\([^A-Z]\)\([A-Z0-9]\)/\1_\2/g' | tr '[:lower:]' '[:upper:]'
@@ -55,9 +55,12 @@ function get_block_number() {
 
 }
 
-
 echo
 echo "Running deployment script: ${DEPLOYMENT_SCRIPT}"
+
+echo
+echo Cleaning up old artifacts...
+forge clean
 
 echo 
 echo Deploying contracts...

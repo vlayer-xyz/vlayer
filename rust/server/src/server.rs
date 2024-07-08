@@ -43,7 +43,7 @@ mod tests {
     }
 
     const CALLER: &str = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266";
-    const TO: &str = "e7f1725E7734CE288F8367e1Bb143E90bb3F0512";
+    const TO: &str = "5fbdb2315678afecb367f032d93f642f64180aa3";
     const DATA: &str = "0xcad0899b00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000002";
 
     #[tokio::test]
@@ -150,7 +150,7 @@ mod tests {
                     "jsonrpc": "2.0",
                     "id": 1,
                     "result": {
-                        "result": "start_contract_address: 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512, function_selector: 0xcad0899b, evm_call_result: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3]"
+                        "result": "start_contract_address: 0x5FbDB2315678afecb367f032d93F642f64180aa3, function_selector: 0xcad0899b, evm_call_result: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3]"
                     }
                 })
             );

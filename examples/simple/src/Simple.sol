@@ -5,18 +5,20 @@ import {IRiscZeroVerifier} from "risc0-ethereum/IRiscZeroVerifier.sol";
 import {Verifier} from "vlayer/Verifier.sol";
 import {Steel} from "vlayer-engine/Steel.sol";
 
-contract Simple is Verifier {
+import {SimpleVerification} from "./vlayer/Simple.v.sol";
 
+contract Simple is Verifier {
+    address public prover;
     uint256 public latestSum;
 
-    constructor(IRiscZeroVerifier verifier) Verifier(verifier) {
-
+    constructor(address _prover) {
+        prover = _prover;
     }
 
-    function updateSum(bytes calldata seal, Steel.ExecutionCommitment memory commitment, uint256 sum) public {
-        _verify(seal, commitment, sum);
-
+    function updateSum(bytes calldata seal, Steel.ExecutionCommitment memory commitment, uint256 sum)
+        public
+        onlyVerified(prover, SimpleVerification.sum.selector)
+    {
         latestSum = sum;
     }
-
 }
