@@ -88,7 +88,7 @@ impl Host<EthersProvider<EthersClient>> {
             .get(&chain_id)
             .ok_or(HostError::NoRpcUrl(chain_id))?;
 
-        let client = EthersClient::new_client(&url, MAX_RETRY, INITIAL_BACKOFF)?;
+        let client = EthersClient::new_client(url, MAX_RETRY, INITIAL_BACKOFF)?;
 
         let provider = EthersProvider::new(client);
 

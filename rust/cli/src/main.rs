@@ -1,7 +1,7 @@
 use crate::errors::CLIError;
 use crate::misc::init::find_src;
 use clap::{Parser, Subcommand};
-use server::server::serve;
+use server::server::{serve, Config};
 
 pub mod errors;
 mod misc;
@@ -40,7 +40,10 @@ async fn run() -> Result<(), CLIError> {
     match &cli.command {
         Commands::Serve => {
             println!("running 'vlayer serve'");
-            serve().await?;
+            let config = Config {
+                url: "http://localhost:8545".to_string(),
+            };
+            serve(config).await?;
         }
         Commands::Init => {
             println!(
