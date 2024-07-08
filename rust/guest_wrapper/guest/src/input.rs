@@ -1,7 +1,4 @@
 use crate::db::{state::StateDb, wrap_state::WrapStateDb};
-use alloy_primitives::Sealed;
-use revm_primitives::B256;
-use std::collections::HashMap;
 use vlayer_engine::evm::{block_header::EvmBlockHeader, env::EvmEnv, input::EvmInput};
 
 pub struct ValidatedEvmInput<H>(EvmInput<H>);
@@ -40,7 +37,7 @@ impl<H: EvmBlockHeader + Clone> From<ValidatedEvmInput<H>> for EvmEnv<WrapStateD
     fn from(input: ValidatedEvmInput<H>) -> Self {
         let input = input.0;
         let header = input.header.clone().seal_slow();
-        let block_hashes = get_block_hashes(&input, &header);
+        let block_hashes = input.block_hashes();
         let db = WrapStateDb::new(StateDb::new(
             input.state_trie,
             input.storage_tries,
@@ -50,18 +47,4 @@ impl<H: EvmBlockHeader + Clone> From<ValidatedEvmInput<H>> for EvmEnv<WrapStateD
 
         EvmEnv::new(db, header)
     }
-}
-
-fn get_block_hashes<H: EvmBlockHeader>(
-    evm_input: &EvmInput<H>,
-    header: &Sealed<H>,
-) -> HashMap<u64, B256> {
-    let mut block_hashes = HashMap::with_capacity(evm_input.ancestors.len() + 1);
-    block_hashes.insert(header.number(), header.seal());
-    for ancestor in &evm_input.ancestors {
-        let ancestor_hash = ancestor.hash_slow();
-        block_hashes.insert(ancestor.number(), ancestor_hash);
-    }
-
-    block_hashes
 }
