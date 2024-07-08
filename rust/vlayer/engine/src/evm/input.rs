@@ -44,7 +44,7 @@ impl<H: EvmBlockHeader + Clone> EvmInput<H> {
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct MultiEvmInput<H>(HashMap<ExecutionLocation, EvmInput<H>>);
+pub struct MultiEvmInput<H>(pub HashMap<ExecutionLocation, EvmInput<H>>);
 
 impl<H> MultiEvmInput<H> {
     pub fn get(&self, location: &ExecutionLocation) -> Option<&EvmInput<H>> {
