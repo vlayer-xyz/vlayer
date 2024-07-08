@@ -1,10 +1,10 @@
-use crate::{db::wrap_state::WrapStateDb, input::ValidatedEvmInput};
+use crate::{db::wrap_state::WrapStateDb, input::ValidatedMultiEvmInput};
 use vlayer_engine::{
     chain::spec::ChainSpec,
     engine::Engine,
     ethereum::EthBlockHeader,
     evm::{
-        env::{EvmEnv, ExecutionLocation},
+        env::{ExecutionLocation, MultiEvmEnv},
         input::MultiEvmInput,
     },
     io::{Call, GuestOutput},
@@ -12,7 +12,8 @@ use vlayer_engine::{
 };
 
 pub struct Guest {
-    env: EvmEnv<WrapStateDb, EthBlockHeader>,
+    start_execution_location: ExecutionLocation,
+    multi_evm_env: MultiEvmEnv<WrapStateDb, EthBlockHeader>,
 }
 
 impl Guest {
@@ -23,24 +24,26 @@ impl Guest {
         let chain_spec = ChainSpec::try_from_config(start_execution_location.chain_id)
             .expect("cannot get chain spec");
 
-        let start_evm_input = multi_evm_input
-            .get(&start_execution_location)
-            .expect("cannot get start evm input")
-            .to_owned(); // TODO: Remove clone and convert this object into MultiEnv
-
-        let validated_start_evm_input: ValidatedEvmInput<_> = start_evm_input.into();
-        let env: EvmEnv<_, _> = validated_start_evm_input.into();
-
-        let env = env
+        let validated_multi_evm_input: ValidatedMultiEvmInput<_> = multi_evm_input.into();
+        let multi_evm_env = MultiEvmEnv::from(validated_multi_evm_input)
             .with_chain_spec(&chain_spec)
             .expect("cannot set chain spec");
-        Guest { env }
+
+        Guest {
+            multi_evm_env,
+            start_execution_location,
+        }
     }
 
     pub fn run(&mut self, call: Call) -> GuestOutput {
-        let evm_call_result = Engine::default().call(&call, &mut self.env).unwrap();
+        let start_evm_env = self
+            .multi_evm_env
+            .get_mut(&self.start_execution_location)
+            .expect("cannot get evm env");
+
+        let evm_call_result = Engine::default().call(&call, start_evm_env).unwrap();
         let execution_commitment =
-            ExecutionCommitment::new(self.env.header(), call.to, call.selector());
+            ExecutionCommitment::new(start_evm_env.header(), call.to, call.selector());
 
         GuestOutput {
             evm_call_result,
