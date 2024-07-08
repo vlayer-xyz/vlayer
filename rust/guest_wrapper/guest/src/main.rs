@@ -12,11 +12,11 @@ pub mod guest;
 
 fn main() {
     let Input {
-        evm_input,
+        multi_evm_input,
         call,
         start_execution_location,
     } = env::read();
-    let start_evm_input = evm_input
+    let start_evm_input = multi_evm_input
         .get(&start_execution_location)
         .expect("cannot get start evm input")
         .to_owned(); // TODO: Remove clone and convert this object into MultiEnv
