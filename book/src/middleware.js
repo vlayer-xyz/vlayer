@@ -95,6 +95,17 @@ const addCredsVisitLog = async (row) => {
 export default async function middleware(request) {
   const url = new URL(request.url);
 
+  const staticFilesRegex = /\.(js|css|png|jpg|woff|woff2|svg|json|gif|mp4|ico)$/i;
+
+  if (staticFilesRegex.test(url.pathname)) {
+    console.log("Docs Auth skipping path: ", url.pathname)
+    return next({
+      headers: {
+        'cache-control': 'public, max-age=31536000, immutable',
+      },
+    });
+  }  
+
   try {
     const { login, password } = parseCreds(request.headers);
     console.log("Docs Auth Login attempt: ", [url.toString(), login]);
