@@ -77,7 +77,7 @@ ensure() {
 
 # Downloads $1 into $2 or stdout
 download() {
-  if [ -n "$2" ]; then
+  if [ -n "${2:-}" ]; then
     # output into $2
     if check_cmd curl; then
       curl -#o "$2" -L "$1"
