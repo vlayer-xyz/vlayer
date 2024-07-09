@@ -20,19 +20,18 @@ library SealLib {
             rhv <<= 8;
             rhv += uint8(seal[i + SEAL_MIDDLE]);
         }
-        lhv <<= 8 * (32-SEAL_MIDDLE); // shift value to most significant bytes
-        rhv <<= 8 * (32-SEAL_MIDDLE);
+        lhv <<= 8 * (32 - SEAL_MIDDLE); // shift value to most significant bytes
+        rhv <<= 8 * (32 - SEAL_MIDDLE);
 
         return Seal(bytes18(bytes32(lhv)), bytes18(bytes32(rhv)));
     }
 
     function decode(Seal memory seal) public pure returns (bytes memory) {
-        
         bytes memory sealBytes = new bytes(SEAL_LENGTH);
 
         for (uint256 i = 0; i < SEAL_MIDDLE; i++) {
-            sealBytes[i] = bytes1(seal.lhv); 
-            sealBytes[SEAL_MIDDLE+i] = bytes1(seal.rhv); 
+            sealBytes[i] = bytes1(seal.lhv);
+            sealBytes[SEAL_MIDDLE + i] = bytes1(seal.rhv);
 
             seal.lhv <<= 8;
             seal.rhv <<= 8;

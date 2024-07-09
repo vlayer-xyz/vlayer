@@ -40,7 +40,7 @@ contract Verifier_OnlyVerified_Modifier_Tests is Test {
 
     function setUp() public {
         vm.roll(100); // have some historical blocks
-        
+
         commitment = Steel.ExecutionCommitment(
             exampleVerifier.PROVER(), ExampleProver.doSomething.selector, block.number - 1, blockhash(block.number - 1)
         );
