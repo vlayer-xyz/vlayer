@@ -31,11 +31,20 @@ contract ExampleVerifier is VerifierUnderTest {
     function verifySomething(Proof calldata) external onlyVerified(PROVER, SIMPLE_PROVER_SELECTOR) returns (bool) {
         return true;
     }
+
+    function verifySomethingElse(Proof calldata, bool value)
+        external
+        onlyVerified(PROVER, SIMPLE_PROVER_SELECTOR)
+        returns (bool)
+    {
+        return value;
+    }
 }
 
 contract Verifier_OnlyVerified_Modifier_Tests is Test {
     ExampleVerifier exampleVerifier = new ExampleVerifier();
     RiscZeroMockVerifier mockVerifier = new RiscZeroMockVerifier(bytes4(0));
+
     Steel.ExecutionCommitment commitment;
 
     function setUp() public {
@@ -47,9 +56,16 @@ contract Verifier_OnlyVerified_Modifier_Tests is Test {
         exampleVerifier.setVerifier(mockVerifier);
     }
 
+    function createProof(bytes memory journalParams) public view returns (Proof memory) {
+        bytes memory journal = TestHelpers.concat(abi.encode(commitment), journalParams);
+
+        bytes memory seal = mockVerifier.mockProve(exampleVerifier.GUEST_ID(), sha256(journal)).seal;
+        return Proof(journal.length, TestHelpers.encodeSeal(seal), commitment);
+    }
+
     function createProof() public view returns (Proof memory) {
-        bytes memory seal = mockVerifier.mockProve(exampleVerifier.GUEST_ID(), sha256(abi.encode(commitment))).seal;
-        return Proof(128, TestHelpers.encodeSeal(seal), commitment);
+        bytes memory emptyBytes = new bytes(0);
+        return createProof(emptyBytes);
     }
 
     function test_verifySuccess() public {
@@ -104,5 +120,29 @@ contract Verifier_OnlyVerified_Modifier_Tests is Test {
 
         vm.expectRevert(VerificationFailed.selector);
         exampleVerifier.verifySomething(proof);
+    }
+
+    function test_functionCanJournaledParams() public {
+        bool value = true;
+        Proof memory proof = createProof(abi.encode(value));
+
+        assertEq(exampleVerifier.verifySomethingElse(proof, value), value);
+    }
+
+    function test_journaledParamCannotBeChanged() public {
+        bool value = true;
+        Proof memory proof = createProof(abi.encode(value));
+
+        value = !value;
+
+        vm.expectRevert(VerificationFailed.selector);
+        assertEq(exampleVerifier.verifySomethingElse(proof, value), value);
+    }
+
+    function test_functionCanHaveNonJournaledParams() public {
+        Proof memory proof = createProof();
+
+        assertEq(exampleVerifier.verifySomethingElse(proof, true), true);
+        assertEq(exampleVerifier.verifySomethingElse(proof, false), false);
     }
 }
