@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import {Test, console} from "forge-std/Test.sol";
-import {IRiscZeroVerifier, Receipt} from "risc0-ethereum/IRiscZeroVerifier.sol";
+import {IRiscZeroVerifier, Receipt, VerificationFailed} from "risc0-ethereum/IRiscZeroVerifier.sol";
 import {RiscZeroMockVerifier} from "risc0-ethereum/test/RiscZeroMockVerifier.sol";
 
 import {Steel} from "vlayer-engine/Steel.sol";
@@ -97,4 +97,12 @@ contract Verifier_OnlyVerified_Modifier_Tests is Test {
         exampleVerifier.verifySomething(proof);
     }
 
+    function test_proofAndJournalDoNotMatch() public {
+        Proof memory proof = createProof();
+        proof.commitment.settleBlockNumber -= 1;
+        proof.commitment.settleBlockHash = blockhash(proof.commitment.settleBlockNumber);
+
+        vm.expectRevert(VerificationFailed.selector);
+        exampleVerifier.verifySomething(proof);
+    }
 }

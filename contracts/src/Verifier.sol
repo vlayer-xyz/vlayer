@@ -5,8 +5,11 @@ import {IRiscZeroVerifier} from "risc0-ethereum/IRiscZeroVerifier.sol";
 import {ControlID, RiscZeroGroth16Verifier} from "risc0-ethereum/groth16/RiscZeroGroth16Verifier.sol";
 import {Steel} from "vlayer-engine/Steel.sol";
 import {Proof} from "./Proof.sol";
+import {SealLib, Seal} from "./Seal.sol";
 
 contract VerifierBase {
+    using SealLib for Seal;
+
     bytes32 public GUEST_ID = bytes32(0xb7079f57c71b4e1d95b8b1254303e13f78914599a8c119534c4c947c996b4d7d);
     uint256 constant AVAILABLE_HISTORICAL_BLOCKS = 256;
 
@@ -19,6 +22,7 @@ contract VerifierBase {
 
     function _verify(address prover, bytes4 selector) internal virtual {
         Proof memory proof = abi.decode(msg.data[4:], (Proof));
+        bytes32 journalHash = sha256(msg.data[100:]); 
 
         require(proof.commitment.startContractAddress == prover, "Invalid prover");
         require(proof.commitment.functionSelector == selector, "Invalid selector");
@@ -29,6 +33,8 @@ contract VerifierBase {
             "Invalid block number: block too old"
         );
         require(proof.commitment.settleBlockHash == blockhash(proof.commitment.settleBlockNumber), "Invalid block hash");
+
+        verifier.verify(proof.seal.decode(), GUEST_ID, journalHash);
     }
 }
 
