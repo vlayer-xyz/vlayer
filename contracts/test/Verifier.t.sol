@@ -39,6 +39,8 @@ contract Verifier_OnlyVerified_Modifier_Tests is Test {
     Steel.ExecutionCommitment commitment;
 
     function setUp() public {
+        vm.roll(100); // have some historical blocks
+        
         commitment = Steel.ExecutionCommitment(
             exampleVerifier.PROVER(), ExampleProver.doSomething.selector, block.number - 1, blockhash(block.number - 1)
         );
@@ -70,4 +72,29 @@ contract Verifier_OnlyVerified_Modifier_Tests is Test {
         vm.expectRevert("Invalid selector");
         exampleVerifier.verifySomething(proof);
     }
+
+    function test_blockFromFuture() public {
+        commitment.settleBlockNumber = block.number;
+        Proof memory proof = createProof();
+
+        vm.expectRevert("Invalid block number: block from future");
+        exampleVerifier.verifySomething(proof);
+    }
+
+    function test_blockOlderThanLast256Blocks() public {
+        vm.roll(block.number + 256); // forward block number
+        Proof memory proof = createProof();
+
+        vm.expectRevert("Invalid block number: block too old");
+        exampleVerifier.verifySomething(proof);
+    }
+
+    function test_invalidBlockHash() public {
+        commitment.settleBlockHash = blockhash(commitment.settleBlockNumber - 1);
+        Proof memory proof = createProof();
+
+        vm.expectRevert("Invalid block hash");
+        exampleVerifier.verifySomething(proof);
+    }
+
 }
