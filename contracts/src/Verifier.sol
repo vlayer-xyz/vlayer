@@ -43,9 +43,3 @@ contract Verifier is VerifierBase {
         verifier = new RiscZeroGroth16Verifier(ControlID.CONTROL_ROOT, ControlID.BN254_CONTROL_ID);
     }
 }
-
-contract VerifierUnderTest is VerifierBase {
-    function setVerifier(IRiscZeroVerifier _verifier) public {
-        verifier = _verifier;
-    }
-}
