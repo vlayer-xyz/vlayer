@@ -11,8 +11,8 @@ use tracing::info;
 
 // First 4 bytes of the call data is the selector id - the rest are arguments.
 const SELECTOR_LEN: usize = 4;
+const ROOT_ADDR: Address = address!("e7f1725e7734ce288f8367e1bb143e90bb3f0512");
 const TRAVEL_CONTRACT_ADDR: Address = address!("1234567890AbcdEF1234567890aBcdef12345678");
-const HOST_ADDR: Address = address!("e7f1725e7734ce288f8367e1bb143e90bb3f0512");
 static SET_BLOCK_SELECTOR: Lazy<Vec<u8>> =
     Lazy::new(|| decode("87cea3ae").expect("Error decoding set_block function call"));
 static SET_CHAIN_SELECTOR: Lazy<Vec<u8>> =
@@ -53,7 +53,7 @@ impl<DB: Database> Inspector<DB> for SetInspector {
         );
 
         match inputs.bytecode_address {
-            HOST_ADDR => {
+            ROOT_ADDR => {
                 info!("Host contract called!");
             }
             TRAVEL_CONTRACT_ADDR => {
@@ -86,15 +86,6 @@ impl<DB: Database> Inspector<DB> for SetInspector {
         }
 
         None
-    }
-
-    fn call_end(
-        &mut self,
-        _context: &mut EvmContext<DB>,
-        _inputs: &CallInputs,
-        outcome: CallOutcome,
-    ) -> CallOutcome {
-        dbg!(outcome)
     }
 }
 
