@@ -3,6 +3,7 @@
 
 pub mod chain;
 pub mod config;
+pub mod consts;
 pub mod engine;
 pub mod ethereum;
 pub mod evm;

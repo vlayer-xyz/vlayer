@@ -9,6 +9,8 @@ use revm::{
 };
 use tracing::info;
 
+use crate::consts::U256_BYTES;
+
 // First 4 bytes of the call data is the selector id - the rest are arguments.
 const SELECTOR_LEN: usize = 4;
 const ROOT_ADDR: Address = address!("e7f1725e7734ce288f8367e1bb143e90bb3f0512");
@@ -89,11 +91,17 @@ impl<DB: Database> Inspector<DB> for SetInspector {
             // If the call is not setBlock/setChain but setBlock/setChain is active, intercept the call.
             _ => {
                 if let Some(block_number) = &self.set_block.take() {
-                    info!("Intercepting the call. Returning last block number: {:?}", *block_number);
+                    info!(
+                        "Intercepting the call. Returning last block number: {:?}",
+                        *block_number
+                    );
                     return Some(MockCallOutcome::from(*block_number).into());
                 }
                 if let Some(chain_id) = &self.set_chain.take() {
-                    info!("Intercepting the call. Returning last chain id: {:?}", *chain_id);
+                    info!(
+                        "Intercepting the call. Returning last chain id: {:?}",
+                        *chain_id
+                    );
                     return Some(MockCallOutcome::from(*chain_id).into());
                 }
             }
