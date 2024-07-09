@@ -19,4 +19,19 @@ library TestHelpers {
 
         return Seal(bytes18(bytes32(lhv)), bytes18(bytes32(rhv)));
     }
+
+    function concat(bytes calldata a, bytes calldata b) public pure returns (bytes memory) {
+        bytes memory c = new bytes(a.length + b.length);
+
+        for (uint256 i = 0; i < a.length; i++) {
+            c[i] = a[i];
+        }
+
+        uint256 offset = a.length;
+        for (uint256 i = 0; i < b.length; i++) {
+            c[offset + i] = b[i];
+        }
+
+        return c;
+    }
 }
