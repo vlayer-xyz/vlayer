@@ -1,7 +1,8 @@
 use alloy_primitives::hex::decode;
-use alloy_primitives::{address, Address};
+use alloy_primitives::{address, Address, Bytes};
 use ethers_core::types::U256;
 use once_cell::sync::Lazy;
+use revm::interpreter::{Gas, InstructionResult, InterpreterResult};
 use revm::{
     interpreter::{CallInputs, CallOutcome},
     Database, EvmContext, Inspector,
@@ -11,6 +12,7 @@ use tracing::info;
 // First 4 bytes of the call data is the selector id - the rest are arguments.
 const SELECTOR_LEN: usize = 4;
 const TRAVEL_CONTRACT_ADDR: Address = address!("1234567890AbcdEF1234567890aBcdef12345678");
+const HOST_ADDR: Address = address!("e7f1725e7734ce288f8367e1bb143e90bb3f0512");
 static SET_BLOCK_SELECTOR: Lazy<Vec<u8>> =
     Lazy::new(|| decode("87cea3ae").expect("Error decoding set_block function call"));
 static SET_CHAIN_SELECTOR: Lazy<Vec<u8>> =
@@ -20,6 +22,23 @@ static SET_CHAIN_SELECTOR: Lazy<Vec<u8>> =
 pub struct SetInspector {
     set_block: Option<U256>,
     set_chain: Option<U256>,
+}
+
+impl SetInspector {
+    fn return_number(number: U256) -> CallOutcome {
+        info!("Intercepting the call. Returning number: {:?}", number);
+        let mut output = [0; 32];
+        number.to_big_endian(&mut output);
+
+        CallOutcome {
+            result: InterpreterResult {
+                result: InstructionResult::Return,
+                output: Bytes::copy_from_slice(&output),
+                gas: Gas::new(0),
+            },
+            memory_offset: 0..0,
+        }
+    }
 }
 
 impl<DB: Database> Inspector<DB> for SetInspector {
@@ -34,6 +53,9 @@ impl<DB: Database> Inspector<DB> for SetInspector {
         );
 
         match inputs.bytecode_address {
+            HOST_ADDR => {
+                info!("Host contract called!");
+            }
             TRAVEL_CONTRACT_ADDR => {
                 let (selector, argument_bytes) = inputs.input.split_at(SELECTOR_LEN);
                 let argument = U256::from_big_endian(argument_bytes);
@@ -52,17 +74,27 @@ impl<DB: Database> Inspector<DB> for SetInspector {
                     self.set_chain = Some(argument);
                 }
             }
+            // If the call is not setBlock/setChain but setBlock/setChain is active, intercept the call.
             _ => {
-                if let Some(number) = &self.set_block.take() {
-                    info!("Need to change block to {:?}!", number);
+                if let Some(block_number) = &self.set_block.take() {
+                    return Some(SetInspector::return_number(*block_number));
                 }
-                if let Some(number) = &self.set_chain.take() {
-                    info!("Need to change chain to {:?}!", number);
+                if let Some(chain_id) = &self.set_chain.take() {
+                    return Some(SetInspector::return_number(*chain_id));
                 }
             }
         }
 
         None
+    }
+
+    fn call_end(
+        &mut self,
+        _context: &mut EvmContext<DB>,
+        _inputs: &CallInputs,
+        outcome: CallOutcome,
+    ) -> CallOutcome {
+        dbg!(outcome)
     }
 }
 
