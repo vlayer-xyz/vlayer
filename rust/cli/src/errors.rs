@@ -17,4 +17,9 @@ pub enum CLIError {
     TomlError(String),
     #[error("Project directory not found: {0}")]
     SrcDirNotFound(PathBuf),
+    #[error("Error downloading vlayer contracts: {0}")]
+    DownloadVlayerFilesError(reqwest::Error),
+    #[error("Error inserting vlayer contracts: following already exist")]
+    // TODO: add list of files to error message
+    InsertVlayerFilesError(Vec<String>),
 }

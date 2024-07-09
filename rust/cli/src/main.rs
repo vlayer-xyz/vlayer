@@ -68,6 +68,9 @@ async fn run() -> Result<(), CLIError> {
                     &src_path.display()
                 ),
             }
+            fetch_vlayer_files_override(&src_path).await?;
+            // let dst = src_path.join("vlayer").join("contracts");
+            // get_vlayer_files(&dst).await?;
         }
     }
     Ok(())
