@@ -22,7 +22,7 @@ contract VerifierBase {
 
     function _verify(address prover, bytes4 selector) internal virtual {
         Proof memory proof = abi.decode(msg.data[4:], (Proof));
-        bytes32 journalHash = sha256(msg.data[100:]); 
+        bytes32 journalHash = sha256(msg.data[100:]);
 
         require(proof.commitment.startContractAddress == prover, "Invalid prover");
         require(proof.commitment.functionSelector == selector, "Invalid selector");
