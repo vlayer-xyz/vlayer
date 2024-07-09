@@ -11,7 +11,7 @@ ROOT_PATH=$(pwd)
 DEPLOY_CONTRACTS_BASE=${ROOT_PATH}/script
 DEPLOYMENT_SCRIPT=${DEPLOY_CONTRACTS_BASE}/DeployVlayer.s.sol
 
-DEPLOYABLE_CONTRACTS=("SimpleVerification")
+DEPLOYABLE_CONTRACTS=("SimpleProver")
 
 function to_upper(){
   echo $1 | sed 's/\([^A-Z]\)\([A-Z0-9]\)/\1_\2/g' | tr '[:lower:]' '[:upper:]'
