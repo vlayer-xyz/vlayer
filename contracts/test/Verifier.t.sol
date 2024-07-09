@@ -2,11 +2,12 @@
 pragma solidity ^0.8.13;
 
 import {Test, console} from "forge-std/Test.sol";
+import {TestHelpers} from "./helpers/TestHelpers.sol";
+
 import {IRiscZeroVerifier, Receipt, VerificationFailed} from "risc0-ethereum/IRiscZeroVerifier.sol";
 import {RiscZeroMockVerifier} from "risc0-ethereum/test/RiscZeroMockVerifier.sol";
 
 import {Steel} from "vlayer-engine/Steel.sol";
-import {Seal, SealLib} from "../src/Seal.sol";
 import {Proof} from "../src/Proof.sol";
 
 import {VerifierUnderTest} from "../src/Verifier.sol";
@@ -49,7 +50,7 @@ contract Verifier_OnlyVerified_Modifier_Tests is Test {
 
     function createProof() public view returns (Proof memory) {
         bytes memory seal = mockVerifier.mockProve(exampleVerifier.GUEST_ID(), sha256(abi.encode(commitment))).seal;
-        return Proof(128, SealLib.encodeSeal(seal), commitment);
+        return Proof(128, TestHelpers.encodeSeal(seal), commitment);
     }
 
     function test_verifySuccess() public {
