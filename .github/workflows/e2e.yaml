@@ -1,0 +1,50 @@
+name: End-to-end integration test
+
+on:
+  push:
+    paths:
+      - "rust/**"
+      - "examples/**"
+      - "bash/**"
+      - ".github/workflows/**"
+
+jobs:
+  e2e-test:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: cargo-bins/cargo-binstall@main
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: "true"
+
+      - name: Set up Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache-workspaces: rust
+
+      - name: Install risc0 instaler
+        run: cargo binstall -y cargo-risczero --force
+
+      - name: Install risc0 toolchain
+        run: cargo risczero install
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly-5ac78a9cd4b94dc53d1fe5e0f42372b28b5a7559 # 2024-06-02
+
+      - name: Run e2e test
+        run: |
+          bash/e2e-test.sh
+
+      - name: Display Logs
+        if: always()
+        run: |
+          for log_file in logs/anvil.log logs/vlayer_serve.log; do
+            echo "=== Contents of $log_file ==="
+            cat "$log_file"
+            echo "============================="
+          done
