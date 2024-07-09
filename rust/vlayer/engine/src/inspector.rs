@@ -49,12 +49,6 @@ impl From<U256> for MockCallOutcome {
     }
 }
 
-impl From<MockCallOutcome> for CallOutcome {
-    fn from(mock_call_outcome: MockCallOutcome) -> Self {
-        mock_call_outcome.0
-    }
-}
-
 impl<DB: Database> Inspector<DB> for SetInspector {
     fn call(
         &mut self,
@@ -95,14 +89,14 @@ impl<DB: Database> Inspector<DB> for SetInspector {
                         "Intercepting the call. Returning last block number: {:?}",
                         *block_number
                     );
-                    return Some(MockCallOutcome::from(*block_number).into());
+                    return Some(MockCallOutcome::from(*block_number).0);
                 }
                 if let Some(chain_id) = &self.set_chain.take() {
                     info!(
                         "Intercepting the call. Returning last chain id: {:?}",
                         *chain_id
                     );
-                    return Some(MockCallOutcome::from(*chain_id).into());
+                    return Some(MockCallOutcome::from(*chain_id).0);
                 }
             }
         }
