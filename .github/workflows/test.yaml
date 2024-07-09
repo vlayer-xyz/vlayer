@@ -51,7 +51,8 @@ jobs:
 
       - name: Run workspace rust tests
         working-directory: rust
-        run: cargo test --workspace
+        run: |
+          cargo test --workspace --locked
         env:
           RUST_LOG: info
           RISC0_DEV_MODE: 1
