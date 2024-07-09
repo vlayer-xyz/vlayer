@@ -24,20 +24,32 @@ pub struct SetInspector {
     set_chain: Option<U256>,
 }
 
-impl SetInspector {
-    fn return_number(number: U256) -> CallOutcome {
-        info!("Intercepting the call. Returning number: {:?}", number);
-        let mut output = [0; 32];
-        number.to_big_endian(&mut output);
+struct MockCallOutcome(CallOutcome);
 
-        CallOutcome {
+impl From<Bytes> for MockCallOutcome {
+    fn from(bytes: Bytes) -> Self {
+        MockCallOutcome(CallOutcome {
             result: InterpreterResult {
                 result: InstructionResult::Return,
-                output: Bytes::copy_from_slice(&output),
+                output: bytes,
                 gas: Gas::new(0),
             },
             memory_offset: 0..0,
-        }
+        })
+    }
+}
+
+impl From<U256> for MockCallOutcome {
+    fn from(number: U256) -> Self {
+        let mut output = [0; U256_BYTES];
+        number.to_big_endian(&mut output);
+        MockCallOutcome::from(Bytes::copy_from_slice(&output))
+    }
+}
+
+impl From<MockCallOutcome> for CallOutcome {
+    fn from(mock_call_outcome: MockCallOutcome) -> Self {
+        mock_call_outcome.0
     }
 }
 
@@ -77,10 +89,12 @@ impl<DB: Database> Inspector<DB> for SetInspector {
             // If the call is not setBlock/setChain but setBlock/setChain is active, intercept the call.
             _ => {
                 if let Some(block_number) = &self.set_block.take() {
-                    return Some(SetInspector::return_number(*block_number));
+                    info!("Intercepting the call. Returning last block number: {:?}", *block_number);
+                    return Some(MockCallOutcome::from(*block_number).into());
                 }
                 if let Some(chain_id) = &self.set_chain.take() {
-                    return Some(SetInspector::return_number(*chain_id));
+                    info!("Intercepting the call. Returning last chain id: {:?}", *chain_id);
+                    return Some(MockCallOutcome::from(*chain_id).into());
                 }
             }
         }
