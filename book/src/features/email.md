@@ -13,7 +13,7 @@ Let's say someone wants to prove they've been a GitHub user since 2020. One way 
 
 A better option is to prove that GitHub's email servers sent a welcome email on a certain date. Below is a sample `Prover` contract that verifies that the caller (`msg.sender`) created a GitHub account before 2020.
 
-Below is an example of such proof genration:
+Below is an example of such proof generation:
 
 ```solidity
 contract GitHubEmail is Prover {
