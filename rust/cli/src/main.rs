@@ -40,10 +40,7 @@ async fn run() -> Result<(), CLIError> {
     match &cli.command {
         Commands::Serve => {
             println!("running 'vlayer serve'");
-            let config = Config {
-                url: "http://localhost:8545".to_string(),
-            };
-            serve(config).await?;
+            serve(Config::default()).await?;
         }
         Commands::Init => {
             println!(

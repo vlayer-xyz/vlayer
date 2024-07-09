@@ -8,15 +8,26 @@ use axum::{routing::post, Router};
 use serde::{Deserialize, Serialize};
 use tracing::info;
 
-#[derive(Debug, Default, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Config {
     pub url: String,
+    pub port: u16,
+}
+
+impl Default for Config {
+    fn default() -> Self {
+        Self {
+            url: "http://localhost:8545".to_string(),
+            port: 3000,
+        }
+    }
 }
 
 pub async fn serve(config: Config) -> anyhow::Result<()> {
     init_tracing()?;
 
-    let listener = tokio::net::TcpListener::bind("127.0.0.1:3000").await?;
+    let listener =
+        tokio::net::TcpListener::bind(format!("{}:{}", "127.0.0.1", config.port)).await?;
 
     info!("listening on {}", listener.local_addr()?);
     axum::serve(listener, server(config)).await?;
@@ -52,6 +63,7 @@ mod tests {
     lazy_static! {
         static ref CONFIG: Config = Config {
             url: "http://localhost:8545".to_string(),
+            port: 3000
         };
     }
 
