@@ -111,7 +111,9 @@ export default async function middleware(request) {
     console.log("Docs Auth Login attempt: ", [url.toString(), login]);
 
     const credsRow = await checkCreds(login, password);
-    await addCredsVisitLog(credsRow);
+    if(process.env.VERCEL_ENV === 'production') {
+      await addCredsVisitLog(credsRow);
+    }
     console.log("Docs Auth Login successful: ", [url.toString(), login]);
 
     return next();
