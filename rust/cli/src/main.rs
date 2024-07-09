@@ -49,6 +49,7 @@ async fn run() -> Result<(), CLIError> {
             info!("Running vlayer serve...");
             let config = Config {
                 url: "http://localhost:8545".to_string(),
+                port: 3000
             };
             serve(config).await?;
         }
