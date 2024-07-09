@@ -13,7 +13,7 @@ alloy-primitives = { workspace = true, features = ["rlp", "serde"] }
 ethers-providers = { workspace = true }
 ethers-core = { version = "2.0" }
 thiserror = { workspace = true }
-url = { version = "2.4", default-features = false }
+url = { version = "2.5", default-features = false }
 alloy-sol-types = { workspace = true }
 anyhow = "1.0"
 log = { version = "0.4" }
@@ -29,7 +29,7 @@ ethereum-types = "0.14.1"
 hex = "0.4.3"
 
 [dev-dependencies]
-alloy-sol-types = "0.7.6"
-test-log = "0.2.15"
+alloy-sol-types = "0.7.7"
+test-log = "0.2.16"
 anyhow = "1.0"
 ctor = "0.2.8"

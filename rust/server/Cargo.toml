@@ -18,9 +18,9 @@ tower-request-id = "0.3.0"
 tracing = "0.1.40"
 alloy-primitives = { workspace = true }
 hex = "0.4.3"
-axum-jrpc = "0.7.0"
+axum-jrpc = "0.7.1"
 host = { path = "../host" }
-alloy-chains = "0.1.22"
+alloy-chains = "0.1.23"
 
 [dev-dependencies]
 reqwest = "0.12.5"

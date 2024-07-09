@@ -10,8 +10,8 @@ rustdoc-args = ["--cfg", "docsrs"]
 
 [dependencies]
 alloy-primitives = { version = "0.7", features = ["rlp", "serde"] }
-alloy-rlp = { version = "0.3.4", default-features = false }
-alloy-rlp-derive = { version = "0.3.4", default-features = false }
+alloy-rlp = { version = "0.3.7", default-features = false }
+alloy-rlp-derive = { version = "0.3.7", default-features = false }
 alloy-sol-types = "0.7"
 anyhow = "1.0"
 ethers-core = {version="2.0"}
@@ -26,8 +26,8 @@ thiserror = { workspace = true }
 mpt = { path = "../../mpt" }
 
 [dev-dependencies]
-alloy-trie = "0.4.0"
-test-log = "0.2.15"
+alloy-trie = "0.4.1"
+test-log = "0.2.16"
 serde_json = { version = "1.0"}
 
 [lints.clippy]
