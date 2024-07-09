@@ -8,7 +8,6 @@ use ethers_providers::{Http, ProviderError, RetryClient};
 use guest_wrapper::GUEST_ELF;
 use risc0_zkvm::{default_prover, ExecutorEnv};
 use thiserror::Error;
-use vlayer_engine::chain::spec::ChainSpec;
 use vlayer_engine::engine::{Engine, EngineError};
 use vlayer_engine::ethereum::EthBlockHeader;
 use vlayer_engine::evm::env::{EvmEnv, ExecutionLocation, MultiEvmEnv};
@@ -92,7 +91,7 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
             .ok_or(HostError::BlockNotFound(start_block_number))?;
 
         let db = ProofDb::new(provider, start_block_number);
-        let chain_spec = ChainSpec::try_from_config(config.start_execution_location.chain_id)?;
+        let chain_spec = config.start_execution_location.chain_id.try_into()?;
         let env = EvmEnv::new(db, header.seal_slow()).with_chain_spec(&chain_spec)?;
         let envs = MultiEvmEnv::from_single(env, config.start_execution_location);
 

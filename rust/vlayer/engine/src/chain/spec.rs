@@ -9,7 +9,6 @@ use crate::{config::CHAIN_MAP, engine::EngineError};
 
 use super::{eip1559::Eip1559Constants, fork::ForkCondition};
 
-/// Specification of a specific chain.
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ChainSpec {
     chain_id: ChainId,
@@ -46,20 +45,10 @@ impl ChainSpec {
         }
     }
 
-    pub fn try_from_config(chain_id: ChainId) -> Result<Self, EngineError> {
-        let chain_spec = CHAIN_MAP
-            .get(&chain_id)
-            .ok_or(EngineError::UnsupportedChainId(chain_id))?;
-        let max_spec_id = chain_spec.max_spec_id;
-        let hard_forks = chain_spec.hard_forks.clone();
-        let gas_constants = chain_spec.gas_constants.clone();
-        Ok(Self::new(chain_id, max_spec_id, hard_forks, gas_constants))
-    }
-    /// Returns the network chain ID.
     pub fn chain_id(&self) -> ChainId {
         self.chain_id
     }
-    /// Validates a [SpecId].
+
     pub fn validate_spec_id(&self, spec_id: SpecId) -> anyhow::Result<()> {
         let (min_spec_id, _) = self.hard_forks.first_key_value().context("no hard forks")?;
         if spec_id < *min_spec_id {
@@ -99,5 +88,16 @@ impl ChainSpec {
             }
         }
         None
+    }
+}
+
+impl TryFrom<ChainId> for ChainSpec {
+    type Error = EngineError;
+
+    fn try_from(chain_id: ChainId) -> Result<Self, Self::Error> {
+        let chain_spec = CHAIN_MAP
+            .get(&chain_id)
+            .ok_or(EngineError::UnsupportedChainId(chain_id))?;
+        Ok((**chain_spec).clone())
     }
 }
