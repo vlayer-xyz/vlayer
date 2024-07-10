@@ -7,7 +7,7 @@ On-chain verification is implemented by using a customized function with the fol
 - a list of arguments in the same order as returned by the `Prover` (public output)
 - optionally, user defined additional arguments
 
-The verification function should use the `onlyVerified()` modifier, which takes two arguments, the address of a smart contract and a selector of function that was executed in the `Prover` contract.
+The verification function should use the `onlyVerified()` modifier, which takes two arguments, the address of a smart contract and a selector of function that was executed in the `Prover` contract. 
 
 See example verification function below:
 
@@ -21,6 +21,8 @@ contract Example is Verifier {
 
 }
 ```
+
+> `proof` is not an argument to `onlyVerified` because it is automatically extracted from `msg.data`.
 
 ## Data flow
 

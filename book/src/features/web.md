@@ -73,13 +73,16 @@ What exactly was going on in the snippet above?
 * First, note that we need to tell the `Verifier` which `Prover` contract to verify:
   * The `PROVER_ADDR` constant holds the address of the `Prover` contract that generated the proof. 
   * The `PROVER_FUNC_SELECTOR` constant holds the selector for the `Prover.main()` function. 
-  * `InfluencerDao` inherits from Verifier, so we can call the `onlyVerified` modifier, which ensures that the proof we pass is correct
+  * `InfluencerDao` inherits from Verifier, so we can call the `onlyVerified` modifier, which ensures that the `proof` we pass is correct
+
+> You don't need to pass `proof` as an argument to `onlyVerified` because it is automatically extracted from `msg.data`.
 
 * Next, we add two fields needed to track DAO members:
   * The `authorizedMembers` mapping holds the addresses of DAO members.
   * The `claimedChannels` mapping holds already claimed channels.
 
 * Finally, we need logic to add new members to the DAO:   
+  * `proof` must be first argument, so `onlyVerified` has access to it and can verify it
   * the `!claimedChannels[channelId]` assertion prevents the same channel from being used more than once
   * `authorizedMembers[msg.sender] = true` adds new member to DAO
   * `claimedChannels[channelId] = true` marks `channelId` as a claimed channel.
