@@ -4,7 +4,7 @@ pragma solidity ^0.8.13;
 import {IRiscZeroVerifier} from "risc0-ethereum/IRiscZeroVerifier.sol";
 import {ControlID, RiscZeroGroth16Verifier} from "risc0-ethereum/groth16/RiscZeroGroth16Verifier.sol";
 
-import {Vlayer} from "vlayer-engine/Vlayer.sol";
+import {Vlayer} from "vlayer-engine/contracts/Vlayer.sol";
 import {Proof} from "./Proof.sol";
 import {SealLib, Seal} from "./Seal.sol";
 
