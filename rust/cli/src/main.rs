@@ -1,9 +1,12 @@
 use crate::errors::CLIError;
 use crate::misc::init::find_src_path;
 use clap::{Parser, Subcommand};
-use misc::{init::create_vlayer_dir, path::find_foundry_root};
+use misc::{
+    init::{create_vlayer_dir, fetch_vlayer_files},
+    path::find_foundry_root,
+};
 use server::server::{serve, Config};
-use tracing::{error, info, warn};
+use tracing::{error, info};
 
 pub mod errors;
 mod misc;
@@ -62,15 +65,15 @@ async fn run() -> Result<(), CLIError> {
             info!("Found foundry project root in \"{}\"", &src_path.display());
 
             match create_vlayer_dir(&src_path)? {
-                true => info!("Created vlayer directory in \"{}\"", src_path.display()),
-                false => warn!(
+                true => {
+                    info!("Created vlayer directory in \"{}\"", src_path.display());
+                    fetch_vlayer_files(&src_path).await?
+                }
+                false => error!(
                     "vlayer directory already exists in \"{}\". Skipping creation.",
                     &src_path.display()
                 ),
             }
-            fetch_vlayer_files_override(&src_path).await?;
-            // let dst = src_path.join("vlayer").join("contracts");
-            // get_vlayer_files(&dst).await?;
         }
     }
     Ok(())
