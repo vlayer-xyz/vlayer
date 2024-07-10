@@ -81,11 +81,36 @@ impl<H> FromIterator<(ExecutionLocation, EvmInput<H>)> for MultiEvmInput<H> {
 
 #[cfg(test)]
 mod test {
+    use alloy_primitives::Sealable;
     use mpt::EMPTY_ROOT_HASH;
 
     use crate::ethereum::EthBlockHeader;
 
     use super::EvmInput;
+
+    mod block_hashes {
+        use super::*;
+
+        #[test]
+        fn success() {
+            let ancestor: EthBlockHeader = Default::default();
+            let input: EvmInput<EthBlockHeader> = EvmInput {
+                header: EthBlockHeader {
+                    number: 1,
+                    parent_hash: ancestor.hash_slow(),
+                    ..Default::default()
+                },
+                ancestors: vec![Default::default()],
+                ..Default::default()
+            };
+
+            let block_hashes = input.block_hashes();
+
+            assert_eq!(block_hashes.len(), 2);
+            assert_eq!(block_hashes.get(&0).unwrap(), &ancestor.hash_slow());
+            assert_eq!(block_hashes.get(&1).unwrap(), &input.header.hash_slow());
+        }
+    }
 
     mod validate_state_root {
         use super::*;
@@ -111,8 +136,6 @@ mod test {
     }
 
     mod validate_ancestors {
-        use alloy_primitives::Sealable;
-
         use super::*;
 
         #[test]
