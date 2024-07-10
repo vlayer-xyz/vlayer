@@ -74,3 +74,4 @@ It is necessary for veryfing the computation done by the Prover contract from th
 - Address of the Prover contract 
 - Function selector of the Prover main function
 
+`Proof` doesn't have to be passed to `onlyVerified` as argument because it is automatically extracted from `msg.data`
