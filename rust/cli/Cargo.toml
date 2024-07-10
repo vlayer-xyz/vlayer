@@ -18,6 +18,8 @@ tracing = { workspace = true }
 reqwest = { version = "0.12.5", features = ["json"] }
 tar = "0.4.41"
 flate2 = "1.0.30"
-tempfile = "3.10.1"
 
 server = { path = "../server" }
+
+[dev-dependencies]
+tempfile = "3.10.1"
