@@ -1,5 +1,5 @@
 use crate::db::proof::ProofDb;
-use crate::into_input::into_input;
+use crate::into_input::into_multi_input;
 use crate::multiprovider::MultiProvider;
 use crate::provider::EthersProviderError;
 use crate::provider::{EthersProvider, Provider};
@@ -112,12 +112,9 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
         let env = self.envs.get_mut(&self.start_execution_location)?;
         let host_output = Engine::default().call(&call, env)?;
 
-        let evm_input = into_input(&env.db, env.header.clone())
-            .map_err(|err| HostError::CreatingInput(err.to_string()))?;
-        let multi_evm_input = [(self.start_execution_location, evm_input)]
-            .into_iter()
-            .collect();
-        let env = self.build_executor_env(multi_evm_input, call)?;
+        let multi_evm_input =
+            into_multi_input(self.envs).map_err(|err| HostError::CreatingInput(err.to_string()))?;
+        let env = Self::build_executor_env(self.start_execution_location, multi_evm_input, call)?;
 
         let raw_guest_output = Self::prove(env, GUEST_ELF)?;
         let guest_output = GuestOutput::from_outputs(&host_output, &raw_guest_output)?;
@@ -144,14 +141,14 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
     }
 
     fn build_executor_env(
-        &self,
+        start_execution_location: ExecutionLocation,
         multi_evm_input: MultiEvmInput<P::Header>,
         call: Call,
-    ) -> Result<ExecutorEnv, HostError> {
+    ) -> Result<ExecutorEnv<'static>, HostError> {
         let input = Input {
             call,
             multi_evm_input,
-            start_execution_location: self.start_execution_location,
+            start_execution_location,
         };
         let env = ExecutorEnv::builder()
             .write(&input)
