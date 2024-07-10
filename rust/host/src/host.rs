@@ -1,14 +1,16 @@
-use std::collections::HashMap;
-
 use crate::db::proof::ProofDb;
 use crate::into_input::into_input;
+use crate::multiprovider::MultiProvider;
 use crate::provider::EthersProviderError;
 use crate::provider::{EthersProvider, Provider};
+use std::collections::HashMap;
+
 use alloy_primitives::{ChainId, Sealable};
 use ethers_providers::Provider as OGEthersProvider;
 use ethers_providers::{Http, ProviderError, RetryClient};
 use guest_wrapper::GUEST_ELF;
 use risc0_zkvm::{default_prover, ExecutorEnv};
+use std::rc::Rc;
 use thiserror::Error;
 use vlayer_engine::engine::{Engine, EngineError};
 use vlayer_engine::ethereum::EthBlockHeader;
@@ -16,9 +18,6 @@ use vlayer_engine::evm::env::{EvmEnv, ExecutionLocation, MultiEvmEnv};
 use vlayer_engine::evm::input::MultiEvmInput;
 use vlayer_engine::io::GuestOutputError;
 use vlayer_engine::io::{Call, GuestOutput, HostOutput, Input};
-
-const MAX_RETRY: u32 = 3;
-const INITIAL_BACKOFF: u64 = 500;
 
 pub type EthersClient = OGEthersProvider<RetryClient<Http>>;
 
@@ -83,21 +82,15 @@ impl HostConfig {
 impl Host<EthersProvider<EthersClient>> {
     pub fn try_new(config: HostConfig) -> Result<Self, HostError> {
         let chain_id = config.start_execution_location.chain_id;
-        let url = config
-            .rpc_urls
-            .get(&chain_id)
-            .ok_or(HostError::NoRpcUrl(chain_id))?;
-
-        let client = EthersClient::new_client(url, MAX_RETRY, INITIAL_BACKOFF)?;
-
-        let provider = EthersProvider::new(client);
+        let mut multi_provider = MultiProvider::new(config.rpc_urls.clone());
+        let provider = multi_provider.get_provider(chain_id)?;
 
         Host::try_new_with_provider(provider, config)
     }
 }
 
 impl<P: Provider<Header = EthBlockHeader>> Host<P> {
-    pub fn try_new_with_provider(provider: P, config: HostConfig) -> Result<Self, HostError> {
+    pub fn try_new_with_provider(provider: Rc<P>, config: HostConfig) -> Result<Self, HostError> {
         let start_block_number = config.start_execution_location.block_number;
         let header = provider
             .get_block_header(start_block_number)

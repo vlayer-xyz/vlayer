@@ -1,6 +1,5 @@
 use std::env;
 
-use ::host::multiprovider::MultiProvider;
 use alloy_primitives::{address, Address};
 use host::{Host, HostConfig, HostError};
 use tracing::info;
@@ -10,6 +9,7 @@ pub mod db;
 pub mod host;
 pub mod host_tests;
 pub mod into_input;
+pub mod multiprovider;
 pub mod provider;
 
 const CONTRACT: Address = address!("5fbdb2315678afecb367f032d93f642f64180aa3");
