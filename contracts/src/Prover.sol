@@ -1,17 +1,21 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-contract Prover {
+interface ITraveler {
+    function setBlock(uint blockNo) external;
+    function setChain(uint chainId, uint blockNo) external;
+}
 
-    address constant TRAVELER = 0x5b2063246fAa1061741463a4A6f74e3CB39A7C5B;
+contract Prover {
+    // Address generated from first 20-bytes of "vlayer.traveler"'s keccak256.
+    ITraveler constant TRAVELER =
+        ITraveler(0x2AE215Ce9FDe588aDfdEa92976dC9AA45AA006A0);
 
     function setBlock(uint blockNo) public {
-        (bool success, ) = TRAVELER.call(abi.encodeWithSignature("setBlock(uint)", blockNo));
-        require(success, "setBlock call failed");
+        TRAVELER.setBlock(blockNo);
     }
 
     function setChain(uint chainId, uint blockNo) public {
-        (bool success, ) = TRAVELER.call(abi.encodeWithSignature("setChain(uint, uint)", chainId, blockNo));
-        require(success, "setChain call failed");
+        TRAVELER.setChain(chainId, blockNo);
     }
 }
