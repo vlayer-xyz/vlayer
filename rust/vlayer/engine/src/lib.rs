@@ -1,6 +1,3 @@
-#![cfg_attr(not(doctest), doc = include_str!("../README.md"))]
-#![cfg_attr(docsrs, feature(doc_cfg, doc_auto_cfg))]
-
 pub mod chain;
 pub mod config;
 pub mod consts;
