@@ -1,8 +1,11 @@
+use std::collections::HashMap;
+
 use crate::{db::proof::ProofDb, provider::Provider};
 use alloy_primitives::Sealed;
 use anyhow::{ensure, Ok};
 use vlayer_engine::evm::block_header::EvmBlockHeader;
-use vlayer_engine::evm::input::EvmInput;
+use vlayer_engine::evm::env::MultiEvmEnv;
+use vlayer_engine::evm::input::{EvmInput, MultiEvmInput};
 
 pub fn into_input<P: Provider>(
     db: &ProofDb<P>,
@@ -24,4 +27,16 @@ pub fn into_input<P: Provider>(
     evm_input.print_sizes();
 
     Ok(evm_input)
+}
+
+pub fn into_multi_input<P: Provider>(
+    envs: MultiEvmEnv<ProofDb<P>, P::Header>,
+) -> anyhow::Result<MultiEvmInput<P::Header>> {
+    let mut inner = HashMap::new();
+    for (location, env) in envs.into_inner() {
+        let header = env.header;
+        let input = into_input(&env.db, header)?;
+        inner.insert(location, input);
+    }
+    Ok(MultiEvmInput(inner))
 }

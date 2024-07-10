@@ -70,6 +70,10 @@ impl<D, H> MultiEvmEnv<D, H> {
 }
 
 impl<D, H: EvmBlockHeader> MultiEvmEnv<D, H> {
+    pub fn into_inner(self) -> HashMap<ExecutionLocation, EvmEnv<D, H>> {
+        self.envs
+    }
+
     pub fn insert(&mut self, location: ExecutionLocation, env: EvmEnv<D, H>) {
         self.envs.insert(location, env);
     }
