@@ -53,6 +53,6 @@ impl<H: EvmBlockHeader + Clone> From<ValidatedMultiEvmInput<H>> for MultiEvmEnv<
             .into_iter()
             .map(|(location, input)| (location, EvmEnv::from(ValidatedEvmInput(input))))
             .collect();
-        MultiEvmEnv { envs }
+        MultiEvmEnv(envs)
     }
 }

@@ -33,7 +33,7 @@ pub fn into_multi_input<P: Provider>(
     envs: MultiEvmEnv<ProofDb<P>, P::Header>,
 ) -> anyhow::Result<MultiEvmInput<P::Header>> {
     let mut inner = HashMap::new();
-    for (location, env) in envs.into_inner() {
+    for (location, env) in envs.0 {
         let header = env.header;
         let input = into_input(&env.db, header)?;
         inner.insert(location, input);

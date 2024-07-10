@@ -57,43 +57,37 @@ impl ExecutionLocation {
     }
 }
 
-pub struct MultiEvmEnv<D, H> {
-    pub envs: HashMap<ExecutionLocation, EvmEnv<D, H>>,
-}
+pub struct MultiEvmEnv<D, H>(pub HashMap<ExecutionLocation, EvmEnv<D, H>>);
 
 impl<D, H> MultiEvmEnv<D, H> {
     pub fn from_single(env: EvmEnv<D, H>, location: ExecutionLocation) -> Self {
         let mut envs = HashMap::new();
         envs.insert(location, env);
-        Self { envs }
+        Self(envs)
     }
 }
 
 impl<D, H: EvmBlockHeader> MultiEvmEnv<D, H> {
-    pub fn into_inner(self) -> HashMap<ExecutionLocation, EvmEnv<D, H>> {
-        self.envs
-    }
-
     pub fn insert(&mut self, location: ExecutionLocation, env: EvmEnv<D, H>) {
-        self.envs.insert(location, env);
+        self.0.insert(location, env);
     }
 
     pub fn get_mut(
         &mut self,
         location: &ExecutionLocation,
     ) -> Result<&mut EvmEnv<D, H>, EngineError> {
-        self.envs
+        self.0
             .get_mut(location)
             .ok_or(EngineError::EvmNotFound(*location))
     }
 
     pub fn with_chain_spec(self, chain_spec: &ChainSpec) -> Result<Self, EngineError> {
         let envs = self
-            .envs
+            .0
             .into_iter()
             .map(|(location, env)| Ok((location, env.with_chain_spec(chain_spec)?)))
             .collect::<Result<_, _>>()?;
 
-        Ok(Self { envs })
+        Ok(Self(envs))
     }
 }
