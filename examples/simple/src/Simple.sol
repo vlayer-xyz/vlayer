@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 
 import {IRiscZeroVerifier} from "risc0-ethereum/IRiscZeroVerifier.sol";
 import {Verifier} from "vlayer/Verifier.sol";
-import {ExecutionCommitment} from "vlayer-engine/contracts/Vlayer.sol";
+import {ExecutionCommitment} from "vlayer/ExecutionCommitment.sol";
 
 import {SimpleProver} from "./vlayer/Simple.v.sol";
 
