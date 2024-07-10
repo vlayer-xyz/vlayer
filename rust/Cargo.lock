@@ -3611,6 +3611,7 @@ dependencies = [
  "hex",
  "host",
  "http-body-util",
+ "lazy_static",
  "mime",
  "reqwest 0.12.5",
  "serde",
