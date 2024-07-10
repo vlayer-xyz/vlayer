@@ -1,11 +1,11 @@
 // Keep everything in the Vlayer library private except the commitment.
 mod private {
-    alloy_sol_types::sol!("./Vlayer.sol");
+    alloy_sol_types::sol!("./contracts/Vlayer.sol");
 }
 
 use alloy_primitives::{Address, Sealable, U256};
 /// Solidity struct representing the committed block used for validation.
-pub use private::Vlayer::ExecutionCommitment;
+pub use private::ExecutionCommitment;
 
 use crate::{evm::block_header::EvmBlockHeader, io::CallSelector};
 

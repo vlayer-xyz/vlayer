@@ -8,7 +8,7 @@ import {VerifierUnderTest} from "./helpers/VerifierUnderTest.sol";
 import {IRiscZeroVerifier, Receipt, VerificationFailed} from "risc0-ethereum/IRiscZeroVerifier.sol";
 import {RiscZeroMockVerifier} from "risc0-ethereum/test/RiscZeroMockVerifier.sol";
 
-import {Vlayer} from "vlayer-engine/Vlayer.sol";
+import {ExecutionCommitment} from "vlayer-engine/contracts/Vlayer.sol";
 import {Proof} from "../src/Proof.sol";
 
 contract Prover {}
@@ -45,12 +45,12 @@ contract Verifier_OnlyVerified_Modifier_Tests is Test {
     ExampleVerifier exampleVerifier = new ExampleVerifier();
     RiscZeroMockVerifier mockVerifier = new RiscZeroMockVerifier(bytes4(0));
 
-    Vlayer.ExecutionCommitment commitment;
+    ExecutionCommitment commitment;
 
     function setUp() public {
         vm.roll(100); // have some historical blocks
 
-        commitment = Vlayer.ExecutionCommitment(
+        commitment = ExecutionCommitment(
             exampleVerifier.PROVER(), ExampleProver.doSomething.selector, block.number - 1, blockhash(block.number - 1)
         );
         exampleVerifier.setVerifier(mockVerifier);
