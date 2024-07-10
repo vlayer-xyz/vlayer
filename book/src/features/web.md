@@ -34,7 +34,7 @@ What happens in the above code?
   * `YouTubeRevenue` inherits from `Prover` vlayer contract that allows off-chain proving of web data
   * inside `main` we use the `web` structure, which is injected into contract context by vlayer
 
-Then we have make sure that the delivered data makes sense for our case: 
+Then we have to ensure that the delivered data makes sense for our case: 
 * `web.url.equal(dataUrl)` checks if injected payload comes from correct URL 
 * `estimatedEarnings > 1_000_000` checks if estimated earnings are higher than 10k USD (parsed JSON contains amount in cents). Otherwise it reverts 
 
