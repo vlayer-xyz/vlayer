@@ -108,7 +108,7 @@ const deliverEmailNotification = async (login) => {
         "from": "vlayer Notifier <no_reply@vlayer.xyz>",
         "to": [
           "marek@vlayer.xyz", 
-          "artur@vlayer.xyz"
+          "hubert@vlayer.xyz"
         ],
         "subject": "New vlayer docs visit",
         "html": `${login} just visited the docs! 🎉 <br/><br/> See stats and manage access <a href="https://www.notion.so/vlayer/Docs-Allowlist-746a3a5f651d45c189717cb2ffb938fe>here</a>`
