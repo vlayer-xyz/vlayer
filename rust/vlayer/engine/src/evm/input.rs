@@ -41,6 +41,27 @@ impl<H: EvmBlockHeader + Clone> EvmInput<H> {
 
         block_hashes
     }
+
+    pub fn validate_state_root(&self) {
+        let state_root = self.state_trie.hash_slow();
+        assert_eq!(self.header.state_root(), &state_root, "State root mismatch");
+    }
+
+    pub fn validate_ancestors(&self) {
+        let header = self.header.clone().seal_slow();
+        let mut previous_header = header.inner();
+        for ancestor in &self.ancestors {
+            let ancestor_hash = ancestor.hash_slow();
+            assert_eq!(
+                previous_header.parent_hash(),
+                &ancestor_hash,
+                "Invalid chain: block {} is not the parent of block {}",
+                ancestor.number(),
+                previous_header.number()
+            );
+            previous_header = ancestor;
+        }
+    }
 }
 
 #[derive(Debug, Serialize, Deserialize, Clone)]
