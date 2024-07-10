@@ -5,6 +5,7 @@ use revm::{
     Database,
 };
 use std::fmt::Debug;
+use std::rc::Rc;
 use thiserror::Error;
 
 /// Error type for the [ProviderDb].
@@ -20,7 +21,7 @@ pub enum ProviderDbError<E: std::error::Error> {
 
 /// A revm [Database] backed by a [Provider].
 pub struct ProviderDb<P> {
-    pub provider: P,
+    pub provider: Rc<P>,
     pub block_number: u64,
 
     /// Cache for code hashes to contract addresses.
@@ -29,7 +30,7 @@ pub struct ProviderDb<P> {
 
 impl<P: Provider> ProviderDb<P> {
     /// Creates a new [ProviderDb] with the given provider and block number.
-    pub fn new(provider: P, block_number: u64) -> Self {
+    pub fn new(provider: Rc<P>, block_number: u64) -> Self {
         Self {
             provider,
             block_number,
