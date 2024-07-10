@@ -7,7 +7,7 @@ use tracing::debug;
 use super::{block_header::EvmBlockHeader, env::ExecutionLocation};
 
 /// The serializable input to derive and validate a [EvmEnv].
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, Default)]
 pub struct EvmInput<H> {
     pub header: H,
     pub state_trie: MerkleTrie,
@@ -16,7 +16,7 @@ pub struct EvmInput<H> {
     pub ancestors: Vec<H>,
 }
 
-impl<H> EvmInput<H> {
+impl<H: EvmBlockHeader> EvmInput<H> {
     pub fn print_sizes(&self) {
         let total_storage_size: usize = self.storage_tries.iter().map(|t| t.size()).sum();
 
@@ -76,5 +76,72 @@ impl<H> MultiEvmInput<H> {
 impl<H> FromIterator<(ExecutionLocation, EvmInput<H>)> for MultiEvmInput<H> {
     fn from_iter<T: IntoIterator<Item = (ExecutionLocation, EvmInput<H>)>>(iter: T) -> Self {
         MultiEvmInput(iter.into_iter().collect())
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use mpt::EMPTY_ROOT_HASH;
+
+    use crate::ethereum::EthBlockHeader;
+
+    use super::EvmInput;
+
+    mod validate_state_root {
+        use super::*;
+
+        #[test]
+        fn success() {
+            let input: EvmInput<EthBlockHeader> = EvmInput {
+                header: EthBlockHeader {
+                    state_root: EMPTY_ROOT_HASH,
+                    ..Default::default()
+                },
+                ..Default::default()
+            };
+            input.validate_state_root();
+        }
+
+        #[test]
+        #[should_panic(expected = "State root mismatch")]
+        fn mismatch() {
+            let input: EvmInput<EthBlockHeader> = Default::default();
+            input.validate_state_root();
+        }
+    }
+
+    mod validate_ancestors {
+        use alloy_primitives::Sealable;
+
+        use super::*;
+
+        #[test]
+        fn success() {
+            let ancestor: EthBlockHeader = Default::default();
+            let input: EvmInput<EthBlockHeader> = EvmInput {
+                header: EthBlockHeader {
+                    number: 1,
+                    parent_hash: ancestor.hash_slow(),
+                    ..Default::default()
+                },
+                ancestors: vec![Default::default()],
+                ..Default::default()
+            };
+            input.validate_ancestors();
+        }
+
+        #[test]
+        #[should_panic(expected = "failed: Invalid chain: block 0 is not the parent of block 1")]
+        fn mismatch() {
+            let input: EvmInput<EthBlockHeader> = EvmInput {
+                header: EthBlockHeader {
+                    number: 1,
+                    ..Default::default()
+                },
+                ancestors: vec![Default::default()],
+                ..Default::default()
+            };
+            input.validate_ancestors();
+        }
     }
 }

@@ -3,7 +3,7 @@ use alloy_primitives::{BlockNumber, Sealable, B256};
 use revm::primitives::BlockEnv;
 
 /// An EVM abstraction of a block header.
-pub trait EvmBlockHeader: Sealable {
+pub trait EvmBlockHeader: Sealable + Default {
     /// Returns the hash of the parent block's header.
     fn parent_hash(&self) -> &B256;
     /// Returns the block number.
