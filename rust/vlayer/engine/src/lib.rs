@@ -6,5 +6,5 @@ pub mod ethereum;
 pub mod evm;
 pub mod inspector;
 pub mod io;
-pub mod steel;
-pub use steel::ExecutionCommitment;
+pub mod vlayer;
+pub use vlayer::ExecutionCommitment;

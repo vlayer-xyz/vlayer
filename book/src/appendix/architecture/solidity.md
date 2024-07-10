@@ -44,7 +44,7 @@ struct ExecutionCommitment {
 }
 ```
 
-> Note that `ExecutionCommitment` structure is generated based on Solidity code from `Steel::Commitment`, with `sol!` macro.
+> Note that `ExecutionCommitment` structure is generated based on Solidity code from `Vlayer::Commitment`, with `sol!` macro.
 
 Then the data is prepended on the `Host` with two additional fields `length` and `seal`. The `Host` returns it via JSON-RPC `v_call` method, as a string of bytes, in the `result` field.
 
