@@ -5,6 +5,7 @@ use reqwest::get;
 use std::fs;
 use std::io::Cursor;
 use std::path::{Path, PathBuf};
+use tar::Archive;
 
 const VLAYER_DIR_NAME: &str = "vlayer";
 const CONTRACTS_URL: &str =
@@ -27,7 +28,6 @@ pub(crate) fn find_src_path(root_path: &Path) -> Result<PathBuf, CLIError> {
 }
 
 pub(crate) async fn fetch_vlayer_files(dst: &Path) -> Result<(), CLIError> {
-    // (!) overrides all files in the dst/vlayer directory, if exists
     let response = get(CONTRACTS_URL)
         .await
         .map_err(map_reqwest_error)?
@@ -35,11 +35,7 @@ pub(crate) async fn fetch_vlayer_files(dst: &Path) -> Result<(), CLIError> {
         .await
         .map_err(map_reqwest_error)?;
 
-    let cursor = Cursor::new(response);
-
-    let d = GzDecoder::new(cursor);
-    let mut archive = tar::Archive::new(d);
-    archive.unpack(dst)?;
+    Archive::new(GzDecoder::new(Cursor::new(response))).unpack(dst)?;
 
     Ok(())
 }
