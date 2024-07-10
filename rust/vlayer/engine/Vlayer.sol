@@ -1,9 +1,7 @@
 // SPDX-License-Identifier: Apache-2.0
 pragma solidity ^0.8.13;
 
-/// @title Steel Library
-/// @notice This library provides a collection of utilities to work with Steel commitments in Solidity.
-library Steel {
+library Vlayer {
     /// @notice An ExecutionCommitment struct representing a block number and its block hash.
     struct ExecutionCommitment {    
         address startContractAddress;
