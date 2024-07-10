@@ -1,5 +1,6 @@
 use std::env;
 
+use ::host::multiprovider::MultiProvider;
 use alloy_primitives::{address, Address};
 use host::{Host, HostConfig, HostError};
 use tracing::info;
