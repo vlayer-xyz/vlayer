@@ -39,7 +39,7 @@ function retrieve_address(){
     <${results_file})
 
   echo "$(to_upper ${contract})_ADDRESS=${address}"
-    
+  export $(to_upper ${contract})_ADDRESS=${address}
 }
 
 function get_block_number() {
@@ -73,3 +73,4 @@ for contract in "${DEPLOYABLE_CONTRACTS[@]}" ; do
 done
 
 echo BLOCK_NO=$(get_block_number)
+export BLOCK_NO=$(get_block_number)
