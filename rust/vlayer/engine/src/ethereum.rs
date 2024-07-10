@@ -15,7 +15,7 @@ pub type EthEvmEnv<D> = EvmEnv<D, EthBlockHeader>;
 pub type MultiEthEvmInput = MultiEvmInput<EthBlockHeader>;
 
 /// Ethereum post-merge block header.
-#[derive(Debug, Clone, Serialize, Deserialize, RlpEncodable)]
+#[derive(Debug, Clone, Serialize, Deserialize, RlpEncodable, Default)]
 #[rlp(trailing)]
 pub struct EthBlockHeader {
     /// Hash of the parent block's header.
