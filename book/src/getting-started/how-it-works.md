@@ -1,5 +1,11 @@
 # How it works?
-vlayer introduces two new types of contracts: Prover and Verifier. The Prover code runs on the vlayer zkEVM infrastructure and Verifier can be executed on EVM-compatible chains. Both types of contracts have to be developed using [Solidity](https://soliditylang.org) programming language.
+vlayer introduces two new types of contracts: `Prover` and `Verifier`. 
+
+The `Prover` code runs on the vlayer zkEVM infrastructure. Proof data structure is the result of this operation. 
+
+The `Verifier` verifies proof and runs your code on EVM-compatible chains.
+
+Both types of contracts must be developed using the [Solidity](https://soliditylang.org) programming language.
 
 ## Features
 Compared to regular contracts, vlayer smart contracts introdcues new features such as:
