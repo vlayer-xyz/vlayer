@@ -8,7 +8,7 @@ import {VerifierUnderTest} from "./helpers/VerifierUnderTest.sol";
 import {IRiscZeroVerifier, Receipt, VerificationFailed} from "risc0-ethereum/IRiscZeroVerifier.sol";
 import {RiscZeroMockVerifier} from "risc0-ethereum/test/RiscZeroMockVerifier.sol";
 
-import {ExecutionCommitment} from "vlayer-engine/contracts/Vlayer.sol";
+import {ExecutionCommitment} from "../src/ExecutionCommitment.sol";
 import {Proof} from "../src/Proof.sol";
 
 contract Prover {}

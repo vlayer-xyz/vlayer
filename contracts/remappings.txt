@@ -1,4 +1,2 @@
 openzeppelin/=lib/risc0-ethereum/lib/openzeppelin-contracts/
 risc0-ethereum/=lib/risc0-ethereum/contracts/src/
-
-vlayer-engine/=../rust/vlayer/engine/

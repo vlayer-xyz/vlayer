@@ -9,7 +9,7 @@ struct ExecutionCommitment {
     bytes32 settleBlockHash; // Hash of the block at the specified block number.
 }
 
-library Vlayer {
+library ExecutionCommitmentLib {
     /// @notice Validates if the provided ExecutionCommitment matches the block hash of the given block number.
     /// @param commitment The ExecutionCommitment struct to validate.
     /// @return isValid True if the commitment's block hash matches the block hash of the block number, false otherwise.

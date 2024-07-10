@@ -1,4 +1,3 @@
-vlayer-engine/=../../rust/vlayer/engine/
 vlayer/=../../contracts/src/
 
 ds-test/=../../contracts/lib/risc0-ethereum/lib/openzeppelin-contracts/lib/forge-std/lib/ds-test/src/
