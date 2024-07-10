@@ -1,12 +1,22 @@
 # How it works?
-vlayer introduces two new types of contracts: Prover and Verifier. The Prover code runs on the vlayer zkEVM infrastructure and Verifier can be executed on EVM-compatible chains. Both types of contracts have to be developed using [Solidity](https://soliditylang.org) programming language.
 
-## Features
-Compared to regular contracts, vlayer smart contracts introdcues new features such as:
-* **[time travel](/features/time-travel.html)** - ability to execute smart contracts on historical data
-* **[teleport](/features/teleport.html)** - ability to execute smart contracts in the context of different chains
-* **[emails](/features/email.html)** - access to verfied content of emails
-* **[web](/features/web.html)** - access to verified web content (APIs and websites)
+vlayer introduces new super powers to Solidity smart contracts:
+
+- **[Time Travel](/features/time-travel.html)**: Execute a smart contract on historical data.
+- **[Teleport](/features/teleport.html)**: Execute a smart contract across different blockchain networks.
+- **[Emails](/features/email.html)**: Access verified email content.
+- **[Web](/features/web.html)**: Access verified web content, including APIs and websites."
+
+## Prover and Verifier
+
+To implement the above features, vlayer introduces two new contract types: `Prover` and `Verifier`. 
+
+The `Prover` code runs on the vlayer zkEVM infrastructure. Proof data structure is the result of this operation.
+
+The `Verifier` verifies generated proof and runs your code on EVM-compatible chains.
+
+Both types of contracts are developed using the [Solidity](https://soliditylang.org) programming language.
+
 
 ## vlayer contract execution
 A typical vlayer execution flow has three steps:
@@ -21,9 +31,9 @@ See the diagram below.
 
 ## Prover
 vlayer Prover contracts have the a few distinct properties:
-* **verification** - can be verified off-chain and results can't be forged
+* **verification** - can be executed off-chain and results can't be forged
 * **privacy** - inputs are private by deafult 
-* **no gas fees** and no usual transaction size limits apply
+* **no gas fees** - no usual transaction size limits apply
 
 > All arguments passed to the Prover contract functions are **private by default**. To make an argument public, 
  simply add it to the list of returned values.
