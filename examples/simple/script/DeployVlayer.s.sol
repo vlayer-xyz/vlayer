@@ -6,7 +6,6 @@ import {console2} from "forge-std/console2.sol";
 
 import {IRiscZeroVerifier} from "risc0-ethereum/IRiscZeroVerifier.sol";
 
-import {Simple} from "../src/vlayer/SimpleVerifier.sol";
 import {SimpleProver} from "../src/vlayer/SimpleProver.sol";
 
 contract SimpleScript is Script {
@@ -16,7 +15,7 @@ contract SimpleScript is Script {
         uint256 deployerPrivateKey = vm.envUint("DEPLOYER_PRIV");
         vm.startBroadcast(deployerPrivateKey);
 
-        SimpleProver simpleVerifier = new SimpleProver();
-        console2.log("SimpleProver contract deployed to:", address(simpleVerifier));
+        SimpleProver simpleProver = new SimpleProver();
+        console2.log("SimpleProver contract deployed to:", address(simpleProver));
     }
 }
