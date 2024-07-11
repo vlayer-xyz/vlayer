@@ -1,48 +1,61 @@
 use crate::host::{EthersClient, HostError};
-use crate::provider::EthersProvider;
+use crate::provider::{EthersProvider, Provider};
 use alloy_primitives::ChainId;
 use std::collections::HashMap;
 use std::rc::Rc;
 
+pub trait MultiProvider<P: Provider>
+where
+    Self: AsMut<HashMap<ChainId, Rc<P>>>,
+{
+    fn create_provider(&mut self, chain_id: ChainId) -> Result<Rc<P>, HostError>;
+    fn get(&mut self, chain_id: ChainId) -> Result<Rc<P>, HostError> {
+        if let Some(provider) = self.as_mut().get(&chain_id) {
+            return Ok(Rc::clone(provider));
+        }
+
+        let provider = self.create_provider(chain_id)?;
+
+        self.as_mut().insert(chain_id, Rc::clone(&provider));
+        Ok(provider)
+    }
+}
+
 const MAX_RETRY: u32 = 3;
 const INITIAL_BACKOFF: u64 = 500;
 
-pub struct MultiProvider {
-    rpc_urls: HashMap<ChainId, String>,
+pub struct EthersMultiProvider {
     providers: HashMap<ChainId, Rc<EthersProvider<EthersClient>>>,
+    rpc_urls: HashMap<ChainId, String>,
 }
 
-impl MultiProvider {
+impl EthersMultiProvider {
     pub fn new(rpc_urls: HashMap<ChainId, String>) -> Self {
-        MultiProvider {
-            rpc_urls,
+        EthersMultiProvider {
             providers: HashMap::new(),
+            rpc_urls,
         }
     }
+}
 
-    fn get_rpc_url(&self, chain_id: ChainId) -> Result<&String, HostError> {
-        self.rpc_urls
-            .get(&chain_id)
-            .ok_or(HostError::NoRpcUrl(chain_id))
+impl AsMut<HashMap<ChainId, Rc<EthersProvider<EthersClient>>>> for EthersMultiProvider {
+    fn as_mut(&mut self) -> &mut HashMap<ChainId, Rc<EthersProvider<EthersClient>>> {
+        &mut self.providers
     }
+}
 
-    pub fn get_provider(
+impl MultiProvider<EthersProvider<EthersClient>> for EthersMultiProvider {
+    fn create_provider(
         &mut self,
         chain_id: ChainId,
     ) -> Result<Rc<EthersProvider<EthersClient>>, HostError> {
-        if let Some(provider) = self.providers.get(&chain_id) {
-            return Ok(provider.clone());
-        }
-
-        let url = self.get_rpc_url(chain_id)?;
+        let url = self
+            .rpc_urls
+            .get(&chain_id)
+            .ok_or(HostError::NoRpcUrl(chain_id))?;
 
         let client = EthersClient::new_client(url, MAX_RETRY, INITIAL_BACKOFF)?;
 
-        let provider = EthersProvider::new(client);
-
-        let rc_provider = Rc::new(provider);
-        self.providers.insert(chain_id, rc_provider.clone());
-
-        Ok(rc_provider)
+        Ok(Rc::new(EthersProvider::new(client)))
     }
 }

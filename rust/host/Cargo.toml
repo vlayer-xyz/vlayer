@@ -29,6 +29,7 @@ tokio = { workspace = true }
 tracing = { workspace = true }
 ethereum-types = "0.14.1"
 hex = "0.4.3"
+auto_impl = "1.2.0"
 
 [dev-dependencies]
 alloy-sol-types = "0.7.7"

@@ -1,6 +1,7 @@
 use alloy_primitives::{
     Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, B256, U256,
 };
+use auto_impl::auto_impl;
 use ethers::{from_ethers_bytes, from_ethers_u256};
 use ethers_core::types::StorageProof as EthersStorageProof;
 use serde::{Deserialize, Serialize};
@@ -20,6 +21,7 @@ pub use file::{EthFileProvider, FileProvider};
 pub type EthersClient = ethers_providers::Provider<RetryClient<Http>>;
 
 /// A trait for providers that fetch data from the Ethereum blockchain.
+#[auto_impl(Rc)]
 pub trait Provider {
     type Error: StdError + Send + Sync + 'static;
     type Header: EvmBlockHeader;

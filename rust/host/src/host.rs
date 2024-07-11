@@ -1,6 +1,6 @@
 use crate::db::proof::ProofDb;
 use crate::into_input::into_multi_input;
-use crate::multiprovider::MultiProvider;
+use crate::multiprovider::{EthersMultiProvider, MultiProvider};
 use crate::provider::EthersProviderError;
 use crate::provider::{EthersProvider, Provider};
 use std::collections::HashMap;
@@ -90,8 +90,8 @@ impl HostConfig {
 impl Host<EthersProvider<EthersClient>> {
     pub fn try_new(config: HostConfig) -> Result<Self, HostError> {
         let chain_id = config.start_execution_location.chain_id;
-        let mut multi_provider = MultiProvider::new(config.rpc_urls.clone());
-        let provider = multi_provider.get_provider(chain_id)?;
+        let mut multi_provider = EthersMultiProvider::new(config.rpc_urls.clone());
+        let provider = multi_provider.get(chain_id)?;
 
         Host::try_new_with_provider(provider, config)
     }
