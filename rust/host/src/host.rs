@@ -119,6 +119,19 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
         })
     }
 
+    pub fn try_new_with_multi_provider<M>(
+        multi_provider: &mut M,
+        config: HostConfig,
+    ) -> Result<Self, HostError>
+    where
+        M: MultiProvider<P>,
+    {
+        let chain_id = config.start_execution_location.chain_id;
+        let provider = multi_provider.get(chain_id)?;
+
+        Self::try_new_with_provider(provider, config)
+    }
+
     pub fn run(mut self, call: Call) -> Result<HostOutput, HostError> {
         let env = self.envs.get_mut(&self.start_execution_location)?;
         let host_output = Engine::default().call(&call, env)?;
