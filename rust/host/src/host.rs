@@ -68,6 +68,9 @@ pub enum HostError {
 
     #[error("Abi encode error: {0}")]
     AbiEncode(String),
+
+    #[error("No rpc cache for chain: {0}")]
+    NoRpcCache(ChainId),
 }
 
 pub struct HostConfig {
