@@ -12,9 +12,12 @@ use vlayer_engine::{
 };
 
 fn create_test_multi_provider() -> FileMultiProvider {
-    let mut rpc_file_cache = HashMap::new();
-    rpc_file_cache.insert(MAINNET_ID, "testdata/mainnet_rpc_cache.json".to_string());
-    rpc_file_cache.insert(SEPOLIA_ID, "testdata/sepolia_rpc_cache.json".to_string());
+    let rpc_file_cache: HashMap<_, _> = [
+        (MAINNET_ID, "testdata/mainnet_rpc_cache.json".to_string()),
+        (SEPOLIA_ID, "testdata/sepolia_rpc_cache.json".to_string()),
+    ]
+    .into_iter()
+    .collect();
 
     FileMultiProvider::new(rpc_file_cache)
 }

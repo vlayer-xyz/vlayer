@@ -1,6 +1,7 @@
 use crate::host::{EthersClient, HostError};
 use crate::provider::{EthFileProvider, EthersProvider, FileProvider, Provider};
 use alloy_primitives::ChainId;
+use derive_more::AsMut;
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::rc::Rc;
@@ -26,7 +27,9 @@ where
 const MAX_RETRY: u32 = 3;
 const INITIAL_BACKOFF: u64 = 500;
 
+#[derive(AsMut)]
 pub struct EthersMultiProvider {
+    #[as_mut]
     providers: HashMap<ChainId, Rc<EthersProvider<EthersClient>>>,
     rpc_urls: HashMap<ChainId, String>,
 }
@@ -37,12 +40,6 @@ impl EthersMultiProvider {
             providers: HashMap::new(),
             rpc_urls,
         }
-    }
-}
-
-impl AsMut<HashMap<ChainId, Rc<EthersProvider<EthersClient>>>> for EthersMultiProvider {
-    fn as_mut(&mut self) -> &mut HashMap<ChainId, Rc<EthersProvider<EthersClient>>> {
-        &mut self.providers
     }
 }
 
@@ -62,7 +59,9 @@ impl MultiProvider<EthersProvider<EthersClient>> for EthersMultiProvider {
     }
 }
 
+#[derive(AsMut)]
 pub struct FileMultiProvider {
+    #[as_mut]
     providers: HashMap<ChainId, Rc<FileProvider<EthBlockHeader>>>,
     rpc_file_cache: HashMap<ChainId, String>,
 }
@@ -73,12 +72,6 @@ impl FileMultiProvider {
             providers: HashMap::new(),
             rpc_file_cache,
         }
-    }
-}
-
-impl AsMut<HashMap<ChainId, Rc<EthFileProvider>>> for FileMultiProvider {
-    fn as_mut(&mut self) -> &mut HashMap<ChainId, Rc<EthFileProvider>> {
-        &mut self.providers
     }
 }
 
