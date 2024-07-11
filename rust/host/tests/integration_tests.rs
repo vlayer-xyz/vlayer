@@ -1,45 +1,33 @@
-use alloy_primitives::{address, b256, uint, Address, ChainId, U256};
+use alloy_primitives::{address, b256, uint, Address, U256};
 use alloy_sol_types::{sol, SolCall};
 use host::{
     host::{Host, HostConfig},
-    provider::EthFileProvider,
+    multiprovider::FileMultiProvider,
     Call,
 };
-use lazy_static::lazy_static;
-use std::{collections::HashMap, path::PathBuf, rc::Rc};
+use std::collections::HashMap;
 use vlayer_engine::{
     config::{MAINNET_ID, SEPOLIA_ID},
     evm::env::ExecutionLocation,
 };
 
-lazy_static! {
-    static ref RPC_CACHE_FILES: HashMap<ChainId, String> = {
-        let mut cache_files: HashMap<ChainId, String> = HashMap::new();
-        cache_files.insert(MAINNET_ID, "testdata/mainnet_rpc_cache.json".to_string());
-        cache_files.insert(SEPOLIA_ID, "testdata/sepolia_rpc_cache.json".to_string());
-        cache_files
-    };
-}
+fn create_test_multi_provider() -> FileMultiProvider {
+    let mut rpc_file_cache = HashMap::new();
+    rpc_file_cache.insert(MAINNET_ID, "testdata/mainnet_rpc_cache.json".to_string());
+    rpc_file_cache.insert(SEPOLIA_ID, "testdata/sepolia_rpc_cache.json".to_string());
 
-fn create_test_provider(chain_id: ChainId) -> anyhow::Result<Rc<EthFileProvider>> {
-    let file_path = RPC_CACHE_FILES
-        .get(&chain_id)
-        .ok_or_else(|| anyhow::anyhow!("RPC cache file not found for chain ID: {}", chain_id))?;
-
-    let test_provider = EthFileProvider::from_file(&PathBuf::from(file_path))?;
-    let rc_test_provider = Rc::new(test_provider);
-    Ok(rc_test_provider)
+    FileMultiProvider::new(rpc_file_cache)
 }
 
 fn run<C>(call: Call, chain_id: u64, block_number: u64) -> anyhow::Result<C::Return>
 where
     C: SolCall,
 {
-    let test_provider = create_test_provider(chain_id)?;
+    let mut test_multi_provider = create_test_multi_provider();
     let null_rpc_url = "a null url value as url is not needed in tests";
     let execution_location = ExecutionLocation::new(block_number, chain_id);
     let config = HostConfig::new(null_rpc_url, execution_location);
-    let host = Host::try_new_with_provider(test_provider, config)?;
+    let host = Host::try_new_with_multi_provider(&mut test_multi_provider, config)?;
     let raw_return_value = host.run(call)?.guest_output.evm_call_result;
     let return_value = C::abi_decode_returns(&raw_return_value, false)?;
     Ok(return_value)
