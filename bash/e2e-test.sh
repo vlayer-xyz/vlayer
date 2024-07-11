@@ -49,7 +49,7 @@ wait_for_port 8545 30s "Anvil"
 
 echo "Starting Vlayer REST server"
 cd "$VLAYER_HOME/rust"
-RISC0_DEV_MODE=1 RUST_LOG=info cargo run --bin vlayer serve >"${LOGS_DIR}/vlayer_serve.out" 2>"${LOGS_DIR}/vlayer_serve.err" &
+RISC0_DEV_MODE=false RUST_LOG=info cargo run --bin vlayer serve >"${LOGS_DIR}/vlayer_serve.out" 2>"${LOGS_DIR}/vlayer_serve.err" &
 VLAYER_SERVER_PID=$!
 echo "Vlayer server started with PID $VLAYER_SERVER_PID."
 wait_for_port 3000 20m "Vlayer server"

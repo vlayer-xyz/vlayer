@@ -9,7 +9,9 @@ use alloy_primitives::{ChainId, Sealable};
 use ethers_providers::Provider as OGEthersProvider;
 use ethers_providers::{Http, ProviderError, RetryClient};
 use guest_wrapper::GUEST_ELF;
-use risc0_zkvm::{default_prover, ExecutorEnv};
+use risc0_ethereum_contracts::groth16::abi_encode;
+use risc0_zkp::verify::VerificationError;
+use risc0_zkvm::{default_prover, is_dev_mode, ExecutorEnv, ProverOpts};
 use std::rc::Rc;
 use thiserror::Error;
 use vlayer_engine::engine::{Engine, EngineError};
@@ -60,6 +62,12 @@ pub enum HostError {
 
     #[error("No rpc url for chain: {0}")]
     NoRpcUrl(ChainId),
+
+    #[error("Verification error: {0}")]
+    Verification(#[from] VerificationError),
+
+    #[error("Abi encode error: {0}")]
+    AbiEncode(String),
 }
 
 pub struct HostConfig {
@@ -116,7 +124,7 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
             into_multi_input(self.envs).map_err(|err| HostError::CreatingInput(err.to_string()))?;
         let env = Self::build_executor_env(self.start_execution_location, multi_evm_input, call)?;
 
-        let raw_guest_output = Self::prove(env, GUEST_ELF)?;
+        let (seal, raw_guest_output) = Self::prove(env, GUEST_ELF)?;
         let guest_output = GuestOutput::from_outputs(&host_output, &raw_guest_output)?;
 
         if guest_output.evm_call_result != host_output {
@@ -128,16 +136,30 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
 
         Ok(HostOutput {
             guest_output,
+            seal,
             raw_abi: raw_guest_output,
         })
     }
 
-    pub(crate) fn prove(env: ExecutorEnv, guest_elf: &[u8]) -> Result<Vec<u8>, HostError> {
+    pub(crate) fn prove(
+        env: ExecutorEnv,
+        guest_elf: &[u8],
+    ) -> Result<(Vec<u8>, Vec<u8>), HostError> {
         let prover = default_prover();
-        prover
-            .prove(env, guest_elf)
-            .map(|p| p.receipt.journal.bytes)
-            .map_err(|err| HostError::Prover(err.to_string()))
+
+        let receipt = prover
+            .prove_with_opts(env, guest_elf, &ProverOpts::groth16())
+            .map_err(|err| HostError::Prover(err.to_string()))?
+            .receipt;
+
+        let seal = if is_dev_mode() {
+            Vec::new()
+        } else {
+            abi_encode(receipt.inner.groth16()?.seal.clone())
+                .map_err(|err| HostError::AbiEncode(err.to_string()))?
+        };
+
+        Ok((seal, receipt.journal.bytes))
     }
 
     fn build_executor_env(
