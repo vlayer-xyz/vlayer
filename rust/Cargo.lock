@@ -2197,6 +2197,7 @@ dependencies = [
  "alloy-primitives",
  "alloy-sol-types",
  "anyhow",
+ "auto_impl",
  "ctor",
  "ethereum-types",
  "ethers-core",
