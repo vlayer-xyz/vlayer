@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 /// @notice An ExecutionCommitment struct representing a block number and its block hash.
-struct ExecutionCommitment {    
+struct ExecutionCommitment {
     address startContractAddress;
     bytes4 functionSelector;
     uint256 settleBlockNumber; // Block number at which the commitment was made.
