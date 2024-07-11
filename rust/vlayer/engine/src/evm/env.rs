@@ -68,10 +68,6 @@ impl<D, H> MultiEvmEnv<D, H> {
 }
 
 impl<D, H: EvmBlockHeader> MultiEvmEnv<D, H> {
-    pub fn insert(&mut self, location: ExecutionLocation, env: EvmEnv<D, H>) {
-        self.0.insert(location, env);
-    }
-
     pub fn get_mut(
         &mut self,
         location: &ExecutionLocation,
