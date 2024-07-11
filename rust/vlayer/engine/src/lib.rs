@@ -4,7 +4,8 @@ pub mod consts;
 pub mod engine;
 pub mod ethereum;
 pub mod evm;
-pub mod execution_commitment;
+
+pub mod sol;
 pub mod inspector;
 pub mod io;
-pub use execution_commitment::ExecutionCommitment;
+pub use sol::execution_commitment::ExecutionCommitment;
