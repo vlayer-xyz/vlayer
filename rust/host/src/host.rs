@@ -93,8 +93,7 @@ impl HostConfig {
 impl Host<EthersProvider<EthersClient>> {
     pub fn try_new(config: HostConfig) -> Result<Self, HostError> {
         let chain_id = config.start_execution_location.chain_id;
-        let mut multi_provider = EthersMultiProvider::new(config.rpc_urls.clone());
-        let provider = multi_provider.get(chain_id)?;
+        let provider = EthersMultiProvider::new(config.rpc_urls.clone()).get(chain_id)?;
 
         Host::try_new_with_provider(provider, config)
     }
