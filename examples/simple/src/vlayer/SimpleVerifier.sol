@@ -5,7 +5,7 @@ import {IRiscZeroVerifier} from "risc0-ethereum/IRiscZeroVerifier.sol";
 import {Verifier} from "vlayer/Verifier.sol";
 import {ExecutionCommitment} from "vlayer/ExecutionCommitment.sol";
 
-import {SimpleProver} from "./vlayer/Simple.v.sol";
+import {SimpleProver} from "./SimpleProver.sol";
 
 contract Simple is Verifier {
     address public prover;
