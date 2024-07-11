@@ -39,6 +39,9 @@ jobs:
       - name: Run e2e test
         run: |
           bash/e2e-test.sh
+        env:
+          BONSAI_API_URL: ${{ vars.BONSAI_API_URL }}
+          BONSAI_API_KEY: ${{ secrets.BONSAI_API_KEY }}
 
       # Teardown
       - name: Display Logs

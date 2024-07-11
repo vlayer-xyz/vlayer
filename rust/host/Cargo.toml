@@ -4,6 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+risc0-ethereum-contracts = { path="../../contracts/lib/risc0-ethereum/contracts"}
+risc0-zkp = { workspace = true }
 risc0-zkvm = { workspace = true }
 vlayer-engine = { path = "../vlayer/engine" }
 guest_wrapper = { path = "../guest_wrapper" }

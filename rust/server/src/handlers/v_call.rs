@@ -22,7 +22,7 @@ pub(crate) async fn call(
 
     Ok(CallResult {
         result: format!(
-            "start_contract_address: {}, function_selector: {}, evm_call_result: {:?}",
+            "start_contract_address: {}, function_selector: {}, evm_call_result: {:?}, seal: {:?}",
             return_data
                 .guest_output
                 .execution_commitment
@@ -31,7 +31,8 @@ pub(crate) async fn call(
                 .guest_output
                 .execution_commitment
                 .functionSelector,
-            return_data.guest_output.evm_call_result
+            return_data.guest_output.evm_call_result,
+            return_data.seal
         ),
     })
 }

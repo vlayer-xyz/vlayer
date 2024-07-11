@@ -72,5 +72,6 @@ impl GuestOutput {
 
 pub struct HostOutput {
     pub raw_abi: Vec<u8>,
+    pub seal: Vec<u8>,
     pub guest_output: GuestOutput,
 }
