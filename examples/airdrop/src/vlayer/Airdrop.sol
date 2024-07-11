@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import { Verifier } from "@vlayer/Verifier.sol";
-import { NftOwnership } from "./vlayer/NftOwnership.v.sol";
+import { Verifier } from "vlayer/Verifier.sol";
+import { NftOwnership } from "./NftOwnership.sol";
 
 address constant NFT_OWNERSHIP_VLAYER_CONTRACT = 0x1744aC92e0Ff310Ff836bB68d56D4159E37D0BdF;
 bytes4 constant FUNCTION_SELECTOR = NftOwnership.main.selector;
