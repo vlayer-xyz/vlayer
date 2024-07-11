@@ -1,17 +1,12 @@
-name: Test
+name: Cache test
 
 on:
   push:
-    paths:
-      - "rust/**"
-      - "examples/**"
-      - ".github/workflows/**"
     branches:
-      - "**"
-  merge_group:
+      - '**'
 
 jobs:
-  rust-test:
+  cargo-cache-tests:
     runs-on: ubuntu-latest
 
     steps:
@@ -33,30 +28,27 @@ jobs:
       - name: Install risc0 toolchain
         run: cargo risczero install
 
+
+
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: nightly-5ac78a9cd4b94dc53d1fe5e0f42372b28b5a7559 # 2024-06-02
 
-      - name: Start Anvil
-        run: |
-          anvil &
-          ANVIL_SERVER_PID=$!
-          echo "ANVIL_SERVER_PID=$ANVIL_SERVER_PID" >> $GITHUB_ENV
-
-      - name: Deploy simple example contract
-        working-directory: examples/simple
-        run: |
-          ../../bash/vlayer-deploy.sh
-
-      - name: Run workspace rust tests
+      - name: Install vlayer
         working-directory: rust
         run: |
-          cargo test --workspace --locked
-        env:
-          RUST_LOG: info
-          RISC0_DEV_MODE: 1
+          cargo build --bin vlayer --release
 
-      - name: Stop Anvil
-        if: always()
-        run: kill $ANVIL_SERVER_PID
+      - name: Copy vlayer to bin
+        run: |
+          cp ./rust/target/release/vlayer /usr/local/bin
+
+    #   - name: Install vlayer
+    #     working-directory: rust
+    #     run: |
+    #       cargo install --path ./cli --locked
+
+      - name: Run vlayer init tests
+        run: |
+          ./bash/vlayer-init-test.sh
