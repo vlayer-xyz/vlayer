@@ -1,13 +1,13 @@
 name: Local prover
-on:
-  push:
-    paths:
-      - 'rust/**'
-      - 'examples/**'
-      - '.github/workflows/**'
-    branches:
-      - '**' 
-  merge_group:
+# on:
+#   push:
+#     paths:
+#       - 'rust/**'
+#       - 'examples/**'
+#       - '.github/workflows/**'
+#     branches:
+#       - '**' 
+#   merge_group:
 
 jobs:
   rust-prove:
