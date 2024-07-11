@@ -6,8 +6,8 @@ import {console2} from "forge-std/console2.sol";
 
 import {IRiscZeroVerifier} from "risc0-ethereum/IRiscZeroVerifier.sol";
 
-import {Simple} from "../src/Simple.sol";
-import {SimpleProver} from "../src/vlayer/Simple.v.sol";
+import {Simple} from "../src/vlayer/SimpleVerifier.sol";
+import {SimpleProver} from "../src/vlayer/SimpleProver.sol";
 
 contract SimpleScript is Script {
     function setUp() public {}
