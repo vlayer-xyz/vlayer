@@ -7,7 +7,6 @@ use revm::{
     primitives::{AccountInfo, Bytecode, HashMap, HashSet},
     Database,
 };
-use std::rc::Rc;
 
 /// A revm [Database] backed by a [Provider] that caches all queries needed for a state proof.
 pub struct ProofDb<P> {
@@ -52,7 +51,7 @@ impl<P: Provider> Database for ProofDb<P> {
 }
 
 impl<P: Provider> ProofDb<P> {
-    pub fn new(provider: Rc<P>, block_number: u64) -> Self {
+    pub fn new(provider: P, block_number: u64) -> Self {
         Self {
             accounts: HashMap::new(),
             contracts: HashMap::new(),

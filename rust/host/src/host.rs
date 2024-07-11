@@ -90,7 +90,7 @@ impl HostConfig {
     }
 }
 
-impl Host<EthersProvider<EthersClient>> {
+impl Host<Rc<EthersProvider<EthersClient>>> {
     pub fn try_new(config: HostConfig) -> Result<Self, HostError> {
         let chain_id = config.start_execution_location.chain_id;
         let provider = EthersMultiProvider::new(config.rpc_urls.clone()).get(chain_id)?;
@@ -99,17 +99,26 @@ impl Host<EthersProvider<EthersClient>> {
     }
 }
 
-impl<P: Provider<Header = EthBlockHeader>> Host<P> {
-    pub fn try_new_with_provider(provider: Rc<P>, config: HostConfig) -> Result<Self, HostError> {
-        let start_block_number = config.start_execution_location.block_number;
-        let header = provider
-            .get_block_header(start_block_number)
-            .map_err(|err| HostError::Provider(err.to_string()))?
-            .ok_or(HostError::BlockNotFound(start_block_number))?;
+fn create_vm<P: Provider>(
+    provider: P,
+    location: ExecutionLocation,
+) -> Result<EvmEnv<ProofDb<P>, P::Header>, HostError> {
+    let start_block_number = location.block_number;
+    let header = provider
+        .get_block_header(start_block_number)
+        .map_err(|err| HostError::Provider(err.to_string()))?
+        .ok_or(HostError::BlockNotFound(start_block_number))?;
 
-        let db = ProofDb::new(provider, start_block_number);
-        let chain_spec = config.start_execution_location.chain_id.try_into()?;
-        let env = EvmEnv::new(db, header.seal_slow()).with_chain_spec(&chain_spec)?;
+    let db = ProofDb::new(provider, start_block_number);
+    let chain_spec = location.chain_id.try_into()?;
+
+    let env = EvmEnv::new(db, header.seal_slow()).with_chain_spec(&chain_spec)?;
+    Ok(env)
+}
+
+impl<P: Provider<Header = EthBlockHeader>> Host<P> {
+    pub fn try_new_with_provider(provider: P, config: HostConfig) -> Result<Self, HostError> {
+        let env = create_vm(provider, config.start_execution_location)?;
         let envs = MultiEvmEnv::from_single(env, config.start_execution_location);
 
         Ok(Host {
