@@ -2199,6 +2199,7 @@ dependencies = [
  "anyhow",
  "auto_impl",
  "ctor",
+ "derive_more",
  "ethereum-types",
  "ethers-core",
  "ethers-providers",
