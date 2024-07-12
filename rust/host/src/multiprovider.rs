@@ -7,12 +7,13 @@ use std::path::PathBuf;
 use std::rc::Rc;
 use vlayer_engine::ethereum::EthBlockHeader;
 
-pub trait MultiProvider<P: Provider>
+pub trait MultiProvider
 where
-    Self: AsMut<HashMap<ChainId, Rc<P>>>,
+    Self: AsMut<HashMap<ChainId, Rc<Self::Provider>>>,
 {
-    fn create_provider(&mut self, chain_id: ChainId) -> Result<Rc<P>, HostError>;
-    fn get(&mut self, chain_id: ChainId) -> Result<Rc<P>, HostError> {
+    type Provider: Provider;
+    fn create_provider(&mut self, chain_id: ChainId) -> Result<Rc<Self::Provider>, HostError>;
+    fn get(&mut self, chain_id: ChainId) -> Result<Rc<Self::Provider>, HostError> {
         if let Some(provider) = self.as_mut().get(&chain_id) {
             return Ok(Rc::clone(provider));
         }
@@ -43,11 +44,9 @@ impl EthersMultiProvider {
     }
 }
 
-impl MultiProvider<EthersProvider<EthersClient>> for EthersMultiProvider {
-    fn create_provider(
-        &mut self,
-        chain_id: ChainId,
-    ) -> Result<Rc<EthersProvider<EthersClient>>, HostError> {
+impl MultiProvider for EthersMultiProvider {
+    type Provider = EthersProvider<EthersClient>;
+    fn create_provider(&mut self, chain_id: ChainId) -> Result<Rc<Self::Provider>, HostError> {
         let url = self
             .rpc_urls
             .get(&chain_id)
@@ -75,8 +74,9 @@ impl FileMultiProvider {
     }
 }
 
-impl MultiProvider<EthFileProvider> for FileMultiProvider {
-    fn create_provider(&mut self, chain_id: ChainId) -> Result<Rc<EthFileProvider>, HostError> {
+impl MultiProvider for FileMultiProvider {
+    type Provider = EthFileProvider;
+    fn create_provider(&mut self, chain_id: ChainId) -> Result<Rc<Self::Provider>, HostError> {
         let file_path = self
             .rpc_file_cache
             .get(&chain_id)

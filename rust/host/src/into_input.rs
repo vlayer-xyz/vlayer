@@ -5,13 +5,17 @@ use crate::multiprovider::MultiProvider;
 use crate::{db::proof::ProofDb, provider::Provider};
 use alloy_primitives::Sealed;
 use anyhow::{ensure, Ok};
+use vlayer_engine::ethereum::EthBlockHeader;
 use vlayer_engine::evm::block_header::EvmBlockHeader;
 use vlayer_engine::evm::input::{EvmInput, MultiEvmInput};
 
-pub fn into_input<P: Provider>(
+pub fn into_input<P>(
     db: &ProofDb<P>,
     header: Sealed<P::Header>,
-) -> anyhow::Result<EvmInput<P::Header>> {
+) -> anyhow::Result<EvmInput<P::Header>>
+where
+    P: Provider,
+{
     let (state_trie, storage_tries) = db.prepare_state_storage_tries()?;
     ensure!(
         header.state_root() == &state_trie.hash_slow(),
@@ -30,9 +34,13 @@ pub fn into_input<P: Provider>(
     Ok(evm_input)
 }
 
-pub fn into_multi_input<P: Provider, M: MultiProvider<P>>(
+pub fn into_multi_input<P, M>(
     envs: HostMultiEvmEnv<P, M>,
-) -> anyhow::Result<MultiEvmInput<P::Header>> {
+) -> anyhow::Result<MultiEvmInput<P::Header>>
+where
+    P: Provider<Header = EthBlockHeader>,
+    M: MultiProvider<Provider = P>,
+{
     let mut inner = HashMap::new();
     for (location, env) in envs.envs.into_iter() {
         let header = env.header;

@@ -4,6 +4,7 @@ use alloy_primitives::Sealable;
 use derive_more::{AsMut, IntoIterator};
 use vlayer_engine::{
     engine::EngineError,
+    ethereum::EthBlockHeader,
     evm::env::{EvmEnv, ExecutionLocation, InnerMultiEvmEnv, MultiEvmEnv},
 };
 
@@ -12,14 +13,22 @@ use crate::{
 };
 
 #[derive(AsMut, IntoIterator)]
-pub struct HostMultiEvmEnv<P: Provider, M> {
+pub struct HostMultiEvmEnv<P: Provider, M>
+where
+    P: Provider<Header = EthBlockHeader>,
+    M: MultiProvider<Provider = P>,
+{
     #[as_mut]
     #[into_iterator(owned)]
     pub envs: InnerMultiEvmEnv<ProofDb<Rc<P>>, P::Header>,
     multi_provider: M,
 }
 
-impl<P: Provider, M: MultiProvider<P>> HostMultiEvmEnv<P, M> {
+impl<P, M> HostMultiEvmEnv<P, M>
+where
+    P: Provider<Header = EthBlockHeader>,
+    M: MultiProvider<Provider = P>,
+{
     pub fn new(multi_provider: M) -> Self {
         Self {
             envs: HashMap::new(),
@@ -57,8 +66,10 @@ impl<P: Provider, M: MultiProvider<P>> HostMultiEvmEnv<P, M> {
     }
 }
 
-impl<P: Provider, M: MultiProvider<P>> MultiEvmEnv<ProofDb<Rc<P>>, P::Header>
-    for HostMultiEvmEnv<P, M>
+impl<P, M> MultiEvmEnv<ProofDb<Rc<P>>, P::Header> for HostMultiEvmEnv<P, M>
+where
+    P: Provider<Header = EthBlockHeader>,
+    M: MultiProvider<Provider = P>,
 {
     fn get_mut(
         &mut self,

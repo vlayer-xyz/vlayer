@@ -2,7 +2,7 @@ use crate::evm_env::HostMultiEvmEnv;
 use crate::into_input::into_multi_input;
 use crate::multiprovider::{EthersMultiProvider, MultiProvider};
 use crate::provider::EthersProviderError;
-use crate::provider::{EthersProvider, Provider};
+use crate::provider::Provider;
 use std::collections::HashMap;
 
 use alloy_primitives::ChainId;
@@ -22,9 +22,12 @@ use vlayer_engine::io::{Call, GuestOutput, HostOutput, Input};
 
 pub type EthersClient = OGEthersProvider<RetryClient<Http>>;
 
-pub struct Host<P: Provider<Header = EthBlockHeader>, M: MultiProvider<P>> {
+pub struct Host<M: MultiProvider>
+where
+    M::Provider: Provider<Header = EthBlockHeader>,
+{
     start_execution_location: ExecutionLocation,
-    envs: HostMultiEvmEnv<P, M>,
+    envs: HostMultiEvmEnv<M::Provider, M>,
 }
 
 #[derive(Error, Debug)]
@@ -89,7 +92,7 @@ impl HostConfig {
     }
 }
 
-impl Host<EthersProvider<EthersClient>, EthersMultiProvider> {
+impl Host<EthersMultiProvider> {
     pub fn try_new(config: HostConfig) -> Result<Self, HostError> {
         let multi_provider = EthersMultiProvider::new(config.rpc_urls.clone());
 
@@ -97,7 +100,11 @@ impl Host<EthersProvider<EthersClient>, EthersMultiProvider> {
     }
 }
 
-impl<P: Provider<Header = EthBlockHeader>, M: MultiProvider<P>> Host<P, M> {
+impl<M> Host<M>
+where
+    M: MultiProvider,
+    M::Provider: Provider<Header = EthBlockHeader>,
+{
     pub fn try_new_with_multi_provider(
         multi_provider: M,
         config: HostConfig,
