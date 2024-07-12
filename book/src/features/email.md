@@ -6,7 +6,11 @@ Many online services, from social media platforms to e-commerce sites, require a
 All of this means that our inboxes are full of data that can be leveraged.
 
 ## Proof of Email
-With vlayer, you can access email data from smart contracts and use it on-chain. Email authenticity is automatically proven under the hood. In addition, you can settle claims on-chain without exposing the details or private content of an email.
+With vlayer, you can access email content from smart contracts and use it on-chain. 
+
+You do this by writing a Solidity smart contract (prover) that has access to the parsed email and returns data to be used on-chain. This allows you to create claims without exposing the full content of an email.
+
+Under the hood, we verify mail server signatures to ensure the authenticity and integrity of the content.
 
 ## Example
 Let's say someone wants to prove they've been a GitHub user since 2020. One way to do this is to take a screenshot and send it to the verifier. However, this is not very reliable because screenshot images can be easily manipulated, and obviously such an image cannot be verified on-chain. 
@@ -29,9 +33,9 @@ contract GitHubEmail is Prover {
     }
 }
 ```
-The `email` structure is automatically injected into the contract context of the email prover by the vlayer. Then we have a series of assertions (regular Solidity `require()`) that check the email details. 
+The `email` structure is automatically injected into the contract context of the email prover by the vlayer. Then we have a series of assertions (*regular Solidity `require()`*) that check the email details. 
 
-String comparison is handled by our `StringUtils` library (described in more [details below](/features/email.html#stringutils)). Date values are formatted in the [Unix time](https://en.wikipedia.org/wiki/Unix_time) notation, which allows them to be compared as integers.
+String comparison is handled by our `StringUtils` library (*described in more [details below](/features/email.html#stringutils)*). Date values are formatted in the [Unix time](https://en.wikipedia.org/wiki/Unix_time) notation, which allows them to be compared as integers.
 
 > If one of the string comparisons fails, require will revert the execution, and as a result, proof generation will fail.
 
@@ -50,24 +54,24 @@ struct Email {
 A `Email` consists of the following fields
 - `subject` - a string with the subject of the email
 - `body` - a string consisting of the entire body of the email
-- `from` - a string consisting of the sender's email address (no name is available) 
-- `to` - an array of strings containing the list of emails of the intended recipients (no names available)
+- `from` - a string consisting of the sender's email address (*no name is available*) 
+- `to` - an array of strings containing the list of emails of the intended recipients (*no names available*)
 - `received_at` - `uint` representing a timestamp of when the email arrived at the destination email server.
 
 By inspecting and parsing the email payload elements, we can generate a claim to be used on-chain.
 
 ## StringUtils
-For convenient manipulation of strings, vlayer provides StringUtils library, which consists of functions like:
+For convenient manipulation of strings, vlayer provides `StringUtils` library, which consists of functions like:
 * `toAddress` - converts a string to an address if properly formatted, reverts otherwise
 * `match` - matches RegExp pattern groups and returns them as a string
 * `equal` - checks the contents of two strings for equality. Returns true if both are equal, false otherwise.
 
 ## Wallet Recovery Example
-Below is another example of a `Prover` smart contract parsing an email. However, this time the use case is a bit more advanced and allows the caller to recover access to a MultiSig wallet (a smart contract that allows multiple wallets to authorize transactions).  
+Below is another example of a `Prover` smart contract parsing an email. This time, however, the use case is a bit more advanced. It allows the caller to recover access to a MultiSig wallet (*a smart contract that allows multiple wallets to authorize transactions*).  
 
-The following implementation assumes that the recovery email is in a predefined format and it extracts data required to recover access to a MultiSig wallet. 
+The following implementation assumes that the recovery email is in a predefined format. It extracts the data needed to restore access to a MultiSig wallet. 
 
-To change the authorized account (recovery procedure), the user just needs to send the email in the following format: 
+To change the authorized account (*recovery procedure*), the user simply needs to send the email in the following format: 
 
 ```
 Date: 02 Jul 24 14:52:18+0300 GMT
@@ -82,40 +86,58 @@ Now, we you can access the email from the `Prover` contract:
 contract RecoveryEmail is Prover {
     using StringUtils for string;
 
-    function main(address multisigAddr) public returns (string, string, address) {      
-      string[] subjectMatches = email.subject.match(
+    function main(address multisigAddr) public returns (address, string, address, uint) {      
+      address lostWallet = parseSubject(email.subject);
+      address newAddress = parseBody(email.body);
+      string memory emailHash = getEmailHash(email.sender, multisigAddr, lostWallet);
+      
+      return (lostWallet, emailHash, newAddress, email.received_at); 
+    }
+
+    function parseSubject(string calldata subject) internal returns (address) {
+      string[] subjectMatches = subject.match(
         "^Wallet recovery of (0x[a-fA-F0-9]{40})$"
       );
       require(subjectMatches.length == 1, "Invalid subject");
 
-      address lostWallet = subjectMatches[0].toAddress();
-      string emailHash = keccak256(abi.encodePacked(email.sender);
-      MultiSigWallet wallet = MultiSigWallet(multisigAddr);
-      string recoveryMailHash = wallet.recoveryEmail(lostWallet);
+      return subjectMatches[0].toAddress();
+    }
 
-      require(
-        recoveryMailHash.equal(emailHash),
-        "wrong recovery email"
-      )
-
-      string[] bodyMatches = email.body.match(
+    function parseBody(string calldata body) internal returns (address) {
+      string[] bodyMatches = body.match(
         "^New wallet address: (0x[a-fA-F0-9]{40})$"
       );
       require(bodyMatches.length == 1, "Invalid body");
-      address newAddress = newbodyMatches[0].toAddress();
       
-      return (lostWallet, emailHash, newAddress, email.received_at); 
+      return newbodyMatches[0].toAddress();
+    }    
+
+    function getEmailHash(string calldata email, address multisig, address owner) 
+      internal 
+      returns (string) 
+    {
+      MultiSigWallet wallet = MultiSigWallet(multisig);
+
+      string memory recoveryMailHash = wallet.recoveryEmail(owner);
+      string memory emailHash = keccak256(abi.encodePacked(email);
+
+      require(recoveryMailHash.equal(emailHash), "wrong recovery email")
+
+      return emailHash;
     }
 }
 ```
 
 What happens step by step in the above snippet? 
 * `RecoveryEmail` inherits from `Prover` to obtain super powers of off-chain proving. 
-* `main()` function takes `multisigAddr` argument to access Multisig Wallet smart contract data. 
-* `email.subject.match` returns strings matching the regular expression for the subject, which must contain the correct wallet address to be recovered.
-* The `subjectMatches.length == 1` condition ensures that the subject is not malformed.
-* `recoveryMailHash.equal(emailHash)` check if correct email was used for recovery 
-* `email.body.match` retrieves new wallet address from the email body
+* `main` function takes `multisigAddr` argument to access Multisig Wallet smart contract data. 
+* `parseSubject` parses email subject and returns address of lost wallet
+  * `email.subject.match` returns strings matching the regular expression for the subject, which must contain the correct wallet address to be recovered.
+  * The `subjectMatches.length == 1` condition ensures that the subject is not malformed.
+* `parseBody` extracts new owner address 
+  * `email.body.match` retrieves new wallet address from the email body
+* `getEmailHash` compares the email associated with the wallet with the one received.
+  * `recoveryMailHash.equal(emailHash)` check if correct email was used for recovery 
 
 On successful execution, proof of computation is returned. It also returns the recovered wallet address, the email address hash, the new wallet address, and the email timestamp as public input.
 
