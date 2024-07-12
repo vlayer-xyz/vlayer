@@ -6,7 +6,7 @@ Many online services, from social media platforms to e-commerce sites, require a
 All of this means that our inboxes are full of data that can be leveraged.
 
 ## Proof of Email
-With vlayer, you can access email data from smart contracts and use it on-chain. Email authenticity is automatically proven under the hood. When we say an email is authentic, we mean that it was actually sent from a particular mail server and that its content hasn't been tampered with. 
+With vlayer, you can access email data from smart contracts and use it on-chain. Under the hood, we verify mail server signatures to ensure authenticity and integrity of the content.
 
 In addition, you can resolve claims on-chain without exposing the details or private content of an email.
 
