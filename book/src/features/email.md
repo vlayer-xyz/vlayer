@@ -6,9 +6,11 @@ Many online services, from social media platforms to e-commerce sites, require a
 All of this means that our inboxes are full of data that can be leveraged.
 
 ## Proof of Email
-With vlayer, you can access email data from smart contracts and use it on-chain. Under the hood, we verify mail server signatures to ensure authenticity and integrity of the content.
+With vlayer, you can access email content from smart contracts and use it on-chain. 
 
-In addition, you can resolve claims on-chain without exposing the details or private content of an email.
+You do this by writing a Solidity smart contract (prover) that has access to the parsed email and returns data to be used on-chain. This allows you to create claims without exposing the full content of an email.
+
+Under the hood, we verify mail server signatures to ensure the authenticity and integrity of the content.
 
 ## Example
 Let's say someone wants to prove they've been a GitHub user since 2020. One way to do this is to take a screenshot and send it to the verifier. However, this is not very reliable because screenshot images can be easily manipulated, and obviously such an image cannot be verified on-chain. 
