@@ -1,7 +1,10 @@
-use crate::db::{state::StateDb, wrap_state::WrapStateDb};
+use crate::{
+    db::{state::StateDb, wrap_state::WrapStateDb},
+    evm_env::GuestMultiEvmEnv,
+};
 use vlayer_engine::evm::{
     block_header::EvmBlockHeader,
-    env::{EvmEnv, MultiEvmEnv},
+    env::EvmEnv,
     input::{EvmInput, MultiEvmInput},
 };
 
@@ -45,7 +48,9 @@ impl<H: EvmBlockHeader + Clone> From<MultiEvmInput<H>> for ValidatedMultiEvmInpu
     }
 }
 
-impl<H: EvmBlockHeader + Clone> From<ValidatedMultiEvmInput<H>> for MultiEvmEnv<WrapStateDb, H> {
+impl<H: EvmBlockHeader + Clone> From<ValidatedMultiEvmInput<H>>
+    for GuestMultiEvmEnv<WrapStateDb, H>
+{
     fn from(input: ValidatedMultiEvmInput<H>) -> Self {
         let envs = input
             .0
@@ -53,6 +58,6 @@ impl<H: EvmBlockHeader + Clone> From<ValidatedMultiEvmInput<H>> for MultiEvmEnv<
             .into_iter()
             .map(|(location, input)| (location, EvmEnv::from(ValidatedEvmInput(input))))
             .collect();
-        MultiEvmEnv(envs)
+        GuestMultiEvmEnv(envs)
     }
 }

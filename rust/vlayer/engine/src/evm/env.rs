@@ -1,9 +1,8 @@
+use crate::{chain::spec::ChainSpec, engine::EngineError};
 use alloy_primitives::{BlockNumber, ChainId, Sealed};
 use revm::primitives::{CfgEnvWithHandlerCfg, SpecId};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
-
-use crate::{chain::spec::ChainSpec, engine::EngineError};
 
 use super::block_header::EvmBlockHeader;
 
@@ -28,12 +27,12 @@ impl<D, H: EvmBlockHeader> EvmEnv<D, H> {
     }
 
     /// Sets the chain ID and specification ID from the given chain spec.
-    pub fn with_chain_spec(mut self, chain_spec: &ChainSpec) -> Result<Self, EngineError> {
+    pub fn with_chain_spec(&mut self, chain_spec: &ChainSpec) -> Result<(), EngineError> {
         self.cfg_env.chain_id = chain_spec.chain_id();
         self.cfg_env.handler_cfg.spec_id = chain_spec
             .active_fork(self.header.number(), self.header.timestamp())
             .map_err(|err| EngineError::ChainSpecError(err.to_string()))?;
-        Ok(self)
+        Ok(())
     }
 
     /// Returns the header of the environment.
@@ -42,7 +41,7 @@ impl<D, H: EvmBlockHeader> EvmEnv<D, H> {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Default)]
 pub struct ExecutionLocation {
     pub block_number: BlockNumber,
     pub chain_id: ChainId,
@@ -57,33 +56,18 @@ impl ExecutionLocation {
     }
 }
 
-pub struct MultiEvmEnv<D, H>(pub HashMap<ExecutionLocation, EvmEnv<D, H>>);
+pub type InnerMultiEvmEnv<D, H> = HashMap<ExecutionLocation, EvmEnv<D, H>>;
 
-impl<D, H> MultiEvmEnv<D, H> {
-    pub fn from_single(env: EvmEnv<D, H>, location: ExecutionLocation) -> Self {
-        let mut envs = HashMap::new();
-        envs.insert(location, env);
-        Self(envs)
-    }
-}
+pub trait MultiEvmEnv<D, H>: Sized + AsMut<InnerMultiEvmEnv<D, H>>
+where
+    H: EvmBlockHeader,
+{
+    fn get_mut(&mut self, location: &ExecutionLocation) -> Result<&mut EvmEnv<D, H>, EngineError>;
 
-impl<D, H: EvmBlockHeader> MultiEvmEnv<D, H> {
-    pub fn get_mut(
-        &mut self,
-        location: &ExecutionLocation,
-    ) -> Result<&mut EvmEnv<D, H>, EngineError> {
-        self.0
-            .get_mut(location)
-            .ok_or(EngineError::EvmNotFound(*location))
-    }
-
-    pub fn with_chain_spec(self, chain_spec: &ChainSpec) -> Result<Self, EngineError> {
-        let envs = self
-            .0
-            .into_iter()
-            .map(|(location, env)| Ok((location, env.with_chain_spec(chain_spec)?)))
-            .collect::<Result<_, _>>()?;
-
-        Ok(Self(envs))
+    fn with_chain_spec(&mut self, chain_spec: &ChainSpec) -> Result<(), EngineError> {
+        for env in self.as_mut().values_mut() {
+            env.with_chain_spec(chain_spec)?;
+        }
+        Ok(())
     }
 }

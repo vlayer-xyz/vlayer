@@ -1,18 +1,15 @@
 #[cfg(test)]
 mod test {
 
-    use crate::host::{EthersClient, Host, HostConfig, HostError};
-    use crate::provider::EthersProvider;
+    use crate::host::{prove, HostError};
     use guest_wrapper::GUEST_ELF;
     use risc0_zkvm::ExecutorEnv;
-    use vlayer_engine::config::MAINNET_ID;
-    use vlayer_engine::evm::env::ExecutionLocation;
 
     #[test]
     fn host_prove_invalid_guest_elf() {
         let env = ExecutorEnv::default();
         let invalid_guest_elf = &[];
-        let res = Host::<EthersProvider<EthersClient>>::prove(env, invalid_guest_elf);
+        let res = prove(env, invalid_guest_elf);
 
         assert!(matches!(
             res.map(|_| ()).unwrap_err(),
@@ -23,24 +20,11 @@ mod test {
     #[test]
     fn host_prove_invalid_input() {
         let env = ExecutorEnv::default();
-        let res = Host::<EthersProvider<EthersClient>>::prove(env, GUEST_ELF);
+        let res = prove(env, GUEST_ELF);
 
         assert!(matches!(
             res.map(|_| ()).unwrap_err(),
             HostError::Prover(ref msg) if msg == "Guest panicked: called `Result::unwrap()` on an `Err` value: DeserializeUnexpectedEnd"
-        ));
-    }
-
-    #[test]
-    fn try_new_invalid_rpc_url() {
-        let execution_location = ExecutionLocation::new(0, MAINNET_ID);
-        let res = Host::try_new(HostConfig::new("http://localhost:123", execution_location));
-
-        assert!(matches!(
-            res.map(|_| ()).unwrap_err(),
-            HostError::Provider(ref msg) if msg.to_string().contains(
-                "(http://localhost:123/): error trying to connect: tcp connect error: Connection refused"
-            )
         ));
     }
 }

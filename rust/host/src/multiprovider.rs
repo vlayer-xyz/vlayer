@@ -11,6 +11,7 @@ pub trait MultiProvider<P: Provider>
 where
     Self: AsMut<HashMap<ChainId, Rc<P>>>,
 {
+    type Provider: Provider;
     fn create_provider(&mut self, chain_id: ChainId) -> Result<Rc<P>, HostError>;
     fn get(&mut self, chain_id: ChainId) -> Result<Rc<P>, HostError> {
         if let Some(provider) = self.as_mut().get(&chain_id) {
@@ -44,6 +45,7 @@ impl EthersMultiProvider {
 }
 
 impl MultiProvider<EthersProvider<EthersClient>> for EthersMultiProvider {
+    type Provider = EthersProvider<EthersClient>;
     fn create_provider(
         &mut self,
         chain_id: ChainId,
@@ -76,6 +78,7 @@ impl FileMultiProvider {
 }
 
 impl MultiProvider<EthFileProvider> for FileMultiProvider {
+    type Provider = EthFileProvider;
     fn create_provider(&mut self, chain_id: ChainId) -> Result<Rc<EthFileProvider>, HostError> {
         let file_path = self
             .rpc_file_cache
@@ -91,5 +94,30 @@ impl MultiProvider<EthFileProvider> for FileMultiProvider {
         })?;
 
         Ok(Rc::new(provider))
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use vlayer_engine::config::MAINNET_ID;
+
+    use crate::multiprovider::{EthersMultiProvider, MultiProvider};
+
+    #[test]
+    fn try_new_invalid_rpc_url() -> anyhow::Result<()> {
+        let chain_id = MAINNET_ID;
+        let rpc_urls = [(chain_id, "http://localhost:123".to_string())]
+            .into_iter()
+            .collect();
+        let mut multi_provider = EthersMultiProvider::new(rpc_urls);
+        let provider = multi_provider.get(chain_id)?;
+        let res = provider.get_block_number();
+        let error = res.unwrap_err();
+
+        assert!(error.to_string().contains(
+            "(http://localhost:123/): error trying to connect: tcp connect error: Connection refused"
+        ));
+
+        Ok(())
     }
 }

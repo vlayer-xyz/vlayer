@@ -1,4 +1,5 @@
 pub mod db;
+pub mod evm_env;
 pub mod host;
 pub mod into_input;
 pub mod multiprovider;
