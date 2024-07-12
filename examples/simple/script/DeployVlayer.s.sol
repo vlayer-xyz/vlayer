@@ -4,8 +4,6 @@ pragma solidity ^0.8.13;
 import {Script} from "forge-std/Script.sol";
 import {console2} from "forge-std/console2.sol";
 
-import {IRiscZeroVerifier} from "risc0-ethereum/IRiscZeroVerifier.sol";
-
 import {SimpleProver} from "../src/vlayer/SimpleProver.sol";
 
 contract SimpleScript is Script {

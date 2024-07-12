@@ -1,6 +1,15 @@
 #!/usr/bin/env bash
 set -ueo pipefail
 
+# Setting up the deployable contracts.
+# When creating a new example, add example_name=("ContractName1" "ContractName2" ...) below,
+# where ContractName is the name of the contract you want to deploy.
+simple=("SimpleProver")
+simple_travel=("SimpleTravelProver")
+
+EXAMPLE=$1
+eval "DEPLOYABLE_CONTRACTS=\${${EXAMPLE}}"
+
 RPC_URL=${RPC_URL:-http://127.0.0.1:8545}
 
 STABLE_DEPLOYER_PRIV="0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
@@ -10,8 +19,6 @@ ROOT_PATH=$(pwd)
 
 DEPLOY_CONTRACTS_BASE=${ROOT_PATH}/script
 DEPLOYMENT_SCRIPT=${DEPLOY_CONTRACTS_BASE}/DeployVlayer.s.sol
-
-DEPLOYABLE_CONTRACTS=("SimpleProver")
 
 function to_upper(){
   echo $1 | sed 's/\([^A-Z]\)\([A-Z0-9]\)/\1_\2/g' | tr '[:lower:]' '[:upper:]'

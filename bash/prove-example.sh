@@ -2,6 +2,12 @@
 
 set -ueo pipefail
 
+# Setting up the example contracts to be called  during e2e tests.
+# When creating a new example, add here the address name corresponding to 
+# the name of the contract in vlayer-deploy.sh that you want to call.
+simple="SIMPLE_PROVER_ADDRESS"
+simple_travel="SIMPLE_TRAVEL_PROVER_ADDRESS"
+
 cleanup() {
     echo "Cleaning up..."
     
@@ -140,16 +146,19 @@ VLAYER_SERVER_PID=$!
 echo "Vlayer server started with PID ${VLAYER_SERVER_PID}."
 wait_for_port 3000 20m "Vlayer server"
 
-echo "Deploying Simple and SimpleVerification smart contracts"
+echo "Deploying smart contracts"
 cd "${VLAYER_HOME}/examples/${EXAMPLE}"
-source ../../bash/vlayer-deploy.sh
+source ../../bash/vlayer-deploy.sh ${EXAMPLE}
+
+eval "EXAMPLE_ADDRESS_VAR=\${${EXAMPLE}}"
+eval "EXAMPLE_ADDRESS=\${${EXAMPLE_ADDRESS_VAR}}"
 
 echo "Sending v_call request to Vlayer REST server"
 v_call_request_json=$(cat <<EOF
 {
     "method": "v_call",
     "params": [
-        {"caller": "${CALLER}", "to": "${SIMPLE_PROVER_ADDRESS}", "data": "${DATA}"},
+        {"caller": "${CALLER}", "to": "${EXAMPLE_ADDRESS}", "data": "${DATA}"},
         {"block_no": ${BLOCK_NO}, "chain_id": 11155111}
     ],
     "id": 1,
