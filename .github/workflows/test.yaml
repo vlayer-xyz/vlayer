@@ -47,7 +47,7 @@ jobs:
       - name: Deploy simple example contract
         working-directory: examples/simple
         run: |
-          ../../bash/vlayer-deploy.sh
+          ../../bash/vlayer-deploy.sh simple
 
       - name: Run workspace rust tests
         working-directory: rust
