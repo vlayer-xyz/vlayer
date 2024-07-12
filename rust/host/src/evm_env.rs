@@ -12,6 +12,9 @@ use crate::{
     db::proof::ProofDb, host::HostError, multiprovider::MultiProvider, provider::Provider,
 };
 
+// This ugliness with P and M is temporary.
+// We need to constraint P to have a ETH Header type, but associated_type_bounds is not stable yet.
+// This will be fixed when we start using dyn for headers. Only M will be needed.
 #[derive(AsMut, IntoIterator)]
 pub struct HostMultiEvmEnv<P: Provider, M>
 where
@@ -20,7 +23,7 @@ where
 {
     #[as_mut]
     #[into_iterator(owned)]
-    pub envs: InnerMultiEvmEnv<ProofDb<Rc<P>>, P::Header>,
+    pub envs: InnerMultiEvmEnv<ProofDb<Rc<M::Provider>>, <M::Provider as Provider>::Header>,
     multi_provider: M,
 }
 
