@@ -11,7 +11,6 @@ pub trait MultiProvider<P: Provider>
 where
     Self: AsMut<HashMap<ChainId, Rc<P>>>,
 {
-    type Provider: Provider;
     fn create_provider(&mut self, chain_id: ChainId) -> Result<Rc<P>, HostError>;
     fn get(&mut self, chain_id: ChainId) -> Result<Rc<P>, HostError> {
         if let Some(provider) = self.as_mut().get(&chain_id) {
@@ -45,7 +44,6 @@ impl EthersMultiProvider {
 }
 
 impl MultiProvider<EthersProvider<EthersClient>> for EthersMultiProvider {
-    type Provider = EthersProvider<EthersClient>;
     fn create_provider(
         &mut self,
         chain_id: ChainId,
@@ -78,7 +76,6 @@ impl FileMultiProvider {
 }
 
 impl MultiProvider<EthFileProvider> for FileMultiProvider {
-    type Provider = EthFileProvider;
     fn create_provider(&mut self, chain_id: ChainId) -> Result<Rc<EthFileProvider>, HostError> {
         let file_path = self
             .rpc_file_cache
