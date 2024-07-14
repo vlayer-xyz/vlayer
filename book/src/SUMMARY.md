@@ -12,6 +12,9 @@
 - [Email](./features/email.md)
 - [Web](./features/web.md)
 
+# Advanced
+- [Proving](./advanced/proving.md)
+
 # Contributing
 - [vlayer](./contributing/vlayer.md)
 - [book](./contributing/book.md)
