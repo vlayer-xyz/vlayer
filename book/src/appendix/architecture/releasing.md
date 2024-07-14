@@ -1,8 +1,9 @@
-# Deployment and release
+# Deployment and Release
 
-Updating `Verifier` infrastructure is a bit tricky:
-- First, we need to deploy supporting contracts (i.e. Groth16 verifier)
-- Than, ensure `GUEST_ID` in `Verifier` is updated. Note: this is done automatically by compilation process
-- Then, modify address of main supporting contract variable in `Verifier`
-- Release new version of vlayer solidity contracts library
-- Release new version of vlayer node
+Updating the `Verifier` infrastructure can be a bit tricky:
+
+1. First, deploy the supporting contracts (e.g., Groth16 verifier).
+2. Then, ensure that the `GUEST_ID` in `Verifier` is updated. Note: this is done automatically by the compilation process.
+3. Next, modify the address of the main supporting contract variable in `Verifier`.
+4. After that, release a new version of the vlayer Solidity contracts library.
+5. Finally, release a new version of the vlayer node.

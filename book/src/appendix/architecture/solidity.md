@@ -86,14 +86,9 @@ Below is a schema of how block of data is encoded in different structures at dif
 
 > Thanks to clever slicing of data, there is no need for additional repackaging or recoding. The smart contracts, can be called with arguments, that can be easily manipulated, without extra deserialization process. JavaScript client which calls JSON-RPC API, have easy access to the variables as well.
 
-## Two proving modes
-To support two [proving modes](/advanced/proving.md), vlayer provides to set of smart contracts connected to Verifier contract, one for each mode:
-- `DEV` - automatically deployed with each `Prover` contract, but only on development and test networks. This mode will be used if the `ProofMode` decoded form `SEAL` is `FAKE`.
-- `PRODUCTION` - This will need infrastructure deployed ahead of time, that performs actual verification. This mode will be used if the `ProofMode` decoded form `SEAL` is `GROTH16`.
+## Two Proving Modes
 
-## Deployment of verification infrastructure
+To support two [proving modes](/advanced/proving.md), vlayer provides a set of smart contracts connected to the Verifier contract, one for each mode:
 
-Deployment of update `Verifier` infrastructure is a bit tricky:
-- First, we need to deploy supporting contracts
-- Than, update `GUEST_ID` in Verifier if needed (this is done automatically by compliation process)
-- Then, modify variable in `Verifier` and
+- `DEV` - Automatically deployed with each `Prover` contract, but only on development and test networks. This mode will be used if the `ProofMode` decoded from `SEAL` is `FAKE`.
+- `PRODUCTION` - This requires infrastructure deployed ahead of time that performs actual verification. This mode will be used if the `ProofMode` decoded from `SEAL` is `GROTH16`.
