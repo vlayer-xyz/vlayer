@@ -1,11 +1,13 @@
 import { next, rewrite } from '@vercel/edge';
+import { RequestCookies, ResponseCookies } from '@edge-runtime/cookies'
 
 const {
   NOTION_DATABASE_ID,
   NOTION_API_KEY,
   NOTION_API_VERSION,
   NOTION_API_URL,
-  RESEND_API_KEY
+  RESEND_API_KEY,
+  COOKIE_SALT
 } = process.env;
 
 const NOTION_API_HEADERS = {
@@ -120,7 +122,52 @@ const deliverEmailNotification = async (login) => {
   }
 }
 
+const hashString = async (str) => {
+  const encoder = new TextEncoder();
+  const data = encoder.encode(str);
+  const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+  const hashArray = Array.from(new Uint8Array(hashBuffer));
+  const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+  return hashHex;
+}
+
+const setAuthCookie = async (login) => {
+  const headers = new Headers()
+  const responseCookies = new ResponseCookies(headers)
+
+  const hash = await hashString(`${login}${COOKIE_SALT}`);
+
+  responseCookies.set('authenticated', `${login}.${hash}`, { 
+    httpOnly: true, 
+    maxAge: 60 * 60 * 24 * 30 
+  }) // make cookie persistent for 30 days
+
+  return  headers;
+}
+
+const isAuthCookieValid = async (headers) => {
+  try {
+    const cookies = new RequestCookies(headers)
+    if(!cookies.has('authenticated')) return false;
+    
+    const [login, cookieHash] = cookies.get('authenticated')?.value.split('.');
+    const validHash = await hashString(`${login}${COOKIE_SALT}`);
+  
+    return cookieHash === validHash;
+  } catch(err) {
+    console.error("Cookie validation error: ", err.message);
+    return false;
+  }
+
+}
+
 export default async function middleware(request) {
+  if(await isAuthCookieValid(request.headers)) {
+    console.log("Docs Auth path skipped: already authenticated")
+    return next();
+  }
+
+
   const url = new URL(request.url);
 
   const staticFilesRegex = /\.(js|css|png|jpg|woff|woff2|svg|json|gif|mp4|ico)$/i;
@@ -133,6 +180,8 @@ export default async function middleware(request) {
       },
     });
   }  
+
+
 
   try {
     const { login, password } = parseCreds(request.headers);
@@ -150,7 +199,12 @@ export default async function middleware(request) {
     
     console.log("Docs Auth Login successful: ", [url.toString(), login]);
 
-    return next();
+    const headers = await setAuthCookie(login);
+
+    return next({
+      headers
+    });
+  
   } catch (err) {
     console.log("Docs Auth Login issue: ", [url.toString(), err.message])
     url.pathname = '/api/auth';
