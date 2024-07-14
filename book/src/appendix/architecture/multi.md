@@ -1,55 +1,72 @@
 # Teleport and time-travel
 
-To support execution on multiple blocks and multiple chains, we span multiple revms' instances during Engine execution. This in turn, requires support for spawning many `Envs`, with many instances and various types of both `DB` and `Header`. `MultiEnv` is a struct, responsible for handling databases and headers. There are two variants of `MultiEnv`: `GuestMultiEnv` and `HostMultiEnv`, with following responsibilities:
+To support execution on multiple blocks and multiple chains, we span multiple revms' instances during Engine execution.
 
-- `HostMultiEnv` creates `Databases` and `Headers` dynamically, utilizing Providers created from `ProvidersConfig`, by fetching data from Ethereum Nodes. Then, it is serialized to be send to Guest.
-- `GuestMultiEnv` provides all required data, from a cached copy deserialized at the beginning of Guest execution.
+## Generic parameter DB
+Note that Engine is parametrized with generic type DB, as it needs to run in revm in with different Database in two different context: Guest and Host.
+
+```rust
+struct Engine<DB: Database> {
+  ...
+}
+```
+
+This parametrization will bubble to several related traits and structs: `EvmEnv`, `EnvFactory`, `HostEnvFactory`, `GuestEnvFactory`.
+
+## Env
+`Env` represents a configuration required to create a revm instance. Depending on the context it might be instantiated with `ProofDB` (Host) or `WrapStateDB` (Guest).
+
+It also parametrized via dynamic dispatch by Header type, which may differ for different hard forks or networks.
+
+See code snippet blow.
+
+```rust
+pub struct EvmEnv<D> {
+    pub db: D,
+    pub cfg_env: CfgEnvWithHandlerCfg,
+    pub header: Box<dyn Sealed<EvmBlockHeader> > ,
+}
+```
+
+## EvnEnvFactory
+
+`EnvFactory` is a type, responsible for handling creation of `EvmEnv`s and in consequence revm instances. There are two variants of `EnvFactory`:
+- `HostEnvFactory` creates `Databases` and `Headers` dynamically, utilizing Providers created from `MultiProvider`, by fetching data from Ethereum Nodes. Then, the data is serialized to be send to Guest.
+- `GuestEnvFactory` provides all required data, from a cached copy deserialized at the beginning of Guest execution.
 
 ```mermaid
 classDiagram
 
-class MultiEnv {
-  envs: HashMap[[ChainId, BlockNo], dyn Env]
-  new(multi_db, header, C)
-  createEvm(chainId, blockNo)
+class EnvFactory<DB> {
+  DB db;
+  create(ExecutionLocation)
 }
 
-class HostMultiEnv {
+class HostEnvFactory {
   providers: HashMap[chainId, Provider]
-  dbs: HashMap[chainId, ProofDb]
-  header: HashMap[[chainId, blockNo], WrapStateDb]  
-  new(ProvidersConfig)
+  new(MultiProvider)
 }
 
-class GuestMultiEnv {  
-  dbs: HashMap[chainId, WrapStateDb]
-  header: HashMap[[chainId, blockNo], WrapStateDb]
+class GuestEnvFactory {
+  envs: HashMap[[ChainId, BlockNo], dyn Env]
   from(MultiInput)
 }
 
-class ProvidersConfig {
-  urls: HashMap[ChainId, string]
-}
 
-class Env {
-  db: Database
+class Env<DB> {
+  db: DB
   config: Config
-  header: Header
+  header: dyn Header
 }
 
-MultiEnv <|-- GuestMultiEnv
-MultiEnv <|-- HostMultiEnv
-MultiEnv o-- Env
+class MultiProvider {
+  providers: HashMap[chainId, EthersProvider]
+}
 
+EnvFactory <|-- GuestEnvFactory
+EnvFactory <|-- HostEnvFactory
+GuestEnvFactory o-- Env
+HostEnvFactory <.. MultiProvider
 ```
 
-See diagram below for a sequence of events.
 
-```mermaid
-sequenceDiagram
-
-Host->>Engine: try_new(multiEvm).run()
-Host->>Guest: prove()
-Guest->>Engine: try_new(multiEvm).run()
-
-```
