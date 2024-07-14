@@ -7,7 +7,7 @@ On-chain verification is implemented by using a customized function with the fol
 - a list of arguments in the same order as returned by the `Prover` (public output)
 - optionally, user defined additional arguments
 
-The verification function should use the `onlyVerified()` modifier, which takes two arguments, the address of a smart contract and a selector of function that was executed in the `Prover` contract. 
+The verification function should use the `onlyVerified()` modifier, which takes two arguments, the address of a smart contract and a selector of function that was executed in the `Prover` contract.
 
 See example verification function below:
 
@@ -26,7 +26,7 @@ contract Example is Verifier {
 
 ## Data flow
 
-Proving data flow is composed of three steps. It starts at `Guest`, which returns `GuestOutput`. `GuestOutput` consist of two fields: `execution_commitment` and `evm_call_result`. 
+Proving data flow is composed of three steps. It starts at `Guest`, which returns `GuestOutput`. `GuestOutput` consist of two fields: `execution_commitment` and `evm_call_result`.
 
 See the code snippets below for pseudocode:
 
@@ -43,7 +43,6 @@ struct ExecutionCommitment {
     bytes4 functionSelector;
     uint256 settleBlockNumber;
     bytes32 settleBlockHash;
-}
 ```
 
 > Note that `ExecutionCommitment` structure is generated based on Solidity code from `Vlayer::Commitment`, with `sol!` macro.
@@ -61,12 +60,6 @@ struct Proof {
     bytes seal;
 
     ExecutionCommitment executionCommitment;
-    //uint256 startBlockNo; (future versions)
-    //uint256 startChainId (future versions)
-    // startContractAddress: Address;
-    // functionSelector: bytes4;
-    // uint256 settleBlockNumber;
-    // bytes32 settleBlockHash;
 }
 ```
 
@@ -80,11 +73,11 @@ function verify(bytes calldata seal, bytes32 imageId, bytes32 journalDigest)
 
 `length` represents the length of journal data, which is located in `msg.data`, starting at byte 0 of `executionCommitment` and ends with the last byte of the last verified argument.
 
-`onlyVerified` gets `seal` and `journalDigest` by slicing it out of `msg.data`. This is where `length` is used. 
+`onlyVerified` gets `seal` and `journalDigest` by slicing it out of `msg.data`. This is where `length` is used.
 
 `imageId` is fixed on blockchain and updated on each new version of vlayer.
 
-## Summary
+## Data encoding summary
 
 Below is a schema of how block of data is encoded in different structures at different stages.
 
@@ -92,3 +85,15 @@ Below is a schema of how block of data is encoded in different structures at dif
 
 
 > Thanks to clever slicing of data, there is no need for additional repackaging or recoding. The smart contracts, can be called with arguments, that can be easily manipulated, without extra deserialization process. JavaScript client which calls JSON-RPC API, have easy access to the variables as well.
+
+## Two proving modes
+To support two [proving modes](/advanced/proving.md), vlayer provides to set of smart contracts connected to Verifier contract, one for each mode:
+- `DEV` - automatically deployed with each `Prover` contract, but only on development and test networks. This mode will be used if the `ProofMode` decoded form `SEAL` is `FAKE`.
+- `PRODUCTION` - This will need infrastructure deployed ahead of time, that performs actual verification. This mode will be used if the `ProofMode` decoded form `SEAL` is `GROTH16`.
+
+## Deployment of verification infrastructure
+
+Deployment of update `Verifier` infrastructure is a bit tricky:
+- First, we need to deploy supporting contracts
+- Than, update `GUEST_ID` in Verifier if needed (this is done automatically by compliation process)
+- Then, modify variable in `Verifier` and

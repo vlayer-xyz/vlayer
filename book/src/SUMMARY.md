@@ -24,5 +24,6 @@
   - [Prover](./appendix/architecture/prover.md)
   - [Multichain](./appendix/architecture/multi.md)
   - [Solidity](./appendix/architecture/solidity.md)
+  - [Releasing](./appendix/architecture/releasing.md)
 - [JSON-RPC API](./appendix/api.md)
 
