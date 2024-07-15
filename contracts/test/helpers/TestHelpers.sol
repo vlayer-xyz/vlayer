@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {Seal, SealLib} from "../../src/Seal.sol";
+import {ProofMode, Seal, SealLib} from "../../src/Seal.sol";
 
 library TestHelpers {
     function encodeSeal(bytes calldata seal) public pure returns (Seal memory) {
@@ -17,9 +17,13 @@ library TestHelpers {
             rhv += uint8(seal[i + SealLib.SEAL_MIDDLE]);
         }
 
+        // set ProofMode to FAKE
+        rhv <<= 8;
+        rhv += uint8(ProofMode.FAKE);
+
         // shift value to most significant bytes
         lhv <<= 8 * (32 - SealLib.SEAL_MIDDLE);
-        rhv <<= 8 * (32 - SealLib.SEAL_MIDDLE);
+        rhv <<= 8 * (32 - SealLib.SEAL_MIDDLE - 1);
 
         return Seal(bytes18(bytes32(lhv)), bytes19(bytes32(rhv)));
     }
