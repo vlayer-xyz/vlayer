@@ -12,7 +12,7 @@ By default, it accepts HTTP requests on port `3000` in the format specified in t
 
 The vlayer node provides two proving modes:
 
-- `DEV` - Intended for development and testing only. It executes code and verifies the correctness of execution but doesn't perform actual proving. In this mode, the Verifier contract will check the correctness of computations, but it can be cheated by a malicious prover.
+- `DEV` - For development and testing only. It executes code and verifies the correctness of the execution, but doesn't perform any actual proving. In this mode, the `Verifier` contract verifies the correctness of computations, but it can be cheated by a malicious `Prover`.
 - `PRODUCTION` - Intended for production and final testing. It performs actual proving.
 
 > By default, the vlayer node operates in DEV mode.
