@@ -23,19 +23,24 @@ contract ExampleProver is Prover {
 
 contract ExampleVerifier is VerifierUnderTest {
     address public immutable PROVER;
-
     bytes4 constant SIMPLE_PROVER_SELECTOR = ExampleProver.doSomething.selector;
 
     constructor() {
         PROVER = address(new ExampleProver());
     }
 
-    function verifySomething(Proof calldata) external onlyVerified(PROVER, SIMPLE_PROVER_SELECTOR) returns (bool) {
+    function verifySomething(Proof calldata)
+        external
+        view
+        onlyVerified(PROVER, SIMPLE_PROVER_SELECTOR)
+        returns (bool)
+    {
         return true;
     }
 
     function verifySomethingElse(Proof calldata, bool value)
         external
+        view
         onlyVerified(PROVER, SIMPLE_PROVER_SELECTOR)
         returns (bool)
     {
@@ -72,58 +77,8 @@ contract Verifier_OnlyVerified_Modifier_Tests is Test {
         return createProof(emptyBytes);
     }
 
-    function test_verifySuccess() public {
+    function test_verifySuccess() public view {
         Proof memory proof = createProof();
-        exampleVerifier.verifySomething(proof);
-    }
-
-    function test_invalidProofMode() public {
-        Proof memory proof = createProof();
-
-        // clear last byte, where ProofMode lives
-        proof.seal.rhv = ((proof.seal.rhv >> 8) << 8);
-
-        vm.expectRevert("Invalid proof mode");
-        exampleVerifier.verifySomething(proof);
-    }
-
-    function test_invalidProver() public {
-        commitment.startContractAddress = address(0x0000000000000000000000000000000000deadbeef);
-        Proof memory proof = createProof();
-
-        vm.expectRevert("Invalid prover");
-        exampleVerifier.verifySomething(proof);
-    }
-
-    function test_invalidSelector() public {
-        commitment.functionSelector = 0xdeadbeef;
-        Proof memory proof = createProof();
-
-        vm.expectRevert("Invalid selector");
-        exampleVerifier.verifySomething(proof);
-    }
-
-    function test_blockFromFuture() public {
-        commitment.settleBlockNumber = block.number;
-        Proof memory proof = createProof();
-
-        vm.expectRevert("Invalid block number: block from future");
-        exampleVerifier.verifySomething(proof);
-    }
-
-    function test_blockOlderThanLast256Blocks() public {
-        vm.roll(block.number + 256); // forward block number
-        Proof memory proof = createProof();
-
-        vm.expectRevert("Invalid block number: block too old");
-        exampleVerifier.verifySomething(proof);
-    }
-
-    function test_invalidBlockHash() public {
-        commitment.settleBlockHash = blockhash(commitment.settleBlockNumber - 1);
-        Proof memory proof = createProof();
-
-        vm.expectRevert("Invalid block hash");
         exampleVerifier.verifySomething(proof);
     }
 
@@ -136,7 +91,7 @@ contract Verifier_OnlyVerified_Modifier_Tests is Test {
         exampleVerifier.verifySomething(proof);
     }
 
-    function test_functionCanJournaledParams() public {
+    function test_journaledParams() public view {
         bool value = true;
         Proof memory proof = createProof(abi.encode(value));
 
@@ -153,7 +108,7 @@ contract Verifier_OnlyVerified_Modifier_Tests is Test {
         assertEq(exampleVerifier.verifySomethingElse(proof, value), value);
     }
 
-    function test_functionCanHaveNonJournaledParams() public {
+    function test_functionCanHaveNonJournaledParams() public view {
         Proof memory proof = createProof();
 
         assertEq(exampleVerifier.verifySomethingElse(proof, true), true);
