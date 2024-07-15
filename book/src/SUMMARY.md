@@ -12,6 +12,9 @@
 - [Email](./features/email.md)
 - [Web](./features/web.md)
 
+# Advanced
+- [Proving](./advanced/proving.md)
+
 # Contributing
 - [vlayer](./contributing/vlayer.md)
 - [book](./contributing/book.md)
@@ -21,5 +24,6 @@
   - [Prover](./appendix/architecture/prover.md)
   - [Multichain](./appendix/architecture/multi.md)
   - [Solidity](./appendix/architecture/solidity.md)
+  - [Releasing](./appendix/architecture/releasing.md)
 - [JSON-RPC API](./appendix/api.md)
 
