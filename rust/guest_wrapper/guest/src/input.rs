@@ -19,7 +19,6 @@ impl<H: EvmBlockHeader + Clone> From<EvmInput<H>> for ValidatedEvmInput<H> {
 impl<H: EvmBlockHeader + Clone> From<ValidatedEvmInput<H>> for EvmEnv<WrapStateDb, H> {
     fn from(input: ValidatedEvmInput<H>) -> Self {
         let input = input.0;
-        let header = input.header.clone();
         let block_hashes = input.block_hashes();
         let db = WrapStateDb::new(StateDb::new(
             input.state_trie,
@@ -28,7 +27,7 @@ impl<H: EvmBlockHeader + Clone> From<ValidatedEvmInput<H>> for EvmEnv<WrapStateD
             block_hashes,
         ));
 
-        EvmEnv::new(db, header)
+        EvmEnv::new(db, input.header)
     }
 }
 
