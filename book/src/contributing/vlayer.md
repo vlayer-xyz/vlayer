@@ -10,10 +10,20 @@ To start working with this repository, you will need to install following softwa
 
 ## Building
 
-To build this project, navigate to the `rust` directory and type:
+To build vlayer project, first, navigate to the `rust` directory and type:
 
 ```sh
 cargo build
+```
+
+Before you build solidity smart contracts, make sure that dependencies are up to date:
+```sh
+git submodule update --init --recursive
+```
+
+Next, navigate to `contracts` and type:
+```sh
+forge build
 ```
 
 ## Running
@@ -39,3 +49,4 @@ RUST_LOG=info RISC0_DEV_MODE=1 cargo run
 ```
 
 For guides about the project structure, check out [architecture appendix](/appendix/architecture.md).
+
