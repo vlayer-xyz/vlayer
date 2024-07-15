@@ -1,6 +1,6 @@
 # Prover
 
-The vlayer node is an HTTP server that serves as a prover. You can run it with the following command:
+The vlayer node is an HTTP server that acts as a prover. You can start it with the following command:
 
 ```sh
 vlayer serve
