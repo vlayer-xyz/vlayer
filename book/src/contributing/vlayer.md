@@ -10,15 +10,20 @@ To start working with this repository, you will need to install following softwa
 
 ## Building
 
-Before you build rust, make sure that solidity dependencies are up to date:
+To build vlayer project, firs, navigate to the `rust` directory and type:
+
+```sh
+cargo build
+```
+
+Before you build solidity smart contracts, make sure that dependencies are up to date:
 ```sh
 git submodule update --init --recursive
 ```
 
-To build this project, navigate to the `rust` directory and type:
-
+Next, navigate to `contracts` and type:
 ```sh
-cargo build
+forge build
 ```
 
 ## Running
