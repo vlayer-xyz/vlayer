@@ -11,11 +11,11 @@ import {IProofVerifier} from "./IProofVerifier.sol";
 abstract contract ProofVerifierBase is IProofVerifier {
     using SealLib for Seal;
 
-    bytes32 public GUEST_ID = bytes32(0xb7079f57c71b4e1d95b8b1254303e13f78914599a8c119534c4c947c996b4d7d);
+    bytes32 public constant GUEST_ID = bytes32(0xb7079f57c71b4e1d95b8b1254303e13f78914599a8c119534c4c947c996b4d7d);
     uint256 constant AVAILABLE_HISTORICAL_BLOCKS = 256;
 
-    IRiscZeroVerifier public verifier;
     ProofMode public immutable proofMode;
+    IRiscZeroVerifier public immutable verifier;
 
     function verify(Proof calldata proof, bytes32 journalHash, address expectedProver, bytes4 expectedSelector)
         external
