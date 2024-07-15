@@ -4,7 +4,7 @@ pragma solidity ^0.8.13;
 import {IRiscZeroVerifier} from "risc0-ethereum/IRiscZeroVerifier.sol";
 
 import {Proof} from "../Proof.sol";
-import {SealLib, Seal} from "../Seal.sol";
+import {ProofMode, SealLib, Seal} from "../Seal.sol";
 
 import {IProofVerifier} from "./IProofVerifier.sol";
 
@@ -15,13 +15,19 @@ abstract contract ProofVerifierBase is IProofVerifier {
     uint256 constant AVAILABLE_HISTORICAL_BLOCKS = 256;
 
     IRiscZeroVerifier public verifier;
+    ProofMode public immutable proofMode;
 
     function verify(Proof calldata proof, bytes32 journalHash, address expectedProver, bytes4 expectedSelector)
         external
         view
     {
+        _verifyProofMode(proof);
         _verifyExecutionEnv(proof, expectedProver, expectedSelector);
         verifier.verify(proof.seal.decode(), GUEST_ID, journalHash);
+    }
+
+    function _verifyProofMode(Proof memory proof) private view {
+        require(proof.seal.proofMode() == proofMode, "Invalid proof mode");
     }
 
     function _verifyExecutionEnv(Proof memory proof, address prover, bytes4 selector) private view {

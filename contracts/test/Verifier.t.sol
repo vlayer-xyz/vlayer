@@ -77,6 +77,16 @@ contract Verifier_OnlyVerified_Modifier_Tests is Test {
         exampleVerifier.verifySomething(proof);
     }
 
+    function test_invalidProofMode() public {
+        Proof memory proof = createProof();
+
+        // clear last byte, where ProofMode lives
+        proof.seal.rhv = ((proof.seal.rhv >> 8) << 8);
+
+        vm.expectRevert("Invalid proof mode");
+        exampleVerifier.verifySomething(proof);
+    }
+
     function test_invalidProver() public {
         commitment.startContractAddress = address(0x0000000000000000000000000000000000deadbeef);
         Proof memory proof = createProof();
