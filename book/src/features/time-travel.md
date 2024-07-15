@@ -40,3 +40,13 @@ First, the call to the `setBlockNumber(15181682)` function sets the `Prover` con
 Second call to `setBlockNumber(20175401)` sets the `Prover` context to block numbered `20175401`. The next call to `require_usdt_balance` checks if the caller owned at least $100, but this time in block `20175401`. Having less than $100 will result in an error (no proof will be generated).
 
 The two `require_usdt_balance` calls return different results if the account balance has changed due to token transfers. 
+
+> 💡  **Try it Now**
+> 
+> To run the above example on your computer, type the following command in your terminal:
+> 
+> ```bash
+> vlayer init --template time_travel_example
+> ```
+> 
+> This command will download all necessary artifacts to your project.

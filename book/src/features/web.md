@@ -43,6 +43,16 @@ Finally, we can return public input:
 
 If there were no execution errors occured and proof was produced, we are ready for on-chain verification. 
 
+> 💡 **Try it Now**
+> 
+> To run the above example on your computer, type the following command in your terminal:
+> 
+> ```bash
+> vlayer init --template web_example
+> ```
+> 
+> This command will download all necessary artifacts to your project.
+
 ## Example Verifier
 
 Contract below is responsible for adding caller's wallet address to the list of DAO members. 
