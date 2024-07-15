@@ -28,8 +28,6 @@ jobs:
             runner: macos-latest
 
     steps:
-      # - uses: cargo-bins/cargo-binstall@main
-
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -53,9 +51,13 @@ jobs:
           cache-workspaces: rust
 
       - name: Install risc0 instaler
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: cargo binstall -y cargo-risczero --force
 
       - name: Install risc0 toolchain
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: cargo risczero install
 
       - name: "Build binaries"
