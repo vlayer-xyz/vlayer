@@ -10,7 +10,7 @@ To start working with this repository, you will need to install following softwa
 
 ## Building
 
-To build vlayer project, firs, navigate to the `rust` directory and type:
+To build vlayer project, first, navigate to the `rust` directory and type:
 
 ```sh
 cargo build
