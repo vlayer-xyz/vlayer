@@ -7,11 +7,13 @@ import {ControlID, RiscZeroGroth16Verifier} from "risc0-ethereum/groth16/RiscZer
 import {Proof} from "./Proof.sol";
 import {SealLib, Seal} from "./Seal.sol";
 
+import {IProofVerifier} from "./proof_verifier/IProofVerifier.sol";
 import {ProofVerifierBase} from "./proof_verifier/ProofVerifierBase.sol";
 
-contract VerifierBase is ProofVerifierBase {
-
+abstract contract VerifierBase {
     uint256 constant JOURNAL_OFFSET = 100;
+
+    IProofVerifier public verifier;
 
     modifier onlyVerified(address prover, bytes4 selector) {
         _verify(prover, selector);
@@ -20,10 +22,10 @@ contract VerifierBase is ProofVerifierBase {
 
     function _verify(address prover, bytes4 selector) internal view {
         (Proof memory proof, bytes32 journalHash) = _decodeCalldata();
-        this.verify(proof, journalHash, prover, selector);
+        verifier.verify(proof, journalHash, prover, selector);
     }
 
-    function _decodeCalldata() private pure returns (Proof memory, bytes32){
+    function _decodeCalldata() private pure returns (Proof memory, bytes32) {
         Proof memory proof = abi.decode(msg.data[4:], (Proof));
 
         uint256 journalEnd = JOURNAL_OFFSET + proof.length;
@@ -36,6 +38,6 @@ contract VerifierBase is ProofVerifierBase {
 
 contract Verifier is VerifierBase {
     constructor() {
-        verifier = new RiscZeroGroth16Verifier(ControlID.CONTROL_ROOT, ControlID.BN254_CONTROL_ID);
+        verifier = new ProofVerifierBase();
     }
 }
