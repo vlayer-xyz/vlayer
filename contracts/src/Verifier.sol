@@ -8,7 +8,7 @@ import {Proof} from "./Proof.sol";
 import {SealLib, Seal} from "./Seal.sol";
 
 import {IProofVerifier} from "./proof_verifier/IProofVerifier.sol";
-import {ProofVerifierBase} from "./proof_verifier/ProofVerifierBase.sol";
+import {Groth16ProofVerifier} from "./proof_verifier/Groth16ProofVerifier.sol";
 
 abstract contract VerifierBase {
     uint256 constant JOURNAL_OFFSET = 100;
@@ -38,6 +38,6 @@ abstract contract VerifierBase {
 
 contract Verifier is VerifierBase {
     constructor() {
-        verifier = new ProofVerifierBase();
+        verifier = new Groth16ProofVerifier();
     }
 }
