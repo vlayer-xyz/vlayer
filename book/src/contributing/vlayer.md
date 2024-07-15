@@ -10,6 +10,11 @@ To start working with this repository, you will need to install following softwa
 
 ## Building
 
+Before you build rust, make sure that solidity dependencies are up to date:
+```sh
+git submodule update --init --recursive
+```
+
 To build this project, navigate to the `rust` directory and type:
 
 ```sh
@@ -39,3 +44,4 @@ RUST_LOG=info RISC0_DEV_MODE=1 cargo run
 ```
 
 For guides about the project structure, check out [architecture appendix](/appendix/architecture.md).
+
