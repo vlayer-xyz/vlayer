@@ -2,12 +2,6 @@
 
 set -ueo pipefail
 
-# Setting up the example contracts to be called  during e2e tests.
-# When creating a new example, add here the address name corresponding to 
-# the name of the contract in vlayer-deploy.sh that you want to call.
-simple="SIMPLE_PROVER_ADDRESS"
-simple_travel="SIMPLE_TRAVEL_PROVER_ADDRESS"
-
 cleanup() {
     echo "Cleaning up..."
     
@@ -149,6 +143,12 @@ wait_for_port 3000 20m "Vlayer server"
 echo "Deploying smart contracts"
 cd "${VLAYER_HOME}/examples/${EXAMPLE}"
 source ../../bash/vlayer-deploy.sh ${EXAMPLE}
+
+# Setting up the example contracts to be called  during e2e tests.
+# When creating a new example, add here the address name corresponding to 
+# the name of the contract in vlayer-deploy.sh that you want to call.
+simple="SIMPLE_PROVER_ADDRESS"
+simple_travel="SIMPLE_TRAVEL_PROVER_ADDRESS"
 
 eval "EXAMPLE_ADDRESS_VAR=\${${EXAMPLE}}"
 eval "EXAMPLE_ADDRESS=\${${EXAMPLE_ADDRESS_VAR}}"
