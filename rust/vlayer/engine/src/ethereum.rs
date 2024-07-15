@@ -11,9 +11,8 @@ use revm::primitives::BlockEnv;
 use serde::{Deserialize, Serialize};
 
 /// [EvmEnv] for Ethereum.
-pub type EthEvmEnv<D> = EvmEnv<D, EthBlockHeader>;
+pub type EthEvmEnv<D> = EvmEnv<D>;
 
-/// [EvmInput] for Ethereum.
 pub type MultiEthEvmInput = MultiEvmInput<EthBlockHeader>;
 
 /// Ethereum post-merge block header.

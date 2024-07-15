@@ -8,16 +8,16 @@ use crate::{chain::spec::ChainSpec, engine::EngineError};
 use super::block_header::EvmBlockHeader;
 
 /// The environment to execute the contract calls in.
-pub struct EvmEnv<D, H> {
+pub struct EvmEnv<D> {
     pub db: D,
     pub cfg_env: CfgEnvWithHandlerCfg,
-    pub header: H,
+    pub header: Box<dyn EvmBlockHeader>,
 }
 
-impl<D, H: EvmBlockHeader> EvmEnv<D, H> {
+impl<D> EvmEnv<D> {
     /// Creates a new environment.
     /// It uses the default configuration for the latest specification.
-    pub fn new(db: D, header: H) -> Self {
+    pub fn new(db: D, header: Box<dyn EvmBlockHeader>) -> Self {
         let cfg_env = CfgEnvWithHandlerCfg::new_with_spec_id(Default::default(), SpecId::LATEST);
 
         Self {
@@ -37,7 +37,7 @@ impl<D, H: EvmBlockHeader> EvmEnv<D, H> {
     }
 
     /// Returns the header of the environment.
-    pub fn header(&self) -> &H {
+    pub fn header(&self) -> &Box<dyn EvmBlockHeader> {
         &self.header
     }
 }
@@ -57,25 +57,25 @@ impl ExecutionLocation {
     }
 }
 
-pub struct MultiEvmEnv<D, H>(pub HashMap<ExecutionLocation, EvmEnv<D, H>>);
+pub struct MultiEvmEnv<D>(pub HashMap<ExecutionLocation, EvmEnv<D>>);
 
-impl<D, H> MultiEvmEnv<D, H> {
-    pub fn from_single(env: EvmEnv<D, H>, location: ExecutionLocation) -> Self {
+impl<D> MultiEvmEnv<D> {
+    pub fn from_single(env: EvmEnv<D>, location: ExecutionLocation) -> Self {
         let mut envs = HashMap::new();
         envs.insert(location, env);
         Self(envs)
     }
 }
 
-impl<D, H: EvmBlockHeader> MultiEvmEnv<D, H> {
-    pub fn insert(&mut self, location: ExecutionLocation, env: EvmEnv<D, H>) {
+impl<D> MultiEvmEnv<D> {
+    pub fn insert(&mut self, location: ExecutionLocation, env: EvmEnv<D>) {
         self.0.insert(location, env);
     }
 
     pub fn get_mut(
         &mut self,
         location: &ExecutionLocation,
-    ) -> Result<&mut EvmEnv<D, H>, EngineError> {
+    ) -> Result<&mut EvmEnv<D>, EngineError> {
         self.0
             .get_mut(location)
             .ok_or(EngineError::EvmNotFound(*location))

@@ -37,11 +37,10 @@ pub enum EngineError {
 }
 
 impl Engine {
-    pub fn call<D, H>(self, tx: &Call, env: &mut EvmEnv<D, H>) -> Result<Vec<u8>, EngineError>
+    pub fn call<D>(self, tx: &Call, env: &mut EvmEnv<D>) -> Result<Vec<u8>, EngineError>
     where
         D: Database,
         D::Error: std::fmt::Debug,
-        H: EvmBlockHeader,
     {
         let evm = Evm::builder()
             .with_db(&mut env.db)

@@ -16,7 +16,7 @@ impl<H: EvmBlockHeader + Clone> From<EvmInput<H>> for ValidatedEvmInput<H> {
     }
 }
 
-impl<H: EvmBlockHeader + Clone> From<ValidatedEvmInput<H>> for EvmEnv<WrapStateDb, H> {
+impl<H: EvmBlockHeader + Clone + 'static> From<ValidatedEvmInput<H>> for EvmEnv<WrapStateDb> {
     fn from(input: ValidatedEvmInput<H>) -> Self {
         let input = input.0;
         let header = input.header.clone();
@@ -28,7 +28,7 @@ impl<H: EvmBlockHeader + Clone> From<ValidatedEvmInput<H>> for EvmEnv<WrapStateD
             block_hashes,
         ));
 
-        EvmEnv::new(db, header)
+        EvmEnv::new(db, Box::new(header))
     }
 }
 
@@ -45,7 +45,9 @@ impl<H: EvmBlockHeader + Clone> From<MultiEvmInput<H>> for ValidatedMultiEvmInpu
     }
 }
 
-impl<H: EvmBlockHeader + Clone> From<ValidatedMultiEvmInput<H>> for MultiEvmEnv<WrapStateDb, H> {
+impl<H: EvmBlockHeader + Clone + 'static> From<ValidatedMultiEvmInput<H>>
+    for MultiEvmEnv<WrapStateDb>
+{
     fn from(input: ValidatedMultiEvmInput<H>) -> Self {
         let envs = input
             .0

@@ -12,7 +12,7 @@ use vlayer_engine::{
 
 pub struct Guest {
     start_execution_location: ExecutionLocation,
-    multi_evm_env: MultiEvmEnv<WrapStateDb, EthBlockHeader>,
+    multi_evm_env: MultiEvmEnv<WrapStateDb>,
 }
 
 impl Guest {

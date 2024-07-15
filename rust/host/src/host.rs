@@ -25,7 +25,7 @@ pub type EthersClient = OGEthersProvider<RetryClient<Http>>;
 
 pub struct Host<P: Provider<Header = EthBlockHeader>> {
     start_execution_location: ExecutionLocation,
-    envs: MultiEvmEnv<ProofDb<P>, EthBlockHeader>,
+    envs: MultiEvmEnv<ProofDb<P>>,
 }
 
 #[derive(Error, Debug)]
@@ -109,7 +109,7 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
 
         let db = ProofDb::new(provider, start_block_number);
         let chain_spec = config.start_execution_location.chain_id.try_into()?;
-        let env = EvmEnv::new(db, header).with_chain_spec(&chain_spec)?;
+        let env = EvmEnv::new(db, Box::new(header)).with_chain_spec(&chain_spec)?;
         let envs = MultiEvmEnv::from_single(env, config.start_execution_location);
 
         Ok(Host {
