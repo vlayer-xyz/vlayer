@@ -2,11 +2,14 @@
 pragma solidity ^0.8.13;
 
 import {IRiscZeroVerifier} from "risc0-ethereum/IRiscZeroVerifier.sol";
+import {RiscZeroMockVerifier} from "risc0-ethereum/test/RiscZeroMockVerifier.sol";
 
 import {Proof} from "../Proof.sol";
 import {SealLib, Seal} from "../Seal.sol";
 
-abstract contract ProofVerifierBase {
+import {IProofVerifier} from "./IProofVerifier.sol";
+
+contract ProofVerifierBase is IProofVerifier {
     using SealLib for Seal;
 
     bytes32 public GUEST_ID = bytes32(0xb7079f57c71b4e1d95b8b1254303e13f78914599a8c119534c4c947c996b4d7d);
@@ -15,16 +18,18 @@ abstract contract ProofVerifierBase {
     IRiscZeroVerifier public verifier;
 
     constructor() {
-
+        verifier = new RiscZeroMockVerifier(bytes4(0));
     }
 
-    function verify(Proof calldata proof, bytes32 journalHash, address expectedProver, bytes4 expectedSelector) external view {
+    function verify(Proof calldata proof, bytes32 journalHash, address expectedProver, bytes4 expectedSelector)
+        external
+        view
+    {
         _verifyExecutionEnv(proof, expectedProver, expectedSelector);
         verifier.verify(proof.seal.decode(), GUEST_ID, journalHash);
     }
 
     function _verifyExecutionEnv(Proof memory proof, address prover, bytes4 selector) private view {
-
         require(proof.commitment.startContractAddress == prover, "Invalid prover");
         require(proof.commitment.functionSelector == selector, "Invalid selector");
 
@@ -36,5 +41,4 @@ abstract contract ProofVerifierBase {
 
         require(proof.commitment.settleBlockHash == blockhash(proof.commitment.settleBlockNumber), "Invalid block hash");
     }
-
 }

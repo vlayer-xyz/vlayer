@@ -11,6 +11,8 @@ import {RiscZeroMockVerifier} from "risc0-ethereum/test/RiscZeroMockVerifier.sol
 import {ExecutionCommitment} from "../src/ExecutionCommitment.sol";
 import {Proof} from "../src/Proof.sol";
 
+import {ProofVerifierBase} from "../src/proof_verifier/ProofVerifierBase.sol";
+
 contract Prover {}
 
 contract ExampleProver is Prover {
@@ -44,6 +46,7 @@ contract ExampleVerifier is VerifierUnderTest {
 contract Verifier_OnlyVerified_Modifier_Tests is Test {
     ExampleVerifier exampleVerifier = new ExampleVerifier();
     RiscZeroMockVerifier mockVerifier = new RiscZeroMockVerifier(bytes4(0));
+    ProofVerifierBase mockProofVerifier = new ProofVerifierBase();
 
     ExecutionCommitment commitment;
 
@@ -53,13 +56,14 @@ contract Verifier_OnlyVerified_Modifier_Tests is Test {
         commitment = ExecutionCommitment(
             exampleVerifier.PROVER(), ExampleProver.doSomething.selector, block.number - 1, blockhash(block.number - 1)
         );
-        exampleVerifier.setVerifier(mockVerifier);
+
+        exampleVerifier.setVerifier(mockProofVerifier);
     }
 
     function createProof(bytes memory journalParams) public view returns (Proof memory) {
         bytes memory journal = TestHelpers.concat(abi.encode(commitment), journalParams);
 
-        bytes memory seal = mockVerifier.mockProve(exampleVerifier.GUEST_ID(), sha256(journal)).seal;
+        bytes memory seal = mockVerifier.mockProve(mockProofVerifier.GUEST_ID(), sha256(journal)).seal;
         return Proof(journal.length, TestHelpers.encodeSeal(seal), commitment);
     }
 
