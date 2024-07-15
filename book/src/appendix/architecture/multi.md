@@ -47,7 +47,7 @@ class HostEnvFactory {
 }
 
 class GuestEnvFactory {
-  envs: HashMap[[ChainId, BlockNo], dyn Env]
+  envs: HashMap[[ChainId, BlockNo], Env<WrapStateDB>]
   from(MultiInput)
 }
 
