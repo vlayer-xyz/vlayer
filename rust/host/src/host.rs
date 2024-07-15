@@ -15,7 +15,7 @@ use risc0_zkvm::{default_prover, is_dev_mode, ExecutorEnv, ProverOpts};
 use thiserror::Error;
 use vlayer_engine::engine::{Engine, EngineError};
 use vlayer_engine::ethereum::EthBlockHeader;
-use vlayer_engine::evm::env::{ExecutionLocation, MultiEvmEnv};
+use vlayer_engine::evm::env::ExecutionLocation;
 use vlayer_engine::evm::input::MultiEvmInput;
 use vlayer_engine::io::GuestOutputError;
 use vlayer_engine::io::{Call, GuestOutput, HostOutput, Input};
@@ -119,7 +119,11 @@ where
 
     pub fn run(mut self, call: Call) -> Result<HostOutput, HostError> {
         self.envs.ensure_vm_exists(self.start_execution_location)?;
-        let env = self.envs.get_mut(&self.start_execution_location)?;
+        let env = self
+            .envs
+            .as_mut()
+            .get_mut(&self.start_execution_location)
+            .ok_or(EngineError::EvmNotFound(self.start_execution_location))?;
         let host_output = Engine::default().call(&call, env)?;
 
         let multi_evm_input =

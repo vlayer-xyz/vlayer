@@ -1,6 +1,4 @@
-use crate::{
-    db::wrap_state::WrapStateDb, evm_env::GuestMultiEvmEnv, input::ValidatedMultiEvmInput,
-};
+use crate::{db::wrap_state::WrapStateDb, input::ValidatedMultiEvmInput};
 use vlayer_engine::{
     engine::Engine,
     ethereum::EthBlockHeader,
@@ -14,7 +12,7 @@ use vlayer_engine::{
 
 pub struct Guest {
     start_execution_location: ExecutionLocation,
-    multi_evm_env: GuestMultiEvmEnv<WrapStateDb, EthBlockHeader>,
+    multi_evm_env: MultiEvmEnv<WrapStateDb, EthBlockHeader>,
 }
 
 impl Guest {
@@ -28,10 +26,11 @@ impl Guest {
             .expect("cannot get chain spec");
 
         let validated_multi_evm_input: ValidatedMultiEvmInput<_> = multi_evm_input.into();
-        let mut multi_evm_env = GuestMultiEvmEnv::from(validated_multi_evm_input);
-        multi_evm_env
-            .with_chain_spec(&chain_spec)
-            .expect("cannot set chain spec");
+        let mut multi_evm_env = MultiEvmEnv::from(validated_multi_evm_input);
+        for env in multi_evm_env.values_mut() {
+            env.with_chain_spec(&chain_spec)
+                .expect("cannot set chain spec");
+        }
 
         Guest {
             multi_evm_env,

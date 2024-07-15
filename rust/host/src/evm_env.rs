@@ -3,9 +3,8 @@ use std::{collections::HashMap, rc::Rc};
 use alloy_primitives::Sealable;
 use derive_more::{AsMut, IntoIterator};
 use vlayer_engine::{
-    engine::EngineError,
     ethereum::EthBlockHeader,
-    evm::env::{EvmEnv, ExecutionLocation, InnerMultiEvmEnv, MultiEvmEnv},
+    evm::env::{EvmEnv, ExecutionLocation, MultiEvmEnv},
 };
 
 use crate::{
@@ -23,7 +22,7 @@ where
 {
     #[as_mut]
     #[into_iterator(owned)]
-    pub envs: InnerMultiEvmEnv<ProofDb<Rc<M::Provider>>, <M::Provider as Provider>::Header>,
+    pub envs: MultiEvmEnv<ProofDb<Rc<M::Provider>>, <M::Provider as Provider>::Header>,
     multi_provider: M,
 }
 
@@ -66,20 +65,5 @@ where
         let mut env = EvmEnv::new(db, header.seal_slow());
         env.with_chain_spec(&chain_spec)?;
         Ok(env)
-    }
-}
-
-impl<P, M> MultiEvmEnv<ProofDb<Rc<P>>, P::Header> for HostMultiEvmEnv<P, M>
-where
-    P: Provider<Header = EthBlockHeader>,
-    M: MultiProvider<Provider = P>,
-{
-    fn get_mut(
-        &mut self,
-        location: &ExecutionLocation,
-    ) -> Result<&mut EvmEnv<ProofDb<Rc<P>>, P::Header>, EngineError> {
-        self.as_mut()
-            .get_mut(location)
-            .ok_or(EngineError::EvmNotFound(*location))
     }
 }

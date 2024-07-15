@@ -8,7 +8,6 @@ use risc0_zkvm::guest::env;
 use vlayer_engine::io::Input;
 
 pub mod db;
-pub mod evm_env;
 pub mod guest;
 pub mod input;
 

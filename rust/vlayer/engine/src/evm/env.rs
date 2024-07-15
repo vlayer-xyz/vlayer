@@ -56,18 +56,4 @@ impl ExecutionLocation {
     }
 }
 
-pub type InnerMultiEvmEnv<D, H> = HashMap<ExecutionLocation, EvmEnv<D, H>>;
-
-pub trait MultiEvmEnv<D, H>: Sized + AsMut<InnerMultiEvmEnv<D, H>>
-where
-    H: EvmBlockHeader,
-{
-    fn get_mut(&mut self, location: &ExecutionLocation) -> Result<&mut EvmEnv<D, H>, EngineError>;
-
-    fn with_chain_spec(&mut self, chain_spec: &ChainSpec) -> Result<(), EngineError> {
-        for env in self.as_mut().values_mut() {
-            env.with_chain_spec(chain_spec)?;
-        }
-        Ok(())
-    }
-}
+pub type MultiEvmEnv<D, H> = HashMap<ExecutionLocation, EvmEnv<D, H>>;
