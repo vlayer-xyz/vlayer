@@ -3,15 +3,18 @@ mod private {
     alloy_sol_types::sol!("../../../contracts/src/ExecutionCommitment.sol");
 }
 
-use alloy_primitives::{Address, Sealable, U256};
+use alloy_primitives::{Address, U256};
 /// Solidity struct representing the committed block used for validation.
 pub use private::ExecutionCommitment;
 
-use crate::{evm::block_header::EvmBlockHeader, io::CallSelector};
+use crate::{
+    evm::block_header::{EvmBlockHeader, Hashable},
+    io::CallSelector,
+};
 
 impl ExecutionCommitment {
     /// Returns the [SolCommitment] used to validate the environment.
-    pub fn new<H: EvmBlockHeader + Sealable + Clone>(
+    pub fn new<H: EvmBlockHeader + Hashable + Clone>(
         header: &H,
         to: Address,
         selector: CallSelector,
@@ -19,7 +22,7 @@ impl ExecutionCommitment {
         Self {
             startContractAddress: to,
             functionSelector: selector.into(),
-            settleBlockHash: header.clone().seal_slow().seal(),
+            settleBlockHash: header.clone().hash_slow(),
             settleBlockNumber: U256::from(header.number()),
         }
     }

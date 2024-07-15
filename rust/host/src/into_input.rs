@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
 use crate::{db::proof::ProofDb, provider::Provider};
-use alloy_primitives::Sealed;
 use anyhow::{ensure, Ok};
 use vlayer_engine::evm::block_header::EvmBlockHeader;
 use vlayer_engine::evm::env::MultiEvmEnv;
@@ -9,7 +8,7 @@ use vlayer_engine::evm::input::{EvmInput, MultiEvmInput};
 
 pub fn into_input<P: Provider>(
     db: &ProofDb<P>,
-    header: Sealed<P::Header>,
+    header: P::Header,
 ) -> anyhow::Result<EvmInput<P::Header>> {
     let (state_trie, storage_tries) = db.prepare_state_storage_tries()?;
     ensure!(
@@ -18,7 +17,7 @@ pub fn into_input<P: Provider>(
     );
 
     let evm_input = EvmInput {
-        header: header.into_inner(),
+        header,
         state_trie,
         storage_tries,
         contracts: db.contracts(),

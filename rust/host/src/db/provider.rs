@@ -1,5 +1,5 @@
 use crate::provider::Provider;
-use alloy_primitives::{Address, Sealable, B256, U256};
+use alloy_primitives::{Address, B256, U256};
 use revm::{
     primitives::{AccountInfo, Bytecode, HashMap, KECCAK_EMPTY},
     Database,
@@ -7,6 +7,7 @@ use revm::{
 use std::fmt::Debug;
 use std::rc::Rc;
 use thiserror::Error;
+use vlayer_engine::evm::block_header::Hashable;
 
 /// Error type for the [ProviderDb].
 #[derive(Error, Debug)]

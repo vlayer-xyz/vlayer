@@ -36,8 +36,7 @@ impl<H: EvmBlockHeader + Clone> EvmInput<H> {
             block_hashes.insert(ancestor.number(), ancestor_hash);
         }
 
-        let header = self.header.clone().seal_slow();
-        block_hashes.insert(self.header.number(), header.seal());
+        block_hashes.insert(self.header.number(), self.header.hash_slow());
 
         block_hashes
     }
@@ -48,8 +47,7 @@ impl<H: EvmBlockHeader + Clone> EvmInput<H> {
     }
 
     pub fn validate_ancestors(&self) {
-        let header = self.header.clone().seal_slow();
-        let mut previous_header = header.inner();
+        let mut previous_header = &self.header;
         for ancestor in &self.ancestors {
             let ancestor_hash = ancestor.hash_slow();
             assert_eq!(
@@ -81,14 +79,15 @@ impl<H> FromIterator<(ExecutionLocation, EvmInput<H>)> for MultiEvmInput<H> {
 
 #[cfg(test)]
 mod test {
-    use alloy_primitives::Sealable;
     use mpt::EMPTY_ROOT_HASH;
 
     use crate::ethereum::EthBlockHeader;
+    use crate::evm::block_header::Hashable;
 
     use super::EvmInput;
 
     mod block_hashes {
+
         use super::*;
 
         #[test]

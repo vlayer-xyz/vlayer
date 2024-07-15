@@ -1,9 +1,14 @@
-use alloy_primitives::{BlockNumber, Sealable, B256};
+use alloy_primitives::{BlockNumber, B256};
 
 use revm::primitives::BlockEnv;
 
+pub trait Hashable {
+    /// Calculate the hash, this may be slow.
+    fn hash_slow(&self) -> B256;
+}
+
 /// An EVM abstraction of a block header.
-pub trait EvmBlockHeader: Sealable + Default {
+pub trait EvmBlockHeader: Hashable {
     /// Returns the hash of the parent block's header.
     fn parent_hash(&self) -> &B256;
     /// Returns the block number.

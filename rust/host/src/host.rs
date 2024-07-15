@@ -5,7 +5,7 @@ use crate::provider::EthersProviderError;
 use crate::provider::{EthersProvider, Provider};
 use std::collections::HashMap;
 
-use alloy_primitives::{ChainId, Sealable};
+use alloy_primitives::ChainId;
 use ethers_providers::Provider as OGEthersProvider;
 use ethers_providers::{Http, ProviderError, RetryClient};
 use guest_wrapper::GUEST_ELF;
@@ -109,7 +109,7 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
 
         let db = ProofDb::new(provider, start_block_number);
         let chain_spec = config.start_execution_location.chain_id.try_into()?;
-        let env = EvmEnv::new(db, header.seal_slow()).with_chain_spec(&chain_spec)?;
+        let env = EvmEnv::new(db, header).with_chain_spec(&chain_spec)?;
         let envs = MultiEvmEnv::from_single(env, config.start_execution_location);
 
         Ok(Host {
