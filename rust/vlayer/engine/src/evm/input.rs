@@ -1,7 +1,7 @@
 use alloy_primitives::{Bytes, B256};
 use mpt::MerkleTrie;
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::{collections::HashMap, iter::once};
 use tracing::debug;
 
 use super::{block_header::EvmBlockHeader, env::ExecutionLocation};
@@ -30,15 +30,11 @@ impl<H: EvmBlockHeader> EvmInput<H> {
 
 impl<H: EvmBlockHeader + Clone> EvmInput<H> {
     pub fn block_hashes(&self) -> HashMap<u64, B256> {
-        let mut block_hashes = HashMap::with_capacity(self.ancestors.len() + 1);
-        for ancestor in &self.ancestors {
-            let ancestor_hash = ancestor.hash_slow();
-            block_hashes.insert(ancestor.number(), ancestor_hash);
-        }
-
-        block_hashes.insert(self.header.number(), self.header.hash_slow());
-
-        block_hashes
+        self.ancestors
+            .iter()
+            .map(|ancestor| (ancestor.number(), ancestor.hash_slow()))
+            .chain(once((self.header.number(), self.header.hash_slow())))
+            .collect()
     }
 
     pub fn validate_state_root(&self) {
