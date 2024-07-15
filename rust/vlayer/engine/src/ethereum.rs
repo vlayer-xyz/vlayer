@@ -1,9 +1,11 @@
 //! Type aliases for Ethereum.
-use crate::evm::{block_header::EvmBlockHeader, env::EvmEnv, input::MultiEvmInput};
-
-use alloy_primitives::{
-    keccak256, Address, BlockHash, BlockNumber, Bloom, Bytes, Sealable, B256, B64, U256,
+use crate::evm::{
+    block_header::{EvmBlockHeader, Hashable},
+    env::EvmEnv,
+    input::MultiEvmInput,
 };
+
+use alloy_primitives::{keccak256, Address, BlockHash, BlockNumber, Bloom, Bytes, B256, B64, U256};
 use alloy_rlp_derive::RlpEncodable;
 use revm::primitives::BlockEnv;
 use serde::{Deserialize, Serialize};
@@ -60,7 +62,7 @@ pub struct EthBlockHeader {
     pub parent_beacon_block_root: Option<B256>,
 }
 
-impl Sealable for EthBlockHeader {
+impl Hashable for EthBlockHeader {
     #[inline]
     fn hash_slow(&self) -> B256 {
         keccak256(alloy_rlp::encode(self))

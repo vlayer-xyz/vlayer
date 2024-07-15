@@ -1,4 +1,4 @@
-use alloy_primitives::{BlockNumber, ChainId, Sealed};
+use alloy_primitives::{BlockNumber, ChainId};
 use revm::primitives::{CfgEnvWithHandlerCfg, SpecId};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
@@ -11,13 +11,13 @@ use super::block_header::EvmBlockHeader;
 pub struct EvmEnv<D, H> {
     pub db: D,
     pub cfg_env: CfgEnvWithHandlerCfg,
-    pub header: Sealed<H>,
+    pub header: H,
 }
 
 impl<D, H: EvmBlockHeader> EvmEnv<D, H> {
     /// Creates a new environment.
     /// It uses the default configuration for the latest specification.
-    pub fn new(db: D, header: Sealed<H>) -> Self {
+    pub fn new(db: D, header: H) -> Self {
         let cfg_env = CfgEnvWithHandlerCfg::new_with_spec_id(Default::default(), SpecId::LATEST);
 
         Self {
@@ -38,7 +38,7 @@ impl<D, H: EvmBlockHeader> EvmEnv<D, H> {
 
     /// Returns the header of the environment.
     pub fn header(&self) -> &H {
-        self.header.inner()
+        &self.header
     }
 }
 
