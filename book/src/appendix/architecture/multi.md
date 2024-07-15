@@ -24,7 +24,7 @@ See the code snippet blow.
 pub struct EvmEnv<DB> {
     pub db: DB,
     pub cfg_env: CfgEnvWithHandlerCfg,
-    pub header: Box<dyn Sealed<EvmBlockHeader> > ,
+    pub header: Box<dyn EvmBlockHeader> ,
 }
 ```
 
