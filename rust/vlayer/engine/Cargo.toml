@@ -14,11 +14,14 @@ alloy-rlp = { version = "0.3.7", default-features = false }
 alloy-rlp-derive = { version = "0.3.7", default-features = false }
 alloy-sol-types = "0.7"
 anyhow = "1.0"
-ethers-core = {version="2.0"}
+ethers-core = { version = "2.0" }
 nybbles = { version = "0.2.1", features = ["serde"] }
 once_cell = "1.19"
 risc0-zkvm = { workspace = true }
-revm = { version = "10.0", default-features = false, features = ["serde", "std"] }
+revm = { version = "11.0", default-features = false, features = [
+    "serde",
+    "std",
+] }
 rlp = "0.5.2"
 serde = "1.0"
 tracing = { workspace = true }
@@ -28,7 +31,7 @@ mpt = { path = "../../mpt" }
 [dev-dependencies]
 alloy-trie = "0.4.1"
 test-log = "0.2.16"
-serde_json = { version = "1.0"}
+serde_json = { version = "1.0" }
 
 [lints.clippy]
 unwrap_used = "deny"

@@ -14,7 +14,7 @@ pub enum ProviderDbError<E: std::error::Error> {
     #[error("provider error")]
     Provider(#[from] E),
     #[error("invalid block number: {0}")]
-    InvalidBlockNumber(U256),
+    InvalidBlockNumber(u64),
     #[error("hash missing for block: {0}")]
     BlockHashMissing(U256),
 }
@@ -92,14 +92,11 @@ impl<P: Provider> Database for ProviderDb<P> {
         Ok(storage)
     }
 
-    fn block_hash(&mut self, number: U256) -> Result<B256, Self::Error> {
-        let block_number: u64 = number
-            .try_into()
-            .map_err(|_| ProviderDbError::InvalidBlockNumber(number))?;
+    fn block_hash(&mut self, block_number: u64) -> Result<B256, Self::Error> {
         let header = self
             .provider
             .get_block_header(block_number)?
-            .ok_or(ProviderDbError::InvalidBlockNumber(number))?;
+            .ok_or(ProviderDbError::InvalidBlockNumber(block_number))?;
 
         Ok(header.hash_slow())
     }

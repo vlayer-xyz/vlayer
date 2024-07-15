@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-risc0-ethereum-contracts = { path="../../contracts/lib/risc0-ethereum/contracts"}
+risc0-ethereum-contracts = { path = "../../contracts/lib/risc0-ethereum/contracts" }
 risc0-zkp = { workspace = true }
 risc0-zkvm = { workspace = true }
 vlayer-engine = { path = "../vlayer/engine" }
@@ -19,7 +19,7 @@ url = { version = "2.5", default-features = false }
 alloy-sol-types = { workspace = true }
 anyhow = "1.0"
 log = { version = "0.4" }
-revm = { version = "10.0", default-features = false, features = [
+revm = { version = "11.0", default-features = false, features = [
     "serde",
     "std",
 ] }

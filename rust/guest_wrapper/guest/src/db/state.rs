@@ -80,9 +80,7 @@ impl StateDb {
             .unwrap_or_else(|| panic!("code not found: {}", hash))
     }
 
-    pub fn block_hash(&self, number: U256) -> B256 {
-        // block number is never bigger then u64::MAX
-        let number: u64 = number.to();
+    pub fn block_hash(&self, number: u64) -> B256 {
         let hash = self
             .block_hashes
             .get(&number)

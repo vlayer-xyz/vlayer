@@ -43,9 +43,9 @@ impl<P: Provider> Database for ProofDb<P> {
         Ok(storage)
     }
 
-    fn block_hash(&mut self, number: U256) -> Result<B256, Self::Error> {
+    fn block_hash(&mut self, number: u64) -> Result<B256, Self::Error> {
         let block_hash = self.db.block_hash(number)?;
-        self.block_hash_numbers.insert(number);
+        self.block_hash_numbers.insert(U256::from(number));
 
         Ok(block_hash)
     }
