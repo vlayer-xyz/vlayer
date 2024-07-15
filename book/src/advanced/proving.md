@@ -17,4 +17,4 @@ The vlayer node provides two proving modes:
 
 > By default, the vlayer node operates in DEV mode.
 > Note that `PRODUCTION` mode is much slower than `DEV` mode. It is important to design protocols with proving execution time in mind, which takes at least a few minutes.
-> DEV mode only works on development and test chains to avoid accidental errors.
+> DEVELOPMENT mode only works on development and test chains to avoid accidental errors.
