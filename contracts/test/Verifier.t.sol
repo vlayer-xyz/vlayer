@@ -11,7 +11,7 @@ import {RiscZeroMockVerifier} from "risc0-ethereum/test/RiscZeroMockVerifier.sol
 import {ExecutionCommitment} from "../src/ExecutionCommitment.sol";
 import {Proof} from "../src/Proof.sol";
 
-import {ProofVerifierBase} from "../src/proof_verifier/ProofVerifierBase.sol";
+import {FakeProofVerifier} from "../src/proof_verifier/FakeProofVerifier.sol";
 
 contract Prover {}
 
@@ -46,7 +46,7 @@ contract ExampleVerifier is VerifierUnderTest {
 contract Verifier_OnlyVerified_Modifier_Tests is Test {
     ExampleVerifier exampleVerifier = new ExampleVerifier();
     RiscZeroMockVerifier mockVerifier = new RiscZeroMockVerifier(bytes4(0));
-    ProofVerifierBase mockProofVerifier = new ProofVerifierBase();
+    FakeProofVerifier mockProofVerifier = new FakeProofVerifier();
 
     ExecutionCommitment commitment;
 
