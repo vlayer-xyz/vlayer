@@ -22,7 +22,7 @@ impl ExecutionCommitment {
         Self {
             startContractAddress: to,
             functionSelector: selector.into(),
-            settleBlockHash: header.clone().hash_slow(),
+            settleBlockHash: header.hash_slow(),
             settleBlockNumber: U256::from(header.number()),
         }
     }
