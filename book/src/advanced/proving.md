@@ -6,7 +6,7 @@ The vlayer node is an HTTP server that acts as a prover. You can start it with t
 vlayer serve
 ```
 
-By default, it accepts HTTP requests on port `3000` in the format specified in the [JSON-RPC API appendix](/appendix/api.md).
+By default, it accepts JSON-RPC requests on port `3000` in the format specified in the [JSON-RPC API appendix](/appendix/api.md).
 
 ## Proving Modes
 
