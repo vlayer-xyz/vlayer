@@ -120,16 +120,6 @@ where
 }
 
 impl<P: Provider<Header = EthBlockHeader>> Host<P> {
-    fn try_new_with_provider(provider: Rc<P>, config: HostConfig) -> Result<Self, HostError> {
-        let env = create_evm_env(provider.clone(), config.start_execution_location)?;
-        let envs = MultiEvmEnv::from([(config.start_execution_location, env)]);
-
-        Ok(Host {
-            envs,
-            start_execution_location: config.start_execution_location,
-        })
-    }
-
     pub fn try_new_with_multi_provider(
         provider_factory: impl ProviderFactory<P>,
         config: HostConfig,
@@ -139,8 +129,13 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
         let provider = get_or_insert_with_result(&mut multi_provider, chain_id, || {
             Ok::<_, HostError>(Rc::new(provider_factory.create(chain_id)?))
         })?;
+        let env = create_evm_env(provider, config.start_execution_location)?;
+        let envs = MultiEvmEnv::from([(config.start_execution_location, env)]);
 
-        Self::try_new_with_provider(provider, config)
+        Ok(Host {
+            envs,
+            start_execution_location: config.start_execution_location,
+        })
     }
 
     pub fn run(mut self, call: Call) -> Result<HostOutput, HostError> {
