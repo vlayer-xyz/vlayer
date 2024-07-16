@@ -8,7 +8,7 @@ Our architecture is inspired by RISC Zero [steel](https://github.com/risc0/risc0
 - guest - (in `guest_wrapper/guest`) - performs execution of the code inside zkEVM.
 - guest-wrapper - (in `guest_wrapper`) - Compiles the guest to [RISC Zero](https://doc.rust-lang.org/rustc/platform-support/riscv32im-risc0-zkvm-elf.html) target and makes it available to be run inside the host. It can be considered Rust equivalent of a code generation script.
 
-The host passes arguments to the guest via standard input, like functionality, and similarly, the guest returns values by standard output, like functionality.
+The host passes arguments to the guest via standard input (stdin), and similarly, the guest returns values via standard output (stdout).
 
 > In ZK terms, all inputs are **private** and all outputs are **public**. If you need public inputs - return them as a part of output.
 
@@ -45,6 +45,7 @@ We have two different databases run in two different places. Each is a composite
   -  `WrapStateDb` is an [adapter](https://en.wikipedia.org/wiki/Adapter_pattern) for `StateDb` that implements Database trait. It additionally do caching of the accounts, for querying storage, so that the account is only fetched once for multiple storage queries.
 
 ```mermaid
+%%{init: {'theme':'dark'}}%%
 classDiagram
 
 class Database {
@@ -102,7 +103,6 @@ class StateAccount {
     code_hash: B256
     storage_root: B256
 }
-
 ```
 
 ### Environments
@@ -136,6 +136,7 @@ The guest is required to verify all data provided by the host. Validation of dat
 
 
 ```mermaid
+%%{init: {'theme':'dark'}}%%
 classDiagram
 
 class EvmInput {
@@ -192,6 +193,7 @@ Below is a short description of the components:
     - runs Solidity contracts inside revm
 
 ```mermaid
+%%{init: {'theme':'dark'}}%%
 classDiagram
 
 RiscGuest --> Guest

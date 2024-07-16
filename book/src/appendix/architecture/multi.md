@@ -35,6 +35,7 @@ pub struct EvmEnv<DB> {
 - `GuestEnvFactory` provides all required data, from a cached copy deserialized at the beginning of Guest execution.
 
 ```mermaid
+%%{init: {'theme':'dark'}}%%
 classDiagram
 
 class EnvFactory {
