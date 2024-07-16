@@ -11,7 +11,7 @@ import {ExecutionCommitment} from "../../src/ExecutionCommitment.sol";
 import {Proof} from "../../src/Proof.sol";
 import {ProofMode} from "../../src/Seal.sol";
 
-import {TestHelpers} from "../helpers/TestHelpers.sol";
+import {TestHelpers, PROVER, SELECTOR} from "../helpers/TestHelpers.sol";
 
 contract ProofVerifierUnderTest is ProofVerifierBase {
     constructor(IRiscZeroVerifier _verifier, ProofMode _proofMode) {
@@ -25,9 +25,6 @@ contract ProofVerifier_Verify_Tests is Test {
     ProofVerifierUnderTest verifier = new ProofVerifierUnderTest(helpers.mockVerifier(), ProofMode.FAKE);
 
     ExecutionCommitment commitment;
-
-    address constant PROVER = address(1);
-    bytes4 constant SELECTOR = 0x01020304;
 
     function setUp() public {
         vm.roll(100); // have some historical blocks

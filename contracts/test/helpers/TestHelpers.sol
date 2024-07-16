@@ -8,6 +8,9 @@ import {Proof} from "../../src/Proof.sol";
 import {ProofMode, Seal, SealLib} from "../../src/Seal.sol";
 import {GUEST_ID} from "../../src/GuestID.sol";
 
+address constant PROVER = address(1);
+bytes4 constant SELECTOR = bytes4(0x01020304);
+
 contract TestHelpers {
     RiscZeroMockVerifier public immutable mockVerifier = new RiscZeroMockVerifier(bytes4(0));
 
@@ -29,6 +32,12 @@ contract TestHelpers {
         return createProof(commitment, emptyBytes);
     }
 
+    function createProof() public view returns (Proof memory, bytes32) {
+        ExecutionCommitment memory commitment =
+            ExecutionCommitment(PROVER, SELECTOR, block.number - 1, blockhash(block.number - 1));
+        bytes memory emptyBytes = new bytes(0);
+        return createProof(commitment, emptyBytes);
+    }
     function encodeSeal(bytes memory seal) public pure returns (Seal memory) {
         require(seal.length == SealLib.SEAL_LENGTH, "Invalid seal length");
 
