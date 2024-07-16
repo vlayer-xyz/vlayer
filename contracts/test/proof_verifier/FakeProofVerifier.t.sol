@@ -1,0 +1,23 @@
+// SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.13;
+
+import {Test, console} from "forge-std/Test.sol";
+
+import {RiscZeroMockVerifier} from "risc0-ethereum/test/RiscZeroMockVerifier.sol";
+
+import {FakeProofVerifier} from "../../src/proof_verifier/FakeProofVerifier.sol";
+import {ProofMode} from "../../src/Seal.sol";
+
+contract FakeProofVerifier_Tests is Test {
+    FakeProofVerifier verifier = new FakeProofVerifier();
+
+    function test_usesFakeProofMode() public view {
+        assert(verifier.proofMode() == ProofMode.FAKE);
+    }
+
+    function test_usesMockRiscZeroVerifier() public {
+        RiscZeroMockVerifier mockVerifier = new RiscZeroMockVerifier(bytes4(0));
+
+        assertEq(address(verifier.verifier()).codehash, address(mockVerifier).codehash);
+    }
+}
