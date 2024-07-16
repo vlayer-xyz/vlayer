@@ -1,18 +1,21 @@
+use crate::db::proof::ProofDb;
 use crate::host::{EthersClient, HostError};
 use crate::provider::{EthFileProvider, EthersProvider, FileProvider, Provider};
-use alloy_primitives::ChainId;
+use alloy_primitives::{ChainId, Sealable};
 use derive_more::AsMut;
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::rc::Rc;
 use vlayer_engine::ethereum::EthBlockHeader;
+use vlayer_engine::evm::env::{EvmEnv, ExecutionLocation};
 
 pub trait MultiProvider
 where
     Self: AsMut<HashMap<ChainId, Rc<Self::Provider>>>,
 {
-    type Provider: Provider;
+    type Provider: Provider<Header = EthBlockHeader>;
     fn create_provider(&mut self, chain_id: ChainId) -> Result<Rc<Self::Provider>, HostError>;
+
     fn get(&mut self, chain_id: ChainId) -> Result<Rc<Self::Provider>, HostError> {
         if let Some(provider) = self.as_mut().get(&chain_id) {
             return Ok(Rc::clone(provider));
@@ -22,6 +25,25 @@ where
 
         self.as_mut().insert(chain_id, Rc::clone(&provider));
         Ok(provider)
+    }
+
+    fn create_env(
+        &mut self,
+        location: ExecutionLocation,
+    ) -> Result<EvmEnv<ProofDb<Rc<Self::Provider>>, EthBlockHeader>, HostError> {
+        let provider = self.get(location.chain_id)?;
+        let start_block_number = location.block_number;
+        let header = provider
+            .get_block_header(start_block_number)
+            .map_err(|err| HostError::Provider(err.to_string()))?
+            .ok_or(HostError::BlockNotFound(start_block_number))?;
+
+        let db = ProofDb::new(provider, start_block_number);
+        let chain_spec = location.chain_id.try_into()?;
+
+        let mut env = EvmEnv::new(db, header.seal_slow());
+        env.with_chain_spec(&chain_spec)?;
+        Ok(env)
     }
 }
 

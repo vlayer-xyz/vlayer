@@ -1,9 +1,10 @@
-use crate::evm_env::HostMultiEvmEnv;
+use crate::db::proof::ProofDb;
 use crate::into_input::into_multi_input;
 use crate::multiprovider::{EthersMultiProvider, MultiProvider};
 use crate::provider::EthersProviderError;
 use crate::provider::Provider;
 use std::collections::HashMap;
+use std::rc::Rc;
 
 use alloy_primitives::ChainId;
 use ethers_providers::Provider as OGEthersProvider;
@@ -15,7 +16,7 @@ use risc0_zkvm::{default_prover, is_dev_mode, ExecutorEnv, ProverOpts};
 use thiserror::Error;
 use vlayer_engine::engine::{Engine, EngineError};
 use vlayer_engine::ethereum::EthBlockHeader;
-use vlayer_engine::evm::env::ExecutionLocation;
+use vlayer_engine::evm::env::{ExecutionLocation, MultiEvmEnv};
 use vlayer_engine::evm::input::MultiEvmInput;
 use vlayer_engine::io::GuestOutputError;
 use vlayer_engine::io::{Call, GuestOutput, HostOutput, Input};
@@ -27,7 +28,8 @@ where
     M::Provider: Provider<Header = EthBlockHeader>,
 {
     start_execution_location: ExecutionLocation,
-    envs: HostMultiEvmEnv<M::Provider, M>,
+    envs: MultiEvmEnv<ProofDb<Rc<M::Provider>>, <M::Provider as Provider>::Header>,
+    multi_provider: M,
 }
 
 #[derive(Error, Debug)]
@@ -109,25 +111,26 @@ where
         multi_provider: M,
         config: HostConfig,
     ) -> Result<Self, HostError> {
-        let envs = HostMultiEvmEnv::new(multi_provider);
-
         Ok(Host {
-            envs,
+            envs: HashMap::new(),
             start_execution_location: config.start_execution_location,
+            multi_provider,
         })
     }
 
     pub fn run(mut self, call: Call) -> Result<HostOutput, HostError> {
-        self.envs.ensure_vm_exists(self.start_execution_location)?;
+        let env = self
+            .multi_provider
+            .create_env(self.start_execution_location)?;
+        self.envs.insert(self.start_execution_location, env);
         let env = self
             .envs
-            .as_mut()
             .get_mut(&self.start_execution_location)
             .ok_or(EngineError::EvmNotFound(self.start_execution_location))?;
         let host_output = Engine::default().call(&call, env)?;
 
-        let multi_evm_input =
-            into_multi_input(self.envs).map_err(|err| HostError::CreatingInput(err.to_string()))?;
+        let multi_evm_input = into_multi_input::<M::Provider, M>(self.envs)
+            .map_err(|err| HostError::CreatingInput(err.to_string()))?;
         let env = build_executor_env(self.start_execution_location, multi_evm_input, call)?;
 
         let (seal, raw_guest_output) = prove(env, GUEST_ELF)?;

@@ -1,12 +1,13 @@
 use std::collections::HashMap;
+use std::rc::Rc;
 
-use crate::evm_env::HostMultiEvmEnv;
 use crate::multiprovider::MultiProvider;
 use crate::{db::proof::ProofDb, provider::Provider};
 use alloy_primitives::Sealed;
 use anyhow::{ensure, Ok};
 use vlayer_engine::ethereum::EthBlockHeader;
 use vlayer_engine::evm::block_header::EvmBlockHeader;
+use vlayer_engine::evm::env::MultiEvmEnv;
 use vlayer_engine::evm::input::{EvmInput, MultiEvmInput};
 
 pub fn into_input<P>(
@@ -35,14 +36,14 @@ where
 }
 
 pub fn into_multi_input<P, M>(
-    envs: HostMultiEvmEnv<P, M>,
+    envs: MultiEvmEnv<ProofDb<Rc<M::Provider>>, <M::Provider as Provider>::Header>,
 ) -> anyhow::Result<MultiEvmInput<P::Header>>
 where
     P: Provider<Header = EthBlockHeader>,
     M: MultiProvider<Provider = P>,
 {
     let mut inner = HashMap::new();
-    for (location, env) in envs.envs.into_iter() {
+    for (location, env) in envs.into_iter() {
         let header = env.header;
         let input = into_input(&env.db, header)?;
         inner.insert(location, input);
