@@ -6,6 +6,7 @@ path = "src/main.rs"
 name = "cli"
 version = "0.1.0"
 edition = "2021"
+build = "build.rs"
 
 [dependencies]
 clap = { version = "4.5.9", features = ["derive"] }
@@ -23,3 +24,10 @@ server = { path = "../server" }
 
 [dev-dependencies]
 tempfile = "3.10.1"
+
+[build-dependencies]
+vergen = { version = "8", default-features = false, features = [
+    "build",
+    "git",
+    "gitcl",
+] }

@@ -14,8 +14,17 @@ mod misc;
 #[cfg(test)]
 mod test_utils;
 
+const VERSION_MESSAGE: &str = concat!(
+    env!("CARGO_PKG_VERSION"),
+    " (",
+    env!("VERGEN_GIT_SHA"),
+    " ",
+    env!("VERGEN_BUILD_TIMESTAMP"),
+    ")"
+);
+
 #[derive(Parser)]
-#[command(version, about, long_about = None)]
+#[command(name = "vlayer", version = VERSION_MESSAGE, about, long_about = None)]
 #[command(propagate_version = true)]
 struct Cli {
     #[command(subcommand)]
