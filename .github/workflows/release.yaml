@@ -1,8 +1,5 @@
 name: Release binaries
 on: 
-  push:
-    branches:
-      fix-releases
   schedule:
     - cron: '0 22 * * 1-5' # Mon-Fri at 22:00 UTC
 
