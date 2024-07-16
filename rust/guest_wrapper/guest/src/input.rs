@@ -36,11 +36,10 @@ pub struct ValidatedMultiEvmInput<H>(MultiEvmInput<H>);
 impl<H: EvmBlockHeader + Clone> From<MultiEvmInput<H>> for ValidatedMultiEvmInput<H> {
     fn from(input: MultiEvmInput<H>) -> Self {
         let validated = input
-            .0
             .into_iter()
             .map(|(location, input)| (location, ValidatedEvmInput::from(input).0))
             .collect();
-        ValidatedMultiEvmInput(MultiEvmInput(validated))
+        ValidatedMultiEvmInput(validated)
     }
 }
 
@@ -48,7 +47,6 @@ impl<H: EvmBlockHeader + Clone> From<ValidatedMultiEvmInput<H>> for MultiEvmEnv<
     fn from(input: ValidatedMultiEvmInput<H>) -> Self {
         input
             .0
-             .0
             .into_iter()
             .map(|(location, input)| (location, EvmEnv::from(ValidatedEvmInput(input))))
             .collect()

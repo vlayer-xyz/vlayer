@@ -1,11 +1,9 @@
 use crate::db::proof::ProofDb;
 use crate::into_input::into_multi_input;
-use crate::multiprovider::get_or_insert_with_result;
 use crate::multiprovider::{EthersProviderFactory, MultiProvider, ProviderFactory};
 use crate::provider::EthersProviderError;
 use crate::provider::{EthersProvider, Provider};
-use std::collections::HashMap;
-
+use crate::utils::get_or_insert_with_result;
 use alloy_primitives::ChainId;
 use ethers_providers::Provider as OGEthersProvider;
 use ethers_providers::{Http, ProviderError, RetryClient};
@@ -13,6 +11,7 @@ use guest_wrapper::GUEST_ELF;
 use risc0_ethereum_contracts::groth16::abi_encode;
 use risc0_zkp::verify::VerificationError;
 use risc0_zkvm::{default_prover, is_dev_mode, ExecutorEnv, ProverOpts};
+use std::collections::HashMap;
 use std::rc::Rc;
 use thiserror::Error;
 use vlayer_engine::engine::{Engine, EngineError};
