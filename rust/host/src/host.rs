@@ -162,21 +162,33 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
         })
     }
 
+    fn get_provider(
+        multi_provider: &mut MultiProvider<P>,
+        provider_factory: &dyn ProviderFactory<P>,
+        chain_id: ChainId,
+    ) -> Result<Rc<P>, HostError> {
+        let create_provider = || Ok::<_, HostError>(Rc::new(provider_factory.create(chain_id)?));
+        Ok(Rc::clone(get_mut_or_insert_with_result(
+            multi_provider,
+            chain_id,
+            create_provider,
+        )?))
+    }
+
     fn get_mut_env(
         &mut self,
         location: ExecutionLocation,
     ) -> Result<&mut EvmEnv<ProofDb<P>, P::Header>, HostError> {
-        get_mut_or_insert_with_result(&mut self.envs, location, || {
-            // I would love to split it out into a separate function, but it's not possible because then borrow checker
-            // can't realize that mutable borrows of self.envs and self.multi_provider don't overlap.
-            let provider = Rc::clone(get_mut_or_insert_with_result(
+        let create_evm_env = || {
+            let provider = Self::get_provider(
                 &mut self.multi_provider,
+                self.provider_factory.as_ref(),
                 location.chain_id,
-                || Ok::<_, HostError>(Rc::new(self.provider_factory.create(location.chain_id)?)),
-            )?);
+            )?;
             let env = create_evm_env(provider, location)?;
             Ok::<_, HostError>(env)
-        })
+        };
+        get_mut_or_insert_with_result(&mut self.envs, location, create_evm_env)
     }
 
     pub(crate) fn prove(
