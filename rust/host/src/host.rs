@@ -1,8 +1,8 @@
 use crate::db::proof::ProofDb;
 use crate::into_input::into_multi_input;
 use crate::provider::factory::{EthersProviderFactory, ProviderFactory};
-use crate::provider::{EthersProviderError, MultiProvider};
 use crate::provider::{EthersProvider, Provider};
+use crate::provider::{EthersProviderError, MultiProvider};
 use crate::utils::get_or_insert_with_result;
 use alloy_primitives::ChainId;
 use ethers_providers::Provider as OGEthersProvider;
@@ -100,18 +100,31 @@ impl Host<EthersProvider<EthersClient>> {
     }
 }
 
+fn create_evm_env<P>(
+    provider: Rc<P>,
+    ExecutionLocation {
+        block_number,
+        chain_id,
+    }: ExecutionLocation,
+) -> Result<EvmEnv<ProofDb<P>, P::Header>, HostError>
+where
+    P: Provider,
+{
+    let header = provider
+        .get_block_header(block_number)
+        .map_err(|err| HostError::Provider(err.to_string()))?
+        .ok_or(HostError::BlockNotFound(block_number))?;
+
+    let db = ProofDb::new(provider, block_number);
+    let chain_spec = chain_id.try_into()?;
+    let mut env = EvmEnv::new(db, header);
+    env.with_chain_spec(&chain_spec)?;
+    Ok(env)
+}
+
 impl<P: Provider<Header = EthBlockHeader>> Host<P> {
     pub fn try_new_with_provider(provider: Rc<P>, config: HostConfig) -> Result<Self, HostError> {
-        let start_block_number = config.start_execution_location.block_number;
-        let header = provider
-            .get_block_header(start_block_number)
-            .map_err(|err| HostError::Provider(err.to_string()))?
-            .ok_or(HostError::BlockNotFound(start_block_number))?;
-
-        let db = ProofDb::new(provider, start_block_number);
-        let chain_spec = config.start_execution_location.chain_id.try_into()?;
-        let mut env = EvmEnv::new(db, header);
-        env.with_chain_spec(&chain_spec)?;
+        let env = create_evm_env(provider.clone(), config.start_execution_location)?;
         let envs = MultiEvmEnv::from([(config.start_execution_location, env)]);
 
         Ok(Host {
