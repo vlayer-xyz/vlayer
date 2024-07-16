@@ -7,12 +7,16 @@ import {Proof} from "./Proof.sol";
 import {SealLib, Seal} from "./Seal.sol";
 
 import {IProofVerifier} from "./proof_verifier/IProofVerifier.sol";
-import {Groth16ProofVerifier} from "./proof_verifier/Groth16ProofVerifier.sol";
+import {ProofVerifierFactory} from "./proof_verifier/ProofVerifierFactory.sol";
 
-abstract contract VerifierBase {
+abstract contract Verifier {
     uint256 constant JOURNAL_OFFSET = 100;
 
     IProofVerifier public verifier;
+
+    constructor() {
+        verifier = ProofVerifierFactory.produce();
+    }
 
     modifier onlyVerified(address prover, bytes4 selector) {
         _verify(prover, selector);
@@ -32,11 +36,5 @@ abstract contract VerifierBase {
         bytes32 journalHash = sha256(journal);
 
         return (proof, journalHash);
-    }
-}
-
-contract Verifier is VerifierBase {
-    constructor() {
-        verifier = new Groth16ProofVerifier();
     }
 }
