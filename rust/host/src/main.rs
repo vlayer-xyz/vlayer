@@ -9,7 +9,6 @@ pub mod db;
 pub mod host;
 pub mod host_tests;
 pub mod into_input;
-pub mod multiprovider;
 pub mod provider;
 pub mod utils;
 

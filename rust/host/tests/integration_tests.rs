@@ -2,7 +2,7 @@ use alloy_primitives::{address, b256, uint, Address, U256};
 use alloy_sol_types::{sol, SolCall};
 use host::{
     host::{Host, HostConfig},
-    multiprovider::FileProviderFactory,
+    provider::factory::FileProviderFactory,
     Call,
 };
 use std::collections::HashMap;

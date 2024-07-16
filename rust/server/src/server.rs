@@ -128,8 +128,7 @@ mod tests {
             let json: serde_json::Value = serde_json::from_str(&body).unwrap();
             let result = json["result"].clone();
             let result = result.as_str().unwrap();
-            let result = u32::from_str_radix(&result[2..], 16).unwrap();
-            result
+            u32::from_str_radix(&result[2..], 16).unwrap()
         }
 
         #[tokio::test]

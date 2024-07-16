@@ -1,7 +1,7 @@
 use crate::db::proof::ProofDb;
 use crate::into_input::into_multi_input;
-use crate::multiprovider::{EthersProviderFactory, MultiProvider, ProviderFactory};
-use crate::provider::EthersProviderError;
+use crate::provider::factory::{EthersProviderFactory, ProviderFactory};
+use crate::provider::{EthersProviderError, MultiProvider};
 use crate::provider::{EthersProvider, Provider};
 use crate::utils::get_or_insert_with_result;
 use alloy_primitives::ChainId;
