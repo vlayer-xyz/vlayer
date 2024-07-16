@@ -58,20 +58,7 @@ impl<H: EvmBlockHeader + Clone> EvmInput<H> {
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
-pub struct MultiEvmInput<H>(pub HashMap<ExecutionLocation, EvmInput<H>>);
-
-impl<H> MultiEvmInput<H> {
-    pub fn get(&self, location: &ExecutionLocation) -> Option<&EvmInput<H>> {
-        self.0.get(location)
-    }
-}
-
-impl<H> FromIterator<(ExecutionLocation, EvmInput<H>)> for MultiEvmInput<H> {
-    fn from_iter<T: IntoIterator<Item = (ExecutionLocation, EvmInput<H>)>>(iter: T) -> Self {
-        MultiEvmInput(iter.into_iter().collect())
-    }
-}
+pub type MultiEvmInput<H> = HashMap<ExecutionLocation, EvmInput<H>>;
 
 #[cfg(test)]
 mod test {
