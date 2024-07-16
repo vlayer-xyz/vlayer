@@ -30,6 +30,6 @@ pub fn into_multi_input<P: Provider>(
     envs: MultiEvmEnv<ProofDb<P>, P::Header>,
 ) -> anyhow::Result<MultiEvmInput<P::Header>> {
     envs.into_iter()
-        .map(|(location, env)| into_input(&env.db, env.header).map(|input| (location, input)))
+        .map(|(location, env)| Ok((location, into_input(&env.db, env.header)?)))
         .collect()
 }
