@@ -1,11 +1,35 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
+import {RiscZeroMockVerifier} from "risc0-ethereum/test/RiscZeroMockVerifier.sol";
+
+import {ExecutionCommitment} from "../../src/ExecutionCommitment.sol";
+import {Proof} from "../../src/Proof.sol";
 import {ProofMode, Seal, SealLib} from "../../src/Seal.sol";
 import {GUEST_ID} from "../../src/GuestID.sol";
 
-library TestHelpers {
-    function encodeSeal(bytes calldata seal) public pure returns (Seal memory) {
+contract TestHelpers {
+    RiscZeroMockVerifier public immutable mockVerifier = new RiscZeroMockVerifier(bytes4(0));
+
+    function createProof(ExecutionCommitment memory commitment, bytes memory journalParams)
+        public
+        view
+        returns (Proof memory, bytes32)
+    {
+        bytes memory journal = concat(abi.encode(commitment), journalParams);
+        bytes32 journalHash = sha256(journal);
+
+        bytes memory seal = mockVerifier.mockProve(GUEST_ID, journalHash).seal;
+        Proof memory proof = Proof(journal.length, encodeSeal(seal), commitment);
+        return (proof, journalHash);
+    }
+
+    function createProof(ExecutionCommitment memory commitment) public view returns (Proof memory, bytes32) {
+        bytes memory emptyBytes = new bytes(0);
+        return createProof(commitment, emptyBytes);
+    }
+
+    function encodeSeal(bytes memory seal) public pure returns (Seal memory) {
         require(seal.length == SealLib.SEAL_LENGTH, "Invalid seal length");
 
         uint256 lhv = 0;
@@ -29,7 +53,7 @@ library TestHelpers {
         return Seal(bytes18(bytes32(lhv)), bytes19(bytes32(rhv)));
     }
 
-    function concat(bytes calldata a, bytes calldata b) public pure returns (bytes memory) {
+    function concat(bytes memory a, bytes memory b) public pure returns (bytes memory) {
         bytes memory c = new bytes(a.length + b.length);
 
         for (uint256 i = 0; i < a.length; i++) {
