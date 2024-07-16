@@ -2,6 +2,7 @@
 pragma solidity ^0.8.13;
 
 import {ProofMode, Seal, SealLib} from "../../src/Seal.sol";
+import {GUEST_ID} from "../../src/GuestID.sol";
 
 library TestHelpers {
     function encodeSeal(bytes calldata seal) public pure returns (Seal memory) {
