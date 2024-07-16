@@ -7,7 +7,7 @@ use misc::{
     init::{create_vlayer_dir, fetch_vlayer_files},
     path::find_foundry_root,
 };
-use server::server::{Config, serve};
+use server::server::{serve, Config};
 
 use crate::{
     cli_args::{Cli, Commands},
@@ -15,9 +15,9 @@ use crate::{
     misc::init::find_src_path,
 };
 
+mod cli_args;
 pub mod errors;
 mod misc;
-mod cli_args;
 
 #[cfg(test)]
 mod test_utils;
