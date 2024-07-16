@@ -1,6 +1,7 @@
 use crate::host::{EthersClient, HostError};
 use crate::provider::{EthFileProvider, EthersProvider, Provider};
 use alloy_primitives::ChainId;
+use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::rc::Rc;
@@ -66,6 +67,22 @@ impl ProviderFactory<EthFileProvider> for FileProviderFactory {
         })?;
 
         Ok(provider)
+    }
+}
+
+pub fn get_or_insert_with_result<K, V, F, E>(map: &mut HashMap<K, V>, key: K, f: F) -> Result<V, E>
+where
+    K: std::hash::Hash + Eq,
+    F: FnOnce() -> Result<V, E>,
+    V: Clone,
+{
+    match map.entry(key) {
+        Entry::Occupied(value) => Ok(value.get().clone()),
+        Entry::Vacant(entry) => {
+            let value = f()?;
+            entry.insert(value.clone());
+            Ok(value)
+        }
     }
 }
 

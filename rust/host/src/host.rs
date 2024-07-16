@@ -1,9 +1,9 @@
 use crate::db::proof::ProofDb;
 use crate::into_input::into_multi_input;
+use crate::multiprovider::get_or_insert_with_result;
 use crate::multiprovider::{EthersProviderFactory, MultiProvider, ProviderFactory};
 use crate::provider::EthersProviderError;
 use crate::provider::{EthersProvider, Provider};
-use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 
 use alloy_primitives::ChainId;
@@ -126,14 +126,9 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
         config: HostConfig,
     ) -> Result<Self, HostError> {
         let chain_id = config.start_execution_location.chain_id;
-        let provider = match multi_provider.entry(chain_id) {
-            Entry::Occupied(provider) => Rc::clone(provider.get()),
-            Entry::Vacant(entry) => {
-                let provider = Rc::new(provider_factory.create(chain_id)?);
-                entry.insert(Rc::clone(&provider));
-                provider
-            }
-        };
+        let provider = get_or_insert_with_result(&mut multi_provider, chain_id, || {
+            Ok::<_, HostError>(Rc::new(provider_factory.create(chain_id)?))
+        })?;
 
         Self::try_new_with_provider(provider, config)
     }
