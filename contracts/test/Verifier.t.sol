@@ -3,7 +3,6 @@ pragma solidity ^0.8.13;
 
 import {Test, console} from "forge-std/Test.sol";
 import {TestHelpers} from "./helpers/TestHelpers.sol";
-import {VerifierUnderTest} from "./helpers/VerifierUnderTest.sol";
 
 import {IRiscZeroVerifier, Receipt, VerificationFailed} from "risc0-ethereum/IRiscZeroVerifier.sol";
 import {RiscZeroMockVerifier} from "risc0-ethereum/test/RiscZeroMockVerifier.sol";
@@ -13,6 +12,7 @@ import {GUEST_ID} from "../src/GuestID.sol";
 import {Proof} from "../src/Proof.sol";
 
 import {FakeProofVerifier} from "../src/proof_verifier/FakeProofVerifier.sol";
+import {Verifier} from "../src/Verifier.sol";
 
 contract Prover {}
 
@@ -22,7 +22,7 @@ contract ExampleProver is Prover {
     }
 }
 
-contract ExampleVerifier is VerifierUnderTest {
+contract ExampleVerifier is Verifier {
     address public immutable PROVER;
     bytes4 constant SIMPLE_PROVER_SELECTOR = ExampleProver.doSomething.selector;
 
@@ -62,8 +62,6 @@ contract Verifier_OnlyVerified_Modifier_Tests is Test {
         commitment = ExecutionCommitment(
             exampleVerifier.PROVER(), ExampleProver.doSomething.selector, block.number - 1, blockhash(block.number - 1)
         );
-
-        exampleVerifier.setVerifier(mockProofVerifier);
     }
 
     function test_verifySuccess() public view {
