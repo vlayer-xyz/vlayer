@@ -99,26 +99,37 @@ impl Host<EthersProvider<EthersClient>> {
     }
 }
 
-fn create_evm_env<P>(
+struct EvmEnvFactory<P> {
     provider: Rc<P>,
-    ExecutionLocation {
-        block_number,
-        chain_id,
-    }: ExecutionLocation,
-) -> Result<EvmEnv<ProofDb<P>, P::Header>, HostError>
+}
+
+impl<P> EvmEnvFactory<P>
 where
     P: Provider,
 {
-    let header = provider
-        .get_block_header(block_number)
-        .map_err(|err| HostError::Provider(err.to_string()))?
-        .ok_or(HostError::BlockNotFound(block_number))?;
+    fn new(provider: Rc<P>) -> Self {
+        EvmEnvFactory { provider }
+    }
 
-    let db = ProofDb::new(provider, block_number);
-    let chain_spec = chain_id.try_into()?;
-    let mut env = EvmEnv::new(db, header);
-    env.with_chain_spec(&chain_spec)?;
-    Ok(env)
+    fn create(
+        &self,
+        ExecutionLocation {
+            block_number,
+            chain_id,
+        }: ExecutionLocation,
+    ) -> Result<EvmEnv<ProofDb<P>, P::Header>, HostError> {
+        let header = self
+            .provider
+            .get_block_header(block_number)
+            .map_err(|err| HostError::Provider(err.to_string()))?
+            .ok_or(HostError::BlockNotFound(block_number))?;
+
+        let db = ProofDb::new(Rc::clone(&self.provider), block_number);
+        let chain_spec = chain_id.try_into()?;
+        let mut env = EvmEnv::new(db, header);
+        env.with_chain_spec(&chain_spec)?;
+        Ok(env)
+    }
 }
 
 impl<P: Provider<Header = EthBlockHeader>> Host<P> {
@@ -185,7 +196,7 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
                 self.provider_factory.as_ref(),
                 location.chain_id,
             )?;
-            let env = create_evm_env(provider, location)?;
+            let env = EvmEnvFactory::new(provider).create(location)?;
             Ok::<_, HostError>(env)
         };
         get_mut_or_insert_with_result(&mut self.envs, location, create_evm_env)
