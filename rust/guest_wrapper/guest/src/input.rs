@@ -46,12 +46,11 @@ impl<H: EvmBlockHeader + Clone> From<MultiEvmInput<H>> for ValidatedMultiEvmInpu
 
 impl<H: EvmBlockHeader + Clone> From<ValidatedMultiEvmInput<H>> for MultiEvmEnv<WrapStateDb, H> {
     fn from(input: ValidatedMultiEvmInput<H>) -> Self {
-        let envs = input
+        input
             .0
              .0
             .into_iter()
             .map(|(location, input)| (location, EvmEnv::from(ValidatedEvmInput(input))))
-            .collect();
-        MultiEvmEnv(envs)
+            .collect()
     }
 }
