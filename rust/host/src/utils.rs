@@ -1,4 +1,5 @@
 use std::collections::{hash_map::Entry, HashMap};
+use std::hash::Hash;
 
 pub fn get_mut_or_insert_with_result<K, V, F, E>(
     map: &mut HashMap<K, V>,
@@ -6,7 +7,7 @@ pub fn get_mut_or_insert_with_result<K, V, F, E>(
     f: F,
 ) -> Result<&mut V, E>
 where
-    K: std::hash::Hash + Eq,
+    K: Hash + Eq,
     F: FnOnce() -> Result<V, E>,
 {
     match map.entry(key) {
