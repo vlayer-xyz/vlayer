@@ -52,7 +52,6 @@ contract ExampleVerifier is Verifier {
 contract Verifier_OnlyVerified_Modifier_Tests is Test {
     ExampleVerifier exampleVerifier = new ExampleVerifier();
     TestHelpers helpers = new TestHelpers();
-    FakeProofVerifier mockProofVerifier = new FakeProofVerifier();
 
     ExecutionCommitment commitment;
 
