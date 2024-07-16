@@ -6,12 +6,12 @@ import {Prover} from "vlayer/Prover.sol";
 struct SessionProof {
     uint8[] header;
     uint8[] signature;
-    uint8[] session_info;
+    uint8[] sessionInfo;
 }
 
 struct SubstringsProof {
     uint8[][] openings;
-    uint8[] inclusion_proof;
+    uint8[] inclusionProof;
 }
 
 contract WebProver is Prover {
@@ -20,7 +20,7 @@ contract WebProver is Prover {
     function main(
         SessionProof calldata session,
         SubstringsProof calldata substrings,
-        string calldata notary_pub_key
+        string calldata notaryPubKey
     ) public pure returns (uint8[] memory) {
         return substrings.openings[0];
     }
