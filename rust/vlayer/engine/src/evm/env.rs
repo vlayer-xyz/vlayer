@@ -37,8 +37,8 @@ impl<D> EvmEnv<D> {
     }
 
     /// Returns the header of the environment.
-    pub fn header(&self) -> &Box<dyn EvmBlockHeader> {
-        &self.header
+    pub fn header(&self) -> &dyn EvmBlockHeader {
+        &*self.header
     }
 }
 
@@ -72,10 +72,7 @@ impl<D> MultiEvmEnv<D> {
         self.0.insert(location, env);
     }
 
-    pub fn get_mut(
-        &mut self,
-        location: &ExecutionLocation,
-    ) -> Result<&mut EvmEnv<D>, EngineError> {
+    pub fn get_mut(&mut self, location: &ExecutionLocation) -> Result<&mut EvmEnv<D>, EngineError> {
         self.0
             .get_mut(location)
             .ok_or(EngineError::EvmNotFound(*location))

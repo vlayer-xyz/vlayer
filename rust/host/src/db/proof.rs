@@ -8,6 +8,7 @@ use revm::{
     Database,
 };
 use std::rc::Rc;
+use vlayer_engine::evm::block_header::EvmBlockHeader;
 
 /// A revm [Database] backed by a [Provider] that caches all queries needed for a state proof.
 pub struct ProofDb<P> {
@@ -65,7 +66,7 @@ impl<P: Provider> ProofDb<P> {
         self.contracts.values().cloned().collect()
     }
 
-    pub fn fetch_ancestors(&self) -> anyhow::Result<Vec<P::Header>> {
+    pub fn fetch_ancestors(&self) -> anyhow::Result<Vec<Box<dyn EvmBlockHeader>>> {
         let provider = &self.db.provider;
         let mut ancestors = Vec::new();
         if let Some(block_hash_min_number) = self.block_hash_numbers.iter().min() {

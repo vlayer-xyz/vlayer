@@ -9,11 +9,12 @@ use alloy_primitives::{keccak256, Address, BlockHash, BlockNumber, Bloom, Bytes,
 use alloy_rlp_derive::RlpEncodable;
 use revm::primitives::BlockEnv;
 use serde::{Deserialize, Serialize};
+use typetag;
 
 /// [EvmEnv] for Ethereum.
 pub type EthEvmEnv<D> = EvmEnv<D>;
 
-pub type MultiEthEvmInput = MultiEvmInput<EthBlockHeader>;
+pub type MultiEthEvmInput = MultiEvmInput;
 
 /// Ethereum post-merge block header.
 #[derive(Debug, Clone, Serialize, Deserialize, RlpEncodable, Default)]
@@ -68,6 +69,7 @@ impl Hashable for EthBlockHeader {
     }
 }
 
+#[typetag::serde]
 impl EvmBlockHeader for EthBlockHeader {
     #[inline]
     fn parent_hash(&self) -> &B256 {

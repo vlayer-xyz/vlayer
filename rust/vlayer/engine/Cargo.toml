@@ -24,6 +24,8 @@ serde = "1.0"
 tracing = { workspace = true }
 thiserror = { workspace = true }
 mpt = { path = "../../mpt" }
+typetag = "0.2.16"
+dyn-clone = "1.0.17"
 
 [dev-dependencies]
 alloy-trie = "0.4.1"

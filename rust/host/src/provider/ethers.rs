@@ -4,7 +4,7 @@ use ethers_core::types::Block;
 use ethers_providers::{Middleware, MiddlewareError};
 use thiserror::Error;
 use tokio::runtime::{Handle, Runtime};
-use vlayer_engine::ethereum::EthBlockHeader;
+use vlayer_engine::{ethereum::EthBlockHeader, evm::block_header::EvmBlockHeader};
 
 /// An error that can occur when interacting with the provider.
 #[derive(Error, Debug)]
@@ -55,17 +55,18 @@ where
     M::Error: 'static,
 {
     type Error = EthersProviderError<M::Error>;
-    type Header = EthBlockHeader;
 
     fn get_block_header(
         &self,
         block: alloy_primitives::BlockNumber,
-    ) -> Result<Option<Self::Header>, Self::Error> {
+    ) -> Result<Option<Box<dyn EvmBlockHeader>>, Self::Error> {
         let block = self.block_on(self.client.get_block(block))?;
         match block {
-            Some(block) => Ok(Some(
-                to_eth_block_header(block).map_err(EthersProviderError::BlockConversionError)?,
-            )),
+            Some(block) => {
+                let header = to_eth_block_header(block)
+                    .map_err(EthersProviderError::BlockConversionError)?;
+                Ok(Some(Box::new(header)))
+            }
             None => Ok(None),
         }
     }

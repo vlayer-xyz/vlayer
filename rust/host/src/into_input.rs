@@ -2,15 +2,14 @@ use std::collections::HashMap;
 
 use crate::{db::proof::ProofDb, provider::Provider};
 use anyhow::{ensure, Ok};
-use vlayer_engine::ethereum::EthBlockHeader;
 use vlayer_engine::evm::block_header::EvmBlockHeader;
 use vlayer_engine::evm::env::MultiEvmEnv;
 use vlayer_engine::evm::input::{EvmInput, MultiEvmInput};
 
 pub fn into_input<P: Provider>(
     db: &ProofDb<P>,
-    header: P::Header,
-) -> anyhow::Result<EvmInput<P::Header>> {
+    header: Box<dyn EvmBlockHeader>,
+) -> anyhow::Result<EvmInput> {
     let (state_trie, storage_tries) = db.prepare_state_storage_tries()?;
     ensure!(
         header.state_root() == &state_trie.hash_slow(),
@@ -30,8 +29,8 @@ pub fn into_input<P: Provider>(
 }
 
 pub fn into_multi_input<P: Provider>(
-    envs: MultiEvmEnv<ProofDb<P>, P::Header>,
-) -> anyhow::Result<MultiEvmInput<P::Header>> {
+    envs: MultiEvmEnv<ProofDb<P>>,
+) -> anyhow::Result<MultiEvmInput> {
     let mut inner = HashMap::new();
     for (location, env) in envs.0 {
         let header = env.header;

@@ -5,10 +5,10 @@ use vlayer_engine::evm::{
     input::{EvmInput, MultiEvmInput},
 };
 
-pub struct ValidatedEvmInput<H>(EvmInput<H>);
+pub struct ValidatedEvmInput(EvmInput);
 
-impl<H: EvmBlockHeader + Clone> From<EvmInput<H>> for ValidatedEvmInput<H> {
-    fn from(input: EvmInput<H>) -> Self {
+impl From<EvmInput> for ValidatedEvmInput {
+    fn from(input: EvmInput) -> Self {
         input.validate_state_root();
         input.validate_ancestors();
 
@@ -16,10 +16,9 @@ impl<H: EvmBlockHeader + Clone> From<EvmInput<H>> for ValidatedEvmInput<H> {
     }
 }
 
-impl<H: EvmBlockHeader + Clone + 'static> From<ValidatedEvmInput<H>> for EvmEnv<WrapStateDb> {
-    fn from(input: ValidatedEvmInput<H>) -> Self {
+impl From<ValidatedEvmInput> for EvmEnv<WrapStateDb> {
+    fn from(input: ValidatedEvmInput) -> Self {
         let input = input.0;
-        let header = input.header.clone();
         let block_hashes = input.block_hashes();
         let db = WrapStateDb::new(StateDb::new(
             input.state_trie,
@@ -27,15 +26,16 @@ impl<H: EvmBlockHeader + Clone + 'static> From<ValidatedEvmInput<H>> for EvmEnv<
             input.contracts,
             block_hashes,
         ));
+        let header = input.header;
 
-        EvmEnv::new(db, Box::new(header))
+        EvmEnv::new(db, header)
     }
 }
 
-pub struct ValidatedMultiEvmInput<H>(MultiEvmInput<H>);
+pub struct ValidatedMultiEvmInput(MultiEvmInput);
 
-impl<H: EvmBlockHeader + Clone> From<MultiEvmInput<H>> for ValidatedMultiEvmInput<H> {
-    fn from(input: MultiEvmInput<H>) -> Self {
+impl From<MultiEvmInput> for ValidatedMultiEvmInput {
+    fn from(input: MultiEvmInput) -> Self {
         let validated = input
             .0
             .into_iter()
@@ -45,10 +45,8 @@ impl<H: EvmBlockHeader + Clone> From<MultiEvmInput<H>> for ValidatedMultiEvmInpu
     }
 }
 
-impl<H: EvmBlockHeader + Clone + 'static> From<ValidatedMultiEvmInput<H>>
-    for MultiEvmEnv<WrapStateDb>
-{
-    fn from(input: ValidatedMultiEvmInput<H>) -> Self {
+impl From<ValidatedMultiEvmInput> for MultiEvmEnv<WrapStateDb> {
+    fn from(input: ValidatedMultiEvmInput) -> Self {
         let envs = input
             .0
              .0

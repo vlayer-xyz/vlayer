@@ -1,4 +1,7 @@
 use alloy_primitives::{BlockNumber, B256};
+use dyn_clone::DynClone;
+use std::fmt::Debug;
+use typetag;
 
 use revm::primitives::BlockEnv;
 
@@ -8,7 +11,8 @@ pub trait Hashable {
 }
 
 /// An EVM abstraction of a block header.
-pub trait EvmBlockHeader: Hashable {
+#[typetag::serde]
+pub trait EvmBlockHeader: Hashable + Debug + DynClone {
     /// Returns the hash of the parent block's header.
     fn parent_hash(&self) -> &B256;
     /// Returns the block number.

@@ -154,7 +154,7 @@ mod view {
             }
 
             /// Tests retrieving the chain ID.
-            function testChainid() external view returns (uint256) {
+            function testChainId() external view returns (uint256) {
                 return block.chainid;
             }
 
@@ -164,7 +164,7 @@ mod view {
             }
 
             /// Tests calling multiple contracts with the same and different storage.
-            function testMuliContractCalls() external view returns (uint256) {
+            function testMultiContractCalls() external view returns (uint256) {
                 return VALUE0.value() + VALUE42_a.value() + VALUE42_b.value();
             }
         }
@@ -231,27 +231,27 @@ mod view {
 
     #[test]
     fn chainid() -> anyhow::Result<()> {
-        let sol_call = ViewCallTest::testChainidCall {};
+        let sol_call = ViewCallTest::testChainIdCall {};
         let call = Call {
             caller: VIEW_CALL,
             to: VIEW_CALL,
             data: sol_call.abi_encode(),
         };
-        let result = run::<ViewCallTest::testChainidCall>(call, SEPOLIA_ID, VIEW_CALL_BLOCK_NO)?;
+        let result = run::<ViewCallTest::testChainIdCall>(call, SEPOLIA_ID, VIEW_CALL_BLOCK_NO)?;
         assert_eq!(result._0, uint!(11_155_111_U256));
         Ok(())
     }
 
     #[test]
     fn multi_contract_calls() -> anyhow::Result<()> {
-        let sol_call = ViewCallTest::testMuliContractCallsCall {};
+        let sol_call = ViewCallTest::testMultiContractCallsCall {};
         let call = Call {
             caller: VIEW_CALL,
             to: VIEW_CALL,
             data: sol_call.abi_encode(),
         };
         let result =
-            run::<ViewCallTest::testMuliContractCallsCall>(call, SEPOLIA_ID, VIEW_CALL_BLOCK_NO)?;
+            run::<ViewCallTest::testMultiContractCallsCall>(call, SEPOLIA_ID, VIEW_CALL_BLOCK_NO)?;
         assert_eq!(result._0, uint!(84_U256));
         Ok(())
     }

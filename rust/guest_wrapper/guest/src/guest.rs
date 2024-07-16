@@ -1,7 +1,6 @@
 use crate::{db::wrap_state::WrapStateDb, input::ValidatedMultiEvmInput};
 use vlayer_engine::{
     engine::Engine,
-    ethereum::EthBlockHeader,
     evm::{
         env::{ExecutionLocation, MultiEvmEnv},
         input::MultiEvmInput,
@@ -17,7 +16,7 @@ pub struct Guest {
 
 impl Guest {
     pub fn new(
-        multi_evm_input: MultiEvmInput<EthBlockHeader>,
+        multi_evm_input: MultiEvmInput,
         start_execution_location: ExecutionLocation,
     ) -> Self {
         let chain_spec = start_execution_location
@@ -25,7 +24,7 @@ impl Guest {
             .try_into()
             .expect("cannot get chain spec");
 
-        let validated_multi_evm_input: ValidatedMultiEvmInput<_> = multi_evm_input.into();
+        let validated_multi_evm_input: ValidatedMultiEvmInput = multi_evm_input.into();
         let multi_evm_env = MultiEvmEnv::from(validated_multi_evm_input)
             .with_chain_spec(&chain_spec)
             .expect("cannot set chain spec");

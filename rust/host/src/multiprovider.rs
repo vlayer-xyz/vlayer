@@ -1,11 +1,10 @@
 use crate::host::{EthersClient, HostError};
-use crate::provider::{EthFileProvider, EthersProvider, FileProvider, Provider};
+use crate::provider::{EthersProvider, FileProvider, Provider};
 use alloy_primitives::ChainId;
 use derive_more::AsMut;
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::rc::Rc;
-use vlayer_engine::ethereum::EthBlockHeader;
 
 pub trait MultiProvider<P: Provider>
 where
@@ -62,7 +61,7 @@ impl MultiProvider<EthersProvider<EthersClient>> for EthersMultiProvider {
 #[derive(AsMut)]
 pub struct FileMultiProvider {
     #[as_mut]
-    providers: HashMap<ChainId, Rc<FileProvider<EthBlockHeader>>>,
+    providers: HashMap<ChainId, Rc<FileProvider>>,
     rpc_file_cache: HashMap<ChainId, String>,
 }
 
@@ -75,15 +74,15 @@ impl FileMultiProvider {
     }
 }
 
-impl MultiProvider<EthFileProvider> for FileMultiProvider {
-    fn create_provider(&mut self, chain_id: ChainId) -> Result<Rc<EthFileProvider>, HostError> {
+impl MultiProvider<FileProvider> for FileMultiProvider {
+    fn create_provider(&mut self, chain_id: ChainId) -> Result<Rc<FileProvider>, HostError> {
         let file_path = self
             .rpc_file_cache
             .get(&chain_id)
             .ok_or_else(|| HostError::NoRpcCache(chain_id))?;
 
         let path_buf = PathBuf::from(file_path);
-        let provider = EthFileProvider::from_file(&path_buf).map_err(|err| {
+        let provider = FileProvider::from_file(&path_buf).map_err(|err| {
             HostError::Provider(format!(
                 "Error creating provider for chain ID {}: {}",
                 chain_id, err

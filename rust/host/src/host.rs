@@ -15,7 +15,6 @@ use risc0_zkvm::{default_prover, is_dev_mode, ExecutorEnv, ProverOpts};
 use std::rc::Rc;
 use thiserror::Error;
 use vlayer_engine::engine::{Engine, EngineError};
-use vlayer_engine::ethereum::EthBlockHeader;
 use vlayer_engine::evm::env::{EvmEnv, ExecutionLocation, MultiEvmEnv};
 use vlayer_engine::evm::input::MultiEvmInput;
 use vlayer_engine::io::GuestOutputError;
@@ -23,7 +22,7 @@ use vlayer_engine::io::{Call, GuestOutput, HostOutput, Input};
 
 pub type EthersClient = OGEthersProvider<RetryClient<Http>>;
 
-pub struct Host<P: Provider<Header = EthBlockHeader>> {
+pub struct Host<P: Provider> {
     start_execution_location: ExecutionLocation,
     envs: MultiEvmEnv<ProofDb<P>>,
 }
@@ -99,7 +98,7 @@ impl Host<EthersProvider<EthersClient>> {
     }
 }
 
-impl<P: Provider<Header = EthBlockHeader>> Host<P> {
+impl<P: Provider> Host<P> {
     pub fn try_new_with_provider(provider: Rc<P>, config: HostConfig) -> Result<Self, HostError> {
         let start_block_number = config.start_execution_location.block_number;
         let header = provider
@@ -109,7 +108,7 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
 
         let db = ProofDb::new(provider, start_block_number);
         let chain_spec = config.start_execution_location.chain_id.try_into()?;
-        let env = EvmEnv::new(db, Box::new(header)).with_chain_spec(&chain_spec)?;
+        let env = EvmEnv::new(db, header).with_chain_spec(&chain_spec)?;
         let envs = MultiEvmEnv::from_single(env, config.start_execution_location);
 
         Ok(Host {
@@ -179,7 +178,7 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
 
     fn build_executor_env(
         start_execution_location: ExecutionLocation,
-        multi_evm_input: MultiEvmInput<P::Header>,
+        multi_evm_input: MultiEvmInput,
         call: Call,
     ) -> Result<ExecutorEnv<'static>, HostError> {
         let input = Input {
