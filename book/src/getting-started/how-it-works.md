@@ -67,7 +67,7 @@ See the example Verifer contract below:
 address NFT_OWNERSHIP_VLAYER_CONTRACT = 0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d;
 
 contract Airdrop is Verifier {
-  function claimOnce(Proof calldata proof, address owner) 
+  function claim(Proof calldata proof, address owner) 
     public 
     onlyVerified(NFT_OWNERSHIP_VLAYER_CONTRACT, NftOwnership.main.selector) 
   {
@@ -78,7 +78,7 @@ contract Airdrop is Verifier {
 Note that the above contract inherits from the `Verfier` vlayer contract. 
 It is necessary for veryfing the computation done by the Prover contract from the previous step. 
 
-`claimOnce()` function takes proof returned by the vlayer SDK as the first argument. Other arguments are public inputs returned from Prover `main()` function (in the same order). 
+`claim()` function takes proof returned by the vlayer SDK as the first argument. Other arguments are public inputs returned from Prover `main()` function (in the same order). 
 
 `onlyVerified(address, bytes4)` modifier ensures that proof is valid and takes two arguments:
 - Address of the Prover contract 
