@@ -1,4 +1,5 @@
 use crate::db::proof::ProofDb;
+use crate::evm_env_factory::EvmEnvFactory;
 use crate::into_input::into_multi_input;
 use crate::provider::factory::{EthersProviderFactory, ProviderFactory};
 use crate::provider::{EthersProvider, Provider};
@@ -96,39 +97,6 @@ impl Host<EthersProvider<EthersClient>> {
     pub fn try_new(config: HostConfig) -> Result<Self, HostError> {
         let provider_factory = EthersProviderFactory::new(config.rpc_urls.clone());
         Host::try_new_with_multi_provider(provider_factory, config)
-    }
-}
-
-struct EvmEnvFactory<P> {
-    provider: Rc<P>,
-}
-
-impl<P> EvmEnvFactory<P>
-where
-    P: Provider,
-{
-    fn new(provider: Rc<P>) -> Self {
-        EvmEnvFactory { provider }
-    }
-
-    fn create(
-        &self,
-        ExecutionLocation {
-            block_number,
-            chain_id,
-        }: ExecutionLocation,
-    ) -> Result<EvmEnv<ProofDb<P>, P::Header>, HostError> {
-        let header = self
-            .provider
-            .get_block_header(block_number)
-            .map_err(|err| HostError::Provider(err.to_string()))?
-            .ok_or(HostError::BlockNotFound(block_number))?;
-
-        let db = ProofDb::new(Rc::clone(&self.provider), block_number);
-        let chain_spec = chain_id.try_into()?;
-        let mut env = EvmEnv::new(db, header);
-        env.with_chain_spec(&chain_spec)?;
-        Ok(env)
     }
 }
 
