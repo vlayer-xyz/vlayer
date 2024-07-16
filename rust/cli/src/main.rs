@@ -1,3 +1,4 @@
+use std::process::Command;
 use crate::errors::CLIError;
 use crate::misc::init::find_src_path;
 use clap::{Parser, Subcommand};
@@ -26,6 +27,7 @@ struct Cli {
 enum Commands {
     Init,
     Serve,
+    Test,
 }
 
 #[tokio::main]
@@ -74,6 +76,18 @@ async fn run() -> Result<(), CLIError> {
                     &src_path.display()
                 ),
             }
+        }
+        Commands::Test => {
+            info!("Running vlayer test");
+            let cwd = std::env::current_dir()?;
+            let root_path = find_foundry_root(&cwd)?;
+
+            Command::new("forge")
+                .args(["test"])
+                .current_dir(root_path)
+                .stdout(std::process::Stdio::inherit())
+                .stderr(std::process::Stdio::inherit())
+                .output()?;
         }
     }
     Ok(())
