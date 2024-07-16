@@ -20,4 +20,11 @@ contract FakeProofVerifier_Tests is Test {
 
         assertEq(address(verifier.verifier()).codehash, address(mockVerifier).codehash);
     }
+
+    function test_cannotBeCreatedOnMainnet() public {
+        vm.chainId(1);
+
+        vm.expectRevert();
+        new FakeProofVerifier();
+    }
 }
