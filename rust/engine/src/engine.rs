@@ -34,6 +34,9 @@ pub enum EngineError {
 
     #[error("EVM not found for location")]
     EvmNotFound(ExecutionLocation),
+
+    #[error("EVM Env not found for location")]
+    EvmEnvNotFound(ExecutionLocation),
 }
 
 impl Engine {

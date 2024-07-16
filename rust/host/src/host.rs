@@ -111,8 +111,9 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
 
         let db = ProofDb::new(provider, start_block_number);
         let chain_spec = config.start_execution_location.chain_id.try_into()?;
-        let env = EvmEnv::new(db, header).with_chain_spec(&chain_spec)?;
-        let envs = MultiEvmEnv::from_single(env, config.start_execution_location);
+        let mut env = EvmEnv::new(db, header);
+        env.with_chain_spec(&chain_spec)?;
+        let envs = MultiEvmEnv::from([(config.start_execution_location, env)]);
 
         Ok(Host {
             envs,
@@ -134,7 +135,12 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
     }
 
     pub fn run(mut self, call: Call) -> Result<HostOutput, HostError> {
-        let env = self.envs.get_mut(&self.start_execution_location)?;
+        let env = self
+            .envs
+            .get_mut(&self.start_execution_location)
+            .ok_or(HostError::Engine(EngineError::EvmEnvNotFound(
+                self.start_execution_location,
+            )))?;
         let host_output = Engine::default().call(&call, env)?;
 
         let multi_evm_input =
