@@ -92,11 +92,8 @@ impl HostConfig {
 
 impl Host<EthersProvider<EthersClient>> {
     pub fn try_new(config: HostConfig) -> Result<Self, HostError> {
-        let chain_id = config.start_execution_location.chain_id;
         let provider_factory = EthersProviderFactory::new(config.rpc_urls.clone());
-        let provider = provider_factory.create(chain_id)?;
-
-        Host::try_new_with_provider(Rc::new(provider), config)
+        Host::try_new_with_multi_provider(HashMap::new(), provider_factory, config)
     }
 }
 
@@ -123,7 +120,7 @@ where
 }
 
 impl<P: Provider<Header = EthBlockHeader>> Host<P> {
-    pub fn try_new_with_provider(provider: Rc<P>, config: HostConfig) -> Result<Self, HostError> {
+    fn try_new_with_provider(provider: Rc<P>, config: HostConfig) -> Result<Self, HostError> {
         let env = create_evm_env(provider.clone(), config.start_execution_location)?;
         let envs = MultiEvmEnv::from([(config.start_execution_location, env)]);
 
