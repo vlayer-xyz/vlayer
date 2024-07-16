@@ -3,6 +3,7 @@ pragma solidity ^0.8.13;
 
 import {IRiscZeroVerifier} from "risc0-ethereum/IRiscZeroVerifier.sol";
 
+import {GUEST_ID} from "../GuestID.sol";
 import {Proof} from "../Proof.sol";
 import {ProofMode, SealLib, Seal} from "../Seal.sol";
 
@@ -11,7 +12,6 @@ import {IProofVerifier} from "./IProofVerifier.sol";
 abstract contract ProofVerifierBase is IProofVerifier {
     using SealLib for Seal;
 
-    bytes32 public constant GUEST_ID = bytes32(0xb7079f57c71b4e1d95b8b1254303e13f78914599a8c119534c4c947c996b4d7d);
     uint256 constant AVAILABLE_HISTORICAL_BLOCKS = 256;
 
     ProofMode public immutable proofMode;
