@@ -1,34 +1,26 @@
 use std::process::Command;
-use crate::errors::CLIError;
-use crate::misc::init::find_src_path;
-use clap::{Parser, Subcommand};
+
+use clap::Parser;
+use tracing::{error, info};
+
 use misc::{
     init::{create_vlayer_dir, fetch_vlayer_files},
     path::find_foundry_root,
 };
-use server::server::{serve, Config};
-use tracing::{error, info};
+use server::server::{Config, serve};
+
+use crate::{
+    cli_args::{Cli, Commands},
+    errors::CLIError,
+    misc::init::find_src_path,
+};
 
 pub mod errors;
 mod misc;
+mod cli_args;
 
 #[cfg(test)]
 mod test_utils;
-
-#[derive(Parser)]
-#[command(version, about, long_about = None)]
-#[command(propagate_version = true)]
-struct Cli {
-    #[command(subcommand)]
-    command: Commands,
-}
-
-#[derive(Subcommand)]
-enum Commands {
-    Init,
-    Serve,
-    Test,
-}
 
 #[tokio::main]
 async fn main() {
@@ -77,13 +69,14 @@ async fn run() -> Result<(), CLIError> {
                 ),
             }
         }
-        Commands::Test => {
-            info!("Running vlayer test");
+        Commands::Test(args) => {
+            info!("Running vlayer tests");
             let cwd = std::env::current_dir()?;
             let root_path = find_foundry_root(&cwd)?;
 
             Command::new("forge")
-                .args(["test"])
+                .arg("test")
+                .args(&args.args)
                 .current_dir(root_path)
                 .stdout(std::process::Stdio::inherit())
                 .stderr(std::process::Stdio::inherit())
