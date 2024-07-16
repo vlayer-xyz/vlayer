@@ -1,8 +1,8 @@
 use crate::db::proof::ProofDb;
 use crate::into_input::into_multi_input;
 use crate::provider::factory::{EthersProviderFactory, ProviderFactory};
-use crate::provider::EthersProviderError;
 use crate::provider::{EthersProvider, Provider};
+use crate::provider::{EthersProviderError, MultiProvider};
 use crate::utils::get_mut_or_insert_with_result;
 use alloy_primitives::ChainId;
 use ethers_providers::Provider as OGEthersProvider;
@@ -26,6 +26,8 @@ pub type EthersClient = OGEthersProvider<RetryClient<Http>>;
 pub struct Host<P: Provider<Header = EthBlockHeader>> {
     start_execution_location: ExecutionLocation,
     envs: MultiEvmEnv<ProofDb<P>, EthBlockHeader>,
+    multi_provider: MultiProvider<P>,
+    provider_factory: Box<dyn ProviderFactory<P>>,
 }
 
 #[derive(Error, Debug)]
@@ -121,32 +123,22 @@ where
 
 impl<P: Provider<Header = EthBlockHeader>> Host<P> {
     pub fn try_new_with_multi_provider(
-        provider_factory: impl ProviderFactory<P>,
+        provider_factory: impl ProviderFactory<P> + 'static,
         config: HostConfig,
     ) -> Result<Self, HostError> {
-        let mut multi_provider = HashMap::new();
-        let chain_id = config.start_execution_location.chain_id;
-        let provider = Rc::clone(get_mut_or_insert_with_result(
-            &mut multi_provider,
-            chain_id,
-            || Ok::<_, HostError>(Rc::new(provider_factory.create(chain_id)?)),
-        )?);
-        let env = create_evm_env(provider, config.start_execution_location)?;
-        let envs = MultiEvmEnv::from([(config.start_execution_location, env)]);
+        let multi_provider = HashMap::new();
+        let envs = HashMap::new();
 
         Ok(Host {
             envs,
+            multi_provider,
+            provider_factory: Box::new(provider_factory),
             start_execution_location: config.start_execution_location,
         })
     }
 
     pub fn run(mut self, call: Call) -> Result<HostOutput, HostError> {
-        let env = self
-            .envs
-            .get_mut(&self.start_execution_location)
-            .ok_or(HostError::Engine(EngineError::EvmEnvNotFound(
-                self.start_execution_location,
-            )))?;
+        let env = self.get_mut_env(self.start_execution_location)?;
         let host_output = Engine::default().call(&call, env)?;
 
         let multi_evm_input =
@@ -167,6 +159,23 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
             guest_output,
             seal,
             raw_abi: raw_guest_output,
+        })
+    }
+
+    fn get_mut_env(
+        &mut self,
+        location: ExecutionLocation,
+    ) -> Result<&mut EvmEnv<ProofDb<P>, P::Header>, HostError> {
+        get_mut_or_insert_with_result(&mut self.envs, location, || {
+            // I would love to split it out into a separate function, but it's not possible because then borrow checker
+            // can't realize that mutable borrows of self.envs and self.multi_provider don't overlap.
+            let provider = Rc::clone(get_mut_or_insert_with_result(
+                &mut self.multi_provider,
+                location.chain_id,
+                || Ok::<_, HostError>(Rc::new(self.provider_factory.create(location.chain_id)?)),
+            )?);
+            let env = create_evm_env(provider, location)?;
+            Ok::<_, HostError>(env)
         })
     }
 
