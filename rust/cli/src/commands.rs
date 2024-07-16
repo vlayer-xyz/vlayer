@@ -9,6 +9,7 @@ pub struct Cli {
     pub command: Commands,
 }
 
+// We don't care about test args for now and let forge do the parsing
 pub struct TestArgs {
     pub args: Vec<OsString>,
 }
