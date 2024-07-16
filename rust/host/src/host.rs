@@ -1,8 +1,8 @@
 use crate::db::proof::ProofDb;
 use crate::into_input::into_multi_input;
 use crate::provider::factory::{EthersProviderFactory, ProviderFactory};
+use crate::provider::EthersProviderError;
 use crate::provider::{EthersProvider, Provider};
-use crate::provider::{EthersProviderError, MultiProvider};
 use crate::utils::get_or_insert_with_result;
 use alloy_primitives::ChainId;
 use ethers_providers::Provider as OGEthersProvider;
@@ -93,7 +93,7 @@ impl HostConfig {
 impl Host<EthersProvider<EthersClient>> {
     pub fn try_new(config: HostConfig) -> Result<Self, HostError> {
         let provider_factory = EthersProviderFactory::new(config.rpc_urls.clone());
-        Host::try_new_with_multi_provider(HashMap::new(), provider_factory, config)
+        Host::try_new_with_multi_provider(provider_factory, config)
     }
 }
 
@@ -131,10 +131,10 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
     }
 
     pub fn try_new_with_multi_provider(
-        mut multi_provider: MultiProvider<P>,
         provider_factory: impl ProviderFactory<P>,
         config: HostConfig,
     ) -> Result<Self, HostError> {
+        let mut multi_provider = HashMap::new();
         let chain_id = config.start_execution_location.chain_id;
         let provider = get_or_insert_with_result(&mut multi_provider, chain_id, || {
             Ok::<_, HostError>(Rc::new(provider_factory.create(chain_id)?))
