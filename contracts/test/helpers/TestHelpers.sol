@@ -38,7 +38,16 @@ contract TestHelpers {
         bytes memory emptyBytes = new bytes(0);
         return createProof(commitment, emptyBytes);
     }
+
+    function setSealProofMode(Seal memory seal, ProofMode proofMode) public pure returns (Seal memory) {
+        return encodeSeal(SealLib.decode(seal), proofMode);
+    }
+
     function encodeSeal(bytes memory seal) public pure returns (Seal memory) {
+        return encodeSeal(seal, ProofMode.FAKE);
+    }
+
+    function encodeSeal(bytes memory seal, ProofMode proofMode) public pure returns (Seal memory) {
         require(seal.length == SealLib.SEAL_LENGTH, "Invalid seal length");
 
         uint256 lhv = 0;
@@ -53,7 +62,7 @@ contract TestHelpers {
 
         // set ProofMode to FAKE
         rhv <<= 8;
-        rhv += uint8(ProofMode.FAKE);
+        rhv += uint8(proofMode);
 
         // shift value to most significant bytes
         lhv <<= 8 * (32 - SealLib.SEAL_MIDDLE);
