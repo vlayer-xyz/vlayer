@@ -3,7 +3,7 @@ use crate::into_input::into_multi_input;
 use crate::provider::factory::{EthersProviderFactory, ProviderFactory};
 use crate::provider::EthersProviderError;
 use crate::provider::{EthersProvider, Provider};
-use crate::utils::get_or_insert_with_result;
+use crate::utils::get_mut_or_insert_with_result;
 use alloy_primitives::ChainId;
 use ethers_providers::Provider as OGEthersProvider;
 use ethers_providers::{Http, ProviderError, RetryClient};
@@ -126,9 +126,11 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
     ) -> Result<Self, HostError> {
         let mut multi_provider = HashMap::new();
         let chain_id = config.start_execution_location.chain_id;
-        let provider = get_or_insert_with_result(&mut multi_provider, chain_id, || {
-            Ok::<_, HostError>(Rc::new(provider_factory.create(chain_id)?))
-        })?;
+        let provider = Rc::clone(get_mut_or_insert_with_result(
+            &mut multi_provider,
+            chain_id,
+            || Ok::<_, HostError>(Rc::new(provider_factory.create(chain_id)?)),
+        )?);
         let env = create_evm_env(provider, config.start_execution_location)?;
         let envs = MultiEvmEnv::from([(config.start_execution_location, env)]);
 
