@@ -10,12 +10,12 @@ use misc::{
 use server::server::{serve, Config};
 
 use crate::{
-    cli_args::{Cli, Commands},
+    commands::{Cli, Commands},
     errors::CLIError,
     misc::init::find_src_path,
 };
 
-mod cli_args;
+mod commands;
 pub mod errors;
 mod misc;
 
