@@ -2,7 +2,7 @@ use alloy_primitives::{address, b256, uint, Address, U256};
 use alloy_sol_types::{sol, SolCall};
 use host::{
     host::{Host, HostConfig},
-    multiprovider::FileMultiProvider,
+    multiprovider::FileProviderFactory,
     Call,
 };
 use std::collections::HashMap;
@@ -11,7 +11,7 @@ use vlayer_engine::{
     evm::env::ExecutionLocation,
 };
 
-fn create_test_multi_provider() -> FileMultiProvider {
+fn create_test_provider_factory() -> FileProviderFactory {
     let rpc_file_cache: HashMap<_, _> = [
         (MAINNET_ID, "testdata/mainnet_rpc_cache.json".to_string()),
         (SEPOLIA_ID, "testdata/sepolia_rpc_cache.json".to_string()),
@@ -19,18 +19,19 @@ fn create_test_multi_provider() -> FileMultiProvider {
     .into_iter()
     .collect();
 
-    FileMultiProvider::new(rpc_file_cache)
+    FileProviderFactory::new(rpc_file_cache)
 }
 
 fn run<C>(call: Call, chain_id: u64, block_number: u64) -> anyhow::Result<C::Return>
 where
     C: SolCall,
 {
-    let mut test_multi_provider = create_test_multi_provider();
+    let multi_provider = HashMap::new();
+    let provider_factory = create_test_provider_factory();
     let null_rpc_url = "a null url value as url is not needed in tests";
     let execution_location = ExecutionLocation::new(block_number, chain_id);
     let config = HostConfig::new(null_rpc_url, execution_location);
-    let host = Host::try_new_with_multi_provider(&mut test_multi_provider, config)?;
+    let host = Host::try_new_with_multi_provider(multi_provider, provider_factory, config)?;
     let raw_return_value = host.run(call)?.guest_output.evm_call_result;
     let return_value = C::abi_decode_returns(&raw_return_value, false)?;
     Ok(return_value)
