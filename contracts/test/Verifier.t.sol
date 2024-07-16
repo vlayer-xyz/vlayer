@@ -51,7 +51,7 @@ contract ExampleVerifier is VerifierUnderTest {
 
 contract Verifier_OnlyVerified_Modifier_Tests is Test {
     ExampleVerifier exampleVerifier = new ExampleVerifier();
-    RiscZeroMockVerifier mockVerifier = new RiscZeroMockVerifier(bytes4(0));
+    TestHelpers helpers = new TestHelpers();
     FakeProofVerifier mockProofVerifier = new FakeProofVerifier();
 
     ExecutionCommitment commitment;
@@ -66,25 +66,13 @@ contract Verifier_OnlyVerified_Modifier_Tests is Test {
         exampleVerifier.setVerifier(mockProofVerifier);
     }
 
-    function createProof(bytes memory journalParams) public view returns (Proof memory) {
-        bytes memory journal = TestHelpers.concat(abi.encode(commitment), journalParams);
-
-        bytes memory seal = mockVerifier.mockProve(mockProofVerifier.GUEST_ID(), sha256(journal)).seal;
-        return Proof(journal.length, TestHelpers.encodeSeal(seal), commitment);
-    }
-
-    function createProof() public view returns (Proof memory) {
-        bytes memory emptyBytes = new bytes(0);
-        return createProof(emptyBytes);
-    }
-
     function test_verifySuccess() public view {
-        Proof memory proof = createProof();
+        (Proof memory proof,) = helpers.createProof(commitment);
         exampleVerifier.verifySomething(proof);
     }
 
     function test_proofAndJournalDoNotMatch() public {
-        Proof memory proof = createProof();
+        (Proof memory proof,) = helpers.createProof(commitment);
         proof.commitment.settleBlockNumber -= 1;
         proof.commitment.settleBlockHash = blockhash(proof.commitment.settleBlockNumber);
 
@@ -94,14 +82,14 @@ contract Verifier_OnlyVerified_Modifier_Tests is Test {
 
     function test_journaledParams() public view {
         bool value = true;
-        Proof memory proof = createProof(abi.encode(value));
+        (Proof memory proof,) = helpers.createProof(commitment, abi.encode(value));
 
         assertEq(exampleVerifier.verifySomethingElse(proof, value), value);
     }
 
     function test_journaledParamCannotBeChanged() public {
         bool value = true;
-        Proof memory proof = createProof(abi.encode(value));
+        (Proof memory proof,) = helpers.createProof(commitment, abi.encode(value));
 
         value = !value;
 
@@ -110,7 +98,7 @@ contract Verifier_OnlyVerified_Modifier_Tests is Test {
     }
 
     function test_functionCanHaveNonJournaledParams() public view {
-        Proof memory proof = createProof();
+        (Proof memory proof,) = helpers.createProof(commitment);
 
         assertEq(exampleVerifier.verifySomethingElse(proof, true), true);
         assertEq(exampleVerifier.verifySomethingElse(proof, false), false);
