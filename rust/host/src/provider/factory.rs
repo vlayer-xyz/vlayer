@@ -3,9 +3,6 @@ use crate::provider::{EthFileProvider, EthersProvider, Provider};
 use alloy_primitives::ChainId;
 use std::collections::HashMap;
 use std::path::PathBuf;
-use std::rc::Rc;
-
-pub type MultiProvider<P> = HashMap<ChainId, Rc<P>>;
 
 pub trait ProviderFactory<P>
 where
@@ -73,7 +70,7 @@ impl ProviderFactory<EthFileProvider> for FileProviderFactory {
 mod test {
     use vlayer_engine::config::MAINNET_ID;
 
-    use crate::multiprovider::{EthersProviderFactory, ProviderFactory};
+    use super::*;
 
     #[test]
     fn try_new_invalid_rpc_url() -> anyhow::Result<()> {
