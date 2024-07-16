@@ -33,11 +33,23 @@ contract GitHubEmail is Prover {
     }
 }
 ```
+
+
 The `email` structure is automatically injected into the contract context of the email prover by the vlayer. Then we have a series of assertions (*regular Solidity `require()`*) that check the email details. 
 
 String comparison is handled by our `StringUtils` library (*described in more [details below](/features/email.html#stringutils)*). Date values are formatted in the [Unix time](https://en.wikipedia.org/wiki/Unix_time) notation, which allows them to be compared as integers.
 
 > If one of the string comparisons fails, require will revert the execution, and as a result, proof generation will fail.
+
+> 💡 **Try it Now**
+> 
+> To run the above example on your computer, type the following command in your terminal:
+> 
+> ```bash
+> vlayer init --template email_example
+> ```
+> 
+> This command will download all necessary artifacts to your project.
 
 ## Email structure
 The `email` structure of type `Email` is injected into the `Prover` and can be used in a `main()` function.
@@ -206,5 +218,5 @@ What exactly happened in the above code?
 
 And voilà, we just successfully used email in the context of an on-chain smart contract. 
 
-> Please note this is just a simplification of what a real MultiSig wallet would look like, but it shows how email recovery function could work.
+> Keep in mind that this is a simplified version of a real MultiSig wallet, demonstrating how an email recovery function could operate.
 

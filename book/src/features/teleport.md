@@ -39,8 +39,19 @@ contract NftOwnership is Prover {
 }
 ```
 
+
 First, call to `setChainId(1, 12_000_000)` configures the desired chain to the Ethereum mainnet (`chainId = 1`). Then, `check_byac_ownership` function ensures `msg.sender` owns of one of Bored Ape Yacht Club NFT on the Ethereum Mainnet at `12,000,000` block. In case caller doesn't have balance of specified NFT, contract would abort execution and throw error (thanks to `require()` check).
 
 Next call `setChainId(42161, 9_000_000)` switches the context to the Arbitrum chain. Then the `check_sandbox_ownership` function checks the ownership of NFT in block `9,000,000`, but this time on a different chain - Arbitrum.
 
 Currently, supported chains are Ethereum Sepolia and Optimism testnet.
+
+> 💡 **Try it Now**
+> 
+> To run the above example on your computer, type the following command in your terminal:
+> 
+> ```bash
+> vlayer init --template teleport_example
+> ```
+> 
+> This command will download all necessary artifacts to your project.
