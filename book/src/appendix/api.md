@@ -27,11 +27,11 @@ and the response:
  {
     "method": "v_call",
     "params": [
-        {   "from": "<from address>", # optional field
+        {   "caller": "<from address>", # optional field
             "to": "<contract address>",
             "data": "0x<abi encoded calldata>"
         },
-        {"chainId": 1, "blockNo": "latest"},
+        {"chain_id": 1, "block_no": "latest"},
         {
             "email": "<base64? encoded raw email>",
             "web": "<encoded web artifacts>",

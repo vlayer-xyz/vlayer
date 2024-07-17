@@ -1,6 +1,7 @@
 use crate::db::proof::ProofDb;
 use crate::into_input::into_multi_input;
-use crate::multiprovider::{EthersMultiProvider, MultiProvider};
+use crate::multiprovider::get_or_insert_with_result;
+use crate::multiprovider::{EthersProviderFactory, MultiProvider, ProviderFactory};
 use crate::provider::EthersProviderError;
 use crate::provider::{EthersProvider, Provider};
 use std::collections::HashMap;
@@ -93,9 +94,10 @@ impl HostConfig {
 impl Host<EthersProvider<EthersClient>> {
     pub fn try_new(config: HostConfig) -> Result<Self, HostError> {
         let chain_id = config.start_execution_location.chain_id;
-        let provider = EthersMultiProvider::new(config.rpc_urls.clone()).get(chain_id)?;
+        let provider_factory = EthersProviderFactory::new(config.rpc_urls.clone());
+        let provider = provider_factory.create(chain_id)?;
 
-        Host::try_new_with_provider(provider, config)
+        Host::try_new_with_provider(Rc::new(provider), config)
     }
 }
 
@@ -118,15 +120,15 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
         })
     }
 
-    pub fn try_new_with_multi_provider<M>(
-        multi_provider: &mut M,
+    pub fn try_new_with_multi_provider(
+        mut multi_provider: MultiProvider<P>,
+        provider_factory: impl ProviderFactory<P>,
         config: HostConfig,
-    ) -> Result<Self, HostError>
-    where
-        M: MultiProvider<P>,
-    {
+    ) -> Result<Self, HostError> {
         let chain_id = config.start_execution_location.chain_id;
-        let provider = multi_provider.get(chain_id)?;
+        let provider = get_or_insert_with_result(&mut multi_provider, chain_id, || {
+            Ok::<_, HostError>(Rc::new(provider_factory.create(chain_id)?))
+        })?;
 
         Self::try_new_with_provider(provider, config)
     }

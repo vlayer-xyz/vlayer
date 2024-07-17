@@ -13,4 +13,8 @@ command = "mdbook-mermaid"
 [output]
 
 [output.html]
+default-theme = "ayu"
+preferred-dark-theme = "ayu"
 additional-js = ["mermaid.min.js", "mermaid-init.js", "src/static/solidity.min.js"]
+git-repository-url = "https://github.com/vlayer-xyz/vlayer"
+git-repository-icon = "fa-github"

@@ -1,53 +1,35 @@
 use crate::host::{EthersClient, HostError};
-use crate::provider::{EthFileProvider, EthersProvider, FileProvider, Provider};
+use crate::provider::{EthFileProvider, EthersProvider, Provider};
 use alloy_primitives::ChainId;
-use derive_more::AsMut;
+use std::collections::hash_map::Entry;
 use std::collections::HashMap;
 use std::path::PathBuf;
 use std::rc::Rc;
-use vlayer_engine::ethereum::EthBlockHeader;
 
-pub trait MultiProvider<P: Provider>
+pub type MultiProvider<P> = HashMap<ChainId, Rc<P>>;
+
+pub trait ProviderFactory<P>
 where
-    Self: AsMut<HashMap<ChainId, Rc<P>>>,
+    P: Provider,
 {
-    fn create_provider(&mut self, chain_id: ChainId) -> Result<Rc<P>, HostError>;
-    fn get(&mut self, chain_id: ChainId) -> Result<Rc<P>, HostError> {
-        if let Some(provider) = self.as_mut().get(&chain_id) {
-            return Ok(Rc::clone(provider));
-        }
+    fn create(&self, chain_id: ChainId) -> Result<P, HostError>;
+}
 
-        let provider = self.create_provider(chain_id)?;
-
-        self.as_mut().insert(chain_id, Rc::clone(&provider));
-        Ok(provider)
-    }
+pub struct EthersProviderFactory {
+    rpc_urls: HashMap<ChainId, String>,
 }
 
 const MAX_RETRY: u32 = 3;
 const INITIAL_BACKOFF: u64 = 500;
 
-#[derive(AsMut)]
-pub struct EthersMultiProvider {
-    #[as_mut]
-    providers: HashMap<ChainId, Rc<EthersProvider<EthersClient>>>,
-    rpc_urls: HashMap<ChainId, String>,
-}
-
-impl EthersMultiProvider {
+impl EthersProviderFactory {
     pub fn new(rpc_urls: HashMap<ChainId, String>) -> Self {
-        EthersMultiProvider {
-            providers: HashMap::new(),
-            rpc_urls,
-        }
+        EthersProviderFactory { rpc_urls }
     }
 }
 
-impl MultiProvider<EthersProvider<EthersClient>> for EthersMultiProvider {
-    fn create_provider(
-        &mut self,
-        chain_id: ChainId,
-    ) -> Result<Rc<EthersProvider<EthersClient>>, HostError> {
+impl ProviderFactory<EthersProvider<EthersClient>> for EthersProviderFactory {
+    fn create(&self, chain_id: ChainId) -> Result<EthersProvider<EthersClient>, HostError> {
         let url = self
             .rpc_urls
             .get(&chain_id)
@@ -55,28 +37,22 @@ impl MultiProvider<EthersProvider<EthersClient>> for EthersMultiProvider {
 
         let client = EthersClient::new_client(url, MAX_RETRY, INITIAL_BACKOFF)?;
 
-        Ok(Rc::new(EthersProvider::new(client)))
+        Ok(EthersProvider::new(client))
     }
 }
 
-#[derive(AsMut)]
-pub struct FileMultiProvider {
-    #[as_mut]
-    providers: HashMap<ChainId, Rc<FileProvider<EthBlockHeader>>>,
+pub struct FileProviderFactory {
     rpc_file_cache: HashMap<ChainId, String>,
 }
 
-impl FileMultiProvider {
+impl FileProviderFactory {
     pub fn new(rpc_file_cache: HashMap<ChainId, String>) -> Self {
-        FileMultiProvider {
-            providers: HashMap::new(),
-            rpc_file_cache,
-        }
+        FileProviderFactory { rpc_file_cache }
     }
 }
 
-impl MultiProvider<EthFileProvider> for FileMultiProvider {
-    fn create_provider(&mut self, chain_id: ChainId) -> Result<Rc<EthFileProvider>, HostError> {
+impl ProviderFactory<EthFileProvider> for FileProviderFactory {
+    fn create(&self, chain_id: ChainId) -> Result<EthFileProvider, HostError> {
         let file_path = self
             .rpc_file_cache
             .get(&chain_id)
@@ -90,6 +66,47 @@ impl MultiProvider<EthFileProvider> for FileMultiProvider {
             ))
         })?;
 
-        Ok(Rc::new(provider))
+        Ok(provider)
+    }
+}
+
+pub fn get_or_insert_with_result<K, V, F, E>(map: &mut HashMap<K, V>, key: K, f: F) -> Result<V, E>
+where
+    K: std::hash::Hash + Eq,
+    F: FnOnce() -> Result<V, E>,
+    V: Clone,
+{
+    match map.entry(key) {
+        Entry::Occupied(value) => Ok(value.get().clone()),
+        Entry::Vacant(entry) => {
+            let value = f()?;
+            entry.insert(value.clone());
+            Ok(value)
+        }
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use vlayer_engine::config::MAINNET_ID;
+
+    use crate::multiprovider::{EthersProviderFactory, ProviderFactory};
+
+    #[test]
+    fn try_new_invalid_rpc_url() -> anyhow::Result<()> {
+        let chain_id = MAINNET_ID;
+        let rpc_urls = [(chain_id, "http://localhost:123".to_string())]
+            .into_iter()
+            .collect();
+        let factory = EthersProviderFactory::new(rpc_urls);
+        let provider = factory.create(chain_id)?;
+        let res = provider.get_block_number();
+        let error = res.unwrap_err();
+
+        assert!(error.to_string().contains(
+            "(http://localhost:123/): error trying to connect: tcp connect error: Connection refused"
+        ));
+
+        Ok(())
     }
 }

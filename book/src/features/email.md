@@ -1,6 +1,6 @@
 # Email
 
-## Significance of the email
+## Email Significance
 Many online services, from social media platforms to e-commerce sites, require an email address to create an account. According to recent surveys, more than 80% of businesses consider email to be their primary communication channel, both internally and with customers. 
 
 All of this means that our inboxes are full of data that can be leveraged.
@@ -8,7 +8,7 @@ All of this means that our inboxes are full of data that can be leveraged.
 ## Proof of Email
 With vlayer, you can access email content from smart contracts and use it on-chain. 
 
-You do this by writing a Solidity smart contract (prover) that has access to the parsed email and returns data to be used on-chain. This allows you to create claims without exposing the full content of an email.
+You do this by writing a Solidity smart contract (`Prover`) that has access to the parsed email and returns data to be used on-chain. This allows you to create claims without exposing the full content of an email.
 
 Under the hood, we verify mail server signatures to ensure the authenticity and integrity of the content.
 
@@ -33,11 +33,23 @@ contract GitHubEmail is Prover {
     }
 }
 ```
+
+
 The `email` structure is automatically injected into the contract context of the email prover by the vlayer. Then we have a series of assertions (*regular Solidity `require()`*) that check the email details. 
 
 String comparison is handled by our `StringUtils` library (*described in more [details below](/features/email.html#stringutils)*). Date values are formatted in the [Unix time](https://en.wikipedia.org/wiki/Unix_time) notation, which allows them to be compared as integers.
 
 > If one of the string comparisons fails, require will revert the execution, and as a result, proof generation will fail.
+
+> 💡 **Try it Now**
+> 
+> To run the above example on your computer, type the following command in your terminal:
+> 
+> ```bash
+> vlayer init --template email_example
+> ```
+> 
+> This command will download all necessary artifacts to your project.
 
 ## Email structure
 The `email` structure of type `Email` is injected into the `Prover` and can be used in a `main()` function.
@@ -51,7 +63,7 @@ struct Email {
   uint received_at;
 }
 ```
-A `Email` consists of the following fields
+An `Email` consists of the following fields
 - `subject` - a string with the subject of the email
 - `body` - a string consisting of the entire body of the email
 - `from` - a string consisting of the sender's email address (*no name is available*) 
@@ -80,7 +92,7 @@ To: <any email with trusted provider>
 Subject: Wallet recovery of {old account address}
 Body: New wallet address {new account address}
 ```
-Now, we you can access the email from the `Prover` contract:
+Now, we can access the email from the `Prover` contract:
 
 ```solidity
 contract RecoveryEmail is Prover {
@@ -206,5 +218,5 @@ What exactly happened in the above code?
 
 And voilà, we just successfully used email in the context of an on-chain smart contract. 
 
-> Please note this is just a simplification of what a real MultiSig wallet would look like, but it shows how email recovery function could work.
+> Keep in mind that this is a simplified version of a real MultiSig wallet, demonstrating how an email recovery function could operate.
 
