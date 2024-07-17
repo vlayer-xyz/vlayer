@@ -149,6 +149,7 @@ source ../../bash/vlayer-deploy.sh ${EXAMPLE}
 # the name of the contract in vlayer-deploy.sh that you want to call.
 simple="SIMPLE_PROVER_ADDRESS"
 simple_travel="SIMPLE_TRAVEL_PROVER_ADDRESS"
+web="WEB_PROVER_ADDRESS"
 
 eval "EXAMPLE_ADDRESS_VAR=\${${EXAMPLE}}"
 eval "EXAMPLE_ADDRESS=\${${EXAMPLE_ADDRESS_VAR}}"

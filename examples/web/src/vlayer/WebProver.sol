@@ -2,26 +2,22 @@
 pragma solidity ^0.8.13;
 
 import {Prover} from "vlayer/Prover.sol";
+import {Strings} from "openzeppelin/contracts/utils/Strings.sol";
 
-struct SessionProof {
-    uint8[] header;
-    uint8[] signature;
-    uint8[] sessionInfo;
-}
-
-struct SubstringsProof {
-    uint8[][] openings;
-    uint8[] inclusionProof;
+struct Web {
+    string url;
+    string content;
+    string notaryPubKey;
 }
 
 contract WebProver is Prover {
     constructor() {}
 
     function main(
-        SessionProof calldata session,
-        SubstringsProof calldata substrings,
-        string calldata notaryPubKey
-    ) public pure returns (uint8[] memory) {
-        return substrings.openings[0];
+        Web calldata web
+    ) public pure returns (string memory, string memory) {
+        require(Strings.equal(web.url, "https://api.x.com"), "Invalid URL");
+
+        return (web.content, web.notaryPubKey);
     }
 }
