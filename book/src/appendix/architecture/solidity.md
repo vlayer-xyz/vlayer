@@ -79,7 +79,7 @@ function verify(bytes calldata seal, bytes32 imageId, bytes32 journalDigest)
 
 ## Data encoding summary
 
-Below is a schema of how block of data is encoded in different structures at different stages.
+Below, is a schema of how a block of data is encoded in different structures at different stages.
 
 ![Schema](/images/architecture/transaction-data.png)
 
@@ -88,7 +88,7 @@ Below is a schema of how block of data is encoded in different structures at dif
 
 ## Two Proving Modes
 
-To support two [proving modes](/advanced/proving.md), vlayer provides a set of smart contracts connected to the Verifier contract, one for each mode:
+To support two [proving modes](/advanced/proving.md), vlayer provides a set of smart contracts connected to the `Verifier` contract, one for each mode:
 
-- `DEV` - Automatically deployed with each `Prover` contract, but only on development and test networks. This mode will be used if the `ProofMode` decoded from `SEAL` is `FAKE`.
+- `DEVELOPMENT` - Automatically deployed with each `Prover` contract, but only on development and test networks. This mode will be used if the `ProofMode` decoded from `SEAL` is `FAKE`.
 - `PRODUCTION` - This requires infrastructure deployed ahead of time that performs actual verification. This mode will be used if the `ProofMode` decoded from `SEAL` is `GROTH16`.
