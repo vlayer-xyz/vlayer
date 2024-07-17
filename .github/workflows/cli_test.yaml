@@ -1,9 +1,9 @@
-name: CLI Init End-to-End Test
+name: E2E cli init
 
 on:
   release:
-    types: [created]
-
+    types: [published]
+    
 jobs:
   cli-test:
     runs-on: ubuntu-latest
@@ -17,9 +17,5 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v2
 
-      - name: Install vlayer and run init test
-        run: |
-          curl -SL  https://install.vlayer.xyz | bash
-          source ~/.config/.bashrc
-          vlayerup
-          ./bash/vlayer-init-test.sh
+      - name: Run init test
+        run: ./bash/vlayer-init-test.sh
