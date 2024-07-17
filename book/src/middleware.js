@@ -137,10 +137,10 @@ const setAuthCookie = async (login) => {
 
   const hash = await hashString(`${login}${COOKIE_SALT}`);
 
-  responseCookies.set('authenticated', `${login}.${hash}`, { 
+  responseCookies.set('authenticated', `${login}.${hash}`, {
     httpOnly: true, 
-    maxAge: 60 * 60 * 24 * 30 
-  }) // make cookie persistent for 30 days
+    maxAge: 60 * 60 * 24
+  }) // make cookie persistent for 24h
 
   return  headers;
 }
