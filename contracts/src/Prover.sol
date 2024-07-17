@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 
 interface ITraveler {
     // These functions need to return something because otherwise Solidity compiler won't generate CALL opcode when they're called.
-    function setBlock(uint256 blockNo) external returns (uint256);
+    function setBlock(uint256 blockNo) external returns (bool);
     function setChain(uint256 chainId, uint256 blockNo) external returns (bool);
 }
 

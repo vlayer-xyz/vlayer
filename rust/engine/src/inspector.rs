@@ -2,7 +2,7 @@ use alloy_primitives::hex::decode;
 use alloy_primitives::{address, Address, Bytes};
 use ethers_core::types::U256;
 use once_cell::sync::Lazy;
-use revm::interpreter::{Gas, InstructionResult, Interpreter, InterpreterResult, OpCode};
+use revm::interpreter::{Gas, InstructionResult, InterpreterResult};
 use revm::{
     interpreter::{CallInputs, CallOutcome},
     Database, EvmContext, Inspector,
@@ -70,14 +70,14 @@ impl<DB: Database> Inspector<DB> for SetInspector {
                         argument
                     );
                     self.set_block = Some(argument);
-                    return Some(MockCallOutcome::from(U256::zero()).0)
+                    return Some(MockCallOutcome::from(U256::zero()).0);
                 } else if selector == *SET_CHAIN_SELECTOR {
                     info!(
                         "Travel contract called with function: setChain and argument: {:?}!",
                         argument
                     );
                     self.set_chain = Some(argument);
-                    return Some(MockCallOutcome::from(U256::zero()).0)
+                    return Some(MockCallOutcome::from(U256::zero()).0);
                 }
             }
             // If the call is not setBlock/setChain but setBlock/setChain is active, intercept the call.
