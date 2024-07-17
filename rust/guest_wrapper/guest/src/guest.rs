@@ -20,18 +20,8 @@ impl Guest {
         multi_evm_input: MultiEvmInput<EthBlockHeader>,
         start_execution_location: ExecutionLocation,
     ) -> Self {
-        let chain_spec = start_execution_location
-            .chain_id
-            .try_into()
-            .expect("cannot get chain spec");
-
         let validated_multi_evm_input: ValidatedMultiEvmInput<_> = multi_evm_input.into();
-        let mut multi_evm_env = MultiEvmEnv::from(validated_multi_evm_input);
-        for evm_env in multi_evm_env.values_mut() {
-            evm_env
-                .with_chain_spec(&chain_spec)
-                .expect("cannot set chain spec");
-        }
+        let multi_evm_env = MultiEvmEnv::from(validated_multi_evm_input);
 
         Guest {
             multi_evm_env,

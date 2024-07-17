@@ -60,7 +60,15 @@ where
         input
             .0
             .into_iter()
-            .map(|(location, input)| (location, EvmEnv::from(ValidatedEvmInput(input))))
+            .map(|(location, input)| {
+                let chain_spec = &location.chain_id.try_into().expect("cannot get chain spec");
+                (
+                    location,
+                    EvmEnv::from(ValidatedEvmInput(input))
+                        .with_chain_spec(chain_spec)
+                        .unwrap(),
+                )
+            })
             .collect()
     }
 }
