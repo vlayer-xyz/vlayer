@@ -1,0 +1,42 @@
+name: Forge test
+
+on:
+  push:
+    paths:
+      - 'contracts/**'
+      - 'examples/**'
+      - '.github/workflows/**'
+    branches:
+      - '**' 
+  merge_group:
+
+env:
+  FOUNDRY_PROFILE: ci
+
+jobs:
+  forge-test:
+    strategy:
+      fail-fast: true
+
+    name: Foundry project
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly-5ac78a9cd4b94dc53d1fe5e0f42372b28b5a7559 # 2024-06-02
+
+      - name: Run Forge build
+        working-directory: ./contracts
+        run: |
+          forge --version
+          forge build --sizes
+
+      - name: Run Forge tests
+        working-directory: ./contracts
+        run: |
+          forge test -vvv

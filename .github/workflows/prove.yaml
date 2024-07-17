@@ -1,0 +1,64 @@
+name: Local prover
+on:
+  push:
+    paths:
+      - 'rust/**'
+      - 'examples/**'
+      - '.github/workflows/**'
+    branches:
+      - '**' 
+  merge_group:
+
+jobs:
+  rust-prove:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: cargo-bins/cargo-binstall@main
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache-workspaces: "rust -> target"
+
+      - name: Install risc0 instaler
+        run: cargo binstall -y cargo-risczero --force
+
+      - name: Install risc0 toolchain
+        run: cargo risczero install
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly-5ac78a9cd4b94dc53d1fe5e0f42372b28b5a7559 # 2024-06-02
+
+      - name: Start Anvil
+        run: |
+          anvil &
+          ANVIL_SERVER_PID=$!
+          echo "ANVIL_SERVER_PID=$ANVIL_SERVER_PID" >> $GITHUB_ENV
+
+      - name: Deploy simple example contract
+        working-directory: examples/simple
+        run: |
+          output=$(mktemp)
+          ../../bash/vlayer-deploy.sh simple | tee ${output}
+          
+          # filter-out env variables and pass them to next steps
+          grep '[A-Z0-9_]\+=[a-zA-Z0-9]\+' <${output} >>${GITHUB_ENV}
+
+      - name: Run host
+        working-directory: rust/host
+        run: cargo run
+        env:
+          RUST_LOG: info
+          RISC0_DEV_MODE: 1
+
+      - name: Stop Anvil
+        if: always()
+        run: kill $ANVIL_SERVER_PID
