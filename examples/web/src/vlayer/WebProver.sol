@@ -22,6 +22,7 @@ contract WebProver is Prover {
         SubstringsProof calldata substrings,
         string calldata notaryPubKey
     ) public pure returns (uint8[] memory) {
-        return substrings.openings[0];
+
+        return substrings.openings[0];ba
     }
 }
