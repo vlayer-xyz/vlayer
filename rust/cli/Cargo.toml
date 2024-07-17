@@ -21,6 +21,19 @@ tar = "0.4.41"
 flate2 = "1.0.30"
 
 server = { path = "../server" }
+foundry-evm-core = { git = "https://github.com/foundry-rs/foundry", version = "0.2.0" }
+color-eyre = "=0.6.3"
+foundry-config = { git = "https://github.com/foundry-rs/foundry", version = "0.2.0" }
+regex = "1.10.4"
+rayon = "1.10.0"
+serde_json = "1.0.120"
+foundry-cli = { git = "https://github.com/foundry-rs/foundry", version = "0.2.0" }
+foundry-common = { git = "https://github.com/foundry-rs/foundry", version = "0.2.0" }
+foundry-debugger = { git = "https://github.com/foundry-rs/foundry", version = "0.2.0" }
+foundry-evm = { git = "https://github.com/foundry-rs/foundry", version = "0.2.0" }
+forge = { git = "https://github.com/foundry-rs/foundry", version = "0.2.0" }
+foundry-compilers = "0.9.0"
+comfy-table = "7.1.1"
 
 [dev-dependencies]
 tempfile = "3.10.1"

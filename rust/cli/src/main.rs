@@ -1,5 +1,5 @@
-use crate::errors::CLIError;
-use crate::misc::init::find_src_path;
+use crate::tests::TestArgs;
+use crate::{errors::CLIError, misc::init::find_src_path};
 use clap::{Parser, Subcommand};
 use misc::{
     init::{create_vlayer_dir, fetch_vlayer_files},
@@ -13,6 +13,7 @@ mod misc;
 
 #[cfg(test)]
 mod test_utils;
+mod tests;
 
 const VERSION_MESSAGE: &str = concat!(
     env!("CARGO_PKG_VERSION"),
@@ -35,6 +36,7 @@ struct Cli {
 enum Commands {
     Init,
     Serve,
+    Test(TestArgs),
 }
 
 #[tokio::main]
@@ -56,7 +58,7 @@ async fn main() {
 async fn run() -> Result<(), CLIError> {
     let cli = Cli::parse();
 
-    match &cli.command {
+    match cli.command {
         Commands::Serve => {
             info!("Running vlayer serve...");
             let config = Config {
@@ -83,6 +85,10 @@ async fn run() -> Result<(), CLIError> {
                     &src_path.display()
                 ),
             }
+        }
+        Commands::Test(cmd) => {
+            info!("Running vlayer tests");
+            cmd.run().await.unwrap();
         }
     }
     Ok(())
