@@ -16,7 +16,10 @@ pub struct EvmInput<H> {
     pub ancestors: Vec<H>,
 }
 
-impl<H: EvmBlockHeader> EvmInput<H> {
+impl<H> EvmInput<H>
+where
+    H: EvmBlockHeader,
+{
     pub fn print_sizes(&self) {
         let total_storage_size: usize = self.storage_tries.iter().map(|t| t.size()).sum();
 
@@ -28,7 +31,10 @@ impl<H: EvmBlockHeader> EvmInput<H> {
     }
 }
 
-impl<H: EvmBlockHeader + Clone> EvmInput<H> {
+impl<H> EvmInput<H>
+where
+    H: EvmBlockHeader + Clone,
+{
     pub fn block_hashes(&self) -> HashMap<u64, B256> {
         self.ancestors
             .iter()
