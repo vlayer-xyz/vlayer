@@ -1,7 +1,7 @@
 #!/bin/bash
-set -e
 
 bun install
+forge build
 
 anvil &
 anvil_pid=$!
@@ -9,7 +9,9 @@ anvil_pid=$!
 vlayer serve &
 vlayer_pid=$!
 
-sleep 5
+sleep 2
+
+(cd ..; ../../bash/vlayer-deploy.sh web)
 
 bun run index.ts
 
