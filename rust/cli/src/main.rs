@@ -1,26 +1,34 @@
-use std::process::Command;
-
-use clap::Parser;
-use tracing::{error, info};
-
+use crate::tests::TestArgs;
+use crate::{errors::CLIError, misc::init::find_src_path};
+use clap::{Parser, Subcommand};
 use misc::{
     init::{create_vlayer_dir, fetch_vlayer_files},
     path::find_foundry_root,
 };
 use server::server::{serve, Config};
+use tracing::{error, info};
 
-use crate::{
-    commands::{Cli, Commands},
-    errors::CLIError,
-    misc::init::find_src_path,
-};
-
-mod commands;
 pub mod errors;
 mod misc;
 
 #[cfg(test)]
 mod test_utils;
+mod tests;
+
+#[derive(Parser)]
+#[command(version, about, long_about = None)]
+#[command(propagate_version = true)]
+pub struct Cli {
+    #[command(subcommand)]
+    pub command: Commands,
+}
+
+#[derive(Subcommand)]
+pub enum Commands {
+    Init,
+    Serve,
+    Test(TestArgs),
+}
 
 #[tokio::main]
 async fn main() {
@@ -41,7 +49,7 @@ async fn main() {
 async fn run() -> Result<(), CLIError> {
     let cli = Cli::parse();
 
-    match &cli.command {
+    match cli.command {
         Commands::Serve => {
             info!("Running vlayer serve...");
             let config = Config {
@@ -69,18 +77,9 @@ async fn run() -> Result<(), CLIError> {
                 ),
             }
         }
-        Commands::Test(args) => {
+        Commands::Test(cmd) => {
             info!("Running vlayer tests");
-            let cwd = std::env::current_dir()?;
-            let root_path = find_foundry_root(&cwd)?;
-
-            Command::new("forge")
-                .arg("test")
-                .args(&args.args)
-                .current_dir(root_path)
-                .stdout(std::process::Stdio::inherit())
-                .stderr(std::process::Stdio::inherit())
-                .output()?;
+            cmd.run().await.unwrap();
         }
     }
     Ok(())
