@@ -36,7 +36,10 @@ pub(super) struct StorageQuery {
 
 /// A simple JSON cache for storing responses from a provider.
 #[derive(Debug, Deserialize, Serialize)]
-pub(crate) struct JsonCache<H: DeserializeOwned + Serialize> {
+pub(crate) struct JsonCache<H>
+where
+    H: DeserializeOwned + Serialize,
+{
     #[serde(skip)]
     file_path: Option<PathBuf>,
 
@@ -54,7 +57,10 @@ pub(crate) struct JsonCache<H: DeserializeOwned + Serialize> {
     pub(super) storage: HashMap<StorageQuery, StorageValue>,
 }
 
-impl<H: DeserializeOwned + Serialize> JsonCache<H> {
+impl<H> JsonCache<H>
+where
+    H: DeserializeOwned + Serialize,
+{
     /// Creates a new empty cache. It will be saved to the given file when dropped.
     pub(super) fn empty(file_path: PathBuf) -> Self {
         Self {
@@ -94,7 +100,10 @@ impl<H: DeserializeOwned + Serialize> JsonCache<H> {
     }
 }
 
-impl<H: DeserializeOwned + Serialize> Drop for JsonCache<H> {
+impl<H> Drop for JsonCache<H>
+where
+    H: DeserializeOwned + Serialize,
+{
     fn drop(&mut self) {
         self.save().expect("failed to save cache");
     }

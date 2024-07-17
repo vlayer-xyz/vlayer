@@ -6,7 +6,10 @@ use vlayer_engine::evm::block_header::EvmBlockHeader;
 /// A simple provider that panics on all queries.
 pub struct NullProvider<H>(pub(crate) PhantomData<H>);
 
-impl<H: EvmBlockHeader> Provider for NullProvider<H> {
+impl<H> Provider for NullProvider<H>
+where
+    H: EvmBlockHeader,
+{
     type Error = Infallible;
     type Header = H;
 

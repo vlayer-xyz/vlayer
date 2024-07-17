@@ -7,7 +7,10 @@ use vlayer_engine::evm::{
 
 pub struct ValidatedEvmInput<H>(EvmInput<H>);
 
-impl<H: EvmBlockHeader + Clone> From<EvmInput<H>> for ValidatedEvmInput<H> {
+impl<H> From<EvmInput<H>> for ValidatedEvmInput<H>
+where
+    H: EvmBlockHeader + Clone,
+{
     fn from(input: EvmInput<H>) -> Self {
         input.validate_state_root();
         input.validate_ancestors();
@@ -16,7 +19,10 @@ impl<H: EvmBlockHeader + Clone> From<EvmInput<H>> for ValidatedEvmInput<H> {
     }
 }
 
-impl<H: EvmBlockHeader + Clone> From<ValidatedEvmInput<H>> for EvmEnv<WrapStateDb, H> {
+impl<H> From<ValidatedEvmInput<H>> for EvmEnv<WrapStateDb, H>
+where
+    H: EvmBlockHeader + Clone,
+{
     fn from(input: ValidatedEvmInput<H>) -> Self {
         let input = input.0;
         let block_hashes = input.block_hashes();
@@ -33,7 +39,10 @@ impl<H: EvmBlockHeader + Clone> From<ValidatedEvmInput<H>> for EvmEnv<WrapStateD
 
 pub struct ValidatedMultiEvmInput<H>(MultiEvmInput<H>);
 
-impl<H: EvmBlockHeader + Clone> From<MultiEvmInput<H>> for ValidatedMultiEvmInput<H> {
+impl<H> From<MultiEvmInput<H>> for ValidatedMultiEvmInput<H>
+where
+    H: EvmBlockHeader + Clone,
+{
     fn from(input: MultiEvmInput<H>) -> Self {
         let validated = input
             .into_iter()
@@ -43,7 +52,10 @@ impl<H: EvmBlockHeader + Clone> From<MultiEvmInput<H>> for ValidatedMultiEvmInpu
     }
 }
 
-impl<H: EvmBlockHeader + Clone> From<ValidatedMultiEvmInput<H>> for MultiEvmEnv<WrapStateDb, H> {
+impl<H> From<ValidatedMultiEvmInput<H>> for MultiEvmEnv<WrapStateDb, H>
+where
+    H: EvmBlockHeader + Clone,
+{
     fn from(input: ValidatedMultiEvmInput<H>) -> Self {
         input
             .0
