@@ -96,12 +96,12 @@ impl HostConfig {
 impl Host<EthersProvider<EthersClient>> {
     pub fn try_new(config: HostConfig) -> Result<Self, HostError> {
         let provider_factory = EthersProviderFactory::new(config.rpc_urls.clone());
-        Host::try_new_with_multi_provider(provider_factory, config)
+        Host::try_new_with_provider_factory(provider_factory, config)
     }
 }
 
 impl<P: Provider<Header = EthBlockHeader>> Host<P> {
-    pub fn try_new_with_multi_provider(
+    pub fn try_new_with_provider_factory(
         provider_factory: impl ProviderFactory<P> + 'static,
         config: HostConfig,
     ) -> Result<Self, HostError> {

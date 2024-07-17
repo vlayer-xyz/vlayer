@@ -30,7 +30,7 @@ where
     let null_rpc_url = "a null url value as url is not needed in tests";
     let execution_location = ExecutionLocation::new(block_number, chain_id);
     let config = HostConfig::new(null_rpc_url, execution_location);
-    let host = Host::try_new_with_multi_provider(provider_factory, config)?;
+    let host = Host::try_new_with_provider_factory(provider_factory, config)?;
     let raw_return_value = host.run(call)?.guest_output.evm_call_result;
     let return_value = C::abi_decode_returns(&raw_return_value, false)?;
     Ok(return_value)
