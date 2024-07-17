@@ -1,6 +1,6 @@
 {
   "name": "web-example",
-  "module": "index.js",
+  "module": "index.ts",
   "type": "module",
   "devDependencies": {
     "@types/bun": "latest"
