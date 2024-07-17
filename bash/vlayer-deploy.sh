@@ -6,6 +6,7 @@ set -ueo pipefail
 # where ContractName is the name of the contract you want to deploy.
 simple=("SimpleProver")
 simple_travel=("SimpleTravelProver")
+web=("WebProver")
 
 EXAMPLE=$1
 eval "DEPLOYABLE_CONTRACTS=\${${EXAMPLE}}"
