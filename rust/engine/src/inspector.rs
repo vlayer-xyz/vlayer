@@ -2,7 +2,7 @@ use alloy_primitives::hex::decode;
 use alloy_primitives::{address, Address, Bytes};
 use ethers_core::types::U256;
 use once_cell::sync::Lazy;
-use revm::interpreter::{Gas, InstructionResult, InterpreterResult};
+use revm::interpreter::{Gas, InstructionResult, Interpreter, InterpreterResult, OpCode};
 use revm::{
     interpreter::{CallInputs, CallOutcome},
     Database, EvmContext, Inspector,
@@ -13,12 +13,11 @@ use crate::consts::U256_BYTES;
 
 // First 4 bytes of the call data is the selector id - the rest are arguments.
 const SELECTOR_LEN: usize = 4;
-const ROOT_ADDR: Address = address!("e7f1725e7734ce288f8367e1bb143e90bb3f0512");
-const TRAVEL_CONTRACT_ADDR: Address = address!("1234567890AbcdEF1234567890aBcdef12345678");
+const TRAVEL_CONTRACT_ADDR: Address = address!("76dc9aa45aa006a0f63942d8f9f21bd4537972a3");
 static SET_BLOCK_SELECTOR: Lazy<Vec<u8>> =
     Lazy::new(|| decode("87cea3ae").expect("Error decoding set_block function call"));
 static SET_CHAIN_SELECTOR: Lazy<Vec<u8>> =
-    Lazy::new(|| decode("1b44fd15").expect("Error decoding set_chain function call"));
+    Lazy::new(|| decode("ffbc5638").expect("Error decoding set_chain function call"));
 
 #[derive(Clone, Debug, Default)]
 pub struct SetInspector {
@@ -61,9 +60,6 @@ impl<DB: Database> Inspector<DB> for SetInspector {
         );
 
         match inputs.bytecode_address {
-            ROOT_ADDR => {
-                info!("Host contract called!");
-            }
             TRAVEL_CONTRACT_ADDR => {
                 let (selector, argument_bytes) = inputs.input.split_at(SELECTOR_LEN);
                 let argument = U256::from_big_endian(argument_bytes);
@@ -74,12 +70,14 @@ impl<DB: Database> Inspector<DB> for SetInspector {
                         argument
                     );
                     self.set_block = Some(argument);
+                    return Some(MockCallOutcome::from(U256::zero()).0)
                 } else if selector == *SET_CHAIN_SELECTOR {
                     info!(
                         "Travel contract called with function: setChain and argument: {:?}!",
                         argument
                     );
                     self.set_chain = Some(argument);
+                    return Some(MockCallOutcome::from(U256::zero()).0)
                 }
             }
             // If the call is not setBlock/setChain but setBlock/setChain is active, intercept the call.
