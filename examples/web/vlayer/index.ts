@@ -1,11 +1,10 @@
 import * as fs from 'fs'
 
-const file = fs.readFileSync('tlsn.json', { encoding: "utf8" })
-const parsed = JSON.parse(file)
-console.log(parsed)
-console.log(parsed.substrings.inclusion_proof)
-console.log(parsed.substrings.openings['38'])
-console.log(Buffer.from(parsed.substrings.openings['38'][1]["Blake3"].data).toString('utf8'))
+const tlsProof = fs.readFileSync('tlsn.json', { encoding: "utf8" })
+// taken from https://notary.pse.dev/v0.1.0-alpha.5/info
+const notaryPubKey = fs.readFileSync('notaryKey.pub', { encoding: "utf8" })
+const parsedTlsProof = JSON.parse(tlsProof)
+console.log(Buffer.from(parsedTlsProof.substrings.openings['38'][1]["Blake3"].data).toString('utf8'))
 
 
 const body = JSON.stringify({
@@ -19,9 +18,12 @@ const body = JSON.stringify({
             "data": "0xdff2dae50000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000006000000000000000000000000000000000000000000000000000000000000000a000000000000000000000000000000000000000000000000000000000000000e0000000000000000000000000000000000000000000000000000000000000001168747470733a2f2f6170692e782e636f6d000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000c746573745f636f6e74656e7400000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000012746573745f6e6f746172795f7075626b65790000000000000000000000000000"
         },
         { "chain_id": 1, "block_no": 1 },
-        // {
-        //     "web": "<encoded web artifacts>",
-        // }
+        {
+            "web": {
+                "tls_proof": tlsProof, 
+                "notary_pub_key": notaryPubKey
+            }
+        }
     ]
 })
 
