@@ -20,11 +20,21 @@ where
 }
 
 #[cfg(test)]
-mod tests {
+mod get_mut_or_insert_with_result {
     use super::*;
 
     #[test]
-    fn test_get_mut_or_insert_with_result() {
+    fn found() {
+        let key = "key";
+        let mut value = 42;
+        let mut map = HashMap::from([(key, value)]);
+
+        let result = get_mut_or_insert_with_result(&mut map, key, || Err("should not be called"));
+        assert_eq!(result, Ok(&mut value));
+    }
+
+    #[test]
+    fn created() {
         let mut map = HashMap::new();
         let key = "key";
         let mut value = 42;
@@ -34,7 +44,7 @@ mod tests {
     }
 
     #[test]
-    fn test_get_mut_or_insert_with_result_error() {
+    fn failed() {
         let mut map = HashMap::<_, (), _>::new();
         let key = "key";
         let error = "error";
