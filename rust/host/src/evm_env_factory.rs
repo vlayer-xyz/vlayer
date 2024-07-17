@@ -31,8 +31,7 @@ where
 
         let db = ProofDb::new(Rc::clone(&self.provider), block_number);
         let chain_spec = chain_id.try_into()?;
-        let mut env = EvmEnv::new(db, header);
-        env.with_chain_spec(&chain_spec)?;
+        let env = EvmEnv::new(db, header).with_chain_spec(&chain_spec)?;
         Ok(env)
     }
 }
