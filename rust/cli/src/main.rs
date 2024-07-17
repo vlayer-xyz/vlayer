@@ -6,6 +6,7 @@ use misc::{
     path::find_foundry_root,
 };
 use server::server::{serve, Config};
+use std::path::PathBuf;
 use tracing::{error, info};
 
 pub mod errors;
@@ -69,27 +70,32 @@ async fn run() -> Result<(), CLIError> {
         }
         Commands::Init => {
             let cwd = std::env::current_dir()?;
-            info!("Running vlayer init from directory {:?}", cwd.display());
-
-            let root_path = find_foundry_root(&cwd)?;
-            let src_path = find_src_path(&root_path)?;
-            info!("Found foundry project root in \"{}\"", &src_path.display());
-
-            match create_vlayer_dir(&src_path)? {
-                true => {
-                    info!("Created vlayer directory in \"{}\"", src_path.display());
-                    fetch_vlayer_files(&src_path).await?
-                }
-                false => error!(
-                    "vlayer directory already exists in \"{}\". Skipping creation.",
-                    &src_path.display()
-                ),
-            }
+            init(cwd).await?;
         }
         Commands::Test(cmd) => {
             info!("Running vlayer tests");
             cmd.run().await.unwrap();
         }
+    }
+    Ok(())
+}
+
+async fn init(cwd: PathBuf) -> Result<(), CLIError> {
+    info!("Running vlayer init from directory {:?}", cwd.display());
+
+    let root_path = find_foundry_root(&cwd)?;
+    let src_path = find_src_path(&root_path)?;
+    info!("Found foundry project root in \"{}\"", &src_path.display());
+
+    match create_vlayer_dir(&src_path)? {
+        true => {
+            info!("Created vlayer directory in \"{}\"", src_path.display());
+            fetch_vlayer_files(&src_path).await?
+        }
+        false => error!(
+            "vlayer directory already exists in \"{}\". Skipping creation.",
+            &src_path.display()
+        ),
     }
     Ok(())
 }
