@@ -27,13 +27,13 @@ const VERSION_MESSAGE: &str = concat!(
 #[derive(Parser)]
 #[command(name = "vlayer", version = VERSION_MESSAGE, about, long_about = None)]
 #[command(propagate_version = true)]
-pub struct Cli {
+struct Cli {
     #[command(subcommand)]
-    pub command: Commands,
+    command: Commands,
 }
 
 #[derive(Subcommand)]
-pub enum Commands {
+enum Commands {
     Init,
     Serve,
     Test(TestArgs),
