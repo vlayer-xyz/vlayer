@@ -37,6 +37,19 @@ pub struct CallContext {
     pub chain_id: ChainId,
 }
 
+#[derive(Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct Extras {
+    pub web: Web,
+}
+
+#[derive(Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct Web {
+    pub url: String,
+    pub content: String,
+}
+
 #[derive(Deserialize, Serialize, Debug)]
 pub struct CallResult {
     pub result: String,

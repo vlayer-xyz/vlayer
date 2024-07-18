@@ -4,12 +4,12 @@ use crate::error::AppError;
 use crate::server::Config;
 use host::host::{Host, HostConfig};
 use host::{Call as HostCall, ExecutionLocation};
-use types::{Call, CallContext, CallResult};
+use types::{Call, CallContext, CallResult, Extras};
 
 pub mod types;
 
 pub(crate) async fn call(
-    params: (Call, CallContext),
+    params: (Call, CallContext, Extras),
     config: Arc<Config>,
 ) -> Result<CallResult, AppError> {
     let call: HostCall = params.0.try_into()?;

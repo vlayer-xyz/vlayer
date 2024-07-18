@@ -159,7 +159,8 @@ v_call_request_json=$(cat <<EOF
     "method": "v_call",
     "params": [
         {"caller": "${CALLER}", "to": "${EXAMPLE_ADDRESS}", "data": "${DATA}"},
-        {"block_no": ${BLOCK_NO}, "chain_id": 11155111}
+        {"block_no": ${BLOCK_NO}, "chain_id": 11155111},
+        {"web": {"url": "", "content": ""}}
     ],
     "id": 1,
     "jsonrpc": "2.0"

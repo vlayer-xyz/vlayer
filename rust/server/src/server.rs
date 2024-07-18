@@ -138,7 +138,7 @@ mod tests {
 
             let req = json!({
                 "method": "v_call",
-                "params": [{"caller": "I am not a valid address!", "to": TO, "data": DATA}, {"block_no": 0}],
+                "params": [{"caller": "I am not a valid address!", "to": TO, "data": DATA}, {"block_no": 0}, {"web": {"url": "", "content": "0x"}}],
                 "id": 1,
                 "jsonrpc": "2.0",
             });
@@ -168,7 +168,7 @@ mod tests {
 
             let req = json!({
                 "method": "v_call",
-                "params": [{"caller": CALLER, "to": TO, "data": DATA}, {"block_no": block_nr, "chain_id": 11155111}],
+                "params": [{"caller": CALLER, "to": TO, "data": DATA}, {"block_no": block_nr, "chain_id": 11155111}, {"web": {"url": "", "content": "0x"}}],
                 "id": 1,
                 "jsonrpc": "2.0",
             });
