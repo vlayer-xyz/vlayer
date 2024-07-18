@@ -32,7 +32,7 @@ impl Guest {
     pub fn run(&mut self, call: Call) -> GuestOutput {
         let start_evm_env = self
             .multi_evm_env
-            .get_mut(&self.start_execution_location)
+            .get(&self.start_execution_location)
             .expect("cannot get evm env");
 
         let evm_call_result = Engine::default().call(&call, start_evm_env).unwrap();
