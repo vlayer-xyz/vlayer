@@ -14,7 +14,7 @@ See example verification function below:
 ```solidity
 contract Example is Verifier {
 
-    function claim(Proof proof, address verifiedArg1, uint verifiedArg2, bytes extraArg) public returns (uint)
+    function claim(Proof _p, address verifiedArg1, uint verifiedArg2, bytes extraArg) public returns (uint)
         onlyVerified(PROVER_ADDRESS, FUNCTION_SIGNATURE) {
         //...
     }

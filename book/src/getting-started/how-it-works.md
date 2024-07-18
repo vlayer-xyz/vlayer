@@ -67,7 +67,7 @@ See the example `Verifer` contract below. It transfers tokens to proven owner of
 address NFT_OWNERSHIP_VLAYER_CONTRACT = 0xbc4ca0eda7647a8ab7c2061c2e118a18a936f13d;
 
 contract Airdrop is Verifier {
-  function claim(Proof calldata proof, address owner) 
+  function claim(Proof calldata _p, address owner) 
     public 
     onlyVerified(NFT_OWNERSHIP_VLAYER_CONTRACT, NftOwnership.main.selector) 
   {

@@ -170,7 +170,7 @@ contract MultiSigWallet is Verifier  {
     mapping (address => string) ownerToEmailHash;
 
     function recovery(
-      Proof proof, 
+      Proof _p, 
       address lostWallet, 
       string emailHash, 
       address newOwner, 

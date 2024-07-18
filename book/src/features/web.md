@@ -67,7 +67,7 @@ contract InfluencerDao is Verifier {
   mapping(address => bool) public authorizedMembers; 
   mapping(string => bool) public claimedChannels;
 
-  function join(Proof proof, string calldata channelId) 
+  function join(Proof _p, string calldata channelId) 
     public 
     onlyVerified(PROVER_ADDR, PROVER_FUNC_SELECTOR)  
   { 
