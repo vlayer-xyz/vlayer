@@ -1,6 +1,6 @@
 pub mod eth;
 
-use std::any::Any;
+use std::any::TypeId;
 
 use as_any::{AsAny, Downcast};
 
@@ -8,6 +8,7 @@ use alloy_primitives::{BlockNumber, B256};
 
 use eth::EthBlockHeader;
 use revm::primitives::BlockEnv;
+use tracing::debug;
 
 pub trait Hashable {
     /// Calculate the hash, this may be slow.
@@ -28,23 +29,43 @@ pub trait EvmBlockHeader: Hashable + AsAny {
     fn fill_block_env(&self, blk_env: &mut BlockEnv);
 }
 
-pub enum BlockHeaderType {
+pub enum BlockHeader {
     Eth(EthBlockHeader),
 }
 
-impl BlockHeaderType {
-    pub fn to_box_dyn(&self) -> Box<dyn EvmBlockHeader> {
-        match self {
-            BlockHeaderType::Eth(header) => Box::new(header.clone()),
+impl From<BlockHeader> for Box<dyn EvmBlockHeader> {
+    fn from(block_header: BlockHeader) -> Self {
+        match block_header {
+            BlockHeader::Eth(header) => Box::new(header),
         }
     }
 }
 
-pub fn match_block_header_type(header: Box<dyn EvmBlockHeader>) -> Option<BlockHeaderType> {
-    if let Some(eth_header) = header.as_ref().downcast_ref::<EthBlockHeader>() {
-        Some(BlockHeaderType::Eth(eth_header.clone()))
-    } else {
-        None
+impl TryFrom<Box<dyn EvmBlockHeader>> for BlockHeader {
+    type Error = &'static str;
+
+    fn try_from(header: Box<dyn EvmBlockHeader>) -> Result<Self, Self::Error> {
+        if (*header).as_any().type_id() == TypeId::of::<EthBlockHeader>() {
+            let casted_header = header.as_ref().downcast_ref::<EthBlockHeader>().unwrap();
+            Ok(BlockHeader::Eth((*casted_header).clone()))
+        } else {
+            Err("Failed converting BlockHeader")
+        }
+    }
+}
+
+#[cfg(test)]
+mod from_header_to_box_dyn {
+    use super::*;
+
+    #[test]
+    fn eth() {
+        let eth_block_header = EthBlockHeader::default();
+
+        let header_type = BlockHeader::Eth(eth_block_header.clone());
+
+        let boxed_header: Box<dyn EvmBlockHeader> = header_type.into();
+        assert!(boxed_header.as_ref().is::<EthBlockHeader>());
     }
 }
 
@@ -53,24 +74,21 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_eth_block_header_to_box_dyn() {
+    fn eth() {
         let eth_block_header = EthBlockHeader::default();
 
-        let header_type = BlockHeaderType::Eth(eth_block_header.clone());
+        let header: Box<dyn EvmBlockHeader> = Box::new(eth_block_header.clone());
 
-        let boxed_header: Box<dyn EvmBlockHeader> = header_type.to_box_dyn();
-        assert!(boxed_header.as_ref().is::<EthBlockHeader>());
-    }
+        let result: Result<BlockHeader, _> = header.try_into();
 
-    #[test]
-    fn test_match_block_header_type() {
-        let eth_block_header = EthBlockHeader::default();
-        let header_type = BlockHeaderType::Eth(eth_block_header.clone());
-
-        let boxed_header: Box<dyn EvmBlockHeader> = header_type.to_box_dyn();
-        match match_block_header_type(boxed_header) {
-            Some(BlockHeaderType::Eth(_)) => println!("Matched EthBlockHeader"),
-            None => panic!("Did not match any block header type"),
+        match result {
+            Ok(BlockHeader::Eth(h)) => {
+                assert_eq!(h.parent_hash, eth_block_header.parent_hash);
+                assert_eq!(h.number, eth_block_header.number);
+                assert_eq!(h.timestamp, eth_block_header.timestamp);
+                assert_eq!(h.state_root, eth_block_header.state_root);
+            }
+            _ => panic!("Conversion to BlockHeader::Eth failed"),
         }
     }
 }
