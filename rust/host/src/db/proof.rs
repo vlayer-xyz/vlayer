@@ -4,23 +4,27 @@ use alloy_primitives::{Address, Bytes, B256, U256};
 use anyhow::Context;
 use mpt::MerkleTrie;
 use revm::{
+    db::WrapDatabaseRef,
     primitives::{AccountInfo, Bytecode, HashMap, HashSet},
     Database,
 };
 use std::rc::Rc;
 
 /// A revm [Database] backed by a [Provider] that caches all queries needed for a state proof.
-pub struct ProofDb<P> {
+pub struct ProofDb<P>
+where
+    P: Provider,
+{
     accounts: HashMap<Address, HashSet<U256>>,
     contracts: HashMap<B256, Bytes>,
     // Numbers of all block hashes requested by `blockhash(number)` calls.
     block_hash_numbers: HashSet<U256>,
 
-    db: ProviderDb<P>,
+    db: WrapDatabaseRef<ProviderDb<P>>,
 }
 
 impl<P: Provider> Database for ProofDb<P> {
-    type Error = <ProviderDb<P> as Database>::Error;
+    type Error = <WrapDatabaseRef<ProviderDb<P>> as Database>::Error;
 
     fn basic(&mut self, address: Address) -> Result<Option<AccountInfo>, Self::Error> {
         let basic = self.db.basic(address)?;
@@ -57,7 +61,7 @@ impl<P: Provider> ProofDb<P> {
             accounts: HashMap::new(),
             contracts: HashMap::new(),
             block_hash_numbers: HashSet::new(),
-            db: ProviderDb::new(provider, block_number),
+            db: WrapDatabaseRef(ProviderDb::new(provider, block_number)),
         }
     }
 
@@ -66,11 +70,11 @@ impl<P: Provider> ProofDb<P> {
     }
 
     pub fn fetch_ancestors(&self) -> anyhow::Result<Vec<P::Header>> {
-        let provider = &self.db.provider;
+        let provider = &self.db.0.provider;
         let mut ancestors = Vec::new();
         if let Some(block_hash_min_number) = self.block_hash_numbers.iter().min() {
             let block_hash_min_number: u64 = block_hash_min_number.to();
-            for number in (block_hash_min_number..self.db.block_number).rev() {
+            for number in (block_hash_min_number..self.db.0.block_number).rev() {
                 let header = provider
                     .get_block_header(number)?
                     .with_context(|| format!("block {number} not found"))?;
@@ -90,10 +94,10 @@ impl<P: Provider> ProofDb<P> {
     fn fetch_proofs(&self) -> anyhow::Result<Vec<EIP1186Proof>> {
         let mut proofs = Vec::new();
         for (address, storage_keys) in &self.accounts {
-            let proof = self.db.provider.get_proof(
+            let proof = self.db.0.provider.get_proof(
                 *address,
                 storage_keys.iter().map(|v| B256::from(*v)).collect(),
-                self.db.block_number,
+                self.db.0.block_number,
             )?;
             proofs.push(proof);
         }
