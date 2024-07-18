@@ -1,5 +1,5 @@
-use crate::errors::CLIError;
-use crate::tests::TestArgs;
+use crate::test_runner::TestArgs;
+use crate::{errors::CLIError, misc::init::find_src_path};
 use clap::{Parser, Subcommand};
 use commands::init::init;
 use server::server::{serve, Config};
@@ -9,9 +9,9 @@ mod commands;
 pub mod errors;
 mod utils;
 
+mod test_runner;
 #[cfg(test)]
 mod test_utils;
-mod tests;
 
 const VERSION_MESSAGE: &str = concat!(
     env!("CARGO_PKG_VERSION"),

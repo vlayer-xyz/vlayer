@@ -59,10 +59,10 @@ mod summary;
 mod vlayer_executor;
 mod vlayer_inspector;
 
-use crate::tests::contract_runner::ContractRunner;
-use crate::tests::filter::ProjectPathsAwareFilter;
-use crate::tests::summary::TestSummaryReporter;
-use crate::tests::vlayer_executor::VlayerExecutor;
+use crate::test_runner::contract_runner::ContractRunner;
+use crate::test_runner::filter::ProjectPathsAwareFilter;
+use crate::test_runner::summary::TestSummaryReporter;
+use crate::test_runner::vlayer_executor::VlayerExecutor;
 pub use filter::FilterArgs;
 use vlayer_engine::inspector::{SetInspector, TRAVEL_CONTRACT_ADDR, TRAVEL_CONTRACT_HASH};
 

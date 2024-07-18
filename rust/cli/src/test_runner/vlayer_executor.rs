@@ -2,7 +2,7 @@ use alloy_dyn_abi::DynSolValue;
 use alloy_dyn_abi::JsonAbiExt;
 use alloy_json_abi::Function;
 
-use crate::tests::vlayer_inspector::VlayerTestInspector;
+use crate::test_runner::vlayer_inspector::VlayerTestInspector;
 use alloy_sol_types::private::{Address, Bytes, U256};
 use color_eyre::eyre;
 use forge::revm;
