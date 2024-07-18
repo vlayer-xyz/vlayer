@@ -28,6 +28,11 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
-          name: my-artifact
+          name: contracts
       - name: Display structure of downloaded files
         run: ls -R
+      - name: Unpack the artifact
+        run: tar -xvf contracts.tar.gz
+      - name: Display structure of unpacked files
+        run: ls -R
+
