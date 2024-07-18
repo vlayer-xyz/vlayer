@@ -1,22 +1,20 @@
-use alloy_primitives::{
-    Address, BlockNumber, Bytes, ChainId, StorageKey, StorageValue, TxNumber, B256, U256,
-};
+use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256};
 use auto_impl::auto_impl;
-use ethers::{from_ethers_bytes, from_ethers_u256};
-use ethers_core::types::StorageProof as EthersStorageProof;
-use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, error::Error as StdError, fmt::Debug, rc::Rc};
+use std::error::Error as StdError;
 use vlayer_engine::evm::block_header::EvmBlockHeader;
 
 mod cache;
-mod ethers;
+pub mod ethers;
 pub mod factory;
 mod file;
+pub mod multi;
 mod null;
 
 pub use ethers::{EthersProvider, EthersProviderError};
 use ethers_providers::{Http, RetryClient};
 pub use file::{EthFileProvider, FileProvider};
+
+use crate::proof::EIP1186Proof;
 
 /// The Ethers client type.
 pub type EthersClient = ethers_providers::Provider<RetryClient<Http>>;
@@ -47,36 +45,4 @@ pub trait Provider {
         storage_keys: Vec<StorageKey>,
         block: BlockNumber,
     ) -> Result<EIP1186Proof, Self::Error>;
-}
-
-pub type MultiProvider<P> = HashMap<ChainId, Rc<P>>;
-
-/// Data structure with proof for one single storage-entry
-#[derive(Debug, Default, Clone, PartialEq, Eq, Deserialize, Serialize)]
-pub struct StorageProof {
-    pub key: StorageKey,
-    pub proof: Vec<Bytes>,
-    pub value: StorageValue,
-}
-
-impl From<EthersStorageProof> for StorageProof {
-    fn from(proof: EthersStorageProof) -> Self {
-        StorageProof {
-            key: from_ethers_u256(proof.key).to_be_bytes().into(),
-            proof: proof.proof.into_iter().map(from_ethers_bytes).collect(),
-            value: from_ethers_u256(proof.value),
-        }
-    }
-}
-
-/// Response for EIP-1186 account proof `eth_getProof`
-#[derive(Debug, Default, Clone, PartialEq, Eq, Deserialize, Serialize)]
-pub struct EIP1186Proof {
-    pub address: Address,
-    pub balance: U256,
-    pub code_hash: B256,
-    pub nonce: TxNumber,
-    pub storage_hash: B256,
-    pub account_proof: Vec<Bytes>,
-    pub storage_proof: Vec<StorageProof>,
 }

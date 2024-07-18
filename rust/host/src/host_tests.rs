@@ -1,8 +1,8 @@
 #[cfg(test)]
 mod test {
 
-    use crate::host::{EthersClient, Host, HostConfig, HostError};
-    use crate::provider::EthersProvider;
+    use crate::host::{config::HostConfig, error::HostError, Host};
+    use crate::provider::{EthersClient, EthersProvider};
     use guest_wrapper::GUEST_ELF;
     use risc0_zkvm::ExecutorEnv;
     use vlayer_engine::config::MAINNET_ID;

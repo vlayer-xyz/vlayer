@@ -1,7 +1,8 @@
 pub mod db;
-pub mod evm_env_factory;
+pub mod evm_env;
 pub mod host;
 pub mod into_input;
+pub mod proof;
 pub mod provider;
 pub mod utils;
 pub use vlayer_engine::evm::env::ExecutionLocation;

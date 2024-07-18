@@ -3,7 +3,7 @@ use axum_jrpc::{
     Value,
 };
 use hex::FromHexError;
-use host::host::HostError;
+use host::host::error::HostError;
 use thiserror::Error;
 use tokio::task::JoinError;
 
