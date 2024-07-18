@@ -1,5 +1,6 @@
 use crate::{db::proof::ProofDb, provider::Provider};
 use anyhow::{ensure, Ok};
+use revm::db::WrapDatabaseRef;
 use vlayer_engine::block_header::EvmBlockHeader;
 use vlayer_engine::evm::env::MultiEvmEnv;
 use vlayer_engine::evm::input::{EvmInput, MultiEvmInput};
@@ -27,9 +28,9 @@ pub fn into_input<P: Provider>(
 }
 
 pub fn into_multi_input<P: Provider>(
-    envs: MultiEvmEnv<ProofDb<P>, P::Header>,
+    envs: MultiEvmEnv<WrapDatabaseRef<ProofDb<P>>, P::Header>,
 ) -> anyhow::Result<MultiEvmInput<P::Header>> {
     envs.into_iter()
-        .map(|(location, env)| Ok((location, into_input(&env.db, env.header)?)))
+        .map(|(location, env)| Ok((location, into_input(&env.db.0, env.header)?)))
         .collect()
 }

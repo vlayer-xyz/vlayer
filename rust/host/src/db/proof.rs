@@ -1,55 +1,74 @@
-use super::provider::ProviderDb;
+use super::provider::{ProviderDb, ProviderDbError};
 use crate::{proof::EIP1186Proof, provider::Provider};
 use alloy_primitives::{Address, Bytes, B256, U256};
 use anyhow::Context;
 use mpt::MerkleTrie;
 use revm::{
-    db::WrapDatabaseRef,
     primitives::{AccountInfo, Bytecode, HashMap, HashSet},
-    Database,
+    DatabaseRef,
 };
-use std::rc::Rc;
+use std::{cell::RefCell, rc::Rc};
+use thiserror::Error;
+
+/// Error type for the [ProofDb].
+#[derive(Error, Debug)]
+pub enum ProofDbError<E: std::error::Error> {
+    #[error("provider db error: {0}")]
+    ProviderDb(#[from] ProviderDbError<E>),
+    #[error("state: {0}")]
+    StateBorrow(#[from] std::cell::BorrowError),
+    #[error("state: {0}")]
+    StateMutBorrow(#[from] std::cell::BorrowMutError),
+}
+
+#[derive(Default, Debug)]
+struct State {
+    accounts: HashMap<Address, HashSet<U256>>,
+    contracts: HashMap<B256, Bytes>,
+    // Numbers of all block hashes requested by `blockhash(number)` calls.
+    block_hash_numbers: HashSet<U256>,
+}
 
 /// A revm [Database] backed by a [Provider] that caches all queries needed for a state proof.
 pub struct ProofDb<P>
 where
     P: Provider,
 {
-    accounts: HashMap<Address, HashSet<U256>>,
-    contracts: HashMap<B256, Bytes>,
-    // Numbers of all block hashes requested by `blockhash(number)` calls.
-    block_hash_numbers: HashSet<U256>,
-
-    db: WrapDatabaseRef<ProviderDb<P>>,
+    db: ProviderDb<P>,
+    state: RefCell<State>,
 }
 
-impl<P: Provider> Database for ProofDb<P> {
-    type Error = <WrapDatabaseRef<ProviderDb<P>> as Database>::Error;
+impl<P: Provider> DatabaseRef for ProofDb<P> {
+    type Error = ProofDbError<P::Error>;
 
-    fn basic(&mut self, address: Address) -> Result<Option<AccountInfo>, Self::Error> {
-        let basic = self.db.basic(address)?;
-        self.accounts.entry(address).or_default();
+    fn basic_ref(&self, address: Address) -> Result<Option<AccountInfo>, Self::Error> {
+        let basic = self.db.basic_ref(address)?;
+        let mut state = self.state.try_borrow_mut()?;
+        state.accounts.entry(address).or_default();
 
         Ok(basic)
     }
 
-    fn code_by_hash(&mut self, code_hash: B256) -> Result<Bytecode, Self::Error> {
-        let code = self.db.code_by_hash(code_hash)?;
-        self.contracts.insert(code_hash, code.original_bytes());
+    fn code_by_hash_ref(&self, code_hash: B256) -> Result<Bytecode, Self::Error> {
+        let code = self.db.code_by_hash_ref(code_hash)?;
+        let mut state = self.state.try_borrow_mut()?;
+        state.contracts.insert(code_hash, code.original_bytes());
 
         Ok(code)
     }
 
-    fn storage(&mut self, address: Address, index: U256) -> Result<U256, Self::Error> {
-        let storage = self.db.storage(address, index)?;
-        self.accounts.entry(address).or_default().insert(index);
+    fn storage_ref(&self, address: Address, index: U256) -> Result<U256, Self::Error> {
+        let storage = self.db.storage_ref(address, index)?;
+        let mut state = self.state.try_borrow_mut()?;
+        state.accounts.entry(address).or_default().insert(index);
 
         Ok(storage)
     }
 
-    fn block_hash(&mut self, number: U256) -> Result<B256, Self::Error> {
-        let block_hash = self.db.block_hash(number)?;
-        self.block_hash_numbers.insert(number);
+    fn block_hash_ref(&self, number: U256) -> Result<B256, Self::Error> {
+        let block_hash = self.db.block_hash_ref(number)?;
+        let mut state = self.state.try_borrow_mut()?;
+        state.block_hash_numbers.insert(number);
 
         Ok(block_hash)
     }
@@ -57,24 +76,25 @@ impl<P: Provider> Database for ProofDb<P> {
 
 impl<P: Provider> ProofDb<P> {
     pub fn new(provider: Rc<P>, block_number: u64) -> Self {
+        let state = RefCell::new(State::default());
         Self {
-            accounts: HashMap::new(),
-            contracts: HashMap::new(),
-            block_hash_numbers: HashSet::new(),
-            db: WrapDatabaseRef(ProviderDb::new(provider, block_number)),
+            state,
+            db: ProviderDb::new(provider, block_number),
         }
     }
 
     pub fn contracts(&self) -> Vec<Bytes> {
-        self.contracts.values().cloned().collect()
+        let state = self.state.borrow();
+        state.contracts.values().cloned().collect()
     }
 
     pub fn fetch_ancestors(&self) -> anyhow::Result<Vec<P::Header>> {
-        let provider = &self.db.0.provider;
+        let state = self.state.borrow();
+        let provider = &self.db.provider;
         let mut ancestors = Vec::new();
-        if let Some(block_hash_min_number) = self.block_hash_numbers.iter().min() {
+        if let Some(block_hash_min_number) = state.block_hash_numbers.iter().min() {
             let block_hash_min_number: u64 = block_hash_min_number.to();
-            for number in (block_hash_min_number..self.db.0.block_number).rev() {
+            for number in (block_hash_min_number..self.db.block_number).rev() {
                 let header = provider
                     .get_block_header(number)?
                     .with_context(|| format!("block {number} not found"))?;
@@ -92,12 +112,13 @@ impl<P: Provider> ProofDb<P> {
     }
 
     fn fetch_proofs(&self) -> anyhow::Result<Vec<EIP1186Proof>> {
+        let state = self.state.borrow();
         let mut proofs = Vec::new();
-        for (address, storage_keys) in &self.accounts {
-            let proof = self.db.0.provider.get_proof(
+        for (address, storage_keys) in &state.accounts {
+            let proof = self.db.provider.get_proof(
                 *address,
                 storage_keys.iter().map(|v| B256::from(*v)).collect(),
-                self.db.0.block_number,
+                self.db.block_number,
             )?;
             proofs.push(proof);
         }
