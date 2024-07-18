@@ -3,7 +3,7 @@
 ## Primer on blocks
 The block number is a unique identifier assigned to each block in the Ethereum blockchain, starting from 0 for the genesis block and incrementing by one for each subsequent block. Smart contracts utilize block numbers to schedule events such as token releases, voting periods, and the start or end of auctions. By knowing the average block time, developers can estimate when these events will occur.
 
-Unfortunately, direct access to historical blocks from within smart contracts is [limited](https://ethereum.github.io/yellowpaper/paper.pdf). This restriction means that smart contracts cannot easily reference past block data for decision-making or verification purposes.
+Unfortunately, direct access to historical state from within smart contracts is impossible. This restriction means that smart contracts cannot easily reference past accounts and smart contracts data for decision-making or verification purposes.
 
 ## Handling historical data in vlayer 
 To overcome the limitation of accessing historical blocks within smart contracts, we have introduced the `setBlockNumber(uint blockNo)` function, available in our `Prover` contracts. This function allows you to switch your next function call context to the desired block number.
