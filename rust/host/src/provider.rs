@@ -4,6 +4,7 @@ use alloy_primitives::{
 use auto_impl::auto_impl;
 use ethers::{from_ethers_bytes, from_ethers_u256};
 use ethers_core::types::StorageProof as EthersStorageProof;
+use factory::ProviderFactory;
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, error::Error as StdError, fmt::Debug, rc::Rc};
 use vlayer_engine::evm::block_header::EvmBlockHeader;
@@ -17,6 +18,8 @@ mod null;
 pub use ethers::{EthersProvider, EthersProviderError};
 use ethers_providers::{Http, RetryClient};
 pub use file::{EthFileProvider, FileProvider};
+
+use crate::{host::HostError, utils::get_mut_or_insert_with_result};
 
 /// The Ethers client type.
 pub type EthersClient = ethers_providers::Provider<RetryClient<Http>>;
@@ -49,7 +52,33 @@ pub trait Provider {
     ) -> Result<EIP1186Proof, Self::Error>;
 }
 
-pub type MultiProvider<P> = HashMap<ChainId, Rc<P>>;
+type MultiProvider<P> = HashMap<ChainId, Rc<P>>;
+
+pub struct CachedMultiProvider<P> {
+    cache: MultiProvider<P>,
+    factory: Box<dyn ProviderFactory<P>>,
+}
+
+impl<P> CachedMultiProvider<P>
+where
+    P: Provider,
+{
+    pub fn new(factory: impl ProviderFactory<P> + 'static) -> Self {
+        CachedMultiProvider {
+            cache: HashMap::new(),
+            factory: Box::new(factory),
+        }
+    }
+
+    pub fn try_get(&mut self, chain_id: ChainId) -> Result<Rc<P>, HostError> {
+        let create_provider = || Ok::<_, HostError>(Rc::new(self.factory.create(chain_id)?));
+        Ok(Rc::clone(get_mut_or_insert_with_result(
+            &mut self.cache,
+            chain_id,
+            create_provider,
+        )?))
+    }
+}
 
 /// Data structure with proof for one single storage-entry
 #[derive(Debug, Default, Clone, PartialEq, Eq, Deserialize, Serialize)]

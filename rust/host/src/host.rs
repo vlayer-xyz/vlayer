@@ -2,8 +2,8 @@ use crate::db::proof::ProofDb;
 use crate::evm_env_factory::EvmEnvFactory;
 use crate::into_input::into_multi_input;
 use crate::provider::factory::{EthersProviderFactory, ProviderFactory};
-use crate::provider::{EthersProvider, Provider};
-use crate::provider::{EthersProviderError, MultiProvider};
+use crate::provider::EthersProviderError;
+use crate::provider::{CachedMultiProvider, EthersProvider, Provider};
 use crate::utils::get_mut_or_insert_with_result;
 use alloy_primitives::ChainId;
 use ethers_providers::Provider as OGEthersProvider;
@@ -13,7 +13,6 @@ use risc0_ethereum_contracts::groth16::abi_encode;
 use risc0_zkp::verify::VerificationError;
 use risc0_zkvm::{default_prover, is_dev_mode, ExecutorEnv, ProverOpts};
 use std::collections::HashMap;
-use std::rc::Rc;
 use thiserror::Error;
 use vlayer_engine::engine::{Engine, EngineError};
 use vlayer_engine::ethereum::EthBlockHeader;
@@ -27,8 +26,7 @@ pub type EthersClient = OGEthersProvider<RetryClient<Http>>;
 pub struct Host<P: Provider<Header = EthBlockHeader>> {
     start_execution_location: ExecutionLocation,
     envs: MultiEvmEnv<ProofDb<P>, EthBlockHeader>,
-    multi_provider: MultiProvider<P>,
-    provider_factory: Box<dyn ProviderFactory<P>>,
+    multi_provider: CachedMultiProvider<P>,
 }
 
 #[derive(Error, Debug)]
@@ -105,13 +103,11 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
         provider_factory: impl ProviderFactory<P> + 'static,
         config: HostConfig,
     ) -> Result<Self, HostError> {
-        let multi_provider = HashMap::new();
         let envs = HashMap::new();
 
         Ok(Host {
             envs,
-            multi_provider,
-            provider_factory: Box::new(provider_factory),
+            multi_provider: CachedMultiProvider::new(provider_factory),
             start_execution_location: config.start_execution_location,
         })
     }
@@ -141,29 +137,12 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
         })
     }
 
-    fn get_provider(
-        multi_provider: &mut MultiProvider<P>,
-        provider_factory: &dyn ProviderFactory<P>,
-        chain_id: ChainId,
-    ) -> Result<Rc<P>, HostError> {
-        let create_provider = || Ok::<_, HostError>(Rc::new(provider_factory.create(chain_id)?));
-        Ok(Rc::clone(get_mut_or_insert_with_result(
-            multi_provider,
-            chain_id,
-            create_provider,
-        )?))
-    }
-
     fn get_mut_env(
         &mut self,
         location: ExecutionLocation,
     ) -> Result<&mut EvmEnv<ProofDb<P>, P::Header>, HostError> {
         let create_evm_env = || {
-            let provider = Self::get_provider(
-                &mut self.multi_provider,
-                self.provider_factory.as_ref(),
-                location.chain_id,
-            )?;
+            let provider = self.multi_provider.try_get(location.chain_id)?;
             let env = EvmEnvFactory::new(provider).create(location)?;
             Ok::<_, HostError>(env)
         };
