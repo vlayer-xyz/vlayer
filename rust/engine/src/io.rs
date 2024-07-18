@@ -1,5 +1,6 @@
-use alloy_primitives::Address;
+use alloy_primitives::{Address, TxKind};
 use alloy_sol_types::SolValue;
+use revm::primitives::TxEnv;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
@@ -27,6 +28,17 @@ impl Default for Call {
             caller: Address::ZERO,
             to: Address::ZERO,
             data: vec![],
+        }
+    }
+}
+
+impl From<Call> for TxEnv {
+    fn from(call: Call) -> Self {
+        Self {
+            caller: call.caller,
+            transact_to: TxKind::Call(call.to),
+            data: call.data.into(),
+            ..Default::default()
         }
     }
 }
