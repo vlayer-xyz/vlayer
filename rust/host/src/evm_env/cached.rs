@@ -28,7 +28,7 @@ where
     pub fn get(
         &mut self,
         location: ExecutionLocation,
-    ) -> Result<&mut EvmEnv<ProofDb<P>, P::Header>, HostError> {
+    ) -> Result<&EvmEnv<ProofDb<P>, P::Header>, HostError> {
         self.cache
             .try_get_or_insert(location, || self.factory.create(location))
     }

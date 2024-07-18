@@ -1,11 +1,7 @@
 use crate::{db::proof::ProofDb, provider::Provider};
 use anyhow::{ensure, Ok};
-<<<<<<< HEAD
 use revm::db::WrapDatabaseRef;
 use vlayer_engine::block_header::EvmBlockHeader;
-=======
-use vlayer_engine::evm::block_header::EvmBlockHeader;
->>>>>>> fdb38ec (Accept DatabaseRef instead of Database in Engine::call and remove all WrapDatabaseRef wrapping in guest & host)
 use vlayer_engine::evm::env::MultiEvmEnv;
 use vlayer_engine::evm::input::{EvmInput, MultiEvmInput};
 

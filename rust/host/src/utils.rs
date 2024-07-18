@@ -5,7 +5,7 @@ pub trait TryGetOrInsert<K, V>
 where
     K: Hash + Eq,
 {
-    fn try_get_or_insert<F, E>(&mut self, key: K, f: F) -> Result<&mut V, E>
+    fn try_get_or_insert<F, E>(&mut self, key: K, f: F) -> Result<&V, E>
     where
         F: FnOnce() -> Result<V, E>;
 }
@@ -14,12 +14,12 @@ impl<K, V> TryGetOrInsert<K, V> for HashMap<K, V>
 where
     K: Hash + Eq,
 {
-    fn try_get_or_insert<F, E>(&mut self, key: K, f: F) -> Result<&mut V, E>
+    fn try_get_or_insert<F, E>(&mut self, key: K, f: F) -> Result<&V, E>
     where
         F: FnOnce() -> Result<V, E>,
     {
         match self.entry(key) {
-            Entry::Occupied(value) => Ok(value.into_mut()),
+            Entry::Occupied(value) => Ok(&*value.into_mut()),
             Entry::Vacant(entry) => {
                 let value = f()?;
                 Ok(entry.insert(value))
@@ -41,7 +41,11 @@ mod try_get_or_insert {
         let mut map = HashMap::from([(key, value)]);
 
         let result = map.try_get_or_insert(key, || Err("should not be called"));
+<<<<<<< HEAD
         assert_eq!(result, Ok(&mut 42));
+=======
+        assert_eq!(result, Ok(&value));
+>>>>>>> 58b00d1 (Stop requiring unique reference to EvmEnv in Engine)
     }
 
     #[test]
@@ -50,8 +54,13 @@ mod try_get_or_insert {
         let key = "key";
         let value = 42;
         let result = map.try_get_or_insert(key, || Ok::<_, ()>(value));
+<<<<<<< HEAD
         assert_eq!(result, Ok(&mut 42));
         assert_eq!(map.get(key), Some(&42));
+=======
+        assert_eq!(result, Ok(&value));
+        assert_eq!(map.get(key), Some(&value));
+>>>>>>> 58b00d1 (Stop requiring unique reference to EvmEnv in Engine)
     }
 
     #[test]

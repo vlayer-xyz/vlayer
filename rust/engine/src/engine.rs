@@ -1,8 +1,7 @@
-use alloy_primitives::TxKind;
 use revm::{
     db::WrapDatabaseRef,
     inspector_handle_register,
-    primitives::{ExecutionResult, ResultAndState, SuccessReason, TxEnv},
+    primitives::{ExecutionResult, ResultAndState, SuccessReason},
     DatabaseRef, Evm,
 };
 use thiserror::Error;
@@ -39,7 +38,7 @@ pub enum EngineError {
 }
 
 impl Engine {
-    pub fn call<D, H>(self, tx: &Call, env: &mut EvmEnv<D, H>) -> Result<Vec<u8>, EngineError>
+    pub fn call<D, H>(self, tx: &Call, env: &EvmEnv<D, H>) -> Result<Vec<u8>, EngineError>
     where
         D: DatabaseRef,
         D::Error: std::fmt::Debug,
