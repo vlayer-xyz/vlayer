@@ -7,17 +7,14 @@ import {Strings} from "openzeppelin/contracts/utils/Strings.sol";
 struct Web {
     string url;
     string content;
-    string notaryPubKey;
 }
 
 contract WebProver is Prover {
     constructor() {}
 
-    function main(
-        Web calldata web
-    ) public pure returns (string memory, string memory) {
+    function main(Web calldata web) public pure returns (string memory) {
         require(Strings.equal(web.url, "https://api.x.com"), "Invalid URL");
 
-        return (web.content, web.notaryPubKey);
+        return (web.content);
     }
 }
