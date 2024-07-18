@@ -45,18 +45,11 @@ impl Engine {
         D::Error: std::fmt::Debug,
         H: EvmBlockHeader,
     {
-        let tx_env = TxEnv {
-            caller: tx.caller,
-            transact_to: TxKind::Call(tx.to),
-            data: tx.data.clone().into(),
-            ..Default::default()
-        };
-
         let evm = Evm::builder()
             .with_ref_db(&env.db)
             .with_external_context(SetInspector::default())
             .with_cfg_env_with_handler_cfg(env.cfg_env.clone())
-            .with_tx_env(tx_env)
+            .with_tx_env(tx.clone().into())
             .append_handler_register(inspector_handle_register)
             .modify_block_env(|blk_env| env.header.fill_block_env(blk_env))
             .build();
