@@ -1,4 +1,4 @@
-name: Test examples artifacts
+name: Release vlayer contracts to AWS
 on:
   push:
     branches:
@@ -40,7 +40,7 @@ jobs:
         uses: mostlytyped/s3-put-action@v1.0.0
         env:
           AWS_ENDPOINT: ${{ vars.AWS_ENDPOINT }}
-          AWS_BUCKET: releases-playground
+          AWS_BUCKET: ${{ vars.AWS_BUCKET }}
           AWS_ACCESS_KEY_ID: ${{ vars.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
