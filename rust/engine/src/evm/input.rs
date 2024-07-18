@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, iter::once};
 use tracing::debug;
 
-use crate::block_header::evm::EvmBlockHeader;
+use crate::block_header::EvmBlockHeader;
 
 use super::env::ExecutionLocation;
 
@@ -74,7 +74,7 @@ mod test {
 
     use super::EvmInput;
     use crate::block_header::eth::EthBlockHeader;
-    use crate::block_header::evm::Hashable;
+    use crate::block_header::Hashable;
 
     mod block_hashes {
         use super::*;

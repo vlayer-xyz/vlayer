@@ -1,6 +1,6 @@
 use crate::db::{state::StateDb, wrap_state::WrapStateDb};
 use vlayer_engine::{
-    block_header::evm::EvmBlockHeader,
+    block_header::EvmBlockHeader,
     evm::{
         env::{EvmEnv, MultiEvmEnv},
         input::{EvmInput, MultiEvmInput},

@@ -7,7 +7,7 @@ use revm::{
 use std::fmt::Debug;
 use std::rc::Rc;
 use thiserror::Error;
-use vlayer_engine::block_header::evm::Hashable;
+use vlayer_engine::block_header::Hashable;
 
 /// Error type for the [ProviderDb].
 #[derive(Error, Debug)]

@@ -1,7 +1,7 @@
 use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256};
 use auto_impl::auto_impl;
 use std::error::Error as StdError;
-use vlayer_engine::block_header::evm::EvmBlockHeader;
+use vlayer_engine::block_header::EvmBlockHeader;
 
 mod cache;
 pub mod ethers;

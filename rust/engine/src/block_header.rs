@@ -1,3 +1,5 @@
+pub mod eth;
+
 use alloy_primitives::{BlockNumber, B256};
 
 use revm::primitives::BlockEnv;
