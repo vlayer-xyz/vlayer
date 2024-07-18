@@ -1,10 +1,12 @@
 use alloy_primitives::TxKind;
 use revm::{
     inspector_handle_register,
+    interpreter::CallInputs,
     primitives::{ExecutionResult, ResultAndState, SuccessReason},
-    Database, Evm, Inspector,
+    Database, Evm, EvmContext, Inspector,
 };
 use thiserror::Error;
+use tracing::info;
 
 use crate::{
     block_header::EvmBlockHeader,
@@ -44,9 +46,17 @@ impl Engine {
         D::Error: std::fmt::Debug,
         H: EvmBlockHeader,
     {
+        let callback =
+            |_: &mut SetInspector<D>, _: &mut EvmContext<&mut D>, inputs: &mut CallInputs| {
+                info!(
+                    "Address: {:?}, caller:{:?}, input:{:?}",
+                    inputs.bytecode_address, inputs.caller, inputs.input,
+                );
+                None
+            };
         let evm = Evm::builder()
             .with_db(&mut env.db)
-            .with_external_context(SetInspector::default())
+            .with_external_context(SetInspector::new(callback))
             .with_cfg_env_with_handler_cfg(env.cfg_env.clone())
             .append_handler_register(inspector_handle_register)
             .modify_block_env(|blk_env| env.header.fill_block_env(blk_env))

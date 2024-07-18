@@ -19,26 +19,7 @@ static SET_BLOCK_SELECTOR: Lazy<Vec<u8>> =
 static SET_CHAIN_SELECTOR: Lazy<Vec<u8>> =
     Lazy::new(|| decode("ffbc5638").expect("Error decoding set_chain function call"));
 
-impl<DB: Database> Default for SetInspector<DB> {
-    fn default() -> Self {
-        Self {
-            set_block: None,
-            set_chain: None,
-            callback: |_, _, _| None,
-        }
-    }
-}
-
-#[derive(Clone, Debug)]
-pub struct SetInspector<DB: Database> {
-    set_block: Option<U256>,
-    set_chain: Option<U256>,
-
-    callback:
-        fn(&mut SetInspector<DB>, &mut EvmContext<DB>, &mut CallInputs) -> Option<MockCallOutcome>,
-}
-
-struct MockCallOutcome(CallOutcome);
+pub struct MockCallOutcome(CallOutcome);
 
 impl From<Bytes> for MockCallOutcome {
     fn from(bytes: Bytes) -> Self {
@@ -61,10 +42,40 @@ impl From<U256> for MockCallOutcome {
     }
 }
 
-impl<DB: Database> Inspector<DB> for SetInspector<DB> {
+#[derive(Clone, Debug)]
+pub struct SetInspector<DB: Database> {
+    set_block: Option<U256>,
+    set_chain: Option<U256>,
+
+    callback:
+        fn(&mut SetInspector<DB>, &mut EvmContext<&mut DB>, &mut CallInputs) -> Option<MockCallOutcome>,
+}
+
+impl<DB: Database> Default for SetInspector<DB> {
+    fn default() -> Self {
+        Self {
+            set_block: None,
+            set_chain: None,
+            callback: |_, _, _| None,
+        }
+    }
+}
+
+impl<DB: Database> SetInspector<DB> {
+    pub fn new(callback: fn(&mut Self, &mut EvmContext<&mut DB>, &mut CallInputs) -> Option<MockCallOutcome>) -> Self {
+        Self {
+            set_block: None,
+            set_chain: None,
+            callback,
+        }
+    }
+
+}
+
+impl<DB: Database> Inspector<&mut DB> for SetInspector<DB> {
     fn call(
         &mut self,
-        context: &mut EvmContext<DB>,
+        context: &mut EvmContext<&mut DB>,
         inputs: &mut CallInputs,
     ) -> Option<CallOutcome> {
         match (self.callback)(self, context, inputs) {
@@ -156,7 +167,7 @@ mod test {
         let mut mock_db = CacheDB::new(EmptyDB::default());
         mock_db.insert_account_info(addr, AccountInfo::default());
 
-        let mut evm_context = EvmContext::new(mock_db);
+        let mut evm_context = EvmContext::new(&mut mock_db);
         let mut call_inputs = create_mock_call_inputs(addr, &SET_BLOCK_SELECTOR);
 
         let mut set_block_inspector = SetInspector::default();
