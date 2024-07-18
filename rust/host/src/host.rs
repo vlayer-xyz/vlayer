@@ -1,5 +1,5 @@
 use crate::db::proof::ProofDb;
-use crate::evm_env_factory::EvmEnvFactory;
+use crate::evm_env_factory::{self, EvmEnvFactory};
 use crate::into_input::into_multi_input;
 use crate::provider::factory::{EthersProviderFactory, ProviderFactory};
 use crate::provider::multi::CachedMultiProvider;
@@ -23,7 +23,7 @@ pub mod error;
 pub struct Host<P: Provider<Header = EthBlockHeader>> {
     start_execution_location: ExecutionLocation,
     envs: MultiEvmEnv<ProofDb<P>, EthBlockHeader>,
-    multi_provider: CachedMultiProvider<P>,
+    env_factory: EvmEnvFactory<P>,
 }
 
 impl Host<EthersProvider<EthersClient>> {
@@ -38,11 +38,13 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
         provider_factory: impl ProviderFactory<P> + 'static,
         config: HostConfig,
     ) -> Result<Self, HostError> {
+        let providers = CachedMultiProvider::new(provider_factory);
+        let env_factory = EvmEnvFactory::new(providers);
         let envs = HashMap::new();
 
         Ok(Host {
             envs,
-            multi_provider: CachedMultiProvider::new(provider_factory),
+            env_factory,
             start_execution_location: config.start_execution_location,
         })
     }
@@ -76,12 +78,9 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
         &mut self,
         location: ExecutionLocation,
     ) -> Result<&mut EvmEnv<ProofDb<P>, P::Header>, HostError> {
-        let create_evm_env = || {
-            let provider = self.multi_provider.try_get(location.chain_id)?;
-            let env = EvmEnvFactory::new(provider).create(location)?;
-            Ok::<_, HostError>(env)
-        };
-        get_mut_or_insert_with_result(&mut self.envs, location, create_evm_env)
+        get_mut_or_insert_with_result(&mut self.envs, location, || {
+            self.env_factory.create(location)
+        })
     }
 
     pub(crate) fn prove(
