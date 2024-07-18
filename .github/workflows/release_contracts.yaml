@@ -35,4 +35,15 @@ jobs:
         run: tar -xvf contracts.tar.gz
       - name: Display structure of unpacked files
         run: ls -R
+        
+      - name: Upload contracts to AWS S3
+        uses: mostlytyped/s3-put-action@v1.0.0
+        env:
+          AWS_ENDPOINT: ${{ vars.AWS_ENDPOINT }}
+          AWS_BUCKET: releases-playground
+          AWS_ACCESS_KEY_ID: ${{ vars.AWS_ACCESS_KEY_ID }}
+          AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+
+          LOCAL_FILE: "contracts.tar.gz"
+          REMOTE_FILE: "latest/contracts.tar.gz" 
 
