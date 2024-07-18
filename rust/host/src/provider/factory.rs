@@ -1,8 +1,10 @@
-use crate::host::{error::HostError, EthersClient};
+use crate::host::error::HostError;
 use crate::provider::{EthFileProvider, EthersProvider, Provider};
 use alloy_primitives::ChainId;
 use std::collections::HashMap;
 use std::path::PathBuf;
+
+use super::EthersClient;
 
 pub trait ProviderFactory<P>
 where

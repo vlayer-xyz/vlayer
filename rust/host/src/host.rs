@@ -2,12 +2,10 @@ use crate::db::proof::ProofDb;
 use crate::evm_env_factory::EvmEnvFactory;
 use crate::into_input::into_multi_input;
 use crate::provider::factory::{EthersProviderFactory, ProviderFactory};
-use crate::provider::{CachedMultiProvider, EthersProvider, Provider};
+use crate::provider::{CachedMultiProvider, EthersClient, EthersProvider, Provider};
 use crate::utils::get_mut_or_insert_with_result;
 use config::HostConfig;
 use error::HostError;
-use ethers_providers::Provider as OGEthersProvider;
-use ethers_providers::{Http, RetryClient};
 use guest_wrapper::GUEST_ELF;
 use risc0_ethereum_contracts::groth16::abi_encode;
 use risc0_zkvm::{default_prover, is_dev_mode, ExecutorEnv, ProverOpts};
@@ -20,8 +18,6 @@ use vlayer_engine::io::{Call, GuestOutput, HostOutput, Input};
 
 pub mod config;
 pub mod error;
-
-pub type EthersClient = OGEthersProvider<RetryClient<Http>>;
 
 pub struct Host<P: Provider<Header = EthBlockHeader>> {
     start_execution_location: ExecutionLocation,
