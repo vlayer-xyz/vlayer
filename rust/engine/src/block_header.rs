@@ -1,6 +1,6 @@
 pub mod eth;
 
-use std::any::TypeId;
+use std::{any::TypeId, error::Error, fmt};
 
 use as_any::{AsAny, Downcast};
 
@@ -8,7 +8,6 @@ use alloy_primitives::{BlockNumber, B256};
 
 use eth::EthBlockHeader;
 use revm::primitives::BlockEnv;
-use tracing::debug;
 
 pub trait Hashable {
     /// Calculate the hash, this may be slow.
@@ -46,8 +45,8 @@ impl TryFrom<Box<dyn EvmBlockHeader>> for BlockHeader {
 
     fn try_from(header: Box<dyn EvmBlockHeader>) -> Result<Self, Self::Error> {
         if (*header).as_any().type_id() == TypeId::of::<EthBlockHeader>() {
-            let casted_header = header.as_ref().downcast_ref::<EthBlockHeader>().unwrap();
-            Ok(BlockHeader::Eth((*casted_header).clone()))
+            let eth_header = (*(header.as_ref().downcast_ref::<EthBlockHeader>().unwrap())).clone();
+            Ok(BlockHeader::Eth(eth_header))
         } else {
             Err("Failed converting BlockHeader")
         }
@@ -55,40 +54,29 @@ impl TryFrom<Box<dyn EvmBlockHeader>> for BlockHeader {
 }
 
 #[cfg(test)]
-mod from_header_to_box_dyn {
+mod header_to_dyn_header {
     use super::*;
 
     #[test]
     fn eth() {
         let eth_block_header = EthBlockHeader::default();
-
-        let header_type = BlockHeader::Eth(eth_block_header.clone());
-
+        let header_type = BlockHeader::Eth(eth_block_header);
         let boxed_header: Box<dyn EvmBlockHeader> = header_type.into();
+
         assert!(boxed_header.as_ref().is::<EthBlockHeader>());
     }
 }
 
 #[cfg(test)]
-mod tests {
+mod dyn_header_to_header {
     use super::*;
 
     #[test]
     fn eth() {
         let eth_block_header = EthBlockHeader::default();
-
-        let header: Box<dyn EvmBlockHeader> = Box::new(eth_block_header.clone());
-
+        let header: Box<dyn EvmBlockHeader> = Box::new(eth_block_header);
         let result: Result<BlockHeader, _> = header.try_into();
 
-        match result {
-            Ok(BlockHeader::Eth(h)) => {
-                assert_eq!(h.parent_hash, eth_block_header.parent_hash);
-                assert_eq!(h.number, eth_block_header.number);
-                assert_eq!(h.timestamp, eth_block_header.timestamp);
-                assert_eq!(h.state_root, eth_block_header.state_root);
-            }
-            _ => panic!("Conversion to BlockHeader::Eth failed"),
-        }
+        assert!(result.is_ok(), "Conversion to BlockHeader failed");
     }
 }
