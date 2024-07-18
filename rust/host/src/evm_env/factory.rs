@@ -21,7 +21,7 @@ where
     }
 
     pub fn create(
-        &mut self,
+        &self,
         ExecutionLocation {
             block_number,
             chain_id,
