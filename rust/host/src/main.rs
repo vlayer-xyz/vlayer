@@ -10,6 +10,7 @@ pub mod evm_env_factory;
 pub mod host;
 pub mod host_tests;
 pub mod into_input;
+pub mod proof;
 pub mod provider;
 pub mod utils;
 

@@ -1,5 +1,5 @@
 use super::provider::ProviderDb;
-use crate::provider::{EIP1186Proof, Provider};
+use crate::{proof::EIP1186Proof, provider::Provider};
 use alloy_primitives::{Address, Bytes, B256, U256};
 use anyhow::Context;
 use mpt::MerkleTrie;
