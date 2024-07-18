@@ -55,7 +55,7 @@ impl Engine {
         Self::transact(evm, tx)
     }
 
-    fn transact<D, I>(mut evm: Evm<'_, I, &mut D>, tx: &Call) -> Result<Vec<u8>, EngineError>
+    fn transact<D, I>(mut evm: Evm<'_, I, D>, tx: &Call) -> Result<Vec<u8>, EngineError>
     where
         D: Database,
         D::Error: std::fmt::Debug,
