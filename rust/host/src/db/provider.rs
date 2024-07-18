@@ -2,10 +2,10 @@ use crate::provider::Provider;
 use alloy_primitives::{Address, B256, U256};
 use revm::{
     primitives::{AccountInfo, Bytecode, HashMap, KECCAK_EMPTY},
-    Database,
+    DatabaseRef,
 };
-use std::fmt::Debug;
 use std::rc::Rc;
+use std::{cell::RefCell, fmt::Debug};
 use thiserror::Error;
 use vlayer_engine::block_header::Hashable;
 
@@ -18,6 +18,10 @@ pub enum ProviderDbError<E: std::error::Error> {
     InvalidBlockNumber(U256),
     #[error("hash missing for block: {0}")]
     BlockHashMissing(U256),
+    #[error("code hashes: {0}")]
+    CodeHashesBorrow(std::cell::BorrowError),
+    #[error("code hashes: {0}")]
+    CodeHashesMutBorrow(std::cell::BorrowMutError),
 }
 
 /// A revm [Database] backed by a [Provider].
@@ -26,7 +30,7 @@ pub struct ProviderDb<P> {
     pub block_number: u64,
 
     /// Cache for code hashes to contract addresses.
-    code_hashes: HashMap<B256, Address>,
+    code_hashes: RefCell<HashMap<B256, Address>>,
 }
 
 impl<P: Provider> ProviderDb<P> {
@@ -35,15 +39,15 @@ impl<P: Provider> ProviderDb<P> {
         Self {
             provider,
             block_number,
-            code_hashes: HashMap::new(),
+            code_hashes: RefCell::new(HashMap::new()),
         }
     }
 }
 
-impl<P: Provider> Database for ProviderDb<P> {
+impl<P: Provider> DatabaseRef for ProviderDb<P> {
     type Error = ProviderDbError<P::Error>;
 
-    fn basic(&mut self, address: Address) -> Result<Option<AccountInfo>, Self::Error> {
+    fn basic_ref(&self, address: Address) -> Result<Option<AccountInfo>, Self::Error> {
         // use `eth_getProof` to get all the account info with a single call
         let proof = self
             .provider
@@ -55,6 +59,8 @@ impl<P: Provider> Database for ProviderDb<P> {
         }
         // cache the code hash to address mapping, so we can later retrieve the code
         self.code_hashes
+            .try_borrow_mut()
+            .map_err(ProviderDbError::CodeHashesMutBorrow)?
             .insert(proof.code_hash.0.into(), proof.address);
 
         Ok(Some(AccountInfo {
@@ -65,7 +71,7 @@ impl<P: Provider> Database for ProviderDb<P> {
         }))
     }
 
-    fn code_by_hash(&mut self, code_hash: B256) -> Result<Bytecode, Self::Error> {
+    fn code_by_hash_ref(&self, code_hash: B256) -> Result<Bytecode, Self::Error> {
         // avoid querying the RPC if the code hash is empty
         if code_hash == KECCAK_EMPTY {
             return Ok(Bytecode::new());
@@ -74,6 +80,8 @@ impl<P: Provider> Database for ProviderDb<P> {
         // this works because we always call `basic_ref` first
         let contract_address = *self
             .code_hashes
+            .try_borrow()
+            .map_err(ProviderDbError::CodeHashesBorrow)?
             .get(&code_hash)
             .expect("`basic` must be called first for the corresponding account");
         let code = self
@@ -84,7 +92,7 @@ impl<P: Provider> Database for ProviderDb<P> {
         Ok(Bytecode::new_raw(code.0.into()))
     }
 
-    fn storage(&mut self, address: Address, index: U256) -> Result<U256, Self::Error> {
+    fn storage_ref(&self, address: Address, index: U256) -> Result<U256, Self::Error> {
         let storage = self
             .provider
             .get_storage_at(address, index.into(), self.block_number)
@@ -93,7 +101,7 @@ impl<P: Provider> Database for ProviderDb<P> {
         Ok(storage)
     }
 
-    fn block_hash(&mut self, number: U256) -> Result<B256, Self::Error> {
+    fn block_hash_ref(&self, number: U256) -> Result<B256, Self::Error> {
         let block_number: u64 = number
             .try_into()
             .map_err(|_| ProviderDbError::InvalidBlockNumber(number))?;
