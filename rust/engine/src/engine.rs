@@ -1,4 +1,6 @@
-use alloy_primitives::TxKind;
+use alloy_primitives::{address, hex::decode, Address, TxKind};
+use ethers_core::types::U256;
+use once_cell::sync::Lazy;
 use revm::{
     inspector_handle_register,
     interpreter::CallInputs,
@@ -11,7 +13,7 @@ use tracing::info;
 use crate::{
     block_header::EvmBlockHeader,
     evm::env::{EvmEnv, ExecutionLocation},
-    inspector::SetInspector,
+    inspector::{SetInspector, MockCallOutcome},
     io::Call,
 };
 
@@ -39,6 +41,15 @@ pub enum EngineError {
     EvmEnvNotFound(ExecutionLocation),
 }
 
+// First 4 bytes of the call data is the selector id - the rest are arguments.
+const SELECTOR_LEN: usize = 4;
+const TRAVEL_CONTRACT_ADDR: Address = address!("1234567890AbcdEF1234567890aBcdef12345678");
+static SET_BLOCK_SELECTOR: Lazy<Vec<u8>> =
+    Lazy::new(|| decode("87cea3ae").expect("Error decoding set_block function call"));
+static SET_CHAIN_SELECTOR: Lazy<Vec<u8>> =
+    Lazy::new(|| decode("1b44fd15").expect("Error decoding set_chain function call"));
+
+
 impl Engine {
     pub fn call<D, H>(self, tx: &Call, env: &mut EvmEnv<D, H>) -> Result<Vec<u8>, EngineError>
     where
@@ -46,14 +57,54 @@ impl Engine {
         D::Error: std::fmt::Debug,
         H: EvmBlockHeader,
     {
-        let callback =
-            |_: &mut SetInspector<D>, _: &mut EvmContext<&mut D>, inputs: &mut CallInputs| {
-                info!(
-                    "Address: {:?}, caller:{:?}, input:{:?}",
-                    inputs.bytecode_address, inputs.caller, inputs.input,
-                );
-                None
-            };
+        let callback = |inspector: &mut SetInspector<D>,
+                        _: &mut EvmContext<&mut D>,
+                        inputs: &mut CallInputs| {
+            info!(
+                "Address: {:?}, caller:{:?}, input:{:?}",
+                inputs.bytecode_address, inputs.caller, inputs.input,
+            );
+
+            match inputs.bytecode_address {
+                TRAVEL_CONTRACT_ADDR => {
+                    let (selector, argument_bytes) = inputs.input.split_at(SELECTOR_LEN);
+                    let argument = U256::from_big_endian(argument_bytes);
+
+                    if selector == *SET_BLOCK_SELECTOR {
+                        info!(
+                            "Travel contract called with function: setBlock and argument: {:?}!",
+                            argument
+                        );
+                        inspector.set_block = Some(argument);
+                    } else if selector == *SET_CHAIN_SELECTOR {
+                        info!(
+                            "Travel contract called with function: setChain and argument: {:?}!",
+                            argument
+                        );
+                        inspector.set_chain = Some(argument);
+                    }
+                }
+                // If the call is not setBlock/setChain but setBlock/setChain is active, intercept the call.
+                _ => {
+                    if let Some(block_number) = &inspector.set_block.take() {
+                        info!(
+                            "Intercepting the call. Returning last block number: {:?}",
+                            *block_number
+                        );
+                        return Some(MockCallOutcome::from(*block_number));
+                    }
+                    if let Some(chain_id) = &inspector.set_chain.take() {
+                        info!(
+                            "Intercepting the call. Returning last chain id: {:?}",
+                            *chain_id
+                        );
+                        return Some(MockCallOutcome::from(*chain_id));
+                    }
+                }
+            }
+
+            None
+        };
         let evm = Evm::builder()
             .with_db(&mut env.db)
             .with_external_context(SetInspector::new(callback))

@@ -1,23 +1,12 @@
-use alloy_primitives::hex::decode;
-use alloy_primitives::{address, Address, Bytes};
+use alloy_primitives::Bytes;
 use ethers_core::types::U256;
-use once_cell::sync::Lazy;
 use revm::interpreter::{Gas, InstructionResult, InterpreterResult};
 use revm::{
     interpreter::{CallInputs, CallOutcome},
     Database, EvmContext, Inspector,
 };
-use tracing::info;
 
 use crate::consts::U256_BYTES;
-
-// First 4 bytes of the call data is the selector id - the rest are arguments.
-const SELECTOR_LEN: usize = 4;
-const TRAVEL_CONTRACT_ADDR: Address = address!("76dc9aa45aa006a0f63942d8f9f21bd4537972a3");
-static SET_BLOCK_SELECTOR: Lazy<Vec<u8>> =
-    Lazy::new(|| decode("87cea3ae").expect("Error decoding set_block function call"));
-static SET_CHAIN_SELECTOR: Lazy<Vec<u8>> =
-    Lazy::new(|| decode("ffbc5638").expect("Error decoding set_chain function call"));
 
 pub struct MockCallOutcome(CallOutcome);
 
@@ -44,11 +33,14 @@ impl From<U256> for MockCallOutcome {
 
 #[derive(Clone, Debug)]
 pub struct SetInspector<DB: Database> {
-    set_block: Option<U256>,
-    set_chain: Option<U256>,
+    pub set_block: Option<U256>,
+    pub set_chain: Option<U256>,
 
-    callback:
-        fn(&mut SetInspector<DB>, &mut EvmContext<&mut DB>, &mut CallInputs) -> Option<MockCallOutcome>,
+    callback: fn(
+        &mut SetInspector<DB>,
+        &mut EvmContext<&mut DB>,
+        &mut CallInputs,
+    ) -> Option<MockCallOutcome>,
 }
 
 impl<DB: Database> Default for SetInspector<DB> {
@@ -62,14 +54,19 @@ impl<DB: Database> Default for SetInspector<DB> {
 }
 
 impl<DB: Database> SetInspector<DB> {
-    pub fn new(callback: fn(&mut Self, &mut EvmContext<&mut DB>, &mut CallInputs) -> Option<MockCallOutcome>) -> Self {
+    pub fn new(
+        callback: fn(
+            &mut Self,
+            &mut EvmContext<&mut DB>,
+            &mut CallInputs,
+        ) -> Option<MockCallOutcome>,
+    ) -> Self {
         Self {
             set_block: None,
             set_chain: None,
             callback,
         }
     }
-
 }
 
 impl<DB: Database> Inspector<&mut DB> for SetInspector<DB> {
@@ -136,7 +133,8 @@ impl<DB: Database> Inspector<&mut DB> for SetInspector<DB> {
 mod test {
     use std::convert::Infallible;
 
-    use alloy_primitives::{address, Address, Bytes, U256};
+    use alloy_primitives::{address, hex::decode, Address, Bytes, U256};
+    use once_cell::sync::Lazy;
     use revm::{
         db::{CacheDB, EmptyDB, EmptyDBTyped},
         interpreter::{CallInputs, CallScheme, CallValue},
@@ -144,9 +142,12 @@ mod test {
         EvmContext, Inspector,
     };
 
-    use super::{SetInspector, SET_BLOCK_SELECTOR, TRAVEL_CONTRACT_ADDR};
+    use super::SetInspector;
 
     const MOCK_CALLER: Address = address!("0000000000000000000000000000000000000000");
+    const TRAVEL_CONTRACT_ADDR: Address = address!("1234567890AbcdEF1234567890aBcdef12345678");
+    static SET_BLOCK_SELECTOR: Lazy<Vec<u8>> =
+        Lazy::new(|| decode("87cea3ae").expect("Error decoding set_block function call"));
 
     fn create_mock_call_inputs(to: Address, input: &[u8]) -> CallInputs {
         CallInputs {
