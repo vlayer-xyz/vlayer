@@ -1,6 +1,6 @@
 pub mod eth;
 
-use std::{any::TypeId, error::Error, fmt};
+use std::any::TypeId;
 
 use as_any::{AsAny, Downcast};
 
@@ -45,7 +45,11 @@ impl TryFrom<Box<dyn EvmBlockHeader>> for BlockHeader {
 
     fn try_from(header: Box<dyn EvmBlockHeader>) -> Result<Self, Self::Error> {
         if (*header).as_any().type_id() == TypeId::of::<EthBlockHeader>() {
-            let eth_header = (*(header.as_ref().downcast_ref::<EthBlockHeader>().unwrap())).clone();
+            let eth_header = (*(header
+                .as_ref()
+                .downcast_ref::<EthBlockHeader>()
+                .expect("Failed to downcast to EthBlockHeader")))
+            .clone();
             Ok(BlockHeader::Eth(eth_header))
         } else {
             Err("Failed converting BlockHeader")
