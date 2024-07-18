@@ -1,7 +1,7 @@
 use alloy_primitives::{address, b256, uint, Address, U256};
 use alloy_sol_types::{sol, SolCall};
 use host::{
-    host::{Host, config::HostConfig},
+    host::{config::HostConfig, Host},
     provider::factory::FileProviderFactory,
     Call,
 };
