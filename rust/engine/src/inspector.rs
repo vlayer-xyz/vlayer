@@ -1,5 +1,5 @@
 use alloy_primitives::hex::decode;
-use alloy_primitives::{address, Address, Bytes};
+use alloy_primitives::{address, b256, Address, Bytes, B256};
 use ethers_core::types::U256;
 use once_cell::sync::Lazy;
 use revm::interpreter::{Gas, InstructionResult, InterpreterResult};
@@ -13,7 +13,16 @@ use crate::consts::U256_BYTES;
 
 // First 4 bytes of the call data is the selector id - the rest are arguments.
 const SELECTOR_LEN: usize = 4;
-const TRAVEL_CONTRACT_ADDR: Address = address!("76dc9aa45aa006a0f63942d8f9f21bd4537972a3");
+const ROOT_ADDR: Address = address!("e7f1725e7734ce288f8367e1bb143e90bb3f0512");
+
+/// This is calculated as:
+/// `address(bytes20(uint160(uint256(keccak256('vlayer.traveler')))))`
+pub const TRAVEL_CONTRACT_ADDR: Address = address!("76dC9aa45aa006A0F63942d8F9f21Bd4537972A3");
+
+/// `keccak256(abi.encodePacked(TRAVEL_CONTRACT_ADDR))`
+pub const TRAVEL_CONTRACT_HASH: B256 =
+    b256!("262498cb66e1ee19d92574a1083e664489e446c94e8cfeb3eefe00a30be92891");
+
 static SET_BLOCK_SELECTOR: Lazy<Vec<u8>> =
     Lazy::new(|| decode("87cea3ae").expect("Error decoding set_block function call"));
 static SET_CHAIN_SELECTOR: Lazy<Vec<u8>> =

@@ -1846,12 +1846,16 @@ dependencies = [
 name = "cli"
 version = "0.1.0"
 dependencies = [
+ "alloy-dyn-abi",
+ "alloy-json-abi",
+ "alloy-sol-types",
  "anyhow",
  "clap",
  "color-eyre",
  "comfy-table",
  "flate2",
  "forge",
+ "foundry-cheatcodes",
  "foundry-cli",
  "foundry-common",
  "foundry-compilers",
@@ -1872,6 +1876,7 @@ dependencies = [
  "tracing",
  "tracing-subscriber 0.3.18",
  "vergen",
+ "vlayer-engine",
 ]
 
 [[package]]
