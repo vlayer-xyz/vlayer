@@ -1,5 +1,5 @@
 use crate::db::proof::ProofDb;
-use crate::evm_env_factory::{self, EvmEnvFactory};
+use crate::evm_env::factory::EvmEnvFactory;
 use crate::into_input::into_multi_input;
 use crate::provider::factory::{EthersProviderFactory, ProviderFactory};
 use crate::provider::multi::CachedMultiProvider;

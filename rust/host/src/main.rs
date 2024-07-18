@@ -6,7 +6,7 @@ use tracing::info;
 use vlayer_engine::{config::SEPOLIA_ID, evm::env::ExecutionLocation, io::Call};
 
 pub mod db;
-pub mod evm_env_factory;
+pub mod evm_env;
 pub mod host;
 pub mod host_tests;
 pub mod into_input;
