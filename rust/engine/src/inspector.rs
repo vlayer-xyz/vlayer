@@ -13,8 +13,6 @@ use crate::consts::U256_BYTES;
 
 // First 4 bytes of the call data is the selector id - the rest are arguments.
 const SELECTOR_LEN: usize = 4;
-const ROOT_ADDR: Address = address!("e7f1725e7734ce288f8367e1bb143e90bb3f0512");
-
 /// This is calculated as:
 /// `address(bytes20(uint160(uint256(keccak256('vlayer.traveler')))))`
 pub const TRAVEL_CONTRACT_ADDR: Address = address!("76dC9aa45aa006A0F63942d8F9f21Bd4537972A3");
