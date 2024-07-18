@@ -1,4 +1,3 @@
-use revm::db::WrapDatabaseRef;
 use vlayer_engine::evm::env::{EvmEnv, ExecutionLocation, MultiEvmEnv};
 
 use crate::{
@@ -11,7 +10,7 @@ pub struct CachedEvmEnv<P>
 where
     P: Provider,
 {
-    cache: MultiEvmEnv<WrapDatabaseRef<ProofDb<P>>, P::Header>,
+    cache: MultiEvmEnv<ProofDb<P>, P::Header>,
     factory: EvmEnvFactory<P>,
 }
 
@@ -29,12 +28,12 @@ where
     pub fn get(
         &mut self,
         location: ExecutionLocation,
-    ) -> Result<&mut EvmEnv<WrapDatabaseRef<ProofDb<P>>, P::Header>, HostError> {
+    ) -> Result<&mut EvmEnv<ProofDb<P>, P::Header>, HostError> {
         self.cache
             .try_get_or_insert(location, || self.factory.create(location))
     }
 
-    pub fn into_inner(self) -> MultiEvmEnv<WrapDatabaseRef<ProofDb<P>>, P::Header> {
+    pub fn into_inner(self) -> MultiEvmEnv<ProofDb<P>, P::Header> {
         self.cache
     }
 }

@@ -1,6 +1,5 @@
 use std::rc::Rc;
 
-use revm::db::WrapDatabaseRef;
 use vlayer_engine::evm::env::{EvmEnv, ExecutionLocation};
 
 use crate::{
@@ -27,14 +26,14 @@ where
             block_number,
             chain_id,
         }: ExecutionLocation,
-    ) -> Result<EvmEnv<WrapDatabaseRef<ProofDb<P>>, P::Header>, HostError> {
+    ) -> Result<EvmEnv<ProofDb<P>, P::Header>, HostError> {
         let provider = self.providers.get(chain_id)?;
         let header = provider
             .get_block_header(block_number)
             .map_err(|err| HostError::Provider(err.to_string()))?
             .ok_or(HostError::BlockNotFound(block_number))?;
 
-        let db = WrapDatabaseRef(ProofDb::new(Rc::clone(&provider), block_number));
+        let db = ProofDb::new(Rc::clone(&provider), block_number);
         let chain_spec = chain_id.try_into()?;
         let env = EvmEnv::new(db, header).with_chain_spec(&chain_spec)?;
         Ok(env)

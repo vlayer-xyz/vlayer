@@ -1,5 +1,4 @@
 use crate::db::{state::StateDb, wrap_state::WrapStateDb};
-use revm::db::WrapDatabaseRef;
 use vlayer_engine::{
     block_header::EvmBlockHeader,
     evm::{
@@ -22,19 +21,19 @@ where
     }
 }
 
-impl<H> From<ValidatedEvmInput<H>> for EvmEnv<WrapDatabaseRef<WrapStateDb>, H>
+impl<H> From<ValidatedEvmInput<H>> for EvmEnv<WrapStateDb, H>
 where
     H: EvmBlockHeader + Clone,
 {
     fn from(input: ValidatedEvmInput<H>) -> Self {
         let input = input.0;
         let block_hashes = input.block_hashes();
-        let db = WrapDatabaseRef(WrapStateDb::new(StateDb::new(
+        let db = WrapStateDb::new(StateDb::new(
             input.state_trie,
             input.storage_tries,
             input.contracts,
             block_hashes,
-        )));
+        ));
 
         EvmEnv::new(db, input.header)
     }
@@ -55,7 +54,7 @@ where
     }
 }
 
-impl<H> From<ValidatedMultiEvmInput<H>> for MultiEvmEnv<WrapDatabaseRef<WrapStateDb>, H>
+impl<H> From<ValidatedMultiEvmInput<H>> for MultiEvmEnv<WrapStateDb, H>
 where
     H: EvmBlockHeader + Clone,
 {

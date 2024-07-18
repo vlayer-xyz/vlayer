@@ -1,8 +1,9 @@
 use alloy_primitives::TxKind;
 use revm::{
+    db::WrapDatabaseRef,
     inspector_handle_register,
-    primitives::{ExecutionResult, ResultAndState, SuccessReason},
-    Database, Evm, Inspector,
+    primitives::{ExecutionResult, ResultAndState, SuccessReason, TxEnv},
+    DatabaseRef, Evm,
 };
 use thiserror::Error;
 
@@ -40,32 +41,36 @@ pub enum EngineError {
 impl Engine {
     pub fn call<D, H>(self, tx: &Call, env: &mut EvmEnv<D, H>) -> Result<Vec<u8>, EngineError>
     where
-        D: Database,
+        D: DatabaseRef,
         D::Error: std::fmt::Debug,
         H: EvmBlockHeader,
     {
+        let tx_env = TxEnv {
+            caller: tx.caller,
+            transact_to: TxKind::Call(tx.to),
+            data: tx.data.clone().into(),
+            ..Default::default()
+        };
+
         let evm = Evm::builder()
-            .with_db(&mut env.db)
+            .with_ref_db(&env.db)
             .with_external_context(SetInspector::default())
             .with_cfg_env_with_handler_cfg(env.cfg_env.clone())
+            .with_tx_env(tx_env)
             .append_handler_register(inspector_handle_register)
             .modify_block_env(|blk_env| env.header.fill_block_env(blk_env))
             .build();
 
-        Self::transact(evm, tx)
+        Self::transact(evm)
     }
 
-    fn transact<D, I>(mut evm: Evm<'_, I, &mut D>, tx: &Call) -> Result<Vec<u8>, EngineError>
+    fn transact<D>(
+        mut evm: Evm<'_, SetInspector, WrapDatabaseRef<&D>>,
+    ) -> Result<Vec<u8>, EngineError>
     where
-        D: Database,
+        D: DatabaseRef,
         D::Error: std::fmt::Debug,
-        I: Inspector<D>,
     {
-        let tx_env = evm.tx_mut();
-        tx_env.caller = tx.caller;
-        tx_env.transact_to = TxKind::Call(tx.to);
-        tx_env.data = tx.data.clone().into();
-
         let ResultAndState { result, .. } = evm
             .transact_preverified()
             .map_err(|err| EngineError::TransactPreverifiedError(format!("{:?}", err)))?;
