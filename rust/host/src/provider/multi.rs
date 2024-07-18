@@ -21,7 +21,7 @@ where
         }
     }
 
-    pub fn try_get(&mut self, chain_id: ChainId) -> Result<Rc<P>, HostError> {
+    pub fn get(&mut self, chain_id: ChainId) -> Result<Rc<P>, HostError> {
         let create_provider = || Ok::<_, HostError>(Rc::new(self.factory.create(chain_id)?));
         Ok(Rc::clone(get_mut_or_insert_with_result(
             &mut self.cache,

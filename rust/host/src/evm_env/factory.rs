@@ -27,7 +27,7 @@ where
             chain_id,
         }: ExecutionLocation,
     ) -> Result<EvmEnv<ProofDb<P>, P::Header>, HostError> {
-        let provider = self.providers.try_get(chain_id)?;
+        let provider = self.providers.get(chain_id)?;
         let header = provider
             .get_block_header(block_number)
             .map_err(|err| HostError::Provider(err.to_string()))?
