@@ -6,7 +6,7 @@ use alloy_rlp_derive::RlpEncodable;
 use revm::primitives::BlockEnv;
 use serde::{Deserialize, Serialize};
 
-use super::evm::{EvmBlockHeader, Hashable};
+use super::{EvmBlockHeader, Hashable};
 
 /// [EvmEnv] for Ethereum.
 pub type EthEvmEnv<D> = EvmEnv<D, EthBlockHeader>;

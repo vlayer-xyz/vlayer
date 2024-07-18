@@ -3,8 +3,7 @@ use revm::primitives::{CfgEnvWithHandlerCfg, SpecId};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-use crate::block_header::evm::EvmBlockHeader;
-use crate::{chain::spec::ChainSpec, engine::EngineError};
+use crate::{block_header::EvmBlockHeader, chain::spec::ChainSpec, engine::EngineError};
 
 /// The environment to execute the contract calls in.
 pub struct EvmEnv<D, H> {
