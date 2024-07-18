@@ -27,6 +27,7 @@ serde = "1.0"
 tracing = { workspace = true }
 thiserror = { workspace = true }
 mpt = { path = "../mpt" }
+as-any = "0.3.1"
 
 [dev-dependencies]
 alloy-trie = "0.4.1"
