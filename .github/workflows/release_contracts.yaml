@@ -1,0 +1,33 @@
+name: Test examples artifacts
+on:
+  push:
+    branches:
+      - fix-releases
+  schedule:
+    - cron: '0 22 * * 1-5' # Mon-Fri at 22:00 UTC
+
+jobs:
+  pack-example-contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Package sample contracts
+        # run: tar -czvf "contracts.tar.gz" -C examples vlayer
+        run: ./bash/pack-examples.sh
+
+      - name: Push artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: contracts
+          path: contracts.tar.gz
+
+  push-example-contracts:
+    runs-on: ubuntu-latest
+    needs: pack-example-contracts
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: my-artifact
+      - name: Display structure of downloaded files
+        run: ls -R
