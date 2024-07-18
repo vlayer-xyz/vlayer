@@ -1,7 +1,7 @@
 use super::{EIP1186Proof, Provider};
 use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256};
 use std::{convert::Infallible, marker::PhantomData};
-use vlayer_engine::evm::block_header::EvmBlockHeader;
+use vlayer_engine::block_header::evm::EvmBlockHeader;
 
 /// A simple provider that panics on all queries.
 pub struct NullProvider<H>(pub(crate) PhantomData<H>);

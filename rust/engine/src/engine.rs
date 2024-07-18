@@ -7,10 +7,8 @@ use revm::{
 use thiserror::Error;
 
 use crate::{
-    evm::{
-        block_header::EvmBlockHeader,
-        env::{EvmEnv, ExecutionLocation},
-    },
+    block_header::evm::EvmBlockHeader,
+    evm::env::{EvmEnv, ExecutionLocation},
     inspector::SetInspector,
     io::Call,
 };
