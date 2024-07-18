@@ -1,8 +1,7 @@
 use vlayer_engine::evm::env::{EvmEnv, ExecutionLocation, MultiEvmEnv};
 
 use crate::{
-    db::proof::ProofDb, host::error::HostError, provider::Provider,
-    utils::get_mut_or_insert_with_result,
+    db::proof::ProofDb, host::error::HostError, provider::Provider, utils::TryGetOrInsert,
 };
 
 use super::factory::EvmEnvFactory;
@@ -30,7 +29,8 @@ where
         &mut self,
         location: ExecutionLocation,
     ) -> Result<&mut EvmEnv<ProofDb<P>, P::Header>, HostError> {
-        get_mut_or_insert_with_result(&mut self.cache, location, || self.factory.create(location))
+        self.cache
+            .try_get_or_insert(location, || self.factory.create(location))
     }
 
     pub fn into_inner(self) -> MultiEvmEnv<ProofDb<P>, P::Header> {

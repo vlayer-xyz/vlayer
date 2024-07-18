@@ -1,5 +1,5 @@
 use super::{factory::ProviderFactory, Provider};
-use crate::{host::error::HostError, utils::get_mut_or_insert_with_result};
+use crate::{host::error::HostError, utils::TryGetOrInsert};
 use alloy_primitives::ChainId;
 use std::{collections::HashMap, rc::Rc};
 
@@ -23,10 +23,8 @@ where
 
     pub fn get(&mut self, chain_id: ChainId) -> Result<Rc<P>, HostError> {
         let create_provider = || Ok::<_, HostError>(Rc::new(self.factory.create(chain_id)?));
-        Ok(Rc::clone(get_mut_or_insert_with_result(
-            &mut self.cache,
-            chain_id,
-            create_provider,
-        )?))
+        Ok(Rc::clone(
+            self.cache.try_get_or_insert(chain_id, create_provider)?,
+        ))
     }
 }
