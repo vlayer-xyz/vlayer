@@ -1,7 +1,7 @@
 use std::env;
 
 use alloy_primitives::{address, Address};
-use host::{Host, HostConfig, HostError};
+use host::{error::HostError, Host, HostConfig};
 use tracing::info;
 use vlayer_engine::{config::SEPOLIA_ID, evm::env::ExecutionLocation, io::Call};
 

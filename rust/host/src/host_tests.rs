@@ -1,7 +1,7 @@
 #[cfg(test)]
 mod test {
 
-    use crate::host::{EthersClient, Host, HostConfig, HostError};
+    use crate::host::{error::HostError, EthersClient, Host, HostConfig};
     use crate::provider::EthersProvider;
     use guest_wrapper::GUEST_ELF;
     use risc0_zkvm::ExecutorEnv;

@@ -19,7 +19,7 @@ pub use ethers::{EthersProvider, EthersProviderError};
 use ethers_providers::{Http, RetryClient};
 pub use file::{EthFileProvider, FileProvider};
 
-use crate::{host::HostError, utils::get_mut_or_insert_with_result};
+use crate::{host::error::HostError, utils::get_mut_or_insert_with_result};
 
 /// The Ethers client type.
 pub type EthersClient = ethers_providers::Provider<RetryClient<Http>>;

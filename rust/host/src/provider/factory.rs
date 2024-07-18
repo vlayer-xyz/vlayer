@@ -1,4 +1,4 @@
-use crate::host::{EthersClient, HostError};
+use crate::host::{error::HostError, EthersClient};
 use crate::provider::{EthFileProvider, EthersProvider, Provider};
 use alloy_primitives::ChainId;
 use std::collections::HashMap;

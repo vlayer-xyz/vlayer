@@ -2,7 +2,7 @@ use std::rc::Rc;
 
 use vlayer_engine::evm::env::{EvmEnv, ExecutionLocation};
 
-use crate::{db::proof::ProofDb, host::HostError, provider::Provider};
+use crate::{db::proof::ProofDb, host::error::HostError, provider::Provider};
 
 pub struct EvmEnvFactory<P> {
     provider: Rc<P>,

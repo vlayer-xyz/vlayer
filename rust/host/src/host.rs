@@ -2,24 +2,23 @@ use crate::db::proof::ProofDb;
 use crate::evm_env_factory::EvmEnvFactory;
 use crate::into_input::into_multi_input;
 use crate::provider::factory::{EthersProviderFactory, ProviderFactory};
-use crate::provider::EthersProviderError;
 use crate::provider::{CachedMultiProvider, EthersProvider, Provider};
 use crate::utils::get_mut_or_insert_with_result;
 use alloy_primitives::ChainId;
+use error::HostError;
 use ethers_providers::Provider as OGEthersProvider;
-use ethers_providers::{Http, ProviderError, RetryClient};
+use ethers_providers::{Http, RetryClient};
 use guest_wrapper::GUEST_ELF;
 use risc0_ethereum_contracts::groth16::abi_encode;
-use risc0_zkp::verify::VerificationError;
 use risc0_zkvm::{default_prover, is_dev_mode, ExecutorEnv, ProverOpts};
 use std::collections::HashMap;
-use thiserror::Error;
-use vlayer_engine::engine::{Engine, EngineError};
+use vlayer_engine::engine::Engine;
 use vlayer_engine::ethereum::EthBlockHeader;
 use vlayer_engine::evm::env::{EvmEnv, ExecutionLocation, MultiEvmEnv};
 use vlayer_engine::evm::input::MultiEvmInput;
-use vlayer_engine::io::GuestOutputError;
 use vlayer_engine::io::{Call, GuestOutput, HostOutput, Input};
+
+pub mod error;
 
 pub type EthersClient = OGEthersProvider<RetryClient<Http>>;
 
@@ -27,51 +26,6 @@ pub struct Host<P: Provider<Header = EthBlockHeader>> {
     start_execution_location: ExecutionLocation,
     envs: MultiEvmEnv<ProofDb<P>, EthBlockHeader>,
     multi_provider: CachedMultiProvider<P>,
-}
-
-#[derive(Error, Debug)]
-pub enum HostError {
-    #[error("ExecutorEnv builder error")]
-    ExecutorEnvBuilder(String),
-
-    #[error("Invalid input")]
-    CreatingInput(String),
-
-    #[error("Engine error {0}")]
-    Engine(#[from] EngineError),
-
-    #[error("Ethers provider error: {0}")]
-    EthersProvider(#[from] EthersProviderError<ProviderError>),
-
-    #[error("Provider error: {0}")]
-    Provider(String),
-
-    #[error("Block not found: {0}")]
-    BlockNotFound(u64),
-
-    #[error("Error creating client: {0}")]
-    NewClient(#[from] url::ParseError),
-
-    #[error("Prover error: {0}")]
-    Prover(String),
-
-    #[error("Guest output error: {0}")]
-    GuestOutput(#[from] GuestOutputError),
-
-    #[error("Host output does not match guest output: {0:?} {1:?}")]
-    HostGuestOutputMismatch(Vec<u8>, Vec<u8>),
-
-    #[error("No rpc url for chain: {0}")]
-    NoRpcUrl(ChainId),
-
-    #[error("Verification error: {0}")]
-    Verification(#[from] VerificationError),
-
-    #[error("Abi encode error: {0}")]
-    AbiEncode(String),
-
-    #[error("No rpc cache for chain: {0}")]
-    NoRpcCache(ChainId),
 }
 
 pub struct HostConfig {
