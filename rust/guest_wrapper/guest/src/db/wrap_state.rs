@@ -1,14 +1,15 @@
 use alloy_primitives::{keccak256, Address, B256, U256};
 use mpt::MerkleTrie;
 use revm::primitives::{AccountInfo, Bytecode, HashMap};
-use revm::Database;
+use revm::DatabaseRef;
+use std::cell::RefCell;
 use std::{convert::Infallible, rc::Rc};
 
 use super::state::StateDb;
 
 pub struct WrapStateDb {
     inner: StateDb,
-    account_storage: HashMap<Address, Option<Rc<MerkleTrie>>>,
+    account_storage: RefCell<HashMap<Address, Option<Rc<MerkleTrie>>>>,
 }
 
 impl WrapStateDb {
@@ -16,24 +17,25 @@ impl WrapStateDb {
     pub(crate) fn new(inner: StateDb) -> Self {
         Self {
             inner,
-            account_storage: HashMap::new(),
+            account_storage: RefCell::new(HashMap::new()),
         }
     }
 }
 
-impl Database for WrapStateDb {
+impl DatabaseRef for WrapStateDb {
     /// The database does not return any errors.
     type Error = Infallible;
 
     /// Get basic account information.
     #[inline]
-    fn basic(&mut self, address: Address) -> Result<Option<AccountInfo>, Self::Error> {
+    fn basic_ref(&self, address: Address) -> Result<Option<AccountInfo>, Self::Error> {
         let account = self.inner.account(address);
         match account {
             Some(account) => {
                 // link storage trie to the account, if it exists
                 if let Some(storage_trie) = self.inner.storage_trie(&account.storage_root) {
                     self.account_storage
+                        .borrow_mut()
                         .insert(address, Some(storage_trie.clone()));
                 }
 
@@ -45,7 +47,7 @@ impl Database for WrapStateDb {
                 }))
             }
             None => {
-                self.account_storage.insert(address, None);
+                self.account_storage.borrow_mut().insert(address, None);
 
                 Ok(None)
             }
@@ -54,16 +56,16 @@ impl Database for WrapStateDb {
 
     /// Get account code by its hash.
     #[inline]
-    fn code_by_hash(&mut self, code_hash: B256) -> Result<Bytecode, Self::Error> {
+    fn code_by_hash_ref(&self, code_hash: B256) -> Result<Bytecode, Self::Error> {
         let code = self.inner.code_by_hash(code_hash);
         Ok(Bytecode::new_raw(code.clone()))
     }
 
     /// Get storage value of address at index.
     #[inline]
-    fn storage(&mut self, address: Address, index: U256) -> Result<U256, Self::Error> {
-        let storage = self
-            .account_storage
+    fn storage_ref(&self, address: Address, index: U256) -> Result<U256, Self::Error> {
+        let account_storage = self.account_storage.borrow();
+        let storage = account_storage
             .get(&address)
             .unwrap_or_else(|| panic!("storage not found: {:?}", address));
         match storage {
@@ -79,7 +81,7 @@ impl Database for WrapStateDb {
 
     /// Get block hash by block number.
     #[inline]
-    fn block_hash(&mut self, number: U256) -> Result<B256, Self::Error> {
+    fn block_hash_ref(&self, number: U256) -> Result<B256, Self::Error> {
         Ok(self.inner.block_hash(number))
     }
 }

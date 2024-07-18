@@ -1,4 +1,5 @@
 use crate::{db::wrap_state::WrapStateDb, input::ValidatedMultiEvmInput};
+use revm::db::WrapDatabaseRef;
 use vlayer_engine::{
     block_header::eth::EthBlockHeader,
     engine::Engine,
@@ -12,7 +13,7 @@ use vlayer_engine::{
 
 pub struct Guest {
     start_execution_location: ExecutionLocation,
-    multi_evm_env: MultiEvmEnv<WrapStateDb, EthBlockHeader>,
+    multi_evm_env: MultiEvmEnv<WrapDatabaseRef<WrapStateDb>, EthBlockHeader>,
 }
 
 impl Guest {
