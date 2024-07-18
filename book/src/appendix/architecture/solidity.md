@@ -51,7 +51,7 @@ Then the data is prepended on the `Host` with two additional fields `length` and
 
 Finally, the method on the on-chain smart contract is called. For that purpose, it is prepended with a function selector and might be additionally appended with custom user arguments.
 
-The `Proof` structure looks as follows and benefits from the:
+The `Proof` structure looks as follows:
 
 
 ```solidity
@@ -71,7 +71,7 @@ To verify a zero-knowledge proof, vlayer uses a `verify` function, delivered by 
 function verify(bytes calldata seal, bytes32 imageId, bytes32 journalDigest)
 ```
 
-`length` represents the length of journal data, which is located in `msg.data`, starting at byte 0 of `executionCommitment` and ends with the last byte of the last verified argument.
+`Proof.length` represents the length of journal data, which is located in `msg.data`, starting at byte 0 of `executionCommitment` and ends with the last byte of the last verified argument.
 
 `onlyVerified` gets `seal` and `journalDigest` by slicing it out of `msg.data`. This is where `length` is used.
 

@@ -198,7 +198,7 @@ contract MultiSigWallet is Verifier  {
 
 What exactly happened in the above code? 
 
-* First, note we need to let know Verifier, which Prover contract to verify:
+* First, note we need to let know `Verifier`, which `Prover` contract to verify:
   * The `PROVER_ADDR` constant holds the address of the `Prover` contract that generated the proof. 
   * The `PROVER_FUNC_SELECTOR` constant holds the selector for the `Prover.main()` function. 
   * `MultiSigWallet` inherits from `Verifier`, so we can call the `onlyVerified` modifier that makes sure the proof is correct or it will revert otherwise.

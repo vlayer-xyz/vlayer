@@ -1,6 +1,6 @@
 # Prover architecture
 
-On the high level, vlayer runs zkEVM that produces a proof of proper execution. Under the hood, vlayer is written in Rust that is compiled to zero knowledge proofs. Currently, Rust is compiled with [RISC Zero](https://www.risczero.com/), but we aim to build vendor-lock free solutions working on multiple zk stacks, like [sp-1](https://github.com/succinctlabs/sp1) or [Jolt](https://github.com/a16z/jolt). Inside rust [revm](https://github.com/bluealloy/revm) is executed.
+On the high level, vlayer runs zkEVM that produces a proof of proper execution of `Prover` smart contract. Under the hood, vlayer is written in Rust that is compiled to zero knowledge proofs. Currently, Rust is compiled with [RISC Zero](https://www.risczero.com/), but we aim to build vendor-lock free solutions working on multiple zk stacks, like [sp-1](https://github.com/succinctlabs/sp1) or [Jolt](https://github.com/a16z/jolt). Inside rust [revm](https://github.com/bluealloy/revm) is executed.
 
 Our architecture is inspired by RISC Zero [steel](https://github.com/risc0/risc0-ethereum/tree/main/steel), with 3 main components that can be found in `rust/` subdirectories:
 
@@ -42,7 +42,7 @@ We have two different databases run in two different places. Each is a composite
 - **host** - runs `ProofDb`, which proxies queries to `ProviderDb`. In turn, `ProviderDb` forwards the call to Ethereum RPC provider. Finally, `ProofDb` stores information about what proofs will need to be generated for the guest.
 - **guest** - runs WrapStateDb, which proxies calls to `StateDb`.
   - `StateDb` consists of state passed from the host and has only the content required to be used by deterministic execution of the Solidity code in the guest. Data in the `StateDb` is stored as sparse Ethereum Merkle Patricia Tries, hence access to accounts and storage serves as verification of state and storage proofs.
-  -  `WrapStateDb` is an [adapter](https://en.wikipedia.org/wiki/Adapter_pattern) for `StateDb` that implements Database trait. It additionally do caching of the accounts, for querying storage, so that the account is only fetched once for multiple storage queries.
+  -  `WrapStateDb` is an [adapter](https://en.wikipedia.org/wiki/Adapter_pattern) for `StateDb` that implements Database trait. It additionally does caching of the accounts, for querying storage, so that the account is only fetched once for multiple storage queries.
 
 ```mermaid
 %%{init: {'theme':'dark'}}%%
@@ -119,7 +119,7 @@ The environment is created in the host and converted into `EvmInput` and seriali
 
 `EvmInput` stores state and storage trees as sparse Ethereum Merkle Patricia Trie implemented by `MPT` structures, which is a wrapped Node. The sparse tree is very similar to the standard MPT in that it includes four standard node types. However, it only keeps data necessary to execution and in place of unused nodes it uses a special node called `Digest`.
 
-The data is deserialized by host with the `EVMInput.into_env()` function. Additionally, this method verifies header hashes (current and ancestors). `StateDb::new` calculates bytecodes hashes and storage roots.
+The data is serialized by host with the `EVMInput.into_env()` function. Additionally, this method verifies header hashes (current and ancestors). `StateDb::new` calculates bytecodes hashes and storage roots.
 
 ### Verification of input data
 
@@ -188,7 +188,7 @@ Below is a short description of the components:
 
 - The `Guest` is a program which communicates via reading input and writing to output. For simplicity, all input is deserialized into `GuestInput` and all output is serialized into `GuestOutput`. The `Guest`'s main purpose is to parse input and run logic from `Engine`.
 
-- The `Engine` consists of share logic between the `Host` and the `Guest`. In the `Host`, it is used to run preflight and in the `Guest` it is used to perform proving. It mainly does two things:
+- The `Engine` consists of shared logic between the `Host` and the `Guest`. In the `Host`, it is used to run preflight and in the `Guest` it is used to perform proving. It mainly does two things:
     - runs Rust preprocessing of a call (e.g. email signature verification)
     - runs Solidity contracts inside revm
 

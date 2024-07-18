@@ -41,7 +41,7 @@ Then we have to ensure that the delivered data makes sense for our case:
 Finally, we can return public input:
 * The caller address (`msg.sender`) and the `channelId` will be returned if all checks have passed
 
-If there were no execution errors occured and proof was produced, we are ready for on-chain verification. 
+If no execution errors occured and proof was produced, we are ready for on-chain verification. 
 
 > 💡 **Try it Now**
 > 
@@ -67,13 +67,13 @@ contract InfluencerDao is Verifier {
   mapping(address => bool) public authorizedMembers; 
   mapping(string => bool) public claimedChannels;
 
-  function join(Proof _p, string calldata channelId) 
+  function join(Proof _p, address influencerAddr, string calldata channelId) 
     public 
     onlyVerified(PROVER_ADDR, PROVER_FUNC_SELECTOR)  
   { 
     require(!claimedChannels[channelId], "ChannelId already used")
 
-    authorizedMembers[msg.sender] = true;
+    authorizedMembers[influencerAddr] = true;
     claimedChannels[channelId] = true;
   }
 }

@@ -3,10 +3,10 @@
 ## Primer on blocks
 The block number is a unique identifier assigned to each block in the Ethereum blockchain, starting from 0 for the genesis block and incrementing by one for each subsequent block. Smart contracts utilize block numbers to schedule events such as token releases, voting periods, and the start or end of auctions. By knowing the average block time, developers can estimate when these events will occur.
 
-Unfortunately, direct access to historical blocks from within smart contracts is limited. This restriction means that smart contracts cannot easily reference past block data for decision-making or verification purposes.
+Unfortunately, direct access to historical blocks from within smart contracts is [limited](https://ethereum.github.io/yellowpaper/paper.pdf). This restriction means that smart contracts cannot easily reference past block data for decision-making or verification purposes.
 
 ## Handling historical data in vlayer 
-To overcome the limitation of accessing historical blocks within smart contracts, we have introduced the `setBlockNumber(uint blockNo)` function, available in our `Prover` contracts. This function allows you to switch your next call context to the desired block number.
+To overcome the limitation of accessing historical blocks within smart contracts, we have introduced the `setBlockNumber(uint blockNo)` function, available in our `Prover` contracts. This function allows you to switch your next function call context to the desired block number.
 
 This allows you to aggregate and review data collected over multiple block numbers. 
 
@@ -35,7 +35,7 @@ contract USDTOwnership is Prover {
 }
 ```
 
-First, the call to the `setBlockNumber(15181682)` function sets the `Prover` context for the `15181682` block. This means that the next call to the `require_usdt_balance' function will be executed in the context of the 15181682 block. As a result, the function will ensure that the caller owns at least $100 at this point in history.
+First, the call to the `setBlockNumber(15181682)` function sets the `Prover` context for the `15181682` block. This means that the next call to the `require_usdt_balance' function will read data in the context of the 15181682 block. As a result, the function will ensure that the caller owns at least $100 at this point in history.
 
 Second call to `setBlockNumber(20175401)` sets the `Prover` context to block numbered `20175401`. The next call to `require_usdt_balance` checks if the caller owned at least $100, but this time in block `20175401`. Having less than $100 will result in an error (no proof will be generated).
 
