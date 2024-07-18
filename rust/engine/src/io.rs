@@ -3,7 +3,7 @@ use alloy_sol_types::SolValue;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-use crate::ethereum::MultiEthEvmInput;
+use crate::block_header::eth::MultiEthEvmInput;
 use crate::evm::env::ExecutionLocation;
 use crate::ExecutionCommitment;
 

@@ -1,8 +1,10 @@
 use crate::db::{state::StateDb, wrap_state::WrapStateDb};
-use vlayer_engine::evm::{
-    block_header::EvmBlockHeader,
-    env::{EvmEnv, MultiEvmEnv},
-    input::{EvmInput, MultiEvmInput},
+use vlayer_engine::{
+    block_header::evm::EvmBlockHeader,
+    evm::{
+        env::{EvmEnv, MultiEvmEnv},
+        input::{EvmInput, MultiEvmInput},
+    },
 };
 
 pub struct ValidatedEvmInput<H>(EvmInput<H>);

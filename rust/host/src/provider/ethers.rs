@@ -4,7 +4,7 @@ use ethers_core::types::Block;
 use ethers_providers::{Middleware, MiddlewareError};
 use thiserror::Error;
 use tokio::runtime::{Handle, Runtime};
-use vlayer_engine::ethereum::EthBlockHeader;
+use vlayer_engine::block_header::eth::EthBlockHeader;
 
 /// An error that can occur when interacting with the provider.
 #[derive(Error, Debug)]

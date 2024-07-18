@@ -1,7 +1,7 @@
 use crate::{db::wrap_state::WrapStateDb, input::ValidatedMultiEvmInput};
 use vlayer_engine::{
+    block_header::eth::EthBlockHeader,
     engine::Engine,
-    ethereum::EthBlockHeader,
     evm::{
         env::{ExecutionLocation, MultiEvmEnv},
         input::MultiEvmInput,

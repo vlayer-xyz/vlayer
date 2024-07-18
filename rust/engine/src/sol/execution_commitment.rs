@@ -8,7 +8,7 @@ use alloy_primitives::{Address, U256};
 pub use private::ExecutionCommitment;
 
 use crate::{
-    evm::block_header::{EvmBlockHeader, Hashable},
+    block_header::evm::{EvmBlockHeader, Hashable},
     io::CallSelector,
 };
 

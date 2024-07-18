@@ -4,7 +4,9 @@ use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, iter::once};
 use tracing::debug;
 
-use super::{block_header::EvmBlockHeader, env::ExecutionLocation};
+use crate::block_header::evm::EvmBlockHeader;
+
+use super::env::ExecutionLocation;
 
 /// The serializable input to derive and validate a [EvmEnv].
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]
@@ -70,13 +72,11 @@ pub type MultiEvmInput<H> = HashMap<ExecutionLocation, EvmInput<H>>;
 mod test {
     use mpt::EMPTY_ROOT_HASH;
 
-    use crate::ethereum::EthBlockHeader;
-    use crate::evm::block_header::Hashable;
-
     use super::EvmInput;
+    use crate::block_header::eth::EthBlockHeader;
+    use crate::block_header::evm::Hashable;
 
     mod block_hashes {
-
         use super::*;
 
         #[test]
@@ -101,6 +101,7 @@ mod test {
     }
 
     mod validate_state_root {
+
         use super::*;
 
         #[test]

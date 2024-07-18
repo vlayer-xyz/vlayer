@@ -1,14 +1,12 @@
 //! Type aliases for Ethereum.
-use crate::evm::{
-    block_header::{EvmBlockHeader, Hashable},
-    env::EvmEnv,
-    input::MultiEvmInput,
-};
+use crate::evm::{env::EvmEnv, input::MultiEvmInput};
 
 use alloy_primitives::{keccak256, Address, BlockHash, BlockNumber, Bloom, Bytes, B256, B64, U256};
 use alloy_rlp_derive::RlpEncodable;
 use revm::primitives::BlockEnv;
 use serde::{Deserialize, Serialize};
+
+use super::evm::{EvmBlockHeader, Hashable};
 
 /// [EvmEnv] for Ethereum.
 pub type EthEvmEnv<D> = EvmEnv<D, EthBlockHeader>;
