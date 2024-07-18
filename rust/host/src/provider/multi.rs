@@ -1,12 +1,13 @@
 use super::{factory::ProviderFactory, Provider};
 use crate::{host::error::HostError, utils::TryGetOrInsert};
 use alloy_primitives::ChainId;
+use std::cell::RefCell;
 use std::{collections::HashMap, rc::Rc};
 
 type MultiProvider<P> = HashMap<ChainId, Rc<P>>;
 
 pub struct CachedMultiProvider<P> {
-    cache: MultiProvider<P>,
+    cache: RefCell<MultiProvider<P>>,
     factory: Box<dyn ProviderFactory<P>>,
 }
 
@@ -16,15 +17,16 @@ where
 {
     pub fn new(factory: impl ProviderFactory<P> + 'static) -> Self {
         CachedMultiProvider {
-            cache: HashMap::new(),
+            cache: RefCell::new(HashMap::new()),
             factory: Box::new(factory),
         }
     }
 
-    pub fn get(&mut self, chain_id: ChainId) -> Result<Rc<P>, HostError> {
+    pub fn get(&self, chain_id: ChainId) -> Result<Rc<P>, HostError> {
         let create_provider = || Ok::<_, HostError>(Rc::new(self.factory.create(chain_id)?));
-        Ok(Rc::clone(
-            self.cache.try_get_or_insert(chain_id, create_provider)?,
-        ))
+        let mut mut_cache = self.cache.borrow_mut();
+        let provider = mut_cache.try_get_or_insert(chain_id, create_provider);
+        let cloned_provider = Rc::clone(provider?);
+        Ok(cloned_provider)
     }
 }
