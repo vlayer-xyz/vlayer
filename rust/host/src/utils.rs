@@ -1,29 +1,38 @@
 use std::collections::{hash_map::Entry, HashMap};
 use std::hash::Hash;
 
-pub fn get_mut_or_insert_with_result<K, V, F, E>(
-    map: &mut HashMap<K, V>,
-    key: K,
-    f: F,
-) -> Result<&mut V, E>
+pub trait TryGetOrInsert<K, V>
 where
     K: Hash + Eq,
-    F: FnOnce() -> Result<V, E>,
 {
-    match map.entry(key) {
-        Entry::Occupied(value) => Ok(value.into_mut()),
-        Entry::Vacant(entry) => {
-            let value = f()?;
-            Ok(entry.insert(value))
+    fn try_get_or_insert<F, E>(&mut self, key: K, f: F) -> Result<&mut V, E>
+    where
+        F: FnOnce() -> Result<V, E>;
+}
+
+impl<K, V> TryGetOrInsert<K, V> for HashMap<K, V>
+where
+    K: Hash + Eq,
+{
+    fn try_get_or_insert<F, E>(&mut self, key: K, f: F) -> Result<&mut V, E>
+    where
+        F: FnOnce() -> Result<V, E>,
+    {
+        match self.entry(key) {
+            Entry::Occupied(value) => Ok(value.into_mut()),
+            Entry::Vacant(entry) => {
+                let value = f()?;
+                Ok(entry.insert(value))
+            }
         }
     }
 }
 
 #[cfg(test)]
-mod get_mut_or_insert_with_result {
+mod try_get_or_insert {
+    use super::TryGetOrInsert;
     use anyhow::anyhow;
-
-    use super::*;
+    use std::collections::HashMap;
 
     #[test]
     fn found() {
@@ -31,7 +40,7 @@ mod get_mut_or_insert_with_result {
         let mut value = 42;
         let mut map = HashMap::from([(key, value)]);
 
-        let result = get_mut_or_insert_with_result(&mut map, key, || Err("should not be called"));
+        let result = map.try_get_or_insert(key, || Err("should not be called"));
         assert_eq!(result, Ok(&mut value));
     }
 
@@ -40,7 +49,7 @@ mod get_mut_or_insert_with_result {
         let mut map = HashMap::new();
         let key = "key";
         let mut value = 42;
-        let result = get_mut_or_insert_with_result(&mut map, key, || Ok::<_, ()>(value));
+        let result = map.try_get_or_insert(key, || Ok::<_, ()>(value));
         assert_eq!(result, Ok(&mut value));
         assert_eq!(map.get(key), Some(&value));
     }
@@ -50,7 +59,7 @@ mod get_mut_or_insert_with_result {
         let mut map = HashMap::<_, (), _>::new();
         let key = "key";
         let error = "error";
-        let result = get_mut_or_insert_with_result(&mut map, key, || Err(error));
+        let result = map.try_get_or_insert(key, || Err(error));
         assert_eq!(result, Err(error));
         assert_eq!(map.get(key), None);
     }
@@ -69,8 +78,8 @@ mod get_mut_or_insert_with_result {
                 Ok(value)
             }
         };
-        get_mut_or_insert_with_result(&mut map, key, &mut return_once)?;
-        get_mut_or_insert_with_result(&mut map, key, &mut return_once)?;
+        map.try_get_or_insert(key, &mut return_once)?;
+        map.try_get_or_insert(key, &mut return_once)?;
         assert_eq!(map.get(key), Some(&value));
         Ok(())
     }
