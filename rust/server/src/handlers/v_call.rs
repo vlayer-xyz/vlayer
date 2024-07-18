@@ -2,7 +2,7 @@ use std::sync::Arc;
 
 use crate::error::AppError;
 use crate::server::Config;
-use host::host::{Host, HostConfig};
+use host::host::{config::HostConfig, Host};
 use host::{Call as HostCall, ExecutionLocation};
 use types::{Call, CallContext, CallResult};
 

@@ -4,7 +4,7 @@ use crate::into_input::into_multi_input;
 use crate::provider::factory::{EthersProviderFactory, ProviderFactory};
 use crate::provider::{CachedMultiProvider, EthersProvider, Provider};
 use crate::utils::get_mut_or_insert_with_result;
-use alloy_primitives::ChainId;
+use config::HostConfig;
 use error::HostError;
 use ethers_providers::Provider as OGEthersProvider;
 use ethers_providers::{Http, RetryClient};
@@ -18,6 +18,7 @@ use vlayer_engine::evm::env::{EvmEnv, ExecutionLocation, MultiEvmEnv};
 use vlayer_engine::evm::input::MultiEvmInput;
 use vlayer_engine::io::{Call, GuestOutput, HostOutput, Input};
 
+pub mod config;
 pub mod error;
 
 pub type EthersClient = OGEthersProvider<RetryClient<Http>>;
@@ -26,23 +27,6 @@ pub struct Host<P: Provider<Header = EthBlockHeader>> {
     start_execution_location: ExecutionLocation,
     envs: MultiEvmEnv<ProofDb<P>, EthBlockHeader>,
     multi_provider: CachedMultiProvider<P>,
-}
-
-pub struct HostConfig {
-    rpc_urls: HashMap<ChainId, String>,
-    start_execution_location: ExecutionLocation,
-}
-
-impl HostConfig {
-    pub fn new(url: &str, start_execution_location: ExecutionLocation) -> Self {
-        let rpc_urls = [(start_execution_location.chain_id, url.to_string())]
-            .into_iter()
-            .collect();
-        HostConfig {
-            rpc_urls,
-            start_execution_location,
-        }
-    }
 }
 
 impl Host<EthersProvider<EthersClient>> {
