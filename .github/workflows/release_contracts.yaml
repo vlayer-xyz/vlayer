@@ -1,8 +1,8 @@
 name: Release vlayer contracts to AWS
-on:
-  push:
-    branches:
-      - release-examples
+# on:
+#   push:
+#     branches:
+#       - release-examples
 
 jobs:
   pack-example-contracts:
