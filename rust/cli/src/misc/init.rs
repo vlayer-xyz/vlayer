@@ -27,7 +27,7 @@ pub(crate) fn find_src_path(root_path: &Path) -> Result<PathBuf, CLIError> {
     }
 }
 
-pub(crate) async fn fetch_vlayer_files(dst: &Path) -> Result<(), CLIError> {
+pub(crate) async fn fetch_vlayer_files(dst: &Path, template: String) -> Result<(), CLIError> {
     let response = get(CONTRACTS_URL)
         .await
         .map_err(map_reqwest_error)?
@@ -35,18 +35,42 @@ pub(crate) async fn fetch_vlayer_files(dst: &Path) -> Result<(), CLIError> {
         .await
         .map_err(map_reqwest_error)?;
 
-    Archive::new(GzDecoder::new(Cursor::new(response))).unpack(dst)?;
+    let mut archive = Archive::new(GzDecoder::new(Cursor::new(response)));
+
+    let temp_dir = tempfile::tempdir()?;
+    archive.unpack(temp_dir.path())?;
+
+    let downloaded_contracts = temp_dir.path().join(template).join("vlayer");
+    copy_dir_to(&downloaded_contracts, dst)?;
 
     Ok(())
 }
 
-pub(crate) fn create_vlayer_dir(src_path: &Path) -> Result<bool, CLIError> {
+fn copy_dir_to(src_dir: &Path, dst_dir: &Path) -> std::io::Result<()> {
+    if !dst_dir.is_dir() {
+        fs::create_dir_all(dst_dir)?;
+    }
+
+    for entry_result in src_dir.read_dir()? {
+        let entry = entry_result?;
+        let file_type = entry.file_type()?;
+        if file_type.is_dir() {
+            copy_dir_to(&entry.path(), &dst_dir.join(entry.file_name()))?;
+        } else {
+            fs::copy(&entry.path(), &dst_dir.join(entry.file_name()))?;
+        }
+    }
+
+    Ok(())
+}
+
+pub(crate) fn create_vlayer_dir(src_path: &Path) -> Result<Option<PathBuf>, CLIError> {
     let vlayer_dir = src_path.join(VLAYER_DIR_NAME);
     if vlayer_dir.exists() {
-        return Ok(false);
+        return Ok(None);
     }
     std::fs::create_dir_all(&vlayer_dir)?;
-    Ok(true)
+    Ok(Some(vlayer_dir))
 }
 
 #[cfg(test)]
@@ -121,8 +145,8 @@ mod tests {
 
         let result = create_vlayer_dir(&src_path);
 
-        assert!(result.unwrap());
-        assert!(vlayer_dir.exists());
+        assert!(&vlayer_dir.exists());
+        assert_eq!(result.unwrap(), Some(vlayer_dir));
     }
 
     #[test]
@@ -134,7 +158,24 @@ mod tests {
 
         let result = create_vlayer_dir(&src_path);
 
-        assert!(!result.unwrap());
+        assert!(result.unwrap().is_none());
         assert!(vlayer_dir.exists());
+    }
+
+    #[test]
+    fn test_copy_dir_to() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let src_dir = temp_dir.path().join("src");
+        let dst_dir = temp_dir.path().join("dst");
+
+        std::fs::create_dir(&src_dir).unwrap();
+        std::fs::write(src_dir.join("file1"), "file1").unwrap();
+        std::fs::write(src_dir.join("file2"), "file2").unwrap();
+
+        copy_dir_to(&src_dir, &dst_dir).unwrap();
+
+        assert!(dst_dir.exists());
+        assert!(dst_dir.join("file1").exists());
+        assert!(dst_dir.join("file2").exists());
     }
 }
