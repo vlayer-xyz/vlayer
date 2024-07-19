@@ -1,26 +1,27 @@
 {
-    "rust-analyzer.linkedProjects": [
-        "rust/Cargo.toml",
-        "rust/guest_wrapper/guest/Cargo.toml",
-    ],
-    "cSpell.words": [
-        "binstall",
-        "bytecodes",
-        "groth",
-        "Hashable",
-        "jrpc",
-        "keccak",
-        "merkle",
-        "multichain",
-        "ommers",
-        "oneshot",
-        "opentelemetry",
-        "preverified",
-        "revm",
-        "SEPOLIA",
-        "sidechains",
-        "thiserror",
-        "vlayer",
-        "zkvm"
-    ]
+  "rust-analyzer.linkedProjects": [
+    "rust/Cargo.toml",
+    "rust/guest_wrapper/guest/Cargo.toml"
+  ],
+  "cSpell.words": [
+    "Augmentors",
+    "binstall",
+    "bytecodes",
+    "groth",
+    "Hashable",
+    "jrpc",
+    "keccak",
+    "merkle",
+    "multichain",
+    "ommers",
+    "oneshot",
+    "opentelemetry",
+    "preverified",
+    "revm",
+    "SEPOLIA",
+    "sidechains",
+    "thiserror",
+    "vlayer",
+    "zkvm"
+  ]
 }
