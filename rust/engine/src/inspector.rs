@@ -79,53 +79,6 @@ impl<DB: Database> Inspector<&mut DB> for SetInspector<DB> {
             Some(outcome) => Some(outcome.0),
             None => None,
         }
-        // info!(
-        //     "Address: {:?}, caller:{:?}, input:{:?}",
-        //     inputs.bytecode_address, inputs.caller, inputs.input,
-        // );
-
-        // match inputs.bytecode_address {
-        //     ROOT_ADDR => {
-        //         info!("Host contract called!");
-        //     }
-        //     TRAVEL_CONTRACT_ADDR => {
-        //         let (selector, argument_bytes) = inputs.input.split_at(SELECTOR_LEN);
-        //         let argument = U256::from_big_endian(argument_bytes);
-
-        //         if selector == *SET_BLOCK_SELECTOR {
-        //             info!(
-        //                 "Travel contract called with function: setBlock and argument: {:?}!",
-        //                 argument
-        //             );
-        //             self.set_block = Some(argument);
-        //         } else if selector == *SET_CHAIN_SELECTOR {
-        //             info!(
-        //                 "Travel contract called with function: setChain and argument: {:?}!",
-        //                 argument
-        //             );
-        //             self.set_chain = Some(argument);
-        //         }
-        //     }
-        //     // If the call is not setBlock/setChain but setBlock/setChain is active, intercept the call.
-        //     _ => {
-        //         if let Some(block_number) = &self.set_block.take() {
-        //             info!(
-        //                 "Intercepting the call. Returning last block number: {:?}",
-        //                 *block_number
-        //             );
-        //             return Some(MockCallOutcome::from(*block_number).0);
-        //         }
-        //         if let Some(chain_id) = &self.set_chain.take() {
-        //             info!(
-        //                 "Intercepting the call. Returning last chain id: {:?}",
-        //                 *chain_id
-        //             );
-        //             return Some(MockCallOutcome::from(*chain_id).0);
-        //         }
-        //     }
-        // }
-
-        // None
     }
 }
 
