@@ -37,6 +37,19 @@ pub struct CallContext {
     pub chain_id: ChainId,
 }
 
+#[derive(Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct Augmentors {
+    pub web: Page,
+}
+
+#[derive(Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct Page {
+    pub notary_pub_key: String,
+    pub tls_poof: String,
+}
+
 #[derive(Deserialize, Serialize, Debug)]
 pub struct CallResult {
     pub result: String,
