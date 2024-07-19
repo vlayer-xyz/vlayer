@@ -4,6 +4,7 @@ language = "en"
 multilingual = false
 src = "src"
 title = "vlayer book"
+description = "Explore vlayer guides and examples for developers."
 
 [preprocessor]
 
