@@ -88,11 +88,12 @@ async fn init(cwd: PathBuf) -> Result<(), CLIError> {
     info!("Found foundry project root in \"{}\"", &src_path.display());
 
     match create_vlayer_dir(&src_path)? {
-        true => {
+        Some(vlayer_path) => {
             info!("Created vlayer directory in \"{}\"", src_path.display());
-            fetch_vlayer_files(&src_path).await?
+            let default_template = "simple";
+            fetch_vlayer_files(&vlayer_path, default_template.into()).await?
         }
-        false => error!(
+        None => error!(
             "vlayer directory already exists in \"{}\". Skipping creation.",
             &src_path.display()
         ),
