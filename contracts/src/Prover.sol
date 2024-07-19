@@ -12,10 +12,12 @@ contract Prover {
     ITraveler constant TRAVELER = ITraveler(address(uint160(uint256(keccak256("vlayer.traveler"))))); // 0x76dc9aa45aa006a0f63942d8f9f21bd4537972a3
 
     function setBlock(uint256 blockNo) public {
-        TRAVELER.setBlock(blockNo);
+        (bool success, ) = address(TRAVELER).call(abi.encodeWithSelector(ITraveler.setBlock.selector, blockNo));
+        require(success, "Call to traveler should get intercepted and succeed");
     }
 
     function setChain(uint256 chainId, uint256 blockNo) public {
-        TRAVELER.setChain(chainId, blockNo);
+        (bool success, ) = address(TRAVELER).call(abi.encodeWithSelector(ITraveler.setChain.selector, chainId, blockNo));
+        require(success, "Call to traveler should get intercepted and succeed");
     }
 }
