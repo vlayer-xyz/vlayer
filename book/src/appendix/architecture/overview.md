@@ -1,10 +1,11 @@
 # Architecture overview
 
-vlayer consist of four main components:
+vlayer consist of five main components:
 - **prover server** - exposing functionality via [vlayer JSON-RPC API](/appendix/api.md)  [[docs](./prover.md)]
 - **javascript SDK** - thin wrapper around the [vlayer JSON-RPC API](/appendix/api.md)
 - **on-chain smart contracts** - used to verify proofs [[docs](./solidity.md)]
 - **browser plugin** - used for notarization of TLS Connections
+- **headers proof cache** - http server used as a cache for proofs of inclusion of a block in a chain
 
 ![Schema](/images/architecture/overview.png)
 
