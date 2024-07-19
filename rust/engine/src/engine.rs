@@ -11,9 +11,11 @@ use thiserror::Error;
 use tracing::info;
 
 use crate::{
-    block_header::EvmBlockHeader,
-    evm::env::{EvmEnv, ExecutionLocation},
-    inspector::{SetInspector, MockCallOutcome},
+    evm::{
+        block_header::EvmBlockHeader,
+        env::{EvmEnv, ExecutionLocation},
+    },
+    inspector::{MockCallOutcome, TravelInspector},
     io::Call,
 };
 
@@ -58,7 +60,7 @@ impl Engine {
     {
         let evm = Evm::builder()
             .with_db(&mut env.db)
-            .with_external_context(SetInspector::new(Self::inspector_callback()))
+            .with_external_context(TravelInspector::new(Self::inspector_callback()))
             .with_cfg_env_with_handler_cfg(env.cfg_env.clone())
             .append_handler_register(inspector_handle_register)
             .modify_block_env(|blk_env| env.header.fill_block_env(blk_env))
@@ -93,10 +95,12 @@ impl Engine {
         Ok(output.into_data().into())
     }
 
-    fn inspector_callback<D: Database>(
-    ) -> fn(&mut SetInspector<D>, &mut EvmContext<&mut D>, &mut CallInputs) -> Option<MockCallOutcome>
-    {
-        return |inspector: &mut SetInspector<D>,
+    fn inspector_callback<D: Database>() -> fn(
+        &mut TravelInspector<D>,
+        &mut EvmContext<&mut D>,
+        &mut CallInputs,
+    ) -> Option<MockCallOutcome> {
+        return |inspector: &mut TravelInspector<D>,
                 _: &mut EvmContext<&mut D>,
                 inputs: &mut CallInputs| {
             info!(

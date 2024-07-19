@@ -32,18 +32,18 @@ impl From<U256> for MockCallOutcome {
 }
 
 #[derive(Clone, Debug)]
-pub struct SetInspector<DB: Database> {
+pub struct TravelInspector<DB: Database> {
     pub set_block: Option<U256>,
     pub set_chain: Option<U256>,
 
     callback: fn(
-        &mut SetInspector<DB>,
+        &mut TravelInspector<DB>,
         &mut EvmContext<&mut DB>,
         &mut CallInputs,
     ) -> Option<MockCallOutcome>,
 }
 
-impl<DB: Database> Default for SetInspector<DB> {
+impl<DB: Database> Default for TravelInspector<DB> {
     fn default() -> Self {
         Self {
             set_block: None,
@@ -53,7 +53,7 @@ impl<DB: Database> Default for SetInspector<DB> {
     }
 }
 
-impl<DB: Database> SetInspector<DB> {
+impl<DB: Database> TravelInspector<DB> {
     pub fn new(
         callback: fn(
             &mut Self,
@@ -69,7 +69,7 @@ impl<DB: Database> SetInspector<DB> {
     }
 }
 
-impl<DB: Database> Inspector<&mut DB> for SetInspector<DB> {
+impl<DB: Database> Inspector<&mut DB> for TravelInspector<DB> {
     fn call(
         &mut self,
         context: &mut EvmContext<&mut DB>,
@@ -95,7 +95,7 @@ mod test {
         EvmContext, Inspector,
     };
 
-    use super::SetInspector;
+    use super::TravelInspector;
 
     const MOCK_CALLER: Address = address!("0000000000000000000000000000000000000000");
     const TRAVEL_CONTRACT_ADDR: Address = address!("1234567890AbcdEF1234567890aBcdef12345678");
@@ -117,14 +117,14 @@ mod test {
         }
     }
 
-    fn inspector_call(addr: Address) -> SetInspector<CacheDB<EmptyDBTyped<Infallible>>> {
+    fn inspector_call(addr: Address) -> TravelInspector<CacheDB<EmptyDBTyped<Infallible>>> {
         let mut mock_db = CacheDB::new(EmptyDB::default());
         mock_db.insert_account_info(addr, AccountInfo::default());
 
         let mut evm_context = EvmContext::new(&mut mock_db);
         let mut call_inputs = create_mock_call_inputs(addr, &SET_BLOCK_SELECTOR);
 
-        let mut set_block_inspector = SetInspector::default();
+        let mut set_block_inspector = TravelInspector::default();
         set_block_inspector.call(&mut evm_context, &mut call_inputs);
 
         set_block_inspector
