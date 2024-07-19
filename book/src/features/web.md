@@ -17,14 +17,14 @@ Below is sample code for such a `Prover` contract:
 contract YouTubeRevenue is Prover {
     string memory dataUrl = "https://studio.youtube.com/creator/get_channel_dashboard";
     
-    function main() public returns (address, string) {      
+    function main(address influencerAddr) public returns (address, string) {      
       require(web.url.equal(dataUrl), "Incorrect URL")
       require(
         web.json.get("channel.estimatedEarnings") > 1_000_000, 
         "Earnings less than $10000"_
       )
 
-      return (msg.sender, web.json.get("channel.id"));
+      return (influencerAddr, web.json.get("channel.id"));
     }
 }
 ```
@@ -39,9 +39,9 @@ Then we have to ensure that the delivered data makes sense for our case:
 * `estimatedEarnings > 1_000_000` checks if estimated earnings are higher than 10k USD (parsed JSON contains amount in cents). Otherwise it reverts 
 
 Finally, we can return public input:
-* The caller address (`msg.sender`) and the `channelId` will be returned if all checks have passed
+* The `influencerAddr` and the `channelId` will be returned if all checks have passed
 
-If there were no execution errors occured and proof was produced, we are ready for on-chain verification. 
+If no execution errors occured and proof was produced, we are ready for on-chain verification. 
 
 > 💡 **Try it Now**
 > 
@@ -67,13 +67,14 @@ contract InfluencerDao is Verifier {
   mapping(address => bool) public authorizedMembers; 
   mapping(string => bool) public claimedChannels;
 
-  function join(Proof _p, string calldata channelId) 
+  function join(Proof _p, address influencerAddr, string calldata channelId) 
     public 
     onlyVerified(PROVER_ADDR, PROVER_FUNC_SELECTOR)  
   { 
+    require(influencerAddr == msg.sender, "wrong caller")
     require(!claimedChannels[channelId], "ChannelId already used")
 
-    authorizedMembers[msg.sender] = true;
+    authorizedMembers[influencerAddr] = true;
     claimedChannels[channelId] = true;
   }
 }
@@ -94,7 +95,7 @@ What exactly was going on in the snippet above?
 * Finally, we need logic to add new members to the DAO:   
   * `proof` must be first argument, so `onlyVerified` has access to it and can verify it
   * the `!claimedChannels[channelId]` assertion prevents the same channel from being used more than once
-  * `authorizedMembers[msg.sender] = true` adds new member to DAO
+  * `authorizedMembers[influencerAddr] = true` adds new member to DAO
   * `claimedChannels[channelId] = true` marks `channelId` as a claimed channel.
 
 And that's it! 
