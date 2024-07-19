@@ -2,7 +2,7 @@ use alloy_primitives::{address, b256, uint, Address, U256};
 use alloy_sol_types::{sol, SolCall};
 use host::{
     host::{config::HostConfig, Host},
-    provider::factory::FileProviderFactory,
+    provider::factory::{CachedProviderFactory, EthersProviderFactory, FileProviderFactory},
     Call,
 };
 use std::collections::HashMap;
@@ -10,6 +10,9 @@ use vlayer_engine::{
     config::{MAINNET_ID, SEPOLIA_ID},
     evm::env::location::ExecutionLocation,
 };
+
+const _MAINNET_URL: &str = "https://eth-mainnet.g.alchemy.com/v2/aELUUoHTIKr-_0QaljabhHEF-Zue2XzH";
+const _SEPOLIA_URL: &str = "https://eth-sepolia.g.alchemy.com/v2/aELUUoHTIKr-_0QaljabhHEF-Zue2XzH";
 
 fn create_test_provider_factory() -> FileProviderFactory {
     let rpc_file_cache = HashMap::from([
@@ -20,14 +23,34 @@ fn create_test_provider_factory() -> FileProviderFactory {
     FileProviderFactory::new(rpc_file_cache)
 }
 
+fn _create_recording_provider_factory() -> CachedProviderFactory {
+    let rpc_file_cache: HashMap<_, _> = [
+        (MAINNET_ID, "testdata/mainnet_rpc_cache.json".to_string()),
+        (SEPOLIA_ID, "testdata/sepolia_rpc_cache.json".to_string()),
+    ]
+    .into_iter()
+    .collect();
+    let rpc_urls: HashMap<_, _> = [
+        (MAINNET_ID, _MAINNET_URL.to_string()),
+        (SEPOLIA_ID, _SEPOLIA_URL.to_string()),
+    ]
+    .into_iter()
+    .collect();
+
+    CachedProviderFactory::new(rpc_urls, rpc_file_cache)
+}
+
 fn run<C>(call: Call, chain_id: u64, block_number: u64) -> anyhow::Result<C::Return>
 where
     C: SolCall,
 {
     let provider_factory = create_test_provider_factory();
+    // Uncomment this line to fill the cache files:
+    // let provider_factory = _create_recording_provider_factory();
     let null_rpc_url = "a null url value as url is not needed in tests";
     let execution_location = ExecutionLocation::new(block_number, chain_id);
     let config = HostConfig::new(null_rpc_url, execution_location);
+
     let host = Host::try_new_with_provider_factory(provider_factory, config)?;
     let raw_return_value = host.run(call)?.guest_output.evm_call_result;
     let return_value = C::abi_decode_returns(&raw_return_value, false)?;
