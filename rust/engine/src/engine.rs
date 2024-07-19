@@ -43,7 +43,6 @@ pub enum EngineError {
     EvmEnvNotFound(ExecutionLocation),
 }
 
-// First 4 bytes of the call data is the selector id - the rest are arguments.
 const SELECTOR_LEN: usize = 4;
 const TRAVEL_CONTRACT_ADDR: Address = address!("76dc9aa45aa006a0f63942d8f9f21bd4537972a3");
 static SET_BLOCK_SELECTOR: Lazy<Vec<u8>> =
@@ -100,55 +99,59 @@ impl Engine {
         &mut EvmContext<&mut D>,
         &mut CallInputs,
     ) -> Option<MockCallOutcome> {
-        return |inspector: &mut TravelInspector<D>,
-                _: &mut EvmContext<&mut D>,
-                inputs: &mut CallInputs| {
+        |inspector: &mut TravelInspector<D>, _: &mut EvmContext<&mut D>, inputs: &mut CallInputs| {
             info!(
                 "Address: {:?}, caller:{:?}, input:{:?}",
                 inputs.bytecode_address, inputs.caller, inputs.input,
             );
 
             match inputs.bytecode_address {
-                TRAVEL_CONTRACT_ADDR => {
-                    let (selector, argument_bytes) = inputs.input.split_at(SELECTOR_LEN);
-                    let argument = U256::from_big_endian(argument_bytes);
-
-                    if selector == *SET_BLOCK_SELECTOR {
-                        info!(
-                            "Travel contract called with function: setBlock and argument: {:?}!",
-                            argument
-                        );
-                        inspector.set_block = Some(argument);
-                        return Some(MockCallOutcome::from(U256::zero()));
-                    } else if selector == *SET_CHAIN_SELECTOR {
-                        info!(
-                            "Travel contract called with function: setChain and argument: {:?}!",
-                            argument
-                        );
-                        inspector.set_chain = Some(argument);
-                        return Some(MockCallOutcome::from(U256::zero()));
-                    }
-                }
-                // If the call is not setBlock/setChain but setBlock/setChain is active, intercept the call.
-                _ => {
-                    if let Some(block_number) = &inspector.set_block.take() {
-                        info!(
-                            "Intercepting the call. Returning last block number: {:?}",
-                            *block_number
-                        );
-                        return Some(MockCallOutcome::from(*block_number));
-                    }
-                    if let Some(chain_id) = &inspector.set_chain.take() {
-                        info!(
-                            "Intercepting the call. Returning last chain id: {:?}",
-                            *chain_id
-                        );
-                        return Some(MockCallOutcome::from(*chain_id));
-                    }
-                }
+                TRAVEL_CONTRACT_ADDR => Self::handle_travel_call(inspector, inputs),
+                _ => Self::handle_call(inspector),
             }
+        }
+    }
 
-            None
-        };
+    fn handle_travel_call<D: Database>(
+        inspector: &mut TravelInspector<D>,
+        inputs: &mut CallInputs,
+    ) -> Option<MockCallOutcome> {
+        let (selector, argument_bytes) = inputs.input.split_at(SELECTOR_LEN);
+        let argument = U256::from_big_endian(argument_bytes);
+
+        if selector == *SET_BLOCK_SELECTOR {
+            info!(
+                "Travel contract called with function: setBlock and argument: {:?}!",
+                argument
+            );
+            inspector.set_block = Some(argument);
+            return Some(MockCallOutcome::from(U256::zero()));
+        } else if selector == *SET_CHAIN_SELECTOR {
+            info!(
+                "Travel contract called with function: setChain and argument: {:?}!",
+                argument
+            );
+            inspector.set_chain = Some(argument);
+            return Some(MockCallOutcome::from(U256::zero()));
+        }
+        None
+    }
+
+    fn handle_call<D: Database>(inspector: &mut TravelInspector<D>) -> Option<MockCallOutcome> {
+        if let Some(block_number) = &inspector.set_block.take() {
+            info!(
+                "Intercepting the call. Returning last block number: {:?}",
+                *block_number
+            );
+            return Some(MockCallOutcome::from(*block_number));
+        }
+        if let Some(chain_id) = &inspector.set_chain.take() {
+            info!(
+                "Intercepting the call. Returning last chain id: {:?}",
+                *chain_id
+            );
+            return Some(MockCallOutcome::from(*chain_id));
+        }
+        None
     }
 }
