@@ -13,6 +13,10 @@ contract SimpleTravelProver is Prover {
 
     function aroundTheWorld() public returns (uint256) {
         setBlock(1);
-        return IExample(EXAMPLE_ADDR).exampleFunction();
+        
+        (bool success, bytes memory result) = address(EXAMPLE_ADDR).call(abi.encodeWithSelector(IExample.exampleFunction.selector));
+        require(success, "Call to example address should get intercepted and succeed");
+        
+        return abi.decode(result, (uint256));
     }
 }
