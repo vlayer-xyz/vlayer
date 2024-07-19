@@ -43,16 +43,6 @@ pub struct TravelInspector<DB: Database> {
     ) -> Option<MockCallOutcome>,
 }
 
-impl<DB: Database> Default for TravelInspector<DB> {
-    fn default() -> Self {
-        Self {
-            set_block: None,
-            set_chain: None,
-            callback: |_, _, _| None,
-        }
-    }
-}
-
 impl<DB: Database> TravelInspector<DB> {
     pub fn new(
         callback: fn(
@@ -95,10 +85,12 @@ mod test {
         EvmContext, Inspector,
     };
 
+    use crate::engine::Engine;
+
     use super::TravelInspector;
 
     const MOCK_CALLER: Address = address!("0000000000000000000000000000000000000000");
-    const TRAVEL_CONTRACT_ADDR: Address = address!("1234567890AbcdEF1234567890aBcdef12345678");
+    const TRAVEL_CONTRACT_ADDR: Address = address!("76dc9aa45aa006a0f63942d8f9f21bd4537972a3");
     static SET_BLOCK_SELECTOR: Lazy<Vec<u8>> =
         Lazy::new(|| decode("87cea3ae").expect("Error decoding set_block function call"));
 
@@ -124,7 +116,7 @@ mod test {
         let mut evm_context = EvmContext::new(&mut mock_db);
         let mut call_inputs = create_mock_call_inputs(addr, &SET_BLOCK_SELECTOR);
 
-        let mut set_block_inspector = TravelInspector::default();
+        let mut set_block_inspector = TravelInspector::new(Engine::inspector_callback());
         set_block_inspector.call(&mut evm_context, &mut call_inputs);
 
         set_block_inspector

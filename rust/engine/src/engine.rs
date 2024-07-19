@@ -94,7 +94,7 @@ impl Engine {
         Ok(output.into_data().into())
     }
 
-    fn inspector_callback<D: Database>() -> fn(
+    pub(crate) fn inspector_callback<D: Database>() -> fn(
         &mut TravelInspector<D>,
         &mut EvmContext<&mut D>,
         &mut CallInputs,
