@@ -4,6 +4,7 @@ use alloy_primitives::ChainId;
 use std::collections::HashMap;
 use std::path::PathBuf;
 
+use super::cache::CachedProvider;
 use super::{EthersClient, FileProvider};
 
 pub trait ProviderFactory<P>
@@ -65,6 +66,49 @@ impl ProviderFactory<FileProvider> for FileProviderFactory {
         })?;
 
         Ok(provider)
+    }
+}
+
+pub struct CachedProviderFactory {
+    rpc_urls: HashMap<ChainId, String>,
+    rpc_file_cache: HashMap<ChainId, String>,
+}
+
+impl CachedProviderFactory {
+    pub fn new(
+        rpc_urls: HashMap<ChainId, String>,
+        rpc_file_cache: HashMap<ChainId, String>,
+    ) -> Self {
+        CachedProviderFactory {
+            rpc_urls,
+            rpc_file_cache,
+        }
+    }
+}
+
+impl ProviderFactory<CachedProvider<EthersProvider<EthersClient>>> for CachedProviderFactory {
+    fn create(
+        &self,
+        chain_id: ChainId,
+    ) -> Result<CachedProvider<EthersProvider<EthersClient>>, HostError> {
+        let url = self
+            .rpc_urls
+            .get(&chain_id)
+            .ok_or(HostError::NoRpcUrl(chain_id))?;
+        let file_path = self
+            .rpc_file_cache
+            .get(&chain_id)
+            .ok_or_else(|| HostError::NoRpcCache(chain_id))?;
+        let path_buf = PathBuf::from(file_path);
+
+        let client = EthersClient::new_client(url, MAX_RETRY, INITIAL_BACKOFF)?;
+        let provider = EthersProvider::new(client);
+        Ok(CachedProvider::new(path_buf, provider).map_err(|err| {
+            HostError::Provider(format!(
+                "Error creating provider for chain ID {}: {}",
+                chain_id, err
+            ))
+        })?)
     }
 }
 
