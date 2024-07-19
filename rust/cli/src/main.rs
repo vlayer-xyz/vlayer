@@ -1,16 +1,13 @@
+use crate::errors::CLIError;
 use crate::tests::TestArgs;
-use crate::{errors::CLIError, misc::init::find_src_path};
 use clap::{Parser, Subcommand};
-use misc::{
-    init::{create_vlayer_dir, fetch_vlayer_files},
-    path::find_foundry_root,
-};
+use commands::init::init;
 use server::server::{serve, Config};
-use std::path::PathBuf;
 use tracing::{error, info};
 
+mod commands;
 pub mod errors;
-mod misc;
+mod utils;
 
 #[cfg(test)]
 mod test_utils;
@@ -76,27 +73,6 @@ async fn run() -> Result<(), CLIError> {
             info!("Running vlayer tests");
             cmd.run().await.unwrap();
         }
-    }
-    Ok(())
-}
-
-async fn init(cwd: PathBuf) -> Result<(), CLIError> {
-    info!("Running vlayer init from directory {:?}", cwd.display());
-
-    let root_path = find_foundry_root(&cwd)?;
-    let src_path = find_src_path(&root_path)?;
-    info!("Found foundry project root in \"{}\"", &src_path.display());
-
-    match create_vlayer_dir(&src_path)? {
-        Some(vlayer_path) => {
-            info!("Created vlayer directory in \"{}\"", src_path.display());
-            let default_template = "simple";
-            fetch_vlayer_files(&vlayer_path, default_template.into()).await?
-        }
-        None => error!(
-            "vlayer directory already exists in \"{}\". Skipping creation.",
-            &src_path.display()
-        ),
     }
     Ok(())
 }

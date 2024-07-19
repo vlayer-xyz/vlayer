@@ -1,4 +1,5 @@
 use crate::errors::CLIError;
+use std::fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::str::from_utf8;
@@ -7,6 +8,24 @@ pub(crate) fn find_foundry_root(start: &Path) -> Result<PathBuf, CLIError> {
     let start = start.canonicalize()?;
     let git_root = find_git_root(&start)?;
     do_find_foundry_root_from(&start, &git_root)
+}
+
+pub(crate) fn copy_dir_to(src_dir: &Path, dst_dir: &Path) -> std::io::Result<()> {
+    if !dst_dir.is_dir() {
+        fs::create_dir_all(dst_dir)?;
+    }
+
+    for entry_result in src_dir.read_dir()? {
+        let entry = entry_result?;
+        let file_type = entry.file_type()?;
+        if file_type.is_dir() {
+            copy_dir_to(&entry.path(), &dst_dir.join(entry.file_name()))?;
+        } else {
+            fs::copy(&entry.path(), &dst_dir.join(entry.file_name()))?;
+        }
+    }
+
+    Ok(())
 }
 
 fn do_find_foundry_root_from(current: &Path, git_root: &PathBuf) -> Result<PathBuf, CLIError> {
@@ -147,5 +166,22 @@ mod tests {
             result.unwrap_err(),
             CLIError::CommandExecutionError(err) if err.kind() == std::io::ErrorKind::NotFound
         ));
+    }
+
+    #[test]
+    fn test_copy_dir_to() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let src_dir = temp_dir.path().join("src");
+        let dst_dir = temp_dir.path().join("dst");
+
+        std::fs::create_dir(&src_dir).unwrap();
+        std::fs::write(src_dir.join("file1"), "file1").unwrap();
+        std::fs::write(src_dir.join("file2"), "file2").unwrap();
+
+        copy_dir_to(&src_dir, &dst_dir).unwrap();
+
+        assert!(dst_dir.exists());
+        assert!(dst_dir.join("file1").exists());
+        assert!(dst_dir.join("file2").exists());
     }
 }
