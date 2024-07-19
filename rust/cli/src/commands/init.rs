@@ -1,21 +1,44 @@
 use crate::errors::CLIError;
-use crate::misc::parse_toml::get_src_from_string;
+use crate::utils::parse_toml::get_src_from_string;
+use crate::utils::path::{copy_dir_to, find_foundry_root};
 use flate2::read::GzDecoder;
 use reqwest::get;
 use std::fs;
 use std::io::Cursor;
 use std::path::{Path, PathBuf};
 use tar::Archive;
+use tracing::{error, info};
 
 const VLAYER_DIR_NAME: &str = "vlayer";
 const CONTRACTS_URL: &str =
     "https://vlayer-releases.s3.eu-north-1.amazonaws.com/latest/contracts.tar.gz";
 
+pub(crate) async fn init(cwd: PathBuf) -> Result<(), CLIError> {
+    info!("Running vlayer init from directory {:?}", cwd.display());
+
+    let root_path = find_foundry_root(&cwd)?;
+    let src_path = find_src_path(&root_path)?;
+    info!("Found foundry project root in \"{}\"", &src_path.display());
+
+    match create_vlayer_dir(&src_path)? {
+        Some(vlayer_path) => {
+            info!("Created vlayer directory in \"{}\"", src_path.display());
+            let default_template = "simple";
+            fetch_vlayer_files(&vlayer_path, default_template.into()).await?
+        }
+        None => error!(
+            "vlayer directory already exists in \"{}\". Skipping creation.",
+            &src_path.display()
+        ),
+    }
+    Ok(())
+}
+
 fn map_reqwest_error(e: reqwest::Error) -> CLIError {
     CLIError::DownloadVlayerFilesError(e)
 }
 
-pub(crate) fn find_src_path(root_path: &Path) -> Result<PathBuf, CLIError> {
+fn find_src_path(root_path: &Path) -> Result<PathBuf, CLIError> {
     let toml_path = root_path.join("foundry.toml");
     let contents = fs::read_to_string(toml_path)?;
     let src_dirname = get_src_from_string(contents)?;
@@ -27,7 +50,7 @@ pub(crate) fn find_src_path(root_path: &Path) -> Result<PathBuf, CLIError> {
     }
 }
 
-pub(crate) async fn fetch_vlayer_files(dst: &Path, template: String) -> Result<(), CLIError> {
+async fn fetch_vlayer_files(dst: &Path, template: String) -> Result<(), CLIError> {
     let response = get(CONTRACTS_URL)
         .await
         .map_err(map_reqwest_error)?
@@ -42,24 +65,6 @@ pub(crate) async fn fetch_vlayer_files(dst: &Path, template: String) -> Result<(
 
     let downloaded_contracts = temp_dir.path().join(template).join("vlayer");
     copy_dir_to(&downloaded_contracts, dst)?;
-
-    Ok(())
-}
-
-fn copy_dir_to(src_dir: &Path, dst_dir: &Path) -> std::io::Result<()> {
-    if !dst_dir.is_dir() {
-        fs::create_dir_all(dst_dir)?;
-    }
-
-    for entry_result in src_dir.read_dir()? {
-        let entry = entry_result?;
-        let file_type = entry.file_type()?;
-        if file_type.is_dir() {
-            copy_dir_to(&entry.path(), &dst_dir.join(entry.file_name()))?;
-        } else {
-            fs::copy(&entry.path(), &dst_dir.join(entry.file_name()))?;
-        }
-    }
 
     Ok(())
 }
@@ -160,22 +165,5 @@ mod tests {
 
         assert!(result.unwrap().is_none());
         assert!(vlayer_dir.exists());
-    }
-
-    #[test]
-    fn test_copy_dir_to() {
-        let temp_dir = tempfile::tempdir().unwrap();
-        let src_dir = temp_dir.path().join("src");
-        let dst_dir = temp_dir.path().join("dst");
-
-        std::fs::create_dir(&src_dir).unwrap();
-        std::fs::write(src_dir.join("file1"), "file1").unwrap();
-        std::fs::write(src_dir.join("file2"), "file2").unwrap();
-
-        copy_dir_to(&src_dir, &dst_dir).unwrap();
-
-        assert!(dst_dir.exists());
-        assert!(dst_dir.join("file1").exists());
-        assert!(dst_dir.join("file2").exists());
     }
 }
