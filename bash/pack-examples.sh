@@ -1,24 +1,19 @@
 #!/bin/bash
-set -ueo pipefail
+set -e
 
-archive="contracts.tar.gz"
-
-temp_dir="temp_dir"
-
-mkdir -p $temp_dir/vlayer
+archive="contracts.tar"
 
 if [[ -f $archive ]]; then
     rm $archive
 fi
 
+touch $archive
+
 for dir in examples/*/src/vlayer/
 do
     if [[ -d $dir ]]; then
-        cp -r $dir* $temp_dir/vlayer/
+        tar --append --file=$archive --transform 's|examples/||;s|/src||' $dir
     fi
 done
 
-tar -czf $archive -C $temp_dir .
-
-# Remove the temporary directory
-rm -rf $temp_dir
+gzip $archive

@@ -3,8 +3,6 @@ on:
   push:
     branches:
       - release-examples
-  schedule:
-    - cron: '0 22 * * 1-5' # Mon-Fri at 22:00 UTC
 
 jobs:
   pack-example-contracts:
@@ -13,7 +11,6 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Package sample contracts
-        # run: tar -czvf "contracts.tar.gz" -C examples vlayer
         run: ./bash/pack-examples.sh
 
       - name: Push artifact
@@ -46,4 +43,3 @@ jobs:
 
           LOCAL_FILE: "contracts.tar.gz"
           REMOTE_FILE: "latest/contracts.tar.gz" 
-
