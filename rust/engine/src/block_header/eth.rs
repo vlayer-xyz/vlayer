@@ -17,7 +17,7 @@ pub type MultiEthEvmInput = MultiEvmInput<EthBlockHeader>;
 /// Ethereum post-merge block header.
 #[derive(Debug, Clone, Serialize, Deserialize, RlpEncodable, Default, PartialEq)]
 #[rlp(trailing)]
-// #[serde(tag = "type")]
+
 pub struct EthBlockHeader {
     /// Hash of the parent block's header.
     pub parent_hash: BlockHash,
