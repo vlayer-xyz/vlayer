@@ -1,8 +1,9 @@
 use super::{factory::ProviderFactory, Provider};
-use crate::{host::error::HostError, utils::TryGetOrInsert};
+use crate::host::error::HostError;
 use alloy_primitives::ChainId;
 use std::cell::RefCell;
 use std::{collections::HashMap, rc::Rc};
+use vlayer_engine::utils::TryGetOrInsert;
 
 type MultiProvider<P> = HashMap<ChainId, Rc<P>>;
 

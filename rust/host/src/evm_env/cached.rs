@@ -4,7 +4,7 @@ use vlayer_engine::{
     evm::env::{EvmEnv, EvmEnvFactory, ExecutionLocation, MultiEvmEnv},
 };
 
-use crate::utils::TryGetOrInsert;
+use vlayer_engine::utils::TryGetOrInsert;
 
 pub struct CachedEvmEnv<D, H>
 where
