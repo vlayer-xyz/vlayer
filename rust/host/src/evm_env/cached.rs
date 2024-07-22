@@ -31,6 +31,7 @@ where
     ) -> Result<&EvmEnv<ProofDb<P>, P::Header>, HostError> {
         self.cache
             .try_get_or_insert(location, || self.factory.create(location))
+            .map_err(HostError::EvmEnvFactory)
     }
 
     pub fn into_inner(self) -> MultiEvmEnv<ProofDb<P>, P::Header> {

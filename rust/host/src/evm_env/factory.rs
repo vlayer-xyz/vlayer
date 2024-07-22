@@ -17,7 +17,7 @@ where
     D: DatabaseRef,
     H: EvmBlockHeader,
 {
-    fn create(&self, location: ExecutionLocation) -> Result<EvmEnv<D, H>, HostError>;
+    fn create(&self, location: ExecutionLocation) -> anyhow::Result<EvmEnv<D, H>>;
 }
 
 pub struct HostEvmEnvFactory<P> {
@@ -43,7 +43,7 @@ where
             block_number,
             chain_id,
         }: ExecutionLocation,
-    ) -> Result<EvmEnv<ProofDb<P>, P::Header>, HostError> {
+    ) -> anyhow::Result<EvmEnv<ProofDb<P>, P::Header>> {
         let provider = self.providers.get(chain_id)?;
         let header = provider
             .get_block_header(block_number)

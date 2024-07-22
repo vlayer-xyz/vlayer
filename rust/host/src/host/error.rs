@@ -48,4 +48,7 @@ pub enum HostError {
 
     #[error("No rpc cache for chain: {0}")]
     NoRpcCache(ChainId),
+
+    #[error("Evm env factory error: {0}")]
+    EvmEnvFactory(#[from] anyhow::Error),
 }
