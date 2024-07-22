@@ -1,5 +1,8 @@
 use alloy_primitives::{BlockNumber, ChainId};
-use revm::primitives::{CfgEnvWithHandlerCfg, SpecId};
+use revm::{
+    primitives::{CfgEnvWithHandlerCfg, SpecId},
+    DatabaseRef,
+};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
@@ -53,6 +56,14 @@ impl ExecutionLocation {
             chain_id,
         }
     }
+}
+
+pub trait EvmEnvFactory<D, H>
+where
+    D: DatabaseRef,
+    H: EvmBlockHeader,
+{
+    fn create(&self, location: ExecutionLocation) -> anyhow::Result<EvmEnv<D, H>>;
 }
 
 pub type MultiEvmEnv<D, H> = HashMap<ExecutionLocation, EvmEnv<D, H>>;

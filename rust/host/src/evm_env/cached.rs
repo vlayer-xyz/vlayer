@@ -1,10 +1,8 @@
-use vlayer_engine::evm::env::{EvmEnv, ExecutionLocation, MultiEvmEnv};
+use vlayer_engine::evm::env::{EvmEnv, EvmEnvFactory, ExecutionLocation, MultiEvmEnv};
 
 use crate::{
     db::proof::ProofDb, host::error::HostError, provider::Provider, utils::TryGetOrInsert,
 };
-
-use super::factory::EvmEnvFactory;
 
 pub struct CachedEvmEnv<P>
 where

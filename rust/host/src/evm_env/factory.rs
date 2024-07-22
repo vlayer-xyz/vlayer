@@ -1,24 +1,12 @@
 use std::rc::Rc;
 
-use revm::DatabaseRef;
-use vlayer_engine::{
-    block_header::EvmBlockHeader,
-    evm::env::{EvmEnv, ExecutionLocation},
-};
+use vlayer_engine::evm::env::{EvmEnv, EvmEnvFactory, ExecutionLocation};
 
 use crate::{
     db::proof::ProofDb,
     host::error::HostError,
     provider::{multi::CachedMultiProvider, Provider},
 };
-
-pub trait EvmEnvFactory<D, H>
-where
-    D: DatabaseRef,
-    H: EvmBlockHeader,
-{
-    fn create(&self, location: ExecutionLocation) -> anyhow::Result<EvmEnv<D, H>>;
-}
 
 pub struct HostEvmEnvFactory<P> {
     providers: CachedMultiProvider<P>,
