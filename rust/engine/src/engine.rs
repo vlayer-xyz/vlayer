@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use revm::{
     db::WrapDatabaseRef,
     inspector_handle_register,
@@ -12,7 +10,7 @@ use tracing::{error, info};
 
 use crate::{
     block_header::EvmBlockHeader,
-    evm::env::{EvmEnv, ExecutionLocation},
+    evm::env::{CachedEvmEnv, ExecutionLocation},
     inspector::{MockCallOutcome, TravelInspector},
     io::Call,
 };
@@ -42,12 +40,20 @@ pub enum EngineError {
 }
 
 impl Engine {
-    pub fn call<D, H>(self, tx: &Call, env: Rc<EvmEnv<D, H>>) -> Result<Vec<u8>, EngineError>
+    pub fn call<D, H>(
+        self,
+        tx: &Call,
+        location: ExecutionLocation,
+        envs: &CachedEvmEnv<D, H>,
+    ) -> Result<Vec<u8>, EngineError>
     where
         D: DatabaseRef,
         D::Error: std::fmt::Debug,
         H: EvmBlockHeader,
     {
+        let env = envs
+            .get(location)
+            .map_err(|_| EngineError::EvmEnvNotFound(location))?;
         let evm = Evm::builder()
             .with_ref_db(&env.db)
             .with_external_context(TravelInspector::new(

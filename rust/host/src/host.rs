@@ -49,11 +49,8 @@ where
     }
 
     pub fn run(self, call: Call) -> Result<HostOutput, HostError> {
-        let env = self
-            .envs
-            .get(self.start_execution_location)
-            .map_err(HostError::EvmEnvFactory)?;
-        let host_output = Engine::default().call(&call, env)?;
+        let host_output =
+            Engine::default().call(&call, self.start_execution_location, &self.envs)?;
 
         let multi_evm_input =
             into_multi_input(self.envs).map_err(|err| HostError::CreatingInput(err.to_string()))?;

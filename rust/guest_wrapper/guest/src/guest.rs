@@ -1,5 +1,4 @@
 use crate::{db::wrap_state::WrapStateDb, input::ValidatedMultiEvmInput};
-use std::rc::Rc;
 use vlayer_engine::{
     block_header::eth::EthBlockHeader,
     engine::Engine,
@@ -32,14 +31,13 @@ impl Guest {
     }
 
     pub fn run(&self, call: Call) -> GuestOutput {
+        let evm_call_result = Engine::default()
+            .call(&call, self.start_execution_location.clone(), &self.evm_envs)
+            .unwrap();
         let start_evm_env = self
             .evm_envs
             .get(self.start_execution_location)
-            .expect("cannot get evm env");
-
-        let evm_call_result = Engine::default()
-            .call(&call, Rc::clone(&start_evm_env))
-            .unwrap();
+            .expect("cannot get start evm env");
         let execution_commitment =
             ExecutionCommitment::new(start_evm_env.header(), call.to, call.selector());
 
