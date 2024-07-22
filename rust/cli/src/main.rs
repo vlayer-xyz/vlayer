@@ -1,7 +1,8 @@
 use crate::errors::CLIError;
-use clap::{Parser, Subcommand};
+use clap::{Parser, Subcommand, ValueEnum};
 use commands::init::init;
 use server::server::{serve, Config};
+use std::fmt;
 use test_runner::cli::TestArgs;
 use tracing::{error, info};
 
@@ -31,9 +32,33 @@ struct Cli {
 
 #[derive(Subcommand)]
 enum Commands {
-    Init,
+    Init(InitArgs),
     Serve,
     Test(TestArgs),
+}
+
+#[derive(Clone, Debug, Parser)]
+struct InitArgs {
+    #[arg(long, value_enum)]
+    template: Option<TemplateOption>,
+}
+
+#[derive(Clone, Debug, ValueEnum, Default)]
+pub(crate) enum TemplateOption {
+    #[default]
+    Simple,
+    Airdrop,
+    SimpleTravel,
+}
+
+impl fmt::Display for TemplateOption {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            TemplateOption::Simple => write!(f, "simple"),
+            TemplateOption::Airdrop => write!(f, "airdrop"),
+            TemplateOption::SimpleTravel => write!(f, "simple_travel"),
+        }
+    }
 }
 
 #[tokio::main]
@@ -64,9 +89,10 @@ async fn run() -> Result<(), CLIError> {
             };
             serve(config).await?;
         }
-        Commands::Init => {
+        Commands::Init(init_arg) => {
+            let template = init_arg.template.unwrap_or_default();
             let cwd = std::env::current_dir()?;
-            init(cwd).await?;
+            init(cwd, template).await?;
         }
         Commands::Test(cmd) => {
             info!("Running vlayer tests");
