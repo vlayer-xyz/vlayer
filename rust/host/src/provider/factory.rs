@@ -1,10 +1,10 @@
 use crate::host::error::HostError;
-use crate::provider::{EthFileProvider, EthersProvider, Provider};
+use crate::provider::{EthersProvider, Provider};
 use alloy_primitives::ChainId;
 use std::collections::HashMap;
 use std::path::PathBuf;
 
-use super::EthersClient;
+use super::{EthersClient, FileProvider};
 
 pub trait ProviderFactory<P>
 where
@@ -49,15 +49,15 @@ impl FileProviderFactory {
     }
 }
 
-impl ProviderFactory<EthFileProvider> for FileProviderFactory {
-    fn create(&self, chain_id: ChainId) -> Result<EthFileProvider, HostError> {
+impl ProviderFactory<FileProvider> for FileProviderFactory {
+    fn create(&self, chain_id: ChainId) -> Result<FileProvider, HostError> {
         let file_path = self
             .rpc_file_cache
             .get(&chain_id)
             .ok_or_else(|| HostError::NoRpcCache(chain_id))?;
 
         let path_buf = PathBuf::from(file_path);
-        let provider = EthFileProvider::from_file(&path_buf).map_err(|err| {
+        let provider = FileProvider::from_file(&path_buf).map_err(|err| {
             HostError::Provider(format!(
                 "Error creating provider for chain ID {}: {}",
                 chain_id, err

@@ -4,16 +4,15 @@ use std::{convert::Infallible, marker::PhantomData};
 use vlayer_engine::block_header::EvmBlockHeader;
 
 /// A simple provider that panics on all queries.
-pub struct NullProvider<H>(pub(crate) PhantomData<H>);
+pub struct NullProvider(pub(crate) PhantomData<Box<dyn EvmBlockHeader>>);
 
-impl<H> Provider for NullProvider<H>
-where
-    H: EvmBlockHeader,
-{
+impl Provider for NullProvider {
     type Error = Infallible;
-    type Header = H;
 
-    fn get_block_header(&self, _: BlockNumber) -> Result<Option<Self::Header>, Self::Error> {
+    fn get_block_header(
+        &self,
+        _: BlockNumber,
+    ) -> Result<Option<Box<dyn EvmBlockHeader>>, Self::Error> {
         panic!("Unexpected provider call")
     }
     fn get_transaction_count(&self, _: Address, _: BlockNumber) -> Result<TxNumber, Self::Error> {

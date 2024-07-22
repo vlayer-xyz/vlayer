@@ -2,31 +2,25 @@ use super::{EIP1186Proof, Provider};
 use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256};
 use anyhow::Context;
 use json::{AccountQuery, BlockQuery, JsonCache, ProofQuery, StorageQuery};
-use serde::{de::DeserializeOwned, Serialize};
 use std::{
     cell::RefCell,
     collections::hash_map::Entry,
     fs::{self},
     path::PathBuf,
 };
+use vlayer_engine::block_header::EvmBlockHeader;
 
 pub mod json;
 
 /// A provider that caches responses from an underlying provider in a JSON file.
 /// Queries are first checked against the cache, and if not found, the provider is invoked.
 /// The cache is saved when the provider is dropped.
-pub struct CachedProvider<P: Provider>
-where
-    P::Header: Clone + Serialize + DeserializeOwned,
-{
+pub struct CachedProvider<P: Provider> {
     pub(super) inner: P,
-    pub(super) cache: RefCell<JsonCache<P::Header>>,
+    pub(super) cache: RefCell<JsonCache>,
 }
 
-impl<P: Provider> CachedProvider<P>
-where
-    P::Header: Clone + Serialize + DeserializeOwned,
-{
+impl<P: Provider> CachedProvider<P> {
     /// Creates a new [CachedProvider]. If the cache file exists, it will be read and deserialized.
     /// Otherwise, a new file will be created when dropped.
     pub fn new(cache_path: PathBuf, provider: P) -> anyhow::Result<Self> {
@@ -51,22 +45,36 @@ where
     }
 }
 
-impl<P: Provider> Provider for CachedProvider<P>
-where
-    P::Header: Clone + Serialize + DeserializeOwned,
-{
+impl<P: Provider> Provider for CachedProvider<P> {
     type Error = P::Error;
-    type Header = P::Header;
 
-    fn get_block_header(&self, block: BlockNumber) -> Result<Option<Self::Header>, Self::Error> {
+    fn get_block_header(
+        &self,
+        block: BlockNumber,
+    ) -> Result<Option<Box<dyn EvmBlockHeader>>, Self::Error> {
         match self
             .cache
             .borrow_mut()
             .partial_blocks
             .entry(BlockQuery { block_no: block })
         {
-            Entry::Occupied(entry) => Ok(entry.get().clone()),
-            Entry::Vacant(entry) => Ok(entry.insert(self.inner.get_block_header(block)?).clone()),
+            Entry::Occupied(entry) => {
+                let header = entry.get();
+                let cloned_header = header
+                    .as_ref()
+                    .map(|header| dyn_clone::clone_box(header.as_ref()));
+                Ok(cloned_header)
+            }
+            Entry::Vacant(v) => match self.inner.get_block_header(block) {
+                Ok(header) => {
+                    let inserted_header = v.insert(header);
+                    let cloned_inserted_header = inserted_header
+                        .as_mut()
+                        .map(|inserted_header| dyn_clone::clone_box(inserted_header.as_ref()));
+                    Ok(cloned_inserted_header)
+                }
+                Err(e) => Err(e),
+            },
         }
     }
 

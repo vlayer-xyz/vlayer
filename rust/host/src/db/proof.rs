@@ -9,6 +9,7 @@ use revm::{
 };
 use std::{cell::RefCell, rc::Rc};
 use thiserror::Error;
+use vlayer_engine::block_header::EvmBlockHeader;
 
 /// Error type for the [ProofDb].
 #[derive(Error, Debug)]
@@ -88,7 +89,7 @@ impl<P: Provider> ProofDb<P> {
         state.contracts.values().cloned().collect()
     }
 
-    pub fn fetch_ancestors(&self) -> anyhow::Result<Vec<P::Header>> {
+    pub fn fetch_ancestors(&self) -> anyhow::Result<Vec<Box<dyn EvmBlockHeader>>> {
         let state = self.state.borrow();
         let provider = &self.db.provider;
         let mut ancestors = Vec::new();

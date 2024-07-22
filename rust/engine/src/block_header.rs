@@ -8,6 +8,7 @@ use as_any::{AsAny, Downcast};
 
 use alloy_primitives::{BlockNumber, B256};
 
+use dyn_clone::DynClone;
 use eth::EthBlockHeader;
 use revm::primitives::BlockEnv;
 use serde::{Deserialize, Serialize};
@@ -19,7 +20,7 @@ pub trait Hashable {
 }
 
 /// An EVM abstraction of a block header.
-pub trait EvmBlockHeader: Hashable + AsAny + Debug {
+pub trait EvmBlockHeader: Hashable + AsAny + Debug + DynClone {
     /// Returns the hash of the parent block's header.
     fn parent_hash(&self) -> &B256;
     /// Returns the block number.
@@ -132,7 +133,7 @@ mod serialize {
 
     #[test]
     fn fail_with_unsupported_type() {
-        #[derive(Debug)]
+        #[derive(Debug, Clone, Serialize)]
         struct UnsupportedBlockHeader;
 
         impl Hashable for UnsupportedBlockHeader {
