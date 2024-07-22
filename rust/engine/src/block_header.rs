@@ -62,12 +62,6 @@ impl TryFrom<&dyn EvmBlockHeader> for BlockHeader {
     }
 }
 
-impl Default for Box<dyn EvmBlockHeader> {
-    fn default() -> Self {
-        Box::new(EthBlockHeader::default())
-    }
-}
-
 impl Serialize for Box<dyn EvmBlockHeader> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
