@@ -13,6 +13,8 @@ use crate::evm::env::ExecutionLocation;
 
 // First 4 bytes of the call data is the selector id - the rest are arguments.
 const SELECTOR_LEN: usize = 4;
+// The length of an argument in call data is 32 bytes.
+const ARG_LEN: usize = 32;
 /// This is calculated as:
 /// `address(bytes20(uint160(uint256(keccak256('vlayer.traveler')))))`
 pub const TRAVEL_CONTRACT_ADDR: Address = address!("76dC9aa45aa006A0F63942d8F9f21Bd4537972A3");
@@ -63,6 +65,25 @@ impl From<U256> for MockCallOutcome {
     }
 }
 
+impl TravelInspector {
+    fn set_block(&mut self, block_number: u64) -> MockCallOutcome {
+        info!(
+            "Travel contract called with function: setBlock and block number: {:?}!",
+            block_number
+        );
+        self.location = Some(ExecutionLocation::new(block_number, self.start_chain_id));
+        MockCallOutcome::from(U256::ZERO)
+    }
+    fn set_chain(&mut self, chain_id: u64, block_number: u64) -> MockCallOutcome {
+        info!(
+            "Travel contract called with function: setChain, with chain id: {:?} block number: {:?}!",
+            chain_id, block_number
+        );
+        self.location = Some(ExecutionLocation::new(block_number, chain_id));
+        MockCallOutcome::from(U256::ZERO)
+    }
+}
+
 impl<DB: Database> Inspector<DB> for TravelInspector {
     fn call(
         &mut self,
@@ -76,26 +97,19 @@ impl<DB: Database> Inspector<DB> for TravelInspector {
 
         match inputs.bytecode_address {
             TRAVEL_CONTRACT_ADDR => {
-                let (selector, argument_bytes) = inputs.input.split_at(SELECTOR_LEN);
-                let argument = U256::from_be_slice(argument_bytes).to::<u64>();
-
+                let (selector, arguments_bytes) = inputs.input.split_at(SELECTOR_LEN);
+                
                 if selector == *SET_BLOCK_SELECTOR {
-                    info!(
-                        "Travel contract called with function: setBlock and argument: {:?}!",
-                        argument
-                    );
-                    self.location = Some(ExecutionLocation::new(argument, self.start_chain_id));
-                    return Some(MockCallOutcome::from(U256::ZERO).0);
+                    let block_number = U256::from_be_slice(arguments_bytes).to::<u64>();
+                    return Some(self.set_block(block_number).0)
                 } else if selector == *SET_CHAIN_SELECTOR {
-                    info!(
-                        "Travel contract called with function: setChain and argument: {:?}!",
-                        argument
-                    );
-                    self.location = Some(ExecutionLocation::new(0, argument));
-                    return Some(MockCallOutcome::from(U256::ZERO).0);
+                    let (chain_id_bytes, block_number_bytes) = arguments_bytes.split_at(ARG_LEN);
+                    let chain_id = U256::from_be_slice(chain_id_bytes).to::<u64>();
+                    let block_number = U256::from_be_slice(block_number_bytes).to::<u64>();
+                    return Some(self.set_chain(chain_id, block_number).0)
                 }
             }
-            // If the call is not setBlock/setChain but setBlock/setChain is active, intercept the call.
+            // If the call is not to the travel contract AND the location is set, run callback.
             _ => {}
         }
 
