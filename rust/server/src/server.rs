@@ -209,6 +209,18 @@ mod tests {
             let response = post(app, "/", &req).await?;
 
             assert_eq!(response.status(), StatusCode::OK);
+            assert_eq!(
+                body_to_json::<Value>(response.into_body()).await?,
+                json!({
+                    "jsonrpc": "2.0",
+                    "id": 1,
+                    "error": {
+                        "code": -32602,
+                        "message": "invalid type: string \"<tls proof value>\", expected struct TlsProof",
+                        "data": null
+                    }
+                })
+            );
 
             Ok(())
         }
