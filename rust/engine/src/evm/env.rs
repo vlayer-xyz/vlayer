@@ -1,4 +1,5 @@
 use alloy_primitives::{BlockNumber, ChainId};
+use anyhow::bail;
 use revm::{
     primitives::{CfgEnvWithHandlerCfg, SpecId},
     DatabaseRef,
@@ -67,6 +68,18 @@ where
     H: EvmBlockHeader,
 {
     fn create(&self, location: ExecutionLocation) -> anyhow::Result<EvmEnv<D, H>>;
+}
+
+pub struct NullEvmEnvFactory;
+
+impl<D, H> EvmEnvFactory<D, H> for NullEvmEnvFactory
+where
+    D: DatabaseRef,
+    H: EvmBlockHeader,
+{
+    fn create(&self, _location: ExecutionLocation) -> anyhow::Result<EvmEnv<D, H>> {
+        bail!("NullEvmEnvFactory cannot create EvmEnv")
+    }
 }
 
 pub type MultiEvmEnv<D, H> = RefCell<HashMap<ExecutionLocation, Rc<EvmEnv<D, H>>>>;
