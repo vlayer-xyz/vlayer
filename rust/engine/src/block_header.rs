@@ -11,6 +11,7 @@ use alloy_primitives::{BlockNumber, B256};
 use eth::EthBlockHeader;
 use revm::primitives::BlockEnv;
 use serde::{Deserialize, Serialize};
+use std::fmt::Debug;
 
 pub trait Hashable {
     /// Calculate the hash, this may be slow.
@@ -18,7 +19,7 @@ pub trait Hashable {
 }
 
 /// An EVM abstraction of a block header.
-pub trait EvmBlockHeader: Hashable + AsAny {
+pub trait EvmBlockHeader: Hashable + AsAny + Debug {
     /// Returns the hash of the parent block's header.
     fn parent_hash(&self) -> &B256;
     /// Returns the block number.
@@ -31,8 +32,7 @@ pub trait EvmBlockHeader: Hashable + AsAny {
     fn fill_block_env(&self, blk_env: &mut BlockEnv);
 }
 
-#[derive(Serialize, Deserialize)]
-#[serde(tag = "type")]
+#[derive(Debug, Serialize, Deserialize)]
 pub enum BlockHeader {
     Eth(EthBlockHeader),
 }
@@ -62,6 +62,12 @@ impl TryFrom<&dyn EvmBlockHeader> for BlockHeader {
     }
 }
 
+impl Default for Box<dyn EvmBlockHeader> {
+    fn default() -> Self {
+        Box::new(EthBlockHeader::default())
+    }
+}
+
 impl Serialize for Box<dyn EvmBlockHeader> {
     fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
     where
@@ -81,9 +87,7 @@ impl<'de> Deserialize<'de> for Box<dyn EvmBlockHeader> {
         D: serde::Deserializer<'de>,
     {
         let block_header = BlockHeader::deserialize(deserializer)?;
-        let boxed: Box<dyn EvmBlockHeader> = match block_header {
-            BlockHeader::Eth(header) => Box::new(header),
-        };
+        let boxed: Box<dyn EvmBlockHeader> = block_header.into();
         Ok(boxed)
     }
 }
@@ -127,9 +131,7 @@ mod serialize {
     fn success() {
         let eth_block_header = EthBlockHeader::default();
         let boxed_header: Box<dyn EvmBlockHeader> = Box::new(eth_block_header);
-
         let serialized = serde_json::to_string(&boxed_header).expect("Serialization failed");
-        println!("Serialized Box<dyn EvmBlockHeader>: {}", serialized);
 
         assert!(!serialized.is_empty());
     }
@@ -143,10 +145,7 @@ mod deserialize {
     fn serialize_and_deserialize_eth_block_header() -> Box<dyn EvmBlockHeader> {
         let eth_block_header = EthBlockHeader::default();
         let boxed_header: Box<dyn EvmBlockHeader> = Box::new(eth_block_header);
-
         let serialized = serde_json::to_string(&boxed_header).expect("Serialization failed");
-        println!("Serialized Box<dyn EvmBlockHeader>: {}", serialized);
-
         let deserialized: Box<dyn EvmBlockHeader> =
             serde_json::from_str(&serialized).expect("Deserialization failed");
 
@@ -163,12 +162,12 @@ mod deserialize {
     #[test]
     fn correct_content() {
         let deserialized = serialize_and_deserialize_eth_block_header();
-
         let deserialized_eth_header = deserialized
             .as_ref()
             .as_any()
             .downcast_ref::<EthBlockHeader>()
             .unwrap();
+
         assert_eq!(deserialized_eth_header, &EthBlockHeader::default());
     }
 }
