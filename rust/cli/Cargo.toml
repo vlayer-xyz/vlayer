@@ -9,32 +9,36 @@ edition = "2021"
 build = "build.rs"
 
 [dependencies]
-clap = { version = "4.5.9", features = ["derive"] }
-tokio = { workspace = true }
+alloy-dyn-abi = "0.7.7"
+alloy-json-abi = "0.7.7"
+alloy-sol-types = "0.7.7"
 anyhow = { workspace = true }
-thiserror = { workspace = true }
-toml = "0.8.14"
-tracing-subscriber = { workspace = true }
-tracing = { workspace = true }
-reqwest = { version = "0.12.5", features = ["json"] }
-tar = "0.4.41"
-flate2 = "1.0.30"
-
-server = { path = "../server" }
-foundry-evm-core = { git = "https://github.com/foundry-rs/foundry", version = "0.2.0" }
+clap = { version = "4.5.9", features = ["derive"] }
 color-eyre = "=0.6.3"
-foundry-config = { git = "https://github.com/foundry-rs/foundry", version = "0.2.0" }
-regex = "1.10.4"
-rayon = "1.10.0"
-serde_json = "1.0.120"
+comfy-table = "7.1.1"
+flate2 = "1.0.30"
+forge = { git = "https://github.com/foundry-rs/foundry", version = "0.2.0" }
+foundry-cheatcodes = { git = "https://github.com/foundry-rs/foundry", version = "0.2.0" }
 foundry-cli = { git = "https://github.com/foundry-rs/foundry", version = "0.2.0" }
 foundry-common = { git = "https://github.com/foundry-rs/foundry", version = "0.2.0" }
+foundry-compilers = "0.9.0"
+foundry-config = { git = "https://github.com/foundry-rs/foundry", version = "0.2.0" }
 foundry-debugger = { git = "https://github.com/foundry-rs/foundry", version = "0.2.0" }
 foundry-evm = { git = "https://github.com/foundry-rs/foundry", version = "0.2.0" }
-forge = { git = "https://github.com/foundry-rs/foundry", version = "0.2.0" }
-foundry-compilers = "0.9.0"
-comfy-table = "7.1.1"
+foundry-evm-core = { git = "https://github.com/foundry-rs/foundry", version = "0.2.0" }
+rayon = "1.10.0"
+regex = "1.10.4"
+reqwest = { version = "0.12.5", features = ["json"] }
+serde_json = "1.0.120"
+server = { path = "../server" }
+tar = "0.4.41"
 tempfile = "3.10.1"
+thiserror = { workspace = true }
+tokio = { workspace = true }
+toml = "0.8.14"
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true }
+vlayer-engine = { path = "../engine" }
 
 [build-dependencies]
 vergen = { version = "8", default-features = false, features = [

@@ -1,10 +1,19 @@
+/**
+* This file is in large part copied from https://github.com/foundry-rs/foundry/blob/6bb5c8ea8dcd00ccbc1811f1175cabed3cb4c116/crates/forge/bin/cmd/test/mod.rs
+* The original file is licensed under the Apache License, Version 2.0.
+* The original file was modified for the purpose of this project.
+* All relevant modifications are commented with "MODIFICATION" comments.
+*/
 use clap::Parser;
 use color_eyre::eyre::{bail, Result};
+use forge::multi_runner::TestContract;
+use forge::revm::primitives::{Bytecode, Bytes};
 use forge::{
     decode::decode_console_logs,
     gas_report::GasReport,
     multi_runner::matches_contract,
     result::{SuiteResult, TestOutcome, TestStatus},
+    revm,
     traces::{
         debug::{ContractSources, DebugTraceIdentifier},
         decode_trace_arena,
@@ -13,6 +22,7 @@ use forge::{
     },
     MultiContractRunner, MultiContractRunnerBuilder, TestFilter, TestOptions, TestOptionsBuilder,
 };
+use foundry_cheatcodes::CheatsConfig;
 use foundry_cli::{
     opts::CoreBuildArgs,
     utils::{self, LoadConfig},
@@ -22,7 +32,7 @@ use foundry_compilers::{
     artifacts::output_selection::OutputSelection,
     compilers::{multi::MultiCompilerLanguage, CompilerSettings, Language},
     utils::source_files_iter,
-    ProjectCompileOutput,
+    ArtifactId, ProjectCompileOutput,
 };
 use foundry_config::{
     figment,
@@ -33,22 +43,34 @@ use foundry_config::{
     get_available_profiles, Config,
 };
 use foundry_debugger::Debugger;
+use foundry_evm::executors::ExecutorBuilder;
 use foundry_evm::traces::identifier::TraceIdentifiers;
+use foundry_evm::traces::TraceMode;
+use foundry_evm_core::backend::Backend;
+use rayon::iter::IntoParallelRefIterator;
+use rayon::iter::ParallelIterator;
 use regex::Regex;
+use std::sync::mpsc;
 use std::{
     collections::{BTreeMap, BTreeSet},
     path::PathBuf,
     sync::{mpsc::channel, Arc},
     time::Instant,
 };
-use tracing::trace;
+use tracing::{debug, debug_span, enabled, trace};
 
+mod composite_inspector;
+mod contract_runner;
 mod filter;
 mod summary;
+mod test_executor;
 
-use crate::tests::filter::ProjectPathsAwareFilter;
-use crate::tests::summary::TestSummaryReporter;
+use crate::test_runner::contract_runner::ContractRunner;
+use crate::test_runner::filter::ProjectPathsAwareFilter;
+use crate::test_runner::summary::TestSummaryReporter;
+use crate::test_runner::test_executor::TestExecutor;
 pub use filter::FilterArgs;
+use vlayer_engine::inspector::{SetInspector, TRAVEL_CONTRACT_ADDR, TRAVEL_CONTRACT_HASH};
 
 // Loads project's figment and merges the build cli arguments into it
 foundry_config::merge_impl_figment_convert!(TestArgs, opts, evm_opts);
@@ -430,7 +452,8 @@ impl TestArgs {
         let show_progress = config.show_progress;
         let handle = tokio::task::spawn_blocking({
             let filter = filter.clone();
-            move || runner.test(&filter, tx, show_progress)
+            // MODIFICATION: Replace runner.test with modified test function
+            move || test(runner, &filter, tx, show_progress)
         });
 
         // Set up trace identifiers.
@@ -715,4 +738,104 @@ fn persist_run_failures(config: &Config, outcome: &TestOutcome) {
         }
         let _ = fs::write(&config.test_failures_file, filter);
     }
+}
+
+fn test(
+    mut runner: MultiContractRunner,
+    filter: &dyn TestFilter,
+    tx: mpsc::Sender<(String, SuiteResult)>,
+    _show_progress: bool,
+) {
+    let tokio_handle = tokio::runtime::Handle::current();
+    trace!("running all tests");
+
+    // The DB backend that serves all the data.
+    let db = Backend::spawn(runner.fork.take());
+
+    let contracts = runner.matching_contracts(filter).collect::<Vec<_>>();
+    contracts.par_iter().for_each(|&(id, contract)| {
+        let _guard = tokio_handle.enter();
+        let result = run_test_suite(&runner, id, contract, db.clone(), filter, &tokio_handle);
+        let _ = tx.send((id.identifier(), result));
+    })
+}
+
+fn run_test_suite(
+    runner: &MultiContractRunner,
+    artifact_id: &ArtifactId,
+    contract: &TestContract,
+    mut db: Backend,
+    filter: &dyn TestFilter,
+    tokio_handle: &tokio::runtime::Handle,
+) -> SuiteResult {
+    let identifier = artifact_id.identifier();
+    let mut span_name = identifier.as_str();
+
+    let cheats_config = CheatsConfig::new(
+        &runner.config,
+        runner.evm_opts.clone(),
+        Some(runner.known_contracts.clone()),
+        None,
+        Some(artifact_id.version.clone()),
+    );
+
+    let trace_mode = TraceMode::default()
+        .with_debug(runner.debug)
+        .with_decode_internal(runner.decode_internal)
+        .with_verbosity(runner.evm_opts.verbosity);
+
+    // MODIFICATION: trick db to think something is deployed at TRAVEL_CONTRACT_ADDR
+    register_traveler_contract(&mut db);
+
+    let executor = ExecutorBuilder::new()
+        .inspectors(|stack| {
+            stack
+                .cheatcodes(Arc::new(cheats_config))
+                .trace_mode(trace_mode)
+                .coverage(runner.coverage)
+                .enable_isolation(runner.isolation)
+        })
+        .spec(runner.evm_spec)
+        .gas_limit(runner.evm_opts.gas_limit())
+        .legacy_assertions(runner.config.legacy_assertions)
+        .build(runner.env.clone(), db);
+
+    if !enabled!(tracing::Level::TRACE) {
+        span_name = identifier.rsplit(':').next().unwrap_or(&identifier);
+    }
+    let span = debug_span!("suite", name = %span_name);
+    let span_local = span.clone();
+    let _guard = span_local.enter();
+
+    debug!("start executing all tests in contract");
+
+    let contract_runner = ContractRunner {
+        contract,
+        libs_to_deploy: &runner.libs_to_deploy,
+        // MODIFICATION: Replace Executor with TestExecutor
+        executor: TestExecutor::new(executor, SetInspector::default()),
+        revert_decoder: &runner.revert_decoder,
+        initial_balance: runner.evm_opts.initial_balance,
+        sender: runner.sender.unwrap_or_default(),
+        tokio_handle,
+        span,
+    };
+    let r = contract_runner.run_tests(filter);
+
+    debug!(duration=?r.duration, "executed all tests in contract");
+
+    r
+}
+
+fn register_traveler_contract(db: &mut Backend) {
+    db.insert_account_info(
+        TRAVEL_CONTRACT_ADDR,
+        revm::primitives::AccountInfo {
+            code: Some(Bytecode::new_raw(Bytes::from_static(&[0]))),
+            // Also set the code hash manually so that it's not computed later.
+            // The code hash value does not matter, as long as it's not zero or `KECCAK_EMPTY`.
+            code_hash: TRAVEL_CONTRACT_HASH,
+            ..Default::default()
+        },
+    );
 }

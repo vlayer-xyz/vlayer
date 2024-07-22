@@ -1,3 +1,8 @@
+/**
+ * This file was copied from https://github.com/foundry-rs/foundry/blob/6bb5c8ea8dcd00ccbc1811f1175cabed3cb4c116/crates/forge/bin/cmd/test/summary.rs
+ * The original file is licensed under the Apache License, Version 2.0.
+ * It wasn't modified, but it wasn't exported from foundry lib
+ */
 use comfy_table::{
     modifiers::UTF8_ROUND_CORNERS, Attribute, Cell, CellAlignment, Color, Row, Table,
 };
