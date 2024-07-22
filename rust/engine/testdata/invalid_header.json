@@ -1,0 +1,24 @@
+{
+  "Eth": {
+    "parent_hash": "0xinvalidhash",
+    "ommers_hash": "0x1dcc4de8dec75d7aab85b567b6ccd41ad312451b948a7413f0a142fd40d49347",
+    "beneficiary": "0x388c818ca8b9251b393131c08a736a67ccb19297",
+    "state_root": "0xa05c68711ea0a14cfe4f326221a9debb632bf85699e4295d9fdac7b668e15e7c",
+    "transactions_root": "0x2a6273be38e1c8917d63b4db9fd79fcb227459f51a9940c7d62975775c00e3ef",
+    "receipts_root": "0xb067f5748e021f07ad95f47da2785b73f8e7f670a025c3f803f62652c5bcce67",
+    "logs_bloom": "0x59eb645267c97d5510fc16f2848d102531cb8029ec66008ad099a9a7573f4e9d78f779cac0f9aa954f5f7b42e0db0b677b2bc00dfb6f68ed3e1c09a001ea6ea84512d5dc64e08ce9c84b683b9c434ae7791712c216e029143cc21c52cc627aecdeca4d8ce244edb9051d9d7468182c7306b284e940584514b65d2a966d0ab88efc8bbe7681e19df4014d9349170e877eb403d671dbb91e5e7e2162fa741f203a77bf597b5381a21e5a1771e0e9b36dc31d59f49ada3249882abc047294abc874d5f236bf8ef86e4f4c609e0609f990c6f8e01ab2d27bd8fd039472cbcb2b61cb1dbd72553db14d3ad4b535a970e7d30486a3d0617b2835d8209fa9b0d818f747",
+    "difficulty": "0x0",
+    "number": 19493153,
+    "gas_limit": 29970705,
+    "gas_used": 14726603,
+    "timestamp": 1711146719,
+    "extra_data": "0x546974616e2028746974616e6275696c6465722e78797a29",
+    "mix_hash": "0x3bfd2dc3f7fdd6a434d1848e46f7b55091fc15f583b15b573fd78d08ba5ba62d",
+    "nonce": "0x0000000000000000",
+    "base_fee_per_gas": "0x500385d77",
+    "withdrawals_root": "0xd6ff600419d5bda1803316212a0a523a0d5dfb17f93a7ad7de3ad9e5d93d608e",
+    "blob_gas_used": 0,
+    "excess_blob_gas": 0,
+    "parent_beacon_block_root": "0x47a9ffb86b1d46b39c1d7d5ad7f3705b6abfc8d57f73f1e5a7e195f25d6960bf"
+  }
+}
