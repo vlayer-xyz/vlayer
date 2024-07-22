@@ -161,7 +161,7 @@ mod tests {
         }
 
         #[tokio::test]
-        async fn success() -> anyhow::Result<()> {
+        async fn success_simple_contract_call() -> anyhow::Result<()> {
             let block_nr = get_block_nr().await;
             let app = server(CONFIG.clone());
 
@@ -184,6 +184,31 @@ mod tests {
                     }
                 })
             );
+
+            Ok(())
+        }
+
+        #[tokio::test]
+        async fn success_web() -> anyhow::Result<()> {
+            let block_nr = get_block_nr().await;
+            let app = server(CONFIG.clone());
+
+            let req = json!({
+                "method": "v_call",
+                "params": [
+                    {"caller": CALLER, "to": TO, "data": DATA},
+                    {"block_no": block_nr, "chain_id": 11155111},
+                    {"web": {
+                        "notary_pub_key": "<notary pub key value>",
+                        "tls_poof": "<tls proof value>",
+                    }}
+                    ],
+                "id": 1,
+                "jsonrpc": "2.0",
+            });
+            let response = post(app, "/", &req).await?;
+
+            assert_eq!(response.status(), StatusCode::OK);
 
             Ok(())
         }

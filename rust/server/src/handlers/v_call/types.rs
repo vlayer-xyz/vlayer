@@ -40,12 +40,12 @@ pub struct CallContext {
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct Augmentors {
-    pub web: Page,
+    pub web: Web,
 }
 
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
-pub struct Page {
+pub struct Web {
     pub notary_pub_key: String,
     pub tls_poof: String,
 }
