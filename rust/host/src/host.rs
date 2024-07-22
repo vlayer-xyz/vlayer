@@ -48,7 +48,7 @@ where
         })
     }
 
-    pub fn run(mut self, call: Call) -> Result<HostOutput, HostError> {
+    pub fn run(self, call: Call) -> Result<HostOutput, HostError> {
         let env = self
             .envs
             .get(self.start_execution_location)

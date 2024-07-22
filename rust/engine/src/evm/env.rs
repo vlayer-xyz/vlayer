@@ -4,7 +4,7 @@ use revm::{
     DatabaseRef,
 };
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, rc::Rc};
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use crate::{
     block_header::EvmBlockHeader, chain::spec::ChainSpec, engine::EngineError,
@@ -76,7 +76,7 @@ where
     D: DatabaseRef,
     H: EvmBlockHeader,
 {
-    cache: MultiEvmEnv<D, H>,
+    cache: RefCell<MultiEvmEnv<D, H>>,
     factory: Box<dyn EvmEnvFactory<D, H>>,
 }
 
@@ -87,18 +87,19 @@ where
 {
     pub fn new(factory: Box<dyn EvmEnvFactory<D, H>>) -> Self {
         CachedEvmEnv {
-            cache: MultiEvmEnv::new(),
+            cache: RefCell::new(MultiEvmEnv::new()),
             factory,
         }
     }
 
-    pub fn get(&mut self, location: ExecutionLocation) -> anyhow::Result<Rc<EvmEnv<D, H>>> {
-        self.cache
-            .try_get_or_insert(location, || self.factory.create(location).map(Rc::new))
-            .map(Rc::clone)
+    pub fn get(&self, location: ExecutionLocation) -> anyhow::Result<Rc<EvmEnv<D, H>>> {
+        let mut cache = self.cache.borrow_mut();
+        let env =
+            cache.try_get_or_insert(location, || self.factory.create(location).map(Rc::new))?;
+        Ok(Rc::clone(env))
     }
 
     pub fn into_inner(self) -> MultiEvmEnv<D, H> {
-        self.cache
+        self.cache.into_inner()
     }
 }
