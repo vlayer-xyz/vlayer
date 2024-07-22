@@ -26,5 +26,6 @@
   - [Multichain](./appendix/architecture/multi.md)
   - [Solidity](./appendix/architecture/solidity.md)
   - [Releasing](./appendix/architecture/releasing.md)
+  - [Header cache](./appendix/architecture/header_cache.md)
 - [JSON-RPC API](./appendix/api.md)
 
