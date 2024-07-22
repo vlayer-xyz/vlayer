@@ -22,17 +22,17 @@ use foundry_evm::inspectors::{InspectorData, InspectorStack};
 use foundry_evm_core::backend::{BackendResult, CowBackend};
 use foundry_evm_core::decode::RevertDecoder;
 use tracing::instrument;
-use vlayer_engine::inspector::SetInspector;
+use vlayer_engine::inspector::TravelInspector;
 
 /// MODIFICATION: This struct is a wrapper around the Executor struct from foundry_evm that adds our inspector that will be passed to the backend
 #[derive(Clone, Debug)]
 pub struct TestExecutor {
-    pub inspector: SetInspector,
+    pub inspector: TravelInspector,
     pub executor: Executor,
 }
 
 impl TestExecutor {
-    pub fn new(executor: Executor, inspector: SetInspector) -> Self {
+    pub fn new(executor: Executor, inspector: TravelInspector) -> Self {
         Self {
             inspector,
             executor,
