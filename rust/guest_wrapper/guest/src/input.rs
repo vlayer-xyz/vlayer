@@ -1,19 +1,11 @@
+use vlayer_engine::evm::{env::{EvmEnv, MultiEvmEnv}, input::{EvmInput, MultiEvmInput}};
+
 use crate::db::{state::StateDb, wrap_state::WrapStateDb};
-use vlayer_engine::{
-    block_header::EvmBlockHeader,
-    evm::{
-        env::{EvmEnv, MultiEvmEnv},
-        input::{EvmInput, MultiEvmInput},
-    },
-};
 
-pub struct ValidatedEvmInput<H>(EvmInput<H>);
+pub struct ValidatedEvmInput(EvmInput);
 
-impl<H> From<EvmInput<H>> for ValidatedEvmInput<H>
-where
-    H: EvmBlockHeader + Clone,
-{
-    fn from(input: EvmInput<H>) -> Self {
+impl From<EvmInput> for ValidatedEvmInput {
+    fn from(input: EvmInput) -> Self {
         input.validate_state_root();
         input.validate_ancestors();
 
@@ -21,11 +13,8 @@ where
     }
 }
 
-impl<H> From<ValidatedEvmInput<H>> for EvmEnv<WrapStateDb, H>
-where
-    H: EvmBlockHeader + Clone,
-{
-    fn from(input: ValidatedEvmInput<H>) -> Self {
+impl From<ValidatedEvmInput> for EvmEnv<WrapStateDb> {
+    fn from(input: ValidatedEvmInput) -> Self {
         let input = input.0;
         let block_hashes = input.block_hashes();
         let db = WrapStateDb::new(StateDb::new(
@@ -39,13 +28,10 @@ where
     }
 }
 
-pub struct ValidatedMultiEvmInput<H>(MultiEvmInput<H>);
+pub struct ValidatedMultiEvmInput(MultiEvmInput);
 
-impl<H> From<MultiEvmInput<H>> for ValidatedMultiEvmInput<H>
-where
-    H: EvmBlockHeader + Clone,
-{
-    fn from(input: MultiEvmInput<H>) -> Self {
+impl From<MultiEvmInput> for ValidatedMultiEvmInput {
+    fn from(input: MultiEvmInput) -> Self {
         let validated = input
             .into_iter()
             .map(|(location, input)| (location, ValidatedEvmInput::from(input).0))
@@ -54,11 +40,8 @@ where
     }
 }
 
-impl<H> From<ValidatedMultiEvmInput<H>> for MultiEvmEnv<WrapStateDb, H>
-where
-    H: EvmBlockHeader + Clone,
-{
-    fn from(input: ValidatedMultiEvmInput<H>) -> Self {
+impl From<ValidatedMultiEvmInput> for MultiEvmEnv<WrapStateDb> {
+    fn from(input: ValidatedMultiEvmInput) -> Self {
         input
             .0
             .into_iter()

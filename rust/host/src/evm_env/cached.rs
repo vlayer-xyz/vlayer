@@ -10,7 +10,7 @@ pub struct CachedEvmEnv<P>
 where
     P: Provider,
 {
-    cache: MultiEvmEnv<ProofDb<P>, P::Header>,
+    cache: MultiEvmEnv<ProofDb<P>>,
     factory: EvmEnvFactory<P>,
 }
 
@@ -25,15 +25,12 @@ where
         }
     }
 
-    pub fn get(
-        &mut self,
-        location: ExecutionLocation,
-    ) -> Result<&EvmEnv<ProofDb<P>, P::Header>, HostError> {
+    pub fn get(&mut self, location: ExecutionLocation) -> Result<&EvmEnv<ProofDb<P>>, HostError> {
         self.cache
             .try_get_or_insert(location, || self.factory.create(location))
     }
 
-    pub fn into_inner(self) -> MultiEvmEnv<ProofDb<P>, P::Header> {
+    pub fn into_inner(self) -> MultiEvmEnv<ProofDb<P>> {
         self.cache
     }
 }

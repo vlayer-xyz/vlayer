@@ -17,3 +17,4 @@ revm-primitives = { version = "5.0.0", default-features = false }
 risc0-zkvm = { version = "1.0.1", default-features = false }
 vlayer-engine = { path = "../../engine" }
 mpt = { path = "../../mpt" }
+serde_json = "1.0.120"

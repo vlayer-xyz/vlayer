@@ -9,7 +9,6 @@ use error::HostError;
 use guest_wrapper::GUEST_ELF;
 use risc0_ethereum_contracts::groth16::abi_encode;
 use risc0_zkvm::{default_prover, is_dev_mode, ExecutorEnv, ProverOpts};
-use vlayer_engine::block_header::eth::EthBlockHeader;
 use vlayer_engine::engine::Engine;
 use vlayer_engine::evm::env::ExecutionLocation;
 use vlayer_engine::evm::input::MultiEvmInput;
@@ -18,7 +17,7 @@ use vlayer_engine::io::{Call, GuestOutput, HostOutput, Input};
 pub mod config;
 pub mod error;
 
-pub struct Host<P: Provider<Header = EthBlockHeader>> {
+pub struct Host<P: Provider> {
     start_execution_location: ExecutionLocation,
     envs: CachedEvmEnv<P>,
 }
@@ -30,7 +29,7 @@ impl Host<EthersProvider<EthersClient>> {
     }
 }
 
-impl<P: Provider<Header = EthBlockHeader>> Host<P> {
+impl<P: Provider> Host<P> {
     pub fn try_new_with_provider_factory(
         provider_factory: impl ProviderFactory<P> + 'static,
         config: HostConfig,
@@ -93,7 +92,7 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
 
     fn build_executor_env(
         start_execution_location: ExecutionLocation,
-        multi_evm_input: MultiEvmInput<P::Header>,
+        multi_evm_input: MultiEvmInput,
         call: Call,
     ) -> Result<ExecutorEnv<'static>, HostError> {
         let input = Input {

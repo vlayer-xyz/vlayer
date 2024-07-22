@@ -9,7 +9,6 @@ use thiserror::Error;
 use tracing::{error, info};
 
 use crate::{
-    block_header::EvmBlockHeader,
     evm::env::{EvmEnv, ExecutionLocation},
     inspector::{MockCallOutcome, TravelInspector},
     io::Call,
@@ -40,11 +39,10 @@ pub enum EngineError {
 }
 
 impl Engine {
-    pub fn call<D, H>(self, tx: &Call, env: &EvmEnv<D, H>) -> Result<Vec<u8>, EngineError>
+    pub fn call<D>(self, tx: &Call, env: &EvmEnv<D>) -> Result<Vec<u8>, EngineError>
     where
         D: DatabaseRef,
         D::Error: std::fmt::Debug,
-        H: EvmBlockHeader,
     {
         let evm = Evm::builder()
             .with_ref_db(&env.db)

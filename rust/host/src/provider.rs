@@ -23,9 +23,11 @@ pub type EthersClient = ethers_providers::Provider<RetryClient<Http>>;
 #[auto_impl(Rc)]
 pub trait Provider {
     type Error: StdError + Send + Sync + 'static;
-    type Header: EvmBlockHeader;
 
-    fn get_block_header(&self, block: BlockNumber) -> Result<Option<Self::Header>, Self::Error>;
+    fn get_block_header(
+        &self,
+        block: BlockNumber,
+    ) -> Result<Option<Box<dyn EvmBlockHeader>>, Self::Error>;
     fn get_transaction_count(
         &self,
         address: Address,
