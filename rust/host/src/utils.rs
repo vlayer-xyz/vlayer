@@ -41,11 +41,7 @@ mod try_get_or_insert {
         let mut map = HashMap::from([(key, value)]);
 
         let result = map.try_get_or_insert(key, || Err("should not be called"));
-<<<<<<< HEAD
-        assert_eq!(result, Ok(&mut 42));
-=======
-        assert_eq!(result, Ok(&value));
->>>>>>> 58b00d1 (Stop requiring unique reference to EvmEnv in Engine)
+        assert_eq!(result, Ok(&42));
     }
 
     #[test]
@@ -54,13 +50,8 @@ mod try_get_or_insert {
         let key = "key";
         let value = 42;
         let result = map.try_get_or_insert(key, || Ok::<_, ()>(value));
-<<<<<<< HEAD
-        assert_eq!(result, Ok(&mut 42));
+        assert_eq!(result, Ok(&42));
         assert_eq!(map.get(key), Some(&42));
-=======
-        assert_eq!(result, Ok(&value));
-        assert_eq!(map.get(key), Some(&value));
->>>>>>> 58b00d1 (Stop requiring unique reference to EvmEnv in Engine)
     }
 
     #[test]
