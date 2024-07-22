@@ -1,6 +1,5 @@
 use alloy_primitives::hex::decode;
-use alloy_primitives::{address, b256, Address, Bytes, B256};
-use ethers_core::types::U256;
+use alloy_primitives::{address, b256, Address, Bytes, B256, U256};
 use once_cell::sync::Lazy;
 use revm::interpreter::{Gas, InstructionResult, InterpreterResult};
 use revm::{
@@ -10,6 +9,7 @@ use revm::{
 use tracing::info;
 
 use crate::consts::U256_BYTES;
+use crate::evm::env::ExecutionLocation;
 
 // First 4 bytes of the call data is the selector id - the rest are arguments.
 const SELECTOR_LEN: usize = 4;
@@ -27,9 +27,18 @@ static SET_CHAIN_SELECTOR: Lazy<Vec<u8>> =
     Lazy::new(|| decode("ffbc5638").expect("Error decoding set_chain function call"));
 
 #[derive(Clone, Debug, Default)]
-pub struct SetInspector {
-    set_block: Option<U256>,
-    set_chain: Option<U256>,
+pub struct TravelInspector {
+    start_chain_id: u64,
+    location: Option<ExecutionLocation>,
+}
+
+impl TravelInspector {
+    pub fn new(start_chain_id: u64) -> Self {
+        Self {
+            start_chain_id,
+            ..Default::default()
+        }
+    }
 }
 
 struct MockCallOutcome(CallOutcome);
@@ -49,13 +58,12 @@ impl From<Bytes> for MockCallOutcome {
 
 impl From<U256> for MockCallOutcome {
     fn from(number: U256) -> Self {
-        let mut output = [0; U256_BYTES];
-        number.to_big_endian(&mut output);
+        let output: [u8; U256_BYTES] = number.to_be_bytes();
         MockCallOutcome::from(Bytes::copy_from_slice(&output))
     }
 }
 
-impl<DB: Database> Inspector<DB> for SetInspector {
+impl<DB: Database> Inspector<DB> for TravelInspector {
     fn call(
         &mut self,
         _context: &mut EvmContext<DB>,
@@ -69,41 +77,26 @@ impl<DB: Database> Inspector<DB> for SetInspector {
         match inputs.bytecode_address {
             TRAVEL_CONTRACT_ADDR => {
                 let (selector, argument_bytes) = inputs.input.split_at(SELECTOR_LEN);
-                let argument = U256::from_big_endian(argument_bytes);
+                let argument = U256::from_be_slice(argument_bytes).to::<u64>();
 
                 if selector == *SET_BLOCK_SELECTOR {
                     info!(
                         "Travel contract called with function: setBlock and argument: {:?}!",
                         argument
                     );
-                    self.set_block = Some(argument);
-                    return Some(MockCallOutcome::from(U256::zero()).0);
+                    self.location = Some(ExecutionLocation::new(argument, self.start_chain_id));
+                    return Some(MockCallOutcome::from(U256::ZERO).0);
                 } else if selector == *SET_CHAIN_SELECTOR {
                     info!(
                         "Travel contract called with function: setChain and argument: {:?}!",
                         argument
                     );
-                    self.set_chain = Some(argument);
-                    return Some(MockCallOutcome::from(U256::zero()).0);
+                    self.location = Some(ExecutionLocation::new(0, argument));
+                    return Some(MockCallOutcome::from(U256::ZERO).0);
                 }
             }
             // If the call is not setBlock/setChain but setBlock/setChain is active, intercept the call.
-            _ => {
-                if let Some(block_number) = &self.set_block.take() {
-                    info!(
-                        "Intercepting the call. Returning last block number: {:?}",
-                        *block_number
-                    );
-                    return Some(MockCallOutcome::from(*block_number).0);
-                }
-                if let Some(chain_id) = &self.set_chain.take() {
-                    info!(
-                        "Intercepting the call. Returning last chain id: {:?}",
-                        *chain_id
-                    );
-                    return Some(MockCallOutcome::from(*chain_id).0);
-                }
-            }
+            _ => {}
         }
 
         None
@@ -120,7 +113,7 @@ mod test {
         EvmContext, Inspector,
     };
 
-    use super::{SetInspector, SET_BLOCK_SELECTOR, TRAVEL_CONTRACT_ADDR};
+    use super::{TravelInspector, SET_BLOCK_SELECTOR, TRAVEL_CONTRACT_ADDR};
 
     const MOCK_CALLER: Address = address!("0000000000000000000000000000000000000000");
 
@@ -139,14 +132,14 @@ mod test {
         }
     }
 
-    fn inspector_call(addr: Address) -> SetInspector {
+    fn inspector_call(addr: Address) -> TravelInspector {
         let mut mock_db = CacheDB::new(EmptyDB::default());
         mock_db.insert_account_info(addr, AccountInfo::default());
 
         let mut evm_context = EvmContext::new(mock_db);
         let mut call_inputs = create_mock_call_inputs(addr, &SET_BLOCK_SELECTOR);
 
-        let mut set_block_inspector = SetInspector::default();
+        let mut set_block_inspector = TravelInspector::default();
         set_block_inspector.call(&mut evm_context, &mut call_inputs);
 
         set_block_inspector

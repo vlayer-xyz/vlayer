@@ -9,7 +9,7 @@ use thiserror::Error;
 use crate::{
     block_header::EvmBlockHeader,
     evm::env::{EvmEnv, ExecutionLocation},
-    inspector::SetInspector,
+    inspector::TravelInspector,
     io::Call,
 };
 
@@ -45,8 +45,8 @@ impl Engine {
         H: EvmBlockHeader,
     {
         let evm = Evm::builder()
-            .with_ref_db(&env.db)
-            .with_external_context(SetInspector::default())
+            .with_db(&mut env.db)
+            .with_external_context(TravelInspector::new(env.cfg_env.chain_id))
             .with_cfg_env_with_handler_cfg(env.cfg_env.clone())
             .with_tx_env(tx.clone().into())
             .append_handler_register(inspector_handle_register)
