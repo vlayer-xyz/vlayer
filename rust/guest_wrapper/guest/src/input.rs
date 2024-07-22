@@ -1,4 +1,5 @@
 use crate::db::{state::StateDb, wrap_state::WrapStateDb};
+use std::cell::RefCell;
 use std::rc::Rc;
 use vlayer_engine::{
     block_header::EvmBlockHeader,
@@ -60,20 +61,22 @@ where
     H: EvmBlockHeader + Clone,
 {
     fn from(input: ValidatedMultiEvmInput<H>) -> Self {
-        input
-            .0
-            .into_iter()
-            .map(|(location, input)| {
-                let chain_spec = &location.chain_id.try_into().expect("cannot get chain spec");
-                (
-                    location,
-                    Rc::new(
-                        EvmEnv::from(ValidatedEvmInput(input))
-                            .with_chain_spec(chain_spec)
-                            .unwrap(),
-                    ),
-                )
-            })
-            .collect()
+        RefCell::new(
+            input
+                .0
+                .into_iter()
+                .map(|(location, input)| {
+                    let chain_spec = &location.chain_id.try_into().expect("cannot get chain spec");
+                    (
+                        location,
+                        Rc::new(
+                            EvmEnv::from(ValidatedEvmInput(input))
+                                .with_chain_spec(chain_spec)
+                                .unwrap(),
+                        ),
+                    )
+                })
+                .collect(),
+        )
     }
 }

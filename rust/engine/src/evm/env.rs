@@ -8,7 +8,7 @@ use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
 use crate::{
     block_header::EvmBlockHeader, chain::spec::ChainSpec, engine::EngineError,
-    utils::TryGetOrInsert,
+    utils::InteriorMutabilityCache,
 };
 
 /// The environment to execute the contract calls in.
@@ -69,14 +69,14 @@ where
     fn create(&self, location: ExecutionLocation) -> anyhow::Result<EvmEnv<D, H>>;
 }
 
-pub type MultiEvmEnv<D, H> = HashMap<ExecutionLocation, Rc<EvmEnv<D, H>>>;
+pub type MultiEvmEnv<D, H> = RefCell<HashMap<ExecutionLocation, Rc<EvmEnv<D, H>>>>;
 
 pub struct CachedEvmEnv<D, H>
 where
     D: DatabaseRef,
     H: EvmBlockHeader,
 {
-    cache: RefCell<MultiEvmEnv<D, H>>,
+    cache: MultiEvmEnv<D, H>,
     factory: Box<dyn EvmEnvFactory<D, H>>,
 }
 
@@ -87,19 +87,17 @@ where
 {
     pub fn new(factory: Box<dyn EvmEnvFactory<D, H>>) -> Self {
         CachedEvmEnv {
-            cache: RefCell::new(MultiEvmEnv::new()),
+            cache: RefCell::new(HashMap::new()),
             factory,
         }
     }
 
     pub fn get(&self, location: ExecutionLocation) -> anyhow::Result<Rc<EvmEnv<D, H>>> {
-        let mut cache = self.cache.borrow_mut();
-        let env =
-            cache.try_get_or_insert(location, || self.factory.create(location).map(Rc::new))?;
-        Ok(Rc::clone(env))
+        self.cache
+            .try_get_or_insert(location, || self.factory.create(location))
     }
 
-    pub fn into_inner(self) -> MultiEvmEnv<D, H> {
+    pub fn into_inner(self) -> HashMap<ExecutionLocation, Rc<EvmEnv<D, H>>> {
         self.cache.into_inner()
     }
 }

@@ -55,8 +55,8 @@ where
             .map_err(HostError::EvmEnvFactory)?;
         let host_output = Engine::default().call(&call, env)?;
 
-        let multi_evm_input = into_multi_input(self.envs.into_inner())
-            .map_err(|err| HostError::CreatingInput(err.to_string()))?;
+        let multi_evm_input =
+            into_multi_input(self.envs).map_err(|err| HostError::CreatingInput(err.to_string()))?;
         let env = Self::build_executor_env(self.start_execution_location, multi_evm_input, call)?;
 
         let (seal, raw_guest_output) = Self::prove(env, GUEST_ELF)?;

@@ -8,6 +8,7 @@ use vlayer_engine::{
         input::MultiEvmInput,
     },
     io::{Call, GuestOutput},
+    utils::InteriorMutabilityCache,
     ExecutionCommitment,
 };
 
@@ -30,12 +31,11 @@ impl Guest {
         }
     }
 
-    pub fn run(&mut self, call: Call) -> GuestOutput {
-        let start_evm_env = Rc::clone(
-            self.multi_evm_env
-                .get(&self.start_execution_location)
-                .expect("cannot get evm env"),
-        );
+    pub fn run(&self, call: Call) -> GuestOutput {
+        let start_evm_env = self
+            .multi_evm_env
+            .get(&self.start_execution_location)
+            .expect("cannot get evm env");
 
         let evm_call_result = Engine::default()
             .call(&call, Rc::clone(&start_evm_env))

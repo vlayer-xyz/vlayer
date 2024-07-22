@@ -3,7 +3,7 @@ use anyhow::anyhow;
 use anyhow::{ensure, Ok};
 use std::rc::Rc;
 use vlayer_engine::block_header::EvmBlockHeader;
-use vlayer_engine::evm::env::MultiEvmEnv;
+use vlayer_engine::evm::env::CachedEvmEnv;
 use vlayer_engine::evm::input::{EvmInput, MultiEvmInput};
 
 pub fn into_input<P: Provider>(
@@ -29,9 +29,10 @@ pub fn into_input<P: Provider>(
 }
 
 pub fn into_multi_input<P: Provider>(
-    envs: MultiEvmEnv<ProofDb<P>, P::Header>,
+    envs: CachedEvmEnv<ProofDb<P>, P::Header>,
 ) -> anyhow::Result<MultiEvmInput<P::Header>> {
-    envs.into_iter()
+    envs.into_inner()
+        .into_iter()
         .map(|(location, env)| {
             let env = Rc::try_unwrap(env).map_err(|rc| {
                 anyhow!(
