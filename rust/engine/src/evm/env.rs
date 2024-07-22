@@ -4,7 +4,7 @@ use revm::{
     DatabaseRef,
 };
 use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use std::{collections::HashMap, rc::Rc};
 
 use crate::{
     block_header::EvmBlockHeader, chain::spec::ChainSpec, engine::EngineError,
@@ -69,7 +69,7 @@ where
     fn create(&self, location: ExecutionLocation) -> anyhow::Result<EvmEnv<D, H>>;
 }
 
-pub type MultiEvmEnv<D, H> = HashMap<ExecutionLocation, EvmEnv<D, H>>;
+pub type MultiEvmEnv<D, H> = HashMap<ExecutionLocation, Rc<EvmEnv<D, H>>>;
 
 pub struct CachedEvmEnv<D, H>
 where
@@ -92,9 +92,10 @@ where
         }
     }
 
-    pub fn get(&mut self, location: ExecutionLocation) -> anyhow::Result<&EvmEnv<D, H>> {
+    pub fn get(&mut self, location: ExecutionLocation) -> anyhow::Result<Rc<EvmEnv<D, H>>> {
         self.cache
-            .try_get_or_insert(location, || self.factory.create(location))
+            .try_get_or_insert(location, || self.factory.create(location).map(Rc::new))
+            .map(Rc::clone)
     }
 
     pub fn into_inner(self) -> MultiEvmEnv<D, H> {

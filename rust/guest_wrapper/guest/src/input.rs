@@ -1,4 +1,5 @@
 use crate::db::{state::StateDb, wrap_state::WrapStateDb};
+use std::rc::Rc;
 use vlayer_engine::{
     block_header::EvmBlockHeader,
     evm::{
@@ -66,9 +67,11 @@ where
                 let chain_spec = &location.chain_id.try_into().expect("cannot get chain spec");
                 (
                     location,
-                    EvmEnv::from(ValidatedEvmInput(input))
-                        .with_chain_spec(chain_spec)
-                        .unwrap(),
+                    Rc::new(
+                        EvmEnv::from(ValidatedEvmInput(input))
+                            .with_chain_spec(chain_spec)
+                            .unwrap(),
+                    ),
                 )
             })
             .collect()
