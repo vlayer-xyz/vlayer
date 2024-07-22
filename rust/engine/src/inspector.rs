@@ -116,7 +116,7 @@ mod test {
         let mut evm_context = EvmContext::new(&mut mock_db);
         let mut call_inputs = create_mock_call_inputs(addr, &SET_BLOCK_SELECTOR);
 
-        let mut set_block_inspector = TravelInspector::new(Engine::inspector_callback());
+        let mut set_block_inspector = TravelInspector::new(Engine::inspector_callback);
         set_block_inspector.call(&mut evm_context, &mut call_inputs);
 
         set_block_inspector
