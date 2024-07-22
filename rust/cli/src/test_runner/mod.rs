@@ -784,6 +784,7 @@ fn run_test_suite(
         .with_decode_internal(runner.decode_internal)
         .with_verbosity(runner.evm_opts.verbosity);
 
+    // MODIFICATION: trick db to think something is deployed at TRAVEL_CONTRACT_ADDR
     register_traveler_contract(&mut db);
 
     let executor = ExecutorBuilder::new()
