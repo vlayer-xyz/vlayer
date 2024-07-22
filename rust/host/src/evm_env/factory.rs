@@ -1,6 +1,10 @@
 use std::rc::Rc;
 
-use vlayer_engine::evm::env::{EvmEnv, ExecutionLocation};
+use revm::DatabaseRef;
+use vlayer_engine::{
+    block_header::EvmBlockHeader,
+    evm::env::{EvmEnv, ExecutionLocation},
+};
 
 use crate::{
     db::proof::ProofDb,
@@ -8,14 +12,12 @@ use crate::{
     provider::{multi::CachedMultiProvider, Provider},
 };
 
-pub trait EvmEnvFactory<P>
+pub trait EvmEnvFactory<D, H>
 where
-    P: Provider,
+    D: DatabaseRef,
+    H: EvmBlockHeader,
 {
-    fn create(
-        &self,
-        location: ExecutionLocation,
-    ) -> Result<EvmEnv<ProofDb<P>, P::Header>, HostError>;
+    fn create(&self, location: ExecutionLocation) -> Result<EvmEnv<D, H>, HostError>;
 }
 
 pub struct HostEvmEnvFactory<P> {
@@ -31,7 +33,7 @@ where
     }
 }
 
-impl<P> EvmEnvFactory<P> for HostEvmEnvFactory<P>
+impl<P> EvmEnvFactory<ProofDb<P>, P::Header> for HostEvmEnvFactory<P>
 where
     P: Provider,
 {

@@ -11,14 +11,14 @@ where
     P: Provider,
 {
     cache: MultiEvmEnv<ProofDb<P>, P::Header>,
-    factory: Box<dyn EvmEnvFactory<P>>,
+    factory: Box<dyn EvmEnvFactory<ProofDb<P>, P::Header>>,
 }
 
 impl<P> CachedEvmEnv<P>
 where
     P: Provider,
 {
-    pub fn new(factory: Box<dyn EvmEnvFactory<P>>) -> Self {
+    pub fn new(factory: Box<dyn EvmEnvFactory<ProofDb<P>, P::Header>>) -> Self {
         CachedEvmEnv {
             cache: MultiEvmEnv::new(),
             factory,
