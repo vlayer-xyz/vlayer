@@ -1,15 +1,17 @@
 use revm::{
     db::WrapDatabaseRef,
     inspector_handle_register,
+    interpreter::CallInputs,
     primitives::{ExecutionResult, ResultAndState, SuccessReason},
     DatabaseRef, Evm,
 };
 use thiserror::Error;
+use tracing::info;
 
 use crate::{
     block_header::EvmBlockHeader,
     evm::env::{EvmEnv, ExecutionLocation},
-    inspector::TravelInspector,
+    inspector::{MockCallOutcome, TravelInspector},
     io::Call,
 };
 
@@ -46,7 +48,10 @@ impl Engine {
     {
         let evm = Evm::builder()
             .with_db(&mut env.db)
-            .with_external_context(TravelInspector::new(env.cfg_env.chain_id))
+            .with_external_context(TravelInspector::new(
+                env.cfg_env.chain_id,
+                Self::inspector_callback,
+            ))
             .with_cfg_env_with_handler_cfg(env.cfg_env.clone())
             .with_tx_env(tx.clone().into())
             .append_handler_register(inspector_handle_register)
@@ -56,9 +61,21 @@ impl Engine {
         Self::transact(evm)
     }
 
-    fn transact<D>(
-        mut evm: Evm<'_, SetInspector, WrapDatabaseRef<&D>>,
-    ) -> Result<Vec<u8>, EngineError>
+    fn inspector_callback(
+        inspector: &mut TravelInspector,
+        _: &mut CallInputs,
+    ) -> Option<MockCallOutcome> {
+        info!(
+            "Intercepting the call. Block number: {:?}, chain id: {:?}",
+            inspector.location.unwrap().block_number,
+            inspector.location.unwrap().chain_id
+        );
+        inspector.location = None;
+
+        None
+    }
+
+    fn transact<D>(mut evm: Evm<'_, TravelInspector, WrapDatabaseRef<&D>>) -> Result<Vec<u8>, EngineError>
     where
         D: DatabaseRef,
         D::Error: std::fmt::Debug,
