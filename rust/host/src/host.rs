@@ -1,5 +1,4 @@
 use crate::db::proof::ProofDb;
-use crate::evm_env::cached::CachedEvmEnv;
 use crate::evm_env::factory::HostEvmEnvFactory;
 use crate::into_input::into_multi_input;
 use crate::provider::factory::{EthersProviderFactory, ProviderFactory};
@@ -12,7 +11,7 @@ use risc0_ethereum_contracts::groth16::abi_encode;
 use risc0_zkvm::{default_prover, is_dev_mode, ExecutorEnv, ProverOpts};
 use vlayer_engine::block_header::eth::EthBlockHeader;
 use vlayer_engine::engine::Engine;
-use vlayer_engine::evm::env::ExecutionLocation;
+use vlayer_engine::evm::env::{CachedEvmEnv, ExecutionLocation};
 use vlayer_engine::evm::input::MultiEvmInput;
 use vlayer_engine::io::{Call, GuestOutput, HostOutput, Input};
 

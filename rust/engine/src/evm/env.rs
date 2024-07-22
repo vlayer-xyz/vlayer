@@ -6,7 +6,10 @@ use revm::{
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 
-use crate::{block_header::EvmBlockHeader, chain::spec::ChainSpec, engine::EngineError};
+use crate::{
+    block_header::EvmBlockHeader, chain::spec::ChainSpec, engine::EngineError,
+    utils::TryGetOrInsert,
+};
 
 /// The environment to execute the contract calls in.
 pub struct EvmEnv<D, H> {
@@ -67,3 +70,34 @@ where
 }
 
 pub type MultiEvmEnv<D, H> = HashMap<ExecutionLocation, EvmEnv<D, H>>;
+
+pub struct CachedEvmEnv<D, H>
+where
+    D: DatabaseRef,
+    H: EvmBlockHeader,
+{
+    cache: MultiEvmEnv<D, H>,
+    factory: Box<dyn EvmEnvFactory<D, H>>,
+}
+
+impl<D, H> CachedEvmEnv<D, H>
+where
+    D: DatabaseRef,
+    H: EvmBlockHeader,
+{
+    pub fn new(factory: Box<dyn EvmEnvFactory<D, H>>) -> Self {
+        CachedEvmEnv {
+            cache: MultiEvmEnv::new(),
+            factory,
+        }
+    }
+
+    pub fn get(&mut self, location: ExecutionLocation) -> anyhow::Result<&EvmEnv<D, H>> {
+        self.cache
+            .try_get_or_insert(location, || self.factory.create(location))
+    }
+
+    pub fn into_inner(self) -> MultiEvmEnv<D, H> {
+        self.cache
+    }
+}
