@@ -11,10 +11,8 @@ use thiserror::Error;
 use tracing::info;
 
 use crate::{
-    evm::{
-        block_header::EvmBlockHeader,
-        env::{EvmEnv, ExecutionLocation},
-    },
+    block_header::EvmBlockHeader,
+    evm::env::{EvmEnv, ExecutionLocation},
     inspector::{MockCallOutcome, TravelInspector},
     io::Call,
 };
