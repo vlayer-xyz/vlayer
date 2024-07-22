@@ -15,6 +15,7 @@
 # Advanced
 - [Prover](./advanced/prover.md)
 - [Verifier](./advanced/verifier.md)
+- [Tests](./advanced/tests.md)
 
 # Contributing
 - [vlayer](./contributing/vlayer.md)
