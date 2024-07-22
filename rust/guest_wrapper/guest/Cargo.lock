@@ -3087,6 +3087,7 @@ dependencies = [
  "risc0-zkvm",
  "rlp",
  "serde",
+ "serde_json",
  "thiserror",
  "tracing",
 ]

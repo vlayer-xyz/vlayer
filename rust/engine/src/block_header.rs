@@ -135,10 +135,92 @@ mod serialize {
 
         assert!(!serialized.is_empty());
     }
+
+    #[test]
+    fn fail_with_unsupported_type() {
+        #[derive(Debug)]
+        struct UnsupportedBlockHeader;
+
+        impl Hashable for UnsupportedBlockHeader {
+            fn hash_slow(&self) -> B256 {
+                unimplemented!()
+            }
+        }
+
+        impl EvmBlockHeader for UnsupportedBlockHeader {
+            fn parent_hash(&self) -> &B256 {
+                unimplemented!()
+            }
+            fn number(&self) -> BlockNumber {
+                unimplemented!()
+            }
+            fn timestamp(&self) -> u64 {
+                unimplemented!()
+            }
+            fn state_root(&self) -> &B256 {
+                unimplemented!()
+            }
+            fn fill_block_env(&self, _blk_env: &mut BlockEnv) {
+                unimplemented!()
+            }
+        }
+
+        let unsupported_header: Box<dyn EvmBlockHeader> = Box::new(UnsupportedBlockHeader);
+        let result = serde_json::to_string(&unsupported_header);
+
+        assert!(
+            result.is_err(),
+            "Expected serialization to fail for unsupported type"
+        );
+    }
 }
 
 #[cfg(test)]
 mod deserialize {
+    use super::*;
+    use alloy_primitives::hex;
+    use serde_json::{self, Value};
+    use std::fs;
+
+    fn read_and_parse_json_file(file_path: &str) -> Value {
+        let file_content = fs::read_to_string(file_path).expect("Failed to read the file");
+        let json_value: serde_json::Value =
+            serde_json::from_str(&file_content).expect("Failed to parse JSON");
+        json_value
+    }
+
+    #[test]
+    fn success() {
+        let json_value = read_and_parse_json_file("testdata/mainnet_rpc_cache.json");
+        let eth_block_header_json = &json_value["partial_blocks"][0][1]["Eth"];
+        let deserialized_eth_header: EthBlockHeader =
+            serde_json::from_value(eth_block_header_json.clone()).expect("Deserialization failed");
+        let expected_parent_hash = eth_block_header_json["parent_hash"].as_str().unwrap();
+        let deserialized_parent_hash =
+            hex::encode(deserialized_eth_header.parent_hash.as_ref() as &[u8]);
+
+        assert_eq!(
+            deserialized_parent_hash,
+            expected_parent_hash.trim_start_matches("0x")
+        );
+    }
+
+    #[test]
+    fn fail_with_invalid_data() {
+        let json_value = read_and_parse_json_file("testdata/invalid_header.json");
+        let eth_block_header_json = &json_value["partial_blocks"][0][1]["Eth"];
+        let result: Result<EthBlockHeader, _> =
+            serde_json::from_value(eth_block_header_json.clone());
+
+        assert!(
+            result.is_err(),
+            "Expected deserialization to fail due to invalid parent hash"
+        );
+    }
+}
+
+#[cfg(test)]
+mod serialize_and_deserialize {
     use super::*;
     use serde_json;
 
