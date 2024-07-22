@@ -7,12 +7,21 @@ use foundry_evm_core::backend::DatabaseExt;
 use foundry_evm_core::InspectorExt;
 use vlayer_engine::inspector::SetInspector;
 
-pub struct VlayerTestInspector {
+pub struct CompositeInspector {
     pub set_inspector: SetInspector,
     pub inspector_stack: InspectorStack,
 }
 
-impl<DB: Database + DatabaseExt> Inspector<DB> for VlayerTestInspector {
+impl CompositeInspector {
+    pub fn new(set_inspector: SetInspector, inspector_stack: InspectorStack) -> Self {
+        Self {
+            set_inspector,
+            inspector_stack,
+        }
+    }
+}
+
+impl<DB: Database + DatabaseExt> Inspector<DB> for CompositeInspector {
     fn call(
         &mut self,
         context: &mut EvmContext<DB>,
@@ -79,4 +88,4 @@ impl<DB: Database + DatabaseExt> Inspector<DB> for VlayerTestInspector {
     }
 }
 
-impl<DB: Database + DatabaseExt> InspectorExt<DB> for VlayerTestInspector {}
+impl<DB: Database + DatabaseExt> InspectorExt<DB> for CompositeInspector {}

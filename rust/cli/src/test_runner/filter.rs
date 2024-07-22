@@ -1,3 +1,8 @@
+/**
+ * This file was copied from https://github.com/foundry-rs/foundry/blob/6bb5c8ea8dcd00ccbc1811f1175cabed3cb4c116/crates/forge/bin/cmd/test/filter.rs
+ * The original file is licensed under the Apache License, Version 2.0.
+ * It wasn't modified, but it wasn't exported from foundry lib
+ */
 use clap::Parser;
 use foundry_common::TestFilter;
 use foundry_compilers::{FileFilter, ProjectPathsConfig};

@@ -1,3 +1,9 @@
+/**
+* This file is in large part copied from https://github.com/foundry-rs/foundry/blob/6bb5c8ea8dcd00ccbc1811f1175cabed3cb4c116/crates/forge/bin/cmd/test/mod.rs
+* The original file is licensed under the Apache License, Version 2.0.
+* The original file was modified for the purpose of this project.
+* All relevant modifications are commented with "MODIFICATION" comments.
+*/
 use clap::Parser;
 use color_eyre::eyre::{bail, Result};
 use forge::multi_runner::TestContract;
@@ -53,16 +59,16 @@ use std::{
 };
 use tracing::{debug, debug_span, enabled, trace};
 
+mod composite_inspector;
 mod contract_runner;
 mod filter;
 mod summary;
-mod vlayer_executor;
-mod vlayer_inspector;
+mod test_executor;
 
 use crate::test_runner::contract_runner::ContractRunner;
 use crate::test_runner::filter::ProjectPathsAwareFilter;
 use crate::test_runner::summary::TestSummaryReporter;
-use crate::test_runner::vlayer_executor::VlayerExecutor;
+use crate::test_runner::test_executor::TestExecutor;
 pub use filter::FilterArgs;
 use vlayer_engine::inspector::{SetInspector, TRAVEL_CONTRACT_ADDR, TRAVEL_CONTRACT_HASH};
 
@@ -446,6 +452,7 @@ impl TestArgs {
         let show_progress = config.show_progress;
         let handle = tokio::task::spawn_blocking({
             let filter = filter.clone();
+            // MODIFICATION: Replace runner.test with modified test function
             move || test(runner, &filter, tx, show_progress)
         });
 
@@ -804,10 +811,8 @@ fn run_test_suite(
     let contract_runner = ContractRunner {
         contract,
         libs_to_deploy: &runner.libs_to_deploy,
-        executor: VlayerExecutor {
-            executor,
-            inspector: SetInspector::default(),
-        },
+        // MODIFICATION: Replace Executor with TestExecutor
+        executor: TestExecutor::new(executor, SetInspector::default()),
         revert_decoder: &runner.revert_decoder,
         initial_balance: runner.evm_opts.initial_balance,
         sender: runner.sender.unwrap_or_default(),

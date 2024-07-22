@@ -1,8 +1,14 @@
+/**
+ * This file is in large part copied from https://github.com/foundry-rs/foundry/blob/65b3cb031336bccbfe7c32c26b8869d1b8654f68/crates/evm/evm/src/executors/mod.rs
+ * The original file is licensed under the Apache License, Version 2.0.
+ * The original file was modified for the purpose of this project.
+ * All relevant modifications are commented with "MODIFICATION" comments.
+ */
 use alloy_dyn_abi::DynSolValue;
 use alloy_dyn_abi::JsonAbiExt;
 use alloy_json_abi::Function;
 
-use crate::test_runner::vlayer_inspector::VlayerTestInspector;
+use crate::test_runner::composite_inspector::CompositeInspector;
 use alloy_sol_types::private::{Address, Bytes, U256};
 use color_eyre::eyre;
 use forge::revm;
@@ -18,13 +24,21 @@ use foundry_evm_core::decode::RevertDecoder;
 use tracing::instrument;
 use vlayer_engine::inspector::SetInspector;
 
+/// MODIFICATION: This struct is a wrapper around the Executor struct from foundry_evm that adds our inspector that will be passed to the backend
 #[derive(Clone, Debug)]
-pub struct VlayerExecutor {
+pub struct TestExecutor {
     pub inspector: SetInspector,
     pub executor: Executor,
 }
 
-impl VlayerExecutor {
+impl TestExecutor {
+    pub fn new(executor: Executor, inspector: SetInspector) -> Self {
+        Self {
+            inspector,
+            executor,
+        }
+    }
+
     pub fn call(
         &self,
         from: Address,
@@ -50,17 +64,16 @@ impl VlayerExecutor {
         self.call_with_env(env)
     }
 
+    // MODIFICATION: Pass CompositeInspector instead of InspectorStack to the backend
     #[instrument(name = "call", level = "debug", skip_all)]
     pub fn call_with_env(&self, mut env: EnvWithHandlerCfg) -> eyre::Result<RawCallResult> {
         let mut backend = CowBackend::new_borrowed(self.executor.backend());
-        let mut vlayer_inspector = VlayerTestInspector {
-            set_inspector: self.inspector.clone(),
-            inspector_stack: self.executor.inspector().clone(),
-        };
-        let result = backend.inspect(&mut env, &mut vlayer_inspector)?;
+        let mut composite_inspector =
+            CompositeInspector::new(self.inspector.clone(), self.executor.inspector().clone());
+        let result = backend.inspect(&mut env, &mut composite_inspector)?;
         convert_executed_result(
             env,
-            vlayer_inspector.inspector_stack,
+            composite_inspector.inspector_stack,
             result,
             backend.has_snapshot_failure(),
         )

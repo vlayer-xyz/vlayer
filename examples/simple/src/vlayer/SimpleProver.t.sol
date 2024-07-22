@@ -10,7 +10,7 @@ contract ProverTest is Test {
         assertEq(prover.sum(1, 2), 3);
     }
 
-    function test_setBlock() public {
+    function test_setBlockWillNotRevert() public {
         SimpleProver prover = new SimpleProver();
         prover.setBlock(420);
     }

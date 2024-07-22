@@ -1,6 +1,10 @@
-//! The Forge test runner.
-
-use crate::test_runner::vlayer_executor::VlayerExecutor;
+/**
+ * This file is in large part copied from https://github.com/foundry-rs/foundry/blob/6bb5c8ea8dcd00ccbc1811f1175cabed3cb4c116/crates/forge/src/runner.rs
+ * The original file is licensed under the Apache License, Version 2.0.
+ * The original file was modified for the purpose of this project.
+ * All relevant modifications are commented with "MODIFICATION" comments.
+ */
+use crate::test_runner::test_executor::TestExecutor;
 use alloy_dyn_abi::DynSolValue;
 use alloy_sol_types::private::alloy_json_abi::Function;
 use color_eyre::eyre;
@@ -37,7 +41,8 @@ pub struct ContractRunner<'a> {
     /// The libraries that need to be deployed before the contract.
     pub libs_to_deploy: &'a Vec<Bytes>,
     /// The executor used by the runner.
-    pub executor: VlayerExecutor,
+    /// MODIFICATION: Changed the type from Executor to TestExecutor.
+    pub executor: TestExecutor,
     /// Revert decoder. Contains all known errors.
     pub revert_decoder: &'a RevertDecoder,
     /// The initial balance of the test contract.
