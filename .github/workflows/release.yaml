@@ -30,6 +30,10 @@ jobs:
 
       - name: Set up Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache-workspaces: |
+            rust
+            rust/guest_wrapper/guest
 
       - name: Install cargo-binstall
         env:
