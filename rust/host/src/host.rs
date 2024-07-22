@@ -1,5 +1,5 @@
 use crate::evm_env::cached::CachedEvmEnv;
-use crate::evm_env::factory::EvmEnvFactory;
+use crate::evm_env::factory::HostEvmEnvFactory;
 use crate::into_input::into_multi_input;
 use crate::provider::factory::{EthersProviderFactory, ProviderFactory};
 use crate::provider::multi::CachedMultiProvider;
@@ -36,7 +36,7 @@ impl<P: Provider<Header = EthBlockHeader>> Host<P> {
         config: HostConfig,
     ) -> Result<Self, HostError> {
         let providers = CachedMultiProvider::new(provider_factory);
-        let env_factory = EvmEnvFactory::new(providers);
+        let env_factory = HostEvmEnvFactory::new(providers);
         let envs = CachedEvmEnv::new(env_factory);
 
         Ok(Host {

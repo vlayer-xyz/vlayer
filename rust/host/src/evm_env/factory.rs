@@ -8,16 +8,16 @@ use crate::{
     provider::{multi::CachedMultiProvider, Provider},
 };
 
-pub struct EvmEnvFactory<P> {
+pub struct HostEvmEnvFactory<P> {
     providers: CachedMultiProvider<P>,
 }
 
-impl<P> EvmEnvFactory<P>
+impl<P> HostEvmEnvFactory<P>
 where
     P: Provider,
 {
     pub fn new(providers: CachedMultiProvider<P>) -> Self {
-        EvmEnvFactory { providers }
+        HostEvmEnvFactory { providers }
     }
 
     pub fn create(
