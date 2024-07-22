@@ -37,21 +37,21 @@ mod try_get_or_insert {
     #[test]
     fn found() {
         let key = "key";
-        let mut value = 42;
+        let value = 42;
         let mut map = HashMap::from([(key, value)]);
 
         let result = map.try_get_or_insert(key, || Err("should not be called"));
-        assert_eq!(result, Ok(&mut value));
+        assert_eq!(result, Ok(&mut 42));
     }
 
     #[test]
     fn created() {
         let mut map = HashMap::new();
         let key = "key";
-        let mut value = 42;
+        let value = 42;
         let result = map.try_get_or_insert(key, || Ok::<_, ()>(value));
-        assert_eq!(result, Ok(&mut value));
-        assert_eq!(map.get(key), Some(&value));
+        assert_eq!(result, Ok(&mut 42));
+        assert_eq!(map.get(key), Some(&42));
     }
 
     #[test]
@@ -60,7 +60,7 @@ mod try_get_or_insert {
         let key = "key";
         let error = "error";
         let result = map.try_get_or_insert(key, || Err(error));
-        assert_eq!(result, Err(error));
+        assert_eq!(result, Err("error"));
         assert_eq!(map.get(key), None);
     }
 
@@ -80,7 +80,7 @@ mod try_get_or_insert {
         };
         map.try_get_or_insert(key, &mut return_once)?;
         map.try_get_or_insert(key, &mut return_once)?;
-        assert_eq!(map.get(key), Some(&value));
+        assert_eq!(map.get(key), Some(&42));
         Ok(())
     }
 }
