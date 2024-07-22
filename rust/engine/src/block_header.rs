@@ -2,9 +2,7 @@ pub mod eth;
 
 use std::any::TypeId;
 
-// Downcast is needed to run is::<EthBlockHeader>() function
-#[allow(unused_imports)]
-use as_any::{AsAny, Downcast};
+use as_any::AsAny;
 
 use alloy_primitives::{BlockNumber, B256};
 
@@ -33,6 +31,8 @@ pub trait EvmBlockHeader: Hashable + AsAny + Debug {
 }
 
 #[derive(Debug, Serialize, Deserialize)]
+// We are not using #[serde(tag = "type", content = "data")] here because zkvm returns
+// NotSupported error for it in deserialize_identifier function in deserializer.rs file
 pub enum BlockHeader {
     Eth(EthBlockHeader),
 }
@@ -89,6 +89,7 @@ impl<'de> Deserialize<'de> for Box<dyn EvmBlockHeader> {
 #[cfg(test)]
 mod header_to_dyn_header {
     use super::*;
+    use as_any::Downcast;
 
     #[test]
     fn eth() {
@@ -119,21 +120,27 @@ mod dyn_header_to_header {
 #[cfg(test)]
 mod serialize {
     use super::*;
-    use serde_json;
+    use serde_json::to_string;
+    use unsupported_block_header::UnsupportedBlockHeader;
 
     #[test]
-    fn success() {
-        let eth_block_header = EthBlockHeader::default();
-        let boxed_header: Box<dyn EvmBlockHeader> = Box::new(eth_block_header);
-        let serialized = serde_json::to_string(&boxed_header).expect("Serialization failed");
+    fn success() -> anyhow::Result<()> {
+        let header: Box<dyn EvmBlockHeader> = Box::new(EthBlockHeader::default());
+        let serialized = to_string(&header)?;
 
         assert!(!serialized.is_empty());
+
+        Ok(())
     }
 
-    #[test]
-    fn fail_with_unsupported_type() {
+    #[cfg(test)]
+    mod unsupported_block_header {
+        use super::*;
+        use alloy_primitives::B256;
+        use revm::primitives::BlockEnv;
+
         #[derive(Debug)]
-        struct UnsupportedBlockHeader;
+        pub struct UnsupportedBlockHeader;
 
         impl Hashable for UnsupportedBlockHeader {
             fn hash_slow(&self) -> B256 {
@@ -158,14 +165,22 @@ mod serialize {
                 unimplemented!()
             }
         }
+    }
 
+    #[test]
+    fn fail_with_unsupported_type() -> anyhow::Result<()> {
         let unsupported_header: Box<dyn EvmBlockHeader> = Box::new(UnsupportedBlockHeader);
-        let result = serde_json::to_string(&unsupported_header);
 
-        assert!(
-            result.is_err(),
-            "Expected serialization to fail for unsupported type"
-        );
+        let result = to_string(&unsupported_header);
+
+        if let Err(err) = result {
+            let err_msg = err.to_string();
+            assert_eq!(err_msg, "Failed converting BlockHeader");
+        } else {
+            panic!("Expected serialization to fail for unsupported type");
+        }
+
+        Ok(())
     }
 }
 
@@ -173,22 +188,24 @@ mod serialize {
 mod deserialize {
     use super::*;
     use alloy_primitives::hex;
-    use serde_json::{self, Value};
+    use serde_json::{self, from_str, from_value, Value};
     use std::fs;
 
-    fn read_and_parse_json_file(file_path: &str) -> Value {
-        let file_content = fs::read_to_string(file_path).expect("Failed to read the file");
-        let json_value: serde_json::Value =
-            serde_json::from_str(&file_content).expect("Failed to parse JSON");
-        json_value
+    const BLOCK_HEADER_INDEX: usize = 1;
+
+    fn read_and_parse_json_file(file_path: &str) -> Result<Value, anyhow::Error> {
+        let file_content = fs::read_to_string(file_path)
+            .map_err(|e| anyhow::anyhow!("Failed to read the file {}: {}", file_path, e))?;
+        let json_value = from_str(&file_content)
+            .map_err(|e| anyhow::anyhow!("Failed to parse JSON from file {}: {}", file_path, e))?;
+        Ok(json_value)
     }
 
     #[test]
-    fn success() {
-        let json_value = read_and_parse_json_file("testdata/mainnet_rpc_cache.json");
-        let eth_block_header_json = &json_value["partial_blocks"][0][1]["Eth"];
-        let deserialized_eth_header: EthBlockHeader =
-            serde_json::from_value(eth_block_header_json.clone()).expect("Deserialization failed");
+    fn success() -> anyhow::Result<()> {
+        let json_value = read_and_parse_json_file("testdata/mainnet_rpc_cache.json")?;
+        let eth_block_header_json = &json_value["partial_blocks"][0][BLOCK_HEADER_INDEX]["Eth"];
+        let deserialized_eth_header: EthBlockHeader = from_value(eth_block_header_json.clone())?;
         let expected_parent_hash = eth_block_header_json["parent_hash"].as_str().unwrap();
         let deserialized_parent_hash =
             hex::encode(deserialized_eth_header.parent_hash.as_ref() as &[u8]);
@@ -197,53 +214,63 @@ mod deserialize {
             deserialized_parent_hash,
             expected_parent_hash.trim_start_matches("0x")
         );
+
+        Ok(())
     }
 
     #[test]
-    fn fail_with_invalid_data() {
-        let json_value = read_and_parse_json_file("testdata/invalid_header.json");
-        let eth_block_header_json = &json_value["partial_blocks"][0][1]["Eth"];
-        let result: Result<EthBlockHeader, _> =
-            serde_json::from_value(eth_block_header_json.clone());
+    fn fail_with_invalid_data() -> anyhow::Result<()> {
+        let json_value = read_and_parse_json_file("testdata/invalid_header.json")?;
+        let eth_block_header_json = &json_value["partial_blocks"][0][BLOCK_HEADER_INDEX]["Eth"];
+        let result: Result<EthBlockHeader, _> = from_value(eth_block_header_json.clone());
 
-        assert!(
-            result.is_err(),
-            "Expected deserialization to fail due to invalid parent hash"
-        );
+        if let Err(err) = result {
+            let err_msg = err.to_string();
+            assert_eq!(
+                err_msg,
+                "invalid type: null, expected struct EthBlockHeader"
+            );
+        } else {
+            panic!("Expected serialization to fail for unsupported type");
+        }
+
+        Ok(())
     }
 }
 
 #[cfg(test)]
 mod serialize_and_deserialize {
     use super::*;
-    use serde_json;
+    use lazy_static::lazy_static;
+    use serde_json::{from_str, to_string};
 
-    fn serialize_and_deserialize_eth_block_header() -> Box<dyn EvmBlockHeader> {
-        let eth_block_header = EthBlockHeader::default();
-        let boxed_header: Box<dyn EvmBlockHeader> = Box::new(eth_block_header);
-        let serialized = serde_json::to_string(&boxed_header).expect("Serialization failed");
-        let deserialized: Box<dyn EvmBlockHeader> =
-            serde_json::from_str(&serialized).expect("Deserialization failed");
-
-        deserialized
+    lazy_static! {
+        static ref ETH_BLOCK_HEADER: EthBlockHeader = EthBlockHeader::default();
     }
 
     #[test]
-    fn correct_type() {
-        let deserialized = serialize_and_deserialize_eth_block_header();
+    fn correct_type() -> anyhow::Result<()> {
+        let header: Box<dyn EvmBlockHeader> = Box::new(ETH_BLOCK_HEADER.clone());
+        let serialized = to_string(&header)?;
+        let deserialized: Box<dyn EvmBlockHeader> = from_str(&serialized)?;
 
         assert!(deserialized.as_ref().as_any().is::<EthBlockHeader>());
+
+        Ok(())
     }
 
     #[test]
-    fn correct_content() {
-        let deserialized = serialize_and_deserialize_eth_block_header();
+    fn correct_content() -> anyhow::Result<()> {
+        let boxed_header: Box<dyn EvmBlockHeader> = Box::new(ETH_BLOCK_HEADER.clone());
+        let serialized = to_string(&boxed_header)?;
+        let deserialized: Box<dyn EvmBlockHeader> = from_str(&serialized)?;
         let deserialized_eth_header = deserialized
             .as_ref()
             .as_any()
             .downcast_ref::<EthBlockHeader>()
             .unwrap();
-
         assert_eq!(deserialized_eth_header, &EthBlockHeader::default());
+
+        Ok(())
     }
 }
