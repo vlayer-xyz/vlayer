@@ -28,22 +28,27 @@ static SET_BLOCK_SELECTOR: Lazy<Vec<u8>> =
 static SET_CHAIN_SELECTOR: Lazy<Vec<u8>> =
     Lazy::new(|| decode("ffbc5638").expect("Error decoding set_chain function call"));
 
-#[derive(Clone, Debug, Default)]
+#[derive(Clone, Debug)]
 pub struct TravelInspector {
     start_chain_id: u64,
-    location: Option<ExecutionLocation>,
+    pub location: Option<ExecutionLocation>,
+    callback: fn(&mut TravelInspector, inputs: &mut CallInputs) -> Option<MockCallOutcome>,
 }
 
 impl TravelInspector {
-    pub fn new(start_chain_id: u64) -> Self {
+    pub fn new(
+        start_chain_id: u64,
+        callback: fn(&mut TravelInspector, inputs: &mut CallInputs) -> Option<MockCallOutcome>,
+    ) -> Self {
         Self {
             start_chain_id,
-            ..Default::default()
+            location: None,
+            callback,
         }
     }
 }
 
-struct MockCallOutcome(CallOutcome);
+pub struct MockCallOutcome(CallOutcome);
 
 impl From<Bytes> for MockCallOutcome {
     fn from(bytes: Bytes) -> Self {
@@ -98,19 +103,26 @@ impl<DB: Database> Inspector<DB> for TravelInspector {
         match inputs.bytecode_address {
             TRAVEL_CONTRACT_ADDR => {
                 let (selector, arguments_bytes) = inputs.input.split_at(SELECTOR_LEN);
-                
+
                 if selector == *SET_BLOCK_SELECTOR {
                     let block_number = U256::from_be_slice(arguments_bytes).to::<u64>();
-                    return Some(self.set_block(block_number).0)
+                    return Some(self.set_block(block_number).0);
                 } else if selector == *SET_CHAIN_SELECTOR {
                     let (chain_id_bytes, block_number_bytes) = arguments_bytes.split_at(ARG_LEN);
                     let chain_id = U256::from_be_slice(chain_id_bytes).to::<u64>();
                     let block_number = U256::from_be_slice(block_number_bytes).to::<u64>();
-                    return Some(self.set_chain(chain_id, block_number).0)
+                    return Some(self.set_chain(chain_id, block_number).0);
                 }
             }
             // If the call is not to the travel contract AND the location is set, run callback.
-            _ => {}
+            _ => {
+                if let Some(_) = self.location {
+                    match (self.callback)(self, inputs) {
+                        Some(outcome) => return Some(outcome.0),
+                        None => {}
+                    }
+                }
+            }
         }
 
         None
