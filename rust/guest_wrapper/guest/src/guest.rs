@@ -4,17 +4,16 @@ use vlayer_engine::{
     block_header::eth::EthBlockHeader,
     engine::Engine,
     evm::{
-        env::{ExecutionLocation, MultiEvmEnv},
+        env::{CachedEvmEnv, ExecutionLocation, MultiEvmEnv},
         input::MultiEvmInput,
     },
     io::{Call, GuestOutput},
-    utils::InteriorMutabilityCache,
     ExecutionCommitment,
 };
 
 pub struct Guest {
     start_execution_location: ExecutionLocation,
-    multi_evm_env: MultiEvmEnv<WrapStateDb, EthBlockHeader>,
+    evm_envs: CachedEvmEnv<WrapStateDb, EthBlockHeader>,
 }
 
 impl Guest {
@@ -24,17 +23,18 @@ impl Guest {
     ) -> Self {
         let validated_multi_evm_input: ValidatedMultiEvmInput<_> = multi_evm_input.into();
         let multi_evm_env = MultiEvmEnv::from(validated_multi_evm_input);
+        let evm_envs = CachedEvmEnv::from_envs(multi_evm_env);
 
         Guest {
-            multi_evm_env,
+            evm_envs,
             start_execution_location,
         }
     }
 
     pub fn run(&self, call: Call) -> GuestOutput {
         let start_evm_env = self
-            .multi_evm_env
-            .get(&self.start_execution_location)
+            .evm_envs
+            .get(self.start_execution_location)
             .expect("cannot get evm env");
 
         let evm_call_result = Engine::default()

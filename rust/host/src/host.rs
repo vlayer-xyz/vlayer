@@ -40,7 +40,7 @@ where
     ) -> Result<Self, HostError> {
         let providers = CachedMultiProvider::new(provider_factory);
         let env_factory = Box::new(HostEvmEnvFactory::new(providers));
-        let envs = CachedEvmEnv::new(env_factory);
+        let envs = CachedEvmEnv::on_demand(env_factory);
 
         Ok(Host {
             envs,

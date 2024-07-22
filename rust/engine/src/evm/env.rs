@@ -98,10 +98,17 @@ where
     D: DatabaseRef,
     H: EvmBlockHeader,
 {
-    pub fn new(factory: Box<dyn EvmEnvFactory<D, H>>) -> Self {
+    pub fn on_demand(factory: Box<dyn EvmEnvFactory<D, H>>) -> Self {
         CachedEvmEnv {
             cache: RefCell::new(HashMap::new()),
             factory,
+        }
+    }
+
+    pub fn from_envs(envs: MultiEvmEnv<D, H>) -> Self {
+        CachedEvmEnv {
+            cache: envs,
+            factory: Box::new(NullEvmEnvFactory),
         }
     }
 
