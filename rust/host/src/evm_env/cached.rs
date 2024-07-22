@@ -4,21 +4,21 @@ use crate::{
     db::proof::ProofDb, host::error::HostError, provider::Provider, utils::TryGetOrInsert,
 };
 
-use super::factory::HostEvmEnvFactory;
+use super::factory::EvmEnvFactory;
 
 pub struct CachedEvmEnv<P>
 where
     P: Provider,
 {
     cache: MultiEvmEnv<ProofDb<P>, P::Header>,
-    factory: HostEvmEnvFactory<P>,
+    factory: Box<dyn EvmEnvFactory<P>>,
 }
 
 impl<P> CachedEvmEnv<P>
 where
     P: Provider,
 {
-    pub fn new(factory: HostEvmEnvFactory<P>) -> Self {
+    pub fn new(factory: Box<dyn EvmEnvFactory<P>>) -> Self {
         CachedEvmEnv {
             cache: MultiEvmEnv::new(),
             factory,

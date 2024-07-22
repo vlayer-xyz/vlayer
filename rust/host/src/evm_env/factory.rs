@@ -8,6 +8,16 @@ use crate::{
     provider::{multi::CachedMultiProvider, Provider},
 };
 
+pub trait EvmEnvFactory<P>
+where
+    P: Provider,
+{
+    fn create(
+        &self,
+        location: ExecutionLocation,
+    ) -> Result<EvmEnv<ProofDb<P>, P::Header>, HostError>;
+}
+
 pub struct HostEvmEnvFactory<P> {
     providers: CachedMultiProvider<P>,
 }
@@ -19,8 +29,13 @@ where
     pub fn new(providers: CachedMultiProvider<P>) -> Self {
         HostEvmEnvFactory { providers }
     }
+}
 
-    pub fn create(
+impl<P> EvmEnvFactory<P> for HostEvmEnvFactory<P>
+where
+    P: Provider,
+{
+    fn create(
         &self,
         ExecutionLocation {
             block_number,

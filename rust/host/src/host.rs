@@ -30,13 +30,16 @@ impl Host<EthersProvider<EthersClient>> {
     }
 }
 
-impl<P: Provider<Header = EthBlockHeader>> Host<P> {
+impl<P> Host<P>
+where
+    P: Provider<Header = EthBlockHeader> + 'static,
+{
     pub fn try_new_with_provider_factory(
         provider_factory: impl ProviderFactory<P> + 'static,
         config: HostConfig,
     ) -> Result<Self, HostError> {
         let providers = CachedMultiProvider::new(provider_factory);
-        let env_factory = HostEvmEnvFactory::new(providers);
+        let env_factory = Box::new(HostEvmEnvFactory::new(providers));
         let envs = CachedEvmEnv::new(env_factory);
 
         Ok(Host {
