@@ -3,20 +3,20 @@
 To support execution on multiple blocks and multiple chains, we span multiple revms' instances during Engine execution.
 
 ## Generic parameter DB
-Note that Engine is parametrized with generic type DB, as it needs to run in revm with different Database in two different contexts: Guest and Host.
+Note that Engine is parametrized with generic type DB, as it needs to run in revm with different Database in two different contexts: Guest and Host. 
 
 ```rust
-struct Engine<DB: Database> {
+struct Engine<DB: DatabaseRef> {
   ...
 }
 ```
 
 This parametrization will bubble to several related traits and structs: `EvmEnv`, `EnvFactory`, `HostEnvFactory`, `GuestEnvFactory`.
 
-## Env
-`Env` represents a configuration required to create a revm instance. Depending on the context, it might be instantiated with `ProofDB` (Host) or `WrapStateDB` (Guest).
+## EvmEnv
+`EvmEnv` represents a configuration required to create a revm instance. Depending on the context, it might be instantiated with `ProofDB` (Host) or `WrapStateDB` (Guest).
 
-It is also parametrized via dynamic dispatch by Header type, which may differ for different hard forks or networks.
+It is also implicitly parametrized via dynamic dispatch by Header type, which may differ for various hard forks or networks.
 
 See the code snippet below.
 
@@ -68,4 +68,39 @@ GuestEnvFactory o-- Env
 HostEnvFactory <.. MultiProvider
 ```
 
+## Engine
 
+`Engine` responsibility is to execute calls. To do so, `Engine` spawns revms instances on demand. 
+Engine calls are intercepted by `TravelInspector`. 
+
+`TravelInspector` role is to intercept calls related to time travel and teleport features.
+It stores destination location (set by `setBlock` and `setChain` calls) and delegates call back to Engine if needed.
+
+
+```mermaid
+%%{init: {'theme':'dark'}}%%
+classDiagram
+
+class Engine {
+  call(ExecutionLocation, Call)
+}
+
+class TravelInspector {
+  destination: Option[ExecutionLocation]
+  callback: F
+  chainId: ChainId
+  setBlock(uint)
+  setChain(uint, uint)
+  delegateCall(call)
+}
+
+Engine *-- TravelInspector
+```
+
+## Testing
+
+Tests are run in a custom `ContractRunner` forked from [forge](https://github.com/foundry-rs/foundry/blob/6bb5c8ea8dcd00ccbc1811f1175cabed3cb4c116/crates/forge/src/runner.rs).
+
+In addition to usual functionalities, tests run by vlayer can use `execProver` feature. The next call after `execProver` is executed in vlayer `Engine`.
+
+Runner is augmented with custom Inspector, which delegates designated calls to an instance of Engine. Design is analogous to `TravelInspector`.
