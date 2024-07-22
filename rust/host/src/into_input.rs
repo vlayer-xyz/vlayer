@@ -1,6 +1,5 @@
 use crate::{db::proof::ProofDb, provider::Provider};
 use anyhow::{ensure, Ok};
-use revm::db::WrapDatabaseRef;
 use vlayer_engine::block_header::EvmBlockHeader;
 use vlayer_engine::evm::env::MultiEvmEnv;
 use vlayer_engine::evm::input::{EvmInput, MultiEvmInput};
