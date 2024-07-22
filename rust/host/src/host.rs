@@ -1,3 +1,4 @@
+use crate::db::proof::ProofDb;
 use crate::evm_env::cached::CachedEvmEnv;
 use crate::evm_env::factory::HostEvmEnvFactory;
 use crate::into_input::into_multi_input;
@@ -20,7 +21,7 @@ pub mod error;
 
 pub struct Host<P: Provider<Header = EthBlockHeader>> {
     start_execution_location: ExecutionLocation,
-    envs: CachedEvmEnv<P>,
+    envs: CachedEvmEnv<ProofDb<P>, P::Header>,
 }
 
 impl Host<EthersProvider<EthersClient>> {
@@ -49,7 +50,10 @@ where
     }
 
     pub fn run(mut self, call: Call) -> Result<HostOutput, HostError> {
-        let env = self.envs.get(self.start_execution_location)?;
+        let env = self
+            .envs
+            .get(self.start_execution_location)
+            .map_err(HostError::EvmEnvFactory)?;
         let host_output = Engine::default().call(&call, env)?;
 
         let multi_evm_input = into_multi_input(self.envs.into_inner())

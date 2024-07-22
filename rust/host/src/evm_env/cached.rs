@@ -1,38 +1,38 @@
-use vlayer_engine::evm::env::{EvmEnv, EvmEnvFactory, ExecutionLocation, MultiEvmEnv};
-
-use crate::{
-    db::proof::ProofDb, host::error::HostError, provider::Provider, utils::TryGetOrInsert,
+use revm::DatabaseRef;
+use vlayer_engine::{
+    block_header::EvmBlockHeader,
+    evm::env::{EvmEnv, EvmEnvFactory, ExecutionLocation, MultiEvmEnv},
 };
 
-pub struct CachedEvmEnv<P>
+use crate::utils::TryGetOrInsert;
+
+pub struct CachedEvmEnv<D, H>
 where
-    P: Provider,
+    D: DatabaseRef,
+    H: EvmBlockHeader,
 {
-    cache: MultiEvmEnv<ProofDb<P>, P::Header>,
-    factory: Box<dyn EvmEnvFactory<ProofDb<P>, P::Header>>,
+    cache: MultiEvmEnv<D, H>,
+    factory: Box<dyn EvmEnvFactory<D, H>>,
 }
 
-impl<P> CachedEvmEnv<P>
+impl<D, H> CachedEvmEnv<D, H>
 where
-    P: Provider,
+    D: DatabaseRef,
+    H: EvmBlockHeader,
 {
-    pub fn new(factory: Box<dyn EvmEnvFactory<ProofDb<P>, P::Header>>) -> Self {
+    pub fn new(factory: Box<dyn EvmEnvFactory<D, H>>) -> Self {
         CachedEvmEnv {
             cache: MultiEvmEnv::new(),
             factory,
         }
     }
 
-    pub fn get(
-        &mut self,
-        location: ExecutionLocation,
-    ) -> Result<&EvmEnv<ProofDb<P>, P::Header>, HostError> {
+    pub fn get(&mut self, location: ExecutionLocation) -> anyhow::Result<&EvmEnv<D, H>> {
         self.cache
             .try_get_or_insert(location, || self.factory.create(location))
-            .map_err(HostError::EvmEnvFactory)
     }
 
-    pub fn into_inner(self) -> MultiEvmEnv<ProofDb<P>, P::Header> {
+    pub fn into_inner(self) -> MultiEvmEnv<D, H> {
         self.cache
     }
 }
