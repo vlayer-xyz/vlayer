@@ -10,13 +10,18 @@ use types::{Augmentors, Call, CallContext, CallResult};
 pub mod types;
 
 #[derive(Deserialize, Serialize)]
-pub struct Params(Call, CallContext, #[serde(default)] Option<Augmentors>);
+pub struct Params {
+    call: Call,
+    context: CallContext,
+    #[serde(default)]
+    augmentors: Option<Augmentors>,
+}
 
 pub(crate) async fn call(params: Params, config: Arc<Config>) -> Result<CallResult, AppError> {
-    let call: HostCall = params.0.try_into()?;
-    let context = params.1;
+    let call: HostCall = params.call.try_into()?;
 
-    let execution_location = ExecutionLocation::new(context.block_no, context.chain_id);
+    let execution_location =
+        ExecutionLocation::new(params.context.block_no, params.context.chain_id);
     let config = HostConfig::new(&config.url, execution_location);
 
     let return_data = tokio::task::spawn_blocking(|| Host::try_new(config)?.run(call)).await??;
