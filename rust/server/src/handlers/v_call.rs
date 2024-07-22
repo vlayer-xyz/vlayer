@@ -4,22 +4,15 @@ use crate::error::AppError;
 use crate::server::Config;
 use host::host::{config::HostConfig, Host};
 use host::{Call as HostCall, ExecutionLocation};
-use types::{Augmentors, Call, CallContext, CallResult};
 use serde::{Deserialize, Serialize};
+use types::{Augmentors, Call, CallContext, CallResult};
 
 pub mod types;
 
 #[derive(Deserialize, Serialize)]
-pub struct Params(
-    Call, 
-    CallContext,
-    #[serde(default)] Option<Augmentors>
-);
+pub struct Params(Call, CallContext, #[serde(default)] Option<Augmentors>);
 
-pub(crate) async fn call(
-    params: Params,
-    config: Arc<Config>,
-) -> Result<CallResult, AppError> {
+pub(crate) async fn call(params: Params, config: Arc<Config>) -> Result<CallResult, AppError> {
     let call: HostCall = params.0.try_into()?;
     let context = params.1;
 
