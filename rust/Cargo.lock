@@ -8999,6 +8999,7 @@ dependencies = [
  "anyhow",
  "as-any",
  "ethers-core",
+ "lazy_static",
  "mpt",
  "nybbles",
  "once_cell",
