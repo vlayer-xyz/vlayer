@@ -1,5 +1,5 @@
 # Verifier contract
-vlayer provides `Verifier` smart contracts that allow on-chain verification of computations performed by `Prover` contracts. To use the output computed by Prover contract follow the rules covered in the next section.
+vlayer provides `Verifier` smart contracts that allow on-chain verification of computations performed by `Prover` contracts. To use the output computed by `Prover` contract follow the rules covered in the next section.
 
 ## Proof Verification 
 Proof verification can be done by any function that uses the `onlyVerified` modifier and passes arguments in a particular way. We call such a function *verification function*. See the example below, with *verification function* `claim`.
