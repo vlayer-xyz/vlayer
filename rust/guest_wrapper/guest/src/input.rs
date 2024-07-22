@@ -1,4 +1,7 @@
-use vlayer_engine::evm::{env::{EvmEnv, MultiEvmEnv}, input::{EvmInput, MultiEvmInput}};
+use vlayer_engine::evm::{
+    env::{EvmEnv, MultiEvmEnv},
+    input::{EvmInput, MultiEvmInput},
+};
 
 use crate::db::{state::StateDb, wrap_state::WrapStateDb};
 
