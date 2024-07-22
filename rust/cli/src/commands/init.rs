@@ -1,6 +1,7 @@
 use crate::errors::CLIError;
 use crate::utils::parse_toml::get_src_from_string;
 use crate::utils::path::{copy_dir_to, find_foundry_root};
+use crate::TemplateOption;
 use flate2::read::GzDecoder;
 use reqwest::get;
 use std::fs;
@@ -13,9 +14,8 @@ const VLAYER_DIR_NAME: &str = "vlayer";
 const CONTRACTS_URL: &str =
     "https://vlayer-releases.s3.eu-north-1.amazonaws.com/latest/contracts.tar.gz";
 
-pub(crate) async fn init(cwd: PathBuf) -> Result<(), CLIError> {
+pub(crate) async fn init(cwd: PathBuf, template: TemplateOption) -> Result<(), CLIError> {
     info!("Running vlayer init from directory {:?}", cwd.display());
-
     let root_path = find_foundry_root(&cwd)?;
     let src_path = find_src_path(&root_path)?;
     info!("Found foundry project root in \"{}\"", &src_path.display());
@@ -23,8 +23,12 @@ pub(crate) async fn init(cwd: PathBuf) -> Result<(), CLIError> {
     match create_vlayer_dir(&src_path)? {
         Some(vlayer_path) => {
             info!("Created vlayer directory in \"{}\"", src_path.display());
-            let default_template = "simple";
-            fetch_vlayer_files(&vlayer_path, default_template.into()).await?
+            fetch_vlayer_files(&vlayer_path, template.to_string()).await?;
+            info!(
+                "Successfully downloaded vlayer example: \"{}\" to \"{}\"",
+                template,
+                vlayer_path.display()
+            );
         }
         None => error!(
             "vlayer directory already exists in \"{}\". Skipping creation.",
