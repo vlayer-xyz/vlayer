@@ -1,5 +1,5 @@
+use crate::errors::CLIError;
 use crate::test_runner::TestArgs;
-use crate::{errors::CLIError, misc::init::find_src_path};
 use clap::{Parser, Subcommand};
 use commands::init::init;
 use server::server::{serve, Config};
