@@ -4,7 +4,7 @@
     "rust/guest_wrapper/guest/Cargo.toml"
   ],
   "cSpell.words": [
-    "Augmentors",
+    "augmentors",
     "binstall",
     "bytecodes",
     "groth",
