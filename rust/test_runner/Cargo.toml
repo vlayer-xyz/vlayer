@@ -1,0 +1,27 @@
+[package]
+name = "test_runner"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+alloy-dyn-abi = "0.7.7"
+alloy-json-abi = "0.7.7"
+alloy-sol-types = "0.7.7"
+clap = { version = "4.5.9", features = ["derive"] }
+color-eyre = "=0.6.3"
+comfy-table = "7.1.1"
+forge = { git = "https://github.com/foundry-rs/foundry", version = "0.2.0" }
+foundry-cheatcodes = { git = "https://github.com/foundry-rs/foundry", version = "0.2.0" }
+foundry-cli = { git = "https://github.com/foundry-rs/foundry", version = "0.2.0" }
+foundry-common = { git = "https://github.com/foundry-rs/foundry", version = "0.2.0" }
+foundry-compilers = "0.9.0"
+foundry-config = { git = "https://github.com/foundry-rs/foundry", version = "0.2.0" }
+foundry-debugger = { git = "https://github.com/foundry-rs/foundry", version = "0.2.0" }
+foundry-evm = { git = "https://github.com/foundry-rs/foundry", version = "0.2.0" }
+foundry-evm-core = { git = "https://github.com/foundry-rs/foundry", version = "0.2.0" }
+rayon = "1.10.0"
+regex = "1.10.4"
+serde_json = "1.0.120"
+tracing = { workspace = true }
+tokio = { workspace = true }
+vlayer-engine = { path = "../engine" }

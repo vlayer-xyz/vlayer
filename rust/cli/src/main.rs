@@ -1,15 +1,14 @@
 use crate::errors::CLIError;
-use crate::test_runner::TestArgs;
 use clap::{Parser, Subcommand};
 use commands::init::init;
 use server::server::{serve, Config};
+use test_runner::cli::TestArgs;
 use tracing::{error, info};
 
 mod commands;
 pub mod errors;
 mod utils;
 
-mod test_runner;
 #[cfg(test)]
 mod test_utils;
 

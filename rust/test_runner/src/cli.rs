@@ -59,17 +59,10 @@ use std::{
 };
 use tracing::{debug, debug_span, enabled, trace};
 
-mod composite_inspector;
-mod contract_runner;
-mod filter;
-mod summary;
-mod test_executor;
-
-use crate::test_runner::contract_runner::ContractRunner;
-use crate::test_runner::filter::ProjectPathsAwareFilter;
-use crate::test_runner::summary::TestSummaryReporter;
-use crate::test_runner::test_executor::TestExecutor;
-pub use filter::FilterArgs;
+use crate::{
+    contract_runner::ContractRunner, filter::FilterArgs, filter::ProjectPathsAwareFilter,
+    summary::TestSummaryReporter, test_executor::TestExecutor,
+};
 use vlayer_engine::inspector::{SetInspector, TRAVEL_CONTRACT_ADDR, TRAVEL_CONTRACT_HASH};
 
 // Loads project's figment and merges the build cli arguments into it

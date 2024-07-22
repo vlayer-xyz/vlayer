@@ -1846,37 +1846,22 @@ dependencies = [
 name = "cli"
 version = "0.1.0"
 dependencies = [
- "alloy-dyn-abi",
- "alloy-json-abi",
- "alloy-sol-types",
  "anyhow",
  "clap",
- "color-eyre",
- "comfy-table",
  "flate2",
- "forge",
- "foundry-cheatcodes",
- "foundry-cli",
- "foundry-common",
- "foundry-compilers",
- "foundry-config",
- "foundry-debugger",
- "foundry-evm",
- "foundry-evm-core",
- "rayon",
  "regex",
  "reqwest 0.12.5",
  "serde_json",
  "server",
  "tar",
  "tempfile",
+ "test_runner",
  "thiserror",
  "tokio",
  "toml 0.8.14",
  "tracing",
  "tracing-subscriber 0.3.18",
  "vergen",
- "vlayer-engine",
 ]
 
 [[package]]
@@ -8249,6 +8234,33 @@ dependencies = [
  "proc-macro2",
  "quote",
  "syn 2.0.71",
+]
+
+[[package]]
+name = "test_runner"
+version = "0.1.0"
+dependencies = [
+ "alloy-dyn-abi",
+ "alloy-json-abi",
+ "alloy-sol-types",
+ "clap",
+ "color-eyre",
+ "comfy-table",
+ "forge",
+ "foundry-cheatcodes",
+ "foundry-cli",
+ "foundry-common",
+ "foundry-compilers",
+ "foundry-config",
+ "foundry-debugger",
+ "foundry-evm",
+ "foundry-evm-core",
+ "rayon",
+ "regex",
+ "serde_json",
+ "tokio",
+ "tracing",
+ "vlayer-engine",
 ]
 
 [[package]]

@@ -8,7 +8,7 @@ use alloy_dyn_abi::DynSolValue;
 use alloy_dyn_abi::JsonAbiExt;
 use alloy_json_abi::Function;
 
-use crate::test_runner::composite_inspector::CompositeInspector;
+use crate::composite_inspector::CompositeInspector;
 use alloy_sol_types::private::{Address, Bytes, U256};
 use color_eyre::eyre;
 use forge::revm;

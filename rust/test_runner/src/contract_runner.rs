@@ -4,7 +4,7 @@
  * The original file was modified for the purpose of this project.
  * All relevant modifications are commented with "MODIFICATION" comments.
  */
-use crate::test_runner::test_executor::TestExecutor;
+use crate::test_executor::TestExecutor;
 use alloy_dyn_abi::DynSolValue;
 use alloy_sol_types::private::alloy_json_abi::Function;
 use color_eyre::eyre;
