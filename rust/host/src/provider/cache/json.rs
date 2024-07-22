@@ -1,13 +1,14 @@
 use super::EIP1186Proof;
 use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256};
 use anyhow::Context;
-use serde::{de::DeserializeOwned, Deserialize, Serialize};
+use serde::{Deserialize, Serialize};
 use std::{
     collections::{BTreeSet, HashMap},
     fs::File,
     io::{BufReader, BufWriter},
     path::PathBuf,
 };
+use vlayer_engine::block_header::EvmBlockHeader;
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Deserialize, Serialize)]
 pub(super) struct AccountQuery {
@@ -36,15 +37,12 @@ pub(super) struct StorageQuery {
 
 /// A simple JSON cache for storing responses from a provider.
 #[derive(Debug, Deserialize, Serialize)]
-pub(crate) struct JsonCache<H>
-where
-    H: DeserializeOwned + Serialize,
-{
+pub(crate) struct JsonCache {
     #[serde(skip)]
     file_path: Option<PathBuf>,
 
     #[serde(with = "ordered_map")]
-    pub(super) partial_blocks: HashMap<BlockQuery, Option<H>>,
+    pub(super) partial_blocks: HashMap<BlockQuery, Option<Box<dyn EvmBlockHeader>>>,
     #[serde(with = "ordered_map")]
     pub(super) proofs: HashMap<ProofQuery, EIP1186Proof>,
     #[serde(with = "ordered_map")]
@@ -57,10 +55,7 @@ where
     pub(super) storage: HashMap<StorageQuery, StorageValue>,
 }
 
-impl<H> JsonCache<H>
-where
-    H: DeserializeOwned + Serialize,
-{
+impl JsonCache {
     /// Creates a new empty cache. It will be saved to the given file when dropped.
     pub(super) fn empty(file_path: PathBuf) -> Self {
         Self {
@@ -100,10 +95,7 @@ where
     }
 }
 
-impl<H> Drop for JsonCache<H>
-where
-    H: DeserializeOwned + Serialize,
-{
+impl Drop for JsonCache {
     fn drop(&mut self) {
         self.save().expect("failed to save cache");
     }

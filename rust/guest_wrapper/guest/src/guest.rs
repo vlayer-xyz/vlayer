@@ -1,6 +1,5 @@
 use crate::{db::wrap_state::WrapStateDb, input::ValidatedMultiEvmInput};
 use vlayer_engine::{
-    block_header::eth::EthBlockHeader,
     engine::Engine,
     evm::{
         env::{ExecutionLocation, MultiEvmEnv},
@@ -12,15 +11,15 @@ use vlayer_engine::{
 
 pub struct Guest {
     start_execution_location: ExecutionLocation,
-    multi_evm_env: MultiEvmEnv<WrapStateDb, EthBlockHeader>,
+    multi_evm_env: MultiEvmEnv<WrapStateDb>,
 }
 
 impl Guest {
     pub fn new(
-        multi_evm_input: MultiEvmInput<EthBlockHeader>,
+        multi_evm_input: MultiEvmInput,
         start_execution_location: ExecutionLocation,
     ) -> Self {
-        let validated_multi_evm_input: ValidatedMultiEvmInput<_> = multi_evm_input.into();
+        let validated_multi_evm_input: ValidatedMultiEvmInput = multi_evm_input.into();
         let multi_evm_env = MultiEvmEnv::from(validated_multi_evm_input);
 
         Guest {

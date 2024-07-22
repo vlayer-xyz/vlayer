@@ -6,16 +6,16 @@ use std::collections::HashMap;
 use crate::{block_header::EvmBlockHeader, chain::spec::ChainSpec, engine::EngineError};
 
 /// The environment to execute the contract calls in.
-pub struct EvmEnv<D, H> {
+pub struct EvmEnv<D> {
     pub db: D,
     pub cfg_env: CfgEnvWithHandlerCfg,
-    pub header: H,
+    pub header: Box<dyn EvmBlockHeader>,
 }
 
-impl<D, H: EvmBlockHeader> EvmEnv<D, H> {
+impl<D> EvmEnv<D> {
     /// Creates a new environment.
     /// It uses the default configuration for the latest specification.
-    pub fn new(db: D, header: H) -> Self {
+    pub fn new(db: D, header: Box<dyn EvmBlockHeader>) -> Self {
         let cfg_env = CfgEnvWithHandlerCfg::new_with_spec_id(Default::default(), SpecId::LATEST);
 
         Self {
@@ -35,8 +35,8 @@ impl<D, H: EvmBlockHeader> EvmEnv<D, H> {
     }
 
     /// Returns the header of the environment.
-    pub fn header(&self) -> &H {
-        &self.header
+    pub fn header(&self) -> &dyn EvmBlockHeader {
+        self.header.as_ref()
     }
 }
 
@@ -55,4 +55,4 @@ impl ExecutionLocation {
     }
 }
 
-pub type MultiEvmEnv<D, H> = HashMap<ExecutionLocation, EvmEnv<D, H>>;
+pub type MultiEvmEnv<D> = HashMap<ExecutionLocation, EvmEnv<D>>;

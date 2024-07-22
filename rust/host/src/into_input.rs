@@ -6,8 +6,8 @@ use vlayer_engine::evm::input::{EvmInput, MultiEvmInput};
 
 pub fn into_input<P: Provider>(
     db: &ProofDb<P>,
-    header: P::Header,
-) -> anyhow::Result<EvmInput<P::Header>> {
+    header: Box<dyn EvmBlockHeader>,
+) -> anyhow::Result<EvmInput> {
     let (state_trie, storage_tries) = db.prepare_state_storage_tries()?;
     ensure!(
         header.state_root() == &state_trie.hash_slow(),
@@ -27,8 +27,8 @@ pub fn into_input<P: Provider>(
 }
 
 pub fn into_multi_input<P: Provider>(
-    envs: MultiEvmEnv<ProofDb<P>, P::Header>,
-) -> anyhow::Result<MultiEvmInput<P::Header>> {
+    envs: MultiEvmEnv<ProofDb<P>>,
+) -> anyhow::Result<MultiEvmInput> {
     envs.into_iter()
         .map(|(location, env)| Ok((location, into_input(&env.db, env.header)?)))
         .collect()

@@ -7,18 +7,11 @@ use alloy_primitives::{Address, U256};
 /// Solidity struct representing the committed block used for validation.
 pub use private::ExecutionCommitment;
 
-use crate::{
-    block_header::{EvmBlockHeader, Hashable},
-    io::CallSelector,
-};
+use crate::{block_header::EvmBlockHeader, io::CallSelector};
 
 impl ExecutionCommitment {
     /// Returns the [SolCommitment] used to validate the environment.
-    pub fn new<H: EvmBlockHeader + Hashable + Clone>(
-        header: &H,
-        to: Address,
-        selector: CallSelector,
-    ) -> Self {
+    pub fn new(header: &dyn EvmBlockHeader, to: Address, selector: CallSelector) -> Self {
         Self {
             startContractAddress: to,
             functionSelector: selector.into(),

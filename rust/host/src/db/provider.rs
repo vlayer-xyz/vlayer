@@ -7,7 +7,6 @@ use revm::{
 use std::rc::Rc;
 use std::{cell::RefCell, fmt::Debug};
 use thiserror::Error;
-use vlayer_engine::block_header::Hashable;
 
 /// Error type for the [ProviderDb].
 #[derive(Error, Debug)]
