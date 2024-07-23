@@ -1,4 +1,4 @@
-use crate::provider::Provider;
+use crate::provider::BlockingProvider;
 use alloy_primitives::{Address, B256, U256};
 use revm::{
     primitives::{AccountInfo, Bytecode, HashMap, KECCAK_EMPTY},
@@ -32,7 +32,7 @@ pub struct ProviderDb<P> {
     code_hashes: RefCell<HashMap<B256, Address>>,
 }
 
-impl<P: Provider> ProviderDb<P> {
+impl<P: BlockingProvider> ProviderDb<P> {
     /// Creates a new [ProviderDb] with the given provider and block number.
     pub fn new(provider: Rc<P>, block_number: u64) -> Self {
         Self {
@@ -43,7 +43,7 @@ impl<P: Provider> ProviderDb<P> {
     }
 }
 
-impl<P: Provider> DatabaseRef for ProviderDb<P> {
+impl<P: BlockingProvider> DatabaseRef for ProviderDb<P> {
     type Error = ProviderDbError<P::Error>;
 
     fn basic_ref(&self, address: Address) -> Result<Option<AccountInfo>, Self::Error> {

@@ -1,4 +1,4 @@
-use super::{EIP1186Proof, Provider};
+use super::{BlockingProvider, EIP1186Proof};
 use alloy_primitives::{B256, U256};
 use ethers_core::types::Block;
 use ethers_providers::{Middleware, MiddlewareError};
@@ -50,7 +50,7 @@ impl<M: Middleware> EthersProvider<M> {
     }
 }
 
-impl<M: Middleware> Provider for EthersProvider<M>
+impl<M: Middleware> BlockingProvider for EthersProvider<M>
 where
     M::Error: 'static,
 {

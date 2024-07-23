@@ -3,7 +3,7 @@ use crate::evm_env::factory::HostEvmEnvFactory;
 use crate::into_input::into_multi_input;
 use crate::provider::factory::{EthersProviderFactory, ProviderFactory};
 use crate::provider::multi::CachedMultiProvider;
-use crate::provider::{EthersClient, EthersProvider, Provider};
+use crate::provider::{BlockingProvider, EthersClient, EthersProvider};
 use config::HostConfig;
 use error::HostError;
 use guest_wrapper::RISC0_GUEST_ELF;
@@ -17,7 +17,7 @@ use vlayer_engine::io::{Call, GuestOutput, HostOutput, Input};
 pub mod config;
 pub mod error;
 
-pub struct Host<P: Provider> {
+pub struct Host<P: BlockingProvider> {
     start_execution_location: ExecutionLocation,
     envs: CachedEvmEnv<ProofDb<P>>,
 }
@@ -31,7 +31,7 @@ impl Host<EthersProvider<EthersClient>> {
 
 impl<P> Host<P>
 where
-    P: Provider + 'static,
+    P: BlockingProvider + 'static,
 {
     pub fn try_new_with_provider_factory(
         provider_factory: impl ProviderFactory<P> + 'static,

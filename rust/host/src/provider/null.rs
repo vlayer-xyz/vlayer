@@ -1,4 +1,4 @@
-use super::{EIP1186Proof, Provider};
+use super::{BlockingProvider, EIP1186Proof};
 use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256};
 use std::{convert::Infallible, marker::PhantomData};
 use vlayer_engine::block_header::EvmBlockHeader;
@@ -6,7 +6,7 @@ use vlayer_engine::block_header::EvmBlockHeader;
 /// A simple provider that panics on all queries.
 pub struct NullProvider(pub(crate) PhantomData<Box<dyn EvmBlockHeader>>);
 
-impl Provider for NullProvider {
+impl BlockingProvider for NullProvider {
     type Error = Infallible;
 
     fn get_block_header(
