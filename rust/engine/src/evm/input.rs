@@ -68,9 +68,27 @@ mod test {
 
     use super::EvmInput;
     use crate::block_header::eth::EthBlockHeader;
-    use crate::block_header::Hashable;
+    use crate::block_header::{EvmBlockHeader, Hashable};
 
     use mpt::MerkleTrie;
+
+    impl Default for EvmInput {
+        fn default() -> Self {
+            Self {
+                header: Box::new(EthBlockHeader::default()),
+                ancestors: vec![Box::new(EthBlockHeader::default())],
+                state_trie: MerkleTrie::default(),
+                storage_tries: Vec::default(),
+                contracts: Vec::default(),
+            }
+        }
+    }
+
+    impl Default for Box<dyn EvmBlockHeader> {
+        fn default() -> Self {
+            Box::new(EthBlockHeader::default())
+        }
+    }
 
     mod block_hashes {
         use super::*;
@@ -78,18 +96,15 @@ mod test {
         #[test]
         fn success() {
             let ancestor: EthBlockHeader = EthBlockHeader::default();
-            let input: EvmInput = EvmInput {
+            let input = EvmInput {
+                ancestors: vec![Box::new(EthBlockHeader::default())],
                 header: Box::new(EthBlockHeader {
                     number: 1,
                     parent_hash: ancestor.hash_slow(),
                     ..Default::default()
                 }),
-                ancestors: vec![Box::new(EthBlockHeader::default())],
-                state_trie: MerkleTrie::default(),
-                storage_tries: Vec::default(),
-                contracts: Vec::default(),
+                ..Default::default()
             };
-
             let block_hashes = input.block_hashes();
 
             assert_eq!(block_hashes.len(), 2);
@@ -104,15 +119,13 @@ mod test {
 
         #[test]
         fn success() {
-            let input: EvmInput = EvmInput {
+            let input = EvmInput {
+                ancestors: vec![Box::new(EthBlockHeader::default())],
                 header: Box::new(EthBlockHeader {
                     state_root: EMPTY_ROOT_HASH,
                     ..Default::default()
                 }),
-                ancestors: vec![Box::new(EthBlockHeader::default())],
-                state_trie: MerkleTrie::default(),
-                storage_tries: Vec::default(),
-                contracts: Vec::default(),
+                ..Default::default()
             };
             input.validate_state_root();
         }
@@ -120,13 +133,7 @@ mod test {
         #[test]
         #[should_panic(expected = "State root mismatch")]
         fn mismatch() {
-            let input: EvmInput = EvmInput {
-                header: Box::new(EthBlockHeader::default()),
-                ancestors: vec![Box::new(EthBlockHeader::default())],
-                state_trie: MerkleTrie::default(),
-                storage_tries: Vec::default(),
-                contracts: Vec::default(),
-            };
+            let input = EvmInput::default();
             input.validate_state_root();
         }
     }
@@ -137,32 +144,29 @@ mod test {
         #[test]
         fn success() {
             let ancestor: EthBlockHeader = Default::default();
-            let input: EvmInput = EvmInput {
+            let input = EvmInput {
+                ancestors: vec![Box::new(EthBlockHeader::default())],
                 header: Box::new(EthBlockHeader {
                     number: 1,
                     parent_hash: ancestor.hash_slow(),
                     ..Default::default()
                 }),
-                ancestors: vec![Box::new(EthBlockHeader::default())],
-                state_trie: MerkleTrie::default(),
-                storage_tries: Vec::default(),
-                contracts: Vec::default(),
+                ..Default::default()
             };
+
             input.validate_ancestors();
         }
 
         #[test]
         #[should_panic(expected = "failed: Invalid chain: block 0 is not the parent of block 1")]
         fn mismatch() {
-            let input: EvmInput = EvmInput {
+            let input = EvmInput {
+                ancestors: vec![Box::new(EthBlockHeader::default())],
                 header: Box::new(EthBlockHeader {
                     number: 1,
                     ..Default::default()
                 }),
-                ancestors: vec![Box::new(EthBlockHeader::default())],
-                state_trie: MerkleTrie::default(),
-                storage_tries: Vec::default(),
-                contracts: Vec::default(),
+                ..Default::default()
             };
             input.validate_ancestors();
         }

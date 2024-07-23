@@ -4,13 +4,13 @@ use revm::primitives::TxEnv;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-use crate::block_header::eth::MultiEthEvmInput;
 use crate::evm::env::ExecutionLocation;
+use crate::evm::input::MultiEvmInput;
 use crate::ExecutionCommitment;
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Input {
-    pub multi_evm_input: MultiEthEvmInput,
+    pub multi_evm_input: MultiEvmInput,
     pub call: Call,
     pub start_execution_location: ExecutionLocation,
 }

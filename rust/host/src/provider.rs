@@ -12,7 +12,7 @@ mod null;
 
 pub use ethers::{EthersProvider, EthersProviderError};
 use ethers_providers::{Http, RetryClient};
-pub use file::{EthFileProvider, FileProvider};
+pub use file::FileProvider;
 
 use crate::proof::EIP1186Proof;
 

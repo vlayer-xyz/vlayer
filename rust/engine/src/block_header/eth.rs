@@ -1,18 +1,10 @@
 //! Type aliases for Ethereum.
-use crate::evm::{env::EvmEnv, input::MultiEvmInput};
-
 use alloy_primitives::{keccak256, Address, BlockHash, BlockNumber, Bloom, Bytes, B256, B64, U256};
 use alloy_rlp_derive::RlpEncodable;
 use revm::primitives::BlockEnv;
 use serde::{Deserialize, Serialize};
 
 use super::{EvmBlockHeader, Hashable};
-
-/// [EvmEnv] for Ethereum.
-pub type EthEvmEnv<D> = EvmEnv<D>;
-
-/// [EvmInput] for Ethereum.
-pub type MultiEthEvmInput = MultiEvmInput;
 
 /// Ethereum post-merge block header.
 #[derive(Debug, Clone, Serialize, Deserialize, RlpEncodable, Default, PartialEq)]
