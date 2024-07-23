@@ -218,5 +218,45 @@ mod server_tests {
 
             Ok(())
         }
+
+        #[tokio::test]
+        async fn success_web_proof() -> anyhow::Result<()> {
+            let block_nr = get_block_nr().await;
+            let app = server(CONFIG.clone());
+
+            let tls_proof: Value = serde_json::from_str(str::from_utf8(include_bytes!(
+                "../testdata/tls_proof.json"
+            ))?)?;
+
+            let req = json!({
+                "method": "v_call",
+                "params": [
+                    {"caller": CALLER, "to": TO, "data": DATA},
+                    {"block_no": block_nr, "chain_id": 11155111},
+                    {"web_proof": {
+                        "notary_pub_key": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExpX/4R4z40gI6C/j9zAM39u58LJu\n3Cx5tXTuqhhu/tirnBi5GniMmspOTEsps4ANnPLpMmMSfhJ+IFHbc3qVOA==\n-----END PUBLIC KEY-----\n",
+                        "tls_proof": tls_proof,
+                    }}
+                    ],
+                "id": 1,
+                "jsonrpc": "2.0",
+            });
+
+            let response = post(app, "/", &req).await?;
+
+            assert_eq!(response.status(), StatusCode::OK);
+            assert_eq!(
+                body_to_json::<Value>(response.into_body()).await?,
+                json!({
+                    "jsonrpc": "2.0",
+                    "id": 1,
+                    "result": {
+                        "result": "start_contract_address: 0x5FbDB2315678afecb367f032d93F642f64180aa3, function_selector: 0xcad0899b, evm_call_result: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3], seal: []"
+                    }
+                })
+            );
+
+            Ok(())
+        }
     }
 }
