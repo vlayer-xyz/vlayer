@@ -3,7 +3,7 @@ use std::env;
 use alloy_primitives::{address, Address};
 use host::{config::HostConfig, error::HostError, Host};
 use tracing::info;
-use vlayer_engine::{config::SEPOLIA_ID, evm::env::ExecutionLocation, io::Call};
+use vlayer_engine::{config::SEPOLIA_ID, evm::env::location::ExecutionLocation, io::Call};
 
 pub mod db;
 pub mod evm_env;

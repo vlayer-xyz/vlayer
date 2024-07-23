@@ -8,7 +8,7 @@ use host::{
 use std::collections::HashMap;
 use vlayer_engine::{
     config::{MAINNET_ID, SEPOLIA_ID},
-    evm::env::ExecutionLocation,
+    evm::env::location::ExecutionLocation,
 };
 
 fn create_test_provider_factory() -> FileProviderFactory {

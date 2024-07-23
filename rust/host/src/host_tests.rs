@@ -7,7 +7,7 @@ mod test {
     use risc0_zkvm::ExecutorEnv;
     use vlayer_engine::config::MAINNET_ID;
     use vlayer_engine::engine::EngineError;
-    use vlayer_engine::evm::env::ExecutionLocation;
+    use vlayer_engine::evm::env::location::ExecutionLocation;
     use vlayer_engine::io::Call;
 
     #[test]
