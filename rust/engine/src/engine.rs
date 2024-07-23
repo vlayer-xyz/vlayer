@@ -62,18 +62,13 @@ impl Engine {
     }
 
     fn inspector_callback(
-        inspector: &mut TravelInspector,
+        location: ExecutionLocation,
         _: &mut CallInputs,
     ) -> Option<MockCallOutcome> {
-        if let Some(location) = inspector.location {
-            info!(
-                "Intercepting the call. Block number: {:?}, chain id: {:?}",
-                location.block_number, location.chain_id
-            );
-        } else {
-            error!("Inspector callback called while location not set in the inspector");
-        }
-
+        info!(
+            "Intercepting the call. Block number: {:?}, chain id: {:?}",
+            location.block_number, location.chain_id
+        );
         None
     }
 
