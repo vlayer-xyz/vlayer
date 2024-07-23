@@ -4,6 +4,7 @@ pub mod config;
 pub mod consts;
 pub mod engine;
 pub mod evm;
+pub mod utils;
 
 pub mod inspector;
 pub mod io;

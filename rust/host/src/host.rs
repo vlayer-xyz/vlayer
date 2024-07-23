@@ -1,5 +1,5 @@
-use crate::evm_env::cached::CachedEvmEnv;
-use crate::evm_env::factory::EvmEnvFactory;
+use crate::db::proof::ProofDb;
+use crate::evm_env::factory::HostEvmEnvFactory;
 use crate::into_input::into_multi_input;
 use crate::provider::factory::{EthersProviderFactory, ProviderFactory};
 use crate::provider::multi::CachedMultiProvider;
@@ -10,7 +10,7 @@ use guest_wrapper::GUEST_ELF;
 use risc0_ethereum_contracts::groth16::abi_encode;
 use risc0_zkvm::{default_prover, is_dev_mode, ExecutorEnv, ProverOpts};
 use vlayer_engine::engine::Engine;
-use vlayer_engine::evm::env::ExecutionLocation;
+use vlayer_engine::evm::env::{cached::CachedEvmEnv, location::ExecutionLocation};
 use vlayer_engine::evm::input::MultiEvmInput;
 use vlayer_engine::io::{Call, GuestOutput, HostOutput, Input};
 
@@ -19,7 +19,7 @@ pub mod error;
 
 pub struct Host<P: Provider> {
     start_execution_location: ExecutionLocation,
-    envs: CachedEvmEnv<P>,
+    envs: CachedEvmEnv<ProofDb<P>>,
 }
 
 impl Host<EthersProvider<EthersClient>> {
@@ -29,14 +29,17 @@ impl Host<EthersProvider<EthersClient>> {
     }
 }
 
-impl<P: Provider> Host<P> {
+impl<P> Host<P>
+where
+    P: Provider + 'static,
+{
     pub fn try_new_with_provider_factory(
         provider_factory: impl ProviderFactory<P> + 'static,
         config: HostConfig,
     ) -> Result<Self, HostError> {
         let providers = CachedMultiProvider::new(provider_factory);
-        let env_factory = EvmEnvFactory::new(providers);
-        let envs = CachedEvmEnv::new(env_factory);
+        let env_factory = HostEvmEnvFactory::new(providers);
+        let envs = CachedEvmEnv::from_factory(env_factory);
 
         Ok(Host {
             envs,
@@ -44,12 +47,11 @@ impl<P: Provider> Host<P> {
         })
     }
 
-    pub fn run(mut self, call: Call) -> Result<HostOutput, HostError> {
-        let env = self.envs.get(self.start_execution_location)?;
-        let host_output = Engine::default().call(&call, env)?;
+    pub fn run(self, call: Call) -> Result<HostOutput, HostError> {
+        let host_output = Engine::new(&self.envs).call(&call, self.start_execution_location)?;
 
-        let multi_evm_input = into_multi_input(self.envs.into_inner())
-            .map_err(|err| HostError::CreatingInput(err.to_string()))?;
+        let multi_evm_input =
+            into_multi_input(self.envs).map_err(|err| HostError::CreatingInput(err.to_string()))?;
         let env = Self::build_executor_env(self.start_execution_location, multi_evm_input, call)?;
 
         let (seal, raw_guest_output) = Self::prove(env, GUEST_ELF)?;

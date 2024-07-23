@@ -2,7 +2,10 @@ use crate::{db::wrap_state::WrapStateDb, input::ValidatedMultiEvmInput};
 use vlayer_engine::{
     engine::Engine,
     evm::{
-        env::{ExecutionLocation, MultiEvmEnv},
+        env::{
+            cached::{CachedEvmEnv, MultiEvmEnv},
+            location::ExecutionLocation,
+        },
         input::MultiEvmInput,
     },
     io::{Call, GuestOutput},
@@ -11,7 +14,7 @@ use vlayer_engine::{
 
 pub struct Guest {
     start_execution_location: ExecutionLocation,
-    multi_evm_env: MultiEvmEnv<WrapStateDb>,
+    evm_envs: CachedEvmEnv<WrapStateDb>,
 }
 
 impl Guest {
@@ -21,20 +24,22 @@ impl Guest {
     ) -> Self {
         let validated_multi_evm_input: ValidatedMultiEvmInput = multi_evm_input.into();
         let multi_evm_env = MultiEvmEnv::from(validated_multi_evm_input);
+        let evm_envs = CachedEvmEnv::from_envs(multi_evm_env);
 
         Guest {
-            multi_evm_env,
+            evm_envs,
             start_execution_location,
         }
     }
 
-    pub fn run(&mut self, call: Call) -> GuestOutput {
+    pub fn run(&self, call: Call) -> GuestOutput {
+        let evm_call_result = Engine::new(&self.evm_envs)
+            .call(&call, self.start_execution_location)
+            .unwrap();
         let start_evm_env = self
-            .multi_evm_env
-            .get(&self.start_execution_location)
-            .expect("cannot get evm env");
-
-        let evm_call_result = Engine::default().call(&call, start_evm_env).unwrap();
+            .evm_envs
+            .get(self.start_execution_location)
+            .expect("cannot get start evm env");
         let execution_commitment =
             ExecutionCommitment::new(start_evm_env.header(), call.to, call.selector());
 

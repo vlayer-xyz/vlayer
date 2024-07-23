@@ -1,31 +1,37 @@
-use vlayer_engine::evm::env::{EvmEnv, ExecutionLocation, MultiEvmEnv};
+use std::cell::RefCell;
+use std::collections::HashMap;
+use std::rc::Rc;
 
-use crate::{
-    db::proof::ProofDb, host::error::HostError, provider::Provider, utils::TryGetOrInsert,
+use vlayer_engine::evm::env::{
+    cached::MultiEvmEnv, location::ExecutionLocation, EvmEnv, EvmEnvFactory,
 };
+use vlayer_engine::utils::InteriorMutabilityCache;
 
-use super::factory::EvmEnvFactory;
+use crate::{db::proof::ProofDb, provider::Provider};
 
 pub struct CachedEvmEnv<P>
 where
     P: Provider,
 {
     cache: MultiEvmEnv<ProofDb<P>>,
-    factory: EvmEnvFactory<P>,
+    factory: Box<dyn EvmEnvFactory<ProofDb<P>>>,
 }
 
 impl<P> CachedEvmEnv<P>
 where
     P: Provider,
 {
-    pub fn new(factory: EvmEnvFactory<P>) -> Self {
+    pub fn new(factory: impl EvmEnvFactory<ProofDb<P>> + 'static) -> Self {
         CachedEvmEnv {
-            cache: MultiEvmEnv::new(),
-            factory,
+            cache: RefCell::new(HashMap::new()),
+            factory: Box::new(factory),
         }
     }
 
-    pub fn get(&mut self, location: ExecutionLocation) -> Result<&EvmEnv<ProofDb<P>>, HostError> {
+    pub fn get(
+        &mut self,
+        location: ExecutionLocation,
+    ) -> Result<Rc<EvmEnv<ProofDb<P>>>, anyhow::Error> {
         self.cache
             .try_get_or_insert(location, || self.factory.create(location))
     }

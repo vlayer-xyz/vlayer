@@ -1,9 +1,13 @@
-use alloy_primitives::{BlockNumber, ChainId};
-use revm::primitives::{CfgEnvWithHandlerCfg, SpecId};
-use serde::{Deserialize, Serialize};
-use std::collections::HashMap;
+use location::ExecutionLocation;
+use revm::{
+    primitives::{CfgEnvWithHandlerCfg, SpecId},
+    DatabaseRef,
+};
 
 use crate::{block_header::EvmBlockHeader, chain::spec::ChainSpec, engine::EngineError};
+
+pub mod cached;
+pub mod location;
 
 /// The environment to execute the contract calls in.
 pub struct EvmEnv<D> {
@@ -40,19 +44,9 @@ impl<D> EvmEnv<D> {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
-pub struct ExecutionLocation {
-    pub block_number: BlockNumber,
-    pub chain_id: ChainId,
+pub trait EvmEnvFactory<D>
+where
+    D: DatabaseRef,
+{
+    fn create(&self, location: ExecutionLocation) -> anyhow::Result<EvmEnv<D>>;
 }
-
-impl ExecutionLocation {
-    pub fn new(block_number: BlockNumber, chain_id: ChainId) -> Self {
-        Self {
-            block_number,
-            chain_id,
-        }
-    }
-}
-
-pub type MultiEvmEnv<D> = HashMap<ExecutionLocation, EvmEnv<D>>;

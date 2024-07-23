@@ -4,7 +4,7 @@ use revm::primitives::TxEnv;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-use crate::evm::env::ExecutionLocation;
+use crate::evm::env::location::ExecutionLocation;
 use crate::evm::input::MultiEvmInput;
 use crate::ExecutionCommitment;
 

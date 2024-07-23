@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use alloy_primitives::ChainId;
-use vlayer_engine::evm::env::ExecutionLocation;
+use vlayer_engine::evm::env::location::ExecutionLocation;
 
 pub struct HostConfig {
     pub rpc_urls: HashMap<ChainId, String>,

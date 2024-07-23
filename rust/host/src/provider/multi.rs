@@ -1,8 +1,9 @@
 use super::{factory::ProviderFactory, Provider};
-use crate::{host::error::HostError, utils::TryGetOrInsert};
+use crate::host::error::HostError;
 use alloy_primitives::ChainId;
 use std::cell::RefCell;
 use std::{collections::HashMap, rc::Rc};
+use vlayer_engine::utils::InteriorMutabilityCache;
 
 type MultiProvider<P> = HashMap<ChainId, Rc<P>>;
 
@@ -23,10 +24,7 @@ where
     }
 
     pub fn get(&self, chain_id: ChainId) -> Result<Rc<P>, HostError> {
-        let create_provider = || Ok::<_, HostError>(Rc::new(self.factory.create(chain_id)?));
-        let mut mut_cache = self.cache.borrow_mut();
-        let provider = mut_cache.try_get_or_insert(chain_id, create_provider);
-        let cloned_provider = Rc::clone(provider?);
-        Ok(cloned_provider)
+        self.cache
+            .try_get_or_insert(chain_id, || self.factory.create(chain_id))
     }
 }

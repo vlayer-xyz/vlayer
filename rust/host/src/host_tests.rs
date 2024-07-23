@@ -6,7 +6,8 @@ mod test {
     use guest_wrapper::GUEST_ELF;
     use risc0_zkvm::ExecutorEnv;
     use vlayer_engine::config::MAINNET_ID;
-    use vlayer_engine::evm::env::ExecutionLocation;
+    use vlayer_engine::engine::EngineError;
+    use vlayer_engine::evm::env::location::ExecutionLocation;
     use vlayer_engine::io::Call;
 
     #[test]
@@ -40,7 +41,7 @@ mod test {
 
         assert!(matches!(
             res.map(|_| ()).unwrap_err(),
-            HostError::Provider(ref msg) if msg.to_string().contains(
+            HostError::Engine(EngineError::EvmEnv(ref msg)) if msg.to_string().contains(
                 "(http://localhost:123/): error trying to connect: tcp connect error: Connection refused"
             )
         ));

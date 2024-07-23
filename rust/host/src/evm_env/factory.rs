@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use vlayer_engine::evm::env::{EvmEnv, ExecutionLocation};
+use vlayer_engine::evm::env::{location::ExecutionLocation, EvmEnv, EvmEnvFactory};
 
 use crate::{
     db::proof::ProofDb,
@@ -8,25 +8,30 @@ use crate::{
     provider::{multi::CachedMultiProvider, Provider},
 };
 
-pub struct EvmEnvFactory<P> {
+pub struct HostEvmEnvFactory<P> {
     providers: CachedMultiProvider<P>,
 }
 
-impl<P> EvmEnvFactory<P>
+impl<P> HostEvmEnvFactory<P>
 where
     P: Provider,
 {
     pub fn new(providers: CachedMultiProvider<P>) -> Self {
-        EvmEnvFactory { providers }
+        HostEvmEnvFactory { providers }
     }
+}
 
-    pub fn create(
+impl<P> EvmEnvFactory<ProofDb<P>> for HostEvmEnvFactory<P>
+where
+    P: Provider,
+{
+    fn create(
         &self,
         ExecutionLocation {
             block_number,
             chain_id,
         }: ExecutionLocation,
-    ) -> Result<EvmEnv<ProofDb<P>>, HostError> {
+    ) -> anyhow::Result<EvmEnv<ProofDb<P>>> {
         let provider = self.providers.get(chain_id)?;
         let header = provider
             .get_block_header(block_number)
