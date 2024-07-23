@@ -12,7 +12,7 @@ To perform a check, we need to hash a block with a certain state root and compar
 However, this method is limited, as it only works for most recent 256 blocks on a given chain.
 Therefore, we need another way to prove inclusion of older blocks in a chain. 
 
-We use following naming in this document:
+We use the following naming in this document:
 - *recent blocks* - any of most recent 256 blocks (relative to current block_no)
 - *historical blocks* - blocks older than 256
 
