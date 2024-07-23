@@ -17,7 +17,7 @@ We use the following naming in this document:
 - *historical blocks* - blocks older than 256
 
 ### Naive block inclusion proofs
-To proof inclusion of certain *historical blocks* in a chain, we will proof that:
+To prove inclusion of certain *historical blocks* in a chain, we will prove that:
 1. Some *recent block* belong to a chain
 2. Both *historical block* and *recent block* belong to the same chain
 
