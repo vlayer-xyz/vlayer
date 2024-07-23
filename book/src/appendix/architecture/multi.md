@@ -3,7 +3,7 @@
 To support execution on multiple blocks and multiple chains, we span multiple revms' instances during Engine execution.
 
 ## Generic parameter DB
-Note that Engine is parametrized with generic type DB, as it needs to run in revm with different Database in two different contexts: Guest and Host. 
+Note that Engine is parametrized with generic type DB, as it needs to run in revm with different Database in two different contexts: Guest and Host.
 
 ```rust
 struct Engine<DB: DatabaseRef> {
