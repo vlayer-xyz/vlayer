@@ -1083,6 +1083,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "guest"
+version = "0.1.0"
+dependencies = [
+ "alloy-primitives",
+ "alloy-rlp",
+ "alloy-rlp-derive",
+ "mpt",
+ "revm",
+ "vlayer-engine",
+]
+
+[[package]]
 name = "hashbrown"
 version = "0.13.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2203,12 +2215,8 @@ dependencies = [
 name = "risc0_guest"
 version = "0.1.0"
 dependencies = [
- "alloy-primitives",
- "alloy-rlp",
- "alloy-rlp-derive",
  "alloy-sol-types",
- "mpt",
- "revm",
+ "guest",
  "revm-primitives",
  "risc0-zkvm",
  "serde_json",
