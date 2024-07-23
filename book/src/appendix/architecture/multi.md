@@ -103,4 +103,4 @@ Tests are run in a custom `ContractRunner` forked from [forge](https://github.co
 
 In addition to the usual functionality, tests run by vlayer can use the `execProver` feature. The next call after `execProver` will be executed in the vlayer `Engine`.
 
-Runner is augmented with custom Inspector, which delegates designated calls to an instance of Engine. Design is analogous to `TravelInspector`.
+Runner is extended with a custom Inspector that delegates certain calls to an instance of `Engine`. The design is similar to `TravelInspector`.
