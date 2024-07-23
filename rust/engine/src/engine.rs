@@ -47,7 +47,7 @@ impl Engine {
         H: EvmBlockHeader,
     {
         let evm = Evm::builder()
-            .with_db(&mut env.db)
+            .with_ref_db(&env.db)
             .with_external_context(TravelInspector::new(
                 env.cfg_env.chain_id,
                 Self::inspector_callback,
@@ -77,7 +77,9 @@ impl Engine {
         None
     }
 
-    fn transact<D>(mut evm: Evm<'_, TravelInspector, WrapDatabaseRef<&D>>) -> Result<Vec<u8>, EngineError>
+    fn transact<D>(
+        mut evm: Evm<'_, TravelInspector, WrapDatabaseRef<&D>>,
+    ) -> Result<Vec<u8>, EngineError>
     where
         D: DatabaseRef,
         D::Error: std::fmt::Debug,
