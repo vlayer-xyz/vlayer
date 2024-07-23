@@ -70,7 +70,7 @@ impl ProviderFactory<FileProvider> for FileProviderFactory {
 }
 
 pub struct CachedProviderFactory {
-    rpc_urls: HashMap<ChainId, String>,
+    ethers_provider_factory: EthersProviderFactory,
     rpc_file_cache: HashMap<ChainId, String>,
 }
 
@@ -80,7 +80,7 @@ impl CachedProviderFactory {
         rpc_file_cache: HashMap<ChainId, String>,
     ) -> Self {
         CachedProviderFactory {
-            rpc_urls,
+            ethers_provider_factory: EthersProviderFactory::new(rpc_urls),
             rpc_file_cache,
         }
     }
@@ -91,18 +91,13 @@ impl ProviderFactory<CachedProvider<EthersProvider<EthersClient>>> for CachedPro
         &self,
         chain_id: ChainId,
     ) -> Result<CachedProvider<EthersProvider<EthersClient>>, HostError> {
-        let url = self
-            .rpc_urls
-            .get(&chain_id)
-            .ok_or(HostError::NoRpcUrl(chain_id))?;
         let file_path = self
             .rpc_file_cache
             .get(&chain_id)
             .ok_or_else(|| HostError::NoRpcCache(chain_id))?;
         let path_buf = PathBuf::from(file_path);
 
-        let client = EthersClient::new_client(url, MAX_RETRY, INITIAL_BACKOFF)?;
-        let provider = EthersProvider::new(client);
+        let provider = self.ethers_provider_factory.create(chain_id)?;
         CachedProvider::new(path_buf, provider).map_err(|err| {
             HostError::Provider(format!(
                 "Error creating provider for chain ID {}: {}",
