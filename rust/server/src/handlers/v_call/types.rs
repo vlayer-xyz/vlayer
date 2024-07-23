@@ -41,12 +41,12 @@ pub struct CallContext {
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct Augmentors {
-    pub web: Web,
+    pub web_proof: WebProof,
 }
 
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
-pub struct Web {
+pub struct WebProof {
     pub notary_pub_key: String,
     pub tls_poof: TlsProof,
 }

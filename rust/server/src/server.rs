@@ -198,7 +198,7 @@ mod tests {
                 "params": [
                     {"caller": CALLER, "to": TO, "data": DATA},
                     {"block_no": block_nr, "chain_id": 11155111},
-                    {"web": {
+                    {"web_proof": {
                         "notary_pub_key": "<notary pub key value>",
                         "tls_poof": "<tls proof value>",
                     }}
