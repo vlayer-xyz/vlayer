@@ -1,20 +1,18 @@
 use alloy_primitives::{address, b256, uint, Address, U256};
 use alloy_sol_types::{sol, SolCall};
+use dotenv::dotenv;
 use host::{
     host::{config::HostConfig, Host},
     provider::factory::{CachedProviderFactory, FileProviderFactory},
     Call,
 };
-use std::collections::HashMap;
+use std::{collections::HashMap, env};
 use vlayer_engine::{
     config::{MAINNET_ID, SEPOLIA_ID},
     evm::env::location::ExecutionLocation,
 };
 
-const _MAINNET_URL: &str = "https://eth-mainnet.g.alchemy.com/v2/aELUUoHTIKr-_0QaljabhHEF-Zue2XzH";
-const _SEPOLIA_URL: &str = "https://eth-sepolia.g.alchemy.com/v2/aELUUoHTIKr-_0QaljabhHEF-Zue2XzH";
-
-fn create_test_provider_factory(test_name: String) -> FileProviderFactory {
+fn create_test_provider_factory(test_name: &str) -> FileProviderFactory {
     let rpc_file_cache: HashMap<_, _> = HashMap::from([
         (
             MAINNET_ID,
@@ -29,8 +27,9 @@ fn create_test_provider_factory(test_name: String) -> FileProviderFactory {
     FileProviderFactory::new(rpc_file_cache)
 }
 
-fn _create_recording_provider_factory(test_name: String) -> CachedProviderFactory {
-    let rpc_file_cache: HashMap<_, _> = [
+#[allow(dead_code)]
+fn create_recording_provider_factory(test_name: &str) -> CachedProviderFactory {
+    let rpc_file_cache: HashMap<_, _> = HashMap::from([
         (
             MAINNET_ID,
             format!("testdata/mainnet_{test_name}_rpc_cache.json"),
@@ -39,21 +38,22 @@ fn _create_recording_provider_factory(test_name: String) -> CachedProviderFactor
             SEPOLIA_ID,
             format!("testdata/sepolia_{test_name}_rpc_cache.json"),
         ),
-    ]
-    .into_iter()
-    .collect();
-    let rpc_urls: HashMap<_, _> = [
-        (MAINNET_ID, _MAINNET_URL.to_string()),
-        (SEPOLIA_ID, _SEPOLIA_URL.to_string()),
-    ]
-    .into_iter()
-    .collect();
+    ]);
+    dotenv().ok();
+    let alchemy_key = env::var("ALCHEMY_KEY")
+        .expect("To use recording provider you need to set ALCHEMY_KEY in the .env file");
+    let mainnet_url = format!("https://eth-mainnet.g.alchemy.com/v2/{alchemy_key}");
+    let sepolia_url = format!("https://eth-sepolia.g.alchemy.com/v2/{alchemy_key}");
+    let rpc_urls: HashMap<_, _> = HashMap::from([
+        (MAINNET_ID, mainnet_url.to_string()),
+        (SEPOLIA_ID, sepolia_url.to_string()),
+    ]);
 
     CachedProviderFactory::new(rpc_urls, rpc_file_cache)
 }
 
 fn run<C>(
-    test_name: String,
+    test_name: &str,
     call: Call,
     chain_id: u64,
     block_number: u64,
@@ -62,7 +62,7 @@ where
     C: SolCall,
 {
     // Uncomment this line to fill the cache files:
-    // let provider_factory = _create_recording_provider_factory(test_name);
+    // let provider_factory = create_recording_provider_factory(test_name);
     let provider_factory = create_test_provider_factory(test_name);
 
     let null_rpc_url = "a null url value as url is not needed in tests";
@@ -104,12 +104,8 @@ mod usdt {
             to: USDT,
             data: sol_call.abi_encode(),
         };
-        let result = run::<IERC20::balanceOfCall>(
-            String::from("usdt_erc20_balance_of"),
-            call,
-            MAINNET_ID,
-            USDT_BLOCK_NO,
-        )?;
+        let result =
+            run::<IERC20::balanceOfCall>("usdt_erc20_balance_of", call, MAINNET_ID, USDT_BLOCK_NO)?;
         assert_eq!(result._0, uint!(3_000_000_000_000_000_U256));
         Ok(())
     }
@@ -161,7 +157,7 @@ mod uniswap {
             data: sol_call.abi_encode(),
         };
         let result = run::<ISwapRouter::exactOutputSingleCall>(
-            String::from("uniswap_exact_output_single"),
+            "uniswap_exact_output_single",
             call,
             MAINNET_ID,
             BLOCK_NO,
@@ -228,7 +224,7 @@ mod view {
             data: sol_call.abi_encode(),
         };
         let result = run::<ViewCallTest::testPrecompileCall>(
-            String::from("view_precompile"),
+            "view_precompile",
             call,
             SEPOLIA_ID,
             VIEW_CALL_BLOCK_NO,
@@ -249,7 +245,7 @@ mod view {
             data: sol_call.abi_encode(),
         };
         let result = run::<ViewCallTest::testNonexistentAccountCall>(
-            String::from("view_nonexistent_account"),
+            "view_nonexistent_account",
             call,
             SEPOLIA_ID,
             VIEW_CALL_BLOCK_NO,
@@ -267,7 +263,7 @@ mod view {
             data: sol_call.abi_encode(),
         };
         let result = run::<ViewCallTest::testEoaAccountCall>(
-            String::from("view_eoa_account"),
+            "view_eoa_account",
             call,
             SEPOLIA_ID,
             VIEW_CALL_BLOCK_NO,
@@ -285,7 +281,7 @@ mod view {
             data: sol_call.abi_encode(),
         };
         let result = run::<ViewCallTest::testBlockhashCall>(
-            String::from("view_blockhash"),
+            "view_blockhash",
             call,
             SEPOLIA_ID,
             VIEW_CALL_BLOCK_NO,
@@ -306,7 +302,7 @@ mod view {
             data: sol_call.abi_encode(),
         };
         let result = run::<ViewCallTest::testChainidCall>(
-            String::from("view_chainid"),
+            "view_chainid",
             call,
             SEPOLIA_ID,
             VIEW_CALL_BLOCK_NO,
@@ -324,7 +320,7 @@ mod view {
             data: sol_call.abi_encode(),
         };
         let result = run::<ViewCallTest::testMuliContractCallsCall>(
-            String::from("view_multi_contract_calls"),
+            "view_multi_contract_calls",
             call,
             SEPOLIA_ID,
             VIEW_CALL_BLOCK_NO,
@@ -340,7 +336,7 @@ mod view {
             ..Default::default()
         };
         run::<ViewCallTest::testEoaAccountCall>(
-            String::from("view_call_eoa"),
+            "view_call_eoa",
             call,
             SEPOLIA_ID,
             VIEW_CALL_BLOCK_NO,

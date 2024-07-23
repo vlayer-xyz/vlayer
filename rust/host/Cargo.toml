@@ -33,6 +33,7 @@ auto_impl = "1.2.0"
 lazy_static = "1.5.0"
 derive_more = "0.99.18"
 dyn-clone = "1.0.17"
+dotenv = "0.15.0"
 
 [dev-dependencies]
 alloy-sol-types = "0.7.7"
