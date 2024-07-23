@@ -4,9 +4,11 @@ On the high level, vlayer runs zkEVM that produces a proof of proper execution o
 
 Our architecture is inspired by RISC Zero [steel](https://github.com/risc0/risc0-ethereum/tree/main/steel), with 3 main components that can be found in `rust/` subdirectories:
 
-- host - (in `host`) - accepts the request, runs a preflight, during which it collects all data required by the guest. Then, guest proving is triggered.
-- guest - (in `guest_wrapper/guest`) - performs execution of the code inside zkEVM.
-- guest-wrapper - (in `guest_wrapper`) - Compiles the guest to [RISC Zero](https://doc.rust-lang.org/rustc/platform-support/riscv32im-risc0-zkvm-elf.html) target and makes it available to be run inside the host. It can be considered Rust equivalent of a code generation script.
+- **Host** - (in `host`) - accepts the request, runs a preflight, during which it collects all data required by the guest. Then, guest proving is triggered.
+- **Guest** - performs execution of the code inside zkEVM. Consists of three parts:
+    * guest - (in `guest`) - Library that contains code for EVM execution and input validation
+    * risc0_guest - (in `guest_wrapper/risc0_guest`) - Thin wrapper that uses Risc0 ZKVM IO and delegates work to `guest`
+    * guest_wrapper - (in `guest_wrapper`) - Compiles the `risc0_guest` to [RISC Zero](https://doc.rust-lang.org/rustc/platform-support/riscv32im-risc0-zkvm-elf.html) target and makes it available to be run inside the host. It can be considered Rust equivalent of a code generation script.
 
 The host passes arguments to the guest via standard input (stdin), and similarly, the guest returns values via standard output (stdout).
 
@@ -39,10 +41,10 @@ Note that solidity execution is deterministic, hence database in the guest has e
 
 We have two different databases run in two different places. Each is a composite database:
 
-- **host** - runs `ProofDb`, which proxies queries to `ProviderDb`. In turn, `ProviderDb` forwards the call to Ethereum RPC provider. Finally, `ProofDb` stores information about what proofs will need to be generated for the guest.
-- **guest** - runs WrapStateDb, which proxies calls to `StateDb`.
+- **Host** - runs `ProofDb`, which proxies queries to `ProviderDb`. In turn, `ProviderDb` forwards the call to Ethereum RPC provider. Finally, `ProofDb` stores information about what proofs will need to be generated for the guest.
+- **Guest** - runs `WrapStateDb`, which proxies calls to `StateDb`.
   - `StateDb` consists of state passed from the host and has only the content required to be used by deterministic execution of the Solidity code in the guest. Data in the `StateDb` is stored as sparse Ethereum Merkle Patricia Tries, hence access to accounts and storage serves as verification of state and storage proofs.
-  -  `WrapStateDb` is an [adapter](https://en.wikipedia.org/wiki/Adapter_pattern) for `StateDb` that implements Database trait. It additionally does caching of the accounts, for querying storage, so that the account is only fetched once for multiple storage queries.
+  -  `WrapStateDb` is an [adapter](https://en.wikipedia.org/wiki/Adapter_pattern) for `StateDb` that implements `Database` trait. It additionally does caching of the accounts, for querying storage, so that the account is only fetched once for multiple storage queries.
 
 ```mermaid
 %%{init: {'theme':'dark'}}%%

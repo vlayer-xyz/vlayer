@@ -6,7 +6,7 @@ use crate::provider::multi::CachedMultiProvider;
 use crate::provider::{EthersClient, EthersProvider, Provider};
 use config::HostConfig;
 use error::HostError;
-use guest_wrapper::GUEST_ELF;
+use guest_wrapper::RISC0_GUEST_ELF;
 use risc0_ethereum_contracts::groth16::abi_encode;
 use risc0_zkvm::{default_prover, is_dev_mode, ExecutorEnv, ProverOpts};
 use vlayer_engine::engine::Engine;
@@ -54,7 +54,7 @@ where
             into_multi_input(self.envs).map_err(|err| HostError::CreatingInput(err.to_string()))?;
         let env = Self::build_executor_env(self.start_execution_location, multi_evm_input, call)?;
 
-        let (seal, raw_guest_output) = Self::prove(env, GUEST_ELF)?;
+        let (seal, raw_guest_output) = Self::prove(env, RISC0_GUEST_ELF)?;
         let guest_output = GuestOutput::from_outputs(&host_output, &raw_guest_output)?;
 
         if guest_output.evm_call_result != host_output {

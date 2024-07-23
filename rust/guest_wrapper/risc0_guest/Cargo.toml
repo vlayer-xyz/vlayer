@@ -2,7 +2,7 @@
 
 
 [package]
-name = "guest"
+name = "risc0_guest"
 version = "0.1.0"
 edition = "2021"
 
