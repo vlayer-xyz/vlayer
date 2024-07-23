@@ -6,7 +6,7 @@ use as_any::AsAny;
 
 use alloy_primitives::{BlockNumber, B256};
 
-use dyn_clone::DynClone;
+use dyn_clone::{clone_trait_object, DynClone};
 use eth::EthBlockHeader;
 use revm::primitives::BlockEnv;
 use serde::{Deserialize, Serialize};
@@ -30,6 +30,8 @@ pub trait EvmBlockHeader: Hashable + AsAny + Debug + DynClone {
     /// Fills the EVM block environment with the header's data.
     fn fill_block_env(&self, blk_env: &mut BlockEnv);
 }
+
+clone_trait_object!(EvmBlockHeader);
 
 #[derive(Debug, Serialize, Deserialize)]
 // We are not using #[serde(tag = "type", content = "data")] here because zkvm returns
