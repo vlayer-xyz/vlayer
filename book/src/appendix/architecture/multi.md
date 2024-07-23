@@ -70,7 +70,7 @@ HostEnvFactory <.. MultiProvider
 
 ## Engine
 
-`Engine` responsibility is to execute calls. To do so, `Engine` spawns revms instances on demand. 
+`Engine`'s responsibility is to execute calls. To do so, `Engine` spawns revms instances on demand. 
 Engine calls are intercepted by `TravelInspector`. 
 
 The role of the `TravelInspector' is to intercept calls related to [time travel](/features/time-travel.html) and [teleport](/features/teleport.html) features.
