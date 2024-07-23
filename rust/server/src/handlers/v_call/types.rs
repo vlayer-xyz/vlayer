@@ -3,6 +3,9 @@ use crate::utils::{parse_address_field, parse_hex_field};
 use alloy_chains::Chain;
 use alloy_primitives::{BlockNumber, ChainId};
 use host::Call as HostCall;
+use p256::PublicKey;
+use pkcs8::DecodePublicKey;
+use serde::de::Deserializer;
 use serde::{Deserialize, Serialize};
 use tlsn_core::proof::TlsProof;
 
@@ -47,13 +50,22 @@ pub struct Augmentors {
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct WebProof {
-    pub notary_pub_key: String,
+    #[serde(deserialize_with = "deserialize_public_key_from_pem_string")]
+    pub notary_pub_key: PublicKey,
     pub tls_proof: TlsProof,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct CallResult {
     pub result: String,
+}
+
+fn deserialize_public_key_from_pem_string<'de, D>(deserializer: D) -> Result<PublicKey, D::Error>
+where
+    D: Deserializer<'de>,
+{
+    let s = String::deserialize(deserializer)?;
+    PublicKey::from_public_key_pem(&s).map_err(serde::de::Error::custom)
 }
 
 #[cfg(test)]

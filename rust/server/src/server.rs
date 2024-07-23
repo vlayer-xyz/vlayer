@@ -199,7 +199,7 @@ mod tests {
                     {"caller": CALLER, "to": TO, "data": DATA},
                     {"block_no": block_nr, "chain_id": 11155111},
                     {"web_proof": {
-                        "notary_pub_key": "<notary pub key value>",
+                        "notary_pub_key": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExpX/4R4z40gI6C/j9zAM39u58LJu\n3Cx5tXTuqhhu/tirnBi5GniMmspOTEsps4ANnPLpMmMSfhJ+IFHbc3qVOA==\n-----END PUBLIC KEY-----\n",
                         "tls_proof": "<tls proof value>",
                     }}
                     ],
@@ -217,6 +217,43 @@ mod tests {
                     "error": {
                         "code": -32602,
                         "message": "invalid type: string \"<tls proof value>\", expected struct TlsProof",
+                        "data": null
+                    }
+                })
+            );
+
+            Ok(())
+        }
+
+        #[tokio::test]
+        async fn failed_notary_pub_key_parsing() -> anyhow::Result<()> {
+            let block_nr = get_block_nr().await;
+            let app = server(CONFIG.clone());
+
+            let req = json!({
+                "method": "v_call",
+                "params": [
+                    {"caller": CALLER, "to": TO, "data": DATA},
+                    {"block_no": block_nr, "chain_id": 11155111},
+                    {"web_proof": {
+                        "notary_pub_key": "<notary pub key value>",
+                        "tls_proof": "<tls proof value>",
+                    }}
+                    ],
+                "id": 1,
+                "jsonrpc": "2.0",
+            });
+            let response = post(app, "/", &req).await?;
+
+            assert_eq!(response.status(), StatusCode::OK);
+            assert_eq!(
+                body_to_json::<Value>(response.into_body()).await?,
+                json!({
+                    "jsonrpc": "2.0",
+                    "id": 1,
+                    "error": {
+                        "code": -32602,
+                        "message": "ASN.1 error: PEM error: PEM preamble contains invalid data (NUL byte)",
                         "data": null
                     }
                 })
