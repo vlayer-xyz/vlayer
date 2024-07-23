@@ -13,7 +13,7 @@ However, this method is limited, as it only works for most recent 256 blocks on 
 Therefore, we need another way to prove inclusion of older blocks in a chain. 
 
 We use the following naming in this document:
-- *recent blocks* - any of most recent 256 blocks (relative to current block_no)
+- *recent blocks* - any of the most recent 256 blocks (relative to current block_no)
 - *historical blocks* - blocks older than 256
 
 ### Naive block inclusion proofs
