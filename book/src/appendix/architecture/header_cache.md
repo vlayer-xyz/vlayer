@@ -6,7 +6,7 @@
 A storage proof proves that a piece of chain state (account or smart contract variable) belongs to a certain block. To ensure that a piece of state belongs to a certain chain, it is not enough to prove that it belongs to a block. We must also prove that the block itself belongs to a chain.
 
 ### Recent and historical blocks
-One way to do prove that block of certain hash belongs to a chain is to run solidity `blockhash(uint)` function. It returns a hash of a block for a given number. 
+One way to prove that a block of a certain hash belongs to a chain is to run the Solidity `blockhash(uint)` function. It returns the hash of a block for a given number.
 To perform a check we need to hash a block with certain state root and compare it with a result of the function.
 
 However, this method is limited, as it only works for most recent 256 blocks on a given chain.
