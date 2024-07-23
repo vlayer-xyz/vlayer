@@ -117,11 +117,11 @@ impl<DB: Database> Inspector<DB> for TravelInspector {
                 let (selector, arguments_bytes) = inputs.input.split_at(SELECTOR_LEN);
 
                 if selector == *SET_BLOCK_SELECTOR {
-                    let block_number = U256::from_be_slice(arguments_bytes).to::<u64>();
+                    let block_number: u64 = U256::from_be_slice(arguments_bytes).to();
                     return Some(self.set_block(block_number).0);
                 } else if selector == *SET_CHAIN_SELECTOR {
                     let (chain_id_bytes, block_number_bytes) = arguments_bytes.split_at(ARG_LEN);
-                    let chain_id = U256::from_be_slice(chain_id_bytes).to::<u64>();
+                    let chain_id: u64 = U256::from_be_slice(chain_id_bytes).to();
                     let block_number = U256::from_be_slice(block_number_bytes).to::<u64>();
                     return Some(self.set_chain(chain_id, block_number).0);
                 }
