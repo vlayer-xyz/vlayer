@@ -3,9 +3,8 @@
 risc0_zkvm::guest::entry!(main);
 
 use alloy_sol_types::SolValue;
-use guest::Guest;
+use guest::{Guest, Input};
 use risc0_zkvm::guest::env;
-use vlayer_engine::io::Input;
 
 fn main() {
     let Input {

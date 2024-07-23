@@ -2217,10 +2217,7 @@ version = "0.1.0"
 dependencies = [
  "alloy-sol-types",
  "guest",
- "revm-primitives",
  "risc0-zkvm",
- "serde_json",
- "vlayer-engine",
 ]
 
 [[package]]
