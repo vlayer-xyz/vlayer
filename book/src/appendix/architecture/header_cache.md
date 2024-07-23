@@ -21,7 +21,7 @@ To proof inclusion of certain *historical blocks* in a chain, we will proof that
 1. Some *recent block* belong to a chain
 2. Both *historical block* and *recent block* belong to the same chain
 
-A naive way to prove inclusion proof of two blocks in the same chain, is to hash all subsequent blocks starting from *historical block* to *recent block* and verify that each blockhash equals subsequent block *prevHash* value.
+A naive way to prove the inclusion proof of two blocks in the same chain is to hash all subsequent blocks from *historical block* to *recent block* and verify that each blockhash is equal to the *prevHash* value of the subsequent block.
 
 Unfortunately, this is a slow process, especially if the blocks are far away form each other on the time scale. Fortunately, there is a way to cache all proofs ahead of time. For this purpose, vlayer uses Block Proof Cache.
 
