@@ -15,8 +15,13 @@ use crate::{
     io::Call,
 };
 
-#[derive(Default)]
-pub struct Engine {}
+pub struct Engine<'a, D, H>
+where
+    D: DatabaseRef,
+    H: EvmBlockHeader,
+{
+    envs: &'a CachedEvmEnv<D, H>,
+}
 
 #[derive(Error, Debug, PartialEq)]
 pub enum EngineError {
@@ -36,19 +41,19 @@ pub enum EngineError {
     EvmEnv(String),
 }
 
-impl Engine {
-    pub fn call<D, H>(
-        self,
-        tx: &Call,
-        location: ExecutionLocation,
-        envs: &CachedEvmEnv<D, H>,
-    ) -> Result<Vec<u8>, EngineError>
-    where
-        D: DatabaseRef,
-        D::Error: std::fmt::Debug,
-        H: EvmBlockHeader,
-    {
-        let env = envs
+impl<'a, D, H> Engine<'a, D, H>
+where
+    D: DatabaseRef,
+    H: EvmBlockHeader,
+    D::Error: std::fmt::Debug,
+{
+    pub fn new(envs: &'a CachedEvmEnv<D, H>) -> Self {
+        Self { envs }
+    }
+
+    pub fn call(self, tx: &Call, location: ExecutionLocation) -> Result<Vec<u8>, EngineError> {
+        let env = self
+            .envs
             .get(location)
             .map_err(|err| EngineError::EvmEnv(err.to_string()))?;
         let evm = Evm::builder()
@@ -77,13 +82,9 @@ impl Engine {
         None
     }
 
-    fn transact<D>(
+    fn transact(
         mut evm: Evm<'_, TravelInspector, WrapDatabaseRef<&D>>,
-    ) -> Result<Vec<u8>, EngineError>
-    where
-        D: DatabaseRef,
-        D::Error: std::fmt::Debug,
-    {
+    ) -> Result<Vec<u8>, EngineError> {
         let ResultAndState { result, .. } = evm
             .transact_preverified()
             .map_err(|err| EngineError::TransactPreverifiedError(format!("{:?}", err)))?;
