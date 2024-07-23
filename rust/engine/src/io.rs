@@ -36,7 +36,11 @@ impl From<Call> for TxEnv {
     fn from(call: Call) -> Self {
         Self {
             caller: call.caller,
-            transact_to: TxKind::Call(call.to),
+            transact_to: if call.to == Address::ZERO {
+                TxKind::Create
+            } else {
+                TxKind::Call(call.to)
+            },
             data: call.data.into(),
             ..Default::default()
         }
