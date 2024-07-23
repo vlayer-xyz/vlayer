@@ -91,3 +91,41 @@ pub struct HostOutput {
     pub seal: Vec<u8>,
     pub guest_output: GuestOutput,
 }
+
+#[cfg(test)]
+mod call_create {
+    use super::*;
+    use alloy_primitives::Address;
+    use revm::primitives::TxKind;
+
+    #[test]
+    fn from_zero_address_success() {
+        let data: Vec<u8> = vec![1, 2, 3].into();
+        let call = Call {
+            caller: Address::ZERO,
+            to: Address::ZERO,
+            data: data.clone(),
+        };
+        let tx_env: TxEnv = call.into();
+
+        assert_eq!(tx_env.caller, Address::ZERO);
+        assert_eq!(tx_env.transact_to, TxKind::Create);
+        assert_eq!(tx_env.data, data);
+    }
+
+    #[test]
+    fn from_call_to_txenv_success() {
+        let non_zero_address = Address::from_slice(&[1; 20]);
+        let data: Vec<u8> = vec![4, 5, 6].into();
+        let call = Call {
+            caller: Address::ZERO,
+            to: non_zero_address,
+            data: data.clone(),
+        };
+        let tx_env: TxEnv = call.into();
+
+        assert_eq!(tx_env.caller, Address::ZERO);
+        assert_eq!(tx_env.transact_to, TxKind::Call(non_zero_address));
+        assert_eq!(tx_env.data, data);
+    }
+}
