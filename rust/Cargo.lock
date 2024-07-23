@@ -7910,6 +7910,8 @@ dependencies = [
  "http-body-util",
  "lazy_static",
  "mime",
+ "p256",
+ "pkcs8",
  "reqwest 0.12.5",
  "serde",
  "serde_json",

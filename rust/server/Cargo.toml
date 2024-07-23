@@ -22,6 +22,8 @@ axum-jrpc = "0.7.1"
 host = { path = "../host" }
 alloy-chains = "0.1.23"
 tlsn-core = { git = "https://github.com/tlsnotary/tlsn.git", version = "0.1.0-alpha.6" }
+p256 = "0.13.2"
+pkcs8 = "0.10.2"
 
 [dev-dependencies]
 reqwest = "0.12.5"
