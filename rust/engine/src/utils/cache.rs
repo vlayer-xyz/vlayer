@@ -45,38 +45,34 @@ mod interior_mutability_cache {
 
     #[test]
     fn found() {
-        let key = "key";
         let value = Rc::new(42);
-        let cache = RefCell::new(HashMap::from([(key, Rc::clone(&value))]));
+        let cache = RefCell::new(HashMap::from([("key", Rc::clone(&value))]));
 
-        let result = cache.try_get_or_insert(key, || Err("should not be called"));
+        let result = cache.try_get_or_insert("key", || Err("should not be called"));
         assert_eq!(result, Ok(value));
     }
 
     #[test]
     fn created() {
         let cache = RefCell::new(HashMap::new());
-        let key = "key";
         let value = Rc::new(42);
-        let result = cache.try_get_or_insert(key, || Ok::<_, ()>(42));
+        let result = cache.try_get_or_insert("key", || Ok::<_, ()>(42));
         assert_eq!(result, Ok(Rc::clone(&value)));
-        assert_eq!(cache.borrow().get(key), Some(&value));
+        assert_eq!(cache.borrow().get("key"), Some(&value));
     }
 
     #[test]
     fn failed() {
         let cache = RefCell::new(HashMap::<_, Rc<()>, _>::new());
-        let key = "key";
         let error = "error";
-        let result = cache.try_get_or_insert(key, || Err(error));
+        let result = cache.try_get_or_insert("key", || Err(error));
         assert_eq!(result, Err("error"));
-        assert_eq!(cache.borrow().get(key), None);
+        assert_eq!(cache.borrow().get("key"), None);
     }
 
     #[test]
     fn idempotence() -> anyhow::Result<()> {
         let cache = RefCell::new(HashMap::new());
-        let key = "key";
         let value = Rc::new(42);
         let call_count = &mut 0;
         let mut return_once = || {
@@ -87,9 +83,9 @@ mod interior_mutability_cache {
                 Ok(42)
             }
         };
-        cache.try_get_or_insert(key, &mut return_once)?;
-        cache.try_get_or_insert(key, &mut return_once)?;
-        assert_eq!(cache.borrow().get(key), Some(&value));
+        cache.try_get_or_insert("key", &mut return_once)?;
+        cache.try_get_or_insert("key", &mut return_once)?;
+        assert_eq!(cache.borrow().get("key"), Some(&value));
         Ok(())
     }
 }
