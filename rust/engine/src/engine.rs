@@ -6,7 +6,7 @@ use revm::{
     DatabaseRef, Evm,
 };
 use thiserror::Error;
-use tracing::info;
+use tracing::{error, info};
 
 use crate::{
     block_header::EvmBlockHeader,
@@ -65,12 +65,14 @@ impl Engine {
         inspector: &mut TravelInspector,
         _: &mut CallInputs,
     ) -> Option<MockCallOutcome> {
-        info!(
-            "Intercepting the call. Block number: {:?}, chain id: {:?}",
-            inspector.location.unwrap().block_number,
-            inspector.location.unwrap().chain_id
-        );
-        inspector.location = None;
+        if let Some(location) = inspector.location {
+            info!(
+                "Intercepting the call. Block number: {:?}, chain id: {:?}",
+                location.block_number, location.chain_id
+            );
+        } else {
+            error!("Inspector callback called while location not set in the inspector");
+        }
 
         None
     }
