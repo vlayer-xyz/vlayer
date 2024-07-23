@@ -74,7 +74,7 @@ HostEnvFactory <.. MultiProvider
 Engine calls are intercepted by `TravelInspector`. 
 
 `TravelInspector` role is to intercept calls related to time travel and teleport features.
-It stores destination location (set by `setBlock` and `setChain` calls) and delegates call back to Engine if needed.
+It stores the destination location (set by `setBlock` and `setChain` calls) and delegates the call back to the `Engine` if needed.
 
 
 ```mermaid
