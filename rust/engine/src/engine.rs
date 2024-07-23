@@ -32,11 +32,8 @@ pub enum EngineError {
     #[error("Chain spec error: {0}")]
     ChainSpecError(String),
 
-    #[error("EVM not found for location")]
-    EvmNotFound(ExecutionLocation),
-
-    #[error("EVM Env not found for location")]
-    EvmEnvNotFound(ExecutionLocation),
+    #[error("Failed to get EvmEnv: {0}")]
+    EvmEnv(String),
 }
 
 impl Engine {
@@ -53,7 +50,7 @@ impl Engine {
     {
         let env = envs
             .get(location)
-            .map_err(|_| EngineError::EvmEnvNotFound(location))?;
+            .map_err(|err| EngineError::EvmEnv(err.to_string()))?;
         let evm = Evm::builder()
             .with_ref_db(&env.db)
             .with_external_context(TravelInspector::new(
