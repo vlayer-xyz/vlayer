@@ -189,7 +189,7 @@ mod tests {
         }
 
         #[tokio::test]
-        async fn success_web() -> anyhow::Result<()> {
+        async fn failed_web_tls_proof_parsing() -> anyhow::Result<()> {
             let block_nr = get_block_nr().await;
             let app = server(CONFIG.clone());
 
@@ -198,9 +198,9 @@ mod tests {
                 "params": [
                     {"caller": CALLER, "to": TO, "data": DATA},
                     {"block_no": block_nr, "chain_id": 11155111},
-                    {"web": {
+                    {"web_proof": {
                         "notary_pub_key": "<notary pub key value>",
-                        "tls_poof": "<tls proof value>",
+                        "tls_proof": "<tls proof value>",
                     }}
                     ],
                 "id": 1,
@@ -209,6 +209,18 @@ mod tests {
             let response = post(app, "/", &req).await?;
 
             assert_eq!(response.status(), StatusCode::OK);
+            assert_eq!(
+                body_to_json::<Value>(response.into_body()).await?,
+                json!({
+                    "jsonrpc": "2.0",
+                    "id": 1,
+                    "error": {
+                        "code": -32602,
+                        "message": "invalid type: string \"<tls proof value>\", expected struct TlsProof",
+                        "data": null
+                    }
+                })
+            );
 
             Ok(())
         }

@@ -21,6 +21,7 @@ hex = "0.4.3"
 axum-jrpc = "0.7.1"
 host = { path = "../host" }
 alloy-chains = "0.1.23"
+tlsn-core = { git = "https://github.com/tlsnotary/tlsn.git", version = "0.1.0-alpha.6" }
 
 [dev-dependencies]
 reqwest = "0.12.5"

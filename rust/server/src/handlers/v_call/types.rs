@@ -4,6 +4,7 @@ use alloy_chains::Chain;
 use alloy_primitives::{BlockNumber, ChainId};
 use host::Call as HostCall;
 use serde::{Deserialize, Serialize};
+use tlsn_core::proof::TlsProof;
 
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
@@ -40,14 +41,14 @@ pub struct CallContext {
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct Augmentors {
-    pub web: Web,
+    pub web_proof: WebProof,
 }
 
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
-pub struct Web {
+pub struct WebProof {
     pub notary_pub_key: String,
-    pub tls_poof: String,
+    pub tls_proof: TlsProof,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
