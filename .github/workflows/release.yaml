@@ -82,6 +82,20 @@ jobs:
           name: ${{ matrix.target }}
           path: ${{ steps.package-release.outputs.output_file }}
 
+  push-template-contracts:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Package sample contracts
+        run: ./bash/pack-examples.sh
+
+      - name: Push artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: contracts
+          path: out/contracts.tar.gz
 
   create-release:
     name: Create GH releases
