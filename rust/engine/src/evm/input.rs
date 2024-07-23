@@ -76,7 +76,7 @@ mod test {
         fn default() -> Self {
             Self {
                 header: Box::new(EthBlockHeader::default()),
-                ancestors: vec![Box::new(EthBlockHeader::default())],
+                ancestors: vec![],
                 state_trie: MerkleTrie::default(),
                 storage_tries: Vec::default(),
                 contracts: Vec::default(),
@@ -97,7 +97,7 @@ mod test {
         fn success() {
             let ancestor: EthBlockHeader = EthBlockHeader::default();
             let input = EvmInput {
-                ancestors: vec![Box::new(EthBlockHeader::default())],
+                ancestors: vec![Default::default()],
                 header: Box::new(EthBlockHeader {
                     number: 1,
                     parent_hash: ancestor.hash_slow(),
@@ -120,7 +120,7 @@ mod test {
         #[test]
         fn success() {
             let input = EvmInput {
-                ancestors: vec![Box::new(EthBlockHeader::default())],
+                ancestors: vec![Default::default()],
                 header: Box::new(EthBlockHeader {
                     state_root: EMPTY_ROOT_HASH,
                     ..Default::default()
@@ -145,7 +145,7 @@ mod test {
         fn success() {
             let ancestor: EthBlockHeader = Default::default();
             let input = EvmInput {
-                ancestors: vec![Box::new(EthBlockHeader::default())],
+                ancestors: vec![Default::default()],
                 header: Box::new(EthBlockHeader {
                     number: 1,
                     parent_hash: ancestor.hash_slow(),
@@ -161,7 +161,7 @@ mod test {
         #[should_panic(expected = "failed: Invalid chain: block 0 is not the parent of block 1")]
         fn mismatch() {
             let input = EvmInput {
-                ancestors: vec![Box::new(EthBlockHeader::default())],
+                ancestors: vec![Default::default()],
                 header: Box::new(EthBlockHeader {
                     number: 1,
                     ..Default::default()
