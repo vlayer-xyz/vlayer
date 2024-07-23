@@ -1,7 +1,7 @@
+use crate::commands::args::TemplateOption;
 use crate::errors::CLIError;
 use crate::utils::parse_toml::get_src_from_string;
 use crate::utils::path::{copy_dir_to, find_foundry_root};
-use crate::TemplateOption;
 use flate2::read::GzDecoder;
 use reqwest::get;
 use std::fs;
@@ -25,7 +25,7 @@ pub(crate) async fn init(cwd: PathBuf, template: TemplateOption) -> Result<(), C
             info!("Created vlayer directory in \"{}\"", src_path.display());
             fetch_vlayer_files(&vlayer_path, template.to_string()).await?;
             info!(
-                "Successfully downloaded vlayer example: \"{}\" to \"{}\"",
+                "Successfully downloaded vlayer template: \"{}\" to \"{}\"",
                 template,
                 vlayer_path.display()
             );
