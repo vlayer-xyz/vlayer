@@ -2,9 +2,6 @@ use super::{cache::CachedProvider, null::NullProvider};
 use crate::provider::cache::json::JsonCache;
 use std::{cell::RefCell, marker::PhantomData, path::PathBuf};
 
-/// [FileProvider] for Ethereum.
-pub type EthFileProvider = FileProvider;
-
 /// A provider returning responses cached in a file.
 /// It panics if queries are not found in the cache.
 pub type FileProvider = CachedProvider<NullProvider>;

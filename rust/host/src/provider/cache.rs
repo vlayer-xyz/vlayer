@@ -52,26 +52,25 @@ impl<P: Provider> Provider for CachedProvider<P> {
         &self,
         block: BlockNumber,
     ) -> Result<Option<Box<dyn EvmBlockHeader>>, Self::Error> {
+        fn clone_header(
+            header: &Option<Box<dyn EvmBlockHeader>>,
+        ) -> Option<Box<dyn EvmBlockHeader>> {
+            header
+                .as_ref()
+                .map(|header| dyn_clone::clone_box(header.as_ref()))
+        }
+
         match self
             .cache
             .borrow_mut()
             .partial_blocks
             .entry(BlockQuery { block_no: block })
         {
-            Entry::Occupied(entry) => {
-                let header = entry.get();
-                let cloned_header = header
-                    .as_ref()
-                    .map(|header| dyn_clone::clone_box(header.as_ref()));
-                Ok(cloned_header)
-            }
+            Entry::Occupied(entry) => Ok(clone_header(entry.get())),
             Entry::Vacant(v) => match self.inner.get_block_header(block) {
                 Ok(header) => {
                     let inserted_header = v.insert(header);
-                    let cloned_inserted_header = inserted_header
-                        .as_mut()
-                        .map(|inserted_header| dyn_clone::clone_box(inserted_header.as_ref()));
-                    Ok(cloned_inserted_header)
+                    Ok(clone_header(&*inserted_header))
                 }
                 Err(e) => Err(e),
             },
