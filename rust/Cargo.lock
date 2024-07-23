@@ -4535,6 +4535,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "guest"
+version = "0.1.0"
+
+[[package]]
 name = "guest_wrapper"
 version = "0.1.0"
 dependencies = [
