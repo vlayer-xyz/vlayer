@@ -16,7 +16,7 @@ jobs:
           - target: x86_64-unknown-linux-gnu
             platform: linux
             arch: amd64
-            runner: releases-builder-linux
+            runner: aws-linux-small
           - target: aarch64-apple-darwin
             platform: darwin
             arch: arm64
@@ -99,7 +99,7 @@ jobs:
 
   create-release:
     name: Create GH releases
-    runs-on: ubuntu-latest
+    runs-on: aws-linux-small
     needs: build-release 
     steps:
       - run: mkdir -p dist
@@ -124,7 +124,7 @@ jobs:
 
   push-artifacts-to-s3:
     name: Push artifacts to AWS S3
-    runs-on: ubuntu-latest
+    runs-on: aws-linux-small
     needs: build-release 
     steps:
       - name: Checkout repository
