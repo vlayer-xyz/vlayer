@@ -98,7 +98,7 @@ where
     D: DatabaseRef,
     H: EvmBlockHeader,
 {
-    pub fn on_demand(factory: Box<dyn EvmEnvFactory<D, H>>) -> Self {
+    pub fn from_factory(factory: Box<dyn EvmEnvFactory<D, H>>) -> Self {
         CachedEvmEnv {
             cache: RefCell::new(HashMap::new()),
             factory,
