@@ -40,40 +40,41 @@ where
 #[cfg(test)]
 mod interior_mutability_cache {
     use super::InteriorMutabilityCache;
-    use anyhow::anyhow;
+    use anyhow::{anyhow, bail};
     use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
     #[test]
-    fn found() {
-        let value = Rc::new(42);
-        let cache = RefCell::new(HashMap::from([("key", Rc::clone(&value))]));
+    fn found() -> anyhow::Result<()> {
+        let cache = RefCell::new(HashMap::from([("key", Rc::new(42))]));
 
-        let result = cache.try_get_or_insert("key", || Err("should not be called"));
-        assert_eq!(result, Ok(value));
+        let value = cache.try_get_or_insert("key", || bail!("should not be called"))?;
+        assert_eq!(*value, 42);
+        Ok(())
     }
 
     #[test]
-    fn created() {
+    fn created() -> anyhow::Result<()> {
         let cache = RefCell::new(HashMap::new());
-        let value = Rc::new(42);
-        let result = cache.try_get_or_insert("key", || Ok::<_, ()>(42));
-        assert_eq!(result, Ok(Rc::clone(&value)));
-        assert_eq!(cache.borrow().get("key"), Some(&value));
+        let value = cache.try_get_or_insert("key", || Ok::<_, anyhow::Error>(42))?;
+        assert_eq!(*value, 42);
+        assert_eq!(**cache.borrow().get("key").unwrap(), 42);
+        Ok(())
     }
 
     #[test]
-    fn failed() {
+    fn failed() -> anyhow::Result<()> {
         let cache = RefCell::new(HashMap::<_, Rc<()>, _>::new());
-        let error = "error";
-        let result = cache.try_get_or_insert("key", || Err(error));
-        assert_eq!(result, Err("error"));
+        let error = cache
+            .try_get_or_insert("key", || bail!("error"))
+            .unwrap_err();
+        assert_eq!(error.to_string(), "error");
         assert_eq!(cache.borrow().get("key"), None);
+        Ok(())
     }
 
     #[test]
     fn idempotence() -> anyhow::Result<()> {
         let cache = RefCell::new(HashMap::new());
-        let value = Rc::new(42);
         let call_count = &mut 0;
         let mut return_once = || {
             *call_count += 1;
@@ -85,7 +86,7 @@ mod interior_mutability_cache {
         };
         cache.try_get_or_insert("key", &mut return_once)?;
         cache.try_get_or_insert("key", &mut return_once)?;
-        assert_eq!(cache.borrow().get("key"), Some(&value));
+        assert_eq!(**cache.borrow().get("key").unwrap(), 42);
         Ok(())
     }
 }
