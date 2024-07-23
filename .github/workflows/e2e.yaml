@@ -10,7 +10,7 @@ on:
 
 jobs:
   e2e-test:
-    runs-on: ubuntu-latest
+    runs-on: aws-linux-small
 
     steps:
       - uses: cargo-bins/cargo-binstall@main
