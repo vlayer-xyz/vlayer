@@ -26,5 +26,6 @@
   - [Multichain](./appendix/architecture/multi.md)
   - [Solidity](./appendix/architecture/solidity.md)
   - [Releasing](./appendix/architecture/releasing.md)
+  - [Block proofs](./appendix/architecture/block_proof.md)
 - [JSON-RPC API](./appendix/api.md)
 
