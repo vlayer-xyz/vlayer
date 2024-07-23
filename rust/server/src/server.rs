@@ -200,7 +200,7 @@ mod tests {
                     {"block_no": block_nr, "chain_id": 11155111},
                     {"web_proof": {
                         "notary_pub_key": "<notary pub key value>",
-                        "tls_poof": "<tls proof value>",
+                        "tls_proof": "<tls proof value>",
                     }}
                     ],
                 "id": 1,

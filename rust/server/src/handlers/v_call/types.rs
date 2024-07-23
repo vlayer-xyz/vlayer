@@ -48,7 +48,7 @@ pub struct Augmentors {
 #[serde(deny_unknown_fields)]
 pub struct WebProof {
     pub notary_pub_key: String,
-    pub tls_poof: TlsProof,
+    pub tls_proof: TlsProof,
 }
 
 #[derive(Deserialize, Serialize, Debug)]
