@@ -5,7 +5,7 @@ use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
 use crate::block_header::eth::MultiEthEvmInput;
-use crate::evm::env::ExecutionLocation;
+use crate::evm::env::location::ExecutionLocation;
 use crate::ExecutionCommitment;
 
 #[derive(Deserialize, Serialize, Debug)]

@@ -4,7 +4,7 @@ use std::rc::Rc;
 use vlayer_engine::{
     block_header::EvmBlockHeader,
     evm::{
-        env::{EvmEnv, MultiEvmEnv},
+        env::{cached::MultiEvmEnv, EvmEnv},
         input::{EvmInput, MultiEvmInput},
     },
 };

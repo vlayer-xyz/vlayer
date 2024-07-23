@@ -6,7 +6,7 @@ use tracing::debug;
 
 use crate::block_header::EvmBlockHeader;
 
-use super::env::ExecutionLocation;
+use super::env::location::ExecutionLocation;
 
 /// The serializable input to derive and validate a [EvmEnv].
 #[derive(Debug, Serialize, Deserialize, Clone, Default)]

@@ -10,7 +10,7 @@ use tracing::{error, info};
 
 use crate::{
     block_header::EvmBlockHeader,
-    evm::env::{CachedEvmEnv, ExecutionLocation},
+    evm::env::{cached::CachedEvmEnv, location::ExecutionLocation},
     inspector::{MockCallOutcome, TravelInspector},
     io::Call,
 };

@@ -1,6 +1,6 @@
 use std::rc::Rc;
 
-use vlayer_engine::evm::env::{EvmEnv, EvmEnvFactory, ExecutionLocation};
+use vlayer_engine::evm::env::{location::ExecutionLocation, EvmEnv, EvmEnvFactory};
 
 use crate::{
     db::proof::ProofDb,

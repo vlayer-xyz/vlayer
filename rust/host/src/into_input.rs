@@ -3,7 +3,7 @@ use anyhow::anyhow;
 use anyhow::{ensure, Ok};
 use std::rc::Rc;
 use vlayer_engine::block_header::EvmBlockHeader;
-use vlayer_engine::evm::env::CachedEvmEnv;
+use vlayer_engine::evm::env::cached::CachedEvmEnv;
 use vlayer_engine::evm::input::{EvmInput, MultiEvmInput};
 
 pub fn into_input<P: Provider>(

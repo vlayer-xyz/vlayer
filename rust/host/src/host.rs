@@ -11,7 +11,7 @@ use risc0_ethereum_contracts::groth16::abi_encode;
 use risc0_zkvm::{default_prover, is_dev_mode, ExecutorEnv, ProverOpts};
 use vlayer_engine::block_header::eth::EthBlockHeader;
 use vlayer_engine::engine::Engine;
-use vlayer_engine::evm::env::{CachedEvmEnv, ExecutionLocation};
+use vlayer_engine::evm::env::{cached::CachedEvmEnv, location::ExecutionLocation};
 use vlayer_engine::evm::input::MultiEvmInput;
 use vlayer_engine::io::{Call, GuestOutput, HostOutput, Input};
 

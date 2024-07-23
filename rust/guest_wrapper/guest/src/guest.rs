@@ -3,7 +3,10 @@ use vlayer_engine::{
     block_header::eth::EthBlockHeader,
     engine::Engine,
     evm::{
-        env::{CachedEvmEnv, ExecutionLocation, MultiEvmEnv},
+        env::{
+            cached::{CachedEvmEnv, MultiEvmEnv},
+            location::ExecutionLocation,
+        },
         input::MultiEvmInput,
     },
     io::{Call, GuestOutput},
