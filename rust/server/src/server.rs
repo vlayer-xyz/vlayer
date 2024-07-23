@@ -189,7 +189,7 @@ mod tests {
         }
 
         #[tokio::test]
-        async fn success_web() -> anyhow::Result<()> {
+        async fn failed_web_tls_proof_parsing() -> anyhow::Result<()> {
             let block_nr = get_block_nr().await;
             let app = server(CONFIG.clone());
 
