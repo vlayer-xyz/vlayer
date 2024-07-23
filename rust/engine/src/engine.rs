@@ -9,13 +9,17 @@ use thiserror::Error;
 use tracing::{error, info};
 
 use crate::{
-    evm::env::{EvmEnv, ExecutionLocation},
+    evm::env::{cached::CachedEvmEnv, location::ExecutionLocation},
     inspector::{MockCallOutcome, TravelInspector},
     io::Call,
 };
 
-#[derive(Default)]
-pub struct Engine {}
+pub struct Engine<'a, D>
+where
+    D: DatabaseRef,
+{
+    envs: &'a CachedEvmEnv<D>,
+}
 
 #[derive(Error, Debug, PartialEq)]
 pub enum EngineError {
@@ -31,19 +35,24 @@ pub enum EngineError {
     #[error("Chain spec error: {0}")]
     ChainSpecError(String),
 
-    #[error("EVM not found for location")]
-    EvmNotFound(ExecutionLocation),
-
-    #[error("EVM Env not found for location")]
-    EvmEnvNotFound(ExecutionLocation),
+    #[error("Failed to get EvmEnv: {0}")]
+    EvmEnv(String),
 }
 
-impl Engine {
-    pub fn call<D>(self, tx: &Call, env: &EvmEnv<D>) -> Result<Vec<u8>, EngineError>
-    where
-        D: DatabaseRef,
-        D::Error: std::fmt::Debug,
-    {
+impl<'a, D> Engine<'a, D>
+where
+    D: DatabaseRef,
+    D::Error: std::fmt::Debug,
+{
+    pub fn new(envs: &'a CachedEvmEnv<D>) -> Self {
+        Self { envs }
+    }
+
+    pub fn call(self, tx: &Call, location: ExecutionLocation) -> Result<Vec<u8>, EngineError> {
+        let env = self
+            .envs
+            .get(location)
+            .map_err(|err| EngineError::EvmEnv(err.to_string()))?;
         let evm = Evm::builder()
             .with_ref_db(&env.db)
             .with_external_context(TravelInspector::new(
@@ -70,13 +79,9 @@ impl Engine {
         None
     }
 
-    fn transact<D>(
+    fn transact(
         mut evm: Evm<'_, TravelInspector, WrapDatabaseRef<&D>>,
-    ) -> Result<Vec<u8>, EngineError>
-    where
-        D: DatabaseRef,
-        D::Error: std::fmt::Debug,
-    {
+    ) -> Result<Vec<u8>, EngineError> {
         let ResultAndState { result, .. } = evm
             .transact_preverified()
             .map_err(|err| EngineError::TransactPreverifiedError(format!("{:?}", err)))?;

@@ -9,7 +9,7 @@ use revm::{
 use tracing::info;
 
 use crate::consts::U256_BYTES;
-use crate::evm::env::ExecutionLocation;
+use crate::evm::env::location::ExecutionLocation;
 
 // First 4 bytes of the call data is the selector id - the rest are arguments.
 const SELECTOR_LEN: usize = 4;
