@@ -4537,6 +4537,14 @@ dependencies = [
 [[package]]
 name = "guest"
 version = "0.1.0"
+dependencies = [
+ "alloy-primitives",
+ "alloy-rlp",
+ "alloy-rlp-derive",
+ "mpt",
+ "revm",
+ "vlayer-engine",
+]
 
 [[package]]
 name = "guest_wrapper"

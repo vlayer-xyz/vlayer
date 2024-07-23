@@ -4,6 +4,12 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+vlayer-engine = { path = "../engine" }
+alloy-primitives = { version = "0.7.6", default-features = false }
+alloy-rlp-derive = { version = "0.3.5" }
+alloy-rlp = { version = "0.3.5", default-features = false }
+mpt = { path = "../mpt" }
+revm = { version = "10.0.0", default-features = false }
 
 [dev-dependencies]
 
