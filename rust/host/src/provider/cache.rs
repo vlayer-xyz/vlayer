@@ -25,8 +25,11 @@ impl<P: BlockingProvider> CachedProvider<P> {
     /// Creates a new [CachedProvider]. If the cache file exists, it will be read and deserialized.
     /// Otherwise, a new file will be created when dropped.
     pub fn new(cache_path: PathBuf, provider: P) -> anyhow::Result<Self> {
-        let cache = match JsonCache::from_file(cache_path.clone()) {
-            Ok(cache) => cache,
+        let cache = match JsonCache::<P::Header>::from_file(cache_path.clone()) {
+            Ok(_) => {
+                fs::remove_file(&cache_path)?;
+                JsonCache::empty(cache_path)
+            },
             Err(err) => match err.downcast_ref::<std::io::Error>() {
                 Some(io_err) if io_err.kind() == std::io::ErrorKind::NotFound => {
                     // create the file and directory if it doesn't exist
