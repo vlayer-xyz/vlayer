@@ -16,8 +16,14 @@ const _SEPOLIA_URL: &str = "https://eth-sepolia.g.alchemy.com/v2/aELUUoHTIKr-_0Q
 
 fn create_test_provider_factory(test_name: String) -> FileProviderFactory {
     let rpc_file_cache: HashMap<_, _> = HashMap::from([
-        (MAINNET_ID, format!("testdata/mainnet_{test_name}_rpc_cache.json")),
-        (SEPOLIA_ID, format!("testdata/sepolia_{test_name}_rpc_cache.json")),
+        (
+            MAINNET_ID,
+            format!("testdata/mainnet_{test_name}_rpc_cache.json"),
+        ),
+        (
+            SEPOLIA_ID,
+            format!("testdata/sepolia_{test_name}_rpc_cache.json"),
+        ),
     ]);
 
     FileProviderFactory::new(rpc_file_cache)

@@ -103,12 +103,12 @@ impl ProviderFactory<CachedProvider<EthersProvider<EthersClient>>> for CachedPro
 
         let client = EthersClient::new_client(url, MAX_RETRY, INITIAL_BACKOFF)?;
         let provider = EthersProvider::new(client);
-        Ok(CachedProvider::new(path_buf, provider).map_err(|err| {
+        CachedProvider::new(path_buf, provider).map_err(|err| {
             HostError::Provider(format!(
                 "Error creating provider for chain ID {}: {}",
                 chain_id, err
             ))
-        })?)
+        })
     }
 }
 
