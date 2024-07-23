@@ -64,8 +64,8 @@ fn deserialize_public_key_from_pem_string<'de, D>(deserializer: D) -> Result<Pub
 where
     D: Deserializer<'de>,
 {
-    let s = String::deserialize(deserializer)?;
-    PublicKey::from_public_key_pem(&s).map_err(serde::de::Error::custom)
+    let key_pem = String::deserialize(deserializer)?;
+    PublicKey::from_public_key_pem(&key_pem).map_err(serde::de::Error::custom)
 }
 
 #[cfg(test)]
