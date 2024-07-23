@@ -5,7 +5,7 @@ use vlayer_engine::evm::env::{location::ExecutionLocation, EvmEnv, EvmEnvFactory
 use crate::{
     db::proof::ProofDb,
     host::error::HostError,
-    provider::{multi::CachedMultiProvider, Provider},
+    provider::{multi::CachedMultiProvider, BlockingProvider},
 };
 
 pub struct HostEvmEnvFactory<P> {
@@ -14,7 +14,7 @@ pub struct HostEvmEnvFactory<P> {
 
 impl<P> HostEvmEnvFactory<P>
 where
-    P: Provider,
+    P: BlockingProvider,
 {
     pub fn new(providers: CachedMultiProvider<P>) -> Self {
         HostEvmEnvFactory { providers }

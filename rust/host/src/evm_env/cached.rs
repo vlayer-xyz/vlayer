@@ -2,16 +2,13 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use vlayer_engine::evm::env::{
-    cached::MultiEvmEnv, location::ExecutionLocation, EvmEnv, EvmEnvFactory,
-};
-use vlayer_engine::utils::InteriorMutabilityCache;
+use vlayer_engine::evm::env::{location::ExecutionLocation, EvmEnv};
 
-use crate::{db::proof::ProofDb, provider::Provider};
+use crate::{db::proof::ProofDb, provider::BlockingProvider};
 
 pub struct CachedEvmEnv<P>
 where
-    P: Provider,
+    P: BlockingProvider,
 {
     cache: MultiEvmEnv<ProofDb<P>>,
     factory: Box<dyn EvmEnvFactory<ProofDb<P>>>,
@@ -19,7 +16,7 @@ where
 
 impl<P> CachedEvmEnv<P>
 where
-    P: Provider,
+    P: BlockingProvider,
 {
     pub fn new(factory: impl EvmEnvFactory<ProofDb<P>> + 'static) -> Self {
         CachedEvmEnv {

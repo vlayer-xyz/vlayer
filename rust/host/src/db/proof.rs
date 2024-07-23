@@ -1,5 +1,5 @@
 use super::provider::{ProviderDb, ProviderDbError};
-use crate::{proof::EIP1186Proof, provider::Provider};
+use crate::{proof::EIP1186Proof, provider::BlockingProvider};
 use alloy_primitives::{Address, Bytes, B256, U256};
 use anyhow::Context;
 use mpt::MerkleTrie;
@@ -33,13 +33,13 @@ struct State {
 /// A revm [Database] backed by a [Provider] that caches all queries needed for a state proof.
 pub struct ProofDb<P>
 where
-    P: Provider,
+    P: BlockingProvider,
 {
     db: ProviderDb<P>,
     state: RefCell<State>,
 }
 
-impl<P: Provider> DatabaseRef for ProofDb<P> {
+impl<P: BlockingProvider> DatabaseRef for ProofDb<P> {
     type Error = ProofDbError<P::Error>;
 
     fn basic_ref(&self, address: Address) -> Result<Option<AccountInfo>, Self::Error> {
@@ -75,7 +75,7 @@ impl<P: Provider> DatabaseRef for ProofDb<P> {
     }
 }
 
-impl<P: Provider> ProofDb<P> {
+impl<P: BlockingProvider> ProofDb<P> {
     pub fn new(provider: Rc<P>, block_number: u64) -> Self {
         let state = RefCell::new(State::default());
         Self {

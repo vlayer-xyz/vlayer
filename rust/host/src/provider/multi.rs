@@ -14,7 +14,7 @@ pub struct CachedMultiProvider<P> {
 
 impl<P> CachedMultiProvider<P>
 where
-    P: Provider,
+    P: BlockingProvider,
 {
     pub fn new(factory: impl ProviderFactory<P> + 'static) -> Self {
         CachedMultiProvider {

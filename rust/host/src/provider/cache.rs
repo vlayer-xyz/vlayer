@@ -1,4 +1,4 @@
-use super::{EIP1186Proof, Provider};
+use super::{BlockingProvider, EIP1186Proof};
 use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256};
 use anyhow::Context;
 use json::{AccountQuery, BlockQuery, JsonCache, ProofQuery, StorageQuery};
@@ -15,12 +15,12 @@ pub mod json;
 /// A provider that caches responses from an underlying provider in a JSON file.
 /// Queries are first checked against the cache, and if not found, the provider is invoked.
 /// The cache is saved when the provider is dropped.
-pub struct CachedProvider<P: Provider> {
+pub struct CachedProvider<P: BlockingProvider> {
     pub(super) inner: P,
     pub(super) cache: RefCell<JsonCache>,
 }
 
-impl<P: Provider> CachedProvider<P> {
+impl<P: BlockingProvider> CachedProvider<P> {
     /// Creates a new [CachedProvider]. If the cache file exists, it will be read and deserialized.
     /// Otherwise, a new file will be created when dropped.
     pub fn new(cache_path: PathBuf, provider: P) -> anyhow::Result<Self> {
@@ -45,7 +45,7 @@ impl<P: Provider> CachedProvider<P> {
     }
 }
 
-impl<P: Provider> Provider for CachedProvider<P> {
+impl<P: BlockingProvider> BlockingProvider for CachedProvider<P> {
     type Error = P::Error;
 
     fn get_block_header(

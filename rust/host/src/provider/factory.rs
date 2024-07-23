@@ -1,5 +1,5 @@
 use crate::host::error::HostError;
-use crate::provider::{EthersProvider, Provider};
+use crate::provider::{BlockingProvider, EthersProvider};
 use alloy_primitives::ChainId;
 use std::collections::HashMap;
 use std::path::PathBuf;
@@ -8,7 +8,7 @@ use super::{EthersClient, FileProvider};
 
 pub trait ProviderFactory<P>
 where
-    P: Provider,
+    P: BlockingProvider,
 {
     fn create(&self, chain_id: ChainId) -> Result<P, HostError>;
 }
