@@ -101,6 +101,6 @@ Engine *-- TravelInspector
 
 Tests are run in a custom `ContractRunner` forked from [forge](https://github.com/foundry-rs/foundry/blob/6bb5c8ea8dcd00ccbc1811f1175cabed3cb4c116/crates/forge/src/runner.rs).
 
-In addition to usual functionalities, tests run by vlayer can use `execProver` feature. The next call after `execProver` is executed in vlayer `Engine`.
+In addition to the usual functionality, tests run by vlayer can use the `execProver` feature. The next call after `execProver` will be executed in the vlayer `Engine`.
 
 Runner is augmented with custom Inspector, which delegates designated calls to an instance of Engine. Design is analogous to `TravelInspector`.
