@@ -806,7 +806,7 @@ fn run_test_suite(
         contract,
         libs_to_deploy: &runner.libs_to_deploy,
         // MODIFICATION: Replace Executor with TestExecutor
-        executor: TestExecutor::new(executor, TravelInspector::default()),
+        executor: TestExecutor::new(executor, TravelInspector::new(1, |_, _| None)),
         revert_decoder: &runner.revert_decoder,
         initial_balance: runner.evm_opts.initial_balance,
         sender: runner.sender.unwrap_or_default(),

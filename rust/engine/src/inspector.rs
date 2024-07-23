@@ -116,10 +116,9 @@ impl<DB: Database> Inspector<DB> for TravelInspector {
             }
             // If the call is not to the travel contract AND the location is set, run callback.
             _ => {
-                if let Some(_) = self.location {
-                    match (self.callback)(self, inputs) {
-                        Some(outcome) => return Some(outcome.0),
-                        None => {}
+                if self.location.is_some() {
+                    if let Some(outcome) = (self.callback)(self, inputs) {
+                        return Some(outcome.0);
                     }
                 }
             }
@@ -165,7 +164,7 @@ mod test {
         let mut evm_context = EvmContext::new(mock_db);
         let mut call_inputs = create_mock_call_inputs(addr, &SET_BLOCK_SELECTOR);
 
-        let mut set_block_inspector = TravelInspector::default();
+        let mut set_block_inspector = TravelInspector::new(1, |_, _| None);
         set_block_inspector.call(&mut evm_context, &mut call_inputs);
 
         set_block_inspector
@@ -174,13 +173,13 @@ mod test {
     #[test]
     fn call_to_travel_contract() {
         let inspector = inspector_call(TRAVEL_CONTRACT_ADDR);
-        assert!(inspector.set_block.is_some());
+        assert!(inspector.location.is_some());
     }
 
     #[test]
     fn call_to_other_contract() {
         let other_contract = address!("0000000000000000000000000000000000000000");
         let inspector = inspector_call(other_contract);
-        assert!(inspector.set_block.is_none());
+        assert!(inspector.location.is_none());
     }
 }
