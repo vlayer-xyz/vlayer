@@ -3,7 +3,7 @@
 ## Block inclusion proofs primer
 
 ### Storage proofs
-A storage proof proves that a pice of chain state (account or smart contract variable) belongs to a certain block. To ensure a piece of state belonged to a certain chain, it is not enough to prove it belongs to a block. We also need to prove that block itself belongs to a chain.
+A storage proof proves that a piece of chain state (account or smart contract variable) belongs to a certain block. To ensure that a piece of state belongs to a certain chain, it is not enough to prove that it belongs to a block. We must also prove that the block itself belongs to a chain.
 
 ### Recent and historical blocks
 One way to do prove that block of certain hash belongs to a chain is to run solidity `blockhash(uint)` function. It returns a hash of a block for a given number. 
