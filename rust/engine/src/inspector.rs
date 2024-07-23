@@ -28,26 +28,6 @@ static SET_BLOCK_SELECTOR: Lazy<Vec<u8>> =
 static SET_CHAIN_SELECTOR: Lazy<Vec<u8>> =
     Lazy::new(|| decode("ffbc5638").expect("Error decoding set_chain function call"));
 
-#[derive(Clone, Debug)]
-pub struct TravelInspector {
-    start_chain_id: u64,
-    pub location: Option<ExecutionLocation>,
-    callback: fn(&mut TravelInspector, inputs: &mut CallInputs) -> Option<MockCallOutcome>,
-}
-
-impl TravelInspector {
-    pub fn new(
-        start_chain_id: u64,
-        callback: fn(&mut TravelInspector, inputs: &mut CallInputs) -> Option<MockCallOutcome>,
-    ) -> Self {
-        Self {
-            start_chain_id,
-            location: None,
-            callback,
-        }
-    }
-}
-
 pub struct MockCallOutcome(CallOutcome);
 
 impl From<Bytes> for MockCallOutcome {
@@ -70,7 +50,35 @@ impl From<U256> for MockCallOutcome {
     }
 }
 
+#[derive(Clone, Debug)]
+pub struct TravelInspector {
+    start_chain_id: u64,
+    pub location: Option<ExecutionLocation>,
+    callback: fn(&mut TravelInspector, inputs: &mut CallInputs) -> Option<MockCallOutcome>,
+}
+
+impl Default for TravelInspector {
+    fn default() -> Self {
+        Self {
+            start_chain_id: 0,
+            location: None,
+            callback: |_, _| None,
+        }
+    }
+}
+
 impl TravelInspector {
+    pub fn new(
+        start_chain_id: u64,
+        callback: fn(&mut TravelInspector, inputs: &mut CallInputs) -> Option<MockCallOutcome>,
+    ) -> Self {
+        Self {
+            start_chain_id,
+            location: None,
+            callback,
+        }
+    }
+
     fn set_block(&mut self, block_number: u64) -> MockCallOutcome {
         info!(
             "Travel contract called with function: setBlock and block number: {:?}!",
@@ -79,6 +87,7 @@ impl TravelInspector {
         self.location = Some(ExecutionLocation::new(block_number, self.start_chain_id));
         MockCallOutcome::from(U256::ZERO)
     }
+
     fn set_chain(&mut self, chain_id: u64, block_number: u64) -> MockCallOutcome {
         info!(
             "Travel contract called with function: setChain, with chain id: {:?} block number: {:?}!",
