@@ -3,7 +3,7 @@ mod test {
 
     use crate::host::{config::HostConfig, error::HostError, Host};
     use crate::provider::{EthersClient, EthersProvider};
-    use guest_wrapper::GUEST_ELF;
+    use guest_wrapper::RISC0_GUEST_ELF;
     use risc0_zkvm::ExecutorEnv;
     use vlayer_engine::config::MAINNET_ID;
     use vlayer_engine::engine::EngineError;
@@ -25,7 +25,7 @@ mod test {
     #[test]
     fn host_prove_invalid_input() {
         let env = ExecutorEnv::default();
-        let res = Host::<EthersProvider<EthersClient>>::prove(env, GUEST_ELF);
+        let res = Host::<EthersProvider<EthersClient>>::prove(env, RISC0_GUEST_ELF);
 
         assert!(matches!(
             res.map(|_| ()).unwrap_err(),
