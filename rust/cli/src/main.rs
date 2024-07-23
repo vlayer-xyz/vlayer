@@ -1,8 +1,8 @@
 use crate::errors::CLIError;
-use clap::{Parser, Subcommand, ValueEnum};
+use clap::{Parser, Subcommand};
+use commands::args::InitArgs;
 use commands::init::init;
 use server::server::{serve, Config};
-use std::fmt;
 use test_runner::cli::TestArgs;
 use tracing::{error, info};
 
@@ -35,30 +35,6 @@ enum Commands {
     Init(InitArgs),
     Serve,
     Test(TestArgs),
-}
-
-#[derive(Clone, Debug, Parser)]
-struct InitArgs {
-    #[arg(long, value_enum)]
-    template: Option<TemplateOption>,
-}
-
-#[derive(Clone, Debug, ValueEnum, Default)]
-pub(crate) enum TemplateOption {
-    #[default]
-    Simple,
-    Airdrop,
-    SimpleTravel,
-}
-
-impl fmt::Display for TemplateOption {
-    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            TemplateOption::Simple => write!(f, "simple"),
-            TemplateOption::Airdrop => write!(f, "airdrop"),
-            TemplateOption::SimpleTravel => write!(f, "simple_travel"),
-        }
-    }
 }
 
 #[tokio::main]
