@@ -54,7 +54,7 @@ impl From<U256> for MockCallOutcome {
 pub struct TravelInspector {
     start_chain_id: u64,
     pub location: Option<ExecutionLocation>,
-    callback: fn(&mut TravelInspector, inputs: &mut CallInputs) -> Option<MockCallOutcome>,
+    callback: fn(location: ExecutionLocation, inputs: &mut CallInputs) -> Option<MockCallOutcome>,
 }
 
 impl Default for TravelInspector {
@@ -70,7 +70,10 @@ impl Default for TravelInspector {
 impl TravelInspector {
     pub fn new(
         start_chain_id: u64,
-        callback: fn(&mut TravelInspector, inputs: &mut CallInputs) -> Option<MockCallOutcome>,
+        callback: fn(
+            location: ExecutionLocation,
+            inputs: &mut CallInputs,
+        ) -> Option<MockCallOutcome>,
     ) -> Self {
         Self {
             start_chain_id,
@@ -125,8 +128,8 @@ impl<DB: Database> Inspector<DB> for TravelInspector {
             }
             // If the call is not to the travel contract AND the location is set, run callback.
             _ => {
-                if self.location.is_some() {
-                    if let Some(outcome) = (self.callback)(self, inputs) {
+                if let Some(location) = self.location {
+                    if let Some(outcome) = (self.callback)(location, inputs) {
                         return Some(outcome.0);
                     }
                 }
