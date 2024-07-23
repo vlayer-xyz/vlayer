@@ -1,4 +1,4 @@
-# Header proof cache
+# Block proof cache
 
 ## Block inclusion proofs primer
 
