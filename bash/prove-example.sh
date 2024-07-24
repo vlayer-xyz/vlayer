@@ -138,7 +138,7 @@ cd "${VLAYER_HOME}/rust"
 RUST_LOG=info cargo run --bin vlayer serve >"${LOGS_DIR}/vlayer_serve.out" 2>"${LOGS_DIR}/vlayer_serve.err" &
 VLAYER_SERVER_PID=$!
 echo "Vlayer server started with PID ${VLAYER_SERVER_PID}."
-wait_for_port 3000 20m "Vlayer server"
+wait_for_port 3000 1h "vlayer server"
 
 echo "Deploying smart contracts"
 cd "${VLAYER_HOME}/examples/${EXAMPLE}"
