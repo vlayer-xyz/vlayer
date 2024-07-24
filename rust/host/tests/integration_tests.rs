@@ -41,7 +41,7 @@ fn create_recording_provider_factory(test_name: &str) -> CachedProviderFactory {
     ]);
     dotenv().ok();
     let alchemy_key = env::var("ALCHEMY_KEY")
-        .expect("To use recording provider you need to set ALCHEMY_KEY in the .env file");
+        .expect("To use recording provider you need to set ALCHEMY_KEY in an .env file. See .env.example.");
     let mainnet_url = format!("https://eth-mainnet.g.alchemy.com/v2/{alchemy_key}");
     let sepolia_url = format!("https://eth-sepolia.g.alchemy.com/v2/{alchemy_key}");
     let rpc_urls: HashMap<_, _> = HashMap::from([
