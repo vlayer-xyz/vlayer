@@ -14,14 +14,10 @@ contract Prover {
 
 
     function setBlock(uint256 blockNo) public {
-        // Note: The internal call will revert, but the result will be overridden by Inspector
-        (bool success,) = address(TRAVELER).call(abi.encodeWithSelector(ITraveler.setBlock.selector, blockNo));
-        require(success, "Call to traveler should get intercepted and succeed");
+        TRAVELER.setBlock(blockNo);
     }
 
     function setChain(uint256 chainId, uint256 blockNo) public {
-        // Note: The internal call will revert, but the result will be overridden by Inspector
-        (bool success,) = address(TRAVELER).call(abi.encodeWithSelector(ITraveler.setChain.selector, chainId, blockNo));
-        require(success, "Call to traveler should get intercepted and succeed");
+        TRAVELER.setChain(chainId, blockNo);
     }
 }
