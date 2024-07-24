@@ -54,6 +54,7 @@ contract SimpleScript is Script {
 }
 ```
 
+### Local environment
 In the separate terminal, run the local Ethereum test node:
 ```sh
 anvil
