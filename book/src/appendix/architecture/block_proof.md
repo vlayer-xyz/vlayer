@@ -27,7 +27,7 @@ Unfortunately, this is a slow process, especially if the blocks are far away for
 
 ## Block Proof Cache
 
-A Block Proof Cache is a distinct type of vlayer node, specifically a JSON RPC server. It mainly consists of a single call `v_getBlockProofs(block_no: int[])`. This call accepts one argument: an array of block numbers for the requested proofs. It returns a triplet: an array of Merkle proofs for each requested block, the root hash of the MMR structure, and π - a zk-proof of correctness of the constructed MMR.
+A Block Proof Cache is a distinct type of vlayer node, specifically a JSON RPC server. It consists mainly  of a single call `v_getBlockProofs(block_no: int[])`. This call takes one argument: an array of block numbers for the requested proofs. It returns a triplet: an array of Merkle proofs for each requested block, the root hash of the MMR structure, and π - a zk-proof of the correctness of the constructed MMR.
 
 An example call could look like this:
 ```json
