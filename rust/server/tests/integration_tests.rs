@@ -225,7 +225,7 @@ mod server_tests {
             let app = server(CONFIG.clone());
 
             let tls_proof: Value = serde_json::from_str(str::from_utf8(include_bytes!(
-                "../testdata/tls_proof.json"
+                "../../web_proof/testdata/tls_proof.json"
             ))?)?;
 
             let req = json!({
