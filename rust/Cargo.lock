@@ -7910,18 +7910,16 @@ dependencies = [
  "http-body-util",
  "lazy_static",
  "mime",
- "p256",
- "pkcs8",
  "reqwest 0.12.5",
  "serde",
  "serde_json",
  "thiserror",
- "tlsn-core",
  "tokio",
  "tower",
  "tower-http",
  "tower-request-id",
  "tracing",
+ "web_proof",
 ]
 
 [[package]]
@@ -9550,6 +9548,12 @@ dependencies = [
 [[package]]
 name = "web_proof"
 version = "0.1.0"
+dependencies = [
+ "p256",
+ "pkcs8",
+ "serde",
+ "tlsn-core",
+]
 
 [[package]]
 name = "webpki"
