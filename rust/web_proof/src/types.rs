@@ -1,8 +1,8 @@
-use serde::{Deserialize, Serialize};
-use tlsn_core::proof::TlsProof;
-use serde::de::Deserializer;
 use p256::PublicKey;
 use pkcs8::DecodePublicKey;
+use serde::de::Deserializer;
+use serde::{Deserialize, Serialize};
+use tlsn_core::proof::TlsProof;
 
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
