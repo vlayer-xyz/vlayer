@@ -3,7 +3,7 @@ vlayer `Prover` contracts are almost the same as regular Solidity smart contract
 
 - **Access to off-chain data.** `Prover` contracts accept data from multiple sources (via features such as [time travel](/features/time-travel.html), [teleport](/features/teleport.html), [email proofs](/features/email.html), and [web proofs](/features/web.html)) and allow claims to be proven without exposing all the data on chain.
 
-- **Execution environment.** The `Prover` code runs on the [vlayer zkEVM](/appendix/architecture/prover.html) and proofs of computation are later verified by the on-chain `Verifier` contract. Unlike the on-chain contract, prover don't have access to the current block. It have access to already mined blocks only. Under the hood, vlayer generates zero-knowledge proofs of the `Prover` execution. 
+- **Execution Environment:** The `Prover` code executes on the [vlayer zkEVM](/appendix/architecture/prover.html), where the proofs of computation are subsequently verified by the on-chain `Verifier` contract. Unlike the on-chain contract, the `Prover` does not have access to the current block. It can only access previously mined blocks. Under the hood, vlayer generates zero-knowledge proofs of the `Prover`'s execution.
 
 ## Prover in-depth
 
