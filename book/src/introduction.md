@@ -9,19 +9,23 @@ vlayer allows smart contracts to be executed [off-chain](/advanced/proving.html)
 ### Sections
 **Getting Started**
 
-To get started with vlayer, [install vlayer]((./getting-started/installation.md)), set up your [first project](/getting-started/first-steps.html) and check out the explainer section to learn [how vlayer works]((/getting-started/how-it-works.html)).
+To get started with vlayer, [install vlayer]((/getting-started/installation.md)), set up your [first project](/getting-started/first-steps.html) and check out the explainer section to learn [how vlayer works]((/getting-started/how-it-works.html)).
 
 **Features**
 
-See how to [time travel](/features/time-travel.html) across block numbers and [teleport](/features/teleport.html) from one chain to another.
-
+See how to [time travel](/features/time-travel.html) across block numbers, [teleport](/features/teleport.html) from one chain to another, prove data coming from [email](/features/email.html) or [web](/features/web.html).
 
 **Contributing**
 
-Help us improve [vlayer](./contributing/vlayer.md) and [vlayer book](./contributing/book.md)!
+Help us improve [vlayer](/contributing/vlayer.md) and [vlayer book](/contributing/book.md)!
 
 **Appendix**
 
 References for:
-- [Architecture](./appendix/architecture.md)
-- [JSON-RPC API](./appendix/api.md)
+- [Architecture](/appendix/architecture/overview.html)
+  - [Prover](/appendix/architecture/prover.html)
+  - [Multichain](/appendix/architecture/multi.html)
+  - [Solidity](/appendix/architecture/solidity.html)
+  - [Releasing](/appendix/architecture/releasing.html)
+  - [Block proofs](/appendix/architecture/block_proof.html)
+- [JSON-RPC API](/appendix/api.md)
