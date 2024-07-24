@@ -1,7 +1,25 @@
+use tlsn_core::proof::TlsProof;
+
 use crate::types::WebProof;
 
-fn _verify_proof(_web_proof: WebProof) -> bool {
-    true
+#[derive(PartialEq, Debug)]
+struct VerificationError;
+
+fn verify_proof(web_proof: WebProof) -> Result<(), VerificationError> {
+    let TlsProof {
+        session,
+        substrings,
+    } = web_proof.tls_proof;
+
+    session
+        .verify_with_default_cert_verifier(web_proof.notary_pub_key)
+        .map_err(|_err| VerificationError)?;
+
+    substrings
+        .verify(&session.header)
+        .map_err(|_err| VerificationError)?;
+
+    Ok(())
 }
 
 #[cfg(test)]
@@ -11,7 +29,7 @@ mod tests {
     use crate::fixtures::{notary_pub_key_example, tls_proof_example};
     use crate::types::WebProof;
 
-    use super::_verify_proof;
+    use super::*;
 
     #[test]
     fn fail_verification() {
@@ -29,7 +47,7 @@ mod tests {
             tls_proof: wrong_tls_proof,
             notary_pub_key: notary_pub_key_example(),
         };
-        assert_eq!(_verify_proof(proof), false)
+        assert_eq!(verify_proof(proof), Err(VerificationError))
     }
 
     #[test]
@@ -38,6 +56,6 @@ mod tests {
             tls_proof: tls_proof_example(),
             notary_pub_key: notary_pub_key_example(),
         };
-        assert_eq!(_verify_proof(proof), true)
+        assert_eq!(verify_proof(proof), Ok(()))
     }
 }
