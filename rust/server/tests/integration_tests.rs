@@ -64,7 +64,7 @@ mod server_tests {
 
     mod v_call {
         use super::*;
-        use web_proof::fixtures::tls_proof;
+        use web_proof::fixtures::{tls_proof, NOTARY_PUB_KEY};
         const LOCALHOST_RPC_URL: &str = "http://localhost:8545";
 
         async fn get_block_nr() -> u32 {
@@ -157,7 +157,7 @@ mod server_tests {
                     {"caller": CALLER, "to": TO, "data": DATA},
                     {"block_no": block_nr, "chain_id": 11155111},
                     {"web_proof": {
-                        "notary_pub_key": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExpX/4R4z40gI6C/j9zAM39u58LJu\n3Cx5tXTuqhhu/tirnBi5GniMmspOTEsps4ANnPLpMmMSfhJ+IFHbc3qVOA==\n-----END PUBLIC KEY-----\n",
+                        "notary_pub_key": NOTARY_PUB_KEY,
                         "tls_proof": "<tls proof value>",
                     }}
                     ],
@@ -231,7 +231,7 @@ mod server_tests {
                     {"caller": CALLER, "to": TO, "data": DATA},
                     {"block_no": block_nr, "chain_id": 11155111},
                     {"web_proof": {
-                        "notary_pub_key": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExpX/4R4z40gI6C/j9zAM39u58LJu\n3Cx5tXTuqhhu/tirnBi5GniMmspOTEsps4ANnPLpMmMSfhJ+IFHbc3qVOA==\n-----END PUBLIC KEY-----\n",
+                        "notary_pub_key": NOTARY_PUB_KEY,
                         "tls_proof": tls_proof(),
                     }}
                     ],
