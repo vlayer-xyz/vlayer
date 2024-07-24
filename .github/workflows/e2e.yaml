@@ -1,6 +1,8 @@
 name: End-to-end integration test
 
 on:
+  schedule:
+    - cron: '0 23 * * 1-5' # Mon-Fri at 23:00 UTC
   push:
     paths:
       - "rust/**"
@@ -42,6 +44,7 @@ jobs:
         run: |
           bash/e2e-test.sh
         env:
+          PROVING_MODE: ${{ github.event_name == 'schedule' && 'prod' || 'dev' }}
           BONSAI_API_URL: ${{ vars.BONSAI_API_URL }}
           BONSAI_API_KEY: ${{ secrets.BONSAI_API_KEY }}
 
