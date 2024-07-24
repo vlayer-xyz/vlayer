@@ -32,7 +32,7 @@ contract WebProver is Prover {
 
 Once the `WebProver` computation is complete, proof is generated and available along with retruned value (`web.content`). This output can now be consumed and cryptographically verified by the `Verifier` on-chain smart contracts.
 
-Note that `web.content` becomes public input for on-chain verification because it was returned from `main` function. All other variables remain secret.
+Note that `web.content` becomes a public input for on-chain verification because it was returned from the `main` function. All other input variables remain private.
 
 > List of returned arguments need to match with arguments used by `Verifer` (see [Verifier page](/advanced/verifier.html) for details)
 
