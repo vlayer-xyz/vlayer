@@ -15,8 +15,6 @@ jobs:
     runs-on: aws-linux-small
 
     steps:
-      - uses: cargo-bins/cargo-binstall@main
-
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -29,24 +27,28 @@ jobs:
             rust
             rust/guest_wrapper/risc0_guest
 
-      - name: Install risc0 instaler
-        run: cargo binstall -y cargo-risczero --force
+      - uses: cargo-bins/cargo-binstall@main
 
       - name: Install risc0 toolchain
-        run: cargo risczero install
+        run: |
+          cargo binstall -y cargo-risczero --force
+          cargo risczero install
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: nightly-5ac78a9cd4b94dc53d1fe5e0f42372b28b5a7559 # 2024-06-02
 
+      - name: Build vlayer server
+        working-directory: rust
+        run: cargo build --package server
+
       - name: Run e2e test
-        run: |
-          bash/e2e-test.sh
         env:
           PROVING_MODE: ${{ github.event_name == 'schedule' && 'prod' || 'dev' }}
           BONSAI_API_URL: ${{ vars.BONSAI_API_URL }}
           BONSAI_API_KEY: ${{ secrets.BONSAI_API_KEY }}
+        run: bash/e2e-test.sh
 
       # Teardown
       - name: Display Logs
