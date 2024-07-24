@@ -1,13 +1,8 @@
 use super::{BlockingProvider, EIP1186Proof};
 use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256};
-use anyhow::Context;
+use anyhow::anyhow;
 use json::{AccountQuery, BlockQuery, JsonCache, ProofQuery, StorageQuery};
-use std::{
-    cell::RefCell,
-    collections::hash_map::Entry,
-    fs::{self},
-    path::PathBuf,
-};
+use std::{ cell::RefCell, collections::hash_map::Entry, path::PathBuf};
 use vlayer_engine::block_header::EvmBlockHeader;
 
 pub mod json;
@@ -22,26 +17,27 @@ pub struct CachedProvider<P: BlockingProvider> {
 }
 
 impl<P: BlockingProvider> CachedProvider<P> {
-    /// Creates a new [CachedProvider]. If the cache file exists, it will be read and deserialized.
-    /// Otherwise, a new file will be created when dropped.
+    /// Creates a new [CachedProvider]. At this point, the cache files
+    /// directory should exist and the cache file itself should not.
+    /// A new cache file will be created when dropped.
     pub fn new(cache_path: PathBuf, provider: P) -> anyhow::Result<Self> {
-        let cache = match JsonCache::from_file(cache_path.clone()) {
-            Ok(_) => {
-                fs::remove_file(&cache_path)?;
-                JsonCache::empty(cache_path)
+        // Sanity checks.
+        if let Some(parent) = cache_path.parent() {
+            if !parent.exists() {
+                return Err(anyhow!(
+                    "Cache files directory '{}' does not exist.",
+                    parent.display()
+                ));
             }
-            Err(err) => match err.downcast_ref::<std::io::Error>() {
-                Some(io_err) if io_err.kind() == std::io::ErrorKind::NotFound => {
-                    // create the file and directory if it doesn't exist
-                    if let Some(parent) = cache_path.parent() {
-                        fs::create_dir_all(parent).context("failed to create directory")?;
-                    }
-                    JsonCache::empty(cache_path)
-                }
-                _ => return Err(err),
-            },
-        };
+        }
+        if cache_path.exists() {
+            return Err(anyhow!(
+                "Cache file {} already exists. Are you trying to create two test files with the same name?",
+                cache_path.display()
+            ));
+        }
 
+        let cache = JsonCache::empty(cache_path);
         Ok(Self {
             inner: provider,
             cache: RefCell::new(cache),

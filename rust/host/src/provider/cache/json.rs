@@ -75,6 +75,7 @@ impl JsonCache {
         }
     }
 
+    #[allow(dead_code)]
     /// Creates a new cache backed by the given file. It updates the file when dropped.
     pub(super) fn from_file(file_path: PathBuf) -> anyhow::Result<Self> {
         Self::load(&file_path).map(|mut cache| {
