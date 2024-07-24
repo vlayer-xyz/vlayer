@@ -13,7 +13,7 @@
 - [Web](./features/web.md)
 
 # Advanced
-- [Proving](./advanced/proving.md)
+- [Prover](./advanced/prover.md)
 - [Verifier](./advanced/verifier.md)
 
 # Contributing

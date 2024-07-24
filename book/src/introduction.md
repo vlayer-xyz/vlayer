@@ -4,7 +4,7 @@
 
 vlayer provides tools and infrastructure that give smart contracts super powers like [time travel](/features/time-travel.html) to past blocks, [teleport](/features/teleport.html) to different chains, and access to real data from the [web](/features/web.html) and [email](/features/email.html).
 
-vlayer allows smart contracts to be executed [off-chain](/advanced/proving.html). The result of the execution can then be used by [on-chain contracts](/advanced/verifier.html).
+vlayer allows smart contracts to be executed [off-chain](/advanced/prover.html). The result of the execution can then be used by [on-chain contracts](/advanced/verifier.html).
 
 ### Sections
 **Getting Started**
