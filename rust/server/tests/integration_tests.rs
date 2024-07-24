@@ -64,6 +64,7 @@ mod server_tests {
 
     mod v_call {
         use super::*;
+        use web_proof::fixtures::tls_proof;
         const LOCALHOST_RPC_URL: &str = "http://localhost:8545";
 
         async fn get_block_nr() -> u32 {
@@ -224,10 +225,6 @@ mod server_tests {
             let block_nr = get_block_nr().await;
             let app = server(CONFIG.clone());
 
-            let tls_proof: Value = serde_json::from_str(str::from_utf8(include_bytes!(
-                "../../web_proof/testdata/tls_proof.json"
-            ))?)?;
-
             let req = json!({
                 "method": "v_call",
                 "params": [
@@ -235,7 +232,7 @@ mod server_tests {
                     {"block_no": block_nr, "chain_id": 11155111},
                     {"web_proof": {
                         "notary_pub_key": "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExpX/4R4z40gI6C/j9zAM39u58LJu\n3Cx5tXTuqhhu/tirnBi5GniMmspOTEsps4ANnPLpMmMSfhJ+IFHbc3qVOA==\n-----END PUBLIC KEY-----\n",
-                        "tls_proof": tls_proof,
+                        "tls_proof": tls_proof(),
                     }}
                     ],
                 "id": 1,
