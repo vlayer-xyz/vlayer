@@ -1,6 +1,6 @@
 [workspace]
 resolver = "2"
-members = ["host", "guest", "guest_wrapper", "engine", "server", "cli", "mpt", "test_runner"]
+members = ["host", "guest", "guest_wrapper", "engine", "server", "cli", "mpt", "test_runner", "web_proof"]
 default-members = ["cli"]
 
 # Always optimize; building and running the guest takes much longer without optimization.
