@@ -13,7 +13,7 @@ Any contract function can be run in the vlayer prover, but to access the additio
 ### Arguments and returned value
 Arbitrary arguments can be passed to `Prover` functions. All arguments are private, which means, they are not visible on-chain. However, keep in mind, they are visible to the prover server. 
 
-All data returned by functions is public. To make an argument public on the chain, return it from the function. 
+All data returned by functions is public. To make an argument public on-chain, return it from the function.
 
 ### Injected values
 Two additional variables may be injected to function body: `web` and `mail`. These variables allows to access data like email or web content and use them in the contract logic.     
