@@ -25,3 +25,49 @@ A naive way to prove the inclusion proof of two blocks in the same chain is to h
 
 Unfortunately, this is a slow process, especially if the blocks are far away form each other on the time scale. Fortunately, there is a way to cache all proofs in advance. For this purpose, vlayer uses the Block Proof Cache.
 
+## Block Proof Cache
+
+A Block Proof Cache is a distinct type of vlayer node, specifically a JSON RPC server. It consists mainly  of a single call `v_getBlockProofs(block_no: int[])`. This call takes one argument: an array of block numbers for the requested proofs. It returns a triplet: an array of Merkle proofs for each requested block, the root hash of the MMR structure, and π - a zk-proof of the correctness of the constructed MMR.
+
+An example call could look like this:
+```json
+{
+    "method": "v_getBlockProofs",
+    "params": [
+        [1231, 123123123, 312312]
+    ]
+}
+```
+
+And the response:
+```json
+{
+    "result": [
+        [
+            [...], 
+            [...], 
+            [...]
+        ],
+        "0xe32ddb9c538f04c994e2e802237fa5f4c4e7e2643ab48bd8535b1c7009c8aa81",
+        "0x9c538f04c994e2e802237fa5f4c4e7e2643ab48bd8535b1c7009c8aa81e32ddb"
+    ]
+}
+```
+
+### Merkle Mountain Range (MMR)
+
+Under the hood, the Block Proof Cache uses a data structure called the Merkle Mountain Range (MMR). This structure is similar to Merkle Trees, with additional properties that make it very suitable for caching block proofs.
+
+See the interface of an MMR below:
+```mermaid
+%%{init: {'theme':'dark'}}%%
+classDiagram
+
+class MMR {
+    root_hash: Hash
+    correctness_proof: zkProof 
+    nodes[]: Hash
+    get_proofs(block_no: uint64[]) MerkleProof, RootHash, ZKProof
+    append_block(block: BlockHeader)
+}
+```

@@ -198,10 +198,11 @@ Below is a short description of the components:
 %%{init: {'theme':'dark'}}%%
 classDiagram
 
-RiscGuest --> Guest
-RiscHost --> Server
+Risc0Guest --> Guest
 Sp1Guest --> Guest
-Sp1Host --> Server
+JoltGuest --> Guest
+Cli --> Host
+Cli --> Server
 Server --> Host
 Guest --> Engine
 Host --> Engine
@@ -220,28 +221,16 @@ class Host {
 
 class Guest {
     new(in, out)
-    run(call)
+    call(Call)
 }
 
-class RiscGuest {
-    main()
-}
-
-class RiscHost {
-    main()
-}
-
-class Sp1Guest {
-    main()
-}
-
-class Sp1Host {
+class Risc0Guest {
     main()
 }
 
 class Server {
     host
-    new(host)
+    call(host)
 }
 
 ```
