@@ -9,3 +9,6 @@ p256 = "0.13.2"
 pkcs8 = "0.10.2"
 serde = { workspace = true, features = ["derive"] }
 serde_json.workspace = true
+
+[features]
+fixtures = []
