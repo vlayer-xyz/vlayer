@@ -2,9 +2,13 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
 
-use vlayer_engine::evm::env::{location::ExecutionLocation, EvmEnv};
+use vlayer_engine::evm::env::{
+    cached::MultiEvmEnv, location::ExecutionLocation, EvmEnv, EvmEnvFactory,
+};
+use vlayer_engine::utils::InteriorMutabilityCache;
 
-use crate::{db::proof::ProofDb, provider::BlockingProvider};
+use crate::db::proof::ProofDb;
+use crate::provider::BlockingProvider;
 
 pub struct CachedEvmEnv<P>
 where

@@ -1,4 +1,5 @@
-use super::{factory::ProviderFactory, Provider};
+use super::factory::ProviderFactory;
+use super::BlockingProvider;
 use crate::host::error::HostError;
 use alloy_primitives::ChainId;
 use std::cell::RefCell;

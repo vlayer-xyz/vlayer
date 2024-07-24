@@ -23,7 +23,7 @@ where
 
 impl<P> EvmEnvFactory<ProofDb<P>> for HostEvmEnvFactory<P>
 where
-    P: Provider,
+    P: BlockingProvider,
 {
     fn create(
         &self,
