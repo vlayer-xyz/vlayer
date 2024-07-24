@@ -17,7 +17,9 @@ See how to [time travel](/features/time-travel.html) across block numbers, [tele
 
 **Advanced**
 
-Learn how [Prover](/advanced/prover.html) and [Verifier](/advanced/verifier.html) contracts are working in-depth.
+Learn in-depth how:
+ * [Prover](/advanced/prover.html) and [Verifier](/advanced/verifier.html) contracts are working 
+ * Run [tests](/advanced/tests.html)
 
 **Contributing**
 
