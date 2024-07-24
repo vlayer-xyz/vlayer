@@ -1,15 +1,21 @@
 # Prover
-`Prover` contracts accept data from multiple sources (via features such as [time travel](/features/time-travel.html), [teleport](/features/teleport.html), [email proofs](/features/email.html), and [web proofs](/features/web.html)) and allow claims to be proven without exposing all the data on chain.
+vlayer `Prover` contracts are almost the same as regular Solidity smart contracts, with two main differences:
 
-Under the hood, vlayer generates zero-knowledge proofs of the `Prover` execution. 
+- **Access to off-chain data.** `Prover` contracts accept data from multiple sources (via features such as [time travel](/features/time-travel.html), [teleport](/features/teleport.html), [email proofs](/features/email.html), and [web proofs](/features/web.html)) and allow claims to be proven without exposing all the data on chain.
 
-## Proving
-vlayer `Prover` contracts are almost the same as regular Solidity smart contracts. The main difference is the environment they run on. The `Prover` code runs on the [vlayer zkEVM](/appendix/architecture/prover.html) and proofs of computation are later verified by the on-chain `Verifier` contract.
+- **Execution environment.** The `Prover` code runs on the [vlayer zkEVM](/appendix/architecture/prover.html) and proofs of computation are later verified by the on-chain `Verifier` contract. Unlike the on-chain contract, prover don't have access to the current block. It have access to already mined blocks only. Under the hood, vlayer generates zero-knowledge proofs of the `Prover` execution. 
 
-Extra features like [teleport](/features/teleport.html) or [time travel](/features/time-travel.html) are only available if the contract inherits from the `Prover` class. 
+## Prover in-depth
 
-Arbitrary arguments can be passed to `Prover` functions. All arguments are private, while each value returned from the functions becomes public.
+### Prover parent contract
+Any contract function can be run in prover, but to get access to the additional features listed in the section above, it must inherit from `Prover'.
 
+### Arguments and returned value
+Arbitrary arguments can be passed to `Prover` functions. All arguments are private, which means, they are not visible on-chain. However, keep in mind, they are visible to the prover server. 
+
+All data returned by functions is public. To make an argument public on the chain, return it from the function. 
+
+### Injected values
 Two additional variables may be injected to function body: `web` and `mail`. These variables allows to access data like email or web content and use them in the contract logic.     
 
 See the example code below:
@@ -22,7 +28,9 @@ contract WebProver is Prover {
 }
 ```
 
-Once the `WebProver` computation is complete, proof and the `web.content` is returned. This output can now be consumed and cryptographically verified by the `Verifier` on-chain smart contracts.
+### Proof
+
+Once the `WebProver` computation is complete, proof is generated and available along with retruned value (`web.content`). This output can now be consumed and cryptographically verified by the `Verifier` on-chain smart contracts.
 
 Note that `web.content` becomes public input for on-chain verification because it was returned from `main` function. All other variables remain secret.
 
@@ -30,11 +38,6 @@ Note that `web.content` becomes public input for on-chain verification because i
 
 ## Deployment 
 The `Prover` contract code must be deployed before use. To do so, just use regular [Foundry](https://book.getfoundry.sh/tutorials/solidity-scripting) workflow. 
-
-Run local Ethereum test node in the separate terminal: 
-```sh
-anvil
-```
 
 Prepare deployment script:
 ```solidity
@@ -49,6 +52,11 @@ contract SimpleScript is Script {
         console2.log("SimpleProver contract deployed to:", address(simpleProver));
     }
 }
+```
+
+In the separate terminal, run the local Ethereum test node:
+```sh
+anvil
 ```
 
 Then save and execute it: 
@@ -70,39 +78,6 @@ You can start it with the following command:
 vlayer serve
 ```
 
-Now we can call the node and get proof of computation. 
-
-Here is example JS call to deployed `Prover` contract:
-```javascript
-import Vlayer from 'vlayer-sdk';
-
-// deployed Prover contract address 
-const to = "0x3f275A83aCdA95e48010132a69Fc604a4e1c1797";     
-
-// caller address (optional)
-const caller = "0x902A5583aF6723fdeb66C3Db98F888F14353d01a"; 
-
-// teleport to desired chainId
-const chainId = 11155420;
-
-// block number you want time travel to
-const blockNo = 123067261;  
-
-const main = async () => {
-    const client = new Vlayer({ url: `http://localhost:3000` });
-    const { proof, params } = await client.call({
-        to,
-        caller,
-        chainId,
-        blockNo
-    });
-
-    console.log("Generated proof:" proof); 
-    console.log("Public inputs:", params);
-}
-
-main();
-```
 See [JSON-RPC API appendix](/appendix/api.md) for more detailed call specification.
 
 ## Proving Modes
