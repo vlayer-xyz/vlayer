@@ -9548,6 +9548,10 @@ dependencies = [
 ]
 
 [[package]]
+name = "web_proof"
+version = "0.1.0"
+
+[[package]]
 name = "webpki"
 version = "0.22.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
