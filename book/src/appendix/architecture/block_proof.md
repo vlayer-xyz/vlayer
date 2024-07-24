@@ -10,7 +10,7 @@ One way to prove that a block of a certain hash belongs to a chain is to run the
 To perform a check, we need to hash a block with a certain state root and compare it with the result of the function.
 
 However, this method is limited, as it only works for most recent 256 blocks on a given chain.
-Therefore, we need another way to prove inclusion of older blocks in a chain. 
+Therefore, we need another way to prove inclusion of older blocks in a chain.
 
 We use the following naming in this document:
 - *recent blocks* - any of the most recent 256 blocks (relative to current block_no)
@@ -44,8 +44,8 @@ And the response:
 {
     "result": [
         [
-            [...], 
-            [...], 
+            [...],
+            [...],
             [...]
         ],
         "0xe32ddb9c538f04c994e2e802237fa5f4c4e7e2643ab48bd8535b1c7009c8aa81",
@@ -65,9 +65,10 @@ classDiagram
 
 class MMR {
     root_hash: Hash
-    correctness_proof: zkProof 
+    correctness_proof: zkProof
     nodes[]: Hash
     get_proofs(block_no: uint64[]) MerkleProof, RootHash, ZKProof
     append_block(block: BlockHeader)
 }
 ```
+
