@@ -93,16 +93,14 @@ pub struct HostOutput {
 }
 
 #[cfg(test)]
-mod call_create {
+mod from_call_to_tx_env {
     use super::*;
-    use alloy_primitives::Address;
-    use revm::primitives::TxKind;
 
     #[test]
-    fn from_zero_address_success() {
+    fn from_creation_call() {
         let data: Vec<u8> = vec![1, 2, 3].into();
         let call = Call {
-            caller: Address::ZERO,
+            caller: Address::default(),
             to: Address::ZERO,
             data: data.clone(),
         };
@@ -114,11 +112,11 @@ mod call_create {
     }
 
     #[test]
-    fn from_call_to_txenv_success() {
+    fn from_non_creation_call() {
         let non_zero_address = Address::from_slice(&[1; 20]);
         let data: Vec<u8> = vec![4, 5, 6].into();
         let call = Call {
-            caller: Address::ZERO,
+            caller: Address::default(),
             to: non_zero_address,
             data: data.clone(),
         };

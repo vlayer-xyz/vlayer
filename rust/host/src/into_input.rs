@@ -1,4 +1,5 @@
-use crate::{db::proof::ProofDb, provider::Provider};
+use crate::db::proof::ProofDb;
+use crate::provider::BlockingProvider;
 use anyhow::anyhow;
 use anyhow::{ensure, Ok};
 use std::rc::Rc;
@@ -6,7 +7,7 @@ use vlayer_engine::block_header::EvmBlockHeader;
 use vlayer_engine::evm::env::cached::CachedEvmEnv;
 use vlayer_engine::evm::input::{EvmInput, MultiEvmInput};
 
-pub fn into_input<P: Provider>(
+pub fn into_input<P: BlockingProvider>(
     db: ProofDb<P>,
     header: Box<dyn EvmBlockHeader>,
 ) -> anyhow::Result<EvmInput> {
@@ -28,7 +29,7 @@ pub fn into_input<P: Provider>(
     Ok(evm_input)
 }
 
-pub fn into_multi_input<P: Provider>(
+pub fn into_multi_input<P: BlockingProvider>(
     envs: CachedEvmEnv<ProofDb<P>>,
 ) -> anyhow::Result<MultiEvmInput> {
     envs.into_inner()
