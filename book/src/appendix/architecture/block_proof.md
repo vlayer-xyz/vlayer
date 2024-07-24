@@ -23,6 +23,12 @@ To prove inclusion of certain *historical blocks* in a chain, we will prove that
 
 A naive way to prove the inclusion proof of two blocks in the same chain is to hash all subsequent blocks from *historical block* to *recent block* and verify that each blockhash is equal to the *prevHash* value of the subsequent block.
 
+See diagram below for visual.
+
+![Schema](/images/architecture/block-proof.png)
+
+
+
 Unfortunately, this is a slow process, especially if the blocks are far away form each other on the time scale. Fortunately, there is a way to cache all proofs in advance. For this purpose, vlayer uses the Block Proof Cache.
 
 ## Block Proof Cache
