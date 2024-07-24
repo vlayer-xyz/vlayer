@@ -15,6 +15,10 @@ To get started with vlayer, [install vlayer]((/getting-started/installation.md))
 
 See how to [time travel](/features/time-travel.html) across block numbers, [teleport](/features/teleport.html) from one chain to another, prove data coming from [email](/features/email.html) or [web](/features/web.html).
 
+**Advanced**
+
+Learn how [Prover](/advanced/prover.html) and [Verifier](/advanced/verifier.html) contracts are working in-depth.
+
 **Contributing**
 
 Help us improve [vlayer](/contributing/vlayer.md) and [vlayer book](/contributing/book.md)!
