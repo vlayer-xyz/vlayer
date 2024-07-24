@@ -11,7 +11,7 @@ vlayer `Prover` contracts are almost the same as regular Solidity smart contract
 Any contract function can be run in the vlayer prover, but to access the additional features listed above, the function must inherit from the `Prover` contract.
 
 ### Arguments and returned value
-Arbitrary arguments can be passed to `Prover` functions. All arguments are private, which means, they are not visible on-chain. However, keep in mind, they are visible to the prover server. 
+Arbitrary arguments can be passed to Prover functions. All arguments are private, meaning they are not visible on-chain; however, they are visible to the prover server.
 
 All data returned by functions is public. To make an argument public on-chain, return it from the function.
 
