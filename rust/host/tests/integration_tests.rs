@@ -12,6 +12,10 @@ use vlayer_engine::{
     evm::env::location::ExecutionLocation,
 };
 
+// To activate recording, set RECORD to true.
+// Recording creates new testdata directory and writes return data from Alchemy into files in that directory.
+const RECORD: bool = false;
+
 fn create_test_provider_factory(test_name: &str) -> FileProviderFactory {
     let rpc_file_cache: HashMap<_, _> = HashMap::from([
         (
@@ -27,7 +31,6 @@ fn create_test_provider_factory(test_name: &str) -> FileProviderFactory {
     FileProviderFactory::new(rpc_file_cache)
 }
 
-#[allow(dead_code)]
 fn create_recording_provider_factory(test_name: &str) -> CachedProviderFactory {
     let rpc_file_cache: HashMap<_, _> = HashMap::from([
         (
@@ -40,14 +43,13 @@ fn create_recording_provider_factory(test_name: &str) -> CachedProviderFactory {
         ),
     ]);
     dotenv().ok();
-    let alchemy_key = env::var("ALCHEMY_KEY")
-        .expect("To use recording provider you need to set ALCHEMY_KEY in an .env file. See .env.example.");
+    let alchemy_key = env::var("ALCHEMY_KEY").expect(
+        "To use recording provider you need to set ALCHEMY_KEY in an .env file. See .env.example for inspiration.",
+    );
     let mainnet_url = format!("https://eth-mainnet.g.alchemy.com/v2/{alchemy_key}");
     let sepolia_url = format!("https://eth-sepolia.g.alchemy.com/v2/{alchemy_key}");
-    let rpc_urls: HashMap<_, _> = HashMap::from([
-        (MAINNET_ID, mainnet_url.to_string()),
-        (SEPOLIA_ID, sepolia_url.to_string()),
-    ]);
+    let rpc_urls: HashMap<_, _> =
+        HashMap::from([(MAINNET_ID, mainnet_url), (SEPOLIA_ID, sepolia_url)]);
 
     CachedProviderFactory::new(rpc_urls, rpc_file_cache)
 }
@@ -61,16 +63,19 @@ fn run<C>(
 where
     C: SolCall,
 {
-    // Uncomment this line to fill the cache files:
-    // let provider_factory = create_recording_provider_factory(test_name);
-    let provider_factory = create_test_provider_factory(test_name);
-
     let null_rpc_url = "a null url value as url is not needed in tests";
     let execution_location = ExecutionLocation::new(block_number, chain_id);
     let config = HostConfig::new(null_rpc_url, execution_location);
 
-    let host = Host::try_new_with_provider_factory(provider_factory, config)?;
-    let raw_return_value = host.run(call)?.guest_output.evm_call_result;
+    let raw_return_value = if RECORD {
+        let provider_factory = create_recording_provider_factory(test_name);
+        let host = Host::try_new_with_provider_factory(provider_factory, config)?;
+        host.run(call)?.guest_output.evm_call_result
+    } else {
+        let provider_factory = create_test_provider_factory(test_name);
+        let host = Host::try_new_with_provider_factory(provider_factory, config)?;
+        host.run(call)?.guest_output.evm_call_result
+    };
     let return_value = C::abi_decode_returns(&raw_return_value, false)?;
     Ok(return_value)
 }
@@ -78,8 +83,13 @@ where
 #[cfg(test)]
 #[ctor::ctor]
 fn before_all() {
-    use std::env::set_var;
+    use std::{env::set_var, fs};
     set_var("RISC0_DEV_MODE", "1");
+
+    if RECORD {
+        fs::remove_dir_all("testdata").ok();
+        fs::create_dir("testdata").ok();
+    }
 }
 
 mod usdt {
