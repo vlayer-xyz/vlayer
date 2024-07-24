@@ -1,23 +1,26 @@
-use tlsn_core::proof::TlsProof;
+use tlsn_core::proof::{SessionProofError, SubstringsProofError, TlsProof};
 
 use crate::types::WebProof;
+use thiserror::Error;
 
-#[derive(PartialEq, Debug)]
-struct VerificationError;
+#[derive(Error, Debug)]
+pub enum VerificationError {
+    #[error("Session proof error: {0}")]
+    SessionProof(#[from] SessionProofError),
 
-fn verify_proof(web_proof: WebProof) -> Result<(), VerificationError> {
+    #[error("Substrings proof error: {0}")]
+    SubstringsProof(#[from] SubstringsProofError),
+}
+
+fn _verify_proof(web_proof: WebProof) -> Result<(), VerificationError> {
     let TlsProof {
         session,
         substrings,
     } = web_proof.tls_proof;
 
-    session
-        .verify_with_default_cert_verifier(web_proof.notary_pub_key)
-        .map_err(|_err| VerificationError)?;
+    session.verify_with_default_cert_verifier(web_proof.notary_pub_key)?;
 
-    substrings
-        .verify(&session.header)
-        .map_err(|_err| VerificationError)?;
+    substrings.verify(&session.header)?;
 
     Ok(())
 }
@@ -47,7 +50,7 @@ mod tests {
             tls_proof: wrong_tls_proof,
             notary_pub_key: notary_pub_key_example(),
         };
-        assert_eq!(verify_proof(proof), Err(VerificationError))
+        assert!(_verify_proof(proof).is_err());
     }
 
     #[test]
@@ -56,6 +59,6 @@ mod tests {
             tls_proof: tls_proof_example(),
             notary_pub_key: notary_pub_key_example(),
         };
-        assert_eq!(verify_proof(proof), Ok(()))
+        assert!(_verify_proof(proof).is_ok());
     }
 }
