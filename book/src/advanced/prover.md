@@ -34,7 +34,7 @@ Once the `WebProver` computation is complete, proof is generated and available a
 
 Note that `web.content` becomes a public input for on-chain verification because it was returned from the `main` function. All other input variables remain private.
 
-> List of returned arguments need to match with arguments used by `Verifer` (see [Verifier page](/advanced/verifier.html) for details)
+> The list of returned arguments must match the arguments used by the `Verifier` (see the [Verifier page](/advanced/verifier.html) for details).
 
 ## Deployment 
 The `Prover` contract code must be deployed before use. To do so, just use regular [Foundry](https://book.getfoundry.sh/tutorials/solidity-scripting) workflow. 
