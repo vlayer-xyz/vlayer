@@ -39,7 +39,7 @@ To deliver all necessary proofs, the following steps are performed:
 - The guest deserializes content into a local database StateDb.
 - Solidity code is executed inside revm using a local copy of StateDb.
 
-Since that solidity execution is deterministic, database in the guest has exactly the data it requires.
+Since that Solidity execution is deterministic, database in the guest has exactly the data it requires.
 
 ![Schema](/images/architecture/prover.png)
 
