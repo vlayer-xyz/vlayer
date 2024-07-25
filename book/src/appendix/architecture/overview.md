@@ -9,7 +9,7 @@ vlayer execution spans across three environments, each written in respective tec
     - [**block proof cache**](./block_proof.md) - http server used as a cache for proofs of inclusion of a block in a chain
     - **notary server** - used to notarize TLS connections
     - **workers** - used to perform actual proving
-- blockchain (solidity)
+- blockchain (Solidity)
     - [**on-chain smart contracts**](./solidity.md) - used to verify proofs
 
 ![Schema](/images/architecture/overview.png)
