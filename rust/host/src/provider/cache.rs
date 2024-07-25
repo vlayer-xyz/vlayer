@@ -5,7 +5,6 @@ use json::{AccountQuery, BlockQuery, JsonCache, ProofQuery, StorageQuery};
 use std::{
     cell::RefCell,
     collections::hash_map::Entry,
-    fmt,
     fs::{self},
     path::PathBuf,
 };
@@ -16,24 +15,10 @@ pub mod json;
 /// A provider that caches responses from an underlying provider in a JSON file.
 /// Queries are first checked against the cache, and if not found, the provider is invoked.
 /// The cache is saved when the provider is dropped.
+#[derive(Debug, PartialEq)]
 pub struct CachedProvider<P: BlockingProvider> {
     pub(super) inner: P,
     pub(super) cache: RefCell<JsonCache>,
-}
-
-impl<P: BlockingProvider + PartialEq> PartialEq for CachedProvider<P> {
-    fn eq(&self, other: &Self) -> bool {
-        self.inner == other.inner && *self.cache.borrow() == *other.cache.borrow()
-    }
-}
-
-impl<P: BlockingProvider + fmt::Debug> fmt::Debug for CachedProvider<P> {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("CachedProvider")
-            .field("inner", &self.inner)
-            .field("cache", &self.cache)
-            .finish()
-    }
 }
 
 impl<P: BlockingProvider> CachedProvider<P> {
