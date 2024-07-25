@@ -49,17 +49,16 @@ where
         Self { envs }
     }
 
-    pub fn call(self, tx: &Call, location: ExecutionLocation) -> Result<Vec<u8>, EngineError> {
+    pub fn call(&self, tx: &Call, location: ExecutionLocation) -> Result<Vec<u8>, EngineError> {
         let env = self
             .envs
             .get(location)
             .map_err(|err| EngineError::EvmEnv(err.to_string()))?;
+        let callback = |location, inputs| self.inspector_callback(location, inputs);
+        let inspector = TravelInspector::new(env.cfg_env.chain_id, callback);
         let evm = Evm::builder()
             .with_ref_db(&env.db)
-            .with_external_context(TravelInspector::new(
-                env.cfg_env.chain_id,
-                Self::inspector_callback,
-            ))
+            .with_external_context(inspector)
             .with_cfg_env_with_handler_cfg(env.cfg_env.clone())
             .with_tx_env(tx.clone().into())
             .append_handler_register(inspector_handle_register)
@@ -69,7 +68,11 @@ where
         Self::transact(evm)
     }
 
-    fn inspector_callback(location: ExecutionLocation, _: &mut CallInputs) -> Option<CallOutcome> {
+    fn inspector_callback(
+        &self,
+        location: ExecutionLocation,
+        _: CallInputs,
+    ) -> Option<CallOutcome> {
         info!(
             "Intercepting the call. Block number: {:?}, chain id: {:?}",
             location.block_number, location.chain_id
@@ -77,9 +80,12 @@ where
         None
     }
 
-    fn transact(
-        mut evm: Evm<'_, TravelInspector, WrapDatabaseRef<&D>>,
-    ) -> Result<Vec<u8>, EngineError> {
+    fn transact<F>(
+        mut evm: Evm<'_, TravelInspector<F>, WrapDatabaseRef<&D>>,
+    ) -> Result<Vec<u8>, EngineError>
+    where
+        F: Fn(ExecutionLocation, CallInputs) -> Option<CallOutcome>,
+    {
         let ResultAndState { result, .. } = evm
             .transact_preverified()
             .map_err(|err| EngineError::TransactPreverifiedError(format!("{:?}", err)))?;

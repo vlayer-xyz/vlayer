@@ -40,28 +40,15 @@ fn call_outcome(output: U256, inputs: &CallInputs) -> CallOutcome {
     }
 }
 
-#[derive(Clone, Debug)]
-pub struct TravelInspector {
+#[derive(Clone, Debug, Default)]
+pub struct TravelInspector<F> {
     start_chain_id: u64,
     pub location: Option<ExecutionLocation>,
-    callback: fn(location: ExecutionLocation, inputs: &mut CallInputs) -> Option<CallOutcome>,
+    callback: F,
 }
 
-impl Default for TravelInspector {
-    fn default() -> Self {
-        Self {
-            start_chain_id: 0,
-            location: None,
-            callback: |_, _| None,
-        }
-    }
-}
-
-impl TravelInspector {
-    pub fn new(
-        start_chain_id: u64,
-        callback: fn(location: ExecutionLocation, inputs: &mut CallInputs) -> Option<CallOutcome>,
-    ) -> Self {
+impl<F> TravelInspector<F> {
+    pub fn new(start_chain_id: u64, callback: F) -> Self {
         Self {
             start_chain_id,
             location: None,
@@ -86,7 +73,11 @@ impl TravelInspector {
     }
 }
 
-impl<DB: Database> Inspector<DB> for TravelInspector {
+impl<DB, F> Inspector<DB> for TravelInspector<F>
+where
+    DB: Database,
+    F: Fn(ExecutionLocation, CallInputs) -> Option<CallOutcome>,
+{
     fn call(
         &mut self,
         _context: &mut EvmContext<DB>,
@@ -116,7 +107,11 @@ impl<DB: Database> Inspector<DB> for TravelInspector {
             // If the call is not to the travel contract AND the location is set, run callback.
             _ => {
                 if let Some(location) = self.location {
-                    if let Some(outcome) = (self.callback)(location, inputs) {
+                    // One could potentially avoid cloning the inputs here by passing a reference,
+                    // but then you need to deal with closures generic over lifetimes and HRTBs.
+                    // My knowledge of Rust is not enough to make it compile and CallInputs is a relatively small object.
+                    // The biggest part of it is Data which we'll need to clone down the line either way.
+                    if let Some(outcome) = (self.callback)(location, inputs.clone()) {
                         return Some(outcome);
                     }
                 }
@@ -129,10 +124,11 @@ impl<DB: Database> Inspector<DB> for TravelInspector {
 
 #[cfg(test)]
 mod test {
+    use crate::evm::env::location::ExecutionLocation;
     use alloy_primitives::{address, Address, Bytes, U256};
     use revm::{
         db::{CacheDB, EmptyDB},
-        interpreter::{CallInputs, CallScheme, CallValue},
+        interpreter::{CallInputs, CallOutcome, CallScheme, CallValue},
         primitives::AccountInfo,
         EvmContext, Inspector,
     };
@@ -156,7 +152,9 @@ mod test {
         }
     }
 
-    fn inspector_call(addr: Address) -> TravelInspector {
+    fn inspector_call(
+        addr: Address,
+    ) -> TravelInspector<impl Fn(ExecutionLocation, CallInputs) -> Option<CallOutcome>> {
         let mut mock_db = CacheDB::new(EmptyDB::default());
         mock_db.insert_account_info(addr, AccountInfo::default());
 
