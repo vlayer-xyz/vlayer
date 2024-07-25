@@ -64,6 +64,13 @@ And the response:
 
 Under the hood, the Block Proof Cache uses a data structure called the Merkle Mountain Range (MMR). This structure is similar to Merkle Trees, with additional properties that make it very suitable for caching block proofs.
 
+See en example Merkle Mountain Range below.
+
+![Schema](/images/architecture/mmr.png)
+
+
+The MMR above has 19 nodes, 11 leaves and 4 peaks. The height is 4.
+
 See the interface of an MMR below:
 ```mermaid
 %%{init: {'theme':'dark'}}%%
