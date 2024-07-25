@@ -26,3 +26,29 @@ impl From<ValidatedEvmInput> for EvmEnv<WrapStateDb> {
         EvmEnv::new(db, input.header)
     }
 }
+
+#[cfg(test)]
+mod evm_env_from_input {
+
+    use super::*;
+    use as_any::Downcast;
+    use vlayer_engine::block_header::eth::EthBlockHeader;
+
+    #[test]
+    fn success() {
+        let expected_header = EthBlockHeader::default();
+        let input = EvmInput {
+            header: Box::new(expected_header.clone()),
+            state_trie: Default::default(),
+            storage_tries: Default::default(),
+            contracts: Default::default(),
+            ancestors: Default::default(),
+        };
+
+        let validated_input = ValidatedEvmInput::from(input);
+        let evm_env = EvmEnv::from(validated_input);
+        let actual_header = evm_env.header().downcast_ref::<EthBlockHeader>().unwrap();
+
+        assert_eq!(expected_header, *actual_header);
+    }
+}

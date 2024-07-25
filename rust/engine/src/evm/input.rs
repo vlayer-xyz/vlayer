@@ -9,7 +9,7 @@ use crate::block_header::EvmBlockHeader;
 use super::env::location::ExecutionLocation;
 
 /// The serializable input to derive and validate a [EvmEnv].
-#[derive(Debug, Serialize, Deserialize)]
+#[derive(Debug, Serialize, Deserialize, Clone)]
 pub struct EvmInput {
     pub header: Box<dyn EvmBlockHeader>,
     pub state_trie: MerkleTrie,

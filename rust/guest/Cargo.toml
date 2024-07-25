@@ -9,4 +9,6 @@ alloy-primitives = { version = "0.7.6", default-features = false }
 alloy-rlp-derive = { version = "0.3.5" }
 alloy-rlp = { version = "0.3.5", default-features = false }
 mpt = { path = "../mpt" }
+as-any = "0.3.1"
+anyhow = "1.0"
 revm = { version = "10.0.0", default-features = false }

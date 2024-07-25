@@ -41,3 +41,43 @@ impl From<ValidatedMultiEvmInput> for MultiEvmEnv<WrapStateDb> {
         )
     }
 }
+
+#[cfg(test)]
+mod multi_evm_env_from_input {
+
+    use super::*;
+    use as_any::Downcast;
+    use vlayer_engine::{
+        block_header::eth::EthBlockHeader,
+        evm::{env::location::ExecutionLocation, input::EvmInput},
+    };
+
+    #[test]
+    fn success() -> anyhow::Result<()> {
+        let expected_header = EthBlockHeader::default();
+        let location = ExecutionLocation::default();
+        let input = MultiEvmInput::from([(
+            location,
+            EvmInput {
+                header: Box::new(expected_header.clone()),
+                state_trie: Default::default(),
+                storage_tries: Default::default(),
+                contracts: Default::default(),
+                ancestors: Default::default(),
+            },
+        )]);
+
+        let validated_input = ValidatedMultiEvmInput::from(input);
+        let evm_env = MultiEvmEnv::from(validated_input);
+        let evm_env = evm_env.borrow();
+        let actual_header = evm_env
+            .get(&location)
+            .unwrap()
+            .header()
+            .downcast_ref::<EthBlockHeader>()
+            .unwrap();
+
+        assert_eq!(expected_header, *actual_header);
+        Ok(())
+    }
+}
