@@ -8,19 +8,7 @@ use revm::{
     DatabaseRef,
 };
 use std::{cell::RefCell, rc::Rc};
-use thiserror::Error;
 use vlayer_engine::block_header::EvmBlockHeader;
-
-/// Error type for the [ProofDb].
-#[derive(Error, Debug)]
-pub enum ProofDbError<E: std::error::Error> {
-    #[error("provider db error: {0}")]
-    ProviderDb(#[from] ProviderDbError<E>),
-    #[error("state: {0}")]
-    StateBorrow(#[from] std::cell::BorrowError),
-    #[error("state: {0}")]
-    StateMutBorrow(#[from] std::cell::BorrowMutError),
-}
 
 #[derive(Default, Debug)]
 struct State {
@@ -39,12 +27,15 @@ where
     state: RefCell<State>,
 }
 
-impl<P: BlockingProvider> DatabaseRef for ProofDb<P> {
-    type Error = ProofDbError<P::Error>;
+impl<P> DatabaseRef for ProofDb<P>
+where
+    P: BlockingProvider,
+{
+    type Error = ProviderDbError<P::Error>;
 
     fn basic_ref(&self, address: Address) -> Result<Option<AccountInfo>, Self::Error> {
         let basic = self.db.basic_ref(address)?;
-        let mut state = self.state.try_borrow_mut()?;
+        let mut state = self.state.borrow_mut();
         state.accounts.entry(address).or_default();
 
         Ok(basic)
@@ -52,7 +43,7 @@ impl<P: BlockingProvider> DatabaseRef for ProofDb<P> {
 
     fn code_by_hash_ref(&self, code_hash: B256) -> Result<Bytecode, Self::Error> {
         let code = self.db.code_by_hash_ref(code_hash)?;
-        let mut state = self.state.try_borrow_mut()?;
+        let mut state = self.state.borrow_mut();
         state.contracts.insert(code_hash, code.original_bytes());
 
         Ok(code)
@@ -60,7 +51,7 @@ impl<P: BlockingProvider> DatabaseRef for ProofDb<P> {
 
     fn storage_ref(&self, address: Address, index: U256) -> Result<U256, Self::Error> {
         let storage = self.db.storage_ref(address, index)?;
-        let mut state = self.state.try_borrow_mut()?;
+        let mut state = self.state.borrow_mut();
         state.accounts.entry(address).or_default().insert(index);
 
         Ok(storage)
@@ -68,14 +59,17 @@ impl<P: BlockingProvider> DatabaseRef for ProofDb<P> {
 
     fn block_hash_ref(&self, number: U256) -> Result<B256, Self::Error> {
         let block_hash = self.db.block_hash_ref(number)?;
-        let mut state = self.state.try_borrow_mut()?;
+        let mut state = self.state.borrow_mut();
         state.block_hash_numbers.insert(number);
 
         Ok(block_hash)
     }
 }
 
-impl<P: BlockingProvider> ProofDb<P> {
+impl<P> ProofDb<P>
+where
+    P: BlockingProvider,
+{
     pub fn new(provider: Rc<P>, block_number: u64) -> Self {
         let state = RefCell::new(State::default());
         Self {

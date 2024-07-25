@@ -17,10 +17,6 @@ pub enum ProviderDbError<E: std::error::Error> {
     InvalidBlockNumber(U256),
     #[error("hash missing for block: {0}")]
     BlockHashMissing(U256),
-    #[error("code hashes: {0}")]
-    CodeHashesBorrow(std::cell::BorrowError),
-    #[error("code hashes: {0}")]
-    CodeHashesMutBorrow(std::cell::BorrowMutError),
 }
 
 /// A revm [Database] backed by a [Provider].
@@ -58,8 +54,7 @@ impl<P: BlockingProvider> DatabaseRef for ProviderDb<P> {
         }
         // cache the code hash to address mapping, so we can later retrieve the code
         self.code_hashes
-            .try_borrow_mut()
-            .map_err(ProviderDbError::CodeHashesMutBorrow)?
+            .borrow_mut()
             .insert(proof.code_hash.0.into(), proof.address);
 
         Ok(Some(AccountInfo {
@@ -79,8 +74,7 @@ impl<P: BlockingProvider> DatabaseRef for ProviderDb<P> {
         // this works because we always call `basic_ref` first
         let contract_address = *self
             .code_hashes
-            .try_borrow()
-            .map_err(ProviderDbError::CodeHashesBorrow)?
+            .borrow()
             .get(&code_hash)
             .expect("`basic` must be called first for the corresponding account");
         let code = self
