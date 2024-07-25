@@ -1,3 +1,4 @@
+use revm::interpreter::CallOutcome;
 use revm::{
     db::WrapDatabaseRef,
     inspector_handle_register,
@@ -10,7 +11,7 @@ use tracing::{error, info};
 
 use crate::{
     evm::env::{cached::CachedEvmEnv, location::ExecutionLocation},
-    inspector::{MockCallOutcome, TravelInspector},
+    inspector::TravelInspector,
     io::Call,
 };
 
@@ -68,10 +69,7 @@ where
         Self::transact(evm)
     }
 
-    fn inspector_callback(
-        location: ExecutionLocation,
-        _: &mut CallInputs,
-    ) -> Option<MockCallOutcome> {
+    fn inspector_callback(location: ExecutionLocation, _: &mut CallInputs) -> Option<CallOutcome> {
         info!(
             "Intercepting the call. Block number: {:?}, chain id: {:?}",
             location.block_number, location.chain_id
