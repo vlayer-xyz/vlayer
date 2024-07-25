@@ -55,11 +55,12 @@ mod multi_evm_env_from_input {
 
     #[test]
     fn success() -> anyhow::Result<()> {
+        let location = ExecutionLocation::default();
         let expected_header = EthBlockHeader {
             state_root: EMPTY_ROOT_HASH,
+            number: location.block_number,
             ..Default::default()
         };
-        let location = ExecutionLocation::default();
         let input = MultiEvmInput::from([(
             location,
             EvmInput {

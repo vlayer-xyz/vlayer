@@ -10,6 +10,7 @@ use crate::chain::{eip1559::Eip1559Constants, fork::ForkCondition, spec::ChainSp
 
 pub const MAINNET_ID: u64 = 1;
 pub const SEPOLIA_ID: u64 = 11155111;
+pub const MAINNET_MERGE_BLOCK_NUMBER: u64 = 15537394;
 
 pub const DEFAULT_CALLER: Address = address!("1111111111111111111111111111111111111111");
 
@@ -25,7 +26,10 @@ pub static ETH_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
         MAINNET_ID,
         SpecId::CANCUN,
         BTreeMap::from([
-            (SpecId::MERGE, ForkCondition::Block(15537394)),
+            (
+                SpecId::MERGE,
+                ForkCondition::Block(MAINNET_MERGE_BLOCK_NUMBER),
+            ),
             (SpecId::SHANGHAI, ForkCondition::Timestamp(1681338455)),
             (SpecId::CANCUN, ForkCondition::Timestamp(1710338135)),
         ]),
