@@ -4,14 +4,8 @@ use std::{convert::Infallible, marker::PhantomData};
 use vlayer_engine::block_header::EvmBlockHeader;
 
 /// A simple provider that panics on all queries.
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct NullProvider(pub(crate) PhantomData<Box<dyn EvmBlockHeader>>);
-
-impl PartialEq for NullProvider {
-    fn eq(&self, _other: &Self) -> bool {
-        true
-    }
-}
 
 impl BlockingProvider for NullProvider {
     type Error = Infallible;

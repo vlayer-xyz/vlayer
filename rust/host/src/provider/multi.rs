@@ -35,19 +35,18 @@ mod get {
     use crate::provider::{factory::FileProviderFactory, FileProvider};
 
     use super::*;
-    use file_provider_test_factory::FileProviderTestFactory;
+    use file_provider_test_factory::NullProviderFactory;
     use std::path::PathBuf;
     use vlayer_engine::config::MAINNET_ID;
 
-    #[cfg(test)]
     mod file_provider_test_factory {
         use super::{HostError, ProviderFactory};
         use crate::provider::FileProvider;
         use alloy_primitives::ChainId;
 
-        pub struct FileProviderTestFactory;
+        pub struct NullProviderFactory;
 
-        impl ProviderFactory<FileProvider> for FileProviderTestFactory {
+        impl ProviderFactory<FileProvider> for NullProviderFactory {
             fn create(&self, _chain_id: ChainId) -> Result<FileProvider, HostError> {
                 Err(HostError::Provider("Forced error for testing".to_string()))
             }
@@ -65,7 +64,7 @@ mod get {
         // If no error was returned, it means the factory did not try to create a provider and used cached provider.
         let cached_multi_provider = CachedMultiProvider {
             cache,
-            factory: Box::new(FileProviderTestFactory {}),
+            factory: Box::new(NullProviderFactory {}),
         };
 
         let returned_provider = cached_multi_provider.get(MAINNET_ID)?;
