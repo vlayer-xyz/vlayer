@@ -10,7 +10,7 @@ Our architecture is inspired by RISC Zero [steel](https://github.com/risc0/risc0
     * risc0_guest - (in `guest_wrapper/risc0_guest`) - Thin wrapper that uses Risc0 ZKVM IO and delegates work to `guest`
     * guest_wrapper - (in `guest_wrapper`) - Compiles the `risc0_guest` to [RISC Zero](https://doc.rust-lang.org/rustc/platform-support/riscv32im-risc0-zkvm-elf.html) target and makes it available to be run inside the host. It can be considered Rust equivalent of a code generation script.
 
-Additionally, several other crates can be found in the `rust/` directory:
+In addition, there are several other crates in the `rust/` directory:
 - **engine**: Main execution shared by Guest and Host, used in both Host's preflight and Guest's zk proving.
 - **cli**: vlayer command line interface used to start the server, run tests, and more.
 - **server**: Server routines accepting vlayer JSON RPC calls.
