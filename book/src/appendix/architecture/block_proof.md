@@ -71,17 +71,71 @@ See en example Merkle Mountain Range below.
 
 The MMR above has 19 nodes, 11 leaves and 3 peaks. The height is 4.
 
-See the interface of an MMR below:
+See the interface of an example MMR below:
 ```mermaid
 %%{init: {'theme':'dark'}}%%
 classDiagram
 
-class MMR {
-    root_hash: Hash
-    correctness_proof: zkProof
-    nodes[]: Hash
-    get_proofs(block_no: uint64[]) MerkleProof, RootHash, ZKProof
-    append_block(block: BlockHeader)
+MMR *-- Backend
+
+
+class Backend {
+    get(u64)
+    set(u64, T)
+    size() u64
+    height() u64
+    new(size)
+}
+
+class MMR {    
+    backend: BACKEND
+    new(size)
+    get_leaf(u64) T
+    get_hash(u64) HASH
+    get_peaks() HASH[]
+    append(item: T)
+    get_proof(u64): HASH[]
 }
 ```
 
+MMR has following generic parameters:
+- T - type of data stored in the leaf
+- HASH - type of data stored in non-leaf nodes
+- BACKEND - used for storing MMR nodes, various implementations can store values in memory or on hard drive.
+
+Additionally, we extend classical MMR with `update` method:
+
+```mermaid
+%%{init: {'theme':'dark'}}%%
+classDiagram
+
+class MMR {    
+    ...
+    update_leaf(u64, T)
+}
+```
+
+
+## Block Proof Cache
+
+`BlockProofStore` is built on top od MMR. 
+
+On top of generic parameters of MMR, BlockProofStore also introduce two new types:
+- ZKPROOF - recursive or composable zk proof
+- BLOCK - block type associated with given chain (e.g. mainnet, optimism, etc)
+
+```mermaid
+%%{init: {'theme':'dark'}}%%
+classDiagram
+
+class BlockProofStore {
+    mmr: MMR[BACKEND, HASH, T]
+    correctness_proof: ZKPROOF
+    root_hash: HASH
+    first_block: BLOCK
+    append(block: BLOCK)
+    prepend(block: BLOCK)
+    reorg_form(block: BLOCK)
+    get_proof(block_no: u64)
+}
+```
