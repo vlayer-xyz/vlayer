@@ -4541,6 +4541,8 @@ dependencies = [
  "alloy-primitives",
  "alloy-rlp",
  "alloy-rlp-derive",
+ "anyhow",
+ "as-any",
  "mpt",
  "revm",
  "vlayer-engine",
