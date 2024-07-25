@@ -36,10 +36,9 @@ impl From<Call> for TxEnv {
     fn from(call: Call) -> Self {
         Self {
             caller: call.caller,
-            transact_to: if call.to == Address::ZERO {
-                TxKind::Create
-            } else {
-                TxKind::Call(call.to)
+            transact_to: match call.to {
+                Address::ZERO => TxKind::Create,
+                to => TxKind::Call(to),
             },
             data: call.data.into(),
             ..Default::default()
@@ -94,36 +93,38 @@ pub struct HostOutput {
 
 #[cfg(test)]
 mod from_call_to_tx_env {
+    use alloy_primitives::Bytes;
+
     use super::*;
 
     #[test]
-    fn from_creation_call() {
-        let data: Vec<u8> = vec![1, 2, 3].into();
-        let call = Call {
-            caller: Address::default(),
-            to: Address::ZERO,
-            data: data.clone(),
-        };
-        let tx_env: TxEnv = call.into();
-
-        assert_eq!(tx_env.caller, Address::ZERO);
-        assert_eq!(tx_env.transact_to, TxKind::Create);
-        assert_eq!(tx_env.data, data);
+    fn data() {
+        let tx_env: TxEnv = Call {
+            data: vec![4, 2],
+            ..Default::default()
+        }
+        .into();
+        assert_eq!(tx_env.data, Bytes::from(vec![4, 2]));
     }
 
     #[test]
-    fn from_non_creation_call() {
-        let non_zero_address = Address::from_slice(&[1; 20]);
-        let data: Vec<u8> = vec![4, 5, 6].into();
-        let call = Call {
-            caller: Address::default(),
-            to: non_zero_address,
-            data: data.clone(),
-        };
-        let tx_env: TxEnv = call.into();
+    fn creation_call() {
+        let tx_env: TxEnv = Call {
+            to: Address::ZERO,
+            ..Default::default()
+        }
+        .into();
+        assert_eq!(tx_env.transact_to, TxKind::Create);
+    }
 
-        assert_eq!(tx_env.caller, Address::ZERO);
+    #[test]
+    fn non_creation_call() {
+        let non_zero_address = Address::from_slice(&[1; 20]);
+        let tx_env: TxEnv = Call {
+            to: non_zero_address,
+            ..Default::default()
+        }
+        .into();
         assert_eq!(tx_env.transact_to, TxKind::Call(non_zero_address));
-        assert_eq!(tx_env.data, data);
     }
 }
