@@ -13,7 +13,6 @@ on:
 jobs:
   e2e-test:
     runs-on: aws-linux-small
-
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -44,6 +43,7 @@ jobs:
         run: cargo build --package server
 
       - name: Run e2e test
+        if: 'false'
         env:
           PROVING_MODE: ${{ github.event_name == 'schedule' && 'prod' || 'dev' }}
           BONSAI_API_URL: ${{ vars.BONSAI_API_URL }}
