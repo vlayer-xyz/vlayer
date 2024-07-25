@@ -6,7 +6,7 @@ vlayer execution spans across three environments, each written in respective tec
     - **browser plugin** - used for notarization of TLS Connections
 - server infrastructure (rust)
     - [**prover server**](./prover.md) - exposing vlayer functionality via [vlayer JSON-RPC API](/appendix/api.md)
-    - [**headers proof cache**](./block_proof.md) - http server used as a cache for proofs of inclusion of a block in a chain
+    - [**block proof cache**](./block_proof.md) - http server used as a cache for proofs of inclusion of a block in a chain
     - **notary server** - used to notarize TLS connections
     - **workers** - used to perform actual proving
 - blockchain (solidity)
