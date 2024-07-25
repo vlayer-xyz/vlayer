@@ -12,12 +12,10 @@ use vlayer_engine::{
 };
 
 fn create_test_provider_factory() -> FileProviderFactory {
-    let rpc_file_cache: HashMap<_, _> = [
+    let rpc_file_cache = HashMap::from([
         (MAINNET_ID, "testdata/mainnet_rpc_cache.json".to_string()),
         (SEPOLIA_ID, "testdata/sepolia_rpc_cache.json".to_string()),
-    ]
-    .into_iter()
-    .collect();
+    ]);
 
     FileProviderFactory::new(rpc_file_cache)
 }
