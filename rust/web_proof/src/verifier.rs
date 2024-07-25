@@ -27,30 +27,18 @@ fn _verify_proof(web_proof: WebProof) -> Result<(), VerificationError> {
 
 #[cfg(test)]
 mod tests {
-    use tlsn_core::proof::{SessionProof, TlsProof};
-
-    use crate::fixtures::{notary_pub_key_example, tls_proof_example};
+    use crate::fixtures::{invalid_tls_proof_example, notary_pub_key_example, tls_proof_example};
     use crate::types::WebProof;
 
     use super::*;
 
     #[test]
     fn fail_verification() {
-        let tls_proof = tls_proof_example();
-
-        let wrong_tls_proof = TlsProof {
-            session: SessionProof {
-                signature: None,
-                ..tls_proof.session
-            },
-            ..tls_proof
-        };
-
-        let proof = WebProof {
-            tls_proof: wrong_tls_proof,
+        let invalid_proof = WebProof {
+            tls_proof: invalid_tls_proof_example(),
             notary_pub_key: notary_pub_key_example(),
         };
-        assert!(_verify_proof(proof).is_err());
+        assert!(_verify_proof(invalid_proof).is_err());
     }
 
     #[test]
