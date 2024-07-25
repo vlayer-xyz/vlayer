@@ -10,7 +10,7 @@ One way to prove that a block of a certain hash belongs to a chain is to run the
 To perform a check, we need to hash a block with a certain state root and compare it with the result of the function.
 
 However, this method is limited, as it only works for most recent 256 blocks on a given chain.
-Therefore, we need another way to prove inclusion of older blocks in a chain. 
+Therefore, we need another way to prove inclusion of older blocks in a chain.
 
 We use the following naming in this document:
 - *recent blocks* - any of the most recent 256 blocks (relative to current block_no)
@@ -22,6 +22,12 @@ To prove inclusion of certain *historical blocks* in a chain, we will prove that
 2. Both *historical block* and *recent block* belong to the same chain
 
 A naive way to prove the inclusion proof of two blocks in the same chain is to hash all subsequent blocks from *historical block* to *recent block* and verify that each blockhash is equal to the *prevHash* value of the subsequent block.
+
+See diagram below for visual.
+
+![Schema](/images/architecture/block-proof.png)
+
+
 
 Unfortunately, this is a slow process, especially if the blocks are far away form each other on the time scale. Fortunately, there is a way to cache all proofs in advance. For this purpose, vlayer uses the Block Proof Cache.
 
@@ -44,8 +50,8 @@ And the response:
 {
     "result": [
         [
-            [...], 
-            [...], 
+            [...],
+            [...],
             [...]
         ],
         "0xe32ddb9c538f04c994e2e802237fa5f4c4e7e2643ab48bd8535b1c7009c8aa81",
@@ -58,6 +64,13 @@ And the response:
 
 Under the hood, the Block Proof Cache uses a data structure called the Merkle Mountain Range (MMR). This structure is similar to Merkle Trees, with additional properties that make it very suitable for caching block proofs.
 
+See en example Merkle Mountain Range below.
+
+![Schema](/images/architecture/mmr.png)
+
+
+The MMR above has 19 nodes, 11 leaves and 3 peaks. The height is 4.
+
 See the interface of an MMR below:
 ```mermaid
 %%{init: {'theme':'dark'}}%%
@@ -65,9 +78,10 @@ classDiagram
 
 class MMR {
     root_hash: Hash
-    correctness_proof: zkProof 
+    correctness_proof: zkProof
     nodes[]: Hash
     get_proofs(block_no: uint64[]) MerkleProof, RootHash, ZKProof
     append_block(block: BlockHeader)
 }
 ```
+

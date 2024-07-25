@@ -2,19 +2,25 @@
 
 On the high level, vlayer runs zkEVM that produces a proof of proper execution of `Prover` smart contract. Under the hood, vlayer is written in Rust that is compiled to zero knowledge proofs. Currently, Rust is compiled with [RISC Zero](https://www.risczero.com/), but we aim to build vendor-lock free solutions working on multiple zk stacks, like [sp-1](https://github.com/succinctlabs/sp1) or [Jolt](https://github.com/a16z/jolt). Inside rust [revm](https://github.com/bluealloy/revm) is executed.
 
-Our architecture is inspired by RISC Zero [steel](https://github.com/risc0/risc0-ethereum/tree/main/steel), with 3 main components that can be found in `rust/` subdirectories:
+Our architecture is inspired by RISC Zero [steel](https://github.com/risc0/risc0-ethereum/tree/main/steel), with two main components that can be found in `rust/` directory:
 
 - **Host** - (in `host`) - accepts the request, runs a preflight, during which it collects all data required by the guest. Then, guest proving is triggered.
-- **Guest** - performs execution of the code inside zkEVM. Consists of three parts:
+- **Guest** - performs execution of the code inside zkEVM. Consists of three crates:
     * guest - (in `guest`) - Library that contains code for EVM execution and input validation
     * risc0_guest - (in `guest_wrapper/risc0_guest`) - Thin wrapper that uses Risc0 ZKVM IO and delegates work to `guest`
     * guest_wrapper - (in `guest_wrapper`) - Compiles the `risc0_guest` to [RISC Zero](https://doc.rust-lang.org/rustc/platform-support/riscv32im-risc0-zkvm-elf.html) target and makes it available to be run inside the host. It can be considered Rust equivalent of a code generation script.
 
-The host passes arguments to the guest via standard input (stdin), and similarly, the guest returns values via standard output (stdout).
-
-> In ZK terms, all inputs are **private** and all outputs are **public**. If you need public inputs - return them as a part of output.
+In addition, there are several other crates in the `rust/` directory:
+- **engine**: Main execution shared by Guest and Host, used in both Host's preflight and Guest's zk proving.
+- **cli**: vlayer command line interface used to start the server, run tests, and more.
+- **server**: Server routines accepting vlayer JSON RPC calls.
+- **mpt**: Sparse Merkle Patricia tries used to pass the database from host to guest.
+- **test_runner**: Fork of the forge test runner used to run vlayer tests.
+- **web_proof**: Web proofs data structures and verification routines.
 
 ## Execution and proving
+
+The host passes arguments to the guest via standard input (stdin), and similarly, the guest returns values via standard output (stdout).
 
 zkVM works in isolation, without access to a disk or network.
 
@@ -33,7 +39,7 @@ To deliver all necessary proofs, the following steps are performed:
 - The guest deserializes content into a local database StateDb.
 - Solidity code is executed inside revm using a local copy of StateDb.
 
-Note that solidity execution is deterministic, hence database in the guest has exactly the data it requires.
+Since that Solidity execution is deterministic, database in the guest has exactly the data it requires.
 
 ![Schema](/images/architecture/prover.png)
 
@@ -113,7 +119,7 @@ The environment in which the execution will take place is stored in the generic 
 
 #### Block header
 
-The block header type might vary on different sidechains and L2s. 
+The block header type may vary between sidechains and L2s.
 
 #### Life cycle
 
@@ -244,7 +250,7 @@ Instead of returning a result, to handle errors, `Guest` panics. It does need to
 ### Dependency injection
 All components should follow the dependency injection pattern, which means all dependencies should be passed via constructors. Hence, components should not need to touch nested members.
 
-There should be one build function per component. 
+There should be one build function per component.
 
 ### Testing
 
