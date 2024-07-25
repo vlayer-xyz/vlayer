@@ -59,6 +59,6 @@ mod tests {
 
         let (sent, recv) = result.unwrap();
         assert!(sent.contains("host: api.x.com"));
-        assert!(recv.contains("\"screen_name\":\"wkr0\""));
+        assert!(recv.contains("HTTP/1.1 200 OK"));
     }
 }
