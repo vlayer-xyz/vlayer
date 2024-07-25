@@ -55,6 +55,12 @@ pub(crate) struct JsonCache {
     pub(super) storage: HashMap<StorageQuery, StorageValue>,
 }
 
+impl PartialEq for JsonCache {
+    fn eq(&self, other: &Self) -> bool {
+        self.file_path == other.file_path
+    }
+}
+
 impl JsonCache {
     /// Creates a new empty cache. It will be saved to the given file when dropped.
     pub(super) fn empty(file_path: PathBuf) -> Self {
