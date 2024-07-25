@@ -32,11 +32,15 @@ mod evm_env_from_input {
 
     use super::*;
     use as_any::Downcast;
+    use mpt::EMPTY_ROOT_HASH;
     use vlayer_engine::block_header::eth::EthBlockHeader;
 
     #[test]
     fn success() {
-        let expected_header = EthBlockHeader::default();
+        let expected_header = EthBlockHeader {
+            state_root: EMPTY_ROOT_HASH,
+            ..Default::default()
+        };
         let input = EvmInput {
             header: Box::new(expected_header.clone()),
             state_trie: Default::default(),
