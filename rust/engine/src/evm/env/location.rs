@@ -1,7 +1,9 @@
 use alloy_primitives::{BlockNumber, ChainId};
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, Default)]
+use crate::config::MAINNET_ID;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
 pub struct ExecutionLocation {
     pub block_number: BlockNumber,
     pub chain_id: ChainId,
@@ -12,6 +14,15 @@ impl ExecutionLocation {
         Self {
             block_number,
             chain_id,
+        }
+    }
+}
+
+impl Default for ExecutionLocation {
+    fn default() -> Self {
+        Self {
+            chain_id: MAINNET_ID,
+            block_number: 1,
         }
     }
 }
