@@ -69,7 +69,7 @@ See en example Merkle Mountain Range below.
 ![Schema](/images/architecture/mmr.png)
 
 
-The MMR above has 19 nodes, 11 leaves and 4 peaks. The height is 4.
+The MMR above has 19 nodes, 11 leaves and 3 peaks. The height is 4.
 
 See the interface of an MMR below:
 ```mermaid
