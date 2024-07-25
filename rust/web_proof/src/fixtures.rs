@@ -1,5 +1,5 @@
 use core::str;
-use p256::PublicKey;
+use p256::{ecdsa, PublicKey};
 use pkcs8::DecodePublicKey;
 use tlsn_core::proof::TlsProof;
 
@@ -12,4 +12,26 @@ pub fn notary_pub_key_example() -> PublicKey {
 pub fn tls_proof_example() -> TlsProof {
     serde_json::from_str(str::from_utf8(include_bytes!("../testdata/tls_proof.json")).unwrap())
         .unwrap()
+}
+
+pub fn invalid_tls_proof_example() -> TlsProof {
+    let mut tls_proof = tls_proof_example();
+
+    let valid_signature = tls_proof.session.signature.unwrap();
+    let invalid_signature = change_signature(valid_signature.clone());
+
+    tls_proof.session.signature = Some(invalid_signature);
+    tls_proof
+}
+
+fn change_signature(mut signature: tlsn_core::Signature) -> tlsn_core::Signature {
+    match signature {
+        tlsn_core::Signature::P256(ref mut sig) => {
+            let mut bytes = sig.to_bytes();
+            bytes[0] = bytes[0].wrapping_add(1);
+            let invalid_sig = ecdsa::Signature::from_bytes(&bytes).unwrap();
+            tlsn_core::Signature::from(invalid_sig)
+        }
+        _ => signature,
+    }
 }
