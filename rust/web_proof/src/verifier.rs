@@ -12,7 +12,7 @@ pub enum VerificationError {
     SubstringsProof(#[from] SubstringsProofError),
 }
 
-fn _verify_proof(web_proof: WebProof) -> Result<(), VerificationError> {
+fn _verify_proof(web_proof: WebProof) -> Result<(String, String), VerificationError> {
     let TlsProof {
         session,
         substrings,
@@ -20,9 +20,15 @@ fn _verify_proof(web_proof: WebProof) -> Result<(), VerificationError> {
 
     session.verify_with_default_cert_verifier(web_proof.notary_pub_key)?;
 
-    substrings.verify(&session.header)?;
+    let (mut sent, mut recv) = substrings.verify(&session.header)?;
 
-    Ok(())
+    sent.set_redacted(b'X');
+    recv.set_redacted(b'X');
+
+    let sent_string = String::from_utf8(sent.data().to_vec()).unwrap();
+    let recv_string = String::from_utf8(recv.data().to_vec()).unwrap();
+
+    Ok((sent_string, recv_string))
 }
 
 #[cfg(test)]
@@ -47,6 +53,12 @@ mod tests {
             tls_proof: tls_proof_example(),
             notary_pub_key: notary_pub_key_example(),
         };
-        assert!(_verify_proof(proof).is_ok());
+
+        let result = _verify_proof(proof);
+        assert!(result.is_ok());
+
+        let (sent, recv) = result.unwrap();
+        assert!(sent.contains("host: api.x.com"));
+        assert!(recv.contains("\"screen_name\":\"wkr0\""));
     }
 }
