@@ -119,7 +119,7 @@ The environment in which the execution will take place is stored in the generic 
 
 #### Block header
 
-The block header type might vary on different sidechains and L2s.
+The block header type may vary between sidechains and L2s.
 
 #### Life cycle
 
