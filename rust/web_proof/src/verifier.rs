@@ -41,7 +41,10 @@ fn _verify_proof(web_proof: WebProof) -> Result<_WebProofRequestResponse, Verifi
 
 #[cfg(test)]
 mod tests {
-    use crate::fixtures::{invalid_tls_proof_example, notary_pub_key_example, tls_proof_example};
+    use crate::fixtures::{
+        invalid_tls_proof_example, notary_pub_key_example, received_response_example,
+        sent_request_example, tls_proof_example,
+    };
     use crate::types::WebProof;
 
     use super::*;
@@ -78,7 +81,8 @@ mod tests {
             request: sent,
             response: recv,
         } = result.unwrap();
-        assert!(sent.contains("host: api.x.com"));
-        assert!(recv.contains("HTTP/1.1 200 OK"));
+
+        assert_eq!(sent, sent_request_example());
+        assert_eq!(recv, received_response_example());
     }
 }
