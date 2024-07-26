@@ -51,6 +51,11 @@ jobs:
         run: |
           ../../bash/vlayer-deploy.sh simple
 
+      - name: Deploy web_proof example contract
+        working-directory: examples/web_proof
+        run: |
+          ../../bash/vlayer-deploy.sh web_proof
+
       - name: Run workspace rust tests
         working-directory: rust
         run: |
