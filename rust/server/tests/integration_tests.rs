@@ -35,7 +35,16 @@ mod server_tests {
     const SIMPLE_EXAMPLE_TEST_DATA: &str = "0xcad0899b00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000002";
     const WEB_PROOF_EXAMPLE_TEST_DATA: &str = "0xefedf8100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000096170692e782e636f6d0000000000000000000000000000000000000000000000";
 
-    fn create_result(message: &str) -> serde_json::Value {
+    fn create_request(method: &str, params: Value, id: i8) -> Value {
+        json!({
+            "jsonrpc": "2.0",
+            "method": method,
+            "params": params,
+            "id": id
+        })
+    }
+
+    fn create_result(message: &str) -> Value {
         json!({
             "jsonrpc": "2.0",
             "id": 1,
@@ -81,15 +90,6 @@ mod server_tests {
         use super::*;
         use web_proof::fixtures::{tls_proof_example, NOTARY_PUB_KEY_PEM_EXAMPLE};
         const LOCALHOST_RPC_URL: &str = "http://localhost:8545";
-
-        fn create_request(method: &str, params: Value, id: i8) -> Value {
-            json!({
-                "jsonrpc": "2.0",
-                "method": method,
-                "params": params,
-                "id": id
-            })
-        }
 
         fn simple_call_example() -> Value {
             json!({"to": SIMPLE_SMART_CONTRACT_ADDRESS, "data": SIMPLE_EXAMPLE_TEST_DATA})
