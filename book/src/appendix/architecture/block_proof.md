@@ -71,25 +71,28 @@ See en example Merkle Mountain Range below.
 
 The MMR above has 19 nodes, 11 leaves and 3 peaks. The height is 4.
 
-See the interface of an example MMR below:
+See the interface of an example MMR:
 ```mermaid
 %%{init: {'theme':'dark'}}%%
 classDiagram
 
-MMR *-- Backend
+MMR *-- StorageBackend
 
 
-class Backend {
+class StorageBackend {
     get(u64)
     set(u64, T)
     size() u64
-    height() u64
-    new(size)
+    new_with_capacity(size)
 }
 
 class MMR {    
     backend: BACKEND
-    new(size)
+    new_with_capacity(size)
+    height() u64    
+    leaf_count(): u64
+    node_count(): u64
+    peak_count(): u64
     get_leaf(u64) T
     get_hash(u64) HASH
     get_peaks() HASH[]
@@ -101,7 +104,8 @@ class MMR {
 MMR has following generic parameters:
 - T - type of data stored in the leaf
 - HASH - type of data stored in non-leaf nodes
-- BACKEND - used for storing MMR nodes, various implementations can store values in memory or on hard drive.
+- BACKEND - used for storing MMR nodes. It has array like linear structure. Various implementations can store values on different mediums (e.g. memory for tests, hard drive for production).
+
 
 Additionally, we extend classical MMR with `update` method:
 
