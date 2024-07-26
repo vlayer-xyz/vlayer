@@ -9,6 +9,20 @@ pub fn notary_pub_key_example() -> PublicKey {
     PublicKey::from_public_key_pem(NOTARY_PUB_KEY_PEM_EXAMPLE).unwrap()
 }
 
+pub fn sent_request_example() -> String {
+    str::from_utf8(include_bytes!("../testdata/sent_request.txt"))
+        .unwrap()
+        .to_string()
+        .replace("\n", "\r\n")
+}
+
+pub fn received_response_example() -> String {
+    str::from_utf8(include_bytes!("../testdata/received_response.txt"))
+        .unwrap()
+        .to_string()
+        .replace("\n", "\r\n")
+}
+
 pub fn tls_proof_example() -> TlsProof {
     serde_json::from_str(str::from_utf8(include_bytes!("../testdata/tls_proof.json")).unwrap())
         .unwrap()
