@@ -82,13 +82,36 @@ mod server_tests {
         use web_proof::fixtures::{tls_proof_example, NOTARY_PUB_KEY_PEM_EXAMPLE};
         const LOCALHOST_RPC_URL: &str = "http://localhost:8545";
 
-        async fn get_block_nr() -> u32 {
-            let req = json!({
+        fn create_request(method: &str, params: Value, id: i8) -> Value {
+            json!({
                 "jsonrpc": "2.0",
-                "method": "eth_blockNumber",
-                "params": [],
-                "id": 0
-            });
+                "method": method,
+                "params": params,
+                "id": id
+            })
+        }
+
+        fn simple_call_example() -> Value {
+            json!({"to": SIMPLE_SMART_CONTRACT_ADDRESS, "data": SIMPLE_EXAMPLE_TEST_DATA})
+        }
+
+        fn web_proof_call_example() -> Value {
+            json!({"to": WEB_PROOF_SMART_CONTRACT_ADDRESS, "data": WEB_PROOF_EXAMPLE_TEST_DATA})
+        }
+
+        fn context_example(block_nr: u32) -> Value {
+            json!({"block_no": block_nr, "chain_id": 11155111})
+        }
+
+        fn web_augmentor_example() -> Value {
+            json!({"web_proof": {
+                "notary_pub_key": NOTARY_PUB_KEY_PEM_EXAMPLE,
+                "tls_proof": tls_proof_example(),
+            }})
+        }
+
+        async fn get_block_nr() -> u32 {
+            let req = create_request("eth_blockNumber", json!([]), 0);
 
             let response = reqwest::Client::new()
                 .post(LOCALHOST_RPC_URL)
@@ -108,12 +131,11 @@ mod server_tests {
         async fn field_validation_error() -> anyhow::Result<()> {
             let app = server(CONFIG.clone());
 
-            let req = json!({
-                "method": "v_call",
-                "params": [{"to": "I am not a valid address!", "data": SIMPLE_EXAMPLE_TEST_DATA}, {"block_no": 0}],
-                "id": 1,
-                "jsonrpc": "2.0",
-            });
+            let req = create_request(
+                "v_call",
+                json!([{"to": "I am not a valid address!", "data": SIMPLE_EXAMPLE_TEST_DATA}, {"block_no": 0}]),
+                1,
+            );
             let response = post(app, "/", &req).await?;
 
             assert_eq!(response.status(), StatusCode::OK);
@@ -133,12 +155,11 @@ mod server_tests {
             let block_nr = get_block_nr().await;
             let app = server(CONFIG.clone());
 
-            let req = json!({
-                "method": "v_call",
-                "params": [{"to": SIMPLE_SMART_CONTRACT_ADDRESS, "data": SIMPLE_EXAMPLE_TEST_DATA}, {"block_no": block_nr, "chain_id": 11155111}],
-                "id": 1,
-                "jsonrpc": "2.0",
-            });
+            let req = create_request(
+                "v_call",
+                json!([simple_call_example(), context_example(block_nr)]),
+                1,
+            );
             let response = post(app, "/", &req).await?;
 
             assert_eq!(response.status(), StatusCode::OK);
@@ -155,19 +176,18 @@ mod server_tests {
             let block_nr = get_block_nr().await;
             let app = server(CONFIG.clone());
 
-            let req = json!({
-                "method": "v_call",
-                "params": [
-                    {"to": SIMPLE_SMART_CONTRACT_ADDRESS, "data": SIMPLE_EXAMPLE_TEST_DATA},
-                    {"block_no": block_nr, "chain_id": 11155111},
-                    {"web_proof": {
-                        "notary_pub_key": NOTARY_PUB_KEY_PEM_EXAMPLE,
-                        "tls_proof": "<tls proof value>",
-                    }}
-                    ],
-                "id": 1,
-                "jsonrpc": "2.0",
-            });
+            let req = create_request(
+                "v_call",
+                json!([
+                    simple_call_example(),
+                    context_example(block_nr),
+                {"web_proof": {
+                    "notary_pub_key": NOTARY_PUB_KEY_PEM_EXAMPLE,
+                    "tls_proof": "<tls proof value>",
+                }}
+                ]),
+                1,
+            );
             let response = post(app, "/", &req).await?;
 
             assert_eq!(response.status(), StatusCode::OK);
@@ -187,19 +207,18 @@ mod server_tests {
             let block_nr = get_block_nr().await;
             let app = server(CONFIG.clone());
 
-            let req = json!({
-                "method": "v_call",
-                "params": [
-                    {"to": SIMPLE_SMART_CONTRACT_ADDRESS, "data": SIMPLE_EXAMPLE_TEST_DATA},
-                    {"block_no": block_nr, "chain_id": 11155111},
-                    {"web_proof": {
-                        "notary_pub_key": "<notary pub key value>",
-                        "tls_proof": tls_proof_example(),
-                    }}
-                    ],
-                "id": 1,
-                "jsonrpc": "2.0",
-            });
+            let req = create_request(
+                "v_call",
+                json!([
+                    simple_call_example(),
+                    context_example(block_nr),
+                {"web_proof": {
+                    "notary_pub_key": "<notary pub key value>",
+                    "tls_proof": tls_proof_example(),
+                }}
+                ]),
+                1,
+            );
             let response = post(app, "/", &req).await?;
 
             assert_eq!(response.status(), StatusCode::OK);
@@ -219,19 +238,15 @@ mod server_tests {
             let block_nr = get_block_nr().await;
             let app = server(CONFIG.clone());
 
-            let req = json!({
-                "method": "v_call",
-                "params": [
-                    {"to": WEB_PROOF_SMART_CONTRACT_ADDRESS, "data": WEB_PROOF_EXAMPLE_TEST_DATA},
-                    {"block_no": block_nr, "chain_id": 11155111},
-                    {"web_proof": {
-                        "notary_pub_key": NOTARY_PUB_KEY_PEM_EXAMPLE,
-                        "tls_proof": tls_proof_example(),
-                    }}
-                    ],
-                "id": 1,
-                "jsonrpc": "2.0",
-            });
+            let req = create_request(
+                "v_call",
+                json!([
+                    web_proof_call_example(),
+                    context_example(block_nr),
+                    web_augmentor_example()
+                ]),
+                1,
+            );
 
             let response = post(app, "/", &req).await?;
 
