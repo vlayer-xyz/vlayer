@@ -3,37 +3,37 @@
 ## Block inclusion proofs primer
 
 ### Storage proofs
-A storage proof proves that a piece of chain state (account or smart contract variable) belongs to a certain block. To ensure that a piece of state belongs to a certain chain, it is not enough to prove that it belongs to a block. We must also prove that the block itself belongs to a chain.
+A storage proof proves that a piece of chain state (an account or smart contract variable) belongs to a certain block. To ensure that a piece of state belongs to a certain chain, it is not enough to prove that it belongs to a block. We must also prove that the block itself belongs to the chain.
 
 ### Recent and historical blocks
 One way to prove that a block of a certain hash belongs to a chain is to run the Solidity `blockhash(uint)` function. It returns the hash of a block for a given number.
 To perform a check, we need to hash a block with a certain state root and compare it with the result of the function.
 
 However, this method is limited, as it only works for most recent 256 blocks on a given chain.
-Therefore, we need another way to prove inclusion of older blocks in a chain.
+Therefore, we need another way to prove inclusion of older blocks in the chain.
 
 We use the following naming in this document:
-- *recent blocks* - any of the most recent 256 blocks (relative to current block_no)
+- *recent blocks* - any of the most recent 256 blocks (relative to the current `block_no`)
 - *historical blocks* - blocks older than 256
 
 ### Naive block inclusion proofs
 To prove inclusion of certain *historical blocks* in a chain, we will prove that:
-1. Some *recent block* belong to a chain
+1. Some *recent block* belong to the chain
 2. Both *historical block* and *recent block* belong to the same chain
 
 A naive way to prove the inclusion proof of two blocks in the same chain is to hash all subsequent blocks from *historical block* to *recent block* and verify that each blockhash is equal to the *prevHash* value of the subsequent block.
 
-See diagram below for visual.
+See the diagram below for the visual.
 
 ![Schema](/images/architecture/block-proof.png)
 
 
 
-Unfortunately, this is a slow process, especially if the blocks are far away form each other on the time scale. Fortunately, there is a way to cache all proofs in advance. For this purpose, vlayer uses the Block Proof Cache.
+Unfortunately, this is a slow process, especially if the blocks are far away from each other on the time scale. Fortunately, there is a way to cache all proofs in advance. For this purpose, vlayer uses the Block Proof Cache.
 
 ## Block Proof Cache
 
-A Block Proof Cache is a distinct type of vlayer node, specifically a JSON RPC server. It consists mainly  of a single call `v_getBlockProofs(block_no: int[])`. This call takes one argument: an array of block numbers for the requested proofs. It returns a triplet: an array of Merkle proofs for each requested block, the root hash of the MMR structure, and π - a zk-proof of the correctness of the constructed MMR.
+A Block Proof Cache is a distinct type of vlayer node, specifically a JSON-RPC server. It consists mainly  of a single call `v_getBlockProofs(block_no: int[])`. This call takes one argument: an array of block numbers for the requested proofs. It returns a triplet: an array of Merkle proofs for each requested block, the root hash of the MMR structure, and π - a zk-proof of the correctness of the constructed MMR.
 
 An example call could look like this:
 ```json
@@ -64,7 +64,7 @@ And the response:
 
 Under the hood, the Block Proof Cache uses a data structure called the Merkle Mountain Range (MMR). This structure is similar to Merkle Trees, with additional properties that make it very suitable for caching block proofs.
 
-See en example Merkle Mountain Range below.
+See en example Merkle Mountain Range below:
 
 ![Schema](/images/architecture/mmr.png)
 
