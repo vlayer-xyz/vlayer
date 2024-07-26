@@ -34,7 +34,6 @@ use tracing::{debug, debug_span, enabled, trace};
 pub const LIBRARY_DEPLOYER: Address = address!("1F95D37F27EA0dEA9C252FC09D5A6eaA97647353");
 
 /// A type that executes all tests of a contract
-#[derive(Clone, Debug)]
 pub struct ContractRunner<'a> {
     /// The data of the contract.
     pub contract: &'a TestContract,
