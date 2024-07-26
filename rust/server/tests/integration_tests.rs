@@ -35,12 +35,12 @@ mod server_tests {
     const SIMPLE_EXAMPLE_TEST_DATA: &str = "0xcad0899b00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000002";
     const WEB_PROOF_EXAMPLE_TEST_DATA: &str = "0xefedf8100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000096170692e782e636f6d0000000000000000000000000000000000000000000000";
 
-    fn create_request(method: &str, params: Value, id: i8) -> Value {
+    fn create_request(method: &str, params: Value) -> Value {
         json!({
             "jsonrpc": "2.0",
             "method": method,
             "params": params,
-            "id": id
+            "id": 1
         })
     }
 
@@ -54,7 +54,7 @@ mod server_tests {
         })
     }
 
-    fn create_error_response(code: i64, message: &str) -> serde_json::Value {
+    fn create_error_response(code: i64, message: &str) -> Value {
         json!({
             "jsonrpc": "2.0",
             "id": 1,
@@ -70,11 +70,7 @@ mod server_tests {
     async fn json_rpc_not_found() -> anyhow::Result<()> {
         let app = server(CONFIG.clone());
 
-        let req = JsonRpcRequest {
-            method: "non_existent_json_rpc_method".to_string(),
-            params: Value::Null,
-            id: 1.into(),
-        };
+        let req = create_request("non_existent_json_rpc_method", json!(null));
         let response = post(app, "/", &req).await?;
 
         assert_eq!(response.status(), StatusCode::OK);
@@ -111,7 +107,7 @@ mod server_tests {
         }
 
         async fn get_block_nr() -> u32 {
-            let req = create_request("eth_blockNumber", json!([]), 0);
+            let req = create_request("eth_blockNumber", json!([]));
 
             let response = reqwest::Client::new()
                 .post(LOCALHOST_RPC_URL)
@@ -121,7 +117,7 @@ mod server_tests {
                 .unwrap();
 
             let body = response.text().await.unwrap();
-            let json: serde_json::Value = serde_json::from_str(&body).unwrap();
+            let json: Value = serde_json::from_str(&body).unwrap();
             let result = json["result"].clone();
             let result = result.as_str().unwrap();
             u32::from_str_radix(&result[2..], 16).unwrap()
@@ -134,7 +130,6 @@ mod server_tests {
             let req = create_request(
                 "v_call",
                 json!([{"to": "I am not a valid address!", "data": SIMPLE_EXAMPLE_TEST_DATA}, {"block_no": 0}]),
-                1,
             );
             let response = post(app, "/", &req).await?;
 
@@ -158,7 +153,6 @@ mod server_tests {
             let req = create_request(
                 "v_call",
                 json!([simple_call_example(), context_example(block_nr)]),
-                1,
             );
             let response = post(app, "/", &req).await?;
 
@@ -181,12 +175,12 @@ mod server_tests {
                 json!([
                     simple_call_example(),
                     context_example(block_nr),
-                {"web_proof": {
+                {
+                    "web_proof": {
                     "notary_pub_key": NOTARY_PUB_KEY_PEM_EXAMPLE,
                     "tls_proof": "<tls proof value>",
                 }}
                 ]),
-                1,
             );
             let response = post(app, "/", &req).await?;
 
@@ -212,12 +206,12 @@ mod server_tests {
                 json!([
                     simple_call_example(),
                     context_example(block_nr),
-                {"web_proof": {
+                {
+                    "web_proof": {
                     "notary_pub_key": "<notary pub key value>",
                     "tls_proof": tls_proof_example(),
                 }}
                 ]),
-                1,
             );
             let response = post(app, "/", &req).await?;
 
@@ -245,7 +239,6 @@ mod server_tests {
                     context_example(block_nr),
                     web_augmentor_example()
                 ]),
-                1,
             );
 
             let response = post(app, "/", &req).await?;
