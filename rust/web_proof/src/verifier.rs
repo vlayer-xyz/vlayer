@@ -53,6 +53,15 @@ mod tests {
             tls_proof: tls_proof_example(),
             notary_pub_key: notary_pub_key_example(),
         };
+        assert!(_verify_proof(proof).is_ok());
+    }
+
+    #[test]
+    fn correct_substrings_extracted() {
+        let proof = WebProof {
+            tls_proof: tls_proof_example(),
+            notary_pub_key: notary_pub_key_example(),
+        };
 
         let result = _verify_proof(proof);
         assert!(result.is_ok());
