@@ -25,11 +25,6 @@ function to_upper(){
   echo $1 | sed 's/\([^A-Z]\)\([A-Z0-9]\)/\1_\2/g' | tr '[:lower:]' '[:upper:]'
 }
 
-function hex_to_decimal(){
-  printf "%d\n" "$1" 
-}
-
-
 function deploy_contracts() {
     DEPLOYER_PRIV=${DEPLOYER_PRIV} \
     forge script ${DEPLOYMENT_SCRIPT} \
@@ -47,20 +42,6 @@ function retrieve_address(){
     <${results_file})
 
   echo "$(to_upper ${contract})_ADDRESS=${address}"
-  export $(to_upper ${contract})_ADDRESS=${address}
-}
-
-function get_block_number() {
-
-  hex_number=$(
-    curl -sX POST "${RPC_URL}" \
-    -H 'Content-Type: application/json' \
-    --data '{"id": 1, "jsonrpc": "2.0", "method": "eth_blockNumber", "params": []}' \
-    | jq -r .result
-  )
-
-  hex_to_decimal "${hex_number}"
-
 }
 
 echo
@@ -80,5 +61,4 @@ for contract in "${DEPLOYABLE_CONTRACTS[@]}" ; do
   retrieve_address "${results_file}" "${contract}"
 done
 
-echo BLOCK_NO=$(get_block_number)
-export BLOCK_NO=$(get_block_number)
+echo BLOCK_NO=$(cast block-number)
