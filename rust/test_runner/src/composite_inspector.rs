@@ -5,15 +5,15 @@ use forge::revm::{Database, EvmContext, Inspector};
 use foundry_evm::inspectors::InspectorStack;
 use foundry_evm_core::backend::DatabaseExt;
 use foundry_evm_core::InspectorExt;
-use vlayer_engine::inspector::TravelInspector;
+use vlayer_engine::inspector::NoopInspector;
 
 pub struct CompositeInspector {
-    pub set_inspector: TravelInspector,
+    pub set_inspector: NoopInspector,
     pub inspector_stack: InspectorStack,
 }
 
 impl CompositeInspector {
-    pub fn new(set_inspector: TravelInspector, inspector_stack: InspectorStack) -> Self {
+    pub fn new(set_inspector: NoopInspector, inspector_stack: InspectorStack) -> Self {
         Self {
             set_inspector,
             inspector_stack,

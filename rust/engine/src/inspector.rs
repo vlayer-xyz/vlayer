@@ -40,19 +40,26 @@ fn call_outcome(output: U256, inputs: &CallInputs) -> CallOutcome {
     }
 }
 
-#[derive(Clone, Debug, Default)]
-pub struct TravelInspector<F> {
+#[derive(Default, Clone, Debug)]
+pub struct NoopInspector;
+
+impl<DB> Inspector<DB> for NoopInspector where DB: Database {}
+
+pub struct TravelInspector<'a> {
     start_chain_id: u64,
     pub location: Option<ExecutionLocation>,
-    callback: F,
+    callback: Box<dyn Fn(ExecutionLocation, CallInputs) -> Option<CallOutcome> + 'a>,
 }
 
-impl<F> TravelInspector<F> {
-    pub fn new(start_chain_id: u64, callback: F) -> Self {
+impl<'a> TravelInspector<'a> {
+    pub fn new(
+        start_chain_id: u64,
+        callback: impl Fn(ExecutionLocation, CallInputs) -> Option<CallOutcome> + 'a,
+    ) -> Self {
         Self {
             start_chain_id,
             location: None,
-            callback,
+            callback: Box::new(callback),
         }
     }
 
@@ -73,10 +80,9 @@ impl<F> TravelInspector<F> {
     }
 }
 
-impl<DB, F> Inspector<DB> for TravelInspector<F>
+impl<'a, DB> Inspector<DB> for TravelInspector<'a>
 where
     DB: Database,
-    F: Fn(ExecutionLocation, CallInputs) -> Option<CallOutcome>,
 {
     fn call(
         &mut self,
@@ -124,11 +130,10 @@ where
 
 #[cfg(test)]
 mod test {
-    use crate::evm::env::location::ExecutionLocation;
     use alloy_primitives::{address, Address, Bytes, U256};
     use revm::{
         db::{CacheDB, EmptyDB},
-        interpreter::{CallInputs, CallOutcome, CallScheme, CallValue},
+        interpreter::{CallInputs, CallScheme, CallValue},
         primitives::AccountInfo,
         EvmContext, Inspector,
     };
@@ -152,9 +157,7 @@ mod test {
         }
     }
 
-    fn inspector_call(
-        addr: Address,
-    ) -> TravelInspector<impl Fn(ExecutionLocation, CallInputs) -> Option<CallOutcome>> {
+    fn inspector_call(addr: Address) -> TravelInspector<'static> {
         let mut mock_db = CacheDB::new(EmptyDB::default());
         mock_db.insert_account_info(addr, AccountInfo::default());
 

@@ -49,7 +49,7 @@ where
         Self { envs }
     }
 
-    pub fn call(&self, tx: &Call, location: ExecutionLocation) -> Result<Vec<u8>, EngineError> {
+    pub fn call(&'a self, tx: &Call, location: ExecutionLocation) -> Result<Vec<u8>, EngineError> {
         let env = self
             .envs
             .get(location)
@@ -80,12 +80,9 @@ where
         None
     }
 
-    fn transact<F>(
-        mut evm: Evm<'_, TravelInspector<F>, WrapDatabaseRef<&D>>,
-    ) -> Result<Vec<u8>, EngineError>
-    where
-        F: Fn(ExecutionLocation, CallInputs) -> Option<CallOutcome>,
-    {
+    fn transact(
+        mut evm: Evm<'_, TravelInspector<'a>, WrapDatabaseRef<&D>>,
+    ) -> Result<Vec<u8>, EngineError> {
         let ResultAndState { result, .. } = evm
             .transact_preverified()
             .map_err(|err| EngineError::TransactPreverifiedError(format!("{:?}", err)))?;
