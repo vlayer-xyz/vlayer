@@ -21,7 +21,7 @@ pub(crate) fn copy_dir_to(src_dir: &Path, dst_dir: &Path) -> std::io::Result<()>
         if file_type.is_dir() {
             copy_dir_to(&entry.path(), &dst_dir.join(entry.file_name()))?;
         } else {
-            fs::copy(&entry.path(), &dst_dir.join(entry.file_name()))?;
+            fs::copy(entry.path(), dst_dir.join(entry.file_name()))?;
         }
     }
 
