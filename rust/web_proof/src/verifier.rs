@@ -12,7 +12,12 @@ pub enum VerificationError {
     SubstringsProof(#[from] SubstringsProofError),
 }
 
-fn _verify_proof(web_proof: WebProof) -> Result<(String, String), VerificationError> {
+struct _WebProofRequestResponse {
+    request: String,
+    response: String,
+}
+
+fn _verify_proof(web_proof: WebProof) -> Result<_WebProofRequestResponse, VerificationError> {
     let TlsProof {
         session,
         substrings,
@@ -28,7 +33,10 @@ fn _verify_proof(web_proof: WebProof) -> Result<(String, String), VerificationEr
     let sent_string = String::from_utf8(sent.data().to_vec()).unwrap();
     let recv_string = String::from_utf8(recv.data().to_vec()).unwrap();
 
-    Ok((sent_string, recv_string))
+    Ok(_WebProofRequestResponse {
+        request: sent_string,
+        response: recv_string,
+    })
 }
 
 #[cfg(test)]
@@ -66,7 +74,10 @@ mod tests {
         let result = _verify_proof(proof);
         assert!(result.is_ok());
 
-        let (sent, recv) = result.unwrap();
+        let _WebProofRequestResponse {
+            request: sent,
+            response: recv,
+        } = result.unwrap();
         assert!(sent.contains("host: api.x.com"));
         assert!(recv.contains("HTTP/1.1 200 OK"));
     }
