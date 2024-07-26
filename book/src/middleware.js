@@ -161,29 +161,38 @@ const isAuthCookieValid = async (headers) => {
 
 }
 
-export default async function middleware(request) {
-  if(await isAuthCookieValid(request.headers)) {
-    console.log("Docs Auth path skipped: already authenticated")
-    return next();
+const checkArchDocsAccess = (pathname, headers) => {
+  if(pathname.includes('appendix/architecture')) {
+    const { login } = parseCreds(headers);
+    // No access for logins without email domain
+    if(!login.includes('@')) {
+      console.log("Architecture docs not permitted:", [login, pathname])
+      throw new Error("restricted");
+    }
   }
+}
 
-
+export default async function middleware(request) {
   const url = new URL(request.url);
 
-  const staticFilesRegex = /\.(js|css|png|jpg|woff|woff2|svg|json|gif|mp4|ico)$/i;
-
-  if (staticFilesRegex.test(url.pathname)) {
-    console.log("Docs Auth path skipped: ", url.pathname)
-    return next({
-      headers: {
-        'cache-control': 'public, max-age=31536000, immutable',
-      },
-    });
-  }  
-
-
-
   try {
+    const staticFilesRegex = /\.(js|css|png|jpg|woff|woff2|svg|json|gif|mp4|ico)$/i;  
+
+    if (staticFilesRegex.test(url.pathname)) {
+      console.log("Docs Auth path skipped: ", url.pathname)
+      return next({
+        headers: {
+          'cache-control': 'public, max-age=31536000, immutable',
+        },
+      });
+    }
+
+    if(await isAuthCookieValid(request.headers)) {
+      checkArchDocsAccess(url.pathname, request.headers);
+      console.log("Docs Auth path skipped: already authenticated")
+      return next();
+    }
+
     const { login, password } = parseCreds(request.headers);
     console.log("Docs Auth Login attempt: ", [url.toString(), login]);
 
@@ -207,8 +216,13 @@ export default async function middleware(request) {
   
   } catch (err) {
     console.log("Docs Auth Login issue: ", [url.toString(), err.message])
-    url.pathname = '/api/auth';
 
+    if(err.message === "restricted") {
+      url.pathname = '/coming.html';
+    } else {
+      url.pathname = '/api/auth';
+    }
+    
     return rewrite(url);
   }
 }
