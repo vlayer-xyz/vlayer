@@ -9,12 +9,16 @@
 # Features
 - [Time travel](./features/time-travel.md)
 - [Teleport](./features/teleport.md)
-- [Email](./features/email.md)
-- [Web](./features/web.md)
+- [Email proof](./features/email.md)
+- [Web proof](./features/web.md)
 
 # Advanced
 - [Prover](./advanced/prover.md)
 - [Verifier](./advanced/verifier.md)
+
+# From JavaScript
+- [Vanilla JS/TS](./javascript/javascript.md)
+- [Web proofs](./javascript/webproofs.md)
 
 # Contributing
 - [vlayer](./contributing/vlayer.md)
