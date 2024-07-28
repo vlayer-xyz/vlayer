@@ -6,9 +6,30 @@ A common way to interact with blockchain is to make calls and send transactions 
 ## Installation
 To install vlayer SDK, run the following command in your JavaScript application
 
+{{#tabs }}
+{{#tab name="yarn" }}
 ```sh
 yarn add @vlayer/sdk
 ```
+{{#endtab }}
+{{#tab name="npm" }}
+```sh
+npm i @vlayer/sdk
+```
+{{#endtab }}
+{{#tab name="pnpm" }}
+```sh
+pnpm i viem
+```
+{{#endtab }}
+{{#tab name="bun" }}
+```sh
+bun i viem
+```
+{{#endtab }}
+
+{{#endtabs }}
+
 
 ## vlayer client
 

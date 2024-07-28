@@ -36,6 +36,11 @@ jobs:
           cargo install cargo-binstall
           cargo binstall --no-confirm mdbook-mermaid
 
+      - name: Install mdbook-tabs
+        run: |
+          cargo install mdbook-tabs
+          mdbook-tabs install
+
       - name: Build book
         run: |
           bin/mdbook build
