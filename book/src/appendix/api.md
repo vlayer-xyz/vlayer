@@ -3,12 +3,10 @@
 vlayer exposes one RPC endpoint under `/` with the following structure of the request:
 ```json
  {
-    "method": "v_call",
-    "params": [
-        "<arg_object>",
-        "<context>",
-        "<extras>"
-    ]
+    "method": "v_prove",
+    "params": {
+        "<proveRequest object>"
+    }
  }
 ```
 
@@ -20,19 +18,17 @@ and the response:
 ```
 
 
-# v_call
-`v_call` is the core endpoint that vlayer provides, with the following format request:
+# v_prove
+`v_prove` is the core endpoint that vlayer provides, with the following format request:
 
 ```json
  {
     "method": "v_call",
     "params": [
-        {   "caller": "<from address>", # optional field
+        {   
             "to": "<contract address>",
-            "data": "0x<abi encoded calldata>"
-        },
-        {"chain_id": 1, "block_no": "latest"},
-        {
+            "data": "0x<abi encoded calldata>",
+            "chain_id": 1,
             "email": "<base64? encoded raw email>",
             "web": "<encoded web artifacts>",
         }
@@ -49,4 +45,4 @@ and the response:
 }
 ```
 
-Where `result` is an ABI encoded result of the function execution and `proof` is a Solidity `Proof` structure prepended.
+Where `result` is an ABI encoded result of the function execution and `proof` is a Solidity `Proof` structure to prepend in verifier function.
