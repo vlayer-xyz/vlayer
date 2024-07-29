@@ -26,24 +26,32 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install mdbook
-        run: |
-          mkdir bin
-          curl -sSL https://github.com/rust-lang/mdBook/releases/download/v0.4.40/mdbook-v0.4.40-x86_64-unknown-linux-gnu.tar.gz | tar -xz --directory=bin
+      - name: Cache
+        uses: actions/cache@v4
+        with:
+          path: book/mdbook-bin
+          key: ${{ runner.os }}-${{ runner.arch }}-mdbook-cargo-binstall
 
-      - name: Install mdbook-mermaid
-        run: |
-          cargo install cargo-binstall
-          cargo binstall --no-confirm mdbook-mermaid
+      - name: Install mdbook and its dependencies
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-      - name: Install mdbook-tabs
+          MDBOOK_VERSION: 0.4.40
+          MERMAID_VERSION: 0.13.0
+          TABS_VERSION: 0.0.5
         run: |
-          cargo install mdbook-tabs
-          mdbook-tabs install
+          cargo binstall --root ./mdbook-bin --no-confirm \
+            "mdbook@${MDBOOK_VERSION}" \
+            "mdbook-mermaid@${MERMAID_VERSION}" \
+            "mdbook-tabs@${TABS_VERSION}"
+
+          ./mdbook-bin/bin/mdbook-tabs install
+
 
       - name: Build book
         run: |
-          bin/mdbook build
+          export PATH="${PATH}:$(pwd)/mdbook-bin/bin"
+          mdbook build
 
       - name: Deploy to Vercel (production)
         if: github.ref == 'refs/heads/main'
