@@ -45,8 +45,6 @@ jobs:
             "mdbook-mermaid@${MERMAID_VERSION}" \
             "mdbook-tabs@${TABS_VERSION}"
 
-          ./mdbook-bin/bin/mdbook-tabs install
-
 
       - name: Build book
         run: |
