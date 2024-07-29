@@ -15,15 +15,3 @@ impl ExecutionLocation {
         }
     }
 }
-
-#[cfg(test)]
-use crate::config::{MAINNET_ID, MAINNET_MERGE_BLOCK_NUMBER};
-#[cfg(test)]
-impl Default for ExecutionLocation {
-    fn default() -> Self {
-        Self {
-            chain_id: MAINNET_ID,
-            block_number: MAINNET_MERGE_BLOCK_NUMBER,
-        }
-    }
-}
