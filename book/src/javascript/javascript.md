@@ -69,7 +69,7 @@ const hash = vlayerClient.prove({
 Wait for the proving to be finish, and then returns the result along with Proof.
 
 ```ts
-const {proof, result} = await vlayerClient.waitForProvingResult({hash});
+const { proof, result } = await vlayerClient.waitForProvingResult({ hash });
 ```
 
 
