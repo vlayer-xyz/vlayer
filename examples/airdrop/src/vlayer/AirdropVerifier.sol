@@ -4,10 +4,10 @@ pragma solidity ^0.8.13;
 import {ExecutionCommitment} from "vlayer/ExecutionCommitment.sol";
 import {Verifier} from "vlayer/Verifier.sol";
 
-import {NftOwnership} from "./NftOwnershipProver.sol";
+import {NftOwnershipProver} from "./NftOwnershipProver.sol";
 
 address constant NFT_OWNERSHIP_VLAYER_CONTRACT = 0x1744aC92e0Ff310Ff836bB68d56D4159E37D0BdF;
-bytes4 constant FUNCTION_SELECTOR = NftOwnership.main.selector;
+bytes4 constant FUNCTION_SELECTOR = NftOwnershipProver.main.selector;
 
 interface IAwesomeToken {
     function transfer(address to, uint256 amount) external;
