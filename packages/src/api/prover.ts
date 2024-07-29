@@ -31,5 +31,10 @@ export async function prove(caller: Address, prover: Address, proverSpec: Prover
     let call: CallParams = { caller, to: prover, data: calldata };
     let context: CallContext = { block_no: blockNo, chain_id: 1 };
 
-    return v_call(call, context);
+    let response = await v_call(call, context); 
+    if (response.result === undefined) {
+      throw Error(`Server responded with error: ${JSON.stringify(response.error)}`);
+    }
+
+    return response;
 }
