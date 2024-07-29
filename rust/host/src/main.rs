@@ -13,7 +13,7 @@ pub mod into_input;
 pub mod proof;
 pub mod provider;
 
-const CONTRACT: Address = address!("5fbdb2315678afecb367f032d93f642f64180aa3");
+const CONTRACT: Address = address!("e7f1725e7734ce288f8367e1bb143e90bb3f0512");
 const CALLER: Address = address!("f39Fd6e51aad88F6F4ce6aB8827279cffFb92266");
 const LOCALHOST_RPC_URL: &str = "http://localhost:8545";
 
@@ -33,11 +33,7 @@ fn main() -> Result<(), HostError> {
     info!("Running proving on block number: {}", config.block_no);
 
     // This is the abi encoded call data (lhs = 1, rhs = 2) for the sum function in the Simple contract.
-    let raw_call_data: Vec<u8> = vec![
-        202, 208, 137, 155, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 0, 0, 0, 0, 0, 2,
-    ];
+    let raw_call_data: Vec<u8> = vec![229, 106, 65, 249];
 
     let call_tx_data = Call {
         caller: CALLER,

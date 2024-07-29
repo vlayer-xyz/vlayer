@@ -1,5 +1,5 @@
 use alloy_primitives::hex::decode;
-use alloy_primitives::{address, b256, Address, B256, U256};
+use alloy_primitives::{address, b256, Address, Bytes, B256, U256};
 use once_cell::sync::Lazy;
 use revm::interpreter::{Gas, InstructionResult, InterpreterResult};
 use revm::{
@@ -28,12 +28,11 @@ static SET_BLOCK_SELECTOR: Lazy<Vec<u8>> =
 static SET_CHAIN_SELECTOR: Lazy<Vec<u8>> =
     Lazy::new(|| decode("ffbc5638").expect("Error decoding set_chain function call"));
 
-fn call_outcome(output: U256, inputs: &CallInputs) -> CallOutcome {
-    let buffer: [u8; U256_BYTES] = output.to_be_bytes();
+pub fn call_outcome(output: &[u8], inputs: &CallInputs) -> CallOutcome {
     CallOutcome {
         result: InterpreterResult {
             result: InstructionResult::Return,
-            output: buffer.into(),
+            output: Bytes::copy_from_slice(output),
             gas: Gas::new(0),
         },
         memory_offset: inputs.return_memory_offset.clone(),
@@ -101,13 +100,19 @@ where
                 if selector == *SET_BLOCK_SELECTOR {
                     let block_number = U256::from_be_slice(arguments_bytes).to();
                     self.set_block(block_number);
-                    return Some(call_outcome(U256::from(1), inputs));
+                    return Some(call_outcome(
+                        &U256::from(1).to_be_bytes::<U256_BYTES>(),
+                        inputs,
+                    ));
                 } else if selector == *SET_CHAIN_SELECTOR {
                     let (chain_id_bytes, block_number_bytes) = arguments_bytes.split_at(ARG_LEN);
                     let chain_id = U256::from_be_slice(chain_id_bytes).to();
                     let block_number = U256::from_be_slice(block_number_bytes).to();
                     self.set_chain(chain_id, block_number);
-                    return Some(call_outcome(U256::from(1), inputs));
+                    return Some(call_outcome(
+                        &U256::from(1).to_be_bytes::<U256_BYTES>(),
+                        inputs,
+                    ));
                 }
             }
             // If the call is not to the travel contract AND the location is set, run callback.
