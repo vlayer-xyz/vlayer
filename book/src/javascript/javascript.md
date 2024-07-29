@@ -28,7 +28,7 @@ Initialize a client with prover with specific url.
 import { createVlayerClient } from '@vlayer/sdk'
  
 const vlayerClient = createVlayerClient({
-  url: 'localhost:3000'
+  url: 'http://localhost:3000'
 })
 ```
 
