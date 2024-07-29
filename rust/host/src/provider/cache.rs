@@ -1,6 +1,6 @@
 use super::{BlockingProvider, EIP1186Proof};
 use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256};
-use anyhow::anyhow;
+use anyhow::bail;
 use json::{AccountQuery, BlockQuery, JsonCache, ProofQuery, StorageQuery};
 use std::{cell::RefCell, collections::hash_map::Entry, path::PathBuf};
 use vlayer_engine::block_header::EvmBlockHeader;
@@ -24,17 +24,17 @@ impl<P: BlockingProvider> CachedProvider<P> {
         // Sanity checks.
         if let Some(parent) = cache_path.parent() {
             if !parent.exists() {
-                return Err(anyhow!(
+                bail!(
                     "Cache files directory '{}' does not exist.",
                     parent.display()
-                ));
+                );
             }
         }
         if cache_path.exists() {
-            return Err(anyhow!(
+            bail!(
                 "Cache file {} already exists. Are you trying to create two test files with the same name?",
                 cache_path.display()
-            ));
+            );
         }
 
         let cache = JsonCache::empty(cache_path);
