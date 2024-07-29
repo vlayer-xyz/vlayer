@@ -55,26 +55,56 @@ and the response:
 }
 ```
 
-## v_getProofRequest
-To get result of `v_prove` query `v_getProofRequest`. 
+## v_getProofReceipt
+
+### Query
+To get result of `v_prove` query `v_getProofReceipt`. 
 
 ```json
 {
-    "method": "v_getProofRequest",
+    "method": "v_getProofReceipt",
     "params": {   
         "id": "<proof request hash>",
     }    
 }
 ```
 
+There are three possible results: `pending`, `success` and `error`.
+
+### Pending
+
 ```json
 {
     "jsonrpc": "0.2",
-    "result": {
+    "status": "pending",
+}
+```
+
+### Success
+
+```json
+{
+    "jsonrpc": "0.2",
+    "status": "success",
+    "result": {        
         "proof": "<calldata encoded Proof structure>",
-        "result": "<calldata encoded result of execution>"
+        "data": "<calldata encoded result of execution>",
+        "block_no": "<hex encoded settlement block>"
     }
 }
 ```
 
-Where `result` is an ABI encoded result of the function execution and `proof` is a Solidity `Proof` structure to prepend in verifier function.
+`data` is an ABI encoded result of the function execution and `proof` is a Solidity `Proof` structure to prepend in verifier function. Note that settlement block is only available in receipt, as we don't want to make assumption on when the the settlement block is assigned.
+
+### Error
+
+```json
+{
+  "jsonrpc": "0.2",
+  "status": "error",
+  "error": {
+    "message": "<error message>",
+  }
+}
+```
+
