@@ -56,16 +56,14 @@ impl ProviderFactory<FileProvider> for FileProviderFactory {
             .rpc_file_cache
             .get(&chain_id)
             .ok_or_else(|| HostError::NoRpcCache(chain_id))?;
-
         let path_buf = PathBuf::from(file_path);
-        let provider = FileProvider::from_file(&path_buf).map_err(|err| {
+
+        FileProvider::from_file(&path_buf).map_err(|err| {
             HostError::Provider(format!(
                 "Error creating provider for chain ID {}: {}",
                 chain_id, err
             ))
-        })?;
-
-        Ok(provider)
+        })
     }
 }
 
