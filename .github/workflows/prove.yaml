@@ -45,11 +45,11 @@ jobs:
           ANVIL_SERVER_PID=$!
           echo "ANVIL_SERVER_PID=$ANVIL_SERVER_PID" >> $GITHUB_ENV
 
-      - name: Deploy simple example contract
-        working-directory: examples/simple
+      - name: Deploy simple travel example contract
+        working-directory: examples/simple_travel
         run: |
           output=$(mktemp)
-          ../../bash/vlayer-deploy.sh simple | tee ${output}
+          ../../bash/vlayer-deploy.sh simple_travel | tee ${output}
           
           # filter-out env variables and pass them to next steps
           grep '[A-Z0-9_]\+=[a-zA-Z0-9]\+' <${output} >>${GITHUB_ENV}
