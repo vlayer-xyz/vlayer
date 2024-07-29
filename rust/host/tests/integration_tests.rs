@@ -147,7 +147,7 @@ mod uniswap {
         )?;
         assert_eq!(
             result._0,
-            address!("1a9c8182c09f50c8318d769245bea52c32be35bc")
+            address!("1a9c8182c09f50c8318d769245bea52c32be35bc") // Uniswap V2: UNI Timelock is the current owner of the factory.
         );
         Ok(())
     }
