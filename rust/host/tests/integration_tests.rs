@@ -1,4 +1,4 @@
-use alloy_primitives::{address, b256, uint, Address, U256};
+use alloy_primitives::{address, b256, uint, Address};
 use alloy_sol_types::{sol, SolCall};
 use dotenv::dotenv;
 use host::{
@@ -145,7 +145,10 @@ mod uniswap {
             MAINNET_ID,
             BLOCK_NO,
         )?;
-        assert_eq!(result._0, address!("1a9c8182c09f50c8318d769245bea52c32be35bc"));
+        assert_eq!(
+            result._0,
+            address!("1a9c8182c09f50c8318d769245bea52c32be35bc")
+        );
         Ok(())
     }
 }

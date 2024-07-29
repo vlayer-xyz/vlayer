@@ -30,7 +30,6 @@ mod server_tests {
         Ok(())
     }
 
-    const CALLER: &str = "0xf39fd6e51aad88f6f4ce6ab8827279cfffb92266";
     const SIMPLE_SMART_CONTRACT_ADDRESS: &str = "5fbdb2315678afecb367f032d93f642f64180aa3";
     const WEB_PROOF_SMART_CONTRACT_ADDRESS: &str = "e7f1725e7734ce288f8367e1bb143e90bb3f0512";
     const SIMPLE_EXAMPLE_TEST_DATA: &str = "0xcad0899b00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000002";
@@ -97,7 +96,7 @@ mod server_tests {
 
             let req = json!({
                 "method": "v_call",
-                "params": [{"caller": "I am not a valid address!", "to": SIMPLE_SMART_CONTRACT_ADDRESS, "data": SIMPLE_EXAMPLE_TEST_DATA}, {"block_no": 0}],
+                "params": [{"to": "I am not a valid address!", "data": SIMPLE_EXAMPLE_TEST_DATA}, {"block_no": 0}],
                 "id": 1,
                 "jsonrpc": "2.0",
             });
@@ -111,7 +110,7 @@ mod server_tests {
                     "id": 1,
                     "error": {
                         "code": -32602,
-                        "message": "Invalid field `caller`: Odd number of digits `I am not a valid address!`",
+                        "message": "Invalid field `to`: Odd number of digits `I am not a valid address!`",
                         "data": null
                     }
                 })
@@ -127,7 +126,7 @@ mod server_tests {
 
             let req = json!({
                 "method": "v_call",
-                "params": [{"caller": CALLER, "to": SIMPLE_SMART_CONTRACT_ADDRESS, "data": SIMPLE_EXAMPLE_TEST_DATA}, {"block_no": block_nr, "chain_id": 11155111}],
+                "params": [{"to": SIMPLE_SMART_CONTRACT_ADDRESS, "data": SIMPLE_EXAMPLE_TEST_DATA}, {"block_no": block_nr, "chain_id": 11155111}],
                 "id": 1,
                 "jsonrpc": "2.0",
             });
@@ -156,7 +155,7 @@ mod server_tests {
             let req = json!({
                 "method": "v_call",
                 "params": [
-                    {"caller": CALLER, "to": SIMPLE_SMART_CONTRACT_ADDRESS, "data": SIMPLE_EXAMPLE_TEST_DATA},
+                    {"to": SIMPLE_SMART_CONTRACT_ADDRESS, "data": SIMPLE_EXAMPLE_TEST_DATA},
                     {"block_no": block_nr, "chain_id": 11155111},
                     {"web_proof": {
                         "notary_pub_key": NOTARY_PUB_KEY_PEM_EXAMPLE,
@@ -193,7 +192,7 @@ mod server_tests {
             let req = json!({
                 "method": "v_call",
                 "params": [
-                    {"caller": CALLER, "to": SIMPLE_SMART_CONTRACT_ADDRESS, "data": SIMPLE_EXAMPLE_TEST_DATA},
+                    {"to": SIMPLE_SMART_CONTRACT_ADDRESS, "data": SIMPLE_EXAMPLE_TEST_DATA},
                     {"block_no": block_nr, "chain_id": 11155111},
                     {"web_proof": {
                         "notary_pub_key": "<notary pub key value>",
@@ -230,7 +229,7 @@ mod server_tests {
             let req = json!({
                 "method": "v_call",
                 "params": [
-                    {"caller": CALLER, "to": WEB_PROOF_SMART_CONTRACT_ADDRESS, "data": WEB_PROOF_EXAMPLE_TEST_DATA},
+                    {"to": WEB_PROOF_SMART_CONTRACT_ADDRESS, "data": WEB_PROOF_EXAMPLE_TEST_DATA},
                     {"block_no": block_nr, "chain_id": 11155111},
                     {"web_proof": {
                         "notary_pub_key": NOTARY_PUB_KEY_PEM_EXAMPLE,
