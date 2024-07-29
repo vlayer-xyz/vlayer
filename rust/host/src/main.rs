@@ -32,7 +32,7 @@ fn main() -> Result<(), HostError> {
 
     info!("Running proving on block number: {}", config.block_no);
 
-    // This is the abi encoded call data (lhs = 1, rhs = 2) for the sum function in the Simple contract.
+    // This is the abi encoded call data for the aroundTheWorld() function in the SimpleTravelProver contract.
     let raw_call_data: Vec<u8> = vec![229, 106, 65, 249];
 
     let call_tx_data = Call {
