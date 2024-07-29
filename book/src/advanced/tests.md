@@ -1,49 +1,60 @@
 # Tests
-What we want to say: 
-# intro
-- vlayer supports testing both verifier and prover contracts 
-- if you used forge before it is very similar 
-# running tests
-- files and directories
-- command (vlayer test)
-# helpers /cheatcodes
-- we introduced a couple new helpers for testing 
-- those helpers are cheatcodes in the forge (example of simple cheatcode)
-# cheatcode examples 
-- provide sample code:
-  execProving(); //next call will be run in prover
-  uint r = ...
-  proof = getProofResult(); // 
+vlayer supports automated testing for [Verifier](/advanced/verifier.html) and [Prover](/advanced/prover.html) contracts.
 
-  verifier.main(proof, r);
+The vlayer test suite allows to simulate the entire flow from the generation of computation proofs to their verification in the on-chain contracts. 
 
+If you have ever used [Foundry](https://book.getfoundry.sh/forge/tests) tests, it feels almost the same.
 
-Learn how to use automated testing in vlayer projects. 
+## Running tests
+Test command searches for all the contract tests available in the working directory. 
 
-Since vlayer execution is distributed across different environments, there are different types of tests to run. The following sections describe each of them. 
+Any contract with an external or public function that starts with `test` is considered to be a test. Usually, tests are be placed in the `test/` directory by convention and end with `.t.sol`.
 
-## E2E tests 
-End-to-end testing allows you to simulate the entire flow from proving to verifying claims in the on-chain contracts. 
-
-Use the following command to run tests:
+To run all available tests, use the following command:
 ```sh
 vlayer test
 ```
 
-The above command sets up all the necessary components, runs the local EVM node, deploys the contracts, generates the proofs, and validates them.
+The above command starts local EVM nodes and runs the test code on them. 
 
-## Contract tests
-To run your smart contract unit tests, simply use the command below:
-```sh
-forge test
+## Test helpers 
+To manipulate the state of the blockchain, as well as to test for specific reverts and events, Foundry introduced the concept of [cheatcodes](https://book.getfoundry.sh/forge/cheatcodes). These are special functions that allow to increase balances, impersonate specific accounts or simulate other behaviors in tests.
+
+See below example of using `vm.prank()`:
+
+```solidity
+contract OwnerUpOnlyTest is Test {
+    OwnerUpOnly upOnly;
+
+    function testFail_IncrementAsNotOwner() public {
+        vm.prank(address(0));
+        upOnly.increment();
+    }
+}
 ```
 
-The above command looks for all the contract tests in your working directory. The [forge](https://book.getfoundry.sh/forge/) script will then run the tests, build and deploy your smart contracts.
+`vm.prank(address(0))` sets `msg.sender` to the null address for the next call. This allows us to simulate a situation where the test fails because a non-owner account is calling the contract method.
 
-## Test networks
-You should test any contract code you write on a testnet before deploying it to the mainnet. To deploy your contracts on the Sepolia testnet, simply run this command: 
-```sh 
-vlayer deploy --chainId 11155111
+## vlayer cheatcodes
+vlayer also introduces a couple of new cheatcodes. See an example of how to use them below: 
+
+```solidity
+contract WebProverTest is Test {
+    WebProver prover;
+    WebVerifier verifier; 
+
+    function test_mainProver() public {
+        exectProving() // next call will run in the Prover
+        uint venmoBalance = prover.main();
+        Proof memory proof = getProofResult();
+        verifier.main(proof, venmoBalance);
+
+    }
+}
 ```
 
-The above command will build and deploy all your vlayer `Prover` and `Verifier` contracts to the Sepolia public testnet (which has `chainId=11155111`).
+In the above example we have two important cheatcodes: 
+* `execProving()` sets the next call environment for the zkEVM environment, so that the proof of computation can be generated 
+* `getProofResult()` gets the proof of the last call of `Prover` 
+
+Using the above cheatcodes allows to test the whole proof journey: from setup & proving to verification. 
