@@ -13,7 +13,7 @@ interface IERC721 {
 
 address constant BYAC_NFT_ADDR = 0x1744aC92e0Ff310Ff836bB68d56D4159E37D0BdF;
 
-contract NftOwnership is Prover {
+contract NftOwnershipProver is Prover {
     function require_byac_nft() public view {
         // Terminate proving if NFT is not owned by the prover
         require(IERC721(BYAC_NFT_ADDR).balanceOf(msg.sender) > 0, "You are not owning any specified NFT");
