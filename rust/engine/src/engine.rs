@@ -83,7 +83,7 @@ where
             to: inputs.bytecode_address,
             data: inputs.input.clone().into(),
         };
-        let result = self.call(&call, location).unwrap();
+        let result = self.call(&call, location).expect("Intercepted call failed");
         info!("Intercepted call returned: {:?}", result);
         let outcome = call_outcome(&result[..], &inputs);
         Some(outcome)
