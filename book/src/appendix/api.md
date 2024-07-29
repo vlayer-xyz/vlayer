@@ -2,7 +2,7 @@
 
 vlayer exposes one RPC endpoint under `/` with the following methods:
 - `v_prove`
-- v_getProofRequest
+- `v_getProofRequest`
 
 With general format of request looking a follows.
 
