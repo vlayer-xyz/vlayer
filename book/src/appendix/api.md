@@ -2,16 +2,16 @@
 
 vlayer exposes one RPC endpoint under `/` with the following methods:
 - `v_prove`
-- `v_getProofRequest`
+- `v_getProofReceipt`
 
 With general format of request looking a follows.
 
 ```json
  {
     "method": "<method name>",
-    "params": {
+    "params": [{
         "<params object>"
-    }
+    }]
  }
 ```
 
@@ -33,13 +33,13 @@ And the response format below.
 ```json
 {
     "method": "v_prove",
-    "params": {   
+    "params": [{   
         "to": "<contract address>",
         "data": "0x<abi encoded calldata>",
         "chain_id": "<desired chain id>",
         "email": "<optional email proof structure>",
         "web": "<optional web proof structure>",
-    }
+    }]
 }
 ```
 
@@ -63,9 +63,9 @@ To get result of `v_prove` query `v_getProofReceipt`.
 ```json
 {
     "method": "v_getProofReceipt",
-    "params": {   
+    "params": [{   
         "id": "<proof request hash>",
-    }    
+    }]
 }
 ```
 
@@ -107,4 +107,3 @@ There are three possible results: `pending`, `success` and `error`.
   }
 }
 ```
-
