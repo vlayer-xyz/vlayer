@@ -1,6 +1,6 @@
 # Architecture overview
 
-vlayer execution spans across three environments, each written in respective technology and consisting of related components:
+vlayer execution spans across three environments, each written in respective technologies and consisting of related components:
 - browser (js)
     - **javascript SDK** - thin wrapper around the [vlayer JSON-RPC API](/appendix/api.md)
     - **browser plugin** - used for notarization of TLS Connections
