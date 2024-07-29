@@ -50,12 +50,16 @@ mod multi_evm_env_from_input {
     use mpt::EMPTY_ROOT_HASH;
     use vlayer_engine::{
         block_header::eth::EthBlockHeader,
+        config::{MAINNET_ID, MAINNET_MERGE_BLOCK_NUMBER},
         evm::{env::location::ExecutionLocation, input::EvmInput},
     };
 
     #[test]
     fn success() -> anyhow::Result<()> {
-        let location = ExecutionLocation::default();
+        let location = ExecutionLocation {
+            chain_id: MAINNET_ID,
+            block_number: MAINNET_MERGE_BLOCK_NUMBER,
+        };
         let expected_header = EthBlockHeader {
             state_root: EMPTY_ROOT_HASH,
             number: location.block_number,
