@@ -19,7 +19,6 @@ impl TryFrom<Call> for HostCall {
 
     fn try_from(value: Call) -> Result<Self, Self::Error> {
         Ok(Self {
-            caller: parse_address_field("caller", value.caller)?,
             to: parse_address_field("to", value.to)?,
             data: parse_hex_field("data", value.data)?,
         })
