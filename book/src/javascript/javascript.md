@@ -1,7 +1,7 @@
 # Vanilla JS/TS
 # JavaScript
 
-Common way to interact with blockchain is to make calls and send transactions from JavaScript, most often form a web browser. vlayer provides developer friendly JavaScript/TypeScript api - vlayer sdk. It combines well with usual way of interacting with smart contracts. 
+A common way to interact with blockchain is to make calls and send transactions from JavaScript, most often from a web browser. vlayer provides developer friendly JavaScript/TypeScript API - vlayer sdk. It combines well with the standard way of interacting with smart contracts. 
 
 ## Installation
 To install vlayer SDK, run the following command in your JavaScript application
