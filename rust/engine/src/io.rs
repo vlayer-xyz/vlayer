@@ -61,6 +61,8 @@ pub enum GuestOutputError {
     #[error("Cannot decode execution commitment: {0}")]
     CannonDecodeExecutionCommitment(String),
 }
+
+#[derive(Debug)]
 pub struct GuestOutput {
     pub execution_commitment: ExecutionCommitment,
     pub evm_call_result: Vec<u8>,
@@ -85,6 +87,7 @@ impl GuestOutput {
     }
 }
 
+#[derive(Debug)]
 pub struct HostOutput {
     pub raw_abi: Vec<u8>,
     pub seal: Vec<u8>,
