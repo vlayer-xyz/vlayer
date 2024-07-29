@@ -40,6 +40,17 @@ impl ProviderFactory<EthersProvider<EthersClient>> for EthersProviderFactory {
     }
 }
 
+fn get_path(
+    rpc_file_cache: &HashMap<ChainId, String>,
+    chain_id: ChainId,
+) -> Result<PathBuf, HostError> {
+    let file_path_str = rpc_file_cache
+        .get(&chain_id)
+        .ok_or_else(|| HostError::NoRpcCache(chain_id))?;
+
+    Ok(PathBuf::from(file_path_str))
+}
+
 pub struct FileProviderFactory {
     rpc_file_cache: HashMap<ChainId, String>,
 }
@@ -52,13 +63,9 @@ impl FileProviderFactory {
 
 impl ProviderFactory<FileProvider> for FileProviderFactory {
     fn create(&self, chain_id: ChainId) -> Result<FileProvider, HostError> {
-        let file_path = self
-            .rpc_file_cache
-            .get(&chain_id)
-            .ok_or_else(|| HostError::NoRpcCache(chain_id))?;
-        let path_buf = PathBuf::from(file_path);
+        let file_path = get_path(&self.rpc_file_cache, chain_id)?;
 
-        FileProvider::from_file(&path_buf).map_err(|err| {
+        FileProvider::from_file(&file_path).map_err(|err| {
             HostError::Provider(format!(
                 "Error creating provider for chain ID {}: {}",
                 chain_id, err
@@ -89,14 +96,10 @@ impl ProviderFactory<CachedProvider<EthersProvider<EthersClient>>> for CachedPro
         &self,
         chain_id: ChainId,
     ) -> Result<CachedProvider<EthersProvider<EthersClient>>, HostError> {
-        let file_path = self
-            .rpc_file_cache
-            .get(&chain_id)
-            .ok_or_else(|| HostError::NoRpcCache(chain_id))?;
-        let path_buf = PathBuf::from(file_path);
+        let file_path = get_path(&self.rpc_file_cache, chain_id)?;
 
         let provider = self.ethers_provider_factory.create(chain_id)?;
-        CachedProvider::new(path_buf, provider).map_err(|err| {
+        CachedProvider::new(file_path, provider).map_err(|err| {
             HostError::Provider(format!(
                 "Error creating provider for chain ID {}: {}",
                 chain_id, err
