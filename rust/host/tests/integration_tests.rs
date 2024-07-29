@@ -110,7 +110,6 @@ mod usdt {
             account: address!("F977814e90dA44bFA03b6295A0616a897441aceC"), // Binance 8
         };
         let call = Call {
-            caller: USDT,
             to: USDT,
             data: sol_call.abi_encode(),
         };
@@ -124,55 +123,29 @@ mod usdt {
 mod uniswap {
     use super::*;
 
-    const UNISWAP: Address = address!("E592427A0AEce92De3Edee1F18E0157C05861564");
-    const UNISWAP_USER: Address = address!("f5213a6a2f0890321712520b8048D9886c1A9900");
-    const USDT: Address = address!("dAC17F958D2ee523a2206206994597C13D831ec7");
-    const WETH: Address = address!("C02aaA39b223FE8D0A0e5C4F27eAD9083C756Cc2");
+    const UNISWAP: Address = address!("1F98431c8aD98523631AE4a59f267346ea31F984");
     const BLOCK_NO: u64 = 19_493_153;
     sol! {
         #[derive(Debug, PartialEq, Eq)]
-        interface ISwapRouter {
-            struct ExactOutputSingleParams {
-                address tokenIn;
-                address tokenOut;
-                uint24 fee;
-                address recipient;
-                uint256 deadline;
-                uint256 amountOut;
-                uint256 amountInMaximum;
-                uint160 sqrtPriceLimitX96;
-            }
-            function exactOutputSingle(ExactOutputSingleParams calldata params) external payable returns (uint256 amountIn);
+        interface IUniswapV3Factory {
+            function owner() external view returns (address);
         }
     }
 
-    #[test] // mimic tx 0x241c81c3aa4c68cd07ae03a756050fc47fd91918a710250453d34c6db9d11997
-    fn exact_output_single() -> anyhow::Result<()> {
-        // swap USDT for 34.1973 WETH
-        let sol_call = ISwapRouter::exactOutputSingleCall {
-            params: ISwapRouter::ExactOutputSingleParams {
-                tokenIn: USDT,
-                tokenOut: WETH,
-                fee: 500,
-                recipient: UNISWAP_USER,
-                deadline: uint!(1_711_146_836_U256),
-                amountOut: uint!(34_197_300_000_000_000_000_U256),
-                amountInMaximum: U256::MAX,
-                sqrtPriceLimitX96: U256::ZERO,
-            },
-        };
+    #[test]
+    fn factory_owner() -> anyhow::Result<()> {
+        let sol_call = IUniswapV3Factory::ownerCall {};
         let call = Call {
-            caller: UNISWAP_USER,
             to: UNISWAP,
             data: sol_call.abi_encode(),
         };
-        let result = run::<ISwapRouter::exactOutputSingleCall>(
-            "uniswap_exact_output_single",
+        let result = run::<IUniswapV3Factory::ownerCall>(
+            "uniswap_factory_owner",
             call,
             MAINNET_ID,
             BLOCK_NO,
         )?;
-        assert_eq!(result.amountIn, uint!(112_537_714_517_U256));
+        assert_eq!(result._0, address!("1a9c8182c09f50c8318d769245bea52c32be35bc"));
         Ok(())
     }
 }
@@ -229,7 +202,6 @@ mod view {
     fn precompile() -> anyhow::Result<()> {
         let sol_call = ViewCallTest::testPrecompileCall {};
         let call = Call {
-            caller: VIEW_CALL,
             to: VIEW_CALL,
             data: sol_call.abi_encode(),
         };
@@ -250,7 +222,6 @@ mod view {
     fn nonexistent_account() -> anyhow::Result<()> {
         let sol_call = ViewCallTest::testNonexistentAccountCall {};
         let call = Call {
-            caller: VIEW_CALL,
             to: VIEW_CALL,
             data: sol_call.abi_encode(),
         };
@@ -268,7 +239,6 @@ mod view {
     fn eoa_account() -> anyhow::Result<()> {
         let sol_call = ViewCallTest::testEoaAccountCall {};
         let call = Call {
-            caller: VIEW_CALL,
             to: VIEW_CALL,
             data: sol_call.abi_encode(),
         };
@@ -286,7 +256,6 @@ mod view {
     fn blockhash() -> anyhow::Result<()> {
         let sol_call = ViewCallTest::testBlockhashCall {};
         let call = Call {
-            caller: VIEW_CALL,
             to: VIEW_CALL,
             data: sol_call.abi_encode(),
         };
@@ -307,7 +276,6 @@ mod view {
     fn chainid() -> anyhow::Result<()> {
         let sol_call = ViewCallTest::testChainidCall {};
         let call = Call {
-            caller: VIEW_CALL,
             to: VIEW_CALL,
             data: sol_call.abi_encode(),
         };
@@ -325,7 +293,6 @@ mod view {
     fn multi_contract_calls() -> anyhow::Result<()> {
         let sol_call = ViewCallTest::testMuliContractCallsCall {};
         let call = Call {
-            caller: VIEW_CALL,
             to: VIEW_CALL,
             data: sol_call.abi_encode(),
         };
