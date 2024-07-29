@@ -73,9 +73,9 @@ mod multi_evm_env_from_input {
         )]);
 
         let validated_input = ValidatedMultiEvmInput::from(input);
-        let evm_env = MultiEvmEnv::from(validated_input);
-        let evm_env = evm_env.borrow();
-        let actual_header = evm_env
+        let multi_evm_env = MultiEvmEnv::from(validated_input);
+        let multi_evm_env = multi_evm_env.borrow();
+        let actual_header = multi_evm_env
             .get(&location)
             .unwrap()
             .header()
