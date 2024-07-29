@@ -9,6 +9,7 @@ use revm::{
 use thiserror::Error;
 use tracing::{error, info};
 
+use crate::inspector::call_outcome;
 use crate::{
     evm::env::{cached::CachedEvmEnv, location::ExecutionLocation},
     inspector::TravelInspector,
@@ -71,13 +72,21 @@ where
     fn inspector_callback(
         &self,
         location: ExecutionLocation,
-        _: CallInputs,
+        inputs: CallInputs,
     ) -> Option<CallOutcome> {
         info!(
             "Intercepting the call. Block number: {:?}, chain id: {:?}",
             location.block_number, location.chain_id
         );
-        None
+        let call = Call {
+            caller: inputs.caller,
+            to: inputs.bytecode_address,
+            data: inputs.input.clone().into(),
+        };
+        let result = self.call(&call, location).unwrap();
+        info!("Intercepted call returned: {:?}", result);
+        let outcome = call_outcome(&result[..], &inputs);
+        Some(outcome)
     }
 
     fn transact(
