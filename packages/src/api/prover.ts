@@ -7,7 +7,7 @@ type Bytecode = {
     object: Hex,
 }
 
-export type ProverSpec = {
+export type ContractSpec = {
     abi: Abi,
     bytecode: Bytecode,
     object: Hex
@@ -16,12 +16,12 @@ export type ProverSpec = {
 type ProverArg = number | string | boolean;
 
 
-export async function getProverSpec(file: string): Promise<ProverSpec> {
-    const output: ProverSpec = await Bun.file(file).json();
+export async function getContractSpec(file: string): Promise<ContractSpec> {
+    const output: ContractSpec = await Bun.file(file).json();
     return output;
 }
 
-export async function prove(caller: Address, prover: Address, proverSpec: ProverSpec, functionName: string, args: ProverArg[], blockNo: number): Promise<any> {
+export async function prove(caller: Address, prover: Address, proverSpec: ContractSpec, functionName: string, args: ProverArg[], blockNo: number): Promise<any> {
     let calldata = encodeFunctionData({
         abi: proverSpec.abi,
         functionName,
