@@ -220,3 +220,9 @@ And voilà, we just successfully used email in the context of an on-chain smart 
 
 > Keep in mind that this is a simplified version of a real MultiSig wallet, demonstrating how an email recovery function could operate.
 
+## Security considerations
+Email is often used for malicious actions such as phishing or spoofing. It is very important to mitigate these threats when dealing with email messages. Otherwise, bad actors could exploit this to their advantage by manipulating the content of the email and using it to prove their false claims. 
+
+How can we be sure that the welcome email we receive from Github was actually sent by Github? At vlayer, we ensure that proof is only generated for emails that have been authorized by the domain owner. We do this by extracting a digital signature from the email headers. Then we can retrieve the sender's public key from the domain's DNS records and confirm the email's authenticity.  
+
+Unfortunately, in a situation where the mail domain is under hacker control, we have no way of detecting this. This means that we have to trust the sender's mail servers completely.
