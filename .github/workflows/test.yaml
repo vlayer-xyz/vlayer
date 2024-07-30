@@ -29,7 +29,7 @@ jobs:
             rust
             rust/guest_wrapper/risc0_guest
 
-      - name: Install risc0 instaler
+      - name: Install risc0 installer
         run: cargo binstall -y cargo-risczero --force
 
       - name: Install risc0 toolchain
@@ -46,15 +46,19 @@ jobs:
           ANVIL_SERVER_PID=$!
           echo "ANVIL_SERVER_PID=$ANVIL_SERVER_PID" >> $GITHUB_ENV
 
-      - name: Deploy simple example contract
-        working-directory: examples/simple
+      - name: Deploy contracts
+        env:
+          ETH_RPC_URL: localhost:8545
+          DEPLOYER_PRIV: "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
         run: |
-          ../../bash/vlayer-deploy.sh simple
-
-      - name: Deploy web_proof example contract
-        working-directory: examples/web_proof
-        run: |
-          ../../bash/vlayer-deploy.sh web_proof
+          (
+            cd examples/simple
+            forge create --private-key ${DEPLOYER_PRIV} "src/vlayer/SimpleProver.sol:SimpleProver"
+          ) 
+          (
+            cd examples/web_proof 
+            forge create --private-key ${DEPLOYER_PRIV} "src/vlayer/WebProofProver.sol:WebProofProver"
+          ) 
 
       - name: Run workspace rust tests
         working-directory: rust
