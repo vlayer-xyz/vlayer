@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import {ExecutionCommitment} from "vlayer/ExecutionCommitment.sol";
+import {Proof} from "vlayer/Proof.sol";
 import {Verifier} from "vlayer/Verifier.sol";
 
 import {NftOwnershipProver} from "./NftOwnershipProver.sol";
@@ -18,7 +18,7 @@ contract Airdrop is Verifier {
     address awesomeTokenAddr = 0x510848bE71Eac101a4Eb871C6436178e52210646;
     mapping(address => bool) public withdrawn;
 
-    function claim(bytes calldata, ExecutionCommitment memory, address sender)
+    function claim(Proof calldata, address sender)
         public
         onlyVerified(NFT_OWNERSHIP_VLAYER_CONTRACT, FUNCTION_SELECTOR)
     {

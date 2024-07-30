@@ -1,5 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 import {SimpleTravelProver} from "./SimpleTravelProver.sol";
+
+import {Proof} from "vlayer/Proof.sol";
 import {Verifier} from "vlayer/Verifier.sol";
 
 contract SimpleTravel is Verifier {
@@ -9,8 +11,5 @@ contract SimpleTravel is Verifier {
         prover = _prover;
     }
 
-    function verify()
-        public
-        onlyVerified(prover, SimpleTravelProver.aroundTheWorld.selector)
-    {}
+    function verify(Proof calldata) public onlyVerified(prover, SimpleTravelProver.aroundTheWorld.selector) {}
 }
