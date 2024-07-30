@@ -8,7 +8,7 @@ address constant CHEATCODES = address(uint160(uint256(keccak256("vlayer.cheatcod
 
 interface ICheatCodes {
     function startProof() external returns (bool);
-    function endProof() external returns (bool);
+    function endProof() external returns (Proof memory);
 }
 
 contract VTest is Test {
@@ -17,7 +17,6 @@ contract VTest is Test {
     }
 
     function endProof() internal returns (Proof memory) {
-        ICheatCodes(CHEATCODES).endProof();
-        return Proof(0, Seal(0, 0), ExecutionCommitment(address(0), bytes4(0), 0, bytes32(0)));
+        return ICheatCodes(CHEATCODES).endProof();
     }
 }
