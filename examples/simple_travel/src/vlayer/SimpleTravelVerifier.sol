@@ -1,4 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
+pragma solidity ^0.8.23;
+
 import {SimpleTravelProver} from "./SimpleTravelProver.sol";
 
 import {Proof} from "vlayer/Proof.sol";

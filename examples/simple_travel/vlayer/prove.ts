@@ -3,6 +3,10 @@ import * as path from "path";
 import { type Address } from "viem";
 import { client } from "../../../packages/src/api/helpers";
 
+const COUNTER = "Counter";
+const COUNTER_FILE = path.join(__dirname, `../out/${COUNTER}.sol/${COUNTER}.json`)
+const COUNTER_SPEC = await getContractSpec(COUNTER_FILE);
+
 const PROVER = "SimpleTravelProver";
 const FILE = path.join(__dirname, `../out/${PROVER}.sol/${PROVER}.json`)
 const PROVER_SPEC = await getContractSpec(FILE);
