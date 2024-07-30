@@ -19,7 +19,6 @@ use foundry_evm::{
     fuzz::{fixture_name, FuzzFixtures},
     traces::{TraceKind, TraceMode},
 };
-use rayon::prelude::*;
 use std::{
     collections::{BTreeMap, HashMap},
     time::Instant,
@@ -373,7 +372,7 @@ impl<'a> ContractRunner<'a> {
         );
 
         let test_results = functions
-            .par_iter()
+            .iter()
             .map(|&func| {
                 let start = Instant::now();
 
