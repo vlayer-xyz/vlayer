@@ -6,6 +6,7 @@ import {Counter} from "./Counter.sol";
 
 contract SimpleTravelProver is Prover {
     Counter counter;
+
     constructor(address _counter) {
         counter = Counter(_counter);
     }

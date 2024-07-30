@@ -14,5 +14,4 @@ contract ProverTest is Test {
         SimpleProver prover = new SimpleProver();
         prover.setBlock(420);
     }
-
 }
