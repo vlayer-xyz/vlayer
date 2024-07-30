@@ -1,9 +1,13 @@
 # Tests
-vlayer supports automated testing for [Verifier](/advanced/verifier.html) and [Prover](/advanced/prover.html) contracts.
+In many ways prover and verifier are just like regular smart contracts. Therefore, you can unit test with your favorite smart contract testing framework.
 
-The vlayer test suite allows to simulate the entire flow from the generation of computation proofs to their verification in the on-chain contracts. 
+vlayer introduces `vlayer test` command that provides additional support for:
+- testing prover functions that use `setBlock` and `setChain`
+- integration testing of the prover working together with verifier
 
-If you have ever used [Foundry](https://book.getfoundry.sh/forge/tests) tests, it feels almost the same.
+The `vlayer test` command allows to simulate the entire flow from the generation of computation proofs, inside zkEVM, to their verification in the on-chain contracts.
+
+The command uses the Foundry's [forge](https://book.getfoundry.sh/forge/tests) tests, so if you have ever used it, you will feel right at home.
 
 ## Running tests
 Test command searches for all the contract tests available in the working directory. 
