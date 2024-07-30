@@ -19,7 +19,7 @@ for example in "${VLAYER_HOME}/examples/simple" ; do
     forge build
 
     bun install
-    bun run prove.tsx 
+    bun run prove.ts 
 
   )
 done
