@@ -11,7 +11,7 @@ contract SimpleTravelProver is Prover {
     }
 
     function aroundTheWorld() public returns (uint256) {
-        setBlock(1);
+        // setBlock(block.number);
         return counter.count();
     }
 }
