@@ -7,8 +7,14 @@ To start working with this repository, you will need to install following softwa
 - [Rust](https://www.rust-lang.org/tools/install) compiler
 - Rust risc-0 [toolchain](https://dev.risczero.com/api/zkvm/quickstart)
 - [Foundry](https://book.getfoundry.sh/getting-started/installation)
+- [Bun](https://bun.sh)
 
 ## Building
+
+Before you build solidity smart contracts, make sure that dependencies are up to date:
+```sh
+git submodule update --init --recursive
+```
 
 To build vlayer project, first, navigate to the `rust` directory and type:
 
@@ -16,37 +22,25 @@ To build vlayer project, first, navigate to the `rust` directory and type:
 cargo build
 ```
 
-Before you build solidity smart contracts, make sure that dependencies are up to date:
-```sh
-git submodule update --init --recursive
-```
-
-Next, navigate to `contracts` and type:
-```sh
-forge build
-```
-
 ## Running
-
-To deploy contract, first install `jq`:
-
-```sh
-brew install jq
-```
 
 Run anvil in the background:
 ```sh
 anvil
 ```
 
-Deploy the contract by going to its directory (e.g. `examples/simple`) and running `../../bash/vlayer-deploy.sh`.
-If `VLAYER_CONTRACT_ADDRESS` is displayed, contract was deployed successfully.
-
-Finally, run:
-
+Then, to run proving server, execute the following command:
 ```sh
-RUST_LOG=info RISC0_DEV_MODE=1 cargo run
+RUST_LOG=info RISC0_DEV_MODE=1 cargo run -- serve
 ```
+
+Finally, to test proving navigate to any of the examples within `/examples` directory, find `vlayer` directory and run the following command:
+```sh
+forge clean 
+forge build
+bun install 
+bun run prove.ts
+``` 
 
 For guides about the project structure, check out [architecture appendix](/appendix/architecture.md).
 
