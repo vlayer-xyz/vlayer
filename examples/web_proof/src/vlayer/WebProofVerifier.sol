@@ -2,6 +2,8 @@
 pragma solidity ^0.8.13;
 
 import {WebProofProver} from "./WebProofProver.sol";
+
+import {Proof} from "vlayer/Proof.sol";
 import {Verifier} from "vlayer/Verifier.sol";
 
 contract WebProofVerifier is Verifier {
@@ -11,8 +13,5 @@ contract WebProofVerifier is Verifier {
         prover = _prover;
     }
 
-    function verify()
-        public
-        onlyVerified(prover, WebProofProver.main.selector)
-    {}
+    function verify(Proof calldata) public onlyVerified(prover, WebProofProver.main.selector) {}
 }

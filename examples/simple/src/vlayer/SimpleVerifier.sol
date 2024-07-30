@@ -2,8 +2,9 @@
 pragma solidity ^0.8.13;
 
 import {IRiscZeroVerifier} from "risc0-ethereum/IRiscZeroVerifier.sol";
+
+import {Proof} from "vlayer/Proof.sol";
 import {Verifier} from "vlayer/Verifier.sol";
-import {ExecutionCommitment} from "vlayer/ExecutionCommitment.sol";
 
 import {SimpleProver} from "./SimpleProver.sol";
 
@@ -15,10 +16,7 @@ contract Simple is Verifier {
         prover = _prover;
     }
 
-    function updateSum(bytes calldata seal, ExecutionCommitment memory commitment, uint256 sum)
-        public
-        onlyVerified(prover, SimpleProver.sum.selector)
-    {
+    function updateSum(Proof calldata, uint256 sum) public onlyVerified(prover, SimpleProver.sum.selector) {
         latestSum = sum;
     }
 }
