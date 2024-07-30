@@ -101,3 +101,13 @@ What exactly was going on in the snippet above?
 And that's it! 
 
 As you can see, Web Proofs can be useful for building dApps. 
+
+## Security considerations
+To use web proofs for trusted verification, we need to be sure that no one has generated them using tempered data. Otherwise, someone could generate a valid proof based on completely false information and try to exploit it. To prevent this, vlayer captures web data and verifies it using the Transport Layer Security (TLS) protocol. 
+
+By default, TLS establishes secure communications only between a server and a client. TLS ensures that the data has not been tampered with and that the server is who it claims to be. This setup plays a vital role in web security, but is not enough for reliable verification. vlayer solves this by introducing an additional party to the TLS communication: *Notary*. 
+
+The job of *Notary* is to verify the TLS session transcript and make sure that nothing malicious is happening. 
+Downside of involving *Notary* is that it must be a trusted entity. *Notary* blindly signs the data, so it can lead to situation where prover cooperates with *Notary* to trick *Verifier*. 
+
+A solution to the above challenge and other security considerations will be available soon in this section.
