@@ -1,8 +1,22 @@
-# Compiler files
-cache/
-out/
+# Foundry artifacts
+**/broadcast
+**/cache
 
-# Ignores development broadcast logs
-!*/broadcast
-*/broadcast/*/31337/
-*/broadcast/**/dry-run/
+# Dependency directories
+**/node_modules/
+
+# Logs
+**/logs
+**/_.log
+**/npm-debug.log_
+**/yarn-debug.log*
+**/yarn-error.log*
+**/lerna-debug.log*
+**/.pnpm-debug.log*
+
+# dotenv environment variable files
+**/.env
+**/.env.development.local
+**/.env.test.local
+**/.env.production.local
+**/.env.local
