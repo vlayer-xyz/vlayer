@@ -1,14 +1,15 @@
+use crate::cheatcodes::{endProofCall, startProofCall, ExecutionCommitment, Proof, Seal};
+use alloy_sol_types::{SolCall, SolValue};
 use forge::revm::interpreter::{Gas, InstructionResult};
 use foundry_evm::revm::interpreter::{CallInputs, CallOutcome, InterpreterResult};
-use foundry_evm::revm::primitives::{address, Address, U256};
+use foundry_evm::revm::primitives::{address, Address, FixedBytes, U256};
 use foundry_evm::revm::{Database, EvmContext, Inspector};
-
-use vlayer_engine::consts::U256_BYTES;
+use std::convert::Into;
+use tracing::warn;
 
 pub struct CheatcodeInspector {}
 
 const CHEATCODE_CALL_ADDR: Address = address!("e5F6E4A8da66436561059673919648CdEa4e486B");
-
 impl<DB: Database> Inspector<DB> for CheatcodeInspector {
     fn call(
         &mut self,
@@ -16,11 +17,44 @@ impl<DB: Database> Inspector<DB> for CheatcodeInspector {
         inputs: &mut CallInputs,
     ) -> Option<CallOutcome> {
         if inputs.target_address == CHEATCODE_CALL_ADDR {
-            let mock_return: [u8; U256_BYTES] = U256::ZERO.to_be_bytes();
-            return Some(CallOutcome::new(
-                InterpreterResult::new(InstructionResult::Return, mock_return.into(), Gas::new(0)),
-                inputs.return_memory_offset.clone(),
-            ));
+            match inputs.input.slice(0..4).as_ref().try_into() {
+                Ok(startProofCall::SELECTOR) => {
+                    return Some(CallOutcome::new(
+                        InterpreterResult::new(
+                            InstructionResult::Return,
+                            true.abi_encode().into(),
+                            Gas::new(0),
+                        ),
+                        inputs.return_memory_offset.clone(),
+                    ));
+                }
+                Ok(endProofCall::SELECTOR) => {
+                    let proof = Proof {
+                        length: U256::ZERO,
+                        seal: Seal {
+                            lhv: FixedBytes::new([0u8; 18]),
+                            rhv: FixedBytes::new([0u8; 19]),
+                        },
+                        commitment: ExecutionCommitment {
+                            proverContractAddress: Address::default(),
+                            functionSelector: FixedBytes::new([0u8; 4]),
+                            settleBlockNumber: U256::ZERO,
+                            settleBlockHash: FixedBytes::new([0u8; 32]),
+                        },
+                    };
+                    return Some(CallOutcome::new(
+                        InterpreterResult::new(
+                            InstructionResult::Return,
+                            proof.abi_encode().into(),
+                            Gas::new(0),
+                        ),
+                        inputs.return_memory_offset.clone(),
+                    ));
+                }
+                _ => {
+                    warn!("Unknown cheatcode call {}", inputs.input);
+                }
+            }
         }
         return None;
     }

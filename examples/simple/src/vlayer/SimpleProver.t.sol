@@ -2,7 +2,8 @@
 pragma solidity ^0.8.13;
 
 import {SimpleProver} from "./SimpleProver.sol";
-import "vlayer/testing/VTest.sol";
+import {VTest} from "vlayer/testing/VTest.sol";
+import {Proof} from "vlayer/Proof.sol";
 
 contract ProverTest is VTest {
     function test_sum() public {
@@ -14,6 +15,8 @@ contract ProverTest is VTest {
         SimpleProver prover = new SimpleProver();
         startProof();
         prover.setBlock(420);
+        Proof memory proof = endProof();
+        assertEq(proof.commitment.functionSelector, bytes4(0));
     }
 
 }
