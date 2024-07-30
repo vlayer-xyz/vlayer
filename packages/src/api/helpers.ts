@@ -1,6 +1,6 @@
 import { createTestClient, walletActions, publicActions, http, Address } from "viem";
 import { foundry } from "viem/chains";
-import { type ProverSpec } from "./prover";
+import { type ContractSpec } from "./prover";
 
 export function client() {
     return createTestClient({
@@ -12,14 +12,15 @@ export function client() {
         .extend(publicActions);
 }
 
-export async function deployProver(proverSpec: ProverSpec): Promise<Address> {
+export async function deployContract(contractSpec: ContractSpec, args: any[] = []): Promise<Address> {
     const ethClient = client();
     const [deployer] = await ethClient.getAddresses();
 
     const txHash = await ethClient.deployContract({
-        abi: proverSpec.abi,
-        bytecode: proverSpec.bytecode.object,
-        account: deployer
+        abi: contractSpec.abi,
+        bytecode: contractSpec.bytecode.object,
+        account: deployer,
+        args
     });
 
     const receipt = await ethClient.waitForTransactionReceipt({ hash: txHash })
