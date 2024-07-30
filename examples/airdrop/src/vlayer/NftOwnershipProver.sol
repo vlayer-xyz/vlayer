@@ -20,10 +20,10 @@ contract NftOwnershipProver is Prover {
     }
 
     function main() public returns (address) {
-        // 🔥 Teleport to chain on which the verification is happening
-        setChain(1, 21_000_000);
+        // // 🔥 Teleport to chain on which the verification is happening
+        // setChain(1, 21_000_000);
 
-        require_byac_nft();
+        // require_byac_nft();
 
         // anything returned here would be visible to the public
         return (msg.sender);
