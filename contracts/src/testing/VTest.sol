@@ -13,10 +13,10 @@ interface ICheatCodes {
 
 contract VTest is Test {
     function callProver() internal {
-        ICheatCodes(CHEATCODES).startProof();
+        ICheatCodes(CHEATCODES).callProver();
     }
 
     function getProof() internal returns (Proof memory) {
-        return ICheatCodes(CHEATCODES).endProof();
+        return ICheatCodes(CHEATCODES).getProof();
     }
 }
