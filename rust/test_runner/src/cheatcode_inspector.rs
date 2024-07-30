@@ -56,6 +56,6 @@ impl<DB: Database> Inspector<DB> for CheatcodeInspector {
                 }
             }
         }
-        return None;
+        None
     }
 }
