@@ -28,11 +28,11 @@ pub(crate) async fn call(params: Params, config: Arc<Config>) -> Result<CallResu
 
     Ok(CallResult {
         result: format!(
-            "start_contract_address: {}, function_selector: {}, evm_call_result: {:?}, seal: {:?}",
+            "prover_contract_address: {}, function_selector: {}, evm_call_result: {:?}, seal: {:?}",
             return_data
                 .guest_output
                 .execution_commitment
-                .startContractAddress,
+                .proverContractAddress,
             return_data
                 .guest_output
                 .execution_commitment

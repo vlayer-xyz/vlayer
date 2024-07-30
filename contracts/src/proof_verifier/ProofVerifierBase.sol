@@ -18,8 +18,8 @@ abstract contract ProofVerifierBase is IProofVerifier {
     IRiscZeroVerifier public immutable verifier;
 
     function verify(Proof calldata proof, bytes32 journalHash, address expectedProver, bytes4 expectedSelector)
-        external
-        view
+    external
+    view
     {
         _verifyProofMode(proof);
         _verifyExecutionEnv(proof, expectedProver, expectedSelector);
@@ -31,7 +31,7 @@ abstract contract ProofVerifierBase is IProofVerifier {
     }
 
     function _verifyExecutionEnv(Proof memory proof, address prover, bytes4 selector) private view {
-        require(proof.commitment.startContractAddress == prover, "Invalid prover");
+        require(proof.commitment.proverContractAddress == prover, "Invalid prover");
         require(proof.commitment.functionSelector == selector, "Invalid selector");
 
         require(proof.commitment.settleBlockNumber < block.number, "Invalid block number: block from future");
