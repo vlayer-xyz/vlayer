@@ -19,5 +19,5 @@ sol!(
 
 
     function callProver() external returns (bool);
-    function getProof() external returns (Proof);
+    function getProof() external returns (Proof memory);
 );

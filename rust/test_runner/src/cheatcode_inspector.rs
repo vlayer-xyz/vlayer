@@ -10,6 +10,7 @@ use tracing::warn;
 pub struct CheatcodeInspector {}
 
 const CHEATCODE_CALL_ADDR: Address = address!("e5F6E4A8da66436561059673919648CdEa4e486B");
+
 impl<DB: Database> Inspector<DB> for CheatcodeInspector {
     fn call(
         &mut self,
@@ -18,7 +19,7 @@ impl<DB: Database> Inspector<DB> for CheatcodeInspector {
     ) -> Option<CallOutcome> {
         if inputs.target_address == CHEATCODE_CALL_ADDR {
             match inputs.input.slice(0..4).as_ref().try_into() {
-                Ok(getProofCall::SELECTOR) => {
+                Ok(callProverCall::SELECTOR) => {
                     return Some(CallOutcome::new(
                         InterpreterResult::new(
                             InstructionResult::Return,
@@ -28,7 +29,7 @@ impl<DB: Database> Inspector<DB> for CheatcodeInspector {
                         inputs.return_memory_offset.clone(),
                     ));
                 }
-                Ok(callProverCall::SELECTOR) => {
+                Ok(getProofCall::SELECTOR) => {
                     let proof = Proof {
                         length: U256::ZERO,
                         seal: Seal {
