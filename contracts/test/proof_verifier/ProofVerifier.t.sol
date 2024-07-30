@@ -48,7 +48,7 @@ contract ProofVerifier_Verify_Tests is Test {
     }
 
     function test_invalidProver() public {
-        commitment.startContractAddress = address(0x0000000000000000000000000000000000deadbeef);
+        commitment.proverContractAddress = address(0x0000000000000000000000000000000000deadbeef);
         (Proof memory proof, bytes32 journalHash) = helpers.createProof(commitment);
 
         vm.expectRevert("Invalid prover");

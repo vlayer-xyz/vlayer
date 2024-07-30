@@ -15,7 +15,7 @@ See example verification function below:
 contract Example is Verifier {
 
     function claim(Proof _p, address verifiedArg1, uint verifiedArg2, bytes extraArg) public returns (uint)
-        onlyVerified(PROVER_ADDRESS, FUNCTION_SIGNATURE) {
+        onlyVerified(PROVER_ADDRESS, FUNCTION_SELECTOR) {
         //...
     }
 
@@ -39,7 +39,7 @@ pub struct GuestOutput {
 
 ```solidity
 struct ExecutionCommitment {
-    address startContractAddress;
+    address proverContractAddress;
     bytes4 functionSelector;
     uint256 settleBlockNumber;
     bytes32 settleBlockHash;

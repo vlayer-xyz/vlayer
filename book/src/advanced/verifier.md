@@ -15,7 +15,7 @@ contract Example is Verifier {
     ) 
       public 
       returns (uint)
-      onlyVerified(PROVER_ADDRESS, FUNCTION_SIGNATURE) 
+      onlyVerified(PROVER_ADDRESS, FUNCTION_SELECTOR) 
     {
         //...
     }

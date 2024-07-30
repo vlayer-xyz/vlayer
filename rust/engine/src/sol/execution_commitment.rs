@@ -13,7 +13,7 @@ impl ExecutionCommitment {
     /// Returns the [SolCommitment] used to validate the environment.
     pub fn new(header: &dyn EvmBlockHeader, to: Address, selector: CallSelector) -> Self {
         Self {
-            startContractAddress: to,
+            proverContractAddress: to,
             functionSelector: selector.into(),
             settleBlockHash: header.hash_slow(),
             settleBlockNumber: U256::from(header.number()),
