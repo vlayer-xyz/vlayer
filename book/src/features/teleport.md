@@ -55,3 +55,6 @@ Currently, supported chains are Ethereum Sepolia and Optimism testnet.
 > ```
 > 
 > This command will download all necessary artifacts to your project.
+
+## Security considerations
+Due to optimistic rollups and their finality, it is possible that invalid transactions may be discarded within the fault challenge period. It is important to be cautious or simply perform teleport jumps to block numbers that are fully confirmed on L1.
