@@ -14,6 +14,7 @@ contract WebProofProver is Prover {
     using Strings for string;
 
     string dataUrl = "api.x.com";
+
     constructor() {}
 
     function main(Web calldata web) public returns (bool) {
