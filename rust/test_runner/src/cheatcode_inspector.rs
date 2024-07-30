@@ -1,4 +1,4 @@
-use crate::cheatcodes::{endProofCall, startProofCall, ExecutionCommitment, Proof, Seal};
+use crate::cheatcodes::{callProverCall, getProofCall, ExecutionCommitment, Proof, Seal};
 use alloy_sol_types::{SolCall, SolValue};
 use forge::revm::interpreter::{Gas, InstructionResult};
 use foundry_evm::revm::interpreter::{CallInputs, CallOutcome, InterpreterResult};
@@ -18,7 +18,7 @@ impl<DB: Database> Inspector<DB> for CheatcodeInspector {
     ) -> Option<CallOutcome> {
         if inputs.target_address == CHEATCODE_CALL_ADDR {
             match inputs.input.slice(0..4).as_ref().try_into() {
-                Ok(startProofCall::SELECTOR) => {
+                Ok(getProofCall::SELECTOR) => {
                     return Some(CallOutcome::new(
                         InterpreterResult::new(
                             InstructionResult::Return,
@@ -28,7 +28,7 @@ impl<DB: Database> Inspector<DB> for CheatcodeInspector {
                         inputs.return_memory_offset.clone(),
                     ));
                 }
-                Ok(endProofCall::SELECTOR) => {
+                Ok(callProverCall::SELECTOR) => {
                     let proof = Proof {
                         length: U256::ZERO,
                         seal: Seal {

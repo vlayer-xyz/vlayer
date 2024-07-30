@@ -18,6 +18,6 @@ sol!(
     }
 
 
-    function startProof() external returns (bool);
-    function endProof() external returns (Proof);
+    function callProver() external returns (bool);
+    function getProof() external returns (Proof);
 );

@@ -13,9 +13,9 @@ contract ProverTest is VTest {
 
     function test_setBlockWillNotRevert() public {
         SimpleProver prover = new SimpleProver();
-        startProof();
+        callProver();
         prover.setBlock(420);
-        Proof memory proof = endProof();
+        Proof memory proof = getProof();
         assertEq(proof.commitment.functionSelector, bytes4(0));
     }
 
