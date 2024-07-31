@@ -7,7 +7,6 @@ mod test {
     use risc0_zkvm::ExecutorEnv;
     use vlayer_engine::config::MAINNET_ID;
     use vlayer_engine::engine::EngineError;
-    use vlayer_engine::evm::env::location::ExecutionLocation;
     use vlayer_engine::io::Call;
 
     #[test]
@@ -35,8 +34,7 @@ mod test {
 
     #[test]
     fn try_new_invalid_rpc_url() -> anyhow::Result<()> {
-        let execution_location = ExecutionLocation::new(0, MAINNET_ID);
-        let res = Host::try_new(HostConfig::new("http://localhost:123", execution_location))?
+        let res = Host::try_new(HostConfig::new("http://localhost:123", MAINNET_ID))?
             .run(Call::default());
 
         assert!(matches!(

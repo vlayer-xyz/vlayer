@@ -3,7 +3,7 @@ use std::sync::Arc;
 use crate::error::AppError;
 use crate::server::Config;
 use host::host::{config::HostConfig, Host};
-use host::{Call as HostCall, ExecutionLocation};
+use host::Call as HostCall;
 use serde::{Deserialize, Serialize};
 use types::{Augmentors, Call, CallContext, CallResult};
 
@@ -20,9 +20,7 @@ pub struct Params {
 pub(crate) async fn call(params: Params, config: Arc<Config>) -> Result<CallResult, AppError> {
     let call: HostCall = params.call.try_into()?;
 
-    let execution_location =
-        ExecutionLocation::new(params.context.block_no, params.context.chain_id);
-    let config = HostConfig::new(&config.url, execution_location);
+    let config = HostConfig::new(&config.url, params.context.chain_id);
 
     let return_data = tokio::task::spawn_blocking(|| Host::try_new(config)?.run(call)).await??;
 

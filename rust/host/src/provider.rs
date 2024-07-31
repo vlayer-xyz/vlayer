@@ -1,4 +1,4 @@
-use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256};
+use alloy_primitives::{Address, Bytes, StorageKey, StorageValue, TxNumber, U256};
 use auto_impl::auto_impl;
 use std::error::Error as StdError;
 use vlayer_engine::block_header::EvmBlockHeader;
@@ -24,27 +24,35 @@ pub type EthersClient = ethers_providers::Provider<RetryClient<Http>>;
 pub trait BlockingProvider {
     type Error: StdError + Send + Sync + 'static;
 
-    fn get_balance(&self, address: Address, block: BlockNumber) -> Result<U256, Self::Error>;
+    fn get_balance(
+        &self,
+        address: Address,
+        block: alloy_primitives::BlockNumber,
+    ) -> Result<U256, Self::Error>;
     fn get_block_header(
         &self,
-        block: BlockNumber,
+        block: ethers_core::types::BlockNumber,
     ) -> Result<Option<Box<dyn EvmBlockHeader>>, Self::Error>;
-    fn get_code(&self, address: Address, block: BlockNumber) -> Result<Bytes, Self::Error>;
+    fn get_code(
+        &self,
+        address: Address,
+        block: alloy_primitives::BlockNumber,
+    ) -> Result<Bytes, Self::Error>;
     fn get_proof(
         &self,
         address: Address,
         storage_keys: Vec<StorageKey>,
-        block: BlockNumber,
+        block: alloy_primitives::BlockNumber,
     ) -> Result<EIP1186Proof, Self::Error>;
     fn get_storage_at(
         &self,
         address: Address,
         key: StorageKey,
-        block: BlockNumber,
+        block: alloy_primitives::BlockNumber,
     ) -> Result<StorageValue, Self::Error>;
     fn get_transaction_count(
         &self,
         address: Address,
-        block: BlockNumber,
+        block: alloy_primitives::BlockNumber,
     ) -> Result<TxNumber, Self::Error>;
 }

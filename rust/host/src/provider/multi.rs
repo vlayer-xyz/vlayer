@@ -35,11 +35,11 @@ mod get {
     use crate::provider::{factory::FileProviderFactory, FileProvider};
 
     use super::*;
-    use file_provider_test_factory::NullProviderFactory;
+    use null_provider_factory::NullProviderFactory;
     use std::path::PathBuf;
     use vlayer_engine::config::MAINNET_ID;
 
-    mod file_provider_test_factory {
+    mod null_provider_factory {
         use super::{HostError, ProviderFactory};
         use crate::provider::FileProvider;
         use alloy_primitives::ChainId;
@@ -60,7 +60,7 @@ mod get {
 
         let cache = RefCell::new(HashMap::from([(MAINNET_ID, Rc::clone(&provider))]));
 
-        // FileProviderTestFactory returns an error when it tries to create a provider.
+        // NullProviderFactory returns an error when it tries to create a provider.
         // If no error was returned, it means the factory did not try to create a provider and used cached provider.
         let cached_multi_provider = CachedMultiProvider {
             cache,

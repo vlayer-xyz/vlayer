@@ -1,5 +1,5 @@
 use super::{BlockingProvider, EIP1186Proof};
-use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256};
+use alloy_primitives::{Address, Bytes, StorageKey, StorageValue, TxNumber, U256};
 use anyhow::bail;
 use json::{AccountQuery, BlockQuery, JsonCache, ProofQuery, StorageQuery};
 use std::{cell::RefCell, collections::hash_map::Entry, path::PathBuf};
@@ -50,14 +50,11 @@ impl<P: BlockingProvider> BlockingProvider for CachedProvider<P> {
 
     fn get_block_header(
         &self,
-        block: BlockNumber,
+        block: ethers_core::types::BlockNumber,
     ) -> Result<Option<Box<dyn EvmBlockHeader>>, Self::Error> {
-        match self
-            .cache
-            .borrow_mut()
-            .partial_blocks
-            .entry(BlockQuery { block_no: block })
-        {
+        match self.cache.borrow_mut().partial_blocks.entry(BlockQuery {
+            block_no: block.into(),
+        }) {
             Entry::Occupied(entry) => Ok(entry.get().clone()),
             Entry::Vacant(v) => match self.inner.get_block_header(block) {
                 Ok(header) => Ok(v.insert(header).clone()),
@@ -69,7 +66,7 @@ impl<P: BlockingProvider> BlockingProvider for CachedProvider<P> {
     fn get_transaction_count(
         &self,
         address: Address,
-        block: BlockNumber,
+        block: alloy_primitives::BlockNumber,
     ) -> Result<TxNumber, Self::Error> {
         match self
             .cache
@@ -87,7 +84,11 @@ impl<P: BlockingProvider> BlockingProvider for CachedProvider<P> {
         }
     }
 
-    fn get_balance(&self, address: Address, block: BlockNumber) -> Result<U256, Self::Error> {
+    fn get_balance(
+        &self,
+        address: Address,
+        block: alloy_primitives::BlockNumber,
+    ) -> Result<U256, Self::Error> {
         match self.cache.borrow_mut().balance.entry(AccountQuery {
             block_no: block,
             address,
@@ -100,7 +101,11 @@ impl<P: BlockingProvider> BlockingProvider for CachedProvider<P> {
         }
     }
 
-    fn get_code(&self, address: Address, block: BlockNumber) -> Result<Bytes, Self::Error> {
+    fn get_code(
+        &self,
+        address: Address,
+        block: alloy_primitives::BlockNumber,
+    ) -> Result<Bytes, Self::Error> {
         match self.cache.borrow_mut().code.entry(AccountQuery {
             block_no: block,
             address,
@@ -117,7 +122,7 @@ impl<P: BlockingProvider> BlockingProvider for CachedProvider<P> {
         &self,
         address: Address,
         key: StorageKey,
-        block: BlockNumber,
+        block: alloy_primitives::BlockNumber,
     ) -> Result<StorageValue, Self::Error> {
         match self.cache.borrow_mut().storage.entry(StorageQuery {
             block_no: block,
@@ -136,7 +141,7 @@ impl<P: BlockingProvider> BlockingProvider for CachedProvider<P> {
         &self,
         address: Address,
         storage_keys: Vec<StorageKey>,
-        block: BlockNumber,
+        block: alloy_primitives::BlockNumber,
     ) -> Result<EIP1186Proof, Self::Error> {
         match self.cache.borrow_mut().proofs.entry(ProofQuery {
             block_no: block,
