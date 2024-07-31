@@ -19,9 +19,9 @@ contract ProverTest is VTest {
     }
 
     // NOTE: vm.expectRevert doesn't work correctly with errors thrown by inspectors, so we check manually
-    function test_UnexpectedCheatcodeCallFails() public {
-        (bool result, bytes memory error) = CHEATCODES.call(abi.encodeWithSignature("thisCheatCodeDoesNotExist()"));
+    function test_unexpectedCheatCodeCallFails() public {
+        (bool result, bytes memory error) = CHEATCODES.call(abi.encodeWithSelector(IFakeCheatcode.thisCheatCodeDoesNotExist.selector));
         assertFalse(result);
-        assertEq(error, abi.encodeWithSignature("Error(string)", "Unexpected Vlayer cheatcode call"));
+        assertEq(error, abi.encodeWithSignature("Error(string)", "Unexpected vlayer cheatcode call"));
     }
 }

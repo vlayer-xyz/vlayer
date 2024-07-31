@@ -45,7 +45,7 @@ impl<DB: Database> Inspector<DB> for CheatcodeInspector {
                     };
                     Some(create_return_outcome(proof, inputs))
                 }
-                _ => Some(create_revert_outcome("Unexpected Vlayer cheatcode call")),
+                _ => Some(create_revert_outcome("Unexpected vlayer cheatcode call")),
             };
         }
         None
