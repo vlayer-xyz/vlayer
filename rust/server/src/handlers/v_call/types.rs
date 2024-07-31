@@ -9,7 +9,6 @@ use web_proof::types::WebProof;
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct Call {
-    caller: String,
     to: String,
     data: String,
 }
@@ -19,7 +18,6 @@ impl TryFrom<Call> for HostCall {
 
     fn try_from(value: Call) -> Result<Self, Self::Error> {
         Ok(Self {
-            caller: parse_address_field("caller", value.caller)?,
             to: parse_address_field("to", value.to)?,
             data: parse_hex_field("data", value.data)?,
         })
@@ -55,32 +53,13 @@ mod test {
     use crate::error::AppError;
     use host::Call as HostCall;
 
-    const FROM: &str = "0x5C69bEe701ef814a2B6a3EDD4B1652CB9cc5aA6f";
     const TO: &str = "0x7Ad53bbA1004e46dd456316912D55dBc5D311a03";
     const DATA: &str = "0x0000";
     const INVALID_ADDRESS: &str = "0x";
 
     #[tokio::test]
-    async fn invalid_from_address() -> anyhow::Result<()> {
-        let call = Call {
-            caller: INVALID_ADDRESS.to_string(),
-            to: TO.to_string(),
-            data: DATA.to_string(),
-        };
-        let actual_result: Result<HostCall, AppError> = call.try_into();
-
-        assert_eq!(
-            actual_result.unwrap_err().to_string(),
-            "Invalid field `caller`: Invalid string length `0x`"
-        );
-
-        Ok(())
-    }
-
-    #[tokio::test]
     async fn invalid_to_address() -> anyhow::Result<()> {
         let call = Call {
-            caller: FROM.to_string(),
             to: INVALID_ADDRESS.to_string(),
             data: DATA.to_string(),
         };
@@ -98,7 +77,6 @@ mod test {
     async fn invalid_data() -> anyhow::Result<()> {
         const INVALID_DATA: &str = "xx";
         let call = Call {
-            caller: FROM.to_string(),
             to: TO.to_string(),
             data: INVALID_DATA.to_string(),
         };

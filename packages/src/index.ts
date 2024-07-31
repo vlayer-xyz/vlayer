@@ -5,10 +5,10 @@ export {
 } from "./api/v_call";
 
 export {
-  getProverSpec,
+  getContractSpec,
   prove
 } from "./api/prover";
 
 export {
-  deployProver
+  deployContract
 } from "./api/helpers";

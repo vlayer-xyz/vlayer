@@ -4,6 +4,7 @@ use revm::primitives::TxEnv;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
+use crate::config::DEFAULT_CALLER;
 use crate::evm::env::location::ExecutionLocation;
 use crate::evm::input::MultiEvmInput;
 use crate::ExecutionCommitment;
@@ -17,7 +18,6 @@ pub struct Input {
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Call {
-    pub caller: Address,
     pub to: Address,
     pub data: Vec<u8>,
 }
@@ -25,7 +25,6 @@ pub struct Call {
 impl Default for Call {
     fn default() -> Self {
         Self {
-            caller: Address::ZERO,
             to: Address::ZERO,
             data: vec![],
         }
@@ -35,7 +34,7 @@ impl Default for Call {
 impl From<Call> for TxEnv {
     fn from(call: Call) -> Self {
         Self {
-            caller: call.caller,
+            caller: DEFAULT_CALLER,
             transact_to: match call.to {
                 Address::ZERO => TxKind::Create,
                 to => TxKind::Call(to),

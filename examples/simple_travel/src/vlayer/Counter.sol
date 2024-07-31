@@ -2,11 +2,9 @@
 pragma solidity ^0.8.13;
 
 contract Counter {
-    uint public count;
+    uint256 public count;
 
-    function increment()
-        public
-    {
+    function increment() public {
         count++;
     }
 }

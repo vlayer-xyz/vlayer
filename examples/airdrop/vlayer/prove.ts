@@ -1,0 +1,22 @@
+import { deployContract, getContractSpec, prove } from "vlayer-sdk";
+import * as path from "path";
+import { type Address } from "viem";
+import { client } from "../../../packages/src/api/helpers";
+
+const PROVER = "NftOwnershipProver";
+const FILE = path.join(__dirname, `../out/${PROVER}.sol/${PROVER}.json`)
+const PROVER_SPEC = await getContractSpec(FILE);
+const FUNCTION_NAME = 'main'
+const ARGS: any[] = []
+
+console.log("Deploying prover")
+let prover: Address = await deployContract(PROVER_SPEC);
+console.log(`Prover has been deployed on ${prover} address`);
+
+let blockNo = Number(await client().getBlockNumber());
+console.log(`Running proving on ${blockNo} block number`);
+
+console.log("Proving...");
+let response = await prove(prover, PROVER_SPEC, FUNCTION_NAME, ARGS, blockNo);
+console.log("Response:")
+console.log(response);
