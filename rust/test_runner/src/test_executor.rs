@@ -29,6 +29,7 @@ pub struct TestExecutor {
     pub inner: Executor,
 }
 
+/// MODIFICATION: Deref and DerefMut added to pass calls to the inner Executor
 impl Deref for TestExecutor {
     type Target = Executor;
 
@@ -43,6 +44,7 @@ impl DerefMut for TestExecutor {
     }
 }
 
+// MODIFICATION: Only keep functions relevant to test execution
 impl TestExecutor {
     pub fn new(inner: Executor) -> Self {
         Self { inner }
