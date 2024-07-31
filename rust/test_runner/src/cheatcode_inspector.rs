@@ -28,8 +28,10 @@ impl<DB: Database> Inspector<DB> for CheatcodeInspector {
             return match selector.try_into() {
                 Ok(callProverCall::SELECTOR) => Some(create_return_outcome(true, inputs)),
                 Ok(getProofCall::SELECTOR) => {
-                    let mut dummy_proof = Proof::default();
-                    dummy_proof.length = U256::from(1337);
+                    let dummy_proof = Proof {
+                        length: U256::from(1337),
+                        ..Default::default()
+                    };
                     Some(create_return_outcome(dummy_proof, inputs))
                 }
                 _ => Some(create_revert_outcome("Unexpected vlayer cheatcode call")),
