@@ -1,12 +1,15 @@
+use alloy_sol_types::SolCall;
+use foundry_evm::revm::interpreter::{CallInputs, CallOutcome};
+use foundry_evm::revm::primitives::{Address, FixedBytes, U256};
+use foundry_evm::revm::{Database, EvmContext, Inspector};
+
+use vlayer_engine::utils::evm_call::{
+    create_return_outcome, create_revert_outcome, split_calldata,
+};
+
 use crate::cheatcodes::{
     callProverCall, getProofCall, ExecutionCommitment, Proof, Seal, CHEATCODE_CALL_ADDR,
 };
-use alloy_sol_types::{SolCall, SolError, SolValue};
-use forge::revm::interpreter::{Gas, InstructionResult};
-use foundry_evm::revm::interpreter::{CallInputs, CallOutcome, InterpreterResult};
-use foundry_evm::revm::primitives::{Address, FixedBytes, U256};
-use foundry_evm::revm::{Database, EvmContext, Inspector};
-use std::convert::Into;
 
 pub struct CheatcodeInspector {}
 
@@ -23,17 +26,9 @@ impl<DB: Database> Inspector<DB> for CheatcodeInspector {
         inputs: &mut CallInputs,
     ) -> Option<CallOutcome> {
         if inputs.target_address == CHEATCODE_CALL_ADDR {
-            match inputs.input.slice(0..4).as_ref().try_into() {
-                Ok(callProverCall::SELECTOR) => {
-                    return Some(CallOutcome::new(
-                        InterpreterResult::new(
-                            InstructionResult::Return,
-                            true.abi_encode().into(),
-                            Gas::new(inputs.gas_limit),
-                        ),
-                        inputs.return_memory_offset.clone(),
-                    ));
-                }
+            let (selector, _) = split_calldata(inputs);
+            return match selector.try_into() {
+                Ok(callProverCall::SELECTOR) => Some(create_return_outcome(true, inputs)),
                 Ok(getProofCall::SELECTOR) => {
                     let proof = Proof {
                         length: U256::from(1337),
@@ -48,28 +43,10 @@ impl<DB: Database> Inspector<DB> for CheatcodeInspector {
                             settleBlockHash: FixedBytes::new([0u8; 32]),
                         },
                     };
-                    return Some(CallOutcome::new(
-                        InterpreterResult::new(
-                            InstructionResult::Return,
-                            proof.abi_encode().into(),
-                            Gas::new(inputs.gas_limit),
-                        ),
-                        inputs.return_memory_offset.clone(),
-                    ));
+                    Some(create_return_outcome(proof, inputs))
                 }
-                _ => {
-                    return Some(CallOutcome::new(
-                        InterpreterResult::new(
-                            InstructionResult::Revert,
-                            alloy_sol_types::Revert::from("Unexpected Vlayer cheatcode call")
-                                .abi_encode()
-                                .into(),
-                            Gas::new(inputs.gas_limit),
-                        ),
-                        usize::MAX..usize::MAX,
-                    ));
-                }
-            }
+                _ => Some(create_revert_outcome("Unexpected Vlayer cheatcode call")),
+            };
         }
         None
     }
