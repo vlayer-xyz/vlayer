@@ -8,8 +8,6 @@ const FILE = path.join(__dirname, `../out/${PROVER}.sol/${PROVER}.json`)
 const PROVER_SPEC = await getContractSpec(FILE);
 const FUNCTION_NAME = 'main'
 const ARGS: any[] = ["fake-web-proof"]
-const CALLER_ADDRESS = "0x0000000000000000000000000000000000000000";
-
 
 console.log("Deploying prover")
 let prover: Address = await deployContract(PROVER_SPEC);
@@ -19,6 +17,6 @@ let blockNo = Number(await client().getBlockNumber());
 console.log(`Running proving on ${blockNo} block number`);
 
 console.log("Proving...");
-let response = await prove(CALLER_ADDRESS, prover, PROVER_SPEC, FUNCTION_NAME, ARGS, blockNo);
+let response = await prove(prover, PROVER_SPEC, FUNCTION_NAME, ARGS, blockNo);
 console.log("Response:")
 console.log(response);
