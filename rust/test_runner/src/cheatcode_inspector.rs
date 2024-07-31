@@ -1,15 +1,13 @@
 use alloy_sol_types::SolCall;
 use foundry_evm::revm::interpreter::{CallInputs, CallOutcome};
-use foundry_evm::revm::primitives::{Address, FixedBytes, U256};
+use foundry_evm::revm::primitives::U256;
 use foundry_evm::revm::{Database, EvmContext, Inspector};
 
 use vlayer_engine::utils::evm_call::{
     create_return_outcome, create_revert_outcome, split_calldata,
 };
 
-use crate::cheatcodes::{
-    callProverCall, getProofCall, ExecutionCommitment, Proof, Seal, CHEATCODE_CALL_ADDR,
-};
+use crate::cheatcodes::{callProverCall, getProofCall, Proof, CHEATCODE_CALL_ADDR};
 
 pub struct CheatcodeInspector {}
 
@@ -30,20 +28,9 @@ impl<DB: Database> Inspector<DB> for CheatcodeInspector {
             return match selector.try_into() {
                 Ok(callProverCall::SELECTOR) => Some(create_return_outcome(true, inputs)),
                 Ok(getProofCall::SELECTOR) => {
-                    let proof = Proof {
-                        length: U256::from(1337),
-                        seal: Seal {
-                            lhv: FixedBytes::new([0u8; 18]),
-                            rhv: FixedBytes::new([0u8; 19]),
-                        },
-                        commitment: ExecutionCommitment {
-                            proverContractAddress: Address::default(),
-                            functionSelector: FixedBytes::new([0u8; 4]),
-                            settleBlockNumber: U256::ZERO,
-                            settleBlockHash: FixedBytes::new([0u8; 32]),
-                        },
-                    };
-                    Some(create_return_outcome(proof, inputs))
+                    let mut dummy_proof = Proof::default();
+                    dummy_proof.length = U256::from(1337);
+                    Some(create_return_outcome(dummy_proof, inputs))
                 }
                 _ => Some(create_revert_outcome("Unexpected vlayer cheatcode call")),
             };
