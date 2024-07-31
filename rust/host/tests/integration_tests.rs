@@ -142,7 +142,6 @@ mod uniswap {
     use super::*;
 
     const UNISWAP: Address = address!("1F98431c8aD98523631AE4a59f267346ea31F984");
-    const BLOCK_NO: u64 = 19_493_153;
     sol! {
         #[derive(Debug, PartialEq, Eq)]
         interface IUniswapV3Factory {
