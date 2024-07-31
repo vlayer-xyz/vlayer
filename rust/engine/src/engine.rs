@@ -79,7 +79,6 @@ where
             location.block_number, location.chain_id
         );
         let call = Call {
-            caller: inputs.caller,
             to: inputs.bytecode_address,
             data: inputs.input.clone().into(),
         };
