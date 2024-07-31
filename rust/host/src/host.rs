@@ -6,6 +6,7 @@ use crate::provider::multi::CachedMultiProvider;
 use crate::provider::{BlockingProvider, EthersClient, EthersProvider};
 use config::HostConfig;
 use error::HostError;
+use ethers_core::types::BlockNumber;
 use guest_wrapper::RISC0_GUEST_ELF;
 use risc0_ethereum_contracts::groth16::abi_encode;
 use risc0_zkvm::{default_prover, is_dev_mode, ExecutorEnv, ProverOpts};
@@ -29,6 +30,18 @@ impl Host<EthersProvider<EthersClient>> {
     }
 }
 
+fn get_block_number<P>(providers: &CachedMultiProvider<P>, chain_id: u64) -> Result<u64, HostError>
+where
+    P: BlockingProvider,
+{
+    let provider = providers.get(chain_id)?;
+    let block_header = provider
+        .get_block_header(BlockNumber::Latest)
+        .map_err(|e| HostError::Provider(format!("Error fetching block header: {:?}", e)))?
+        .ok_or_else(|| HostError::Provider(String::from("Block header not found")))?;
+    Ok((*block_header).number())
+}
+
 impl<P> Host<P>
 where
     P: BlockingProvider + 'static,
@@ -38,12 +51,28 @@ where
         config: HostConfig,
     ) -> Result<Self, HostError> {
         let providers = CachedMultiProvider::new(provider_factory);
-        let env_factory = HostEvmEnvFactory::new(providers);
-        let envs = CachedEvmEnv::from_factory(env_factory);
+        let block_number = get_block_number(&providers, config.chain_id)?;
+        let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
+        let start_execution_location = ExecutionLocation::new(block_number, config.chain_id);
 
         Ok(Host {
             envs,
-            start_execution_location: config.start_execution_location,
+            start_execution_location,
+        })
+    }
+
+    pub fn try_new_with_provider_and_block_number(
+        provider_factory: impl ProviderFactory<P> + 'static,
+        config: HostConfig,
+        block_number: u64,
+    ) -> Result<Self, HostError> {
+        let providers: CachedMultiProvider<P> = CachedMultiProvider::new(provider_factory);
+        let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
+        let start_execution_location = ExecutionLocation::new(block_number, config.chain_id);
+
+        Ok(Host {
+            envs,
+            start_execution_location,
         })
     }
 

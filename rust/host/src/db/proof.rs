@@ -91,7 +91,7 @@ where
             let block_hash_min_number: u64 = block_hash_min_number.to();
             for number in (block_hash_min_number..self.db.block_number).rev() {
                 let header = provider
-                    .get_block_header(number)?
+                    .get_block_header(number.into())?
                     .with_context(|| format!("block {number} not found"))?;
                 ancestors.push(header);
             }

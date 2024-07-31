@@ -1,7 +1,9 @@
 use super::EIP1186Proof;
 use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256};
 use anyhow::Context;
-use serde::{Deserialize, Serialize};
+use serde::de::{self, Visitor};
+use serde::{Deserialize, Deserializer, Serialize, Serializer};
+use std::fmt;
 use std::{
     collections::{BTreeSet, HashMap},
     fs::File,
@@ -9,6 +11,74 @@ use std::{
     path::PathBuf,
 };
 use vlayer_engine::block_header::EvmBlockHeader;
+
+#[derive(Clone, Debug, PartialEq, Eq, Ord, PartialOrd, Hash)]
+pub enum TagBlockNumber {
+    Number(u64),
+    Latest,
+}
+
+impl Serialize for TagBlockNumber {
+    fn serialize<S>(&self, serializer: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        match *self {
+            TagBlockNumber::Number(ref n) => serializer.serialize_u64(*n),
+            TagBlockNumber::Latest => serializer.serialize_str("latest"),
+        }
+    }
+}
+
+impl<'de> Deserialize<'de> for TagBlockNumber {
+    fn deserialize<D>(deserializer: D) -> Result<TagBlockNumber, D::Error>
+    where
+        D: Deserializer<'de>,
+    {
+        struct TagBlockNumberVisitor;
+
+        impl<'de> Visitor<'de> for TagBlockNumberVisitor {
+            type Value = TagBlockNumber;
+
+            fn expecting(&self, formatter: &mut fmt::Formatter) -> fmt::Result {
+                formatter.write_str("an integer or the string 'latest'")
+            }
+
+            fn visit_u64<E>(self, value: u64) -> Result<TagBlockNumber, E>
+            where
+                E: de::Error,
+            {
+                Ok(TagBlockNumber::Number(value))
+            }
+
+            fn visit_str<E>(self, value: &str) -> Result<TagBlockNumber, E>
+            where
+                E: de::Error,
+            {
+                if value == "latest" {
+                    Ok(TagBlockNumber::Latest)
+                } else {
+                    Err(de::Error::invalid_value(de::Unexpected::Str(value), &self))
+                }
+            }
+        }
+
+        deserializer.deserialize_any(TagBlockNumberVisitor)
+    }
+}
+
+impl From<ethers_core::types::BlockNumber> for TagBlockNumber {
+    fn from(ethers_block_number: ethers_core::types::BlockNumber) -> Self {
+        match ethers_block_number {
+            ethers_core::types::BlockNumber::Number(num) => TagBlockNumber::Number(num.as_u64()),
+            ethers_core::types::BlockNumber::Latest => TagBlockNumber::Latest,
+            _ => panic!(
+                "Only specific block numbers are supported, got {:?}",
+                ethers_block_number
+            ),
+        }
+    }
+}
 
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Deserialize, Serialize)]
 pub(super) struct AccountQuery {
@@ -18,7 +88,7 @@ pub(super) struct AccountQuery {
 
 #[derive(Clone, Debug, PartialEq, Eq, Ord, PartialOrd, Hash, Deserialize, Serialize)]
 pub(super) struct BlockQuery {
-    pub(super) block_no: BlockNumber,
+    pub(super) block_no: TagBlockNumber,
 }
 
 #[derive(Clone, Debug, PartialEq, Eq, Ord, PartialOrd, Hash, Deserialize, Serialize)]

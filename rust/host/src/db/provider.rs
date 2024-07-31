@@ -100,7 +100,7 @@ impl<P: BlockingProvider> DatabaseRef for ProviderDb<P> {
             .map_err(|_| ProviderDbError::InvalidBlockNumber(number))?;
         let header = self
             .provider
-            .get_block_header(block_number)?
+            .get_block_header(block_number.into())?
             .ok_or(ProviderDbError::InvalidBlockNumber(number))?;
 
         Ok(header.hash_slow())

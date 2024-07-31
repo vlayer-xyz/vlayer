@@ -58,7 +58,7 @@ where
 
     fn get_block_header(
         &self,
-        block: alloy_primitives::BlockNumber,
+        block: ethers_core::types::BlockNumber,
     ) -> Result<Option<Box<dyn EvmBlockHeader>>, Self::Error> {
         let block = self.block_on(self.client.get_block(block))?;
         match block {

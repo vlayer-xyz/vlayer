@@ -34,7 +34,7 @@ where
     ) -> anyhow::Result<EvmEnv<ProofDb<P>>> {
         let provider = self.providers.get(chain_id)?;
         let header = provider
-            .get_block_header(block_number)
+            .get_block_header(block_number.into())
             .map_err(|err| HostError::Provider(err.to_string()))?
             .ok_or(HostError::BlockNotFound(block_number))?;
 
