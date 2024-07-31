@@ -21,14 +21,14 @@ export async function getContractSpec(file: string): Promise<ContractSpec> {
     return output;
 }
 
-export async function prove(caller: Address, prover: Address, proverSpec: ContractSpec, functionName: string, args: ProverArg[], blockNo: number): Promise<any> {
+export async function prove(prover: Address, proverSpec: ContractSpec, functionName: string, args: ProverArg[], blockNo: number): Promise<any> {
     let calldata = encodeFunctionData({
         abi: proverSpec.abi,
         functionName,
         args
     });
 
-    let call: CallParams = { caller, to: prover, data: calldata };
+    let call: CallParams = { to: prover, data: calldata };
     let context: CallContext = { block_no: blockNo, chain_id: 1 };
 
     let response = await v_call(call, context); 
