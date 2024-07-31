@@ -23,7 +23,6 @@ use tracing::instrument;
 
 use crate::cheatcode_inspector::CheatcodeInspector;
 use crate::composite_inspector::CompositeInspector;
-use vlayer_engine::inspector::TravelInspector;
 
 /// MODIFICATION: This struct is a wrapper around the Executor struct from foundry_evm that adds our inspector that will be passed to the backend
 pub struct TestExecutor {
@@ -78,11 +77,8 @@ impl TestExecutor {
     #[instrument(name = "call", level = "debug", skip_all)]
     pub fn call_with_env(&self, mut env: EnvWithHandlerCfg) -> eyre::Result<RawCallResult> {
         let mut backend = CowBackend::new_borrowed(self.backend());
-        let mut composite_inspector = CompositeInspector::new(
-            TravelInspector::new(1337, |_, _| None),
-            self.inspector().clone(),
-            CheatcodeInspector {},
-        );
+        let mut composite_inspector =
+            CompositeInspector::new(self.inspector().clone(), CheatcodeInspector::new());
         let result = backend.inspect(&mut env, &mut composite_inspector)?;
         convert_executed_result(
             env,

@@ -2,21 +2,26 @@
 pragma solidity ^0.8.13;
 
 import {SimpleProver} from "./SimpleProver.sol";
-import {VTest} from "vlayer/testing/VTest.sol";
+import  "vlayer/testing/VTest.sol";
 import {Proof} from "vlayer/Proof.sol";
+
+interface IFakeCheatcode {
+    function thisCheatCodeDoesNotExist() external returns (bool);
+}
 
 contract ProverTest is VTest {
     function test_sum() public {
         SimpleProver prover = new SimpleProver();
-        assertEq(prover.sum(1, 2), 3);
-    }
-
-    function test_setBlockWillNotRevert() public {
-        SimpleProver prover = new SimpleProver();
         callProver();
-        prover.setBlock(420);
+        assertEq(prover.sum(1, 2), 3);
         Proof memory proof = getProof();
-        assertEq(proof.commitment.functionSelector, bytes4(0));
+        assertEq(proof.length, 1337);
     }
 
+    // NOTE: vm.expectRevert doesn't work correctly with errors thrown by inspectors, so we check manually
+    function test_UnexpectedCheatcodeCallFails() public {
+        (bool result, bytes memory error) = CHEATCODES.call(abi.encodeWithSignature("thisCheatCodeDoesNotExist()"));
+        assertFalse(result);
+        assertEq(error, abi.encodeWithSignature("Error(string)", "Unexpected Vlayer cheatcode call"));
+    }
 }

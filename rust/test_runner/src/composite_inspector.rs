@@ -6,22 +6,15 @@ use forge::revm::{Database, EvmContext, Inspector};
 use foundry_evm::inspectors::InspectorStack;
 use foundry_evm_core::backend::DatabaseExt;
 use foundry_evm_core::InspectorExt;
-use vlayer_engine::inspector::TravelInspector;
 
 pub struct CompositeInspector {
-    pub travel_inspector: TravelInspector<'static>,
     pub inspector_stack: InspectorStack,
     pub cheatcode_inspector: CheatcodeInspector,
 }
 
 impl CompositeInspector {
-    pub fn new(
-        travel_inspector: TravelInspector<'static>,
-        inspector_stack: InspectorStack,
-        cheatcode_inspector: CheatcodeInspector,
-    ) -> Self {
+    pub fn new(inspector_stack: InspectorStack, cheatcode_inspector: CheatcodeInspector) -> Self {
         Self {
-            travel_inspector,
             inspector_stack,
             cheatcode_inspector,
         }
@@ -35,9 +28,6 @@ impl<DB: Database + DatabaseExt> Inspector<DB> for CompositeInspector {
         inputs: &mut CallInputs,
     ) -> Option<CallOutcome> {
         let inspector_stack_outcome = self.inspector_stack.call(context, inputs);
-        if let Some(call_outcome) = self.travel_inspector.call(context, inputs) {
-            return Some(call_outcome);
-        }
         if let Some(call_outcome) = self.cheatcode_inspector.call(context, inputs) {
             return Some(call_outcome);
         }
