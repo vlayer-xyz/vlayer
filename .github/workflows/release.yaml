@@ -16,7 +16,7 @@ jobs:
           - target: x86_64-unknown-linux-gnu
             platform: linux
             arch: amd64
-            runner: aws-linux-small
+            runner: aws-linux-medium
           - target: aarch64-apple-darwin
             platform: darwin
             arch: arm64
