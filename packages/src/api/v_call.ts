@@ -3,7 +3,6 @@ import { type Address } from "viem";
 type Calldata = string;
 
 export type CallParams = {
-    caller: Address,
     to: Address,
     data: Calldata
 }
