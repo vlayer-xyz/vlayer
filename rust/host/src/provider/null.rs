@@ -1,5 +1,6 @@
 use super::{BlockingProvider, EIP1186Proof};
-use alloy_primitives::{Address, Bytes, StorageKey, StorageValue, TxNumber, U256};
+use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256};
+use ethers_core::types::BlockNumber as BlockTag;
 use std::{convert::Infallible, marker::PhantomData};
 use vlayer_engine::block_header::EvmBlockHeader;
 
@@ -12,32 +13,24 @@ impl BlockingProvider for NullProvider {
 
     fn get_block_header(
         &self,
-        _: ethers_core::types::BlockNumber,
+        _: BlockTag,
     ) -> Result<Option<Box<dyn EvmBlockHeader>>, Self::Error> {
         panic!("Unexpected provider call")
     }
-    fn get_transaction_count(
-        &self,
-        _: Address,
-        _: alloy_primitives::BlockNumber,
-    ) -> Result<TxNumber, Self::Error> {
+    fn get_transaction_count(&self, _: Address, _: BlockNumber) -> Result<TxNumber, Self::Error> {
         panic!("Unexpected provider call")
     }
-    fn get_balance(
-        &self,
-        _: Address,
-        _: alloy_primitives::BlockNumber,
-    ) -> Result<U256, Self::Error> {
+    fn get_balance(&self, _: Address, _: BlockNumber) -> Result<U256, Self::Error> {
         panic!("Unexpected provider call")
     }
-    fn get_code(&self, _: Address, _: alloy_primitives::BlockNumber) -> Result<Bytes, Self::Error> {
+    fn get_code(&self, _: Address, _: BlockNumber) -> Result<Bytes, Self::Error> {
         panic!("Unexpected provider call")
     }
     fn get_storage_at(
         &self,
         _: Address,
         _: StorageKey,
-        _: alloy_primitives::BlockNumber,
+        _: BlockNumber,
     ) -> Result<StorageValue, Self::Error> {
         panic!("Unexpected provider call")
     }
@@ -45,7 +38,7 @@ impl BlockingProvider for NullProvider {
         &self,
         _: Address,
         _: Vec<StorageKey>,
-        _: alloy_primitives::BlockNumber,
+        _: BlockNumber,
     ) -> Result<EIP1186Proof, Self::Error> {
         panic!("Unexpected provider call")
     }

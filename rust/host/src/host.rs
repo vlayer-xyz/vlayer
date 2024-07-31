@@ -66,7 +66,7 @@ where
         config: HostConfig,
         block_number: u64,
     ) -> Result<Self, HostError> {
-        let providers: CachedMultiProvider<P> = CachedMultiProvider::new(provider_factory);
+        let providers = CachedMultiProvider::new(provider_factory);
         let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
         let start_execution_location = ExecutionLocation::new(block_number, config.chain_id);
 

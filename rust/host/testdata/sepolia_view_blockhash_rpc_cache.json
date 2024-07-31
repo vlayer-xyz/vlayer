@@ -2,7 +2,9 @@
   "partial_blocks": [
     [
       {
-        "block_no": 5702741
+        "block_no": {
+          "Number": 5702741
+        }
       },
       {
         "Eth": {
@@ -31,7 +33,9 @@
     ],
     [
       {
-        "block_no": 5702742
+        "block_no": {
+          "Number": 5702742
+        }
       },
       {
         "Eth": {
@@ -60,7 +64,9 @@
     ],
     [
       {
-        "block_no": 5702743
+        "block_no": {
+          "Number": 5702743
+        }
       },
       {
         "Eth": {

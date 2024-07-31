@@ -1,6 +1,8 @@
 use super::{BlockingProvider, EIP1186Proof};
+use alloy_primitives::BlockNumber;
 use alloy_primitives::{B256, U256};
 use ethers_core::types::Block;
+use ethers_core::types::BlockNumber as BlockTag;
 use ethers_providers::{Middleware, MiddlewareError};
 use thiserror::Error;
 use tokio::runtime::{Handle, Runtime};
@@ -40,7 +42,7 @@ impl<M: Middleware> EthersProvider<M> {
     }
 
     /// Fetches the current block number.
-    pub fn get_block_number(&self) -> Result<alloy_primitives::BlockNumber, M::Error> {
+    pub fn get_block_number(&self) -> Result<BlockNumber, M::Error> {
         Ok(self.block_on(self.client.get_block_number())?.as_u64())
     }
 
@@ -58,7 +60,7 @@ where
 
     fn get_block_header(
         &self,
-        block: ethers_core::types::BlockNumber,
+        block: BlockTag,
     ) -> Result<Option<Box<dyn EvmBlockHeader>>, Self::Error> {
         let block = self.block_on(self.client.get_block(block))?;
         match block {
@@ -74,7 +76,7 @@ where
     fn get_transaction_count(
         &self,
         address: alloy_primitives::Address,
-        block: alloy_primitives::BlockNumber,
+        block: BlockNumber,
     ) -> Result<alloy_primitives::TxNumber, Self::Error> {
         let address = to_ethers_h160(address);
         let count = self
@@ -89,7 +91,7 @@ where
     fn get_balance(
         &self,
         address: alloy_primitives::Address,
-        block: alloy_primitives::BlockNumber,
+        block: BlockNumber,
     ) -> Result<alloy_primitives::U256, Self::Error> {
         let address = to_ethers_h160(address);
         Ok(from_ethers_u256(self.block_on(
@@ -100,7 +102,7 @@ where
     fn get_code(
         &self,
         address: alloy_primitives::Address,
-        block: alloy_primitives::BlockNumber,
+        block: BlockNumber,
     ) -> Result<alloy_primitives::Bytes, Self::Error> {
         let address = to_ethers_h160(address);
         Ok(from_ethers_bytes(self.block_on(
@@ -112,7 +114,7 @@ where
         &self,
         address: alloy_primitives::Address,
         key: alloy_primitives::StorageKey,
-        block: alloy_primitives::BlockNumber,
+        block: BlockNumber,
     ) -> Result<alloy_primitives::StorageValue, Self::Error> {
         let address = to_ethers_h160(address);
         let key = to_ethers_h256(key);
@@ -125,7 +127,7 @@ where
         &self,
         address: alloy_primitives::Address,
         storage_keys: Vec<alloy_primitives::StorageKey>,
-        block: alloy_primitives::BlockNumber,
+        block: BlockNumber,
     ) -> Result<EIP1186Proof, Self::Error> {
         let address = to_ethers_h160(address);
         let storage_keys = storage_keys.into_iter().map(to_ethers_h256).collect();
