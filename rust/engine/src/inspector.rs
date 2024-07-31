@@ -1,14 +1,12 @@
 use alloy_primitives::hex::decode;
-use alloy_primitives::{address, b256, Address, Bytes, B256, U256};
+use alloy_primitives::{address, b256, Address, B256, U256};
 use once_cell::sync::Lazy;
-use revm::interpreter::{Gas, InstructionResult, InterpreterResult};
 use revm::{
     interpreter::{CallInputs, CallOutcome},
     Database, EvmContext, Inspector,
 };
 use tracing::info;
 
-use crate::consts::U256_BYTES;
 use crate::evm::env::location::ExecutionLocation;
 use crate::utils::evm_call::{create_return_outcome, split_calldata};
 
