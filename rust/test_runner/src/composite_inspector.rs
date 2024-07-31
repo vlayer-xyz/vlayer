@@ -1,3 +1,4 @@
+use crate::cheatcode_inspector::CheatcodeInspector;
 use alloy_sol_types::private::{Address, U256};
 use forge::revm::interpreter::{CallInputs, CallOutcome, CreateInputs, CreateOutcome, Interpreter};
 use forge::revm::precompile::Log;
@@ -5,18 +6,17 @@ use forge::revm::{Database, EvmContext, Inspector};
 use foundry_evm::inspectors::InspectorStack;
 use foundry_evm_core::backend::DatabaseExt;
 use foundry_evm_core::InspectorExt;
-use vlayer_engine::inspector::NoopInspector;
 
 pub struct CompositeInspector {
-    pub set_inspector: NoopInspector,
     pub inspector_stack: InspectorStack,
+    pub cheatcode_inspector: CheatcodeInspector,
 }
 
 impl CompositeInspector {
-    pub fn new(set_inspector: NoopInspector, inspector_stack: InspectorStack) -> Self {
+    pub fn new(inspector_stack: InspectorStack, cheatcode_inspector: CheatcodeInspector) -> Self {
         Self {
-            set_inspector,
             inspector_stack,
+            cheatcode_inspector,
         }
     }
 }
@@ -28,7 +28,7 @@ impl<DB: Database + DatabaseExt> Inspector<DB> for CompositeInspector {
         inputs: &mut CallInputs,
     ) -> Option<CallOutcome> {
         let inspector_stack_outcome = self.inspector_stack.call(context, inputs);
-        if let Some(call_outcome) = self.set_inspector.call(context, inputs) {
+        if let Some(call_outcome) = self.cheatcode_inspector.call(context, inputs) {
             return Some(call_outcome);
         }
         inspector_stack_outcome

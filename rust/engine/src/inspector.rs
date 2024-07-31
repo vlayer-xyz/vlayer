@@ -1,18 +1,15 @@
 use alloy_primitives::hex::decode;
-use alloy_primitives::{address, b256, Address, Bytes, B256, U256};
+use alloy_primitives::{address, b256, Address, B256, U256};
 use once_cell::sync::Lazy;
-use revm::interpreter::{Gas, InstructionResult, InterpreterResult};
 use revm::{
     interpreter::{CallInputs, CallOutcome},
     Database, EvmContext, Inspector,
 };
 use tracing::info;
 
-use crate::consts::U256_BYTES;
 use crate::evm::env::location::ExecutionLocation;
+use crate::utils::evm_call::{create_return_outcome, split_calldata};
 
-// First 4 bytes of the call data is the selector id - the rest are arguments.
-const SELECTOR_LEN: usize = 4;
 // The length of an argument in call data is 32 bytes.
 const ARG_LEN: usize = 32;
 /// This is calculated as:
@@ -27,17 +24,6 @@ static SET_BLOCK_SELECTOR: Lazy<Vec<u8>> =
     Lazy::new(|| decode("87cea3ae").expect("Error decoding set_block function call"));
 static SET_CHAIN_SELECTOR: Lazy<Vec<u8>> =
     Lazy::new(|| decode("ffbc5638").expect("Error decoding set_chain function call"));
-
-pub fn call_outcome(output: &[u8], inputs: &CallInputs) -> CallOutcome {
-    CallOutcome {
-        result: InterpreterResult {
-            result: InstructionResult::Return,
-            output: Bytes::copy_from_slice(output),
-            gas: Gas::new(0),
-        },
-        memory_offset: inputs.return_memory_offset.clone(),
-    }
-}
 
 #[derive(Default, Clone, Debug)]
 pub struct NoopInspector;
@@ -95,24 +81,18 @@ where
 
         match inputs.bytecode_address {
             TRAVEL_CONTRACT_ADDR => {
-                let (selector, arguments_bytes) = inputs.input.split_at(SELECTOR_LEN);
+                let (selector, arguments_bytes) = split_calldata(inputs);
 
                 if selector == *SET_BLOCK_SELECTOR {
                     let block_number = U256::from_be_slice(arguments_bytes).to();
                     self.set_block(block_number);
-                    return Some(call_outcome(
-                        &U256::from(1).to_be_bytes::<U256_BYTES>(),
-                        inputs,
-                    ));
+                    return Some(create_return_outcome(true, inputs));
                 } else if selector == *SET_CHAIN_SELECTOR {
                     let (chain_id_bytes, block_number_bytes) = arguments_bytes.split_at(ARG_LEN);
                     let chain_id = U256::from_be_slice(chain_id_bytes).to();
                     let block_number = U256::from_be_slice(block_number_bytes).to();
                     self.set_chain(chain_id, block_number);
-                    return Some(call_outcome(
-                        &U256::from(1).to_be_bytes::<U256_BYTES>(),
-                        inputs,
-                    ));
+                    return Some(create_return_outcome(true, inputs));
                 }
             }
             // If the call is not to the travel contract AND the location is set, run callback.

@@ -7,8 +7,6 @@
 use alloy_dyn_abi::DynSolValue;
 use alloy_dyn_abi::JsonAbiExt;
 use alloy_json_abi::Function;
-
-use crate::composite_inspector::CompositeInspector;
 use alloy_sol_types::private::{Address, Bytes, U256};
 use color_eyre::eyre;
 use forge::revm;
@@ -16,26 +14,40 @@ use forge::revm::interpreter::{return_ok, InstructionResult};
 use forge::revm::primitives::{
     BlockEnv, Env, EnvWithHandlerCfg, ExecutionResult, Output, ResultAndState, TxEnv, TxKind,
 };
-use forge::traces::TraceMode;
-use foundry_evm::executors::{CallResult, DeployResult, EvmError, Executor, RawCallResult};
+use foundry_evm::executors::{CallResult, EvmError, Executor, RawCallResult};
 use foundry_evm::inspectors::{InspectorData, InspectorStack};
-use foundry_evm_core::backend::{BackendResult, CowBackend};
+use foundry_evm_core::backend::CowBackend;
 use foundry_evm_core::decode::RevertDecoder;
+use std::ops::{Deref, DerefMut};
 use tracing::instrument;
-use vlayer_engine::inspector::NoopInspector;
+
+use crate::cheatcode_inspector::CheatcodeInspector;
+use crate::composite_inspector::CompositeInspector;
 
 /// MODIFICATION: This struct is a wrapper around the Executor struct from foundry_evm that adds our inspector that will be passed to the backend
 pub struct TestExecutor {
-    pub inspector: NoopInspector,
-    pub executor: Executor,
+    pub inner: Executor,
 }
 
+/// MODIFICATION: Deref and DerefMut added to pass calls to the inner Executor
+impl Deref for TestExecutor {
+    type Target = Executor;
+
+    fn deref(&self) -> &Self::Target {
+        &self.inner
+    }
+}
+
+impl DerefMut for TestExecutor {
+    fn deref_mut(&mut self) -> &mut Self::Target {
+        &mut self.inner
+    }
+}
+
+// MODIFICATION: Only keep functions relevant to test execution
 impl TestExecutor {
-    pub fn new(executor: Executor, inspector: NoopInspector) -> Self {
-        Self {
-            inspector,
-            executor,
-        }
+    pub fn new(inner: Executor) -> Self {
+        Self { inner }
     }
 
     pub fn call(
@@ -66,9 +78,9 @@ impl TestExecutor {
     // MODIFICATION: Pass CompositeInspector instead of InspectorStack to the backend
     #[instrument(name = "call", level = "debug", skip_all)]
     pub fn call_with_env(&self, mut env: EnvWithHandlerCfg) -> eyre::Result<RawCallResult> {
-        let mut backend = CowBackend::new_borrowed(self.executor.backend());
+        let mut backend = CowBackend::new_borrowed(self.backend());
         let mut composite_inspector =
-            CompositeInspector::new(self.inspector.clone(), self.executor.inspector().clone());
+            CompositeInspector::new(self.inspector().clone(), CheatcodeInspector::new());
         let result = backend.inspect(&mut env, &mut composite_inspector)?;
         convert_executed_result(
             env,
@@ -86,10 +98,10 @@ impl TestExecutor {
         value: U256,
     ) -> EnvWithHandlerCfg {
         let env = Env {
-            cfg: self.executor.env().cfg.clone(),
+            cfg: self.env().cfg.clone(),
             block: BlockEnv {
                 basefee: U256::ZERO,
-                ..self.executor.env().block.clone()
+                ..self.env().block.clone()
             },
             tx: TxEnv {
                 caller,
@@ -98,62 +110,11 @@ impl TestExecutor {
                 value,
                 gas_price: U256::ZERO,
                 gas_priority_fee: None,
-                ..self.executor.env().tx.clone()
+                ..self.env().tx.clone()
             },
         };
 
-        EnvWithHandlerCfg::new_with_spec_id(Box::new(env), self.executor.spec_id())
-    }
-
-    pub fn is_raw_call_mut_success(
-        &self,
-        address: Address,
-        call_result: &mut RawCallResult,
-        should_fail: bool,
-    ) -> bool {
-        self.executor
-            .is_raw_call_mut_success(address, call_result, should_fail)
-    }
-    pub fn set_tracing(&mut self, mode: TraceMode) {
-        self.executor = self.executor.set_tracing(mode).clone();
-    }
-    pub fn inspector_mut(&mut self) -> &mut InspectorStack {
-        self.executor.inspector_mut()
-    }
-
-    pub fn setup(
-        &mut self,
-        from: Option<Address>,
-        to: Address,
-        rd: Option<&RevertDecoder>,
-    ) -> Result<RawCallResult, EvmError> {
-        self.executor.setup(from, to, rd)
-    }
-
-    pub fn deploy_create2_deployer(&mut self) -> eyre::Result<()> {
-        self.executor.deploy_create2_deployer()
-    }
-
-    pub fn get_nonce(&self, address: Address) -> BackendResult<u64> {
-        self.executor.get_nonce(address)
-    }
-
-    pub fn deploy(
-        &mut self,
-        from: Address,
-        code: Bytes,
-        value: U256,
-        rd: Option<&RevertDecoder>,
-    ) -> Result<DeployResult, EvmError> {
-        self.executor.deploy(from, code, value, rd)
-    }
-
-    pub fn set_balance(&mut self, address: Address, amount: U256) -> BackendResult<()> {
-        self.executor.set_balance(address, amount)
-    }
-
-    pub fn set_nonce(&mut self, address: Address, nonce: u64) -> BackendResult<()> {
-        self.executor.set_nonce(address, nonce)
+        EnvWithHandlerCfg::new_with_spec_id(Box::new(env), self.spec_id())
     }
 }
 

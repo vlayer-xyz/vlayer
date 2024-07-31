@@ -63,7 +63,7 @@ use crate::{
     contract_runner::ContractRunner, filter::FilterArgs, filter::ProjectPathsAwareFilter,
     summary::TestSummaryReporter, test_executor::TestExecutor,
 };
-use vlayer_engine::inspector::{NoopInspector, TRAVEL_CONTRACT_ADDR, TRAVEL_CONTRACT_HASH};
+use vlayer_engine::inspector::{TRAVEL_CONTRACT_ADDR, TRAVEL_CONTRACT_HASH};
 
 // Loads project's figment and merges the build cli arguments into it
 foundry_config::merge_impl_figment_convert!(TestArgs, opts, evm_opts);
@@ -806,7 +806,7 @@ fn run_test_suite(
         contract,
         libs_to_deploy: &runner.libs_to_deploy,
         // MODIFICATION: Replace Executor with TestExecutor
-        executor: TestExecutor::new(executor, NoopInspector),
+        executor: TestExecutor::new(executor),
         revert_decoder: &runner.revert_decoder,
         initial_balance: runner.evm_opts.initial_balance,
         sender: runner.sender.unwrap_or_default(),

@@ -9,7 +9,7 @@ use revm::{
 use thiserror::Error;
 use tracing::{error, info};
 
-use crate::inspector::call_outcome;
+use crate::utils::evm_call::create_return_outcome;
 use crate::{
     evm::env::{cached::CachedEvmEnv, location::ExecutionLocation},
     inspector::TravelInspector,
@@ -84,7 +84,7 @@ where
         };
         let result = self.call(&call, location).expect("Intercepted call failed");
         info!("Intercepted call returned: {:?}", result);
-        let outcome = call_outcome(&result[..], &inputs);
+        let outcome = create_return_outcome(&result[..], &inputs);
         Some(outcome)
     }
 
