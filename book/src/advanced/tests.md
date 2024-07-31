@@ -1,15 +1,15 @@
 # Tests
 
-The prover and verifier in vlayer function similarly to regular smart contracts, allowing you to perform unit testing using your preferred smart contract testing framework.
+The prover and verifier contracts in vlayer are similar to regular smart contracts, allowing you to perform unit testing using your preferred smart contract testing framework.
 
 vlayer introduces the `vlayer test` command, along with a couple of cheatcodes, which offers additional support for vlayer specific tests:
 - Testing prover functions that utilize `setBlock` and `setChain`
 - Integration testing involving both the prover and the verifier
 
-This command uses Foundry's [forge](https://book.getfoundry.sh/forge/tests) testing framework, so if you are familiar with it, you will find the process straightforward.
+This command uses Foundry's [Forge](https://book.getfoundry.sh/forge/tests) testing framework, so if you are familiar with it, you will find the process straightforward.
 
 ## Cheatcodes
-To manipulate the blockchain state and test for specific reverts and events, Foundry provides [cheatcodes](https://book.getfoundry.sh/forge/cheatcodes).
+To manipulate the blockchain state and test for specific reverts and events, Forge provides [cheatcodes](https://book.getfoundry.sh/forge/cheatcodes).
 
 vlayer introduces additional cheatcodes:
 - `callProver()`: Executes the next call within the vlayer zkEVM environment, generating a proof of computation accessible via `getProof`.
