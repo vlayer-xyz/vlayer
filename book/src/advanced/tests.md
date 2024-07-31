@@ -1,48 +1,49 @@
 # Tests
-In many ways, the prover and verifier are just like regular smart contracts. Therefore, you can unit test them with your favorite smart contract testing framework.
+The prover and verifier in vlayer function similarly to regular smart contracts, allowing you to perform unit testing using your preferred smart contract testing framework.
 
-vlayer introduces the `vlayer test` command, which provides additional support for:
-- testing prover functions that use `setBlock` and `setChain`
-- integration testing of the prover working together with the verifier
+vlayer introduces the `vlayer test` command, which offers additional support for vlayer specific tests:
+- Testing prover functions that utilize `setBlock` and `setChain`
+- Integration testing involving both the prover and the verifier
 
-The `vlayer test` command allows to simulate the entire flow from the generation of computation proofs, to their verification in the on-chain contracts.
+The `vlayer test` command enables the simulation of the entire process, from the generation of computation proofs to their verification in on-chain contracts.
 
-The command uses the Foundry's [forge](https://book.getfoundry.sh/forge/tests) tests, so if you have ever used it, you will feel right at home.
+This command uses Foundry's [forge](https://book.getfoundry.sh/forge/tests) testing framework, so if you are familiar with it, you will find the process straightforward.
 
-## Running tests
-The test command searches for all the contract tests available in the working directory. 
+## Running Tests
+The `vlayer test` command searches for all contract tests in the current working directory. 
 
-Any contract with an external or public function that starts with `test` is considered to be a test. Tests are be placed in the `test/` directory by convention and end with `.t.sol`. Usually, vlayer tests are be placed in the `test/vlayer` directory.
+Any contract with an external or public function beginning with `test` is recognized as a test. By convention, tests should be placed in the `test/` directory and should have a `.t.sol` extension and derive from `Test` contract
 
-To run all available tests, use the following command:
+vlayer specific tests are located in the `test/vlayer` directory and derive from `VTest` contract, which give access to two new cheatcodes.
+
+To run all available tests, execute the following command:
 ```sh
 vlayer test
 ```
 
-This command will run both forge tests and vlayer specific tests.
+This command will execute both Forge tests and vlayer-specific tests.
 
 ## Cheatcodes
-To manipulate the state of the blockchain, as well as to test for specific reverts and events, Foundry introduced the concept of [cheatcodes](https://book.getfoundry.sh/forge/cheatcodes). These are special functions that can be used to increase balances, impersonate specific accounts or simulate other behaviors in tests.
+To manipulate the blockchain state and test for specific reverts and events, Foundry provides [cheatcodes](https://book.getfoundry.sh/forge/cheatcodes).
 
+vlayer introduces additional cheatcodes:
+- `callProver()`: Sets the next call to be executed within the vlayer zkEVM environment, generating a proof of computation accessible via `getProof`.
+- `getProof()`: Retrieves the proof from the last call after using `callProver`.
 
-vlayer introduces a couple of new cheatcodes:
-* `callProver()` sets the next call to be exececuted inside vlayer zkEVM environment. Generates the proof of computation, accessable via `getProof`.
-* `getProof()` returns the proof of the last call after `callProver`.
-
-See an example of how to use them below: 
+### Example Usage
 
 ```solidity
 contract WebProverTest is VTest {
     WebProver prover;
-    WebVerifier verifier; 
+    WebVerifier verifier;
 
     function test_mainProver() public {
-        callProver() // next call will run in the Prover
-        uint venmo Balance = prover.main();
+        callProver(); // The next call will execute in the Prover
+        uint venmoBalance = prover.main();
         Proof memory proof = getProof();
         verifier.main(proof, venmoBalance);
     }
 }
 ```
 
-Using the above cheatcodes allows testing the entire proof journey: from setting up and proving to verifying.
+Using these cheatcodes allows you to test the entire proof journey: from setup and proving to verification
