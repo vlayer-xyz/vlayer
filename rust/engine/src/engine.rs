@@ -1,15 +1,12 @@
-use revm::interpreter::CallOutcome;
 use revm::{
     db::WrapDatabaseRef,
     inspector_handle_register,
-    interpreter::CallInputs,
     primitives::{ExecutionResult, ResultAndState, SuccessReason},
     DatabaseRef, Evm,
 };
 use thiserror::Error;
-use tracing::{error, info};
+use tracing::error;
 
-use crate::utils::evm_call::create_return_outcome;
 use crate::{
     evm::env::{cached::CachedEvmEnv, location::ExecutionLocation},
     inspector::TravelInspector,
@@ -55,7 +52,7 @@ where
             .envs
             .get(location)
             .map_err(|err| EngineError::EvmEnv(err.to_string()))?;
-        let callback = |location, inputs| self.inspector_callback(location, inputs);
+        let callback = |call: &_, location| self.call(call, location);
         let inspector = TravelInspector::new(env.cfg_env.chain_id, callback);
         let evm = Evm::builder()
             .with_ref_db(&env.db)
@@ -67,25 +64,6 @@ where
             .build();
 
         Self::transact(evm)
-    }
-
-    fn inspector_callback(
-        &self,
-        location: ExecutionLocation,
-        inputs: CallInputs,
-    ) -> Option<CallOutcome> {
-        info!(
-            "Intercepting the call. Block number: {:?}, chain id: {:?}",
-            location.block_number, location.chain_id
-        );
-        let call = Call {
-            to: inputs.bytecode_address,
-            data: inputs.input.clone().into(),
-        };
-        let result = self.call(&call, location).expect("Intercepted call failed");
-        info!("Intercepted call returned: {:?}", result);
-        let outcome = create_return_outcome(&result[..], &inputs);
-        Some(outcome)
     }
 
     fn transact(

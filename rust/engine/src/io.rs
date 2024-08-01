@@ -1,5 +1,6 @@
 use alloy_primitives::{Address, TxKind};
 use alloy_sol_types::SolValue;
+use revm::interpreter::CallInputs;
 use revm::primitives::TxEnv;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
@@ -41,6 +42,15 @@ impl From<Call> for TxEnv {
             },
             data: call.data.into(),
             ..Default::default()
+        }
+    }
+}
+
+impl From<&mut CallInputs> for Call {
+    fn from(inputs: &mut CallInputs) -> Self {
+        Self {
+            to: inputs.bytecode_address,
+            data: inputs.input.clone().into(),
         }
     }
 }
