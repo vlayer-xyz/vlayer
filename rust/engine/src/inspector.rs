@@ -65,6 +65,34 @@ impl<'a> TravelInspector<'a> {
         );
         self.location = Some(ExecutionLocation::new(block_number, chain_id));
     }
+
+    fn on_call(&self, inputs: &CallInputs) -> Option<CallOutcome> {
+        let location = self.location?;
+        info!(
+            "Intercepting the call. Block number: {:?}, chain id: {:?}",
+            location.block_number, location.chain_id
+        );
+        let result = (self.callback)(&inputs.into(), location).expect("Intercepted call failed");
+        info!("Intercepted call returned: {:?}", result);
+        let outcome = create_return_outcome(&result[..], &inputs);
+        Some(outcome)
+    }
+
+    fn on_travel_call(&mut self, inputs: &CallInputs) -> Option<CallOutcome> {
+        let (selector, arguments_bytes) = split_calldata(inputs);
+
+        if selector == *SET_BLOCK_SELECTOR {
+            let block_number = U256::from_be_slice(arguments_bytes).to();
+            self.set_block(block_number);
+        } else if selector == *SET_CHAIN_SELECTOR {
+            let (chain_id_bytes, block_number_bytes) = arguments_bytes.split_at(ARG_LEN);
+            let chain_id = U256::from_be_slice(chain_id_bytes).to();
+            let block_number = U256::from_be_slice(block_number_bytes).to();
+            self.set_chain(chain_id, block_number);
+        }
+
+        Some(create_return_outcome(true, inputs))
+    }
 }
 
 impl<'a, DB> Inspector<DB> for TravelInspector<'a>
@@ -80,39 +108,10 @@ where
             "Address: {:?}, caller:{:?}, input:{:?}",
             inputs.bytecode_address, inputs.caller, inputs.input,
         );
-
         match inputs.bytecode_address {
-            TRAVEL_CONTRACT_ADDR => {
-                let (selector, arguments_bytes) = split_calldata(inputs);
-
-                if selector == *SET_BLOCK_SELECTOR {
-                    let block_number = U256::from_be_slice(arguments_bytes).to();
-                    self.set_block(block_number);
-                    return Some(create_return_outcome(true, inputs));
-                } else if selector == *SET_CHAIN_SELECTOR {
-                    let (chain_id_bytes, block_number_bytes) = arguments_bytes.split_at(ARG_LEN);
-                    let chain_id = U256::from_be_slice(chain_id_bytes).to();
-                    let block_number = U256::from_be_slice(block_number_bytes).to();
-                    self.set_chain(chain_id, block_number);
-                    return Some(create_return_outcome(true, inputs));
-                }
-            }
-            // If the call is not to the travel contract AND the location is set, run callback.
-            _ => {
-                let location = self.location?;
-                info!(
-                    "Intercepting the call. Block number: {:?}, chain id: {:?}",
-                    location.block_number, location.chain_id
-                );
-                let result =
-                    (self.callback)(&inputs.into(), location).expect("Intercepted call failed");
-                info!("Intercepted call returned: {:?}", result);
-                let outcome = create_return_outcome(&result[..], &inputs);
-                return Some(outcome);
-            }
+            TRAVEL_CONTRACT_ADDR => self.on_travel_call(inputs),
+            _ => self.on_call(inputs),
         }
-
-        None
     }
 }
 

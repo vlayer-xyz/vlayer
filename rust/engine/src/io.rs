@@ -46,8 +46,8 @@ impl From<Call> for TxEnv {
     }
 }
 
-impl From<&mut CallInputs> for Call {
-    fn from(inputs: &mut CallInputs) -> Self {
+impl From<&CallInputs> for Call {
+    fn from(inputs: &CallInputs) -> Self {
         Self {
             to: inputs.bytecode_address,
             data: inputs.input.clone().into(),
