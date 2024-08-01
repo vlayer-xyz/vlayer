@@ -1,5 +1,6 @@
 name: Release binaries
 on: 
+  push:
   schedule:
     - cron: '0 22 * * 1-5' # Mon-Fri at 22:00 UTC
 
@@ -101,6 +102,7 @@ jobs:
   create-release:
     name: Create GH releases
     runs-on: aws-linux-small
+    if: false
     needs: [build-release, build-template-contracts] 
     steps:
       - run: mkdir -p dist
