@@ -13,6 +13,7 @@ pub(crate) enum TemplateOption {
     Simple,
     Airdrop,
     SimpleTravel,
+    ERC20Balances,
 }
 
 impl fmt::Display for TemplateOption {
@@ -21,6 +22,7 @@ impl fmt::Display for TemplateOption {
             TemplateOption::Simple => write!(f, "simple"),
             TemplateOption::Airdrop => write!(f, "airdrop"),
             TemplateOption::SimpleTravel => write!(f, "simple_travel"),
+            TemplateOption::ERC20Balances => write!(f, "erc20_balances"),
         }
     }
 }
