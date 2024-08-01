@@ -20,21 +20,22 @@ pub(crate) async fn init(cwd: PathBuf, template: TemplateOption) -> Result<(), C
     let src_path = find_src_path(&root_path)?;
     info!("Found foundry project root in \"{}\"", &src_path.display());
 
-    match create_vlayer_dir(&src_path)? {
-        Some(vlayer_path) => {
+    match (
+        create_vlayer_dir(&root_path)?,
+        create_vlayer_dir(&src_path)?,
+    ) {
+        (Some(scripts_path), Some(contracts_path)) => {
             info!("Created vlayer directory in \"{}\"", src_path.display());
-            fetch_vlayer_files(&vlayer_path, template.to_string()).await?;
-            info!(
-                "Successfully downloaded vlayer template: \"{}\" to \"{}\"",
-                template,
-                vlayer_path.display()
-            );
+            fetch_vlayer_files(&contracts_path, &scripts_path, template.to_string()).await?;
+            info!("Successfully downloaded vlayer template \"{}\"", template);
         }
-        None => error!(
-            "vlayer directory already exists in \"{}\". Skipping creation.",
+        _ => error!(
+            "vlayer directory already exists in \"{}\" or \"{}\". Skipping creation.",
+            &root_path.display(),
             &src_path.display()
         ),
     }
+
     Ok(())
 }
 
@@ -54,7 +55,11 @@ fn find_src_path(root_path: &Path) -> Result<PathBuf, CLIError> {
     }
 }
 
-async fn fetch_vlayer_files(dst: &Path, template: String) -> Result<(), CLIError> {
+async fn fetch_vlayer_files(
+    contracts_dst: &Path,
+    scripts_dst: &Path,
+    template: String,
+) -> Result<(), CLIError> {
     let response = get(CONTRACTS_URL)
         .await
         .map_err(map_reqwest_error)?
@@ -67,8 +72,11 @@ async fn fetch_vlayer_files(dst: &Path, template: String) -> Result<(), CLIError
     let temp_dir = tempfile::tempdir()?;
     archive.unpack(temp_dir.path())?;
 
-    let downloaded_contracts = temp_dir.path().join(template).join("vlayer");
-    copy_dir_to(&downloaded_contracts, dst)?;
+    let downloaded_scripts = temp_dir.path().join(&template).join("vlayer");
+    let downloaded_contracts = temp_dir.path().join(&template).join("src/vlayer");
+
+    copy_dir_to(&downloaded_scripts, scripts_dst)?;
+    copy_dir_to(&downloaded_contracts, contracts_dst)?;
 
     Ok(())
 }
