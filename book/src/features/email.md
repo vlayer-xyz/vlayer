@@ -221,18 +221,12 @@ And voilà, we just successfully used email in the context of an on-chain smart 
 > Keep in mind that this is a simplified version of a real MultiSig wallet, demonstrating how an email recovery function could operate.
 
 ## Security assumptions
+Billions of users trust providers to deliver and store their email. Inboxes often contain critical information, including work-related data, personal files, password recovery links, and more. They also have access to their customers' emails, which they often use to serve ads. Email proofs can only be as secure as the email itself. The protocol relies on both the sending and receiving servers being trustworthy.
 
-### How trusted is email? 
-All popular email providers, such as Gmail, Outlook, iCloud Mail, and others, have full read access to their customers' emails. Inboxes often contain critical information, including sensitive personal data, medical records, password recovery links, and work-related secrets.
+### Outgoing server 
+The vlayer prover checks that the message signature matches the public key listed in the DNS records. However, a dishonest outgoing server can forge emails and trick the prover into generating valid proof for them. This threat is not specific to the vlayer setup; any email client may be vulnerable to such attacks.
 
-Yet millions of users trust these email providers every day.
+### Prevent unauthorized actions
+Both outgoing and incoming servers can read emails and use them to create proofs without the permission of the real mailbox owner. This also applies to the prover. Protocols are advised to use email proofs in a way that makes it impossible to manipulate smart contracts into unauthorized actions, such as sending funds to unintended recipients. 
 
-### How secure is Email proof? 
-Email proofs are only as secure as email itself. The protocol relies on both the sending and receiving servers being trustworthy.
-
-The vlayer prover checks that the message signature matches the public key listed in DNS records. However, dishonest sending servers can forge emails and trick the prover into generating valid proofs for them. This threat is not specific to the vlayer setup; any email client can be vulnerable to such attacks.
-
-To reduce the risk of DNS hijacking, records can be stored on the blockchain. Initially, records are moved manually, but later they can be managed by a DAO or ultimately moved in a permissionless manner with TLSNotary.
-
-### Protocol design considerations
-Protocols are advised to use email in a way that makes it difficult to request funds or perform sensitive operations simply by handing over email content. It is advisable to combine email proofing with a second factor authentication such as a signature from a specific wallet. This would minimize the risk of email being used by bad actors who just gain access to the mailbox. 
+In particular, it is advisable to include complete information in the email to ensure correct actions. Prefer emails like: "Send 1 ETH from X to Y on Ethereum Mainnet" over emails like: "Send 1 ETH". 
