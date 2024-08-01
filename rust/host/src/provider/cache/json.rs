@@ -30,6 +30,12 @@ impl From<BlockTag> for SerializableBlockTag {
     }
 }
 
+impl From<u64> for SerializableBlockTag {
+    fn from(num: u64) -> Self {
+        SerializableBlockTag::Number(num)
+    }
+}
+
 #[derive(Clone, Debug, PartialEq, Eq, PartialOrd, Ord, Hash, Deserialize, Serialize)]
 pub(super) struct AccountQuery {
     pub(super) block_no: BlockNumber,

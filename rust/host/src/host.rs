@@ -30,10 +30,10 @@ impl Host<EthersProvider<EthersClient>> {
     }
 }
 
-fn get_block_number<P>(providers: &CachedMultiProvider<P>, chain_id: u64) -> Result<u64, HostError>
-where
-    P: BlockingProvider,
-{
+fn get_block_number(
+    providers: &CachedMultiProvider<impl BlockingProvider>,
+    chain_id: u64,
+) -> Result<u64, HostError> {
     let provider = providers.get(chain_id)?;
     let block_header = provider
         .get_block_header(BlockNumber::Latest)
@@ -61,7 +61,7 @@ where
         })
     }
 
-    pub fn try_new_with_provider_and_block_number(
+    pub fn try_new_with_provider_factory_and_block_number(
         provider_factory: impl ProviderFactory<P> + 'static,
         config: HostConfig,
         block_number: u64,

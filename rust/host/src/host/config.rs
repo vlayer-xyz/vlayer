@@ -9,7 +9,7 @@ pub struct HostConfig {
 
 impl HostConfig {
     pub fn new(url: &str, chain_id: ChainId) -> Self {
-        let rpc_urls = [(chain_id, url.to_string())].into_iter().collect();
+        let rpc_urls = HashMap::from([(chain_id, url.to_string())]);
         HostConfig { rpc_urls, chain_id }
     }
 }
