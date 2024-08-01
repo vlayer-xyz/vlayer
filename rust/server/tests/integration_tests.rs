@@ -4,10 +4,17 @@ use core::str;
 use lazy_static::lazy_static;
 use serde_json::json;
 use server::server::{server, Config};
+use anvil::{spawn, NodeConfig, NodeHandle};
 
 mod test_helpers;
 
 use test_helpers::{body_to_json, body_to_string, post};
+
+async fn test_helper() {
+    let config = NodeConfig::default();
+    let (api, handle) = anvil::spawn(config).await;
+    handle.await.unwrap().unwrap();
+}
 
 mod server_tests {
     use super::*;
@@ -69,6 +76,8 @@ mod server_tests {
         const LOCALHOST_RPC_URL: &str = "http://localhost:8545";
 
         async fn get_block_nr() -> u32 {
+            let handle = test_helper().await;
+
             let req = json!({
                 "jsonrpc": "2.0",
                 "method": "eth_blockNumber",
