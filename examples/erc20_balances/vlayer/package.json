@@ -1,0 +1,18 @@
+{
+  "name": "erc20_balances",
+  "module": "prove.ts",
+  "type": "module",
+  "dependencies": {
+    "viem": "^2.17.5"
+  },
+  "peerDependencies": {
+    "typescript": "^5.5.4"
+  },
+  "devDependencies": {
+    "@types/bun": "^1.1.6",
+    "@typescript-eslint/eslint-plugin": "^7.17.0",
+    "@typescript-eslint/parser": "^7.17.0",
+    "eslint": "^9.7.0",
+    "eslint-plugin-react": "^7.35.0"
+  }
+}
