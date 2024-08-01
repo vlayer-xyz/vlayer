@@ -20,10 +20,11 @@ alloy-primitives = { workspace = true }
 hex = "0.4.3"
 axum-jrpc = "0.7.1"
 host = { path = "../host" }
-alloy-chains = "0.1.23"
+alloy-chains = "0.1.24"
 web_proof = { path = "../web_proof" }
 
 [dev-dependencies]
 reqwest = "0.12.5"
 lazy_static = "1.5.0"
 web_proof = { path = "../web_proof", features = ["fixtures"] }
+anvil = { git = "https://github.com/foundry-rs/foundry", version = "0.2.0" }
