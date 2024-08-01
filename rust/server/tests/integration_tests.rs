@@ -175,8 +175,7 @@ mod server_tests {
                 json!([
                     simple_call_example(),
                     context_example(block_nr),
-                {
-                    "web_proof": {
+                {"web_proof": {
                     "notary_pub_key": NOTARY_PUB_KEY_PEM_EXAMPLE,
                     "tls_proof": "<tls proof value>",
                 }}
@@ -206,8 +205,7 @@ mod server_tests {
                 json!([
                     simple_call_example(),
                     context_example(block_nr),
-                {
-                    "web_proof": {
+                {"web_proof": {
                     "notary_pub_key": "<notary pub key value>",
                     "tls_proof": tls_proof_example(),
                 }}
