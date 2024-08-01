@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {IERC20} from "openzeppelin-contracts/token/ERC20/IERC20.sol";
-import {ERC20} from "openzeppelin-contracts/token/ERC20/ERC20.sol";
+import {IERC20} from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
+import {ERC20} from "openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 
 contract VToyken is ERC20 {
     constructor() ERC20("VToyken", "VTKN") {
