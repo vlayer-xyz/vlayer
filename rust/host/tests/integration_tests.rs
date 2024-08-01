@@ -1,7 +1,8 @@
 use alloy_primitives::{address, b256, uint, Address};
 use alloy_sol_types::{sol, SolCall};
 use dotenv::dotenv;
-use host::provider::cache::json::SerializableBlockTag;
+use ethers_core::types::BlockNumber as BlockTag;
+
 use host::{
     host::{config::HostConfig, error::HostError, Host},
     provider::{
@@ -16,7 +17,7 @@ use vlayer_engine::config::{MAINNET_ID, SEPOLIA_ID};
 // To activate recording, set UPDATE_SNAPSHOTS to true.
 // Recording creates new testdata directory and writes return data from Alchemy into files in that directory.
 const UPDATE_SNAPSHOTS: bool = false;
-const LATEST_BLOCK: SerializableBlockTag = SerializableBlockTag::Latest;
+const LATEST_BLOCK: BlockTag = BlockTag::Latest;
 
 fn create_test_provider_factory(test_name: &str) -> FileProviderFactory {
     let rpc_file_cache: HashMap<_, _> = HashMap::from([
@@ -59,18 +60,22 @@ fn create_recording_provider_factory(test_name: &str) -> CachedProviderFactory {
 fn create_host<P>(
     provider_factory: impl ProviderFactory<P> + 'static,
     config: HostConfig,
-    block_number: SerializableBlockTag,
+    block_number: BlockTag,
 ) -> Result<Host<P>, HostError>
 where
     P: BlockingProvider + 'static,
 {
     match block_number {
-        SerializableBlockTag::Latest => {
-            Host::try_new_with_provider_factory(provider_factory, config)
-        }
-        SerializableBlockTag::Number(block_no) => {
-            Host::try_new_with_provider_factory_and_block_number(provider_factory, config, block_no)
-        }
+        BlockTag::Latest => Host::try_new_with_provider_factory(provider_factory, config),
+        BlockTag::Number(block_no) => Host::try_new_with_provider_factory_and_block_number(
+            provider_factory,
+            config,
+            block_no.as_u64(),
+        ),
+        _ => panic!(
+            "Only Latest and specific block numbers are supported, got {:?}",
+            block_number
+        ),
     }
 }
 
@@ -78,7 +83,7 @@ fn run<C>(
     test_name: &str,
     call: Call,
     chain_id: u64,
-    block_number: SerializableBlockTag,
+    block_number: BlockTag,
 ) -> anyhow::Result<C::Return>
 where
     C: SolCall,
