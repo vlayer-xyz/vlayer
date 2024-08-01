@@ -10,10 +10,11 @@ mod test_helpers;
 
 use test_helpers::{body_to_json, body_to_string, post};
 
-async fn test_helper() {
+async fn test_helper() -> NodeHandle {
     let config = NodeConfig::default();
     let (api, handle) = anvil::spawn(config).await;
     handle.await.unwrap().unwrap();
+    handle
 }
 
 mod server_tests {
