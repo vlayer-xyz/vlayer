@@ -220,9 +220,19 @@ And voilà, we just successfully used email in the context of an on-chain smart 
 
 > Keep in mind that this is a simplified version of a real MultiSig wallet, demonstrating how an email recovery function could operate.
 
-## Security considerations
-Email is often used for malicious actions such as phishing or spoofing. It is very important to mitigate these threats when dealing with email messages. Otherwise, bad actors could exploit this to their advantage by manipulating the content of the email and using it to prove their false claims. 
+## Security assumptions
 
-How can we be sure that the welcome email we receive from Github was actually sent by Github? At vlayer, we ensure that proof is only generated for emails that have been authorized by the domain owner. We do this by extracting a digital signature from the email headers. Then we can retrieve the sender's public key from the domain's DNS records and confirm the email's authenticity.  
+### How trusted is email? 
+All popular email providers, such as Gmail, Outlook, iCloud Mail, and others, have full read access to their customers' emails. Inboxes often contain critical information, including sensitive personal data, medical records, password recovery links, and work-related secrets.
 
-Unfortunately, in a situation where the mail domain is under hacker control, we have no way of detecting this. This means that we have to trust the sender's mail servers completely.
+Yet millions of users trust these email providers every day.
+
+### How secure is Email proof? 
+Email proofs are only as secure as email itself. The protocol relies on both the sending and receiving servers being trustworthy.
+
+The vlayer prover checks that the message signature matches the public key listed in DNS records. However, dishonest sending servers can forge emails and trick the prover into generating valid proofs for them. This threat is not specific to the vlayer setup; any email client can be vulnerable to such attacks.
+
+To reduce the risk of DNS hijacking, records can be stored on the blockchain. Initially, records are moved manually, but later they can be managed by a DAO or ultimately moved in a permissionless manner with TLSNotary.
+
+### Protocol design considerations
+Protocols are advised to use email in a way that makes it difficult to request funds or perform sensitive operations simply by handing over email content. It is advisable to combine email proofing with a second factor authentication such as a signature from a specific wallet. This would minimize the risk of email being used by bad actors who just gain access to the mailbox. 
