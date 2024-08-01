@@ -32,10 +32,12 @@ pub struct NoopInspector;
 
 impl<DB> Inspector<DB> for NoopInspector where DB: Database {}
 
+type Callback<'a> = dyn Fn(&Call, ExecutionLocation) -> Result<Vec<u8>, EngineError> + 'a;
+
 pub struct TravelInspector<'a> {
     start_chain_id: u64,
     pub location: Option<ExecutionLocation>,
-    callback: Box<dyn Fn(&Call, ExecutionLocation) -> Result<Vec<u8>, EngineError> + 'a>,
+    callback: Box<Callback<'a>>,
 }
 
 impl<'a> TravelInspector<'a> {
@@ -74,7 +76,7 @@ impl<'a> TravelInspector<'a> {
         );
         let result = (self.callback)(&inputs.into(), location).expect("Intercepted call failed");
         info!("Intercepted call returned: {:?}", result);
-        let outcome = create_return_outcome(&result[..], &inputs);
+        let outcome = create_return_outcome(&result[..], inputs);
         Some(outcome)
     }
 
@@ -151,7 +153,7 @@ mod test {
         let mut evm_context = EvmContext::new(mock_db);
         let mut call_inputs = create_mock_call_inputs(addr, &SET_BLOCK_SELECTOR);
 
-        let mut set_block_inspector = TravelInspector::new(1, |_, _| None);
+        let mut set_block_inspector = TravelInspector::new(1, |_, _| Ok(vec![]));
         set_block_inspector.call(&mut evm_context, &mut call_inputs);
 
         set_block_inspector
