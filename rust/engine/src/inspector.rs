@@ -69,7 +69,9 @@ impl<'a> TravelInspector<'a> {
     }
 
     fn on_call(&self, inputs: &CallInputs) -> Option<CallOutcome> {
-        let location = self.location?;
+        let Some(location) = self.location else {
+            return None; // If no setChain/setBlock happened, we don't need to teleport to a new VM, but can continue with the current one.
+        };
         info!(
             "Intercepting the call. Block number: {:?}, chain id: {:?}",
             location.block_number, location.chain_id
