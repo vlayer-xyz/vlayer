@@ -7,7 +7,9 @@ use revm::{
 };
 use tracing::info;
 
+use crate::engine::EngineError;
 use crate::evm::env::location::ExecutionLocation;
+use crate::io::Call;
 use crate::utils::evm_call::{create_return_outcome, split_calldata};
 
 // The length of an argument in call data is 32 bytes.
@@ -33,13 +35,13 @@ impl<DB> Inspector<DB> for NoopInspector where DB: Database {}
 pub struct TravelInspector<'a> {
     start_chain_id: u64,
     pub location: Option<ExecutionLocation>,
-    callback: Box<dyn Fn(ExecutionLocation, CallInputs) -> Option<CallOutcome> + 'a>,
+    callback: Box<dyn Fn(&Call, ExecutionLocation) -> Result<Vec<u8>, EngineError> + 'a>,
 }
 
 impl<'a> TravelInspector<'a> {
     pub fn new(
         start_chain_id: u64,
-        callback: impl Fn(ExecutionLocation, CallInputs) -> Option<CallOutcome> + 'a,
+        callback: impl Fn(&Call, ExecutionLocation) -> Result<Vec<u8>, EngineError> + 'a,
     ) -> Self {
         Self {
             start_chain_id,
@@ -97,15 +99,16 @@ where
             }
             // If the call is not to the travel contract AND the location is set, run callback.
             _ => {
-                if let Some(location) = self.location {
-                    // One could potentially avoid cloning the inputs here by passing a reference,
-                    // but then you need to deal with closures generic over lifetimes and HRTBs.
-                    // My knowledge of Rust is not enough to make it compile and CallInputs is a relatively small object.
-                    // The biggest part of it is Data which we'll need to clone down the line either way.
-                    if let Some(outcome) = (self.callback)(location, inputs.clone()) {
-                        return Some(outcome);
-                    }
-                }
+                let location = self.location?;
+                info!(
+                    "Intercepting the call. Block number: {:?}, chain id: {:?}",
+                    location.block_number, location.chain_id
+                );
+                let result =
+                    (self.callback)(&inputs.into(), location).expect("Intercepted call failed");
+                info!("Intercepted call returned: {:?}", result);
+                let outcome = create_return_outcome(&result[..], &inputs);
+                return Some(outcome);
             }
         }
 
