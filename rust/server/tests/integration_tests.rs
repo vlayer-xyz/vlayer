@@ -1,5 +1,5 @@
 use axum::http::StatusCode;
-use axum_jrpc::{JsonRpcRequest, Value};
+use axum_jrpc::Value;
 use core::str;
 use lazy_static::lazy_static;
 use serde_json::json;
