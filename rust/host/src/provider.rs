@@ -3,7 +3,7 @@ use auto_impl::auto_impl;
 use std::error::Error as StdError;
 use vlayer_engine::block_header::EvmBlockHeader;
 
-mod cache;
+pub mod cache;
 pub mod ethers;
 pub mod factory;
 mod file;

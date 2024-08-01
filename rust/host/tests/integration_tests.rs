@@ -1,6 +1,7 @@
 use alloy_primitives::{address, b256, uint, Address};
 use alloy_sol_types::{sol, SolCall};
 use dotenv::dotenv;
+use host::provider::cache::json::SerializableBlockTag;
 use host::{
     host::{config::HostConfig, error::HostError, Host},
     provider::{
@@ -12,9 +13,10 @@ use host::{
 use std::{collections::HashMap, env};
 use vlayer_engine::config::{MAINNET_ID, SEPOLIA_ID};
 
-// To activate recording, set RECORD to true.
+// To activate recording, set UPDATE_SNAPSHOTS to true.
 // Recording creates new testdata directory and writes return data from Alchemy into files in that directory.
-const RECORD: bool = false;
+const UPDATE_SNAPSHOTS: bool = false;
+const LATEST_BLOCK: SerializableBlockTag = SerializableBlockTag::Latest;
 
 fn create_test_provider_factory(test_name: &str) -> FileProviderFactory {
     let rpc_file_cache: HashMap<_, _> = HashMap::from([
@@ -57,15 +59,18 @@ fn create_recording_provider_factory(test_name: &str) -> CachedProviderFactory {
 fn create_host<P>(
     provider_factory: impl ProviderFactory<P> + 'static,
     config: HostConfig,
-    block_number: Option<u64>,
+    block_number: SerializableBlockTag,
 ) -> Result<Host<P>, HostError>
 where
     P: BlockingProvider + 'static,
 {
-    if let Some(block_number) = block_number {
-        Host::try_new_with_provider_and_block_number(provider_factory, config, block_number)
-    } else {
-        Host::try_new_with_provider_factory(provider_factory, config)
+    match block_number {
+        SerializableBlockTag::Latest => {
+            Host::try_new_with_provider_factory(provider_factory, config)
+        }
+        SerializableBlockTag::Number(block_no) => {
+            Host::try_new_with_provider_factory_and_block_number(provider_factory, config, block_no)
+        }
     }
 }
 
@@ -73,7 +78,7 @@ fn run<C>(
     test_name: &str,
     call: Call,
     chain_id: u64,
-    block_number: Option<u64>,
+    block_number: SerializableBlockTag,
 ) -> anyhow::Result<C::Return>
 where
     C: SolCall,
@@ -81,13 +86,13 @@ where
     let null_rpc_url = "a null url value as url is not needed in tests";
     let config = HostConfig::new(null_rpc_url, chain_id);
 
-    let raw_return_value = if RECORD {
+    let raw_return_value = if UPDATE_SNAPSHOTS {
         let provider_factory = create_recording_provider_factory(test_name);
-        let host = create_host(provider_factory, config, block_number)?;
+        let host = create_host(provider_factory, config, block_number.into())?;
         host.run(call)?.guest_output.evm_call_result
     } else {
         let provider_factory = create_test_provider_factory(test_name);
-        let host = create_host(provider_factory, config, block_number)?;
+        let host = create_host(provider_factory, config, block_number.into())?;
         host.run(call)?.guest_output.evm_call_result
     };
     let return_value = C::abi_decode_returns(&raw_return_value, false)?;
@@ -100,7 +105,7 @@ fn before_all() {
     use std::{env::set_var, fs};
     set_var("RISC0_DEV_MODE", "1");
 
-    if RECORD {
+    if UPDATE_SNAPSHOTS {
         fs::remove_dir_all("testdata").ok();
         fs::create_dir("testdata").ok();
     }
@@ -131,7 +136,7 @@ mod usdt {
             "usdt_erc20_balance_of",
             call,
             MAINNET_ID,
-            Some(USDT_BLOCK_NO),
+            USDT_BLOCK_NO.into(),
         )?;
         assert_eq!(result._0, uint!(3_000_000_000_000_000_U256));
         Ok(())
@@ -156,8 +161,12 @@ mod uniswap {
             to: UNISWAP,
             data: sol_call.abi_encode(),
         };
-        let result =
-            run::<IUniswapV3Factory::ownerCall>("uniswap_factory_owner", call, MAINNET_ID, None)?;
+        let result = run::<IUniswapV3Factory::ownerCall>(
+            "uniswap_factory_owner",
+            call,
+            MAINNET_ID,
+            LATEST_BLOCK,
+        )?;
         assert_eq!(
             result._0,
             address!("1a9c8182c09f50c8318d769245bea52c32be35bc") // Uniswap V2: UNI Timelock is the current owner of the factory.
@@ -221,8 +230,12 @@ mod view {
             to: VIEW_CALL,
             data: sol_call.abi_encode(),
         };
-        let result =
-            run::<ViewCallTest::testPrecompileCall>("view_precompile", call, SEPOLIA_ID, None)?;
+        let result = run::<ViewCallTest::testPrecompileCall>(
+            "view_precompile",
+            call,
+            SEPOLIA_ID,
+            LATEST_BLOCK,
+        )?;
         assert_eq!(
             result._0,
             b256!("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
@@ -241,7 +254,7 @@ mod view {
             "view_nonexistent_account",
             call,
             SEPOLIA_ID,
-            None,
+            LATEST_BLOCK,
         )?;
         assert_eq!(result.size, uint!(0_U256));
         Ok(())
@@ -254,8 +267,12 @@ mod view {
             to: VIEW_CALL,
             data: sol_call.abi_encode(),
         };
-        let result =
-            run::<ViewCallTest::testEoaAccountCall>("view_eoa_account", call, SEPOLIA_ID, None)?;
+        let result = run::<ViewCallTest::testEoaAccountCall>(
+            "view_eoa_account",
+            call,
+            SEPOLIA_ID,
+            LATEST_BLOCK,
+        )?;
         assert_eq!(result.size, uint!(0_U256));
         Ok(())
     }
@@ -271,7 +288,7 @@ mod view {
             "view_blockhash",
             call,
             SEPOLIA_ID,
-            Some(VIEW_CALL_BLOCK_NO),
+            VIEW_CALL_BLOCK_NO.into(),
         )?;
         assert_eq!(
             result._0,
@@ -287,7 +304,8 @@ mod view {
             to: VIEW_CALL,
             data: sol_call.abi_encode(),
         };
-        let result = run::<ViewCallTest::testChainidCall>("view_chainid", call, SEPOLIA_ID, None)?;
+        let result =
+            run::<ViewCallTest::testChainidCall>("view_chainid", call, SEPOLIA_ID, LATEST_BLOCK)?;
         assert_eq!(result._0, uint!(11_155_111_U256));
         Ok(())
     }
@@ -303,7 +321,7 @@ mod view {
             "view_multi_contract_calls",
             call,
             SEPOLIA_ID,
-            None,
+            LATEST_BLOCK,
         )?;
         assert_eq!(result._0, uint!(84_U256));
         Ok(())
@@ -315,7 +333,7 @@ mod view {
             to: address!("d8dA6BF26964aF9D7eEd9e03E53415D37aA96045"), // vitalik.eth
             ..Default::default()
         };
-        run::<ViewCallTest::testEoaAccountCall>("view_call_eoa", call, SEPOLIA_ID, None)
+        run::<ViewCallTest::testEoaAccountCall>("view_call_eoa", call, SEPOLIA_ID, LATEST_BLOCK)
             .expect_err("calling an EOA should fail");
 
         Ok(())
