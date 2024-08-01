@@ -9,6 +9,4 @@ export {
   prove
 } from "./api/prover";
 
-export {
-  deployContract
-} from "./api/helpers";
+export * as helpers from "./api/helpers";
