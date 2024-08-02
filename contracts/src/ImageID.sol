@@ -1,0 +1,1 @@
+../../rust/target/release/assets/ImageID.sol
