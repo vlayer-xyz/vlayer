@@ -30,12 +30,11 @@ impl Node {
             Node::Extension(prefix, child) => key_nibs
                 .strip_prefix(prefix.as_slice())
                 .and_then(|remaining| child.get(remaining)),
-            Node::Branch(children) => match key_nibs.split_first() {
-                Some((idx, remaining)) => children[*idx as usize]
-                    .as_deref()
-                    .and_then(|node| node.get(remaining)),
-                None => None, // branch nodes don't have values in our MPT version
-            },
+            Node::Branch(children) => {
+                let (idx, remaining) = key_nibs.split_first()?;
+                let child = children[*idx as usize].as_deref()?;
+                child.get(remaining)
+            }
             Node::Digest(_) => panic!("Attempted to access unresolved node"),
         }
     }
@@ -162,4 +161,46 @@ fn encoded_header(list: bool, payload_length: usize) -> Vec<u8> {
     let mut out = Vec::with_capacity(header.length() + payload_length);
     header.encode(&mut out);
     out
+}
+
+#[cfg(test)]
+mod node_size {
+    use nybbles::Nibbles;
+
+    use super::Node;
+
+    #[test]
+    fn null() {
+        let node = Node::Null;
+        assert_eq!(node.size(), 0);
+    }
+
+    #[test]
+    fn digest() {
+        let node = Node::Digest(Default::default());
+        assert_eq!(node.size(), 0);
+    }
+
+    #[test]
+    fn leaf() {
+        let node = Node::Leaf(Nibbles::default(), Box::new([]));
+        assert_eq!(node.size(), 1);
+    }
+
+    #[test]
+    fn extension() {
+        let leaf = Node::Leaf(Nibbles::default(), Box::new([]));
+        let extension = Node::Extension(Nibbles::default(), Box::new(leaf));
+        assert_eq!(extension.size(), 2);
+    }
+
+    #[test]
+    fn branch() {
+        let leaf = Node::Leaf(Nibbles::default(), Box::new([]));
+        const NULL_CHILD: Option<Box<Node>> = None;
+        let mut children = [NULL_CHILD; 16];
+        children[0] = Some(Box::new(leaf));
+        let branch = Node::Branch(children);
+        assert_eq!(branch.size(), 2);
+    }
 }
