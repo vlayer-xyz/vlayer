@@ -18,7 +18,7 @@ where
 {
     fn from(path: T) -> Self {
         let path = Nibbles::unpack(path);
-        assert!(path.len() >= 2);
+        assert!(path.len() >= 2, "Path should have at least 2 nibbles");
 
         let kind = if path[0] & 2 != 0 {
             PathKind::Leaf
@@ -68,5 +68,11 @@ mod decode_path {
 
         assert_eq!(path.kind, Leaf);
         assert_eq!(path.nibbles.as_slice(), &[0x1, 0x2, 0x3][..]);
+    }
+
+    #[test]
+    #[should_panic(expected = "Path should have at least 2 nibbles")]
+    fn too_short() {
+        let _: Path = [].into();
     }
 }
