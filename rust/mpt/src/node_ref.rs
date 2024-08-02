@@ -5,25 +5,25 @@ use super::node::Node;
 
 /// Represents the way in which a node is referenced from within another node.
 #[derive(Default)]
-pub(crate) enum NodeRef<'a> {
+pub(crate) enum NodeRef {
     #[default]
     Empty,
-    Digest(&'a B256),
+    Digest(B256),
     Node(Vec<u8>),
 }
 
-impl NodeRef<'_> {
+impl NodeRef {
     #[inline]
-    pub(crate) fn from_node(node: &Node) -> NodeRef<'_> {
+    pub(crate) fn from_node(node: &Node) -> NodeRef {
         match node {
             Node::Null => NodeRef::Empty,
-            Node::Digest(digest) => NodeRef::Digest(digest),
+            Node::Digest(digest) => NodeRef::Digest(*digest),
             node => NodeRef::Node(node.rlp_encoded()),
         }
     }
 }
 
-impl Encodable for NodeRef<'_> {
+impl Encodable for NodeRef {
     #[inline]
     fn encode(&self, out: &mut dyn BufMut) {
         match self {
