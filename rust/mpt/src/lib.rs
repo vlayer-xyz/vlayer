@@ -9,6 +9,7 @@ use thiserror::Error as ThisError;
 
 mod node;
 mod node_ref;
+mod path;
 
 /// Root hash of an empty Merkle Patricia trie, i.e. `keccak256(RLP(""))`.
 pub const EMPTY_ROOT_HASH: B256 =
