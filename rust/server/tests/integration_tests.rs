@@ -7,13 +7,11 @@ use ethers::{
     middleware::SignerMiddleware,
     providers::{Http, Provider},
     signers::{LocalWallet, Signer},
-    types::U256,
 };
 use eyre::Result;
-use lazy_static::lazy_static;
 use serde_json::json;
 use server::server::{server, Config};
-use std::{path::PathBuf, sync::Arc, time::Duration};
+use std::{sync::Arc, time::Duration};
 
 mod test_helpers;
 
@@ -37,7 +35,7 @@ async fn setup_anvil() -> Result<AnvilInstance> {
         provider,
         wallet.with_chain_id(anvil.chain_id()),
     ));
-    let greeter_contract = SimpleProver::deploy(client.clone(), ())
+    SimpleProver::deploy(client.clone(), ())
         .unwrap()
         .send()
         .await
