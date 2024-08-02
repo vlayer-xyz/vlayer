@@ -1,27 +1,65 @@
 use axum::http::StatusCode;
 use axum_jrpc::{JsonRpcRequest, Value};
 use core::str;
+use ethers::{
+    contract::abigen,
+    core::utils::{Anvil, AnvilInstance},
+    middleware::SignerMiddleware,
+    providers::{Http, Provider},
+    signers::{LocalWallet, Signer},
+    types::U256,
+};
+use eyre::Result;
 use lazy_static::lazy_static;
 use serde_json::json;
 use server::server::{server, Config};
+use std::{path::PathBuf, sync::Arc, time::Duration};
 
 mod test_helpers;
 
 use test_helpers::{body_to_json, body_to_string, post};
 
+abigen!(
+    SimpleProver,
+    "../../examples/simple/out/SimpleProver.sol/SimpleProver.json",
+);
+abigen!(
+    WebProofProver,
+    "../../examples/web_proof/out/WebProofProver.sol/WebProofProver.json",
+);
+
+async fn setup_anvil() -> Result<AnvilInstance> {
+    let anvil = Anvil::new().spawn();
+    let wallet: LocalWallet = anvil.keys()[0].clone().into();
+    let provider =
+        Provider::<Http>::try_from(anvil.endpoint())?.interval(Duration::from_millis(10u64));
+    let client = Arc::new(SignerMiddleware::new(
+        provider,
+        wallet.with_chain_id(anvil.chain_id()),
+    ));
+    let greeter_contract = SimpleProver::deploy(client.clone(), ())
+        .unwrap()
+        .send()
+        .await
+        .unwrap();
+    WebProofProver::deploy(client.clone(), ())
+        .unwrap()
+        .send()
+        .await
+        .unwrap();
+    Ok(anvil)
+}
+
 mod server_tests {
     use super::*;
 
-    lazy_static! {
-        static ref CONFIG: Config = Config {
-            url: "http://localhost:8545".to_string(),
-            port: 3000
-        };
-    }
-
     #[tokio::test]
     async fn http_not_found() -> anyhow::Result<()> {
-        let app = server(CONFIG.clone());
+        let anvil = setup_anvil().await.unwrap();
+        let app = server(Config {
+            url: anvil.endpoint(),
+            port: 3000,
+        });
         let response = post(app, "/non_existent_http_path", &()).await?;
 
         assert_eq!(response.status(), StatusCode::NOT_FOUND);
@@ -37,7 +75,11 @@ mod server_tests {
 
     #[tokio::test]
     async fn json_rpc_not_found() -> anyhow::Result<()> {
-        let app = server(CONFIG.clone());
+        let anvil = setup_anvil().await.unwrap();
+        let app = server(Config {
+            url: anvil.endpoint(),
+            port: 3000,
+        });
 
         let req = JsonRpcRequest {
             method: "non_existent_json_rpc_method".to_string(),
@@ -66,9 +108,8 @@ mod server_tests {
     mod v_call {
         use super::*;
         use web_proof::fixtures::{tls_proof_example, NOTARY_PUB_KEY_PEM_EXAMPLE};
-        const LOCALHOST_RPC_URL: &str = "http://localhost:8545";
 
-        async fn get_block_nr() -> u32 {
+        async fn get_block_nr(anvil: &AnvilInstance) -> u32 {
             let req = json!({
                 "jsonrpc": "2.0",
                 "method": "eth_blockNumber",
@@ -77,7 +118,7 @@ mod server_tests {
             });
 
             let response = reqwest::Client::new()
-                .post(LOCALHOST_RPC_URL)
+                .post(anvil.endpoint())
                 .json(&req)
                 .send()
                 .await
@@ -92,7 +133,11 @@ mod server_tests {
 
         #[tokio::test]
         async fn field_validation_error() -> anyhow::Result<()> {
-            let app = server(CONFIG.clone());
+            let anvil = setup_anvil().await.unwrap();
+            let app = server(Config {
+                url: anvil.endpoint(),
+                port: 3000,
+            });
 
             let req = json!({
                 "method": "v_call",
@@ -121,8 +166,12 @@ mod server_tests {
 
         #[tokio::test]
         async fn success_simple_contract_call() -> anyhow::Result<()> {
-            let block_nr = get_block_nr().await;
-            let app = server(CONFIG.clone());
+            let anvil = setup_anvil().await.unwrap();
+            let block_nr = get_block_nr(&anvil).await;
+            let app = server(Config {
+                url: anvil.endpoint(),
+                port: 3000,
+            });
 
             let req = json!({
                 "method": "v_call",
@@ -149,8 +198,12 @@ mod server_tests {
 
         #[tokio::test]
         async fn failed_web_tls_proof_parsing() -> anyhow::Result<()> {
-            let block_nr = get_block_nr().await;
-            let app = server(CONFIG.clone());
+            let anvil = setup_anvil().await.unwrap();
+            let block_nr = get_block_nr(&anvil).await;
+            let app = server(Config {
+                url: anvil.endpoint(),
+                port: 3000,
+            });
 
             let req = json!({
                 "method": "v_call",
@@ -186,8 +239,12 @@ mod server_tests {
 
         #[tokio::test]
         async fn failed_notary_pub_key_parsing() -> anyhow::Result<()> {
-            let block_nr = get_block_nr().await;
-            let app = server(CONFIG.clone());
+            let anvil = setup_anvil().await.unwrap();
+            let block_nr = get_block_nr(&anvil).await;
+            let app = server(Config {
+                url: anvil.endpoint(),
+                port: 3000,
+            });
 
             let req = json!({
                 "method": "v_call",
@@ -223,8 +280,12 @@ mod server_tests {
 
         #[tokio::test]
         async fn success_web_proof() -> anyhow::Result<()> {
-            let block_nr = get_block_nr().await;
-            let app = server(CONFIG.clone());
+            let anvil = setup_anvil().await.unwrap();
+            let block_nr = get_block_nr(&anvil).await;
+            let app = server(Config {
+                url: anvil.endpoint(),
+                port: 3000,
+            });
 
             let req = json!({
                 "method": "v_call",
