@@ -2,10 +2,6 @@ import { helpers, getContractSpec, prove } from "vlayer-sdk";
 import * as path from "path";
 import { type Address } from "viem";
 
-const COUNTER = "Counter";
-const COUNTER_FILE = path.join(__dirname, `../out/${COUNTER}.sol/${COUNTER}.json`)
-const COUNTER_SPEC = await getContractSpec(COUNTER_FILE);
-
 const PROVER = "SimpleTravelProver";
 const FILE = path.join(__dirname, `../out/${PROVER}.sol/${PROVER}.json`)
 const PROVER_SPEC = await getContractSpec(FILE);
@@ -13,8 +9,7 @@ const FUNCTION_NAME = 'aroundTheWorld'
 const ARGS: any[] = []
 
 console.log("Deploying prover")
-let counter: Address = await helpers.deployContract(COUNTER_SPEC);
-let prover: Address = await helpers.deployContract(PROVER_SPEC, [counter]);
+let prover: Address = await deployContract(PROVER_SPEC);
 console.log(`Prover has been deployed on ${prover} address`);
 
 let blockNo = Number(await helpers.client().getBlockNumber());
