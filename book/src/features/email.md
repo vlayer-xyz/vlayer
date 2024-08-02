@@ -221,12 +221,12 @@ And voilà, we just successfully used email in the context of an on-chain smart 
 > Keep in mind that this is a simplified version of a real MultiSig wallet, demonstrating how an email recovery function could operate.
 
 ## Security assumptions
-Billions of users trust providers to deliver and store their email. Inboxes often contain critical information, including work-related data, personal files, password recovery links, and more. They also have access to their customers' emails, which they often use to serve ads. Email proofs can only be as secure as the email itself. The protocol relies on both the sending and receiving servers being trustworthy.
+Billions of users trust providers to deliver and store their emails. Inboxes often contain critical information, including work-related data, personal files, password recovery links, and more. Email providers also access customer emails for purposes like serving ads. Email proofs can only be as secure as the email itself. The protocol relies on the trustworthiness of both sending and receiving servers.
 
 ### Outgoing server 
-The vlayer prover checks that the message signature matches the public key listed in the DNS records. However, a dishonest outgoing server can forge emails and trick the prover into generating valid proof for them. This threat is not specific to the vlayer setup; any email client may be vulnerable to such attacks.
+The vlayer prover verifies that the message signature matches the public key listed in the DNS records. However, a dishonest outgoing server can forge emails and deceive the prover into generating valid proofs for them. This threat is not unique to the vlayer setup; any email client can be vulnerable to such attacks.
 
 ### Prevent unauthorized actions
-Both outgoing and incoming servers can read emails and use them to create proofs without the permission of the real mailbox owner. This also applies to the prover. Protocols are advised to use email proofs in a way that makes it impossible to manipulate smart contracts into unauthorized actions, such as sending funds to unintended recipients. 
+Both outgoing and incoming servers can read emails and use them to create proofs without the permission of the actual mailbox owner. This risk also extends to the prover. It is crucial for protocols to utilize email proofs in a manner that prevents the manipulation of smart contracts into performing unauthorized actions, such as sending funds to unintended recipients.
 
-In particular, it is advisable to include complete information in the email to ensure correct actions. Prefer emails like: "Send 1 ETH from X to Y on Ethereum Mainnet" over emails like: "Send 1 ETH". 
+Specifically, it is advisable to include complete information in the email to ensure correct actions. Prefer emails like: "Send 1 ETH from X to Y on Ethereum Mainnet" over vague instructions like: "Send 1 ETH."
