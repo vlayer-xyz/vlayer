@@ -5,7 +5,7 @@ use rlp as legacy_rlp;
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 
-use crate::path::decode_path;
+use crate::path::{Path, PathKind};
 
 use super::node_ref::NodeRef;
 
@@ -112,16 +112,19 @@ impl legacy_rlp::Decodable for Node {
         match rlp.prototype()? {
             Prototype::Null | Prototype::Data(0) => Ok(Node::Null),
             Prototype::List(2) => {
-                let (path, is_leaf) = decode_path(rlp.val_at::<Vec<u8>>(0)?);
-                if is_leaf {
-                    let val = rlp.val_at::<Vec<u8>>(1)?;
-                    Ok(Node::Leaf(path, val.into_boxed_slice()))
-                } else {
-                    let node = Decodable::decode(&rlp.at(1)?)?;
-                    if node == Node::Null {
-                        return Err(DecoderError::Custom("extension node with null child"));
+                let Path { kind, nibbles } = rlp.val_at::<Vec<u8>>(0)?.into();
+                match kind {
+                    PathKind::Leaf => {
+                        let val = rlp.val_at::<Vec<u8>>(1)?;
+                        Ok(Node::Leaf(nibbles, val.into_boxed_slice()))
                     }
-                    Ok(Node::Extension(path, Box::new(node)))
+                    PathKind::Extension => {
+                        let node = Decodable::decode(&rlp.at(1)?)?;
+                        if node == Node::Null {
+                            return Err(DecoderError::Custom("extension node with null child"));
+                        }
+                        Ok(Node::Extension(nibbles, Box::new(node)))
+                    }
                 }
             }
             Prototype::List(17) => {
