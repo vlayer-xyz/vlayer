@@ -110,4 +110,4 @@ By default, TLS establishes secure communications only between a server and a cl
 The job of *Notary* is to verify the TLS session transcript and make sure that nothing malicious is happening. 
 Downside of involving *Notary* is that it must be a trusted entity. *Notary* blindly signs the data, so it can lead to situation where prover cooperates with *Notary* to trick *Verifier*. 
 
-A solution to the above challenge and other security considerations will be available soon in this section.
+A solution to this challenge, along with other security considerations, will be available soon in this section.
