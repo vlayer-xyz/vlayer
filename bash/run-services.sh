@@ -62,21 +62,20 @@ function startup_anvil(){
 
 function startup_vlayer(){
     echo "Starting vlayer REST server"
-    (
-        cd "${VLAYER_HOME}/rust"
+    pushd "${VLAYER_HOME}/rust"
 
-        RUST_LOG=info \
-        RISC0_DEV_MODE="${RISC0_DEV_MODE}" \
-        BONSAI_API_URL="${BONSAI_API_URL}" \
-        BONSAI_API_KEY="${BONSAI_API_KEY}" \
-        cargo run --bin vlayer serve >"${LOGS_DIR}/vlayer_serve.out" & 
+    RUST_LOG=info \
+    RISC0_DEV_MODE="${RISC0_DEV_MODE}" \
+    BONSAI_API_URL="${BONSAI_API_URL}" \
+    BONSAI_API_KEY="${BONSAI_API_KEY}" \
+    cargo run --bin vlayer serve >"${LOGS_DIR}/vlayer_serve.out" & 
 
-        VLAYER_SERVER_PID=$!
+    VLAYER_SERVER_PID=$!
 
-        echo "vlayer server started with PID ${VLAYER_SERVER_PID}."
-        wait_for_port_and_pid 3000 ${VLAYER_SERVER_PID} 30m "vlayer server"
+    echo "vlayer server started with PID ${VLAYER_SERVER_PID}."
+    wait_for_port_and_pid 3000 ${VLAYER_SERVER_PID} 30m "vlayer server"
 
-    )
+    popd
 }
 
 trap cleanup EXIT ERR INT
