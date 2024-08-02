@@ -6,7 +6,7 @@ import {RiscZeroMockVerifier} from "risc0-ethereum/test/RiscZeroMockVerifier.sol
 import {ExecutionCommitment} from "../../src/ExecutionCommitment.sol";
 import {Proof} from "../../src/Proof.sol";
 import {ProofMode, Seal, SealLib} from "../../src/Seal.sol";
-import {GUEST_ID} from "../../src/GuestID.sol";
+import {ImageID} from "../../src/ImageID.sol";
 
 address constant PROVER = address(1);
 bytes4 constant SELECTOR = bytes4(0x01020304);
@@ -22,7 +22,7 @@ contract TestHelpers {
         bytes memory journal = concat(abi.encode(commitment), journalParams);
         bytes32 journalHash = sha256(journal);
 
-        bytes memory seal = mockVerifier.mockProve(GUEST_ID, journalHash).seal;
+        bytes memory seal = mockVerifier.mockProve(ImageID.RISC0_GUEST_ID, journalHash).seal;
         Proof memory proof = Proof(journal.length, encodeSeal(seal), commitment);
         return (proof, journalHash);
     }
