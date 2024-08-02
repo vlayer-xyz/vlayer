@@ -8,7 +8,6 @@ import {IRiscZeroVerifier, Receipt, VerificationFailed} from "risc0-ethereum/IRi
 import {RiscZeroMockVerifier} from "risc0-ethereum/test/RiscZeroMockVerifier.sol";
 
 import {ExecutionCommitment} from "../src/ExecutionCommitment.sol";
-import {GUEST_ID} from "../src/GuestID.sol";
 import {Proof} from "../src/Proof.sol";
 
 import {FakeProofVerifier} from "../src/proof_verifier/FakeProofVerifier.sol";

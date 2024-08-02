@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 
 import {IRiscZeroVerifier} from "risc0-ethereum/IRiscZeroVerifier.sol";
 
-import {GUEST_ID} from "../GuestID.sol";
+import {ImageID} from "../ImageID.sol";
 import {Proof} from "../Proof.sol";
 import {ProofMode, SealLib, Seal} from "../Seal.sol";
 
@@ -23,7 +23,7 @@ abstract contract ProofVerifierBase is IProofVerifier {
     {
         _verifyProofMode(proof);
         _verifyExecutionEnv(proof, expectedProver, expectedSelector);
-        verifier.verify(proof.seal.decode(), GUEST_ID, journalHash);
+        verifier.verify(proof.seal.decode(), ImageID.RISC0_CALL_GUEST_ID, journalHash);
     }
 
     function _verifyProofMode(Proof memory proof) private view {
