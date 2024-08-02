@@ -5,6 +5,8 @@ use rlp as legacy_rlp;
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 
+use crate::path::decode_path;
+
 use super::node_ref::NodeRef;
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
@@ -145,17 +147,6 @@ impl legacy_rlp::Decodable for Node {
             _ => Err(DecoderError::RlpIncorrectListLen),
         }
     }
-}
-
-#[inline]
-fn decode_path(path: impl AsRef<[u8]>) -> (Nibbles, bool) {
-    let path = Nibbles::unpack(path);
-    assert!(path.len() >= 2);
-    let is_leaf = path[0] & 2 != 0;
-    let odd_nibbles = path[0] & 1 != 0;
-
-    let prefix = if odd_nibbles { &path[1..] } else { &path[2..] };
-    (Nibbles::from_nibbles_unchecked(prefix), is_leaf)
 }
 
 #[inline]
