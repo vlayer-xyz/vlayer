@@ -220,3 +220,14 @@ And voilà, we just successfully used email in the context of an on-chain smart 
 
 > Keep in mind that this is a simplified version of a real MultiSig wallet, demonstrating how an email recovery function could operate.
 
+
+## Security Assumptions
+Billions of users trust providers to deliver and store their emails. Inboxes often contain critical information, including work-related data, personal files, password recovery links, and more. Email providers also access customer emails for purposes like serving ads. Email proofs can only be as secure as the email itself, and the protocol relies on the trustworthiness of both sending and receiving servers.
+
+### Outgoing Server
+The vlayer prover verifies that the message signature matches the public key listed in the DNS records. However, a dishonest outgoing server can forge emails and deceive the prover into generating valid proofs for them. To mitigate this risk, vlayers support only a limited number of the world's most trusted email providers.
+
+### Preventing Unauthorized Actions
+Both outgoing and incoming servers can read emails and use them to create proofs without the permission of the actual mail sender or receiver. This risk also extends to the prover, which accesses the email to generate claims. It is crucial for protocols to utilize email proofs in a manner that prevents the manipulation of smart contracts into performing unauthorized actions, such as sending funds to unintended recipients.
+
+For example, it is advisable to include complete information in the email to ensure correct actions. Prefer emails like: "Send 1 ETH from address X to address Y on Ethereum Mainnet" over partial instructions like: "Send 1 ETH," where other details come from another source, such as smart contract call parameters. Another approach is to use unique identifiers that unambiguously point to the necessary details.
