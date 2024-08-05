@@ -165,6 +165,8 @@ fn encoded_header(list: bool, payload_length: usize) -> Vec<u8> {
 
 #[cfg(test)]
 mod node_size {
+    use std::array::from_fn;
+
     use nybbles::Nibbles;
 
     use super::Node;
@@ -195,12 +197,22 @@ mod node_size {
     }
 
     #[test]
-    fn branch() {
+    fn branch_one_child() {
         let leaf = Node::Leaf(Nibbles::default(), Box::new([]));
+        let child = Some(Box::new(leaf));
         const NULL_CHILD: Option<Box<Node>> = None;
         let mut children = [NULL_CHILD; 16];
-        children[0] = Some(Box::new(leaf));
+        children[0] = child;
         let branch = Node::Branch(children);
         assert_eq!(branch.size(), 2);
+    }
+
+    #[test]
+    fn branch_many_children() {
+        let leaf = Node::Leaf(Nibbles::default(), Box::new([]));
+        let child = Some(Box::new(leaf));
+        let children: [_; 16] = from_fn(|_| child.clone());
+        let branch = Node::Branch(children);
+        assert_eq!(branch.size(), 17);
     }
 }
