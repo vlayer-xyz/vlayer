@@ -1,9 +1,12 @@
-use super::KECCAK_EMPTY;
 use crate::MerkleTrie;
-use alloy_primitives::{address, keccak256, uint, Bytes, TxNumber, B256, U256};
+use alloy_primitives::{address, b256, keccak256, uint, Bytes, TxNumber, B256, U256};
 use alloy_rlp_derive::{RlpDecodable, RlpEncodable};
 use alloy_trie::EMPTY_ROOT_HASH;
 use serde_json::json;
+
+/// Hash of an empty byte array, i.e. `keccak256([])`.
+pub const KECCAK_EMPTY: B256 =
+    b256!("c5d2460186f7233c927e7db2dcc703c0e500b653ca82273b7bfad8045d85a470");
 
 #[derive(Debug, Clone, PartialEq, Eq, RlpEncodable, RlpDecodable)]
 pub struct StateAccount {
@@ -25,7 +28,7 @@ impl Default for StateAccount {
 }
 
 #[test]
-pub fn parse_eth_get_proof_existing() {
+fn parse_eth_get_proof_existing() {
     // { "id": 1, "jsonrpc": "2.0",
     //   "method": "eth_getProof",
     //   "params": ["0x0000000000000000000000000000000000000004", [], "0x12962D1"] }
@@ -46,7 +49,7 @@ pub fn parse_eth_get_proof_existing() {
 }
 
 #[test]
-pub fn parse_eth_get_proof_nonexisting() {
+fn parse_eth_get_proof_nonexisting() {
     // { "id": 1, "jsonrpc": "2.0",
     //   "method": "eth_getProof",
     //   "params": ["0x0010000000000000000000000000000000000000", [], "0x12962D1"] }
