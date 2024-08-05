@@ -10,17 +10,11 @@ pub fn notary_pub_key_example() -> PublicKey {
 }
 
 pub fn sent_request_example() -> String {
-    str::from_utf8(include_bytes!("../testdata/sent_request.txt"))
-        .unwrap()
-        .to_string()
-        .replace('\n', "\r\n")
+    read_fixtures(include_bytes!("../testdata/sent_request.txt"))
 }
 
 pub fn received_response_example() -> String {
-    str::from_utf8(include_bytes!("../testdata/received_response.txt"))
-        .unwrap()
-        .to_string()
-        .replace('\n', "\r\n")
+    read_fixtures(include_bytes!("../testdata/received_response.txt"))
 }
 
 pub fn tls_proof_example() -> TlsProof {
@@ -36,6 +30,13 @@ pub fn invalid_tls_proof_example() -> TlsProof {
 
     tls_proof.session.signature = Some(invalid_signature);
     tls_proof
+}
+
+fn read_fixtures(file_bytes: &[u8]) -> String {
+    str::from_utf8(file_bytes)
+        .unwrap()
+        .to_string()
+        .replace('\n', "\r\n")
 }
 
 fn change_signature(mut signature: tlsn_core::Signature) -> tlsn_core::Signature {
