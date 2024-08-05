@@ -4,19 +4,19 @@ use alloy_primitives::{b256, B256};
 use nybbles::Nibbles;
 
 #[test]
-pub fn null() {
+fn null() {
     let mpt = MerkleTrie(Node::Null);
     assert_eq!(mpt.hash_slow(), EMPTY_ROOT_HASH);
 }
 
 #[test]
-pub fn digest() {
+fn digest() {
     let mpt = MerkleTrie(Node::Digest(B256::ZERO));
     assert_eq!(mpt.hash_slow(), B256::ZERO);
 }
 
 #[test]
-pub fn leaf() {
+fn leaf() {
     let mpt = MerkleTrie(Node::Leaf(Nibbles::unpack(B256::ZERO), vec![0].into()));
     assert_eq!(
         mpt.hash_slow(),
@@ -25,7 +25,7 @@ pub fn leaf() {
 }
 
 #[test]
-pub fn extension() {
+fn extension() {
     let leaf = Node::Leaf(Nibbles::unpack([1]), vec![0].into());
     let mpt = MerkleTrie(Node::Extension(Nibbles::from_nibbles([0; 1]), leaf.into()));
     assert_eq!(
@@ -35,7 +35,7 @@ pub fn extension() {
 }
 
 #[test]
-pub fn branch() {
+fn branch() {
     let mut children: [Option<Box<Node>>; 16] = Default::default();
     children[0] = Some(Box::new(Node::Leaf(
         Nibbles::from_nibbles([0; 63]),
