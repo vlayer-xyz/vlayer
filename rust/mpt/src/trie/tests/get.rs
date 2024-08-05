@@ -13,7 +13,7 @@ pub fn null() {
 }
 
 #[test]
-#[should_panic]
+#[should_panic(expected = "Attempted to access unresolved node")]
 fn digest() {
     let mpt = MerkleTrie(Node::Digest(B256::ZERO));
     mpt.get([]);
