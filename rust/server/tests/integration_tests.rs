@@ -8,7 +8,6 @@ use ethers::{
     providers::{Http, Provider},
     signers::{LocalWallet, Signer},
 };
-use eyre::Result;
 use serde_json::json;
 use server::server::{server, Config};
 use std::{sync::Arc, time::Duration};
@@ -26,11 +25,12 @@ abigen!(
     "../../examples/web_proof/out/WebProofProver.sol/WebProofProver.json",
 );
 
-async fn setup_anvil() -> Result<AnvilInstance> {
+async fn setup_anvil() -> AnvilInstance {
     let anvil = Anvil::new().spawn();
     let wallet: LocalWallet = anvil.keys()[0].clone().into();
-    let provider =
-        Provider::<Http>::try_from(anvil.endpoint())?.interval(Duration::from_millis(10u64));
+    let provider = Provider::<Http>::try_from(anvil.endpoint())
+        .unwrap()
+        .interval(Duration::from_millis(10u64));
     let client = Arc::new(SignerMiddleware::new(
         provider,
         wallet.with_chain_id(anvil.chain_id()),
@@ -45,7 +45,7 @@ async fn setup_anvil() -> Result<AnvilInstance> {
         .send()
         .await
         .unwrap();
-    Ok(anvil)
+    anvil
 }
 
 mod server_tests {
@@ -53,7 +53,7 @@ mod server_tests {
 
     #[tokio::test]
     async fn http_not_found() -> anyhow::Result<()> {
-        let anvil = setup_anvil().await.unwrap();
+        let anvil = setup_anvil().await;
         let app = server(Config {
             url: anvil.endpoint(),
             port: 3000,
@@ -73,7 +73,7 @@ mod server_tests {
 
     #[tokio::test]
     async fn json_rpc_not_found() -> anyhow::Result<()> {
-        let anvil = setup_anvil().await.unwrap();
+        let anvil = setup_anvil().await;
         let app = server(Config {
             url: anvil.endpoint(),
             port: 3000,
@@ -131,7 +131,7 @@ mod server_tests {
 
         #[tokio::test]
         async fn field_validation_error() -> anyhow::Result<()> {
-            let anvil = setup_anvil().await.unwrap();
+            let anvil = setup_anvil().await;
             let app = server(Config {
                 url: anvil.endpoint(),
                 port: 3000,
@@ -164,7 +164,7 @@ mod server_tests {
 
         #[tokio::test]
         async fn success_simple_contract_call() -> anyhow::Result<()> {
-            let anvil = setup_anvil().await.unwrap();
+            let anvil = setup_anvil().await;
             let block_nr = get_block_nr(&anvil).await;
             let app = server(Config {
                 url: anvil.endpoint(),
@@ -196,7 +196,7 @@ mod server_tests {
 
         #[tokio::test]
         async fn failed_web_tls_proof_parsing() -> anyhow::Result<()> {
-            let anvil = setup_anvil().await.unwrap();
+            let anvil = setup_anvil().await;
             let block_nr = get_block_nr(&anvil).await;
             let app = server(Config {
                 url: anvil.endpoint(),
@@ -237,7 +237,7 @@ mod server_tests {
 
         #[tokio::test]
         async fn failed_notary_pub_key_parsing() -> anyhow::Result<()> {
-            let anvil = setup_anvil().await.unwrap();
+            let anvil = setup_anvil().await;
             let block_nr = get_block_nr(&anvil).await;
             let app = server(Config {
                 url: anvil.endpoint(),
@@ -278,7 +278,7 @@ mod server_tests {
 
         #[tokio::test]
         async fn success_web_proof() -> anyhow::Result<()> {
-            let anvil = setup_anvil().await.unwrap();
+            let anvil = setup_anvil().await;
             let block_nr = get_block_nr(&anvil).await;
             let app = server(Config {
                 url: anvil.endpoint(),
