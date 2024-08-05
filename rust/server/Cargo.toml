@@ -27,3 +27,4 @@ web_proof = { path = "../web_proof" }
 reqwest = "0.12.5"
 lazy_static = "1.5.0"
 web_proof = { path = "../web_proof", features = ["fixtures"] }
+ethers = { version = "2.0" }

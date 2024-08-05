@@ -7914,6 +7914,7 @@ dependencies = [
  "anyhow",
  "axum",
  "axum-jrpc",
+ "ethers",
  "hex",
  "host",
  "http-body-util",

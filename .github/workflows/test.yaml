@@ -40,24 +40,15 @@ jobs:
         with:
           version: nightly-5ac78a9cd4b94dc53d1fe5e0f42372b28b5a7559 # 2024-06-02
 
-      - name: Start Anvil
-        run: |
-          anvil &
-          ANVIL_SERVER_PID=$!
-          echo "ANVIL_SERVER_PID=$ANVIL_SERVER_PID" >> $GITHUB_ENV
-
-      - name: Deploy contracts
-        env:
-          ETH_RPC_URL: localhost:8545
-          DEPLOYER_PRIV: "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
+      - name: Build contracts
         run: |
           (
             cd examples/simple
-            forge create --private-key ${DEPLOYER_PRIV} "src/vlayer/SimpleProver.sol:SimpleProver"
+            forge build
           ) 
           (
             cd examples/web_proof 
-            forge create --private-key ${DEPLOYER_PRIV} "src/vlayer/WebProofProver.sol:WebProofProver"
+            forge build
           ) 
 
       - name: Run workspace rust tests
@@ -67,7 +58,3 @@ jobs:
         env:
           RUST_LOG: info
           RISC0_DEV_MODE: 1
-
-      - name: Stop Anvil
-        if: always()
-        run: kill $ANVIL_SERVER_PID
