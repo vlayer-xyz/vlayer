@@ -12,12 +12,12 @@ pub enum VerificationError {
     SubstringsProof(#[from] SubstringsProofError),
 }
 
-struct _WebProofRequestResponse {
+struct _WebProofJournal {
     request: String,
     response: String,
 }
 
-fn _verify_proof(web_proof: WebProof) -> Result<_WebProofRequestResponse, VerificationError> {
+fn _verify_proof(web_proof: WebProof) -> Result<_WebProofJournal, VerificationError> {
     let TlsProof {
         session,
         substrings,
@@ -33,7 +33,7 @@ fn _verify_proof(web_proof: WebProof) -> Result<_WebProofRequestResponse, Verifi
     let sent_string = String::from_utf8(sent.data().to_vec()).unwrap();
     let recv_string = String::from_utf8(recv.data().to_vec()).unwrap();
 
-    Ok(_WebProofRequestResponse {
+    Ok(_WebProofJournal {
         request: sent_string,
         response: recv_string,
     })
