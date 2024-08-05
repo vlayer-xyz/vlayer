@@ -1,7 +1,7 @@
-use crate::MerkleTrie;
 use alloy_primitives::{address, b256, keccak256, uint, Bytes, TxNumber, B256, U256};
 use alloy_rlp_derive::{RlpDecodable, RlpEncodable};
 use alloy_trie::EMPTY_ROOT_HASH;
+use mpt::MerkleTrie;
 use serde_json::json;
 
 /// Hash of an empty byte array, i.e. `keccak256([])`.
