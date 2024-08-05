@@ -48,7 +48,7 @@ mod server_tests {
         });
         let response = post(app, "/non_existent_http_path", &()).await?;
 
-        assert_eq!(response.status(), StatusCode::NOT_FOUND);
+        assert_eq!(StatusCode::NOT_FOUND, response.status());
         assert!(body_to_string(response.into_body()).await?.is_empty());
 
         Ok(())
@@ -73,9 +73,8 @@ mod server_tests {
         };
         let response = post(app, "/", &req).await?;
 
-        assert_eq!(response.status(), StatusCode::OK);
+        assert_eq!(StatusCode::OK, response.status());
         assert_eq!(
-            body_to_json::<Value>(response.into_body()).await?,
             json!({
                 "jsonrpc": "2.0",
                 "id": 1,
@@ -84,7 +83,8 @@ mod server_tests {
                     "message": "Method `non_existent_json_rpc_method` not found",
                     "data": null
                 }
-            })
+            }),
+            body_to_json::<Value>(response.into_body()).await?
         );
 
         Ok(())
@@ -132,9 +132,8 @@ mod server_tests {
             });
             let response = post(app, "/", &req).await?;
 
-            assert_eq!(response.status(), StatusCode::OK);
+            assert_eq!(StatusCode::OK, response.status());
             assert_eq!(
-                body_to_json::<Value>(response.into_body()).await?,
                 json!({
                     "jsonrpc": "2.0",
                     "id": 1,
@@ -143,7 +142,8 @@ mod server_tests {
                         "message": "Invalid field `to`: Odd number of digits `I am not a valid address!`",
                         "data": null
                     }
-                })
+                }),
+                body_to_json::<Value>(response.into_body()).await?
             );
 
             Ok(())
@@ -166,16 +166,16 @@ mod server_tests {
             });
             let response = post(app, "/", &req).await?;
 
-            assert_eq!(response.status(), StatusCode::OK);
+            assert_eq!(StatusCode::OK, response.status());
             assert_eq!(
-                body_to_json::<Value>(response.into_body()).await?,
                 json!({
                     "jsonrpc": "2.0",
                     "id": 1,
                     "result": {
                         "result": "prover_contract_address: 0x5FbDB2315678afecb367f032d93F642f64180aa3, function_selector: 0xcad0899b, evm_call_result: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3], seal: []"
                     }
-                })
+                }),
+                body_to_json::<Value>(response.into_body()).await?
             );
 
             Ok(())
@@ -205,9 +205,8 @@ mod server_tests {
             });
             let response = post(app, "/", &req).await?;
 
-            assert_eq!(response.status(), StatusCode::OK);
+            assert_eq!(StatusCode::OK, response.status());
             assert_eq!(
-                body_to_json::<Value>(response.into_body()).await?,
                 json!({
                     "jsonrpc": "2.0",
                     "id": 1,
@@ -216,7 +215,8 @@ mod server_tests {
                         "message": "invalid type: string \"<tls proof value>\", expected struct TlsProof",
                         "data": null
                     }
-                })
+                }),
+                body_to_json::<Value>(response.into_body()).await?
             );
 
             Ok(())
@@ -246,9 +246,8 @@ mod server_tests {
             });
             let response = post(app, "/", &req).await?;
 
-            assert_eq!(response.status(), StatusCode::OK);
+            assert_eq!(StatusCode::OK, response.status());
             assert_eq!(
-                body_to_json::<Value>(response.into_body()).await?,
                 json!({
                     "jsonrpc": "2.0",
                     "id": 1,
@@ -257,7 +256,8 @@ mod server_tests {
                         "message": "ASN.1 error: PEM error: PEM preamble contains invalid data (NUL byte)",
                         "data": null
                     }
-                })
+                }),
+                body_to_json::<Value>(response.into_body()).await?
             );
 
             Ok(())
@@ -288,16 +288,16 @@ mod server_tests {
 
             let response = post(app, "/", &req).await?;
 
-            assert_eq!(response.status(), StatusCode::OK);
+            assert_eq!(StatusCode::OK, response.status());
             assert_eq!(
-                body_to_json::<Value>(response.into_body()).await?,
                 json!({
                     "jsonrpc": "2.0",
                     "id": 1,
                     "result": {
                         "result": "prover_contract_address: 0x5FbDB2315678afecb367f032d93F642f64180aa3, function_selector: 0xe752d2a0, evm_call_result: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], seal: []"
                     }
-                })
+                }),
+                body_to_json::<Value>(response.into_body()).await?
             );
 
             Ok(())
