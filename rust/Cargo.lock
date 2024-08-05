@@ -8419,6 +8419,7 @@ dependencies = [
  "alloy-json-abi",
  "alloy-sol-types",
  "call_engine",
+ "alloy-trie",
  "clap",
  "color-eyre",
  "comfy-table",

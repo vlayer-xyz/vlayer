@@ -27,3 +27,4 @@ tracing = { workspace = true }
 tokio = { workspace = true }
 call_engine = { path = "../call/engine" }
 ethers-core = "2.0.14"
+alloy-trie = "0.4.1"
