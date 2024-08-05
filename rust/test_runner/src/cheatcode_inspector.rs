@@ -3,7 +3,9 @@ use foundry_evm::revm::interpreter::{CallInputs, CallOutcome};
 use foundry_evm::revm::primitives::U256;
 use foundry_evm::revm::{Database, EvmContext, Inspector};
 
-use call_engine::utils::evm_call::{create_return_outcome, create_revert_outcome, split_calldata};
+use vlayer_engine::utils::evm_call::{
+    create_encoded_return_outcome, create_return_outcome, create_revert_outcome, split_calldata,
+};
 
 use crate::cheatcodes::{callProverCall, getProofCall, Proof, CHEATCODE_CALL_ADDR};
 
@@ -24,13 +26,13 @@ impl<DB: Database> Inspector<DB> for CheatcodeInspector {
         if inputs.target_address == CHEATCODE_CALL_ADDR {
             let (selector, _) = split_calldata(inputs);
             return match selector.try_into() {
-                Ok(callProverCall::SELECTOR) => Some(create_return_outcome(true, inputs)),
+                Ok(callProverCall::SELECTOR) => Some(create_encoded_return_outcome(true, inputs)),
                 Ok(getProofCall::SELECTOR) => {
                     let dummy_proof = Proof {
                         length: U256::from(1337),
                         ..Default::default()
                     };
-                    Some(create_return_outcome(dummy_proof, inputs))
+                    Some(create_encoded_return_outcome(dummy_proof, inputs))
                 }
                 _ => Some(create_revert_outcome("Unexpected vlayer cheatcode call")),
             };

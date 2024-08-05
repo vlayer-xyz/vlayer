@@ -1,11 +1,12 @@
 import { helpers, getContractSpec, prove } from "vlayer-sdk";
 import * as path from "path";
 import { type Address } from "viem";
+import { deployContract } from "../../../packages/src/api/helpers";
 
 const PROVER = "SimpleTravelProver";
 const FILE = path.join(__dirname, `../out/${PROVER}.sol/${PROVER}.json`)
 const PROVER_SPEC = await getContractSpec(FILE);
-const FUNCTION_NAME = 'aroundTheWorld'
+const FUNCTION_NAME = 'usdtOwner'
 const ARGS: any[] = []
 
 console.log("Deploying prover")

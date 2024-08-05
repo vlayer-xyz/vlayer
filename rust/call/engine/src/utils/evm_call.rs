@@ -1,4 +1,5 @@
-use alloy_primitives::bytes::Buf;
+use alloy_primitives::Bytes;
+use alloy_rlp::Buf;
 use alloy_sol_types::{decode_revert_reason, SolError, SolValue};
 use revm::interpreter::{CallInputs, CallOutcome, Gas, InstructionResult, InterpreterResult};
 use revm::primitives::ExecutionResult;
@@ -9,15 +10,19 @@ pub fn split_calldata(inputs: &CallInputs) -> (&[u8], &[u8]) {
     inputs.input.split_at(SELECTOR_LEN)
 }
 
-pub fn create_return_outcome<T: SolValue>(value: T, inputs: &CallInputs) -> CallOutcome {
+pub fn create_return_outcome<T: Into<Bytes>>(value: T, inputs: &CallInputs) -> CallOutcome {
     CallOutcome::new(
         InterpreterResult::new(
             InstructionResult::Return,
-            value.abi_encode().into(),
+            value.into(),
             Gas::new(inputs.gas_limit),
         ),
         inputs.return_memory_offset.clone(),
     )
+}
+
+pub fn create_encoded_return_outcome<T: SolValue>(value: T, inputs: &CallInputs) -> CallOutcome {
+    create_return_outcome(value.abi_encode(), inputs)
 }
 
 pub fn create_revert_outcome(reason: &str) -> CallOutcome {

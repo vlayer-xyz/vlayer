@@ -53,9 +53,9 @@ where
         config: HostConfig,
     ) -> Result<Self, HostError> {
         let providers = CachedMultiProvider::new(provider_factory);
-        let block_number = get_block_number(&providers, config.chain_id)?;
+        let block_number = get_block_number(&providers, config.start_chain_id)?;
         let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
-        let start_execution_location = ExecutionLocation::new(block_number, config.chain_id);
+        let start_execution_location = ExecutionLocation::new(block_number, config.start_chain_id);
 
         Ok(Host {
             envs,
@@ -70,7 +70,7 @@ where
     ) -> Result<Self, HostError> {
         let providers = CachedMultiProvider::new(provider_factory);
         let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
-        let start_execution_location = ExecutionLocation::new(block_number, config.chain_id);
+        let start_execution_location = ExecutionLocation::new(block_number, config.start_chain_id);
 
         Ok(Host {
             envs,
