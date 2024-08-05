@@ -2,7 +2,7 @@ use std::borrow::Borrow;
 
 use alloy_sol_types::SolCall;
 use call_engine::utils::evm_call::{
-    create_encoded_return_outcome, create_revert_outcome, split_calldata,
+    create_raw_return_outcome, create_encoded_return_outcome, create_revert_outcome, split_calldata,
 };
 use foundry_evm::revm::interpreter::{CallInputs, CallOutcome};
 use foundry_evm::revm::primitives::U256;
@@ -52,7 +52,10 @@ impl<DB: Database> Inspector<DB> for CheatcodeInspector {
                 to: inputs.target_address,
                 data: inputs.input.clone().into(),
             }) {
-                Ok(_) => Some(create_encoded_return_outcome(true, inputs)),
+                Ok(host_output) => Some(create_raw_return_outcome(
+                    host_output.guest_output.evm_call_result,
+                    inputs,
+                )),
                 Err(error) => Some(create_revert_outcome(&format!("{:?}", error))),
             };
         }

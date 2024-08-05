@@ -25,6 +25,17 @@ pub fn create_encoded_return_outcome<T: SolValue>(value: T, inputs: &CallInputs)
     create_return_outcome(value.abi_encode(), inputs)
 }
 
+pub fn create_raw_return_outcome(value: Vec<u8>, inputs: &CallInputs) -> CallOutcome {
+    CallOutcome::new(
+        InterpreterResult::new(
+            InstructionResult::Return,
+            value.into(),
+            Gas::new(inputs.gas_limit),
+        ),
+        inputs.return_memory_offset.clone(),
+    )
+}
+
 pub fn create_revert_outcome(reason: &str) -> CallOutcome {
     CallOutcome::new(
         InterpreterResult::new(

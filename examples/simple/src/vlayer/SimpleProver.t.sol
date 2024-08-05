@@ -13,9 +13,7 @@ contract ProverTest is VTest {
     function test_sum() public {
         SimpleProver prover = new SimpleProver();
         callProver();
-        uint res = prover.sum(1, 2);
-        console.log("res", res);
-        assertEq(res, 3);
+        assertEq(prover.sum(1, 2), 3);
         Proof memory proof = getProof();
         assertEq(proof.length, 1337);
     }

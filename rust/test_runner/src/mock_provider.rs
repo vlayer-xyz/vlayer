@@ -57,8 +57,6 @@ impl MockProvider {
     }
 }
 
-impl MockProvider {}
-
 impl<'a> BlockingProvider for MockProvider {
     type Error = Infallible;
 
