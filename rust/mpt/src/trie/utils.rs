@@ -66,3 +66,85 @@ mod parse_node {
         Ok(())
     }
 }
+
+#[cfg(test)]
+mod resolve_trie {
+    use std::array::from_fn;
+
+    use alloy_primitives::keccak256;
+    use alloy_trie::HashMap;
+    use nybbles::Nibbles;
+
+    use crate::node::Node;
+
+    use super::resolve_trie;
+
+    #[test]
+    fn null() {
+        let root = Node::Null;
+        let nodes_by_hash = HashMap::new();
+        let resolved_node = resolve_trie(root, &nodes_by_hash);
+        assert_eq!(resolved_node, Node::Null);
+    }
+
+    #[test]
+    fn leaf() {
+        let nibbles = Nibbles::from_nibbles([0]);
+        let root = Node::Leaf(nibbles.clone(), vec![0].into());
+        let nodes_by_hash = HashMap::new();
+        let resolved_node = resolve_trie(root, &nodes_by_hash);
+        assert_eq!(resolved_node, Node::Leaf(nibbles, vec![0].into()));
+    }
+
+    #[test]
+    fn digest() {
+        let null_node = Node::Null;
+        let digest = keccak256(null_node.rlp_encoded());
+        let node = Node::Digest(digest);
+        let nodes_by_hash = HashMap::new();
+        let resolved_node = resolve_trie(node.clone(), &nodes_by_hash);
+        assert_eq!(resolved_node, node);
+    }
+
+    #[test]
+    fn digest_resolved() {
+        let null_node = Node::Null;
+        let digest = keccak256(null_node.rlp_encoded());
+        let node = Node::Digest(digest);
+        let nodes_by_hash = HashMap::from_iter([(digest, null_node.clone())]);
+        let resolved_node = resolve_trie(node, &nodes_by_hash);
+        assert_eq!(resolved_node, Node::Null);
+    }
+
+    #[test]
+    fn extension() {
+        let leaf_nibbles = Nibbles::from_nibbles([1]);
+        let extension_nibbles = Nibbles::from_nibbles([0]);
+        let leaf = Node::Leaf(leaf_nibbles.clone(), vec![0].into());
+        let digest = keccak256(leaf.rlp_encoded());
+        let extension = Node::Extension(extension_nibbles.clone(), Box::new(Node::Digest(digest)));
+        let nodes_by_hash = HashMap::from([(digest, leaf.clone())]);
+        let resolved_node = resolve_trie(extension, &nodes_by_hash);
+        assert_eq!(
+            resolved_node,
+            Node::Extension(extension_nibbles, Box::new(leaf))
+        );
+    }
+
+    #[test]
+    fn branch() {
+        let leaf_nibbles = Nibbles::from_nibbles([1]);
+        let leaf = Node::Leaf(leaf_nibbles.clone(), vec![0].into());
+        let digest = keccak256(leaf.rlp_encoded());
+        let child = None;
+        let mut children: [_; 16] = from_fn(|_| child.clone());
+        children[0] = Some(Box::new(Node::Digest(digest)));
+        let branch = Node::Branch(children);
+        let nodes_by_hash = HashMap::from([(digest, leaf.clone())]);
+        let resolved_node = resolve_trie(branch, &nodes_by_hash);
+        let Node::Branch(children) = resolved_node else {
+            panic!("expected branch, got {:?}", resolved_node);
+        };
+        assert_eq!(children[0], Some(Box::new(leaf)));
+    }
+}
