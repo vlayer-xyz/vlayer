@@ -60,18 +60,16 @@ mod tests {
 
     #[test]
     fn success_verification() {
-        let proof =
-            load_web_proof_fixture("../testdata/tls_proof.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
+        let proof = load_web_proof_fixture("./testdata/tls_proof.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
         assert!(_verify_proof(proof).is_ok());
     }
 
     #[test]
     fn correct_substrings_extracted() {
-        let proof =
-            load_web_proof_fixture("../testdata/tls_proof.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
+        let proof = load_web_proof_fixture("./testdata/tls_proof.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
         let _WebProofJournal { request, response } = _verify_proof(proof).unwrap();
 
-        assert_eq!(request, read_fixture("../testdata/sent_request.txt"));
-        assert_eq!(response, read_fixture("../testdata/received_response.txt"));
+        assert_eq!(request, read_fixture("./testdata/sent_request.txt"));
+        assert_eq!(response, read_fixture("./testdata/received_response.txt"));
     }
 }
