@@ -10,7 +10,9 @@ use tracing::info;
 use crate::engine::EngineError;
 use crate::evm::env::location::ExecutionLocation;
 use crate::io::Call;
-use crate::utils::evm_call::{create_return_outcome, split_calldata};
+use crate::utils::evm_call::{
+    create_encoded_return_outcome, create_return_outcome, split_calldata,
+};
 
 // The length of an argument in call data is 32 bytes.
 const ARG_LEN: usize = 32;
@@ -78,7 +80,7 @@ impl<'a> TravelInspector<'a> {
         );
         let result = (self.callback)(&inputs.into(), location).expect("Intercepted call failed");
         info!("Intercepted call returned: {:?}", result);
-        let outcome = create_return_outcome(&result[..], inputs);
+        let outcome = create_return_outcome(result, inputs);
         Some(outcome)
     }
 
@@ -95,7 +97,7 @@ impl<'a> TravelInspector<'a> {
             self.set_chain(chain_id, block_number);
         }
 
-        Some(create_return_outcome(true, inputs))
+        Some(create_encoded_return_outcome(true, inputs))
     }
 }
 

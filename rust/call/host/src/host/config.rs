@@ -4,12 +4,15 @@ use alloy_primitives::ChainId;
 
 pub struct HostConfig {
     pub rpc_urls: HashMap<ChainId, String>,
-    pub chain_id: ChainId,
+    pub start_chain_id: ChainId,
 }
 
 impl HostConfig {
-    pub fn new(url: &str, chain_id: ChainId) -> Self {
-        let rpc_urls = HashMap::from([(chain_id, url.to_string())]);
-        HostConfig { rpc_urls, chain_id }
+    pub fn new(rpc_urls: Vec<(ChainId, String)>, start_chain_id: ChainId) -> Self {
+        let rpc_urls = rpc_urls.into_iter().collect();
+        HostConfig {
+            rpc_urls,
+            start_chain_id,
+        }
     }
 }
