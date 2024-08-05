@@ -1,6 +1,7 @@
 use core::str;
 use p256::{ecdsa, PublicKey};
 use pkcs8::DecodePublicKey;
+use std::fs;
 use tlsn_core::proof::TlsProof;
 
 use crate::types::WebProof;
@@ -11,23 +12,15 @@ pub fn notary_pub_key_example() -> PublicKey {
     PublicKey::from_public_key_pem(NOTARY_PUB_KEY_PEM_EXAMPLE).unwrap()
 }
 
-pub fn sent_request_example() -> String {
-    read_fixtures(include_bytes!("../testdata/sent_request.txt"))
-}
-
-pub fn received_response_example() -> String {
-    read_fixtures(include_bytes!("../testdata/received_response.txt"))
-}
-
 pub fn tls_proof_example() -> TlsProof {
     serde_json::from_str(str::from_utf8(include_bytes!("../testdata/tls_proof.json")).unwrap())
         .unwrap()
 }
 
-pub fn webproof_example() -> WebProof {
+pub fn load_web_proof_fixture(proof_path: &str, notary_pub_key_pem: &str) -> WebProof {
     WebProof {
-        tls_proof: tls_proof_example(),
-        notary_pub_key: notary_pub_key_example(),
+        tls_proof: serde_json::from_str(&read_fixture(proof_path)).unwrap(),
+        notary_pub_key: PublicKey::from_public_key_pem(notary_pub_key_pem).unwrap(),
     }
 }
 
@@ -41,8 +34,8 @@ pub fn invalid_tls_proof_example() -> TlsProof {
     tls_proof
 }
 
-fn read_fixtures(file_bytes: &[u8]) -> String {
-    str::from_utf8(file_bytes)
+pub fn read_fixture(path: &str) -> String {
+    str::from_utf8(&fs::read(path).unwrap())
         .unwrap()
         .to_string()
         .replace('\n', "\r\n")

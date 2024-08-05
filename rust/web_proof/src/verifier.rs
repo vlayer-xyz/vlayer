@@ -42,8 +42,8 @@ fn _verify_proof(web_proof: WebProof) -> Result<_WebProofJournal, VerificationEr
 #[cfg(test)]
 mod tests {
     use crate::fixtures::{
-        invalid_tls_proof_example, notary_pub_key_example, received_response_example,
-        sent_request_example, tls_proof_example, webproof_example,
+        invalid_tls_proof_example, load_web_proof_fixture, notary_pub_key_example, read_fixture,
+        NOTARY_PUB_KEY_PEM_EXAMPLE,
     };
     use crate::types::WebProof;
 
@@ -60,19 +60,18 @@ mod tests {
 
     #[test]
     fn success_verification() {
-        let proof = WebProof {
-            tls_proof: tls_proof_example(),
-            notary_pub_key: notary_pub_key_example(),
-        };
+        let proof =
+            load_web_proof_fixture("../testdata/tls_proof.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
         assert!(_verify_proof(proof).is_ok());
     }
 
     #[test]
     fn correct_substrings_extracted() {
-        let proof = webproof_example();
+        let proof =
+            load_web_proof_fixture("../testdata/tls_proof.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
         let _WebProofJournal { request, response } = _verify_proof(proof).unwrap();
 
-        assert_eq!(request, sent_request_example());
-        assert_eq!(response, received_response_example());
+        assert_eq!(request, read_fixture("../testdata/sent_request.txt"));
+        assert_eq!(response, read_fixture("../testdata/received_response.txt"));
     }
 }
