@@ -3,7 +3,7 @@ use alloy_trie::HashBuilder;
 use nybbles::Nibbles;
 use std::collections::BTreeMap;
 
-use crate::MerkleTrie;
+use mpt::MerkleTrie;
 
 #[test]
 fn root_match() -> anyhow::Result<()> {
