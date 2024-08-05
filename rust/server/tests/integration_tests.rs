@@ -16,14 +16,7 @@ mod test_helpers;
 
 use test_helpers::{body_to_json, body_to_string, post};
 
-abigen!(
-    SimpleProver,
-    "../../examples/simple/out/SimpleProver.sol/SimpleProver.json",
-);
-abigen!(
-    WebProofProver,
-    "../../examples/web_proof/out/WebProofProver.sol/WebProofProver.json",
-);
+abigen!(ExampleProver, "./testdata/ExampleProver.json",);
 
 async fn setup_anvil() -> AnvilInstance {
     let anvil = Anvil::new().spawn();
@@ -35,12 +28,7 @@ async fn setup_anvil() -> AnvilInstance {
         provider,
         wallet.with_chain_id(anvil.chain_id()),
     ));
-    SimpleProver::deploy(client.clone(), ())
-        .unwrap()
-        .send()
-        .await
-        .unwrap();
-    WebProofProver::deploy(client.clone(), ())
+    ExampleProver::deploy(client.clone(), ())
         .unwrap()
         .send()
         .await
@@ -66,10 +54,9 @@ mod server_tests {
         Ok(())
     }
 
-    const SIMPLE_SMART_CONTRACT_ADDRESS: &str = "5fbdb2315678afecb367f032d93f642f64180aa3";
-    const WEB_PROOF_SMART_CONTRACT_ADDRESS: &str = "e7f1725e7734ce288f8367e1bb143e90bb3f0512";
+    const EXAMPLE_SMART_CONTRACT_ADDRESS: &str = "5fbdb2315678afecb367f032d93f642f64180aa3";
     const SIMPLE_EXAMPLE_TEST_DATA: &str = "0xcad0899b00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000002";
-    const WEB_PROOF_EXAMPLE_TEST_DATA: &str = "0xefedf8100000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000002000000000000000000000000000000000000000000000000000000000000000096170692e782e636f6d0000000000000000000000000000000000000000000000";
+    const WEB_PROOF_EXAMPLE_TEST_DATA: &str = "0xe752d2a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000375726c0000000000000000000000000000000000000000000000000000000000";
 
     #[tokio::test]
     async fn json_rpc_not_found() -> anyhow::Result<()> {
@@ -173,7 +160,7 @@ mod server_tests {
 
             let req = json!({
                 "method": "v_call",
-                "params": [{"to": SIMPLE_SMART_CONTRACT_ADDRESS, "data": SIMPLE_EXAMPLE_TEST_DATA}, {"block_no": block_nr, "chain_id": 11155111}],
+                "params": [{"to": EXAMPLE_SMART_CONTRACT_ADDRESS, "data": SIMPLE_EXAMPLE_TEST_DATA}, {"block_no": block_nr, "chain_id": 11155111}],
                 "id": 1,
                 "jsonrpc": "2.0",
             });
@@ -206,7 +193,7 @@ mod server_tests {
             let req = json!({
                 "method": "v_call",
                 "params": [
-                    {"to": SIMPLE_SMART_CONTRACT_ADDRESS, "data": SIMPLE_EXAMPLE_TEST_DATA},
+                    {"to": EXAMPLE_SMART_CONTRACT_ADDRESS, "data": SIMPLE_EXAMPLE_TEST_DATA},
                     {"block_no": block_nr, "chain_id": 11155111},
                     {"web_proof": {
                         "notary_pub_key": NOTARY_PUB_KEY_PEM_EXAMPLE,
@@ -247,7 +234,7 @@ mod server_tests {
             let req = json!({
                 "method": "v_call",
                 "params": [
-                    {"to": SIMPLE_SMART_CONTRACT_ADDRESS, "data": SIMPLE_EXAMPLE_TEST_DATA},
+                    {"to": EXAMPLE_SMART_CONTRACT_ADDRESS, "data": SIMPLE_EXAMPLE_TEST_DATA},
                     {"block_no": block_nr, "chain_id": 11155111},
                     {"web_proof": {
                         "notary_pub_key": "<notary pub key value>",
@@ -288,7 +275,7 @@ mod server_tests {
             let req = json!({
                 "method": "v_call",
                 "params": [
-                    {"to": WEB_PROOF_SMART_CONTRACT_ADDRESS, "data": WEB_PROOF_EXAMPLE_TEST_DATA},
+                    {"to": EXAMPLE_SMART_CONTRACT_ADDRESS, "data": WEB_PROOF_EXAMPLE_TEST_DATA},
                     {"block_no": block_nr, "chain_id": 11155111},
                     {"web_proof": {
                         "notary_pub_key": NOTARY_PUB_KEY_PEM_EXAMPLE,
@@ -308,7 +295,7 @@ mod server_tests {
                     "jsonrpc": "2.0",
                     "id": 1,
                     "result": {
-                        "result": "prover_contract_address: 0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512, function_selector: 0xefedf810, evm_call_result: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], seal: []"
+                        "result": "prover_contract_address: 0x5FbDB2315678afecb367f032d93F642f64180aa3, function_selector: 0xe752d2a0, evm_call_result: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], seal: []"
                     }
                 })
             );
