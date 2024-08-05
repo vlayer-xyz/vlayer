@@ -55,8 +55,8 @@ mod server_tests {
     }
 
     const EXAMPLE_SMART_CONTRACT_ADDRESS: &str = "5fbdb2315678afecb367f032d93f642f64180aa3";
-    const SIMPLE_EXAMPLE_TEST_DATA: &str = "0xcad0899b00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000002";
-    const WEB_PROOF_EXAMPLE_TEST_DATA: &str = "0xe752d2a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000375726c0000000000000000000000000000000000000000000000000000000000";
+    const SUM_TEST_DATA: &str = "0xcad0899b00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000002";
+    const WEB_PROOF_TEST_DATA: &str = "0xe752d2a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000375726c0000000000000000000000000000000000000000000000000000000000";
 
     #[tokio::test]
     async fn json_rpc_not_found() -> anyhow::Result<()> {
@@ -126,7 +126,7 @@ mod server_tests {
 
             let req = json!({
                 "method": "v_call",
-                "params": [{"to": "I am not a valid address!", "data": SIMPLE_EXAMPLE_TEST_DATA}, {"block_no": 0}],
+                "params": [{"to": "I am not a valid address!", "data": SUM_TEST_DATA}, {"block_no": 0}],
                 "id": 1,
                 "jsonrpc": "2.0",
             });
@@ -160,7 +160,7 @@ mod server_tests {
 
             let req = json!({
                 "method": "v_call",
-                "params": [{"to": EXAMPLE_SMART_CONTRACT_ADDRESS, "data": SIMPLE_EXAMPLE_TEST_DATA}, {"block_no": block_nr, "chain_id": 11155111}],
+                "params": [{"to": EXAMPLE_SMART_CONTRACT_ADDRESS, "data": SUM_TEST_DATA}, {"block_no": block_nr, "chain_id": 11155111}],
                 "id": 1,
                 "jsonrpc": "2.0",
             });
@@ -193,7 +193,7 @@ mod server_tests {
             let req = json!({
                 "method": "v_call",
                 "params": [
-                    {"to": EXAMPLE_SMART_CONTRACT_ADDRESS, "data": SIMPLE_EXAMPLE_TEST_DATA},
+                    {"to": EXAMPLE_SMART_CONTRACT_ADDRESS, "data": SUM_TEST_DATA},
                     {"block_no": block_nr, "chain_id": 11155111},
                     {"web_proof": {
                         "notary_pub_key": NOTARY_PUB_KEY_PEM_EXAMPLE,
@@ -234,7 +234,7 @@ mod server_tests {
             let req = json!({
                 "method": "v_call",
                 "params": [
-                    {"to": EXAMPLE_SMART_CONTRACT_ADDRESS, "data": SIMPLE_EXAMPLE_TEST_DATA},
+                    {"to": EXAMPLE_SMART_CONTRACT_ADDRESS, "data": SUM_TEST_DATA},
                     {"block_no": block_nr, "chain_id": 11155111},
                     {"web_proof": {
                         "notary_pub_key": "<notary pub key value>",
@@ -275,7 +275,7 @@ mod server_tests {
             let req = json!({
                 "method": "v_call",
                 "params": [
-                    {"to": EXAMPLE_SMART_CONTRACT_ADDRESS, "data": WEB_PROOF_EXAMPLE_TEST_DATA},
+                    {"to": EXAMPLE_SMART_CONTRACT_ADDRESS, "data": WEB_PROOF_TEST_DATA},
                     {"block_no": block_nr, "chain_id": 11155111},
                     {"web_proof": {
                         "notary_pub_key": NOTARY_PUB_KEY_PEM_EXAMPLE,
