@@ -3,4 +3,5 @@ mod node_ref;
 mod path;
 mod trie;
 
-pub use trie::{MerkleTrie, EMPTY_ROOT_HASH};
+pub use alloy_trie::EMPTY_ROOT_HASH;
+pub use trie::MerkleTrie;
