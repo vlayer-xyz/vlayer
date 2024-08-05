@@ -12,6 +12,8 @@ pub fn into_input<P: BlockingProvider>(
     header: Box<dyn EvmBlockHeader>,
 ) -> anyhow::Result<EvmInput> {
     let (state_trie, storage_tries) = db.prepare_state_storage_tries()?;
+    dbg!(&header.state_root());
+    dbg!(&state_trie.hash_slow());
     ensure!(
         header.state_root() == &state_trie.hash_slow(),
         "root of the state trie does not match the header"

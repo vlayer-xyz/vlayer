@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import {SimpleProver} from "./SimpleProver.sol";
-import {VTest, Proof, CHEATCODES} from "vlayer/testing/VTest.sol";
+import "vlayer/testing/VTest.sol";
 import {Proof} from "vlayer/Proof.sol";
 
 interface IFakeCheatcode {

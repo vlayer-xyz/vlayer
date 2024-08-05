@@ -1,6 +1,7 @@
 use alloy_primitives::hex::decode;
 use alloy_primitives::{address, b256, Address, ChainId, B256, U256};
 use once_cell::sync::Lazy;
+use revm::interpreter::Interpreter;
 use revm::{
     interpreter::{CallInputs, CallOutcome},
     Database, EvmContext, Inspector,
@@ -118,6 +119,10 @@ where
             TRAVEL_CONTRACT_ADDR => self.on_travel_call(inputs),
             _ => self.on_call(inputs),
         }
+    }
+
+    fn step(&mut self, interp: &mut Interpreter, _context: &mut EvmContext<DB>) {
+        dbg!(interp.current_opcode());
     }
 }
 

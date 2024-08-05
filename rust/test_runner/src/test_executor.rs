@@ -79,8 +79,10 @@ impl TestExecutor {
     #[instrument(name = "call", level = "debug", skip_all)]
     pub fn call_with_env(&self, mut env: EnvWithHandlerCfg) -> eyre::Result<RawCallResult> {
         let mut backend = CowBackend::new_borrowed(self.backend());
-        let mut composite_inspector =
-            CompositeInspector::new(self.inspector().clone(), CheatcodeInspector::new());
+        let mut composite_inspector = CompositeInspector::new(
+            self.inspector().clone(),
+            CheatcodeInspector::new(self.backend().mem_db()),
+        );
         let result = backend.inspect(&mut env, &mut composite_inspector)?;
         convert_executed_result(
             env,
