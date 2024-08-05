@@ -6,6 +6,7 @@ use nybbles::Nibbles;
 use std::collections::BTreeMap;
 
 mod e2e;
+mod hash_slow;
 
 /// Hash of an empty byte array, i.e. `keccak256([])`.
 pub const KECCAK_EMPTY: B256 =
@@ -31,8 +32,6 @@ pub fn mpt_null() {
         MerkleTrie::from_rlp_nodes(rlp_encoded(&mpt.0)).unwrap()
     );
 
-    assert_eq!(mpt.hash_slow(), EMPTY_ROOT_HASH);
-
     // the empty trie provides a non-inclusion proof for any key
     assert_eq!(mpt.get([]), None);
     assert_eq!(mpt.get([0]), None);
@@ -46,8 +45,6 @@ pub fn mpt_digest() {
         mpt,
         MerkleTrie::from_rlp_nodes(rlp_encoded(&mpt.0)).unwrap()
     );
-
-    assert_eq!(mpt.hash_slow(), B256::ZERO);
 }
 
 #[test]
@@ -56,11 +53,6 @@ pub fn mpt_leaf() {
     assert_eq!(
         mpt,
         MerkleTrie::from_rlp_nodes(rlp_encoded(&mpt.0)).unwrap()
-    );
-
-    assert_eq!(
-        mpt.hash_slow(),
-        b256!("ebcd1aff3f48f44a89c8bceb54a7e73c44edda96852b9debc4447b5ac9be19a6")
     );
 
     // a single leave proves the inclusion of the key and non-inclusion of any other key
@@ -82,10 +74,6 @@ pub fn mpt_branch() {
         vec![1].into(),
     )));
     let mpt = MerkleTrie(Node::Branch(children));
-    assert_eq!(
-        mpt.hash_slow(),
-        b256!("f09860d0bbaa3a755a53bbeb7b06824cdda5ac2ee5557d14aa49117a47bd0a3e")
-    );
 
     assert_eq!(mpt.get(B256::repeat_byte(0x00)), Some(&[0][..]));
     assert_eq!(mpt.get(B256::repeat_byte(0x11)), Some(&[1][..]));
@@ -110,10 +98,6 @@ pub fn mpt_extension() {
         Nibbles::from_nibbles([0; 1]),
         branch.into(),
     ));
-    assert_eq!(
-        mpt.hash_slow(),
-        b256!("97aa4d930926792c6c5a716223c01dad6b64ce11ac261665d6f2fa031570ad26")
-    );
 
     assert_eq!(mpt.get(B256::ZERO), Some(&[0][..]));
     assert_eq!(
