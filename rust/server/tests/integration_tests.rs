@@ -1,40 +1,13 @@
 use axum::http::StatusCode;
 use axum_jrpc::{JsonRpcRequest, Value};
 use core::str;
-use ethers::{
-    contract::abigen,
-    core::utils::{Anvil, AnvilInstance},
-    middleware::SignerMiddleware,
-    providers::{Http, Provider},
-    signers::{LocalWallet, Signer},
-};
+use ethers::core::utils::AnvilInstance;
 use serde_json::json;
 use server::server::{server, Config};
-use std::{sync::Arc, time::Duration};
 
 mod test_helpers;
 
-use test_helpers::{body_to_json, body_to_string, post};
-
-abigen!(ExampleProver, "./testdata/ExampleProver.json",);
-
-async fn setup_anvil() -> AnvilInstance {
-    let anvil = Anvil::new().spawn();
-    let wallet: LocalWallet = anvil.keys()[0].clone().into();
-    let provider = Provider::<Http>::try_from(anvil.endpoint())
-        .unwrap()
-        .interval(Duration::from_millis(10u64));
-    let client = Arc::new(SignerMiddleware::new(
-        provider,
-        wallet.with_chain_id(anvil.chain_id()),
-    ));
-    ExampleProver::deploy(client.clone(), ())
-        .unwrap()
-        .send()
-        .await
-        .unwrap();
-    anvil
-}
+use test_helpers::{anvil::setup_anvil, body_to_json, body_to_string, post};
 
 mod server_tests {
     use super::*;

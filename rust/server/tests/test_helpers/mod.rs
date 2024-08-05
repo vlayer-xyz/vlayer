@@ -9,6 +9,8 @@ use serde::{de::DeserializeOwned, Serialize};
 use serde_json::to_string;
 use tower::ServiceExt;
 
+pub(crate) mod anvil;
+
 pub(crate) async fn post<T>(app: Router, url: &str, body: &T) -> anyhow::Result<Response<Body>>
 where
     T: Serialize,
