@@ -84,10 +84,10 @@ where
 
         let multi_evm_input =
             into_multi_input(self.envs).map_err(|err| HostError::CreatingInput(err.to_string()))?;
+        dbg!(multi_evm_input.clone());
         let env = Self::build_executor_env(self.start_execution_location, multi_evm_input, call)?;
         let (seal, raw_guest_output) = Self::prove(env, RISC0_CALL_GUEST_ELF)?;
         let guest_output = GuestOutput::from_outputs(&host_output, &raw_guest_output)?;
-        dbg!(3);
 
         if guest_output.evm_call_result != host_output {
             return Err(HostError::HostGuestOutputMismatch(
@@ -113,7 +113,6 @@ where
             .prove_with_opts(env, guest_elf, &ProverOpts::groth16())
             .map_err(|err| HostError::Prover(err.to_string()))?
             .receipt;
-        dbg!(&receipt);
         let seal = if is_dev_mode() {
             Vec::new()
         } else {

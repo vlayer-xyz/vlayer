@@ -1,26 +1,26 @@
+use std::borrow::Borrow;
+use std::collections::HashMap;
+use std::convert::Infallible;
+
 use alloy_sol_types::private::{Address, Bytes, U256};
 use alloy_trie::proof::ProofRetainer;
 use alloy_trie::{HashBuilder, Nibbles};
 use ethers_core::types::BlockNumber as BlockTag;
 use ethers_core::utils::keccak256;
-use forge::revm::db::DbAccount;
 use forge::revm::primitives::alloy_primitives::private::alloy_rlp;
 use forge::revm::primitives::alloy_primitives::private::alloy_rlp::Encodable;
 use forge::revm::primitives::alloy_primitives::{
     BlockNumber, ChainId, StorageKey, StorageValue, TxNumber,
 };
-use forge::revm::primitives::{
-    b256, Account, AccountInfo, Bytecode, EvmStorageSlot, FixedBytes, B256,
-};
-use forge::revm::{Database, Evm};
+use forge::revm::primitives::{Account, AccountInfo, EvmStorageSlot, FixedBytes, B256};
+use forge::revm::Database;
 use forge::revm::{DatabaseRef, JournaledState};
-use foundry_evm_core::backend::{Backend, FoundryEvmInMemoryDB};
+
+use host::db::proof::ProofDb;
 use host::host::error::HostError;
 use host::proof::{EIP1186Proof, StorageProof};
 use host::provider::factory::ProviderFactory;
 use host::provider::BlockingProvider;
-use std::collections::HashMap;
-use std::convert::Infallible;
 use vlayer_engine::block_header::eth::EthBlockHeader;
 use vlayer_engine::block_header::EvmBlockHeader;
 
@@ -35,7 +35,29 @@ impl MockProvider {
             .get(&address)
             .map(|account| account.clone())
     }
+
+    fn proofs(&self) -> anyhow::Result<Vec<EIP1186Proof>> {
+        let state = self.state.state.borrow();
+        let mut proofs = Vec::new();
+        for (address, account) in state {
+            let proof = self.get_proof(
+                *address,
+                account.storage.keys().map(|v| B256::from(*v)).collect(),
+                0,
+            )?;
+            proofs.push(proof);
+        }
+        Ok(proofs)
+    }
+
+    fn get_state_root(&self) -> anyhow::Result<B256> {
+        let proofs = self.proofs()?;
+        let state_trie = ProofDb::<MockProvider>::state_trie(&proofs)?;
+        Ok(state_trie.hash_slow())
+    }
 }
+
+impl MockProvider {}
 
 impl<'a> BlockingProvider for MockProvider {
     type Error = Infallible;
@@ -50,7 +72,7 @@ impl<'a> BlockingProvider for MockProvider {
     ) -> Result<Option<Box<dyn EvmBlockHeader>>, Self::Error> {
         Ok(Some(Box::new(EthBlockHeader {
             number: 15537395,
-            state_root: b256!("c755f1beb877e572a1a56a133898967fbc7c1a9b8bce71f1330ab841d8bc66e8"),
+            state_root: self.get_state_root().unwrap_or_default(),
             ..EthBlockHeader::default()
         })))
     }
@@ -61,7 +83,7 @@ impl<'a> BlockingProvider for MockProvider {
             .info
             .code
             .clone()
-            .map_or(Bytes::default(), |code| code.bytes()))
+            .map_or(Bytes::default(), |code| code.original_bytes()))
     }
 
     fn get_proof(
@@ -70,6 +92,7 @@ impl<'a> BlockingProvider for MockProvider {
         _storage_keys: Vec<StorageKey>,
         _block: BlockNumber,
     ) -> Result<EIP1186Proof, Self::Error> {
+        dbg!(self.try_get_account(address));
         let Some(_) = self.try_get_account(address) else {
             return Ok(EIP1186Proof::default());
         };

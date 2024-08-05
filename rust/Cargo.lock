@@ -8420,6 +8420,7 @@ dependencies = [
  "alloy-sol-types",
  "call_engine",
  "alloy-trie",
+ "anyhow",
  "clap",
  "color-eyre",
  "comfy-table",

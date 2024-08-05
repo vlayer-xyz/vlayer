@@ -15,6 +15,7 @@ impl From<EvmInput> for ValidatedEvmInput {
 impl From<ValidatedEvmInput> for EvmEnv<WrapStateDb> {
     fn from(input: ValidatedEvmInput) -> Self {
         let input = input.0;
+        dbg!("adsadasds", input.clone());
         let block_hashes = input.block_hashes();
         let db = WrapStateDb::new(StateDb::new(
             input.state_trie,

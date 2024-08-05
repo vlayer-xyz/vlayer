@@ -120,10 +120,6 @@ where
             _ => self.on_call(inputs),
         }
     }
-
-    fn step(&mut self, interp: &mut Interpreter, _context: &mut EvmContext<DB>) {
-        dbg!(interp.current_opcode());
-    }
 }
 
 #[cfg(test)]

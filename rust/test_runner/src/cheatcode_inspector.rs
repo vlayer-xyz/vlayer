@@ -52,14 +52,8 @@ impl<DB: Database> Inspector<DB> for CheatcodeInspector {
                 to: inputs.target_address,
                 data: inputs.input.clone().into(),
             }) {
-                Ok(outcome) => {
-                    dbg!(outcome);
-                    Some(create_encoded_return_outcome(true, inputs))
-                }
-                Err(error) => {
-                    dbg!(&error);
-                    Some(create_revert_outcome(&format!("{:?}", error)))
-                }
+                Ok(_) => Some(create_encoded_return_outcome(true, inputs)),
+                Err(error) => Some(create_revert_outcome(&format!("{:?}", error))),
             };
         }
         if inputs.target_address == CHEATCODE_CALL_ADDR {
