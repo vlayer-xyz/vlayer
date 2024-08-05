@@ -1,6 +1,7 @@
 use crate::node::Node;
-use alloy_primitives::{b256, keccak256, B256};
+use alloy_primitives::{keccak256, B256};
 use alloy_rlp::Decodable;
+use alloy_trie::EMPTY_ROOT_HASH;
 use nybbles::Nibbles;
 use rlp as legacy_rlp;
 use serde::{Deserialize, Serialize};
@@ -17,10 +18,6 @@ pub enum ParseNodeError {
     #[error("RLP error")]
     Rlp(#[from] legacy_rlp::DecoderError),
 }
-
-/// Root hash of an empty Merkle Patricia trie, i.e. `keccak256(RLP(""))`.
-pub const EMPTY_ROOT_HASH: B256 =
-    b256!("56e81f171bcc55a6ff8345e692c0f86e5b48e01b996cadc001622fb5e363b421");
 
 /// A sparse Merkle Patricia trie storing byte values.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
