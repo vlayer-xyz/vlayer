@@ -21,7 +21,7 @@ pub enum ParseNodeError {
 
 /// A sparse Merkle Patricia trie storing byte values.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
-pub struct MerkleTrie(Node);
+pub struct MerkleTrie(pub(crate) Node);
 
 impl MerkleTrie {
     /// Returns a reference to the byte value corresponding to the key.

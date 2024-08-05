@@ -28,7 +28,7 @@ impl Default for StateAccount {
 }
 
 #[test]
-fn parse_eth_get_proof_existing() {
+fn existing() {
     // { "id": 1, "jsonrpc": "2.0",
     //   "method": "eth_getProof",
     //   "params": ["0x0000000000000000000000000000000000000004", [], "0x12962D1"] }
@@ -49,7 +49,7 @@ fn parse_eth_get_proof_existing() {
 }
 
 #[test]
-fn parse_eth_get_proof_nonexisting() {
+fn nonexisting() {
     // { "id": 1, "jsonrpc": "2.0",
     //   "method": "eth_getProof",
     //   "params": ["0x0010000000000000000000000000000000000000", [], "0x12962D1"] }

@@ -1,5 +1,4 @@
-use super::*;
-
+use crate::{node::Node, MerkleTrie};
 use alloy_primitives::B256;
 use nybbles::Nibbles;
 
