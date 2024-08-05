@@ -38,6 +38,7 @@ impl Encodable for NodeRef {
             }
         }
     }
+
     #[inline]
     fn length(&self) -> usize {
         // hash length + 1 byte for the RLP header
@@ -54,5 +55,56 @@ impl Encodable for NodeRef {
                 }
             }
         }
+    }
+}
+
+#[cfg(test)]
+mod encodable {
+    use super::*;
+
+    #[test]
+    fn empty() {
+        let mut out = Vec::new();
+        let node = NodeRef::Empty;
+        node.encode(&mut out);
+
+        assert_eq!(node.length(), 1);
+        assert_eq!(out, vec![EMPTY_STRING_CODE]);
+    }
+
+    #[test]
+    fn digest() {
+        let digest = B256::repeat_byte(0x1);
+        let mut out = Vec::new();
+        let node = NodeRef::Digest(digest);
+        node.encode(&mut out);
+
+        assert_eq!(node.length(), 33);
+        assert_eq!(out[0], EMPTY_STRING_CODE + 32);
+        assert_eq!(out[1..], vec![0x1; 32]);
+    }
+
+    #[test]
+    fn inline_node() {
+        let rlp = vec![0x1];
+        let mut out = Vec::new();
+        let node = NodeRef::Node(rlp.clone());
+        node.encode(&mut out);
+
+        assert_eq!(node.length(), 1);
+        assert_eq!(out, rlp);
+    }
+
+    #[test]
+    fn hash_node() {
+        let rlp = vec![0x1; 32];
+        let hash = keccak256(&rlp);
+        let mut out = Vec::new();
+        let node = NodeRef::Node(rlp.clone());
+        node.encode(&mut out);
+
+        assert_eq!(node.length(), 33);
+        assert_eq!(out[0], EMPTY_STRING_CODE + 32);
+        assert_eq!(&out[1..], hash.as_slice());
     }
 }
