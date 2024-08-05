@@ -1,6 +1,6 @@
-use super::*;
-
+use crate::{node::Node, MerkleTrie};
 use alloy_primitives::{b256, B256};
+use alloy_trie::EMPTY_ROOT_HASH;
 use nybbles::Nibbles;
 
 #[test]

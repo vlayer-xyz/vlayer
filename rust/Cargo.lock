@@ -5651,6 +5651,7 @@ dependencies = [
  "alloy-rlp",
  "alloy-rlp-derive",
  "alloy-trie",
+ "anyhow",
  "nybbles",
  "rlp",
  "serde",

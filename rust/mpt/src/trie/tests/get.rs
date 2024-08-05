@@ -1,7 +1,7 @@
-use super::*;
-
 use alloy_primitives::{b256, B256};
 use nybbles::Nibbles;
+
+use crate::{node::Node, MerkleTrie};
 
 #[test]
 pub fn null() {
