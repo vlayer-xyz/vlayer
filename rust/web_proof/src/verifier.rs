@@ -41,20 +41,16 @@ fn _verify_proof(web_proof: WebProof) -> Result<_WebProofJournal, VerificationEr
 
 #[cfg(test)]
 mod tests {
-    use crate::fixtures::{
-        invalid_tls_proof_example, load_web_proof_fixture, notary_pub_key_example, read_fixture,
-        NOTARY_PUB_KEY_PEM_EXAMPLE,
-    };
-    use crate::types::WebProof;
+    use crate::fixtures::{load_web_proof_fixture, read_fixture, NOTARY_PUB_KEY_PEM_EXAMPLE};
 
     use super::*;
 
     #[test]
     fn fail_verification() {
-        let invalid_proof = WebProof {
-            tls_proof: invalid_tls_proof_example(),
-            notary_pub_key: notary_pub_key_example(),
-        };
+        let invalid_proof = load_web_proof_fixture(
+            "./testdata/invalid_tls_proof.json",
+            NOTARY_PUB_KEY_PEM_EXAMPLE,
+        );
         assert!(_verify_proof(invalid_proof).is_err());
     }
 
