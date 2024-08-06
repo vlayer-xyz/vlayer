@@ -36,7 +36,7 @@ impl fmt::Display for TemplateOption {
 fn parse_rpc_url(s: &str) -> Result<(u64, String), String> {
     let parts: Vec<&str> = s.split(':').collect();
     if parts.len() < 2 {
-        return Err(format!("expected <chain-id>:<url>"));
+        return Err("expected <chain-id>:<url>".to_string());
     }
     let chain_id: u64 = parts[0]
         .parse()
