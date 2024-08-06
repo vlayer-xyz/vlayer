@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 
 import {Prover} from "vlayer/Prover.sol";
 
-interface IERC20 {
+interface IOwner {
     function owner() external view returns (address);
 }
 
@@ -13,6 +13,6 @@ contract SimpleTravelProver is Prover {
         uint some_block_no = 20_000_000;
 
         setChain(1, some_block_no);
-        return IERC20(USDT).owner();
+        return IOwner(USDT).owner();
     }
 }
