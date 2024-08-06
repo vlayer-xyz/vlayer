@@ -1,8 +1,7 @@
 use crate::errors::CLIError;
 use clap::{Parser, Subcommand};
 use commands::args::InitArgs;
-use commands::init::init;
-use server::server::{serve, Config};
+use commands::{init::init, serve::run_serve};
 use test_runner::cli::TestArgs;
 use tracing::{error, info};
 
@@ -58,12 +57,7 @@ async fn run() -> Result<(), CLIError> {
 
     match cli.command {
         Commands::Serve => {
-            info!("Running vlayer serve...");
-            let config = Config {
-                url: "http://localhost:8545".to_string(),
-                port: 3000,
-            };
-            serve(config).await?;
+            run_serve().await?;
         }
         Commands::Init(init_arg) => {
             let template = init_arg.template.unwrap_or_default();
