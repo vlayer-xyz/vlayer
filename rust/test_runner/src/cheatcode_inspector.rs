@@ -1,4 +1,5 @@
 use alloy_sol_types::SolCall;
+use forge::revm::JournaledState;
 use call_engine::utils::evm_call::{
     create_raw_return_outcome, create_encoded_return_outcome, create_revert_outcome, split_calldata,
 };
@@ -11,7 +12,7 @@ use host::host::Host;
 use vlayer_engine::io::Call;
 
 use crate::cheatcodes::{callProverCall, getProofCall, Proof, CHEATCODE_CALL_ADDR};
-use crate::pending_state_provider::PendingStateProviderFactory;
+use crate::pending_state_provider::{PendingStateProvider, PendingStateProviderFactory};
 
 #[derive(Default)]
 pub struct CheatcodeInspector {
@@ -21,21 +22,12 @@ pub struct CheatcodeInspector {
 impl<DB: Database> Inspector<DB> for CheatcodeInspector {
     fn call(
         &mut self,
-        _context: &mut EvmContext<DB>,
+        context: &mut EvmContext<DB>,
         inputs: &mut CallInputs,
     ) -> Option<CallOutcome> {
         if self.should_start_proving {
             self.should_start_proving = false;
-            let host = Host::try_new_with_provider_factory(
-                PendingStateProviderFactory {
-                    state: _context.journaled_state.clone(),
-                },
-                HostConfig {
-                    rpc_urls: Default::default(),
-                    chain_id: 1,
-                },
-            )
-            .expect("Failed to create host");
+            let host = create_host(&context.journaled_state);
             return match host.run(Call {
                 to: inputs.target_address,
                 data: inputs.input.clone().into(),
@@ -66,4 +58,17 @@ impl<DB: Database> Inspector<DB> for CheatcodeInspector {
         }
         None
     }
+}
+
+fn create_host(journaled_state: &JournaledState) -> Host<PendingStateProvider> {
+    Host::try_new_with_provider_factory(
+        PendingStateProviderFactory {
+            state: journaled_state.clone(),
+        },
+        HostConfig {
+            rpc_urls: Default::default(),
+            chain_id: 1,
+        },
+    )
+    .expect("Failed to create host")
 }
