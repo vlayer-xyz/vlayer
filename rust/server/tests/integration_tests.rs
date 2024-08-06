@@ -102,7 +102,7 @@ mod server_tests {
         #[tokio::test]
         async fn success_simple_contract_call() -> anyhow::Result<()> {
             let test_helper = test_helper().await;
-            let block_nr = test_helper.get_block_nr().await;
+            let block_nr = test_helper.block_nr();
             let app = server(Config {
                 url: test_helper.anvil().endpoint(),
                 port: 3000,
@@ -134,7 +134,7 @@ mod server_tests {
         #[tokio::test]
         async fn failed_web_tls_proof_parsing() -> anyhow::Result<()> {
             let test_helper = test_helper().await;
-            let block_nr = test_helper.get_block_nr().await;
+            let block_nr = test_helper.block_nr();
             let app = server(Config {
                 url: test_helper.anvil().endpoint(),
                 port: 3000,
@@ -175,7 +175,7 @@ mod server_tests {
         #[tokio::test]
         async fn failed_notary_pub_key_parsing() -> anyhow::Result<()> {
             let test_helper = test_helper().await;
-            let block_nr = test_helper.get_block_nr().await;
+            let block_nr = test_helper.block_nr();
             let app = server(Config {
                 url: test_helper.anvil().endpoint(),
                 port: 3000,
@@ -216,7 +216,7 @@ mod server_tests {
         #[tokio::test]
         async fn success_web_proof() -> anyhow::Result<()> {
             let test_helper = test_helper().await;
-            let block_nr = test_helper.get_block_nr().await;
+            let block_nr = test_helper.block_nr();
             let app = server(Config {
                 url: test_helper.anvil().endpoint(),
                 port: 3000,
