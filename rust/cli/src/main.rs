@@ -1,7 +1,8 @@
 use crate::errors::CLIError;
 use clap::{Parser, Subcommand};
-use commands::args::InitArgs;
+use commands::args::{InitArgs, ServeArgs};
 use commands::{init::init, serve::run_serve};
+use std::collections::HashMap;
 use test_runner::cli::TestArgs;
 use tracing::{error, info};
 
@@ -32,7 +33,7 @@ struct Cli {
 #[derive(Subcommand)]
 enum Commands {
     Init(InitArgs),
-    Serve,
+    Serve(ServeArgs),
     Test(TestArgs),
 }
 
@@ -56,7 +57,9 @@ async fn run() -> Result<(), CLIError> {
     let cli = Cli::parse();
 
     match cli.command {
-        Commands::Serve => {
+        Commands::Serve(serve_args) => {
+            let rpc_url_map: HashMap<u64, String> = serve_args.rpc_url.into_iter().collect();
+            info!("RPC URLs: {:?}", rpc_url_map);
             run_serve().await?;
         }
         Commands::Init(init_arg) => {
