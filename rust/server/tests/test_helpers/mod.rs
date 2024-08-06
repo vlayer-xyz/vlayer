@@ -27,7 +27,7 @@ abigen!(ExampleProver, "./testdata/ExampleProver.json",);
 pub(crate) struct TestHelper {
     client: Option<Arc<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>>>,
     anvil: Option<AnvilInstance>,
-    block_number: u32,
+    pub(crate) block_number: u32,
 }
 
 pub(crate) async fn test_helper() -> TestHelper {
@@ -45,10 +45,6 @@ impl TestHelper {
 
     fn client(&self) -> Arc<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>> {
         self.client.as_ref().unwrap().clone()
-    }
-
-    pub(crate) fn block_nr(&self) -> u32 {
-        self.block_number
     }
 
     pub(crate) async fn post<T>(self, url: &str, body: &T) -> anyhow::Result<Response<Body>>
