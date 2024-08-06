@@ -14,7 +14,7 @@ use host::host::Host;
 use vlayer_engine::io::Call;
 
 use crate::cheatcodes::{callProverCall, getProofCall, Proof, CHEATCODE_CALL_ADDR};
-use crate::mock_provider::MockProviderFactory;
+use crate::pending_state_provider::PendingStateProviderFactory;
 
 pub struct CheatcodeInspector {
     should_start_proving: bool,
@@ -39,7 +39,7 @@ impl<DB: Database> Inspector<DB> for CheatcodeInspector {
         if self.should_start_proving {
             self.should_start_proving = false;
             let host = Host::try_new_with_provider_factory(
-                MockProviderFactory {
+                PendingStateProviderFactory {
                     state: _context.journaled_state.clone(),
                 },
                 HostConfig {

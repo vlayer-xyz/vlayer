@@ -24,11 +24,11 @@ use host::provider::BlockingProvider;
 use vlayer_engine::block_header::eth::EthBlockHeader;
 use vlayer_engine::block_header::EvmBlockHeader;
 
-pub struct MockProvider {
+pub struct PendingStateProvider {
     state: JournaledState,
 }
 
-impl MockProvider {
+impl PendingStateProvider {
     fn try_get_account(&self, address: Address) -> Option<Account> {
         self.state
             .state
@@ -52,12 +52,12 @@ impl MockProvider {
 
     fn get_state_root(&self) -> anyhow::Result<B256> {
         let proofs = self.proofs()?;
-        let state_trie = ProofDb::<MockProvider>::state_trie(&proofs)?;
+        let state_trie = ProofDb::<PendingStateProvider>::state_trie(&proofs)?;
         Ok(state_trie.hash_slow())
     }
 }
 
-impl<'a> BlockingProvider for MockProvider {
+impl<'a> BlockingProvider for PendingStateProvider {
     type Error = Infallible;
 
     fn get_balance(&self, address: Address, _block: BlockNumber) -> Result<U256, Self::Error> {
@@ -122,13 +122,13 @@ impl<'a> BlockingProvider for MockProvider {
     }
 }
 
-pub struct MockProviderFactory {
+pub struct PendingStateProviderFactory {
     pub state: JournaledState,
 }
 
-impl ProviderFactory<MockProvider> for MockProviderFactory {
-    fn create(&self, _chain_id: ChainId) -> Result<MockProvider, HostError> {
-        Ok(MockProvider {
+impl ProviderFactory<PendingStateProvider> for PendingStateProviderFactory {
+    fn create(&self, _chain_id: ChainId) -> Result<PendingStateProvider, HostError> {
+        Ok(PendingStateProvider {
             state: self.state.clone(),
         })
     }
