@@ -53,7 +53,7 @@ The initialize function is used to create Block Proof Cache as a Merkle Patricia
 - **elf_id**: a hash of the guest binary.
 - **block**: the block header to be added.
 
-It calculates the hash of the block using the keccak256 function on the RLP-encoded block. Then it inserts this hash into the MPT at the position corresponding to the block number.
+It calculates the hash of the block using the keccak256 function on the RLP-encoded block. Then it inserts this hash into the MPT at the position corresponding to the block number. Notice that no invariants about neighbours are checked as there are no neighbours yet.
 
 ```rs
 fn initialize(elf_id: Hash, block: Block) -> (MptRoot, elf_id) {
