@@ -1,24 +1,112 @@
 use axum::{
     body::Body,
     http::{header::CONTENT_TYPE, Request, Response},
-    Router,
+};
+use ethers::{
+    contract::abigen,
+    core::{
+        k256::ecdsa,
+        utils::{Anvil, AnvilInstance},
+    },
+    middleware::SignerMiddleware,
+    providers::{Http, Provider},
+    signers::{LocalWallet, Signer, Wallet},
 };
 use http_body_util::BodyExt;
 use mime::APPLICATION_JSON;
 use serde::{de::DeserializeOwned, Serialize};
+use serde_json::json;
 use serde_json::to_string;
+use server::server::{server, Config};
+use std::{sync::Arc, time::Duration};
 use tower::ServiceExt;
 
-pub(crate) mod anvil;
+abigen!(ExampleProver, "./testdata/ExampleProver.json",);
 
-pub(crate) async fn post<T>(app: Router, url: &str, body: &T) -> anyhow::Result<Response<Body>>
-where
-    T: Serialize,
-{
-    let request = Request::post(url)
-        .header(CONTENT_TYPE, APPLICATION_JSON.as_ref())
-        .body(Body::from(to_string(body)?))?;
-    Ok(app.oneshot(request).await?)
+#[derive(Default)]
+pub(crate) struct TestHelper {
+    client: Option<Arc<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>>>,
+    anvil: Option<AnvilInstance>,
+    block_number: u32,
+}
+
+pub(crate) async fn test_helper() -> TestHelper {
+    let mut test_helper = TestHelper::default();
+    test_helper.setup_anvil().await;
+    test_helper.deploy_test_contract().await;
+    test_helper.set_block_nr().await;
+    test_helper
+}
+
+impl TestHelper {
+    pub(crate) fn anvil(&self) -> &AnvilInstance {
+        self.anvil.as_ref().unwrap()
+    }
+
+    fn client(&self) -> Arc<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>> {
+        self.client.as_ref().unwrap().clone()
+    }
+
+    pub(crate) fn block_nr(&self) -> u32 {
+        self.block_number
+    }
+
+    pub(crate) async fn post<T>(self, url: &str, body: &T) -> anyhow::Result<Response<Body>>
+    where
+        T: Serialize,
+    {
+        let app = server(Config {
+            url: self.anvil().endpoint(),
+            port: 3000,
+        });
+        let request = Request::post(url)
+            .header(CONTENT_TYPE, APPLICATION_JSON.as_ref())
+            .body(Body::from(to_string(body)?))?;
+        Ok(app.oneshot(request).await?)
+    }
+
+    async fn setup_anvil(&mut self) {
+        self.anvil = Some(Anvil::new().spawn());
+        let wallet: LocalWallet = self.anvil().keys()[0].clone().into();
+        let provider = Provider::<Http>::try_from(self.anvil().endpoint())
+            .unwrap()
+            .interval(Duration::from_millis(10u64));
+        let client = Arc::new(SignerMiddleware::new(
+            provider,
+            wallet.with_chain_id(self.anvil().chain_id()),
+        ));
+        self.client = Some(client.clone());
+    }
+
+    async fn deploy_test_contract(&self) {
+        ExampleProver::deploy(self.client(), ())
+            .unwrap()
+            .send()
+            .await
+            .unwrap();
+    }
+
+    async fn set_block_nr(&mut self) {
+        let req = json!({
+            "jsonrpc": "2.0",
+            "method": "eth_blockNumber",
+            "params": [],
+            "id": 0
+        });
+
+        let response = reqwest::Client::new()
+            .post(self.anvil().endpoint())
+            .json(&req)
+            .send()
+            .await
+            .unwrap();
+
+        let body = response.text().await.unwrap();
+        let json: serde_json::Value = serde_json::from_str(&body).unwrap();
+        let result = json["result"].clone();
+        let result = result.as_str().unwrap();
+        self.block_number = u32::from_str_radix(&result[2..], 16).unwrap();
+    }
 }
 
 pub(crate) async fn body_to_string(body: Body) -> anyhow::Result<String> {

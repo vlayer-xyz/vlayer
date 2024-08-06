@@ -2,11 +2,10 @@ use axum::http::StatusCode;
 use axum_jrpc::{JsonRpcRequest, Value};
 use core::str;
 use serde_json::json;
-use server::server::{server, Config};
 
 mod test_helpers;
 
-use test_helpers::{anvil::test_helper, body_to_json, body_to_string, post};
+use test_helpers::{body_to_json, body_to_string, test_helper};
 
 mod server_tests {
     use super::*;
@@ -14,11 +13,7 @@ mod server_tests {
     #[tokio::test]
     async fn http_not_found() -> anyhow::Result<()> {
         let test_helper = test_helper().await;
-        let app = server(Config {
-            url: test_helper.anvil().endpoint(),
-            port: 3000,
-        });
-        let response = post(app, "/non_existent_http_path", &()).await?;
+        let response = test_helper.post("/non_existent_http_path", &()).await?;
 
         assert_eq!(StatusCode::NOT_FOUND, response.status());
         assert!(body_to_string(response.into_body()).await?.is_empty());
@@ -33,17 +28,13 @@ mod server_tests {
     #[tokio::test]
     async fn json_rpc_not_found() -> anyhow::Result<()> {
         let test_helper = test_helper().await;
-        let app = server(Config {
-            url: test_helper.anvil().endpoint(),
-            port: 3000,
-        });
 
         let req = JsonRpcRequest {
             method: "non_existent_json_rpc_method".to_string(),
             params: Value::Null,
             id: 1.into(),
         };
-        let response = post(app, "/", &req).await?;
+        let response = test_helper.post("/", &req).await?;
 
         assert_eq!(StatusCode::OK, response.status());
         assert_eq!(
@@ -69,10 +60,6 @@ mod server_tests {
         #[tokio::test]
         async fn field_validation_error() -> anyhow::Result<()> {
             let test_helper = test_helper().await;
-            let app = server(Config {
-                url: test_helper.anvil().endpoint(),
-                port: 3000,
-            });
 
             let req = json!({
                 "method": "v_call",
@@ -80,7 +67,7 @@ mod server_tests {
                 "id": 1,
                 "jsonrpc": "2.0",
             });
-            let response = post(app, "/", &req).await?;
+            let response = test_helper.post("/", &req).await?;
 
             assert_eq!(StatusCode::OK, response.status());
             assert_eq!(
@@ -103,10 +90,6 @@ mod server_tests {
         async fn success_simple_contract_call() -> anyhow::Result<()> {
             let test_helper = test_helper().await;
             let block_nr = test_helper.block_number;
-            let app = server(Config {
-                url: test_helper.anvil().endpoint(),
-                port: 3000,
-            });
 
             let req = json!({
                 "method": "v_call",
@@ -114,7 +97,7 @@ mod server_tests {
                 "id": 1,
                 "jsonrpc": "2.0",
             });
-            let response = post(app, "/", &req).await?;
+            let response = test_helper.post("/", &req).await?;
 
             assert_eq!(StatusCode::OK, response.status());
             assert_eq!(
@@ -135,10 +118,6 @@ mod server_tests {
         async fn failed_web_tls_proof_parsing() -> anyhow::Result<()> {
             let test_helper = test_helper().await;
             let block_nr = test_helper.block_number;
-            let app = server(Config {
-                url: test_helper.anvil().endpoint(),
-                port: 3000,
-            });
 
             let req = json!({
                 "method": "v_call",
@@ -153,7 +132,7 @@ mod server_tests {
                 "id": 1,
                 "jsonrpc": "2.0",
             });
-            let response = post(app, "/", &req).await?;
+            let response = test_helper.post("/", &req).await?;
 
             assert_eq!(StatusCode::OK, response.status());
             assert_eq!(
@@ -176,10 +155,6 @@ mod server_tests {
         async fn failed_notary_pub_key_parsing() -> anyhow::Result<()> {
             let test_helper = test_helper().await;
             let block_nr = test_helper.block_number;
-            let app = server(Config {
-                url: test_helper.anvil().endpoint(),
-                port: 3000,
-            });
 
             let req = json!({
                 "method": "v_call",
@@ -194,7 +169,7 @@ mod server_tests {
                 "id": 1,
                 "jsonrpc": "2.0",
             });
-            let response = post(app, "/", &req).await?;
+            let response = test_helper.post("/", &req).await?;
 
             assert_eq!(StatusCode::OK, response.status());
             assert_eq!(
@@ -217,10 +192,6 @@ mod server_tests {
         async fn success_web_proof() -> anyhow::Result<()> {
             let test_helper = test_helper().await;
             let block_nr = test_helper.block_number;
-            let app = server(Config {
-                url: test_helper.anvil().endpoint(),
-                port: 3000,
-            });
 
             let req = json!({
                 "method": "v_call",
@@ -236,7 +207,7 @@ mod server_tests {
                 "jsonrpc": "2.0",
             });
 
-            let response = post(app, "/", &req).await?;
+            let response = test_helper.post("/", &req).await?;
 
             assert_eq!(StatusCode::OK, response.status());
             assert_eq!(
