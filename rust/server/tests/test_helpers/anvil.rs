@@ -34,7 +34,7 @@ impl _TestHelper {
         self.client.as_ref().unwrap().clone()
     }
 
-    pub(crate) async fn setup_anvil(&mut self) {
+    async fn setup_anvil(&mut self) {
         self.anvil = Some(Anvil::new().spawn());
         let wallet: LocalWallet = self.anvil().keys()[0].clone().into();
         let provider = Provider::<Http>::try_from(self.anvil().endpoint())
