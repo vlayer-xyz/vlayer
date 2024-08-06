@@ -75,7 +75,6 @@ impl StateDb {
     }
 
     pub fn code_by_hash(&self, hash: B256) -> &Bytes {
-        dbg!(self.contracts.clone());
         self.contracts
             .get(&hash)
             .unwrap_or_else(|| panic!("code not found: {}", hash))

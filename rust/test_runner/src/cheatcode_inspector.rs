@@ -1,5 +1,3 @@
-use std::borrow::Borrow;
-
 use alloy_sol_types::SolCall;
 use call_engine::utils::evm_call::{
     create_raw_return_outcome, create_encoded_return_outcome, create_revert_outcome, split_calldata,
@@ -7,7 +5,6 @@ use call_engine::utils::evm_call::{
 use foundry_evm::revm::interpreter::{CallInputs, CallOutcome};
 use foundry_evm::revm::primitives::U256;
 use foundry_evm::revm::{Database, EvmContext, Inspector};
-use foundry_evm_core::backend::FoundryEvmInMemoryDB;
 
 use host::host::config::HostConfig;
 use host::host::Host;
@@ -18,14 +15,12 @@ use crate::pending_state_provider::PendingStateProviderFactory;
 
 pub struct CheatcodeInspector {
     should_start_proving: bool,
-    mem_db: FoundryEvmInMemoryDB,
 }
 
-impl CheatcodeInspector {
-    pub fn new(mem_db: &FoundryEvmInMemoryDB) -> Self {
+impl Default for CheatcodeInspector {
+    fn default() -> Self {
         Self {
             should_start_proving: false,
-            mem_db: mem_db.clone(),
         }
     }
 }

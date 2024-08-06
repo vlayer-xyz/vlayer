@@ -13,8 +13,7 @@ use forge::revm::primitives::alloy_primitives::{
     BlockNumber, ChainId, StorageKey, StorageValue, TxNumber,
 };
 use forge::revm::primitives::{Account, AccountInfo, EvmStorageSlot, FixedBytes, B256};
-use forge::revm::Database;
-use forge::revm::{DatabaseRef, JournaledState};
+use forge::revm::JournaledState;
 
 use host::db::proof::ProofDb;
 use host::host::error::HostError;
@@ -55,6 +54,50 @@ impl PendingStateProvider {
         let state_trie = ProofDb::<PendingStateProvider>::state_trie(&proofs)?;
         Ok(state_trie.hash_slow())
     }
+
+    fn prove_account_at(&self, address: Address, keys: Vec<B256>) -> EIP1186Proof {
+        let state = self.state.state.clone();
+        let account = self.state.account(address);
+
+        let mut builder =
+            HashBuilder::default().with_proof_retainer(ProofRetainer::new(vec![Nibbles::unpack(
+                keccak256(address),
+            )]));
+
+        for (key, account) in trie_accounts(&state) {
+            builder.add_leaf(key, &account);
+        }
+
+        let _ = builder.root();
+
+        let proof = builder.take_proofs().values().cloned().collect::<Vec<_>>();
+        let storage_proofs = prove_storage(&account.storage, &keys);
+
+        let account_proof = EIP1186Proof {
+            address,
+            balance: account.info.balance,
+            nonce: account.info.nonce,
+            code_hash: account.info.code_hash,
+            storage_hash: storage_root(&account.storage),
+            account_proof: proof.into(),
+            storage_proof: keys
+                .into_iter()
+                .zip(storage_proofs)
+                .map(|(key, proof)| {
+                    let storage_key: U256 = key.into();
+                    let value = account
+                        .storage
+                        .get(&storage_key)
+                        .cloned()
+                        .unwrap_or_default()
+                        .present_value;
+                    StorageProof { key, value, proof }
+                })
+                .collect(),
+        };
+
+        account_proof
+    }
 }
 
 impl<'a> BlockingProvider for PendingStateProvider {
@@ -90,12 +133,11 @@ impl<'a> BlockingProvider for PendingStateProvider {
         _storage_keys: Vec<StorageKey>,
         _block: BlockNumber,
     ) -> Result<EIP1186Proof, Self::Error> {
-        dbg!(self.try_get_account(address));
         let Some(_) = self.try_get_account(address) else {
             return Ok(EIP1186Proof::default());
         };
 
-        Ok(prove_account_at(&self.state, address, _storage_keys))
+        Ok(self.prove_account_at(address, _storage_keys))
     }
 
     fn get_storage_at(
@@ -133,56 +175,7 @@ impl ProviderFactory<PendingStateProvider> for PendingStateProviderFactory {
         })
     }
 }
-
-fn prove_account_at(
-    journaled_state: &JournaledState,
-    address: Address,
-    keys: Vec<B256>,
-) -> EIP1186Proof {
-    let state = journaled_state.state.clone();
-    let account = journaled_state.account(address);
-
-    let mut builder =
-        HashBuilder::default().with_proof_retainer(ProofRetainer::new(vec![Nibbles::unpack(
-            keccak256(address),
-        )]));
-
-    for (key, account) in trie_accounts(&state) {
-        builder.add_leaf(key, &account);
-    }
-
-    let _ = builder.root();
-
-    let proof = builder.take_proofs().values().cloned().collect::<Vec<_>>();
-    let storage_proofs = prove_storage(&account.storage, &keys);
-
-    let account_proof = EIP1186Proof {
-        address,
-        balance: account.info.balance,
-        nonce: account.info.nonce,
-        code_hash: account.info.code_hash,
-        storage_hash: storage_root(&account.storage),
-        account_proof: proof.into(),
-        storage_proof: keys
-            .into_iter()
-            .zip(storage_proofs)
-            .map(|(key, proof)| {
-                let storage_key: U256 = key.into();
-                let value = account
-                    .storage
-                    .get(&storage_key)
-                    .cloned()
-                    .unwrap_or_default()
-                    .present_value;
-                StorageProof { key, value, proof }
-            })
-            .collect(),
-    };
-
-    account_proof
-}
-
-pub fn trie_accounts(accounts: &HashMap<Address, Account>) -> Vec<(Nibbles, Vec<u8>)> {
+fn trie_accounts(accounts: &HashMap<Address, Account>) -> Vec<(Nibbles, Vec<u8>)> {
     let mut accounts = accounts
         .iter()
         .map(|(address, account)| {
@@ -198,7 +191,7 @@ pub fn trie_accounts(accounts: &HashMap<Address, Account>) -> Vec<(Nibbles, Vec<
     accounts
 }
 
-pub fn trie_account_rlp(info: &AccountInfo, storage: &HashMap<U256, EvmStorageSlot>) -> Vec<u8> {
+fn trie_account_rlp(info: &AccountInfo, storage: &HashMap<U256, EvmStorageSlot>) -> Vec<u8> {
     let mut out: Vec<u8> = Vec::new();
     let list: [&dyn Encodable; 4] = [
         &info.nonce,
@@ -212,11 +205,11 @@ pub fn trie_account_rlp(info: &AccountInfo, storage: &HashMap<U256, EvmStorageSl
     out
 }
 
-pub fn storage_root(storage: &HashMap<U256, EvmStorageSlot>) -> B256 {
+fn storage_root(storage: &HashMap<U256, EvmStorageSlot>) -> B256 {
     build_root(trie_storage(storage))
 }
 
-pub fn build_root(values: impl IntoIterator<Item = (Nibbles, Vec<u8>)>) -> B256 {
+fn build_root(values: impl IntoIterator<Item = (Nibbles, Vec<u8>)>) -> B256 {
     let mut builder = HashBuilder::default();
     for (key, value) in values {
         builder.add_leaf(key, value.as_ref());
@@ -224,7 +217,7 @@ pub fn build_root(values: impl IntoIterator<Item = (Nibbles, Vec<u8>)>) -> B256 
     builder.root()
 }
 
-pub fn trie_storage(storage: &HashMap<U256, EvmStorageSlot>) -> Vec<(Nibbles, Vec<u8>)> {
+fn trie_storage(storage: &HashMap<U256, EvmStorageSlot>) -> Vec<(Nibbles, Vec<u8>)> {
     let mut storage = storage
         .iter()
         .map(|(key, value)| {
@@ -240,7 +233,7 @@ pub fn trie_storage(storage: &HashMap<U256, EvmStorageSlot>) -> Vec<(Nibbles, Ve
     storage
 }
 
-pub fn prove_storage(
+fn prove_storage(
     storage: &HashMap<U256, EvmStorageSlot>,
     keys: &Vec<FixedBytes<32>>,
 ) -> Vec<Vec<Bytes>> {

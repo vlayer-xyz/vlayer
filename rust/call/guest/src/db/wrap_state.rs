@@ -30,7 +30,6 @@ impl DatabaseRef for WrapStateDb {
     #[inline]
     fn basic_ref(&self, address: Address) -> Result<Option<AccountInfo>, Self::Error> {
         let account = self.inner.account(address);
-        dbg!(address, account.clone());
         match account {
             Some(account) => {
                 // link storage trie to the account, if it exists

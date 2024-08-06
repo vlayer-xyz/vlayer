@@ -7,7 +7,7 @@ contract SimpleProver is Prover {
     constructor() {}
 
     function sum(uint256 lhs, uint256 rhs) public returns (uint256) {
-//        setBlock(1234);
+        setBlock(1234);
         return lhs + rhs;
     }
 }

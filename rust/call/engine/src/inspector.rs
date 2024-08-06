@@ -1,7 +1,6 @@
 use alloy_primitives::hex::decode;
 use alloy_primitives::{address, b256, Address, ChainId, B256, U256};
 use once_cell::sync::Lazy;
-use revm::interpreter::Interpreter;
 use revm::{
     interpreter::{CallInputs, CallOutcome},
     Database, EvmContext, Inspector,
