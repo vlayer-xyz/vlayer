@@ -30,7 +30,7 @@ To prove inclusion of certain **historical blocks** in a chain, we will prove th
 1. Some **recent block** belong to the chain
 2. Both **historical block** and **recent block** belong to the same chain
 
-A naive way to prove the inclusion proof of two blocks in the same chain is to hash all subsequent blocks from **historical block** to **recent block** and verify that each blockhash is equal to the _prevHash_ value of the subsequent block.
+A naive way to prove the inclusion proof of two blocks in the same chain is to hash all subsequent blocks from **historical block** to **recent block** and verify that each blockhash is equal to the **prevHash** value of the subsequent block.
 
 See the diagram below for the visual.
 
