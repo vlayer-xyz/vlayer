@@ -10,6 +10,7 @@ pub(crate) enum NodeRef {
     Empty,
     Digest(B256),
     Node(Vec<u8>),
+    InlineNode(Vec<u8>),
 }
 
 impl NodeRef {
@@ -18,7 +19,14 @@ impl NodeRef {
         match node {
             Node::Null => NodeRef::Empty,
             Node::Digest(digest) => NodeRef::Digest(*digest),
-            node => NodeRef::Node(node.rlp_encoded()),
+            node => {
+                let encoded = node.rlp_encoded();
+                if encoded.len() < B256::len_bytes() {
+                    NodeRef::InlineNode(encoded)
+                } else {
+                    NodeRef::Node(encoded)
+                }
+            }
         }
     }
 }
@@ -36,6 +44,7 @@ impl Encodable for NodeRef {
                     out.put_slice(rlp);
                 }
             }
+            NodeRef::InlineNode(data) => out.put_slice(data),
         }
     }
 
@@ -54,6 +63,7 @@ impl Encodable for NodeRef {
                     rlp.len()
                 }
             }
+            NodeRef::InlineNode(data) => data.len(),
         }
     }
 }
