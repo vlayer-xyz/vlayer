@@ -14,19 +14,24 @@ abigen!(ExampleProver, "./testdata/ExampleProver.json",);
 
 #[derive(Default)]
 pub(crate) struct _TestHelper {
-    pub _client: Option<Arc<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>>>,
+    client: Option<Arc<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>>>,
     anvil: Option<AnvilInstance>,
 }
 
 pub(crate) async fn test_helper() -> _TestHelper {
     let mut test_helper = _TestHelper::default();
     test_helper.setup_anvil().await;
+    test_helper.deploy_test_contract().await;
     test_helper
 }
 
 impl _TestHelper {
     pub(crate) fn anvil(&self) -> &AnvilInstance {
         self.anvil.as_ref().unwrap()
+    }
+
+    fn client(&self) -> Arc<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>> {
+        self.client.as_ref().unwrap().clone()
     }
 
     pub(crate) async fn setup_anvil(&mut self) {
@@ -39,8 +44,11 @@ impl _TestHelper {
             provider,
             wallet.with_chain_id(self.anvil().chain_id()),
         ));
-        self._client = Some(client.clone());
-        ExampleProver::deploy(client, ())
+        self.client = Some(client.clone());
+    }
+
+    async fn deploy_test_contract(&self) {
+        ExampleProver::deploy(self.client(), ())
             .unwrap()
             .send()
             .await
