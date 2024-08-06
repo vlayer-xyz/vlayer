@@ -20,29 +20,24 @@ pub(crate) struct _TestHelper {
 
 pub(crate) async fn test_helper() -> _TestHelper {
     let mut test_helper = _TestHelper::default();
-    test_helper._setup().await;
+    test_helper.setup_anvil().await;
     test_helper
 }
 
 impl _TestHelper {
-    pub(crate) async fn _setup(&mut self) {
-        let anvil = self.setup_anvil().await;
-        self.anvil = Some(anvil);
-    }
-
     pub(crate) fn anvil(&self) -> &AnvilInstance {
         self.anvil.as_ref().unwrap()
     }
 
-    async fn setup_anvil(&mut self) -> AnvilInstance {
-        let anvil = Anvil::new().spawn();
-        let wallet: LocalWallet = anvil.keys()[0].clone().into();
-        let provider = Provider::<Http>::try_from(anvil.endpoint())
+    pub(crate) async fn setup_anvil(&mut self) {
+        self.anvil = Some(Anvil::new().spawn());
+        let wallet: LocalWallet = self.anvil().keys()[0].clone().into();
+        let provider = Provider::<Http>::try_from(self.anvil().endpoint())
             .unwrap()
             .interval(Duration::from_millis(10u64));
         let client = Arc::new(SignerMiddleware::new(
             provider,
-            wallet.with_chain_id(anvil.chain_id()),
+            wallet.with_chain_id(self.anvil().chain_id()),
         ));
         self._client = Some(client.clone());
         ExampleProver::deploy(client, ())
@@ -50,6 +45,5 @@ impl _TestHelper {
             .send()
             .await
             .unwrap();
-        anvil
     }
 }
