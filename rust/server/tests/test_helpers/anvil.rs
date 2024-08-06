@@ -13,17 +13,17 @@ use std::{sync::Arc, time::Duration};
 abigen!(ExampleProver, "./testdata/ExampleProver.json",);
 
 pub(crate) struct _TestHelper {
-    client: Arc<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>>,
-    anvil: AnvilInstance,
+    pub _client: Arc<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>>,
+    pub anvil: AnvilInstance,
 }
 
 pub(crate) async fn _test_helper() -> _TestHelper {
-    let (client, anvil) = setup_anvil().await;
-    let test_helper = _TestHelper { client, anvil };
+    let (_client, anvil) = setup_anvil().await;
+    let test_helper = _TestHelper { _client, anvil };
     test_helper
 }
 
-pub(crate) async fn setup_anvil() -> (
+async fn setup_anvil() -> (
     Arc<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>>,
     AnvilInstance,
 ) {

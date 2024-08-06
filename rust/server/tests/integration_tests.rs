@@ -7,14 +7,17 @@ use server::server::{server, Config};
 
 mod test_helpers;
 
-use test_helpers::{anvil::setup_anvil, body_to_json, body_to_string, post};
+use test_helpers::{
+    anvil::{_TestHelper, _test_helper},
+    body_to_json, body_to_string, post,
+};
 
 mod server_tests {
     use super::*;
 
     #[tokio::test]
     async fn http_not_found() -> anyhow::Result<()> {
-        let (_, anvil) = setup_anvil().await;
+        let _TestHelper { _client, anvil } = _test_helper().await;
         let app = server(Config {
             url: anvil.endpoint(),
             port: 3000,
@@ -33,7 +36,7 @@ mod server_tests {
 
     #[tokio::test]
     async fn json_rpc_not_found() -> anyhow::Result<()> {
-        let (_, anvil) = setup_anvil().await;
+        let _TestHelper { _client, anvil } = _test_helper().await;
         let app = server(Config {
             url: anvil.endpoint(),
             port: 3000,
@@ -91,7 +94,7 @@ mod server_tests {
 
         #[tokio::test]
         async fn field_validation_error() -> anyhow::Result<()> {
-            let (_, anvil) = setup_anvil().await;
+            let _TestHelper { _client, anvil } = _test_helper().await;
             let app = server(Config {
                 url: anvil.endpoint(),
                 port: 3000,
@@ -124,7 +127,7 @@ mod server_tests {
 
         #[tokio::test]
         async fn success_simple_contract_call() -> anyhow::Result<()> {
-            let (_, anvil) = setup_anvil().await;
+            let _TestHelper { _client, anvil } = _test_helper().await;
             let block_nr = get_block_nr(&anvil).await;
             let app = server(Config {
                 url: anvil.endpoint(),
@@ -156,7 +159,7 @@ mod server_tests {
 
         #[tokio::test]
         async fn failed_web_tls_proof_parsing() -> anyhow::Result<()> {
-            let (_, anvil) = setup_anvil().await;
+            let _TestHelper { _client, anvil } = _test_helper().await;
             let block_nr = get_block_nr(&anvil).await;
             let app = server(Config {
                 url: anvil.endpoint(),
@@ -197,7 +200,7 @@ mod server_tests {
 
         #[tokio::test]
         async fn failed_notary_pub_key_parsing() -> anyhow::Result<()> {
-            let (_, anvil) = setup_anvil().await;
+            let _TestHelper { _client, anvil } = _test_helper().await;
             let block_nr = get_block_nr(&anvil).await;
             let app = server(Config {
                 url: anvil.endpoint(),
@@ -238,7 +241,7 @@ mod server_tests {
 
         #[tokio::test]
         async fn success_web_proof() -> anyhow::Result<()> {
-            let (_, anvil) = setup_anvil().await;
+            let _TestHelper { _client, anvil } = _test_helper().await;
             let block_nr = get_block_nr(&anvil).await;
             let app = server(Config {
                 url: anvil.endpoint(),
