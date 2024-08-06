@@ -1,12 +1,20 @@
 # Block proof cache
 
-The vlayer infrastructure enables the creation of proofs to verify the current and historical state of Ethereum and layer 2 chains. To understand how this system works under the hood, it is essential to become familiar with the concepts of block proofs, storage proofs and understand the difference between recent and historical blocks. Then we will see how historical blockchain state data is preserved in the verifiable way.
+Vlayer allows one to provably execute Solidity code offchain and use proof of that execution onchain. To do that - one needs a verified source of storage data which is provided by storage proofs. Proofs connect to a single block hash that is later verified on-chain.
+
+We also provide time-travel functionality. As a result of that - our state and storage proofs do not connect to a single block, but to multiple blocks. In order to prove that a set of blocks belongs to the chain - we prove two facts:
+
+- All blocks belong to some sequence of blocks connected with parent hash.
+- Latest block belongs to canonical chain.
+
+This service allows to prove the first statement by maintaining a data structure that contains this sequence as well as a ZK proof that it was constructed correctly. Below we provide more details.
+
 
 ## Block inclusion proofs primer
 
 ### Block and Storage proofs
 
-A **block proof** verifies that a particular block belongs to a specific blockchain, ensuring the block's authenticity and its place in the chain. A \*\*storage proof, on the other hand, specifically verifies that a piece of data, such as an account balance or a smart contract variable, is stored within a particular state in a specific block.
+A **block proof** verifies that a particular block belongs to a specific blockchain, ensuring the block's authenticity and its place in the chain. A **storage proof**, on the other hand, specifically verifies that a piece of data, such as an account balance or a smart contract variable, is stored within a particular state in a specific block.
 
 To ensure that a piece of state belongs to a certain chain, it is essential to provide both types of proofs. A storage proof demonstrates that the data is part of a specific block, while a block proof confirms that this block is indeed a legitimate part of the blockchain.
 
@@ -40,7 +48,7 @@ Unfortunately, this is a slow process, especially if the blocks are far away fro
 
 ## Block Proof Cache
 
-The Block Proof Cache stores `<block_number, blockhash>` mapping for historical blocks. It is implemented using a Merkle Patricia Trie, where block numbers are the keys and blockhashes are the values. The construction is inductive, in which we preserve the invariant that each block stored in the Block Proof Cache has an immediate parent or child block. In order to prove correctness of construction with `N+1` nodes we verify that a ZK proof of construction with `N` nodes is correct. We do this by recursively by verifying ZK proof inside ZK proof. When this is verified, we check `N+1` step, by ensuring new block data fits existing structure. Then we generate a new ZK proof for computation appending or prepending the next block hash to the trie.
+The Block Proof Cache stores `<block_number, blockhash>` mapping for historical blocks. It is implemented using a Merkle Patricia Trie, where block numbers are the keys and blockhashes are the values. The construction is inductive, in which we preserve the invariant that each block stored in the Block Proof Cache has an immediate parent or child block. In order to prove correctness of construction with `N+1` nodes we verify that a ZK proof of construction with `N` nodes is correct. We do this by recursively by verifying ZK proofs created so far which are stored as ZK proofs in ZK proofs. When this is verified, we check `N+1` step, by ensuring new block data fits existing structure. Then we generate a new ZK proof for computation appending/prepending the next block hash to the trie.
 
 The following functions written in pseudocode provide more details on the Block Proof Cache implementation.
 
