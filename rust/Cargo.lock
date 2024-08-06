@@ -1878,6 +1878,7 @@ dependencies = [
 name = "cli"
 version = "0.1.0"
 dependencies = [
+ "alloy-primitives",
  "anyhow",
  "clap",
  "flate2",
@@ -7930,6 +7931,7 @@ dependencies = [
  "tower-http",
  "tower-request-id",
  "tracing",
+ "vlayer-engine",
  "web_proof",
 ]
 

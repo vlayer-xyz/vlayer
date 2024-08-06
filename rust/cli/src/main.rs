@@ -2,7 +2,7 @@ use crate::errors::CLIError;
 use clap::{Parser, Subcommand};
 use commands::args::{InitArgs, ServeArgs};
 use commands::{init::init, serve::run_serve};
-use std::collections::HashMap;
+use server::server::ServerConfig;
 use test_runner::cli::TestArgs;
 use tracing::{error, info};
 
@@ -58,9 +58,8 @@ async fn run() -> Result<(), CLIError> {
 
     match cli.command {
         Commands::Serve(serve_args) => {
-            let rpc_url_map: HashMap<u64, String> = serve_args.rpc_url.into_iter().collect();
-            info!("RPC URLs: {:?}", rpc_url_map);
-            run_serve().await?;
+            let server_config: ServerConfig = ServerConfig::new(serve_args.rpc_url);
+            run_serve(server_config).await?;
         }
         Commands::Init(init_arg) => {
             let template = init_arg.template.unwrap_or_default();
