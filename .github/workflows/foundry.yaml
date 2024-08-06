@@ -7,7 +7,7 @@ on:
       - 'examples/**'
       - '.github/workflows/**'
     branches:
-      - '**' 
+      - '**'
   merge_group:
 
 env:
@@ -19,7 +19,7 @@ jobs:
       fail-fast: true
 
     name: Foundry project
-    runs-on: ubuntu-latest
+    runs-on: aws-linux-small
     steps:
       - uses: actions/checkout@v4
         with:

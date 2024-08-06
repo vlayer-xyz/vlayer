@@ -2,13 +2,13 @@ name: Book
 on:
   pull_request:
     paths:
-      - 'book/**' 
-      - '.github/workflows/**'  
+      - 'book/**'
+      - '.github/workflows/**'
     branches:
       - '**'  # Run on pull requests to any branch
   push:
     paths:
-      - 'book/**'    
+      - 'book/**'
     branches:
       - main  # Run on push to main branch
 
@@ -18,7 +18,7 @@ defaults:
 
 jobs:
   book:
-    runs-on: ubuntu-latest
+    runs-on: aws-linux-small
 
     steps:
       - uses: cargo-bins/cargo-binstall@main
