@@ -4,6 +4,8 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+vlayer-engine = { path = "../engine" }
+
 anyhow = { workspace = true }
 axum = { version = "0.7.5", features = ["macros"] }
 http-body-util = "0.1.2"

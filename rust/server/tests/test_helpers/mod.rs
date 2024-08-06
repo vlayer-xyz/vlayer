@@ -18,7 +18,8 @@ use mime::APPLICATION_JSON;
 use serde::Serialize;
 use serde_json::json;
 use serde_json::to_string;
-use server::server::{server, Config};
+use server::server::{server, ServerConfig};
+use std::collections::HashMap;
 use std::{sync::Arc, time::Duration};
 use tower::ServiceExt;
 
@@ -62,8 +63,8 @@ impl TestHelper {
     where
         T: Serialize,
     {
-        let app = server(Config {
-            url: self.anvil().endpoint(),
+        let app = server(ServerConfig {
+            rpc_urls: HashMap::from([(self.anvil().chain_id(), self.anvil().endpoint())]),
             port: 3000,
         });
         let request = Request::post(url)
@@ -73,7 +74,7 @@ impl TestHelper {
     }
 
     async fn setup_anvil(&mut self) {
-        self.anvil = Some(Anvil::new().spawn());
+        self.anvil = Some(Anvil::new().chain_id(11155111u64).spawn());
         let wallet: LocalWallet = self.anvil().keys()[0].clone().into();
         let provider = Provider::<Http>::try_from(self.anvil().endpoint())
             .unwrap()

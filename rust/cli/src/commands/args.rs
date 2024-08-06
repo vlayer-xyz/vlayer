@@ -1,3 +1,4 @@
+use alloy_primitives::ChainId;
 use clap::{ArgAction, Parser, ValueEnum};
 use std::fmt;
 
@@ -10,7 +11,7 @@ pub(crate) struct InitArgs {
 #[derive(Parser)]
 pub(crate) struct ServeArgs {
     #[arg(long, action = ArgAction::Append, value_parser = parse_rpc_url)]
-    pub(crate) rpc_url: Vec<(u64, String)>,
+    pub(crate) rpc_url: Vec<(ChainId, String)>,
 }
 
 #[derive(Clone, Debug, ValueEnum, Default)]

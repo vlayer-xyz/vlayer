@@ -1,10 +1,9 @@
 use crate::errors::CLIError;
-use server::server::{serve, Config};
+use server::server::{serve, ServerConfig};
 use tracing::info;
 
-pub(crate) async fn run_serve() -> Result<(), CLIError> {
+pub(crate) async fn run_serve(server_config: ServerConfig) -> Result<(), CLIError> {
     info!("Running vlayer serve...");
-    let config: Config = Config::default();
-    serve(config).await?;
+    serve(server_config).await?;
     Ok(())
 }
