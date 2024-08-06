@@ -29,10 +29,7 @@ pub struct PendingStateProvider {
 
 impl PendingStateProvider {
     fn try_get_account(&self, address: Address) -> Option<Account> {
-        self.state
-            .state
-            .get(&address)
-            .map(|account| account.clone())
+        self.state.state.get(&address).cloned()
     }
 
     fn proofs(&self) -> anyhow::Result<Vec<EIP1186Proof>> {
@@ -79,7 +76,7 @@ impl PendingStateProvider {
             nonce: account.info.nonce,
             code_hash: account.info.code_hash,
             storage_hash: storage_root(&account.storage),
-            account_proof: proof.into(),
+            account_proof: proof,
             storage_proof: keys
                 .into_iter()
                 .zip(storage_proofs)
@@ -100,7 +97,7 @@ impl PendingStateProvider {
     }
 }
 
-impl<'a> BlockingProvider for PendingStateProvider {
+impl BlockingProvider for PendingStateProvider {
     type Error = Infallible;
 
     fn get_balance(&self, address: Address, _block: BlockNumber) -> Result<U256, Self::Error> {
@@ -151,7 +148,7 @@ impl<'a> BlockingProvider for PendingStateProvider {
                 Ok(account
                     .storage
                     .get(&key.into())
-                    .map_or(StorageValue::default(), |value| value.present_value.into()))
+                    .map_or(StorageValue::default(), |value| value.present_value))
             })
     }
 
@@ -235,7 +232,7 @@ fn trie_storage(storage: &HashMap<U256, EvmStorageSlot>) -> Vec<(Nibbles, Vec<u8
 
 fn prove_storage(
     storage: &HashMap<U256, EvmStorageSlot>,
-    keys: &Vec<FixedBytes<32>>,
+    keys: &[FixedBytes<32>],
 ) -> Vec<Vec<Bytes>> {
     let keys: Vec<_> = keys
         .iter()
@@ -254,8 +251,6 @@ fn prove_storage(
     let all_proof_nodes = builder.take_proofs();
 
     for proof_key in keys {
-        // Iterate over all proof nodes and find the matching ones.
-        // The filtered results are guaranteed to be in order.
         let matching_proof_nodes = all_proof_nodes
             .iter()
             .filter(|(path, _)| proof_key.starts_with(path))

@@ -112,6 +112,7 @@ where
             .prove_with_opts(env, guest_elf, &ProverOpts::groth16())
             .map_err(|err| HostError::Prover(err.to_string()))?
             .receipt;
+
         let seal = if is_dev_mode() {
             Vec::new()
         } else {

@@ -13,16 +13,9 @@ use vlayer_engine::io::Call;
 use crate::cheatcodes::{callProverCall, getProofCall, Proof, CHEATCODE_CALL_ADDR};
 use crate::pending_state_provider::PendingStateProviderFactory;
 
+#[derive(Default)]
 pub struct CheatcodeInspector {
     should_start_proving: bool,
-}
-
-impl Default for CheatcodeInspector {
-    fn default() -> Self {
-        Self {
-            should_start_proving: false,
-        }
-    }
 }
 
 impl<DB: Database> Inspector<DB> for CheatcodeInspector {

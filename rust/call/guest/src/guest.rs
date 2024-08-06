@@ -25,6 +25,7 @@ impl Guest {
         let validated_multi_evm_input: ValidatedMultiEvmInput = multi_evm_input.into();
         let multi_evm_env = MultiEvmEnv::from(validated_multi_evm_input);
         let evm_envs = CachedEvmEnv::from_envs(multi_evm_env);
+
         Guest {
             evm_envs,
             start_execution_location,
