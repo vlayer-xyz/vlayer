@@ -8,6 +8,7 @@ use ethers::{
     providers::{Http, Provider},
     signers::{LocalWallet, Signer, Wallet},
 };
+use serde_json::json;
 use std::{sync::Arc, time::Duration};
 
 abigen!(ExampleProver, "./testdata/ExampleProver.json",);
@@ -28,6 +29,28 @@ pub(crate) async fn test_helper() -> TestHelper {
 impl TestHelper {
     pub(crate) fn anvil(&self) -> &AnvilInstance {
         self.anvil.as_ref().unwrap()
+    }
+
+    pub(crate) async fn get_block_nr(&self) -> u32 {
+        let req = json!({
+            "jsonrpc": "2.0",
+            "method": "eth_blockNumber",
+            "params": [],
+            "id": 0
+        });
+
+        let response = reqwest::Client::new()
+            .post(self.anvil().endpoint())
+            .json(&req)
+            .send()
+            .await
+            .unwrap();
+
+        let body = response.text().await.unwrap();
+        let json: serde_json::Value = serde_json::from_str(&body).unwrap();
+        let result = json["result"].clone();
+        let result = result.as_str().unwrap();
+        u32::from_str_radix(&result[2..], 16).unwrap()
     }
 
     fn client(&self) -> Arc<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>> {
