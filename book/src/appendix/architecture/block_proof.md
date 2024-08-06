@@ -94,7 +94,7 @@ The prepend function is used to add a new oldest block to the Merkle Patricia Tr
 - **child_block**: the full data of the currently oldest block already stored in the MPT.
 - **mpt**: a sparse MPT containing the path from the root to the child block and the new block's intended position.
 - **proof**: a zero-knowledge proof (zk-proof) that verifies the correctness of the MPT so far.
-  The function verifies the proof to ensure the full data from the child block fits the MPT we have so far. If the verification succeeds, it takes the parent_hash from the currently oldest block and inserts it with the corresponding number into the MPT.
+  The function verifies the proof to ensure the full data from the child block fits the MPT we have so far. If the verification succeeds, it takes the parent_hash from the currently oldest block and inserts it with the corresponding number into the MPT. Note that we don't need to pass the full parent block as the trie only store hashes. We will need to pass it next time we want to prepend though.
 
 ```rs
 fn prepend(elf_id: Hash, child_block: BlockHeader, mpt: SparseMpt<ChildBlockIdx, NewBlockIdx>, proof: ZkProof) -> (MptRoot, elf_id) {
@@ -115,7 +115,7 @@ An example call could look like this:
 ```json
 {
   "method": "v_getBlockProofs",
-  "params": [[1231, 123123123, 312312]]
+  "params": [1231, 123123123, 312312]
 }
 ```
 
