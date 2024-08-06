@@ -45,7 +45,7 @@ mod parse_node {
     #[test]
     fn inline() -> anyhow::Result<()> {
         let node = Node::Null;
-        let (hash, node) = parse_node(&node.rlp_encoded())?;
+        let (hash, node) = parse_node(node.rlp_encoded())?;
         assert_eq!(hash, None);
         assert_eq!(node, Node::Null);
         Ok(())
@@ -55,7 +55,7 @@ mod parse_node {
     fn non_inline() -> anyhow::Result<()> {
         let nibbles = Nibbles::unpack(B256::ZERO);
         let node = Node::Leaf(nibbles.clone(), vec![0].into());
-        let (hash, node) = parse_node(&node.rlp_encoded())?;
+        let (hash, node) = parse_node(node.rlp_encoded())?;
         assert_eq!(
             hash,
             Some(b256!(
