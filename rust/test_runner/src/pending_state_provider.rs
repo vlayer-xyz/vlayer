@@ -1,6 +1,5 @@
 use std::borrow::Borrow;
 use std::collections::HashMap;
-use std::convert::Infallible;
 
 use alloy_sol_types::private::{Address, Bytes, U256};
 use alloy_trie::proof::ProofRetainer;
@@ -12,24 +11,33 @@ use forge::revm::primitives::alloy_primitives::private::alloy_rlp::Encodable;
 use forge::revm::primitives::alloy_primitives::{
     BlockNumber, ChainId, StorageKey, StorageValue, TxNumber,
 };
-use forge::revm::primitives::{Account, AccountInfo, EvmStorageSlot, FixedBytes, B256};
+use forge::revm::primitives::{address, Account, AccountInfo, EvmStorageSlot, FixedBytes, B256};
 use forge::revm::JournaledState;
-
 use host::db::proof::ProofDb;
 use host::host::error::HostError;
 use host::proof::{EIP1186Proof, StorageProof};
 use host::provider::factory::ProviderFactory;
 use host::provider::BlockingProvider;
+use thiserror::Error;
 use vlayer_engine::block_header::eth::EthBlockHeader;
 use vlayer_engine::block_header::EvmBlockHeader;
+
+#[derive(Error, Debug)]
+pub enum PendingStateProviderError {
+    #[error("Account not found {0}")]
+    AccountNotFound(Address),
+}
 
 pub struct PendingStateProvider {
     state: JournaledState,
 }
 
 impl PendingStateProvider {
-    fn try_get_account(&self, address: Address) -> Option<Account> {
-        self.state.state.get(&address).cloned()
+    fn account(&self, address: Address) -> Result<Account, PendingStateProviderError> {
+        Ok(match self.state.state.get(&address) {
+            Some(account) => account.clone(),
+            None => Account::default(),
+        })
     }
 
     fn proofs(&self) -> anyhow::Result<Vec<EIP1186Proof>> {
@@ -51,24 +59,57 @@ impl PendingStateProvider {
         let state_trie = ProofDb::<PendingStateProvider>::state_trie(&proofs)?;
         Ok(state_trie.hash_slow())
     }
+}
 
-    fn prove_account_at(&self, address: Address, keys: Vec<B256>) -> EIP1186Proof {
-        let state = self.state.state.clone();
-        let account = self.state.account(address);
+impl BlockingProvider for PendingStateProvider {
+    type Error = PendingStateProviderError;
+
+    fn get_balance(&self, address: Address, _block: BlockNumber) -> Result<U256, Self::Error> {
+        Ok(self.account(address)?.info.balance)
+    }
+
+    fn get_block_header(
+        &self,
+        _block: BlockTag,
+    ) -> Result<Option<Box<dyn EvmBlockHeader>>, Self::Error> {
+        Ok(Some(Box::new(EthBlockHeader {
+            number: 15537395,
+            state_root: self.get_state_root().unwrap_or_default(),
+            ..EthBlockHeader::default()
+        })))
+    }
+
+    fn get_code(&self, address: Address, _block: BlockNumber) -> Result<Bytes, Self::Error> {
+        let account = self.account(address)?;
+        Ok(account
+            .info
+            .code
+            .clone()
+            .map_or(Bytes::default(), |code| code.original_bytes()))
+    }
+
+    fn get_proof(
+        &self,
+        address: Address,
+        storage_keys: Vec<StorageKey>,
+        _block: BlockNumber,
+    ) -> Result<EIP1186Proof, Self::Error> {
+        let account = self.account(address)?;
+        let evm_state = &self.state.state;
 
         let mut builder =
             HashBuilder::default().with_proof_retainer(ProofRetainer::new(vec![Nibbles::unpack(
                 keccak256(address),
             )]));
 
-        for (key, account) in trie_accounts(&state) {
+        for (key, account) in trie_accounts(evm_state) {
             builder.add_leaf(key, &account);
         }
 
         let _ = builder.root();
 
         let proof = builder.take_proofs().values().cloned().collect::<Vec<_>>();
-        let storage_proofs = prove_storage(&account.storage, &keys);
+        let storage_proofs = prove_storage(&account.storage, &storage_keys);
 
         let account_proof = EIP1186Proof {
             address,
@@ -77,7 +118,7 @@ impl PendingStateProvider {
             code_hash: account.info.code_hash,
             storage_hash: storage_root(&account.storage),
             account_proof: proof,
-            storage_proof: keys
+            storage_proof: storage_keys
                 .into_iter()
                 .zip(storage_proofs)
                 .map(|(key, proof)| {
@@ -93,48 +134,7 @@ impl PendingStateProvider {
                 .collect(),
         };
 
-        account_proof
-    }
-}
-
-impl BlockingProvider for PendingStateProvider {
-    type Error = Infallible;
-
-    fn get_balance(&self, address: Address, _block: BlockNumber) -> Result<U256, Self::Error> {
-        Ok(self.state.account(address).info.balance)
-    }
-
-    fn get_block_header(
-        &self,
-        _block: BlockTag,
-    ) -> Result<Option<Box<dyn EvmBlockHeader>>, Self::Error> {
-        Ok(Some(Box::new(EthBlockHeader {
-            number: 15537395,
-            state_root: self.get_state_root().unwrap_or_default(),
-            ..EthBlockHeader::default()
-        })))
-    }
-
-    fn get_code(&self, address: Address, _block: BlockNumber) -> Result<Bytes, Self::Error> {
-        let account = self.state.account(address);
-        Ok(account
-            .info
-            .code
-            .clone()
-            .map_or(Bytes::default(), |code| code.original_bytes()))
-    }
-
-    fn get_proof(
-        &self,
-        address: Address,
-        _storage_keys: Vec<StorageKey>,
-        _block: BlockNumber,
-    ) -> Result<EIP1186Proof, Self::Error> {
-        let Some(_) = self.try_get_account(address) else {
-            return Ok(EIP1186Proof::default());
-        };
-
-        Ok(self.prove_account_at(address, _storage_keys))
+        Ok(account_proof)
     }
 
     fn get_storage_at(
@@ -143,13 +143,12 @@ impl BlockingProvider for PendingStateProvider {
         key: StorageKey,
         _block: BlockNumber,
     ) -> Result<StorageValue, Self::Error> {
-        self.try_get_account(address)
-            .map_or(Ok(StorageValue::default()), |account| {
-                Ok(account
-                    .storage
-                    .get(&key.into())
-                    .map_or(StorageValue::default(), |value| value.present_value))
-            })
+        let storage_value = self
+            .account(address)?
+            .storage
+            .get(&key.into())
+            .map_or(StorageValue::default(), |value| value.present_value);
+        Ok(storage_value)
     }
 
     fn get_transaction_count(
@@ -157,7 +156,8 @@ impl BlockingProvider for PendingStateProvider {
         address: Address,
         _block: BlockNumber,
     ) -> Result<TxNumber, Self::Error> {
-        Ok(self.try_get_account(address).unwrap_or_default().info.nonce)
+        let account = self.account(address)?;
+        Ok(account.info.nonce)
     }
 }
 
@@ -172,6 +172,7 @@ impl ProviderFactory<PendingStateProvider> for PendingStateProviderFactory {
         })
     }
 }
+
 fn trie_accounts(accounts: &HashMap<Address, Account>) -> Vec<(Nibbles, Vec<u8>)> {
     let mut accounts = accounts
         .iter()
