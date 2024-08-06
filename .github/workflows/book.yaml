@@ -18,7 +18,7 @@ defaults:
 
 jobs:
   book:
-    runs-on: aws-linux-small
+    runs-on: ubuntu-latest
 
     steps:
       - uses: cargo-bins/cargo-binstall@main
