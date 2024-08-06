@@ -11,7 +11,7 @@ on:
 
 jobs:
   rust-lint:
-    runs-on: ubuntu-latest
+    runs-on: aws-linux-small
 
     steps:
       - uses: cargo-bins/cargo-binstall@main
