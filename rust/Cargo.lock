@@ -8438,7 +8438,6 @@ dependencies = [
  "rayon",
  "regex",
  "serde_json",
- "thiserror",
  "tokio",
  "tracing",
 ]
