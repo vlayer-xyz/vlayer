@@ -54,6 +54,7 @@ jobs:
           BONSAI_API_URL: ${{ vars.BONSAI_API_URL }}
           BONSAI_API_KEY: ${{ secrets.BONSAI_API_KEY }}
           VLAYER_TMP_DIR: ./artifacts
+          ALCHEMY_KEY: IHJOWZSabgMvTt3kjXnZ0Urzo8FFweES
         run: bash/e2e-test.sh
 
       # Teardown
