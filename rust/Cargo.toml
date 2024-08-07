@@ -1,6 +1,16 @@
 [workspace]
 resolver = "2"
-members = ["host", "guest", "guest_wrapper", "engine", "server", "cli", "mpt", "test_runner", "web_proof"]
+members = [
+    "host",
+    "guest",
+    "guest_wrapper",
+    "engine",
+    "server",
+    "cli",
+    "mpt",
+    "test_runner",
+    "web_proof",
+]
 default-members = ["cli"]
 
 # Always optimize; building and running the guest takes much longer without optimization.
@@ -16,10 +26,10 @@ lto = true
 risc0-zkvm = "1.0.1"
 risc0-zkp = { version = "1.0", default-features = false }
 risc0-build = "1.0.1"
-serde = { version = "1.0", features=["derive"] }
+serde = { version = "1.0", features = ["derive"] }
 serde_json = "1.0.120"
 alloy-sol-types = "0.7.7"
-alloy-primitives = { version = "0.7.7", features = ["serde"] }
+alloy-primitives = { version = "0.7.7", default-features = false }
 ethers-providers = "2.0"
 anyhow = "1.0.86"
 tokio = { version = "1.38.0", default-features = false, features = [
