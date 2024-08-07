@@ -49,7 +49,10 @@ mod server_tests {
     }
 
     mod v_call {
+        use crate::test_helpers::Web;
+
         use super::*;
+        use ethers::types::U256;
         use web_proof::fixtures::{tls_proof_example, NOTARY_PUB_KEY_PEM_EXAMPLE};
 
         #[tokio::test]
@@ -61,7 +64,7 @@ mod server_tests {
                 "params": [
                     {
                         "to": "I am not a valid address!",
-                        "data": helper.sum_call_data
+                        "data": helper.contract().sum(U256::from(1), U256::from(2)).calldata().unwrap()
                     },
                     {
                         "block_no": 0
@@ -97,8 +100,8 @@ mod server_tests {
                 "method": "v_call",
                 "params": [
                     {
-                        "to": helper.contract_address,
-                        "data": helper.sum_call_data
+                        "to": helper.contract().address(),
+                        "data": helper.contract().sum(U256::from(1), U256::from(2)).calldata().unwrap()
                     },
                     {
                         "block_no": helper.block_number,
@@ -133,8 +136,8 @@ mod server_tests {
                 "method": "v_call",
                 "params": [
                     {
-                        "to": helper.contract_address,
-                        "data": helper.sum_call_data
+                        "to": helper.contract().address(),
+                        "data": helper.contract().sum(U256::from(1), U256::from(2)).calldata().unwrap()
                     },
                     {
                         "block_no": helper.block_number,
@@ -178,8 +181,8 @@ mod server_tests {
                 "method": "v_call",
                 "params": [
                     {
-                        "to": helper.contract_address,
-                        "data": helper.sum_call_data
+                        "to": helper.contract().address(),
+                        "data": helper.contract().sum(U256::from(1), U256::from(2)).calldata().unwrap()
                     },
                     {
                         "block_no": helper.block_number,
@@ -223,8 +226,8 @@ mod server_tests {
                 "method": "v_call",
                 "params": [
                     {
-                        "to": helper.contract_address,
-                        "data": helper.webproof_call_data
+                        "to": helper.contract().address(),
+                        "data": helper.contract().web_proof(Web{url: "api.x.com".to_string()}).calldata().unwrap()
                     },
                     {
                         "block_no": helper.block_number,
