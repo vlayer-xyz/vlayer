@@ -21,7 +21,6 @@ mod server_tests {
         Ok(())
     }
 
-    const SUM_TEST_DATA: &str = "0xcad0899b00000000000000000000000000000000000000000000000000000000000000010000000000000000000000000000000000000000000000000000000000000002";
     const WEB_PROOF_TEST_DATA: &str = "0xe752d2a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000375726c0000000000000000000000000000000000000000000000000000000000";
 
     #[tokio::test]
@@ -62,7 +61,7 @@ mod server_tests {
 
             let req = json!({
                 "method": "v_call",
-                "params": [{"to": "I am not a valid address!", "data": SUM_TEST_DATA}, {"block_no": 0}],
+                "params": [{"to": "I am not a valid address!", "data": test_helper.sum_call_data}, {"block_no": 0}],
                 "id": 1,
                 "jsonrpc": "2.0",
             });
@@ -92,7 +91,7 @@ mod server_tests {
 
             let req = json!({
                 "method": "v_call",
-                "params": [{"to": test_helper.contract_address, "data": SUM_TEST_DATA}, {"block_no": block_nr, "chain_id": 11155111}],
+                "params": [{"to": test_helper.contract_address, "data": test_helper.sum_call_data}, {"block_no": block_nr, "chain_id": 11155111}],
                 "id": 1,
                 "jsonrpc": "2.0",
             });
@@ -121,7 +120,7 @@ mod server_tests {
             let req = json!({
                 "method": "v_call",
                 "params": [
-                    {"to": test_helper.contract_address, "data": SUM_TEST_DATA},
+                    {"to": test_helper.contract_address, "data": test_helper.sum_call_data},
                     {"block_no": block_nr, "chain_id": 11155111},
                     {"web_proof": {
                         "notary_pub_key": NOTARY_PUB_KEY_PEM_EXAMPLE,
@@ -158,7 +157,7 @@ mod server_tests {
             let req = json!({
                 "method": "v_call",
                 "params": [
-                    {"to": test_helper.contract_address, "data": SUM_TEST_DATA},
+                    {"to": test_helper.contract_address, "data": test_helper.sum_call_data},
                     {"block_no": block_nr, "chain_id": 11155111},
                     {"web_proof": {
                         "notary_pub_key": "<notary pub key value>",

@@ -11,7 +11,7 @@ use ethers::{
     middleware::SignerMiddleware,
     providers::{Http, Provider},
     signers::{LocalWallet, Signer, Wallet},
-    types::Address,
+    types::{Address, Bytes, U256},
 };
 use http_body_util::BodyExt;
 use mime::APPLICATION_JSON;
@@ -30,6 +30,7 @@ pub(crate) struct TestHelper {
     anvil: Option<AnvilInstance>,
     pub(crate) block_number: u32,
     pub(crate) contract_address: Address,
+    pub(crate) sum_call_data: Bytes,
 }
 
 pub(crate) async fn test_helper() -> TestHelper {
@@ -83,6 +84,10 @@ impl TestHelper {
             .await
             .unwrap();
         self.contract_address = example_contract.address();
+        self.sum_call_data = example_contract
+            .sum(U256::from(1), U256::from(2))
+            .calldata()
+            .unwrap();
     }
 
     async fn set_block_nr(&mut self) {
