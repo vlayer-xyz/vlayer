@@ -1,2 +1,6 @@
 [alias]
 lint = "clippy --workspace --all-targets --all-features"
+
+[env]
+CC_riscv32im_risc0_zkvm_elf = "clang"
+CFLAGS_riscv32im_risc0_zkvm_elf = "-nostdlibinc -DRING_CORE_NOSTDLIBINC=1"
