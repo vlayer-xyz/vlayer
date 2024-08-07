@@ -20,6 +20,7 @@ use std::collections::HashMap;
 use std::convert::Infallible;
 use vlayer_engine::block_header::eth::EthBlockHeader;
 use vlayer_engine::block_header::EvmBlockHeader;
+use vlayer_engine::config::MAINNET_MERGE_BLOCK_NUMBER;
 
 pub struct PendingStateProvider {
     state: JournaledState,
@@ -54,8 +55,6 @@ impl PendingStateProvider {
     }
 }
 
-const FIRST_PARIS_BLOCK: u64 = 15537395;
-
 impl BlockingProvider for PendingStateProvider {
     type Error = Infallible;
 
@@ -63,13 +62,12 @@ impl BlockingProvider for PendingStateProvider {
         Ok(self.account(address).info.balance)
     }
 
-    // For now, we trick the host that we are on mainnet post Paris merge
     fn get_block_header(
         &self,
         _block: BlockTag,
     ) -> Result<Option<Box<dyn EvmBlockHeader>>, Self::Error> {
         Ok(Some(Box::new(EthBlockHeader {
-            number: FIRST_PARIS_BLOCK,
+            number: MAINNET_MERGE_BLOCK_NUMBER,
             state_root: self.get_state_root().unwrap_or_default(),
             ..EthBlockHeader::default()
         })))

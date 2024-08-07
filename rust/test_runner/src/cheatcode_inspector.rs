@@ -9,6 +9,7 @@ use foundry_evm::revm::{Database, EvmContext, Inspector};
 
 use host::host::config::HostConfig;
 use host::host::Host;
+use vlayer_engine::config::SEPOLIA_ID;
 use vlayer_engine::io::Call;
 
 use crate::cheatcodes::{callProverCall, getProofCall, Proof, CHEATCODE_CALL_ADDR};
@@ -67,7 +68,7 @@ fn create_host(journaled_state: &JournaledState) -> Host<PendingStateProvider> {
         },
         HostConfig {
             rpc_urls: Default::default(),
-            chain_id: 1,
+            chain_id: SEPOLIA_ID,
         },
     )
     .expect("Failed to create host")
