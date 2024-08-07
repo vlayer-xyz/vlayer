@@ -11,6 +11,7 @@ use ethers::{
     middleware::SignerMiddleware,
     providers::{Http, Provider},
     signers::{LocalWallet, Signer, Wallet},
+    types::Address,
 };
 use http_body_util::BodyExt;
 use mime::APPLICATION_JSON;
@@ -28,6 +29,7 @@ pub(crate) struct TestHelper {
     client: Option<Arc<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>>>,
     anvil: Option<AnvilInstance>,
     pub(crate) block_number: u32,
+    pub(crate) contract_address: Address,
 }
 
 pub(crate) async fn test_helper() -> TestHelper {
@@ -74,12 +76,13 @@ impl TestHelper {
         self.client = Some(client.clone());
     }
 
-    async fn deploy_test_contract(&self) {
-        ExampleProver::deploy(self.client(), ())
+    async fn deploy_test_contract(&mut self) {
+        let example_contract = ExampleProver::deploy(self.client(), ())
             .unwrap()
             .send()
             .await
             .unwrap();
+        self.contract_address = example_contract.address();
     }
 
     async fn set_block_nr(&mut self) {
