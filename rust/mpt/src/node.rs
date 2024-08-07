@@ -15,7 +15,7 @@ pub(crate) enum Node {
     Null,
     Leaf(Nibbles, Box<[u8]>),
     Extension(Nibbles, Box<Node>),
-    Branch([Option<Box<Node>>; 16]),
+    Branch([Option<Box<Node>>; 16], Option<Box<[u8]>>),
     Digest(B256),
 }
 
@@ -30,10 +30,14 @@ impl Node {
             Node::Extension(prefix, child) => key_nibs
                 .strip_prefix(prefix.as_slice())
                 .and_then(|remaining| child.get(remaining)),
-            Node::Branch(children) => {
-                let (idx, remaining) = key_nibs.split_first()?;
-                let child = children[*idx as usize].as_deref()?;
-                child.get(remaining)
+            Node::Branch(children, value) => {
+                if key_nibs.is_empty() {
+                    value.as_deref()
+                } else {
+                    let (idx, remaining) = key_nibs.split_first()?;
+                    let child = children[*idx as usize].as_deref()?;
+                    child.get(remaining)
+                }
             }
             Node::Digest(_) => panic!("Attempted to access unresolved node"),
         }
@@ -46,7 +50,7 @@ impl Node {
             Node::Null | Node::Digest(_) => 0,
             Node::Leaf(..) => 1,
             Node::Extension(_, child) => 1 + child.size(),
-            Node::Branch(children) => {
+            Node::Branch(children, _) => {
                 1 + children
                     .iter()
                     .filter_map(Option::as_deref)
@@ -77,7 +81,7 @@ impl Node {
 
                 out
             }
-            Node::Branch(children) => {
+            Node::Branch(children, value) => {
                 let mut child_refs: [NodeRef; 16] = Default::default();
                 let mut payload_length = 1; // start with 1 for the EMPTY_STRING_CODE at the end
 
@@ -92,10 +96,18 @@ impl Node {
                     }
                 }
 
+                if let Some(value) = value {
+                    payload_length += value.len();
+                }
+
                 let mut out = encoded_header(true, payload_length);
                 child_refs.iter().for_each(|child| child.encode(&mut out));
                 // add an EMPTY_STRING_CODE for the missing value
                 out.push(EMPTY_STRING_CODE);
+
+                if let Some(value) = value {
+                    out.extend_from_slice(value);
+                }
 
                 out
             }
@@ -115,7 +127,7 @@ impl legacy_rlp::Decodable for Node {
                 match kind {
                     PathKind::Leaf => {
                         let val = rlp.val_at::<Vec<u8>>(1)?;
-                        Ok(Node::Leaf(nibbles, val.into_boxed_slice()))
+                        Ok(Node::Leaf(nibbles, val.into()))
                     }
                     PathKind::Extension => {
                         let node = Decodable::decode(&rlp.at(1)?)?;
@@ -134,12 +146,13 @@ impl legacy_rlp::Decodable for Node {
                         _ => children[i] = Some(Box::new(Decodable::decode(&node_rlp)?)),
                     }
                 }
-                // verify that there is no 17th element with a value
-                if !rlp.at(16)?.is_empty() {
-                    return Err(DecoderError::Custom("branch node with value"));
-                }
+                let val = if rlp.at(16)?.is_empty() {
+                    None
+                } else {
+                    Some(rlp.val_at::<Vec<u8>>(16)?.into    ())
+                };
 
-                Ok(Node::Branch(children))
+                Ok(Node::Branch(children, val))
             }
             Prototype::Data(32) => {
                 let digest = B256::decode(&mut rlp.as_raw())
@@ -203,8 +216,21 @@ mod node_size {
         const NULL_CHILD: Option<Box<Node>> = None;
         let mut children = [NULL_CHILD; 16];
         children[0] = child;
-        let branch = Node::Branch(children);
+        let branch = Node::Branch(children, None);
         assert_eq!(branch.size(), 2);
+    }
+
+    #[test]
+    fn branch_with_value_one_child() {
+        let leaf = Node::Leaf(Nibbles::default(), Box::new([]));
+        let child = Some(Box::new(leaf));
+        const NULL_CHILD: Option<Box<Node>> = None;
+        let mut children = [NULL_CHILD; 16];
+        children[0] = child;
+        let value = Some([42u8].as_slice().into());
+        let branch = Node::Branch(children, value);
+        assert_eq!(branch.size(), 2);
+        assert_eq!(branch.get(&[]), Some(&[42u8][..]));
     }
 
     #[test]
@@ -212,7 +238,18 @@ mod node_size {
         let leaf = Node::Leaf(Nibbles::default(), Box::new([]));
         let child = Some(Box::new(leaf));
         let children: [_; 16] = from_fn(|_| child.clone());
-        let branch = Node::Branch(children);
+        let branch = Node::Branch(children, None);
         assert_eq!(branch.size(), 17);
+    }
+
+    #[test]
+    fn branch_with_value_and_many_children() {
+        let leaf = Node::Leaf(Nibbles::default(), Box::new([]));
+        let child = Some(Box::new(leaf));
+        let children: [_; 16] = from_fn(|_| child.clone());
+        let value = Some([42u8].as_slice().into());
+        let branch = Node::Branch(children, value);
+        assert_eq!(branch.size(), 17);
+        assert_eq!(branch.get(&[]), Some(&[42u8][..]));
     }
 }

@@ -7,10 +7,10 @@ fn rlp_encoded(root: &Node) -> Vec<Vec<u8>> {
     match root {
         Node::Null | Node::Leaf(_, _) | Node::Digest(_) => {}
         Node::Extension(_, child) => out.extend(rlp_encoded(child)),
-        Node::Branch(children) => {
+        Node::Branch(children, _) => {
             out.extend(children.iter().flatten().flat_map(|c| rlp_encoded(c)));
         }
-    };
+    }
     out
 }
 

@@ -36,6 +36,24 @@ fn extension() {
 
 #[test]
 fn branch() {
+    let mpt = setup_branch_test(None);
+    assert_eq!(
+        mpt.hash_slow(),
+        b256!("f09860d0bbaa3a755a53bbeb7b06824cdda5ac2ee5557d14aa49117a47bd0a3e")
+    );
+}
+
+#[test]
+fn branch_with_value() {
+    let value = Some(vec![42u8].into());
+    let mpt = setup_branch_test(value);
+    assert_eq!(
+        mpt.hash_slow(),
+        b256!("d8234b21207e7321dbc42e0fe8688913489ad1d365b690a23508e24104e33337")
+    );
+}
+
+fn setup_branch_test(value: Option<Box<[u8]>>) -> MerkleTrie {
     let mut children: [Option<Box<Node>>; 16] = Default::default();
     children[0] = Some(Box::new(Node::Leaf(
         Nibbles::from_nibbles([0; 63]),
@@ -45,9 +63,6 @@ fn branch() {
         Nibbles::from_nibbles([1; 63]),
         vec![1].into(),
     )));
-    let mpt = MerkleTrie(Node::Branch(children));
-    assert_eq!(
-        mpt.hash_slow(),
-        b256!("f09860d0bbaa3a755a53bbeb7b06824cdda5ac2ee5557d14aa49117a47bd0a3e")
-    );
+    let mpt = MerkleTrie(Node::Branch(children, value));
+    mpt
 }
