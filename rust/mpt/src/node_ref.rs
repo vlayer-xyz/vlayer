@@ -9,8 +9,8 @@ pub(crate) enum NodeRef {
     #[default]
     Empty,
     Digest(B256),
-    Node(Vec<u8>),
     InlineNode(Vec<u8>),
+    Node(Vec<u8>),
 }
 
 impl NodeRef {
@@ -37,14 +37,8 @@ impl Encodable for NodeRef {
         match self {
             NodeRef::Empty => out.put_u8(EMPTY_STRING_CODE),
             NodeRef::Digest(digest) => digest.encode(out),
-            NodeRef::Node(rlp) => {
-                if rlp.len() >= B256::len_bytes() {
-                    keccak256(rlp).encode(out);
-                } else {
-                    out.put_slice(rlp);
-                }
-            }
             NodeRef::InlineNode(data) => out.put_slice(data),
+            NodeRef::Node(rlp) => keccak256(rlp).encode(out),
         }
     }
 
@@ -56,20 +50,16 @@ impl Encodable for NodeRef {
         match self {
             NodeRef::Empty => 1,
             NodeRef::Digest(_) => DIGEST_LENGTH,
-            NodeRef::Node(rlp) => {
-                if rlp.len() >= B256::len_bytes() {
-                    DIGEST_LENGTH
-                } else {
-                    rlp.len()
-                }
-            }
-            NodeRef::InlineNode(data) => data.len(),
+            NodeRef::InlineNode(rlp) => rlp.len(),
+            NodeRef::Node(_) => DIGEST_LENGTH,
         }
     }
 }
 
 #[cfg(test)]
 mod encodable {
+    use nybbles::Nibbles;
+
     use super::*;
 
     #[test]
@@ -98,11 +88,14 @@ mod encodable {
     fn inline_node() {
         let rlp = vec![0x1];
         let mut out = Vec::new();
-        let node = NodeRef::Node(rlp.clone());
-        node.encode(&mut out);
+        let leaf_node = Node::Leaf(Nibbles::from_nibbles([]), rlp.clone().into_boxed_slice());
+        let node_ref = NodeRef::from_node(&leaf_node);
+        node_ref.encode(&mut out);
 
-        assert_eq!(node.length(), 1);
-        assert_eq!(out, rlp);
+        let expected_rlp_encoded = leaf_node.rlp_encoded();
+
+        assert_eq!(node_ref.length(), expected_rlp_encoded.len());
+        assert_eq!(out, expected_rlp_encoded);
     }
 
     #[test]
