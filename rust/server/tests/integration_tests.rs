@@ -49,7 +49,7 @@ mod server_tests {
     }
 
     mod v_call {
-        use crate::test_helpers::Web;
+        use crate::test_helpers::{bool_to_vec32, u256_to_vec32, Web};
 
         use super::*;
         use ethers::types::U256;
@@ -117,6 +117,14 @@ mod server_tests {
                 "jsonrpc": "2.0",
             });
             let response = helper.post("/", &req).await?;
+            let evm_call_result = helper
+                .contract
+                .clone()
+                .unwrap()
+                .sum(U256::from(1), U256::from(2))
+                .call()
+                .await
+                .unwrap();
 
             assert_eq!(StatusCode::OK, response.status());
             assert_eq!(
@@ -125,7 +133,7 @@ mod server_tests {
                     "id": 1,
                     "result": {
                         "result": {
-                            "evm_call_result": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3],
+                            "evm_call_result": u256_to_vec32(evm_call_result),
                             "function_selector": call_data.to_string()[0..10],
                             "prover_contract_address": helper.contract().address(),
                             "seal": []
@@ -262,6 +270,16 @@ mod server_tests {
             });
 
             let response = helper.post("/", &req).await?;
+            let evm_call_result = helper
+                .contract
+                .clone()
+                .unwrap()
+                .web_proof(Web {
+                    url: "api.x.com".to_string(),
+                })
+                .call()
+                .await
+                .unwrap();
 
             assert_eq!(StatusCode::OK, response.status());
             assert_eq!(
@@ -270,7 +288,7 @@ mod server_tests {
                     "id": 1,
                     "result": {
                         "result": {
-                            "evm_call_result": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                            "evm_call_result": bool_to_vec32(evm_call_result),
                             "function_selector": call_data.to_string()[0..10],
                             "prover_contract_address": helper.contract().address(),
                             "seal": []
