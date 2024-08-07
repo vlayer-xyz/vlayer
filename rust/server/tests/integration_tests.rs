@@ -1,5 +1,4 @@
 use axum::http::StatusCode;
-use axum_jrpc::{JsonRpcRequest, Value};
 use serde_json::json;
 
 mod test_helpers;
@@ -96,7 +95,16 @@ mod server_tests {
 
             let req = json!({
                 "method": "v_call",
-                "params": [{"to": test_helper.contract_address, "data": test_helper.sum_call_data}, {"block_no": block_nr, "chain_id": 11155111}],
+                "params": [
+                    {
+                        "to": helper.contract_address,
+                        "data": helper.sum_call_data
+                    },
+                    {
+                        "block_no": helper.block_number,
+                        "chain_id": 11155111
+                    }
+                    ],
                 "id": 1,
                 "jsonrpc": "2.0",
             });

@@ -16,7 +16,7 @@ use ethers::{
 };
 use http_body_util::BodyExt;
 use mime::APPLICATION_JSON;
-use serde::{de::DeserializeOwned, Serialize};
+use serde::Serialize;
 use serde_json::json;
 use serde_json::to_string;
 use server::server::{server, Config};
@@ -127,7 +127,7 @@ pub(crate) async fn body_to_string(body: Body) -> anyhow::Result<String> {
 }
 
 pub(crate) async fn body_to_json(body: Body) -> Value {
-    let body_bytes = body.collect().await?.to_bytes();
-    let deserialized = serde_json::from_slice(&body_bytes)?;
-    deserialized.unwrap()
+    let body_bytes = body.collect().await.unwrap().to_bytes();
+    let deserialized = serde_json::from_slice(&body_bytes).unwrap();
+    deserialized
 }
