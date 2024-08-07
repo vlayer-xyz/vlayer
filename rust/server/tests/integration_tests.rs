@@ -93,7 +93,6 @@ mod server_tests {
         #[tokio::test]
         async fn success_simple_contract_call() -> anyhow::Result<()> {
             let helper = test_helper().await;
-            let block_nr = test_helper.block_number;
 
             let req = json!({
                 "method": "v_call",
@@ -121,7 +120,6 @@ mod server_tests {
         #[tokio::test]
         async fn failed_web_tls_proof_parsing() -> anyhow::Result<()> {
             let helper = test_helper().await;
-            let block_nr = helper.block_number;
 
             let req = json!({
                 "method": "v_call",
@@ -131,7 +129,7 @@ mod server_tests {
                         "data": helper.sum_call_data
                     },
                     {
-                        "block_no": block_nr,
+                        "block_no": helper.block_number,
                         "chain_id": 11155111
                     },
                     {
@@ -167,7 +165,6 @@ mod server_tests {
         #[tokio::test]
         async fn failed_notary_pub_key_parsing() -> anyhow::Result<()> {
             let helper = test_helper().await;
-            let block_nr = helper.block_number;
 
             let req = json!({
                 "method": "v_call",
@@ -177,7 +174,7 @@ mod server_tests {
                         "data": helper.sum_call_data
                     },
                     {
-                        "block_no": block_nr,
+                        "block_no": helper.block_number,
                         "chain_id": 11155111
                     },
                     {
@@ -213,7 +210,6 @@ mod server_tests {
         #[tokio::test]
         async fn success_web_proof() -> anyhow::Result<()> {
             let helper = test_helper().await;
-            let block_nr = helper.block_number;
 
             let req = json!({
                 "method": "v_call",
@@ -223,7 +219,7 @@ mod server_tests {
                         "data": helper.webproof_call_data
                     },
                     {
-                        "block_no": block_nr,
+                        "block_no": helper.block_number,
                         "chain_id": 11155111
                     },
                     {
