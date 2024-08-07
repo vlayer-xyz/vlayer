@@ -1,5 +1,5 @@
 use crate::errors::CLIError;
-use call_server::server::ServerConfig;
+use call_server::server::{ProofMode, ServerConfig};
 use clap::{Parser, Subcommand};
 use commands::args::{InitArgs, ServeArgs};
 use commands::{init::init, serve::run_serve};
@@ -58,7 +58,8 @@ async fn run() -> Result<(), CLIError> {
 
     match cli.command {
         Commands::Serve(serve_args) => {
-            let server_config = ServerConfig::new(serve_args.rpc_urls);
+            let proof_mode: ProofMode = serve_args.proof.unwrap_or_default().map();
+            let server_config: ServerConfig = ServerConfig::new(serve_args.rpc_url, proof_mode);
             run_serve(server_config).await?;
         }
         Commands::Init(init_arg) => {

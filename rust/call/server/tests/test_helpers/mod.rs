@@ -2,7 +2,7 @@ use axum::{
     body::Body,
     http::{header::CONTENT_TYPE, Request, Response},
 };
-use call_server::server::{server, ServerConfig};
+use call_server::server::{server, ProofMode, ServerConfig};
 use ethers::{
     contract::abigen,
     core::{
@@ -64,6 +64,7 @@ impl TestHelper {
         let app = server(ServerConfig {
             rpc_urls: HashMap::from([(self.anvil().chain_id(), self.anvil().endpoint())]),
             port: 3000,
+            proof_mode: ProofMode::Fake,
         });
         let request = Request::post(url)
             .header(CONTENT_TYPE, APPLICATION_JSON.as_ref())
