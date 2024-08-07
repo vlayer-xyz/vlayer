@@ -5,6 +5,7 @@ use crate::server::ServerConfig;
 use host::host::{config::HostConfig, Host};
 use host::Call as HostCall;
 use serde::{Deserialize, Serialize};
+use serde_json::json;
 use types::{Augmentors, Call, CallContext, CallResult};
 
 pub mod types;
@@ -32,18 +33,11 @@ pub(crate) async fn call(
         tokio::task::spawn_blocking(|| Host::try_new(host_config)?.run(call)).await??;
 
     Ok(CallResult {
-        result: format!(
-            "prover_contract_address: {}, function_selector: {}, evm_call_result: {:?}, seal: {:?}",
-            return_data
-                .guest_output
-                .execution_commitment
-                .proverContractAddress,
-            return_data
-                .guest_output
-                .execution_commitment
-                .functionSelector,
-            return_data.guest_output.evm_call_result,
-            return_data.seal
-        ),
+        result: json!({
+            "evm_call_result": return_data.guest_output.evm_call_result,
+            "function_selector": return_data.guest_output.execution_commitment.functionSelector,
+            "prover_contract_address": return_data.guest_output.execution_commitment.proverContractAddress,
+            "seal": return_data.seal
+        }),
     })
 }

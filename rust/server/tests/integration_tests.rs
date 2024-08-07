@@ -119,7 +119,12 @@ mod server_tests {
                     "jsonrpc": "2.0",
                     "id": 1,
                     "result": {
-                        "result": "prover_contract_address: 0x5FbDB2315678afecb367f032d93F642f64180aa3, function_selector: 0xcad0899b, evm_call_result: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3], seal: []"
+                        "result": {
+                            "evm_call_result": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3],
+                            "function_selector": "0xcad0899b",
+                            "prover_contract_address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+                            "seal": []
+                        }
                     }
                 }),
                 body_to_json(response.into_body()).await
@@ -252,7 +257,12 @@ mod server_tests {
                     "jsonrpc": "2.0",
                     "id": 1,
                     "result": {
-                        "result": "prover_contract_address: 0x5FbDB2315678afecb367f032d93F642f64180aa3, function_selector: 0xe752d2a0, evm_call_result: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], seal: []"
+                        "result": {
+                            "evm_call_result": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                            "function_selector": "0xe752d2a0",
+                            "prover_contract_address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+                            "seal": []
+                        }
                     }
                 }),
                 body_to_json(response.into_body()).await
