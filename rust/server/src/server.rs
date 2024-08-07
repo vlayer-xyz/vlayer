@@ -8,7 +8,7 @@ use axum::{routing::post, Router};
 use serde::{Deserialize, Serialize};
 use std::collections::HashMap;
 use tracing::info;
-use vlayer_engine::config::SEPOLIA_ID;
+use vlayer_engine::config::{MAINNET_ID, SEPOLIA_ID};
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ServerConfig {
@@ -18,8 +18,12 @@ pub struct ServerConfig {
 
 impl Default for ServerConfig {
     fn default() -> Self {
+        let anvil_url = "http://localhost:8545";
         Self {
-            rpc_urls: HashMap::from([(SEPOLIA_ID, "http://localhost:8545".to_string())]),
+            rpc_urls: HashMap::from([
+                (SEPOLIA_ID, anvil_url.to_string()),
+                (MAINNET_ID, anvil_url.to_string()),
+            ]),
             port: 3000,
         }
     }
