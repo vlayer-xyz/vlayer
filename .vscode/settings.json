@@ -20,6 +20,8 @@
     "revm",
     "SEPOLIA",
     "sidechains",
+    "struct",
+    "structs",
     "thiserror",
     "vlayer",
     "zkvm"
