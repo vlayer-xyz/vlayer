@@ -2,6 +2,7 @@ use crate::error::AppError;
 use crate::utils::{parse_address_field, parse_hex_field};
 use alloy_chains::Chain;
 use alloy_primitives::{BlockNumber, ChainId};
+use axum_jrpc::Value;
 use host::Call as HostCall;
 use serde::{Deserialize, Serialize};
 use web_proof::types::WebProof;
@@ -44,7 +45,7 @@ pub struct Augmentors {
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct CallResult {
-    pub result: String,
+    pub result: Value,
 }
 
 #[cfg(test)]
