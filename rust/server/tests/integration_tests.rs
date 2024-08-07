@@ -58,7 +58,15 @@ mod server_tests {
 
             let req = json!({
                 "method": "v_call",
-                "params": [{"to": "I am not a valid address!", "data": helper.sum_call_data}, {"block_no": 0}],
+                "params": [
+                    {
+                        "to": "I am not a valid address!",
+                        "data": helper.sum_call_data
+                    },
+                    {
+                        "block_no": 0
+                    }
+                    ],
                 "id": 1,
                 "jsonrpc": "2.0",
             });
@@ -117,12 +125,21 @@ mod server_tests {
             let req = json!({
                 "method": "v_call",
                 "params": [
-                    {"to": helper.contract_address, "data": helper.sum_call_data},
-                    {"block_no": block_nr, "chain_id": 11155111},
-                    {"web_proof": {
-                        "notary_pub_key": NOTARY_PUB_KEY_PEM_EXAMPLE,
-                        "tls_proof": "<tls proof value>",
-                    }}
+                    {
+                        "to": helper.contract_address,
+                        "data": helper.sum_call_data
+                    },
+                    {
+                        "block_no": block_nr,
+                        "chain_id": 11155111
+                    },
+                    {
+                        "web_proof":
+                        {
+                            "notary_pub_key": NOTARY_PUB_KEY_PEM_EXAMPLE,
+                            "tls_proof": "<tls proof value>",
+                        }
+                    }
                     ],
                 "id": 1,
                 "jsonrpc": "2.0",
@@ -154,12 +171,21 @@ mod server_tests {
             let req = json!({
                 "method": "v_call",
                 "params": [
-                    {"to": helper.contract_address, "data": helper.sum_call_data},
-                    {"block_no": block_nr, "chain_id": 11155111},
-                    {"web_proof": {
-                        "notary_pub_key": "<notary pub key value>",
-                        "tls_proof": "<tls proof value>",
-                    }}
+                    {
+                        "to": helper.contract_address,
+                        "data": helper.sum_call_data
+                    },
+                    {
+                        "block_no": block_nr,
+                        "chain_id": 11155111
+                    },
+                    {
+                        "web_proof":
+                        {
+                            "notary_pub_key": "<notary pub key value>",
+                            "tls_proof": "<tls proof value>",
+                        }
+                    }
                     ],
                 "id": 1,
                 "jsonrpc": "2.0",
@@ -191,12 +217,20 @@ mod server_tests {
             let req = json!({
                 "method": "v_call",
                 "params": [
-                    {"to": helper.contract_address, "data": helper.webproof_call_data},
-                    {"block_no": block_nr, "chain_id": 11155111},
-                    {"web_proof": {
-                        "notary_pub_key": NOTARY_PUB_KEY_PEM_EXAMPLE,
-                        "tls_proof": tls_proof_example(),
-                    }}
+                    {
+                        "to": helper.contract_address,
+                        "data": helper.webproof_call_data
+                    },
+                    {
+                        "block_no": block_nr,
+                        "chain_id": 11155111
+                    },
+                    {
+                        "web_proof": {
+                            "notary_pub_key": NOTARY_PUB_KEY_PEM_EXAMPLE,
+                            "tls_proof": tls_proof_example(),
+                        }
+                    }
                     ],
                 "id": 1,
                 "jsonrpc": "2.0",
