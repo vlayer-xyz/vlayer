@@ -13,6 +13,23 @@ use tracing::info;
 pub struct ServerConfig {
     pub rpc_urls: HashMap<ChainId, String>,
     pub port: u16,
+    pub proof_mode: ProofMode,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub enum ProofMode {
+    Groth16,
+    Fake,
+}
+
+impl ProofMode {
+    fn set_risc0_flag(&self) {
+        let value = match self {
+            ProofMode::Groth16 => "0",
+            ProofMode::Fake => "1",
+        };
+        std::env::set_var("RISC0_DEV_MODE", value);
+    }
 }
 
 impl Default for ServerConfig {
@@ -25,19 +42,22 @@ impl Default for ServerConfig {
                 (SEPOLIA_ID, anvil2_url.to_string()),
             ]),
             port: 3000,
+            proof_mode: ProofMode::Groth16,
         }
     }
 }
 
 impl ServerConfig {
-    pub fn new(rpc_mappings: Vec<(ChainId, String)>) -> ServerConfig {
-        if rpc_mappings.is_empty() {
-            ServerConfig::default()
-        } else {
-            ServerConfig {
-                rpc_urls: rpc_mappings.into_iter().collect(),
-                port: 3000,
-            }
+    pub fn new(rpc_mappings: Vec<(ChainId, String)>, proof_mode: ProofMode) -> ServerConfig {
+        let default = ServerConfig::default();
+        ServerConfig {
+            rpc_urls: if rpc_mappings.is_empty() {
+                default.rpc_urls
+            } else {
+                rpc_mappings.into_iter().collect()
+            },
+            port: default.port,
+            proof_mode,
         }
     }
 }
@@ -53,6 +73,7 @@ pub async fn serve(config: ServerConfig) -> anyhow::Result<()> {
 }
 
 pub fn server(config: ServerConfig) -> Router {
+    config.proof_mode.set_risc0_flag();
     let config = Arc::new(config);
     Router::new()
         .route("/", post(move |req| json_rpc(config, req)))

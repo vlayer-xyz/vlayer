@@ -1,4 +1,5 @@
 use alloy_primitives::ChainId;
+use call_server::server::ProofMode;
 use clap::{ArgAction, Parser, ValueEnum};
 use std::fmt;
 
@@ -11,7 +12,10 @@ pub(crate) struct InitArgs {
 #[derive(Parser)]
 pub(crate) struct ServeArgs {
     #[arg(long, action = ArgAction::Append, value_parser = parse_rpc_url)]
-    pub(crate) rpc_urls: Vec<(ChainId, String)>,
+    pub(crate) rpc_url: Vec<(ChainId, String)>,
+
+    #[arg(long, value_enum)]
+    pub(crate) proof: Option<ProofModeArg>,
 }
 
 #[derive(Clone, Debug, ValueEnum, Default)]
@@ -21,6 +25,22 @@ pub(crate) enum TemplateOption {
     Airdrop,
     SimpleTravel,
     ERC20Balances,
+}
+
+#[derive(Clone, Debug, ValueEnum, Default)]
+pub(crate) enum ProofModeArg {
+    #[default]
+    Groth16,
+    Fake,
+}
+
+impl ProofModeArg {
+    pub(crate) fn map(self) -> ProofMode {
+        match self {
+            ProofModeArg::Groth16 => ProofMode::Groth16,
+            ProofModeArg::Fake => ProofMode::Fake,
+        }
+    }
 }
 
 impl fmt::Display for TemplateOption {
