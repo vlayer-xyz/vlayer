@@ -1,6 +1,5 @@
 use axum::http::StatusCode;
 use axum_jrpc::{JsonRpcRequest, Value};
-use core::str;
 use serde_json::json;
 
 mod test_helpers;
@@ -20,8 +19,6 @@ mod server_tests {
 
         Ok(())
     }
-
-    const WEB_PROOF_TEST_DATA: &str = "0xe752d2a000000000000000000000000000000000000000000000000000000000000000200000000000000000000000000000000000000000000000000000000000000020000000000000000000000000000000000000000000000000000000000000000375726c0000000000000000000000000000000000000000000000000000000000";
 
     #[tokio::test]
     async fn json_rpc_not_found() -> anyhow::Result<()> {
@@ -194,7 +191,7 @@ mod server_tests {
             let req = json!({
                 "method": "v_call",
                 "params": [
-                    {"to": test_helper.contract_address, "data": WEB_PROOF_TEST_DATA},
+                    {"to": test_helper.contract_address, "data": test_helper.webproof_call_data},
                     {"block_no": block_nr, "chain_id": 11155111},
                     {"web_proof": {
                         "notary_pub_key": NOTARY_PUB_KEY_PEM_EXAMPLE,
