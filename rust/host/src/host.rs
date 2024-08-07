@@ -4,6 +4,7 @@ use crate::into_input::into_multi_input;
 use crate::provider::factory::{EthersProviderFactory, ProviderFactory};
 use crate::provider::multi::CachedMultiProvider;
 use crate::provider::{BlockingProvider, EthersClient, EthersProvider};
+use alloy_primitives::ChainId;
 use config::HostConfig;
 use error::HostError;
 use ethers_core::types::BlockNumber;
@@ -32,8 +33,8 @@ impl Host<EthersProvider<EthersClient>> {
 
 fn get_block_number(
     providers: &CachedMultiProvider<impl BlockingProvider>,
-    chain_id: u64,
-) -> Result<u64, HostError> {
+    chain_id: ChainId,
+) -> Result<ChainId, HostError> {
     let provider = providers.get(chain_id)?;
     let block_header = provider
         .get_block_header(BlockNumber::Latest)

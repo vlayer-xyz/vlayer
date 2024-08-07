@@ -1,4 +1,4 @@
-use alloy_primitives::{address, b256, uint, Address};
+use alloy_primitives::{address, b256, uint, Address, ChainId};
 use alloy_sol_types::{sol, SolCall};
 use dotenv::dotenv;
 use ethers_core::types::BlockNumber as BlockTag;
@@ -82,7 +82,7 @@ where
 fn run<C>(
     test_name: &str,
     call: Call,
-    chain_id: u64,
+    chain_id: ChainId,
     block_number: BlockTag,
 ) -> anyhow::Result<C::Return>
 where

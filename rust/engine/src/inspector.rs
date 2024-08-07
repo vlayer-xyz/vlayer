@@ -1,5 +1,5 @@
 use alloy_primitives::hex::decode;
-use alloy_primitives::{address, b256, Address, B256, U256};
+use alloy_primitives::{address, b256, Address, ChainId, B256, U256};
 use once_cell::sync::Lazy;
 use revm::{
     interpreter::{CallInputs, CallOutcome},
@@ -35,14 +35,14 @@ impl<DB> Inspector<DB> for NoopInspector where DB: Database {}
 type Callback<'a> = dyn Fn(&Call, ExecutionLocation) -> Result<Vec<u8>, EngineError> + 'a;
 
 pub struct TravelInspector<'a> {
-    start_chain_id: u64,
+    start_chain_id: ChainId,
     pub location: Option<ExecutionLocation>,
     callback: Box<Callback<'a>>,
 }
 
 impl<'a> TravelInspector<'a> {
     pub fn new(
-        start_chain_id: u64,
+        start_chain_id: ChainId,
         callback: impl Fn(&Call, ExecutionLocation) -> Result<Vec<u8>, EngineError> + 'a,
     ) -> Self {
         Self {
@@ -60,7 +60,7 @@ impl<'a> TravelInspector<'a> {
         self.location = Some(ExecutionLocation::new(block_number, self.start_chain_id));
     }
 
-    fn set_chain(&mut self, chain_id: u64, block_number: u64) {
+    fn set_chain(&mut self, chain_id: ChainId, block_number: u64) {
         info!(
             "Travel contract called with function: setChain, with chain id: {:?} block number: {:?}!",
             chain_id, block_number

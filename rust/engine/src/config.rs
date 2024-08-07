@@ -1,20 +1,20 @@
 //! Handling different blockchain specifications.
 use std::collections::BTreeMap;
 
-use alloy_primitives::{address, Address};
+use alloy_primitives::{address, Address, ChainId};
 use once_cell::sync::Lazy;
 use revm::primitives::SpecId;
 use std::collections::HashMap;
 
 use crate::chain::{eip1559::Eip1559Constants, fork::ForkCondition, spec::ChainSpec};
 
-pub const MAINNET_ID: u64 = 1;
-pub const SEPOLIA_ID: u64 = 11155111;
+pub const MAINNET_ID: ChainId = 1;
+pub const SEPOLIA_ID: ChainId = 11155111;
 pub const MAINNET_MERGE_BLOCK_NUMBER: u64 = 15537394;
 
 pub const DEFAULT_CALLER: Address = address!("1111111111111111111111111111111111111111");
 
-pub static CHAIN_MAP: Lazy<HashMap<u64, &'static Lazy<ChainSpec>>> = Lazy::new(|| {
+pub static CHAIN_MAP: Lazy<HashMap<ChainId, &'static Lazy<ChainSpec>>> = Lazy::new(|| {
     HashMap::from([
         (MAINNET_ID, &ETH_MAINNET_CHAIN_SPEC),
         (SEPOLIA_ID, &ETH_SEPOLIA_CHAIN_SPEC),

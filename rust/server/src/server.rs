@@ -12,7 +12,7 @@ use vlayer_engine::config::{MAINNET_ID, SEPOLIA_ID};
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ServerConfig {
-    pub rpc_urls: HashMap<u64, String>,
+    pub rpc_urls: HashMap<ChainId, String>,
     pub port: u16,
 }
 
@@ -30,12 +30,12 @@ impl Default for ServerConfig {
 }
 
 impl ServerConfig {
-    pub fn new(l: Vec<(ChainId, String)>) -> ServerConfig {
-        if l.is_empty() {
+    pub fn new(rpc_mappings: Vec<(ChainId, String)>) -> ServerConfig {
+        if rpc_mappings.is_empty() {
             ServerConfig::default()
         } else {
             ServerConfig {
-                rpc_urls: l.into_iter().collect(),
+                rpc_urls: rpc_mappings.into_iter().collect(),
                 port: 3000,
             }
         }
