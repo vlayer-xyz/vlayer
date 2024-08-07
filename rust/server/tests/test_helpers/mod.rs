@@ -12,6 +12,7 @@ use ethers::{
     middleware::SignerMiddleware,
     providers::{Http, Provider},
     signers::{LocalWallet, Signer, Wallet},
+    types::U256,
 };
 use http_body_util::BodyExt;
 use mime::APPLICATION_JSON;
@@ -127,4 +128,16 @@ pub(crate) async fn body_to_json(body: Body) -> Value {
     let body_bytes = body.collect().await.unwrap().to_bytes();
     let deserialized = serde_json::from_slice(&body_bytes).unwrap();
     deserialized
+}
+
+pub(crate) fn bool_to_vec32(value: bool) -> Vec<u8> {
+    let mut bytes = [0u8; 32];
+    bytes[31] = value as u8;
+    bytes.to_vec()
+}
+
+pub(crate) fn u256_to_vec32(value: U256) -> Vec<u8> {
+    let mut bytes = [0u8; 32];
+    value.to_big_endian(&mut bytes);
+    bytes.to_vec()
 }
