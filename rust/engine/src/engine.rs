@@ -8,6 +8,7 @@ use revm::{
 use thiserror::Error;
 use tracing::error;
 
+use crate::utils::evm_call::format_failed_call_result;
 use crate::{
     evm::env::{cached::CachedEvmEnv, location::ExecutionLocation},
     inspector::TravelInspector,
@@ -80,7 +81,9 @@ where
             ..
         } = result
         else {
-            return Err(EngineError::TransactError(format!("{:?}", result)));
+            return Err(EngineError::TransactError(format_failed_call_result(
+                result,
+            )));
         };
         Ok(output.into_data().into())
     }
