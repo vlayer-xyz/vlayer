@@ -18,14 +18,14 @@ pub(crate) fn resolve_trie(root: Node, nodes_by_hash: &HashMap<B256, Node>) -> N
         Node::Extension(prefix, child) => {
             Node::Extension(prefix, Box::new(resolve_trie(*child, nodes_by_hash)))
         }
-        Node::Branch(mut children) => {
+        Node::Branch(mut children, value) => {
             // iterate over the children in place, resolving each child node recursively.
             for child in children.iter_mut() {
                 if let Some(node) = child.take() {
                     *child = Some(Box::new(resolve_trie(*node, nodes_by_hash)));
                 }
             }
-            Node::Branch(children)
+            Node::Branch(children, value)
         }
         Node::Digest(digest) => match nodes_by_hash.get(&digest) {
             Some(node) => resolve_trie(node.clone(), nodes_by_hash),
@@ -139,12 +139,26 @@ mod resolve_trie {
         let child = None;
         let mut children: [_; 16] = from_fn(|_| child.clone());
         children[0] = Some(Box::new(Node::Digest(digest)));
-        let branch = Node::Branch(children);
+        let branch = Node::Branch(children, None);
         let nodes_by_hash = HashMap::from([(digest, leaf.clone())]);
         let resolved_node = resolve_trie(branch, &nodes_by_hash);
-        let Node::Branch(children) = resolved_node else {
+        let Node::Branch(children, None) = resolved_node else {
             panic!("expected branch, got {:?}", resolved_node);
         };
         assert_eq!(children[0], Some(Box::new(leaf)));
+    }
+
+    #[test]
+    fn branch_with_value() {
+        let child = None;
+        let children: [_; 16] = from_fn(|_| child.clone());
+        let value = Some(vec![42u8].into());
+        let branch = Node::Branch(children, value);
+        let nodes_by_hash = HashMap::new();
+        let resolved_node = resolve_trie(branch, &nodes_by_hash);
+        let Node::Branch(_children, Some(value)) = resolved_node else {
+            panic!("expected branch with value, got {:?}", resolved_node);
+        };
+        assert_eq!(value, vec![42u8].into());
     }
 }

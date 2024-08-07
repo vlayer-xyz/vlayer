@@ -40,11 +40,23 @@ fn branch() {
         Nibbles::from_nibbles([1; 63]),
         vec![1].into(),
     )));
-    let mpt = MerkleTrie(Node::Branch(children));
+
+    let mpt = MerkleTrie(Node::Branch(children, None));
 
     assert_eq!(mpt.get(B256::repeat_byte(0x00)), Some(&[0][..]));
     assert_eq!(mpt.get(B256::repeat_byte(0x11)), Some(&[1][..]));
     assert_eq!(mpt.get([]), None);
+    assert_eq!(mpt.get([0]), None);
+    assert_eq!(mpt.get([1, 2, 3]), None);
+}
+
+#[test]
+fn branch_with_value() {
+    let children: [Option<Box<Node>>; 16] = Default::default();
+    let value = Some(vec![42u8].into());
+    let mpt = MerkleTrie(Node::Branch(children, value));
+
+    assert_eq!(mpt.get([]), Some(&[42u8][..]));
     assert_eq!(mpt.get([0]), None);
     assert_eq!(mpt.get([1, 2, 3]), None);
 }
@@ -60,7 +72,7 @@ fn extension() {
         Nibbles::from_nibbles([1; 62]),
         vec![1].into(),
     )));
-    let branch = Node::Branch(children);
+    let branch = Node::Branch(children, None);
     let mpt = MerkleTrie(Node::Extension(
         Nibbles::from_nibbles([0; 1]),
         branch.into(),
