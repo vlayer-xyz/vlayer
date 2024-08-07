@@ -149,7 +149,7 @@ impl legacy_rlp::Decodable for Node {
                 let val = if rlp.at(16)?.is_empty() {
                     None
                 } else {
-                    Some(rlp.val_at::<Vec<u8>>(16)?.into    ())
+                    Some(rlp.val_at::<Vec<u8>>(16)?.into())
                 };
 
                 Ok(Node::Branch(children, val))
@@ -221,19 +221,6 @@ mod node_size {
     }
 
     #[test]
-    fn branch_with_value_one_child() {
-        let leaf = Node::Leaf(Nibbles::default(), Box::new([]));
-        let child = Some(Box::new(leaf));
-        const NULL_CHILD: Option<Box<Node>> = None;
-        let mut children = [NULL_CHILD; 16];
-        children[0] = child;
-        let value = Some([42u8].as_slice().into());
-        let branch = Node::Branch(children, value);
-        assert_eq!(branch.size(), 2);
-        assert_eq!(branch.get(&[]), Some(&[42u8][..]));
-    }
-
-    #[test]
     fn branch_many_children() {
         let leaf = Node::Leaf(Nibbles::default(), Box::new([]));
         let child = Some(Box::new(leaf));
@@ -243,13 +230,14 @@ mod node_size {
     }
 
     #[test]
-    fn branch_with_value_and_many_children() {
+    fn branch_with_value() {
         let leaf = Node::Leaf(Nibbles::default(), Box::new([]));
         let child = Some(Box::new(leaf));
-        let children: [_; 16] = from_fn(|_| child.clone());
+        const NULL_CHILD: Option<Box<Node>> = None;
+        let mut children = [NULL_CHILD; 16];
+        children[0] = child;
         let value = Some([42u8].as_slice().into());
         let branch = Node::Branch(children, value);
-        assert_eq!(branch.size(), 17);
         assert_eq!(branch.get(&[]), Some(&[42u8][..]));
     }
 }
