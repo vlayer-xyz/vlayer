@@ -1,3 +1,4 @@
+use alloy_primitives::ChainId;
 use revm::{
     db::WrapDatabaseRef,
     inspector_handle_register,
@@ -29,7 +30,7 @@ pub enum EngineError {
     TransactError(String),
 
     #[error("Unsupported chain id: {0}")]
-    UnsupportedChainId(u64),
+    UnsupportedChainId(ChainId),
 
     #[error("Chain spec error: {0}")]
     ChainSpecError(String),
