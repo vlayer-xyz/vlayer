@@ -18,9 +18,13 @@ function cleanup() {
     echo "Cleaning up..."
     
     # Kill Anvil if running
-    if [[ -n "${ANVIL_PID:-}" ]] && ps -p "$ANVIL_PID" > /dev/null; then
-        echo "Killing anvil (PID $ANVIL_PID)..."
-        kill "$ANVIL_PID"
+    if [[ -n "${ANVIL1_PID:-}" ]] && ps -p "$ANVIL1_PID" > /dev/null; then
+        echo "Killing anvil 1 (PID $ANVIL1_PID)..."
+        kill "$ANVIL1_PID"
+    fi
+    if [[ -n "${ANVIL2_PID:-}" ]] && ps -p "$ANVIL2_PID" > /dev/null; then
+        echo "Killing anvil 2 (PID $ANVIL2_PID)..."
+        kill "$ANVIL2_PID"
     fi
 
     # Kill vlayer server if running
@@ -52,12 +56,18 @@ wait_for_port_and_pid() {
     check_exit_status "Error: Timeout reached. ${service_name} is not available on localhost:${port}."
 }
 
-function startup_anvil(){
-    echo "Starting Anvil"
-    anvil >"${LOGS_DIR}/anvil.out" &
-    ANVIL_PID=$!
-    echo "Anvil started with PID ${ANVIL_PID}."
-    wait_for_port_and_pid 8545 ${ANVIL_PID} 30s "Anvil"
+function startup_anvils(){
+    echo "Starting Anvil 1"
+    anvil >"${LOGS_DIR}/anvil1.out" &
+    ANVIL1_PID=$!
+    echo "Anvil 1 started with PID ${ANVIL1_PID}."
+    wait_for_port_and_pid 8545 ${ANVIL1_PID} 30s "Anvil"
+
+    echo "Starting Anvil 2"
+    anvil -p 8546 >"${LOGS_DIR}/anvil2.out" &
+    ANVIL2_PID=$!
+    echo "Anvil 2 started with PID ${ANVIL2_PID}."
+    wait_for_port_and_pid 8546 ${ANVIL2_PID} 30s "Anvil"
 }
 
 function startup_vlayer(){
@@ -109,7 +119,7 @@ echo "BONSAI_API_URL: ${BONSAI_API_URL}"
 echo
 echo "Starting services..."
 
-startup_anvil
+startup_anvils
 startup_vlayer
 
 echo "Services has been succesfully started..."
