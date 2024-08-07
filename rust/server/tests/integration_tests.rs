@@ -24,11 +24,12 @@ mod server_tests {
     async fn json_rpc_not_found() -> anyhow::Result<()> {
         let helper = test_helper().await;
 
-        let req = JsonRpcRequest {
-            method: "non_existent_json_rpc_method".to_string(),
-            params: Value::Null,
-            id: 1.into(),
-        };
+        let req = json!({
+            "method": "non_existent_json_rpc_method",
+            "params": [],
+            "id": 1,
+            "jsonrpc": "2.0",
+        });
         let response = helper.post("/", &req).await?;
 
         assert_eq!(StatusCode::OK, response.status());
