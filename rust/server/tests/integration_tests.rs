@@ -122,7 +122,7 @@ mod server_tests {
                         "result": {
                             "evm_call_result": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3],
                             "function_selector": "0xcad0899b",
-                            "prover_contract_address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+                            "prover_contract_address": helper.contract().address(),
                             "seal": []
                         }
                     }
@@ -260,7 +260,7 @@ mod server_tests {
                         "result": {
                             "evm_call_result": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
                             "function_selector": "0xe752d2a0",
-                            "prover_contract_address": "0x5fbdb2315678afecb367f032d93f642f64180aa3",
+                            "prover_contract_address": helper.contract().address(),
                             "seal": []
                         }
                     }

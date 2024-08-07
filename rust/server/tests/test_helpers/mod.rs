@@ -59,7 +59,7 @@ impl TestHelper {
         self.client.as_ref().unwrap().clone()
     }
 
-    pub(crate) async fn post<T>(self, url: &str, body: &T) -> anyhow::Result<Response<Body>>
+    pub(crate) async fn post<T>(&self, url: &str, body: &T) -> anyhow::Result<Response<Body>>
     where
         T: Serialize,
     {
