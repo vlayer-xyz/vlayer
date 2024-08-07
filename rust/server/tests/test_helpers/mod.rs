@@ -31,6 +31,7 @@ pub(crate) struct TestHelper {
     pub(crate) block_number: u32,
     pub(crate) contract_address: Address,
     pub(crate) sum_call_data: Bytes,
+    pub(crate) webproof_call_data: Bytes,
 }
 
 pub(crate) async fn test_helper() -> TestHelper {
@@ -86,6 +87,12 @@ impl TestHelper {
         self.contract_address = example_contract.address();
         self.sum_call_data = example_contract
             .sum(U256::from(1), U256::from(2))
+            .calldata()
+            .unwrap();
+        self.webproof_call_data = example_contract
+            .web_proof(Web {
+                url: "api.x.com".to_string(),
+            })
             .calldata()
             .unwrap();
     }
