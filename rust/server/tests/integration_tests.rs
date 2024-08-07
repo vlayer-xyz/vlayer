@@ -1,5 +1,4 @@
 use axum::http::StatusCode;
-use axum_jrpc::{JsonRpcRequest, Value};
 use serde_json::json;
 
 mod test_helpers;
@@ -11,8 +10,8 @@ mod server_tests {
 
     #[tokio::test]
     async fn http_not_found() -> anyhow::Result<()> {
-        let test_helper = test_helper().await;
-        let response = test_helper.post("/non_existent_http_path", &()).await?;
+        let helper = test_helper().await;
+        let response = helper.post("/non_existent_http_path", &()).await?;
 
         assert_eq!(StatusCode::NOT_FOUND, response.status());
         assert!(body_to_string(response.into_body()).await?.is_empty());
@@ -22,14 +21,15 @@ mod server_tests {
 
     #[tokio::test]
     async fn json_rpc_not_found() -> anyhow::Result<()> {
-        let test_helper = test_helper().await;
+        let helper = test_helper().await;
 
-        let req = JsonRpcRequest {
-            method: "non_existent_json_rpc_method".to_string(),
-            params: Value::Null,
-            id: 1.into(),
-        };
-        let response = test_helper.post("/", &req).await?;
+        let req = json!({
+            "method": "non_existent_json_rpc_method",
+            "params": [],
+            "id": 1,
+            "jsonrpc": "2.0",
+        });
+        let response = helper.post("/", &req).await?;
 
         assert_eq!(StatusCode::OK, response.status());
         assert_eq!(
@@ -42,7 +42,7 @@ mod server_tests {
                     "data": null
                 }
             }),
-            body_to_json::<Value>(response.into_body()).await?
+            body_to_json(response.into_body()).await
         );
 
         Ok(())
@@ -54,15 +54,23 @@ mod server_tests {
 
         #[tokio::test]
         async fn field_validation_error() -> anyhow::Result<()> {
-            let test_helper = test_helper().await;
+            let helper = test_helper().await;
 
             let req = json!({
                 "method": "v_call",
-                "params": [{"to": "I am not a valid address!", "data": test_helper.sum_call_data}, {"block_no": 0}],
+                "params": [
+                    {
+                        "to": "I am not a valid address!",
+                        "data": helper.sum_call_data
+                    },
+                    {
+                        "block_no": 0
+                    }
+                    ],
                 "id": 1,
                 "jsonrpc": "2.0",
             });
-            let response = test_helper.post("/", &req).await?;
+            let response = helper.post("/", &req).await?;
 
             assert_eq!(StatusCode::OK, response.status());
             assert_eq!(
@@ -75,7 +83,7 @@ mod server_tests {
                         "data": null
                     }
                 }),
-                body_to_json::<Value>(response.into_body()).await?
+                body_to_json(response.into_body()).await
             );
 
             Ok(())
@@ -83,16 +91,24 @@ mod server_tests {
 
         #[tokio::test]
         async fn success_simple_contract_call() -> anyhow::Result<()> {
-            let test_helper = test_helper().await;
-            let block_nr = test_helper.block_number;
+            let helper = test_helper().await;
 
             let req = json!({
                 "method": "v_call",
-                "params": [{"to": test_helper.contract_address, "data": test_helper.sum_call_data}, {"block_no": block_nr, "chain_id": 11155111}],
+                "params": [
+                    {
+                        "to": helper.contract_address,
+                        "data": helper.sum_call_data
+                    },
+                    {
+                        "block_no": helper.block_number,
+                        "chain_id": 11155111
+                    }
+                    ],
                 "id": 1,
                 "jsonrpc": "2.0",
             });
-            let response = test_helper.post("/", &req).await?;
+            let response = helper.post("/", &req).await?;
 
             assert_eq!(StatusCode::OK, response.status());
             assert_eq!(
@@ -103,7 +119,7 @@ mod server_tests {
                         "result": "prover_contract_address: 0x5FbDB2315678afecb367f032d93F642f64180aa3, function_selector: 0xcad0899b, evm_call_result: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3], seal: []"
                     }
                 }),
-                body_to_json::<Value>(response.into_body()).await?
+                body_to_json(response.into_body()).await
             );
 
             Ok(())
@@ -111,23 +127,31 @@ mod server_tests {
 
         #[tokio::test]
         async fn failed_web_tls_proof_parsing() -> anyhow::Result<()> {
-            let test_helper = test_helper().await;
-            let block_nr = test_helper.block_number;
+            let helper = test_helper().await;
 
             let req = json!({
                 "method": "v_call",
                 "params": [
-                    {"to": test_helper.contract_address, "data": test_helper.sum_call_data},
-                    {"block_no": block_nr, "chain_id": 11155111},
-                    {"web_proof": {
-                        "notary_pub_key": NOTARY_PUB_KEY_PEM_EXAMPLE,
-                        "tls_proof": "<tls proof value>",
-                    }}
+                    {
+                        "to": helper.contract_address,
+                        "data": helper.sum_call_data
+                    },
+                    {
+                        "block_no": helper.block_number,
+                        "chain_id": 11155111
+                    },
+                    {
+                        "web_proof":
+                        {
+                            "notary_pub_key": NOTARY_PUB_KEY_PEM_EXAMPLE,
+                            "tls_proof": "<tls proof value>",
+                        }
+                    }
                     ],
                 "id": 1,
                 "jsonrpc": "2.0",
             });
-            let response = test_helper.post("/", &req).await?;
+            let response = helper.post("/", &req).await?;
 
             assert_eq!(StatusCode::OK, response.status());
             assert_eq!(
@@ -140,7 +164,7 @@ mod server_tests {
                         "data": null
                     }
                 }),
-                body_to_json::<Value>(response.into_body()).await?
+                body_to_json(response.into_body()).await
             );
 
             Ok(())
@@ -148,23 +172,31 @@ mod server_tests {
 
         #[tokio::test]
         async fn failed_notary_pub_key_parsing() -> anyhow::Result<()> {
-            let test_helper = test_helper().await;
-            let block_nr = test_helper.block_number;
+            let helper = test_helper().await;
 
             let req = json!({
                 "method": "v_call",
                 "params": [
-                    {"to": test_helper.contract_address, "data": test_helper.sum_call_data},
-                    {"block_no": block_nr, "chain_id": 11155111},
-                    {"web_proof": {
-                        "notary_pub_key": "<notary pub key value>",
-                        "tls_proof": "<tls proof value>",
-                    }}
+                    {
+                        "to": helper.contract_address,
+                        "data": helper.sum_call_data
+                    },
+                    {
+                        "block_no": helper.block_number,
+                        "chain_id": 11155111
+                    },
+                    {
+                        "web_proof":
+                        {
+                            "notary_pub_key": "<notary pub key value>",
+                            "tls_proof": "<tls proof value>",
+                        }
+                    }
                     ],
                 "id": 1,
                 "jsonrpc": "2.0",
             });
-            let response = test_helper.post("/", &req).await?;
+            let response = helper.post("/", &req).await?;
 
             assert_eq!(StatusCode::OK, response.status());
             assert_eq!(
@@ -177,7 +209,7 @@ mod server_tests {
                         "data": null
                     }
                 }),
-                body_to_json::<Value>(response.into_body()).await?
+                body_to_json(response.into_body()).await
             );
 
             Ok(())
@@ -185,24 +217,31 @@ mod server_tests {
 
         #[tokio::test]
         async fn success_web_proof() -> anyhow::Result<()> {
-            let test_helper = test_helper().await;
-            let block_nr = test_helper.block_number;
+            let helper = test_helper().await;
 
             let req = json!({
                 "method": "v_call",
                 "params": [
-                    {"to": test_helper.contract_address, "data": test_helper.webproof_call_data},
-                    {"block_no": block_nr, "chain_id": 11155111},
-                    {"web_proof": {
-                        "notary_pub_key": NOTARY_PUB_KEY_PEM_EXAMPLE,
-                        "tls_proof": tls_proof_example(),
-                    }}
+                    {
+                        "to": helper.contract_address,
+                        "data": helper.webproof_call_data
+                    },
+                    {
+                        "block_no": helper.block_number,
+                        "chain_id": 11155111
+                    },
+                    {
+                        "web_proof": {
+                            "notary_pub_key": NOTARY_PUB_KEY_PEM_EXAMPLE,
+                            "tls_proof": tls_proof_example(),
+                        }
+                    }
                     ],
                 "id": 1,
                 "jsonrpc": "2.0",
             });
 
-            let response = test_helper.post("/", &req).await?;
+            let response = helper.post("/", &req).await?;
 
             assert_eq!(StatusCode::OK, response.status());
             assert_eq!(
@@ -213,7 +252,7 @@ mod server_tests {
                         "result": "prover_contract_address: 0x5FbDB2315678afecb367f032d93F642f64180aa3, function_selector: 0xe752d2a0, evm_call_result: [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1], seal: []"
                     }
                 }),
-                body_to_json::<Value>(response.into_body()).await?
+                body_to_json(response.into_body()).await
             );
 
             Ok(())
