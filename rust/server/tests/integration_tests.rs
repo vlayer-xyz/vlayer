@@ -95,13 +95,18 @@ mod server_tests {
         #[tokio::test]
         async fn success_simple_contract_call() -> anyhow::Result<()> {
             let helper = test_helper().await;
+            let call_data = helper
+                .contract()
+                .sum(U256::from(1), U256::from(2))
+                .calldata()
+                .unwrap();
 
             let req = json!({
                 "method": "v_call",
                 "params": [
                     {
                         "to": helper.contract().address(),
-                        "data": helper.contract().sum(U256::from(1), U256::from(2)).calldata().unwrap()
+                        "data": call_data
                     },
                     {
                         "block_no": helper.block_number,
@@ -121,7 +126,7 @@ mod server_tests {
                     "result": {
                         "result": {
                             "evm_call_result": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 3],
-                            "function_selector": "0xcad0899b",
+                            "function_selector": call_data.to_string()[0..10],
                             "prover_contract_address": helper.contract().address(),
                             "seal": []
                         }
@@ -226,13 +231,20 @@ mod server_tests {
         #[tokio::test]
         async fn success_web_proof() -> anyhow::Result<()> {
             let helper = test_helper().await;
+            let call_data = helper
+                .contract()
+                .web_proof(Web {
+                    url: "api.x.com".to_string(),
+                })
+                .calldata()
+                .unwrap();
 
             let req = json!({
                 "method": "v_call",
                 "params": [
                     {
                         "to": helper.contract().address(),
-                        "data": helper.contract().web_proof(Web{url: "api.x.com".to_string()}).calldata().unwrap()
+                        "data": call_data
                     },
                     {
                         "block_no": helper.block_number,
@@ -259,7 +271,7 @@ mod server_tests {
                     "result": {
                         "result": {
                             "evm_call_result": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
-                            "function_selector": "0xe752d2a0",
+                            "function_selector": call_data.to_string()[0..10],
                             "prover_contract_address": helper.contract().address(),
                             "seal": []
                         }
