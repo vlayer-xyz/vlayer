@@ -2,6 +2,7 @@ use axum::{
     body::Body,
     http::{header::CONTENT_TYPE, Request, Response},
 };
+use axum_jrpc::Value;
 use ethers::{
     contract::abigen,
     core::{
@@ -125,8 +126,8 @@ pub(crate) async fn body_to_string(body: Body) -> anyhow::Result<String> {
     Ok(String::from_utf8(body_bytes.to_vec())?)
 }
 
-pub(crate) async fn body_to_json<T: DeserializeOwned>(body: Body) -> anyhow::Result<T> {
+pub(crate) async fn body_to_json(body: Body) -> Value {
     let body_bytes = body.collect().await?.to_bytes();
     let deserialized = serde_json::from_slice(&body_bytes)?;
-    Ok(deserialized)
+    deserialized.unwrap()
 }
