@@ -8,6 +8,7 @@ To start working with this repository, you will need to install following softwa
 - Rust risc-0 [toolchain](https://dev.risczero.com/api/zkvm/quickstart)
 - [Foundry](https://book.getfoundry.sh/getting-started/installation)
 - [Bun](https://bun.sh)
+- [LLVM Clang](https://clang.llvm.org/) compiler version which supports [RISC-V build target](https://llvm.org/docs/RISCVUsage.html) available on the `PATH`
 
 ## Building
 
