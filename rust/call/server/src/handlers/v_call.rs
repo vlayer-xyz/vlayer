@@ -6,7 +6,8 @@ use call_host::host::{config::HostConfig, Host};
 use call_host::Call as HostCall;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
-use types::{Augmentors, Call, CallContext, CallResult};
+use types::{Call, CallContext, CallResult};
+use vlayer_engine::io::Augmentors;
 
 pub mod types;
 

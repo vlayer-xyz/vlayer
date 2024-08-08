@@ -5,7 +5,6 @@ use alloy_primitives::{BlockNumber, ChainId};
 use axum_jrpc::Value;
 use call_host::Call as HostCall;
 use serde::{Deserialize, Serialize};
-use web_proof::types::WebProof;
 
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
@@ -35,12 +34,6 @@ pub struct CallContext {
     pub block_no: BlockNumber,
     #[serde(default = "mainnet_chain_id")]
     pub chain_id: ChainId,
-}
-
-#[derive(Deserialize, Serialize)]
-#[serde(deny_unknown_fields)]
-pub struct Augmentors {
-    pub web_proof: WebProof,
 }
 
 #[derive(Deserialize, Serialize, Debug)]

@@ -4,6 +4,7 @@ use revm::interpreter::CallInputs;
 use revm::primitives::TxEnv;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
+use web_proof::types::WebProof;
 
 use crate::config::DEFAULT_CALLER;
 use crate::evm::env::location::ExecutionLocation;
@@ -15,6 +16,12 @@ pub struct Input {
     pub multi_evm_input: MultiEvmInput,
     pub call: Call,
     pub start_execution_location: ExecutionLocation,
+}
+
+#[derive(Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct Augmentors {
+    pub web_proof: WebProof,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
