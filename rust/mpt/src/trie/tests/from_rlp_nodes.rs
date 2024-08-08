@@ -12,7 +12,9 @@ fn rlp_encoded(root: &Node) -> Vec<EncodedNode> {
         Node::Null | Node::Leaf(_, _) | Node::Digest(_) => {}
         Node::Extension(_, child) => out.extend(rlp_encoded(child)),
         Node::Branch(children, _) => {
-            out.extend(children.iter().flatten().flat_map(|c| rlp_encoded(c)));
+            let non_empty_children = children.iter().flatten();
+            let encoded_nodes = non_empty_children.flat_map(|c| rlp_encoded(c));
+            out.extend(encoded_nodes);
         }
     }
     out

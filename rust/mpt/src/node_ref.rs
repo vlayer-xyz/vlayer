@@ -87,7 +87,8 @@ mod encodable {
 
     #[test]
     fn inline_node() {
-        let leaf_node = Node::Leaf(Nibbles::from_nibbles([]), vec![0x1].into());
+        let nibbles = Nibbles::from_nibbles([]);
+        let leaf_node = Node::Leaf(nibbles, vec![0x1].into());
         let node_ref = NodeRef::from_node(&leaf_node);
         let out = encode(node_ref.clone());
 
