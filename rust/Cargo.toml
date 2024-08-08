@@ -1,11 +1,11 @@
 [workspace]
 resolver = "2"
 members = [
-    "host",
-    "guest",
-    "guest_wrapper",
-    "engine",
-    "server",
+    "call/host",
+    "call/guest",
+    "call/guest_wrapper",
+    "call/engine",
+    "call/server",
     "cli",
     "mpt",
     "test_runner",

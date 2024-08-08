@@ -26,7 +26,7 @@ jobs:
         with:
           cache-workspaces: |
             rust
-            rust/guest_wrapper/risc0_guest
+            rust/call/guest_wrapper/risc0_guest
 
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
@@ -42,7 +42,7 @@ jobs:
           cargo clippy --all-targets --all-features
 
       - name: Run Clippy Risc0 Guest
-        working-directory: rust/guest_wrapper/risc0_guest
+        working-directory: rust/call/guest_wrapper/risc0_guest
         env:
           RUSTFLAGS: "-Dwarnings"
         run: |

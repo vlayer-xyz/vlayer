@@ -23,10 +23,10 @@ hex = "0.4.3"
 axum-jrpc = "0.7.1"
 host = { path = "../host" }
 alloy-chains = "0.1.23"
-web_proof = { path = "../web_proof" }
+web_proof = { path = "../../web_proof" }
 
 [dev-dependencies]
 reqwest = "0.12.5"
 lazy_static = "1.5.0"
-web_proof = { path = "../web_proof", features = ["fixtures"] }
+web_proof = { path = "../../web_proof", features = ["fixtures"] }
 ethers = { version = "2.0" }
