@@ -107,7 +107,7 @@ pub fn prove_storage(
     }
 
     storage_keys
-        .into_iter()
+        .iter()
         .zip(proofs)
         .map(|(key, proof)| StorageProof {
             key: *key,
