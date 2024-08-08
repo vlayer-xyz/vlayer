@@ -2,7 +2,6 @@ use axum::{
     body::Body,
     http::{header::CONTENT_TYPE, Request, Response},
 };
-use axum_jrpc::Value;
 use call_server::server::{server, ServerConfig};
 use ethers::{
     contract::abigen,
@@ -13,9 +12,7 @@ use ethers::{
     middleware::SignerMiddleware,
     providers::{Http, Provider},
     signers::{LocalWallet, Signer, Wallet},
-    types::U256,
 };
-use http_body_util::BodyExt;
 use mime::APPLICATION_JSON;
 use serde::Serialize;
 use serde_json::json;
@@ -117,27 +114,4 @@ impl TestHelper {
         let result = result.as_str().unwrap();
         self.block_number = u32::from_str_radix(&result[2..], 16).unwrap();
     }
-}
-
-pub(crate) async fn body_to_string(body: Body) -> anyhow::Result<String> {
-    let body_bytes = body.collect().await?.to_bytes();
-    Ok(String::from_utf8(body_bytes.to_vec())?)
-}
-
-pub(crate) async fn body_to_json(body: Body) -> Value {
-    let body_bytes = body.collect().await.unwrap().to_bytes();
-    let deserialized = serde_json::from_slice(&body_bytes).unwrap();
-    deserialized
-}
-
-pub(crate) fn bool_to_vec32(value: bool) -> Vec<u8> {
-    let mut bytes = [0u8; 32];
-    bytes[31] = value as u8;
-    bytes.to_vec()
-}
-
-pub(crate) fn u256_to_vec32(value: U256) -> Vec<u8> {
-    let mut bytes = [0u8; 32];
-    value.to_big_endian(&mut bytes);
-    bytes.to_vec()
 }

@@ -1,11 +1,11 @@
 use std::sync::Arc;
 
 use crate::json_rpc::json_rpc;
-use server_utils::{RequestIdLayer, init_trace_layer};
 use alloy_primitives::ChainId;
 use axum::{routing::post, Router};
 use call_engine::config::{MAINNET_ID, SEPOLIA_ID};
 use serde::{Deserialize, Serialize};
+use server_utils::{init_trace_layer, RequestIdLayer};
 use std::collections::HashMap;
 use tracing::info;
 

@@ -3,7 +3,8 @@ use serde_json::json;
 
 mod test_helpers;
 
-use test_helpers::{body_to_json, body_to_string, test_helper};
+use server_utils::{body_to_json, body_to_string};
+use test_helpers::test_helper;
 
 mod server_tests {
     use super::*;
@@ -49,7 +50,8 @@ mod server_tests {
     }
 
     mod v_call {
-        use crate::test_helpers::{bool_to_vec32, u256_to_vec32, Web};
+        use crate::test_helpers::Web;
+        use server_utils::{bool_to_vec32, u256_to_vec32};
 
         use super::*;
         use ethers::types::U256;
