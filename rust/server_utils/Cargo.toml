@@ -4,3 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+axum = { version = "0.7.5", features = ["macros"] }
+tower-http = { version = "0.5.2", features = ["trace"] }
+tower-request-id = "0.3.0"
+tracing = "0.1.40"
