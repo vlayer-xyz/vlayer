@@ -1805,7 +1805,6 @@ dependencies = [
  "call_host",
  "ethers",
  "hex",
- "http-body-util",
  "lazy_static",
  "mime",
  "reqwest 0.12.5",
@@ -7967,7 +7966,12 @@ dependencies = [
 name = "server_utils"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
  "axum",
+ "axum-jrpc",
+ "ethers",
+ "http-body-util",
+ "serde_json",
  "tower-http",
  "tower-request-id",
  "tracing",
