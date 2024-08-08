@@ -23,7 +23,7 @@ source ${VLAYER_HOME}/bash/run-services.sh
 #   )
 # done
 
-cd web_proof/vlayer
+cd ${VLAYER_HOME}/examples/web_proof/vlayer
 
 forge clean
 forge build
