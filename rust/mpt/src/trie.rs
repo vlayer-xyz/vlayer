@@ -69,8 +69,8 @@ impl MerkleTrie {
     /// order and are resolved if they are referenced (directly or indirectly) by the root node.
     /// Referenced children that cannot be resolved are represented by their hash. This guarantees
     /// that the root hash can be computed and matches the root hash of the fully resolved trie.
-    pub fn from_rlp_nodes<T: AsRef<[u8]> + Debug>(
-        nodes: impl IntoIterator<Item = T> + Debug,
+    pub fn from_rlp_nodes<T: AsRef<[u8]>>(
+        nodes: impl IntoIterator<Item = T>,
     ) -> Result<Self, ParseNodeError> {
         let mut nodes_by_hash = HashMap::new();
         let mut root_node_opt = None;
