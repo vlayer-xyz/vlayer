@@ -4,12 +4,12 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-axum = { version = "0.7.5", features = ["macros"] }
-tower-http = { version = "0.5.2", features = ["trace"] }
-tower-request-id = "0.3.0"
-tracing = "0.1.40"
+axum = { workspace = true, features = ["macros"] }
+tower-http = { workspace = true, features = ["trace"] }
+tower-request-id = { workspace = true }
+tracing = { workspace = true }
 serde_json = { workspace = true }
-axum-jrpc = "0.7.1"
+axum-jrpc = { workspace = true }
 anyhow = { workspace = true }
-http-body-util = "0.1.2"
-ethers = { version = "2.0" }
+http-body-util = { workspace = true }
+ethers = { workspace = true }
