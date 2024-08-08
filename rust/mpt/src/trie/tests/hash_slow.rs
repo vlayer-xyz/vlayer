@@ -1,7 +1,12 @@
 use crate::{node::Node, MerkleTrie};
 use alloy_primitives::{b256, B256};
 use alloy_trie::EMPTY_ROOT_HASH;
+use lazy_static::lazy_static;
 use nybbles::Nibbles;
+
+lazy_static! {
+    static ref MPT_WITHOUT_VALUE: MerkleTrie = setup_branch_test(None);
+}
 
 #[test]
 fn null() {
@@ -36,7 +41,7 @@ fn extension() {
 
 #[test]
 fn branch() {
-    let mpt = setup_branch_test(None);
+    let mpt = MPT_WITHOUT_VALUE.clone();
     assert_eq!(
         mpt.hash_slow(),
         b256!("f09860d0bbaa3a755a53bbeb7b06824cdda5ac2ee5557d14aa49117a47bd0a3e")
@@ -45,11 +50,17 @@ fn branch() {
 
 #[test]
 fn branch_with_value() {
-    let value = Some(vec![42u8].into());
-    let mpt = setup_branch_test(value);
+    let mut mpt = MPT_WITHOUT_VALUE.clone();
+    let value = vec![42u8].into();
+
+    let MerkleTrie(Node::Branch(_, ref mut branch_value)) = mpt else {
+        panic!("Expected a Branch node");
+    };
+    *branch_value = Some(value);
+
     assert_eq!(
         mpt.hash_slow(),
-        b256!("d8234b21207e7321dbc42e0fe8688913489ad1d365b690a23508e24104e33337")
+        b256!("81b2bafe48b11cf92d7b5d765155e3cab7b87f7e0e2fa8181c3535552cdafc40")
     );
 }
 
@@ -63,6 +74,5 @@ fn setup_branch_test(value: Option<Box<[u8]>>) -> MerkleTrie {
         Nibbles::from_nibbles([1; 63]),
         vec![1].into(),
     )));
-    let mpt = MerkleTrie(Node::Branch(children, value));
-    mpt
+    MerkleTrie(Node::Branch(children, value))
 }
