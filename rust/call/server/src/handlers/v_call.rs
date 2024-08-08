@@ -31,7 +31,8 @@ pub(crate) async fn call(
     };
 
     let return_data =
-        tokio::task::spawn_blocking(|| Host::try_new(host_config)?.run(call)).await??;
+        tokio::task::spawn_blocking(|| Host::try_new(host_config)?.run(call, params.augmentors))
+            .await??;
 
     Ok(CallResult {
         result: json!({
