@@ -7,10 +7,13 @@ use foundry_evm::revm::interpreter::{CallInputs, CallOutcome};
 use foundry_evm::revm::primitives::U256;
 use foundry_evm::revm::{Database, EvmContext, Inspector};
 
-use host::host::config::HostConfig;
-use host::host::Host;
-use vlayer_engine::config::SEPOLIA_ID;
-use vlayer_engine::io::Call;
+use call_engine::config::SEPOLIA_ID;
+use call_engine::io::Call;
+use call_engine::utils::evm_call::{
+    create_raw_return_outcome, create_return_outcome, create_revert_outcome, split_calldata,
+};
+use call_host::host::config::HostConfig;
+use call_host::host::Host;
 
 use crate::cheatcodes::{callProverCall, getProofCall, Proof, CHEATCODE_CALL_ADDR};
 use crate::pending_state_provider::{PendingStateProvider, PendingStateProviderFactory};

@@ -1,11 +1,11 @@
 use alloy_primitives::{Address, Bytes, FixedBytes, B256, U256};
 use alloy_trie::proof::ProofRetainer;
 use alloy_trie::{HashBuilder, Nibbles};
+use call_host::proof::StorageProof;
 use ethers_core::utils::keccak256;
 use forge::revm::primitives::alloy_primitives::private::alloy_rlp;
 use forge::revm::primitives::alloy_primitives::private::alloy_rlp::Encodable;
 use forge::revm::primitives::{Account, AccountInfo, EvmState, EvmStorageSlot};
-use host::proof::StorageProof;
 use std::collections::{BTreeMap, HashMap};
 
 fn address_to_nibbles(address: Address) -> Nibbles {

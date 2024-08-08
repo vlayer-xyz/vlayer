@@ -21,7 +21,7 @@ foundry-config = { workspace = true }
 foundry-debugger = { workspace = true }
 foundry-evm = { workspace = true }
 foundry-evm-core = { workspace = true }
-host = { path = "../host" }
+call_host = { path = "../call/host" }
 rayon = { workspace = true }
 regex = { workspace = true }
 serde_json = { workspace = true }
