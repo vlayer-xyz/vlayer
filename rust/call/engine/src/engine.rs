@@ -52,10 +52,10 @@ where
     pub fn call(
         &'a self,
         tx: &Call,
-        location: ExecutionLocation,
+        start_location: ExecutionLocation,
         _augmentors: Option<Augmentors>,
     ) -> Result<Vec<u8>, EngineError> {
-        self.call_inner(tx, location)
+        self.call_inner(tx, start_location)
     }
 
     pub fn call_inner(
