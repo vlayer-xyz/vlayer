@@ -4,7 +4,7 @@ use alloy_rlp::{BufMut, Encodable, EMPTY_STRING_CODE};
 use super::node::Node;
 
 /// Represents the way in which a node is referenced from within another node.
-#[derive(Default)]
+#[derive(Default, Clone)]
 pub(crate) enum NodeRef {
     #[default]
     Empty,
@@ -58,6 +58,7 @@ impl Encodable for NodeRef {
 
 #[cfg(test)]
 mod encodable {
+    use alloy_rlp::encode;
     use nybbles::Nibbles;
 
     use super::*;
@@ -86,11 +87,9 @@ mod encodable {
 
     #[test]
     fn inline_node() {
-        let rlp = vec![0x1];
-        let mut out = Vec::new();
-        let leaf_node = Node::Leaf(Nibbles::from_nibbles([]), rlp.clone().into_boxed_slice());
+        let leaf_node = Node::Leaf(Nibbles::from_nibbles([]), vec![0x1].into());
         let node_ref = NodeRef::from_node(&leaf_node);
-        node_ref.encode(&mut out);
+        let out = encode(node_ref.clone());
 
         let expected_rlp_encoded = leaf_node.rlp_encoded();
 

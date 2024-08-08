@@ -46,7 +46,6 @@ fn branch() {
     let mpt = MerkleTrie(Node::Branch(children, value.clone()));
     let proof = rlp_encoded(&mpt.0);
 
-    // Decode the proof back to a MerkleTrie and check for equality
     let decoded_mpt = MerkleTrie::from_rlp_nodes(proof).unwrap();
     assert_eq!(mpt, decoded_mpt);
 }

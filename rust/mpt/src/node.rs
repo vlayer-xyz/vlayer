@@ -96,21 +96,14 @@ impl Node {
                     }
                 }
 
-                if let Some(value) = value {
-                    payload_length += value.len();
-                } else {
-                    // Only add 1 for the EMPTY_STRING_CODE if value is not present
-                    payload_length += 1;
-                }
+                payload_length += value
+                    .as_ref()
+                    .map_or(1 /* EMPTY_STRING_CODE */, |v| v.len());
 
                 let mut out = encoded_header(true, payload_length);
                 child_refs.iter().for_each(|child| child.encode(&mut out));
 
-                if let Some(value) = value {
-                    out.extend_from_slice(value);
-                } else {
-                    out.push(EMPTY_STRING_CODE);
-                }
+                out.extend_from_slice(value.as_deref().unwrap_or(&[EMPTY_STRING_CODE]));
 
                 out
             }
