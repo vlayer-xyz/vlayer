@@ -55,10 +55,10 @@ where
         start_location: ExecutionLocation,
         _augmentors: Option<Augmentors>,
     ) -> Result<Vec<u8>, EngineError> {
-        self.call_inner(tx, start_location)
+        self.traveling_call(tx, start_location)
     }
 
-    pub fn call_inner(
+    pub fn traveling_call(
         &'a self,
         tx: &Call,
         location: ExecutionLocation,
@@ -67,7 +67,7 @@ where
             .envs
             .get(location)
             .map_err(|err| EngineError::EvmEnv(err.to_string()))?;
-        let callback = |call: &_, location| self.call_inner(call, location);
+        let callback = |call: &_, location| self.traveling_call(call, location);
         let inspector = TravelInspector::new(env.cfg_env.chain_id, callback);
         let evm = Evm::builder()
             .with_ref_db(&env.db)
