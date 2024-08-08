@@ -8,6 +8,7 @@ alloy-dyn-abi = { workspace = true }
 alloy-json-abi = { workspace = true }
 alloy-sol-types = { workspace = true }
 alloy-primitives = "0.7.7"
+alloy-rlp = "0.3.8"
 clap = { workspace = true, features = ["derive"] }
 color-eyre = { workspace = true }
 comfy-table = { workspace = true }
@@ -27,6 +28,7 @@ serde_json = { workspace = true }
 tracing = { workspace = true }
 tokio = { workspace = true }
 call_engine = { path = "../call/engine" }
+mpt = { path = "../mpt" }
 ethers-core = "2.0.14"
 alloy-trie = "0.4.1"
 anyhow = "1.0.86"

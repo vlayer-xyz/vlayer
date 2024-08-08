@@ -5,6 +5,7 @@ use ethers_core::utils::keccak256;
 use forge::revm::primitives::alloy_primitives::private::alloy_rlp;
 use forge::revm::primitives::alloy_primitives::private::alloy_rlp::Encodable;
 use forge::revm::primitives::{Account, AccountInfo, EvmState, EvmStorageSlot};
+use host::proof::StorageProof;
 use std::collections::{BTreeMap, HashMap};
 
 fn address_to_nibbles(address: Address) -> Nibbles {
@@ -87,9 +88,9 @@ fn trie_storage(storage: &HashMap<U256, EvmStorageSlot>) -> Vec<(Nibbles, Vec<u8
 
 pub fn prove_storage(
     storage: &HashMap<U256, EvmStorageSlot>,
-    keys: &[FixedBytes<32>],
-) -> Vec<Vec<Bytes>> {
-    let keys: Vec<_> = keys
+    storage_keys: &[FixedBytes<32>],
+) -> Vec<StorageProof> {
+    let keys: Vec<_> = storage_keys
         .iter()
         .map(|key| Nibbles::unpack(alloy_sol_types::private::keccak256(key)))
         .collect();
@@ -105,15 +106,37 @@ pub fn prove_storage(
         proofs.push(matching_proof_nodes.collect());
     }
 
-    proofs
+    storage_keys
+        .into_iter()
+        .zip(proofs)
+        .map(|(key, proof)| StorageProof {
+            key: *key,
+            value: storage
+                .get(&(*key).into())
+                .cloned()
+                .unwrap_or_default()
+                .present_value,
+            proof,
+        })
+        .collect()
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
     use alloy_primitives::{address, b256, hex, U160};
+    use alloy_rlp::RlpDecodable;
+    use mpt::MerkleTrie;
     use serde_json::{from_str, from_value, Value};
     use std::fs;
+
+    #[derive(Debug, Clone, PartialEq, Eq, RlpDecodable)]
+    struct StateAccount {
+        pub nonce: u64,
+        pub balance: U256,
+        pub storage_root: B256,
+        pub code_hash: B256,
+    }
 
     fn read_and_parse_json_file(file_path: &str) -> Value {
         let file_content = fs::read_to_string(file_path).expect("Failed to read the file");
@@ -142,10 +165,21 @@ mod tests {
     }
 
     #[test]
-    fn test_account_proof() {
-        let evm_state = build_state();
-        let address = address!();
+    fn test_account_proof_is_decoded_by_mpt() {
+        let evm_state: EvmState = build_state();
+        let address = address!("5615deb798bb3e4dfa0139dfa1b3d433cc23b72f");
         let proofs = account_proof(address, &evm_state);
-        assert_eq!(proofs.len(), 1);
+        let mpt = MerkleTrie::from_rlp_nodes(proofs).unwrap();
+        let decoded_account = mpt
+            .get_rlp::<StateAccount>(keccak256(address))
+            .unwrap()
+            .unwrap();
+        let expected_account = StateAccount {
+            nonce: evm_state.get(&address).unwrap().info.nonce,
+            balance: evm_state.get(&address).unwrap().info.balance,
+            code_hash: evm_state.get(&address).unwrap().info.code_hash,
+            storage_root: storage_root(&evm_state.get(&address).unwrap().storage),
+        };
+        assert_eq!(decoded_account, expected_account);
     }
 }

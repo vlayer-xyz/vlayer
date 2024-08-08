@@ -8,7 +8,7 @@ use forge::revm::primitives::alloy_primitives::{
 use forge::revm::primitives::{Account, Address, Bytes, EvmState, B256, U256};
 use host::db::proof::ProofDb;
 use host::host::error::HostError;
-use host::proof::{EIP1186Proof, StorageProof};
+use host::proof::EIP1186Proof;
 use host::provider::factory::ProviderFactory;
 use host::provider::BlockingProvider;
 use vlayer_engine::block_header::eth::EthBlockHeader;
@@ -29,7 +29,7 @@ impl PendingStateProvider {
         }
     }
 
-    fn proofs(&self) -> anyhow::Result<Vec<EIP1186Proof>> {
+    fn all_account_proofs(&self) -> anyhow::Result<Vec<EIP1186Proof>> {
         let state = self.state.borrow();
         let mut proofs = Vec::new();
         for (address, account) in state {
@@ -44,7 +44,7 @@ impl PendingStateProvider {
     }
 
     fn get_state_root(&self) -> anyhow::Result<B256> {
-        let proofs = self.proofs()?;
+        let proofs = self.all_account_proofs()?;
         let state_trie = ProofDb::<PendingStateProvider>::state_trie(&proofs)?;
         Ok(state_trie.hash_slow())
     }
@@ -84,7 +84,6 @@ impl BlockingProvider for PendingStateProvider {
         _block: BlockNumber,
     ) -> Result<EIP1186Proof, Self::Error> {
         let account = self.account(address);
-        let storage_proofs = prove_storage(&account.storage, &storage_keys);
 
         let account_proof = EIP1186Proof {
             address,
@@ -93,20 +92,7 @@ impl BlockingProvider for PendingStateProvider {
             code_hash: account.info.code_hash,
             storage_hash: storage_root(&account.storage),
             account_proof: account_proof(address, &self.state),
-            storage_proof: storage_keys
-                .into_iter()
-                .zip(storage_proofs)
-                .map(|(key, proof)| {
-                    let storage_key: U256 = key.into();
-                    let value = account
-                        .storage
-                        .get(&storage_key)
-                        .cloned()
-                        .unwrap_or_default()
-                        .present_value;
-                    StorageProof { key, value, proof }
-                })
-                .collect(),
+            storage_proof: prove_storage(&account.storage, &storage_keys),
         };
 
         Ok(account_proof)
