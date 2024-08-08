@@ -70,14 +70,12 @@ impl MerkleTrie {
     /// Referenced children that cannot be resolved are represented by their hash. This guarantees
     /// that the root hash can be computed and matches the root hash of the fully resolved trie.
     pub fn from_rlp_nodes<T: AsRef<[u8]> + Debug>(
-        nodes: impl IntoIterator<Item = T>,
+        nodes: impl IntoIterator<Item = T> + Debug,
     ) -> Result<Self, ParseNodeError> {
         let mut nodes_by_hash = HashMap::new();
         let mut root_node_opt = None;
-        println!("Parsing nodes...");
 
         for rlp in nodes {
-            println!("Parsing node {:?}", rlp);
             let (hash, node) = parse_node(rlp)?;
 
             // initialize with the first node if it hasn't been set
@@ -92,7 +90,6 @@ impl MerkleTrie {
         let trie = MerkleTrie(resolve_trie(root_node.clone(), &nodes_by_hash));
         // Optional: Verify the resolved trie's hash matches the initial root's hash
         debug_assert!(trie.hash_slow() == MerkleTrie(root_node).hash_slow());
-        println!("ok");
 
         Ok(trie)
     }
