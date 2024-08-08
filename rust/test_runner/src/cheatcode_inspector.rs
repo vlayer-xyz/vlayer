@@ -64,7 +64,7 @@ impl<DB: Database> Inspector<DB> for CheatcodeInspector {
 fn create_host(journaled_state: &JournaledState) -> Host<PendingStateProvider> {
     Host::try_new_with_provider_factory(
         PendingStateProviderFactory {
-            state: journaled_state.clone(),
+            state: journaled_state.state.clone(),
         },
         HostConfig {
             rpc_urls: Default::default(),

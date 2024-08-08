@@ -1,41 +1,36 @@
-use alloy_sol_types::private::{Address, Bytes, U256};
-use alloy_trie::proof::ProofRetainer;
-use alloy_trie::{HashBuilder, Nibbles};
+use std::borrow::Borrow;
+use std::convert::Infallible;
+
 use ethers_core::types::BlockNumber as BlockTag;
-use ethers_core::utils::keccak256;
-use forge::revm::primitives::alloy_primitives::private::alloy_rlp;
-use forge::revm::primitives::alloy_primitives::private::alloy_rlp::Encodable;
 use forge::revm::primitives::alloy_primitives::{
     BlockNumber, ChainId, StorageKey, StorageValue, TxNumber,
 };
-use forge::revm::primitives::{Account, AccountInfo, EvmStorageSlot, FixedBytes, B256};
-use forge::revm::JournaledState;
+use forge::revm::primitives::{Account, Address, Bytes, EvmState, B256, U256};
 use host::db::proof::ProofDb;
 use host::host::error::HostError;
 use host::proof::{EIP1186Proof, StorageProof};
 use host::provider::factory::ProviderFactory;
 use host::provider::BlockingProvider;
-use std::borrow::Borrow;
-use std::collections::HashMap;
-use std::convert::Infallible;
 use vlayer_engine::block_header::eth::EthBlockHeader;
 use vlayer_engine::block_header::EvmBlockHeader;
 use vlayer_engine::config::MAINNET_MERGE_BLOCK_NUMBER;
 
+use crate::proof::{account_proof, prove_storage, storage_root};
+
 pub struct PendingStateProvider {
-    state: JournaledState,
+    state: EvmState,
 }
 
 impl PendingStateProvider {
     fn account(&self, address: Address) -> Account {
-        match self.state.state.get(&address) {
+        match self.state.get(&address) {
             Some(account) => account.clone(),
             None => Account::default(),
         }
     }
 
     fn proofs(&self) -> anyhow::Result<Vec<EIP1186Proof>> {
-        let state = self.state.state.borrow();
+        let state = self.state.borrow();
         let mut proofs = Vec::new();
         for (address, account) in state {
             let proof = self.get_proof(
@@ -88,20 +83,6 @@ impl BlockingProvider for PendingStateProvider {
         storage_keys: Vec<StorageKey>,
         _block: BlockNumber,
     ) -> Result<EIP1186Proof, Self::Error> {
-        let evm_state = &self.state.state;
-
-        let mut builder =
-            HashBuilder::default().with_proof_retainer(ProofRetainer::new(vec![Nibbles::unpack(
-                keccak256(address),
-            )]));
-
-        for (key, account) in trie_accounts(evm_state) {
-            builder.add_leaf(key, &account);
-        }
-
-        let _ = builder.root();
-
-        let proof = builder.take_proofs().values().cloned().collect::<Vec<_>>();
         let account = self.account(address);
         let storage_proofs = prove_storage(&account.storage, &storage_keys);
 
@@ -111,7 +92,7 @@ impl BlockingProvider for PendingStateProvider {
             nonce: account.info.nonce,
             code_hash: account.info.code_hash,
             storage_hash: storage_root(&account.storage),
-            account_proof: proof,
+            account_proof: account_proof(address, &self.state),
             storage_proof: storage_keys
                 .into_iter()
                 .zip(storage_proofs)
@@ -155,7 +136,7 @@ impl BlockingProvider for PendingStateProvider {
 }
 
 pub struct PendingStateProviderFactory {
-    pub state: JournaledState,
+    pub state: EvmState,
 }
 
 impl ProviderFactory<PendingStateProvider> for PendingStateProviderFactory {
@@ -164,93 +145,4 @@ impl ProviderFactory<PendingStateProvider> for PendingStateProviderFactory {
             state: self.state.clone(),
         })
     }
-}
-
-fn trie_accounts(accounts: &HashMap<Address, Account>) -> Vec<(Nibbles, Vec<u8>)> {
-    let mut accounts = accounts
-        .iter()
-        .map(|(address, account)| {
-            let data = trie_account_rlp(&account.info, &account.storage);
-            (
-                Nibbles::unpack(alloy_sol_types::private::keccak256(*address)),
-                data,
-            )
-        })
-        .collect::<Vec<_>>();
-    accounts.sort_by(|(key1, _), (key2, _)| key1.cmp(key2));
-
-    accounts
-}
-
-fn trie_account_rlp(info: &AccountInfo, storage: &HashMap<U256, EvmStorageSlot>) -> Vec<u8> {
-    let mut out: Vec<u8> = Vec::new();
-    let list: [&dyn Encodable; 4] = [
-        &info.nonce,
-        &info.balance,
-        &storage_root(storage),
-        &info.code_hash,
-    ];
-
-    alloy_rlp::encode_list::<_, dyn Encodable>(&list, &mut out);
-
-    out
-}
-
-fn storage_root(storage: &HashMap<U256, EvmStorageSlot>) -> B256 {
-    build_root(trie_storage(storage))
-}
-
-fn build_root(values: impl IntoIterator<Item = (Nibbles, Vec<u8>)>) -> B256 {
-    let mut builder = HashBuilder::default();
-    for (key, value) in values {
-        builder.add_leaf(key, value.as_ref());
-    }
-    builder.root()
-}
-
-fn trie_storage(storage: &HashMap<U256, EvmStorageSlot>) -> Vec<(Nibbles, Vec<u8>)> {
-    let mut storage = storage
-        .iter()
-        .map(|(key, value)| {
-            let data = alloy_rlp::encode(value.present_value);
-            (
-                Nibbles::unpack(alloy_sol_types::private::keccak256(key.to_be_bytes::<32>())),
-                data,
-            )
-        })
-        .collect::<Vec<_>>();
-    storage.sort_by(|(key1, _), (key2, _)| key1.cmp(key2));
-
-    storage
-}
-
-fn prove_storage(
-    storage: &HashMap<U256, EvmStorageSlot>,
-    keys: &[FixedBytes<32>],
-) -> Vec<Vec<Bytes>> {
-    let keys: Vec<_> = keys
-        .iter()
-        .map(|key| Nibbles::unpack(alloy_sol_types::private::keccak256(key)))
-        .collect();
-
-    let mut builder = HashBuilder::default().with_proof_retainer(ProofRetainer::new(keys.clone()));
-
-    for (key, value) in trie_storage(storage) {
-        builder.add_leaf(key, &value);
-    }
-
-    let _ = builder.root();
-
-    let mut proofs = Vec::new();
-    let all_proof_nodes = builder.take_proofs();
-
-    for proof_key in keys {
-        let matching_proof_nodes = all_proof_nodes
-            .iter()
-            .filter(|(path, _)| proof_key.starts_with(path))
-            .map(|(_, node)| node.clone());
-        proofs.push(matching_proof_nodes.collect());
-    }
-
-    proofs
 }

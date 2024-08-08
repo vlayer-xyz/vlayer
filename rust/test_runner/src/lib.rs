@@ -5,5 +5,6 @@ mod composite_inspector;
 mod contract_runner;
 mod filter;
 mod pending_state_provider;
+mod proof;
 mod summary;
 mod test_executor;
