@@ -13,8 +13,8 @@ pub enum VerificationError {
 }
 
 pub struct _WebProofJournal {
-    request: String,
-    response: String,
+    _request: String,
+    _response: String,
 }
 
 pub fn _verify_proof(web_proof: WebProof) -> Result<_WebProofJournal, VerificationError> {
@@ -34,8 +34,8 @@ pub fn _verify_proof(web_proof: WebProof) -> Result<_WebProofJournal, Verificati
     let recv_string = String::from_utf8(recv.data().to_vec()).unwrap();
 
     Ok(_WebProofJournal {
-        request: sent_string,
-        response: recv_string,
+        _request: sent_string,
+        _response: recv_string,
     })
 }
 
@@ -63,9 +63,9 @@ mod tests {
     #[test]
     fn correct_substrings_extracted() {
         let proof = load_web_proof_fixture("./testdata/tls_proof.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
-        let _WebProofJournal { request, response } = _verify_proof(proof).unwrap();
+        let _WebProofJournal { _request, _response } = _verify_proof(proof).unwrap();
 
-        assert_eq!(request, read_fixture("./testdata/sent_request.txt"));
-        assert_eq!(response, read_fixture("./testdata/received_response.txt"));
+        assert_eq!(_request, read_fixture("./testdata/sent_request.txt"));
+        assert_eq!(_response, read_fixture("./testdata/received_response.txt"));
     }
 }
