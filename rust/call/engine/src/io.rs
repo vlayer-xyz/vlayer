@@ -18,12 +18,6 @@ pub struct Input {
     pub start_execution_location: ExecutionLocation,
 }
 
-#[derive(Deserialize, Serialize)]
-#[serde(deny_unknown_fields)]
-pub struct Augmentors {
-    pub web_proof: WebProof,
-}
-
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Call {
     pub to: Address,
@@ -70,6 +64,12 @@ impl Call {
             .try_into()
             .expect("cannot extract function selector from call data")
     }
+}
+
+#[derive(Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct Augmentors {
+    pub web_proof: WebProof,
 }
 
 #[derive(Error, Debug)]
