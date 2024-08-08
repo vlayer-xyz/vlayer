@@ -21,6 +21,3 @@ target/
 # npm dependencies
 **/node_modules
 
-# Foundry compiler files
-**/cache
-**/out
