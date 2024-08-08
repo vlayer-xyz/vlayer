@@ -33,7 +33,7 @@ jobs:
         with:
           cache-workspaces: |
             rust
-            rust/guest_wrapper/risc0_guest
+            rust/call/guest_wrapper/risc0_guest
 
       - name: Install cargo-binstall
         env:

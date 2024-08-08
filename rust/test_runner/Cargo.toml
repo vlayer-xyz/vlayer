@@ -24,4 +24,4 @@ regex = "1.10.4"
 serde_json = "1.0.120"
 tracing = { workspace = true }
 tokio = { workspace = true }
-vlayer-engine = { path = "../engine" }
+vlayer-engine = { path = "../call/engine" }
