@@ -10,7 +10,6 @@ risc0-zkvm = { workspace = true }
 call_engine = { path = "../engine" }
 call_guest_wrapper = { path = "../guest_wrapper" }
 mpt = { path = "../../mpt" }
-tracing-subscriber = { workspace = true }
 alloy-primitives = { workspace = true, features = ["rlp", "serde"] }
 ethers-providers = { workspace = true }
 ethers-core = { workspace = true }
@@ -18,18 +17,11 @@ thiserror = { workspace = true }
 url = { workspace = true }
 alloy-sol-types = { workspace = true }
 anyhow = { workspace = true }
-log = { workspace = true }
 revm = { workspace = true, features = ["serde", "std"] }
 serde = { workspace = true }
 serde_json = { workspace = true }
 tokio = { workspace = true }
-tracing = { workspace = true }
-ethereum-types = { workspace = true }
-hex = { workspace = true }
 auto_impl = { workspace = true }
-lazy_static = { workspace = true }
-derive_more = { workspace = true }
-dyn-clone = { workspace = true }
 dotenv = { workspace = true }
 
 [dev-dependencies]

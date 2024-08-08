@@ -14,12 +14,9 @@ alloy-rlp = { workspace = true }
 alloy-rlp-derive = { workspace = true }
 alloy-sol-types = { workspace = true }
 anyhow = { workspace = true }
-ethers-core = { workspace = true }
-nybbles = { workspace = true, features = ["serde"] }
 once_cell = { workspace = true }
 risc0-zkvm = { workspace = true }
 revm = { workspace = true, features = ["serde", "std"] }
-rlp = { workspace = true }
 serde = { workspace = true }
 tracing = { workspace = true }
 thiserror = { workspace = true }
@@ -37,3 +34,6 @@ serde_json = { workspace = true }
 
 [lints.clippy]
 unwrap_used = "deny"
+
+[package.metadata.cargo-machete]
+ignored = ["risc0-zkvm"]
