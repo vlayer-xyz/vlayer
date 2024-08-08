@@ -1708,6 +1708,118 @@ dependencies = [
 ]
 
 [[package]]
+name = "call_engine"
+version = "0.1.0"
+dependencies = [
+ "alloy-primitives",
+ "alloy-rlp",
+ "alloy-rlp-derive",
+ "alloy-sol-types",
+ "alloy-trie",
+ "anyhow",
+ "as-any",
+ "dyn-clone",
+ "ethers-core",
+ "lazy_static",
+ "mpt",
+ "nybbles",
+ "once_cell",
+ "revm",
+ "risc0-zkvm",
+ "rlp",
+ "serde",
+ "serde_json",
+ "test-log",
+ "thiserror",
+ "tracing",
+]
+
+[[package]]
+name = "call_guest"
+version = "0.1.0"
+dependencies = [
+ "alloy-primitives",
+ "alloy-rlp",
+ "alloy-rlp-derive",
+ "anyhow",
+ "as-any",
+ "call_engine",
+ "mpt",
+ "revm",
+]
+
+[[package]]
+name = "call_guest_wrapper"
+version = "0.1.0"
+dependencies = [
+ "risc0-build",
+ "risc0-build-ethereum",
+]
+
+[[package]]
+name = "call_host"
+version = "0.1.0"
+dependencies = [
+ "alloy-primitives",
+ "alloy-sol-types",
+ "anyhow",
+ "auto_impl",
+ "call_engine",
+ "call_guest_wrapper",
+ "ctor",
+ "derive_more",
+ "dotenv",
+ "dyn-clone",
+ "ethereum-types",
+ "ethers-core",
+ "ethers-providers",
+ "hex",
+ "lazy_static",
+ "log",
+ "mpt",
+ "revm",
+ "risc0-ethereum-contracts",
+ "risc0-zkp",
+ "risc0-zkvm",
+ "serde",
+ "serde_json",
+ "test-log",
+ "thiserror",
+ "tokio",
+ "tracing",
+ "tracing-subscriber 0.3.18",
+ "url",
+]
+
+[[package]]
+name = "call_server"
+version = "0.1.0"
+dependencies = [
+ "alloy-chains",
+ "alloy-primitives",
+ "anyhow",
+ "axum",
+ "axum-jrpc",
+ "call_engine",
+ "call_host",
+ "ethers",
+ "hex",
+ "http-body-util",
+ "lazy_static",
+ "mime",
+ "reqwest 0.12.5",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "tokio",
+ "tower",
+ "tower-http",
+ "tower-request-id",
+ "tracing",
+ "web_proof",
+]
+
+[[package]]
 name = "camino"
 version = "1.1.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1880,12 +1992,12 @@ version = "0.1.0"
 dependencies = [
  "alloy-primitives",
  "anyhow",
+ "call_server",
  "clap",
  "flate2",
  "regex",
  "reqwest 0.12.5",
  "serde_json",
- "server",
  "tar",
  "tempfile",
  "test_runner",
@@ -4542,28 +4654,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "guest"
-version = "0.1.0"
-dependencies = [
- "alloy-primitives",
- "alloy-rlp",
- "alloy-rlp-derive",
- "anyhow",
- "as-any",
- "mpt",
- "revm",
- "vlayer-engine",
-]
-
-[[package]]
-name = "guest_wrapper"
-version = "0.1.0"
-dependencies = [
- "risc0-build",
- "risc0-build-ethereum",
-]
-
-[[package]]
 name = "h2"
 version = "0.3.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4705,41 +4795,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e3d1354bf6b7235cb4a0576c2619fd4ed18183f689b12b006a0ee7329eeff9a5"
 dependencies = [
  "windows-sys 0.52.0",
-]
-
-[[package]]
-name = "host"
-version = "0.1.0"
-dependencies = [
- "alloy-primitives",
- "alloy-sol-types",
- "anyhow",
- "auto_impl",
- "ctor",
- "derive_more",
- "dotenv",
- "dyn-clone",
- "ethereum-types",
- "ethers-core",
- "ethers-providers",
- "guest_wrapper",
- "hex",
- "lazy_static",
- "log",
- "mpt",
- "revm",
- "risc0-ethereum-contracts",
- "risc0-zkp",
- "risc0-zkvm",
- "serde",
- "serde_json",
- "test-log",
- "thiserror",
- "tokio",
- "tracing",
- "tracing-subscriber 0.3.18",
- "url",
- "vlayer-engine",
 ]
 
 [[package]]
@@ -7908,34 +7963,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "server"
-version = "0.1.0"
-dependencies = [
- "alloy-chains",
- "alloy-primitives",
- "anyhow",
- "axum",
- "axum-jrpc",
- "ethers",
- "hex",
- "host",
- "http-body-util",
- "lazy_static",
- "mime",
- "reqwest 0.12.5",
- "serde",
- "serde_json",
- "thiserror",
- "tokio",
- "tower",
- "tower-http",
- "tower-request-id",
- "tracing",
- "vlayer-engine",
- "web_proof",
-]
-
-[[package]]
 name = "sha1"
 version = "0.10.6"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -8508,6 +8535,7 @@ dependencies = [
  "alloy-dyn-abi",
  "alloy-json-abi",
  "alloy-sol-types",
+ "call_engine",
  "clap",
  "color-eyre",
  "comfy-table",
@@ -8525,7 +8553,6 @@ dependencies = [
  "serde_json",
  "tokio",
  "tracing",
- "vlayer-engine",
 ]
 
 [[package]]
@@ -9318,33 +9345,6 @@ name = "version_check"
 version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
-
-[[package]]
-name = "vlayer-engine"
-version = "0.1.0"
-dependencies = [
- "alloy-primitives",
- "alloy-rlp",
- "alloy-rlp-derive",
- "alloy-sol-types",
- "alloy-trie",
- "anyhow",
- "as-any",
- "dyn-clone",
- "ethers-core",
- "lazy_static",
- "mpt",
- "nybbles",
- "once_cell",
- "revm",
- "risc0-zkvm",
- "rlp",
- "serde",
- "serde_json",
- "test-log",
- "thiserror",
- "tracing",
-]
 
 [[package]]
 name = "vsimd"

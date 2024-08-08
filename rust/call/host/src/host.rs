@@ -5,16 +5,16 @@ use crate::provider::factory::{EthersProviderFactory, ProviderFactory};
 use crate::provider::multi::CachedMultiProvider;
 use crate::provider::{BlockingProvider, EthersClient, EthersProvider};
 use alloy_primitives::ChainId;
+use call_engine::engine::Engine;
+use call_engine::evm::env::{cached::CachedEvmEnv, location::ExecutionLocation};
+use call_engine::evm::input::MultiEvmInput;
+use call_engine::io::{Call, GuestOutput, HostOutput, Input};
+use call_guest_wrapper::RISC0_CALL_GUEST_ELF;
 use config::HostConfig;
 use error::HostError;
 use ethers_core::types::BlockNumber;
-use guest_wrapper::RISC0_GUEST_ELF;
 use risc0_ethereum_contracts::groth16::abi_encode;
 use risc0_zkvm::{default_prover, is_dev_mode, ExecutorEnv, ProverOpts};
-use vlayer_engine::engine::Engine;
-use vlayer_engine::evm::env::{cached::CachedEvmEnv, location::ExecutionLocation};
-use vlayer_engine::evm::input::MultiEvmInput;
-use vlayer_engine::io::{Call, GuestOutput, HostOutput, Input};
 
 pub mod config;
 pub mod error;
@@ -84,7 +84,7 @@ where
             into_multi_input(self.envs).map_err(|err| HostError::CreatingInput(err.to_string()))?;
         let env = Self::build_executor_env(self.start_execution_location, multi_evm_input, call)?;
 
-        let (seal, raw_guest_output) = Self::prove(env, RISC0_GUEST_ELF)?;
+        let (seal, raw_guest_output) = Self::prove(env, RISC0_CALL_GUEST_ELF)?;
         let guest_output = GuestOutput::from_outputs(&host_output, &raw_guest_output)?;
 
         if guest_output.evm_call_result != host_output {

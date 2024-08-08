@@ -3,7 +3,7 @@
 risc0_zkvm::guest::entry!(main);
 
 use alloy_sol_types::SolValue;
-use guest::{Guest, Input};
+use call_guest::{Guest, Input};
 use risc0_zkvm::guest::env;
 
 fn main() {

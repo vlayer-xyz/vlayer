@@ -625,6 +625,45 @@ dependencies = [
 ]
 
 [[package]]
+name = "call_engine"
+version = "0.1.0"
+dependencies = [
+ "alloy-primitives",
+ "alloy-rlp",
+ "alloy-rlp-derive",
+ "alloy-sol-types",
+ "anyhow",
+ "as-any",
+ "dyn-clone",
+ "ethers-core",
+ "lazy_static",
+ "mpt",
+ "nybbles",
+ "once_cell",
+ "revm",
+ "risc0-zkvm",
+ "rlp",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "tracing",
+]
+
+[[package]]
+name = "call_guest"
+version = "0.1.0"
+dependencies = [
+ "alloy-primitives",
+ "alloy-rlp",
+ "alloy-rlp-derive",
+ "anyhow",
+ "as-any",
+ "call_engine",
+ "mpt",
+ "revm",
+]
+
+[[package]]
 name = "cc"
 version = "1.0.99"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1080,20 +1119,6 @@ dependencies = [
  "ff",
  "rand_core",
  "subtle",
-]
-
-[[package]]
-name = "guest"
-version = "0.1.0"
-dependencies = [
- "alloy-primitives",
- "alloy-rlp",
- "alloy-rlp-derive",
- "anyhow",
- "as-any",
- "mpt",
- "revm",
- "vlayer-engine",
 ]
 
 [[package]]
@@ -2214,11 +2239,11 @@ dependencies = [
 ]
 
 [[package]]
-name = "risc0_guest"
+name = "risc0_call_guest"
 version = "0.1.0"
 dependencies = [
  "alloy-sol-types",
- "guest",
+ "call_guest",
  "risc0-zkvm",
 ]
 
@@ -2969,31 +2994,6 @@ name = "version_check"
 version = "0.9.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "49874b5167b65d7193b8aba1567f5c7d93d001cafc34600cee003eda787e483f"
-
-[[package]]
-name = "vlayer-engine"
-version = "0.1.0"
-dependencies = [
- "alloy-primitives",
- "alloy-rlp",
- "alloy-rlp-derive",
- "alloy-sol-types",
- "anyhow",
- "as-any",
- "dyn-clone",
- "ethers-core",
- "lazy_static",
- "mpt",
- "nybbles",
- "once_cell",
- "revm",
- "risc0-zkvm",
- "rlp",
- "serde",
- "serde_json",
- "thiserror",
- "tracing",
-]
 
 [[package]]
 name = "wait-timeout"

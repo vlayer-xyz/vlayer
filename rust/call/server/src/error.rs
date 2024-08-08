@@ -2,8 +2,8 @@ use axum_jrpc::{
     error::{JsonRpcError, JsonRpcErrorReason},
     Value,
 };
+use call_host::host::error::HostError;
 use hex::FromHexError;
-use host::host::error::HostError;
 use thiserror::Error;
 use tokio::task::JoinError;
 

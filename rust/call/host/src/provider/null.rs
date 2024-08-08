@@ -1,8 +1,8 @@
 use super::{BlockingProvider, EIP1186Proof};
 use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256};
+use call_engine::block_header::EvmBlockHeader;
 use ethers_core::types::BlockNumber as BlockTag;
 use std::{convert::Infallible, marker::PhantomData};
-use vlayer_engine::block_header::EvmBlockHeader;
 
 /// A simple provider that panics on all queries.
 #[derive(Debug, PartialEq)]

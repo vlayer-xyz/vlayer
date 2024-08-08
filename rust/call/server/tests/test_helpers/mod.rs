@@ -3,6 +3,7 @@ use axum::{
     http::{header::CONTENT_TYPE, Request, Response},
 };
 use axum_jrpc::Value;
+use call_server::server::{server, ServerConfig};
 use ethers::{
     contract::abigen,
     core::{
@@ -19,7 +20,6 @@ use mime::APPLICATION_JSON;
 use serde::Serialize;
 use serde_json::json;
 use serde_json::to_string;
-use server::server::{server, ServerConfig};
 use std::collections::HashMap;
 use std::{sync::Arc, time::Duration};
 use tower::ServiceExt;

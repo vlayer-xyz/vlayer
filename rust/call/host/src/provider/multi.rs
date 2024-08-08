@@ -2,9 +2,9 @@ use super::factory::ProviderFactory;
 use super::BlockingProvider;
 use crate::host::error::HostError;
 use alloy_primitives::ChainId;
+use call_engine::utils::InteriorMutabilityCache;
 use std::cell::RefCell;
 use std::{collections::HashMap, rc::Rc};
-use vlayer_engine::utils::InteriorMutabilityCache;
 
 type MultiProvider<P> = HashMap<ChainId, Rc<P>>;
 
@@ -35,9 +35,9 @@ mod get {
     use crate::provider::{factory::FileProviderFactory, FileProvider};
 
     use super::*;
+    use call_engine::config::MAINNET_ID;
     use null_provider_factory::NullProviderFactory;
     use std::path::PathBuf;
-    use vlayer_engine::config::MAINNET_ID;
 
     mod null_provider_factory {
         use super::{HostError, ProviderFactory};

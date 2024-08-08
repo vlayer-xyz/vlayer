@@ -1,4 +1,4 @@
-# Proving server
+# Call proofs server
 
 ## Running
 

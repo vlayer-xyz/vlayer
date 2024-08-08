@@ -1,9 +1,9 @@
 use crate::provider::EthersProviderError;
 use alloy_primitives::ChainId;
+use call_engine::{engine::EngineError, io::GuestOutputError};
 use ethers_providers::ProviderError;
 use risc0_zkp::verify::VerificationError;
 use thiserror::Error;
-use vlayer_engine::{engine::EngineError, io::GuestOutputError};
 
 #[derive(Error, Debug)]
 pub enum HostError {

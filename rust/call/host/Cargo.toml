@@ -1,5 +1,5 @@
 [package]
-name = "host"
+name = "call_host"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,8 +7,8 @@ edition = "2021"
 risc0-ethereum-contracts = { path = "../../../contracts/lib/risc0-ethereum/contracts" }
 risc0-zkp = { workspace = true }
 risc0-zkvm = { workspace = true }
-vlayer-engine = { path = "../engine" }
-guest_wrapper = { path = "../guest_wrapper" }
+call_engine = { path = "../engine" }
+call_guest_wrapper = { path = "../guest_wrapper" }
 mpt = { path = "../../mpt" }
 tracing-subscriber = { workspace = true }
 alloy-primitives = { workspace = true, features = ["rlp", "serde"] }
