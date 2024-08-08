@@ -2,13 +2,13 @@ use super::provider::{ProviderDb, ProviderDbError};
 use crate::{proof::EIP1186Proof, provider::BlockingProvider};
 use alloy_primitives::{Address, Bytes, B256, U256};
 use anyhow::Context;
+use call_engine::block_header::EvmBlockHeader;
 use mpt::MerkleTrie;
 use revm::{
     primitives::{AccountInfo, Bytecode, HashMap, HashSet},
     DatabaseRef,
 };
 use std::{cell::RefCell, rc::Rc};
-use vlayer_engine::block_header::EvmBlockHeader;
 
 #[derive(Default, Debug)]
 struct State {

@@ -2,8 +2,8 @@ use std::sync::Arc;
 
 use crate::error::AppError;
 use crate::server::ServerConfig;
-use host::host::{config::HostConfig, Host};
-use host::Call as HostCall;
+use call_host::host::{config::HostConfig, Host};
+use call_host::Call as HostCall;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
 use types::{Augmentors, Call, CallContext, CallResult};

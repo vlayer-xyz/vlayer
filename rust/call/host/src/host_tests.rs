@@ -3,11 +3,11 @@ mod test {
 
     use crate::host::{config::HostConfig, error::HostError, Host};
     use crate::provider::{EthersClient, EthersProvider};
+    use call_engine::config::MAINNET_ID;
+    use call_engine::engine::EngineError;
+    use call_engine::io::Call;
     use guest_wrapper::RISC0_GUEST_ELF;
     use risc0_zkvm::ExecutorEnv;
-    use vlayer_engine::config::MAINNET_ID;
-    use vlayer_engine::engine::EngineError;
-    use vlayer_engine::io::Call;
 
     #[test]
     fn host_prove_invalid_guest_elf() {

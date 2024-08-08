@@ -3,7 +3,8 @@ use alloy_sol_types::{sol, SolCall};
 use dotenv::dotenv;
 use ethers_core::types::BlockNumber as BlockTag;
 
-use host::{
+use call_engine::config::{MAINNET_ID, SEPOLIA_ID};
+use call_host::{
     host::{config::HostConfig, error::HostError, Host},
     provider::{
         factory::{CachedProviderFactory, FileProviderFactory, ProviderFactory},
@@ -12,7 +13,6 @@ use host::{
     Call,
 };
 use std::{collections::HashMap, env};
-use vlayer_engine::config::{MAINNET_ID, SEPOLIA_ID};
 
 // To activate recording, set UPDATE_SNAPSHOTS to true.
 // Recording creates new testdata directory and writes return data from Alchemy into files in that directory.

@@ -1,10 +1,10 @@
 [package]
-name = "server"
+name = "call_server"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-vlayer-engine = { path = "../engine" }
+call_engine = { path = "../engine" }
 
 anyhow = { workspace = true }
 axum = { version = "0.7.5", features = ["macros"] }
@@ -21,7 +21,7 @@ tracing = "0.1.40"
 alloy-primitives = { workspace = true }
 hex = "0.4.3"
 axum-jrpc = "0.7.1"
-host = { path = "../host" }
+call_host = { path = "../host" }
 alloy-chains = "0.1.23"
 web_proof = { path = "../../web_proof" }
 

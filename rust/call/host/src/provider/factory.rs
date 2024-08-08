@@ -110,7 +110,7 @@ impl ProviderFactory<CachedProvider<EthersProvider<EthersClient>>> for CachedPro
 
 #[cfg(test)]
 mod test {
-    use vlayer_engine::config::MAINNET_ID;
+    use call_engine::config::MAINNET_ID;
 
     use super::*;
 

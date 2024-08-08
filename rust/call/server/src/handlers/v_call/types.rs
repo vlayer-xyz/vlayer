@@ -3,7 +3,7 @@ use crate::utils::{parse_address_field, parse_hex_field};
 use alloy_chains::Chain;
 use alloy_primitives::{BlockNumber, ChainId};
 use axum_jrpc::Value;
-use host::Call as HostCall;
+use call_host::Call as HostCall;
 use serde::{Deserialize, Serialize};
 use web_proof::types::WebProof;
 
@@ -52,7 +52,7 @@ pub struct CallResult {
 mod test {
     use super::Call;
     use crate::error::AppError;
-    use host::Call as HostCall;
+    use call_host::Call as HostCall;
 
     const TO: &str = "0x7Ad53bbA1004e46dd456316912D55dBc5D311a03";
     const DATA: &str = "0x0000";

@@ -1,8 +1,8 @@
 use crate::errors::CLIError;
+use call_server::server::ServerConfig;
 use clap::{Parser, Subcommand};
 use commands::args::{InitArgs, ServeArgs};
 use commands::{init::init, serve::run_serve};
-use server::server::ServerConfig;
 use test_runner::cli::TestArgs;
 use tracing::{error, info};
 

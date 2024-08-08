@@ -1,5 +1,5 @@
 use crate::db::{state::StateDb, wrap_state::WrapStateDb};
-use vlayer_engine::evm::{env::EvmEnv, input::EvmInput};
+use call_engine::evm::{env::EvmEnv, input::EvmInput};
 
 pub struct ValidatedEvmInput(pub(crate) EvmInput);
 
@@ -32,8 +32,8 @@ mod evm_env_from_input {
 
     use super::*;
     use as_any::Downcast;
+    use call_engine::block_header::eth::EthBlockHeader;
     use mpt::EMPTY_ROOT_HASH;
-    use vlayer_engine::block_header::eth::EthBlockHeader;
 
     #[test]
     fn success() {

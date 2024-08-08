@@ -63,7 +63,7 @@ use crate::{
     contract_runner::ContractRunner, filter::FilterArgs, filter::ProjectPathsAwareFilter,
     summary::TestSummaryReporter, test_executor::TestExecutor,
 };
-use vlayer_engine::inspector::{TRAVEL_CONTRACT_ADDR, TRAVEL_CONTRACT_HASH};
+use call_engine::inspector::{TRAVEL_CONTRACT_ADDR, TRAVEL_CONTRACT_HASH};
 
 // Loads project's figment and merges the build cli arguments into it
 foundry_config::merge_impl_figment_convert!(TestArgs, opts, evm_opts);
