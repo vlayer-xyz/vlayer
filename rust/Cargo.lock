@@ -1732,6 +1732,7 @@ dependencies = [
  "test-log",
  "thiserror",
  "tracing",
+ "web_proof",
 ]
 
 [[package]]
