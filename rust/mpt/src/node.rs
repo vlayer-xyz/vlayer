@@ -83,7 +83,7 @@ impl Node {
             }
             Node::Branch(children, value) => {
                 let mut child_refs: [NodeRef; 16] = Default::default();
-                let mut payload_length = 1; // start with 1 for the EMPTY_STRING_CODE at the end
+                let mut payload_length = 0;
 
                 for (i, child) in children.iter().enumerate() {
                     match child.as_deref() {
@@ -102,8 +102,6 @@ impl Node {
 
                 let mut out = encoded_header(true, payload_length);
                 child_refs.iter().for_each(|child| child.encode(&mut out));
-                // add an EMPTY_STRING_CODE for the missing value
-                out.push(EMPTY_STRING_CODE);
 
                 if let Some(value) = value {
                     out.extend_from_slice(value);
@@ -120,6 +118,8 @@ impl legacy_rlp::Decodable for Node {
     fn decode(rlp: &legacy_rlp::Rlp) -> Result<Self, legacy_rlp::DecoderError> {
         use legacy_rlp::{Decodable, DecoderError, Prototype};
 
+        let proto = rlp.prototype()?;
+        println!("RLP prototype: {:?}", proto);
         match rlp.prototype()? {
             Prototype::Null | Prototype::Data(0) => Ok(Node::Null),
             Prototype::List(2) => {
