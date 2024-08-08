@@ -98,6 +98,9 @@ impl Node {
 
                 if let Some(value) = value {
                     payload_length += value.len();
+                } else {
+                    // Only add 1 for the EMPTY_STRING_CODE if value is not present
+                    payload_length += 1;
                 }
 
                 let mut out = encoded_header(true, payload_length);
@@ -105,6 +108,8 @@ impl Node {
 
                 if let Some(value) = value {
                     out.extend_from_slice(value);
+                } else {
+                    out.push(EMPTY_STRING_CODE);
                 }
 
                 out
@@ -118,8 +123,6 @@ impl legacy_rlp::Decodable for Node {
     fn decode(rlp: &legacy_rlp::Rlp) -> Result<Self, legacy_rlp::DecoderError> {
         use legacy_rlp::{Decodable, DecoderError, Prototype};
 
-        let proto = rlp.prototype()?;
-        println!("RLP prototype: {:?}", proto);
         match rlp.prototype()? {
             Prototype::Null | Prototype::Data(0) => Ok(Node::Null),
             Prototype::List(2) => {
