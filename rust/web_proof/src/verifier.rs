@@ -63,7 +63,10 @@ mod tests {
     #[test]
     fn correct_substrings_extracted() {
         let proof = load_web_proof_fixture("./testdata/tls_proof.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
-        let _WebProofJournal { _request, _response } = _verify_proof(proof).unwrap();
+        let _WebProofJournal {
+            _request,
+            _response,
+        } = _verify_proof(proof).unwrap();
 
         assert_eq!(_request, read_fixture("./testdata/sent_request.txt"));
         assert_eq!(_response, read_fixture("./testdata/received_response.txt"));
