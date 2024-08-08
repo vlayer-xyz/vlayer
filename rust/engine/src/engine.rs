@@ -7,6 +7,7 @@ use revm::{
 };
 use thiserror::Error;
 use tracing::error;
+use web_proof::{types::WebProof, verifier::_verify_proof, fixtures::{tls_proof_example, pub_key}};
 
 use crate::{
     evm::env::{cached::CachedEvmEnv, location::ExecutionLocation},
@@ -49,6 +50,12 @@ where
     }
 
     pub fn call(&'a self, tx: &Call, location: ExecutionLocation) -> Result<Vec<u8>, EngineError> {
+
+        _verify_proof(WebProof {
+            tls_proof: tls_proof_example(),
+            notary_pub_key: pub_key(),
+        }).unwrap();
+
         let env = self
             .envs
             .get(location)

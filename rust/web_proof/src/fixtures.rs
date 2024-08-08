@@ -15,6 +15,10 @@ pub fn read_fixture(path: &str) -> String {
         .replace('\n', "\r\n")
 }
 
+pub fn pub_key() -> PublicKey {
+    PublicKey::from_public_key_pem(NOTARY_PUB_KEY_PEM_EXAMPLE).unwrap()
+}
+
 pub fn load_web_proof_fixture(proof_path: &str, notary_pub_key_pem: &str) -> WebProof {
     WebProof {
         tls_proof: serde_json::from_str(&read_fixture(proof_path)).unwrap(),

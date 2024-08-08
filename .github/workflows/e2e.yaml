@@ -50,7 +50,7 @@ jobs:
 
       - name: Run e2e test
         env:
-          PROVING_MODE: ${{ github.event_name == 'schedule' && 'prod' || 'dev' }}
+          PROVING_MODE: 'prod'
           BONSAI_API_URL: ${{ vars.BONSAI_API_URL }}
           BONSAI_API_KEY: ${{ secrets.BONSAI_API_KEY }}
           VLAYER_TMP_DIR: ./artifacts

@@ -12,12 +12,12 @@ pub enum VerificationError {
     SubstringsProof(#[from] SubstringsProofError),
 }
 
-struct _WebProofJournal {
+pub struct _WebProofJournal {
     request: String,
     response: String,
 }
 
-fn _verify_proof(web_proof: WebProof) -> Result<_WebProofJournal, VerificationError> {
+pub fn _verify_proof(web_proof: WebProof) -> Result<_WebProofJournal, VerificationError> {
     let TlsProof {
         session,
         substrings,
