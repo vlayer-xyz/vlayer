@@ -1,8 +1,7 @@
 use std::sync::Arc;
 
 use crate::json_rpc::json_rpc;
-use crate::layers::request_id::RequestIdLayer;
-use crate::layers::trace::init_trace_layer;
+use server_utils::{RequestIdLayer, init_trace_layer};
 use alloy_primitives::ChainId;
 use axum::{routing::post, Router};
 use call_engine::config::{MAINNET_ID, SEPOLIA_ID};
