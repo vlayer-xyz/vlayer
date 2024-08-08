@@ -5709,6 +5709,7 @@ dependencies = [
  "alloy-rlp-derive",
  "alloy-trie",
  "anyhow",
+ "lazy_static",
  "nybbles",
  "rlp",
  "serde",
