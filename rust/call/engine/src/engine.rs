@@ -8,12 +8,12 @@ use revm::{
 use thiserror::Error;
 use tracing::error;
 
-use crate::utils::evm_call::format_failed_call_result;
 use crate::{
     evm::env::{cached::CachedEvmEnv, location::ExecutionLocation},
     inspector::TravelInspector,
     io::Call,
 };
+use crate::{io::Augmentors, utils::evm_call::format_failed_call_result};
 
 pub struct Engine<'a, D>
 where
@@ -49,7 +49,12 @@ where
         Self { envs }
     }
 
-    pub fn call(&'a self, tx: &Call, location: ExecutionLocation) -> Result<Vec<u8>, EngineError> {
+    pub fn call(
+        &'a self,
+        tx: &Call,
+        location: ExecutionLocation,
+        _augmentors: Option<Augmentors>,
+    ) -> Result<Vec<u8>, EngineError> {
         self.call_inner(tx, location)
     }
 
