@@ -50,11 +50,19 @@ where
     }
 
     pub fn call(&'a self, tx: &Call, location: ExecutionLocation) -> Result<Vec<u8>, EngineError> {
+        self.call_inner(tx, location)
+    }
+
+    pub fn call_inner(
+        &'a self,
+        tx: &Call,
+        location: ExecutionLocation,
+    ) -> Result<Vec<u8>, EngineError> {
         let env = self
             .envs
             .get(location)
             .map_err(|err| EngineError::EvmEnv(err.to_string()))?;
-        let callback = |call: &_, location| self.call(call, location);
+        let callback = |call: &_, location| self.call_inner(call, location);
         let inspector = TravelInspector::new(env.cfg_env.chain_id, callback);
         let evm = Evm::builder()
             .with_ref_db(&env.db)
