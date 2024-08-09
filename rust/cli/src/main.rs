@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use crate::errors::CLIError;
 use call_server::server::ServerConfig;
 use clap::{Parser, Subcommand};
@@ -12,6 +14,9 @@ mod utils;
 
 #[cfg(test)]
 mod test_utils;
+
+const MAINNET_ID: u64 = 1;
+const SEPOLIA_ID: u64 = 11155111;
 
 const VERSION_MESSAGE: &str = concat!(
     env!("CARGO_PKG_VERSION"),
@@ -58,7 +63,11 @@ async fn run() -> Result<(), CLIError> {
 
     match cli.command {
         Commands::Serve(serve_args) => {
-            let server_config: ServerConfig = ServerConfig::new(serve_args.rpc_url);
+            let server_config = ServerConfig::new(
+                vec![
+                    (MAINNET_ID, "http://localhost:8545".to_string()),
+                    (SEPOLIA_ID, "http://localhost:8546".to_string()),
+                ]);
             run_serve(server_config).await?;
         }
         Commands::Init(init_arg) => {
