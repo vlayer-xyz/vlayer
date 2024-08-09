@@ -40,11 +40,20 @@ jobs:
         with:
           version: nightly-5ac78a9cd4b94dc53d1fe5e0f42372b28b5a7559 # 2024-06-02
 
+      - name: Check for clang binary
+        id: check_clang
+        run: |
+          if command -v ./llvm/clang &> /dev/null; then
+            echo "clang_exists=true" >> $GITHUB_ENV
+          else
+            echo "clang_exists=false" >> $GITHUB_ENV
+          fi
+
       - name: Install LLVM and Clang
         uses: KyleMayes/install-llvm-action@v2.0.3
         with:
           version: "17.0.5"
-          cached: true
+          cached: ${{ env.clang_exists == 'true' }}
 
       - name: Run workspace rust tests
         working-directory: rust
