@@ -71,14 +71,15 @@ function startup_anvils(){
 }
 
 function startup_vlayer(){
+    local PROOF_ARG=$1
+
     echo "Starting vlayer REST server"
     pushd "${VLAYER_HOME}/rust"
 
     RUST_LOG=info \
-    RISC0_DEV_MODE="${RISC0_DEV_MODE}" \
     BONSAI_API_URL="${BONSAI_API_URL}" \
     BONSAI_API_KEY="${BONSAI_API_KEY}" \
-    cargo run --bin vlayer serve >"${LOGS_DIR}/vlayer_serve.out" & 
+    cargo run --bin vlayer serve --proof ${PROOF_ARG} >"${LOGS_DIR}/vlayer_serve.out" & 
 
     VLAYER_SERVER_PID=$!
 
@@ -95,13 +96,13 @@ PROVING_MODE=${PROVING_MODE:-dev}
 RISC0_DEV_MODE=""
 BONSAI_API_URL="${BONSAI_API_URL:-https://api.bonsai.xyz/}"
 BONSAI_API_KEY="${BONSAI_API_KEY:-}"
+SERVER_PROOF_ARG="fake"
 
-
-# Set the RISC0_DEV_MODE environment variable based on the mode
+# Set the SERVER_PROOF_MODE variable based on the mode
 if [[ "${PROVING_MODE}" == "dev" ]]; then
-    RISC0_DEV_MODE=true
+    SERVER_PROOF_ARG="fake"
 elif [[ "${PROVING_MODE}" == "prod" ]]; then
-    RISC0_DEV_MODE=false
+    SERVER_PROOF_ARG="groth16"
 
     # Check that BONSAI_API_URL and BONSAI_API_KEY are not empty in prod mode
     if [[ -z "$BONSAI_API_URL" || -z "$BONSAI_API_KEY" ]]; then
@@ -112,14 +113,14 @@ fi
 
 # Display the parsed parameters
 echo "PROVING_MODE: ${PROVING_MODE}"
-echo "RISC0_DEV_MODE: ${RISC0_DEV_MODE}"
 echo "BONSAI_API_URL: ${BONSAI_API_URL}"
+echo "SERVER_PROOF_ARG: ${SERVER_PROOF_ARG}"
 
 
 echo
 echo "Starting services..."
 
 startup_anvils
-startup_vlayer
+startup_vlayer ${SERVER_PROOF_ARG}
 
 echo "Services has been succesfully started..."
