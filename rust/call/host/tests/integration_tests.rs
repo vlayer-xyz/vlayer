@@ -88,7 +88,10 @@ fn run<C>(
 where
     C: SolCall,
 {
-    let config = HostConfig::new(Vec::new(), chain_id);
+    let config = HostConfig {
+        rpc_urls: HashMap::new(),
+        start_chain_id: chain_id,
+    };
 
     let raw_return_value = if UPDATE_SNAPSHOTS {
         let provider_factory = create_recording_provider_factory(test_name);

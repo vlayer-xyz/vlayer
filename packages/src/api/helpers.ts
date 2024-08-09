@@ -6,7 +6,7 @@ export function client() {
     return createTestClient({
         chain: foundry,
         mode: 'anvil',
-        transport: http()
+        transport: http("localhost:8546")
     })
         .extend(walletActions)
         .extend(publicActions);
