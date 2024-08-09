@@ -3,17 +3,9 @@ use axum_jrpc::{
     Value,
 };
 use call_host::host::error::HostError;
-use hex::FromHexError;
+use server_utils::FieldValidationError;
 use thiserror::Error;
 use tokio::task::JoinError;
-
-#[derive(Debug, Error, PartialEq)]
-pub enum FieldValidationError {
-    #[error("{1} `{0}`")]
-    InvalidHex(String, FromHexError),
-    #[error("Invalid hex prefix `{0}`")]
-    InvalidHexPrefix(String),
-}
 
 #[derive(Debug, Error)]
 pub enum AppError {

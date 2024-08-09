@@ -7834,12 +7834,15 @@ dependencies = [
 name = "server_utils"
 version = "0.1.0"
 dependencies = [
+ "alloy-primitives",
  "anyhow",
  "axum",
  "axum-jrpc",
  "ethers",
+ "hex",
  "http-body-util",
  "serde_json",
+ "thiserror",
  "tower-http",
  "tower-request-id",
  "tracing",

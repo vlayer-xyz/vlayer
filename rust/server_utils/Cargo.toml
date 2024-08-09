@@ -13,3 +13,6 @@ axum-jrpc = { workspace = true }
 anyhow = { workspace = true }
 http-body-util = { workspace = true }
 ethers = { workspace = true }
+alloy-primitives = { workspace = true }
+hex = { workspace = true }
+thiserror = { workspace = true }
