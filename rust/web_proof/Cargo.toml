@@ -4,9 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-tlsn-core = { git = "https://github.com/tlsnotary/tlsn.git", version = "0.1.0-alpha.6" }
-p256 = "0.13.2"
-pkcs8 = "0.10.2"
+tlsn-core = { workspace = true }
+p256 = { workspace = true }
+pkcs8 = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json.workspace = true
 thiserror = { workspace = true }

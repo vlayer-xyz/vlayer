@@ -13,30 +13,27 @@ mpt = { path = "../../mpt" }
 tracing-subscriber = { workspace = true }
 alloy-primitives = { workspace = true, features = ["rlp", "serde"] }
 ethers-providers = { workspace = true }
-ethers-core = { version = "2.0" }
+ethers-core = { workspace = true }
 thiserror = { workspace = true }
-url = { version = "2.5", default-features = false }
+url = { workspace = true }
 alloy-sol-types = { workspace = true }
-anyhow = "1.0"
-log = { version = "0.4" }
-revm = { version = "10.0", default-features = false, features = [
-    "serde",
-    "std",
-] }
-serde = "1.0"
-serde_json = { version = "1.0" }
+anyhow = { workspace = true }
+log = { workspace = true }
+revm = { workspace = true, features = ["serde", "std"] }
+serde = { workspace = true }
+serde_json = { workspace = true }
 tokio = { workspace = true }
 tracing = { workspace = true }
-ethereum-types = "0.14.1"
-hex = "0.4.3"
-auto_impl = "1.2.0"
-lazy_static = "1.5.0"
-derive_more = "0.99.18"
-dyn-clone = "1.0.17"
-dotenv = "0.15.0"
+ethereum-types = { workspace = true }
+hex = { workspace = true }
+auto_impl = { workspace = true }
+lazy_static = { workspace = true }
+derive_more = { workspace = true }
+dyn-clone = { workspace = true }
+dotenv = { workspace = true }
 
 [dev-dependencies]
-alloy-sol-types = "0.7.7"
-test-log = "0.2.16"
-anyhow = "1.0"
-ctor = "0.2.8"
+alloy-sol-types = { workspace = true }
+test-log = { workspace = true }
+anyhow = { workspace = true }
+ctor = { workspace = true }
