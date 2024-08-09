@@ -3,7 +3,10 @@ use std::sync::Arc;
 use axum_jrpc::{JrpcResult, JsonRpcExtractor, JsonRpcResponse};
 use tracing::instrument;
 
-use crate::{handlers::v_call::call, server::ServerConfig};
+use crate::{
+    handlers::{v_call::VCall, JsonRpcHandler},
+    server::ServerConfig,
+};
 
 #[instrument(level = "debug")]
 pub(crate) async fn json_rpc(config: Arc<ServerConfig>, request: JsonRpcExtractor) -> JrpcResult {
@@ -12,7 +15,7 @@ pub(crate) async fn json_rpc(config: Arc<ServerConfig>, request: JsonRpcExtracto
     let response = match method {
         "v_call" => {
             let params = request.parse_params()?;
-            match call(params, config).await {
+            match VCall::call(params, config).await {
                 Ok(result) => JsonRpcResponse::success(request_id, result),
                 Err(err) => JsonRpcResponse::error(request_id, err.into()),
             }

@@ -1782,6 +1782,7 @@ dependencies = [
  "alloy-chains",
  "alloy-primitives",
  "anyhow",
+ "async-trait",
  "axum",
  "axum-jrpc",
  "call_engine",
