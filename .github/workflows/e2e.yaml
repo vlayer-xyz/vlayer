@@ -43,6 +43,7 @@ jobs:
         uses: KyleMayes/install-llvm-action@v2.0.3
         with:
           version: "17.0.5"
+          cached: true
 
       - name: Build vlayer
         working-directory: rust
