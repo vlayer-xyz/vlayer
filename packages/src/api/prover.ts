@@ -1,8 +1,7 @@
 import { type CallParams, type CallContext, v_call } from "./v_call";
 import { encodeFunctionData, type Address, type Abi, type Hex } from "viem";
 import { client } from "./helpers";
-
-const SEPOLIA_ID = 11155111;
+import { sepolia } from "viem/chains";
 
 type Bytecode = {
     object: Hex,
@@ -30,7 +29,7 @@ export async function prove(prover: Address, proverSpec: ContractSpec, functionN
     });
 
     let call: CallParams = { to: prover, data: calldata };
-    let context: CallContext = { block_no: blockNo, chain_id: SEPOLIA_ID };
+    let context: CallContext = { block_no: blockNo, chain_id: sepolia.id };
 
     let response = await v_call(call, context); 
     if (response.result === undefined) {

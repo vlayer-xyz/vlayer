@@ -1,19 +1,26 @@
-import { createTestClient, walletActions, publicActions, http, Address } from "viem";
-import { foundry } from "viem/chains";
+import { createTestClient, walletActions, publicActions, http, Address, HttpTransport } from "viem";
+import { foundry, mainnet, sepolia } from "viem/chains";
 import { type ContractSpec } from "./prover";
 
-export function client() {
+const rpcUrls: Map<number, HttpTransport> = new Map([[mainnet.id, http()], [sepolia.id, http("localhost:8546")]]);
+
+export function client(chainId: number = sepolia.id) {
+    let transport = rpcUrls.get(chainId);
+    if (transport == undefined) {
+        throw Error(`No url for chainId ${chainId}`);
+    }
+    
     return createTestClient({
         chain: foundry,
         mode: 'anvil',
-        transport: http("localhost:8546")
+        transport
     })
         .extend(walletActions)
         .extend(publicActions);
 }
 
-export async function deployContract(contractSpec: ContractSpec, args: any[] = []): Promise<Address> {
-    const ethClient = client();
+export async function deployContract(contractSpec: ContractSpec, args: any[] = [], chainId: number = sepolia.id): Promise<Address> {
+    const ethClient = client(chainId);
     const [deployer] = await ethClient.getAddresses();
 
     const txHash = await ethClient.deployContract({
