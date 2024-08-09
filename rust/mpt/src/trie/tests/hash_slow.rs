@@ -52,7 +52,7 @@ fn extension() {
 
 #[test]
 fn branch() {
-    let mpt = MPT_BRANCH_WITH_TWO_CHILDREN.clone();
+    let mpt = &MPT_BRANCH_WITH_TWO_CHILDREN;
     assert_eq!(
         mpt.hash_slow(),
         b256!("f09860d0bbaa3a755a53bbeb7b06824cdda5ac2ee5557d14aa49117a47bd0a3e")
