@@ -20,9 +20,7 @@ pub struct VCall;
 impl JsonRpcHandler for VCall {
     type Params = Params;
     type Config = Arc<ServerConfig>;
-    type Output = CallResult;
-    type Error = AppError;
-    async fn call(params: Self::Params, config: Self::Config) -> Result<Self::Output, Self::Error> {
+    async fn call(params: Self::Params, config: Self::Config) -> Result<CallResult, AppError> {
         let call: HostCall = params.call.try_into()?;
 
         let host_config = HostConfig {
