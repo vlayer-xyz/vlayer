@@ -52,4 +52,3 @@ jobs:
         env:
           RUST_LOG: info
           RISC0_DEV_MODE: 1
-          ALCHEMY_KEY: IHJOWZSabgMvTt3kjXnZ0Urzo8FFweES
