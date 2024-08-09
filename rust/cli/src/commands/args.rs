@@ -11,7 +11,7 @@ pub(crate) struct InitArgs {
 #[derive(Parser)]
 pub(crate) struct ServeArgs {
     #[arg(long, action = ArgAction::Append, value_parser = parse_rpc_url)]
-    pub(crate) rpc_url: Vec<(ChainId, String)>,
+    pub(crate) rpc_urls: Vec<(ChainId, String)>,
 }
 
 #[derive(Clone, Debug, ValueEnum, Default)]
