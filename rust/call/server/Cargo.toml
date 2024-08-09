@@ -7,26 +7,26 @@ edition = "2021"
 call_engine = { path = "../engine" }
 
 anyhow = { workspace = true }
-axum = { version = "0.7.5", features = ["macros"] }
-http-body-util = "0.1.2"
-mime = "0.3.17"
+axum = { workspace = true, features = ["macros"] }
+http-body-util = { workspace = true }
+mime = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
-tower = "0.4.13"
-tower-http = { version = "0.5.2", features = ["trace"] }
-tower-request-id = "0.3.0"
-tracing = "0.1.40"
+tower = { workspace = true }
+tower-http = { workspace = true, features = ["trace"] }
+tower-request-id = { workspace = true }
+tracing = { workspace = true }
 alloy-primitives = { workspace = true }
-hex = "0.4.3"
-axum-jrpc = "0.7.1"
+hex = { workspace = true }
+axum-jrpc = { workspace = true }
 call_host = { path = "../host" }
-alloy-chains = "0.1.23"
+alloy-chains = { workspace = true }
 web_proof = { path = "../../web_proof" }
 
 [dev-dependencies]
-reqwest = "0.12.5"
-lazy_static = "1.5.0"
+reqwest = { workspace = true }
+lazy_static = { workspace = true }
 web_proof = { path = "../../web_proof", features = ["fixtures"] }
-ethers = { version = "2.0" }
+ethers = { workspace = true }
