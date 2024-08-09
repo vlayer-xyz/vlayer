@@ -17,11 +17,12 @@ pub struct ServerConfig {
 
 impl Default for ServerConfig {
     fn default() -> Self {
-        let anvil_url = "http://localhost:8545";
+        let anvil1_url = "http://localhost:8545";
+        let anvil2_url = "http://localhost:8546";
         Self {
             rpc_urls: HashMap::from([
-                (SEPOLIA_ID, anvil_url.to_string()),
-                (MAINNET_ID, anvil_url.to_string()),
+                (MAINNET_ID, anvil1_url.to_string()),
+                (SEPOLIA_ID, anvil2_url.to_string()),
             ]),
             port: 3000,
         }

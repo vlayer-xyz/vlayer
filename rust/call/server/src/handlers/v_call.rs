@@ -27,7 +27,7 @@ pub(crate) async fn call(
 
     let host_config = HostConfig {
         rpc_urls: config.rpc_urls.clone(),
-        chain_id: params.context.chain_id,
+        start_chain_id: params.context.chain_id,
     };
 
     let return_data =

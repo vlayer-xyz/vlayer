@@ -1,11 +1,10 @@
 use alloy_sol_types::SolCall;
+use call_engine::utils::evm_call::{
+    create_encoded_return_outcome, create_revert_outcome, split_calldata,
+};
 use foundry_evm::revm::interpreter::{CallInputs, CallOutcome};
 use foundry_evm::revm::primitives::U256;
 use foundry_evm::revm::{Database, EvmContext, Inspector};
-
-use vlayer_engine::utils::evm_call::{
-    create_encoded_return_outcome, create_return_outcome, create_revert_outcome, split_calldata,
-};
 
 use crate::cheatcodes::{callProverCall, getProofCall, Proof, CHEATCODE_CALL_ADDR};
 
