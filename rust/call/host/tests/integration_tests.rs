@@ -94,11 +94,11 @@ where
     let raw_return_value = if UPDATE_SNAPSHOTS {
         let provider_factory = create_recording_provider_factory(test_name);
         let host = create_host(provider_factory, config, block_number.into())?;
-        host.run(call)?.guest_output.evm_call_result
+        host.run(call, None)?.guest_output.evm_call_result
     } else {
         let provider_factory = create_test_provider_factory(test_name);
         let host = create_host(provider_factory, config, block_number.into())?;
-        host.run(call)?.guest_output.evm_call_result
+        host.run(call, None)?.guest_output.evm_call_result
     };
     let return_value = C::abi_decode_returns(&raw_return_value, false)?;
     Ok(return_value)
