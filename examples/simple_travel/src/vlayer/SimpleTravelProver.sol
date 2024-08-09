@@ -3,16 +3,18 @@ pragma solidity ^0.8.13;
 
 import {Prover} from "vlayer/Prover.sol";
 
-interface IOwner {
-    function owner() external view returns (address);
+interface IExample {
+    function example() external pure returns (uint256);
 }
 
 contract SimpleTravelProver is Prover {
-    function usdtOwner() public returns (address) {
-        address USDT = 0xdAC17F958D2ee523a2206206994597C13D831ec7;
-        uint some_block_no = 20_000_000;
+    function aroundTheWorld() public returns (uint256) {
+        // Important: the address of otherChainContract depends on when it was deployed on anvil 1.
+        address otherChainContract = 0x5FbDB2315678afecb367f032d93F642f64180aa3;
+        uint mainnetId = 1;
+        uint blockNo = 1;
 
-        setChain(1, some_block_no);
-        return IOwner(USDT).owner();
+        setChain(mainnetId, blockNo);
+        return IExample(otherChainContract).example();
     }
 }

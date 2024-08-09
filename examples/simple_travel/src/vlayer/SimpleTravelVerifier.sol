@@ -15,5 +15,5 @@ contract SimpleTravel is Verifier {
 
     function verify(
         Proof calldata
-    ) public onlyVerified(prover, SimpleTravelProver.usdtOwner.selector) {}
+    ) public onlyVerified(prover, SimpleTravelProver.aroundTheWorld.selector) {}
 }
