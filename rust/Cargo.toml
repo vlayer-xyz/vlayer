@@ -61,14 +61,14 @@ dotenv = "0.15.0"
 dyn-clone = "1.0.17"
 ethereum-types = "0.14.1"
 ethers = "2.0"
-ethers-core = "2.0"
+ethers-core = { version = "2.0", default-features = false }
 flate2 = "1.0.30"
-forge = { git = "https://github.com/foundry-rs/foundry" }
+forge = { git = "https://github.com/foundry-rs/foundry", default-features = false }
 foundry-cheatcodes = { git = "https://github.com/foundry-rs/foundry" }
-foundry-cli = { git = "https://github.com/foundry-rs/foundry" }
+foundry-cli = { git = "https://github.com/foundry-rs/foundry", default-features = false }
 foundry-common = { git = "https://github.com/foundry-rs/foundry" }
-foundry-compilers = "0.9.0"
-foundry-config = { git = "https://github.com/foundry-rs/foundry" }
+foundry-compilers = { version = "0.9.0", default-features = false }
+foundry-config = { git = "https://github.com/foundry-rs/foundry", default-features = false }
 foundry-debugger = { git = "https://github.com/foundry-rs/foundry" }
 foundry-evm = { git = "https://github.com/foundry-rs/foundry" }
 foundry-evm-core = { git = "https://github.com/foundry-rs/foundry" }
@@ -83,7 +83,7 @@ p256 = "0.13.2"
 pkcs8 = "0.10.2"
 rayon = "1.10.0"
 regex = "1.10.4"
-reqwest = "0.12.5"
+reqwest = { version = "0.12.5", default-features = false }
 revm = { version = "10.0.0", default-features = false }
 risc0-build-ethereum = "1.0.0"
 rlp = "0.5.2"
