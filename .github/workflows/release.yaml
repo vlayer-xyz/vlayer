@@ -59,7 +59,7 @@ jobs:
       - name: Check for clang binary
         id: check_clang
         run: |
-          if command -v ./llvm/clang &> /dev/null; then
+          if command -v ./llvm/bin/clang &> /dev/null; then
             echo "clang_exists=true" >> $GITHUB_ENV
           else
             echo "clang_exists=false" >> $GITHUB_ENV
