@@ -22,7 +22,6 @@ call_host = { path = "../host" }
 alloy-chains = { workspace = true }
 web_proof = { path = "../../web_proof" }
 server_utils = { path = "../../server_utils" }
-async-trait = "0.1.81"
 
 [dev-dependencies]
 reqwest = { workspace = true }

@@ -2,8 +2,6 @@ use std::sync::Arc;
 
 use crate::error::AppError;
 use crate::server::ServerConfig;
-use async_trait::async_trait;
-use axum_jrpc::{JrpcResult, JsonRpcExtractor, JsonRpcResponse};
 use call_engine::io::Augmentors;
 use call_host::host::{config::HostConfig, Host};
 use call_host::Call as HostCall;
@@ -23,8 +21,14 @@ impl VCall {
     pub fn new(config: Arc<ServerConfig>) -> Self {
         Self { config }
     }
+}
 
-    pub async fn call_inner(&self, params: Params) -> Result<CallResult, AppError> {
+#[allow(refining_impl_trait)]
+impl JsonRpcHandler for VCall {
+    type Params = Params;
+    type Result = CallResult;
+
+    async fn call(&self, params: Self::Params) -> Result<Self::Result, AppError> {
         let call: HostCall = params.call.try_into()?;
 
         let host_config = HostConfig {
@@ -43,19 +47,6 @@ impl VCall {
                 "prover_contract_address": return_data.guest_output.execution_commitment.proverContractAddress,
                 "seal": return_data.seal
             }),
-        })
-    }
-}
-
-#[async_trait]
-impl JsonRpcHandler for VCall {
-    async fn call(&self, request: JsonRpcExtractor) -> JrpcResult {
-        let request_id = request.get_answer_id();
-        let params: Params = request.parse_params()?;
-
-        Ok(match self.call_inner(params).await {
-            Ok(result) => JsonRpcResponse::success(request_id, result),
-            Err(err) => JsonRpcResponse::error(request_id, err.into()),
         })
     }
 }
