@@ -1,14 +1,10 @@
-use std::error::Error;
-
 use async_trait::async_trait;
-use serde::{de::DeserializeOwned, Serialize};
+use axum_jrpc::{JrpcResult, JsonRpcExtractor};
 
 #[async_trait]
 pub trait JsonRpcHandler {
-    type Params: DeserializeOwned;
     type Config;
-    async fn call(params: Self::Params, config: Self::Config)
-        -> Result<impl Serialize, impl Error>;
+    async fn call(&self, request: JsonRpcExtractor, config: Self::Config) -> JrpcResult;
 }
 
 pub mod v_call;
