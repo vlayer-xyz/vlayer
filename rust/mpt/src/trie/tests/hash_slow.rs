@@ -6,14 +6,8 @@ use lazy_static::lazy_static;
 lazy_static! {
     static ref MPT_BRANCH_WITH_TWO_CHILDREN: MerkleTrie = {
         let mut children: [Option<Box<Node>>; 16] = Default::default();
-        children[0] = Some(Box::new(Node::Leaf(
-            KeyNibbles::new([0; 63]),
-            vec![0].into(),
-        )));
-        children[1] = Some(Box::new(Node::Leaf(
-            KeyNibbles::new([1; 63]),
-            vec![1].into(),
-        )));
+        children[0] = Some(Box::new(Node::Leaf(KeyNibbles::new([0; 63]), [0].into())));
+        children[1] = Some(Box::new(Node::Leaf(KeyNibbles::new([1; 63]), [1].into())));
         MerkleTrie(Node::Branch(children, None))
     };
 }
@@ -32,7 +26,7 @@ fn digest() {
 
 #[test]
 fn leaf() {
-    let mpt = MerkleTrie(Node::Leaf(KeyNibbles::unpack(B256::ZERO), vec![0].into()));
+    let mpt = MerkleTrie(Node::Leaf(KeyNibbles::unpack(B256::ZERO), [0].into()));
     assert_eq!(
         mpt.hash_slow(),
         b256!("ebcd1aff3f48f44a89c8bceb54a7e73c44edda96852b9debc4447b5ac9be19a6")
@@ -41,7 +35,7 @@ fn leaf() {
 
 #[test]
 fn extension() {
-    let leaf = Node::Leaf(KeyNibbles::unpack([1]), vec![0].into());
+    let leaf = Node::Leaf(KeyNibbles::unpack([1]), [0].into());
     let mpt = MerkleTrie(Node::Extension(KeyNibbles::new([0; 1]), leaf.into()));
     assert_eq!(
         mpt.hash_slow(),
@@ -65,7 +59,7 @@ fn branch_with_value() {
     let MerkleTrie(Node::Branch(_, ref mut branch_value)) = mpt else {
         panic!("Expected a Branch node");
     };
-    *branch_value = Some(vec![42u8].into());
+    *branch_value = Some([42u8].into());
 
     assert_eq!(
         mpt.hash_slow(),

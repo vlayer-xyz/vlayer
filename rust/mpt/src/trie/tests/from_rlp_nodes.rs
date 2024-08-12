@@ -36,7 +36,7 @@ fn digest() {
 #[test]
 fn leaf() {
     let key_nibbles = KeyNibbles::new(B256::ZERO);
-    let mpt = MerkleTrie(Node::Leaf(key_nibbles, vec![0].into()));
+    let mpt = MerkleTrie(Node::Leaf(key_nibbles, [0].into()));
     let proof = rlp_encoded(&mpt.0);
     assert_eq!(mpt, MerkleTrie::from_rlp_nodes(proof).unwrap());
 }
@@ -44,7 +44,7 @@ fn leaf() {
 #[test]
 fn branch() {
     let children: [Option<Box<Node>>; 16] = Default::default();
-    let value = Some(vec![42u8].into());
+    let value = Some([42u8].into());
     let mpt = MerkleTrie(Node::Branch(children, value.clone()));
     let proof = rlp_encoded(&mpt.0);
 
