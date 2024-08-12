@@ -1,5 +1,5 @@
 use alloy_primitives::ChainId;
-use call_server::server::ProofMode;
+use call_server::ProofMode;
 use clap::{ArgAction, Parser, ValueEnum};
 use std::fmt;
 

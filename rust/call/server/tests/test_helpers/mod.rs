@@ -2,7 +2,8 @@ use axum::{
     body::Body,
     http::{header::CONTENT_TYPE, Request, Response},
 };
-use call_server::server::{server, ProofMode, ServerConfig};
+use call_server::server;
+use call_server::{ProofMode, ServerConfig};
 use ethers::{
     contract::abigen,
     core::{
@@ -19,7 +20,6 @@ use serde_json::json;
 use serde_json::to_string;
 use std::collections::HashMap;
 use std::{sync::Arc, time::Duration};
-use tower::ServiceExt;
 
 abigen!(ExampleProver, "./testdata/ExampleProver.json",);
 

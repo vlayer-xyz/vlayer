@@ -1,5 +1,5 @@
 use crate::errors::CLIError;
-use call_server::server::{ProofMode, ServerConfig};
+use call_server::{ProofMode, ServerConfig};
 use clap::{Parser, Subcommand};
 use commands::args::{InitArgs, ServeArgs};
 use commands::{init::init, serve::run_serve};

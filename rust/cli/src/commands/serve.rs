@@ -1,5 +1,5 @@
 use crate::errors::CLIError;
-use call_server::server::{serve, ProofMode, ServerConfig};
+use call_server::{serve, ProofMode, ServerConfig};
 use tracing::{info, warn};
 
 pub(crate) async fn run_serve(server_config: ServerConfig) -> Result<(), CLIError> {
