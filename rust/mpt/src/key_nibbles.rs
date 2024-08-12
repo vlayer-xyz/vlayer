@@ -17,15 +17,15 @@ impl KeyNibbles {
         Self::from_nibbles(nibbles)
     }
 
+    pub fn as_slice(&self) -> &[u8] {
+        self.0.as_slice()
+    }
+
     fn from_nibbles(nibbles: Nibbles) -> Self {
         if nibbles.is_empty() {
             panic!("KeyNibbles cannot be empty");
         }
         KeyNibbles(nibbles)
-    }
-
-    pub fn as_slice(&self) -> &[u8] {
-        self.0.as_slice()
     }
 }
 
@@ -44,7 +44,7 @@ mod new {
         let valid_nibbles = vec![0x1, 0x2, 0x3];
         let key_nibbles = KeyNibbles::new(&valid_nibbles);
 
-        assert_eq!(&**key_nibbles, &valid_nibbles[..]);
+        assert_eq!(key_nibbles, valid_nibbles[..]);
     }
 
     #[test]
