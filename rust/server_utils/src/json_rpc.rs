@@ -1,7 +1,7 @@
+use crate::JsonRpcHandler;
 use axum_jrpc::{JrpcResult, JsonRpcExtractor, JsonRpcResponse};
-use server_utils::JsonRpcHandler;
 
-pub(crate) async fn handle<H>(request: JsonRpcExtractor, handler: H) -> JrpcResult
+async fn handle<H>(request: JsonRpcExtractor, handler: H) -> JrpcResult
 where
     H: JsonRpcHandler,
 {
@@ -14,7 +14,7 @@ where
     })
 }
 
-pub(crate) async fn route(request: JsonRpcExtractor, handler: impl JsonRpcHandler) -> JrpcResult {
+pub async fn route(request: JsonRpcExtractor, handler: impl JsonRpcHandler) -> JrpcResult {
     let method = request.method();
     match method {
         "v_call" => handle(request, handler).await,
