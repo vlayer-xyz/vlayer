@@ -22,10 +22,10 @@ fn digest() {
 fn leaf() {
     let mpt = MerkleTrie(Node::Leaf(KeyNibbles::unpack(B256::ZERO), vec![0].into()));
     // A single leaf proves the inclusion of the key and non-inclusion of any other key
-    assert_eq!(mpt.get(B256::ZERO.as_slice()), Some(&[0][..]));
-    assert_eq!(mpt.get(&[]), None);
-    assert_eq!(mpt.get(&[0]), None);
-    assert_eq!(mpt.get(&[1, 2, 3]), None);
+    assert_eq!(mpt.get(B256::ZERO), Some(&[0][..]));
+    assert_eq!(mpt.get([]), None);
+    assert_eq!(mpt.get([0]), None);
+    assert_eq!(mpt.get([1, 2, 3]), None);
 }
 
 #[test]
