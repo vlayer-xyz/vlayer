@@ -20,6 +20,7 @@ use serde_json::json;
 use serde_json::to_string;
 use std::collections::HashMap;
 use std::{sync::Arc, time::Duration};
+use tower::ServiceExt;
 
 abigen!(ExampleProver, "./testdata/ExampleProver.json",);
 

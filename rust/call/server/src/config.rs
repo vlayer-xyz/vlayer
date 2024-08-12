@@ -1,7 +1,7 @@
-use crate::proof_mode::ProofMode;
 use alloy_primitives::ChainId;
 use call_engine::config::{MAINNET_ID, SEPOLIA_ID};
 use serde::{Deserialize, Serialize};
+use server_utils::ProofMode;
 use std::collections::HashMap;
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
