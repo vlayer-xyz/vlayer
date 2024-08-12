@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::json_rpc::json_rpc;
+use crate::{handlers::v_call::VCall, json_rpc::route};
 use alloy_primitives::ChainId;
 use axum::{routing::post, Router};
 use call_engine::config::{MAINNET_ID, SEPOLIA_ID};
@@ -75,8 +75,9 @@ pub async fn serve(config: ServerConfig) -> anyhow::Result<()> {
 pub fn server(config: ServerConfig) -> Router {
     config.proof_mode.set_risc0_flag();
     let config = Arc::new(config);
+
     Router::new()
-        .route("/", post(move |req| json_rpc(config, req)))
+        .route("/", post(move |req| route(req, VCall::new(config.clone()))))
         .layer(init_trace_layer())
         // NOTE: RequestIdLayer should be added after the Trace layer
         .layer(RequestIdLayer)
