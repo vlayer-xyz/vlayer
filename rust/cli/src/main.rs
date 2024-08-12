@@ -31,9 +31,11 @@ enum Commands {
 const VERSION_MESSAGE: &str = concat!(
     env!("CARGO_PKG_VERSION"),
     "-",
-    env!("BUILD_TYPE"),
+    env!("VLAYER_RELEASE"),
     "-",
-    env!("VERGEN_GIT_SHA")
+    env!("VERGEN_GIT_SHA"),
+    "\nguestId: ",
+    env!("RISC0_CALL_GUEST_ID")
 );
 
 #[tokio::main]

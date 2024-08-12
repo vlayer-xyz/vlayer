@@ -26,3 +26,4 @@ alloy-primitives = { workspace = true, features = ["rlp"] }
 
 [build-dependencies]
 vergen = { workspace = true, features = ["build", "git", "gitcl"] }
+call_guest_wrapper = { path = "../call/guest_wrapper" }

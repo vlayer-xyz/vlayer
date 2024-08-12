@@ -1974,6 +1974,7 @@ version = "0.1.0"
 dependencies = [
  "alloy-primitives",
  "anyhow",
+ "call_guest_wrapper",
  "call_server",
  "clap",
  "flate2",
