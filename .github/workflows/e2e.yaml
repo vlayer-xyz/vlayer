@@ -41,7 +41,7 @@ jobs:
 
       - name: Check clang and LLVM version
         env:
-          EXPECTED_LLVM_VERSION: "18.1.*"
+          EXPECTED_LLVM_VERSION: "18.1"
         run: |
           if ! command -v clang &> /dev/null; then
             echo "clang command not found"
@@ -49,11 +49,11 @@ jobs:
           fi
 
           LLVM_VERSION=$(llvm-config --version)
-          if [[ "$LLVM_VERSION" != "$EXPECTED_LLVM_VERSION" ]]; then
+          if [[ "$LLVM_VERSION" != "$EXPECTED_LLVM_VERSION"* ]]; then
             echo "LLVM version mismatches $EXPECTED_LLVM_VERSION. Found version: $LLVM_VERSION"
             exit 1
           fi
-          echo "clang available and LLVM version matches $EXPECTED_LLVM_VERSION"
+          echo "clang available and LLVM version starts with $EXPECTED_LLVM_VERSION"
 
       - name: Build vlayer
         working-directory: rust
