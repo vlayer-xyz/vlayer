@@ -20,8 +20,9 @@ pub async fn route(
     handler: impl JsonRpcHandler,
 ) -> JrpcResult {
     let called_method = request.method();
-    match called_method {
-        method => handle(request, handler).await,
-        _ => Err(request.method_not_found(called_method)),
+    if called_method == method {
+        handle(request, handler).await
+    } else {
+        Err(request.method_not_found(called_method))
     }
 }
