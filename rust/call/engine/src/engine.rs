@@ -53,7 +53,7 @@ where
         &'a self,
         tx: &Call,
         start_location: ExecutionLocation,
-        _augmentors: Option<Augmentors>,
+        _augmentors: &Option<Augmentors>,
     ) -> Result<Vec<u8>, EngineError> {
         self.call_inner(tx, start_location)
     }
