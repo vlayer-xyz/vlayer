@@ -11,6 +11,7 @@ fn main() {
         multi_evm_input,
         call,
         start_execution_location,
+        augmentors,
     } = env::read();
 
     let output = Guest::new(multi_evm_input, start_execution_location).run(call);

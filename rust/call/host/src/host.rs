@@ -129,10 +129,12 @@ where
         multi_evm_input: MultiEvmInput,
         call: Call,
     ) -> Result<ExecutorEnv<'static>, HostError> {
+        let augmentors = vec![];
         let input = Input {
             call,
             multi_evm_input,
             start_execution_location,
+            augmentors,
         };
         let env = ExecutorEnv::builder()
             .write(&input)
