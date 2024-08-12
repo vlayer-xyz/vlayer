@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
+use crate::config::ServerConfig;
 use crate::error::AppError;
-use crate::server::ServerConfig;
 use call_engine::io::Augmentors;
 use call_host::host::{config::HostConfig, Host};
 use call_host::Call as HostCall;
