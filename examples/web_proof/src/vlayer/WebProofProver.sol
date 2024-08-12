@@ -18,7 +18,7 @@ contract WebProofProver is Prover {
     constructor() {}
 
     function main(Web calldata web) public returns (bool) {
-        // require(web.url.equal(dataUrl), "Incorrect URL");
+        require(web.url.equal(dataUrl), "Incorrect URL");
 
         return true;
     }
