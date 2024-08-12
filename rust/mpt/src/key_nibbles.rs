@@ -37,12 +37,6 @@ impl Deref for KeyNibbles {
     }
 }
 
-impl From<KeyNibbles> for Nibbles {
-    fn from(key_nibbles: KeyNibbles) -> Self {
-        key_nibbles.0
-    }
-}
-
 impl PartialEq<[u8]> for KeyNibbles {
     fn eq(&self, other: &[u8]) -> bool {
         self.0.as_slice() == other
@@ -68,7 +62,6 @@ impl Index<RangeFrom<usize>> for KeyNibbles {
 #[cfg(test)]
 mod key_nibbles {
     use super::*;
-    use nybbles::Nibbles;
 
     #[test]
     fn creation_success() {
@@ -83,14 +76,5 @@ mod key_nibbles {
     fn creation_failure_empty() {
         let empty_nibbles = vec![];
         let _ = KeyNibbles::new(&empty_nibbles);
-    }
-
-    #[test]
-    fn key_nibbles_to_nibbles() {
-        let valid_nibbles = vec![0x6, 0x7];
-        let key_nibbles = KeyNibbles::new(&valid_nibbles);
-        let nibbles: Nibbles = key_nibbles.into();
-
-        assert_eq!(nibbles.as_slice(), &valid_nibbles[..]);
     }
 }
