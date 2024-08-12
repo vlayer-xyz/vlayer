@@ -16,3 +16,4 @@ ethers = { workspace = true }
 alloy-primitives = { workspace = true }
 hex = { workspace = true }
 thiserror = { workspace = true }
+serde = { workspace = true }

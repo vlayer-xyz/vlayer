@@ -7841,6 +7841,7 @@ dependencies = [
  "ethers",
  "hex",
  "http-body-util",
+ "serde",
  "serde_json",
  "thiserror",
  "tower-http",
