@@ -84,7 +84,7 @@ mod server_tests {
                     "id": 1,
                     "error": {
                         "code": -32602,
-                        "message": "Invalid field `to`: Odd number of digits `I am not a valid address!`",
+                        "message": "Invalid field: `to` Odd number of digits `I am not a valid address!`",
                         "data": null
                     }
                 }),

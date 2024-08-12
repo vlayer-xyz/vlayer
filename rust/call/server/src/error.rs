@@ -9,8 +9,8 @@ use tokio::task::JoinError;
 
 #[derive(Debug, Error)]
 pub enum AppError {
-    #[error("Invalid field `{0}`: {1}")]
-    FieldValidation(String, FieldValidationError),
+    #[error("Invalid field: {0}")]
+    FieldValidation(#[from] FieldValidationError),
     #[error("Host error: {0}")]
     Host(#[from] HostError),
     #[error("Join error: {0}")]
