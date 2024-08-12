@@ -1,6 +1,6 @@
 # Block proof cache
 
-Vlayer allows one to provably execute Solidity code offchain and use proof of that execution onchain. To do that - one needs a verified source of storage data which is provided by storage proofs. Proofs connect to a single block hash that is later verified on-chain.
+vlayer allows one to provably execute Solidity code offchain and use proof of that execution onchain. To do that - one needs a verified source of storage data which is provided by storage proofs. Proofs connect to a single block hash that is later verified on-chain.
 
 We also provide time-travel functionality. As a result of that - our state and storage proofs do not connect to a single block, but to multiple blocks. In order to prove that a set of blocks belongs to the chain - we prove two facts:
 

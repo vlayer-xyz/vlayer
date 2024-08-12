@@ -1,7 +1,7 @@
 # vlayer JSON-RPC API
 
 vlayer exposes one RPC endpoint under `/` with the following methods:
-- `v_call`
+- `v_prove`
 - `v_getProofReceipt`
 
 With general format of request looking a follows.
@@ -27,28 +27,19 @@ And the response format below.
 ```
 
 
-## v_call
-`v_call` is the core endpoint that vlayer provides for requesting proof of computation generation, with the following format request:
+## v_prove
+`v_prove` is the core endpoint that vlayer provides, with the following format request:
 
 ```json
 {
-    "method": "v_call",
-    "params": [
-        {   
-            "to": "<contract address>",
-            "data": "0x<abi encoded calldata>",
-        },
-        {
-            "block_no": "<desired block number>",
-            "chain_id": "<desired chain id>",
-        },
-        {
-             "web_proof": {
-                "notary_pub_key": "<notary public key>",
-                "tls_proof": "<tls proof value>",
-            }
-        }
-    ]
+    "method": "v_prove",
+    "params": [{   
+        "to": "<contract address>",
+        "data": "0x<abi encoded calldata>",
+        "chain_id": "<desired chain id>",
+        "email": "<optional email proof structure>",
+        "web": "<optional web proof structure>",
+    }]
 }
 ```
 
@@ -67,7 +58,7 @@ and the response:
 ## v_getProofReceipt
 
 ### Query
-To get result of `v_call` query `v_getProofReceipt`. 
+To get result of `v_prove` query `v_getProofReceipt`. 
 
 ```json
 {

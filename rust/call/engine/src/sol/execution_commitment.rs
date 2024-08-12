@@ -1,4 +1,4 @@
-// Keep everything in the Vlayer library private except the commitment.
+// Keep everything in the vlayer library private except the commitment.
 mod private {
     alloy_sol_types::sol!(#![sol(all_derives)] "../../../contracts/src/ExecutionCommitment.sol");
 }
