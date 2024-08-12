@@ -6,7 +6,7 @@ const PROVER = "WebProofProver";
 const FILE = path.join(__dirname, `../out/${PROVER}.sol/${PROVER}.json`)
 const PROVER_SPEC = await getContractSpec(FILE);
 const FUNCTION_NAME = 'main'
-const ARGS: any[] = ["fake-web-proof"]
+const ARGS: any[] = [["api.x.com"]]
 
 console.log("Deploying prover")
 let prover: Address = await helpers.deployContract(PROVER_SPEC);
