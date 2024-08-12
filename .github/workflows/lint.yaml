@@ -3,6 +3,7 @@ name: Lint
 on:
   push:
     paths:
+      - "rust-toolchain.toml"
       - 'rust/**'
       - '.github/workflows/**'
     branches:

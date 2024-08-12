@@ -5,6 +5,7 @@ on:
     - cron: '0 23 * * 1-5' # Mon-Fri at 23:00 UTC
   push:
     paths:
+      - "rust-toolchain.toml"
       - "rust/**"
       - "examples/**"
       - "bash/**"
