@@ -1,39 +1,31 @@
-use std::ops::{Deref, Index, RangeFrom};
+use derive_more::Deref;
 
 use nybbles::Nibbles;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Deref, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct KeyNibbles(Nibbles);
 
 impl KeyNibbles {
     pub fn new<T: AsRef<[u8]>>(input: T) -> Self {
-        let nibbles = Nibbles::from_vec(input.as_ref().to_vec());
-        Self::create_and_validate(nibbles).unwrap()
-    }
-
-    fn create_and_validate(nibbles: Nibbles) -> Result<Self, &'static str> {
-        if nibbles.is_empty() {
-            panic!("KeyNibbles cannot be empty");
-        }
-        Ok(KeyNibbles(nibbles))
+        let nibbles = Nibbles::from_nibbles(input);
+        Self::from_nibbles(nibbles)
     }
 
     pub fn unpack<T: AsRef<[u8]>>(data: T) -> Self {
         let nibbles = Nibbles::unpack(data);
-        Self::create_and_validate(nibbles).unwrap()
+        Self::from_nibbles(nibbles)
     }
 
-    pub fn as_nibbles(&self) -> &Nibbles {
-        &self.0
+    fn from_nibbles(nibbles: Nibbles) -> Self {
+        if nibbles.is_empty() {
+            panic!("KeyNibbles cannot be empty");
+        }
+        KeyNibbles(nibbles)
     }
-}
 
-impl Deref for KeyNibbles {
-    type Target = Nibbles;
-
-    fn deref(&self) -> &Self::Target {
-        &self.0
+    pub fn as_slice(&self) -> &[u8] {
+        self.0.as_slice()
     }
 }
 
@@ -43,37 +35,21 @@ impl PartialEq<[u8]> for KeyNibbles {
     }
 }
 
-impl Index<usize> for KeyNibbles {
-    type Output = u8;
-
-    fn index(&self, index: usize) -> &Self::Output {
-        &self.0.as_slice()[index]
-    }
-}
-
-impl Index<RangeFrom<usize>> for KeyNibbles {
-    type Output = [u8];
-
-    fn index(&self, index: RangeFrom<usize>) -> &Self::Output {
-        &self.0.as_slice()[index]
-    }
-}
-
 #[cfg(test)]
-mod key_nibbles {
+mod new {
     use super::*;
 
     #[test]
-    fn creation_success() {
+    fn non_empty() {
         let valid_nibbles = vec![0x1, 0x2, 0x3];
         let key_nibbles = KeyNibbles::new(&valid_nibbles);
 
-        assert_eq!(key_nibbles.as_nibbles(), &valid_nibbles[..]);
+        assert_eq!(&**key_nibbles, &valid_nibbles[..]);
     }
 
     #[test]
     #[should_panic(expected = "KeyNibbles cannot be empty")]
-    fn creation_failure_empty() {
+    fn empty() {
         let empty_nibbles = vec![];
         let _ = KeyNibbles::new(&empty_nibbles);
     }

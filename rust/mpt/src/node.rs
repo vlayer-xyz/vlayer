@@ -30,7 +30,7 @@ impl Node {
             Node::Leaf(prefix, value) if prefix == key_nibs => Some(value),
             Node::Leaf(..) => None,
             Node::Extension(prefix, child) => key_nibs
-                .strip_prefix(prefix.as_nibbles().as_slice())
+                .strip_prefix(prefix.as_slice())
                 .and_then(|remaining| child.get(remaining)),
             Node::Branch(children, value) => {
                 if key_nibs.is_empty() {
@@ -67,7 +67,7 @@ impl Node {
         match self {
             Node::Null => vec![EMPTY_STRING_CODE],
             Node::Leaf(prefix, value) => {
-                let path = prefix.as_nibbles().encode_path_leaf(true);
+                let path = prefix.encode_path_leaf(true);
                 let mut out = encoded_header(true, path.length() + value.length());
                 path.encode(&mut out);
                 value.encode(&mut out);
@@ -75,7 +75,7 @@ impl Node {
                 out
             }
             Node::Extension(prefix, child) => {
-                let path = prefix.as_nibbles().encode_path_leaf(false);
+                let path = prefix.encode_path_leaf(false);
                 let node_ref = NodeRef::from_node(child);
                 let mut out = encoded_header(true, path.length() + node_ref.length());
                 path.encode(&mut out);
@@ -208,7 +208,7 @@ mod node_size {
 
     #[test]
     fn branch_one_child() {
-        let leaf = Node::Leaf(KeyNibbles::new(vec![0x1]), Box::new([]));
+        let leaf = Node::Leaf(KeyNibbles::new([0x1]), Box::new([]));
         let child = Some(Box::new(leaf));
         const NULL_CHILD: Option<Box<Node>> = None;
         let mut children = [NULL_CHILD; 16];
