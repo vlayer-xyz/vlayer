@@ -34,11 +34,12 @@ impl JsonRpcHandler for VCall {
             rpc_urls: self.config.rpc_urls.clone(),
             start_chain_id: params.context.chain_id,
         };
-    
-        let return_data =
-            tokio::task::spawn_blocking(|| Host::try_new(host_config)?.run(call, params.augmentors))
-                .await??;
-    
+
+        let return_data = tokio::task::spawn_blocking(|| {
+            Host::try_new(host_config)?.run(call, params.augmentors)
+        })
+        .await??;
+
         Ok(CallResult {
             result: json!({
                 "evm_call_result": return_data.guest_output.evm_call_result,
