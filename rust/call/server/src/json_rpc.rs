@@ -12,7 +12,7 @@ use crate::{
 pub(crate) async fn json_rpc(config: Arc<ServerConfig>, request: JsonRpcExtractor) -> JrpcResult {
     let method = request.method();
     match method {
-        "v_call" => VCall.call(request, config).await,
+        "v_call" => VCall::new(config).call(request).await,
         _ => Err(request.method_not_found(method)),
     }
 }

@@ -15,17 +15,20 @@ use super::JsonRpcHandler;
 
 pub mod types;
 
-pub struct VCall;
+pub struct VCall {
+    config: Arc<ServerConfig>,
+}
 
 impl VCall {
-    pub async fn call_inner(
-        params: Params,
-        config: Arc<ServerConfig>,
-    ) -> Result<CallResult, AppError> {
+    pub fn new(config: Arc<ServerConfig>) -> Self {
+        Self { config }
+    }
+
+    pub async fn call_inner(&self, params: Params) -> Result<CallResult, AppError> {
         let call: HostCall = params.call.try_into()?;
 
         let host_config = HostConfig {
-            rpc_urls: config.rpc_urls.clone(),
+            rpc_urls: self.config.rpc_urls.clone(),
             start_chain_id: params.context.chain_id,
         };
     
@@ -46,12 +49,11 @@ impl VCall {
 
 #[async_trait]
 impl JsonRpcHandler for VCall {
-    type Config = Arc<ServerConfig>;
-    async fn call(&self, request: JsonRpcExtractor, config: Self::Config) -> JrpcResult {
+    async fn call(&self, request: JsonRpcExtractor) -> JrpcResult {
         let request_id = request.get_answer_id();
         let params: Params = request.parse_params()?;
 
-        Ok(match Self::call_inner(params, config).await {
+        Ok(match self.call_inner(params).await {
             Ok(result) => JsonRpcResponse::success(request_id, result),
             Err(err) => JsonRpcResponse::error(request_id, err.into()),
         })
