@@ -5,8 +5,11 @@ import {IERC20} from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import {ERC20} from "openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 
 contract VToyken is ERC20 {
-    constructor() ERC20("VToyken", "VTKN") {
-        address[11] memory initialOwners = [
+    address[] public initialOwners;
+
+    constructor(address [] memory extraOwners) ERC20("VToyken", "VTKN") {
+        initialOwners = 
+        [
             0x70997970C51812dc3A010C7d01b50e0d17dc79C8,
             0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC,
             0x90F79bf6EB2c4f870365E785982E1f101E93b906,
@@ -19,6 +22,10 @@ contract VToyken is ERC20 {
             0x328809Bc894f92807417D2dAD6b7C998c1aFdac6,
             0xeD5E44e0dfEEeAb7F538AA25d7d178da08F94218
         ];
+
+        for (uint i = 0; i < extraOwners.length; i++){
+            initialOwners.push(extraOwners[i]);
+        }
 
         for (uint i = 0; i < initialOwners.length; i++){
             _mint(initialOwners[i], i * 1 ether);

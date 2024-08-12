@@ -18,7 +18,7 @@ contract PrivateAirdropProverTest is VTest {
 
         bytes memory signature = abi.encodePacked(r, s, v); 
 
-        VToyken token = new VToyken();
+        VToyken token = new VToyken(new address[](0));
         PrivateAirdropProver prover = new PrivateAirdropProver(token);
         (uint256 balance, bytes32 nullifier) = prover.prove(alice, signature);
         assert(balance == 9000000000000000000);
@@ -34,7 +34,7 @@ contract PrivateAirdropProverTest is VTest {
 
         bytes memory signature = abi.encodePacked(r, s, v); 
 
-        VToyken token = new VToyken();
+        VToyken token = new VToyken(new address[](0));
         PrivateAirdropProver prover = new PrivateAirdropProver(token);
         vm.expectRevert(bytes("Invalid Signature"));
         prover.prove(alice, signature);

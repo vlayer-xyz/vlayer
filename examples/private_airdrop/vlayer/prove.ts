@@ -13,7 +13,7 @@ const PROVER_SPEC = await getContractSpec(FILE);
 const FUNCTION_NAME = 'prove'
 
 const client = helpers.client();
-const account = privateKeyToAccount("0xd913a2f110382ecb4046247e20d59147cb04bc6e1205995c6332bc4cad643a6d")
+const account = privateKeyToAccount(generatePrivateKey())
 const signature = await client.signMessage({ 
   account,
   message: 'erc20 prover',
@@ -22,7 +22,7 @@ const signature = await client.signMessage({
 const ARGS = [account.address, signature];
 
 console.log("Deploying prover")
-let token: Address = await helpers.deployContract(TOKEN_SPEC);
+let token: Address = await helpers.deployContract(TOKEN_SPEC, [[account.address]]);
 let prover: Address = await helpers.deployContract(PROVER_SPEC, [token]);
 console.log(`Prover has been deployed on ${prover} address`);
 
