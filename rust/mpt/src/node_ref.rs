@@ -58,8 +58,8 @@ impl Encodable for NodeRef {
 
 #[cfg(test)]
 mod encodable {
+    use crate::key_nibbles::KeyNibbles;
     use alloy_rlp::encode;
-    use nybbles::Nibbles;
 
     use super::*;
 
@@ -87,8 +87,8 @@ mod encodable {
 
     #[test]
     fn inline_node() {
-        let nibbles = Nibbles::from_nibbles([]);
-        let leaf_node = Node::Leaf(nibbles, vec![0x1].into());
+        let key_nibbles = KeyNibbles::new([0x1]);
+        let leaf_node = Node::Leaf(key_nibbles, vec![0x1].into());
         let node_ref = NodeRef::from_node(&leaf_node);
         let out = encode(node_ref.clone());
 

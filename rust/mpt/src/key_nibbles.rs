@@ -1,14 +1,27 @@
-use nybbles::Nibbles;
+use std::ops::{Deref, Index, RangeFrom};
 
-#[derive(Debug, Clone, PartialEq, Eq)]
+use nybbles::Nibbles;
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub struct KeyNibbles(Nibbles);
 
 impl KeyNibbles {
-    pub fn new(nibbles: Nibbles) -> Result<Self, &'static str> {
+    pub fn new<T: AsRef<[u8]> + std::fmt::Debug>(input: T) -> Self {
+        let nibbles = Nibbles::from_vec(input.as_ref().to_vec());
+        Self::create_and_validate(nibbles).unwrap()
+    }
+
+    fn create_and_validate(nibbles: Nibbles) -> Result<Self, &'static str> {
         if nibbles.is_empty() {
-            return Err("KeyNibbles cannot be empty");
+            panic!("KeyNibbles cannot be empty");
         }
         Ok(KeyNibbles(nibbles))
+    }
+
+    pub fn unpack<T: AsRef<[u8]>>(data: T) -> Self {
+        let nibbles = Nibbles::unpack(data);
+        Self::create_and_validate(nibbles).unwrap()
     }
 
     pub fn as_nibbles(&self) -> &Nibbles {
@@ -16,17 +29,39 @@ impl KeyNibbles {
     }
 }
 
-impl TryFrom<Nibbles> for KeyNibbles {
-    type Error = &'static str;
+impl Deref for KeyNibbles {
+    type Target = Nibbles;
 
-    fn try_from(nibbles: Nibbles) -> Result<Self, Self::Error> {
-        KeyNibbles::new(nibbles)
+    fn deref(&self) -> &Self::Target {
+        &self.0
     }
 }
 
 impl From<KeyNibbles> for Nibbles {
     fn from(key_nibbles: KeyNibbles) -> Self {
         key_nibbles.0
+    }
+}
+
+impl PartialEq<[u8]> for KeyNibbles {
+    fn eq(&self, other: &[u8]) -> bool {
+        self.0.as_slice() == other
+    }
+}
+
+impl Index<usize> for KeyNibbles {
+    type Output = u8;
+
+    fn index(&self, index: usize) -> &Self::Output {
+        &self.0.as_slice()[index]
+    }
+}
+
+impl Index<RangeFrom<usize>> for KeyNibbles {
+    type Output = [u8];
+
+    fn index(&self, index: RangeFrom<usize>) -> &Self::Output {
+        &self.0.as_slice()[index]
     }
 }
 
@@ -37,46 +72,40 @@ mod key_nibbles {
 
     #[test]
     fn creation_success() {
-        let valid_nibbles = Nibbles::from_vec(vec![0x1, 0x2, 0x3]);
-        let key_nibbles = KeyNibbles::new(valid_nibbles.clone());
+        let valid_nibbles = vec![0x1, 0x2, 0x3];
+        let key_nibbles = KeyNibbles::new(&valid_nibbles);
 
-        assert!(key_nibbles.is_ok());
-        assert_eq!(key_nibbles.unwrap().as_nibbles(), &valid_nibbles);
+        assert_eq!(key_nibbles.as_nibbles(), &valid_nibbles[..]);
     }
 
     #[test]
+    #[should_panic(expected = "KeyNibbles cannot be empty")]
     fn creation_failure_empty() {
-        let empty_nibbles = Nibbles::from_vec(vec![]);
-        let key_nibbles = KeyNibbles::new(empty_nibbles);
-
-        assert!(key_nibbles.is_err());
-        assert_eq!(key_nibbles.err(), Some("KeyNibbles cannot be empty"));
+        let empty_nibbles = vec![];
+        let _ = KeyNibbles::new(&empty_nibbles);
     }
 
     #[test]
-    fn test_try_from_nibbles_success() {
-        let valid_nibbles = Nibbles::from_vec(vec![0x4, 0x5]);
-        let key_nibbles = KeyNibbles::try_from(valid_nibbles.clone());
+    fn try_from_vec_success() {
+        let valid_nibbles = vec![0x4, 0x5];
+        let key_nibbles = KeyNibbles::new(&valid_nibbles);
 
-        assert!(key_nibbles.is_ok());
-        assert_eq!(key_nibbles.unwrap().as_nibbles(), &valid_nibbles);
+        assert_eq!(key_nibbles.as_nibbles(), &valid_nibbles[..]);
     }
 
     #[test]
-    fn test_try_from_nibbles_failure_empty() {
-        let empty_nibbles = Nibbles::from_vec(vec![]);
-        let key_nibbles = KeyNibbles::try_from(empty_nibbles);
-
-        assert!(key_nibbles.is_err());
-        assert_eq!(key_nibbles.err(), Some("KeyNibbles cannot be empty"));
+    #[should_panic(expected = "KeyNibbles cannot be empty")]
+    fn try_from_vec_failure_empty() {
+        let empty_nibbles = vec![];
+        let _ = KeyNibbles::new(&empty_nibbles);
     }
 
     #[test]
-    fn test_key_nibbles_to_nibbles() {
-        let valid_nibbles = Nibbles::from_vec(vec![0x6, 0x7]);
-        let key_nibbles = KeyNibbles::new(valid_nibbles.clone()).unwrap();
+    fn key_nibbles_to_nibbles() {
+        let valid_nibbles = vec![0x6, 0x7];
+        let key_nibbles = KeyNibbles::new(&valid_nibbles);
         let nibbles: Nibbles = key_nibbles.into();
 
-        assert_eq!(nibbles, valid_nibbles);
+        assert_eq!(nibbles.as_slice(), &valid_nibbles[..]);
     }
 }
