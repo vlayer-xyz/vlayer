@@ -7,9 +7,8 @@ use call_host::host::{config::HostConfig, Host};
 use call_host::Call as HostCall;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use server_utils::JsonRpcHandler;
 use types::{Call, CallContext, CallResult};
-
-use super::JsonRpcHandler;
 
 pub mod types;
 

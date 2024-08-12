@@ -1,6 +1,5 @@
 use axum_jrpc::{JrpcResult, JsonRpcExtractor, JsonRpcResponse};
-
-use crate::handlers::JsonRpcHandler;
+use server_utils::JsonRpcHandler;
 
 pub(crate) async fn handle<H>(request: JsonRpcExtractor, handler: H) -> JrpcResult
 where
