@@ -8,7 +8,7 @@ use call_engine::{
         },
         input::MultiEvmInput,
     },
-    io::{Call, GuestOutput},
+    io::{Augmentors, Call, GuestOutput},
     ExecutionCommitment,
 };
 
@@ -32,9 +32,9 @@ impl Guest {
         }
     }
 
-    pub fn run(&self, call: Call) -> GuestOutput {
+    pub fn run(&self, call: Call, augmentors: Option<Augmentors>) -> GuestOutput {
         let evm_call_result = Engine::new(&self.evm_envs)
-            .call(&call, self.start_execution_location, &None)
+            .call(&call, self.start_execution_location, &augmentors)
             .unwrap();
         let start_evm_env = self
             .evm_envs

@@ -14,7 +14,7 @@ fn main() {
         augmentors,
     } = env::read();
 
-    let output = Guest::new(multi_evm_input, start_execution_location).run(call);
+    let output = Guest::new(multi_evm_input, start_execution_location).run(call, None);
 
     env::commit_slice(&output.execution_commitment.abi_encode());
     env::commit_slice(&output.evm_call_result);
