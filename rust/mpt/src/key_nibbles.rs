@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 pub struct KeyNibbles(Nibbles);
 
 impl KeyNibbles {
-    pub fn new<T: AsRef<[u8]> + std::fmt::Debug>(input: T) -> Self {
+    pub fn new<T: AsRef<[u8]>>(input: T) -> Self {
         let nibbles = Nibbles::from_vec(input.as_ref().to_vec());
         Self::create_and_validate(nibbles).unwrap()
     }
