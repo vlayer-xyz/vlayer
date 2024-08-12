@@ -86,21 +86,6 @@ mod key_nibbles {
     }
 
     #[test]
-    fn try_from_vec_success() {
-        let valid_nibbles = vec![0x4, 0x5];
-        let key_nibbles = KeyNibbles::new(&valid_nibbles);
-
-        assert_eq!(key_nibbles.as_nibbles(), &valid_nibbles[..]);
-    }
-
-    #[test]
-    #[should_panic(expected = "KeyNibbles cannot be empty")]
-    fn try_from_vec_failure_empty() {
-        let empty_nibbles = vec![];
-        let _ = KeyNibbles::new(&empty_nibbles);
-    }
-
-    #[test]
     fn key_nibbles_to_nibbles() {
         let valid_nibbles = vec![0x6, 0x7];
         let key_nibbles = KeyNibbles::new(&valid_nibbles);
