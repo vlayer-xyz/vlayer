@@ -84,7 +84,12 @@ where
 
         let multi_evm_input =
             into_multi_input(self.envs).map_err(|err| HostError::CreatingInput(err.to_string()))?;
-        let env = Self::build_executor_env(self.start_execution_location, multi_evm_input, call)?;
+        let env = Self::build_executor_env(
+            self.start_execution_location,
+            multi_evm_input,
+            call,
+            augmentors,
+        )?;
 
         let (seal, raw_guest_output) = Self::prove(env, RISC0_CALL_GUEST_ELF)?;
         let guest_output = GuestOutput::from_outputs(&host_output, &raw_guest_output)?;
@@ -128,13 +133,13 @@ where
         start_execution_location: ExecutionLocation,
         multi_evm_input: MultiEvmInput,
         call: Call,
+        augmentors: Option<Augmentors>,
     ) -> Result<ExecutorEnv<'static>, HostError> {
-        let augmentors = vec![];
         let input = Input {
             call,
             multi_evm_input,
             start_execution_location,
-            augmentors,
+            augmentors: serde_json::to_string(&augmentors).unwrap(),
         };
         let env = ExecutorEnv::builder()
             .write(&input)

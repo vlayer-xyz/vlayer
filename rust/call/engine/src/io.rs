@@ -16,7 +16,7 @@ pub struct Input {
     pub multi_evm_input: MultiEvmInput,
     pub call: Call,
     pub start_execution_location: ExecutionLocation,
-    pub augmentors: Vec<u8>,
+    pub augmentors: String,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
