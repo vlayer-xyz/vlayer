@@ -1,10 +1,10 @@
 use crate::error::AppError;
-use crate::utils::{parse_address_field, parse_hex_field};
 use alloy_chains::Chain;
 use alloy_primitives::{BlockNumber, ChainId};
 use axum_jrpc::Value;
 use call_host::Call as HostCall;
 use serde::{Deserialize, Serialize};
+use server_utils::{parse_address_field, parse_hex_field};
 
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
