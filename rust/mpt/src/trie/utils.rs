@@ -37,10 +37,9 @@ pub(crate) fn resolve_trie(root: Node, nodes_by_hash: &HashMap<B256, Node>) -> N
 #[cfg(test)]
 mod parse_node {
     use alloy_primitives::{b256, B256};
-    use nybbles::Nibbles;
 
     use super::parse_node;
-    use crate::node::Node;
+    use crate::{key_nibbles::KeyNibbles, node::Node};
 
     #[test]
     fn inline() -> anyhow::Result<()> {
@@ -53,7 +52,7 @@ mod parse_node {
 
     #[test]
     fn non_inline() -> anyhow::Result<()> {
-        let nibbles = Nibbles::unpack(B256::ZERO);
+        let nibbles = KeyNibbles::unpack(B256::ZERO);
         let node = Node::Leaf(nibbles.clone(), vec![0].into());
         let (hash, node) = parse_node(node.rlp_encoded())?;
         assert_eq!(
@@ -73,9 +72,8 @@ mod resolve_trie {
 
     use alloy_primitives::keccak256;
     use alloy_trie::HashMap;
-    use nybbles::Nibbles;
 
-    use crate::node::Node;
+    use crate::{key_nibbles::KeyNibbles, node::Node};
 
     use super::resolve_trie;
 
@@ -89,11 +87,11 @@ mod resolve_trie {
 
     #[test]
     fn leaf() {
-        let nibbles = Nibbles::from_nibbles([0]);
-        let root = Node::Leaf(nibbles.clone(), vec![0].into());
+        let key_nibbles = KeyNibbles::new([0]);
+        let root = Node::Leaf(key_nibbles.clone(), vec![0].into());
         let nodes_by_hash = HashMap::new();
         let resolved_node = resolve_trie(root, &nodes_by_hash);
-        assert_eq!(resolved_node, Node::Leaf(nibbles, vec![0].into()));
+        assert_eq!(resolved_node, Node::Leaf(key_nibbles, vec![0].into()));
     }
 
     #[test]
@@ -118,8 +116,8 @@ mod resolve_trie {
 
     #[test]
     fn extension() {
-        let leaf_nibbles = Nibbles::from_nibbles([1]);
-        let extension_nibbles = Nibbles::from_nibbles([0]);
+        let leaf_nibbles = KeyNibbles::new([1]);
+        let extension_nibbles = KeyNibbles::new([0]);
         let leaf = Node::Leaf(leaf_nibbles.clone(), vec![0].into());
         let digest = keccak256(leaf.rlp_encoded());
         let extension = Node::Extension(extension_nibbles.clone(), Box::new(Node::Digest(digest)));
@@ -133,7 +131,7 @@ mod resolve_trie {
 
     #[test]
     fn branch() {
-        let leaf_nibbles = Nibbles::from_nibbles([1]);
+        let leaf_nibbles = KeyNibbles::new([1]);
         let leaf = Node::Leaf(leaf_nibbles.clone(), vec![0].into());
         let digest = keccak256(leaf.rlp_encoded());
         let child = None;

@@ -1,6 +1,5 @@
-use crate::{node::Node, MerkleTrie};
+use crate::{key_nibbles::KeyNibbles, node::Node, MerkleTrie};
 use alloy_primitives::B256;
-use nybbles::Nibbles;
 
 type EncodedNode = Vec<u8>;
 
@@ -36,7 +35,8 @@ fn digest() {
 
 #[test]
 fn leaf() {
-    let mpt = MerkleTrie(Node::Leaf(Nibbles::unpack(B256::ZERO), vec![0].into()));
+    let key_nibbles = KeyNibbles::new(B256::ZERO);
+    let mpt = MerkleTrie(Node::Leaf(key_nibbles, vec![0].into()));
     let proof = rlp_encoded(&mpt.0);
     assert_eq!(mpt, MerkleTrie::from_rlp_nodes(proof).unwrap());
 }

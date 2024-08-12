@@ -1,4 +1,4 @@
-use nybbles::Nibbles;
+use crate::key_nibbles::KeyNibbles;
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum PathKind {
@@ -8,7 +8,7 @@ pub enum PathKind {
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct Path {
-    pub nibbles: Nibbles,
+    pub nibbles: KeyNibbles,
     pub kind: PathKind,
 }
 
@@ -17,7 +17,7 @@ where
     T: AsRef<[u8]>,
 {
     fn from(path: T) -> Self {
-        let path = Nibbles::unpack(path);
+        let path = KeyNibbles::unpack(path);
         assert!(path.len() >= 2, "Path should have at least 2 nibbles");
 
         let kind = if path[0] & 2 != 0 {
@@ -28,7 +28,7 @@ where
         let odd_nibbles = path[0] & 1 != 0;
 
         let prefix = if odd_nibbles { &path[1..] } else { &path[2..] };
-        let nibbles = Nibbles::from_nibbles_unchecked(prefix);
+        let nibbles = KeyNibbles::new(prefix);
         Path { nibbles, kind }
     }
 }
@@ -71,7 +71,7 @@ mod decode_path {
     }
 
     #[test]
-    #[should_panic(expected = "Path should have at least 2 nibbles")]
+    #[should_panic(expected = "KeyNibbles cannot be empty")]
     fn too_short() {
         let _: Path = [].into();
     }

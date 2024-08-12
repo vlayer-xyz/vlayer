@@ -1,11 +1,13 @@
 use alloy_primitives::B256;
 use alloy_rlp::{Decodable, Encodable, Header, EMPTY_STRING_CODE};
-use nybbles::Nibbles;
 use rlp as legacy_rlp;
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 
-use crate::path::{Path, PathKind};
+use crate::{
+    key_nibbles::KeyNibbles,
+    path::{Path, PathKind},
+};
 
 use super::node_ref::NodeRef;
 
@@ -13,8 +15,8 @@ use super::node_ref::NodeRef;
 pub(crate) enum Node {
     #[default]
     Null,
-    Leaf(Nibbles, Box<[u8]>),
-    Extension(Nibbles, Box<Node>),
+    Leaf(KeyNibbles, Box<[u8]>),
+    Extension(KeyNibbles, Box<Node>),
     Branch([Option<Box<Node>>; 16], Option<Box<[u8]>>),
     Digest(B256),
 }
@@ -28,7 +30,7 @@ impl Node {
             Node::Leaf(prefix, value) if prefix == key_nibs => Some(value),
             Node::Leaf(..) => None,
             Node::Extension(prefix, child) => key_nibs
-                .strip_prefix(prefix.as_slice())
+                .strip_prefix(prefix.as_nibbles().as_slice())
                 .and_then(|remaining| child.get(remaining)),
             Node::Branch(children, value) => {
                 if key_nibs.is_empty() {
@@ -65,7 +67,7 @@ impl Node {
         match self {
             Node::Null => vec![EMPTY_STRING_CODE],
             Node::Leaf(prefix, value) => {
-                let path = prefix.encode_path_leaf(true);
+                let path = prefix.as_nibbles().encode_path_leaf(true);
                 let mut out = encoded_header(true, path.length() + value.length());
                 path.encode(&mut out);
                 value.encode(&mut out);
@@ -73,7 +75,7 @@ impl Node {
                 out
             }
             Node::Extension(prefix, child) => {
-                let path = prefix.encode_path_leaf(false);
+                let path = prefix.as_nibbles().encode_path_leaf(false);
                 let node_ref = NodeRef::from_node(child);
                 let mut out = encoded_header(true, path.length() + node_ref.length());
                 path.encode(&mut out);
@@ -174,11 +176,8 @@ fn encoded_header(list: bool, payload_length: usize) -> Vec<u8> {
 
 #[cfg(test)]
 mod node_size {
-    use std::array::from_fn;
-
-    use nybbles::Nibbles;
-
     use super::Node;
+    use crate::key_nibbles::KeyNibbles;
 
     #[test]
     fn null() {
@@ -194,20 +193,23 @@ mod node_size {
 
     #[test]
     fn leaf() {
-        let node = Node::Leaf(Nibbles::default(), Box::new([]));
+        let key_nibbles = KeyNibbles::new(vec![0x1]);
+        let node = Node::Leaf(key_nibbles, Box::new([]));
         assert_eq!(node.size(), 1);
     }
 
     #[test]
     fn extension() {
-        let leaf = Node::Leaf(Nibbles::default(), Box::new([]));
-        let extension = Node::Extension(Nibbles::default(), Box::new(leaf));
+        let key_nibbles = KeyNibbles::new(vec![0x1]);
+        let leaf = Node::Leaf(key_nibbles.clone(), Box::new([]));
+        let extension = Node::Extension(key_nibbles, Box::new(leaf));
         assert_eq!(extension.size(), 2);
     }
 
     #[test]
     fn branch_one_child() {
-        let leaf = Node::Leaf(Nibbles::default(), Box::new([]));
+        let key_nibbles = KeyNibbles::new(vec![0x1]);
+        let leaf = Node::Leaf(key_nibbles, Box::new([]));
         let child = Some(Box::new(leaf));
         const NULL_CHILD: Option<Box<Node>> = None;
         let mut children = [NULL_CHILD; 16];
@@ -218,16 +220,18 @@ mod node_size {
 
     #[test]
     fn branch_many_children() {
-        let leaf = Node::Leaf(Nibbles::default(), Box::new([]));
+        let key_nibbles = KeyNibbles::new(vec![0x1]);
+        let leaf = Node::Leaf(key_nibbles.clone(), Box::new([]));
         let child = Some(Box::new(leaf));
-        let children: [_; 16] = from_fn(|_| child.clone());
+        let children: [_; 16] = std::array::from_fn(|_| child.clone());
         let branch = Node::Branch(children, None);
         assert_eq!(branch.size(), 17);
     }
 
     #[test]
     fn branch_with_value() {
-        let leaf = Node::Leaf(Nibbles::default(), Box::new([]));
+        let key_nibbles = KeyNibbles::new(vec![0x1]);
+        let leaf = Node::Leaf(key_nibbles, Box::new([]));
         let child = Some(Box::new(leaf));
         const NULL_CHILD: Option<Box<Node>> = None;
         let mut children = [NULL_CHILD; 16];
