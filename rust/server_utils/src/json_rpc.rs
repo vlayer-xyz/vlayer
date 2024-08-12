@@ -14,10 +14,14 @@ where
     })
 }
 
-pub async fn route(request: JsonRpcExtractor, handler: impl JsonRpcHandler) -> JrpcResult {
-    let method = request.method();
-    match method {
-        "v_call" => handle(request, handler).await,
-        _ => Err(request.method_not_found(method)),
+pub async fn route(
+    request: JsonRpcExtractor,
+    method: &str,
+    handler: impl JsonRpcHandler,
+) -> JrpcResult {
+    let called_method = request.method();
+    match called_method {
+        method => handle(request, handler).await,
+        _ => Err(request.method_not_found(called_method)),
     }
 }

@@ -77,7 +77,10 @@ pub fn server(config: ServerConfig) -> Router {
     let config = Arc::new(config);
 
     Router::new()
-        .route("/", post(move |req| route(req, VCall::new(config.clone()))))
+        .route(
+            "/",
+            post(move |req| route(req, "v_call", VCall::new(config.clone()))),
+        )
         .layer(init_trace_layer())
         // NOTE: RequestIdLayer should be added after the Trace layer
         .layer(RequestIdLayer)
