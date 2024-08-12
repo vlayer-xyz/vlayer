@@ -70,7 +70,7 @@ mod encodable {
         node.encode(&mut out);
 
         assert_eq!(node.length(), 1);
-        assert_eq!(out, vec![EMPTY_STRING_CODE]);
+        assert_eq!(out, [EMPTY_STRING_CODE]);
     }
 
     #[test]
@@ -82,13 +82,13 @@ mod encodable {
 
         assert_eq!(node.length(), 33);
         assert_eq!(out[0], EMPTY_STRING_CODE + 32);
-        assert_eq!(out[1..], vec![0x1; 32]);
+        assert_eq!(out[1..], [0x1; 32]);
     }
 
     #[test]
     fn inline_node() {
         let key_nibbles = KeyNibbles::new([0x1]);
-        let leaf_node = Node::Leaf(key_nibbles, vec![0x1].into());
+        let leaf_node = Node::Leaf(key_nibbles, [0x1].into());
         let node_ref = NodeRef::from_node(&leaf_node);
         let out = encode(node_ref.clone());
 

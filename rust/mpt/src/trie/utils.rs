@@ -53,7 +53,7 @@ mod parse_node {
     #[test]
     fn non_inline() -> anyhow::Result<()> {
         let nibbles = KeyNibbles::unpack(B256::ZERO);
-        let node = Node::Leaf(nibbles.clone(), vec![0].into());
+        let node = Node::Leaf(nibbles.clone(), [0].into());
         let (hash, node) = parse_node(node.rlp_encoded())?;
         assert_eq!(
             hash,
@@ -61,7 +61,7 @@ mod parse_node {
                 "ebcd1aff3f48f44a89c8bceb54a7e73c44edda96852b9debc4447b5ac9be19a6"
             ))
         );
-        assert_eq!(node, Node::Leaf(nibbles, vec![0].into()));
+        assert_eq!(node, Node::Leaf(nibbles, [0].into()));
         Ok(())
     }
 }
@@ -88,10 +88,10 @@ mod resolve_trie {
     #[test]
     fn leaf() {
         let key_nibbles = KeyNibbles::new([0]);
-        let root = Node::Leaf(key_nibbles.clone(), vec![0].into());
+        let root = Node::Leaf(key_nibbles.clone(), [0].into());
         let nodes_by_hash = HashMap::new();
         let resolved_node = resolve_trie(root, &nodes_by_hash);
-        assert_eq!(resolved_node, Node::Leaf(key_nibbles, vec![0].into()));
+        assert_eq!(resolved_node, Node::Leaf(key_nibbles, [0].into()));
     }
 
     #[test]
@@ -118,7 +118,7 @@ mod resolve_trie {
     fn extension() {
         let leaf_nibbles = KeyNibbles::new([1]);
         let extension_nibbles = KeyNibbles::new([0]);
-        let leaf = Node::Leaf(leaf_nibbles.clone(), vec![0].into());
+        let leaf = Node::Leaf(leaf_nibbles.clone(), [0].into());
         let digest = keccak256(leaf.rlp_encoded());
         let extension = Node::Extension(extension_nibbles.clone(), Box::new(Node::Digest(digest)));
         let nodes_by_hash = HashMap::from([(digest, leaf.clone())]);
@@ -132,7 +132,7 @@ mod resolve_trie {
     #[test]
     fn branch() {
         let leaf_nibbles = KeyNibbles::new([1]);
-        let leaf = Node::Leaf(leaf_nibbles.clone(), vec![0].into());
+        let leaf = Node::Leaf(leaf_nibbles.clone(), [0].into());
         let digest = keccak256(leaf.rlp_encoded());
         let child = None;
         let mut children: [_; 16] = from_fn(|_| child.clone());
@@ -150,13 +150,13 @@ mod resolve_trie {
     fn branch_with_value() {
         let child = None;
         let children: [_; 16] = from_fn(|_| child.clone());
-        let value = Some(vec![42u8].into());
+        let value = Some([42u8].into());
         let branch = Node::Branch(children, value);
         let nodes_by_hash = HashMap::new();
         let resolved_node = resolve_trie(branch, &nodes_by_hash);
         let Node::Branch(_children, Some(value)) = resolved_node else {
             panic!("expected branch with value, got {:?}", resolved_node);
         };
-        assert_eq!(value, vec![42u8].into());
+        assert_eq!(value, [42u8].into());
     }
 }

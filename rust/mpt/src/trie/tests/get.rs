@@ -20,7 +20,7 @@ fn digest() {
 
 #[test]
 fn leaf() {
-    let mpt = MerkleTrie(Node::Leaf(KeyNibbles::unpack(B256::ZERO), vec![0].into()));
+    let mpt = MerkleTrie(Node::Leaf(KeyNibbles::unpack(B256::ZERO), [0].into()));
     // A single leaf proves the inclusion of the key and non-inclusion of any other key
     assert_eq!(mpt.get(B256::ZERO), Some(&[0][..]));
     assert_eq!(mpt.get([]), None);
@@ -31,14 +31,8 @@ fn leaf() {
 #[test]
 fn branch() {
     let mut children: [Option<Box<Node>>; 16] = Default::default();
-    children[0] = Some(Box::new(Node::Leaf(
-        KeyNibbles::new([0; 63]),
-        vec![0].into(),
-    )));
-    children[1] = Some(Box::new(Node::Leaf(
-        KeyNibbles::new([1; 63]),
-        vec![1].into(),
-    )));
+    children[0] = Some(Box::new(Node::Leaf(KeyNibbles::new([0; 63]), [0].into())));
+    children[1] = Some(Box::new(Node::Leaf(KeyNibbles::new([1; 63]), [1].into())));
 
     let mpt = MerkleTrie(Node::Branch(children, None));
 
@@ -52,7 +46,7 @@ fn branch() {
 #[test]
 fn branch_with_value() {
     let children: [Option<Box<Node>>; 16] = Default::default();
-    let value = Some(vec![42u8].into());
+    let value = Some([42u8].into());
     let mpt = MerkleTrie(Node::Branch(children, value));
 
     assert_eq!(mpt.get([]), Some(&[42u8][..]));
@@ -63,14 +57,8 @@ fn branch_with_value() {
 #[test]
 fn extension() {
     let mut children: [Option<Box<Node>>; 16] = Default::default();
-    children[0] = Some(Box::new(Node::Leaf(
-        KeyNibbles::new([0; 62]),
-        vec![0].into(),
-    )));
-    children[1] = Some(Box::new(Node::Leaf(
-        KeyNibbles::new([1; 62]),
-        vec![1].into(),
-    )));
+    children[0] = Some(Box::new(Node::Leaf(KeyNibbles::new([0; 62]), [0].into())));
+    children[1] = Some(Box::new(Node::Leaf(KeyNibbles::new([1; 62]), [1].into())));
     let branch = Node::Branch(children, None);
     let mpt = MerkleTrie(Node::Extension(KeyNibbles::new([0; 1]), branch.into()));
 
