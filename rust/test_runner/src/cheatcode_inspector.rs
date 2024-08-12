@@ -1,17 +1,14 @@
 use alloy_sol_types::SolCall;
-use forge::revm::JournaledState;
 use call_engine::utils::evm_call::{
-    create_raw_return_outcome, create_encoded_return_outcome, create_revert_outcome, split_calldata,
+    create_encoded_return_outcome, create_return_outcome, create_revert_outcome, split_calldata,
 };
+use forge::revm::JournaledState;
 use foundry_evm::revm::interpreter::{CallInputs, CallOutcome};
 use foundry_evm::revm::primitives::U256;
 use foundry_evm::revm::{Database, EvmContext, Inspector};
 
 use call_engine::config::SEPOLIA_ID;
 use call_engine::io::Call;
-use call_engine::utils::evm_call::{
-    create_raw_return_outcome, create_return_outcome, create_revert_outcome, split_calldata,
-};
 use call_host::host::config::HostConfig;
 use call_host::host::Host;
 
@@ -32,11 +29,14 @@ impl<DB: Database> Inspector<DB> for CheatcodeInspector {
         if self.should_start_proving {
             self.should_start_proving = false;
             let host = create_host(&context.journaled_state);
-            return match host.run(Call {
-                to: inputs.target_address,
-                data: inputs.input.clone().into(),
-            }) {
-                Ok(host_output) => Some(create_raw_return_outcome(
+            return match host.run(
+                Call {
+                    to: inputs.target_address,
+                    data: inputs.input.clone().into(),
+                },
+                None,
+            ) {
+                Ok(host_output) => Some(create_return_outcome(
                     host_output.guest_output.evm_call_result,
                     inputs,
                 )),
@@ -71,7 +71,7 @@ fn create_host(journaled_state: &JournaledState) -> Host<PendingStateProvider> {
         },
         HostConfig {
             rpc_urls: Default::default(),
-            chain_id: SEPOLIA_ID,
+            start_chain_id: SEPOLIA_ID,
         },
     )
     .expect("Failed to create host")
