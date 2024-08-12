@@ -31,8 +31,8 @@ fn leaf() {
 #[test]
 fn branch() {
     let mut children: [Option<Box<Node>>; 16] = Default::default();
-    children[0] = Some(Box::new(Node::Leaf(KeyNibbles::new([0; 63]), [0].into())));
-    children[1] = Some(Box::new(Node::Leaf(KeyNibbles::new([1; 63]), [1].into())));
+    children[0] = Some(Box::new(Node::Leaf([0; 63].into(), [0].into())));
+    children[1] = Some(Box::new(Node::Leaf([1; 63].into(), [1].into())));
 
     let mpt = MerkleTrie(Node::Branch(children, None));
 
@@ -57,10 +57,10 @@ fn branch_with_value() {
 #[test]
 fn extension() {
     let mut children: [Option<Box<Node>>; 16] = Default::default();
-    children[0] = Some(Box::new(Node::Leaf(KeyNibbles::new([0; 62]), [0].into())));
-    children[1] = Some(Box::new(Node::Leaf(KeyNibbles::new([1; 62]), [1].into())));
+    children[0] = Some(Box::new(Node::Leaf([0; 62].into(), [0].into())));
+    children[1] = Some(Box::new(Node::Leaf([1; 62].into(), [1].into())));
     let branch = Node::Branch(children, None);
-    let mpt = MerkleTrie(Node::Extension(KeyNibbles::new([0; 1]), branch.into()));
+    let mpt = MerkleTrie(Node::Extension([0; 1].into(), branch.into()));
 
     assert_eq!(mpt.get(B256::ZERO), Some(&[0][..]));
     assert_eq!(

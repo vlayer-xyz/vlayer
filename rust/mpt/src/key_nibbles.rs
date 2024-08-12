@@ -7,11 +7,6 @@ use serde::{Deserialize, Serialize};
 pub struct KeyNibbles(Nibbles);
 
 impl KeyNibbles {
-    pub fn new<T: AsRef<[u8]>>(input: T) -> Self {
-        let nibbles = Nibbles::from_nibbles(input);
-        Self::from_nibbles(nibbles)
-    }
-
     pub fn unpack<T: AsRef<[u8]>>(data: T) -> Self {
         let nibbles = Nibbles::unpack(data);
         Self::from_nibbles(nibbles)
@@ -35,6 +30,13 @@ impl PartialEq<[u8]> for KeyNibbles {
     }
 }
 
+impl<T: AsRef<[u8]>> From<T> for KeyNibbles {
+    fn from(input: T) -> Self {
+        let nibbles = Nibbles::from_nibbles(input);
+        Self::from_nibbles(nibbles)
+    }
+}
+
 #[cfg(test)]
 mod new {
     use super::*;
@@ -42,7 +44,7 @@ mod new {
     #[test]
     fn non_empty() {
         let valid_nibbles = vec![0x1, 0x2, 0x3];
-        let key_nibbles = KeyNibbles::new(&valid_nibbles);
+        let key_nibbles: KeyNibbles = valid_nibbles[..].into();
 
         assert_eq!(key_nibbles, valid_nibbles[..]);
     }
@@ -51,6 +53,6 @@ mod new {
     #[should_panic(expected = "KeyNibbles cannot be empty")]
     fn empty() {
         let empty_nibbles = vec![];
-        let _ = KeyNibbles::new(&empty_nibbles);
+        let _: KeyNibbles = empty_nibbles.into();
     }
 }

@@ -35,7 +35,7 @@ fn digest() {
 
 #[test]
 fn leaf() {
-    let key_nibbles = KeyNibbles::new(B256::ZERO);
+    let key_nibbles: KeyNibbles = B256::ZERO.into();
     let mpt = MerkleTrie(Node::Leaf(key_nibbles, [0].into()));
     let proof = rlp_encoded(&mpt.0);
     assert_eq!(mpt, MerkleTrie::from_rlp_nodes(proof).unwrap());

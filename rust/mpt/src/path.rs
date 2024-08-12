@@ -28,7 +28,7 @@ where
         let odd_nibbles = path[0] & 1 != 0;
 
         let prefix = if odd_nibbles { &path[1..] } else { &path[2..] };
-        let nibbles = KeyNibbles::new(prefix);
+        let nibbles: KeyNibbles = prefix.into();
         Path { nibbles, kind }
     }
 }

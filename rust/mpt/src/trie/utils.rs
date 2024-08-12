@@ -87,7 +87,7 @@ mod resolve_trie {
 
     #[test]
     fn leaf() {
-        let key_nibbles = KeyNibbles::new([0]);
+        let key_nibbles: KeyNibbles = [0].into();
         let root = Node::Leaf(key_nibbles.clone(), [0].into());
         let nodes_by_hash = HashMap::new();
         let resolved_node = resolve_trie(root, &nodes_by_hash);
@@ -116,9 +116,8 @@ mod resolve_trie {
 
     #[test]
     fn extension() {
-        let leaf_nibbles = KeyNibbles::new([1]);
-        let extension_nibbles = KeyNibbles::new([0]);
-        let leaf = Node::Leaf(leaf_nibbles.clone(), [0].into());
+        let extension_nibbles: KeyNibbles = [0].into();
+        let leaf = Node::Leaf([1].into(), [0].into());
         let digest = keccak256(leaf.rlp_encoded());
         let extension = Node::Extension(extension_nibbles.clone(), Box::new(Node::Digest(digest)));
         let nodes_by_hash = HashMap::from([(digest, leaf.clone())]);
@@ -131,8 +130,7 @@ mod resolve_trie {
 
     #[test]
     fn branch() {
-        let leaf_nibbles = KeyNibbles::new([1]);
-        let leaf = Node::Leaf(leaf_nibbles.clone(), [0].into());
+        let leaf = Node::Leaf([1].into(), [0].into());
         let digest = keccak256(leaf.rlp_encoded());
         let child = None;
         let mut children: [_; 16] = from_fn(|_| child.clone());

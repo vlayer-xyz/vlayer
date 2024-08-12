@@ -6,8 +6,8 @@ use lazy_static::lazy_static;
 lazy_static! {
     static ref MPT_BRANCH_WITH_TWO_CHILDREN: MerkleTrie = {
         let mut children: [Option<Box<Node>>; 16] = Default::default();
-        children[0] = Some(Box::new(Node::Leaf(KeyNibbles::new([0; 63]), [0].into())));
-        children[1] = Some(Box::new(Node::Leaf(KeyNibbles::new([1; 63]), [1].into())));
+        children[0] = Some(Box::new(Node::Leaf([0; 63].into(), [0].into())));
+        children[1] = Some(Box::new(Node::Leaf([1; 63].into(), [1].into())));
         MerkleTrie(Node::Branch(children, None))
     };
 }
@@ -36,7 +36,7 @@ fn leaf() {
 #[test]
 fn extension() {
     let leaf = Node::Leaf(KeyNibbles::unpack([1]), [0].into());
-    let mpt = MerkleTrie(Node::Extension(KeyNibbles::new([0; 1]), leaf.into()));
+    let mpt = MerkleTrie(Node::Extension([0; 1].into(), leaf.into()));
     assert_eq!(
         mpt.hash_slow(),
         b256!("36a045336263723ea10ae76482d278f4212fe858a6937204ecc747921e2bc8c1")
