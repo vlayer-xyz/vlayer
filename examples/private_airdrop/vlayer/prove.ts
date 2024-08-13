@@ -3,14 +3,14 @@ import * as path from "path";
 import { type Address } from "viem";
 import { privateKeyToAccount, generatePrivateKey } from 'viem/accounts'
 
-const TOKEN = "VToyken";
+const TOKEN = "ExampleToken";
 const TOKEN_FILE = path.join(__dirname, `../out/${TOKEN}.sol/${TOKEN}.json`)
 const TOKEN_SPEC = await getContractSpec(TOKEN_FILE);
 
 const PROVER = "PrivateAirdropProver";
 const FILE = path.join(__dirname, `../out/${PROVER}.sol/${PROVER}.json`)
 const PROVER_SPEC = await getContractSpec(FILE);
-const FUNCTION_NAME = 'prove'
+const FUNCTION_NAME = 'main'
 
 const client = helpers.client();
 const account = privateKeyToAccount(generatePrivateKey())
