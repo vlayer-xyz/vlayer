@@ -16,15 +16,24 @@ fn from_two_ordered_entries(lhs: Entry, rhs: Entry) -> Node {
     if lhs.key == rhs.key {
         panic!("Key already exists")
     }
+    let (rhs_nibble, rhs) = rhs.split_first_key_nibble();
     if lhs.key.is_empty() {
         let mut children: [Option<Box<Node>>; 16] = from_fn(|_| None);
-        let (rhs_nibble, rhs) = rhs.split_first_key_nibble();
-        let node: Node = rhs.into();
-        children[rhs_nibble as usize] = Some(Box::new(node));
-        return branch(children, lhs.value);
-    };
+        children[rhs_nibble as usize] = Some(Box::new(rhs.into()));
 
-    unimplemented!()
+        return branch(children, Some(lhs.value));
+    } else {
+        let (lhs_nibble, lhs) = lhs.split_first_key_nibble();
+        if lhs_nibble != rhs_nibble {
+            let mut children: [Option<Box<Node>>; 16] = from_fn(|_| None);
+            children[lhs_nibble as usize] = Some(Box::new(lhs.into()));
+            children[rhs_nibble as usize] = Some(Box::new(rhs.into()));
+
+            return branch(children, None);
+        } else {
+            unimplemented!()
+        }
+    }
 }
 
 fn from_two_entries(lhs: impl Into<Entry>, rhs: impl Into<Entry>) -> Node {

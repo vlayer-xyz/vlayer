@@ -26,7 +26,7 @@ impl From<Entry> for Node {
     fn from(entry: Entry) -> Self {
         if entry.key.is_empty() {
             let children = from_fn(|_| None);
-            branch(children, entry.value)
+            branch(children, Some(entry.value))
         } else {
             leaf(entry.key, entry.value)
         }
