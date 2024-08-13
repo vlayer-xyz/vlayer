@@ -53,8 +53,31 @@ impl Entry {
     }
 }
 
+// Expects lhs key length to be less or equal to rhs key length.
+fn from_two_ordered_entries(lhs: Entry, rhs: Entry) -> Node {
+    debug_assert!(lhs.key.len() <= rhs.key.len());
+    if lhs.key == rhs.key {
+        panic!("Key already exists")
+    }
+    if lhs.key.is_empty() {
+        let mut children: [Option<Box<Node>>; 16] = from_fn(|_| None);
+        let (rhs_nibble, rhs) = rhs.split_first_key_nibble();
+        let node: Node = rhs.into();
+        children[rhs_nibble as usize] = Some(Box::new(node));
+        return branch(children, lhs.value);
+    };
+
+    unimplemented!()
+}
+
 fn from_two_entries(lhs: impl Into<Entry>, rhs: impl Into<Entry>) -> Node {
-    todo!()
+    let lhs: Entry = lhs.into();
+    let rhs: Entry = rhs.into();
+    if lhs.key.len() <= rhs.key.len() {
+        from_two_ordered_entries(lhs, rhs)
+    } else {
+        from_two_ordered_entries(rhs, lhs)
+    }
 }
 
 impl Node {
@@ -122,6 +145,15 @@ mod node_insert {
 
         mod new_key_is_prefix_of_existing_key {
             use super::*;
+
+            #[test]
+            fn empty_common_prefix() {
+                let node = leaf([1], [42]);
+                let updated_node = node.insert([], [43]);
+
+                assert_eq!(updated_node.get([1]).unwrap(), [42]);
+                assert_eq!(updated_node.get([]).unwrap(), [43]);
+            }
 
             #[test]
             fn single_nibble_common_prefix() {
