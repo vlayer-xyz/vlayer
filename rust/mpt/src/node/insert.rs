@@ -24,6 +24,12 @@ impl Node {
                 }
             }
             Node::Digest(_) => panic!("Cannot insert into a digest node"),
+            Node::Leaf(old_key_nibs, old_value) => {
+                if old_key_nibs == key_nibs {
+                    panic!("Prefix already exists")
+                }
+                todo!()
+            }
             _ => todo!(),
         }
     }
@@ -31,6 +37,7 @@ impl Node {
 
 #[cfg(test)]
 mod node_insert {
+    use super::*;
     use crate::node::Node;
 
     mod null {
@@ -58,6 +65,17 @@ mod node_insert {
         #[should_panic(expected = "Cannot insert into a digest node")]
         fn panics() {
             let node = Node::Digest(Default::default());
+            node.insert([1], [42]);
+        }
+    }
+
+    mod leaf {
+        use super::*;
+
+        #[test]
+        #[should_panic(expected = "Prefix already exists")]
+        fn override_attempt() {
+            let node = leaf([1], [42]);
             node.insert([1], [42]);
         }
     }
