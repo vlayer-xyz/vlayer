@@ -13,7 +13,7 @@ on:
 
 jobs:
   e2e-test:
-    runs-on: aws-linux-small
+    runs-on: aws-linux-medium
     steps:
       - uses: oven-sh/setup-bun@v2
       - name: Checkout repository
@@ -47,7 +47,7 @@ jobs:
 
       - name: Build vlayer
         working-directory: rust
-        run: cargo build --package cli
+        run: cargo build --package cli --release
 
       - name: Run e2e test
         env:
