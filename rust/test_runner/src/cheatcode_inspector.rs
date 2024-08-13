@@ -28,20 +28,7 @@ impl<DB: Database> Inspector<DB> for CheatcodeInspector {
     ) -> Option<CallOutcome> {
         if self.should_start_proving {
             self.should_start_proving = false;
-            let host = create_host(&context.journaled_state);
-            return match host.run(
-                Call {
-                    to: inputs.target_address,
-                    data: inputs.input.clone().into(),
-                },
-                None,
-            ) {
-                Ok(host_output) => Some(create_return_outcome(
-                    host_output.guest_output.evm_call_result,
-                    inputs,
-                )),
-                Err(error) => Some(create_revert_outcome(&format!("{:?}", error))),
-            };
+            return Some(self.run_host(&context, inputs));
         }
         if inputs.target_address == CHEATCODE_CALL_ADDR {
             let (selector, _) = split_calldata(inputs);
@@ -61,6 +48,29 @@ impl<DB: Database> Inspector<DB> for CheatcodeInspector {
             };
         }
         None
+    }
+}
+
+impl CheatcodeInspector {
+    fn run_host<DB: Database>(
+        &self,
+        context: &&mut EvmContext<DB>,
+        inputs: &mut CallInputs,
+    ) -> CallOutcome {
+        let host = create_host(&context.journaled_state);
+        let call_result = host.run(
+            Call {
+                to: inputs.target_address,
+                data: inputs.input.clone().into(),
+            },
+            None,
+        );
+        return match call_result {
+            Ok(host_output) => {
+                create_return_outcome(host_output.guest_output.evm_call_result, inputs)
+            }
+            Err(error) => create_revert_outcome(&format!("{:?}", error)),
+        };
     }
 }
 
