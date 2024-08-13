@@ -1,14 +1,27 @@
+use std::array::from_fn;
+
 use super::Node;
 
 fn leaf(key_nibs: impl AsRef<[u8]>, value: impl AsRef<[u8]>) -> Node {
     Node::Leaf(key_nibs.into(), value.as_ref().into())
 }
 
+fn branch(value: impl AsRef<[u8]>) -> Node {
+    let children = from_fn(|_| None);
+    Node::Branch(children, Some(value.as_ref().into()))
+}
+
 impl Node {
     #[allow(unused)]
     pub fn insert(self, key_nibs: impl AsRef<[u8]>, value: impl AsRef<[u8]>) -> Node {
         match self {
-            Node::Null => leaf(key_nibs, value),
+            Node::Null => {
+                if key_nibs.as_ref().is_empty() {
+                    branch(value)
+                } else {
+                    leaf(key_nibs, value)
+                }
+            }
             _ => todo!(),
         }
     }
@@ -26,6 +39,13 @@ mod node_insert {
             let node = Node::Null;
             let updated_node = node.insert([1], [42]);
             assert_eq!(updated_node.get([1]).unwrap(), [42]);
+        }
+
+        #[test]
+        fn empty_key() {
+            let node = Node::Null;
+            let updated_node = node.insert([], [42]);
+            assert_eq!(updated_node.get([]).unwrap(), [42]);
         }
     }
 }
