@@ -91,7 +91,7 @@ pub fn prove_storage(
     storage: &HashMap<U256, EvmStorageSlot>,
     storage_keys: &[FixedBytes<32>],
 ) -> Vec<StorageProof> {
-    let keys: Vec<_> = storage_keys.iter().map(|key| to_nibbles(key)).collect();
+    let keys: Vec<_> = storage_keys.iter().map(to_nibbles).collect();
 
     let all_proof_nodes = build_proof(keys.clone(), trie_storage(storage));
 
