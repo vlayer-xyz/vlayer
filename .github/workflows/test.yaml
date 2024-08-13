@@ -40,10 +40,21 @@ jobs:
         with:
           version: nightly-5ac78a9cd4b94dc53d1fe5e0f42372b28b5a7559 # 2024-06-02
 
-      - name: Install LLVM and Clang
-        uses: KyleMayes/install-llvm-action@v2.0.3
-        with:
-          version: "17.0.5"
+      - name: Check clang and LLVM version
+        env:
+          EXPECTED_LLVM_VERSION: "18.1"
+        run: |
+          if ! command -v clang &> /dev/null; then
+            echo "clang command not found"
+            exit 1
+          fi
+
+          LLVM_VERSION=$(llvm-config --version)
+          if [[ "$LLVM_VERSION" != "$EXPECTED_LLVM_VERSION"* ]]; then
+            echo "LLVM version mismatches $EXPECTED_LLVM_VERSION. Found version: $LLVM_VERSION"
+            exit 1
+          fi
+          echo "clang available and LLVM version starts with $EXPECTED_LLVM_VERSION"
 
       - name: Run workspace rust tests
         working-directory: rust
