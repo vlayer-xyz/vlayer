@@ -30,7 +30,7 @@ impl Node {
         let key_nibs = key_nibs.as_ref();
         match self {
             Node::Null => None,
-            Node::Leaf(prefix, value) if prefix == key_nibs => Some(value),
+            Node::Leaf(prefix, value) if *prefix == key_nibs => Some(value),
             Node::Leaf(..) => None,
             Node::Extension(prefix, child) => key_nibs
                 .strip_prefix(prefix.as_slice())

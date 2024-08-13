@@ -24,9 +24,12 @@ impl KeyNibbles {
     }
 }
 
-impl PartialEq<[u8]> for KeyNibbles {
-    fn eq(&self, other: &[u8]) -> bool {
-        self.0.as_slice() == other
+impl<T> PartialEq<T> for KeyNibbles
+where
+    T: AsRef<[u8]>,
+{
+    fn eq(&self, other: &T) -> bool {
+        self.0.as_slice() == other.as_ref()
     }
 }
 
@@ -46,7 +49,7 @@ mod new {
         let valid_nibbles = vec![0x1, 0x2, 0x3];
         let key_nibbles: KeyNibbles = valid_nibbles[..].into();
 
-        assert_eq!(key_nibbles, valid_nibbles[..]);
+        assert_eq!(key_nibbles, valid_nibbles);
     }
 
     #[test]
