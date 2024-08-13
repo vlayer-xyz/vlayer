@@ -13,14 +13,17 @@ interface IExample {
 contract WebProofProver is Prover {
     using Strings for string;
 
-    string dataWebProof = "api.x.com";
-
     constructor() {}
 
     function main(WebProof calldata webProof) public returns (bool) {
+        bytes calldata web_proof_json = bytes(webProof.web_proof_json);
         require(
-            webProof.web_proof_json.equal(dataWebProof),
-            "Incorrect web proof"
+            web_proof_json[0] == "{",
+            string(abi.encodePacked("Incorrect web proof"))
+        );
+        require(
+            web_proof_json[web_proof_json.length - 1] == "}",
+            string(abi.encodePacked("Incorrect web proof"))
         );
 
         return true;
