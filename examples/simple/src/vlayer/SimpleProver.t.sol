@@ -9,7 +9,7 @@ interface IFakeCheatcode {
 }
 
 contract ProverTest is VTest {
-    function test_sum() public {
+    function test_sumDoesNotRevertWithCallProver() public {
         SimpleProver prover = new SimpleProver();
         callProver();
         assertEq(prover.sum(1, 2), 3);
