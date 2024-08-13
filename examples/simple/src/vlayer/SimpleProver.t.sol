@@ -3,7 +3,6 @@ pragma solidity ^0.8.13;
 
 import {SimpleProver} from "./SimpleProver.sol";
 import "vlayer/testing/VTest.sol";
-import {Proof} from "vlayer/Proof.sol";
 
 interface IFakeCheatcode {
     function thisCheatCodeDoesNotExist() external returns (bool);

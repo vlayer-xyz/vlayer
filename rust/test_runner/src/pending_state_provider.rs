@@ -1,4 +1,3 @@
-use std::borrow::Borrow;
 use std::convert::Infallible;
 
 use call_engine::block_header::eth::EthBlockHeader;
@@ -30,9 +29,8 @@ impl PendingStateProvider {
     }
 
     fn all_account_proofs(&self) -> anyhow::Result<Vec<EIP1186Proof>> {
-        let state = self.state.borrow();
         let mut proofs = Vec::new();
-        for (address, account) in state {
+        for (address, account) in &self.state {
             let proof = self.get_proof(
                 *address,
                 account.storage.keys().map(|v| B256::from(*v)).collect(),
