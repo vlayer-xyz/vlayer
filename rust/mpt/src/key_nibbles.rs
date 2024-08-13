@@ -18,6 +18,10 @@ impl KeyNibbles {
         }
         KeyNibbles(nibbles)
     }
+
+    pub fn push_front(&self, nibble: u8) -> Self {
+        KeyNibbles(self.0.join(&Nibbles::from_vec(vec![nibble])))
+    }
 }
 
 impl<T> PartialEq<T> for KeyNibbles
