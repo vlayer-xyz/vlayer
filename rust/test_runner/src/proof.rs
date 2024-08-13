@@ -100,8 +100,9 @@ pub fn prove_storage(
         let matching_proof_nodes = all_proof_nodes
             .iter()
             .filter(|(path, _)| proof_key.starts_with(path))
-            .map(|(_, node)| node.clone());
-        proofs.push(matching_proof_nodes.collect());
+            .map(|(_, node)| node.clone())
+            .collect();
+        proofs.push(matching_proof_nodes);
     }
 
     storage_keys
