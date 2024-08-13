@@ -1,3 +1,4 @@
+use core::panic;
 use std::array::from_fn;
 
 use super::Node;
@@ -22,6 +23,7 @@ impl Node {
                     leaf(key_nibs, value)
                 }
             }
+            Node::Digest(_) => panic!("Cannot insert into a digest node"),
             _ => todo!(),
         }
     }
@@ -46,6 +48,17 @@ mod node_insert {
             let node = Node::Null;
             let updated_node = node.insert([], [42]);
             assert_eq!(updated_node.get([]).unwrap(), [42]);
+        }
+    }
+
+    mod digest {
+        use super::*;
+
+        #[test]
+        #[should_panic(expected = "Cannot insert into a digest node")]
+        fn panics() {
+            let node = Node::Digest(Default::default());
+            node.insert([1], [42]);
         }
     }
 }
