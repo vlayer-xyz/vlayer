@@ -33,7 +33,7 @@ impl PendingStateProvider {
         for (address, account) in &self.state {
             let proof = self.get_proof(
                 *address,
-                account.storage.keys().map(|v| B256::from(*v)).collect(),
+                account.storage.keys().map(|v| (*v).into()).collect(),
                 0,
             )?;
             proofs.push(proof);
