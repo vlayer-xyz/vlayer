@@ -9429,6 +9429,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "web_proof_methods"
+version = "0.1.0"
+dependencies = [
+ "risc0-build",
+]
+
+[[package]]
+name = "web_proof_profiling"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "risc0-zkvm",
+ "tracing-subscriber 0.3.18",
+ "web_proof_methods",
+]
+
+[[package]]
 name = "webpki"
 version = "0.22.4"
 source = "registry+https://github.com/rust-lang/crates.io-index"

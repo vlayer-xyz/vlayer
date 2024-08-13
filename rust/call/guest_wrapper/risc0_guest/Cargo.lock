@@ -3346,6 +3346,7 @@ dependencies = [
  "p256",
  "pkcs8",
  "serde",
+ "serde_json",
  "thiserror",
  "tlsn-core",
 ]

@@ -10,6 +10,7 @@ members = [
     "mpt",
     "test_runner",
     "web_proof",
+    "web_proof_profiling",
     "server_utils",
 ]
 default-members = ["cli"]

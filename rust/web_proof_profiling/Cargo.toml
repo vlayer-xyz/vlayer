@@ -1,0 +1,10 @@
+[package]
+name = "web_proof_profiling"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1.0"
+web_proof_methods = { path = "methods" }
+risc0-zkvm = { workspace = true }
+tracing-subscriber = { version = "0.3", features = ["env-filter"] }

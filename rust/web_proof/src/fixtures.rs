@@ -26,3 +26,7 @@ pub fn tls_proof_example() -> TlsProof {
     serde_json::from_str(str::from_utf8(include_bytes!("../testdata/tls_proof.json")).unwrap())
         .unwrap()
 }
+
+pub fn pub_key() -> PublicKey {
+    PublicKey::from_public_key_pem(NOTARY_PUB_KEY_PEM_EXAMPLE).unwrap()
+}

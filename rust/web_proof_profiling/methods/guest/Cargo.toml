@@ -1,0 +1,17 @@
+[package]
+name = "web-proof-guest"
+version = "0.1.0"
+edition = "2021"
+
+[workspace]
+
+[dependencies]
+web_proof = { path = "../../../web_proof" }
+risc0-zkvm = { version = "1.0.1", default-features = false, features = ["std"] }
+
+[profile.release]
+debug = 1
+
+[patch.crates-io]
+ring = { git = "https://github.com/briansmith/ring.git", rev= "7c0024abaf4fd59250c9b79cc41a029aa0ef3497" }
+
