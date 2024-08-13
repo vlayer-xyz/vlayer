@@ -4,7 +4,7 @@ pragma solidity ^0.8.13;
 import "@openzeppelin/contracts/utils/Strings.sol";
 
 import {Prover} from "vlayer/Prover.sol";
-import {Web} from "vlayer/Web.sol";
+import {WebProof} from "vlayer/WebProof.sol";
 
 interface IExample {
     function exampleFunction() external returns (uint256);
@@ -13,12 +13,15 @@ interface IExample {
 contract WebProofProver is Prover {
     using Strings for string;
 
-    string dataUrl = "api.x.com";
+    string dataWebProof = "api.x.com";
 
     constructor() {}
 
-    function main(Web calldata web) public returns (bool) {
-        require(web.url.equal(dataUrl), "Incorrect URL");
+    function main(WebProof calldata webProof) public returns (bool) {
+        require(
+            webProof.web_proof_json.equal(dataWebProof),
+            "Incorrect web proof"
+        );
 
         return true;
     }
