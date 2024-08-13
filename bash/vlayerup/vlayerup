@@ -14,7 +14,7 @@ main() {
   need_cmd git
   need_cmd curl
 
-  # Compute the URL of the release tarball in the Vlayer repository (will work with public repo)
+  # Compute the URL of the release tarball in the vlayer repository (will work with public repo)
   # TODO: Add support for different platforms/architectures
     PLATFORM=$(tolower "$(uname -s)")
     EXT="tar.gz"
