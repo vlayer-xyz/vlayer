@@ -78,5 +78,36 @@ mod node_insert {
             let node = leaf([1], [42]);
             node.insert([1], [42]);
         }
+
+        mod new_key_is_prefix_of_existing_key {
+            use super::*;
+
+            #[test]
+            fn single_nibble_common_prefix() {
+                let node = leaf([1, 2, 3], [42]);
+                let updated_node = node.insert([1], [43]);
+
+                assert_eq!(updated_node.get([1, 2, 3]).unwrap(), [42]);
+                assert_eq!(updated_node.get([1]).unwrap(), [43]);
+            }
+
+            #[test]
+            fn single_nibble_leftover_suffix() {
+                let node = leaf([1, 2, 3], [42]);
+                let updated_node = node.insert([1, 2], [43]);
+
+                assert_eq!(updated_node.get([1, 2, 3]).unwrap(), [42]);
+                assert_eq!(updated_node.get([1, 2]).unwrap(), [43]);
+            }
+
+            #[test]
+            fn both_common_prefix_and_leftover_suffix_have_more_than_one_nibble() {
+                let node = leaf([1, 2, 3, 4], [42]);
+                let updated_node = node.insert([1, 2], [43]);
+
+                assert_eq!(updated_node.get([1, 2, 3, 4]).unwrap(), [42]);
+                assert_eq!(updated_node.get([1, 2]).unwrap(), [43]);
+            }
+        }
     }
 }
