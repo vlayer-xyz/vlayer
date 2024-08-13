@@ -235,7 +235,7 @@ mod node_size {
         const NULL_CHILD: Option<Box<Node>> = None;
         let mut children = [NULL_CHILD; 16];
         children[0] = child;
-        let value = Some([42].as_slice().into());
+        let value = Some([42].into());
         let branch = Node::Branch(children, value);
         assert_eq!(branch.get([]).unwrap(), [42]);
     }

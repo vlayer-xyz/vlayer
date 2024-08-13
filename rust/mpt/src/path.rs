@@ -43,7 +43,7 @@ mod decode_path {
         let path: Path = [0x00, 0x12].into();
 
         assert_eq!(path.kind, Extension);
-        assert_eq!(path.nibbles.as_slice(), &[0x1, 0x2][..]);
+        assert_eq!(path.nibbles, [0x1, 0x2]);
     }
 
     #[test]
@@ -51,7 +51,7 @@ mod decode_path {
         let path: Path = [0x11, 0x23].into();
 
         assert_eq!(path.kind, Extension);
-        assert_eq!(path.nibbles.as_slice(), &[0x1, 0x2, 0x3][..]);
+        assert_eq!(path.nibbles, [0x1, 0x2, 0x3]);
     }
 
     #[test]
@@ -59,7 +59,7 @@ mod decode_path {
         let path: Path = [0x20, 0x12].into();
 
         assert_eq!(path.kind, Leaf);
-        assert_eq!(path.nibbles.as_slice(), &[0x1, 0x2][..]);
+        assert_eq!(path.nibbles, [0x1, 0x2]);
     }
 
     #[test]
@@ -67,7 +67,7 @@ mod decode_path {
         let path: Path = [0x31, 0x23].into();
 
         assert_eq!(path.kind, Leaf);
-        assert_eq!(path.nibbles.as_slice(), &[0x1, 0x2, 0x3][..]);
+        assert_eq!(path.nibbles, [0x1, 0x2, 0x3]);
     }
 
     #[test]
