@@ -1,5 +1,3 @@
-use std::convert::Infallible;
-
 use call_engine::block_header::eth::EthBlockHeader;
 use call_engine::block_header::EvmBlockHeader;
 use call_engine::config::MAINNET_MERGE_BLOCK_NUMBER;
@@ -13,6 +11,7 @@ use forge::revm::primitives::alloy_primitives::{
     BlockNumber, ChainId, StorageKey, StorageValue, TxNumber,
 };
 use forge::revm::primitives::{Account, Address, Bytes, EvmState, B256, U256};
+use std::convert::Infallible;
 
 use crate::proof::{account_proof, prove_storage, storage_root};
 
@@ -28,23 +27,24 @@ impl PendingStateProvider {
         }
     }
 
-    fn all_account_proofs(&self) -> anyhow::Result<Vec<EIP1186Proof>> {
-        let mut proofs = Vec::new();
-        for (address, account) in &self.state {
-            let proof = self.get_proof(
-                *address,
-                account.storage.keys().map(|v| (*v).into()).collect(),
-                0,
-            )?;
-            proofs.push(proof);
-        }
-        Ok(proofs)
+    fn all_account_proofs(&self) -> Vec<EIP1186Proof> {
+        self.state
+            .iter()
+            .map(|(address, account)| {
+                self.get_proof(
+                    *address,
+                    account.storage.keys().map(|v| (*v).into()).collect(),
+                    0,
+                )
+                .unwrap()
+            })
+            .collect()
     }
 
-    fn get_state_root(&self) -> anyhow::Result<B256> {
-        let proofs = self.all_account_proofs()?;
-        let state_trie = ProofDb::<PendingStateProvider>::state_trie(&proofs)?;
-        Ok(state_trie.hash_slow())
+    fn get_state_root(&self) -> B256 {
+        let proofs = self.all_account_proofs();
+        let state_trie = ProofDb::<PendingStateProvider>::state_trie(&proofs);
+        state_trie.map_or(Default::default(), |trie| trie.hash_slow())
     }
 }
 
@@ -60,8 +60,12 @@ impl BlockingProvider for PendingStateProvider {
         _block: BlockTag,
     ) -> Result<Option<Box<dyn EvmBlockHeader>>, Self::Error> {
         Ok(Some(Box::new(EthBlockHeader {
+            /*
+             * This only used to initialize EVMConfig, need to be after merge to succeed
+             * this is not used for block.number variable in Solidity
+             */
             number: MAINNET_MERGE_BLOCK_NUMBER,
-            state_root: self.get_state_root().unwrap_or_default(),
+            state_root: self.get_state_root(),
             ..EthBlockHeader::default()
         })))
     }

@@ -8421,7 +8421,6 @@ dependencies = [
  "alloy-rlp",
  "alloy-sol-types",
  "alloy-trie",
- "anyhow",
  "call_engine",
  "call_host",
  "clap",

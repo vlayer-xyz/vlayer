@@ -1,15 +1,15 @@
-use alloy_primitives::{Address, Bytes, FixedBytes, B256, U256};
+use alloy_primitives::{keccak256, Address, Bytes, FixedBytes, B256, U256};
+use alloy_rlp::encode;
 use alloy_trie::proof::ProofRetainer;
 use alloy_trie::{HashBuilder, Nibbles};
 use call_host::proof::StorageProof;
-use ethers_core::utils::keccak256;
 use forge::revm::primitives::alloy_primitives::private::alloy_rlp;
 use forge::revm::primitives::alloy_primitives::private::alloy_rlp::Encodable;
 use forge::revm::primitives::{Account, AccountInfo, EvmState, EvmStorageSlot};
 use std::collections::{BTreeMap, HashMap};
 
-fn address_to_nibbles(address: Address) -> Nibbles {
-    Nibbles::unpack(keccak256(address))
+fn to_nibbles<T: AsRef<[u8]>>(word: T) -> Nibbles {
+    Nibbles::unpack(keccak256(word))
 }
 
 fn build_proof(targets: Vec<Nibbles>, leafs: Vec<(Nibbles, Vec<u8>)>) -> BTreeMap<Nibbles, Bytes> {
@@ -25,7 +25,7 @@ fn build_proof(targets: Vec<Nibbles>, leafs: Vec<(Nibbles, Vec<u8>)>) -> BTreeMa
 }
 
 pub fn account_proof(address: Address, evm_state: &EvmState) -> Vec<Bytes> {
-    build_proof(vec![address_to_nibbles(address)], trie_accounts(evm_state))
+    build_proof(vec![to_nibbles(address)], trie_accounts(evm_state))
         .values()
         .cloned()
         .collect::<Vec<_>>()
@@ -35,8 +35,10 @@ fn trie_accounts(accounts: &HashMap<Address, Account>) -> Vec<(Nibbles, Vec<u8>)
     let mut accounts = accounts
         .iter()
         .map(|(address, account)| {
-            let data = trie_account_rlp(&account.info, &account.storage);
-            (address_to_nibbles(*address), data)
+            (
+                to_nibbles(*address),
+                trie_account_rlp(&account.info, &account.storage),
+            )
         })
         .collect::<Vec<_>>();
     accounts.sort_by(|(key1, _), (key2, _)| key1.cmp(key2));
@@ -74,10 +76,9 @@ fn trie_storage(storage: &HashMap<U256, EvmStorageSlot>) -> Vec<(Nibbles, Vec<u8
     let mut storage = storage
         .iter()
         .map(|(key, value)| {
-            let data = alloy_rlp::encode(value.present_value);
             (
-                Nibbles::unpack(alloy_sol_types::private::keccak256(key.to_be_bytes::<32>())),
-                data,
+                to_nibbles(key.to_be_bytes::<32>()),
+                encode(value.present_value),
             )
         })
         .collect::<Vec<_>>();
@@ -90,10 +91,7 @@ pub fn prove_storage(
     storage: &HashMap<U256, EvmStorageSlot>,
     storage_keys: &[FixedBytes<32>],
 ) -> Vec<StorageProof> {
-    let keys: Vec<_> = storage_keys
-        .iter()
-        .map(|key| Nibbles::unpack(alloy_sol_types::private::keccak256(key)))
-        .collect();
+    let keys: Vec<_> = storage_keys.iter().map(|key| to_nibbles(key)).collect();
 
     let all_proof_nodes = build_proof(keys.clone(), trie_storage(storage));
 
@@ -157,7 +155,7 @@ mod tests {
             keccak256(address),
             b256!("f5c7e89ecc8b4dced430a51ceb6cac1af1067e6aef60306400853e88334e023c")
         );
-        let nibbles = address_to_nibbles(address);
+        let nibbles = to_nibbles(address);
         assert_eq!(
             nibbles.as_slice(),
             hex!("0f050c070e08090e0c0c080b040d0c0e0d0403000a05010c0e0b060c0a0c010a0f010006070e060a0e0f06000300060400000805030e08080303040e0002030c")
