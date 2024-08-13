@@ -5,7 +5,7 @@ use super::Node;
 
 pub mod entry;
 mod two_entries;
-mod utils;
+pub mod utils;
 
 impl Node {
     #[allow(unused)]

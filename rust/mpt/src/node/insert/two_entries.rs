@@ -1,6 +1,6 @@
 use std::array::from_fn;
 
-use crate::node::{insert::utils::branch, Node};
+use crate::node::Node;
 
 use super::entry::Entry;
 
@@ -15,7 +15,7 @@ fn from_two_ordered_entries(lhs: Entry, rhs: Entry) -> Node {
         let mut children: [Option<Box<Node>>; 16] = from_fn(|_| None);
         children[rhs_nibble as usize] = Some(Box::new(rhs.into()));
 
-        return branch(children, Some(lhs.value));
+        Node::Branch(children, Some(lhs.value))
     } else {
         let (lhs_nibble, lhs) = lhs.split_first_key_nibble();
         if lhs_nibble != rhs_nibble {
@@ -23,7 +23,7 @@ fn from_two_ordered_entries(lhs: Entry, rhs: Entry) -> Node {
             children[lhs_nibble as usize] = Some(Box::new(lhs.into()));
             children[rhs_nibble as usize] = Some(Box::new(rhs.into()));
 
-            return branch(children, None);
+            Node::Branch(children, None)
         } else {
             let node = from_two_ordered_entries(lhs, rhs);
             match node {

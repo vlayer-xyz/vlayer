@@ -180,7 +180,7 @@ fn encoded_header(list: bool, payload_length: usize) -> Vec<u8> {
 #[cfg(test)]
 mod node_size {
     use super::Node;
-    use crate::key_nibbles::KeyNibbles;
+    use crate::node::insert::utils::leaf;
     use std::array::from_fn;
 
     #[test]
@@ -196,22 +196,21 @@ mod node_size {
     }
 
     #[test]
-    fn leaf() {
-        let node = Node::Leaf([0x1].into(), Box::new([]));
+    fn leaf_() {
+        let node = leaf([0x1], []);
         assert_eq!(node.size(), 1);
     }
 
     #[test]
     fn extension() {
-        let key_nibbles: KeyNibbles = [0x1].into();
-        let leaf = Node::Leaf(key_nibbles.clone(), Box::new([]));
-        let extension = Node::Extension(key_nibbles, Box::new(leaf));
+        let leaf = leaf([0x1], []);
+        let extension = Node::Extension([0x1].into(), Box::new(leaf));
         assert_eq!(extension.size(), 2);
     }
 
     #[test]
     fn branch_one_child() {
-        let leaf = Node::Leaf([0x1].into(), Box::new([]));
+        let leaf = leaf([0x1], []);
         let child = Some(Box::new(leaf));
         const NULL_CHILD: Option<Box<Node>> = None;
         let mut children = [NULL_CHILD; 16];
@@ -222,7 +221,7 @@ mod node_size {
 
     #[test]
     fn branch_many_children() {
-        let leaf = Node::Leaf([0x1].into(), Box::new([]));
+        let leaf = leaf([0x1], []);
         let child = Some(Box::new(leaf));
         let children: [_; 16] = from_fn(|_| child.clone());
         let branch = Node::Branch(children, None);
@@ -231,13 +230,13 @@ mod node_size {
 
     #[test]
     fn branch_with_value() {
-        let leaf = Node::Leaf([0x1].into(), Box::new([]));
+        let leaf = leaf([0x1], []);
         let child = Some(Box::new(leaf));
         const NULL_CHILD: Option<Box<Node>> = None;
         let mut children = [NULL_CHILD; 16];
         children[0] = child;
-        let value = Some([42u8].as_slice().into());
+        let value = Some([42].as_slice().into());
         let branch = Node::Branch(children, value);
-        assert_eq!(branch.get(&[]), Some(&[42u8][..]));
+        assert_eq!(branch.get([]).unwrap(), [42]);
     }
 }
