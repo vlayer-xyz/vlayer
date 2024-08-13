@@ -65,12 +65,12 @@ impl CheatcodeInspector {
             },
             None,
         );
-        return match call_result {
+        match call_result {
             Ok(host_output) => {
                 create_return_outcome(host_output.guest_output.evm_call_result, inputs)
             }
             Err(error) => create_revert_outcome(&format!("{:?}", error)),
-        };
+        }
     }
 }
 
