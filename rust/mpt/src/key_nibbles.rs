@@ -12,10 +12,6 @@ impl KeyNibbles {
         Self::from_nibbles(nibbles)
     }
 
-    pub fn as_slice(&self) -> &[u8] {
-        self.0.as_slice()
-    }
-
     fn from_nibbles(nibbles: Nibbles) -> Self {
         if nibbles.is_empty() {
             panic!("KeyNibbles cannot be empty");
