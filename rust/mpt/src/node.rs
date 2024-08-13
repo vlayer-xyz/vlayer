@@ -4,6 +4,8 @@ use rlp as legacy_rlp;
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 
+pub mod insert;
+
 use crate::{
     key_nibbles::KeyNibbles,
     path::{Path, PathKind},
