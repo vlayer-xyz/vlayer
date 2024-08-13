@@ -8,6 +8,7 @@ alloy-primitives = { workspace = true }
 alloy-rlp = { workspace = true }
 alloy-rlp-derive = { workspace = true }
 alloy-trie = { workspace = true }
+assert_matches = "1.5.0"
 derive_more = { workspace = true }
 lazy_static = { workspace = true }
 nybbles = { workspace = true, features = ["serde"] }

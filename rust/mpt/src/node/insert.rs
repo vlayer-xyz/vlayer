@@ -101,7 +101,6 @@ impl Node {
 
 #[cfg(test)]
 mod node_insert {
-    use super::*;
     use crate::node::Node;
 
     mod null {
@@ -135,6 +134,8 @@ mod node_insert {
 
     mod leaf {
         use super::*;
+        use crate::node::insert::utils::leaf;
+        use assert_matches::assert_matches;
 
         #[test]
         #[should_panic(expected = "Key already exists")]
@@ -143,44 +144,24 @@ mod node_insert {
             node.insert([1], [42]);
         }
 
-        mod new_key_is_prefix_of_existing_key {
-            use super::*;
+        #[test]
+        fn no_common_prefix() {
+            let node = leaf([1], [42]);
+            let updated_node = node.insert([2], [43]);
 
-            #[test]
-            fn empty_common_prefix() {
-                let node = leaf([1], [42]);
-                let updated_node = node.insert([], [43]);
+            assert_eq!(updated_node.get([1]).unwrap(), [42]);
+            assert_eq!(updated_node.get([2]).unwrap(), [43]);
+            assert_matches!(updated_node, Node::Branch(_, None));
+        }
 
-                assert_eq!(updated_node.get([1]).unwrap(), [42]);
-                assert_eq!(updated_node.get([]).unwrap(), [43]);
-            }
+        #[test]
+        fn common_prefix() {
+            let node = leaf([1, 2], [42]);
+            let updated_node = node.insert([1, 3], [43]);
 
-            #[test]
-            fn single_nibble_common_prefix() {
-                let node = leaf([1, 2, 3], [42]);
-                let updated_node = node.insert([1], [43]);
-
-                assert_eq!(updated_node.get([1, 2, 3]).unwrap(), [42]);
-                assert_eq!(updated_node.get([1]).unwrap(), [43]);
-            }
-
-            #[test]
-            fn single_nibble_leftover_suffix() {
-                let node = leaf([1, 2, 3], [42]);
-                let updated_node = node.insert([1, 2], [43]);
-
-                assert_eq!(updated_node.get([1, 2, 3]).unwrap(), [42]);
-                assert_eq!(updated_node.get([1, 2]).unwrap(), [43]);
-            }
-
-            #[test]
-            fn both_common_prefix_and_leftover_suffix_have_more_than_one_nibble() {
-                let node = leaf([1, 2, 3, 4], [42]);
-                let updated_node = node.insert([1, 2], [43]);
-
-                assert_eq!(updated_node.get([1, 2, 3, 4]).unwrap(), [42]);
-                assert_eq!(updated_node.get([1, 2]).unwrap(), [43]);
-            }
+            assert_eq!(updated_node.get([1, 2]).unwrap(), [42]);
+            assert_eq!(updated_node.get([1, 3]).unwrap(), [43]);
+            assert_matches!(updated_node, Node::Extension(_, _));
         }
     }
 }

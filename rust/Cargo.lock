@@ -1000,6 +1000,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "assert_matches"
+version = "1.5.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "9b34d609dfbaf33d6889b2b7106d3ca345eacad44200913df5ba02bfd31d2ba9"
+
+[[package]]
 name = "async-priority-channel"
 version = "0.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -5636,6 +5642,7 @@ dependencies = [
  "alloy-rlp-derive",
  "alloy-trie",
  "anyhow",
+ "assert_matches",
  "derive_more",
  "lazy_static",
  "nybbles",
