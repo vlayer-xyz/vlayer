@@ -36,11 +36,6 @@ contract PrivateAirdropProver is Prover {
     function isValidSignature(address _account, bytes memory signature) internal pure returns (bool) {
         require(_account != address(0), "Missing Address");
 
-
-        // bytes32 signedHash = keccak256(
-        //     abi.encodePacked("\x19Ethereum Signed Message:\n", Strings.toString(bytes("erc20 prover").length), "erc20 prover")
-        // );
-
         bytes32 signedHash = bytes("erc20 prover").toEthSignedMessageHash();
         return signedHash.recover(signature) == _account;
     }

@@ -10,7 +10,6 @@ const TOKEN_SPEC = await getContractSpec(TOKEN_FILE);
 const PROVER = "PrivateAirdropProver";
 const FILE = path.join(__dirname, `../out/${PROVER}.sol/${PROVER}.json`)
 const PROVER_SPEC = await getContractSpec(FILE);
-const FUNCTION_NAME = 'main'
 
 const client = helpers.client();
 const account = privateKeyToAccount(generatePrivateKey())
@@ -19,7 +18,6 @@ const signature = await client.signMessage({
   message: 'erc20 prover',
 })
 
-const ARGS = [account.address, signature];
 
 console.log("Deploying prover")
 let token: Address = await helpers.deployContract(TOKEN_SPEC, [[account.address]]);
@@ -30,6 +28,6 @@ let blockNo = Number(await helpers.client().getBlockNumber());
 console.log(`Running proving on ${blockNo} block number`);
 
 console.log("Proving...");
-let response = await prove(prover, PROVER_SPEC, FUNCTION_NAME, ARGS, blockNo);
+let response = await prove(prover, PROVER_SPEC, 'main', [account.address, signature], blockNo);
 console.log("Response:")
 console.log(response);
