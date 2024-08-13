@@ -12,23 +12,37 @@ fn branch(value: impl AsRef<[u8]>) -> Node {
     Node::Branch(children, Some(value.as_ref().into()))
 }
 
+impl<K, V> From<(K, V)> for Node
+where
+    K: AsRef<[u8]>,
+    V: AsRef<[u8]>,
+{
+    fn from((key_nibs, value): (K, V)) -> Self {
+        if key_nibs.as_ref().is_empty() {
+            branch(value)
+        } else {
+            leaf(key_nibs, value)
+        }
+    }
+}
+
+fn from_two_entries(lhs: (&[u8], &[u8]), rhs: (&[u8], &[u8])) -> Node {
+    todo!()
+}
+
 impl Node {
     #[allow(unused)]
     pub fn insert(self, key_nibs: impl AsRef<[u8]>, value: impl AsRef<[u8]>) -> Node {
         match self {
-            Node::Null => {
-                if key_nibs.as_ref().is_empty() {
-                    branch(value)
-                } else {
-                    leaf(key_nibs, value)
-                }
-            }
+            Node::Null => (key_nibs, value).into(),
             Node::Digest(_) => panic!("Cannot insert into a digest node"),
             Node::Leaf(old_key_nibs, old_value) => {
                 if old_key_nibs == key_nibs {
                     panic!("Prefix already exists")
                 }
-                todo!()
+                let old_entry = (&**old_key_nibs, &*old_value);
+                let entry = (key_nibs.as_ref(), value.as_ref());
+                from_two_entries(old_entry, entry)
             }
             _ => todo!(),
         }
