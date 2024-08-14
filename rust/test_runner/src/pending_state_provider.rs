@@ -21,10 +21,7 @@ pub struct PendingStateProvider {
 
 impl PendingStateProvider {
     fn account(&self, address: Address) -> Account {
-        match self.state.get(&address) {
-            Some(account) => account.clone(),
-            None => Account::default(),
-        }
+        self.state.get(&address).cloned().unwrap_or_default()
     }
 
     fn all_account_proofs(&self) -> Vec<EIP1186Proof> {
