@@ -1,6 +1,5 @@
 import { type CallParams, type CallContext, v_call } from "./v_call";
 import { encodeFunctionData, type Address, type Abi, type Hex } from "viem";
-import { client } from "./helpers";
 import { sepolia } from "viem/chains";
 
 type Bytecode = {
@@ -10,7 +9,6 @@ type Bytecode = {
 export type ContractSpec = {
     abi: Abi,
     bytecode: Bytecode,
-    object: Hex
 }
 
 type ProverArg = number | string | boolean;
