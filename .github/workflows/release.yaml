@@ -57,9 +57,10 @@ jobs:
           version: nightly-5ac78a9cd4b94dc53d1fe5e0f42372b28b5a7559 # 2024-06-02
 
       - name: Check clang and LLVM version
+        working-directory: bash
         env:
           EXPECTED_LLVM_VERSION: "18.1"
-        run: bash/check_llvm_clang.sh
+        run: ./check_llvm_clang.sh
 
       - name: "Build binaries"
         run: cargo build --release --target ${{ matrix.target }}
