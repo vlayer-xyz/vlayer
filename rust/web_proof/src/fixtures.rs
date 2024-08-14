@@ -27,6 +27,16 @@ pub fn tls_proof_example() -> TlsProof {
         .unwrap()
 }
 
+pub fn tls_proof_example_not_redacted() -> TlsProof {
+    serde_json::from_str(str::from_utf8(include_bytes!("../testdata/web_proof_not_redacted.json")).unwrap())
+        .unwrap()
+}
+
+pub fn tls_proof_example_very_redacted() -> TlsProof {
+    serde_json::from_str(str::from_utf8(include_bytes!("../testdata/tls_proof_very_redacted.json")).unwrap())
+        .unwrap()
+}
+
 pub fn pub_key() -> PublicKey {
     PublicKey::from_public_key_pem(NOTARY_PUB_KEY_PEM_EXAMPLE).unwrap()
 }

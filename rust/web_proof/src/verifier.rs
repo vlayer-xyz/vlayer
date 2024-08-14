@@ -13,8 +13,8 @@ pub enum VerificationError {
 }
 
 pub struct _WebProofJournal {
-    _request: String,
-    _response: String,
+    pub request: String,
+    pub response: String,
 }
 
 pub fn _verify_proof(web_proof: WebProof) -> Result<_WebProofJournal, VerificationError> {
@@ -34,8 +34,8 @@ pub fn _verify_proof(web_proof: WebProof) -> Result<_WebProofJournal, Verificati
     let recv_string = String::from_utf8(recv.data().to_vec()).unwrap();
 
     Ok(_WebProofJournal {
-        _request: sent_string,
-        _response: recv_string,
+        request: sent_string,
+        response: recv_string,
     })
 }
 

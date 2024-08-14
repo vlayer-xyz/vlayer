@@ -8,3 +8,4 @@ anyhow = "1.0"
 web_proof_methods = { path = "methods" }
 risc0-zkvm = { workspace = true }
 tracing-subscriber = { version = "0.3", features = ["env-filter"] }
+web_proof = { path = "../web_proof" }

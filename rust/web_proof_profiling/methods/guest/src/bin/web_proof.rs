@@ -1,4 +1,4 @@
-use web_proof::{types::WebProof, verifier::_verify_proof, fixtures::{tls_proof_example, pub_key}};
+use web_proof::{types::WebProof, verifier::_verify_proof, fixtures::{tls_proof_example_very_redacted, pub_key}};
 
 use risc0_zkvm::guest::env;
 
@@ -7,7 +7,7 @@ fn main() {
     let _x: u8 = env::read();
 
     _verify_proof(WebProof {
-        tls_proof: tls_proof_example(),
+        tls_proof: tls_proof_example_very_redacted(),
         notary_pub_key: pub_key(),
     }).unwrap();
     
