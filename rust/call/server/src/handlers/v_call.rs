@@ -2,7 +2,6 @@ use std::sync::Arc;
 
 use crate::config::ServerConfig;
 use crate::error::AppError;
-use call_engine::io::Augmentors;
 use call_host::host::{config::HostConfig, Host};
 use call_host::Call as HostCall;
 use serde::{Deserialize, Serialize};
@@ -15,8 +14,6 @@ pub mod types;
 pub struct Params {
     call: Call,
     context: CallContext,
-    #[serde(default)]
-    augmentors: Option<Augmentors>,
 }
 
 pub async fn v_call(config: Arc<ServerConfig>, params: Params) -> Result<CallResult, AppError> {
@@ -28,8 +25,7 @@ pub async fn v_call(config: Arc<ServerConfig>, params: Params) -> Result<CallRes
     };
 
     let return_data =
-        tokio::task::spawn_blocking(|| Host::try_new(host_config)?.run(call, params.augmentors))
-            .await??;
+        tokio::task::spawn_blocking(|| Host::try_new(host_config)?.run(call)).await??;
 
     Ok(CallResult {
         result: json!({

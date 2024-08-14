@@ -4,7 +4,6 @@ use revm::interpreter::CallInputs;
 use revm::primitives::TxEnv;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
-use web_proof::types::WebProof;
 
 use crate::config::DEFAULT_CALLER;
 use crate::evm::env::location::ExecutionLocation;
@@ -64,11 +63,6 @@ impl Call {
             .try_into()
             .expect("cannot extract function selector from call data")
     }
-}
-
-#[derive(Deserialize, Serialize)]
-pub struct Augmentors {
-    pub web_proof: WebProof,
 }
 
 #[derive(Error, Debug)]

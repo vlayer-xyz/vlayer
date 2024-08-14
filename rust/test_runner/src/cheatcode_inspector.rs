@@ -58,13 +58,10 @@ impl CheatcodeInspector {
         inputs: &mut CallInputs,
     ) -> CallOutcome {
         let host = create_host(&context.journaled_state);
-        let call_result = host.run(
-            Call {
-                to: inputs.target_address,
-                data: inputs.input.clone().into(),
-            },
-            None,
-        );
+        let call_result = host.run(Call {
+            to: inputs.target_address,
+            data: inputs.input.clone().into(),
+        });
         match call_result {
             Ok(host_output) => {
                 create_return_outcome(host_output.guest_output.evm_call_result, inputs)
