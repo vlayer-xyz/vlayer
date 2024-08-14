@@ -9,21 +9,22 @@ edition = "2021"
 build = "build.rs"
 
 [dependencies]
+call_guest_wrapper = { path = "../call/guest_wrapper" }
+call_server = { path = "../call/server" }
+test_runner = { path = "../test_runner" }
+
 anyhow = { workspace = true }
 clap = { workspace = true, features = ["derive", "string"] }
 flate2 = { workspace = true }
 reqwest = { workspace = true, features = ["json"] }
-call_server = { path = "../call/server" }
 tar = { workspace = true }
 tempfile = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
 toml = { workspace = true }
-test_runner = { path = "../test_runner" }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 alloy-primitives = { workspace = true, features = ["rlp"] }
 
 [build-dependencies]
 vergen = { workspace = true, features = ["build", "git", "gitcl"] }
-call_guest_wrapper = { path = "../call/guest_wrapper" }
