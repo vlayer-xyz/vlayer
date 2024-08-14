@@ -46,3 +46,4 @@ pub fn from_two_entries(lhs: impl Into<Entry>, rhs: impl Into<Entry>) -> Node {
         from_two_ordered_entries(rhs, lhs)
     }
 }
+

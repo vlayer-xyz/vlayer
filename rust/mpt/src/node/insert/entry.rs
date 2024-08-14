@@ -1,9 +1,3 @@
-use std::array::from_fn;
-
-use crate::node::Node;
-
-use super::utils::{branch, leaf};
-
 pub struct Entry {
     pub key: Box<[u8]>,
     pub value: Box<[u8]>,
@@ -18,17 +12,6 @@ where
         Entry {
             key: key.as_ref().into(),
             value: value.as_ref().into(),
-        }
-    }
-}
-
-impl From<Entry> for Node {
-    fn from(entry: Entry) -> Self {
-        if entry.key.is_empty() {
-            let children = from_fn(|_| None);
-            branch(children, Some(entry.value))
-        } else {
-            leaf(entry.key, entry.value)
         }
     }
 }

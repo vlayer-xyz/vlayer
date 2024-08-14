@@ -2,13 +2,18 @@ use alloy_primitives::B256;
 use alloy_rlp::{Decodable, Encodable, Header, EMPTY_STRING_CODE};
 use rlp as legacy_rlp;
 use serde::{Deserialize, Serialize};
-use std::fmt::Debug;
+use std::{array::from_fn, fmt::Debug};
 
 pub mod insert;
 
 use crate::{
     key_nibbles::KeyNibbles,
     path::{Path, PathKind},
+};
+
+use self::insert::{
+    entry::Entry,
+    utils::{branch, leaf},
 };
 
 use super::node_ref::NodeRef;
@@ -175,6 +180,45 @@ fn encoded_header(list: bool, payload_length: usize) -> Vec<u8> {
     let mut out = Vec::with_capacity(header.length() + payload_length);
     header.encode(&mut out);
     out
+}
+
+impl From<Entry> for Node {
+    fn from(entry: Entry) -> Self {
+        if entry.key.is_empty() {
+            let children = from_fn(|_| None);
+            branch(children, Some(entry.value))
+        } else {
+            leaf(entry.key, entry.value)
+        }
+    }
+}
+
+#[cfg(test)]
+mod from {
+    use crate::node::{insert::entry::Entry, Node};
+
+    #[test]
+    fn empty_key() {
+        let entry = Entry::from(([], [42]));
+        let node = Node::from(entry);
+        assert_eq!(node, Node::Branch(Default::default(), Some([42].into())));
+    }
+
+    #[test]
+    fn short_key() {
+        let entry = Entry::from(([0x1], [42]));
+        let node = Node::from(entry);
+        assert_eq!(node, Node::Leaf([0x1].into(), Box::new([42])));
+    }
+
+    #[test]
+    fn long_key() {
+        let key: [u8; 4] = [0xF, 0xF, 0xF, 0xF];
+        let value: [u8; 7] = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFE];
+        let entry = Entry::from((key, value));
+        let node = Node::from(entry);
+        assert_eq!(node, Node::Leaf(key.into(), Box::new(value)));
+    }
 }
 
 #[cfg(test)]
