@@ -44,18 +44,3 @@ bun run prove.ts
 ``` 
 
 For guides about the project structure, check out [architecture appendix](/appendix/architecture.md).
-
-## Developer experience
-
-Incremental compilation in this repo is slow by default because it re-compiles `guest_wrapper` to `RISC-V` target to generate up to date `GUEST_ELF`.
-Most developer workflows don't need this and therefore would benefit from temporarily disabling this step.
-
-Examples on when you should disable it:
-* Getting something to type-check/compile
-* Working on unit-tests of functionality that does not call any guest code through host
-
-Examples when you should not disable it:
-* CI
-* Integration/E2E tests that call guest through host
-
-To disable guest build - set the flag: `RISC0_SKIP_BUILD = "1"` in `.cargo/config.toml`. This file is respected by both rust-analyzer in the IDE as well as CLI commands
