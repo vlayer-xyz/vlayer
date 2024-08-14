@@ -4,6 +4,10 @@ fn main() {
         use risc0_build_ethereum::generate_solidity_files;
         use std::env;
 
+        if !env::var("RISC0_SKIP_BUILD").unwrap_or_default().is_empty() {
+            return;
+        }
+
         // Generate Solidity source files for use with Forge.
         let out_dir = env::var_os("OUT_DIR").unwrap().into_string().unwrap();
         let solidity_opts = risc0_build_ethereum::Options::default()
