@@ -1,6 +1,6 @@
-use std::sync::Arc;
+use std::{pin::Pin, sync::Arc};
 
-use crate::{config::ServerConfig, handlers::v_call::VCall};
+use crate::{config::ServerConfig, handlers::v_call::v_call};
 use axum::{routing::post, Router};
 use server_utils::{init_trace_layer, route, RequestIdLayer};
 use tracing::info;
@@ -18,12 +18,11 @@ pub async fn serve(config: ServerConfig) -> anyhow::Result<()> {
 pub fn server(config: ServerConfig) -> Router {
     config.proof_mode.set_risc0_flag();
     let config = Arc::new(config);
+    let jrpc_handler = move |params| Box::pin(v_call(config.clone(), params)) as Pin<Box<_>>;
+    let http_handler = move |req| async move { route(req, "v_call", jrpc_handler).await };
 
     Router::new()
-        .route(
-            "/",
-            post(move |req| route(req, "v_call", VCall::new(config.clone()))),
-        )
+        .route("/", post(http_handler))
         .layer(init_trace_layer())
         // NOTE: RequestIdLayer should be added after the Trace layer
         .layer(RequestIdLayer)
