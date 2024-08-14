@@ -2,6 +2,7 @@ use crate::errors::CLIError;
 use call_server::{ProofMode, ServerConfig};
 use clap::{Parser, Subcommand};
 use commands::args::{InitArgs, ServeArgs};
+use commands::version::Version;
 use commands::{init::init, serve::run_serve};
 use test_runner::cli::TestArgs;
 use tracing::{error, info};
@@ -14,7 +15,7 @@ mod utils;
 mod test_utils;
 
 #[derive(Parser)]
-#[command(name = "vlayer", version = VERSION_MESSAGE, about, long_about = None)]
+#[command(name = "vlayer", version = Version, about, long_about = None)]
 #[command(propagate_version = true)]
 struct Cli {
     #[command(subcommand)]
@@ -27,16 +28,6 @@ enum Commands {
     Serve(ServeArgs),
     Test(TestArgs),
 }
-
-const VERSION_MESSAGE: &str = concat!(
-    env!("CARGO_PKG_VERSION"),
-    "-",
-    env!("VLAYER_RELEASE"),
-    "-",
-    env!("VERGEN_GIT_SHA"),
-    "\nguestId: ",
-    env!("RISC0_CALL_GUEST_ID")
-);
 
 #[tokio::main]
 async fn main() {

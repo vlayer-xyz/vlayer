@@ -10,7 +10,7 @@ build = "build.rs"
 
 [dependencies]
 anyhow = { workspace = true }
-clap = { workspace = true, features = ["derive"] }
+clap = { workspace = true, features = ["derive", "string"] }
 flate2 = { workspace = true }
 reqwest = { workspace = true, features = ["json"] }
 call_server = { path = "../call/server" }
