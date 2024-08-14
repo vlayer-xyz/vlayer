@@ -8,7 +8,6 @@ use alloy_primitives::ChainId;
 use call_engine::engine::Engine;
 use call_engine::evm::env::{cached::CachedEvmEnv, location::ExecutionLocation};
 use call_engine::evm::input::MultiEvmInput;
-use call_engine::io::Augmentors;
 use call_engine::io::{Call, GuestOutput, HostOutput, Input};
 use call_guest_wrapper::RISC0_CALL_GUEST_ELF;
 use config::HostConfig;
@@ -78,9 +77,8 @@ where
         })
     }
 
-    pub fn run(self, call: Call, augmentors: Option<Augmentors>) -> Result<HostOutput, HostError> {
-        let host_output =
-            Engine::new(&self.envs).call(&call, self.start_execution_location, augmentors)?;
+    pub fn run(self, call: Call) -> Result<HostOutput, HostError> {
+        let host_output = Engine::new(&self.envs).call(&call, self.start_execution_location)?;
 
         let multi_evm_input =
             into_multi_input(self.envs).map_err(|err| HostError::CreatingInput(err.to_string()))?;

@@ -55,7 +55,6 @@ mod server_tests {
 
         use super::*;
         use ethers::types::U256;
-        use web_proof::fixtures::{tls_proof_example, NOTARY_PUB_KEY_PEM_EXAMPLE};
 
         #[tokio::test]
         async fn field_validation_error() -> anyhow::Result<()> {
@@ -141,96 +140,6 @@ mod server_tests {
         }
 
         #[tokio::test]
-        async fn failed_web_tls_proof_parsing() -> anyhow::Result<()> {
-            let helper = test_helper().await;
-
-            let req = json!({
-                "method": "v_call",
-                "params": [
-                    {
-                        "to": helper.contract().address(),
-                        "data": helper.contract().sum(U256::from(1), U256::from(2)).calldata().unwrap()
-                    },
-                    {
-                        "block_no": helper.block_number,
-                        "chain_id": 11155111
-                    },
-                    {
-                        "web_proof":
-                        {
-                            "notary_pub_key": NOTARY_PUB_KEY_PEM_EXAMPLE,
-                            "tls_proof": "<tls proof value>",
-                        }
-                    }
-                    ],
-                "id": 1,
-                "jsonrpc": "2.0",
-            });
-            let response = helper.post("/", &req).await?;
-
-            assert_eq!(StatusCode::OK, response.status());
-            assert_eq!(
-                json!({
-                    "jsonrpc": "2.0",
-                    "id": 1,
-                    "error": {
-                        "code": -32602,
-                        "message": "invalid type: string \"<tls proof value>\", expected struct TlsProof",
-                        "data": null
-                    }
-                }),
-                body_to_json(response.into_body()).await
-            );
-
-            Ok(())
-        }
-
-        #[tokio::test]
-        async fn failed_notary_pub_key_parsing() -> anyhow::Result<()> {
-            let helper = test_helper().await;
-
-            let req = json!({
-                "method": "v_call",
-                "params": [
-                    {
-                        "to": helper.contract().address(),
-                        "data": helper.contract().sum(U256::from(1), U256::from(2)).calldata().unwrap()
-                    },
-                    {
-                        "block_no": helper.block_number,
-                        "chain_id": 11155111
-                    },
-                    {
-                        "web_proof":
-                        {
-                            "notary_pub_key": "<notary pub key value>",
-                            "tls_proof": "<tls proof value>",
-                        }
-                    }
-                    ],
-                "id": 1,
-                "jsonrpc": "2.0",
-            });
-            let response = helper.post("/", &req).await?;
-
-            assert_eq!(StatusCode::OK, response.status());
-            assert_eq!(
-                json!({
-                    "jsonrpc": "2.0",
-                    "id": 1,
-                    "error": {
-                        "code": -32602,
-                        "message": "ASN.1 error: PEM error: PEM preamble contains invalid data (NUL byte)",
-                        "data": null
-                    }
-                }),
-                body_to_json(response.into_body()).await
-            );
-
-            Ok(())
-        }
-
-        #[tokio::test]
         async fn success_web_proof() -> anyhow::Result<()> {
             let helper = test_helper().await;
             let call_data = helper
@@ -251,12 +160,6 @@ mod server_tests {
                     {
                         "block_no": helper.block_number,
                         "chain_id": 11155111
-                    },
-                    {
-                        "web_proof": {
-                            "notary_pub_key": NOTARY_PUB_KEY_PEM_EXAMPLE,
-                            "tls_proof": tls_proof_example(),
-                        }
                     }
                     ],
                 "id": 1,
