@@ -7,7 +7,9 @@ const PROVER = "WebProofProver";
 const FILE = path.join(__dirname, `../out/${PROVER}.sol/${PROVER}.json`)
 const PROVER_SPEC = await getContractSpec(FILE);
 const FUNCTION_NAME = 'main'
-const ARGS: any[] = [[JSON.stringify(tls_proof)]];
+const NOTARY_PUB_KEY_PEM = "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExpX/4R4z40gI6C/j9zAM39u58LJu\n3Cx5tXTuqhhu/tirnBi5GniMmspOTEsps4ANnPLpMmMSfhJ+IFHbc3qVOA==\n-----END PUBLIC KEY-----\n"
+const WEB_PROOF = {web_proof: {tls_proof: tls_proof, notary_pub_key_pem: NOTARY_PUB_KEY_PEM}}
+const ARGS: any[] = [[JSON.stringify(WEB_PROOF)]];
 
 console.log("Deploying prover")
 let prover: Address = await helpers.deployContract(PROVER_SPEC);
