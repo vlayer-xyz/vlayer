@@ -1,7 +1,7 @@
 import { helpers, getContractSpec, prove } from "vlayer-sdk";
 import * as path from "path";
 import { type Address } from "viem";
-import tls_proof from '../../../rust/web_proof/testdata/tls_proof.json';
+import tls_proof from './tls_proof.json';
 
 const PROVER = "WebProofProver";
 const FILE = path.join(__dirname, `../out/${PROVER}.sol/${PROVER}.json`)
