@@ -4,4 +4,6 @@ lint = "clippy --workspace --all-targets --all-features"
 [env]
 CC_riscv32im_risc0_zkvm_elf = "clang"
 CFLAGS_riscv32im_risc0_zkvm_elf = "-nostdlibinc -DRING_CORE_NOSTDLIBINC=1 -target riscv32-unknown-elf -march=rv32im"
+# RISC0 build increases the iteration time significantly and is not necessary for most development
+# You should disable it while trying to get things to compile or working on code that does not hit guest
 # RISC0_SKIP_BUILD = "1"
