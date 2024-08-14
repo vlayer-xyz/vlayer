@@ -6,6 +6,10 @@ fn main() {
         use std::fs;
         use std::path::Path;
 
+        if !env::var("RISC0_SKIP_BUILD").unwrap_or_default().is_empty() {
+            return;
+        }
+
         // Generate Solidity source files for use with Forge.
         let build_profile = env::var_os("PROFILE").unwrap().into_string().unwrap();
         let assets_path_str = format!("../../target/{build_profile}/assets");
