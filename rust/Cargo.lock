@@ -285,9 +285,9 @@ dependencies = [
 
 [[package]]
 name = "alloy-rlp"
-version = "0.3.7"
+version = "0.3.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "a43b18702501396fa9bcdeecd533bc85fac75150d308fc0f6800a01e6234a003"
+checksum = "26154390b1d205a4a7ac7352aa2eb4f81f391399d4e2f546fb81a2f8bb383f62"
 dependencies = [
  "alloy-rlp-derive",
  "arrayvec",
@@ -296,9 +296,9 @@ dependencies = [
 
 [[package]]
 name = "alloy-rlp-derive"
-version = "0.3.7"
+version = "0.3.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "d83524c1f6162fcb5b0decf775498a125066c86dda6066ed609531b0e912f85a"
+checksum = "4d0f2d905ebd295e7effec65e5f6868d153936130ae718352771de3e7d03c75c"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -8422,11 +8422,16 @@ version = "0.1.0"
 dependencies = [
  "alloy-dyn-abi",
  "alloy-json-abi",
+ "alloy-primitives",
+ "alloy-rlp",
  "alloy-sol-types",
+ "alloy-trie",
  "call_engine",
+ "call_host",
  "clap",
  "color-eyre",
  "comfy-table",
+ "ethers-core",
  "forge",
  "foundry-cheatcodes",
  "foundry-cli",
@@ -8436,6 +8441,7 @@ dependencies = [
  "foundry-debugger",
  "foundry-evm",
  "foundry-evm-core",
+ "mpt",
  "rayon",
  "regex",
  "serde_json",

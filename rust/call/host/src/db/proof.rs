@@ -120,7 +120,7 @@ where
         Ok(proofs)
     }
 
-    fn state_trie(proofs: &[EIP1186Proof]) -> anyhow::Result<MerkleTrie> {
+    pub fn state_trie(proofs: &[EIP1186Proof]) -> anyhow::Result<MerkleTrie> {
         let state_nodes = proofs.iter().flat_map(|p| p.account_proof.iter());
         let state_trie =
             MerkleTrie::from_rlp_nodes(state_nodes).context("invalid account proof")?;

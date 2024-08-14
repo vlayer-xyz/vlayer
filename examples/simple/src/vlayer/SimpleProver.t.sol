@@ -2,15 +2,14 @@
 pragma solidity ^0.8.13;
 
 import {SimpleProver} from "./SimpleProver.sol";
-import {VTest, Proof, CHEATCODES} from "vlayer/testing/VTest.sol";
-import {Proof} from "vlayer/Proof.sol";
+import "vlayer/testing/VTest.sol";
 
 interface IFakeCheatcode {
     function thisCheatCodeDoesNotExist() external returns (bool);
 }
 
 contract ProverTest is VTest {
-    function test_sum() public {
+    function test_sumDoesNotRevertWithCallProver() public {
         SimpleProver prover = new SimpleProver();
         callProver();
         assertEq(prover.sum(1, 2), 3);

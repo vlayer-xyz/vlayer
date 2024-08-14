@@ -4,12 +4,20 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+call_host = { path = "../call/host" }
+call_engine = { path = "../call/engine" }
+mpt = { path = "../mpt" }
+
 alloy-dyn-abi = { workspace = true }
 alloy-json-abi = { workspace = true }
 alloy-sol-types = { workspace = true }
+alloy-primitives = { workspace = true }
+alloy-rlp = { workspace = true }
+alloy-trie = { workspace = true }
 clap = { workspace = true, features = ["derive"] }
 color-eyre = { workspace = true }
 comfy-table = { workspace = true }
+ethers-core = { workspace = true }
 forge = { workspace = true }
 foundry-cheatcodes = { workspace = true }
 foundry-cli = { workspace = true }
@@ -24,4 +32,3 @@ regex = { workspace = true }
 serde_json = { workspace = true }
 tracing = { workspace = true }
 tokio = { workspace = true }
-call_engine = { path = "../call/engine" }
