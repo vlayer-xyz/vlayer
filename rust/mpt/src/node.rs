@@ -2,14 +2,18 @@ use alloy_primitives::B256;
 use alloy_rlp::{Decodable, Encodable, Header, EMPTY_STRING_CODE};
 use rlp as legacy_rlp;
 use serde::{Deserialize, Serialize};
-use std::fmt::Debug;
+use std::{array::from_fn, fmt::Debug};
 
 use crate::{
     key_nibbles::KeyNibbles,
     path::{Path, PathKind},
 };
 
+use self::entry::Entry;
+
 use super::node_ref::NodeRef;
+
+pub mod entry;
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub(crate) enum Node {
@@ -22,6 +26,19 @@ pub(crate) enum Node {
 }
 
 impl Node {
+    #[allow(unused)]
+    pub(crate) fn insert(&self, key_nibs: &[u8], value: impl AsRef<[u8]>) -> Node {
+        match self {
+            Node::Null => {
+                if key_nibs.is_empty() {
+                    Node::Branch(Default::default(), Some(value.as_ref().into()))
+                } else {
+                    Node::leaf(key_nibs, value)
+                }
+            }
+            _ => Node::Null,
+        }
+    }
     /// Returns a reference to the value corresponding to the key.
     /// It panics when neither inclusion nor exclusion of the key can be shown in the sparse trie.
     pub(crate) fn get(&self, key_nibs: &[u8]) -> Option<&[u8]> {
@@ -112,6 +129,10 @@ impl Node {
             Node::Digest(digest) => alloy_rlp::encode(digest),
         }
     }
+
+    pub fn leaf(key_nibs: impl AsRef<[u8]>, value: impl AsRef<[u8]>) -> Node {
+        Node::Leaf(key_nibs.into(), value.as_ref().into())
+    }
 }
 
 impl legacy_rlp::Decodable for Node {
@@ -172,6 +193,70 @@ fn encoded_header(list: bool, payload_length: usize) -> Vec<u8> {
     let mut out = Vec::with_capacity(header.length() + payload_length);
     header.encode(&mut out);
     out
+}
+
+impl From<Entry> for Node {
+    fn from(entry: Entry) -> Self {
+        if entry.key.is_empty() {
+            let children = from_fn(|_| None);
+            Node::Branch(children, Some(entry.value))
+        } else {
+            Node::leaf(entry.key, entry.value)
+        }
+    }
+}
+#[cfg(test)]
+mod insert {
+    use super::Node;
+
+    #[test]
+    fn empty_key() {
+        let node = Node::Null.insert(&[], [42]);
+        assert_eq!(Node::Branch(Default::default(), Some([42].into())), node);
+    }
+
+    #[test]
+    fn short_key() {
+        let node = Node::Null.insert(&[2], [42]);
+        assert_eq!(Node::Leaf([2].into(), Box::new([42])), node,);
+    }
+
+    #[test]
+    fn long_key() {
+        let node = Node::Null.insert(&[0xF, 0xF, 0xF, 0xF], [42]);
+        assert_eq!(
+            Node::Leaf([0xF, 0xF, 0xF, 0xF].into(), Box::new([42])),
+            node
+        );
+    }
+}
+
+#[cfg(test)]
+mod from {
+    use crate::node::{entry::Entry, Node};
+
+    #[test]
+    fn empty_key() {
+        let entry = Entry::from(([], [42]));
+        let node = Node::from(entry);
+        assert_eq!(node, Node::Branch(Default::default(), Some([42].into())));
+    }
+
+    #[test]
+    fn short_key() {
+        let entry = Entry::from(([0x1], [42]));
+        let node = Node::from(entry);
+        assert_eq!(node, Node::Leaf([0x1].into(), Box::new([42])));
+    }
+
+    #[test]
+    fn long_key() {
+        let key: [u8; 4] = [0xF, 0xF, 0xF, 0xF];
+        let value: [u8; 7] = [0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFF, 0xFE];
+        let entry = Entry::from((key, value));
+        let node = Node::from(entry);
+        assert_eq!(node, Node::Leaf(key.into(), Box::new(value)));
+    }
 }
 
 #[cfg(test)]
