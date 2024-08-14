@@ -14,7 +14,7 @@ use crate::{
     io::Call,
 };
 use crate::{io::Augmentors, utils::evm_call::format_failed_call_result};
-use web_proof::{types::WebProof, verifier::_verify_proof, fixtures::{tls_proof_example_very_redacted, pub_key}};
+use web_proof::{types::WebProof, verifier::_verify_proof, fixtures::{tls_proof_example, pub_key}};
 
 pub struct Engine<'a, D>
 where
@@ -58,7 +58,7 @@ where
     ) -> Result<Vec<u8>, EngineError> {
 
         _verify_proof(WebProof {
-            tls_proof: tls_proof_example_very_redacted(),
+            tls_proof: tls_proof_example(),
             notary_pub_key: pub_key(),
         }).unwrap();
 
