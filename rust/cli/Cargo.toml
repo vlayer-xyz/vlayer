@@ -26,5 +26,8 @@ tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 alloy-primitives = { workspace = true, features = ["rlp"] }
 
+[dev-dependencies]
+regex = "1.10.6"
+
 [build-dependencies]
 vergen = { workspace = true, features = ["build", "git", "gitcl"] }
