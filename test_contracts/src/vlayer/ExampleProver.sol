@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import {Prover} from "vlayer/Prover.sol";
-import {Web} from "vlayer/Web.sol";
+import {WebProof} from "vlayer/WebProof.sol";
 
 /*
  * This contract is used in rust/server integration tests. The test fixture
@@ -21,8 +21,8 @@ contract ExampleProver is Prover {
         return lhs + rhs;
     }
 
-    function web_proof(Web calldata web) public returns (bool) {
-        // require(web.url.equal(dataUrl), "Incorrect URL");
+    function web_proof(WebProof calldata webProof) public returns (bool) {
+        // require(webProof.url.equal(""), "Incorrect URL");
 
         return true;
     }
