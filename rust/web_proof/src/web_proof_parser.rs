@@ -2,12 +2,6 @@ use http::HeaderName;
 use regex::Regex;
 use thiserror::Error;
 
-#[derive(Debug, PartialEq)]
-pub(crate) enum _RequestLine<'a> {
-    Header { name: &'a str, value: &'a str },
-    Other(&'a str),
-}
-
 #[derive(Error, Debug, PartialEq)]
 pub enum ParserError {
     #[error("Regex error: {0}")]
@@ -23,6 +17,12 @@ pub enum ParserError {
 #[derive(Debug)]
 pub(crate) struct _RequestParseResult<'a> {
     lines: Vec<_RequestLine<'a>>,
+}
+
+#[derive(Debug, PartialEq)]
+pub(crate) enum _RequestLine<'a> {
+    Header { name: &'a str, value: &'a str },
+    Other(&'a str),
 }
 
 impl _RequestParseResult<'_> {
@@ -42,6 +42,8 @@ impl _RequestParseResult<'_> {
     }
 }
 
+// TODO: Consider using `httparse` crate for HTTP parsing, but first research how redaction works in TLSN
+// to ensure that integrating this library will properly parse redacted HTTP request/response.
 pub(crate) fn _parse_web_proof_request(request: &str) -> Result<_RequestParseResult, ParserError> {
     request
         .lines()
@@ -52,7 +54,7 @@ pub(crate) fn _parse_web_proof_request(request: &str) -> Result<_RequestParseRes
         .map(|lines| _RequestParseResult { lines })
 }
 
-pub(crate) fn _parse_web_proof_request_line(line: &str) -> Result<_RequestLine, ParserError> {
+fn _parse_web_proof_request_line(line: &str) -> Result<_RequestLine, ParserError> {
     let header_regex = Regex::new(r"^\s*(\S+)\s*:\s*(\S+)\s*$")?;
 
     if let Some(captures) = header_regex.captures(line) {
