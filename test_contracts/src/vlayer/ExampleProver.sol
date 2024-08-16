@@ -2,17 +2,17 @@
 pragma solidity ^0.8.13;
 
 import {Prover} from "vlayer/Prover.sol";
-import {Web} from "vlayer/Web.sol";
+import {WebProof} from "vlayer/WebProof.sol";
 
 /*
-* This contract is used in rust/server integration tests. The test fixture
-* (compiled contract) is placed in rust/server/testdata/ExampleProver.json.
-* 
-* In order to update the test fixture:
-* 1. Modify this contract below.
-* 2. cd test_contracts && forge build
-* 3. cp out/ExampleProver.sol/ExampleProver.json ../rust/server/testdata
-*/
+ * This contract is used in rust/server integration tests. The test fixture
+ * (compiled contract) is placed in rust/server/testdata/ExampleProver.json.
+ *
+ * In order to update the test fixture:
+ * 1. Modify this contract below.
+ * 2. cd test_contracts && forge build
+ * 3. cp out/ExampleProver.sol/ExampleProver.json ../rust/call/server/testdata
+ */
 
 contract ExampleProver is Prover {
     constructor() {}
@@ -21,8 +21,8 @@ contract ExampleProver is Prover {
         return lhs + rhs;
     }
 
-    function web_proof(Web calldata web) public returns (bool) {
-        // require(web.url.equal(dataUrl), "Incorrect URL");
+    function web_proof(WebProof calldata webProof) public returns (bool) {
+        // require(webProof.url.equal(""), "Incorrect URL");
 
         return true;
     }

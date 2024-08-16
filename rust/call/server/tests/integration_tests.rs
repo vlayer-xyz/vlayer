@@ -50,8 +50,9 @@ mod server_tests {
     }
 
     mod v_call {
-        use crate::test_helpers::Web;
+        use crate::test_helpers::WebProof;
         use server_utils::{bool_to_vec32, u256_to_vec32};
+        use web_proof::fixtures::{load_web_proof_fixture, NOTARY_PUB_KEY_PEM_EXAMPLE};
 
         use super::*;
         use ethers::types::U256;
@@ -144,8 +145,11 @@ mod server_tests {
             let helper = test_helper().await;
             let call_data = helper
                 .contract()
-                .web_proof(Web {
-                    url: "api.x.com".to_string(),
+                .web_proof(WebProof {
+                    web_proof_json: serde_json::to_string(&json!({
+                        "web_proof": load_web_proof_fixture("../../web_proof/testdata/tls_proof.json", NOTARY_PUB_KEY_PEM_EXAMPLE)
+                    }))
+                    .unwrap(),
                 })
                 .calldata()
                 .unwrap();
