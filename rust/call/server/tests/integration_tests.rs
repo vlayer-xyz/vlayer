@@ -50,7 +50,7 @@ mod server_tests {
     }
 
     mod v_call {
-        use crate::test_helpers::Web;
+        use crate::test_helpers::WebProof;
         use server_utils::{bool_to_vec32, u256_to_vec32};
 
         use super::*;
@@ -144,8 +144,8 @@ mod server_tests {
             let helper = test_helper().await;
             let call_data = helper
                 .contract()
-                .web_proof(Web {
-                    url: "api.x.com".to_string(),
+                .web_proof(WebProof {
+                    web_proof_json: "".to_string(),
                 })
                 .calldata()
                 .unwrap();
