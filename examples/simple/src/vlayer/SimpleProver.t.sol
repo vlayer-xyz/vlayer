@@ -3,6 +3,7 @@ pragma solidity ^0.8.13;
 
 import {SimpleProver} from "./SimpleProver.sol";
 import "vlayer/testing/VTest.sol";
+import "./SimpleVerifier.sol";
 
 interface IFakeCheatcode {
     function thisCheatCodeDoesNotExist() external returns (bool);
@@ -11,10 +12,12 @@ interface IFakeCheatcode {
 contract ProverTest is VTest {
     function test_sumDoesNotRevertWithCallProver() public {
         SimpleProver prover = new SimpleProver();
+        vm.roll(15537395);
         callProver();
         assertEq(prover.sum(1, 2), 3);
         Proof memory proof = getProof();
-        assertEq(proof.length, 1337);
+        Simple verifier = new Simple(address(prover));
+        verifier.updateSum(proof, 3);
     }
 
     // NOTE: vm.expectRevert doesn't work correctly with errors thrown by inspectors, so we check manually
