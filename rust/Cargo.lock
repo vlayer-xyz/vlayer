@@ -1978,8 +1978,10 @@ dependencies = [
  "call_server",
  "clap",
  "flate2",
+ "hex",
  "regex",
  "reqwest 0.12.5",
+ "risc0-zkp",
  "tar",
  "tempfile",
  "test_runner",
@@ -7186,9 +7188,9 @@ dependencies = [
 
 [[package]]
 name = "risc0-core"
-version = "1.0.3"
+version = "1.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "be98b31168c4ff7dbe4c2744a1c189fdba6db200b0c581afd1272f0cc0d79aad"
+checksum = "047cc26c68c092d664ded7488dcac0462d9e31190e1598a7820fe4246d313583"
 dependencies = [
  "bytemuck",
  "rand_core",
@@ -7226,9 +7228,9 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkp"
-version = "1.0.3"
+version = "1.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6186432695488efb2eb4794d4074cf1edf381962303ecdd1732e366662f88afe"
+checksum = "ae55272541351a2391e5051519b33bfdf41f5648216827cc2cb94a49b6937380"
 dependencies = [
  "anyhow",
  "blake2",
@@ -7278,9 +7280,9 @@ dependencies = [
 
 [[package]]
 name = "risc0-zkvm-platform"
-version = "1.0.3"
+version = "1.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "0494a25344644aea2fe9bdb2f619a28e68eb4aff2c173c723a1331fceac56eea"
+checksum = "16735dab52ae8bf0dc30df78fce901b674f469dfd7b5f5dfddd54caea22f14d5"
 dependencies = [
  "bytemuck",
  "getrandom",

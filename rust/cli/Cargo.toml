@@ -25,6 +25,8 @@ toml = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
 alloy-primitives = { workspace = true, features = ["rlp"] }
+risc0-zkp = { workspace = true }
+hex = { workspace = true }
 
 [dev-dependencies]
 regex = "1.10.6"
