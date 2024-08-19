@@ -9428,8 +9428,10 @@ dependencies = [
 name = "web_proof"
 version = "0.1.0"
 dependencies = [
+ "http 1.1.0",
  "p256",
  "pkcs8",
+ "regex",
  "serde",
  "serde_json",
  "thiserror",
