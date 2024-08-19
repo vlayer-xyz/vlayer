@@ -12,10 +12,11 @@ interface IExample {
 
 contract WebProofProver is Prover {
     using Strings for string;
+    using WebProofLib for WebProof;
 
     constructor() {}
 
-    function main(WebProof calldata webProof) public returns (bool) {
+    function main(WebProof calldata webProof) public pure returns (bool) {
         bytes calldata web_proof_json = bytes(webProof.web_proof_json);
         require(
             web_proof_json[0] == "{",
@@ -26,11 +27,7 @@ contract WebProofProver is Prover {
             string(abi.encodePacked("Incorrect web proof"))
         );
 
-        require(
-            keccak256(abi.encodePacked(WebProofLib.url(webProof))) ==
-                keccak256("api.x.com"),
-            "Incorrect URL"
-        );
+        require(webProof.url().equal("api.x.com"), "Incorrect URL");
 
         return true;
     }
