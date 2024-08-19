@@ -1,6 +1,15 @@
-use tlsn_core::proof::{SessionProofError, SubstringsProofError, TlsProof};
+use std::string::FromUtf8Error;
 
-use crate::types::WebProof;
+use http::header;
+use tlsn_core::{
+    proof::{SessionProofError, SubstringsProofError, TlsProof},
+    RedactedTranscript,
+};
+
+use crate::{
+    types::WebProof,
+    web_proof_parser::{parse_web_proof_request, ParserError},
+};
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -10,14 +19,32 @@ pub enum VerificationError {
 
     #[error("Substrings proof error: {0}")]
     SubstringsProof(#[from] SubstringsProofError),
+
+    #[error("From utf8 error: {0}")]
+    FromUtf8(#[from] FromUtf8Error),
+
+    #[error("Parse error: {0}")]
+    Parser(#[from] ParserError),
 }
 
-struct _WebProofJournal {
-    request: String,
-    response: String,
+pub struct Web {
+    pub url: String,
 }
 
-fn _verify_proof(web_proof: WebProof) -> Result<_WebProofJournal, VerificationError> {
+pub fn verify_and_parse(web_proof: WebProof) -> Result<Web, VerificationError> {
+    let (sent, recv) = verify_proof(web_proof)?;
+    let (sent_string, _recv_string) = extract_sent_recv_strings((sent, recv))?;
+    let request_parse_result = parse_web_proof_request(&sent_string)?;
+    let host_value = request_parse_result.header(header::HOST)?;
+
+    Ok(Web {
+        url: host_value.into(),
+    })
+}
+
+fn verify_proof(
+    web_proof: WebProof,
+) -> Result<(RedactedTranscript, RedactedTranscript), VerificationError> {
     let TlsProof {
         session,
         substrings,
@@ -25,18 +52,19 @@ fn _verify_proof(web_proof: WebProof) -> Result<_WebProofJournal, VerificationEr
 
     session.verify_with_default_cert_verifier(web_proof.notary_pub_key)?;
 
-    let (mut sent, mut recv) = substrings.verify(&session.header)?;
+    Ok(substrings.verify(&session.header)?)
+}
 
+fn extract_sent_recv_strings(
+    (mut sent, mut recv): (RedactedTranscript, RedactedTranscript),
+) -> Result<(String, String), FromUtf8Error> {
     sent.set_redacted(b'X');
     recv.set_redacted(b'X');
 
-    let sent_string = String::from_utf8(sent.data().to_vec()).unwrap();
-    let recv_string = String::from_utf8(recv.data().to_vec()).unwrap();
+    let sent_string = String::from_utf8(sent.data().to_vec())?;
+    let recv_string = String::from_utf8(recv.data().to_vec())?;
 
-    Ok(_WebProofJournal {
-        request: sent_string,
-        response: recv_string,
-    })
+    Ok((sent_string, recv_string))
 }
 
 #[cfg(test)]
@@ -51,21 +79,31 @@ mod tests {
             "./testdata/invalid_tls_proof.json",
             NOTARY_PUB_KEY_PEM_EXAMPLE,
         );
-        assert!(_verify_proof(invalid_proof).is_err());
+        assert!(verify_proof(invalid_proof).is_err());
     }
 
     #[test]
     fn success_verification() {
         let proof = load_web_proof_fixture("./testdata/tls_proof.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
-        assert!(_verify_proof(proof).is_ok());
+        assert!(verify_proof(proof).is_ok());
     }
 
     #[test]
     fn correct_substrings_extracted() {
         let proof = load_web_proof_fixture("./testdata/tls_proof.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
-        let _WebProofJournal { request, response } = _verify_proof(proof).unwrap();
+        let (request, response) = extract_sent_recv_strings(verify_proof(proof).unwrap()).unwrap();
 
         assert_eq!(request, read_fixture("./testdata/sent_request.txt"));
         assert_eq!(response, read_fixture("./testdata/received_response.txt"));
+    }
+
+    #[test]
+    fn correct_web_extracted() {
+        let web_proof =
+            load_web_proof_fixture("./testdata/tls_proof.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
+
+        let web = verify_and_parse(web_proof).unwrap();
+
+        assert_eq!(web.url, "api.x.com");
     }
 }

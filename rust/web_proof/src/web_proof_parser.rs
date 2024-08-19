@@ -8,29 +8,29 @@ pub enum ParserError {
     Regex(#[from] regex::Error),
 
     #[error("Header not found {0}")]
-    _HeaderNotFound(String),
+    HeaderNotFound(String),
 
     #[error("Capture error")]
-    _Capture,
+    Capture,
 }
 
 #[derive(Debug)]
-pub(crate) struct _RequestParseResult<'a> {
-    lines: Vec<_RequestLine<'a>>,
+pub(crate) struct RequestParseResult<'a> {
+    lines: Vec<RequestLine<'a>>,
 }
 
 #[derive(Debug, PartialEq)]
-pub(crate) enum _RequestLine<'a> {
+pub(crate) enum RequestLine<'a> {
     Header { name: &'a str, value: &'a str },
     Other(&'a str),
 }
 
-impl _RequestParseResult<'_> {
-    pub(crate) fn _header(&self, header_name: HeaderName) -> Result<&str, ParserError> {
+impl RequestParseResult<'_> {
+    pub(crate) fn header(&self, header_name: HeaderName) -> Result<&str, ParserError> {
         self.lines
             .iter()
             .filter_map(|line| {
-                if let _RequestLine::Header { name, value } = line {
+                if let RequestLine::Header { name, value } = line {
                     if *name == header_name {
                         return Some(*value);
                     }
@@ -38,31 +38,31 @@ impl _RequestParseResult<'_> {
                 None
             })
             .next()
-            .ok_or(ParserError::_HeaderNotFound(header_name.to_string()))
+            .ok_or(ParserError::HeaderNotFound(header_name.to_string()))
     }
 }
 
 // TODO: Consider using `httparse` crate for HTTP parsing, but first research how redaction works in TLSN
 // to ensure that integrating this library will properly parse redacted HTTP request/response.
-pub(crate) fn _parse_web_proof_request(request: &str) -> Result<_RequestParseResult, ParserError> {
+pub(crate) fn parse_web_proof_request(request: &str) -> Result<RequestParseResult, ParserError> {
     request
         .lines()
-        .map(_parse_web_proof_request_line)
-        .collect::<Vec<Result<_RequestLine, ParserError>>>()
+        .map(parse_web_proof_request_line)
+        .collect::<Vec<Result<RequestLine, ParserError>>>()
         .into_iter()
-        .collect::<Result<Vec<_RequestLine>, ParserError>>()
-        .map(|lines| _RequestParseResult { lines })
+        .collect::<Result<Vec<RequestLine>, ParserError>>()
+        .map(|lines| RequestParseResult { lines })
 }
 
-fn _parse_web_proof_request_line(line: &str) -> Result<_RequestLine, ParserError> {
+fn parse_web_proof_request_line(line: &str) -> Result<RequestLine, ParserError> {
     let header_regex = Regex::new(r"^\s*(\S+)\s*:\s*(\S+)\s*$")?;
 
     if let Some(captures) = header_regex.captures(line) {
-        let name = captures.get(1).ok_or(ParserError::_Capture)?.as_str();
-        let value = captures.get(2).ok_or(ParserError::_Capture)?.as_str();
-        Ok(_RequestLine::Header { name, value })
+        let name = captures.get(1).ok_or(ParserError::Capture)?.as_str();
+        let value = captures.get(2).ok_or(ParserError::Capture)?.as_str();
+        Ok(RequestLine::Header { name, value })
     } else {
-        Ok(_RequestLine::Other(line))
+        Ok(RequestLine::Other(line))
     }
 }
 
@@ -76,16 +76,16 @@ mod tests {
     #[test]
     fn hidden_as_other() {
         assert_eq!(
-            _RequestLine::Other(""),
-            _parse_web_proof_request_line("").unwrap()
+            RequestLine::Other(""),
+            parse_web_proof_request_line("").unwrap()
         );
         assert_eq!(
-            _RequestLine::Other("X"),
-            _parse_web_proof_request_line("X").unwrap()
+            RequestLine::Other("X"),
+            parse_web_proof_request_line("X").unwrap()
         );
         assert_eq!(
-            _RequestLine::Other("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"),
-            _parse_web_proof_request_line("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX").unwrap()
+            RequestLine::Other("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"),
+            parse_web_proof_request_line("XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX").unwrap()
         );
     }
 
@@ -94,43 +94,43 @@ mod tests {
         let method_and_url_line = "GET https://example.com HTTP/1.1";
 
         assert_eq!(
-            _RequestLine::Other(method_and_url_line),
-            _parse_web_proof_request_line(method_and_url_line).unwrap()
+            RequestLine::Other(method_and_url_line),
+            parse_web_proof_request_line(method_and_url_line).unwrap()
         );
     }
 
     #[test]
     fn http_header() {
         assert_eq!(
-            _RequestLine::Header {
+            RequestLine::Header {
                 name: "host",
                 value: "example.com"
             },
-            _parse_web_proof_request_line("host: example.com").unwrap()
+            parse_web_proof_request_line("host: example.com").unwrap()
         );
 
         assert_eq!(
-            _RequestLine::Header {
+            RequestLine::Header {
                 name: "connection",
                 value: "close"
             },
-            _parse_web_proof_request_line("connection: close").unwrap()
+            parse_web_proof_request_line("connection: close").unwrap()
         );
     }
 
     #[test]
     fn empty_header_name_as_other() {
         assert_eq!(
-            _RequestLine::Other(": example.com"),
-            _parse_web_proof_request_line(": example.com").unwrap()
+            RequestLine::Other(": example.com"),
+            parse_web_proof_request_line(": example.com").unwrap()
         );
     }
 
     #[test]
     fn empty_header_value_as_other() {
         assert_eq!(
-            _RequestLine::Other("host: "),
-            _parse_web_proof_request_line("host: ").unwrap()
+            RequestLine::Other("host: "),
+            parse_web_proof_request_line("host: ").unwrap()
         );
     }
 
@@ -143,12 +143,12 @@ mod tests {
             (header::CONNECTION, Ok("close")),
             (
                 header::ACCEPT,
-                Err(ParserError::_HeaderNotFound(header::ACCEPT.to_string())),
+                Err(ParserError::HeaderNotFound(header::ACCEPT.to_string())),
             ),
         ]) {
             assert_eq!(
                 expected_value,
-                _parse_web_proof_request(&request).unwrap()._header(header)
+                parse_web_proof_request(&request).unwrap().header(header)
             );
         }
     }
