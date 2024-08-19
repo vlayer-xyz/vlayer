@@ -2,6 +2,7 @@ use crate::errors::CLIError;
 use call_server::{ProofMode, ServerConfig};
 use clap::{Parser, Subcommand};
 use commands::args::{InitArgs, ServeArgs};
+use commands::version::Version;
 use commands::{init::init, serve::run_serve};
 use test_runner::cli::TestArgs;
 use tracing::{error, info};
@@ -13,17 +14,8 @@ mod utils;
 #[cfg(test)]
 mod test_utils;
 
-const VERSION_MESSAGE: &str = concat!(
-    env!("CARGO_PKG_VERSION"),
-    " (",
-    env!("VERGEN_GIT_SHA"),
-    " ",
-    env!("VERGEN_BUILD_TIMESTAMP"),
-    ")"
-);
-
 #[derive(Parser)]
-#[command(name = "vlayer", version = VERSION_MESSAGE, about, long_about = None)]
+#[command(name = "vlayer", version = Version, about, long_about = None)]
 #[command(propagate_version = true)]
 struct Cli {
     #[command(subcommand)]
