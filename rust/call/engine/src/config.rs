@@ -10,6 +10,7 @@ use crate::chain::{eip1559::Eip1559Constants, fork::ForkCondition, spec::ChainSp
 
 pub const MAINNET_ID: ChainId = 1;
 pub const SEPOLIA_ID: ChainId = 11155111;
+pub const TESTING_CHAIN_ID: ChainId = 55511555;
 pub const MAINNET_MERGE_BLOCK_NUMBER: u64 = 15537394;
 
 pub const DEFAULT_CALLER: Address = address!("1111111111111111111111111111111111111111");
@@ -18,6 +19,7 @@ pub static CHAIN_MAP: Lazy<HashMap<ChainId, &'static Lazy<ChainSpec>>> = Lazy::n
     HashMap::from([
         (MAINNET_ID, &ETH_MAINNET_CHAIN_SPEC),
         (SEPOLIA_ID, &ETH_SEPOLIA_CHAIN_SPEC),
+        (TESTING_CHAIN_ID, &TESTING_CHAIN_SPEC),
     ])
 });
 
@@ -45,6 +47,19 @@ pub static ETH_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
             (SpecId::MERGE, ForkCondition::Block(1735371)),
             (SpecId::SHANGHAI, ForkCondition::Timestamp(1677557088)),
             (SpecId::CANCUN, ForkCondition::Timestamp(1706655072)),
+        ]),
+        BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
+    )
+});
+
+pub static TESTING_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
+    ChainSpec::new(
+        TESTING_CHAIN_ID,
+        SpecId::CANCUN,
+        BTreeMap::from([
+            (SpecId::MERGE, ForkCondition::Block(1)),
+            (SpecId::SHANGHAI, ForkCondition::Block(1)),
+            (SpecId::CANCUN, ForkCondition::Block(1)),
         ]),
         BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
     )

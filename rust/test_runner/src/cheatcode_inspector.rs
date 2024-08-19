@@ -13,6 +13,11 @@ use foundry_evm::revm::interpreter::{CallInputs, CallOutcome};
 use foundry_evm::revm::primitives::U256;
 use foundry_evm::revm::{Database, EvmContext, Inspector};
 
+use call_engine::config::TESTING_CHAIN_ID;
+use call_engine::io::Call;
+use call_host::host::config::HostConfig;
+use call_host::host::Host;
+
 use crate::cheatcodes::{callProverCall, getProofCall, CHEATCODE_CALL_ADDR};
 use crate::pending_state_provider::{PendingStateProvider, PendingStateProviderFactory};
 
@@ -100,7 +105,7 @@ fn create_host(journaled_state: &JournaledState) -> Host<PendingStateProvider> {
         },
         HostConfig {
             rpc_urls: Default::default(),
-            start_chain_id: SEPOLIA_ID,
+            start_chain_id: TESTING_CHAIN_ID,
         },
     )
     .expect("Failed to create host")
