@@ -1,28 +1,6 @@
-use super::Node;
-
-impl Node {
-    /// Returns the number of full nodes in the trie.
-    /// A full node is a node that needs to be fully encoded to compute the root hash.
-    pub(crate) fn size(&self) -> usize {
-        match self {
-            Node::Null | Node::Digest(_) => 0,
-            Node::Leaf(..) => 1,
-            Node::Extension(_, child) => 1 + child.size(),
-            Node::Branch(children, _) => {
-                1 + children
-                    .iter()
-                    .filter_map(Option::as_deref)
-                    .map(Node::size)
-                    .sum::<usize>()
-            }
-        }
-    }
-}
-
 #[cfg(test)]
 mod node_size {
-    use super::Node;
-    use crate::key_nibbles::KeyNibbles;
+    use crate::{key_nibbles::KeyNibbles, node::Node};
     use std::array::from_fn;
 
     #[test]
