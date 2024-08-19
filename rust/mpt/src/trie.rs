@@ -1,8 +1,7 @@
-use crate::{key_nibbles::KeyNibbles, node::Node};
+use crate::node::Node;
 use alloy_primitives::{keccak256, B256};
 use alloy_rlp::Decodable;
 use alloy_trie::EMPTY_ROOT_HASH;
-use core::panic;
 use nybbles::Nibbles;
 use rlp as legacy_rlp;
 use serde::{Deserialize, Serialize};
@@ -95,14 +94,10 @@ impl MerkleTrie {
         Ok(trie)
     }
 
+    // work in progress
+    #[cfg(test)]
     pub fn insert(&mut self, key: impl AsRef<[u8]>, value: impl AsRef<[u8]>) {
-        if self.get(key.as_ref()).is_some() {
-            panic!("Key already exists");
-        }
-        if key.as_ref().is_empty() {
-            return self.0 = Node::Branch(Default::default(), Some(value.as_ref().into()));
-        }
-        self.0 = Node::Leaf(KeyNibbles::unpack(key), value.as_ref().into());
+        self.0.insert(Nibbles::unpack(key), value);
     }
 }
 

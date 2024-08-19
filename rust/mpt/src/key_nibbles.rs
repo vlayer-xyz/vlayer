@@ -16,7 +16,7 @@ impl KeyNibbles {
         self.0.as_slice()
     }
 
-    fn from_nibbles(nibbles: Nibbles) -> Self {
+    pub fn from_nibbles(nibbles: Nibbles) -> Self {
         if nibbles.is_empty() {
             panic!("KeyNibbles cannot be empty");
         }
