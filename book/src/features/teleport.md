@@ -55,3 +55,12 @@ Currently, supported chains are Ethereum Sepolia and Optimism testnet.
 > ```
 > 
 > This command will download all necessary artifacts to your project.
+
+## Finality considerations
+Finality, in a context of blockchains, is a point at which a transaction or block is fully confirmed and irreversible. When using vlayer `setChainId` teleports, chain finality is an important factor to consider.
+
+One should be aware that different chains may have different finality thresholds. For example, Ethereum Mainnet blocks are final after no more than about 12 minutes.
+
+In the case of L2 chains, things are a bit more complicated. For example in case of optimistic rollup, like Optimism and Arbitrum, after L2 blocks are submitted to L1, there's a challenge period (often 7 days). If there is no evidence of a invalid state transistion during this period, the L2 block is finally considered as final.
+
+Now consider teleporting to blocks that are not yet final in the destination chain. This can lead to situations where we are proving things that can be rolled back. It is important to include this risk in a protocol. The simplest way is to only teleport to blocks that are final and cannot be reorganized.
