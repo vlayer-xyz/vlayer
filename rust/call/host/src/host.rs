@@ -4,17 +4,19 @@ use crate::into_input::into_multi_input;
 use crate::provider::factory::{EthersProviderFactory, ProviderFactory};
 use crate::provider::multi::CachedMultiProvider;
 use crate::provider::{BlockingProvider, EthersClient, EthersProvider};
+use crate::seal::EncodableReceipt;
 use alloy_primitives::ChainId;
+use alloy_sol_types::SolValue;
 use call_engine::engine::Engine;
 use call_engine::evm::env::{cached::CachedEvmEnv, location::ExecutionLocation};
 use call_engine::evm::input::MultiEvmInput;
 use call_engine::io::{Call, GuestOutput, HostOutput, Input};
+use call_engine::Seal;
 use call_guest_wrapper::RISC0_CALL_GUEST_ELF;
 use config::HostConfig;
 use error::HostError;
 use ethers_core::types::BlockNumber;
-use risc0_ethereum_contracts::groth16::abi_encode;
-use risc0_zkvm::{default_prover, is_dev_mode, ExecutorEnv, ProverOpts};
+use risc0_zkvm::{default_prover, ExecutorEnv, ProverOpts};
 
 pub mod config;
 pub mod error;
@@ -106,19 +108,13 @@ where
     ) -> Result<(Vec<u8>, Vec<u8>), HostError> {
         let prover = default_prover();
 
-        let receipt = prover
+        let result = prover
             .prove_with_opts(env, guest_elf, &ProverOpts::groth16())
-            .map_err(|err| HostError::Prover(err.to_string()))?
-            .receipt;
+            .map_err(|err| HostError::Prover(err.to_string()))?;
 
-        let seal = if is_dev_mode() {
-            Vec::new()
-        } else {
-            abi_encode(receipt.inner.groth16()?.seal.clone())
-                .map_err(|err| HostError::AbiEncode(err.to_string()))?
-        };
+        let seal: Seal = EncodableReceipt::from(result.receipt.clone()).try_into()?;
 
-        Ok((seal, receipt.journal.bytes))
+        Ok((seal.abi_encode(), result.receipt.journal.bytes))
     }
 
     fn build_executor_env(
