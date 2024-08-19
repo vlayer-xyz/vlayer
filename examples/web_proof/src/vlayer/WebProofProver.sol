@@ -18,13 +18,10 @@ contract WebProofProver is Prover {
 
     function main(WebProof calldata webProof) public pure returns (bool) {
         bytes calldata web_proof_json = bytes(webProof.web_proof_json);
-        require(
-            web_proof_json[0] == "{",
-            string(abi.encodePacked("Incorrect web proof"))
-        );
+        require(web_proof_json[0] == "{", "Incorrect web proof");
         require(
             web_proof_json[web_proof_json.length - 1] == "}",
-            string(abi.encodePacked("Incorrect web proof"))
+            "Incorrect web proof"
         );
 
         require(webProof.url().equal("api.x.com"), "Incorrect URL");
