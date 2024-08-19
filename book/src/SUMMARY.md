@@ -15,6 +15,7 @@
 # Advanced
 - [Prover](./advanced/prover.md)
 - [Verifier](./advanced/verifier.md)
+- [Prover special variables](./advanced/prover-special-variables.md)
 - [Tests](./advanced/tests.md)
 
 # From JavaScript

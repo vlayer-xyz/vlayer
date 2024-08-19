@@ -24,37 +24,6 @@ contract Example is Verifier {
 
 > `proof` is not an argument to `onlyVerified` because it is automatically extracted from `msg.data`.
 
-### Special variables
-There are special Solidity variables and functions that exist in the global namespace. These entities are mainly used to provide information about the current state of the blockchain in which the code is executed, or are general utility functions. 
-
-Since prover contracts are executed in the [vlayer zkEVM environment](/appendix/architecture/prover.html), some variables are not implemented or behave in a different way than in regular EVM chains. Below is a list of all variables available to vlayer provers with their description.
-
-Variables that have special implemention in vlayer zkEVM:
-* `block.number(uint)`: current block number, controlled either by vlayer prover [JSON-RPC call](/appendix/api.html) or [teleport](/features/teleport.html) / [time-travel](/features/time-travel.html) functions
-* `msg.sender`: cannot be used as in typical Solidity as it always points to the same address
-* `block.chainid(uint)`: current chain id, controlled either by vlayer prover [JSON-RPC call](/appendix/api.html) or [teleport](/features/teleport.html) / [time-travel](/features/time-travel.html) functions
-
-Not available variables: 
-* `block.basefee(uint)`: returns 0
-* `block.blobbasefee(uint)`: returns 0
-* `block.coinbase(address payable)`: returns 0x0 zero address
-* `block.difficulty(uint)`: returns 0
-* `block.gaslimit (uint)`: returns 0
-* `block.prevrandao(uint)`: returns 0
-* `msg.value`: payable functionalities are not supported, returns 0
-
-Same behaviour as in regular Solidity:
-* `blockhash(uint blockNumber)`: hash of the given block when blocknumber is one of the 256 most recent blocks; otherwise returns zero
-* `blobhash(uint index)`: versioned hash of the index-th blob associated with the current transaction. Returns zero if no blob with the given index exists.
-* `block.timestamp (uint)`: current block timestamp as seconds since unix epoch
-* `gasleft()`: remaining gas
-* `msg.data`: complete calldata
-* `msg.sig`: first four bytes of the calldata (i.e. function identifier)
-* `tx.gasprice`: gas price of the transaction
-* `tx.origin`: sender of the transaction (full call chain)
-
-> Note that since Verifier contracts can be deployed on various chains, they may support a different set of special variables specifc to given chain. Always check official docs for reference.
-
 ## Data flow
 
 Proving data flow is composed of three steps. It starts at `Guest`, which returns `GuestOutput`. `GuestOutput` consist of two fields: `execution_commitment` and `evm_call_result`.
