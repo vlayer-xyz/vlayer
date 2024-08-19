@@ -107,7 +107,11 @@ To use web proofs for trusted verification, we need to be sure that no one has g
 
 By default, TLS establishes secure communications only between a server and a client. TLS ensures that the data has not been tampered with and that the server is who it claims to be. This setup plays a vital role in web security, but is not enough for reliable verification. vlayer solves this by introducing an additional party to the TLS communication: *Notary*. 
 
-The job of *Notary* is to verify the TLS session transcript and make sure that nothing malicious is happening. 
-Downside of involving *Notary* is that it must be a trusted entity. *Notary* blindly signs the data, so it can lead to situation where prover cooperates with *Notary* to trick *Verifier*. 
+The job of *Notary* is to verify the TLS session transcript and ensure that nothing malicious is happening. Thanks to advanced cryptography, the Notary can have full confidence in the integrity of the content, but still never see the content of the original communication.
 
-A solution to this challenge, along with other security considerations, will be available soon in this section.
+### Notary Trust
+The disadvantage of involving *Notary* is that it must be a highly trusted third party. The *Notary* signs or certifies the incoming data, so it can lead to a situation where the *Prover* works with the *Notary* to create malicious proofs for the *Verifier*. 
+
+Having one or a few notaries can also compromise the promise of decentralization and make the protocol vulnerable to censorship threats.
+
+In the near future, vlayer will publish a roadmap specifying in detail how to achieve high level of security when setting up the *Notary* service.
