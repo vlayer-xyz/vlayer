@@ -51,4 +51,7 @@ pub enum HostError {
 
     #[error("Evm env factory error: {0}")]
     EvmEnvFactory(#[from] anyhow::Error),
+
+    #[error("Seal encoding error: {0}")]
+    SealEncodingError(String),
 }

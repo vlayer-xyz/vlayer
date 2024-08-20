@@ -130,7 +130,7 @@ mod server_tests {
                             "evm_call_result": u256_to_vec32(U256::from(3)),
                             "function_selector": call_data.to_string()[0..10],
                             "prover_contract_address": helper.contract().address(),
-                            "seal": []
+                            "seal": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0]
                         }
                     }
                 }),
@@ -182,7 +182,7 @@ mod server_tests {
                             "evm_call_result": bool_to_vec32(true),
                             "function_selector": call_data.to_string()[0..10],
                             "prover_contract_address": helper.contract().address(),
-                            "seal": []
+                            "seal": [0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0]
                         }
                     }
                 }),
