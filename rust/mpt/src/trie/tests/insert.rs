@@ -76,14 +76,14 @@ pub fn one_empty_key_one_long_key() {
     assert_eq!(Some(&[43][..]), mpt.get([]));
 }
 
-// #[test]
-// pub fn common_prefix() {
-//     let mut mpt = MerkleTrie(Node::Null);
-//     mpt.insert([0xff, 0xff, 0x01], [42]);
-//     mpt.insert([0xff, 0xff, 0x02], [43]);
-//     assert_eq!(Some(&[42][..]), mpt.get([0xff, 0xff, 0x01]));
-//     assert_eq!(Some(&[43][..]), mpt.get([0xff, 0xff, 0x02]));
-// }
+#[test]
+pub fn common_prefix() {
+    let mut mpt = MerkleTrie(Node::Null);
+    mpt.insert([0xff, 0xff, 0x01], [42]);
+    mpt.insert([0xff, 0xff, 0x02], [43]);
+    assert_eq!(Some(&[42][..]), mpt.get([0xff, 0xff, 0x01]));
+    assert_eq!(Some(&[43][..]), mpt.get([0xff, 0xff, 0x02]));
+}
 
 // #[test]
 // pub fn contained_prefix() {

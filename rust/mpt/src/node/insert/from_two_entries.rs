@@ -31,7 +31,6 @@ fn from_two_ordered_entries(
         panic!("Key already exists")
     }
     let (rhs_first_nibble, remaining_rhs_key) = split_first_nibble(&rhs_key).unwrap();
-    dbg!(&rhs_first_nibble, &remaining_rhs_key);
     if lhs_key.is_empty() {
         create_branch_with_leaf(rhs_first_nibble, remaining_rhs_key, rhs_value, lhs_value)
     } else {
@@ -80,14 +79,20 @@ fn create_branch_with_two_leaves(
     rhs_value: Box<[u8]>,
 ) -> Node {
     let mut children: [Option<Box<Node>>; 16] = Default::default();
-    children[lhs_first_nibble as usize] = Some(Box::new(Node::Leaf(
-        KeyNibbles::from_nibbles(remaining_lhs_key),
-        lhs_value,
-    )));
-    children[rhs_first_nibble as usize] = Some(Box::new(Node::Leaf(
-        KeyNibbles::from_nibbles(remaining_rhs_key),
-        rhs_value,
-    )));
+    let lhs_child = if remaining_lhs_key.is_empty() {
+        let child_branch_children: [Option<Box<Node>>; 16] = Default::default();
+        Node::Branch(child_branch_children, Some(lhs_value))
+    } else {
+        Node::Leaf(KeyNibbles::from_nibbles(remaining_lhs_key), lhs_value)
+    };
+    let rhs_child = if remaining_rhs_key.is_empty() {
+        let child_branch_children: [Option<Box<Node>>; 16] = Default::default();
+        Node::Branch(child_branch_children, Some(rhs_value))
+    } else {
+        Node::Leaf(KeyNibbles::from_nibbles(remaining_rhs_key), rhs_value)
+    };
+    children[lhs_first_nibble as usize] = Some(Box::new(lhs_child));
+    children[rhs_first_nibble as usize] = Some(Box::new(rhs_child));
     Node::Branch(children, None)
 }
 
