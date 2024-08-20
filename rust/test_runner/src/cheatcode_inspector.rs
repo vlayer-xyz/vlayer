@@ -83,9 +83,7 @@ impl CheatcodeInspector {
 
         Proof {
             seal: Seal {
-                lhv: FixedBytes::<18>::new([0; 18]),
-                // Set last byte to 1 to indicate fake proof mode
-                rhv: FixedBytes::<18>::new([0; 18]).concat_const(FixedBytes::<1>::new([1])),
+                seal: [FixedBytes::new([0; 32]); 8],
                 mode: ProofMode::FAKE,
             },
             // We don't have journal data here yet, to be added later
