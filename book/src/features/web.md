@@ -102,16 +102,14 @@ And that's it!
 
 As you can see, Web Proofs can be useful for building dApps. 
 
-## Security considerations
-To use web proofs for trusted verification, we need to be sure that no one has generated them using tempered data. Otherwise, someone could generate a valid proof based on completely false information and try to exploit it. To prevent this, vlayer captures web data and verifies it using the Transport Layer Security (TLS) protocol. 
+## Security Considerations
+vlayer retrieves web data and verifies it using the Transport Layer Security (TLS) protocol, which secures most modern encrypted connections on the Internet. Web Proofs ensures the authenticity of web data by extending the TLS protocol. A designated server, called a *Notary*, joins a TLS session between the client and server and can cryptographically certify its contents.
 
-By default, TLS establishes secure communications only between a server and a client. TLS ensures that the data has not been tampered with and that the server is who it claims to be. This setup plays a vital role in web security, but is not enough for reliable verification. vlayer solves this by introducing an additional party to the TLS communication: *Notary*. 
+From a privacy perspective, it is crucial that the *Notary* server never has access to the transcript of the connection.
 
-The job of *Notary* is to verify the TLS session transcript and ensure that nothing malicious is happening. Thanks to advanced cryptography, the Notary can have full confidence in the integrity of the content, but still never see the content of the original communication.
+The web proof feature is based on the [TLSNotary](https://tlsnotary.org/) protocol.
 
-### Notary Trust
-The disadvantage of involving *Notary* is that it must be a highly trusted third party. The *Notary* signs or certifies the incoming data, so it can lead to a situation where the *Prover* works with the *Notary* to create malicious proofs for the *Verifier*. 
+### Notary Trust Assumption
+A key disadvantage of using a *Notary* is the requirement to trust it. Since the *Notary* certifies incoming data, a malicious *Notary* could create fake proofs that are still validated by the *Verifier*.
 
-Having one or a few notaries can also compromise the promise of decentralization and make the protocol vulnerable to censorship threats.
-
-In the near future, vlayer will publish a roadmap specifying in detail how to achieve high level of security when setting up the *Notary* service.
+vlayer will publish a roadmap outlining how it will achieve a high level of security when using the *Notary* service.
