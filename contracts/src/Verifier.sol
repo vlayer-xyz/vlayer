@@ -3,14 +3,16 @@ pragma solidity ^0.8.13;
 
 import {IRiscZeroVerifier} from "risc0-ethereum/IRiscZeroVerifier.sol";
 
-import {Proof} from "./Proof.sol";
-import {SealLib, Seal} from "./Seal.sol";
+import {Proof, ProofLib} from "./Proof.sol";
+import {Seal, SealLib} from "./Seal.sol";
 
 import {IProofVerifier} from "./proof_verifier/IProofVerifier.sol";
 import {ProofVerifierFactory} from "./proof_verifier/ProofVerifierFactory.sol";
 
 abstract contract Verifier {
-    uint256 constant JOURNAL_OFFSET = 100;
+    uint256 constant SELECTOR_LEN = 4;
+    uint256 constant PROOF_OFFSET = SELECTOR_LEN;
+    uint256 constant JOURNAL_OFFSET = PROOF_OFFSET + ProofLib.COMMITMENT_OFFSET;
 
     IProofVerifier public verifier;
 
