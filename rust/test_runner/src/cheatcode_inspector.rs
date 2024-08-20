@@ -1,6 +1,5 @@
 use alloy_primitives::{b256, FixedBytes};
 use alloy_sol_types::SolCall;
-use call_engine::config::SEPOLIA_ID;
 use call_engine::io::{Call, HostOutput};
 use call_engine::utils::evm_call::{
     create_encoded_return_outcome, create_return_outcome, create_revert_outcome, split_calldata,
@@ -14,9 +13,6 @@ use foundry_evm::revm::primitives::U256;
 use foundry_evm::revm::{Database, EvmContext, Inspector};
 
 use call_engine::config::TESTING_CHAIN_ID;
-use call_engine::io::Call;
-use call_host::host::config::HostConfig;
-use call_host::host::Host;
 
 use crate::cheatcodes::{callProverCall, getProofCall, CHEATCODE_CALL_ADDR};
 use crate::pending_state_provider::{PendingStateProvider, PendingStateProviderFactory};
