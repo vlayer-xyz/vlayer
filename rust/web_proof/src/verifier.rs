@@ -111,4 +111,14 @@ mod tests {
 
         assert_eq!(web.url, "api.x.com");
     }
+
+    #[test]
+    fn correct_server_name_extracted() {
+        let web_proof =
+            load_web_proof_fixture("./testdata/tls_proof.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
+
+        let web = verify_and_parse(web_proof).unwrap();
+
+        assert_eq!(web.server_name, "api.x.com");
+    }
 }
