@@ -1,4 +1,5 @@
 import { createTestClient, walletActions, publicActions, http, Address, HttpTransport } from "viem";
+import { privateKeyToAccount, generatePrivateKey } from 'viem/accounts'
 import { foundry, mainnet, sepolia } from "viem/chains";
 import { type ContractSpec } from "./prover";
 
@@ -40,3 +41,5 @@ export async function deployContract(contractSpec: ContractSpec, args: any[] = [
 
     return adddress;
 }
+
+export const getTestAccount = () => privateKeyToAccount(generatePrivateKey());

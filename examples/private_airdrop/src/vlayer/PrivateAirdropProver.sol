@@ -36,7 +36,8 @@ contract PrivateAirdropProver is Prover {
     function isValidSignature(address _account, bytes memory signature) internal pure returns (bool) {
         require(_account != address(0), "Missing Address");
 
-        bytes32 signedHash = bytes("erc20 prover").toEthSignedMessageHash();
+        bytes32 signedHash = bytes("I own ExampleToken and I want to privately claim my airdrop")
+            .toEthSignedMessageHash();
         return signedHash.recover(signature) == _account;
     }
 }

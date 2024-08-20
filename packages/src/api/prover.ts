@@ -1,6 +1,5 @@
 import { type CallParams, type CallContext, v_call } from "./v_call";
 import { encodeFunctionData, type Address, type Abi, type Hex } from "viem";
-import { client } from "./helpers";
 import { sepolia } from "viem/chains";
 
 type Bytecode = {
@@ -10,7 +9,6 @@ type Bytecode = {
 export type ContractSpec = {
     abi: Abi,
     bytecode: Bytecode,
-    object: Hex
 }
 
 type ProverArg = number | string | boolean;
@@ -21,7 +19,7 @@ export async function getContractSpec(file: string): Promise<ContractSpec> {
     return output;
 }
 
-export async function prove(prover: Address, proverSpec: ContractSpec, functionName: string, args: ProverArg[], blockNo: number): Promise<any> {
+export async function prove(prover: Address, proverSpec: ContractSpec, functionName: string, args: ProverArg[], blockNo: number = 1): Promise<any> {
     let calldata = encodeFunctionData({
         abi: proverSpec.abi,
         functionName,
@@ -29,7 +27,10 @@ export async function prove(prover: Address, proverSpec: ContractSpec, functionN
     });
 
     let call: CallParams = { to: prover, data: calldata };
-    let context: CallContext = { block_no: blockNo, chain_id: sepolia.id };
+    let context: CallContext = { 
+        block_no: blockNo ?? 1, //TODO: remove once backend removes this field validation
+        chain_id: sepolia.id 
+    };
 
     let response = await v_call(call, context); 
     if (response.result === undefined) {
