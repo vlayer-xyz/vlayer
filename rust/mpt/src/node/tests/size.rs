@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod node_size {
-    use crate::{key_nibbles::KeyNibbles, node::Node};
+    use crate::node::Node;
     use std::array::from_fn;
 
     #[test]
@@ -17,21 +17,20 @@ mod node_size {
 
     #[test]
     fn leaf() {
-        let node = Node::Leaf([0x1].into(), Box::new([]));
+        let node = Node::create_leaf([0x1], []);
         assert_eq!(node.size(), 1);
     }
 
     #[test]
     fn extension() {
-        let key_nibbles: KeyNibbles = [0x1].into();
-        let leaf = Node::Leaf(key_nibbles.clone(), Box::new([]));
-        let extension = Node::Extension(key_nibbles, Box::new(leaf));
+        let leaf = Node::create_leaf([0x1], []);
+        let extension = Node::Extension([0x1].into(), Box::new(leaf));
         assert_eq!(extension.size(), 2);
     }
 
     #[test]
     fn branch_one_child() {
-        let leaf = Node::Leaf([0x1].into(), Box::new([]));
+        let leaf = Node::create_leaf([0x1], []);
         let child = Some(Box::new(leaf));
         const NULL_CHILD: Option<Box<Node>> = None;
         let mut children = [NULL_CHILD; 16];
@@ -42,7 +41,7 @@ mod node_size {
 
     #[test]
     fn branch_many_children() {
-        let leaf = Node::Leaf([0x1].into(), Box::new([]));
+        let leaf = Node::create_leaf([0x1], []);
         let child = Some(Box::new(leaf));
         let children: [_; 16] = from_fn(|_| child.clone());
         let branch = Node::Branch(children, None);
@@ -51,7 +50,7 @@ mod node_size {
 
     #[test]
     fn branch_with_value() {
-        let leaf = Node::Leaf([0x1].into(), Box::new([]));
+        let leaf = Node::create_leaf([0x1], []);
         let child = Some(Box::new(leaf));
         const NULL_CHILD: Option<Box<Node>> = None;
         let mut children = [NULL_CHILD; 16];
