@@ -7,32 +7,23 @@ enum ProofMode {
 }
 
 struct Seal {
-    bytes18 lhv;
-    bytes19 rhv;
+    bytes32[8] seal;
     ProofMode mode;
 }
 
 library SealLib {
-    uint256 constant SEAL_LENGTH = 36;
-    uint256 constant SEAL_MIDDLE = SEAL_LENGTH / 2;
-    uint256 constant PROOF_MODE_POSITION = SEAL_LENGTH + 1;
+    uint256 constant FAKE_SEAL_LENGTH = 36;
+    uint256 constant GROTH16_SEAL_LENGTH = 256;
+    uint256 constant SEAL_LENGTH = 256;
 
     function decode(Seal memory seal) internal pure returns (bytes memory) {
-        bytes memory sealBytes = new bytes(SEAL_LENGTH);
-
-        // we don't want to change the original seal
-        bytes18 lhv = seal.lhv;
-        bytes19 rhv = seal.rhv;
-
-        for (uint256 i = 0; i < SEAL_MIDDLE; i++) {
-            sealBytes[i] = bytes1(lhv);
-            sealBytes[SEAL_MIDDLE + i] = bytes1(rhv);
-
-            lhv <<= 8;
-            rhv <<= 8;
+        if (seal.mode == ProofMode.FAKE) {
+            bytes32 firstWord = seal.seal[0];
+            bytes4 secondWord = bytes4(seal.seal[1]);
+            return abi.encodePacked(firstWord, secondWord);
+        } else {
+            return abi.encode(seal.seal);
         }
-
-        return sealBytes;
     }
 
     function proofMode(Seal memory seal) internal pure returns (ProofMode) {
