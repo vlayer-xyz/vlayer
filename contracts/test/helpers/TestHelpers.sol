@@ -8,11 +8,13 @@ import {Proof} from "../../src/Proof.sol";
 import {ProofMode, Seal, SealLib} from "../../src/Seal.sol";
 import {ImageID} from "../../src/ImageID.sol";
 
+import {FAKE_VERIFIER_SELECTOR} from "../../src/proof_verifier/FakeProofVerifier.sol";
+
 address constant PROVER = address(1);
 bytes4 constant SELECTOR = bytes4(0x01020304);
 
 contract TestHelpers {
-    RiscZeroMockVerifier public immutable mockVerifier = new RiscZeroMockVerifier(bytes4(0));
+    RiscZeroMockVerifier public immutable mockVerifier = new RiscZeroMockVerifier(FAKE_VERIFIER_SELECTOR);
 
     function createProof(ExecutionCommitment memory commitment, bytes memory journalParams)
         public
