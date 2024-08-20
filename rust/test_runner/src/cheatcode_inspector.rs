@@ -17,7 +17,6 @@ use crate::cheatcodes::{callProverCall, getProofCall, CHEATCODE_CALL_ADDR};
 use crate::providers::pending_state_provider::PendingStateProviderFactory;
 use crate::providers::test_provider::{TestProvider, TestProviderFactory};
 use call_engine::config::TESTING_CHAIN_ID;
-use call_host::provider::factory::EthersProviderFactory;
 
 #[derive(Default)]
 pub struct CheatcodeInspector {
