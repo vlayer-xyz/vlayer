@@ -14,6 +14,7 @@ use forge::revm::interpreter::{return_ok, InstructionResult};
 use forge::revm::primitives::{
     BlockEnv, Env, EnvWithHandlerCfg, ExecutionResult, Output, ResultAndState, TxEnv, TxKind,
 };
+use foundry_config::RpcEndpoints;
 use foundry_evm::executors::{CallResult, EvmError, Executor, RawCallResult};
 use foundry_evm::inspectors::{InspectorData, InspectorStack};
 use foundry_evm_core::backend::CowBackend;
@@ -27,6 +28,7 @@ use crate::composite_inspector::CompositeInspector;
 /// MODIFICATION: This struct is a wrapper around the Executor struct from foundry_evm that adds our inspector that will be passed to the backend
 pub struct TestExecutor {
     pub inner: Executor,
+    pub rpc_endpoints: RpcEndpoints,
 }
 
 /// MODIFICATION: Deref and DerefMut added to pass calls to the inner Executor
@@ -46,8 +48,11 @@ impl DerefMut for TestExecutor {
 
 // MODIFICATION: Only keep functions relevant to test execution
 impl TestExecutor {
-    pub fn new(inner: Executor) -> Self {
-        Self { inner }
+    pub fn new(inner: Executor, rpc_endpoints: RpcEndpoints) -> Self {
+        Self {
+            inner,
+            rpc_endpoints,
+        }
     }
 
     pub fn call(
@@ -79,8 +84,10 @@ impl TestExecutor {
     #[instrument(name = "call", level = "debug", skip_all)]
     pub fn call_with_env(&self, mut env: EnvWithHandlerCfg) -> eyre::Result<RawCallResult> {
         let mut backend = CowBackend::new_borrowed(self.backend());
-        let mut composite_inspector =
-            CompositeInspector::new(self.inspector().clone(), CheatcodeInspector::default());
+        let mut composite_inspector = CompositeInspector::new(
+            self.inspector().clone(),
+            CheatcodeInspector::new(self.rpc_endpoints.clone()),
+        );
         let result = backend.inspect(&mut env, &mut composite_inspector)?;
         convert_executed_result(
             env,

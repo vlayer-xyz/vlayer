@@ -1,12 +1,12 @@
 //! Handling different blockchain specifications.
 use std::collections::BTreeMap;
 
+use crate::chain::{eip1559::Eip1559Constants, fork::ForkCondition, spec::ChainSpec};
 use alloy_primitives::{address, Address, ChainId};
 use once_cell::sync::Lazy;
 use revm::primitives::SpecId;
 use std::collections::HashMap;
-
-use crate::chain::{eip1559::Eip1559Constants, fork::ForkCondition, spec::ChainSpec};
+use std::convert::Into;
 
 pub const MAINNET_ID: ChainId = 1;
 pub const SEPOLIA_ID: ChainId = 11155111;
@@ -20,6 +20,13 @@ pub static CHAIN_MAP: Lazy<HashMap<ChainId, &'static Lazy<ChainSpec>>> = Lazy::n
         (MAINNET_ID, &ETH_MAINNET_CHAIN_SPEC),
         (SEPOLIA_ID, &ETH_SEPOLIA_CHAIN_SPEC),
         (TESTING_CHAIN_ID, &TESTING_CHAIN_SPEC),
+    ])
+});
+
+pub static CHAIN_NAMES: Lazy<HashMap<String, ChainId>> = Lazy::new(|| {
+    HashMap::from([
+        ("mainnet".into(), MAINNET_ID),
+        ("sepolia".into(), SEPOLIA_ID),
     ])
 });
 

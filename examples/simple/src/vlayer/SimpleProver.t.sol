@@ -10,13 +10,13 @@ interface IFakeCheatcode {
 }
 
 contract ProverTest is VTest {
-    function test_ChainId() public {
+    function test_ChainId() public view {
         assertEq(block.chainid, 55511555);
     }
 
     function test_sumDoesNotRevertWithCallProver() public {
         SimpleProver prover = new SimpleProver();
-        vm.roll(15537395);
+        vm.roll(2);
         callProver();
         assertEq(prover.sum(1, 2), 3);
         Proof memory proof = getProof();

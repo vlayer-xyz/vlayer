@@ -8,6 +8,7 @@ use call_engine::{Proof, Seal};
 use call_host::host::config::HostConfig;
 use call_host::host::Host;
 use forge::revm::JournaledState;
+use foundry_config::RpcEndpoints;
 use foundry_evm::revm::interpreter::{CallInputs, CallOutcome};
 use foundry_evm::revm::primitives::U256;
 use foundry_evm::revm::{Database, EvmContext, Inspector};
@@ -22,6 +23,17 @@ use call_host::provider::factory::EthersProviderFactory;
 pub struct CheatcodeInspector {
     should_start_proving: bool,
     previous_proof: Option<Proof>,
+    rpc_endpoints: RpcEndpoints,
+}
+
+impl CheatcodeInspector {
+    pub fn new(rpc_endpoints: RpcEndpoints) -> Self {
+        Self {
+            should_start_proving: false,
+            previous_proof: None,
+            rpc_endpoints,
+        }
+    }
 }
 
 impl<DB: Database> Inspector<DB> for CheatcodeInspector {
@@ -61,7 +73,7 @@ impl CheatcodeInspector {
         context: &&mut EvmContext<DB>,
         inputs: &mut CallInputs,
     ) -> CallOutcome {
-        let host = create_host(&context.journaled_state);
+        let host = create_host(&context.journaled_state, &self.rpc_endpoints);
         let call_result = host.run(Call {
             to: inputs.target_address,
             data: inputs.input.clone().into(),
@@ -95,14 +107,16 @@ impl CheatcodeInspector {
     }
 }
 
-fn create_host(journaled_state: &JournaledState) -> Host<TestProvider> {
+fn create_host(
+    journaled_state: &JournaledState,
+    rpc_endpoints: &RpcEndpoints,
+) -> Host<TestProvider> {
     let pending_state_provider_factory = PendingStateProviderFactory {
         state: journaled_state.state.clone(),
     };
-    let ethers_provider_factory = EthersProviderFactory::new(Default::default());
 
     Host::try_new_with_provider_factory(
-        TestProviderFactory::new(pending_state_provider_factory, ethers_provider_factory),
+        TestProviderFactory::new(pending_state_provider_factory, rpc_endpoints.clone()),
         HostConfig {
             rpc_urls: Default::default(),
             start_chain_id: TESTING_CHAIN_ID,

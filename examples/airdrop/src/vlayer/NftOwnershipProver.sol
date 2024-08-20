@@ -11,21 +11,21 @@ interface IERC721 {
     function balanceOf(address owner) external view returns (uint256 balance);
 }
 
-address constant BYAC_NFT_ADDR = 0x1744aC92e0Ff310Ff836bB68d56D4159E37D0BdF;
+address constant BYAC_NFT_ADDR = 0xBC4CA0EdA7647A8aB7C2061c2E118A18a936f13D;
 
 contract NftOwnershipProver is Prover {
-    function require_byac_nft() public view {
+    function require_byac_nft(address owner) public view {
         // Terminate proving if NFT is not owned by the prover
-        require(IERC721(BYAC_NFT_ADDR).balanceOf(msg.sender) > 0, "You are not owning any specified NFT");
+        require(IERC721(BYAC_NFT_ADDR).balanceOf(owner) > 0, "You are not owning any specified NFT");
     }
 
-    function main() public returns (address) {
+    function main(address owner) public returns (address) {
         // // 🔥 Teleport to chain on which the verification is happening
-        // setChain(1, 21_000_000);
+        setChain(1, 20_000_000);
 
-        // require_byac_nft();
+        require_byac_nft(owner);
 
         // anything returned here would be visible to the public
-        return (msg.sender);
+        return owner;
     }
 }

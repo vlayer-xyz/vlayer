@@ -1,14 +1,15 @@
 use alloy_primitives::{
     Address, BlockNumber, Bytes, ChainId, StorageKey, StorageValue, TxNumber, U256,
 };
-use ethers_core::types::BlockNumber as BlockTag;
-
 use call_engine::block_header::EvmBlockHeader;
-use call_engine::config::TESTING_CHAIN_ID;
+use call_engine::config::{CHAIN_NAMES, TESTING_CHAIN_ID};
 use call_host::host::error::HostError;
 use call_host::proof::EIP1186Proof;
 use call_host::provider::factory::{EthersProviderFactory, ProviderFactory};
 use call_host::provider::{BlockingProvider, EthersClient, EthersProvider};
+use ethers_core::types::BlockNumber as BlockTag;
+use foundry_config::RpcEndpoints;
+use std::collections::HashMap;
 
 use crate::providers::pending_state_provider::PendingStateProviderFactory;
 
@@ -65,18 +66,27 @@ impl BlockingProvider for TestProvider {
 
 pub struct TestProviderFactory {
     pending_state_provider_factory: PendingStateProviderFactory,
-    ethers_provider_factory: EthersProviderFactory,
+    rpc_endpoints: RpcEndpoints,
 }
 
 impl TestProviderFactory {
     pub fn new(
         pending_state_provider_factory: PendingStateProviderFactory,
-        ethers_provider_factory: EthersProviderFactory,
+        rpc_endpoints: RpcEndpoints,
     ) -> Self {
         TestProviderFactory {
             pending_state_provider_factory,
-            ethers_provider_factory,
+            rpc_endpoints,
         }
+    }
+
+    fn get_urls_map(&self, chain_id: ChainId) -> HashMap<ChainId, String> {
+        for (id, rpc_endpoint) in self.rpc_endpoints.iter() {
+            if CHAIN_NAMES.get(id) == Some(&chain_id) {
+                return HashMap::from([(chain_id, rpc_endpoint.endpoint.as_url().unwrap().into())]);
+            }
+        }
+        Default::default()
     }
 }
 
@@ -88,7 +98,8 @@ impl ProviderFactory<TestProvider> for TestProviderFactory {
                 provider: Box::new(pending_state_provider),
             })
         } else {
-            let ethers_provider = self.ethers_provider_factory.create(chain_id)?;
+            let ethers_provider_factory = EthersProviderFactory::new(self.get_urls_map(chain_id));
+            let ethers_provider = ethers_provider_factory.create(chain_id)?;
             Ok(TestProvider {
                 provider: Box::new(ethers_provider),
             })
