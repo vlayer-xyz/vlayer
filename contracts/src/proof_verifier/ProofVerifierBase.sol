@@ -18,8 +18,8 @@ abstract contract ProofVerifierBase is IProofVerifier {
     IRiscZeroVerifier public immutable verifier;
 
     function verify(Proof calldata proof, bytes32 journalHash, address expectedProver, bytes4 expectedSelector)
-    external
-    view
+        external
+        view
     {
         _verifyProofMode(proof);
         _verifyExecutionEnv(proof, expectedProver, expectedSelector);

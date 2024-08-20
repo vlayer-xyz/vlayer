@@ -4,7 +4,7 @@ use call_engine::io::{Call, HostOutput};
 use call_engine::utils::evm_call::{
     create_encoded_return_outcome, create_return_outcome, create_revert_outcome, split_calldata,
 };
-use call_engine::{Proof, Seal};
+use call_engine::{Proof, ProofMode, Seal};
 use call_host::host::config::HostConfig;
 use call_host::host::Host;
 use forge::revm::JournaledState;
@@ -86,6 +86,7 @@ impl CheatcodeInspector {
                 lhv: FixedBytes::<18>::new([0; 18]),
                 // Set last byte to 1 to indicate fake proof mode
                 rhv: FixedBytes::<18>::new([0; 18]).concat_const(FixedBytes::<1>::new([1])),
+                mode: ProofMode::FAKE,
             },
             // We don't have journal data here yet, to be added later
             length: U256::ZERO,

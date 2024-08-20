@@ -11,4 +11,4 @@ pub mod io;
 pub mod sol;
 pub use sol::execution_commitment::ExecutionCommitment;
 pub use sol::proof::Proof;
-pub use sol::seal::Seal;
+pub use sol::seal::{ProofMode, Seal};

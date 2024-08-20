@@ -6,19 +6,15 @@ struct WebProof {
 }
 
 library WebProofLib {
-    function verify(WebProof memory webProof) internal pure returns (bool) {
+    function verify(WebProof memory) internal pure returns (bool) {
         return true;
     }
 
-    function url(
-        WebProof memory webProof
-    ) internal pure returns (string memory) {
+    function url(WebProof memory) internal pure returns (string memory) {
         return "api.x.com";
     }
 
-    function body(
-        WebProof memory webProof
-    ) internal pure returns (string memory) {
+    function body(WebProof memory) internal pure returns (string memory) {
         return "";
     }
 }
