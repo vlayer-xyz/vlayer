@@ -6,7 +6,6 @@ use alloy_primitives::{address, Address, ChainId};
 use once_cell::sync::Lazy;
 use revm::primitives::SpecId;
 use std::collections::HashMap;
-use std::convert::Into;
 
 pub const MAINNET_ID: ChainId = 1;
 pub const SEPOLIA_ID: ChainId = 11155111;
