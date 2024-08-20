@@ -1,12 +1,12 @@
-import { helpers, getContractSpec, prove } from "vlayer-sdk";
+import {helpers, getContractSpec, prove} from "vlayer-sdk";
 import * as path from "path";
-import { type Address } from "viem";
+import {type Address} from "viem";
 
 const PROVER = "NftOwnershipProver";
 const FILE = path.join(__dirname, `../out/${PROVER}.sol/${PROVER}.json`)
 const PROVER_SPEC = await getContractSpec(FILE);
 const FUNCTION_NAME = 'main'
-const ARGS: any[] = []
+const ARGS: any[] = ["0xaAa2DA255DF9Ee74C7075bCB6D81f97940908A5D"]
 
 console.log("Deploying prover")
 let prover: Address = await helpers.deployContract(PROVER_SPEC);
