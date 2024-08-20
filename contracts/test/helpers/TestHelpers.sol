@@ -19,7 +19,7 @@ contract TestHelpers {
         view
         returns (Proof memory, bytes32)
     {
-        bytes memory journal = concat(abi.encode(commitment), journalParams);
+        bytes memory journal = bytes.concat(abi.encode(commitment), journalParams);
         bytes32 journalHash = sha256(journal);
 
         bytes memory seal = mockVerifier.mockProve(ImageID.RISC0_CALL_GUEST_ID, journalHash).seal;
@@ -69,20 +69,5 @@ contract TestHelpers {
         rhv <<= 8 * (32 - SealLib.SEAL_MIDDLE - 1);
 
         return Seal(bytes18(bytes32(lhv)), bytes19(bytes32(rhv)), proofMode);
-    }
-
-    function concat(bytes memory a, bytes memory b) public pure returns (bytes memory) {
-        bytes memory c = new bytes(a.length + b.length);
-
-        for (uint256 i = 0; i < a.length; i++) {
-            c[i] = a[i];
-        }
-
-        uint256 offset = a.length;
-        for (uint256 i = 0; i < b.length; i++) {
-            c[offset + i] = b[i];
-        }
-
-        return c;
     }
 }
