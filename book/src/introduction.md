@@ -19,6 +19,7 @@ See how to [time travel](/features/time-travel.html) across block numbers, [tele
 
 Learn in-depth how:
  * [Prover](/advanced/prover.html) and [Verifier](/advanced/verifier.html) contracts are working 
+ * Use [Global Variables]((./advanced/prover-global-variables.md))
  * Run [tests](/advanced/tests.html)
 
 **Contributing**
