@@ -21,4 +21,10 @@ library WebProofLib {
     ) internal pure returns (string memory) {
         return "";
     }
+
+    function serverName(
+        WebProof memory webProof
+    ) internal pure returns (string memory) {
+        return "";
+    }
 }
