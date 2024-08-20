@@ -1,6 +1,5 @@
 use alloy_primitives::{b256, FixedBytes};
 use alloy_sol_types::SolCall;
-use call_engine::config::SEPOLIA_ID;
 use call_engine::io::{Call, HostOutput};
 use call_engine::utils::evm_call::{
     create_encoded_return_outcome, create_return_outcome, create_revert_outcome, split_calldata,
@@ -12,6 +11,8 @@ use forge::revm::JournaledState;
 use foundry_evm::revm::interpreter::{CallInputs, CallOutcome};
 use foundry_evm::revm::primitives::U256;
 use foundry_evm::revm::{Database, EvmContext, Inspector};
+
+use call_engine::config::TESTING_CHAIN_ID;
 
 use crate::cheatcodes::{callProverCall, getProofCall, CHEATCODE_CALL_ADDR};
 use crate::pending_state_provider::{PendingStateProvider, PendingStateProviderFactory};
@@ -100,7 +101,7 @@ fn create_host(journaled_state: &JournaledState) -> Host<PendingStateProvider> {
         },
         HostConfig {
             rpc_urls: Default::default(),
-            start_chain_id: SEPOLIA_ID,
+            start_chain_id: TESTING_CHAIN_ID,
         },
     )
     .expect("Failed to create host")

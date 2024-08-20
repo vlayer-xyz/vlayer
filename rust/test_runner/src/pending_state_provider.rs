@@ -8,7 +8,6 @@ use forge::revm::primitives::{Account, Address, Bytes, EvmState, B256, U256};
 
 use call_engine::block_header::eth::EthBlockHeader;
 use call_engine::block_header::EvmBlockHeader;
-use call_engine::config::MAINNET_MERGE_BLOCK_NUMBER;
 use call_host::db::proof::ProofDb;
 use call_host::host::error::HostError;
 use call_host::proof::EIP1186Proof;
@@ -63,7 +62,7 @@ impl BlockingProvider for PendingStateProvider {
              * This only used to initialize EVMConfig, need to be after merge to succeed
              * this is not used for block.number variable in Solidity
              */
-            number: MAINNET_MERGE_BLOCK_NUMBER,
+            number: 1,
             state_root: self.get_state_root(),
             ..EthBlockHeader::default()
         })))

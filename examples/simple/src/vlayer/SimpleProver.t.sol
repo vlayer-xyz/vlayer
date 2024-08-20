@@ -10,6 +10,10 @@ interface IFakeCheatcode {
 }
 
 contract ProverTest is VTest {
+    function test_ChainId() public {
+        assertEq(block.chainid, 55511555);
+    }
+
     function test_sumDoesNotRevertWithCallProver() public {
         SimpleProver prover = new SimpleProver();
         vm.roll(15537395);

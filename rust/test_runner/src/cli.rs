@@ -1,9 +1,15 @@
 /**
-* This file is in large part copied from https://github.com/foundry-rs/foundry/blob/6bb5c8ea8dcd00ccbc1811f1175cabed3cb4c116/crates/forge/bin/cmd/test/mod.rs
-* The original file is licensed under the Apache License, Version 2.0.
-* The original file was modified for the purpose of this project.
-* All relevant modifications are commented with "MODIFICATION" comments.
-*/
+ * This file is in large part copied from https://github.com/foundry-rs/foundry/blob/6bb5c8ea8dcd00ccbc1811f1175cabed3cb4c116/crates/forge/bin/cmd/test/mod.rs
+ * The original file is licensed under the Apache License, Version 2.0.
+ * The original file was modified for the purpose of this project.
+ * All relevant modifications are commented with "MODIFICATION" comments.
+ */
+use crate::{
+    contract_runner::ContractRunner, filter::FilterArgs, filter::ProjectPathsAwareFilter,
+    summary::TestSummaryReporter, test_executor::TestExecutor,
+};
+use call_engine::config::TESTING_CHAIN_ID;
+use call_engine::inspector::{TRAVEL_CONTRACT_ADDR, TRAVEL_CONTRACT_HASH};
 use clap::Parser;
 use color_eyre::eyre::{bail, Result};
 use forge::multi_runner::TestContract;
@@ -47,6 +53,7 @@ use foundry_evm::executors::ExecutorBuilder;
 use foundry_evm::traces::identifier::TraceIdentifiers;
 use foundry_evm::traces::TraceMode;
 use foundry_evm_core::backend::Backend;
+use foundry_evm_core::opts::EvmOpts;
 use rayon::iter::IntoParallelRefIterator;
 use rayon::iter::ParallelIterator;
 use regex::Regex;
@@ -58,12 +65,6 @@ use std::{
     time::Instant,
 };
 use tracing::{debug, debug_span, enabled, trace};
-
-use crate::{
-    contract_runner::ContractRunner, filter::FilterArgs, filter::ProjectPathsAwareFilter,
-    summary::TestSummaryReporter, test_executor::TestExecutor,
-};
-use call_engine::inspector::{TRAVEL_CONTRACT_ADDR, TRAVEL_CONTRACT_HASH};
 
 // Loads project's figment and merges the build cli arguments into it
 foundry_config::merge_impl_figment_convert!(TestArgs, opts, evm_opts);
@@ -250,6 +251,18 @@ impl TestArgs {
         Ok(test_sources)
     }
 
+    // MODIFICATION: Swap CHAIN_ID in evm_opts with TESTING_CHAIN_ID
+    fn validate_chain_id(evm_opts: &mut EvmOpts) -> Result<()> {
+        if evm_opts.env.chain_id.is_some() {
+            return Err(color_eyre::eyre::eyre!(
+                "cannot change chainId in vlayer tests"
+            ));
+        }
+
+        evm_opts.env.chain_id = Some(TESTING_CHAIN_ID);
+        Ok(())
+    }
+
     /// Executes all the tests in the project.
     ///
     /// This will trigger the build process first. On success all test contracts that match the
@@ -259,6 +272,7 @@ impl TestArgs {
     pub async fn execute_tests(self) -> Result<TestOutcome> {
         // Merge all configs.
         let (mut config, mut evm_opts) = self.load_config_and_evm_opts_emit_warnings()?;
+        Self::validate_chain_id(&mut evm_opts)?;
 
         // Set number of max threads to execute tests.
         // If not specified then the number of threads determined by rayon will be used.
