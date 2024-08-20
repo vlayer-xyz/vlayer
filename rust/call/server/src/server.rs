@@ -19,7 +19,7 @@ pub fn server(config: ServerConfig) -> Router {
     config.proof_mode.set_risc0_flag();
     let config = Arc::new(config);
     let jrpc_handler = move |params| Box::pin(v_call(config.clone(), params)) as Pin<Box<_>>;
-    let http_handler = move |req| async move { route(req, "v_call", jrpc_handler).await };
+    let http_handler = |req| async move { route(req, "v_call", jrpc_handler).await };
 
     Router::new()
         .route("/", post(http_handler))
