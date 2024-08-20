@@ -80,7 +80,7 @@ impl TestProviderFactory {
         }
     }
 
-    fn get_urls_map(&self, chain_id: ChainId) -> HashMap<ChainId, String> {
+    fn get_rpc_url(&self, chain_id: ChainId) -> HashMap<ChainId, String> {
         for (id, rpc_endpoint) in self.rpc_endpoints.iter() {
             if CHAIN_NAMES.get(id) == Some(&chain_id) {
                 return HashMap::from([(chain_id, rpc_endpoint.endpoint.as_url().unwrap().into())]);
@@ -98,7 +98,7 @@ impl ProviderFactory<TestProvider> for TestProviderFactory {
                 provider: Box::new(pending_state_provider),
             })
         } else {
-            let ethers_provider_factory = EthersProviderFactory::new(self.get_urls_map(chain_id));
+            let ethers_provider_factory = EthersProviderFactory::new(self.get_rpc_url(chain_id));
             let ethers_provider = ethers_provider_factory.create(chain_id)?;
             Ok(TestProvider {
                 provider: Box::new(ethers_provider),
