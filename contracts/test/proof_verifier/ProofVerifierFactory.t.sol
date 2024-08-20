@@ -6,7 +6,7 @@ import {Test, console} from "forge-std/Test.sol";
 import {IProofVerifier} from "../../src/proof_verifier/IProofVerifier.sol";
 import {ProofVerifierFactory, InvalidChainId} from "../../src/proof_verifier/ProofVerifierFactory.sol";
 
-contract Verifier_OnlyVerified_Modifier_Tests is Test {
+contract VerifierFactory_Tests is Test {
     function test_producesAVerifierInDevMode() public {
         vm.chainId(31337);
 
