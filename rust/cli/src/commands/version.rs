@@ -1,4 +1,5 @@
 use clap::builder::{IntoResettable, Resettable, Str};
+use risc0_zkp::core::digest::Digest;
 
 use call_guest_wrapper::RISC0_CALL_GUEST_ID;
 
@@ -15,7 +16,8 @@ fn version_msg() -> String {
 }
 
 fn call_guest_id() -> String {
-    format!("CALL_GUEST_ID: {}", to_hex(RISC0_CALL_GUEST_ID.into()))
+    let little_endian_hex = hex::encode(Digest::from(RISC0_CALL_GUEST_ID));
+    format!("CALL_GUEST_ID: {}", little_endian_hex)
 }
 
 fn version() -> String {
@@ -29,13 +31,6 @@ fn version() -> String {
         env!("VERGEN_GIT_SHA"),
     ]
     .join("-")
-}
-
-fn to_hex(arr: Vec<u32>) -> String {
-    arr.into_iter()
-        .map(|e| format!("{e:08x}"))
-        .collect::<Vec<String>>()
-        .join("")
 }
 
 #[cfg(test)]
@@ -65,12 +60,15 @@ mod tests {
     mod guest_id {
         use super::*;
 
+        use hex::FromHex;
+
         #[test]
         fn guest_id_equals_to_compiled_in_version() {
             let guest_id_line = call_guest_id();
-            let guest_id = guest_id_line.trim_start_matches("CALL_GUEST_ID: ");
+            let guest_id_hex = guest_id_line.trim_start_matches("CALL_GUEST_ID: ");
+            let guest_id: [u32; 8] = Digest::from_hex(guest_id_hex).unwrap().into();
 
-            assert_eq!(guest_id, to_hex(RISC0_CALL_GUEST_ID.into()));
+            assert_eq!(guest_id, RISC0_CALL_GUEST_ID);
         }
     }
 
@@ -116,20 +114,6 @@ mod tests {
             let build_commit = version.split('-').nth(3).unwrap();
 
             assert!(commit_regex.is_match(build_commit));
-        }
-    }
-
-    mod to_hex {
-        use super::*;
-
-        #[test]
-        fn returns_hex_repr_of_an_array() {
-            assert_eq!("ffffffff00000000", to_hex(vec![u32::MAX, u32::MIN]));
-        }
-
-        #[test]
-        fn does_not_cut_leading_zeros() {
-            assert_eq!("00000001", to_hex(vec![1]));
         }
     }
 }
