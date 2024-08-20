@@ -8,8 +8,6 @@ mod split_first_nibble {
     fn non_empty_nibbles() {
         let nibbles = Nibbles::from_nibbles([0xA, 0xB, 0xC, 0xD]);
         let result = split_first_nibble(&nibbles);
-
-        assert!(result.is_ok());
         let (first, rest) = result.unwrap();
 
         assert_eq!(first, 0xA);
@@ -20,8 +18,6 @@ mod split_first_nibble {
     fn single_nibble() {
         let nibbles: Nibbles = Nibbles::from_nibbles([0x7]);
         let result = split_first_nibble(&nibbles);
-
-        assert!(result.is_ok());
         let (first, rest) = result.unwrap();
 
         assert_eq!(first, 0x7);
@@ -33,7 +29,6 @@ mod split_first_nibble {
         let nibbles = Nibbles::from_nibbles([]);
         let result = split_first_nibble(&nibbles);
 
-        assert!(result.is_err());
         assert_eq!(result.unwrap_err(), "Nibbles is empty");
     }
 }

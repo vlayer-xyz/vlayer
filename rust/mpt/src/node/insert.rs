@@ -5,36 +5,31 @@ use nybbles::Nibbles;
 
 impl Node {
     #[allow(unused)]
-    pub(crate) fn insert(&mut self, key: Nibbles, value: impl AsRef<[u8]>) {
+    pub(crate) fn insert(self, key: Nibbles, value: impl AsRef<[u8]>) -> Node {
         let nibble = key.clone().pop();
         match self {
-            Node::Null => {
-                self.insert_null(key, value);
-            }
+            Node::Null => Node::insert_null(key, value),
             Node::Leaf(old_key, old_value) => {
-                let old_key = old_key.clone();
-                let old_value = old_value.clone();
-                self.insert_into_leaf(&old_key, &old_value, key, value);
+                Node::insert_into_leaf(&old_key, &old_value, key, value)
             }
-            _ => {}
+            _ => panic!("Not implemented"),
         }
     }
 
-    fn insert_null(&mut self, key: Nibbles, value: impl AsRef<[u8]>) {
+    fn insert_null(key: Nibbles, value: impl AsRef<[u8]>) -> Node {
         if key.is_empty() {
-            *self = Node::Branch(Default::default(), Some(value.as_ref().into()));
+            Node::Branch(Default::default(), Some(value.as_ref().into()))
         } else {
-            *self = Node::create_leaf(key.as_slice(), value);
+            Node::create_leaf(key.as_slice(), value)
         }
     }
 
     fn insert_into_leaf(
-        &mut self,
         old_key: &Nibbles,
         old_value: &[u8],
         key: Nibbles,
         value: impl AsRef<[u8]>,
-    ) {
+    ) -> Node {
         if **old_key == key {
             panic!("Key already exists");
         } else {
@@ -51,7 +46,7 @@ impl Node {
                 value.as_ref().into(),
             )));
 
-            *self = Node::Branch(children, None);
+            Node::Branch(children, None)
         }
     }
 }
@@ -63,43 +58,5 @@ pub fn split_first_nibble(nibbles: &Nibbles) -> Result<(u8, Nibbles), &'static s
         Ok((first_nibble[0], rest))
     } else {
         Err("Nibbles is empty")
-    }
-}
-
-#[cfg(test)]
-mod split_first_nibble {
-    use super::*;
-
-    #[test]
-    fn non_empty_nibbles() {
-        let nibbles = Nibbles::from_nibbles([0xA, 0xB, 0xC, 0xD]);
-        let result = split_first_nibble(&nibbles);
-
-        assert!(result.is_ok());
-        let (first, rest) = result.unwrap();
-
-        assert_eq!(first, 0xA);
-        assert_eq!(rest, Nibbles::from_nibbles([0xB, 0xC, 0xD]));
-    }
-
-    #[test]
-    fn single_nibble() {
-        let nibbles = Nibbles::from_nibbles([0x7]);
-        let result = split_first_nibble(&nibbles);
-
-        assert!(result.is_ok());
-        let (first, rest) = result.unwrap();
-
-        assert_eq!(first, 0x7);
-        assert!(rest.is_empty());
-    }
-
-    #[test]
-    fn empty_nibbles() {
-        let nibbles = Nibbles::from_nibbles([]);
-        let result = split_first_nibble(&nibbles);
-
-        assert!(result.is_err());
-        assert_eq!(result.unwrap_err(), "Nibbles is empty");
     }
 }

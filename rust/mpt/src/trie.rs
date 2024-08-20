@@ -94,10 +94,9 @@ impl MerkleTrie {
         Ok(trie)
     }
 
-    // work in progress
     #[cfg(test)]
     pub fn insert(&mut self, key: impl AsRef<[u8]>, value: impl AsRef<[u8]>) {
-        self.0.insert(Nibbles::unpack(key), value);
+        self.0 = self.0.clone().insert(Nibbles::unpack(key), value);
     }
 }
 
