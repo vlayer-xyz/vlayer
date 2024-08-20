@@ -2,7 +2,8 @@
 pragma solidity ^0.8.13;
 
 import {Prover} from "vlayer/Prover.sol";
-import {WebProof} from "vlayer/WebProof.sol";
+import {WebProof, WebProofLib} from "vlayer/WebProof.sol";
+import "openzeppelin/contracts/utils/Strings.sol";
 
 /*
  * This contract is used in rust/server integration tests. The test fixture
@@ -15,6 +16,9 @@ import {WebProof} from "vlayer/WebProof.sol";
  */
 
 contract ExampleProver is Prover {
+    using Strings for string;
+    using WebProofLib for WebProof;
+
     constructor() {}
 
     function sum(uint256 lhs, uint256 rhs) public pure returns (uint256) {
@@ -22,7 +26,7 @@ contract ExampleProver is Prover {
     }
 
     function web_proof(WebProof calldata webProof) public returns (bool) {
-        // require(webProof.url.equal(""), "Incorrect URL");
+        require(webProof.url().equal("api.x.com"), "Incorrect URL");
 
         return true;
     }

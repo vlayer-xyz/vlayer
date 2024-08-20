@@ -1,13 +1,17 @@
+use std::sync::Arc;
+
 use alloy_primitives::ChainId;
+use revm::precompile::PrecompileSpecId;
 use revm::{
     db::WrapDatabaseRef,
     inspector_handle_register,
     primitives::{ExecutionResult, ResultAndState, SuccessReason},
-    DatabaseRef, Evm,
+    ContextPrecompiles, DatabaseRef, Evm,
 };
 use thiserror::Error;
 use tracing::error;
 
+use crate::precompiles::VLAYER_PRECOMPILES;
 use crate::utils::evm_call::format_failed_call_result;
 use crate::{
     evm::env::{cached::CachedEvmEnv, location::ExecutionLocation},
@@ -61,6 +65,13 @@ where
             .with_external_context(inspector)
             .with_cfg_env_with_handler_cfg(env.cfg_env.clone())
             .with_tx_env(tx.clone().into())
+            .append_handler_register(|handler| {
+                handler.pre_execution.load_precompiles = Arc::new(move || {
+                    let mut precompiles = ContextPrecompiles::new(PrecompileSpecId::CANCUN);
+                    precompiles.extend(VLAYER_PRECOMPILES);
+                    precompiles
+                });
+            })
             .append_handler_register(inspector_handle_register)
             .modify_block_env(|blk_env| env.header.fill_block_env(blk_env))
             .build();

@@ -1,1 +1,3 @@
 vlayer/=../contracts/src/
+openzeppelin/=../contracts/lib/risc0-ethereum/lib/openzeppelin-contracts/
+openzeppelin-contracts/=../contracts/lib/risc0-ethereum/lib/openzeppelin-contracts
