@@ -1,14 +1,15 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-struct Seal {
-    bytes18 lhv;
-    bytes19 rhv;
-}
-
 enum ProofMode {
     GROTH16,
     FAKE
+}
+
+struct Seal {
+    bytes18 lhv;
+    bytes19 rhv;
+    ProofMode mode;
 }
 
 library SealLib {
@@ -35,7 +36,6 @@ library SealLib {
     }
 
     function proofMode(Seal memory seal) internal pure returns (ProofMode) {
-        bytes1 proofModeByte = bytes1(seal.rhv << 8 * (PROOF_MODE_POSITION - SEAL_MIDDLE - 1));
-        return ProofMode(uint8(proofModeByte));
+        return seal.mode;
     }
 }

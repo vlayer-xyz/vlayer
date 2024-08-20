@@ -68,7 +68,7 @@ contract TestHelpers {
         lhv <<= 8 * (32 - SealLib.SEAL_MIDDLE);
         rhv <<= 8 * (32 - SealLib.SEAL_MIDDLE - 1);
 
-        return Seal(bytes18(bytes32(lhv)), bytes19(bytes32(rhv)));
+        return Seal(bytes18(bytes32(lhv)), bytes19(bytes32(rhv)), proofMode);
     }
 
     function concat(bytes memory a, bytes memory b) public pure returns (bytes memory) {

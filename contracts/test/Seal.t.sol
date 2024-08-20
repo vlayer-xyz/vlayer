@@ -10,27 +10,30 @@ contract SealLib_decode_Tests is Test {
     using SealLib for Seal;
 
     function test_empty() public pure {
-        Seal memory seal = Seal(0x000000000000000000000000000000000000, 0x00000000000000000000000000000000000000);
+        Seal memory seal =
+            Seal(0x000000000000000000000000000000000000, 0x00000000000000000000000000000000000000, ProofMode.GROTH16);
         assertEq(seal.decode(), SealFixtures.EMPTY());
     }
 
     function test_max() public pure {
         // SEAL_MAX = ffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff
-        Seal memory seal = Seal(0xffffffffffffffffffffffffffffffffffff, 0xffffffffffffffffffffffffffffffffffffff);
+        Seal memory seal =
+            Seal(0xffffffffffffffffffffffffffffffffffff, 0xffffffffffffffffffffffffffffffffffffff, ProofMode.GROTH16);
         assertEq(seal.decode(), SealFixtures.MAX());
     }
 
     function test_sealIsDecodedFromLeftToRight() public pure {
         // SEAL_SEQ = 000102030405060708090a0b0c0d0e0f101112131415161718191a1b1c1d1e1f2021222324
-        Seal memory seal = Seal(0x0102030405060708090a0b0c0d0e0f101112, 0x131415161718191a1b1c1d1e1f202122232400);
+        Seal memory seal =
+            Seal(0x0102030405060708090a0b0c0d0e0f101112, 0x131415161718191a1b1c1d1e1f202122232400, ProofMode.GROTH16);
 
         assertEq(seal.decode(), SealFixtures.SEQ());
     }
 
     function test_immutability() public pure {
         bytes18 lhv = 0x0102030405060708090a0b0c0d0e0f101112;
-        bytes19 rhv = 0x131415161718191a1b1c1d1e1f202122232401;
-        Seal memory seal = Seal(lhv, rhv);
+        bytes19 rhv = 0x131415161718191a1b1c1d1e1f202122232400;
+        Seal memory seal = Seal(lhv, rhv, ProofMode.GROTH16);
 
         seal.decode();
 
@@ -42,27 +45,45 @@ contract SealLib_decode_Tests is Test {
 contract SealLib_proofMode_Tests is Test {
     using SealLib for Seal;
 
-    function test_prodSeal() public pure {
-        Seal memory seal = Seal(0x0102030405060708090a0b0c0d0e0f101112, 0x131415161718191a1b1c1d1e1f202122232400);
-        assert(seal.proofMode() == ProofMode.GROTH16);
+    uint8 constant PROOF_MODE_ENC_LOCATION = 3 * 32 - 1;
+
+    function test_sealModeIsEncodedOn_64th_byte() public pure {
+        Seal memory sealGroth16 =
+            Seal(0x0102030405060708090a0b0c0d0e0f101112, 0x131415161718191a1b1c1d1e1f202122232400, ProofMode.GROTH16);
+        Seal memory sealFake =
+            Seal(0x0102030405060708090a0b0c0d0e0f101112, 0x131415161718191a1b1c1d1e1f202122232400, ProofMode.FAKE);
+
+        bytes memory encodedGroth16 = abi.encode(sealGroth16);
+        bytes memory encodedFake = abi.encode(sealFake);
+
+        assertEq(encodedGroth16[PROOF_MODE_ENC_LOCATION], bytes1(uint8(ProofMode.GROTH16)));
+        assertEq(encodedFake[PROOF_MODE_ENC_LOCATION], bytes1(uint8(ProofMode.FAKE)));
     }
 
-    function test_mockSeal() public pure {
-        Seal memory seal = Seal(0x0102030405060708090a0b0c0d0e0f101112, 0x131415161718191a1b1c1d1e1f202122232401);
-        assert(seal.proofMode() == ProofMode.FAKE);
+    function test_proofMode() public pure {
+        Seal memory sealGroth16 =
+            Seal(0x0102030405060708090a0b0c0d0e0f101112, 0x131415161718191a1b1c1d1e1f202122232400, ProofMode.GROTH16);
+        Seal memory sealFake =
+            Seal(0x0102030405060708090a0b0c0d0e0f101112, 0x131415161718191a1b1c1d1e1f202122232400, ProofMode.FAKE);
+
+        assert(sealGroth16.proofMode() == ProofMode.GROTH16);
+        assert(sealFake.proofMode() == ProofMode.FAKE);
     }
 
     function test_invalidValueReverts() public {
-        Seal memory seal = Seal(0x0102030405060708090a0b0c0d0e0f101112, 0x131415161718191a1b1c1d1e1f202122232402);
+        Seal memory seal =
+            Seal(0x0102030405060708090a0b0c0d0e0f101112, 0x131415161718191a1b1c1d1e1f202122232400, ProofMode.GROTH16);
+        bytes memory encoded = abi.encode(seal);
+        encoded[PROOF_MODE_ENC_LOCATION] = bytes1(0x02);
 
         vm.expectRevert(); // should panic with 0x21
-        seal.proofMode();
+        abi.decode(encoded, (Seal));
     }
 
     function test_immutability() public pure {
         bytes18 lhv = 0x0102030405060708090a0b0c0d0e0f101112;
         bytes19 rhv = 0x131415161718191a1b1c1d1e1f202122232401;
-        Seal memory seal = Seal(lhv, rhv);
+        Seal memory seal = Seal(lhv, rhv, ProofMode.FAKE);
 
         seal.proofMode();
 
