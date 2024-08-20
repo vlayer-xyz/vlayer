@@ -9,6 +9,8 @@ import {ProofMode, SealLib, Seal} from "../Seal.sol";
 import {ChainIdLibrary, InvalidChainId} from "./ChainId.sol";
 import {ProofVerifierBase} from "./ProofVerifierBase.sol";
 
+bytes4 constant FAKE_VERIFIER_SELECTOR = bytes4(0xdeafbeef);
+
 contract FakeProofVerifier is ProofVerifierBase {
     using SealLib for Seal;
 
@@ -17,7 +19,7 @@ contract FakeProofVerifier is ProofVerifierBase {
             revert InvalidChainId();
         }
 
-        verifier = new RiscZeroMockVerifier(bytes4(0));
+        verifier = new RiscZeroMockVerifier(FAKE_VERIFIER_SELECTOR);
         proofMode = ProofMode.FAKE;
     }
 }
