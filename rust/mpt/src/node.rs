@@ -6,6 +6,7 @@ use crate::key_nibbles::KeyNibbles;
 
 pub mod insert;
 pub mod rlp;
+pub mod size;
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub(crate) enum Node {
@@ -44,24 +45,4 @@ impl Node {
             Node::Digest(_) => panic!("Attempted to access unresolved node"),
         }
     }
-
-    /// Returns the number of full nodes in the trie.
-    /// A full node is a node that needs to be fully encoded to compute the root hash.
-    pub(crate) fn size(&self) -> usize {
-        match self {
-            Node::Null | Node::Digest(_) => 0,
-            Node::Leaf(..) => 1,
-            Node::Extension(_, child) => 1 + child.size(),
-            Node::Branch(children, _) => {
-                1 + children
-                    .iter()
-                    .filter_map(Option::as_deref)
-                    .map(Node::size)
-                    .sum::<usize>()
-            }
-        }
-    }
 }
-
-#[cfg(test)]
-mod tests;
