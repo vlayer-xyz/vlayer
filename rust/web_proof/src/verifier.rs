@@ -33,9 +33,7 @@ pub struct Web {
 }
 
 pub fn verify_and_parse(web_proof: WebProof) -> Result<Web, VerificationError> {
-    let server_name = match web_proof.tls_proof.session.session_info.server_name.clone() {
-        ServerName::Dns(name) => name,
-    };
+    let ServerName::Dns(server_name) = web_proof.tls_proof.session.session_info.server_name.clone();
     let (sent, recv) = verify_proof(web_proof)?;
     let (sent_string, _recv_string) = extract_sent_recv_strings((sent, recv))?;
     let request_parse_result = parse_web_proof_request(&sent_string)?;
