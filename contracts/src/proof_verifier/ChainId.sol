@@ -5,7 +5,7 @@ error InvalidChainId();
 
 library ChainIdLibrary {
     function is_devnet() internal view returns (bool) {
-        return block.chainid == 31337;
+        return !is_mainnet();
     }
 
     function is_mainnet() internal view returns (bool) {
