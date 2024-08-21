@@ -1,12 +1,11 @@
 use std::sync::Arc;
 
 use alloy_primitives::ChainId;
-use revm::precompile::PrecompileSpecId;
 use revm::{
     db::WrapDatabaseRef,
     inspector_handle_register,
     primitives::{ExecutionResult, ResultAndState, SuccessReason},
-    ContextPrecompiles, DatabaseRef, Evm,
+    DatabaseRef, Evm,
 };
 use thiserror::Error;
 use tracing::error;
@@ -19,11 +18,11 @@ use crate::{
     io::Call,
 };
 
-pub struct Engine<'a, D>
+pub struct Engine<'envs, D>
 where
     D: DatabaseRef,
 {
-    envs: &'a CachedEvmEnv<D>,
+    envs: &'envs CachedEvmEnv<D>,
 }
 
 #[derive(Error, Debug, PartialEq)]
@@ -44,16 +43,20 @@ pub enum EngineError {
     EvmEnv(String),
 }
 
-impl<'a, D> Engine<'a, D>
+impl<'envs, D> Engine<'envs, D>
 where
     D: DatabaseRef,
     D::Error: std::fmt::Debug,
 {
-    pub fn new(envs: &'a CachedEvmEnv<D>) -> Self {
+    pub fn new(envs: &'envs CachedEvmEnv<D>) -> Self {
         Self { envs }
     }
 
-    pub fn call(&'a self, tx: &Call, location: ExecutionLocation) -> Result<Vec<u8>, EngineError> {
+    pub fn call(
+        &'envs self,
+        tx: &Call,
+        location: ExecutionLocation,
+    ) -> Result<Vec<u8>, EngineError> {
         let env = self
             .envs
             .get(location)
@@ -66,8 +69,9 @@ where
             .with_cfg_env_with_handler_cfg(env.cfg_env.clone())
             .with_tx_env(tx.clone().into())
             .append_handler_register(|handler| {
+                let precompiles = handler.pre_execution.load_precompiles();
                 handler.pre_execution.load_precompiles = Arc::new(move || {
-                    let mut precompiles = ContextPrecompiles::new(PrecompileSpecId::CANCUN);
+                    let mut precompiles = precompiles.clone();
                     precompiles.extend(VLAYER_PRECOMPILES);
                     precompiles
                 });
@@ -79,8 +83,8 @@ where
         Self::transact(evm)
     }
 
-    fn transact(
-        mut evm: Evm<'_, TravelInspector<'a>, WrapDatabaseRef<&D>>,
+    fn transact<'env>(
+        mut evm: Evm<'env, TravelInspector<'env>, WrapDatabaseRef<&'env D>>,
     ) -> Result<Vec<u8>, EngineError> {
         let ResultAndState { result, .. } = evm
             .transact_preverified()
