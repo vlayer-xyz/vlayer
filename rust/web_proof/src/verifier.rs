@@ -61,11 +61,14 @@ fn verify_proof(
 fn extract_sent_recv_strings(
     (mut sent, mut recv): (RedactedTranscript, RedactedTranscript),
 ) -> Result<(String, String), FromUtf8Error> {
-    sent.set_redacted(b'X');
-    recv.set_redacted(b'X');
+    sent.set_redacted(0);
+    recv.set_redacted(0);
 
-    let sent_string = String::from_utf8(sent.data().to_vec())?;
-    let recv_string = String::from_utf8(recv.data().to_vec())?;
+    let mut sent_string = String::from_utf8(sent.data().to_vec())?.replace("\0\r\n", "");
+    let mut recv_string = String::from_utf8(recv.data().to_vec())?.replace("\0\r\n", "");
+
+    sent_string.retain(|c| c != '\0');
+    recv_string.retain(|c| c != '\0');
 
     Ok((sent_string, recv_string))
 }
