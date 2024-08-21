@@ -14,6 +14,7 @@
     "bytecodes",
     "groth",
     "Hashable",
+    "Httparse",
     "jrpc",
     "keccak",
     "merkle",
@@ -28,6 +29,7 @@
     "struct",
     "structs",
     "thiserror",
+    "tlsn",
     "vlayer",
     "zkvm"
   ]
