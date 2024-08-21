@@ -25,7 +25,7 @@
     "noPropertyAccessFromIndexSignature": false,
     "paths": {
       "vlayer-sdk": [
-        "../../../packages/src/index.ts"
+        "../../../packages/@vlayer/sdk/src/index.ts"
       ]
     }
   }
