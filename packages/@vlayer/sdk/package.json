@@ -2,6 +2,7 @@
   "name": "@vlayer/sdk",
   "type": "module",
   "module": "src/index.ts",
+  "version": "0.0.1",
   "devDependencies": {
     "@types/bun": "latest"
   },
@@ -9,6 +10,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@changesets/cli": "^2.27.7",
     "viem": "^2.17.5"
   }
 }
