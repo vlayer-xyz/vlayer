@@ -112,7 +112,7 @@ mod tests {
 
     #[test]
     fn wrong_server_name() {
-        //"wrong_server_name_tls_proof.json" has a different server name in tls_proof than the one in request header
+        // "wrong_server_name_tls_proof.json" is a real tls_proof, but with tampered server name, which the notary did not sign
         let web_proof = load_web_proof_fixture(
             "./testdata/wrong_server_name_tls_proof.json",
             NOTARY_PUB_KEY_PEM_EXAMPLE,
