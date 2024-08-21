@@ -1,3 +1,5 @@
+use std::array::from_fn;
+
 use alloy_primitives::{b256, B256};
 
 use crate::{key_nibbles::KeyNibbles, node::Node, MerkleTrie};
@@ -20,9 +22,10 @@ fn digest() {
 
 #[test]
 fn leaf() {
-    let mpt = MerkleTrie(Node::Leaf(KeyNibbles::unpack(B256::ZERO), [0].into()));
+    let leaf_key = KeyNibbles::unpack(B256::ZERO);
+    let mpt = MerkleTrie(Node::leaf(leaf_key.as_slice(), [0]));
     // A single leaf proves the inclusion of the key and non-inclusion of any other key
-    assert_eq!(mpt.get(B256::ZERO), Some(&[0][..]));
+    assert_eq!(mpt.get(B256::ZERO).unwrap(), [0]);
     assert_eq!(mpt.get([]), None);
     assert_eq!(mpt.get([0]), None);
     assert_eq!(mpt.get([1, 2, 3]), None);
@@ -31,13 +34,13 @@ fn leaf() {
 #[test]
 fn branch() {
     let mut children: [Option<Box<Node>>; 16] = Default::default();
-    children[0] = Some(Box::new(Node::Leaf([0; 63].into(), [0].into())));
-    children[1] = Some(Box::new(Node::Leaf([1; 63].into(), [1].into())));
+    children[0] = Some(Box::new(Node::leaf([0; 63], [0])));
+    children[1] = Some(Box::new(Node::leaf([1; 63], [1])));
 
     let mpt = MerkleTrie(Node::Branch(children, None));
 
-    assert_eq!(mpt.get(B256::repeat_byte(0x00)), Some(&[0][..]));
-    assert_eq!(mpt.get(B256::repeat_byte(0x11)), Some(&[1][..]));
+    assert_eq!(mpt.get(B256::repeat_byte(0x00)).unwrap(), [0]);
+    assert_eq!(mpt.get(B256::repeat_byte(0x11)).unwrap(), [1]);
     assert_eq!(mpt.get([]), None);
     assert_eq!(mpt.get([0]), None);
     assert_eq!(mpt.get([1, 2, 3]), None);
@@ -45,11 +48,9 @@ fn branch() {
 
 #[test]
 fn branch_with_value() {
-    let children: [Option<Box<Node>>; 16] = Default::default();
-    let value = Some([42u8].into());
-    let mpt = MerkleTrie(Node::Branch(children, value));
+    let mpt = MerkleTrie(Node::branch(from_fn(|_| None), Some([42u8])));
 
-    assert_eq!(mpt.get([]), Some(&[42u8][..]));
+    assert_eq!(mpt.get([]).unwrap(), [42]);
     assert_eq!(mpt.get([0]), None);
     assert_eq!(mpt.get([1, 2, 3]), None);
 }
@@ -57,17 +58,18 @@ fn branch_with_value() {
 #[test]
 fn extension() {
     let mut children: [Option<Box<Node>>; 16] = Default::default();
-    children[0] = Some(Box::new(Node::Leaf([0; 62].into(), [0].into())));
-    children[1] = Some(Box::new(Node::Leaf([1; 62].into(), [1].into())));
+    children[0] = Some(Box::new(Node::leaf([0; 62], [0])));
+    children[1] = Some(Box::new(Node::leaf([1; 62], [1])));
     let branch = Node::Branch(children, None);
-    let mpt = MerkleTrie(Node::Extension([0; 1].into(), branch.into()));
+    let mpt = MerkleTrie(Node::extension([0], branch));
 
-    assert_eq!(mpt.get(B256::ZERO), Some(&[0][..]));
+    assert_eq!(mpt.get(B256::ZERO).unwrap(), [0]);
     assert_eq!(
         mpt.get(b256!(
             "0111111111111111111111111111111111111111111111111111111111111111"
-        )),
-        Some(&[1][..])
+        ))
+        .unwrap(),
+        [1]
     );
     assert_eq!(mpt.get([]), None);
     assert_eq!(mpt.get([0]), None);
