@@ -2,7 +2,7 @@
   "name": "@vlayer/sdk",
   "type": "module",
   "module": "src/index.ts",
-  "version": "0.0.1",
+  "version": "0.0.2",
   "devDependencies": {
     "@types/bun": "latest"
   },
