@@ -68,8 +68,6 @@ mod parse_node {
 
 #[cfg(test)]
 mod resolve_trie {
-    use std::array::from_fn;
-
     use alloy_primitives::keccak256;
     use alloy_trie::HashMap;
 
