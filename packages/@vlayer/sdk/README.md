@@ -1,5 +1,7 @@
 # @vlayer/sdk
 
+## Install / usage
+
 To install dependencies:
 
 ```bash
@@ -11,5 +13,10 @@ To run:
 ```bash
 bun run src/index.ts
 ```
-
-This project was created using `bun init` in bun v1.1.20. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+## Versioning 
+1. Apply changes to the code
+1. Run `bun changeset`
+1. Submit information about your changes (would be visible in the changelog)
+1. Run `bun changeset version`
+1. Commit modified files changes 
+1. Push
