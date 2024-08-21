@@ -28,6 +28,12 @@ impl Node {
         Node::Extension(key_nibs.into(), value.into())
     }
 
+    #[allow(unused)]
+    pub fn branch(children: [Option<Box<Node>>; 16], value: Option<impl AsRef<[u8]>>) -> Node {
+        let value = value.map(|v| v.as_ref().into());
+        Node::Branch(children, value)
+    }
+
     /// Returns a reference to the value corresponding to the key.
     /// It panics when neither inclusion nor exclusion of the key can be shown in the sparse trie.
     pub(crate) fn get(&self, key_nibs: impl AsRef<[u8]>) -> Option<&[u8]> {
