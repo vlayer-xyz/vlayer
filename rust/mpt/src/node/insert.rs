@@ -9,10 +9,10 @@ impl Node {
     #[allow(unused)]
     pub(crate) fn insert(self, key: Nibbles, value: impl AsRef<[u8]>) -> Node {
         match self {
-            Node::Null => Node::insert_into_null(Entry {
-                key,
-                value: value.as_ref().into(),
-            }),
+            Node::Null => {
+                let entry = (&*key, value).into();
+                Node::insert_into_null(entry)
+            }
             Node::Leaf(old_key, old_value) => {
                 let old_entry = (&**old_key, old_value).into();
                 let entry = (&*key, value).into();

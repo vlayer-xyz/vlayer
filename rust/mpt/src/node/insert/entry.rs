@@ -36,15 +36,9 @@ impl From<Entry> for Node {
 
 impl Entry {
     pub fn split_first_key_nibble(self) -> Result<(u8, Entry), &'static str> {
-        if let Some((first_nibble, rest)) = self.key.split_first() {
-            let rest = Nibbles::from_nibbles(rest);
-            Ok((
-                *first_nibble,
-                Entry {
-                    key: rest,
-                    value: self.value,
-                },
-            ))
+        if let Some((first_key_nibble, remaining_key)) = self.key.split_first() {
+            let entry = (&*remaining_key, self.value).into();
+            Ok((*first_key_nibble, entry))
         } else {
             Err("Nibbles is empty")
         }
@@ -56,43 +50,29 @@ mod tests {
     use super::*;
 
     #[test]
-    fn non_empty_nibbles() {
-        let entry = Entry {
-            key: Nibbles::from_nibbles([0xA, 0xB, 0xC, 0xD]),
-            value: Box::new([0x01, 0x02]),
-        };
-
-        let (first, rest_entry) = entry.split_first_key_nibble().unwrap();
-
-        assert_eq!(first, 0xA);
-        assert_eq!(rest_entry.key, Nibbles::from_nibbles([0xB, 0xC, 0xD]));
-        assert_eq!(rest_entry.value.as_ref(), [0x01, 0x02]);
+    fn empty_nibbles() {
+        let entry: Entry = ([], []).into();
+        assert_eq!(entry.split_first_key_nibble(), Err("Nibbles is empty"));
     }
 
     #[test]
     fn single_nibble() {
-        let entry = Entry {
-            key: Nibbles::from_nibbles([0x7]),
-            value: Box::new([0x03, 0x04]),
-        };
+        let entry: Entry = ([0x0], []).into();
 
         let (first, rest_entry) = entry.split_first_key_nibble().unwrap();
 
-        assert_eq!(first, 0x7);
-        assert!(rest_entry.key.is_empty());
-        assert_eq!(rest_entry.value.as_ref(), [0x03, 0x04]);
+        assert_eq!(first, 0x0);
+        assert_eq!(*rest_entry.value, []);
     }
 
     #[test]
-    fn empty_nibbles() {
-        let entry = Entry {
-            key: Nibbles::from_nibbles([]),
-            value: Box::new([0x05, 0x06]),
-        };
+    fn non_empty_nibbles() {
+        let entry: Entry = ([0x0, 0x1], []).into();
 
-        let result = entry.split_first_key_nibble();
+        let (first, rest_entry) = entry.split_first_key_nibble().unwrap();
 
-        assert!(result.is_err());
-        assert_eq!(result.unwrap_err(), "Nibbles is empty");
+        assert_eq!(first, 0x0);
+        assert_eq!(*rest_entry.key, [0x1]);
+        assert_eq!(*rest_entry.value, []);
     }
 }
