@@ -5,8 +5,9 @@ use revm::{
         PrecompileErrors::Error,
         PrecompileWithAddress,
     },
-    primitives::{Bytes, Precompile, PrecompileOutput, PrecompileResult},
+    primitives::{Bytes, Precompile, PrecompileErrors, PrecompileOutput, PrecompileResult},
 };
+use web_proof::verifier::verify_and_parse;
 
 pub const VLAYER_PRECOMPILES: [PrecompileWithAddress; 1] = [VERIFY_AND_PARSE];
 
@@ -31,8 +32,13 @@ fn verify_and_parse_run(input: &Bytes, gas_limit: u64) -> PrecompileResult {
         return Err(Error(OutOfGas));
     }
 
-    let _web_proof_json =
-        std::str::from_utf8(input).map_err(|err| Error(Other(err.to_string())))?;
+    let web_proof_json = std::str::from_utf8(input).map_err(map_to_other)?;
+    let web_proof = serde_json::from_str(web_proof_json).map_err(map_to_other)?;
+    let web = verify_and_parse(web_proof).map_err(map_to_other)?;
 
-    Ok(PrecompileOutput::new(gas_used, "api.x.com".into()))
+    Ok(PrecompileOutput::new(gas_used, web.url.into()))
+}
+
+fn map_to_other<E: ToString>(err: E) -> PrecompileErrors {
+    Error(Other(err.to_string()))
 }

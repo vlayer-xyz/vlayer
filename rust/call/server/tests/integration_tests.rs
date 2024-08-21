@@ -152,9 +152,10 @@ mod server_tests {
             let call_data = helper
                 .contract()
                 .web_proof(WebProof {
-                    web_proof_json: serde_json::to_string(&json!({
-                        "web_proof": load_web_proof_fixture("../../web_proof/testdata/tls_proof.json", NOTARY_PUB_KEY_PEM_EXAMPLE)
-                    }))
+                    web_proof_json: serde_json::to_string(&json!(load_web_proof_fixture(
+                        "../../web_proof/testdata/tls_proof.json",
+                        NOTARY_PUB_KEY_PEM_EXAMPLE
+                    )))
                     .unwrap(),
                 })
                 .calldata()
