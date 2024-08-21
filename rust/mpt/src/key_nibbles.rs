@@ -43,16 +43,13 @@ mod new {
 
     #[test]
     fn non_empty() {
-        let valid_nibbles = vec![0x1, 0x2, 0x3];
-        let key_nibbles: KeyNibbles = valid_nibbles[..].into();
-
-        assert_eq!(key_nibbles, valid_nibbles);
+        let key_nibbles: KeyNibbles = [0x0].into();
+        assert_eq!(key_nibbles, [0x0]);
     }
 
     #[test]
     #[should_panic(expected = "KeyNibbles cannot be empty")]
     fn empty() {
-        let empty_nibbles = vec![];
-        let _: KeyNibbles = empty_nibbles.into();
+        let _ = KeyNibbles::from([]);
     }
 }
