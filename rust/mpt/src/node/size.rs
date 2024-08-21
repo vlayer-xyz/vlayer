@@ -72,7 +72,7 @@ mod node_size {
         let leaf = Node::leaf([0x1], []);
         let mut children: [Option<Box<Node>>; 16] = Default::default();
         children[0] = Some(Box::new(leaf));
-        let branch = Node::Branch(children, Some([42u8].as_slice().into()));
-        assert_eq!(branch.get(&[]), Some(&[42u8][..]));
+        let branch = Node::Branch(children, Some([42].as_slice().into()));
+        assert_eq!(branch.get([]).unwrap(), [42]);
     }
 }

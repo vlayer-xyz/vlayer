@@ -29,7 +29,7 @@ impl MerkleTrie {
     /// It panics when neither inclusion nor exclusion of the key can be guaranteed.
     pub fn get(&self, key: impl AsRef<[u8]>) -> Option<&[u8]> {
         let nibbles = Nibbles::unpack(key);
-        self.0.get(&nibbles)
+        self.0.get(&*nibbles)
     }
 
     /// Inserts a key-value pair into the trie.
