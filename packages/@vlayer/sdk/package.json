@@ -11,6 +11,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "@changesets/cli": "^2.27.7",
     "viem": "^2.17.5"
   }
 }
