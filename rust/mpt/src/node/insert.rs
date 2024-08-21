@@ -34,9 +34,8 @@ impl Node {
         if old_entry.key == entry.key {
             panic!("Key already exists");
         } else {
-            let (first_old_key_nibble, remaining_old_entry) =
-                old_entry.split_first_key_nibble().unwrap();
-            let (first_key_nibble, remaining_entry) = entry.split_first_key_nibble().unwrap();
+            let (first_old_key_nibble, remaining_old_entry) = old_entry.split_first_key_nibble();
+            let (first_key_nibble, remaining_entry) = entry.split_first_key_nibble();
             if first_old_key_nibble != first_key_nibble {
                 let mut children: [Option<Box<Node>>; 16] = Default::default();
                 children[first_old_key_nibble as usize] =

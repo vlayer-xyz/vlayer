@@ -35,13 +35,12 @@ impl From<Entry> for Node {
 }
 
 impl Entry {
-    pub fn split_first_key_nibble(self) -> Result<(u8, Entry), &'static str> {
-        if let Some((first_key_nibble, remaining_key)) = self.key.split_first() {
-            let entry = (&*remaining_key, self.value).into();
-            Ok((*first_key_nibble, entry))
-        } else {
-            Err("Nibbles is empty")
-        }
+    pub fn split_first_key_nibble(self) -> (u8, Entry) {
+        let Some((first_key_nibble, remaining_key)) = self.key.split_first() else {
+            unreachable!("Can't split first key nibble from empty nibbles");
+        };
+        let entry = (&*remaining_key, self.value).into();
+        (*first_key_nibble, entry)
     }
 }
 
@@ -50,16 +49,17 @@ mod tests {
     use super::*;
 
     #[test]
+    #[should_panic(expected = "Can't split first key nibble from empty nibbles")]
     fn empty_nibbles() {
         let entry: Entry = ([], []).into();
-        assert_eq!(entry.split_first_key_nibble(), Err("Nibbles is empty"));
+        entry.split_first_key_nibble();
     }
 
     #[test]
     fn single_nibble() {
         let entry: Entry = ([0x0], []).into();
 
-        let (first, rest_entry) = entry.split_first_key_nibble().unwrap();
+        let (first, rest_entry) = entry.split_first_key_nibble();
 
         assert_eq!(first, 0x0);
         assert_eq!(*rest_entry.value, []);
@@ -69,7 +69,7 @@ mod tests {
     fn non_empty_nibbles() {
         let entry: Entry = ([0x0, 0x1], []).into();
 
-        let (first, rest_entry) = entry.split_first_key_nibble().unwrap();
+        let (first, rest_entry) = entry.split_first_key_nibble();
 
         assert_eq!(first, 0x0);
         assert_eq!(*rest_entry.key, [0x1]);
