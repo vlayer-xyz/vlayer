@@ -45,7 +45,7 @@ mod node_size {
     #[test]
     fn extension() {
         let leaf = Node::leaf([0x1], []);
-        let extension = Node::Extension([0x1].into(), Box::new(leaf));
+        let extension = Node::extension([0x1], leaf);
         assert_eq!(extension.size(), 2);
     }
 

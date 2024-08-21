@@ -27,16 +27,23 @@ impl MerkleTrie {
     /// Returns a reference to the byte value corresponding to the key.
     ///
     /// It panics when neither inclusion nor exclusion of the key can be guaranteed.
-    #[inline]
     pub fn get(&self, key: impl AsRef<[u8]>) -> Option<&[u8]> {
-        self.0.get(Nibbles::unpack(key).as_slice())
+        let nibbles = Nibbles::unpack(key);
+        self.0.get(&nibbles)
+    }
+
+    /// Inserts a key-value pair into the trie.
+    ///
+    /// It panics when the key already exists in the trie.
+    #[cfg(test)]
+    pub fn insert(&mut self, key: impl AsRef<[u8]>, value: impl AsRef<[u8]>) {
+        self.0 = self.0.clone().insert(Nibbles::unpack(key), value);
     }
 
     /// Returns the RLP decoded value corresponding to the key.
     ///
     /// It panics when neither inclusion nor exclusion of the key can be guaranteed or when the
     /// value is not RLP decodable.
-    #[inline]
     pub fn get_rlp<T: Decodable>(&self, key: impl AsRef<[u8]>) -> alloy_rlp::Result<Option<T>> {
         match self.get(key) {
             Some(mut bytes) => Ok(Some(T::decode(&mut bytes)?)),
@@ -47,13 +54,11 @@ impl MerkleTrie {
     /// Returns the number of full nodes in the trie.
     ///
     /// A full node is a node that needs to be fully encoded to compute the root hash.
-    #[inline]
     pub fn size(&self) -> usize {
         self.0.size()
     }
 
     /// Returns the hash of the trie's root node.
-    #[inline]
     pub fn hash_slow(&self) -> B256 {
         // compute the keccak hash of the RLP encoded root node
         match self.0 {
@@ -92,11 +97,6 @@ impl MerkleTrie {
         debug_assert!(trie.hash_slow() == MerkleTrie(root_node).hash_slow());
 
         Ok(trie)
-    }
-
-    #[cfg(test)]
-    pub fn insert(&mut self, key: impl AsRef<[u8]>, value: impl AsRef<[u8]>) {
-        self.0 = self.0.clone().insert(Nibbles::unpack(key), value);
     }
 }
 

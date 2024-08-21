@@ -23,6 +23,11 @@ impl Node {
         Node::Leaf(key_nibs.into(), value.as_ref().into())
     }
 
+    #[allow(unused)]
+    pub fn extension(key_nibs: impl AsRef<[u8]>, value: Node) -> Node {
+        Node::Extension(key_nibs.into(), value.into())
+    }
+
     /// Returns a reference to the value corresponding to the key.
     /// It panics when neither inclusion nor exclusion of the key can be shown in the sparse trie.
     pub(crate) fn get(&self, key_nibs: &[u8]) -> Option<&[u8]> {
