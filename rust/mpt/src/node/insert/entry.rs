@@ -2,7 +2,7 @@ use std::array::from_fn;
 
 use nybbles::Nibbles;
 
-use crate::{key_nibbles::KeyNibbles, node::Node};
+use crate::node::Node;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Entry {
@@ -24,12 +24,12 @@ where
 }
 
 impl From<Entry> for Node {
-    fn from(entry: Entry) -> Self {
-        if entry.key.is_empty() {
+    fn from(Entry { key, value }: Entry) -> Self {
+        if key.is_empty() {
             let children = from_fn(|_| None);
-            Node::Branch(children, Some(entry.value))
+            Node::Branch(children, Some(value))
         } else {
-            Node::Leaf(KeyNibbles::from_nibbles(entry.key), entry.value)
+            Node::leaf(&*key, value)
         }
     }
 }
