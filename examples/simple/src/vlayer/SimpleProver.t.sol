@@ -16,7 +16,6 @@ contract ProverTest is VTest {
 
     function test_sumDoesNotRevertWithCallProver() public {
         SimpleProver prover = new SimpleProver();
-        vm.roll(2);
         callProver();
         assertEq(prover.sum(1, 2), 3);
         Proof memory proof = getProof();
