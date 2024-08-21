@@ -1,4 +1,8 @@
-use crate::{key_nibbles::KeyNibbles, node::{constructors::EMPTY_CHILDREN, Node}, MerkleTrie};
+use crate::{
+    key_nibbles::KeyNibbles,
+    node::{constructors::EMPTY_CHILDREN, Node},
+    MerkleTrie,
+};
 use alloy_primitives::{b256, B256};
 use alloy_trie::EMPTY_ROOT_HASH;
 use lazy_static::lazy_static;

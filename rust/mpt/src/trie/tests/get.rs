@@ -2,7 +2,11 @@ use std::array::from_fn;
 
 use alloy_primitives::{b256, B256};
 
-use crate::{key_nibbles::KeyNibbles, node::{constructors::EMPTY_CHILDREN, Node}, MerkleTrie};
+use crate::{
+    key_nibbles::KeyNibbles,
+    node::{constructors::EMPTY_CHILDREN, Node},
+    MerkleTrie,
+};
 
 #[test]
 pub fn null() {
