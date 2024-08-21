@@ -26,7 +26,7 @@ impl Node {
         if entry.key.is_empty() {
             Node::Branch(Default::default(), Some(entry.value.as_ref().into()))
         } else {
-            Node::create_leaf(entry.key.as_slice(), entry.value)
+            Node::leaf(entry.key.as_slice(), entry.value)
         }
     }
 

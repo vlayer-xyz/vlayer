@@ -27,7 +27,7 @@ mod insert {
         let node = Node::Null;
         assert_eq!(
             node.insert(Nibbles::unpack([0xf, 0xf, 0xf, 0xf]), [42]),
-            Node::create_leaf([0xf, 0xf, 0xf, 0xf], [42])
+            Node::leaf([0xf, 0xf, 0xf, 0xf], [42])
         );
     }
 
@@ -40,8 +40,8 @@ mod insert {
         let mut expected_branch = Node::Branch(Default::default(), None);
 
         if let Node::Branch(ref mut children, _) = expected_branch {
-            children[0x1] = Some(Box::new(Node::create_leaf([0x1], [42])));
-            children[0x2] = Some(Box::new(Node::create_leaf([0x1], [43])));
+            children[0x1] = Some(Box::new(Node::leaf([0x1], [42])));
+            children[0x2] = Some(Box::new(Node::leaf([0x1], [43])));
         }
 
         assert_eq!(expected_branch, updated_node);

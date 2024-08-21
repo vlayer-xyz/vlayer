@@ -38,20 +38,20 @@ mod node_size {
 
     #[test]
     fn leaf() {
-        let node = Node::create_leaf([0x1], []);
+        let node = Node::leaf([0x1], []);
         assert_eq!(node.size(), 1);
     }
 
     #[test]
     fn extension() {
-        let leaf = Node::create_leaf([0x1], []);
+        let leaf = Node::leaf([0x1], []);
         let extension = Node::Extension([0x1].into(), Box::new(leaf));
         assert_eq!(extension.size(), 2);
     }
 
     #[test]
     fn branch_one_child() {
-        let leaf = Node::create_leaf([0x1], []);
+        let leaf = Node::leaf([0x1], []);
         let mut children: [Option<Box<Node>>; 16] = Default::default();
         children[0] = Some(Box::new(leaf));
         let branch = Node::Branch(children, None);
@@ -60,7 +60,7 @@ mod node_size {
 
     #[test]
     fn branch_many_children() {
-        let leaf = Node::create_leaf([0x1], []);
+        let leaf = Node::leaf([0x1], []);
         let child = Some(Box::new(leaf));
         let children: [_; 16] = from_fn(|_| child.clone());
         let branch = Node::Branch(children, None);
@@ -69,7 +69,7 @@ mod node_size {
 
     #[test]
     fn branch_with_value() {
-        let leaf = Node::create_leaf([0x1], []);
+        let leaf = Node::leaf([0x1], []);
         let mut children: [Option<Box<Node>>; 16] = Default::default();
         children[0] = Some(Box::new(leaf));
         let branch = Node::Branch(children, Some([42u8].as_slice().into()));
