@@ -11,6 +11,8 @@ fi
 LOGS_DIR="${VLAYER_TMP_DIR}/logs"
 VLAYER_HOME=$(git rev-parse --show-toplevel)
 
+source "${VLAYER_HOME}/bash/common.sh"
+
 mkdir -p "${LOGS_DIR}"
 echo "Saving artifacts to: ${VLAYER_TMP_DIR}"
 
@@ -34,44 +36,16 @@ function cleanup() {
     fi
 }
 
-check_exit_status() {
-  if [ $? -ne 0 ]; then
-    echo "$1"
-    exit 1
-  fi
-}
-
-wait_for_port_and_pid() {
-    local port=$1
-    local pid=$2
-    local timeout=$3
-    local service_name=$4
-    echo "Waiting for ${service_name} to be ready on localhost:${port}..."
-
-    # wait until port is open and the expected pid is alive
-    # if the port is open, but pid is not alive, exit 
-    timeout >/dev/null 2>&1 --preserve-status --foreground --kill-after=5s "${timeout}" bash -c \
-        "sleep 3 ;  while ! (nc -z localhost ${port}) && ps -p $pid ; do  sleep 3;  done ; if ! (ps -p $pid) ; then exit 1 ; fi"
-    
-    check_exit_status "Error: Timeout reached. ${service_name} is not available on localhost:${port}."
-}
-
 function startup_anvils(){
     echo "Starting Anvil 1"
-    anvil >"${LOGS_DIR}/anvil1.out" &
-    ANVIL1_PID=$!
-    echo "Anvil 1 started with PID ${ANVIL1_PID}."
-    wait_for_port_and_pid 8545 ${ANVIL1_PID} 30s "Anvil"
+    startup_anvil "${LOGS_DIR}/anvil1.out" 8545 ANVIL1_PID
 
     echo "Starting Anvil 2"
-    anvil -p 8546 >"${LOGS_DIR}/anvil2.out" &
-    ANVIL2_PID=$!
-    echo "Anvil 2 started with PID ${ANVIL2_PID}."
-    wait_for_port_and_pid 8546 ${ANVIL2_PID} 30s "Anvil"
+    startup_anvil "${LOGS_DIR}/anvil2.out" 8546 ANVIL2_PID
 }
 
 function startup_vlayer(){
-    local PROOF_ARG=$1
+    local proof_arg=$1
 
     echo "Starting vlayer REST server"
     pushd "${VLAYER_HOME}/rust"
@@ -79,7 +53,7 @@ function startup_vlayer(){
     RUST_LOG=info \
     BONSAI_API_URL="${BONSAI_API_URL}" \
     BONSAI_API_KEY="${BONSAI_API_KEY}" \
-    cargo run --bin vlayer serve --proof ${PROOF_ARG} >"${LOGS_DIR}/vlayer_serve.out" & 
+    cargo run --bin vlayer serve --proof "${proof_arg}" >"${LOGS_DIR}/vlayer_serve.out" & 
 
     VLAYER_SERVER_PID=$!
 
