@@ -23,20 +23,20 @@ The `blockhash(uint blockNumber)` function returns the hash for the given `block
 * `blockhash(uint blockNumber)`: Returns the hash of the given block if `blockNumber` is within the 256 most recent blocks; otherwise, it returns zero.
 * `block.timestamp`: The current block timestamp in seconds since the Unix epoch.
 * `msg.sender`: Initially set to a fixed address, it behaves like in standard EVM after a call.
+* `block.prevrandao`: Returns pseudo-random uint, use with caution.
+* `block.coinbase(address payable)`: Returns `0x0000000000000000000000000000000000000000`.
 
 ## Behaves the Same as in Solidity
 * `msg.data`: The complete calldata, passed by the prover.
 
 ## Unavailable Variables
-* `block.basefee`: Returns 0.
-* `block.blobbasefee`: Returns 0.
-* `block.coinbase(address payable)`: Returns the zero address `0x0`.
-* `block.difficulty`: Returns 0.
-* `block.gaslimit`: Returns 0.
-* `block.prevrandao`: Returns 0.
+* `block.basefee`: Not usable.
+* `block.blobbasefee`: Not usable.
+* `block.difficulty`: Not usable.
+* `block.gaslimit`: Returns 30000000.
 * `msg.value`: Payable functionalities are unsupported; returns 0.
 * `msg.sig`: Not usable; does not contain a valid signature.
 * `tx.origin`: Sender of the transaction (full call chain).
-* `blobhash(uint index)`: Versioned hash of the `index`-th blob associated with the current transaction. Returns zero if no blob with the given index exists.
+* `blobhash(uint index)`: Not usable.
 * `gasleft`: Unused.
 * `tx.gasprice`: Unused.
