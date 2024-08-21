@@ -3,7 +3,7 @@ use std::string::FromUtf8Error;
 use http::header;
 use tlsn_core::{
     proof::{SessionProofError, SubstringsProofError, TlsProof},
-    RedactedTranscript,
+    RedactedTranscript, ServerName,
 };
 
 use crate::{
@@ -29,9 +29,11 @@ pub enum VerificationError {
 
 pub struct Web {
     pub url: String,
+    pub server_name: String,
 }
 
 pub fn verify_and_parse(web_proof: WebProof) -> Result<Web, VerificationError> {
+    let ServerName::Dns(server_name) = web_proof.tls_proof.session.session_info.server_name.clone();
     let (sent, recv) = verify_proof(web_proof)?;
     let (sent_string, _recv_string) = extract_sent_recv_strings((sent, recv))?;
     let request_parse_result = parse_web_proof_request(&sent_string)?;
@@ -39,6 +41,7 @@ pub fn verify_and_parse(web_proof: WebProof) -> Result<Web, VerificationError> {
 
     Ok(Web {
         url: host_value.into(),
+        server_name,
     })
 }
 
@@ -105,5 +108,26 @@ mod tests {
         let web = verify_and_parse(web_proof).unwrap();
 
         assert_eq!(web.url, "api.x.com");
+    }
+
+    #[test]
+    fn wrong_server_name() {
+        // "wrong_server_name_tls_proof.json" is a real tls_proof, but with tampered server name, which the notary did not sign
+        let web_proof = load_web_proof_fixture(
+            "./testdata/wrong_server_name_tls_proof.json",
+            NOTARY_PUB_KEY_PEM_EXAMPLE,
+        );
+
+        assert!(verify_and_parse(web_proof).is_err());
+    }
+
+    #[test]
+    fn correct_server_name_extracted() {
+        let web_proof =
+            load_web_proof_fixture("./testdata/tls_proof.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
+
+        let web = verify_and_parse(web_proof).unwrap();
+
+        assert_eq!(web.server_name, "api.x.com");
     }
 }
