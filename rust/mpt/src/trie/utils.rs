@@ -73,7 +73,7 @@ mod resolve_trie {
     use alloy_primitives::keccak256;
     use alloy_trie::HashMap;
 
-    use crate::{key_nibbles::KeyNibbles, node::Node};
+    use crate::{key_nibbles::KeyNibbles, node::{constructors::EMPTY_CHILDREN, Node}};
 
     use super::resolve_trie;
 
@@ -132,8 +132,7 @@ mod resolve_trie {
     fn branch() {
         let leaf = Node::Leaf([1].into(), [0].into());
         let digest = keccak256(leaf.rlp_encoded());
-        let child = None;
-        let mut children: [_; 16] = from_fn(|_| child.clone());
+        let mut children = EMPTY_CHILDREN.clone();
         children[0] = Some(Box::new(Node::Digest(digest)));
         let branch = Node::Branch(children, None);
         let nodes_by_hash = HashMap::from([(digest, leaf.clone())]);

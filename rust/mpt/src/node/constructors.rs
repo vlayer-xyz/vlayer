@@ -1,8 +1,6 @@
 use super::Node;
 
-#[cfg(test)]
 const EMPTY_CHILD: std::option::Option<Box<Node>> = None;
-#[cfg(test)]
 pub static EMPTY_CHILDREN: [Option<Box<Node>>; 16] = [EMPTY_CHILD; 16];
 
 impl Node {

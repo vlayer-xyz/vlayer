@@ -2,7 +2,7 @@ use std::array::from_fn;
 
 use alloy_primitives::{b256, B256};
 
-use crate::{key_nibbles::KeyNibbles, node::Node, MerkleTrie};
+use crate::{key_nibbles::KeyNibbles, node::{constructors::EMPTY_CHILDREN, Node}, MerkleTrie};
 
 #[test]
 pub fn null() {
@@ -33,7 +33,7 @@ fn leaf() {
 
 #[test]
 fn branch() {
-    let mut children: [Option<Box<Node>>; 16] = Default::default();
+    let mut children = EMPTY_CHILDREN.clone();
     children[0] = Some(Box::new(Node::leaf([0; 63], [0])));
     children[1] = Some(Box::new(Node::leaf([1; 63], [1])));
 
@@ -57,7 +57,7 @@ fn branch_with_value() {
 
 #[test]
 fn extension() {
-    let mut children: [Option<Box<Node>>; 16] = Default::default();
+    let mut children = EMPTY_CHILDREN.clone();
     children[0] = Some(Box::new(Node::leaf([0; 62], [0])));
     children[1] = Some(Box::new(Node::leaf([1; 62], [1])));
     let branch = Node::Branch(children, None);

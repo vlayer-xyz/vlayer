@@ -1,4 +1,4 @@
-use crate::{key_nibbles::KeyNibbles, node::Node, MerkleTrie};
+use crate::{key_nibbles::KeyNibbles, node::{constructors::EMPTY_CHILDREN, Node}, MerkleTrie};
 use alloy_primitives::B256;
 
 type EncodedNode = Vec<u8>;
@@ -43,9 +43,8 @@ fn leaf() {
 
 #[test]
 fn branch() {
-    let children: [Option<Box<Node>>; 16] = Default::default();
     let value = Some([42u8].into());
-    let mpt = MerkleTrie(Node::Branch(children, value.clone()));
+    let mpt = MerkleTrie(Node::Branch(EMPTY_CHILDREN.clone(), value.clone()));
     let proof = rlp_encoded(&mpt.0);
 
     let decoded_mpt = MerkleTrie::from_rlp_nodes(proof).unwrap();

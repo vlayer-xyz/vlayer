@@ -3,6 +3,7 @@ use alloy_rlp::{Decodable, Encodable, Header, EMPTY_STRING_CODE};
 use rlp as legacy_rlp;
 
 use crate::{
+    node::constructors::EMPTY_CHILDREN,
     node_ref::NodeRef,
     path::{Path, PathKind},
 };
@@ -32,7 +33,7 @@ impl legacy_rlp::Decodable for Node {
                 }
             }
             Prototype::List(17) => {
-                let mut children: [Option<Box<Node>>; 16] = Default::default();
+                let mut children = EMPTY_CHILDREN.clone();
                 for (i, node_rlp) in rlp.iter().enumerate().take(16) {
                     match node_rlp.prototype()? {
                         Prototype::Null | Prototype::Data(0) => {}
