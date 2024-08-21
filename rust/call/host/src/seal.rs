@@ -1,18 +1,53 @@
+use alloy_primitives::FixedBytes;
 use risc0_zkvm::{
     FakeReceipt, Groth16Receipt,
     InnerReceipt::{self, Fake, Groth16},
     Receipt, ReceiptClaim,
 };
 
+use crate::host::error::HostError;
 use call_engine::{ProofMode, Seal};
 
-use crate::host::error::HostError;
+const GROTH16_PROOF_SIZE: usize = 256;
+const SEAL_BYTES_SIZE: usize = GROTH16_PROOF_SIZE;
 
-const SEAL_SIZE: usize = 36;
-const HALF_SEAL_SIZE: usize = SEAL_SIZE / 2;
-const SEAL_TYPE_SIZE: usize = 1;
+type SealBytesT = [u8; SEAL_BYTES_SIZE];
 
 pub struct EncodableReceipt(InnerReceipt);
+
+impl EncodableReceipt {
+    fn proof_mode(&self) -> Option<ProofMode> {
+        match self.0 {
+            Groth16(_) => Some(ProofMode::GROTH16),
+            Fake(_) => Some(ProofMode::FAKE),
+            _ => None,
+        }
+    }
+
+    fn seal_bytes(&self) -> Option<SealBytesT> {
+        match &self.0 {
+            Groth16(inner) => Self::extract_groth16_seal(inner),
+            Fake(inner) => Self::extract_fake_seal(inner),
+            _ => None,
+        }
+    }
+
+    fn extract_fake_seal(_inner: &FakeReceipt<ReceiptClaim>) -> Option<SealBytesT> {
+        Some([0; 256])
+    }
+    fn extract_groth16_seal(inner: &Groth16Receipt<ReceiptClaim>) -> Option<SealBytesT> {
+        let mut result = [0; GROTH16_PROOF_SIZE];
+        let bytes = &inner.seal;
+
+        if bytes.len() != GROTH16_PROOF_SIZE {
+            return None;
+        }
+
+        result.clone_from_slice(bytes.as_slice());
+
+        Some(result)
+    }
+}
 
 impl From<Receipt> for EncodableReceipt {
     fn from(value: Receipt) -> Self {
@@ -24,61 +59,38 @@ impl TryFrom<EncodableReceipt> for Seal {
     type Error = HostError;
 
     fn try_from(value: EncodableReceipt) -> Result<Self, Self::Error> {
-        let seal_type =
-            proof_mode(&value).ok_or(HostError::SealEncodingError("Invalid proof type".into()))?;
-        let (lhv, rhv): ([u8; HALF_SEAL_SIZE], [u8; HALF_SEAL_SIZE]) = extract_raw_seal(&value)
-            .and_then(split_raw_seal)
-            .ok_or(HostError::SealEncodingError("Invalid seal length".into()))?;
+        let seal_type = value
+            .proof_mode()
+            .ok_or(HostError::SealEncodingError("Invalid proof type".into()))?;
 
-        let mut rhv_with_seal_type: [u8; HALF_SEAL_SIZE + SEAL_TYPE_SIZE] = Default::default();
-
-        rhv_with_seal_type[..HALF_SEAL_SIZE].copy_from_slice(&rhv);
-        rhv_with_seal_type[HALF_SEAL_SIZE] = 0;
+        let raw_seal = value
+            .seal_bytes()
+            .ok_or(HostError::SealEncodingError(
+                "Could not retreive valid seal bytes".into(),
+            ))
+            .map(split_seal_into_bytes)?;
 
         Ok(Seal {
-            lhv: lhv.into(),
-            rhv: rhv_with_seal_type.into(),
+            seal: raw_seal,
             mode: seal_type,
         })
     }
 }
 
-fn extract_raw_seal(value: &EncodableReceipt) -> Option<Vec<u8>> {
-    match &value.0 {
-        Groth16(inner) => Some(from_groth16_receipt(inner)),
-        Fake(inner) => Some(from_fake_receipt(inner)),
-        _ => None,
-    }
-}
+fn split_seal_into_bytes(bytes: SealBytesT) -> [FixedBytes<32>; 8] {
+    let chunks: Vec<FixedBytes<32>> = bytes
+        .chunks(32)
+        .map(|chunk: &[u8]| {
+            let mut word: [u8; 32] = [0; 32];
+            word.clone_from_slice(chunk);
+            FixedBytes::<32>::new(word)
+        })
+        .collect();
 
-fn proof_mode(value: &EncodableReceipt) -> Option<ProofMode> {
-    match &value.0 {
-        Groth16(_) => Some(ProofMode::GROTH16),
-        Fake(_) => Some(ProofMode::FAKE),
-        _ => None,
-    }
-}
+    let mut result: [FixedBytes<32>; 8] = Default::default();
+    result.clone_from_slice(chunks.as_slice());
 
-fn from_groth16_receipt(receipt: &Groth16Receipt<ReceiptClaim>) -> Vec<u8> {
-    receipt.seal.clone()
-}
-fn from_fake_receipt(_: &FakeReceipt<ReceiptClaim>) -> Vec<u8> {
-    vec![0; SEAL_SIZE]
-}
-
-fn split_raw_seal(raw_seal: Vec<u8>) -> Option<([u8; HALF_SEAL_SIZE], [u8; HALF_SEAL_SIZE])> {
-    if raw_seal.len() != SEAL_SIZE {
-        return None;
-    }
-
-    let mut lhv: [u8; HALF_SEAL_SIZE] = Default::default();
-    let mut rhv: [u8; HALF_SEAL_SIZE] = Default::default();
-
-    let (l, r): (&[u8; HALF_SEAL_SIZE], &[u8]) = raw_seal.split_first_chunk()?;
-    lhv.clone_from_slice(l);
-    rhv.clone_from_slice(r);
-
-    Some((lhv, rhv))
+    result
 }
 
 #[cfg(test)]
@@ -92,12 +104,9 @@ mod test {
     use risc0_zkvm::{Groth16Receipt, Groth16ReceiptVerifierParameters, ReceiptClaim};
 
     const ETH_WORD_SIZE: usize = 32;
-    const SEAL_ENCODING_SIZE: usize = 3 * ETH_WORD_SIZE;
+    const SEAL_ENCODING_SIZE: usize = GROTH16_PROOF_SIZE + ETH_WORD_SIZE;
 
-    const INNER_SEAL: [u8; SEAL_SIZE] = [
-        0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14, 15, 16, 17, 18, 19, 20, 21, 22, 23, 24,
-        25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35,
-    ];
+    const INNER_SEAL: [u8; GROTH16_PROOF_SIZE] = [1; GROTH16_PROOF_SIZE];
 
     fn mock_journal() -> Vec<u8> {
         Vec::<u8>::default()
@@ -138,58 +147,50 @@ mod test {
         // |      SEAL LHV       |      PADDING     |      SEAL RHV        |     PADDING     |     PADDING     | PROOF MODE |
         // |0..................17|18..............31|32..................49|50.............63|64.............95|     96     |
 
-        let expected_encoding: [u8; SEAL_ENCODING_SIZE] = [
-            00, 01, 02, 03, 04, 05, 06, 07, 08, 09, 10, 11, 12, 13, 14, 15, 16, 17, // LHV
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // PADDING
-            18, 19, 20, 21, 22, 23, 24, 25, 26, 27, 28, 29, 30, 31, 32, 33, 34, 35, // RHV
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // PADDING
-            0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, // PADDING
-            0, // PROOF MODE
-        ];
+        let mut expected_encoding = vec![1; 256];
+
+        expected_encoding.extend_from_slice(ProofMode::GROTH16.abi_encode().as_slice());
 
         assert_eq!(expected_encoding, seal.abi_encode().as_slice());
     }
 
-    #[test]
-    fn receipt_into_seal_conversion_splits_inner_seal() {
-        let receipt: EncodableReceipt = mock_groth16_receipt().into();
-        let seal: Seal = receipt.try_into().unwrap();
+    // #[test]
+    // fn receipt_into_seal_conversion_splits_inner_seal() {
+    //     let receipt: EncodableReceipt = mock_groth16_receipt().into();
+    //     let seal: Seal = receipt.try_into().unwrap();
 
-        let lhv = seal.lhv.0;
-        let rhv = &(seal.rhv.0[..HALF_SEAL_SIZE]);
+    //     let lhv = seal.lhv.0;
+    //     let rhv = &(seal.rhv.0[..HALF_SEAL_SIZE]);
 
-        assert_eq!(&INNER_SEAL[0..HALF_SEAL_SIZE], lhv);
-        assert_eq!(&INNER_SEAL[HALF_SEAL_SIZE..], rhv);
-    }
+    //     assert_eq!(&INNER_SEAL[0..HALF_SEAL_SIZE], lhv);
+    //     assert_eq!(&INNER_SEAL[HALF_SEAL_SIZE..], rhv);
+    // }
 
     #[test]
     fn seal_encodes_proof_mode() {
         let groth16_receipt: EncodableReceipt = mock_groth16_receipt().into();
         let groth16_seal: Seal = groth16_receipt.try_into().unwrap();
 
-        let fake_receipt: EncodableReceipt = mock_fake_receipt().into();
-        let fake_seal: Seal = fake_receipt.try_into().unwrap();
-
-        assert_eq!(ProofMode::GROTH16 as u8, groth16_seal.mode as u8);
-        assert_eq!(ProofMode::FAKE as u8, fake_seal.mode as u8);
+        assert_eq!(ProofMode::GROTH16, groth16_seal.mode);
     }
 
-    mod split_raw_seal {
-
+    mod encodable_receipt {
         use super::*;
 
-        #[test]
-        fn splits_seal_of_expected_size() {
-            let (lhv, rhv) = split_raw_seal(INNER_SEAL.into()).unwrap();
+        mod proof_mode {
+            use super::*;
+            #[test]
+            fn returns_groth16_mode_for_groth16_receipt() {
+                let receipt: EncodableReceipt = mock_groth16_receipt().into();
 
-            assert_eq!(&INNER_SEAL[0..HALF_SEAL_SIZE], lhv);
-            assert_eq!(&INNER_SEAL[HALF_SEAL_SIZE..SEAL_SIZE], rhv);
-        }
+                assert_eq!(ProofMode::GROTH16, receipt.proof_mode().unwrap())
+            }
 
-        #[test]
-        fn returns_none_for_invalid_seal_size() {
-            let none = split_raw_seal(INNER_SEAL[1..].into());
-            assert!(none.is_none())
+            #[test]
+            fn returns_fake_mode_for_fake_receipt() {
+                let receipt: EncodableReceipt = mock_fake_receipt().into();
+                assert_eq!(ProofMode::FAKE, receipt.proof_mode().unwrap())
+            }
         }
     }
 }
