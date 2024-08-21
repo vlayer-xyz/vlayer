@@ -68,7 +68,7 @@ mod server_tests {
                 "params": [
                     {
                         "to": "I am not a valid address!",
-                        "data": helper.contract().sum(U256::from(1), U256::from(2)).calldata().unwrap()
+                        "data": helper.contract.sum(U256::from(1), U256::from(2)).calldata().unwrap()
                     },
                     {
                         "block_no": 0
@@ -100,7 +100,7 @@ mod server_tests {
         async fn success_simple_contract_call() -> anyhow::Result<()> {
             let helper = test_helper().await;
             let call_data = helper
-                .contract()
+                .contract
                 .sum(U256::from(1), U256::from(2))
                 .calldata()
                 .unwrap();
@@ -109,7 +109,7 @@ mod server_tests {
                 "method": "v_call",
                 "params": [
                     {
-                        "to": helper.contract().address(),
+                        "to": helper.contract.address(),
                         "data": call_data
                     },
                     {
@@ -131,7 +131,7 @@ mod server_tests {
                         "result": {
                             "evm_call_result": u256_to_vec32(U256::from(3)),
                             "function_selector": call_data.to_string()[0..10],
-                            "prover_contract_address": helper.contract().address(),
+                            "prover_contract_address": helper.contract.address(),
                             "seal": [
                                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
                                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
@@ -150,7 +150,7 @@ mod server_tests {
         async fn success_web_proof() -> anyhow::Result<()> {
             let helper = test_helper().await;
             let call_data = helper
-                .contract()
+                .contract
                 .web_proof(WebProof {
                     web_proof_json: serde_json::to_string(&json!(load_web_proof_fixture(
                         "../../web_proof/testdata/tls_proof.json",
@@ -165,7 +165,7 @@ mod server_tests {
                 "method": "v_call",
                 "params": [
                     {
-                        "to": helper.contract().address(),
+                        "to": helper.contract.address(),
                         "data": call_data
                     },
                     {
@@ -188,7 +188,7 @@ mod server_tests {
                         "result": {
                             "evm_call_result": bool_to_vec32(true),
                             "function_selector": call_data.to_string()[0..10],
-                            "prover_contract_address": helper.contract().address(),
+                            "prover_contract_address": helper.contract.address(),
                             "seal": [
                                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
                                 0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
