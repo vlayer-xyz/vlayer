@@ -111,6 +111,17 @@ mod tests {
     }
 
     #[test]
+    fn wrong_server_name() {
+        //"wrong_server_name_tls_proof.json" has a different server name in tls_proof than the one in request header
+        let web_proof = load_web_proof_fixture(
+            "./testdata/wrong_server_name_tls_proof.json",
+            NOTARY_PUB_KEY_PEM_EXAMPLE,
+        );
+
+        assert!(verify_and_parse(web_proof).is_err());
+    }
+
+    #[test]
     fn correct_server_name_extracted() {
         let web_proof =
             load_web_proof_fixture("./testdata/tls_proof.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
