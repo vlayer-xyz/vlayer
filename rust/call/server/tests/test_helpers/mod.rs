@@ -31,16 +31,34 @@ pub(crate) struct TestHelper {
     pub(crate) contract: ExampleProver<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>>,
 }
 
-pub(crate) async fn test_helper() -> TestHelper {
-    let anvil = setup_anvil().await;
-    let client = setup_client(&anvil).await;
-    let contract = deploy_test_contract(client).await;
-    let block_number = set_block_nr(&anvil).await;
+impl TestHelper {
+    pub(crate) async fn new() -> Self {
+        let anvil = setup_anvil().await;
+        let client = setup_client(&anvil).await;
+        let contract = deploy_test_contract(client).await;
+        let block_number = set_block_nr(&anvil).await;
 
-    TestHelper {
-        anvil,
-        block_number,
-        contract,
+        Self {
+            anvil,
+            block_number,
+            contract,
+        }
+    }
+
+    pub(crate) async fn post<T: Serialize>(
+        &self,
+        url: &str,
+        body: &T,
+    ) -> anyhow::Result<Response<Body>> {
+        let app = server(ServerConfig {
+            rpc_urls: HashMap::from([(self.anvil.chain_id(), self.anvil.endpoint())]),
+            port: 3000,
+            proof_mode: ProofMode::Fake,
+        });
+        let request = Request::post(url)
+            .header(CONTENT_TYPE, APPLICATION_JSON.as_ref())
+            .body(Body::from(to_string(body)?))?;
+        Ok(app.oneshot(request).await?)
     }
 }
 
@@ -63,13 +81,12 @@ async fn setup_client(
 
 async fn deploy_test_contract(
     client: Arc<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>>,
-) -> example_prover::ExampleProver<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>> {
-    let example_contract = ExampleProver::deploy(client, ())
+) -> ExampleProver<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>> {
+    ExampleProver::deploy(client, ())
         .unwrap()
         .send()
         .await
-        .unwrap();
-    example_contract
+        .unwrap()
 }
 
 async fn set_block_nr(anvil: &AnvilInstance) -> u32 {
@@ -92,21 +109,4 @@ async fn set_block_nr(anvil: &AnvilInstance) -> u32 {
     let result = json["result"].clone();
     let result = result.as_str().unwrap();
     u32::from_str_radix(&result[2..], 16).unwrap()
-}
-
-impl TestHelper {
-    pub(crate) async fn post<T>(&self, url: &str, body: &T) -> anyhow::Result<Response<Body>>
-    where
-        T: Serialize,
-    {
-        let app = server(ServerConfig {
-            rpc_urls: HashMap::from([(self.anvil.chain_id(), self.anvil.endpoint())]),
-            port: 3000,
-            proof_mode: ProofMode::Fake,
-        });
-        let request = Request::post(url)
-            .header(CONTENT_TYPE, APPLICATION_JSON.as_ref())
-            .body(Body::from(to_string(body)?))?;
-        Ok(app.oneshot(request).await?)
-    }
 }

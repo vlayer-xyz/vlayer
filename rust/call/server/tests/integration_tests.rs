@@ -6,14 +6,14 @@ use serde_json::json;
 mod test_helpers;
 
 use server_utils::{body_to_json, body_to_string};
-use test_helpers::test_helper;
+use test_helpers::TestHelper;
 
 mod server_tests {
     use super::*;
 
     #[tokio::test]
     async fn http_not_found() -> anyhow::Result<()> {
-        let helper = test_helper().await;
+        let helper = TestHelper::new().await;
         let response = helper.post("/non_existent_http_path", &()).await?;
 
         assert_eq!(StatusCode::NOT_FOUND, response.status());
@@ -24,7 +24,7 @@ mod server_tests {
 
     #[tokio::test]
     async fn json_rpc_not_found() -> anyhow::Result<()> {
-        let helper = test_helper().await;
+        let helper = TestHelper::new().await;
 
         let req = json!({
             "method": "non_existent_json_rpc_method",
@@ -61,7 +61,7 @@ mod server_tests {
 
         #[tokio::test]
         async fn field_validation_error() -> anyhow::Result<()> {
-            let helper = test_helper().await;
+            let helper = TestHelper::new().await;
 
             let req = json!({
                 "method": "v_call",
@@ -98,7 +98,7 @@ mod server_tests {
 
         #[tokio::test]
         async fn success_simple_contract_call() -> anyhow::Result<()> {
-            let helper = test_helper().await;
+            let helper = TestHelper::new().await;
             let call_data = helper
                 .contract
                 .sum(U256::from(1), U256::from(2))
@@ -148,7 +148,7 @@ mod server_tests {
 
         #[tokio::test]
         async fn success_web_proof() -> anyhow::Result<()> {
-            let helper = test_helper().await;
+            let helper = TestHelper::new().await;
             let call_data = helper
                 .contract
                 .web_proof(WebProof {
