@@ -2,6 +2,7 @@ use std::sync::Arc;
 
 use crate::config::ServerConfig;
 use crate::error::AppError;
+use alloy_primitives::hex::ToHexExt;
 use call_host::host::{config::HostConfig, Host};
 use call_host::Call as HostCall;
 use serde::{Deserialize, Serialize};
@@ -29,10 +30,10 @@ pub async fn v_call(config: Arc<ServerConfig>, params: Params) -> Result<CallRes
 
     Ok(CallResult {
         result: json!({
-            "evm_call_result": return_data.guest_output.evm_call_result,
+            "evm_call_result": return_data.guest_output.evm_call_result.encode_hex_with_prefix(),
             "function_selector": return_data.guest_output.execution_commitment.functionSelector,
             "prover_contract_address": return_data.guest_output.execution_commitment.proverContractAddress,
-            "seal": return_data.seal
+            "seal": return_data.seal.encode_hex_with_prefix()
         }),
     })
 }
