@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
+import "forge-std/console.sol";
+
+
 import {RiscZeroMockVerifier} from "risc0-ethereum/test/RiscZeroMockVerifier.sol";
 
 import {ExecutionCommitment} from "../../src/ExecutionCommitment.sol";
@@ -21,22 +24,36 @@ contract TestHelpers {
         view
         returns (Proof memory, bytes32)
     {
+ 
         bytes memory journal = bytes.concat(abi.encode(commitment), journalParams);
         bytes32 journalHash = sha256(journal);
 
+        console.log("Digest:");
+        console.logBytes32(journalHash);
+        console.log("Journal:");
+        console.logBytes(journal);
+        
+
         bytes memory seal = mockVerifier.mockProve(ImageID.RISC0_CALL_GUEST_ID, journalHash).seal;
+
+        console.log("Seal:");
+        console.logBytes(seal);
+
         Proof memory proof = Proof(journal.length, encodeSeal(seal), commitment);
         return (proof, journalHash);
     }
 
     function createProof(ExecutionCommitment memory commitment) public view returns (Proof memory, bytes32) {
         bytes memory emptyBytes = new bytes(0);
+        console.logBytes(abi.encode(commitment));
+
         return createProof(commitment, emptyBytes);
     }
 
     function createProof() public view returns (Proof memory, bytes32) {
         ExecutionCommitment memory commitment =
             ExecutionCommitment(PROVER, SELECTOR, block.number - 1, blockhash(block.number - 1));
+
         bytes memory emptyBytes = new bytes(0);
         return createProof(commitment, emptyBytes);
     }

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {Test} from "forge-std/Test.sol";
+import {Test, console} from "forge-std/Test.sol";
 import {TestHelpers} from "./helpers/TestHelpers.sol";
 
 import {IRiscZeroVerifier, Receipt, VerificationFailed} from "risc0-ethereum/IRiscZeroVerifier.sol";
@@ -46,6 +46,15 @@ contract ExampleVerifier is Verifier {
     {
         return value;
     }
+
+    function updateSum(Proof calldata, uint256 value)
+        external
+        view
+        onlyVerified(PROVER, SIMPLE_PROVER_SELECTOR)
+        returns (bool)
+    {
+        return value == 3;
+    }
 }
 
 contract Verifier_OnlyVerified_Modifier_Tests is Test {
@@ -60,6 +69,17 @@ contract Verifier_OnlyVerified_Modifier_Tests is Test {
         commitment = ExecutionCommitment(
             exampleVerifier.PROVER(), ExampleProver.doSomething.selector, block.number - 1, blockhash(block.number - 1)
         );
+    }
+
+    function test_updateSum() public view {
+        bytes memory journal = abi.encode(uint256(3));
+        (Proof memory proof,) = helpers.createProof(commitment, journal);
+
+        console.log("TEST JOURNAL");
+        console.logBytes(journal);
+        console.logBytes(abi.encode(proof));
+
+        exampleVerifier.updateSum(proof, 3);
     }
 
     function test_verifySuccess() public view {
