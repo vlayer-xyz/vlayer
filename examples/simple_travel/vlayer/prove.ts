@@ -6,13 +6,13 @@ import simpleTravelProver from "../out/SimpleTravelProver.sol/SimpleTravelProver
 import { testChainId2 } from "../../../packages/vlayer/sdk/src/api/helpers";
 
 console.log("Deploying prover on anvil 1");
-let prover: Address = await testHelpers.deployContract(simpleTravelProver);
+const prover: Address = await testHelpers.deployContract(simpleTravelProver);
 console.log(`Prover has been deployed on ${prover} address`);
 
 console.log("Deploying a contract on anvil 2");
-let otherChainContract: Address = await testHelpers.deployContract(otherChainContractSpec, [], testChainId2);
+const otherChainContract: Address = await testHelpers.deployContract(otherChainContractSpec, [], testChainId2);
 console.log(`Contract has been deployed on ${otherChainContract} address`);
 
 console.log("Proving...");
-let response = await prove(prover, simpleTravelProver, 'aroundTheWorld', []);
+const response = await prove(prover, simpleTravelProver, 'aroundTheWorld', []);
 console.log("Response:", response)
