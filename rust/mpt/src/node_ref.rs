@@ -86,8 +86,7 @@ mod encodable {
 
     #[test]
     fn inline_node() {
-        let key_nibbles = [0x1].into();
-        let leaf_node = Node::Leaf(key_nibbles, [0x1].into());
+        let leaf_node = Node::leaf([0x0], [0x0]);
         let node_ref = NodeRef::from_node(&leaf_node);
         let out = encode(node_ref.clone());
 
@@ -99,7 +98,7 @@ mod encodable {
 
     #[test]
     fn hash_node() {
-        let rlp = vec![0x1; 32];
+        let rlp = vec![0x0; 32];
         let hash = keccak256(&rlp);
         let mut out = Vec::new();
         let node = NodeRef::Node(rlp.clone());
