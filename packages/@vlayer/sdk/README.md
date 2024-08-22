@@ -21,4 +21,8 @@ bun run src/index.ts
 1. Commit modified files changes 
 1. Push
 
+<<<<<<< HEAD
 Quick list of common questions to get you started engaging with changesets (tool for versioning) is in [their docs](https://github.com/changesets/changesets/blob/main/docs/common-questions.md)
+=======
+Quick list of common questions to get you started engaging with changesets (tool for versioning) is in[their docs](https://github.com/changesets/changesets/blob/main/docs/common-questions.md)
+>>>>>>> fad85746 (use @vlayer/sdk imports)
