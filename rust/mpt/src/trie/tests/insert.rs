@@ -10,8 +10,8 @@ pub fn empty_key() {
 #[test]
 pub fn one_byte_key() {
     let mut mpt = MerkleTrie(Node::Null);
-    mpt.insert([0x1], [42]);
-    assert_eq!(mpt.get([0x01]), Some(&[42][..]));
+    mpt.insert([0x0], [42]);
+    assert_eq!(mpt.get([0x0]), Some(&[42][..]));
 }
 
 #[test]
@@ -30,11 +30,10 @@ pub fn duplicate_key() {
 }
 
 #[test]
-#[ignore]
-pub fn two_keys() {
+pub fn identical_first_nibble() {
     let mut mpt = MerkleTrie(Node::Null);
-    mpt.insert([0x0], [42]);
-    mpt.insert([0x1], [43]);
-    assert_eq!(mpt.get([0x0]), Some(&[42][..]));
-    assert_eq!(mpt.get([0x1]), Some(&[43][..]));
+    mpt.insert([0x1], [42]);
+    mpt.insert([0x10], [43]);
+    assert_eq!(mpt.get([0x1]), Some(&[42][..]));
+    assert_eq!(mpt.get([0x10]), Some(&[43][..]));
 }

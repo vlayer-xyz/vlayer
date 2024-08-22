@@ -1,7 +1,6 @@
 use nybbles::Nibbles;
-use std::array::from_fn;
 
-use crate::node::Node;
+use crate::node::{constructors::EMPTY_CHILDREN, Node};
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Entry {
@@ -25,7 +24,7 @@ where
 impl From<Entry> for Node {
     fn from(Entry { key, value }: Entry) -> Self {
         if key.is_empty() {
-            let children = from_fn(|_| None);
+            let children = EMPTY_CHILDREN.clone();
             Node::Branch(children, Some(value))
         } else {
             Node::leaf(&*key, value)
@@ -38,7 +37,7 @@ impl Entry {
         let Some((first_key_nibble, remaining_key)) = self.key.split_first() else {
             unreachable!("Can't split first key nibble from empty nibbles");
         };
-        let entry = (&*remaining_key, self.value).into();
+        let entry = (remaining_key, self.value).into();
         (*first_key_nibble, entry)
     }
 }
