@@ -78,10 +78,7 @@ fn extract_sent_recv_strings(
 
 fn find_value(headers: &[Header], name: &str) -> Option<String> {
     let header = headers.iter().find(|header| header.name == name);
-    match header {
-        Some(header) => Some(std::str::from_utf8(header.value).unwrap().to_string()),
-        None => None,
-    }
+    header.map(|header| std::str::from_utf8(header.value).unwrap().to_string())
 }
 
 #[cfg(test)]
