@@ -24,6 +24,9 @@ pub enum VerificationError {
 
     #[error("Httparse error: {0}")]
     Httparse(#[from] httparse::Error),
+
+    #[error("No header found: {0}")]
+    NoHeaderFound(String),
 }
 
 pub struct Web {
@@ -40,7 +43,8 @@ pub fn verify_and_parse(web_proof: WebProof) -> Result<Web, VerificationError> {
     let mut req = Request::new(&mut headers);
     req.parse(sent_string.as_bytes())?;
 
-    let host_value = find_value(&headers, "host").expect("Host header not found");
+    let host_value =
+        find_value(&headers, "host").ok_or(VerificationError::NoHeaderFound("host".to_string()))?;
 
     Ok(Web {
         url: host_value,
