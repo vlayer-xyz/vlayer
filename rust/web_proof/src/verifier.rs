@@ -6,10 +6,7 @@ use tlsn_core::{
     RedactedTranscript, ServerName,
 };
 
-use crate::{
-    types::WebProof,
-    web_proof_parser::{parse_web_proof_request, ParserError},
-};
+use crate::types::WebProof;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -23,8 +20,8 @@ pub enum VerificationError {
     #[error("From utf8 error: {0}")]
     FromUtf8(#[from] FromUtf8Error),
 
-    #[error("Parse error: {0}")]
-    Parser(#[from] ParserError),
+    #[error("Httparse error: {0}")]
+    Httparse(#[from] httparse::Error),
 }
 
 pub struct Web {
