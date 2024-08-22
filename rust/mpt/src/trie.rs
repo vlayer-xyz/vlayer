@@ -32,6 +32,14 @@ impl MerkleTrie {
         self.0.get(Nibbles::unpack(key).as_slice())
     }
 
+    /// Inserts a key-value pair into the trie.
+    ///
+    /// It panics when the key already exists in the trie.
+    #[cfg(test)]
+    pub fn insert(&mut self, key: impl AsRef<[u8]>, value: impl AsRef<[u8]>) {
+        self.0 = self.0.clone().insert(Nibbles::unpack(key), value);
+    }
+
     /// Returns the RLP decoded value corresponding to the key.
     ///
     /// It panics when neither inclusion nor exclusion of the key can be guaranteed or when the
