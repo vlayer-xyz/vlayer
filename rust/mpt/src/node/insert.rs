@@ -13,12 +13,17 @@ impl Node {
     pub(crate) fn insert(self, key: Nibbles, value: impl AsRef<[u8]>) -> Node {
         match self {
             Node::Null => Entry::from((&*key, value)).into(),
+            Node::Digest(_) => panic!("Cannot insert into a digest node"),
             Node::Leaf(old_key, old_value) => {
                 let old_entry = (&**old_key, old_value).into();
                 let entry = (&*key, value).into();
                 from_two_entries(old_entry, entry)
             }
-            _ => todo!("Branch and extension nodes"),
+            Node::Branch(mut children, branch_value) => {
+                let branch = Node::Branch(children, branch_value);
+                from_branch_and_entry(branch, (&*key, value).into())
+            }
+            _ => panic!("Not implemented"),
         }
     }
 }

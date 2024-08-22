@@ -8,7 +8,6 @@ pub mod constructors;
 pub mod insert;
 pub mod rlp;
 pub mod size;
-pub mod insert;
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub(crate) enum Node {

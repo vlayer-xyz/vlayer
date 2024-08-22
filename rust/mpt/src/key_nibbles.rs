@@ -16,6 +16,10 @@ impl KeyNibbles {
         self.0.as_slice()
     }
 
+    pub fn push_front(&self, nibble: u8) -> Self {
+        KeyNibbles(self.0.join(&Nibbles::from_vec(vec![nibble])))
+    }
+
     fn from_nibbles(nibbles: Nibbles) -> Self {
         if nibbles.is_empty() {
             panic!("KeyNibbles cannot be empty");

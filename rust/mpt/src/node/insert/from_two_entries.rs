@@ -2,12 +2,24 @@ use crate::node::{constructors::EMPTY_CHILDREN, Node};
 
 use super::entry::Entry;
 
-pub fn from_two_entries(lhs: Entry, rhs: Entry) -> Node {
+pub(crate) fn from_two_entries(lhs: Entry, rhs: Entry) -> Node {
+    if lhs.key.len() > rhs.key.len() {
+        from_two_ordered_entries(rhs, lhs)
+    } else {
+        from_two_ordered_entries(lhs, rhs)
+    }
+}
+
+fn from_two_ordered_entries(lhs: Entry, rhs: Entry) -> Node {
     if lhs.key == rhs.key {
         panic!("Key already exists");
     } else {
-        if lhs.key.is_empty() || rhs.key.is_empty() {
-            todo!("Handle empty key case");
+        if lhs.key.is_empty() {
+            let (rhs_first_nibble, remaining_rhs) = rhs.split_first_key_nibble();
+            let mut children = EMPTY_CHILDREN.clone();
+            children[rhs_first_nibble as usize] = Some(Box::new(remaining_rhs.into()));
+
+            return Node::Branch(children, Some(lhs.value));
         }
         let (lhs_first_nibble, remaining_lhs) = lhs.split_first_key_nibble();
         let (rhs_first_nibble, remaining_rhs) = rhs.split_first_key_nibble();
@@ -17,9 +29,16 @@ pub fn from_two_entries(lhs: Entry, rhs: Entry) -> Node {
             children[lhs_first_nibble as usize] = Some(Box::new(remaining_lhs.into()));
             children[rhs_first_nibble as usize] = Some(Box::new(remaining_rhs.into()));
 
-            Node::Branch(children, None)
-        } else {
-            todo!("Extend with branch or extension");
+            return Node::Branch(children, None);
+        }
+
+        let node = from_two_ordered_entries(remaining_lhs, remaining_rhs);
+        match node {
+            Node::Branch(_, _) => Node::extension([lhs_first_nibble], node),
+            Node::Extension(nibbles, child) => {
+                Node::Extension(nibbles.push_front(lhs_first_nibble), child)
+            }
+            _ => unreachable!("from_two_ordered_entries returns only Branch or Extension"),
         }
     }
 }
@@ -39,36 +58,92 @@ mod tests {
     }
 
     #[test]
-    fn two_keys() {
+    fn different_single_nibbles() {
         let first_entry: Entry = ([0x0], [42]).into();
         let second_entry: Entry = ([0x1], [43]).into();
+
         let node = from_two_entries(first_entry, second_entry);
 
-        if let Node::Branch(children, _) = node {
-            assert_eq!(
-                children[0],
-                Some(Box::new(Node::branch(EMPTY_CHILDREN.clone(), Some([42]))))
-            );
-            assert_eq!(
-                children[1],
-                Some(Box::new(Node::branch(EMPTY_CHILDREN.clone(), Some([43]))))
-            );
-        } else {
-            panic!("Expected branch node");
-        }
+        let mut children = EMPTY_CHILDREN.clone();
+        children[0] = Some(Box::new(Node::branch(EMPTY_CHILDREN.clone(), Some([42]))));
+        children[1] = Some(Box::new(Node::branch(EMPTY_CHILDREN.clone(), Some([43]))));
+        let expected_node = Node::Branch(children, None);
+
+        assert_eq!(node, expected_node);
     }
 
     #[test]
-    fn two_long_keys() {
+    fn no_common_prefix() {
         let first_entry: Entry = ([0x0, 0x0], [42]).into();
         let second_entry: Entry = ([0x1, 0x0], [43]).into();
         let node = from_two_entries(first_entry, second_entry);
 
-        if let Node::Branch(children, _) = node {
-            assert_eq!(children[0], Some(Box::new(Node::leaf([0], [42]))));
-            assert_eq!(children[1], Some(Box::new(Node::leaf([0], [43]))));
-        } else {
-            panic!("Expected branch node");
-        }
+        let mut children = EMPTY_CHILDREN.clone();
+        children[0] = Some(Box::new(Node::leaf([0], [42])));
+        children[1] = Some(Box::new(Node::leaf([0], [43])));
+        let expected_node = Node::Branch(children, None);
+
+        assert_eq!(node, expected_node);
+    }
+
+    #[test]
+    fn common_prefix() {
+        let first_entry: Entry = ([0x0, 0x0], [42]).into();
+        let second_entry: Entry = ([0x0, 0x1], [43]).into();
+
+        let node = from_two_entries(first_entry, second_entry);
+
+        let mut children = EMPTY_CHILDREN.clone();
+        children[0] = Some(Box::new(Node::branch(EMPTY_CHILDREN.clone(), Some([42]))));
+        children[1] = Some(Box::new(Node::branch(EMPTY_CHILDREN.clone(), Some([43]))));
+        let expected_node_child = Node::Branch(children, None);
+        let expected_node = Node::extension([0x0], expected_node_child);
+
+        assert_eq!(node, expected_node);
+    }
+
+    #[test]
+    fn long_common_prefix() {
+        let first_entry: Entry = ([0x0, 0x0, 0x0], [42]).into();
+        let second_entry: Entry = ([0x0, 0x0, 0x1], [43]).into();
+
+        let node = from_two_entries(first_entry, second_entry);
+
+        let mut children = EMPTY_CHILDREN.clone();
+        children[0] = Some(Box::new(Node::branch(EMPTY_CHILDREN.clone(), Some([42]))));
+        children[1] = Some(Box::new(Node::branch(EMPTY_CHILDREN.clone(), Some([43]))));
+        let expected_node_child = Node::Branch(children, None);
+        let expected_node = Node::extension([0x0, 0x0], expected_node_child);
+
+        assert_eq!(node, expected_node);
+    }
+
+    #[test]
+    fn common_prefix_with_long_different_long_suffix() {
+        let first_entry: Entry = ([0x0, 0x0, 0x1], [42]).into();
+        let second_entry: Entry = ([0x0, 0x1, 0x0], [43]).into();
+
+        let node = from_two_entries(first_entry, second_entry);
+
+        let mut branch_children = EMPTY_CHILDREN.clone();
+        branch_children[0] = Some(Box::new(Node::leaf([0x1], [42])));
+        branch_children[1] = Some(Box::new(Node::leaf([0x0], [43])));
+        let expected_node_child = Node::Branch(branch_children, None);
+        let expected_node = Node::extension([0x0], expected_node_child);
+
+        assert_eq!(node, expected_node);
+    }
+
+    #[test]
+    fn empty_key_and_non_empty_key() {
+        let first_entry: Entry = ([], [42]).into();
+        let second_entry: Entry = ([0x0], [43]).into();
+        let node = from_two_entries(first_entry, second_entry);
+
+        let mut children = EMPTY_CHILDREN.clone();
+        children[0] = Some(Box::new(Node::branch(EMPTY_CHILDREN.clone(), Some([43]))));
+        let expected_node = Node::branch(children, Some([42]));
+
+        assert_eq!(node, expected_node);
     }
 }
