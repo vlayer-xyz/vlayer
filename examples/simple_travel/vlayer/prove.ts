@@ -1,6 +1,6 @@
-import { type Address } from "viem";
+import type { Address } from "viem";
 
-import { testHelpers, prove } from "vlayer-sdk";
+import { testHelpers, prove } from "@vlayer/sdk";
 import { mainnet } from "viem/chains";
 import otherChainContractSpec from "../out/OtherChainContract.sol/OtherChainContract.json";
 import simpleTravelProver from "../out/SimpleTravelProver.sol/SimpleTravelProver.json";

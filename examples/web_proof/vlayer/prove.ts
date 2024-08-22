@@ -1,6 +1,6 @@
-import { type Address } from "viem";
+import type { Address } from "viem";
 
-import { testHelpers, prove } from "vlayer-sdk";
+import { testHelpers, prove } from "@vlayer/sdk";
 import webProofProver from "../out/WebProofProver.sol/WebProofProver.json";
 import tls_proof from './tls_proof.json';
 

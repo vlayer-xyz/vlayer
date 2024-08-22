@@ -1,7 +1,9 @@
-import { createTestClient, walletActions, publicActions, http, Address, HttpTransport } from "viem";
+import type { ContractSpec } from "./prover";
+import type { Address, HttpTransport } from "viem";
+
+import { createTestClient, walletActions, publicActions, http } from "viem";
 import { privateKeyToAccount, generatePrivateKey } from 'viem/accounts'
 import { foundry, mainnet, sepolia } from "viem/chains";
-import { type ContractSpec } from "./prover";
 
 const rpcUrls: Map<number, HttpTransport> = new Map([[sepolia.id, http()], [mainnet.id, http("http://127.0.0.1:8546")]]);
 

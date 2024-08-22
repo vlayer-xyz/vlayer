@@ -1,6 +1,6 @@
 import type { Address, Account } from "viem";
 
-import { testHelpers, prove, createTestClient } from "vlayer-sdk";
+import { testHelpers, prove, createTestClient } from "@vlayer/sdk";
 import exampleToken from "../out/ExampleToken.sol/ExampleToken.json";
 import privateAirdropProver from "../out/PrivateAirdropProver.sol/PrivateAirdropProver.json";
 
