@@ -12,6 +12,7 @@ serde_json = { workspace = true, optional = true}
 thiserror = { workspace = true }
 regex = "1.10.6"
 http = "1.1.0"
+httparse = "1.9.4"
 
 [features]
 fixtures = ["dep:serde_json"]

@@ -1,15 +1,12 @@
 use std::string::FromUtf8Error;
 
-use http::header;
+use httparse::{Header, Request, EMPTY_HEADER};
 use tlsn_core::{
     proof::{SessionProofError, SubstringsProofError, TlsProof},
     RedactedTranscript, ServerName,
 };
 
-use crate::{
-    types::WebProof,
-    web_proof_parser::{parse_web_proof_request, ParserError},
-};
+use crate::{types::WebProof, web_proof_parser::ParserError};
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -25,6 +22,9 @@ pub enum VerificationError {
 
     #[error("Parse error: {0}")]
     Parser(#[from] ParserError),
+
+    #[error("Httparse error: {0}")]
+    Httparse(#[from] httparse::Error),
 }
 
 pub struct Web {
@@ -36,11 +36,15 @@ pub fn verify_and_parse(web_proof: WebProof) -> Result<Web, VerificationError> {
     let ServerName::Dns(server_name) = web_proof.tls_proof.session.session_info.server_name.clone();
     let (sent, recv) = verify_proof(web_proof)?;
     let (sent_string, _recv_string) = extract_sent_recv_strings((sent, recv))?;
-    let request_parse_result = parse_web_proof_request(&sent_string)?;
-    let host_value = request_parse_result.header(header::HOST)?;
+
+    let mut headers = [EMPTY_HEADER; 20];
+    let mut req = Request::new(&mut headers);
+    req.parse(sent_string.as_bytes())?;
+
+    let host_value = find_value(&headers, "host").expect("Host header not found");
 
     Ok(Web {
-        url: host_value.into(),
+        url: host_value,
         server_name,
     })
 }
@@ -71,6 +75,14 @@ fn extract_sent_recv_strings(
     recv_string.retain(|c| c != '\0');
 
     Ok((sent_string, recv_string))
+}
+
+fn find_value(headers: &[Header], name: &str) -> Option<String> {
+    let header = headers.iter().find(|header| header.name == name);
+    match header {
+        Some(header) => Some(std::str::from_utf8(header.value).unwrap().to_string()),
+        None => None,
+    }
 }
 
 #[cfg(test)]

@@ -3344,6 +3344,7 @@ name = "web_proof"
 version = "0.1.0"
 dependencies = [
  "http",
+ "httparse",
  "p256",
  "pkcs8",
  "regex",
