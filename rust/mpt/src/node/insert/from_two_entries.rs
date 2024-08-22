@@ -26,6 +26,8 @@ pub fn from_two_entries(lhs: Entry, rhs: Entry) -> Node {
 
 #[cfg(test)]
 mod tests {
+    use core::panic;
+
     use super::*;
 
     #[test]
@@ -37,7 +39,7 @@ mod tests {
     }
 
     #[test]
-    fn two_nibbles() {
+    fn two_keys() {
         let first_entry: Entry = ([0x0], [42]).into();
         let second_entry: Entry = ([0x1], [43]).into();
         let node = from_two_entries(first_entry, second_entry);
@@ -51,11 +53,13 @@ mod tests {
                 children[1],
                 Some(Box::new(Node::branch(EMPTY_CHILDREN.clone(), Some([43]))))
             );
+        } else {
+            panic!("Expected branch node");
         }
     }
 
     #[test]
-    fn two_long_nibbles() {
+    fn two_long_keys() {
         let first_entry: Entry = ([0x0, 0x0], [42]).into();
         let second_entry: Entry = ([0x1, 0x0], [43]).into();
         let node = from_two_entries(first_entry, second_entry);
@@ -63,6 +67,8 @@ mod tests {
         if let Node::Branch(children, _) = node {
             assert_eq!(children[0], Some(Box::new(Node::leaf([0], [42]))));
             assert_eq!(children[1], Some(Box::new(Node::leaf([0], [43]))));
+        } else {
+            panic!("Expected branch node");
         }
     }
 }

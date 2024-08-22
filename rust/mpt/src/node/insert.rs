@@ -18,7 +18,7 @@ impl Node {
                 let entry = (&*key, value).into();
                 from_two_entries(old_entry, entry)
             }
-            _ => panic!("Not implemented"),
+            _ => todo!("Branch and extension nodes"),
         }
     }
 }
