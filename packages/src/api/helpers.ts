@@ -83,37 +83,4 @@ export async function send<
   return ethClient.waitForTransactionReceipt({hash: txHash});
 }
 
-export function encodeCalldata(response, blockNo, block) {
-
-  const {
-    result: {
-      result: {
-        evm_call_result,
-        function_selector,
-        prover_contract_address,
-        seal
-      }
-    }
-  } = response;
-
-  let blockNoEnc = blockNo.toString(16);
-  let blockNoEncPadded = "0".repeat(64 - blockNoEnc.length) + blockNoEnc;
-  let prover_address = "0".repeat(12 * 2) + prover_contract_address;
-  let function_selector_padded = function_selector + "0".repeat(56);
-
-  let seal_without_prefix = seal.replaceAll("0x", "");
-
-  let evm_call_result1 = "0x1111111111111111111111111111111111111111111111111111111111111111";
-
-
-  let length = "0".repeat(62) + "a0";
-  let commitment = prover_address + function_selector_padded + blockNoEncPadded + block.hash + evm_call_result1;
-  let commitment_without_prefixes = commitment.replaceAll("0x", "");
-  let selector = "73138a30";
-  let calldata = "0x" + selector + length + seal_without_prefix + commitment_without_prefixes;
-
-  return calldata;
-
-}
-
 export const getTestAccount = () => privateKeyToAccount(generatePrivateKey());
