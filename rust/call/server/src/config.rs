@@ -17,8 +17,8 @@ impl Default for ServerConfig {
         let anvil2_url = "http://localhost:8546";
         Self {
             rpc_urls: HashMap::from([
-                (MAINNET_ID, anvil1_url.to_string()),
-                (SEPOLIA_ID, anvil2_url.to_string()),
+                (SEPOLIA_ID, anvil1_url.to_string()),
+                (MAINNET_ID, anvil2_url.to_string()),
             ]),
             port: 3000,
             proof_mode: ProofMode::Groth16,
