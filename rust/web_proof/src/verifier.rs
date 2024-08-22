@@ -9,6 +9,8 @@ use tlsn_core::{
 use crate::types::WebProof;
 use thiserror::Error;
 
+const HEADERS_AMOUNT: usize = 20;
+
 #[derive(Error, Debug)]
 pub enum VerificationError {
     #[error("Session proof error: {0}")]
@@ -34,7 +36,7 @@ pub fn verify_and_parse(web_proof: WebProof) -> Result<Web, VerificationError> {
     let (sent, recv) = verify_proof(web_proof)?;
     let (sent_string, _recv_string) = extract_sent_recv_strings((sent, recv))?;
 
-    let mut headers = [EMPTY_HEADER; 20];
+    let mut headers = [EMPTY_HEADER; HEADERS_AMOUNT];
     let mut req = Request::new(&mut headers);
     req.parse(sent_string.as_bytes())?;
 
