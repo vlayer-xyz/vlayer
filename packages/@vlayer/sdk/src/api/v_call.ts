@@ -1,6 +1,7 @@
 import { type Address } from "viem";
 
 type Calldata = string;
+export type Json = string | number | boolean | null | { [key: string]: Json } | Json[];
 
 export type CallParams = {
     to: Address,
@@ -22,7 +23,7 @@ function v_callBody(call: CallParams, context: CallContext) {
     };
 }
 
-export async function v_call(call: CallParams, context: CallContext) {
+export async function v_call(call: CallParams, context: CallContext): Promise<Json> {
     const response = await fetch("http://127.0.0.1:3000", {
         method: "POST",
         body: JSON.stringify(v_callBody(call, context)),
