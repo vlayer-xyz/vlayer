@@ -26,8 +26,9 @@ mod insert {
     fn long_key() {
         let node = Node::Null;
         assert_eq!(
-            node.insert(Nibbles::unpack([0xf, 0xf, 0xf, 0xf]), [42]),
-            Node::leaf([0xf, 0xf, 0xf, 0xf], [42])
+            node.insert(Nibbles::unpack([0x0, 0x0]), [42]),
+            //here we create a leaf from nibbles, not from bytes as above
+            Node::leaf([0x0, 0x0, 0x0, 0x0], [42])
         );
     }
 

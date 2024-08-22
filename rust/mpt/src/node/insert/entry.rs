@@ -24,8 +24,7 @@ where
 impl From<Entry> for Node {
     fn from(Entry { key, value }: Entry) -> Self {
         if key.is_empty() {
-            let children = EMPTY_CHILDREN.clone();
-            Node::Branch(children, Some(value))
+            Node::Branch(EMPTY_CHILDREN.clone(), Some(value))
         } else {
             Node::leaf(&*key, value)
         }
@@ -43,7 +42,7 @@ impl Entry {
 }
 
 #[cfg(test)]
-mod tests {
+mod split_first_key_nibble {
     use super::*;
 
     #[test]

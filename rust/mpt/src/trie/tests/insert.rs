@@ -30,10 +30,10 @@ pub fn duplicate_key() {
 }
 
 #[test]
-pub fn identical_first_nibble() {
+pub fn different_length_nibbles() {
     let mut mpt = MerkleTrie(Node::Null);
-    mpt.insert([0x1], [42]);
+    mpt.insert([0x0], [42]);
     mpt.insert([0x10], [43]);
-    assert_eq!(mpt.get([0x1]), Some(&[42][..]));
+    assert_eq!(mpt.get([0x0]), Some(&[42][..]));
     assert_eq!(mpt.get([0x10]), Some(&[43][..]));
 }
