@@ -1,17 +1,17 @@
 import {type CallContext, type CallParams, v_call, VCallResponse} from "./v_call";
 import {
-  type Abi, AbiStateMutability,
+  type Abi,
+  AbiStateMutability,
   type Address,
   ContractFunctionArgs,
-  ContractFunctionName, decodeAbiParameters, decodeFunctionResult,
-  encodeAbiParameters,
+  ContractFunctionName,
+  decodeAbiParameters,
+  decodeFunctionResult,
   encodeFunctionData,
-  type Hex, parseAbiParameter
+  type Hex,
+  parseAbiParameter
 } from "viem";
 import {sepolia} from "viem/chains";
-import VerifierAbi from "../../../contracts/out/IProofVerifier.sol/IProofVerifier";
-
-import {AbiInternalType} from "abitype";
 import {client} from "./helpers.ts";
 
 type Bytecode = {
