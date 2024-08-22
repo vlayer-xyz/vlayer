@@ -1,4 +1,4 @@
-use std::string::FromUtf8Error;
+use std::{str::Utf8Error, string::FromUtf8Error};
 
 use httparse::{Header, Request, EMPTY_HEADER};
 use tlsn_core::{
@@ -22,6 +22,9 @@ pub enum VerificationError {
     #[error("From utf8 error: {0}")]
     FromUtf8(#[from] FromUtf8Error),
 
+    #[error("utf8 error: {0}")]
+    Utf8(#[from] Utf8Error),
+
     #[error("Httparse error: {0}")]
     Httparse(#[from] httparse::Error),
 
@@ -43,8 +46,7 @@ pub fn verify_and_parse(web_proof: WebProof) -> Result<Web, VerificationError> {
     let mut req = Request::new(&mut headers);
     req.parse(sent_string.as_bytes())?;
 
-    let host_value =
-        find_value(&headers, "host").ok_or(VerificationError::NoHeaderFound("host".to_string()))?;
+    let host_value = find_value(&headers, "host")?;
 
     Ok(Web {
         url: host_value,
@@ -77,11 +79,14 @@ fn extract_sent_recv_strings(
     Ok((sent_string, recv_string))
 }
 
-fn find_value(headers: &[Header], name: &str) -> Option<String> {
+fn find_value(headers: &[Header], name: &str) -> Result<String, VerificationError> {
     let header = headers.iter().find(|header| header.name == name);
     match header {
-        Some(header) => Some(std::str::from_utf8(header.value).unwrap().to_string()),
-        None => None,
+        Some(header) => match std::str::from_utf8(header.value) {
+            Ok(value) => Ok(value.to_string()),
+            Err(e) => Err(VerificationError::Utf8(e)),
+        },
+        None => Err(VerificationError::NoHeaderFound(name.to_string())),
     }
 }
 
