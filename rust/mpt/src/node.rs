@@ -5,6 +5,7 @@ use std::fmt::Debug;
 use crate::key_nibbles::KeyNibbles;
 
 pub mod constructors;
+pub mod insert;
 pub mod rlp;
 pub mod size;
 
