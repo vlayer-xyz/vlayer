@@ -6,7 +6,7 @@ use tlsn_core::{
     RedactedTranscript, ServerName,
 };
 
-use crate::{types::WebProof, web_proof_parser::ParserError};
+use crate::types::WebProof;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -19,9 +19,6 @@ pub enum VerificationError {
 
     #[error("From utf8 error: {0}")]
     FromUtf8(#[from] FromUtf8Error),
-
-    #[error("Parse error: {0}")]
-    Parser(#[from] ParserError),
 
     #[error("Httparse error: {0}")]
     Httparse(#[from] httparse::Error),
@@ -41,7 +38,7 @@ pub fn verify_and_parse(web_proof: WebProof) -> Result<Web, VerificationError> {
     let mut req = Request::new(&mut headers);
     req.parse(sent_string.as_bytes())?;
 
-    let host_value = find_value(&headers, "host").expect("Host header not found");
+    let host_value = find_value(req.headers, "host").expect("Host header not found");
 
     Ok(Web {
         url: host_value,
