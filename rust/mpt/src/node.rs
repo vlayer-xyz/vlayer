@@ -7,6 +7,7 @@ use crate::key_nibbles::KeyNibbles;
 pub mod constructors;
 pub mod rlp;
 pub mod size;
+pub mod insert;
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub(crate) enum Node {
