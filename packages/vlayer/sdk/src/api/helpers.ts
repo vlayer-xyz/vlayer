@@ -50,7 +50,7 @@ export async function deployContract(contractSpec: ContractSpec, args: any[] = [
     throw new Error(`Contract deployment failed with status: ${receipt.status}`);
   }
 
-  return receipt.contractAddress;
+  return receipt.contractAddress as Address;
 }
 
 

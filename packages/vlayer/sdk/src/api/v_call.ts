@@ -1,6 +1,7 @@
 import {Hex, type Address} from "viem";
 
 type Calldata = string;
+export type Json = string | number | boolean | null | { [key: string]: Json } | Json[];
 
 export type CallParams = {
   to: Address,

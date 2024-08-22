@@ -1,0 +1,16 @@
+name: Lint TS examples and sdk
+on: 
+  pull_request:
+    paths:
+      - 'examples/**'
+      - 'packages/**'
+    branches:
+      - '**'  # Run on pull requests to any branch
+jobs:
+  ts-lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: oven-sh/setup-bun@v2      
+    - uses: actions/checkout@v2
+    - name: Run ESLint
+      run: bash/lint-ts.sh
