@@ -2,8 +2,14 @@
   "name": "@vlayer/sdk",
   "type": "module",
   "module": "src/index.ts",
+  "scripts": {
+    "build": "npm run gen:types",
+    "gen:types": "sh ../bash/build_ts_types.sh"
+  },
   "devDependencies": {
-    "@types/bun": "latest"
+    "@types/bun": "latest",
+    "@wagmi/cli": "^2.1.15",
+    "abitype": "^1.0.6"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
