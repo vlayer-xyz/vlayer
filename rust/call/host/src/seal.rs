@@ -1,5 +1,6 @@
 use alloy_primitives::FixedBytes;
 use risc0_zkvm::{
+    sha::Digestible,
     FakeReceipt, Groth16Receipt,
     InnerReceipt::{self, Fake, Groth16},
     Receipt, ReceiptClaim,
@@ -32,8 +33,12 @@ impl EncodableReceipt {
         }
     }
 
-    fn extract_fake_seal(_inner: &FakeReceipt<ReceiptClaim>) -> Option<SealBytesT> {
-        Some([0; 256])
+    fn extract_fake_seal(inner: &FakeReceipt<ReceiptClaim>) -> Option<SealBytesT> {
+        let mut result = [0; GROTH16_PROOF_SIZE];
+        let mut seal: Vec<u8> = inner.claim.digest().as_bytes().into();
+        seal.resize(GROTH16_PROOF_SIZE, 0);
+        result.clone_from_slice(seal.as_slice());
+        Some(result)
     }
     fn extract_groth16_seal(inner: &Groth16Receipt<ReceiptClaim>) -> Option<SealBytesT> {
         let mut result = [0; GROTH16_PROOF_SIZE];
@@ -97,11 +102,13 @@ fn split_seal_into_bytes(bytes: SealBytesT) -> [FixedBytes<32>; 8] {
 mod test {
     use super::*;
 
+    use alloy_primitives::hex::{FromHex, ToHex};
+    use alloy_primitives::{Address, Uint};
     use alloy_sol_types::{SolType, SolValue};
     use call_guest_wrapper::RISC0_CALL_GUEST_ID;
 
     use risc0_zkvm::sha::Digestible;
-    use risc0_zkvm::{Groth16Receipt, Groth16ReceiptVerifierParameters, ReceiptClaim};
+    use risc0_zkvm::{Groth16Receipt, Groth16ReceiptVerifierParameters, Journal, ReceiptClaim};
 
     const ETH_WORD_SIZE: usize = 32;
     const SEAL_ENCODING_SIZE: usize = GROTH16_PROOF_SIZE + ETH_WORD_SIZE;
@@ -109,7 +116,14 @@ mod test {
     const INNER_SEAL: [u8; GROTH16_PROOF_SIZE] = [1; GROTH16_PROOF_SIZE];
 
     fn mock_journal() -> Vec<u8> {
-        Vec::<u8>::default()
+        let execution_commitment = call_engine::ExecutionCommitment {
+            proverContractAddress: Address::from_hex("0x0000000000000000000000000000000000000001")
+                .unwrap(),
+            functionSelector: FixedBytes::new([1, 2, 3, 4]),
+            settleBlockNumber: Uint::<256, 4>::from(1),
+            settleBlockHash: FixedBytes::new([0; 32]),
+        };
+        execution_commitment.abi_encode()
     }
 
     fn mock_groth16_receipt() -> Receipt {
@@ -129,7 +143,6 @@ mod test {
             RISC0_CALL_GUEST_ID,
             journal.clone(),
         ));
-
         Receipt::new(Fake(inner), journal)
     }
 
@@ -143,10 +156,6 @@ mod test {
         let receipt: EncodableReceipt = mock_groth16_receipt().into();
         let seal: Seal = receipt.try_into().unwrap();
 
-        // ABI  ENCODED SEAL structure
-        // |      SEAL LHV       |      PADDING     |      SEAL RHV        |     PADDING     |     PADDING     | PROOF MODE |
-        // |0..................17|18..............31|32..................49|50.............63|64.............95|     96     |
-
         let mut expected_encoding = vec![1; 256];
 
         expected_encoding.extend_from_slice(ProofMode::GROTH16.abi_encode().as_slice());
@@ -154,24 +163,12 @@ mod test {
         assert_eq!(expected_encoding, seal.abi_encode().as_slice());
     }
 
-    // #[test]
-    // fn receipt_into_seal_conversion_splits_inner_seal() {
-    //     let receipt: EncodableReceipt = mock_groth16_receipt().into();
-    //     let seal: Seal = receipt.try_into().unwrap();
-
-    //     let lhv = seal.lhv.0;
-    //     let rhv = &(seal.rhv.0[..HALF_SEAL_SIZE]);
-
-    //     assert_eq!(&INNER_SEAL[0..HALF_SEAL_SIZE], lhv);
-    //     assert_eq!(&INNER_SEAL[HALF_SEAL_SIZE..], rhv);
-    // }
-
     #[test]
     fn seal_encodes_proof_mode() {
-        let groth16_receipt: EncodableReceipt = mock_groth16_receipt().into();
+        let groth16_receipt: EncodableReceipt = mock_fake_receipt().into();
         let groth16_seal: Seal = groth16_receipt.try_into().unwrap();
 
-        assert_eq!(ProofMode::GROTH16, groth16_seal.mode);
+        assert_eq!(ProofMode::FAKE, groth16_seal.mode);
     }
 
     mod encodable_receipt {
