@@ -8,7 +8,7 @@ use crate::{
     contract_runner::ContractRunner, filter::FilterArgs, filter::ProjectPathsAwareFilter,
     summary::TestSummaryReporter, test_executor::TestExecutor,
 };
-use call_engine::config::TESTING_CHAIN_ID;
+use call_engine::config::TEST_CHAIN_ID_1;
 use call_engine::inspector::{TRAVEL_CONTRACT_ADDR, TRAVEL_CONTRACT_HASH};
 use clap::Parser;
 use color_eyre::eyre::{bail, Result};
@@ -259,7 +259,7 @@ impl TestArgs {
             ));
         }
 
-        evm_opts.env.chain_id = Some(TESTING_CHAIN_ID);
+        evm_opts.env.chain_id = Some(TEST_CHAIN_ID_1);
         Ok(())
     }
 

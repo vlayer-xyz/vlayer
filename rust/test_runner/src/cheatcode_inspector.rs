@@ -16,7 +16,7 @@ use foundry_evm::revm::{Database, EvmContext, Inspector};
 use crate::cheatcodes::{callProverCall, getProofCall, CHEATCODE_CALL_ADDR};
 use crate::providers::pending_state_provider::PendingStateProviderFactory;
 use crate::providers::test_provider::{TestProvider, TestProviderFactory};
-use call_engine::config::TESTING_CHAIN_ID;
+use call_engine::config::TEST_CHAIN_ID_1;
 
 #[derive(Default)]
 pub struct CheatcodeInspector {
@@ -120,7 +120,7 @@ fn create_host(
         TestProviderFactory::new(pending_state_provider_factory, rpc_endpoints.clone()),
         HostConfig {
             rpc_urls: Default::default(),
-            start_chain_id: TESTING_CHAIN_ID,
+            start_chain_id: TEST_CHAIN_ID_1,
         },
     )
     .expect("Failed to create host")

@@ -1,5 +1,5 @@
 use alloy_primitives::ChainId;
-use call_engine::config::{MAINNET_ID, SEPOLIA_ID};
+use call_engine::config::{TEST_CHAIN_ID_1, TEST_CHAIN_ID_2};
 use serde::{Deserialize, Serialize};
 use server_utils::ProofMode;
 use std::collections::HashMap;
@@ -17,8 +17,8 @@ impl Default for ServerConfig {
         let anvil2_url = "http://localhost:8546";
         Self {
             rpc_urls: HashMap::from([
-                (SEPOLIA_ID, anvil1_url.to_string()),
-                (MAINNET_ID, anvil2_url.to_string()),
+                (TEST_CHAIN_ID_1, anvil1_url.to_string()),
+                (TEST_CHAIN_ID_2, anvil2_url.to_string()),
             ]),
             port: 3000,
             proof_mode: ProofMode::Groth16,
