@@ -1,4 +1,4 @@
-use alloy_primitives::{b256, FixedBytes};
+use alloy_primitives::{keccak256, FixedBytes, B256};
 use alloy_sol_types::SolCall;
 use call_engine::io::{Call, HostOutput};
 use call_engine::utils::evm_call::{
@@ -88,9 +88,7 @@ impl CheatcodeInspector {
 
     fn host_output_into_proof(host_output: &HostOutput) -> Proof {
         let mut commitment = host_output.guest_output.execution_commitment.clone();
-        // For now we hardcode the settle block hash.
-        commitment.settleBlockHash =
-            b256!("c89efdaa54c0f20c7adf612882df0950f5a951637e0307cdcb4c672f298b8bc6");
+        commitment.settleBlockHash = Self::forge_block_hash(commitment.settleBlockNumber);
 
         Proof {
             seal: Seal {
@@ -103,6 +101,10 @@ impl CheatcodeInspector {
             length: U256::ZERO,
             commitment,
         }
+    }
+
+    fn forge_block_hash(block_number: U256) -> B256 {
+        keccak256(block_number.to_string())
     }
 }
 
@@ -122,4 +124,21 @@ fn create_host(
         },
     )
     .expect("Failed to create host")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_forge_block_hash_is_hash_of_block_number_as_string() {
+        assert_eq!(
+            CheatcodeInspector::forge_block_hash(U256::from(1)),
+            keccak256("1")
+        );
+        assert_eq!(
+            CheatcodeInspector::forge_block_hash(U256::from(12345)),
+            keccak256("12345")
+        );
+    }
 }
