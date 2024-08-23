@@ -32,7 +32,7 @@ pub(crate) struct TestHelper {
 }
 
 impl TestHelper {
-    pub(crate) async fn new() -> Self {
+    pub(crate) async fn create() -> Self {
         let anvil = setup_anvil().await;
         let client = setup_client(&anvil).await;
         let contract = deploy_test_contract(client).await;
