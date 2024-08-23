@@ -12,6 +12,8 @@ use call_engine::{ProofMode, Seal};
 const GROTH16_PROOF_SIZE: usize = 256;
 const SEAL_BYTES_SIZE: usize = GROTH16_PROOF_SIZE;
 
+const FAKE_VERIFIER_SELECTOR: [u8; 4] = [0xde, 0xaf, 0xbe, 0xef]; // Should align with constant in FakeProofVerifier.sol
+
 type SealBytesT = [u8; SEAL_BYTES_SIZE];
 
 pub struct EncodableReceipt(InnerReceipt);
@@ -35,11 +37,17 @@ impl EncodableReceipt {
 
     fn extract_fake_seal(inner: &FakeReceipt<ReceiptClaim>) -> Option<SealBytesT> {
         let mut result = [0; GROTH16_PROOF_SIZE];
-        let mut seal: Vec<u8> = inner.claim.digest().as_bytes().into();
+        let mut seal_suffix: Vec<u8> = inner.claim.digest().as_bytes().into();
+
+        let mut seal: Vec<u8> = FAKE_VERIFIER_SELECTOR.to_vec();
+        seal.append(&mut seal_suffix);
+
         seal.resize(GROTH16_PROOF_SIZE, 0);
         result.clone_from_slice(seal.as_slice());
+
         Some(result)
     }
+
     fn extract_groth16_seal(inner: &Groth16Receipt<ReceiptClaim>) -> Option<SealBytesT> {
         let mut result = [0; GROTH16_PROOF_SIZE];
         let bytes = &inner.seal;
@@ -102,18 +110,18 @@ fn split_seal_into_bytes(bytes: SealBytesT) -> [FixedBytes<32>; 8] {
 mod test {
     use super::*;
 
-    use alloy_primitives::hex::{FromHex, ToHex};
+    use alloy_primitives::hex::FromHex;
     use alloy_primitives::{Address, Uint};
     use alloy_sol_types::{SolType, SolValue};
     use call_guest_wrapper::RISC0_CALL_GUEST_ID;
 
     use risc0_zkvm::sha::Digestible;
-    use risc0_zkvm::{Groth16Receipt, Groth16ReceiptVerifierParameters, Journal, ReceiptClaim};
+    use risc0_zkvm::{Groth16Receipt, Groth16ReceiptVerifierParameters, ReceiptClaim};
 
     const ETH_WORD_SIZE: usize = 32;
     const SEAL_ENCODING_SIZE: usize = GROTH16_PROOF_SIZE + ETH_WORD_SIZE;
 
-    const INNER_SEAL: [u8; GROTH16_PROOF_SIZE] = [1; GROTH16_PROOF_SIZE];
+    const GROTH16_MOCK_SEAL: [u8; GROTH16_PROOF_SIZE] = [1; GROTH16_PROOF_SIZE];
 
     fn mock_journal() -> Vec<u8> {
         let execution_commitment = call_engine::ExecutionCommitment {
@@ -129,7 +137,7 @@ mod test {
     fn mock_groth16_receipt() -> Receipt {
         let journal = mock_journal();
         let inner = Groth16Receipt::<ReceiptClaim>::new(
-            INNER_SEAL.into(),
+            GROTH16_MOCK_SEAL.into(),
             ReceiptClaim::ok(RISC0_CALL_GUEST_ID, journal.clone()).into(),
             Groth16ReceiptVerifierParameters::default().digest(),
         );
@@ -143,6 +151,7 @@ mod test {
             RISC0_CALL_GUEST_ID,
             journal.clone(),
         ));
+
         Receipt::new(Fake(inner), journal)
     }
 
@@ -164,11 +173,28 @@ mod test {
     }
 
     #[test]
-    fn seal_encodes_proof_mode() {
-        let groth16_receipt: EncodableReceipt = mock_fake_receipt().into();
-        let groth16_seal: Seal = groth16_receipt.try_into().unwrap();
+    fn can_encode_fake_seal_into_abi() {
+        let receipt: EncodableReceipt = mock_fake_receipt().into();
+        let seal: Seal = receipt.try_into().unwrap();
 
-        assert_eq!(ProofMode::FAKE, groth16_seal.mode);
+        let claim: ReceiptClaim = ReceiptClaim::ok(RISC0_CALL_GUEST_ID, mock_journal());
+        let mut expected_suffix: Vec<u8> = claim.digest().as_bytes().into();
+
+        let mut expected_encoding = FAKE_VERIFIER_SELECTOR.to_vec();
+
+        expected_encoding.append(&mut expected_suffix);
+        expected_encoding.resize(256, 0);
+        expected_encoding.extend_from_slice(ProofMode::FAKE.abi_encode().as_slice());
+
+        assert_eq!(expected_encoding, seal.abi_encode().as_slice());
+    }
+
+    #[test]
+    fn seal_encodes_proof_mode() {
+        let receipt: EncodableReceipt = mock_fake_receipt().into();
+        let seal: Seal = receipt.try_into().unwrap();
+
+        assert_eq!(ProofMode::FAKE, seal.mode);
     }
 
     mod encodable_receipt {
