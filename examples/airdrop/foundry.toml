@@ -5,4 +5,4 @@ libs = ["lib", "../../contracts/lib", "../../contracts/src", "../../rust/target"
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
 [rpc_endpoints]
-mainnet = "https://mainnet.infura.io/v3/e4b66244e61a4149af62215a6d907226"
+mainnet = "https://rpc.flashbots.net"
