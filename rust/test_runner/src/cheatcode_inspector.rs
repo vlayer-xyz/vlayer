@@ -7,7 +7,6 @@ use call_engine::utils::evm_call::{
 use call_engine::{Proof, ProofMode, Seal};
 use call_host::host::config::HostConfig;
 use call_host::host::Host;
-use forge::revm::JournaledState;
 use foundry_config::RpcEndpoints;
 use foundry_evm::revm::interpreter::{CallInputs, CallOutcome};
 use foundry_evm::revm::primitives::U256;
@@ -71,7 +70,7 @@ impl CheatcodeInspector {
         context: &&mut EvmContext<DB>,
         inputs: &mut CallInputs,
     ) -> CallOutcome {
-        let host = create_host(&context.journaled_state, &self.rpc_endpoints);
+        let host = create_host(&context, &self.rpc_endpoints);
         let call_result = host.run(Call {
             to: inputs.target_address,
             data: inputs.input.clone().into(),
@@ -89,7 +88,6 @@ impl CheatcodeInspector {
     fn host_output_into_proof(host_output: &HostOutput) -> Proof {
         let mut commitment = host_output.guest_output.execution_commitment.clone();
         commitment.settleBlockHash = Self::forge_block_hash(commitment.settleBlockNumber);
-
         Proof {
             seal: Seal {
                 lhv: FixedBytes::<18>::new([0; 18]),
@@ -108,12 +106,13 @@ impl CheatcodeInspector {
     }
 }
 
-fn create_host(
-    journaled_state: &JournaledState,
+fn create_host<DB: Database>(
+    ctx: &EvmContext<DB>,
     rpc_endpoints: &RpcEndpoints,
 ) -> Host<TestProvider> {
     let pending_state_provider_factory = PendingStateProviderFactory {
-        state: journaled_state.state.clone(),
+        block_number: ctx.env.block.number.try_into().unwrap(),
+        state: ctx.journaled_state.state.clone(),
     };
 
     Host::try_new_with_provider_factory(

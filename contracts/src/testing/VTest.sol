@@ -18,6 +18,7 @@ contract VTest is Test {
     }
 
     function getProof() internal returns (Proof memory) {
+        vm.roll(block.number + 1);
         return ICheatCodes(CHEATCODES).getProof();
     }
 }
