@@ -1,7 +1,9 @@
+use alloy_primitives::hex::ToHexExt;
 use axum::body::Body;
 use axum_jrpc::Value;
-use ethers::types::U256;
 use http_body_util::BodyExt;
+
+use ethers::types::Bytes;
 
 pub async fn body_to_string(body: Body) -> anyhow::Result<String> {
     let body_bytes = body.collect().await?.to_bytes();
@@ -13,14 +15,8 @@ pub async fn body_to_json(body: Body) -> Value {
     serde_json::from_slice(&body_bytes).unwrap()
 }
 
-pub fn bool_to_vec32(value: bool) -> Vec<u8> {
-    let mut bytes = [0u8; 32];
-    bytes[31] = value as u8;
-    bytes.to_vec()
-}
-
-pub fn u256_to_vec32(value: U256) -> Vec<u8> {
-    let mut bytes = [0u8; 32];
-    value.to_big_endian(&mut bytes);
-    bytes.to_vec()
+pub fn function_selector(calldata: Bytes) -> String {
+    let calldata_bytes = calldata.to_vec();
+    let selector_bytes = &calldata_bytes.as_slice()[..4];
+    selector_bytes.encode_hex_with_prefix()
 }

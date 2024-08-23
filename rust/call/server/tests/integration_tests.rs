@@ -53,11 +53,12 @@ mod server_tests {
 
     mod v_call {
         use crate::test_helpers::WebProof;
-        use server_utils::{bool_to_vec32, u256_to_vec32};
+        use assert_json_diff::assert_json_include;
+        use server_utils::function_selector;
         use web_proof::fixtures::{load_web_proof_fixture, NOTARY_PUB_KEY_PEM_EXAMPLE};
 
         use super::*;
-        use ethers::types::U256;
+        use ethers::{abi::AbiEncode, types::Uint8, types::U256};
 
         #[tokio::test]
         async fn field_validation_error() -> anyhow::Result<()> {
@@ -123,24 +124,19 @@ mod server_tests {
             let response = helper.post("/", &req).await?;
 
             assert_eq!(StatusCode::OK, response.status());
-            assert_eq!(
-                json!({
-                    "jsonrpc": "2.0",
-                    "id": 1,
-                    "result": {
+            assert_json_include!(
+                expected: json!({
+                        "jsonrpc": "2.0",
+                        "id": 1,
                         "result": {
-                            "evm_call_result": u256_to_vec32(U256::from(3)),
-                            "function_selector": call_data.to_string()[0..10],
-                            "prover_contract_address": helper.contract().address(),
-                            "seal": [
-                                0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-                                0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-                                0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1
-                            ],
+                            "result": {
+                                "evm_call_result": U256::from(3).encode_hex(),
+                                "function_selector": function_selector(call_data),
+                                "prover_contract_address": helper.contract().address(),
+                            }
                         }
-                    }
-                }),
-                body_to_json(response.into_body()).await
+                    }),
+                actual: body_to_json(response.into_body()).await,
             );
 
             Ok(())
@@ -179,24 +175,19 @@ mod server_tests {
             let response = helper.post("/", &req).await?;
 
             assert_eq!(StatusCode::OK, response.status());
-            assert_eq!(
-                json!({
-                    "jsonrpc": "2.0",
-                    "id": 1,
-                    "result": {
+            assert_json_include!(
+                expected: json!({
+                        "jsonrpc": "2.0",
+                        "id": 1,
                         "result": {
-                            "evm_call_result": bool_to_vec32(true),
-                            "function_selector": call_data.to_string()[0..10],
-                            "prover_contract_address": helper.contract().address(),
-                            "seal": [
-                                0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-                                0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-                                0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1
-                            ],
+                            "result": {
+                                "evm_call_result": Uint8::from(1).encode_hex(),
+                                "function_selector": function_selector(call_data),
+                                "prover_contract_address": helper.contract().address(),
+                            }
                         }
-                    }
-                }),
-                body_to_json(response.into_body()).await
+                    }),
+                actual: body_to_json(response.into_body()).await,
             );
 
             Ok(())
