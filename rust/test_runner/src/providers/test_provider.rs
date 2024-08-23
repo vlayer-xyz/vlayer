@@ -13,14 +13,14 @@ use std::collections::HashMap;
 
 use crate::providers::pending_state_provider::PendingStateProviderFactory;
 
+pub type ProviderError = <EthersProvider<EthersClient> as BlockingProvider>::Error;
+
 pub struct TestProvider {
-    provider: Box<
-        dyn BlockingProvider<Error = <EthersProvider<EthersClient> as BlockingProvider>::Error>,
-    >,
+    provider: Box<dyn BlockingProvider<Error = ProviderError>>,
 }
 
 impl BlockingProvider for TestProvider {
-    type Error = <EthersProvider<EthersClient> as BlockingProvider>::Error;
+    type Error = ProviderError;
 
     fn get_balance(&self, address: Address, block: BlockNumber) -> Result<U256, Self::Error> {
         self.provider.get_balance(address, block)

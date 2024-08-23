@@ -10,9 +10,10 @@ use call_host::db::proof::ProofDb;
 use call_host::host::error::HostError;
 use call_host::proof::EIP1186Proof;
 use call_host::provider::factory::ProviderFactory;
-use call_host::provider::{BlockingProvider, EthersClient, EthersProvider};
+use call_host::provider::BlockingProvider;
 
 use crate::proof::{account_proof, prove_storage, storage_root};
+use crate::providers::test_provider::ProviderError;
 
 pub struct PendingStateProvider {
     state: EvmState,
@@ -45,7 +46,7 @@ impl PendingStateProvider {
 }
 
 impl BlockingProvider for PendingStateProvider {
-    type Error = <EthersProvider<EthersClient> as BlockingProvider>::Error;
+    type Error = ProviderError;
 
     fn get_balance(&self, address: Address, _block: BlockNumber) -> Result<U256, Self::Error> {
         Ok(self.account(address).info.balance)

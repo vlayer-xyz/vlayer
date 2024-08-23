@@ -820,7 +820,7 @@ fn run_test_suite(
         contract,
         libs_to_deploy: &runner.libs_to_deploy,
         // MODIFICATION: Replace Executor with TestExecutor
-        executor: TestExecutor::new(executor, runner.config.rpc_endpoints.clone()),
+        executor: TestExecutor::new(executor, &runner.config.rpc_endpoints),
         revert_decoder: &runner.revert_decoder,
         initial_balance: runner.evm_opts.initial_balance,
         sender: runner.sender.unwrap_or_default(),

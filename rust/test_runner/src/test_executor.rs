@@ -26,13 +26,13 @@ use crate::cheatcode_inspector::CheatcodeInspector;
 use crate::composite_inspector::CompositeInspector;
 
 /// MODIFICATION: This struct is a wrapper around the Executor struct from foundry_evm that adds our inspector that will be passed to the backend
-pub struct TestExecutor {
+pub struct TestExecutor<'a> {
     pub inner: Executor,
-    pub rpc_endpoints: RpcEndpoints,
+    pub rpc_endpoints: &'a RpcEndpoints,
 }
 
 /// MODIFICATION: Deref and DerefMut added to pass calls to the inner Executor
-impl Deref for TestExecutor {
+impl<'a> Deref for TestExecutor<'a> {
     type Target = Executor;
 
     fn deref(&self) -> &Self::Target {
@@ -40,15 +40,15 @@ impl Deref for TestExecutor {
     }
 }
 
-impl DerefMut for TestExecutor {
+impl<'a> DerefMut for TestExecutor<'a> {
     fn deref_mut(&mut self) -> &mut Self::Target {
         &mut self.inner
     }
 }
 
 // MODIFICATION: Only keep functions relevant to test execution
-impl TestExecutor {
-    pub fn new(inner: Executor, rpc_endpoints: RpcEndpoints) -> Self {
+impl<'a> TestExecutor<'a> {
+    pub fn new(inner: Executor, rpc_endpoints: &'a RpcEndpoints) -> Self {
         Self {
             inner,
             rpc_endpoints,

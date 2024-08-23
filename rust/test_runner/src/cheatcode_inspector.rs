@@ -28,9 +28,8 @@ pub struct CheatcodeInspector {
 impl CheatcodeInspector {
     pub fn new(rpc_endpoints: RpcEndpoints) -> Self {
         Self {
-            should_start_proving: false,
-            previous_proof: None,
             rpc_endpoints,
+            ..Default::default()
         }
     }
 }

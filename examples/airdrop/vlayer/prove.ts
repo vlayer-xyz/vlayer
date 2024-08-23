@@ -6,7 +6,7 @@ const PROVER = "NftOwnershipProver";
 const FILE = path.join(__dirname, `../out/${PROVER}.sol/${PROVER}.json`)
 const PROVER_SPEC = await getContractSpec(FILE);
 const FUNCTION_NAME = 'main'
-const ARGS: any[] = ["0xaAa2DA255DF9Ee74C7075bCB6D81f97940908A5D"]
+const ARGS: any[] = ["0xaAa2DA255DF9Ee74C7075bCB6D81f97940908A5D"] // mainnet BAYC address
 
 console.log("Deploying prover")
 let prover: Address = await helpers.deployContract(PROVER_SPEC);
