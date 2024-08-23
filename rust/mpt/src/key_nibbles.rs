@@ -17,7 +17,9 @@ impl KeyNibbles {
     }
 
     pub fn push_front(&self, nibble: u8) -> Self {
-        KeyNibbles(self.0.join(&Nibbles::from_vec(vec![nibble])))
+        let mut nibbles = vec![nibble];
+        nibbles.extend_from_slice(self.0.as_ref());
+        KeyNibbles(Nibbles::from_vec(nibbles))
     }
 
     fn from_nibbles(nibbles: Nibbles) -> Self {
@@ -55,5 +57,26 @@ mod new {
     #[should_panic(expected = "KeyNibbles cannot be empty")]
     fn empty() {
         let _ = KeyNibbles::from([]);
+    }
+}
+
+#[cfg(test)]
+mod push_front {
+    use super::*;
+
+    #[test]
+    fn push_front_single_nibble() {
+        let original: KeyNibbles = [0x1, 0x2].into();
+        let result = original.push_front(0x0);
+        let expected: KeyNibbles = [0x0, 0x1, 0x2].into();
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn push_front_multiple_times() {
+        let original: KeyNibbles = [0x2].into();
+        let result = original.push_front(0x1).push_front(0x0);
+        let expected: KeyNibbles = [0x0, 0x1, 0x2].into();
+        assert_eq!(result, expected);
     }
 }

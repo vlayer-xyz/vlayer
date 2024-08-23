@@ -4,22 +4,22 @@ use super::entry::Entry;
 
 pub(crate) fn from_two_entries(lhs: Entry, rhs: Entry) -> Node {
     if lhs.key.len() > rhs.key.len() {
-        from_two_ordered_entries(rhs, lhs)
+        from_two_ordered_entries(rhs, lhs).unwrap()
     } else {
-        from_two_ordered_entries(lhs, rhs)
+        from_two_ordered_entries(lhs, rhs).unwrap()
     }
 }
 
-fn from_two_ordered_entries(lhs: Entry, rhs: Entry) -> Node {
+fn from_two_ordered_entries(lhs: Entry, rhs: Entry) -> Result<Node, String> {
     if lhs.key == rhs.key {
-        panic!("Key already exists");
+        Err("Key already exists".to_string())
     } else {
         if lhs.key.is_empty() {
             let (rhs_first_nibble, remaining_rhs) = rhs.split_first_key_nibble();
             let mut children = EMPTY_CHILDREN.clone();
             children[rhs_first_nibble as usize] = Some(Box::new(remaining_rhs.into()));
 
-            return Node::Branch(children, Some(lhs.value));
+            return Ok(Node::Branch(children, Some(lhs.value)));
         }
         let (lhs_first_nibble, remaining_lhs) = lhs.split_first_key_nibble();
         let (rhs_first_nibble, remaining_rhs) = rhs.split_first_key_nibble();
@@ -29,32 +29,34 @@ fn from_two_ordered_entries(lhs: Entry, rhs: Entry) -> Node {
             children[lhs_first_nibble as usize] = Some(Box::new(remaining_lhs.into()));
             children[rhs_first_nibble as usize] = Some(Box::new(remaining_rhs.into()));
 
-            return Node::Branch(children, None);
+            return Ok(Node::Branch(children, None));
         }
 
-        let node = from_two_ordered_entries(remaining_lhs, remaining_rhs);
-        match node {
+        let node = from_two_ordered_entries(remaining_lhs, remaining_rhs)?;
+
+        let result_node = match node {
             Node::Branch(_, _) => Node::extension([lhs_first_nibble], node),
             Node::Extension(nibbles, child) => {
                 Node::Extension(nibbles.push_front(lhs_first_nibble), child)
             }
-            _ => unreachable!("from_two_ordered_entries returns only Branch or Extension"),
-        }
+            _ => unreachable!("from_two_ordered_entries should return only Branch or Extension"),
+        };
+
+        Ok(result_node)
     }
 }
 
 #[cfg(test)]
 mod tests {
-    use core::panic;
-
     use super::*;
 
     #[test]
-    #[should_panic(expected = "Key already exists")]
     fn duplicate_key() {
         let old_entry: Entry = ([0], [42]).into();
         let entry: Entry = ([0], [43]).into();
-        from_two_entries(old_entry, entry);
+        let result = from_two_ordered_entries(old_entry, entry);
+        assert!(result.is_err(), "Expected an error, but got Ok");
+        assert_eq!(result.unwrap_err(), "Key already exists");
     }
 
     #[test]
@@ -104,8 +106,8 @@ mod tests {
 
     #[test]
     fn long_common_prefix() {
-        let first_entry: Entry = ([0x0, 0x0, 0x0], [42]).into();
-        let second_entry: Entry = ([0x0, 0x0, 0x1], [43]).into();
+        let first_entry: Entry = ([0x0, 0x1, 0x0], [42]).into();
+        let second_entry: Entry = ([0x0, 0x1, 0x1], [43]).into();
 
         let node = from_two_entries(first_entry, second_entry);
 
@@ -113,13 +115,13 @@ mod tests {
         children[0] = Some(Box::new(Node::branch(EMPTY_CHILDREN.clone(), Some([42]))));
         children[1] = Some(Box::new(Node::branch(EMPTY_CHILDREN.clone(), Some([43]))));
         let expected_node_child = Node::Branch(children, None);
-        let expected_node = Node::extension([0x0, 0x0], expected_node_child);
+        let expected_node = Node::extension([0x0, 0x1], expected_node_child);
 
         assert_eq!(node, expected_node);
     }
 
     #[test]
-    fn common_prefix_with_long_different_long_suffix() {
+    fn common_prefix_with_different_long_suffix() {
         let first_entry: Entry = ([0x0, 0x0, 0x1], [42]).into();
         let second_entry: Entry = ([0x0, 0x1, 0x0], [43]).into();
 
