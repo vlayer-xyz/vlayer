@@ -19,6 +19,9 @@
     "composite": true,
     "types": [
       "bun" // add Bun global
-    ]
+    ],
+    "paths": {
+      "@contracts/*": ["../../../contracts/out/*"]
+    }
   }
 }
