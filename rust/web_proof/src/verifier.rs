@@ -45,12 +45,12 @@ pub fn verify_and_parse(web_proof: WebProof) -> Result<Web, VerificationError> {
     let mut req_headers = [EMPTY_HEADER; MAX_HEADERS_NUMBER];
     let req = parse_tlsn_http_request(&sent_string, &mut req_headers)?;
 
-    let host_value = find_value(req.headers, "host")?;
+    let url = req
+        .path
+        .ok_or(VerificationError::NoHeaderFound("path".to_string()))?
+        .to_string();
 
-    Ok(Web {
-        url: host_value,
-        server_name,
-    })
+    Ok(Web { url, server_name })
 }
 
 fn verify_proof(
@@ -96,7 +96,7 @@ fn _parse_tlsn_http_response<'a>(
     Ok(res)
 }
 
-fn find_value(headers: &[Header], name: &str) -> Result<String, VerificationError> {
+fn _find_value(headers: &[Header], name: &str) -> Result<String, VerificationError> {
     let header = headers.iter().find(|header| header.name == name);
     match header {
         Some(header) => match std::str::from_utf8(header.value) {
@@ -191,7 +191,7 @@ mod tests {
 
         let web = verify_and_parse(web_proof).unwrap();
 
-        assert_eq!(web.url, "api.x.com");
+        assert_eq!(web.url, "https://api.x.com/1.1/account/settings.json?include_ext_sharing_audiospaces_listening_data_with_followers=true&include_mention_filter=true&include_nsfw_user_flag=true&include_nsfw_admin_flag=true&include_ranked_timeline=true&include_alt_text_compose=true&ext=ssoConnections&include_country_code=true&include_ext_dm_nsfw_media_filter=true");
     }
 
     #[test]
