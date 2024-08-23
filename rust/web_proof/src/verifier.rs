@@ -9,7 +9,7 @@ use tlsn_core::{
 use crate::types::WebProof;
 use thiserror::Error;
 
-const HEADERS_AMOUNT: usize = 40;
+const MAX_HEADERS_NUMBER: usize = 40;
 
 #[derive(Error, Debug)]
 pub enum VerificationError {
@@ -42,11 +42,10 @@ pub fn verify_and_parse(web_proof: WebProof) -> Result<Web, VerificationError> {
     let (sent, recv) = verify_proof(web_proof)?;
     let (sent_string, _recv_string) = extract_sent_recv_strings((sent, recv))?;
 
-    let mut headers = [EMPTY_HEADER; HEADERS_AMOUNT];
-    let mut req = Request::new(&mut headers);
-    req.parse(sent_string.as_bytes())?;
+    let mut req_headers = [EMPTY_HEADER; MAX_HEADERS_NUMBER];
+    let req = parse_tlsn_http_output(&sent_string, &mut req_headers)?;
 
-    let host_value = find_value(&headers, "host")?;
+    let host_value = find_value(req.headers, "host")?;
 
     Ok(Web {
         url: host_value,
@@ -77,6 +76,15 @@ fn extract_sent_recv_strings(
     let recv_string = String::from_utf8(recv.data().to_vec())?;
 
     Ok((sent_string, recv_string))
+}
+
+fn parse_tlsn_http_output<'a>(
+    tlsn_http_output: &'a str,
+    headers: &'a mut [Header<'a>],
+) -> Result<Request<'a, 'a>, VerificationError> {
+    let mut req = Request::new(headers);
+    req.parse(tlsn_http_output.as_bytes())?;
+    Ok(req)
 }
 
 fn find_value(headers: &[Header], name: &str) -> Result<String, VerificationError> {
