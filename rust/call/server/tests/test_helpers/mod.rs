@@ -45,11 +45,7 @@ impl TestHelper {
         }
     }
 
-    pub(crate) async fn post<T: Serialize>(
-        &self,
-        url: &str,
-        body: &T,
-    ) -> anyhow::Result<Response<Body>> {
+    pub(crate) async fn post<T: Serialize>(&self, url: &str, body: &T) -> Response<Body> {
         let app = server(ServerConfig {
             rpc_urls: HashMap::from([(self.anvil.chain_id(), self.anvil.endpoint())]),
             port: 3000,
@@ -57,8 +53,9 @@ impl TestHelper {
         });
         let request = Request::post(url)
             .header(CONTENT_TYPE, APPLICATION_JSON.as_ref())
-            .body(Body::from(to_string(body)?))?;
-        Ok(app.oneshot(request).await?)
+            .body(Body::from(to_string(body).unwrap()))
+            .unwrap();
+        app.oneshot(request).await.unwrap()
     }
 }
 

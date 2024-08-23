@@ -3,9 +3,9 @@ use axum_jrpc::Value;
 use ethers::types::U256;
 use http_body_util::BodyExt;
 
-pub async fn body_to_string(body: Body) -> anyhow::Result<String> {
-    let body_bytes = body.collect().await?.to_bytes();
-    Ok(String::from_utf8(body_bytes.to_vec())?)
+pub async fn body_to_string(body: Body) -> String {
+    let body_bytes = body.collect().await.unwrap().to_bytes();
+    String::from_utf8(body_bytes.to_vec()).unwrap()
 }
 
 pub async fn body_to_json(body: Body) -> Value {
