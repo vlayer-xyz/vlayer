@@ -146,7 +146,10 @@ mod tests {
         let redacted_request = read_fixture("./testdata/redacted_sent_request.txt");
         let mut req_headers = [EMPTY_HEADER; MAX_HEADERS_NUMBER];
         let req = parse_tlsn_http_request(&redacted_request, &mut req_headers);
-        assert!(req.is_err());
+        assert_eq!(
+            req.unwrap_err().to_string(),
+            "Httparse error: invalid header name"
+        );
     }
 
     #[test]
