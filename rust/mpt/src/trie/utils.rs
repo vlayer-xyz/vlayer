@@ -68,12 +68,13 @@ mod parse_node {
 
 #[cfg(test)]
 mod resolve_trie {
-    use std::array::from_fn;
-
     use alloy_primitives::keccak256;
     use alloy_trie::HashMap;
 
-    use crate::{key_nibbles::KeyNibbles, node::Node};
+    use crate::{
+        key_nibbles::KeyNibbles,
+        node::{constructors::EMPTY_CHILDREN, Node},
+    };
 
     use super::resolve_trie;
 
@@ -130,10 +131,9 @@ mod resolve_trie {
 
     #[test]
     fn branch() {
-        let leaf = Node::Leaf([1].into(), [0].into());
+        let leaf = Node::leaf([1], [0]);
         let digest = keccak256(leaf.rlp_encoded());
-        let child = None;
-        let mut children: [_; 16] = from_fn(|_| child.clone());
+        let mut children = EMPTY_CHILDREN.clone();
         children[0] = Some(Box::new(Node::Digest(digest)));
         let branch = Node::Branch(children, None);
         let nodes_by_hash = HashMap::from([(digest, leaf.clone())]);
@@ -141,20 +141,19 @@ mod resolve_trie {
         let Node::Branch(children, None) = resolved_node else {
             panic!("expected branch, got {:?}", resolved_node);
         };
+
         assert_eq!(children[0], Some(Box::new(leaf)));
     }
 
     #[test]
     fn branch_with_value() {
-        let child = None;
-        let children: [_; 16] = from_fn(|_| child.clone());
-        let value = Some([42u8].into());
-        let branch = Node::Branch(children, value);
+        let branch = Node::branch(EMPTY_CHILDREN.clone(), Some([42u8]));
         let nodes_by_hash = HashMap::new();
         let resolved_node = resolve_trie(branch, &nodes_by_hash);
-        let Node::Branch(_children, Some(value)) = resolved_node else {
+        let Node::Branch(_, Some(value)) = resolved_node else {
             panic!("expected branch with value, got {:?}", resolved_node);
         };
+
         assert_eq!(value, [42u8].into());
     }
 }

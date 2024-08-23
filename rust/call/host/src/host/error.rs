@@ -13,7 +13,7 @@ pub enum HostError {
     #[error("Invalid input")]
     CreatingInput(String),
 
-    #[error("Engine error {0}")]
+    #[error("Engine error: {0}")]
     Engine(#[from] EngineError),
 
     #[error("Ethers provider error: {0}")]
@@ -51,4 +51,7 @@ pub enum HostError {
 
     #[error("Evm env factory error: {0}")]
     EvmEnvFactory(#[from] anyhow::Error),
+
+    #[error("Seal encoding error: {0}")]
+    SealEncodingError(String),
 }

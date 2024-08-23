@@ -1,3 +1,5 @@
+use std::sync::Arc;
+
 use alloy_primitives::ChainId;
 use revm::{
     db::WrapDatabaseRef,
@@ -8,6 +10,7 @@ use revm::{
 use thiserror::Error;
 use tracing::error;
 
+use crate::precompiles::VLAYER_PRECOMPILES;
 use crate::utils::evm_call::format_failed_call_result;
 use crate::{
     evm::env::{cached::CachedEvmEnv, location::ExecutionLocation},
@@ -15,11 +18,11 @@ use crate::{
     io::Call,
 };
 
-pub struct Engine<'a, D>
+pub struct Engine<'envs, D>
 where
     D: DatabaseRef,
 {
-    envs: &'a CachedEvmEnv<D>,
+    envs: &'envs CachedEvmEnv<D>,
 }
 
 #[derive(Error, Debug, PartialEq)]
@@ -40,16 +43,20 @@ pub enum EngineError {
     EvmEnv(String),
 }
 
-impl<'a, D> Engine<'a, D>
+impl<'envs, D> Engine<'envs, D>
 where
     D: DatabaseRef,
     D::Error: std::fmt::Debug,
 {
-    pub fn new(envs: &'a CachedEvmEnv<D>) -> Self {
+    pub fn new(envs: &'envs CachedEvmEnv<D>) -> Self {
         Self { envs }
     }
 
-    pub fn call(&'a self, tx: &Call, location: ExecutionLocation) -> Result<Vec<u8>, EngineError> {
+    pub fn call(
+        &'envs self,
+        tx: &Call,
+        location: ExecutionLocation,
+    ) -> Result<Vec<u8>, EngineError> {
         let env = self
             .envs
             .get(location)
@@ -61,6 +68,14 @@ where
             .with_external_context(inspector)
             .with_cfg_env_with_handler_cfg(env.cfg_env.clone())
             .with_tx_env(tx.clone().into())
+            .append_handler_register(|handler| {
+                let precompiles = handler.pre_execution.load_precompiles();
+                handler.pre_execution.load_precompiles = Arc::new(move || {
+                    let mut precompiles = precompiles.clone();
+                    precompiles.extend(VLAYER_PRECOMPILES);
+                    precompiles
+                });
+            })
             .append_handler_register(inspector_handle_register)
             .modify_block_env(|blk_env| env.header.fill_block_env(blk_env))
             .build();
@@ -68,8 +83,8 @@ where
         Self::transact(evm)
     }
 
-    fn transact(
-        mut evm: Evm<'_, TravelInspector<'a>, WrapDatabaseRef<&D>>,
+    fn transact<'env>(
+        mut evm: Evm<'env, TravelInspector<'env>, WrapDatabaseRef<&'env D>>,
     ) -> Result<Vec<u8>, EngineError> {
         let ResultAndState { result, .. } = evm
             .transact_preverified()

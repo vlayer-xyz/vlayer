@@ -16,7 +16,7 @@ contract WebProofProver is Prover {
 
     constructor() {}
 
-    function main(WebProof calldata webProof) public pure returns (bool) {
+    function main(WebProof calldata webProof) public view returns (bool) {
         bytes calldata web_proof_json = bytes(webProof.web_proof_json);
         require(web_proof_json[0] == "{", "Incorrect web proof");
         require(

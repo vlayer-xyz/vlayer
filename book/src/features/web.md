@@ -101,3 +101,15 @@ What exactly was going on in the snippet above?
 And that's it! 
 
 As you can see, Web Proofs can be useful for building dApps. 
+
+## Security Considerations
+vlayer retrieves web data and verifies it using the Transport Layer Security (TLS) protocol, which secures most modern encrypted connections on the Internet. Web Proofs ensures the authenticity of web data by extending the TLS protocol. A designated server, called a *Notary*, joins a TLS session between the client and server and can cryptographically certify its contents.
+
+From a privacy perspective, it is crucial that the *Notary* server never has access to the transcript of the connection.
+
+The web proof feature is based on the [TLSNotary](https://tlsnotary.org/) protocol.
+
+### Notary Trust Assumption
+A key disadvantage of using a *Notary* is the requirement to trust it. Since the *Notary* certifies incoming data, a malicious *Notary* could create fake proofs that are still validated by the *Verifier*.
+
+vlayer will publish a roadmap outlining how it will achieve a high level of security when using the *Notary* service.

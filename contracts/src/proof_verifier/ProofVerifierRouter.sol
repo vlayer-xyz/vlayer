@@ -11,16 +11,33 @@ contract ProofVerifierRouter is IProofVerifier {
     using SealLib for Seal;
 
     FakeProofVerifier public fakeProofVerifier = new FakeProofVerifier();
-    Groth16ProofVerifier public groth16ProofVerifier = new Groth16ProofVerifier();
+    Groth16ProofVerifier public groth16ProofVerifier =
+        new Groth16ProofVerifier();
 
-    function verify(Proof calldata proof, bytes32 journalHash, address expectedProver, bytes4 expectedSelector)
-        external
-        view
-    {
+    function guest_id() external view returns (bytes32) {
+        return groth16ProofVerifier.guest_id();
+    }
+
+    function verify(
+        Proof calldata proof,
+        bytes32 journalHash,
+        address expectedProver,
+        bytes4 expectedSelector
+    ) external view {
         if (proof.seal.proofMode() == ProofMode.FAKE) {
-            fakeProofVerifier.verify(proof, journalHash, expectedProver, expectedSelector);
+            fakeProofVerifier.verify(
+                proof,
+                journalHash,
+                expectedProver,
+                expectedSelector
+            );
         } else if (proof.seal.proofMode() == ProofMode.GROTH16) {
-            groth16ProofVerifier.verify(proof, journalHash, expectedProver, expectedSelector);
+            groth16ProofVerifier.verify(
+                proof,
+                journalHash,
+                expectedProver,
+                expectedSelector
+            );
         }
     }
 }

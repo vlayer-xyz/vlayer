@@ -15,6 +15,7 @@
 # Advanced
 - [Prover](./advanced/prover.md)
 - [Verifier](./advanced/verifier.md)
+- [Global variables](./advanced/prover-global-variables.md)
 - [Tests](./advanced/tests.md)
 
 # From JavaScript
@@ -22,7 +23,8 @@
 - [Web proofs](./javascript/webproofs.md)
 
 # Contributing
-- [vlayer](./contributing/vlayer.md)
+- [Rust](./contributing/rust.md)
+- [Javascript](./contributing/javascript.md)
 - [book](./contributing/book.md)
 
 # Appendix

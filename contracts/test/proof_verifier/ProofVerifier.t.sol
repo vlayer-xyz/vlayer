@@ -40,8 +40,8 @@ contract ProofVerifier_Verify_Tests is Test {
     function test_invalidProofMode() public {
         (Proof memory proof, bytes32 journalHash) = helpers.createProof(commitment);
 
-        // clear last byte, where ProofMode lives
-        proof.seal.rhv = ((proof.seal.rhv >> 8) << 8);
+        // Use Groth16 proof for Fake proof verifier
+        proof.seal.mode = ProofMode.GROTH16;
 
         vm.expectRevert("Invalid proof mode");
         verifier.verify(proof, journalHash, PROVER, SELECTOR);

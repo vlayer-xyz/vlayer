@@ -4,5 +4,6 @@ pub mod host;
 pub mod into_input;
 pub mod proof;
 pub mod provider;
+pub mod seal;
 pub use call_engine::evm::env::location::ExecutionLocation;
 pub use call_engine::io::Call;

@@ -1,13 +1,16 @@
 use p256::PublicKey;
-use pkcs8::DecodePublicKey;
+use pkcs8::{DecodePublicKey, EncodePublicKey, LineEnding};
 use serde::de::Deserializer;
-use serde::{Deserialize, Serialize};
+use serde::{Deserialize, Serialize, Serializer};
 use tlsn_core::proof::TlsProof;
 
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct WebProof {
-    #[serde(deserialize_with = "deserialize_public_key_from_pem_string")]
+    #[serde(
+        deserialize_with = "deserialize_public_key_from_pem_string",
+        serialize_with = "serialize_public_key_to_pem_string"
+    )]
     pub notary_pub_key: PublicKey,
     pub tls_proof: TlsProof,
 }
@@ -18,4 +21,14 @@ where
 {
     let key_pem = String::deserialize(deserializer)?;
     PublicKey::from_public_key_pem(&key_pem).map_err(serde::de::Error::custom)
+}
+
+fn serialize_public_key_to_pem_string<S>(key: &PublicKey, serializer: S) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    let key_pem = key
+        .to_public_key_pem(LineEnding::LF)
+        .map_err(serde::ser::Error::custom)?;
+    serializer.serialize_str(&key_pem)
 }

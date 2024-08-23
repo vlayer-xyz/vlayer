@@ -6,17 +6,28 @@ struct WebProof {
 }
 
 library WebProofLib {
-    function verify(WebProof memory webProof) internal pure returns (bool) {
+
+    address constant VERIFY_AND_PARSE_PRECOMPILE = address(0x100);
+
+    function verify(WebProof memory) internal pure returns (bool) {
         return true;
     }
 
     function url(
         WebProof memory webProof
-    ) internal pure returns (string memory) {
-        return "api.x.com";
+    ) internal view returns (string memory) {
+        (bool success, bytes memory returnData) = VERIFY_AND_PARSE_PRECOMPILE.staticcall(bytes(webProof.web_proof_json));
+
+        require(success, "verify_and_parse precompile call failed");
+
+        return string(returnData);
     }
 
-    function body(
+    function body(WebProof memory) internal pure returns (string memory) {
+        return "";
+    }
+
+    function serverName(
         WebProof memory webProof
     ) internal pure returns (string memory) {
         return "";
