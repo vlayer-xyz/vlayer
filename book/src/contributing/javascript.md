@@ -1,19 +1,11 @@
-# @vlayer/sdk
+# Contributing to vlayer JavaScript codebase
 
-## Install / usage
+## Prerequisites
 
-To install dependencies:
+To start working with this repository, you will need to install following software:
+- [Bun](https://bun.sh/) JavaScript runtime. 
 
-```bash
-bun install
-```
-
-To run:
-
-```bash
-bun run src/index.ts
-```
-## Versioning 
+## Bumping version 
 1. Apply changes to the code
 1. Run `bun changeset`
 1. Submit information about your changes (would be visible in the changelog)

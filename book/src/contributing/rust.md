@@ -1,4 +1,4 @@
-# Contributing to vlayer
+# Contributing to vlayer Rust codebase
 
 ## Prerequisites
 

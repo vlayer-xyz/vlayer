@@ -23,7 +23,8 @@
 - [Web proofs](./javascript/webproofs.md)
 
 # Contributing
-- [vlayer](./contributing/vlayer.md)
+- [Rust](./contributing/rust.md)
+- [Javascript](./contributing/javascript.md)
 - [book](./contributing/book.md)
 
 # Appendix
