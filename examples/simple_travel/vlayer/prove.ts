@@ -1,9 +1,9 @@
 import type { Address } from "viem";
 
-import { testHelpers, prove } from "vlayer-sdk";
+import { testHelpers, prove } from "@vlayer/sdk";
 import otherChainContractSpec from "../out/OtherChainContract.sol/OtherChainContract.json";
 import simpleTravelProver from "../out/SimpleTravelProver.sol/SimpleTravelProver.json";
-import { testChainId2 } from "../../../packages/src/api/helpers";
+import { testChainId2 } from "../../../packages/vlayer/sdk/src/api/helpers";
 
 console.log("Deploying prover on sepolia");
 let prover: Address = await testHelpers.deployContract(simpleTravelProver);

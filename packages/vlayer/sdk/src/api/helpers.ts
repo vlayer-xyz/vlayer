@@ -4,7 +4,6 @@ import type { Address, HttpTransport } from "viem";
 import { createTestClient, walletActions, publicActions, http } from "viem";
 import { privateKeyToAccount, generatePrivateKey } from 'viem/accounts'
 import { foundry } from "viem/chains";
-import { type ContractSpec } from "./prover";
 
 export const testChainId1 = 55511555;
 export const testChainId2 = 1114;
