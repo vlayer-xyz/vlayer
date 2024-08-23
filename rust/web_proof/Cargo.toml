@@ -8,10 +8,10 @@ tlsn-core = { workspace = true }
 p256 = { workspace = true }
 pkcs8 = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
-serde_json = { workspace = true, optional = true} 
+serde_json = { workspace = true}
 thiserror = { workspace = true }
 regex = "1.10.6"
 http = "1.1.0"
 
 [features]
-fixtures = ["dep:serde_json"]
+fixtures = []
