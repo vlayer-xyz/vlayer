@@ -9,7 +9,7 @@ interface IExample {
 
 contract SimpleTravelProver is Prover {
     function aroundTheWorld() public returns (uint256) {
-        // Important: the address of otherChainContract depends on when it was deployed on anvil 1.
+        // Important: the address of otherChainContract depends on when it was deployed on anvil 2.
         address otherChainContract = 0x5FbDB2315678afecb367f032d93F642f64180aa3;
         uint testChainId2 = 1114;
         uint blockNo = 1;
