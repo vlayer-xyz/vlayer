@@ -5,4 +5,4 @@ libs = ["lib", "../../contracts/lib", "../../contracts/src", "../../rust/target"
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
 [rpc_endpoints]
-mainnet = "https://rpc.flashbots.net"
+mainnet = "http://127.0.0.1:8545"
