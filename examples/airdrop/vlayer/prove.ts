@@ -1,6 +1,6 @@
-import { type Address } from "viem";
+import type { Address } from "viem";
 
-import { testHelpers, prove } from "vlayer-sdk";
+import { testHelpers, prove } from "@vlayer/sdk";
 import nftOwnershipProver from "../out/NftOwnershipProver.sol/NftOwnershipProver.json";
 
 console.log("Deploying prover")

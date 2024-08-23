@@ -1,6 +1,6 @@
 import { type Address } from "viem";
 
-import { testHelpers, prove } from "vlayer-sdk";
+import { testHelpers, prove } from "@vlayer/sdk";
 import vToyken from "../out/VToyken.sol/VToyken.json";
 import erc20Prover from "../out/ERC20Prover.sol/ERC20Prover.json";
 

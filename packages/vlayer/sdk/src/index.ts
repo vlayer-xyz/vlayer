@@ -6,6 +6,7 @@ export {
 
 export {
   getContractSpec,
+  type ContractSpec,
   prove,
 } from "./api/prover";
 
