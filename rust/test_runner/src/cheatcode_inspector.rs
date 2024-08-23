@@ -70,7 +70,7 @@ impl CheatcodeInspector {
         context: &&mut EvmContext<DB>,
         inputs: &mut CallInputs,
     ) -> CallOutcome {
-        let host = create_host(&context, &self.rpc_endpoints);
+        let host = create_host(context, &self.rpc_endpoints);
         let call_result = host.run(Call {
             to: inputs.target_address,
             data: inputs.input.clone().into(),
