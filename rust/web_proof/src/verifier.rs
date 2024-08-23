@@ -105,6 +105,17 @@ mod tests {
     use super::*;
 
     #[test]
+    fn fail_too_many_headers() {
+        let request = read_fixture("./testdata/sent_request.txt");
+        let mut headers = [EMPTY_HEADER; 1];
+        let req = parse_tlsn_http_output(&request, &mut headers);
+        assert_eq!(
+            req.unwrap_err().to_string(),
+            "Httparse error: too many headers"
+        );
+    }
+
+    #[test]
     fn fail_verification() {
         let invalid_proof = load_web_proof_fixture(
             "./testdata/invalid_tls_proof.json",
