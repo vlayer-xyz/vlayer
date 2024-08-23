@@ -1,7 +1,7 @@
 # Prover Global Variables
 In the global namespace, Solidity provides special variables and functions that primarily offer information about blocks, transactions, and gas.
 
-Since [Prover](/advanced/prover.html) contracts operate in the [vlayer zkEVM environment](/appendix/architecture/prover.html), some variables are either not implemented or behave differently compared to standard EVM chains.
+Since [Prover](/advanced/prover.html) contracts operate in the [vlayer zkEVM environment](/appendix/architecture/prover.html), some variables are either not implemented or behave differently, compared to standard EVM chains.
 
 ## Current Block and Chain
 vlayer extends Solidity with features like [time traveling](/features/time-travel.html) between block numbers and [teleporting](/features/teleport.html) to other chains. As a result, the values returned by `block.number` and `block.chainId` are influenced by these features.
@@ -12,7 +12,7 @@ Typically, the prover will use the most recent block. However, proving takes tim
 
 It is recommended to set `setBlock` to a specific block before making assertions.
 
-Regarding `block.chainId`, initially is set to the settlement chain ID, as specified in the JSON RPC call. Later, it can be changed using the setChain() function.
+Regarding `block.chainId`, initially it is set to the settlement chain ID, as specified in the JSON RPC call. Later, it can be changed using the `setChain()` function.
 
 ## Hashes of Older Blocks
 The `blockhash(uint blockNumber)` function returns the hash for the given `blockNumber`, but it only works for the 256 most recent blocks. Any block number outside this range returns 0.
