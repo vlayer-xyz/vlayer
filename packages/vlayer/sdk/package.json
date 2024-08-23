@@ -3,9 +3,15 @@
   "type": "module",
   "module": "src/index.ts",
   "version": "0.0.2",
+  "scripts": {
+    "build": "npm run gen:types",
+    "gen:types": "sh ../bash/build_ts_types.sh"
+  },
   "devDependencies": {
     "@changesets/cli": "^2.27.7",
     "@types/bun": "latest"
+    "@wagmi/cli": "^2.1.15",
+    "abitype": "^1.0.6"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
