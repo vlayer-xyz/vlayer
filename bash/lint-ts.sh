@@ -17,9 +17,8 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
   )
 done
 
-SDK_DIR="$VLAYER_HOME/packages/vlayer/sdk"
-echo "Running eslint for: $SDK_DIR"
-cd "${SDK_DIR}"
+echo "Running eslint for: $VLAYER_HOME"
+cd "${VLAYER_HOME}"
 
 bun install
-bun run eslint .
+bun run lint

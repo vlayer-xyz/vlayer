@@ -34,12 +34,12 @@ export async function getContractSpec(file: string): Promise<ContractSpec> {
   return Bun.file(file).json();
 }
 
-export async function prove(prover: Address, proverSpec: ContractSpec, functionName: string, args: ProverArg[], blockNo: number = 1): Promise<any> {
-  let calldata = encodeFunctionData({
-    abi: proverSpec.abi,
-    functionName,
-    args
-  });
+export async function prove(prover: Address, proverSpec: ContractSpec, functionName: string, args: ProverArg[], blockNo: number = 1): Promise<VCallResponse> {
+    const calldata = encodeFunctionData({
+        abi: proverSpec.abi,
+        functionName,
+        args
+    });
 
   let call: CallParams = { to: prover, data: calldata };
     let context: CallContext = { 
