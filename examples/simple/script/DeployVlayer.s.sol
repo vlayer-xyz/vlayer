@@ -2,6 +2,7 @@
 pragma solidity ^0.8.13;
 
 import {Script} from "forge-std/Script.sol";
+// solhint-disable-next-line
 import {console2} from "forge-std/console2.sol";
 
 import {SimpleProver} from "../src/vlayer/SimpleProver.sol";
@@ -14,6 +15,7 @@ contract SimpleScript is Script {
         vm.startBroadcast(deployerPrivateKey);
 
         SimpleProver simpleProver = new SimpleProver();
+        // solhint-disable-next-line
         console2.log("SimpleProver contract deployed to:", address(simpleProver));
     }
 }

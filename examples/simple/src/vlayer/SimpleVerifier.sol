@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {IRiscZeroVerifier} from "risc0-ethereum/IRiscZeroVerifier.sol";
-
 import {Proof} from "vlayer/Proof.sol";
 import {Verifier} from "vlayer/Verifier.sol";
 

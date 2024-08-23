@@ -3,7 +3,6 @@ pragma solidity ^0.8.13;
 
 import { ECDSA } from "openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol";
 import { MessageHashUtils } from "openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol";
-import { Strings } from "openzeppelin/contracts/utils/Strings.sol";
 import { IERC20 } from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import { Prover } from "vlayer/Prover.sol";
 

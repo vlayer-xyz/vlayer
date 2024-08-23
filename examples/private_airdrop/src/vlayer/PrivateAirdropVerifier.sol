@@ -11,8 +11,8 @@ interface IAwesomeToken {
 
 // This contract is executed on-chain (Ethereum Mainnet, Arbitrum, Base, etc.)
 contract PrivateAirdropVerifier is Verifier {
-    address awesomeTokenAddr;
-    address proverContractAddr;
+    address private awesomeTokenAddr;
+    address private proverContractAddr;
     mapping(bytes32 => bool) public claimedNullifiers;
 
     constructor(address proverAddr, IAwesomeToken tokenAddr) {
@@ -25,8 +25,7 @@ contract PrivateAirdropVerifier is Verifier {
         onlyVerified(proverContractAddr, PrivateAirdropProver.main.selector)
     {
         require(claimedNullifiers[nullifier] == false, "Already withdrawn");
-
-        IAwesomeToken(awesomeTokenAddr).transfer(sender, 1000);
         claimedNullifiers[nullifier] = true;
+        IAwesomeToken(awesomeTokenAddr).transfer(sender, 1000);
     }
 }

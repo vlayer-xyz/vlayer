@@ -14,20 +14,19 @@ interface IAwesomeToken {
 
 // This contract is executed on-chain (Ethereum Mainnet, Arbitrum, Base, etc.)
 contract Airdrop is Verifier {
-    address immutable prover;
+    address private immutable PROVER;
     mapping(address => bool) public withdrawn;
 
     constructor(address _prover) {
-        prover = _prover;
+        PROVER = _prover;
     }
 
     function claim(Proof calldata, address sender)
         public
-        onlyVerified(prover, FUNCTION_SELECTOR)
+        onlyVerified(PROVER, FUNCTION_SELECTOR)
     {
         require(withdrawn[sender] == false, "Already withdrawn");
-
-//        IAwesomeToken(awesomeTokenAddr).transfer(sender, 1000);
         withdrawn[sender] = true;
+        IAwesomeToken(awesomeTokenAddr).transfer(sender, 1000);
     }
 }

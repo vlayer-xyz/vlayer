@@ -1,0 +1,17 @@
+{
+  "name": "vlayer",
+  "module": "index.ts",
+  "type": "module",
+  "scripts": {
+    "lint:solidity": "bun run solhint './examples/**/*.sol'"
+  },
+  "devDependencies": {
+    "@types/bun": "latest"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "solhint": "^5.0.3"
+  }
+}

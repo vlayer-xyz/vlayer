@@ -1,0 +1,13 @@
+name: Lint Solidity
+on: 
+  pull_request:
+    paths:
+      - 'examples/**'
+jobs:
+  sol-lint:
+    runs-on: ubuntu-latest
+    steps:
+    - uses: oven-sh/setup-bun@v2      
+    - uses: actions/checkout@v2
+    - name: Run lint:solidity
+      run: bun run lint:solidity

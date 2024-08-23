@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import "vlayer/testing/VTest.sol";
+import { VTest } from "vlayer/testing/VTest.sol";
 import {VerificationFailed} from "risc0-ethereum/IRiscZeroVerifier.sol";
 import {SimpleProver} from "./SimpleProver.sol";
-import "./SimpleVerifier.sol";
+import { Simple } from "./SimpleVerifier.sol";
 
 interface IFakeCheatcode {
     function thisCheatCodeDoesNotExist() external returns (bool);
@@ -57,7 +57,13 @@ contract ProverTest is VTest {
 
     // NOTE: vm.expectRevert doesn't work correctly with errors thrown by inspectors, so we check manually
     function test_unexpectedCheatCodeCallFails() public {
-        (bool result, bytes memory error) = CHEATCODES.call(abi.encodeWithSelector(IFakeCheatcode.thisCheatCodeDoesNotExist.selector));
+        // NOTE: vm.expectRevert doesn't work correctly with errors thrown by inspectors, so we check manually
+        // solhint-disable-next-line
+        (bool result, bytes memory error) = CHEATCODES.call(
+            abi.encodeWithSelector(
+                IFakeCheatcode.thisCheatCodeDoesNotExist.selector
+            )
+        );
         assertFalse(result);
         assertEq(error, abi.encodeWithSignature("Error(string)", "Unexpected vlayer cheatcode call"));
     }

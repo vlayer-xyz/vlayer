@@ -2,6 +2,7 @@
 pragma solidity ^0.8.13;
 
 import {Script} from "forge-std/Script.sol";
+// solhint-disable-next-line
 import {console2} from "forge-std/console2.sol";
 
 import {WebProofProver} from "../src/vlayer/WebProofProver.sol";
@@ -14,6 +15,7 @@ contract WebProofScript is Script {
         vm.startBroadcast(deployerPrivateKey);
 
         WebProofProver webProofProver = new WebProofProver();
+        // solhint-disable-next-line
         console2.log("WebProofProver contract deployed to:", address(webProofProver));
     }
 }
