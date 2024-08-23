@@ -3348,6 +3348,7 @@ dependencies = [
  "pkcs8",
  "regex",
  "serde",
+ "serde_json",
  "thiserror",
  "tlsn-core",
 ]
