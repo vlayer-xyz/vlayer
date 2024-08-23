@@ -1,9 +1,9 @@
 import {helpers} from "vlayer-sdk";
 import {type Address} from "viem";
-import {call, send} from "../../../packages/src/api/helpers";
+import {call, writeContract} from "../../../packages/src/api/helpers";
+import {completeProof} from "../../../packages/src/api/prover.ts";
 import ProverAbi from "../out/SimpleProver.sol/SimpleProver";
 import VerifierAbi from "../out/SimpleVerifier.sol/Simple";
-import {completeProof} from "../../../packages/src/api/prover.ts";
 
 const FUNCTION_NAME = 'sum'
 const ARGS = [1n, 120n] as const
@@ -16,9 +16,10 @@ console.log(`Verifier has been deployed on ${verifier} address`);
 
 console.log("Proving...");
 let {proof, returnValue} = await completeProof(prover, ProverAbi.abi, FUNCTION_NAME, ARGS);
+console.log("Proof result:")
 console.log(proof, returnValue);
 
-const receipt = await send(verifier, VerifierAbi.abi, "updateSum", [proof, returnValue])
+const receipt = await writeContract(verifier, VerifierAbi.abi, "updateSum", [proof, returnValue])
 
 console.log(`Verification result: ${receipt.status}`);
 

@@ -25,6 +25,10 @@ export type ContractSpec = {
 
 type ProverArg = number | string | boolean;
 
+const EXECUTION_COMMITMENT_FIELDS_COUNT = 4;
+const FIELD_SIZE_IN_BYTES = 32;
+const EXECUTION_COMMITMENT_SIZE = EXECUTION_COMMITMENT_FIELDS_COUNT * FIELD_SIZE_IN_BYTES;
+
 
 export async function getContractSpec(file: string): Promise<ContractSpec> {
   return Bun.file(file).json();
@@ -71,7 +75,7 @@ export async function completeProof<T extends Abi, F extends ContractFunctionNam
 }
 
 async function composeProof(response: VCallResponse, blockNumber: bigint) {
-  const length = 4 * 32 + response.result.result.evm_call_result.length;
+  const length = EXECUTION_COMMITMENT_SIZE + response.result.result.evm_call_result.length;
   const blockHash = (await client().getBlock({
     blockNumber
   })).hash;

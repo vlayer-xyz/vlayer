@@ -65,7 +65,7 @@ export async function call<T extends Abi, F extends ContractFunctionName<T, 'pur
   });
 }
 
-export async function send<
+export async function writeContract<
   T extends Abi,
   F extends ContractFunctionName<T, 'payable' | 'nonpayable'>,
 >(address: Address, abi: T, functionName: F, args: ContractFunctionArgs<T, 'payable' | 'nonpayable', F>, chainId: number = sepolia.id) {
