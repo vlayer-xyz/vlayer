@@ -12,18 +12,16 @@ mod server_tests {
     use super::*;
 
     #[tokio::test]
-    async fn http_not_found() -> anyhow::Result<()> {
+    async fn http_not_found() {
         let helper = TestHelper::create().await;
-        let response = helper.post("/non_existent_http_path", &()).await?;
+        let response = helper.post("/non_existent_http_path", &()).await;
 
         assert_eq!(StatusCode::NOT_FOUND, response.status());
-        assert!(body_to_string(response.into_body()).await?.is_empty());
-
-        Ok(())
+        assert!(body_to_string(response.into_body()).await.is_empty());
     }
 
     #[tokio::test]
-    async fn json_rpc_not_found() -> anyhow::Result<()> {
+    async fn json_rpc_not_found() {
         let helper = TestHelper::create().await;
 
         let req = json!({
@@ -32,7 +30,7 @@ mod server_tests {
             "id": 1,
             "jsonrpc": "2.0",
         });
-        let response = helper.post("/", &req).await?;
+        let response = helper.post("/", &req).await;
 
         assert_eq!(StatusCode::OK, response.status());
         assert_eq!(
@@ -47,8 +45,6 @@ mod server_tests {
             }),
             body_to_json(response.into_body()).await
         );
-
-        Ok(())
     }
 
     mod v_call {
@@ -60,7 +56,7 @@ mod server_tests {
         use ethers::types::U256;
 
         #[tokio::test]
-        async fn field_validation_error() -> anyhow::Result<()> {
+        async fn field_validation_error() {
             let helper = TestHelper::create().await;
 
             let req = json!({
@@ -77,7 +73,7 @@ mod server_tests {
                 "id": 1,
                 "jsonrpc": "2.0",
             });
-            let response = helper.post("/", &req).await?;
+            let response = helper.post("/", &req).await;
 
             assert_eq!(StatusCode::OK, response.status());
             assert_eq!(
@@ -92,12 +88,10 @@ mod server_tests {
                 }),
                 body_to_json(response.into_body()).await
             );
-
-            Ok(())
         }
 
         #[tokio::test]
-        async fn success_simple_contract_call() -> anyhow::Result<()> {
+        async fn success_simple_contract_call() {
             let helper = TestHelper::create().await;
             let call_data = helper
                 .contract
@@ -120,7 +114,7 @@ mod server_tests {
                 "id": 1,
                 "jsonrpc": "2.0",
             });
-            let response = helper.post("/", &req).await?;
+            let response = helper.post("/", &req).await;
 
             assert_eq!(StatusCode::OK, response.status());
             assert_eq!(
@@ -142,12 +136,10 @@ mod server_tests {
                 }),
                 body_to_json(response.into_body()).await
             );
-
-            Ok(())
         }
 
         #[tokio::test]
-        async fn success_web_proof() -> anyhow::Result<()> {
+        async fn success_web_proof() {
             let helper = TestHelper::create().await;
             let call_data = helper
                 .contract
@@ -177,7 +169,7 @@ mod server_tests {
                 "jsonrpc": "2.0",
             });
 
-            let response = helper.post("/", &req).await?;
+            let response = helper.post("/", &req).await;
 
             assert_eq!(StatusCode::OK, response.status());
             assert_eq!(
@@ -199,8 +191,6 @@ mod server_tests {
                 }),
                 body_to_json(response.into_body()).await
             );
-
-            Ok(())
         }
     }
 }
