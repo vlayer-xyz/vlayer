@@ -28,3 +28,4 @@ reqwest = { workspace = true }
 lazy_static = { workspace = true }
 web_proof = { path = "../../web_proof", features = ["fixtures"] }
 ethers = { workspace = true }
+assert-json-diff = "2.0.2"
