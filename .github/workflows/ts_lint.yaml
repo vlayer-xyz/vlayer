@@ -4,8 +4,6 @@ on:
     paths:
       - 'examples/**'
       - 'packages/**'
-    branches:
-      - '**'  # Run on pull requests to any branch
 jobs:
   ts-lint:
     runs-on: ubuntu-latest
