@@ -96,17 +96,6 @@ fn _parse_tlsn_http_response<'a>(
     Ok(res)
 }
 
-fn _find_value(headers: &[Header], name: &str) -> Result<String, VerificationError> {
-    let header = headers.iter().find(|header| header.name == name);
-    match header {
-        Some(header) => match std::str::from_utf8(header.value) {
-            Ok(value) => Ok(value.to_string()),
-            Err(e) => Err(VerificationError::Utf8(e)),
-        },
-        None => Err(VerificationError::NoHeaderFound(name.to_string())),
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use crate::fixtures::{load_web_proof_fixture, read_fixture, NOTARY_PUB_KEY_PEM_EXAMPLE};
