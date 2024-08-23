@@ -41,7 +41,7 @@ pub struct ContractRunner<'a> {
     pub libs_to_deploy: &'a Vec<Bytes>,
     /// The executor used by the runner.
     /// MODIFICATION: Changed the type from Executor to TestExecutor.
-    pub executor: TestExecutor,
+    pub executor: TestExecutor<'a>,
     /// Revert decoder. Contains all known errors.
     pub revert_decoder: &'a RevertDecoder,
     /// The initial balance of the test contract.

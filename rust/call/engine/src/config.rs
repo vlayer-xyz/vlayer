@@ -23,6 +23,13 @@ pub static CHAIN_MAP: Lazy<HashMap<ChainId, &'static Lazy<ChainSpec>>> = Lazy::n
     ])
 });
 
+pub static CHAIN_NAMES: Lazy<HashMap<String, ChainId>> = Lazy::new(|| {
+    HashMap::from([
+        ("mainnet".into(), MAINNET_ID),
+        ("sepolia".into(), SEPOLIA_ID),
+    ])
+});
+
 pub static ETH_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
     ChainSpec::new(
         MAINNET_ID,

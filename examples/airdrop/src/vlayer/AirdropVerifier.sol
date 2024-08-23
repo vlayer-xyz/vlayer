@@ -6,7 +6,6 @@ import {Verifier} from "vlayer/Verifier.sol";
 
 import {NftOwnershipProver} from "./NftOwnershipProver.sol";
 
-address constant NFT_OWNERSHIP_VLAYER_CONTRACT = 0x1744aC92e0Ff310Ff836bB68d56D4159E37D0BdF;
 bytes4 constant FUNCTION_SELECTOR = NftOwnershipProver.main.selector;
 
 interface IAwesomeToken {
@@ -15,16 +14,20 @@ interface IAwesomeToken {
 
 // This contract is executed on-chain (Ethereum Mainnet, Arbitrum, Base, etc.)
 contract Airdrop is Verifier {
-    address awesomeTokenAddr = 0x510848bE71Eac101a4Eb871C6436178e52210646;
+    address immutable prover;
     mapping(address => bool) public withdrawn;
+
+    constructor(address _prover) {
+        prover = _prover;
+    }
 
     function claim(Proof calldata, address sender)
         public
-        onlyVerified(NFT_OWNERSHIP_VLAYER_CONTRACT, FUNCTION_SELECTOR)
+        onlyVerified(prover, FUNCTION_SELECTOR)
     {
         require(withdrawn[sender] == false, "Already withdrawn");
 
-        IAwesomeToken(awesomeTokenAddr).transfer(sender, 1000);
+//        IAwesomeToken(awesomeTokenAddr).transfer(sender, 1000);
         withdrawn[sender] = true;
     }
 }

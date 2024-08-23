@@ -8,19 +8,30 @@ use call_engine::{Proof, ProofMode, Seal};
 use call_host::host::config::HostConfig;
 use call_host::host::Host;
 use forge::revm::JournaledState;
+use foundry_config::RpcEndpoints;
 use foundry_evm::revm::interpreter::{CallInputs, CallOutcome};
 use foundry_evm::revm::primitives::U256;
 use foundry_evm::revm::{Database, EvmContext, Inspector};
 
-use call_engine::config::TESTING_CHAIN_ID;
-
 use crate::cheatcodes::{callProverCall, getProofCall, CHEATCODE_CALL_ADDR};
-use crate::pending_state_provider::{PendingStateProvider, PendingStateProviderFactory};
+use crate::providers::pending_state_provider::PendingStateProviderFactory;
+use crate::providers::test_provider::{TestProvider, TestProviderFactory};
+use call_engine::config::TESTING_CHAIN_ID;
 
 #[derive(Default)]
 pub struct CheatcodeInspector {
     should_start_proving: bool,
     previous_proof: Option<Proof>,
+    rpc_endpoints: RpcEndpoints,
+}
+
+impl CheatcodeInspector {
+    pub fn new(rpc_endpoints: RpcEndpoints) -> Self {
+        Self {
+            rpc_endpoints,
+            ..Default::default()
+        }
+    }
 }
 
 impl<DB: Database> Inspector<DB> for CheatcodeInspector {
@@ -60,7 +71,7 @@ impl CheatcodeInspector {
         context: &&mut EvmContext<DB>,
         inputs: &mut CallInputs,
     ) -> CallOutcome {
-        let host = create_host(&context.journaled_state);
+        let host = create_host(&context.journaled_state, &self.rpc_endpoints);
         let call_result = host.run(Call {
             to: inputs.target_address,
             data: inputs.input.clone().into(),
@@ -79,7 +90,7 @@ impl CheatcodeInspector {
         let mut commitment = host_output.guest_output.execution_commitment.clone();
         // For now we hardcode the settle block hash.
         commitment.settleBlockHash =
-            b256!("6dee40da52db0e5ad9927dbf5fe137d0d8518f1b617b3ddc912f117bd58a49fd");
+            b256!("c89efdaa54c0f20c7adf612882df0950f5a951637e0307cdcb4c672f298b8bc6");
 
         Proof {
             seal: Seal {
@@ -95,11 +106,16 @@ impl CheatcodeInspector {
     }
 }
 
-fn create_host(journaled_state: &JournaledState) -> Host<PendingStateProvider> {
+fn create_host(
+    journaled_state: &JournaledState,
+    rpc_endpoints: &RpcEndpoints,
+) -> Host<TestProvider> {
+    let pending_state_provider_factory = PendingStateProviderFactory {
+        state: journaled_state.state.clone(),
+    };
+
     Host::try_new_with_provider_factory(
-        PendingStateProviderFactory {
-            state: journaled_state.state.clone(),
-        },
+        TestProviderFactory::new(pending_state_provider_factory, rpc_endpoints.clone()),
         HostConfig {
             rpc_urls: Default::default(),
             start_chain_id: TESTING_CHAIN_ID,
