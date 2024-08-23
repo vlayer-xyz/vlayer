@@ -25,7 +25,7 @@ impl Node {
                 let branch = Node::Branch(children, branch_value);
                 from_branch_and_entry(branch, (&*key, value).into()).unwrap()
             }
-            _ => panic!("Not implemented"),
+            _ => todo!("Implement insert for Extension"),
         }
     }
 }

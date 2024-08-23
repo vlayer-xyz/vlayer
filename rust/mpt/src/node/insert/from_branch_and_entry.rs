@@ -5,7 +5,11 @@ use super::entry::Entry;
 pub(crate) fn from_branch_and_entry(branch: Node, entry: Entry) -> Result<Node, String> {
     if let Node::Branch(mut children, branch_value) = branch {
         if entry.key.is_empty() {
-            return Err("Key already exists".to_string());
+            if branch_value.is_some() {
+                return Err("Key already exists".to_string());
+            } else {
+                return Ok(Node::Branch(children, Some(entry.value)));
+            }
         }
 
         let (entry_first_nibble, remaining_entry) = entry.split_first_key_nibble();
@@ -39,7 +43,17 @@ mod tests {
     }
 
     #[test]
-    fn branch_and_entry() {
+    fn add_value_to_branch_without_value() {
+        let branch = Node::Branch(EMPTY_CHILDREN.clone(), None);
+        let node = from_branch_and_entry(branch, ([], [42]).into()).unwrap();
+
+        let expected_node = Node::branch(EMPTY_CHILDREN.clone(), Some([42]));
+
+        assert_eq!(node, expected_node);
+    }
+
+    #[test]
+    fn branch_with_no_children() {
         let branch = Node::branch(EMPTY_CHILDREN.clone(), Some([42]));
         let node = from_branch_and_entry(branch, ([0x0], [43]).into()).unwrap();
 
@@ -51,7 +65,7 @@ mod tests {
     }
 
     #[test]
-    fn creating_branch_with_nested_descendants() {
+    fn branch_with_children() {
         let mut children = EMPTY_CHILDREN.clone();
         children[0] = Some(Box::new(Node::branch(EMPTY_CHILDREN.clone(), Some([]))));
         let branch = Node::branch(children, Some([]));

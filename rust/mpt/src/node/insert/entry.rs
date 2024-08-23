@@ -32,7 +32,7 @@ impl From<Entry> for Node {
 }
 
 impl Entry {
-    pub fn split_first_key_nibble(self) -> (u8, Entry) {
+    pub(crate) fn split_first_key_nibble(self) -> (u8, Entry) {
         let Some((first_key_nibble, remaining_key)) = self.key.split_first() else {
             unreachable!("Can't split first key nibble from empty nibbles");
         };

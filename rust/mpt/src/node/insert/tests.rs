@@ -43,7 +43,7 @@ mod insert {
         }
 
         #[test]
-        fn branch_with_two_children() {
+        fn double_insert() {
             let node = Node::Null;
             let updated_node = node
                 .insert(Nibbles::unpack([0x10]), [42])
@@ -67,8 +67,8 @@ mod insert {
         #[test]
         #[should_panic(expected = "Key already exists")]
         fn duplicate_key() {
-            // Trie::insert takes even number of nibbles so two is the minimal
-            // number of nibbles for a leaf. Leafs cannot have empty keys.
+            // Trie::insert always inserts even number of nibbles so two is the minimal
+            // number of nibbles for a leaf, cause leafs cannot have empty keys.
             let node = Node::leaf([0x0, 0x0], [42]);
             node.insert(Nibbles::unpack([0x0]), [43]);
         }
