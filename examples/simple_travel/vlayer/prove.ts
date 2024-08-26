@@ -5,7 +5,7 @@ import otherChainContractSpec from "../out/OtherChainContract.sol/OtherChainCont
 import simpleTravelProver from "../out/SimpleTravelProver.sol/SimpleTravelProver.json";
 import { testChainId2 } from "../../../packages/vlayer/sdk/src/api/helpers";
 
-console.log("Deploying prover on sepolia");
+console.log("Deploying prover on anvil 1");
 let prover: Address = await testHelpers.deployContract(simpleTravelProver);
 console.log(`Prover has been deployed on ${prover} address`);
 
