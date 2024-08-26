@@ -1,4 +1,15 @@
-#!/bin/bash
+#!/usr/bin/env bash
 
-find ../{contracts,examples/**}/out/*.sol -name "*.json" -exec bash -c "echo export default \<const\> > {}.ts && cat {} >> {}.ts" \;
-find ../{contracts,examples/**}/out/*.sol -name "*.json.ts" -exec bash -c 'mv $0 ${0%???????}ts' {} \;
+set -ueo pipefail
+
+VLAYER_HOME=$(git rev-parse --show-toplevel)
+
+for output_json in $(find "${VLAYER_HOME}" -wholename "*/out/*.sol/*.json") ; do 
+  output_ts="${output_json%.json}.ts"
+
+  echo "Generating ${output_ts}" 
+  
+  echo "export default <const>" >"${output_ts}" 
+  cat "${output_json}" | jq >>"${output_ts}"
+ 
+done
