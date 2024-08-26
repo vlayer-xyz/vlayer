@@ -19,12 +19,12 @@ npm i @vlayer/sdk
 {{#endtab }}
 {{#tab name="pnpm" }}
 ```sh
-pnpm i viem
+pnpm i @vlayer/sdk
 ```
 {{#endtab }}
 {{#tab name="bun" }}
 ```sh
-bun i viem
+bun i @vlayer/sdk
 ```
 {{#endtab }}
 
