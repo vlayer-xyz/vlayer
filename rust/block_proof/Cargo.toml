@@ -1,0 +1,9 @@
+[package]
+name = "block_proof"
+version = "0.1.0"
+edition = "2024"
+
+[dependencies]
+axum = { workspace = true, features = ["macros"] }
+tokio = { workspace = true }
+tower = { workspace = true }
