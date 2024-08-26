@@ -17,6 +17,7 @@ use crate::providers::test_provider::ProviderError;
 
 pub struct PendingStateProvider {
     state: EvmState,
+    block_number: u64,
 }
 
 impl PendingStateProvider {
@@ -54,14 +55,14 @@ impl BlockingProvider for PendingStateProvider {
 
     fn get_block_header(
         &self,
-        _block: BlockTag,
+        block: BlockTag,
     ) -> Result<Option<Box<dyn EvmBlockHeader>>, Self::Error> {
+        let block_number: u64 = match block {
+            BlockTag::Number(n) => n.as_u64(),
+            _ => self.block_number,
+        };
         Ok(Some(Box::new(EthBlockHeader {
-            /*
-             * This only used to initialize EVMConfig, need to be after merge to succeed
-             * this is not used for block.number variable in Solidity
-             */
-            number: 1,
+            number: block_number,
             state_root: self.get_state_root(),
             ..EthBlockHeader::default()
         })))
@@ -121,6 +122,7 @@ impl BlockingProvider for PendingStateProvider {
 }
 
 pub struct PendingStateProviderFactory {
+    pub block_number: u64,
     pub state: EvmState,
 }
 
@@ -128,6 +130,7 @@ impl ProviderFactory<PendingStateProvider> for PendingStateProviderFactory {
     fn create(&self, _chain_id: ChainId) -> Result<PendingStateProvider, HostError> {
         Ok(PendingStateProvider {
             state: self.state.clone(),
+            block_number: self.block_number,
         })
     }
 }

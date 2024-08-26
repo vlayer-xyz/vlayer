@@ -23,6 +23,17 @@ contract ProverTest is VTest {
         verifier.updateSum(proof, 3);
     }
 
+    function test_worksAfterRollingBlock() public {
+        SimpleProver prover = new SimpleProver();
+        vm.roll(420);
+        callProver();
+        assertEq(prover.sum(1, 2), 3);
+        Proof memory proof = getProof();
+        assertEq(proof.commitment.settleBlockNumber, 420);
+        Simple verifier = new Simple(address(prover));
+        verifier.updateSum(proof, 3);
+    }
+
     // NOTE: vm.expectRevert doesn't work correctly with errors thrown by inspectors, so we check manually
     function test_unexpectedCheatCodeCallFails() public {
         (bool result, bytes memory error) = CHEATCODES.call(abi.encodeWithSelector(IFakeCheatcode.thisCheatCodeDoesNotExist.selector));

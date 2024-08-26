@@ -65,9 +65,9 @@ pub static TESTING_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
         TEST_CHAIN_ID_1,
         SpecId::CANCUN,
         BTreeMap::from([
-            (SpecId::MERGE, ForkCondition::Block(1)),
-            (SpecId::SHANGHAI, ForkCondition::Block(1)),
-            (SpecId::CANCUN, ForkCondition::Block(1)),
+            (SpecId::MERGE, ForkCondition::Block(0)),
+            (SpecId::SHANGHAI, ForkCondition::Block(0)),
+            (SpecId::CANCUN, ForkCondition::Block(0)),
         ]),
         BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
     )
