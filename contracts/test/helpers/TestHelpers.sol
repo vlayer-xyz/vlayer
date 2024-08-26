@@ -8,11 +8,13 @@ import {Proof} from "../../src/Proof.sol";
 import {ProofMode, Seal, SealLib} from "../../src/Seal.sol";
 import {ImageID} from "../../src/ImageID.sol";
 
+import {FAKE_VERIFIER_SELECTOR} from "../../src/proof_verifier/FakeProofVerifier.sol";
+
 address constant PROVER = address(1);
 bytes4 constant SELECTOR = bytes4(0x01020304);
 
 contract TestHelpers {
-    RiscZeroMockVerifier public immutable mockVerifier = new RiscZeroMockVerifier(bytes4(0));
+    RiscZeroMockVerifier public immutable mockVerifier = new RiscZeroMockVerifier(FAKE_VERIFIER_SELECTOR);
 
     function createProof(ExecutionCommitment memory commitment, bytes memory journalParams)
         public
@@ -48,26 +50,29 @@ contract TestHelpers {
     }
 
     function encodeSeal(bytes memory seal, ProofMode proofMode) public pure returns (Seal memory) {
-        require(seal.length == SealLib.SEAL_LENGTH, "Invalid seal length");
+        bytes32[8] memory words;
+        if (proofMode == ProofMode.FAKE) {
+            words = encodeWordsFake(seal);
+        }
+        return Seal(words, proofMode);
+    }
 
-        uint256 lhv = 0;
-        uint256 rhv = 0;
+    function encodeWordsFake(bytes memory seal) private pure returns (bytes32[8] memory) {
+        bytes32[8] memory words;
 
-        for (uint256 i = 0; i < SealLib.SEAL_MIDDLE; i++) {
-            lhv <<= 8;
-            lhv += uint8(seal[i]);
-            rhv <<= 8;
-            rhv += uint8(seal[i + SealLib.SEAL_MIDDLE]);
+        require(seal.length == SealLib.FAKE_SEAL_LENGTH, "Invalid seal length");
+
+        bytes32 firstWord = abi.decode(seal, (bytes32));
+        uint32 secondWord = 0;
+
+        for (uint256 i = 0; i < SealLib.FAKE_SEAL_LENGTH - 32; i++) {
+            secondWord <<= 8;
+            secondWord += uint8(seal[32 + i]);
         }
 
-        // set ProofMode to FAKE
-        rhv <<= 8;
-        rhv += uint8(proofMode);
+        words[0] = firstWord;
+        words[1] = bytes32(bytes4(secondWord));
 
-        // shift value to most significant bytes
-        lhv <<= 8 * (32 - SealLib.SEAL_MIDDLE);
-        rhv <<= 8 * (32 - SealLib.SEAL_MIDDLE - 1);
-
-        return Seal(bytes18(bytes32(lhv)), bytes19(bytes32(rhv)), proofMode);
+        return words;
     }
 }

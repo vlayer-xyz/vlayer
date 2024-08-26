@@ -5,7 +5,7 @@ import {Test, console} from "forge-std/Test.sol";
 
 import {RiscZeroMockVerifier} from "risc0-ethereum/test/RiscZeroMockVerifier.sol";
 
-import {FakeProofVerifier} from "../../src/proof_verifier/FakeProofVerifier.sol";
+import {FakeProofVerifier, FAKE_VERIFIER_SELECTOR} from "../../src/proof_verifier/FakeProofVerifier.sol";
 import {ProofMode} from "../../src/Seal.sol";
 
 contract FakeProofVerifier_Tests is Test {
@@ -16,7 +16,7 @@ contract FakeProofVerifier_Tests is Test {
     }
 
     function test_usesMockRiscZeroVerifier() public {
-        RiscZeroMockVerifier mockVerifier = new RiscZeroMockVerifier(bytes4(0));
+        RiscZeroMockVerifier mockVerifier = new RiscZeroMockVerifier(FAKE_VERIFIER_SELECTOR);
 
         assertEq(address(verifier.verifier()).codehash, address(mockVerifier).codehash);
     }
