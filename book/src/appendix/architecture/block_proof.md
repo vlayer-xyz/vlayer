@@ -21,7 +21,9 @@ To ensure that a piece of state belongs to a certain chain, it is essential to p
 ### Recent and historical blocks
 
 One way to prove that a block of a certain hash belongs to a chain is to run the Solidity `blockhash(uint)` function. It returns the hash of a block for a given number.
-To perform a check, we need to compare the hash from storage proof with the result of the function.
+To perform a check, we need to:
+- hash a block with a certain state root and compare it with the result of the function
+- ensure root hash from merkle proof equals to state root
 
 However, this method is limited, as it only works for most recent 256 blocks on a given chain.
 Therefore, we need another way to prove inclusion of older blocks in the chain.
