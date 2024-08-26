@@ -12,10 +12,10 @@ import {IProofVerifier} from "./IProofVerifier.sol";
 abstract contract ProofVerifierBase is IProofVerifier {
     using SealLib for Seal;
 
-    uint256 constant AVAILABLE_HISTORICAL_BLOCKS = 256;
+    uint256 private constant AVAILABLE_HISTORICAL_BLOCKS = 256;
 
-    ProofMode public immutable proofMode;
-    IRiscZeroVerifier public immutable verifier;
+    ProofMode public immutable PROOF_MODE;
+    IRiscZeroVerifier public immutable VERIFIER;
 
     function guest_id() external pure returns (bytes32) {
         return ImageID.RISC0_CALL_GUEST_ID;
@@ -29,7 +29,7 @@ abstract contract ProofVerifierBase is IProofVerifier {
     ) external view {
         _verifyProofMode(proof);
         _verifyExecutionEnv(proof, expectedProver, expectedSelector);
-        verifier.verify(
+        VERIFIER.verify(
             proof.seal.decode(),
             ImageID.RISC0_CALL_GUEST_ID,
             journalHash
@@ -37,7 +37,7 @@ abstract contract ProofVerifierBase is IProofVerifier {
     }
 
     function _verifyProofMode(Proof memory proof) private view {
-        require(proof.seal.proofMode() == proofMode, "Invalid proof mode");
+        require(proof.seal.proofMode() == PROOF_MODE, "Invalid proof mode");
     }
 
     function _verifyExecutionEnv(

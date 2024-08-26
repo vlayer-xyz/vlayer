@@ -8,7 +8,7 @@ import {ProofMode} from "../Seal.sol";
 
 contract Groth16ProofVerifier is ProofVerifierBase {
     constructor() {
-        proofMode = ProofMode.GROTH16;
-        verifier = new RiscZeroGroth16Verifier(ControlID.CONTROL_ROOT, ControlID.BN254_CONTROL_ID);
+        PROOF_MODE = ProofMode.GROTH16;
+        VERIFIER = new RiscZeroGroth16Verifier(ControlID.CONTROL_ROOT, ControlID.BN254_CONTROL_ID);
     }
 }

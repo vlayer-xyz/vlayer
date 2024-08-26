@@ -19,7 +19,7 @@ contract NftOwnershipProver is Prover {
         require(IERC721(BYAC_NFT_ADDR).balanceOf(owner) > 0, "You are not owning any specified NFT");
     }
 
-    function main(address owner) public returns (address) {
+    function main(address owner) public pure returns (address) {
         // // 🔥 Teleport to chain on which the verification is happening
 //        setChain(1, 20_000_000);
 

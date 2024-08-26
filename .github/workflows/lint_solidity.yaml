@@ -3,6 +3,7 @@ on:
   pull_request:
     paths:
       - 'examples/**'
+      - 'contracts/**'
 jobs:
   sol-lint:
     runs-on: ubuntu-latest

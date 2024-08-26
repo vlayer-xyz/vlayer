@@ -15,7 +15,7 @@ library ProofLib {
     uint256 constant LENGTH_LEN = 32;
     uint256 constant SEAL_LEN = 256 + 32;
 
-    uint256 constant LENGTH_OFFSET = 0;
-    uint256 constant SEAL_OFFSET = LENGTH_LEN;
-    uint256 constant COMMITMENT_OFFSET = SEAL_OFFSET + SEAL_LEN;
+    uint256 public constant LENGTH_OFFSET = 0;
+    uint256 public constant SEAL_OFFSET = LENGTH_LEN;
+    uint256 public constant COMMITMENT_OFFSET = SEAL_OFFSET + SEAL_LEN;
 }
