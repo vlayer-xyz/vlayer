@@ -9,7 +9,7 @@ console.log("Deploying prover on sepolia");
 let prover: Address = await testHelpers.deployContract(simpleTravelProver);
 console.log(`Prover has been deployed on ${prover} address`);
 
-console.log("Deploying a contract on mainnet");
+console.log("Deploying a contract on anvil");
 let otherChainContract: Address = await testHelpers.deployContract(otherChainContractSpec, [], testChainId2);
 console.log(`Contract has been deployed on ${otherChainContract} address`);
 
