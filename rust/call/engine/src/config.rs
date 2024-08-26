@@ -1,6 +1,7 @@
 //! Handling different blockchain specifications.
 use std::collections::BTreeMap;
 
+use alloy_chains::Chain;
 use alloy_primitives::{address, Address, ChainId};
 use once_cell::sync::Lazy;
 use revm::primitives::SpecId;
@@ -8,31 +9,31 @@ use std::collections::HashMap;
 
 use crate::chain::{eip1559::Eip1559Constants, fork::ForkCondition, spec::ChainSpec};
 
-pub const MAINNET_ID: ChainId = 1;
-pub const SEPOLIA_ID: ChainId = 11155111;
-pub const TESTING_CHAIN_ID: ChainId = 55511555;
+pub const TEST_CHAIN_ID_1: ChainId = 55511555;
+pub const TEST_CHAIN_ID_2: ChainId = 1114;
 pub const MAINNET_MERGE_BLOCK_NUMBER: u64 = 15537394;
 
 pub const DEFAULT_CALLER: Address = address!("1111111111111111111111111111111111111111");
 
 pub static CHAIN_MAP: Lazy<HashMap<ChainId, &'static Lazy<ChainSpec>>> = Lazy::new(|| {
     HashMap::from([
-        (MAINNET_ID, &ETH_MAINNET_CHAIN_SPEC),
-        (SEPOLIA_ID, &ETH_SEPOLIA_CHAIN_SPEC),
-        (TESTING_CHAIN_ID, &TESTING_CHAIN_SPEC),
+        (Chain::mainnet().id(), &ETH_MAINNET_CHAIN_SPEC),
+        (Chain::sepolia().id(), &ETH_SEPOLIA_CHAIN_SPEC),
+        (TEST_CHAIN_ID_1, &TESTING_CHAIN_SPEC),
+        (TEST_CHAIN_ID_2, &TESTING_CHAIN_SPEC),
     ])
 });
 
 pub static CHAIN_NAMES: Lazy<HashMap<String, ChainId>> = Lazy::new(|| {
     HashMap::from([
-        ("mainnet".into(), MAINNET_ID),
-        ("sepolia".into(), SEPOLIA_ID),
+        ("mainnet".into(), Chain::mainnet().id()),
+        ("sepolia".into(), Chain::sepolia().id()),
     ])
 });
 
 pub static ETH_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
     ChainSpec::new(
-        MAINNET_ID,
+        Chain::mainnet().id(),
         SpecId::CANCUN,
         BTreeMap::from([
             (
@@ -48,7 +49,7 @@ pub static ETH_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
 
 pub static ETH_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
     ChainSpec::new(
-        SEPOLIA_ID,
+        Chain::sepolia().id(),
         SpecId::CANCUN,
         BTreeMap::from([
             (SpecId::MERGE, ForkCondition::Block(1735371)),
@@ -61,7 +62,7 @@ pub static ETH_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
 
 pub static TESTING_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
     ChainSpec::new(
-        TESTING_CHAIN_ID,
+        TEST_CHAIN_ID_1,
         SpecId::CANCUN,
         BTreeMap::from([
             (SpecId::MERGE, ForkCondition::Block(1)),

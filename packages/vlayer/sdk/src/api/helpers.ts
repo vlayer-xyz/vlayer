@@ -3,11 +3,13 @@ import type { Address, HttpTransport } from "viem";
 
 import { createTestClient, walletActions, publicActions, http } from "viem";
 import { privateKeyToAccount, generatePrivateKey } from 'viem/accounts'
-import { foundry, mainnet, sepolia } from "viem/chains";
+import { foundry } from "viem/chains";
 
-const rpcUrls: Map<number, HttpTransport> = new Map([[sepolia.id, http()], [mainnet.id, http("http://127.0.0.1:8546")]]);
+export const testChainId1 = 55511555;
+export const testChainId2 = 1114;
+const rpcUrls: Map<number, HttpTransport> = new Map([[testChainId1, http()], [testChainId2, http("http://127.0.0.1:8546")]]);
 
-export function client(chainId: number = sepolia.id) {
+export function client(chainId: number = testChainId1) {
     let transport = rpcUrls.get(chainId);
     if (transport == undefined) {
         throw Error(`No url for chainId ${chainId}`);
@@ -22,7 +24,7 @@ export function client(chainId: number = sepolia.id) {
         .extend(publicActions);
 }
 
-export async function deployContract(contractSpec: ContractSpec, args: any[] = [], chainId: number = sepolia.id): Promise<Address> {
+export async function deployContract(contractSpec: ContractSpec, args: any[] = [], chainId: number = testChainId1): Promise<Address> {
     const ethClient = client(chainId);
     const [deployer] = await ethClient.getAddresses();
 

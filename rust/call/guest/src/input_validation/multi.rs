@@ -46,10 +46,11 @@ impl From<ValidatedMultiEvmInput> for MultiEvmEnv<WrapStateDb> {
 mod multi_evm_env_from_input {
 
     use super::*;
+    use alloy_chains::Chain;
     use as_any::Downcast;
     use call_engine::{
         block_header::eth::EthBlockHeader,
-        config::{MAINNET_ID, MAINNET_MERGE_BLOCK_NUMBER},
+        config::MAINNET_MERGE_BLOCK_NUMBER,
         evm::{env::location::ExecutionLocation, input::EvmInput},
     };
     use mpt::EMPTY_ROOT_HASH;
@@ -57,7 +58,7 @@ mod multi_evm_env_from_input {
     #[test]
     fn success() -> anyhow::Result<()> {
         let location = ExecutionLocation {
-            chain_id: MAINNET_ID,
+            chain_id: Chain::mainnet().id(),
             block_number: MAINNET_MERGE_BLOCK_NUMBER,
         };
         let expected_header = EthBlockHeader {

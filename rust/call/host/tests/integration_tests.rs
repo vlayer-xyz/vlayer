@@ -1,9 +1,9 @@
+use alloy_chains::Chain;
 use alloy_primitives::{address, b256, uint, Address, ChainId};
 use alloy_sol_types::{sol, SolCall};
 use dotenv::dotenv;
 use ethers_core::types::BlockNumber as BlockTag;
 
-use call_engine::config::{MAINNET_ID, SEPOLIA_ID};
 use call_host::{
     host::{config::HostConfig, error::HostError, Host},
     provider::{
@@ -22,11 +22,11 @@ const LATEST_BLOCK: BlockTag = BlockTag::Latest;
 fn create_test_provider_factory(test_name: &str) -> FileProviderFactory {
     let rpc_file_cache: HashMap<_, _> = HashMap::from([
         (
-            MAINNET_ID,
+            Chain::mainnet().id(),
             format!("testdata/mainnet_{test_name}_rpc_cache.json"),
         ),
         (
-            SEPOLIA_ID,
+            Chain::sepolia().id(),
             format!("testdata/sepolia_{test_name}_rpc_cache.json"),
         ),
     ]);
@@ -37,11 +37,11 @@ fn create_test_provider_factory(test_name: &str) -> FileProviderFactory {
 fn create_recording_provider_factory(test_name: &str) -> CachedProviderFactory {
     let rpc_file_cache: HashMap<_, _> = HashMap::from([
         (
-            MAINNET_ID,
+            Chain::mainnet().id(),
             format!("testdata/mainnet_{test_name}_rpc_cache.json"),
         ),
         (
-            SEPOLIA_ID,
+            Chain::sepolia().id(),
             format!("testdata/sepolia_{test_name}_rpc_cache.json"),
         ),
     ]);
@@ -51,8 +51,10 @@ fn create_recording_provider_factory(test_name: &str) -> CachedProviderFactory {
     );
     let mainnet_url = format!("https://eth-mainnet.g.alchemy.com/v2/{alchemy_key}");
     let sepolia_url = format!("https://eth-sepolia.g.alchemy.com/v2/{alchemy_key}");
-    let rpc_urls: HashMap<_, _> =
-        HashMap::from([(MAINNET_ID, mainnet_url), (SEPOLIA_ID, sepolia_url)]);
+    let rpc_urls: HashMap<_, _> = HashMap::from([
+        (Chain::mainnet().id(), mainnet_url),
+        (Chain::sepolia().id(), sepolia_url),
+    ]);
 
     CachedProviderFactory::new(rpc_urls, rpc_file_cache)
 }
@@ -142,7 +144,7 @@ mod usdt {
         let result = run::<IERC20::balanceOfCall>(
             "usdt_erc20_balance_of",
             call,
-            MAINNET_ID,
+            Chain::mainnet().id(),
             USDT_BLOCK_NO.into(),
         )?;
         assert_eq!(result._0, uint!(3_000_000_000_000_000_U256));
@@ -171,7 +173,7 @@ mod uniswap {
         let result = run::<IUniswapV3Factory::ownerCall>(
             "uniswap_factory_owner",
             call,
-            MAINNET_ID,
+            Chain::mainnet().id(),
             LATEST_BLOCK,
         )?;
         assert_eq!(
@@ -240,7 +242,7 @@ mod view {
         let result = run::<ViewCallTest::testPrecompileCall>(
             "view_precompile",
             call,
-            SEPOLIA_ID,
+            Chain::sepolia().id(),
             LATEST_BLOCK,
         )?;
         assert_eq!(
@@ -260,7 +262,7 @@ mod view {
         let result = run::<ViewCallTest::testNonexistentAccountCall>(
             "view_nonexistent_account",
             call,
-            SEPOLIA_ID,
+            Chain::sepolia().id(),
             LATEST_BLOCK,
         )?;
         assert_eq!(result.size, uint!(0_U256));
@@ -277,7 +279,7 @@ mod view {
         let result = run::<ViewCallTest::testEoaAccountCall>(
             "view_eoa_account",
             call,
-            SEPOLIA_ID,
+            Chain::sepolia().id(),
             LATEST_BLOCK,
         )?;
         assert_eq!(result.size, uint!(0_U256));
@@ -294,7 +296,7 @@ mod view {
         let result = run::<ViewCallTest::testBlockhashCall>(
             "view_blockhash",
             call,
-            SEPOLIA_ID,
+            Chain::sepolia().id(),
             VIEW_CALL_BLOCK_NO.into(),
         )?;
         assert_eq!(
@@ -311,8 +313,12 @@ mod view {
             to: VIEW_CALL,
             data: sol_call.abi_encode(),
         };
-        let result =
-            run::<ViewCallTest::testChainidCall>("view_chainid", call, SEPOLIA_ID, LATEST_BLOCK)?;
+        let result = run::<ViewCallTest::testChainidCall>(
+            "view_chainid",
+            call,
+            Chain::sepolia().id(),
+            LATEST_BLOCK,
+        )?;
         assert_eq!(result._0, uint!(11_155_111_U256));
         Ok(())
     }
@@ -327,7 +333,7 @@ mod view {
         let result = run::<ViewCallTest::testMuliContractCallsCall>(
             "view_multi_contract_calls",
             call,
-            SEPOLIA_ID,
+            Chain::sepolia().id(),
             LATEST_BLOCK,
         )?;
         assert_eq!(result._0, uint!(84_U256));
@@ -340,8 +346,13 @@ mod view {
             to: address!("d8dA6BF26964aF9D7eEd9e03E53415D37aA96045"), // vitalik.eth
             ..Default::default()
         };
-        run::<ViewCallTest::testEoaAccountCall>("view_call_eoa", call, SEPOLIA_ID, LATEST_BLOCK)
-            .expect_err("calling an EOA should fail");
+        run::<ViewCallTest::testEoaAccountCall>(
+            "view_call_eoa",
+            call,
+            Chain::sepolia().id(),
+            LATEST_BLOCK,
+        )
+        .expect_err("calling an EOA should fail");
 
         Ok(())
     }

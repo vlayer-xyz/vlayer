@@ -2,7 +2,7 @@ use alloy_primitives::{
     Address, BlockNumber, Bytes, ChainId, StorageKey, StorageValue, TxNumber, U256,
 };
 use call_engine::block_header::EvmBlockHeader;
-use call_engine::config::{CHAIN_NAMES, TESTING_CHAIN_ID};
+use call_engine::config::{CHAIN_NAMES, TEST_CHAIN_ID_1};
 use call_host::host::error::HostError;
 use call_host::proof::EIP1186Proof;
 use call_host::provider::factory::{EthersProviderFactory, ProviderFactory};
@@ -92,7 +92,7 @@ impl TestProviderFactory {
 
 impl ProviderFactory<TestProvider> for TestProviderFactory {
     fn create(&self, chain_id: ChainId) -> Result<TestProvider, HostError> {
-        if chain_id == TESTING_CHAIN_ID {
+        if chain_id == TEST_CHAIN_ID_1 {
             let pending_state_provider = self.pending_state_provider_factory.create(chain_id)?;
             Ok(TestProvider {
                 provider: Box::new(pending_state_provider),

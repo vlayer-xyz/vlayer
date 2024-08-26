@@ -10,6 +10,7 @@ risc0-zkvm = { workspace = true }
 call_engine = { path = "../engine" }
 call_guest_wrapper = { path = "../guest_wrapper" }
 mpt = { path = "../../mpt" }
+alloy-chains = { workspace = true }
 alloy-primitives = { workspace = true, features = ["rlp", "serde"] }
 ethers-providers = { workspace = true }
 ethers-core = { workspace = true }

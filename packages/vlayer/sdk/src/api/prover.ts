@@ -1,6 +1,6 @@
 import { type CallParams, type CallContext, v_call } from "./v_call";
 import { encodeFunctionData, type Address, type Abi, type Hex } from "viem";
-import { sepolia } from "viem/chains";
+import { testChainId1 } from "./helpers";
 
 type Bytecode = {
     object: Hex,
@@ -29,7 +29,7 @@ export async function prove(prover: Address, proverSpec: ContractSpec, functionN
     let call: CallParams = { to: prover, data: calldata };
     let context: CallContext = { 
         block_no: blockNo ?? 1, //TODO: remove once backend removes this field validation
-        chain_id: sepolia.id 
+        chain_id: testChainId1
     };
 
     let response = await v_call(call, context); 
