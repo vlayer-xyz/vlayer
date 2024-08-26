@@ -1754,6 +1754,7 @@ dependencies = [
 name = "call_host"
 version = "0.1.0"
 dependencies = [
+ "alloy-chains",
  "alloy-primitives",
  "alloy-sol-types",
  "anyhow",

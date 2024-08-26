@@ -35,7 +35,7 @@ mod get {
     use crate::provider::{factory::FileProviderFactory, FileProvider};
 
     use super::*;
-    use call_engine::config::MAINNET_ID;
+    use alloy_chains::Chain;
     use null_provider_factory::NullProviderFactory;
     use std::path::PathBuf;
 
@@ -58,7 +58,10 @@ mod get {
         let path_buf = PathBuf::from("testdata/mainnet_uniswap_factory_owner_rpc_cache.json");
         let provider = Rc::new(FileProvider::from_file(&path_buf)?);
 
-        let cache = RefCell::new(HashMap::from([(MAINNET_ID, Rc::clone(&provider))]));
+        let cache = RefCell::new(HashMap::from([(
+            Chain::mainnet().id(),
+            Rc::clone(&provider),
+        )]));
 
         // NullProviderFactory returns an error when it tries to create a provider.
         // If no error was returned, it means the factory did not try to create a provider and used cached provider.
@@ -67,7 +70,7 @@ mod get {
             factory: Box::new(NullProviderFactory {}),
         };
 
-        let returned_provider = cached_multi_provider.get(MAINNET_ID)?;
+        let returned_provider = cached_multi_provider.get(Chain::mainnet().id())?;
 
         assert_eq!(*provider, *returned_provider);
 
@@ -77,13 +80,13 @@ mod get {
     #[test]
     fn gets_created_provider() -> anyhow::Result<()> {
         let rpc_file_cache = HashMap::from([(
-            MAINNET_ID,
+            Chain::mainnet().id(),
             "testdata/mainnet_uniswap_factory_owner_rpc_cache.json".to_string(),
         )]);
 
         let provider_factory = FileProviderFactory::new(rpc_file_cache);
         let cached_multi_provider = CachedMultiProvider::new(provider_factory);
-        cached_multi_provider.get(MAINNET_ID)?;
+        cached_multi_provider.get(Chain::mainnet().id())?;
 
         Ok(())
     }

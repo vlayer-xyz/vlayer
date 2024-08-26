@@ -110,13 +110,12 @@ impl ProviderFactory<CachedProvider<EthersProvider<EthersClient>>> for CachedPro
 
 #[cfg(test)]
 mod test {
-    use call_engine::config::MAINNET_ID;
-
     use super::*;
+    use alloy_chains::Chain;
 
     #[test]
     fn try_new_invalid_rpc_url() -> anyhow::Result<()> {
-        let chain_id = MAINNET_ID;
+        let chain_id = Chain::mainnet().id();
         let rpc_urls = [(chain_id, "http://localhost:123".to_string())]
             .into_iter()
             .collect();
