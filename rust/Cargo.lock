@@ -1561,6 +1561,9 @@ name = "block_proof"
 version = "0.1.0"
 dependencies = [
  "axum",
+ "serde",
+ "serde_json",
+ "server_utils",
  "tokio",
  "tower",
 ]
