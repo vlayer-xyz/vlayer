@@ -4,7 +4,7 @@ vlayer allows one to provably execute Solidity code offchain and use proof of th
 
 We also provide time-travel functionality. As a result of that - our state and storage proofs do not connect to a single block, but to multiple blocks. In order to prove that a set of blocks belongs to the chain - we prove two facts:
 
-- All blocks belong to some sequence of blocks connected with parent hash.
+- All blocks belong to some sequence of blocks that is interconnected with parent hashes.
 - Latest block belongs to canonical chain.
 
 This service allows to prove the first statement by maintaining a data structure that contains this sequence as well as a ZK proof that it was constructed correctly. Below we provide more details.
@@ -21,7 +21,7 @@ To ensure that a piece of state belongs to a certain chain, it is essential to p
 ### Recent and historical blocks
 
 One way to prove that a block of a certain hash belongs to a chain is to run the Solidity `blockhash(uint)` function. It returns the hash of a block for a given number.
-To perform a check, we need to hash a block with a certain state root and compare it with the result of the function.
+To perform a check, we need to compare the hash from storage proof with the result of the function.
 
 However, this method is limited, as it only works for most recent 256 blocks on a given chain.
 Therefore, we need another way to prove inclusion of older blocks in the chain.
@@ -35,7 +35,7 @@ We use the following naming in this document:
 
 To prove inclusion of certain **historical blocks** in a chain, we will prove that:
 
-1. Some **recent block** belong to the chain
+1. Some **recent block** belongs to the chain
 2. Both **historical block** and **recent block** belong to the same chain
 
 A naive way to prove the inclusion proof of two blocks in the same chain is to hash all subsequent blocks from **historical block** to **recent block** and verify that each blockhash is equal to the **prevHash** value of the subsequent block.
@@ -44,7 +44,7 @@ See the diagram below for the visual.
 
 ![Schema](/images/architecture/block-proof.png)
 
-Unfortunately, this is a slow process, especially if the blocks are far away from each other on the time scale. Fortunately, there is a way to cache all proofs in advance. For this purpose, we cache block proofs in the way, that enables us to verify its correctness reliably and quickly.
+Unfortunately, this is a slow process, especially if the blocks are far away from each other on the time scale. Fortunately, there is a way to cache all proofs in advance. For this purpose, we cache block proofs in a way that enables us to verify its correctness reliably and quickly.
 
 ## Block Proof Cache
 
@@ -59,12 +59,12 @@ The following functions written in pseudocode provide more details on the Block 
 The initialize function is used to create Block Proof Cache as a Merkle Patricia Trie and insert the initial block's hash into it. It takes the following arguments:
 
 - **elf_id**: a hash of the guest binary.
-- **block**: the block header to be added.
+- **block**: the block header of the block to be added.
 
 It calculates the hash of the block using the keccak256 function on the RLP-encoded block. Then it inserts this hash into the MPT at the position corresponding to the block number. Notice that no invariants about neighbours are checked as there are no neighbours yet.
 
 ```rs
-fn initialize(elf_id: Hash, block: Block) -> (MptRoot, elf_id) {
+fn initialize(elf_id: Hash, block: BlockHeader) -> (MptRoot, elf_id) {
     let block_hash = keccak256(rlp(block));
     let mpt = new SparseMpt();
     mpt.insert(block.number, block_hash);
