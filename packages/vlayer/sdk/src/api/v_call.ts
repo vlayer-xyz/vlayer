@@ -1,4 +1,4 @@
-import {type Address} from "viem";
+import {Hex, type Address} from "viem";
 
 type Calldata = string;
 
@@ -13,10 +13,10 @@ export type CallContext = {
 }
 
 export interface Proof {
-  evm_call_result: number[],
+  evm_call_result: Hex,
   function_selector: string,
   prover_contract_address: Address,
-  seal: number[],
+  seal: Hex,
 }
 
 export interface VCallResponse {

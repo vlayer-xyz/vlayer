@@ -9,8 +9,7 @@
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.7",
-    "@types/bun": "latest"
-    "@wagmi/cli": "^2.1.15",
+    "@types/bun": "latest",
     "abitype": "^1.0.6"
   },
   "peerDependencies": {

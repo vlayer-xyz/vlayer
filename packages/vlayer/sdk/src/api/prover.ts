@@ -68,14 +68,14 @@ export async function completeProof<T extends Abi, F extends ContractFunctionNam
   const returnValue = decodeFunctionResult({
     abi,
     functionName,
-    data: `0x${Buffer.from(Uint8Array.from(response.result.result.evm_call_result)).toString('hex')}`,
+    data: response.result.result.evm_call_result,
   })
 
   return {proof, returnValue};
 }
 
 async function composeProof(response: VCallResponse, blockNumber: bigint) {
-  const length = EXECUTION_COMMITMENT_SIZE + response.result.result.evm_call_result.length;
+  const length = EXECUTION_COMMITMENT_SIZE + byteLength(response.result.result.evm_call_result);
   const blockHash = (await client().getBlock({
     blockNumber
   })).hash;
@@ -87,7 +87,7 @@ async function composeProof(response: VCallResponse, blockNumber: bigint) {
   const [seal] = decodeAbiParameters([parseAbiParameter([
     'Seal',
     SEAL_STRUCT
-  ])], Uint8Array.from(encodedSeal));
+  ])], encodedSeal);
 
   return {
     length: BigInt(length),
@@ -99,4 +99,8 @@ async function composeProof(response: VCallResponse, blockNumber: bigint) {
     },
     seal
   }
+}
+
+function byteLength(hex: Hex): number {
+  return (hex.length - 2) / 2;
 }
