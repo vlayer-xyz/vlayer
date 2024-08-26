@@ -46,13 +46,11 @@ export async function deployContract(contractSpec: ContractSpec, args: any[] = [
 
   const receipt = await ethClient.waitForTransactionReceipt({hash: txHash})
 
-  let adddress = receipt.contractAddress;
-
-  if (adddress === undefined || adddress === null) {
+  if (receipt.status != 'success') {
     throw new Error(`Contract deployment failed with status: ${receipt.status}`);
   }
 
-  return adddress;
+  return receipt.contractAddress;
 }
 
 

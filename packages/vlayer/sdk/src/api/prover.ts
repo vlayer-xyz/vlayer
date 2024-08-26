@@ -60,7 +60,7 @@ export async function completeProof<T extends Abi, F extends ContractFunctionNam
   let call: CallParams = {to: prover, data: calldata};
   let context: CallContext = {
     block_no: blockNo ?? 1, //TODO: remove once backend removes this field validation
-    chain_id: sepolia.id
+    chain_id: testChainId1
   };
 
   const response = await v_call(call, context);

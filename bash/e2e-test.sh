@@ -6,7 +6,10 @@ VLAYER_HOME=$(git rev-parse --show-toplevel)
 
 PROVING_MODE=${PROVING_MODE:-dev}
 
-source ${VLAYER_HOME}/bash/build_ts_types.sh
+echo Generating typescript bidings ...
+${VLAYER_HOME}/bash/build_ts_types.sh >/dev/null
+
+echo Running services...
 source ${VLAYER_HOME}/bash/run-services.sh
 
 for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ; do
