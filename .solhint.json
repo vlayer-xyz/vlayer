@@ -19,6 +19,7 @@
     "no-empty-blocks": "off",
     "contract-name-camelcase": "off",
     "no-inline-assembly": "off",
-    "reason-string": ["warn", { "maxLength": 64 }]
+    "reason-string": ["warn", { "maxLength": 64 }],
+    "one-contract-per-file": "off"
   }
 }

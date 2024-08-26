@@ -12,12 +12,12 @@ contract FakeProofVerifier_Tests is Test {
     Groth16ProofVerifier verifier = new Groth16ProofVerifier();
 
     function test_usesGroth16ProofMode() public view {
-        assert(verifier.proofMode() == ProofMode.GROTH16);
+        assert(verifier.PROOF_MODE() == ProofMode.GROTH16);
     }
 
     function test_usesGroth16RiscZeroVerifier() public {
         RiscZeroGroth16Verifier mockVerifier =
             new RiscZeroGroth16Verifier(ControlID.CONTROL_ROOT, ControlID.BN254_CONTROL_ID);
-        assertEq(address(verifier.verifier()).codehash, address(mockVerifier).codehash);
+        assertEq(address(verifier.VERIFIER()).codehash, address(mockVerifier).codehash);
     }
 }
