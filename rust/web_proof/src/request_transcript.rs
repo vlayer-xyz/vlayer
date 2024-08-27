@@ -48,7 +48,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn parse_real_url() {
+    fn parse_real_url_with_single_slice_transcript() {
         let transcript = RequestTranscript {
             transcript: RedactedTranscript::new(
                 1998,
@@ -65,7 +65,7 @@ mod tests {
     }
 
     #[test]
-    fn multiple_slice() {
+    fn parse_real_url_with_multiple_slice_transcript() {
         let transcript = RequestTranscript {
             transcript: RedactedTranscript::new(
                 1998,
