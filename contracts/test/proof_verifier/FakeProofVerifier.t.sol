@@ -12,13 +12,13 @@ contract FakeProofVerifier_Tests is Test {
     FakeProofVerifier verifier = new FakeProofVerifier();
 
     function test_usesFakeProofMode() public view {
-        assert(verifier.proofMode() == ProofMode.FAKE);
+        assert(verifier.PROOF_MODE() == ProofMode.FAKE);
     }
 
     function test_usesMockRiscZeroVerifier() public {
         RiscZeroMockVerifier mockVerifier = new RiscZeroMockVerifier(FAKE_VERIFIER_SELECTOR);
 
-        assertEq(address(verifier.verifier()).codehash, address(mockVerifier).codehash);
+        assertEq(address(verifier.VERIFIER()).codehash, address(mockVerifier).codehash);
     }
 
     function test_cannotBeCreatedOnMainnet() public {

@@ -3,7 +3,6 @@ pragma solidity ^0.8.13;
 
 import { ECDSA } from "openzeppelin-contracts/contracts/utils/cryptography/ECDSA.sol";
 import { MessageHashUtils } from "openzeppelin-contracts/contracts/utils/cryptography/MessageHashUtils.sol";
-import { Strings } from "openzeppelin/contracts/utils/Strings.sol";
 import { IERC20 } from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 import { Prover } from "vlayer/Prover.sol";
 
@@ -16,11 +15,11 @@ contract PrivateAirdropProver is Prover {
         TOKEN = token;
     }
 
-    function nullifier(address _addr) public view returns (bytes32) {
+    function nullifier(address _addr) public pure returns (bytes32) {
         return(keccak256(abi.encodePacked(_addr)));
     }
 
-    function main(address account, bytes memory signature) public returns (uint256, bytes32) {
+    function main(address account, bytes memory signature) public view returns (uint256, bytes32) {
         uint256 balance = TOKEN.balanceOf(account);
         require(balance > 0, "Insufficient balance");
 

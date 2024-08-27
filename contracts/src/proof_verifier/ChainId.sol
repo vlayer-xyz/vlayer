@@ -9,13 +9,13 @@ library ChainIdLibrary {
     }
 
     function is_mainnet() internal view returns (bool) {
-        uint256[2] memory MAINNETS = [
+        uint256[2] memory mainnets = [
             uint256(1), // Ethereum
             uint256(10) // Optimism
         ];
 
-        for (uint256 i = 0; i < MAINNETS.length; i++) {
-            if (MAINNETS[i] == block.chainid) {
+        for (uint256 i = 0; i < mainnets.length; i++) {
+            if (mainnets[i] == block.chainid) {
                 return true;
             }
         }

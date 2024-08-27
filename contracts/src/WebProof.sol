@@ -2,12 +2,12 @@
 pragma solidity ^0.8.13;
 
 struct WebProof {
-    string web_proof_json;
+    string webProofJson;
 }
 
 library WebProofLib {
 
-    address constant VERIFY_AND_PARSE_PRECOMPILE = address(0x100);
+    address private constant VERIFY_AND_PARSE_PRECOMPILE = address(0x100);
 
     function verify(WebProof memory) internal pure returns (bool) {
         return true;
@@ -16,7 +16,7 @@ library WebProofLib {
     function url(
         WebProof memory webProof
     ) internal view returns (string memory) {
-        (bool success, bytes memory returnData) = VERIFY_AND_PARSE_PRECOMPILE.staticcall(bytes(webProof.web_proof_json));
+        (bool success, bytes memory returnData) = VERIFY_AND_PARSE_PRECOMPILE.staticcall(bytes(webProof.webProofJson));
 
         require(success, "verify_and_parse precompile call failed");
 
@@ -27,9 +27,7 @@ library WebProofLib {
         return "";
     }
 
-    function serverName(
-        WebProof memory webProof
-    ) internal pure returns (string memory) {
+    function serverName(WebProof memory) internal pure returns (string memory) {
         return "";
     }
 }

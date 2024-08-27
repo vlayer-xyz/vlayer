@@ -15,8 +15,8 @@ import {TestHelpers, PROVER, SELECTOR} from "../helpers/TestHelpers.sol";
 
 contract ProofVerifierUnderTest is ProofVerifierBase {
     constructor(IRiscZeroVerifier _verifier, ProofMode _proofMode) {
-        verifier = _verifier;
-        proofMode = _proofMode;
+        VERIFIER = _verifier;
+        PROOF_MODE = _proofMode;
     }
 }
 

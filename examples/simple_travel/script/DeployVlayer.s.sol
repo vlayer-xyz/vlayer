@@ -2,7 +2,8 @@
 pragma solidity ^0.8.13;
 
 import {Script} from "forge-std/Script.sol";
-import {console2} from "forge-std/console2.sol";
+// solhint-disable-next-line no-console
+import { console2 } from "forge-std/console2.sol";
 
 import {SimpleTravelProver} from "../src/vlayer/SimpleTravelProver.sol";
 
@@ -14,6 +15,7 @@ contract SimpleTravelScript is Script {
         vm.startBroadcast(deployerPrivateKey);
 
         SimpleTravelProver simpleTravelProver = new SimpleTravelProver();
+        // solhint-disable-next-line no-console
         console2.log("SimpleTravelProver contract deployed to:", address(simpleTravelProver));
     }
 }
