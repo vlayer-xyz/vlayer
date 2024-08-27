@@ -21,11 +21,12 @@ pub struct Web {
 }
 
 pub fn verify_and_parse(web_proof: WebProof) -> Result<Web, WebCreationError> {
+    let server_name = web_proof.get_server_name();
     let request = web_proof.verify()?;
 
     Ok(Web {
         url: request.parse_url()?,
-        server_name: web_proof.get_server_name(),
+        server_name,
     })
 }
 
