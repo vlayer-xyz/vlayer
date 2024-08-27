@@ -57,8 +57,7 @@ contract ProverTest is VTest {
 
     // NOTE: vm.expectRevert doesn't work correctly with errors thrown by inspectors, so we check manually
     function test_unexpectedCheatCodeCallFails() public {
-        // NOTE: vm.expectRevert doesn't work correctly with errors thrown by inspectors, so we check manually
-        // solhint-disable-next-line
+        // solhint-disable-next-line avoid-low-level-calls
         (bool result, bytes memory error) = CHEATCODES.call(
             abi.encodeWithSelector(
                 IFakeCheatcode.thisCheatCodeDoesNotExist.selector
