@@ -2,7 +2,6 @@
 pragma solidity ^0.8.13;
 
 import {IRiscZeroVerifier} from "risc0-ethereum/IRiscZeroVerifier.sol";
-import "forge-std/console.sol";
 import {Proof, ProofLib} from "./Proof.sol";
 import {Seal, SealLib} from "./Seal.sol";
 
@@ -35,7 +34,6 @@ abstract contract Verifier {
 
         uint256 journalEnd = JOURNAL_OFFSET + proof.length;
         bytes memory journal = msg.data[JOURNAL_OFFSET:journalEnd];
-        console.logBytes(journal);
         bytes32 journalHash = sha256(journal);
 
         return (proof, journalHash);

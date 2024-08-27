@@ -22,6 +22,6 @@ impl ExecutionCommitment {
     }
 
     pub fn size() -> usize {
-        Self::ENCODED_SIZE.unwrap()
+        Self::ENCODED_SIZE.expect("ExecutionCommitment compiletime size does not exist")
     }
 }
