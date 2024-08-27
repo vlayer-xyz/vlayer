@@ -1,26 +1,54 @@
-use axum::{
-    body::Body,
-    http::{Request, Response, StatusCode},
-};
+use axum::{body::Body, http::StatusCode, serve};
 use block_proof::server;
+use reqwest::{header, Client, Method, Response};
 use serde::Serialize;
-use serde_json::{json, to_string};
+use serde_json::{from_slice, json, to_string, Value};
 use server_utils::body_to_json;
-use tower::ServiceExt;
 
-async fn post<T: Serialize>(url: &str, body: &T) -> Response<Body> {
+async fn post(url: &str, body: Value) -> Response {
     let app = server();
-    let request = Request::post(url)
-        .body(Body::from(to_string(body).unwrap()))
-        .unwrap();
-    app.oneshot(request).await.unwrap()
+    let addr = "127.0.0.1:4000";
+    let listener = tokio::net::TcpListener::bind(addr).await.unwrap();
+    serve(listener, app).await.unwrap();
+
+    Client::new()
+        .post(addr.to_string() + url)
+        .header("Content-Type", "application/json")
+        .json(&body)
+        .send()
+        .await
+        .unwrap() // TODO: handle error?
 }
 
 #[tokio::test]
 async fn http_not_found() {
     let empty_body = json!({});
-    let response = post("/non_existing", &empty_body).await;
+    let response = post("/non_existing", empty_body).await;
     assert_eq!(StatusCode::NOT_FOUND, response.status());
+}
+
+#[tokio::test]
+async fn method_missing() {
+    let req = json!({
+        "params": [],
+        "id": 1,
+        "jsonrpc": "2.0",
+    });
+
+    let response = post("/", req).await;
+    assert_eq!(StatusCode::OK, response.status());
+    assert_eq!(
+        json!({
+            "jsonrpc": "2.0",
+            "id": 1,
+            "error": {
+                "code": -32601,
+                "message": "Method missing",
+                "data": null
+            }
+        }),
+        response.json::<Value>().await.unwrap()
+    );
 }
 
 #[tokio::test]
@@ -31,7 +59,7 @@ async fn method_not_found() {
         "id": 1,
         "jsonrpc": "2.0",
     });
-    let response = post("/", &req).await;
+    let response = post("/", req).await;
 
     assert_eq!(StatusCode::OK, response.status());
     assert_eq!(
@@ -44,6 +72,6 @@ async fn method_not_found() {
                 "data": null
             }
         }),
-        body_to_json(response.into_body()).await
+        response.json::<Value>().await.unwrap()
     );
 }

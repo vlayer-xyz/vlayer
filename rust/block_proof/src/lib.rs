@@ -1,14 +1,19 @@
-use axum::{routing::post, Router};
+use axum::{routing::post, Json, Router};
+use serde::Deserialize;
 use serde_json::{from_str, json, to_string, Value};
 
-async fn method_not_found(payload: String) -> String {
-    let payload: Value = from_str(&payload).unwrap();
+#[derive(Deserialize)]
+struct Request {
+    method: String
+}
+
+async fn method_not_found(Json(payload): Json<Request>) -> String {
     to_string(&json!({
         "jsonrpc": "2.0",
         "id": 1,
         "error": {
             "code": -32601,
-            "message": format!("Method {} not found", payload["method"]),
+            "message": format!("Method {} not found", payload.method),
             "data": null
         }
     }))
