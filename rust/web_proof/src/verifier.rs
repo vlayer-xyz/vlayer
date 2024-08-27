@@ -31,9 +31,10 @@ pub fn verify_and_parse(web_proof: WebProof) -> Result<Web, VerificationError> {
     let (sent, _recv) = verify_proof(web_proof)?;
     let request = RequestTranscript::new(sent);
 
-    let url = request.parse_url()?;
-
-    Ok(Web { url, server_name })
+    Ok(Web {
+        url: request.parse_url()?,
+        server_name,
+    })
 }
 
 fn verify_proof(
