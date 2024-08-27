@@ -5,6 +5,7 @@ use revm::primitives::BlockEnv;
 use serde::{Deserialize, Serialize};
 
 use super::{EvmBlockHeader, Hashable};
+use crate::block_header::casting_utils::try_downcast;
 
 /// Ethereum post-merge block header.
 #[derive(Debug, Clone, Serialize, Deserialize, RlpEncodable, Default, PartialEq)]
@@ -57,6 +58,14 @@ impl Hashable for EthBlockHeader {
     #[inline]
     fn hash_slow(&self) -> B256 {
         keccak256(alloy_rlp::encode(self))
+    }
+}
+
+impl TryFrom<&dyn EvmBlockHeader> for EthBlockHeader {
+    type Error = &'static str;
+
+    fn try_from(header: &dyn EvmBlockHeader) -> Result<Self, Self::Error> {
+        try_downcast(header)
     }
 }
 

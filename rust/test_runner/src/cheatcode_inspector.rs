@@ -1,10 +1,9 @@
-use alloy_primitives::{keccak256, FixedBytes, B256};
-use alloy_sol_types::SolCall;
+use alloy_sol_types::{SolCall, SolType};
 use call_engine::io::{Call, HostOutput};
 use call_engine::utils::evm_call::{
     create_encoded_return_outcome, create_return_outcome, create_revert_outcome, split_calldata,
 };
-use call_engine::{Proof, ProofMode, Seal};
+use call_engine::{ExecutionCommitment, Proof, Seal};
 use call_host::host::config::HostConfig;
 use call_host::host::Host;
 use foundry_config::RpcEndpoints;
@@ -86,21 +85,22 @@ impl CheatcodeInspector {
     }
 
     fn host_output_into_proof(host_output: &HostOutput) -> Proof {
-        let mut commitment = host_output.guest_output.execution_commitment.clone();
-        commitment.settleBlockHash = Self::forge_block_hash(commitment.settleBlockNumber);
+        let commitment = host_output.guest_output.execution_commitment.clone();
+
+        let decoded_seal = Seal::abi_decode(&host_output.seal, true)
+            .unwrap_or_else(|_| panic!("Failed to decode seal: {:x?}", host_output.seal));
+
         Proof {
-            seal: Seal {
-                seal: [FixedBytes::new([0; 32]); 8],
-                mode: ProofMode::FAKE,
-            },
-            // We don't have journal data here yet, to be added later
-            length: U256::ZERO,
+            seal: decoded_seal,
+            length: Self::proof_length(host_output),
             commitment,
         }
     }
 
-    fn forge_block_hash(block_number: U256) -> B256 {
-        keccak256(block_number.to_string())
+    fn proof_length(host_output: &HostOutput) -> U256 {
+        (ExecutionCommitment::size() + host_output.guest_output.evm_call_result.len())
+            .try_into()
+            .unwrap()
     }
 }
 
@@ -121,21 +121,4 @@ fn create_host<DB: Database>(
         },
     )
     .expect("Failed to create host")
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_forge_block_hash_is_hash_of_block_number_as_string() {
-        assert_eq!(
-            CheatcodeInspector::forge_block_hash(U256::from(1)),
-            keccak256("1")
-        );
-        assert_eq!(
-            CheatcodeInspector::forge_block_hash(U256::from(12345)),
-            keccak256("12345")
-        );
-    }
 }

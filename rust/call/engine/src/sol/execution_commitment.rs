@@ -4,6 +4,7 @@ mod private {
 }
 
 use alloy_primitives::{Address, U256};
+use alloy_sol_types::SolType;
 /// Solidity struct representing the committed block used for validation.
 pub use private::ExecutionCommitment;
 
@@ -18,5 +19,9 @@ impl ExecutionCommitment {
             settleBlockHash: header.hash_slow(),
             settleBlockNumber: U256::from(header.number()),
         }
+    }
+
+    pub fn size() -> usize {
+        Self::ENCODED_SIZE.unwrap()
     }
 }
