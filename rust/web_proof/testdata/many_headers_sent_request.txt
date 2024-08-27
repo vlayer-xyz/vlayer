@@ -1,0 +1,62 @@
+GET https://api.x.com/1.1/account/settings.json?include_ext_sharing_audiospaces_listening_data_with_followers=true&include_mention_filter=true&include_nsfw_user_flag=true&include_nsfw_admin_flag=true&include_ranked_timeline=true&include_alt_text_compose=true&ext=ssoConnections&include_country_code=true&include_ext_dm_nsfw_media_filter=true HTTP/1.1
+sec-ch-ua: "Not/A)Brand";v="8", "Chromium";v="126", "Google Chrome";v="126"
+user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36
+sec-fetch-site: same-site
+x-twitter-client-language: en
+authorization: Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA
+host: api.x.com
+x-csrf-token: 5532e73ea84ce07e35cbadd2ed23a5d13ebf81013c62bcca7e2b313ab997e6dbcb0079606f0edb31495f79c0d227617ace140b4d2d7feec35140f81900ddcdc9a6a2aa526ed44d81da64c4cc3071c003
+origin: https://x.com
+referer: https://x.com/
+sec-fetch-dest: empty
+x-twitter-auth-type: OAuth2Session
+x-twitter-active-user: yes
+sec-fetch-mode: cors
+accept-encoding: identity
+cookie: night_mode=2; d_prefs=MToxLGNvbnNlbnRfdmVyc2lvbjoyLHRleHRfdmVyc2lvbjoxMDAw; guest_id_ads=v1%3A172112734919478519; guest_id_marketing=v1%3A172112734919478519; personalization_id="v1_DWIoHzVtnmo6VSp962n+oQ=="; kdt=T1AH8upc4gBy3fB4AzD7Cjl03bj7Tp5KN3D5f65w; dnt=1; guest_id=v1%3A172405775961695014; gt=1825456667967864948; auth_token=53a46f71ea629011c34f5906108e6ab9a5e7de52; ct0=5532e73ea84ce07e35cbadd2ed23a5d13ebf81013c62bcca7e2b313ab997e6dbcb0079606f0edb31495f79c0d227617ace140b4d2d7feec35140f81900ddcdc9a6a2aa526ed44d81da64c4cc3071c003; att=1-xEq9bxa9ttP8geL0xsH2V92H28uD8jnW05VVEPih; twid=u%3D1813496899858575360
+sec-ch-ua-mobile: ?0
+accept: */*
+accept-language: en-GB,en-US;q=0.9,en;q=0.8
+connection: close
+sec-ch-ua-platform: "macOS"
+x-client-transaction-id: PkAGf3URUrsuJ8fIT07+T5CxEfvtJQEA9Hvi11ilT74DFyv7QHnMLcOLfIHvAQgJokKYTTxB3ZxfClUdhm6BpRKbSdLUPQ
+user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36
+sec-fetch-site: same-site
+x-twitter-client-language: en
+authorization: Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA
+host: api.x.com
+x-csrf-token: 5532e73ea84ce07e35cbadd2ed23a5d13ebf81013c62bcca7e2b313ab997e6dbcb0079606f0edb31495f79c0d227617ace140b4d2d7feec35140f81900ddcdc9a6a2aa526ed44d81da64c4cc3071c003
+origin: https://x.com
+referer: https://x.com/
+sec-fetch-dest: empty
+x-twitter-auth-type: OAuth2Session
+x-twitter-active-user: yes
+sec-fetch-mode: cors
+accept-encoding: identity
+cookie: night_mode=2; d_prefs=MToxLGNvbnNlbnRfdmVyc2lvbjoyLHRleHRfdmVyc2lvbjoxMDAw; guest_id_ads=v1%3A172112734919478519; guest_id_marketing=v1%3A172112734919478519; personalization_id="v1_DWIoHzVtnmo6VSp962n+oQ=="; kdt=T1AH8upc4gBy3fB4AzD7Cjl03bj7Tp5KN3D5f65w; dnt=1; guest_id=v1%3A172405775961695014; gt=1825456667967864948; auth_token=53a46f71ea629011c34f5906108e6ab9a5e7de52; ct0=5532e73ea84ce07e35cbadd2ed23a5d13ebf81013c62bcca7e2b313ab997e6dbcb0079606f0edb31495f79c0d227617ace140b4d2d7feec35140f81900ddcdc9a6a2aa526ed44d81da64c4cc3071c003; att=1-xEq9bxa9ttP8geL0xsH2V92H28uD8jnW05VVEPih; twid=u%3D1813496899858575360
+sec-ch-ua-mobile: ?0
+accept: */*
+accept-language: en-GB,en-US;q=0.9,en;q=0.8
+connection: close
+sec-ch-ua-platform: "macOS"
+x-client-transaction-id: PkAGf3URUrsuJ8fIT07+T5CxEfvtJQEA9Hvi11ilT74DFyv7QHnMLcOLfIHvAQgJokKYTTxB3ZxfClUdhm6BpRKbSdLUPQ
+user-agent: Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36
+sec-fetch-site: same-site
+x-twitter-client-language: en
+authorization: Bearer AAAAAAAAAAAAAAAAAAAAANRILgAAAAAAnNwIzUejRCOuH5E6I8xnZz4puTs%3D1Zv7ttfk8LF81IUq16cHjhLTvJu4FA33AGWWjCpTnA
+host: api.x.com
+x-csrf-token: 5532e73ea84ce07e35cbadd2ed23a5d13ebf81013c62bcca7e2b313ab997e6dbcb0079606f0edb31495f79c0d227617ace140b4d2d7feec35140f81900ddcdc9a6a2aa526ed44d81da64c4cc3071c003
+origin: https://x.com
+referer: https://x.com/
+sec-fetch-dest: empty
+x-twitter-auth-type: OAuth2Session
+x-twitter-active-user: yes
+sec-fetch-mode: cors
+accept-encoding: identity
+cookie: night_mode=2; d_prefs=MToxLGNvbnNlbnRfdmVyc2lvbjoyLHRleHRfdmVyc2lvbjoxMDAw; guest_id_ads=v1%3A172112734919478519; guest_id_marketing=v1%3A172112734919478519; personalization_id="v1_DWIoHzVtnmo6VSp962n+oQ=="; kdt=T1AH8upc4gBy3fB4AzD7Cjl03bj7Tp5KN3D5f65w; dnt=1; guest_id=v1%3A172405775961695014; gt=1825456667967864948; auth_token=53a46f71ea629011c34f5906108e6ab9a5e7de52; ct0=5532e73ea84ce07e35cbadd2ed23a5d13ebf81013c62bcca7e2b313ab997e6dbcb0079606f0edb31495f79c0d227617ace140b4d2d7feec35140f81900ddcdc9a6a2aa526ed44d81da64c4cc3071c003; att=1-xEq9bxa9ttP8geL0xsH2V92H28uD8jnW05VVEPih; twid=u%3D1813496899858575360
+sec-ch-ua-mobile: ?0
+accept: */*
+accept-language: en-GB,en-US;q=0.9,en;q=0.8
+connection: close
+sec-ch-ua-platform: "macOS"
+x-client-transaction-id: PkAGf3URUrsuJ8fIT07+T5CxEfvtJQEA9Hvi11ilT74DFyv7QHnMLcOLfIHvAQgJokKYTTxB3ZxfClUdhm6BpRKbSdLUPQ

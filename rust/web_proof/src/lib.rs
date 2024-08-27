@@ -1,4 +1,5 @@
 #[cfg(any(test, feature = "fixtures"))]
 pub mod fixtures;
+mod request_transcript;
 pub mod types;
 pub mod verifier;
