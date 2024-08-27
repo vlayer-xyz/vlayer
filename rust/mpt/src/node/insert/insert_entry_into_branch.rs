@@ -1,15 +1,17 @@
-use crate::node::Node;
+use crate::node::{MPTError, Node};
 
 use super::entry::Entry;
 
 impl Node {
     #[allow(clippy::wrong_self_convention)]
-    pub(crate) fn insert_entry_into_branch(self, entry: Entry) -> Result<Node, String> {
+    pub(crate) fn insert_entry_into_branch(self, entry: Entry) -> Result<Node, MPTError> {
         if let Node::Branch(children, branch_value) = self {
             let mut children = children;
             if entry.key.is_empty() {
                 if branch_value.is_some() {
-                    return Err("Key already exists".to_string());
+                    return Err(MPTError::DuplicatedKey(
+                        String::from_utf8(entry.key.to_vec()).expect("Invalid UTF-8"),
+                    ));
                 } else {
                     return Ok(Node::Branch(children.clone(), Some(entry.value)));
                 }
@@ -27,7 +29,7 @@ impl Node {
 
             Ok(Node::Branch(children.clone(), branch_value.clone()))
         } else {
-            unreachable!("from_branch_and_entry is used only for Branch nodes");
+            unreachable!("insert_entry_into_branch is used only for Branch nodes");
         }
     }
 }
@@ -39,7 +41,7 @@ mod tests {
     use super::*;
 
     #[test]
-    #[should_panic(expected = "from_branch_and_entry is used only for Branch nodes")]
+    #[should_panic(expected = "insert_entry_into_branch is used only for Branch nodes")]
     fn unreachable() {
         let leaf = Node::leaf([0x0], [42]);
         let _ = leaf.insert_entry_into_branch(([0x0], [42]).into());
@@ -63,7 +65,7 @@ mod tests {
             let branch = Node::branch(EMPTY_CHILDREN.clone(), Some([42]));
             let result = branch.insert_entry_into_branch(([], [43]).into());
             assert!(result.is_err(), "Expected an error, but got Ok");
-            assert_eq!(result.unwrap_err(), "Key already exists");
+            assert_eq!(result.unwrap_err(), MPTError::DuplicatedKey("".to_string()));
         }
     }
 
@@ -106,7 +108,7 @@ mod tests {
             use super::*;
 
             #[test]
-            #[should_panic(expected = "Key already exists")]
+            #[should_panic(expected = "DuplicatedKey(\"\")")]
             fn no_nibble_remaining() {
                 let mut children = EMPTY_CHILDREN.clone();
                 children[0] = Some(Box::new(Node::branch(EMPTY_CHILDREN.clone(), Some([42]))));

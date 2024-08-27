@@ -65,7 +65,7 @@ mod insert {
         use super::*;
 
         #[test]
-        #[should_panic(expected = "Key already exists")]
+        #[should_panic(expected = "DuplicatedKey(\"\\0\\0\")")]
         fn duplicate_key() {
             // Trie::insert always inserts even number of nibbles so two is the minimal
             // number of nibbles for a leaf, cause leafs cannot have empty keys.
@@ -106,7 +106,7 @@ mod insert {
         use super::*;
 
         #[test]
-        #[should_panic(expected = "Key already exists")]
+        #[should_panic(expected = "DuplicatedKey(\"\")")]
         fn duplicate_key() {
             let node = Node::branch(EMPTY_CHILDREN.clone(), Some([42]));
             node.insert(Nibbles::unpack([]), [43]);
