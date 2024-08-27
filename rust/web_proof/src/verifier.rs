@@ -6,7 +6,10 @@ use tlsn_core::{
     RedactedTranscript, ServerName,
 };
 
-use crate::types::WebProof;
+use crate::{
+    request_transcript::{ParsingError, RequestTranscript},
+    types::WebProof,
+};
 use thiserror::Error;
 
 const MAX_HEADERS_NUMBER: usize = 40;
@@ -30,6 +33,9 @@ pub enum VerificationError {
 
     #[error("No header found: {0}")]
     NoHeaderFound(String),
+
+    #[error("Request parsing error: {0}")]
+    ParsingError(#[from] ParsingError),
 }
 
 pub struct Web {
@@ -39,16 +45,10 @@ pub struct Web {
 
 pub fn verify_and_parse(web_proof: WebProof) -> Result<Web, VerificationError> {
     let ServerName::Dns(server_name) = web_proof.tls_proof.session.session_info.server_name.clone();
-    let (sent, recv) = verify_proof(web_proof)?;
-    let (sent_string, _recv_string) = extract_sent_recv_strings((sent, recv))?;
+    let (sent, _recv) = verify_proof(web_proof)?;
+    let request = RequestTranscript::new(sent);
 
-    let mut req_headers = [EMPTY_HEADER; MAX_HEADERS_NUMBER];
-    let req = parse_tlsn_http_request(&sent_string, &mut req_headers)?;
-
-    let url = req
-        .path
-        .ok_or(VerificationError::NoHeaderFound("path".to_string()))?
-        .to_string();
+    let url = request.parse_url()?;
 
     Ok(Web { url, server_name })
 }
