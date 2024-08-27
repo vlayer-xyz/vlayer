@@ -1,0 +1,6 @@
+{ 
+  "scripts": {
+    "lint:solidity": "solhint './src/**/*.sol'"
+  },
+  "dependencies": { "solhint": "^5.0.3" } 
+}

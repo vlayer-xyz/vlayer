@@ -2,8 +2,12 @@
   "name": "erc20_balances",
   "module": "prove.ts",
   "type": "module",
+  "scripts": {
+    "lint:solidity": "solhint '../src/**/*.sol'"
+  },
   "dependencies": {
     "@noble/hashes": "^1.4.0",
+    "solhint": "^5.0.3",
     "viem": "^2.17.5"
   },
   "peerDependencies": {

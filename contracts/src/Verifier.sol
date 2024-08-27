@@ -34,11 +34,8 @@ abstract contract Verifier {
 
         uint256 journalEnd = JOURNAL_OFFSET + proof.length;
         bytes memory journal = msg.data[JOURNAL_OFFSET:journalEnd];
-<<<<<<< HEAD
-=======
         // solhint-disable-next-line no-console
         console.logBytes(journal);
->>>>>>> b0c4f36a (rebase)
         bytes32 journalHash = sha256(journal);
 
         return (proof, journalHash);

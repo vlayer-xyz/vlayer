@@ -13,6 +13,10 @@ jobs:
       - name: Mock ImageId.sol
         run: ./bash/mock-imageid.sh
       - name: Run install bun 
+        working-directory: contracts
         run: bun install
       - name: lint:solidity
+        working-directory: contracts
         run: bun run lint:solidity
+      - name: lint Solidity examples
+        run: ./bash/lint-solidity-examples.sh
