@@ -4,6 +4,9 @@ use serde::de::Deserializer;
 use serde::{Deserialize, Serialize, Serializer};
 use thiserror::Error;
 use tlsn_core::proof::{SessionProofError, SubstringsProofError, TlsProof};
+use tlsn_core::ServerName;
+
+use crate::request_transcript::RequestTranscript;
 
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
@@ -14,6 +17,25 @@ pub struct WebProof {
     )]
     pub notary_pub_key: PublicKey,
     pub tls_proof: TlsProof,
+}
+
+impl WebProof {
+    fn verify(self) -> Result<RequestTranscript, VerificationError> {
+        let TlsProof {
+            session,
+            substrings,
+        } = self.tls_proof;
+
+        session.verify_with_default_cert  _verifier(self.notary_pub_key)?;
+        let (sent, _) = substrings.verify(&session.header)?;
+
+        Ok(RequestTranscript::new(sent))
+    }
+
+    pub fn get_server_name(self) -> String {
+        let ServerName::Dns(server_name) = self.tls_proof.session.session_info.server_name;
+        server_name
+    }
 }
 
 #[derive(Error, Debug)]
