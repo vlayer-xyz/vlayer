@@ -6,6 +6,7 @@ on:
       - "rust-toolchain.toml"
       - "rust/**"
       - "examples/**"
+      - "packages/vlayer/**"
       - "bash/**"
       - ".github/workflows/**"
 
