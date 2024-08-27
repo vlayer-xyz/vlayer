@@ -1,7 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {IRiscZeroVerifier} from "risc0-ethereum/IRiscZeroVerifier.sol";
+// solhint-disable-next-line no-console
+import { console } from "forge-std/console.sol";
 import {Proof, ProofLib} from "./Proof.sol";
 
 import {IProofVerifier} from "./proof_verifier/IProofVerifier.sol";
@@ -33,6 +34,11 @@ abstract contract Verifier {
 
         uint256 journalEnd = JOURNAL_OFFSET + proof.length;
         bytes memory journal = msg.data[JOURNAL_OFFSET:journalEnd];
+<<<<<<< HEAD
+=======
+        // solhint-disable-next-line no-console
+        console.logBytes(journal);
+>>>>>>> b0c4f36a (rebase)
         bytes32 journalHash = sha256(journal);
 
         return (proof, journalHash);

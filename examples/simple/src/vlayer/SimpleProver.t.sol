@@ -11,8 +11,8 @@ interface IFakeCheatcode {
 }
 
 contract ProverTest is VTest {
-    SimpleProver prover;
-    Simple verifier;
+    SimpleProver private prover;
+    Simple private verifier;
 
     function setUp() public {
         prover = new SimpleProver();
