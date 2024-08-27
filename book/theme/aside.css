@@ -22,13 +22,6 @@
     font-size: 20px;
   }
 
-  /* span::before {
-    content: "✓";
-    display: inline-block;
-    margin-right: 10px;
-    font-size: 24px;
-  }   */
-
   svg {
     display: inline-block;
     margin-right: 10px;
