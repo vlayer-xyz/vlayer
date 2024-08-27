@@ -56,9 +56,11 @@ async fn run() -> Result<(), CLIError> {
         }
         Commands::Init(init_args) => {
             let existing = init_args.existing;
+            let project_name = init_args.project_name;
             let template = init_args.template.unwrap_or_default();
+
             let cwd = std::env::current_dir()?;
-            init(existing, cwd, template).await?;
+            init(cwd, template, existing, project_name).await?;
         }
         Commands::Test(cmd) => {
             info!("Running vlayer tests");

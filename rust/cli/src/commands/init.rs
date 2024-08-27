@@ -15,25 +15,37 @@ const CONTRACTS_URL: &str =
     "https://vlayer-releases.s3.eu-north-1.amazonaws.com/latest/contracts.tar.gz";
 
 pub(crate) async fn init(
-    existing: bool,
-    cwd: PathBuf,
+    mut cwd: PathBuf,
     template: TemplateOption,
+    existing: bool,
+    project_name: Option<String>,
 ) -> Result<(), CLIError> {
     if !existing {
-        let output = std::process::Command::new("forge").arg("init").output()?;
+        let mut command = std::process::Command::new("forge");
+        command.arg("init");
+        if let Some(project_name) = project_name {
+            cwd.push(&project_name);
+            command.arg(project_name);
+        }
+        let output = command.output()?;
+
         if !output.status.success() {
             let stderr = String::from_utf8_lossy(&output.stderr);
             return Err(CLIError::ForgeInitError(stderr.to_string()));
         }
     }
+
     init_existing(cwd, template).await
 }
 
 pub(crate) async fn init_existing(cwd: PathBuf, template: TemplateOption) -> Result<(), CLIError> {
     info!("Running vlayer init from directory {:?}", cwd.display());
+
     let root_path = find_foundry_root(&cwd)?;
     let src_path = find_src_path(&root_path)?;
+
     info!("Found foundry project root in \"{}\"", &src_path.display());
+
     if vlayer_dir_exists_in(&src_path) || vlayer_dir_exists_in(&root_path) {
         error!(
             "vlayer directory already exists in \"{}\" or \"{}\". Skipping creation.",
