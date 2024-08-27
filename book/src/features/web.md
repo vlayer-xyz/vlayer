@@ -29,7 +29,7 @@ contract YouTubeRevenue is Prover {
     function main(WebProof calldata webProof, address influencerAddr) public returns (address, string) {
       webProof.verify();
       require(webProof.notaryPubKey().equal(notaryPubKey), "Invalid notary identity");
-      require(webProof.serverName().equal(serverName), "Incorrect SSL cerfiticate server name") ;
+      require(webProof.serverName().equal(serverName), "Incorrect SSL certificate server name") ;
       
       require(webProof.url().equal(dataUrl), "Incorrect URL");
       require(
