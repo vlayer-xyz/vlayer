@@ -1,5 +1,3 @@
-use std::{str::Utf8Error, string::FromUtf8Error};
-
 use tlsn_core::{
     proof::{SessionProofError, SubstringsProofError, TlsProof},
     RedactedTranscript, ServerName,
@@ -18,18 +16,6 @@ pub enum VerificationError {
 
     #[error("Substrings proof error: {0}")]
     SubstringsProof(#[from] SubstringsProofError),
-
-    #[error("From utf8 error: {0}")]
-    FromUtf8(#[from] FromUtf8Error),
-
-    #[error("utf8 error: {0}")]
-    Utf8(#[from] Utf8Error),
-
-    #[error("Httparse error: {0}")]
-    Httparse(#[from] httparse::Error),
-
-    #[error("No header found: {0}")]
-    NoHeaderFound(String),
 
     #[error("Request parsing error: {0}")]
     ParsingError(#[from] ParsingError),
