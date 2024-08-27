@@ -54,10 +54,11 @@ async fn run() -> Result<(), CLIError> {
             let server_config: ServerConfig = ServerConfig::new(serve_args.rpc_url, proof_mode);
             run_serve(server_config).await?;
         }
-        Commands::Init(init_arg) => {
-            let template = init_arg.template.unwrap_or_default();
+        Commands::Init(init_args) => {
+            let existing = init_args.existing;
+            let template = init_args.template.unwrap_or_default();
             let cwd = std::env::current_dir()?;
-            init(cwd, template).await?;
+            init(existing, cwd, template).await?;
         }
         Commands::Test(cmd) => {
             info!("Running vlayer tests");

@@ -14,7 +14,22 @@ const VLAYER_DIR_NAME: &str = "vlayer";
 const CONTRACTS_URL: &str =
     "https://vlayer-releases.s3.eu-north-1.amazonaws.com/latest/contracts.tar.gz";
 
-pub(crate) async fn init(cwd: PathBuf, template: TemplateOption) -> Result<(), CLIError> {
+pub(crate) async fn init(
+    existing: bool,
+    cwd: PathBuf,
+    template: TemplateOption,
+) -> Result<(), CLIError> {
+    if !existing {
+        let output = std::process::Command::new("forge").arg("init").output()?;
+        if !output.status.success() {
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            return Err(CLIError::ForgeInitError(stderr.to_string()));
+        }
+    }
+    init_existing(cwd, template).await
+}
+
+pub(crate) async fn init_existing(cwd: PathBuf, template: TemplateOption) -> Result<(), CLIError> {
     info!("Running vlayer init from directory {:?}", cwd.display());
     let root_path = find_foundry_root(&cwd)?;
     let src_path = find_src_path(&root_path)?;
@@ -87,6 +102,7 @@ pub(crate) fn create_vlayer_dir(src_path: &Path) -> Result<Option<PathBuf>, CLIE
         return Ok(None);
     }
     std::fs::create_dir_all(&vlayer_dir)?;
+    info!("Created vlayer directory in \"{}\"", src_path.display());
     Ok(Some(vlayer_dir))
 }
 
