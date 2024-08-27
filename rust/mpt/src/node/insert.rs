@@ -1,13 +1,12 @@
 use self::entry::Entry;
-use self::from_branch_and_entry::from_branch_and_entry;
 use self::from_two_entries::from_two_entries;
 
 use super::Node;
 use nybbles::Nibbles;
 
 mod entry;
-mod from_branch_and_entry;
 mod from_two_entries;
+mod insert_entry_into_branch;
 mod tests;
 
 impl Node {
@@ -21,10 +20,9 @@ impl Node {
                 let entry = (&*key, value).into();
                 from_two_entries(old_entry, entry)
             }
-            Node::Branch(mut children, branch_value) => {
-                let branch = Node::Branch(children, branch_value);
-                from_branch_and_entry(branch, (&*key, value).into()).unwrap()
-            }
+            Node::Branch(_, _) => self
+                .insert_entry_into_branch((&*key, value).into())
+                .unwrap(),
             _ => todo!("Implement insert for Extension"),
         }
     }
