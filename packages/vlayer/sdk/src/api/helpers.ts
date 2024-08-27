@@ -9,33 +9,33 @@ import {
   publicActions,
   walletActions
 } from "viem";
-import { privateKeyToAccount, generatePrivateKey } from 'viem/accounts'
-import { foundry } from "viem/chains";
+import {privateKeyToAccount, generatePrivateKey} from 'viem/accounts'
+import {foundry} from "viem/chains";
 
-import type { ContractSpec } from "./prover";
+import type {ContractSpec} from "./prover";
 
 export const testChainId1 = 55511555;
 export const testChainId2 = 1114;
 const rpcUrls: Map<number, HttpTransport> = new Map([[testChainId1, http()], [testChainId2, http("http://127.0.0.1:8546")]]);
 
 export function client(chainId: number = testChainId1) {
-    let transport = rpcUrls.get(chainId);
-    if (transport == undefined) {
-        throw Error(`No url for chainId ${chainId}`);
-    }
-    
-    return createTestClient({
-        chain: foundry,
-        mode: 'anvil',
-        transport
-    })
-        .extend(walletActions)
-        .extend(publicActions);
+  let transport = rpcUrls.get(chainId);
+  if (transport == undefined) {
+    throw Error(`No url for chainId ${chainId}`);
+  }
+
+  return createTestClient({
+    chain: foundry,
+    mode: 'anvil',
+    transport
+  })
+    .extend(walletActions)
+    .extend(publicActions);
 }
 
 export async function deployContract(contractSpec: ContractSpec, args: any[] = [], chainId: number = testChainId1): Promise<Address> {
-    const ethClient = client(chainId);
-    const [deployer] = await ethClient.getAddresses();
+  const ethClient = client(chainId);
+  const [deployer] = await ethClient.getAddresses();
 
   const txHash = await ethClient.deployContract({
     abi: contractSpec.abi,
@@ -80,7 +80,13 @@ export async function writeContract<
     account,
   } as any);
 
-  return ethClient.waitForTransactionReceipt({hash: txHash});
+  const txReceipt = await ethClient.waitForTransactionReceipt({hash: txHash});
+
+  if (txReceipt.status != 'success') {
+    throw new Error(`Transaction failed with status: ${txReceipt.status}`);
+  }
+
+  return txReceipt;
 }
 
 export const getTestAccount = () => privateKeyToAccount(generatePrivateKey());

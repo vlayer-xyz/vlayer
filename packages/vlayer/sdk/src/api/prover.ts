@@ -12,7 +12,7 @@ import {
 } from "viem";
 
 import {type CallContext, type CallParams, v_call, VCallResponse} from "./v_call";
-import { testChainId1, client } from "./helpers";
+import {testChainId1, client} from "./helpers";
 
 type Bytecode = {
   object: Hex,
@@ -41,30 +41,32 @@ export async function prove(prover: Address, proverSpec: ContractSpec, functionN
     args
   });
 
-  let call: CallParams = { to: prover, data: calldata };
-    let context: CallContext = { 
-        block_no: blockNo ?? 1, //TODO: remove once backend removes this field validation
-        chain_id: testChainId1
-    };
-
-  return v_call(call, context);
-}
-
-export async function completeProof<T extends Abi, F extends ContractFunctionName<T>>(prover: Address, abi: T, functionName: F, args: ContractFunctionArgs<T, AbiStateMutability, F>, blockNo: number = 1) {
-  const calldata = encodeFunctionData({
-    abi,
-    functionName,
-    args
-  });
-
   let call: CallParams = {to: prover, data: calldata};
   let context: CallContext = {
     block_no: blockNo ?? 1, //TODO: remove once backend removes this field validation
     chain_id: testChainId1
   };
 
+  return v_call(call, context);
+}
+
+export async function completeProof<T extends Abi, F extends ContractFunctionName<T>>(prover: Address, abi: T, functionName: F, args: ContractFunctionArgs<T, AbiStateMutability, F>, blockNo?: number) {
+  const calldata = encodeFunctionData({
+    abi,
+    functionName,
+    args
+  });
+
+  const blockNumber = blockNo ?? await client().getBlockNumber();
+
+  let call: CallParams = {to: prover, data: calldata};
+  let context: CallContext = {
+    block_no: Number(blockNumber),
+    chain_id: testChainId1
+  };
+  
   const response = await v_call(call, context);
-  const proof = await composeProof(response, BigInt(blockNo));
+  const proof = await composeProof(response, BigInt(blockNumber));
   const returnValue = decodeFunctionResult({
     abi,
     functionName,
