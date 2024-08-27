@@ -12,8 +12,8 @@ struct Proof {
 }
 
 library ProofLib {
-    uint256 constant LENGTH_LEN = 32;
-    uint256 constant SEAL_LEN = 256 + 32;
+    uint256 private constant LENGTH_LEN = 32;
+    uint256 private constant SEAL_LEN = 256 + 32;
 
     uint256 public constant LENGTH_OFFSET = 0;
     uint256 public constant SEAL_OFFSET = LENGTH_LEN;

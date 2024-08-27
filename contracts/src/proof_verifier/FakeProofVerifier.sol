@@ -18,7 +18,7 @@ contract FakeProofVerifier is ProofVerifierBase {
             revert InvalidChainId();
         }
 
-        verifier = new RiscZeroMockVerifier(FAKE_VERIFIER_SELECTOR);
-        proofMode = ProofMode.FAKE;
+        VERIFIER = new RiscZeroMockVerifier(FAKE_VERIFIER_SELECTOR);
+        PROOF_MODE = ProofMode.FAKE;
     }
 }
