@@ -11,40 +11,47 @@ interface IFakeCheatcode {
 }
 
 contract ProverTest is VTest {
+    SimpleProver prover;
+    Simple verifier;
+
+    function setUp() public {
+        prover = new SimpleProver();
+        verifier = new Simple(address(prover));
+    }
+
     function test_ChainId() public view {
         assertEq(block.chainid, 55511555);
     }
 
     function test_sumDoesNotRevertWithCallProver() public {
-        SimpleProver prover = new SimpleProver();
         callProver();
         assertEq(prover.sum(1, 2), 3);
+
         Proof memory proof = getProof();
-        Simple verifier = new Simple(address(prover));
         verifier.updateSum(proof, 3);
         assertEq(verifier.latestSum(), 3);
     }
 
     function test_worksAfterRollingBlock() public {
-        SimpleProver prover = new SimpleProver();
         vm.roll(420);
         callProver();
         assertEq(prover.sum(420, 69), 489);
+
         Proof memory proof = getProof();
         assertEq(proof.commitment.settleBlockNumber, 420);
-        Simple verifier = new Simple(address(prover));
+
         verifier.updateSum(proof, 489);
         assertEq(verifier.latestSum(), 489);
     }
 
     function test_revertsOnIncorrectProof() public {
-        SimpleProver prover = new SimpleProver();
         callProver();
         assertEq(prover.sum(1, 2), 3);
+
         Proof memory proof = getProof();
-        Simple verifier = new Simple(address(prover));
         vm.expectRevert(abi.encodeWithSelector(VerificationFailed.selector));
         verifier.updateSum(proof, 4);
+
         assertEq(verifier.latestSum(), 0);
     }
 
