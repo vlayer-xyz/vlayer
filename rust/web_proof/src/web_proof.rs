@@ -2,7 +2,8 @@ use p256::PublicKey;
 use pkcs8::{DecodePublicKey, EncodePublicKey, LineEnding};
 use serde::de::Deserializer;
 use serde::{Deserialize, Serialize, Serializer};
-use tlsn_core::proof::TlsProof;
+use thiserror::Error;
+use tlsn_core::proof::{SessionProofError, SubstringsProofError, TlsProof};
 
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
@@ -13,6 +14,15 @@ pub struct WebProof {
     )]
     pub notary_pub_key: PublicKey,
     pub tls_proof: TlsProof,
+}
+
+#[derive(Error, Debug)]
+pub enum VerificationError {
+    #[error("Session proof error: {0}")]
+    SessionProof(#[from] SessionProofError),
+
+    #[error("Substrings proof error: {0}")]
+    SubstringsProof(#[from] SubstringsProofError),
 }
 
 fn deserialize_public_key_from_pem_string<'de, D>(deserializer: D) -> Result<PublicKey, D::Error>
