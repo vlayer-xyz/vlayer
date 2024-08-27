@@ -4,10 +4,12 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-axum = { workspace = true, features = ["macros"] }
-reqwest = { workspace = true }
+axum = { workspace = true, features = ["macros", "json"] }
+axum-extra = { workspace = true }
+mime = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 server_utils = { path = "../server_utils" }
+thiserror = { workspace = true }
 tokio = { workspace = true }
 tower = { workspace = true }

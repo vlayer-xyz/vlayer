@@ -49,6 +49,7 @@ alloy-trie = "0.4.1"
 as-any = "0.3.1"
 auto_impl = "1.2.0"
 axum = "0.7.5"
+axum-extra = "0.9.3"
 axum-jrpc = "0.7.1"
 clap = "4.5.9"
 color-eyre = "=0.6.3"
@@ -79,7 +80,7 @@ p256 = { version = "0.13.2", features = ["ecdsa"] }
 pkcs8 = "0.10.2"
 rayon = "1.10.0"
 regex = "1.10.4"
-reqwest = { version = "0.12.5", default-features = false, features = ["json"] }
+reqwest = { version = "0.12.5", default-features = false }
 revm = { version = "10.0.0", default-features = false }
 risc0-build-ethereum = "1.0.0"
 rlp = "0.5.2"
