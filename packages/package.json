@@ -2,10 +2,10 @@
   "name": "vlayer",
   "module": "index.ts",
   "type": "module",
-  "workspaces": ["packages/*"],
+  "workspaces": ["*"],
   "scripts": {
-    "lint": "eslint ./packages",
-    "lint:fix": "eslint ./packages --fix"
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix"
   },  
   "devDependencies": {
     "@types/bun": "latest",

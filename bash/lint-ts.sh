@@ -17,8 +17,8 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
   )
 done
 
-echo "Running eslint for: $VLAYER_HOME"
-cd "${VLAYER_HOME}"
+echo "Running eslint for: $VLAYER_HOME/packages"
+cd "${VLAYER_HOME}/packages"
 
 bun install
 bun run lint
