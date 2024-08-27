@@ -64,3 +64,23 @@ where
         .map_err(serde::ser::Error::custom)?;
     serializer.serialize_str(&key_pem)
 }
+
+#[cfg(test)]
+mod tests {
+    use crate::fixtures::{load_web_proof_fixture, NOTARY_PUB_KEY_PEM_EXAMPLE};
+
+    #[test]
+    fn fail_verification() {
+        let invalid_proof = load_web_proof_fixture(
+            "./testdata/invalid_tls_proof.json",
+            NOTARY_PUB_KEY_PEM_EXAMPLE,
+        );
+        assert!(invalid_proof.verify().is_err());
+    }
+
+    #[test]
+    fn success_verification() {
+        let proof = load_web_proof_fixture("./testdata/tls_proof.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
+        assert!(proof.verify().is_ok());
+    }
+}

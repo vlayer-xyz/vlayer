@@ -49,21 +49,6 @@ mod tests {
     use super::*;
 
     #[test]
-    fn fail_verification() {
-        let invalid_proof = load_web_proof_fixture(
-            "./testdata/invalid_tls_proof.json",
-            NOTARY_PUB_KEY_PEM_EXAMPLE,
-        );
-        assert!(verify_proof(invalid_proof).is_err());
-    }
-
-    #[test]
-    fn success_verification() {
-        let proof = load_web_proof_fixture("./testdata/tls_proof.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
-        assert!(verify_proof(proof).is_ok());
-    }
-
-    #[test]
     fn correct_web_extracted() {
         let web_proof =
             load_web_proof_fixture("./testdata/tls_proof.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
