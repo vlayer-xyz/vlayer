@@ -21,13 +21,11 @@ pub struct Web {
 }
 
 pub fn verify_and_parse(web_proof: WebProof) -> Result<Web, WebCreationError> {
-    let ServerName::Dns(server_name) = web_proof.tls_proof.session.session_info.server_name.clone();
-    let (sent, _recv) = verify_proof(web_proof)?;
-    let request = RequestTranscript::new(sent);
+    let request = web_proof.verify()?;
 
     Ok(Web {
         url: request.parse_url()?,
-        server_name,
+        server_name: web_proof.get_server_name(),
     })
 }
 
