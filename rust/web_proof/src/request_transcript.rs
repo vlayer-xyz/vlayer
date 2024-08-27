@@ -34,3 +34,29 @@ impl RequestTranscript {
         Ok(url)
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use tlsn_core::TranscriptSlice;
+
+    use crate::fixtures::read_fixture;
+
+    use super::*;
+
+    #[test]
+    fn test_parse_real_url() {
+        let transcript = RequestTranscript {
+            transcript: RedactedTranscript::new(
+                1998,
+                vec![TranscriptSlice::new(
+                    0..1998,
+                    read_fixture("./testdata/sent_request.txt")
+                        .as_bytes()
+                        .to_vec(),
+                )],
+            ),
+        };
+        let url = transcript.parse_url().unwrap();
+        assert_eq!(url, "https://api.x.com/1.1/account/settings.json?include_ext_sharing_audiospaces_listening_data_with_followers=true&include_mention_filter=true&include_nsfw_user_flag=true&include_nsfw_admin_flag=true&include_ranked_timeline=true&include_alt_text_compose=true&ext=ssoConnections&include_country_code=true&include_ext_dm_nsfw_media_filter=true");
+    }
+}
