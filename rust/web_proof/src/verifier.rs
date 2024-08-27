@@ -1,7 +1,5 @@
-use tlsn_core::{proof::TlsProof, RedactedTranscript, ServerName};
-
 use crate::{
-    request_transcript::{ParsingError, RequestTranscript},
+    request_transcript::ParsingError,
     web_proof::{VerificationError, WebProof},
 };
 use thiserror::Error;
@@ -28,19 +26,6 @@ pub fn verify_and_parse(web_proof: WebProof) -> Result<Web, WebCreationError> {
         url: request.parse_url()?,
         server_name,
     })
-}
-
-fn verify_proof(
-    web_proof: WebProof,
-) -> Result<(RedactedTranscript, RedactedTranscript), VerificationError> {
-    let TlsProof {
-        session,
-        substrings,
-    } = web_proof.tls_proof;
-
-    session.verify_with_default_cert_verifier(web_proof.notary_pub_key)?;
-
-    Ok(substrings.verify(&session.header)?)
 }
 
 #[cfg(test)]

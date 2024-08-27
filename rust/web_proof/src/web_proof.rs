@@ -20,13 +20,13 @@ pub struct WebProof {
 }
 
 impl WebProof {
-    fn verify(self) -> Result<RequestTranscript, VerificationError> {
+    pub(crate) fn verify(self) -> Result<RequestTranscript, VerificationError> {
         let TlsProof {
             session,
             substrings,
         } = self.tls_proof;
 
-        session.verify_with_default_cert  _verifier(self.notary_pub_key)?;
+        session.verify_with_default_cert_verifier(self.notary_pub_key)?;
         let (sent, _) = substrings.verify(&session.header)?;
 
         Ok(RequestTranscript::new(sent))
