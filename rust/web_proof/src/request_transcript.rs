@@ -48,7 +48,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn test_parse_real_url() {
+    fn parse_real_url() {
         let transcript = RequestTranscript {
             transcript: RedactedTranscript::new(
                 1998,
@@ -62,5 +62,45 @@ mod tests {
         };
         let url = transcript.parse_url().unwrap();
         assert_eq!(url, "https://api.x.com/1.1/account/settings.json?include_ext_sharing_audiospaces_listening_data_with_followers=true&include_mention_filter=true&include_nsfw_user_flag=true&include_nsfw_admin_flag=true&include_ranked_timeline=true&include_alt_text_compose=true&ext=ssoConnections&include_country_code=true&include_ext_dm_nsfw_media_filter=true");
+    }
+
+    #[test]
+    fn fail_redacted() {
+        let transcript = RequestTranscript {
+            transcript: RedactedTranscript::new(
+                1735,
+                vec![TranscriptSlice::new(
+                    0..1735,
+                    read_fixture("./testdata/redacted_sent_request.txt")
+                        .as_bytes()
+                        .to_vec(),
+                )],
+            ),
+        };
+        let url = transcript.parse_url();
+        assert_eq!(
+            url.unwrap_err().to_string(),
+            "Httparse error: invalid header name"
+        );
+    }
+
+    #[test]
+    fn fail_to_many_headers() {
+        let transcript = RequestTranscript {
+            transcript: RedactedTranscript::new(
+                5128,
+                vec![TranscriptSlice::new(
+                    0..5128,
+                    read_fixture("./testdata/many_headers_sent_request.txt")
+                        .as_bytes()
+                        .to_vec(),
+                )],
+            ),
+        };
+        let url = transcript.parse_url();
+        assert_eq!(
+            url.unwrap_err().to_string(),
+            "Httparse error: too many headers"
+        );
     }
 }
