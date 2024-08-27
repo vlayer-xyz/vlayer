@@ -88,7 +88,7 @@ impl CheatcodeInspector {
         let commitment = host_output.guest_output.execution_commitment.clone();
 
         let decoded_seal = Seal::abi_decode(&host_output.seal, true)
-            .expect(format!("Failed to decode seal: {:x?}", host_output.seal).as_str());
+            .unwrap_or_else(|_| panic!("Failed to decode seal: {:x?}", host_output.seal));
 
         Proof {
             seal: decoded_seal,
