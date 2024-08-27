@@ -18,7 +18,7 @@ impl Node {
             Node::Leaf(old_key, old_value) => {
                 let old_entry = (&**old_key, old_value).into();
                 let entry = (&*key, value).into();
-                from_two_entries(old_entry, entry)
+                from_two_entries(old_entry, entry).unwrap()
             }
             Node::Branch(_, _) => self
                 .insert_entry_into_branch((&*key, value).into())
