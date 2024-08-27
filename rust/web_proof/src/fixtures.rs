@@ -4,7 +4,7 @@ use pkcs8::DecodePublicKey;
 use std::fs;
 use tlsn_core::proof::TlsProof;
 
-use crate::types::WebProof;
+use crate::web_proof::WebProof;
 
 pub const NOTARY_PUB_KEY_PEM_EXAMPLE: &str = "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExpX/4R4z40gI6C/j9zAM39u58LJu\n3Cx5tXTuqhhu/tirnBi5GniMmspOTEsps4ANnPLpMmMSfhJ+IFHbc3qVOA==\n-----END PUBLIC KEY-----\n";
 

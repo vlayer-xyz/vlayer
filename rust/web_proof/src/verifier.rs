@@ -5,7 +5,7 @@ use tlsn_core::{
 
 use crate::{
     request_transcript::{ParsingError, RequestTranscript},
-    types::WebProof,
+    web_proof::WebProof,
 };
 use thiserror::Error;
 
