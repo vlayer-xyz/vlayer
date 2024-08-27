@@ -23,6 +23,10 @@ pub enum ParsingError {
 }
 
 impl RequestTranscript {
+    pub fn new(transcript: RedactedTranscript) -> Self {
+        Self { transcript }
+    }
+
     pub(crate) fn parse_url(self) -> Result<String, ParsingError> {
         let request_string = String::from_utf8(self.transcript.data().to_vec())?;
 
