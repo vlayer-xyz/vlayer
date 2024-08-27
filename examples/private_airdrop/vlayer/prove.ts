@@ -8,8 +8,8 @@ const client = createTestClient();
 
 const deployContracts = async (account: Account) => {
   console.log("Deploying prover...")
-  let exampleErc20: Address = await testHelpers.deployContract(exampleToken, [[account.address]]);
-  let proverAddress: Address = await testHelpers.deployContract(privateAirdropProver, [exampleErc20]);
+  const exampleErc20: Address = await testHelpers.deployContract(exampleToken, [[account.address]]);
+  const proverAddress: Address = await testHelpers.deployContract(privateAirdropProver, [exampleErc20]);
   console.log(`Prover has been deployed on ${proverAddress} address`);
 
   return proverAddress;
@@ -27,7 +27,7 @@ const generateTestSignature = async (account: Account) => {
 const generateProof = async (prover: Address, tokenOwner: Account) => {
   const signature = await generateTestSignature(tokenOwner);
 
-  let response = await prove(prover, privateAirdropProver, 'main', [tokenOwner.address, signature]);
+  const response = await prove(prover, privateAirdropProver, 'main', [tokenOwner.address, signature]);
   console.log("Response:", response)
 }
 

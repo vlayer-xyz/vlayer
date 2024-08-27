@@ -4,10 +4,10 @@ import {testHelpers, prove} from "@vlayer/sdk";
 import nftOwnershipProver from "../out/NftOwnershipProver.sol/NftOwnershipProver.json";
 
 console.log("Deploying prover")
-let prover: Address = await testHelpers.deployContract(nftOwnershipProver);
+const prover: Address = await testHelpers.deployContract(nftOwnershipProver);
 console.log(`Prover has been deployed on ${prover} address`);
 
 console.log("Proving...");
-let response = await prove(prover, nftOwnershipProver, "main", [testHelpers.getTestAccount().address]);
+const response = await prove(prover, nftOwnershipProver, "main", [testHelpers.getTestAccount().address]);
 console.log("Response:")
 console.log(response);

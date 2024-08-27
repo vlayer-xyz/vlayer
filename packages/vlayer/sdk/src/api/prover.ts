@@ -23,7 +23,7 @@ export type ContractSpec = {
   bytecode: Bytecode,
 }
 
-type ProverArg = number | string | boolean;
+export type ContractArg = number | string | boolean;
 
 const EXECUTION_COMMITMENT_FIELDS_COUNT = 4;
 const FIELD_SIZE_IN_BYTES = 32;
@@ -34,15 +34,15 @@ export async function getContractSpec(file: string): Promise<ContractSpec> {
   return Bun.file(file).json();
 }
 
-export async function prove(prover: Address, proverSpec: ContractSpec, functionName: string, args: ProverArg[], blockNo: number = 1): Promise<any> {
-  let calldata = encodeFunctionData({
+export async function prove(prover: Address, proverSpec: ContractSpec, functionName: string, args: ContractArg[], blockNo: number = 1): Promise<VCallResponse> {
+  const calldata = encodeFunctionData({
     abi: proverSpec.abi,
     functionName,
     args
   });
 
-  let call: CallParams = {to: prover, data: calldata};
-  let context: CallContext = {
+  const call: CallParams = {to: prover, data: calldata};
+  const context: CallContext = {
     block_no: blockNo ?? 1, //TODO: remove once backend removes this field validation
     chain_id: testChainId1
   };
@@ -59,12 +59,12 @@ export async function completeProof<T extends Abi, F extends ContractFunctionNam
 
   const blockNumber = blockNo ?? await client().getBlockNumber();
 
-  let call: CallParams = {to: prover, data: calldata};
-  let context: CallContext = {
+  const call: CallParams = {to: prover, data: calldata};
+  const context: CallContext = {
     block_no: Number(blockNumber),
     chain_id: testChainId1
   };
-  
+
   const response = await v_call(call, context);
   const proof = await composeProof(response, BigInt(blockNumber));
   const returnValue = decodeFunctionResult({
