@@ -5,6 +5,7 @@ import {Proof} from "vlayer/Proof.sol";
 import {Verifier} from "vlayer/Verifier.sol";
 
 import {NftOwnershipProver} from "./NftOwnershipProver.sol";
+import { IERC20 } from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 
 bytes4 constant FUNCTION_SELECTOR = NftOwnershipProver.main.selector;
 
@@ -15,12 +16,12 @@ interface IAwesomeToken {
 // This contract is executed on-chain (Ethereum Mainnet, Arbitrum, Base, etc.)
 contract Airdrop is Verifier {
     address private immutable PROVER;
-    address private immutable TOKEN_ADDR;
+    IERC20 private immutable TOKEN;
     mapping(address => bool) public withdrawn;
 
-    constructor(address _prover, address _tokenAddr) {
+    constructor(address _prover, IERC20 _token) {
         PROVER = _prover;
-        TOKEN_ADDR = _tokenAddr;
+        TOKEN = _token;
     }
 
     function claim(Proof calldata, address sender)
@@ -29,6 +30,6 @@ contract Airdrop is Verifier {
     {
         require(withdrawn[sender] == false, "Already withdrawn");
         withdrawn[sender] = true;
-        IAwesomeToken(TOKEN_ADDR).transfer(sender, 1000);
+        TOKEN.transfer(sender, 1000);
     }
 }
