@@ -2,13 +2,11 @@ fn main() {
     #[cfg(not(clippy))]
     {
         use risc0_build_ethereum::generate_solidity_files;
-        use std::env;
         use std::fs;
         use std::path::Path;
 
         // Generate Solidity source files for use with Forge.
-        let build_profile = env::var_os("PROFILE").unwrap().into_string().unwrap();
-        let assets_path_str = format!("../../target/{build_profile}/assets");
+        let assets_path_str = format!("../../target/assets");
         let assets_path = Path::new(&assets_path_str);
 
         if !assets_path.exists() {
