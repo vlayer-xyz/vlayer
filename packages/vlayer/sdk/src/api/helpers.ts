@@ -12,14 +12,14 @@ import {
 import { privateKeyToAccount, generatePrivateKey } from 'viem/accounts'
 import { foundry } from "viem/chains";
 
-import type { ContractSpec } from "./prover";
+import type { ContractSpec, ContractArg } from "./prover";
 
 export const testChainId1 = 55511555;
 export const testChainId2 = 1114;
 const rpcUrls: Map<number, HttpTransport> = new Map([[testChainId1, http()], [testChainId2, http("http://127.0.0.1:8546")]]);
 
 export function client(chainId: number = testChainId1) {
-    let transport = rpcUrls.get(chainId);
+    const transport = rpcUrls.get(chainId);
     if (transport == undefined) {
         throw Error(`No url for chainId ${chainId}`);
     }
@@ -33,7 +33,7 @@ export function client(chainId: number = testChainId1) {
         .extend(publicActions);
 }
 
-export async function deployContract(contractSpec: ContractSpec, args: any[] = [], chainId: number = testChainId1): Promise<Address> {
+export async function deployContract(contractSpec: ContractSpec, args: ContractArg[] = [], chainId: number = testChainId1): Promise<Address> {
     const ethClient = client(chainId);
     const [deployer] = await ethClient.getAddresses();
 
@@ -78,7 +78,9 @@ export async function writeContract<
     functionName,
     args,
     account,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any);
+  // TODO: fix any to viem type
 
   return ethClient.waitForTransactionReceipt({hash: txHash});
 }
