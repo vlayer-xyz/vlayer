@@ -43,10 +43,6 @@ jobs:
           EXPECTED_LLVM_VERSION: "18.1"
         run: bash/check_llvm_clang.sh
 
-      - name: Build vlayer
-        working-directory: rust
-        run: cargo build --package cli --release
-
       - name: Run e2e test
         env:
           PROVING_MODE: ${{ github.ref == 'refs/heads/main' && 'prod' || 'dev' }}
