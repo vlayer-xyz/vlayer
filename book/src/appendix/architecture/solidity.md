@@ -57,9 +57,23 @@ The `Proof` structure looks as follows:
 ```solidity
 struct Proof {
     uint32 length;
-    bytes seal;
+    Seal seal;
 
     ExecutionCommitment executionCommitment;
+}
+```
+
+with `Seal` having the following structure: 
+
+```solidity
+enum ProofMode {
+    GROTH16,
+    FAKE
+}
+
+struct Seal {
+    bytes32[8] seal;
+    ProofMode mode;
 }
 ```
 
@@ -68,7 +82,7 @@ struct Proof {
 To verify a zero-knowledge proof, vlayer uses a `verify` function, delivered by Risc-0.
 
 ```solidity
-function verify(bytes calldata seal, bytes32 imageId, bytes32 journalDigest)
+function verify(Seal calldata seal, bytes32 imageId, bytes32 journalDigest)
 ```
 
 `Proof.length` represents the length of journal data, which is located in `msg.data`, starting at byte 0 of `executionCommitment` and ends with the last byte of the last verified argument.
