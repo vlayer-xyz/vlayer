@@ -4,7 +4,7 @@ use forge::revm::primitives::alloy_primitives::{
 };
 use forge::revm::primitives::{Account, Address, Bytes, EvmState, B256, U256};
 
-use call_engine::block_header::eth::EthBlockHeader;
+use call_engine::block_header::forge::ForgeBlockHeader;
 use call_engine::block_header::EvmBlockHeader;
 use call_host::db::proof::ProofDb;
 use call_host::host::error::HostError;
@@ -61,11 +61,10 @@ impl BlockingProvider for PendingStateProvider {
             BlockTag::Number(n) => n.as_u64(),
             _ => self.block_number,
         };
-        Ok(Some(Box::new(EthBlockHeader {
-            number: block_number,
-            state_root: self.get_state_root(),
-            ..EthBlockHeader::default()
-        })))
+        Ok(Some(Box::new(ForgeBlockHeader::new(
+            block_number,
+            self.get_state_root(),
+        ))))
     }
 
     fn get_code(&self, address: Address, _block: BlockNumber) -> Result<Bytes, Self::Error> {

@@ -1,13 +1,15 @@
+mod casting_utils;
 pub mod eth;
-
-use std::any::TypeId;
+pub mod forge;
 
 use as_any::AsAny;
 
 use alloy_primitives::{BlockNumber, B256};
 
+use casting_utils::is;
 use dyn_clone::{clone_trait_object, DynClone};
 use eth::EthBlockHeader;
+use forge::ForgeBlockHeader;
 use revm::primitives::BlockEnv;
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
@@ -38,12 +40,14 @@ clone_trait_object!(EvmBlockHeader);
 // NotSupported error for it in deserialize_identifier function in deserializer.rs file
 pub enum BlockHeader {
     Eth(EthBlockHeader),
+    Forge(ForgeBlockHeader),
 }
 
 impl From<BlockHeader> for Box<dyn EvmBlockHeader> {
     fn from(block_header: BlockHeader) -> Self {
         match block_header {
             BlockHeader::Eth(header) => Box::new(header),
+            BlockHeader::Forge(header) => Box::new(header),
         }
     }
 }
@@ -52,13 +56,10 @@ impl TryFrom<&dyn EvmBlockHeader> for BlockHeader {
     type Error = &'static str;
 
     fn try_from(header: &dyn EvmBlockHeader) -> Result<Self, Self::Error> {
-        if header.as_any().type_id() == TypeId::of::<EthBlockHeader>() {
-            let eth_header = header
-                .as_any()
-                .downcast_ref::<EthBlockHeader>()
-                .ok_or("Failed to downcast to EthBlockHeader")?
-                .clone();
-            Ok(BlockHeader::Eth(eth_header))
+        if is::<EthBlockHeader>(header) {
+            Ok(BlockHeader::Eth(header.try_into()?))
+        } else if is::<ForgeBlockHeader>(header) {
+            Ok(BlockHeader::Forge(header.try_into()?))
         } else {
             Err("Failed converting BlockHeader")
         }
