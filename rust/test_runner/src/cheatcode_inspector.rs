@@ -3,7 +3,7 @@ use call_engine::io::{Call, HostOutput};
 use call_engine::utils::evm_call::{
     create_encoded_return_outcome, create_return_outcome, create_revert_outcome, split_calldata,
 };
-use call_engine::{Proof, ProofMode, Seal};
+use call_engine::{ExecutionCommitment, Proof, Seal};
 use call_host::host::config::HostConfig;
 use call_host::host::Host;
 use foundry_config::RpcEndpoints;
@@ -87,16 +87,20 @@ impl CheatcodeInspector {
     fn host_output_into_proof(host_output: &HostOutput) -> Proof {
         let commitment = host_output.guest_output.execution_commitment.clone();
 
-        let decoded_seal = Seal::abi_decode(&host_output.seal, true).unwrap_or(Seal {
-            mode: ProofMode::FAKE,
-            seal: Default::default(),
-        });
+        let decoded_seal = Seal::abi_decode(&host_output.seal, true)
+            .expect(format!("Failed to decode seal: {:x?}", host_output.seal).as_str());
 
         Proof {
             seal: decoded_seal,
-            length: U256::from(160),
+            length: Self::proof_length(host_output),
             commitment,
         }
+    }
+
+    fn proof_length(host_output: &HostOutput) -> U256 {
+        (ExecutionCommitment::size() + host_output.guest_output.evm_call_result.len())
+            .try_into()
+            .unwrap()
     }
 }
 
