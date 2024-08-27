@@ -14,11 +14,6 @@ Let's say we want to create an influencer DAO (_Decentralized Autonomous Organiz
 Below is sample code for such a `Prover` contract:
 
 ```solidity
-pragma solidity ^0.8.13;
-
-import "openzeppelin/contracts/utils/Strings.sol";
-
-import {Prover} from "vlayer/Prover.sol";
 import {WebProof, WebProofLib} from "vlayer/WebProof.sol";
 
 contract YouTubeRevenue is Prover {
