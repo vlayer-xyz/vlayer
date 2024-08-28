@@ -75,7 +75,10 @@ mod tests {
             "./testdata/invalid_tls_proof.json",
             NOTARY_PUB_KEY_PEM_EXAMPLE,
         );
-        assert!(invalid_proof.verify().is_err());
+        assert_eq!(
+            invalid_proof.verify().unwrap_err().to_string(),
+            "Session proof error: signature verification failed: signature error"
+        );
     }
 
     #[test]
