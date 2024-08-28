@@ -24,7 +24,7 @@ pub struct EthersProvider<M: Middleware> {
 }
 
 impl<M: Middleware> EthersProvider<M> {
-    pub fn new(client: M) -> Self {
+    pub(crate) fn new(client: M) -> Self {
         // if we are not in a tokio runtime, we need to create a new handle
         let runtime_handle = match Handle::try_current() {
             Ok(handle) => (handle, None),
@@ -39,11 +39,6 @@ impl<M: Middleware> EthersProvider<M> {
             client,
             runtime_handle,
         }
-    }
-
-    /// Fetches the current block number.
-    pub fn get_block_number(&self) -> Result<BlockNumber, M::Error> {
-        Ok(self.block_on(self.client.get_block_number())?.as_u64())
     }
 
     /// internal utility function to call tokio feature and wait for output
@@ -190,22 +185,22 @@ fn to_eth_block_header<T>(block: Block<T>) -> Result<EthBlockHeader, String> {
     })
 }
 
-pub fn from_ethers_bytes(v: ethers_core::types::Bytes) -> alloy_primitives::Bytes {
+pub(crate) fn from_ethers_bytes(v: ethers_core::types::Bytes) -> alloy_primitives::Bytes {
     v.0.into()
 }
 
-pub fn to_ethers_h256(v: alloy_primitives::B256) -> ethers_core::types::H256 {
+pub(crate) fn to_ethers_h256(v: alloy_primitives::B256) -> ethers_core::types::H256 {
     v.0.into()
 }
 
-pub fn from_ethers_h256(v: ethers_core::types::H256) -> B256 {
+pub(crate) fn from_ethers_h256(v: ethers_core::types::H256) -> B256 {
     v.0.into()
 }
 
-pub fn from_ethers_u256(v: ethers_core::types::U256) -> U256 {
+pub(crate) fn from_ethers_u256(v: ethers_core::types::U256) -> U256 {
     alloy_primitives::U256::from_limbs(v.0)
 }
 
-pub fn to_ethers_h160(v: alloy_primitives::Address) -> ethers_core::types::H160 {
+pub(crate) fn to_ethers_h160(v: alloy_primitives::Address) -> ethers_core::types::H160 {
     v.into_array().into()
 }

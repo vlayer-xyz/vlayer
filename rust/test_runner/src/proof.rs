@@ -139,8 +139,7 @@ mod tests {
 
     fn read_and_parse_json_file(file_path: &str) -> Value {
         let file_content = fs::read_to_string(file_path).expect("Failed to read the file");
-        let json_value = from_str(&file_content).expect("Failed to parse JSON from file");
-        json_value
+        from_str(&file_content).expect("Failed to parse JSON from file")
     }
 
     fn build_state() -> EvmState {

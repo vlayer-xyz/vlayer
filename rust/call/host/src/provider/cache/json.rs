@@ -12,7 +12,7 @@ use std::{
 };
 
 #[derive(Clone, Debug, PartialEq, Eq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
-pub enum SerializableBlockTag {
+pub(crate) enum SerializableBlockTag {
     Number(u64),
     Latest,
 }
@@ -140,7 +140,7 @@ mod ordered_map {
 
     use serde::{Deserialize, Deserializer, Serialize, Serializer};
 
-    pub fn serialize<S, K, V>(map: &HashMap<K, V>, serializer: S) -> Result<S::Ok, S::Error>
+    pub(crate) fn serialize<S, K, V>(map: &HashMap<K, V>, serializer: S) -> Result<S::Ok, S::Error>
     where
         S: Serializer,
         K: Ord + Serialize,
@@ -151,7 +151,7 @@ mod ordered_map {
         vec.serialize(serializer)
     }
 
-    pub fn deserialize<'de, D, K, V>(deserializer: D) -> Result<HashMap<K, V>, D::Error>
+    pub(crate) fn deserialize<'de, D, K, V>(deserializer: D) -> Result<HashMap<K, V>, D::Error>
     where
         D: Deserializer<'de>,
         K: Eq + Hash + Deserialize<'de>,

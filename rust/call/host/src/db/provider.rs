@@ -20,9 +20,9 @@ pub enum ProviderDbError<E: std::error::Error> {
 }
 
 /// A revm [Database] backed by a [Provider].
-pub struct ProviderDb<P> {
-    pub provider: Rc<P>,
-    pub block_number: u64,
+pub(crate) struct ProviderDb<P> {
+    pub(crate) provider: Rc<P>,
+    pub(crate) block_number: u64,
 
     /// Cache for code hashes to contract addresses.
     code_hashes: RefCell<HashMap<B256, Address>>,
@@ -30,7 +30,7 @@ pub struct ProviderDb<P> {
 
 impl<P: BlockingProvider> ProviderDb<P> {
     /// Creates a new [ProviderDb] with the given provider and block number.
-    pub fn new(provider: Rc<P>, block_number: u64) -> Self {
+    pub(crate) fn new(provider: Rc<P>, block_number: u64) -> Self {
         Self {
             provider,
             block_number,

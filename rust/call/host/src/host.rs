@@ -102,10 +102,7 @@ where
         })
     }
 
-    pub(crate) fn prove(
-        env: ExecutorEnv,
-        guest_elf: &[u8],
-    ) -> Result<(Vec<u8>, Vec<u8>), HostError> {
+    fn prove(env: ExecutorEnv, guest_elf: &[u8]) -> Result<(Vec<u8>, Vec<u8>), HostError> {
         let prover = default_prover();
 
         let result = prover

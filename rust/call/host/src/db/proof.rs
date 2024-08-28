@@ -70,7 +70,7 @@ impl<P> ProofDb<P>
 where
     P: BlockingProvider,
 {
-    pub fn new(provider: Rc<P>, block_number: u64) -> Self {
+    pub(crate) fn new(provider: Rc<P>, block_number: u64) -> Self {
         let state = RefCell::new(State::default());
         Self {
             state,
@@ -78,12 +78,12 @@ where
         }
     }
 
-    pub fn contracts(&self) -> Vec<Bytes> {
+    pub(crate) fn contracts(&self) -> Vec<Bytes> {
         let state = self.state.borrow();
         state.contracts.values().cloned().collect()
     }
 
-    pub fn fetch_ancestors(&self) -> anyhow::Result<Vec<Box<dyn EvmBlockHeader>>> {
+    pub(crate) fn fetch_ancestors(&self) -> anyhow::Result<Vec<Box<dyn EvmBlockHeader>>> {
         let state = self.state.borrow();
         let provider = &self.db.provider;
         let mut ancestors = Vec::new();
@@ -99,7 +99,9 @@ where
         Ok(ancestors)
     }
 
-    pub fn prepare_state_storage_tries(&self) -> anyhow::Result<(MerkleTrie, Vec<MerkleTrie>)> {
+    pub(crate) fn prepare_state_storage_tries(
+        &self,
+    ) -> anyhow::Result<(MerkleTrie, Vec<MerkleTrie>)> {
         let proofs = self.fetch_proofs()?;
         let state_trie = Self::state_trie(&proofs)?;
         let storage_tries = Self::storage_tries(&proofs)?;
