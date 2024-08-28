@@ -87,4 +87,10 @@ mod tests {
             read_fixture("./testdata/sent_request.txt").as_bytes()
         );
     }
+
+    #[test]
+    fn success_get_server_name() {
+        let proof = load_web_proof_fixture("./testdata/tls_proof.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
+        assert_eq!(proof.get_server_name(), "api.x.com");
+    }
 }
