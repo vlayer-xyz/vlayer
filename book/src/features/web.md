@@ -44,13 +44,13 @@ What happens in the above code?
   * `YouTubeRevenue` inherits from `Prover` vlayer contract that allows off-chain proving of web data.
   * `main` receives `WebProof` as argument, which contains a transcript of an HTTPS session signed by a Notary (see section [Security Considerations](#security-considerations) below for details about TLS Notary).
 
-* Then, we need to make sure the Web Proof is valid - the call `webProof.verify(dataUrl)` performs:
+* Then, we need to make sure that the Web Proof is valid - the call `webProof.verify(dataUrl)` performs:
   * verification of the validity of the HTTPS transcript.
   * verification of the signature of the Notary who signed the transcript.
-  * a check whether the Notary is the one we trust (by checking their key used to sign the data).
-  * a check that the HTTPS data comes from a server whose identity (as specified in the server's SSL certificate) is the one we expect (in this case `studio.youtube.com`, which is the domain name in `dataUrl`).
-  * a check whether the HTTPS request targeted the expected `dataUrl`.
-  * retrieval of plaintext transcript from the Web Proof and makes it available for further `webProof` calls.
+  * a check whether the Notary is the one we trust (we verify this by checking their key used to sign the data).
+  * a check that the HTTPS data comes from a server whose identity (server name specified in the server's SSL certificate) is the one we expect (in this case `studio.youtube.com`, which is the domain name in `dataUrl`).
+  * a check whether the HTTPS data comes from the expected `dataUrl`.
+  * retrieval of plaintext transcript from the Web Proof and makes it available for further `WebProof` calls.
 
 * Then we have to ensure that the delivered data makes sense for our case:
   * `web.json()` parses JSON body of the HTTP response and allows subsequent `get()` calls.
