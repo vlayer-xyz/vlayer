@@ -13,8 +13,14 @@ contract SimpleTravel is Verifier {
         prover = _prover;
     }
 
+<<<<<<< HEAD
     function verify(Proof calldata, uint256 exampleReturn)
         public
         onlyVerified(prover, SimpleTravelProver.aroundTheWorld.selector)
     {}
+=======
+    function verify(
+        Proof calldata
+    ) public onlyVerified(prover, SimpleTravelProver.proveMultiChainOwnership.selector) {}
+>>>>>>> 1f7e3583 (wip travel example)
 }

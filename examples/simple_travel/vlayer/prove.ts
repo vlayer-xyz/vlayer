@@ -1,23 +1,21 @@
 import type { Address } from "viem";
 
 import { testHelpers, prove } from "@vlayer/sdk";
-import otherChainContractSpec from "../out/OtherChainContract.sol/OtherChainContract";
 import simpleTravelProver from "../out/SimpleTravelProver.sol/SimpleTravelProver";
+import exampleToken from "../out/ExampleToken.sol/ExampleToken";
 import simpleTravelVerifier from "../out/SimpleTravelVerifier.sol/SimpleTravel";
-import { testChainId2 } from "../../../packages/vlayer/sdk/src/api/helpers";
 
-const [prover, verifier] = await testHelpers.deployProverVerifier(
-  simpleTravelProver,
-  simpleTravelVerifier,
-);
+const john = testHelpers.getTestAccount();
 
-console.log("Deploying a contract on anvil 2");
-const otherChainContract: Address = await testHelpers.deployContract(
-  otherChainContractSpec,
-  [],
-  testChainId2,
-);
-console.log(`Contract has been deployed on ${otherChainContract} address`);
+console.log("Deploying example erc20 token on anvil 2");
+const tokenB: Address = await testHelpers.deployContract(exampleToken, [[john.address]], testHelpers.chainIds[1]);
+console.log(`Token has been deployed on ${tokenB} address`);
+
+console.log("Deploying prover and example token on anvil 1");
+const tokenA: Address = await testHelpers.deployContract(exampleToken, [[john.address]]);
+console.log(`Token has been deployed on ${tokenA} address`);
+const prover: Address = await testHelpers.deployContract(simpleTravelProver, [[tokenA, tokenB], [testHelpers.chainIds[0], testHelpers.chainIds[1]]]);
+console.log(`Prover has been deployed on ${prover} address`);
 
 console.log("Proving...");
 const { proof, returnValue } = await prove(
