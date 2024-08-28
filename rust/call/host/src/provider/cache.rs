@@ -7,7 +7,7 @@ use ethers_core::types::BlockNumber as BlockTag;
 use json::{AccountQuery, BlockQuery, JsonCache, ProofQuery, StorageQuery};
 use std::{cell::RefCell, collections::hash_map::Entry, path::PathBuf};
 
-pub mod json;
+pub(crate) mod json;
 
 /// A provider that caches responses from an underlying provider in a JSON file.
 /// Queries are first checked against the cache, and if not found, the provider is invoked.

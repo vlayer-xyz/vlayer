@@ -8,7 +8,7 @@ use crate::{
     provider::{multi::CachedMultiProvider, BlockingProvider},
 };
 
-pub struct HostEvmEnvFactory<P> {
+pub(crate) struct HostEvmEnvFactory<P> {
     providers: CachedMultiProvider<P>,
 }
 
@@ -16,7 +16,7 @@ impl<P> HostEvmEnvFactory<P>
 where
     P: BlockingProvider,
 {
-    pub fn new(providers: CachedMultiProvider<P>) -> Self {
+    pub(crate) fn new(providers: CachedMultiProvider<P>) -> Self {
         HostEvmEnvFactory { providers }
     }
 }

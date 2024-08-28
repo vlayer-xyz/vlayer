@@ -7,7 +7,7 @@ use call_engine::evm::env::cached::CachedEvmEnv;
 use call_engine::evm::input::{EvmInput, MultiEvmInput};
 use std::rc::Rc;
 
-pub fn into_input<P: BlockingProvider>(
+fn into_input<P: BlockingProvider>(
     db: ProofDb<P>,
     header: Box<dyn EvmBlockHeader>,
 ) -> anyhow::Result<EvmInput> {
@@ -29,7 +29,7 @@ pub fn into_input<P: BlockingProvider>(
     Ok(evm_input)
 }
 
-pub fn into_multi_input<P: BlockingProvider>(
+pub(crate) fn into_multi_input<P: BlockingProvider>(
     envs: CachedEvmEnv<ProofDb<P>>,
 ) -> anyhow::Result<MultiEvmInput> {
     envs.into_inner()

@@ -10,7 +10,7 @@ use call_engine::utils::InteriorMutabilityCache;
 use crate::db::proof::ProofDb;
 use crate::provider::BlockingProvider;
 
-pub struct CachedEvmEnv<P>
+pub(crate) struct CachedEvmEnv<P>
 where
     P: BlockingProvider,
 {
@@ -22,14 +22,14 @@ impl<P> CachedEvmEnv<P>
 where
     P: BlockingProvider,
 {
-    pub fn new(factory: impl EvmEnvFactory<ProofDb<P>> + 'static) -> Self {
+    pub(crate) fn new(factory: impl EvmEnvFactory<ProofDb<P>> + 'static) -> Self {
         CachedEvmEnv {
             cache: RefCell::new(HashMap::new()),
             factory: Box::new(factory),
         }
     }
 
-    pub fn get(
+    pub(crate) fn get(
         &mut self,
         location: ExecutionLocation,
     ) -> Result<Rc<EvmEnv<ProofDb<P>>>, anyhow::Error> {
@@ -37,7 +37,7 @@ where
             .try_get_or_insert(location, || self.factory.create(location))
     }
 
-    pub fn into_inner(self) -> MultiEvmEnv<ProofDb<P>> {
+    pub(crate) fn into_inner(self) -> MultiEvmEnv<ProofDb<P>> {
         self.cache
     }
 }

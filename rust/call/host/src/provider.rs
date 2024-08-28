@@ -3,18 +3,18 @@ use auto_impl::auto_impl;
 use call_engine::block_header::EvmBlockHeader;
 use std::error::Error as StdError;
 
-pub mod cache;
-pub mod ethers;
+pub(crate) mod cache;
+pub(crate) mod ethers;
 pub mod factory;
 mod file;
-pub mod multi;
+pub(crate) mod multi;
 mod null;
 
 use crate::proof::EIP1186Proof;
 pub use ethers::{EthersProvider, EthersProviderError};
 use ethers_core::types::BlockNumber as BlockTag;
 use ethers_providers::{Http, RetryClient};
-pub use file::FileProvider;
+pub(crate) use file::FileProvider;
 
 /// The Ethers client type.
 pub type EthersClient = ethers_providers::Provider<RetryClient<Http>>;

@@ -1,9 +1,11 @@
 pub mod db;
-pub mod encodable_receipt;
-pub mod evm_env;
+pub(crate) mod encodable_receipt;
+pub(crate) mod evm_env;
 pub mod host;
-pub mod into_input;
+pub(crate) mod into_input;
 pub mod proof;
 pub mod provider;
-pub use call_engine::evm::env::location::ExecutionLocation;
+pub(crate) use call_engine::evm::env::location::ExecutionLocation;
 pub use call_engine::io::Call;
+
+

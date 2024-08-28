@@ -1,2 +1,2 @@
-pub mod cached;
-pub mod factory;
+pub(crate) mod cached;
+pub(crate) mod factory;
