@@ -15,5 +15,5 @@ contract SimpleTravel is Verifier {
 
     function verify(
         Proof calldata
-    ) public onlyVerified(prover, SimpleTravelProver.aroundTheWorld.selector) {}
+    ) public onlyVerified(prover, SimpleTravelProver.proveMultiChainOwnership.selector) {}
 }

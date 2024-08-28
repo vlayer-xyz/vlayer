@@ -16,6 +16,8 @@ import type {ContractSpec, ContractArg } from "./prover";
 
 export const testChainId1 = 55511555;
 export const testChainId2 = 1114;
+export const chainIds = [testChainId1, testChainId2];
+
 const rpcUrls: Map<number, HttpTransport> = new Map([[testChainId1, http()], [testChainId2, http("http://127.0.0.1:8546")]]);
 
 export function client(chainId: number = testChainId1) {
