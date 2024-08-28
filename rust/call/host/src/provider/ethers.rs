@@ -41,11 +41,6 @@ impl<M: Middleware> EthersProvider<M> {
         }
     }
 
-    /// Fetches the current block number.
-    pub(crate) fn get_block_number(&self) -> Result<BlockNumber, M::Error> {
-        Ok(self.block_on(self.client.get_block_number())?.as_u64())
-    }
-
     /// internal utility function to call tokio feature and wait for output
     fn block_on<F: core::future::Future>(&self, f: F) -> F::Output {
         self.runtime_handle.0.block_on(f)

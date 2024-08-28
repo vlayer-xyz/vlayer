@@ -112,6 +112,7 @@ impl ProviderFactory<CachedProvider<EthersProvider<EthersClient>>> for CachedPro
 mod test {
     use super::*;
     use alloy_chains::Chain;
+    use ethers_core::types::BlockNumber::Latest;
 
     #[test]
     fn try_new_invalid_rpc_url() -> anyhow::Result<()> {
@@ -121,7 +122,7 @@ mod test {
             .collect();
         let factory = EthersProviderFactory::new(rpc_urls);
         let provider = factory.create(chain_id)?;
-        let res = provider.get_block_number();
+        let res = provider.get_block_header(Latest);
         let error = res.unwrap_err();
 
         assert!(error.to_string().contains(
