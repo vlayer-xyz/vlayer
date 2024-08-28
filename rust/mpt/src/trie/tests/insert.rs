@@ -22,7 +22,7 @@ pub fn multi_byte_key() {
 }
 
 #[test]
-#[should_panic(expected = "Key already exists")]
+#[should_panic(expected = "DuplicatedKey(\"\\0\\0\")")]
 pub fn duplicate_key() {
     let mut mpt = MerkleTrie(Node::Null);
     mpt.insert([0], [42]);

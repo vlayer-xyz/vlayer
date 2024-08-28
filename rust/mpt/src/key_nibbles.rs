@@ -7,13 +7,19 @@ use serde::{Deserialize, Serialize};
 pub struct KeyNibbles(Nibbles);
 
 impl KeyNibbles {
-    pub fn unpack<T: AsRef<[u8]>>(data: T) -> Self {
+    pub(crate) fn unpack<T: AsRef<[u8]>>(data: T) -> Self {
         let nibbles = Nibbles::unpack(data);
         Self::from_nibbles(nibbles)
     }
 
-    pub fn as_slice(&self) -> &[u8] {
+    pub(crate) fn as_slice(&self) -> &[u8] {
         self.0.as_slice()
+    }
+
+    pub(crate) fn push_front(&self, nibble: u8) -> Self {
+        let mut nibbles = vec![nibble];
+        nibbles.extend_from_slice(self.0.as_ref());
+        KeyNibbles(Nibbles::from_vec(nibbles))
     }
 
     fn from_nibbles(nibbles: Nibbles) -> Self {
@@ -51,5 +57,26 @@ mod new {
     #[should_panic(expected = "KeyNibbles cannot be empty")]
     fn empty() {
         let _ = KeyNibbles::from([]);
+    }
+}
+
+#[cfg(test)]
+mod push_front {
+    use super::*;
+
+    #[test]
+    fn single_nibble() {
+        let original: KeyNibbles = [0x1, 0x2].into();
+        let result = original.push_front(0x0);
+        let expected: KeyNibbles = [0x0, 0x1, 0x2].into();
+        assert_eq!(result, expected);
+    }
+
+    #[test]
+    fn multiple_times() {
+        let original: KeyNibbles = [0x2].into();
+        let result = original.push_front(0x1).push_front(0x0);
+        let expected: KeyNibbles = [0x0, 0x1, 0x2].into();
+        assert_eq!(result, expected);
     }
 }

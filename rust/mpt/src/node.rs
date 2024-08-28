@@ -44,3 +44,8 @@ impl Node {
         }
     }
 }
+
+#[derive(Debug, PartialEq)]
+pub enum MPTError {
+    DuplicatedKey(String),
+}
