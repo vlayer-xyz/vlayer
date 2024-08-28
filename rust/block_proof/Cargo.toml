@@ -4,8 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-axum = { workspace = true, features = ["macros", "json"] }
+axum = { workspace = true, features = ["macros"] }
 axum-extra = { workspace = true }
+axum-jrpc = { workspace = true }
 mime = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
