@@ -14,32 +14,28 @@ Let's say we want to create an influencer DAO (_Decentralized Autonomous Organiz
 Below is sample code for such a `Prover` contract:
 
 ```solidity
+import "openzeppelin/contracts/utils/Strings.sol";
+
+import {Prover} from "vlayer/Prover.sol";
 import {WebProof, WebProofLib} from "vlayer/WebProof.sol";
 
 contract YouTubeRevenue is Prover {
     using Strings for string;
     using WebProofLib for WebProof;
-
-    string memory notaryPubKey = "-----BEGIN PUBLIC KEY-----...----END PUBLIC KEY-----";
-    string memory serverName = "studio.youtube.com";
-    string memory dataUrl = "https://studio.youtube.com/creator/get_channel_dashboard";
-
-    constructor() {}
+    
+    public string dataUrl = "https://studio.youtube.com/creator/get_channel_dashboard";
     
     function main(WebProof calldata webProof, address influencerAddr) public returns (address, string) {
-      webProof.verify();
-      require(webProof.notaryPubKey().equal(notaryPubKey), "Invalid notary identity");
-      require(webProof.serverName().equal(serverName), "Incorrect SSL certificate server name") ;
-      
-      require(webProof.url().equal(dataUrl), "Incorrect URL");
+      webProof.verify(dataUrl);
+
       require(
-        web.json().get("channel.estimatedEarnings") > 1_000_000, 
+        webProof.json().get("channel.estimatedEarnings") > 1_000_000, 
         "Earnings less than $10000"
       );
 
       return (influencerAddr, web.json().get("channel.id"));
     }
-}
+} 
 ```
 
 What happens in the above code?  
@@ -48,13 +44,15 @@ What happens in the above code?
   * `YouTubeRevenue` inherits from `Prover` vlayer contract that allows off-chain proving of web data.
   * `main` receives `WebProof` as argument, which contains a transcript of an HTTPS session signed by a Notary (see section [Security Considerations](#security-considerations) below for details about TLS Notary).
 
-* Then, we need to make sure the Web Proof is valid:
-  * `webProof.verify()` delegates to a precompile, which verifies the validity of the HTTPS transcript and verifies Notary's signature; this call also retrieves plaintext transcript, parses it and makes it available for further `webProof.*()` method calls; `verify()` call will revert, if verification fails.
-  * `webProof.notaryPubKey().equal(notaryPubKey)` checks that a notary whom we trust signed the data.
-  * `webProof.serverName().equal(serverName)` checks that the HTTPS data comes from a server whose identity (as specified in the server's SSL certificate) is the one we expect.
+* Then, we need to make sure the Web Proof is valid - the call `webProof.verify(dataUrl)` performs:
+  * verification of the validity of the HTTPS transcript.
+  * verification of the signature of the Notary who signed the transcript.
+  * a check whether the Notary is the one we trust (by checking their key used to sign the data).
+  * a check that the HTTPS data comes from a server whose identity (as specified in the server's SSL certificate) is the one we expect (in this case `studio.youtube.com`, which is the domain name in `dataUrl`).
+  * a check whether the HTTPS request targeted the expected `dataUrl`.
+  * retrieval of plaintext transcript from the Web Proof and makes it available for further `webProof` calls.
 
 * Then we have to ensure that the delivered data makes sense for our case:
-  * `web.url().equal(dataUrl)` checks if injected payload comes from correct URL.
   * `web.json()` parses JSON body of the HTTP response and allows subsequent `get()` calls.
   * `web.json().get("channel.estimatedEarnings") > 1_000_000` retrieves the `channel.estimatedEarnings` path of the JSON and checks if estimated earnings are higher than 10k USD (parsed JSON contains amount in cents).
 
