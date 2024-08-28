@@ -5,12 +5,10 @@ type Calldata = string;
 export type VCallResponse = {
     jsonrpc: string;
     result: {
-        result: {
         evm_call_result: number[];
         function_selector: string;
         prover_contract_address: string;
         seal: number[];
-        };
     };
     id: number;
 };
@@ -34,9 +32,7 @@ export interface Proof {
 
 export interface VCallResponse {
   jsonrpc: string;
-  result: {
-    result: Proof
-  };
+  result: Proof;
   id: number;
 }
 

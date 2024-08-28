@@ -70,19 +70,19 @@ export async function completeProof<T extends Abi, F extends ContractFunctionNam
   const returnValue = decodeFunctionResult({
     abi,
     functionName,
-    data: response.result.result.evm_call_result,
+    data: response.result.evm_call_result,
   })
 
   return {proof, returnValue};
 }
 
 async function composeProof(response: VCallResponse, blockNumber: bigint) {
-  const length = EXECUTION_COMMITMENT_SIZE + byteLength(response.result.result.evm_call_result);
+  const length = EXECUTION_COMMITMENT_SIZE + byteLength(response.result.evm_call_result);
   const blockHash = (await client().getBlock({
     blockNumber
   })).hash;
 
-  const {prover_contract_address, seal: encodedSeal, function_selector} = response.result.result;
+  const {prover_contract_address, seal: encodedSeal, function_selector} = response.result;
 
   const SEAL_STRUCT = 'struct Seal { bytes32[8] seal; uint8 mode; }';
 
