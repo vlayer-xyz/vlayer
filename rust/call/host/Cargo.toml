@@ -30,3 +30,6 @@ alloy-sol-types = { workspace = true }
 test-log = { workspace = true }
 anyhow = { workspace = true }
 ctor = { workspace = true }
+
+[features]
+profiling = []

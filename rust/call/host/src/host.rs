@@ -102,6 +102,7 @@ where
         })
     }
 
+    #[cfg(not(feature = "profiling"))]
     pub(crate) fn prove(
         env: ExecutorEnv,
         guest_elf: &[u8],
@@ -133,5 +134,18 @@ where
             .build()
             .map_err(|err| HostError::ExecutorEnvBuilder(err.to_string()))?;
         Ok(env)
+    }
+
+    #[cfg(feature = "profiling")]
+    pub(crate) fn prove(
+        env: ExecutorEnv,
+        guest_elf: &[u8],
+    ) -> Result<(Vec<u8>, Vec<u8>), HostError> {
+        use risc0_zkvm::{default_executor, ExecutorEnv};
+
+        let exec = default_executor();
+        exec.execute(env, guest_elf)?;
+
+        Ok((Vec::new(), Vec::new()))
     }
 }
