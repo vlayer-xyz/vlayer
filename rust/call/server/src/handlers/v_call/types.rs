@@ -37,9 +37,7 @@ pub struct CallContext {
 }
 
 #[derive(Deserialize, Serialize, Debug)]
-pub struct CallResult {
-    pub result: Value,
-}
+pub struct CallResult(pub Value);
 
 #[cfg(test)]
 mod test {
