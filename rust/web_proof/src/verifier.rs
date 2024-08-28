@@ -5,12 +5,12 @@ use crate::{
 use thiserror::Error;
 
 #[derive(Error, Debug)]
-pub enum WebCreationError {
+pub enum WebProofError {
     #[error("Verification error: {0}")]
-    VerificationError(#[from] VerificationError),
+    Verification(#[from] VerificationError),
 
     #[error("Request parsing error: {0}")]
-    ParsingError(#[from] ParsingError),
+    Parsing(#[from] ParsingError),
 }
 
 pub struct Web {
@@ -18,7 +18,7 @@ pub struct Web {
     pub server_name: String,
 }
 
-pub fn verify_and_parse(web_proof: WebProof) -> Result<Web, WebCreationError> {
+pub fn verify_and_parse(web_proof: WebProof) -> Result<Web, WebProofError> {
     let server_name = web_proof.get_server_name();
     let request = web_proof.verify()?;
 
