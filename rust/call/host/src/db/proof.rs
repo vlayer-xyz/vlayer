@@ -99,7 +99,9 @@ where
         Ok(ancestors)
     }
 
-    pub(crate) fn prepare_state_storage_tries(&self) -> anyhow::Result<(MerkleTrie, Vec<MerkleTrie>)> {
+    pub(crate) fn prepare_state_storage_tries(
+        &self,
+    ) -> anyhow::Result<(MerkleTrie, Vec<MerkleTrie>)> {
         let proofs = self.fetch_proofs()?;
         let state_trie = Self::state_trie(&proofs)?;
         let storage_tries = Self::storage_tries(&proofs)?;
