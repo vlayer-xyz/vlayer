@@ -14,28 +14,50 @@ const VLAYER_DIR_NAME: &str = "vlayer";
 const CONTRACTS_URL: &str =
     "https://vlayer-releases.s3.eu-north-1.amazonaws.com/latest/contracts.tar.gz";
 
-pub(crate) async fn init(cwd: PathBuf, template: TemplateOption) -> Result<(), CLIError> {
+pub(crate) async fn init(
+    mut cwd: PathBuf,
+    template: TemplateOption,
+    existing: bool,
+    project_name: Option<String>,
+) -> Result<(), CLIError> {
+    if !existing {
+        let mut command = std::process::Command::new("forge");
+        command.arg("init");
+        if let Some(project_name) = project_name {
+            cwd.push(&project_name);
+            command.arg(project_name);
+        }
+        let output = command.output()?;
+
+        if !output.status.success() {
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            return Err(CLIError::ForgeInitError(stderr.to_string()));
+        }
+    }
+
+    init_existing(cwd, template).await
+}
+
+pub(crate) async fn init_existing(cwd: PathBuf, template: TemplateOption) -> Result<(), CLIError> {
     info!("Running vlayer init from directory {:?}", cwd.display());
+
     let root_path = find_foundry_root(&cwd)?;
     let src_path = find_src_path(&root_path)?;
+
     info!("Found foundry project root in \"{}\"", &src_path.display());
 
-    match (
-        create_vlayer_dir(&root_path)?,
-        create_vlayer_dir(&src_path)?,
-    ) {
-        (Some(scripts_path), Some(contracts_path)) => {
-            info!("Created vlayer directory in \"{}\"", src_path.display());
-            fetch_vlayer_files(&contracts_path, &scripts_path, template.to_string()).await?;
-            info!("Successfully downloaded vlayer template \"{}\"", template);
-        }
-        _ => error!(
+    if vlayer_dir_exists_in(&src_path) || vlayer_dir_exists_in(&root_path) {
+        error!(
             "vlayer directory already exists in \"{}\" or \"{}\". Skipping creation.",
             &root_path.display(),
             &src_path.display()
-        ),
+        )
+    } else {
+        let scripts_dst = create_vlayer_dir(&root_path)?;
+        let contracts_dst = create_vlayer_dir(&src_path)?;
+        fetch_vlayer_files(&contracts_dst, &scripts_dst, template.to_string()).await?;
+        info!("Successfully downloaded vlayer template \"{}\"", template);
     }
-
     Ok(())
 }
 
@@ -81,13 +103,15 @@ async fn fetch_vlayer_files(
     Ok(())
 }
 
-pub(crate) fn create_vlayer_dir(src_path: &Path) -> Result<Option<PathBuf>, CLIError> {
+pub(crate) fn vlayer_dir_exists_in(src_path: &Path) -> bool {
+    src_path.join(VLAYER_DIR_NAME).exists()
+}
+
+pub(crate) fn create_vlayer_dir(src_path: &Path) -> Result<PathBuf, CLIError> {
     let vlayer_dir = src_path.join(VLAYER_DIR_NAME);
-    if vlayer_dir.exists() {
-        return Ok(None);
-    }
     std::fs::create_dir_all(&vlayer_dir)?;
-    Ok(Some(vlayer_dir))
+    info!("Created vlayer directory in \"{}\"", src_path.display());
+    Ok(vlayer_dir)
 }
 
 #[cfg(test)]
@@ -163,19 +187,6 @@ mod tests {
         let result = create_vlayer_dir(&src_path);
 
         assert!(&vlayer_dir.exists());
-        assert_eq!(result.unwrap(), Some(vlayer_dir));
-    }
-
-    #[test]
-    fn test_create_vlayer_dir_alr_exists() {
-        let (_temp_dir, src_path, _root_path) = prepare_foundry_dir("src");
-
-        let vlayer_dir = src_path.join(VLAYER_DIR_NAME);
-        std::fs::create_dir_all(&vlayer_dir).unwrap();
-
-        let result = create_vlayer_dir(&src_path);
-
-        assert!(result.unwrap().is_none());
-        assert!(vlayer_dir.exists());
+        assert_eq!(result.unwrap(), vlayer_dir);
     }
 }

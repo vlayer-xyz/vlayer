@@ -19,4 +19,6 @@ pub enum CLIError {
     SrcDirNotFound(PathBuf),
     #[error("Error downloading vlayer contracts: {0}")]
     DownloadVlayerFilesError(reqwest::Error),
+    #[error("Failed initializing Forge: {0}")]
+    ForgeInitError(String),
 }

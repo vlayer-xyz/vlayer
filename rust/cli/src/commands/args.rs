@@ -7,6 +7,10 @@ use std::fmt;
 pub(crate) struct InitArgs {
     #[arg(long, value_enum)]
     pub(crate) template: Option<TemplateOption>,
+    #[arg(long)]
+    pub(crate) existing: bool,
+    #[arg()]
+    pub(crate) project_name: Option<String>,
 }
 
 #[derive(Parser)]
