@@ -1,24 +1,16 @@
-use tlsn_core::{
-    proof::{SessionProofError, SubstringsProofError, TlsProof},
-    RedactedTranscript, ServerName,
-};
-
 use crate::{
-    request_transcript::{ParsingError, RequestTranscript},
-    web_proof::WebProof,
+    request_transcript::ParsingError,
+    web_proof::{VerificationError, WebProof},
 };
 use thiserror::Error;
 
 #[derive(Error, Debug)]
-pub enum VerificationError {
-    #[error("Session proof error: {0}")]
-    SessionProof(#[from] SessionProofError),
-
-    #[error("Substrings proof error: {0}")]
-    SubstringsProof(#[from] SubstringsProofError),
+pub enum WebProofError {
+    #[error("Verification error: {0}")]
+    Verification(#[from] VerificationError),
 
     #[error("Request parsing error: {0}")]
-    ParsingError(#[from] ParsingError),
+    Parsing(#[from] ParsingError),
 }
 
 pub struct Web {
@@ -26,10 +18,9 @@ pub struct Web {
     pub server_name: String,
 }
 
-pub fn verify_and_parse(web_proof: WebProof) -> Result<Web, VerificationError> {
-    let ServerName::Dns(server_name) = web_proof.tls_proof.session.session_info.server_name.clone();
-    let (sent, _recv) = verify_proof(web_proof)?;
-    let request = RequestTranscript::new(sent);
+pub fn verify_and_parse(web_proof: WebProof) -> Result<Web, WebProofError> {
+    let server_name = web_proof.get_server_name();
+    let request = web_proof.verify()?;
 
     Ok(Web {
         url: request.parse_url()?,
@@ -37,39 +28,11 @@ pub fn verify_and_parse(web_proof: WebProof) -> Result<Web, VerificationError> {
     })
 }
 
-fn verify_proof(
-    web_proof: WebProof,
-) -> Result<(RedactedTranscript, RedactedTranscript), VerificationError> {
-    let TlsProof {
-        session,
-        substrings,
-    } = web_proof.tls_proof;
-
-    session.verify_with_default_cert_verifier(web_proof.notary_pub_key)?;
-
-    Ok(substrings.verify(&session.header)?)
-}
-
 #[cfg(test)]
 mod tests {
     use crate::fixtures::{load_web_proof_fixture, NOTARY_PUB_KEY_PEM_EXAMPLE};
 
     use super::*;
-
-    #[test]
-    fn fail_verification() {
-        let invalid_proof = load_web_proof_fixture(
-            "./testdata/invalid_tls_proof.json",
-            NOTARY_PUB_KEY_PEM_EXAMPLE,
-        );
-        assert!(verify_proof(invalid_proof).is_err());
-    }
-
-    #[test]
-    fn success_verification() {
-        let proof = load_web_proof_fixture("./testdata/tls_proof.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
-        assert!(verify_proof(proof).is_ok());
-    }
 
     #[test]
     fn correct_web_extracted() {
