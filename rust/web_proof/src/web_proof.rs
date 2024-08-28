@@ -67,7 +67,7 @@ where
 
 #[cfg(test)]
 mod tests {
-    use crate::fixtures::{load_web_proof_fixture, NOTARY_PUB_KEY_PEM_EXAMPLE};
+    use crate::fixtures::{load_web_proof_fixture, read_fixture, NOTARY_PUB_KEY_PEM_EXAMPLE};
 
     #[test]
     fn fail_verification() {
@@ -81,6 +81,10 @@ mod tests {
     #[test]
     fn success_verification() {
         let proof = load_web_proof_fixture("./testdata/tls_proof.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
-        assert!(proof.verify().is_ok());
+        let request = proof.verify().unwrap();
+        assert_eq!(
+            request.transcript.data(),
+            read_fixture("./testdata/sent_request.txt").as_bytes()
+        );
     }
 }

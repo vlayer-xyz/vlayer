@@ -7,7 +7,7 @@ use tlsn_core::RedactedTranscript;
 const MAX_HEADERS_NUMBER: usize = 40;
 
 pub(crate) struct RequestTranscript {
-    transcript: RedactedTranscript,
+    pub(crate) transcript: RedactedTranscript,
 }
 
 #[derive(Error, Debug)]
