@@ -33,7 +33,7 @@ contract YouTubeRevenue is Prover {
         "Earnings less than $10000"
       );
 
-      return (influencerAddr, web.json().get("channel.id"));
+      return (influencerAddr, webProof.json().get("channel.id"));
     }
 } 
 ```
