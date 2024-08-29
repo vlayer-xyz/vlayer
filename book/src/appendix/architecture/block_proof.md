@@ -25,17 +25,17 @@ We use the following naming in this document:
 
 ### Naive chain proofs
 
-Now going back to the first statement from the introduction - we need a way to prove that a set of hashes belongs to the same chain (not necessarily a real one). A naive way to do that is to hash all subsequent blocks from the oldest to the most recent and verify that each blockhash is equal to the **prevHash** value of the subsequent block. If along the way all the hashes occured, then they all belong to the same chain.
+Now going back to the first statement from the introduction - we need a way to prove that a set of hashes belongs to the same chain. A naive way to do that is to hash all subsequent blocks from the oldest to the most recent one and verify that each blockhash is equal to the **prevHash** value of the subsequent block. If along the way all the hashes from our set appeared, then they all belong to the same chain.
 
 See the diagram below for the visual.
 
 ![Schema](/images/architecture/block-proof.png)
 
-Unfortunately, this is a slow process, especially if the blocks are far away from each other on the time scale. Fortunately, there is a way to cache all proofs in advance. For this purpose, we cache block proofs in a way that enables us to verify its correctness reliably and quickly.
+Unfortunately, this is a slow process, especially if the blocks are far away from each other on the time scale. Fortunately, with the help of Block Proof Cache, this process can be sped up logarithmically!
 
 ## Block Proof Cache
 
-The Block Proof Cache stores `<block_number, blockhash>` mapping for historical(!!!) blocks. It is implemented using a Merkle Patricia Trie, where block numbers are the keys and blockhashes are the values. The construction is inductive, in which we preserve the invariant that each block stored in the Block Proof Cache has an immediate parent or child block. In order to prove correctness of construction with `N+1` nodes we verify that a ZK proof of construction with `N` nodes is correct. We do this by recursively by verifying ZK proofs created so far which are stored as ZK proofs in ZK proofs. When this is verified, we check `N+1` step, by ensuring new block data fits existing structure. Then we generate a new ZK proof for computation appending/prepending the next block hash to the trie.
+The Block Proof Cache stores `<block_number, blockhash>` mapping for historical blocks. It is implemented using a Merkle Patricia Trie, where block numbers are the keys and blockhashes are the values. The construction is inductive, in which we preserve the invariant that each block stored in the Block Proof Cache has an immediate parent or child block. In order to prove correctness of construction with `N+1` nodes we verify that a ZK proof of construction with `N` nodes is correct. We do this by recursively by verifying ZK proofs created so far which are stored as ZK proofs in ZK proofs. When this is verified, we check `N+1` step, by ensuring new block data fits existing structure. Then we generate a new ZK proof for computation appending/prepending the next block hash to the trie.
 
 The following functions written in pseudocode provide more details on the Block Proof Cache implementation.
 
