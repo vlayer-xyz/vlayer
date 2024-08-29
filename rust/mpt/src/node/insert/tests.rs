@@ -19,7 +19,7 @@ mod insert {
             let node = Node::Null;
             assert_eq!(
                 node.insert(Nibbles::unpack([]), [42]).unwrap(),
-                Node::branch(Default::default(), Some([42]))
+                Node::branch_with_value(EMPTY_CHILDREN.clone(), [42])
             );
         }
 
@@ -82,7 +82,7 @@ mod insert {
 
             let mut children = EMPTY_CHILDREN.clone();
             children[0] = Some(Box::new(Entry::from(([0x0], [42])).into()));
-            let expected_branch = Node::branch(children, Some([43]));
+            let expected_branch = Node::branch_with_value(children, [43]);
 
             assert_eq!(updated_node, expected_branch);
         }
@@ -93,8 +93,14 @@ mod insert {
             let updated_node = node.insert(Nibbles::unpack([0x1]), [43]).unwrap();
 
             let mut children = EMPTY_CHILDREN.clone();
-            children[0] = Some(Box::new(Node::branch(EMPTY_CHILDREN.clone(), Some([42]))));
-            children[1] = Some(Box::new(Node::branch(EMPTY_CHILDREN.clone(), Some([43]))));
+            children[0] = Some(Box::new(Node::branch_with_value(
+                EMPTY_CHILDREN.clone(),
+                [42],
+            )));
+            children[1] = Some(Box::new(Node::branch_with_value(
+                EMPTY_CHILDREN.clone(),
+                [43],
+            )));
             let expected_branch = Node::extension([0x0], Node::Branch(children, None));
 
             assert_eq!(updated_node, expected_branch);
@@ -109,17 +115,17 @@ mod insert {
 
         #[test]
         fn duplicate_key() {
-            let node = Node::branch(EMPTY_CHILDREN.clone(), Some([42]));
+            let node = Node::branch_with_value(EMPTY_CHILDREN.clone(), [42]);
             let result = node.insert(Nibbles::unpack([]), [43]);
             assert_eq!(result.unwrap_err(), NodeError::DuplicatedKey);
         }
 
         #[test]
         fn new_key() {
-            let node = Node::branch(EMPTY_CHILDREN.clone(), Some([42]));
+            let node = Node::branch_with_value(EMPTY_CHILDREN.clone(), [42]);
             let updated_node = node.insert(Nibbles::unpack([0x0]), [43]).unwrap();
 
-            let mut expected_branch = Node::branch(EMPTY_CHILDREN.clone(), Some([42]));
+            let mut expected_branch = Node::branch_with_value(EMPTY_CHILDREN.clone(), [42]);
             if let Node::Branch(ref mut children, _) = expected_branch {
                 children[0] = Some(Box::new(Entry::from(([0x0], [43])).into()));
             }

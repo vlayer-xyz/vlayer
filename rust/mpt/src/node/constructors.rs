@@ -16,11 +16,10 @@ impl Node {
     }
 
     #[allow(unused)]
-    pub(crate) fn branch(
+    pub(crate) fn branch_with_value(
         children: [Option<Box<Node>>; 16],
-        value: Option<impl AsRef<[u8]>>,
+        value: impl AsRef<[u8]>,
     ) -> Node {
-        let value = value.map(|v| v.as_ref().into());
-        Node::Branch(children, value)
+        Node::Branch(children, Some(value.as_ref().into()))
     }
 }

@@ -55,14 +55,14 @@ mod tests {
             let branch = EMPTY_BRANCH.clone();
             let node = branch.insert_entry_into_branch(([], [42])).unwrap();
 
-            let expected_node = Node::branch(EMPTY_CHILDREN.clone(), Some([42]));
+            let expected_node = Node::branch_with_value(EMPTY_CHILDREN.clone(), [42]);
 
             assert_eq!(node, expected_node);
         }
 
         #[test]
         fn branch_value_some() {
-            let branch = Node::branch(EMPTY_CHILDREN.clone(), Some([42]));
+            let branch = Node::branch_with_value(EMPTY_CHILDREN.clone(), [42]);
             let result = branch.insert_entry_into_branch(([], [43]));
             assert_eq!(result.unwrap_err(), NodeError::DuplicatedKey);
         }
@@ -80,7 +80,10 @@ mod tests {
                 let node = branch.insert_entry_into_branch(([0x0], [42])).unwrap();
 
                 let mut children = EMPTY_CHILDREN.clone();
-                children[0] = Some(Box::new(Node::branch(EMPTY_CHILDREN.clone(), Some([42]))));
+                children[0] = Some(Box::new(Node::branch_with_value(
+                    EMPTY_CHILDREN.clone(),
+                    [42],
+                )));
                 let expected_node = Node::Branch(children, None);
 
                 assert_eq!(node, expected_node);
@@ -105,7 +108,10 @@ mod tests {
             #[test]
             fn no_nibble_remaining() {
                 let mut children = EMPTY_CHILDREN.clone();
-                children[0] = Some(Box::new(Node::branch(EMPTY_CHILDREN.clone(), Some([42]))));
+                children[0] = Some(Box::new(Node::branch_with_value(
+                    EMPTY_CHILDREN.clone(),
+                    [42],
+                )));
                 let branch = Node::Branch(children, None);
                 let result = branch.insert_entry_into_branch(([0x0], [43]));
                 assert_eq!(result.unwrap_err(), NodeError::DuplicatedKey);
@@ -114,17 +120,22 @@ mod tests {
             #[test]
             fn nibble_remaining() {
                 let mut children = EMPTY_CHILDREN.clone();
-                children[0] = Some(Box::new(Node::branch(EMPTY_CHILDREN.clone(), Some([]))));
-                let branch = Node::branch(children, Some([]));
+                children[0] = Some(Box::new(Node::branch_with_value(
+                    EMPTY_CHILDREN.clone(),
+                    [],
+                )));
+                let branch = Node::branch_with_value(children, []);
 
                 let node = branch.insert_entry_into_branch(([0x0, 0x0], [42])).unwrap();
 
                 let mut expected_node_children = EMPTY_CHILDREN.clone();
                 let mut internal_node_children = EMPTY_CHILDREN.clone();
                 internal_node_children[0] = Some(Box::new(Entry::from(([], [42])).into()));
-                expected_node_children[0] =
-                    Some(Box::new(Node::branch(internal_node_children, Some([]))));
-                let expected_node = Node::branch(expected_node_children, Some([]));
+                expected_node_children[0] = Some(Box::new(Node::branch_with_value(
+                    internal_node_children,
+                    [],
+                )));
+                let expected_node = Node::branch_with_value(expected_node_children, []);
 
                 assert_eq!(node, expected_node);
             }

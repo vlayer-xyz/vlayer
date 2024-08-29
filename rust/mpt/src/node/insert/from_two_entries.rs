@@ -67,8 +67,11 @@ mod tests {
         let node = from_two_entries(first_entry, second_entry).unwrap();
 
         let mut children = EMPTY_CHILDREN.clone();
-        children[0] = Some(Box::new(Node::branch(EMPTY_CHILDREN.clone(), Some([43]))));
-        let expected_node = Node::branch(children, Some([42]));
+        children[0] = Some(Box::new(Node::branch_with_value(
+            EMPTY_CHILDREN.clone(),
+            [43],
+        )));
+        let expected_node = Node::branch_with_value(children, [42]);
 
         assert_eq!(node, expected_node);
     }
@@ -89,8 +92,14 @@ mod tests {
         let node = from_two_entries(first_entry, second_entry).unwrap();
 
         let mut children = EMPTY_CHILDREN.clone();
-        children[0] = Some(Box::new(Node::branch(EMPTY_CHILDREN.clone(), Some([42]))));
-        children[1] = Some(Box::new(Node::branch(EMPTY_CHILDREN.clone(), Some([43]))));
+        children[0] = Some(Box::new(Node::branch_with_value(
+            EMPTY_CHILDREN.clone(),
+            [42],
+        )));
+        children[1] = Some(Box::new(Node::branch_with_value(
+            EMPTY_CHILDREN.clone(),
+            [43],
+        )));
         let expected_node = Node::Branch(children, None);
 
         assert_eq!(node, expected_node);
@@ -118,8 +127,14 @@ mod tests {
         let node = from_two_entries(first_entry, second_entry).unwrap();
 
         let mut children = EMPTY_CHILDREN.clone();
-        children[0] = Some(Box::new(Node::branch(EMPTY_CHILDREN.clone(), Some([42]))));
-        children[1] = Some(Box::new(Node::branch(EMPTY_CHILDREN.clone(), Some([43]))));
+        children[0] = Some(Box::new(Node::branch_with_value(
+            EMPTY_CHILDREN.clone(),
+            [42],
+        )));
+        children[1] = Some(Box::new(Node::branch_with_value(
+            EMPTY_CHILDREN.clone(),
+            [43],
+        )));
         let expected_node_child = Node::Branch(children, None);
         let expected_node = Node::extension([0x0], expected_node_child);
 
@@ -134,8 +149,14 @@ mod tests {
         let node = from_two_entries(first_entry, second_entry).unwrap();
 
         let mut children = EMPTY_CHILDREN.clone();
-        children[0] = Some(Box::new(Node::branch(EMPTY_CHILDREN.clone(), Some([42]))));
-        children[1] = Some(Box::new(Node::branch(EMPTY_CHILDREN.clone(), Some([43]))));
+        children[0] = Some(Box::new(Node::branch_with_value(
+            EMPTY_CHILDREN.clone(),
+            [42],
+        )));
+        children[1] = Some(Box::new(Node::branch_with_value(
+            EMPTY_CHILDREN.clone(),
+            [43],
+        )));
         let expected_node_child = Node::Branch(children, None);
         let expected_node = Node::extension([0x0, 0x1], expected_node_child);
 

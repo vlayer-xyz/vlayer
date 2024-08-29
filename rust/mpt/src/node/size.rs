@@ -71,7 +71,7 @@ mod node_size {
 
     #[test]
     fn branch_with_value() {
-        let branch = Node::branch(EMPTY_CHILDREN.clone(), Some([42]));
+        let branch = Node::branch_with_value(EMPTY_CHILDREN.clone(), [42]);
         assert_eq!(branch.get([]).unwrap(), [42]);
     }
 }
