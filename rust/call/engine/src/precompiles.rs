@@ -1,7 +1,7 @@
-mod get_string;
+mod json_get_string;
 mod verify_and_parse;
 
-use crate::precompiles::get_string::GET_STRING_PRECOMPILE;
+use crate::precompiles::json_get_string::JSON_GET_STRING_PRECOMPILE;
 use crate::precompiles::verify_and_parse::VERIFY_AND_PARSE_PRECOMPILE;
 use revm::precompile::Error::OutOfGas;
 use revm::precompile::{calc_linear_cost_u32, u64_to_address};
@@ -12,7 +12,7 @@ use revm::{
 
 pub(crate) const VLAYER_PRECOMPILES: [PrecompileWithAddress; 2] = [
     PrecompileWithAddress(u64_to_address(0x100), VERIFY_AND_PARSE_PRECOMPILE),
-    PrecompileWithAddress(u64_to_address(0x101), GET_STRING_PRECOMPILE),
+    PrecompileWithAddress(u64_to_address(0x101), JSON_GET_STRING_PRECOMPILE),
 ];
 
 fn map_to_other<E: ToString>(err: E) -> PrecompileErrors {
