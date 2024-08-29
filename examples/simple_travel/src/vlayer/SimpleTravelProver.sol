@@ -2,26 +2,20 @@
 pragma solidity ^0.8.13;
 
 import {Prover} from "vlayer/Prover.sol";
-import { ExampleToken } from "./ExampleToken.sol";
+import {ExampleToken} from "./ExampleToken.sol";
 
 contract SimpleTravelProver is Prover {
-    ExampleToken [] public tokens;
-    mapping(address => uint256) public chainIdToToken;
-
-    constructor(address [] memory _tokens, uint256 [] memory _chainIds) {
-        for (uint256 i = 0; i < _tokens.length; i++) {
-            tokens.push(ExampleToken(_tokens[i]));
-            chainIdToToken[_tokens[i]] = _chainIds[i];
-        }
-    } 
-
-    function proveMultiChainOwnership(address _owner) public returns (address, uint256) {
+    function proveMultiChainOwnership(
+        address [] memory _tokens, 
+        address _owner, 
+        uint256 [] memory _chainIds,
+        uint256 [] memory _blockNumbers
+    ) public returns (address, uint256) {
         uint256 sum = 0;
-        uint256 blockNo = 1;
 
-        for (uint256 i = 0; i < tokens.length; i++) {
-            setChain(chainIdToToken[address(tokens[i])], blockNo);
-            sum += tokens[i].balanceOf(_owner);
+        for (uint256 i = 0; i < _tokens.length; i++) {
+            setChain(_chainIds[i], _blockNumbers[i]);
+            sum += ExampleToken(_tokens[i]).balanceOf(_owner);
         }
 
         return (_owner, sum);

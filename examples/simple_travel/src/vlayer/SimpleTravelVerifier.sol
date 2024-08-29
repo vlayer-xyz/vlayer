@@ -8,19 +8,18 @@ import {Verifier} from "vlayer/Verifier.sol";
 
 contract SimpleTravel is Verifier {
     address public prover;
+    mapping(address => bool) public claimed;
+    mapping(address => uint256) public claimedSum;
 
     constructor(address _prover) {
         prover = _prover;
     }
 
-<<<<<<< HEAD
-    function verify(Proof calldata, uint256 exampleReturn)
-        public
-        onlyVerified(prover, SimpleTravelProver.aroundTheWorld.selector)
-    {}
-=======
-    function verify(
-        Proof calldata
-    ) public onlyVerified(prover, SimpleTravelProver.proveMultiChainOwnership.selector) {}
->>>>>>> 1f7e3583 (wip travel example)
+    function claim(
+        Proof calldata, address claimer, uint256 sum
+    ) public onlyVerified(prover, SimpleTravelProver.proveMultiChainOwnership.selector) {
+        require(!claimed[claimer], "Already claimed");
+        claimed[claimer] = true;
+        claimedSum[claimer] = sum;
+    }
 }

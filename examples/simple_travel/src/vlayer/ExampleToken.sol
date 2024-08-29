@@ -12,7 +12,7 @@ contract ExampleToken is ERC20 {
         }
 
         for (uint256 i = 0; i < initialOwners.length; i++){
-            _mint(initialOwners[i], i+1 * 1 ether);
+            _mint(initialOwners[i], i+1 * 10 ether);
         }
     }
 }
