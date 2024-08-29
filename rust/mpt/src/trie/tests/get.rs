@@ -1,5 +1,3 @@
-use std::array::from_fn;
-
 use alloy_primitives::{b256, B256};
 
 use crate::{
@@ -52,7 +50,7 @@ fn branch() {
 
 #[test]
 fn branch_with_value() {
-    let mpt = MerkleTrie(Node::branch(from_fn(|_| None), Some([42u8])));
+    let mpt = MerkleTrie(Node::branch_with_value([42]));
 
     assert_eq!(mpt.get([]).unwrap(), [42]);
     assert_eq!(mpt.get([0]), None);

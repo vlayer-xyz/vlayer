@@ -21,7 +21,7 @@ impl Node {
 
 #[cfg(test)]
 mod node_size {
-    use crate::node::{constructors::EMPTY_CHILDREN, Node};
+    use crate::node::Node;
     use std::array::from_fn;
 
     #[test]
@@ -52,9 +52,7 @@ mod node_size {
     #[test]
     fn branch_one_child() {
         let leaf = Node::leaf([0x0], []);
-        let mut children = EMPTY_CHILDREN.clone();
-        children[0] = Some(Box::new(leaf));
-        let branch = Node::Branch(children, None);
+        let branch = Node::branch_with_child(0, leaf);
 
         assert_eq!(branch.size(), 2);
     }
@@ -71,7 +69,7 @@ mod node_size {
 
     #[test]
     fn branch_with_value() {
-        let branch = Node::branch(EMPTY_CHILDREN.clone(), Some([42]));
+        let branch = Node::branch_with_value([42]);
         assert_eq!(branch.get([]).unwrap(), [42]);
     }
 }

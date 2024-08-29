@@ -18,10 +18,11 @@ pub(crate) fn from_two_entries(lhs: Entry, rhs: Entry) -> Result<Node, NodeError
 
     if shorter.key.is_empty() {
         let (longer_first_nibble, remaining_longer) = longer.split_first_key_nibble();
-        let mut children = EMPTY_CHILDREN.clone();
-        children[longer_first_nibble as usize] = Some(Box::new(remaining_longer.into()));
-
-        return Ok(Node::Branch(children, Some(shorter.value)));
+        return Ok(Node::branch_with_child_and_value(
+            longer_first_nibble,
+            remaining_longer,
+            shorter.value,
+        ));
     }
     let (shorter_first_nibble, remaining_shorter) = shorter.split_first_key_nibble();
     let (longer_first_nibble, remaining_longer) = longer.split_first_key_nibble();
@@ -53,8 +54,8 @@ mod tests {
 
     #[test]
     fn two_empty_keys() {
-        let first_entry: Entry = ([], [42]).into();
-        let second_entry: Entry = ([], [43]).into();
+        let first_entry = ([], [42]).into();
+        let second_entry = ([], [43]).into();
 
         let result = from_two_entries(first_entry, second_entry);
         assert_eq!(result.unwrap_err(), NodeError::DuplicatedKey);
@@ -62,35 +63,34 @@ mod tests {
 
     #[test]
     fn one_empty_key() {
-        let first_entry: Entry = ([], [42]).into();
-        let second_entry: Entry = ([0x0], [43]).into();
+        let first_entry = ([], [42]).into();
+        let second_entry = ([0x0], [43]).into();
         let node = from_two_entries(first_entry, second_entry).unwrap();
 
-        let mut children = EMPTY_CHILDREN.clone();
-        children[0] = Some(Box::new(Node::branch(EMPTY_CHILDREN.clone(), Some([43]))));
-        let expected_node = Node::branch(children, Some([42]));
+        let expected_node =
+            Node::branch_with_child_and_value(0, Node::branch_with_value([43]), [42]);
 
         assert_eq!(node, expected_node);
     }
 
     #[test]
     fn duplicate_key() {
-        let old_entry: Entry = ([0], [42]).into();
-        let entry: Entry = ([0], [43]).into();
+        let old_entry = ([0], [42]).into();
+        let entry = ([0], [43]).into();
         let result = from_two_entries(old_entry, entry);
         assert_eq!(result.unwrap_err(), NodeError::DuplicatedKey);
     }
 
     #[test]
     fn different_single_nibbles() {
-        let first_entry: Entry = ([0x0], [42]).into();
-        let second_entry: Entry = ([0x1], [43]).into();
+        let first_entry = ([0x0], [42]).into();
+        let second_entry = ([0x1], [43]).into();
 
         let node = from_two_entries(first_entry, second_entry).unwrap();
 
         let mut children = EMPTY_CHILDREN.clone();
-        children[0] = Some(Box::new(Node::branch(EMPTY_CHILDREN.clone(), Some([42]))));
-        children[1] = Some(Box::new(Node::branch(EMPTY_CHILDREN.clone(), Some([43]))));
+        children[0] = Some(Box::new(Node::branch_with_value([42])));
+        children[1] = Some(Box::new(Node::branch_with_value([43])));
         let expected_node = Node::Branch(children, None);
 
         assert_eq!(node, expected_node);
@@ -98,8 +98,8 @@ mod tests {
 
     #[test]
     fn no_common_prefix() {
-        let first_entry: Entry = ([0x0, 0x0], [42]).into();
-        let second_entry: Entry = ([0x1, 0x0], [43]).into();
+        let first_entry = ([0x0, 0x0], [42]).into();
+        let second_entry = ([0x1, 0x0], [43]).into();
         let node = from_two_entries(first_entry, second_entry).unwrap();
 
         let mut children = EMPTY_CHILDREN.clone();
@@ -112,14 +112,14 @@ mod tests {
 
     #[test]
     fn common_prefix() {
-        let first_entry: Entry = ([0x0, 0x0], [42]).into();
-        let second_entry: Entry = ([0x0, 0x1], [43]).into();
+        let first_entry = ([0x0, 0x0], [42]).into();
+        let second_entry = ([0x0, 0x1], [43]).into();
 
         let node = from_two_entries(first_entry, second_entry).unwrap();
 
         let mut children = EMPTY_CHILDREN.clone();
-        children[0] = Some(Box::new(Node::branch(EMPTY_CHILDREN.clone(), Some([42]))));
-        children[1] = Some(Box::new(Node::branch(EMPTY_CHILDREN.clone(), Some([43]))));
+        children[0] = Some(Box::new(Node::branch_with_value([42])));
+        children[1] = Some(Box::new(Node::branch_with_value([43])));
         let expected_node_child = Node::Branch(children, None);
         let expected_node = Node::extension([0x0], expected_node_child);
 
@@ -128,14 +128,14 @@ mod tests {
 
     #[test]
     fn long_common_prefix() {
-        let first_entry: Entry = ([0x0, 0x1, 0x0], [42]).into();
-        let second_entry: Entry = ([0x0, 0x1, 0x1], [43]).into();
+        let first_entry = ([0x0, 0x1, 0x0], [42]).into();
+        let second_entry = ([0x0, 0x1, 0x1], [43]).into();
 
         let node = from_two_entries(first_entry, second_entry).unwrap();
 
         let mut children = EMPTY_CHILDREN.clone();
-        children[0] = Some(Box::new(Node::branch(EMPTY_CHILDREN.clone(), Some([42]))));
-        children[1] = Some(Box::new(Node::branch(EMPTY_CHILDREN.clone(), Some([43]))));
+        children[0] = Some(Box::new(Node::branch_with_value([42])));
+        children[1] = Some(Box::new(Node::branch_with_value([43])));
         let expected_node_child = Node::Branch(children, None);
         let expected_node = Node::extension([0x0, 0x1], expected_node_child);
 
@@ -144,8 +144,8 @@ mod tests {
 
     #[test]
     fn common_prefix_with_different_long_suffix() {
-        let first_entry: Entry = ([0x0, 0x0, 0x1], [42]).into();
-        let second_entry: Entry = ([0x0, 0x1, 0x0], [43]).into();
+        let first_entry = ([0x0, 0x0, 0x1], [42]).into();
+        let second_entry = ([0x0, 0x1, 0x0], [43]).into();
 
         let node = from_two_entries(first_entry, second_entry).unwrap();
 

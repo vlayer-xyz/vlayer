@@ -19,7 +19,7 @@ mod insert {
             let node = Node::Null;
             assert_eq!(
                 node.insert(Nibbles::unpack([]), [42]).unwrap(),
-                Node::Branch(Default::default(), Some([42].into()))
+                Node::branch_with_value([42])
             );
         }
 
@@ -28,7 +28,7 @@ mod insert {
             let node = Node::Null;
             assert_eq!(
                 node.insert(Nibbles::unpack([0x0]), [42]).unwrap(),
-                Node::Leaf(Nibbles::unpack([0x0]).as_slice().into(), Box::new([42]))
+                Node::leaf([0x0, 0x0], [42])
             );
         }
 
@@ -80,9 +80,8 @@ mod insert {
             let node = Node::leaf([0x0, 0x0], [42]);
             let updated_node = node.insert(Nibbles::unpack([]), [43]).unwrap();
 
-            let mut children = EMPTY_CHILDREN.clone();
-            children[0] = Some(Box::new(Entry::from(([0x0], [42])).into()));
-            let expected_branch = Node::Branch(children, Some([43].into()));
+            let expected_branch =
+                Node::branch_with_child_and_value(0, Entry::from(([0x0], [42])), [43]);
 
             assert_eq!(updated_node, expected_branch);
         }
@@ -93,8 +92,8 @@ mod insert {
             let updated_node = node.insert(Nibbles::unpack([0x1]), [43]).unwrap();
 
             let mut children = EMPTY_CHILDREN.clone();
-            children[0] = Some(Box::new(Node::branch(EMPTY_CHILDREN.clone(), Some([42]))));
-            children[1] = Some(Box::new(Node::branch(EMPTY_CHILDREN.clone(), Some([43]))));
+            children[0] = Some(Box::new(Node::branch_with_value([42])));
+            children[1] = Some(Box::new(Node::branch_with_value([43])));
             let expected_branch = Node::extension([0x0], Node::Branch(children, None));
 
             assert_eq!(updated_node, expected_branch);
@@ -103,26 +102,24 @@ mod insert {
 
     #[cfg(test)]
     mod into_branch {
-        use crate::node::{constructors::EMPTY_CHILDREN, insert::entry::Entry, NodeError};
+        use crate::node::{insert::entry::Entry, NodeError};
 
         use super::*;
 
         #[test]
         fn duplicate_key() {
-            let node = Node::branch(EMPTY_CHILDREN.clone(), Some([42]));
+            let node = Node::branch_with_value([42]);
             let result = node.insert(Nibbles::unpack([]), [43]);
             assert_eq!(result.unwrap_err(), NodeError::DuplicatedKey);
         }
 
         #[test]
         fn new_key() {
-            let node = Node::branch(EMPTY_CHILDREN.clone(), Some([42]));
+            let node = Node::branch_with_value([42]);
             let updated_node = node.insert(Nibbles::unpack([0x0]), [43]).unwrap();
 
-            let mut expected_branch = Node::Branch(EMPTY_CHILDREN.clone(), Some([42].into()));
-            if let Node::Branch(ref mut children, _) = expected_branch {
-                children[0] = Some(Box::new(Entry::from(([0x0], [43])).into()));
-            }
+            let expected_branch =
+                Node::branch_with_child_and_value(0, Entry::from(([0x0], [43])), [42]);
 
             assert_eq!(expected_branch, updated_node);
         }
