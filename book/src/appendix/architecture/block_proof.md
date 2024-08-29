@@ -8,38 +8,24 @@ We also provide time-travel functionality. As a result of that - our state and s
 
 This service allows to prove **the first statement** by maintaining a data structure called Block Proof Cache that stores block hashes, along with a ZK proof that all the hashes it contains belong to the same chain. Below we provide more details.
 
-
 ## Before diving in to Block Proof Cache
 
-### Block and Storage proofs
-
-A **block proof** verifies that a particular block belongs to a specific blockchain ??, ensuring the block's authenticity and its place in the chain. A **storage proof**, on the other hand, specifically verifies that a piece of data, such as an account balance or a smart contract variable, is stored within a particular state in a specific block.
-
-To ensure that a piece of state belongs to a certain chain, it is essential to provide both types of proofs. A storage proof demonstrates that the data is part of a specific block, while a block proof confirms that this block is indeed a legitimate part of the blockchain.
+Before diving in to Block Proof Cache details, it is recommended to go through or at least glance over the two topics below.
 
 ### Recent and historical blocks
 
-One way to prove that a block of a certain hash belongs to a chain is to run the Solidity `blockhash(uint)` function. It returns the hash of a block for a given number.
-To perform a check, we need to:
-- hash a block with a certain state root and compare it with the result of the function
-- ensure root hash from merkle proof equals to state root
+As it was said, it's going to be essential to be able to verify a hash on-chain. One way to do this is to run the Solidity `blockhash(uint)` function - which for a given block number returns the corresponding hash. The hash to be verified needs to be compared to the result of the function (the block number is taken from the storage proof).
 
-However, this method is limited, as it only works for most recent 256 blocks on a given chain.
-Therefore, we need another way to prove inclusion of older blocks in the chain.
+However, this method is limited, as it only works for most recent 256 blocks on a given chain. That is why, we need to make sure that the latest hash that is going to be verified on-chain is a hash of a recent block. If it's not - it needs to be added to the set of hashes.
 
 We use the following naming in this document:
 
 - **recent blocks** - any of the most recent 256 blocks (relative to the current `block_no`)
 - **historical blocks** - blocks older than 256
 
-### Naive block inclusion proofs
+### Naive chain proofs
 
-To prove inclusion of certain **historical blocks** in a chain, we will prove that:
-
-1. Some **recent block** belongs to the chain
-2. Both **historical block** and **recent block** belong to the same chain
-
-A naive way to prove the inclusion proof of two blocks in the same chain is to hash all subsequent blocks from **historical block** to **recent block** and verify that each blockhash is equal to the **prevHash** value of the subsequent block.
+Now going back to the first statement from the introduction - we need a way to prove that a set of hashes belongs to the same chain (not necessarily a real one). A naive way to do that is to hash all subsequent blocks from the oldest to the most recent and verify that each blockhash is equal to the **prevHash** value of the subsequent block. If along the way all the hashes occured, then they all belong to the same chain.
 
 See the diagram below for the visual.
 
@@ -49,7 +35,7 @@ Unfortunately, this is a slow process, especially if the blocks are far away fro
 
 ## Block Proof Cache
 
-The Block Proof Cache stores `<block_number, blockhash>` mapping for historical blocks. It is implemented using a Merkle Patricia Trie, where block numbers are the keys and blockhashes are the values. The construction is inductive, in which we preserve the invariant that each block stored in the Block Proof Cache has an immediate parent or child block. In order to prove correctness of construction with `N+1` nodes we verify that a ZK proof of construction with `N` nodes is correct. We do this by recursively by verifying ZK proofs created so far which are stored as ZK proofs in ZK proofs. When this is verified, we check `N+1` step, by ensuring new block data fits existing structure. Then we generate a new ZK proof for computation appending/prepending the next block hash to the trie.
+The Block Proof Cache stores `<block_number, blockhash>` mapping for historical(!!!) blocks. It is implemented using a Merkle Patricia Trie, where block numbers are the keys and blockhashes are the values. The construction is inductive, in which we preserve the invariant that each block stored in the Block Proof Cache has an immediate parent or child block. In order to prove correctness of construction with `N+1` nodes we verify that a ZK proof of construction with `N` nodes is correct. We do this by recursively by verifying ZK proofs created so far which are stored as ZK proofs in ZK proofs. When this is verified, we check `N+1` step, by ensuring new block data fits existing structure. Then we generate a new ZK proof for computation appending/prepending the next block hash to the trie.
 
 The following functions written in pseudocode provide more details on the Block Proof Cache implementation.
 
