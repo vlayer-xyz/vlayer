@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -ueo pipefail
+set -uexo pipefail
 
 function setup_foundry_project() {
         cd $(mktemp -d)
@@ -37,8 +37,9 @@ function test_init_is_not_idempotent() {
 }
 
 ####### SETUP
+
 curl -SL  https://install.vlayer.xyz | bash
-source ~/.config/.bashrc
+source  "${HOME}/.bashrc"
 vlayerup
 
 ####### TESTS
