@@ -7,6 +7,7 @@ enum ProofMode {
 }
 
 struct Seal {
+    bytes4 verifierSelector;
     bytes32[8] seal;
     ProofMode mode;
 }
@@ -20,14 +21,17 @@ library SealLib {
     function decode(Seal memory seal) internal pure returns (bytes memory) {
         if (seal.mode == ProofMode.FAKE) {
             bytes32 firstWord = seal.seal[0];
-            bytes4 secondWord = bytes4(seal.seal[1]);
-            return abi.encodePacked(firstWord, secondWord);
+            return abi.encodePacked(seal.verifierSelector, firstWord);
         } else {
-            return abi.encode(seal.seal);
+            return abi.encodePacked(seal.verifierSelector, seal.seal);
         }
     }
 
     function proofMode(Seal memory seal) internal pure returns (ProofMode) {
         return seal.mode;
+    }
+
+    function verifierSelector(Seal memory seal) internal pure returns (bytes4) {
+        return seal.verifierSelector;
     }
 }

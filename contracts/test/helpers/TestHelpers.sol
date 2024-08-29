@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
+import {console } from "forge-std/console.sol";
+
 import {RiscZeroMockVerifier} from "risc0-ethereum/test/RiscZeroMockVerifier.sol";
 
 import {ExecutionCommitment} from "../../src/ExecutionCommitment.sol";
@@ -54,24 +56,21 @@ contract TestHelpers {
         if (proofMode == ProofMode.FAKE) {
             words = encodeWordsFake(seal);
         }
-        return Seal(words, proofMode);
+        return Seal(FAKE_VERIFIER_SELECTOR, words, proofMode);
     }
 
     function encodeWordsFake(bytes memory seal) private pure returns (bytes32[8] memory) {
         bytes32[8] memory words;
+        uint256 rawSeal; 
 
         require(seal.length == SealLib.FAKE_SEAL_LENGTH, "Invalid seal length");
 
-        bytes32 firstWord = abi.decode(seal, (bytes32));
-        uint32 secondWord = 0;
-
-        for (uint256 i = 0; i < SealLib.FAKE_SEAL_LENGTH - 32; i++) {
-            secondWord <<= 8;
-            secondWord += uint8(seal[32 + i]);
+        for (uint256 i = SealLib.VERIFIER_SELECTOR_LENGTH - 1; i < seal.length; ++i) {
+            rawSeal <<= 8;
+            rawSeal += uint8(seal[i]);
         }
 
-        words[0] = firstWord;
-        words[1] = bytes32(bytes4(secondWord));
+        words[0] = bytes32(rawSeal);
 
         return words;
     }
