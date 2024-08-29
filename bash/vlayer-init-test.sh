@@ -4,36 +4,39 @@ set -uexo pipefail
 
 function setup_foundry_project() {
         cd $(mktemp -d)
-        forge init myproject --no-commit
-        cd myproject
 }
 
 function test_can_initialise_properly() {
-    setup_foundry_project
+    (    
+        setup_foundry_project
 
-    vlayer init
+        vlayer init myproject
+        cd myproject
     
-    contracts=(
-        "SimpleProver.sol"
-        "SimpleProver.t.sol"
-        "SimpleVerifier.sol"
+        contracts=(
+            "SimpleProver.sol"
+            "SimpleProver.t.sol"
+            "SimpleVerifier.sol"
+        )
+    
+        for contract in "${contracts[@]}"; do
+            if [[ ! -f "src/vlayer/${contract}" ]] ; then
+                echo "ERROR: $contract not found" >&2
+                exit 1
+            fi
+        done
     )
-    
-    for contract in "${contracts[@]}"; do
-        if [[ ! -f "src/vlayer/${contract}" ]] ; then
-            echo "ERROR: $contract not found" >&2
-            exit 1
-        fi
-    done
 }
 
 function test_init_is_not_idempotent() {
-    setup_foundry_project
+    (    
+        setup_foundry_project
 
-    vlayer init
+        vlayer init myproject
 
-    # should log an error. If not, 'grep' exits with 1
-    vlayer init | grep -q "ERROR" 
+        # should log an error. If not, 'grep' exits with 1
+        vlayer init myproject | grep -q "ERROR" 
+    )
 }
 
 ####### SETUP
