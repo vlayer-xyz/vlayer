@@ -61,3 +61,25 @@ async fn method_missing() {
         body_to_json(response.into_body()).await
     );
 }
+
+#[tokio::test]
+async fn success_dummy() {
+    let app = server();
+    let req = json!({
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "v_proveChain",
+        "params": []
+    });
+    let response = post(app, "/", &req).await;
+
+    assert_eq!(StatusCode::OK, response.status());
+    assert_eq!(
+        json!({
+            "jsonrpc": "2.0",
+            "id": 1,
+            "result": null
+        }),
+        body_to_json(response.into_body()).await
+    );
+}

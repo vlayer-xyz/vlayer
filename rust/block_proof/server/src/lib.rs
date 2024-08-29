@@ -1,11 +1,41 @@
-use axum::{routing::post, Router};
-use axum_jrpc::{JrpcResult, JsonRpcExtractor};
+use std::pin::Pin;
 
-async fn method_not_found(req: JsonRpcExtractor) -> JrpcResult {
-    let method = req.method();
-    Ok(req.method_not_found(method))
+use axum::{routing::post, Router};
+use axum_jrpc::{
+    error::{JsonRpcError, JsonRpcErrorReason},
+    Value,
+};
+use serde::{Deserialize, Serialize};
+use server_utils::route;
+use thiserror::Error;
+
+#[derive(Deserialize, Serialize)]
+pub struct Params {}
+
+#[derive(Serialize)]
+pub struct ChainProof;
+
+#[derive(Debug, Error)]
+pub enum BpServerError {}
+
+impl From<BpServerError> for JsonRpcError {
+    fn from(error: BpServerError) -> Self {
+        JsonRpcError::new(
+            JsonRpcErrorReason::InternalError,
+            error.to_string(),
+            Value::Null,
+        )
+    }
+}
+
+async fn v_prove_chain(_params: Params) -> Result<ChainProof, BpServerError> {
+    Ok(ChainProof)
 }
 
 pub fn server() -> Router {
-    Router::new().route("/", post(method_not_found))
+    let v_prove_chain_handler = move |params| Box::pin(v_prove_chain(params)) as Pin<Box<_>>;
+    let jrpc_handler =
+        move |req| async move { route(req, "v_proveChain", v_prove_chain_handler).await };
+
+    Router::new().route("/", post(jrpc_handler))
 }

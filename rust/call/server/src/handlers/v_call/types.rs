@@ -1,7 +1,6 @@
 use crate::error::AppError;
 use alloy_chains::Chain;
 use alloy_primitives::{Address, BlockNumber, ChainId, FixedBytes};
-use axum_jrpc::Value;
 use call_host::Call as HostCall;
 use serde::{Deserialize, Serialize};
 use server_utils::{parse_address_field, parse_hex_field};
