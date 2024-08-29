@@ -1,8 +1,4 @@
-use crate::{
-    key_nibbles::KeyNibbles,
-    node::{constructors::EMPTY_CHILDREN, Node},
-    MerkleTrie,
-};
+use crate::{key_nibbles::KeyNibbles, node::Node, MerkleTrie};
 use alloy_primitives::B256;
 
 type EncodedNode = Vec<u8>;

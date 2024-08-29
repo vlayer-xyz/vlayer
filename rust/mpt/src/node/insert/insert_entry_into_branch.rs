@@ -36,7 +36,6 @@ impl Node {
 #[cfg(test)]
 mod tests {
     use crate::node::constructors::EMPTY_BRANCH;
-    use crate::node::constructors::EMPTY_CHILDREN;
 
     use super::*;
 

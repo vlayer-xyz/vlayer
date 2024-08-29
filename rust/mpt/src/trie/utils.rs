@@ -71,10 +71,7 @@ mod resolve_trie {
     use alloy_primitives::keccak256;
     use alloy_trie::HashMap;
 
-    use crate::{
-        key_nibbles::KeyNibbles,
-        node::{constructors::EMPTY_CHILDREN, Node},
-    };
+    use crate::{key_nibbles::KeyNibbles, node::Node};
 
     use super::resolve_trie;
 
