@@ -111,15 +111,11 @@ mod tests {
 
                 let node = branch.insert_entry_into_branch(([0x0, 0x0], [42])).unwrap();
 
-                let mut expected_node_children = EMPTY_CHILDREN.clone();
-                let mut internal_node_children = EMPTY_CHILDREN.clone();
-                internal_node_children[0] = Some(Box::new(Entry::from(([], [42])).into()));
-                expected_node_children[0] = Some(Box::new(Node::branch_with_children_and_value(
-                    internal_node_children,
+                let expected_node = Node::branch_with_child_and_value(
+                    0,
+                    Node::branch_with_child_and_value(0, Entry::from(([], [42])), []),
                     [],
-                )));
-                let expected_node =
-                    Node::branch_with_children_and_value(expected_node_children, []);
+                );
 
                 assert_eq!(node, expected_node);
             }
