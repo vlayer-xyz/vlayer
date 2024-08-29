@@ -34,6 +34,7 @@ function test_init_is_not_idempotent() {
 
         vlayer init myproject
 
+        set +o pipefail # vlayer command will fail, so we need to turn off pipefail option for the next expression
         # should log an error. If not, 'grep' exits with 1
         vlayer init myproject | grep -q "ERROR" 
     )
