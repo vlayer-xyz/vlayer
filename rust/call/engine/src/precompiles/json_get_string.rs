@@ -1,4 +1,4 @@
-use crate::precompiles::{gas_used, map_to_other};
+use crate::precompiles::gas_used;
 use alloy_primitives::Bytes;
 use revm::precompile::{Precompile, PrecompileOutput, PrecompileResult};
 use std::convert::Into;
