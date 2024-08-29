@@ -1,17 +1,28 @@
+mod get_string;
 mod verify_and_parse;
 
+use crate::precompiles::verify_and_parse::VERIFY_AND_PARSE_PRECOMPILE;
+use revm::precompile::Error::OutOfGas;
+use revm::precompile::{calc_linear_cost_u32, u64_to_address};
 use revm::{
-    precompile::{
-        PrecompileError::Other,
-        PrecompileErrors::Error,
-        PrecompileWithAddress,
-    },
+    precompile::{PrecompileError::Other, PrecompileErrors::Error, PrecompileWithAddress},
     primitives::PrecompileErrors,
 };
-use verify_and_parse::VERIFY_AND_PARSE;
 
-pub(crate) const VLAYER_PRECOMPILES: [PrecompileWithAddress; 1] = [VERIFY_AND_PARSE];
+pub(crate) const VLAYER_PRECOMPILES: [PrecompileWithAddress; 2] = [
+    PrecompileWithAddress(u64_to_address(0x100), VERIFY_AND_PARSE_PRECOMPILE),
+    PrecompileWithAddress(u64_to_address(0x101), VERIFY_AND_PARSE_PRECOMPILE),
+];
 
 fn map_to_other<E: ToString>(err: E) -> PrecompileErrors {
     Error(Other(err.to_string()))
+}
+
+fn gas_used(len: usize, base: u64, word: u64, gas_limit: u64) -> Result<u64, PrecompileErrors> {
+    let gas_used = calc_linear_cost_u32(len, base, word);
+    if gas_used > gas_limit {
+        Err(Error(OutOfGas))
+    } else {
+        Ok(gas_used)
+    }
 }
