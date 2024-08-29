@@ -1,4 +1,4 @@
-use crate::node::{constructors::EMPTY_CHILDREN, MPTError, Node};
+use crate::node::{constructors::EMPTY_CHILDREN, Node, NodeError};
 
 use super::entry::Entry;
 
@@ -10,12 +10,10 @@ fn order_entries(lhs: Entry, rhs: Entry) -> (Entry, Entry) {
     }
 }
 
-pub(crate) fn from_two_entries(lhs: Entry, rhs: Entry) -> Result<Node, MPTError> {
+pub(crate) fn from_two_entries(lhs: Entry, rhs: Entry) -> Result<Node, NodeError> {
     let (shorter, longer) = order_entries(lhs, rhs);
     if shorter.key == longer.key {
-        return Err(MPTError::DuplicatedKey(
-            String::from_utf8(shorter.key.to_vec()).expect("Invalid UTF-8"),
-        ));
+        return Err(NodeError::DuplicatedKey);
     }
 
     if shorter.key.is_empty() {
@@ -54,12 +52,12 @@ mod tests {
     use super::*;
 
     #[test]
-    #[should_panic(expected = "DuplicatedKey(\"\")")]
     fn two_empty_keys() {
         let first_entry: Entry = ([], [42]).into();
         let second_entry: Entry = ([], [43]).into();
 
-        let _ = from_two_entries(first_entry, second_entry).unwrap();
+        let result = from_two_entries(first_entry, second_entry);
+        assert_eq!(result.unwrap_err(), NodeError::DuplicatedKey);
     }
 
     #[test]
@@ -80,11 +78,7 @@ mod tests {
         let old_entry: Entry = ([0], [42]).into();
         let entry: Entry = ([0], [43]).into();
         let result = from_two_entries(old_entry, entry);
-        assert!(result.is_err(), "Expected an error, but got Ok");
-        assert_eq!(
-            result.unwrap_err(),
-            MPTError::DuplicatedKey("\0".to_string())
-        );
+        assert_eq!(result.unwrap_err(), NodeError::DuplicatedKey);
     }
 
     #[test]

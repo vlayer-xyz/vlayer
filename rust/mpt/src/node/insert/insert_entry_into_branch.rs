@@ -1,36 +1,32 @@
-use crate::node::{MPTError, Node};
+use crate::node::{Node, NodeError};
 
 use super::entry::Entry;
 
 impl Node {
-    #[allow(clippy::wrong_self_convention)]
-    pub(crate) fn insert_entry_into_branch(self, entry: Entry) -> Result<Node, MPTError> {
-        if let Node::Branch(children, branch_value) = self {
-            let mut children = children;
-            if entry.key.is_empty() {
-                if branch_value.is_some() {
-                    return Err(MPTError::DuplicatedKey(
-                        String::from_utf8(entry.key.to_vec()).expect("Invalid UTF-8"),
-                    ));
-                } else {
-                    return Ok(Node::Branch(children.clone(), Some(entry.value)));
-                }
-            }
-
-            let (entry_first_nibble, remaining_entry) = entry.split_first_key_nibble();
-
-            if let Some(existing_child) = children[entry_first_nibble as usize].take() {
-                children[entry_first_nibble as usize] = Some(Box::new(
-                    existing_child.insert(remaining_entry.key, remaining_entry.value),
-                ));
-            } else {
-                children[entry_first_nibble as usize] = Some(Box::new(remaining_entry.into()));
-            }
-
-            Ok(Node::Branch(children.clone(), branch_value.clone()))
-        } else {
+    pub(crate) fn insert_entry_into_branch(self, entry: Entry) -> Result<Node, NodeError> {
+        let Node::Branch(children, branch_value) = self else {
             unreachable!("insert_entry_into_branch is used only for Branch nodes");
+        };
+
+        let mut children = children;
+        if entry.key.is_empty() {
+            if branch_value.is_some() {
+                return Err(NodeError::DuplicatedKey);
+            }
+            return Ok(Node::Branch(children, Some(entry.value)));
         }
+
+        let (entry_first_nibble, remaining_entry) = entry.split_first_key_nibble();
+
+        if let Some(existing_child) = children[entry_first_nibble as usize].take() {
+            children[entry_first_nibble as usize] = Some(Box::new(
+                existing_child.insert(remaining_entry.key, remaining_entry.value)?,
+            ));
+        } else {
+            children[entry_first_nibble as usize] = Some(Box::new(remaining_entry.into()));
+        }
+
+        Ok(Node::Branch(children, branch_value))
     }
 }
 
@@ -44,7 +40,7 @@ mod tests {
     #[should_panic(expected = "insert_entry_into_branch is used only for Branch nodes")]
     fn unreachable() {
         let leaf = Node::leaf([0x0], [42]);
-        let _ = leaf.insert_entry_into_branch(([0x0], [42]).into());
+        leaf.insert_entry_into_branch(([0x0], [42]).into()).unwrap();
     }
 
     mod empty_key {
@@ -64,8 +60,7 @@ mod tests {
         fn branch_value_some() {
             let branch = Node::branch(EMPTY_CHILDREN.clone(), Some([42]));
             let result = branch.insert_entry_into_branch(([], [43]).into());
-            assert!(result.is_err(), "Expected an error, but got Ok");
-            assert_eq!(result.unwrap_err(), MPTError::DuplicatedKey("".to_string()));
+            assert_eq!(result.unwrap_err(), NodeError::DuplicatedKey);
         }
     }
 
@@ -108,14 +103,12 @@ mod tests {
             use super::*;
 
             #[test]
-            #[should_panic(expected = "DuplicatedKey(\"\")")]
             fn no_nibble_remaining() {
                 let mut children = EMPTY_CHILDREN.clone();
                 children[0] = Some(Box::new(Node::branch(EMPTY_CHILDREN.clone(), Some([42]))));
                 let branch = Node::Branch(children, None);
-                branch
-                    .insert_entry_into_branch(([0x0], [43]).into())
-                    .unwrap();
+                let result = branch.insert_entry_into_branch(([0x0], [43]).into());
+                assert_eq!(result.unwrap_err(), NodeError::DuplicatedKey);
             }
 
             #[test]

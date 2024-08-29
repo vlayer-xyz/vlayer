@@ -1,4 +1,5 @@
 use crate::node::Node;
+use crate::node::NodeError;
 use alloy_primitives::{keccak256, B256};
 use alloy_rlp::Decodable;
 use alloy_trie::EMPTY_ROOT_HASH;
@@ -33,11 +34,19 @@ impl MerkleTrie {
     }
 
     /// Inserts a key-value pair into the trie.
-    ///
-    /// It panics when the key already exists in the trie.
-    #[cfg(test)]
-    pub fn insert(&mut self, key: impl AsRef<[u8]>, value: impl AsRef<[u8]>) {
-        self.0 = self.0.clone().insert(Nibbles::unpack(key), value);
+    pub fn insert(
+        &mut self,
+        key: impl AsRef<[u8]>,
+        value: impl AsRef<[u8]>,
+    ) -> Result<(), MPTError> {
+        let nibbles = Nibbles::unpack(key.as_ref());
+        match self.0.clone().insert(nibbles.clone(), value) {
+            Ok(new_node) => {
+                self.0 = new_node;
+                Ok(())
+            }
+            Err(NodeError::DuplicatedKey) => Err(MPTError::DuplicatedKey(nibbles)),
+        }
     }
 
     /// Returns the RLP decoded value corresponding to the key.
@@ -101,6 +110,12 @@ impl MerkleTrie {
 
         Ok(trie)
     }
+}
+
+#[allow(dead_code)]
+#[derive(Debug, PartialEq)]
+pub enum MPTError {
+    DuplicatedKey(Nibbles),
 }
 
 #[cfg(test)]

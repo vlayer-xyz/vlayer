@@ -8,7 +8,7 @@ mod insert {
     #[should_panic(expected = "Cannot insert into a digest node")]
     fn digest() {
         let node = Node::Digest(Default::default());
-        node.insert(Nibbles::unpack([0x0]), [42]);
+        node.insert(Nibbles::unpack([0x0]), [42]).unwrap();
     }
 
     mod into_null {
@@ -18,7 +18,7 @@ mod insert {
         fn empty_key() {
             let node = Node::Null;
             assert_eq!(
-                node.insert(Nibbles::unpack([]), [42]),
+                node.insert(Nibbles::unpack([]), [42]).unwrap(),
                 Node::Branch(Default::default(), Some([42].into()))
             );
         }
@@ -27,7 +27,7 @@ mod insert {
         fn short_key() {
             let node = Node::Null;
             assert_eq!(
-                node.insert(Nibbles::unpack([0x0]), [42]),
+                node.insert(Nibbles::unpack([0x0]), [42]).unwrap(),
                 Node::Leaf(Nibbles::unpack([0x0]).as_slice().into(), Box::new([42]))
             );
         }
@@ -36,7 +36,7 @@ mod insert {
         fn long_key() {
             let node = Node::Null;
             assert_eq!(
-                node.insert(Nibbles::unpack([0x0, 0x0]), [42]),
+                node.insert(Nibbles::unpack([0x0, 0x0]), [42]).unwrap(),
                 //here we create a leaf from nibbles, not from bytes as above
                 Node::leaf([0x0, 0x0, 0x0, 0x0], [42])
             );
@@ -47,7 +47,9 @@ mod insert {
             let node = Node::Null;
             let updated_node = node
                 .insert(Nibbles::unpack([0x10]), [42])
-                .insert(Nibbles::unpack([0x20]), [43]);
+                .unwrap()
+                .insert(Nibbles::unpack([0x20]), [43])
+                .unwrap();
 
             let mut children = EMPTY_CHILDREN.clone();
             children[0x1] = Some(Box::new(Node::leaf([0x0], [42])));
@@ -60,23 +62,23 @@ mod insert {
 
     #[cfg(test)]
     mod into_leaf {
-        use crate::node::insert::entry::Entry;
+        use crate::node::{insert::entry::Entry, NodeError};
 
         use super::*;
 
         #[test]
-        #[should_panic(expected = "DuplicatedKey(\"\\0\\0\")")]
         fn duplicate_key() {
             // Trie::insert always inserts even number of nibbles so two is the minimal
             // number of nibbles for a leaf, cause leafs cannot have empty keys.
             let node = Node::leaf([0x0, 0x0], [42]);
-            node.insert(Nibbles::unpack([0x0]), [43]);
+            let result = node.insert(Nibbles::unpack([0x0]), [43]);
+            assert_eq!(result.unwrap_err(), NodeError::DuplicatedKey);
         }
 
         #[test]
         fn empty_key() {
             let node = Node::leaf([0x0, 0x0], [42]);
-            let updated_node = node.insert(Nibbles::unpack([]), [43]);
+            let updated_node = node.insert(Nibbles::unpack([]), [43]).unwrap();
 
             let mut children = EMPTY_CHILDREN.clone();
             children[0] = Some(Box::new(Entry::from(([0x0], [42])).into()));
@@ -88,7 +90,7 @@ mod insert {
         #[test]
         fn non_empty_key() {
             let node = Node::leaf([0x0, 0x0], [42]);
-            let updated_node = node.insert(Nibbles::unpack([0x1]), [43]);
+            let updated_node = node.insert(Nibbles::unpack([0x1]), [43]).unwrap();
 
             let mut children = EMPTY_CHILDREN.clone();
             children[0] = Some(Box::new(Node::branch(EMPTY_CHILDREN.clone(), Some([42]))));
@@ -101,21 +103,21 @@ mod insert {
 
     #[cfg(test)]
     mod into_branch {
-        use crate::node::{constructors::EMPTY_CHILDREN, insert::entry::Entry};
+        use crate::node::{constructors::EMPTY_CHILDREN, insert::entry::Entry, NodeError};
 
         use super::*;
 
         #[test]
-        #[should_panic(expected = "DuplicatedKey(\"\")")]
         fn duplicate_key() {
             let node = Node::branch(EMPTY_CHILDREN.clone(), Some([42]));
-            node.insert(Nibbles::unpack([]), [43]);
+            let result = node.insert(Nibbles::unpack([]), [43]);
+            assert_eq!(result.unwrap_err(), NodeError::DuplicatedKey);
         }
 
         #[test]
         fn new_key() {
             let node = Node::branch(EMPTY_CHILDREN.clone(), Some([42]));
-            let updated_node = node.insert(Nibbles::unpack([0x0]), [43]);
+            let updated_node = node.insert(Nibbles::unpack([0x0]), [43]).unwrap();
 
             let mut expected_branch = Node::Branch(EMPTY_CHILDREN.clone(), Some([42].into()));
             if let Node::Branch(ref mut children, _) = expected_branch {
