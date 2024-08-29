@@ -15,13 +15,6 @@ impl Node {
         Node::Extension(key_nibs.into(), value.into())
     }
 
-    pub(crate) fn branch_with_children_and_value(
-        children: [Option<Box<Node>>; 16],
-        value: impl AsRef<[u8]>,
-    ) -> Node {
-        Node::Branch(children, Some(value.as_ref().into()))
-    }
-
     #[allow(unused)]
     pub(crate) fn branch_with_child(idx: u8, child: impl Into<Node>) -> Node {
         let mut children = EMPTY_CHILDREN.clone();
@@ -42,5 +35,12 @@ impl Node {
         let mut children = EMPTY_CHILDREN.clone();
         children[idx as usize] = Some(Box::new(child.into()));
         Node::branch_with_children_and_value(children, value)
+    }
+
+    fn branch_with_children_and_value(
+        children: [Option<Box<Node>>; 16],
+        value: impl AsRef<[u8]>,
+    ) -> Node {
+        Node::Branch(children, Some(value.as_ref().into()))
     }
 }

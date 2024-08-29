@@ -19,7 +19,7 @@ mod insert {
             let node = Node::Null;
             assert_eq!(
                 node.insert(Nibbles::unpack([]), [42]).unwrap(),
-                Node::branch_with_children_and_value(Default::default(), [42])
+                Node::branch_with_value([42])
             );
         }
 
