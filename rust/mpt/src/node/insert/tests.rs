@@ -72,7 +72,6 @@ mod insert {
             // number of nibbles for a leaf, cause leafs cannot have empty keys.
             let node = Node::leaf([0x0, 0x0], [42]);
             let result = node.insert(Nibbles::unpack([0x0]), [43]);
-            assert!(result.is_err(), "Expected an error, but got Ok");
             assert_eq!(result.unwrap_err(), NodeError::DuplicatedKey);
         }
 
@@ -112,7 +111,6 @@ mod insert {
         fn duplicate_key() {
             let node = Node::branch(EMPTY_CHILDREN.clone(), Some([42]));
             let result = node.insert(Nibbles::unpack([]), [43]);
-            assert!(result.is_err(), "Expected an error, but got Ok");
             assert_eq!(result.unwrap_err(), NodeError::DuplicatedKey);
         }
 

@@ -57,7 +57,6 @@ mod tests {
         let second_entry: Entry = ([], [43]).into();
 
         let result = from_two_entries(first_entry, second_entry);
-        assert!(result.is_err(), "Expected an error, but got Ok");
         assert_eq!(result.unwrap_err(), NodeError::DuplicatedKey);
     }
 
@@ -79,7 +78,6 @@ mod tests {
         let old_entry: Entry = ([0], [42]).into();
         let entry: Entry = ([0], [43]).into();
         let result = from_two_entries(old_entry, entry);
-        assert!(result.is_err(), "Expected an error, but got Ok");
         assert_eq!(result.unwrap_err(), NodeError::DuplicatedKey);
     }
 

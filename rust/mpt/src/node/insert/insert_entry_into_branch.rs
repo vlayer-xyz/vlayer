@@ -60,7 +60,6 @@ mod tests {
         fn branch_value_some() {
             let branch = Node::branch(EMPTY_CHILDREN.clone(), Some([42]));
             let result = branch.insert_entry_into_branch(([], [43]).into());
-            assert!(result.is_err(), "Expected an error, but got Ok");
             assert_eq!(result.unwrap_err(), NodeError::DuplicatedKey);
         }
     }
@@ -109,7 +108,6 @@ mod tests {
                 children[0] = Some(Box::new(Node::branch(EMPTY_CHILDREN.clone(), Some([42]))));
                 let branch = Node::Branch(children, None);
                 let result = branch.insert_entry_into_branch(([0x0], [43]).into());
-                assert!(result.is_err(), "Expected an error, but got Ok");
                 assert_eq!(result.unwrap_err(), NodeError::DuplicatedKey);
             }
 

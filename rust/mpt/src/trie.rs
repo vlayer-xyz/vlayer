@@ -39,14 +39,13 @@ impl MerkleTrie {
         key: impl AsRef<[u8]>,
         value: impl AsRef<[u8]>,
     ) -> Result<(), MPTError> {
-        match self.0.clone().insert(Nibbles::unpack(key.as_ref()), value) {
+        let nibbles = Nibbles::unpack(key.as_ref());
+        match self.0.clone().insert(nibbles.clone(), value) {
             Ok(new_node) => {
                 self.0 = new_node;
                 Ok(())
             }
-            Err(NodeError::DuplicatedKey) => Err(MPTError::DuplicatedKey(
-                String::from_utf8(key.as_ref().to_vec()).unwrap(),
-            )),
+            Err(NodeError::DuplicatedKey) => Err(MPTError::DuplicatedKey(nibbles)),
         }
     }
 
@@ -112,10 +111,11 @@ impl MerkleTrie {
         Ok(trie)
     }
 }
+
 #[allow(dead_code)]
 #[derive(Debug, PartialEq)]
 pub enum MPTError {
-    DuplicatedKey(String),
+    DuplicatedKey(Nibbles),
 }
 
 #[cfg(test)]
