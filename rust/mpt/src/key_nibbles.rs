@@ -18,7 +18,7 @@ impl KeyNibbles {
 
     pub(crate) fn push_front(&self, nibble: u8) -> Self {
         let mut nibbles = vec![nibble];
-        nibbles.extend_from_slice(self.0.as_ref());
+        nibbles.extend_from_slice(&*self);
         KeyNibbles(Nibbles::from_vec(nibbles))
     }
 
