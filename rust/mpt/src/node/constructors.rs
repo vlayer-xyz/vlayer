@@ -29,6 +29,11 @@ impl Node {
         Node::Branch(children, None)
     }
 
+    #[allow(unused)]
+    pub(crate) fn branch_with_value(value: impl AsRef<[u8]>) -> Node {
+        Node::branch_with_children_and_value(EMPTY_CHILDREN.clone(), value)
+    }
+
     pub(crate) fn branch_with_child_and_value(
         idx: u8,
         child: impl Into<Node>,
@@ -37,10 +42,5 @@ impl Node {
         let mut children = EMPTY_CHILDREN.clone();
         children[idx as usize] = Some(Box::new(child.into()));
         Node::branch_with_children_and_value(children, value)
-    }
-
-    #[allow(unused)]
-    pub(crate) fn branch_with_value(value: impl AsRef<[u8]>) -> Node {
-        Node::branch_with_children_and_value(EMPTY_CHILDREN.clone(), value)
     }
 }
