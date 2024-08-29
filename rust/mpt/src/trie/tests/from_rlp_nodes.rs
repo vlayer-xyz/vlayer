@@ -47,8 +47,7 @@ fn leaf() {
 
 #[test]
 fn branch() {
-    let value = Some([42u8].into());
-    let mpt = MerkleTrie(Node::Branch(EMPTY_CHILDREN.clone(), value.clone()));
+    let mpt = MerkleTrie(Node::branch_with_value([42]));
     let proof = rlp_encoded(&mpt.0);
 
     let decoded_mpt = MerkleTrie::from_rlp_nodes(proof).unwrap();

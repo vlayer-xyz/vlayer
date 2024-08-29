@@ -133,9 +133,7 @@ mod resolve_trie {
     fn branch() {
         let leaf = Node::leaf([1], [0]);
         let digest = keccak256(leaf.rlp_encoded());
-        let mut children = EMPTY_CHILDREN.clone();
-        children[0] = Some(Box::new(Node::Digest(digest)));
-        let branch = Node::Branch(children, None);
+        let branch = Node::branch_with_child(0, Node::Digest(digest));
         let nodes_by_hash = HashMap::from([(digest, leaf.clone())]);
         let resolved_node = resolve_trie(branch, &nodes_by_hash);
         let Node::Branch(children, None) = resolved_node else {
@@ -147,7 +145,7 @@ mod resolve_trie {
 
     #[test]
     fn branch_with_value() {
-        let branch = Node::branch_with_children_and_value(EMPTY_CHILDREN.clone(), [42u8]);
+        let branch = Node::branch_with_value([42]);
         let nodes_by_hash = HashMap::new();
         let resolved_node = resolve_trie(branch, &nodes_by_hash);
         let Node::Branch(_, Some(value)) = resolved_node else {

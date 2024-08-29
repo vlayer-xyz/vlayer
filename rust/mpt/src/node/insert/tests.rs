@@ -92,14 +92,8 @@ mod insert {
             let updated_node = node.insert(Nibbles::unpack([0x1]), [43]).unwrap();
 
             let mut children = EMPTY_CHILDREN.clone();
-            children[0] = Some(Box::new(Node::branch_with_children_and_value(
-                EMPTY_CHILDREN.clone(),
-                [42],
-            )));
-            children[1] = Some(Box::new(Node::branch_with_children_and_value(
-                EMPTY_CHILDREN.clone(),
-                [43],
-            )));
+            children[0] = Some(Box::new(Node::branch_with_value([42])));
+            children[1] = Some(Box::new(Node::branch_with_value([43])));
             let expected_branch = Node::extension([0x0], Node::Branch(children, None));
 
             assert_eq!(updated_node, expected_branch);
