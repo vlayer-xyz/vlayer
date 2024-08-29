@@ -21,6 +21,9 @@ pub enum ParsingError {
 
     #[error("Httparse error: {0}")]
     Httparse(#[from] httparse::Error),
+
+    #[error("Partial httparse error")]
+    Partial,
 }
 
 impl RequestTranscript {
