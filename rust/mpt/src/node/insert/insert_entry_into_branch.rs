@@ -3,11 +3,15 @@ use crate::node::{Node, NodeError};
 use super::entry::Entry;
 
 impl Node {
-    pub(crate) fn insert_entry_into_branch(self, entry: Entry) -> Result<Node, NodeError> {
+    pub(crate) fn insert_entry_into_branch(
+        self,
+        entry: impl Into<Entry>,
+    ) -> Result<Node, NodeError> {
         let Node::Branch(mut children, branch_value) = self else {
             unreachable!("insert_entry_into_branch is used only for Branch nodes");
         };
 
+        let entry = entry.into();
         if entry.key.is_empty() {
             if branch_value.is_some() {
                 return Err(NodeError::DuplicatedKey);
@@ -40,7 +44,7 @@ mod tests {
     #[should_panic(expected = "insert_entry_into_branch is used only for Branch nodes")]
     fn unreachable() {
         let leaf = Node::leaf([0x0], [42]);
-        leaf.insert_entry_into_branch(([0x0], [42]).into()).unwrap();
+        leaf.insert_entry_into_branch(([0x0], [42])).unwrap();
     }
 
     mod empty_key {
@@ -49,7 +53,7 @@ mod tests {
         #[test]
         fn branch_value_none() {
             let branch = EMPTY_BRANCH.clone();
-            let node = branch.insert_entry_into_branch(([], [42]).into()).unwrap();
+            let node = branch.insert_entry_into_branch(([], [42])).unwrap();
 
             let expected_node = Node::branch(EMPTY_CHILDREN.clone(), Some([42]));
 
@@ -59,7 +63,7 @@ mod tests {
         #[test]
         fn branch_value_some() {
             let branch = Node::branch(EMPTY_CHILDREN.clone(), Some([42]));
-            let result = branch.insert_entry_into_branch(([], [43]).into());
+            let result = branch.insert_entry_into_branch(([], [43]));
             assert_eq!(result.unwrap_err(), NodeError::DuplicatedKey);
         }
     }
@@ -73,9 +77,7 @@ mod tests {
             #[test]
             fn no_nibble_remaining() {
                 let branch = EMPTY_BRANCH.clone();
-                let node = branch
-                    .insert_entry_into_branch(([0x0], [42]).into())
-                    .unwrap();
+                let node = branch.insert_entry_into_branch(([0x0], [42])).unwrap();
 
                 let mut children = EMPTY_CHILDREN.clone();
                 children[0] = Some(Box::new(Node::branch(EMPTY_CHILDREN.clone(), Some([42]))));
@@ -87,9 +89,7 @@ mod tests {
             #[test]
             fn nibble_remaining() {
                 let branch = EMPTY_BRANCH.clone();
-                let node = branch
-                    .insert_entry_into_branch(([0x0, 0x0], [42]).into())
-                    .unwrap();
+                let node = branch.insert_entry_into_branch(([0x0, 0x0], [42])).unwrap();
 
                 let mut children = EMPTY_CHILDREN.clone();
                 children[0] = Some(Box::new(Node::leaf([0x0], [42])));
@@ -107,7 +107,7 @@ mod tests {
                 let mut children = EMPTY_CHILDREN.clone();
                 children[0] = Some(Box::new(Node::branch(EMPTY_CHILDREN.clone(), Some([42]))));
                 let branch = Node::Branch(children, None);
-                let result = branch.insert_entry_into_branch(([0x0], [43]).into());
+                let result = branch.insert_entry_into_branch(([0x0], [43]));
                 assert_eq!(result.unwrap_err(), NodeError::DuplicatedKey);
             }
 
@@ -117,9 +117,7 @@ mod tests {
                 children[0] = Some(Box::new(Node::branch(EMPTY_CHILDREN.clone(), Some([]))));
                 let branch = Node::branch(children, Some([]));
 
-                let node = branch
-                    .insert_entry_into_branch(([0x0, 0x0], [42]).into())
-                    .unwrap();
+                let node = branch.insert_entry_into_branch(([0x0, 0x0], [42])).unwrap();
 
                 let mut expected_node_children = EMPTY_CHILDREN.clone();
                 let mut internal_node_children = EMPTY_CHILDREN.clone();

@@ -20,7 +20,7 @@ impl Node {
                 let entry = (&*key, value).into();
                 from_two_entries(old_entry, entry)
             }
-            Node::Branch(_, _) => self.insert_entry_into_branch((&*key, value).into()),
+            Node::Branch(_, _) => self.insert_entry_into_branch((&*key, value)),
             _ => todo!("Implement insert for Extension"),
         }
     }
