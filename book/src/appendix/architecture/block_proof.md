@@ -1,20 +1,19 @@
-# Block proof cache
+# Block Proof Cache
 
-vlayer allows one to provably execute Solidity code offchain and use proof of that execution onchain. To do that - one needs a verified source of storage data which is provided by storage proofs. Proofs connect to a single block hash that is later verified on-chain.
+vLayer allows one to provably execute Solidity code offchain and use proof of that execution on-chain. To do that - one needs a verified source of storage data which is provided by storage proofs. Storage proofs allow us to prove that a piece of storage is a part of a block with a specific hash - the storage proof is 'connected' to a certain block hash. However, they don't guarantee that this hash actually exists on the chain. This needs to be verified later on-chain.
 
-We also provide time-travel functionality. As a result of that - our state and storage proofs do not connect to a single block, but to multiple blocks. In order to prove that a set of blocks belongs to the chain - we prove two facts:
+We also provide time-travel functionality. As a result of that - our state and storage proofs do not 'connect' to a single block hash, but to multiple block hashes. To make sure that these hashes exist on the chain two things need to be done:
+- First, it needs to be proved that all the hashes belong to the same chain. Sounds like we should end here? Not at all! The blocks might belong to an imaginary chain and not a real one! That's why:
+- Second, the latest hash needs to be verified on-chain.
 
-- All blocks belong to some sequence of blocks that is interconnected with parent hashes.
-- Latest block belongs to canonical chain.
-
-This service allows to prove the first statement by maintaining a data structure that contains this sequence as well as a ZK proof that it was constructed correctly. Below we provide more details.
+This service allows to prove **the first statement** by maintaining a data structure called Block Proof Cache that stores block hashes, along with a ZK proof that all the hashes it contains belong to the same chain. Below we provide more details.
 
 
-## Block inclusion proofs primer
+## Before diving in to Block Proof Cache
 
 ### Block and Storage proofs
 
-A **block proof** verifies that a particular block belongs to a specific blockchain, ensuring the block's authenticity and its place in the chain. A **storage proof**, on the other hand, specifically verifies that a piece of data, such as an account balance or a smart contract variable, is stored within a particular state in a specific block.
+A **block proof** verifies that a particular block belongs to a specific blockchain ??, ensuring the block's authenticity and its place in the chain. A **storage proof**, on the other hand, specifically verifies that a piece of data, such as an account balance or a smart contract variable, is stored within a particular state in a specific block.
 
 To ensure that a piece of state belongs to a certain chain, it is essential to provide both types of proofs. A storage proof demonstrates that the data is part of a specific block, while a block proof confirms that this block is indeed a legitimate part of the blockchain.
 
