@@ -1,4 +1,4 @@
-use httparse::{Response, EMPTY_HEADER};
+use httparse::{Response, Status, EMPTY_HEADER};
 use tlsn_core::RedactedTranscript;
 
 use crate::request_transcript::ParsingError;
@@ -20,7 +20,10 @@ impl ResponseTranscript {
 
         let mut headers = [EMPTY_HEADER; MAX_HEADERS_NUMBER];
         let mut res = Response::new(&mut headers);
-        let body_index = res.parse(response_string.as_bytes())?.unwrap();
+        let body_index = match res.parse(response_string.as_bytes())? {
+            Status::Complete(t) => t,
+            Status::Partial => return Err(ParsingError::Httparse(httparse::Error::Status)),
+        };
 
         let body = response_string[body_index..].to_string();
 
