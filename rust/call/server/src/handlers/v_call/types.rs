@@ -1,10 +1,13 @@
 use crate::error::AppError;
 use alloy_chains::Chain;
-use alloy_primitives::ChainId;
+use alloy_primitives::{Address, BlockNumber, ChainId, FixedBytes};
 use axum_jrpc::Value;
 use call_host::Call as HostCall;
 use serde::{Deserialize, Serialize};
 use server_utils::{parse_address_field, parse_hex_field};
+
+const SELECTOR_LEN: usize = 4;
+const HASH_LEN: usize = 32;
 
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
@@ -36,7 +39,14 @@ pub struct CallContext {
 }
 
 #[derive(Deserialize, Serialize, Debug)]
-pub struct CallResult(pub Value);
+pub struct CallResult {
+    pub evm_call_result: String,
+    pub function_selector: FixedBytes<SELECTOR_LEN>,
+    pub prover_contract_address: Address,
+    pub seal: String,
+    pub block_no: u64,
+    pub block_hash: FixedBytes<HASH_LEN>
+}
 
 #[cfg(test)]
 mod test {
