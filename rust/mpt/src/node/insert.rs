@@ -7,6 +7,7 @@ use nybbles::Nibbles;
 mod entry;
 mod from_two_entries;
 mod insert_entry_into_branch;
+mod insert_entry_into_extension;
 mod tests;
 
 impl Node {
@@ -21,6 +22,7 @@ impl Node {
                 from_two_entries(old_entry, entry)
             }
             Node::Branch(_, _) => self.insert_entry_into_branch((&*key, value)),
+            Node::Extension(_, _) => self.insert_entry_into_extension((&*key, value).into()),
             _ => todo!("Implement insert for Extension"),
         }
     }

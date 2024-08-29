@@ -35,7 +35,7 @@ impl Node {
         Node::branch_with_children_and_value(children, value)
     }
 
-    fn branch_with_children_and_value(
+    pub(crate) fn branch_with_children_and_value(
         children: [Option<Box<Node>>; 16],
         value: impl AsRef<[u8]>,
     ) -> Node {

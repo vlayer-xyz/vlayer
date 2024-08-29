@@ -3,7 +3,7 @@ use nybbles::Nibbles;
 use crate::node::Node;
 
 #[derive(Debug, Clone, PartialEq)]
-pub struct Entry {
+pub(crate) struct Entry {
     pub key: Nibbles,
     pub value: Box<[u8]>,
 }

@@ -22,7 +22,7 @@ impl KeyNibbles {
         KeyNibbles(Nibbles::from_vec(nibbles))
     }
 
-    fn from_nibbles(nibbles: Nibbles) -> Self {
+    pub(crate) fn from_nibbles(nibbles: Nibbles) -> Self {
         if nibbles.is_empty() {
             panic!("KeyNibbles cannot be empty");
         }
