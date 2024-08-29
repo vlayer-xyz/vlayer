@@ -94,7 +94,7 @@ async function composeProof(response: VCallResponse, blockNumber: bigint) {
   return {
     length: BigInt(length),
     commitment: {
-      proverContractAddress: prover_contract_address,
+      proverContractAddress: prover_contract_address as Address,
       functionSelector: function_selector as Hex,
       settleBlockNumber: blockNumber,
       settleBlockHash: blockHash
