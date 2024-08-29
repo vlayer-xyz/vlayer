@@ -46,6 +46,6 @@ impl Node {
 }
 
 #[derive(Debug, PartialEq)]
-pub enum MPTError {
-    DuplicatedKey(String),
+pub enum NodeError {
+    DuplicatedKey,
 }
