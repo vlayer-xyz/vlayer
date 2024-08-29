@@ -11,10 +11,12 @@ use call_engine::{ProofMode, Seal};
 
 const GROTH16_PROOF_SIZE: usize = 256;
 const SEAL_BYTES_SIZE: usize = GROTH16_PROOF_SIZE;
-
-const FAKE_VERIFIER_SELECTOR: [u8; 4] = [0xde, 0xaf, 0xbe, 0xef]; // Should align with constant in FakeProofVerifier.sol
+const FAKE_VERIFIER_SELECTOR: VerifierSelector = VerifierSelector([0xde, 0xaf, 0xbe, 0xef]); // Should align with constant in FakeProofVerifier.sol
 
 type SealBytesT = [u8; SEAL_BYTES_SIZE];
+
+#[derive(Debug, Default, PartialEq, Eq)]
+struct VerifierSelector([u8; 4]);
 
 pub(crate) struct EncodableReceipt(InnerReceipt);
 
@@ -35,14 +37,18 @@ impl EncodableReceipt {
         }
     }
 
+    fn verifier_selector(&self) -> Option<VerifierSelector> {
+        match &self.0 {
+            Groth16(inner) => Some(Self::extract_groth16_verifier_selector(inner)),
+            Fake(_) => Some(FAKE_VERIFIER_SELECTOR),
+            _ => None,
+        }
+    }
+
     fn extract_fake_seal(inner: &FakeReceipt<ReceiptClaim>) -> Option<SealBytesT> {
         let mut result: SealBytesT = [0; SEAL_BYTES_SIZE];
-        let mut seal_suffix: Vec<u8> = inner.claim.digest().as_bytes().into();
-
-        let mut seal: Vec<u8> = FAKE_VERIFIER_SELECTOR.to_vec();
-        seal.append(&mut seal_suffix);
-
-        seal.resize(GROTH16_PROOF_SIZE, 0);
+        let mut seal: Vec<u8> = inner.claim.digest().as_bytes().into();
+        seal.resize(SEAL_BYTES_SIZE, 0);
         result.clone_from_slice(seal.as_slice());
 
         Some(result)
@@ -59,6 +65,14 @@ impl EncodableReceipt {
         result.clone_from_slice(bytes.as_slice());
 
         Some(result)
+    }
+
+    fn extract_groth16_verifier_selector(inner: &Groth16Receipt<ReceiptClaim>) -> VerifierSelector {
+        let mut selector: VerifierSelector = Default::default();
+        let selector_bytes = &inner.verifier_parameters.as_bytes()[..4];
+        selector.0.clone_from_slice(selector_bytes);
+
+        selector
     }
 }
 
@@ -83,7 +97,15 @@ impl TryFrom<EncodableReceipt> for Seal {
             ))
             .map(split_seal_into_bytes)?;
 
+        let verifier_selector: FixedBytes<4> = value
+            .verifier_selector()
+            .ok_or(HostError::SealEncodingError(
+                "Could not retreive verifier selector".into(),
+            ))
+            .map(|sel| sel.0.into())?;
+
         Ok(Seal {
+            verifierSelector: verifier_selector,
             seal: raw_seal,
             mode: seal_type,
         })
@@ -119,7 +141,7 @@ mod test {
     use risc0_zkvm::{Groth16Receipt, Groth16ReceiptVerifierParameters, ReceiptClaim};
 
     const ETH_WORD_SIZE: usize = 32;
-    const SEAL_ENCODING_SIZE: usize = GROTH16_PROOF_SIZE + ETH_WORD_SIZE;
+    const SEAL_ENCODING_SIZE: usize = ETH_WORD_SIZE + GROTH16_PROOF_SIZE + ETH_WORD_SIZE;
 
     const GROTH16_MOCK_SEAL: [u8; GROTH16_PROOF_SIZE] = [1; GROTH16_PROOF_SIZE];
 
@@ -155,6 +177,23 @@ mod test {
         Receipt::new(Fake(inner), journal)
     }
 
+    fn mock_other_receipt() -> Receipt {
+        use risc0_zkvm::CompositeReceipt;
+        use std::{mem::MaybeUninit, ptr::addr_of_mut};
+
+        let mut uninit: std::mem::MaybeUninit<CompositeReceipt> = MaybeUninit::uninit();
+        let ptr = uninit.as_mut_ptr();
+        unsafe {
+            // done just to fool the compiler, since CompositeReceipt is non-exhaustive
+            addr_of_mut!((*ptr).segments).write(Default::default());
+            addr_of_mut!((*ptr).assumption_receipts).write(Default::default());
+            addr_of_mut!((*ptr).verifier_parameters).write(Default::default());
+        }
+        let receipt = unsafe { uninit.assume_init() };
+
+        Receipt::new(InnerReceipt::Composite(receipt), mock_journal())
+    }
+
     #[test]
     fn expected_encoding_size() {
         assert_eq!(SEAL_ENCODING_SIZE, Seal::ENCODED_SIZE.unwrap())
@@ -162,30 +201,40 @@ mod test {
 
     #[test]
     fn can_encode_seal_into_abi() {
-        let receipt: EncodableReceipt = mock_groth16_receipt().into();
-        let seal: Seal = receipt.try_into().unwrap();
+        let expected_encoding = vec![
+            0xde, 0xaf, 0xbe, 0xef, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+            0, 0, 0, 0, 0, 0, 0, // selector
+            0xab, 0x1f, 0x9b, 0xd2, 0x0f, 0x3d, 0x02, 0x4c, 0x12, 0x3c, 0xb0, 0x61, 0xe1, 0x1f,
+            0x70, 0x28, 0x73, 0xcd, 0x95, 0xfe, 0x75, 0xd4, 0xbf, 0x32, 0x39, 0x6e, 0x70, 0x21,
+            0x14, 0xe0, 0xbe, 0xd0, // seal
+            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+            0x0, // empty bytes
+            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+            0x0, // empty bytes
+            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+            0x0, // empty bytes
+            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+            0x0, // empty bytes
+            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+            0x0, // empty bytes
+            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+            0x0, // empty bytes
+            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+            0x0, // empty bytes
+            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
+            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0, 0,
+            0x01, // proof mode
+        ];
 
-        let mut expected_encoding = vec![1; 256];
-
-        expected_encoding.extend_from_slice(ProofMode::GROTH16.abi_encode().as_slice());
-
-        assert_eq!(expected_encoding, seal.abi_encode().as_slice());
-    }
-
-    #[test]
-    fn can_encode_fake_seal_into_abi() {
         let receipt: EncodableReceipt = mock_fake_receipt().into();
         let seal: Seal = receipt.try_into().unwrap();
-
-        let claim: ReceiptClaim = ReceiptClaim::ok(RISC0_CALL_GUEST_ID, mock_journal());
-        let mut expected_suffix: Vec<u8> = claim.digest().as_bytes().into();
-
-        let mut expected_encoding = FAKE_VERIFIER_SELECTOR.to_vec();
-
-        expected_encoding.append(&mut expected_suffix);
-        expected_encoding.resize(256, 0);
-        expected_encoding.extend_from_slice(ProofMode::FAKE.abi_encode().as_slice());
-
         assert_eq!(expected_encoding, seal.abi_encode().as_slice());
     }
 
@@ -197,14 +246,19 @@ mod test {
         assert_eq!(ProofMode::FAKE, seal.mode);
     }
 
+    #[test]
+    fn seal_encodes_verifier_selector() {
+        let receipt: EncodableReceipt = mock_fake_receipt().into();
+        let seal: Seal = receipt.try_into().unwrap();
+
+        assert_eq!(&FAKE_VERIFIER_SELECTOR.0, seal.verifierSelector.as_slice());
+    }
+
     mod encodable_receipt {
         use super::*;
 
         mod proof_mode {
             use super::*;
-
-            use risc0_zkvm::CompositeReceipt;
-            use std::{mem::MaybeUninit, ptr::addr_of_mut};
 
             #[test]
             fn returns_groth16_mode_for_groth16_receipt() {
@@ -221,24 +275,34 @@ mod test {
 
             #[test]
             fn returns_none_for_other_receipt() {
-                let mut uninit: std::mem::MaybeUninit<CompositeReceipt> = MaybeUninit::uninit();
-                let ptr = uninit.as_mut_ptr();
-                unsafe {
-                    // done just to fool the compiler, since CompositeReceipt is non-exhaustive
-                    addr_of_mut!((*ptr).segments).write(Default::default());
-                    addr_of_mut!((*ptr).assumption_receipts).write(Default::default());
-                    addr_of_mut!((*ptr).verifier_parameters).write(Default::default());
-                }
-
-                let receipt = unsafe { uninit.assume_init() };
-
-                let receipt: EncodableReceipt =
-                    Receipt::new(InnerReceipt::Composite(receipt), mock_journal()).into();
-
+                let receipt: EncodableReceipt = mock_other_receipt().into();
                 assert_eq!(None, receipt.proof_mode());
             }
         }
 
+        mod verifier_selector {
+            use super::*;
+
+            #[test]
+            fn returns_fake_verifier_selector_for_fake_receipt() {
+                let receipt: EncodableReceipt = mock_fake_receipt().into();
+                assert_eq!(FAKE_VERIFIER_SELECTOR, receipt.verifier_selector().unwrap())
+            }
+
+            #[test]
+            fn returns_groth16_verifier_params_for_groth16_receipt() {
+                let receipt: EncodableReceipt = mock_groth16_receipt().into();
+                // expected selector by solidity groth16 verifiers
+                let expected_selector = VerifierSelector([0x31, 0x0f, 0xe5, 0x98]);
+                assert_eq!(expected_selector, receipt.verifier_selector().unwrap())
+            }
+
+            #[test]
+            fn returns_none_for_other_receipt() {
+                let receipt: EncodableReceipt = mock_other_receipt().into();
+                assert_eq!(None, receipt.verifier_selector());
+            }
+        }
         mod seal_bytes {
             use super::*;
 
