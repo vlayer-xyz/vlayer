@@ -7,18 +7,11 @@ import { ERC20 } from "openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
 
 import { Airdrop } from "./AirdropVerifier.sol";
 
-contract TestToken is ERC20 {
-    constructor() ERC20("Test", "TEST") {}
-}
-
-
 contract AirdropTest is VTest {
     function test_airdrop() public {
-        ERC20 testToken = new TestToken();
-
         address holder = address(0xaAa2DA255DF9Ee74C7075bCB6D81f97940908A5D);
         NftOwnershipProver prover = new NftOwnershipProver();
-        Airdrop airdrop = new Airdrop(address(prover), testToken);
+        Airdrop airdrop = new Airdrop(address(prover));
         callProver();
         address owner = prover.main(holder);
         Proof memory proof = getProof();

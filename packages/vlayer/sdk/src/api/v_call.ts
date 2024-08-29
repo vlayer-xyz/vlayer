@@ -2,17 +2,6 @@ import {Hex, type Address} from "viem";
 
 type Calldata = string;
 
-export type VCallResponse = {
-    jsonrpc: string;
-    result: {
-        evm_call_result: number[];
-        function_selector: string;
-        prover_contract_address: string;
-        seal: number[];
-    };
-    id: number;
-};
-
 export type CallParams = {
   to: Address,
   data: Calldata
@@ -57,5 +46,5 @@ export async function v_call(call: CallParams, context: CallContext): Promise<VC
     throw new Error(`HTTP error! status: ${response.status}`);
   }
 
-    return response.json() as Promise<VCallResponse>;
+  return response.json() as Promise<VCallResponse>;
 }

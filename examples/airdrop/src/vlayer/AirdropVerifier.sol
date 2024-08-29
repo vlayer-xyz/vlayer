@@ -4,24 +4,27 @@ pragma solidity ^0.8.13;
 import {Proof} from "vlayer/Proof.sol";
 import {Verifier} from "vlayer/Verifier.sol";
 
+import {ERC20} from "openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
+
 import {NftOwnershipProver} from "./NftOwnershipProver.sol";
-import { IERC20 } from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 
 bytes4 constant FUNCTION_SELECTOR = NftOwnershipProver.main.selector;
 
-interface IAwesomeToken {
-    function transfer(address to, uint256 amount) external;
+contract AwesomeToken is ERC20 {
+    constructor() ERC20("AwesomeToken", "AT") {
+        _mint(msg.sender, 1000000);
+    }
 }
 
 // This contract is executed on-chain (Ethereum Mainnet, Arbitrum, Base, etc.)
 contract Airdrop is Verifier {
-    address private immutable PROVER;
-    IERC20 private immutable TOKEN;
+    address public immutable PROVER;
+    AwesomeToken public immutable TOKEN;
     mapping(address => bool) public withdrawn;
 
-    constructor(address _prover, IERC20 _token) {
+    constructor(address _prover) {
         PROVER = _prover;
-        TOKEN = _token;
+        TOKEN = new AwesomeToken();
     }
 
     function claim(Proof calldata, address sender)

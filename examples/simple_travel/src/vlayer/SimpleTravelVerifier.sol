@@ -14,6 +14,7 @@ contract SimpleTravel is Verifier {
     }
 
     function verify(
-        Proof calldata
+        Proof calldata,
+        uint256 exampleReturn
     ) public onlyVerified(prover, SimpleTravelProver.aroundTheWorld.selector) {}
 }
