@@ -4,11 +4,10 @@ use super::entry::Entry;
 
 impl Node {
     pub(crate) fn insert_entry_into_branch(self, entry: Entry) -> Result<Node, NodeError> {
-        let Node::Branch(children, branch_value) = self else {
+        let Node::Branch(mut children, branch_value) = self else {
             unreachable!("insert_entry_into_branch is used only for Branch nodes");
         };
 
-        let mut children = children;
         if entry.key.is_empty() {
             if branch_value.is_some() {
                 return Err(NodeError::DuplicatedKey);
