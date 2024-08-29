@@ -1,33 +1,25 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
+import {Strings} from "openzeppelin/contracts/utils/Strings.sol";
+
 struct WebProof {
     string webProofJson;
 }
 
 library WebProofLib {
+    using Strings for string;
 
     address private constant VERIFY_AND_PARSE_PRECOMPILE = address(0x100);
 
-    function verify(WebProof memory) internal pure returns (bool) {
-        return true;
-    }
-
-    function url(
-        WebProof memory webProof
-    ) internal view returns (string memory) {
+    function verify(WebProof memory webProof, string memory dataUrl) internal view returns (bool) {
         (bool success, bytes memory returnData) = VERIFY_AND_PARSE_PRECOMPILE.staticcall(bytes(webProof.webProofJson));
 
         require(success, "verify_and_parse precompile call failed");
 
-        return string(returnData);
-    }
+        string memory url = string(returnData);
+        require(dataUrl.equal(url), "Incorrect URL");
 
-    function body(WebProof memory) internal pure returns (string memory) {
-        return "";
-    }
-
-    function serverName(WebProof memory) internal pure returns (string memory) {
-        return "";
+        return true;
     }
 }
