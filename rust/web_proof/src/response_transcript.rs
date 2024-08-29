@@ -22,7 +22,7 @@ impl ResponseTranscript {
         let mut res = Response::new(&mut headers);
         let body_index = match res.parse(response_string.as_bytes())? {
             Status::Complete(t) => t,
-            Status::Partial => return Err(ParsingError::Httparse(httparse::Error::Status)),
+            Status::Partial => return Err(ParsingError::Partial),
         };
 
         let body = response_string[body_index..].to_string();
