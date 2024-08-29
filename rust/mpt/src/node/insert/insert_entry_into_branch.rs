@@ -35,9 +35,10 @@ impl Node {
 
 #[cfg(test)]
 mod tests {
-    use crate::node::constructors::EMPTY_BRANCH;
-
     use super::*;
+    use crate::node::constructors::EMPTY_CHILD;
+
+    pub static EMPTY_BRANCH: Node = Node::Branch([EMPTY_CHILD; 16], None);
 
     #[test]
     #[should_panic(expected = "insert_entry_into_branch is used only for Branch nodes")]
