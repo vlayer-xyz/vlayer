@@ -53,8 +53,8 @@ mod tests {
 
     #[test]
     fn two_empty_keys() {
-        let first_entry: Entry = ([], [42]).into();
-        let second_entry: Entry = ([], [43]).into();
+        let first_entry = ([], [42]).into();
+        let second_entry = ([], [43]).into();
 
         let result = from_two_entries(first_entry, second_entry);
         assert_eq!(result.unwrap_err(), NodeError::DuplicatedKey);
@@ -62,8 +62,8 @@ mod tests {
 
     #[test]
     fn one_empty_key() {
-        let first_entry: Entry = ([], [42]).into();
-        let second_entry: Entry = ([0x0], [43]).into();
+        let first_entry = ([], [42]).into();
+        let second_entry = ([0x0], [43]).into();
         let node = from_two_entries(first_entry, second_entry).unwrap();
 
         let mut children = EMPTY_CHILDREN.clone();
@@ -75,16 +75,16 @@ mod tests {
 
     #[test]
     fn duplicate_key() {
-        let old_entry: Entry = ([0], [42]).into();
-        let entry: Entry = ([0], [43]).into();
+        let old_entry = ([0], [42]).into();
+        let entry = ([0], [43]).into();
         let result = from_two_entries(old_entry, entry);
         assert_eq!(result.unwrap_err(), NodeError::DuplicatedKey);
     }
 
     #[test]
     fn different_single_nibbles() {
-        let first_entry: Entry = ([0x0], [42]).into();
-        let second_entry: Entry = ([0x1], [43]).into();
+        let first_entry = ([0x0], [42]).into();
+        let second_entry = ([0x1], [43]).into();
 
         let node = from_two_entries(first_entry, second_entry).unwrap();
 
@@ -98,8 +98,8 @@ mod tests {
 
     #[test]
     fn no_common_prefix() {
-        let first_entry: Entry = ([0x0, 0x0], [42]).into();
-        let second_entry: Entry = ([0x1, 0x0], [43]).into();
+        let first_entry = ([0x0, 0x0], [42]).into();
+        let second_entry = ([0x1, 0x0], [43]).into();
         let node = from_two_entries(first_entry, second_entry).unwrap();
 
         let mut children = EMPTY_CHILDREN.clone();
@@ -112,8 +112,8 @@ mod tests {
 
     #[test]
     fn common_prefix() {
-        let first_entry: Entry = ([0x0, 0x0], [42]).into();
-        let second_entry: Entry = ([0x0, 0x1], [43]).into();
+        let first_entry = ([0x0, 0x0], [42]).into();
+        let second_entry = ([0x0, 0x1], [43]).into();
 
         let node = from_two_entries(first_entry, second_entry).unwrap();
 
@@ -128,8 +128,8 @@ mod tests {
 
     #[test]
     fn long_common_prefix() {
-        let first_entry: Entry = ([0x0, 0x1, 0x0], [42]).into();
-        let second_entry: Entry = ([0x0, 0x1, 0x1], [43]).into();
+        let first_entry = ([0x0, 0x1, 0x0], [42]).into();
+        let second_entry = ([0x0, 0x1, 0x1], [43]).into();
 
         let node = from_two_entries(first_entry, second_entry).unwrap();
 
@@ -144,8 +144,8 @@ mod tests {
 
     #[test]
     fn common_prefix_with_different_long_suffix() {
-        let first_entry: Entry = ([0x0, 0x0, 0x1], [42]).into();
-        let second_entry: Entry = ([0x0, 0x1, 0x0], [43]).into();
+        let first_entry = ([0x0, 0x0, 0x1], [42]).into();
+        let second_entry = ([0x0, 0x1, 0x0], [43]).into();
 
         let node = from_two_entries(first_entry, second_entry).unwrap();
 
