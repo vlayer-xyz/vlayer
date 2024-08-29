@@ -1,7 +1,4 @@
-use axum::{
-    body::Body,
-    http::{header::CONTENT_TYPE, Request, Response},
-};
+use axum::{body::Body, http::Response};
 use call_server::server;
 use call_server::{ProofMode, ServerConfig};
 use ethers::{
@@ -15,13 +12,11 @@ use ethers::{
     signers::{LocalWallet, Signer, Wallet},
 };
 use example_prover::ExampleProver;
-use mime::APPLICATION_JSON;
 use serde::Serialize;
 use serde_json::json;
-use serde_json::to_string;
+use server_utils::post;
 use std::collections::HashMap;
 use std::{sync::Arc, time::Duration};
-use tower::ServiceExt;
 
 abigen!(ExampleProver, "./testdata/ExampleProver.json",);
 
@@ -51,11 +46,7 @@ impl TestHelper {
             port: 3000,
             proof_mode: ProofMode::Fake,
         });
-        let request = Request::post(url)
-            .header(CONTENT_TYPE, APPLICATION_JSON.as_ref())
-            .body(Body::from(to_string(body).unwrap()))
-            .unwrap();
-        app.oneshot(request).await.unwrap()
+        post(app, url, body).await
     }
 }
 
