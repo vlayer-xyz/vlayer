@@ -5,32 +5,32 @@ use super::entry::Entry;
 impl Node {
     #[allow(clippy::wrong_self_convention)]
     pub(crate) fn insert_entry_into_branch(self, entry: Entry) -> Result<Node, MPTError> {
-        if let Node::Branch(children, branch_value) = self {
-            let mut children = children;
-            if entry.key.is_empty() {
-                if branch_value.is_some() {
-                    return Err(MPTError::DuplicatedKey(
-                        String::from_utf8(entry.key.to_vec()).expect("Invalid UTF-8"),
-                    ));
-                } else {
-                    return Ok(Node::Branch(children.clone(), Some(entry.value)));
-                }
-            }
-
-            let (entry_first_nibble, remaining_entry) = entry.split_first_key_nibble();
-
-            if let Some(existing_child) = children[entry_first_nibble as usize].take() {
-                children[entry_first_nibble as usize] = Some(Box::new(
-                    existing_child.insert(remaining_entry.key, remaining_entry.value),
+        let Node::Branch(children, branch_value) = self else {
+            unreachable!("insert_entry_into_branch is used only for Branch nodes");
+        };
+        
+        let mut children = children;
+        if entry.key.is_empty() {
+            if branch_value.is_some() {
+                return Err(MPTError::DuplicatedKey(
+                    String::from_utf8(entry.key.to_vec()).expect("Invalid UTF-8"),
                 ));
             } else {
-                children[entry_first_nibble as usize] = Some(Box::new(remaining_entry.into()));
+                return Ok(Node::Branch(children, Some(entry.value)));
             }
-
-            Ok(Node::Branch(children.clone(), branch_value.clone()))
-        } else {
-            unreachable!("insert_entry_into_branch is used only for Branch nodes");
         }
+        
+        let (entry_first_nibble, remaining_entry) = entry.split_first_key_nibble();
+        
+        if let Some(existing_child) = children[entry_first_nibble as usize].take() {
+            children[entry_first_nibble as usize] = Some(Box::new(
+                existing_child.insert(remaining_entry.key, remaining_entry.value),
+            ));
+        } else {
+            children[entry_first_nibble as usize] = Some(Box::new(remaining_entry.into()));
+        }
+        
+        Ok(Node::Branch(children, branch_value))
     }
 }
 
