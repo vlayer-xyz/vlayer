@@ -28,7 +28,7 @@ abstract contract Verifier {
     }
 
     function _decodeCalldata() private pure returns (Proof memory, bytes32) {
-        Proof memory proof = abi.decode(msg.data[4:], (Proof));
+        Proof memory proof = abi.decode(msg.data[PROOF_OFFSET:], (Proof));
 
         uint256 journalEnd = JOURNAL_OFFSET + proof.length;
         bytes memory journal = msg.data[JOURNAL_OFFSET:journalEnd];

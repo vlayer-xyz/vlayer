@@ -12,9 +12,10 @@ struct Seal {
 }
 
 library SealLib {
-    uint256 public constant FAKE_SEAL_LENGTH = 36;
+    uint256 public constant VERIFIER_SELECTOR_LENGTH = 4;
+    uint256 public constant FAKE_SEAL_LENGTH = VERIFIER_SELECTOR_LENGTH + 32;
     uint256 public constant GROTH16_SEAL_LENGTH = 256;
-    uint256 public constant SEAL_LENGTH = 256;
+    uint256 public constant SEAL_ENCODING_LENGTH = 32 + 256 + 32;
 
     function decode(Seal memory seal) internal pure returns (bytes memory) {
         if (seal.mode == ProofMode.FAKE) {
