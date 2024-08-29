@@ -19,10 +19,7 @@ fn json_get_string_run(input: &Bytes, gas_limit: u64) -> PrecompileResult {
         gas_limit,
     )?;
 
-    // TODO: parse body and path
-    let _body_json = std::str::from_utf8(input).map_err(map_to_other)?;
-
-    // TODO extract string field from body at path
+    // TODO: parse body and path and extract field at path
     let result = "";
 
     Ok(PrecompileOutput::new(gas_used, result.into()))
