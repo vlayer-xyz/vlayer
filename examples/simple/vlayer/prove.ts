@@ -1,11 +1,11 @@
-import {testHelpers, completeProof} from "@vlayer/sdk";
+import {testHelpers, prove} from "@vlayer/sdk";
 import ProverAbi from "../out/SimpleProver.sol/SimpleProver";
 import VerifierAbi from "../out/SimpleVerifier.sol/Simple";
 
 const [prover, verifier] = await testHelpers.deployProverVerifier(ProverAbi, VerifierAbi);
 
 console.log("Proving...");
-const {proof, returnValue} = await completeProof(prover, ProverAbi.abi, "sum", [1n, 2n]);
+const {proof, returnValue} = await prove(prover, ProverAbi.abi, "sum", [1n, 2n]);
 console.log("Proof result:")
 console.log(proof, returnValue);
 

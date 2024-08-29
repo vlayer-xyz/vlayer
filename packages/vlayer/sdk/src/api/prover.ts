@@ -34,23 +34,7 @@ export async function getContractSpec(file: string): Promise<ContractSpec> {
   return Bun.file(file).json();
 }
 
-export async function prove(prover: Address, proverSpec: ContractSpec, functionName: string, args: ContractArg[], blockNo: number = 1): Promise<VCallResponse> {
-  const calldata = encodeFunctionData({
-    abi: proverSpec.abi,
-    functionName,
-    args
-  });
-
-  const call: CallParams = {to: prover, data: calldata};
-  const context: CallContext = {
-    block_no: blockNo ?? 1, //TODO: remove once backend removes this field validation
-    chain_id: testChainId1
-  };
-
-  return v_call(call, context);
-}
-
-export async function completeProof<T extends Abi, F extends ContractFunctionName<T>>(prover: Address, abi: T, functionName: F, args: ContractFunctionArgs<T, AbiStateMutability, F>, blockNo?: number) {
+export async function prove<T extends Abi, F extends ContractFunctionName<T>>(prover: Address, abi: T, functionName: F, args: ContractFunctionArgs<T, AbiStateMutability, F>, blockNo?: number) {
   const calldata = encodeFunctionData({
     abi,
     functionName,

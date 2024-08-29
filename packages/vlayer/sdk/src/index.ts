@@ -8,7 +8,6 @@ export {
   getContractSpec,
   type ContractSpec,
   prove,
-  completeProof,
 } from "./api/prover";
 
 export * as testHelpers from './api/helpers';

@@ -1,4 +1,4 @@
-import {testHelpers, completeProof} from "@vlayer/sdk";
+import {testHelpers, prove} from "@vlayer/sdk";
 import webProofProver from "../out/WebProofProver.sol/WebProofProver";
 import webProofVerifier from "../out/WebProofVerifier.sol/WebProofVerifier";
 import tls_proof from './tls_proof.json';
@@ -9,7 +9,7 @@ const webProof = {tls_proof: tls_proof, notary_pub_key: notaryPubKey}
 const [prover, verifier] = await testHelpers.deployProverVerifier(webProofProver, webProofVerifier);
 
 console.log("Proving...");
-const {proof, returnValue} = await completeProof(prover, webProofProver.abi, 'main', [{
+const {proof, returnValue} = await prove(prover, webProofProver.abi, 'main', [{
   webProofJson: JSON.stringify(webProof)
 }]);
 console.log("Proof:", proof)

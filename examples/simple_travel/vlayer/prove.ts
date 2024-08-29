@@ -1,6 +1,6 @@
 import type {Address} from "viem";
 
-import {testHelpers, prove, completeProof} from "@vlayer/sdk";
+import {testHelpers, prove} from "@vlayer/sdk";
 import otherChainContractSpec from "../out/OtherChainContract.sol/OtherChainContract";
 import simpleTravelProver from "../out/SimpleTravelProver.sol/SimpleTravelProver";
 import simpleTravelVerifier from "../out/SimpleTravelVerifier.sol/SimpleTravel";
@@ -13,7 +13,7 @@ const otherChainContract: Address = await testHelpers.deployContract(otherChainC
 console.log(`Contract has been deployed on ${otherChainContract} address`);
 
 console.log("Proving...");
-const {proof, returnValue} = await completeProof(prover, simpleTravelProver.abi, 'aroundTheWorld', []);
+const {proof, returnValue} = await prove(prover, simpleTravelProver.abi, 'aroundTheWorld', []);
 console.log("Proof:", proof)
 
 console.log("Verifying...")

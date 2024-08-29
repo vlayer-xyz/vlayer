@@ -1,7 +1,7 @@
 import type {Address, Account} from "viem";
 import assert from "node:assert";
 
-import {testHelpers, createTestClient, completeProof} from "@vlayer/sdk";
+import {testHelpers, createTestClient, prove} from "@vlayer/sdk";
 import exampleToken from "../out/ExampleToken.sol/ExampleToken";
 import privateAirdropProver from "../out/PrivateAirdropProver.sol/PrivateAirdropProver";
 import privateAirdropVerifier from "../out/PrivateAirdropVerifier.sol/PrivateAirdropVerifier";
@@ -41,7 +41,7 @@ const generateProof = async (prover: Address, tokenOwner: Account) => {
   const {
     proof,
     returnValue
-  } = await completeProof(prover, privateAirdropProver.abi, 'main', [tokenOwner.address, signature]);
+  } = await prove(prover, privateAirdropProver.abi, 'main', [tokenOwner.address, signature]);
   console.log("Proof:", proof)
 
   return {proof, returnValue};
