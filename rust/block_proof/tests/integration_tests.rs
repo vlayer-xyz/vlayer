@@ -1,39 +1,26 @@
-use axum::{
-    body::Body,
-    http::{header::CONTENT_TYPE, Request, Response, StatusCode},
-};
+use axum::http::StatusCode;
 use block_proof::server;
-use mime::APPLICATION_JSON;
-use serde::Serialize;
-use serde_json::{json, to_string};
-use server_utils::body_to_json;
-use tower::ServiceExt;
-
-async fn post<T: Serialize>(url: &str, body: &T) -> Response<Body> {
-    let app = server();
-    let request = Request::post(url)
-        .header(CONTENT_TYPE, APPLICATION_JSON.as_ref())
-        .body(Body::from(to_string(body).unwrap()))
-        .unwrap();
-    app.oneshot(request).await.unwrap()
-}
+use serde_json::json;
+use server_utils::{body_to_json, post};
 
 #[tokio::test]
 async fn http_not_found() {
+    let app = server();
     let empty_body = json!({});
-    let response = post("/non-existent", &empty_body).await;
+    let response = post(app, "/non-existent", &empty_body).await;
     assert_eq!(StatusCode::NOT_FOUND, response.status());
 }
 
 #[tokio::test]
 async fn method_not_found() {
+    let app = server();
     let req = json!({
         "jsonrpc": "2.0",
         "id": 1,
         "method": "random_gibberish",
         "params": []
     });
-    let response = post("/", &req).await;
+    let response = post(app, "/", &req).await;
 
     assert_eq!(StatusCode::OK, response.status());
     assert_eq!(
@@ -52,12 +39,13 @@ async fn method_not_found() {
 
 #[tokio::test]
 async fn method_missing() {
+    let app = server();
     let req = json!({
         "jsonrpc": "2.0",
         "id": 2,
         "params": []
     });
-    let response = post("/", &req).await;
+    let response = post(app, "/", &req).await;
 
     assert_eq!(StatusCode::OK, response.status());
     assert_eq!(
