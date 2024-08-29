@@ -19,7 +19,7 @@ contract PrivateAirdropProver is Prover {
         return(keccak256(abi.encodePacked(_addr)));
     }
 
-    function main(address account, bytes memory signature) public view returns (uint256, bytes32) {
+    function main(address account, bytes memory signature) public view returns (address, bytes32) {
         uint256 balance = TOKEN.balanceOf(account);
         require(balance > 0, "Insufficient balance");
 
@@ -29,7 +29,7 @@ contract PrivateAirdropProver is Prover {
             ), "Invalid Signature"
         );
 
-        return (balance, nullifier(account));
+        return (account, nullifier(account));
     }
 
     function isValidSignature(address _account, bytes memory signature) internal pure returns (bool) {

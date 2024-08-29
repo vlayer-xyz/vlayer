@@ -1,13 +1,15 @@
 import {
-  Abi,
-  Address,
-  ContractFunctionArgs,
-  ContractFunctionName,
+  type Abi,
+  type Address,
+  type ContractConstructorArgs,
+  type ContractFunctionArgs,
+  type ContractFunctionName,
   createTestClient,
+  type Hex,
   http,
   HttpTransport,
   publicActions,
-  walletActions
+  walletActions,
 } from "viem";
 import {privateKeyToAccount, generatePrivateKey} from 'viem/accounts'
 import {foundry} from "viem/chains";
@@ -53,6 +55,31 @@ export async function deployContract(contractSpec: ContractSpec, args: ContractA
   return receipt.contractAddress as Address;
 }
 
+type DeploySpec<T extends Abi> = {
+  abi: T;
+  bytecode: {
+    object: Hex;
+  };
+}
+
+type Tail<T extends readonly unknown[]> = T extends readonly [unknown, ...infer U] ? U : [];
+
+export async function deployProverVerifier<
+  P extends Abi, V extends Abi, PArgs extends ContractConstructorArgs<P>, VArgs extends ContractConstructorArgs<V>
+>(proverSpec: DeploySpec<P>, verifierSpec: DeploySpec<V>, args: {
+  prover?: PArgs,
+  verifier?: Tail<VArgs>,
+} = {}, chainId: number = testChainId1) {
+  console.log("Deploying prover")
+  const proverAddress = await deployContract(proverSpec, args.prover ?? [], chainId);
+  console.log(`Prover has been deployed on ${proverAddress} address`);
+
+  console.log("Deploying verifier")
+  const verifierAddress = await deployContract(verifierSpec, [proverAddress, ...(args.verifier ?? [])], chainId);
+  console.log(`Verifier has been deployed on ${verifierAddress} address`);
+
+  return [proverAddress, verifierAddress];
+}
 
 export async function call<T extends Abi, F extends ContractFunctionName<T, 'pure' | 'view'>>(abi: T, address: Address, functionName: F, args?: ContractFunctionArgs<T, 'pure' | 'view', F>, chainId: number = testChainId1) {
   const ethClient = client(chainId);
