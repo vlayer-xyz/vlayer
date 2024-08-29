@@ -2,6 +2,7 @@ use super::Node;
 
 const EMPTY_CHILD: std::option::Option<Box<Node>> = None;
 pub static EMPTY_CHILDREN: [Option<Box<Node>>; 16] = [EMPTY_CHILD; 16];
+pub static EMPTY_BRANCH: Node = Node::Branch([EMPTY_CHILD; 16], None);
 
 impl Node {
     #[allow(unused)]

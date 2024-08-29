@@ -31,6 +31,7 @@ impl Node {
 
 #[cfg(test)]
 mod tests {
+    use crate::node::constructors::EMPTY_BRANCH;
     use crate::node::constructors::EMPTY_CHILDREN;
 
     use super::*;
@@ -47,7 +48,7 @@ mod tests {
 
         #[test]
         fn branch_value_none() {
-            let branch = Node::Branch(EMPTY_CHILDREN.clone(), None);
+            let branch = EMPTY_BRANCH.clone();
             let node = branch.insert_entry_into_branch(([], [42]).into()).unwrap();
 
             let expected_node = Node::branch(EMPTY_CHILDREN.clone(), Some([42]));
@@ -71,7 +72,7 @@ mod tests {
 
             #[test]
             fn no_nibble_remaining() {
-                let branch = Node::Branch(EMPTY_CHILDREN.clone(), None);
+                let branch = EMPTY_BRANCH.clone();
                 let node = branch
                     .insert_entry_into_branch(([0x0], [42]).into())
                     .unwrap();
@@ -85,7 +86,7 @@ mod tests {
 
             #[test]
             fn nibble_remaining() {
-                let branch = Node::Branch(EMPTY_CHILDREN.clone(), None);
+                let branch = EMPTY_BRANCH.clone();
                 let node = branch
                     .insert_entry_into_branch(([0x0, 0x0], [42]).into())
                     .unwrap();
