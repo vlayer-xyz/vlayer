@@ -7,6 +7,7 @@ use tlsn_core::proof::{SessionProofError, SubstringsProofError, TlsProof};
 use tlsn_core::ServerName;
 
 use crate::request_transcript::RequestTranscript;
+use crate::response_transcript::ResponseTranscript;
 
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
@@ -20,16 +21,21 @@ pub struct WebProof {
 }
 
 impl WebProof {
-    pub(crate) fn verify(self) -> Result<RequestTranscript, VerificationError> {
+    pub(crate) fn verify(
+        self,
+    ) -> Result<(RequestTranscript, ResponseTranscript), VerificationError> {
         let TlsProof {
             session,
             substrings,
         } = self.tls_proof;
 
         session.verify_with_default_cert_verifier(self.notary_pub_key)?;
-        let (sent, _) = substrings.verify(&session.header)?;
+        let (sent, received) = substrings.verify(&session.header)?;
 
-        Ok(RequestTranscript::new(sent))
+        Ok((
+            RequestTranscript::new(sent),
+            ResponseTranscript::new(received),
+        ))
     }
 
     pub fn get_server_name(&self) -> String {
@@ -96,10 +102,14 @@ mod tests {
     #[test]
     fn success_verification() {
         let proof = load_web_proof_fixture("./testdata/tls_proof.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
-        let request = proof.verify().unwrap();
+        let (request, response) = proof.verify().unwrap();
         assert_eq!(
             request.transcript.data(),
             read_fixture("./testdata/sent_request.txt").as_bytes()
+        );
+        assert_eq!(
+            response.transcript.data(),
+            read_fixture("./testdata/received_response.txt").as_bytes()
         );
     }
 

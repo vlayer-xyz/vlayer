@@ -5,6 +5,7 @@ use crate::request_transcript::ParsingError;
 
 const MAX_HEADERS_NUMBER: usize = 40;
 
+#[derive(Debug)]
 pub(crate) struct ResponseTranscript {
     pub(crate) transcript: RedactedTranscript,
 }
