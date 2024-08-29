@@ -152,13 +152,13 @@ mod tests {
     #[test]
     fn error_not_utf8_transcript() {
         let transcript = ResponseTranscript {
-            transcript: RedactedTranscript::new(2, vec![TranscriptSlice::new(0..2, vec![0, 159])]),
+            transcript: RedactedTranscript::new(1, vec![TranscriptSlice::new(0..1, vec![128])]),
         };
 
         let body = transcript.parse_body();
         assert_eq!(
             body.unwrap_err().to_string(),
-            "From utf8 error: invalid utf-8 sequence of 1 bytes from index 1".to_string()
+            "From utf8 error: invalid utf-8 sequence of 1 bytes from index 0".to_string()
         );
     }
 }
