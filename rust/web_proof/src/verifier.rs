@@ -1,5 +1,5 @@
 use crate::{
-    request_transcript::ParsingError,
+    errors::ParsingError,
     web_proof::{VerificationError, WebProof},
 };
 use thiserror::Error;
