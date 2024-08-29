@@ -1,0 +1,15 @@
+[package]
+name = "block_proof"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+axum = { workspace = true, features = ["macros"] }
+axum-jrpc = { workspace = true }
+mime = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+server_utils = { path = "../server_utils" }
+thiserror = { workspace = true }
+tokio = { workspace = true }
+tower = { workspace = true }
