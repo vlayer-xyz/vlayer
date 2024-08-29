@@ -107,4 +107,25 @@ mod tests {
             "Httparse error: too many headers"
         );
     }
+
+    #[test]
+    fn fail_empty_transcript() {
+        let transcript = RequestTranscript {
+            transcript: RedactedTranscript::new(0, vec![]),
+        };
+        let url = transcript.parse_url();
+        assert_eq!(url.unwrap_err().to_string(), "No path in request");
+    }
+
+    #[test]
+    fn fail_not_utf8_transcript() {
+        let transcript = RequestTranscript {
+            transcript: RedactedTranscript::new(1, vec![TranscriptSlice::new(0..1, vec![128])]),
+        };
+        let url = transcript.parse_url();
+        assert_eq!(
+            url.unwrap_err().to_string(),
+            "From utf8 error: invalid utf-8 sequence of 1 bytes from index 0"
+        );
+    }
 }
