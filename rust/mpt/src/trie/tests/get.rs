@@ -52,7 +52,10 @@ fn branch() {
 
 #[test]
 fn branch_with_value() {
-    let mpt = MerkleTrie(Node::branch_with_value(from_fn(|_| None), [42u8]));
+    let mpt = MerkleTrie(Node::branch_with_children_and_value(
+        from_fn(|_| None),
+        [42u8],
+    ));
 
     assert_eq!(mpt.get([]).unwrap(), [42]);
     assert_eq!(mpt.get([0]), None);

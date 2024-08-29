@@ -1,6 +1,6 @@
 use nybbles::Nibbles;
 
-use crate::node::{constructors::EMPTY_CHILDREN, Node};
+use crate::node::Node;
 
 #[derive(Debug, Clone, PartialEq)]
 pub struct Entry {
@@ -24,7 +24,7 @@ where
 impl From<Entry> for Node {
     fn from(Entry { key, value }: Entry) -> Self {
         if key.is_empty() {
-            Node::Branch(EMPTY_CHILDREN.clone(), Some(value))
+            Node::branch_with_value(value)
         } else {
             Node::leaf(&*key, value)
         }

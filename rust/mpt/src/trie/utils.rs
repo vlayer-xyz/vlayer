@@ -147,7 +147,7 @@ mod resolve_trie {
 
     #[test]
     fn branch_with_value() {
-        let branch = Node::branch_with_value(EMPTY_CHILDREN.clone(), [42u8]);
+        let branch = Node::branch_with_children_and_value(EMPTY_CHILDREN.clone(), [42u8]);
         let nodes_by_hash = HashMap::new();
         let resolved_node = resolve_trie(branch, &nodes_by_hash);
         let Node::Branch(_, Some(value)) = resolved_node else {
