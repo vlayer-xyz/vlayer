@@ -1,5 +1,6 @@
 use crate::{
     errors::ParsingError,
+    web::Web,
     web_proof::{VerificationError, WebProof},
 };
 use thiserror::Error;
@@ -11,12 +12,6 @@ pub enum WebProofError {
 
     #[error("Request parsing error: {0}")]
     Parsing(#[from] ParsingError),
-}
-
-pub struct Web {
-    pub url: String,
-    pub server_name: String,
-    pub body: String,
 }
 
 pub fn verify_and_parse(web_proof: WebProof) -> Result<Web, WebProofError> {

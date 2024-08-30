@@ -13,6 +13,10 @@ thiserror = { workspace = true }
 regex = "1.10.6"
 http = "1.1.0"
 httparse = "1.9.4"
+alloy-dyn-abi = { workspace = true }
+
+[dev-dependencies]
+alloy-primitives = { workspace = true }
 
 [features]
 fixtures = []
