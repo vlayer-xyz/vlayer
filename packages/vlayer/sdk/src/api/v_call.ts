@@ -8,13 +8,14 @@ export type CallParams = {
 }
 
 export type CallContext = {
-  block_no: number, // latest
   chain_id: number // 31337
 }
 
 export interface Proof {
   evm_call_result: Hex,
-  function_selector: string,
+  function_selector: Hex,
+  block_no: number,
+  block_hash: Hex,
   prover_contract_address: Address,
   seal: Hex,
 }
