@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-risc0-ethereum-contracts = { path = "../../../contracts/lib/risc0-ethereum/contracts" }
+risc0-ethereum-contracts = { path = "../../../contracts/dependencies/risc0-ethereum-1.0.0/contracts" }
 risc0-zkp = { workspace = true }
 risc0-zkvm = { workspace = true }
 call_engine = { path = "../engine" }
