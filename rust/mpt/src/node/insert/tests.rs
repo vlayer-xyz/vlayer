@@ -29,22 +29,14 @@ mod insert {
         #[test]
         fn long_key() -> anyhow::Result<()> {
             let node = Node::Null;
-            assert_eq!(
-                node.insert([0x0, 0x0], [42])?,
-                //here we create a leaf from nibbles, not from bytes as above
-                Node::leaf([0x0, 0x0], [42])
-            );
+            assert_eq!(node.insert([0x0, 0x0], [42])?, Node::leaf([0x0, 0x0], [42]));
             Ok(())
         }
 
         #[test]
         fn double_insert() -> anyhow::Result<()> {
             let node = Node::Null;
-            let updated_node = node
-                .insert([0x1, 0x0], [42])
-                .unwrap()
-                .insert([0x2, 0x0], [43])
-                .unwrap();
+            let updated_node = node.insert([0x1, 0x0], [42])?.insert([0x2, 0x0], [43])?;
 
             let mut children = EMPTY_CHILDREN.clone();
             children[0x1] = Some(Box::new(Node::leaf([0x0], [42])));
@@ -58,8 +50,6 @@ mod insert {
 
     #[cfg(test)]
     mod into_leaf {
-        use anyhow::Ok;
-
         use crate::node::{insert::entry::Entry, NodeError};
 
         use super::*;

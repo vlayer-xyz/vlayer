@@ -50,8 +50,6 @@ pub(crate) fn from_two_entries(lhs: Entry, rhs: Entry) -> Result<Node, NodeError
 
 #[cfg(test)]
 mod tests {
-    use anyhow::Ok;
-
     use super::*;
 
     #[test]

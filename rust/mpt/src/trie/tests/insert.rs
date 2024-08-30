@@ -21,7 +21,7 @@ pub fn duplicate_key() {
     let mut mpt = MerkleTrie(Node::Null);
     mpt.insert([0], [42]).unwrap();
     let result = mpt.insert([0], [43]);
-    assert_eq!(result.unwrap_err(), MPTError::DuplicatedKey(vec![0]));
+    assert_eq!(result.unwrap_err(), MPTError::DuplicatedKey(Box::from([0])));
 }
 
 #[test]

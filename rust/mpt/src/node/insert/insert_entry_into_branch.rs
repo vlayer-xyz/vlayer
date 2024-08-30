@@ -23,7 +23,7 @@ impl Node {
 
         if let Some(existing_child) = children[entry_first_nibble as usize].take() {
             children[entry_first_nibble as usize] = Some(Box::new(
-                existing_child.insert(remaining_entry.key.to_vec(), remaining_entry.value)?,
+                existing_child.insert(&*remaining_entry.key, remaining_entry.value)?,
             ));
         } else {
             children[entry_first_nibble as usize] = Some(Box::new(remaining_entry.into()));

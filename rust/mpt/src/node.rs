@@ -1,7 +1,6 @@
 use alloy_primitives::B256;
-use core::fmt;
 use serde::{Deserialize, Serialize};
-use std::{error::Error, fmt::Debug};
+use thiserror::Error;
 
 use crate::key_nibbles::KeyNibbles;
 
@@ -46,17 +45,8 @@ impl Node {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Error, Debug, PartialEq)]
 pub enum NodeError {
+    #[error("duplicated key")]
     DuplicatedKey,
 }
-
-impl fmt::Display for NodeError {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match self {
-            NodeError::DuplicatedKey => write!(f, "Duplicated key"),
-        }
-    }
-}
-
-impl Error for NodeError {}
