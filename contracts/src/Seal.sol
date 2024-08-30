@@ -13,10 +13,17 @@ struct Seal {
 }
 
 library SealLib {
+    uint256 constant ETH_WORD_SIZE = 32;
+
     uint256 public constant VERIFIER_SELECTOR_LENGTH = 4;
     uint256 public constant FAKE_SEAL_LENGTH = VERIFIER_SELECTOR_LENGTH + 32;
-    uint256 public constant GROTH16_SEAL_LENGTH = 256;
-    uint256 public constant SEAL_ENCODING_LENGTH = 32 + 256 + 32;
+    uint256 public constant GROTH16_SEAL_LENGTH = VERIFIER_SELECTOR_LENGTH + 256;
+
+    uint256 public constant VERIFIER_SELECTOR_ENCODING_LENGTH = ETH_WORD_SIZE;
+    uint256 public constant SEAL_BYTES_ENCODING_LENGTH = 256;
+    uint256 public constant PROOF_MODE_ENCODING_LENGTH = ETH_WORD_SIZE;
+
+    uint256 public constant SEAL_ENCODING_LENGTH = VERIFIER_SELECTOR_ENCODING_LENGTH + SEAL_BYTES_ENCODING_LENGTH + ETH_WORD_SIZE;
 
     function decode(Seal memory seal) internal pure returns (bytes memory) {
         if (seal.mode == ProofMode.FAKE) {

@@ -9,14 +9,16 @@ use risc0_zkvm::{
 use crate::host::error::HostError;
 use call_engine::{ProofMode, Seal};
 
+const VERIFIER_SELECTOR_LENGTH: usize = 4;
 const GROTH16_PROOF_SIZE: usize = 256;
 const SEAL_BYTES_SIZE: usize = GROTH16_PROOF_SIZE;
+
 const FAKE_VERIFIER_SELECTOR: VerifierSelector = VerifierSelector([0xde, 0xaf, 0xbe, 0xef]); // Should align with constant in FakeProofVerifier.sol
 
 type SealBytesT = [u8; SEAL_BYTES_SIZE];
 
 #[derive(Debug, Default, PartialEq, Eq)]
-struct VerifierSelector([u8; 4]);
+struct VerifierSelector([u8; VERIFIER_SELECTOR_LENGTH]);
 
 #[derive(Clone)]
 pub(crate) struct EncodableReceipt(InnerReceipt);
@@ -70,7 +72,7 @@ impl EncodableReceipt {
 
     fn extract_groth16_verifier_selector(inner: &Groth16Receipt<ReceiptClaim>) -> VerifierSelector {
         let mut selector: VerifierSelector = Default::default();
-        let selector_bytes = &inner.verifier_parameters.as_bytes()[..4];
+        let selector_bytes = &inner.verifier_parameters.as_bytes()[..VERIFIER_SELECTOR_LENGTH];
         selector.0.clone_from_slice(selector_bytes);
 
         selector
@@ -98,7 +100,7 @@ impl TryFrom<EncodableReceipt> for Seal {
             ))
             .map(split_seal_into_bytes)?;
 
-        let verifier_selector: FixedBytes<4> = value
+        let verifier_selector: FixedBytes<VERIFIER_SELECTOR_LENGTH> = value
             .verifier_selector()
             .ok_or(HostError::SealEncodingError(
                 "Could not retreive verifier selector".into(),
