@@ -18,6 +18,7 @@ type SealBytesT = [u8; SEAL_BYTES_SIZE];
 #[derive(Debug, Default, PartialEq, Eq)]
 struct VerifierSelector([u8; 4]);
 
+#[derive(Clone)]
 pub(crate) struct EncodableReceipt(InnerReceipt);
 
 impl EncodableReceipt {
@@ -134,16 +135,19 @@ mod test {
 
     use alloy_primitives::hex::FromHex;
     use alloy_primitives::{Address, Uint};
-    use alloy_sol_types::{SolType, SolValue};
-    use call_guest_wrapper::RISC0_CALL_GUEST_ID;
-
+    use alloy_sol_types::SolValue;
     use risc0_zkvm::sha::Digestible;
     use risc0_zkvm::{Groth16Receipt, Groth16ReceiptVerifierParameters, ReceiptClaim};
+
+    const MOCK_CALL_GUEST_ID: [u8; 32] = [1; 32];
 
     const ETH_WORD_SIZE: usize = 32;
     const SEAL_ENCODING_SIZE: usize = ETH_WORD_SIZE + GROTH16_PROOF_SIZE + ETH_WORD_SIZE;
 
     const GROTH16_MOCK_SEAL: [u8; GROTH16_PROOF_SIZE] = [1; GROTH16_PROOF_SIZE];
+
+    // stable, expected selector by solidity groth16 verifiers
+    const GROTH16_VERIFIER_SELECTOR: VerifierSelector = VerifierSelector([0x31, 0x0f, 0xe5, 0x98]);
 
     fn mock_journal() -> Vec<u8> {
         let execution_commitment = call_engine::ExecutionCommitment {
@@ -160,7 +164,7 @@ mod test {
         let journal = mock_journal();
         let inner = Groth16Receipt::<ReceiptClaim>::new(
             GROTH16_MOCK_SEAL.into(),
-            ReceiptClaim::ok(RISC0_CALL_GUEST_ID, journal.clone()).into(),
+            ReceiptClaim::ok(MOCK_CALL_GUEST_ID, journal.clone()).into(),
             Groth16ReceiptVerifierParameters::default().digest(),
         );
 
@@ -169,10 +173,8 @@ mod test {
 
     fn mock_fake_receipt() -> Receipt {
         let journal = mock_journal();
-        let inner: FakeReceipt<ReceiptClaim> = FakeReceipt::<ReceiptClaim>::new(ReceiptClaim::ok(
-            RISC0_CALL_GUEST_ID,
-            journal.clone(),
-        ));
+        let inner: FakeReceipt<ReceiptClaim> =
+            FakeReceipt::<ReceiptClaim>::new(ReceiptClaim::ok(MOCK_CALL_GUEST_ID, journal.clone()));
 
         Receipt::new(Fake(inner), journal)
     }
@@ -194,68 +196,50 @@ mod test {
         Receipt::new(InnerReceipt::Composite(receipt), mock_journal())
     }
 
-    #[test]
-    fn expected_encoding_size() {
-        assert_eq!(SEAL_ENCODING_SIZE, Seal::ENCODED_SIZE.unwrap())
-    }
+    mod abi_encoding {
 
-    #[test]
-    fn can_encode_seal_into_abi() {
-        let expected_encoding = vec![
-            0xde, 0xaf, 0xbe, 0xef, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-            0, 0, 0, 0, 0, 0, 0, // selector
-            0xab, 0x1f, 0x9b, 0xd2, 0x0f, 0x3d, 0x02, 0x4c, 0x12, 0x3c, 0xb0, 0x61, 0xe1, 0x1f,
-            0x70, 0x28, 0x73, 0xcd, 0x95, 0xfe, 0x75, 0xd4, 0xbf, 0x32, 0x39, 0x6e, 0x70, 0x21,
-            0x14, 0xe0, 0xbe, 0xd0, // seal
-            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-            0x0, // empty bytes
-            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-            0x0, // empty bytes
-            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-            0x0, // empty bytes
-            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-            0x0, // empty bytes
-            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-            0x0, // empty bytes
-            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-            0x0, // empty bytes
-            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-            0x0, // empty bytes
-            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0,
-            0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0x0, 0, 0,
-            0x01, // proof mode
-        ];
+        use super::*;
 
-        let receipt: EncodableReceipt = mock_fake_receipt().into();
-        let seal: Seal = receipt.try_into().unwrap();
-        assert_eq!(expected_encoding, seal.abi_encode().as_slice());
-    }
-
-    #[test]
-    fn seal_encodes_proof_mode() {
-        let receipt: EncodableReceipt = mock_fake_receipt().into();
-        let seal: Seal = receipt.try_into().unwrap();
-
-        assert_eq!(ProofMode::FAKE, seal.mode);
-    }
-
-    #[test]
-    fn seal_encodes_verifier_selector() {
-        let receipt: EncodableReceipt = mock_fake_receipt().into();
-        let seal: Seal = receipt.try_into().unwrap();
-
-        assert_eq!(&FAKE_VERIFIER_SELECTOR.0, seal.verifierSelector.as_slice());
+        #[test]
+        fn expected_encoding_size() {
+            use alloy_sol_types::SolType;
+            assert_eq!(SEAL_ENCODING_SIZE, Seal::ENCODED_SIZE.unwrap())
+        }
     }
 
     mod encodable_receipt {
         use super::*;
+
+        mod try_into_seal {
+            use super::*;
+
+            #[test]
+            fn seal_has_proof_mode() {
+                let receipt: EncodableReceipt = mock_fake_receipt().into();
+                let seal: Seal = receipt.try_into().unwrap();
+
+                assert_eq!(ProofMode::FAKE, seal.mode);
+            }
+
+            #[test]
+            fn seal_has_verifier_selector() {
+                let receipt: EncodableReceipt = mock_fake_receipt().into();
+                let seal: Seal = receipt.try_into().unwrap();
+
+                assert_eq!(&FAKE_VERIFIER_SELECTOR.0, seal.verifierSelector.as_slice());
+            }
+
+            #[test]
+            fn seal_has_seal_bytes() {
+                let receipt: EncodableReceipt = mock_fake_receipt().into();
+                let seal: Seal = receipt.clone().try_into().unwrap();
+
+                let seal_bytes: [[u8; 32]; 8] = seal.seal.map(|word| word.into());
+                let seal_bytes = seal_bytes.concat();
+
+                assert_eq!(receipt.seal_bytes().unwrap(), seal_bytes.as_slice());
+            }
+        }
 
         mod proof_mode {
             use super::*;
@@ -263,7 +247,6 @@ mod test {
             #[test]
             fn returns_groth16_mode_for_groth16_receipt() {
                 let receipt: EncodableReceipt = mock_groth16_receipt().into();
-
                 assert_eq!(ProofMode::GROTH16, receipt.proof_mode().unwrap())
             }
 
@@ -292,9 +275,10 @@ mod test {
             #[test]
             fn returns_groth16_verifier_params_for_groth16_receipt() {
                 let receipt: EncodableReceipt = mock_groth16_receipt().into();
-                // expected selector by solidity groth16 verifiers
-                let expected_selector = VerifierSelector([0x31, 0x0f, 0xe5, 0x98]);
-                assert_eq!(expected_selector, receipt.verifier_selector().unwrap())
+                assert_eq!(
+                    GROTH16_VERIFIER_SELECTOR,
+                    receipt.verifier_selector().unwrap()
+                )
             }
 
             #[test]
@@ -306,19 +290,56 @@ mod test {
         mod seal_bytes {
             use super::*;
 
-            #[test]
-            fn returns_none_for_invalid_groth16_seal_size() {
-                let mut seal_bytes: Vec<u8> = GROTH16_MOCK_SEAL.into();
-                seal_bytes.push(1);
+            mod fake_proof_receipt {
+                use super::*;
 
-                let inner = Groth16Receipt::<ReceiptClaim>::new(
-                    seal_bytes,
-                    ReceiptClaim::ok(RISC0_CALL_GUEST_ID, mock_journal()).into(),
-                    Groth16ReceiptVerifierParameters::default().digest(),
-                );
-                let receipt: EncodableReceipt = Receipt::new(Groth16(inner), mock_journal()).into();
+                #[test]
+                fn fake_seal_bytes_starts_with_claim_digest() {
+                    let journal = mock_journal();
+                    let claim = ReceiptClaim::ok(MOCK_CALL_GUEST_ID, journal);
 
-                assert_eq!(None, receipt.seal_bytes());
+                    let receipt: EncodableReceipt = mock_fake_receipt().into();
+                    let first_word = &receipt.seal_bytes().unwrap()[..ETH_WORD_SIZE];
+
+                    assert_eq!(claim.digest().as_bytes(), first_word);
+                }
+
+                #[test]
+                fn other_bytes_are_zeroed() {
+                    let receipt: EncodableReceipt = mock_fake_receipt().into();
+                    let other_words = &receipt.seal_bytes().unwrap()[ETH_WORD_SIZE..];
+
+                    assert_eq!(&[0u8; SEAL_BYTES_SIZE - ETH_WORD_SIZE], other_words);
+                }
+            }
+            mod groth16_proof_receipt {
+                use super::*;
+
+                #[test]
+                fn returns_seal_for_groth16() {
+                    let receipt: EncodableReceipt = mock_groth16_receipt().into();
+                    let expected_seal_bytes = &receipt.0.groth16().unwrap().seal;
+
+                    assert_eq!(
+                        expected_seal_bytes.as_slice(),
+                        receipt.seal_bytes().unwrap()
+                    );
+                }
+                #[test]
+                fn returns_none_for_invalid_groth16_seal_size() {
+                    let mut seal_bytes: Vec<u8> = GROTH16_MOCK_SEAL.into();
+                    seal_bytes.push(1);
+
+                    let inner = Groth16Receipt::<ReceiptClaim>::new(
+                        seal_bytes,
+                        ReceiptClaim::ok(MOCK_CALL_GUEST_ID, mock_journal()).into(),
+                        Groth16ReceiptVerifierParameters::default().digest(),
+                    );
+                    let receipt: EncodableReceipt =
+                        Receipt::new(Groth16(inner), mock_journal()).into();
+
+                    assert_eq!(None, receipt.seal_bytes());
+                }
             }
         }
     }
