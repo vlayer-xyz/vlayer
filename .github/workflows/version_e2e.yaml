@@ -31,7 +31,7 @@ jobs:
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
-          version: nightly-5ac78a9cd4b94dc53d1fe5e0f42372b28b5a7559 # 2024-06-02
+          version: nightly-626221f5ef44b4af950a08e09bd714650d9eb77d # 2024-08-02
 
       - name: Check clang and LLVM version
         env:
