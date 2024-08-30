@@ -12,7 +12,7 @@ import {
 } from "viem";
 
 import {type CallContext, type CallParams, v_call, VCallResponse} from "./v_call";
-import {testChainId1, client} from "./helpers";
+import {testChainId1} from "./helpers";
 
 type Bytecode = {
   object: Hex,
@@ -34,23 +34,20 @@ export async function getContractSpec(file: string): Promise<ContractSpec> {
   return Bun.file(file).json();
 }
 
-export async function prove<T extends Abi, F extends ContractFunctionName<T>>(prover: Address, abi: T, functionName: F, args: ContractFunctionArgs<T, AbiStateMutability, F>, blockNo?: number) {
+export async function prove<T extends Abi, F extends ContractFunctionName<T>>(prover: Address, abi: T, functionName: F, args: ContractFunctionArgs<T, AbiStateMutability, F>, chainId = testChainId1) {
   const calldata = encodeFunctionData({
     abi,
     functionName,
     args
   });
 
-  const blockNumber = blockNo ?? await client().getBlockNumber();
-
   const call: CallParams = {to: prover, data: calldata};
   const context: CallContext = {
-    block_no: Number(blockNumber),
-    chain_id: testChainId1
+    chain_id: chainId,
   };
 
   const response = await v_call(call, context);
-  const proof = await composeProof(response, BigInt(blockNumber));
+  const proof = await composeProof(response);
   const returnValue = decodeFunctionResult({
     abi,
     functionName,
@@ -60,16 +57,11 @@ export async function prove<T extends Abi, F extends ContractFunctionName<T>>(pr
   return {proof, returnValue};
 }
 
-async function composeProof(response: VCallResponse, blockNumber: bigint) {
+async function composeProof(response: VCallResponse) {
   const length = EXECUTION_COMMITMENT_SIZE + byteLength(response.result.evm_call_result);
-  const blockHash = (await client().getBlock({
-    blockNumber
-  })).hash;
-
-  const {prover_contract_address, seal: encodedSeal, function_selector} = response.result;
+  const {prover_contract_address, seal: encodedSeal, function_selector, block_no, block_hash} = response.result;
 
   const SEAL_STRUCT = 'struct Seal { bytes4 verifierSelector; bytes32[8] seal; uint8 mode; }';
-
   const [seal] = decodeAbiParameters([parseAbiParameter([
     'Seal',
     SEAL_STRUCT
@@ -80,8 +72,8 @@ async function composeProof(response: VCallResponse, blockNumber: bigint) {
     commitment: {
       proverContractAddress: prover_contract_address as Address,
       functionSelector: function_selector as Hex,
-      settleBlockNumber: blockNumber,
-      settleBlockHash: blockHash
+      settleBlockNumber: BigInt(block_no),
+      settleBlockHash: block_hash,
     },
     seal
   }

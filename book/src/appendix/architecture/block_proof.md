@@ -21,7 +21,7 @@ However, this method is limited, as it only works for the most recent 256 blocks
 
 We use the following terminology in this document:
 
-- **Recent blocks** - any of the most recent 256 blocks (relative to the current `block_no`)
+- **Recent blocks** - any of the most recent 256 blocks (relative to the current block number)
 - **Historical blocks** - blocks older than 256
 
 ### Naive chain proofs

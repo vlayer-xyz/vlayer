@@ -1,6 +1,6 @@
 use crate::error::AppError;
 use alloy_chains::Chain;
-use alloy_primitives::{BlockNumber, ChainId};
+use alloy_primitives::ChainId;
 use axum_jrpc::Value;
 use call_host::Call as HostCall;
 use serde::{Deserialize, Serialize};
@@ -31,7 +31,6 @@ fn mainnet_chain_id() -> ChainId {
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct CallContext {
-    pub block_no: BlockNumber,
     #[serde(default = "mainnet_chain_id")]
     pub chain_id: ChainId,
 }
