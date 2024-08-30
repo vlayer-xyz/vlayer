@@ -21,53 +21,29 @@ abstract contract ProofVerifierBase is IProofVerifier {
         return ImageID.RISC0_CALL_GUEST_ID;
     }
 
-    function verify(
-        Proof calldata proof,
-        bytes32 journalHash,
-        address expectedProver,
-        bytes4 expectedSelector
-    ) external view {
+    function verify(Proof calldata proof, bytes32 journalHash, address expectedProver, bytes4 expectedSelector)
+        external
+        view
+    {
         _verifyProofMode(proof);
         _verifyExecutionEnv(proof, expectedProver, expectedSelector);
-        VERIFIER.verify(
-            proof.seal.decode(),
-            ImageID.RISC0_CALL_GUEST_ID,
-            journalHash
-        );
+        VERIFIER.verify(proof.seal.decode(), ImageID.RISC0_CALL_GUEST_ID, journalHash);
     }
 
     function _verifyProofMode(Proof memory proof) private view {
         require(proof.seal.proofMode() == PROOF_MODE, "Invalid proof mode");
     }
 
-    function _verifyExecutionEnv(
-        Proof memory proof,
-        address prover,
-        bytes4 selector
-    ) private view {
-        require(
-            proof.commitment.proverContractAddress == prover,
-            "Invalid prover"
-        );
-        require(
-            proof.commitment.functionSelector == selector,
-            "Invalid selector"
-        );
+    function _verifyExecutionEnv(Proof memory proof, address prover, bytes4 selector) private view {
+        require(proof.commitment.proverContractAddress == prover, "Invalid prover");
+        require(proof.commitment.functionSelector == selector, "Invalid selector");
 
+        require(proof.commitment.settleBlockNumber < block.number, "Invalid block number: block from future");
         require(
-            proof.commitment.settleBlockNumber < block.number,
-            "Invalid block number: block from future"
-        );
-        require(
-            proof.commitment.settleBlockNumber + AVAILABLE_HISTORICAL_BLOCKS >=
-                block.number,
+            proof.commitment.settleBlockNumber + AVAILABLE_HISTORICAL_BLOCKS >= block.number,
             "Invalid block number: block too old"
         );
 
-        require(
-            proof.commitment.settleBlockHash ==
-                blockhash(proof.commitment.settleBlockNumber),
-            "Invalid block hash"
-        );
+        require(proof.commitment.settleBlockHash == blockhash(proof.commitment.settleBlockNumber), "Invalid block hash");
     }
 }

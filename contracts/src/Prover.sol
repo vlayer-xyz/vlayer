@@ -11,7 +11,7 @@ interface ITraveler {
 contract Prover {
     // Address generated from first 20-bytes of "vlayer.traveler"'s keccak256.
     // 0x76dc9aa45aa006a0f63942d8f9f21bd4537972a3
-    ITraveler private constant TRAVELER = ITraveler(address(uint160(uint256(keccak256("vlayer.traveler"))))); 
+    ITraveler private constant TRAVELER = ITraveler(address(uint160(uint256(keccak256("vlayer.traveler")))));
 
     function setBlock(uint256 blockNo) public {
         TRAVELER.setBlock(blockNo);

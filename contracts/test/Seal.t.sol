@@ -38,16 +38,16 @@ contract SealLib_proofMode_Tests is Test {
     uint32 constant PROOF_MODE_ENC_LOCATION = 32 + 256 + 32 - 1; // 320th byte, array index 319
 
     function test_proofMode() public pure {
-        Seal memory sealGroth16 = Seal(SealFixtures.MOCK_SELECTOR,SealFixtures.MAX_WORDS(), ProofMode.GROTH16);
-        Seal memory sealFake = Seal(SealFixtures.MOCK_SELECTOR,SealFixtures.MAX_WORDS(), ProofMode.FAKE);
+        Seal memory sealGroth16 = Seal(SealFixtures.MOCK_SELECTOR, SealFixtures.MAX_WORDS(), ProofMode.GROTH16);
+        Seal memory sealFake = Seal(SealFixtures.MOCK_SELECTOR, SealFixtures.MAX_WORDS(), ProofMode.FAKE);
 
         assert(sealGroth16.proofMode() == ProofMode.GROTH16);
         assert(sealFake.proofMode() == ProofMode.FAKE);
     }
 
     function test_proofModeIsEncodedOn288thByte() public pure {
-        Seal memory sealGroth16 = Seal(SealFixtures.MOCK_SELECTOR,SealFixtures.MAX_WORDS(), ProofMode.GROTH16);
-        Seal memory sealFake = Seal(SealFixtures.MOCK_SELECTOR,SealFixtures.MAX_WORDS(), ProofMode.FAKE);
+        Seal memory sealGroth16 = Seal(SealFixtures.MOCK_SELECTOR, SealFixtures.MAX_WORDS(), ProofMode.GROTH16);
+        Seal memory sealFake = Seal(SealFixtures.MOCK_SELECTOR, SealFixtures.MAX_WORDS(), ProofMode.FAKE);
 
         bytes memory encodedGroth16 = abi.encode(sealGroth16);
         bytes memory encodedFake = abi.encode(sealFake);
@@ -57,7 +57,7 @@ contract SealLib_proofMode_Tests is Test {
     }
 
     function test_invalidValueReverts() public {
-        Seal memory seal = Seal(SealFixtures.MOCK_SELECTOR,SealFixtures.MAX_WORDS(), ProofMode.GROTH16);
+        Seal memory seal = Seal(SealFixtures.MOCK_SELECTOR, SealFixtures.MAX_WORDS(), ProofMode.GROTH16);
         bytes memory encoded = abi.encode(seal);
         encoded[PROOF_MODE_ENC_LOCATION] = bytes1(0x02);
 
@@ -67,7 +67,6 @@ contract SealLib_proofMode_Tests is Test {
 }
 
 library SealFixtures {
-
     bytes4 public constant MOCK_SELECTOR = 0x01020304;
 
     function MAX_WORDS() public pure returns (bytes32[8] memory) {
@@ -88,7 +87,7 @@ library SealFixtures {
 
     function EMPTY() public pure returns (bytes memory) {
         return abi.encodePacked(
-        MOCK_SELECTOR,
+            MOCK_SELECTOR,
             [
                 0x0000000000000000000000000000000000000000000000000000000000000000,
                 0x0000000000000000000000000000000000000000000000000000000000000000,
@@ -104,7 +103,7 @@ library SealFixtures {
 
     function MAX() public pure returns (bytes memory) {
         return abi.encodePacked(
-        MOCK_SELECTOR,
+            MOCK_SELECTOR,
             [
                 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff,
                 0xffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffffff,

@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {console } from "forge-std/console.sol";
+import {console} from "forge-std/console.sol";
 
 import {RiscZeroMockVerifier} from "risc0-ethereum/test/RiscZeroMockVerifier.sol";
 
@@ -61,7 +61,7 @@ contract TestHelpers {
 
     function encodeWordsFake(bytes memory seal) private pure returns (bytes32[8] memory) {
         bytes32[8] memory words;
-        uint256 rawSeal; 
+        uint256 rawSeal;
 
         require(seal.length == SealLib.FAKE_SEAL_LENGTH, "Invalid seal length");
 
