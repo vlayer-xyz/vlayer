@@ -1,3 +1,5 @@
+use nybbles::Nibbles;
+
 use crate::{
     key_nibbles::KeyNibbles,
     node::{Node, NodeError},
@@ -22,39 +24,30 @@ impl Node {
         let entry = entry.into();
 
         let (common_prefix, remaining_extension_key, remaining_entry_key) =
-            extract_common_prefix((*key).clone(), entry.key.clone());
+            extract_common_prefix((*key).as_ref(), entry.key.as_ref());
 
         if common_prefix.is_empty() {
             // Because common_prefix is empty we know that remaining_extension_key is non empty: Extension
             // always has non empty key. Hence we can create Extension with non empty key from remaining_extension_key.
             return Ok(from_extension_and_entry_no_common_prefix(
-                Node::Extension(
-                    KeyNibbles::from_nibbles(remaining_extension_key),
-                    extension_node,
-                ),
+                Node::extension(remaining_extension_key, *extension_node),
                 entry,
             ));
         }
 
         if remaining_extension_key.is_empty() {
-            return Ok(Node::Extension(
-                KeyNibbles::from_nibbles(common_prefix),
-                Box::new(extension_node.insert(remaining_entry_key, entry.value)?),
+            return Ok(Node::extension(
+                common_prefix,
+                extension_node.insert(Nibbles::from_nibbles(remaining_entry_key), entry.value)?,
             ));
         }
 
-        Ok(Node::Extension(
-            KeyNibbles::from_nibbles(common_prefix),
-            Box::new(from_extension_and_entry_no_common_prefix(
-                Node::Extension(
-                    KeyNibbles::from_nibbles(remaining_extension_key),
-                    extension_node,
-                ),
-                Entry {
-                    key: remaining_entry_key,
-                    value: entry.value,
-                },
-            )),
+        Ok(Node::extension(
+            common_prefix,
+            from_extension_and_entry_no_common_prefix(
+                Node::extension(remaining_extension_key, *extension_node),
+                (remaining_entry_key, entry.value).into(),
+            ),
         ))
     }
 }
@@ -78,9 +71,7 @@ mod tests {
         #[test]
         fn one_nibble_extension() {
             let extension = Node::extension([0x0], Node::branch_with_value([42]));
-            let node = extension
-                .insert_entry_into_extension(([], [43]))
-                .unwrap();
+            let node = extension.insert_entry_into_extension(([], [43])).unwrap();
 
             let child = Node::branch_with_value([42]);
             let expected_node = Node::branch_with_child_and_value(0, child, [43]);
@@ -91,9 +82,7 @@ mod tests {
         #[test]
         fn multiple_nibbles_extension() {
             let extension = Node::extension([0x0, 0x0], Node::branch_with_value([42]));
-            let node = extension
-                .insert_entry_into_extension(([], [43]))
-                .unwrap();
+            let node = extension.insert_entry_into_extension(([], [43])).unwrap();
 
             let child = Node::extension([0x0], Node::branch_with_value([42]));
             let expected_node = Node::branch_with_child_and_value(0, child, [43]);
