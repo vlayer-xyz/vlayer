@@ -82,6 +82,8 @@ mod tests {
         let serialized = serde_json::to_string(&proof).unwrap();
         let deserialized: WebProof = serde_json::from_str(&serialized).unwrap();
 
+        // TlsProofs don't derive Eq, so we compare only notary_pub_key from WebProof structure
+        // Comparing notary_pub_key is more important because its (de)serialization is custom
         assert_eq!(proof.notary_pub_key, deserialized.notary_pub_key);
     }
 
