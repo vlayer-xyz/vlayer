@@ -57,10 +57,10 @@ mod test {
         };
         let actual_result: Result<HostCall, AppError> = call.try_into();
 
-        assert_eq!(
-            actual_result.unwrap_err().to_string(),
-            "Invalid field: `to` Invalid string length `0x`"
-        );
+        assert!(matches!(
+            actual_result,
+            Err(AppError::FieldValidation(err)) if err.to_string() == "`to` Invalid string length `0x`"
+        ));
 
         Ok(())
     }
@@ -74,10 +74,10 @@ mod test {
         };
         let actual_result: Result<HostCall, AppError> = call.try_into();
 
-        assert_eq!(
-            actual_result.unwrap_err().to_string(),
-            "Invalid field: `data` Invalid hex prefix `xx`"
-        );
+        assert!(matches!(
+            actual_result,
+            Err(AppError::FieldValidation(err)) if err.to_string() == "`data` Invalid hex prefix `xx`"
+        ));
 
         Ok(())
     }
