@@ -37,7 +37,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn correct_web_extracted() {
+    fn correct_url_extracted() {
         let web_proof =
             load_web_proof_fixture("./testdata/tls_proof.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
 
