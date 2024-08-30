@@ -1,9 +1,6 @@
 use nybbles::Nibbles;
 
-use crate::{
-    key_nibbles::KeyNibbles,
-    node::{Node, NodeError},
-};
+use crate::node::{Node, NodeError};
 
 use self::extract_common_prefix::extract_common_prefix;
 use self::from_extension_and_entry_no_common_prefix::from_extension_and_entry_no_common_prefix;
@@ -36,19 +33,17 @@ impl Node {
         }
 
         if remaining_extension_key.is_empty() {
-            return Ok(Node::extension(
-                common_prefix,
-                extension_node.insert(Nibbles::from_nibbles(remaining_entry_key), entry.value)?,
-            ));
+            let extension_node =
+                extension_node.insert(Nibbles::from_nibbles(remaining_entry_key), entry.value)?;
+            return Ok(Node::extension(common_prefix, extension_node));
         }
 
-        Ok(Node::extension(
-            common_prefix,
-            from_extension_and_entry_no_common_prefix(
-                Node::extension(remaining_extension_key, *extension_node),
-                (remaining_entry_key, entry.value).into(),
-            ),
-        ))
+        let extension_node = from_extension_and_entry_no_common_prefix(
+            Node::extension(remaining_extension_key, *extension_node),
+            (remaining_entry_key, entry.value).into(),
+        );
+
+        Ok(Node::extension(common_prefix, extension_node))
     }
 }
 
@@ -60,7 +55,7 @@ mod tests {
     #[test]
     #[should_panic(expected = "from_extension_and_entry is used only for Extension nodes")]
     fn unreachable() {
-        let node = Node::Branch(EMPTY_CHILDREN.clone(), None);
+        let node = Node::Null;
         let entry = ([0x0], [42]);
         let _ = node.insert_entry_into_extension(entry);
     }

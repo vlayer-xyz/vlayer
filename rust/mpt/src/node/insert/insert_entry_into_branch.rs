@@ -43,7 +43,7 @@ mod tests {
     #[test]
     #[should_panic(expected = "insert_entry_into_branch is used only for Branch nodes")]
     fn unreachable() {
-        let leaf = Node::leaf([0x0], [42]);
+        let leaf = Node::Null;
         leaf.insert_entry_into_branch(([0x0], [42])).unwrap();
     }
 
