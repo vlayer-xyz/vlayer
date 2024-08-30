@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod insert {
-    use crate::node::{constructors::EMPTY_CHILDREN, Node};
+    use crate::node::{constructors::EMPTY_CHILDREN, insert::entry::Entry, Node, NodeError};
 
     #[test]
     #[should_panic(expected = "Cannot insert into a digest node")]
@@ -50,8 +50,6 @@ mod insert {
 
     #[cfg(test)]
     mod into_leaf {
-        use crate::node::{insert::entry::Entry, NodeError};
-
         use super::*;
 
         #[test]
@@ -91,8 +89,6 @@ mod insert {
 
     #[cfg(test)]
     mod into_branch {
-        use crate::node::{insert::entry::Entry, NodeError};
-
         use super::*;
 
         #[test]
@@ -112,6 +108,20 @@ mod insert {
 
             assert_eq!(expected_branch, updated_node);
             Ok(())
+        }
+    }
+
+    #[cfg(test)]
+    mod into_extension {
+        use super::*;
+
+        #[test]
+        #[ignore]
+        fn duplicate_key() {
+            let node = Node::extension([0x0], Node::branch_with_value([42]));
+            let result = node.insert([], [43]);
+
+            assert_eq!(result.unwrap_err(), NodeError::DuplicateKey);
         }
     }
 }
