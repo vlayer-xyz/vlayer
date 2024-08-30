@@ -125,6 +125,7 @@ mod server_tests {
                             "proof": {
                                 "length": 160,
                                 "seal": {
+                                    "verifierSelector": "0xdeafbeef",
                                     "mode": 1,
                                 },
                                 "commitment": {
@@ -180,6 +181,7 @@ mod server_tests {
                             "proof": {
                                 "length": 160,
                                 "seal": {
+                                    "verifierSelector": "0xdeafbeef",
                                     "mode": 1,
                                 },
                                 "commitment": {

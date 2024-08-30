@@ -14,6 +14,7 @@ export type CallContext = {
 export interface Proof {
   length: bigint,
   seal: {
+    verifierSelector: Hex,
     seal: [Hex, Hex, Hex, Hex, Hex, Hex, Hex, Hex],
     mode: number,
   },

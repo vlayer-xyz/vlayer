@@ -34,6 +34,7 @@ fn proof_to_json(proof: Proof) -> Value {
     json!({
         "length": u256_to_number(proof.length),
         "seal": {
+            "verifierSelector": proof.seal.verifierSelector,
             "seal": proof.seal.seal,
             "mode": Into::<u8>::into(proof.seal.mode),
         },
