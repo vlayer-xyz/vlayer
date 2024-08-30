@@ -68,7 +68,7 @@ async function composeProof(response: VCallResponse, blockNumber: bigint) {
 
   const {prover_contract_address, seal: encodedSeal, function_selector} = response.result;
 
-  const SEAL_STRUCT = 'struct Seal { bytes32[8] seal; uint8 mode; }';
+  const SEAL_STRUCT = 'struct Seal { bytes4 verifierSelector; bytes32[8] seal; uint8 mode; }';
 
   const [seal] = decodeAbiParameters([parseAbiParameter([
     'Seal',
