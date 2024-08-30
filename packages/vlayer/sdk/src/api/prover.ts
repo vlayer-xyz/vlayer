@@ -39,12 +39,12 @@ export async function prove<T extends Abi, F extends ContractFunctionName<T>>(pr
     chain_id: chainId,
   };
 
-  const response = (await v_call(call, context)).result;
-  const proof = response.proof;
+  const {result: {proof, evm_call_result}} = await v_call(call, context);
+
   const returnValue = decodeFunctionResult({
     abi,
     functionName,
-    data: response.evm_call_result,
+    data: evm_call_result,
   })
 
   return {proof, returnValue};
