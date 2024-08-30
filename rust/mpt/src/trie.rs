@@ -3,6 +3,7 @@ use crate::node::NodeError;
 use alloy_primitives::{keccak256, B256};
 use alloy_rlp::Decodable;
 use alloy_trie::EMPTY_ROOT_HASH;
+use core::fmt;
 use nybbles::Nibbles;
 use rlp as legacy_rlp;
 use serde::{Deserialize, Serialize};
@@ -39,13 +40,18 @@ impl MerkleTrie {
         key: impl AsRef<[u8]>,
         value: impl AsRef<[u8]>,
     ) -> Result<(), MPTError> {
-        let nibbles = Nibbles::unpack(key.as_ref());
-        match self.0.clone().insert(nibbles.clone(), value) {
+        let key_vec = key.as_ref().to_vec();
+
+        match self
+            .0
+            .clone()
+            .insert(Nibbles::unpack(key).as_slice(), value)
+        {
             Ok(new_node) => {
                 self.0 = new_node;
                 Ok(())
             }
-            Err(NodeError::DuplicatedKey) => Err(MPTError::DuplicatedKey(nibbles)),
+            Err(NodeError::DuplicatedKey) => Err(MPTError::DuplicatedKey(key_vec)),
         }
     }
 
@@ -112,11 +118,20 @@ impl MerkleTrie {
     }
 }
 
-#[allow(dead_code)]
 #[derive(Debug, PartialEq)]
 pub enum MPTError {
-    DuplicatedKey(Nibbles),
+    DuplicatedKey(Vec<u8>),
 }
+
+impl fmt::Display for MPTError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        match self {
+            MPTError::DuplicatedKey(key) => write!(f, "Duplicated key: {:?}", key),
+        }
+    }
+}
+
+impl std::error::Error for MPTError {}
 
 #[cfg(test)]
 mod tests;
