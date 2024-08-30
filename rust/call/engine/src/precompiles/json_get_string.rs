@@ -1,7 +1,12 @@
 use crate::precompiles::gas_used;
 use alloy_primitives::Bytes;
+use alloy_sol_types::sol_data;
+use alloy_sol_types::{SolType, SolValue};
 use revm::precompile::{Precompile, PrecompileOutput, PrecompileResult};
+use serde_json::Value;
 use std::convert::Into;
+use std::io::Read;
+use std::str::from_utf8;
 
 pub(crate) const JSON_GET_STRING_PRECOMPILE: Precompile = Precompile::Standard(json_get_string_run);
 
@@ -11,7 +16,11 @@ const JSON_GET_STRING_BASE: u64 = 10;
 /// The cost per word.
 const JSON_GET_STRING_PER_WORD: u64 = 1;
 
+type InputType = sol_data::FixedArray<sol_data::String, 2>;
+
 fn json_get_string_run(input: &Bytes, gas_limit: u64) -> PrecompileResult {
+    let [body, json_path]: [String; 2] = InputType::abi_decode(&input, true).unwrap();
+
     let gas_used = gas_used(
         input.len(),
         JSON_GET_STRING_BASE,
@@ -19,8 +28,42 @@ fn json_get_string_run(input: &Bytes, gas_limit: u64) -> PrecompileResult {
         gas_limit,
     )?;
 
-    // TODO: parse body and path and extract field at path
-    let result = "";
+    let v: Value = serde_json::from_str(body.as_str()).unwrap();
 
+    let result = get_value_by_path(&v, json_path.as_str())
+        .unwrap()
+        .to_string();
     Ok(PrecompileOutput::new(gas_used, result.into()))
+}
+
+// Function to extract value using dot notation path
+fn get_value_by_path<'a>(value: &'a Value, path: &str) -> Option<&'a Value> {
+    path.split('.').fold(Some(value), |acc, key| acc?.get(key))
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn success() {
+        let body = r#"
+            {
+                "root": {
+                    "level1": {
+                        "level2": "level2_string_value"
+                    }
+                }
+            }
+            "#;
+        let json_path = "root.level1.level2";
+
+        let abi_encoded_body_and_json_path = InputType::abi_encode(&[body, json_path]);
+
+        let precompile_output =
+            json_get_string_run(&abi_encoded_body_and_json_path.into(), u64::MAX).unwrap();
+        let precompile_result = from_utf8(precompile_output.bytes.as_ref()).unwrap();
+
+        assert_eq!("\"level2_string_value\"", precompile_result);
+    }
 }
