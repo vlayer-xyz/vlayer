@@ -93,7 +93,7 @@ mod tests {
         fn one_nibble_extension() {
             let extension = Node::extension([0x0], Node::branch_with_value([42]));
             let node = extension
-                .insert_entry_into_extension(([0x1], [43]).into())
+                .insert_entry_into_extension(([0x1], [43]))
                 .unwrap();
 
             let mut children = EMPTY_CHILDREN.clone();
@@ -108,7 +108,7 @@ mod tests {
         fn multiple_nibbles_extension() {
             let extension = Node::extension([0x0, 0x0], Node::branch_with_value([42]));
             let node = extension
-                .insert_entry_into_extension(([0x1], [43]).into())
+                .insert_entry_into_extension(([0x1], [43]))
                 .unwrap();
 
             let mut children = EMPTY_CHILDREN.clone();
