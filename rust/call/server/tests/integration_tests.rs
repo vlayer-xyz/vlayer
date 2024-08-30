@@ -122,8 +122,16 @@ mod server_tests {
                         "id": 1,
                         "result": {
                             "evm_call_result": U256::from(3).encode_hex(),
-                            "function_selector": function_selector(call_data),
-                            "prover_contract_address": helper.contract.address(),
+                            "proof": {
+                                "length": 160,
+                                "seal": {
+                                    "mode": 1,
+                                },
+                                "commitment": {
+                                    "functionSelector": function_selector(call_data),
+                                    "proverContractAddress": helper.contract.address(),
+                                }
+                            },
                         }
                     }),
                 actual: body_to_json(response.into_body()).await,
@@ -169,8 +177,16 @@ mod server_tests {
                         "id": 1,
                         "result": {
                             "evm_call_result": Uint8::from(1).encode_hex(),
-                            "function_selector": function_selector(call_data),
-                            "prover_contract_address": helper.contract.address(),
+                            "proof": {
+                                "length": 160,
+                                "seal": {
+                                    "mode": 1,
+                                },
+                                "commitment": {
+                                    "functionSelector": function_selector(call_data),
+                                    "proverContractAddress": helper.contract.address(),
+                                }
+                            },
                         }
                     }),
                 actual: body_to_json(response.into_body()).await,
