@@ -1,38 +1,38 @@
 # Block Proof Cache
 
-vlayer executes Solidity code offchain and proves correctness of that execution on-chain. For that purpose, it fetches (state and) storage data and verifies it with storage proofs. Storage proofs prove that a piece of storage is a part of a block with a specific hash. Hence, the storage proof is 'connected' to a certain block hash. However, they don't guarantee that block with specific hash actually exists on the chain. This needs to be verified later with on-chain smart contract.
+vlayer executes Solidity code off-chain and proves the correctness of that execution on-chain. For that purpose, it fetches (state and) storage data and verifies it with storage proofs. Storage proofs prove that a piece of storage is part of a block with a specific hash. Hence, the storage proof is 'connected' to a certain block hash. However, they don't guarantee that the block with the specific hash actually exists on the chain. This verification needs to be done later with an on-chain smart contract.
 
-vlayer provides time-travel functionality. Hence, state and storage proofs do not 'connect' to a single block hash, but to multiple block hashes. To make sure that these hashes exist on the chain two things need to be done:
+Vlayer provides time-travel functionality. As a result, state and storage proofs are not 'connected' to a single block hash, but to multiple block hashes. To ensure that these hashes exist on the chain, two things need to be done:
 
-1. First, it needs to be proved that all the hashes belong to the same chain. However, the blocks might belong to an imaginary chain and not a real one. That's why a second step is needed.
+1. First, it needs to be proven that all the hashes belong to the same chain. However, the blocks might belong to an imaginary chain and not a real one. That's why a second step is needed.
 2. Second, the latest hash needs to be verified on-chain.
 
-**Block Proof Cache** service allows to prove **the first point** by maintaining a data structure,  that stores block hashes, along with a ZK proof that all the hashes it contains belong to the same chain. Below we provide more details.
+The **Block Proof Cache** service allows for proving **the first point** by maintaining a data structure that stores block hashes, along with a ZK proof that all the hashes it contains belong to the same chain. Below we provide more details.
 
-## Before diving in to Block Proof Cache
+## Before diving into Block Proof Cache
 
-Before diving in to Block Proof Cache details, it is recommended to go through or at least glance over the two topics below.
+Before diving into the details of Block Proof Cache, it is recommended to go through, or at least glance over, the two topics below.
 
 ### Recent and historical blocks
 
-As it was said, it's going to be essential to be able to verify a hash on-chain. The way to do this is to run the Solidity `blockhash(uint)` function - which for a given block number returns the corresponding hash. The hash to be verified needs to be compared to the result of the function (the block number is taken from the storage proof).
+As mentioned, it is essential to be able to verify a hash on-chain. The way to do this is to run the Solidity `blockhash(uint)` function, which returns the corresponding hash for a given block number. The hash to be verified needs to be compared to the result of the function (with the block number taken from the storage proof).
 
-However, this method is limited, as it only works for most recent 256 blocks on a given chain. That is why, we need to make sure that the latest hash that is going to be verified on-chain is a hash of a recent block. If it's not - it needs to be added to the set of hashes.
+However, this method is limited, as it only works for the most recent 256 blocks on a given chain. That is why we need to ensure that the latest hash to be verified on-chain is a hash of a recent block. If it is not, it needs to be added to the set of hashes.
 
-We use the following naming in this document:
+We use the following terminology in this document:
 
-- **recent blocks** - any of the most recent 256 blocks (relative to the current `block_no`)
-- **historical blocks** - blocks older than 256
+- **Recent blocks** - any of the most recent 256 blocks (relative to the current `block_no`)
+- **Historical blocks** - blocks older than 256
 
 ### Naive chain proofs
 
-Now going back to the first statement from the introduction - we need a way to prove that a set of hashes belongs to the same chain. A naive way to do that is to hash all subsequent blocks from the oldest to the most recent one and verify that each blockhash is equal to the **prevHash** value of the subsequent block. If along the way all the hashes from our set appeared, then they all belong to the same chain.
+Returning to the first point from the introduction, we need a way to prove that a set of hashes belongs to the same chain. A naive way to do this is to hash all subsequent blocks from the oldest to the most recent and verify that each block hash is equal to the **prevHash** value of the subsequent block. If all the hashes from our set appear along the way, then they all belong to the same chain.
 
-See the diagram below for the visual.
+See the diagram below for a visual representation.
 
 ![Schema](/images/architecture/block-proof.png)
 
-Unfortunately, this is a slow process, especially if the blocks are far away from each other on the time scale. Fortunately, with the help of Block Proof Cache, this process can be sped up to logarithmic time.
+Unfortunately, this is a slow process, especially if the blocks are far apart on the time scale. Fortunately, with the help of Block Proof Cache, this process can be sped up to logarithmic time.
 
 ## Block Proof Cache
 
