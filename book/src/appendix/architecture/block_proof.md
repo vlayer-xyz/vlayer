@@ -2,7 +2,7 @@
 
 vlayer executes Solidity code off-chain and proves the correctness of that execution on-chain. For that purpose, it fetches (state and) storage data and verifies it with storage proofs. Storage proofs prove that a piece of storage is part of a block with a specific hash. Hence, the storage proof is 'connected' to a certain block hash. However, they don't guarantee that the block with the specific hash actually exists on the chain. This verification needs to be done later with an on-chain smart contract.
 
-Vlayer provides time-travel functionality. As a result, state and storage proofs are not 'connected' to a single block hash, but to multiple block hashes. To ensure that these hashes exist on the chain, two things need to be done:
+vlayer provides time-travel functionality. As a result, state and storage proofs are not 'connected' to a single block hash, but to multiple block hashes. To ensure that these hashes exist on the chain, two things need to be done:
 
 1. First, it needs to be proven that all the hashes belong to the same chain. However, the blocks might belong to an imaginary chain and not a real one. That's why a second step is needed.
 2. Second, the latest hash needs to be verified on-chain.
@@ -21,8 +21,8 @@ However, this method is limited, as it only works for the most recent 256 blocks
 
 We use the following terminology in this document:
 
-- **Recent blocks** - any of the most recent 256 blocks (relative to the current block number)
-- **Historical blocks** - blocks older than 256
+- **recent blocks** - any of the most recent 256 blocks (relative to the current block number)
+- **historical blocks** - blocks older than 256
 
 ### Naive chain proofs
 
@@ -36,7 +36,21 @@ Unfortunately, this is a slow process, especially if the blocks are far apart on
 
 ## Block Proof Cache
 
-The Block Proof Cache stores `<block_number, blockhash>` mapping for historical blocks. It is implemented using a Merkle Patricia Trie, where block numbers are the keys and blockhashes are the values. The construction is inductive, in which we preserve the invariant that each block stored in the Block Proof Cache has an immediate parent or child block. In order to prove correctness of construction with `N+1` nodes we verify that a ZK proof of construction with `N` nodes is correct. We do this by recursively by verifying ZK proofs created so far which are stored as ZK proofs in ZK proofs. When this is verified, we check `N+1` step, by ensuring new block data fits existing structure. Then we generate a new ZK proof for computation appending/prepending the next block hash to the trie.
+The Block Proof Cache service maintains two things:
+- a Block Proof Cache structure that stores block hashes,
+- a ZK proof $\pi$ that all these hashes belong to the same chain. 
+
+Given these two elements it is easy to prove that a set of hashes belongs to the same chain. 
+1. First, it needs to be verified that all the hashes are a part of the Block Proof Cache structure.
+2. Second, $\pi$ needs to be verified. 
+
+### Block Proof Cache structure
+
+The Block Proof Cache structure is a dictionary that stores `<block_number, block_hash>` mapping. It is implemented using a Merkle Patricia Trie, where block numbers are the keys and block hashes are the values. Thanks to the properties of a Merkle Patricia Trie, the first point of the previous paragraph is fast and easy to achieve. To prove that a set of hashes is part of the Block Proof Cache structure its sufficient to supply their corresponding merkle proofs.
+
+The last things that need to be taken care of are how the hashes are added to the BPC structure and how $\pi$ is maintained (the ZK proof that all the hashes in the BPC structure belong to the same chain).
+
+It is important to mention that at all times in the BPC structure the blocks that are stored create a consistent subchain. In other words, we preserve the invariant that each block stored has an immediate parent or child block. Each time a block is added, an updated $\pi$ is created. To prove that after adding a new block all the blocks in BPC structure belong to the same chain, first the previous $\pi$ needs to be verified and last, it needs to be ensured that the hash of the new block 'links' to either the oldest or the most recent block. In this way all the elements needed to prove that a set of hashes belongs to the same chain (listed in the Block Proof Cache section) are supplied.
 
 The following functions written in pseudocode provide more details on the Block Proof Cache implementation.
 
