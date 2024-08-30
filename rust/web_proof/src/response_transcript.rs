@@ -1,7 +1,7 @@
 use httparse::{Response, Status, EMPTY_HEADER};
 use tlsn_core::RedactedTranscript;
 
-use crate::request_transcript::ParsingError;
+use crate::errors::ParsingError;
 
 const MAX_HEADERS_NUMBER: usize = 40;
 

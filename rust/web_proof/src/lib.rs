@@ -1,3 +1,4 @@
+mod errors;
 #[cfg(any(test, feature = "fixtures"))]
 pub mod fixtures;
 mod request_transcript;

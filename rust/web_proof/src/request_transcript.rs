@@ -1,29 +1,13 @@
-use std::string::FromUtf8Error;
-
 use httparse::{Request, EMPTY_HEADER};
-use thiserror::Error;
 use tlsn_core::RedactedTranscript;
+
+use crate::errors::ParsingError;
 
 const MAX_HEADERS_NUMBER: usize = 40;
 
 #[derive(Debug)]
 pub(crate) struct RequestTranscript {
     pub(crate) transcript: RedactedTranscript,
-}
-
-#[derive(Error, Debug)]
-pub enum ParsingError {
-    #[error("No path in request")]
-    NoPathInRequest(),
-
-    #[error("From utf8 error: {0}")]
-    FromUtf8(#[from] FromUtf8Error),
-
-    #[error("Httparse error: {0}")]
-    Httparse(#[from] httparse::Error),
-
-    #[error("Partial httparse error")]
-    Partial,
 }
 
 impl RequestTranscript {
@@ -38,7 +22,7 @@ impl RequestTranscript {
         let mut req = Request::new(&mut headers);
         req.parse(request_string.as_bytes())?;
 
-        let url = req.path.ok_or(ParsingError::NoPathInRequest())?.to_string();
+        let url = req.path.ok_or(ParsingError::NoPathInRequest)?.to_string();
         Ok(url)
     }
 }
