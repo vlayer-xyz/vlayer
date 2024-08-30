@@ -48,7 +48,7 @@ impl MerkleTrie {
                 self.0 = new_node;
                 Ok(())
             }
-            Err(NodeError::DuplicatedKey) => Err(MPTError::DuplicatedKey(Box::from(key.as_ref()))),
+            Err(NodeError::DuplicateKey) => Err(MPTError::DuplicateKey(Box::from(key.as_ref()))),
         }
     }
 
@@ -117,8 +117,8 @@ impl MerkleTrie {
 
 #[derive(Debug, Error, PartialEq)]
 pub enum MPTError {
-    #[error("Duplicated key: {0:?}")]
-    DuplicatedKey(Box<[u8]>),
+    #[error("Duplicate key: {0:?}")]
+    DuplicateKey(Box<[u8]>),
 }
 
 #[cfg(test)]

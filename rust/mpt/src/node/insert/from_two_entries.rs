@@ -13,7 +13,7 @@ fn order_entries(lhs: Entry, rhs: Entry) -> (Entry, Entry) {
 pub(crate) fn from_two_entries(lhs: Entry, rhs: Entry) -> Result<Node, NodeError> {
     let (shorter, longer) = order_entries(lhs, rhs);
     if shorter.key == longer.key {
-        return Err(NodeError::DuplicatedKey);
+        return Err(NodeError::DuplicateKey);
     }
 
     if shorter.key.is_empty() {
@@ -58,7 +58,7 @@ mod tests {
         let second_entry = ([], [43]).into();
 
         let result = from_two_entries(first_entry, second_entry);
-        assert_eq!(result.unwrap_err(), NodeError::DuplicatedKey);
+        assert_eq!(result.unwrap_err(), NodeError::DuplicateKey);
     }
 
     #[test]
@@ -79,7 +79,7 @@ mod tests {
         let old_entry = ([0], [42]).into();
         let entry = ([0], [43]).into();
         let result = from_two_entries(old_entry, entry);
-        assert_eq!(result.unwrap_err(), NodeError::DuplicatedKey);
+        assert_eq!(result.unwrap_err(), NodeError::DuplicateKey);
     }
 
     #[test]

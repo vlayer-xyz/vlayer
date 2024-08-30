@@ -14,7 +14,7 @@ impl Node {
         let entry = entry.into();
         if entry.key.is_empty() {
             if branch_value.is_some() {
-                return Err(NodeError::DuplicatedKey);
+                return Err(NodeError::DuplicateKey);
             }
             return Ok(Node::Branch(children, Some(entry.value)));
         }
@@ -65,7 +65,7 @@ mod tests {
         fn branch_value_some() {
             let branch = Node::branch_with_value([42]);
             let result = branch.insert_entry_into_branch(([], [43]));
-            assert_eq!(result.unwrap_err(), NodeError::DuplicatedKey);
+            assert_eq!(result.unwrap_err(), NodeError::DuplicateKey);
         }
     }
 
@@ -105,7 +105,7 @@ mod tests {
             fn no_nibble_remaining() {
                 let branch = Node::branch_with_child(0, Node::branch_with_value([42]));
                 let result = branch.insert_entry_into_branch(([0x0], [43]));
-                assert_eq!(result.unwrap_err(), NodeError::DuplicatedKey);
+                assert_eq!(result.unwrap_err(), NodeError::DuplicateKey);
             }
 
             #[test]

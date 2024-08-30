@@ -47,6 +47,6 @@ impl Node {
 
 #[derive(Error, Debug, PartialEq)]
 pub enum NodeError {
-    #[error("duplicated key")]
-    DuplicatedKey,
+    #[error("duplicate key")]
+    DuplicateKey,
 }

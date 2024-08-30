@@ -58,7 +58,7 @@ mod insert {
         fn duplicate_key() -> anyhow::Result<()> {
             let node = Node::leaf([0x0], [42]);
             let result = node.insert([0x0], [43]);
-            assert_eq!(result.unwrap_err(), NodeError::DuplicatedKey);
+            assert_eq!(result.unwrap_err(), NodeError::DuplicateKey);
             Ok(())
         }
 
@@ -99,7 +99,7 @@ mod insert {
         fn duplicate_key() {
             let node = Node::branch_with_value([42]);
             let result = node.insert([], [43]);
-            assert_eq!(result.unwrap_err(), NodeError::DuplicatedKey);
+            assert_eq!(result.unwrap_err(), NodeError::DuplicateKey);
         }
 
         #[test]
