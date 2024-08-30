@@ -8,6 +8,7 @@ mod entry;
 mod from_two_entries;
 mod insert_entry_into_branch;
 mod tests;
+mod utils;
 
 impl Node {
     #[allow(unused)]
