@@ -7,7 +7,7 @@ libs = ["dependencies"]
 [dependencies]
 forge-std = "1.9.2"
 "@openzeppelin-contracts" = "5.0.2"
-risc0-ethereum = { version = "1.0.0", url = "https://github.com/risc0/risc0-ethereum/archive/refs/tags/v1.0.0.zip" }
+risc0-ethereum = { version = "1.0.0", git = "git@github.com:risc0/risc0-ethereum.git", rev = "34d2fee4ca6b5fb354a8a1a00c43f8945097bfe5" }
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
 
