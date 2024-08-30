@@ -1,14 +1,19 @@
-#[allow(unused)]
-pub(crate) fn longest_common_prefix_len(lhs: &[u8], rhs: &[u8]) -> usize {
+fn longest_common_prefix_len(lhs: &[u8], rhs: &[u8]) -> usize {
     lhs.iter()
         .zip(rhs.iter())
         .take_while(|(lhs, rhs)| lhs == rhs)
         .count()
 }
 
-fn extract_common_prefix<'a>(lhs: &'a [u8], rhs: &'a [u8]) -> (&'a [u8], &'a [u8], &'a [u8]) {
+#[allow(unused)]
+pub(crate) fn extract_common_prefix<'a>(
+    lhs: &'a [u8],
+    rhs: &'a [u8],
+) -> (&'a [u8], &'a [u8], &'a [u8]) {
     let len = longest_common_prefix_len(lhs, rhs);
-    (&lhs[..len], &lhs[len..], &rhs[len..])
+    let (prefix, lhs_remaining) = lhs.split_at(len);
+    let (_, rhs_remaining) = rhs.split_at(len);
+    (prefix, lhs_remaining, rhs_remaining)
 }
 
 #[cfg(test)]
