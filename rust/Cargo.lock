@@ -9461,6 +9461,8 @@ dependencies = [
 name = "web_proof"
 version = "0.1.0"
 dependencies = [
+ "alloy-dyn-abi",
+ "alloy-primitives",
  "http 1.1.0",
  "httparse",
  "p256",
