@@ -11,6 +11,7 @@ function build_contracts() {
     (
     cd contracts
     forge clean
+    forge soldeer update
     forge build
     )
 }
