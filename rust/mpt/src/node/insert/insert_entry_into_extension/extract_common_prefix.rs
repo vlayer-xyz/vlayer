@@ -1,23 +1,17 @@
+use std::cmp::min;
+
 use nybbles::Nibbles;
 
 /// Extracts the common prefix between two `Nibbles` and returns the remaining `Nibbles` for both inputs.
 pub(crate) fn extract_common_prefix(lhs: Nibbles, rhs: Nibbles) -> (Nibbles, Nibbles, Nibbles) {
-    let mut common_prefix = Nibbles::default();
-    let min_len = lhs.len().min(rhs.len());
+    let min_len = min(lhs.len(), rhs.len());
+    let common_prefix_len = (0..min_len).take_while(|&i| lhs[i] == rhs[i]).count();
 
-    for i in 0..min_len {
-        if lhs[i] == rhs[i] {
-            common_prefix.push(lhs[i]);
-        } else {
-            break;
-        }
-    }
-
-    let (_, lhs_remaining) = lhs.split_at(common_prefix.len());
-    let (_, rhs_remaining) = rhs.split_at(common_prefix.len());
+    let (common_prefix, lhs_remaining) = lhs.split_at(common_prefix_len);
+    let (_, rhs_remaining) = rhs.split_at(common_prefix_len);
 
     (
-        common_prefix,
+        Nibbles::from_nibbles(common_prefix),
         Nibbles::from_nibbles(lhs_remaining),
         Nibbles::from_nibbles(rhs_remaining),
     )
