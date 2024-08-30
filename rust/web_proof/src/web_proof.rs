@@ -73,7 +73,19 @@ where
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use crate::fixtures::{load_web_proof_fixture, read_fixture, NOTARY_PUB_KEY_PEM_EXAMPLE};
+
+    #[test]
+    fn serialize_deserialize_web_proof() {
+        let proof = load_web_proof_fixture("./testdata/tls_proof.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
+        let serialized = serde_json::to_string(&proof).unwrap();
+        let deserialized: WebProof = serde_json::from_str(&serialized).unwrap();
+
+        // TlsProofs don't derive Eq, so we compare only notary_pub_key from WebProof structure
+        // Comparing notary_pub_key is more important because its (de)serialization is custom
+        assert_eq!(proof.notary_pub_key, deserialized.notary_pub_key);
+    }
 
     #[test]
     fn fail_verification_session_error() {
