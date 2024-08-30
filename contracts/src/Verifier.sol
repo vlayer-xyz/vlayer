@@ -1,8 +1,6 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-// solhint-disable-next-line no-console
-import { console } from "forge-std/console.sol";
 import {Proof, ProofLib} from "./Proof.sol";
 
 import {IProofVerifier} from "./proof_verifier/IProofVerifier.sol";
@@ -34,8 +32,6 @@ abstract contract Verifier {
 
         uint256 journalEnd = JOURNAL_OFFSET + proof.length;
         bytes memory journal = msg.data[JOURNAL_OFFSET:journalEnd];
-        // solhint-disable-next-line no-console
-        console.logBytes(journal);
         bytes32 journalHash = sha256(journal);
 
         return (proof, journalHash);
