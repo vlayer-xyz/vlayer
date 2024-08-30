@@ -29,3 +29,23 @@ pub async fn v_call(config: Arc<ServerConfig>, params: Params) -> Result<CallRes
 
     Ok(return_data.into())
 }
+
+pub fn proof_to_json(proof: Proof) -> Value {
+    json!({
+        "length": u256_to_number(proof.length),
+        "seal": {
+            "seal": proof.seal.seal,
+            "mode": Into::<u8>::into(proof.seal.mode),
+        },
+        "commitment": {
+            "functionSelector": proof.commitment.functionSelector,
+            "proverContractAddress": proof.commitment.proverContractAddress,
+            "settleBlockNumber": u256_to_number(proof.commitment.settleBlockNumber),
+            "settleBlockHash": proof.commitment.settleBlockHash,
+        }
+    })
+}
+
+fn u256_to_number(value: U256) -> u64 {
+    u64::try_from(value).unwrap()
+}
