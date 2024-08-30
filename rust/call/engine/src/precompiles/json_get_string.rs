@@ -35,9 +35,8 @@ fn json_get_string_run(input: &Bytes, gas_limit: u64) -> PrecompileResult {
     }
 }
 
-// Function to extract value using dot notation path
 fn get_value_by_path<'a>(value: &'a Value, path: &str) -> Option<&'a Value> {
-    path.split('.').fold(Some(value), |acc, key| acc?.get(key))
+    path.split('.').try_fold(value, |acc, key| acc.get(key))
 }
 
 #[cfg(test)]
