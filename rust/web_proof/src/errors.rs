@@ -5,7 +5,7 @@ use thiserror::Error;
 #[derive(Error, Debug)]
 pub enum ParsingError {
     #[error("No path in request")]
-    NoPathInRequest(),
+    NoPathInRequest,
 
     #[error("From utf8 error: {0}")]
     FromUtf8(#[from] FromUtf8Error),

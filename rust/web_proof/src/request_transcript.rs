@@ -22,7 +22,7 @@ impl RequestTranscript {
         let mut req = Request::new(&mut headers);
         req.parse(request_string.as_bytes())?;
 
-        let url = req.path.ok_or(ParsingError::NoPathInRequest())?.to_string();
+        let url = req.path.ok_or(ParsingError::NoPathInRequest)?.to_string();
         Ok(url)
     }
 }
