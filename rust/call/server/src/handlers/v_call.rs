@@ -30,7 +30,7 @@ pub async fn v_call(config: Arc<ServerConfig>, params: Params) -> Result<CallRes
     Ok(return_data.into())
 }
 
-pub fn proof_to_json(proof: Proof) -> Value {
+fn proof_to_json(proof: Proof) -> Value {
     json!({
         "length": u256_to_number(proof.length),
         "seal": {
@@ -47,5 +47,5 @@ pub fn proof_to_json(proof: Proof) -> Value {
 }
 
 fn u256_to_number(value: U256) -> u64 {
-    u64::try_from(value).unwrap()
+    u64::try_from(value).expect("Expected value to fit into u64")
 }
