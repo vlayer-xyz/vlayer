@@ -1,12 +1,13 @@
 # Block Proof Cache
 
-vLayer allows one to provably execute Solidity code offchain and use proof of that execution on-chain. To do that - one needs a verified source of storage data which is provided by storage proofs. Storage proofs allow us to prove that a piece of storage is a part of a block with a specific hash - the storage proof is 'connected' to a certain block hash. However, they don't guarantee that this hash actually exists on the chain. This needs to be verified later on-chain.
+vlayer executes Solidity code offchain and proves correctness of that execution on-chain. For that purpose, it fetches (state and) storage data and verifies it with storage proofs. Storage proofs prove that a piece of storage is a part of a block with a specific hash. Hence, the storage proof is 'connected' to a certain block hash. However, they don't guarantee that block with specific hash actually exists on the chain. This needs to be verified later with on-chain smart contract.
 
-We also provide time-travel functionality. As a result of that - our state and storage proofs do not 'connect' to a single block hash, but to multiple block hashes. To make sure that these hashes exist on the chain two things need to be done:
-- First, it needs to be proved that all the hashes belong to the same chain. Sounds like we should end here? Not at all! The blocks might belong to an imaginary chain and not a real one! That's why:
-- Second, the latest hash needs to be verified on-chain.
+vlayer provides time-travel functionality. Hence, state and storage proofs do not 'connect' to a single block hash, but to multiple block hashes. To make sure that these hashes exist on the chain two things need to be done:
 
-This service allows to prove **the first statement** by maintaining a data structure called Block Proof Cache that stores block hashes, along with a ZK proof that all the hashes it contains belong to the same chain. Below we provide more details.
+1. First, it needs to be proved that all the hashes belong to the same chain. However, the blocks might belong to an imaginary chain and not a real one. That's why a second step is needed.
+2. Second, the latest hash needs to be verified on-chain.
+
+**Block Proof Cache** service allows to prove **the first point** by maintaining a data structure,  that stores block hashes, along with a ZK proof that all the hashes it contains belong to the same chain. Below we provide more details.
 
 ## Before diving in to Block Proof Cache
 
@@ -14,7 +15,7 @@ Before diving in to Block Proof Cache details, it is recommended to go through o
 
 ### Recent and historical blocks
 
-As it was said, it's going to be essential to be able to verify a hash on-chain. One way to do this is to run the Solidity `blockhash(uint)` function - which for a given block number returns the corresponding hash. The hash to be verified needs to be compared to the result of the function (the block number is taken from the storage proof).
+As it was said, it's going to be essential to be able to verify a hash on-chain. The way to do this is to run the Solidity `blockhash(uint)` function - which for a given block number returns the corresponding hash. The hash to be verified needs to be compared to the result of the function (the block number is taken from the storage proof).
 
 However, this method is limited, as it only works for most recent 256 blocks on a given chain. That is why, we need to make sure that the latest hash that is going to be verified on-chain is a hash of a recent block. If it's not - it needs to be added to the set of hashes.
 
@@ -31,7 +32,7 @@ See the diagram below for the visual.
 
 ![Schema](/images/architecture/block-proof.png)
 
-Unfortunately, this is a slow process, especially if the blocks are far away from each other on the time scale. Fortunately, with the help of Block Proof Cache, this process can be sped up logarithmically!
+Unfortunately, this is a slow process, especially if the blocks are far away from each other on the time scale. Fortunately, with the help of Block Proof Cache, this process can be sped up to logarithmic time.
 
 ## Block Proof Cache
 
