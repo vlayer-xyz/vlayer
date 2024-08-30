@@ -1,6 +1,6 @@
 use alloy_primitives::B256;
 use serde::{Deserialize, Serialize};
-use std::fmt::Debug;
+use thiserror::Error;
 
 use crate::key_nibbles::KeyNibbles;
 
@@ -45,7 +45,8 @@ impl Node {
     }
 }
 
-#[derive(Debug, PartialEq)]
+#[derive(Error, Debug, PartialEq)]
 pub enum NodeError {
-    DuplicatedKey,
+    #[error("duplicate key")]
+    DuplicateKey,
 }

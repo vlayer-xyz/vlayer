@@ -13,7 +13,7 @@ fn order_entries(lhs: Entry, rhs: Entry) -> (Entry, Entry) {
 pub(crate) fn from_two_entries(lhs: Entry, rhs: Entry) -> Result<Node, NodeError> {
     let (shorter, longer) = order_entries(lhs, rhs);
     if shorter.key == longer.key {
-        return Err(NodeError::DuplicatedKey);
+        return Err(NodeError::DuplicateKey);
     }
 
     if shorter.key.is_empty() {
@@ -58,19 +58,20 @@ mod tests {
         let second_entry = ([], [43]).into();
 
         let result = from_two_entries(first_entry, second_entry);
-        assert_eq!(result.unwrap_err(), NodeError::DuplicatedKey);
+        assert_eq!(result.unwrap_err(), NodeError::DuplicateKey);
     }
 
     #[test]
-    fn one_empty_key() {
+    fn one_empty_key() -> anyhow::Result<()> {
         let first_entry = ([], [42]).into();
         let second_entry = ([0x0], [43]).into();
-        let node = from_two_entries(first_entry, second_entry).unwrap();
+        let node = from_two_entries(first_entry, second_entry)?;
 
         let expected_node =
             Node::branch_with_child_and_value(0, Node::branch_with_value([43]), [42]);
 
         assert_eq!(node, expected_node);
+        Ok(())
     }
 
     #[test]
@@ -78,15 +79,15 @@ mod tests {
         let old_entry = ([0], [42]).into();
         let entry = ([0], [43]).into();
         let result = from_two_entries(old_entry, entry);
-        assert_eq!(result.unwrap_err(), NodeError::DuplicatedKey);
+        assert_eq!(result.unwrap_err(), NodeError::DuplicateKey);
     }
 
     #[test]
-    fn different_single_nibbles() {
+    fn different_single_nibbles() -> anyhow::Result<()> {
         let first_entry = ([0x0], [42]).into();
         let second_entry = ([0x1], [43]).into();
 
-        let node = from_two_entries(first_entry, second_entry).unwrap();
+        let node = from_two_entries(first_entry, second_entry)?;
 
         let mut children = EMPTY_CHILDREN.clone();
         children[0] = Some(Box::new(Node::branch_with_value([42])));
@@ -94,13 +95,14 @@ mod tests {
         let expected_node = Node::Branch(children, None);
 
         assert_eq!(node, expected_node);
+        Ok(())
     }
 
     #[test]
-    fn no_common_prefix() {
+    fn no_common_prefix() -> anyhow::Result<()> {
         let first_entry = ([0x0, 0x0], [42]).into();
         let second_entry = ([0x1, 0x0], [43]).into();
-        let node = from_two_entries(first_entry, second_entry).unwrap();
+        let node = from_two_entries(first_entry, second_entry)?;
 
         let mut children = EMPTY_CHILDREN.clone();
         children[0] = Some(Box::new(Node::leaf([0], [42])));
@@ -108,14 +110,15 @@ mod tests {
         let expected_node = Node::Branch(children, None);
 
         assert_eq!(node, expected_node);
+        Ok(())
     }
 
     #[test]
-    fn common_prefix() {
+    fn common_prefix() -> anyhow::Result<()> {
         let first_entry = ([0x0, 0x0], [42]).into();
         let second_entry = ([0x0, 0x1], [43]).into();
 
-        let node = from_two_entries(first_entry, second_entry).unwrap();
+        let node = from_two_entries(first_entry, second_entry)?;
 
         let mut children = EMPTY_CHILDREN.clone();
         children[0] = Some(Box::new(Node::branch_with_value([42])));
@@ -124,14 +127,15 @@ mod tests {
         let expected_node = Node::extension([0x0], expected_node_child);
 
         assert_eq!(node, expected_node);
+        Ok(())
     }
 
     #[test]
-    fn long_common_prefix() {
+    fn long_common_prefix() -> anyhow::Result<()> {
         let first_entry = ([0x0, 0x1, 0x0], [42]).into();
         let second_entry = ([0x0, 0x1, 0x1], [43]).into();
 
-        let node = from_two_entries(first_entry, second_entry).unwrap();
+        let node = from_two_entries(first_entry, second_entry)?;
 
         let mut children = EMPTY_CHILDREN.clone();
         children[0] = Some(Box::new(Node::branch_with_value([42])));
@@ -140,14 +144,15 @@ mod tests {
         let expected_node = Node::extension([0x0, 0x1], expected_node_child);
 
         assert_eq!(node, expected_node);
+        Ok(())
     }
 
     #[test]
-    fn common_prefix_with_different_long_suffix() {
+    fn common_prefix_with_different_long_suffix() -> anyhow::Result<()> {
         let first_entry = ([0x0, 0x0, 0x1], [42]).into();
         let second_entry = ([0x0, 0x1, 0x0], [43]).into();
 
-        let node = from_two_entries(first_entry, second_entry).unwrap();
+        let node = from_two_entries(first_entry, second_entry)?;
 
         let mut branch_children = EMPTY_CHILDREN.clone();
         branch_children[0] = Some(Box::new(Node::leaf([0x1], [42])));
@@ -156,5 +161,6 @@ mod tests {
         let expected_node = Node::extension([0x0], expected_node_child);
 
         assert_eq!(node, expected_node);
+        Ok(())
     }
 }
