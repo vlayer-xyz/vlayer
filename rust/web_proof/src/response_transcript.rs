@@ -103,11 +103,10 @@ mod tests {
             transcript: RedactedTranscript::new(0, vec![TranscriptSlice::new(0..0, vec![])]),
         };
 
-        let body = transcript.parse_body();
-        assert_eq!(
-            body.unwrap_err().to_string(),
-            "Partial httparse error".to_string()
-        );
+        assert!(matches!(
+            transcript.parse_body(),
+            Err(ParsingError::Partial)
+        ));
     }
 
     #[test]
@@ -124,11 +123,10 @@ mod tests {
             ),
         };
 
-        let body = transcript.parse_body();
-        assert_eq!(
-            body.unwrap_err().to_string(),
-            "Httparse error: invalid HTTP version".to_string()
-        );
+        assert!(matches!(
+            transcript.parse_body(),
+            Err(ParsingError::Httparse(httparse::Error::Version))
+        ));
     }
 
     #[test]
@@ -155,10 +153,9 @@ mod tests {
             transcript: RedactedTranscript::new(1, vec![TranscriptSlice::new(0..1, vec![128])]),
         };
 
-        let body = transcript.parse_body();
-        assert_eq!(
-            body.unwrap_err().to_string(),
-            "From utf8 error: invalid utf-8 sequence of 1 bytes from index 0".to_string()
-        );
+        assert!(matches!(
+            transcript.parse_body(),
+            Err(ParsingError::FromUtf8(err)) if err.to_string() == "invalid utf-8 sequence of 1 bytes from index 0"
+        ));
     }
 }

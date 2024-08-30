@@ -75,21 +75,19 @@ mod tests {
     #[test]
     fn fail_redacted() {
         let transcript = create_transcript("./testdata/redacted_sent_request.txt");
-        let url = transcript.parse_url();
-        assert_eq!(
-            url.unwrap_err().to_string(),
-            "Httparse error: invalid header name"
-        );
+        assert!(matches!(
+            transcript.parse_url(),
+            Err(ParsingError::Httparse(err)) if err.to_string() == "invalid header name"
+        ));
     }
 
     #[test]
     fn fail_to_many_headers() {
         let transcript = create_transcript("./testdata/many_headers_sent_request.txt");
-        let url = transcript.parse_url();
-        assert_eq!(
-            url.unwrap_err().to_string(),
-            "Httparse error: too many headers"
-        );
+        assert!(matches!(
+            transcript.parse_url(),
+            Err(ParsingError::Httparse(err)) if err.to_string() == "too many headers"
+        ));
     }
 
     #[test]
@@ -97,8 +95,10 @@ mod tests {
         let transcript = RequestTranscript {
             transcript: RedactedTranscript::new(0, vec![]),
         };
-        let url = transcript.parse_url();
-        assert_eq!(url.unwrap_err().to_string(), "No path in request");
+        assert!(matches!(
+            transcript.parse_url(),
+            Err(ParsingError::NoPathInRequest)
+        ));
     }
 
     #[test]
@@ -106,10 +106,9 @@ mod tests {
         let transcript = RequestTranscript {
             transcript: RedactedTranscript::new(1, vec![TranscriptSlice::new(0..1, vec![128])]),
         };
-        let url = transcript.parse_url();
-        assert_eq!(
-            url.unwrap_err().to_string(),
-            "From utf8 error: invalid utf-8 sequence of 1 bytes from index 0"
-        );
+        assert!(matches!(
+            transcript.parse_url(),
+            Err(ParsingError::FromUtf8(err)) if err.to_string() == "invalid utf-8 sequence of 1 bytes from index 0"
+        ));
     }
 }

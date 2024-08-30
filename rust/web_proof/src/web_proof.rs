@@ -73,6 +73,7 @@ where
 
 #[cfg(test)]
 mod tests {
+    use super::*;
     use crate::fixtures::{load_web_proof_fixture, read_fixture, NOTARY_PUB_KEY_PEM_EXAMPLE};
 
     #[test]
@@ -81,10 +82,10 @@ mod tests {
             "./testdata/invalid_session_tls_proof.json",
             NOTARY_PUB_KEY_PEM_EXAMPLE,
         );
-        assert_eq!(
-            invalid_proof.verify().unwrap_err().to_string(),
-            "Session proof error: signature verification failed: signature error"
-        );
+        assert!(matches!(
+            invalid_proof.verify(),
+            Err(VerificationError::SessionProof(err)) if err.to_string() == "signature verification failed: signature error"
+        ));
     }
 
     #[test]
@@ -93,10 +94,10 @@ mod tests {
             "./testdata/invalid_substrings_tls_proof.json",
             NOTARY_PUB_KEY_PEM_EXAMPLE,
         );
-        assert_eq!(
-            invalid_proof.verify().unwrap_err().to_string(),
-            "Substrings proof error: invalid inclusion proof: Failed to verify a Merkle proof"
-        );
+        assert!(matches!(
+            invalid_proof.verify(),
+            Err(VerificationError::SubstringsProof(err)) if err.to_string() == "invalid inclusion proof: Failed to verify a Merkle proof"
+        ));
     }
 
     #[test]
