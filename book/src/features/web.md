@@ -40,11 +40,11 @@ contract YouTubeRevenue is Prover {
       webProof.verify(dataUrl);
 
       require(
-        webProof.json().get("channel.estimatedEarnings") > 1_000_000, 
+        webProof.json().getInt("channel.estimatedEarnings") > 1_000_000, 
         "Earnings less than $10000"
       );
 
-      return (influencerAddr, webProof.json().get("channel.id"));
+      return (influencerAddr, webProof.json().getString("channel.id"));
     }
 } 
 ```
@@ -53,12 +53,12 @@ What happens in the above code?
 
 * First, we need to set up the `Prover` contract:
   * `YouTubeRevenue` inherits from `Prover` vlayer contract that allows off-chain proving of web data.
-  * `main` receives `WebProof` as argument, which contains a transcript of an HTTPS session signed by a Notary (see section [Security Considerations](#security-considerations) below for details about TLS Notary).
+  * `main` receives `WebProof` as argument, which contains a transcript of an HTTPS session signed by a *Notary* (see section [Security Considerations](#security-considerations) below for details about TLS *Notary*).
 
 * Then, we need to make sure that the Web Proof is valid - the call `webProof.verify(dataUrl)` performs:
   * verification of the validity of the HTTPS transcript.
-  * verification of the signature of the Notary who signed the transcript.
-  * a check whether the Notary is the one we trust (we verify this by checking their key used to sign the data).
+  * verification of the signature of the *Notary* who signed the transcript.
+  * a check whether the *Notary* is the one we trust (we verify this by checking their key used to sign the data).
   * a check that the HTTPS data comes from a server whose identity (server name specified in the server's SSL certificate) is the one we expect (in this case `studio.youtube.com`, which is the domain name in `dataUrl`).
   * a check whether the HTTPS data comes from the expected `dataUrl`.
   * retrieval of plaintext transcript from the Web Proof and makes it available for further `WebProof` calls.
@@ -133,13 +133,15 @@ And that's it!
 As you can see, Web Proofs can be useful for building dApps. 
 
 ## Security Considerations
-vlayer retrieves web data and verifies it using the Transport Layer Security (TLS) protocol, which secures most modern encrypted connections on the Internet. Web Proofs ensures the authenticity of web data by extending the TLS protocol. A designated server, called a *Notary*, joins a TLS session between the client and server and can cryptographically certify its contents.
 
-From the privacy perspective, it is crucial that the *Notary* server never has access to the transcript of the connection.
+The Web Proof feature is based on the [TLSNotary](https://tlsnotary.org/) protocol. Web data is retrieved from an HTTP endpoint and it's integrity and authenticity during the HTTP session is verified using the Transport Layer Security (TLS) protocol (the "S" in HTTPS), which secures most modern encrypted connections on the Internet. Web Proofs ensure the integrity and authenticity of web data after the HTTPS session finishes by extending the TLS protocol. A designated server, called *Notary*, joins the HTTPS session between the client and the server and can cryptographically certify its contents.
 
-The web proof feature is based on the [TLSNotary](https://tlsnotary.org/) protocol.
+From privacy perspective, it is important to note that the *Notary* server never has access to the plaintext transcript of the connection and therefore, *Notary* can never steal client data and pretend to be client. Furthermore, the transcript can be redacted (i.e. certain parts can be removed) by the client, making these parts of the communication not accessible by `Prover` and vlayer infrastructure running the `Prover`.
 
-### Notary Trust Assumption
-A key disadvantage of using a *Notary* is the requirement to trust it. Since the *Notary* certifies incoming data, a malicious *Notary* could create fake proofs that are still validated by the *Verifier*.
+### Trust Assumptions
+
+It is important to understand that the *Notary* is a trusted party in the above setup. Since the *Notary* certifies the data, a malicious *Notary* could collude with a malicious client to create fake proofs that would still be successfully verified by `Prover`. Currently vlayer runs it's own *Notary* server, which means that vlayer needs to be trusted to certify HTTPS sessions.
+
+ Currently vlayer also needs to be trused when passing additional data (data other than the Web Proof itself) to `Prover` smart contract, e.g. `influencerAddr` in the example above. The Web Proof could be hijacked before running `Prover` and additional data, different from the original, could be passed to `Prover`, e.g. an attacker could pass their own address as `influencerAddr` in our `YouTubeRevenue` example. Before going to production this will be addressed by making the setup trustless through an association of the additional data with a particular Web Proof in a way that's impossible to forge.
 
 vlayer will publish a roadmap outlining how it will achieve a high level of security when using the *Notary* service.
