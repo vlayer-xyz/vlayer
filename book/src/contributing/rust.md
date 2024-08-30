@@ -47,7 +47,7 @@ For guides about the project structure, check out [architecture appendix](/appen
 
 ## Guest Profiling
 
-In order to profile execution of Guest code in zkVM, we leverage the profiling functionality [provided by risc0](https://dev.risczero.com/api/zkvm/profiling). In order to run profiling, follow the steps in [Usage](https://dev.risczero.com/api/zkvm/profiling#usage) section of risc0 documentation, but in [Step 2](https://dev.risczero.com/api/zkvm/profiling#step-2-running) replace the command you run with:
+To profile execution of Guest code in zkVM, we leverage the profiling functionality [provided by risc0](https://dev.risczero.com/api/zkvm/profiling). In order to run profiling, follow the steps in the [Usage](https://dev.risczero.com/api/zkvm/profiling#usage) section of the risc0 documentation, but in [Step 2](https://dev.risczero.com/api/zkvm/profiling#step-2-running) replace the command you run with:
 
 ```sh
 RISC0_PPROF_OUT=./profile.pb cargo run --bin vlayer serve --proof fake
