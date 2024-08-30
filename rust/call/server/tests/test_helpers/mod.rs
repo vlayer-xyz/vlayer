@@ -13,7 +13,6 @@ use ethers::{
 };
 use example_prover::ExampleProver;
 use serde::Serialize;
-use serde_json::json;
 use server_utils::post;
 use std::collections::HashMap;
 use std::{sync::Arc, time::Duration};
@@ -22,7 +21,6 @@ abigen!(ExampleProver, "./testdata/ExampleProver.json",);
 
 pub(crate) struct TestHelper {
     anvil: AnvilInstance,
-    pub(crate) block_number: u32,
     pub(crate) contract: ExampleProver<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>>,
 }
 
@@ -31,13 +29,8 @@ impl TestHelper {
         let anvil = setup_anvil().await;
         let client = setup_client(&anvil).await;
         let contract = deploy_test_contract(client).await;
-        let block_number = set_block_nr(&anvil).await;
 
-        Self {
-            anvil,
-            block_number,
-            contract,
-        }
+        Self { anvil, contract }
     }
 
     pub(crate) async fn post<T: Serialize>(&self, url: &str, body: &T) -> Response<Body> {
@@ -75,26 +68,4 @@ async fn deploy_test_contract(
         .send()
         .await
         .unwrap()
-}
-
-async fn set_block_nr(anvil: &AnvilInstance) -> u32 {
-    let req = json!({
-        "jsonrpc": "2.0",
-        "method": "eth_blockNumber",
-        "params": [],
-        "id": 0
-    });
-
-    let response = reqwest::Client::new()
-        .post(anvil.endpoint())
-        .json(&req)
-        .send()
-        .await
-        .unwrap();
-
-    let body = response.text().await.unwrap();
-    let json: serde_json::Value = serde_json::from_str(&body).unwrap();
-    let result = json["result"].clone();
-    let result = result.as_str().unwrap();
-    u32::from_str_radix(&result[2..], 16).unwrap()
 }

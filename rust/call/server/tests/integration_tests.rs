@@ -68,7 +68,6 @@ mod server_tests {
                         "data": helper.contract.sum(U256::from(1), U256::from(2)).calldata().unwrap()
                     },
                     {
-                        "block_no": 0
                     }
                     ],
                 "id": 1,
@@ -108,7 +107,6 @@ mod server_tests {
                         "data": call_data
                     },
                     {
-                        "block_no": helper.block_number,
                         "chain_id": 11155111
                     }
                     ],
@@ -155,7 +153,6 @@ mod server_tests {
                         "data": call_data
                     },
                     {
-                        "block_no": helper.block_number,
                         "chain_id": 11155111
                     }
                     ],
