@@ -96,4 +96,69 @@ mod tests {
             REDACTED_RESPONSE_BODY.to_string()
         );
     }
+
+    #[test]
+    fn empty_response() {
+        let transcript = ResponseTranscript {
+            transcript: RedactedTranscript::new(0, vec![TranscriptSlice::new(0..0, vec![])]),
+        };
+
+        let body = transcript.parse_body();
+        assert_eq!(
+            body.unwrap_err().to_string(),
+            "Partial httparse error".to_string()
+        );
+    }
+
+    #[test]
+    fn no_headers_response() {
+        let transcript = ResponseTranscript {
+            transcript: RedactedTranscript::new(
+                1432,
+                vec![TranscriptSlice::new(
+                    0..1432,
+                    read_fixture("./testdata/no_headers_response.txt")
+                        .as_bytes()
+                        .to_vec(),
+                )],
+            ),
+        };
+
+        let body = transcript.parse_body();
+        assert_eq!(
+            body.unwrap_err().to_string(),
+            "Httparse error: invalid HTTP version".to_string()
+        );
+    }
+
+    #[test]
+    fn no_body_response() {
+        let transcript = ResponseTranscript {
+            transcript: RedactedTranscript::new(
+                1258,
+                vec![TranscriptSlice::new(
+                    0..1258,
+                    read_fixture("./testdata/no_body_response.txt")
+                        .as_bytes()
+                        .to_vec(),
+                )],
+            ),
+        };
+
+        let body = transcript.parse_body();
+        assert_eq!(body.unwrap().to_string(), "".to_string());
+    }
+
+    #[test]
+    fn error_not_utf8_transcript() {
+        let transcript = ResponseTranscript {
+            transcript: RedactedTranscript::new(1, vec![TranscriptSlice::new(0..1, vec![128])]),
+        };
+
+        let body = transcript.parse_body();
+        assert_eq!(
+            body.unwrap_err().to_string(),
+            "From utf8 error: invalid utf-8 sequence of 1 bytes from index 0".to_string()
+        );
+    }
 }

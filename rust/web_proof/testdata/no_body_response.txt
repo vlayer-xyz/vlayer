@@ -1,0 +1,28 @@
+HTTP/1.1 200 OK
+date: Mon, 19 Aug 2024 09:03:04 GMT
+perf: 7402827104
+pragma: no-cache
+server: tsa_f
+status: 200 OK
+expires: Tue, 31 Mar 1981 05:00:00 GMT
+content-type: application/json;charset=utf-8
+cache-control: no-cache, no-store, must-revalidate, pre-check=0, post-check=0
+last-modified: Mon, 19 Aug 2024 09:03:04 GMT
+x-transaction: 0c8266aaa603f2ce
+content-length: 1432
+x-access-level: read-write-directmessages
+x-frame-options: SAMEORIGIN
+x-transaction-id: 0c8266aaa603f2ce
+x-xss-protection: 0
+content-disposition: attachment; filename=json.json
+x-client-event-enabled: true
+x-content-type-options: nosniff
+x-twitter-response-tags: BouncerCompliant
+strict-transport-security: max-age=631138519
+access-control-allow-origin: https://x.com
+access-control-allow-credentials: true
+access-control-expose-headers: X-Twitter-Spotify-Access-Token,X-Twitter-Client-Version,X-Twitter-Diffy-Request-Key,X-Rate-Limit-Limit,X-TD-Mtime,X-Twitter-Client,Backoff-Policy,X-Rate-Limit-Remaining,Content-Length,X-Rate-Limit-Reset,X-Transaction-Id,X-Acted-As-User-Id,X-Twitter-Polling,X-Twitter-UTCOffset,X-Response-Time
+x-response-time: 131
+x-connection-hash: cfc113741917662940e932723eb024ad5ee3e11138b99df25b8f35362359ba91
+connection: close
+
