@@ -37,20 +37,24 @@ Unfortunately, this is a slow process, especially if the blocks are far apart on
 ## Block Proof Cache
 
 The Block Proof Cache service maintains two things:
-- a Block Proof Cache structure that stores block hashes (which is a Merkle Patricia Trie),
+- a Block Proof Cache structure (Merkle Patricia Trie) that stores block hashes,
 - a ZK proof 𝜋 that all these hashes belong to the same chain.
 
 Given these two elements, it is easy to prove that a set of hashes belongs to the same chain.
 1. First, it needs to be verified that all the hashes are part of the Block Proof Cache structure.
 2. Second, 𝜋 needs to be verified.
 
-### Block Proof Cache structure
+### Block Proof Cache (BPC) structure
 
-The Block Proof Cache structure is a dictionary that stores a `<block_number, block_hash>` mapping. It is implemented using a Merkle Patricia Trie, where block numbers are the keys and block hashes are the values. Thanks to the properties of a Merkle Patricia Trie, the first point of the previous paragraph is fast and easy to achieve. To prove that a set of hashes is part of the Block Proof Cache structure, it is sufficient to supply their corresponding Merkle proofs.
+The Block Proof Cache structure is a dictionary that stores a `<block_number, block_hash>` mapping. It is implemented using a Merkle Patricia Trie. This enables us to prove that a set of hashes is part of the structure (point 1 from the previous paragraph) by supplying their corresponding Merkle proofs.
 
-The last things that need to be addressed are how the hashes are added to the BPC structure and how 𝜋 is maintained (the ZK proof that all the hashes in the BPC structure belong to the same chain).
+#### Adding hashes to the BPC structure and maintaining 𝜋
 
-It is important to mention that at all times, the blocks stored in the BPC structure form a consistent subchain. In other words, we preserve the invariant that each block stored has an immediate parent or child block. Each time a block is added, an updated 𝜋 is created. To prove that after adding a new block, all the blocks in the BPC structure belong to the same chain, the previous 𝜋 must first be verified, and then it must be ensured that the hash of the new block 'links' to either the oldest or the most recent block. In this way, all the elements needed to prove that a set of hashes belongs to the same chain (as listed in the Block Proof Cache section) are supplied.
+At all times, the blocks stored in the BPC structure form a consistent subchain. In other words, we preserve the invariant that for every pair of block numbers `i, i+1` contained in the structure, `block(i + 1).prevHash = hash(block(i))`.
+
+Each time a block is added, 𝜋 is updated. To prove that after adding a new block, all the blocks in the BPC structure belong to the same chain, two things must be done:
+- First, the previous 𝜋 must be verified.
+- Second, it must be ensured that the hash of the new block 'links' to either the oldest or the most recent block.
 
 The following functions, written in pseudocode, provide more details on the Block Proof Cache implementation.
 
