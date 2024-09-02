@@ -6,6 +6,7 @@ use super::{Node, NodeError};
 mod entry;
 mod from_two_entries;
 mod insert_entry_into_branch;
+mod insert_entry_into_extension;
 mod tests;
 mod utils;
 
@@ -25,7 +26,7 @@ impl Node {
                 from_two_entries(old_entry, entry)
             }
             Node::Branch(_, _) => self.insert_entry_into_branch((key, value)),
-            _ => todo!("Implement insert for Extension"),
+            Node::Extension(_, _) => self.insert_entry_into_extension((key, value)),
         }
     }
 }

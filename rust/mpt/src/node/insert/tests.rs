@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod insert {
-    use crate::node::{constructors::EMPTY_CHILDREN, Node};
+    use crate::node::{constructors::EMPTY_CHILDREN, insert::entry::Entry, Node, NodeError};
 
     #[test]
     #[should_panic(expected = "Cannot insert into a digest node")]
@@ -50,8 +50,6 @@ mod insert {
 
     #[cfg(test)]
     mod into_leaf {
-        use crate::node::{insert::entry::Entry, NodeError};
-
         use super::*;
 
         #[test]
@@ -91,8 +89,6 @@ mod insert {
 
     #[cfg(test)]
     mod into_branch {
-        use crate::node::{insert::entry::Entry, NodeError};
-
         use super::*;
 
         #[test]
