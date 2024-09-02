@@ -40,6 +40,7 @@ pub struct CallContext {
     pub chain_id: ChainId,
 }
 
+#[derive(Deserialize, Serialize, Debug)]
 pub struct CallResult {
     proof: Proof,
     evm_call_result: Vec<u8>,
