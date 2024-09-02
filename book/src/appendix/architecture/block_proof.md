@@ -41,8 +41,8 @@ The Block Proof Cache service maintains two things:
 - a ZK proof 𝜋 that all these hashes belong to the same chain.
 
 Given these two elements, it is easy to prove that a set of hashes belongs to the same chain.
-1. First, it needs to be verified that all the hashes are part of the Block Proof Cache structure.
-2. Second, 𝜋 needs to be verified.
+1. It needs to be verified that all the hashes are part of the Block Proof Cache structure.
+2. 𝜋 needs to be verified.
 
 ### Block Proof Cache (BPC) structure
 
@@ -50,11 +50,11 @@ The Block Proof Cache structure is a dictionary that stores a `<block_number, bl
 
 #### Adding hashes to the BPC structure and maintaining 𝜋
 
-At all times, the blocks stored in the BPC structure form a consistent subchain. In other words, we preserve the invariant that for every pair of block numbers `i, i+1` contained in the structure, `block(i + 1).prevHash = hash(block(i))`.
+At all times, the blocks stored in the BPC structure form a consistent subchain. In other words, we preserve the invariant that for every pair of block numbers `i, i+1` contained in the structure, `block(i + 1).parentHash = hash(block(i))`.
 
 Each time a block is added, 𝜋 is updated. To prove that after adding a new block, all the blocks in the BPC structure belong to the same chain, two things must be done:
-- First, the previous 𝜋 must be verified.
-- Second, it must be ensured that the hash of the new block 'links' to either the oldest or the most recent block.
+- The previous 𝜋 must be verified.
+- It must be ensured that the hash of the new block 'links' to either the oldest or the most recent block.
 
 The following functions, written in pseudocode, provide more details on the Block Proof Cache implementation.
 
