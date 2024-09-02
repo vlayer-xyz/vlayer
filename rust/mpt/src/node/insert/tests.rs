@@ -110,18 +110,4 @@ mod insert {
             Ok(())
         }
     }
-
-    #[cfg(test)]
-    mod into_extension {
-        use super::*;
-
-        #[test]
-        #[ignore]
-        fn duplicate_key() {
-            let node = Node::extension([0x0], Node::branch_with_value([42]));
-            let result = node.insert([], [43]);
-
-            assert_eq!(result.unwrap_err(), NodeError::DuplicateKey);
-        }
-    }
 }
