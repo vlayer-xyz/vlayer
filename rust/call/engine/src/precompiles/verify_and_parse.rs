@@ -4,7 +4,7 @@ use revm::precompile::{Precompile, PrecompileOutput, PrecompileResult};
 use std::convert::Into;
 use web_proof::verifier::verify_and_parse;
 
-pub(crate) const VERIFY_AND_PARSE_PRECOMPILE: Precompile =
+pub(super) const VERIFY_AND_PARSE_PRECOMPILE: Precompile =
     Precompile::Standard(verify_and_parse_run);
 
 // TODO: set an accurate gas cost values reflecting the operation's computational complexity.

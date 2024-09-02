@@ -6,7 +6,7 @@ use revm::precompile::{Precompile, PrecompileOutput, PrecompileResult};
 use serde_json::Value;
 use std::convert::Into;
 
-pub(crate) const JSON_GET_STRING_PRECOMPILE: Precompile = Precompile::Standard(json_get_string_run);
+pub(super) const JSON_GET_STRING_PRECOMPILE: Precompile = Precompile::Standard(json_get_string_run);
 
 // TODO: set an accurate gas cost values reflecting the operation's computational complexity.
 /// The base cost of the operation.
