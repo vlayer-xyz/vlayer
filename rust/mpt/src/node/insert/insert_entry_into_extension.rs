@@ -8,7 +8,7 @@ impl Node {
         self,
         entry: impl Into<Entry>,
     ) -> Result<Node, NodeError> {
-        let Node::Extension(key, extension_node) = self else {
+        let Node::Extension(key, child_node) = self else {
             unreachable!("insert_entry_into_extension is used only for Extension nodes");
         };
 
@@ -17,8 +17,8 @@ impl Node {
             extract_common_prefix(&key, &entry.key);
 
         if remaining_extension_key.is_empty() {
-            let extension_node = extension_node.insert(remaining_entry_key, entry.value)?;
-            return Ok(Node::extension(common_prefix, extension_node));
+            let child_node = child_node.insert(remaining_entry_key, entry.value)?;
+            return Ok(Node::extension(common_prefix, child_node));
         }
 
         todo!();
@@ -32,8 +32,8 @@ mod tests {
     #[test]
     #[should_panic(expected = "insert_entry_into_extension is used only for Extension nodes")]
     fn unreachable() {
-        let leaf = Node::Null;
-        leaf.insert_entry_into_extension(([], [42])).unwrap();
+        let null = Node::Null;
+        null.insert_entry_into_extension(([], [42])).unwrap();
     }
 
     mod common_prefix_non_empty {
