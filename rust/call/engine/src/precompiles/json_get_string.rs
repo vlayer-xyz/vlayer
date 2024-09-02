@@ -20,7 +20,8 @@ fn json_get_string_run(input: &Bytes, gas_limit: u64) -> PrecompileResult {
     let gas_used = gas_used(input.len(), BASE_COST, PER_WORD_COST, gas_limit)?;
 
     let [body, json_path] = InputType::abi_decode(input, true).map_err(map_to_other)?;
-    let body = serde_json::from_str(body.as_str()).map_err(map_to_other)?;
+    let body = serde_json::from_str(body.as_str())
+        .map_err(|err| map_to_other(format!("Error converting string body to json: {}", err)))?;
 
     let value_by_path = get_value_by_path(&body, json_path.as_str())
         .ok_or(map_to_other(format!("Missing value at path {json_path}")))?;
@@ -147,7 +148,7 @@ mod tests {
 
         assert!(
             matches!(json_get_string_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
-            Err(Error(Other(message))) if message == "EOF while parsing a value at line 1 column 0")
+            Err(Error(Other(message))) if message == "Error converting string body to json: EOF while parsing a value at line 1 column 0")
         );
     }
 
@@ -167,7 +168,7 @@ mod tests {
 
         assert!(
             matches!(json_get_string_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
-            Err(Error(Other(message))) if message == "expected value at line 1 column 1")
+            Err(Error(Other(message))) if message == "Error converting string body to json: expected value at line 1 column 1")
         )
     }
 }
