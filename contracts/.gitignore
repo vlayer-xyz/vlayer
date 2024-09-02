@@ -1,3 +1,5 @@
 # Foundry compiler files
 **/cache
 **/out
+
+dependencies/

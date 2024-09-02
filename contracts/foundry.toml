@@ -29,4 +29,4 @@ remappings_prefix = ""
 remappings_location = "txt"
 
 # whether to install sub-dependencies or not. If true this wil install the dependencies of dependencies 1 level down.
-recursive_deps = false
+recursive_deps = true
