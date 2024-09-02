@@ -17,7 +17,6 @@ members = [
     "test_runner",
     "web_proof",
     "server_utils",
-    "guest_wrapper_utils",
 ]
 default-members = ["cli"]
 

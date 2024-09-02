@@ -1,9 +1,0 @@
-[package]
-name = "guest_wrapper_utils"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-risc0-build = { workspace = true }
-risc0-build-ethereum = { workspace = true }
-anyhow.workspace = true
