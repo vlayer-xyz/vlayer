@@ -8,40 +8,51 @@ import {
   decodeFunctionResult,
   encodeFunctionData,
   type Hex,
-  parseAbiParameter
+  parseAbiParameter,
 } from "viem";
 
-import {type CallContext, type CallParams, v_call, VCallResponse} from "./v_call";
-import {testChainId1} from "./helpers";
+import {
+  type CallContext,
+  type CallParams,
+  v_call,
+  VCallResponse,
+} from "./v_call";
+import { testChainId1 } from "./helpers";
 
 type Bytecode = {
-  object: Hex,
-}
+  object: Hex;
+};
 
 export type ContractSpec = {
-  abi: Abi,
-  bytecode: Bytecode,
-}
+  abi: Abi;
+  bytecode: Bytecode;
+};
 
 export type ContractArg = number | string | boolean;
 
 const EXECUTION_COMMITMENT_FIELDS_COUNT = 4;
 const FIELD_SIZE_IN_BYTES = 32;
-const EXECUTION_COMMITMENT_SIZE = EXECUTION_COMMITMENT_FIELDS_COUNT * FIELD_SIZE_IN_BYTES;
-
+const EXECUTION_COMMITMENT_SIZE =
+  EXECUTION_COMMITMENT_FIELDS_COUNT * FIELD_SIZE_IN_BYTES;
 
 export async function getContractSpec(file: string): Promise<ContractSpec> {
   return Bun.file(file).json();
 }
 
-export async function prove<T extends Abi, F extends ContractFunctionName<T>>(prover: Address, abi: T, functionName: F, args: ContractFunctionArgs<T, AbiStateMutability, F>, chainId = testChainId1) {
+export async function prove<T extends Abi, F extends ContractFunctionName<T>>(
+  prover: Address,
+  abi: T,
+  functionName: F,
+  args: ContractFunctionArgs<T, AbiStateMutability, F>,
+  chainId = testChainId1,
+) {
   const calldata = encodeFunctionData({
     abi,
     functionName,
-    args
+    args,
   });
 
-  const call: CallParams = {to: prover, data: calldata};
+  const call: CallParams = { to: prover, data: calldata };
   const context: CallContext = {
     chain_id: chainId,
   };
@@ -52,20 +63,28 @@ export async function prove<T extends Abi, F extends ContractFunctionName<T>>(pr
     abi,
     functionName,
     data: response.result.evm_call_result,
-  })
+  });
 
-  return {proof, returnValue};
+  return { proof, returnValue };
 }
 
 async function composeProof(response: VCallResponse) {
-  const length = EXECUTION_COMMITMENT_SIZE + byteLength(response.result.evm_call_result);
-  const {prover_contract_address, seal: encodedSeal, function_selector, block_no, block_hash} = response.result;
+  const length =
+    EXECUTION_COMMITMENT_SIZE + byteLength(response.result.evm_call_result);
+  const {
+    prover_contract_address,
+    seal: encodedSeal,
+    function_selector,
+    block_no,
+    block_hash,
+  } = response.result;
 
-  const SEAL_STRUCT = 'struct Seal { bytes4 verifierSelector; bytes32[8] seal; uint8 mode; }';
-  const [seal] = decodeAbiParameters([parseAbiParameter([
-    'Seal',
-    SEAL_STRUCT
-  ])], encodedSeal);
+  const SEAL_STRUCT =
+    "struct Seal { bytes4 verifierSelector; bytes32[8] seal; uint8 mode; }";
+  const [seal] = decodeAbiParameters(
+    [parseAbiParameter(["Seal", SEAL_STRUCT])],
+    encodedSeal,
+  );
 
   return {
     length: BigInt(length),
@@ -75,8 +94,8 @@ async function composeProof(response: VCallResponse) {
       settleBlockNumber: BigInt(block_no),
       settleBlockHash: block_hash,
     },
-    seal
-  }
+    seal,
+  };
 }
 
 function byteLength(hex: Hex): number {
