@@ -12,7 +12,6 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
 
     bun install
     bun run lint:solidity
-    forge fmt --check
   )
 done
  
