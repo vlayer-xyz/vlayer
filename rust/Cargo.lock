@@ -1771,8 +1771,7 @@ dependencies = [
 name = "call_guest_wrapper"
 version = "0.1.0"
 dependencies = [
- "risc0-build",
- "risc0-build-ethereum",
+ "guest_wrapper_utils",
 ]
 
 [[package]]
@@ -4648,6 +4647,15 @@ dependencies = [
  "ff",
  "rand_core",
  "subtle",
+]
+
+[[package]]
+name = "guest_wrapper_utils"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "risc0-build",
+ "risc0-build-ethereum",
 ]
 
 [[package]]
