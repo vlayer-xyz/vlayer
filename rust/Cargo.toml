@@ -2,6 +2,7 @@
 resolver = "2"
 members = [
     "prove_chain/server",
+    "prove_chain/engine",
     "call/host",
     "call/guest",
     "call/guest_wrapper",
