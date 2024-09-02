@@ -1567,6 +1567,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "block_proof_engine"
+version = "0.1.0"
+dependencies = [
+ "serde",
+]
+
+[[package]]
+name = "block_proof_guest"
+version = "0.1.0"
+
+[[package]]
+name = "block_proof_host"
+version = "0.1.0"
+
+[[package]]
 name = "blst"
 version = "0.3.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2888,13 +2903,6 @@ name = "endian-type"
 version = "0.1.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c34f04666d835ff5d62e058c3995147c06f42fe86ff053337632bca83e42702d"
-
-[[package]]
-name = "engine"
-version = "0.1.0"
-dependencies = [
- "serde",
-]
 
 [[package]]
 name = "enr"
@@ -6647,7 +6655,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "prove_chain"
+name = "prove_chain_server"
 version = "0.1.0"
 dependencies = [
  "axum",

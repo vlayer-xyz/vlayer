@@ -1,13 +1,17 @@
 [workspace]
 resolver = "2"
 members = [
-    "prove_chain/server",
+    "prove_chain/host",
+    "prove_chain/guest",
     "prove_chain/engine",
+    "prove_chain/server",
+
     "call/host",
     "call/guest",
     "call/guest_wrapper",
     "call/engine",
     "call/server",
+
     "cli",
     "mpt",
     "test_runner",
