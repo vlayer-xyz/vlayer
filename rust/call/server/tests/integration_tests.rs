@@ -150,6 +150,7 @@ mod server_tests {
                         NOTARY_PUB_KEY_PEM_EXAMPLE
                     )))
                     .unwrap(),
+                    body: "".to_string(),
                 })
                 .calldata()
                 .unwrap();

@@ -5,6 +5,7 @@ import {Strings} from "openzeppelin/contracts/utils/Strings.sol";
 
 struct WebProof {
     string webProofJson;
+    string body;
 }
 
 library WebProofLib {
@@ -13,24 +14,31 @@ library WebProofLib {
     address private constant VERIFY_AND_PARSE_PRECOMPILE = address(0x100);
     address private constant JSON_GET_STRING_PRECOMPILE = address(0x101);
 
-    function verify(WebProof memory webProof, string memory dataUrl) internal view returns (string memory) {
-        (bool success, bytes memory returnData) = VERIFY_AND_PARSE_PRECOMPILE.staticcall(bytes(webProof.webProofJson));
+    function verify(
+        WebProof memory webProof,
+        string memory dataUrl
+    ) internal view returns (WebProof memory) {
+        (bool success, bytes memory returnData) = VERIFY_AND_PARSE_PRECOMPILE
+            .staticcall(bytes(webProof.webProofJson));
 
         string[3] memory data = abi.decode(returnData, (string[3]));
         string memory serverName = "api.x.com";
-        string memory body = data[2];
+        webProof.body = data[2];
 
         require(success, "verify_and_parse precompile call failed");
         require(dataUrl.equal(data[0]), "Incorrect URL");
         require(serverName.equal(data[1]), "Server name not found");
 
-        return body;
+        return webProof;
     }
 
-    function jsonGetString(string memory body, string memory jsonPath) internal view returns (string memory) {
-        require(bytes(body).length > 0, "Body is empty");
+    function jsonGetString(
+        WebProof memory webProof,
+        string memory jsonPath
+    ) internal view returns (string memory) {
+        require(bytes(webProof.body).length > 0, "Body is empty");
 
-        bytes memory encodedParams = abi.encode([body, jsonPath]);
+        bytes memory encodedParams = abi.encode([webProof.body, jsonPath]);
 
         (bool success, bytes memory returnData) = JSON_GET_STRING_PRECOMPILE.staticcall(encodedParams);
 
