@@ -116,8 +116,8 @@ fn create_host<DB: Database>(
     Host::try_new_with_provider_factory(
         TestProviderFactory::new(pending_state_provider_factory, rpc_endpoints.clone()),
         HostConfig {
-            rpc_urls: Default::default(),
             start_chain_id: TEST_CHAIN_ID_1,
+            ..Default::default()
         },
     )
     .expect("Failed to create host")
