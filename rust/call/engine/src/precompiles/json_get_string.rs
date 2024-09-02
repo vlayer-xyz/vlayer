@@ -140,4 +140,34 @@ mod tests {
             Err(Error(Other(message))) if message == "Expected type 'String' at root.nested_level.field_object, but found Object {}")
         );
     }
+
+    #[test]
+    fn fail_empty_json_string() {
+        let abi_encoded_body_and_json_path = InputType::abi_encode(&["", "field"]);
+
+        assert!(
+            matches!(json_get_string_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
+            Err(Error(Other(message))) if message == "EOF while parsing a value at line 1 column 0")
+        );
+    }
+
+    #[test]
+    fn fail_empty_json_body() {
+        let abi_encoded_body_and_json_path = InputType::abi_encode(&["{}", "field"]);
+
+        assert!(
+            matches!(json_get_string_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
+            Err(Error(Other(message))) if message == "Missing value at path field")
+        )
+    }
+
+    #[test]
+    fn fail_string_as_json() {
+        let abi_encoded_body_and_json_path = InputType::abi_encode(&["a string", "field"]);
+
+        assert!(
+            matches!(json_get_string_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
+            Err(Error(Other(message))) if message == "expected value at line 1 column 1")
+        )
+    }
 }
