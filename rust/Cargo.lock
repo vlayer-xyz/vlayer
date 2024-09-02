@@ -1567,6 +1567,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "block_proof_engine"
+version = "0.1.0"
+dependencies = [
+ "serde",
+]
+
+[[package]]
+name = "block_proof_guest"
+version = "0.1.0"
+
+[[package]]
+name = "block_proof_host"
+version = "0.1.0"
+
+[[package]]
 name = "blst"
 version = "0.3.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1756,8 +1771,7 @@ dependencies = [
 name = "call_guest_wrapper"
 version = "0.1.0"
 dependencies = [
- "risc0-build",
- "risc0-build-ethereum",
+ "guest_wrapper_utils",
 ]
 
 [[package]]
@@ -4636,6 +4650,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "guest_wrapper_utils"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "risc0-build",
+ "risc0-build-ethereum",
+]
+
+[[package]]
 name = "h2"
 version = "0.3.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6640,7 +6663,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "prove_chain"
+name = "prove_chain_server"
 version = "0.1.0"
 dependencies = [
  "axum",

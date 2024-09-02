@@ -1,17 +1,23 @@
 [workspace]
 resolver = "2"
 members = [
+    "prove_chain/host",
+    "prove_chain/guest",
+    "prove_chain/engine",
     "prove_chain/server",
+
     "call/host",
     "call/guest",
     "call/guest_wrapper",
     "call/engine",
     "call/server",
+
     "cli",
     "mpt",
     "test_runner",
     "web_proof",
     "server_utils",
+    "guest_wrapper_utils",
 ]
 default-members = ["cli"]
 
