@@ -10,6 +10,7 @@ pub struct Risc0Builder {
     elf_path: PathBuf,
 }
 
+#[allow(clippy::new_without_default)]
 impl Risc0Builder {
     pub fn new() -> Self {
         let assets_dir = Path::new("../../target/assets");
@@ -24,7 +25,7 @@ impl Risc0Builder {
     pub fn build(&self) -> Result<()> {
         let guests = embed_methods();
 
-        self.build_solidity(&*guests)
+        self.build_solidity(&guests)
     }
 
     // Generate Solidity source files for use with Forge.
