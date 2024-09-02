@@ -13,7 +13,7 @@ library WebProofLib {
     address private constant VERIFY_AND_PARSE_PRECOMPILE = address(0x100);
     address private constant JSON_GET_STRING_PRECOMPILE = address(0x101);
 
-    function verify(WebProof memory webProof, string memory dataUrl) internal view returns (bool) {
+    function verify(WebProof memory webProof, string memory dataUrl) internal view returns (string memory) {
         (bool success, bytes memory returnData) = VERIFY_AND_PARSE_PRECOMPILE.staticcall(bytes(webProof.webProofJson));
 
         string[3] memory data = abi.decode(returnData, (string[3]));
