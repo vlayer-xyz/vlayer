@@ -39,7 +39,7 @@ fn get_value_by_path<'a>(value: &'a Value, path: &str) -> Option<&'a Value> {
 
 #[cfg(test)]
 mod tests {
-    use revm::precompile::{PrecompileError::Other, PrecompileErrors::Error};
+    use revm::precompile::{PrecompileError::{Other, OutOfGas}, PrecompileErrors::Error};
     use super::*;
 
     const TEST_JSON: &str = r#"
@@ -66,6 +66,18 @@ mod tests {
         let precompile_result = std::str::from_utf8(precompile_output.bytes.as_ref()).unwrap();
 
         assert_eq!("field_string_value", precompile_result);
+    }
+
+    #[test]
+    fn fail_out_of_gas() {
+        let abi_encoded_body_and_json_path = InputType::abi_encode(&[TEST_JSON, "root.level1.field_string"]);
+
+        let too_small_gas_limit = 1;
+
+        let precompile_output =
+            json_get_string_run(&abi_encoded_body_and_json_path.into(), too_small_gas_limit);
+
+        assert!(matches!(precompile_output, Err(Error(OutOfGas))));
     }
 
     #[test]
