@@ -77,10 +77,12 @@ mod tests {
         let abi_encoded_body_and_json_path =
             InputType::abi_encode(&[TEST_JSON, "root.level1.field_string"]);
 
-        let too_small_gas_limit = 1;
+        let insufficient_gas_limit = 1;
 
-        let precompile_output =
-            json_get_string_run(&abi_encoded_body_and_json_path.into(), too_small_gas_limit);
+        let precompile_output = json_get_string_run(
+            &abi_encoded_body_and_json_path.into(),
+            insufficient_gas_limit,
+        );
 
         assert!(matches!(precompile_output, Err(Error(OutOfGas))));
     }
