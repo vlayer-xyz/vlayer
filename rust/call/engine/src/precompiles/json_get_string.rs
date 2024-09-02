@@ -1,7 +1,7 @@
 use crate::precompiles::{gas_used, map_to_other};
 use alloy_primitives::Bytes;
-use alloy_sol_types::sol_data;
 use alloy_sol_types::SolType;
+use alloy_sol_types::{sol_data, SolValue};
 use revm::precompile::{Precompile, PrecompileOutput, PrecompileResult};
 use serde_json::Value;
 use std::convert::Into;
@@ -27,7 +27,7 @@ fn json_get_string_run(input: &Bytes, gas_limit: u64) -> PrecompileResult {
         .ok_or(map_to_other(format!("Missing value at path {json_path}")))?;
 
     match value_by_path {
-        Value::String(result) => Ok(PrecompileOutput::new(gas_used, result.to_string().into())),
+        Value::String(result) => Ok(PrecompileOutput::new(gas_used, result.abi_encode().into())),
         _ => Err(map_to_other(format!(
             "Expected type 'String' at {json_path}, but found {value_by_path:?}"
         ))),
@@ -67,9 +67,11 @@ mod tests {
 
         let precompile_output =
             json_get_string_run(&abi_encoded_body_and_json_path.into(), u64::MAX).unwrap();
-        let precompile_result = std::str::from_utf8(precompile_output.bytes.as_ref()).unwrap();
 
-        assert_eq!("field_string_value", precompile_result);
+        assert_eq!(
+            "field_string_value",
+            sol_data::String::abi_decode(precompile_output.bytes.as_ref(), true).unwrap()
+        );
     }
 
     #[test]
