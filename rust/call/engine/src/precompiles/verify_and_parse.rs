@@ -25,5 +25,5 @@ fn verify_and_parse_run(input: &Bytes, gas_limit: u64) -> PrecompileResult {
     let web_proof = serde_json::from_str(web_proof_json).map_err(map_to_other)?;
     let web = verify_and_parse(web_proof).map_err(map_to_other)?;
 
-    Ok(PrecompileOutput::new(gas_used, web.url.into()))
+    Ok(PrecompileOutput::new(gas_used, web.abi_encode().into()))
 }
