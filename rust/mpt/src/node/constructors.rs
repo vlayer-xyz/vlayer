@@ -48,6 +48,21 @@ impl Node {
         Node::Branch(children, None)
     }
 
+    #[allow(unused)]
+    pub(crate) fn branch_with_child_node(
+        idx: u8,
+        key: impl AsRef<[u8]>,
+        child_node: impl Into<Node>,
+    ) -> Node {
+        let node: Node = if key.as_ref().is_empty() {
+            child_node.into()
+        } else {
+            Node::extension(key, child_node.into())
+        };
+
+        Node::branch_with_child(idx, node)
+    }
+
     fn branch_with_children_and_value(
         children: [Option<Box<Node>>; 16],
         value: impl AsRef<[u8]>,
