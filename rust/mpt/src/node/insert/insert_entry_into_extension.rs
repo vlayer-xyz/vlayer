@@ -1,10 +1,10 @@
-use crate::node::insert::insert_entry_into_extension::from_extension_and_entry_no_common_prefix::from_extension_and_entry_no_common_prefix;
+use crate::node::insert::insert_entry_into_extension::from_extension_and_entry_empty_common_prefix::from_extension_and_entry_empty_common_prefix;
 use crate::node::{Node, NodeError};
 
 use super::entry::Entry;
 use super::utils::extract_common_prefix;
 
-mod from_extension_and_entry_no_common_prefix;
+mod from_extension_and_entry_empty_common_prefix;
 
 impl Node {
     pub(crate) fn insert_entry_into_extension(
@@ -26,10 +26,7 @@ impl Node {
 
         if common_prefix.is_empty() {
             let remaining_extension = Node::extension(remaining_extension_key, *child_node);
-            return Ok(from_extension_and_entry_no_common_prefix(
-                remaining_extension,
-                entry,
-            ));
+            return from_extension_and_entry_empty_common_prefix(remaining_extension, entry);
         }
 
         todo!();
