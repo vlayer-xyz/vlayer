@@ -1,5 +1,5 @@
 use axum::http::StatusCode;
-use block_proof::server;
+use prove_chain::server;
 use serde_json::json;
 use server_utils::{body_to_json, post};
 

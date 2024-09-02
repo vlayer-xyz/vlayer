@@ -16,10 +16,10 @@ pub struct Params {}
 pub struct ChainProof;
 
 #[derive(Debug, Error)]
-pub enum BpServerError {}
+pub enum Error {}
 
-impl From<BpServerError> for JsonRpcError {
-    fn from(error: BpServerError) -> Self {
+impl From<Error> for JsonRpcError {
+    fn from(error: Error) -> Self {
         JsonRpcError::new(
             JsonRpcErrorReason::InternalError,
             error.to_string(),
@@ -28,7 +28,7 @@ impl From<BpServerError> for JsonRpcError {
     }
 }
 
-async fn v_prove_chain(_params: Params) -> Result<ChainProof, BpServerError> {
+async fn v_prove_chain(_params: Params) -> Result<ChainProof, Error> {
     Ok(ChainProof)
 }
 

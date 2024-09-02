@@ -2,7 +2,6 @@ use std::sync::Arc;
 
 use crate::config::ServerConfig;
 use crate::error::AppError;
-use alloy_primitives::hex::ToHexExt;
 use call_host::host::{config::HostConfig, Host};
 use call_host::Call as HostCall;
 use serde::{Deserialize, Serialize};
@@ -27,20 +26,5 @@ pub async fn v_call(config: Arc<ServerConfig>, params: Params) -> Result<CallRes
     let return_data =
         tokio::task::spawn_blocking(|| Host::try_new(host_config)?.run(call)).await??;
 
-    let block_number = u64::try_from(
-        return_data
-            .guest_output
-            .execution_commitment
-            .settleBlockNumber,
-    )
-    .unwrap();
-
-    Ok(CallResult {
-        evm_call_result: return_data.guest_output.evm_call_result.encode_hex_with_prefix(),
-        function_selector: return_data.guest_output.execution_commitment.functionSelector,
-        prover_contract_address: return_data.guest_output.execution_commitment.proverContractAddress,
-        seal: return_data.seal.encode_hex_with_prefix(),
-        block_no: block_number,
-        block_hash: return_data.guest_output.execution_commitment.settleBlockHash
-    })
+    Ok(return_data.into())
 }

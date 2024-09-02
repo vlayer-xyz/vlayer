@@ -1,6 +1,8 @@
 use crate::error::AppError;
 use alloy_chains::Chain;
-use alloy_primitives::{Address, BlockNumber, ChainId, FixedBytes};
+use alloy_primitives::hex::ToHexExt;
+use alloy_primitives::{Address, ChainId, FixedBytes};
+use call_engine::io::HostOutput;
 use call_host::Call as HostCall;
 use serde::{Deserialize, Serialize};
 use server_utils::{parse_address_field, parse_hex_field};
@@ -39,12 +41,43 @@ pub struct CallContext {
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct CallResult {
-    pub evm_call_result: String,
-    pub function_selector: FixedBytes<SELECTOR_LEN>,
-    pub prover_contract_address: Address,
-    pub seal: String,
-    pub block_no: u64,
-    pub block_hash: FixedBytes<HASH_LEN>
+    evm_call_result: String,
+    function_selector: FixedBytes<SELECTOR_LEN>,
+    prover_contract_address: Address,
+    seal: String,
+    block_no: u64,
+    block_hash: FixedBytes<HASH_LEN>,
+}
+
+impl From<HostOutput> for CallResult {
+    fn from(host_output: HostOutput) -> Self {
+        Self {
+            evm_call_result: host_output
+                .guest_output
+                .evm_call_result
+                .encode_hex_with_prefix(),
+            function_selector: host_output
+                .guest_output
+                .execution_commitment
+                .functionSelector,
+            prover_contract_address: host_output
+                .guest_output
+                .execution_commitment
+                .proverContractAddress,
+            seal: host_output.seal.encode_hex_with_prefix(),
+            block_no: u64::try_from(
+                host_output
+                    .guest_output
+                    .execution_commitment
+                    .settleBlockNumber,
+            )
+            .unwrap(),
+            block_hash: host_output
+                .guest_output
+                .execution_commitment
+                .settleBlockHash,
+        }
+    }
 }
 
 #[cfg(test)]
