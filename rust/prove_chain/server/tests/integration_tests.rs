@@ -1,5 +1,5 @@
 use axum::http::StatusCode;
-use block_proof::server;
+use prove_chain::server;
 use serde_json::json;
 use server_utils::{body_to_json, post};
 
@@ -57,6 +57,28 @@ async fn method_missing() {
                 "message": "missing field `method` at line 1 column 36",
                 "data": null
             }
+        }),
+        body_to_json(response.into_body()).await
+    );
+}
+
+#[tokio::test]
+async fn success_dummy() {
+    let app = server();
+    let req = json!({
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "v_proveChain",
+        "params": []
+    });
+    let response = post(app, "/", &req).await;
+
+    assert_eq!(StatusCode::OK, response.status());
+    assert_eq!(
+        json!({
+            "jsonrpc": "2.0",
+            "id": 1,
+            "result": null
         }),
         body_to_json(response.into_body()).await
     );

@@ -1567,21 +1567,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "block_proof"
-version = "0.1.0"
-dependencies = [
- "axum",
- "axum-jrpc",
- "mime",
- "serde",
- "serde_json",
- "server_utils",
- "thiserror",
- "tokio",
- "tower",
-]
-
-[[package]]
 name = "blst"
 version = "0.3.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6652,6 +6637,21 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "6872f4d4f4b98303239a2b5838f5bbbb77b01ffc892d627957f37a22d7cfe69c"
 dependencies = [
  "thiserror",
+]
+
+[[package]]
+name = "prove_chain"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "axum-jrpc",
+ "mime",
+ "serde",
+ "serde_json",
+ "server_utils",
+ "thiserror",
+ "tokio",
+ "tower",
 ]
 
 [[package]]

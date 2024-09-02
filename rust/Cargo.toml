@@ -1,7 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
-    "block_proof/server",
+    "prove_chain/server",
     "call/host",
     "call/guest",
     "call/guest_wrapper",
