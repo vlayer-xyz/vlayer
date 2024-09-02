@@ -91,8 +91,8 @@ where
     C: SolCall,
 {
     let config = HostConfig {
-        rpc_urls: HashMap::new(),
         start_chain_id: chain_id,
+        ..Default::default()
     };
 
     let raw_return_value = if UPDATE_SNAPSHOTS {
