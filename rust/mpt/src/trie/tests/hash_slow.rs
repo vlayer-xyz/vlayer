@@ -1,18 +1,17 @@
-use crate::{
-    key_nibbles::KeyNibbles,
-    node::{constructors::EMPTY_CHILDREN, Node},
-    MerkleTrie,
-};
+use crate::{key_nibbles::KeyNibbles, node::Node, MerkleTrie};
 use alloy_primitives::{b256, B256};
 use alloy_trie::EMPTY_ROOT_HASH;
 use lazy_static::lazy_static;
 
 lazy_static! {
     static ref MPT_BRANCH_WITH_TWO_CHILDREN: MerkleTrie = {
-        let mut children = EMPTY_CHILDREN.clone();
-        children[0] = Some(Box::new(Node::Leaf([0; 63].into(), [0].into())));
-        children[1] = Some(Box::new(Node::Leaf([1; 63].into(), [1].into())));
-        MerkleTrie(Node::Branch(children, None))
+        let branch = Node::branch_with_two_children(
+            0,
+            Node::leaf([0; 63], [0]),
+            1,
+            Node::leaf([1; 63], [1]),
+        );
+        MerkleTrie(branch)
     };
 }
 

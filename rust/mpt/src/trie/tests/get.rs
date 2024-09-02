@@ -1,10 +1,6 @@
 use alloy_primitives::{b256, B256};
 
-use crate::{
-    key_nibbles::KeyNibbles,
-    node::{constructors::EMPTY_CHILDREN, Node},
-    MerkleTrie,
-};
+use crate::{key_nibbles::KeyNibbles, node::Node, MerkleTrie};
 
 #[test]
 pub fn null() {
@@ -35,11 +31,10 @@ fn leaf() {
 
 #[test]
 fn branch() {
-    let mut children = EMPTY_CHILDREN.clone();
-    children[0] = Some(Box::new(Node::leaf([0; 63], [0])));
-    children[1] = Some(Box::new(Node::leaf([1; 63], [1])));
+    let root =
+        Node::branch_with_two_children(0, Node::leaf([0; 63], [0]), 1, Node::leaf([1; 63], [1]));
 
-    let mpt = MerkleTrie(Node::Branch(children, None));
+    let mpt = MerkleTrie(root);
 
     assert_eq!(mpt.get(B256::repeat_byte(0x00)).unwrap(), [0]);
     assert_eq!(mpt.get(B256::repeat_byte(0x11)).unwrap(), [1]);
@@ -59,10 +54,8 @@ fn branch_with_value() {
 
 #[test]
 fn extension() {
-    let mut children = EMPTY_CHILDREN.clone();
-    children[0] = Some(Box::new(Node::leaf([0; 62], [0])));
-    children[1] = Some(Box::new(Node::leaf([1; 62], [1])));
-    let branch = Node::Branch(children, None);
+    let branch =
+        Node::branch_with_two_children(0, Node::leaf([0; 62], [0]), 1, Node::leaf([1; 62], [1]));
     let mpt = MerkleTrie(Node::extension([0], branch));
 
     assert_eq!(mpt.get(B256::ZERO).unwrap(), [0]);

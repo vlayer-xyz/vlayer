@@ -89,10 +89,12 @@ mod tests {
 
         let node = from_two_entries(first_entry, second_entry)?;
 
-        let mut children = EMPTY_CHILDREN.clone();
-        children[0] = Some(Box::new(Node::branch_with_value([42])));
-        children[1] = Some(Box::new(Node::branch_with_value([43])));
-        let expected_node = Node::Branch(children, None);
+        let expected_node = Node::branch_with_two_children(
+            0,
+            Node::branch_with_value([42]),
+            1,
+            Node::branch_with_value([43]),
+        );
 
         assert_eq!(node, expected_node);
         Ok(())
@@ -104,10 +106,8 @@ mod tests {
         let second_entry = ([0x1, 0x0], [43]).into();
         let node = from_two_entries(first_entry, second_entry)?;
 
-        let mut children = EMPTY_CHILDREN.clone();
-        children[0] = Some(Box::new(Node::leaf([0], [42])));
-        children[1] = Some(Box::new(Node::leaf([0], [43])));
-        let expected_node = Node::Branch(children, None);
+        let expected_node =
+            Node::branch_with_two_children(0, Node::leaf([0], [42]), 1, Node::leaf([0], [43]));
 
         assert_eq!(node, expected_node);
         Ok(())
@@ -120,11 +120,13 @@ mod tests {
 
         let node = from_two_entries(first_entry, second_entry)?;
 
-        let mut children = EMPTY_CHILDREN.clone();
-        children[0] = Some(Box::new(Node::branch_with_value([42])));
-        children[1] = Some(Box::new(Node::branch_with_value([43])));
-        let expected_node_child = Node::Branch(children, None);
-        let expected_node = Node::extension([0x0], expected_node_child);
+        let expected_child_node = Node::branch_with_two_children(
+            0,
+            Node::branch_with_value([42]),
+            1,
+            Node::branch_with_value([43]),
+        );
+        let expected_node = Node::extension([0x0], expected_child_node);
 
         assert_eq!(node, expected_node);
         Ok(())
@@ -137,11 +139,13 @@ mod tests {
 
         let node = from_two_entries(first_entry, second_entry)?;
 
-        let mut children = EMPTY_CHILDREN.clone();
-        children[0] = Some(Box::new(Node::branch_with_value([42])));
-        children[1] = Some(Box::new(Node::branch_with_value([43])));
-        let expected_node_child = Node::Branch(children, None);
-        let expected_node = Node::extension([0x0, 0x1], expected_node_child);
+        let expected_child_node = Node::branch_with_two_children(
+            0,
+            Node::branch_with_value([42]),
+            1,
+            Node::branch_with_value([43]),
+        );
+        let expected_node = Node::extension([0x0, 0x1], expected_child_node);
 
         assert_eq!(node, expected_node);
         Ok(())
@@ -154,11 +158,10 @@ mod tests {
 
         let node = from_two_entries(first_entry, second_entry)?;
 
-        let mut branch_children = EMPTY_CHILDREN.clone();
-        branch_children[0] = Some(Box::new(Node::leaf([0x1], [42])));
-        branch_children[1] = Some(Box::new(Node::leaf([0x0], [43])));
-        let expected_node_child = Node::Branch(branch_children, None);
-        let expected_node = Node::extension([0x0], expected_node_child);
+        let expected_child_node =
+            Node::branch_with_two_children(0, Node::leaf([0x1], [42]), 1, Node::leaf([0x0], [43]));
+
+        let expected_node = Node::extension([0x0], expected_child_node);
 
         assert_eq!(node, expected_node);
         Ok(())

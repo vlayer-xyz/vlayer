@@ -1,6 +1,6 @@
 #[cfg(test)]
 mod insert {
-    use crate::node::{constructors::EMPTY_CHILDREN, insert::entry::Entry, Node, NodeError};
+    use crate::node::{insert::entry::Entry, Node, NodeError};
 
     #[test]
     #[should_panic(expected = "Cannot insert into a digest node")]
@@ -38,10 +38,12 @@ mod insert {
             let node = Node::Null;
             let updated_node = node.insert([0x1, 0x0], [42])?.insert([0x2, 0x0], [43])?;
 
-            let mut children = EMPTY_CHILDREN.clone();
-            children[0x1] = Some(Box::new(Node::leaf([0x0], [42])));
-            children[0x2] = Some(Box::new(Node::leaf([0x0], [43])));
-            let expected_branch = Node::Branch(children, None);
+            let expected_branch = Node::branch_with_two_children(
+                0x1,
+                Node::leaf([0x0], [42]),
+                0x2,
+                Node::leaf([0x0], [43]),
+            );
 
             assert_eq!(expected_branch, updated_node);
             Ok(())
@@ -77,12 +79,15 @@ mod insert {
             let node = Node::leaf([0x0, 0x0], [42]);
             let updated_node = node.insert([0x0, 0x1], [43])?;
 
-            let mut children = EMPTY_CHILDREN.clone();
-            children[0] = Some(Box::new(Node::branch_with_value([42])));
-            children[1] = Some(Box::new(Node::branch_with_value([43])));
-            let expected_branch = Node::extension([0x0], Node::Branch(children, None));
+            let expected_child_node = Node::branch_with_two_children(
+                0,
+                Node::branch_with_value([42]),
+                1,
+                Node::branch_with_value([43]),
+            );
+            let expected_node = Node::extension([0x0], expected_child_node);
 
-            assert_eq!(updated_node, expected_branch);
+            assert_eq!(updated_node, expected_node);
             Ok(())
         }
     }
