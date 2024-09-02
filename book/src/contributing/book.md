@@ -1,6 +1,10 @@
 # Contributing to vlayer book
 
 ## Prerequisites
+Make sure that you have rust and cargo installed: 
+```sh
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
+```
 
 To build this book, you will need `mdbook` installed:
 ```sh
