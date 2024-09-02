@@ -43,3 +43,6 @@ jobs:
         working-directory: ./contracts
         run: |
           forge test -vvv
+      - name: Run Forge formatter
+        run: |
+          forge fmt ./examples ./contracts --check
