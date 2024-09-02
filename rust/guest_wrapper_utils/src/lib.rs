@@ -32,8 +32,8 @@ impl Risc0Builder {
     fn build_solidity(&self, guests: &[GuestListEntry]) -> Result<()> {
         create_dir_all(self.assets_dir)?;
 
-        remove_file(&self.image_id_path)?;
-        remove_file(&self.elf_path)?;
+        let _ = remove_file(&self.image_id_path);
+        let _ = remove_file(&self.elf_path);
 
         let solidity_opts = Options::default()
             .with_image_id_sol_path(&self.image_id_path)
