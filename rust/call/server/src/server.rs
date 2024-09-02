@@ -19,10 +19,11 @@ pub async fn serve(config: ServerConfig) -> anyhow::Result<()> {
 pub fn server(config: ServerConfig) -> Router {
     config.proof_mode.set_risc0_flag();
     let config = Arc::new(config);
-    let x = |config: Arc<ServerConfig>, params: Params| async move {
+    let call_and_format = |config: Arc<ServerConfig>, params: Params| async move {
         v_call(config.clone(), params).await.map(|x| x.to_json())
     };
-    let v_call_handler = move |params| Box::pin(x(config.clone(), params)) as Pin<Box<_>>;
+    let v_call_handler =
+        move |params| Box::pin(call_and_format(config.clone(), params)) as Pin<Box<_>>;
     let jrpc_handler = |req| async move { route(req, "v_call", v_call_handler).await };
 
     Router::new()

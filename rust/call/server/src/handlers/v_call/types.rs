@@ -48,7 +48,7 @@ pub struct CallResult {
 impl CallResult {
     pub fn to_json(&self) -> Value {
         json!({
-            "evmCallResult": self.evm_call_result.encode_hex_with_prefix(),
+            "evm_call_result": self.evm_call_result.encode_hex_with_prefix(),
             "proof": {
                 "length": u256_to_number(self.proof.length),
                 "seal": {
