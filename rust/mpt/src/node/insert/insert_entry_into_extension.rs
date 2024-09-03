@@ -29,7 +29,12 @@ impl Node {
             return from_extension_and_entry_empty_common_prefix(remaining_extension, entry);
         }
 
-        todo!();
+        let child_node = from_extension_and_entry_empty_common_prefix(
+            Node::extension(remaining_extension_key, *child_node),
+            (remaining_entry_key, entry.value),
+        )?;
+
+        Ok(Node::extension(common_prefix, child_node))
     }
 }
 
@@ -76,6 +81,44 @@ mod tests {
 
             assert_eq!(updated_node, Node::extension([0x0], updated_child_node));
             Ok(())
+        }
+
+        mod remaining_extension_key_non_empty {
+            use super::*;
+
+            #[test]
+            fn single_nibble_remaining_extension_key() -> anyhow::Result<()> {
+                let extension = Node::extension([0x0, 0x0], Node::branch_with_value([42]));
+                let node = extension.insert_entry_into_extension(([0x0, 0x1], [43]))?;
+
+                let child_node = Node::branch_with_two_children(
+                    0,
+                    Node::branch_with_value([42]),
+                    1,
+                    Node::branch_with_value([43]),
+                );
+                let expected_node = Node::extension([0x0], child_node);
+
+                assert_eq!(node, expected_node);
+                Ok(())
+            }
+
+            #[test]
+            fn multiple_nibbles_remaining_extension_key() -> anyhow::Result<()> {
+                let extension = Node::extension([0x0, 0x0, 0x0], Node::branch_with_value([42]));
+                let node = extension.insert_entry_into_extension(([0x0, 0x1], [43]))?;
+
+                let expected_child = Node::branch_with_two_children(
+                    0,
+                    Node::extension([0x0], Node::branch_with_value([42])),
+                    1,
+                    Node::branch_with_value([43]),
+                );
+                let expected_node = Node::extension([0x0], expected_child);
+
+                assert_eq!(node, expected_node);
+                Ok(())
+            }
         }
     }
 }
