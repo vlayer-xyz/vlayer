@@ -9,17 +9,17 @@ import {
   type Hex,
 } from "viem";
 
-import {type CallContext, type CallParams, v_call} from "./v_call";
-import {testChainId1} from "./helpers";
+import { type CallContext, type CallParams, v_call } from "./v_call";
+import { testChainId1 } from "./helpers";
 
 type Bytecode = {
-  object: Hex,
-}
+  object: Hex;
+};
 
 export type ContractSpec = {
-  abi: Abi,
-  bytecode: Bytecode,
-}
+  abi: Abi;
+  bytecode: Bytecode;
+};
 
 export type ContractArg = number | string | boolean;
 
@@ -27,25 +27,33 @@ export async function getContractSpec(file: string): Promise<ContractSpec> {
   return Bun.file(file).json();
 }
 
-export async function prove<T extends Abi, F extends ContractFunctionName<T>>(prover: Address, abi: T, functionName: F, args: ContractFunctionArgs<T, AbiStateMutability, F>, chainId = testChainId1) {
+export async function prove<T extends Abi, F extends ContractFunctionName<T>>(
+  prover: Address,
+  abi: T,
+  functionName: F,
+  args: ContractFunctionArgs<T, AbiStateMutability, F>,
+  chainId = testChainId1,
+) {
   const calldata = encodeFunctionData({
     abi,
     functionName,
-    args
+    args,
   });
 
-  const call: CallParams = {to: prover, data: calldata};
+  const call: CallParams = { to: prover, data: calldata };
   const context: CallContext = {
     chain_id: chainId,
   };
 
-  const {result: {proof, evm_call_result}} = await v_call(call, context);
+  const {
+    result: { proof, evm_call_result },
+  } = await v_call(call, context);
 
   const returnValue = decodeFunctionResult({
     abi,
     functionName,
     data: evm_call_result,
-  })
+  });
 
-  return {proof, returnValue};
+  return { proof, returnValue };
 }
