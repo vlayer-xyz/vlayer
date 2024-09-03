@@ -16,14 +16,17 @@ use call_guest_wrapper::RISC0_CALL_GUEST_ELF;
 use config::HostConfig;
 use error::HostError;
 use ethers_core::types::BlockNumber;
-use risc0_zkvm::{default_prover, ExecutorEnv, ProverOpts};
+use prover::Prover;
+use risc0_zkvm::ExecutorEnv;
 
 pub mod config;
 pub mod error;
+mod prover;
 
 pub struct Host<P: BlockingProvider> {
     start_execution_location: ExecutionLocation,
     envs: CachedEvmEnv<ProofDb<P>>,
+    prover: Prover,
 }
 
 impl Host<EthersProvider<EthersClient>> {
@@ -57,10 +60,12 @@ where
         let block_number = get_block_number(&providers, config.start_chain_id)?;
         let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
         let start_execution_location = ExecutionLocation::new(block_number, config.start_chain_id);
+        let prover = Prover::new(&config);
 
         Ok(Host {
             envs,
             start_execution_location,
+            prover,
         })
     }
 
@@ -72,10 +77,12 @@ where
         let providers = CachedMultiProvider::new(provider_factory);
         let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
         let start_execution_location = ExecutionLocation::new(block_number, config.start_chain_id);
+        let prover = Prover::new(&config);
 
         Ok(Host {
             envs,
             start_execution_location,
+            prover,
         })
     }
 
@@ -85,7 +92,7 @@ where
         let multi_evm_input =
             into_multi_input(self.envs).map_err(|err| HostError::CreatingInput(err.to_string()))?;
         let env = Self::build_executor_env(self.start_execution_location, multi_evm_input, call)?;
-        let (seal, raw_guest_output) = Self::prove(env, RISC0_CALL_GUEST_ELF)?;
+        let (seal, raw_guest_output) = Self::prove(&self.prover, env, RISC0_CALL_GUEST_ELF)?;
 
         let proof_len = raw_guest_output.len();
         let guest_output = GuestOutput::from_outputs(&host_output, &raw_guest_output)?;
@@ -105,11 +112,13 @@ where
         })
     }
 
-    fn prove(env: ExecutorEnv, guest_elf: &[u8]) -> Result<(Vec<u8>, Vec<u8>), HostError> {
-        let prover = default_prover();
-
+    fn prove(
+        prover: &Prover,
+        env: ExecutorEnv,
+        guest_elf: &[u8],
+    ) -> Result<(Vec<u8>, Vec<u8>), HostError> {
         let result = prover
-            .prove_with_opts(env, guest_elf, &ProverOpts::groth16())
+            .prove(env, guest_elf)
             .map_err(|err| HostError::Prover(err.to_string()))?;
 
         let seal: Seal = EncodableReceipt::from(result.receipt.clone()).try_into()?;

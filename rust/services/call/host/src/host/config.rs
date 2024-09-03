@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use alloy_primitives::ChainId;
 
-#[derive(Default)]
+#[derive(Default, Clone, Copy)]
 pub enum ProofMode {
     #[default]
     Fake,
