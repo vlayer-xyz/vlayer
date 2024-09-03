@@ -14,8 +14,8 @@ impl Node {
         let Node::Extension(key, child_node) = self else {
             unreachable!("insert_entry_into_extension is used only for Extension nodes");
         };
-
         let entry = entry.into();
+
         let (common_prefix, remaining_extension_key, remaining_entry_key) =
             extract_common_prefix(&key, &entry.key);
 
@@ -29,7 +29,12 @@ impl Node {
             return from_extension_and_entry_empty_common_prefix(remaining_extension, entry);
         }
 
-        todo!();
+        let child_node = from_extension_and_entry_empty_common_prefix(
+            Node::extension(remaining_extension_key, *child_node),
+            (remaining_entry_key, entry.value),
+        )?;
+
+        Ok(Node::extension(common_prefix, child_node))
     }
 }
 
@@ -67,7 +72,7 @@ mod tests {
         // In case where extension nibbles is a prefix of inserted key
         // we delegate insertion to the child node.
         // We test this by comparing the result of inserting to the child node directly.
-        fn insert_into_child_node() -> anyhow::Result<()> {
+        fn into_child_node() -> anyhow::Result<()> {
             let child_node = Node::branch_with_value([42]);
             let node = Node::extension([0x0], child_node.clone());
 
@@ -75,6 +80,23 @@ mod tests {
             let updated_child_node = child_node.insert([0x1], [43])?;
 
             assert_eq!(updated_node, Node::extension([0x0], updated_child_node));
+            Ok(())
+        }
+
+        #[test]
+        fn into_extension_node_directly() -> anyhow::Result<()> {
+            let extension = Node::extension([0x0, 0x0], Node::branch_with_value([42]));
+            let node = extension.insert_entry_into_extension(([0x0, 0x1], [43]))?;
+
+            let child_node = Node::branch_with_two_children(
+                0,
+                Node::branch_with_value([42]),
+                1,
+                Node::branch_with_value([43]),
+            );
+            let expected_node = Node::extension([0x0], child_node);
+
+            assert_eq!(node, expected_node);
             Ok(())
         }
     }

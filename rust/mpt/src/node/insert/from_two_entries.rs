@@ -1,4 +1,4 @@
-use crate::node::{constructors::EMPTY_CHILDREN, Node, NodeError};
+use crate::node::{Node, NodeError};
 
 use super::entry::Entry;
 
@@ -10,7 +10,13 @@ fn order_entries(lhs: Entry, rhs: Entry) -> (Entry, Entry) {
     }
 }
 
-pub(crate) fn from_two_entries(lhs: Entry, rhs: Entry) -> Result<Node, NodeError> {
+pub(crate) fn from_two_entries(
+    lhs: impl Into<Entry>,
+    rhs: impl Into<Entry>,
+) -> Result<Node, NodeError> {
+    let lhs = lhs.into();
+    let rhs = rhs.into();
+
     let (shorter, longer) = order_entries(lhs, rhs);
     if shorter.key == longer.key {
         return Err(NodeError::DuplicateKey);
@@ -28,11 +34,12 @@ pub(crate) fn from_two_entries(lhs: Entry, rhs: Entry) -> Result<Node, NodeError
     let (longer_first_nibble, remaining_longer) = longer.split_first_key_nibble();
 
     if shorter_first_nibble != longer_first_nibble {
-        let mut children = EMPTY_CHILDREN.clone();
-        children[shorter_first_nibble as usize] = Some(Box::new(remaining_shorter.into()));
-        children[longer_first_nibble as usize] = Some(Box::new(remaining_longer.into()));
-
-        return Ok(Node::Branch(children, None));
+        return Ok(Node::branch_with_two_children(
+            shorter_first_nibble,
+            remaining_shorter,
+            longer_first_nibble,
+            remaining_longer,
+        ));
     }
 
     let node = from_two_entries(remaining_shorter, remaining_longer)?;
@@ -54,8 +61,8 @@ mod tests {
 
     #[test]
     fn two_empty_keys() {
-        let first_entry = ([], [42]).into();
-        let second_entry = ([], [43]).into();
+        let first_entry = ([], [42]);
+        let second_entry = ([], [43]);
 
         let result = from_two_entries(first_entry, second_entry);
         assert_eq!(result.unwrap_err(), NodeError::DuplicateKey);
@@ -63,8 +70,8 @@ mod tests {
 
     #[test]
     fn one_empty_key() -> anyhow::Result<()> {
-        let first_entry = ([], [42]).into();
-        let second_entry = ([0x0], [43]).into();
+        let first_entry = ([], [42]);
+        let second_entry = ([0x0], [43]);
         let node = from_two_entries(first_entry, second_entry)?;
 
         let expected_node =
@@ -76,16 +83,16 @@ mod tests {
 
     #[test]
     fn duplicate_key() {
-        let old_entry = ([0], [42]).into();
-        let entry = ([0], [43]).into();
+        let old_entry = ([0], [42]);
+        let entry = ([0], [43]);
         let result = from_two_entries(old_entry, entry);
         assert_eq!(result.unwrap_err(), NodeError::DuplicateKey);
     }
 
     #[test]
     fn different_single_nibbles() -> anyhow::Result<()> {
-        let first_entry = ([0x0], [42]).into();
-        let second_entry = ([0x1], [43]).into();
+        let first_entry = ([0x0], [42]);
+        let second_entry = ([0x1], [43]);
 
         let node = from_two_entries(first_entry, second_entry)?;
 
@@ -102,8 +109,8 @@ mod tests {
 
     #[test]
     fn no_common_prefix() -> anyhow::Result<()> {
-        let first_entry = ([0x0, 0x0], [42]).into();
-        let second_entry = ([0x1, 0x0], [43]).into();
+        let first_entry = ([0x0, 0x0], [42]);
+        let second_entry = ([0x1, 0x0], [43]);
         let node = from_two_entries(first_entry, second_entry)?;
 
         let expected_node =
@@ -115,8 +122,8 @@ mod tests {
 
     #[test]
     fn common_prefix() -> anyhow::Result<()> {
-        let first_entry = ([0x0, 0x0], [42]).into();
-        let second_entry = ([0x0, 0x1], [43]).into();
+        let first_entry = ([0x0, 0x0], [42]);
+        let second_entry = ([0x0, 0x1], [43]);
 
         let node = from_two_entries(first_entry, second_entry)?;
 
@@ -134,8 +141,8 @@ mod tests {
 
     #[test]
     fn long_common_prefix() -> anyhow::Result<()> {
-        let first_entry = ([0x0, 0x1, 0x0], [42]).into();
-        let second_entry = ([0x0, 0x1, 0x1], [43]).into();
+        let first_entry = ([0x0, 0x1, 0x0], [42]);
+        let second_entry = ([0x0, 0x1, 0x1], [43]);
 
         let node = from_two_entries(first_entry, second_entry)?;
 
@@ -153,8 +160,8 @@ mod tests {
 
     #[test]
     fn common_prefix_with_different_long_suffix() -> anyhow::Result<()> {
-        let first_entry = ([0x0, 0x0, 0x1], [42]).into();
-        let second_entry = ([0x0, 0x1, 0x0], [43]).into();
+        let first_entry = ([0x0, 0x0, 0x1], [42]);
+        let second_entry = ([0x0, 0x1, 0x0], [43]);
 
         let node = from_two_entries(first_entry, second_entry)?;
 
