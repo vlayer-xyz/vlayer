@@ -16,13 +16,3 @@ impl From<ProofMode> for HostProofMode {
         }
     }
 }
-
-impl ProofMode {
-    pub fn set_risc0_flag(&self) {
-        let value = match self {
-            ProofMode::Groth16 => "0",
-            ProofMode::Fake => "1",
-        };
-        std::env::set_var("RISC0_DEV_MODE", value);
-    }
-}
