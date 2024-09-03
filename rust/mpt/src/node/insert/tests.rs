@@ -115,4 +115,33 @@ mod insert {
             Ok(())
         }
     }
+
+    #[cfg(test)]
+    mod into_extension {
+        use super::*;
+
+        #[test]
+        fn duplicate_key() {
+            let node = Node::extension([0x0], Node::branch_with_value([42]));
+            let result = node.insert([0x0], [43]);
+            assert_eq!(result.unwrap_err(), NodeError::DuplicateKey);
+        }
+
+        #[test]
+        fn new_key() -> anyhow::Result<()> {
+            let extension = Node::extension([0x0, 0x0, 0x0], Node::branch_with_value([42]));
+            let node = extension.insert([0x0, 0x1], [43])?;
+
+            let expected_child = Node::branch_with_two_children(
+                0,
+                Node::extension([0x0], Node::branch_with_value([42])),
+                1,
+                Node::branch_with_value([43]),
+            );
+            let expected_node = Node::extension([0x0], expected_child);
+
+            assert_eq!(node, expected_node);
+            Ok(())
+        }
+    }
 }
