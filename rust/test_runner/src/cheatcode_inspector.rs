@@ -1,14 +1,14 @@
+use alloy_primitives::U256;
 use alloy_sol_types::{SolCall, SolType};
 use call_engine::io::{Call, HostOutput};
 use call_engine::utils::evm_call::{
     create_encoded_return_outcome, create_return_outcome, create_revert_outcome, split_calldata,
 };
-use call_engine::{ExecutionCommitment, Proof, Seal};
+use call_engine::{Proof, Seal};
 use call_host::host::config::HostConfig;
 use call_host::host::Host;
 use foundry_config::RpcEndpoints;
 use foundry_evm::revm::interpreter::{CallInputs, CallOutcome};
-use foundry_evm::revm::primitives::U256;
 use foundry_evm::revm::{Database, EvmContext, Inspector};
 
 use crate::cheatcodes::{callProverCall, getProofCall, CHEATCODE_CALL_ADDR};
@@ -92,15 +92,9 @@ impl CheatcodeInspector {
 
         Proof {
             seal: decoded_seal,
-            length: Self::proof_length(host_output),
+            length: U256::from(host_output.proof_len),
             commitment,
         }
-    }
-
-    fn proof_length(host_output: &HostOutput) -> U256 {
-        (ExecutionCommitment::size() + host_output.guest_output.evm_call_result.len())
-            .try_into()
-            .unwrap()
     }
 }
 

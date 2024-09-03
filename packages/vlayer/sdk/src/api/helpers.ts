@@ -74,12 +74,7 @@ type DeploySpec<T extends Abi> = {
   };
 };
 
-type Tail<T extends readonly unknown[]> = T extends readonly [
-  unknown,
-  ...infer U,
-]
-  ? U
-  : [];
+type Tail<T> = T extends readonly [unknown, ...infer U] ? U : [];
 
 export async function deployProverVerifier<
   P extends Abi,

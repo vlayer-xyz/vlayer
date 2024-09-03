@@ -16,6 +16,7 @@ tokio = { workspace = true }
 tower = { workspace = true }
 tracing = { workspace = true }
 alloy-primitives = { workspace = true }
+alloy-sol-types = { workspace = true }
 hex = { workspace = true }
 axum-jrpc = { workspace = true }
 call_host = { path = "../host" }

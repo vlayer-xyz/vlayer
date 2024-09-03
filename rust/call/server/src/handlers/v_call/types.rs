@@ -1,14 +1,15 @@
 use crate::error::AppError;
 use alloy_chains::Chain;
 use alloy_primitives::hex::ToHexExt;
-use alloy_primitives::{Address, ChainId, FixedBytes};
+use alloy_primitives::{ChainId, U256};
+use alloy_sol_types::SolValue;
 use call_engine::io::HostOutput;
+use call_engine::{Proof, Seal};
+use call_host::host::error::HostError;
 use call_host::Call as HostCall;
 use serde::{Deserialize, Serialize};
+use serde_json::{json, Value};
 use server_utils::{parse_address_field, parse_hex_field};
-
-const SELECTOR_LEN: usize = 4;
-const HASH_LEN: usize = 32;
 
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
@@ -39,45 +40,62 @@ pub struct CallContext {
     pub chain_id: ChainId,
 }
 
-#[derive(Deserialize, Serialize, Debug)]
 pub struct CallResult {
-    evm_call_result: String,
-    function_selector: FixedBytes<SELECTOR_LEN>,
-    prover_contract_address: Address,
-    seal: String,
-    block_no: u64,
-    block_hash: FixedBytes<HASH_LEN>,
+    proof: Proof,
+    evm_call_result: Vec<u8>,
 }
 
-impl From<HostOutput> for CallResult {
-    fn from(host_output: HostOutput) -> Self {
-        Self {
-            evm_call_result: host_output
-                .guest_output
-                .evm_call_result
-                .encode_hex_with_prefix(),
-            function_selector: host_output
-                .guest_output
-                .execution_commitment
-                .functionSelector,
-            prover_contract_address: host_output
-                .guest_output
-                .execution_commitment
-                .proverContractAddress,
-            seal: host_output.seal.encode_hex_with_prefix(),
-            block_no: u64::try_from(
-                host_output
-                    .guest_output
-                    .execution_commitment
-                    .settleBlockNumber,
-            )
-            .unwrap(),
-            block_hash: host_output
-                .guest_output
-                .execution_commitment
-                .settleBlockHash,
-        }
+impl CallResult {
+    pub fn to_json(&self) -> Value {
+        json!({
+            "evm_call_result": self.evm_call_result.encode_hex_with_prefix(),
+            "proof": {
+                "length": u256_to_number(self.proof.length),
+                "seal": {
+                    "verifierSelector": self.proof.seal.verifierSelector,
+                    "seal": self.proof.seal.seal,
+                    "mode": Into::<u8>::into(self.proof.seal.mode),
+                },
+                "commitment": {
+                    "functionSelector": self.proof.commitment.functionSelector,
+                    "proverContractAddress": self.proof.commitment.proverContractAddress,
+                    "settleBlockNumber": u256_to_number(self.proof.commitment.settleBlockNumber),
+                    "settleBlockHash": self.proof.commitment.settleBlockHash,
+                }
+            },
+        })
     }
+}
+
+impl TryFrom<HostOutput> for CallResult {
+    type Error = HostError;
+
+    fn try_from(host_output: HostOutput) -> Result<Self, Self::Error> {
+        let HostOutput {
+            guest_output,
+            seal,
+            proof_len,
+            ..
+        } = host_output;
+        let proof = Proof {
+            seal: decode_seal(seal)?,
+            commitment: guest_output.execution_commitment,
+            length: U256::from(proof_len),
+        };
+        Ok(Self {
+            proof,
+            evm_call_result: guest_output.evm_call_result,
+        })
+    }
+}
+
+fn decode_seal(seal: Vec<u8>) -> Result<Seal, HostError> {
+    Seal::abi_decode(&seal, true)
+        .map_err(|_| HostError::SealEncodingError(format!("Invalid seal: {:x?}", seal)))
+}
+
+fn u256_to_number(value: U256) -> u64 {
+    u64::try_from(value).expect("Expected value to fit into u64")
 }
 
 #[cfg(test)]

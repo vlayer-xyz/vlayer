@@ -86,6 +86,8 @@ where
             into_multi_input(self.envs).map_err(|err| HostError::CreatingInput(err.to_string()))?;
         let env = Self::build_executor_env(self.start_execution_location, multi_evm_input, call)?;
         let (seal, raw_guest_output) = Self::prove(env, RISC0_CALL_GUEST_ELF)?;
+
+        let proof_len = raw_guest_output.len();
         let guest_output = GuestOutput::from_outputs(&host_output, &raw_guest_output)?;
 
         if guest_output.evm_call_result != host_output {
@@ -99,6 +101,7 @@ where
             guest_output,
             seal,
             raw_abi: raw_guest_output,
+            proof_len,
         })
     }
 

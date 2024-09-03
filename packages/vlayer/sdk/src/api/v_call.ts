@@ -12,17 +12,28 @@ export type CallContext = {
 };
 
 export interface Proof {
+  length: bigint;
+  seal: {
+    verifierSelector: Hex;
+    seal: [Hex, Hex, Hex, Hex, Hex, Hex, Hex, Hex];
+    mode: number;
+  };
+  commitment: {
+    proverContractAddress: Address;
+    functionSelector: Hex;
+    settleBlockHash: Hex;
+    settleBlockNumber: bigint;
+  };
+}
+
+export interface VCallResult {
   evm_call_result: Hex;
-  function_selector: Hex;
-  block_no: number;
-  block_hash: Hex;
-  prover_contract_address: Address;
-  seal: Hex;
+  proof: Proof;
 }
 
 export interface VCallResponse {
   jsonrpc: string;
-  result: Proof;
+  result: VCallResult;
   id: number;
 }
 

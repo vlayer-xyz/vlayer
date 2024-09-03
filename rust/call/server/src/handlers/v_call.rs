@@ -27,5 +27,5 @@ pub async fn v_call(config: Arc<ServerConfig>, params: Params) -> Result<CallRes
     let return_data =
         tokio::task::spawn_blocking(|| Host::try_new(host_config)?.run(call)).await??;
 
-    Ok(return_data.into())
+    return_data.try_into().map_err(AppError::Host)
 }
