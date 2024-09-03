@@ -27,10 +27,7 @@ contract Airdrop is Verifier {
         TOKEN = new AwesomeToken();
     }
 
-    function claim(Proof calldata, address sender)
-        public
-        onlyVerified(PROVER, FUNCTION_SELECTOR)
-    {
+    function claim(Proof calldata, address sender) public onlyVerified(PROVER, FUNCTION_SELECTOR) {
         require(withdrawn[sender] == false, "Already withdrawn");
         withdrawn[sender] = true;
         TOKEN.transfer(sender, 1000);

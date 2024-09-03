@@ -43,3 +43,9 @@ jobs:
         working-directory: ./contracts
         run: |
           forge test -vvv
+      - name: Run Forge formatter (examples)
+        run: |
+          forge fmt ./examples --check
+      - name: Run Forge formatter (vlayer contracts)
+        run: |
+          forge fmt ./contracts/src --check
