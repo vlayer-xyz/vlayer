@@ -18,5 +18,5 @@
     "lint:fix": "eslint . --fix"
   },
   "type": "module",
-  "workspaces": ["*"]
+  "workspaces": ["vlayer/*", "browser-plugin"]
 }

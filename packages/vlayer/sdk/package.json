@@ -1,7 +1,8 @@
 {
   "name": "@vlayer/sdk",
   "type": "module",
-  "module": "src/index.ts",
+  "main": "src/index.ts",
+  "types": "src/index.ts",
   "version": "0.0.2",
   "scripts": {
     "build": "npm run gen:types",
