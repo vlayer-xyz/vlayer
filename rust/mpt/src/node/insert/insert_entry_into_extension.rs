@@ -1,7 +1,10 @@
+use crate::node::insert::insert_entry_into_extension::from_extension_and_entry_empty_common_prefix::from_extension_and_entry_empty_common_prefix;
 use crate::node::{Node, NodeError};
 
 use super::entry::Entry;
 use super::utils::extract_common_prefix;
+
+mod from_extension_and_entry_empty_common_prefix;
 
 impl Node {
     pub(crate) fn insert_entry_into_extension(
@@ -21,6 +24,11 @@ impl Node {
             return Ok(Node::extension(common_prefix, child_node));
         }
 
+        if common_prefix.is_empty() {
+            let remaining_extension = Node::extension(remaining_extension_key, *child_node);
+            return from_extension_and_entry_empty_common_prefix(remaining_extension, entry);
+        }
+
         todo!();
     }
 }
@@ -34,6 +42,22 @@ mod tests {
     fn unreachable() {
         let null = Node::Null;
         null.insert_entry_into_extension(([], [42])).unwrap();
+    }
+
+    #[test]
+    fn common_prefix_empty() -> anyhow::Result<()> {
+        let node = Node::extension([0x0], Node::branch_with_value([42]));
+        let updated_node = node.insert_entry_into_extension(([0x1], [43]))?;
+
+        let expected_node = Node::branch_with_two_children(
+            0,
+            Node::branch_with_value([42]),
+            1,
+            Node::branch_with_value([43]),
+        );
+
+        assert_eq!(updated_node, expected_node);
+        Ok(())
     }
 
     mod common_prefix_non_empty {

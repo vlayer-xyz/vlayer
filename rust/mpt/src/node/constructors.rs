@@ -1,3 +1,5 @@
+use crate::key_nibbles::KeyNibbles;
+
 use super::Node;
 
 pub const EMPTY_CHILD: std::option::Option<Box<Node>> = None;
@@ -9,8 +11,8 @@ impl Node {
         Node::Leaf(key_nibs.into(), value.as_ref().into())
     }
 
-    pub(crate) fn extension(key_nibs: impl AsRef<[u8]>, value: Node) -> Node {
-        Node::Extension(key_nibs.into(), value.into())
+    pub(crate) fn extension(key_nibs: impl AsRef<[u8]>, value: impl Into<Node>) -> Node {
+        Node::Extension(key_nibs.into(), value.into().into())
     }
 
     #[allow(unused)]
@@ -46,6 +48,18 @@ impl Node {
         children[first_idx as usize] = Some(Box::new(first_child.into()));
         children[second_idx as usize] = Some(Box::new(second_child.into()));
         Node::Branch(children, None)
+    }
+
+    #[allow(unused)]
+    pub(crate) fn branch_with_child_node(key: KeyNibbles, child_node: impl Into<Node>) -> Node {
+        let (first_key_nibble, remaining_key_nibbles) = key.split_first();
+        let node = if remaining_key_nibbles.is_empty() {
+            child_node.into()
+        } else {
+            Node::extension(remaining_key_nibbles, child_node)
+        };
+
+        Node::branch_with_child(first_key_nibble, node)
     }
 
     fn branch_with_children_and_value(

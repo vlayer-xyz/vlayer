@@ -22,6 +22,12 @@ impl KeyNibbles {
         KeyNibbles(Nibbles::from_vec(nibbles))
     }
 
+    pub(crate) fn split_first(&self) -> (u8, &[u8]) {
+        let first = self.0[0];
+        let rest = &self.0[1..];
+        (first, rest)
+    }
+
     fn from_nibbles(nibbles: Nibbles) -> Self {
         if nibbles.is_empty() {
             panic!("KeyNibbles cannot be empty");
