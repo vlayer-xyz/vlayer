@@ -72,7 +72,7 @@ mod tests {
         // In case where extension nibbles is a prefix of inserted key
         // we delegate insertion to the child node.
         // We test this by comparing the result of inserting to the child node directly.
-        fn insert_into_child_node() -> anyhow::Result<()> {
+        fn into_child_node() -> anyhow::Result<()> {
             let child_node = Node::branch_with_value([42]);
             let node = Node::extension([0x0], child_node.clone());
 
@@ -83,42 +83,21 @@ mod tests {
             Ok(())
         }
 
-        mod remaining_extension_key_non_empty {
-            use super::*;
+        #[test]
+        fn into_extension_node_directly() -> anyhow::Result<()> {
+            let extension = Node::extension([0x0, 0x0], Node::branch_with_value([42]));
+            let node = extension.insert_entry_into_extension(([0x0, 0x1], [43]))?;
 
-            #[test]
-            fn single_nibble_remaining_extension_key() -> anyhow::Result<()> {
-                let extension = Node::extension([0x0, 0x0], Node::branch_with_value([42]));
-                let node = extension.insert_entry_into_extension(([0x0, 0x1], [43]))?;
+            let child_node = Node::branch_with_two_children(
+                0,
+                Node::branch_with_value([42]),
+                1,
+                Node::branch_with_value([43]),
+            );
+            let expected_node = Node::extension([0x0], child_node);
 
-                let child_node = Node::branch_with_two_children(
-                    0,
-                    Node::branch_with_value([42]),
-                    1,
-                    Node::branch_with_value([43]),
-                );
-                let expected_node = Node::extension([0x0], child_node);
-
-                assert_eq!(node, expected_node);
-                Ok(())
-            }
-
-            #[test]
-            fn multiple_nibbles_remaining_extension_key() -> anyhow::Result<()> {
-                let extension = Node::extension([0x0, 0x0, 0x0], Node::branch_with_value([42]));
-                let node = extension.insert_entry_into_extension(([0x0, 0x1], [43]))?;
-
-                let expected_child = Node::branch_with_two_children(
-                    0,
-                    Node::extension([0x0], Node::branch_with_value([42])),
-                    1,
-                    Node::branch_with_value([43]),
-                );
-                let expected_node = Node::extension([0x0], expected_child);
-
-                assert_eq!(node, expected_node);
-                Ok(())
-            }
+            assert_eq!(node, expected_node);
+            Ok(())
         }
     }
 }
