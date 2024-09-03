@@ -42,8 +42,16 @@ jobs:
           cargo fmt --check
           cargo clippy --all-targets --all-features
 
-      - name: Run Clippy Risc0 Guest
+      - name: Run Clippy Risc0 Call Guest
         working-directory: rust/call/guest_wrapper/risc0_guest
+        env:
+          RUSTFLAGS: "-Dwarnings"
+        run: |
+          cargo fmt --check
+          cargo clippy --all-targets --all-features
+      
+      - name: Run Clippy Risc0 Chain Guest
+        working-directory: rust/prove_chain/guest_wrapper/risc0_guest
         env:
           RUSTFLAGS: "-Dwarnings"
         run: |

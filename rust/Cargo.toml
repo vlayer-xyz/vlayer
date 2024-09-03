@@ -3,6 +3,7 @@ resolver = "2"
 members = [
     "prove_chain/host",
     "prove_chain/guest",
+    "prove_chain/guest_wrapper",
     "prove_chain/engine",
     "prove_chain/server",
 

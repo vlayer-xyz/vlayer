@@ -1,5 +1,5 @@
 [package]
-name = "block_proof_engine"
+name = "prove_chain_engine"
 version = "0.1.0"
 edition = "2021"
 

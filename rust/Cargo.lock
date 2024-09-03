@@ -1567,21 +1567,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "block_proof_engine"
-version = "0.1.0"
-dependencies = [
- "serde",
-]
-
-[[package]]
-name = "block_proof_guest"
-version = "0.1.0"
-
-[[package]]
-name = "block_proof_host"
-version = "0.1.0"
-
-[[package]]
 name = "blst"
 version = "0.3.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6654,6 +6639,31 @@ checksum = "6872f4d4f4b98303239a2b5838f5bbbb77b01ffc892d627957f37a22d7cfe69c"
 dependencies = [
  "thiserror",
 ]
+
+[[package]]
+name = "prove_chain_engine"
+version = "0.1.0"
+dependencies = [
+ "serde",
+]
+
+[[package]]
+name = "prove_chain_guest"
+version = "0.1.0"
+dependencies = [
+ "prove_chain_engine",
+]
+
+[[package]]
+name = "prove_chain_guest_wrapper"
+version = "0.1.0"
+dependencies = [
+ "risc0-build",
+]
+
+[[package]]
+name = "prove_chain_host"
+version = "0.1.0"
 
 [[package]]
 name = "prove_chain_server"
