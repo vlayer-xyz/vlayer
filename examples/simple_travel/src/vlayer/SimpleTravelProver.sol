@@ -21,8 +21,8 @@ contract SimpleTravelProver is Prover {
         }
     }
 
-    function multichainBalanceOf(address _owner, Erc20Token[] memory _tokens) public returns (address, uint256) {
-        uint256 sum = 0;
+    function crossChainBalanceOf(address _owner, Erc20Token[] memory _tokens) public returns (address, uint256) {
+        uint256 crossChainBalance = 0;
 
         for (uint256 i = 0; i < _tokens.length; i++) {
             Erc20Token memory token = permittedTokens[_tokens[i].contractAddr];
@@ -30,9 +30,9 @@ contract SimpleTravelProver is Prover {
             require(token.blockNumber == _tokens[i].blockNumber, "wrong block no");
 
             setChain(token.chainId, token.blockNumber);
-            sum += IERC20(token.contractAddr).balanceOf(_owner);
+            crossChainBalance += IERC20(token.contractAddr).balanceOf(_owner);
         }
 
-        return (_owner, sum);
+        return (_owner, crossChainBalance);
     }
 }

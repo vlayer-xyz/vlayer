@@ -91,7 +91,7 @@ const proverParams = [
 const { proof, returnValue } = await prove(
   proverAddr,
   simpleTravelProver.abi,
-  "multichainBalanceOf",
+  "crossChainBalanceOf",
   proverParams,
 );
 console.log("Response:", proof, returnValue);

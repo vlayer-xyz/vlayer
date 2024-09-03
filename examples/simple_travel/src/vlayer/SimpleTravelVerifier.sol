@@ -17,13 +17,13 @@ contract SimpleTravel is Verifier {
         reward = _nft;
     }
 
-    function claim(Proof calldata, address claimer, uint256 sum)
+    function claim(Proof calldata, address claimer, uint256 crossChainBalance)
         public
-        onlyVerified(prover, SimpleTravelProver.multichainBalanceOf.selector)
+        onlyVerified(prover, SimpleTravelProver.crossChainBalanceOf.selector)
     {
         require(!claimed[claimer], "Already claimed");
 
-        if (sum >= 10_000_000) {
+        if (crossChainBalance >= 10_000_000) {
             claimed[claimer] = true;
             reward.mint(claimer);
         }
