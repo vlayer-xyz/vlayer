@@ -14,8 +14,8 @@ impl Node {
         let Node::Extension(key, child_node) = self else {
             unreachable!("insert_entry_into_extension is used only for Extension nodes");
         };
-
         let entry = entry.into();
+
         let (common_prefix, remaining_extension_key, remaining_entry_key) =
             extract_common_prefix(&key, &entry.key);
 

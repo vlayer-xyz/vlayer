@@ -21,8 +21,8 @@ impl Node {
             Node::Null => Ok(Entry::from((key, value)).into()),
             Node::Digest(_) => panic!("Cannot insert into a digest node"),
             Node::Leaf(old_key, old_value) => {
-                let old_entry = (&**old_key, old_value).into();
-                let entry = (key, value).into();
+                let old_entry = (&**old_key, old_value);
+                let entry = (key, value);
                 from_two_entries(old_entry, entry)
             }
             Node::Branch(_, _) => self.insert_entry_into_branch((key, value)),
