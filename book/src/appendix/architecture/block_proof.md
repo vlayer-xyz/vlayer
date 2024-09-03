@@ -40,8 +40,8 @@ Unfortunately, this is a slow process, especially if the blocks are far apart on
 ## Block Proof Cache
 
 The Block Proof Cache service maintains two things:
-- a Block Proof Cache structure (Merkle Patricia Trie) that stores block hashes,
-- a ZK proof 𝜋 that all these hashes belong to the same chain.
+- a Block Proof Cache structure (a Merkle Patricia Trie) that stores block hashes,
+- a zk-proof 𝜋 that all these hashes belong to the same chain.
 
 Given these two elements, it is easy to prove that a set of hashes belongs to the same chain.
 1. It needs to be verified that all the hashes are part of the Block Proof Cache structure.
@@ -53,7 +53,9 @@ The Block Proof Cache structure is a dictionary that stores a `<block_number, bl
 
 #### Adding hashes to the BPC structure and maintaining 𝜋
 
-At all times, the blocks stored in the BPC structure form a consistent subchain. In other words, we preserve the invariant that for every pair of block numbers `i, i+1` contained in the structure, `block(i + 1).parentHash = hash(block(i))`.
+At all times, the blocks stored in the BPC structure form a consistent subchain. In other words, we preserve the invariant that:
+- for every pair of block numbers `i, j` contained in the structure and every `k` such that `i < k < j`, `k` is also contained in the structure,
+- for every pair of block numbers `i, i+1` contained in the structure, `block(i + 1).parentHash = hash(block(i))`.
 
 Each time a block is added, 𝜋 is updated. To prove that after adding a new block, all the blocks in the BPC structure belong to the same chain, two things must be done:
 - The previous 𝜋 must be verified.
@@ -123,16 +125,16 @@ fn prepend(elf_id: Hash, child_block: BlockHeader, mpt: SparseMpt<ChildBlockIdx,
 }
 ```
 
-### ProveChain server
+### Prove Chain server
 
-Block Proof Cache are stored in a distinct type of vlayer node, specifically a JSON-RPC server. It consists mainly of a single call `v_getBlockProofs(block_no: int[])`. This call takes one argument: an array of block numbers for the requested proofs. It returns a triplet: an array of Merkle proofs for each requested block, the root hash of the Merkle Patricia Trie structure, and π - a zk-proof of the correctness of the constructed MPT.
+Block Proof Cache structure is stored in a distinct type of vlayer node, specifically a JSON-RPC server. It consists of a single call `v_proveChain(block_hashes: Hash[])`. This call takes an array of block hashes as an argument and, if succeeds, returns 𝜋 - the zk-proof that all the hashes belong to the same chain.
 
 An example call could look like this:
 
 ```json
 {
-  "method": "v_getBlockProofs",
-  "params": [1231, 123123123, 312312]
+  "method": "v_proveChain",
+  "params": ["0xb2b3e25c8939198cfeef52980defe56bdc96b8ea8459f2dc518ebc54e80f55a2", "0x162f1aa6efac84780a1cdba8f61e9d381cf103600b6122c8c56f4ebf3395beeb", "0x67df7671915189f30b83869a794df3acfaab6ed0b4644f81a2779866789a4412"]
 }
 ```
 
@@ -141,13 +143,7 @@ And the response:
 ```json
 {
     "result": [
-        [
-            [...],
-            [...],
-            [...]
-        ],
-        "0xe32ddb9c538f04c994e2e802237fa5f4c4e7e2643ab48bd8535b1c7009c8aa81",
-        "0x9c538f04c994e2e802237fa5f4c4e7e2643ab48bd8535b1c7009c8aa81e32ddb"
+        "0xe32ddb9c538f04c994e2e802237fa5f4c4e7e2643ab48bd8535b1c7009c8aa81"
     ]
 }
 ```
