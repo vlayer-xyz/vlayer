@@ -1,22 +1,34 @@
-# Contributing to vlayer book
+# Contributing to vlayer Book
 
 ## Prerequisites
-
-To build this book, you will need `mdbook` installed:
+Ensure you have [Rust](https://www.rust-lang.org/learn) and the [Cargo package manager](https://doc.rust-lang.org/cargo/) installed:
 ```sh
-cargo install mdbook
+curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh
 ```
 
-To compile diagrams in the book, you need to install [mdbook-mermaid](https://github.com/badboy/mdbook-mermaid) preprocessor:
+After installing Rust, install the required dependencies:
+- `mdbook`: A command-line tool for creating books with Markdown.
+- `mdbook-mermaid`: A preprocessor for compiling Mermaid diagrams.
+- `mdbook-tabs`: A plugin for adding tab functionality to the book.
+
 ```sh
-cargo install mdbook-mermaid
+cargo install mdbook mdbook-mermaid mdbook-tabs
 ```
 
-## Building
+## Development
 
-Book source is available in the vlayer monorepo. To build the book navigate to `book/` and type:
-```
+The book's source is in the vlayer monorepo. To start the development server, navigate to the `book/` directory and run:
+```sh
 mdbook serve
 ```
 
-Now, the preview of the book is available at `http://localhost:3000/`.
+Whenever you update the book's source, the preview will automatically refresh. Access the preview at `http://localhost:3000`.
+
+## Building
+
+To build the book, navigate to the `book/` directory and run:
+```sh
+mdbook build
+```
+
+The static HTML output will be generated in the `book/book` directory. You can use this output to preview the book locally or deploy it to a static site hosting service.
