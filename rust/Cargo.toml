@@ -66,15 +66,15 @@ derive_more = "0.99.18"
 ethers = "2.0"
 ethers-core = { version = "2.0", default-features = false }
 flate2 = "1.0.30"
-forge = { git = "https://github.com/foundry-rs/foundry", default-features = false }
-foundry-cheatcodes = { git = "https://github.com/foundry-rs/foundry" }
-foundry-cli = { git = "https://github.com/foundry-rs/foundry", default-features = false }
-foundry-common = { git = "https://github.com/foundry-rs/foundry" }
+forge = { git = "https://github.com/foundry-rs/foundry", rev = "cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5", default-features = false }
+foundry-cheatcodes = { git = "https://github.com/foundry-rs/foundry", rev = "cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5" }
+foundry-cli = { git = "https://github.com/foundry-rs/foundry", rev = "cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5", default-features = false }
+foundry-common = { git = "https://github.com/foundry-rs/foundry", rev = "cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5" }
 foundry-compilers = { version = "0.9.0", default-features = false }
-foundry-config = { git = "https://github.com/foundry-rs/foundry", default-features = false }
-foundry-debugger = { git = "https://github.com/foundry-rs/foundry" }
-foundry-evm = { git = "https://github.com/foundry-rs/foundry" }
-foundry-evm-core = { git = "https://github.com/foundry-rs/foundry" }
+foundry-config = { git = "https://github.com/foundry-rs/foundry", rev = "cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5", default-features = false }
+foundry-debugger = { git = "https://github.com/foundry-rs/foundry", rev = "cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5" }
+foundry-evm = { git = "https://github.com/foundry-rs/foundry", rev = "cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5" }
+foundry-evm-core = { git = "https://github.com/foundry-rs/foundry", rev = "cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5" }
 hex = "0.4.3"
 http-body-util = "0.1.2"
 lazy_static = "1.5.0"
