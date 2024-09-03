@@ -28,7 +28,16 @@ export type ContractSpec = {
   bytecode: Bytecode;
 };
 
-export type ContractArg = number | string | boolean;
+export type ContractArg =
+  | number
+  | string
+  | boolean
+  | Address
+  | number[]
+  | string[]
+  | boolean[]
+  | bigint[]
+  | Address[];
 
 const EXECUTION_COMMITMENT_FIELDS_COUNT = 4;
 const FIELD_SIZE_IN_BYTES = 32;

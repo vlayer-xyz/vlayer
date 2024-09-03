@@ -1,36 +1,106 @@
 import type { Address } from "viem";
 
-import { testHelpers, prove } from "@vlayer/sdk";
-import otherChainContractSpec from "../out/OtherChainContract.sol/OtherChainContract";
+import { testHelpers, prove, createTestClient } from "@vlayer/sdk";
 import simpleTravelProver from "../out/SimpleTravelProver.sol/SimpleTravelProver";
+import exampleToken from "../out/ExampleToken.sol/ExampleToken";
 import simpleTravelVerifier from "../out/SimpleTravelVerifier.sol/SimpleTravel";
-import { testChainId2 } from "../../../packages/vlayer/sdk/src/api/helpers";
+import exampleNFT from "../out/ExampleNFT.sol/ExampleNFT";
 
-const [prover, verifier] = await testHelpers.deployProverVerifier(
-  simpleTravelProver,
-  simpleTravelVerifier,
-);
+const john = testHelpers.getTestAccount();
 
-console.log("Deploying a contract on anvil 2");
-const otherChainContract: Address = await testHelpers.deployContract(
-  otherChainContractSpec,
-  [],
-  testChainId2,
+const deployTestTokens = async (
+  tester: Address,
+  chainA: number,
+  chainB: number,
+) => {
+  console.log("Deploying example erc20 token on searate chains");
+  const tokenA: Address = await testHelpers.deployContract(
+    exampleToken,
+    [tester, 10_000_000_000],
+    chainA,
+  );
+  const tokenB: Address = await testHelpers.deployContract(
+    exampleToken,
+    [tester, 10_000_000_000],
+    chainB,
+  );
+  const rewardNFT: Address = await testHelpers.deployContract(
+    exampleNFT,
+    [],
+    chainA,
+  );
+
+  return [tokenA, tokenB, rewardNFT];
+};
+
+const deployProver = async (
+  tokens: Address[],
+  chainIds: number[],
+  blockNumbers: number[],
+) => {
+  const prover: Address = await testHelpers.deployContract(simpleTravelProver, [
+    tokens,
+    chainIds,
+    blockNumbers,
+  ]);
+
+  return prover;
+};
+
+const deployVerifier = async (prover: Address, rewardNFT: Address) => {
+  const verifier: Address = await testHelpers.deployContract(
+    simpleTravelVerifier,
+    [prover, rewardNFT],
+  );
+
+  return verifier;
+};
+
+const getCurrentBlockNumbers = async () => {
+  const clientA = await createTestClient(chainA);
+  const blockNumberA = await clientA.getBlockNumber();
+  const clientB = await createTestClient(chainB);
+  const blockNumberB = await clientB.getBlockNumber();
+
+  return [blockNumberA, blockNumberB];
+};
+
+const [chainA, chainB] = testHelpers.chainIds;
+const [tokenA, tokenB, rewardNFT] = await deployTestTokens(
+  john.address,
+  chainA,
+  chainB,
 );
-console.log(`Contract has been deployed on ${otherChainContract} address`);
 
 console.log("Proving...");
-const { proof, returnValue } = await prove(
-  prover,
-  simpleTravelProver.abi,
-  "aroundTheWorld",
-  [],
+const [blockNumberA, blockNumberB] = await getCurrentBlockNumbers();
+const proverAddr = await deployProver(
+  [tokenA, tokenB],
+  [chainA, chainB],
+  [blockNumberA, blockNumberB],
 );
-console.log("Proof:", proof);
 
-console.log("Verifying...");
-await testHelpers.writeContract(verifier, simpleTravelVerifier.abi, "verify", [
-  proof,
-  returnValue,
-]);
-console.log("Verified!");
+const proverParams = [
+  john.address,
+  [
+    [tokenA, chainA, blockNumberA],
+    [tokenB, chainB, blockNumberB],
+  ],
+];
+
+const { proof, returnValue } = await prove(
+  proverAddr,
+  simpleTravelProver.abi,
+  "crossChainBalanceOf",
+  proverParams,
+);
+console.log("Response:", proof, returnValue);
+
+const verifierAddr = await deployVerifier(proverAddr, rewardNFT);
+const receipt = await testHelpers.writeContract(
+  verifierAddr,
+  simpleTravelVerifier.abi,
+  "claim",
+  [proof, ...returnValue],
+);
+console.log(`Verification result: ${receipt.status}`);

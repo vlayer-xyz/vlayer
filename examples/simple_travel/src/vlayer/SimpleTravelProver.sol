@@ -2,19 +2,37 @@
 pragma solidity ^0.8.13;
 
 import {Prover} from "vlayer/Prover.sol";
-
-interface IExample {
-    function example() external pure returns (uint256);
-}
+import {ExampleToken} from "./ExampleToken.sol";
+import {IERC20} from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
 
 contract SimpleTravelProver is Prover {
-    function aroundTheWorld() public returns (uint256) {
-        // Important: the address of otherChainContract depends on when it was deployed on anvil 2.
-        address otherChainContract = 0x5FbDB2315678afecb367f032d93F642f64180aa3;
-        uint256 testChainId2 = 1114;
-        uint256 blockNo = 1;
+    struct Erc20Token {
+        address contractAddr;
+        uint256 chainId;
+        uint256 blockNumber;
+    }
 
-        setChain(testChainId2, blockNo);
-        return IExample(otherChainContract).example();
+    mapping(address => Erc20Token) public permittedTokens;
+
+    constructor(address[] memory _tokens, uint256[] memory _chainIds, uint256[] memory _blockNumbers) {
+        require(_tokens.length == _chainIds.length && _tokens.length == _blockNumbers.length, "Invalid input length");
+        for (uint256 i = 0; i < _tokens.length; i++) {
+            permittedTokens[_tokens[i]] = Erc20Token(_tokens[i], _chainIds[i], _blockNumbers[i]);
+        }
+    }
+
+    function crossChainBalanceOf(address _owner, Erc20Token[] memory _tokens) public returns (address, uint256) {
+        uint256 crossChainBalance = 0;
+
+        for (uint256 i = 0; i < _tokens.length; i++) {
+            Erc20Token memory token = permittedTokens[_tokens[i].contractAddr];
+            require(token.contractAddr != address(0), "token not permitted");
+            require(token.blockNumber == _tokens[i].blockNumber, "wrong block no");
+
+            setChain(token.chainId, token.blockNumber);
+            crossChainBalance += IERC20(token.contractAddr).balanceOf(_owner);
+        }
+
+        return (_owner, crossChainBalance);
     }
 }
