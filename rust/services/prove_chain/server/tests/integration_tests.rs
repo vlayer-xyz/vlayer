@@ -1,5 +1,5 @@
 use axum::http::StatusCode;
-use prove_chain_server::server;
+use prove_chain_server::server::server;
 use serde_json::json;
 use server_utils::{body_to_json, post};
 
