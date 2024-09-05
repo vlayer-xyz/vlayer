@@ -126,8 +126,7 @@ where
     fn from_iter<I: IntoIterator<Item = (K, V)>>(iter: I) -> Self {
         let mut trie = MerkleTrie::new();
         for (key, value) in iter {
-            trie.insert(key.as_ref(), value.as_ref())
-                .expect("Insert failed");
+            trie.insert(key, value).expect("Insert failed");
         }
         trie
     }
