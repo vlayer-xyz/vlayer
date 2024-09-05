@@ -1678,7 +1678,6 @@ dependencies = [
  "lazy_static",
  "nybbles",
  "rand",
- "rand_chacha",
  "rlp",
  "serde",
  "serde_json",
