@@ -149,6 +149,7 @@ mod test {
     const GROTH16_MOCK_SEAL: [u8; GROTH16_PROOF_SIZE] = [1; GROTH16_PROOF_SIZE];
 
     // stable, expected selector by solidity groth16 verifiers
+    // must be keept in sync with value from `contracts/test/helpers/Groth16VerifierSelector.sol`
     const GROTH16_VERIFIER_SELECTOR: VerifierSelector = VerifierSelector([0x31, 0x0f, 0xe5, 0x98]);
 
     fn mock_journal() -> Vec<u8> {

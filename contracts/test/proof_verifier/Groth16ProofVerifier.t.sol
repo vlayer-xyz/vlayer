@@ -2,6 +2,7 @@
 pragma solidity ^0.8.13;
 
 import {Test, console} from "forge-std/Test.sol";
+import {Groth16VerifierSelector} from "../helpers/Groth16VerifierSelector.sol";
 
 import {ControlID, RiscZeroGroth16Verifier} from "risc0-ethereum/groth16/RiscZeroGroth16Verifier.sol";
 
@@ -19,5 +20,12 @@ contract FakeProofVerifier_Tests is Test {
         RiscZeroGroth16Verifier mockVerifier =
             new RiscZeroGroth16Verifier(ControlID.CONTROL_ROOT, ControlID.BN254_CONTROL_ID);
         assertEq(address(verifier.VERIFIER()).codehash, address(mockVerifier).codehash);
+    }
+
+    function test_verifierSelectorIsStable() public {
+        RiscZeroGroth16Verifier mockVerifier =
+            new RiscZeroGroth16Verifier(ControlID.CONTROL_ROOT, ControlID.BN254_CONTROL_ID);
+
+        assertEq(Groth16VerifierSelector.STABLE_VERIFIER_SELECTOR, mockVerifier.SELECTOR());
     }
 }
