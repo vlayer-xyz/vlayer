@@ -2,7 +2,7 @@
     "name": "@vlayer/plugin",
     "private": true,
     "version": "1.0.0",
-    "type": "module",
+    "type": "module", 
     "scripts": {
       "prepare": "zx scripts/prepare.mjs",
       "dev": "zx scripts/dev.mjs"
