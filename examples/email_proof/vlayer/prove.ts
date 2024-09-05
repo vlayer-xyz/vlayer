@@ -6,7 +6,7 @@ const email = { mimeEmail: "Mock email" };
 
 const [prover, verifier] = await testHelpers.deployProverVerifier(
   emailProofProver,
-  emailProofVerifier
+  emailProofVerifier,
 );
 
 console.log("Proving...");
@@ -14,7 +14,7 @@ const { proof, returnValue } = await prove(
   prover,
   emailProofProver.abi,
   "main",
-  [email]
+  [email],
 );
 console.log("Proof:", proof);
 
