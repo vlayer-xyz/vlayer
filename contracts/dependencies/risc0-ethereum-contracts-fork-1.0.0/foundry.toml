@@ -1,0 +1,33 @@
+
+# Full reference https://github.com/foundry-rs/foundry/tree/master/crates/config
+
+[profile.default]
+script = "script"
+solc = "0.8.26"
+src = "src"
+test = "test"
+libs = ["dependencies"]
+
+[dependencies]
+forge-std = "1.8.2"
+"@openzeppelin-contracts" = "5.0.1"
+
+[soldeer]
+# whether soldeer manages remappings
+remappings_generate = true
+
+# whether soldeer re-generates all remappings when installing, updating or uninstalling deps
+remappings_regenerate = true
+
+# whether to suffix the remapping with the version: `name-a.b.c`
+remappings_version = true
+
+# a prefix to add to the remappings ("@" would give `@name`)
+remappings_prefix = ""
+
+# where to store the remappings ("txt" for `remappings.txt` or "config" for `foundry.toml`)
+# ignored when `soldeer.toml` is used as config (uses `remappings.txt`)
+remappings_location = "txt"
+
+# whether to install sub-dependencies or not. If true this wil install the dependencies of dependencies 1 level down.
+recursive_deps = true
