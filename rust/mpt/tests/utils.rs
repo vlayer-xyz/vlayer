@@ -1,8 +1,6 @@
 use std::collections::HashSet;
 
-use mpt::MerkleTrie;
 use rand::rngs::StdRng;
-use rand::seq::SliceRandom;
 use rand::Rng;
 
 const MAX_KEY_LENGTH: u8 = 8;
@@ -24,23 +22,5 @@ pub(crate) fn create_elements(rng: &mut StdRng) -> Vec<(Vec<u8>, Vec<u8>)> {
             elements.push((key, value));
         }
     }
-    elements
-}
-
-#[allow(unused)]
-pub(crate) fn create_trie_with_elements_inserted(elements: &[(Vec<u8>, Vec<u8>)]) -> MerkleTrie {
-    let mut trie = MerkleTrie::new();
-    for (key, value) in elements {
-        trie.insert(key, value).expect("Insert failed");
-    }
-    trie
-}
-
-#[allow(unused)]
-pub(crate) fn shuffle_elements(
-    mut elements: Vec<(Vec<u8>, Vec<u8>)>,
-    rng: &mut StdRng,
-) -> Vec<(Vec<u8>, Vec<u8>)> {
-    elements.shuffle(rng);
     elements
 }

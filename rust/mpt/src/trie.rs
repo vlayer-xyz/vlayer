@@ -118,6 +118,21 @@ impl MerkleTrie {
     }
 }
 
+impl<K, V> FromIterator<(K, V)> for MerkleTrie
+where
+    K: AsRef<[u8]>,
+    V: AsRef<[u8]>,
+{
+    fn from_iter<I: IntoIterator<Item = (K, V)>>(iter: I) -> Self {
+        let mut trie = MerkleTrie::new();
+        for (key, value) in iter {
+            trie.insert(key.as_ref(), value.as_ref())
+                .expect("Insert failed");
+        }
+        trie
+    }
+}
+
 #[derive(Debug, Error, PartialEq)]
 pub enum MPTError {
     #[error("Duplicate key: {0:?}")]

@@ -1,19 +1,21 @@
-use rand::{rngs::StdRng, SeedableRng};
+use mpt::MerkleTrie;
+use rand::rngs::StdRng;
+use rand::seq::SliceRandom;
+use rand::SeedableRng;
 
-use crate::utils::{create_elements, create_trie_with_elements_inserted, shuffle_elements};
+use crate::utils::create_elements;
 
 mod utils;
 
 #[test]
 fn structure_independent_of_insert_order() {
-    let seed: [u8; 32] = [0; 32];
-    let mut rng = StdRng::from_seed(seed);
+    let mut rng = StdRng::seed_from_u64(0);
 
-    let elements = create_elements(&mut rng);
-    let trie = create_trie_with_elements_inserted(&elements);
+    let mut elements = create_elements(&mut rng);
+    let trie = MerkleTrie::from_iter(elements.clone());
 
-    let shuffled_elements = shuffle_elements(elements, &mut rng);
-    let trie_with_elements_shuffled = create_trie_with_elements_inserted(&shuffled_elements);
+    elements.shuffle(&mut rng);
+    let trie_with_elements_shuffled = MerkleTrie::from_iter(elements);
 
     assert_eq!(trie, trie_with_elements_shuffled);
 }
