@@ -1,12 +1,10 @@
 [package]
-name = "call_guest_wrapper"
+name = "prove_chain_guest_wrapper"
 version = "0.1.0"
 edition = "2021"
 
 [build-dependencies]
 risc0-build.workspace = true
-risc0-build-ethereum.workspace = true
-anyhow.workspace = true
 
 [package.metadata.risc0]
 methods = ["risc0_guest"]

@@ -3,6 +3,7 @@ resolver = "2"
 members = [
     "prove_chain/host",
     "prove_chain/guest",
+    "prove_chain/guest_wrapper",
     "prove_chain/engine",
     "prove_chain/server",
 
@@ -17,7 +18,6 @@ members = [
     "test_runner",
     "web_proof",
     "server_utils",
-    "guest_wrapper_utils",
 ]
 default-members = ["cli"]
 
