@@ -1,5 +1,5 @@
 import fs from "fs";
-import { logger } from "./logger";
+import { logger } from "./logger.js";
 await $`ls`;
 await $`git submodule update --init --recursive`;
 await $`cd tlsn && git checkout tags/v0.1.0-alpha.5`;
