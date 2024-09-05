@@ -5,7 +5,7 @@ use utils::{create_elements, create_trie_with_elements_inserted};
 mod utils;
 
 #[test]
-fn retrieve_inserted_elements() {
+fn insert_and_get() {
     let seed: [u8; 32] = [0; 32];
     let mut rng = StdRng::from_seed(seed);
 

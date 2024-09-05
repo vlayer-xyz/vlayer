@@ -6,8 +6,8 @@ use rand::seq::SliceRandom;
 use rand::Rng;
 
 const MAX_KEY_LENGTH: u8 = 8;
-const MAX_VALUE_PER_BYTE: u8 = 8;
-const NUMBER_OF_ELEMENTS: usize = 1024;
+const MAX_VALUE_PER_BYTE: u8 = 5;
+const NUMBER_OF_ELEMENTS: usize = 2048;
 
 #[allow(unused)]
 pub(crate) fn create_elements(rng: &mut StdRng) -> Vec<(Vec<u8>, Vec<u8>)> {
