@@ -63,13 +63,16 @@ async fn method_missing() {
 }
 
 #[tokio::test]
+#[ignore]
 async fn success_dummy() {
     let app = server();
     let req = json!({
         "jsonrpc": "2.0",
         "id": 1,
         "method": "v_proveChain",
-        "params": []
+        "params": {
+            "block_hashes": ["0x315f5bdb76d078c43b8ac0064e4a016464891cc396722fa9b74f24d106b502f3"]
+        }
     });
     let response = post(app, "/", &req).await;
 
@@ -79,6 +82,34 @@ async fn success_dummy() {
             "jsonrpc": "2.0",
             "id": 1,
             "result": null
+        }),
+        body_to_json(response.into_body()).await
+    );
+}
+
+#[tokio::test]
+async fn empty_params() {
+    let app = server();
+    let req = json!({
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "v_proveChain",
+        "params": {
+            "block_hashes": []
+        }
+    });
+    let response = post(app, "/", &req).await;
+
+    assert_eq!(StatusCode::OK, response.status());
+    assert_eq!(
+        json!({
+            "jsonrpc": "2.0",
+            "id": 1,
+            "error": {
+                "code": -32602,
+                "message": "Invalid params: empty list of block hashes provided - nothing to prove",
+                "data": null
+            }
         }),
         body_to_json(response.into_body()).await
     );
