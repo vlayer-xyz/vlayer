@@ -1,0 +1,14 @@
+{
+    "name": "@vlayer/plugin",
+    "private": true,
+    "version": "1.0.0",
+    "type": "module",
+    "scripts": {
+      "prepare": "zx scripts/prepare.mjs",
+      "dev": "zx scripts/dev.mjs"
+    },
+    "devDependencies": {
+      "zx": "^8.1.5"
+    }
+  }
+  

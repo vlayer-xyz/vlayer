@@ -7,3 +7,9 @@
 [submodule "test_contracts/lib/forge-std"]
 	path = test_contracts/lib/forge-std
 	url = https://github.com/foundry-rs/forge-std
+[submodule "packages/plugin/websockify"]
+	path = packages/plugin/websockify
+	url = https://github.com/novnc/websockify
+[submodule "packages/plugin/tlsn"]
+	path = packages/plugin/tlsn
+	url = https://github.com/tlsnotary/tlsn
