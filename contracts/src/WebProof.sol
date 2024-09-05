@@ -31,18 +31,18 @@ library WebProofLib {
 
         return web;
     }
+}
+
+library WebLib {
+    address private constant JSON_GET_STRING_PRECOMPILE = address(0x101);
 
     function jsonGetString(Web memory web, string memory jsonPath) internal view returns (string memory) {
         require(bytes(web.body).length > 0, "Body is empty");
 
         bytes memory encodedParams = abi.encode([web.body, jsonPath]);
-
         (bool success, bytes memory returnData) = JSON_GET_STRING_PRECOMPILE.staticcall(encodedParams);
-
         require(success, "json_get_string precompile call failed");
 
-        string memory jsonValue = abi.decode(returnData, (string));
-
-        return jsonValue;
+        return abi.decode(returnData, (string));
     }
 }

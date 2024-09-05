@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import {Prover} from "vlayer/Prover.sol";
-import {Web, WebProof, WebProofLib} from "vlayer/WebProof.sol";
+import {Web, WebProof, WebProofLib, WebLib} from "vlayer/WebProof.sol";
 import "openzeppelin/contracts/utils/Strings.sol";
 
 /*
@@ -18,7 +18,7 @@ import "openzeppelin/contracts/utils/Strings.sol";
 contract ExampleProver is Prover {
     using Strings for string;
     using WebProofLib for WebProof;
-    using WebProofLib for Web;
+    using WebLib for Web;
 
     constructor() {}
 
