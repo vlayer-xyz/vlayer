@@ -12,8 +12,6 @@ await $`tmux send-keys -t websockerproxy "cd websockify && docker run -it --rm -
 await $`tmux new-window -n "tlsn"`;
 await $`tmux send-keys -t tlsn "cd tlsn/notary-server && cargo run --release" C-m`;
 
-
-
 await $`tmux new-window -n "anvil"`;
 await $`tmux send-keys -t anvil "anvil" C-m`;
 

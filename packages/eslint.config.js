@@ -18,5 +18,6 @@ export default [
         Bun: false,
       },
     },
+    ignores: ["dist/"], // Add this line to ignore the dist directory
   },
 ];
