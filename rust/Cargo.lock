@@ -6173,6 +6173,7 @@ dependencies = [
  "alloy-trie",
  "anyhow",
  "derive_more",
+ "itertools 0.13.0",
  "lazy_static",
  "nybbles",
  "rand",
