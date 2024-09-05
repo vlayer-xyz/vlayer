@@ -7,13 +7,14 @@ use rand::Rng;
 
 const MAX_KEY_LENGTH: u8 = 8;
 const MAX_VALUE_PER_BYTE: u8 = 8;
+const NUMBER_OF_ELEMENTS: usize = 1024;
 
 #[allow(unused)]
 pub(crate) fn create_elements(rng: &mut StdRng) -> Vec<(Vec<u8>, Vec<u8>)> {
     let mut unique_keys = HashSet::new();
     let mut elements = Vec::new();
 
-    while elements.len() < 1024 {
+    while elements.len() < NUMBER_OF_ELEMENTS {
         let key: Vec<u8> = (0..rng.gen_range(0..=MAX_KEY_LENGTH))
             .map(|_| rng.gen_range(0..MAX_VALUE_PER_BYTE))
             .collect();
