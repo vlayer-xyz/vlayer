@@ -6175,6 +6175,8 @@ dependencies = [
  "derive_more",
  "lazy_static",
  "nybbles",
+ "rand",
+ "rand_chacha",
  "rlp",
  "serde",
  "serde_json",
