@@ -29,7 +29,7 @@ impl MerkleTrie {
     pub fn new() -> Self {
         MerkleTrie(Node::Null)
     }
-    
+
     /// Returns a reference to the byte value corresponding to the key.
     ///
     /// It panics when neither inclusion nor exclusion of the key can be guaranteed.

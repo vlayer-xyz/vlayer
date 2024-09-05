@@ -5,18 +5,17 @@ use rand::rngs::StdRng;
 use rand::seq::SliceRandom;
 use rand::Rng;
 
+const MAX_KEY_LENGTH: u8 = 8;
+const MAX_VALUE_PER_BYTE: u8 = 8;
+
 #[allow(unused)]
-pub(crate) fn create_elements(
-    max_key_length: u8,
-    max_value_per_byte: u8,
-    rng: &mut StdRng,
-) -> Vec<(Vec<u8>, Vec<u8>)> {
+pub(crate) fn create_elements(rng: &mut StdRng) -> Vec<(Vec<u8>, Vec<u8>)> {
     let mut unique_keys = HashSet::new();
     let mut elements = Vec::new();
 
     while elements.len() < 1024 {
-        let key: Vec<u8> = (0..rng.gen_range(0..=max_key_length))
-            .map(|_| rng.gen_range(0..max_value_per_byte))
+        let key: Vec<u8> = (0..rng.gen_range(0..=MAX_KEY_LENGTH))
+            .map(|_| rng.gen_range(0..MAX_VALUE_PER_BYTE))
             .collect();
 
         if unique_keys.insert(key.clone()) {
@@ -38,10 +37,9 @@ pub(crate) fn create_trie_with_elements_inserted(elements: &[(Vec<u8>, Vec<u8>)]
 
 #[allow(unused)]
 pub(crate) fn shuffle_elements(
-    elements: &[(Vec<u8>, Vec<u8>)],
+    mut elements: Vec<(Vec<u8>, Vec<u8>)>,
     rng: &mut StdRng,
 ) -> Vec<(Vec<u8>, Vec<u8>)> {
-    let mut shuffled_elements = elements.to_vec();
-    shuffled_elements.shuffle(rng);
-    shuffled_elements
+    elements.shuffle(rng);
+    elements
 }
