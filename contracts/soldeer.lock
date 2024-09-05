@@ -15,5 +15,5 @@ integrity = "e88336d0a787dce78cf3b485ca2e8651c5690e884b819d35cfbd822c33e925b7"
 [[dependencies]]
 name = "risc0-ethereum"
 version = "1.0.0"
-source = "git@github.com:risc0/risc0-ethereum.git"
-checksum = "34d2fee4ca6b5fb354a8a1a00c43f8945097bfe5"
+source = "git@github.com:vlayer-xyz/risc0-contracts.git"
+checksum = "7c9fde54da315699b77c97ea8424878c666a0ca7"

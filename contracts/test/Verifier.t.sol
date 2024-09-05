@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {Test} from "forge-std/Test.sol";
+import {Test} from "forge-std-1.9.2/src/Test.sol";
 import {TestHelpers} from "./helpers/TestHelpers.sol";
 
-import {IRiscZeroVerifier, Receipt, VerificationFailed} from "risc0-ethereum/IRiscZeroVerifier.sol";
-import {RiscZeroMockVerifier} from "risc0-ethereum/test/RiscZeroMockVerifier.sol";
+import {IRiscZeroVerifier, Receipt, VerificationFailed} from "risc0-ethereum-1.0.0/src/IRiscZeroVerifier.sol";
+import {RiscZeroMockVerifier} from "risc0-ethereum-1.0.0/src/test/RiscZeroMockVerifier.sol";
 
 import {ExecutionCommitment} from "../src/ExecutionCommitment.sol";
 import {Proof} from "../src/Proof.sol";
@@ -29,7 +29,9 @@ contract ExampleVerifier is Verifier {
         PROVER = address(new ExampleProver());
     }
 
-    function verifySomething(Proof calldata)
+    function verifySomething(
+        Proof calldata
+    )
         external
         view
         onlyVerified(PROVER, SIMPLE_PROVER_SELECTOR)
@@ -38,7 +40,10 @@ contract ExampleVerifier is Verifier {
         return true;
     }
 
-    function verifySomethingElse(Proof calldata, bool value)
+    function verifySomethingElse(
+        Proof calldata,
+        bool value
+    )
         external
         view
         onlyVerified(PROVER, SIMPLE_PROVER_SELECTOR)
@@ -58,19 +63,24 @@ contract Verifier_OnlyVerified_Modifier_Tests is Test {
         vm.roll(100); // have some historical blocks
 
         commitment = ExecutionCommitment(
-            exampleVerifier.PROVER(), ExampleProver.doSomething.selector, block.number - 1, blockhash(block.number - 1)
+            exampleVerifier.PROVER(),
+            ExampleProver.doSomething.selector,
+            block.number - 1,
+            blockhash(block.number - 1)
         );
     }
 
     function test_verifySuccess() public view {
-        (Proof memory proof,) = helpers.createProof(commitment);
+        (Proof memory proof, ) = helpers.createProof(commitment);
         exampleVerifier.verifySomething(proof);
     }
 
     function test_proofAndJournalDoNotMatch() public {
-        (Proof memory proof,) = helpers.createProof(commitment);
+        (Proof memory proof, ) = helpers.createProof(commitment);
         proof.commitment.settleBlockNumber -= 1;
-        proof.commitment.settleBlockHash = blockhash(proof.commitment.settleBlockNumber);
+        proof.commitment.settleBlockHash = blockhash(
+            proof.commitment.settleBlockNumber
+        );
 
         vm.expectRevert(VerificationFailed.selector);
         exampleVerifier.verifySomething(proof);
@@ -78,14 +88,20 @@ contract Verifier_OnlyVerified_Modifier_Tests is Test {
 
     function test_journaledParams() public view {
         bool value = true;
-        (Proof memory proof,) = helpers.createProof(commitment, abi.encode(value));
+        (Proof memory proof, ) = helpers.createProof(
+            commitment,
+            abi.encode(value)
+        );
 
         assertEq(exampleVerifier.verifySomethingElse(proof, value), value);
     }
 
     function test_journaledParamCannotBeChanged() public {
         bool value = true;
-        (Proof memory proof,) = helpers.createProof(commitment, abi.encode(value));
+        (Proof memory proof, ) = helpers.createProof(
+            commitment,
+            abi.encode(value)
+        );
 
         value = !value;
 
@@ -94,7 +110,7 @@ contract Verifier_OnlyVerified_Modifier_Tests is Test {
     }
 
     function test_functionCanHaveNonJournaledParams() public view {
-        (Proof memory proof,) = helpers.createProof(commitment);
+        (Proof memory proof, ) = helpers.createProof(commitment);
 
         assertEq(exampleVerifier.verifySomethingElse(proof, true), true);
         assertEq(exampleVerifier.verifySomethingElse(proof, false), false);

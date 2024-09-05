@@ -2,24 +2,24 @@
 src = "src"
 out = "out"
 
-libs = ["dependencies"]
+libs = ["dependencies", "risc0-ethereum-1.0.0/lib/"]
 
 [dependencies]
 forge-std = "1.9.2"
 "@openzeppelin-contracts" = "5.0.2"
-risc0-ethereum = { version = "1.0.0", git = "git@github.com:risc0/risc0-ethereum.git", rev = "34d2fee4ca6b5fb354a8a1a00c43f8945097bfe5" }
+risc0-ethereum = { version = "1.0.0", git = "git@github.com:vlayer-xyz/risc0-contracts.git", rev = "7c9fde54da315699b77c97ea8424878c666a0ca7" }
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
 
 [soldeer]
 # whether soldeer manages remappings
-remappings_generate = false
+remappings_generate = true
 
 # whether soldeer re-generates all remappings when installing, updating or uninstalling deps
-remappings_regenerate = false
+remappings_regenerate = true
 
 # whether to suffix the remapping with the version: `name-a.b.c`
-remappings_version = false
+remappings_version = true
 
 # a prefix to add to the remappings ("@" would give `@name`)
 remappings_prefix = ""
