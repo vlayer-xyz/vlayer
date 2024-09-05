@@ -15,7 +15,7 @@ contract EmailProver is Prover {
     using EmailProofLib for EmailProof;
 
     function main(EmailProof calldata emailProof) public view returns (bool) {
-        string memory body = emailProof.verify();
+        emailProof.verify();
 
         return true;
     }
