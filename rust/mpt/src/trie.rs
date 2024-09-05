@@ -25,6 +25,11 @@ pub enum ParseNodeError {
 pub struct MerkleTrie(pub(crate) Node);
 
 impl MerkleTrie {
+    /// Creates a new empty trie.
+    pub fn new() -> Self {
+        MerkleTrie(Node::Null)
+    }
+
     /// Returns a reference to the byte value corresponding to the key.
     ///
     /// It panics when neither inclusion nor exclusion of the key can be guaranteed.
@@ -110,6 +115,20 @@ impl MerkleTrie {
         debug_assert!(trie.hash_slow() == MerkleTrie(root_node).hash_slow());
 
         Ok(trie)
+    }
+}
+
+impl<K, V> FromIterator<(K, V)> for MerkleTrie
+where
+    K: AsRef<[u8]>,
+    V: AsRef<[u8]>,
+{
+    fn from_iter<I: IntoIterator<Item = (K, V)>>(iter: I) -> Self {
+        let mut trie = MerkleTrie::new();
+        for (key, value) in iter {
+            trie.insert(key, value).expect("Insert failed");
+        }
+        trie
     }
 }
 

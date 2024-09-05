@@ -11,6 +11,7 @@ alloy-trie = { workspace = true }
 derive_more = { workspace = true }
 lazy_static = { workspace = true }
 nybbles = { workspace = true, features = ["serde"] }
+rand = "0.8.5"
 rlp = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
@@ -18,3 +19,4 @@ thiserror = { workspace = true }
 
 [dev-dependencies]
 anyhow = { workspace = true }
+itertools = { version = "0.13.0" }

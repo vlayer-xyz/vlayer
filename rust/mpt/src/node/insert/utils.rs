@@ -5,7 +5,6 @@ fn longest_common_prefix_len(lhs: &[u8], rhs: &[u8]) -> usize {
         .count()
 }
 
-#[allow(unused)]
 pub(crate) fn extract_common_prefix<'a>(
     lhs: &'a [u8],
     rhs: &'a [u8],
