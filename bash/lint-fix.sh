@@ -22,3 +22,6 @@ bun run lint:fix
 cd "${VLAYER_HOME}/contracts"
 bun install --no-save
 bun run lint:solidity -- --fix --noPrompt
+
+forge fmt "${VLAYER_HOME}/examples" -- --write
+forge fmt "${VLAYER_HOME}/contracts/src" -- --write
