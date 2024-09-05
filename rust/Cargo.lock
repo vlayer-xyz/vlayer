@@ -3893,7 +3893,7 @@ checksum = "aa9a19cbb55df58761df49b23516a86d432839add4af60fc256da840f66ed35b"
 [[package]]
 name = "forge"
 version = "0.2.0"
-source = "git+https://github.com/foundry-rs/foundry#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
+source = "git+https://github.com/foundry-rs/foundry?rev=cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
 dependencies = [
  "alloy-chains",
  "alloy-consensus 0.1.4",
@@ -3971,7 +3971,7 @@ dependencies = [
 [[package]]
 name = "forge-doc"
 version = "0.2.0"
-source = "git+https://github.com/foundry-rs/foundry#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
+source = "git+https://github.com/foundry-rs/foundry?rev=cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
 dependencies = [
  "alloy-primitives",
  "auto_impl",
@@ -3996,7 +3996,7 @@ dependencies = [
 [[package]]
 name = "forge-fmt"
 version = "0.2.0"
-source = "git+https://github.com/foundry-rs/foundry#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
+source = "git+https://github.com/foundry-rs/foundry?rev=cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
 dependencies = [
  "alloy-primitives",
  "ariadne",
@@ -4010,7 +4010,7 @@ dependencies = [
 [[package]]
 name = "forge-script"
 version = "0.2.0"
-source = "git+https://github.com/foundry-rs/foundry#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
+source = "git+https://github.com/foundry-rs/foundry?rev=cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
 dependencies = [
  "alloy-chains",
  "alloy-dyn-abi",
@@ -4053,7 +4053,7 @@ dependencies = [
 [[package]]
 name = "forge-sol-macro-gen"
 version = "0.2.0"
-source = "git+https://github.com/foundry-rs/foundry#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
+source = "git+https://github.com/foundry-rs/foundry?rev=cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
 dependencies = [
  "alloy-json-abi",
  "alloy-sol-macro-expander",
@@ -4070,7 +4070,7 @@ dependencies = [
 [[package]]
 name = "forge-verify"
 version = "0.2.0"
-source = "git+https://github.com/foundry-rs/foundry#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
+source = "git+https://github.com/foundry-rs/foundry?rev=cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
 dependencies = [
  "alloy-json-abi",
  "alloy-primitives",
@@ -4128,7 +4128,7 @@ dependencies = [
 [[package]]
 name = "foundry-cheatcodes"
 version = "0.2.0"
-source = "git+https://github.com/foundry-rs/foundry#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
+source = "git+https://github.com/foundry-rs/foundry?rev=cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
 dependencies = [
  "alloy-dyn-abi",
  "alloy-genesis 0.1.4",
@@ -4168,7 +4168,7 @@ dependencies = [
 [[package]]
 name = "foundry-cheatcodes-spec"
 version = "0.2.0"
-source = "git+https://github.com/foundry-rs/foundry#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
+source = "git+https://github.com/foundry-rs/foundry?rev=cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
 dependencies = [
  "alloy-sol-types",
  "foundry-macros",
@@ -4178,7 +4178,7 @@ dependencies = [
 [[package]]
 name = "foundry-cli"
 version = "0.2.0"
-source = "git+https://github.com/foundry-rs/foundry#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
+source = "git+https://github.com/foundry-rs/foundry?rev=cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
 dependencies = [
  "alloy-chains",
  "alloy-dyn-abi",
@@ -4213,7 +4213,7 @@ dependencies = [
 [[package]]
 name = "foundry-common"
 version = "0.2.0"
-source = "git+https://github.com/foundry-rs/foundry#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
+source = "git+https://github.com/foundry-rs/foundry?rev=cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
 dependencies = [
  "alloy-contract 0.1.4",
  "alloy-dyn-abi",
@@ -4258,7 +4258,7 @@ dependencies = [
 [[package]]
 name = "foundry-common-fmt"
 version = "0.2.0"
-source = "git+https://github.com/foundry-rs/foundry#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
+source = "git+https://github.com/foundry-rs/foundry?rev=cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
 dependencies = [
  "alloy-consensus 0.1.4",
  "alloy-dyn-abi",
@@ -4378,7 +4378,7 @@ dependencies = [
 [[package]]
 name = "foundry-config"
 version = "0.2.0"
-source = "git+https://github.com/foundry-rs/foundry#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
+source = "git+https://github.com/foundry-rs/foundry?rev=cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
 dependencies = [
  "Inflector",
  "alloy-chains",
@@ -4412,7 +4412,7 @@ dependencies = [
 [[package]]
 name = "foundry-debugger"
 version = "0.2.0"
-source = "git+https://github.com/foundry-rs/foundry#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
+source = "git+https://github.com/foundry-rs/foundry?rev=cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
 dependencies = [
  "alloy-primitives",
  "crossterm",
@@ -4430,7 +4430,7 @@ dependencies = [
 [[package]]
 name = "foundry-evm"
 version = "0.2.0"
-source = "git+https://github.com/foundry-rs/foundry#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
+source = "git+https://github.com/foundry-rs/foundry?rev=cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
 dependencies = [
  "alloy-dyn-abi",
  "alloy-json-abi",
@@ -4457,7 +4457,7 @@ dependencies = [
 [[package]]
 name = "foundry-evm-abi"
 version = "0.2.0"
-source = "git+https://github.com/foundry-rs/foundry#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
+source = "git+https://github.com/foundry-rs/foundry?rev=cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
 dependencies = [
  "alloy-primitives",
  "alloy-sol-types",
@@ -4472,7 +4472,7 @@ dependencies = [
 [[package]]
 name = "foundry-evm-core"
 version = "0.2.0"
-source = "git+https://github.com/foundry-rs/foundry#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
+source = "git+https://github.com/foundry-rs/foundry?rev=cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
 dependencies = [
  "alloy-dyn-abi",
  "alloy-genesis 0.1.4",
@@ -4506,7 +4506,7 @@ dependencies = [
 [[package]]
 name = "foundry-evm-coverage"
 version = "0.2.0"
-source = "git+https://github.com/foundry-rs/foundry#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
+source = "git+https://github.com/foundry-rs/foundry?rev=cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
 dependencies = [
  "alloy-primitives",
  "eyre",
@@ -4523,7 +4523,7 @@ dependencies = [
 [[package]]
 name = "foundry-evm-fuzz"
 version = "0.2.0"
-source = "git+https://github.com/foundry-rs/foundry#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
+source = "git+https://github.com/foundry-rs/foundry?rev=cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
 dependencies = [
  "ahash",
  "alloy-dyn-abi",
@@ -4550,7 +4550,7 @@ dependencies = [
 [[package]]
 name = "foundry-evm-traces"
 version = "0.2.0"
-source = "git+https://github.com/foundry-rs/foundry#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
+source = "git+https://github.com/foundry-rs/foundry?rev=cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
 dependencies = [
  "alloy-dyn-abi",
  "alloy-json-abi",
@@ -4604,7 +4604,7 @@ dependencies = [
 [[package]]
 name = "foundry-linking"
 version = "0.2.0"
-source = "git+https://github.com/foundry-rs/foundry#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
+source = "git+https://github.com/foundry-rs/foundry?rev=cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
 dependencies = [
  "alloy-primitives",
  "foundry-compilers",
@@ -4615,7 +4615,7 @@ dependencies = [
 [[package]]
 name = "foundry-macros"
 version = "0.2.0"
-source = "git+https://github.com/foundry-rs/foundry#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
+source = "git+https://github.com/foundry-rs/foundry?rev=cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
 dependencies = [
  "proc-macro-error",
  "proc-macro2",
@@ -4626,7 +4626,7 @@ dependencies = [
 [[package]]
 name = "foundry-wallets"
 version = "0.2.0"
-source = "git+https://github.com/foundry-rs/foundry#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
+source = "git+https://github.com/foundry-rs/foundry?rev=cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5#cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5"
 dependencies = [
  "alloy-consensus 0.1.4",
  "alloy-dyn-abi",
