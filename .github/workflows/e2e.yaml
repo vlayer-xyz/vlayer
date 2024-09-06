@@ -39,9 +39,9 @@ jobs:
         with:
           version: nightly-626221f5ef44b4af950a08e09bd714650d9eb77d # 2024-08-02
         
-      - name: Fetch contracts dependencies
+      - name: Install contract dependencies
         working-directory: ./contracts
-        run: forge soldeer update
+        run: forge soldeer install
 
       - name: Check clang and LLVM version
         env:

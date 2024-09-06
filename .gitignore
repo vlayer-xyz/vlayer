@@ -21,3 +21,5 @@ target/
 # npm dependencies
 **/node_modules
 
+# soldeeer dependencies
+**/dependencies/

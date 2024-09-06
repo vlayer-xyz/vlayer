@@ -2,7 +2,7 @@
 src = "src"
 out = "out"
 
-libs = ["dependencies", "risc0-ethereum-1.0.0/src/lib/"]
+libs = ["dependencies"]
 
 [dependencies]
 forge-std = "1.9.2"
