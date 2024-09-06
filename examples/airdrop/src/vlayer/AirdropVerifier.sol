@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import {Proof} from "vlayer/Proof.sol";
-import {Verifier} from "vlayer/Verifier.sol";
+import {Proof} from "vlayer-contracts-0.1.0/src/Proof.sol";
+import {Verifier} from "vlayer-contracts-0.1.0/src/Verifier.sol";
 
-import {ERC20} from "openzeppelin-contracts/contracts/token/ERC20/ERC20.sol";
+import {ERC20} from "@openzeppelin-contracts-5.0.2/token/ERC20/ERC20.sol";
 
 import {NftOwnershipProver} from "./NftOwnershipProver.sol";
 
@@ -27,10 +27,10 @@ contract Airdrop is Verifier {
         TOKEN = new AwesomeToken();
     }
 
-    function claim(Proof calldata, address sender)
-        public
-        onlyVerified(PROVER, FUNCTION_SELECTOR)
-    {
+    function claim(
+        Proof calldata,
+        address sender
+    ) public onlyVerified(PROVER, FUNCTION_SELECTOR) {
         require(withdrawn[sender] == false, "Already withdrawn");
         withdrawn[sender] = true;
         TOKEN.transfer(sender, 1000);
