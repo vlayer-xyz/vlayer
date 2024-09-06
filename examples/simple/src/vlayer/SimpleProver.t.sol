@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import { VerificationFailed } from "risc0-ethereum/IRiscZeroVerifier.sol";
-import { SimpleProver } from "./SimpleProver.sol";
-import { VTest, Proof, CHEATCODES } from "vlayer/testing/VTest.sol";
-import { Simple } from "./SimpleVerifier.sol";
+import {VerificationFailed} from "risc0-ethereum-contracts-fork-1.0.1/src/IRiscZeroVerifier.sol";
+import {SimpleProver} from "./SimpleProver.sol";
+import {VTest, Proof, CHEATCODES} from "vlayer-contracts-0.1.0/src/testing/VTest.sol";
+import {Simple} from "./SimpleVerifier.sol";
 
 interface IFakeCheatcode {
     function thisCheatCodeDoesNotExist() external returns (bool);
@@ -64,6 +64,12 @@ contract ProverTest is VTest {
             )
         );
         assertFalse(result);
-        assertEq(error, abi.encodeWithSignature("Error(string)", "Unexpected vlayer cheatcode call"));
+        assertEq(
+            error,
+            abi.encodeWithSignature(
+                "Error(string)",
+                "Unexpected vlayer cheatcode call"
+            )
+        );
     }
 }

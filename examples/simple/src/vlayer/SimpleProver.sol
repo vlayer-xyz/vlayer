@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {Prover} from "vlayer/Prover.sol";
+import {Prover} from "vlayer-contracts-0.1.0/src/Prover.sol";
 
 contract SimpleProver is Prover {
     constructor() {}
