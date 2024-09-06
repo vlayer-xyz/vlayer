@@ -25,7 +25,7 @@ pub fn verify_and_parse(web_proof: WebProof) -> Result<Web, WebProofError> {
         url: request.parse_url()?,
         server_name,
         body: response.parse_body()?,
-        notary_pub_key: notary_pub_key,
+        notary_pub_key,
     })
 }
 
