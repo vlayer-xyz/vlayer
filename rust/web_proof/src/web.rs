@@ -4,6 +4,7 @@ pub struct Web {
     pub url: String,
     pub server_name: String,
     pub body: String,
+    pub notary_pub_key: String,
 }
 
 impl Web {
@@ -19,6 +20,8 @@ impl Web {
 
 #[cfg(test)]
 mod tests {
+    use crate::fixtures::NOTARY_PUB_KEY_PEM_EXAMPLE;
+
     use super::*;
 
     use alloy_primitives::hex;
@@ -32,6 +35,7 @@ mod tests {
             url: "https://api.x.com/1.1/account/settings.json".to_string(),
             server_name: "api.x.com".to_string(),
             body: "body".to_string(),
+            notary_pub_key: NOTARY_PUB_KEY_PEM_EXAMPLE.to_string(),
         };
 
         assert_eq!(expected_encoding, web.abi_encode());
