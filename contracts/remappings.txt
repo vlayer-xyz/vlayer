@@ -1,3 +1,3 @@
 @openzeppelin-contracts-5.0.2/=dependencies/@openzeppelin-contracts-5.0.2/
 forge-std-1.9.2/=dependencies/forge-std-1.9.2/
-risc0-ethereum-1.0.0/=dependencies/risc0-ethereum-contracts-fork-1.0.0/
+risc0-ethereum-contracts-fork-1.0.1/=dependencies/risc0-ethereum-contracts-fork-1.0.1/
