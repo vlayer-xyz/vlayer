@@ -17,6 +17,7 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
   (
     echo "Running tests of: ${example}"
     cd "${example}"
+    echo "Running example: ${example}"
     forge soldeer install
     cd vlayer
 
