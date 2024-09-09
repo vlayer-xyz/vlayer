@@ -37,6 +37,8 @@ jobs:
         working-directory: ./contracts
         run: |
           forge --version
+
+          forge soldeer install
           forge build --sizes
 
       - name: Run Forge tests
