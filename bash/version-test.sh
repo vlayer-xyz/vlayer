@@ -10,6 +10,7 @@ ANVIL_PORT=8546
 function build_contracts() {
     (
     cd contracts
+    forge soldeer install
     forge clean
     forge build
     )
