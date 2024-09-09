@@ -13,9 +13,11 @@ echo Running services...
 source ${VLAYER_HOME}/bash/run-services.sh
 
 for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ; do
-
   (
     echo "Running tests of: ${example}"
+    soldeer --version
+    bun --version
+    
     cd "${example}"
     echo "Running example: ${example}"
     forge soldeer install
@@ -28,4 +30,3 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
     bun run prove.ts 
   )
 done
- 
