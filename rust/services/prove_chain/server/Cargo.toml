@@ -9,7 +9,7 @@ axum-jrpc = { workspace = true }
 mime = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
-server_utils = { path = "../../server_utils" }
+server_utils = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
 tower = { workspace = true }

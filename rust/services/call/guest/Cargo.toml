@@ -4,12 +4,12 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-call_engine = { path = "../engine" }
+call_engine = { workspace = true }
 alloy-chains = { workspace = true }
 alloy-primitives = { workspace = true }
 alloy-rlp-derive = { workspace = true }
 alloy-rlp = { workspace = true }
-mpt = { path = "../../mpt" }
+mpt = { workspace = true }
 as-any = { workspace = true }
 anyhow = { workspace = true }
 revm = { workspace = true }

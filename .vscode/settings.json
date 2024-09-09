@@ -1,7 +1,8 @@
 {
   "rust-analyzer.linkedProjects": [
     "rust/Cargo.toml",
-    "rust/call/guest_wrapper/risc0_guest/Cargo.toml"
+    "rust/services/call/guest_wrapper/risc0_guest/Cargo.toml",
+    "rust/services/prove_chain/guest_wrapper/risc0_guest/Cargo.toml"
   ],
   "rust-analyzer.server.extraEnv": {
     // Should be in sync with ./cargo/config.toml [env] section to avoid recompilation of guest_wrapper

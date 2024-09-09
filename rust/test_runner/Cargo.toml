@@ -4,9 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-call_host = { path = "../call/host" }
-call_engine = { path = "../call/engine" }
-mpt = { path = "../mpt" }
+call_host = { workspace = true }
+call_engine = { workspace = true }
+mpt = { workspace = true }
 
 alloy-dyn-abi = { workspace = true }
 alloy-json-abi = { workspace = true }
