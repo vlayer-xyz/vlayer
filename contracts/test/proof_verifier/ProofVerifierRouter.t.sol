@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {Test, console} from "forge-std/Test.sol";
+import {Test, console} from "forge-std-1.8.2/src/Test.sol";
 
-import {SelectorMismatch} from "risc0-ethereum/groth16/RiscZeroGroth16Verifier.sol";
+import {SelectorMismatch} from "risc0-ethereum-1.0.0/src/groth16/RiscZeroGroth16Verifier.sol";
 
 import {Proof} from "../../src/Proof.sol";
 import {ProofMode} from "../../src/Seal.sol";
