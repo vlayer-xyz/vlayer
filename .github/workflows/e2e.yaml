@@ -35,9 +35,9 @@ jobs:
           cargo risczero install
 
       - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
-        with:
-          version: nightly-626221f5ef44b4af950a08e09bd714650d9eb77d # 2024-08-02
+        uses: foundry-rs/foundry-toolchain@v1.2.0
+        # with:
+        #   version: nightly-626221f5ef44b4af950a08e09bd714650d9eb77d # 2024-08-02
         
       - name: Install contract dependencies
         working-directory: ./contracts

@@ -15,7 +15,7 @@ source ${VLAYER_HOME}/bash/run-services.sh
 for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ; do
   (
     echo "Running tests of: ${example}"
-    soldeer --version
+    forge soldeer version
     bun --version
     
     cd "${example}"
