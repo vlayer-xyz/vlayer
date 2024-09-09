@@ -4,7 +4,7 @@ pragma solidity ^0.8.13;
 import {
     ControlID,
     RiscZeroGroth16Verifier
-} from "risc0-ethereum-contracts-fork-1.0.1/src/groth16/RiscZeroGroth16Verifier.sol";
+} from "risc0-ethereum-1.0.0/src/groth16/RiscZeroGroth16Verifier.sol";
 
 import {ProofVerifierBase} from "./ProofVerifierBase.sol";
 import {ProofMode} from "../Seal.sol";

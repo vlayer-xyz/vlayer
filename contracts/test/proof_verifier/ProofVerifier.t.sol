@@ -7,8 +7,8 @@ import {
     IRiscZeroVerifier,
     Receipt,
     VerificationFailed
-} from "risc0-ethereum-contracts-fork-1.0.1/src/IRiscZeroVerifier.sol";
-import {RiscZeroMockVerifier} from "risc0-ethereum-contracts-fork-1.0.1/src/test/RiscZeroMockVerifier.sol";
+} from "risc0-ethereum-1.0.0/src/IRiscZeroVerifier.sol";
+import {RiscZeroMockVerifier} from "risc0-ethereum-1.0.0/src/test/RiscZeroMockVerifier.sol";
 
 import {ProofVerifierBase} from "../../src/proof_verifier/ProofVerifierBase.sol";
 import {ExecutionCommitment} from "../../src/ExecutionCommitment.sol";

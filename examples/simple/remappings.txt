@@ -8,4 +8,4 @@ openzeppelin/=../../contracts/lib/risc0-ethereum/lib/openzeppelin-contracts/
 risc0-ethereum/=../../contracts/lib/risc0-ethereum/contracts/src/
 
 forge-std-1.9.2/=../../contracts/lib/forge-std
-risc0-ethereum-contracts-fork-1.0.1/=../../contracts/lib/risc0-ethereum/contracts
+risc0-ethereum-1.0.0/=../../contracts/lib/risc0-ethereum/contracts/
