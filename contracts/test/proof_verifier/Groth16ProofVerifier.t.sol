@@ -13,7 +13,7 @@ import {ProofMode} from "../../src/Seal.sol";
 import {Groth16VerifierSelector} from "../helpers/Groth16VerifierSelector.sol";
 
 contract FakeProofVerifier_Tests is Test {
-    Groth16ProofVerifier verifier = new Groth16ProofVerifier();
+    Groth16ProofVerifier public verifier = new Groth16ProofVerifier();
 
     function test_usesGroth16ProofMode() public view {
         assert(verifier.PROOF_MODE() == ProofMode.GROTH16);
