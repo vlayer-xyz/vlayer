@@ -4,6 +4,7 @@ use crate::{
     web_proof::{VerificationError, WebProof},
 };
 use thiserror::Error;
+use url::{ParseError, Url};
 
 #[derive(Error, Debug)]
 pub enum WebProofError {
@@ -12,6 +13,15 @@ pub enum WebProofError {
 
     #[error("Request parsing error: {0}")]
     Parsing(#[from] ParsingError),
+
+    #[error("Url parsing error: {0}")]
+    ParseUrl(#[from] ParseError),
+
+    #[error("No host found in the URL")]
+    NoHostFoundInUrl,
+
+    #[error("Host name extracted from url is different that server name")]
+    HostNameMismatch,
 }
 
 pub fn verify_and_parse(web_proof: WebProof) -> Result<Web, WebProofError> {
@@ -21,12 +31,31 @@ pub fn verify_and_parse(web_proof: WebProof) -> Result<Web, WebProofError> {
         .map_err(VerificationError::PublicKeySerialization)?;
     let (request, response) = web_proof.verify()?;
 
-    Ok(Web {
+    let web = Web {
         url: request.parse_url()?,
-        server_name,
+        server_name: server_name.clone(),
         body: response.parse_body()?,
         notary_pub_key,
-    })
+    };
+
+    verify_server_name(&server_name, &web.url)?;
+
+    Ok(web)
+}
+
+fn verify_server_name(server_name: &str, url: &str) -> Result<(), WebProofError> {
+    if extract_host(url)? == server_name {
+        Ok(())
+    } else {
+        Err(WebProofError::HostNameMismatch)
+    }
+}
+
+fn extract_host(url: &str) -> Result<String, WebProofError> {
+    Url::parse(url)?
+        .host_str()
+        .ok_or(WebProofError::NoHostFoundInUrl)
+        .map(ToString::to_string)
 }
 
 #[cfg(test)]
@@ -35,6 +64,8 @@ mod tests {
 
     use super::*;
 
+    const TEST_URL: &str = "https://api.x.com/1.1/account/settings.json?include_ext_sharing_audiospaces_listening_data_with_followers=true&include_mention_filter=true&include_nsfw_user_flag=true&include_nsfw_admin_flag=true&include_ranked_timeline=true&include_alt_text_compose=true&ext=ssoConnections&include_country_code=true&include_ext_dm_nsfw_media_filter=true";
+
     #[test]
     fn correct_url_extracted() {
         let web_proof =
@@ -42,7 +73,7 @@ mod tests {
 
         let web = verify_and_parse(web_proof).unwrap();
 
-        assert_eq!(web.url, "https://api.x.com/1.1/account/settings.json?include_ext_sharing_audiospaces_listening_data_with_followers=true&include_mention_filter=true&include_nsfw_user_flag=true&include_nsfw_admin_flag=true&include_ranked_timeline=true&include_alt_text_compose=true&ext=ssoConnections&include_country_code=true&include_ext_dm_nsfw_media_filter=true");
+        assert_eq!(web.url, TEST_URL);
     }
 
     #[test]
@@ -83,5 +114,34 @@ mod tests {
         let web = verify_and_parse(web_proof).unwrap();
 
         assert_eq!(web.notary_pub_key, NOTARY_PUB_KEY_PEM_EXAMPLE);
+    }
+
+    #[test]
+    fn server_name_verification_success() {
+        assert!(verify_server_name("api.x.com", TEST_URL).is_ok());
+    }
+
+    #[test]
+    fn server_name_verification_fail_host_name_mismatch() {
+        assert!(matches!(
+            verify_server_name("x.com", TEST_URL).unwrap_err(),
+            WebProofError::HostNameMismatch
+        ));
+    }
+
+    #[test]
+    fn server_name_verification_fail_parse_url() {
+        assert!(matches!(
+            verify_server_name("", "").unwrap_err(),
+            WebProofError::ParseUrl(ParseError::RelativeUrlWithoutBase)
+        ));
+    }
+
+    #[test]
+    fn server_name_verification_fail_host_not_found_in_url() {
+        assert!(matches!(
+            verify_server_name("", "unix:/a").unwrap_err(),
+            WebProofError::NoHostFoundInUrl
+        ));
     }
 }
