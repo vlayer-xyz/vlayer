@@ -1,6 +1,13 @@
-cd "./contracts"
-IMAGE_ID_FILE=src/ImageID.sol
-rm "${IMAGE_ID_FILE}"
+#!/usr/bin/env bash
+
+set -uexo pipefail
+
+VLAYER_HOME=$(git rev-parse --show-toplevel)
+IMAGE_ID_FILE="${VLAYER_HOME}/contracts/src/ImageID.sol"
+
+if [[ -e "${IMAGE_ID_FILE}" ]] ; then
+    rm "${IMAGE_ID_FILE}"
+fi
 
 cat <<EOF >"${IMAGE_ID_FILE}"
 pragma solidity ^0.8.20;
