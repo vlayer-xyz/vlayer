@@ -42,6 +42,10 @@ impl WebProof {
         let ServerName::Dns(server_name) = &self.tls_proof.session.session_info.server_name;
         server_name.to_string()
     }
+
+    pub fn get_notary_pub_key(&self) -> Result<String, pkcs8::spki::Error> {
+        self.notary_pub_key.to_public_key_pem(LineEnding::LF)
+    }
 }
 
 #[derive(Error, Debug)]
@@ -51,6 +55,9 @@ pub enum VerificationError {
 
     #[error("Substrings proof error: {0}")]
     SubstringsProof(#[from] SubstringsProofError),
+
+    #[error("Notary public key serialization error: {0}")]
+    PublicKeySerialization(#[from] pkcs8::spki::Error),
 }
 
 fn deserialize_public_key_from_pem_string<'de, D>(deserializer: D) -> Result<PublicKey, D::Error>
@@ -129,5 +136,14 @@ mod tests {
     fn success_get_server_name() {
         let proof = load_web_proof_fixture("./testdata/tls_proof.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
         assert_eq!(proof.get_server_name(), "api.x.com");
+    }
+
+    #[test]
+    fn success_get_notary_pub_key() {
+        let proof = load_web_proof_fixture("./testdata/tls_proof.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
+        assert_eq!(
+            proof.get_notary_pub_key().unwrap(),
+            NOTARY_PUB_KEY_PEM_EXAMPLE
+        );
     }
 }
