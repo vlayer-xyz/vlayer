@@ -5,18 +5,18 @@ out = "out"
 libs = ["dependencies"]
 
 [dependencies]
-forge-std = "1.9.2"
-"@openzeppelin-contracts" = "5.0.2"
+forge-std = "1.8.2"
+"@openzeppelin-contracts" = "5.0.1"
 risc0-ethereum = { version = "1.0.0", url = "https://github.com/vlayer-xyz/risc0-ethereum/releases/download/v1.0.0-soldeer/contracts.zip" }
 
 # See more config options https://github.com/foundry-rs/foundry/blob/master/crates/config/README.md#all-options
 
 [soldeer]
 # whether soldeer manages remappings
-remappings_generate = true
+remappings_generate = false
 
 # whether soldeer re-generates all remappings when installing, updating or uninstalling deps
-remappings_regenerate = true
+remappings_regenerate = false
 
 # whether to suffix the remapping with the version: `name-a.b.c`
 remappings_version = true
