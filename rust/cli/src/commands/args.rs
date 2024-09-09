@@ -29,6 +29,7 @@ pub(crate) enum TemplateOption {
     Airdrop,
     SimpleTravel,
     ERC20Balances,
+    WebProof
 }
 
 #[derive(Clone, Debug, ValueEnum, Default)]
@@ -54,6 +55,7 @@ impl fmt::Display for TemplateOption {
             TemplateOption::Airdrop => write!(f, "airdrop"),
             TemplateOption::SimpleTravel => write!(f, "simple_travel"),
             TemplateOption::ERC20Balances => write!(f, "erc20_balances"),
+            TemplateOption::WebProof => write!(f, "web_proof"),
         }
     }
 }
