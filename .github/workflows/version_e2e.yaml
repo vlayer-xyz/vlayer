@@ -19,7 +19,8 @@ jobs:
         with:
           cache-workspaces: |
             rust
-            rust/call/guest_wrapper/risc0_guest
+            rust/services/call/guest_wrapper/risc0_guest
+            rust/services/prove_chain/guest_wrapper/risc0_guest
 
       - uses: cargo-bins/cargo-binstall@main
 

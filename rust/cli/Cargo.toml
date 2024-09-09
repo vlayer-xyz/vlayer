@@ -9,9 +9,9 @@ edition = "2021"
 build = "build.rs"
 
 [dependencies]
-call_guest_wrapper = { path = "../call/guest_wrapper" }
-call_server = { path = "../call/server" }
-test_runner = { path = "../test_runner" }
+call_guest_wrapper = { workspace = true }
+call_server = { workspace = true }
+test_runner = { workspace = true }
 
 anyhow = { workspace = true }
 clap = { workspace = true, features = ["derive", "string"] }

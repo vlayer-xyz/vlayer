@@ -1,6 +1,6 @@
 // Keep everything in the vlayer library private except the commitment.
 mod private {
-    alloy_sol_types::sol!(#![sol(all_derives)] "../../../contracts/src/ExecutionCommitment.sol");
+    alloy_sol_types::sol!(#![sol(all_derives)] "../../../../contracts/src/ExecutionCommitment.sol");
 }
 
 use alloy_primitives::{Address, U256};

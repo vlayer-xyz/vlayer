@@ -9,7 +9,7 @@ fn main() -> Result<()> {
 
         let guests = risc0_build::embed_methods();
 
-        let assets_dir = Path::new("../../target/assets");
+        let assets_dir = Path::new("../../../target/assets");
         let image_id_path = assets_dir.join("ImageID.sol");
         let elf_path = assets_dir.join("Elf.sol");
 
