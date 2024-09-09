@@ -13,8 +13,8 @@ checksum = "20fd008c7c69b6c737cc0284469d1c76497107bc3e004d8381f6d8781cb27980"
 integrity = "f49457fb6591f0dfd8b59e02e6eb4508a115ef08a86b0803feb0a3939d82d783"
 
 [[dependencies]]
-name = "risc0-ethereum-contracts-fork"
-version = "1.0.1"
-source = "https://soldeer-revisions.s3.amazonaws.com/risc0-ethereum-contracts-fork/1_0_1_06-09-2024_09:05:05_contracts-risc0-eth.zip"
-checksum = "e19dc7016788abda760bee604b30c785c7443f4a7bc482590547391c97a8ee02"
-integrity = "2b631625c397416516d10180d8e25418a7a177c012b88e35bf0ed82000d16684"
+name = "risc0-ethereum"
+version = "1.0.0"
+source = "https://github.com/vlayer-xyz/risc0-ethereum/releases/download/v1.0.0-soldeer/contracts.zip"
+checksum = "29dce8297a030792bb9b70d1372fce9d890b728302a92e2287fb066f6ad87f78"
+integrity = "cc324f79ea650ced892ad69ac67a9da1b34aa1d2317f83e4a5946943d8b29f4d"
