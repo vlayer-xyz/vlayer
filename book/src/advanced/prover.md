@@ -27,6 +27,8 @@ Arbitrary arguments can be passed to Prover functions. All arguments are private
 
 All data returned by functions is public. To make an argument public on-chain, return it from the function.
 
+> **NOTE**: Dynamically sized arrays (eg. `bytes` or `string`) are not yet supported as return values from the Prover function. 
+
 ### Injected values
 Two additional variables may be injected to function body: `web` and `mail`. These variables allows to access data like email or web content and use them in the contract logic.     
 

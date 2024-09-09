@@ -61,7 +61,7 @@ contract Verifier {
 
 ```
 
-> Note: Arrays are not yet supported as return values from the Prover function, so public inputs cannot be arrays. 
+> Note: Dynamically sized arrays (eg. `bytes` or `string`) are not yet supported as return values from the Prover function, so these types cannot be public inputs to verification functions. 
 
 > Note: Passing different variables (in terms of type, name, or order) would either revert execution or cause undefined behavior and should be avoided for security reasons.
 
