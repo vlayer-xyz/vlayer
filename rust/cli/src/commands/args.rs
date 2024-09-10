@@ -29,7 +29,7 @@ pub(crate) enum TemplateOption {
     Airdrop,
     SimpleTravel,
     ERC20Balances,
-    WebProof
+    WebProof,
 }
 
 #[derive(Clone, Debug, ValueEnum, Default)]
