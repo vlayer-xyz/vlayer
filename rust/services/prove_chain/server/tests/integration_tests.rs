@@ -71,7 +71,7 @@ async fn success_dummy() {
         "id": 1,
         "method": "v_proveChain",
         "params": {
-            "block_hashes": ["0x315f5bdb76d078c43b8ac0064e4a016464891cc396722fa9b74f24d106b502f3"]
+            "block_hashes": ["0x0000000000000000000000000000000000000000000000000000000000000000"]
         }
     });
     let response = post(app, "/", &req).await;
