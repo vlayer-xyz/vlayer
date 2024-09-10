@@ -1,10 +1,11 @@
 import vlayerLogo from "/vlayer_logo.svg";
-import "./App.css";
 
 function App() {
   return (
     <>
-      <div className="card">
+      <div style={{
+        padding: "2em"
+      }}>
         <img src={vlayerLogo} alt="Vlayer Logo" />
       </div>
     </>
