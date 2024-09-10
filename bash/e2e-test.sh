@@ -16,11 +16,12 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
 
   (
     echo "Running tests of: ${example}"
-    cd "${example}/vlayer"
-
+    cd "${example}"
+    forge soldeer install
     forge clean
     forge build
 
+    cd vlayer
     bun install
     bun run prove.ts 
 
