@@ -1,5 +1,3 @@
-use std::error::Error;
-
 use crate::db::proof::ProofDb;
 use crate::encodable_receipt::EncodableReceipt;
 use crate::evm_env::factory::HostEvmEnvFactory;
@@ -17,13 +15,12 @@ use call_guest_wrapper::RISC0_CALL_GUEST_ELF;
 use config::HostConfig;
 use error::HostError;
 use ethers_core::types::BlockNumber;
-use prover::Prover;
+use host_utils::Prover;
 use risc0_zkvm::ExecutorEnv;
 use serde::Serialize;
 
 pub mod config;
 pub mod error;
-mod prover;
 
 pub struct Host<P: BlockingProvider> {
     start_execution_location: ExecutionLocation,
@@ -62,7 +59,7 @@ where
         let block_number = get_block_number(&providers, config.start_chain_id)?;
         let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
         let start_execution_location = ExecutionLocation::new(block_number, config.start_chain_id);
-        let prover = Prover::new(&config);
+        let prover = Prover::new(config.proof_mode);
 
         Ok(Host {
             envs,
@@ -79,7 +76,7 @@ where
         let providers = CachedMultiProvider::new(provider_factory);
         let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
         let start_execution_location = ExecutionLocation::new(block_number, config.start_chain_id);
-        let prover = Prover::new(&config);
+        let prover = Prover::new(config.proof_mode);
 
         Ok(Host {
             envs,
