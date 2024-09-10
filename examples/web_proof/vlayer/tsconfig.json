@@ -3,7 +3,8 @@
     // Enable latest features
     "lib": [
       "ESNext",
-      "DOM"
+      "DOM",
+      "DOM.Iterable"
     ],
     "target": "ESNext",
     "module": "ESNext",
@@ -13,6 +14,7 @@
     // Bundler mode
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
+    "isolatedModules": true,
     "verbatimModuleSyntax": true,
     "noEmit": true,
     // Best practices
@@ -25,8 +27,11 @@
     "noPropertyAccessFromIndexSignature": false,
     "paths": {
       "@vlayer/sdk": [
-        "../../../packages/vlayer/sdk/src/index.ts"
+        "../../../packages/vlayer/sdk/src/index"
       ]
-    }
-  }
+    },
+  }, 
+  "include" : [
+    "src"
+  ]
 }
