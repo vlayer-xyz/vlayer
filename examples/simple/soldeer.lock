@@ -1,0 +1,6 @@
+[[dependencies]]
+name = "forge-std"
+version = "1.8.2"
+source = "https://soldeer-revisions.s3.amazonaws.com/forge-std/1_8_2_19-05-2024_18:52:07_forge-std-1.8.2.zip"
+checksum = "88a37e1d79f60b8aad08c7bd50a7a5ef973fc172b1495028d0725a17f5a4976c"
+integrity = "7db36e30b7e5ff6bd2a38ee5d634d811ed98fd7c684785f937fea3ac3df37111"
