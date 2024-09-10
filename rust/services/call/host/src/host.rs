@@ -1,3 +1,5 @@
+use std::error::Error;
+
 use crate::db::proof::ProofDb;
 use crate::encodable_receipt::EncodableReceipt;
 use crate::evm_env::factory::HostEvmEnvFactory;
@@ -9,7 +11,6 @@ use alloy_primitives::ChainId;
 use alloy_sol_types::SolValue;
 use call_engine::engine::Engine;
 use call_engine::evm::env::{cached::CachedEvmEnv, location::ExecutionLocation};
-use call_engine::evm::input::MultiEvmInput;
 use call_engine::io::{Call, GuestOutput, HostOutput, Input};
 use call_engine::Seal;
 use call_guest_wrapper::RISC0_CALL_GUEST_ELF;
@@ -18,6 +19,7 @@ use error::HostError;
 use ethers_core::types::BlockNumber;
 use prover::Prover;
 use risc0_zkvm::ExecutorEnv;
+use serde::Serialize;
 
 pub mod config;
 pub mod error;
@@ -91,7 +93,14 @@ where
 
         let multi_evm_input =
             into_multi_input(self.envs).map_err(|err| HostError::CreatingInput(err.to_string()))?;
-        let env = Self::build_executor_env(self.start_execution_location, multi_evm_input, call)?;
+        let input = Input {
+            call,
+            multi_evm_input,
+            start_execution_location: self.start_execution_location,
+        };
+
+        let env = Self::build_executor_env(input)
+            .map_err(|err| HostError::ExecutorEnvBuilder(err.to_string()))?;
         let (seal, raw_guest_output) = Self::prove(&self.prover, env, RISC0_CALL_GUEST_ELF)?;
 
         let proof_len = raw_guest_output.len();
@@ -126,21 +135,7 @@ where
         Ok((seal.abi_encode(), result.receipt.journal.bytes))
     }
 
-    fn build_executor_env(
-        start_execution_location: ExecutionLocation,
-        multi_evm_input: MultiEvmInput,
-        call: Call,
-    ) -> Result<ExecutorEnv<'static>, HostError> {
-        let input = Input {
-            call,
-            multi_evm_input,
-            start_execution_location,
-        };
-        let env = ExecutorEnv::builder()
-            .write(&input)
-            .map_err(|err| HostError::ExecutorEnvBuilder(err.to_string()))?
-            .build()
-            .map_err(|err| HostError::ExecutorEnvBuilder(err.to_string()))?;
-        Ok(env)
+    fn build_executor_env(input: impl Serialize) -> anyhow::Result<ExecutorEnv<'static>> {
+        Ok(ExecutorEnv::builder().write(&input)?.build()?)
     }
 }
