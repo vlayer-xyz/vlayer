@@ -1,9 +1,11 @@
 vlayer/=../../contracts/src/
 
-forge-std/=../../contracts/dependencies/forge-std-1.8.2/
 openzeppelin-contracts/=../../contracts/dependencies/@openzeppelin-contracts-5.0.1/
 openzeppelin/=../../contracts/dependencies/@openzeppelin-contracts-5.0.1/
 risc0-ethereum/=../../contracts/dependencies/risc0-ethereum-1.0.0/
 
 forge-std-1.8.2/=../../contracts/dependencies/forge-std-1.8.2/
 risc0-ethereum-1.0.0/=../../contracts/dependencies/risc0-ethereum-1.0.0/
+
+@openzeppelin-contracts/=dependencies/@openzeppelin-contracts-5.0.1/
+forge-std/=dependencies/forge-std-1.8.2/
