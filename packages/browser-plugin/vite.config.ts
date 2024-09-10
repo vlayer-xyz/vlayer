@@ -17,6 +17,10 @@ export default defineConfig({
     webExtension({
       manifest: generateManifest,
       watchFilePaths: ["package.json", "manifest.json"],
+      webExtConfig: {
+        startUrl: "http://localhost:5174",
+      },
+
     }),
   ],
 });
