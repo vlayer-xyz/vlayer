@@ -5,7 +5,7 @@ set -uexo pipefail
 VLAYER_HOME=$(git rev-parse --show-toplevel)
 IMAGE_ID_FILE="${VLAYER_HOME}/contracts/src/ImageID.sol"
 
-if [[ -e "${IMAGE_ID_FILE}" ]] ; then
+if [[ -L "${IMAGE_ID_FILE}" ]] ; then # check whether ImageID is a symlink
     rm "${IMAGE_ID_FILE}"
 fi
 
