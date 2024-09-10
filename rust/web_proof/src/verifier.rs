@@ -14,12 +14,27 @@ pub enum WebProofError {
     Parsing(#[from] ParsingError),
 }
 
+use crate::hello::HelloMessage;
+use protobuf::Message;
+
 pub fn verify_and_parse(web_proof: WebProof) -> Result<Web, WebProofError> {
     let server_name = web_proof.get_server_name();
     let notary_pub_key = web_proof
         .get_notary_pub_key()
         .map_err(VerificationError::PublicKeySerialization)?;
     let (request, response) = web_proof.verify()?;
+
+     // Create a new HelloMessage
+     let mut message = HelloMessage::new();
+ 
+     // Serialize the message to a byte array
+     let serialized_message = message.write_to_bytes().unwrap();
+     println!("Serialized message: {:?}", serialized_message);
+ 
+     // Deserialize the byte array back to a HelloMessage
+     let deserialized_message = HelloMessage::parse_from_bytes(&serialized_message).unwrap();
+     println!("Deserialized message: name = {}, age = {}", deserialized_message.name, deserialized_message.age);
+ 
 
     Ok(Web {
         url: request.parse_url()?,
