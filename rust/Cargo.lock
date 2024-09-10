@@ -1776,6 +1776,7 @@ dependencies = [
  "dotenv",
  "ethers-core",
  "ethers-providers",
+ "host_utils",
  "mpt",
  "revm",
  "risc0-ethereum-contracts",
@@ -4761,6 +4762,10 @@ checksum = "e3d1354bf6b7235cb4a0576c2619fd4ed18183f689b12b006a0ee7329eeff9a5"
 dependencies = [
  "windows-sys 0.52.0",
 ]
+
+[[package]]
+name = "host_utils"
+version = "0.1.0"
 
 [[package]]
 name = "html5ever"
@@ -7901,9 +7906,9 @@ dependencies = [
  "anyhow",
  "axum",
  "axum-jrpc",
- "call_host",
  "ethers",
  "hex",
+ "host_utils",
  "http-body-util",
  "mime",
  "serde",

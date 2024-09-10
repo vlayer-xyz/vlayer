@@ -3,7 +3,8 @@ use risc0_zkvm::{
     BonsaiProver, ExecutorEnv, ExternalProver, ProveInfo, Prover as ProverTrait, ProverOpts,
 };
 
-use super::config::{HostConfig, ProofMode};
+use super::config::HostConfig;
+use host_utils::ProofMode;
 
 pub(super) struct Prover {
     mode: ProofMode,

@@ -2,12 +2,7 @@ use std::collections::HashMap;
 
 use alloy_primitives::ChainId;
 
-#[derive(Default, Clone, Copy)]
-pub enum ProofMode {
-    #[default]
-    Fake,
-    Groth16,
-}
+use host_utils::ProofMode;
 
 #[derive(Default)]
 pub struct HostConfig {
