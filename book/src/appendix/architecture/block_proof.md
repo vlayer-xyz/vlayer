@@ -1,32 +1,35 @@
 # Block Proof Cache
 
-vlayer executes Solidity code off-chain and proves the correctness of that execution on-chain. For that purpose, it fetches (state and) storage data and verifies it with storage proofs. Storage proofs prove that a piece of storage is part of a block with a specific hash. Hence, the storage proof is 'connected' to a certain block hash. However, they don't guarantee that the block with the specific hash actually exists on the chain. This verification needs to be done later with an on-chain smart contract.
+## Introduction
 
-vlayer provides time-travel functionality. As a result, state and storage proofs are not 'connected' to a single block hash, but to multiple block hashes. To ensure that these hashes exist on the chain, two things need to be done:
+### Prerequisites
 
-1. First, it needs to be proven that all the hashes belong to the same chain. However, the blocks might belong to an imaginary chain and not a real one. That's why a second step is needed.
-2. Second, the latest hash needs to be verified on-chain.
+vlayer executes Solidity code off-chain and proves the correctness of that execution on-chain. For that purpose, it fetches state and storage data and verifies it with storage proofs.
 
-The **Block Proof Cache** service allows for proving **the first point** by maintaining a data structure that stores block hashes, along with a ZK proof that all the hashes it contains belong to the same chain. Below we provide more details.
+Storage proofs prove that a piece of storage is part of a block _with a specific hash_. We say the storage proof is 'connected' to a certain block hash.
+
+However, the storage proof doesn't guarantee that the block with the specific hash actually exists on the chain. This verification needs to be done later with an on-chain smart contract.
+
+### Motivation
+
+vlayer provides **time-travel functionality**. As a result, state and storage proofs are not 'connected' to a single block hash, but to multiple block hashes. To ensure that these hashes exist on the chain, two things need to be done:
+
+1. It needs to be proven that all the hashes belong to the same chain. However, the blocks may not belong to the chain we are interested in. That's why a second step is needed.
+2. The latest hash needs to be verified on-chain.
+
+The **Block Proof Cache** service allows for proving _the first point_ by maintaining a data structure that stores block hashes, along with a zk-proof that all the hashes it contains belong to the same chain. Before going into more detail, it is recommended to go through the next section.
 
 ## Before diving into Block Proof Cache
 
-Before diving into the details of Block Proof Cache, it is recommended to go through, or at least glance over, the two topics below.
+### Verifying a hash on-chain
 
-### Recent and historical blocks
+As mentioned, it is essential to be able to verify a hash on-chain. The way to do this is by running the Solidity `blockhash(uint)` function. The hash needs to be compared to the result of the function (with the block number taken from the storage proof).
 
-As mentioned, it is essential to be able to verify a hash on-chain. The way to do this is to run the Solidity `blockhash(uint)` function, which returns the corresponding hash for a given block number. The hash to be verified needs to be compared to the result of the function (with the block number taken from the storage proof).
-
-However, this method is limited, as it only works for the most recent 256 blocks on a given chain. That is why we need to ensure that the latest hash to be verified on-chain is a hash of a recent block. If it is not, it needs to be added to the set of hashes.
-
-We use the following terminology in this document:
-
-- **recent blocks** - any of the most recent 256 blocks (relative to the current block number)
-- **historical blocks** - blocks older than 256
+However, this method is limited, as it only works for the most recent 256 blocks on a given chain. Therefore, we must ensure that the latest hash being verified on-chain is a hash of a recent block (one of the last 256). If it is not, it must be added to the set of hashes we want to prove belong to the same chain.
 
 ### Naive chain proofs
 
-Returning to the first point from the introduction, we need a way to prove that a set of hashes belongs to the same chain. A naive way to do this is to hash all subsequent blocks from the oldest to the most recent and verify that each block hash is equal to the **prevHash** value of the subsequent block. If all the hashes from our set appear along the way, then they all belong to the same chain.
+Returning to the first point from the introduction, we need a way to prove that a set of hashes belongs to the same chain. A naive way to do this is to hash all subsequent blocks from the oldest to the most recent and verify that each block hash is equal to the **parentHash** value of the following block. If all the hashes from our set appear along the way, then they all belong to the same chain.
 
 See the diagram below for a visual representation.
 
@@ -37,8 +40,8 @@ Unfortunately, this is a slow process, especially if the blocks are far apart on
 ## Block Proof Cache
 
 The Block Proof Cache service maintains two things:
-- a Block Proof Cache structure (Merkle Patricia Trie) that stores block hashes,
-- a ZK proof 𝜋 that all these hashes belong to the same chain.
+- a Block Proof Cache structure (a Merkle Patricia Trie) that stores block hashes,
+- a zk-proof 𝜋 that all these hashes belong to the same chain.
 
 Given these two elements, it is easy to prove that a set of hashes belongs to the same chain.
 1. It needs to be verified that all the hashes are part of the Block Proof Cache structure.
@@ -50,7 +53,9 @@ The Block Proof Cache structure is a dictionary that stores a `<block_number, bl
 
 #### Adding hashes to the BPC structure and maintaining 𝜋
 
-At all times, the blocks stored in the BPC structure form a consistent subchain. In other words, we preserve the invariant that for every pair of block numbers `i, i+1` contained in the structure, `block(i + 1).parentHash = hash(block(i))`.
+At all times, the BPC structure stores a sequence of consecutive block hashes that form a chain. In other words, we preserve the invariant that:
+- block numbers contained in the structure form a sequence of consecutive natural numbers,
+- for every pair of block numbers `i, i+1` contained in the structure, `block(i + 1).parentHash = hash(block(i))`.
 
 Each time a block is added, 𝜋 is updated. To prove that after adding a new block, all the blocks in the BPC structure belong to the same chain, two things must be done:
 - The previous 𝜋 must be verified.
@@ -62,7 +67,7 @@ The following functions, written in pseudocode, provide more details on the Bloc
 
 #### Initialize
 
-The initialize function is used to create Block Proof Cache as a Merkle Patricia Trie and insert the initial block's hash into it. It takes the following arguments:
+The initialize function is used to create Block Proof Cache structure as a Merkle Patricia Trie (MPT) and insert the initial block hash into it. It takes the following arguments:
 
 - **elf_id**: a hash of the guest binary.
 - **block**: the block header of the block to be added.
@@ -80,12 +85,12 @@ fn initialize(elf_id: Hash, block: BlockHeader) -> (MptRoot, elf_id) {
 
 #### Append
 
-The append function is used to add a new block to the Merkle Patricia Trie. It takes the following arguments:
+The append function is used to add a most recent block to the Merkle Patricia Trie. It takes the following arguments:
 
-- **elf_id**: a hash of the guest binary.
-- **block**: the block header to be added.
-- **mpt**: a sparse MPT containing two paths: one from the root to the parent block and one from the root to the node where the new block will be inserted.
-- **proof**: a zero-knowledge proof (zk-proof) that verifies the correctness of the MPT so far.
+- **elf_id**: a hash of the guest binary,
+- **block**: the block header to be added,
+- **mpt**: a sparse MPT containing two paths: one from the root to the parent block and one from the root to the node where the new block will be inserted,
+- **proof**: a zero-knowledge proof that all contained hashes so far belong to the same chain.
   The function ensures that the new block correctly follows the previous block by checking the parent block's hash. If everything is correct, it inserts the new block's hash into the trie.
 
 ```rs
@@ -102,13 +107,13 @@ fn append(elf_id: Hash, block: BlockHeader, mpt: SparseMpt<ParentBlockIdx, NewBl
 
 #### Prepend
 
-The prepend function is used to add a new oldest block to the Merkle Patricia Trie (MPT). It takes the following arguments:
+The prepend function is used to add a new oldest block to the Merkle Patricia Trie. It takes the following arguments:
 
 - **elf_id**: a hash of the guest binary.
 - **child_block**: the full data of the currently oldest block already stored in the MPT.
 - **mpt**: a sparse MPT containing the path from the root to the child block and the new block's intended position.
-- **proof**: a zero-knowledge proof (zk-proof) that verifies the correctness of the MPT so far.
-  The function verifies the proof to ensure the full data from the child block fits the MPT we have so far. If the verification succeeds, it takes the parent_hash from the currently oldest block and inserts it with the corresponding number into the MPT. Note that we don't need to pass the full parent block as the trie only store hashes. We will need to pass it next time we want to prepend though.
+- **proof**: a zero-knowledge proof that all contained hashes so far belong to the same chain.
+  The function verifies the proof to ensure the full data from the child block fits the MPT we have so far. If the verification succeeds, it takes the `parent_hash` from the currently oldest block and inserts it with the corresponding number into the MPT. Note that we don't need to pass the full parent block as the trie only store hashes. However, we will need to pass it next time we want to prepend.
 
 ```rs
 fn prepend(elf_id: Hash, child_block: BlockHeader, mpt: SparseMpt<ChildBlockIdx, NewBlockIdx>, proof: ZkProof) -> (MptRoot, elf_id) {
@@ -120,16 +125,16 @@ fn prepend(elf_id: Hash, child_block: BlockHeader, mpt: SparseMpt<ChildBlockIdx,
 }
 ```
 
-### Block Proof Cache server
+### Prove Chain server
 
-Block Proof Cache are stored in a distinct type of vlayer node, specifically a JSON-RPC server. It consists mainly of a single call `v_getBlockProofs(block_no: int[])`. This call takes one argument: an array of block numbers for the requested proofs. It returns a triplet: an array of Merkle proofs for each requested block, the root hash of the Merkle Patricia Trie structure, and π - a zk-proof of the correctness of the constructed MPT.
+Block Proof Cache structure is stored in a distinct type of vlayer node, specifically a JSON-RPC server. It consists of a single call `v_proveChain(block_hashes: Hash[])`. This call takes an array of block hashes as an argument and, if succeeds, returns 𝜋 - the zk-proof that all the hashes belong to the same chain.
 
 An example call could look like this:
 
 ```json
 {
-  "method": "v_getBlockProofs",
-  "params": [1231, 123123123, 312312]
+  "method": "v_proveChain",
+  "params": ["0xb2b3e25c8939198cfeef52980defe56bdc96b8ea8459f2dc518ebc54e80f55a2", "0x162f1aa6efac84780a1cdba8f61e9d381cf103600b6122c8c56f4ebf3395beeb", "0x67df7671915189f30b83869a794df3acfaab6ed0b4644f81a2779866789a4412"]
 }
 ```
 
@@ -138,13 +143,7 @@ And the response:
 ```json
 {
     "result": [
-        [
-            [...],
-            [...],
-            [...]
-        ],
-        "0xe32ddb9c538f04c994e2e802237fa5f4c4e7e2643ab48bd8535b1c7009c8aa81",
-        "0x9c538f04c994e2e802237fa5f4c4e7e2643ab48bd8535b1c7009c8aa81e32ddb"
+        "0xe32ddb9c538f04c994e2e802237fa5f4c4e7e2643ab48bd8535b1c7009c8aa81"
     ]
 }
 ```
