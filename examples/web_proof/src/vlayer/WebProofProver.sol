@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {Strings} from "openzeppelin-contracts/utils/Strings.sol";
+import {Strings} from "@openzeppelin-contracts/utils/Strings.sol";
 
 import {Prover} from "vlayer/Prover.sol";
 import {Web, WebProof, WebProofLib, WebLib} from "vlayer/WebProof.sol";
