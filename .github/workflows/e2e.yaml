@@ -45,6 +45,10 @@ jobs:
           EXPECTED_LLVM_VERSION: "18.1"
         run: bash/check_llvm_clang.sh
 
+      - name: Install contracts' dependencies
+        working-directory: ./contracts
+        run: forge soldeer install
+        
       - name: Run e2e test
         env:
           PROVING_MODE: ${{ github.ref == 'refs/heads/main' && 'prod' || 'dev' }}

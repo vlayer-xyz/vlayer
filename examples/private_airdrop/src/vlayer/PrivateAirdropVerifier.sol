@@ -4,7 +4,7 @@ pragma solidity ^0.8.13;
 import {Proof} from "vlayer/Proof.sol";
 import {Verifier} from "vlayer/Verifier.sol";
 import {PrivateAirdropProver} from "./PrivateAirdropProver.sol";
-import {IERC20} from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
+import {IERC20} from "openzeppelin-contracts/token/ERC20/IERC20.sol";
 
 // This contract is executed on-chain (Ethereum Mainnet, Arbitrum, Base, etc.)
 contract PrivateAirdropVerifier is Verifier {

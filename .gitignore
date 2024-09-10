@@ -21,3 +21,4 @@ target/
 # npm dependencies
 **/node_modules
 
+**/dependencies
