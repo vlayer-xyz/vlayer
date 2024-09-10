@@ -2,12 +2,18 @@
 
 ## Initialization
 
-To initialize a vlayer project run following command inside your [Foundry](https://getfoundry.sh/) project:
+To initialize a fresh new vlayer project just run following command:
 ```bash
-$ vlayer init
+$ vlayer init project-name
 ```
 
-The command above will add all necessary dependencies and sample vlayer contracts.
+The above command will create new `project-name` folder in your current location, add all necessary dependencies with sample vlayer contracts.
+
+### Adding to existing project
+To initialize vlayer within your already created Foundry project use `--existing` flag: 
+```bash
+cd ./your-project && vlayer init --existing
+```
 
 ## Testing
 
