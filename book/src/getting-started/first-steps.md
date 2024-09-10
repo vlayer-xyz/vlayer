@@ -21,7 +21,7 @@ To run tests, one must first launch a local Ethereum node:
 ```bash
 $ anvil 
 ```
-and in a new terminal session:
+and in a new terminal session start [Prover server](/advanced/prover.html#prover-server):
 
 ```bash
 $ vlayer serve
