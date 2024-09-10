@@ -6,7 +6,12 @@ struct EmailProof {
 }
 
 library EmailProofLib {
-    function verify(EmailProof memory emailProof) internal pure returns (string memory) {
-        return emailProof.mimeEmail;
+    address private constant VERIFY_EMAIL_PRECOMPILE = address(0x102);
+
+    function verify(EmailProof memory emailProof) internal view returns (string memory) {
+        (bool success, bytes memory email) = VERIFY_EMAIL_PRECOMPILE.staticcall(bytes(emailProof.mimeEmail));
+        require(success, "verify_email precompile call failed");
+        string memory decodedEmail = abi.decode(email, (string));
+        return decodedEmail;
     }
 }
