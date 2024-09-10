@@ -17,6 +17,8 @@ vlayer provides **time-travel functionality**. As a result, state and storage pr
 1. It needs to be proven that all the hashes belong to the same chain. However, the blocks may not belong to the chain we are interested in. That's why a second step is needed.
 2. The latest hash needs to be verified on-chain.
 
+![2-step verification](/images/architecture/block_proof/on-off-chain.png)
+
 The **Block Proof Cache** service allows for proving _the first point_ by maintaining a data structure that stores block hashes, along with a zk-proof that all the hashes it contains belong to the same chain. Before going into more detail, it is recommended to go through the next section.
 
 ## Before diving into Block Proof Cache
@@ -33,7 +35,7 @@ Returning to the first point from the introduction, we need a way to prove that 
 
 See the diagram below for a visual representation.
 
-![Schema](/images/architecture/block-proof.png)
+![Naive chain proof](/images/architecture/block_proof/naive_chain_proof.png)
 
 Unfortunately, this is a slow process, especially if the blocks are far apart on the time scale. Fortunately, with the help of Block Proof Cache, this process can be sped up to logarithmic time.
 
@@ -50,6 +52,8 @@ Given these two elements, it is easy to prove that a set of hashes belongs to th
 ### Block Proof Cache (BPC) structure
 
 The Block Proof Cache structure is a dictionary that stores a `<block_number, block_hash>` mapping. It is implemented using a Merkle Patricia Trie. This enables us to prove that a set of hashes is part of the structure (point 1 from the previous paragraph) by supplying their corresponding Merkle proofs.
+
+![Chain proof elements](/images/architecture/block_proof/chain_proof.png)
 
 #### Adding hashes to the BPC structure and maintaining 𝜋
 
