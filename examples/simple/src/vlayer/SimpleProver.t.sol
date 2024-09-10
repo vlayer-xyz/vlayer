@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {VerificationFailed} from "risc0-ethereum/IRiscZeroVerifier.sol";
+import {VerificationFailed} from "risc0-ethereum/src/IRiscZeroVerifier.sol";
 import {SimpleProver} from "./SimpleProver.sol";
 import {VTest, Proof, CHEATCODES} from "vlayer/testing/VTest.sol";
 import {Simple} from "./SimpleVerifier.sol";
