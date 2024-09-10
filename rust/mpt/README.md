@@ -14,9 +14,11 @@ There are plenty of libraries that implement MPT, but their interface usually al
 
 Functionality of sparse MPT:
 * Compute the root hash
-* Verify proofs for selected values (also exclusion proofs)
-* Takes up less space than N proofs (because top-level nodes are not duplicated)
-* Becomes even more efficient when keys are close to each other
+* Verify inclusion proofs for selected values (also exclusion proofs)
+
+Advantages of using sparse MPT:
+* Top level nodes are not duplicated. Therefore the more proofs you store, the less memory is needed for proof
+* Key prefix proximity escalates the abovementioned effect
 
 ## Usage
 
@@ -32,6 +34,9 @@ The main struct is `MerkleTrie(Node)` in [trie.rs](./src/trie.rs) which contains
     * For successful exclusion proof - None is returned
     * Panics when neither inclusion nor exclusion of the key can be guaranteed
     * If the value is RLP decodable - you can use `get_rlp`
+* `insert(&mut self, key: impl AsRef<[u8]>, value: impl AsRef<[u8]>)`
+    * Updates the trie, adding a new node with the given (key, value) pair
+    * If the key already exists in the trie, it returns DuplicateKey error
 
 
 ## Internal structure
@@ -53,6 +58,9 @@ enum Node {
 `Node` methods:
 * `get(&self, key_nibs: &[u8]) -> Option<&[u8]>`
     * Has similar semantics as `MerkleTrie.get` as one calls another
+* `insert(self, key: impl AsRef<[u8]>, value: impl AsRef<[u8]>,)`
+    * Has similar semantics as `MerkleTrie.insert` as one calls another
+    * It doesn't modify existing node, but returns a new, updated one
 * `size(&self) -> usize`
     * Returns the number of full nodes in the trie
     * Full nodes are nodes that need to be hashed to compute the root hash
@@ -139,3 +147,5 @@ There are unit tests for specific functions of specific structs and two [e2e tes
 ## Acknowledgements
 
 Inspired by [risc0 steel](https://github.com/risc0/risc0-ethereum/blob/main/steel/src/mpt.rs)
+
+### Insert
