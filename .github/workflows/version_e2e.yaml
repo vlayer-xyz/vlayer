@@ -25,7 +25,7 @@ jobs:
 
       - name: Install risc0 toolchain
         run: |
-          cargo binstall -y cargo-risczero --force
+          cargo binstall -y cargo-risczero@1.0.5 --force
           cargo risczero install
 
       - name: Install Foundry

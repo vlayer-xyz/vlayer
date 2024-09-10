@@ -31,7 +31,7 @@ jobs:
             rust/call/guest_wrapper/risc0_guest
 
       - name: Install risc0 installer
-        run: cargo binstall -y cargo-risczero --force
+        run: cargo binstall -y cargo-risczero@1.0.5 --force
 
       - name: Install risc0 toolchain
         run: cargo risczero install
