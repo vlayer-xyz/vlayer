@@ -61,6 +61,37 @@ enum Node {
     * `rlp_encoded(&self) -> Vec<u8>`
     * `impl rlp::Decodable for Node`
 
+### Insert
+Depending on the type of the node, insert method works differently.
+
+The (key, value) pair is often represented in the Node::insert function using the Entry structure to facilitate efficient insertion into a trie. The Entry struct provides a convenient way to encapsulate both the key and value, allowing the Node::insert function to handle them as a single unit. The From<(K, V)> for Entry implementation allows for easy creation of an Entry from various types, enabling the Node::insert function to accept a wide range of input formats. Entry also enables creating Node directly from it, transforming self into Branch with value and empty children (in the case of empty keys) or Leaf (if key is not empty).
+
+Insert function works differently depending on the type of node we are inserting to:
+
+1. Node::Null
+This happens only during the first insert into the trie. Node::Null is not created later during insertion in any way.
+
+When we insert into Node::Null, we replace null node by Branch with value if inserted value key is empty or Leaf otherwise.
+
+2. Node::Digest
+Insert into Digest node shouldn't even happen so we just panic if we trie to insert into Digest.
+
+2. Node::Leaf
+In order to simplify the number of cases we handle, we convert leaf key and value into the Entry and replace it with the new node created using `from_two_entries` function. This way we treat old entry and the new one symmetricaly and have less cases to consider.
+
+
+
+
+Co wytlumaczyc:
+* czym jest entry - DONE
+* dlaczego entry jest potrzebne - DONE
+* jak dziala wkladanie do nulla  
+* jak dziala wkladanie do digesta
+* jak dziala wkladanie do leafa
+* jak dziala wkladanie do brancha
+* jak dziala wkladanie do extension
+
+
 ### NodeRef
 
 `Node` is a recursive data structure that contains other nodes. RLP encoding of the node is not recursive and either contains other nodes inline (for nodes shorter than 32 bytes) or contains their hashes.
