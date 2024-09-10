@@ -107,8 +107,6 @@ web_proof = { path = "web_proof" }
 test_runner = { path = "test_runner" }
 host_utils = { path = "host_utils" }
 
-risc0-ethereum-contracts = { path = "../contracts/lib/risc0-ethereum/contracts" }
-
 call_host = { path = "services/call/host" }
 call_guest = { path = "services/call/guest" }
 call_engine = { path = "services/call/engine" }

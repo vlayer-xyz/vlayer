@@ -4,7 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-risc0-ethereum-contracts = { workspace = true }
 risc0-zkp = { workspace = true }
 risc0-zkvm = { workspace = true }
 host_utils = { workspace = true }

@@ -1779,7 +1779,6 @@ dependencies = [
  "host_utils",
  "mpt",
  "revm",
- "risc0-ethereum-contracts",
  "risc0-zkp",
  "risc0-zkvm",
  "serde",
@@ -7257,16 +7256,6 @@ checksum = "047cc26c68c092d664ded7488dcac0462d9e31190e1598a7820fe4246d313583"
 dependencies = [
  "bytemuck",
  "rand_core",
-]
-
-[[package]]
-name = "risc0-ethereum-contracts"
-version = "1.0.0"
-dependencies = [
- "alloy-sol-types",
- "anyhow",
- "ethers",
- "risc0-zkvm",
 ]
 
 [[package]]
