@@ -11,7 +11,7 @@ impl Node {
         self,
         entry: impl Into<Entry>,
     ) -> Result<Node, NodeError> {
-        let Node::Extension(key, child_node) = self else {
+        let Node::Extension(key, child_node) = self.clone() else {
             unreachable!("insert_entry_into_extension is used only for Extension nodes");
         };
         let entry = entry.into();
@@ -25,8 +25,7 @@ impl Node {
         }
 
         if common_prefix.is_empty() {
-            let remaining_extension = Node::extension(remaining_extension_key, *child_node);
-            return from_extension_and_entry_empty_common_prefix(remaining_extension, entry);
+            return from_extension_and_entry_empty_common_prefix(self, entry);
         }
 
         let child_node = from_extension_and_entry_empty_common_prefix(
