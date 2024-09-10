@@ -37,7 +37,6 @@ impl Node {
         Node::branch_with_children_and_value(children, value)
     }
 
-    #[allow(unused)]
     pub(crate) fn branch_with_two_children(
         first_idx: u8,
         first_child: impl Into<Node>,
@@ -50,9 +49,11 @@ impl Node {
         Node::Branch(children, None)
     }
 
-    #[allow(unused)]
-    pub(crate) fn branch_with_child_node(key: KeyNibbles, child_node: impl Into<Node>) -> Node {
-        let (first_key_nibble, remaining_key_nibbles) = key.split_first();
+    pub(crate) fn branch_with_child_node(
+        child_key: KeyNibbles,
+        child_node: impl Into<Node>,
+    ) -> Node {
+        let (first_key_nibble, remaining_key_nibbles) = child_key.split_first();
         let node = if remaining_key_nibbles.is_empty() {
             child_node.into()
         } else {
