@@ -4,9 +4,9 @@
 
 ### Prerequisites
 
-vlayer executes Solidity code off-chain and proves the correctness of that execution on-chain. For that purpose, it fetches (state and) storage data and verifies it with storage proofs. 
+vlayer executes Solidity code off-chain and proves the correctness of that execution on-chain. For that purpose, it fetches state and storage data and verifies it with storage proofs.
 
-Storage proofs prove that a piece of storage is part of a block _with a specific hash_. Hence, the storage proof is 'connected' to a certain block hash. 
+Storage proofs prove that a piece of storage is part of a block _with a specific hash_. We say the storage proof is 'connected' to a certain block hash.
 
 However, the storage proof doesn't guarantee that the block with the specific hash actually exists on the chain. This verification needs to be done later with an on-chain smart contract.
 
@@ -14,7 +14,7 @@ However, the storage proof doesn't guarantee that the block with the specific ha
 
 vlayer provides **time-travel functionality**. As a result, state and storage proofs are not 'connected' to a single block hash, but to multiple block hashes. To ensure that these hashes exist on the chain, two things need to be done:
 
-1. It needs to be proven that all the hashes belong to the same chain. However, the blocks might belong to an imaginary chain and not a real one. That's why a second step is needed.
+1. It needs to be proven that all the hashes belong to the same chain. However, the blocks may not belong to the chain we are interested in. That's why a second step is needed.
 2. The latest hash needs to be verified on-chain.
 
 The **Block Proof Cache** service allows for proving _the first point_ by maintaining a data structure that stores block hashes, along with a zk-proof that all the hashes it contains belong to the same chain. Before going into more detail, it is recommended to go through the next section.
@@ -25,7 +25,7 @@ The **Block Proof Cache** service allows for proving _the first point_ by mainta
 
 As mentioned, it is essential to be able to verify a hash on-chain. The way to do this is by running the Solidity `blockhash(uint)` function. The hash needs to be compared to the result of the function (with the block number taken from the storage proof).
 
-However, this method is limited, as it only works for the most recent 256 blocks on a given chain. That is why we need to ensure that the latest hash to be verified on-chain is a hash of a recent (one of last 256) block. If it is not, it needs to be added to the set of hashes.
+However, this method is limited, as it only works for the most recent 256 blocks on a given chain. Therefore, we must ensure that the latest hash being verified on-chain is a hash of a recent block (one of the last 256). If it is not, it must be added to the set of hashes we want to prove belong to the same chain.
 
 ### Naive chain proofs
 
@@ -53,8 +53,8 @@ The Block Proof Cache structure is a dictionary that stores a `<block_number, bl
 
 #### Adding hashes to the BPC structure and maintaining 𝜋
 
-At all times, the blocks stored in the BPC structure form a consistent subchain. In other words, we preserve the invariant that:
-- for every pair of block numbers `i, j` contained in the structure and every `k` such that `i < k < j`, `k` is also contained in the structure,
+At all times, the BPC structure stores a sequence of consecutive block hashes that form a chain. In other words, we preserve the invariant that:
+- block numbers contained in the structure form a sequence of consecutive natural numbers,
 - for every pair of block numbers `i, i+1` contained in the structure, `block(i + 1).parentHash = hash(block(i))`.
 
 Each time a block is added, 𝜋 is updated. To prove that after adding a new block, all the blocks in the BPC structure belong to the same chain, two things must be done:
@@ -85,7 +85,7 @@ fn initialize(elf_id: Hash, block: BlockHeader) -> (MptRoot, elf_id) {
 
 #### Append
 
-The append function is used to add a new most recent block to the Merkle Patricia Trie. It takes the following arguments:
+The append function is used to add a most recent block to the Merkle Patricia Trie. It takes the following arguments:
 
 - **elf_id**: a hash of the guest binary,
 - **block**: the block header to be added,
@@ -113,7 +113,7 @@ The prepend function is used to add a new oldest block to the Merkle Patricia Tr
 - **child_block**: the full data of the currently oldest block already stored in the MPT.
 - **mpt**: a sparse MPT containing the path from the root to the child block and the new block's intended position.
 - **proof**: a zero-knowledge proof that all contained hashes so far belong to the same chain.
-  The function verifies the proof to ensure the full data from the child block fits the MPT we have so far. If the verification succeeds, it takes the `parent_hash` from the currently oldest block and inserts it with the corresponding number into the MPT. Note that we don't need to pass the full parent block as the trie only store hashes. However, We will need to pass it next time we want to prepend.
+  The function verifies the proof to ensure the full data from the child block fits the MPT we have so far. If the verification succeeds, it takes the `parent_hash` from the currently oldest block and inserts it with the corresponding number into the MPT. Note that we don't need to pass the full parent block as the trie only store hashes. However, we will need to pass it next time we want to prepend.
 
 ```rs
 fn prepend(elf_id: Hash, child_block: BlockHeader, mpt: SparseMpt<ChildBlockIdx, NewBlockIdx>, proof: ZkProof) -> (MptRoot, elf_id) {
