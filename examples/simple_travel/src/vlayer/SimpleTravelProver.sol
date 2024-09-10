@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 
 import {Prover} from "vlayer/Prover.sol";
 import {ExampleToken} from "./ExampleToken.sol";
-import {IERC20} from "openzeppelin-contracts/contracts/token/ERC20/IERC20.sol";
+import {IERC20} from "openzeppelin-contracts/token/ERC20/IERC20.sol";
 
 contract SimpleTravelProver is Prover {
     struct Erc20Token {

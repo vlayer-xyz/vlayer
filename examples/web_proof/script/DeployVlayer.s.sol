@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {Script} from "forge-std/Script.sol";
+import {Script} from "forge-std/src/Script.sol";
 // solhint-disable-next-line no-console
-import {console2} from "forge-std/console2.sol";
+import {console2} from "forge-std/src/console2.sol";
 
 import {WebProofProver} from "../src/vlayer/WebProofProver.sol";
 
