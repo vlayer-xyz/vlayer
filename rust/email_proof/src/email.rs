@@ -12,31 +12,6 @@ pub struct Email {
     pub body: String,
 }
 
-mod private {
-    use alloy_sol_types::sol;
-
-    sol!(#![sol(all_derives)] "../../contracts/src/EmailProof.sol");
-}
-
-impl Email {
-    pub fn abi_encode(self) -> Vec<u8> {
-        let email_sol: private::Email = self.into();
-        email_sol.abi_encode()
-    }
-}
-
-impl Into<private::Email> for Email {
-    fn into(self) -> private::Email {
-        private::Email {
-            from: self.from.unwrap_or_default(),
-            to: self.to.unwrap_or_default(),
-            subject: self.subject.unwrap_or_default(),
-            date: self.date.map(|d| d.timestamp()).unwrap_or_default() as u64,
-            body: self.body,
-        }
-    }
-}
-
 impl TryFrom<ParsedMail<'_>> for Email {
     type Error = MailParseError;
 
@@ -64,4 +39,28 @@ impl TryFrom<ParsedMail<'_>> for Email {
 
 fn header_getter(headers: Headers) -> impl Fn(&str) -> Option<String> + '_ {
     move |key: &str| headers.get_first_value(key).map(String::from)
+}
+
+mod private {
+    use alloy_sol_types::sol;
+
+    sol!(#![sol(all_derives)] "../../contracts/src/EmailProof.sol");
+}
+
+impl From<Email> for private::Email {
+    fn from(email: Email) -> private::Email {
+        private::Email {
+            from: email.from.unwrap_or_default(),
+            to: email.to.unwrap_or_default(),
+            subject: email.subject.unwrap_or_default(),
+            date: email.date.map(|d| d.timestamp()).unwrap_or_default() as u64,
+            body: email.body,
+        }
+    }
+}
+
+impl Email {
+    pub fn abi_encode(self) -> Vec<u8> {
+        private::Email::from(self).abi_encode()
+    }
 }
