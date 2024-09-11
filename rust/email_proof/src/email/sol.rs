@@ -6,7 +6,7 @@ mod private {
     sol!(#![sol(all_derives)] "../../contracts/src/EmailProof.sol");
 }
 
-pub use private::Email as SolEmail;
+pub(crate) use private::Email as SolEmail;
 
 impl From<Email> for SolEmail {
     fn from(email: Email) -> SolEmail {
