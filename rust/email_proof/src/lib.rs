@@ -33,7 +33,7 @@ mod tests {
 
         let expected_from: String =
             "\"piro-test@clear-code.com\" <piro-test@clear-code.com>".into();
-        assert_eq!(parsed.from.unwrap(), expected_from);
+        assert_eq!(expected_from, parsed.from.unwrap());
 
         let expected_to: String = "piro.outsider.reflex+1@gmail.com, \
                  piro.outsider.reflex+2@gmail.com, \
@@ -44,16 +44,16 @@ mod tests {
                  webmaster@example.jp, \
                  mailmaster@example.jp"
             .into();
-        assert_eq!(parsed.to.unwrap(), expected_to);
+        assert_eq!(expected_to, parsed.to.unwrap());
 
-        assert_eq!(parsed.subject, Some("test confirmation".into()));
+        assert_eq!(Some("test confirmation".into()), parsed.subject);
         assert_eq!(
-            parsed.date.unwrap().to_string(),
-            "2019-08-15 14:54:37 +09:00"
+            "2019-08-15 14:54:37 +09:00",
+            parsed.date.unwrap().to_string()
         );
         assert_eq!(
-            parsed.body,
-            "This is a multi-part message in MIME format.\n"
+            "This is a multi-part message in MIME format.\n",
+            parsed.body
         );
     }
 }
