@@ -22,23 +22,20 @@ mod tests {
         buffer
     }
 
-    fn read_test_email() -> Vec<u8> {
+    fn email_fixture() -> Vec<u8> {
         read_file("testdata/email.txt")
     }
 
     #[test]
     fn test_parse_mime() {
-        let email = read_test_email();
+        let email = email_fixture();
         let parsed = parse_mime(&email).unwrap();
 
-        assert_eq!(
-            parsed.from,
-            Some("\"piro-test@clear-code.com\" <piro-test@clear-code.com>".into())
-        );
-        assert_eq!(
-            parsed.to,
-            Some(
-                "piro.outsider.reflex+1@gmail.com, \
+        let expected_from: String =
+            "\"piro-test@clear-code.com\" <piro-test@clear-code.com>".into();
+        assert_eq!(parsed.from.unwrap(), expected_from);
+
+        let expected_to: String = "piro.outsider.reflex+1@gmail.com, \
                  piro.outsider.reflex+2@gmail.com, \
                  mailmaster@example.com, \
                  mailmaster@example.org, \
@@ -46,9 +43,9 @@ mod tests {
                  webmaster@example.org, \
                  webmaster@example.jp, \
                  mailmaster@example.jp"
-                    .into()
-            )
-        );
+            .into();
+        assert_eq!(parsed.to.unwrap(), expected_to);
+
         assert_eq!(parsed.subject, Some("test confirmation".into()));
         assert_eq!(
             parsed.date.unwrap().to_string(),
