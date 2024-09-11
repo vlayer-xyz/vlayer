@@ -31,6 +31,8 @@ enum Node {
     * `rlp_encoded(&self) -> Vec<u8>`
     * `impl rlp::Decodable for Node`
 
+More details regarding insert implementation can be found [here](./insert.md).
+
 ## NodeRef
 
 `Node` is a recursive data structure that contains other nodes. RLP encoding of the node is not recursive and either contains other nodes inline (for nodes shorter than 32 bytes) or contains their hashes.

@@ -1,10 +1,10 @@
 # Insert
 
-Depending on the type of the node we insert to, `insert` method works differently. A key helper structure used in this function is `Entry`. To understand how this function works, we need to take a look at `Entry` first.
+A key helper structure used in [`insert`](../src/node/insert.rs) method is [`Entry`](../src/node/insert/entry.rs). Before we dive into how `insert` works, we need to take a look at `Entry` first.
 
 ## Entry
 
-The `(key, value)` pair is often represented in the `Node::insert` function using the `Entry` structure to facilitate efficient insertion into a trie. The `Entry` struct provides a convenient way to encapsulate both the `key` and `value`, allowing the `Node::insert` function to handle them as a single unit.
+The `(key, value)` pair is often represented in the `Node::insert` function using the `Entry` structure to facilitate efficient insertion into a node. The `Entry` struct provides a convenient way to encapsulate both the `key` and `value`, allowing to handle them as a single unit.
 
 Its important features are:
 
@@ -17,21 +17,19 @@ Insert function works differently depending on the type of node we are inserting
 
 This happens only during the first insertion into the trie. `Node::Null` is never created later during the insertion in any way.
 
-When we insert into `Node::Null`, we replace the `Null` node with a:
-* `Branch` with a value, if the inserted value's key is empty
-* `Leaf` otherwise.
+When we insert into `Node::Null`, we just take `Entry` to be inserted and convert it to `Node` using abovementioned `From<Entry>` to `Node` conversion.
 
 ## Into Digest
 
-Insert into `Digest` node shouldn't happen, so we simply panic if we try to insert into a `Digest`.
+Inserting into `Digest` node shouldn't happen, so we simply panic if we try to insert into a `Digest`.
 
 ## Into Leaf
 
-To simplify the number of cases we need to handle, we convert the leaf's `key` and `value` into an `Entry` and then replace the `Leaf` with a new node created using the `from_two_entries` function. This approach allows us to treat the old entry and the new one symmetrically, reducing the number of cases to consider.
+To simplify the number of cases we need to handle, we convert the leaf's `key` and `value` into an `Entry`. Then we replace the `Leaf` with a new node created using the [`from_two_entries`](../src/node/insert/from_two_entries.rs) function. This approach allows us to treat the old entry and the new one symmetrically, reducing the number of cases to consider.
 
 ### from_two_entries
 
-The function signature:
+The function signature looks like this:
 ```rs
 fn from_two_entries(
     lhs: impl Into<Entry>,
@@ -48,7 +46,7 @@ if shorter.key == longer.key {
 }
 ```
 
-It then sorts `lhs` and `rhs` entries, so we can reduce the number of cases to consider.
+It then sorts `lhs` and `rhs` entries to reduce the number of cases to consider.
 
 ```rs
 let (shorter, longer) = order_entries(lhs, rhs);
@@ -58,7 +56,7 @@ It handles multiple cases based on the configurations of `shorter.key` and `long
 
 #### 1. `shorter.key` is empty
 
-    We know that `longer.key` can't be, since the case of equal keys was already handled above. Therefore, we can split longer, extracting its first key nibble. We then create a `Branch` that has `shorter.value` as a value and `remaining_longer` as a child at `longer_first_nibble index`.
+We know that `longer.key` can't be, since the case of equal keys was already handled above. Therefore, we can split longer, extracting its first key nibble. We then create a `Branch` that has `shorter.value` as a value and `remaining_longer` as a child at `longer_first_nibble index`.
 
 Note that the branch child can be a `Leaf` or a `Branch` (with value) depending on the `remaining_longer.key` length.
 
