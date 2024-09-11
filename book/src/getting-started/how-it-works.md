@@ -21,8 +21,8 @@ Both types of contracts are developed using the [Solidity](https://soliditylang.
 ## vlayer contract execution
 A typical vlayer execution flow has three steps:
 1. The application initiates a call to the Prover contract that is executed off-chain in the zkEVM. All the input for this call is private by default and is not published on-chain.
-1. The result of the computation is passed along with a proof to be executed in the on-chain contract. All the output from Prover is public and is published on-chain as a parameter to the Verifier contract.
-1. The Verifier contract verifies the data sent by Prover (using the submitted proof) and then executes the Verifier code.
+1. The result of the computation is passed along with a proof to be executed in the on-chain contract. All the output returned from Prover contract is public and is published on-chain as parameters to the Verifier contract.
+1. The Verifier contract verifies the data sent by proving party (using the submitted proof by client) and then executes the Verifier code.
 
 See the diagram below.
 
@@ -31,7 +31,7 @@ See the diagram below.
 
 ## Prover
 vlayer Prover contracts have a few distinct properties:
-* **verification** - can be executed off-chain and results can't be forged
+* **verifiability** - can be executed off-chain and results can't be forged
 * **privacy** - inputs are private by deafult 
 * **no gas fees** - no usual transaction size limits apply
 
