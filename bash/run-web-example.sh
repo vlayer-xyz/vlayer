@@ -1,3 +1,5 @@
+#!/usr/bin/env bash
+
 set -ueo pipefail
 
 VLAYER_HOME=$(git rev-parse --show-toplevel)
