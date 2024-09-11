@@ -5,11 +5,9 @@ edition = "2021"
 
 [dependencies]
 alloy-dyn-abi = { workspace = true }
-http = { workspace = true }
 httparse = { workspace = true }
 p256 = { workspace = true }
 pkcs8 = { workspace = true }
-regex = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 thiserror = { workspace = true }

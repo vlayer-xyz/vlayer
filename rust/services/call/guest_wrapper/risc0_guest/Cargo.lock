@@ -3502,11 +3502,9 @@ name = "web_proof"
 version = "0.1.0"
 dependencies = [
  "alloy-dyn-abi",
- "http",
  "httparse",
  "p256",
  "pkcs8",
- "regex",
  "serde",
  "serde_json",
  "thiserror",
