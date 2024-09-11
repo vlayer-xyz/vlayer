@@ -15,6 +15,9 @@ To start working with this repository, you will need to install following softwa
 Before you build solidity smart contracts, make sure that dependencies are up to date:
 ```sh
 git submodule update --init --recursive
+
+cd contracts
+forge soldeer install
 ```
 
 To build vlayer project, first, navigate to the `rust` directory and type:
@@ -35,10 +38,15 @@ Then, to run proving server, execute the following command:
 RUST_LOG=info RISC0_DEV_MODE=1 cargo run -- serve
 ```
 
-Finally, to test proving navigate to any of the examples within `/examples` directory, find `vlayer` directory and run the following command:
-```sh
+Finally, to test proving navigate to any of the examples within `/examples` directory, run following commands to build example's contracts: 
+```bash
+forge soldeer install
 forge clean 
 forge build
+```
+
+then navigate to `vlayer` directory within the selected example and run the following command:
+```sh
 bun install 
 bun run prove.ts
 ``` 
