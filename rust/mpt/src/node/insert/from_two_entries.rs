@@ -30,7 +30,7 @@ fn from_two_ordered_entries(shorter: Entry, longer: Entry) -> Result<Node, NodeE
         return Err(NodeError::DuplicateKey);
     }
 
-    // If the shorter key is empty, we create a Branch with a child and a value. Notice that We know
+    // If the shorter key is empty, we create a Branch with a child and a value. Notice that we know
     // longer.key` can't be empty, since the case of equal keys was already handled above.
     // ![Schema](../../../images/into_leaf_0.png)
     if shorter.key.is_empty() {
@@ -45,7 +45,7 @@ fn from_two_ordered_entries(shorter: Entry, longer: Entry) -> Result<Node, NodeE
     let (shorter_first_nibble, remaining_shorter) = shorter.split_first_key_nibble();
     let (longer_first_nibble, remaining_longer) = longer.split_first_key_nibble();
 
-    // If the both first nibbles exist and are different, we create a Branch with two children.
+    // If both first nibbles exist and are different, we create a Branch with two children.
     // ![Schema](../../../images/into_leaf_1.png)
     if shorter_first_nibble != longer_first_nibble {
         return Ok(Node::branch_with_two_children(
@@ -66,7 +66,7 @@ fn from_two_ordered_entries(shorter: Entry, longer: Entry) -> Result<Node, NodeE
         Node::Extension(nibbles, child) => {
             Node::Extension(nibbles.push_front(shorter_first_nibble), child)
         }
-        _ => unreachable!("from_two_entries should return only Branch or Extension"),
+        _ => unreachable!("from_two_ordered_entries should return only Branch or Extension"),
     };
 
     Ok(result_node)
