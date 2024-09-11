@@ -1,6 +1,5 @@
 use crate::precompiles::{gas_used, map_to_other};
 use alloy_primitives::Bytes;
-use email_proof;
 use revm::precompile::{Precompile, PrecompileOutput, PrecompileResult};
 use std::convert::Into;
 pub(super) const VERIFY_EMAIL_PRECOMPILE: Precompile = Precompile::Standard(verify_and_parse_run);
