@@ -21,13 +21,11 @@ library WebProofLib {
         (bool success, bytes memory returnData) = VERIFY_AND_PARSE_PRECOMPILE.staticcall(bytes(webProof.webProofJson));
 
         string[3] memory data = abi.decode(returnData, (string[3]));
-        string memory serverName = "api.x.com";
         Web memory web;
         web.body = data[2];
 
         require(success, "verify_and_parse precompile call failed");
         require(dataUrl.equal(data[0]), "Incorrect URL");
-        require(serverName.equal(data[1]), "Server name not found");
 
         return web;
     }

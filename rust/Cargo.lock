@@ -9496,6 +9496,7 @@ dependencies = [
  "serde_json",
  "thiserror",
  "tlsn-core",
+ "url",
 ]
 
 [[package]]
