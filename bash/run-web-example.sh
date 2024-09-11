@@ -1,8 +1,10 @@
 VLAYER_HOME=$(git rev-parse --show-toplevel)
 
-
 source ${VLAYER_HOME}/bash/run-services.sh &
-source ${VLAYER_HOME}/bash/deploy-contracts.sh &
-source ${VLAYER_HOME}/bash/run-web-app.sh &
-source ${VLAYER_HOME}/bash/run-web-extension.sh &
 
+cd ${VLAYER_HOME}/examples/web_proof/vlayer
+bun run deploy.ts
+bun run dev &
+
+cd ${VLAYER_HOME}/packages/browser-plugin
+bun run dev &
