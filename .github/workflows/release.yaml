@@ -112,8 +112,6 @@ jobs:
     name: Build examples
     runs-on: ubuntu-latest
     steps:
-      - run: pwd
-      - run: ls -la
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -134,24 +132,11 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Download ImageID.sol - Linux
-        uses: actions/download-artifact@v4
-        with:
-          name: linux-ImageID.sol
-          path: ./imageid
-
       - name: Download ImageID.sol - Darwin
         uses: actions/download-artifact@v4
         with:
           name: darwin-ImageID.sol
           path: ./imageid
-
-      - run: |
-          cd imageid;
-          pwd;
-          ls -la
-      - run:
-          file ImageID.sol;
 
       - name: Copy ImageID to contracts
         run: |
@@ -185,7 +170,7 @@ jobs:
         with:
           path: ./dist
           merge-multiple: true
-      - run: rm ./dist/*ImageID.sol
+      - run: rm ./dist/ImageID.sol
 
       - name: Release tagged nightly
         uses: ncipollo/release-action@v1
@@ -223,7 +208,7 @@ jobs:
           args: --recursive
         env:
           AWS_ENDPOINT: ${{ vars.AWS_ENDPOINT }}
-          AWS_BUCKET: releases-playground
+          AWS_BUCKET: ${{ vars.AWS_BUCKET }}
           AWS_ACCESS_KEY_ID: ${{ vars.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
@@ -236,7 +221,7 @@ jobs:
           args: --recursive
         env:
           AWS_ENDPOINT: ${{ vars.AWS_ENDPOINT }}
-          AWS_BUCKET: releases-playground
+          AWS_BUCKET: ${{ vars.AWS_BUCKET }}
           AWS_ACCESS_KEY_ID: ${{ vars.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
@@ -249,7 +234,7 @@ jobs:
           args: --recursive
         env:
           AWS_ENDPOINT: ${{ vars.AWS_ENDPOINT }}
-          AWS_BUCKET: releases-playground
+          AWS_BUCKET: ${{ vars.AWS_BUCKET }}
           AWS_ACCESS_KEY_ID: ${{ vars.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
