@@ -20,7 +20,7 @@ function run_web_app {
 
 function run_browser_plugin {
     cd ${VLAYER_HOME}/packages/browser-plugin
-    bun run dev &
+    bun run dev 
 }
 
 run_services
