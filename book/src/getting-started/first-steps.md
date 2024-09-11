@@ -2,7 +2,7 @@
 
 ## Initialization
 
-To initialize a fresh new vlayer project, just run the following command:
+To initialize a fresh new vlayer project, run the following command:
 ```bash
 $ vlayer init project-name
 ```
