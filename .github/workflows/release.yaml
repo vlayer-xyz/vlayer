@@ -1,10 +1,10 @@
 name: Release binaries
 on: 
+  schedule:
+    - cron: '0 22 * * 1-5' # Mon-Fri at 22:00 UTC
   push:
     branches:
       - release-contracts
-  schedule:
-    - cron: '0 22 * * 1-5' # Mon-Fri at 22:00 UTC
 
 jobs:
   build-release:
@@ -102,10 +102,18 @@ jobs:
           name: ${{ matrix.target }}
           path: ${{ steps.package-release.outputs.output_file }}
 
+      - name: Push ImageID artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ matrix.platform }}-ImageID.sol
+          path: contracts/src/ImageID.sol
+
   build-examples:
-    name: Build example contracts artifacts
+    name: Build examples
     runs-on: ubuntu-latest
     steps:
+      - run: pwd
+      - run: ls -la
       - name: Checkout repository
         uses: actions/checkout@v4
 
@@ -117,6 +125,55 @@ jobs:
         with:
           name: examples
           path: out/examples.tar.gz
+  
+  push-contracts:
+    name: Push vlayer contracts
+    needs: [build-release] 
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Download ImageID.sol - Linux
+        uses: actions/download-artifact@v4
+        with:
+          name: linux-ImageID.sol
+          path: ./imageid
+
+      - name: Download ImageID.sol - Darwin
+        uses: actions/download-artifact@v4
+        with:
+          name: darwin-ImageID.sol
+          path: ./imageid
+
+      - run: |
+          cd imageid;
+          pwd;
+          ls -la
+      - run:
+          file ImageID.sol;
+
+      - name: Copy ImageID to contracts
+        run: |
+          rm contracts/src/ImageID.sol;
+          cp imageid/ImageID.sol contracts/src/ImageID.sol
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly-d75318c9c7a1c6af5404fe96f63ca890dcdd588d # 2024-09-05
+
+      - name: Build vlayer contracts
+        run: |
+          forge soldeer push vlayer-contracts~1.0.0 --dry-run
+        working-directory: contracts
+
+      - name: Push contracts artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: vlayer-contracts
+          path: contracts/contracts.zip
+
 
   create-release:
     name: Create GH releases
@@ -128,6 +185,7 @@ jobs:
         with:
           path: ./dist
           merge-multiple: true
+      - run: rm ./dist/*ImageID.sol
 
       - name: Release tagged nightly
         uses: ncipollo/release-action@v1
@@ -145,8 +203,8 @@ jobs:
 
   push-artifacts-to-s3:
     name: Push artifacts to AWS S3
-    runs-on: aws-linux-small
-    needs: [build-release, build-examples] 
+    runs-on: ubuntu-latest
+    needs: [build-release, build-examples, push-contracts] 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -156,6 +214,7 @@ jobs:
         with:
           path: ./dist/latest
           merge-multiple: true
+      - run: rm ./dist/latest/*ImageID.sol
       - run: cp -r "./dist/latest" "./dist/${{ github.sha }}"
 
       - name: Push tagged binaries to AWS S3
@@ -164,7 +223,7 @@ jobs:
           args: --recursive
         env:
           AWS_ENDPOINT: ${{ vars.AWS_ENDPOINT }}
-          AWS_BUCKET: ${{ vars.AWS_BUCKET }}
+          AWS_BUCKET: releases-playground
           AWS_ACCESS_KEY_ID: ${{ vars.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
@@ -177,7 +236,7 @@ jobs:
           args: --recursive
         env:
           AWS_ENDPOINT: ${{ vars.AWS_ENDPOINT }}
-          AWS_BUCKET: ${{ vars.AWS_BUCKET }}
+          AWS_BUCKET: releases-playground
           AWS_ACCESS_KEY_ID: ${{ vars.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
@@ -190,7 +249,7 @@ jobs:
           args: --recursive
         env:
           AWS_ENDPOINT: ${{ vars.AWS_ENDPOINT }}
-          AWS_BUCKET: ${{ vars.AWS_BUCKET }}
+          AWS_BUCKET: releases-playground
           AWS_ACCESS_KEY_ID: ${{ vars.AWS_ACCESS_KEY_ID }}
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
