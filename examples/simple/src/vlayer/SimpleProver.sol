@@ -2,11 +2,16 @@
 pragma solidity ^0.8.13;
 
 import {Prover} from "vlayer/Prover.sol";
+import {Balance} from "./Balance.sol";
 
-contract SimpleProver is Prover {
-    constructor() {}
+contract SimpleProver is Balance {
+    address usdc;
 
-    function sum(uint256 lhs, uint256 rhs) public pure returns (uint256) {
-        return lhs + rhs;
+    constructor(address _tokenAddr) {
+        usdc = _tokenAddr;
+    }
+
+    function balance(address _owner) public view returns (uint256) {
+        return balanceOf(_owner, usdc);
     }
 }
