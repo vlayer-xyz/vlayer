@@ -75,6 +75,7 @@ foundry-config = { git = "https://github.com/foundry-rs/foundry", rev = "cb9dfae
 foundry-debugger = { git = "https://github.com/foundry-rs/foundry", rev = "cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5" }
 foundry-evm = { git = "https://github.com/foundry-rs/foundry", rev = "cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5" }
 foundry-evm-core = { git = "https://github.com/foundry-rs/foundry", rev = "cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5" }
+httparse = "1.9.4"
 hex = "0.4.3"
 http-body-util = "0.1.2"
 lazy_static = "1.5.0"

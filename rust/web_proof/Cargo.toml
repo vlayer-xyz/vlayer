@@ -4,17 +4,15 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-tlsn-core = { workspace = true }
+alloy-dyn-abi = { workspace = true }
+httparse = { workspace = true }
 p256 = { workspace = true }
 pkcs8 = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
-serde_json = { workspace = true}
+serde_json = { workspace = true }
 thiserror = { workspace = true }
-regex = "1.10.6"
-http = "1.1.0"
-httparse = "1.9.4"
-alloy-dyn-abi = { workspace = true }
-url = "2.5.2"
+tlsn-core = { workspace = true }
+url = { workspace = true }
 
 [dev-dependencies]
 alloy-primitives = { workspace = true }
