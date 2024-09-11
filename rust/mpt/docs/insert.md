@@ -1,6 +1,6 @@
 # Insert
 
-Depending on the type of the node, insert method works differently. A key helper structure used in this function is `Entry`.
+Depending on the type of the node we insert to, `insert` method works differently. A key helper structure used in this function is `Entry`. To understand how this function works, we need to take a look at `Entry` first.
 
 ## Entry
 
@@ -40,7 +40,7 @@ fn from_two_entries(
 ```
 It performs the following steps:
 
-If the keys are equal we throw `DuplicateKey` error.
+If the keys are equal it throws `DuplicateKey` error.
 
 ```rs
 if shorter.key == longer.key {
@@ -48,7 +48,7 @@ if shorter.key == longer.key {
 }
 ```
 
-It then sorts `lhs` and `rhs` entries
+It then sorts `lhs` and `rhs` entries, so we can reduce the number of cases to consider.
 
 ```rs
 let (shorter, longer) = order_entries(lhs, rhs);
