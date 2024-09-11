@@ -5,7 +5,7 @@ set -uexo pipefail
 VLAYER_HOME=$(git rev-parse --show-toplevel)
 
 output_dir="$(pwd)/out"
-ARCHIVE="${output_dir}/contracts.tar"
+ARCHIVE="${output_dir}/examples.tar"
 
 # Create the output directory if it doesn't exist
 mkdir -p $output_dir

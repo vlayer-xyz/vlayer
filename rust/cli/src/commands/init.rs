@@ -11,8 +11,8 @@ use tar::Archive;
 use tracing::{error, info};
 
 const VLAYER_DIR_NAME: &str = "vlayer";
-const CONTRACTS_URL: &str =
-    "https://vlayer-releases.s3.eu-north-1.amazonaws.com/latest/contracts.tar.gz";
+const EXAMPLES_URL: &str =
+    "https://vlayer-releases.s3.eu-north-1.amazonaws.com/latest/examples.tar.gz";
 
 pub(crate) async fn init(
     mut cwd: PathBuf,
@@ -82,7 +82,7 @@ async fn fetch_vlayer_files(
     scripts_dst: &Path,
     template: String,
 ) -> Result<(), CLIError> {
-    let response = get(CONTRACTS_URL)
+    let response = get(EXAMPLES_URL)
         .await
         .map_err(map_reqwest_error)?
         .bytes()

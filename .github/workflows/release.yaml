@@ -99,26 +99,26 @@ jobs:
           name: ${{ matrix.target }}
           path: ${{ steps.package-release.outputs.output_file }}
 
-  build-template-contracts:
-    name: Build template contracts artifacts
+  build-examples:
+    name: Build example contracts artifacts
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Package sample contracts
+      - name: Package examples
         run: ./bash/pack-examples.sh
 
       - name: Push artifact
         uses: actions/upload-artifact@v4
         with:
-          name: contracts
-          path: out/contracts.tar.gz
+          name: examples
+          path: out/examples.tar.gz
 
   create-release:
     name: Create GH releases
     runs-on: aws-linux-small
-    needs: [build-release, build-template-contracts] 
+    needs: [build-release, build-examples] 
     steps:
       - run: mkdir -p dist
       - uses: actions/download-artifact@v4
@@ -143,7 +143,7 @@ jobs:
   push-artifacts-to-s3:
     name: Push artifacts to AWS S3
     runs-on: aws-linux-small
-    needs: [build-release, build-template-contracts] 
+    needs: [build-release, build-examples] 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
