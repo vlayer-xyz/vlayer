@@ -38,6 +38,8 @@ The main struct is `MerkleTrie(Node)` in [trie.rs](./src/trie.rs) which contains
     * Updates the trie, adding a new node with the given (key, value) pair
     * If the key already exists in the trie, it returns DuplicateKey error
 
+## Internal structure
+More details regarding the Merkle Patricia Trie implementation can be found in [Node Internal Structure](./docs/node.md) documentation.
 
 ## Acknowledgements
 

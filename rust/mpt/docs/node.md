@@ -1,6 +1,8 @@
+# Node Internal Structure
+
 `MerkleTrie` is a handle to a root `Node`, hence most of the logic occurs here.
 
-### Node
+## Node
 `Node` type is defined in [node.rs](./src/node.rs).
 ```rs
 enum Node {
@@ -29,7 +31,7 @@ enum Node {
     * `rlp_encoded(&self) -> Vec<u8>`
     * `impl rlp::Decodable for Node`
 
-### NodeRef
+## NodeRef
 
 `Node` is a recursive data structure that contains other nodes. RLP encoding of the node is not recursive and either contains other nodes inline (for nodes shorter than 32 bytes) or contains their hashes.
 
@@ -44,7 +46,7 @@ pub(crate) enum NodeRef {
 
 NodeRef is RLP encodable ()`impl Encodable for NodeRef`).
 
-### Path
+## Path
 
 The least trivial part of MPT is how it encodes path nibbles in `Leaf` and `Extension` nodes. There are two problems that this encoding solves.
 * Both `Leaf` and `Extension` are two-element RLP arrays. We need a way to get back type info
@@ -69,7 +71,9 @@ impl From<impl AsRef<[u8]>> for Path
 ```
 ## Tests
 
-There are unit tests for specific functions of specific structs and four [e2e tests](./tests/):
+Unit tests exist for functions of the specific structs.
+
+There are also four [e2e tests](../tests/):
 * Testing that our implementation produces the same roots as `alloy_trie`
 * Verifying that we can parse the results of `eth_getProof`
 * Ensuring that after inserting a large number of elements into the MPT, we can later retrieve them using the get method, even when the structure becomes complex
