@@ -114,3 +114,34 @@ async fn empty_params() {
         body_to_json(response.into_body()).await
     );
 }
+
+#[tokio::test]
+async fn invalid_block_hashes() {
+    let app = server();
+
+    let valid_hash = "0x0000000000000000000000000000000000000000000000000000000000000000";
+    let invalid_hash = "0x";
+    let req = json!({
+        "jsonrpc": "2.0",
+        "id": 1,
+        "method": "v_proveChain",
+        "params": {
+            "block_hashes": [valid_hash, invalid_hash]
+        }
+    });
+    let response = post(app, "/", &req).await;
+
+    assert_eq!(StatusCode::OK, response.status());
+    assert_eq!(
+        json!({
+            "jsonrpc": "2.0",
+            "id": 1,
+            "error": {
+                "code": -32602,
+                "message": "Invalid field: `block hashes` Invalid string length `0x`",
+                "data": null
+            }
+        }),
+        body_to_json(response.into_body()).await
+    );
+}

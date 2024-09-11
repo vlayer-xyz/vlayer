@@ -20,7 +20,6 @@ members = [
     "server_utils",
     "host_utils",
 ]
-default-members = ["cli"]
 
 [profile.release]
 debug = 1
