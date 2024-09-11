@@ -13,9 +13,6 @@ const [prover, verifier] = await testHelpers.deployProverVerifier(
   webProofVerifier,
 );
 
-console.log(`Prover: ${prover}`);
-console.log(`Verifier: ${verifier}`);
-console.log("dir", __dirname);
 const envPath = path.resolve(__dirname, ".env.development");
 const envContent = `VITE_PROVER_ADDRESS=${prover}\nVITE_VERIFIER_ADDRESS=${verifier}\n`;
 
