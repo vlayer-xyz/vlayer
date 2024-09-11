@@ -1,3 +1,4 @@
+mod dkim;
 mod email;
 
 use crate::email::Email;

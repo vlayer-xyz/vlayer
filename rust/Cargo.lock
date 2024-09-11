@@ -2879,6 +2879,7 @@ dependencies = [
  "alloy-dyn-abi",
  "alloy-sol-types",
  "mailparse",
+ "thiserror",
 ]
 
 [[package]]
