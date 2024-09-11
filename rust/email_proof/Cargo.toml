@@ -1,0 +1,10 @@
+[package]
+name = "email_proof"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+alloy-dyn-abi = { workspace = true }
+alloy-sol-types = { workspace = true }
+mailparse = "0.15.0"
+chrono = "0.4.38"

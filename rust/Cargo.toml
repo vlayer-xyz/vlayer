@@ -6,17 +6,16 @@ members = [
     "services/prove_chain/guest_wrapper",
     "services/prove_chain/engine",
     "services/prove_chain/server",
-
     "services/call/host",
     "services/call/guest",
     "services/call/guest_wrapper",
     "services/call/engine",
     "services/call/server",
-
     "cli",
     "mpt",
     "test_runner",
     "web_proof",
+    "email_proof",
     "server_utils",
 ]
 default-members = ["cli"]
@@ -102,6 +101,7 @@ vergen = { version = "8", default-features = false }
 
 server_utils = { path = "server_utils" }
 mpt = { path = "mpt" }
+email_proof = { path = "email_proof" }
 web_proof = { path = "web_proof" }
 test_runner = { path = "test_runner" }
 
