@@ -5,7 +5,7 @@ pub use config::HostConfig;
 pub use error::HostError;
 use host_utils::Prover;
 use prove_chain_engine::Input;
-use prove_chain_guest_wrapper::RISC0_CALL_GUEST_ELF;
+use prove_chain_guest_wrapper::RISC0_PROVE_CHAIN_GUEST_ELF;
 use risc0_zkvm::{ExecutorEnv, ProveInfo, Receipt};
 use serde::Serialize;
 
@@ -30,7 +30,8 @@ impl Host {
 
         let env = Self::build_executor_env(input)
             .map_err(|err| HostError::ExecutorEnvBuilder(err.to_string()))?;
-        let ProveInfo { receipt, .. } = Self::prove(&self.prover, env, RISC0_CALL_GUEST_ELF)?;
+        let ProveInfo { receipt, .. } =
+            Self::prove(&self.prover, env, RISC0_PROVE_CHAIN_GUEST_ELF)?;
 
         Ok(HostOutput { receipt })
     }
@@ -43,5 +44,23 @@ impl Host {
 
     fn build_executor_env(input: impl Serialize) -> anyhow::Result<ExecutorEnv<'static>> {
         Ok(ExecutorEnv::builder().write(&input)?.build()?)
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    #[test]
+    fn host_prove_invalid_guest_elf() {
+        let prover = Prover::default();
+        let env = ExecutorEnv::default();
+        let invalid_guest_elf = &[];
+        let res = Host::prove(&prover, env, invalid_guest_elf);
+
+        assert!(matches!(
+            res.map(|_| ()).unwrap_err(),
+            HostError::Prover(ref msg) if msg == "Elf parse error: Could not read bytes in range [0x0, 0x10)"
+        ));
     }
 }

@@ -136,3 +136,58 @@ where
         Ok(ExecutorEnv::builder().write(&input)?.build()?)
     }
 }
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    use call_engine::config::TEST_CHAIN_ID_1;
+    use host_utils::ProofMode;
+
+    #[test]
+    fn host_prove_invalid_guest_elf() {
+        let prover = Prover::default();
+        let env = ExecutorEnv::default();
+        let invalid_guest_elf = &[];
+        let res = Host::<EthersProvider<EthersClient>>::prove(&prover, env, invalid_guest_elf);
+
+        assert!(matches!(
+            res.map(|_| ()).unwrap_err(),
+            HostError::Prover(ref msg) if msg == "Elf parse error: Could not read bytes in range [0x0, 0x10)"
+        ));
+    }
+
+    #[test]
+    fn host_prove_invalid_input() {
+        let prover = Prover::default();
+        let env = ExecutorEnv::default();
+        let res = Host::<EthersProvider<EthersClient>>::prove(&prover, env, RISC0_CALL_GUEST_ELF);
+
+        assert!(matches!(
+            res.map(|_| ()).unwrap_err(),
+            HostError::Prover(ref msg) if msg == "Guest panicked: called `Result::unwrap()` on an `Err` value: DeserializeUnexpectedEnd"
+        ));
+    }
+
+    #[test]
+    fn try_new_invalid_rpc_url() -> anyhow::Result<()> {
+        let rpc_urls = [(TEST_CHAIN_ID_1, "http://localhost:123/".to_string())]
+            .into_iter()
+            .collect();
+        let config = HostConfig {
+            rpc_urls,
+            start_chain_id: TEST_CHAIN_ID_1,
+            proof_mode: ProofMode::Fake,
+        };
+        let res = Host::try_new(config);
+
+        assert!(matches!(
+            res.map(|_| ()).unwrap_err(),
+            HostError::Provider(ref msg) if msg.to_string().contains(
+                "Error fetching block header"
+            )
+        ));
+
+        Ok(())
+    }
+}

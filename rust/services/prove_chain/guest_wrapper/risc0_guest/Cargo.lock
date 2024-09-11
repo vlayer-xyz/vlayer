@@ -630,7 +630,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "risc0_call_guest"
+name = "risc0_prove_chain_guest"
 version = "0.1.0"
 dependencies = [
  "prove_chain_guest",

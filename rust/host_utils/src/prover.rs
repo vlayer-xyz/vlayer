@@ -4,6 +4,7 @@ use risc0_zkvm::{
     BonsaiProver, ExecutorEnv, ExternalProver, ProveInfo, Prover as ProverTrait, ProverOpts,
 };
 
+#[derive(Debug, Default, Clone, Copy)]
 pub struct Prover {
     mode: ProofMode,
 }

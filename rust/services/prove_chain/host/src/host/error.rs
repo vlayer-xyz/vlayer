@@ -1,6 +1,6 @@
 use thiserror::Error;
 
-#[derive(Error, Debug)]
+#[derive(Error, Debug, Clone)]
 pub enum HostError {
     #[error("ExecutorEnvBuilder: {0}")]
     ExecutorEnvBuilder(String),

@@ -1,4 +1,4 @@
-#[derive(Default, Copy, Clone)]
+#[derive(Debug, Default, Copy, Clone)]
 pub enum ProofMode {
     #[default]
     Fake,
