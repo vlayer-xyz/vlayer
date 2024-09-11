@@ -10,7 +10,7 @@ $ vlayer init project-name
 The above command will create a new folder called `project-name` in your current location, and then add all the necessary dependencies with sample vlayer contracts.
 
 ### Adding to existing project
-Use the `--existing` flag to initialize vlayer within your existing Foundry project:
+Use the `--existing` flag to initialize vlayer within your existing [Foundry](https://getfoundry.sh/) project:
 ```bash
 cd ./your-project && vlayer init --existing
 ```
