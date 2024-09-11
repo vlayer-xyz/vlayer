@@ -133,7 +133,7 @@ where
     }
 
     fn build_executor_env(input: impl Serialize) -> anyhow::Result<ExecutorEnv<'static>> {
-        Ok(ExecutorEnv::builder().write(&input)?.build()?)
+        ExecutorEnv::builder().write(&input)?.build()
     }
 }
 
