@@ -2,37 +2,22 @@
 pragma solidity ^0.8.13;
 
 import {Prover} from "vlayer/Prover.sol";
-import {ExampleToken} from "./ExampleToken.sol";
-import {IERC20} from "openzeppelin-contracts/token/ERC20/IERC20.sol";
+import {CrossChainBalance, Erc20Token} from "./CrossChainBalance.sol";
 
-contract SimpleTravelProver is Prover {
-    struct Erc20Token {
-        address contractAddr;
-        uint256 chainId;
-        uint256 blockNumber;
+contract SimpleTravelProver is CrossChainBalance {
+    function getTokens() public pure returns (Erc20Token[] memory) {
+        Erc20Token[] memory tokens = new Erc20Token[](3);
+
+        tokens[0] = Erc20Token(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48, 1, 20683110); // mainnet
+        tokens[1] = Erc20Token(0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913, 8453, 19367633); // base
+        tokens[2] = Erc20Token(0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85, 10, 124962954); // arbitrum
+
+        return tokens;
     }
 
-    mapping(address => Erc20Token) public permittedTokens;
+    function crossChainBalanceOf(address _owner) public returns (address, uint256) {
+        uint256 balance = balanceOf(_owner, getTokens());
 
-    constructor(address[] memory _tokens, uint256[] memory _chainIds, uint256[] memory _blockNumbers) {
-        require(_tokens.length == _chainIds.length && _tokens.length == _blockNumbers.length, "Invalid input length");
-        for (uint256 i = 0; i < _tokens.length; i++) {
-            permittedTokens[_tokens[i]] = Erc20Token(_tokens[i], _chainIds[i], _blockNumbers[i]);
-        }
-    }
-
-    function crossChainBalanceOf(address _owner, Erc20Token[] memory _tokens) public returns (address, uint256) {
-        uint256 crossChainBalance = 0;
-
-        for (uint256 i = 0; i < _tokens.length; i++) {
-            Erc20Token memory token = permittedTokens[_tokens[i].contractAddr];
-            require(token.contractAddr != address(0), "token not permitted");
-            require(token.blockNumber == _tokens[i].blockNumber, "wrong block no");
-
-            setChain(token.chainId, token.blockNumber);
-            crossChainBalance += IERC20(token.contractAddr).balanceOf(_owner);
-        }
-
-        return (_owner, crossChainBalance);
+        return (_owner, balance);
     }
 }

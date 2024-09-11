@@ -53,7 +53,14 @@ function startup_vlayer(){
     RUST_LOG=info \
     BONSAI_API_URL="${BONSAI_API_URL}" \
     BONSAI_API_KEY="${BONSAI_API_KEY}" \
-    cargo run --bin vlayer serve --proof "${proof_arg}" >"${LOGS_DIR}/vlayer_serve.out" & 
+    cargo run --bin vlayer serve \
+        --proof "${proof_arg}" \
+        --rpc-url 1114:http://localhost:8546 \
+        --rpc-url 55511555:http://localhost:8545 \
+        --rpc-url 1:https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY} \
+        --rpc-url 8453:https://base-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY} \
+        --rpc-url 10:https://opt-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY} \
+        >"${LOGS_DIR}/vlayer_serve.out" &
 
     VLAYER_SERVER_PID=$!
 
@@ -69,6 +76,7 @@ trap cleanup EXIT ERR INT
 PROVING_MODE=${PROVING_MODE:-dev}
 RISC0_DEV_MODE=""
 BONSAI_API_URL="${BONSAI_API_URL:-https://api.bonsai.xyz/}"
+ALCHEMY_API_KEY="${ALCHEMY_API_KEY:-"fGv36-JdQF0k425JzqjVEge5mpCx868J"}"
 BONSAI_API_KEY="${BONSAI_API_KEY:-}"
 SERVER_PROOF_ARG="fake"
 
