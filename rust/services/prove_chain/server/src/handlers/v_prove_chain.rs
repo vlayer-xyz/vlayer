@@ -1,30 +1,13 @@
-use alloy_primitives::BlockHash;
 use serde::{Deserialize, Serialize};
-use server_utils::parse_hash_field;
+use types::ValidatedParams;
 
 use crate::error::AppError;
+
+pub mod types;
 
 #[derive(Deserialize, Serialize)]
 pub struct Params {
     block_hashes: Vec<String>,
-}
-
-pub struct ValidatedParams {
-    block_hashes: Vec<BlockHash>,
-}
-
-impl TryFrom<Params> for ValidatedParams {
-    type Error = AppError;
-
-    fn try_from(value: Params) -> Result<Self, Self::Error> {
-        let block_hashes = value
-            .block_hashes
-            .into_iter()
-            .map(|hash| parse_hash_field("block hashes", hash))
-            .collect::<Result<_, _>>()?;
-
-        Ok(Self { block_hashes })
-    }
 }
 
 #[derive(Serialize, Debug)]
@@ -37,15 +20,4 @@ pub async fn v_prove_chain(params: Params) -> Result<ChainProof, AppError> {
     } else {
         todo!();
     }
-}
-
-#[tokio::test]
-async fn empty_block_hashes() {
-    let empty_block_hashes = Params {
-        block_hashes: vec![],
-    };
-    assert_eq!(
-        v_prove_chain(empty_block_hashes).await.unwrap_err(),
-        AppError::NoBlockHashes
-    );
 }
