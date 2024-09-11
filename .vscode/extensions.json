@@ -1,0 +1,6 @@
+{
+  "recommendations": [
+    "kisstkondoros.vscode-gutter-preview",
+    "rust-lang.rust-analyzer"
+  ]
+}
