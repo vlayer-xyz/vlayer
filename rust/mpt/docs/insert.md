@@ -1,28 +1,44 @@
 # Insert
 
-Depending on the type of the node, insert method works differently.
+Depending on the type of the node, insert method works differently. A key helper structure used in this function is `Entry`.
 
-The (key, value) pair is often represented in the Node::insert function using the Entry structure to facilitate efficient insertion into a trie. The Entry struct provides a convenient way to encapsulate both the key and value, allowing the Node::insert function to handle them as a single unit. The From<(K, V)> for Entry implementation allows for easy creation of an Entry from various types, enabling the Node::insert function to accept a wide range of input formats. Entry also enables creating Node directly from it, transforming self into Branch with value and empty children (in the case of empty keys) or Leaf (if key is not empty).
+## Entry
+
+The `(key, value)` pair is often represented in the `Node::insert` function using the `Entry` structure to facilitate efficient insertion into a trie. The `Entry` struct provides a convenient way to encapsulate both the `key` and `value`, allowing the `Node::insert` function to handle them as a single unit.
+
+Its important features are:
+
+- The `From<(K, V)> for Entry` implementation which allows for easy creation of an `Entry` from various types, enabling the insertion helper functions (like `insert_entry_into_branch` and `insert_entry_into_extension`) to accept a wide range of input formats.
+- The `From<Entry> for Node` implementation which allows the creation of a `Node` directly from `Entry`, transforming `self` into `Branch` with value (in the case of empty keys) or `Leaf` (if key is not empty).
 
 Insert function works differently depending on the type of node we are inserting to:
 
 ## Into Null
 
-This happens only during the first insert into the trie. `Node::Null` is not created later during insertion in any way.
+This happens only during the first insertion into the trie. `Node::Null` is never created later during the insertion in any way.
 
-When we insert into `Node::Null`, we replace the null node with a `Branch` with a value if the inserted value's key is empty or a `Leaf` otherwise.
+When we insert into `Node::Null`, we replace the `Null` node with a:
+* `Branch` with a value, if the inserted value's key is empty
+* `Leaf` otherwise.
 
 ## Into Digest
 
-Insert into Digest node shouldn't even happen so we just panic if we trie to insert into Digest.
+Insert into `Digest` node shouldn't happen, so we simply panic if we try to insert into a `Digest`.
 
 ## Into Leaf
 
-In order to simplify the number of cases we handle, we convert leaf key and value into the Entry and replace it with the new node created using `from_two_entries` function. This way we treat old entry and the new one symmetricaly and have less cases to consider.
+To simplify the number of cases we need to handle, we convert the leaf's `key` and `value` into an `Entry` and then replace the `Leaf` with a new node created using the `from_two_entries` function. This approach allows us to treat the old entry and the new one symmetrically, reducing the number of cases to consider.
 
-### from_two_entries(lhs: impl Into<Entry>,rhs: impl Into<Entry>)
+### from_two_entries
 
-It does the following:
+The function signature:
+```rs
+fn from_two_entries(
+    lhs: impl Into<Entry>,
+    rhs: impl Into<Entry>,
+) -> Result<Node, NodeError>
+```
+It performs the following steps:
 
 If the keys are equal we throw `DuplicateKey` error.
 
@@ -32,19 +48,19 @@ if shorter.key == longer.key {
 }
 ```
 
-Then it sorts `lhs` and `rhs` entries
+It then sorts `lhs` and `rhs` entries
 
 ```rs
 let (shorter, longer) = order_entries(lhs, rhs);
 ```
 
-Now we handle multiple cases of `shorter.key` and `longer.key` configurations.
+It handles multiple cases based on the configurations of `shorter.key` and `longer.key`:
 
 #### 1. `shorter.key` is empty
 
     We know that `longer.key` can't be, since the case of equal keys was already handled above. Therefore, we can split longer, extracting its first key nibble. We then create a `Branch` that has `shorter.value` as a value and `remaining_longer` as a child at `longer_first_nibble index`.
 
-   Note that the branch child can be a `Leaf` or a `Branch` (with value) depending on the `remaining_longer.key` length.
+Note that the branch child can be a `Leaf` or a `Branch` (with value) depending on the `remaining_longer.key` length.
 
 ![Schema](./images/into_leaf_0.png)
 
@@ -60,6 +76,7 @@ if shorter.key.is_empty() {
 ```
 
 #### 2. Both keys are not empty, `shorter_first_nibble != longer_first_nibble`
+
 Here we just create branch with two children, as shown on the picture below.
 
 ![Schema](./images/into_leaf_1.png)
@@ -79,6 +96,7 @@ if shorter_first_nibble != longer_first_nibble {
 ```
 
 #### 3. Both keys are not empty, `shorter_first_nibble == longer_first_nibble`.
+
 In that case we extract recursively longest common prefix and then return `Extension` node with longest common prefix as a key with a `Branch` as a child. This `Branch` has two children, each correspoding to one of the entries.
 
 ![Schema](./images/into_leaf_2.png)
@@ -96,6 +114,5 @@ let result_node = match node {
 
 Ok(result_node)
 ```
-In the above code we only handle cases if resulting node is either a `Branch` or an `Extension`, as this are the only possible node types that `from_two_entries` can return.
 
-## Into Branch
+In the above code we only handle cases if resulting node is either a `Branch` or an `Extension`, as this are the only possible node types that `from_two_entries` can return.
