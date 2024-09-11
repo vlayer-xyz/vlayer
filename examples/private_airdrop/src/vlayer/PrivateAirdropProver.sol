@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {ECDSA} from "openzeppelin-contracts/utils/cryptography/ECDSA.sol";
-import {MessageHashUtils} from "openzeppelin-contracts/utils/cryptography/MessageHashUtils.sol";
-import {IERC20} from "openzeppelin-contracts/token/ERC20/IERC20.sol";
+import {ECDSA} from "@openzeppelin-contracts/utils/cryptography/ECDSA.sol";
+import {MessageHashUtils} from "@openzeppelin-contracts/utils/cryptography/MessageHashUtils.sol";
+import {IERC20} from "@openzeppelin-contracts/token/ERC20/IERC20.sol";
 import {Prover} from "vlayer/Prover.sol";
 
 contract PrivateAirdropProver is Prover {
