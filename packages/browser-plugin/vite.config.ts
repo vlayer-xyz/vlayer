@@ -20,7 +20,6 @@ export default defineConfig({
       webExtConfig: {
         startUrl: "http://localhost:5174",
       },
-
     }),
   ],
 });

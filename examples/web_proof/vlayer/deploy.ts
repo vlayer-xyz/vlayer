@@ -1,8 +1,8 @@
-import { testHelpers } from "@vlayer/sdk"; 
+import { testHelpers } from "@vlayer/sdk";
 import fs from "node:fs";
 import path from "node:path";
 
-//TODO : check 
+//TODO : check
 //@ts-expect-error - sol file is not a module
 import webProofProver from "../out/WebProofProver.sol/WebProofProver";
 //@ts-expect-error - sol file is not a module
