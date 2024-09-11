@@ -17,10 +17,10 @@ pub(crate) fn from_two_entries(
     let lhs = lhs.into();
     let rhs = rhs.into();
 
-    let (shorter, longer) = order_entries(lhs, rhs);
-    if shorter.key == longer.key {
+    if lhs.key == rhs.key {
         return Err(NodeError::DuplicateKey);
     }
+    let (shorter, longer) = order_entries(lhs, rhs);
 
     if shorter.key.is_empty() {
         let (longer_first_nibble, remaining_longer) = longer.split_first_key_nibble();
