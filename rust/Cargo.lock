@@ -6676,6 +6676,7 @@ version = "0.1.0"
 name = "prove_chain_server"
 version = "0.1.0"
 dependencies = [
+ "alloy-primitives",
  "axum",
  "axum-jrpc",
  "mime",

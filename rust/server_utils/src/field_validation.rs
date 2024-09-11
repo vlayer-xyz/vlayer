@@ -1,5 +1,5 @@
 use alloy_primitives::hex::FromHexError as AlloyFromHexError;
-use alloy_primitives::Address;
+use alloy_primitives::{Address, BlockHash};
 use hex::FromHexError;
 use thiserror::Error;
 
@@ -25,6 +25,16 @@ pub fn parse_address_field(
         .map_err(|error| FieldValidationError::InvalidHex {
             field: field_name.to_string(),
             value: address,
+            error,
+        })
+}
+
+pub fn parse_hash_field(field_name: &str, hash: String) -> Result<BlockHash, FieldValidationError> {
+    hash.parse()
+        .map_err(alloy_hex_error_to_standard_hex_error)
+        .map_err(|error| FieldValidationError::InvalidHex {
+            field: field_name.to_string(),
+            value: hash,
             error,
         })
 }
