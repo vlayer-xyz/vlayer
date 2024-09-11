@@ -3,7 +3,7 @@
   "type": "module",
   "scripts": {
     "lint:solidity": "solhint '../src/**/*.sol'",
-    "dev": "vite",
+    "dev": "vite --port 5174",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "preview": "vite preview"
