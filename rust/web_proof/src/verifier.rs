@@ -20,8 +20,8 @@ pub enum WebProofError {
     #[error("No host found in the URL")]
     NoHostFoundInUrl,
 
-    #[error("Host name extracted from url is different that server name")]
-    HostNameMismatch,
+    #[error("Host name extracted from url: {0} is different from server name: {1}")]
+    HostNameMismatch(String, String),
 }
 
 pub fn verify_and_parse(web_proof: WebProof) -> Result<Web, WebProofError> {
@@ -44,10 +44,14 @@ pub fn verify_and_parse(web_proof: WebProof) -> Result<Web, WebProofError> {
 }
 
 fn verify_server_name(server_name: &str, url: &str) -> Result<(), WebProofError> {
-    if extract_host(url)? == server_name {
+    let extracted_host = extract_host(url)?;
+    if extracted_host == server_name {
         Ok(())
     } else {
-        Err(WebProofError::HostNameMismatch)
+        Err(WebProofError::HostNameMismatch(
+            extracted_host,
+            server_name.to_string(),
+        ))
     }
 }
 
@@ -125,7 +129,7 @@ mod tests {
     fn server_name_verification_fail_host_name_mismatch() {
         assert!(matches!(
             verify_server_name("x.com", TEST_URL).unwrap_err(),
-            WebProofError::HostNameMismatch
+            WebProofError::HostNameMismatch(host, server_name) if host == "api.x.com" && server_name == "x.com"
         ));
     }
 
