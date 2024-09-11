@@ -1,3 +1,7 @@
+// The (key, value) pair is often represented in the Node::insert logic using the Entry structure.
+// The Entry struct provides concise way to encapsulate both the key and value, allowing them
+// to be handled as a single unit, thus reducing code clutter and unnecessary conversions.
+
 use nybbles::Nibbles;
 
 use crate::node::Node;
@@ -8,6 +12,10 @@ pub struct Entry {
     pub value: Box<[u8]>,
 }
 
+// The From<(K, V)> for Entry implementation converts a (key, value) tuple into an Entry struct.
+// This allows insertion helper functions like insert_entry_into_branch
+// and insert_entry_into_extension to accept a tuple directly, simplifying their interfaces by
+// reducing the need for converting a tuple into Entry.
 impl<K, V> From<(K, V)> for Entry
 where
     K: AsRef<[u8]>,
@@ -21,6 +29,8 @@ where
     }
 }
 
+// The From<Entry> for Node implementation converts an Entry into a Node,
+// creating a Branch if the key is empty or a Leaf if it is not.
 impl From<Entry> for Node {
     fn from(Entry { key, value }: Entry) -> Self {
         if key.is_empty() {
@@ -31,6 +41,7 @@ impl From<Entry> for Node {
     }
 }
 
+// Splits the first nibble from the entry's key, returning it along with the remaining entry.
 impl Entry {
     pub(crate) fn split_first_key_nibble(self) -> (u8, Entry) {
         let Some((first_key_nibble, remaining_key)) = self.key.split_first() else {

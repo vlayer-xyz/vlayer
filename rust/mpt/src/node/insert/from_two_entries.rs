@@ -1,6 +1,21 @@
+// from_two_entries is a helper function used in Node::insert to handle inserting into Leaf node. It is used to reduce
+// the number of cases to handle - we convert Leaf's key and value into an Entry struct and then use from_two_entries which
+// treats both new entry and Leaf's entry symmetrically.
+
 use crate::node::{Node, NodeError};
 
 use super::entry::Entry;
+
+pub(crate) fn from_two_entries(
+    lhs: impl Into<Entry>,
+    rhs: impl Into<Entry>,
+) -> Result<Node, NodeError> {
+    let lhs = lhs.into();
+    let rhs = rhs.into();
+
+    let (shorter, longer) = order_entries(lhs, rhs);
+    from_two_ordered_entries(shorter, longer)
+}
 
 fn order_entries(lhs: Entry, rhs: Entry) -> (Entry, Entry) {
     if lhs.key.len() <= rhs.key.len() {
@@ -10,18 +25,14 @@ fn order_entries(lhs: Entry, rhs: Entry) -> (Entry, Entry) {
     }
 }
 
-pub(crate) fn from_two_entries(
-    lhs: impl Into<Entry>,
-    rhs: impl Into<Entry>,
-) -> Result<Node, NodeError> {
-    let lhs = lhs.into();
-    let rhs = rhs.into();
-
-    if lhs.key == rhs.key {
+fn from_two_ordered_entries(shorter: Entry, longer: Entry) -> Result<Node, NodeError> {
+    if shorter.key == longer.key {
         return Err(NodeError::DuplicateKey);
     }
-    let (shorter, longer) = order_entries(lhs, rhs);
 
+    // If the shorter key is empty, we create a Branch with a child and a value. Notice that We know
+    // longer.key` can't be empty, since the case of equal keys was already handled above.
+    // ![Schema](../../../images/into_leaf_0.png)
     if shorter.key.is_empty() {
         let (longer_first_nibble, remaining_longer) = longer.split_first_key_nibble();
         return Ok(Node::branch_with_child_and_value(
@@ -30,9 +41,12 @@ pub(crate) fn from_two_entries(
             shorter.value,
         ));
     }
+
     let (shorter_first_nibble, remaining_shorter) = shorter.split_first_key_nibble();
     let (longer_first_nibble, remaining_longer) = longer.split_first_key_nibble();
 
+    // If the both first nibbles exist and are different, we create a Branch with two children.
+    // ![Schema](../../../images/into_leaf_1.png)
     if shorter_first_nibble != longer_first_nibble {
         return Ok(Node::branch_with_two_children(
             shorter_first_nibble,
@@ -42,6 +56,9 @@ pub(crate) fn from_two_entries(
         ));
     }
 
+    // Here we extract recursively longest common prefix and then return Extension node with longest common prefix
+    // as a key with a Branch as a child. This Branch has two children, each corresponding to one of the entries.
+    // ![Schema](../../../images/into_leaf_2.png)
     let node = from_two_entries(remaining_shorter, remaining_longer)?;
 
     let result_node = match node {
@@ -49,7 +66,7 @@ pub(crate) fn from_two_entries(
         Node::Extension(nibbles, child) => {
             Node::Extension(nibbles.push_front(shorter_first_nibble), child)
         }
-        _ => unreachable!("from_two_ordered_entries should return only Branch or Extension"),
+        _ => unreachable!("from_two_entries should return only Branch or Extension"),
     };
 
     Ok(result_node)
