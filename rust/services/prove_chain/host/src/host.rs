@@ -14,8 +14,7 @@ pub struct Host {
 }
 
 pub struct HostOutput {
-    #[allow(unused)]
-    receipt: Receipt,
+    pub receipt: Receipt,
 }
 
 impl Host {
