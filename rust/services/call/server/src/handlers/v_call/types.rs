@@ -1,7 +1,7 @@
 use crate::error::AppError;
 use alloy_chains::Chain;
 use alloy_primitives::hex::ToHexExt;
-use alloy_primitives::{ChainId, U256};
+use alloy_primitives::{uint, ChainId, U256};
 use alloy_sol_types::SolValue;
 use call_engine::io::HostOutput;
 use call_engine::{Proof, Seal};
@@ -78,9 +78,11 @@ impl TryFrom<HostOutput> for CallResult {
             ..
         } = host_output;
         let proof = Proof {
-            seal: decode_seal(seal)?,
-            commitment: guest_output.execution_commitment,
             length: U256::from(proof_len),
+            seal: decode_seal(seal)?,
+            numberOfDynamicParams: uint!(0_U256),
+            dynamicParamsOffsets: [uint!(0_U256); 10],
+            commitment: guest_output.execution_commitment,
         };
         Ok(Self {
             proof,

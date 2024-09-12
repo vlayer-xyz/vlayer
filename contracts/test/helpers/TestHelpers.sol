@@ -27,7 +27,8 @@ contract TestHelpers {
         bytes32 journalHash = sha256(journal);
 
         bytes memory seal = mockVerifier.mockProve(ImageID.RISC0_CALL_GUEST_ID, journalHash).seal;
-        Proof memory proof = Proof(journal.length, encodeSeal(seal), commitment);
+        Proof memory proof =
+            Proof(journal.length, encodeSeal(seal), 0, [uint256(0), 0, 0, 0, 0, 0, 0, 0, 0, 0], commitment);
         return (proof, journalHash);
     }
 

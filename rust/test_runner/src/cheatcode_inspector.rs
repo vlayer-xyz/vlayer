@@ -1,4 +1,4 @@
-use alloy_primitives::U256;
+use alloy_primitives::{uint, U256};
 use alloy_sol_types::{SolCall, SolType};
 use call_engine::io::{Call, HostOutput};
 use call_engine::utils::evm_call::{
@@ -91,8 +91,10 @@ impl CheatcodeInspector {
             .unwrap_or_else(|_| panic!("Failed to decode seal: {:x?}", host_output.seal));
 
         Proof {
-            seal: decoded_seal,
             length: U256::from(host_output.proof_len),
+            seal: decoded_seal,
+            numberOfDynamicParams: uint!(0_U256),
+            dynamicParamsOffsets: [uint!(0_U256); 10],
             commitment,
         }
     }
