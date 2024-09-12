@@ -34,12 +34,7 @@ fn from_two_ordered_entries(shorter: Entry, longer: Entry) -> Result<Node, NodeE
     // longer.key` can't be empty, since the case of equal keys was already handled above.
     // ![Schema](../../../images/into_leaf_0.png)
     if shorter.key.is_empty() {
-        let (longer_first_nibble, remaining_longer) = longer.split_first_key_nibble();
-        return Ok(Node::branch_with_child_and_value(
-            longer_first_nibble,
-            remaining_longer,
-            shorter.value,
-        ));
+        return Ok(from_value_and_entry(shorter.value, longer));
     }
 
     let (shorter_first_nibble, remaining_shorter) = shorter.split_first_key_nibble();
@@ -60,16 +55,22 @@ fn from_two_ordered_entries(shorter: Entry, longer: Entry) -> Result<Node, NodeE
     // as a key with a Branch as a child. This Branch has two children, each corresponding to one of the entries.
     // ![Schema](../../../images/into_leaf_2.png)
     let node = from_two_entries(remaining_shorter, remaining_longer)?;
-
-    let result_node = match node {
-        Node::Branch(_, _) => Node::extension([shorter_first_nibble], node),
-        Node::Extension(nibbles, child) => {
-            Node::Extension(nibbles.push_front(shorter_first_nibble), child)
-        }
-        _ => unreachable!("from_two_ordered_entries should return only Branch or Extension"),
-    };
+    let result_node = prepend_nibble(shorter_first_nibble, node);
 
     Ok(result_node)
+}
+
+fn from_value_and_entry(value: impl AsRef<[u8]>, entry: Entry) -> Node {
+    let (nibble, remaining) = entry.split_first_key_nibble();
+    Node::branch_with_child_and_value(nibble, remaining, value)
+}
+
+fn prepend_nibble(nibble: u8, node: Node) -> Node {
+    match node {
+        Node::Branch(_, _) => Node::extension([nibble], node),
+        Node::Extension(nibbles, child) => Node::Extension(nibbles.push_front(nibble), child),
+        _ => unreachable!("from_two_ordered_entries should return only Branch or Extension"),
+    }
 }
 
 #[cfg(test)]
