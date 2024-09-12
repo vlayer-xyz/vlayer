@@ -1,16 +1,12 @@
 {
   "name": "@vlayer/components",
-  "version": "0.0.0",
+  "version": "0.1.0",
   "main": "src/index.ts",
   "types": "src/index.ts",
   "description": "",
   "files": [
     "dist"
   ],
-  "keywords": [
-    "bun"
-  ],
-  "license": "MIT",
   "devDependencies": {
     "bun-plugin-dts": "^0.2.1",
     "@types/bun": "^1.0.0",
