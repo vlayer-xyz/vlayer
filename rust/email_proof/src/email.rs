@@ -25,8 +25,9 @@ impl TryFrom<ParsedMail<'_>> for Email {
         let headers = mail.get_headers();
         let get_header = header_getter(headers);
 
-        let from = get_header("From").ok_or(MailParseError::Generic("From header is missing"))?;
-        let to = get_header("To").ok_or(MailParseError::Generic("To header is missing"))?;
+        let from =
+            get_header("From").ok_or(MailParseError::Generic("\"From\" header is missing"))?;
+        let to = get_header("To").ok_or(MailParseError::Generic("\"To\" header is missing"))?;
         let subject = get_header("Subject");
 
         let body = mail.get_body()?;
@@ -86,7 +87,7 @@ mod test {
             let email = parsed_email(vec![("To", "me")], "body");
             assert_eq!(
                 email.unwrap_err().to_string(),
-                MailParseError::Generic("From header is missing").to_string()
+                MailParseError::Generic("\"From\" header is missing").to_string()
             );
         }
 
@@ -95,7 +96,7 @@ mod test {
             let email = parsed_email(vec![("From", "me")], "body");
             assert_eq!(
                 email.unwrap_err().to_string(),
-                MailParseError::Generic("To header is missing").to_string()
+                MailParseError::Generic("\"To\" header is missing").to_string()
             );
         }
 
