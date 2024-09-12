@@ -12,10 +12,10 @@ pub struct ChainProof;
 
 pub async fn v_prove_chain(params: Params) -> Result<ChainProof, AppError> {
     if params.block_hashes.is_empty() {
-        Err(AppError::NoBlockHashes)
-    } else {
-        todo!();
-    }
+        return Err(AppError::NoBlockHashes);
+    };
+
+    unimplemented!("v_prove_chain")
 }
 
 #[cfg(test)]
