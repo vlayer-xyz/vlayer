@@ -1,3 +1,6 @@
+use std::collections::HashMap;
+
+use prove_chain_host::{Host, HostConfig, HostOutput, ProofMode};
 use serde::{Deserialize, Serialize};
 use types::ValidatedParams;
 
@@ -21,12 +24,24 @@ pub async fn v_prove_chain(params: Params) -> Result<ChainProof, AppError> {
         return Err(AppError::NoBlockHashes);
     };
 
-    Ok(ChainProof { receipt: vec![] })
+    let config = HostConfig {
+        rpc_urls: HashMap::new(),
+        proof_mode: ProofMode::Fake,
+    };
+    let HostOutput { receipt } = Host::new(config).run()?;
+    let encoded_receipt =
+        bincode::serialize(&receipt).map_err(|err| AppError::Bincode(err.to_string()))?;
+
+    Ok(ChainProof {
+        receipt: encoded_receipt,
+    })
 }
 
 #[cfg(test)]
 mod tests {
     use super::*;
+    use anyhow::Result;
+    use risc0_zkvm::Receipt;
 
     #[tokio::test]
     async fn empty_block_hashes() {
@@ -40,7 +55,7 @@ mod tests {
     }
 
     #[tokio::test]
-    async fn success() -> Result<(), AppError> {
+    async fn returns_valid_receipt() -> Result<()> {
         let parent_block_hash =
             "0xb390d63aac03bbef75de888d16bd56b91c9291c2a7e38d36ac24731351522bd1".to_string(); // https://etherscan.io/block/19999999
         let block_hash =
@@ -49,7 +64,8 @@ mod tests {
             block_hashes: vec![parent_block_hash, block_hash],
         };
 
-        assert!(v_prove_chain(params).await.is_ok());
+        let chain_proof = v_prove_chain(params).await?;
+        let _: Receipt = bincode::deserialize(chain_proof.receipt.as_slice())?;
 
         Ok(())
     }
