@@ -74,6 +74,8 @@ jobs:
       - name: "Build binaries"
         env:
           VLAYER_RELEASE: "nightly"
+          # link libusb statically to avoid runtime linking issues
+          LIBUSB_STATIC: 1
         run: cargo build --release --target ${{ matrix.target }}
 
       - name: Package release
