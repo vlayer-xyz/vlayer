@@ -5,7 +5,7 @@ use rand::Rng;
 
 const MAX_KEY_LENGTH: usize = 8;
 const MAX_VALUE_PER_BYTE: u8 = 5;
-const NUMBER_OF_ELEMENTS: usize = 2048;
+const NUMBER_OF_ELEMENTS: usize = 1000;
 
 type Entry = (Vec<u8>, [u8; 32]);
 
