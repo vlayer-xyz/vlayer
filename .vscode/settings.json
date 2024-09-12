@@ -7,7 +7,8 @@
   "rust-analyzer.server.extraEnv": {
     // Should be in sync with ./cargo/config.toml [env] section to avoid recompilation of guest_wrapper
     "CC_riscv32im_risc0_zkvm_elf": "clang",
-    "CFLAGS_riscv32im_risc0_zkvm_elf": "-nostdlibinc -DRING_CORE_NOSTDLIBINC=1 -target riscv32-unknown-elf -march=rv32im"
+    "CFLAGS_riscv32im_risc0_zkvm_elf": "-nostdlibinc -DRING_CORE_NOSTDLIBINC=1 -target riscv32-unknown-elf -march=rv32im",
+    "LIBUSB_STATIC": "1"
   },
   "cSpell.words": [
     "augmentors",
