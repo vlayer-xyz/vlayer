@@ -14,5 +14,8 @@
     "vite": "^5.0.0",
     "vite-plugin-web-extension": "^4.0.0",
     "webextension-polyfill": "^0.10.0"
+  },
+  "dependencies": {
+    "tlsn-js": "github:tlsnotary/tlsn-js#v0.1.0-alpha.5.3"
   }
 }
