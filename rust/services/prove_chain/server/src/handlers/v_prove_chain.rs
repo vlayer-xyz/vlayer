@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use prove_chain_host::{Host, HostConfig, HostOutput, ProofMode};
+use risc0_zkvm::Receipt;
 use serde::{Deserialize, Serialize};
 use types::ValidatedParams;
 
@@ -18,6 +19,15 @@ pub struct ChainProof {
     receipt: Vec<u8>,
 }
 
+impl TryFrom<Receipt> for ChainProof {
+    type Error = AppError;
+    fn try_from(value: Receipt) -> Result<Self, Self::Error> {
+        let receipt =
+            bincode::serialize(&value).map_err(|err| AppError::Bincode(err.to_string()))?;
+        Ok(ChainProof { receipt })
+    }
+}
+
 pub async fn v_prove_chain(params: Params) -> Result<ChainProof, AppError> {
     let params: ValidatedParams = params.try_into()?;
     if params.block_hashes.is_empty() {
@@ -28,13 +38,9 @@ pub async fn v_prove_chain(params: Params) -> Result<ChainProof, AppError> {
         rpc_urls: HashMap::new(),
         proof_mode: ProofMode::Fake,
     };
-    let HostOutput { receipt } = Host::new(config).run()?;
-    let encoded_receipt =
-        bincode::serialize(&receipt).map_err(|err| AppError::Bincode(err.to_string()))?;
+    let HostOutput { receipt } = Host::new(config)?.run()?;
 
-    Ok(ChainProof {
-        receipt: encoded_receipt,
-    })
+    Ok(receipt.try_into()?)
 }
 
 #[cfg(test)]
