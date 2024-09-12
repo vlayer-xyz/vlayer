@@ -18,7 +18,7 @@ members = [
     "test_runner",
     "web_proof",
     "server_utils",
-    "host_utils",
+    "host_utils", "chain",
 ]
 default-members = ["cli"]
 
@@ -106,6 +106,7 @@ mpt = { path = "mpt" }
 web_proof = { path = "web_proof" }
 test_runner = { path = "test_runner" }
 host_utils = { path = "host_utils" }
+chain = { path = "chain" }
 
 risc0-ethereum-contracts = { path = "../contracts/lib/risc0-ethereum/contracts" }
 

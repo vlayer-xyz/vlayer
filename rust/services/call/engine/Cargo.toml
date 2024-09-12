@@ -27,6 +27,7 @@ dyn-clone = { workspace = true }
 serde_json = { workspace = true }
 lazy_static = { workspace = true }
 web_proof = { workspace = true }
+chain = { workspace = true }
 
 [dev-dependencies]
 alloy-trie = { workspace = true }

@@ -1,5 +1,5 @@
 use alloy_primitives::ChainId;
-use call_engine::config::{TEST_CHAIN_ID_1, TEST_CHAIN_ID_2};
+use chain::{TEST_CHAIN_ID_1, TEST_CHAIN_ID_2};
 use serde::{Deserialize, Serialize};
 use server_utils::ProofMode;
 use std::collections::HashMap;
