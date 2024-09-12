@@ -21,15 +21,18 @@ impl Node {
 
         let (entry_first_nibble, remaining_entry) = entry.split_first_key_nibble();
 
-        if let Some(existing_child) = children[entry_first_nibble as usize].take() {
-            children[entry_first_nibble as usize] = Some(Box::new(
-                existing_child.insert(&*remaining_entry.key, remaining_entry.value)?,
-            ));
-        } else {
-            children[entry_first_nibble as usize] = Some(Box::new(remaining_entry.into()));
-        }
+        let child = children[entry_first_nibble as usize].take();
+        let new_child = insert_entry_into_child(child, remaining_entry)?;
+        children[entry_first_nibble as usize] = Some(Box::new(new_child));
 
         Ok(Node::Branch(children, branch_value))
+    }
+}
+
+fn insert_entry_into_child(child: Option<Box<Node>>, entry: Entry) -> Result<Node, NodeError> {
+    match child {
+        Some(existing_child) => existing_child.insert(&*entry.key, entry.value),
+        None => Ok(entry.into()),
     }
 }
 
