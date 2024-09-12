@@ -18,3 +18,4 @@ tower = { workspace = true }
 prove_chain_host = { workspace = true}
 risc0-zkvm = { workspace = true }
 bincode = "1.3.3"
+chain = { workspace = true }

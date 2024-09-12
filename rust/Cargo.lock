@@ -6744,6 +6744,7 @@ dependencies = [
  "axum",
  "axum-jrpc",
  "bincode",
+ "chain",
  "mime",
  "prove_chain_host",
  "risc0-zkvm",
