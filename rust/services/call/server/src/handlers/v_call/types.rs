@@ -56,6 +56,8 @@ impl CallResult {
                     "seal": self.proof.seal.seal,
                     "mode": Into::<u8>::into(self.proof.seal.mode),
                 },
+                "numberOfDynamicParams": self.proof.numberOfDynamicParams,
+                "dynamicParamsOffsets": self.proof.dynamicParamsOffsets,
                 "commitment": {
                     "functionSelector": self.proof.commitment.functionSelector,
                     "proverContractAddress": self.proof.commitment.proverContractAddress,
