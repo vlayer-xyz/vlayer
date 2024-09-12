@@ -26,6 +26,7 @@ as-any = { workspace = true }
 dyn-clone = { workspace = true }
 serde_json = { workspace = true }
 lazy_static = { workspace = true }
+email_proof = { workspace = true }
 web_proof = { workspace = true }
 
 [dev-dependencies]
