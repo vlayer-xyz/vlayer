@@ -19,11 +19,13 @@ impl Node {
         let (common_prefix, remaining_extension_key, remaining_entry_key) =
             extract_common_prefix(&key, &entry.key);
 
+        // ![Remaining extension key empty](../../../images/into_extension_0.png)
         if remaining_extension_key.is_empty() {
             let child_node = child_node.insert(remaining_entry_key, entry.value)?;
             return Ok(Node::extension(common_prefix, child_node));
         }
 
+        // ![Common prefix empty](../../../images/into_extension_1.png)
         if common_prefix.is_empty() {
             return from_extension_and_entry_empty_common_prefix(self, entry);
         }
@@ -33,6 +35,7 @@ impl Node {
             (remaining_entry_key, entry.value),
         )?;
 
+        // ![Common prefix nonempty](../../../images/into_extension_2.png)
         Ok(Node::extension(common_prefix, child_node))
     }
 }
@@ -68,9 +71,6 @@ mod tests {
         use super::*;
 
         #[test]
-        // In case where extension nibbles is a prefix of inserted key
-        // we delegate insertion to the child node.
-        // We test this by comparing the result of inserting to the child node directly.
         fn into_child_node() -> anyhow::Result<()> {
             let child_node = Node::branch_with_value([42]);
             let node = Node::extension([0x0], child_node.clone());

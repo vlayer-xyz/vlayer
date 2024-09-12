@@ -30,9 +30,8 @@ fn from_two_ordered_entries(shorter: Entry, longer: Entry) -> Result<Node, NodeE
         return Err(NodeError::DuplicateKey);
     }
 
-    // If the shorter key is empty, we create a Branch with a child and a value. Notice that we know
-    // longer.key` can't be empty, since the case of equal keys was already handled above.
-    // ![Schema](../../../images/into_leaf_0.png)
+    // We know longer.key can't be empty, since the case of equal keys was handled above.
+    // ![Shorter key empty](../../../images/into_leaf_0.png)
     if shorter.key.is_empty() {
         return Ok(from_value_and_entry(shorter.value, longer));
     }
@@ -40,8 +39,7 @@ fn from_two_ordered_entries(shorter: Entry, longer: Entry) -> Result<Node, NodeE
     let (shorter_first_nibble, remaining_shorter) = shorter.split_first_key_nibble();
     let (longer_first_nibble, remaining_longer) = longer.split_first_key_nibble();
 
-    // If both first nibbles exist and are different, we create a Branch with two children.
-    // ![Schema](../../../images/into_leaf_1.png)
+    // ![Different first nibbles](../../../images/into_leaf_1.png)
     if shorter_first_nibble != longer_first_nibble {
         return Ok(Node::branch_with_two_children(
             shorter_first_nibble,
@@ -51,9 +49,7 @@ fn from_two_ordered_entries(shorter: Entry, longer: Entry) -> Result<Node, NodeE
         ));
     }
 
-    // Here we extract recursively longest common prefix and then return Extension node with longest common prefix
-    // as a key with a Branch as a child. This Branch has two children, each corresponding to one of the entries.
-    // ![Schema](../../../images/into_leaf_2.png)
+    // ![Common prefix nonempty](../../../images/into_leaf_2.png)
     let node = from_two_entries(remaining_shorter, remaining_longer)?;
     let result_node = prepend_nibble(shorter_first_nibble, node);
 
