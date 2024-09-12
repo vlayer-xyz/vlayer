@@ -163,7 +163,7 @@ jobs:
   create-release:
     name: Create GH releases
     runs-on: aws-linux-small
-    needs: [build-release, build-examples] 
+    needs: [build-examples, push-contracts]
     steps:
       - run: mkdir -p dist
       - uses: actions/download-artifact@v4
