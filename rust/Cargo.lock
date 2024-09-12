@@ -6694,6 +6694,7 @@ dependencies = [
  "axum",
  "axum-jrpc",
  "mime",
+ "prove_chain_host",
  "serde",
  "serde_json",
  "server_utils",

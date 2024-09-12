@@ -13,3 +13,4 @@ server_utils = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
 tower = { workspace = true }
+prove_chain_host = { workspace = true}
