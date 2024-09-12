@@ -4,7 +4,8 @@ use revm::{
     DatabaseRef,
 };
 
-use crate::{block_header::EvmBlockHeader, chain::spec::ChainSpec, engine::EngineError};
+use crate::{block_header::EvmBlockHeader, engine::EngineError};
+use chain::ChainSpec;
 
 pub mod cached;
 pub mod location;

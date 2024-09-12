@@ -5,9 +5,9 @@ use anyhow::{bail, Context};
 use revm::primitives::SpecId;
 use serde::{Deserialize, Serialize};
 
-use crate::{config::CHAIN_MAP, engine::EngineError};
+use crate::config::CHAIN_MAP;
 
-use super::{eip1559::Eip1559Constants, fork::ForkCondition};
+use crate::{eip1559::Eip1559Constants, error::ChainError, fork::ForkCondition};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ChainSpec {
@@ -92,12 +92,12 @@ impl ChainSpec {
 }
 
 impl TryFrom<ChainId> for ChainSpec {
-    type Error = EngineError;
+    type Error = ChainError;
 
     fn try_from(chain_id: ChainId) -> Result<Self, Self::Error> {
         let chain_spec = CHAIN_MAP
             .get(&chain_id)
-            .ok_or(EngineError::UnsupportedChainId(chain_id))?;
+            .ok_or(ChainError::UnsupportedChainId(chain_id))?;
         Ok((**chain_spec).clone())
     }
 }

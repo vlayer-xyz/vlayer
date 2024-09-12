@@ -1723,6 +1723,7 @@ dependencies = [
  "alloy-trie",
  "anyhow",
  "as-any",
+ "chain",
  "dyn-clone",
  "email_proof",
  "lazy_static",
@@ -1749,6 +1750,7 @@ dependencies = [
  "anyhow",
  "as-any",
  "call_engine",
+ "chain",
  "mpt",
  "revm",
 ]
@@ -1773,6 +1775,7 @@ dependencies = [
  "auto_impl",
  "call_engine",
  "call_guest_wrapper",
+ "chain",
  "ctor",
  "dotenv",
  "ethers-core",
@@ -1803,6 +1806,7 @@ dependencies = [
  "axum-jrpc",
  "call_engine",
  "call_host",
+ "chain",
  "ethers",
  "hex",
  "lazy_static",
@@ -1886,6 +1890,19 @@ name = "cfg_aliases"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "fd16c4719339c4530435d38e511904438d07cce7950afa3718a84ac36c10e89e"
+
+[[package]]
+name = "chain"
+version = "0.1.0"
+dependencies = [
+ "alloy-chains",
+ "alloy-primitives",
+ "anyhow",
+ "once_cell",
+ "revm",
+ "serde",
+ "thiserror",
+]
 
 [[package]]
 name = "charset"
@@ -8544,6 +8561,7 @@ dependencies = [
  "alloy-trie",
  "call_engine",
  "call_host",
+ "chain",
  "clap",
  "color-eyre",
  "comfy-table",

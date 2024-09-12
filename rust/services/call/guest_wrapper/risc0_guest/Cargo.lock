@@ -742,6 +742,7 @@ dependencies = [
  "alloy-sol-types",
  "anyhow",
  "as-any",
+ "chain",
  "dyn-clone",
  "email_proof",
  "lazy_static",
@@ -767,6 +768,7 @@ dependencies = [
  "anyhow",
  "as-any",
  "call_engine",
+ "chain",
  "mpt",
  "revm",
 ]
@@ -782,6 +784,19 @@ name = "cfg-if"
 version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
+
+[[package]]
+name = "chain"
+version = "0.1.0"
+dependencies = [
+ "alloy-chains",
+ "alloy-primitives",
+ "anyhow",
+ "once_cell",
+ "revm",
+ "serde",
+ "thiserror",
+]
 
 [[package]]
 name = "charset"

@@ -24,6 +24,7 @@ serde_json = { workspace = true }
 tokio = { workspace = true }
 auto_impl = { workspace = true }
 dotenv = { workspace = true }
+chain = { workspace = true }
 
 [dev-dependencies]
 alloy-sol-types = { workspace = true }

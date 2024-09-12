@@ -1,6 +1,5 @@
 use std::sync::Arc;
 
-use alloy_primitives::ChainId;
 use revm::{
     db::WrapDatabaseRef,
     inspector_handle_register,
@@ -32,9 +31,6 @@ pub enum EngineError {
 
     #[error("EVM transact error: {0}")]
     TransactError(String),
-
-    #[error("Unsupported chain id: {0}")]
-    UnsupportedChainId(ChainId),
 
     #[error("Chain spec error: {0}")]
     ChainSpecError(String),

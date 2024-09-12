@@ -14,7 +14,7 @@ use foundry_evm::revm::{Database, EvmContext, Inspector};
 use crate::cheatcodes::{callProverCall, getProofCall, CHEATCODE_CALL_ADDR};
 use crate::providers::pending_state_provider::PendingStateProviderFactory;
 use crate::providers::test_provider::{TestProvider, TestProviderFactory};
-use call_engine::config::TEST_CHAIN_ID_1;
+use chain::TEST_CHAIN_ID_1;
 
 #[derive(Default)]
 pub struct CheatcodeInspector {

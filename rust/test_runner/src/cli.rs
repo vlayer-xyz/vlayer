@@ -8,8 +8,8 @@ use crate::{
     contract_runner::ContractRunner, filter::FilterArgs, filter::ProjectPathsAwareFilter,
     summary::TestSummaryReporter, test_executor::TestExecutor,
 };
-use call_engine::config::TEST_CHAIN_ID_1;
 use call_engine::inspector::{TRAVEL_CONTRACT_ADDR, TRAVEL_CONTRACT_HASH};
+use chain::TEST_CHAIN_ID_1;
 use clap::Parser;
 use color_eyre::eyre::{bail, Result};
 use forge::multi_runner::TestContract;
