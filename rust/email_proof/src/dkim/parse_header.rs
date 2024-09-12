@@ -31,51 +31,62 @@ pub enum DkimError {
 impl DkimHeader {
     pub(crate) fn parse(header: &str) -> Result<Self, DkimError> {
         let tags = header.split(';');
-        let mut header = DkimHeader::default();
-        for tag in tags {
-            let mut parts = tag.splitn(2, '=');
-
-            let key = parts
-                .next()
-                .ok_or(DkimError::ParseError(format!(
-                    "Invalid tag: {}",
-                    tag.trim()
-                )))?
-                .trim();
-
-            let value: String = parts
-                .next()
-                .ok_or(DkimError::ParseError(format!(
-                    "Invalid tag: {}",
-                    tag.trim()
-                )))?
-                .trim()
-                .into();
-
-            match key {
-                "v" => header.v = value,
-                "a" => header.a = value,
-                "d" => header.d = value,
-                "s" => header.s = value,
-                "c" => header.c = Some(value),
-                "q" => header.q = Some(value),
-                "i" => header.i = Some(value),
-                "t" => header.t = value,
-                "x" => header.x = value,
-                "l" => header.l = Some(value),
-                "h" => header.h = value,
-                "z" => header.z = Some(value),
-                "bh" => header.bh = value,
-                "b" => header.b = value,
-                unknown_tag => {
-                    return Err(DkimError::ParseError(format!(
-                        "Unknown DKIM tag: {unknown_tag}"
-                    )))
-                }
-            }
-        }
+        let header = tags.fold(Ok(Self::default()), Self::fill_header)?;
         header.validate_required_tags()?;
         Ok(header)
+    }
+
+    fn fill_header(header: Result<Self, DkimError>, tag: &str) -> Result<Self, DkimError> {
+        let (key, value) = Self::split_tag(tag)?;
+        Self::do_fill_header(header?, key, value)
+    }
+
+    fn do_fill_header(mut header: Self, key: &str, value: String) -> Result<Self, DkimError> {
+        match key {
+            "v" => header.v = value,
+            "a" => header.a = value,
+            "d" => header.d = value,
+            "s" => header.s = value,
+            "c" => header.c = Some(value),
+            "q" => header.q = Some(value),
+            "i" => header.i = Some(value),
+            "t" => header.t = value,
+            "x" => header.x = value,
+            "l" => header.l = Some(value),
+            "h" => header.h = value,
+            "z" => header.z = Some(value),
+            "bh" => header.bh = value,
+            "b" => header.b = value,
+            unknown_tag => {
+                return Err(DkimError::ParseError(format!(
+                    "Unknown DKIM tag: {unknown_tag}"
+                )))
+            }
+        }
+
+        Ok(header)
+    }
+
+    fn split_tag(tag: &str) -> Result<(&str, String), DkimError> {
+        let mut parts = tag.splitn(2, '=');
+        let key: &str = parts
+            .next()
+            .ok_or(DkimError::ParseError(format!(
+                "Invalid tag: {}",
+                tag.trim()
+            )))?
+            .trim();
+
+        let value: String = parts
+            .next()
+            .ok_or(DkimError::ParseError(format!(
+                "Invalid tag: {}",
+                tag.trim()
+            )))?
+            .trim()
+            .into();
+
+        Ok((key, value))
     }
 
     fn validate_required_tags(&self) -> Result<(), DkimError> {
