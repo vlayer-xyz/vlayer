@@ -1,23 +1,25 @@
 use thiserror::Error;
 
+use crate::dkim::tags::*;
+
 #[allow(dead_code)]
 #[derive(Default, Debug)]
 pub struct DkimHeader {
-    v: String,
-    a: String,
-    d: String,
-    s: String,
-    c: Option<String>,
-    q: Option<String>,
-    i: Option<String>,
+    v: Version,
+    a: SigningAlgorithm,
+    d: SigningDomainIdentifier,
+    s: Selector,
+    c: Option<Canonicalization>,
+    q: Option<QueryMethod>,
+    i: Option<Identity>,
     // t and x are not required by RFC, but recommended and we should require it
-    t: String,
-    x: String,
-    l: Option<String>,
-    h: String,
-    z: Option<String>,
-    bh: String,
-    b: String,
+    t: Timestamp,
+    x: Expiration,
+    l: Option<BodyLength>,
+    h: SignedHeaders,
+    z: Option<CopiedHeaders>,
+    bh: BodyHash,
+    b: Signature,
 }
 
 #[allow(dead_code)]
@@ -43,20 +45,20 @@ impl DkimHeader {
 
     fn do_fill_header(mut header: Self, key: &str, value: String) -> Result<Self, DkimError> {
         match key {
-            "v" => header.v = value,
-            "a" => header.a = value,
-            "d" => header.d = value,
-            "s" => header.s = value,
-            "c" => header.c = Some(value),
-            "q" => header.q = Some(value),
-            "i" => header.i = Some(value),
-            "t" => header.t = value,
-            "x" => header.x = value,
-            "l" => header.l = Some(value),
-            "h" => header.h = value,
-            "z" => header.z = Some(value),
-            "bh" => header.bh = value,
-            "b" => header.b = value,
+            "v" => header.v = Version(value),
+            "a" => header.a = SigningAlgorithm(value),
+            "d" => header.d = SigningDomainIdentifier(value),
+            "s" => header.s = Selector(value),
+            "c" => header.c = Some(Canonicalization(value)),
+            "q" => header.q = Some(QueryMethod(value)),
+            "i" => header.i = Some(Identity(value)),
+            "t" => header.t = Timestamp(value),
+            "x" => header.x = Expiration(value),
+            "l" => header.l = Some(BodyLength(value)),
+            "h" => header.h = SignedHeaders(value),
+            "z" => header.z = Some(CopiedHeaders(value)),
+            "bh" => header.bh = BodyHash(value),
+            "b" => header.b = Signature(value),
             unknown_tag => {
                 return Err(DkimError::ParseError(format!(
                     "Unknown DKIM tag: {unknown_tag}"
@@ -112,6 +114,8 @@ impl DkimHeader {
 
 #[cfg(test)]
 mod test {
+    use super::*;
+
     const TEST_SIGNATURE: &str = "v=1; a=rsa-sha256; d=example.net; s=brisbane;
      c=relaxed/simple; q=dns/txt; i=foo@eng.example.net;
      t=1117574938; x=1118006938; l=200;
@@ -124,34 +128,37 @@ mod test {
 
     #[test]
     fn parse_correct_dkim_header() {
-        let header = super::DkimHeader::parse(TEST_SIGNATURE).unwrap();
-        assert_eq!(header.v, "1");
-        assert_eq!(header.a, "rsa-sha256");
-        assert_eq!(header.d, "example.net");
-        assert_eq!(header.s, "brisbane");
-        assert_eq!(header.c, Some("relaxed/simple".to_string()));
-        assert_eq!(header.q, Some("dns/txt".to_string()));
-        assert_eq!(header.i, Some("foo@eng.example.net".to_string()));
-        assert_eq!(header.t, "1117574938");
-        assert_eq!(header.x, "1118006938");
-        assert_eq!(header.l, Some("200".to_string()));
+        let header = DkimHeader::parse(TEST_SIGNATURE).unwrap();
+        assert_eq!(header.v.0, "1");
+        assert_eq!(header.a.0, "rsa-sha256");
+        assert_eq!(header.d.0, "example.net");
+        assert_eq!(header.s.0, "brisbane");
         assert_eq!(
-            header.h,
+            header.c,
+            Some(Canonicalization("relaxed/simple".to_string()))
+        );
+        assert_eq!(header.q, Some(QueryMethod("dns/txt".to_string())));
+        assert_eq!(header.i, Some(Identity("foo@eng.example.net".to_string())));
+        assert_eq!(header.t.0, "1117574938");
+        assert_eq!(header.x.0, "1118006938");
+        assert_eq!(header.l, Some(BodyLength("200".to_string())));
+        assert_eq!(
+            header.h.0,
             "from:to:subject:date:keywords:keywords".to_string()
         );
         assert_eq!(
             header.z,
-            Some(
+            Some(CopiedHeaders(
                 "From:foo@eng.example.net|To:joe@example.com|Subject:demo=20run|Date:July=205,=202005=203:44:08=20PM=20-0700"
                     .to_string()
-            )
+            ))
         );
         assert_eq!(
-            header.bh,
+            header.bh.0,
             "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=".to_string()
         );
         assert_eq!(
-            header.b,
+            header.b.0,
             "dzdVyOfAKCdLXdJOc9G2q8LoXSlEniSbav+yuU4zGeeruD00lszZVoG4ZHRNiYzR".to_string()
         );
     }
@@ -159,7 +166,7 @@ mod test {
     #[test]
     fn error_when_no_required_tag() {
         fn expect_error_with_tag_removed(tag: &str) {
-            let parse_result = super::DkimHeader::parse(&rm_tag(tag));
+            let parse_result = DkimHeader::parse(&rm_tag(tag));
             assert!(parse_result.is_err());
             assert_eq!(
                 parse_result.unwrap_err().to_string(),
@@ -180,7 +187,7 @@ mod test {
 
     #[test]
     fn error_when_unexpected_tag() {
-        let parse_result = super::DkimHeader::parse(&format!("{TEST_SIGNATURE}; unexpected=tag"));
+        let parse_result = DkimHeader::parse(&format!("{TEST_SIGNATURE}; unexpected=tag"));
         assert!(parse_result.is_err());
         assert_eq!(
             parse_result.unwrap_err().to_string(),
@@ -191,7 +198,7 @@ mod test {
     #[test]
     fn error_when_invalid_tag() {
         let parse_result =
-            super::DkimHeader::parse(&format!("{TEST_SIGNATURE}; this_tag-has-no-equal-sign"));
+            DkimHeader::parse(&format!("{TEST_SIGNATURE}; this_tag-has-no-equal-sign"));
         assert!(parse_result.is_err());
         assert_eq!(
             parse_result.unwrap_err().to_string(),
@@ -201,11 +208,11 @@ mod test {
 
     #[test]
     fn parses_when_optional_tags_missing() {
-        assert_eq!(super::DkimHeader::parse(&rm_tag("c")).unwrap().c, None);
-        assert_eq!(super::DkimHeader::parse(&rm_tag("q")).unwrap().q, None);
-        assert_eq!(super::DkimHeader::parse(&rm_tag("i")).unwrap().i, None);
-        assert_eq!(super::DkimHeader::parse(&rm_tag("l")).unwrap().l, None);
-        assert_eq!(super::DkimHeader::parse(&rm_tag("z")).unwrap().z, None);
+        assert_eq!(DkimHeader::parse(&rm_tag("c")).unwrap().c, None);
+        assert_eq!(DkimHeader::parse(&rm_tag("q")).unwrap().q, None);
+        assert_eq!(DkimHeader::parse(&rm_tag("i")).unwrap().i, None);
+        assert_eq!(DkimHeader::parse(&rm_tag("l")).unwrap().l, None);
+        assert_eq!(DkimHeader::parse(&rm_tag("z")).unwrap().z, None);
     }
 
     fn rm_tag(tag_name: &str) -> String {
