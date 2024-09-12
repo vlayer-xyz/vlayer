@@ -96,9 +96,9 @@ where
             start_execution_location: self.start_execution_location,
         };
 
-        let env = Self::build_executor_env(input)
+        let env = build_executor_env(input)
             .map_err(|err| HostError::ExecutorEnvBuilder(err.to_string()))?;
-        let (seal, raw_guest_output) = Self::prove(&self.prover, env, RISC0_CALL_GUEST_ELF)?;
+        let (seal, raw_guest_output) = prove(&self.prover, env, RISC0_CALL_GUEST_ELF)?;
 
         let proof_len = raw_guest_output.len();
         let guest_output = GuestOutput::from_outputs(&host_output, &raw_guest_output)?;
@@ -117,24 +117,24 @@ where
             proof_len,
         })
     }
+}
 
-    fn prove(
-        prover: &Prover,
-        env: ExecutorEnv,
-        guest_elf: &[u8],
-    ) -> Result<(Vec<u8>, Vec<u8>), HostError> {
-        let result = prover
-            .prove(env, guest_elf)
-            .map_err(|err| HostError::Prover(err.to_string()))?;
+fn prove(
+    prover: &Prover,
+    env: ExecutorEnv,
+    guest_elf: &[u8],
+) -> Result<(Vec<u8>, Vec<u8>), HostError> {
+    let result = prover
+        .prove(env, guest_elf)
+        .map_err(|err| HostError::Prover(err.to_string()))?;
 
-        let seal: Seal = EncodableReceipt::from(result.receipt.clone()).try_into()?;
+    let seal: Seal = EncodableReceipt::from(result.receipt.clone()).try_into()?;
 
-        Ok((seal.abi_encode(), result.receipt.journal.bytes))
-    }
+    Ok((seal.abi_encode(), result.receipt.journal.bytes))
+}
 
-    fn build_executor_env(input: impl Serialize) -> anyhow::Result<ExecutorEnv<'static>> {
-        ExecutorEnv::builder().write(&input)?.build()
-    }
+fn build_executor_env(input: impl Serialize) -> anyhow::Result<ExecutorEnv<'static>> {
+    ExecutorEnv::builder().write(&input)?.build()
 }
 
 #[cfg(test)]
@@ -149,7 +149,7 @@ mod test {
         let prover = Prover::default();
         let env = ExecutorEnv::default();
         let invalid_guest_elf = &[];
-        let res = Host::<EthersProvider<EthersClient>>::prove(&prover, env, invalid_guest_elf);
+        let res = prove(&prover, env, invalid_guest_elf);
 
         assert!(matches!(
             res.map(|_| ()).unwrap_err(),
@@ -161,7 +161,7 @@ mod test {
     fn host_prove_invalid_input() {
         let prover = Prover::default();
         let env = ExecutorEnv::default();
-        let res = Host::<EthersProvider<EthersClient>>::prove(&prover, env, RISC0_CALL_GUEST_ELF);
+        let res = prove(&prover, env, RISC0_CALL_GUEST_ELF);
 
         assert!(matches!(
             res.map(|_| ()).unwrap_err(),

@@ -28,23 +28,22 @@ impl Host {
     pub fn run(self) -> Result<HostOutput, HostError> {
         let input = Input {};
 
-        let env = Self::build_executor_env(input)
+        let env = build_executor_env(input)
             .map_err(|err| HostError::ExecutorEnvBuilder(err.to_string()))?;
-        let ProveInfo { receipt, .. } =
-            Self::prove(&self.prover, env, RISC0_PROVE_CHAIN_GUEST_ELF)?;
+        let ProveInfo { receipt, .. } = prove(&self.prover, env, RISC0_PROVE_CHAIN_GUEST_ELF)?;
 
         Ok(HostOutput { receipt })
     }
+}
 
-    fn prove(prover: &Prover, env: ExecutorEnv, guest_elf: &[u8]) -> Result<ProveInfo, HostError> {
-        prover
-            .prove(env, guest_elf)
-            .map_err(|err| HostError::Prover(err.to_string()))
-    }
+fn prove(prover: &Prover, env: ExecutorEnv, guest_elf: &[u8]) -> Result<ProveInfo, HostError> {
+    prover
+        .prove(env, guest_elf)
+        .map_err(|err| HostError::Prover(err.to_string()))
+}
 
-    fn build_executor_env(input: impl Serialize) -> anyhow::Result<ExecutorEnv<'static>> {
-        ExecutorEnv::builder().write(&input)?.build()
-    }
+fn build_executor_env(input: impl Serialize) -> anyhow::Result<ExecutorEnv<'static>> {
+    ExecutorEnv::builder().write(&input)?.build()
 }
 
 #[cfg(test)]
@@ -56,7 +55,7 @@ mod test {
         let prover = Prover::default();
         let env = ExecutorEnv::default();
         let invalid_guest_elf = &[];
-        let res = Host::prove(&prover, env, invalid_guest_elf);
+        let res = prove(&prover, env, invalid_guest_elf);
 
         assert!(matches!(
             res.map(|_| ()).unwrap_err(),
