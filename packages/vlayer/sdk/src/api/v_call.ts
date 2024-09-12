@@ -19,7 +19,18 @@ export interface Proof {
     mode: number;
   };
   numberOfDynamicParams: bigint;
-  dynamicParamsOffsets: [bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint, bigint];
+  dynamicParamsOffsets: [
+    bigint,
+    bigint,
+    bigint,
+    bigint,
+    bigint,
+    bigint,
+    bigint,
+    bigint,
+    bigint,
+    bigint,
+  ];
   commitment: {
     proverContractAddress: Address;
     functionSelector: Hex;
