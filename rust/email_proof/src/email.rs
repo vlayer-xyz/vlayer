@@ -55,7 +55,7 @@ mod test {
             email.push_str(&format!("{}: {}\n", key, value));
         }
         if !body.is_empty() {
-            email.push_str("\n");
+            email.push('\n');
             email.push_str(body);
         }
         email
