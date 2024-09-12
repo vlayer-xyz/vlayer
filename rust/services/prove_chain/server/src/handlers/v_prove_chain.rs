@@ -50,7 +50,7 @@ pub async fn v_prove_chain(
     };
     let HostOutput { receipt } = Host::new(config)?.run()?;
 
-    Ok(receipt.try_into()?)
+    receipt.try_into()
 }
 
 #[cfg(test)]
