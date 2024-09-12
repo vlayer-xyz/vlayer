@@ -24,6 +24,5 @@ contract EmailProverTest is VTest {
         Email memory email = wrapper.verify(emailProof);
         assertEq(email.from, "vitalik@gmail.com");
         assertEq(email.body, "THIS IS BODY");
-        assertEq(email.date, 1565848477);
     }
 }

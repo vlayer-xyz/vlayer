@@ -11,10 +11,9 @@ pub(crate) use private::Email as SolEmail;
 impl From<Email> for SolEmail {
     fn from(email: Email) -> SolEmail {
         SolEmail {
-            from: email.from.unwrap_or_default(),
-            to: email.to.unwrap_or_default(),
+            from: email.from,
+            to: email.to,
             subject: email.subject.unwrap_or_default(),
-            date: email.date.map(|d| d.timestamp()).unwrap_or_default() as u64,
             body: email.body,
         }
     }

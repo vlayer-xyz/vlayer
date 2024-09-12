@@ -10,7 +10,6 @@ struct Email {
     string to;
     string subject;
     string body;
-    uint64 date;
 }
 
 library EmailProofLib {
