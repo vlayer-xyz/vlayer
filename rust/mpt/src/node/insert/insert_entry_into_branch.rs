@@ -16,6 +16,7 @@ impl Node {
             if branch_value.is_some() {
                 return Err(NodeError::DuplicateKey);
             }
+            // ![Entry key empty](../../../images/into_branch_0.png)
             return Ok(Node::Branch(children, Some(entry.value)));
         }
 
@@ -30,6 +31,9 @@ impl Node {
 }
 
 fn insert_entry_into_child(child: Option<Box<Node>>, entry: Entry) -> Result<Node, NodeError> {
+    // Depending on the child node, either insert the entry into the child node or create a new child node
+    // ![Into existing child](../../../images/into_branch_1.png)
+    // ![Into empty child](../../../images/into_branch_2.png)
     match child {
         Some(existing_child) => existing_child.insert(&*entry.key, entry.value),
         None => Ok(entry.into()),
