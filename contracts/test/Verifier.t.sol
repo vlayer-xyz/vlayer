@@ -50,6 +50,15 @@ contract ExampleVerifier is Verifier {
     {
         return value;
     }
+
+    function verifyWithString(Proof calldata, string calldata value)
+        external
+        view
+        onlyVerified(PROVER, SIMPLE_PROVER_SELECTOR)
+        returns (string memory)
+    {
+        return value;
+    }
 }
 
 contract Verifier_OnlyVerified_Modifier_Tests is Test {
@@ -102,5 +111,28 @@ contract Verifier_OnlyVerified_Modifier_Tests is Test {
 
         assertEq(exampleVerifier.verifySomethingElse(proof, true), true);
         assertEq(exampleVerifier.verifySomethingElse(proof, false), false);
+    }
+
+    function test_journaledStringParam() public view {
+        string memory userParam = "abc";
+        (Proof memory proof,) = helpers.createProof(commitment, userParam);
+
+        assertEq(exampleVerifier.verifyWithString(proof, userParam), userParam);
+    }
+
+    function test_functionCanHaveNonJournaledStringParams() public view {
+        (Proof memory proof,) = helpers.createProof(commitment);
+
+        assertEq(exampleVerifier.verifyWithString(proof, "xyz"), "xyz");
+    }
+
+    function test_journaledStringParamCannotBeChanged() public {
+        string memory value = "abc";
+        (Proof memory proof,) = helpers.createProof(commitment, value);
+
+        value = "def";
+
+        vm.expectRevert(VerificationFailed.selector);
+        exampleVerifier.verifyWithString(proof, value);
     }
 }

@@ -13,5 +13,5 @@ contract WebProofVerifier is Verifier {
         prover = _prover;
     }
 
-    function verify(Proof calldata, bool) public onlyVerified(prover, WebProofProver.main.selector) {}
+    function verify(Proof calldata, string calldata) public onlyVerified(prover, WebProofProver.main.selector) {}
 }

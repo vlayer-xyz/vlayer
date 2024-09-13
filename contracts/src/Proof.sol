@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {ExecutionCommitment} from "./ExecutionCommitment.sol";
+import {ExecutionCommitment, ExecutionCommitmentLib} from "./ExecutionCommitment.sol";
 
 import {Seal, SealLib} from "./Seal.sol";
 
@@ -25,4 +25,8 @@ library ProofLib {
 
     uint256 public constant COMMITMENT_OFFSET =
         LENGTH_LEN + SealLib.SEAL_ENCODING_LENGTH + NUMBER_OF_DYNAMIC_PARAMS_LEN + DYNAMIC_PARAMS_OFFSETS_LEN;
+
+    uint256 public constant PROOF_ENCODING_LENGTH = LENGTH_LEN + SealLib.SEAL_ENCODING_LENGTH
+        + NUMBER_OF_DYNAMIC_PARAMS_LEN + DYNAMIC_PARAMS_OFFSETS_LEN
+        + ExecutionCommitmentLib.EXECUTION_COMMITMENT_ENCODING_LENGTH;
 }
