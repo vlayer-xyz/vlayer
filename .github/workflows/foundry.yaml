@@ -1,0 +1,54 @@
+name: Forge test
+
+on:
+  push:
+    paths:
+      - 'bash/**'
+      - 'contracts/**'
+      - 'examples/**'
+      - '.github/workflows/**'
+    branches:
+      - '**'
+  merge_group:
+
+env:
+  FOUNDRY_PROFILE: ci
+
+jobs:
+  forge-test:
+    strategy:
+      fail-fast: true
+
+    name: Foundry project
+    runs-on: aws-linux-small
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly-d75318c9c7a1c6af5404fe96f63ca890dcdd588d # 2024-09-05
+
+      - name: Mock ImageId.sol
+        run: ./bash/mock-imageid.sh
+
+      - name: Run Forge build
+        working-directory: ./contracts
+        run: |
+          forge --version
+
+          forge soldeer install
+          forge build --sizes
+
+      - name: Run Forge tests
+        working-directory: ./contracts
+        run: |
+          forge test -vvv
+      - name: Run Forge formatter (examples)
+        run: |
+          forge fmt ./examples --check
+      - name: Run Forge formatter (vlayer contracts)
+        run: |
+          forge fmt ./contracts/src --check

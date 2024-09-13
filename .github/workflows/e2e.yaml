@@ -1,0 +1,68 @@
+name: End-to-end integration test
+
+on:
+  push:
+    paths:
+      - "rust-toolchain.toml"
+      - "rust/**"
+      - "examples/**"
+      - "packages/vlayer/**"
+      - "bash/**"
+      - ".github/workflows/**"
+
+jobs:
+  e2e-test:
+    runs-on: aws-linux-medium
+    steps:
+      - uses: oven-sh/setup-bun@v2
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache-workspaces: |
+            rust
+            rust/services/call/guest_wrapper/risc0_guest
+            rust/services/prove_chain/guest_wrapper/risc0_guest
+
+      - uses: cargo-bins/cargo-binstall@main
+
+      - name: Install risc0 toolchain
+        run: |
+          cargo binstall -y cargo-risczero@1.0.5 --force
+          cargo risczero install
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly-d75318c9c7a1c6af5404fe96f63ca890dcdd588d # 2024-09-05
+          
+      - name: Check clang and LLVM version
+        env:
+          EXPECTED_LLVM_VERSION: "18.1"
+        run: bash/check_llvm_clang.sh
+
+      - name: Install contracts' dependencies
+        working-directory: ./contracts
+        run: forge soldeer install
+        
+      - name: Run e2e test
+        env:
+          PROVING_MODE: ${{ github.ref == 'refs/heads/main' && 'prod' || 'dev' }}
+          BONSAI_API_URL: ${{ vars.BONSAI_API_URL }}
+          BONSAI_API_KEY: ${{ secrets.BONSAI_API_KEY }}
+          VLAYER_TMP_DIR: ./artifacts
+        run: bash/e2e-test.sh
+
+      # Teardown
+      - name: Display Logs
+        if: always()
+        run: |
+          for log_file in $(find ./artifacts/logs -type f); do
+            echo "=== Contents of $log_file ==="
+            cat "$log_file"
+            echo "============================="
+          done
