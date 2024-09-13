@@ -98,7 +98,7 @@ where
 
         let env = build_executor_env(input)
             .map_err(|err| HostError::ExecutorEnvBuilder(err.to_string()))?;
-        let (seal, raw_guest_output) = prove(&self.prover, env, RISC0_CALL_GUEST_ELF)?;
+        let (seal, raw_guest_output) = provably_execute(&self.prover, env, RISC0_CALL_GUEST_ELF)?;
 
         let proof_len = raw_guest_output.len();
         let guest_output = GuestOutput::from_outputs(&host_output, &raw_guest_output)?;
@@ -119,7 +119,7 @@ where
     }
 }
 
-fn prove(
+fn provably_execute(
     prover: &Prover,
     env: ExecutorEnv,
     guest_elf: &[u8],
@@ -145,11 +145,11 @@ mod test {
     use host_utils::ProofMode;
 
     #[test]
-    fn host_prove_invalid_guest_elf() {
+    fn host_provably_execute_invalid_guest_elf() {
         let prover = Prover::default();
         let env = ExecutorEnv::default();
         let invalid_guest_elf = &[];
-        let res = prove(&prover, env, invalid_guest_elf);
+        let res = provably_execute(&prover, env, invalid_guest_elf);
 
         assert!(matches!(
             res.map(|_| ()).unwrap_err(),
@@ -158,10 +158,10 @@ mod test {
     }
 
     #[test]
-    fn host_prove_invalid_input() {
+    fn host_provably_execute_invalid_input() {
         let prover = Prover::default();
         let env = ExecutorEnv::default();
-        let res = prove(&prover, env, RISC0_CALL_GUEST_ELF);
+        let res = provably_execute(&prover, env, RISC0_CALL_GUEST_ELF);
 
         assert!(matches!(
             res.map(|_| ()).unwrap_err(),

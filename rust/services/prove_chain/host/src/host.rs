@@ -30,13 +30,18 @@ impl Host {
 
         let env = build_executor_env(input)
             .map_err(|err| HostError::ExecutorEnvBuilder(err.to_string()))?;
-        let ProveInfo { receipt, .. } = prove(&self.prover, env, RISC0_PROVE_CHAIN_GUEST_ELF)?;
+        let ProveInfo { receipt, .. } =
+            provably_execute(&self.prover, env, RISC0_PROVE_CHAIN_GUEST_ELF)?;
 
         Ok(HostOutput { receipt })
     }
 }
 
-fn prove(prover: &Prover, env: ExecutorEnv, guest_elf: &[u8]) -> Result<ProveInfo, HostError> {
+fn provably_execute(
+    prover: &Prover,
+    env: ExecutorEnv,
+    guest_elf: &[u8],
+) -> Result<ProveInfo, HostError> {
     prover
         .prove(env, guest_elf)
         .map_err(|err| HostError::Prover(err.to_string()))
@@ -55,7 +60,7 @@ mod test {
         let prover = Prover::default();
         let env = ExecutorEnv::default();
         let invalid_guest_elf = &[];
-        let res = prove(&prover, env, invalid_guest_elf);
+        let res = provably_execute(&prover, env, invalid_guest_elf);
 
         assert!(matches!(
             res.map(|_| ()).unwrap_err(),
