@@ -1,6 +1,5 @@
-#[derive(Default, Copy, Clone)]
-pub enum ProofMode {
-    #[default]
-    Fake,
-    Groth16,
-}
+mod config;
+mod prover;
+
+pub use config::ProofMode;
+pub use prover::Prover;

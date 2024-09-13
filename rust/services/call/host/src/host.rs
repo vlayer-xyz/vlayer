@@ -9,19 +9,18 @@ use alloy_primitives::ChainId;
 use alloy_sol_types::SolValue;
 use call_engine::engine::Engine;
 use call_engine::evm::env::{cached::CachedEvmEnv, location::ExecutionLocation};
-use call_engine::evm::input::MultiEvmInput;
 use call_engine::io::{Call, GuestOutput, HostOutput, Input};
 use call_engine::Seal;
 use call_guest_wrapper::RISC0_CALL_GUEST_ELF;
 use config::HostConfig;
 use error::HostError;
 use ethers_core::types::BlockNumber;
-use prover::Prover;
+use host_utils::Prover;
 use risc0_zkvm::ExecutorEnv;
+use serde::Serialize;
 
 pub mod config;
 pub mod error;
-mod prover;
 
 pub struct Host<P: BlockingProvider> {
     start_execution_location: ExecutionLocation,
@@ -60,7 +59,7 @@ where
         let block_number = get_block_number(&providers, config.start_chain_id)?;
         let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
         let start_execution_location = ExecutionLocation::new(block_number, config.start_chain_id);
-        let prover = Prover::new(&config);
+        let prover = Prover::new(config.proof_mode);
 
         Ok(Host {
             envs,
@@ -77,7 +76,7 @@ where
         let providers = CachedMultiProvider::new(provider_factory);
         let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
         let start_execution_location = ExecutionLocation::new(block_number, config.start_chain_id);
-        let prover = Prover::new(&config);
+        let prover = Prover::new(config.proof_mode);
 
         Ok(Host {
             envs,
@@ -91,8 +90,15 @@ where
 
         let multi_evm_input =
             into_multi_input(self.envs).map_err(|err| HostError::CreatingInput(err.to_string()))?;
-        let env = Self::build_executor_env(self.start_execution_location, multi_evm_input, call)?;
-        let (seal, raw_guest_output) = Self::prove(&self.prover, env, RISC0_CALL_GUEST_ELF)?;
+        let input = Input {
+            call,
+            multi_evm_input,
+            start_execution_location: self.start_execution_location,
+        };
+
+        let env = build_executor_env(input)
+            .map_err(|err| HostError::ExecutorEnvBuilder(err.to_string()))?;
+        let (seal, raw_guest_output) = provably_execute(&self.prover, env, RISC0_CALL_GUEST_ELF)?;
 
         let proof_len = raw_guest_output.len();
         let guest_output = GuestOutput::from_outputs(&host_output, &raw_guest_output)?;
@@ -111,36 +117,77 @@ where
             proof_len,
         })
     }
+}
 
-    fn prove(
-        prover: &Prover,
-        env: ExecutorEnv,
-        guest_elf: &[u8],
-    ) -> Result<(Vec<u8>, Vec<u8>), HostError> {
-        let result = prover
-            .prove(env, guest_elf)
-            .map_err(|err| HostError::Prover(err.to_string()))?;
+fn provably_execute(
+    prover: &Prover,
+    env: ExecutorEnv,
+    guest_elf: &[u8],
+) -> Result<(Vec<u8>, Vec<u8>), HostError> {
+    let result = prover
+        .prove(env, guest_elf)
+        .map_err(|err| HostError::Prover(err.to_string()))?;
 
-        let seal: Seal = EncodableReceipt::from(result.receipt.clone()).try_into()?;
+    let seal: Seal = EncodableReceipt::from(result.receipt.clone()).try_into()?;
 
-        Ok((seal.abi_encode(), result.receipt.journal.bytes))
+    Ok((seal.abi_encode(), result.receipt.journal.bytes))
+}
+
+fn build_executor_env(input: impl Serialize) -> anyhow::Result<ExecutorEnv<'static>> {
+    ExecutorEnv::builder().write(&input)?.build()
+}
+
+#[cfg(test)]
+mod test {
+    use super::*;
+
+    use call_engine::config::TEST_CHAIN_ID_1;
+    use host_utils::ProofMode;
+
+    #[test]
+    fn host_provably_execute_invalid_guest_elf() {
+        let prover = Prover::default();
+        let env = ExecutorEnv::default();
+        let invalid_guest_elf = &[];
+        let res = provably_execute(&prover, env, invalid_guest_elf);
+
+        assert!(matches!(
+            res.map(|_| ()).unwrap_err(),
+            HostError::Prover(ref msg) if msg == "Elf parse error: Could not read bytes in range [0x0, 0x10)"
+        ));
     }
 
-    fn build_executor_env(
-        start_execution_location: ExecutionLocation,
-        multi_evm_input: MultiEvmInput,
-        call: Call,
-    ) -> Result<ExecutorEnv<'static>, HostError> {
-        let input = Input {
-            call,
-            multi_evm_input,
-            start_execution_location,
+    #[test]
+    fn host_provably_execute_invalid_input() {
+        let prover = Prover::default();
+        let env = ExecutorEnv::default();
+        let res = provably_execute(&prover, env, RISC0_CALL_GUEST_ELF);
+
+        assert!(matches!(
+            res.map(|_| ()).unwrap_err(),
+            HostError::Prover(ref msg) if msg == "Guest panicked: called `Result::unwrap()` on an `Err` value: DeserializeUnexpectedEnd"
+        ));
+    }
+
+    #[test]
+    fn try_new_invalid_rpc_url() -> anyhow::Result<()> {
+        let rpc_urls = [(TEST_CHAIN_ID_1, "http://localhost:123/".to_string())]
+            .into_iter()
+            .collect();
+        let config = HostConfig {
+            rpc_urls,
+            start_chain_id: TEST_CHAIN_ID_1,
+            proof_mode: ProofMode::Fake,
         };
-        let env = ExecutorEnv::builder()
-            .write(&input)
-            .map_err(|err| HostError::ExecutorEnvBuilder(err.to_string()))?
-            .build()
-            .map_err(|err| HostError::ExecutorEnvBuilder(err.to_string()))?;
-        Ok(env)
+        let res = Host::try_new(config);
+
+        assert!(matches!(
+            res.map(|_| ()).unwrap_err(),
+            HostError::Provider(ref msg) if msg.to_string().contains(
+                "Error fetching block header"
+            )
+        ));
+
+        Ok(())
     }
 }

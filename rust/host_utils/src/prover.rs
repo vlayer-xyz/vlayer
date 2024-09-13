@@ -1,20 +1,17 @@
+use crate::ProofMode;
 use anyhow::Result;
 use risc0_zkvm::{
     BonsaiProver, ExecutorEnv, ExternalProver, ProveInfo, Prover as ProverTrait, ProverOpts,
 };
 
-use super::config::HostConfig;
-use host_utils::ProofMode;
-
-pub(super) struct Prover {
+#[derive(Debug, Default, Clone, Copy)]
+pub struct Prover {
     mode: ProofMode,
 }
 
 impl Prover {
-    pub fn new(config: &HostConfig) -> Self {
-        Prover {
-            mode: config.proof_mode,
-        }
+    pub fn new(mode: ProofMode) -> Self {
+        Prover { mode }
     }
 
     pub fn prove(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<ProveInfo> {
