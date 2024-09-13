@@ -2,9 +2,6 @@ name: Release binaries
 on: 
   schedule:
     - cron: '0 22 * * 1-5' # Mon-Fri at 22:00 UTC
-  push:
-    branches:
-      - release-contracts
 
 jobs:
   build-release:
