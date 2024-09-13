@@ -20,7 +20,7 @@ contract ProverTest is VTest {
     }
 
     function test_ChainId() public view {
-        assertEq(block.chainid, 55511555);
+        assertEq(block.chainid, 100001);
     }
 
     function test_sumDoesNotRevertWithCallProver() public {

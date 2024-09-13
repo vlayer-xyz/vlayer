@@ -9,8 +9,10 @@ use std::collections::HashMap;
 
 use crate::{eip1559::Eip1559Constants, fork::ForkCondition, spec::ChainSpec};
 
-pub const TEST_CHAIN_ID_1: ChainId = 55511555;
-pub const TEST_CHAIN_ID_2: ChainId = 1114;
+// Some unique chain ids for testing
+pub const TEST_CHAIN_ID_1: ChainId = 100001;
+pub const TEST_CHAIN_ID_2: ChainId = 100002;
+
 pub const MAINNET_MERGE_BLOCK_NUMBER: u64 = 15537394;
 
 pub static CHAIN_MAP: Lazy<HashMap<ChainId, &'static Lazy<ChainSpec>>> = Lazy::new(|| {

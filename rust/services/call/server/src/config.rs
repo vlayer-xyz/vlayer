@@ -13,12 +13,12 @@ pub struct ServerConfig {
 
 impl Default for ServerConfig {
     fn default() -> Self {
-        let anvil1_url = "http://localhost:8545";
-        let anvil2_url = "http://localhost:8546";
+        let anvil_1_url = "http://localhost:8545";
+        let anvil_2_url = "http://localhost:8546";
         Self {
             rpc_urls: HashMap::from([
-                (TEST_CHAIN_ID_1, anvil1_url.to_string()),
-                (TEST_CHAIN_ID_2, anvil2_url.to_string()),
+                (TEST_CHAIN_ID_1, anvil_1_url.to_string()),
+                (TEST_CHAIN_ID_2, anvil_2_url.to_string()),
             ]),
             port: 3000,
             proof_mode: ProofMode::Groth16,

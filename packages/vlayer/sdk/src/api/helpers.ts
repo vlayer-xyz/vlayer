@@ -16,8 +16,8 @@ import { foundry } from "viem/chains";
 
 import type { ContractSpec, ContractArg } from "./prover";
 
-export const testChainId1 = 55511555;
-export const testChainId2 = 1114;
+export const testChainId1 = 100001;
+export const testChainId2 = 100002;
 
 const rpcUrls: Map<number, HttpTransport> = new Map([
   [testChainId1, http()],

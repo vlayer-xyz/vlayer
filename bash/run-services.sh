@@ -55,8 +55,8 @@ function startup_vlayer(){
     BONSAI_API_KEY="${BONSAI_API_KEY}" \
     cargo run --bin vlayer serve \
         --proof "${proof_arg}" \
-        --rpc-url 1114:http://localhost:8546 \
-        --rpc-url 55511555:http://localhost:8545 \
+        --rpc-url 100002:http://localhost:8546 \
+        --rpc-url 100001:http://localhost:8545 \
         --rpc-url 1:https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY} \
         --rpc-url 8453:https://base-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY} \
         --rpc-url 10:https://opt-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY} \
