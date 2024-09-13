@@ -2,16 +2,16 @@
 
 vlayer introduces new super powers to Solidity smart contracts:
 
+- **[Web proof](/features/web.html)**: Access verified web content, including APIs and websites.
+- **[Email proof](/features/email.html)**: Access verified email content.
 - **[Time Travel](/features/time-travel.html)**: Execute a smart contract on historical data.
 - **[Teleport](/features/teleport.html)**: Execute a smart contract across different blockchain networks.
-- **[Emails](/features/email.html)**: Access verified email content.
-- **[Web](/features/web.html)**: Access verified web content, including APIs and websites."
 
 ## Prover and Verifier
 
 To implement the above features, vlayer introduces two new contract types: `Prover` and `Verifier`. 
 
-The `Prover` code runs on the vlayer zkEVM infrastructure. Proof data structure is the result of this operation.
+The `Prover` code runs on the [vlayer zkEVM infrastructure](/appendix/architecture/prover.html). Proof data structure is the result of this operation.
 
 The `Verifier` verifies generated proof and runs your code on EVM-compatible chains.
 
