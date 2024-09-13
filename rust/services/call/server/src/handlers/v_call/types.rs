@@ -56,6 +56,8 @@ impl CallResult {
                     "seal": self.proof.seal.seal,
                     "mode": Into::<u8>::into(self.proof.seal.mode),
                 },
+                "numberOfDynamicParams": self.proof.numberOfDynamicParams,
+                "dynamicParamsOffsets": self.proof.dynamicParamsOffsets,
                 "commitment": {
                     "functionSelector": self.proof.commitment.functionSelector,
                     "proverContractAddress": self.proof.commitment.proverContractAddress,
@@ -78,9 +80,12 @@ impl TryFrom<HostOutput> for CallResult {
             ..
         } = host_output;
         let proof = Proof {
-            seal: decode_seal(seal)?,
-            commitment: guest_output.execution_commitment,
             length: U256::from(proof_len),
+            seal: decode_seal(seal)?,
+            // Intentionally set to 0. These fields will be updated with the correct values by the prover script, based on the verifier ABI.
+            numberOfDynamicParams: 0_u16,
+            dynamicParamsOffsets: [0_u16; 10],
+            commitment: guest_output.execution_commitment,
         };
         Ok(Self {
             proof,

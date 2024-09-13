@@ -91,8 +91,10 @@ impl CheatcodeInspector {
             .unwrap_or_else(|_| panic!("Failed to decode seal: {:x?}", host_output.seal));
 
         Proof {
-            seal: decoded_seal,
             length: U256::from(host_output.proof_len),
+            seal: decoded_seal,
+            numberOfDynamicParams: 0_u16,
+            dynamicParamsOffsets: [0_u16; 10],
             commitment,
         }
     }

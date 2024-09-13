@@ -18,6 +18,19 @@ export interface Proof {
     seal: [Hex, Hex, Hex, Hex, Hex, Hex, Hex, Hex];
     mode: number;
   };
+  numberOfDynamicParams: bigint;
+  dynamicParamsOffsets: [
+    bigint,
+    bigint,
+    bigint,
+    bigint,
+    bigint,
+    bigint,
+    bigint,
+    bigint,
+    bigint,
+    bigint,
+  ];
   commitment: {
     proverContractAddress: Address;
     functionSelector: Hex;
