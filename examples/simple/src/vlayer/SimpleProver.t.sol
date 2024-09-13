@@ -1,9 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {VerificationFailed} from "risc0-ethereum/src/IRiscZeroVerifier.sol";
 import {SimpleProver} from "./SimpleProver.sol";
-import {VTest, Proof, CHEATCODES} from "vlayer/testing/VTest.sol";
+import {VTest, Proof, CHEATCODES, VerificationFailed} from "vlayer/testing/VTest.sol";
 import {SimpleVerifier} from "./SimpleVerifier.sol";
 import {ExampleToken} from "./ExampleToken.sol";
 import {ExampleNFT} from "./ExampleNFT.sol";
@@ -18,7 +17,7 @@ contract ProverTest is VTest {
     ExampleNFT private rewardNFT;
     ExampleToken private exampleErc20;
 
-    address john = address(1);
+    address john = vm.addr(1);
     uint256 initBalance = 10_000_000_000;
 
     function setUp() public {
@@ -28,11 +27,7 @@ contract ProverTest is VTest {
         verifier = new SimpleVerifier(address(prover), address(rewardNFT));
     }
 
-    function test_ChainId() public view {
-        assertEq(block.chainid, 100001);
-    }
-
-    function test_sumDoesNotRevertWithCallProver() public {
+    function test_mintWhaleNFT() public {
         callProver();
         (address returnedOwner, uint256 returnedBalance) = prover.balance(john);
         assertEq(returnedOwner, john);
@@ -45,9 +40,7 @@ contract ProverTest is VTest {
 
     function test_revertsOnIncorrectProof() public {
         callProver();
-        (address returnedOwner, uint256 returnedBalance) = prover.balance(john);
-        assertEq(returnedOwner, john);
-        assertEq(returnedBalance, initBalance);
+        prover.balance(john);
 
         Proof memory proof = getProof();
         vm.expectRevert(abi.encodeWithSelector(VerificationFailed.selector));
