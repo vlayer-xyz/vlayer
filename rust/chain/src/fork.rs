@@ -10,7 +10,7 @@ pub enum ForkCondition {
     Timestamp(u64),
     /// The fork is never activated
     #[default]
-    TBD,
+    Tbd,
 }
 
 impl ForkCondition {
@@ -19,7 +19,7 @@ impl ForkCondition {
         match self {
             ForkCondition::Block(block) => *block <= block_number,
             ForkCondition::Timestamp(ts) => *ts <= timestamp,
-            ForkCondition::TBD => false,
+            ForkCondition::Tbd => false,
         }
     }
 }

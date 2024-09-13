@@ -2,11 +2,11 @@ use alloy_primitives::{
     Address, BlockNumber, Bytes, ChainId, StorageKey, StorageValue, TxNumber, U256,
 };
 use call_engine::block_header::EvmBlockHeader;
-use call_engine::config::{CHAIN_NAMES, TEST_CHAIN_ID_1};
 use call_host::host::error::HostError;
 use call_host::proof::EIP1186Proof;
 use call_host::provider::factory::{EthersProviderFactory, ProviderFactory};
 use call_host::provider::{BlockingProvider, EthersClient, EthersProvider};
+use chain::{CHAIN_NAMES, TEST_CHAIN_ID_1};
 use ethers_core::types::BlockNumber as BlockTag;
 use foundry_config::RpcEndpoints;
 use std::collections::HashMap;

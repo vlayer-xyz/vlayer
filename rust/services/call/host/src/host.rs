@@ -141,7 +141,7 @@ fn build_executor_env(input: impl Serialize) -> anyhow::Result<ExecutorEnv<'stat
 mod test {
     use super::*;
 
-    use call_engine::config::TEST_CHAIN_ID_1;
+    use chain::TEST_CHAIN_ID_1;
     use host_utils::ProofMode;
 
     #[test]

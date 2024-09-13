@@ -13,3 +13,4 @@ mpt = { workspace = true }
 as-any = { workspace = true }
 anyhow = { workspace = true }
 revm = { workspace = true }
+chain = { workspace = true }

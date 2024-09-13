@@ -23,6 +23,7 @@ call_host = { workspace = true }
 alloy-chains = { workspace = true }
 web_proof = { workspace = true }
 server_utils = { workspace = true }
+chain = { workspace = true }
 
 [dev-dependencies]
 reqwest = { workspace = true }

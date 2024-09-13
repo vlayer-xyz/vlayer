@@ -50,9 +50,9 @@ mod multi_evm_env_from_input {
     use as_any::Downcast;
     use call_engine::{
         block_header::eth::EthBlockHeader,
-        config::MAINNET_MERGE_BLOCK_NUMBER,
         evm::{env::location::ExecutionLocation, input::EvmInput},
     };
+    use chain::MAINNET_MERGE_BLOCK_NUMBER;
     use mpt::EMPTY_ROOT_HASH;
 
     #[test]
