@@ -5,4 +5,4 @@ mod path;
 mod trie;
 
 pub use alloy_trie::EMPTY_ROOT_HASH;
-pub use trie::MerkleTrie;
+pub use trie::{MPTError, MerkleTrie};

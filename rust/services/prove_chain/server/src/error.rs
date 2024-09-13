@@ -2,6 +2,7 @@ use axum_jrpc::{
     error::{JsonRpcError, JsonRpcErrorReason},
     Value,
 };
+use mpt::MPTError;
 use prove_chain_host::HostError;
 use server_utils::FieldValidationError;
 use thiserror::Error;
@@ -18,6 +19,9 @@ pub enum AppError {
 
     #[error("Bincode error: {0}")]
     Bincode(String),
+
+    #[error("MPT error: {0}")]
+    MPT(#[from] MPTError),
 }
 
 impl From<AppError> for JsonRpcError {
@@ -25,6 +29,7 @@ impl From<AppError> for JsonRpcError {
         match error {
             AppError::Bincode(..)
             | AppError::Host(..)
+            | AppError::MPT(..)
             | AppError::NoBlockHashes
             | AppError::FieldValidation(..) => JsonRpcError::new(
                 JsonRpcErrorReason::InvalidParams,
