@@ -18,12 +18,12 @@ function run_web_app {
     bun run dev &
 }
 
-function run_browser_plugin {
-    cd ${VLAYER_HOME}/packages/browser-plugin
+function run_browser_extension {
+    cd ${VLAYER_HOME}/packages/browser-extension
     bun run dev 
 }
 
 run_services
 deploy_contracts
 run_web_app
-run_browser_plugin
+run_browser_extension

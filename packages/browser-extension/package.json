@@ -6,9 +6,13 @@
   "scripts": {
     "compile": "tsc --noEmit",
     "dev": "vite --port 5173",
-    "build": "vite build"
+    "build": "vite build",
+    "build:watch": "vite build --watch --mode development",
+    "lint:fix" : "eslint --fix ."
   },
   "devDependencies": {
+    "@types/react": "^18.3.5",
+    "@types/react-dom": "^18.3.0",
     "@types/webextension-polyfill": "^0.10.0",
     "typescript": "^5.3.2",
     "vite": "^5.0.0",
@@ -16,6 +20,8 @@
     "webextension-polyfill": "^0.10.0"
   },
   "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
     "tlsn-js": "github:tlsnotary/tlsn-js#v0.1.0-alpha.5.3"
   }
 }
