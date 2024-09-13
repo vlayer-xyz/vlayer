@@ -17,8 +17,8 @@ pub enum CLIError {
     TomlError(String),
     #[error("Project directory not found: {0}")]
     SrcDirNotFound(PathBuf),
-    #[error("Error downloading vlayer contracts: {0}")]
-    DownloadVlayerFilesError(reqwest::Error),
+    #[error("Error downloading vlayer examples: {0}")]
+    DownloadExamplesError(reqwest::Error),
     #[error("Failed initializing Forge: {0}")]
     ForgeInitError(String),
 }

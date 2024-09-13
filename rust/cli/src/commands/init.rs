@@ -1,6 +1,6 @@
 use crate::commands::args::TemplateOption;
 use crate::errors::CLIError;
-use crate::utils::parse_toml::get_src_from_string;
+use crate::utils::parse_toml::{add_deps_to_foundry_toml, get_src_from_string};
 use crate::utils::path::{copy_dir_to, find_foundry_root};
 use flate2::read::GzDecoder;
 use reqwest::get;
@@ -11,8 +11,12 @@ use tar::Archive;
 use tracing::{error, info};
 
 const VLAYER_DIR_NAME: &str = "vlayer";
+const EXAMPLES_URL: &str =
+    "https://vlayer-releases.s3.eu-north-1.amazonaws.com/latest/examples.tar.gz";
 const CONTRACTS_URL: &str =
-    "https://vlayer-releases.s3.eu-north-1.amazonaws.com/latest/contracts.tar.gz";
+    "https://vlayer-releases.s3.eu-north-1.amazonaws.com/latest/contracts.zip";
+
+const VLAYER_PACKAGE: &str = "vlayer~0.1.0-nightly";
 
 pub(crate) async fn init(
     mut cwd: PathBuf,
@@ -54,15 +58,23 @@ pub(crate) async fn init_existing(cwd: PathBuf, template: TemplateOption) -> Res
         )
     } else {
         let scripts_dst = create_vlayer_dir(&root_path)?;
-        let contracts_dst = create_vlayer_dir(&src_path)?;
-        fetch_vlayer_files(&contracts_dst, &scripts_dst, template.to_string()).await?;
+        let examples_dst = create_vlayer_dir(&src_path)?;
+        fetch_examples(&examples_dst, &scripts_dst, template.to_string()).await?;
         info!("Successfully downloaded vlayer template \"{}\"", template);
     }
+
+    add_deps_to_foundry_toml(&root_path)?;
+
+    std::env::set_current_dir(&root_path)?;
+
+    install_contracts()?;
+    info!("Successfully installed vlayer contracts");
+
     Ok(())
 }
 
 fn map_reqwest_error(e: reqwest::Error) -> CLIError {
-    CLIError::DownloadVlayerFilesError(e)
+    CLIError::DownloadExamplesError(e)
 }
 
 fn find_src_path(root_path: &Path) -> Result<PathBuf, CLIError> {
@@ -77,12 +89,12 @@ fn find_src_path(root_path: &Path) -> Result<PathBuf, CLIError> {
     }
 }
 
-async fn fetch_vlayer_files(
-    contracts_dst: &Path,
+async fn fetch_examples(
+    examples_dst: &Path,
     scripts_dst: &Path,
     template: String,
 ) -> Result<(), CLIError> {
-    let response = get(CONTRACTS_URL)
+    let response = get(EXAMPLES_URL)
         .await
         .map_err(map_reqwest_error)?
         .bytes()
@@ -95,10 +107,26 @@ async fn fetch_vlayer_files(
     archive.unpack(temp_dir.path())?;
 
     let downloaded_scripts = temp_dir.path().join(&template).join("vlayer");
-    let downloaded_contracts = temp_dir.path().join(&template).join("src/vlayer");
+    let downloaded_examples = temp_dir.path().join(&template).join("src/vlayer");
 
     copy_dir_to(&downloaded_scripts, scripts_dst)?;
-    copy_dir_to(&downloaded_contracts, contracts_dst)?;
+    copy_dir_to(&downloaded_examples, examples_dst)?;
+
+    Ok(())
+}
+
+fn install_contracts() -> Result<(), CLIError> {
+    let output = std::process::Command::new("forge")
+        .arg("soldeer")
+        .arg("install")
+        .arg(VLAYER_PACKAGE)
+        .arg(CONTRACTS_URL)
+        .output()?;
+
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        return Err(CLIError::ForgeInitError(stderr.to_string()));
+    }
 
     Ok(())
 }
