@@ -4,7 +4,9 @@ pragma solidity ^0.8.13;
 import {VerificationFailed} from "risc0-ethereum/src/IRiscZeroVerifier.sol";
 import {SimpleProver} from "./SimpleProver.sol";
 import {VTest, Proof, CHEATCODES} from "vlayer/testing/VTest.sol";
-import {Simple} from "./SimpleVerifier.sol";
+import {SimpleVerifier} from "./SimpleVerifier.sol";
+import {ExampleToken} from "./ExampleToken.sol";
+import {ExampleNFT} from "./ExampleNFT.sol";
 
 interface IFakeCheatcode {
     function thisCheatCodeDoesNotExist() external returns (bool);
@@ -12,11 +14,18 @@ interface IFakeCheatcode {
 
 contract ProverTest is VTest {
     SimpleProver private prover;
-    Simple private verifier;
+    SimpleVerifier private verifier;
+    ExampleNFT private rewardNFT;
+    ExampleToken private exampleErc20;
+
+    address john = address(1);
+    uint256 initBalance = 10_000_000_000;
 
     function setUp() public {
-        prover = new SimpleProver();
-        verifier = new Simple(address(prover));
+        exampleErc20 = new ExampleToken(john, initBalance);
+        rewardNFT = new ExampleNFT();
+        prover = new SimpleProver(address(exampleErc20));
+        verifier = new SimpleVerifier(address(prover), address(rewardNFT));
     }
 
     function test_ChainId() public view {
@@ -25,34 +34,26 @@ contract ProverTest is VTest {
 
     function test_sumDoesNotRevertWithCallProver() public {
         callProver();
-        assertEq(prover.sum(1, 2), 3);
+        (address returnedOwner, uint256 returnedBalance) = prover.balance(john);
+        assertEq(returnedOwner, john);
+        assertEq(returnedBalance, initBalance);
 
         Proof memory proof = getProof();
-        verifier.updateSum(proof, 3);
-        assertEq(verifier.latestSum(), 3);
-    }
-
-    function test_worksAfterRollingBlock() public {
-        vm.roll(420);
-        callProver();
-        assertEq(prover.sum(420, 69), 489);
-
-        Proof memory proof = getProof();
-        assertEq(proof.commitment.settleBlockNumber, 420);
-
-        verifier.updateSum(proof, 489);
-        assertEq(verifier.latestSum(), 489);
+        verifier.claimWhale(proof, john, initBalance);
+        assertEq(verifier.claimed(john), true);
     }
 
     function test_revertsOnIncorrectProof() public {
         callProver();
-        assertEq(prover.sum(1, 2), 3);
+        (address returnedOwner, uint256 returnedBalance) = prover.balance(john);
+        assertEq(returnedOwner, john);
+        assertEq(returnedBalance, initBalance);
 
         Proof memory proof = getProof();
         vm.expectRevert(abi.encodeWithSelector(VerificationFailed.selector));
-        verifier.updateSum(proof, 4);
+        verifier.claimWhale(proof, john, initBalance);
 
-        assertEq(verifier.latestSum(), 0);
+        assertEq(verifier.claimed(john), false);
     }
 
     // NOTE: vm.expectRevert doesn't work correctly with errors thrown by inspectors, so we check manually

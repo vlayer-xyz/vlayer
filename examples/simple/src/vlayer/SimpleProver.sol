@@ -5,13 +5,13 @@ import {Prover} from "vlayer/Prover.sol";
 import {Balance} from "./Balance.sol";
 
 contract SimpleProver is Balance {
-    address usdc;
+    address immutable tokenAddr;
 
     constructor(address _tokenAddr) {
-        usdc = _tokenAddr;
+        tokenAddr = _tokenAddr;
     }
 
-    function balance(address _owner) public view returns (uint256) {
-        return balanceOf(_owner, usdc);
+    function balance(address _owner) public view returns (address, uint256) {
+        return (_owner, balanceOf(_owner, tokenAddr));
     }
 }

@@ -10,6 +10,7 @@ import {ExampleNFT} from "./ExampleNFT.sol";
 contract SimpleVerifier is Verifier {
     address public prover;
     ExampleNFT public whaleNFT;
+
     mapping(address => bool) public claimed;
 
     constructor(address _prover, address _nft) {
@@ -17,13 +18,13 @@ contract SimpleVerifier is Verifier {
         whaleNFT = ExampleNFT(_nft);
     }
 
-    function claimWhale(Proof calldata, address claimer, uint256 balance) 
-        public 
-        onlyVerified(prover, SimpleProver.balance.selector) 
+    function claimWhale(Proof calldata, address claimer, uint256 balance)
+        public
+        onlyVerified(prover, SimpleProver.balance.selector)
     {
         require(!claimed[claimer], "Already claimed");
 
-        if(balance > 10_000_000) {
+        if (balance > 10_000_000) {
             claimed[claimer] = true;
             whaleNFT.mint(claimer);
         }
