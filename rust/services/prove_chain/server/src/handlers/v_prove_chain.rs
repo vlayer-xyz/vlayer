@@ -6,6 +6,7 @@ use prove_chain_host::{Host, HostConfig, HostOutput};
 use risc0_zkvm::Receipt;
 use serde::{Deserialize, Serialize};
 use serde_json::json;
+use types::ValidatedParams;
 
 use crate::{config::ServerConfig, error::AppError};
 
@@ -42,6 +43,7 @@ pub async fn v_prove_chain(
     config: Arc<ServerConfig>,
     params: Params,
 ) -> Result<ChainProof, AppError> {
+    let params: ValidatedParams = params.try_into()?;
     if params.block_hashes.is_empty() {
         return Err(AppError::NoBlockHashes);
     };
