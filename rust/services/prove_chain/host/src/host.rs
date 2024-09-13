@@ -19,10 +19,10 @@ pub struct HostOutput {
 }
 
 impl Host {
-    pub fn new(config: HostConfig) -> Result<Self, HostError> {
+    pub fn new(config: HostConfig) -> Self {
         let prover = Prover::new(config.proof_mode);
 
-        Ok(Host { prover })
+        Host { prover }
     }
 
     pub fn run(self) -> Result<HostOutput, HostError> {
