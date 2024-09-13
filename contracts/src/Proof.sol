@@ -11,9 +11,10 @@ uint256 constant WORD_SIZE = 32;
 struct Proof {
     uint256 length;
     Seal seal;
-    uint256 numberOfDynamicParams;
+    uint16 numberOfDynamicParams;
     // Using 10 instead of MAX_NUMBER_OF_DYNAMIC_PARAMS due to `sol!` macro not supporting generic expressions in array sizes.
-    uint256[10] dynamicParamsOffsets;
+    // TODO: Optimize space usage by packing values more efficiently
+    uint16[10] dynamicParamsOffsets;
     ExecutionCommitment commitment;
 }
 
