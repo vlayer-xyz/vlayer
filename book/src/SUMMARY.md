@@ -9,8 +9,8 @@
 # Features
 - [Time travel](./features/time-travel.md)
 - [Teleport](./features/teleport.md)
-- [Email proof](./features/email.md)
 - [Web proof](./features/web.md)
+- [Email proof](./features/email.md)
 
 # Advanced
 - [Prover](./advanced/prover.md)
