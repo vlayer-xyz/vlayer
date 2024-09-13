@@ -7,10 +7,10 @@
 - [How it works](./getting-started/how-it-works.md)
 
 # Features
-- [Web proof](./features/web.md)
-- [Email proof](./features/email.md)
 - [Time travel](./features/time-travel.md)
 - [Teleport](./features/teleport.md)
+- [Web proof](./features/web.md)
+- [Email proof](./features/email.md)
 
 # Advanced
 - [Prover](./advanced/prover.md)

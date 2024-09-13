@@ -1,11 +1,10 @@
 # How it works?
 
 vlayer introduces new super powers to Solidity smart contracts:
-
-- **[Web proof](/features/web.html)**: Access verified web content, including APIs and websites.
-- **[Email proof](/features/email.html)**: Access verified email content.
 - **[Time Travel](/features/time-travel.html)**: Execute a smart contract on historical data.
 - **[Teleport](/features/teleport.html)**: Execute a smart contract across different blockchain networks.
+- **[Web proof](/features/web.html)**: Access verified web content, including APIs and websites.
+- **[Email proof](/features/email.html)**: Access verified email content.
 
 ## Prover and Verifier
 
