@@ -2,16 +2,19 @@
 pragma solidity ^0.8.13;
 
 import {Prover} from "vlayer/Prover.sol";
-import {Balance} from "./Balance.sol";
+import {IERC20} from "openzeppelin-contracts/token/ERC20/IERC20.sol";
 
-contract SimpleProver is Balance {
-    address immutable tokenAddr;
+contract SimpleProver is Prover {
+    IERC20 immutable token;
+    uint256 immutable blockNo;
 
-    constructor(address _tokenAddr) {
-        tokenAddr = _tokenAddr;
+    constructor(IERC20 _token, uint256 _blockNo) {
+        token = _token;
+        blockNo = _blockNo;
     }
 
-    function balance(address _owner) public view returns (address, uint256) {
-        return (_owner, balanceOf(_owner, tokenAddr));
+    function balance(address _owner) public returns (address, uint256) {
+        setBlock(blockNo);
+        return (_owner, token.balanceOf(_owner));
     }
 }

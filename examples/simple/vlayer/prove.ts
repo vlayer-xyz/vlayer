@@ -10,8 +10,12 @@ const exampleToken = await testHelpers.deployContract(ExampleToken, [
   john.address,
   10_000_000,
 ]);
+const blockNumber = await testHelpers.client().getBlockNumber();
 const rewardNFT = await testHelpers.deployContract(ExampleNftAbi, []);
-const prover = await testHelpers.deployContract(SimpleProver, [exampleToken]);
+const prover = await testHelpers.deployContract(SimpleProver, [
+  exampleToken,
+  blockNumber,
+]);
 const verifier = await testHelpers.deployContract(SimpleVerifier, [
   prover,
   rewardNFT,

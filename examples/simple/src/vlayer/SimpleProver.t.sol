@@ -23,7 +23,7 @@ contract ProverTest is VTest {
     function setUp() public {
         exampleErc20 = new ExampleToken(john, initBalance);
         rewardNFT = new ExampleNFT();
-        prover = new SimpleProver(address(exampleErc20));
+        prover = new SimpleProver(exampleErc20, vm.getBlockNumber());
         verifier = new SimpleVerifier(address(prover), address(rewardNFT));
     }
 
