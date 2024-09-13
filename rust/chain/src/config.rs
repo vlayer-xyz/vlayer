@@ -21,6 +21,8 @@ pub static CHAIN_MAP: Lazy<HashMap<ChainId, &'static Lazy<ChainSpec>>> = Lazy::n
         (Chain::sepolia().id(), &ETH_SEPOLIA_CHAIN_SPEC),
         (TEST_CHAIN_ID_1, &TESTING_CHAIN_SPEC),
         (TEST_CHAIN_ID_2, &TESTING_CHAIN_SPEC),
+        (Chain::base_mainnet().id(), &TESTING_CHAIN_SPEC),
+        (Chain::optimism_mainnet().id(), &TESTING_CHAIN_SPEC),
     ])
 });
 
