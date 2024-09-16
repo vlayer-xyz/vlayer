@@ -19,12 +19,23 @@
     "sidePanel",
     "storage", 
     "webRequest",
-    "cookies"
+    "cookies",
+    "nativeMessaging",
+    "tabs"
   ],
+  "externally_connectable": {
+    "matches": ["*://localhost/*"]
+  },
   "host_permissions": [
     "*://*/*"
   ],
   "side_panel": {
     "default_path": "src/templates/sidepanel/sidepanel.html"
-  }
+  },
+  "content_scripts": [
+    {
+      "matches": ["*://*/*"],
+      "js": ["src/content.ts"]
+    }
+  ]
 }

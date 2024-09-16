@@ -72,17 +72,18 @@ export default function SidePanel() {
           <Button variant="soft" onClick={() => {
             browser.tabs.create({ url: 'https://x.com' });
           }}> Go to x.com</Button>
-          <Button disabled={hasDataToProve && !isProoving? false : true} variant="soft" onClick={async () => {
+          <Button disabled={ hasDataToProve && !isProoving? false : true} variant="soft" onClick={async () => {
             if ( isProofReady) {
               browser.tabs.create({ url: 'http://localhost:5134' });
             } else {
               setIsProving(true);
+
               try { 
                 const proof = await prove('https://api.x.com/1.1/account/settings.json',
                   {
                     method: 'GET',
-                    notaryUrl: 'http://localhost:7047',
-                    websocketProxyUrl: 'ws://localhost:55689',
+                    notaryUrl: import.meta.env.VITE_NOTARY_URL,
+                    websocketProxyUrl: import.meta.env.VITE_WEBSOCKET_PROXY_URL + '?tokebn=api.x.com',
                     headers: {
                       'x-twitter-client-language': 'en',
                       'x-csrf-token': xCsrftoken,
@@ -101,6 +102,7 @@ export default function SidePanel() {
                 setProof(proof);
                 setIsProofReady(true);
                 setIsProving(false);
+                browser.runtime.sendMessage({ type: "PROOF", proof });
               } catch (e) {
                 console.error("errorwhile making proof", e);
               }
