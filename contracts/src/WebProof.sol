@@ -17,6 +17,8 @@ library WebProofLib {
     address private constant VERIFY_AND_PARSE_PRECOMPILE = address(0x100);
     address private constant JSON_GET_STRING_PRECOMPILE = address(0x101);
 
+    string private constant NOTARY_PUB_KEY = "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExpX/4R4z40gI6C/j9zAM39u58LJu\n3Cx5tXTuqhhu/tirnBi5GniMmspOTEsps4ANnPLpMmMSfhJ+IFHbc3qVOA==\n-----END PUBLIC KEY-----\n";
+
     function verify(WebProof memory webProof, string memory dataUrl) internal view returns (Web memory) {
         (bool success, bytes memory returnData) = VERIFY_AND_PARSE_PRECOMPILE.staticcall(bytes(webProof.webProofJson));
 
@@ -26,6 +28,7 @@ library WebProofLib {
 
         require(success, "verify_and_parse precompile call failed");
         require(dataUrl.equal(data[0]), "Incorrect URL");
+        require(NOTARY_PUB_KEY.equal(data[1]), "Incorrect notary public key");
 
         return web;
     }
