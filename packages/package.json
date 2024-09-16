@@ -17,8 +17,5 @@
     "lint": "eslint .",
     "lint:fix": "eslint . --fix"
   },
-  "type": "module",
-  "workslpaces": [
-    "*"
-  ]
+  "type": "module"
 }

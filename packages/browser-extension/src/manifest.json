@@ -16,7 +16,13 @@
     "{{firefox}}.scripts": ["src/background.ts"]
   },
   "permissions": [
-    "sidePanel"
+    "sidePanel",
+    "storage", 
+    "webRequest",
+    "cookies"
+  ],
+  "host_permissions": [
+    "*://*/*"
   ],
   "side_panel": {
     "default_path": "src/templates/sidepanel/sidepanel.html"

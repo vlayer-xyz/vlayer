@@ -1,9 +1,10 @@
 import React from "react";
 import ReactDOM from "react-dom/client";
-import Popup from "../../pages/Popup";
+import SidePanel from "../../pages/SidePanel";
+import '@radix-ui/themes/styles.css';
 
 ReactDOM.createRoot(document.body).render(
   <React.StrictMode>
-    <Popup />
+    <SidePanel  />
   </React.StrictMode>,
 );
