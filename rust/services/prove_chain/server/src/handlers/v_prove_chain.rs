@@ -1,6 +1,5 @@
 use std::sync::Arc;
 
-use axum_jrpc::Value;
 use mpt::MerkleTrie;
 use serde::{Deserialize, Serialize};
 
@@ -15,12 +14,6 @@ pub struct Params {
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct ChainProof {
     merkle_trie: MerkleTrie,
-}
-
-impl ChainProof {
-    pub fn to_json(&self) -> Value {
-        serde_json::to_value(self).expect("ChainProof to json")
-    }
 }
 
 pub async fn v_prove_chain(
