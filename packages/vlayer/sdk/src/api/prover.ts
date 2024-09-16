@@ -25,6 +25,7 @@ export type ContractArg =
   | number
   | string
   | boolean
+  | bigint
   | Address
   | number[]
   | string[]

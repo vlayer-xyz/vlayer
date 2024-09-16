@@ -5,16 +5,28 @@ import {Proof} from "vlayer/Proof.sol";
 import {Verifier} from "vlayer/Verifier.sol";
 
 import {SimpleProver} from "./SimpleProver.sol";
+import {ExampleNFT} from "./ExampleNFT.sol";
 
-contract Simple is Verifier {
+contract SimpleVerifier is Verifier {
     address public prover;
-    uint256 public latestSum;
+    ExampleNFT public whaleNFT;
 
-    constructor(address _prover) {
+    mapping(address => bool) public claimed;
+
+    constructor(address _prover, address _nft) {
         prover = _prover;
+        whaleNFT = ExampleNFT(_nft);
     }
 
-    function updateSum(Proof calldata, uint256 sum) public onlyVerified(prover, SimpleProver.sum.selector) {
-        latestSum = sum;
+    function claimWhale(Proof calldata, address claimer, uint256 balance)
+        public
+        onlyVerified(prover, SimpleProver.balance.selector)
+    {
+        require(!claimed[claimer], "Already claimed");
+
+        if (balance > 10_000_000) {
+            claimed[claimer] = true;
+            whaleNFT.mint(claimer);
+        }
     }
 }
