@@ -19,3 +19,5 @@ prove_chain_host = { workspace = true}
 risc0-zkvm = { workspace = true }
 bincode = "1.3.3"
 chain = { workspace = true }
+mpt = { workspace = true }
+lazy_static.workspace = true

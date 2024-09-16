@@ -1,4 +1,4 @@
-use crate::{node::Node, trie::MPTError, MerkleTrie};
+use crate::{node::Node, trie::MptError, MerkleTrie};
 
 #[test]
 pub fn empty_key() -> anyhow::Result<()> {
@@ -21,7 +21,7 @@ pub fn duplicate_key() {
     let mut mpt = MerkleTrie(Node::Null);
     mpt.insert([0], [42]).unwrap();
     let result = mpt.insert([0], [43]);
-    assert_eq!(result.unwrap_err(), MPTError::DuplicateKey(Box::from([0])));
+    assert_eq!(result.unwrap_err(), MptError::DuplicateKey(Box::from([0])));
 }
 
 #[test]
