@@ -1,10 +1,11 @@
 import React, { useEffect } from "react";
-import { Button, Theme, Grid } from "@radix-ui/themes";
+import { Button, Theme, Grid, Spinner} from "@radix-ui/themes";
 import browser from "webextension-polyfill";
 import { useLocalStorage } from "@vlayer/extension-hooks"
 
-import { prove } from "tlsn-js"
+import { prove, verify } from "tlsn-js"
 export default function SidePanel() {
+  
 
 
   // cookies 
@@ -16,6 +17,9 @@ export default function SidePanel() {
   const [authorization, setAuthorization] = useLocalStorage("authorization", "");
 
   const [hasDataToProve, setHasDataToProve] = useLocalStorage("hasDataToProve", false);
+  const [ isProoving, setIsProving] = useLocalStorage("isProving", false);
+  const [isProofReady, setIsProofReady] = useLocalStorage("isProofReady", false);
+  const [proof, setProof] = useLocalStorage<any>("proof", "");
   useEffect(() => {
     setHasDataToProve(authToken && ct0 && xCsrftoken && authorization ? true : false);
   }, [authToken, ct0, xCsrftoken, authorization]);
@@ -60,64 +64,67 @@ export default function SidePanel() {
 
 
   return (
-    <Theme accentColor="violet">
-      <img src="/vlayer_logo.svg" />
-      <h1>Vlayer extension</h1>
-      <Grid columns="2" gapY="4" top="8">
-        <Grid columns="1" gapY="4" top="8">
+    <Theme accentColor="violet" hasBackground={true} panelBackground="solid">
+      <Grid columns="8" gapY="4" top="16" style={{marginTop : '80px'}} >
+        <div style={{gridColumn : 'span 1'}}></div>
+        <div style={{gridColumn: 'span 6'}}>
+          <Grid columns="1" gapY="4">
           <Button variant="soft" onClick={() => {
             browser.tabs.create({ url: 'https://x.com' });
           }}> Go to x.com</Button>
-          <Button disabled={hasDataToProve ? false : true} variant="soft" onClick={async () => {
-            console.log("Making proof");
-            try { 
-              const x = await prove('https://api.x.com/1.1/account/settings.json',
-                {
-                  method: 'GET',
-                  notaryUrl: import.meta.env.VITE_NOTARY_URL,
-                  websocketProxyUrl : import.meta.env.VITE_WEBSOCKET_PROXY_URL + "?token=api.x.com",
-                  headers: {
-                    'x-twitter-client-language': 'en',
-                    'x-csrf-token': xCsrftoken,
-                    Host: 'api.x.com',
-                    authorization: authorization,
-                    Cookie: `lang=en; auth_token=${authToken}; ct0=${ct0}`,
-                    'Accept-Encoding': 'identity',
-                    Connection: 'close',
-                  },
-                  secretHeaders: [
-                    `x-csrf-token: ${xCsrftoken}`,
-                    `cookie: lang=en; auth_token=${authToken}; ct0=${ct0}`,
-                    `authorization: ${authorization}`,
-                  ],
-                
-              })              
-              console.log("Proof made",x);
-            } catch (e) {
-              console.error("errorwhile making proof", e);
+          <Button disabled={hasDataToProve && !isProoving? false : true} variant="soft" onClick={async () => {
+            if ( isProofReady) {
+              browser.tabs.create({ url: 'http://localhost:5134' });
+            } else {
+              setIsProving(true);
+              try { 
+                const proof = await prove('https://api.x.com/1.1/account/settings.json',
+                  {
+                    method: 'GET',
+                    notaryUrl: 'http://localhost:7047',
+                    websocketProxyUrl: 'ws://localhost:55689',
+                    headers: {
+                      'x-twitter-client-language': 'en',
+                      'x-csrf-token': xCsrftoken,
+                      Host: 'api.x.com',
+                      authorization: authorization,
+                      Cookie: `lang=en; auth_token=${authToken}; ct0=${ct0}`,
+                      'Accept-Encoding': 'identity',
+                      Connection: 'close',
+                    },
+                    secretHeaders: [
+                      `x-csrf-token: ${xCsrftoken}`,
+                      `cookie: lang=en; auth_token=${authToken}; ct0=${ct0}`,
+                      `authorization: ${authorization}`,
+                    ],
+                })              
+                setProof(proof);
+                setIsProofReady(true);
+                setIsProving(false);
+              } catch (e) {
+                console.error("errorwhile making proof", e);
+              }
             }
+          }}> { isProoving ? <Spinner/> : isProofReady? "Back to home with proove" : "Make Proof"}</Button>
+{/* 
+          <Button disabled={isProofReady ? false : true} variant="soft" onClick={() => {
+            browser.tabs.create({ url: 'http://localhost:5134' });
+          }}> Back to home page</Button> */}
 
-          }}> Make proof</Button>
+          {/* <Button variant="soft" onClick={async () => {
 
-          <Button variant="soft" onClick={async () => {
-             const proof = await prove('https://swapi.dev/api/people/1', {
+             const proof = await prove('https://rickandmortyapi.com/api/character/2', {
               method: 'GET',
-              headers: {
-                Connection: 'close',
-                Accept: 'application/json',
-                'Accept-Encoding': 'identity',
-              },
-              body: '',
-              maxTranscriptSize: 20000,
-              notaryUrl: import.meta.env.VITE_NOTARY_URL,
-              websocketProxyUrl: 'ws://127.0.0.1:55688',
-
+              notaryUrl: 'http://localhost:7047',
+              websocketProxyUrl: 'ws://localhost:55688',
             });
           console.log(proof);
           }
-          }> Make proof for swapi</Button>
+          }> Make proof for swapi</Button> */}
 
+          
         </Grid>
+        </div>
 
       </Grid>
 
