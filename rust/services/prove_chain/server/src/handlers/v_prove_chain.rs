@@ -84,7 +84,7 @@ mod tests {
 
         for (idx, block_hash) in params.block_hashes.iter().enumerate() {
             let hex: FixedBytes<32> = block_hash.parse()?;
-            trie.insert(&[idx as u8], hex)?;
+            trie.insert([idx as u8], hex)?;
         }
 
         let response = v_prove_chain(config.clone(), trie, params).await?;
