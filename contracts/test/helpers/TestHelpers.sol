@@ -25,13 +25,15 @@ contract TestHelpers {
         view
         returns (Proof memory, bytes32)
     {
-        bytes memory journal = bytes.concat(abi.encode(commitment), journalParams);
-        bytes32 journalHash = sha256(journal);
+        return createProof(commitment, journalParams, 0);
+    }
 
-        bytes memory seal = mockVerifier.mockProve(ImageID.RISC0_CALL_GUEST_ID, journalHash).seal;
-        Proof memory proof =
-            Proof(journal.length, encodeSeal(seal), 0, [uint16(0), 0, 0, 0, 0, 0, 0, 0, 0, 0], commitment);
-        return (proof, journalHash);
+    function createProof(ExecutionCommitment memory commitment, string memory journalStringParam)
+        public
+        view
+        returns (Proof memory, bytes32)
+    {
+        return createProof(commitment, abi.encode(journalStringParam), 32);
     }
 
     function createProof(ExecutionCommitment memory commitment) public view returns (Proof memory, bytes32) {
@@ -46,17 +48,17 @@ contract TestHelpers {
         return createProof(commitment, emptyBytes);
     }
 
-    function createProof(ExecutionCommitment memory commitment, string memory journalParam)
+    function createProof(ExecutionCommitment memory commitment, bytes memory journalParams, uint16 journalParamOffset)
         public
         view
         returns (Proof memory, bytes32)
     {
-        bytes memory encodedJournalParam = abi.encode(journalParam);
-        bytes memory journal = bytes.concat(abi.encode(commitment), encodedJournalParam);
+        bytes memory journal = bytes.concat(abi.encode(commitment), journalParams);
         bytes32 journalHash = sha256(journal);
+
         bytes memory seal = mockVerifier.mockProve(ImageID.RISC0_CALL_GUEST_ID, journalHash).seal;
         Proof memory proof =
-            Proof(journal.length, encodeSeal(seal), 0, [uint16(32), 0, 0, 0, 0, 0, 0, 0, 0, 0], commitment);
+            Proof(journal.length, encodeSeal(seal), 0, [journalParamOffset, 0, 0, 0, 0, 0, 0, 0, 0, 0], commitment);
 
         return (proof, journalHash);
     }
