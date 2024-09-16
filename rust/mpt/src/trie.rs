@@ -1,6 +1,5 @@
 use crate::node::Node;
 use crate::node::NodeError;
-use alloy_primitives::Bytes;
 use alloy_primitives::{keccak256, B256};
 use alloy_rlp::Decodable;
 use alloy_trie::EMPTY_ROOT_HASH;
@@ -118,8 +117,8 @@ impl MerkleTrie {
         Ok(trie)
     }
 
-    pub fn to_rlp_nodes(self) -> impl Iterator<Item = Bytes> {
-        vec![].into_iter()
+    pub fn to_rlp_nodes(&self) -> impl Iterator<Item = Vec<u8>> {
+        self.0.to_rlp_nodes().into_iter()
     }
 }
 

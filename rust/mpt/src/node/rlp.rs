@@ -110,6 +110,22 @@ impl Node {
             Node::Digest(digest) => alloy_rlp::encode(digest),
         }
     }
+
+    pub(crate) fn to_rlp_nodes(&self) -> Vec<Vec<u8>> {
+        let mut out = vec![self.rlp_encoded()];
+        match self {
+            Node::Branch(children, _) => {
+                for child in children.iter().flatten() {
+                    out.extend(child.to_rlp_nodes());
+                }
+            }
+            Node::Extension(_, child) => {
+                out.extend(child.to_rlp_nodes());
+            }
+            _ => {}
+        };
+        out
+    }
 }
 
 #[inline]
