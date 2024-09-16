@@ -20,7 +20,7 @@ library WebProofLib {
     function verify(WebProof memory webProof, string memory dataUrl) internal view returns (Web memory) {
         (bool success, bytes memory returnData) = VERIFY_AND_PARSE_PRECOMPILE.staticcall(bytes(webProof.webProofJson));
 
-        string[3] memory data = abi.decode(returnData, (string[3]));
+        string[4] memory data = abi.decode(returnData, (string[4]));
         Web memory web;
         web.body = data[2];
 
