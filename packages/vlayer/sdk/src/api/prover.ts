@@ -9,7 +9,7 @@ import {
   type Hex,
 } from "viem";
 
-import { type CallContext, type CallParams, v_call } from "./v_call";
+import { type CallContext, type CallParams, Proof, v_call } from "./v_call";
 import { testChainId1 } from "./helpers";
 
 type Bytecode = {
@@ -64,5 +64,26 @@ export async function prove<T extends Abi, F extends ContractFunctionName<T>>(
     data: evm_call_result,
   });
 
+  addDynamicParamsOffsets(abi, functionName, proof);
+
   return { proof, returnValue };
+}
+
+function addDynamicParamsOffsets(abi: Abi, functionName: string, proof: Proof) {
+  const proverFunction = abi.filter(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    (it: any) => it.type === "function" && it.name === functionName,
+  );
+
+  if (
+    proverFunction.length > 0 &&
+    proverFunction[0].outputs &&
+    proverFunction[0].outputs.length > 0
+  ) {
+    const secondVerifyMethodParamType = proverFunction[0].outputs[0].type;
+
+    if (secondVerifyMethodParamType === "string") {
+      proof.dynamicParamsOffsets[0] = BigInt(32);
+    }
+  }
 }

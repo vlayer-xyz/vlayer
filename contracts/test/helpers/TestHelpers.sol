@@ -6,7 +6,7 @@ import {console} from "forge-std-1.8.2/src/console.sol";
 import {RiscZeroMockVerifier} from "risc0-ethereum-1.0.0/src/test/RiscZeroMockVerifier.sol";
 
 import {ExecutionCommitment} from "../../src/ExecutionCommitment.sol";
-import {Proof} from "../../src/Proof.sol";
+import {Proof, ProofLib} from "../../src/Proof.sol";
 import {ProofMode, Seal, SealLib} from "../../src/Seal.sol";
 import {ImageID} from "../../src/ImageID.sol";
 
@@ -18,18 +18,22 @@ bytes4 constant SELECTOR = bytes4(0x01020304);
 contract TestHelpers {
     RiscZeroMockVerifier public immutable mockVerifier = new RiscZeroMockVerifier(FAKE_VERIFIER_SELECTOR);
 
+    uint256 private constant LENGTH_ABI_FIELD_LEN = 0x20;
+
     function createProof(ExecutionCommitment memory commitment, bytes memory journalParams)
         public
         view
         returns (Proof memory, bytes32)
     {
-        bytes memory journal = bytes.concat(abi.encode(commitment), journalParams);
-        bytes32 journalHash = sha256(journal);
+        return createProof(commitment, journalParams, 0);
+    }
 
-        bytes memory seal = mockVerifier.mockProve(ImageID.RISC0_CALL_GUEST_ID, journalHash).seal;
-        Proof memory proof =
-            Proof(journal.length, encodeSeal(seal), 0, [uint16(0), 0, 0, 0, 0, 0, 0, 0, 0, 0], commitment);
-        return (proof, journalHash);
+    function createProof(ExecutionCommitment memory commitment, string memory journalStringParam)
+        public
+        view
+        returns (Proof memory, bytes32)
+    {
+        return createProof(commitment, abi.encode(journalStringParam), 32);
     }
 
     function createProof(ExecutionCommitment memory commitment) public view returns (Proof memory, bytes32) {
@@ -42,6 +46,21 @@ contract TestHelpers {
             ExecutionCommitment(PROVER, SELECTOR, block.number - 1, blockhash(block.number - 1));
         bytes memory emptyBytes = new bytes(0);
         return createProof(commitment, emptyBytes);
+    }
+
+    function createProof(ExecutionCommitment memory commitment, bytes memory journalParams, uint16 journalParamOffset)
+        public
+        view
+        returns (Proof memory, bytes32)
+    {
+        bytes memory journal = bytes.concat(abi.encode(commitment), journalParams);
+        bytes32 journalHash = sha256(journal);
+
+        bytes memory seal = mockVerifier.mockProve(ImageID.RISC0_CALL_GUEST_ID, journalHash).seal;
+        Proof memory proof =
+            Proof(journal.length, encodeSeal(seal), 0, [journalParamOffset, 0, 0, 0, 0, 0, 0, 0, 0, 0], commitment);
+
+        return (proof, journalHash);
     }
 
     function setSealProofMode(Seal memory seal, ProofMode proofMode) public pure returns (Seal memory) {

@@ -1,10 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {Proof, ProofLib} from "./Proof.sol";
+import {Proof, ProofLib, MAX_NUMBER_OF_DYNAMIC_PARAMS} from "./Proof.sol";
 
 import {IProofVerifier} from "./proof_verifier/IProofVerifier.sol";
 import {ProofVerifierFactory} from "./proof_verifier/ProofVerifierFactory.sol";
+import {ExecutionCommitmentLib} from "./ExecutionCommitment.sol";
 
 abstract contract Verifier {
     uint256 private constant SELECTOR_LEN = 4;
@@ -32,8 +33,39 @@ abstract contract Verifier {
 
         uint256 journalEnd = JOURNAL_OFFSET + proof.length;
         bytes memory journal = msg.data[JOURNAL_OFFSET:journalEnd];
-        bytes32 journalHash = sha256(journal);
 
+        for (uint256 i = 0; i < MAX_NUMBER_OF_DYNAMIC_PARAMS; i++) {
+            if (proof.dynamicParamsOffsets[i] > 0) {
+                journal = shiftOffset(journal, ProofLib.PROOF_ENCODING_LENGTH, proof.dynamicParamsOffsets[i]);
+            }
+        }
+        bytes32 journalHash = sha256(journal);
         return (proof, journalHash);
+    }
+
+    function shiftOffset(bytes memory data, uint256 shiftBy, uint256 offsetPosition)
+        public
+        pure
+        returns (bytes memory)
+    {
+        uint256 offsetPositionRelativeToJournal =
+            ExecutionCommitmentLib.EXECUTION_COMMITMENT_ENCODING_LENGTH + offsetPosition;
+
+        require(data.length >= offsetPositionRelativeToJournal, "Encoded data too short");
+
+        uint256 dataOffset;
+        assembly {
+            dataOffset := mload(add(data, offsetPositionRelativeToJournal))
+        }
+
+        uint256 shiftedOffset = dataOffset - shiftBy;
+
+        bytes memory dataCopy = data;
+
+        assembly {
+            mstore(add(dataCopy, offsetPositionRelativeToJournal), shiftedOffset)
+        }
+
+        return dataCopy;
     }
 }
