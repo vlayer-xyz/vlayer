@@ -48,10 +48,10 @@ abstract contract Verifier {
         pure
         returns (bytes memory)
     {
-        require(data.length >= 32, "Encoded data too short");
-
         uint256 offsetPositionRelativeToJournal =
             ExecutionCommitmentLib.EXECUTION_COMMITMENT_ENCODING_LENGTH + offsetPosition;
+
+        require(data.length >= offsetPositionRelativeToJournal, "Encoded data too short");
 
         uint256 dataOffset;
         assembly {
