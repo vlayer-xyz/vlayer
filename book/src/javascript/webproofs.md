@@ -109,6 +109,7 @@ import {
 } from '@vlayer/sdk/web_proof'
 
 // all args to prover contract except webProof itself
+// all args required by prover contract function except webProof itself
 const commitmentArgs = ['0x0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', 123]
 
 const proverCallCommitment = {
