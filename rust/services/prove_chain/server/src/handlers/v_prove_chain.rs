@@ -60,12 +60,6 @@ mod tests {
         );
     }
 
-    fn verify_response(response: ChainProof, expected_root: FixedBytes<32>) {
-        let ChainProof { merkle_trie } = response;
-        let root = merkle_trie.hash_slow();
-        assert_eq!(root, expected_root)
-    }
-
     #[tokio::test]
     async fn two_consecutive_block_hashes() -> Result<()> {
         let mut trie = MerkleTrie::default();
@@ -81,10 +75,16 @@ mod tests {
 
         let response = v_prove_chain(config.clone(), trie, params).await?;
 
-        verify_response(
-            response,
-            fixed_bytes!("94d2f2f7b7d20826dace8c875192670a01c64a20f0b2f19cfbfb942b1515af4d"),
+        let ChainProof { proof, nodes } = response;
+        let trie = MerkleTrie::from_rlp_nodes(nodes)?;
+        let root = trie.hash_slow();
+
+        assert_eq!(
+            root,
+            fixed_bytes!("94d2f2f7b7d20826dace8c875192670a01c64a20f0b2f19cfbfb942b1515af4d")
         );
+        assert_eq!(trie.get([1]).unwrap(), parent_hash);
+        assert_eq!(trie.get([2]).unwrap(), child_hash);
 
         Ok(())
     }
