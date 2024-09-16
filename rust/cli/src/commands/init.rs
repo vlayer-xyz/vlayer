@@ -5,7 +5,9 @@ use crate::utils::path::{copy_dir_to, find_foundry_root};
 use flate2::read::GzDecoder;
 use reqwest::get;
 use std::fs;
+use std::fs::OpenOptions;
 use std::io::Cursor;
+use std::io::Write;
 use std::path::{Path, PathBuf};
 use tar::Archive;
 use tracing::{error, info};
@@ -16,7 +18,7 @@ const EXAMPLES_URL: &str =
 const CONTRACTS_URL: &str =
     "https://vlayer-releases.s3.eu-north-1.amazonaws.com/latest/contracts.zip";
 
-const VLAYER_PACKAGE: &str = "vlayer~0.1.0-nightly";
+const VLAYER_PACKAGE: &str = "vlayer~0.1.0";
 
 pub(crate) async fn init(
     mut cwd: PathBuf,
@@ -69,6 +71,11 @@ pub(crate) async fn init_existing(cwd: PathBuf, template: TemplateOption) -> Res
 
     install_contracts()?;
     info!("Successfully installed vlayer contracts");
+    install_dependencies()?;
+    info!("Successfully installed all dependencies");
+    add_risc0_eth_remappings(&root_path)?;
+
+    std::env::set_current_dir(&cwd)?;
 
     Ok(())
 }
@@ -122,6 +129,47 @@ fn install_contracts() -> Result<(), CLIError> {
         .arg(VLAYER_PACKAGE)
         .arg(CONTRACTS_URL)
         .output()?;
+
+    if !output.status.success() {
+        let stderr = String::from_utf8_lossy(&output.stderr);
+        return Err(CLIError::ForgeInitError(stderr.to_string()));
+    }
+    Ok(())
+}
+
+fn add_risc0_eth_remappings(foundry_root: &Path) -> std::io::Result<()> {
+    let remappings_txt = foundry_root.join("remappings.txt");
+    let suffix = "forge-std/=dependencies/forge-std-1.8.2/src\nopenzeppelin-contracts=dependencies/@openzeppelin-contracts-5.0.1/";
+
+    let mut file = OpenOptions::new().append(true).open(remappings_txt)?;
+
+    writeln!(file, "{}", suffix)?;
+
+    Ok(())
+}
+
+fn install_dependencies() -> Result<(), CLIError> {
+    let dependencies = vec!["@openzeppelin-contracts~5.0.1", "forge-std~1.8.2"];
+
+    for dep in dependencies {
+        let output = std::process::Command::new("forge")
+            .arg("soldeer")
+            .arg("install")
+            .arg(dep)
+            .output()?;
+
+        if !output.status.success() {
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            return Err(CLIError::ForgeInitError(stderr.to_string()));
+        }
+    }
+
+    let output = std::process::Command::new("forge")
+    .arg("soldeer")
+    .arg("install")
+    .arg("risc0-ethereum~1.0.0")
+    .arg("https://github.com/vlayer-xyz/risc0-ethereum/releases/download/v1.0.0-soldeer/contracts.zip")
+    .output()?;
 
     if !output.status.success() {
         let stderr = String::from_utf8_lossy(&output.stderr);

@@ -1,4 +1,4 @@
-vlayer/=../../contracts/src/
+vlayer-0.1.0/=../../contracts/
 
 forge-std/=../../contracts/dependencies/forge-std-1.9.2/
 openzeppelin-contracts/=../../contracts/dependencies/@openzeppelin-contracts-5.0.1/
