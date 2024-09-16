@@ -83,7 +83,6 @@ function addDynamicParamsOffsets(proof: Proof, abi: Abi) {
     const secondVerifyMethodParamType = mainFunction[0].outputs[0].type;
 
     if (secondVerifyMethodParamType === "string") {
-      proof.numberOfDynamicParams = BigInt(1);
       proof.dynamicParamsOffsets[0] = BigInt(32);
     }
   }
