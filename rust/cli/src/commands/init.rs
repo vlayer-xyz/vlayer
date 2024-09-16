@@ -168,7 +168,7 @@ fn install_dependencies() -> Result<(), CLIError> {
     .arg("soldeer")
     .arg("install")
     .arg("risc0-ethereum~1.0.0")
-    .arg("https://github.com/vlayer-xyz/risc0-ethereum/releases/download/v1.0.0-soldeer/contracts.zip")
+    .arg("https://github.com/vlayer-xyz/risc0-ethereum/releases/download/v1.0.0-soldeer-no-remappings/contracts.zip")
     .output()?;
 
     if !output.status.success() {
