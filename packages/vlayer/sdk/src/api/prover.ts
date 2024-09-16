@@ -64,23 +64,23 @@ export async function prove<T extends Abi, F extends ContractFunctionName<T>>(
     data: evm_call_result,
   });
 
-  addDynamicParamsOffsets(proof, abi);
+  addDynamicParamsOffsets(abi, functionName, proof);
 
   return { proof, returnValue };
 }
 
-function addDynamicParamsOffsets(proof: Proof, abi: Abi) {
-  const mainFunction = abi.filter(
+function addDynamicParamsOffsets(abi: Abi, functionName: string, proof: Proof) {
+  const proverFunction = abi.filter(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (it: any) => it.type === "function" && it.name === "main",
+    (it: any) => it.type === "function" && it.name === functionName,
   );
 
   if (
-    mainFunction.length > 0 &&
-    mainFunction[0].outputs &&
-    mainFunction[0].outputs.length > 0
+    proverFunction.length > 0 &&
+    proverFunction[0].outputs &&
+    proverFunction[0].outputs.length > 0
   ) {
-    const secondVerifyMethodParamType = mainFunction[0].outputs[0].type;
+    const secondVerifyMethodParamType = proverFunction[0].outputs[0].type;
 
     if (secondVerifyMethodParamType === "string") {
       proof.dynamicParamsOffsets[0] = BigInt(32);
