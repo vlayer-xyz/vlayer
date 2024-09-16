@@ -145,7 +145,7 @@ jobs:
         with:
           version: nightly-d75318c9c7a1c6af5404fe96f63ca890dcdd588d # 2024-09-05
 
-      - name: Build vlayer contracts
+      - name: Build vlayer contracts artifact
         run: |
           forge soldeer push vlayer-contracts~1.0.0 --dry-run
         working-directory: contracts
