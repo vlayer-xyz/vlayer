@@ -102,7 +102,8 @@ impl Node {
                 let mut out = encoded_header(true, payload_length);
                 child_refs.iter().for_each(|child| child.encode(&mut out));
 
-                out.extend_from_slice(value.as_deref().unwrap_or(&[EMPTY_STRING_CODE]));
+                let value = value.as_deref().unwrap_or(&[]);
+                value.encode(&mut out);
 
                 out
             }
