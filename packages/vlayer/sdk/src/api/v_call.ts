@@ -73,5 +73,11 @@ export async function v_call(
     throw new Error(`HTTP error! status: ${response.status}`);
   }
 
-  return response.json() as Promise<VCallResponse>;
+  const response_json = await response.json();
+
+  if("error" in response_json) {
+    throw new Error(response_json.error.message);
+  }
+
+  return response_json as Promise<VCallResponse>;
 }
