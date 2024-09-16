@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use alloy_primitives::Bytes;
 use mpt::MerkleTrie;
 use serde::{Deserialize, Serialize};
 
@@ -13,7 +14,8 @@ pub struct Params {
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct ChainProof {
-    merkle_trie: MerkleTrie,
+    proof: Bytes,
+    nodes: Vec<Bytes>,
 }
 
 pub async fn v_prove_chain(
@@ -25,7 +27,10 @@ pub async fn v_prove_chain(
         return Err(AppError::NoBlockNumbers);
     };
 
-    Ok(ChainProof { merkle_trie })
+    Ok(ChainProof {
+        proof: Bytes::default(),
+        nodes: merkle_trie.to_rlp_nodes(),
+    })
 }
 
 #[cfg(test)]
