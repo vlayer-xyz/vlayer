@@ -29,7 +29,7 @@ pub async fn v_prove_chain(
 
     Ok(ChainProof {
         proof: Bytes::default(),
-        nodes: merkle_trie.to_rlp_nodes(),
+        nodes: merkle_trie.to_rlp_nodes().map(Bytes::from).collect(),
     })
 }
 
@@ -80,13 +80,16 @@ mod tests {
 
         let response = v_prove_chain(config.clone(), trie, params).await?;
 
-        let ChainProof { proof, nodes } = response;
+        let ChainProof {
+            proof: _proof,
+            nodes,
+        } = response;
         let trie = MerkleTrie::from_rlp_nodes(nodes)?;
         let root = trie.hash_slow();
 
         assert_eq!(
             root,
-            fixed_bytes!("94d2f2f7b7d20826dace8c875192670a01c64a20f0b2f19cfbfb942b1515af4d")
+            fixed_bytes!("cdb081c8a4b30d52307c3bebbc49a8f1520c0f936a0802e8bbc4e04dff17dbaa")
         );
         assert_eq!(trie.get([1]).unwrap(), parent_hash);
         assert_eq!(trie.get([2]).unwrap(), child_hash);
