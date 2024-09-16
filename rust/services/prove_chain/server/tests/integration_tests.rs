@@ -74,7 +74,8 @@ mod v_prove_chain {
             "id": 1,
             "method": "v_proveChain",
             "params": {
-                "block_hashes": ["0x0000000000000000000000000000000000000000000000000000000000000000"]
+                "chain_id": 1,
+                "block_numbers": [1]
             }
         });
         let response = post(app, "/", &req).await;
@@ -91,14 +92,15 @@ mod v_prove_chain {
     }
 
     #[tokio::test]
-    async fn no_block_hashes_error() {
+    async fn no_block_numbers_error() {
         let app = server(ServerConfig::default());
         let req = json!({
             "jsonrpc": "2.0",
             "id": 1,
             "method": "v_proveChain",
             "params": {
-                "block_hashes": []
+                "chain_id": 1,
+                "block_numbers": []
             }
         });
         let response = post(app, "/", &req).await;
@@ -110,7 +112,7 @@ mod v_prove_chain {
                 "id": 1,
                 "error": {
                     "code": -32602,
-                    "message": "Invalid params: empty list of block hashes provided - nothing to prove",
+                    "message": "Invalid params: empty list of block numbers provided - nothing to prove",
                     "data": null
                 }
             }),
@@ -122,14 +124,15 @@ mod v_prove_chain {
     async fn field_validation_error() {
         let app = server(ServerConfig::default());
 
-        let valid_hash = "0x0000000000000000000000000000000000000000000000000000000000000000";
-        let invalid_hash = "0x";
+        let valid_number = 42;
+        let invalid_number = "";
         let req = json!({
             "jsonrpc": "2.0",
             "id": 1,
             "method": "v_proveChain",
             "params": {
-                "block_hashes": [valid_hash, invalid_hash]
+                "chain_id": 1,
+                "block_numbers": [valid_number, invalid_number]
             }
         });
         let response = post(app, "/", &req).await;
@@ -141,7 +144,7 @@ mod v_prove_chain {
                 "id": 1,
                 "error": {
                     "code": -32602,
-                    "message": "Invalid field: `block hashes` Invalid string length `0x`",
+                    "message": "invalid type: string \"\", expected u32",
                     "data": null
                 }
             }),

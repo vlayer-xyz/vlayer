@@ -9,8 +9,8 @@ use thiserror::Error;
 
 #[derive(Debug, Error, PartialEq)]
 pub enum AppError {
-    #[error("Invalid params: empty list of block hashes provided - nothing to prove")]
-    NoBlockHashes,
+    #[error("Invalid params: empty list of block numbers provided - nothing to prove")]
+    NoBlockNumbers,
     #[error("Invalid field: {0}")]
     FieldValidation(#[from] FieldValidationError),
 
@@ -30,7 +30,7 @@ impl From<AppError> for JsonRpcError {
             AppError::Bincode(..)
             | AppError::Host(..)
             | AppError::Mpt(..)
-            | AppError::NoBlockHashes
+            | AppError::NoBlockNumbers
             | AppError::FieldValidation(..) => JsonRpcError::new(
                 JsonRpcErrorReason::InvalidParams,
                 error.to_string(),
