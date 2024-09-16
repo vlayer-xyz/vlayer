@@ -18,6 +18,7 @@ contract ProverTest is VTest {
     ExampleToken private exampleErc20;
 
     address john = vm.addr(1);
+    address harry = vm.addr(2);
     uint256 initBalance = 10_000_000_000;
 
     function setUp() public {
@@ -40,7 +41,7 @@ contract ProverTest is VTest {
 
     function test_revertsOnIncorrectProof() public {
         callProver();
-        prover.balance(john);
+        prover.balance(harry);
 
         Proof memory proof = getProof();
         vm.expectRevert(abi.encodeWithSelector(VerificationFailed.selector));

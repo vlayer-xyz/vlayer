@@ -15,6 +15,8 @@ contract SimpleProver is Prover {
 
     function balance(address _owner) public returns (address, uint256) {
         setBlock(blockNo);
-        return (_owner, token.balanceOf(_owner));
+        uint256 currentBalance = token.balanceOf(_owner);
+ 
+        return (_owner, currentBalance);
     }
 }
