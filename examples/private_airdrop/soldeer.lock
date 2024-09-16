@@ -3,11 +3,11 @@ name = "@openzeppelin-contracts"
 version = "5.0.1"
 source = "https://soldeer-revisions.s3.amazonaws.com/@openzeppelin-contracts/5_0_1_22-01-2024_13:14:01_contracts.zip"
 checksum = "c256cbf6f5f38d3b65c7528bbffb530d0bdb818a20c9d5b61235a829202d7df7"
-integrity = "0dabb06b7ce9a5fec6e97a174c230829260e5843d4f7e22931c51385f4ede155"
+integrity = "6142958dc33f96fb662f8e66a104bb3ad23c7b8ea114ef9b16703da686508a86"
 
 [[dependencies]]
 name = "forge-std"
 version = "1.8.2"
 source = "https://soldeer-revisions.s3.amazonaws.com/forge-std/1_8_2_19-05-2024_18:52:07_forge-std-1.8.2.zip"
 checksum = "88a37e1d79f60b8aad08c7bd50a7a5ef973fc172b1495028d0725a17f5a4976c"
-integrity = "7db36e30b7e5ff6bd2a38ee5d634d811ed98fd7c684785f937fea3ac3df37111"
+integrity = "97ba5bc15d3b44acee2df4cfa0fe76df1fdb9084d1a2b22763a0e019a3977c37"

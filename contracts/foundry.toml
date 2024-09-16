@@ -5,7 +5,7 @@ out = "out"
 libs = ["dependencies"]
 
 [dependencies]
-forge-std = "1.8.2"
+forge-std = "1.9.2"
 "@openzeppelin-contracts" = "5.0.1"
 risc0-ethereum = { version = "1.0.0", url = "https://github.com/vlayer-xyz/risc0-ethereum/releases/download/v1.0.0-soldeer/contracts.zip" }
 
