@@ -131,14 +131,25 @@ fn prepend(elf_id: Hash, child_block: BlockHeader, mpt: SparseMpt<ChildBlockIdx,
 
 ### Prove Chain server
 
-Block Proof Cache structure is stored in a distinct type of vlayer node, specifically a JSON-RPC server. It consists of a single call `v_proveChain(block_hashes: Hash[])`. This call takes an array of block hashes as an argument and, if succeeds, returns 𝜋 - the zk-proof that all the hashes belong to the same chain.
+Block Proof Cache structure is stored in a distinct type of vlayer node, specifically a JSON-RPC server. It consists of a single call `v_proveChain(chain_id: number, block_numbers: number[])`. 
+This call takes chain ID and an array of block numbers as an argument.
+It returns two things:
+* Sparse MPT that contains proofs for all block numbers passed as arguments.
+* 𝜋 - the zk-proof that the trie was constructed correctly (invariant that all the blocks belong to the same chain is maintained).
 
 An example call could look like this:
 
 ```json
 {
   "method": "v_proveChain",
-  "params": ["0xb2b3e25c8939198cfeef52980defe56bdc96b8ea8459f2dc518ebc54e80f55a2", "0x162f1aa6efac84780a1cdba8f61e9d381cf103600b6122c8c56f4ebf3395beeb", "0x67df7671915189f30b83869a794df3acfaab6ed0b4644f81a2779866789a4412"]
+  "params": {
+    "chain_id": 1,
+    "block_numbers": [
+      12_000_000,
+      12_000_001,
+      20_762_494, // This should be recent block that can be verified on-chain
+    ]
+  }
 }
 ```
 
@@ -146,8 +157,13 @@ And the response:
 
 ```json
 {
-    "result": [
-        "0xe32ddb9c538f04c994e2e802237fa5f4c4e7e2643ab48bd8535b1c7009c8aa81"
-    ]
+    "result": {
+        "proof": "0xe32ddb9c538f04c994e2e802237fa5f4c4e7e2643ab48bd8535b1c7009c8aa81", // ZK Proof
+        "nodes": [
+          "0x...." // Root node. It's hash is proven by ZK Proof
+          "0x...." // Other nodes in arbitrary order
+          ...
+        ]
+    }
 }
 ```
