@@ -3,11 +3,7 @@ pragma solidity ^0.8.13;
 
 import {Test, console} from "forge-std-1.9.2/src/Test.sol";
 
-import {
-    IRiscZeroVerifier,
-    Receipt,
-    VerificationFailed
-} from "risc0-ethereum-1.0.0/src/IRiscZeroVerifier.sol";
+import {IRiscZeroVerifier, Receipt, VerificationFailed} from "risc0-ethereum-1.0.0/src/IRiscZeroVerifier.sol";
 import {RiscZeroMockVerifier} from "risc0-ethereum-1.0.0/src/test/RiscZeroMockVerifier.sol";
 
 import {ProofVerifierBase} from "../../src/proof_verifier/ProofVerifierBase.sol";
