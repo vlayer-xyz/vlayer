@@ -9,3 +9,4 @@ forge-std-1.9.2/=../../contracts/dependencies/forge-std-1.9.2/
 risc0-ethereum-1.0.0/=../../contracts/dependencies/risc0-ethereum-1.0.0/
 
 @openzeppelin-contracts/=dependencies/@openzeppelin-contracts-5.0.1/
+@openzeppelin-contracts-5.0.1/=dependencies/@openzeppelin-contracts-5.0.1/
