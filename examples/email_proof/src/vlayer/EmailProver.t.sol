@@ -18,7 +18,7 @@ contract EmailProverTest is VTest {
 
     function test_decodesEmail() public {
         EmailProofLibWrapper wrapper = new EmailProofLibWrapper();
-        string memory mime = "From: vitalik@gmail.com\nDate: Thu, 15 Aug 2019 14:54:37 +0900\n\nTHIS IS BODY";
+        string memory mime = "From: vitalik@gmail.com\nDate: Thu, 15 Aug 2019 14:54:37 +0900\nTo: dupa@aa.aa\n\nTHIS IS BODY";
         EmailProof memory emailProof = EmailProof(mime);
         callProver();
         Email memory email = wrapper.verify(emailProof);

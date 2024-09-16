@@ -1726,6 +1726,7 @@ dependencies = [
  "chain",
  "dyn-clone",
  "email_proof",
+ "futures",
  "lazy_static",
  "mpt",
  "once_cell",

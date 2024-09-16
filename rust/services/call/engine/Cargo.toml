@@ -29,6 +29,7 @@ lazy_static = { workspace = true }
 email_proof = { workspace = true }
 web_proof = { workspace = true }
 chain = { workspace = true }
+futures = "0.3.30"
 
 [dev-dependencies]
 alloy-trie = { workspace = true }

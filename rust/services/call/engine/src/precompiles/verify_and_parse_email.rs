@@ -9,7 +9,14 @@ const VERIFY_EMAIL_BASE: u64 = 10;
 /// The cost per word.
 const VERIFY_EMAIL_PER_WORD: u64 = 1;
 
+async fn add(a: u64, b: u64) -> u64 {
+    a + b
+}
+
 fn verify_and_parse_run(input: &Bytes, gas_limit: u64) -> PrecompileResult {
+    let future = add(1, 2);
+    let _result = futures::executor::block_on(future);
+
     let gas_used = gas_used(
         input.len(),
         VERIFY_EMAIL_BASE,
