@@ -29,7 +29,7 @@ library WebProofLib {
 
         require(success, "verify_and_parse precompile call failed");
         require(dataUrl.equal(data[0]), "Incorrect URL");
-        require(NOTARY_PUB_KEY.equal(data[1]), "Incorrect notary public key");
+        require(NOTARY_PUB_KEY.equal(data[3]), "Incorrect notary public key");
 
         return web;
     }
