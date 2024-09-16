@@ -84,7 +84,7 @@ To learn more details about the Web Proof feature, please see the [Web Proof sec
 
 ### Low-level API
 
-While vlayer client method `proveWeb` described above provides convenient interface to both vlayer browser extension as well as prover contract, we also provide methods which can access each of them separately.
+While the vlayer client method `proveWeb` described above provides a convenient interface to both the vlayer browser extension and the prover contract, we also provide methods that can access each of them separately.
 
 We can configure a Web Proof provider which uses vlayer browser extension and enables configuring custom *Notary* server and custom WebSocket proxy. 
 
