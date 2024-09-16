@@ -75,7 +75,7 @@ export async function v_call(
 
   const response_json = await response.json();
 
-  if("error" in response_json) {
+  if ("error" in response_json) {
     throw new Error(response_json.error.message);
   }
 
