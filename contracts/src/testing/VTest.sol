@@ -15,7 +15,7 @@ interface ICheatCodes {
 }
 
 contract VTest is Test {
-    constructor() public {
+    constructor() {
         // solhint-disable-next-line reason-string
         require(
             block.chainid == VTEST_CHAIN_ID,

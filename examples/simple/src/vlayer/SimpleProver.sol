@@ -13,10 +13,10 @@ contract SimpleProver is Prover {
         blockNo = _blockNo;
     }
 
-    function balance(address _owner) public returns (address, uint256) {
-        setBlock(blockNo);
-        uint256 currentBalance = token.balanceOf(_owner);
+    function balance(IERC20 newToken, address _owner) public returns (address, uint256) {
+        // setBlock(blockNo);
+        uint256 ownerBalance = newToken.balanceOf(_owner);
  
-        return (_owner, currentBalance);
+        return (_owner, ownerBalance);
     }
 }
