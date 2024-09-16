@@ -46,8 +46,8 @@ mod tests {
             proof_mode: ProofMode::Fake,
             ..Default::default()
         });
-        static ref parent_block_hash: String = "0x88e96d4537bea4d9c05d12549907b32561d3bf31f45aae734cdc119f13406cb6".to_string(); // https://etherscan.io/block/1
-        static ref child_block_hash: String = "0xb495a1d7e6663152ae92708da4843337b958146015a2802f4193a410044698c9".to_string(); // https://etherscan.io/block/2
+        static ref parent_hash: FixedBytes<32> = fixed_bytes!("88e96d4537bea4d9c05d12549907b32561d3bf31f45aae734cdc119f13406cb6"); // https://etherscan.io/block/1
+        static ref child_hash: FixedBytes<32> = fixed_bytes!("b495a1d7e6663152ae92708da4843337b958146015a2802f4193a410044698c9"); // https://etherscan.io/block/2
     }
 
     #[tokio::test]
@@ -67,11 +67,7 @@ mod tests {
 
     #[tokio::test]
     async fn two_consecutive_block_hashes() -> Result<()> {
-        let mut trie = MerkleTrie::default();
-        let parent_hash: FixedBytes<32> = parent_block_hash.parse()?;
-        trie.insert([1], parent_hash)?;
-        let child_hash: FixedBytes<32> = child_block_hash.parse()?;
-        trie.insert([2], child_hash)?;
+        let trie = MerkleTrie::from_iter([([1], *parent_hash), ([2], *child_hash)]);
 
         let params = Params {
             chain_id: 1,
@@ -85,14 +81,13 @@ mod tests {
             nodes,
         } = response;
         let trie = MerkleTrie::from_rlp_nodes(nodes)?;
-        let root = trie.hash_slow();
 
         assert_eq!(
-            root,
+            trie.hash_slow(),
             fixed_bytes!("cdb081c8a4b30d52307c3bebbc49a8f1520c0f936a0802e8bbc4e04dff17dbaa")
         );
-        assert_eq!(trie.get([1]).unwrap(), parent_hash);
-        assert_eq!(trie.get([2]).unwrap(), child_hash);
+        assert_eq!(trie.get([1]).unwrap(), *parent_hash);
+        assert_eq!(trie.get([2]).unwrap(), *child_hash);
 
         Ok(())
     }
