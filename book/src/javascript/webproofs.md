@@ -28,7 +28,7 @@ import { createVlayerClient } from '@vlayer/sdk'
 const vlayer = createVlayerClient()
 ```
 
-Next we can define how vlayer extension should generate the Web Proof. We do so in a declarative fashion, by specifying the steps through which the extension guides the user.
+Next, we can define how the vlayer extension should generate the Web Proof. We do this in a declarative way, by specifying the steps the extension should guide the user through.
 
 ```ts
 import { 
