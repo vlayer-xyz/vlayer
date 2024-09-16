@@ -1,6 +1,6 @@
 [[dependencies]]
 name = "forge-std"
-version = "1.8.2"
-source = "https://soldeer-revisions.s3.amazonaws.com/forge-std/1_8_2_19-05-2024_18:52:07_forge-std-1.8.2.zip"
-checksum = "88a37e1d79f60b8aad08c7bd50a7a5ef973fc172b1495028d0725a17f5a4976c"
-integrity = "6531798e01afbf11ca7a1f004c7d81baab95e33fae2d813235ee85275067f2ba"
+version = "1.9.2"
+source = "https://soldeer-revisions.s3.amazonaws.com/forge-std/1_9_2_06-08-2024_17:31:25_forge-std-1.9.2.zip"
+checksum = "20fd008c7c69b6c737cc0284469d1c76497107bc3e004d8381f6d8781cb27980"
+integrity = "2a8c30cfc27dbe8cd23e1af5cb5fe52a7cb94d2028a87558fe1914340142e83c"

@@ -11,7 +11,7 @@ libs = [
 mainnet = "http://127.0.0.1:8545"
 
 [dependencies]
-forge-std = "1.8.2"
+forge-std = "1.9.2"
 "@openzeppelin-contracts" = "5.0.1"
 
 [soldeer]

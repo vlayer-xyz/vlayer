@@ -7,7 +7,7 @@ integrity = "272e08ef1428eb090801685a1c342eaf2b52c84615128cf922564073a3c90e40"
 
 [[dependencies]]
 name = "forge-std"
-version = "1.8.2"
-source = "https://soldeer-revisions.s3.amazonaws.com/forge-std/1_8_2_19-05-2024_18:52:07_forge-std-1.8.2.zip"
-checksum = "88a37e1d79f60b8aad08c7bd50a7a5ef973fc172b1495028d0725a17f5a4976c"
-integrity = "c7763dd856eb533978d29d68c7f0c69eb4fe67e0a0a122c75b55670585c73632"
+version = "1.9.2"
+source = "https://soldeer-revisions.s3.amazonaws.com/forge-std/1_9_2_06-08-2024_17:31:25_forge-std-1.9.2.zip"
+checksum = "20fd008c7c69b6c737cc0284469d1c76497107bc3e004d8381f6d8781cb27980"
+integrity = "fbde4560918518c8d2393fdfdf46ed0a38bd6d841376d88bdb079c3f9eba6645"
