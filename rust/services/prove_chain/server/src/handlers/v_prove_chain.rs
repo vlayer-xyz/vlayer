@@ -3,15 +3,13 @@ use std::sync::Arc;
 use axum_jrpc::Value;
 use mpt::MerkleTrie;
 use serde::{Deserialize, Serialize};
-use types::ValidatedParams;
 
 use crate::{config::ServerConfig, error::AppError};
 
-pub mod types;
-
 #[derive(Deserialize, Serialize)]
 pub struct Params {
-    block_hashes: Vec<String>,
+    chain_id: u32,
+    block_numbers: Vec<u32>,
 }
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
@@ -30,9 +28,8 @@ pub async fn v_prove_chain(
     merkle_trie: MerkleTrie,
     params: Params,
 ) -> Result<ChainProof, AppError> {
-    let params: ValidatedParams = params.try_into()?;
-    if params.block_hashes.is_empty() {
-        return Err(AppError::NoBlockHashes);
+    if params.block_numbers.is_empty() {
+        return Err(AppError::NoBlockNumbers);
     };
 
     Ok(ChainProof { merkle_trie })
@@ -51,21 +48,22 @@ mod tests {
             proof_mode: ProofMode::Fake,
             ..Default::default()
         });
-        static ref parent_block_hash: String = "0xb390d63aac03bbef75de888d16bd56b91c9291c2a7e38d36ac24731351522bd1".to_string(); // https://etherscan.io/block/19999999
-        static ref child_block_hash: String = "0xd24fd73f794058a3807db926d8898c6481e902b7edb91ce0d479d6760f276183".to_string(); // https://etherscan.io/block/20000000
+        static ref parent_block_hash: String = "0x88e96d4537bea4d9c05d12549907b32561d3bf31f45aae734cdc119f13406cb6".to_string(); // https://etherscan.io/block/1
+        static ref child_block_hash: String = "0xb495a1d7e6663152ae92708da4843337b958146015a2802f4193a410044698c9".to_string(); // https://etherscan.io/block/2
     }
 
     #[tokio::test]
     async fn empty_block_hashes() {
         let empty_block_hashes = Params {
-            block_hashes: vec![],
+            chain_id: 1,
+            block_numbers: vec![],
         };
         let trie = MerkleTrie::default();
         assert_eq!(
             v_prove_chain(config.clone(), trie, empty_block_hashes)
                 .await
                 .unwrap_err(),
-            AppError::NoBlockHashes
+            AppError::NoBlockNumbers
         );
     }
 
@@ -77,21 +75,22 @@ mod tests {
 
     #[tokio::test]
     async fn two_consecutive_block_hashes() -> Result<()> {
-        let params = Params {
-            block_hashes: vec![parent_block_hash.clone(), child_block_hash.clone()],
-        };
         let mut trie = MerkleTrie::default();
+        let parent_hash: FixedBytes<32> = parent_block_hash.parse()?;
+        trie.insert([1], parent_hash)?;
+        let child_hash: FixedBytes<32> = child_block_hash.parse()?;
+        trie.insert([2], child_hash)?;
 
-        for (idx, block_hash) in params.block_hashes.iter().enumerate() {
-            let hex: FixedBytes<32> = block_hash.parse()?;
-            trie.insert([idx as u8], hex)?;
-        }
+        let params = Params {
+            chain_id: 1,
+            block_numbers: vec![1, 2],
+        };
 
         let response = v_prove_chain(config.clone(), trie, params).await?;
 
         verify_response(
             response,
-            fixed_bytes!("1f85ea9c12d6a78a33d70d4759fabf710fa67ba3a2d215348c779c6861c8c5ac"),
+            fixed_bytes!("94d2f2f7b7d20826dace8c875192670a01c64a20f0b2f19cfbfb942b1515af4d"),
         );
 
         Ok(())
