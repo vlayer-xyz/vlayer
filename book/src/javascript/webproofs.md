@@ -71,7 +71,7 @@ const hash = await vlayer.proveWeb({
 ```
 
 The above snippet:
-* Opens vlayer browser extension and guides the user throught the steps defined above. The Web Proof is generated using vlayer default *Notary* server and WebSocket proxy.
+* Opens vlayer browser extension and guides the user throught the steps defined above. The Web Proof is generated using vlayer default *Notary* server and WebSocket proxy (the proxy is necessary to give browser access to low-level TLS connection of the HTTPS request we are generating Web Proof for).
 * Once the Web Proof is successfully generated, it is submitted to prover contract:
   * with address `0x70997970c51812dc3a010c7d01b50e0d17dc79c8`,
   * whose interface is defined by `proverAbi`,
