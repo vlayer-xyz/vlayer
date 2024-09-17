@@ -1,4 +1,4 @@
-import { prove as tlsnProve, verify as tlsnVerify, verify } from "tlsn-js";
+import { prove as tlsnProve, verify as tlsnVerify } from "tlsn-js";
 import browser from "webextension-polyfill";
 import { useProofContext } from "./useProofContext";
 import React, {
@@ -13,14 +13,14 @@ import { formatTlsnHeaders } from "../lib/formatTlsnHeaders";
 
 const TlsnProofContext = createContext({
   prove: () => {},
-  proof: null,
+  proof: {},
   isProoving: false,
   hasDataForProof: false,
 });
 
 export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
   const { proofUrl } = useProofContext();
-  const [proof, setProof] = useState<any>();
+  const [proof, setProof] = useState<object>({});
   const [isProoving, setIsProoving] = useState(false);
   const [hasDataForProof, setHasDataForProof] = useState(false);
   const [cookies, setCookies] = useState<browser.Cookies.Cookie[]>([]);
