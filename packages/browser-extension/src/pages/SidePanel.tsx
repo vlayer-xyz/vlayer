@@ -53,8 +53,14 @@ export default function SidePanel() {
         <div style={{ gridColumn: "span 1" }}></div>
         <div style={{ gridColumn: "span 6" }}>
           <Grid columns="1" gapY="4">
-            <Button variant="soft"> Go to page .. </Button>
-            <Button> Make a proof </Button>
+            <GoToPageButton isVisible={redirectUrl ? true : false} />
+            <ProofButton isVisible={proof ? false : true} />
+            <BackButton isVisible={proof ? true : false} />
+            {proof ? (
+              <div>
+                Have a proof: <pre>{JSON.stringify(proof, null, 2)}</pre>
+              </div>
+            ) : null}
           </Grid>
         </div>
       </Grid>

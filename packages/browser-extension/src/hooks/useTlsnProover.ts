@@ -10,25 +10,31 @@ import { useCallback, useEffect, useState } from "react";
 const formatTlsnHeaders = (
   headers: browser.WebRequest.HttpHeadersItemType[],
   cookies: browser.Cookies.Cookie[],
-	doCheck: boolean = false
+  doCheck: boolean = false,
 ) => {
-  const xCsrftoken = headers.find(
-    (header) => header.name === "x-csrf-token",
-  )?.value;
-  const authToken = cookies.find(
-    (cookie) => cookie.name === "auth_token",
-  )?.value;
-  const ct0 = cookies.find((cookie) => cookie.name === "ct0")?.value;
-  const authorization = headers.find(
-    (header) => header.name === "authorization",
-  )?.value;
+  const xCsrftoken =
+    headers.find((header) => header.name === "x-csrf-token")?.value || "";
+  const authToken =
+    cookies.find((cookie) => cookie.name === "auth_token")?.value || "";
+  const ct0 = cookies.find((cookie) => cookie.name === "ct0")?.value || "";
+  const authorization =
+    headers.find((header) => header.name === "authorization")?.value || "";
 
-  if ( doCheck && (!xCsrftoken || !authToken || !ct0 || !authorization)) {
-   console.error("Missing headers or cookies");
+  if (doCheck) {
+    if (!xCsrftoken) {
+      throw new Error("x-csrf-token header is missing");
+    }
+    if (!authToken) {
+      throw new Error("auth_token cookie is missing");
+    }
+    if (!ct0) {
+      throw new Error("ct0 cookie is missing");
+    }
+    if (!authorization) {
+      throw new Error("authorization header is missing");
+    }
   }
-	console.log("authToken",authToken);
-	console.log("ct0",ct0);
-	console.log("xCsrftoken",cookies);
+
   return {
     headers: {
       "x-twitter-client-language": "en",
@@ -58,16 +64,20 @@ export const useTlsnProover = () => {
   >([]);
 
   const [fotmattedHeaders, setFormattedHeaders] = useState<{
-    headers: Record<string, string | undefined>;
+    headers: Record<string, string>;
     secretHeaders: string[];
   }>({
     headers: {},
     secretHeaders: [],
   });
 
-  useEffect(() => {		
-		const formattedHeaders = formatTlsnHeaders(headers, cookies,hasDataForProof);
-		console.log("formattedHeaders",formattedHeaders);
+  useEffect(() => {
+    const formattedHeaders = formatTlsnHeaders(
+      headers,
+      cookies,
+      hasDataForProof,
+    );
+    console.log("formattedHeaders", formattedHeaders);
     setFormattedHeaders(formattedHeaders);
   }, [headers, cookies, hasDataForProof]);
 
@@ -102,7 +112,6 @@ export const useTlsnProover = () => {
 
   const prove = useCallback(async () => {
     setIsProoving(true);
-		console.log("Proving",fotmattedHeaders);
     const tlsnProof = await tlsnProve(proofUrl, {
       notaryUrl: import.meta.env.VITE_NOTARY_URL,
       websocketProxyUrl: `${import.meta.env.VITE_WEBSOCKET_PROXY_URL}?token=${new URL(proofUrl).host}`,
