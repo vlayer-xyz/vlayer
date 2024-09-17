@@ -16,7 +16,7 @@ const BackButton = ({isVisible } : { isVisible : boolean}) => {
 
 const ProofButton = ( {isVisible} : {isVisible : boolean } ) => {
 	const { prove, isProoving, hasDataForProof } = useTlsnProover();
-	return isVisible ? <Button disabled={hasDataForProof ? true : false } onClick={()=> {
+	return isVisible ? <Button disabled={hasDataForProof ? false : true } onClick={()=> {
 		prove()
 	}}> {
 		isProoving ? <Spinner /> : 'Make Proof'
@@ -25,7 +25,9 @@ const ProofButton = ( {isVisible} : {isVisible : boolean } ) => {
 
 const GoToPageButton = ({ isVisible} : {isVisible : boolean}) => {
 	const { redirectUrl } = useProofContext();
-	return isVisible ? <Button variant="soft"> Go to page {redirectUrl} </Button> : null;
+	return isVisible ? <Button variant="soft" onClick={ () => {
+		browser.tabs.create({ url: redirectUrl });
+	}}> Go to page {redirectUrl} </Button> : null;
 }
 
 export default function SidePanel() {

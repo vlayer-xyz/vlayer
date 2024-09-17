@@ -17,7 +17,11 @@
   },
   "permissions": [
     "sidePanel",
-    "storage"
+    "storage",
+    "webRequest",
+    "cookies",
+    "nativeMessaging", 
+    "tabs"
   ],
   "externally_connectable": {
     "matches": ["*://localhost/*"]
