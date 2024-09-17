@@ -26,6 +26,7 @@
 - [Rust](./contributing/rust.md)
 - [Javascript](./contributing/javascript.md)
 - [book](./contributing/book.md)
+- [extension](./contributing/extension.md)
 
 # Appendix
 - [Architecture](./appendix/architecture/overview.md)
