@@ -76,6 +76,7 @@ mod tests {
         use alloy_primitives::{fixed_bytes, FixedBytes};
         use anyhow::Result;
         use chain_host::RISC0_CHAIN_GUEST_ID;
+        use risc0_zkp::{digest, verify::VerificationError};
         use risc0_zkvm::{InnerReceipt, Receipt};
 
         lazy_static! {
@@ -116,6 +117,33 @@ mod tests {
             let inner_receipt: InnerReceipt = bincode::deserialize(&proof)?;
             let receipt = Receipt::new(inner_receipt, trie.hash_slow().to_vec());
             assert!(receipt.verify(RISC0_CHAIN_GUEST_ID).is_ok());
+
+            Ok(())
+        }
+
+        #[tokio::test]
+        async fn proof_does_not_verify_with_invalid_elf_id() -> Result<()> {
+            let response = v_prove_chain(config.clone(), db_trie.clone(), params.clone()).await?;
+
+            let ChainProof { proof, nodes } = response;
+            let trie = MerkleTrie::from_rlp_nodes(nodes)?;
+
+            let inner_receipt: InnerReceipt = bincode::deserialize(&proof)?;
+            let receipt = Receipt::new(inner_receipt, trie.hash_slow().to_vec());
+
+            let wrong_guest_id = [0; 32];
+
+            assert_eq!(
+                receipt.verify(wrong_guest_id).unwrap_err(),
+                VerificationError::ClaimDigestMismatch {
+                    expected: digest!(
+                        "5c42161bce6c0e06eada541107cf6e98af3c0aab22599df815feede3550db28d"
+                    ),
+                    received: digest!(
+                        "26f0f4262d78ca42e28b4048c3d8bdaa9bb118a803269eae28270db311fd7463"
+                    )
+                }
+            );
 
             Ok(())
         }
