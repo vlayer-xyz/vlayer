@@ -9,6 +9,7 @@ use std::fs::OpenOptions;
 use std::io::Cursor;
 use std::io::Write;
 use std::path::{Path, PathBuf};
+use std::process::Output;
 use tar::Archive;
 use tracing::{error, info};
 
@@ -18,7 +19,38 @@ const EXAMPLES_URL: &str =
 const CONTRACTS_URL: &str =
     "https://vlayer-releases.s3.eu-north-1.amazonaws.com/latest/contracts.zip";
 
-const VLAYER_PACKAGE: &str = "vlayer~0.1.0";
+const DEPENDENCIES: [SoldeerDep; 4] = [
+    SoldeerDep::SoldeerRegistryDep {
+        name: "@openzeppelin-contracts",
+        version: "5.0.1",
+    },
+    SoldeerDep::SoldeerRegistryDep {
+        name: "forge-std",
+        version: "1.9.2",
+    },
+    SoldeerDep::UrlDep {
+        name: "risc0-ethereum",
+        version: "1.0.0",
+        url: "https://github.com/vlayer-xyz/risc0-ethereum/releases/download/v1.0.0-soldeer-no-remappings/contracts.zip",
+    },
+    SoldeerDep::UrlDep {
+        name: "vlayer",
+        version: "0.1.0",
+        url: CONTRACTS_URL,
+    },
+];
+
+enum SoldeerDep {
+    SoldeerRegistryDep {
+        name: &'static str,
+        version: &'static str,
+    },
+    UrlDep {
+        name: &'static str,
+        version: &'static str,
+        url: &'static str,
+    },
+}
 
 pub(crate) async fn init(
     mut cwd: PathBuf,
@@ -69,13 +101,57 @@ pub(crate) async fn init_existing(cwd: PathBuf, template: TemplateOption) -> Res
 
     std::env::set_current_dir(&root_path)?;
 
-    install_contracts()?;
-    info!("Successfully installed vlayer contracts");
+    info!("Installing dependencies");
     install_dependencies()?;
     info!("Successfully installed all dependencies");
     add_risc0_eth_remappings(&root_path)?;
 
     std::env::set_current_dir(&cwd)?;
+
+    Ok(())
+}
+
+impl SoldeerDep {
+    pub fn install(self) -> Result<(), CLIError> {
+        let output = match self {
+            SoldeerDep::SoldeerRegistryDep { name, version } => install_dep(name, version)?,
+            SoldeerDep::UrlDep { name, version, url } => install_url_dep(name, version, url)?,
+        };
+
+        if !output.status.success() {
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            return Err(CLIError::ForgeInitError(stderr.to_string()));
+        }
+
+        Ok(())
+    }
+}
+
+fn install_dep(name: &str, version: &str) -> Result<Output, CLIError> {
+    let output = std::process::Command::new("forge")
+        .arg("soldeer")
+        .arg("install")
+        .arg(format!("{}~{}", name, version))
+        .output()?;
+
+    Ok(output)
+}
+
+fn install_url_dep(name: &str, version: &str, url: &str) -> Result<Output, CLIError> {
+    let output = std::process::Command::new("forge")
+        .arg("soldeer")
+        .arg("install")
+        .arg(format!("{}~{}", name, version))
+        .arg(url)
+        .output()?;
+
+    Ok(output)
+}
+
+fn install_dependencies() -> Result<(), CLIError> {
+    for dep in DEPENDENCIES {
+        dep.install()?;
+    }
 
     Ok(())
 }
@@ -122,21 +198,6 @@ async fn fetch_examples(
     Ok(())
 }
 
-fn install_contracts() -> Result<(), CLIError> {
-    let output = std::process::Command::new("forge")
-        .arg("soldeer")
-        .arg("install")
-        .arg(VLAYER_PACKAGE)
-        .arg(CONTRACTS_URL)
-        .output()?;
-
-    if !output.status.success() {
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        return Err(CLIError::ForgeInitError(stderr.to_string()));
-    }
-    Ok(())
-}
-
 fn add_risc0_eth_remappings(foundry_root: &Path) -> std::io::Result<()> {
     let remappings_txt = foundry_root.join("remappings.txt");
     let suffix = "forge-std/=dependencies/forge-std-1.9.2/src\nopenzeppelin-contracts=dependencies/@openzeppelin-contracts-5.0.1/";
@@ -144,37 +205,6 @@ fn add_risc0_eth_remappings(foundry_root: &Path) -> std::io::Result<()> {
     let mut file = OpenOptions::new().append(true).open(remappings_txt)?;
 
     writeln!(file, "{}", suffix)?;
-
-    Ok(())
-}
-
-fn install_dependencies() -> Result<(), CLIError> {
-    let dependencies = vec!["@openzeppelin-contracts~5.0.1", "forge-std~1.9.2"];
-
-    for dep in dependencies {
-        let output = std::process::Command::new("forge")
-            .arg("soldeer")
-            .arg("install")
-            .arg(dep)
-            .output()?;
-
-        if !output.status.success() {
-            let stderr = String::from_utf8_lossy(&output.stderr);
-            return Err(CLIError::ForgeInitError(stderr.to_string()));
-        }
-    }
-
-    let output = std::process::Command::new("forge")
-    .arg("soldeer")
-    .arg("install")
-    .arg("risc0-ethereum~1.0.0")
-    .arg("https://github.com/vlayer-xyz/risc0-ethereum/releases/download/v1.0.0-soldeer-no-remappings/contracts.zip")
-    .output()?;
-
-    if !output.status.success() {
-        let stderr = String::from_utf8_lossy(&output.stderr);
-        return Err(CLIError::ForgeInitError(stderr.to_string()));
-    }
 
     Ok(())
 }
