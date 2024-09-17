@@ -1,4 +1,12 @@
-set -ueo pipefail
+ensure_cmd() {
+  if ! check_cmd "$1"; then
+    echo "Command not found: '$1'" >&2
+  fi
+}
+
+check_cmd() {
+  command -v "$1" &>/dev/null
+}
 
 check_exit_status() {
   if [ $? -ne 0 ]; then
@@ -12,6 +20,9 @@ wait_for_port_and_pid() {
     local pid=$2
     local timeout=$3
     local service_name=$4
+
+    ensure_cmd timeout
+
     echo "Waiting for ${service_name} to be ready on localhost:${port}..."
 
     # wait until port is open and the expected pid is alive
@@ -26,6 +37,8 @@ function startup_anvil() {
     local LOG_DIR=$1
     local PORT=$2
     local ANVIL_VAR_NAME=$3
+
+    ensure_cmd anvil
     anvil -p ${PORT} > ${LOG_DIR} &
     ANVIL_PID=$!
     echo "Anvil started with PID ${ANVIL_PID}."
