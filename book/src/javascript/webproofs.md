@@ -38,13 +38,12 @@ import {
   notarizeStep 
 } from '@vlayer/sdk/web_proof'
 
-const logoUrl = 'https://mycompany.com/logo.png'
-
 const webProof = createWebProof({
+  logoUrl: 'http://twitterswap.com/logo.png',
   steps: [
-    redirectStep('https://x.com', 'Go to Twitter', logoUrl),
-    requireAuthorization('https://x.com', 'Log in to Twitter', logoUrl),
-    notarizeStep('https://api.x.com/1.1/account/settings.json', 'GET', 'Generate Proof of Twitter profile', logoUrl),
+    startPage('https://x.com/i/flow/login', 'Go to x.com login page'),
+    expectUrl('https://x.com/home', 'Log in'),
+    notarize('https://api.x.com/1.1/account/settings.json', 'GET', 'Generate Proof of Twitter profile'),
   ],
 })
 ```
