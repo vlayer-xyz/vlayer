@@ -102,12 +102,29 @@ impl Node {
                 let mut out = encoded_header(true, payload_length);
                 child_refs.iter().for_each(|child| child.encode(&mut out));
 
-                out.extend_from_slice(value.as_deref().unwrap_or(&[EMPTY_STRING_CODE]));
+                let value = value.as_deref().unwrap_or(&[]);
+                value.encode(&mut out);
 
                 out
             }
             Node::Digest(digest) => alloy_rlp::encode(digest),
         }
+    }
+
+    pub(crate) fn to_rlp_nodes(&self) -> Vec<Vec<u8>> {
+        let mut out = vec![self.rlp_encoded()];
+        match self {
+            Node::Branch(children, _) => {
+                for child in children.iter().flatten() {
+                    out.extend(child.to_rlp_nodes());
+                }
+            }
+            Node::Extension(_, child) => {
+                out.extend(child.to_rlp_nodes());
+            }
+            _ => {}
+        };
+        out
     }
 }
 

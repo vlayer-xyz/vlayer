@@ -85,7 +85,10 @@ mod v_prove_chain {
             json!({
                 "jsonrpc": "2.0",
                 "id": 1,
-                "result": null
+                "result": {
+                    "proof": ["0x"],
+                    "nodes": ["0x80"] // Null node RLP-encoded
+                }
             }),
             body_to_json(response.into_body()).await
         );

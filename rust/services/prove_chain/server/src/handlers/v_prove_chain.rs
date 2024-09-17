@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use axum_jrpc::Value;
+use alloy_primitives::Bytes;
 use mpt::MerkleTrie;
 use serde::{Deserialize, Serialize};
 
@@ -14,13 +14,8 @@ pub struct Params {
 
 #[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct ChainProof {
-    merkle_trie: MerkleTrie,
-}
-
-impl ChainProof {
-    pub fn to_json(&self) -> Value {
-        serde_json::to_value(self).expect("ChainProof to json")
-    }
+    proof: Bytes,
+    nodes: Vec<Bytes>,
 }
 
 pub async fn v_prove_chain(
@@ -32,7 +27,10 @@ pub async fn v_prove_chain(
         return Err(AppError::NoBlockNumbers);
     };
 
-    Ok(ChainProof { merkle_trie })
+    Ok(ChainProof {
+        proof: Bytes::default(),
+        nodes: merkle_trie.to_rlp_nodes().map(Bytes::from).collect(),
+    })
 }
 
 #[cfg(test)]
@@ -48,8 +46,8 @@ mod tests {
             proof_mode: ProofMode::Fake,
             ..Default::default()
         });
-        static ref parent_block_hash: String = "0x88e96d4537bea4d9c05d12549907b32561d3bf31f45aae734cdc119f13406cb6".to_string(); // https://etherscan.io/block/1
-        static ref child_block_hash: String = "0xb495a1d7e6663152ae92708da4843337b958146015a2802f4193a410044698c9".to_string(); // https://etherscan.io/block/2
+        static ref parent_hash: FixedBytes<32> = fixed_bytes!("88e96d4537bea4d9c05d12549907b32561d3bf31f45aae734cdc119f13406cb6"); // https://etherscan.io/block/1
+        static ref child_hash: FixedBytes<32> = fixed_bytes!("b495a1d7e6663152ae92708da4843337b958146015a2802f4193a410044698c9"); // https://etherscan.io/block/2
     }
 
     #[tokio::test]
@@ -67,19 +65,9 @@ mod tests {
         );
     }
 
-    fn verify_response(response: ChainProof, expected_root: FixedBytes<32>) {
-        let ChainProof { merkle_trie } = response;
-        let root = merkle_trie.hash_slow();
-        assert_eq!(root, expected_root)
-    }
-
     #[tokio::test]
     async fn two_consecutive_block_hashes() -> Result<()> {
-        let mut trie = MerkleTrie::default();
-        let parent_hash: FixedBytes<32> = parent_block_hash.parse()?;
-        trie.insert([1], parent_hash)?;
-        let child_hash: FixedBytes<32> = child_block_hash.parse()?;
-        trie.insert([2], child_hash)?;
+        let trie = MerkleTrie::from_iter([([1], *parent_hash), ([2], *child_hash)]);
 
         let params = Params {
             chain_id: 1,
@@ -88,10 +76,18 @@ mod tests {
 
         let response = v_prove_chain(config.clone(), trie, params).await?;
 
-        verify_response(
-            response,
-            fixed_bytes!("94d2f2f7b7d20826dace8c875192670a01c64a20f0b2f19cfbfb942b1515af4d"),
+        let ChainProof {
+            proof: _proof,
+            nodes,
+        } = response;
+        let trie = MerkleTrie::from_rlp_nodes(nodes)?;
+
+        assert_eq!(
+            trie.hash_slow(),
+            fixed_bytes!("cdb081c8a4b30d52307c3bebbc49a8f1520c0f936a0802e8bbc4e04dff17dbaa")
         );
+        assert_eq!(trie.get([1]).unwrap(), *parent_hash);
+        assert_eq!(trie.get([2]).unwrap(), *child_hash);
 
         Ok(())
     }

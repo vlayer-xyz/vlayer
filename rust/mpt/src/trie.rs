@@ -116,6 +116,10 @@ impl MerkleTrie {
 
         Ok(trie)
     }
+
+    pub fn to_rlp_nodes(&self) -> impl Iterator<Item = Vec<u8>> {
+        self.0.to_rlp_nodes().into_iter()
+    }
 }
 
 impl<K, V> FromIterator<(K, V)> for MerkleTrie
