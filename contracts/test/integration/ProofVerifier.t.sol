@@ -110,14 +110,13 @@ library ProofFixtures {
         );
 
         uint256 length = 0; // it is not used in verification, so can be set to 0
-        (uint16 numberOfDynamicParams, uint16[10] memory dynamicParamsOffsets) = dynamicParams();
+        uint16[10] memory dynamicParamsOffsets = dynamicParams();
 
-        Proof memory proof = Proof(length, seal, numberOfDynamicParams, dynamicParamsOffsets, executionCommitment);
+        Proof memory proof = Proof(length, seal, dynamicParamsOffsets, executionCommitment);
         return (proof, journalHash(executionCommitment, FIXED_LHS + FIXED_RHS));
     }
 
-    function dynamicParams() private pure returns (uint16, uint16[10] memory) {
-        uint16 numberOfDynamicParams = 0;
+    function dynamicParams() private pure returns (uint16[10] memory) {
         uint16[10] memory dynamicParamsOffsets = [
             uint16(0),
             uint16(0),
@@ -131,7 +130,7 @@ library ProofFixtures {
             uint16(0)
         ];
 
-        return (numberOfDynamicParams, dynamicParamsOffsets);
+        return dynamicParamsOffsets;
     }
 
     function journalHash(ExecutionCommitment memory executionCommitment, uint256 proverResult)
