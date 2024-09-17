@@ -46,7 +46,7 @@ export type ProveResult<T> =
     }
   | {
       ok: false;
-      error: any;
+      error: unknown;
       proof: undefined;
       returnValue: undefined;
     };
