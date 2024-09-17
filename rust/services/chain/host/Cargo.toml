@@ -1,0 +1,14 @@
+[package]
+name = "chain_host"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+host_utils = { workspace = true }
+alloy-primitives = { workspace = true }
+risc0-zkvm = { workspace = true }
+serde = { workspace = true }
+anyhow = { workspace = true }
+chain_engine = { workspace = true }
+thiserror = { workspace = true }
+chain_guest_wrapper = { workspace = true }
