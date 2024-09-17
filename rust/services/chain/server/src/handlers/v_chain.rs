@@ -123,7 +123,7 @@ mod tests {
 
         #[tokio::test]
         async fn proof_does_not_verify_with_invalid_elf_id() -> Result<()> {
-            let response = v_prove_chain(config.clone(), db_trie.clone(), params.clone()).await?;
+            let response = v_chain(config.clone(), db_trie.clone(), params.clone()).await?;
 
             let ChainProof { proof, nodes } = response;
             let trie = MerkleTrie::from_rlp_nodes(nodes)?;

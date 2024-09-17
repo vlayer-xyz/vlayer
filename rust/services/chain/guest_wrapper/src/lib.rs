@@ -6,3 +6,6 @@ pub const RISC0_CHAIN_GUEST_ELF: &[u8] = &[];
 
 #[cfg(clippy)]
 pub const RISC0_CHAIN_GUEST_ID: [u32; 8] = [0; 8];
+
+#[cfg(clippy)]
+pub const RISC0_CHAIN_GUEST_PATH: &str = "";

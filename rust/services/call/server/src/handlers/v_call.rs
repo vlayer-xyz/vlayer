@@ -21,7 +21,7 @@ pub async fn v_call(config: Arc<ServerConfig>, params: Params) -> Result<CallRes
     let host_config = HostConfig {
         rpc_urls: config.rpc_urls.clone(),
         start_chain_id: params.context.chain_id,
-        proof_mode: config.proof_mode.clone().into(),
+        proof_mode: config.proof_mode.into(),
     };
 
     let return_data =
