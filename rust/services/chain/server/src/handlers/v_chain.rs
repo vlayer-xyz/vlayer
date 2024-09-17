@@ -1,13 +1,13 @@
 use std::sync::Arc;
 
 use alloy_primitives::{BlockNumber, Bytes, ChainId};
-use mpt::MerkleTrie;
 use chain_host::{Host, HostConfig, HostOutput};
+use mpt::MerkleTrie;
 use serde::{Deserialize, Serialize};
 
 use crate::{config::ServerConfig, error::AppError};
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct Params {
     chain_id: ChainId,
     block_numbers: Vec<BlockNumber>,
@@ -46,11 +46,7 @@ pub async fn v_chain(
 #[cfg(test)]
 mod tests {
     use super::*;
-    use alloy_primitives::{fixed_bytes, FixedBytes};
-    use anyhow::Result;
     use lazy_static::lazy_static;
-    use prove_chain_host::RISC0_PROVE_CHAIN_GUEST_ID;
-    use risc0_zkvm::{InnerReceipt, Receipt};
     use server_utils::ProofMode;
 
     lazy_static! {
@@ -58,8 +54,6 @@ mod tests {
             proof_mode: ProofMode::Fake,
             ..Default::default()
         });
-        static ref parent_hash: FixedBytes<32> = fixed_bytes!("88e96d4537bea4d9c05d12549907b32561d3bf31f45aae734cdc119f13406cb6"); // https://etherscan.io/block/1
-        static ref child_hash: FixedBytes<32> = fixed_bytes!("b495a1d7e6663152ae92708da4843337b958146015a2802f4193a410044698c9"); // https://etherscan.io/block/2
     }
 
     #[tokio::test]
@@ -77,32 +71,53 @@ mod tests {
         );
     }
 
-    #[tokio::test]
-    async fn two_consecutive_block_hashes() -> Result<()> {
-        let trie = MerkleTrie::from_iter([([1], *parent_hash), ([2], *child_hash)]);
+    mod two_consecutive_block_hashes {
+        use super::*;
+        use alloy_primitives::{fixed_bytes, FixedBytes};
+        use anyhow::Result;
+        use chain_host::RISC0_CHAIN_GUEST_ID;
+        use risc0_zkvm::{InnerReceipt, Receipt};
 
-        let params = Params {
-            chain_id: 1,
-            block_numbers: vec![1, 2],
-        };
+        lazy_static! {
+            static ref parent_hash: FixedBytes<32> = fixed_bytes!("88e96d4537bea4d9c05d12549907b32561d3bf31f45aae734cdc119f13406cb6"); // https://etherscan.io/block/1
+            static ref child_hash: FixedBytes<32> = fixed_bytes!("b495a1d7e6663152ae92708da4843337b958146015a2802f4193a410044698c9"); // https://etherscan.io/block/2
+            static ref db_trie: MerkleTrie =
+                MerkleTrie::from_iter([([1], *parent_hash), ([2], *child_hash)]);
+            static ref params: Params = Params {
+                chain_id: 1,
+                block_numbers: vec![1, 2],
+            };
+        }
 
-        let response = v_chain(config.clone(), trie, params).await?;
+        #[tokio::test]
+        async fn trie_contains_proofs() -> Result<()> {
+            let response = v_chain(config.clone(), db_trie.clone(), params.clone()).await?;
 
-        let ChainProof { proof, nodes } = response;
-        let trie = MerkleTrie::from_rlp_nodes(nodes)?;
-        let root_hash = trie.hash_slow();
+            let ChainProof { nodes, .. } = response;
+            let trie = MerkleTrie::from_rlp_nodes(nodes)?;
 
-        assert_eq!(
-            root_hash,
-            fixed_bytes!("cdb081c8a4b30d52307c3bebbc49a8f1520c0f936a0802e8bbc4e04dff17dbaa")
-        );
-        assert_eq!(trie.get([1]).unwrap(), *parent_hash);
-        assert_eq!(trie.get([2]).unwrap(), *child_hash);
+            assert_eq!(
+                trie.hash_slow(),
+                fixed_bytes!("cdb081c8a4b30d52307c3bebbc49a8f1520c0f936a0802e8bbc4e04dff17dbaa")
+            );
+            assert_eq!(trie.get([1]).unwrap(), *parent_hash);
+            assert_eq!(trie.get([2]).unwrap(), *child_hash);
 
-        let inner_receipt: InnerReceipt = bincode::deserialize(&proof)?;
-        let receipt = Receipt::new(inner_receipt, root_hash.to_vec());
-        assert!(receipt.verify(RISC0_PROVE_CHAIN_GUEST_ID).is_ok());
+            Ok(())
+        }
 
-        Ok(())
+        #[tokio::test]
+        async fn proof_does_verify() -> Result<()> {
+            let response = v_chain(config.clone(), db_trie.clone(), params.clone()).await?;
+
+            let ChainProof { proof, nodes } = response;
+            let trie = MerkleTrie::from_rlp_nodes(nodes)?;
+
+            let inner_receipt: InnerReceipt = bincode::deserialize(&proof)?;
+            let receipt = Receipt::new(inner_receipt, trie.hash_slow().to_vec());
+            assert!(receipt.verify(RISC0_CHAIN_GUEST_ID).is_ok());
+
+            Ok(())
+        }
     }
 }
