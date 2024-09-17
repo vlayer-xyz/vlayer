@@ -9,6 +9,7 @@ To start working with this repository, you will need to install following softwa
 - [Foundry](https://book.getfoundry.sh/getting-started/installation)
 - [Bun](https://bun.sh)
 - [LLVM Clang](https://clang.llvm.org/) compiler version which supports [RISC-V build target](https://llvm.org/docs/RISCVUsage.html) available on the `PATH`
+- `timeout` terminal command (`brew install coreutils` on macOS)
 
 ## Building
 
