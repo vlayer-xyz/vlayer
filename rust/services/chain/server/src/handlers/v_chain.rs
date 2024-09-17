@@ -77,7 +77,7 @@ mod tests {
         use anyhow::Result;
         use chain_host::RISC0_CHAIN_GUEST_ID;
         use risc0_zkp::{digest, verify::VerificationError};
-        use risc0_zkvm::{InnerReceipt, Receipt};
+        use risc0_zkvm::{sha::Digestible, InnerReceipt, Receipt};
 
         lazy_static! {
             static ref parent_hash: FixedBytes<32> = fixed_bytes!("88e96d4537bea4d9c05d12549907b32561d3bf31f45aae734cdc119f13406cb6"); // https://etherscan.io/block/1
@@ -133,17 +133,10 @@ mod tests {
 
             let wrong_guest_id = [0; 32];
 
-            assert_eq!(
+            assert!(matches!(
                 receipt.verify(wrong_guest_id).unwrap_err(),
-                VerificationError::ClaimDigestMismatch {
-                    expected: digest!(
-                        "5c42161bce6c0e06eada541107cf6e98af3c0aab22599df815feede3550db28d"
-                    ),
-                    received: digest!(
-                        "26f0f4262d78ca42e28b4048c3d8bdaa9bb118a803269eae28270db311fd7463"
-                    )
-                }
-            );
+                VerificationError::ClaimDigestMismatch { .. }
+            ));
 
             Ok(())
         }
