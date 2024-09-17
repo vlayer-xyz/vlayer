@@ -2,7 +2,7 @@ use serde::{Deserialize, Serialize};
 
 use host_utils::ProofMode as HostProofMode;
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone, Deserialize, Serialize, Copy)]
 pub enum ProofMode {
     Groth16,
     Fake,

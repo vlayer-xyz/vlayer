@@ -147,7 +147,7 @@ mod v_chain {
                 "id": 1,
                 "error": {
                     "code": -32602,
-                    "message": "invalid type: string \"\", expected u32",
+                    "message": "invalid type: string \"\", expected u64",
                     "data": null
                 }
             }),

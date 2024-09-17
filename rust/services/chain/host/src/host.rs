@@ -1,11 +1,13 @@
 pub mod config;
 pub mod error;
 
+use alloy_primitives::{BlockNumber, ChainId};
 use chain_engine::Input;
 use chain_guest_wrapper::RISC0_CHAIN_GUEST_ELF;
 pub use config::HostConfig;
 pub use error::HostError;
 use host_utils::Prover;
+use mpt::MerkleTrie;
 use risc0_zkvm::{ExecutorEnv, ProveInfo, Receipt};
 use serde::Serialize;
 
@@ -24,8 +26,14 @@ impl Host {
         Host { prover }
     }
 
-    pub fn run(self) -> Result<HostOutput, HostError> {
-        let input = Input {};
+    pub fn run(
+        self,
+        _chain_id: ChainId,
+        _block_numbers: &[BlockNumber],
+        merkle_trie: &MerkleTrie,
+    ) -> Result<HostOutput, HostError> {
+        let root_hash = merkle_trie.hash_slow();
+        let input = Input { root_hash };
 
         let env = build_executor_env(input)
             .map_err(|err| HostError::ExecutorEnvBuilder(err.to_string()))?;
