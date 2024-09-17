@@ -1,0 +1,51 @@
+import browser from "webextension-polyfill";
+
+// this is mechanism of extracting the headers and cookies from the request
+// that works only for twitter
+// we need to make it generic
+
+export const formatTlsnHeaders = (
+  headers: browser.WebRequest.HttpHeadersItemType[],
+  cookies: browser.Cookies.Cookie[],
+  doCheck: boolean = false,
+) => {
+  const xCsrftoken =
+    headers.find((header) => header.name === "x-csrf-token")?.value || "";
+  const authToken =
+    cookies.find((cookie) => cookie.name === "auth_token")?.value || "";
+  const ct0 = cookies.find((cookie) => cookie.name === "ct0")?.value || "";
+  const authorization =
+    headers.find((header) => header.name === "authorization")?.value || "";
+
+  if (doCheck) {
+    if (!xCsrftoken) {
+      throw new Error("x-csrf-token header is missing");
+    }
+    if (!authToken) {
+      throw new Error("auth_token cookie is missing");
+    }
+    if (!ct0) {
+      throw new Error("ct0 cookie is missing");
+    }
+    if (!authorization) {
+      throw new Error("authorization header is missing");
+    }
+  }
+
+  return {
+    headers: {
+      "x-twitter-client-language": "en",
+      "x-csrf-token": xCsrftoken,
+      Host: "api.x.com",
+      authorization: authorization,
+      Cookie: `lang=en; auth_token=${authToken}; ct0=${ct0}`,
+      "Accept-Encoding": "identity",
+      Connection: "close",
+    },
+    secretHeaders: [
+      `x-csrf-token: ${xCsrftoken}`,
+      `cookie: lang=en; auth_token=${authToken}; ct0=${ct0}`,
+      `authorization: ${authorization}`,
+    ],
+  };
+};

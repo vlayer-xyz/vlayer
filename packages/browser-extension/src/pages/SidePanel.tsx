@@ -1,11 +1,16 @@
 import React from "react";
-import { Button, Theme, Grid, Spinner } from "@radix-ui/themes";
+import { Button, Theme, Grid, Spinner, Card } from "@radix-ui/themes";
 import browser from "webextension-polyfill";
-import { useTlsnProover, useProofContext } from "../hooks";
+import {
+  useTlsnProover,
+  useProofContext,
+  TlsnProofContextProvider,
+} from "../context";
 
-const BackButton = ({ isVisible }: { isVisible: boolean }) => {
+const BackButton = () => {
   const { backUrl } = useProofContext();
-  return isVisible ? (
+  const { proof } = useTlsnProover();
+  return proof ? (
     <Button
       onClick={() => {
         browser.tabs.create({ url: backUrl });
@@ -16,9 +21,10 @@ const BackButton = ({ isVisible }: { isVisible: boolean }) => {
   ) : null;
 };
 
-const ProofButton = ({ isVisible }: { isVisible: boolean }) => {
-  const { prove, isProoving, hasDataForProof } = useTlsnProover();
-  return isVisible ? (
+const ProofButton = () => {
+  const { prove, proof, isProoving, hasDataForProof } = useTlsnProover();
+
+  return !proof ? (
     <Button
       disabled={hasDataForProof ? false : true}
       onClick={() => {
@@ -31,9 +37,10 @@ const ProofButton = ({ isVisible }: { isVisible: boolean }) => {
   ) : null;
 };
 
-const GoToPageButton = ({ isVisible }: { isVisible: boolean }) => {
+const GoToPageButton = () => {
+  const { hasDataForProof } = useTlsnProover();
   const { redirectUrl } = useProofContext();
-  return isVisible ? (
+  return !hasDataForProof ? (
     <Button
       variant="soft"
       onClick={() => {
@@ -46,24 +53,41 @@ const GoToPageButton = ({ isVisible }: { isVisible: boolean }) => {
   ) : null;
 };
 
-export default function SidePanel() {
+const Proof = () => {
+  const { proof } = useTlsnProover();
+  console.log(proof);
+  return proof ? (
+    <Card>
+      <pre
+        style={{
+          textWrap: "balance",
+          fontSize: "12px",
+        }}
+      >
+        {JSON.stringify(proof, null, 2)}
+      </pre>
+    </Card>
+  ) : null;
+};
+
+const SidePanel = () => {
   return (
-    <Theme accentColor="violet">
-      <Grid columns="8" gapY="4" top="16" style={{ marginTop: "80px" }}>
-        <div style={{ gridColumn: "span 1" }}></div>
-        <div style={{ gridColumn: "span 6" }}>
-          <Grid columns="1" gapY="4">
-            <GoToPageButton isVisible={redirectUrl ? true : false} />
-            <ProofButton isVisible={proof ? false : true} />
-            <BackButton isVisible={proof ? true : false} />
-            {proof ? (
-              <div>
-                Have a proof: <pre>{JSON.stringify(proof, null, 2)}</pre>
-              </div>
-            ) : null}
-          </Grid>
-        </div>
-      </Grid>
-    </Theme>
+    <TlsnProofContextProvider>
+      <Theme accentColor="violet">
+        <Grid columns="8" gapY="4" top="16" style={{ marginTop: "80px" }}>
+          <div style={{ gridColumn: "span 1" }}></div>
+          <div style={{ gridColumn: "span 6" }}>
+            <Grid columns="1" gapY="4">
+              <GoToPageButton />
+              <ProofButton />
+              <BackButton />
+              <Proof />
+            </Grid>
+          </div>
+        </Grid>
+      </Theme>
+    </TlsnProofContextProvider>
   );
-}
+};
+
+export default SidePanel;
