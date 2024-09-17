@@ -11,8 +11,7 @@ pub fn server(config: ServerConfig) -> Router {
     let v_chain_handler = move |params| {
         Box::pin(v_chain(config.clone(), MerkleTrie::default(), params)) as Pin<Box<_>>
     };
-    let jrpc_handler =
-        move |req| async move { route(req, "v_proveChain", v_chain_handler).await };
+    let jrpc_handler = move |req| async move { route(req, "v_chain", v_chain_handler).await };
 
     Router::new().route("/", post(jrpc_handler))
 }

@@ -2,8 +2,8 @@ use axum_jrpc::{
     error::{JsonRpcError, JsonRpcErrorReason},
     Value,
 };
-use mpt::MptError;
 use chain_host::HostError;
+use mpt::MptError;
 use server_utils::FieldValidationError;
 use thiserror::Error;
 
