@@ -2,7 +2,7 @@
 
 ## Prerequisites
 
-To start working with this repository, you will need to install following software:
+To start working with [this repository](https://github.com/vlayer-xyz/vlayer), you will need to install following software:
 
 - [Rust](https://www.rust-lang.org/tools/install) compiler
 - Rust risc-0 [toolchain](https://dev.risczero.com/api/zkvm/quickstart)
@@ -52,7 +52,7 @@ bun install
 bun run prove.ts
 ``` 
 
-For guides about the project structure, check out [architecture appendix](/appendix/architecture.md).
+For guides about the project structure, check out [architecture appendix](/appendix/architecture/overview.html).
 
 ## Guest Profiling
 
