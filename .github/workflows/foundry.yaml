@@ -50,5 +50,6 @@ jobs:
         run: |
           forge fmt ./examples --check
       - name: Run Forge formatter (vlayer contracts)
+        working-directory: ./contracts
         run: |
-          forge fmt ./contracts/src --check
+          forge fmt --check
