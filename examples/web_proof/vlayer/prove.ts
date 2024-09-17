@@ -2,6 +2,7 @@ import { testHelpers, prove } from "@vlayer/sdk";
 import webProofProver from "../out/WebProofProver.sol/WebProofProver";
 import webProofVerifier from "../out/WebProofVerifier.sol/WebProofVerifier";
 import tls_proof from "./tls_proof.json";
+import * as assert from "assert";
 
 const notaryPubKey =
   "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExpX/4R4z40gI6C/j9zAM39u58LJu\n3Cx5tXTuqhhu/tirnBi5GniMmspOTEsps4ANnPLpMmMSfhJ+IFHbc3qVOA==\n-----END PUBLIC KEY-----\n";
@@ -26,3 +27,18 @@ await testHelpers.writeContract(verifier, webProofVerifier.abi, "verify", [
   returnValue,
 ]);
 console.log("Verified!");
+
+const [account] = await testHelpers.client().getAddresses();
+
+const name = await testHelpers.call(webProofVerifier.abi, verifier, "name");
+const symbol = await testHelpers.call(webProofVerifier.abi, verifier, "symbol");
+const balance = await testHelpers.call(
+  webProofVerifier.abi,
+  verifier,
+  "balanceOf",
+  [account],
+);
+
+assert.strictEqual(name, "TwitterNFT");
+assert.strictEqual(symbol, "TNFT");
+assert.strictEqual(balance, 1n);
