@@ -83,7 +83,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
         headers: fotmattedHeaders.headers,
         secretHeaders: fotmattedHeaders.secretHeaders,
       });
-      const verifiedProof = await verify(tlsnProof);
+      const verifiedProof = await tlsnVerify(tlsnProof);
       setProof(verifiedProof);
       setIsProoving(false);
     } catch (e) {
