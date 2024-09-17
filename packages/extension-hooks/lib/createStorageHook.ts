@@ -2,9 +2,9 @@ import { useState, useEffect, useCallback } from "react";
 import browser from "webextension-polyfill";
 function createStorageHook(storage: browser.Storage.StorageArea) {
   // for now this implementation is enough
-  // to add later :
+  // to add later:
   // - serialize and deserialize the value
-  // - syn WebStorage support
+  // - sync WebStorage support
 
   return function useStorage<T>(
     storageKey: string,
@@ -15,7 +15,7 @@ function createStorageHook(storage: browser.Storage.StorageArea) {
     useEffect(() => {
       storage.set({ [storageKey]: initialValue });
 
-      // obser storage changes
+      // observe storage changes
 
       const handleStorageChange = (changes: {
         [key: string]: browser.Storage.StorageChange;
@@ -27,10 +27,10 @@ function createStorageHook(storage: browser.Storage.StorageArea) {
         });
       };
 
-      browser.storage.onChanged.addListener(handleStorageChange);
+      storage.onChanged.addListener(handleStorageChange);
 
       return () => {
-        browser.storage.onChanged.removeListener(handleStorageChange);
+        storage.onChanged.removeListener(handleStorageChange);
       };
     }, []);
 

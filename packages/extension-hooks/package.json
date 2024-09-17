@@ -1,5 +1,5 @@
 {
-  "name": "@vlayer/extension-hooks-",
+  "name": "@vlayer/extension-hooks",
   "module": "index.ts",
   "type": "module",
   "devDependencies": {
