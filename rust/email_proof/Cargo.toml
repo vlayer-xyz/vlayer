@@ -8,3 +8,5 @@ alloy-dyn-abi = { workspace = true }
 alloy-sol-types = { workspace = true }
 mailparse = "0.15.0"
 thiserror = { workspace = true }
+mail-auth = { git = "https://github.com/vlayer-xyz/mail-auth", rev = "008c5c5726af710f61e7529b5742abf3afaaeadb" }
+futures = "0.3.30"
