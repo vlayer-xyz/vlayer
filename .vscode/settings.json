@@ -7,6 +7,10 @@
     "RISC0_SKIP_BUILD": 1,
     "LIBUSB_STATIC": "1"
   },
+  "[rust]": {
+    "editor.defaultFormatter": "rust-lang.rust-analyzer",
+    "editor.formatOnSave": true
+  },
   "rust-analyzer.check.workspace": false,
   "cSpell.words": [
     "augmentors",
