@@ -139,7 +139,7 @@ fn install_contracts() -> Result<(), CLIError> {
 
 fn add_risc0_eth_remappings(foundry_root: &Path) -> std::io::Result<()> {
     let remappings_txt = foundry_root.join("remappings.txt");
-    let suffix = "forge-std/=dependencies/forge-std-1.8.2/src\nopenzeppelin-contracts=dependencies/@openzeppelin-contracts-5.0.1/";
+    let suffix = "forge-std/=dependencies/forge-std-1.9.2/src\nopenzeppelin-contracts=dependencies/@openzeppelin-contracts-5.0.1/";
 
     let mut file = OpenOptions::new().append(true).open(remappings_txt)?;
 
@@ -149,7 +149,7 @@ fn add_risc0_eth_remappings(foundry_root: &Path) -> std::io::Result<()> {
 }
 
 fn install_dependencies() -> Result<(), CLIError> {
-    let dependencies = vec!["@openzeppelin-contracts~5.0.1", "forge-std~1.8.2"];
+    let dependencies = vec!["@openzeppelin-contracts~5.0.1", "forge-std~1.9.2"];
 
     for dep in dependencies {
         let output = std::process::Command::new("forge")
