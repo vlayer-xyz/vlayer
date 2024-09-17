@@ -1,5 +1,33 @@
 import React from "react";
-import { Button, Theme, Grid } from "@radix-ui/themes";
+import { Button, Theme, Grid, Spinner} from "@radix-ui/themes";
+import browser from "webextension-polyfill";
+import { 
+	useTlsnProover,
+	useProofContext
+} from '../hooks'
+
+
+const BackButton = ({isVisible } : { isVisible : boolean}) => {
+	const { backUrl } = useProofContext();
+	return isVisible ? <Button onClick={() => {
+		browser.tabs.create({ url: backUrl });
+	}}>Back</Button> : null;
+}
+
+const ProofButton = ( {isVisible} : {isVisible : boolean } ) => {
+	const { prove, isProoving, hasDataForProof } = useTlsnProover();
+	return isVisible ? <Button disabled={hasDataForProof ? true : false } onClick={()=> {
+		prove()
+	}}> {
+		isProoving ? <Spinner /> : 'Make Proof'
+	}  </Button> : null;
+}
+
+const GoToPageButton = ({ isVisible} : {isVisible : boolean}) => {
+	const { redirectUrl } = useProofContext();
+	return isVisible ? <Button variant="soft"> Go to page {redirectUrl} </Button> : null;
+}
+
 export default function SidePanel() {
   return (
     <Theme accentColor="violet">

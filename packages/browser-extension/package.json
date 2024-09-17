@@ -24,6 +24,7 @@
     "monorepo": "radix-ui/themes",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "tlsn-js": "v0.1.0-alpha.5.4"
+    "tlsn-js": "v0.1.0-alpha.5.4",
+    "@vlayer/extension-hooks": "file:../extension-hooks"
   }
 }
