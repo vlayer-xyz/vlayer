@@ -1,5 +1,5 @@
 [package]
-name = "prove_chain_server"
+name = "chain_server"
 version = "0.1.0"
 edition = "2021"
 
@@ -15,7 +15,7 @@ server_utils = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
 tower = { workspace = true }
-prove_chain_host = { workspace = true}
+chain_host = { workspace = true}
 risc0-zkvm = { workspace = true }
 bincode = "1.3.3"
 chain = { workspace = true }

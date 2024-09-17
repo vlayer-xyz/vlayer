@@ -1,5 +1,5 @@
 use axum::http::StatusCode;
-use prove_chain_server::{server::server, ServerConfig};
+use chain_server::{server::server, ServerConfig};
 use serde_json::json;
 use server_utils::{body_to_json, post};
 
@@ -62,7 +62,7 @@ async fn method_missing() {
     );
 }
 
-mod v_prove_chain {
+mod v_chain {
     use super::*;
 
     #[tokio::test]
@@ -72,7 +72,7 @@ mod v_prove_chain {
         let req = json!({
             "jsonrpc": "2.0",
             "id": 1,
-            "method": "v_proveChain",
+            "method": "v_chain",
             "params": {
                 "chain_id": 1,
                 "block_numbers": [1]
@@ -100,7 +100,7 @@ mod v_prove_chain {
         let req = json!({
             "jsonrpc": "2.0",
             "id": 1,
-            "method": "v_proveChain",
+            "method": "v_chain",
             "params": {
                 "chain_id": 1,
                 "block_numbers": []
@@ -132,7 +132,7 @@ mod v_prove_chain {
         let req = json!({
             "jsonrpc": "2.0",
             "id": 1,
-            "method": "v_proveChain",
+            "method": "v_chain",
             "params": {
                 "chain_id": 1,
                 "block_numbers": [valid_number, invalid_number]

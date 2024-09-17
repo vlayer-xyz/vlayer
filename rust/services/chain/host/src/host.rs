@@ -1,11 +1,11 @@
 pub mod config;
 pub mod error;
 
+use chain_engine::Input;
+use chain_guest_wrapper::RISC0_CHAIN_GUEST_ELF;
 pub use config::HostConfig;
 pub use error::HostError;
 use host_utils::Prover;
-use prove_chain_engine::Input;
-use prove_chain_guest_wrapper::RISC0_PROVE_CHAIN_GUEST_ELF;
 use risc0_zkvm::{ExecutorEnv, ProveInfo, Receipt};
 use serde::Serialize;
 
@@ -29,8 +29,7 @@ impl Host {
 
         let env = build_executor_env(input)
             .map_err(|err| HostError::ExecutorEnvBuilder(err.to_string()))?;
-        let ProveInfo { receipt, .. } =
-            provably_execute(&self.prover, env, RISC0_PROVE_CHAIN_GUEST_ELF)?;
+        let ProveInfo { receipt, .. } = provably_execute(&self.prover, env, RISC0_CHAIN_GUEST_ELF)?;
 
         Ok(HostOutput { receipt })
     }

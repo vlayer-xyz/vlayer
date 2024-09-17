@@ -2,11 +2,11 @@
 
 
 [package]
-name = "risc0_prove_chain_guest"
+name = "risc0_chain_guest"
 version = "0.1.0"
 edition = "2021"
 
 
 [dependencies]
-prove_chain_guest = { path = "../../guest" }
+chain_guest = { path = "../../guest" }
 risc0-zkvm = { version = "1.0.1", default-features = false, features = ["std"] }

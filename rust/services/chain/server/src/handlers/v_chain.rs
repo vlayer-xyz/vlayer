@@ -18,7 +18,7 @@ pub struct ChainProof {
     nodes: Vec<Bytes>,
 }
 
-pub async fn v_prove_chain(
+pub async fn v_chain(
     _config: Arc<ServerConfig>,
     merkle_trie: MerkleTrie,
     params: Params,
@@ -58,7 +58,7 @@ mod tests {
         };
         let trie = MerkleTrie::default();
         assert_eq!(
-            v_prove_chain(config.clone(), trie, empty_block_hashes)
+            v_chain(config.clone(), trie, empty_block_hashes)
                 .await
                 .unwrap_err(),
             AppError::NoBlockNumbers
@@ -74,7 +74,7 @@ mod tests {
             block_numbers: vec![1, 2],
         };
 
-        let response = v_prove_chain(config.clone(), trie, params).await?;
+        let response = v_chain(config.clone(), trie, params).await?;
 
         let ChainProof {
             proof: _proof,

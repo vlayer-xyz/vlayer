@@ -1,5 +1,5 @@
 [package]
-name = "prove_chain_host"
+name = "chain_host"
 version = "0.1.0"
 edition = "2021"
 
@@ -9,6 +9,6 @@ alloy-primitives = { workspace = true }
 risc0-zkvm = { workspace = true }
 serde = { workspace = true }
 anyhow = { workspace = true }
-prove_chain_engine = { workspace = true }
+chain_engine = { workspace = true }
 thiserror = { workspace = true }
-prove_chain_guest_wrapper = { workspace = true }
+chain_guest_wrapper = { workspace = true }

@@ -131,7 +131,7 @@ fn prepend(elf_id: Hash, child_block: BlockHeader, mpt: SparseMpt<ChildBlockIdx,
 
 ### Prove Chain server
 
-Block Proof Cache structure is stored in a distinct type of vlayer node, specifically a JSON-RPC server. It consists of a single call `v_proveChain(chain_id: number, block_numbers: number[])`. 
+Block Proof Cache structure is stored in a distinct type of vlayer node, specifically a JSON-RPC server. It consists of a single call `v_chain(chain_id: number, block_numbers: number[])`. 
 This call takes chain ID and an array of block numbers as an argument.
 It returns two things:
 * Sparse MPT that contains proofs for all block numbers passed as arguments.
@@ -141,7 +141,7 @@ An example call could look like this:
 
 ```json
 {
-  "method": "v_proveChain",
+  "method": "v_chain",
   "params": {
     "chain_id": 1,
     "block_numbers": [

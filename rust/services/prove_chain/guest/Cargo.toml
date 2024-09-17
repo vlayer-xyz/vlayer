@@ -1,7 +1,0 @@
-[package]
-name = "prove_chain_guest"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-prove_chain_engine = { workspace = true }

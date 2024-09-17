@@ -29,7 +29,7 @@ jobs:
           cache-workspaces: |
             rust
             rust/services/call/guest_wrapper/risc0_guest
-            rust/services/prove_chain/guest_wrapper/risc0_guest
+            rust/services/chain/guest_wrapper/risc0_guest
 
       - name: Install risc0 installer
         run: cargo binstall -y cargo-risczero@1.0.5 --force

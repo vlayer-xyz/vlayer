@@ -2,7 +2,7 @@
 
 risc0_zkvm::guest::entry!(main);
 
-use prove_chain_guest::{Guest, Input};
+use chain_guest::{Guest, Input};
 use risc0_zkvm::guest::env;
 
 fn main() {

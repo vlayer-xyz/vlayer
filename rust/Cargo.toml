@@ -1,11 +1,11 @@
 [workspace]
 resolver = "2"
 members = [
-    "services/prove_chain/host",
-    "services/prove_chain/guest",
-    "services/prove_chain/guest_wrapper",
-    "services/prove_chain/engine",
-    "services/prove_chain/server",
+    "services/chain/host",
+    "services/chain/guest",
+    "services/chain/guest_wrapper",
+    "services/chain/engine",
+    "services/chain/server",
     "services/call/host",
     "services/call/guest",
     "services/call/guest_wrapper",
@@ -114,8 +114,8 @@ call_engine = { path = "services/call/engine" }
 call_guest_wrapper = { path = "services/call/guest_wrapper" }
 call_server = { path = "services/call/server" }
 
-prove_chain_host = { path = "services/prove_chain/host" }
-prove_chain_guest = { path = "services/prove_chain/guest" }
-prove_chain_engine = { path = "services/prove_chain/engine" }
-prove_chain_guest_wrapper = { path = "services/prove_chain/guest_wrapper" }
-prove_chain_server = { path = "services/prove_chain/server" }
+chain_host = { path = "services/chain/host" }
+chain_guest = { path = "services/chain/guest" }
+chain_engine = { path = "services/chain/engine" }
+chain_guest_wrapper = { path = "services/chain/guest_wrapper" }
+chain_server = { path = "services/chain/server" }
