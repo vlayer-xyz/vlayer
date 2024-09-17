@@ -16,9 +16,10 @@ abstract contract ProofVerifierBase is IProofVerifier {
 
     ProofMode public immutable PROOF_MODE;
     IRiscZeroVerifier public immutable VERIFIER;
+    bytes32 public immutable CALL_GUEST_ID;
 
-    function guest_id() external pure returns (bytes32) {
-        return ImageID.RISC0_CALL_GUEST_ID;
+    constructor() {
+        CALL_GUEST_ID = ImageID.RISC0_CALL_GUEST_ID;
     }
 
     function verify(Proof calldata proof, bytes32 journalHash, address expectedProver, bytes4 expectedSelector)
@@ -27,7 +28,11 @@ abstract contract ProofVerifierBase is IProofVerifier {
     {
         _verifyProofMode(proof);
         _verifyExecutionEnv(proof, expectedProver, expectedSelector);
-        VERIFIER.verify(proof.seal.decode(), ImageID.RISC0_CALL_GUEST_ID, journalHash);
+        VERIFIER.verify(proof.seal.decode(), CALL_GUEST_ID, journalHash);
+    }
+
+    function call_guest_id() external view returns (bytes32) {
+        return CALL_GUEST_ID;
     }
 
     function _verifyProofMode(Proof memory proof) private view {
