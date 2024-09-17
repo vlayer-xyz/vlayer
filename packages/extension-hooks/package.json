@@ -1,0 +1,17 @@
+{
+  "name": "@vlayer/extension-hooks",
+  "module": "index.ts",
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest",
+    "webextension-polyfill": "^0.12.0"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0",
+    "react": "^18.3.1"
+  },
+  "dependencies": {
+    "@types/react": "^18.3.5",
+    "@types/webextension-polyfill": "^0.12.1"
+  }
+}
