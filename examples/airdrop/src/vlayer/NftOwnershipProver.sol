@@ -5,7 +5,7 @@ pragma solidity ^0.8.13;
 // tokenId and msg.sender would be privately provided to the prover
 // Such proof can be used by on-chain smart contract to claim airdrop or any other logic
 
-import {Prover} from "vlayer/Prover.sol";
+import {Prover} from "vlayer-0.1.0/src/Prover.sol";
 
 interface IERC721 {
     function balanceOf(address owner) external view returns (uint256 balance);
