@@ -76,8 +76,8 @@ mod tests {
         use alloy_primitives::{fixed_bytes, FixedBytes};
         use anyhow::Result;
         use chain_host::RISC0_CHAIN_GUEST_ID;
-        use risc0_zkp::{digest, verify::VerificationError};
-        use risc0_zkvm::{sha::Digestible, InnerReceipt, Receipt};
+        use risc0_zkp::verify::VerificationError;
+        use risc0_zkvm::{InnerReceipt, Receipt};
 
         lazy_static! {
             static ref parent_hash: FixedBytes<32> = fixed_bytes!("88e96d4537bea4d9c05d12549907b32561d3bf31f45aae734cdc119f13406cb6"); // https://etherscan.io/block/1
