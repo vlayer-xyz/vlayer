@@ -53,12 +53,13 @@ const generateTestSignature = async (account: Account) => {
 const generateProof = async (prover: Address, tokenOwner: Account) => {
   const signature = await generateTestSignature(tokenOwner);
 
-  const { proof, returnValue } = await prove(
+  const { proof, returnValue, ok } = await prove(
     prover,
     privateAirdropProver.abi,
     "main",
     [tokenOwner.address, signature],
   );
+  assert(ok, "Proving failed");
   console.log("Proof:", proof);
 
   return { proof, returnValue };

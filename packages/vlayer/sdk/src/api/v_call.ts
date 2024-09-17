@@ -44,9 +44,21 @@ export interface VCallResult {
   proof: Proof;
 }
 
-export interface VCallResponse {
+interface VCallResponseOk {
   jsonrpc: string;
   result: VCallResult;
+  id: number;
+}
+
+type VCallResponse = VCallResponseOk | VCallResponseError;
+
+interface VCallResponseError {
+  jsonrpc: string;
+  error: {
+    code: number;
+    message: string;
+    data: unknown;
+  };
   id: number;
 }
 
@@ -59,10 +71,7 @@ function v_callBody(call: CallParams, context: CallContext) {
   };
 }
 
-export async function v_call(
-  call: CallParams,
-  context: CallContext,
-): Promise<VCallResponse> {
+export async function v_call(call: CallParams, context: CallContext) {
   const response = await fetch("http://127.0.0.1:3000", {
     method: "POST",
     body: JSON.stringify(v_callBody(call, context)),

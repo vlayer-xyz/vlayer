@@ -4,6 +4,7 @@ import SimpleProver from "../out/SimpleProver.sol/SimpleProver";
 import SimpleVerifier from "../out/SimpleVerifier.sol/SimpleVerifier";
 import ExampleNftAbi from "../out/ExampleNFT.sol/ExampleNFT";
 import ExampleToken from "../out/ExampleToken.sol/ExampleToken";
+import assert from "node:assert";
 
 const john = testHelpers.getTestAccount();
 const exampleToken = await testHelpers.deployContract(ExampleToken, [
@@ -22,12 +23,13 @@ const verifier = await testHelpers.deployContract(SimpleVerifier, [
 ]);
 
 console.log("Proving...");
-const { proof, returnValue } = await prove(
+const { proof, returnValue, ok } = await prove(
   prover,
   SimpleProver.abi,
   "balance",
   [john.address],
 );
+assert(ok, "Proving failed");
 console.log("Proof result:");
 console.log(proof, returnValue);
 

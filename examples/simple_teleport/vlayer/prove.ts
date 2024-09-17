@@ -4,6 +4,7 @@ import { testHelpers, prove } from "@vlayer/sdk";
 import simpleTravelProver from "../out/SimpleTravelProver.sol/SimpleTravelProver";
 import simpleTravelVerifier from "../out/SimpleTravelVerifier.sol/SimpleTravel";
 import exampleNFT from "../out/ExampleNFT.sol/ExampleNFT";
+import assert from "node:assert";
 
 const john = testHelpers.getTestAccount();
 
@@ -30,12 +31,13 @@ const deployVerifier = async (prover: Address) => {
 console.log("Proving...");
 const proverAddr = await deployProver();
 
-const { proof, returnValue } = await prove(
+const { proof, returnValue, ok } = await prove(
   proverAddr,
   simpleTravelProver.abi,
   "crossChainBalanceOf",
   [john.address],
 );
+assert(ok, "Proving failed");
 console.log("Response:", proof, returnValue);
 
 const verifierAddr = await deployVerifier(proverAddr);

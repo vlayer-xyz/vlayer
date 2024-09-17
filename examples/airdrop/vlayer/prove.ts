@@ -12,12 +12,12 @@ const [prover, verifier] = await testHelpers.deployProverVerifier(
 
 console.log("Proving...");
 const sender = testHelpers.getTestAccount().address;
-const { proof, returnValue: claimAddress } = await prove(
-  prover,
-  nftOwnershipProver.abi,
-  "main",
-  [sender],
-);
+const {
+  proof,
+  returnValue: claimAddress,
+  ok,
+} = await prove(prover, nftOwnershipProver.abi, "main", [sender]);
+assert(ok, "Proving failed");
 console.log("Proof:");
 console.log(proof);
 assert.equal(claimAddress, sender);

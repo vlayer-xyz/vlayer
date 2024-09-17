@@ -5,6 +5,7 @@ import {
   ContractFunctionArgs,
   ContractFunctionName,
   decodeFunctionResult,
+  DecodeFunctionResultReturnType,
   encodeFunctionData,
   type Hex,
 } from "viem";
@@ -37,13 +38,34 @@ export async function getContractSpec(file: string): Promise<ContractSpec> {
   return Bun.file(file).json();
 }
 
+export type ProveResult<T> =
+  | {
+      ok: true;
+      proof: Proof;
+      returnValue: T;
+    }
+  | {
+      ok: false;
+      error: any;
+      proof: undefined;
+      returnValue: undefined;
+    };
+
 export async function prove<T extends Abi, F extends ContractFunctionName<T>>(
   prover: Address,
   abi: T,
   functionName: F,
   args: ContractFunctionArgs<T, AbiStateMutability, F>,
   chainId = testChainId1,
-) {
+): Promise<
+  ProveResult<
+    DecodeFunctionResultReturnType<
+      T,
+      F,
+      ContractFunctionArgs<T, AbiStateMutability, F>
+    >
+  >
+> {
   const calldata = encodeFunctionData({
     abi,
     functionName,
@@ -55,19 +77,26 @@ export async function prove<T extends Abi, F extends ContractFunctionName<T>>(
     chain_id: chainId,
   };
 
-  const {
-    result: { proof, evm_call_result },
-  } = await v_call(call, context);
+  const vCallResponse = await v_call(call, context);
+
+  if ("error" in vCallResponse) {
+    return {
+      ok: false,
+      error: vCallResponse.error,
+      proof: undefined,
+      returnValue: undefined,
+    };
+  }
 
   const returnValue = decodeFunctionResult({
     abi,
     functionName,
-    data: evm_call_result,
+    data: vCallResponse.result.evm_call_result,
   });
 
-  addDynamicParamsOffsets(abi, functionName, proof);
+  addDynamicParamsOffsets(abi, functionName, vCallResponse.result.proof);
 
-  return { proof, returnValue };
+  return { ok: true, proof: vCallResponse.result.proof, returnValue };
 }
 
 function addDynamicParamsOffsets(abi: Abi, functionName: string, proof: Proof) {
