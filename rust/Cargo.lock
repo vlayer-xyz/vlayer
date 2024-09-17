@@ -1908,6 +1908,7 @@ dependencies = [
 name = "chain_engine"
 version = "0.1.0"
 dependencies = [
+ "alloy-primitives",
  "serde",
 ]
 
@@ -1934,6 +1935,7 @@ dependencies = [
  "chain_engine",
  "chain_guest_wrapper",
  "host_utils",
+ "mpt",
  "risc0-zkvm",
  "serde",
  "thiserror",
@@ -1953,6 +1955,7 @@ dependencies = [
  "lazy_static",
  "mime",
  "mpt",
+ "risc0-zkp",
  "risc0-zkvm",
  "serde",
  "serde_json",

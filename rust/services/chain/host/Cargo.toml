@@ -12,3 +12,4 @@ anyhow = { workspace = true }
 chain_engine = { workspace = true }
 thiserror = { workspace = true }
 chain_guest_wrapper = { workspace = true }
+mpt = { workspace = true }

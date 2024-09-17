@@ -6,9 +6,9 @@ use chain_guest::{Guest, Input};
 use risc0_zkvm::guest::env;
 
 fn main() {
-    let Input {} = env::read();
+    let Input { root_hash } = env::read();
 
     let _ = Guest {};
 
-    // env::commit_slice(&[]);
+    env::commit_slice(root_hash.as_slice());
 }
