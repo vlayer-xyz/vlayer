@@ -130,19 +130,13 @@ where
     }
 
     fn storage_tries(proofs: &[EIP1186Proof]) -> anyhow::Result<Vec<MerkleTrie>> {
-        let mut storage_tries = HashMap::new();
-        for proof in proofs {
-            // skip non-existing accounts or accounts where no storage slots were requested
-            if proof.storage_proof.is_empty() || proof.storage_hash.is_zero() {
-                continue;
-            }
-
-            let storage_nodes = proof.storage_proof.iter().flat_map(|p| p.proof.iter());
-            let storage_trie =
-                MerkleTrie::from_rlp_nodes(storage_nodes).context("invalid storage proof")?;
-            storage_tries.insert(storage_trie.hash_slow(), storage_trie);
-        }
-        let storage_tries: Vec<_> = storage_tries.into_values().collect();
-        Ok(storage_tries)
+        proofs
+            .iter()
+            .filter(|proof| !(proof.storage_proof.is_empty() || proof.storage_hash.is_zero()))
+            .map(|proof| {
+                let storage_nodes = proof.storage_proof.iter().flat_map(|p| p.proof.iter());
+                MerkleTrie::from_rlp_nodes(storage_nodes).context("invalid storage proof")
+            })
+            .collect()
     }
 }
