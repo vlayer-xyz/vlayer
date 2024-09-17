@@ -27,19 +27,6 @@ Arbitrary arguments can be passed to Prover functions. All arguments are private
 
 All data returned by functions is public. To make an argument public on-chain, return it from the function.
 
-### Injected values
-Two additional variables may be injected to function body: `web` and `mail`. These variables allows to access data like email or web content and use them in the contract logic.     
-
-See the example code below:
-```solidity
-contract WebProver is Prover {
-    function main() public pure returns (string memory) {
-        require(web.url.equal("https://api.x.com"), "Invalid URL");
-        return (web.content);
-    }
-}
-```
-
 ### Proof
 
 Once the `WebProver` computation is complete, a proof is generated and made available along with the returned value (e.g., `web.content` in our example). This output can then be consumed and cryptographically verified by the `Verifier` on-chain smart contract.
