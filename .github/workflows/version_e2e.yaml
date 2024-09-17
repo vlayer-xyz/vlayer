@@ -20,7 +20,7 @@ jobs:
           cache-workspaces: |
             rust
             rust/services/call/guest_wrapper/risc0_guest
-            rust/services/prove_chain/guest_wrapper/risc0_guest
+            rust/services/chain/guest_wrapper/risc0_guest
 
       - uses: cargo-bins/cargo-binstall@main
 
