@@ -74,7 +74,7 @@ In order to start proving, we will need to provide:
 - `chainId` - id of the chain in whose context the prover contract call shall be executed
 
 ```ts
-import { sepolia } from 'viem/chains'
+import { foundry } from 'viem/chains'
 import { proverAbi } from './proverAbi'
 
 const hash = vlayer.prove({
@@ -82,7 +82,7 @@ const hash = vlayer.prove({
     proverAbi
     funcationName: 'main', 
     args: ['0x0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', 123],
-    chainId: sepolia,
+    chainId: foundry,
 })
 ```
 
@@ -99,11 +99,15 @@ const { proof, result } = await vlayer.waitForProvingResult({ hash });
 Once we have obtained proving result, we can call verifier contract (below example demontrates how to use `viem` for that purpose).
 
 ```ts
-import { createTestClient } from 'viem'
+import { createTestClient, http } from 'viem'
 import { verifierAbi } from './verifierAbi'
 
 
-await createTestClient({...}).writeContract({
+createTestClient({
+   mode: 'anvil',
+   chain: foundry,
+   transport: http(),
+}).writeContract({
     abi: verifierAbi,
     address,
     account
