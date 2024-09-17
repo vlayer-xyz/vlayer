@@ -1,5 +1,5 @@
 # Vanilla JS/TS
-# JavaScript
+## JavaScript
 <div class="feature-card feature-in-dev">
   <div class="title">
     <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -12,7 +12,7 @@
   <p>Our team is currently working on this feature. In case of any bug please retry in 1-2 weeks. We appreciate your patience. </p>
 </div>
 
-A common way to interact with blockchain is to make calls and send transactions from JavaScript, most often from a web browser. vlayer provides developer friendly JavaScript/TypeScript API - vlayer sdk. It combines well with the standard way of interacting with smart contracts. 
+A common way to interact with blockchain is to make calls and send transactions from JavaScript, most often from a web browser. vlayer provides developer friendly JavaScript/TypeScript API - vlayer SDK. It combines well with the standard way of interacting with smart contracts. 
 
 ## Installation
 To install vlayer SDK, run the following command in your JavaScript application
@@ -44,14 +44,14 @@ bun i @vlayer/sdk
 
 ## vlayer client
 
-A vlayer client is an interface to vlayer JSON-RPC API methods to trigger and follow the status of proving.
+A vlayer client is an interface to vlayer JSON-RPC API methods to trigger and follow the status of proving. It also provides convenient access to specific vlayer features such as [Web Proofs](./webproofs.md).
 
 Initialize a client with default prover.
 
 ```ts
 import { createVlayerClient } from '@vlayer/sdk'
  
-const client = createVlayerClient();
+const vlayer = createVlayerClient();
 ```
 
 Initialize a client with prover with specific url.
@@ -59,49 +59,59 @@ Initialize a client with prover with specific url.
 ```ts
 import { createVlayerClient } from '@vlayer/sdk'
  
-const vlayerClient = createVlayerClient({
-  url: 'http://localhost:3000'
-})
-```
-
-## Encoding transaction
-vlayer sdk is based on [viem](https://viem.sh/) - a TypeScript interface for Ethereum. If you used viem before, you will feel right at home. 
-
-We will start with encoding a call to a prover contract, with viem:
-
-```ts
-import { encodeFunctionData } from 'viem'
-import { proverAbi } from './abi'
- 
-const data = encodeFunctionData({
-  abi: proverAbi,
-  functionName: 'main',
-  args: ['0xa5cc3c03994DB5b0d9A5eEdD10CabaB0813678AC']
+const vlayer = createVlayerClient({
+  proverUrl: 'http://localhost:3000',
 })
 ```
 
 ## Proving
 
-Now, we can request proving. We will need to provide:
-- `to` - an address of prover contract
-- `data` - encoded call to prover for the section above
-- `chain` - a chain which will be used to settle a transaction
+In order to start proving, we will need to provide:
+- `address` - an address of prover contract
+- `proverAbi` - abi of prover contract
+- `functionName` - name of prover contract function to call
+- `args` - an array of arguments to `functionName` prover contract function 
+- `chainId` - id of the chain in whose context the prover contract call shall be executed
 
 ```ts
-import { sepolia } from 'viem/chains'
+import { foundry } from 'viem/chains'
+import { proverAbi } from './proverAbi'
 
-const hash = vlayerClient.prove({
-    to: '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
-    data
-    chain: sepolia
-});
+const hash = vlayer.prove({
+    address: '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
+    proverAbi
+    funcationName: 'main', 
+    args: ['0x0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', 123],
+    chainId: foundry,
+})
 ```
 
 ### Waiting for result
-Wait for the proving to be finish, and then returns the result along with Proof.
+
+Wait for the proving to be finished, and then retrieve the result along with Proof.
 
 ```ts
-const { proof, result } = await vlayerClient.waitForProvingResult({ hash });
+const { proof, result } = await vlayer.waitForProvingResult({ hash });
 ```
 
+## Verification
 
+Once we have obtained proving result, we can call verifier contract (below example demontrates how to use `viem` for that purpose).
+
+```ts
+import { createTestClient, http } from 'viem'
+import { verifierAbi } from './verifierAbi'
+
+
+createTestClient({
+   mode: 'anvil',
+   chain: foundry,
+   transport: http(),
+}).writeContract({
+    abi: verifierAbi,
+    address,
+    account
+    functionName: 'verify',
+    args: [proof, ...result, 'additional arg'],
+})
+```
