@@ -29,7 +29,8 @@ A better option is to prove that GitHub's email servers sent a welcome email. Be
 Below is an example of such proof generation:
 
 ```solidity
-import {EmailProofLib} from "vlayer/EmailProof.sol";
+import {Prover} from "vlayer/Prover.sol";
+import {VerifiedEmail, MimeEmail, EmailProofLib} from "vlayer/EmailProof.sol";
 
 contract GitHubEmail is Prover {
     using EmailProofLib for MimeEmail;
@@ -47,7 +48,7 @@ contract GitHubEmail is Prover {
 ```
 
 
-The `email` structure is automatically injected into the contract context of the email prover by the vlayer. Then we have a series of assertions (*regular Solidity `require()`*) that check the email details. 
+First, we verify the integrity of the email with the `verify()` function. Then we have a series of assertions (*regular Solidity `require()`*) that check the email details. 
 
 String comparison is handled by our `StringUtils` library (*described in more [details below](/features/email.html#stringutils)*). Date values are formatted in the [Unix time](https://en.wikipedia.org/wiki/Unix_time) notation, which allows them to be compared as integers.
 
@@ -105,6 +106,7 @@ Body: New wallet address {new account address}
 Now, we can access the email from the `Prover` contract:
 
 ```solidity
+import {Prover} from "vlayer/Prover.sol";
 import {VerifiedEmail, MimeEmail, EmailProofLib} from "vlayer/EmailProof.sol";
 
 contract RecoveryEmail is Prover {
@@ -175,6 +177,8 @@ Now we are ready to use the proof and results from the previous step for on-chai
 Below is a sample implementation of this:
 
 ```solidity 
+import { Verifier } from "vlayer/Verifier.sol";
+
 import { RecoveryEmail } from "RecoveryEmail.sol";
 
 address constant PROVER_ADDR = 0xd7141F4954c0B082b184542B8b3Bd00Dc58F5E05;
