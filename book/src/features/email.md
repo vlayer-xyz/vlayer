@@ -29,8 +29,12 @@ A better option is to prove that GitHub's email servers sent a welcome email on 
 Below is an example of such proof generation:
 
 ```solidity
+import {EmailProofLib} from "vlayer/EmailProof.sol";
+
 contract GitHubEmail is Prover {
-    function main() public returns (bool) {      
+    function main() public returns (bool) {
+      EmailProofLib.Email memory email = EmailProofLib.verify(emailProof);
+
       require(email.subject.equal("Welcome to GitHub"), "Incorrect subject")
       require(email.from.equal("notifications@github.com"), "Incorrect sender")
       require(email.to[0].equal("john.prover@gmail.com"), "Incorrect recipient")
@@ -104,8 +108,12 @@ Body: New wallet address {new account address}
 Now, we can access the email from the `Prover` contract:
 
 ```solidity
+import {EmailProofLib} from "vlayer/EmailProof.sol";
+
 contract RecoveryEmail is Prover {
     using StringUtils for string;
+
+    EmailProofLib.Email memory email = EmailProofLib.verify(emailProof);
 
     function main(address multisigAddr) public returns (address, string, address, uint) {      
       address lostWallet = parseSubject(email.subject);
