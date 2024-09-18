@@ -1,11 +1,11 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-struct EmailProof {
-    string mimeEmail;
+struct MimeEmail {
+    string email;
 }
 
-struct Email {
+struct VerifiedEmail {
     string from;
     string to;
     string subject;
@@ -15,10 +15,10 @@ struct Email {
 library EmailProofLib {
     address private constant VERIFY_EMAIL_PRECOMPILE = address(0x102);
 
-    function verify(EmailProof memory emailProof) internal view returns (Email memory) {
-        (bool success, bytes memory email) = VERIFY_EMAIL_PRECOMPILE.staticcall(bytes(emailProof.mimeEmail));
+    function verify(MimeEmail memory mimeEmail) internal view returns (VerifiedEmail memory) {
+        (bool success, bytes memory emailBytes) = VERIFY_EMAIL_PRECOMPILE.staticcall(bytes(mimeEmail.email));
         require(success, "verify_email precompile call failed");
-        Email memory decodedEmail = abi.decode(email, (Email));
-        return decodedEmail;
+        VerifiedEmail memory email = abi.decode(emailBytes, (VerifiedEmail));
+        return email;
     }
 }
