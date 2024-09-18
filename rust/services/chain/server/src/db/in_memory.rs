@@ -18,13 +18,11 @@ pub struct InMemoryBlockDb {
 impl InMemoryBlockDb {
     #[allow(unused)]
     pub fn initialize() -> Self {
-        // Initialize parent and child hashes using FixedBytes<32>
         let parent_hash: FixedBytes<32> =
             fixed_bytes!("88e96d4537bea4d9c05d12549907b32561d3bf31f45aae734cdc119f13406cb6"); // Block 1
         let child_hash: FixedBytes<32> =
             fixed_bytes!("b495a1d7e6663152ae92708da4843337b958146015a2802f4193a410044698c9"); // Block 2
 
-        // Initialize the MerkleTrie with parent and child hashes
         let trie = MerkleTrie::from_iter([
             (vec![1], parent_hash.clone()),
             (vec![2], child_hash.clone()),
@@ -78,27 +76,27 @@ impl BlockDatabase for InMemoryBlockDb {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use lazy_static::lazy_static;
+
+    lazy_static! {
+        static ref DB: InMemoryBlockDb = InMemoryBlockDb::initialize();
+    }
 
     #[test]
     fn empty_block_numbers() {
-        let db = InMemoryBlockDb::initialize();
-        let result = db.get_proof([]);
+        let result = DB.get_proof([]);
         assert_eq!(result.unwrap_err(), BlockDbError::EmptyBlockNumbers);
     }
 
     #[test]
     fn single_block_outside_of_current_range() {
-        let db = InMemoryBlockDb::initialize();
-        let result = db.get_proof([3]);
-
+        let result = DB.get_proof([3]);
         assert_eq!(result.unwrap_err(), BlockDbError::OutsideOfRange(3, (1, 2)));
     }
 
     #[test]
     fn multiple_blocks_outside_of_current_range() {
-        let db = InMemoryBlockDb::initialize();
-        let result = db.get_proof([3, 4]);
-
+        let result = DB.get_proof([3, 4]);
         assert_eq!(result.unwrap_err(), BlockDbError::OutsideOfRange(3, (1, 2)));
     }
 }
