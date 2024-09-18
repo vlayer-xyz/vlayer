@@ -22,7 +22,7 @@ const BackButton = () => {
 };
 
 const ProofButton = () => {
-  const { prove, proof, isProoving, hasDataForProof } = useTlsnProover();
+  const { prove, proof, isProving, hasDataForProof } = useTlsnProover();
 
   return !proof ? (
     <Button
@@ -32,7 +32,7 @@ const ProofButton = () => {
       }}
     >
       {" "}
-      {isProoving ? <Spinner /> : "Make Proof"}{" "}
+      {isProving ? <Spinner /> : "Make Proof"}{" "}
     </Button>
   ) : null;
 };

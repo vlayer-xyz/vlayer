@@ -14,14 +14,14 @@ import { formatTlsnHeaders } from "../lib/formatTlsnHeaders";
 const TlsnProofContext = createContext({
   prove: () => {},
   proof: null as object | null,
-  isProoving: false,
+  isProving: false,
   hasDataForProof: false,
 });
 
 export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
   const { proofUrl } = useProofContext();
   const [proof, setProof] = useState<object | null>(null);
-  const [isProoving, setIsProoving] = useState(false);
+  const [isProving, setIsProving] = useState(false);
   const [hasDataForProof, setHasDataForProof] = useState(false);
   const [cookies, setCookies] = useState<browser.Cookies.Cookie[]>([]);
   const [headers, setHeaders] = useState<
@@ -70,7 +70,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
   }, []);
 
   const prove = useCallback(async () => {
-    setIsProoving(true);
+    setIsProving(true);
     console.log("Making tlsn request with:", formattedHeaders);
     try {
       const tlsnProof = await tlsnProve(proofUrl, {
@@ -80,20 +80,20 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
         headers: formattedHeaders?.headers,
         secretHeaders: formattedHeaders?.secretHeaders,
       });
-      // this is temporary v erification call
+      // this is temporary verification call
       // when we wil connect vlayer contracts we will transfer this back to the SDK
       const verifiedProof = await tlsnVerify(tlsnProof);
       setProof(verifiedProof);
-      setIsProoving(false);
+      setIsProving(false);
     } catch (e) {
       console.error("error in tlsnotary", e);
-      setIsProoving(false);
+      setIsProving(false);
     }
   }, [formattedHeaders]);
 
   return (
     <TlsnProofContext.Provider
-      value={{ prove, proof, isProoving, hasDataForProof }}
+      value={{ prove, proof, isProving, hasDataForProof }}
     >
       {children}
     </TlsnProofContext.Provider>
