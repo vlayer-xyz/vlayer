@@ -1,6 +1,6 @@
 import "./style.css";
 import { setupProveButton } from "./prove";
-
+import { extensionConnector } from "./extensionConnector";
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div class="container">
     <div class="logoContainer">
@@ -12,3 +12,4 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
 
 const twitterProofButton = document.querySelector<HTMLButtonElement>("#prove")!;
 setupProveButton(twitterProofButton);
+extensionConnector.connect();
