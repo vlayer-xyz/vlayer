@@ -2,6 +2,7 @@ use crate::precompiles::{gas_used, map_to_fatal};
 use alloy_primitives::Bytes;
 use revm::precompile::{Precompile, PrecompileOutput, PrecompileResult};
 use std::convert::Into;
+
 pub(super) const VERIFY_EMAIL_PRECOMPILE: Precompile = Precompile::Standard(verify_and_parse_run);
 
 /// The base cost of the operation.
@@ -17,7 +18,7 @@ fn verify_and_parse_run(input: &Bytes, gas_limit: u64) -> PrecompileResult {
         gas_limit,
     )?;
 
-    let parsed_email = email_proof::parse_mime(input).map_err(map_to_fatal)?;
+    let parsed_email = email_proof::parse_and_verify(input).map_err(map_to_fatal)?;
 
     Ok(PrecompileOutput::new(
         gas_used,

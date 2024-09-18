@@ -2,62 +2,18 @@ mod dkim;
 mod email;
 
 use crate::email::Email;
-use mail_auth::common::parse::TxtRecordParser;
-use mail_auth::common::resolver::{IntoFqdn, UnwrapTxtRecord};
-// use mail_auth::dkim::verify::DkimVerifier;
-// use mail_auth::{
-//     common::resolve::Resolve, AuthenticatedMessage, DkimResult, Error as AuthError, Txt,
-// };
+use dkim::verify;
+use mail_auth::Error as AuthError;
 use mailparse::MailParseError;
-// use std::sync::Arc;
 
-pub fn parse_mime(email: &[u8]) -> Result<Email, MailParseError> {
+fn parse_mime(email: &[u8]) -> Result<Email, MailParseError> {
     mailparse::parse_mail(email)?.try_into()
 }
 
-struct StaticResolver {}
-
-// impl Resolve for StaticResolver {
-//     async fn txt_lookup<'x, T: TxtRecordParser + Into<Txt> + UnwrapTxtRecord>(
-//         &self,
-//         _key: impl IntoFqdn<'x>,
-//     ) -> mail_auth::Result<Arc<T>> {
-//         const DNS_RECORDS: [&str; 2] = [
-//             "brisbane._domainkey.football.example.com v=DKIM1; k=ed25519; p=11qYAYKxCrfVS/7TyWQHOg7hcvPapiMlrwIaaPcHURo=",
-//             "test._domainkey.football.example.com v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDkHlOQoBTzWRiGs5V6NpP3idY6Wk08a5qhdR6wy5bdOKb2jLQiY/J16JYi0Qvx/byYzCNb3W91y3FutACDfzwQ/BC/e/8uBsCR+yz1Lxj+PL6lHvqMKrM3rG4hstT5QjvHO9PzoxZyVYLzBfO2EeC3Ip3G+2kryOTIKT+l/K4w3QIDAQAB",
-//         ];
-//         Ok(Arc::new(T::parse(DNS_RECORDS.join("\n").as_bytes())?))
-//     }
-// }
-//
-// pub fn mail_auth_parse(email: &[u8]) -> Result<AuthenticatedMessage, AuthError> {
-//     let authenticated_message = AuthenticatedMessage::parse(email).ok_or(AuthError::ParseError)?;
-//     let resolver = StaticResolver {};
-//     let future = DkimVerifier::verify_dkim(&resolver, &authenticated_message);
-//     let dkim_outputs = futures::executor::block_on(future);
-//     if dkim_outputs.is_empty() {
-//         return Err(AuthError::NoHeadersFound);
-//     }
-//     for output in dkim_outputs.iter() {
-//         let result = output.result().clone();
-//         if result == DkimResult::None {
-//             return Err(AuthError::NoHeadersFound);
-//         }
-//         if let DkimResult::Fail(err) = result {
-//             return Err(err);
-//         }
-//         if let DkimResult::Neutral(err) = result {
-//             return Err(err);
-//         }
-//         if let DkimResult::PermError(err) = result {
-//             return Err(err);
-//         }
-//         if let DkimResult::TempError(err) = result {
-//             return Err(err);
-//         }
-//     }
-//     Ok(authenticated_message)
-// }
+pub fn parse_and_verify(email: &[u8]) -> Result<Email, AuthError> {
+    verify::verify_dkim(email)?;
+    parse_mime(email).map_err(|_| AuthError::ParseError)
+}
 
 #[cfg(test)]
 mod tests {
