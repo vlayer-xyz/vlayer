@@ -32,10 +32,10 @@ Below is an example of such proof generation:
 import {EmailProofLib} from "vlayer/EmailProof.sol";
 
 contract GitHubEmail is Prover {
-    using EmailProofLib for EmailProof;
+    using EmailProofLib for MimeEmail;
 
-    function main(EmailProof calldata emailProof) public returns (bool) {
-      EmailProofLib.Email memory email = emailProof.verify()
+    function main(MimeEmail calldata mimeEmail) public returns (bool) {
+      VerifiedEmail memory email = mimeEmail.verify()
 
       require(email.subject.equal("Welcome to GitHub"), "Incorrect subject")
       require(email.from.equal("notifications@github.com"), "Incorrect sender")
@@ -64,17 +64,17 @@ String comparison is handled by our `StringUtils` library (*described in more [d
 > This command will download all necessary artifacts to your project.
 
 ## Email structure
-The `email` structure of type `Email` is injected into the `Prover` and can be used in a `main()` function.
+The `email` structure of type `VerifiedEmail` is injected into the `Prover` and can be used in a `main()` function.
 
 ```solidity
-struct Email {
+struct VerifiedEmail {
   string subject;
   string body;
   string from;
   string[] to;
 }
 ```
-An `Email` consists of the following fields
+An `VerifiedEmail` consists of the following fields
 - `subject` - a string with the subject of the email
 - `body` - a string consisting of the entire body of the email
 - `from` - a string consisting of the sender's email address (*no name is available*) 
@@ -105,14 +105,14 @@ Body: New wallet address {new account address}
 Now, we can access the email from the `Prover` contract:
 
 ```solidity
-import {Email, EmailProof, EmailProofLib} from "vlayer/EmailProof.sol";
+import {VerifiedEmail, MimeEmail, EmailProofLib} from "vlayer/EmailProof.sol";
 
 contract RecoveryEmail is Prover {
     using StringUtils for string;
-    using EmailProofLib for EmailProof;
+    using EmailProofLib for MimeEmail;
 
-    function main(address multisigAddr, ) public returns (address, string, address, uint) {     
-      Email memory email = emailProof.verify()
+    function main(address multisigAddr, MimeEmail calldata mimeEmail) public returns (address, string, address, uint) {     
+      VerifiedEmail memory email = mimeEmail.verify()
  
       address lostWallet = parseSubject(email.subject);
       address newAddress = parseBody(email.body);
@@ -175,7 +175,7 @@ Now we are ready to use the proof and results from the previous step for on-chai
 Below is a sample implementation of this:
 
 ```solidity 
-import { RecoveryEmail } from "./RecoveryEmail.sol";
+import { RecoveryEmail } from "RecoveryEmail.sol";
 
 address constant PROVER_ADDR = 0xd7141F4954c0B082b184542B8b3Bd00Dc58F5E05;
 bytes4 constant  PROVER_FUNC_SELECTOR = RecoveryEmail.main.selector;
