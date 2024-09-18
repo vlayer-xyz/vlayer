@@ -46,6 +46,8 @@ function startup_anvils(){
 
 function startup_vlayer(){
     local proof_arg=$1
+    shift # shift input params, since the second (and last) arg is an array of external_urls 
+    local external_urls=("$@")
 
     echo "Starting vlayer REST server"
     pushd "${VLAYER_HOME}/rust"
@@ -57,9 +59,7 @@ function startup_vlayer(){
         --proof "${proof_arg}" \
         --rpc-url 100002:http://localhost:8546 \
         --rpc-url 100001:http://localhost:8545 \
-        --rpc-url 1:https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY} \
-        --rpc-url 8453:https://base-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY} \
-        --rpc-url 10:https://opt-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY} \
+        ${external_urls[@]} \
         >"${LOGS_DIR}/vlayer_serve.out" &
 
     VLAYER_SERVER_PID=$!
@@ -76,9 +76,9 @@ trap cleanup EXIT ERR INT
 PROVING_MODE=${PROVING_MODE:-dev}
 RISC0_DEV_MODE=""
 BONSAI_API_URL="${BONSAI_API_URL:-https://api.bonsai.xyz/}"
-ALCHEMY_API_KEY="${ALCHEMY_API_KEY:-}"
 BONSAI_API_KEY="${BONSAI_API_KEY:-}"
 SERVER_PROOF_ARG="fake"
+EXTERNAL_RPC_URLS=()     
 
 # Set the SERVER_PROOF_MODE variable based on the mode
 if [[ "${PROVING_MODE}" == "dev" ]]; then
@@ -93,6 +93,19 @@ elif [[ "${PROVING_MODE}" == "prod" ]]; then
     fi
 fi
 
+# set external rpc urls
+if [[ -z "${ALCHEMY_API_KEY:-}" ]] ; then
+    echo ALCHEMY_API_KEY is not configured. Using using only local rpc-urls. >&2
+else 
+
+    EXTERNAL_RPC_URLS=(
+        "--rpc-url" "1:https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}" 
+        "--rpc-url" "8453:https://base-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}"
+        "--rpc-url" "10:https://opt-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}"
+    )
+
+fi
+
 # Display the parsed parameters
 echo "PROVING_MODE: ${PROVING_MODE}"
 echo "BONSAI_API_URL: ${BONSAI_API_URL}"
@@ -103,6 +116,6 @@ echo
 echo "Starting services..."
 
 startup_anvils
-startup_vlayer ${SERVER_PROOF_ARG}
+startup_vlayer "${SERVER_PROOF_ARG}" ${EXTERNAL_RPC_URLS[@]}
 
 echo "Services has been succesfully started..."
