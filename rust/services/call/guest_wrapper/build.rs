@@ -4,8 +4,13 @@ fn main() -> Result<()> {
     #[cfg(not(clippy))]
     {
         use risc0_build_ethereum::{generate_solidity_files, Options};
+        use std::env;
         use std::fs::{create_dir_all, remove_file};
         use std::path::Path;
+
+        if env::var("RISC0_SKIP_BUILD").is_ok() {
+            return Ok(());
+        }
 
         let guests = risc0_build::embed_methods();
 
