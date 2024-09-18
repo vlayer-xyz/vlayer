@@ -28,23 +28,24 @@ Below is sample code for such a `Prover` contract:
 import "openzeppelin/contracts/utils/Strings.sol";
 
 import {Prover} from "vlayer/Prover.sol";
-import {WebProof, WebProofLib} from "vlayer/WebProof.sol";
+import {Web, WebProof, WebProofLib, WebLib} from "vlayer/WebProof.sol";
 
 contract YouTubeRevenue is Prover {
     using Strings for string;
     using WebProofLib for WebProof;
+    using WebLib for Web;
     
     public string dataUrl = "https://studio.youtube.com/creator/get_channel_dashboard";
     
     function main(WebProof calldata webProof, address influencerAddr) public returns (address, string) {
-      webProof.verify(dataUrl);
+      Web memory web = webProof.verify(dataUrl);
 
       require(
-        webProof.json().getInt("channel.estimatedEarnings") > 1_000_000, 
+        web.jsonGetInt("channel.estimatedEarnings") > 1_000_000, 
         "Earnings less than $10000"
       );
 
-      return (influencerAddr, webProof.json().getString("channel.id"));
+      return (influencerAddr, webProof.jsonGetString("channel.id"));
     }
 } 
 ```
@@ -61,14 +62,13 @@ What happens in the above code?
   * a check whether the *Notary* is the one we trust (we verify this by checking their key used to sign the data).
   * a check that the HTTPS data comes from a server whose identity (server name specified in the server's SSL certificate) is the one we expect (in this case `studio.youtube.com`, which is the domain name in `dataUrl`).
   * a check whether the HTTPS data comes from the expected `dataUrl`.
-  * retrieval of plaintext transcript from the Web Proof and makes it available for further `WebProof` calls.
+  * retrieval of plaintext transcript from the Web Proof and returns it as `Web` for further processing.
 
 * Then we have to ensure that the delivered data makes sense for our case:
-  * `web.json()` parses JSON body of the HTTP response and allows subsequent `get()` calls.
-  * `web.json().get("channel.estimatedEarnings") > 1_000_000` retrieves the `channel.estimatedEarnings` path of the JSON and checks if estimated earnings are higher than 10k USD (parsed JSON contains amount in cents).
+  * `web.jsonGetInt("channel.estimatedEarnings") > 1_000_000` parses JSON body of the HTTP response, retrieves the `channel.estimatedEarnings` path of the JSON and checks if estimated earnings are higher than 10k USD (parsed JSON contains amount in cents).
 
 Finally, we can return public input:
-* The `influencerAddr` and the `web.json().get("channel.id")` will be returned if all checks have passed.
+* The `influencerAddr` and the `web.jsonGetString("channel.id")` will be returned if all checks have passed.
 
 If no execution errors occured and proof was produced, we are ready for on-chain verification. 
 
