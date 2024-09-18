@@ -26,7 +26,7 @@ impl InMemoryBlockDb {
 
         // Initialize the MerkleTrie with parent and child hashes
         let trie = MerkleTrie::from_iter([
-            (vec![1], parent_hash.clone()), // Assuming keys are Vec<u8>
+            (vec![1], parent_hash.clone()),
             (vec![2], child_hash.clone()),
         ]);
 
@@ -59,11 +59,11 @@ impl BlockDatabase for InMemoryBlockDb {
     fn get_proof(&self, block_numbers: impl AsRef<[u8]>) -> Result<&Vec<u8>, BlockDbError> {
         let block_numbers = block_numbers.as_ref();
         if block_numbers.is_empty() {
-            return Err(BlockDbError::EmptyBlockNumbers); // Assuming 0 for now, since block_number is undefined
+            return Err(BlockDbError::EmptyBlockNumbers);
         }
         let (start, end) = self.current_range;
         for &block_number in block_numbers {
-            let block_number = block_number as u32; // Assuming u8s represent block numbers
+            let block_number = block_number as u32;
             if block_number < start || block_number > end {
                 return Err(BlockDbError::OutsideOfRange(
                     block_number,
@@ -78,12 +78,6 @@ impl BlockDatabase for InMemoryBlockDb {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use lazy_static::lazy_static;
-
-    lazy_static! {
-        static ref parent_hash: FixedBytes<32> = fixed_bytes!("88e96d4537bea4d9c05d12549907b32561d3bf31f45aae734cdc119f13406cb6"); // https://etherscan.io/block/1
-        static ref child_hash: FixedBytes<32> = fixed_bytes!("b495a1d7e6663152ae92708da4843337b958146015a2802f4193a410044698c9"); // https://etherscan.io/block/2
-    }
 
     #[test]
     fn empty_block_numbers() {
