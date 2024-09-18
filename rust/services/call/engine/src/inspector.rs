@@ -1,5 +1,5 @@
 use alloy_primitives::hex::decode;
-use alloy_primitives::{address, b256, Address, ChainId, B256, U256};
+use alloy_primitives::{address, b256, Address, ChainId, B256};
 use once_cell::sync::Lazy;
 use revm::{
     interpreter::{CallInputs, CallOutcome},
@@ -24,10 +24,16 @@ pub const TRAVEL_CONTRACT_ADDR: Address = address!("76dC9aa45aa006A0F63942d8F9f2
 pub const TRAVEL_CONTRACT_HASH: B256 =
     b256!("262498cb66e1ee19d92574a1083e664489e446c94e8cfeb3eefe00a30be92891");
 
-static SET_BLOCK_SELECTOR: Lazy<Vec<u8>> =
-    Lazy::new(|| decode("87cea3ae").expect("Error decoding set_block function call"));
-static SET_CHAIN_SELECTOR: Lazy<Vec<u8>> =
-    Lazy::new(|| decode("ffbc5638").expect("Error decoding set_chain function call"));
+static SET_BLOCK_SELECTOR: Lazy<Box<[u8]>> = Lazy::new(|| {
+    decode("87cea3ae")
+        .expect("Error decoding set_block function call")
+        .into_boxed_slice()
+});
+static SET_CHAIN_SELECTOR: Lazy<Box<[u8]>> = Lazy::new(|| {
+    decode("ffbc5638")
+        .expect("Error decoding set_chain function call")
+        .into_boxed_slice()
+});
 
 #[derive(Default, Clone, Debug)]
 pub struct NoopInspector;
@@ -35,6 +41,40 @@ pub struct NoopInspector;
 impl<DB> Inspector<DB> for NoopInspector where DB: Database {}
 
 type Callback<'a> = dyn Fn(&Call, ExecutionLocation) -> Result<Vec<u8>, EngineError> + 'a;
+
+enum TravelCall {
+    SetBlock { block_number: u64 },
+    SetChain { chain_id: u64, block_number: u64 },
+}
+
+impl TravelCall {
+    pub fn from_inputs(inputs: &CallInputs) -> Self {
+        let (selector, arguments_bytes) = split_calldata(inputs);
+        let arguments = arguments_bytes
+            .chunks_exact(ARG_LEN)
+            .map(u64_from_be_slice)
+            .collect::<Vec<_>>();
+        if selector == SET_BLOCK_SELECTOR.as_ref() {
+            let [block_number] = arguments.try_into().expect("Invalid args for set_block");
+            TravelCall::SetBlock { block_number }
+        } else if selector == SET_CHAIN_SELECTOR.as_ref() {
+            let [chain_id, block_number] =
+                arguments.try_into().expect("Invalid args for set_chain");
+            TravelCall::SetChain {
+                chain_id,
+                block_number,
+            }
+        } else {
+            panic!("Invalid travel call selector: {:?}", selector)
+        }
+    }
+}
+
+/// Take last 8 bytes from slice and interpret as big-endian encoded u64.
+/// Will trim larger numbers to u64 range, and panic if slice is smaller than 8 bytes.
+fn u64_from_be_slice(slice: &[u8]) -> u64 {
+    u64::from_be_bytes(*slice.last_chunk().expect("invalid u64 slice"))
+}
 
 pub struct TravelInspector<'a> {
     start_chain_id: ChainId,
@@ -85,16 +125,12 @@ impl<'a> TravelInspector<'a> {
     }
 
     fn on_travel_call(&mut self, inputs: &CallInputs) -> Option<CallOutcome> {
-        let (selector, arguments_bytes) = split_calldata(inputs);
-
-        if selector == *SET_BLOCK_SELECTOR {
-            let block_number = U256::from_be_slice(arguments_bytes).to();
-            self.set_block(block_number);
-        } else if selector == *SET_CHAIN_SELECTOR {
-            let (chain_id_bytes, block_number_bytes) = arguments_bytes.split_at(ARG_LEN);
-            let chain_id = U256::from_be_slice(chain_id_bytes).to();
-            let block_number = U256::from_be_slice(block_number_bytes).to();
-            self.set_chain(chain_id, block_number);
+        match TravelCall::from_inputs(inputs) {
+            TravelCall::SetBlock { block_number } => self.set_block(block_number),
+            TravelCall::SetChain {
+                chain_id,
+                block_number,
+            } => self.set_chain(chain_id, block_number),
         }
 
         Some(create_encoded_return_outcome(&true, inputs))
@@ -131,7 +167,7 @@ mod test {
         EvmContext, Inspector,
     };
 
-    use super::{TravelInspector, SET_BLOCK_SELECTOR, TRAVEL_CONTRACT_ADDR};
+    use super::*;
 
     const MOCK_CALLER: Address = address!("0000000000000000000000000000000000000000");
 
@@ -174,5 +210,13 @@ mod test {
         let other_contract = address!("0000000000000000000000000000000000000000");
         let inspector = inspector_call(other_contract);
         assert!(inspector.location.is_none());
+    }
+
+    #[test]
+    fn u64_from_u256_be_slice() {
+        let x = 20240918u64;
+        let slice: [u8; 32] = U256::from(x).to_be_bytes();
+        let y = u64_from_be_slice(&slice);
+        assert_eq!(x, y)
     }
 }
