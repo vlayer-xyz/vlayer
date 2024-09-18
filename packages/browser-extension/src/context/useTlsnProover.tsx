@@ -35,12 +35,11 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
     headers: {},
     secretHeaders: [],
   });
-  
 
   useEffect(() => {
     setFormattedHeaders(formatTlsnHeaders(headers, cookies));
-  }, [headers, cookies ]);
-  
+  }, [headers, cookies]);
+
   useEffect(() => {
     setHasDataForProof(!!formattedHeaders);
   }, [formattedHeaders]);
@@ -81,7 +80,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
         headers: formattedHeaders?.headers,
         secretHeaders: formattedHeaders?.secretHeaders,
       });
-      // this is temporary v erification call 
+      // this is temporary v erification call
       // when we wil connect vlayer contracts we will transfer this back to the SDK
       const verifiedProof = await tlsnVerify(tlsnProof);
       setProof(verifiedProof);
@@ -90,7 +89,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
       console.error("error in tlsnotary", e);
       setIsProoving(false);
     }
-  }, [formattedHeaders])
+  }, [formattedHeaders]);
 
   return (
     <TlsnProofContext.Provider
