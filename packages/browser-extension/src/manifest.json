@@ -24,7 +24,7 @@
     "tabs"
   ],
   "externally_connectable": {
-    "matches": ["*://localhost/*"]
+    "matches": ["<all_urls>"]
   },
   "host_permissions": [
     "*://*/*"
