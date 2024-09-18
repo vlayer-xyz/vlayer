@@ -22,9 +22,9 @@ You do this by writing a Solidity smart contract (`Prover`) that has access to t
 Under the hood, we verify mail server signatures to ensure the authenticity and integrity of the content.
 
 ## Example
-Let's say someone wants to prove they've been a GitHub user since 2020. One way to do this is to take a screenshot and send it to the verifier. However, this is not very reliable because screenshot images can be easily manipulated, and obviously such an image cannot be verified on-chain. 
+Let's say someone wants to prove they are a GitHub user. One way to do this is to take a screenshot and send it to the verifier. However, this is not very reliable because screenshot images can be easily manipulated, and obviously such an image cannot be verified on-chain. 
 
-A better option is to prove that GitHub's email servers sent a welcome email on a certain date. Below is a sample `Prover` contract that verifies that the caller (`msg.sender`) created a GitHub account before 2020.
+A better option is to prove that GitHub's email servers sent a welcome email. Below is a sample `Prover` contract that verifies that the caller (`msg.sender`) created a GitHub account.
 
 Below is an example of such proof generation:
 
@@ -41,9 +41,6 @@ contract GitHubEmail is Prover {
       require(email.from.equal("notifications@github.com"), "Incorrect sender")
       require(email.to[0].equal("john.prover@gmail.com"), "Incorrect recipient")
       
-      // Wed Jan 01 2020 00:00:00 GMT+0100
-      require(email.received_at < 1577833200, "Email received after 2020") 
-
       return true;
     }
 }
@@ -75,7 +72,6 @@ struct Email {
   string body;
   string from;
   string[] to;
-  uint received_at;
 }
 ```
 An `Email` consists of the following fields
@@ -83,7 +79,6 @@ An `Email` consists of the following fields
 - `body` - a string consisting of the entire body of the email
 - `from` - a string consisting of the sender's email address (*no name is available*) 
 - `to` - an array of strings containing the list of emails of the intended recipients (*no names available*)
-- `received_at` - `uint` representing a timestamp of when the email arrived at the destination email server.
 
 By inspecting and parsing the email payload elements, we can generate a claim to be used on-chain.
 
@@ -123,7 +118,7 @@ contract RecoveryEmail is Prover {
       address newAddress = parseBody(email.body);
       string memory emailAddrHash = getEmailAddressHash(email.sender, multisigAddr, lostWallet);
       
-      return (lostWallet, emailAddrHash, newAddress, email.received_at); 
+      return (lostWallet, emailAddrHash, newAddress); 
     }
 
     function parseSubject(string calldata subject) internal returns (address) {
@@ -180,12 +175,12 @@ Now we are ready to use the proof and results from the previous step for on-chai
 Below is a sample implementation of this:
 
 ```solidity 
-import { RecoveryEmail } from "./v/RecoveryEmail.v.sol";
+import { RecoveryEmail } from "./RecoveryEmail.sol";
 
 address constant PROVER_ADDR = 0xd7141F4954c0B082b184542B8b3Bd00Dc58F5E05;
 bytes4 constant  PROVER_FUNC_SELECTOR = RecoveryEmail.main.selector;
 
-contract MultiSigWallet is Verifier  {    
+contract MultiSigWallet is Verifier  {
     mapping (address => bool) public owners;
     mapping (address => string) ownerToEmailHash;
 
@@ -194,7 +189,6 @@ contract MultiSigWallet is Verifier  {
       address lostWallet, 
       string emailAddrHash, 
       address newOwner, 
-      uint recoveryDate
     ) 
       public 
       onlyVerified(PROVER_ADDR, PROVER_FUNC_SELECTOR) 
@@ -203,10 +197,6 @@ contract MultiSigWallet is Verifier  {
       require(
         ownerToEmailHash[lostWallet] == emailAddrHash, 
         "wrong email given"
-      );
-      require(
-        (block.timestamp - recoveryDate) <= 86400, 
-        "email older than 24h"
       );
 
       owners[newOwner] = true;
@@ -232,7 +222,6 @@ What exactly happened in the above code?
   * `onlyVerified(PROVER_ADDR, PROVER_FUNC_SELECTOR)` validates execution of Prover and correctness of arguments. If the proof is invalid or arguments don't match returned values it will revert. 
   * You don't need to pass `proof` as an argument to `onlyVerified` because it is automatically extracted from `msg.data`.
   * `ownerToEmailHash[lostWallet] == emailAddrHash` make sure recovery email address matches the one that was set up previously in the wallet
-  * `(block.timestamp - recoveryDate) <= 86400` call makes sure recovery email isn't older than 24h, otherwise reverts
   * `owners[newOwner] = true` sets up a new wallet to be authorized to use `MultiSigWallet`.
 
 
