@@ -1,4 +1,4 @@
-import { prove as tlsnProve, verify as tlsnVerify } from "tlsn-js";
+import { prove as tlsnProve } from "tlsn-js";
 import browser from "webextension-polyfill";
 import { useProofContext } from "./useProofContext";
 import React, {
@@ -73,17 +73,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
 
   const prove = useCallback(async () => {
     setIsProving(true);
-    console.log("Making tlsn request with:", formattedHeaders);
-    await sleep(1000);
-    try {
-      console.log("sending message to background");
-      browser.runtime.sendMessage("PROOF");
 
-    } catch (e) {
-      console.log("could not send message to background", e);
-      setIsProving(false);
-    }
-    setIsProving(false);
     try {
       const tlsnProof = await tlsnProve(proofUrl, {
         notaryUrl: import.meta.env.VITE_NOTARY_URL,
@@ -99,7 +89,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
         type: MESSAGE.proof_done,
         proof: tlsnProof,
       });
-
+      setProof(proof);
       setIsProving(false);
     } catch (e) {
       console.error("error in tlsnotary", e);
@@ -108,7 +98,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
         type: MESSAGE.proof_error,
         error: e,
       });
-      
+
       setIsProving(false);
     }
   }, [formattedHeaders]);
