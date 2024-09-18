@@ -1950,6 +1950,7 @@ dependencies = [
  "bincode",
  "chain",
  "chain_host",
+ "hex",
  "lazy_static",
  "mime",
  "mpt",

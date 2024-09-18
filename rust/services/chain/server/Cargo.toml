@@ -21,3 +21,4 @@ bincode = "1.3.3"
 chain = { workspace = true }
 mpt = { workspace = true }
 lazy_static.workspace = true
+hex.workspace = true
