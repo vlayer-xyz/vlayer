@@ -15,6 +15,7 @@ import {Groth16ProofVerifier} from "../../src/proof_verifier/Groth16ProofVerifie
 import {Groth16VerifierSelector} from "../helpers/Groth16VerifierSelector.sol";
 
 // Proofs has been generated using SimpleProver from examples/simple
+// All the pinned values have been obtained using the following instruction: https://github.com/vlayer-xyz/vlayer/pull/577#issuecomment-2355839549
 contract PinnedSimpleProver is Prover {
     constructor() {}
 
