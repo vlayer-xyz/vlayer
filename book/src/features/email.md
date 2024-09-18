@@ -24,7 +24,7 @@ Under the hood, we verify mail server signatures to ensure the authenticity and 
 ## Example
 Let's say someone wants to prove they are a GitHub user. One way to do this is to take a screenshot and send it to the verifier. However, this is not very reliable because screenshot images can be easily manipulated, and obviously such an image cannot be verified on-chain. 
 
-A better option is to prove that GitHub's email servers sent a welcome email. Below is a sample `Prover` contract that verifies that the caller (`msg.sender`) created a GitHub account.
+A better option is to prove that GitHub's email servers sent a welcome email. Below is a sample `Prover` contract that verifies that the caller created a GitHub account.
 
 Below is an example of such proof generation:
 
@@ -118,7 +118,7 @@ contract RecoveryEmail is Prover {
  
       address lostWallet = parseSubject(email.subject);
       address newAddress = parseBody(email.body);
-      string memory emailAddrHash = getEmailAddressHash(email.sender, multisigAddr, lostWallet);
+      string memory emailAddrHash = getEmailAddressHash(email.from, multisigAddr, lostWallet);
       
       return (lostWallet, emailAddrHash, newAddress); 
     }
