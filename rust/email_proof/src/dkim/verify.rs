@@ -5,15 +5,18 @@ use mail_auth::{AuthenticatedMessage, DkimOutput, DkimResult, Error as AuthError
 pub fn verify_dkim(email: &[u8]) -> Result<(), AuthError> {
     let authenticated_message = AuthenticatedMessage::parse(email).ok_or(AuthError::ParseError)?;
     let resolver = StaticResolver {};
+
     let future = DkimVerifier::verify_dkim(&resolver, &authenticated_message);
     let dkim_outputs = futures::executor::block_on(future);
-    is_dkim_verified(dkim_outputs)
+
+    assert_dkim_verified(dkim_outputs)
 }
 
-fn is_dkim_verified(verification_output: Vec<DkimOutput>) -> Result<(), AuthError> {
+fn assert_dkim_verified(verification_output: Vec<DkimOutput>) -> Result<(), AuthError> {
     if verification_output.is_empty() {
         return Err(AuthError::NoHeadersFound);
     }
+
     for output in verification_output {
         match output.result().clone() {
             DkimResult::None => return Err(AuthError::NoHeadersFound),
@@ -24,6 +27,7 @@ fn is_dkim_verified(verification_output: Vec<DkimOutput>) -> Result<(), AuthErro
             _ => {}
         }
     }
+
     Ok(())
 }
 
@@ -37,21 +41,21 @@ mod tests {
         #[test]
         fn test_returns_err_if_no_headers_found() {
             let verification_output = vec![];
-            let result = is_dkim_verified(verification_output);
+            let result = assert_dkim_verified(verification_output);
             assert_eq!(result, Err(AuthError::NoHeadersFound));
         }
 
         #[test]
         fn test_all_ok_single_header() {
             let verification_output = vec![DkimOutput::pass()];
-            let result = is_dkim_verified(verification_output);
+            let result = assert_dkim_verified(verification_output);
             assert_eq!(result, Ok(()));
         }
 
         #[test]
         fn test_all_ok_multiple_headers() {
             let verification_output = vec![DkimOutput::pass(), DkimOutput::pass()];
-            let result = is_dkim_verified(verification_output);
+            let result = assert_dkim_verified(verification_output);
             assert_eq!(result, Ok(()));
         }
 
@@ -61,7 +65,7 @@ mod tests {
                 DkimOutput::pass(),
                 DkimOutput::fail(AuthError::MissingParameters),
             ];
-            let result = is_dkim_verified(verification_output);
+            let result = assert_dkim_verified(verification_output);
             assert_eq!(result, Err(AuthError::MissingParameters));
         }
 
@@ -71,7 +75,7 @@ mod tests {
                 DkimOutput::pass(),
                 DkimOutput::perm_err(AuthError::MissingParameters),
             ];
-            let result = is_dkim_verified(verification_output);
+            let result = assert_dkim_verified(verification_output);
             assert_eq!(result, Err(AuthError::MissingParameters));
         }
 
@@ -81,7 +85,7 @@ mod tests {
                 DkimOutput::pass(),
                 DkimOutput::temp_err(AuthError::MissingParameters),
             ];
-            let result = is_dkim_verified(verification_output);
+            let result = assert_dkim_verified(verification_output);
             assert_eq!(result, Err(AuthError::MissingParameters));
         }
 
@@ -91,7 +95,7 @@ mod tests {
                 DkimOutput::pass(),
                 DkimOutput::neutral(AuthError::MissingParameters),
             ];
-            let result = is_dkim_verified(verification_output);
+            let result = assert_dkim_verified(verification_output);
             assert_eq!(result, Err(AuthError::MissingParameters));
         }
     }
