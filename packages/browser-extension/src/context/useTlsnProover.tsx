@@ -13,14 +13,14 @@ import { formatTlsnHeaders } from "../lib/formatTlsnHeaders";
 
 const TlsnProofContext = createContext({
   prove: () => {},
-  proof: {},
+  proof: null as object | null,
   isProoving: false,
   hasDataForProof: false,
 });
 
 export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
   const { proofUrl } = useProofContext();
-  const [proof, setProof] = useState<object>({});
+  const [proof, setProof] = useState<object | null>(null);
   const [isProoving, setIsProoving] = useState(false);
   const [hasDataForProof, setHasDataForProof] = useState(false);
   const [cookies, setCookies] = useState<browser.Cookies.Cookie[]>([]);
@@ -28,25 +28,22 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
     browser.WebRequest.HttpHeadersItemType[]
   >([]);
 
-  const [fotmattedHeaders, setFormattedHeaders] = useState<{
+  const [formattedHeaders, setFormattedHeaders] = useState<{
     headers: Record<string, string>;
     secretHeaders: string[];
-  }>({
+  } | null>({
     headers: {},
     secretHeaders: [],
   });
-  useEffect(() => {
-    const formattedHeaders = formatTlsnHeaders(
-      headers,
-      cookies,
-      hasDataForProof,
-    );
-    setFormattedHeaders(formattedHeaders);
-  }, [headers, cookies, hasDataForProof]);
+  
 
   useEffect(() => {
-    setHasDataForProof(cookies.length > 0 && headers.length > 0);
-  }, [cookies, headers]);
+    setFormattedHeaders(formatTlsnHeaders(headers, cookies));
+  }, [headers, cookies ]);
+  
+  useEffect(() => {
+    setHasDataForProof(!!formattedHeaders);
+  }, [formattedHeaders]);
 
   useEffect(() => {
     browser.webRequest.onResponseStarted.addListener(
@@ -75,14 +72,17 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
 
   const prove = useCallback(async () => {
     setIsProoving(true);
+    console.log("Making tlsn request with:", formattedHeaders);
     try {
       const tlsnProof = await tlsnProve(proofUrl, {
         notaryUrl: import.meta.env.VITE_NOTARY_URL,
         websocketProxyUrl: `${import.meta.env.VITE_WEBSOCKET_PROXY_URL}?token=${new URL(proofUrl).host}`,
         method: "GET",
-        headers: fotmattedHeaders.headers,
-        secretHeaders: fotmattedHeaders.secretHeaders,
+        headers: formattedHeaders?.headers,
+        secretHeaders: formattedHeaders?.secretHeaders,
       });
+      // this is temporary v erification call 
+      // when we wil connect vlayer contracts we will transfer this back to the SDK
       const verifiedProof = await tlsnVerify(tlsnProof);
       setProof(verifiedProof);
       setIsProoving(false);
@@ -90,7 +90,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
       console.error("error in tlsnotary", e);
       setIsProoving(false);
     }
-  }, [cookies, headers]);
+  }, [formattedHeaders])
 
   return (
     <TlsnProofContext.Provider

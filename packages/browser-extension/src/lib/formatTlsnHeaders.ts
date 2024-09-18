@@ -7,7 +7,6 @@ import browser from "webextension-polyfill";
 export const formatTlsnHeaders = (
   headers: browser.WebRequest.HttpHeadersItemType[],
   cookies: browser.Cookies.Cookie[],
-  doCheck: boolean = false,
 ) => {
   const xCsrftoken =
     headers.find((header) => header.name === "x-csrf-token")?.value || "";
@@ -17,21 +16,9 @@ export const formatTlsnHeaders = (
   const authorization =
     headers.find((header) => header.name === "authorization")?.value || "";
 
-  if (doCheck) {
-    if (!xCsrftoken) {
-      throw new Error("x-csrf-token header is missing");
-    }
-    if (!authToken) {
-      throw new Error("auth_token cookie is missing");
-    }
-    if (!ct0) {
-      throw new Error("ct0 cookie is missing");
-    }
-    if (!authorization) {
-      throw new Error("authorization header is missing");
-    }
+  if (!xCsrftoken || !authToken || !ct0 || !authorization) {
+    return null;
   }
-
   return {
     headers: {
       "x-twitter-client-language": "en",

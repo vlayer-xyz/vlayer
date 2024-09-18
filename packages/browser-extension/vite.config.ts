@@ -1,7 +1,6 @@
 import { defineConfig } from "vite";
 import webExtension, { readJsonFile } from "vite-plugin-web-extension";
 import { viteStaticCopy } from "vite-plugin-static-copy";
-import path from "node:path";
 
 function generateManifest() {
   const manifest = readJsonFile("src/manifest.json");
@@ -13,13 +12,6 @@ function generateManifest() {
     ...manifest,
   };
 }
-
-console.log(
-  "duoo",
-  path.resolve(
-    `${__dirname}/../node_modules/tlsn-js/build/284ddec2a9dac2774b1d.wasm`,
-  ),
-);
 
 export default defineConfig({
   plugins: [
