@@ -1,25 +1,25 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.23;
 
-import {SimpleTimeTravelProver} from "./SimpleTimeTravelProver.sol";
-import {ExampleNFT} from "./ExampleNFT.sol";
+import {AverageBalance} from "./AverageBalance.sol";
+import {HodlerBadgeNFT} from "./HodlerBadgeNFT.sol";
 
 import {Proof} from "vlayer/Proof.sol";
 import {Verifier} from "vlayer/Verifier.sol";
 
-contract SimpleTimeTravel is Verifier {
+contract AverageBalanceVerifier is Verifier {
     address public prover;
     mapping(address => bool) public claimed;
-    ExampleNFT public reward;
+    HodlerBadgeNFT public reward;
 
-    constructor(address _prover, ExampleNFT _nft) {
+    constructor(address _prover, HodlerBadgeNFT _nft) {
         prover = _prover;
         reward = _nft;
     }
 
     function claim(Proof calldata, address claimer, uint256 average)
         public
-        onlyVerified(prover, SimpleTimeTravelProver.averageBalanceOf.selector)
+        onlyVerified(prover, AverageBalance.averageBalanceOf.selector)
     {
         require(!claimed[claimer], "Already claimed");
 
