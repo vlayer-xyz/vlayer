@@ -27,7 +27,7 @@ browser.runtime.onMessage.addListener((message) => {
     try {
       port?.postMessage(message);
     } catch (e) {
-      console.log("Could not send message to webpage", port);
+      console.log("Could not send message to webpage", e);
     }
   }
 });

@@ -12,7 +12,6 @@ import React, {
 import { formatTlsnHeaders } from "../lib/formatTlsnHeaders";
 import { MESSAGE } from "../constants/message";
 
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 const TlsnProofContext = createContext({
   prove: () => {},
   proof: null as object | null,
