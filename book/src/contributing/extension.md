@@ -9,10 +9,14 @@ To start working with vlayer browser extension, you need to install following so
 
 ## Building
 
+First build vlayer server with:
+
 ```sh
 cd rust
 cargo build --release
 ```
+
+Then build vlayer contracts with:
 
 ```sh
 cd contracts
@@ -47,7 +51,7 @@ cd packages/vlayer/sdk/src
 bun install
 ```
 
-## Running
+## Local development
 
 Run anvil:
 
@@ -69,7 +73,7 @@ cd examples/web_proof/vlayer
 bun run deploy.ts
 ```
 
-`deploy.ts` script deploys prover and verifier contracts. These contracts' addresses are saved in `.env.development` file and later used by the web app.
+`deploy.ts` script deploys the Prover and Verifier contracts. Their addresses are saved in the `.env.development` file and later used by the web app.
 
 Start web app on localhost:
 
@@ -78,18 +82,18 @@ cd examples/web_proof/vlayer
 bun run dev
 ```
 
-Before starting browser extension, copy `.env.template` to `.env.development` file in `browser-extension` directory.
-Start browser extension:
+Before starting the browser extension, copy the `.env.template` file to `.env.development` in the `browser-extension` directory.
+Then, start the browser extension:
 
 ```sh
 cd packages/browser-extension
 bun run dev
 ```
 
-This will open web browser with vlayer app and browser extension installed.
+This will open a web browser with the vlayer app and browser extension installed.
 Now all saved changes will be applied in browser.
 
-There is a script `bash/run-web-example.sh` that runs all of the above mentioned steps.
+There is a script, `bash/run-web-example.sh`, that runs all of the above steps.
 
 ### Extension watch mode
 
