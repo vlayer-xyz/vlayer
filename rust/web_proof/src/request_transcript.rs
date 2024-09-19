@@ -17,10 +17,13 @@ impl RequestTranscript {
 
     pub(crate) fn parse_url(self) -> Result<String, ParsingError> {
         let request_string = String::from_utf8(self.transcript.data().to_vec())?;
-
+        println!("### request_string: {}", request_string);
         let mut headers = [EMPTY_HEADER; MAX_HEADERS_NUMBER];
         let mut req = Request::new(&mut headers);
-        req.parse(request_string.as_bytes())?;
+        httparse::ParserConfig::default()
+            .allow_space_before_first_header_name(true)
+            .allow_spaces_after_header_name_in_responses(true)
+            .parse_request(&mut req, request_string.as_bytes())?;
 
         let url = req.path.ok_or(ParsingError::NoPathInRequest)?.to_string();
         Ok(url)

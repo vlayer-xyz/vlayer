@@ -73,7 +73,7 @@ mod tests {
     #[test]
     fn correct_url_extracted() {
         let web_proof =
-            load_web_proof_fixture("./testdata/tls_proof.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
+            load_web_proof_fixture("./testdata/tls_proof2.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
 
         let web = verify_and_parse(web_proof).unwrap();
 
