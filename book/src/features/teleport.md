@@ -34,11 +34,11 @@ contract CrossChainBalance is Prover {
     Erc20Token[] tokens = new Erc20Token[](3);
 
     constructor() {
-        // mainnet
+        // Ethereum mainnet USDC
         tokens[0] = Erc20Token(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48, 1, 20683110); 
-        // base
+        // Base USDC
         tokens[1] = Erc20Token(0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913, 8453, 19367633); 
-        // arbitrum
+        // Arbitrum USDC
         tokens[2] = Erc20Token(0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85, 10, 124962954); 
     }
 
@@ -76,6 +76,6 @@ Finality, in the context of blockchains, is a point at which a transaction or bl
 
 One should be aware that different chains may have different finality thresholds. For example, Ethereum Mainnet blocks are final after no more than about 12 minutes.
 
-In the case of L2 chains, things are a bit more complicated. For example in case of optimistic rollup, like Optimism and Arbitrum, after L2 blocks are submitted to L1, there's a challenge period (often 7 days). If there is no evidence of an invalid state transistion during this period, the L2 block is finally considered as final.
+In the case of L2 chains, things are a bit more complicated. For example in case of optimistic rollup, like Optimism and Arbitrum, after L2 blocks are submitted to L1, there's a challenge period (often 7 days). If there is no evidence of an invalid state transistion during this period, the L2 block is considered final.
 
 Now consider teleporting to blocks that are not yet final in the destination chain. This can lead to situations where we are proving things that can be rolled back. It is important to include this risk in a protocol. The simplest way is to only teleport to blocks that are final and cannot be reorganized.
