@@ -4,7 +4,7 @@ use crate::handlers::v_call::Params;
 use crate::{config::ServerConfig, handlers::v_call::v_call};
 use axum::{routing::post, Router};
 use server_utils::{init_trace_layer, route, RequestIdLayer};
-use tower_http::cors::{Any, CorsLayer};
+use tower_http::cors::CorsLayer;
 use tracing::info;
 
 pub async fn serve(config: ServerConfig) -> anyhow::Result<()> {
@@ -27,11 +27,7 @@ pub fn server(config: ServerConfig) -> Router {
     let jrpc_handler = |req| async move { route(req, "v_call", v_call_handler).await };
 
     //TODO: Lets decide do we need strict CORS policy or not and update this eventually
-    let cors = CorsLayer::new()
-        .allow_methods(Any)
-        .allow_origin(Any)
-        .allow_headers(Any);
-
+    let cors = CorsLayer::permissive();
     Router::new()
         .route("/", post(jrpc_handler))
         .layer(cors)
