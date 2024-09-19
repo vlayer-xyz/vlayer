@@ -14,8 +14,8 @@ contract EmailProver is Prover {
     using Strings for string;
     using EmailProofLib for MimeEmail;
 
-    function main(MimeEmail calldata emailProof) public view returns (bool) {
-        VerifiedEmail memory email = emailProof.verify();
+    function main(MimeEmail calldata mimeEmail) public view returns (bool) {
+        VerifiedEmail memory email = mimeEmail.verify();
 
         require(email.subject.equal("Is dinner ready?"), "subject must be 'Is dinner ready?'");
 
