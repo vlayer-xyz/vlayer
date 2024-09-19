@@ -1,7 +1,7 @@
 import { prove, testHelpers } from "@vlayer/sdk";
 import webProofProver from "../out/WebProofProver.sol/WebProofProver";
 import webProofVerifier from "../out/WebProofVerifier.sol/WebProofVerifier";
-import tls_proof from "./tls_proof.json";
+import tls_proof from "./tls_proof2.json";
 import * as assert from "assert";
 import { encodePacked, keccak256 } from "viem";
 
