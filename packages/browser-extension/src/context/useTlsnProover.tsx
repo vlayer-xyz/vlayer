@@ -1,4 +1,4 @@
-import { prove as tlsnProve, verify as tlsnVerify } from "tlsn-js";
+import { prove as tlsnProve } from "tlsn-js";
 import browser from "webextension-polyfill";
 import { useProofContext } from "./useProofContext";
 import React, {
@@ -10,6 +10,7 @@ import React, {
   PropsWithChildren,
 } from "react";
 import { formatTlsnHeaders } from "../lib/formatTlsnHeaders";
+import { MESSAGE } from "../constants/message";
 
 const TlsnProofContext = createContext({
   prove: () => {},
@@ -71,7 +72,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
 
   const prove = useCallback(async () => {
     setIsProving(true);
-    console.log("Making tlsn request with:", formattedHeaders);
+
     try {
       const tlsnProof = await tlsnProve(proofUrl, {
         notaryUrl: import.meta.env.VITE_NOTARY_URL,
@@ -82,11 +83,21 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
       });
       // this is temporary verification call
       // when we wil connect vlayer contracts we will transfer this back to the SDK
-      const verifiedProof = await tlsnVerify(tlsnProof);
-      setProof(verifiedProof);
+
+      browser.runtime.sendMessage({
+        type: MESSAGE.proof_done,
+        proof: tlsnProof,
+      });
+      setProof(proof);
       setIsProving(false);
     } catch (e) {
       console.error("error in tlsnotary", e);
+
+      browser.runtime.sendMessage({
+        type: MESSAGE.proof_error,
+        error: e,
+      });
+
       setIsProving(false);
     }
   }, [formattedHeaders]);
