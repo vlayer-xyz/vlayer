@@ -79,7 +79,7 @@ An `VerifiedEmail` consists of the following fields
 - `subject` - a string with the subject of the email
 - `body` - a string consisting of the entire body of the email
 - `from` - a string consisting of the sender's email address (*no name is available*) 
-- `to` - an array of strings containing the list of emails of the intended recipients (*no names available*)
+- `to` - strings containing the intended recipient (*no names available*)
 
 By inspecting and parsing the email payload elements, we can generate a claim to be used on-chain.
 
