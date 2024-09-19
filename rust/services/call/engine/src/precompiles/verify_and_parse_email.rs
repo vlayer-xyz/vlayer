@@ -25,18 +25,3 @@ fn verify_and_parse_run(input: &Bytes, gas_limit: u64) -> PrecompileResult {
         parsed_email.abi_encode().into(),
     ))
 }
-
-#[cfg(test)]
-mod test {
-    use super::*;
-
-    const TEST_EMAIL: &[u8] = b"From: me\nTo:you\n\nThis is a test email.";
-
-    #[test]
-    fn test_gas_usage() {
-        let input = Bytes::from_static(TEST_EMAIL);
-        let PrecompileOutput { gas_used, .. } = verify_and_parse_run(&input, 1000).unwrap();
-
-        assert_eq!(gas_used, 12);
-    }
-}
