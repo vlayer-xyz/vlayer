@@ -1818,6 +1818,7 @@ dependencies = [
  "thiserror",
  "tokio",
  "tower",
+ "tower-http",
  "tracing",
  "web_proof",
 ]
