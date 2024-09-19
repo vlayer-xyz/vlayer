@@ -119,3 +119,31 @@ chain_guest = { path = "services/chain/guest" }
 chain_engine = { path = "services/chain/engine" }
 chain_guest_wrapper = { path = "services/chain/guest_wrapper" }
 chain_server = { path = "services/chain/server" }
+
+[workspace.lints.clippy]
+as_ptr_cast_mut = "warn"
+assigning_clones = "warn"
+cast_possible_truncation = "warn"
+cast_precision_loss = "warn"
+dbg_macro = "warn"
+explicit_into_iter_loop = "warn"
+explicit_iter_loop = "warn"
+filter_map_next = "warn"
+if_then_some_else_none = "warn"
+inefficient_to_string = "warn"
+manual_let_else = "warn"
+manual_ok_or = "warn"
+match_same_arms = "warn"
+needless_collect = "warn"
+needless_continue = "warn"
+needless_pass_by_ref_mut = "warn"
+needless_pass_by_value = "warn"
+redundant_clone = "warn"
+redundant_closure_for_method_calls = "warn"
+type_repetition_in_bounds = "warn"
+unneeded_field_pattern = "warn"
+unused_async = "warn"
+unused_peekable = "warn"
+unused_self = "warn"
+used_underscore_binding = "warn"
+useless_let_if_seq = "warn"

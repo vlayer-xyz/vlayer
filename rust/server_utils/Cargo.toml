@@ -20,3 +20,6 @@ tower-http = { workspace = true, features = ["trace"] }
 tower-request-id = { workspace = true }
 tracing = { workspace = true }
 host_utils = { workspace = true }
+
+[lints]
+workspace = true

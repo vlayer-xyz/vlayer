@@ -33,3 +33,6 @@ regex = "1.10.6"
 
 [build-dependencies]
 vergen = { workspace = true, features = ["build", "git", "gitcl"] }
+
+[lints]
+workspace = true
