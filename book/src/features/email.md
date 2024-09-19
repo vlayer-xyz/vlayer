@@ -62,7 +62,7 @@ String comparison is handled by our `StringUtils` library (*described in more [d
 > vlayer init --template email_example
 > ```
 > 
-> This command will download all necessary artifacts to your project.
+> This command will download create and initialise a new project with sample email proof contracts.
 
 ## Email structure
 The `email` structure of type `VerifiedEmail` is injected into the `Prover` and can be used in a `main()` function.
