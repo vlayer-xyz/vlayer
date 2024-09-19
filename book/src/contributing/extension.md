@@ -6,9 +6,22 @@ To start working with vlayer browser extension, you need to install following so
 
 - [Bun](https://bun.sh/)
 - [Foundry](https://book.getfoundry.sh/getting-started/installation)
-- [Vite](https://vitejs.dev)
 
 ## Building
+
+```sh
+cd rust
+cargo build --release
+```
+
+```sh
+cd contracts
+forge soldeer install
+forge clean
+forge build
+```
+
+Web app's files are in `examples/web_proof/vlayer` folder.
 
 ```sh
 cd examples/web_proof
@@ -19,6 +32,18 @@ forge build
 
 ```sh
 cd examples/web_proof/vlayer
+bun install
+```
+
+Extension's files are in `packages/browser-extension` folder.
+
+```sh
+cd packages
+bun install
+```
+
+```sh
+cd packages/vlayer/sdk/src
 bun install
 ```
 
@@ -33,10 +58,11 @@ anvil
 Run vlayer server:
 
 ```sh
+cd rust
 cargo run --bin vlayer serve --proof fake
 ```
 
-Deploy WebProofProver and WebProofVerifier contracts on anvil:
+Deploy `WebProofProver` and `WebProofVerifier` contracts on anvil:
 
 ```sh
 cd examples/web_proof/vlayer
@@ -52,6 +78,7 @@ cd examples/web_proof/vlayer
 bun run dev
 ```
 
+Before starting browser extension, copy `.env.template` to `.env.development` file in `browser-extension` directory.
 Start browser extension:
 
 ```sh
@@ -60,13 +87,16 @@ bun run dev
 ```
 
 This will open web browser with vlayer app and browser extension installed.
-
 Now all saved changes will be applied in browser.
 
-## Vlayer web app
+There is a script `bash/run-web-example.sh` that runs all of the above mentioned steps.
 
-Web app's files are in `examples/web_proof/vlayer` folder.
+### Extension watch mode
 
-## Vlayer browser extension
+Extension can be also built using:
 
-Extension's files are in `packages/browser-extension` folder.
+```sh
+bun run build:watch
+```
+
+in `packages/browser-extension` directory. It enables hot-reload of the extension.
