@@ -40,7 +40,7 @@ contract GitHubEmail is Prover {
 
       require(email.subject.equal("Welcome to GitHub"), "Incorrect subject")
       require(email.from.equal("notifications@github.com"), "Incorrect sender")
-      require(email.to[0].equal("john.prover@gmail.com"), "Incorrect recipient")
+      require(email.to.equal("john.prover@gmail.com"), "Incorrect recipient")
       
       return true;
     }
@@ -59,7 +59,7 @@ String comparison is handled by our `StringUtils` library (*described in more [d
 > To run the above example on your computer, type the following command in your terminal:
 > 
 > ```bash
-> vlayer init --template email_example
+> vlayer init --template email_proof
 > ```
 > 
 > This command will download create and initialise a new project with sample email proof contracts.
@@ -143,14 +143,14 @@ contract RecoveryEmail is Prover {
 
     function getEmailAddressHash(string calldata emailAddr, address multisig, address owner) 
       internal 
-      returns (string) 
+      returns (bytes32) 
     {
       MultiSigWallet wallet = MultiSigWallet(multisig);
 
-      string memory recoveryMailHash = wallet.recoveryEmail(owner);
-      string memory emailAddrHash = keccak256(abi.encodePacked(emailAddr);
+      bytes32 memory recoveryMailHash = wallet.recoveryEmail(owner);
+      bytes32 emailAddrHash = keccak256(abi.encodePacked(emailAddr);
 
-      require(recoveryMailHash.equal(emailAddrHash), "wrong recovery email")
+      require(recoveryMailHash == emailAddrHash, "Recovery email mismatch") 
 
       return emailAddrHash;
     }
@@ -181,17 +181,17 @@ import { Verifier } from "vlayer/Verifier.sol";
 
 import { RecoveryEmail } from "RecoveryEmail.sol";
 
-address constant PROVER_ADDR = 0xd7141F4954c0B082b184542B8b3Bd00Dc58F5E05;
+address constant PROVER_ADDR = address(0xd7141F4954c0B082b184542B8b3Bd00Dc58F5E05);
 bytes4 constant  PROVER_FUNC_SELECTOR = RecoveryEmail.main.selector;
 
 contract MultiSigWallet is Verifier  {
     mapping (address => bool) public owners;
-    mapping (address => string) ownerToEmailHash;
+    mapping (address => bytes32) ownerToEmailHash;
 
     function recovery(
       Proof _p, 
       address lostWallet, 
-      string emailAddrHash, 
+      bytes32 emailAddrHash, 
       address newOwner, 
     ) 
       public 
