@@ -1,4 +1,4 @@
-use crate::precompiles::{gas_used, map_to_other};
+use crate::precompiles::{gas_used, map_to_fatal};
 use alloy_primitives::Bytes;
 use alloy_sol_types::SolType;
 use alloy_sol_types::{sol_data, SolValue};
@@ -19,16 +19,16 @@ type InputType = sol_data::FixedArray<sol_data::String, 2>;
 fn json_get_string_run(input: &Bytes, gas_limit: u64) -> PrecompileResult {
     let gas_used = gas_used(input.len(), BASE_COST, PER_WORD_COST, gas_limit)?;
 
-    let [body, json_path] = InputType::abi_decode(input, true).map_err(map_to_other)?;
+    let [body, json_path] = InputType::abi_decode(input, true).map_err(map_to_fatal)?;
     let body = serde_json::from_str(body.as_str())
-        .map_err(|err| map_to_other(format!("Error converting string body to json: {}", err)))?;
+        .map_err(|err| map_to_fatal(format!("Error converting string body to json: {}", err)))?;
 
     let value_by_path = get_value_by_path(&body, json_path.as_str())
-        .ok_or(map_to_other(format!("Missing value at path {json_path}")))?;
+        .ok_or(map_to_fatal(format!("Missing value at path {json_path}")))?;
 
     match value_by_path {
         Value::String(result) => Ok(PrecompileOutput::new(gas_used, result.abi_encode().into())),
-        _ => Err(map_to_other(format!(
+        _ => Err(map_to_fatal(format!(
             "Expected type 'String' at {json_path}, but found {value_by_path:?}"
         ))),
     }
@@ -42,8 +42,8 @@ fn get_value_by_path<'a>(value: &'a Value, path: &str) -> Option<&'a Value> {
 mod tests {
     use super::*;
     use revm::precompile::{
-        PrecompileError::{Other, OutOfGas},
-        PrecompileErrors::Error,
+        PrecompileError::OutOfGas,
+        PrecompileErrors::{Error, Fatal},
     };
 
     const TEST_JSON: &str = r#"
@@ -93,7 +93,7 @@ mod tests {
             InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_missing"]);
 
         assert!(matches!(json_get_string_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
-            Err(Error(Other(message))) if message == "Missing value at path root.nested_level.field_missing"));
+            Err(Fatal { msg: message }) if message == "Missing value at path root.nested_level.field_missing"));
     }
 
     #[test]
@@ -102,7 +102,7 @@ mod tests {
             InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_number"]);
 
         assert!(matches!(json_get_string_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
-            Err(Error(Other(message))) if message == "Expected type 'String' at root.nested_level.field_number, but found Number(0)"));
+            Err(Fatal { msg: message }) if message == "Expected type 'String' at root.nested_level.field_number, but found Number(0)"));
     }
 
     #[test]
@@ -111,7 +111,7 @@ mod tests {
             InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_boolean"]);
 
         assert!(matches!(json_get_string_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
-            Err(Error(Other(message))) if message == "Expected type 'String' at root.nested_level.field_boolean, but found Bool(true)"));
+            Err(Fatal { msg: message }) if message == "Expected type 'String' at root.nested_level.field_boolean, but found Bool(true)"));
     }
 
     #[test]
@@ -120,7 +120,7 @@ mod tests {
             InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_array"]);
 
         assert!(matches!(json_get_string_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
-            Err(Error(Other(message))) if message == "Expected type 'String' at root.nested_level.field_array, but found Array []"));
+            Err(Fatal { msg: message }) if message == "Expected type 'String' at root.nested_level.field_array, but found Array []"));
     }
 
     #[test]
@@ -129,7 +129,7 @@ mod tests {
             InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_object"]);
 
         assert!(matches!(json_get_string_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
-            Err(Error(Other(message))) if message == "Expected type 'String' at root.nested_level.field_object, but found Object {}"));
+            Err(Fatal { msg: message }) if message == "Expected type 'String' at root.nested_level.field_object, but found Object {}"));
     }
 
     #[test]
@@ -137,7 +137,7 @@ mod tests {
         let abi_encoded_body_and_json_path = InputType::abi_encode(&["", "field"]);
 
         assert!(matches!(json_get_string_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
-            Err(Error(Other(message))) if message == "Error converting string body to json: EOF while parsing a value at line 1 column 0"));
+            Err(Fatal { msg: message }) if message == "Error converting string body to json: EOF while parsing a value at line 1 column 0"));
     }
 
     #[test]
@@ -145,7 +145,7 @@ mod tests {
         let abi_encoded_body_and_json_path = InputType::abi_encode(&["{}", "field"]);
 
         assert!(matches!(json_get_string_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
-            Err(Error(Other(message))) if message == "Missing value at path field"))
+            Err(Fatal { msg: message }) if message == "Missing value at path field"))
     }
 
     #[test]
@@ -153,6 +153,6 @@ mod tests {
         let abi_encoded_body_and_json_path = InputType::abi_encode(&["a string", "field"]);
 
         assert!(matches!(json_get_string_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
-            Err(Error(Other(message))) if message == "Error converting string body to json: expected value at line 1 column 1"))
+            Err(Fatal { msg: message }) if message == "Error converting string body to json: expected value at line 1 column 1"))
     }
 }

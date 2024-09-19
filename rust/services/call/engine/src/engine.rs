@@ -3,7 +3,7 @@ use std::sync::Arc;
 use revm::{
     db::WrapDatabaseRef,
     inspector_handle_register,
-    primitives::{ExecutionResult, ResultAndState, SuccessReason},
+    primitives::{EVMError, ExecutionResult, ResultAndState, SuccessReason},
     DatabaseRef, Evm,
 };
 use thiserror::Error;
@@ -79,9 +79,7 @@ where
     fn transact<'env>(
         mut evm: Evm<'env, TravelInspector<'env>, WrapDatabaseRef<&'env D>>,
     ) -> Result<Vec<u8>, EngineError> {
-        let ResultAndState { result, .. } = evm
-            .transact_preverified()
-            .map_err(|err| EngineError::TransactPreverifiedError(format!("{:?}", err)))?;
+        let ResultAndState { result, .. } = evm.transact_preverified()?;
 
         let ExecutionResult::Success {
             reason: SuccessReason::Return,
@@ -92,5 +90,19 @@ where
             return Err(EngineError::TransactError(format_failed_call_result(result)));
         };
         Ok(output.into_data().into())
+    }
+}
+
+impl<D: std::fmt::Debug> From<EVMError<D>> for EngineError {
+    fn from(err: EVMError<D>) -> Self {
+        match err {
+            EVMError::Precompile(err) => EngineError::TransactError(format_failed_call_result({
+                ExecutionResult::Revert {
+                    gas_used: 0,
+                    output: err.into_bytes().into(),
+                }
+            })),
+            _ => EngineError::TransactPreverifiedError(format!("{:?}", err)),
+        }
     }
 }

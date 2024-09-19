@@ -8,7 +8,7 @@ use crate::precompiles::verify_and_parse_email::VERIFY_EMAIL_PRECOMPILE;
 use revm::precompile::Error::OutOfGas;
 use revm::precompile::{calc_linear_cost_u32, u64_to_address};
 use revm::{
-    precompile::{PrecompileError::Other, PrecompileErrors::Error, PrecompileWithAddress},
+    precompile::{PrecompileErrors::Error, PrecompileWithAddress},
     primitives::PrecompileErrors,
 };
 
@@ -19,8 +19,10 @@ pub(crate) const VLAYER_PRECOMPILES: [PrecompileWithAddress; 3] = [
 ];
 
 #[allow(clippy::needless_pass_by_value)] // More convenient to use in map_err
-fn map_to_other<E: ToString>(err: E) -> PrecompileErrors {
-    Error(Other(err.to_string()))
+fn map_to_fatal<E: ToString>(err: E) -> PrecompileErrors {
+    PrecompileErrors::Fatal {
+        msg: err.to_string(),
+    }
 }
 
 fn gas_used(len: usize, base: u64, word: u64, gas_limit: u64) -> Result<u64, PrecompileErrors> {

@@ -2,10 +2,17 @@ mod dkim;
 mod email;
 
 use crate::email::Email;
+use dkim::verify;
+use mail_auth::Error as AuthError;
 use mailparse::MailParseError;
 
-pub fn parse_mime(email: &[u8]) -> Result<Email, MailParseError> {
+fn parse_mime(email: &[u8]) -> Result<Email, MailParseError> {
     mailparse::parse_mail(email)?.try_into()
+}
+
+pub fn parse_and_verify(email: &[u8]) -> Result<Email, AuthError> {
+    verify::verify_dkim(email)?;
+    parse_mime(email).map_err(|_| AuthError::ParseError)
 }
 
 #[cfg(test)]

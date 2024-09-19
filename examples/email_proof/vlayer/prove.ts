@@ -1,8 +1,11 @@
+import fs from "fs";
 import { testHelpers, prove } from "@vlayer/sdk";
 import emailProofProver from "../out/EmailProver.sol/EmailProver";
 import emailProofVerifier from "../out/EmailProofVerifier.sol/EmailProofVerifier";
 
-const email = { email: "From: me\r\nTo: you\r\n\r\nMock email" };
+const mimeEmail = fs.readFileSync("./test_email.txt").toString();
+
+const email = { email: mimeEmail };
 
 const [prover, verifier] = await testHelpers.deployProverVerifier(
   emailProofProver,
