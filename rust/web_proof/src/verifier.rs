@@ -92,6 +92,19 @@ mod tests {
     }
 
     #[test]
+    fn wrong_header() {
+        let web_proof = load_web_proof_fixture(
+            "./testdata/invalid_header_tls_proof.json",
+            NOTARY_PUB_KEY_PEM_EXAMPLE,
+        );
+
+        assert!(matches!(
+            verify_and_parse(web_proof).err().unwrap(),
+            WebProofError::Parsing(ParsingError::Httparse(httparse::Error::HeaderName))
+        ));
+    }
+
+    #[test]
     fn correct_server_name_extracted() {
         let web_proof =
             load_web_proof_fixture("./testdata/tls_proof.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
