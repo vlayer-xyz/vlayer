@@ -29,10 +29,10 @@ export const formatTlsnHeaders = (
       "Accept-Encoding": "identity",
       Connection: "close",
     },
-    secretHeaders: [
-      `x-csrf-token: ${xCsrftoken}`,
-      `cookie: lang=en; auth_token=${authToken}; ct0=${ct0}`,
-      `authorization: ${authorization}`,
-    ],
+    // secretHeaders: [
+    //   `x-csrf-token: ${xCsrftoken}`,
+    //   `cookie: lang=en; auth_token=${authToken}; ct0=${ct0}`,
+    //   `authorization: ${authorization}`,
+    // ],
   };
 };
