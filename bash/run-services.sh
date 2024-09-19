@@ -59,7 +59,7 @@ function startup_vlayer(){
         --proof "${proof_arg}" \
         --rpc-url 100002:http://localhost:8546 \
         --rpc-url 100001:http://localhost:8545 \
-        ${external_urls[@]} \
+        ${external_urls[@]+"${external_urls[@]}"} \
         >"${LOGS_DIR}/vlayer_serve.out" &
 
     VLAYER_SERVER_PID=$!
@@ -116,6 +116,6 @@ echo
 echo "Starting services..."
 
 startup_anvils
-startup_vlayer "${SERVER_PROOF_ARG}" ${EXTERNAL_RPC_URLS[@]}
+startup_vlayer "${SERVER_PROOF_ARG}" ${EXTERNAL_RPC_URLS[@]+"${EXTERNAL_RPC_URLS[@]}"}
 
 echo "Services has been succesfully started..."
