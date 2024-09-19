@@ -72,7 +72,6 @@ impl BlockingProvider for PendingStateProvider {
             .account(address)
             .info
             .code
-            .clone()
             .map_or(Bytes::default(), |code| code.original_bytes()))
     }
 

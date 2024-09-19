@@ -77,7 +77,7 @@ impl<'a> ContractRunner<'a> {
 
         let mut logs = Vec::new();
         let mut traces = Vec::with_capacity(self.libs_to_deploy.len());
-        for code in self.libs_to_deploy.iter() {
+        for code in self.libs_to_deploy {
             match self.executor.deploy(
                 LIBRARY_DEPLOYER,
                 code.clone(),
@@ -222,7 +222,7 @@ impl<'a> ContractRunner<'a> {
     /// `function fixture_owner() public returns (address[] memory){}`
     /// returns an array of addresses to be used for fuzzing `owner` named parameter in scope of the
     /// current test.
-    fn fuzz_fixtures(&mut self, address: Address) -> FuzzFixtures {
+    fn fuzz_fixtures(&self, address: Address) -> FuzzFixtures {
         let mut fixtures = HashMap::new();
         let fixture_functions = self
             .contract
@@ -232,12 +232,9 @@ impl<'a> ContractRunner<'a> {
         for func in fixture_functions {
             if func.inputs.is_empty() {
                 // Read fixtures declared as functions.
-                if let Ok(CallResult {
-                    raw: _,
-                    decoded_result,
-                }) = self
-                    .executor
-                    .call(CALLER, address, func, &[], U256::ZERO, None)
+                if let Ok(CallResult { decoded_result, .. }) =
+                    self.executor
+                        .call(CALLER, address, func, &[], U256::ZERO, None)
                 {
                     fixtures.insert(fixture_name(func.name.clone()), decoded_result);
                 }
@@ -247,10 +244,7 @@ impl<'a> ContractRunner<'a> {
                 let mut vals = Vec::new();
                 let mut index = 0;
                 loop {
-                    if let Ok(CallResult {
-                        raw: _,
-                        decoded_result,
-                    }) = self.executor.call(
+                    if let Ok(CallResult { decoded_result, .. }) = self.executor.call(
                         CALLER,
                         address,
                         func,
@@ -286,7 +280,7 @@ impl<'a> ContractRunner<'a> {
             .collect();
         let call_setup = setup_fns.len() == 1 && setup_fns[0].name == "setUp";
         // There is a single miss-cased `setUp` function, so we add a warning
-        for &setup_fn in setup_fns.iter() {
+        for &setup_fn in &setup_fns {
             if setup_fn.name != "setUp" {
                 warnings.push(format!(
                     "Found invalid setup function \"{}\" did you mean \"setUp()\"?",
@@ -308,13 +302,14 @@ impl<'a> ContractRunner<'a> {
         }
 
         // Check if `afterInvariant` function with valid signature declared.
-        let after_invariant_fns: Vec<_> = self
+        let after_invariant_fns = self
             .contract
             .abi
             .functions()
             .filter(|func| func.name.is_after_invariant())
-            .collect();
-        if after_invariant_fns.len() > 1 {
+            .count()
+            > 1;
+        if after_invariant_fns {
             // Return a single test result failure if multiple functions declared.
             return SuiteResult::new(
                 start.elapsed(),
@@ -333,7 +328,7 @@ impl<'a> ContractRunner<'a> {
             .contract
             .abi
             .functions()
-            .any(|func| func.is_invariant_test());
+            .any(TestFunctionExt::is_invariant_test);
 
         let prev_tracer = self.executor.inspector_mut().tracer.take();
         if prev_tracer.is_some() || has_invariants {

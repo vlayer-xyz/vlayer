@@ -47,11 +47,11 @@ impl<DB: Database> Inspector<DB> for CheatcodeInspector {
             return match selector.try_into() {
                 Ok(callProverCall::SELECTOR) => {
                     self.should_start_proving = true;
-                    Some(create_encoded_return_outcome(true, inputs))
+                    Some(create_encoded_return_outcome(&true, inputs))
                 }
                 Ok(getProofCall::SELECTOR) => {
                     if let Some(proof) = self.previous_proof.take() {
-                        Some(create_encoded_return_outcome(proof, inputs))
+                        Some(create_encoded_return_outcome(&proof, inputs))
                     } else {
                         Some(create_revert_outcome("No proof available"))
                     }
@@ -67,7 +67,7 @@ impl CheatcodeInspector {
     fn run_host<DB: Database>(
         &mut self,
         context: &&mut EvmContext<DB>,
-        inputs: &mut CallInputs,
+        inputs: &CallInputs,
     ) -> CallOutcome {
         let host = create_host(context, &self.rpc_endpoints);
         let call_result = host.run(Call {
@@ -78,7 +78,7 @@ impl CheatcodeInspector {
         match call_result {
             Ok(host_output) => {
                 self.previous_proof = Some(Self::host_output_into_proof(&host_output));
-                create_return_outcome(host_output.guest_output.evm_call_result.clone(), inputs)
+                create_return_outcome(host_output.guest_output.evm_call_result, inputs)
             }
             Err(error) => create_revert_outcome(&format!("{:?}", error)),
         }
@@ -110,7 +110,7 @@ fn create_host<DB: Database>(
 
     Host::try_new_with_provider_factory(
         TestProviderFactory::new(pending_state_provider_factory, rpc_endpoints.clone()),
-        HostConfig {
+        &HostConfig {
             start_chain_id: TEST_CHAIN_ID_1,
             ..Default::default()
         },

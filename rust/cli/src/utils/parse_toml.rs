@@ -1,10 +1,11 @@
 use crate::errors::CLIError;
 use std::path::Path;
 
-pub(crate) fn get_src_from_string(contents: String) -> Result<String, CLIError> {
-    let config = toml::from_str(&contents).map_err(|e| CLIError::TomlError(e.to_string()))?;
+pub(crate) fn get_src_from_str(contents: impl AsRef<str>) -> Result<String, CLIError> {
+    let config =
+        toml::from_str(contents.as_ref()).map_err(|e| CLIError::TomlError(e.to_string()))?;
 
-    let result = get_src_from_toml(config);
+    let result = get_src_from_toml(&config);
     match result {
         Some(src) => Ok(src),
         None => Err(CLIError::TomlError(
@@ -13,7 +14,7 @@ pub(crate) fn get_src_from_string(contents: String) -> Result<String, CLIError> 
     }
 }
 
-fn get_src_from_toml(config: toml::Table) -> Option<String> {
+fn get_src_from_toml(config: &toml::Table) -> Option<String> {
     let default_src = config
         .get("profile")?
         .get("default")?
@@ -152,7 +153,7 @@ mod tests {
             [profile.default]
             src = "src"
         "#;
-        let result = get_src_from_string(contents.to_string());
+        let result = get_src_from_str(contents);
         assert_eq!(result.unwrap(), "src".to_string());
     }
 
@@ -162,7 +163,7 @@ mod tests {
             [profile.dev]
             src = "src"
         "#;
-        let result = get_src_from_string(contents.to_string());
+        let result = get_src_from_str(contents);
         assert!(
             matches!(result.unwrap_err(), CLIError::TomlError(errormsg) if errormsg == "No source found in foundry.toml")
         );
@@ -174,7 +175,7 @@ mod tests {
             [profile.default]
             src = "src"aaa
         "#;
-        let result = get_src_from_string(invalid_toml.to_string());
+        let result = get_src_from_str(invalid_toml);
         assert!(
             matches!(result.unwrap_err(), CLIError::TomlError(errormsg) if errormsg != "No source found in foundry.toml")
         ); // A long error message is returned, specifying the error in the TOML

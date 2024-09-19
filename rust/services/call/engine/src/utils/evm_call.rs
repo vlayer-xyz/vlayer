@@ -21,7 +21,7 @@ pub fn create_return_outcome<T: Into<Bytes>>(value: T, inputs: &CallInputs) -> C
     )
 }
 
-pub fn create_encoded_return_outcome<T: SolValue>(value: T, inputs: &CallInputs) -> CallOutcome {
+pub fn create_encoded_return_outcome<T: SolValue>(value: &T, inputs: &CallInputs) -> CallOutcome {
     create_return_outcome(value.abi_encode(), inputs)
 }
 

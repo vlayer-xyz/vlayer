@@ -49,9 +49,8 @@ impl Encodable for NodeRef {
 
         match self {
             NodeRef::Empty => 1,
-            NodeRef::Digest(_) => DIGEST_LENGTH,
+            NodeRef::Digest(_) | NodeRef::Node(_) => DIGEST_LENGTH,
             NodeRef::InlineNode(rlp) => rlp.len(),
-            NodeRef::Node(_) => DIGEST_LENGTH,
         }
     }
 }

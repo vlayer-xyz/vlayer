@@ -22,7 +22,7 @@ pub async fn body_to_json(body: Body) -> Value {
     serde_json::from_slice(&body_bytes).unwrap()
 }
 
-pub fn function_selector(calldata: Bytes) -> String {
+pub fn function_selector(calldata: &Bytes) -> String {
     let calldata_bytes = calldata.to_vec();
     let selector_bytes = &calldata_bytes.as_slice()[..4];
     selector_bytes.encode_hex_with_prefix()

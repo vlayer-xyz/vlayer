@@ -18,6 +18,7 @@ pub(crate) const VLAYER_PRECOMPILES: [PrecompileWithAddress; 3] = [
     PrecompileWithAddress(u64_to_address(0x102), VERIFY_EMAIL_PRECOMPILE),
 ];
 
+#[allow(clippy::needless_pass_by_value)] // More convenient to use in map_err
 fn map_to_other<E: ToString>(err: E) -> PrecompileErrors {
     Error(Other(err.to_string()))
 }

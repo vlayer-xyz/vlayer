@@ -20,7 +20,7 @@ pub(crate) fn resolve_trie(root: Node, nodes_by_hash: &HashMap<B256, Node>) -> N
         }
         Node::Branch(mut children, value) => {
             // iterate over the children in place, resolving each child node recursively.
-            for child in children.iter_mut() {
+            for child in &mut children {
                 if let Some(node) = child.take() {
                     *child = Some(Box::new(resolve_trie(*node, nodes_by_hash)));
                 }

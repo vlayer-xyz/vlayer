@@ -40,11 +40,10 @@ impl legacy_rlp::Decodable for Node {
                         _ => children[i] = Some(Box::new(Decodable::decode(&node_rlp)?)),
                     }
                 }
-                let val = if !rlp.at(16)?.is_empty() {
-                    Some(rlp.val_at::<Vec<u8>>(16)?.into())
-                } else {
-                    None
-                };
+                let val = (!rlp.at(16)?.is_empty())
+                    .then(|| rlp.val_at::<Vec<u8>>(16))
+                    .transpose()?
+                    .map(Into::into);
 
                 Ok(Node::Branch(children, val))
             }

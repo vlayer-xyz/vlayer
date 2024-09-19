@@ -1,6 +1,6 @@
 use crate::commands::args::TemplateOption;
 use crate::errors::CLIError;
-use crate::utils::parse_toml::{add_deps_to_foundry_toml, get_src_from_string};
+use crate::utils::parse_toml::{add_deps_to_foundry_toml, get_src_from_str};
 use crate::utils::path::{copy_dir_to, find_foundry_root};
 use flate2::read::GzDecoder;
 use reqwest::get;
@@ -163,7 +163,7 @@ fn map_reqwest_error(e: reqwest::Error) -> CLIError {
 fn find_src_path(root_path: &Path) -> Result<PathBuf, CLIError> {
     let toml_path = root_path.join("foundry.toml");
     let contents = fs::read_to_string(toml_path)?;
-    let src_dirname = get_src_from_string(contents)?;
+    let src_dirname = get_src_from_str(contents)?;
     let src_path = root_path.join(src_dirname);
     if src_path.exists() {
         Ok(src_path)

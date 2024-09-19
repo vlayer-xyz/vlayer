@@ -7,6 +7,7 @@ use clap::Parser;
 use foundry_common::TestFilter;
 use foundry_compilers::{FileFilter, ProjectPathsConfig};
 use foundry_config::{filter::GlobMatcher, Config};
+use regex::Regex;
 use std::{fmt, path::Path};
 
 /// The filter to use during testing.
@@ -101,33 +102,30 @@ impl FilterArgs {
 impl fmt::Debug for FilterArgs {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("FilterArgs")
-            .field(
-                "match-test",
-                &self.test_pattern.as_ref().map(|r| r.as_str()),
-            )
+            .field("match-test", &self.test_pattern.as_ref().map(Regex::as_str))
             .field(
                 "no-match-test",
-                &self.test_pattern_inverse.as_ref().map(|r| r.as_str()),
+                &self.test_pattern_inverse.as_ref().map(Regex::as_str),
             )
             .field(
                 "match-contract",
-                &self.contract_pattern.as_ref().map(|r| r.as_str()),
+                &self.contract_pattern.as_ref().map(Regex::as_str),
             )
             .field(
                 "no-match-contract",
-                &self.contract_pattern_inverse.as_ref().map(|r| r.as_str()),
+                &self.contract_pattern_inverse.as_ref().map(Regex::as_str),
             )
             .field(
                 "match-path",
-                &self.path_pattern.as_ref().map(|g| g.as_str()),
+                &self.path_pattern.as_ref().map(GlobMatcher::as_str),
             )
             .field(
                 "no-match-path",
-                &self.path_pattern_inverse.as_ref().map(|g| g.as_str()),
+                &self.path_pattern_inverse.as_ref().map(GlobMatcher::as_str),
             )
             .field(
                 "no-match-coverage",
-                &self.coverage_pattern_inverse.as_ref().map(|g| g.as_str()),
+                &self.coverage_pattern_inverse.as_ref().map(Regex::as_str),
             )
             .finish_non_exhaustive()
     }
