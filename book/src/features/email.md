@@ -30,19 +30,21 @@ Below is an example of such proof generation:
 
 ```solidity
 import {Prover} from "vlayer/Prover.sol";
-import {VerifiedEmail, MimeEmail, EmailProofLib} from "vlayer/EmailProof.sol";
+import {MimeEmail, VerifiedEmail, EmailProofLib} from "vlayer/EmailProof.sol";
+import {StringUtils} "vlayer/StringUtils.sol";
 
 contract GitHubEmail is Prover {
     using EmailProofLib for MimeEmail;
+    using StringUtils for string;
 
-    function main(MimeEmail calldata mimeEmail) public returns (bool) {
-      VerifiedEmail memory email = mimeEmail.verify()
+    function main(MimeEmail calldata mimeEmail) public view returns (bool) {
+        VerifiedEmail memory email = mimeEmail.verify();
 
-      require(email.subject.equal("Welcome to GitHub"), "Incorrect subject")
-      require(email.from.equal("notifications@github.com"), "Incorrect sender")
-      require(email.to.equal("john.prover@gmail.com"), "Incorrect recipient")
-      
-      return true;
+        require(email.subject.equal("Welcome to GitHub"), "Incorrect subject");
+        require(email.from.equal("notifications@github.com"), "Incorrect sender");
+        require(email.to.equal("john.prover@gmail.com"), "Incorrect recipient");
+
+        return true;
     }
 }
 ```
