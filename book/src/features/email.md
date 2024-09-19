@@ -22,29 +22,35 @@ You do this by writing a Solidity smart contract (`Prover`) that has access to t
 Under the hood, we verify mail server signatures to ensure the authenticity and integrity of the content.
 
 ## Example
-Let's say someone wants to prove they've been a GitHub user since 2020. One way to do this is to take a screenshot and send it to the verifier. However, this is not very reliable because screenshot images can be easily manipulated, and obviously such an image cannot be verified on-chain. 
+Let's say someone wants to prove they are a GitHub user. One way to do this is to take a screenshot and send it to the verifier. However, this is not very reliable because screenshot images can be easily manipulated, and obviously such an image cannot be verified on-chain. 
 
-A better option is to prove that GitHub's email servers sent a welcome email on a certain date. Below is a sample `Prover` contract that verifies that the caller (`msg.sender`) created a GitHub account before 2020.
+A better option is to prove that GitHub's email servers sent a welcome email. Below is a sample `Prover` contract that verifies that the caller created a GitHub account.
 
 Below is an example of such proof generation:
 
 ```solidity
-contract GitHubEmail is Prover {
-    function main() public returns (bool) {      
-      require(email.subject.equal("Welcome to GitHub"), "Incorrect subject")
-      require(email.from.equal("notifications@github.com"), "Incorrect sender")
-      require(email.to[0].equal("john.prover@gmail.com"), "Incorrect recipient")
-      
-      // Wed Jan 01 2020 00:00:00 GMT+0100
-      require(email.received_at < 1577833200, "Email received after 2020") 
+import {Prover} from "vlayer/Prover.sol";
+import {MimeEmail, VerifiedEmail, EmailProofLib} from "vlayer/EmailProof.sol";
+import {StringUtils} "vlayer/StringUtils.sol";
 
-      return true;
+contract GitHubEmail is Prover {
+    using EmailProofLib for MimeEmail;
+    using StringUtils for string;
+
+    function main(MimeEmail calldata mimeEmail) public view returns (bool) {
+        VerifiedEmail memory email = mimeEmail.verify();
+
+        require(email.subject.equal("Welcome to GitHub"), "Incorrect subject");
+        require(email.from.equal("notifications@github.com"), "Incorrect sender");
+        require(email.to.equal("john.prover@gmail.com"), "Incorrect recipient");
+
+        return true;
     }
 }
 ```
 
 
-The `email` structure is automatically injected into the contract context of the email prover by the vlayer. Then we have a series of assertions (*regular Solidity `require()`*) that check the email details. 
+First, we verify the integrity of the email with the `verify()` function. Then we have a series of assertions (*regular Solidity `require()`*) that check the email details. 
 
 String comparison is handled by our `StringUtils` library (*described in more [details below](/features/email.html#stringutils)*). Date values are formatted in the [Unix time](https://en.wikipedia.org/wiki/Unix_time) notation, which allows them to be compared as integers.
 
@@ -55,29 +61,27 @@ String comparison is handled by our `StringUtils` library (*described in more [d
 > To run the above example on your computer, type the following command in your terminal:
 > 
 > ```bash
-> vlayer init --template email_example
+> vlayer init --template email_proof
 > ```
 > 
-> This command will download all necessary artifacts to your project.
+> This command will download create and initialise a new project with sample email proof contracts.
 
 ## Email structure
-The `email` structure of type `Email` is injected into the `Prover` and can be used in a `main()` function.
+The `email` structure of type `VerifiedEmail` is injected into the `Prover` and can be used in a `main()` function.
 
 ```solidity
-struct Email {
+struct VerifiedEmail {
   string subject;
   string body;
   string from;
-  string[] to;
-  uint received_at;
+  string to;
 }
 ```
-An `Email` consists of the following fields
+An `VerifiedEmail` consists of the following fields
 - `subject` - a string with the subject of the email
 - `body` - a string consisting of the entire body of the email
 - `from` - a string consisting of the sender's email address (*no name is available*) 
-- `to` - an array of strings containing the list of emails of the intended recipients (*no names available*)
-- `received_at` - `uint` representing a timestamp of when the email arrived at the destination email server.
+- `to` - a string consisting of the intended recipient's email address (*no name is available*)
 
 By inspecting and parsing the email payload elements, we can generate a claim to be used on-chain.
 
@@ -104,15 +108,22 @@ Body: New wallet address {new account address}
 Now, we can access the email from the `Prover` contract:
 
 ```solidity
+import {Prover} from "vlayer/Prover.sol";
+import {VerifiedEmail, MimeEmail, EmailProofLib} from "vlayer/EmailProof.sol";
+import {StringUtils} from "vlayer/StringUtils.sol"
+
 contract RecoveryEmail is Prover {
     using StringUtils for string;
+    using EmailProofLib for MimeEmail;
 
-    function main(address multisigAddr) public returns (address, string, address, uint) {      
+    function main(address multisigAddr, MimeEmail calldata mimeEmail) public returns (address, bytes32, address) {     
+      VerifiedEmail memory email = mimeEmail.verify()
+ 
       address lostWallet = parseSubject(email.subject);
       address newAddress = parseBody(email.body);
-      string memory emailHash = getEmailHash(email.sender, multisigAddr, lostWallet);
+      bytes32 emailAddrHash = getEmailAddressHash(email.from, multisigAddr, lostWallet);
       
-      return (lostWallet, emailHash, newAddress, email.received_at); 
+      return (lostWallet, emailAddrHash, newAddress); 
     }
 
     function parseSubject(string calldata subject) internal returns (address) {
@@ -133,18 +144,18 @@ contract RecoveryEmail is Prover {
       return newbodyMatches[0].toAddress();
     }    
 
-    function getEmailHash(string calldata email, address multisig, address owner) 
+    function getEmailAddressHash(string calldata emailAddr, address multisig, address owner) 
       internal 
-      returns (string) 
+      returns (bytes32) 
     {
       MultiSigWallet wallet = MultiSigWallet(multisig);
 
-      string memory recoveryMailHash = wallet.recoveryEmail(owner);
-      string memory emailHash = keccak256(abi.encodePacked(email);
+      bytes32 memory recoveryMailHash = wallet.recoveryEmail(owner);
+      bytes32 emailAddrHash = keccak256(abi.encodePacked(emailAddr);
 
-      require(recoveryMailHash.equal(emailHash), "wrong recovery email")
+      require(recoveryMailHash == emailAddrHash, "Recovery email mismatch");
 
-      return emailHash;
+      return emailAddrHash;
     }
 }
 ```
@@ -157,8 +168,8 @@ What happens step by step in the above snippet?
   * The `subjectMatches.length == 1` condition ensures that the subject is not malformed.
 * `parseBody` extracts new owner address 
   * `email.body.match` retrieves new wallet address from the email body
-* `getEmailHash` compares the email associated with the wallet with the one received.
-  * `recoveryMailHash.equal(emailHash)` check if correct email was used for recovery 
+* `getEmailAddressHash` compares the email address associated with the wallet with the one received.
+  * `recoveryMailHash == emailAddrHash` check if correct email was used for recovery 
 
 On successful execution, proof of computation is returned. It also returns the recovered wallet address, the email address hash, the new wallet address, and the email timestamp as public input.
 
@@ -169,35 +180,35 @@ Now we are ready to use the proof and results from the previous step for on-chai
 Below is a sample implementation of this:
 
 ```solidity 
-import { RecoveryEmail } from "./v/RecoveryEmail.v.sol";
+import { Verifier } from "vlayer/Verifier.sol";
 
-address constant PROVER_ADDR = 0xd7141F4954c0B082b184542B8b3Bd00Dc58F5E05;
+import { RecoveryEmail } from "RecoveryEmail.sol";
+
+address constant PROVER_ADDR = address(0xd7141F4954c0B082b184542B8b3Bd00Dc58F5E05);
 bytes4 constant  PROVER_FUNC_SELECTOR = RecoveryEmail.main.selector;
 
-contract MultiSigWallet is Verifier  {    
+contract MultiSigWallet is Verifier  {
     mapping (address => bool) public owners;
-    mapping (address => string) ownerToEmailHash;
+    mapping (address => bytes32) ownerToEmailHash;
 
     function recovery(
       Proof _p, 
       address lostWallet, 
-      string emailHash, 
+      bytes32 emailAddrHash, 
       address newOwner, 
-      uint recoveryDate
     ) 
       public 
       onlyVerified(PROVER_ADDR, PROVER_FUNC_SELECTOR) 
       returns (address) 
     {  
       require(
-        ownerToEmailHash[lostWallet] == emailHash, 
-        "wrong email given"
-      );
-      require(
-        (block.timestamp - recoveryDate) <= 86400, 
-        "email older than 24h"
+        ownerToEmailHash[lostWallet] == emailAddrHash, 
+        "Recovery email mismatch"
       );
 
+      require(owners[lostWallet]; "Not an owner");
+      
+      owners[lostWallet] = false;
       owners[newOwner] = true;
 
       return (newOwner); 
@@ -220,8 +231,7 @@ What exactly happened in the above code?
   * The `recovery()` function takes follwoing arguments:`proof` and returned values generated by `Prover.main()`.
   * `onlyVerified(PROVER_ADDR, PROVER_FUNC_SELECTOR)` validates execution of Prover and correctness of arguments. If the proof is invalid or arguments don't match returned values it will revert. 
   * You don't need to pass `proof` as an argument to `onlyVerified` because it is automatically extracted from `msg.data`.
-  * `ownerToEmailHash[lostWallet] == emailHash` make sure recovery email address matches the one that was set up previously in the wallet
-  * `(block.timestamp - recoveryDate) <= 86400` call makes sure recovery email isn't older than 24h, otherwise reverts
+  * `ownerToEmailHash[lostWallet] == emailAddrHash` make sure recovery email address matches the one that was set up previously in the wallet
   * `owners[newOwner] = true` sets up a new wallet to be authorized to use `MultiSigWallet`.
 
 
