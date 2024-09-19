@@ -12,15 +12,13 @@
   <p>Our team is currently working on this feature. In case of any bug please retry in 1-2 weeks. We appreciate your patience. </p>
 </div>
 
-## Primer on blocks
-The block number is a unique identifier assigned to each block in the Ethereum blockchain, starting from 0 for the genesis block and incrementing by one for each subsequent block. Smart contracts utilize block numbers to schedule events such as token releases, voting periods, and the start or end of auctions. By knowing the average block time, developers can estimate when these events will occur.
-
 ## Access to historical data 
-Unfortunately, direct access to historical state from within smart contracts is impossible. This restriction means that smart contracts cannot easily reference past accounts and smart contracts data for decision-making or verification purposes.
+Unfortunately, direct access to the historical state from within smart contracts is not possible. 
+Smart contracts only have access to the current state of the current block. 
 
-To overcome the limitation of accessing historical blocks within smart contracts, we have introduced the `setBlockNumber(uint blockNo)` function, available in our `Prover` contracts. This function allows you to switch your next function call context to the desired block number.
+To overcome this limitation, vlayer introduced the `setBlock(uint blockNo)` function, available in our `Prover` contracts. This function allows switching context of subsequent call to the desired block number.
 
-This allows you to aggregate and review data collected over multiple block numbers. 
+This allows aggregating data from multiple blocks in a single call to a function. 
 
 ## Example
 The following is an example of Prover code that calculates the average USDC balance at specific block numbers.
@@ -32,11 +30,11 @@ contract AverageBalance is Prover {
     uint256 immutable endingBlock;
     uint256 immutable step;
 
-    constructor(IERC20 _token, uint256 _startBlockNo, uint256 _endingBlockNo, uint256 _step) {
+    constructor(IERC20 _token) {
         token = _token;
-        startingBlock = _startBlockNo;
-        endingBlock = _endingBlockNo;
-        step = _step;
+        startingBlock = 6600000;
+        endingBlock = 6700000;
+        step = 10000;
     }
 
     function averageBalanceOf(address _owner) public returns (address, uint256) {
@@ -55,9 +53,9 @@ contract AverageBalance is Prover {
 }
 ```
 
-First, the call to the `setBlock(blockNo)` function sets the `Prover` context for the `6600000` block (`startingBlock` configured in the constructor). This means that the next call to the `token.balanceOf` function will read data in the context of the `6600000` block.
+First call to the `setBlock(blockNo)` function sets the `Prover` context for the `startingBlock` (`6600000` configured in the constructor). This means that the next call to the `token.balanceOf` function will read data in the context of the `6600000` block.
 
-Next call to `setBlock()` sets the `Prover` context to block numbered `6610000` when step is configured to `10000`. The next call to `token.balanceOf` checks again total balance, but this time in block `6610000`.
+Next call to `setBlock()` sets the `Prover` context to block numbered `6610000` when step is configured to `10000`. The subsequent call to `token.balanceOf` checks again total balance, but this time in block `6610000`.
 
 Each call to `token.balanceOf` can return different results if the account balance changes between blocks due to token transfers.
 
