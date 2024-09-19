@@ -82,8 +82,7 @@ where
     fn transact<'env>(
         mut evm: Evm<'env, TravelInspector<'env>, WrapDatabaseRef<&'env D>>,
     ) -> Result<Vec<u8>, EngineError> {
-        let ResultAndState { result, .. } =
-            evm.transact_preverified().map_err(EngineError::from)?;
+        let ResultAndState { result, .. } = evm.transact_preverified()?;
 
         let ExecutionResult::Success {
             reason: SuccessReason::Return,
