@@ -87,7 +87,7 @@ mod tests {
         };
 
         let body = transcript.parse_body();
-        assert_eq!(body.unwrap().to_string(), REDACTED_RESPONSE_BODY.to_string());
+        assert_eq!(body.unwrap(), REDACTED_RESPONSE_BODY.to_string());
     }
 
     #[test]
@@ -130,7 +130,7 @@ mod tests {
         };
 
         let body = transcript.parse_body();
-        assert_eq!(body.unwrap().to_string(), "".to_string());
+        assert_eq!(body.unwrap(), "".to_string());
     }
 
     #[test]

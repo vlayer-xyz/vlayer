@@ -233,7 +233,7 @@ mod test {
                 let receipt: EncodableReceipt = mock_fake_receipt().into();
                 let seal: Seal = receipt.clone().try_into().unwrap();
 
-                let seal_bytes: [[u8; 32]; 8] = seal.seal.map(|word| word.into());
+                let seal_bytes: [[u8; 32]; 8] = seal.seal.map(Into::into);
                 let seal_bytes = seal_bytes.concat();
 
                 assert_eq!(receipt.seal_bytes().unwrap(), seal_bytes.as_slice());

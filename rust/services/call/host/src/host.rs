@@ -176,7 +176,7 @@ mod test {
             start_chain_id: TEST_CHAIN_ID_1,
             proof_mode: ProofMode::Fake,
         };
-        let res = Host::try_new(config);
+        let res = Host::try_new(&config);
 
         assert!(matches!(
             res.map(|_| ()).unwrap_err(),

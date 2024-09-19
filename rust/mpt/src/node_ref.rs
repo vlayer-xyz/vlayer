@@ -100,7 +100,7 @@ mod encodable {
         let rlp = vec![0x0; 32];
         let hash = keccak256(&rlp);
         let mut out = Vec::new();
-        let node = NodeRef::Node(rlp.clone());
+        let node = NodeRef::Node(rlp);
         node.encode(&mut out);
 
         assert_eq!(node.length(), 33);

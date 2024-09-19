@@ -53,7 +53,7 @@ mod parse_node {
     #[test]
     fn non_inline() -> anyhow::Result<()> {
         let nibbles = KeyNibbles::unpack(B256::ZERO);
-        let node = Node::Leaf(nibbles.clone(), [0].into());
+        let node = Node::Leaf(nibbles, [0].into());
         let (hash, parsed_node) = parse_node(node.rlp_encoded())?;
         assert_eq!(
             hash,
@@ -114,7 +114,7 @@ mod resolve_trie {
         let null_node = Node::Null;
         let digest = keccak256(null_node.rlp_encoded());
         let node = Node::Digest(digest);
-        let nodes_by_hash = HashMap::from_iter([(digest, null_node.clone())]);
+        let nodes_by_hash = HashMap::from_iter([(digest, null_node)]);
         let resolved_node = resolve_trie(node, &nodes_by_hash);
         assert_eq!(resolved_node, Node::Null);
     }
