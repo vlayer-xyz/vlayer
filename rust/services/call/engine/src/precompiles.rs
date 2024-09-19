@@ -18,7 +18,7 @@ pub(crate) const VLAYER_PRECOMPILES: [PrecompileWithAddress; 3] = [
     PrecompileWithAddress(u64_to_address(0x102), VERIFY_EMAIL_PRECOMPILE),
 ];
 
-fn map_to_other<E: ToString>(err: E) -> PrecompileErrors {
+fn map_to_fatal<E: ToString>(err: E) -> PrecompileErrors {
     PrecompileErrors::Fatal {
         msg: err.to_string(),
     }
