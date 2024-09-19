@@ -74,14 +74,14 @@ struct VerifiedEmail {
   string subject;
   string body;
   string from;
-  string[] to;
+  string to;
 }
 ```
 An `VerifiedEmail` consists of the following fields
 - `subject` - a string with the subject of the email
 - `body` - a string consisting of the entire body of the email
 - `from` - a string consisting of the sender's email address (*no name is available*) 
-- `to` - strings containing the intended recipient (*no names available*)
+- `to` - a string consisting of the intended recipient's email address (*no name is available*)
 
 By inspecting and parsing the email payload elements, we can generate a claim to be used on-chain.
 
@@ -110,6 +110,7 @@ Now, we can access the email from the `Prover` contract:
 ```solidity
 import {Prover} from "vlayer/Prover.sol";
 import {VerifiedEmail, MimeEmail, EmailProofLib} from "vlayer/EmailProof.sol";
+import {StringUtils} from "vlayer/StringUtils.sol"
 
 contract RecoveryEmail is Prover {
     using StringUtils for string;
@@ -152,7 +153,7 @@ contract RecoveryEmail is Prover {
       bytes32 memory recoveryMailHash = wallet.recoveryEmail(owner);
       bytes32 emailAddrHash = keccak256(abi.encodePacked(emailAddr);
 
-      require(recoveryMailHash == emailAddrHash, "Recovery email mismatch") 
+      require(recoveryMailHash == emailAddrHash, "Recovery email mismatch");
 
       return emailAddrHash;
     }
@@ -168,7 +169,7 @@ What happens step by step in the above snippet?
 * `parseBody` extracts new owner address 
   * `email.body.match` retrieves new wallet address from the email body
 * `getEmailAddressHash` compares the email address associated with the wallet with the one received.
-  * `recoveryMailHash.equal(emailAddrHash)` check if correct email was used for recovery 
+  * `recoveryMailHash == emailAddrHash` check if correct email was used for recovery 
 
 On successful execution, proof of computation is returned. It also returns the recovered wallet address, the email address hash, the new wallet address, and the email timestamp as public input.
 
