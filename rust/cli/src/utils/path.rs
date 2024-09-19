@@ -56,9 +56,7 @@ pub fn find_git_root(relative_to: impl AsRef<Path>) -> Result<PathBuf, CLIError>
         .output()?;
 
     if !output.status.success() {
-        return Err(CLIError::GitError(
-            String::from_utf8_lossy(&output.stderr).to_string(),
-        ));
+        return Err(CLIError::GitError(String::from_utf8_lossy(&output.stderr).to_string()));
     }
 
     let path = from_utf8(&output.stdout)?.trim_end_matches('\n');

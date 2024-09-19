@@ -38,10 +38,7 @@ pub static ETH_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
         Chain::mainnet().id(),
         SpecId::CANCUN,
         BTreeMap::from([
-            (
-                SpecId::MERGE,
-                ForkCondition::Block(MAINNET_MERGE_BLOCK_NUMBER),
-            ),
+            (SpecId::MERGE, ForkCondition::Block(MAINNET_MERGE_BLOCK_NUMBER)),
             (SpecId::SHANGHAI, ForkCondition::Timestamp(1681338455)),
             (SpecId::CANCUN, ForkCondition::Timestamp(1710338135)),
         ]),
@@ -82,18 +79,9 @@ mod tests {
     #[test]
     fn spec_id() {
         assert_eq!(ETH_MAINNET_CHAIN_SPEC.spec_id(15537393, 0), None);
-        assert_eq!(
-            ETH_MAINNET_CHAIN_SPEC.spec_id(15537394, 0),
-            Some(SpecId::MERGE)
-        );
-        assert_eq!(
-            ETH_MAINNET_CHAIN_SPEC.spec_id(17034869, 0),
-            Some(SpecId::MERGE)
-        );
-        assert_eq!(
-            ETH_MAINNET_CHAIN_SPEC.spec_id(0, 1681338455),
-            Some(SpecId::SHANGHAI)
-        );
+        assert_eq!(ETH_MAINNET_CHAIN_SPEC.spec_id(15537394, 0), Some(SpecId::MERGE));
+        assert_eq!(ETH_MAINNET_CHAIN_SPEC.spec_id(17034869, 0), Some(SpecId::MERGE));
+        assert_eq!(ETH_MAINNET_CHAIN_SPEC.spec_id(0, 1681338455), Some(SpecId::SHANGHAI));
     }
 
     #[test]

@@ -35,10 +35,7 @@ fn trie_accounts(accounts: &HashMap<Address, Account>) -> Vec<(Nibbles, Vec<u8>)
     let mut accounts = accounts
         .iter()
         .map(|(address, account)| {
-            (
-                to_nibbles(*address),
-                trie_account_rlp(&account.info, &account.storage),
-            )
+            (to_nibbles(*address), trie_account_rlp(&account.info, &account.storage))
         })
         .collect::<Vec<_>>();
     accounts.sort_by(|(key1, _), (key2, _)| key1.cmp(key2));
@@ -48,12 +45,8 @@ fn trie_accounts(accounts: &HashMap<Address, Account>) -> Vec<(Nibbles, Vec<u8>)
 
 fn trie_account_rlp(info: &AccountInfo, storage: &HashMap<U256, EvmStorageSlot>) -> Vec<u8> {
     let mut out: Vec<u8> = Vec::new();
-    let list: [&dyn Encodable; 4] = [
-        &info.nonce,
-        &info.balance,
-        &storage_root(storage),
-        &info.code_hash,
-    ];
+    let list: [&dyn Encodable; 4] =
+        [&info.nonce, &info.balance, &storage_root(storage), &info.code_hash];
 
     alloy_rlp::encode_list::<_, dyn Encodable>(&list, &mut out);
 
@@ -75,12 +68,7 @@ fn build_root(values: impl IntoIterator<Item = (Nibbles, Vec<u8>)>) -> B256 {
 fn trie_storage(storage: &HashMap<U256, EvmStorageSlot>) -> Vec<(Nibbles, Vec<u8>)> {
     let mut storage = storage
         .iter()
-        .map(|(key, value)| {
-            (
-                to_nibbles(key.to_be_bytes::<32>()),
-                encode(value.present_value),
-            )
-        })
+        .map(|(key, value)| (to_nibbles(key.to_be_bytes::<32>()), encode(value.present_value)))
         .collect::<Vec<_>>();
     storage.sort_by(|(key1, _), (key2, _)| key1.cmp(key2));
 
@@ -110,11 +98,7 @@ pub fn prove_storage(
         .zip(proofs)
         .map(|(key, proof)| StorageProof {
             key: *key,
-            value: storage
-                .get(&(*key).into())
-                .cloned()
-                .unwrap_or_default()
-                .present_value,
+            value: storage.get(&(*key).into()).cloned().unwrap_or_default().present_value,
             proof,
         })
         .collect()
@@ -168,10 +152,7 @@ mod tests {
         let address = address!("5615deb798bb3e4dfa0139dfa1b3d433cc23b72f");
         let proofs = account_proof(address, &evm_state);
         let mpt = MerkleTrie::from_rlp_nodes(proofs).unwrap();
-        let decoded_account = mpt
-            .get_rlp::<StateAccount>(keccak256(address))
-            .unwrap()
-            .unwrap();
+        let decoded_account = mpt.get_rlp::<StateAccount>(keccak256(address)).unwrap().unwrap();
         let expected_account = StateAccount {
             nonce: evm_state.get(&address).unwrap().info.nonce,
             balance: evm_state.get(&address).unwrap().info.balance,

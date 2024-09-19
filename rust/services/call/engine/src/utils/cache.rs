@@ -64,9 +64,7 @@ mod interior_mutability_cache {
     #[test]
     fn failed() -> anyhow::Result<()> {
         let cache = RefCell::new(HashMap::<_, Rc<()>, _>::new());
-        let error = cache
-            .try_get_or_insert("key", || bail!("error"))
-            .unwrap_err();
+        let error = cache.try_get_or_insert("key", || bail!("error")).unwrap_err();
         assert_eq!(error.to_string(), "error");
         assert_eq!(cache.borrow().get("key"), None);
         Ok(())

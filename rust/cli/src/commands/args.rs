@@ -65,9 +65,8 @@ fn parse_rpc_url(s: &str) -> Result<(ChainId, String), String> {
     if parts.len() < 2 {
         return Err("expected <chain-id>:<url>".to_string());
     }
-    let chain_id: ChainId = parts[0]
-        .parse()
-        .map_err(|_| format!("Invalid chain ID: {}", parts[0]))?;
+    let chain_id: ChainId =
+        parts[0].parse().map_err(|_| format!("Invalid chain ID: {}", parts[0]))?;
     let url = parts[1..].join(":");
     Ok((chain_id, url))
 }

@@ -21,14 +21,8 @@ const LATEST_BLOCK: BlockTag = BlockTag::Latest;
 
 fn create_test_provider_factory(test_name: &str) -> FileProviderFactory {
     let rpc_file_cache: HashMap<_, _> = HashMap::from([
-        (
-            Chain::mainnet().id(),
-            format!("testdata/mainnet_{test_name}_rpc_cache.json"),
-        ),
-        (
-            Chain::sepolia().id(),
-            format!("testdata/sepolia_{test_name}_rpc_cache.json"),
-        ),
+        (Chain::mainnet().id(), format!("testdata/mainnet_{test_name}_rpc_cache.json")),
+        (Chain::sepolia().id(), format!("testdata/sepolia_{test_name}_rpc_cache.json")),
     ]);
 
     FileProviderFactory::new(rpc_file_cache)
@@ -36,14 +30,8 @@ fn create_test_provider_factory(test_name: &str) -> FileProviderFactory {
 
 fn create_recording_provider_factory(test_name: &str) -> CachedProviderFactory {
     let rpc_file_cache: HashMap<_, _> = HashMap::from([
-        (
-            Chain::mainnet().id(),
-            format!("testdata/mainnet_{test_name}_rpc_cache.json"),
-        ),
-        (
-            Chain::sepolia().id(),
-            format!("testdata/sepolia_{test_name}_rpc_cache.json"),
-        ),
+        (Chain::mainnet().id(), format!("testdata/mainnet_{test_name}_rpc_cache.json")),
+        (Chain::sepolia().id(), format!("testdata/sepolia_{test_name}_rpc_cache.json")),
     ]);
     dotenv().ok();
     let alchemy_key = env::var("ALCHEMY_KEY").expect(
@@ -51,10 +39,8 @@ fn create_recording_provider_factory(test_name: &str) -> CachedProviderFactory {
     );
     let mainnet_url = format!("https://eth-mainnet.g.alchemy.com/v2/{alchemy_key}");
     let sepolia_url = format!("https://eth-sepolia.g.alchemy.com/v2/{alchemy_key}");
-    let rpc_urls: HashMap<_, _> = HashMap::from([
-        (Chain::mainnet().id(), mainnet_url),
-        (Chain::sepolia().id(), sepolia_url),
-    ]);
+    let rpc_urls: HashMap<_, _> =
+        HashMap::from([(Chain::mainnet().id(), mainnet_url), (Chain::sepolia().id(), sepolia_url)]);
 
     CachedProviderFactory::new(rpc_urls, rpc_file_cache)
 }
@@ -74,10 +60,7 @@ where
             config,
             block_no.as_u64(),
         ),
-        _ => panic!(
-            "Only Latest and specific block numbers are supported, got {:?}",
-            block_number
-        ),
+        _ => panic!("Only Latest and specific block numbers are supported, got {:?}", block_number),
     }
 }
 

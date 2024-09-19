@@ -75,10 +75,7 @@ where
     ) -> Result<alloy_primitives::TxNumber, Self::Error> {
         let address = to_ethers_h160(address);
         let count = self
-            .block_on(
-                self.client
-                    .get_transaction_count(address, Some(block.into())),
-            )
+            .block_on(self.client.get_transaction_count(address, Some(block.into())))
             .map(from_ethers_u256)?;
         Ok(count.to())
     }
@@ -89,9 +86,9 @@ where
         block: BlockNumber,
     ) -> Result<alloy_primitives::U256, Self::Error> {
         let address = to_ethers_h160(address);
-        Ok(from_ethers_u256(self.block_on(
-            self.client.get_balance(address, Some(block.into())),
-        )?))
+        Ok(from_ethers_u256(
+            self.block_on(self.client.get_balance(address, Some(block.into())))?,
+        ))
     }
 
     fn get_code(
@@ -100,9 +97,9 @@ where
         block: BlockNumber,
     ) -> Result<alloy_primitives::Bytes, Self::Error> {
         let address = to_ethers_h160(address);
-        Ok(from_ethers_bytes(self.block_on(
-            self.client.get_code(address, Some(block.into())),
-        )?))
+        Ok(from_ethers_bytes(
+            self.block_on(self.client.get_code(address, Some(block.into())))?,
+        ))
     }
 
     fn get_storage_at(
@@ -126,11 +123,8 @@ where
     ) -> Result<EIP1186Proof, Self::Error> {
         let address = to_ethers_h160(address);
         let storage_keys = storage_keys.into_iter().map(to_ethers_h256).collect();
-        let proof = self.block_on(self.client.get_proof(
-            address,
-            storage_keys,
-            Some(block.into()),
-        ))?;
+        let proof =
+            self.block_on(self.client.get_proof(address, storage_keys, Some(block.into())))?;
 
         Ok(EIP1186Proof {
             address: address.0.into(),
@@ -138,11 +132,7 @@ where
             code_hash: from_ethers_h256(proof.code_hash),
             nonce: proof.nonce.as_u64(),
             storage_hash: from_ethers_h256(proof.storage_hash),
-            account_proof: proof
-                .account_proof
-                .into_iter()
-                .map(from_ethers_bytes)
-                .collect(),
+            account_proof: proof.account_proof.into_iter().map(from_ethers_bytes).collect(),
             storage_proof: proof.storage_proof.into_iter().map(Into::into).collect(),
         })
     }
@@ -161,22 +151,14 @@ fn to_eth_block_header<T>(block: Block<T>) -> Result<EthBlockHeader, String> {
         ),
         difficulty: from_ethers_u256(block.difficulty),
         number: block.number.ok_or("number is missing")?.as_u64(),
-        gas_limit: block
-            .gas_limit
-            .try_into()
-            .map_err(|_| "invalid gas limit")?,
+        gas_limit: block.gas_limit.try_into().map_err(|_| "invalid gas limit")?,
         gas_used: block.gas_used.try_into().map_err(|_| "invalid gas used")?,
-        timestamp: block
-            .timestamp
-            .try_into()
-            .map_err(|_| "invalid timestamp")?,
+        timestamp: block.timestamp.try_into().map_err(|_| "invalid timestamp")?,
         extra_data: block.extra_data.0.into(),
         mix_hash: from_ethers_h256(block.mix_hash.ok_or("mix_hash is missing")?),
         nonce: block.nonce.ok_or("nonce is missing")?.0.into(),
         base_fee_per_gas: from_ethers_u256(
-            block
-                .base_fee_per_gas
-                .ok_or("base_fee_per_gas is missing")?,
+            block.base_fee_per_gas.ok_or("base_fee_per_gas is missing")?,
         ),
         withdrawals_root: block.withdrawals_root.map(from_ethers_h256),
         blob_gas_used: block.blob_gas_used.map(TryInto::try_into).transpose()?,

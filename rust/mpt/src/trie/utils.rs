@@ -57,9 +57,7 @@ mod parse_node {
         let (hash, parsed_node) = parse_node(node.rlp_encoded())?;
         assert_eq!(
             hash,
-            Some(b256!(
-                "ebcd1aff3f48f44a89c8bceb54a7e73c44edda96852b9debc4447b5ac9be19a6"
-            ))
+            Some(b256!("ebcd1aff3f48f44a89c8bceb54a7e73c44edda96852b9debc4447b5ac9be19a6"))
         );
         assert_eq!(parsed_node, node);
         Ok(())
@@ -129,10 +127,7 @@ mod resolve_trie {
         let extension = Node::Extension(extension_nibbles.clone(), Box::new(Node::Digest(digest)));
         let nodes_by_hash = HashMap::from([(digest, leaf.clone())]);
         let resolved_node = resolve_trie(extension, &nodes_by_hash);
-        assert_eq!(
-            resolved_node,
-            Node::Extension(extension_nibbles, Box::new(leaf))
-        );
+        assert_eq!(resolved_node, Node::Extension(extension_nibbles, Box::new(leaf)));
     }
 
     #[test]

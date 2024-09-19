@@ -29,12 +29,8 @@ impl PendingStateProvider {
         self.state
             .iter()
             .map(|(address, account)| {
-                self.get_proof(
-                    *address,
-                    account.storage.keys().map(|v| (*v).into()).collect(),
-                    0,
-                )
-                .unwrap()
+                self.get_proof(*address, account.storage.keys().map(|v| (*v).into()).collect(), 0)
+                    .unwrap()
             })
             .collect()
     }
@@ -61,10 +57,7 @@ impl BlockingProvider for PendingStateProvider {
             BlockTag::Number(n) => n.as_u64(),
             _ => self.block_number,
         };
-        Ok(Some(Box::new(ForgeBlockHeader::new(
-            block_number,
-            self.get_state_root(),
-        ))))
+        Ok(Some(Box::new(ForgeBlockHeader::new(block_number, self.get_state_root()))))
     }
 
     fn get_code(&self, address: Address, _block: BlockNumber) -> Result<Bytes, Self::Error> {

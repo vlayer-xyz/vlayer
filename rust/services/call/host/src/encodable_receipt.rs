@@ -95,16 +95,12 @@ impl TryFrom<EncodableReceipt> for Seal {
 
         let raw_seal = value
             .seal_bytes()
-            .ok_or(HostError::SealEncodingError(
-                "Could not retreive valid seal bytes".into(),
-            ))
+            .ok_or(HostError::SealEncodingError("Could not retreive valid seal bytes".into()))
             .map(split_seal_into_bytes)?;
 
         let verifier_selector: FixedBytes<VERIFIER_SELECTOR_LENGTH> = value
             .verifier_selector()
-            .ok_or(HostError::SealEncodingError(
-                "Could not retreive verifier selector".into(),
-            ))
+            .ok_or(HostError::SealEncodingError("Could not retreive verifier selector".into()))
             .map(|sel| sel.0.into())?;
 
         Ok(Seal {
@@ -278,10 +274,7 @@ mod test {
             #[test]
             fn returns_groth16_verifier_params_for_groth16_receipt() {
                 let receipt: EncodableReceipt = mock_groth16_receipt().into();
-                assert_eq!(
-                    GROTH16_VERIFIER_SELECTOR,
-                    receipt.verifier_selector().unwrap()
-                )
+                assert_eq!(GROTH16_VERIFIER_SELECTOR, receipt.verifier_selector().unwrap())
             }
 
             #[test]
@@ -323,10 +316,7 @@ mod test {
                     let receipt: EncodableReceipt = mock_groth16_receipt().into();
                     let expected_seal_bytes = &receipt.0.groth16().unwrap().seal;
 
-                    assert_eq!(
-                        expected_seal_bytes.as_slice(),
-                        receipt.seal_bytes().unwrap()
-                    );
+                    assert_eq!(expected_seal_bytes.as_slice(), receipt.seal_bytes().unwrap());
                 }
                 #[test]
                 fn returns_none_for_invalid_groth16_seal_size() {

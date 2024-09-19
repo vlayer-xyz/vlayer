@@ -22,10 +22,7 @@ impl From<BlockTag> for SerializableBlockTag {
         match ethers_block_number {
             BlockTag::Number(num) => SerializableBlockTag::Number(num.as_u64()),
             BlockTag::Latest => SerializableBlockTag::Latest,
-            _ => panic!(
-                "Only specific block numbers are supported, got {:?}",
-                ethers_block_number
-            ),
+            _ => panic!("Only specific block numbers are supported, got {:?}", ethers_block_number),
         }
     }
 }

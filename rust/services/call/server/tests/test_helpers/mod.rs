@@ -54,18 +54,11 @@ async fn setup_client(
     let provider = Provider::<Http>::try_from(anvil.endpoint())
         .unwrap()
         .interval(Duration::from_millis(10u64));
-    Arc::new(SignerMiddleware::new(
-        provider,
-        wallet.with_chain_id(anvil.chain_id()),
-    ))
+    Arc::new(SignerMiddleware::new(provider, wallet.with_chain_id(anvil.chain_id())))
 }
 
 async fn deploy_test_contract(
     client: Arc<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>>,
 ) -> ExampleProver<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>> {
-    ExampleProver::deploy(client, ())
-        .unwrap()
-        .send()
-        .await
-        .unwrap()
+    ExampleProver::deploy(client, ()).unwrap().send().await.unwrap()
 }

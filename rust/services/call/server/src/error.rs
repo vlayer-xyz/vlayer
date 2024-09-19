@@ -20,16 +20,12 @@ pub enum AppError {
 impl From<AppError> for JsonRpcError {
     fn from(error: AppError) -> Self {
         match error {
-            AppError::FieldValidation(..) => JsonRpcError::new(
-                JsonRpcErrorReason::InvalidParams,
-                error.to_string(),
-                Value::Null,
-            ),
-            AppError::Host(..) | AppError::Join(..) => JsonRpcError::new(
-                JsonRpcErrorReason::InternalError,
-                error.to_string(),
-                Value::Null,
-            ),
+            AppError::FieldValidation(..) => {
+                JsonRpcError::new(JsonRpcErrorReason::InvalidParams, error.to_string(), Value::Null)
+            }
+            AppError::Host(..) | AppError::Join(..) => {
+                JsonRpcError::new(JsonRpcErrorReason::InternalError, error.to_string(), Value::Null)
+            }
         }
     }
 }

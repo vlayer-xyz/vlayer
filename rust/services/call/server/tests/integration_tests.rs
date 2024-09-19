@@ -93,11 +93,7 @@ mod server_tests {
         #[tokio::test]
         async fn success_simple_contract_call() {
             let helper = TestHelper::create().await;
-            let call_data = helper
-                .contract
-                .sum(U256::from(1), U256::from(2))
-                .calldata()
-                .unwrap();
+            let call_data = helper.contract.sum(U256::from(1), U256::from(2)).calldata().unwrap();
 
             let req = json!({
                 "method": "v_call",

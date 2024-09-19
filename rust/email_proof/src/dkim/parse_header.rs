@@ -60,9 +60,7 @@ impl DkimHeader {
             "bh" => header.bh = BodyHash(value),
             "b" => header.b = Signature(value),
             unknown_tag => {
-                return Err(DkimError::ParseError(format!(
-                    "Unknown DKIM tag: {unknown_tag}"
-                )))
+                return Err(DkimError::ParseError(format!("Unknown DKIM tag: {unknown_tag}")))
             }
         }
 
@@ -73,18 +71,12 @@ impl DkimHeader {
         let mut parts = tag.splitn(2, '=');
         let key: &str = parts
             .next()
-            .ok_or(DkimError::ParseError(format!(
-                "Invalid tag: {}",
-                tag.trim()
-            )))?
+            .ok_or(DkimError::ParseError(format!("Invalid tag: {}", tag.trim())))?
             .trim();
 
         let value: String = parts
             .next()
-            .ok_or(DkimError::ParseError(format!(
-                "Invalid tag: {}",
-                tag.trim()
-            )))?
+            .ok_or(DkimError::ParseError(format!("Invalid tag: {}", tag.trim())))?
             .trim()
             .into();
 
@@ -133,19 +125,13 @@ mod test {
         assert_eq!(header.a.0, "rsa-sha256");
         assert_eq!(header.d.0, "example.net");
         assert_eq!(header.s.0, "brisbane");
-        assert_eq!(
-            header.c,
-            Some(Canonicalization("relaxed/simple".to_string()))
-        );
+        assert_eq!(header.c, Some(Canonicalization("relaxed/simple".to_string())));
         assert_eq!(header.q, Some(QueryMethod("dns/txt".to_string())));
         assert_eq!(header.i, Some(Identity("foo@eng.example.net".to_string())));
         assert_eq!(header.t.0, "1117574938");
         assert_eq!(header.x.0, "1118006938");
         assert_eq!(header.l, Some(BodyLength("200".to_string())));
-        assert_eq!(
-            header.h.0,
-            "from:to:subject:date:keywords:keywords".to_string()
-        );
+        assert_eq!(header.h.0, "from:to:subject:date:keywords:keywords".to_string());
         assert_eq!(
             header.z,
             Some(CopiedHeaders(
@@ -153,10 +139,7 @@ mod test {
                     .to_string()
             ))
         );
-        assert_eq!(
-            header.bh.0,
-            "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=".to_string()
-        );
+        assert_eq!(header.bh.0, "MTIzNDU2Nzg5MDEyMzQ1Njc4OTAxMjM0NTY3ODkwMTI=".to_string());
         assert_eq!(
             header.b.0,
             "dzdVyOfAKCdLXdJOc9G2q8LoXSlEniSbav+yuU4zGeeruD00lszZVoG4ZHRNiYzR".to_string()

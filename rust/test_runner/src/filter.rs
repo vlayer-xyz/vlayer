@@ -103,30 +103,12 @@ impl fmt::Debug for FilterArgs {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("FilterArgs")
             .field("match-test", &self.test_pattern.as_ref().map(Regex::as_str))
-            .field(
-                "no-match-test",
-                &self.test_pattern_inverse.as_ref().map(Regex::as_str),
-            )
-            .field(
-                "match-contract",
-                &self.contract_pattern.as_ref().map(Regex::as_str),
-            )
-            .field(
-                "no-match-contract",
-                &self.contract_pattern_inverse.as_ref().map(Regex::as_str),
-            )
-            .field(
-                "match-path",
-                &self.path_pattern.as_ref().map(GlobMatcher::as_str),
-            )
-            .field(
-                "no-match-path",
-                &self.path_pattern_inverse.as_ref().map(GlobMatcher::as_str),
-            )
-            .field(
-                "no-match-coverage",
-                &self.coverage_pattern_inverse.as_ref().map(Regex::as_str),
-            )
+            .field("no-match-test", &self.test_pattern_inverse.as_ref().map(Regex::as_str))
+            .field("match-contract", &self.contract_pattern.as_ref().map(Regex::as_str))
+            .field("no-match-contract", &self.contract_pattern_inverse.as_ref().map(Regex::as_str))
+            .field("match-path", &self.path_pattern.as_ref().map(GlobMatcher::as_str))
+            .field("no-match-path", &self.path_pattern_inverse.as_ref().map(GlobMatcher::as_str))
+            .field("no-match-coverage", &self.coverage_pattern_inverse.as_ref().map(Regex::as_str))
             .finish_non_exhaustive()
     }
 }

@@ -5,9 +5,5 @@ fn main() {
         println!("cargo:rustc-env=VLAYER_RELEASE=dev");
     }
 
-    vergen::EmitBuilder::builder()
-        .build_date()
-        .git_sha(true)
-        .emit()
-        .unwrap();
+    vergen::EmitBuilder::builder().build_date().git_sha(true).emit().unwrap();
 }

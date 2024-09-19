@@ -142,13 +142,7 @@ fn convert_executed_result(
         } => (reason.into(), gas_refunded, gas_used, Some(output), logs),
         ExecutionResult::Revert { gas_used, output } => {
             // Need to fetch the unused gas
-            (
-                InstructionResult::Revert,
-                0_u64,
-                gas_used,
-                Some(Output::Call(output)),
-                vec![],
-            )
+            (InstructionResult::Revert, 0_u64, gas_used, Some(Output::Call(output)), vec![])
         }
         ExecutionResult::Halt { reason, gas_used } => {
             (reason.into(), 0_u64, gas_used, None, vec![])

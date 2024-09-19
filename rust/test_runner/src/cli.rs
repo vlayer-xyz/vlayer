@@ -254,9 +254,7 @@ impl TestArgs {
     // MODIFICATION: Swap CHAIN_ID in evm_opts with TESTING_CHAIN_ID
     fn validate_chain_id(evm_opts: &mut EvmOpts) -> Result<()> {
         if evm_opts.env.chain_id.is_some() {
-            return Err(color_eyre::eyre::eyre!(
-                "cannot change chainId in vlayer tests"
-            ));
+            return Err(color_eyre::eyre::eyre!("cannot change chainId in vlayer tests"));
         }
 
         evm_opts.env.chain_id = Some(TEST_CHAIN_ID_1);
@@ -278,9 +276,7 @@ impl TestArgs {
         // If not specified then the number of threads determined by rayon will be used.
         if let Some(test_threads) = config.threads {
             trace!(target: "forge::test", "execute tests with {} max threads", test_threads);
-            rayon::ThreadPoolBuilder::new()
-                .num_threads(test_threads)
-                .build_global()?;
+            rayon::ThreadPoolBuilder::new().num_threads(test_threads).build_global()?;
         }
 
         // Explicitly enable isolation for gas reports for more correct gas accounting.
@@ -374,9 +370,7 @@ impl TestArgs {
         )?;
 
         let libraries = runner.libraries.clone();
-        let outcome = self
-            .run_tests(runner, config, verbosity, &filter, &output)
-            .await?;
+        let outcome = self.run_tests(runner, config, verbosity, &filter, &output).await?;
 
         if should_debug {
             // Get first non-empty suite result. We will have only one such entry.
@@ -395,12 +389,7 @@ impl TestArgs {
             // Run the debugger.
             let mut builder = Debugger::builder()
                 .traces(
-                    test_result
-                        .traces
-                        .iter()
-                        .filter(|(t, _)| t.is_execution())
-                        .cloned()
-                        .collect(),
+                    test_result.traces.iter().filter(|(t, _)| t.is_execution()).cloned().collect(),
                 )
                 .sources(sources)
                 .breakpoints(test_result.breakpoints.clone());
@@ -491,12 +480,9 @@ impl TestArgs {
         }
         let mut decoder = builder.build();
 
-        let mut gas_report = self.gas_report.then(|| {
-            GasReport::new(
-                config.gas_reports.clone(),
-                config.gas_reports_ignore.clone(),
-            )
-        });
+        let mut gas_report = self
+            .gas_report
+            .then(|| GasReport::new(config.gas_reports.clone(), config.gas_reports_ignore.clone()));
 
         let mut outcome = TestOutcome::empty(self.allow_failure);
 
@@ -544,12 +530,9 @@ impl TestArgs {
 
                 // Clear the addresses and labels from previous runs.
                 decoder.clear_addresses();
-                decoder.labels.extend(
-                    result
-                        .labeled_addresses
-                        .iter()
-                        .map(|(k, v)| (*k, v.clone())),
-                );
+                decoder
+                    .labels
+                    .extend(result.labeled_addresses.iter().map(|(k, v)| (*k, v.clone())));
 
                 // Identify addresses and decode traces.
                 let mut decoded_traces = Vec::with_capacity(result.traces.len());
@@ -677,15 +660,10 @@ impl Provider for TestArgs {
 
         dict.insert("fuzz".into(), Dict::default().into());
 
-        if let Some(etherscan_api_key) = self
-            .etherscan_api_key
-            .as_ref()
-            .filter(|s| !s.trim().is_empty())
+        if let Some(etherscan_api_key) =
+            self.etherscan_api_key.as_ref().filter(|s| !s.trim().is_empty())
         {
-            dict.insert(
-                "etherscan_api_key".to_string(),
-                etherscan_api_key.to_string().into(),
-            );
+            dict.insert("etherscan_api_key".to_string(), etherscan_api_key.to_string().into());
         }
 
         if self.show_progress {

@@ -45,9 +45,7 @@ mod tests {
             2690,
             vec![TranscriptSlice::new(
                 0..2690,
-                read_fixture("./testdata/received_response.txt")
-                    .as_bytes()
-                    .to_vec(),
+                read_fixture("./testdata/received_response.txt").as_bytes().to_vec(),
             )],
         ));
 
@@ -83,18 +81,13 @@ mod tests {
                 2687,
                 vec![TranscriptSlice::new(
                     0..2687,
-                    read_fixture("./testdata/redacted_received_response.txt")
-                        .as_bytes()
-                        .to_vec(),
+                    read_fixture("./testdata/redacted_received_response.txt").as_bytes().to_vec(),
                 )],
             ),
         };
 
         let body = transcript.parse_body();
-        assert_eq!(
-            body.unwrap().to_string(),
-            REDACTED_RESPONSE_BODY.to_string()
-        );
+        assert_eq!(body.unwrap().to_string(), REDACTED_RESPONSE_BODY.to_string());
     }
 
     #[test]
@@ -103,10 +96,7 @@ mod tests {
             transcript: RedactedTranscript::new(0, vec![TranscriptSlice::new(0..0, vec![])]),
         };
 
-        assert!(matches!(
-            transcript.parse_body(),
-            Err(ParsingError::Partial)
-        ));
+        assert!(matches!(transcript.parse_body(), Err(ParsingError::Partial)));
     }
 
     #[test]
@@ -116,9 +106,7 @@ mod tests {
                 1432,
                 vec![TranscriptSlice::new(
                     0..1432,
-                    read_fixture("./testdata/no_headers_response.txt")
-                        .as_bytes()
-                        .to_vec(),
+                    read_fixture("./testdata/no_headers_response.txt").as_bytes().to_vec(),
                 )],
             ),
         };
@@ -136,9 +124,7 @@ mod tests {
                 1258,
                 vec![TranscriptSlice::new(
                     0..1258,
-                    read_fixture("./testdata/no_body_response.txt")
-                        .as_bytes()
-                        .to_vec(),
+                    read_fixture("./testdata/no_body_response.txt").as_bytes().to_vec(),
                 )],
             ),
         };

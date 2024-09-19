@@ -25,8 +25,7 @@ where
     }
 
     pub(crate) fn get(&self, chain_id: ChainId) -> Result<Rc<P>, HostError> {
-        self.cache
-            .try_get_or_insert(chain_id, || self.factory.create(chain_id))
+        self.cache.try_get_or_insert(chain_id, || self.factory.create(chain_id))
     }
 }
 
@@ -58,10 +57,7 @@ mod get {
         let path_buf = PathBuf::from("testdata/mainnet_uniswap_factory_owner_rpc_cache.json");
         let provider = Rc::new(FileProvider::from_file(&path_buf)?);
 
-        let cache = RefCell::new(HashMap::from([(
-            Chain::mainnet().id(),
-            Rc::clone(&provider),
-        )]));
+        let cache = RefCell::new(HashMap::from([(Chain::mainnet().id(), Rc::clone(&provider))]));
 
         // NullProviderFactory returns an error when it tries to create a provider.
         // If no error was returned, it means the factory did not try to create a provider and used cached provider.

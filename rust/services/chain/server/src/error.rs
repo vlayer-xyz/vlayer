@@ -31,11 +31,9 @@ impl From<AppError> for JsonRpcError {
             | AppError::Host(..)
             | AppError::Mpt(..)
             | AppError::NoBlockNumbers
-            | AppError::FieldValidation(..) => JsonRpcError::new(
-                JsonRpcErrorReason::InvalidParams,
-                error.to_string(),
-                Value::Null,
-            ),
+            | AppError::FieldValidation(..) => {
+                JsonRpcError::new(JsonRpcErrorReason::InvalidParams, error.to_string(), Value::Null)
+            }
         }
     }
 }

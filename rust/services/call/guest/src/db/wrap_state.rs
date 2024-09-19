@@ -34,9 +34,7 @@ impl DatabaseRef for WrapStateDb {
             Some(account) => {
                 // link storage trie to the account, if it exists
                 if let Some(storage_trie) = self.inner.storage_trie(&account.storage_root) {
-                    self.account_storage
-                        .borrow_mut()
-                        .insert(address, Some(storage_trie.clone()));
+                    self.account_storage.borrow_mut().insert(address, Some(storage_trie.clone()));
                 }
 
                 Ok(Some(AccountInfo {

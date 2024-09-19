@@ -52,10 +52,7 @@ impl StateDb {
         contracts: impl IntoIterator<Item = Bytes>,
         block_hashes: HashMap<u64, B256>,
     ) -> Self {
-        let contracts = contracts
-            .into_iter()
-            .map(|code| (keccak256(&code), code))
-            .collect();
+        let contracts = contracts.into_iter().map(|code| (keccak256(&code), code)).collect();
         let storage_tries = storage_tries
             .into_iter()
             .map(|trie| (trie.hash_slow(), Rc::new(trie)))
@@ -69,15 +66,11 @@ impl StateDb {
     }
 
     pub fn account(&self, address: Address) -> Option<StateAccount> {
-        self.state_trie
-            .get_rlp(keccak256(address))
-            .expect("invalid state value")
+        self.state_trie.get_rlp(keccak256(address)).expect("invalid state value")
     }
 
     pub fn code_by_hash(&self, hash: B256) -> &Bytes {
-        self.contracts
-            .get(&hash)
-            .unwrap_or_else(|| panic!("code not found: {}", hash))
+        self.contracts.get(&hash).unwrap_or_else(|| panic!("code not found: {}", hash))
     }
 
     pub fn block_hash(&self, number: U256) -> B256 {

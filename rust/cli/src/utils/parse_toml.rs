@@ -8,18 +8,12 @@ pub(crate) fn get_src_from_str(contents: impl AsRef<str>) -> Result<String, CLIE
     let result = get_src_from_toml(&config);
     match result {
         Some(src) => Ok(src),
-        None => Err(CLIError::TomlError(
-            "No source found in foundry.toml".to_string(),
-        )),
+        None => Err(CLIError::TomlError("No source found in foundry.toml".to_string())),
     }
 }
 
 fn get_src_from_toml(config: &toml::Table) -> Option<String> {
-    let default_src = config
-        .get("profile")?
-        .get("default")?
-        .get("src")?
-        .as_str()?;
+    let default_src = config.get("profile")?.get("default")?.get("src")?.as_str()?;
     Some(default_src.to_string())
 }
 

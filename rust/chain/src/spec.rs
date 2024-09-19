@@ -75,10 +75,7 @@ impl ChainSpec {
     }
     /// Returns the Eip1559 constants for a given [SpecId].
     pub fn gas_constants(&self, spec_id: SpecId) -> Option<&Eip1559Constants> {
-        self.gas_constants
-            .range(..=spec_id)
-            .next_back()
-            .map(|(_, v)| v)
+        self.gas_constants.range(..=spec_id).next_back().map(|(_, v)| v)
     }
 
     pub fn spec_id(&self, block_number: BlockNumber, timestamp: u64) -> Option<SpecId> {
@@ -95,9 +92,8 @@ impl TryFrom<ChainId> for ChainSpec {
     type Error = ChainError;
 
     fn try_from(chain_id: ChainId) -> Result<Self, Self::Error> {
-        let chain_spec = CHAIN_MAP
-            .get(&chain_id)
-            .ok_or(ChainError::UnsupportedChainId(chain_id))?;
+        let chain_spec =
+            CHAIN_MAP.get(&chain_id).ok_or(ChainError::UnsupportedChainId(chain_id))?;
         Ok((**chain_spec).clone())
     }
 }

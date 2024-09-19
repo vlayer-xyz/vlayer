@@ -48,9 +48,7 @@ fn provably_execute(
     env: ExecutorEnv,
     guest_elf: &[u8],
 ) -> Result<ProveInfo, HostError> {
-    prover
-        .prove(env, guest_elf)
-        .map_err(|err| HostError::Prover(err.to_string()))
+    prover.prove(env, guest_elf).map_err(|err| HostError::Prover(err.to_string()))
 }
 
 fn build_executor_env(input: impl Serialize) -> anyhow::Result<ExecutorEnv<'static>> {

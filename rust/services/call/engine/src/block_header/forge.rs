@@ -57,10 +57,7 @@ mod tests {
 
     #[test]
     fn test_forge_block_hash_is_hash_of_block_number_as_string() {
-        assert_eq!(
-            ForgeBlockHeader::new(1, Default::default()).hash_slow(),
-            keccak256("1")
-        );
+        assert_eq!(ForgeBlockHeader::new(1, Default::default()).hash_slow(), keccak256("1"));
         assert_eq!(
             ForgeBlockHeader::new(12345, Default::default()).hash_slow(),
             keccak256("12345")

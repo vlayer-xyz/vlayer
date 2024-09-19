@@ -12,11 +12,7 @@ pub fn split_calldata(inputs: &CallInputs) -> (&[u8], &[u8]) {
 
 pub fn create_return_outcome<T: Into<Bytes>>(value: T, inputs: &CallInputs) -> CallOutcome {
     CallOutcome::new(
-        InterpreterResult::new(
-            InstructionResult::Return,
-            value.into(),
-            Gas::new(inputs.gas_limit),
-        ),
+        InterpreterResult::new(InstructionResult::Return, value.into(), Gas::new(inputs.gas_limit)),
         inputs.return_memory_offset.clone(),
     )
 }

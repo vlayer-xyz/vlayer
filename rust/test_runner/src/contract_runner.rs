@@ -58,8 +58,7 @@ impl<'a> ContractRunner<'a> {
     /// Deploys the test contract inside the runner from the sending account, and optionally runs
     /// the `setUp` function on the test contract.
     pub fn setup(&mut self, call_setup: bool) -> TestSetup {
-        self._setup(call_setup)
-            .unwrap_or_else(|err| TestSetup::failed(err.to_string()))
+        self._setup(call_setup).unwrap_or_else(|err| TestSetup::failed(err.to_string()))
     }
 
     fn _setup(&mut self, call_setup: bool) -> eyre::Result<TestSetup> {
@@ -89,12 +88,7 @@ impl<'a> ContractRunner<'a> {
                     traces.extend(d.raw.traces.map(|traces| (TraceKind::Deployment, traces)));
                 }
                 Err(e) => {
-                    return Ok(TestSetup::from_evm_error_with(
-                        e,
-                        logs,
-                        traces,
-                        Default::default(),
-                    ))
+                    return Ok(TestSetup::from_evm_error_with(e, logs, traces, Default::default()))
                 }
             }
         }
@@ -118,30 +112,21 @@ impl<'a> ContractRunner<'a> {
                 d.address
             }
             Err(e) => {
-                return Ok(TestSetup::from_evm_error_with(
-                    e,
-                    logs,
-                    traces,
-                    Default::default(),
-                ))
+                return Ok(TestSetup::from_evm_error_with(e, logs, traces, Default::default()))
             }
         };
 
         // Reset `self.sender`s, `CALLER`s and `LIBRARY_DEPLOYER`'s balance to the initial balance.
-        self.executor
-            .set_balance(self.sender, self.initial_balance)?;
+        self.executor.set_balance(self.sender, self.initial_balance)?;
         self.executor.set_balance(CALLER, self.initial_balance)?;
-        self.executor
-            .set_balance(LIBRARY_DEPLOYER, self.initial_balance)?;
+        self.executor.set_balance(LIBRARY_DEPLOYER, self.initial_balance)?;
 
         self.executor.deploy_create2_deployer()?;
 
         // Optionally call the `setUp` function
         let result = if call_setup {
             trace!("calling setUp");
-            let res = self
-                .executor
-                .setup(None, address, Some(self.revert_decoder));
+            let res = self.executor.setup(None, address, Some(self.revert_decoder));
             let (setup_logs, setup_traces, labeled_addresses, reason, coverage) = match res {
                 Ok(RawCallResult {
                     traces,
@@ -165,21 +150,11 @@ impl<'a> ContractRunner<'a> {
                             },
                         reason,
                     } = *err;
-                    (
-                        logs,
-                        traces,
-                        labels,
-                        Some(format!("setup failed: {reason}")),
-                        coverage,
-                    )
+                    (logs, traces, labels, Some(format!("setup failed: {reason}")), coverage)
                 }
-                Err(err) => (
-                    Vec::new(),
-                    None,
-                    HashMap::new(),
-                    Some(format!("setup failed: {err}")),
-                    None,
-                ),
+                Err(err) => {
+                    (Vec::new(), None, HashMap::new(), Some(format!("setup failed: {err}")), None)
+                }
             };
             traces.extend(setup_traces.map(|traces| (TraceKind::Setup, traces)));
             logs.extend(setup_logs);
@@ -224,17 +199,12 @@ impl<'a> ContractRunner<'a> {
     /// current test.
     fn fuzz_fixtures(&self, address: Address) -> FuzzFixtures {
         let mut fixtures = HashMap::new();
-        let fixture_functions = self
-            .contract
-            .abi
-            .functions()
-            .filter(|func| func.is_fixture());
+        let fixture_functions = self.contract.abi.functions().filter(|func| func.is_fixture());
         for func in fixture_functions {
             if func.inputs.is_empty() {
                 // Read fixtures declared as functions.
                 if let Ok(CallResult { decoded_result, .. }) =
-                    self.executor
-                        .call(CALLER, address, func, &[], U256::ZERO, None)
+                    self.executor.call(CALLER, address, func, &[], U256::ZERO, None)
                 {
                     fixtures.insert(fixture_name(func.name.clone()), decoded_result);
                 }
@@ -272,12 +242,8 @@ impl<'a> ContractRunner<'a> {
         let mut warnings = Vec::new();
 
         // Check if `setUp` function with valid signature declared.
-        let setup_fns: Vec<_> = self
-            .contract
-            .abi
-            .functions()
-            .filter(|func| func.name.is_setup())
-            .collect();
+        let setup_fns: Vec<_> =
+            self.contract.abi.functions().filter(|func| func.name.is_setup()).collect();
         let call_setup = setup_fns.len() == 1 && setup_fns[0].name == "setUp";
         // There is a single miss-cased `setUp` function, so we add a warning
         for &setup_fn in &setup_fns {
@@ -292,10 +258,12 @@ impl<'a> ContractRunner<'a> {
         if setup_fns.len() > 1 {
             return SuiteResult::new(
                 start.elapsed(),
-                [(
-                    "setUp()".to_string(),
-                    TestResult::fail("multiple setUp functions".to_string()),
-                )]
+                [
+                    (
+                        "setUp()".to_string(),
+                        TestResult::fail("multiple setUp functions".to_string()),
+                    ),
+                ]
                 .into(),
                 warnings,
             );
@@ -324,11 +292,7 @@ impl<'a> ContractRunner<'a> {
 
         // Invariant testing requires tracing to figure out what contracts were created.
         // We also want to disable `debug` for setup since we won't be using those traces.
-        let has_invariants = self
-            .contract
-            .abi
-            .functions()
-            .any(TestFunctionExt::is_invariant_test);
+        let has_invariants = self.contract.abi.functions().any(TestFunctionExt::is_invariant_test);
 
         let prev_tracer = self.executor.inspector_mut().tracer.take();
         if prev_tracer.is_some() || has_invariants {

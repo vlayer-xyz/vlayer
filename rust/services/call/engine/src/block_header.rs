@@ -71,10 +71,8 @@ impl Serialize for Box<dyn EvmBlockHeader> {
     where
         S: serde::Serializer,
     {
-        let block_header: BlockHeader = self
-            .as_ref()
-            .try_into()
-            .map_err(serde::ser::Error::custom)?;
+        let block_header: BlockHeader =
+            self.as_ref().try_into().map_err(serde::ser::Error::custom)?;
         block_header.serialize(serializer)
     }
 }
@@ -214,10 +212,7 @@ mod deserialize {
         let deserialized_parent_hash =
             hex::encode(deserialized_eth_header.parent_hash.as_ref() as &[u8]);
 
-        assert_eq!(
-            deserialized_parent_hash,
-            expected_parent_hash.trim_start_matches("0x")
-        );
+        assert_eq!(deserialized_parent_hash, expected_parent_hash.trim_start_matches("0x"));
 
         Ok(())
     }
@@ -230,10 +225,7 @@ mod deserialize {
 
         if let Err(err) = result {
             let err_msg = err.to_string();
-            assert_eq!(
-                err_msg,
-                "invalid type: null, expected struct EthBlockHeader"
-            );
+            assert_eq!(err_msg, "invalid type: null, expected struct EthBlockHeader");
         } else {
             panic!("Expected serialization to fail for unsupported type");
         }
@@ -268,11 +260,8 @@ mod serialize_and_deserialize {
         let boxed_header: Box<dyn EvmBlockHeader> = Box::new(ETH_BLOCK_HEADER.clone());
         let serialized = to_string(&boxed_header)?;
         let deserialized: Box<dyn EvmBlockHeader> = from_str(&serialized)?;
-        let deserialized_eth_header = deserialized
-            .as_ref()
-            .as_any()
-            .downcast_ref::<EthBlockHeader>()
-            .unwrap();
+        let deserialized_eth_header =
+            deserialized.as_ref().as_any().downcast_ref::<EthBlockHeader>().unwrap();
         assert_eq!(deserialized_eth_header, &EthBlockHeader::default());
 
         Ok(())

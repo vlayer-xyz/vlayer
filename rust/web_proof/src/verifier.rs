@@ -48,10 +48,7 @@ fn verify_server_name(server_name: &str, url: &str) -> Result<(), WebProofError>
     if extracted_host == server_name {
         Ok(())
     } else {
-        Err(WebProofError::HostNameMismatch(
-            extracted_host,
-            server_name.to_string(),
-        ))
+        Err(WebProofError::HostNameMismatch(extracted_host, server_name.to_string()))
     }
 }
 

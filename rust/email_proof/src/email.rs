@@ -71,11 +71,9 @@ mod test {
 
         #[test]
         fn parses_email() {
-            let email = parsed_email(
-                vec![("From", "me"), ("To", "you"), ("Subject", "hello")],
-                "body",
-            )
-            .unwrap();
+            let email =
+                parsed_email(vec![("From", "me"), ("To", "you"), ("Subject", "hello")], "body")
+                    .unwrap();
             assert_eq!(email.from, "me");
             assert_eq!(email.to, "you");
             assert_eq!(email.subject.unwrap(), "hello");
@@ -123,10 +121,8 @@ mod test {
 
         #[test]
         fn encodes_email_to_sol_type() {
-            let email = parsed_email(
-                vec![("From", "me"), ("To", "you"), ("Subject", "hello")],
-                "body",
-            );
+            let email =
+                parsed_email(vec![("From", "me"), ("To", "you"), ("Subject", "hello")], "body");
             let encoded = email.unwrap().abi_encode();
             let decoded = sol::SolEmail::abi_decode(&encoded, true).unwrap();
             assert_eq!(decoded.from, "me".to_string());

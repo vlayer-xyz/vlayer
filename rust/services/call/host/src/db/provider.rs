@@ -44,18 +44,14 @@ impl<P: BlockingProvider> DatabaseRef for ProviderDb<P> {
 
     fn basic_ref(&self, address: Address) -> Result<Option<AccountInfo>, Self::Error> {
         // use `eth_getProof` to get all the account info with a single call
-        let proof = self
-            .provider
-            .get_proof(address, vec![], self.block_number)?;
+        let proof = self.provider.get_proof(address, vec![], self.block_number)?;
         // for non-existent accounts, the code hash is zero
         // see https://github.com/ethereum/go-ethereum/issues/28441
         if proof.code_hash == B256::ZERO {
             return Ok(None);
         }
         // cache the code hash to address mapping, so we can later retrieve the code
-        self.code_hashes
-            .borrow_mut()
-            .insert(proof.code_hash.0.into(), proof.address);
+        self.code_hashes.borrow_mut().insert(proof.code_hash.0.into(), proof.address);
 
         Ok(Some(AccountInfo {
             nonce: proof.nonce,
@@ -95,9 +91,8 @@ impl<P: BlockingProvider> DatabaseRef for ProviderDb<P> {
     }
 
     fn block_hash_ref(&self, number: U256) -> Result<B256, Self::Error> {
-        let block_number: u64 = number
-            .try_into()
-            .map_err(|_| ProviderDbError::InvalidBlockNumber(number))?;
+        let block_number: u64 =
+            number.try_into().map_err(|_| ProviderDbError::InvalidBlockNumber(number))?;
         let header = self
             .provider
             .get_block_header(block_number.into())?

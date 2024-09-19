@@ -32,10 +32,7 @@ impl WebProof {
         session.verify_with_default_cert_verifier(self.notary_pub_key)?;
         let (sent, received) = substrings.verify(&session.header)?;
 
-        Ok((
-            RequestTranscript::new(sent),
-            ResponseTranscript::new(received),
-        ))
+        Ok((RequestTranscript::new(sent), ResponseTranscript::new(received)))
     }
 
     pub fn get_server_name(&self) -> String {
@@ -72,9 +69,7 @@ fn serialize_public_key_to_pem_string<S>(key: &PublicKey, serializer: S) -> Resu
 where
     S: Serializer,
 {
-    let key_pem = key
-        .to_public_key_pem(LineEnding::LF)
-        .map_err(serde::ser::Error::custom)?;
+    let key_pem = key.to_public_key_pem(LineEnding::LF).map_err(serde::ser::Error::custom)?;
     serializer.serialize_str(&key_pem)
 }
 
@@ -141,9 +136,6 @@ mod tests {
     #[test]
     fn success_get_notary_pub_key() {
         let proof = load_web_proof_fixture("./testdata/tls_proof.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
-        assert_eq!(
-            proof.get_notary_pub_key().unwrap(),
-            NOTARY_PUB_KEY_PEM_EXAMPLE
-        );
+        assert_eq!(proof.get_notary_pub_key().unwrap(), NOTARY_PUB_KEY_PEM_EXAMPLE);
     }
 }

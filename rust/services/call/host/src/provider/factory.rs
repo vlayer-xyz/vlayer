@@ -29,10 +29,7 @@ impl EthersProviderFactory {
 
 impl ProviderFactory<EthersProvider<EthersClient>> for EthersProviderFactory {
     fn create(&self, chain_id: ChainId) -> Result<EthersProvider<EthersClient>, HostError> {
-        let url = self
-            .rpc_urls
-            .get(&chain_id)
-            .ok_or(HostError::NoRpcUrl(chain_id))?;
+        let url = self.rpc_urls.get(&chain_id).ok_or(HostError::NoRpcUrl(chain_id))?;
 
         let client = EthersClient::new_client(url, MAX_RETRY, INITIAL_BACKOFF)?;
 
@@ -44,9 +41,8 @@ fn get_path(
     rpc_file_cache: &HashMap<ChainId, String>,
     chain_id: ChainId,
 ) -> Result<PathBuf, HostError> {
-    let file_path_str = rpc_file_cache
-        .get(&chain_id)
-        .ok_or_else(|| HostError::NoRpcCache(chain_id))?;
+    let file_path_str =
+        rpc_file_cache.get(&chain_id).ok_or_else(|| HostError::NoRpcCache(chain_id))?;
 
     Ok(PathBuf::from(file_path_str))
 }
@@ -117,9 +113,7 @@ mod test {
     #[test]
     fn try_new_invalid_rpc_url() -> anyhow::Result<()> {
         let chain_id = Chain::mainnet().id();
-        let rpc_urls = [(chain_id, "http://localhost:123".to_string())]
-            .into_iter()
-            .collect();
+        let rpc_urls = [(chain_id, "http://localhost:123".to_string())].into_iter().collect();
         let factory = EthersProviderFactory::new(rpc_urls);
         let provider = factory.create(chain_id)?;
         let res = provider.get_block_header(Latest);
