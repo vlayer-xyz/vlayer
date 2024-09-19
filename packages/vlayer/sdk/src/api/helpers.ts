@@ -137,17 +137,18 @@ export async function writeContract<
   abi: T,
   functionName: F,
   args: ContractFunctionArgs<T, "payable" | "nonpayable", F>,
+  sender?: Address,
   chainId: number = testChainId1,
 ) {
   const ethClient = client(chainId);
-  const [account] = await ethClient.getAddresses();
+  const selectedSender = sender || (await ethClient.getAddresses())[0];
 
   const txHash = await ethClient.writeContract({
     abi,
     address,
     functionName,
     args,
-    account,
+    account: selectedSender,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } as any);
   // TODO: fix any to viem type
@@ -162,3 +163,7 @@ export async function writeContract<
 }
 
 export const getTestAccount = () => privateKeyToAccount(generatePrivateKey());
+
+export const getTestAddresses = (
+  chainId: number = testChainId1,
+): Promise<Address[]> => client(chainId).getAddresses();
