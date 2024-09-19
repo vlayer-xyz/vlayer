@@ -113,12 +113,12 @@ contract RecoveryEmail is Prover {
     using StringUtils for string;
     using EmailProofLib for MimeEmail;
 
-    function main(address multisigAddr, MimeEmail calldata mimeEmail) public returns (address, string, address, uint) {     
+    function main(address multisigAddr, MimeEmail calldata mimeEmail) public returns (address, bytes32, address) {     
       VerifiedEmail memory email = mimeEmail.verify()
  
       address lostWallet = parseSubject(email.subject);
       address newAddress = parseBody(email.body);
-      string memory emailAddrHash = getEmailAddressHash(email.from, multisigAddr, lostWallet);
+      bytes32 emailAddrHash = getEmailAddressHash(email.from, multisigAddr, lostWallet);
       
       return (lostWallet, emailAddrHash, newAddress); 
     }
@@ -200,9 +200,12 @@ contract MultiSigWallet is Verifier  {
     {  
       require(
         ownerToEmailHash[lostWallet] == emailAddrHash, 
-        "wrong email given"
+        "Recovery email mismatch"
       );
 
+      require(owners[lostWallet]; "Not an owner");
+      
+      owners[lostWallet] = false;
       owners[newOwner] = true;
 
       return (newOwner); 
