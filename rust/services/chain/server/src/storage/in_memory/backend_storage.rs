@@ -1,25 +1,24 @@
+use alloy_primitives::Bytes;
 use std::collections::HashMap;
 
-use alloy_primitives::Bytes;
-
-use super::block_storage_backend::BlockStorageBackend;
+use crate::storage::block_storage::BlockStorageBackend;
 
 type ChainId = String;
 
-pub struct InMemoryChainBlockStorage {
+pub(crate) struct InMemoryChainBlockStorageBackend {
     hash_to_node: HashMap<String, Vec<u8>>,
     block_range_to_root: HashMap<(u32, u32), String>,
     block_range_to_proof: HashMap<(u32, u32), Bytes>,
     current_block_range: (u32, u32),
 }
 
-impl InMemoryChainBlockStorage {
-    pub fn new() -> Self {
-        InMemoryChainBlockStorage {
+impl InMemoryChainBlockStorageBackend {
+    pub fn new(block_id: u32) -> Self {
+        InMemoryChainBlockStorageBackend {
             hash_to_node: HashMap::new(),
             block_range_to_root: HashMap::new(),
             block_range_to_proof: HashMap::new(),
-            current_block_range: (0, 0),
+            current_block_range: (block_id, block_id),
         }
     }
 
@@ -56,25 +55,33 @@ impl InMemoryChainBlockStorage {
     }
 }
 
-pub(crate) struct InMemoryBlockStorage {
-    chain_storages: HashMap<ChainId, InMemoryChainBlockStorage>,
+pub(crate) struct InMemoryBlockStorageBackend {
+    chain_storages: HashMap<ChainId, InMemoryChainBlockStorageBackend>,
 }
 
-impl InMemoryBlockStorage {
+impl InMemoryBlockStorageBackend {
     #[allow(unused)]
     pub fn new() -> Self {
-        InMemoryBlockStorage {
+        InMemoryBlockStorageBackend {
             chain_storages: HashMap::new(),
         }
     }
+
+    /// Initializes the chain storage with the given `chain_id` and `block_id`.
+    /// This must be called before any operations on that chain.
+    pub fn init_chain_storage(&mut self, chain_id: &str, block_id: u32) {
+        self.chain_storages
+            .entry(chain_id.to_string())
+            .or_insert_with(|| InMemoryChainBlockStorageBackend::new(block_id));
+    }
 }
 
-impl BlockStorageBackend for InMemoryBlockStorage {
+impl BlockStorageBackend for InMemoryBlockStorageBackend {
     fn insert_hash_to_node(&mut self, chain_id: &str, hash: &str, node: &[u8]) {
         let chain_storage = self
             .chain_storages
-            .entry(chain_id.to_string())
-            .or_insert_with(InMemoryChainBlockStorage::new);
+            .get_mut(chain_id)
+            .expect("Chain storage not initialized. Call `init_chain_storage` first.");
         chain_storage.insert_hash_to_node(hash, node);
     }
 
@@ -87,8 +94,8 @@ impl BlockStorageBackend for InMemoryBlockStorage {
     fn insert_block_range_to_root(&mut self, chain_id: &str, range: (u32, u32), root: &str) {
         let chain_storage = self
             .chain_storages
-            .entry(chain_id.to_string())
-            .or_insert_with(InMemoryChainBlockStorage::new);
+            .get_mut(chain_id)
+            .expect("Chain storage not initialized. Call `init_chain_storage` first.");
         chain_storage.insert_block_range_to_root(range, root);
     }
 
@@ -101,8 +108,8 @@ impl BlockStorageBackend for InMemoryBlockStorage {
     fn insert_block_range_to_proof(&mut self, chain_id: &str, range: (u32, u32), proof: Bytes) {
         let chain_storage = self
             .chain_storages
-            .entry(chain_id.to_string())
-            .or_insert_with(InMemoryChainBlockStorage::new);
+            .get_mut(chain_id)
+            .expect("Chain storage not initialized. Call `init_chain_storage` first.");
         chain_storage.insert_block_range_to_proof(range, proof);
     }
 
@@ -115,8 +122,8 @@ impl BlockStorageBackend for InMemoryBlockStorage {
     fn set_current_block_range(&mut self, chain_id: &str, range: (u32, u32)) {
         let chain_storage = self
             .chain_storages
-            .entry(chain_id.to_string())
-            .or_insert_with(InMemoryChainBlockStorage::new);
+            .get_mut(chain_id)
+            .expect("Chain storage not initialized. Call `init_chain_storage` first.");
         chain_storage.set_current_block_range(range);
     }
 
