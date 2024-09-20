@@ -1,7 +1,7 @@
 import { prove, testHelpers } from "@vlayer/sdk";
 import webProofProver from "../out/WebProofProver.sol/WebProofProver";
 import webProofVerifier from "../out/WebProofVerifier.sol/WebProofVerifier";
-import tls_proof from "./tls_proof.json";
+import tls_proof from "./tls_gp_proof.json";
 import * as assert from "assert";
 import { encodePacked, keccak256 } from "viem";
 
@@ -47,7 +47,7 @@ const tokenOwnerAddress = await testHelpers.call(
   webProofVerifier.abi,
   verifier,
   "ownerOf",
-  [generateTokenId("jab68503")],
+  [generateTokenId("g_p_vlayer")],
 );
 
 assert.strictEqual(twitterUserAddress, tokenOwnerAddress);

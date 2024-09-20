@@ -55,7 +55,6 @@ const GoToPageButton = () => {
 
 const Proof = () => {
   const { proof } = useTlsnProover();
-  console.log(proof);
   return proof ? (
     <Card>
       <pre
