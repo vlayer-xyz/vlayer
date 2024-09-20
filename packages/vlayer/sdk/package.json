@@ -10,12 +10,15 @@
   "devDependencies": {
     "@changesets/cli": "^2.27.7",
     "@types/bun": "latest",
-    "abitype": "^1.0.6"
+    "@types/mailparser": "^3.4.4",
+    "abitype": "^1.0.6",
+    "vitest": "^2.1.1"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "mailparser": "^3.7.1",
     "viem": "^2.21.0"
   }
 }
