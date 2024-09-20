@@ -12,7 +12,7 @@ pub struct InMemoryBlockDb {
     hash_to_node: HashMap<String, Vec<u8>>,
     block_range_to_root: HashMap<(u32, u32), String>,
     block_range_to_proof: HashMap<(u32, u32), Bytes>,
-    current_range: (u32, u32),
+    current_block_range: (u32, u32),
 }
 
 impl InMemoryBlockDb {
@@ -29,11 +29,22 @@ impl InMemoryBlockDb {
         ]);
 
         let nodes: Vec<Bytes> = trie.to_rlp_nodes().map(Bytes::from).collect::<Vec<Bytes>>();
+        dbg!(&nodes);
+
+        let reconstructed_trie = MerkleTrie::from_rlp_nodes(vec![nodes[0].clone()]).unwrap();
+
+        dbg!(&reconstructed_trie);
+        let nodes: Vec<Bytes> = reconstructed_trie
+            .to_rlp_nodes()
+            .map(Bytes::from)
+            .collect::<Vec<Bytes>>();
 
         let mut hash_to_node = HashMap::new();
 
         for node in &nodes {
             let hash = encode(keccak256(&node));
+            dbg!(keccak256(&node));
+            dbg!(&hash);
             hash_to_node.insert(hash, node.to_vec());
         }
 
@@ -54,13 +65,14 @@ impl InMemoryBlockDb {
 }
 
 impl BlockDatabase for InMemoryBlockDb {
-    fn get_proof(&self, block_numbers: impl AsRef<[u8]>) -> Result<&Vec<u8>, BlockDbError> {
-        let block_numbers = block_numbers.as_ref();
+    fn get_proof(&self, block_numbers: impl AsRef<[u8]>) -> Result<Vec<u8>, BlockDbError> {
+        let mut block_numbers = block_numbers.as_ref().to_vec();
         if block_numbers.is_empty() {
             return Err(BlockDbError::EmptyBlockNumbers);
         }
+        block_numbers.sort_unstable();
         let (start, end) = self.current_range;
-        for &block_number in block_numbers {
+        for &block_number in &block_numbers {
             let block_number = block_number as u32;
             if block_number < start || block_number > end {
                 return Err(BlockDbError::OutsideOfRange(
@@ -68,6 +80,16 @@ impl BlockDatabase for InMemoryBlockDb {
                     self.current_range,
                 ));
             }
+        }
+        if block_numbers.len() == 2 {
+            let start = block_numbers[0] as u32;
+            let end = block_numbers[1] as u32;
+
+            return self
+                .block_range_to_proof
+                .get(&(start, end))
+                .map(|bytes| bytes.to_vec())
+                .ok_or(BlockDbError::ProofNotFound(start));
         }
         todo!()
     }
@@ -98,5 +120,12 @@ mod tests {
     fn multiple_blocks_outside_of_current_range() {
         let result = DB.get_proof([3, 4]);
         assert_eq!(result.unwrap_err(), BlockDbError::OutsideOfRange(3, (1, 2)));
+    }
+
+    #[test]
+    fn two_blocks() {
+        let result = DB.get_proof([1, 2]);
+        dbg!(&result);
+        assert_eq!(result.unwrap(), Vec::<u8>::new());
     }
 }

@@ -2,7 +2,7 @@ use thiserror::Error;
 
 pub(crate) trait BlockDatabase {
     #[allow(unused)]
-    fn get_proof(&self, block_numbers: impl AsRef<[u8]>) -> Result<&Vec<u8>, BlockDbError>;
+    fn get_proof(&self, block_numbers: impl AsRef<[u8]>) -> Result<Vec<u8>, BlockDbError>;
 }
 
 #[derive(Error, Debug, PartialEq)]

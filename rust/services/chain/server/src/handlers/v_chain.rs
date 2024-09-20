@@ -75,6 +75,7 @@ mod tests {
         };
 
         let response = v_chain(config.clone(), trie, params).await?;
+        dbg!(&response);
 
         let ChainProof {
             proof: _proof,
