@@ -3,6 +3,7 @@ use crate::errors::CLIError;
 use crate::utils::parse_toml::{add_deps_to_foundry_toml, get_src_from_str};
 use crate::utils::path::{copy_dir_to, find_foundry_root};
 use flate2::read::GzDecoder;
+use lazy_static::lazy_static;
 use reqwest::get;
 use std::fs;
 use std::fs::OpenOptions;
@@ -19,37 +20,97 @@ const EXAMPLES_URL: &str =
 const CONTRACTS_URL: &str =
     "https://vlayer-releases.s3.eu-north-1.amazonaws.com/latest/contracts.zip";
 
-const DEPENDENCIES: [SoldeerDep; 4] = [
-    SoldeerDep::SoldeerRegistryDep {
-        name: "@openzeppelin-contracts",
-        version: "5.0.1",
-    },
-    SoldeerDep::SoldeerRegistryDep {
-        name: "forge-std",
-        version: "1.9.2",
-    },
-    SoldeerDep::UrlDep {
-        name: "risc0-ethereum",
-        version: "1.0.0",
-        url: "https://github.com/vlayer-xyz/risc0-ethereum/releases/download/v1.0.0-soldeer-no-remappings/contracts.zip",
-    },
-    SoldeerDep::UrlDep {
-        name: "vlayer",
-        version: "0.1.0",
-        url: CONTRACTS_URL,
-    },
-];
+lazy_static! {
+    static ref DEPENDENCIES: Vec<SoldeerDep> = vec![
+        SoldeerDep {
+            name: String::from("@openzeppelin-contracts"),
+            version: String::from("5.0.1"),
+            url: None,
+            remapping: Some(String::from("openzeppelin-contracts=dependencies/@openzeppelin-contracts-5.0.1/")),
+        },
+        SoldeerDep {
+            name: String::from("forge-std"),
+            version: String::from("1.9.2"),
+            url: None,
+            remapping: Some(String::from("forge-std/=dependencies/forge-std-1.9.2/src")),
+        },
+        SoldeerDep {
+            name: String::from("risc0-ethereum"),
+            version: String::from("1.0.0"),
+            url: Some(String::from("https://github.com/vlayer-xyz/risc0-ethereum/releases/download/v1.0.0-soldeer-no-remappings/contracts.zip")),
+            remapping: None,
+        },
+        SoldeerDep {
+            name: String::from("vlayer"),
+            version: String::from("0.1.0"),
+            url: Some(String::from(CONTRACTS_URL)),
+            remapping: None,
+        }
+    ];
+}
 
-enum SoldeerDep {
-    SoldeerRegistryDep {
-        name: &'static str,
-        version: &'static str,
-    },
-    UrlDep {
-        name: &'static str,
-        version: &'static str,
-        url: &'static str,
-    },
+struct SoldeerDep {
+    name: String,
+    version: String,
+    url: Option<String>,
+    remapping: Option<String>,
+}
+
+impl SoldeerDep {
+    pub fn install(&self) -> Result<(), CLIError> {
+        let output = match &self.url {
+            Some(url) => Self::install_url_dep(&self.name, &self.version, url)?,
+            None => Self::install_dep(&self.name, &self.version)?,
+        };
+
+        if !output.status.success() {
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            return Err(CLIError::ForgeInitError(stderr.to_string()));
+        }
+
+        Ok(())
+    }
+
+    fn install_dep(name: &String, version: &String) -> Result<Output, CLIError> {
+        let output = std::process::Command::new("forge")
+            .arg("soldeer")
+            .arg("install")
+            .arg(format!("{}~{}", name, version))
+            .output()?;
+
+        Ok(output)
+    }
+
+    fn install_url_dep(name: &String, version: &String, url: &String) -> Result<Output, CLIError> {
+        let output = std::process::Command::new("forge")
+            .arg("soldeer")
+            .arg("install")
+            .arg(format!("{}~{}", name, version))
+            .arg(url)
+            .output()?;
+
+        Ok(output)
+    }
+}
+
+fn install_dependencies() -> Result<(), CLIError> {
+    for dep in DEPENDENCIES.iter() {
+        dep.install()?;
+    }
+
+    Ok(())
+}
+
+fn add_remappings(foundry_root: &Path) -> Result<(), CLIError> {
+    let remappings_txt = foundry_root.join("remappings.txt");
+    let mut file = OpenOptions::new().append(true).open(remappings_txt)?;
+    for dep in DEPENDENCIES.iter() {
+        if let Some(remapping) = &dep.remapping {
+            writeln!(file, "{}", remapping)?;
+        }
+    }
+
+    Ok(())
 }
 
 pub(crate) async fn init(
@@ -104,54 +165,9 @@ pub(crate) async fn init_existing(cwd: PathBuf, template: TemplateOption) -> Res
     info!("Installing dependencies");
     install_dependencies()?;
     info!("Successfully installed all dependencies");
-    add_risc0_eth_remappings(&root_path)?;
+    add_remappings(&root_path)?;
 
     std::env::set_current_dir(&cwd)?;
-
-    Ok(())
-}
-
-impl SoldeerDep {
-    pub fn install(self) -> Result<(), CLIError> {
-        let output = match self {
-            SoldeerDep::SoldeerRegistryDep { name, version } => install_dep(name, version)?,
-            SoldeerDep::UrlDep { name, version, url } => install_url_dep(name, version, url)?,
-        };
-
-        if !output.status.success() {
-            let stderr = String::from_utf8_lossy(&output.stderr);
-            return Err(CLIError::ForgeInitError(stderr.to_string()));
-        }
-
-        Ok(())
-    }
-}
-
-fn install_dep(name: &str, version: &str) -> Result<Output, CLIError> {
-    let output = std::process::Command::new("forge")
-        .arg("soldeer")
-        .arg("install")
-        .arg(format!("{}~{}", name, version))
-        .output()?;
-
-    Ok(output)
-}
-
-fn install_url_dep(name: &str, version: &str, url: &str) -> Result<Output, CLIError> {
-    let output = std::process::Command::new("forge")
-        .arg("soldeer")
-        .arg("install")
-        .arg(format!("{}~{}", name, version))
-        .arg(url)
-        .output()?;
-
-    Ok(output)
-}
-
-fn install_dependencies() -> Result<(), CLIError> {
-    for dep in DEPENDENCIES {
-        dep.install()?;
-    }
 
     Ok(())
 }
@@ -194,17 +210,6 @@ async fn fetch_examples(
 
     copy_dir_to(&downloaded_scripts, scripts_dst)?;
     copy_dir_to(&downloaded_examples, examples_dst)?;
-
-    Ok(())
-}
-
-fn add_risc0_eth_remappings(foundry_root: &Path) -> std::io::Result<()> {
-    let remappings_txt = foundry_root.join("remappings.txt");
-    let suffix = "forge-std/=dependencies/forge-std-1.9.2/src\nopenzeppelin-contracts=dependencies/@openzeppelin-contracts-5.0.1/";
-
-    let mut file = OpenOptions::new().append(true).open(remappings_txt)?;
-
-    writeln!(file, "{}", suffix)?;
 
     Ok(())
 }
@@ -294,5 +299,23 @@ mod tests {
 
         assert!(&vlayer_dir.exists());
         assert_eq!(result.unwrap(), vlayer_dir);
+    }
+
+    #[test]
+    fn test_add_remappings() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let root_path = temp_dir.path().to_path_buf();
+        let remappings_txt = root_path.join("remappings.txt");
+        std::fs::write(&remappings_txt, "some initial remappings\n").unwrap();
+
+        add_remappings(&root_path).unwrap();
+
+        let remappings_txt = root_path.join("remappings.txt");
+        let contents = fs::read_to_string(remappings_txt).unwrap();
+
+        assert_eq!(
+            contents,
+            "some initial remappings\nopenzeppelin-contracts=dependencies/@openzeppelin-contracts-5.0.1/\nforge-std/=dependencies/forge-std-1.9.2/src\n"
+        );
     }
 }
