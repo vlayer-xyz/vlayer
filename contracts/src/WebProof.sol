@@ -26,9 +26,6 @@ library WebProofLib {
         string[4] memory data = abi.decode(returnData, (string[4]));
 
         require(success, "verify_and_parse precompile call failed");
-        //NOTE: for now we are not checking the dataUrl
-        //I think it shouldn't check exact url but only host or path
-        // but now query params
         require(dataUrl.equal(data[0]), "Incorrect URL");
         require(NOTARY_PUB_KEY.equal(data[3]), "Incorrect notary public key");
 
