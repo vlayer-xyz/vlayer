@@ -15,8 +15,8 @@ contract WebProofProver is Prover {
     using WebProofLib for WebProof;
     using WebLib for Web;
 
-    string dataUrl =
-        "https://api.x.com/1.1/account/settings.json";
+    string dataUrl = "https://api.x.com/1.1/account/settings.json";
+
     function main(WebProof calldata webProof) public view returns (string memory) {
         Web memory web = webProof.verify(dataUrl);
 
