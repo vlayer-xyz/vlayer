@@ -1,5 +1,9 @@
 import "./style.css";
-import { setupRequestProveButton, setupVProverButton } from "./prove";
+import {
+  setupRequestProveButton,
+  setupVerifyButton,
+  setupVProverButton,
+} from "./prove";
 import { extensionConnector } from "./extensionConnector";
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div class="container">
@@ -17,4 +21,5 @@ const twitterProofButton = document.querySelector<HTMLButtonElement>("#prove")!;
 const vproveButton = document.querySelector<HTMLButtonElement>("#vprove")!;
 setupRequestProveButton(twitterProofButton);
 setupVProverButton(vproveButton);
+setupVerifyButton(document.querySelector<HTMLButtonElement>("#vverify")!);
 extensionConnector.connect();

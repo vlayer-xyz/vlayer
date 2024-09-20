@@ -1,13 +1,12 @@
 import browser from "webextension-polyfill";
 import { MESSAGE } from "./constants/message";
 
-//@ts-expect-error 
 chrome.tabs.onActivated.addListener(function (activeInfo) {
   console.log("Actives tab changed", activeInfo);
   windowId = activeInfo.windowId;
 });
 
-// to receive messages from popup script 
+// to receive messages from popup script
 let port: browser.Runtime.Port | undefined = undefined;
 
 browser.runtime.onInstalled.addListener((details) => {
@@ -44,12 +43,12 @@ browser.tabs.onActivated.addListener(function (activeInfo) {
   windowId = activeInfo.windowId;
 });
 
-browser.runtime.onMessageExternal.addListener((message, sender) => {
+browser.runtime.onMessageExternal.addListener((message) => {
   (async () => {
-    if (message.action === 'open_side_panel') {
-      // @ts-expect-error
-      if(chrome.sidePanel) {
-        // @ts-expect-error
+    if (message.action === "open_side_panel") {
+      //We nned to use chrome specific API to open side panel
+      //as webextension-polyfill does not support it
+      if (chrome.sidePanel) {
         chrome.sidePanel.open({ windowId: windowId });
       }
     }

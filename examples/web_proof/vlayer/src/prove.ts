@@ -1,6 +1,9 @@
 import { extensionConnector } from "./extensionConnector";
 import { prove } from "@vlayer/sdk";
 import webProofProver from "../../out/WebProofProver.sol/WebProofProver.json";
+import webProofVerifier from "../../out/WebProofVerifier.sol/WebProofVerifier.json";
+import { createTestClient, http, publicActions, walletActions } from "viem";
+import { foundry } from "viem/chains";
 
 export function setupRequestProveButton(element: HTMLButtonElement) {
   element.addEventListener("click", () => {
@@ -18,7 +21,7 @@ export const setupVProverButton = (element: HTMLButtonElement) => {
 
     console.log("extensionConnector.proof", extensionConnector);
     const webProof = {
-      tls_proof: extensionConnector.proof,
+      tls_proof: extensionConnector.tlsproof,
       notary_pub_key: notaryPubKey,
     };
     console.log("webProof", webProof);
@@ -38,11 +41,27 @@ export const setupVProverButton = (element: HTMLButtonElement) => {
     );
     console.log("Proof:", proof);
     console.log("returnValue:", returnValue);
+    extensionConnector.zkproof = proof;
+    extensionConnector.returnValue = returnValue;
   });
 };
 
 export const setupVerifyButton = (element: HTMLButtonElement) => {
   element.addEventListener("click", async () => {
-    console.log("Verifying...");
+    const verification = await createTestClient({
+      chain: foundry,
+      mode: "anvil",
+      transport: http(),
+    })
+      .extend(publicActions)
+      .extend(walletActions)
+      .writeContract({
+        address: import.meta.env.VITE_VERIFIER_ADDRESS,
+        abi: webProofVerifier.abi,
+        functionName: "verify",
+        args: [extensionConnector.zkproof, extensionConnector.returnValue],
+        account: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+      });
+    console.log("Verified!", verification);
   });
 };

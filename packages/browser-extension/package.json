@@ -8,7 +8,7 @@
     "dev": "vite --port 5173",
     "build": "vite build",
     "build:watch": "vite build --watch --mode development",
-    "lint:fix": "eslint --fix ."
+    "lint:fix": "eslint --fix src"
   },
   "devDependencies": {
     "@types/react": "^18.3.5",

@@ -3,17 +3,20 @@ export const extensionConnector: {
   port?: chrome.runtime.Port;
   windowId?: number;
   connect: () => void;
-  proof?: object;
+  tlsproof?: object;
+  zkproof?: object;
+  returnValue?: unknown;
 } = {
   port: undefined,
-  proof: gpProof,
+  tlsproof: gpProof,
+
   connect: function () {
     this.port = chrome.runtime.connect(import.meta.env.VITE_EXTENSION_ID);
     console.log("Connected to extension", this.port);
     this.port.onMessage.addListener((message) => {
       console.log("Message from extension", message);
       if (message.type === "proof_done") {
-        this.proof = message.proof;
+        this.tlsproof = message.proof;
       }
     });
     chrome.tabs.onActivated.addListener((activeInfo) => {
