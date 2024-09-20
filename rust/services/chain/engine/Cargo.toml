@@ -4,8 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+anyhow = { workspace = true }
 serde = { workspace = true }
 alloy-primitives = { workspace = true }
+thiserror = { workspace = true }
 
 [lints]
 workspace = true
