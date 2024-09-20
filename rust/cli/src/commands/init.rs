@@ -22,37 +22,78 @@ const CONTRACTS_URL: &str =
 
 lazy_static! {
     static ref DEPENDENCIES: Vec<SoldeerDep> = vec![
-        SoldeerDep::SoldeerRegistryDep {
+        SoldeerDep {
             name: String::from("@openzeppelin-contracts"),
             version: String::from("5.0.1"),
+            url: None,
         },
-        SoldeerDep::SoldeerRegistryDep {
+        SoldeerDep {
             name: String::from("forge-std"),
             version: String::from("1.9.2"),
+            url: None,
         },
-        SoldeerDep::UrlDep {
+        SoldeerDep {
             name: String::from("risc0-ethereum"),
             version: String::from("1.0.0"),
-            url: String::from("https://github.com/vlayer-xyz/risc0-ethereum/releases/download/v1.0.0-soldeer-no-remappings/contracts.zip"),
+            url: Some(String::from("https://github.com/vlayer-xyz/risc0-ethereum/releases/download/v1.0.0-soldeer-no-remappings/contracts.zip")),
         },
-        SoldeerDep::UrlDep {
+        SoldeerDep {
             name: String::from("vlayer"),
             version: String::from("0.1.0"),
-            url: String::from(CONTRACTS_URL),
+            url: Some(String::from(CONTRACTS_URL)),
         }
     ];
 }
 
-enum SoldeerDep {
-    SoldeerRegistryDep {
-        name: String,
-        version: String,
-    },
-    UrlDep {
-        name: String,
-        version: String,
-        url: String,
-    },
+struct SoldeerDep {
+    name: String,
+    version: String,
+    url: Option<String>,
+}
+
+impl SoldeerDep {
+    pub fn install(&self) -> Result<(), CLIError> {
+        let output = match &self.url {
+            Some(url) => Self::install_url_dep(&self.name, &self.version, url)?,
+            None => Self::install_dep(&self.name, &self.version)?,
+        };
+
+        if !output.status.success() {
+            let stderr = String::from_utf8_lossy(&output.stderr);
+            return Err(CLIError::ForgeInitError(stderr.to_string()));
+        }
+
+        Ok(())
+    }
+
+    fn install_dep(name: &String, version: &String) -> Result<Output, CLIError> {
+        let output = std::process::Command::new("forge")
+            .arg("soldeer")
+            .arg("install")
+            .arg(format!("{}~{}", name, version))
+            .output()?;
+
+        Ok(output)
+    }
+
+    fn install_url_dep(name: &String, version: &String, url: &String) -> Result<Output, CLIError> {
+        let output = std::process::Command::new("forge")
+            .arg("soldeer")
+            .arg("install")
+            .arg(format!("{}~{}", name, version))
+            .arg(url)
+            .output()?;
+
+        Ok(output)
+    }
+}
+
+fn install_dependencies() -> Result<(), CLIError> {
+    for dep in DEPENDENCIES.iter() {
+        dep.install()?;
+    }
+
+    Ok(())
 }
 
 pub(crate) async fn init(
@@ -110,51 +151,6 @@ pub(crate) async fn init_existing(cwd: PathBuf, template: TemplateOption) -> Res
     add_risc0_eth_remappings(&root_path)?;
 
     std::env::set_current_dir(&cwd)?;
-
-    Ok(())
-}
-
-impl SoldeerDep {
-    pub fn install(&self) -> Result<(), CLIError> {
-        let output = match self {
-            SoldeerDep::SoldeerRegistryDep { name, version } => Self::install_dep(name, version)?,
-            SoldeerDep::UrlDep { name, version, url } => Self::install_url_dep(name, version, url)?,
-        };
-
-        if !output.status.success() {
-            let stderr = String::from_utf8_lossy(&output.stderr);
-            return Err(CLIError::ForgeInitError(stderr.to_string()));
-        }
-
-        Ok(())
-    }
-
-    fn install_dep(name: &String, version: &String) -> Result<Output, CLIError> {
-        let output = std::process::Command::new("forge")
-            .arg("soldeer")
-            .arg("install")
-            .arg(format!("{}~{}", name, version))
-            .output()?;
-
-        Ok(output)
-    }
-
-    fn install_url_dep(name: &String, version: &String, url: &String) -> Result<Output, CLIError> {
-        let output = std::process::Command::new("forge")
-            .arg("soldeer")
-            .arg("install")
-            .arg(format!("{}~{}", name, version))
-            .arg(url)
-            .output()?;
-
-        Ok(output)
-    }
-}
-
-fn install_dependencies() -> Result<(), CLIError> {
-    for dep in DEPENDENCIES.iter() {
-        dep.install()?;
-    }
 
     Ok(())
 }
