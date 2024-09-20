@@ -6,6 +6,7 @@ on:
       - "rust-toolchain.toml"
       - "rust/**"
       - "examples/**"
+      - "packages/vlayer/**"
       - ".github/workflows/**"
     branches:
       - "**"
@@ -46,6 +47,9 @@ jobs:
     steps:
       - uses: oven-sh/setup-bun@v2
       - uses: actions/checkout@v2
+      - name: Install packages
+        working-directory: packages/vlayer/sdk
+        run: bun install
       - name: Run SDK tests
         working-directory: packages/vlayer/sdk
         run: bun test
