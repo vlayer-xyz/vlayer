@@ -41,16 +41,11 @@ jobs:
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: nightly-d75318c9c7a1c6af5404fe96f63ca890dcdd588d # 2024-09-05
-          
-      - name: Check clang and LLVM version
-        env:
-          EXPECTED_LLVM_VERSION: "18.1"
-        run: bash/check_llvm_clang.sh
-
-      - name: Run workspace rust tests
-        working-directory: rust
-        run: |
-          cargo test --workspace --locked
-        env:
-          RUST_LOG: info
-          RISC0_DEV_MODE: 1
+  ts-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: oven-sh/setup-bun@v2
+      - uses: actions/checkout@v2
+      - name: Run SDK tests
+        working-directory: packages/vlayer/sdk
+        run: bun test

@@ -5,6 +5,7 @@
   "version": "0.0.2",
   "scripts": {
     "build": "npm run gen:types",
+    "test": "vitest --run",
     "gen:types": "sh ../bash/build_ts_types.sh"
   },
   "devDependencies": {
