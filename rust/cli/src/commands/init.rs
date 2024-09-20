@@ -3,6 +3,7 @@ use crate::errors::CLIError;
 use crate::utils::parse_toml::{add_deps_to_foundry_toml, get_src_from_string};
 use crate::utils::path::{copy_dir_to, find_foundry_root};
 use flate2::read::GzDecoder;
+use lazy_static::lazy_static;
 use reqwest::get;
 use std::fs;
 use std::fs::OpenOptions;
@@ -19,36 +20,38 @@ const EXAMPLES_URL: &str =
 const CONTRACTS_URL: &str =
     "https://vlayer-releases.s3.eu-north-1.amazonaws.com/latest/contracts.zip";
 
-const DEPENDENCIES: [SoldeerDep; 4] = [
-    SoldeerDep::SoldeerRegistryDep {
-        name: "@openzeppelin-contracts",
-        version: "5.0.1",
-    },
-    SoldeerDep::SoldeerRegistryDep {
-        name: "forge-std",
-        version: "1.9.2",
-    },
-    SoldeerDep::UrlDep {
-        name: "risc0-ethereum",
-        version: "1.0.0",
-        url: "https://github.com/vlayer-xyz/risc0-ethereum/releases/download/v1.0.0-soldeer-no-remappings/contracts.zip",
-    },
-    SoldeerDep::UrlDep {
-        name: "vlayer",
-        version: "0.1.0",
-        url: CONTRACTS_URL,
-    },
-];
+lazy_static! {
+    static ref DEPENDENCIES: Vec<SoldeerDep> = vec![
+        SoldeerDep::SoldeerRegistryDep {
+            name: String::from("@openzeppelin-contracts"),
+            version: String::from("5.0.1"),
+        },
+        SoldeerDep::SoldeerRegistryDep {
+            name: String::from("forge-std"),
+            version: String::from("1.9.2"),
+        },
+        SoldeerDep::UrlDep {
+            name: String::from("risc0-ethereum"),
+            version: String::from("1.0.0"),
+            url: String::from("https://github.com/vlayer-xyz/risc0-ethereum/releases/download/v1.0.0-soldeer-no-remappings/contracts.zip"),
+        },
+        SoldeerDep::UrlDep {
+            name: String::from("vlayer"),
+            version: String::from("0.1.0"),
+            url: String::from(CONTRACTS_URL),
+        }
+    ];
+}
 
 enum SoldeerDep {
     SoldeerRegistryDep {
-        name: &'static str,
-        version: &'static str,
+        name: String,
+        version: String,
     },
     UrlDep {
-        name: &'static str,
-        version: &'static str,
-        url: &'static str,
+        name: String,
+        version: String,
+        url: String,
     },
 }
 
@@ -112,7 +115,7 @@ pub(crate) async fn init_existing(cwd: PathBuf, template: TemplateOption) -> Res
 }
 
 impl SoldeerDep {
-    pub fn install(self) -> Result<(), CLIError> {
+    pub fn install(&self) -> Result<(), CLIError> {
         let output = match self {
             SoldeerDep::SoldeerRegistryDep { name, version } => install_dep(name, version)?,
             SoldeerDep::UrlDep { name, version, url } => install_url_dep(name, version, url)?,
@@ -127,7 +130,7 @@ impl SoldeerDep {
     }
 }
 
-fn install_dep(name: &str, version: &str) -> Result<Output, CLIError> {
+fn install_dep(name: &String, version: &String) -> Result<Output, CLIError> {
     let output = std::process::Command::new("forge")
         .arg("soldeer")
         .arg("install")
@@ -137,7 +140,7 @@ fn install_dep(name: &str, version: &str) -> Result<Output, CLIError> {
     Ok(output)
 }
 
-fn install_url_dep(name: &str, version: &str, url: &str) -> Result<Output, CLIError> {
+fn install_url_dep(name: &String, version: &String, url: &String) -> Result<Output, CLIError> {
     let output = std::process::Command::new("forge")
         .arg("soldeer")
         .arg("install")
@@ -149,7 +152,7 @@ fn install_url_dep(name: &str, version: &str, url: &str) -> Result<Output, CLIEr
 }
 
 fn install_dependencies() -> Result<(), CLIError> {
-    for dep in DEPENDENCIES {
+    for dep in DEPENDENCIES.iter() {
         dep.install()?;
     }
 

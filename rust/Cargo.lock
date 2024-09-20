@@ -2085,6 +2085,7 @@ dependencies = [
  "clap",
  "flate2",
  "hex",
+ "lazy_static",
  "regex",
  "reqwest 0.12.5",
  "risc0-zkp",
