@@ -27,9 +27,12 @@ pub(crate) enum TemplateOption {
     #[default]
     Simple,
     Airdrop,
-    SimpleTravel,
+    PrivateAirdrop,
+    SimpleTeleport,
+    SimpleTimeTravel,
     ERC20Balances,
     WebProof,
+    EmailProof,
 }
 
 #[derive(Clone, Debug, ValueEnum, Default, PartialEq, Eq)]
@@ -53,9 +56,12 @@ impl fmt::Display for TemplateOption {
         match self {
             TemplateOption::Simple => write!(f, "simple"),
             TemplateOption::Airdrop => write!(f, "airdrop"),
-            TemplateOption::SimpleTravel => write!(f, "simple_travel"),
+            TemplateOption::PrivateAirdrop => write!(f, "private_airdrop"),
+            TemplateOption::SimpleTeleport => write!(f, "simple_teleport"),
+            TemplateOption::SimpleTimeTravel => write!(f, "simple_time_travel"),
             TemplateOption::ERC20Balances => write!(f, "erc20_balances"),
             TemplateOption::WebProof => write!(f, "web_proof"),
+            TemplateOption::EmailProof => write!(f, "email_proof"),
         }
     }
 }
