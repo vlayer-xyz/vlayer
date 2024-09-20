@@ -14,8 +14,10 @@ pub enum KeyValueDBError {
     DuplicateKey,
 }
 
+type KeyValueMap = HashMap<Box<[u8]>, Box<[u8]>>;
+
 pub struct InMemoryKeyValueDB {
-    store: RwLock<HashMap<Box<[u8]>, Box<[u8]>>>,
+    store: RwLock<KeyValueMap>,
 }
 
 impl InMemoryKeyValueDB {
