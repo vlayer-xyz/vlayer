@@ -159,7 +159,8 @@ where
 
 #[cfg(test)]
 mod test {
-    use alloy_primitives::{address, Address, Bytes, U256};
+    use alloy_primitives::{address, Address, U256};
+    use alloy_rlp::{Bytes, BytesMut};
     use revm::{
         db::{CacheDB, EmptyDB},
         interpreter::{CallInputs, CallScheme, CallValue},
@@ -171,9 +172,9 @@ mod test {
 
     const MOCK_CALLER: Address = address!("0000000000000000000000000000000000000000");
 
-    fn create_mock_call_inputs(to: Address, input: &[u8]) -> CallInputs {
+    fn create_mock_call_inputs(to: Address, input: Bytes) -> CallInputs {
         CallInputs {
-            input: Bytes::copy_from_slice(input),
+            input: input.into(),
             gas_limit: 0,
             bytecode_address: to,
             target_address: to,
@@ -186,12 +187,14 @@ mod test {
         }
     }
 
-    fn inspector_call(addr: Address) -> TravelInspector<'static> {
+    fn inspector_call(addr: Address, selector: &[u8], args: &[u8]) -> TravelInspector<'static> {
         let mut mock_db = CacheDB::new(EmptyDB::default());
         mock_db.insert_account_info(addr, AccountInfo::default());
 
         let mut evm_context = EvmContext::new(mock_db);
-        let mut call_inputs = create_mock_call_inputs(addr, &SET_BLOCK_SELECTOR);
+        let mut input = BytesMut::from(selector);
+        input.extend_from_slice(args);
+        let mut call_inputs = create_mock_call_inputs(addr, Bytes::from(input));
 
         let mut set_block_inspector = TravelInspector::new(1, |_, _| Ok(vec![]));
         set_block_inspector.call(&mut evm_context, &mut call_inputs);
@@ -200,15 +203,47 @@ mod test {
     }
 
     #[test]
-    fn call_to_travel_contract() {
-        let inspector = inspector_call(TRAVEL_CONTRACT_ADDR);
-        assert!(inspector.location.is_some());
+    fn call_set_block() {
+        let block_num = 2137u64;
+        let inspector = inspector_call(
+            TRAVEL_CONTRACT_ADDR,
+            &SET_BLOCK_SELECTOR,
+            &U256::from(block_num).to_be_bytes::<32>(),
+        );
+        assert!(inspector
+            .location
+            .is_some_and(|loc| loc.block_number == block_num));
+    }
+
+    #[test]
+    fn call_set_chain() {
+        let chain_id = 1337u64;
+        let block_num = 2137u64;
+        let mut args = BytesMut::with_capacity(64);
+        args.extend_from_slice(&U256::from(chain_id).to_be_bytes::<32>());
+        args.extend_from_slice(&U256::from(block_num).to_be_bytes::<32>());
+        let inspector = inspector_call(TRAVEL_CONTRACT_ADDR, &SET_CHAIN_SELECTOR, &args);
+        assert!(inspector
+            .location
+            .is_some_and(|loc| loc.block_number == block_num && loc.chain_id == chain_id));
+    }
+
+    #[test]
+    #[should_panic]
+    fn call_invalid_selector() {
+        inspector_call(TRAVEL_CONTRACT_ADDR, &[1u8, 2u8, 3u8, 4u8], &[]);
+    }
+
+    #[test]
+    #[should_panic]
+    fn call_missing_args() {
+        inspector_call(TRAVEL_CONTRACT_ADDR, &SET_BLOCK_SELECTOR, &[]);
     }
 
     #[test]
     fn call_to_other_contract() {
         let other_contract = address!("0000000000000000000000000000000000000000");
-        let inspector = inspector_call(other_contract);
+        let inspector = inspector_call(other_contract, &[], &[]);
         assert!(inspector.location.is_none());
     }
 
