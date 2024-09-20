@@ -20,7 +20,10 @@ cd ${VLAYER_HOME}/packages/vlayer/sdk && bun install
 EXAMPLES_REQUIRING_ALCHEMY=("simple_time_travel" "simple_teleport")
 
 # check if ALCHEMY_API_KEY is set in GitHub actions; running in GH is detected by checking RUNNER_OS env var
-test -n "${RUNNER_OS:-}" && test -z "${ALCHEMY_API_KEY:-}" && { echo "ALCHEMY_API_KEY must be set in GitHub actions. Exiting."; exit 1; }
+if [[  -n "${RUNNER_OS:-}" ]] && [[ -z "${ALCHEMY_API_KEY:-}" ]] ;then 
+  echo "ALCHEMY_API_KEY must be set in GitHub actions. Exiting." >&2
+  exit 1
+fi
 
 for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ; do
 
