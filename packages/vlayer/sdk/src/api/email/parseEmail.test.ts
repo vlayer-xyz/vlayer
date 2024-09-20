@@ -1,7 +1,7 @@
 import assert from "node:assert";
 import { describe, expect, test } from "vitest";
 import { getDkimSigners, parseEmail } from "./parseEmail.ts";
-import { HeaderValue, StructuredHeader } from "mailparser";
+import { StructuredHeader } from "mailparser";
 
 const emailHeaders = `From: "John Doe" <john@d.oe>
 To: "Jane Doe" <jane@d.oe>
