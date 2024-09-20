@@ -29,7 +29,7 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
 
   (
     example_name=$(basename "${example}")
-    if [[ " ${EXAMPLES_REQUIRING_ALCHEMY[@]} " =~ " ${example_name} " ]] && [[ -z "${ALCHEMY_API_KEY:-}" ]]; then
+    if [[ "${EXAMPLES_REQUIRING_ALCHEMY[@]}" =~ "${example_name}" ]] && [[ -z "${ALCHEMY_API_KEY:-}" ]]; then
       continue
     fi
 
