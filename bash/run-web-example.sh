@@ -23,6 +23,12 @@ function run_browser_extension {
     bun run dev 
 }
 
+function install_deps {
+    cd ${VLAYER_HOME}/packages && bun install
+    cd ${VLAYER_HOME}/examples/web_proof/vlayer && bun install
+}
+
+install_deps
 run_services
 deploy_contracts
 run_web_app
