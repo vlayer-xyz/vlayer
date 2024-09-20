@@ -18,11 +18,11 @@ contract EmailProverTest is VTest {
 
     function test_decodesEmail() public {
         EmailProofLibWrapper wrapper = new EmailProofLibWrapper();
-        string memory mime = "From: vitalik@gmail.com\nDate: Thu, 15 Aug 2019 14:54:37 +0900\n\nTHIS IS BODY";
+        string memory mime = vm.readFile("./testdata/test_email.txt");
         MimeEmail memory email = MimeEmail(mime);
         callProver();
         VerifiedEmail memory verifiedEmail = wrapper.verify(email);
-        assertEq(verifiedEmail.from, "vitalik@gmail.com");
-        assertEq(verifiedEmail.body, "THIS IS BODY");
+        assertEq(verifiedEmail.from, "Joe SixPack <joe@football.example.com>");
+        assertEq(verifiedEmail.body, "Hi.\r\n\r\nWe lost the game. Are you hungry yet?\r\n\r\nJoe.\r\n");
     }
 }

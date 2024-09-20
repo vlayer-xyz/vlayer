@@ -16,63 +16,66 @@
 The Ethereum ecosystem is fragmented, consisting of various EVM chains such as Arbitrum, Optimism, Base, and many more. Developing applications that interact with multiple chains used to be challenging, but Teleport makes it easy.
 
 ## Teleporting betweens chains
-`setChainId(uint chainId, uint blockNo)` function, available in Prover contracts, allows to switch the context of execution to another chain (teleport).  It takes two arguments:
+`setChain(uint chainId, uint blockNo)` function, available in Prover contracts, allows to switch the context of execution to another chain (teleport).  It takes two arguments:
 * `chainId`, which specifies the chain in the context of which the next function call will be executed
 * `blockNo`, which is the block number of the given chain
 
 ## Example 
 
-The example below ilustrates checking NFT balances on two different chains:
+The example below shows how to check USDC balances across three different chains:
 
 ```solidity
-contract NftOwnership is Prover {
+contract CrossChainBalance is Prover {
+    struct Erc20Token {
+      address addr;
+      uint256 chainId;
+      uint256 blockNumber;
+    }
+    Erc20Token[] tokens = new Erc20Token[](3);
 
-  function check_byac_ownership()  {
-    require(
-      IERC721(BYAC_NFT_ADDR).balanceOf(msg.sender) > 0, "not owning any BYAC"
-    );
-  }
+    constructor() {
+        // Ethereum mainnet USDC
+        tokens[0] = Erc20Token(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48, 1, 20683110); 
+        // Base USDC
+        tokens[1] = Erc20Token(0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913, 8453, 19367633); 
+        // Arbitrum USDC
+        tokens[2] = Erc20Token(0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85, 10, 124962954); 
+    }
 
-  function check_sandbox_ownership() {
-    require(
-      IERC721(SANDBOX_NFT_ADDR).balanceOf(msg.sender) > 0, "not owning any Sandbox"
-    );
-  }
+    function balanceOf(address _owner) public returns (address, uint256) {
+        uint256 balance = 0;
 
-  function main() public {
-    setChainId(1, 12_000_000);  
-    // function call below will be teleported to Ethereum, block 12,000,000
-    check_byac_ownership() // checks balanceOf at Ethereum
+        for (uint256 i = 0; i < tokens.length; i++) {
+            setChain(tokens[i].chainId, tokens[i].blockNumber);
+            balance += IERC20(tokens[i].addr).balanceOf(_owner);
+        }
 
-    setChainId(42161, 9_000_000); 
-    // function call below will be teleported to Arbitrum, block 9,000,000
-    check_sandbox_ownership() // checks balanceOf at Arbitrum
-  }
+        return (_owner_, balance);
+    }
 }
 ```
 
+First, the call to `setChain(1, 20683110)` sets the chain to Ethereum mainnet (chainId = 1). Then, the ERC20 `balanceOf` function retrieves the USDC balance of `_owner` at block 20683110.
 
-First, call to `setChainId(1, 12_000_000)` configures the desired chain to the Ethereum mainnet (`chainId = 1`). Then, `check_byac_ownership` function ensures `msg.sender` owns of one of Bored Ape Yacht Club NFT on the Ethereum Mainnet at `12,000,000` block. In case caller doesn't have balance of specified NFT, contract would abort execution and throw error (thanks to `require()` check).
+Next, `setChain(8453, 19367633)` switches the context to the Base chain. The `balanceOf` function then checks the balance at block 19367633, but this time on the Base chain.
 
-Next call `setChainId(42161, 9_000_000)` switches the context to the Arbitrum chain. Then the `check_sandbox_ownership` function checks the ownership of NFT in block `9,000,000`, but this time on a different chain - Arbitrum.
-
-Currently, supported chains are Ethereum Sepolia and Optimism testnet.
+Subsequent calls are handled by a for loop, which switches the context to the specified chains and block numbers accordingly.
 
 > 💡 **Try it Now**
 > 
 > To run the above example on your computer, type the following command in your terminal:
 > 
 > ```bash
-> vlayer init --template teleport_example
+> vlayer init --template simple_teleport
 > ```
 > 
-> This command will download all necessary artifacts to your project.
+> This command will download all the necessary artefacts into your current directory (which must be empty). Make sure you have [Bun](https://bun.sh/) and [Foundry](https://book.getfoundry.sh/getting-started/installation) installed on your system.
 
 ## Finality considerations
-Finality, in the context of blockchains, is a point at which a transaction or block is fully confirmed and irreversible. When using vlayer `setChainId` teleports, chain finality is an important factor to consider.
+Finality, in the context of blockchains, is a point at which a transaction or block is fully confirmed and irreversible. When using vlayer `setChain` teleports, chain finality is an important factor to consider.
 
 One should be aware that different chains may have different finality thresholds. For example, Ethereum Mainnet blocks are final after no more than about 12 minutes.
 
-In the case of L2 chains, things are a bit more complicated. For example in case of optimistic rollup, like Optimism and Arbitrum, after L2 blocks are submitted to L1, there's a challenge period (often 7 days). If there is no evidence of an invalid state transistion during this period, the L2 block is finally considered as final.
+In the case of L2 chains, things are a bit more complicated. For example in case of optimistic rollup, like Optimism and Arbitrum, after L2 blocks are submitted to L1, there's a challenge period (often 7 days). If there is no evidence of an invalid state transistion during this period, the L2 block is considered final.
 
 Now consider teleporting to blocks that are not yet final in the destination chain. This can lead to situations where we are proving things that can be rolled back. It is important to include this risk in a protocol. The simplest way is to only teleport to blocks that are final and cannot be reorganized.

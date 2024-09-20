@@ -5,7 +5,7 @@ set -ueo pipefail
 VLAYER_HOME=$(git rev-parse --show-toplevel)
 
 function run_services {
-    source ${VLAYER_HOME}/bash/run-services.sh &
+    source ${VLAYER_HOME}/bash/run-services.sh 
 }
 
 function deploy_contracts {
