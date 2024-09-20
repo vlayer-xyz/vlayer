@@ -19,23 +19,24 @@ pub fn parse_address_field(
     field_name: &str,
     address: String,
 ) -> Result<Address, FieldValidationError> {
-    address.parse().map_err(alloy_hex_error_to_standard_hex_error).map_err(|error| {
-        FieldValidationError::InvalidHex {
+    address
+        .parse()
+        .map_err(alloy_hex_error_to_standard_hex_error)
+        .map_err(|error| FieldValidationError::InvalidHex {
             field: field_name.to_string(),
             value: address,
             error,
-        }
-    })
+        })
 }
 
 pub fn parse_hash_field(field_name: &str, hash: String) -> Result<BlockHash, FieldValidationError> {
-    hash.parse().map_err(alloy_hex_error_to_standard_hex_error).map_err(|error| {
-        FieldValidationError::InvalidHex {
+    hash.parse()
+        .map_err(alloy_hex_error_to_standard_hex_error)
+        .map_err(|error| FieldValidationError::InvalidHex {
             field: field_name.to_string(),
             value: hash,
             error,
-        }
-    })
+        })
 }
 
 pub fn parse_hex_field(field_name: &str, hex: String) -> Result<Vec<u8>, FieldValidationError> {

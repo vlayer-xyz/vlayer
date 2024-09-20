@@ -64,7 +64,9 @@ mod tests {
         };
         let trie = MerkleTrie::default();
         assert_eq!(
-            v_chain(config.clone(), trie, empty_block_hashes).await.unwrap_err(),
+            v_chain(config.clone(), trie, empty_block_hashes)
+                .await
+                .unwrap_err(),
             AppError::NoBlockNumbers
         );
     }

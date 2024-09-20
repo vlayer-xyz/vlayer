@@ -98,7 +98,11 @@ pub fn prove_storage(
         .zip(proofs)
         .map(|(key, proof)| StorageProof {
             key: *key,
-            value: storage.get(&(*key).into()).cloned().unwrap_or_default().present_value,
+            value: storage
+                .get(&(*key).into())
+                .cloned()
+                .unwrap_or_default()
+                .present_value,
             proof,
         })
         .collect()
@@ -152,7 +156,10 @@ mod tests {
         let address = address!("5615deb798bb3e4dfa0139dfa1b3d433cc23b72f");
         let proofs = account_proof(address, &evm_state);
         let mpt = MerkleTrie::from_rlp_nodes(proofs).unwrap();
-        let decoded_account = mpt.get_rlp::<StateAccount>(keccak256(address)).unwrap().unwrap();
+        let decoded_account = mpt
+            .get_rlp::<StateAccount>(keccak256(address))
+            .unwrap()
+            .unwrap();
         let expected_account = StateAccount {
             nonce: evm_state.get(&address).unwrap().info.nonce,
             balance: evm_state.get(&address).unwrap().info.balance,

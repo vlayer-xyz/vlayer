@@ -60,5 +60,9 @@ async fn setup_client(
 async fn deploy_test_contract(
     client: Arc<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>>,
 ) -> ExampleProver<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>> {
-    ExampleProver::deploy(client, ()).unwrap().send().await.unwrap()
+    ExampleProver::deploy(client, ())
+        .unwrap()
+        .send()
+        .await
+        .unwrap()
 }

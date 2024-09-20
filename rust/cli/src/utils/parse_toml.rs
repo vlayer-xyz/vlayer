@@ -13,7 +13,11 @@ pub(crate) fn get_src_from_str(contents: impl AsRef<str>) -> Result<String, CLIE
 }
 
 fn get_src_from_toml(config: &toml::Table) -> Option<String> {
-    let default_src = config.get("profile")?.get("default")?.get("src")?.as_str()?;
+    let default_src = config
+        .get("profile")?
+        .get("default")?
+        .get("src")?
+        .as_str()?;
     Some(default_src.to_string())
 }
 

@@ -9,7 +9,11 @@ impl Node {
             Node::Leaf(..) => 1,
             Node::Extension(_, child) => 1 + child.size(),
             Node::Branch(children, _) => {
-                1 + children.iter().filter_map(Option::as_deref).map(Node::size).sum::<usize>()
+                1 + children
+                    .iter()
+                    .filter_map(Option::as_deref)
+                    .map(Node::size)
+                    .sum::<usize>()
             }
         }
     }

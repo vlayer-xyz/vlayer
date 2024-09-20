@@ -25,7 +25,8 @@ where
     }
 
     pub(crate) fn get(&self, chain_id: ChainId) -> Result<Rc<P>, HostError> {
-        self.cache.try_get_or_insert(chain_id, || self.factory.create(chain_id))
+        self.cache
+            .try_get_or_insert(chain_id, || self.factory.create(chain_id))
     }
 }
 

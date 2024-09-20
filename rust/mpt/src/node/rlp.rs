@@ -94,8 +94,9 @@ impl Node {
                     }
                 }
 
-                payload_length +=
-                    value.as_ref().map_or(1 /* EMPTY_STRING_CODE */, |v| v.len());
+                payload_length += value
+                    .as_ref()
+                    .map_or(1 /* EMPTY_STRING_CODE */, |v| v.len());
 
                 let mut out = encoded_header(true, payload_length);
                 child_refs.iter().for_each(|child| child.encode(&mut out));

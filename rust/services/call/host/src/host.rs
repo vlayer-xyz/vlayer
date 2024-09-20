@@ -124,7 +124,9 @@ fn provably_execute(
     env: ExecutorEnv,
     guest_elf: &[u8],
 ) -> Result<(Vec<u8>, Vec<u8>), HostError> {
-    let result = prover.prove(env, guest_elf).map_err(|err| HostError::Prover(err.to_string()))?;
+    let result = prover
+        .prove(env, guest_elf)
+        .map_err(|err| HostError::Prover(err.to_string()))?;
 
     let seal: Seal = EncodableReceipt::from(result.receipt.clone()).try_into()?;
 
@@ -169,8 +171,9 @@ mod test {
 
     #[test]
     fn try_new_invalid_rpc_url() -> anyhow::Result<()> {
-        let rpc_urls =
-            [(TEST_CHAIN_ID_1, "http://localhost:123/".to_string())].into_iter().collect();
+        let rpc_urls = [(TEST_CHAIN_ID_1, "http://localhost:123/".to_string())]
+            .into_iter()
+            .collect();
         let config = HostConfig {
             rpc_urls,
             start_chain_id: TEST_CHAIN_ID_1,

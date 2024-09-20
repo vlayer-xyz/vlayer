@@ -67,10 +67,14 @@ impl<P: BlockingProvider> BlockingProvider for CachedProvider<P> {
         address: Address,
         block: BlockNumber,
     ) -> Result<TxNumber, Self::Error> {
-        match self.cache.borrow_mut().transaction_count.entry(AccountQuery {
-            block_no: block,
-            address,
-        }) {
+        match self
+            .cache
+            .borrow_mut()
+            .transaction_count
+            .entry(AccountQuery {
+                block_no: block,
+                address,
+            }) {
             Entry::Occupied(entry) => Ok(*entry.get()),
             Entry::Vacant(entry) => {
                 let count = self.inner.get_transaction_count(address, block)?;

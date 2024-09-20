@@ -71,8 +71,10 @@ impl Serialize for Box<dyn EvmBlockHeader> {
     where
         S: serde::Serializer,
     {
-        let block_header: BlockHeader =
-            self.as_ref().try_into().map_err(serde::ser::Error::custom)?;
+        let block_header: BlockHeader = self
+            .as_ref()
+            .try_into()
+            .map_err(serde::ser::Error::custom)?;
         block_header.serialize(serializer)
     }
 }
@@ -260,8 +262,11 @@ mod serialize_and_deserialize {
         let boxed_header: Box<dyn EvmBlockHeader> = Box::new(ETH_BLOCK_HEADER.clone());
         let serialized = to_string(&boxed_header)?;
         let deserialized: Box<dyn EvmBlockHeader> = from_str(&serialized)?;
-        let deserialized_eth_header =
-            deserialized.as_ref().as_any().downcast_ref::<EthBlockHeader>().unwrap();
+        let deserialized_eth_header = deserialized
+            .as_ref()
+            .as_any()
+            .downcast_ref::<EthBlockHeader>()
+            .unwrap();
         assert_eq!(deserialized_eth_header, &EthBlockHeader::default());
 
         Ok(())

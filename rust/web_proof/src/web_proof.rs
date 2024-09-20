@@ -69,7 +69,9 @@ fn serialize_public_key_to_pem_string<S>(key: &PublicKey, serializer: S) -> Resu
 where
     S: Serializer,
 {
-    let key_pem = key.to_public_key_pem(LineEnding::LF).map_err(serde::ser::Error::custom)?;
+    let key_pem = key
+        .to_public_key_pem(LineEnding::LF)
+        .map_err(serde::ser::Error::custom)?;
     serializer.serialize_str(&key_pem)
 }
 

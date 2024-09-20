@@ -47,7 +47,8 @@ where
     }
 
     pub fn get(&self, location: ExecutionLocation) -> anyhow::Result<Rc<EvmEnv<D>>> {
-        self.cache.try_get_or_insert(location, || self.factory.create(location))
+        self.cache
+            .try_get_or_insert(location, || self.factory.create(location))
     }
 
     pub fn into_inner(self) -> HashMap<ExecutionLocation, Rc<EvmEnv<D>>> {
