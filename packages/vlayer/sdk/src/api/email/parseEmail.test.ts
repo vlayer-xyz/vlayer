@@ -1,6 +1,7 @@
 import assert from "node:assert";
 import { describe, expect, test } from "vitest";
 import { getDkimSigners, parseEmail } from "./parseEmail.ts";
+import { HeaderValue, StructuredHeader } from "mailparser";
 
 const emailHeaders = `From: "John Doe" <john@d.oe>
 To: "Jane Doe" <jane@d.oe>
@@ -37,7 +38,9 @@ describe("parseEmail", () => {
     const email = await parseEmail(
       `${emailHeaders}${dkimHeader}\n${dkimHeader2}\n\n${body}`,
     );
-    const dkim: any = email.headers.get("dkim-signature")!;
+    const dkim = email.headers.get(
+      "dkim-signature",
+    )! as unknown as StructuredHeader[];
     expect(dkim).toHaveLength(2);
     expect(dkim[0].params.s).toBe("selector1");
     expect(dkim[1].params.s).toBe("selector2");
