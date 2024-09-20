@@ -49,9 +49,8 @@ impl Encodable for NodeRef {
 
         match self {
             NodeRef::Empty => 1,
-            NodeRef::Digest(_) => DIGEST_LENGTH,
+            NodeRef::Digest(_) | NodeRef::Node(_) => DIGEST_LENGTH,
             NodeRef::InlineNode(rlp) => rlp.len(),
-            NodeRef::Node(_) => DIGEST_LENGTH,
         }
     }
 }
@@ -101,7 +100,7 @@ mod encodable {
         let rlp = vec![0x0; 32];
         let hash = keccak256(&rlp);
         let mut out = Vec::new();
-        let node = NodeRef::Node(rlp.clone());
+        let node = NodeRef::Node(rlp);
         node.encode(&mut out);
 
         assert_eq!(node.length(), 33);

@@ -214,10 +214,7 @@ mod deserialize {
         let deserialized_parent_hash =
             hex::encode(deserialized_eth_header.parent_hash.as_ref() as &[u8]);
 
-        assert_eq!(
-            deserialized_parent_hash,
-            expected_parent_hash.trim_start_matches("0x")
-        );
+        assert_eq!(deserialized_parent_hash, expected_parent_hash.trim_start_matches("0x"));
 
         Ok(())
     }
@@ -230,10 +227,7 @@ mod deserialize {
 
         if let Err(err) = result {
             let err_msg = err.to_string();
-            assert_eq!(
-                err_msg,
-                "invalid type: null, expected struct EthBlockHeader"
-            );
+            assert_eq!(err_msg, "invalid type: null, expected struct EthBlockHeader");
         } else {
             panic!("Expected serialization to fail for unsupported type");
         }

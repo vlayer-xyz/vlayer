@@ -89,9 +89,9 @@ where
         block: BlockNumber,
     ) -> Result<alloy_primitives::U256, Self::Error> {
         let address = to_ethers_h160(address);
-        Ok(from_ethers_u256(self.block_on(
-            self.client.get_balance(address, Some(block.into())),
-        )?))
+        Ok(from_ethers_u256(
+            self.block_on(self.client.get_balance(address, Some(block.into())))?,
+        ))
     }
 
     fn get_code(
@@ -100,9 +100,9 @@ where
         block: BlockNumber,
     ) -> Result<alloy_primitives::Bytes, Self::Error> {
         let address = to_ethers_h160(address);
-        Ok(from_ethers_bytes(self.block_on(
-            self.client.get_code(address, Some(block.into())),
-        )?))
+        Ok(from_ethers_bytes(
+            self.block_on(self.client.get_code(address, Some(block.into())))?,
+        ))
     }
 
     fn get_storage_at(
@@ -179,8 +179,8 @@ fn to_eth_block_header<T>(block: Block<T>) -> Result<EthBlockHeader, String> {
                 .ok_or("base_fee_per_gas is missing")?,
         ),
         withdrawals_root: block.withdrawals_root.map(from_ethers_h256),
-        blob_gas_used: block.blob_gas_used.map(|x| x.try_into()).transpose()?,
-        excess_blob_gas: block.excess_blob_gas.map(|x| x.try_into()).transpose()?,
+        blob_gas_used: block.blob_gas_used.map(TryInto::try_into).transpose()?,
+        excess_blob_gas: block.excess_blob_gas.map(TryInto::try_into).transpose()?,
         parent_beacon_block_root: block.parent_beacon_block_root.map(from_ethers_h256),
     })
 }

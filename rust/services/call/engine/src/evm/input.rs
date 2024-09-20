@@ -20,7 +20,7 @@ pub struct EvmInput {
 
 impl EvmInput {
     pub fn print_sizes(&self) {
-        let total_storage_size: usize = self.storage_tries.iter().map(|t| t.size()).sum();
+        let total_storage_size: usize = self.storage_tries.iter().map(MerkleTrie::size).sum();
 
         debug!("state size: {}", self.state_trie.size());
         debug!("storage tries: {}", self.storage_tries.len());

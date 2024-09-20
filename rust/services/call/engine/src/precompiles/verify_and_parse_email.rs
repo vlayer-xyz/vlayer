@@ -11,17 +11,9 @@ const VERIFY_EMAIL_BASE: u64 = 10;
 const VERIFY_EMAIL_PER_WORD: u64 = 1;
 
 fn verify_and_parse_run(input: &Bytes, gas_limit: u64) -> PrecompileResult {
-    let gas_used = gas_used(
-        input.len(),
-        VERIFY_EMAIL_BASE,
-        VERIFY_EMAIL_PER_WORD,
-        gas_limit,
-    )?;
+    let gas_used = gas_used(input.len(), VERIFY_EMAIL_BASE, VERIFY_EMAIL_PER_WORD, gas_limit)?;
 
     let parsed_email = email_proof::parse_and_verify(input).map_err(map_to_fatal)?;
 
-    Ok(PrecompileOutput::new(
-        gas_used,
-        parsed_email.abi_encode().into(),
-    ))
+    Ok(PrecompileOutput::new(gas_used, parsed_email.abi_encode().into()))
 }

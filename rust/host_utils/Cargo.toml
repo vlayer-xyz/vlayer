@@ -6,3 +6,6 @@ edition = "2021"
 [dependencies]
 risc0-zkvm = { workspace = true }
 anyhow = { workspace = true }
+
+[lints]
+workspace = true

@@ -90,9 +90,7 @@ where
             ..
         } = result
         else {
-            return Err(EngineError::TransactError(format_failed_call_result(
-                result,
-            )));
+            return Err(EngineError::TransactError(format_failed_call_result(result)));
         };
         Ok(output.into_data().into())
     }

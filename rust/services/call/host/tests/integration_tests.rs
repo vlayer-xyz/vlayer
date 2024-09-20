@@ -21,14 +21,8 @@ const LATEST_BLOCK: BlockTag = BlockTag::Latest;
 
 fn create_test_provider_factory(test_name: &str) -> FileProviderFactory {
     let rpc_file_cache: HashMap<_, _> = HashMap::from([
-        (
-            Chain::mainnet().id(),
-            format!("testdata/mainnet_{test_name}_rpc_cache.json"),
-        ),
-        (
-            Chain::sepolia().id(),
-            format!("testdata/sepolia_{test_name}_rpc_cache.json"),
-        ),
+        (Chain::mainnet().id(), format!("testdata/mainnet_{test_name}_rpc_cache.json")),
+        (Chain::sepolia().id(), format!("testdata/sepolia_{test_name}_rpc_cache.json")),
     ]);
 
     FileProviderFactory::new(rpc_file_cache)
@@ -36,14 +30,8 @@ fn create_test_provider_factory(test_name: &str) -> FileProviderFactory {
 
 fn create_recording_provider_factory(test_name: &str) -> CachedProviderFactory {
     let rpc_file_cache: HashMap<_, _> = HashMap::from([
-        (
-            Chain::mainnet().id(),
-            format!("testdata/mainnet_{test_name}_rpc_cache.json"),
-        ),
-        (
-            Chain::sepolia().id(),
-            format!("testdata/sepolia_{test_name}_rpc_cache.json"),
-        ),
+        (Chain::mainnet().id(), format!("testdata/mainnet_{test_name}_rpc_cache.json")),
+        (Chain::sepolia().id(), format!("testdata/sepolia_{test_name}_rpc_cache.json")),
     ]);
     dotenv().ok();
     let alchemy_key = env::var("ALCHEMY_KEY").expect(
@@ -51,17 +39,15 @@ fn create_recording_provider_factory(test_name: &str) -> CachedProviderFactory {
     );
     let mainnet_url = format!("https://eth-mainnet.g.alchemy.com/v2/{alchemy_key}");
     let sepolia_url = format!("https://eth-sepolia.g.alchemy.com/v2/{alchemy_key}");
-    let rpc_urls: HashMap<_, _> = HashMap::from([
-        (Chain::mainnet().id(), mainnet_url),
-        (Chain::sepolia().id(), sepolia_url),
-    ]);
+    let rpc_urls: HashMap<_, _> =
+        HashMap::from([(Chain::mainnet().id(), mainnet_url), (Chain::sepolia().id(), sepolia_url)]);
 
     CachedProviderFactory::new(rpc_urls, rpc_file_cache)
 }
 
 fn create_host<P>(
     provider_factory: impl ProviderFactory<P> + 'static,
-    config: HostConfig,
+    config: &HostConfig,
     block_number: BlockTag,
 ) -> Result<Host<P>, HostError>
 where
@@ -74,10 +60,7 @@ where
             config,
             block_no.as_u64(),
         ),
-        _ => panic!(
-            "Only Latest and specific block numbers are supported, got {:?}",
-            block_number
-        ),
+        _ => panic!("Only Latest and specific block numbers are supported, got {:?}", block_number),
     }
 }
 
@@ -97,11 +80,11 @@ where
 
     let raw_return_value = if UPDATE_SNAPSHOTS {
         let provider_factory = create_recording_provider_factory(test_name);
-        let host = create_host(provider_factory, config, block_number)?;
+        let host = create_host(provider_factory, &config, block_number)?;
         host.run(call)?.guest_output.evm_call_result
     } else {
         let provider_factory = create_test_provider_factory(test_name);
-        let host = create_host(provider_factory, config, block_number)?;
+        let host = create_host(provider_factory, &config, block_number)?;
         host.run(call)?.guest_output.evm_call_result
     };
     let return_value = C::abi_decode_returns(&raw_return_value, false)?;

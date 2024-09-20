@@ -91,10 +91,7 @@ mod tests {
         };
 
         let body = transcript.parse_body();
-        assert_eq!(
-            body.unwrap().to_string(),
-            REDACTED_RESPONSE_BODY.to_string()
-        );
+        assert_eq!(body.unwrap(), REDACTED_RESPONSE_BODY.to_string());
     }
 
     #[test]
@@ -103,10 +100,7 @@ mod tests {
             transcript: RedactedTranscript::new(0, vec![TranscriptSlice::new(0..0, vec![])]),
         };
 
-        assert!(matches!(
-            transcript.parse_body(),
-            Err(ParsingError::Partial)
-        ));
+        assert!(matches!(transcript.parse_body(), Err(ParsingError::Partial)));
     }
 
     #[test]
@@ -144,7 +138,7 @@ mod tests {
         };
 
         let body = transcript.parse_body();
-        assert_eq!(body.unwrap().to_string(), "".to_string());
+        assert_eq!(body.unwrap(), "".to_string());
     }
 
     #[test]

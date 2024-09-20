@@ -20,7 +20,7 @@ pub struct HostOutput {
 }
 
 impl Host {
-    pub fn new(config: HostConfig) -> Self {
+    pub fn new(config: &HostConfig) -> Self {
         let prover = Prover::new(config.proof_mode);
 
         Host { prover }

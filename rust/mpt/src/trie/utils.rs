@@ -20,7 +20,7 @@ pub(crate) fn resolve_trie(root: Node, nodes_by_hash: &HashMap<B256, Node>) -> N
         }
         Node::Branch(mut children, value) => {
             // iterate over the children in place, resolving each child node recursively.
-            for child in children.iter_mut() {
+            for child in &mut children {
                 if let Some(node) = child.take() {
                     *child = Some(Box::new(resolve_trie(*node, nodes_by_hash)));
                 }
@@ -53,13 +53,11 @@ mod parse_node {
     #[test]
     fn non_inline() -> anyhow::Result<()> {
         let nibbles = KeyNibbles::unpack(B256::ZERO);
-        let node = Node::Leaf(nibbles.clone(), [0].into());
+        let node = Node::Leaf(nibbles, [0].into());
         let (hash, parsed_node) = parse_node(node.rlp_encoded())?;
         assert_eq!(
             hash,
-            Some(b256!(
-                "ebcd1aff3f48f44a89c8bceb54a7e73c44edda96852b9debc4447b5ac9be19a6"
-            ))
+            Some(b256!("ebcd1aff3f48f44a89c8bceb54a7e73c44edda96852b9debc4447b5ac9be19a6"))
         );
         assert_eq!(parsed_node, node);
         Ok(())
@@ -116,7 +114,7 @@ mod resolve_trie {
         let null_node = Node::Null;
         let digest = keccak256(null_node.rlp_encoded());
         let node = Node::Digest(digest);
-        let nodes_by_hash = HashMap::from_iter([(digest, null_node.clone())]);
+        let nodes_by_hash = HashMap::from_iter([(digest, null_node)]);
         let resolved_node = resolve_trie(node, &nodes_by_hash);
         assert_eq!(resolved_node, Node::Null);
     }
@@ -129,10 +127,7 @@ mod resolve_trie {
         let extension = Node::Extension(extension_nibbles.clone(), Box::new(Node::Digest(digest)));
         let nodes_by_hash = HashMap::from([(digest, leaf.clone())]);
         let resolved_node = resolve_trie(extension, &nodes_by_hash);
-        assert_eq!(
-            resolved_node,
-            Node::Extension(extension_nibbles, Box::new(leaf))
-        );
+        assert_eq!(resolved_node, Node::Extension(extension_nibbles, Box::new(leaf)));
     }
 
     #[test]

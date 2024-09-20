@@ -95,10 +95,7 @@ mod tests {
         let transcript = RequestTranscript {
             transcript: RedactedTranscript::new(0, vec![]),
         };
-        assert!(matches!(
-            transcript.parse_url(),
-            Err(ParsingError::NoPathInRequest)
-        ));
+        assert!(matches!(transcript.parse_url(), Err(ParsingError::NoPathInRequest)));
     }
 
     #[test]

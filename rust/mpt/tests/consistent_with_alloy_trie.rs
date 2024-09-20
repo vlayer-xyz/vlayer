@@ -13,10 +13,7 @@ fn root_match() -> anyhow::Result<()> {
     let leaves: BTreeMap<_, _> = (0..NUM_LEAVES)
         .map(|i| {
             let key = U256::from(i);
-            (
-                Nibbles::unpack(keccak256(key.to_be_bytes::<32>())),
-                alloy_rlp::encode(key),
-            )
+            (Nibbles::unpack(keccak256(key.to_be_bytes::<32>())), alloy_rlp::encode(key))
         })
         .collect();
 

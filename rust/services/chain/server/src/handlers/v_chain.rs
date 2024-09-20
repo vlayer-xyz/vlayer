@@ -32,7 +32,7 @@ pub async fn v_chain(
         rpc_urls: config.rpc_urls.clone(),
         proof_mode: config.proof_mode.into(),
     };
-    let host = Host::new(host_config);
+    let host = Host::new(&host_config);
     let HostOutput { receipt } = host.run(params.chain_id, &params.block_numbers, &merkle_trie)?;
     let proof =
         bincode::serialize(&receipt.inner).map_err(|err| AppError::Bincode(err.to_string()))?;

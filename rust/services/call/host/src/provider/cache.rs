@@ -26,10 +26,7 @@ impl<P: BlockingProvider> CachedProvider<P> {
         // Sanity checks.
         if let Some(parent) = cache_path.parent() {
             if !parent.exists() {
-                bail!(
-                    "Cache files directory '{}' does not exist.",
-                    parent.display()
-                );
+                bail!("Cache files directory '{}' does not exist.", parent.display());
             }
         }
         if cache_path.exists() {

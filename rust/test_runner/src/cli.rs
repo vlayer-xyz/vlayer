@@ -254,9 +254,7 @@ impl TestArgs {
     // MODIFICATION: Swap CHAIN_ID in evm_opts with TESTING_CHAIN_ID
     fn validate_chain_id(evm_opts: &mut EvmOpts) -> Result<()> {
         if evm_opts.env.chain_id.is_some() {
-            return Err(color_eyre::eyre::eyre!(
-                "cannot change chainId in vlayer tests"
-            ));
+            return Err(color_eyre::eyre::eyre!("cannot change chainId in vlayer tests"));
         }
 
         evm_opts.env.chain_id = Some(TEST_CHAIN_ID_1);
@@ -426,13 +424,13 @@ impl TestArgs {
         output: &ProjectCompileOutput,
     ) -> Result<TestOutcome> {
         if self.list {
-            return list(runner, filter, self.json);
+            return list(&runner, filter, self.json);
         }
 
         trace!(target: "forge::test", "running all tests");
 
         let num_filtered = runner.matching_test_functions(filter).count();
-        if (self.debug.is_some() || self.decode_internal.as_ref().map_or(false, |v| v.is_some()))
+        if (self.debug.is_some() || self.decode_internal.as_ref().map_or(false, Option::is_some))
             && num_filtered != 1
         {
             bail!(
@@ -460,7 +458,7 @@ impl TestArgs {
         let handle = tokio::task::spawn_blocking({
             let filter = filter.clone();
             // MODIFICATION: Replace runner.test with modified test function
-            move || test(runner, &filter, tx, show_progress)
+            move || test(runner, &filter, &tx, show_progress)
         });
 
         // Set up trace identifiers.
@@ -491,12 +489,9 @@ impl TestArgs {
         }
         let mut decoder = builder.build();
 
-        let mut gas_report = self.gas_report.then(|| {
-            GasReport::new(
-                config.gas_reports.clone(),
-                config.gas_reports_ignore.clone(),
-            )
-        });
+        let mut gas_report = self
+            .gas_report
+            .then(|| GasReport::new(config.gas_reports.clone(), config.gas_reports_ignore.clone()));
 
         let mut outcome = TestOutcome::empty(self.allow_failure);
 
@@ -512,7 +507,7 @@ impl TestArgs {
 
             // Print suite header.
             println!();
-            for warning in suite_result.warnings.iter() {
+            for warning in &suite_result.warnings {
                 eprintln!("Warning: {warning}");
             }
             if !tests.is_empty() {
@@ -591,7 +586,7 @@ impl TestArgs {
                         .analyze(result.traces.iter().map(|(_, arena)| arena), &decoder)
                         .await;
 
-                    for trace in result.gas_report_traces.iter() {
+                    for trace in &result.gas_report_traces {
                         decoder.clear_addresses();
 
                         // Re-execute setup and deployment traces to collect identities created in
@@ -682,10 +677,7 @@ impl Provider for TestArgs {
             .as_ref()
             .filter(|s| !s.trim().is_empty())
         {
-            dict.insert(
-                "etherscan_api_key".to_string(),
-                etherscan_api_key.to_string().into(),
-            );
+            dict.insert("etherscan_api_key".to_string(), etherscan_api_key.to_string().into());
         }
 
         if self.show_progress {
@@ -702,7 +694,7 @@ impl Provider for TestArgs {
 
 /// Lists all matching tests
 fn list(
-    runner: MultiContractRunner,
+    runner: &MultiContractRunner,
     filter: &ProjectPathsAwareFilter,
     json: bool,
 ) -> Result<TestOutcome> {
@@ -711,9 +703,9 @@ fn list(
     if json {
         println!("{}", serde_json::to_string(&results)?);
     } else {
-        for (file, contracts) in results.iter() {
+        for (file, contracts) in &results {
             println!("{file}");
-            for (contract, tests) in contracts.iter() {
+            for (contract, tests) in contracts {
                 println!("  {contract}");
                 println!("    {}\n", tests.join("\n    "));
             }
@@ -750,7 +742,7 @@ fn persist_run_failures(config: &Config, outcome: &TestOutcome) {
 fn test(
     mut runner: MultiContractRunner,
     filter: &dyn TestFilter,
-    tx: mpsc::Sender<(String, SuiteResult)>,
+    tx: &mpsc::Sender<(String, SuiteResult)>,
     _show_progress: bool,
 ) {
     let tokio_handle = tokio::runtime::Handle::current();

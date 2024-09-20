@@ -129,7 +129,7 @@ mod server_tests {
                                     "mode": 1,
                                 },
                                 "commitment": {
-                                    "functionSelector": function_selector(call_data),
+                                    "functionSelector": function_selector(&call_data),
                                     "proverContractAddress": helper.contract.address(),
                                 }
                             },
@@ -185,7 +185,7 @@ mod server_tests {
                                     "mode": 1,
                                 },
                                 "commitment": {
-                                    "functionSelector": function_selector(call_data),
+                                    "functionSelector": function_selector(&call_data),
                                     "proverContractAddress": helper.contract.address(),
                                 }
                             },

@@ -10,7 +10,7 @@ pub(crate) fn from_extension_and_entry_empty_common_prefix(
     };
     let entry = entry.into();
 
-    let branch = Node::branch_with_child_node(key, *child_node);
+    let branch = Node::branch_with_child_node(&key, *child_node);
     let updated_branch = branch.insert(&*entry.key, entry.value)?;
 
     Ok(updated_branch)

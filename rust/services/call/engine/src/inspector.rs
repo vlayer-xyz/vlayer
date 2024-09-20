@@ -97,7 +97,7 @@ impl<'a> TravelInspector<'a> {
             self.set_chain(chain_id, block_number);
         }
 
-        Some(create_encoded_return_outcome(true, inputs))
+        Some(create_encoded_return_outcome(&true, inputs))
     }
 }
 

@@ -61,40 +61,32 @@ mod tests {
 
         #[test]
         fn test_returns_err_if_fail() {
-            let verification_output = vec![
-                DkimOutput::pass(),
-                DkimOutput::fail(AuthError::MissingParameters),
-            ];
+            let verification_output =
+                vec![DkimOutput::pass(), DkimOutput::fail(AuthError::MissingParameters)];
             let result = assert_dkim_verified(verification_output);
             assert_eq!(result, Err(AuthError::MissingParameters));
         }
 
         #[test]
         fn test_returns_err_if_perm_error() {
-            let verification_output = vec![
-                DkimOutput::pass(),
-                DkimOutput::perm_err(AuthError::MissingParameters),
-            ];
+            let verification_output =
+                vec![DkimOutput::pass(), DkimOutput::perm_err(AuthError::MissingParameters)];
             let result = assert_dkim_verified(verification_output);
             assert_eq!(result, Err(AuthError::MissingParameters));
         }
 
         #[test]
         fn test_returns_err_if_temp_error() {
-            let verification_output = vec![
-                DkimOutput::pass(),
-                DkimOutput::temp_err(AuthError::MissingParameters),
-            ];
+            let verification_output =
+                vec![DkimOutput::pass(), DkimOutput::temp_err(AuthError::MissingParameters)];
             let result = assert_dkim_verified(verification_output);
             assert_eq!(result, Err(AuthError::MissingParameters));
         }
 
         #[test]
         fn test_returns_err_if_neutral() {
-            let verification_output = vec![
-                DkimOutput::pass(),
-                DkimOutput::neutral(AuthError::MissingParameters),
-            ];
+            let verification_output =
+                vec![DkimOutput::pass(), DkimOutput::neutral(AuthError::MissingParameters)];
             let result = assert_dkim_verified(verification_output);
             assert_eq!(result, Err(AuthError::MissingParameters));
         }

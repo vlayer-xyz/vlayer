@@ -29,7 +29,7 @@ pub struct Host<P: BlockingProvider> {
 }
 
 impl Host<EthersProvider<EthersClient>> {
-    pub fn try_new(config: HostConfig) -> Result<Self, HostError> {
+    pub fn try_new(config: &HostConfig) -> Result<Self, HostError> {
         let provider_factory = EthersProviderFactory::new(config.rpc_urls.clone());
         Host::try_new_with_provider_factory(provider_factory, config)
     }
@@ -53,7 +53,7 @@ where
 {
     pub fn try_new_with_provider_factory(
         provider_factory: impl ProviderFactory<P> + 'static,
-        config: HostConfig,
+        config: &HostConfig,
     ) -> Result<Self, HostError> {
         let providers = CachedMultiProvider::new(provider_factory);
         let block_number = get_block_number(&providers, config.start_chain_id)?;
@@ -70,7 +70,7 @@ where
 
     pub fn try_new_with_provider_factory_and_block_number(
         provider_factory: impl ProviderFactory<P> + 'static,
-        config: HostConfig,
+        config: &HostConfig,
         block_number: u64,
     ) -> Result<Self, HostError> {
         let providers = CachedMultiProvider::new(provider_factory);
@@ -179,7 +179,7 @@ mod test {
             start_chain_id: TEST_CHAIN_ID_1,
             proof_mode: ProofMode::Fake,
         };
-        let res = Host::try_new(config);
+        let res = Host::try_new(&config);
 
         assert!(matches!(
             res.map(|_| ()).unwrap_err(),

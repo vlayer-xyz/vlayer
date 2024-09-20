@@ -19,3 +19,6 @@ alloy-primitives = { workspace = true }
 
 [features]
 fixtures = []
+
+[lints]
+workspace = true

@@ -32,10 +32,7 @@ impl WebProof {
         session.verify_with_default_cert_verifier(self.notary_pub_key)?;
         let (sent, received) = substrings.verify(&session.header)?;
 
-        Ok((
-            RequestTranscript::new(sent),
-            ResponseTranscript::new(received),
-        ))
+        Ok((RequestTranscript::new(sent), ResponseTranscript::new(received)))
     }
 
     pub fn get_server_name(&self) -> String {
@@ -141,9 +138,6 @@ mod tests {
     #[test]
     fn success_get_notary_pub_key() {
         let proof = load_web_proof_fixture("./testdata/tls_proof.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
-        assert_eq!(
-            proof.get_notary_pub_key().unwrap(),
-            NOTARY_PUB_KEY_PEM_EXAMPLE
-        );
+        assert_eq!(proof.get_notary_pub_key().unwrap(), NOTARY_PUB_KEY_PEM_EXAMPLE);
     }
 }

@@ -8,3 +8,6 @@ risc0-build = { workspace = true }
 
 [package.metadata.risc0]
 methods = ["risc0_guest"]
+
+[lints]
+workspace = true

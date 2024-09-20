@@ -8,7 +8,7 @@ use call_engine::evm::input::{EvmInput, MultiEvmInput};
 use std::rc::Rc;
 
 fn into_input<P: BlockingProvider>(
-    db: ProofDb<P>,
+    db: &ProofDb<P>,
     header: Box<dyn EvmBlockHeader>,
 ) -> anyhow::Result<EvmInput> {
     let (state_trie, storage_tries) = db.prepare_state_storage_tries()?;
@@ -41,7 +41,7 @@ pub(crate) fn into_multi_input<P: BlockingProvider>(
                     Rc::strong_count(&rc)
                 )
             })?;
-            Ok((location, into_input(env.db, env.header)?))
+            Ok((location, into_input(&env.db, env.header)?))
         })
         .collect()
 }
