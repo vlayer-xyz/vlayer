@@ -12,7 +12,7 @@ ${VLAYER_HOME}/bash/build_ts_types.sh >/dev/null
 echo Running services...
 source ${VLAYER_HOME}/bash/run-services.sh
 
-echo Settingup sdk 
+echo Setting up SDK 
 cd ${VLAYER_HOME}/packages/vlayer/sdk && bun install
 
 for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ; do
