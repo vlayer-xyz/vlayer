@@ -3,7 +3,7 @@ import type { Address } from "viem";
 import { testHelpers, prove } from "@vlayer/sdk";
 import simpleTravelProver from "../out/SimpleTravelProver.sol/SimpleTravelProver";
 import simpleTravelVerifier from "../out/SimpleTravelVerifier.sol/SimpleTravel";
-import exampleNFT from "../out/ExampleNFT.sol/ExampleNFT";
+import whaleBadgeNFT from "../out/WhaleBadgeNFT.sol/WhaleBadgeNFT";
 
 const john = testHelpers.getTestAccount();
 
@@ -17,7 +17,10 @@ const deployProver = async () => {
 };
 
 const deployVerifier = async (prover: Address) => {
-  const rewardNFT: Address = await testHelpers.deployContract(exampleNFT, []);
+  const rewardNFT: Address = await testHelpers.deployContract(
+    whaleBadgeNFT,
+    [],
+  );
 
   const verifier: Address = await testHelpers.deployContract(
     simpleTravelVerifier,

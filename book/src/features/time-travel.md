@@ -38,17 +38,15 @@ contract AverageBalance is Prover {
     }
 
     function averageBalanceOf(address _owner) public returns (address, uint256) {
-        uint256 total = 0;
+        uint256 totalBalance = 0;
         uint256 iterations = 0;
 
         for (uint256 blockNo = startingBlock; blockNo <= endingBlock; blockNo += step) {
-            setBlock(blockNo);
-            total += token.balanceOf(_owner); // USDC balance in historic block
+            setChain(chainId, blockNo);
+            totalBalance += token.balanceOf(_owner); // USDC balance
             iterations += 1;
         }
-        uint256 average = total / iterations;
-
-        return (_owner, average);
+        return (_owner, totalBalance / iterations);
     }
 }
 ```
