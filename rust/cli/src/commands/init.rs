@@ -26,21 +26,25 @@ lazy_static! {
             name: String::from("@openzeppelin-contracts"),
             version: String::from("5.0.1"),
             url: None,
+            remapping: Some(String::from("openzeppelin-contracts=dependencies/@openzeppelin-contracts-5.0.1/")),
         },
         SoldeerDep {
             name: String::from("forge-std"),
             version: String::from("1.9.2"),
             url: None,
+            remapping: Some(String::from("forge-std/=dependencies/forge-std-1.9.2/src")),
         },
         SoldeerDep {
             name: String::from("risc0-ethereum"),
             version: String::from("1.0.0"),
             url: Some(String::from("https://github.com/vlayer-xyz/risc0-ethereum/releases/download/v1.0.0-soldeer-no-remappings/contracts.zip")),
+            remapping: None,
         },
         SoldeerDep {
             name: String::from("vlayer"),
             version: String::from("0.1.0"),
             url: Some(String::from(CONTRACTS_URL)),
+            remapping: None,
         }
     ];
 }
@@ -49,6 +53,7 @@ struct SoldeerDep {
     name: String,
     version: String,
     url: Option<String>,
+    remapping: Option<String>,
 }
 
 impl SoldeerDep {
@@ -91,6 +96,18 @@ impl SoldeerDep {
 fn install_dependencies() -> Result<(), CLIError> {
     for dep in DEPENDENCIES.iter() {
         dep.install()?;
+    }
+
+    Ok(())
+}
+
+fn add_remappings(foundry_root: &Path) -> Result<(), CLIError> {
+    let remappings_txt = foundry_root.join("remappings.txt");
+    let mut file = OpenOptions::new().append(true).open(remappings_txt)?;
+    for dep in DEPENDENCIES.iter() {
+        if let Some(remapping) = &dep.remapping {
+            writeln!(file, "{}", remapping)?;
+        }
     }
 
     Ok(())
@@ -148,7 +165,7 @@ pub(crate) async fn init_existing(cwd: PathBuf, template: TemplateOption) -> Res
     info!("Installing dependencies");
     install_dependencies()?;
     info!("Successfully installed all dependencies");
-    add_risc0_eth_remappings(&root_path)?;
+    add_remappings(&root_path)?;
 
     std::env::set_current_dir(&cwd)?;
 
@@ -193,17 +210,6 @@ async fn fetch_examples(
 
     copy_dir_to(&downloaded_scripts, scripts_dst)?;
     copy_dir_to(&downloaded_examples, examples_dst)?;
-
-    Ok(())
-}
-
-fn add_risc0_eth_remappings(foundry_root: &Path) -> std::io::Result<()> {
-    let remappings_txt = foundry_root.join("remappings.txt");
-    let suffix = "forge-std/=dependencies/forge-std-1.9.2/src\nopenzeppelin-contracts=dependencies/@openzeppelin-contracts-5.0.1/";
-
-    let mut file = OpenOptions::new().append(true).open(remappings_txt)?;
-
-    writeln!(file, "{}", suffix)?;
 
     Ok(())
 }
@@ -293,5 +299,23 @@ mod tests {
 
         assert!(&vlayer_dir.exists());
         assert_eq!(result.unwrap(), vlayer_dir);
+    }
+
+    #[test]
+    fn test_add_remappings() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let root_path = temp_dir.path().to_path_buf();
+        let remappings_txt = root_path.join("remappings.txt");
+        std::fs::write(&remappings_txt, "some initial remappings\n").unwrap();
+
+        add_remappings(&root_path).unwrap();
+
+        let remappings_txt = root_path.join("remappings.txt");
+        let contents = fs::read_to_string(remappings_txt).unwrap();
+
+        assert_eq!(
+            contents,
+            "some initial remappings\nopenzeppelin-contracts=dependencies/@openzeppelin-contracts-5.0.1/\nforge-std/=dependencies/forge-std-1.9.2/src\n"
+        );
     }
 }
