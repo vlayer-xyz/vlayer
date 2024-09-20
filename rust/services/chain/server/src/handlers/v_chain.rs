@@ -4,18 +4,12 @@ use alloy_primitives::Bytes;
 use mpt::MerkleTrie;
 use serde::{Deserialize, Serialize};
 
-use crate::{config::ServerConfig, error::AppError};
+use crate::{config::ServerConfig, error::AppError, storage::ChainProof};
 
 #[derive(Deserialize, Serialize)]
 pub struct Params {
     chain_id: u32,
     block_numbers: Vec<u32>,
-}
-
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
-pub struct ChainProof {
-    proof: Bytes,
-    nodes: Vec<Bytes>,
 }
 
 pub async fn v_chain(
@@ -27,10 +21,7 @@ pub async fn v_chain(
         return Err(AppError::NoBlockNumbers);
     };
 
-    Ok(ChainProof {
-        proof: Bytes::default(),
-        nodes: merkle_trie.to_rlp_nodes().map(Bytes::from).collect(),
-    })
+    Ok(ChainProof::new(Bytes::default(), merkle_trie.to_rlp_nodes().map(Bytes::from).collect()))
 }
 
 #[cfg(test)]
