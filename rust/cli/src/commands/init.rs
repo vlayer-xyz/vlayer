@@ -117,8 +117,8 @@ pub(crate) async fn init_existing(cwd: PathBuf, template: TemplateOption) -> Res
 impl SoldeerDep {
     pub fn install(&self) -> Result<(), CLIError> {
         let output = match self {
-            SoldeerDep::SoldeerRegistryDep { name, version } => install_dep(name, version)?,
-            SoldeerDep::UrlDep { name, version, url } => install_url_dep(name, version, url)?,
+            SoldeerDep::SoldeerRegistryDep { name, version } => Self::install_dep(name, version)?,
+            SoldeerDep::UrlDep { name, version, url } => Self::install_url_dep(name, version, url)?,
         };
 
         if !output.status.success() {
@@ -128,27 +128,27 @@ impl SoldeerDep {
 
         Ok(())
     }
-}
 
-fn install_dep(name: &String, version: &String) -> Result<Output, CLIError> {
-    let output = std::process::Command::new("forge")
-        .arg("soldeer")
-        .arg("install")
-        .arg(format!("{}~{}", name, version))
-        .output()?;
+    fn install_dep(name: &String, version: &String) -> Result<Output, CLIError> {
+        let output = std::process::Command::new("forge")
+            .arg("soldeer")
+            .arg("install")
+            .arg(format!("{}~{}", name, version))
+            .output()?;
 
-    Ok(output)
-}
+        Ok(output)
+    }
 
-fn install_url_dep(name: &String, version: &String, url: &String) -> Result<Output, CLIError> {
-    let output = std::process::Command::new("forge")
-        .arg("soldeer")
-        .arg("install")
-        .arg(format!("{}~{}", name, version))
-        .arg(url)
-        .output()?;
+    fn install_url_dep(name: &String, version: &String, url: &String) -> Result<Output, CLIError> {
+        let output = std::process::Command::new("forge")
+            .arg("soldeer")
+            .arg("install")
+            .arg(format!("{}~{}", name, version))
+            .arg(url)
+            .output()?;
 
-    Ok(output)
+        Ok(output)
+    }
 }
 
 fn install_dependencies() -> Result<(), CLIError> {
