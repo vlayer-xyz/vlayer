@@ -1,13 +1,10 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, sync::RwLock};
 use thiserror::Error;
 
 #[allow(unused)]
 pub trait KeyValueDB {
-    fn insert(
-        &mut self,
-        key: impl AsRef<[u8]>,
-        value: impl AsRef<[u8]>,
-    ) -> Result<(), KeyValueDBError>;
+    fn insert(&self, key: impl AsRef<[u8]>, value: impl AsRef<[u8]>)
+        -> Result<(), KeyValueDBError>;
     fn get(&self, key: impl AsRef<[u8]>) -> Option<Box<[u8]>>;
 }
 
@@ -18,34 +15,36 @@ pub enum KeyValueDBError {
 }
 
 pub struct InMemoryKeyValueDB {
-    store: HashMap<Box<[u8]>, Box<[u8]>>,
+    store: RwLock<HashMap<Box<[u8]>, Box<[u8]>>>,
 }
 
 impl InMemoryKeyValueDB {
     #[allow(unused)]
     pub fn new() -> Self {
         InMemoryKeyValueDB {
-            store: HashMap::new(),
+            store: RwLock::new(HashMap::new()),
         }
     }
 }
 
 impl KeyValueDB for InMemoryKeyValueDB {
     fn insert(
-        &mut self,
+        &self,
         key: impl AsRef<[u8]>,
         value: impl AsRef<[u8]>,
     ) -> Result<(), KeyValueDBError> {
-        let key = key.as_ref();
-        if self.store.contains_key(key) {
+        let key_ref = key.as_ref();
+        let mut store = self.store.write().unwrap();
+        if store.contains_key(key_ref) {
             return Err(KeyValueDBError::DuplicateKey);
         }
-        self.store.insert(key.into(), value.as_ref().into());
+        store.insert(key_ref.into(), value.as_ref().into());
         Ok(())
     }
 
     fn get(&self, key: impl AsRef<[u8]>) -> Option<Box<[u8]>> {
-        self.store.get(key.as_ref()).cloned()
+        let store = self.store.read().unwrap();
+        store.get(key.as_ref()).cloned()
     }
 }
 
@@ -55,7 +54,7 @@ mod tests {
 
     #[test]
     fn insert_and_get() -> anyhow::Result<()> {
-        let mut db = InMemoryKeyValueDB::new();
+        let db = InMemoryKeyValueDB::new();
 
         db.insert([0], [42])?;
 
@@ -66,7 +65,7 @@ mod tests {
 
     #[test]
     fn insert_duplicate_key() {
-        let mut db = InMemoryKeyValueDB::new();
+        let db = InMemoryKeyValueDB::new();
 
         db.insert([0], [42]).unwrap();
 

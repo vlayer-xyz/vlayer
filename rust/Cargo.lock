@@ -1906,6 +1906,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "chain_db"
+version = "0.1.0"
+dependencies = [
+ "alloy-primitives",
+ "anyhow",
+ "serde",
+ "thiserror",
+]
+
+[[package]]
 name = "chain_engine"
 version = "0.1.0"
 dependencies = [

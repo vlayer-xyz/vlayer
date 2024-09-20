@@ -1,6 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
+    "services/chain/db",
     "services/chain/host",
     "services/chain/guest",
     "services/chain/guest_wrapper",
