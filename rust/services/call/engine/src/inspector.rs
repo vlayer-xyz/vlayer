@@ -160,7 +160,7 @@ where
 #[cfg(test)]
 mod test {
     use alloy_primitives::{address, Address, U256};
-    use alloy_rlp::{Bytes, BytesMut};
+    use alloy_rlp::Bytes;
     use revm::{
         db::{CacheDB, EmptyDB},
         interpreter::{CallInputs, CallScheme, CallValue},
@@ -172,9 +172,9 @@ mod test {
 
     const MOCK_CALLER: Address = address!("0000000000000000000000000000000000000000");
 
-    fn create_mock_call_inputs(to: Address, input: Bytes) -> CallInputs {
+    fn create_mock_call_inputs(to: Address, input: impl Into<Bytes>) -> CallInputs {
         CallInputs {
-            input: input.into(),
+            input: input.into().into(),
             gas_limit: 0,
             bytecode_address: to,
             target_address: to,
@@ -192,8 +192,7 @@ mod test {
         mock_db.insert_account_info(addr, AccountInfo::default());
 
         let mut evm_context = EvmContext::new(mock_db);
-        let mut input = BytesMut::from(selector);
-        input.extend_from_slice(args);
+        let input = [selector, args].concat();
         let mut call_inputs = create_mock_call_inputs(addr, Bytes::from(input));
 
         let mut set_block_inspector = TravelInspector::new(1, |_, _| Ok(vec![]));
@@ -204,7 +203,7 @@ mod test {
 
     #[test]
     fn call_set_block() {
-        let block_num = 2137u64;
+        let block_num = 1;
         let inspector = inspector_call(
             TRAVEL_CONTRACT_ADDR,
             &SET_BLOCK_SELECTOR,
@@ -217,11 +216,13 @@ mod test {
 
     #[test]
     fn call_set_chain() {
-        let chain_id = 1337u64;
-        let block_num = 2137u64;
-        let mut args = BytesMut::with_capacity(64);
-        args.extend_from_slice(&U256::from(chain_id).to_be_bytes::<32>());
-        args.extend_from_slice(&U256::from(block_num).to_be_bytes::<32>());
+        let chain_id = 1;
+        let block_num = 2;
+        let args = [
+            U256::from(chain_id).to_be_bytes::<32>(),
+            U256::from(block_num).to_be_bytes::<32>(),
+        ]
+        .concat();
         let inspector = inspector_call(TRAVEL_CONTRACT_ADDR, &SET_CHAIN_SELECTOR, &args);
         assert!(inspector
             .location
@@ -231,7 +232,7 @@ mod test {
     #[test]
     #[should_panic]
     fn call_invalid_selector() {
-        inspector_call(TRAVEL_CONTRACT_ADDR, &[1u8, 2u8, 3u8, 4u8], &[]);
+        inspector_call(TRAVEL_CONTRACT_ADDR, &[0; 4], &[]);
     }
 
     #[test]
@@ -249,9 +250,16 @@ mod test {
 
     #[test]
     fn u64_from_u256_be_slice() {
-        let x = 20240918u64;
+        let x = u64::MAX; // To use all 8 bytes
         let slice: [u8; 32] = U256::from(x).to_be_bytes();
         let y = u64_from_be_slice(&slice);
         assert_eq!(x, y)
+    }
+
+    #[test]
+    #[should_panic]
+    fn u64_from_invalid_slice() {
+        let slice = [0];
+        _ = u64_from_be_slice(&slice);
     }
 }
