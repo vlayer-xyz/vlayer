@@ -37,7 +37,7 @@ vlayer Prover contracts have a few distinct properties:
 > All arguments passed to the Prover contract functions are **private by default**. To make an argument public, 
  simply add it to the list of returned values.
 
-See the example Prover contract code below. It generates proof of ownership of the BYAC NFT.
+See the example Prover contract code below. It generates proof of ownership of the BYAC (*Bored Ape Yacht Club*) NFT.
 
 ```solidity
 contract BoredApeOwnership is Prover  {
