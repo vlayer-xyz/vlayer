@@ -1,9 +1,13 @@
+extern crate mail_auth as extern_mail_auth;
+
 mod dkim;
 mod email;
+mod mail_auth;
+
+use dkim::verify;
 
 use crate::email::Email;
-use dkim::verify;
-use mail_auth::Error as AuthError;
+use extern_mail_auth::Error as AuthError;
 use mailparse::MailParseError;
 
 fn parse_mime(email: &[u8]) -> Result<Email, MailParseError> {
