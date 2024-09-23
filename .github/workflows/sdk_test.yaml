@@ -2,6 +2,9 @@ name: SDK Test
 
 on:
   push:
+    paths:
+      - "packages/vlayer/sdk/**"
+      - ".github/workflows/**"
     branches:
       - "**"
   merge_group:
