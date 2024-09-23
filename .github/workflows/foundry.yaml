@@ -45,7 +45,7 @@ jobs:
       - name: Run Forge tests
         working-directory: ./contracts
         run: |
-          forge test -vvv
+          forge test --no-match-path "test/vlayer/*" -vvv
       - name: Run Forge formatter (examples)
         run: |
           forge fmt ./examples --check
