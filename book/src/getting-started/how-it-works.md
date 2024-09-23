@@ -41,7 +41,7 @@ See the example Prover contract code below. It generates proof of ownership of t
 
 ```solidity
 contract BoredApeOwnership is Prover  {
-    function main(address _owner, uint256 _apeId) public returns (address, uint256) {  
+    function main(address _owner, uint256 _apeId) public returns (address) {  
       setChainId(1, 12292922); // jumps to block 12292922 at ETH mainnet, when BYAC where minted
 
       require(IERC721(BYAC_NFT_ADDR).ownerOf(_apeId) == _owner,  "Given address not owning that BYAC");
@@ -63,7 +63,7 @@ See the example `Verifer` contract below. It transfers tokens to proven owner of
 
 ```solidity
 contract Airdrop is Verifier {
-  function claim(Proof calldata _p, address owner, uint tokenId) 
+  function claim(Proof calldata _p, address owner) 
     public 
     onlyVerified(PROVER_VLAYER_CONTRACT_ADDR, NftOwnership.main.selector) 
   {
