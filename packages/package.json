@@ -20,7 +20,7 @@
   "type": "module",
   "workspaces": [
     "vlayer/*",
-    "browser-extension", 
+    "browser-extension",
     "extension-hooks"
   ]
 }
