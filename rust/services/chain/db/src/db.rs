@@ -35,12 +35,12 @@ impl KeyValueDB for InMemoryKeyValueDB {
         key: impl AsRef<[u8]>,
         value: impl AsRef<[u8]>,
     ) -> Result<(), KeyValueDBError> {
-        let key_ref = key.as_ref();
+        let key = key.as_ref();
         let mut store = self.store.write().unwrap();
-        if store.contains_key(key_ref) {
+        if store.contains_key(key) {
             return Err(KeyValueDBError::DuplicateKey);
         }
-        store.insert(key_ref.into(), value.as_ref().into());
+        store.insert(key.into(), value.as_ref().into());
         Ok(())
     }
 
