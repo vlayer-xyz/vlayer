@@ -19,6 +19,8 @@
   },
   "type": "module",
   "workspaces": [
-    "*"
+    "vlayer/*",
+    "browser-extension",
+    "extension-hooks"
   ]
 }
