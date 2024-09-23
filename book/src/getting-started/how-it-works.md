@@ -31,7 +31,7 @@ See the diagram below.
 ## Prover
 vlayer Prover contracts have a few distinct properties:
 * **verifiability** - can be executed off-chain and results can't be forged
-* **privacy** - inputs are private by deafult 
+* **privacy** - inputs are private by default and are not published on-chain
 * **no gas fees** - no usual transaction size limits apply
 
 > All arguments passed to the Prover contract functions are **private by default**. To make an argument public, 
