@@ -1,0 +1,26 @@
+name: Test
+
+on:
+  push:
+    paths:
+      - "rust-toolchain.toml"
+      - "rust/**"
+      - "examples/**"
+      - "packages/vlayer/**"
+      - ".github/workflows/**"
+    branches:
+      - "**"
+  merge_group:
+
+jobs:
+  sdk-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: oven-sh/setup-bun@v2
+      - uses: actions/checkout@v2
+      - name: Install packages
+        working-directory: packages/vlayer/sdk
+        run: bun install
+      - name: Run SDK tests
+        working-directory: packages/vlayer/sdk
+        run: bun test
