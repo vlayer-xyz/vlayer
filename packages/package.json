@@ -19,8 +19,11 @@
   },
   "type": "module",
   "workspaces": [
+    "browser-extension/",
     "vlayer/*",
-    "browser-extension",
-    "extension-hooks"
+    "extension-hooks/"
+  ],
+  "trustedDependencies": [
+    "viem"
   ]
 }
