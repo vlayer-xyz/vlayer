@@ -37,14 +37,14 @@ vlayer Prover contracts have a few distinct properties:
 > All arguments passed to the Prover contract functions are **private by default**. To make an argument public, 
  simply add it to the list of returned values.
 
-See the example Prover contract code below. It generates proof of ownership of the very first BYAC NFT.
+See the example Prover contract code below. It generates proof of ownership of the BYAC NFT.
 
 ```solidity
-contract NftOwnership is Prover  {
-    function main(address _owner, uint256 _tokenId) public returns (address, uint256) {  
-      setChainId(1, 12292922); // jumps to block 12292922 at ETH mainnet
+contract BoredApeOwnership is Prover  {
+    function main(address _owner, uint256 _apeId) public returns (address, uint256) {  
+      setChainId(1, 12292922); // jumps to block 12292922 at ETH mainnet, when BYAC where minted
 
-      require(IERC721(BYAC_NFT_ADDR).ownerOf(_tokenId) == _owner,  "Given address not owning that BYAC");
+      require(IERC721(BYAC_NFT_ADDR).ownerOf(_apeId) == _owner,  "Given address not owning that BYAC");
 
       return (_owner); 
     }
@@ -67,7 +67,7 @@ contract Airdrop is Verifier {
     public 
     onlyVerified(PROVER_VLAYER_CONTRACT_ADDR, NftOwnership.main.selector) 
   {
-    IAwesomeToken(TOKEN_ADDR).transfer(owner, tokenId);
+    IERC20(TOKEN_ADDR).transfer(owner, 1000);
   }
 }
 ```
