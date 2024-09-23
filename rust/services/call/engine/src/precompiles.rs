@@ -16,8 +16,8 @@ use revm::{
 
 pub(crate) const VLAYER_PRECOMPILES: [PrecompileWithAddress; 5] = [
     PrecompileWithAddress(u64_to_address(0x100), VERIFY_AND_PARSE_PRECOMPILE),
-    PrecompileWithAddress(u64_to_address(0x101), VERIFY_EMAIL_PRECOMPILE),
-    PrecompileWithAddress(u64_to_address(0x102), JSON_GET_STRING_PRECOMPILE),
+    PrecompileWithAddress(u64_to_address(0x102), VERIFY_EMAIL_PRECOMPILE),
+    PrecompileWithAddress(u64_to_address(0x101), JSON_GET_STRING_PRECOMPILE),
     PrecompileWithAddress(u64_to_address(0x103), JSON_GET_INT_PRECOMPILE),
     PrecompileWithAddress(u64_to_address(0x104), JSON_GET_BOOL_PRECOMPILE),
 ];
