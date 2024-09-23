@@ -1,13 +1,7 @@
-name: Test
+name: SDK Test
 
 on:
   push:
-    paths:
-      - "rust-toolchain.toml"
-      - "rust/**"
-      - "examples/**"
-      - "packages/vlayer/**"
-      - ".github/workflows/**"
     branches:
       - "**"
   merge_group:
