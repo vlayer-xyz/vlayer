@@ -2,8 +2,10 @@ name: SDK Test
 
 on:
   push:
+    paths:
+      - 'packages/vlayer/sdk/**'
     branches:
-      - "**"
+      - '**'
   merge_group:
 
 jobs:
