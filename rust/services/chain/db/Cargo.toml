@@ -1,5 +1,5 @@
 [package]
-name = "chain_engine"
+name = "chain_db"
 version = "0.1.0"
 edition = "2021"
 
