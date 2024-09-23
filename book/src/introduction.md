@@ -15,6 +15,10 @@ To get started with vlayer, [install vlayer](/getting-started/installation.html)
 
 See how to [time travel](/features/time-travel.html) across block numbers, [teleport](/features/teleport.html) from one chain to another, prove data coming from [email](/features/email.html) or [web](/features/web.html).
 
+**From JavaScript**
+
+Lear how to [interact with vlayer](/javascript/javascript.html) from your JS code and how [generate web proofs](/javascript/webproofs.html) using our SDK.
+
 **Advanced**
 
 Learn in-depth how:
