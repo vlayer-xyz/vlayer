@@ -1,9 +1,9 @@
 use crate::precompiles::{gas_used, map_to_fatal};
-use alloy_primitives::{Bytes, I256};
+use alloy_primitives::Bytes;
 use alloy_sol_types::SolType;
 use alloy_sol_types::{sol_data, SolValue};
 use revm::precompile::{Precompile, PrecompileErrors, PrecompileOutput, PrecompileResult};
-use serde_json::{value, Value};
+use serde_json::Value;
 use std::convert::Into;
 
 pub(super) const JSON_GET_STRING_PRECOMPILE: Precompile = Precompile::Standard(json_get_string_run);
@@ -96,7 +96,7 @@ mod tests {
 
         let result =
             sol_data::Int::<256>::abi_decode(precompile_output.bytes.as_ref(), false).unwrap();
-        let parsed: I256 = "12".parse().unwrap();
+        let parsed: alloy_primitives::I256 = "12".parse().unwrap();
 
         assert_eq!(parsed, result);
     }
@@ -111,7 +111,7 @@ mod tests {
 
         let result = sol_data::Bool::abi_decode(precompile_output.bytes.as_ref(), false).unwrap();
 
-        assert_eq!(true, result);
+        assert!(result);
     }
 
     #[test]
