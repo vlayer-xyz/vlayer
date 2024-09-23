@@ -87,4 +87,4 @@ It is necessary for veryfing the computation done by the Prover contract from th
 
 --- 
 
-To learn more about how the `Prover` and `Verifier` work under the hood, please refer to [our appendix](/appendix/architecture/prover.html).
+To learn more about how the [Prover](/advanced/prover.html) and [Verifier](/advanced/verifier.html) work under the hood, please refer to our **Advanced** section. 
