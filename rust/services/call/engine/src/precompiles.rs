@@ -1,8 +1,10 @@
-mod json_get_string;
+mod json;
 mod verify_and_parse;
 mod verify_and_parse_email;
 
-use crate::precompiles::json_get_string::JSON_GET_STRING_PRECOMPILE;
+use crate::precompiles::json::{
+    JSON_GET_BOOL_PRECOMPILE, JSON_GET_INT_PRECOMPILE, JSON_GET_STRING_PRECOMPILE,
+};
 use crate::precompiles::verify_and_parse::VERIFY_AND_PARSE_PRECOMPILE;
 use crate::precompiles::verify_and_parse_email::VERIFY_EMAIL_PRECOMPILE;
 use revm::precompile::Error::OutOfGas;
@@ -12,10 +14,12 @@ use revm::{
     primitives::PrecompileErrors,
 };
 
-pub(crate) const VLAYER_PRECOMPILES: [PrecompileWithAddress; 3] = [
+pub(crate) const VLAYER_PRECOMPILES: [PrecompileWithAddress; 5] = [
     PrecompileWithAddress(u64_to_address(0x100), VERIFY_AND_PARSE_PRECOMPILE),
-    PrecompileWithAddress(u64_to_address(0x101), JSON_GET_STRING_PRECOMPILE),
-    PrecompileWithAddress(u64_to_address(0x102), VERIFY_EMAIL_PRECOMPILE),
+    PrecompileWithAddress(u64_to_address(0x101), VERIFY_EMAIL_PRECOMPILE),
+    PrecompileWithAddress(u64_to_address(0x102), JSON_GET_STRING_PRECOMPILE),
+    PrecompileWithAddress(u64_to_address(0x103), JSON_GET_INT_PRECOMPILE),
+    PrecompileWithAddress(u64_to_address(0x104), JSON_GET_BOOL_PRECOMPILE),
 ];
 
 #[allow(clippy::needless_pass_by_value)] // More convenient to use in map_err
