@@ -1,5 +1,5 @@
 import assert from "node:assert";
-import { describe, expect, test } from "vitest";
+import { describe, expect, test } from "bun:test";
 import { getDkimSigners, parseEmail } from "./parseEmail.ts";
 import { StructuredHeader } from "mailparser";
 
