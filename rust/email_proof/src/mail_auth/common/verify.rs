@@ -13,12 +13,8 @@ impl DomainKey {
         input: &impl VerifySignature,
         canonicalization: Canonicalization,
     ) -> crate::mail_auth::Result<()> {
-        self.p.verify(
-            headers,
-            input.signature(),
-            canonicalization,
-            input.algorithm(),
-        )
+        self.p
+            .verify(headers, input.signature(), canonicalization, input.algorithm())
     }
 }
 
