@@ -37,7 +37,8 @@ Therefore, the flow will be like this:
 * As soon as Host is ready to generate the proof - it will do two things in parallel:
     * Send a transaction on-chain pinning the latest block
     * Start generating the proof
-* When proof is ready, and we settle on-chain we:
+    
+* Once the proof is ready, in order to settle on-chain we:
     * First try to use `blockhash`
     * If it fails - fallback to the list of pinned blocks
 
