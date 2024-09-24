@@ -32,7 +32,7 @@ At all times, the BPC structure stores a sequence of consecutive block hashes th
 - block numbers contained in the structure form a sequence of consecutive natural numbers,
 - for every pair of block numbers `i, i+1` contained in the structure, `block(i + 1).parentHash = hash(block(i))`.
 
-Each time a block is added, 𝜋 is updated. To prove that after adding a new block, all the blocks in the BPC structure belong to the same chain, two things must be done:
+Every time a block is added, 𝜋 is updated. To prove that after adding a new block, all the blocks in the BPC structure belong to the same chain, two things must be done:
 - The previous 𝜋 must be verified.
 - It must be ensured that the hash of the new block 'links' to either the oldest or the most recent block.
 
