@@ -54,3 +54,8 @@ jobs:
         env:
           RUST_LOG: info
           RISC0_DEV_MODE: 1
+
+      - name: Run vlayer tests
+        working-directory: ./contracts
+        run: |
+          cargo run --manifest-path ../rust/Cargo.toml --package cli -- test
