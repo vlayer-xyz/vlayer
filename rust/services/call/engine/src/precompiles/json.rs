@@ -10,7 +10,6 @@ pub(super) const JSON_GET_STRING_PRECOMPILE: Precompile = Precompile::Standard(j
 pub(super) const JSON_GET_INT_PRECOMPILE: Precompile = Precompile::Standard(json_get_int_run);
 pub(super) const JSON_GET_BOOL_PRECOMPILE: Precompile = Precompile::Standard(json_get_bool_run);
 
-// TODO: set an accurate gas cost values reflecting the operation's computational complexity.
 /// The base cost of the operation.
 const BASE_COST: u64 = 10;
 /// The cost per word.

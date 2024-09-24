@@ -7,8 +7,7 @@ use web_proof::verifier::verify_and_parse;
 pub(super) const VERIFY_AND_PARSE_PRECOMPILE: Precompile =
     Precompile::Standard(verify_and_parse_run);
 
-// TODO: set an accurate gas cost values reflecting the operation's computational complexity.
-/// The base cost of the operation.
+/// The base cost.
 const VERIFY_AND_PARSE_BASE: u64 = 10;
 /// The cost per word.
 const VERIFY_AND_PARSE_PER_WORD: u64 = 1;
