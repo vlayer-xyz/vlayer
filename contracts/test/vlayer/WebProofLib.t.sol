@@ -26,21 +26,4 @@ contract EmailProverTest is VTest {
 
         assertEq(bytes(web.body)[0], "{");
     }
-
-    // function test_failedVerification() public {
-    //     vm.mockCall(
-    //         address(0x100),
-    //         uint256 value,
-    //         bytes calldata data,
-    //         bytes calldata retdata
-    //     );
-
-    //     WebProofLibWrapper wrapper = new WebProofLibWrapper();
-    //     WebProof memory webProof = WebProof(vm.readFile("testdata/web_proof.json"));
-
-    //     callProver();
-    //     Web memory web = wrapper.verify(webProof);
-
-    //     assertEq(bytes(web.body)[0], "{");
-    // }
 }
