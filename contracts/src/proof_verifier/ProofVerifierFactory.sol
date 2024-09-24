@@ -9,7 +9,7 @@ library ProofVerifierFactory {
     function produce() internal returns (IProofVerifier) {
         if (ChainIdLibrary.is_mainnet()) {
             return IProofVerifier(address(0));
-        } else if (ChainIdLibrary.is_devnet()) {
+        } else if (ChainIdLibrary.is_devnet() || ChainIdLibrary.is_testnet()) {
             return new ProofVerifierRouter();
         }
 
