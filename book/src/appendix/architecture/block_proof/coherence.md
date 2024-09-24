@@ -2,7 +2,7 @@
 
 ## Naive Block Proof Cache
 
-We need a way to prove that a set of hashes belongs to the same chain. A naive way to do this is to hash all subsequent blocks from the oldest to the most recent and verify that each block hash is equal to the **parentHash** value of the following block. If all the hashes from our set appear along the way, then they all belong to the same chain.
+We need a way to prove that a set of hashes belongs to the same chain. A naive way to do this is to hash all of the subsequent blocks, from the oldest to the most recent, and then verify that each block hash is equal to the **parentHash** value of the following block. If all the hashes from our set appear along the way, then they all belong to the same chain.
 
 See the diagram below for a visual representation.
 
