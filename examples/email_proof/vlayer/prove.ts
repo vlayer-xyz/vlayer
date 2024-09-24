@@ -5,7 +5,7 @@ import emailProofVerifier from "../out/EmailProofVerifier.sol/EmailProofVerifier
 
 const mimeEmail = fs.readFileSync("../testdata/test_email.txt").toString();
 
-const email = { email: mimeEmail };
+const unverifiedEmail = { email: mimeEmail };
 
 const [prover, verifier] = await testHelpers.deployProverVerifier(
   emailProofProver,
@@ -17,7 +17,7 @@ const { proof, returnValue } = await prove(
   prover,
   emailProofProver.abi,
   "main",
-  [email],
+  [unverifiedEmail],
 );
 console.log("Proof:", proof);
 
