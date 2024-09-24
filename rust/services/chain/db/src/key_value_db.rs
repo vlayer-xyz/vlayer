@@ -6,20 +6,20 @@ use thiserror::Error;
 
 #[allow(unused)]
 pub trait KeyValueDB {
-    type RoTx: DBTx;
-    type RwTx: WriteDBTx;
+    type RoTx: ReadDBTx;
+    type RwTx: RwDBTx;
 
     fn begin_ro(&self) -> Self::RoTx;
     fn begin_rw(&mut self) -> Self::RwTx;
 }
 
 #[allow(unused)]
-pub trait DBTx {
+pub trait ReadDBTx {
     fn get(&self, table: impl AsRef<str>, key: &[u8]) -> Option<Box<[u8]>>;
 }
 
 #[allow(unused)]
-pub trait WriteDBTx: DBTx {
+pub trait RwDBTx: ReadDBTx {
     fn insert(
         &mut self,
         table: impl AsRef<str>,
@@ -59,7 +59,7 @@ pub struct InMemoryReadOnlyTx<'a> {
     store: RwLockReadGuard<'a, KeyValueMap>,
 }
 
-impl<'a> DBTx for InMemoryReadOnlyTx<'a> {
+impl<'a> ReadDBTx for InMemoryReadOnlyTx<'a> {
     fn get(&self, table: impl AsRef<str>, key: &[u8]) -> Option<Box<[u8]>> {
         let prefixed_key = add_table_prefix(table, key);
         self.store.get(prefixed_key.as_slice()).cloned()
@@ -70,7 +70,7 @@ pub struct InMemoryReadWriteTx<'a> {
     store: RwLockWriteGuard<'a, KeyValueMap>,
 }
 
-impl<'a> DBTx for InMemoryReadWriteTx<'a> {
+impl<'a> ReadDBTx for InMemoryReadWriteTx<'a> {
     fn get(&self, table: impl AsRef<str>, key: &[u8]) -> Option<Box<[u8]>> {
         let prefixed_key = add_table_prefix(table, key);
         self.store.get(prefixed_key.as_slice()).cloned()
@@ -84,7 +84,7 @@ fn add_table_prefix(table: impl AsRef<str>, key: &[u8]) -> Vec<u8> {
     prefixed_key
 }
 
-impl<'a> WriteDBTx for InMemoryReadWriteTx<'a> {
+impl<'a> RwDBTx for InMemoryReadWriteTx<'a> {
     fn insert(
         &mut self,
         table: impl AsRef<str>,
