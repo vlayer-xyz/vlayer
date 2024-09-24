@@ -1,9 +1,9 @@
 use super::provider::{ProviderDb, ProviderDbError};
-use crate::{proof::EIP1186Proof, provider::BlockingProvider};
 use alloy_primitives::{Address, Bytes, B256, U256};
 use anyhow::Context;
 use call_engine::block_header::EvmBlockHeader;
 use mpt::MerkleTrie;
+use provider::{BlockingProvider, EIP1186Proof};
 use revm::{
     primitives::{AccountInfo, Bytecode, HashMap, HashSet},
     DatabaseRef,

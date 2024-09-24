@@ -1,5 +1,5 @@
-use crate::provider::BlockingProvider;
 use alloy_primitives::{Address, B256, U256};
+use provider::BlockingProvider;
 use revm::{
     primitives::{AccountInfo, Bytecode, HashMap, KECCAK_EMPTY},
     DatabaseRef,

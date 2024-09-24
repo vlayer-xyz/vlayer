@@ -1,6 +1,7 @@
+use crate::factory::ProviderFactoryError;
+
 use super::factory::ProviderFactory;
 use super::BlockingProvider;
-use crate::host::error::HostError;
 use alloy_primitives::ChainId;
 use call_engine::utils::InteriorMutabilityCache;
 use std::cell::RefCell;
@@ -8,7 +9,7 @@ use std::{collections::HashMap, rc::Rc};
 
 type MultiProvider<P> = HashMap<ChainId, Rc<P>>;
 
-pub(crate) struct CachedMultiProvider<P> {
+pub struct CachedMultiProvider<P> {
     cache: RefCell<MultiProvider<P>>,
     factory: Box<dyn ProviderFactory<P>>,
 }
@@ -17,14 +18,14 @@ impl<P> CachedMultiProvider<P>
 where
     P: BlockingProvider,
 {
-    pub(crate) fn new(factory: impl ProviderFactory<P> + 'static) -> Self {
+    pub fn new(factory: impl ProviderFactory<P> + 'static) -> Self {
         CachedMultiProvider {
             cache: RefCell::new(HashMap::new()),
             factory: Box::new(factory),
         }
     }
 
-    pub(crate) fn get(&self, chain_id: ChainId) -> Result<Rc<P>, HostError> {
+    pub fn get(&self, chain_id: ChainId) -> Result<Rc<P>, ProviderFactoryError> {
         self.cache
             .try_get_or_insert(chain_id, || self.factory.create(chain_id))
     }
@@ -32,23 +33,21 @@ where
 
 #[cfg(test)]
 mod get {
-    use crate::provider::{factory::FileProviderFactory, FileProvider};
-
     use super::*;
-    use alloy_chains::Chain;
-    use null_provider_factory::NullProviderFactory;
     use std::path::PathBuf;
 
+    use crate::{factory::FileProviderFactory, FileProvider};
+    use alloy_chains::Chain;
+    use null_provider_factory::NullProviderFactory;
+
     mod null_provider_factory {
-        use super::{HostError, ProviderFactory};
-        use crate::provider::FileProvider;
-        use alloy_primitives::ChainId;
+        use super::*;
 
         pub(crate) struct NullProviderFactory;
 
         impl ProviderFactory<FileProvider> for NullProviderFactory {
-            fn create(&self, _chain_id: ChainId) -> Result<FileProvider, HostError> {
-                Err(HostError::Provider("Forced error for testing".to_string()))
+            fn create(&self, _chain_id: ChainId) -> Result<FileProvider, ProviderFactoryError> {
+                Err(ProviderFactoryError::FileProvider("Forced error for testing".to_string()))
             }
         }
     }

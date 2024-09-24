@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+provider = { workspace = true }
 call_host = { workspace = true }
 call_engine = { workspace = true }
 mpt = { workspace = true }

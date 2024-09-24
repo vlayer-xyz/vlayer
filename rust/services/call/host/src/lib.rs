@@ -1,6 +1,5 @@
 pub mod db;
 pub mod host;
-pub mod proof;
 pub mod provider;
 pub use call_engine::io::Call;
 

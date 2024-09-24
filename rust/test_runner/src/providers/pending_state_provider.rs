@@ -7,10 +7,7 @@ use forge::revm::primitives::{Account, Address, Bytes, EvmState, B256, U256};
 use call_engine::block_header::forge::ForgeBlockHeader;
 use call_engine::block_header::EvmBlockHeader;
 use call_host::db::proof::ProofDb;
-use call_host::host::error::HostError;
-use call_host::proof::EIP1186Proof;
-use call_host::provider::factory::ProviderFactory;
-use call_host::provider::BlockingProvider;
+use provider::{BlockingProvider, EIP1186Proof, ProviderFactory, ProviderFactoryError};
 
 use crate::proof::{account_proof, prove_storage, storage_root};
 use crate::providers::test_provider::ProviderError;
@@ -118,7 +115,7 @@ pub struct PendingStateProviderFactory {
 }
 
 impl ProviderFactory<PendingStateProvider> for PendingStateProviderFactory {
-    fn create(&self, _chain_id: ChainId) -> Result<PendingStateProvider, HostError> {
+    fn create(&self, _chain_id: ChainId) -> Result<PendingStateProvider, ProviderFactoryError> {
         Ok(PendingStateProvider {
             state: self.state.clone(),
             block_number: self.block_number,
