@@ -13,7 +13,7 @@ struct VerifiedEmail {
 }
 
 library EmailProofLib {
-    address private constant VERIFY_EMAIL_PRECOMPILE = address(0x102);
+    address private constant VERIFY_EMAIL_PRECOMPILE = address(0x101);
 
     function verify(MimeEmail memory mimeEmail) internal view returns (VerifiedEmail memory) {
         (bool success, bytes memory emailBytes) = VERIFY_EMAIL_PRECOMPILE.staticcall(bytes(mimeEmail.email));
