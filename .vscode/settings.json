@@ -13,9 +13,11 @@
   },
   "rust-analyzer.check.workspace": false,
   "cSpell.words": [
+    "Arbitrum",
     "augmentors",
     "bincode",
     "binstall",
+    "blockhash",
     "bytecodes",
     "groth",
     "Hashable",
