@@ -19,7 +19,7 @@ Vlayer provides **time-travel functionality**. As a result, state and storage pr
 
 Will be proven using [**Block Proof Cache**](./block_proof/coherence.md) service.
 
-It maintains a data structure that stores block hashes, along with a zk-proof that all the hashes it contains belong to the same chain.
+It maintains a data structure that stores block hashes along with a zk-proof. The zk-proof proves that all the hashes contained by the data structure belong to the same chain.
 
 ### Canonicity
 
