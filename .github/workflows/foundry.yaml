@@ -46,9 +46,16 @@ jobs:
         working-directory: ./contracts
         run: |
           forge test --no-match-path "test/vlayer/*" -vvv
+
+      - name: Run vlayer tests
+        working-directory: ./contracts
+        run: |
+          cargo run --manifest-path ../rust/Cargo.toml test
+
       - name: Run Forge formatter (examples)
         run: |
           forge fmt ./examples --check
+
       - name: Run Forge formatter (vlayer contracts)
         working-directory: ./contracts
         run: |
