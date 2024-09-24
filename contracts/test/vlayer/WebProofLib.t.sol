@@ -14,7 +14,7 @@ contract WebProofLibWrapper {
     }
 }
 
-contract EmailProverTest is VTest {
+contract WebProverTest is VTest {
     using WebProofLib for WebProof;
 
     function test_verifiesWebProof() public {
