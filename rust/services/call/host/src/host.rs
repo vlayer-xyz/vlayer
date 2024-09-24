@@ -2,9 +2,6 @@ use crate::db::proof::ProofDb;
 use crate::encodable_receipt::EncodableReceipt;
 use crate::evm_env::factory::HostEvmEnvFactory;
 use crate::into_input::into_multi_input;
-use crate::provider::factory::{EthersProviderFactory, ProviderFactory};
-use crate::provider::multi::CachedMultiProvider;
-use crate::provider::{BlockingProvider, EthersClient, EthersProvider};
 use alloy_primitives::ChainId;
 use alloy_sol_types::SolValue;
 use call_engine::engine::Engine;
@@ -16,6 +13,10 @@ use config::HostConfig;
 use error::HostError;
 use ethers_core::types::BlockNumber;
 use host_utils::Prover;
+use provider::{
+    BlockingProvider, CachedMultiProvider, EthersClient, EthersProvider, EthersProviderFactory,
+    ProviderFactory,
+};
 use risc0_zkvm::ExecutorEnv;
 use serde::Serialize;
 

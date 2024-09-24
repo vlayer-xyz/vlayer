@@ -18,7 +18,9 @@ members = [
     "web_proof",
     "email_proof",
     "server_utils",
-    "host_utils", "chain",
+    "host_utils",
+    "chain",
+    "provider",
 ]
 
 [profile.release]
@@ -108,6 +110,7 @@ web_proof = { path = "web_proof" }
 test_runner = { path = "test_runner" }
 host_utils = { path = "host_utils" }
 chain = { path = "chain" }
+provider = { path = "provider" }
 
 call_host = { path = "services/call/host" }
 call_guest = { path = "services/call/guest" }

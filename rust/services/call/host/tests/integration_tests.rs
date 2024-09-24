@@ -6,12 +6,9 @@ use ethers_core::types::BlockNumber as BlockTag;
 
 use call_host::{
     host::{config::HostConfig, error::HostError, Host},
-    provider::{
-        factory::{CachedProviderFactory, FileProviderFactory, ProviderFactory},
-        BlockingProvider,
-    },
     Call,
 };
+use provider::{BlockingProvider, CachedProviderFactory, FileProviderFactory, ProviderFactory};
 use std::{collections::HashMap, env};
 
 // To activate recording, set UPDATE_SNAPSHOTS to true.

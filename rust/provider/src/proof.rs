@@ -3,7 +3,7 @@ use ethers_core::types::StorageProof as EthersStorageProof;
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;
 
-use crate::provider::ethers::{from_ethers_bytes, from_ethers_u256};
+use crate::ethers::{from_ethers_bytes, from_ethers_u256};
 
 /// Data structure with proof for one single storage-entry
 #[derive(Debug, Default, Clone, PartialEq, Eq, Deserialize, Serialize)]

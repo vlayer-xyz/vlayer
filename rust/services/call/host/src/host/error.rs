@@ -1,7 +1,6 @@
-use crate::provider::EthersProviderError;
 use alloy_primitives::ChainId;
 use call_engine::{engine::EngineError, io::GuestOutputError};
-use ethers_providers::ProviderError;
+use provider::ProviderFactoryError;
 use risc0_zkp::verify::VerificationError;
 use thiserror::Error;
 
@@ -16,8 +15,8 @@ pub enum HostError {
     #[error("Engine error: {0}")]
     Engine(#[from] EngineError),
 
-    #[error("Ethers provider error: {0}")]
-    EthersProvider(#[from] EthersProviderError<ProviderError>),
+    #[error("Provider factory error: {0}")]
+    ProviderFactory(#[from] ProviderFactoryError),
 
     #[error("Provider error: {0}")]
     Provider(String),

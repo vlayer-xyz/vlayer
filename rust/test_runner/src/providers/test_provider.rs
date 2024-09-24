@@ -2,13 +2,13 @@ use alloy_primitives::{
     Address, BlockNumber, Bytes, ChainId, StorageKey, StorageValue, TxNumber, U256,
 };
 use call_engine::block_header::EvmBlockHeader;
-use call_host::host::error::HostError;
-use call_host::proof::EIP1186Proof;
-use call_host::provider::factory::{EthersProviderFactory, ProviderFactory};
-use call_host::provider::{BlockingProvider, EthersClient, EthersProvider};
 use chain::{CHAIN_NAMES, TEST_CHAIN_ID_1};
 use ethers_core::types::BlockNumber as BlockTag;
 use foundry_config::RpcEndpoints;
+use provider::{
+    BlockingProvider, EIP1186Proof, EthersClient, EthersProvider, EthersProviderFactory,
+    ProviderFactory, ProviderFactoryError,
+};
 use std::collections::HashMap;
 
 use crate::providers::pending_state_provider::PendingStateProviderFactory;
@@ -91,7 +91,7 @@ impl TestProviderFactory {
 }
 
 impl ProviderFactory<TestProvider> for TestProviderFactory {
-    fn create(&self, chain_id: ChainId) -> Result<TestProvider, HostError> {
+    fn create(&self, chain_id: ChainId) -> Result<TestProvider, ProviderFactoryError> {
         if chain_id == TEST_CHAIN_ID_1 {
             let pending_state_provider = self.pending_state_provider_factory.create(chain_id)?;
             Ok(TestProvider {

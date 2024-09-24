@@ -1782,6 +1782,7 @@ dependencies = [
  "ethers-providers",
  "host_utils",
  "mpt",
+ "provider",
  "revm",
  "risc0-zkp",
  "risc0-zkvm",
@@ -6915,6 +6916,24 @@ dependencies = [
 ]
 
 [[package]]
+name = "provider"
+version = "0.1.0"
+dependencies = [
+ "alloy-chains",
+ "alloy-primitives",
+ "anyhow",
+ "auto_impl",
+ "call_engine",
+ "ethers-core",
+ "ethers-providers",
+ "serde",
+ "serde_json",
+ "thiserror",
+ "tokio",
+ "url",
+]
+
+[[package]]
 name = "pulldown-cmark"
 version = "0.10.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -8764,6 +8783,7 @@ dependencies = [
  "foundry-evm",
  "foundry-evm-core",
  "mpt",
+ "provider",
  "rayon",
  "regex",
  "serde_json",

@@ -2,10 +2,10 @@ use alloy_primitives::{keccak256, Address, Bytes, FixedBytes, B256, U256};
 use alloy_rlp::encode;
 use alloy_trie::proof::ProofRetainer;
 use alloy_trie::{HashBuilder, Nibbles};
-use call_host::proof::StorageProof;
 use forge::revm::primitives::alloy_primitives::private::alloy_rlp;
 use forge::revm::primitives::alloy_primitives::private::alloy_rlp::Encodable;
 use forge::revm::primitives::{Account, AccountInfo, EvmState, EvmStorageSlot};
+use provider::StorageProof;
 use std::collections::{BTreeMap, HashMap};
 
 fn to_nibbles<T: AsRef<[u8]>>(word: T) -> Nibbles {
