@@ -19,15 +19,13 @@ try {
     envContent = "";
   }
 
-  envContent = `${envContent}\n`;
-
   const proverRegex = /^VITE_PROVER_ADDRESS=.*/m;
   const verifierRegex = /^VITE_VERIFIER_ADDRESS=.*/m;
 
   if (proverRegex.test(envContent)) {
     envContent = envContent.replace(
       proverRegex,
-      `VITE_PROVER_ADDRESS=${prover}`,
+      `VITE_PROVER_ADDRESS=${prover.trim()}`,
     );
   } else {
     envContent += `VITE_PROVER_ADDRESS=${prover}\n`;
