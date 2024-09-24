@@ -8,6 +8,10 @@ anyhow = { workspace = true }
 serde = { workspace = true }
 alloy-primitives = { workspace = true }
 thiserror = { workspace = true }
+libmdbx = "0.5.2"
+
+[dev-dependencies]
+tempfile = { workspace = true }
 
 [lints]
 workspace = true
