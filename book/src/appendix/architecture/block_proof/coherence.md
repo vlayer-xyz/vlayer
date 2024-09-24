@@ -65,7 +65,7 @@ The append function is used to add a most recent block to the Merkle Patricia Tr
 - **elf_id**: a hash of the guest binary,
 - **block**: the block header to be added,
 - **mpt**: a sparse MPT containing two paths: one from the root to the parent block and one from the root to the node where the new block will be inserted,
-- **proof**: a zero-knowledge proof that all contained hashes so far belong to the same chain.
+- **proof (π)**: a zero-knowledge proof that all contained hashes so far belong to the same chain.
   This function ensures that the new block correctly follows the previous block by checking the parent block's hash. If everything is correct, it inserts the new block's hash into the trie.
 
 ```rs
