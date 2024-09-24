@@ -33,7 +33,7 @@ With current prover performance - it takes 2 minutes to generate a no-op proof s
 
 Instead of waiting for the proof - we can have a smart-contract that **pins** block hashes we are planning to use in storage.
 
-Therefore, the flow will look like this:
+Therefore, the flow will be like this:
 * As soon as Host is ready to generate the proof - it will do two things in parallel:
     * Send a transaction on-chain pinning the latest block
     * Start generating the proof
