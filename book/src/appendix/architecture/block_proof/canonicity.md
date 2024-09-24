@@ -27,7 +27,7 @@ However, this method is limited, as it only works for the most recent 256 blocks
 * **Optimism**: 2 seconds - 8.5 minutes
 * **Arbitrum One**: 250ms - 1 minute
 
-With current prover performance - it takes at least 2 minutes to generate a trivial proof, so means that by the time we will have a proof generated, we will already have missed the slot to settle on Arbitrum.
+With current prover performance - it takes a couple of minutes to generate a proof. That means by the time it's ready, we will already have missed the slot to settle on Arbitrum.
 
 ### Block Pinning
 
