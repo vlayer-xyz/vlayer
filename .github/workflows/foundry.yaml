@@ -50,7 +50,7 @@ jobs:
       - name: Run vlayer tests
         working-directory: ./contracts
         run: |
-          cargo run --manifest-path ../rust/Cargo.toml test
+          cargo run --manifest-path ../rust/Cargo.toml --package cli -- test
 
       - name: Run Forge formatter (examples)
         run: |
