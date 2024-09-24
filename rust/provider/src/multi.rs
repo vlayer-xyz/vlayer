@@ -54,7 +54,7 @@ mod get {
 
     #[test]
     fn gets_cached_provider() -> anyhow::Result<()> {
-        let path_buf = PathBuf::from("testdata/mainnet_uniswap_factory_owner_rpc_cache.json");
+        let path_buf = PathBuf::from("testdata/cache.json");
         let provider = Rc::new(FileProvider::from_file(&path_buf)?);
 
         let cache = RefCell::new(HashMap::from([(Chain::mainnet().id(), Rc::clone(&provider))]));
@@ -75,10 +75,8 @@ mod get {
 
     #[test]
     fn gets_created_provider() -> anyhow::Result<()> {
-        let rpc_file_cache = HashMap::from([(
-            Chain::mainnet().id(),
-            "testdata/mainnet_uniswap_factory_owner_rpc_cache.json".to_string(),
-        )]);
+        let rpc_file_cache =
+            HashMap::from([(Chain::mainnet().id(), "testdata/cache.json".to_string())]);
 
         let provider_factory = FileProviderFactory::new(rpc_file_cache);
         let cached_multi_provider = CachedMultiProvider::new(provider_factory);
