@@ -79,9 +79,13 @@ impl<'a> RwTransaction for InMemoryRwTransaction<'a> {
         &mut self,
         table: impl AsRef<str>,
         key: impl AsRef<[u8]>,
-    ) -> Result<bool, DatabaseError> {
+    ) -> Result<(), DatabaseError> {
         let prefixed_key = add_table_prefix(table, key);
-        Ok(self.store.remove(prefixed_key.as_slice()).is_some())
+        if self.store.remove(prefixed_key.as_slice()).is_some() {
+            Ok(())
+        } else {
+            Err(DatabaseError::NonExistingKey)
+        }
     }
 
     fn commit(self) -> Result<(), DatabaseError> {

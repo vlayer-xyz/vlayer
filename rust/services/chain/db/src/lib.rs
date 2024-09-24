@@ -30,7 +30,7 @@ pub trait RwTransaction {
         &mut self,
         table: impl AsRef<str>,
         key: impl AsRef<[u8]>,
-    ) -> Result<bool, DatabaseError>;
+    ) -> Result<(), DatabaseError>;
     fn commit(self) -> Result<(), DatabaseError>;
 }
 
