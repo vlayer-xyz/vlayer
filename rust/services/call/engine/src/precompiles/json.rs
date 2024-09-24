@@ -150,114 +150,127 @@ mod tests {
             Err(Fatal { msg: message }) if message == "Missing value at path root.nested_level.field_missing"));
     }
 
-    #[test]
-    //failing string tests
-    fn fail_string_number() {
-        let abi_encoded_body_and_json_path =
-            InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_number"]);
+    mod string_tests {
+        use super::*;
+        #[test]
+        fn fail_string_number() {
+            let abi_encoded_body_and_json_path =
+                InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_number"]);
 
-        assert!(matches!(json_get_string_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
-            Err(Fatal { msg: message }) if message == "Expected type 'String' at root.nested_level.field_number, but found Number(12)"));
-    }
-    #[test]
-    fn fail_string_bool() {
-        let abi_encoded_body_and_json_path =
-            InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_boolean"]);
+            assert!(
+                matches!(json_get_string_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
+                Err(Fatal { msg: message }) if message == "Expected type 'String' at root.nested_level.field_number, but found Number(12)")
+            );
+        }
 
-        assert!(matches!(json_get_string_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
-            Err(Fatal { msg: message }) if message == "Expected type 'String' at root.nested_level.field_boolean, but found Bool(true)"));
-    }
+        #[test]
+        fn fail_string_bool() {
+            let abi_encoded_body_and_json_path =
+                InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_boolean"]);
 
-    #[test]
-    fn fail_string_array() {
-        let abi_encoded_body_and_json_path =
-            InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_array"]);
+            assert!(
+                matches!(json_get_string_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
+                Err(Fatal { msg: message }) if message == "Expected type 'String' at root.nested_level.field_boolean, but found Bool(true)")
+            );
+        }
 
-        assert!(matches!(json_get_string_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
-            Err(Fatal { msg: message }) if message == "Expected type 'String' at root.nested_level.field_array, but found Array []"));
-    }
+        #[test]
+        fn fail_string_array() {
+            let abi_encoded_body_and_json_path =
+                InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_array"]);
 
-    #[test]
-    fn fail_string_object() {
-        let abi_encoded_body_and_json_path =
-            InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_object"]);
+            assert!(
+                matches!(json_get_string_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
+                Err(Fatal { msg: message }) if message == "Expected type 'String' at root.nested_level.field_array, but found Array []")
+            );
+        }
 
-        assert!(matches!(json_get_string_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
-            Err(Fatal { msg: message }) if message == "Expected type 'String' at root.nested_level.field_object, but found Object {}"));
-    }
+        #[test]
+        fn fail_string_object() {
+            let abi_encoded_body_and_json_path =
+                InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_object"]);
 
-    //failing number tests
-
-    #[test]
-    fn fail_number_bool() {
-        let abi_encoded_body_and_json_path =
-            InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_boolean"]);
-
-        assert!(matches!(json_get_int_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
-            Err(Fatal { msg: message }) if message == "Expected type 'Number' at root.nested_level.field_boolean, but found Bool(true)"));
-    }
-
-    #[test]
-    fn fail_number_string() {
-        let abi_encoded_body_and_json_path =
-            InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_string"]);
-
-        assert!(matches!(json_get_int_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
-            Err(Fatal { msg: message }) if message == "Expected type 'Number' at root.nested_level.field_string, but found String(\"field_string_value\")"));
+            assert!(
+                matches!(json_get_string_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
+                Err(Fatal { msg: message }) if message == "Expected type 'String' at root.nested_level.field_object, but found Object {}")
+            );
+        }
     }
 
-    #[test]
-    fn fail_number_array() {
-        let abi_encoded_body_and_json_path =
-            InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_array"]);
+    mod number_tests {
+        use super::*;
+        #[test]
+        fn fail_number_bool() {
+            let abi_encoded_body_and_json_path =
+                InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_boolean"]);
 
-        assert!(matches!(json_get_int_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
-            Err(Fatal { msg: message }) if message == "Expected type 'Number' at root.nested_level.field_array, but found Array []"));
-    }
-    #[test]
-    fn fail_number_object() {
-        let abi_encoded_body_and_json_path =
-            InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_object"]);
+            assert!(matches!(json_get_int_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
+                Err(Fatal { msg: message }) if message == "Expected type 'Number' at root.nested_level.field_boolean, but found Bool(true)"));
+        }
 
-        assert!(matches!(json_get_int_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
-            Err(Fatal { msg: message }) if message == "Expected type 'Number' at root.nested_level.field_object, but found Object {}"));
-    }
+        #[test]
+        fn fail_number_string() {
+            let abi_encoded_body_and_json_path =
+                InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_string"]);
 
-    //failing boolean tests
+            assert!(matches!(json_get_int_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
+                Err(Fatal { msg: message }) if message == "Expected type 'Number' at root.nested_level.field_string, but found String(\"field_string_value\")"));
+        }
 
-    #[test]
-    fn fail_boolean_string() {
-        let abi_encoded_body_and_json_path =
-            InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_string"]);
+        #[test]
+        fn fail_number_array() {
+            let abi_encoded_body_and_json_path =
+                InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_array"]);
 
-        assert!(matches!(json_get_bool_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
-            Err(Fatal { msg: message }) if message == "Expected type 'Bool' at root.nested_level.field_string, but found String(\"field_string_value\")"));
-    }
-    #[test]
-    fn fail_bool_number() {
-        let abi_encoded_body_and_json_path =
-            InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_number"]);
+            assert!(matches!(json_get_int_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
+                Err(Fatal { msg: message }) if message == "Expected type 'Number' at root.nested_level.field_array, but found Array []"));
+        }
+        #[test]
+        fn fail_number_object() {
+            let abi_encoded_body_and_json_path =
+                InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_object"]);
 
-        assert!(matches!(json_get_bool_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
-            Err(Fatal { msg: message }) if message == "Expected type 'Bool' at root.nested_level.field_number, but found Number(12)"));
-    }
-
-    #[test]
-    fn fail_bool_array() {
-        let abi_encoded_body_and_json_path =
-            InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_array"]);
-
-        assert!(matches!(json_get_bool_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
-            Err(Fatal { msg: message }) if message == "Expected type 'Bool' at root.nested_level.field_array, but found Array []"));
+            assert!(matches!(json_get_int_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
+                Err(Fatal { msg: message }) if message == "Expected type 'Number' at root.nested_level.field_object, but found Object {}"));
+        }
     }
 
-    #[test]
-    fn fail_bool_object() {
-        let abi_encoded_body_and_json_path =
-            InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_object"]);
+    mod bool_tests {
+        use super::*;
+        #[test]
+        fn fail_boolean_string() {
+            let abi_encoded_body_and_json_path =
+                InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_string"]);
 
-        assert!(matches!(json_get_bool_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
-            Err(Fatal { msg: message }) if message == "Expected type 'Bool' at root.nested_level.field_object, but found Object {}"));
+            assert!(matches!(json_get_bool_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
+                Err(Fatal { msg: message }) if message == "Expected type 'Bool' at root.nested_level.field_string, but found String(\"field_string_value\")"));
+        }
+        #[test]
+        fn fail_bool_number() {
+            let abi_encoded_body_and_json_path =
+                InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_number"]);
+
+            assert!(matches!(json_get_bool_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
+                Err(Fatal { msg: message }) if message == "Expected type 'Bool' at root.nested_level.field_number, but found Number(12)"));
+        }
+
+        #[test]
+        fn fail_bool_array() {
+            let abi_encoded_body_and_json_path =
+                InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_array"]);
+
+            assert!(matches!(json_get_bool_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
+                Err(Fatal { msg: message }) if message == "Expected type 'Bool' at root.nested_level.field_array, but found Array []"));
+        }
+
+        #[test]
+        fn fail_bool_object() {
+            let abi_encoded_body_and_json_path =
+                InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_object"]);
+
+            assert!(matches!(json_get_bool_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
+                Err(Fatal { msg: message }) if message == "Expected type 'Bool' at root.nested_level.field_object, but found Object {}"));
+        }
     }
 
     #[test]
