@@ -38,6 +38,19 @@ Every time a block is added, 𝜋 is updated. To prove that after adding a new b
 
 The following functions, written in pseudocode, provide more details on the Block Proof Cache implementation.
 
+### Recursive proofs
+
+In an ideal world - ZK Circuit will have access to its own ELF ID and therefore be able to verify the proofs produces by its previous invocations recursively. Unfortunately because ELF ID is a hash of a binary - it can't be included in itself.
+
+Therefore, we extract ELF ID into an argument and "pipe" it through all the proofs. We also add it to an output.
+Finally - when verifying this proof within the call proof - we check ELF ID against a hard-coded constant. This can be done there as **call** and **chain** are different circuits and having an ID of one within the other does not present the cycle mentioned above.
+
+We can reason about soundness backwards. If someone provided the proof which has correct ELF ID in the output and verifies with correct ELF ID - it also had correct ELF ID in the inputs and therefore correctly verified the internal proof.
+
+If one would try to generate the proof with ELF ID for an empty circuit (no assertions) - they can do that but:
+* either the output will not match;
+* or the proof will not verify with our ELF ID.
+
 ### Implementation
 
 #### Initialize
@@ -70,7 +83,7 @@ The append function is used to add a most recent block to the Merkle Patricia Tr
 
 ```rs
 fn append(elf_id: Hash, block: BlockHeader, mpt: SparseMpt<ParentBlockIdx, NewBlockIdx>, proof: ZkProof) -> (MptRoot, elf_id) {
-    risc0_std::verify_zk_proof(proof, mpt.root, elf_id);
+    risc0_std::verify_zk_proof(proof, (mpt.root, elf_id), elf_id);
     let parent_block_idx = block.number - 1;
     let parent_block_hash = mpt.get(parent_block_idx);
     assert_eq(parent_block_hash, block.parent_hash, "Block hash mismatch");
@@ -92,7 +105,7 @@ The prepend function is used to add a new oldest block to the Merkle Patricia Tr
 
 ```rs
 fn prepend(elf_id: Hash, child_block: BlockHeader, mpt: SparseMpt<ChildBlockIdx, NewBlockIdx>, proof: ZkProof) -> (MptRoot, elf_id) {
-    risc0_std::verify_zk_proof(proof, mpt.root, elf_id);
+    risc0_std::verify_zk_proof(proof, (mpt.root, elf_id), elf_id);
     let child_block_hash = mpt.get(child_block.number);
     assert_eq(child_block_hash, keccak256(rlp(child_block)), "Block hash mismatch");
     let new_mpt = mpt.insert(child_block.number - 1, child_block.parent_hash);
