@@ -2,7 +2,7 @@
 
 It is essential to be able to verify the latest block hash on-chain.
 
-Without that - an attacker will be able to:
+Without that - an attacker would be able to:
 * Execute code on some made-up chain with made-up data
 * Execute code on some non-canonical fork
 
