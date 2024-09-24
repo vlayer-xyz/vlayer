@@ -33,6 +33,8 @@
   - [Prover](./appendix/architecture/prover.md)
   - [Multichain](./appendix/architecture/multi.md)
   - [Block proofs](./appendix/architecture/block_proof.md)
+    - [Coherence](./appendix/architecture/block_proof/coherence.md)
+    - [Canonicity](./appendix/architecture/block_proof/canonicity.md)
   - [Solidity](./appendix/architecture/solidity.md)
   - [Releasing](./appendix/architecture/releasing.md)
 - [JSON-RPC API](./appendix/api.md)
