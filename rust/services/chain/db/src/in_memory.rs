@@ -9,19 +9,25 @@ pub struct InMemoryDatabase {
     store: KeyValueMap,
 }
 
-impl Database for InMemoryDatabase {
-    type RoTx = InMemoryRoTransaction;
-    type RwTx = InMemoryRwTransaction;
+pub struct InMemoryRoTransaction<'a> {
+    store: &'a KeyValueMap,
+}
+
+pub struct InMemoryRwTransaction<'a> {
+    store: &'a mut KeyValueMap,
+}
+
+impl<'a> Database<'a> for InMemoryDatabase {
+    type RoTx = InMemoryRoTransaction<'a>;
+    type RwTx = InMemoryRwTransaction<'a>;
 
     fn begin_ro(&self) -> InMemoryRoTransaction {
-        InMemoryRoTransaction {
-            store: self.store.clone(),
-        }
+        InMemoryRoTransaction { store: &self.store }
     }
 
     fn begin_rw(&mut self) -> InMemoryRwTransaction {
         InMemoryRwTransaction {
-            store: self.store.clone(),
+            store: &mut self.store,
         }
     }
 }
@@ -35,22 +41,14 @@ impl InMemoryDatabase {
     }
 }
 
-pub struct InMemoryRoTransaction {
-    store: KeyValueMap,
-}
-
-impl RoTransaction for InMemoryRoTransaction {
+impl<'a> RoTransaction for InMemoryRoTransaction<'a> {
     fn get(&self, table: impl AsRef<str>, key: impl AsRef<[u8]>) -> Option<Box<[u8]>> {
         let prefixed_key = add_table_prefix(table, key);
         self.store.get(prefixed_key.as_slice()).cloned()
     }
 }
 
-pub struct InMemoryRwTransaction {
-    store: KeyValueMap,
-}
-
-impl RoTransaction for InMemoryRwTransaction {
+impl<'a> RoTransaction for InMemoryRwTransaction<'a> {
     fn get(&self, table: impl AsRef<str>, key: impl AsRef<[u8]>) -> Option<Box<[u8]>> {
         let prefixed_key = add_table_prefix(table, key);
         self.store.get(prefixed_key.as_slice()).cloned()
@@ -61,7 +59,7 @@ fn add_table_prefix(table: impl AsRef<str>, key: impl AsRef<[u8]>) -> Vec<u8> {
     [table.as_ref().as_bytes(), key.as_ref()].concat()
 }
 
-impl RwTransaction for InMemoryRwTransaction {
+impl<'a> RwTransaction for InMemoryRwTransaction<'a> {
     fn insert(
         &mut self,
         table: impl AsRef<str>,

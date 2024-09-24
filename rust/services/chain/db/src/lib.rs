@@ -3,12 +3,12 @@ use thiserror::Error;
 mod in_memory;
 
 #[allow(unused)]
-pub trait Database {
-    type RoTx: RoTransaction;
-    type RwTx: RwTransaction;
+pub trait Database<'a> {
+    type RoTx: RoTransaction + 'a;
+    type RwTx: RwTransaction + 'a;
 
-    fn begin_ro(&self) -> Self::RoTx;
-    fn begin_rw(&mut self) -> Self::RwTx;
+    fn begin_ro(&'a self) -> Self::RoTx;
+    fn begin_rw(&'a mut self) -> Self::RwTx;
 }
 
 #[allow(unused)]
