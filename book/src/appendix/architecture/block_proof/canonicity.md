@@ -43,3 +43,9 @@ Therefore, the flow will be like this:
     * If it fails - fallback to the list of pinned blocks
 
 This is not implemented yet.
+
+### EIP2935
+
+[EIP2935](https://eips.ethereum.org/EIPS/eip-2935) proposes a very similar solution but on a protocol level.
+Instead of pinning blocks - it requires nodes to make some (8192) range of blocks available through the storage of system contract.
+It's planned to be included in a Pectra hard fork and go live on mainnet early 2025.
