@@ -35,7 +35,7 @@ try {
       `VITE_EXTENSION_ID=${extensionId.trim()}`,
     );
   } else {
-    envContent += `VITE_EXTENTION_ID=${extensionId}`.trim() + "\n";
+    envContent += `VITE_EXTENSION_ID=${extensionId}`.trim() + "\n";
   }
   await Bun.write(envPath, envContent);
 } catch (err) {
