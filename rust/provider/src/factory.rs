@@ -16,7 +16,7 @@ pub enum ProviderFactoryError {
     NoRpcCache(ChainId),
     #[error("Failed to load file cache: {0}")]
     FileProvider(String),
-    #[error("Failed create file cache: {0}")]
+    #[error("Failed to create cached provider: {0}")]
     CachedProvider(String),
     #[error("Failed to create rpc provider: {0}")]
     RpcProvider(#[from] ParseError),
