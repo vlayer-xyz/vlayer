@@ -1,6 +1,6 @@
 use std::collections::HashMap;
 
-use crate::{Database, DatabaseError, RoTransaction, RwTransaction};
+use crate::{Database, DatabaseError, ReadTx, ReadWriteTx, WriteTx};
 
 type KeyValueMap = HashMap<Box<[u8]>, Box<[u8]>>;
 
@@ -9,26 +9,26 @@ pub struct InMemoryDatabase {
     store: KeyValueMap,
 }
 
-pub struct InMemoryRoTransaction<'a> {
+pub struct InMemoryReadTx<'a> {
     store: &'a KeyValueMap,
 }
 
-pub struct InMemoryRwTransaction<'a> {
+pub struct InMemoryReadWriteTx<'a> {
     store: &'a mut KeyValueMap,
 }
 
 impl<'a> Database<'a> for InMemoryDatabase {
-    type RoTx = InMemoryRoTransaction<'a>;
-    type RwTx = InMemoryRwTransaction<'a>;
+    type ReadTx = InMemoryReadTx<'a>;
+    type ReadWriteTx = InMemoryReadWriteTx<'a>;
 
-    fn begin_ro(&self) -> InMemoryRoTransaction {
-        InMemoryRoTransaction { store: &self.store }
+    fn begin_ro(&'a self) -> Result<Self::ReadTx, DatabaseError> {
+        Ok(InMemoryReadTx { store: &self.store })
     }
 
-    fn begin_rw(&mut self) -> InMemoryRwTransaction {
-        InMemoryRwTransaction {
+    fn begin_rw(&'a mut self) -> Result<Self::ReadWriteTx, DatabaseError> {
+        Ok(InMemoryReadWriteTx {
             store: &mut self.store,
-        }
+        })
     }
 }
 
@@ -41,17 +41,25 @@ impl InMemoryDatabase {
     }
 }
 
-impl<'a> RoTransaction for InMemoryRoTransaction<'a> {
-    fn get(&self, table: impl AsRef<str>, key: impl AsRef<[u8]>) -> Option<Box<[u8]>> {
+impl<'a> ReadTx for InMemoryReadTx<'a> {
+    fn get(
+        &self,
+        table: impl AsRef<str>,
+        key: impl AsRef<[u8]>,
+    ) -> Result<Option<Box<[u8]>>, DatabaseError> {
         let prefixed_key = add_table_prefix(table, key);
-        self.store.get(prefixed_key.as_slice()).cloned()
+        Ok(self.store.get(prefixed_key.as_slice()).cloned())
     }
 }
 
-impl<'a> RoTransaction for InMemoryRwTransaction<'a> {
-    fn get(&self, table: impl AsRef<str>, key: impl AsRef<[u8]>) -> Option<Box<[u8]>> {
+impl<'a> ReadTx for InMemoryReadWriteTx<'a> {
+    fn get(
+        &self,
+        table: impl AsRef<str>,
+        key: impl AsRef<[u8]>,
+    ) -> Result<Option<Box<[u8]>>, DatabaseError> {
         let prefixed_key = add_table_prefix(table, key);
-        self.store.get(prefixed_key.as_slice()).cloned()
+        Ok(self.store.get(prefixed_key.as_slice()).cloned())
     }
 }
 
@@ -59,7 +67,7 @@ fn add_table_prefix(table: impl AsRef<str>, key: impl AsRef<[u8]>) -> Vec<u8> {
     [table.as_ref().as_bytes(), key.as_ref()].concat()
 }
 
-impl<'a> RwTransaction for InMemoryRwTransaction<'a> {
+impl<'a> WriteTx for InMemoryReadWriteTx<'a> {
     fn insert(
         &mut self,
         table: impl AsRef<str>,
@@ -92,3 +100,5 @@ impl<'a> RwTransaction for InMemoryRwTransaction<'a> {
         Ok(())
     }
 }
+
+impl<'a> ReadWriteTx for InMemoryReadWriteTx<'a> {}
