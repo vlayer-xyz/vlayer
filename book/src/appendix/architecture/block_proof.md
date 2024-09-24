@@ -1,6 +1,6 @@
 # Block Proof
 
-Vlayer executes Solidity code off-chain and proves the correctness of that execution on-chain. For that purpose, it fetches state and storage data and verifies it with storage proofs.
+vlayer executes Solidity code off-chain and proves the correctness of that execution on-chain. For that purpose, it fetches state and storage data and verifies it with storage proofs.
 
 Storage proofs prove that a piece of storage is part of a block _with a specific hash_. We say the storage proof is 'connected' to a certain block hash.
 
@@ -8,7 +8,7 @@ However, the storage proof doesn't guarantee that the block with the specific ha
 
 ## Motivation
 
-Vlayer provides **time-travel functionality**. As a result, state and storage proofs are not *connected* to a single block hash, but to multiple block hashes. To ensure that all those hashes exist on the chain, it's enough to prove two things:
+vlayer provides **time-travel functionality**. As a result, state and storage proofs are not *connected* to a single block hash, but to multiple block hashes. To ensure that all those hashes exist on the chain, it's enough to prove two things:
 
 * **Coherence** - all the blocks' hashes belong to the same chain
 * **Canonicity** - the last block hash is a member of a canonical chain
