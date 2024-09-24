@@ -1,7 +1,6 @@
 [profile.default]
 src = "src"
 out = "out"
-#no_match_path = "test/vlayer/*"
 fs_permissions = [{ access = "read", path = "./testdata"}]
 
 libs = ["dependencies"]
