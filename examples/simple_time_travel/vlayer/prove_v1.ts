@@ -3,11 +3,10 @@ import type { Address } from "viem";
 import { sepolia } from "viem/chains";
 
 import { testHelpers, prove } from "@vlayer/sdk";
-import averageBalance from "../out/AverageBalance.sol/AverageBalance";
+import averageBalance from "../out/AverageBalanceV1.sol/AverageBalanceV1";
 import averageBalanceVerifier from "../out/AverageBalanceVerifier.sol/AverageBalanceVerifier";
 import hodlerBadge from "../out/HodlerBadgeNFT.sol/HodlerBadgeNFT";
 
-const chainId = sepolia.id;
 const usdcTokenAddr = "0x1c7D4B196Cb0C7B01d743Fbc6116a902379C7238";
 const tokenOwner = "0x6dBe810e3314546009bD6e1B29f9031211CdA5d2";
 const startBlock = 6639262;
@@ -16,7 +15,6 @@ const step = 9000;
 
 const deployProver = async () => {
   const prover: Address = await testHelpers.deployContract(averageBalance, [
-    chainId,
     usdcTokenAddr,
     startBlock,
     endBlock,
@@ -45,6 +43,7 @@ const { proof, returnValue } = await prove(
   averageBalance.abi,
   "averageBalanceOf",
   [tokenOwner],
+  sepolia.id,
 );
 console.log("Response:", proof, returnValue);
 
