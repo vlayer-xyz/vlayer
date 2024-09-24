@@ -3,23 +3,23 @@ pragma solidity ^0.8.13;
 
 import {VTest} from "vlayer-0.1.0/src/testing/VTest.sol";
 import "./EmailProver.sol";
-import {MimeEmail, EmailProofLib, VerifiedEmail} from "vlayer-0.1.0/src/EmailProof.sol";
+import {UnverifiedEmail, EmailProofLib, VerifiedEmail} from "vlayer-0.1.0/src/EmailProof.sol";
 
 contract EmailProofLibWrapper {
-    using EmailProofLib for MimeEmail;
+    using EmailProofLib for UnverifiedEmail;
 
-    function verify(MimeEmail calldata email) public view returns (VerifiedEmail memory) {
+    function verify(UnverifiedEmail calldata email) public view returns (VerifiedEmail memory) {
         return email.verify();
     }
 }
 
 contract EmailProverTest is VTest {
-    using EmailProofLib for MimeEmail;
+    using EmailProofLib for UnverifiedEmail;
 
     function test_decodesEmail() public {
         EmailProofLibWrapper wrapper = new EmailProofLibWrapper();
         string memory mime = vm.readFile("./testdata/test_email.txt");
-        MimeEmail memory email = MimeEmail(mime);
+        UnverifiedEmail memory email = UnverifiedEmail(mime);
         callProver();
         VerifiedEmail memory verifiedEmail = wrapper.verify(email);
         assertEq(verifiedEmail.from, "Joe SixPack <joe@football.example.com>");

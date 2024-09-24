@@ -30,15 +30,15 @@ Below is an example of such proof generation:
 
 ```solidity
 import {Prover} from "vlayer/Prover.sol";
-import {MimeEmail, VerifiedEmail, EmailProofLib} from "vlayer/EmailProof.sol";
+import {UnverifiedEmail, VerifiedEmail, EmailProofLib} from "vlayer/EmailProof.sol";
 import {StringUtils} "vlayer/StringUtils.sol";
 
 contract GitHubEmail is Prover {
-    using EmailProofLib for MimeEmail;
+    using EmailProofLib for UnverifiedEmail;
     using StringUtils for string;
 
-    function main(MimeEmail calldata mimeEmail) public view returns (bool) {
-        VerifiedEmail memory email = mimeEmail.verify();
+    function main(UnverifiedEmail calldata unverifiedEmail) public view returns (bool) {
+        VerifiedEmail memory email = unverifiedEmail.verify();
 
         require(email.subject.equal("Welcome to GitHub"), "Incorrect subject");
         require(email.from.equal("notifications@github.com"), "Incorrect sender");
@@ -109,15 +109,15 @@ Now, we can access the email from the `Prover` contract:
 
 ```solidity
 import {Prover} from "vlayer/Prover.sol";
-import {VerifiedEmail, MimeEmail, EmailProofLib} from "vlayer/EmailProof.sol";
+import {VerifiedEmail, UnverifiedEmail, EmailProofLib} from "vlayer/EmailProof.sol";
 import {StringUtils} from "vlayer/StringUtils.sol"
 
 contract RecoveryEmail is Prover {
     using StringUtils for string;
-    using EmailProofLib for MimeEmail;
+    using EmailProofLib for UnverifiedEmail;
 
-    function main(address multisigAddr, MimeEmail calldata mimeEmail) public returns (address, bytes32, address) {     
-      VerifiedEmail memory email = mimeEmail.verify()
+    function main(address multisigAddr, UnverifiedEmail calldata unverifiedEmail) public returns (address, bytes32, address) {     
+      VerifiedEmail memory email = unverifiedEmail.verify()
  
       address lostWallet = parseSubject(email.subject);
       address newAddress = parseBody(email.body);
