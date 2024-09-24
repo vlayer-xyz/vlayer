@@ -129,10 +129,10 @@ And the response:
 ```json
 {
     "result": {
-        "proof": "0xe32ddb9c538f04c994e2e802237fa5f4c4e7e2643ab48bd8535b1c7009c8aa81", // ZK Proof
+        "proof": "0x...", // ZK Proof
         "nodes": [
-          "0x...." // Root node. It's hash is proven by ZK Proof
-          "0x...." // Other nodes in arbitrary order
+          "0x..." // Root node. It's hash is proven by ZK Proof
+          "0x..." // Other nodes in arbitrary order
           ...
         ]
     }
