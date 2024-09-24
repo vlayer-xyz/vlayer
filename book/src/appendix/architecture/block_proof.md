@@ -23,4 +23,4 @@ It maintains a data structure that stores block hashes along with a zk-proof. Th
 
 ### Canonicity
 
-The latest hash needs to be verified on-chain. Generating proofs is slow. Some fast chains might prune our latest block by the time we are ready to settle the proof. Proposed solution is described [here](./block_proof/canonicity.md).
+Since the latest hash needs to be verified on-chain, but generating proofs is a slow process; some fast chains might prune our latest block by the time we are ready to settle the proof. Proposed solution is described [here](./block_proof/canonicity.md).
