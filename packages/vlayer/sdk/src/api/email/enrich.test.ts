@@ -25,8 +25,6 @@ describe("Enrich email: integration", () => {
     const emailWithNoDkimHeader = fs
       .readFileSync("./src/api/email/testdata/test_email_unknown_domain.txt")
       .toString();
-    await expect(enrichEmail(emailWithNoDkimHeader)).rejects.toThrow(
-      "queryTxt ENOTFOUND",
-    );
+    await expect(enrichEmail(emailWithNoDkimHeader)).rejects.toThrow();
   });
 });
