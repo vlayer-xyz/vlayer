@@ -74,9 +74,19 @@ export async function v_call(
 
   const response_json = await response.json();
 
-  if ("error" in response_json) {
-    throw new Error(response_json.error.message);
+  
+  //TODO we should launch some schema validation here 
+
+  if ("error" in response_json ) {
+    throw new Error(response_json.error?.message);
   }
 
   return response_json as Promise<VCallResponse>;
+}
+
+
+function asserObject(x: unknown): asserts x is object {
+  if (typeof x !== "object" ) {
+    throw new Error("Expected object");
+  }
 }

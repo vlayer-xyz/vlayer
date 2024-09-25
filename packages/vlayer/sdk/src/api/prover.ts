@@ -38,15 +38,16 @@ export async function getContractSpec(file: string): Promise<ContractSpec> {
 }
 
 // TODO all those casts here are not acceptable in long term
+import { testChainId1} from "./helpers";
 
 export async function prove<T extends Abi>({
   abi,
   functionName,
   args,
   prover,
-  chainId,
+  chainId = testChainId1
 }: EncodeFunctionDataParameters & {
-  chainId: number;
+  chainId?: number;
   prover: Address;
 } & {
   abi: T;
