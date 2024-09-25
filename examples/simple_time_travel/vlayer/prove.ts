@@ -40,12 +40,12 @@ const deployVerifier = async (prover: Address) => {
 console.log("Proving...");
 const proverAddr = await deployProver();
 
-const { proof, returnValue } = await prove({
-  abi: averageBalance.abi,
-  functionName: "averageBalanceOf",
-  args: [tokenOwner],
-  prover: proverAddr,
-});
+const { proof, returnValue } = await prove(
+  proverAddr,
+  averageBalance.abi,
+  "averageBalanceOf",
+  [tokenOwner],
+);
 console.log("Response:", proof, returnValue);
 
 const verifierAddr = await deployVerifier(proverAddr);

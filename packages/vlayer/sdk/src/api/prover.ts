@@ -40,20 +40,13 @@ export async function getContractSpec(file: string): Promise<ContractSpec> {
 // TODO all those casts here are not acceptable in long term
 import { testChainId1} from "./helpers";
 
-export async function prove<T extends Abi>({
-  abi,
-  functionName,
-  args,
-  prover,
-  chainId = testChainId1
-}: EncodeFunctionDataParameters & {
-  chainId?: number;
-  prover: Address;
-} & {
-  abi: T;
-  functionName: ContractFunctionName<T> | undefined;
-  args: ContractFunctionArgs<T>;
-}) {
+export async function prove<T extends Abi>(
+  prover: Address,
+  abi: T,
+  functionName: ContractFunctionName<T> | undefined,
+  args: ContractFunctionArgs<T>,
+  chainId = testChainId1,
+) {
   const calldata = encodeFunctionData({
     abi: abi as Abi,
     functionName: functionName as string,
@@ -77,7 +70,7 @@ export async function prove<T extends Abi>({
 
   addDynamicParamsOffsets(abi, functionName, proof);
 
-  return { proof, returnValue };
+  return { proof, returnValue : returnValue as `0x${string}`[] };
 }
 
 function addDynamicParamsOffsets(
