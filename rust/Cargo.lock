@@ -8890,7 +8890,7 @@ checksum = "1f3ccbac311fea05f86f61904b462b55fb3df8837a366dfc601a0161d0532f20"
 [[package]]
 name = "tlsn-core"
 version = "0.1.0-alpha.6"
-source = "git+https://github.com/tlsnotary/tlsn.git#3554db83e17b2e5fc98293b397a2907b7f023496"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.6#3554db83e17b2e5fc98293b397a2907b7f023496"
 dependencies = [
  "bimap",
  "bytes",
@@ -8913,7 +8913,7 @@ dependencies = [
 [[package]]
 name = "tlsn-tls-core"
 version = "0.1.0-alpha.6"
-source = "git+https://github.com/tlsnotary/tlsn.git#3554db83e17b2e5fc98293b397a2907b7f023496"
+source = "git+https://github.com/tlsnotary/tlsn.git?tag=v0.1.0-alpha.6#3554db83e17b2e5fc98293b397a2907b7f023496"
 dependencies = [
  "futures",
  "hmac",
