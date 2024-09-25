@@ -55,7 +55,7 @@ Email is passed to the Solidity contract as an `UnverifiedEmail` structure that 
 ```solidity
 // Note: more fields will be added soon
 struct UnverifiedEmail {
-  string mime;
+  string email;
   string[] dnsRecords;
 }
 ```
