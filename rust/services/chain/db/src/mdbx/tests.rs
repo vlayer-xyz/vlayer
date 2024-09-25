@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use anyhow::Result;
 use tempfile::{NamedTempFile, TempDir};
 
@@ -5,110 +7,125 @@ use crate::Database;
 
 use super::*;
 
-fn crate_and_insert(
-    db: &mut Mdbx,
-    table: &str,
-    key: impl AsRef<[u8]>,
-    value: impl AsRef<[u8]>,
-) -> DbResult<()> {
+// Tests use only one table
+const TABLE: &str = "table";
+
+// Macro for db setup - `db_dir` needs to be in scope, otherwise the directory would not be cleaned up after test
+macro_rules! temp_db {
+    ($db_var:ident) => {
+        let db_dir = TempDir::new().expect("Failed to create temp dir");
+        let mut $db_var = Mdbx::open(db_dir.path()).expect("Failed to open database");
+    };
+}
+
+fn crate_and_insert(db: &mut Mdbx, key: impl AsRef<[u8]>, value: impl AsRef<[u8]>) -> DbResult<()> {
     db.with_rw_tx(|tx| {
-        tx.create_table(table)?;
-        tx.insert(table, key, value)
+        tx.create_table(TABLE)?;
+        tx.insert(TABLE, key, value)
     })
+}
+
+fn insert(db: &mut Mdbx, key: impl AsRef<[u8]>, value: impl AsRef<[u8]>) -> DbResult<()> {
+    db.with_rw_tx(|tx| tx.insert(TABLE, key, value))
+}
+
+fn delete(db: &mut Mdbx, key: impl AsRef<[u8]>) -> DbResult<()> {
+    db.with_rw_tx(|tx| tx.delete(TABLE, key))
+}
+
+fn get(db: &Mdbx, key: impl AsRef<[u8]>) -> DbResult<Option<Box<[u8]>>> {
+    db.with_ro_tx(|tx| tx.get(TABLE, key))
 }
 
 #[test]
 fn db_flow() -> Result<()> {
-    let db_dir = TempDir::new()?;
-    let mut db = Mdbx::open(db_dir.path())?;
+    temp_db!(db);
 
-    let key = [0];
-    let value = [1];
+    crate_and_insert(&mut db, [0], [1])?;
+    assert_eq!(get(&db, [0])?.unwrap().as_ref(), [1]);
 
-    // Check insert
-    crate_and_insert(&mut db, "table", key, value)?;
-    let read_val = db.with_ro_tx(|tx| tx.get("table", key))?;
-    assert_eq!(read_val.unwrap().as_ref(), value);
-
-    // Check delete
-    db.with_rw_tx(|tx| tx.delete("table", key))?;
-    let read_val = db.with_ro_tx(|tx| tx.get("table", key))?;
-    assert!(read_val.is_none());
+    delete(&mut db, [0])?;
+    assert_eq!(get(&db, [0])?, None);
 
     Ok(())
 }
 
 #[test]
-fn get_no_table() -> Result<()> {
-    let db_dir = TempDir::new()?;
-    let mut db = Mdbx::open(db_dir.path())?;
-
-    let result = db.with_ro_tx(|tx| tx.get("table", [0]));
-    assert_eq!(result.unwrap_err(), DbError::NonExistingTable);
-
-    Ok(())
+fn get_no_table() {
+    temp_db!(db);
+    assert_eq!(get(&db, [0]).unwrap_err(), DbError::NonExistingTable);
 }
 
 #[test]
 fn get_missing_key() -> Result<()> {
-    let db_dir = TempDir::new()?;
-    let mut db = Mdbx::open(db_dir.path())?;
+    temp_db!(db);
 
-    crate_and_insert(&mut db, "table", [0], [1])?;
-    let result = db.with_ro_tx(|tx| tx.get("table", [2]))?;
-    assert!(result.is_none());
+    crate_and_insert(&mut db, [0], [1])?;
+    assert_eq!(get(&db, [2])?, None);
 
     Ok(())
 }
 
 #[test]
 fn insert_duplicate_key() -> Result<()> {
-    let db_dir = TempDir::new()?;
-    let mut db = Mdbx::open(db_dir.path())?;
+    temp_db!(db);
 
-    crate_and_insert(&mut db, "table", [0], [1])?;
-    let result = db.with_rw_tx(|tx| tx.insert("table", [0], [1]));
-    assert_eq!(result.unwrap_err(), DbError::DuplicateKey);
+    crate_and_insert(&mut db, [0], [1])?;
+    assert_eq!(insert(&mut db, [0], [1]).unwrap_err(), DbError::DuplicateKey);
 
     Ok(())
 }
 
 #[test]
-fn delete_no_table() -> Result<()> {
-    let db_dir = TempDir::new()?;
-    let mut db = Mdbx::open(db_dir.path())?;
-
-    let result = db.with_rw_tx(|tx| tx.delete("table", [0]));
-    assert_eq!(result.unwrap_err(), DbError::NonExistingTable);
-
-    Ok(())
+fn delete_no_table() {
+    temp_db!(db);
+    assert_eq!(delete(&mut db, [0]).unwrap_err(), DbError::NonExistingTable);
 }
 
 #[test]
 fn delete_missing_key() -> Result<()> {
-    let db_dir = TempDir::new()?;
-    let mut db = Mdbx::open(db_dir.path())?;
+    temp_db!(db);
 
-    crate_and_insert(&mut db, "table", [0], [1])?;
-    let result = db.with_rw_tx(|tx| tx.delete("table", [2]));
-    assert_eq!(result.unwrap_err(), DbError::NonExistingKey);
+    crate_and_insert(&mut db, [0], [1])?;
+    assert_eq!(delete(&mut db, [2]).unwrap_err(), DbError::NonExistingKey);
+
     Ok(())
 }
 
 #[test]
 fn rollback_on_drop() -> Result<()> {
-    let db_dir = TempDir::new()?;
-    let mut db = Mdbx::open(db_dir.path())?;
+    temp_db!(db);
 
     {
         // Insert without commit
         let mut tx = db.begin_rw()?;
-        tx.create_table("table")?;
-        tx.insert("table", [0], [1])?;
+        tx.create_table(TABLE)?;
+        tx.insert(TABLE, [0], [1])?;
     }
 
     // Table should not exist
-    let result = db.with_ro_tx(|tx| tx.get("table", [0]));
-    assert_eq!(result.unwrap_err(), DbError::NonExistingTable);
+    assert_eq!(get(&db, [0]).unwrap_err(), DbError::NonExistingTable);
+
+    Ok(())
+}
+
+#[test]
+fn persistence() -> Result<()> {
+    let db_dir = TempDir::new()?;
+    let path = PathBuf::from(db_dir.path());
+    let mut db = Mdbx::open(&path)?;
+    crate_and_insert(&mut db, [0], [1])?;
+
+    // After reopening, the data is still there
+    drop(db);
+    let db = Mdbx::open(&path)?;
+    assert_eq!(get(&db, [0])?.unwrap().as_ref(), [1]);
+
+    // But it's gone if we delete the directory
+    drop(db);
+    drop(db_dir);
+    let db = Mdbx::open(&path)?;
+    assert_eq!(get(&db, [0]).unwrap_err(), DbError::NonExistingTable);
+
     Ok(())
 }

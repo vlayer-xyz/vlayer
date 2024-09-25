@@ -13,15 +13,18 @@ pub trait Database<'a> {
 
     fn begin_rw(&'a mut self) -> DbResult<Self::ReadWriteTx>;
 
-    fn with_ro_tx<T, F: FnOnce(&Self::ReadTx) -> DbResult<T>>(&'a self, f: F) -> DbResult<T> {
+    fn with_ro_tx<T, F>(&'a self, f: F) -> DbResult<T>
+    where
+        F: FnOnce(&Self::ReadTx) -> DbResult<T>,
+    {
         let tx = self.begin_ro()?;
         f(&tx)
     }
 
-    fn with_rw_tx<T, F: FnOnce(&mut Self::ReadWriteTx) -> DbResult<T>>(
-        &'a mut self,
-        f: F,
-    ) -> DbResult<T> {
+    fn with_rw_tx<T, F>(&'a mut self, f: F) -> DbResult<T>
+    where
+        F: FnOnce(&mut Self::ReadWriteTx) -> DbResult<T>,
+    {
         let mut tx = self.begin_rw()?;
         let res = f(&mut tx)?;
         tx.commit()?;
