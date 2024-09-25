@@ -57,14 +57,13 @@ use foundry_evm_core::opts::EvmOpts;
 use rayon::iter::IntoParallelRefIterator;
 use rayon::iter::ParallelIterator;
 use regex::Regex;
-use std::sync::mpsc;
 use std::{
     collections::{BTreeMap, BTreeSet},
     path::PathBuf,
-    sync::{mpsc::channel, Arc},
+    sync::Arc,
     time::Instant,
 };
-use tracing::{debug, debug_span, enabled, trace};
+use tracing::{debug, debug_span, enabled, error, trace};
 
 // Loads project's figment and merges the build cli arguments into it
 foundry_config::merge_impl_figment_convert!(TestArgs, opts, evm_opts);
@@ -452,7 +451,7 @@ impl TestArgs {
         let libraries = runner.libraries.clone();
 
         // Run tests.
-        let (tx, rx) = channel::<(String, SuiteResult)>();
+        let (tx, mut rx) = tokio::sync::mpsc::channel(1024);
         let timer = Instant::now();
         let show_progress = config.show_progress;
         let handle = tokio::task::spawn_blocking({
@@ -496,7 +495,7 @@ impl TestArgs {
         let mut outcome = TestOutcome::empty(self.allow_failure);
 
         let mut any_test_failed = false;
-        for (contract_name, suite_result) in rx {
+        while let Some((contract_name, suite_result)) = rx.recv().await {
             let tests = &suite_result.test_results;
 
             // Clear the addresses and labels from previous test.
@@ -742,7 +741,7 @@ fn persist_run_failures(config: &Config, outcome: &TestOutcome) {
 fn test(
     mut runner: MultiContractRunner,
     filter: &dyn TestFilter,
-    tx: &mpsc::Sender<(String, SuiteResult)>,
+    tx: &tokio::sync::mpsc::Sender<(String, SuiteResult)>,
     _show_progress: bool,
 ) {
     let tokio_handle = tokio::runtime::Handle::current();
@@ -755,7 +754,9 @@ fn test(
     contracts.par_iter().for_each(|&(id, contract)| {
         let _guard = tokio_handle.enter();
         let result = run_test_suite(&runner, id, contract, db.clone(), filter, &tokio_handle);
-        let _ = tx.send((id.identifier(), result));
+        _ = tx
+            .blocking_send((id.identifier(), result))
+            .map_err(|err| error!("Suite result dropped: {err:?}"));
     })
 }
 
