@@ -2,9 +2,10 @@ use crate::dkim::static_resolver::StaticResolver;
 use mail_auth::dkim::verify::DkimVerifier;
 use mail_auth::{AuthenticatedMessage, DkimOutput, DkimResult, Error as AuthError};
 
-pub fn verify_dkim(email: &[u8]) -> Result<(), AuthError> {
+pub fn verify_dkim(email: &[u8], dns_records: Vec<String>) -> Result<(), AuthError> {
     let authenticated_message = AuthenticatedMessage::parse(email).ok_or(AuthError::ParseError)?;
-    let resolver = StaticResolver {};
+    let dns_record = dns_records.get(0).ok_or(AuthError::UnsupportedKeyType)?;
+    let resolver = StaticResolver::new(dns_record);
 
     let future = DkimVerifier::verify_dkim(&resolver, &authenticated_message);
     let dkim_outputs = futures::executor::block_on(future);

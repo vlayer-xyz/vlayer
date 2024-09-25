@@ -2,7 +2,7 @@ use alloy_sol_types::SolValue;
 use mailparse::headers::Headers;
 use mailparse::{MailHeaderMap, MailParseError, ParsedMail};
 
-mod sol;
+pub(crate) mod sol;
 
 #[derive(Debug)]
 pub struct Email {
