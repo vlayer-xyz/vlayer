@@ -1,16 +1,16 @@
-use std::sync::Arc;
+use std::{rc::Rc, sync::Arc};
 
 use revm::{
     db::WrapDatabaseRef,
     inspector_handle_register,
     primitives::{EVMError, ExecutionResult, ResultAndState, SuccessReason},
-    DatabaseRef, Evm,
+    DatabaseRef, Evm, Handler,
 };
 use thiserror::Error;
 use tracing::error;
 
-use crate::precompiles::VLAYER_PRECOMPILES;
 use crate::utils::evm_call::format_failed_call_result;
+use crate::{evm::env::EvmEnv, precompiles::VLAYER_PRECOMPILES};
 use crate::{
     evm::env::{cached::CachedEvmEnv, location::ExecutionLocation},
     inspector::TravelInspector,
@@ -48,30 +48,35 @@ where
         Self { envs }
     }
 
+    fn get_env(&self, location: ExecutionLocation) -> Result<Rc<EvmEnv<D>>, EngineError> {
+        self.envs
+            .get(location)
+            .map_err(|err| EngineError::EvmEnv(err.to_string()))
+    }
+
     pub fn call(
         &'envs self,
         tx: &Call,
         location: ExecutionLocation,
     ) -> Result<Vec<u8>, EngineError> {
-        let env = self
-            .envs
-            .get(location)
-            .map_err(|err| EngineError::EvmEnv(err.to_string()))?;
-        let callback = |call: &_, location| self.call(call, location);
-        let inspector = TravelInspector::new(env.cfg_env.chain_id, callback);
+        let env = self.get_env(location)?;
+        let transaction_callback = |call: &_, location| self.call(call, location);
+        let inspector = TravelInspector::new(env.cfg_env.chain_id, transaction_callback);
+        let precompiles_handle_register = |handler: &mut Handler<_, _, _>| {
+            let precompiles = handler.pre_execution.load_precompiles();
+            handler.pre_execution.load_precompiles = Arc::new(move || {
+                let mut precompiles = precompiles.clone();
+                precompiles.extend(VLAYER_PRECOMPILES);
+                precompiles
+            });
+        };
+
         let evm = Evm::builder()
             .with_ref_db(&env.db)
             .with_external_context(inspector)
             .with_cfg_env_with_handler_cfg(env.cfg_env.clone())
             .with_tx_env(tx.clone().into())
-            .append_handler_register(|handler| {
-                let precompiles = handler.pre_execution.load_precompiles();
-                handler.pre_execution.load_precompiles = Arc::new(move || {
-                    let mut precompiles = precompiles.clone();
-                    precompiles.extend(VLAYER_PRECOMPILES);
-                    precompiles
-                });
-            })
+            .append_handler_register(precompiles_handle_register)
             .append_handler_register(inspector_handle_register)
             .modify_block_env(|blk_env| env.header.fill_block_env(blk_env))
             .build();

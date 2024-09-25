@@ -35,12 +35,8 @@ static SET_CHAIN_SELECTOR: Lazy<Box<[u8]>> = Lazy::new(|| {
         .into_boxed_slice()
 });
 
-#[derive(Default, Clone, Debug)]
-pub struct NoopInspector;
-
-impl<DB> Inspector<DB> for NoopInspector where DB: Database {}
-
-type Callback<'a> = dyn Fn(&Call, ExecutionLocation) -> Result<Vec<u8>, EngineError> + 'a;
+type TransactionCallback<'a> =
+    dyn Fn(&Call, ExecutionLocation) -> Result<Vec<u8>, EngineError> + 'a;
 
 enum TravelCall {
     SetBlock { block_number: u64 },
@@ -79,18 +75,18 @@ fn u64_from_be_slice(slice: &[u8]) -> u64 {
 pub struct TravelInspector<'a> {
     start_chain_id: ChainId,
     pub location: Option<ExecutionLocation>,
-    callback: Box<Callback<'a>>,
+    transaction_callback: Box<TransactionCallback<'a>>,
 }
 
 impl<'a> TravelInspector<'a> {
     pub fn new(
         start_chain_id: ChainId,
-        callback: impl Fn(&Call, ExecutionLocation) -> Result<Vec<u8>, EngineError> + 'a,
+        transaction_callback: impl Fn(&Call, ExecutionLocation) -> Result<Vec<u8>, EngineError> + 'a,
     ) -> Self {
         Self {
             start_chain_id,
             location: None,
-            callback: Box::new(callback),
+            transaction_callback: Box::new(transaction_callback),
         }
     }
 
@@ -118,7 +114,8 @@ impl<'a> TravelInspector<'a> {
             "Intercepting the call. Block number: {:?}, chain id: {:?}",
             location.block_number, location.chain_id
         );
-        let result = (self.callback)(&inputs.into(), location).expect("Intercepted call failed");
+        let result =
+            (self.transaction_callback)(&inputs.into(), location).expect("Intercepted call failed");
         info!("Intercepted call returned: {:?}", result);
         let outcome = create_return_outcome(result, inputs);
         Some(outcome)
