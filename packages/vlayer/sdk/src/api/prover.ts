@@ -6,7 +6,6 @@ import {
   ContractFunctionName,
   decodeFunctionResult,
   encodeFunctionData,
-  EncodeFunctionDataParameters,
   type Hex,
 } from "viem";
 
