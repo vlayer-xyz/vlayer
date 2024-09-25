@@ -1,8 +1,10 @@
-name: Test
+name: Vlayer test
 
 on:
   push:
     paths:
+      - 'bash/**'
+      - 'contracts/**'
       - "rust-toolchain.toml"
       - "rust/**"
       - "examples/**"
@@ -12,7 +14,7 @@ on:
   merge_group:
 
 jobs:
-  rust-test:
+  vlayer-test:
     runs-on: aws-linux-small
 
     steps:
@@ -41,16 +43,14 @@ jobs:
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: nightly-d75318c9c7a1c6af5404fe96f63ca890dcdd588d # 2024-09-05
-          
-      - name: Check clang and LLVM version
-        env:
-          EXPECTED_LLVM_VERSION: "18.1"
-        run: bash/check_llvm_clang.sh
 
-      - name: Run workspace rust tests
-        working-directory: rust
+      - name: Run Forge build
+        working-directory: ./contracts
         run: |
-          cargo test --workspace --locked
-        env:
-          RUST_LOG: info
-          RISC0_DEV_MODE: 1
+          forge soldeer install
+
+      - name: Run vlayer tests for contracts
+        working-directory: ./contracts
+        run: |
+          # vlayer test
+          cargo run --manifest-path ../rust/Cargo.toml --package cli -- test
