@@ -16,7 +16,8 @@ contract EmailProofLibWrapper {
 contract EmailProverTest is VTest {
     using EmailProofLib for UnverifiedEmail;
 
-    string constant HARDCODED_DNS_RECORD = "newengland._domainkey.example.com v=DKIM1; p=MIGJAoGBALVI635dLK4cJJAH3Lx6upo3X/Lm1tQz3mezcWTA3BUBnyIsdnRf57aD5BtNmhPrYYDlWlzw3UgnKisIxktkk5+iMQMlFtAS10JB8L3YadXNJY+JBcbeSi5TgJe4WFzNgW95FWDAuSTRXSWZfA/8xjflbTLDx0euFZOM7C4T0GwLAgMBAAE=";
+    string constant HARDCODED_DNS_RECORD =
+        "newengland._domainkey.example.com v=DKIM1; p=MIGJAoGBALVI635dLK4cJJAH3Lx6upo3X/Lm1tQz3mezcWTA3BUBnyIsdnRf57aD5BtNmhPrYYDlWlzw3UgnKisIxktkk5+iMQMlFtAS10JB8L3YadXNJY+JBcbeSi5TgJe4WFzNgW95FWDAuSTRXSWZfA/8xjflbTLDx0euFZOM7C4T0GwLAgMBAAE=";
 
     function test_decodesEmail() public {
         EmailProofLibWrapper wrapper = new EmailProofLibWrapper();
