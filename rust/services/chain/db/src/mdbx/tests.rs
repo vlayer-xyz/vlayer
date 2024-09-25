@@ -1,153 +1,114 @@
+use anyhow::Result;
 use tempfile::{NamedTempFile, TempDir};
 
 use crate::Database;
 
 use super::*;
 
-#[test]
-fn test_db_flow() {
-    let db_dir = TempDir::new().expect("Failed to create temp file");
-    let mut db = Mdbx::open(db_dir.path()).expect("DB open failed");
-
-    let table = "table";
-    let key = "key".as_bytes();
-    let value = "val".as_bytes();
-
-    {
-        // Insert
-        let mut tx = db.begin_rw().expect("begin_rw failed");
-        tx.insert(table, key, value).expect("insert failed");
-        tx.commit().expect("commit failed");
-    }
-
-    {
-        // Verify insert result
-        let tx = db.begin_ro().expect("begin_ro failed");
-        let read_val = tx
-            .get(table, key)
-            .expect("get failed")
-            .expect("value missing");
-        assert_eq!(value, read_val.as_ref());
-    }
-
-    {
-        // Delete
-        let mut tx = db.begin_rw().expect("begin_rw failed");
-        tx.delete(table, key).expect("delete failed");
-        tx.commit().expect("commit failed");
-    }
-
-    {
-        // Verify delete result
-        let tx = db.begin_ro().expect("begin_ro failed");
-        let read_val = tx.get(table, key).expect("get failed");
-        assert!(read_val.is_none())
-    }
+fn crate_and_insert(
+    db: &mut Mdbx,
+    table: &str,
+    key: impl AsRef<[u8]>,
+    value: impl AsRef<[u8]>,
+) -> DbResult<()> {
+    db.with_rw_tx(|tx| {
+        tx.create_table(table)?;
+        tx.insert(table, key, value)
+    })
 }
 
 #[test]
-fn test_get_no_table() {
-    let db_dir = TempDir::new().expect("Failed to create temp file");
-    let mut db = Mdbx::open(db_dir.path()).expect("DB open failed");
-    let tx = db.begin_ro().expect("begin_ro failed");
-    let result = tx.get("table", "key").expect("get failed");
-    assert!(result.is_none())
+fn db_flow() -> Result<()> {
+    let db_dir = TempDir::new()?;
+    let mut db = Mdbx::open(db_dir.path())?;
+
+    let key = [0];
+    let value = [1];
+
+    // Check insert
+    crate_and_insert(&mut db, "table", key, value)?;
+    let read_val = db.with_ro_tx(|tx| tx.get("table", key))?;
+    assert_eq!(read_val.unwrap().as_ref(), value);
+
+    // Check delete
+    db.with_rw_tx(|tx| tx.delete("table", key))?;
+    let read_val = db.with_ro_tx(|tx| tx.get("table", key))?;
+    assert!(read_val.is_none());
+
+    Ok(())
 }
 
 #[test]
-fn test_get_missing_key() {
-    let db_dir = TempDir::new().expect("Failed to create temp file");
-    let mut db = Mdbx::open(db_dir.path()).expect("DB open failed");
+fn get_no_table() -> Result<()> {
+    let db_dir = TempDir::new()?;
+    let mut db = Mdbx::open(db_dir.path())?;
 
-    let table = "table";
-    {
-        // Insert some key/value just to init the table
-        let mut tx = db.begin_rw().expect("begin_rw failed");
-        tx.insert(table, "key", "value").expect("insert failed");
-        tx.commit().expect("commit failed");
-    }
+    let result = db.with_ro_tx(|tx| tx.get("table", [0]));
+    assert_eq!(result.unwrap_err(), DbError::NonExistingTable);
 
-    {
-        // Get another key
-        let tx = db.begin_ro().expect("begin_ro failed");
-        let result = tx.get(table, "").expect("get failed");
-        assert!(result.is_none())
-    }
+    Ok(())
 }
 
 #[test]
-fn test_insert_duplicate_key() {
-    let db_dir = TempDir::new().expect("Failed to create temp file");
-    let mut db = Mdbx::open(db_dir.path()).expect("DB open failed");
+fn get_missing_key() -> Result<()> {
+    let db_dir = TempDir::new()?;
+    let mut db = Mdbx::open(db_dir.path())?;
 
-    let table = "table";
-    let key = "key".as_bytes();
-    let value = "val".as_bytes();
+    crate_and_insert(&mut db, "table", [0], [1])?;
+    let result = db.with_ro_tx(|tx| tx.get("table", [2]))?;
+    assert!(result.is_none());
 
-    {
-        // Insert once
-        let mut tx = db.begin_rw().expect("begin_rw failed");
-        tx.insert(table, key, value).expect("insert failed");
-        tx.commit().expect("commit failed");
-    }
-
-    {
-        // Insert twice
-        let mut tx = db.begin_rw().expect("begin_rw failed");
-        let result = tx.insert(table, key, value);
-        assert!(result.is_err_and(|err| err == DbError::DuplicateKey));
-    }
+    Ok(())
 }
 
 #[test]
-fn test_delete_no_table() {
-    let db_dir = TempDir::new().expect("Failed to create temp file");
-    let mut db = Mdbx::open(db_dir.path()).expect("DB open failed");
-    let mut tx = db.begin_rw().expect("begin_rw failed");
-    let result = tx.delete("table", "key");
-    assert!(result.is_err_and(|err| err == DbError::NonExistingKey));
+fn insert_duplicate_key() -> Result<()> {
+    let db_dir = TempDir::new()?;
+    let mut db = Mdbx::open(db_dir.path())?;
+
+    crate_and_insert(&mut db, "table", [0], [1])?;
+    let result = db.with_rw_tx(|tx| tx.insert("table", [0], [1]));
+    assert_eq!(result.unwrap_err(), DbError::DuplicateKey);
+
+    Ok(())
 }
 
 #[test]
-fn test_delete_missing_key() {
-    let db_dir = TempDir::new().expect("Failed to create temp file");
-    let mut db = Mdbx::open(db_dir.path()).expect("DB open failed");
+fn delete_no_table() -> Result<()> {
+    let db_dir = TempDir::new()?;
+    let mut db = Mdbx::open(db_dir.path())?;
 
-    let table = "table";
-    {
-        // Insert some key/value just to init the table
-        let mut tx = db.begin_rw().expect("begin_rw failed");
-        tx.insert(table, "key", "value").expect("insert failed");
-        tx.commit().expect("commit failed");
-    }
+    let result = db.with_rw_tx(|tx| tx.delete("table", [0]));
+    assert_eq!(result.unwrap_err(), DbError::NonExistingTable);
 
-    {
-        // Delete another key
-        let mut tx = db.begin_rw().expect("begin_rw failed");
-        let result = tx.delete(table, "");
-        assert!(result.is_err_and(|err| err == DbError::NonExistingKey));
-    }
+    Ok(())
 }
 
 #[test]
-fn test_rollback_on_drop() {
-    let db_dir = TempDir::new().expect("Failed to create temp file");
-    let mut db = Mdbx::open(db_dir.path()).expect("DB open failed");
+fn delete_missing_key() -> Result<()> {
+    let db_dir = TempDir::new()?;
+    let mut db = Mdbx::open(db_dir.path())?;
 
-    let table = "table";
-    let key = "key".as_bytes();
-    let value = "val".as_bytes();
+    crate_and_insert(&mut db, "table", [0], [1])?;
+    let result = db.with_rw_tx(|tx| tx.delete("table", [2]));
+    assert_eq!(result.unwrap_err(), DbError::NonExistingKey);
+    Ok(())
+}
+
+#[test]
+fn rollback_on_drop() -> Result<()> {
+    let db_dir = TempDir::new()?;
+    let mut db = Mdbx::open(db_dir.path())?;
 
     {
         // Insert without commit
-        let mut tx = db.begin_rw().expect("begin_rw failed");
-        tx.insert(table, key, value).expect("insert failed");
+        let mut tx = db.begin_rw()?;
+        tx.create_table("table")?;
+        tx.insert("table", [0], [1])?;
     }
 
-    {
-        // Value should not exist
-        let tx = db.begin_ro().expect("begin_ro failed");
-        let result = tx.get(table, key).expect("get failed");
-        assert!(result.is_none());
-    }
+    // Table should not exist
+    let result = db.with_ro_tx(|tx| tx.get("table", [0]));
+    assert_eq!(result.unwrap_err(), DbError::NonExistingTable);
+    Ok(())
 }

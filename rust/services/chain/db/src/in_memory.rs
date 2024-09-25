@@ -60,6 +60,10 @@ fn add_table_prefix(table: impl AsRef<str>, key: impl AsRef<[u8]>) -> Vec<u8> {
 }
 
 impl<'a> WriteTx for InMemoryReadWriteTx<'a> {
+    fn create_table(&mut self, table: impl AsRef<str>) -> DbResult<()> {
+        Ok(())
+    }
+
     fn insert(
         &mut self,
         table: impl AsRef<str>,

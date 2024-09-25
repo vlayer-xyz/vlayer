@@ -1,7 +1,7 @@
 use std::path::Path;
 
 use libmdbx::{
-    DatabaseOptions, TableFlags, Transaction, TransactionKind, WriteFlags, WriteMap, RO, RW,
+    DatabaseOptions, Table, TableFlags, Transaction, TransactionKind, WriteFlags, WriteMap, RO, RW,
 };
 
 use super::{DbError, DbResult, ReadTx, WriteTx};
@@ -52,13 +52,19 @@ pub struct MdbxTx<'a, TK: TransactionKind> {
     tx: Transaction<'a, TK, WriteMap>,
 }
 
+impl<'a, TK: TransactionKind> MdbxTx<'a, TK> {
+    fn get_table(&'a self, table: impl AsRef<str>) -> DbResult<Table<'a>> {
+        match self.tx.open_table(table.as_ref().into()) {
+            Ok(table) => Ok(table),
+            Err(libmdbx::Error::NotFound) => Err(DbError::NonExistingTable),
+            Err(e) => Err(e.into()),
+        }
+    }
+}
+
 impl<'a, TK: TransactionKind> ReadTx for MdbxTx<'a, TK> {
     fn get(&self, table: impl AsRef<str>, key: impl AsRef<[u8]>) -> DbResult<Option<Box<[u8]>>> {
-        let table = match self.tx.open_table(table.as_ref().into()) {
-            Ok(table) => table,
-            Err(libmdbx::Error::NotFound) => return Ok(None),
-            err @ Err(_) => err?,
-        };
+        let table = self.get_table(table)?;
         Ok(self
             .tx
             .get::<Vec<u8>>(&table, key.as_ref())?
@@ -67,22 +73,26 @@ impl<'a, TK: TransactionKind> ReadTx for MdbxTx<'a, TK> {
 }
 
 impl<'a> WriteTx for MdbxTx<'a, RW> {
+    fn create_table(&mut self, table: impl AsRef<str>) -> DbResult<()> {
+        // `create_table` creates only if the table doesn't exist
+        self.tx
+            .create_table(table.as_ref().into(), TableFlags::CREATE)?;
+        Ok(())
+    }
+
     fn insert(
         &mut self,
         table: impl AsRef<str>,
         key: impl AsRef<[u8]>,
         value: impl AsRef<[u8]>,
     ) -> DbResult<()> {
-        // `create_table` creates only if the table doesn't exist
-        let table = self
-            .tx
-            .create_table(table.as_ref().into(), TableFlags::CREATE)?;
+        let table = self.get_table(table)?;
         self.tx.put(&table, key, value, WriteFlags::NO_OVERWRITE)?;
         Ok(())
     }
 
     fn delete(&mut self, table: impl AsRef<str>, key: impl AsRef<[u8]>) -> DbResult<()> {
-        let table = self.tx.open_table(table.as_ref().into())?;
+        let table = self.get_table(table)?;
         self.tx
             .del(&table, key, None)?
             .then_some(())
