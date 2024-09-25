@@ -37,7 +37,7 @@ export async function getContractSpec(file: string): Promise<ContractSpec> {
 }
 
 // TODO all those casts here are not acceptable in long term
-import { testChainId1} from "./helpers";
+import { testChainId1 } from "./helpers";
 
 export async function prove<T extends Abi>(
   prover: Address,
@@ -69,7 +69,7 @@ export async function prove<T extends Abi>(
 
   addDynamicParamsOffsets(abi, functionName, proof);
 
-  return { proof, returnValue : returnValue as `0x${string}`[] };
+  return { proof, returnValue: returnValue as `0x${string}`[] };
 }
 
 function addDynamicParamsOffsets(
