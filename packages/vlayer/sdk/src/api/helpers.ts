@@ -1,7 +1,6 @@
 import {
   type Abi,
   type Address,
-  type ContractConstructorArgs,
   type ContractFunctionArgs,
   type ContractFunctionName,
   createTestClient,
@@ -9,6 +8,7 @@ import {
   http,
   HttpTransport,
   publicActions,
+  PublicClient,
   walletActions,
 } from "viem";
 import { privateKeyToAccount, generatePrivateKey } from "viem/accounts";
@@ -26,7 +26,9 @@ const rpcUrls: Map<number, HttpTransport> = new Map([
 
 export const chainIds = [testChainId1, testChainId2];
 
-export function client(chainId: number = testChainId1) {
+export function client(
+  chainId: number = testChainId1,
+): ReturnType<typeof walletActions> & PublicClient {
   const transport = rpcUrls.get(chainId);
   if (transport == undefined) {
     throw Error(`No url for chainId ${chainId}`);
@@ -35,10 +37,10 @@ export function client(chainId: number = testChainId1) {
   return createTestClient({
     chain: foundry,
     mode: "anvil",
-    transport,
+    transport: transport,
   })
-    .extend(walletActions)
-    .extend(publicActions);
+    .extend(publicActions)
+    .extend(walletActions);
 }
 
 export async function deployContract(
@@ -47,6 +49,7 @@ export async function deployContract(
   chainId: number = testChainId1,
 ): Promise<Address> {
   const ethClient = client(chainId);
+
   const [deployer] = await ethClient.getAddresses();
 
   const txHash = await ethClient.deployContract({
@@ -54,6 +57,7 @@ export async function deployContract(
     bytecode: contractSpec.bytecode.object,
     account: deployer,
     args,
+    chain: foundry,
   });
 
   const receipt = await ethClient.waitForTransactionReceipt({ hash: txHash });
@@ -76,17 +80,12 @@ type DeploySpec<T extends Abi> = {
 
 type Tail<T> = T extends readonly [unknown, ...infer U] ? U : [];
 
-export async function deployProverVerifier<
-  P extends Abi,
-  V extends Abi,
-  PArgs extends ContractConstructorArgs<P>,
-  VArgs extends ContractConstructorArgs<V>,
->(
+export async function deployProverVerifier<P extends Abi, V extends Abi>(
   proverSpec: DeploySpec<P>,
   verifierSpec: DeploySpec<V>,
   args: {
-    prover?: PArgs;
-    verifier?: Tail<VArgs>;
+    prover?: ContractArg[];
+    verifier?: Tail<ContractArg>[];
   } = {},
   chainId: number = testChainId1,
 ) {
