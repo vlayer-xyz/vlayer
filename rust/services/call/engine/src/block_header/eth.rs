@@ -1,10 +1,10 @@
 //! Type aliases for Ethereum.
-use alloy_primitives::{keccak256, Address, BlockHash, BlockNumber, Bloom, Bytes, B256, B64, U256};
+use alloy_primitives::{Address, BlockHash, BlockNumber, Bloom, Bytes, B256, B64, U256};
 use alloy_rlp_derive::RlpEncodable;
 use revm::primitives::BlockEnv;
 use serde::{Deserialize, Serialize};
 
-use super::{EvmBlockHeader, Hashable};
+use super::EvmBlockHeader;
 use crate::block_header::casting_utils::try_downcast;
 
 /// Ethereum post-merge block header.
@@ -52,13 +52,6 @@ pub struct EthBlockHeader {
     pub excess_blob_gas: Option<u64>,
     /// Hash tree root of the parent beacon block for the given execution block.
     pub parent_beacon_block_root: Option<B256>,
-}
-
-impl Hashable for EthBlockHeader {
-    #[inline]
-    fn hash_slow(&self) -> B256 {
-        keccak256(alloy_rlp::encode(self))
-    }
 }
 
 impl TryFrom<&dyn EvmBlockHeader> for EthBlockHeader {
