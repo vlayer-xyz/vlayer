@@ -4,6 +4,14 @@ pragma solidity ^0.8.13;
 import {VTest} from "../../src/testing/VTest.sol";
 import {Web, WebProof, WebProofLib, WebLib} from "../../src/WebProof.sol";
 
+contract WebProofLibWrapper {
+    using WebProofLib for WebProof;
+
+    function verify(WebProof calldata webProof, string memory dataUrl) public view returns (Web memory) {
+        return webProof.verify(dataUrl);
+    }
+}
+
 contract WebProverTest is VTest {
     using WebProofLib for WebProof;
 
@@ -17,5 +25,50 @@ contract WebProverTest is VTest {
         Web memory web = webProof.verify(DATA_URL);
 
         assertEq(bytes(web.body)[0], "{");
+    }
+
+    function test_incorrectUrl() public {
+        WebProof memory webProof = WebProof(vm.readFile("testdata/web_proof.json"));
+
+        callProver();
+
+        WebProofLibWrapper wrapper = new WebProofLibWrapper();
+
+        try wrapper.verify(webProof, "") returns (Web memory web) {
+            revert("Expected error");
+        } catch Error(string memory reason) {
+            assertEq(reason, "Engine(TransactError(\"revert: Incorrect URL\"))");
+        }
+    }
+
+    function test_missingNotaryPubKey() public {
+        WebProof memory webProof = WebProof("{}");
+
+        callProver();
+
+        WebProofLibWrapper wrapper = new WebProofLibWrapper();
+
+        try wrapper.verify(webProof, DATA_URL) returns (Web memory web) {
+            revert("Expected error");
+        } catch Error(string memory reason) {
+            assertEq(reason, "Engine(TransactError(\"missing field `notary_pub_key` at line 1 column 2\"))");
+        }
+    }
+
+    function test_invalidNotaryPubKey() public {
+        WebProof memory webProof = WebProof(vm.readFile("testdata/web_proof_invalid_notary_pub_key.json"));
+
+        callProver();
+
+        WebProofLibWrapper wrapper = new WebProofLibWrapper();
+
+        try wrapper.verify(webProof, DATA_URL) returns (Web memory web) {
+            revert("Expected error");
+        } catch Error(string memory reason) {
+            assertEq(
+                reason,
+                "Engine(TransactError(\"unknown/unsupported algorithm OID: 1.2.840.10045.2.1 at line 8444 column 1\"))"
+            );
+        }
     }
 }
