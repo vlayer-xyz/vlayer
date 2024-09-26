@@ -1,53 +1,72 @@
+#![allow(unused)]
+
 use thiserror::Error;
 
 mod in_memory;
+mod mdbx;
 
-#[allow(unused)]
 pub trait Database<'a> {
     type ReadTx: ReadTx + 'a;
     type ReadWriteTx: ReadWriteTx + 'a;
 
-    fn begin_ro(&'a self) -> Result<Self::ReadTx, DatabaseError>;
-    fn begin_rw(&'a mut self) -> Result<Self::ReadWriteTx, DatabaseError>;
+    fn begin_ro(&'a self) -> DbResult<Self::ReadTx>;
+
+    fn begin_rw(&'a mut self) -> DbResult<Self::ReadWriteTx>;
+
+    fn with_ro_tx<T, F>(&'a self, f: F) -> DbResult<T>
+    where
+        F: FnOnce(&Self::ReadTx) -> DbResult<T>,
+    {
+        let tx = self.begin_ro()?;
+        f(&tx)
+    }
+
+    fn with_rw_tx<T, F>(&'a mut self, f: F) -> DbResult<T>
+    where
+        F: FnOnce(&mut Self::ReadWriteTx) -> DbResult<T>,
+    {
+        let mut tx = self.begin_rw()?;
+        let res = f(&mut tx)?;
+        tx.commit()?;
+        Ok(res)
+    }
 }
 
-#[allow(unused)]
 pub trait ReadTx {
-    fn get(
-        &self,
-        table: impl AsRef<str>,
-        key: impl AsRef<[u8]>,
-    ) -> Result<Option<Box<[u8]>>, DatabaseError>;
+    fn get(&self, table: impl AsRef<str>, key: impl AsRef<[u8]>) -> DbResult<Option<Box<[u8]>>>;
 }
 
 // While nothing in code require a mutable reference in insert and delete, we want to
 // discourage the user from sharing a write transaction as this can lead to db data races
-#[allow(unused)]
 pub trait WriteTx {
+    fn create_table(&mut self, table: impl AsRef<str>) -> DbResult<()>;
+
     fn insert(
         &mut self,
         table: impl AsRef<str>,
         key: impl AsRef<[u8]>,
         value: impl AsRef<[u8]>,
-    ) -> Result<(), DatabaseError>;
-    fn delete(
-        &mut self,
-        table: impl AsRef<str>,
-        key: impl AsRef<[u8]>,
-    ) -> Result<(), DatabaseError>;
-    fn commit(self) -> Result<(), DatabaseError>;
+    ) -> DbResult<()>;
+
+    fn delete(&mut self, table: impl AsRef<str>, key: impl AsRef<[u8]>) -> DbResult<()>;
+
+    fn commit(self) -> DbResult<()>;
 }
 
 pub trait ReadWriteTx: ReadTx + WriteTx {}
 
+impl<T: ReadTx + WriteTx> ReadWriteTx for T {}
+
 #[derive(Error, Debug, PartialEq)]
-pub enum DatabaseError {
-    #[error("duplicate key")]
+pub enum DbError {
+    #[error("Specified key already exists")]
     DuplicateKey,
-    #[error("{0}")]
-    #[allow(unused)]
-    Custom(String), //todo: Implement associated error type for KeyValueDB (?)
-    #[error("non existing key")]
-    #[allow(unused)]
+    #[error("Specified key doesn't exist")]
     NonExistingKey,
+    #[error("Specified table doesn't exist")]
+    NonExistingTable,
+    #[error("{0}")]
+    Custom(String), //todo: Implement associated error type for KeyValueDB (?)
 }
+
+pub type DbResult<T> = Result<T, DbError>;
