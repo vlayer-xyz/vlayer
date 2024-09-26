@@ -91,11 +91,14 @@ impl<'a> TravelInspector<'a> {
     }
 
     fn set_block(&mut self, block_number: u64) {
+        let chain_id = self
+            .location
+            .map_or(self.start_chain_id, |loc| loc.chain_id);
         info!(
-            "Travel contract called with function: setBlock and block number: {:?}!",
-            block_number
+            "Travel contract called with function: setBlock and block number: {:?}! Chain id remains {:?}.",
+            block_number, chain_id
         );
-        self.location = Some(ExecutionLocation::new(block_number, self.start_chain_id));
+        self.location = Some(ExecutionLocation::new(block_number, chain_id));
     }
 
     fn set_chain(&mut self, chain_id: ChainId, block_number: u64) {
