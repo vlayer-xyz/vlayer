@@ -91,11 +91,14 @@ impl<'a> TravelInspector<'a> {
     }
 
     fn set_block(&mut self, block_number: u64) {
+        let chain_id = self
+            .location
+            .map_or(self.start_chain_id, |loc| loc.chain_id);
         info!(
-            "Travel contract called with function: setBlock and block number: {:?}!",
-            block_number
+            "Travel contract called with function: setBlock and block number: {:?}! Chain id remains {:?}.",
+            block_number, chain_id
         );
-        self.location = Some(ExecutionLocation::new(block_number, self.start_chain_id));
+        self.location = Some((block_number, chain_id).into());
     }
 
     fn set_chain(&mut self, chain_id: ChainId, block_number: u64) {
@@ -103,7 +106,7 @@ impl<'a> TravelInspector<'a> {
             "Travel contract called with function: setChain, with chain id: {:?} block number: {:?}!",
             chain_id, block_number
         );
-        self.location = Some(ExecutionLocation::new(block_number, chain_id));
+        self.location = Some((block_number, chain_id).into());
     }
 
     fn on_call(&self, inputs: &CallInputs) -> Option<CallOutcome> {
@@ -156,7 +159,7 @@ where
 
 #[cfg(test)]
 mod test {
-    use alloy_primitives::{address, Address, U256};
+    use alloy_primitives::{address, Address, BlockNumber, U256};
     use alloy_rlp::Bytes;
     use revm::{
         db::{CacheDB, EmptyDB},
@@ -168,6 +171,10 @@ mod test {
     use super::*;
 
     const MOCK_CALLER: Address = address!("0000000000000000000000000000000000000000");
+    const MAINNET_ID: ChainId = 1;
+    const SEPOLIA_ID: ChainId = 11155111;
+    const MAINNET_BLOCK: BlockNumber = 20_000_000;
+    const SEPOLIA_BLOCK: BlockNumber = 6_000_000;
 
     fn create_mock_call_inputs(to: Address, input: impl Into<Bytes>) -> CallInputs {
         CallInputs {
@@ -196,6 +203,22 @@ mod test {
         set_block_inspector.call(&mut evm_context, &mut call_inputs);
 
         set_block_inspector
+    }
+
+    #[test]
+    fn set_block_sets_chain_id_to_latest_not_start() {
+        let locations: Vec<ExecutionLocation> = vec![
+            (MAINNET_BLOCK, MAINNET_ID).into(),
+            (SEPOLIA_BLOCK, SEPOLIA_ID).into(),
+            (SEPOLIA_BLOCK - 1, SEPOLIA_ID).into(),
+        ];
+        let mut inspector = TravelInspector::new(locations[0].chain_id, |_, _| Ok(vec![]));
+
+        inspector.set_chain(locations[1].chain_id, locations[1].block_number);
+        assert_eq!(inspector.location, Some(locations[1]));
+
+        inspector.set_block(locations[2].block_number);
+        assert_eq!(inspector.location, Some(locations[2]));
     }
 
     #[test]
