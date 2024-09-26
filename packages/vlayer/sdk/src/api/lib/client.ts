@@ -1,7 +1,7 @@
 import { VlayerClient } from "types/vlayer";
-import { WebProof, WebProofProvider } from "types/webProof";
+import { WebProofProvider } from "types/webProof";
 
-export const creaateVlayerClient = ({
+export const createVlayerClient = ({
   url,
   webProofProvider,
 }: {
