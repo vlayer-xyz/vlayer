@@ -9,6 +9,8 @@ serde = { workspace = true }
 alloy-primitives = { workspace = true }
 thiserror = { workspace = true }
 libmdbx = "0.5.2"
+mpt = { workspace = true }
+alloy-rlp = { workspace = true }
 
 [dev-dependencies]
 tempfile = { workspace = true }

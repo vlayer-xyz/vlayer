@@ -10,7 +10,7 @@ pub mod rlp;
 pub mod size;
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
-pub(crate) enum Node {
+pub enum Node {
     #[default]
     Null,
     Leaf(KeyNibbles, Box<[u8]>),

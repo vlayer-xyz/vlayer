@@ -1938,8 +1938,10 @@ name = "chain_db"
 version = "0.1.0"
 dependencies = [
  "alloy-primitives",
+ "alloy-rlp",
  "anyhow",
  "libmdbx",
+ "mpt",
  "serde",
  "tempfile",
  "thiserror",

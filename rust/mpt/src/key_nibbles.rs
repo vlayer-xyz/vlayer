@@ -7,22 +7,22 @@ use serde::{Deserialize, Serialize};
 pub struct KeyNibbles(Nibbles);
 
 impl KeyNibbles {
-    pub(crate) fn unpack<T: AsRef<[u8]>>(data: T) -> Self {
+    pub fn unpack<T: AsRef<[u8]>>(data: T) -> Self {
         let nibbles = Nibbles::unpack(data);
         Self::from_nibbles(nibbles)
     }
 
-    pub(crate) fn as_slice(&self) -> &[u8] {
+    pub fn as_slice(&self) -> &[u8] {
         self.0.as_slice()
     }
 
-    pub(crate) fn push_front(&self, nibble: u8) -> Self {
+    pub fn push_front(&self, nibble: u8) -> Self {
         let mut nibbles = vec![nibble];
         nibbles.extend_from_slice(self);
         KeyNibbles(Nibbles::from_vec(nibbles))
     }
 
-    pub(crate) fn split_first(&self) -> (u8, &[u8]) {
+    pub fn split_first(&self) -> (u8, &[u8]) {
         let first = self.0[0];
         let rest = &self.0[1..];
         (first, rest)
