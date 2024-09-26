@@ -2,14 +2,6 @@ import browser from "webextension-polyfill";
 import { MESSAGE } from "./constants/message";
 
 chrome.tabs.onActivated.addListener(function (activeInfo) {
-  console.log("Actives tab changed", activeInfo);
-  chrome.notifications.create({
-    type: "basic",
-    title: "Action Triggered",
-    message: "You clicked the extension icon!",
-    iconUrl: "./vlayer_logo.svg",
-  });
-
   windowId = activeInfo.windowId;
 });
 
