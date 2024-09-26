@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
-import { enrichEmail } from "./enrich.ts";
-import { readFile } from "../../tests/readFile.ts";
+import { enrichEmail } from "./enrich";
+import { readFile } from "testHelpers";
 
 describe("Enrich email: integration", () => {
   test("adds dns record to email mime", async () => {
