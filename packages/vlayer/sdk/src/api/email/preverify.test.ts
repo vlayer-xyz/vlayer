@@ -1,12 +1,12 @@
 import { describe, expect, test } from "vitest";
-import { enrichEmail } from "./enrich.ts";
+import { preverifyEmail } from "./preverify.ts";
 import { readFile } from "../../tests/readFile.ts";
 
-describe("Enrich email: integration", () => {
+describe("Preverify email: integration", () => {
   test("adds dns record to email mime", async () => {
     const rawEmail = readFile("./src/api/email/testdata/test_email.txt");
-    const enrichedEmail = await enrichEmail(rawEmail);
-    expect(enrichedEmail).toMatchObject({
+    const preverifiedEmail = await preverifyEmail(rawEmail);
+    expect(preverifiedEmail).toMatchObject({
       email: rawEmail,
       dnsRecords: [expect.stringContaining("v=DKIM1; k=rsa; p=")],
     });
@@ -14,7 +14,7 @@ describe("Enrich email: integration", () => {
 
   test("throws error if DKIM not found", async () => {
     const emailWithNoDkimHeader = 'From: "Alice"\n\nBody';
-    await expect(enrichEmail(emailWithNoDkimHeader)).rejects.toThrow(
+    await expect(preverifyEmail(emailWithNoDkimHeader)).rejects.toThrow(
       "No DKIM header found",
     );
   });
@@ -23,14 +23,14 @@ describe("Enrich email: integration", () => {
     const emailWithNoDkimHeader = readFile(
       "./src/api/email/testdata/test_email_unknown_domain.txt",
     );
-    await expect(enrichEmail(emailWithNoDkimHeader)).rejects.toThrow();
+    await expect(preverifyEmail(emailWithNoDkimHeader)).rejects.toThrow();
   });
 
   test("throws error if multiple DNS records found", async () => {
     const emailWithNoDkimHeader = readFile(
       "./src/api/email/testdata/test_email_multiple_dkims.txt",
     );
-    await expect(enrichEmail(emailWithNoDkimHeader)).rejects.toThrow(
+    await expect(preverifyEmail(emailWithNoDkimHeader)).rejects.toThrow(
       "Multiple DKIM headers found",
     );
   });
