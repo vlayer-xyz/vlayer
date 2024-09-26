@@ -21,7 +21,9 @@
       "bun" // add Bun global
     ],
     "paths": {
-      "@contracts/*": ["../../../contracts/out/*"]
-    }
+      "@contracts/*": ["../../../contracts/out/*"],
+      "types/*": ["./src/api/lib/types/*"],
+    },
+
   }
 }
