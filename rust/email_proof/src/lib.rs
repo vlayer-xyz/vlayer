@@ -19,7 +19,7 @@ pub fn parse_and_verify(calldata: &[u8]) -> Result<Email, AuthError> {
     let unverified_email =
         UnverifiedEmail::abi_decode(calldata, true).map_err(|_| AuthError::ParseError)?;
     let raw_email = unverified_email.email.as_bytes();
-    verify::verify_dkim(raw_email, unverified_email.dnsRecords)?;
+    verify::verify_dkim(raw_email, &unverified_email.dnsRecords)?;
     parse_mime(raw_email).map_err(|_| AuthError::ParseError)
 }
 
