@@ -55,6 +55,23 @@ contract WebProverTest is VTest {
         }
     }
 
+    function test_missingSignature() public {
+        WebProof memory webProof = WebProof(vm.readFile("testdata/web_proof_missing_signature.json"));
+
+        callProver();
+
+        WebProofLibWrapper wrapper = new WebProofLibWrapper();
+
+        try wrapper.verify(webProof, DATA_URL) returns (Web memory web) {
+            revert("Expected error");
+        } catch Error(string memory reason) {
+            assertEq(
+                reason,
+                "Engine(TransactError(\"Verification error: Session proof error: session proof is missing notary signature\"))"
+            );
+        }
+    }
+
     function test_invalidNotaryPubKey() public {
         WebProof memory webProof = WebProof(vm.readFile("testdata/web_proof_invalid_notary_pub_key.json"));
 
