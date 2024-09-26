@@ -24,5 +24,5 @@ bun install
 bun run lint
 
 cd "${VLAYER_HOME}/packages/vlayer/sdk"
-echo "Running tsc  for: $VLAYER_HOME/packages/vlayer/sdk"
+echo "Running tsc for: $VLAYER_HOME/packages/vlayer/sdk"
 tsc  --noEmit
