@@ -7,7 +7,6 @@ import {
   ContractFunctionName,
   decodeFunctionResult,
   encodeFunctionData,
-  type Hex,
 } from "viem";
 
 import { type CallContext, type CallParams, Proof } from "types/vlayer";

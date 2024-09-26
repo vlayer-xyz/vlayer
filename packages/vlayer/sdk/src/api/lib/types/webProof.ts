@@ -80,7 +80,7 @@ export interface Substrings {
 }
 
 export interface InclusionProof {
-  proof: any[];
+  proof: unknown[];
   total_leaves: number;
 }
 

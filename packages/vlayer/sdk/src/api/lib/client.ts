@@ -9,6 +9,10 @@ export const createVlayerClient = ({
   webProofProvider: WebProofProvider;
 }): VlayerClient => {
   return {
-    prove: async () => {},
+    prove: async () => {
+      console.log("prove");
+      console.log("url", url);
+      console.log("webProofProvider", webProofProvider);
+    },
   };
 };

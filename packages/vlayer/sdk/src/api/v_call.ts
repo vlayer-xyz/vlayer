@@ -1,4 +1,3 @@
-import { Hex, type Address } from "viem";
 import { CallContext, CallParams, VCallResponse } from "types/vlayer";
 
 function v_callBody(call: CallParams, context: CallContext) {
