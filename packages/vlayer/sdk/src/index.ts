@@ -5,4 +5,4 @@ export type { ContractSpec } from "types/ethereum";
 export { getContractSpec, prove } from "./api/prover";
 export * as testHelpers from "./api/helpers";
 export { client as createTestClient } from "./api/helpers";
-export { enrichEmail } from "./api/email/enrich.ts";
+export { preverifyEmail } from "./api/email/preverify.ts";
