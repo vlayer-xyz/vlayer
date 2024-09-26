@@ -1,5 +1,5 @@
 import fs from "fs";
-import { testHelpers, prove, enrichEmail } from "@vlayer/sdk";
+import { testHelpers, prove, preverifyEmail } from "@vlayer/sdk";
 import emailProofProver from "../out/EmailProver.sol/EmailProver";
 import emailProofVerifier from "../out/EmailProofVerifier.sol/EmailProofVerifier";
 
@@ -7,7 +7,7 @@ const mimeEmail = fs
   .readFileSync("../testdata/real_signed_email.eml")
   .toString();
 
-const unverifiedEmail = await enrichEmail(mimeEmail);
+const unverifiedEmail = await preverifyEmail(mimeEmail);
 
 const [prover, verifier] = await testHelpers.deployProverVerifier(
   emailProofProver,
