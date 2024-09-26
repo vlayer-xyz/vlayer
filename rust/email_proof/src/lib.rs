@@ -5,8 +5,8 @@ mod email;
 mod mail_auth;
 
 use dkim::verify;
+use email::{sol::UnverifiedEmail, Email};
 
-use crate::email::Email;
 use extern_mail_auth::Error as AuthError;
 use mailparse::MailParseError;
 
@@ -14,9 +14,11 @@ fn parse_mime(email: &[u8]) -> Result<Email, MailParseError> {
     mailparse::parse_mail(email)?.try_into()
 }
 
-pub fn parse_and_verify(email: &[u8]) -> Result<Email, AuthError> {
-    verify::verify_dkim(email)?;
-    parse_mime(email).map_err(|_| AuthError::ParseError)
+pub fn parse_and_verify(calldata: &[u8]) -> Result<Email, AuthError> {
+    let (raw_email, dns_records) =
+        UnverifiedEmail::parse_calldata(calldata).map_err(|_| AuthError::ParseError)?;
+    verify::verify_dkim(&raw_email, &dns_records)?;
+    parse_mime(&raw_email).map_err(|_| AuthError::ParseError)
 }
 
 #[cfg(test)]

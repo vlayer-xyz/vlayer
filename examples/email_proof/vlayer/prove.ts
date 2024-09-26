@@ -1,11 +1,13 @@
 import fs from "fs";
-import { testHelpers, prove } from "@vlayer/sdk";
+import { testHelpers, prove, preverifyEmail } from "@vlayer/sdk";
 import emailProofProver from "../out/EmailProver.sol/EmailProver";
 import emailProofVerifier from "../out/EmailProofVerifier.sol/EmailProofVerifier";
 
-const mimeEmail = fs.readFileSync("../testdata/test_email.txt").toString();
+const mimeEmail = fs
+  .readFileSync("../testdata/real_signed_email.eml")
+  .toString();
 
-const unverifiedEmail = { email: mimeEmail };
+const unverifiedEmail = await preverifyEmail(mimeEmail);
 
 const [prover, verifier] = await testHelpers.deployProverVerifier(
   emailProofProver,
