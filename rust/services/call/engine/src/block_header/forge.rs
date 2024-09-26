@@ -1,9 +1,10 @@
-use alloy_primitives::{keccak256, BlockNumber, B256};
+use alloy_primitives::{BlockNumber, B256};
+use alloy_rlp::Encodable;
 use revm::primitives::BlockEnv;
 use serde::{Deserialize, Serialize};
 
 use crate::block_header::casting_utils::try_downcast;
-use crate::block_header::{EvmBlockHeader, Hashable};
+use crate::block_header::EvmBlockHeader;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ForgeBlockHeader {
@@ -17,17 +18,17 @@ impl ForgeBlockHeader {
     }
 }
 
+impl Encodable for ForgeBlockHeader {
+    fn encode(&self, out: &mut dyn alloy_rlp::BufMut) {
+        out.put_slice(self.number.to_string().as_bytes());
+    }
+}
+
 impl TryFrom<&dyn EvmBlockHeader> for ForgeBlockHeader {
     type Error = &'static str;
 
     fn try_from(header: &dyn EvmBlockHeader) -> Result<Self, Self::Error> {
         try_downcast(header)
-    }
-}
-
-impl Hashable for ForgeBlockHeader {
-    fn hash_slow(&self) -> B256 {
-        keccak256(self.number.to_string())
     }
 }
 
@@ -53,7 +54,10 @@ impl EvmBlockHeader for ForgeBlockHeader {
 
 #[cfg(test)]
 mod tests {
+    use crate::block_header::Hashable;
+
     use super::*;
+    use alloy_primitives::keccak256;
 
     #[test]
     fn test_forge_block_hash_is_hash_of_block_number_as_string() {
