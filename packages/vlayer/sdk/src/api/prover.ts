@@ -21,8 +21,7 @@ export async function getContractSpec(file: string): Promise<ContractSpec> {
 // TODO all those casts here are not acceptable in long term
 
 export async function prove<
-  T extends readonly [AbiFunction, ...Abi[number][]],
-  F extends ContractFunctionName<T>,
+cccc  F extends ContractFunctionName<T>,
 >(
   prover: Address,
   abi: T,
@@ -30,6 +29,7 @@ export async function prove<
   args: ContractFunctionArgs<T, AbiStateMutability, F>,
   chainId = testChainId1,
 ) {
+
   const calldata = encodeFunctionData({
     abi: abi as Abi,
     functionName: functionName as string,
