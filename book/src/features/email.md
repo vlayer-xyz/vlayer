@@ -49,8 +49,8 @@ contract GitHubEmail is Prover {
 }
 ```
 
-Email is passed to the Solidity contract as an `UnverifiedEmail` structure that can be created using the `enrichEmail` function in the [SDK](../javascript/javascript.md).
-`enrichEmail` should be called with the raw `.eml` file content as an argument. The email is also required to have "From" and ["DKIM-Signature"](https://datatracker.ietf.org/doc/html/rfc6376) headers.
+Email is passed to the Solidity contract as an `UnverifiedEmail` structure that can be created using the `preverifyEmail` function in the [SDK](../javascript/javascript.md).
+`preverifyEmail` should be called with the raw `.eml` file content as an argument. The email is also required to have "From" and ["DKIM-Signature"](https://datatracker.ietf.org/doc/html/rfc6376) headers.
 
 ```solidity
 // Note: more fields will be added soon
