@@ -3023,6 +3023,7 @@ dependencies = [
  "alloy-dyn-abi",
  "alloy-sol-types",
  "futures",
+ "lazy_static",
  "mail-auth",
  "mailparse",
  "thiserror",

@@ -4,17 +4,11 @@ use std::fmt::Display;
 
 use common::{crypto::HashAlgorithm, headers::Header};
 use dkim::Canonicalization;
+use resolver::Resolver;
 
 pub mod common;
 pub mod dkim;
-
-pub struct Resolver {}
-
-impl Resolver {
-    pub(crate) fn txt_lookup<DomainKey>(&self, _: String) -> crate::mail_auth::Result<DomainKey> {
-        todo!()
-    }
-}
+pub(crate) mod resolver;
 
 pub struct AuthenticatedMessage<'x> {
     pub headers: Vec<(&'x [u8], &'x [u8])>,
