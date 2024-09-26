@@ -76,7 +76,10 @@ impl Resolver {
             }
 
             // Obtain ._domainkey TXT record
-            let record = match self.txt_lookup::<DomainKey>(signature.domain_key()) {
+            let record = match self
+                .dkim_key(signature.domain(), signature.selector())
+                .ok_or(Error::DnsError("Missing record".to_string()))
+            {
                 Ok(record) => record,
                 Err(err) => {
                     output.push(DkimOutput::dns_error(err).with_signature(signature));
@@ -85,17 +88,17 @@ impl Resolver {
             };
 
             // Enforce t=s flag
-            if !signature.validate_auid(&record) {
+            if !signature.validate_auid(record) {
                 output.push(DkimOutput::fail(Error::FailedAuidMatch).with_signature(signature));
                 continue;
             }
 
             // Hash headers
             let dkim_hdr_value = header.value.strip_signature();
-            let mut headers = message.signed_headers(&signature.h, header.name, &dkim_hdr_value);
+            let headers = message.signed_headers(&signature.h, header.name, &dkim_hdr_value);
 
             // Verify signature
-            if let Err(err) = record.verify(&mut headers, signature, signature.ch) {
+            if let Err(err) = record.verify(&headers, signature, signature.ch) {
                 output.push(DkimOutput::fail(err).with_signature(signature));
                 continue;
             }
