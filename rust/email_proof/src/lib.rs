@@ -2,23 +2,26 @@ extern crate mail_auth as extern_mail_auth;
 
 mod dkim;
 mod email;
+mod errors;
 mod mail_auth;
 
-use dkim::verify;
-use email::{sol::UnverifiedEmail, Email};
+pub use crate::email::Email;
+pub use crate::errors::Error;
 
-use extern_mail_auth::Error as AuthError;
+use dkim::verify;
+use email::sol::UnverifiedEmail;
+
 use mailparse::MailParseError;
+
+pub fn parse_and_verify(calldata: &[u8]) -> Result<Email, Error> {
+    let (raw_email, dns_records) =
+        UnverifiedEmail::parse_calldata(calldata).map_err(Error::Calldata)?;
+    verify::verify_dkim(&raw_email, &dns_records).map_err(Error::DkimVerification)?;
+    parse_mime(&raw_email).map_err(Error::EmailParse)
+}
 
 fn parse_mime(email: &[u8]) -> Result<Email, MailParseError> {
     mailparse::parse_mail(email)?.try_into()
-}
-
-pub fn parse_and_verify(calldata: &[u8]) -> Result<Email, AuthError> {
-    let (raw_email, dns_records) =
-        UnverifiedEmail::parse_calldata(calldata).map_err(|_| AuthError::ParseError)?;
-    verify::verify_dkim(&raw_email, &dns_records)?;
-    parse_mime(&raw_email).map_err(|_| AuthError::ParseError)
 }
 
 #[cfg(test)]
