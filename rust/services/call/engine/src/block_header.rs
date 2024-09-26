@@ -2,9 +2,10 @@ mod casting_utils;
 pub mod eth;
 pub mod forge;
 
+use alloy_rlp::Encodable;
 use as_any::AsAny;
 
-use alloy_primitives::{BlockNumber, B256};
+use alloy_primitives::{keccak256, BlockNumber, B256};
 
 use casting_utils::is;
 use dyn_clone::{clone_trait_object, DynClone};
@@ -19,8 +20,15 @@ pub trait Hashable {
     fn hash_slow(&self) -> B256;
 }
 
+impl<H: EvmBlockHeader> Hashable for H {
+    #[inline]
+    fn hash_slow(&self) -> B256 {
+        keccak256(alloy_rlp::encode(self))
+    }
+}
+
 /// An EVM abstraction of a block header.
-pub trait EvmBlockHeader: Hashable + AsAny + Debug + DynClone {
+pub trait EvmBlockHeader: Hashable + Encodable + AsAny + Debug + DynClone {
     /// Returns the hash of the parent block's header.
     fn parent_hash(&self) -> &B256;
     /// Returns the block number.
@@ -141,16 +149,11 @@ mod serialize {
     mod unsupported_block_header {
         use super::*;
         use alloy_primitives::B256;
+        use alloy_rlp_derive::RlpEncodable;
         use revm::primitives::BlockEnv;
 
-        #[derive(Debug, Clone)]
+        #[derive(Debug, Clone, RlpEncodable)]
         pub struct UnsupportedBlockHeader;
-
-        impl Hashable for UnsupportedBlockHeader {
-            fn hash_slow(&self) -> B256 {
-                unimplemented!()
-            }
-        }
 
         impl EvmBlockHeader for UnsupportedBlockHeader {
             fn parent_hash(&self) -> &B256 {

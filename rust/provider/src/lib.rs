@@ -15,10 +15,10 @@ pub use file::FileProvider;
 pub use multi::CachedMultiProvider;
 pub use proof::{EIP1186Proof, StorageProof};
 
-use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256};
+pub use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256};
 use auto_impl::auto_impl;
-use call_engine::block_header::EvmBlockHeader;
-use ethers_core::types::BlockNumber as BlockTag;
+pub use call_engine::block_header::EvmBlockHeader;
+pub use ethers_core::types::BlockNumber as BlockTag;
 use ethers_providers::{Http, RetryClient};
 use std::error::Error as StdError;
 

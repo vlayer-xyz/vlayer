@@ -7,6 +7,7 @@ members = [
     "services/chain/guest_wrapper",
     "services/chain/engine",
     "services/chain/server",
+    "services/chain/worker",
     "services/call/host",
     "services/call/guest",
     "services/call/guest_wrapper",
@@ -123,6 +124,7 @@ chain_guest = { path = "services/chain/guest" }
 chain_engine = { path = "services/chain/engine" }
 chain_guest_wrapper = { path = "services/chain/guest_wrapper" }
 chain_server = { path = "services/chain/server" }
+chain_worker = { path = "services/chain/worker" }
 
 [workspace.lints.clippy]
 as_ptr_cast_mut = "warn"
