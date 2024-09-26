@@ -19,12 +19,16 @@ contract EmailProverTest is VTest {
     string constant HARDCODED_DNS_RECORD =
         "newengland._domainkey.example.com v=DKIM1; p=MIGJAoGBALVI635dLK4cJJAH3Lx6upo3X/Lm1tQz3mezcWTA3BUBnyIsdnRf57aD5BtNmhPrYYDlWlzw3UgnKisIxktkk5+iMQMlFtAS10JB8L3YadXNJY+JBcbeSi5TgJe4WFzNgW95FWDAuSTRXSWZfA/8xjflbTLDx0euFZOM7C4T0GwLAgMBAAE=";
 
-    function test_decodesEmail() public {
-        EmailProofLibWrapper wrapper = new EmailProofLibWrapper();
+    function getTestEmail() public view returns (UnverifiedEmail memory) {
         string memory mime = vm.readFile("./testdata/test_email.txt");
         string[] memory dnsRecords = new string[](1);
         dnsRecords[0] = HARDCODED_DNS_RECORD;
-        UnverifiedEmail memory email = UnverifiedEmail(mime, dnsRecords);
+        return UnverifiedEmail(mime, dnsRecords);
+    }
+
+    function test_decodesEmail() public {
+        EmailProofLibWrapper wrapper = new EmailProofLibWrapper();
+        UnverifiedEmail memory email = getTestEmail();
         callProver();
         VerifiedEmail memory verifiedEmail = wrapper.verify(email);
         assertEq(verifiedEmail.from, "Joe SixPack <joe@football.example.com>");
