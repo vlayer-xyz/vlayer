@@ -22,7 +22,7 @@ export type ContractArg =
   | Address[];
 
 export type EthereumAddress = Branded<Hex, "EthereumAddress">;
-export type EthereumTxHash = Branded<`0x${string}`, "EthereumTxHash">;
+export type EthereumTxHash = Branded<Hex, "EthereumTxHash">;
 
 export function assertEthereumAddress(
   hash: string,
