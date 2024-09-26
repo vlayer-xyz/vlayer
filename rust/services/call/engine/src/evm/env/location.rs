@@ -15,3 +15,9 @@ impl ExecutionLocation {
         }
     }
 }
+
+impl From<(BlockNumber, ChainId)> for ExecutionLocation {
+    fn from((block_number, chain_id): (BlockNumber, ChainId)) -> Self {
+        Self::new(block_number, chain_id)
+    }
+}
