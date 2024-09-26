@@ -1,15 +1,25 @@
 use crate::mail_auth::dkim::Canonicalization;
 use crate::mail_auth::Result;
 
-pub trait VerifyingKey {
-    fn verify<'a>(
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum VerifyingKey {
+    RsaKey(Vec<u8>),
+}
+
+#[allow(unused_variables)]
+#[allow(clippy::unused_self)]
+impl VerifyingKey {
+    pub fn verify<'a>(
         &self,
-        headers: &mut dyn Iterator<Item = (&'a [u8], &'a [u8])>,
+        headers: &dyn Iterator<Item = (&'a [u8], &'a [u8])>,
         signature: &[u8],
         canonicalication: Canonicalization,
         algorithm: Algorithm,
-    ) -> Result<()>;
+    ) -> Result<()> {
+        Ok(())
+    }
 }
+
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
 #[repr(u64)]
 pub enum HashAlgorithm {

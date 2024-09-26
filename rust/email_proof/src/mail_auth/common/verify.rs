@@ -1,20 +1,38 @@
 use crate::mail_auth::dkim::Canonicalization;
 
-use super::crypto::{Algorithm, VerifyingKey};
+use super::crypto::{Algorithm, VerifyingKey, R_HASH_SHA256};
 
+#[derive(Debug, Clone, PartialEq, Eq)]
 pub struct DomainKey {
-    pub p: Box<dyn VerifyingKey>,
+    pub p: Box<VerifyingKey>,
     pub f: u64,
 }
 impl DomainKey {
     pub(crate) fn verify<'a>(
         &self,
-        headers: &mut dyn Iterator<Item = (&'a [u8], &'a [u8])>,
+        headers: &dyn Iterator<Item = (&'a [u8], &'a [u8])>,
         input: &impl VerifySignature,
         canonicalization: Canonicalization,
     ) -> crate::mail_auth::Result<()> {
         self.p
             .verify(headers, input.signature(), canonicalization, input.algorithm())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub enum DkimRecordError {
+    Err,
+}
+
+impl TryFrom<String> for DomainKey {
+    type Error = DkimRecordError;
+
+    fn try_from(value: String) -> Result<Self, Self::Error> {
+        let domain_key = Self {
+            p: Box::new(VerifyingKey::RsaKey(value.as_bytes().into())),
+            f: R_HASH_SHA256,
+        };
+        Ok(domain_key)
     }
 }
 

@@ -4,17 +4,11 @@ use std::fmt::Display;
 
 use common::{crypto::HashAlgorithm, headers::Header};
 use dkim::Canonicalization;
+use resolver::Resolver;
 
 pub mod common;
 pub mod dkim;
-
-pub struct Resolver {}
-
-impl Resolver {
-    pub(crate) fn txt_lookup<DomainKey>(&self, _: String) -> crate::mail_auth::Result<DomainKey> {
-        todo!()
-    }
-}
+pub(crate) mod resolver;
 
 pub struct AuthenticatedMessage<'x> {
     pub headers: Vec<(&'x [u8], &'x [u8])>,
@@ -45,6 +39,7 @@ pub struct DkimOutput<'x> {
 #[allow(clippy::enum_variant_names)]
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum Error {
+    DkimRecord(String),
     FailedAuidMatch,
     FailedBodyHashMatch,
     SignatureExpired,
@@ -62,6 +57,7 @@ impl Display for Error {
             }
             Error::FailedAuidMatch => write!(f, "AUID does not match domain name"),
             Error::DnsError(err) => write!(f, "DNS resolution error: {err}"),
+            Error::DkimRecord(err) => write!(f, "Failed to parse DKIM record: {err}"),
         }
     }
 }
