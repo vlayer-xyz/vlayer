@@ -5,6 +5,9 @@ edition = "2021"
 
 [dependencies]
 provider = { workspace = true }
+clap = { workspace = true, features = ["derive", "string"] }
+alloy-primitives = { workspace = true }
+anyhow = { workspace = true }
 
 [lints]
 workspace = true
