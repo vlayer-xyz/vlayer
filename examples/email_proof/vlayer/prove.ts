@@ -3,7 +3,7 @@ import { testHelpers, prove, enrichEmail } from "@vlayer/sdk";
 import emailProofProver from "../out/EmailProver.sol/EmailProver";
 import emailProofVerifier from "../out/EmailProofVerifier.sol/EmailProofVerifier";
 
-const mimeEmail = fs.readFileSync("../testdata/test_email.txt").toString();
+const mimeEmail = fs.readFileSync("../testdata/siema_email.eml").toString();
 
 const unverifiedEmail = await enrichEmail(mimeEmail);
 
