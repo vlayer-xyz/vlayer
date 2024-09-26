@@ -1,14 +1,14 @@
 import fs from "fs";
-import { testHelpers, prove } from "@vlayer/sdk";
+import { testHelpers, prove, preverifyEmail } from "@vlayer/sdk";
 import emailProofProver from "../out/EmailDomainProver.sol/EmailDomainProver";
 import emailProofVerifier from "../out/EmailProofVerifier.sol/EmailDomainVerifier";
 
-const mimeEmail = fs.readFileSync("../testdata/test_email.txt").toString();
+const mimeEmail = fs.readFileSync("../testdata/verify_vlayer.eml").toString();
 
-const unverifiedEmail = { email: mimeEmail };
+const unverifiedEmail = await preverifyEmail(mimeEmail);
 
 const prover = await testHelpers.deployContract(emailProofProver, [
-  "football.example.com",
+  "@vlayer.xyz",
 ]);
 
 const verifier = await testHelpers.deployContract(emailProofVerifier, [prover]);

@@ -1,0 +1,88 @@
+Delivered-To: chmarus@gmail.com
+Received: by 2002:a05:6638:b96:b0:4d1:fc71:5c58 with SMTP id b22csp1173389jad;
+        Thu, 26 Sep 2024 07:51:24 -0700 (PDT)
+X-Received: by 2002:a05:6512:1083:b0:536:548a:ff89 with SMTP id 2adb3069b0e04-53877564a83mr4040140e87.39.1727362283976;
+        Thu, 26 Sep 2024 07:51:23 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1727362283; cv=none;
+        d=google.com; s=arc-20160816;
+        b=fB6kNqy+ZoVyRZKNd1CPPRSN5e74RMs0BDQCXXtMYvHPxGGy89MqJJTdlfJnPkmfIE
+         +xMxi3cYgj7Go36v4M4OOhbs2YsuOv8D8IZ31wdfmuzRq8ELFtzHPxRmHbm6Gj7zF5IW
+         TEwj+DifdCHWIS4vQbuV+kWJlpglUB2ynx/UmgfGGi53uJgcM0L2sxIUUqDoCyYNv6Hr
+         vIr8TA9NAVTa1E+4lNj/p25GgnDp+DOxLiabt9fhf4DjHoFgXXger/08AsQTIj3TwWtD
+         yrz11ETUYo2SWfGthyqTx9/d5S+U+zGkrNun4xJoI5j5km86cxElkBPg5yY/0Hyh5nMp
+         hjJg==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20160816;
+        h=to:date:message-id:subject:mime-version:content-transfer-encoding
+         :from:dkim-signature;
+        bh=pjf1+fvEUIbYiMVKV9S2+8+g2s78G+RQ4nNCzWoJ2QA=;
+        fh=vQXb/oOZISmMrHYw7xDf0jOJN4ng+6XvFkSg/p8Du0o=;
+        b=GLs22VatoSloKTqIDp3sZHXyVPJoeP7HJvD0xgdSjvbejjLd9Wh99LkAtd5UqtQPo+
+         c3CxJ72tXGt2fYFfxR67ctqIdw1vC48nJ5TH3MrCDWjPKQfqJC6pRGSOt6CeMEppuOTJ
+         yyZqQTVi+BUyB+CtASlC/AAHj7OG2fpH2yXh9zesgUinVF3U2c3Zgnnfj8vJ6cj7hnTB
+         TIZLgk/Pnd3voTDR61587gNggtfXAm/pO10nahn/jbTIEeagE7xwfGyIbiA1D/2+DqUJ
+         MbLhEa+dOZ+XFn4cN/1qWzMAWGIJH9WjaATL9CrzTGtkV1TGjGBBYyUvC4jeM4LT9ZDx
+         Yzbg==;
+        dara=google.com
+ARC-Authentication-Results: i=1; mx.google.com;
+       dkim=pass header.i=@vlayer-xyz.20230601.gappssmtp.com header.s=20230601 header.b=Mpn1FuqH;
+       spf=fail (google.com: domain of artur@vlayer.xyz does not designate 209.85.220.41 as permitted sender) smtp.mailfrom=artur@vlayer.xyz;
+       dmarc=fail (p=NONE sp=NONE dis=NONE) header.from=vlayer.xyz;
+       dara=pass header.i=@gmail.com
+Return-Path: <artur@vlayer.xyz>
+Received: from mail-sor-f41.google.com (mail-sor-f41.google.com. [209.85.220.41])
+        by mx.google.com with SMTPS id 2adb3069b0e04-537a857a4dfsor2324896e87.0.2024.09.26.07.51.23
+        for <chmarus@gmail.com>
+        (Google Transport Security);
+        Thu, 26 Sep 2024 07:51:23 -0700 (PDT)
+Received-SPF: fail (google.com: domain of artur@vlayer.xyz does not designate 209.85.220.41 as permitted sender) client-ip=209.85.220.41;
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@vlayer-xyz.20230601.gappssmtp.com header.s=20230601 header.b=Mpn1FuqH;
+       spf=fail (google.com: domain of artur@vlayer.xyz does not designate 209.85.220.41 as permitted sender) smtp.mailfrom=artur@vlayer.xyz;
+       dmarc=fail (p=NONE sp=NONE dis=NONE) header.from=vlayer.xyz;
+       dara=pass header.i=@gmail.com
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=vlayer-xyz.20230601.gappssmtp.com; s=20230601; t=1727362283; x=1727967083; dara=google.com;
+        h=to:date:message-id:subject:mime-version:content-transfer-encoding
+         :from:from:to:cc:subject:date:message-id:reply-to;
+        bh=pjf1+fvEUIbYiMVKV9S2+8+g2s78G+RQ4nNCzWoJ2QA=;
+        b=Mpn1FuqH+o0u28CpLiawkVLrBH8Jps4FKk57+Tu0UqvEIWM8/ktRUOecxAr205PidR
+         23SeTtPpLBT/wr5ERyHIgSJ8XolzytLv2ukT6H4BMVhtlh0VQUgq+2rR7o6H0zuwDX1Y
+         +mfp81pNu1uaYQsaFcExiudKVEVixFirw6TpzDAbu7H5+U/xLgWVYZ3NjdecFkf1LIuO
+         cB205x3pNcuaNkbvYdirQUeoe4Oj6YgULBuNs1agG7z9Ym3LT515XLHdd5lU3jw2tKBx
+         f+FzgKRChyY2XbvQzKFMFDuAQjKqEqt6GKdHjgsPWOPbDQxcHUmsMh85blwgiGu9ep43
+         N4Ow==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1727362283; x=1727967083;
+        h=to:date:message-id:subject:mime-version:content-transfer-encoding
+         :from:x-gm-message-state:from:to:cc:subject:date:message-id:reply-to;
+        bh=pjf1+fvEUIbYiMVKV9S2+8+g2s78G+RQ4nNCzWoJ2QA=;
+        b=WSFeY/fqGtfIeta1UqvFYRlGi5VL50LQYadK9Wvvb7fW/OAeldkDtWVLEUxARVxvf7
+         u/He3Xm7p5c6RK1Qb2fhXThhaWmdIDmwG+GqmS60yr3OFV9cBkuzyxxpPxi1kGOnxCPl
+         aPwufsCmvs2dfPLUFpgDNBICnmOrVUG1zmvVicSW7lFno88UzshOClZofGowYHDLd4Zn
+         MAk5QMO7cmRJpFsVXr9Xe7HRqPmSrLQUGsQn8+Qu/ChWJFlILMtVZO/Vakef6l4OzVDq
+         eEu1XozRmqPnzjpr1U33Xi7TP+xju7kuktXuuC73DFxt23ZvAW9NFYj3v7CiZb7a3sM3
+         Rsjw==
+X-Gm-Message-State: AOJu0Yy9x4dcdLHAz+t+6ssKp3ApucyLa/WbQMpR9X88LN5+Ak3qj9B2
+	Bseg9fQ+NK5lzam7d/FwZJGQJNQvhR6JBtq2QvJ0Ee66Oe39gv6KI/+a1r7r9YwF77+GWd+H7Z7
+	xELQ=
+X-Google-Smtp-Source: AGHT+IGU74Kty4dkIy0KoMDErlbFo25eRcKJAYxpXAvaASzLJudFUj+BG19CeVKDTTI8ITxPOhUp5w==
+X-Received: by 2002:a05:6512:1581:b0:52e:9f6b:64 with SMTP id 2adb3069b0e04-53877538f2amr4399999e87.34.1727362282864;
+        Thu, 26 Sep 2024 07:51:22 -0700 (PDT)
+Return-Path: <artur@vlayer.xyz>
+Received: from smtpclient.apple (74.88-199-147.vspace.pl. [88.199.147.74])
+        by smtp.gmail.com with ESMTPSA id a640c23a62f3a-a93c27ed180sm6240766b.94.2024.09.26.07.51.22
+        for <chmarus@gmail.com>
+        (version=TLS1_2 cipher=ECDHE-ECDSA-AES128-GCM-SHA256 bits=128/128);
+        Thu, 26 Sep 2024 07:51:22 -0700 (PDT)
+From: Artur Chmaro <artur@vlayer.xyz>
+Content-Type: text/plain;
+	charset=us-ascii
+Content-Transfer-Encoding: 7bit
+Mime-Version: 1.0 (Mac OS X Mail 16.0 \(3774.500.171.1.1\))
+Subject: Verify me
+Message-Id: <C8746E12-75FF-4F1F-8D81-80A6FF1EA1AC@vlayer.xyz>
+Date: Thu, 26 Sep 2024 16:51:11 +0200
+To: chmarus@gmail.com
+X-Mailer: Apple Mail (2.3774.500.171.1.1)
+
+0x0E8e5015042BeF1ccF2D449652C7A457a163ECB9
