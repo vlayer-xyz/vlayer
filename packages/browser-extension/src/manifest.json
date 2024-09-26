@@ -21,7 +21,8 @@
     "webRequest",
     "cookies",
     "nativeMessaging", 
-    "tabs"
+    "tabs",
+    "notifications"
   ],
   "externally_connectable": {
     "matches": ["<all_urls>"]

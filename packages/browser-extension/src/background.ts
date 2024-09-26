@@ -2,7 +2,6 @@ import browser from "webextension-polyfill";
 import { MESSAGE } from "./constants/message";
 
 chrome.tabs.onActivated.addListener(function (activeInfo) {
-  console.log("Actives tab changed", activeInfo);
   windowId = activeInfo.windowId;
 });
 

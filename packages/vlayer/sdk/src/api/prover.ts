@@ -1,5 +1,6 @@
 import {
   type Abi,
+  AbiFunction,
   AbiStateMutability,
   type Address,
   ContractFunctionArgs,
@@ -10,7 +11,6 @@ import {
 } from "viem";
 
 import { type CallContext, type CallParams, Proof, v_call } from "./v_call";
-import { testChainId1 } from "./helpers";
 
 type Bytecode = {
   object: Hex;
@@ -37,7 +37,13 @@ export async function getContractSpec(file: string): Promise<ContractSpec> {
   return Bun.file(file).json();
 }
 
-export async function prove<T extends Abi, F extends ContractFunctionName<T>>(
+// TODO all those casts here are not acceptable in long term
+import { testChainId1 } from "./helpers";
+
+export async function prove<
+  T extends readonly [AbiFunction, ...Abi[number][]],
+  F extends ContractFunctionName<T>,
+>(
   prover: Address,
   abi: T,
   functionName: F,
@@ -45,9 +51,9 @@ export async function prove<T extends Abi, F extends ContractFunctionName<T>>(
   chainId = testChainId1,
 ) {
   const calldata = encodeFunctionData({
-    abi,
-    functionName,
-    args,
+    abi: abi as Abi,
+    functionName: functionName as string,
+    args: args as readonly unknown[],
   });
 
   const call: CallParams = { to: prover, data: calldata };
@@ -60,28 +66,27 @@ export async function prove<T extends Abi, F extends ContractFunctionName<T>>(
   } = await v_call(call, context);
 
   const returnValue = decodeFunctionResult({
-    abi,
-    functionName,
+    abi: abi as Abi,
     data: evm_call_result,
+    functionName: functionName as string,
   });
 
   addDynamicParamsOffsets(abi, functionName, proof);
 
-  return { proof, returnValue };
+  return { proof, returnValue: returnValue as `0x${string}`[] };
 }
 
-function addDynamicParamsOffsets(abi: Abi, functionName: string, proof: Proof) {
-  const proverFunction = abi.filter(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    (it: any) => it.type === "function" && it.name === functionName,
-  );
+function addDynamicParamsOffsets(
+  abi: Abi,
+  functionName: string | undefined,
+  proof: Proof,
+) {
+  const proverFunction = abi.find(
+    (f) => f.type === "function" && f.name === functionName,
+  ) as AbiFunction;
 
-  if (
-    proverFunction.length > 0 &&
-    proverFunction[0].outputs &&
-    proverFunction[0].outputs.length > 0
-  ) {
-    const secondVerifyMethodParamType = proverFunction[0].outputs[0].type;
+  if (proverFunction?.outputs && proverFunction.outputs.length > 0) {
+    const secondVerifyMethodParamType = proverFunction.outputs[0].type;
 
     if (secondVerifyMethodParamType === "string") {
       proof.dynamicParamsOffsets[0] = BigInt(32);
