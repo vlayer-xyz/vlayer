@@ -7,7 +7,7 @@ use revm::{
     DatabaseRef, Evm, Handler,
 };
 use thiserror::Error;
-use tracing::error;
+use tracing::{debug, error};
 
 use crate::utils::evm_call::format_failed_call_result;
 use crate::{evm::env::EvmEnv, precompiles::VLAYER_PRECOMPILES};
@@ -88,6 +88,7 @@ where
         mut evm: Evm<'env, TravelInspector<'env>, WrapDatabaseRef<&'env D>>,
     ) -> Result<Vec<u8>, EngineError> {
         let ResultAndState { result, .. } = evm.transact_preverified()?;
+        debug!["Execution result: {:?}", result];
 
         let ExecutionResult::Success {
             reason: SuccessReason::Return,
