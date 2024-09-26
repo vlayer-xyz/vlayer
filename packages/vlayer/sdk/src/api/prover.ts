@@ -1,6 +1,7 @@
 import {
   type Abi,
   AbiFunction,
+  AbiStateMutability,
   type Address,
   ContractFunctionArgs,
   ContractFunctionName,
@@ -39,11 +40,14 @@ export async function getContractSpec(file: string): Promise<ContractSpec> {
 // TODO all those casts here are not acceptable in long term
 import { testChainId1 } from "./helpers";
 
-export async function prove<T extends Abi>(
+export async function prove<
+  T extends readonly [AbiFunction, ...Abi[number][]],
+  F extends ContractFunctionName<T>,
+>(
   prover: Address,
   abi: T,
-  functionName: ContractFunctionName<T> | undefined,
-  args: ContractFunctionArgs<T>,
+  functionName: F,
+  args: ContractFunctionArgs<T, AbiStateMutability, F>,
   chainId = testChainId1,
 ) {
   const calldata = encodeFunctionData({
@@ -64,7 +68,7 @@ export async function prove<T extends Abi>(
   const returnValue = decodeFunctionResult({
     abi: abi as Abi,
     data: evm_call_result,
-    functionName: functionName,
+    functionName: functionName as string,
   });
 
   addDynamicParamsOffsets(abi, functionName, proof);
