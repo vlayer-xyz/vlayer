@@ -10,15 +10,9 @@ pub mod dkim;
 pub(crate) mod error;
 pub(crate) mod resolver;
 
-#[derive(Debug, PartialEq, Eq, Clone)]
-pub enum DkimResult {
-    Pass,
-    Neutral(crate::mail_auth::Error),
-    Fail(crate::mail_auth::Error),
-    PermError(crate::mail_auth::Error),
-    TempError(crate::mail_auth::Error),
-    None,
-}
+pub type Result<T> = std::result::Result<T, Error>;
+
+use dkim::result::Result as DkimResult;
 
 #[allow(dead_code)]
 pub struct DkimOutput<'x> {
@@ -27,5 +21,3 @@ pub struct DkimOutput<'x> {
     report: Option<String>,
     // is_atps: bool,
 }
-
-pub type Result<T> = std::result::Result<T, Error>;

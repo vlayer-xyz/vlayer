@@ -3,14 +3,17 @@ use super::{
         crypto::{Algorithm, HashAlgorithm},
         verify::VerifySignature,
     },
-    DkimOutput, DkimResult, Error,
+    DkimOutput, Error,
 };
+
+use result::Result as DkimResult;
 
 // pub mod builder;
 // pub mod canonicalize;
 // pub mod headers;
 pub mod parse;
 // pub mod sign;
+pub mod result;
 pub mod verify;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
