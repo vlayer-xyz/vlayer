@@ -78,7 +78,7 @@ impl Resolver {
             // Obtain ._domainkey TXT record
             let record = match self
                 .dkim_key(signature.domain(), signature.selector())
-                .ok_or(Error::DnsError("Missing record".to_string()))
+                .ok_or(Error::Dns("Missing record".to_string()))
             {
                 Ok(record) => record,
                 Err(err) => {

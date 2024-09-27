@@ -114,7 +114,7 @@ impl<'x> DkimOutput<'x> {
     }
 
     pub(crate) fn dns_error(err: Error) -> Self {
-        if matches!(&err, Error::DnsError(_)) {
+        if matches!(&err, Error::Dns(_)) {
             DkimOutput::temp_err(err)
         } else {
             DkimOutput::perm_err(err)
