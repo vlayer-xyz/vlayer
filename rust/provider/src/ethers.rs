@@ -148,7 +148,7 @@ where
     }
 }
 
-fn to_eth_block_header<T>(block: Block<T>) -> Result<EthBlockHeader, String> {
+pub fn to_eth_block_header<T>(block: Block<T>) -> Result<EthBlockHeader, String> {
     Ok(EthBlockHeader {
         parent_hash: from_ethers_h256(block.parent_hash),
         ommers_hash: from_ethers_h256(block.uncles_hash),

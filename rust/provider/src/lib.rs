@@ -6,7 +6,7 @@ mod multi;
 mod null;
 mod proof;
 
-pub use ethers::{EthersProvider, EthersProviderError};
+pub use ethers::{EthersProvider, EthersProviderError, to_eth_block_header};
 pub use factory::{
     CachedProviderFactory, EthersProviderFactory, FileProviderFactory, ProviderFactory,
     ProviderFactoryError,
