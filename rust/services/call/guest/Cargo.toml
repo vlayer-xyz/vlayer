@@ -17,3 +17,6 @@ chain = { workspace = true }
 
 [lints]
 workspace = true
+
+[package.metadata.cargo-machete]
+ignored = ["alloy-rlp"]

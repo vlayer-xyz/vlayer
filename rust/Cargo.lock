@@ -1585,6 +1585,22 @@ dependencies = [
 ]
 
 [[package]]
+name = "block_header"
+version = "0.1.0"
+dependencies = [
+ "alloy-primitives",
+ "alloy-rlp",
+ "alloy-rlp-derive",
+ "anyhow",
+ "as-any",
+ "dyn-clone",
+ "lazy_static",
+ "revm",
+ "serde",
+ "serde_json",
+]
+
+[[package]]
 name = "blst"
 version = "0.3.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -1733,18 +1749,14 @@ dependencies = [
 name = "call_engine"
 version = "0.1.0"
 dependencies = [
- "alloy-chains",
  "alloy-primitives",
  "alloy-rlp",
- "alloy-rlp-derive",
  "alloy-sol-types",
  "alloy-trie",
  "anyhow",
- "as-any",
+ "block_header",
  "chain",
- "dyn-clone",
  "email_proof",
- "lazy_static",
  "mpt",
  "once_cell",
  "revm",
@@ -1790,14 +1802,12 @@ dependencies = [
  "alloy-primitives",
  "alloy-sol-types",
  "anyhow",
- "auto_impl",
  "call_engine",
  "call_guest_wrapper",
  "chain",
  "ctor",
  "dotenv",
  "ethers-core",
- "ethers-providers",
  "host_utils",
  "mpt",
  "provider",
@@ -1805,10 +1815,8 @@ dependencies = [
  "risc0-zkp",
  "risc0-zkvm",
  "serde",
- "serde_json",
  "test-log",
  "thiserror",
- "tokio",
  "url",
 ]
 
@@ -1829,14 +1837,12 @@ dependencies = [
  "ethers",
  "hex",
  "lazy_static",
- "mime",
  "reqwest 0.12.5",
  "serde",
  "serde_json",
  "server_utils",
  "thiserror",
  "tokio",
- "tower",
  "tower-http",
  "tracing",
  "web_proof",
@@ -1937,10 +1943,8 @@ dependencies = [
 name = "chain_db"
 version = "0.1.0"
 dependencies = [
- "alloy-primitives",
  "anyhow",
  "libmdbx",
- "serde",
  "tempfile",
  "thiserror",
 ]
@@ -1949,16 +1953,15 @@ dependencies = [
 name = "chain_engine"
 version = "0.1.0"
 dependencies = [
- "alloy-primitives",
- "anyhow",
+ "block_header",
  "serde",
- "thiserror",
 ]
 
 [[package]]
 name = "chain_guest"
 version = "0.1.0"
 dependencies = [
+ "block_header",
  "chain_engine",
 ]
 
@@ -1975,10 +1978,13 @@ version = "0.1.0"
 dependencies = [
  "alloy-primitives",
  "anyhow",
+ "chain_db",
  "chain_engine",
  "chain_guest_wrapper",
+ "ethers",
  "host_utils",
  "mpt",
+ "provider",
  "risc0-zkvm",
  "serde",
  "thiserror",
@@ -1993,10 +1999,8 @@ dependencies = [
  "axum",
  "axum-jrpc",
  "bincode",
- "chain",
  "chain_host",
  "lazy_static",
- "mime",
  "mpt",
  "risc0-zkp",
  "risc0-zkvm",
@@ -2005,7 +2009,6 @@ dependencies = [
  "server_utils",
  "thiserror",
  "tokio",
- "tower",
 ]
 
 [[package]]
@@ -3081,7 +3084,6 @@ dependencies = [
 name = "email_proof"
 version = "0.1.0"
 dependencies = [
- "alloy-dyn-abi",
  "alloy-sol-types",
  "futures",
  "lazy_static",
@@ -8284,7 +8286,6 @@ name = "server_utils"
 version = "0.1.0"
 dependencies = [
  "alloy-primitives",
- "anyhow",
  "axum",
  "axum-jrpc",
  "ethers",

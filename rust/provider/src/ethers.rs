@@ -1,7 +1,7 @@
 use super::{BlockingProvider, EIP1186Proof};
 use alloy_primitives::BlockNumber;
 use alloy_primitives::{B256, U256};
-use call_engine::block_header::{eth::EthBlockHeader, EvmBlockHeader};
+use call_engine::{EthBlockHeader, EvmBlockHeader};
 use ethers_core::types::Block;
 use ethers_core::types::BlockNumber as BlockTag;
 use ethers_providers::{Middleware, MiddlewareError};

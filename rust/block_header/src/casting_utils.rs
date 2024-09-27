@@ -1,4 +1,4 @@
-use crate::block_header::EvmBlockHeader;
+use crate::EvmBlockHeader;
 use std::any::TypeId;
 
 pub(crate) fn try_downcast<To: EvmBlockHeader + Clone>(

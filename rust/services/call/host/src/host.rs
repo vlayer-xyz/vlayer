@@ -14,8 +14,7 @@ use error::HostError;
 use ethers_core::types::BlockNumber;
 use host_utils::Prover;
 use provider::{
-    BlockingProvider, CachedMultiProvider, EthersClient, EthersProvider, EthersProviderFactory,
-    ProviderFactory,
+    BlockingProvider, CachedMultiProvider, EthProvider, EthersProviderFactory, ProviderFactory,
 };
 use risc0_zkvm::ExecutorEnv;
 use serde::Serialize;

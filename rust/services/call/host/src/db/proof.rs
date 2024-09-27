@@ -1,7 +1,7 @@
 use super::provider::{ProviderDb, ProviderDbError};
 use alloy_primitives::{Address, Bytes, B256, U256};
 use anyhow::Context;
-use call_engine::block_header::EvmBlockHeader;
+use call_engine::EvmBlockHeader;
 use mpt::MerkleTrie;
 use provider::{BlockingProvider, EIP1186Proof};
 use revm::{

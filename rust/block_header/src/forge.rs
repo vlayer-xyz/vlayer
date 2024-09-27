@@ -3,8 +3,8 @@ use alloy_rlp::Encodable;
 use revm::primitives::BlockEnv;
 use serde::{Deserialize, Serialize};
 
-use crate::block_header::casting_utils::try_downcast;
-use crate::block_header::EvmBlockHeader;
+use crate::casting_utils::try_downcast;
+use crate::EvmBlockHeader;
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ForgeBlockHeader {
@@ -54,7 +54,7 @@ impl EvmBlockHeader for ForgeBlockHeader {
 
 #[cfg(test)]
 mod tests {
-    use crate::block_header::Hashable;
+    use crate::Hashable;
 
     use super::*;
     use alloy_primitives::keccak256;

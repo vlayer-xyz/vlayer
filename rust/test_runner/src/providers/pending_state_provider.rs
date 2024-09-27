@@ -4,8 +4,7 @@ use forge::revm::primitives::alloy_primitives::{
 };
 use forge::revm::primitives::{Account, Address, Bytes, EvmState, B256, U256};
 
-use call_engine::block_header::forge::ForgeBlockHeader;
-use call_engine::block_header::EvmBlockHeader;
+use call_engine::{EvmBlockHeader, ForgeBlockHeader};
 use call_host::db::proof::ProofDb;
 use provider::{BlockingProvider, EIP1186Proof, ProviderFactory, ProviderFactoryError};
 

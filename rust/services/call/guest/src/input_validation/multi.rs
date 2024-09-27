@@ -49,8 +49,8 @@ mod multi_evm_env_from_input {
     use alloy_chains::Chain;
     use as_any::Downcast;
     use call_engine::{
-        block_header::eth::EthBlockHeader,
         evm::{env::location::ExecutionLocation, input::EvmInput},
+        EthBlockHeader,
     };
     use chain::MAINNET_MERGE_BLOCK_NUMBER;
     use mpt::EMPTY_ROOT_HASH;

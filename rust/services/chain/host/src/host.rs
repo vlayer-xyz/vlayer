@@ -1,13 +1,18 @@
 pub mod config;
 pub mod error;
 
-use alloy_primitives::{BlockNumber, ChainId};
+use alloy_primitives::ChainId;
+use chain_db::Database;
 use chain_engine::Input;
 use chain_guest_wrapper::RISC0_CHAIN_GUEST_ELF;
 pub use config::HostConfig;
 pub use error::HostError;
+use ethers::{
+    providers::{Http, Middleware, Provider},
+    types::BlockNumber,
+};
 use host_utils::Prover;
-use mpt::MerkleTrie;
+use provider::to_eth_block_header;
 use risc0_zkvm::{ExecutorEnv, ProveInfo, Receipt};
 use serde::Serialize;
 
@@ -26,14 +31,23 @@ impl Host {
         Host { prover }
     }
 
-    pub fn run(
+    pub async fn initialize<'db>(
         self,
         _chain_id: ChainId,
-        _block_numbers: &[BlockNumber],
-        merkle_trie: &MerkleTrie,
+        provider: &Provider<Http>,
+        _db: &mut impl Database<'db>,
     ) -> Result<HostOutput, HostError> {
-        let root_hash = merkle_trie.hash_slow();
-        let input = Input { root_hash };
+        let ethers_block = provider
+            .get_block(BlockNumber::Latest)
+            .await
+            .map_err(|err| HostError::Provider(err.to_string()))?
+            .ok_or(HostError::NoLatestBlock)?;
+
+        let block = to_eth_block_header(ethers_block).map_err(HostError::BlockConversion)?;
+
+        let input = Input::Initialize {
+            block: Box::new(block),
+        };
 
         let env = build_executor_env(input)
             .map_err(|err| HostError::ExecutorEnvBuilder(err.to_string()))?;

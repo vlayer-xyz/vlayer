@@ -1,13 +1,13 @@
 use alloy_primitives::{
     Address, BlockNumber, Bytes, ChainId, StorageKey, StorageValue, TxNumber, U256,
 };
-use call_engine::block_header::EvmBlockHeader;
+use call_engine::EvmBlockHeader;
 use chain::{CHAIN_NAMES, TEST_CHAIN_ID_1};
 use ethers_core::types::BlockNumber as BlockTag;
 use foundry_config::RpcEndpoints;
 use provider::{
-    BlockingProvider, EIP1186Proof, EthersClient, EthersProvider, EthersProviderFactory,
-    ProviderFactory, ProviderFactoryError,
+    BlockingProvider, EIP1186Proof, EthProvider, EthersProviderFactory, ProviderFactory,
+    ProviderFactoryError,
 };
 use std::collections::HashMap;
 
