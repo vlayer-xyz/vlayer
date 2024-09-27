@@ -4,7 +4,6 @@ use alloy_primitives::{keccak256, B256};
 use alloy_rlp::Decodable;
 use alloy_trie::EMPTY_ROOT_HASH;
 use nybbles::Nibbles;
-use rlp as legacy_rlp;
 use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, fmt::Debug};
 use thiserror::Error;
@@ -16,8 +15,8 @@ mod utils;
 #[derive(Debug, Error)]
 pub enum ParseNodeError {
     /// Error that occurs when parsing the RLP encoding of a node.
-    #[error("RLP error")]
-    Rlp(#[from] legacy_rlp::DecoderError),
+    #[error("RLP error: {0}")]
+    Rlp(#[from] alloy_rlp::Error),
 }
 
 /// A sparse Merkle Patricia trie storing byte values.

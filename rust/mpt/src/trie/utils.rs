@@ -1,15 +1,14 @@
 use super::ParseNodeError;
 use crate::node::Node;
 use alloy_primitives::{keccak256, B256};
-use rlp as legacy_rlp;
+use alloy_rlp::Decodable;
 use std::collections::HashMap;
 
 /// Returns the decoded node and its RLP hash.
 pub(crate) fn parse_node(rlp: impl AsRef<[u8]>) -> Result<(Option<B256>, Node), ParseNodeError> {
-    let rlp = rlp.as_ref();
-    let node = legacy_rlp::decode(rlp)?;
+    let node = Node::decode(&mut rlp.as_ref())?;
     // the hash is only needed for RLP length >= 32
-    Ok(((rlp.len() >= 32).then(|| keccak256(rlp)), node))
+    Ok(((rlp.as_ref().len() >= 32).then(|| keccak256(rlp)), node))
 }
 
 pub(crate) fn resolve_trie(root: Node, nodes_by_hash: &HashMap<B256, Node>) -> Node {
