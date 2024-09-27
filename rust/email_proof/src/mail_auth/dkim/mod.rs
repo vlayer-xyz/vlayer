@@ -1,18 +1,9 @@
-use super::{
-    common::{
-        crypto::{Algorithm, HashAlgorithm},
-        verify::VerifySignature,
-    },
-    DkimOutput, Error,
+use super::common::{
+    crypto::{Algorithm, HashAlgorithm},
+    verify::VerifySignature,
 };
-
-use result::Result as DkimResult;
-
-// pub mod builder;
-// pub mod canonicalize;
-// pub mod headers;
+pub mod output;
 pub mod parse;
-// pub mod sign;
 pub mod result;
 pub mod verify;
 
@@ -80,52 +71,5 @@ impl VerifySignature for Signature {
 
     fn domain(&self) -> &str {
         &self.d
-    }
-}
-
-impl<'x> DkimOutput<'x> {
-    pub(crate) fn perm_err(err: Error) -> Self {
-        DkimOutput {
-            result: DkimResult::PermError(err),
-            signature: None,
-            report: None,
-        }
-    }
-
-    pub(crate) fn temp_err(err: Error) -> Self {
-        DkimOutput {
-            result: DkimResult::TempError(err),
-            signature: None,
-            report: None,
-        }
-    }
-
-    pub(crate) fn fail(err: Error) -> Self {
-        DkimOutput {
-            result: DkimResult::Fail(err),
-            signature: None,
-            report: None,
-        }
-    }
-
-    pub(crate) fn neutral(err: Error) -> Self {
-        DkimOutput {
-            result: DkimResult::Neutral(err),
-            signature: None,
-            report: None,
-        }
-    }
-
-    pub(crate) fn dns_error(err: Error) -> Self {
-        if matches!(&err, Error::Dns(_)) {
-            DkimOutput::temp_err(err)
-        } else {
-            DkimOutput::perm_err(err)
-        }
-    }
-
-    pub(crate) fn with_signature(mut self, signature: &'x Signature) -> Self {
-        self.signature = signature.into();
-        self
     }
 }

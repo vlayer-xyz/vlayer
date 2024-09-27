@@ -11,13 +11,3 @@ pub(crate) mod error;
 pub(crate) mod resolver;
 
 pub type Result<T> = std::result::Result<T, Error>;
-
-use dkim::result::Result as DkimResult;
-
-#[allow(dead_code)]
-pub struct DkimOutput<'x> {
-    result: DkimResult,
-    signature: Option<&'x dkim::Signature>,
-    report: Option<String>,
-    // is_atps: bool,
-}
