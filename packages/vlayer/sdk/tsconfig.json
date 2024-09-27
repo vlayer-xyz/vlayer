@@ -20,8 +20,11 @@
     "types": [
       "bun" // add Bun global
     ],
+    "baseUrl": "./",
     "paths": {
-      "@contracts/*": ["../../../contracts/out/*"]
-    }
+      "types/*": ["./src/api/lib/types/*"],
+      "testHelpers/*": ["./src/testHelpers/*"],
+    },
+
   }
 }
