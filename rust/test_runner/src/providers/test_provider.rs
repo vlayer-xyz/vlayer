@@ -13,7 +13,7 @@ use std::collections::HashMap;
 
 use crate::providers::pending_state_provider::PendingStateProviderFactory;
 
-pub type ProviderError = <EthersProvider<EthersClient> as BlockingProvider>::Error;
+pub type ProviderError = <EthProvider as BlockingProvider>::Error;
 
 pub struct TestProvider {
     provider: Box<dyn BlockingProvider<Error = ProviderError>>,

@@ -29,7 +29,7 @@ pub struct Host<P: BlockingProvider> {
     prover: Prover,
 }
 
-impl Host<EthersProvider<EthersClient>> {
+impl Host<EthProvider> {
     pub fn try_new(config: &HostConfig) -> Result<Self, HostError> {
         let provider_factory = EthersProviderFactory::new(config.rpc_urls.clone());
         Host::try_new_with_provider_factory(provider_factory, config)
