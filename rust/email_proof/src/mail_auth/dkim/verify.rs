@@ -14,7 +14,8 @@ use crate::mail_auth::{
         crypto::HashAlgorithm,
         verify::{DomainKey, VerifySignature},
     },
-    AuthenticatedMessage, Error, Resolver,
+    resolver::Resolver,
+    AuthenticatedMessage, Error,
 };
 use std::time::SystemTime;
 
