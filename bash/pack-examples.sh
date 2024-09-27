@@ -4,28 +4,29 @@ set -uexo pipefail
 
 VLAYER_HOME=$(git rev-parse --show-toplevel)
 
-output_dir="$(pwd)/out"
+output_dir="${VLAYER_HOME}/out"
 ARCHIVE="${output_dir}/examples.tar"
 
 # Create the output directory if it doesn't exist
-mkdir -p $output_dir
+mkdir -p "${output_dir}"
 
-if [[ -f $ARCHIVE ]]; then
-    rm $ARCHIVE
+if [[ -f "${ARCHIVE}" ]]; then
+    rm "${ARCHIVE}"
 fi
+touch "${ARCHIVE}"
 
-touch $ARCHIVE
+(
+    cd "${VLAYER_HOME}/examples"
 
-cd ${VLAYER_HOME}/examples
+    for example in $(find . -type d -maxdepth 1 -mindepth 1) ; do
 
-for example in $(find . -type d -maxdepth 1 -mindepth 1) ; do
+        scripts="${example}/vlayer"
+        contracts="${example}/src/vlayer"
 
-    scripts="${example}/vlayer"
-    contracts="${example}/src/vlayer"
+        tar --append --file=$ARCHIVE --strip 1 --exclude-from "${VLAYER_HOME}/examples/.gitignore" --dereference "${contracts}"
+        tar --append --file=$ARCHIVE --strip 1 --exclude-from "${VLAYER_HOME}/examples/.gitignore" --dereference "${scripts}"
 
-    tar --append --file=$ARCHIVE --strip 1  --exclude-from .gitignore "${contracts}"
-    tar --append --file=$ARCHIVE --strip 1  --exclude-from .gitignore "${scripts}"
+    done
+)
 
-done
-
-gzip -f $ARCHIVE
+gzip -f "${ARCHIVE}"

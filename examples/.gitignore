@@ -1,12 +1,12 @@
 # Foundry artifacts
-**/broadcast
-**/cache
+**/broadcast/*
+**/cache/*
 
 # Dependency directories
-**/node_modules/
+**/node_modules/*
 
 # Logs
-**/logs
+**/logs/*
 **/_.log
 **/npm-debug.log_
 **/yarn-debug.log*
