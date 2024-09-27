@@ -22,13 +22,12 @@
 - [Vanilla JS/TS](./javascript/javascript.md)
 - [Web proofs](./javascript/webproofs.md)
 
-# Contributing
-- [Rust](./contributing/rust.md)
-- [Javascript](./contributing/javascript.md)
-- [book](./contributing/book.md)
-- [extension](./contributing/extension.md)
-
 # Appendix
+- [Contributing](./contributing/overview.md)
+  - [Rust](./contributing/overview.md)
+  - [Javascript](./contributing/javascript.md)
+  - [Book](./contributing/book.md)
+  - [Extension](./contributing/extension.md)
 - [Architecture](./appendix/architecture/overview.md)
   - [Prover](./appendix/architecture/prover.md)
   - [Multichain](./appendix/architecture/multi.md)
@@ -38,4 +37,3 @@
   - [Solidity](./appendix/architecture/solidity.md)
   - [Releasing](./appendix/architecture/releasing.md)
 - [JSON-RPC API](./appendix/api.md)
-
