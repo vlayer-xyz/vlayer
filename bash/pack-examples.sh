@@ -23,8 +23,8 @@ for example in $(find . -type d -maxdepth 1 -mindepth 1) ; do
     scripts="${example}/vlayer"
     contracts="${example}/src/vlayer"
 
-    tar --append --file=$ARCHIVE --strip 1  --exclude-from .gitignore "${contracts}"
-    tar --append --file=$ARCHIVE --strip 1  --exclude-from .gitignore "${scripts}"
+    tar --append --file=$ARCHIVE --strip 1 --exclude-from .gitignore --dereference "${contracts}"
+    tar --append --file=$ARCHIVE --strip 1 --exclude-from .gitignore --dereference "${scripts}"
 
 done
 
