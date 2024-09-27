@@ -172,7 +172,7 @@ mod test {
 
     fn create_mock_call_inputs(to: Address, input: impl Into<Bytes>) -> CallInputs {
         CallInputs {
-            input: input.into().into(),
+            input: input.into(),
             gas_limit: 0,
             bytecode_address: to,
             target_address: to,
@@ -193,15 +193,13 @@ mod test {
         let input = [selector, args].concat();
         let mut call_inputs = create_mock_call_inputs(addr, Bytes::from(input));
 
-        let transaction_callback: Box<TransactionCallback> = Box::new(|call, location| {
-            // Here you can mock the behavior of the callback based on `call` and `location`
-            // For this example, we return a mock successful execution result
+        let transaction_callback: Box<TransactionCallback> = Box::new(|_call, _location| {
             Ok(ExecutionResult::Success {
                 reason: SuccessReason::Return,
                 gas_used: 21000,
                 gas_refunded: 0,
                 logs: vec![],
-                output: Output::Call(Bytes::from(vec![0xde, 0xad, 0xbe, 0xef])), // Mock output
+                output: Output::Call(Bytes::from(vec![0x0])),
             })
         });
         let mut set_block_inspector = TravelInspector::new(1, transaction_callback);

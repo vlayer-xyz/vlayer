@@ -21,7 +21,6 @@ pub fn execution_result_to_call_outcome(
     result: ExecutionResult,
     inputs: &CallInputs,
 ) -> CallOutcome {
-    // Map ExecutionResult to InstructionResult
     let instruction_result = match result {
         ExecutionResult::Success { reason, .. } => match reason {
             SuccessReason::Stop => InstructionResult::Stop,
@@ -63,14 +62,12 @@ pub fn execution_result_to_call_outcome(
         },
     };
 
-    // Extract output and gas information
     let (output, gas_used) = match &result {
         ExecutionResult::Success {
             output, gas_used, ..
         } => {
             let bytes = match output {
-                Output::Call(b) => b.clone(),
-                Output::Create(b, _) => b.clone(),
+                Output::Create(b, _) | Output::Call(b) => b.clone(),
             };
             (bytes, *gas_used)
         }
@@ -78,14 +75,12 @@ pub fn execution_result_to_call_outcome(
         ExecutionResult::Halt { gas_used, .. } => (Bytes::new(), *gas_used),
     };
 
-    // Create InterpreterResult
     let interpreter_result = InterpreterResult {
         result: instruction_result,
         output,
         gas: Gas::new(gas_used),
     };
 
-    // Create CallOutcome
     CallOutcome {
         result: interpreter_result,
         memory_offset: inputs.return_memory_offset.clone(),
