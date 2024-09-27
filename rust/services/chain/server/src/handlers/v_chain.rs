@@ -44,13 +44,9 @@ pub async fn v_chain(
 mod tests {
     use super::*;
     use lazy_static::lazy_static;
-    use server_utils::ProofMode;
 
     lazy_static! {
-        static ref config: Arc<ServerConfig> = Arc::new(ServerConfig {
-            proof_mode: ProofMode::Groth16,
-            ..Default::default()
-        });
+        static ref config: Arc<ServerConfig> = Default::default();
     }
 
     #[tokio::test]
