@@ -55,7 +55,6 @@ where
     }
 
     fn build_evm<'a>(
-        &self,
         env: &'envs EvmEnv<D>,
         tx: &Call,
         inspector: TravelInspector<'a>,
@@ -91,7 +90,7 @@ where
         let transaction_callback = |call: &_, location| self.internal_call(call, location);
         let inspector = TravelInspector::new(env.cfg_env.chain_id, transaction_callback);
 
-        let evm = self.build_evm(&env, tx, inspector)?;
+        let evm = Engine::build_evm(&env, tx, inspector)?;
 
         Self::transact(evm)
     }
@@ -105,7 +104,7 @@ where
         let transaction_callback = |call: &_, location| self.internal_call(call, location);
         let inspector = TravelInspector::new(env.cfg_env.chain_id, transaction_callback);
 
-        let evm = self.build_evm(&env, tx, inspector)?;
+        let evm = Engine::build_evm(&env, tx, inspector)?;
 
         Self::internal_transact(evm)
     }
