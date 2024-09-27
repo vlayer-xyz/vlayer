@@ -54,14 +54,12 @@ where
             .map_err(|err| EngineError::EvmEnv(err.to_string()))
     }
 
-    pub fn call(
-        &'envs self,
+    fn build_evm<'a>(
+        &self,
+        env: &'envs EvmEnv<D>,
         tx: &Call,
-        location: ExecutionLocation,
-    ) -> Result<Vec<u8>, EngineError> {
-        let env = self.get_env(location)?;
-        let transaction_callback = |call: &_, location| self.call(call, location);
-        let inspector = TravelInspector::new(env.cfg_env.chain_id, transaction_callback);
+        inspector: TravelInspector<'a>,
+    ) -> Result<Evm<'a, TravelInspector<'a>, WrapDatabaseRef<&'envs D>>, EngineError> {
         let precompiles_handle_register = |handler: &mut Handler<_, _, _>| {
             let precompiles = handler.pre_execution.load_precompiles();
             handler.pre_execution.load_precompiles = Arc::new(move || {
@@ -71,6 +69,7 @@ where
             });
         };
 
+        // Build the EVM instance with the specified configurations.
         let evm = Evm::builder()
             .with_ref_db(&env.db)
             .with_external_context(inspector)
@@ -81,7 +80,35 @@ where
             .modify_block_env(|blk_env| env.header.fill_block_env(blk_env))
             .build();
 
+        Ok(evm)
+    }
+
+    pub fn call(
+        &'envs self,
+        tx: &Call,
+        location: ExecutionLocation,
+    ) -> Result<Vec<u8>, EngineError> {
+        let env = self.get_env(location)?;
+        let transaction_callback = |call: &_, location| self.internal_call(call, location);
+        let inspector = TravelInspector::new(env.cfg_env.chain_id, transaction_callback);
+
+        let evm = self.build_evm(&env, tx, inspector)?;
+
         Self::transact(evm)
+    }
+
+    pub fn internal_call(
+        &'envs self,
+        tx: &Call,
+        location: ExecutionLocation,
+    ) -> Result<ExecutionResult, EngineError> {
+        let env = self.get_env(location)?;
+        let transaction_callback = |call: &_, location| self.internal_call(call, location);
+        let inspector = TravelInspector::new(env.cfg_env.chain_id, transaction_callback);
+
+        let evm = self.build_evm(&env, tx, inspector)?;
+
+        Self::internal_transact(evm)
     }
 
     fn transact<'env>(
@@ -99,6 +126,14 @@ where
             return Err(EngineError::TransactError(format_failed_call_result(result)));
         };
         Ok(output.into_data().into())
+    }
+
+    fn internal_transact<'env>(
+        mut evm: Evm<'env, TravelInspector<'env>, WrapDatabaseRef<&'env D>>,
+    ) -> Result<ExecutionResult, EngineError> {
+        let ResultAndState { result, .. } = evm.transact_preverified()?;
+        debug!["Execution result: {:?}", result];
+        Ok(result)
     }
 }
 

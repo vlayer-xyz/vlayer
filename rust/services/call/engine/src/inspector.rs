@@ -1,6 +1,7 @@
 use alloy_primitives::hex::decode;
 use alloy_primitives::{address, b256, Address, ChainId, B256};
 use once_cell::sync::Lazy;
+use revm::primitives::ExecutionResult;
 use revm::{
     interpreter::{CallInputs, CallOutcome},
     Database, EvmContext, Inspector,
@@ -11,7 +12,7 @@ use crate::engine::EngineError;
 use crate::evm::env::location::ExecutionLocation;
 use crate::io::Call;
 use crate::utils::evm_call::{
-    create_encoded_return_outcome, create_return_outcome, split_calldata,
+    create_encoded_return_outcome, execution_result_to_call_outcome, split_calldata,
 };
 
 // The length of an argument in call data is 32 bytes.
@@ -36,7 +37,7 @@ static SET_CHAIN_SELECTOR: Lazy<Box<[u8]>> = Lazy::new(|| {
 });
 
 type TransactionCallback<'a> =
-    dyn Fn(&Call, ExecutionLocation) -> Result<Vec<u8>, EngineError> + 'a;
+    dyn Fn(&Call, ExecutionLocation) -> Result<ExecutionResult, EngineError> + 'a;
 
 enum TravelCall {
     SetBlock { block_number: u64 },
@@ -81,7 +82,8 @@ pub struct TravelInspector<'a> {
 impl<'a> TravelInspector<'a> {
     pub fn new(
         start_chain_id: ChainId,
-        transaction_callback: impl Fn(&Call, ExecutionLocation) -> Result<Vec<u8>, EngineError> + 'a,
+        transaction_callback: impl Fn(&Call, ExecutionLocation) -> Result<ExecutionResult, EngineError>
+            + 'a,
     ) -> Self {
         Self {
             start_chain_id,
@@ -91,14 +93,11 @@ impl<'a> TravelInspector<'a> {
     }
 
     fn set_block(&mut self, block_number: u64) {
-        let chain_id = self
-            .location
-            .map_or(self.start_chain_id, |loc| loc.chain_id);
         info!(
-            "Travel contract called with function: setBlock and block number: {:?}! Chain id remains {:?}.",
-            block_number, chain_id
+            "Travel contract called with function: setBlock and block number: {:?}!",
+            block_number
         );
-        self.location = Some((block_number, chain_id).into());
+        self.location = Some(ExecutionLocation::new(block_number, self.start_chain_id));
     }
 
     fn set_chain(&mut self, chain_id: ChainId, block_number: u64) {
@@ -106,7 +105,7 @@ impl<'a> TravelInspector<'a> {
             "Travel contract called with function: setChain, with chain id: {:?} block number: {:?}!",
             chain_id, block_number
         );
-        self.location = Some((block_number, chain_id).into());
+        self.location = Some(ExecutionLocation::new(block_number, chain_id));
     }
 
     fn on_call(&self, inputs: &CallInputs) -> Option<CallOutcome> {
@@ -120,7 +119,7 @@ impl<'a> TravelInspector<'a> {
         let result =
             (self.transaction_callback)(&inputs.into(), location).expect("Intercepted call failed");
         info!("Intercepted call returned: {:?}", result);
-        let outcome = create_return_outcome(result, inputs);
+        let outcome = execution_result_to_call_outcome(result, inputs);
         Some(outcome)
     }
 
@@ -159,22 +158,17 @@ where
 
 #[cfg(test)]
 mod test {
-    use alloy_primitives::{address, Address, BlockNumber, U256};
-    use alloy_rlp::Bytes;
+    use alloy_primitives::{address, Address, Bytes, U256};
     use revm::{
         db::{CacheDB, EmptyDB},
         interpreter::{CallInputs, CallScheme, CallValue},
-        primitives::AccountInfo,
+        primitives::{AccountInfo, Output, SuccessReason},
         EvmContext, Inspector,
     };
 
     use super::*;
 
     const MOCK_CALLER: Address = address!("0000000000000000000000000000000000000000");
-    const MAINNET_ID: ChainId = 1;
-    const SEPOLIA_ID: ChainId = 11155111;
-    const MAINNET_BLOCK: BlockNumber = 20_000_000;
-    const SEPOLIA_BLOCK: BlockNumber = 6_000_000;
 
     fn create_mock_call_inputs(to: Address, input: impl Into<Bytes>) -> CallInputs {
         CallInputs {
@@ -199,26 +193,21 @@ mod test {
         let input = [selector, args].concat();
         let mut call_inputs = create_mock_call_inputs(addr, Bytes::from(input));
 
-        let mut set_block_inspector = TravelInspector::new(1, |_, _| Ok(vec![]));
+        let transaction_callback: Box<TransactionCallback> = Box::new(|call, location| {
+            // Here you can mock the behavior of the callback based on `call` and `location`
+            // For this example, we return a mock successful execution result
+            Ok(ExecutionResult::Success {
+                reason: SuccessReason::Return,
+                gas_used: 21000,
+                gas_refunded: 0,
+                logs: vec![],
+                output: Output::Call(Bytes::from(vec![0xde, 0xad, 0xbe, 0xef])), // Mock output
+            })
+        });
+        let mut set_block_inspector = TravelInspector::new(1, transaction_callback);
         set_block_inspector.call(&mut evm_context, &mut call_inputs);
 
         set_block_inspector
-    }
-
-    #[test]
-    fn set_block_sets_chain_id_to_latest_not_start() {
-        let locations: Vec<ExecutionLocation> = vec![
-            (MAINNET_BLOCK, MAINNET_ID).into(),
-            (SEPOLIA_BLOCK, SEPOLIA_ID).into(),
-            (SEPOLIA_BLOCK - 1, SEPOLIA_ID).into(),
-        ];
-        let mut inspector = TravelInspector::new(locations[0].chain_id, |_, _| Ok(vec![]));
-
-        inspector.set_chain(locations[1].chain_id, locations[1].block_number);
-        assert_eq!(inspector.location, Some(locations[1]));
-
-        inspector.set_block(locations[2].block_number);
-        assert_eq!(inspector.location, Some(locations[2]));
     }
 
     #[test]

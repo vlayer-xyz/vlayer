@@ -2,7 +2,7 @@ use alloy_primitives::Bytes;
 use alloy_rlp::Buf;
 use alloy_sol_types::{decode_revert_reason, SolError, SolValue};
 use revm::interpreter::{CallInputs, CallOutcome, Gas, InstructionResult, InterpreterResult};
-use revm::primitives::ExecutionResult;
+use revm::primitives::{ExecutionResult, HaltReason, Output, SuccessReason};
 
 const SELECTOR_LEN: usize = 4;
 
@@ -15,6 +15,81 @@ pub fn create_return_outcome<T: Into<Bytes>>(value: T, inputs: &CallInputs) -> C
         InterpreterResult::new(InstructionResult::Return, value.into(), Gas::new(inputs.gas_limit)),
         inputs.return_memory_offset.clone(),
     )
+}
+
+pub fn execution_result_to_call_outcome(
+    result: ExecutionResult,
+    inputs: &CallInputs,
+) -> CallOutcome {
+    // Map ExecutionResult to InstructionResult
+    let instruction_result = match result {
+        ExecutionResult::Success { reason, .. } => match reason {
+            SuccessReason::Stop => InstructionResult::Stop,
+            SuccessReason::Return => InstructionResult::Return,
+            SuccessReason::SelfDestruct => InstructionResult::SelfDestruct,
+            SuccessReason::EofReturnContract => InstructionResult::ReturnContract,
+        },
+        ExecutionResult::Revert { .. } => InstructionResult::Revert,
+        ExecutionResult::Halt { reason, .. } => match reason {
+            HaltReason::OutOfGas(_) => InstructionResult::OutOfGas,
+            HaltReason::OpcodeNotFound => InstructionResult::OpcodeNotFound,
+            HaltReason::InvalidEFOpcode => InstructionResult::InvalidEFOpcode,
+            HaltReason::InvalidJump => InstructionResult::InvalidJump,
+            HaltReason::NotActivated => InstructionResult::NotActivated,
+            HaltReason::StackUnderflow => InstructionResult::StackUnderflow,
+            HaltReason::StackOverflow => InstructionResult::StackOverflow,
+            HaltReason::OutOfOffset => InstructionResult::OutOfOffset,
+            HaltReason::CreateCollision => InstructionResult::CreateCollision,
+            HaltReason::PrecompileError => InstructionResult::PrecompileError,
+            HaltReason::NonceOverflow => InstructionResult::NonceOverflow,
+            HaltReason::CreateContractSizeLimit => InstructionResult::CreateContractSizeLimit,
+            HaltReason::CreateContractStartingWithEF => {
+                InstructionResult::CreateContractStartingWithEF
+            }
+            HaltReason::CreateInitCodeSizeLimit => InstructionResult::CreateInitCodeSizeLimit,
+            HaltReason::OverflowPayment => InstructionResult::OverflowPayment,
+            HaltReason::StateChangeDuringStaticCall => {
+                InstructionResult::StateChangeDuringStaticCall
+            }
+            HaltReason::CallNotAllowedInsideStatic => InstructionResult::CallNotAllowedInsideStatic,
+            HaltReason::OutOfFunds => InstructionResult::OutOfFunds,
+            HaltReason::CallTooDeep => InstructionResult::CallTooDeep,
+            HaltReason::EofAuxDataOverflow => InstructionResult::EofAuxDataOverflow,
+            HaltReason::EofAuxDataTooSmall => InstructionResult::EofAuxDataTooSmall,
+            HaltReason::EOFFunctionStackOverflow => InstructionResult::EOFFunctionStackOverflow,
+            _ => {
+                panic!("Encountered an unsupported HaltReason variant.")
+            }
+        },
+    };
+
+    // Extract output and gas information
+    let (output, gas_used) = match &result {
+        ExecutionResult::Success {
+            output, gas_used, ..
+        } => {
+            let bytes = match output {
+                Output::Call(b) => b.clone(),
+                Output::Create(b, _) => b.clone(),
+            };
+            (bytes, *gas_used)
+        }
+        ExecutionResult::Revert { output, gas_used } => (output.clone(), *gas_used),
+        ExecutionResult::Halt { gas_used, .. } => (Bytes::new(), *gas_used),
+    };
+
+    // Create InterpreterResult
+    let interpreter_result = InterpreterResult {
+        result: instruction_result,
+        output,
+        gas: Gas::new(gas_used),
+    };
+
+    // Create CallOutcome
+    CallOutcome {
+        result: interpreter_result,
+        memory_offset: inputs.return_memory_offset.clone(),
+    }
 }
 
 pub fn create_encoded_return_outcome<T: SolValue>(value: &T, inputs: &CallInputs) -> CallOutcome {
