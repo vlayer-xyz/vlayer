@@ -32,5 +32,8 @@
   - [Solidity](./appendix/architecture/solidity.md)
   - [Releasing](./appendix/architecture/releasing.md)
 - [JSON-RPC API](./appendix/api.md)
-- [Contributing](./contributing.md)
-
+- [Contributing](./contributing/overview.md)
+  - [Rust](./contributing/overview.md)
+  - [Javascript](./contributing/javascript.md)
+  - [Book](./contributing/book.md)
+  - [Extension](./contributing/extension.md)
