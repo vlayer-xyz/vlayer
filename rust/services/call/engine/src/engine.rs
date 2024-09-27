@@ -69,7 +69,6 @@ where
             });
         };
 
-        // Build the EVM instance with the specified configurations.
         let evm = Evm::builder()
             .with_ref_db(&env.db)
             .with_external_context(inspector)

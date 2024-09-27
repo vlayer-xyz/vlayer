@@ -119,7 +119,7 @@ impl<'a> TravelInspector<'a> {
         let result =
             (self.transaction_callback)(&inputs.into(), location).expect("Intercepted call failed");
         info!("Intercepted call returned: {:?}", result);
-        let outcome = execution_result_to_call_outcome(result, inputs);
+        let outcome = execution_result_to_call_outcome(&result, inputs);
         Some(outcome)
     }
 

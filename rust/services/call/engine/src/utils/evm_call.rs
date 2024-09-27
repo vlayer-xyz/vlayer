@@ -18,7 +18,7 @@ pub fn create_return_outcome<T: Into<Bytes>>(value: T, inputs: &CallInputs) -> C
 }
 
 pub fn execution_result_to_call_outcome(
-    result: ExecutionResult,
+    result: &ExecutionResult,
     inputs: &CallInputs,
 ) -> CallOutcome {
     let instruction_result = match result {
