@@ -1,5 +1,3 @@
-use super::common::crypto::{Algorithm, HashAlgorithm};
-
 use signature::Signature;
 
 pub mod output;
@@ -27,14 +25,5 @@ pub(crate) enum Flag {
 impl From<Flag> for u64 {
     fn from(v: Flag) -> Self {
         v as u64
-    }
-}
-
-impl From<Algorithm> for HashAlgorithm {
-    fn from(a: Algorithm) -> Self {
-        match a {
-            Algorithm::RsaSha256 | Algorithm::Ed25519Sha256 => HashAlgorithm::Sha256,
-            Algorithm::RsaSha1 => HashAlgorithm::Sha1,
-        }
     }
 }

@@ -37,5 +37,14 @@ pub enum Algorithm {
     Ed25519Sha256,
 }
 
+impl From<Algorithm> for HashAlgorithm {
+    fn from(a: Algorithm) -> Self {
+        match a {
+            Algorithm::RsaSha256 | Algorithm::Ed25519Sha256 => HashAlgorithm::Sha256,
+            Algorithm::RsaSha1 => HashAlgorithm::Sha1,
+        }
+    }
+}
+
 pub(crate) const R_HASH_SHA1: u64 = 0x01;
 pub(crate) const R_HASH_SHA256: u64 = 0x02;
