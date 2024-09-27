@@ -74,7 +74,7 @@ jobs:
       - name: "Build binaries"
         env:
           VLAYER_RELEASE: "nightly"
-        run: cargo build --release --target ${{ matrix.target }}
+        run: cargo build --release --target ${{ matrix.target }} --package cli 
 
       - name: Package release
         id: package-release
