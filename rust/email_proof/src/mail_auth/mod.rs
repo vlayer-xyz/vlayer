@@ -6,7 +6,6 @@ pub mod dkim;
 pub(crate) mod error;
 pub(crate) mod resolver;
 
-use authenticated_message::AuthenticatedMessage;
 use error::Error;
 
 pub type Result<T> = std::result::Result<T, error::Error>;
