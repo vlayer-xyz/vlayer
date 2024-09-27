@@ -93,11 +93,14 @@ impl<'a> TravelInspector<'a> {
     }
 
     fn set_block(&mut self, block_number: u64) {
+        let chain_id = self
+            .location
+            .map_or(self.start_chain_id, |loc| loc.chain_id);
         info!(
-            "Travel contract called with function: setBlock and block number: {:?}!",
-            block_number
+            "Travel contract called with function: setBlock and block number: {:?}! Chain id remains {:?}.",
+            block_number, chain_id
         );
-        self.location = Some(ExecutionLocation::new(block_number, self.start_chain_id));
+        self.location = Some((block_number, chain_id).into());
     }
 
     fn set_chain(&mut self, chain_id: ChainId, block_number: u64) {
@@ -197,7 +200,7 @@ mod test {
         let input = [selector, args].concat();
         let mut call_inputs = create_mock_call_inputs(addr, Bytes::from(input));
 
-        let transaction_callback: Box<TransactionCallback> = Box::new(|_call, _location| {
+        let transaction_callback: Box<TransactionCallback> = Box::new(|_, _| {
             Ok(ExecutionResult::Success {
                 reason: SuccessReason::Return,
                 gas_used: 21000,
@@ -219,7 +222,16 @@ mod test {
             (SEPOLIA_BLOCK, SEPOLIA_ID).into(),
             (SEPOLIA_BLOCK - 1, SEPOLIA_ID).into(),
         ];
-        let mut inspector = TravelInspector::new(locations[0].chain_id, |_, _| Ok(vec![]));
+        let transaction_callback: Box<TransactionCallback> = Box::new(|_, _| {
+            Ok(ExecutionResult::Success {
+                reason: SuccessReason::Return,
+                gas_used: 21000,
+                gas_refunded: 0,
+                logs: vec![],
+                output: Output::Call(Bytes::from(vec![])),
+            })
+        });
+        let mut inspector = TravelInspector::new(locations[0].chain_id, transaction_callback);
 
         inspector.set_chain(locations[1].chain_id, locations[1].block_number);
         assert_eq!(inspector.location, Some(locations[1]));
@@ -227,7 +239,6 @@ mod test {
         inspector.set_block(locations[2].block_number);
         assert_eq!(inspector.location, Some(locations[2]));
     }
-
 
     #[test]
     fn call_set_block() {
