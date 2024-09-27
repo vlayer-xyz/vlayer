@@ -4,7 +4,7 @@ use crate::{Database, DbError, DbResult, ReadTx, ReadWriteTx, WriteTx};
 
 type KeyValueMap = HashMap<Box<[u8]>, Box<[u8]>>;
 
-#[allow(unused)]
+#[derive(Default)]
 pub struct InMemoryDatabase {
     store: KeyValueMap,
 }
@@ -33,7 +33,6 @@ impl<'a> Database<'a> for InMemoryDatabase {
 }
 
 impl InMemoryDatabase {
-    #[allow(unused)]
     pub fn new() -> Self {
         InMemoryDatabase {
             store: HashMap::new(),
