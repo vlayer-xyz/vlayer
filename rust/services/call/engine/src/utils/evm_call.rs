@@ -56,9 +56,6 @@ pub fn execution_result_to_call_outcome(
             HaltReason::EofAuxDataOverflow => InstructionResult::EofAuxDataOverflow,
             HaltReason::EofAuxDataTooSmall => InstructionResult::EofAuxDataTooSmall,
             HaltReason::EOFFunctionStackOverflow => InstructionResult::EOFFunctionStackOverflow,
-            _ => {
-                panic!("Encountered an unsupported HaltReason variant.")
-            }
         },
     };
 
