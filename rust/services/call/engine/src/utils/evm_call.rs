@@ -56,6 +56,9 @@ pub fn execution_result_to_call_outcome(
             HaltReason::EofAuxDataOverflow => InstructionResult::EofAuxDataOverflow,
             HaltReason::EofAuxDataTooSmall => InstructionResult::EofAuxDataTooSmall,
             HaltReason::EOFFunctionStackOverflow => InstructionResult::EOFFunctionStackOverflow,
+            HaltReason::FailedDeposit => unreachable!(
+                "FailedDeposit is a part of optimism feature and is not currently supported"
+            ),
         },
     };
 
