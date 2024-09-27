@@ -1,6 +1,6 @@
 import { describe, expect, test } from "vitest";
 import { preverifyEmail } from "./preverify.ts";
-import { readFile } from "../../tests/readFile.ts";
+import { readFile } from "testHelpers/readFile"
 
 describe("Preverify email: integration", () => {
   test("adds dns record to email mime", async () => {

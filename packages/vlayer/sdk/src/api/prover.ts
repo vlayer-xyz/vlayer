@@ -7,38 +7,16 @@ import {
   ContractFunctionName,
   decodeFunctionResult,
   encodeFunctionData,
-  type Hex,
 } from "viem";
 
-import { type CallContext, type CallParams, Proof, v_call } from "./v_call";
-
-type Bytecode = {
-  object: Hex;
-};
-
-export type ContractSpec = {
-  abi: Abi;
-  bytecode: Bytecode;
-};
-
-export type ContractArg =
-  | number
-  | string
-  | boolean
-  | bigint
-  | Address
-  | number[]
-  | string[]
-  | boolean[]
-  | bigint[]
-  | Address[];
+import { type CallContext, type CallParams, Proof } from "types/vlayer";
+import { v_call } from "./v_call";
+import { testChainId1 } from "./helpers";
+import { ContractSpec } from "types/ethereum";
 
 export async function getContractSpec(file: string): Promise<ContractSpec> {
   return Bun.file(file).json();
 }
-
-// TODO all those casts here are not acceptable in long term
-import { testChainId1 } from "./helpers";
 
 export async function prove<
   T extends readonly [AbiFunction, ...Abi[number][]],
@@ -50,6 +28,7 @@ export async function prove<
   args: ContractFunctionArgs<T, AbiStateMutability, F>,
   chainId = testChainId1,
 ) {
+
   const calldata = encodeFunctionData({
     abi: abi as Abi,
     functionName: functionName as string,

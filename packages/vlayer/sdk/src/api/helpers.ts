@@ -11,10 +11,11 @@ import {
   PublicClient,
   walletActions,
 } from "viem";
+
 import { privateKeyToAccount, generatePrivateKey } from "viem/accounts";
 import { foundry } from "viem/chains";
 
-import type { ContractSpec, ContractArg } from "./prover";
+import type { ContractSpec, ContractArg } from "types/ethereum";
 
 export const testChainId1 = 100001;
 export const testChainId2 = 100002;
