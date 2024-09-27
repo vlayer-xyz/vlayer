@@ -9,5 +9,5 @@ fn main() {
     let output = match env::read() {
         Input::Initialize { block } => Guest::initialize(&*block),
     };
-    env::commit_slice(&output);
+    env::commit(&output);
 }

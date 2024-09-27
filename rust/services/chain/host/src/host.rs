@@ -2,13 +2,12 @@ pub mod config;
 pub mod error;
 
 use alloy_primitives::ChainId;
-use chain_db::Database;
 use chain_engine::Input;
 use chain_guest_wrapper::RISC0_CHAIN_GUEST_ELF;
 pub use config::HostConfig;
 pub use error::HostError;
 use ethers::{
-    providers::{Http, Middleware, Provider},
+    providers::{JsonRpcClient, Middleware, Provider},
     types::BlockNumber,
 };
 use host_utils::Prover;
@@ -31,11 +30,10 @@ impl Host {
         Host { prover }
     }
 
-    pub async fn initialize<'db>(
+    pub async fn initialize<P: JsonRpcClient>(
         self,
         _chain_id: ChainId,
-        provider: &Provider<Http>,
-        _db: &mut impl Database<'db>,
+        provider: &Provider<P>,
     ) -> Result<HostOutput, HostError> {
         let ethers_block = provider
             .get_block(BlockNumber::Latest)
@@ -74,6 +72,56 @@ fn build_executor_env(input: impl Serialize) -> anyhow::Result<ExecutorEnv<'stat
 #[cfg(test)]
 mod test {
     use super::*;
+    use ethers::{providers::Provider, types::Block};
+    use lazy_static::lazy_static;
+    use serde_json::{from_value, json};
+
+    lazy_static! {
+        static ref block: Block<()> = from_value(json!(
+        {
+            "number": "0x42",
+
+            "baseFeePerGas": "0x0",
+            "miner": "0x0000000000000000000000000000000000000000",
+            "hash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+            "parentHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+            "mixHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+            "nonce": "0x0000000000000000",
+            "sealFields": [],
+            "sha3Uncles": "0x0000000000000000000000000000000000000000000000000000000000000000",
+            "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+            "transactionsRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+            "receiptsRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+            "stateRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+            "difficulty": "0x0",
+            "totalDifficulty": "0x0",
+            "extraData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+            "size": "0x0",
+            "gasLimit": "0x0",
+            "minGasPrice": "0x0",
+            "gasUsed": "0x0",
+            "timestamp": "0x0",
+            "transactions": [],
+            "uncles": []
+          }
+        )).unwrap();
+    }
+
+    #[tokio::test]
+    async fn initialize() -> anyhow::Result<()> {
+        let config = HostConfig::default();
+        let host = Host::new(&config);
+
+        let (provider, mock) = Provider::mocked();
+        mock.push(block.clone())?;
+
+        let HostOutput { receipt } = host.initialize(ChainId::default(), &provider).await?;
+
+        let actual_block_number: u64 = receipt.journal.decode()?;
+        assert_eq!(actual_block_number, 0x42);
+
+        Ok(())
+    }
 
     #[test]
     fn host_prove_invalid_guest_elf() {

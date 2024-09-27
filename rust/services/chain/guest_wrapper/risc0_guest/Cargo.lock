@@ -519,6 +519,7 @@ version = "0.1.0"
 dependencies = [
  "block_header",
  "chain_engine",
+ "serde",
 ]
 
 [[package]]

@@ -16,6 +16,11 @@ mpt = { workspace = true }
 chain_db = { workspace = true }
 ethers = { workspace = true }
 provider = { workspace = true }
+tokio = { workspace = true, features = ["macros"] }
+
+[dev-dependencies]
+serde_json = { workspace = true }
+lazy_static = { workspace = true }
 
 [lints]
 workspace = true

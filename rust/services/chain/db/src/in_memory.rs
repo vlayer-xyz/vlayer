@@ -34,7 +34,7 @@ impl<'a> Database<'a> for InMemoryDatabase {
 
 impl InMemoryDatabase {
     #[allow(unused)]
-    fn new() -> Self {
+    pub fn new() -> Self {
         InMemoryDatabase {
             store: HashMap::new(),
         }

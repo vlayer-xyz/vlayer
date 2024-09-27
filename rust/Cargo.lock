@@ -1963,6 +1963,7 @@ version = "0.1.0"
 dependencies = [
  "block_header",
  "chain_engine",
+ "serde",
 ]
 
 [[package]]
@@ -1983,11 +1984,14 @@ dependencies = [
  "chain_guest_wrapper",
  "ethers",
  "host_utils",
+ "lazy_static",
  "mpt",
  "provider",
  "risc0-zkvm",
  "serde",
+ "serde_json",
  "thiserror",
+ "tokio",
 ]
 
 [[package]]
