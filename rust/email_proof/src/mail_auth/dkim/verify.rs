@@ -10,11 +10,8 @@
 
 use super::output::Output as DkimOutput;
 use crate::mail_auth::{
-    common::{
-        crypto::HashAlgorithm,
-        verify::{DomainKey, VerifySignature},
-    },
-    resolver::Resolver,
+    common::{crypto::HashAlgorithm, verify::VerifySignature},
+    resolver::{domain_key::DomainKey, Resolver},
     AuthenticatedMessage, Error,
 };
 use std::time::SystemTime;

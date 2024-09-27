@@ -1,6 +1,8 @@
 use std::collections::HashMap;
 
-use super::common::verify::DomainKey;
+use domain_key::DomainKey;
+
+pub(crate) mod domain_key;
 
 type Domain = (String, String);
 
