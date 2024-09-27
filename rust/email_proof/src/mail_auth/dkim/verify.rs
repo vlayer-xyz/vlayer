@@ -16,7 +16,7 @@ use crate::mail_auth::{
 };
 use std::time::SystemTime;
 
-use super::{Flag, Signature};
+use super::{signature::Signature, Flag};
 
 impl Resolver {
     /// Verifies DKIM headers of an RFC5322 message.

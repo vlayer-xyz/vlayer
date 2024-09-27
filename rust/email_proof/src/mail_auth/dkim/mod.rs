@@ -1,10 +1,11 @@
-use super::common::{
-    crypto::{Algorithm, HashAlgorithm},
-    verify::VerifySignature,
-};
+use super::common::crypto::{Algorithm, HashAlgorithm};
+
+use signature::Signature;
+
 pub mod output;
 pub mod parse;
 pub mod result;
+pub mod signature;
 pub mod verify;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Default)]
@@ -12,24 +13,6 @@ pub enum Canonicalization {
     #[default]
     Relaxed,
     Simple,
-}
-
-#[derive(Debug, PartialEq, Eq, Clone, Default)]
-pub struct Signature {
-    //     pub v: u32,
-    pub a: Algorithm,
-    pub d: String,
-    pub s: String,
-    pub b: Vec<u8>,
-    pub bh: Vec<u8>,
-    pub h: Vec<String>,
-    //     pub z: Vec<String>,
-    pub i: String,
-    pub l: u64,
-    pub x: u64,
-    pub t: u64,
-    pub ch: Canonicalization,
-    pub cb: Canonicalization,
 }
 
 pub(crate) const R_FLAG_MATCH_DOMAIN: u64 = 0x20;
@@ -53,23 +36,5 @@ impl From<Algorithm> for HashAlgorithm {
             Algorithm::RsaSha256 | Algorithm::Ed25519Sha256 => HashAlgorithm::Sha256,
             Algorithm::RsaSha1 => HashAlgorithm::Sha1,
         }
-    }
-}
-
-impl VerifySignature for Signature {
-    fn signature(&self) -> &[u8] {
-        &self.b
-    }
-
-    fn algorithm(&self) -> Algorithm {
-        self.a
-    }
-
-    fn selector(&self) -> &str {
-        &self.s
-    }
-
-    fn domain(&self) -> &str {
-        &self.d
     }
 }
