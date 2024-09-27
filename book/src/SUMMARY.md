@@ -23,6 +23,11 @@
 - [Web proofs](./javascript/webproofs.md)
 
 # Appendix
+- [Contributing](./contributing/overview.md)
+  - [Rust](./contributing/overview.md)
+  - [Javascript](./contributing/javascript.md)
+  - [Book](./contributing/book.md)
+  - [Extension](./contributing/extension.md)
 - [Architecture](./appendix/architecture/overview.md)
   - [Prover](./appendix/architecture/prover.md)
   - [Multichain](./appendix/architecture/multi.md)
@@ -32,8 +37,3 @@
   - [Solidity](./appendix/architecture/solidity.md)
   - [Releasing](./appendix/architecture/releasing.md)
 - [JSON-RPC API](./appendix/api.md)
-- [Contributing](./contributing/overview.md)
-  - [Rust](./contributing/overview.md)
-  - [Javascript](./contributing/javascript.md)
-  - [Book](./contributing/book.md)
-  - [Extension](./contributing/extension.md)
