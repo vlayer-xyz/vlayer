@@ -180,8 +180,7 @@ mod test {
 
     type StaticTransactionCallback = dyn Fn(&Call, ExecutionLocation) -> Result<ExecutionResult, EngineError>
         + Send
-        + Sync
-        + 'static;
+        + Sync;
 
     static TRANSACTION_CALLBACK: Lazy<Arc<StaticTransactionCallback>> = Lazy::new(|| {
         Arc::new(|_call, _location| {
