@@ -24,7 +24,7 @@
 
 # Appendix
 - [Contributing](./contributing/overview.md)
-  - [Rust](./contributing/overview.md)
+  - [Rust](./contributing/rust.md)
   - [Javascript](./contributing/javascript.md)
   - [Book](./contributing/book.md)
   - [Extension](./contributing/extension.md)
