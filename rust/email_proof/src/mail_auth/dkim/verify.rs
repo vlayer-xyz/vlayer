@@ -11,12 +11,10 @@
 use super::output::Output as DkimOutput;
 use crate::mail_auth::{
     common::{crypto::HashAlgorithm, verify::VerifySignature},
-    resolver::{domain_key::DomainKey, Resolver},
+    resolver::Resolver,
     AuthenticatedMessage, Error,
 };
 use std::time::SystemTime;
-
-use super::{signature::Signature, Flag};
 
 impl Resolver {
     /// Verifies DKIM headers of an RFC5322 message.
@@ -143,36 +141,6 @@ impl<'x> AuthenticatedMessage<'x> {
                 }
             })
             .chain([(dkim_hdr_name, dkim_hdr_value)])
-    }
-}
-
-impl Signature {
-    #[allow(clippy::while_let_on_iterator)]
-    pub(crate) fn validate_auid(&self, record: &DomainKey) -> bool {
-        // Enforce t=s flag
-        if !self.i.is_empty() && record.has_flag(Flag::MatchDomain) {
-            let mut auid = self.i.chars();
-            let mut domain = self.d.chars();
-            while let Some(ch) = auid.next() {
-                if ch == '@' {
-                    break;
-                }
-            }
-            while let Some(ch) = auid.next() {
-                if let Some(dch) = domain.next() {
-                    if ch != dch {
-                        return false;
-                    }
-                } else {
-                    break;
-                }
-            }
-            if domain.next().is_some() {
-                return false;
-            }
-        }
-
-        true
     }
 }
 
