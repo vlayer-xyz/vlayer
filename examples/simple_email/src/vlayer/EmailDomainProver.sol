@@ -22,8 +22,8 @@ contract EmailDomainProver is Prover {
     {
         VerifiedEmail memory email = unverifiedEmail.verify();
 
-        require(contains(email.from, targetDomain), "wrong sender domain");
-        require(email.subject.equal("Verify me"), "subject must be 'Verify me'");
+        require(contains(email.from, targetDomain), "incorrect sender domain");
+        require(email.subject.equal("Verify me for company NFT"), "incorrect subject");
 
         return (sha256(abi.encodePacked(email.from)), targetWallet);
     }
