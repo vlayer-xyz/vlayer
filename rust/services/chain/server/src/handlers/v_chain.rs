@@ -1,10 +1,8 @@
-use std::sync::Arc;
-
 use alloy_primitives::{bytes, BlockNumber, Bytes, ChainId};
 use mpt::MerkleTrie;
 use serde::{Deserialize, Serialize};
 
-use crate::{config::ServerConfig, error::AppError};
+use crate::error::AppError;
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct Params {
@@ -25,11 +23,7 @@ const SOME_RISC0_CHAIN_GUEST_ID: [u32; 8] = [
     2663174293, 2024089015, 3465834372, 887420448, 2606376422, 1669533029, 1010997213, 2366700158,
 ];
 
-pub async fn v_chain(
-    _config: Arc<ServerConfig>,
-    merkle_trie: MerkleTrie,
-    params: Params,
-) -> Result<ChainProof, AppError> {
+pub async fn v_chain(merkle_trie: MerkleTrie, params: Params) -> Result<ChainProof, AppError> {
     if params.block_numbers.is_empty() {
         return Err(AppError::NoBlockNumbers);
     };
@@ -45,10 +39,6 @@ mod tests {
     use super::*;
     use lazy_static::lazy_static;
 
-    lazy_static! {
-        static ref config: Arc<ServerConfig> = Default::default();
-    }
-
     #[tokio::test]
     async fn empty_block_hashes() {
         let empty_block_hashes = Params {
@@ -56,12 +46,7 @@ mod tests {
             block_numbers: vec![],
         };
         let trie = MerkleTrie::default();
-        assert_eq!(
-            v_chain(config.clone(), trie, empty_block_hashes)
-                .await
-                .unwrap_err(),
-            AppError::NoBlockNumbers
-        );
+        assert_eq!(v_chain(trie, empty_block_hashes).await.unwrap_err(), AppError::NoBlockNumbers);
     }
 
     mod two_consecutive_block_hashes {
@@ -84,7 +69,7 @@ mod tests {
 
         #[tokio::test]
         async fn trie_contains_proofs() -> Result<()> {
-            let response = v_chain(config.clone(), db_trie.clone(), params.clone()).await?;
+            let response = v_chain(db_trie.clone(), params.clone()).await?;
 
             let ChainProof { nodes, .. } = response;
             let trie = MerkleTrie::from_rlp_nodes(nodes)?;
@@ -101,7 +86,7 @@ mod tests {
 
         #[tokio::test]
         async fn proof_does_verify() -> Result<()> {
-            let response = v_chain(config.clone(), db_trie.clone(), params.clone()).await?;
+            let response = v_chain(db_trie.clone(), params.clone()).await?;
 
             let ChainProof { proof, nodes } = response;
             let trie = MerkleTrie::from_rlp_nodes(nodes)?;
@@ -115,7 +100,7 @@ mod tests {
 
         #[tokio::test]
         async fn proof_does_not_verify_with_invalid_elf_id() -> Result<()> {
-            let response = v_chain(config.clone(), db_trie.clone(), params.clone()).await?;
+            let response = v_chain(db_trie.clone(), params.clone()).await?;
 
             let ChainProof { proof, nodes } = response;
             let trie = MerkleTrie::from_rlp_nodes(nodes)?;

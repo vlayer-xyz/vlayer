@@ -1,11 +1,11 @@
 use axum::http::StatusCode;
-use chain_server::{server::server, ServerConfig};
+use chain_server::server::server;
 use serde_json::json;
 use server_utils::{body_to_json, post};
 
 #[tokio::test]
 async fn http_not_found() {
-    let app = server(ServerConfig::default());
+    let app = server();
     let empty_body = json!({});
     let response = post(app, "/non-existent", &empty_body).await;
     assert_eq!(StatusCode::NOT_FOUND, response.status());
@@ -13,7 +13,7 @@ async fn http_not_found() {
 
 #[tokio::test]
 async fn method_not_found() {
-    let app = server(ServerConfig::default());
+    let app = server();
     let req = json!({
         "jsonrpc": "2.0",
         "id": 1,
@@ -39,7 +39,7 @@ async fn method_not_found() {
 
 #[tokio::test]
 async fn method_missing() {
-    let app = server(ServerConfig::default());
+    let app = server();
     let req = json!({
         "jsonrpc": "2.0",
         "id": 2,
@@ -68,7 +68,7 @@ mod v_chain {
     #[tokio::test]
     #[ignore]
     async fn success_dummy() {
-        let app = server(ServerConfig::default());
+        let app = server();
         let req = json!({
             "jsonrpc": "2.0",
             "id": 1,
@@ -96,7 +96,7 @@ mod v_chain {
 
     #[tokio::test]
     async fn no_block_numbers_error() {
-        let app = server(ServerConfig::default());
+        let app = server();
         let req = json!({
             "jsonrpc": "2.0",
             "id": 1,
@@ -125,7 +125,7 @@ mod v_chain {
 
     #[tokio::test]
     async fn field_validation_error() {
-        let app = server(ServerConfig::default());
+        let app = server();
 
         let valid_number = 42;
         let invalid_number = "";
