@@ -20,7 +20,7 @@ jobs:
           - target: aarch64-apple-darwin
             platform: darwin
             arch: arm64
-            runner: macos-latest
+            runner: macos-14
 
     steps:
       - name: Checkout repository
@@ -31,7 +31,7 @@ jobs:
       # Free up disk space as the macOS runners end up using most for Xcode
       # versions we don't need and use iOS simulators.
       - name: Free up disk space
-        if:  matrix.runner == 'macos-latest' 
+        if:  matrix.runner == 'macos-14' 
         run: |
           echo '*** Delete iOS simulators and their caches'
           xcrun simctl delete all
