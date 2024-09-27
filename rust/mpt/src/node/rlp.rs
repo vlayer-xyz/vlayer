@@ -78,7 +78,7 @@ fn map_rlp_error(err: legacy_rlp::DecoderError) -> alloy_rlp::Error {
         rlp::DecoderError::RlpExpectedToBeData => alloy_rlp::Error::Custom("data expected"),
         rlp::DecoderError::RlpIncorrectListLen => alloy_rlp::Error::Custom("incorrect list length"),
         rlp::DecoderError::RlpInvalidIndirection => alloy_rlp::Error::Custom("invalid indirection"),
-        rlp::DecoderError::Custom(_) => alloy_rlp::Error::Custom("unknown error"), // Cannot convert &str to &'static str, co message is discarded
+        rlp::DecoderError::Custom(str) => alloy_rlp::Error::Custom(str),
     }
 }
 
