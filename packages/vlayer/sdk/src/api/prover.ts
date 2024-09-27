@@ -28,7 +28,6 @@ export async function prove<
   args: ContractFunctionArgs<T, AbiStateMutability, F>,
   chainId = testChainId1,
 ) {
-
   const calldata = encodeFunctionData({
     abi: abi as Abi,
     functionName: functionName as string,
