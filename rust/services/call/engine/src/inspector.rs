@@ -108,7 +108,7 @@ impl<'a> TravelInspector<'a> {
             "Travel contract called with function: setChain, with chain id: {:?} block number: {:?}!",
             chain_id, block_number
         );
-        self.location = Some(ExecutionLocation::new(block_number, chain_id));
+        self.location = Some((block_number, chain_id).into());
     }
 
     fn on_call(&self, inputs: &CallInputs) -> Option<CallOutcome> {
@@ -168,6 +168,7 @@ mod test {
         primitives::{AccountInfo, Output, SuccessReason},
         EvmContext, Inspector,
     };
+    use std::sync::Arc;
 
     use super::*;
 
@@ -176,6 +177,23 @@ mod test {
     const SEPOLIA_ID: ChainId = 11155111;
     const MAINNET_BLOCK: BlockNumber = 20_000_000;
     const SEPOLIA_BLOCK: BlockNumber = 6_000_000;
+
+    type StaticTransactionCallback = dyn Fn(&Call, ExecutionLocation) -> Result<ExecutionResult, EngineError>
+        + Send
+        + Sync
+        + 'static;
+
+    static TRANSACTION_CALLBACK: Lazy<Arc<StaticTransactionCallback>> = Lazy::new(|| {
+        Arc::new(|_call, _location| {
+            Ok(ExecutionResult::Success {
+                reason: SuccessReason::Return,
+                gas_used: 21000,
+                gas_refunded: 0,
+                logs: vec![],
+                output: Output::Call(Bytes::from(vec![0x0])),
+            })
+        })
+    });
 
     fn create_mock_call_inputs(to: Address, input: impl Into<Bytes>) -> CallInputs {
         CallInputs {
@@ -200,16 +218,9 @@ mod test {
         let input = [selector, args].concat();
         let mut call_inputs = create_mock_call_inputs(addr, Bytes::from(input));
 
-        let transaction_callback: Box<TransactionCallback> = Box::new(|_, _| {
-            Ok(ExecutionResult::Success {
-                reason: SuccessReason::Return,
-                gas_used: 21000,
-                gas_refunded: 0,
-                logs: vec![],
-                output: Output::Call(Bytes::from(vec![0x0])),
-            })
+        let mut set_block_inspector = TravelInspector::new(1, move |call, location| {
+            (TRANSACTION_CALLBACK.clone())(call, location)
         });
-        let mut set_block_inspector = TravelInspector::new(1, transaction_callback);
         set_block_inspector.call(&mut evm_context, &mut call_inputs);
 
         set_block_inspector
@@ -222,16 +233,10 @@ mod test {
             (SEPOLIA_BLOCK, SEPOLIA_ID).into(),
             (SEPOLIA_BLOCK - 1, SEPOLIA_ID).into(),
         ];
-        let transaction_callback: Box<TransactionCallback> = Box::new(|_, _| {
-            Ok(ExecutionResult::Success {
-                reason: SuccessReason::Return,
-                gas_used: 21000,
-                gas_refunded: 0,
-                logs: vec![],
-                output: Output::Call(Bytes::from(vec![])),
-            })
+
+        let mut inspector = TravelInspector::new(locations[0].chain_id, move |call, location| {
+            (TRANSACTION_CALLBACK.clone())(call, location)
         });
-        let mut inspector = TravelInspector::new(locations[0].chain_id, transaction_callback);
 
         inspector.set_chain(locations[1].chain_id, locations[1].block_number);
         assert_eq!(inspector.location, Some(locations[1]));
