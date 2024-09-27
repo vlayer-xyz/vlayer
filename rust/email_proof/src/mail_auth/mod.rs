@@ -1,22 +1,14 @@
 #![allow(dead_code)]
 
-use common::{crypto::HashAlgorithm, headers::Header};
-use dkim::Canonicalization;
+use authenticated_message::AuthenticatedMessage;
 use error::Error;
 use resolver::Resolver;
 
+pub(crate) mod authenticated_message;
 pub mod common;
 pub mod dkim;
 pub(crate) mod error;
 pub(crate) mod resolver;
-
-pub struct AuthenticatedMessage<'x> {
-    pub headers: Vec<(&'x [u8], &'x [u8])>,
-    pub dkim_headers: Vec<Header<'x, crate::mail_auth::Result<dkim::Signature>>>,
-    pub body_hashes: Vec<(Canonicalization, HashAlgorithm, u64, Vec<u8>)>,
-}
-
-impl<'x> AuthenticatedMessage<'x> {}
 
 #[derive(Debug, PartialEq, Eq, Clone)]
 pub enum DkimResult {
