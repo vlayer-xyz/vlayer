@@ -18,10 +18,9 @@ export async function getContractSpec(file: string): Promise<ContractSpec> {
   return Bun.file(file).json();
 }
 
-// TODO all those casts here are not acceptable in long term
-
 export async function prove<
-cccc  F extends ContractFunctionName<T>,
+  T extends readonly [AbiFunction, ...Abi[number][]],
+  F extends ContractFunctionName<T>,
 >(
   prover: Address,
   abi: T,
