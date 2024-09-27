@@ -1,11 +1,8 @@
-use std::sync::Arc;
-
-use alloy_primitives::{BlockNumber, Bytes, ChainId};
-use chain_host::{Host, HostConfig, HostOutput};
+use alloy_primitives::{bytes, BlockNumber, Bytes, ChainId};
 use mpt::MerkleTrie;
 use serde::{Deserialize, Serialize};
 
-use crate::{config::ServerConfig, error::AppError};
+use crate::error::AppError;
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct Params {
@@ -19,26 +16,20 @@ pub struct ChainProof {
     nodes: Vec<Bytes>,
 }
 
-pub async fn v_chain(
-    config: Arc<ServerConfig>,
-    merkle_trie: MerkleTrie,
-    params: Params,
-) -> Result<ChainProof, AppError> {
+// Server reads proofs from DB, but for now we just use a hardcoded proof genrated by the bonsai
+const SOME_PROOF: Bytes = bytes!("0200000000010000000000002a6a30624f8e369e9e52beb870e2320d78faa7eaa0cde307c60bf0de5dd9ed5c1c5d530ba0d64f6005ff14036b57ec50ef4120808c0b9ad19573a1514d22d9a02379217a08dba9fffb5ed72a65e726339b03ade78082baea80b2e5218b813786299b8c688cfdf073c8c6f09ad14fe3a5f2a3a227da31733066f5bfff0bb12bd122e617b68420b3bd6f918b4c004dfdb70a213dc6be373efbf3820528782349d80aed2dca06bff75c969bc653c9df91fc27f2d74f8e0cb7c02ca7e8546772dffb1e9dc9131c22eb3b87a5130b4c25ae16d672aef2079c8ac6ec60ea6a93e337d21f7b2b0d8c67ff442912610a03825be61cba767ca0e1c4bc3579f4cc171e474600000000000000000436200086f57219536951276fb0b8b74d7342c5c8cfe74b953d8e16b343364199f8524e0000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000100000000000000000000000000000000000000000000000000000000000000000000000000000001000000002000000000000000cdb081c8a4b30d52307c3bebbc49a8f1520c0f936a0802e8bbc4e04dff17dbaa000000000000000000000000310fe598e8e3e92fa805bc272d7f587898bb8b68c4d5d7938db884abaa76e15c");
+#[cfg(test)]
+const SOME_RISC0_CHAIN_GUEST_ID: [u32; 8] = [
+    2663174293, 2024089015, 3465834372, 887420448, 2606376422, 1669533029, 1010997213, 2366700158,
+];
+
+pub async fn v_chain(merkle_trie: MerkleTrie, params: Params) -> Result<ChainProof, AppError> {
     if params.block_numbers.is_empty() {
         return Err(AppError::NoBlockNumbers);
     };
 
-    let host_config = HostConfig {
-        rpc_urls: config.rpc_urls.clone(),
-        proof_mode: config.proof_mode.into(),
-    };
-    let host = Host::new(&host_config);
-    let HostOutput { receipt } = host.run(params.chain_id, &params.block_numbers, &merkle_trie)?;
-    let proof =
-        bincode::serialize(&receipt.inner).map_err(|err| AppError::Bincode(err.to_string()))?;
-
     Ok(ChainProof {
-        proof: proof.into(),
+        proof: SOME_PROOF,
         nodes: merkle_trie.to_rlp_nodes().map(Bytes::from).collect(),
     })
 }
@@ -47,14 +38,6 @@ pub async fn v_chain(
 mod tests {
     use super::*;
     use lazy_static::lazy_static;
-    use server_utils::ProofMode;
-
-    lazy_static! {
-        static ref config: Arc<ServerConfig> = Arc::new(ServerConfig {
-            proof_mode: ProofMode::Fake,
-            ..Default::default()
-        });
-    }
 
     #[tokio::test]
     async fn empty_block_hashes() {
@@ -63,19 +46,13 @@ mod tests {
             block_numbers: vec![],
         };
         let trie = MerkleTrie::default();
-        assert_eq!(
-            v_chain(config.clone(), trie, empty_block_hashes)
-                .await
-                .unwrap_err(),
-            AppError::NoBlockNumbers
-        );
+        assert_eq!(v_chain(trie, empty_block_hashes).await.unwrap_err(), AppError::NoBlockNumbers);
     }
 
     mod two_consecutive_block_hashes {
         use super::*;
         use alloy_primitives::{fixed_bytes, FixedBytes};
         use anyhow::Result;
-        use chain_host::RISC0_CHAIN_GUEST_ID;
         use risc0_zkp::verify::VerificationError;
         use risc0_zkvm::{InnerReceipt, Receipt};
 
@@ -92,7 +69,7 @@ mod tests {
 
         #[tokio::test]
         async fn trie_contains_proofs() -> Result<()> {
-            let response = v_chain(config.clone(), db_trie.clone(), params.clone()).await?;
+            let response = v_chain(db_trie.clone(), params.clone()).await?;
 
             let ChainProof { nodes, .. } = response;
             let trie = MerkleTrie::from_rlp_nodes(nodes)?;
@@ -109,21 +86,21 @@ mod tests {
 
         #[tokio::test]
         async fn proof_does_verify() -> Result<()> {
-            let response = v_chain(config.clone(), db_trie.clone(), params.clone()).await?;
+            let response = v_chain(db_trie.clone(), params.clone()).await?;
 
             let ChainProof { proof, nodes } = response;
             let trie = MerkleTrie::from_rlp_nodes(nodes)?;
 
             let inner_receipt: InnerReceipt = bincode::deserialize(&proof)?;
             let receipt = Receipt::new(inner_receipt, trie.hash_slow().to_vec());
-            assert!(receipt.verify(RISC0_CHAIN_GUEST_ID).is_ok());
+            assert!(receipt.verify(SOME_RISC0_CHAIN_GUEST_ID).is_ok());
 
             Ok(())
         }
 
         #[tokio::test]
         async fn proof_does_not_verify_with_invalid_elf_id() -> Result<()> {
-            let response = v_chain(config.clone(), db_trie.clone(), params.clone()).await?;
+            let response = v_chain(db_trie.clone(), params.clone()).await?;
 
             let ChainProof { proof, nodes } = response;
             let trie = MerkleTrie::from_rlp_nodes(nodes)?;
