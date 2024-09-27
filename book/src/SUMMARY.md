@@ -22,12 +22,6 @@
 - [Vanilla JS/TS](./javascript/javascript.md)
 - [Web proofs](./javascript/webproofs.md)
 
-# Contributing
-- [Rust](./contributing/rust.md)
-- [Javascript](./contributing/javascript.md)
-- [book](./contributing/book.md)
-- [extension](./contributing/extension.md)
-
 # Appendix
 - [Architecture](./appendix/architecture/overview.md)
   - [Prover](./appendix/architecture/prover.md)
@@ -38,4 +32,5 @@
   - [Solidity](./appendix/architecture/solidity.md)
   - [Releasing](./appendix/architecture/releasing.md)
 - [JSON-RPC API](./appendix/api.md)
+- [Contributing](./contributing.md)
 
