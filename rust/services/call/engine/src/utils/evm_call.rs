@@ -17,6 +17,30 @@ pub fn create_return_outcome<T: Into<Bytes>>(value: T, inputs: &CallInputs) -> C
     )
 }
 
+pub fn execution_result_to_call_outcome(
+    result: &ExecutionResult,
+    inputs: &CallInputs,
+) -> CallOutcome {
+    let interpreter_result = InterpreterResult {
+        result: execution_result_to_instruction_result(result),
+        output: result.output().cloned().unwrap_or_default(),
+        gas: Gas::new(result.gas_used()),
+    };
+
+    CallOutcome {
+        result: interpreter_result,
+        memory_offset: inputs.return_memory_offset.clone(),
+    }
+}
+
+fn execution_result_to_instruction_result(result: &ExecutionResult) -> InstructionResult {
+    match result {
+        ExecutionResult::Success { reason, .. } => (*reason).into(),
+        ExecutionResult::Revert { .. } => InstructionResult::Revert,
+        ExecutionResult::Halt { reason, .. } => (*reason).into(),
+    }
+}
+
 pub fn create_encoded_return_outcome<T: SolValue>(value: &T, inputs: &CallInputs) -> CallOutcome {
     create_return_outcome(value.abi_encode(), inputs)
 }

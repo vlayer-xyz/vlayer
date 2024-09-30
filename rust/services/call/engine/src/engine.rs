@@ -54,14 +54,11 @@ where
             .map_err(|err| EngineError::EvmEnv(err.to_string()))
     }
 
-    pub fn call(
-        &'envs self,
+    fn build_evm<'a>(
+        env: &'envs EvmEnv<D>,
         tx: &Call,
-        location: ExecutionLocation,
-    ) -> Result<Vec<u8>, EngineError> {
-        let env = self.get_env(location)?;
-        let transaction_callback = |call: &_, location| self.call(call, location);
-        let inspector = TravelInspector::new(env.cfg_env.chain_id, transaction_callback);
+        inspector: TravelInspector<'a>,
+    ) -> Result<Evm<'a, TravelInspector<'a>, WrapDatabaseRef<&'envs D>>, EngineError> {
         let precompiles_handle_register = |handler: &mut Handler<_, _, _>| {
             let precompiles = handler.pre_execution.load_precompiles();
             handler.pre_execution.load_precompiles = Arc::new(move || {
@@ -81,24 +78,43 @@ where
             .modify_block_env(|blk_env| env.header.fill_block_env(blk_env))
             .build();
 
-        Self::transact(evm)
+        Ok(evm)
     }
 
-    fn transact<'env>(
-        mut evm: Evm<'env, TravelInspector<'env>, WrapDatabaseRef<&'env D>>,
+    pub fn call(
+        &'envs self,
+        tx: &Call,
+        location: ExecutionLocation,
     ) -> Result<Vec<u8>, EngineError> {
-        let ResultAndState { result, .. } = evm.transact_preverified()?;
-        debug!["Execution result: {:?}", result];
+        Self::assert_success_return_and_extract_return_data(self.internal_call(tx, location)?)
+    }
 
-        let ExecutionResult::Success {
-            reason: SuccessReason::Return,
-            output,
-            ..
-        } = result
-        else {
-            return Err(EngineError::TransactError(format_failed_call_result(result)));
-        };
-        Ok(output.into_data().into())
+    pub fn internal_call(
+        &'envs self,
+        tx: &Call,
+        location: ExecutionLocation,
+    ) -> Result<ExecutionResult, EngineError> {
+        let env = self.get_env(location)?;
+        let transaction_callback = |call: &_, location| self.internal_call(call, location);
+        let inspector = TravelInspector::new(env.cfg_env.chain_id, transaction_callback);
+        let mut evm = Engine::build_evm(&env, tx, inspector)?;
+        let ResultAndState { result, .. } = evm.transact_preverified()?;
+        debug!("EVM call result: {:?}", result);
+
+        Ok(result)
+    }
+
+    fn assert_success_return_and_extract_return_data(
+        result: ExecutionResult,
+    ) -> Result<Vec<u8>, EngineError> {
+        match result {
+            ExecutionResult::Success {
+                reason: SuccessReason::Return,
+                output,
+                ..
+            } => Ok(output.into_data().into()),
+            _ => Err(EngineError::TransactError(format_failed_call_result(result))),
+        }
     }
 }
 

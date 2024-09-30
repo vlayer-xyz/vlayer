@@ -1,6 +1,7 @@
 use alloy_primitives::hex::decode;
 use alloy_primitives::{address, b256, Address, ChainId, B256};
 use once_cell::sync::Lazy;
+use revm::primitives::ExecutionResult;
 use revm::{
     interpreter::{CallInputs, CallOutcome},
     Database, EvmContext, Inspector,
@@ -11,7 +12,7 @@ use crate::engine::EngineError;
 use crate::evm::env::location::ExecutionLocation;
 use crate::io::Call;
 use crate::utils::evm_call::{
-    create_encoded_return_outcome, create_return_outcome, split_calldata,
+    create_encoded_return_outcome, execution_result_to_call_outcome, split_calldata,
 };
 
 // The length of an argument in call data is 32 bytes.
@@ -36,7 +37,7 @@ static SET_CHAIN_SELECTOR: Lazy<Box<[u8]>> = Lazy::new(|| {
 });
 
 type TransactionCallback<'a> =
-    dyn Fn(&Call, ExecutionLocation) -> Result<Vec<u8>, EngineError> + 'a;
+    dyn Fn(&Call, ExecutionLocation) -> Result<ExecutionResult, EngineError> + 'a;
 
 enum TravelCall {
     SetBlock { block_number: u64 },
@@ -81,7 +82,8 @@ pub struct TravelInspector<'a> {
 impl<'a> TravelInspector<'a> {
     pub fn new(
         start_chain_id: ChainId,
-        transaction_callback: impl Fn(&Call, ExecutionLocation) -> Result<Vec<u8>, EngineError> + 'a,
+        transaction_callback: impl Fn(&Call, ExecutionLocation) -> Result<ExecutionResult, EngineError>
+            + 'a,
     ) -> Self {
         Self {
             start_chain_id,
@@ -120,7 +122,7 @@ impl<'a> TravelInspector<'a> {
         let result =
             (self.transaction_callback)(&inputs.into(), location).expect("Intercepted call failed");
         info!("Intercepted call returned: {:?}", result);
-        let outcome = create_return_outcome(result, inputs);
+        let outcome = execution_result_to_call_outcome(&result, inputs);
         Some(outcome)
     }
 
@@ -159,12 +161,11 @@ where
 
 #[cfg(test)]
 mod test {
-    use alloy_primitives::{address, Address, BlockNumber, U256};
-    use alloy_rlp::Bytes;
+    use alloy_primitives::{address, Address, BlockNumber, Bytes, U256};
     use revm::{
         db::{CacheDB, EmptyDB},
         interpreter::{CallInputs, CallScheme, CallValue},
-        primitives::AccountInfo,
+        primitives::{AccountInfo, Output, SuccessReason},
         EvmContext, Inspector,
     };
 
@@ -176,9 +177,22 @@ mod test {
     const MAINNET_BLOCK: BlockNumber = 20_000_000;
     const SEPOLIA_BLOCK: BlockNumber = 6_000_000;
 
+    type StaticTransactionCallback =
+        dyn Fn(&Call, ExecutionLocation) -> Result<ExecutionResult, EngineError> + Send + Sync;
+
+    static TRANSACTION_CALLBACK: &StaticTransactionCallback = &|_, _| {
+        Ok(ExecutionResult::Success {
+            reason: SuccessReason::Return,
+            gas_used: 0,
+            gas_refunded: 0,
+            logs: vec![],
+            output: Output::Call(Bytes::from(vec![])),
+        })
+    };
+
     fn create_mock_call_inputs(to: Address, input: impl Into<Bytes>) -> CallInputs {
         CallInputs {
-            input: input.into().into(),
+            input: input.into(),
             gas_limit: 0,
             bytecode_address: to,
             target_address: to,
@@ -199,7 +213,8 @@ mod test {
         let input = [selector, args].concat();
         let mut call_inputs = create_mock_call_inputs(addr, Bytes::from(input));
 
-        let mut set_block_inspector = TravelInspector::new(1, |_, _| Ok(vec![]));
+        let mut set_block_inspector =
+            TravelInspector::new(1, |call, location| (TRANSACTION_CALLBACK)(call, location));
         set_block_inspector.call(&mut evm_context, &mut call_inputs);
 
         set_block_inspector
@@ -212,7 +227,10 @@ mod test {
             (SEPOLIA_BLOCK, SEPOLIA_ID).into(),
             (SEPOLIA_BLOCK - 1, SEPOLIA_ID).into(),
         ];
-        let mut inspector = TravelInspector::new(locations[0].chain_id, |_, _| Ok(vec![]));
+
+        let mut inspector = TravelInspector::new(locations[0].chain_id, |call, location| {
+            (TRANSACTION_CALLBACK)(call, location)
+        });
 
         inspector.set_chain(locations[1].chain_id, locations[1].block_number);
         assert_eq!(inspector.location, Some(locations[1]));
