@@ -21,7 +21,7 @@ The Ethereum ecosystem is fragmented, consisting of various EVM chains such as A
 * `blockNo`, which is the block number of the given chain
 
 ## Example 
-
+### Prover
 The example below shows how to check USDC balances across three different chains:
 
 ```solidity
@@ -60,6 +60,37 @@ First, the call to `setChain(1, 20683110)` sets the chain to Ethereum mainnet (c
 Next, `setChain(8453, 19367633)` switches the context to the Base chain. The `balanceOf` function then checks the balance at block 19367633, but this time on the Base chain.
 
 Subsequent calls are handled by a for loop, which switches the context to the specified chains and block numbers accordingly.
+
+### Verifier
+After proving is complete, the generated proof and public inputs can be used for on-chain verification. 
+
+```solidity
+contract SimpleTravel is Verifier {
+    address public prover;
+    mapping(address => bool) public claimed;
+    WhaleBadgeNFT public reward;
+
+    constructor(address _prover, WhaleBadgeNFT _nft) {
+        prover = _prover;
+        reward = _nft;
+    }
+
+    function claim(Proof calldata, address claimer, uint256 crossChainBalance)
+        public
+        onlyVerified(prover, SimpleTravelProver.crossChainBalanceOf.selector)
+    {
+        require(!claimed[claimer], "Already claimed");
+
+        if (crossChainBalance >= 10_000_000) {
+            claimed[claimer] = true;
+            reward.mint(claimer);
+        }
+    }
+}
+```
+In this Verifier contract, the `claim` function allows users to mint an NFT if their USDC average cross-chain balance is at least 10,000,000. The `onlyVerified` modifier ensures the correctness of the proof and the provided public inputs (`claimer` and `crossChainBalance`).
+
+If the proof is invalid or the public inputs are incorrect, the transaction will revert and the NFT reward would not be sent.
 
 > 💡 **Try it Now**
 > 
