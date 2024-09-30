@@ -86,13 +86,7 @@ where
         tx: &Call,
         location: ExecutionLocation,
     ) -> Result<Vec<u8>, EngineError> {
-        let env = self.get_env(location)?;
-        let transaction_callback = |call: &_, location| self.internal_call(call, location);
-        let inspector = TravelInspector::new(env.cfg_env.chain_id, transaction_callback);
-
-        let evm = Engine::build_evm(&env, tx, inspector)?;
-
-        Self::transact(evm)
+        Self::extract_return_data(self.internal_call(tx, location)?)
     }
 
     pub fn internal_call(
@@ -104,34 +98,21 @@ where
         let transaction_callback = |call: &_, location| self.internal_call(call, location);
         let inspector = TravelInspector::new(env.cfg_env.chain_id, transaction_callback);
 
-        let evm = Engine::build_evm(&env, tx, inspector)?;
-
-        Self::internal_transact(evm)
-    }
-
-    fn transact<'env>(
-        mut evm: Evm<'env, TravelInspector<'env>, WrapDatabaseRef<&'env D>>,
-    ) -> Result<Vec<u8>, EngineError> {
+        let mut evm = Engine::build_evm(&env, tx, inspector)?;
         let ResultAndState { result, .. } = evm.transact_preverified()?;
-        debug!["transact execution result: {:?}", result];
-
-        let ExecutionResult::Success {
-            reason: SuccessReason::Return,
-            output,
-            ..
-        } = result
-        else {
-            return Err(EngineError::TransactError(format_failed_call_result(result)));
-        };
-        Ok(output.into_data().into())
-    }
-
-    fn internal_transact<'env>(
-        mut evm: Evm<'env, TravelInspector<'env>, WrapDatabaseRef<&'env D>>,
-    ) -> Result<ExecutionResult, EngineError> {
-        let ResultAndState { result, .. } = evm.transact_preverified()?;
-        debug!["internal_transact execution result: {:?}", result];
+        debug!("EVM call result: {:?}", result);
         Ok(result)
+    }
+
+    fn extract_return_data(result: ExecutionResult) -> Result<Vec<u8>, EngineError> {
+        match result {
+            ExecutionResult::Success {
+                reason: SuccessReason::Return,
+                output,
+                ..
+            } => Ok(output.into_data().into()),
+            _ => Err(EngineError::TransactError(format_failed_call_result(result))),
+        }
     }
 }
 

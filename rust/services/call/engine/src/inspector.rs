@@ -168,7 +168,6 @@ mod test {
         primitives::{AccountInfo, Output, SuccessReason},
         EvmContext, Inspector,
     };
-    use std::sync::Arc;
 
     use super::*;
 
@@ -181,17 +180,15 @@ mod test {
     type StaticTransactionCallback =
         dyn Fn(&Call, ExecutionLocation) -> Result<ExecutionResult, EngineError> + Send + Sync;
 
-    static TRANSACTION_CALLBACK: Lazy<Arc<StaticTransactionCallback>> = Lazy::new(|| {
-        Arc::new(|_, _: ExecutionLocation| {
-            Ok(ExecutionResult::Success {
-                reason: SuccessReason::Return,
-                gas_used: 21000,
-                gas_refunded: 0,
-                logs: vec![],
-                output: Output::Call(Bytes::from(vec![0x0])),
-            })
+    static TRANSACTION_CALLBACK: &StaticTransactionCallback = &|_, _| {
+        Ok(ExecutionResult::Success {
+            reason: SuccessReason::Return,
+            gas_used: 21000,
+            gas_refunded: 0,
+            logs: vec![],
+            output: Output::Call(Bytes::from(vec![0x0])),
         })
-    });
+    };
 
     fn create_mock_call_inputs(to: Address, input: impl Into<Bytes>) -> CallInputs {
         CallInputs {
@@ -216,9 +213,8 @@ mod test {
         let input = [selector, args].concat();
         let mut call_inputs = create_mock_call_inputs(addr, Bytes::from(input));
 
-        let mut set_block_inspector = TravelInspector::new(1, |call, location| {
-            (TRANSACTION_CALLBACK.clone())(call, location)
-        });
+        let mut set_block_inspector =
+            TravelInspector::new(1, |call, location| (TRANSACTION_CALLBACK)(call, location));
         set_block_inspector.call(&mut evm_context, &mut call_inputs);
 
         set_block_inspector
@@ -233,7 +229,7 @@ mod test {
         ];
 
         let mut inspector = TravelInspector::new(locations[0].chain_id, |call, location| {
-            (TRANSACTION_CALLBACK.clone())(call, location)
+            (TRANSACTION_CALLBACK)(call, location)
         });
 
         inspector.set_chain(locations[1].chain_id, locations[1].block_number);
