@@ -1,6 +1,6 @@
 use std::ops::{Deref, DerefMut};
 
-use alloy_primitives::{keccak256, B256};
+use alloy_primitives::{keccak256, ChainId, B256};
 use alloy_rlp::{BytesMut, Decodable, Encodable, RlpDecodable, RlpEncodable};
 use mpt::{KeyNibbles, Node, NodeRef, EMPTY_ROOT_HASH};
 use thiserror::Error;
@@ -16,14 +16,12 @@ const NODES: &str = "nodes";
 /// Chains table. Holds `chain_id -> chain_info` mapping
 const CHAINS: &str = "chains";
 
-type ChainId = u64;
-
 #[derive(Debug, Clone, PartialEq, Eq, RlpEncodable, RlpDecodable)]
 pub struct ChainInfo {
     pub first_block: u64,
     pub last_block: u64,
     pub merkle_root: B256,
-    pub zk_proof: Vec<u8>,
+    pub zk_proof: Vec<u8>, // #[derive(RlpEncodable, RlpDecodable)] doesn't work for `Box<[u8]>`
 }
 
 pub struct ChainDb<DB: for<'a> Database<'a>> {
@@ -161,7 +159,6 @@ impl<TX: WriteTx> ChainDbTx<TX> {
     }
 }
 
-#[inline]
 fn node_hash(node: &Node, node_rlp: impl AsRef<[u8]>) -> B256 {
     match node {
         Node::Null => EMPTY_ROOT_HASH,
