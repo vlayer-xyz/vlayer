@@ -36,8 +36,6 @@ Every time a block is added, 𝜋 is updated. To prove that after adding a new b
 - The previous 𝜋 must be verified.
 - It must be ensured that the hash of the new block 'links' to either the oldest or the most recent block.
 
-The following functions, written in pseudocode, provide more details on the Block Proof Cache implementation.
-
 ### Recursive proofs
 
 In an ideal world - ZK Circuit will have access to its own ELF ID and therefore be able to verify the proofs produces by its previous invocations recursively. Unfortunately because ELF ID is a hash of a binary - it can't be included in itself.
@@ -53,9 +51,13 @@ If one would try to generate the proof with ELF ID for an empty circuit (no asse
 
 ### Implementation
 
+Guest code exposes two functions:
+* `initialize()` - Initializes the MPT and inserts first block;
+* `append_and_prepend()` - Extends the MPT inserting new blocks from the right and from the left while checking invariants and verifying previous proofs. In order to understand it's logic - we first explain in pseudocode how would a single append and a single prepend work before jumping into batch implementation.
+
 #### Initialize
 
-The initialize function is used to create Block Proof Cache structure as a Merkle Patricia Trie (MPT) and insert the initial block hash into it. It takes the following arguments:
+The `initialize()` function is used to create Block Proof Cache structure as a Merkle Patricia Trie (MPT) and insert the initial block hash into it. It takes the following arguments:
 
 - **elf_id**: a hash of the guest binary.
 - **block**: the block header of the block to be added.
@@ -73,42 +75,82 @@ fn initialize(elf_id: Hash, block: BlockHeader) -> (MptRoot, elf_id) {
 
 #### Append
 
-The append function is used to add a most recent block to the Merkle Patricia Trie. It takes the following arguments:
+The `append()` function is used to add a most recent block to the Merkle Patricia Trie. It takes the following arguments:
 
 - **elf_id**: a hash of the guest binary,
-- **block**: the block header to be added,
+- **new_rightmost_block**: the block header to be added,
 - **mpt**: a sparse MPT containing two paths: one from the root to the parent block and one from the root to the node where the new block will be inserted,
 - **proof (π)**: a zero-knowledge proof that all contained hashes so far belong to the same chain.
   This function ensures that the new block correctly follows the previous block by checking the parent block's hash. If everything is correct, it inserts the new block's hash into the trie.
 
 ```rs
-fn append(elf_id: Hash, block: BlockHeader, mpt: SparseMpt<ParentBlockIdx, NewBlockIdx>, proof: ZkProof) -> (MptRoot, elf_id) {
+fn append(elf_id: Hash, new_rightmost_block: BlockHeader, mpt: SparseMpt<ParentBlockIdx, NewBlockIdx>, proof: ZkProof) -> (MptRoot, elf_id) {
     risc0_std::verify_zk_proof(proof, (mpt.root, elf_id), elf_id);
-    let parent_block_idx = block.number - 1;
+    let parent_block_idx = new_rightmost_block.number - 1;
     let parent_block_hash = mpt.get(parent_block_idx);
-    assert_eq(parent_block_hash, block.parent_hash, "Block hash mismatch");
-    let block_hash = keccak256(rlp(block));
-    let new_mpt = mpt.insert(block.number, block_hash);
+    assert_eq(parent_block_hash, new_rightmost_block.parent_hash, "Block hash mismatch");
+    let block_hash = keccak256(rlp(new_rightmost_block));
+    let new_mpt = mpt.insert(new_rightmost_block.number, block_hash);
     (new_mpt.root, elf_id)
 }
 ```
 
 #### Prepend
 
-The prepend function is used to add a new oldest block to the Merkle Patricia Trie. It takes the following arguments:
+The `prepend()` function is used to add a new oldest block to the Merkle Patricia Trie. It takes the following arguments:
 
 - **elf_id**: a hash of the guest binary.
-- **child_block**: the full data of the currently oldest block already stored in the MPT.
+- **old_leftmost_block**: the full data of the currently oldest block already stored in the MPT.
 - **mpt**: a sparse MPT containing the path from the root to the child block and the new block's intended position.
 - **proof**: a zero-knowledge proof that all contained hashes so far belong to the same chain.
   The function verifies the proof to ensure the full data from the child block fits the MPT we have so far. If the verification succeeds, it takes the `parent_hash` from the currently oldest block and inserts it with the corresponding number into the MPT. Note that we don't need to pass the full parent block as the trie only store hashes. However, we will need to pass it next time we want to prepend.
 
 ```rs
-fn prepend(elf_id: Hash, child_block: BlockHeader, mpt: SparseMpt<ChildBlockIdx, NewBlockIdx>, proof: ZkProof) -> (MptRoot, elf_id) {
+fn prepend(elf_id: Hash, old_leftmost_block: BlockHeader, mpt: SparseMpt<ChildBlockIdx, NewBlockIdx>, proof: ZkProof) -> (MptRoot, elf_id) {
     risc0_std::verify_zk_proof(proof, (mpt.root, elf_id), elf_id);
-    let child_block_hash = mpt.get(child_block.number);
-    assert_eq(child_block_hash, keccak256(rlp(child_block)), "Block hash mismatch");
-    let new_mpt = mpt.insert(child_block.number - 1, child_block.parent_hash);
+    let old_leftmost_block_hash = mpt.get(old_leftmost_block.number);
+    assert_eq(old_leftmost_block_hash, keccak256(rlp(old_leftmost_block)), "Block hash mismatch");
+    let new_mpt = mpt.insert(old_leftmost_block.number - 1, old_leftmost_block.parent_hash);
+    (new_mpt.root, elf_id)
+}
+```
+
+#### Batch version
+
+In order to save on proving costs and latency - we don't expose singular versions of append and prepend but instead - a batch version. It checks the ZK proof only once at the beginning. The rest is the same.
+```rs
+fn append(mpt: SparseMpt, new_rightmost_block: BlockHeader) -> SparseMpt {
+    let parent_block_idx = new_rightmost_block.number - 1;
+    let parent_block_hash = mpt.get(parent_block_idx);
+    assert_eq(parent_block_hash, new_rightmost_block.parent_hash, "Block hash mismatch");
+    let block_hash = keccak256(rlp(new_rightmost_block));
+    let new_mpt = mpt.insert(new_rightmost_block.number, block_hash);
+    new_mpt
+}
+
+fn prepend(mpt: SparseMpt, old_leftmost_block: BlockHeader) -> SparseMpt {
+    let old_leftmost_block_hash = mpt.get(old_leftmost_block.number);
+    assert_eq(old_leftmost_block_hash, keccak256(rlp(old_leftmost_block)), "Block hash mismatch");
+    let new_mpt = mpt.insert(old_leftmost_block.number - 1, old_leftmost_block.parent_hash);
+    new_mpt
+}
+
+fn append_prepend(
+  elf_id: Hash,
+  prepend_blocks: [BlockHeader],
+  append_blocks: [BlockHeader],
+  old_leftmost_block: BlockHeader,
+  mpt: SparseMpt<[NewLeft..OldLeft], [OldRight...NewRight]>,
+  proof: ZkProof
+) -> (MptRoot, elf_id) {
+    risc0_std::verify_zk_proof(proof, (mpt.root, elf_id), elf_id);
+    for block in append_blocks {
+      mpt = append(mpt, block);
+    } 
+    for block in prepend_blocks.reverse() {
+      mpt = prepend(mpt, old_leftmost_block);
+      old_leftmost_block = block
+    }
     (new_mpt.root, elf_id)
 }
 ```
@@ -116,38 +158,6 @@ fn prepend(elf_id: Hash, child_block: BlockHeader, mpt: SparseMpt<ChildBlockIdx,
 ### Prove Chain server
 
 Block Proof Cache structure is stored in a distinct type of vlayer node, specifically a JSON-RPC server. It consists of a single call `v_chain(chain_id: number, block_numbers: number[])`. 
-This call takes chain ID and an array of block numbers as an argument.
-It returns two things:
-* Sparse MPT that contains proofs for all block numbers passed as arguments.
-* 𝜋 - the zk-proof that the trie was constructed correctly (invariant that all the blocks belong to the same chain is maintained).
 
-An example call could look like this:
 
-```json
-{
-  "method": "v_chain",
-  "params": {
-    "chain_id": 1,
-    "block_numbers": [
-      12_000_000,
-      12_000_001,
-      20_762_494, // This should be recent block that can be verified on-chain
-    ]
-  }
-}
-```
-
-And the response:
-
-```json
-{
-    "result": {
-        "proof": "0x...", // ZK Proof
-        "nodes": [
-          "0x..." // Root node. It's hash is proven by ZK Proof
-          "0x..." // Other nodes in arbitrary order
-          ...
-        ]
-    }
-}
-```
+[Detailed JSON-RPC API docs](../../api.md)
