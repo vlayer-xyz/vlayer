@@ -36,17 +36,16 @@ pub struct EthersProviderFactory {
 const MAX_RETRY: u32 = 3;
 const INITIAL_BACKOFF: u64 = 500;
 
+pub type EthProvider = EthersProvider<EthersClient>;
+
 impl EthersProviderFactory {
     pub fn new(rpc_urls: HashMap<ChainId, String>) -> Self {
         EthersProviderFactory { rpc_urls }
     }
 }
 
-impl ProviderFactory<EthersProvider<EthersClient>> for EthersProviderFactory {
-    fn create(
-        &self,
-        chain_id: ChainId,
-    ) -> Result<EthersProvider<EthersClient>, ProviderFactoryError> {
+impl ProviderFactory<EthProvider> for EthersProviderFactory {
+    fn create(&self, chain_id: ChainId) -> Result<EthProvider, ProviderFactoryError> {
         let url = self
             .rpc_urls
             .get(&chain_id)
@@ -105,11 +104,11 @@ impl CachedProviderFactory {
     }
 }
 
-impl ProviderFactory<CachedProvider<EthersProvider<EthersClient>>> for CachedProviderFactory {
+impl ProviderFactory<CachedProvider<EthProvider>> for CachedProviderFactory {
     fn create(
         &self,
         chain_id: ChainId,
-    ) -> Result<CachedProvider<EthersProvider<EthersClient>>, ProviderFactoryError> {
+    ) -> Result<CachedProvider<EthProvider>, ProviderFactoryError> {
         let file_path = get_path(&self.rpc_file_cache, chain_id)?;
 
         let provider = self.ethers_provider_factory.create(chain_id)?;

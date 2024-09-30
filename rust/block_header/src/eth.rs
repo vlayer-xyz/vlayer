@@ -5,7 +5,7 @@ use revm::primitives::BlockEnv;
 use serde::{Deserialize, Serialize};
 
 use super::EvmBlockHeader;
-use crate::block_header::casting_utils::try_downcast;
+use crate::casting_utils::try_downcast;
 
 /// Ethereum post-merge block header.
 #[derive(Debug, Clone, Serialize, Deserialize, RlpEncodable, Default, PartialEq)]
@@ -89,5 +89,11 @@ impl EvmBlockHeader for EthBlockHeader {
         blk_env.prevrandao = Some(self.mix_hash);
         blk_env.basefee = self.base_fee_per_gas;
         blk_env.gas_limit = U256::from(self.gas_limit);
+    }
+}
+
+impl Default for Box<dyn EvmBlockHeader> {
+    fn default() -> Self {
+        Box::new(EthBlockHeader::default())
     }
 }

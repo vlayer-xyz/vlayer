@@ -1,6 +1,9 @@
 mod casting_utils;
-pub mod eth;
-pub mod forge;
+mod eth;
+mod forge;
+
+pub use eth::EthBlockHeader;
+pub use forge::ForgeBlockHeader;
 
 use alloy_rlp::Encodable;
 use as_any::AsAny;
@@ -9,8 +12,6 @@ use alloy_primitives::{keccak256, BlockNumber, B256};
 
 use casting_utils::is;
 use dyn_clone::{clone_trait_object, DynClone};
-use eth::EthBlockHeader;
-use forge::ForgeBlockHeader;
 use revm::primitives::BlockEnv;
 use serde::{Deserialize, Serialize};
 use std::fmt::Debug;

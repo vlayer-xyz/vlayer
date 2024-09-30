@@ -6,10 +6,10 @@ mod multi;
 mod null;
 mod proof;
 
-pub use ethers::{EthersProvider, EthersProviderError};
+pub use ethers::{to_eth_block_header, EthersProvider, EthersProviderError};
 pub use factory::{
-    CachedProviderFactory, EthersProviderFactory, FileProviderFactory, ProviderFactory,
-    ProviderFactoryError,
+    CachedProviderFactory, EthProvider, EthersProviderFactory, FileProviderFactory,
+    ProviderFactory, ProviderFactoryError,
 };
 pub use file::FileProvider;
 pub use multi::CachedMultiProvider;
@@ -17,7 +17,7 @@ pub use proof::{EIP1186Proof, StorageProof};
 
 pub use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256};
 use auto_impl::auto_impl;
-pub use call_engine::block_header::EvmBlockHeader;
+pub use block_header::EvmBlockHeader;
 pub use ethers_core::types::BlockNumber as BlockTag;
 use ethers_providers::{Http, RetryClient};
 use std::error::Error as StdError;

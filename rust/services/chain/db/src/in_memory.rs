@@ -4,6 +4,7 @@ use crate::{Database, DbError, DbResult, ReadTx, ReadWriteTx, WriteTx};
 
 type KeyValueMap = HashMap<Box<[u8]>, Box<[u8]>>;
 
+#[derive(Default)]
 pub struct InMemoryDatabase {
     store: KeyValueMap,
 }

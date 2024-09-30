@@ -1,19 +1,19 @@
 use alloy_primitives::{
     Address, BlockNumber, Bytes, ChainId, StorageKey, StorageValue, TxNumber, U256,
 };
-use call_engine::block_header::EvmBlockHeader;
+use block_header::EvmBlockHeader;
 use chain::{CHAIN_NAMES, TEST_CHAIN_ID_1};
 use ethers_core::types::BlockNumber as BlockTag;
 use foundry_config::RpcEndpoints;
 use provider::{
-    BlockingProvider, EIP1186Proof, EthersClient, EthersProvider, EthersProviderFactory,
-    ProviderFactory, ProviderFactoryError,
+    BlockingProvider, EIP1186Proof, EthProvider, EthersProviderFactory, ProviderFactory,
+    ProviderFactoryError,
 };
 use std::collections::HashMap;
 
 use crate::providers::pending_state_provider::PendingStateProviderFactory;
 
-pub type ProviderError = <EthersProvider<EthersClient> as BlockingProvider>::Error;
+pub type ProviderError = <EthProvider as BlockingProvider>::Error;
 
 pub struct TestProvider {
     provider: Box<dyn BlockingProvider<Error = ProviderError>>,

@@ -6,6 +6,9 @@ mod chain_db;
 mod in_memory;
 mod mdbx;
 
+pub use in_memory::InMemoryDatabase;
+pub use mdbx::Mdbx;
+
 pub trait Database<'a> {
     type ReadTx: ReadTx + 'a;
     type ReadWriteTx: ReadWriteTx + 'a;

@@ -1,7 +1,7 @@
-use alloy_primitives::FixedBytes;
+use block_header::EvmBlockHeader;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
-pub struct Input {
-    pub root_hash: FixedBytes<32>,
+pub enum Input {
+    Initialize { block: Box<dyn EvmBlockHeader> },
 }
