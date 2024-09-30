@@ -535,6 +535,7 @@ dependencies = [
 name = "chain_guest"
 version = "0.1.0"
 dependencies = [
+ "alloy-rlp",
  "block_header",
  "chain_engine",
  "mpt",

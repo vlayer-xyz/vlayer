@@ -1967,6 +1967,7 @@ dependencies = [
 name = "chain_guest"
 version = "0.1.0"
 dependencies = [
+ "alloy-rlp",
  "block_header",
  "chain_engine",
  "mpt",
@@ -1986,6 +1987,7 @@ name = "chain_host"
 version = "0.1.0"
 dependencies = [
  "alloy-primitives",
+ "alloy-rlp",
  "anyhow",
  "chain_db",
  "chain_engine",
