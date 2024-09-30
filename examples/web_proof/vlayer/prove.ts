@@ -77,6 +77,7 @@ async function testFailedProving(prover: Address) {
         webProofJson: JSON.stringify(wrongWebProof),
       },
     ]);
+    throw new Error("Proving should have failed!");
   } catch (error) {
     if (
       error instanceof Error &&
@@ -91,8 +92,6 @@ async function testFailedProving(prover: Address) {
     }
     return;
   }
-
-  throw new Error("Proving should have failed!");
 }
 
 function generateTokenId(username: string): bigint {
