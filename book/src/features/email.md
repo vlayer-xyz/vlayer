@@ -24,7 +24,7 @@ Under the hood, we verify mail server signatures to ensure the authenticity and 
 ## Example
 Let's say someone wants to prove they are part of company or organization. One way to do this is to take a screenshot and send it to the verifier. However, this is not very reliable because screenshot images can be easily manipulated, and obviously such an image cannot be verified on-chain. 
 
-A better option is to prove that one can send email from it's company or organization domain. Below is a sample `Prover` contract that verifies that the caller sent specific email.
+A better option is to prove that one can send email from it's organization domain. Below is a sample `Prover` contract that verifies that the sender sent email from a specific domain.
 
 Below is an example of such proof generation:
 
