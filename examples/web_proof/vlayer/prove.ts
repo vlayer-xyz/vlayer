@@ -14,16 +14,24 @@ const [prover, verifier] = await testHelpers.deployProverVerifier(
   webProofProver,
   webProofVerifier,
 );
-testSuccessProvingAndVerification(prover, verifier)
-testFailedProving(prover)
+testSuccessProvingAndVerification(prover, verifier);
+testFailedProving(prover);
 
-async function testSuccessProvingAndVerification(prover: Address, verifier: Address) {
+async function testSuccessProvingAndVerification(
+  prover: Address,
+  verifier: Address,
+) {
   console.log("Proving...");
-  const { proof, returnValue } = await prove(prover, webProofProver.abi, "main", [
-    {
-      webProofJson: JSON.stringify(webProof),
-    },
-  ]);
+  const { proof, returnValue } = await prove(
+    prover,
+    webProofProver.abi,
+    "main",
+    [
+      {
+        webProofJson: JSON.stringify(webProof),
+      },
+    ],
+  );
   console.log("Proof:", proof);
 
   const twitterUserAddress = (await testHelpers.getTestAddresses())[0];
@@ -64,18 +72,18 @@ async function testFailedProving(prover: Address) {
       {
         webProofJson: JSON.stringify(wrongWebProof),
       },
-    ])
+    ]);
   } catch (error) {
-    if (error instanceof Error && error.message == "Error response: Host error: Engine error: EVM transact error: ASN.1 error: PEM error: PEM preamble contains invalid data (NUL byte) at line 1 column 22883") {
+    if (
+      error instanceof Error &&
+      error.message ==
+        "Error response: Host error: Engine error: EVM transact error: ASN.1 error: PEM error: PEM preamble contains invalid data (NUL byte) at line 1 column 22883"
+    ) {
       console.log("Proving failed as expected with message:", error.message);
     } else if (error instanceof Error) {
-      throw new Error(
-        `Error with wrong message returned: ${error.message}`,
-      );
+      throw new Error(`Error with wrong message returned: ${error.message}`);
     } else {
-      throw new Error(
-        `Invalid error returned: ${error}`,
-      );
+      throw new Error(`Invalid error returned: ${error}`);
     }
     return;
   }
