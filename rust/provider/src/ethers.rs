@@ -1,7 +1,7 @@
 use super::{BlockingProvider, EIP1186Proof};
 use alloy_primitives::BlockNumber;
 use alloy_primitives::{B256, U256};
-use call_engine::block_header::{eth::EthBlockHeader, EvmBlockHeader};
+use block_header::{EthBlockHeader, EvmBlockHeader};
 use ethers_core::types::Block;
 use ethers_core::types::BlockNumber as BlockTag;
 use ethers_providers::{Middleware, MiddlewareError};
@@ -148,7 +148,7 @@ where
     }
 }
 
-fn to_eth_block_header<T>(block: Block<T>) -> Result<EthBlockHeader, String> {
+pub fn to_eth_block_header<T>(block: Block<T>) -> Result<EthBlockHeader, String> {
     Ok(EthBlockHeader {
         parent_hash: from_ethers_h256(block.parent_hash),
         ommers_hash: from_ethers_h256(block.uncles_hash),

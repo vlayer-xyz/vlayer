@@ -1,10 +1,11 @@
+use block_header::EvmBlockHeader;
 use location::ExecutionLocation;
 use revm::{
     primitives::{CfgEnvWithHandlerCfg, SpecId},
     DatabaseRef,
 };
 
-use crate::{block_header::EvmBlockHeader, engine::EngineError};
+use crate::engine::EngineError;
 use chain::ChainSpec;
 
 pub mod cached;

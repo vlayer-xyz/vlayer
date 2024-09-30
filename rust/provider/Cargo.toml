@@ -9,6 +9,7 @@ alloy-primitives = { workspace = true, features = ["rlp", "serde"] }
 ethers-providers = { workspace = true }
 ethers-core = { workspace = true }
 call_engine = { workspace = true }
+block_header = { workspace = true }
 anyhow = { workspace = true }
 tokio = { workspace = true }
 thiserror = { workspace = true }

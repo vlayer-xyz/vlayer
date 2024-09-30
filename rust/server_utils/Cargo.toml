@@ -5,7 +5,6 @@ edition = "2021"
 
 [dependencies]
 alloy-primitives = { workspace = true }
-anyhow = { workspace = true }
 axum = { workspace = true, features = ["macros"] }
 axum-jrpc = { workspace = true }
 ethers = { workspace = true }

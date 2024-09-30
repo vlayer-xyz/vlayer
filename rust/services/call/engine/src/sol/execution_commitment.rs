@@ -5,10 +5,11 @@ mod private {
 
 use alloy_primitives::{Address, U256};
 use alloy_sol_types::SolType;
+use block_header::EvmBlockHeader;
 /// Solidity struct representing the committed block used for validation.
 pub use private::ExecutionCommitment;
 
-use crate::{block_header::EvmBlockHeader, io::CallSelector};
+use crate::io::CallSelector;
 
 impl ExecutionCommitment {
     /// Returns the [SolCommitment] used to validate the environment.

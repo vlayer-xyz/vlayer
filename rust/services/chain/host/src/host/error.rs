@@ -6,4 +6,10 @@ pub enum HostError {
     ExecutorEnvBuilder(String),
     #[error("Prover: {0}")]
     Prover(String),
+    #[error("Provider: {0}")]
+    Provider(String),
+    #[error("Failed to fetch latest block")]
+    NoLatestBlock,
+    #[error("Block conversion error: {0}")]
+    BlockConversion(String),
 }

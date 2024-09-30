@@ -21,6 +21,7 @@ members = [
     "server_utils",
     "host_utils",
     "chain",
+    "block_header",
     "provider",
 ]
 
@@ -112,6 +113,7 @@ test_runner = { path = "test_runner" }
 host_utils = { path = "host_utils" }
 chain = { path = "chain" }
 provider = { path = "provider" }
+block_header = { path = "block_header" }
 
 call_host = { path = "services/call/host" }
 call_guest = { path = "services/call/guest" }
@@ -125,6 +127,7 @@ chain_engine = { path = "services/chain/engine" }
 chain_guest_wrapper = { path = "services/chain/guest_wrapper" }
 chain_server = { path = "services/chain/server" }
 chain_worker = { path = "services/chain/worker" }
+chain_db = { path = "services/chain/db" }
 
 [workspace.lints.clippy]
 as_ptr_cast_mut = "warn"

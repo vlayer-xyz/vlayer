@@ -5,8 +5,6 @@ edition = "2021"
 
 [dependencies]
 anyhow = { workspace = true }
-serde = { workspace = true }
-alloy-primitives = { workspace = true }
 thiserror = { workspace = true }
 libmdbx = "0.5.2"
 

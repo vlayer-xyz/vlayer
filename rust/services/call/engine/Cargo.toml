@@ -9,10 +9,8 @@ all-features = true
 rustdoc-args = ["--cfg", "docsrs"]
 
 [dependencies]
-alloy-chains = { workspace = true }
 alloy-primitives = { workspace = true, features = ["rlp", "serde"] }
 alloy-rlp = { workspace = true }
-alloy-rlp-derive = { workspace = true }
 alloy-sol-types = { workspace = true }
 anyhow = { workspace = true }
 once_cell = { workspace = true }
@@ -22,13 +20,11 @@ serde = { workspace = true }
 tracing = { workspace = true }
 thiserror = { workspace = true }
 mpt = { workspace = true }
-as-any = { workspace = true }
-dyn-clone = { workspace = true }
 serde_json = { workspace = true }
-lazy_static = { workspace = true }
 email_proof = { workspace = true }
 web_proof = { workspace = true }
 chain = { workspace = true }
+block_header = { workspace = true }
 
 [dev-dependencies]
 alloy-trie = { workspace = true }

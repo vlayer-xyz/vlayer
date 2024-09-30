@@ -32,7 +32,7 @@ mod evm_env_from_input {
 
     use super::*;
     use as_any::Downcast;
-    use call_engine::block_header::eth::EthBlockHeader;
+    use block_header::EthBlockHeader;
     use mpt::EMPTY_ROOT_HASH;
 
     #[test]

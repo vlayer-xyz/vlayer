@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 use std::{collections::HashMap, iter::once};
 use tracing::debug;
 
-use crate::block_header::EvmBlockHeader;
+use block_header::EvmBlockHeader;
 
 use super::env::location::ExecutionLocation;
 
@@ -67,8 +67,7 @@ mod test {
     use mpt::EMPTY_ROOT_HASH;
 
     use super::EvmInput;
-    use crate::block_header::eth::EthBlockHeader;
-    use crate::block_header::{EvmBlockHeader, Hashable};
+    use block_header::{EthBlockHeader, Hashable};
 
     use mpt::MerkleTrie;
 
@@ -81,12 +80,6 @@ mod test {
                 storage_tries: Vec::default(),
                 contracts: Vec::default(),
             }
-        }
-    }
-
-    impl Default for Box<dyn EvmBlockHeader> {
-        fn default() -> Self {
-            Box::new(EthBlockHeader::default())
         }
     }
 
