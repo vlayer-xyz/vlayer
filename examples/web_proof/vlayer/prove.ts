@@ -66,11 +66,15 @@ async function testFailedProving(prover: Address) {
       },
     ])
   } catch (error) {
-    if (error.message == "Error response: Host error: Engine error: EVM transact error: ASN.1 error: PEM error: PEM preamble contains invalid data (NUL byte) at line 1 column 22883") {
+    if (error instanceof Error && error.message == "Error response: Host error: Engine error: EVM transact error: ASN.1 error: PEM error: PEM preamble contains invalid data (NUL byte) at line 1 column 22883") {
       console.log("Proving failed as expected with message:", error.message);
+    } else if (error instanceof Error) {
+      throw new Error(
+        `Error with wrong message returned: ${error.message}`,
+      );
     } else {
       throw new Error(
-        `Invalid error returned: ${error.message}`,
+        `Invalid error returned: ${error}`,
       );
     }
     return;
