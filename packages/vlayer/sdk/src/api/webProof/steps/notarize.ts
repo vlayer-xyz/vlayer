@@ -1,3 +1,13 @@
+import { Branded } from "types/utils";
+
+export type WebProofStepNotarize = Branded<
+  {
+    url: string;
+    method: string;
+    label: string;
+  },
+  "notarize"
+>;
 export const notarize = (
   url: string,
   method: string = "GET",
@@ -7,5 +17,5 @@ export const notarize = (
     url,
     method,
     label,
-  };
+  } as WebProofStepNotarize;
 };
