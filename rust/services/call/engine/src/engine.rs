@@ -113,7 +113,7 @@ where
         mut evm: Evm<'env, TravelInspector<'env>, WrapDatabaseRef<&'env D>>,
     ) -> Result<Vec<u8>, EngineError> {
         let ResultAndState { result, .. } = evm.transact_preverified()?;
-        debug!["Execution result: {:?}", result];
+        debug!["transact execution result: {:?}", result];
 
         let ExecutionResult::Success {
             reason: SuccessReason::Return,
@@ -130,7 +130,7 @@ where
         mut evm: Evm<'env, TravelInspector<'env>, WrapDatabaseRef<&'env D>>,
     ) -> Result<ExecutionResult, EngineError> {
         let ResultAndState { result, .. } = evm.transact_preverified()?;
-        debug!["Execution result: {:?}", result];
+        debug!["internal_transact execution result: {:?}", result];
         Ok(result)
     }
 }
