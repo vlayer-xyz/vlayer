@@ -21,7 +21,18 @@ pub fn execution_result_to_call_outcome(
     result: &ExecutionResult,
     inputs: &CallInputs,
 ) -> CallOutcome {
-    let instruction_result = match result {
+    let instruction_result = map_execution_result_to_instruction_result(result);
+    let (output, gas_used) = extract_output_and_gas(result);
+    let interpreter_result = build_interpreter_result(instruction_result, output, gas_used);
+
+    CallOutcome {
+        result: interpreter_result,
+        memory_offset: inputs.return_memory_offset.clone(),
+    }
+}
+
+fn map_execution_result_to_instruction_result(result: &ExecutionResult) -> InstructionResult {
+    match result {
         ExecutionResult::Success { reason, .. } => match reason {
             SuccessReason::Stop => InstructionResult::Stop,
             SuccessReason::Return => InstructionResult::Return,
@@ -42,15 +53,14 @@ pub fn execution_result_to_call_outcome(
             HaltReason::PrecompileError => InstructionResult::PrecompileError,
             HaltReason::NonceOverflow => InstructionResult::NonceOverflow,
             HaltReason::CreateContractSizeLimit => InstructionResult::CreateContractSizeLimit,
-            HaltReason::CreateContractStartingWithEF => {
-                InstructionResult::CreateContractStartingWithEF
-            }
+            HaltReason::CreateContractStartingWithEF => 
+                InstructionResult::CreateContractStartingWithEF,
             HaltReason::CreateInitCodeSizeLimit => InstructionResult::CreateInitCodeSizeLimit,
             HaltReason::OverflowPayment => InstructionResult::OverflowPayment,
-            HaltReason::StateChangeDuringStaticCall => {
-                InstructionResult::StateChangeDuringStaticCall
-            }
-            HaltReason::CallNotAllowedInsideStatic => InstructionResult::CallNotAllowedInsideStatic,
+            HaltReason::StateChangeDuringStaticCall => 
+                InstructionResult::StateChangeDuringStaticCall,
+            HaltReason::CallNotAllowedInsideStatic => 
+                InstructionResult::CallNotAllowedInsideStatic,
             HaltReason::OutOfFunds => InstructionResult::OutOfFunds,
             HaltReason::CallTooDeep => InstructionResult::CallTooDeep,
             HaltReason::EofAuxDataOverflow => InstructionResult::EofAuxDataOverflow,
@@ -60,9 +70,11 @@ pub fn execution_result_to_call_outcome(
                 "FailedDeposit is a part of the optimism revm feature and is not supported currently"
             ),
         },
-    };
+    }
+}
 
-    let (output, gas_used) = match &result {
+fn extract_output_and_gas(result: &ExecutionResult) -> (Bytes, u64) {
+    match result {
         ExecutionResult::Success {
             output, gas_used, ..
         } => {
@@ -73,17 +85,18 @@ pub fn execution_result_to_call_outcome(
         }
         ExecutionResult::Revert { output, gas_used } => (output.clone(), *gas_used),
         ExecutionResult::Halt { gas_used, .. } => (Bytes::new(), *gas_used),
-    };
+    }
+}
 
-    let interpreter_result = InterpreterResult {
+fn build_interpreter_result(
+    instruction_result: InstructionResult,
+    output: Bytes,
+    gas_used: u64,
+) -> InterpreterResult {
+    InterpreterResult {
         result: instruction_result,
         output,
         gas: Gas::new(gas_used),
-    };
-
-    CallOutcome {
-        result: interpreter_result,
-        memory_offset: inputs.return_memory_offset.clone(),
     }
 }
 

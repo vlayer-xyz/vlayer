@@ -97,10 +97,10 @@ where
         let env = self.get_env(location)?;
         let transaction_callback = |call: &_, location| self.internal_call(call, location);
         let inspector = TravelInspector::new(env.cfg_env.chain_id, transaction_callback);
-
         let mut evm = Engine::build_evm(&env, tx, inspector)?;
         let ResultAndState { result, .. } = evm.transact_preverified()?;
         debug!("EVM call result: {:?}", result);
+        
         Ok(result)
     }
 
