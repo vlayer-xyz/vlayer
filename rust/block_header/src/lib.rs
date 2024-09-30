@@ -29,7 +29,7 @@ impl<H: EvmBlockHeader> Hashable for H {
 }
 
 /// An EVM abstraction of a block header.
-pub trait EvmBlockHeader: Hashable + Encodable + AsAny + Debug + DynClone {
+pub trait EvmBlockHeader: Hashable + Encodable + AsAny + Debug + DynClone + Send + Sync {
     /// Returns the hash of the parent block's header.
     fn parent_hash(&self) -> &B256;
     /// Returns the block number.

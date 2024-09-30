@@ -7,6 +7,8 @@ edition = "2021"
 chain_engine = { workspace = true }
 block_header = { workspace = true }
 serde = { workspace = true }
+mpt = { workspace = true }
+risc0-zkp = { workspace = true }
 
 [lints]
 workspace = true

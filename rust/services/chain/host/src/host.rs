@@ -3,7 +3,7 @@ pub mod error;
 
 use alloy_primitives::ChainId;
 use chain_engine::Input;
-use chain_guest_wrapper::RISC0_CHAIN_GUEST_ELF;
+use chain_guest_wrapper::{RISC0_CHAIN_GUEST_ELF, RISC0_CHAIN_GUEST_ID};
 pub use config::HostConfig;
 pub use error::HostError;
 use ethers::{
@@ -45,6 +45,7 @@ impl Host {
 
         let input = Input::Initialize {
             block: Box::new(block),
+            elf_id: RISC0_CHAIN_GUEST_ID.into(),
         };
 
         let env = build_executor_env(input)
@@ -71,13 +72,20 @@ fn build_executor_env(input: impl Serialize) -> anyhow::Result<ExecutorEnv<'stat
 
 #[cfg(test)]
 mod test {
+    use std::sync::Arc;
+
     use super::*;
+    use alloy_primitives::B256;
     use ethers::{providers::Provider, types::Block};
     use lazy_static::lazy_static;
-    use serde_json::{from_value, json};
+    use mpt::MerkleTrie;
+    use provider::EvmBlockHeader;
+    use risc0_zkp::core::digest::Digest;
+    use serde_json::{from_value, json, Value};
 
     lazy_static! {
-        static ref block: Block<()> = from_value(json!(
+        // All fields are zeroed out except for the block number
+        static ref rpc_block: Block<()> = from_value(json!(
         {
             "number": "0x42",
 
@@ -105,20 +113,32 @@ mod test {
             "uncles": []
           }
         )).unwrap();
+        static ref block: Arc<dyn EvmBlockHeader> = Arc::new(to_eth_block_header(rpc_block.clone()).unwrap());
+        static ref block_hash: B256 = block.hash_slow();
+
+        static ref config: HostConfig = HostConfig::default();
     }
 
     #[tokio::test]
     async fn initialize() -> anyhow::Result<()> {
-        let config = HostConfig::default();
-        let host = Host::new(&config);
-
         let (provider, mock) = Provider::mocked();
-        mock.push(block.clone())?;
+        mock.push(rpc_block.clone())?;
 
+        let expected_root_hash =
+            MerkleTrie::from_iter([(block.number().to_ne_bytes(), *block_hash)]).hash_slow();
+
+        let host = Host::new(&config);
         let HostOutput { receipt } = host.initialize(ChainId::default(), &provider).await?;
 
-        let actual_block_number: u64 = receipt.journal.decode()?;
-        assert_eq!(actual_block_number, 0x42);
+        mock.assert_request(
+            "eth_getBlockByNumber",
+            Value::Array(vec!["latest".into(), false.into()]),
+        )?;
+
+        let (root_hash, elf_id): (B256, Digest) = receipt.journal.decode()?;
+
+        assert_eq!(root_hash, expected_root_hash);
+        assert_eq!(elf_id, RISC0_CHAIN_GUEST_ID.into());
 
         Ok(())
     }
