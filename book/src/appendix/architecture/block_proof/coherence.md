@@ -158,38 +158,6 @@ fn append_prepend(
 ### Prove Chain server
 
 Block Proof Cache structure is stored in a distinct type of vlayer node, specifically a JSON-RPC server. It consists of a single call `v_chain(chain_id: number, block_numbers: number[])`. 
-This call takes chain ID and an array of block numbers as an argument.
-It returns two things:
-* Sparse MPT that contains proofs for all block numbers passed as arguments.
-* 𝜋 - the zk-proof that the trie was constructed correctly (invariant that all the blocks belong to the same chain is maintained).
 
-An example call could look like this:
 
-```json
-{
-  "method": "v_chain",
-  "params": {
-    "chain_id": 1,
-    "block_numbers": [
-      12_000_000,
-      12_000_001,
-      20_762_494, // This should be recent block that can be verified on-chain
-    ]
-  }
-}
-```
-
-And the response:
-
-```json
-{
-    "result": {
-        "proof": "0x...", // ZK Proof
-        "nodes": [
-          "0x..." // Root node. It's hash is proven by ZK Proof
-          "0x..." // Other nodes in arbitrary order
-          ...
-        ]
-    }
-}
-```
+[Detailed JSON-RPC API docs](../../api.md)
