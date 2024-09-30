@@ -2,21 +2,17 @@ import fs from "fs";
 import { testHelpers, prove, preverifyEmail } from "@vlayer/sdk";
 import emailProofProver from "../out/EmailDomainProver.sol/EmailDomainProver";
 import emailProofVerifier from "../out/EmailProofVerifier.sol/EmailDomainVerifier";
-import companyNFT from "../out/CompanyNFT.sol/CompanyNFT";
 
 const mimeEmail = fs.readFileSync("../testdata/verify_vlayer.eml").toString();
-
-const unverifiedEmail = await preverifyEmail(mimeEmail);
 
 const prover = await testHelpers.deployContract(emailProofProver, [
   "@vlayer.xyz",
 ]);
 
-const nft = await testHelpers.deployContract(companyNFT, []);
-
 const verifier = await testHelpers.deployContract(emailProofVerifier, [
   prover,
-  nft,
+  "vlayer badge",
+  "VL",
 ]);
 const john = testHelpers.getTestAccount();
 
@@ -25,7 +21,7 @@ const { proof, returnValue } = await prove(
   prover,
   emailProofProver.abi,
   "main",
-  [unverifiedEmail, john.address],
+  [await preverifyEmail(mimeEmail), john.address],
 );
 console.log("Proof:", proof);
 

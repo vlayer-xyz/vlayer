@@ -13,9 +13,9 @@ contract EmailDomainVerifier is Verifier {
 
     mapping(bytes32 => address) public emailHashToAddr;
 
-    constructor(address _prover, CompanyNFT _nft) {
+    constructor(address _prover, string memory _nftName, string memory _nftSymbol) {
         prover = _prover;
-        nft = _nft;
+        nft = new CompanyNFT(_nftName, _nftSymbol);
     }
 
     function verify(Proof calldata, bytes32 _emailHash, address _targetWallet)
