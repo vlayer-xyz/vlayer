@@ -1,12 +1,6 @@
 import { Branded } from "types/utils";
 
-export type WebProofStepExpectUrl = Branded<
-  {
-    url: string;
-    label: string;
-  },
-  "expectUrl"
->;
+import { WebProofStepExpectUrl } from "types/webProofProvider.ts";
 
 export const expectUrl = (url: string, label: string) => {
   return {
@@ -14,5 +8,3 @@ export const expectUrl = (url: string, label: string) => {
     label,
   } as WebProofStepExpectUrl;
 };
-
-const x = expectUrl("d", "b");

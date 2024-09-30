@@ -1,13 +1,5 @@
-import { Branded } from "types/utils";
+import { WebProofStepNotarize } from "types/webProofProvider.ts";
 
-export type WebProofStepNotarize = Branded<
-  {
-    url: string;
-    method: string;
-    label: string;
-  },
-  "notarize"
->;
 export const notarize = (
   url: string,
   method: string = "GET",

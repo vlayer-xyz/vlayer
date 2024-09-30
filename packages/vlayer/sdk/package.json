@@ -3,6 +3,7 @@
   "type": "module",
   "module": "src/index.ts",
   "version": "0.1.0",
+  "types": "src/index.ts",
   "scripts": {
     "build": "npm run gen:types",
     "test": "vitest --run",
@@ -12,6 +13,7 @@
     "@changesets/cli": "^2.27.7",
     "@types/bun": "latest",
     "@types/mailparser": "^3.4.4",
+    "@types/chrome": "^0.0.273",
     "abitype": "^1.0.6",
     "vitest": "^2.1.1"
   },
@@ -22,6 +24,7 @@
     "dns-over-http-resolver": "^3.0.3",
     "mailparser": "^3.7.1",
     "postal-mime": "^2.3.2",
-    "viem": "^2.21.0"
+    "viem": "^2.21.0",
+    "zod": "^3.23.8"
   }
 }

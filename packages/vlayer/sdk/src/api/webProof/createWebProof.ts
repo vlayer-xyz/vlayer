@@ -1,21 +1,4 @@
-import type {
-  WebProofStepExpectUrl,
-  WebProofStepNotarize,
-  WebProofStepStartPage,
-} from "./steps";
-import { Branded } from "types/utils.ts";
-
-type WebProofSetupInput = {
-  logoUrl: string;
-  steps: [WebProofStepExpectUrl, WebProofStepStartPage, WebProofStepStartPage];
-};
-
-export type WebProofSetup = Branded<
-  WebProofSetupInput & {
-    isWebProof: true;
-  },
-  "webProof"
->;
+import { WebProofSetup, WebProofSetupInput } from "types/webProofProvider.ts";
 
 export const createWebProof = ({ logoUrl, steps }: WebProofSetupInput) => {
   return {

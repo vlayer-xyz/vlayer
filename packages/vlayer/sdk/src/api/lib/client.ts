@@ -1,5 +1,5 @@
 import { VlayerClient } from "types/vlayer";
-import { WebProofProvider } from "types/webProof";
+import { WebProofProvider } from "types/webProofProvider";
 
 export const createVlayerClient = ({
   url,

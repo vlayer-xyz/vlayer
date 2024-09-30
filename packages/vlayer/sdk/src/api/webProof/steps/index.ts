@@ -1,6 +1,6 @@
-import { expectUrl, WebProofStepExpectUrl } from "./expectUrl.ts";
-import { startPage, WebProofStepStartPage } from "./startPage.ts";
-import { notarize, WebProofStepNotarize } from "./notarize.ts";
+import { expectUrl,  } from "./expectUrl.ts";
+import { startPage,  } from "./startPage.ts";
+import { notarize,  } from "./notarize.ts";
 
 const steps = {
   expectUrl,
@@ -8,18 +8,10 @@ const steps = {
   notarize,
 };
 
-type WebProofStep =
-  | WebProofStepNotarize
-  | WebProofStepExpectUrl
-  | WebProofStepStartPage;
-
 export {
   expectUrl,
   startPage,
   notarize,
   steps,
-  WebProofStep,
-  WebProofStepNotarize,
-  WebProofStepStartPage,
-  WebProofStepExpectUrl,
+
 };

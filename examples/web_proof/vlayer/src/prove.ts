@@ -1,16 +1,50 @@
-import { extensionConnector } from "./extensionConnector";
-import { prove } from "@vlayer/sdk";
-import webProofProver from "../../out/WebProofProver.sol/WebProofProver.json";
-import webProofVerifier from "../../out/WebProofVerifier.sol/WebProofVerifier.json";
-import { createTestClient, http, publicActions, walletActions } from "viem";
+import webProofProver from "../../out/WebProofProver.sol/WebProofProver";
+
 import { foundry } from "viem/chains";
 
-export function setupRequestProveButton(element: HTMLButtonElement) {
-  element.addEventListener("click", () => {
-    console.log("Requesting proof", import.meta.env.VITE_EXTENSION_ID);
-    chrome.runtime.sendMessage(import.meta.env.VITE_EXTENSION_ID, {
-      action: "open_side_panel",
-    });
+import {
+  createExtensionWebProofProvider,
+  expectUrl,
+  notarize,
+  startPage,
+  prove,
+  type WebProof,
+  type VCallResponse,
+} from "@vlayer/sdk";
+import { createTestClient, http, publicActions, walletActions } from "viem";
+import webProofVerifier from "../../out/WebProofVerifier.sol/WebProofVerifier";
+
+const context: {
+  webProof: WebProof;
+  zkProof: VCallResponse;
+  result: `0x${string}`[];
+} = {
+  webProof: {} as WebProof,
+  zkProof: {} as VCallResponse,
+  result: [`0x`],
+};
+
+export async function setupRequestProveButton(element: HTMLButtonElement) {
+  element.addEventListener("click", () => {});
+  const provider = createExtensionWebProofProvider({});
+  context.webProof = await provider.getWebProof({
+    proverCallCommitment: {
+      address: import.meta.env.VITE_PROVER_ADDRESS,
+      proverAbi: webProofProver.abi,
+      chainId: foundry.id,
+      functionName: "main",
+      commitmentArgs: [],
+    },
+    logoUrl: "http://twitterswap.com/logo.png",
+    steps: [
+      startPage("https://x.com/i/flow/login", "Go to x.com login page"),
+      expectUrl("https://x.com/home", "Log in"),
+      notarize(
+        "https://api.x.com/1.1/account/settings.json",
+        "GET",
+        "Generate Proof of Twitter profile",
+      ),
+    ],
   });
 }
 
@@ -19,18 +53,13 @@ export const setupVProverButton = (element: HTMLButtonElement) => {
     const notaryPubKey =
       "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExpX/4R4z40gI6C/j9zAM39u58LJu\n3Cx5tXTuqhhu/tirnBi5GniMmspOTEsps4ANnPLpMmMSfhJ+IFHbc3qVOA==\n-----END PUBLIC KEY-----\n";
 
-    console.log("extensionConnector.proof", extensionConnector);
     const webProof = {
-      tls_proof: extensionConnector.tlsproof,
+      tls_proof: context.webProof,
       notary_pub_key: notaryPubKey,
     };
-    console.log("webProof", webProof);
-    console.log("notaryPubKey", notaryPubKey);
-    console.log("prover address", import.meta.env.VITE_PROVER_ADDRESS);
 
     const { proof, returnValue } = await prove(
       import.meta.env.VITE_PROVER_ADDRESS,
-      // @ts-expect-error problem with abi
       webProofProver.abi,
       "main",
       [
@@ -39,10 +68,9 @@ export const setupVProverButton = (element: HTMLButtonElement) => {
         },
       ],
     );
-    console.log("Proof:", proof);
-    console.log("returnValue:", returnValue);
-    extensionConnector.zkproof = proof;
-    extensionConnector.returnValue = returnValue;
+
+    context.zkProof = proof;
+    context.result = returnValue;
   });
 };
 
@@ -59,7 +87,8 @@ export const setupVerifyButton = (element: HTMLButtonElement) => {
         address: import.meta.env.VITE_VERIFIER_ADDRESS,
         abi: webProofVerifier.abi,
         functionName: "verify",
-        args: [extensionConnector.zkproof, extensionConnector.returnValue],
+        //@ts-expect-error TODO : check typing here
+        args: [context.zkProof, context.result],
         account: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
       });
     console.log("Verified!", verification);

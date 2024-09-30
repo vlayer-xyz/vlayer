@@ -2,6 +2,8 @@
 // for some reason newest vertsions doesnt not export this type (clarification is in progress)
 // probaly it should be reexported from tlsn-js
 
+import { z } from "zod";
+
 export interface WebProof {
   session: Session;
   substrings: Substrings;
@@ -101,6 +103,11 @@ export interface Range {
   end: number;
 }
 
-export type WebProofProvider = {
-  requestProof: (url: string) => Promise<WebProof>;
+export const assertWebProof = function (candidate: {
+  notaryUrl?: string;
+}): asserts candidate is WebProof {
+  if (!candidate.notaryUrl) {
+    throw new Error("ddd");
+  }
+  console.log("Implement webproof assertion");
 };
