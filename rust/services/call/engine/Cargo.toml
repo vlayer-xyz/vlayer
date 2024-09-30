@@ -10,7 +10,6 @@ rustdoc-args = ["--cfg", "docsrs"]
 
 [dependencies]
 alloy-primitives = { workspace = true, features = ["rlp", "serde"] }
-alloy-chains = { workspace = true }
 alloy-rlp = { workspace = true }
 alloy-sol-types = { workspace = true }
 anyhow = { workspace = true }

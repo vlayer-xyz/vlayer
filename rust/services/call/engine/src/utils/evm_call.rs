@@ -53,14 +53,17 @@ fn map_execution_result_to_instruction_result(result: &ExecutionResult) -> Instr
             HaltReason::PrecompileError => InstructionResult::PrecompileError,
             HaltReason::NonceOverflow => InstructionResult::NonceOverflow,
             HaltReason::CreateContractSizeLimit => InstructionResult::CreateContractSizeLimit,
-            HaltReason::CreateContractStartingWithEF => 
-                InstructionResult::CreateContractStartingWithEF,
+            HaltReason::CreateContractStartingWithEF => {
+                InstructionResult::CreateContractStartingWithEF
+            },
             HaltReason::CreateInitCodeSizeLimit => InstructionResult::CreateInitCodeSizeLimit,
             HaltReason::OverflowPayment => InstructionResult::OverflowPayment,
-            HaltReason::StateChangeDuringStaticCall => 
-                InstructionResult::StateChangeDuringStaticCall,
-            HaltReason::CallNotAllowedInsideStatic => 
-                InstructionResult::CallNotAllowedInsideStatic,
+            HaltReason::StateChangeDuringStaticCall => {
+                InstructionResult::StateChangeDuringStaticCall
+            },
+            HaltReason::CallNotAllowedInsideStatic => {
+                InstructionResult::CallNotAllowedInsideStatic
+            },
             HaltReason::OutOfFunds => InstructionResult::OutOfFunds,
             HaltReason::CallTooDeep => InstructionResult::CallTooDeep,
             HaltReason::EofAuxDataOverflow => InstructionResult::EofAuxDataOverflow,

@@ -783,6 +783,7 @@ dependencies = [
  "alloy-rlp-derive",
  "anyhow",
  "as-any",
+ "block_header",
  "call_engine",
  "chain",
  "mpt",

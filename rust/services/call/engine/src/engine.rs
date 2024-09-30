@@ -100,7 +100,7 @@ where
         let mut evm = Engine::build_evm(&env, tx, inspector)?;
         let ResultAndState { result, .. } = evm.transact_preverified()?;
         debug!("EVM call result: {:?}", result);
-        
+
         Ok(result)
     }
 
