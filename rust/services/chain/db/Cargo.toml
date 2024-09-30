@@ -7,6 +7,9 @@ edition = "2021"
 anyhow = { workspace = true }
 thiserror = { workspace = true }
 libmdbx = "0.5.2"
+mpt = { workspace = true }
+alloy-rlp = { workspace = true }
+alloy-primitives = { workspace = true }
 
 [dev-dependencies]
 tempfile = { workspace = true }

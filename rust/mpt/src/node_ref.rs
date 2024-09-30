@@ -5,7 +5,7 @@ use super::node::Node;
 
 /// Represents the way in which a node is referenced from within another node.
 #[derive(Default, Clone)]
-pub(crate) enum NodeRef {
+pub enum NodeRef {
     #[default]
     Empty,
     Digest(B256),
@@ -15,7 +15,7 @@ pub(crate) enum NodeRef {
 
 impl NodeRef {
     #[inline]
-    pub(crate) fn from_node(node: &Node) -> NodeRef {
+    pub fn from_node(node: &Node) -> NodeRef {
         match node {
             Node::Null => NodeRef::Empty,
             Node::Digest(digest) => NodeRef::Digest(*digest),

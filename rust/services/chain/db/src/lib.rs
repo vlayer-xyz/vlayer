@@ -2,6 +2,7 @@
 
 use thiserror::Error;
 
+mod chain_db;
 mod in_memory;
 mod mdbx;
 
