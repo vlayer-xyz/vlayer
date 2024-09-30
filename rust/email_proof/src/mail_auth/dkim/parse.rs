@@ -11,7 +11,6 @@
 
 // use mail_parser::decoders::base64::base64_decode_stream;
 
-use crate::mail_auth::common::verify::DomainKey;
 // use crate::mail_auth::{
 //     common::{crypto::VerifyingKeyType, parse::*, verify::DomainKey},
 //     dkim::{RR_EXPIRATION, RR_SIGNATURE, RR_UNKNOWN_TAG, RR_VERIFICATION},
@@ -412,12 +411,6 @@ use crate::mail_auth::common::verify::DomainKey;
 //         Ok(record)
 //     }
 // }
-
-impl DomainKey {
-    pub fn has_flag(&self, flag: impl Into<u64>) -> bool {
-        (self.f & flag.into()) != 0
-    }
-}
 
 // impl ItemParser for HashAlgorithm {
 //     fn parse(bytes: &[u8]) -> Option<Self> {
