@@ -1,7 +1,7 @@
 use super::EIP1186Proof;
 use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256};
 use anyhow::Context;
-use call_engine::EvmBlockHeader;
+use block_header::EvmBlockHeader;
 use ethers_core::types::BlockNumber as BlockTag;
 use serde::{Deserialize, Serialize};
 use std::{

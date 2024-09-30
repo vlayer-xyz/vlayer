@@ -17,7 +17,7 @@ pub use proof::{EIP1186Proof, StorageProof};
 
 pub use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256};
 use auto_impl::auto_impl;
-pub use call_engine::EvmBlockHeader;
+pub use block_header::EvmBlockHeader;
 pub use ethers_core::types::BlockNumber as BlockTag;
 use ethers_providers::{Http, RetryClient};
 use std::error::Error as StdError;

@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 call_engine = { workspace = true }
+block_header = { workspace = true }
 alloy-chains = { workspace = true }
 alloy-primitives = { workspace = true }
 alloy-rlp-derive = { workspace = true }

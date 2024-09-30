@@ -7,6 +7,7 @@ edition = "2021"
 provider = { workspace = true }
 call_host = { workspace = true }
 call_engine = { workspace = true }
+block_header = { workspace = true }
 mpt = { workspace = true }
 
 alloy-dyn-abi = { workspace = true }
