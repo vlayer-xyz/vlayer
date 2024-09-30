@@ -86,7 +86,7 @@ where
         tx: &Call,
         location: ExecutionLocation,
     ) -> Result<Vec<u8>, EngineError> {
-        Self::extract_return_data(self.internal_call(tx, location)?)
+        Self::assert_success_return_and_extract_return_data(self.internal_call(tx, location)?)
     }
 
     pub fn internal_call(
@@ -104,7 +104,9 @@ where
         Ok(result)
     }
 
-    fn extract_return_data(result: ExecutionResult) -> Result<Vec<u8>, EngineError> {
+    fn assert_success_return_and_extract_return_data(
+        result: ExecutionResult,
+    ) -> Result<Vec<u8>, EngineError> {
         match result {
             ExecutionResult::Success {
                 reason: SuccessReason::Return,

@@ -183,10 +183,10 @@ mod test {
     static TRANSACTION_CALLBACK: &StaticTransactionCallback = &|_, _| {
         Ok(ExecutionResult::Success {
             reason: SuccessReason::Return,
-            gas_used: 21000,
+            gas_used: 0,
             gas_refunded: 0,
             logs: vec![],
-            output: Output::Call(Bytes::from(vec![0x0])),
+            output: Output::Call(Bytes::from(vec![])),
         })
     };
 
