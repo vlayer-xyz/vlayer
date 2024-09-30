@@ -7,8 +7,6 @@ import { encodePacked, keccak256, type Address } from "viem";
 
 const notaryPubKey =
   "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExpX/4R4z40gI6C/j9zAM39u58LJu\n3Cx5tXTuqhhu/tirnBi5GniMmspOTEsps4ANnPLpMmMSfhJ+IFHbc3qVOA==\n-----END PUBLIC KEY-----\n";
-const webProof = { tls_proof: tls_proof, notary_pub_key: notaryPubKey };
-const wrongWebProof = { tls_proof: tls_proof, notary_pub_key: "wrong" };
 
 const [prover, verifier] = await testHelpers.deployProverVerifier(
   webProofProver,
@@ -22,6 +20,9 @@ async function testSuccessProvingAndVerification(
   verifier: Address,
 ) {
   console.log("Proving...");
+
+  const webProof = { tls_proof: tls_proof, notary_pub_key: notaryPubKey };
+
   const { proof, returnValue } = await prove(
     prover,
     webProofProver.abi,
@@ -67,6 +68,9 @@ async function testSuccessProvingAndVerification(
 
 async function testFailedProving(prover: Address) {
   console.log("Proving...");
+  
+  const wrongWebProof = { tls_proof: tls_proof, notary_pub_key: "wrong" };
+
   try {
     await prove(prover, webProofProver.abi, "main", [
       {
