@@ -4,8 +4,8 @@ pragma solidity ^0.8.23;
 import {AverageBalance} from "./AverageBalance.sol";
 import {HodlerBadgeNFT} from "./HodlerBadgeNFT.sol";
 
-import {Proof} from "vlayer/Proof.sol";
-import {Verifier} from "vlayer/Verifier.sol";
+import {Proof} from "vlayer-0.1.0/Proof.sol";
+import {Verifier} from "vlayer-0.1.0/Verifier.sol";
 
 contract AverageBalanceVerifier is Verifier {
     address public prover;

@@ -1,4 +1,4 @@
-vlayer/=../../contracts/src/
+vlayer-0.1.0/=../../contracts/src/
 
 openzeppelin-contracts/=../../contracts/dependencies/@openzeppelin-contracts-5.0.1/
 openzeppelin/=../../contracts/dependencies/@openzeppelin-contracts-5.0.1/
