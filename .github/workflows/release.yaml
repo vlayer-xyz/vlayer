@@ -2,7 +2,6 @@ name: Release binaries
 on: 
   schedule:
     - cron: '0 22 * * 1-5' # Mon-Fri at 22:00 UTC
-
 jobs:
   build-release:
     defaults:
@@ -10,6 +9,8 @@ jobs:
         working-directory: rust
     name: Release nightly for ${{ matrix.platform }} ${{ matrix.arch }}
     runs-on: ${{ matrix.runner }}
+    outputs:
+      vlayer_build: ${{ steps.vlayer_build.outputs.vlayer_build }}
     strategy:
       matrix:
         include:
@@ -67,6 +68,16 @@ jobs:
           VLAYER_RELEASE: "nightly"
         run: cargo build --release --target ${{ matrix.target }} --package cli 
 
+      - name: "Print build version"
+        id: vlayer_build
+        if:  matrix.runner == 'aws-linux-medium' 
+        env:
+          VLAYER_RELEASE: "nightly"
+        run: |
+          BUILD=$(./target/${{ matrix.target }}/release/vlayer --version | awk '/vlayer/ {print $2}')
+          echo "vlayer_build=${BUILD}" | tee -a ${GITHUB_OUTPUT}
+
+
       - name: Package release
         id: package-release
         env:
@@ -120,6 +131,17 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly-d75318c9c7a1c6af5404fe96f63ca890dcdd588d # 2024-09-05
+
+      - name: Set up Soldeer login
+        env:
+            SOLDEER_LOGIN_FILE: "${{ runner.temp }}/.soldeer_login"
+        run: |
+          echo -n "${{ secrets.SOLDEER_API_KEY }}" > "${SOLDEER_LOGIN_FILE}"
+
       - name: Download ImageID.sol - Darwin
         uses: actions/download-artifact@v4
         with:
@@ -131,15 +153,20 @@ jobs:
           rm contracts/src/ImageID.sol;
           cp imageid/ImageID.sol contracts/src/ImageID.sol
 
-      - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
-        with:
-          version: nightly-d75318c9c7a1c6af5404fe96f63ca890dcdd588d # 2024-09-05
+      - name: Release contracts to Soldeer
+        working-directory: contracts
+        env:
+            SOLDEER_LOGIN_FILE: "${{ runner.temp }}/.soldeer_login"
+            VLAYER_BUILD: ${{ needs.build-release.outputs.vlayer_build }}
+        run: |
+          forge soldeer push "vlayer~${VLAYER_BUILD}" --skip-warnings
 
       - name: Build vlayer contracts artifact
-        run: |
-          forge soldeer push vlayer-contracts~1.0.0 --dry-run
         working-directory: contracts
+        env:
+            VLAYER_BUILD: ${{ needs.build-release.outputs.vlayer_build }}
+        run: |
+          forge soldeer push "vlayer~${VLAYER_BUILD}" --dry-run
 
       - name: Push contracts artifact
         uses: actions/upload-artifact@v4
