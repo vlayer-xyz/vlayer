@@ -28,7 +28,7 @@ pub struct EvmEnv<DB> {
 }
 ```
 
-## EvnEnvFactory
+## EnvFactory
 
 `EnvFactory` is a type, responsible for creation of `EvmEnv` and, in consequence, revm instances. There are two variants of `EnvFactory`:
 - `HostEnvFactory` creates `Databases` and `Headers` dynamically, utilizing Providers created from `MultiProvider`, by fetching data from Ethereum Nodes. Then, the data is serialized to be sent to Guest.
