@@ -9,6 +9,7 @@ mailparse = "0.15.0"
 thiserror = { workspace = true }
 mail-auth = { git = "https://github.com/vlayer-xyz/mail-auth", rev = "3c4bb85ef39494fc774d3aaacd01f9bcd2afab3b", default-features = false, features = ["rust-crypto", "rustls-pemfile"] }
 futures = "0.3.30"
+regex = { workspace = true }
 
 [dev-dependencies]
 lazy_static = { workspace = true }

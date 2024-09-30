@@ -1,6 +1,7 @@
 use alloy_sol_types::SolValue;
 use mailparse::headers::Headers;
 use mailparse::{MailHeaderMap, MailParseError, ParsedMail};
+use regex::Regex;
 
 pub(crate) mod sol;
 
@@ -25,19 +26,49 @@ impl TryFrom<ParsedMail<'_>> for Email {
         let headers = mail.get_headers();
         let get_header = header_getter(headers);
 
-        let from =
+        let from_raw =
             get_header("From").ok_or(MailParseError::Generic("\"From\" header is missing"))?;
+        let from_email = Self::extract_address_from_header(&from_raw)?;
         let to = get_header("To").ok_or(MailParseError::Generic("\"To\" header is missing"))?;
         let subject = get_header("Subject");
 
         let body = mail.get_body()?;
 
         Ok(Email {
-            from,
+            from: from_email,
             to,
             subject,
             body,
         })
+    }
+}
+
+impl Email {
+    fn extract_address_from_header(header: &str) -> Result<String, MailParseError> {
+        let Some(start) = header.find('<') else {
+            return Self::validate_email(header);
+        };
+        let end = header.rfind('>');
+        match end {
+            None => Err(MailParseError::Generic("Unexpected email format")),
+            Some(end) if end <= start => Err(MailParseError::Generic("Unexpected email format")),
+            Some(end) => Self::validate_email(&header[start + 1..end]),
+        }
+    }
+
+    fn validate_email(email: &str) -> Result<String, MailParseError> {
+        let email = email.trim();
+
+        if !Self::is_email_valid(email) {
+            return Err(MailParseError::Generic("Unexpected email format"));
+        }
+
+        Ok(email.to_string())
+    }
+
+    fn is_email_valid(email: &str) -> bool {
+        let email_regex = Regex::new(r"^[\w\-.]+@([\w-]+\.)+[\w-]{2,4}$").unwrap();
+        email_regex.is_match(email)
     }
 }
 
@@ -140,6 +171,101 @@ mod test {
             assert_eq!(decoded.to, "you".to_string());
             assert_eq!(decoded.subject, "".to_string());
             assert_eq!(decoded.body, "body".to_string());
+        }
+    }
+
+    mod is_email_valid {
+        use super::*;
+
+        #[test]
+        fn valid_email() {
+            assert!(Email::is_email_valid("hello@aa.aa"));
+            assert!(Email::is_email_valid("this.is-valid...e-mail@aa.aa"));
+        }
+
+        #[test]
+        fn invalid_email() {
+            assert!(!Email::is_email_valid("hello@aa"));
+            assert!(!Email::is_email_valid("hel@lo@aa.aa"));
+            assert!(!Email::is_email_valid("hello@aa..aa"));
+            assert!(!Email::is_email_valid("hello@aa.a"));
+            assert!(!Email::is_email_valid("hello@.aa"));
+            assert!(!Email::is_email_valid("hello.aa"));
+            assert!(!Email::is_email_valid("email with.whitespace@aa.aa"));
+            assert!(!Email::is_email_valid("email<with>brackets@aa.aa"));
+        }
+    }
+
+    mod validate_email {
+        use super::*;
+
+        #[test]
+        fn validates_email_with_spaces() {
+            assert_eq!(
+                Email::validate_email(" hello@aa.aa   ").unwrap(),
+                "hello@aa.aa".to_string()
+            );
+        }
+
+        #[test]
+        fn returns_error_for_invalid_email() {
+            let email = Email::validate_email("hello@aa");
+            assert_eq!(email.unwrap_err().to_string(), "Unexpected email format");
+        }
+    }
+
+    mod extract_address_from_header {
+        use super::*;
+
+        #[test]
+        fn extracts_email_from_header() {
+            let extracted_email =
+                Email::extract_address_from_header("  Name (comment) <hello@aa.aa >  ").unwrap();
+            assert_eq!(extracted_email, "hello@aa.aa");
+        }
+
+        #[test]
+        fn works_for_not_named_field() {
+            let extracted_email = Email::extract_address_from_header(" hello@aa.aa ").unwrap();
+            assert_eq!(extracted_email, "hello@aa.aa");
+        }
+
+        #[test]
+        fn error_if_email_is_missing() {
+            let email = Email::extract_address_from_header("Name (comment)");
+            assert_eq!(email.unwrap_err().to_string(), "Unexpected email format");
+        }
+
+        #[test]
+        fn error_if_incorrect_email_inside_brackets() {
+            let email = Email::extract_address_from_header("Name <aaa>");
+            assert_eq!(email.unwrap_err().to_string(), "Unexpected email format");
+        }
+
+        #[test]
+        fn error_if_brackets_misaligned() {
+            let extract = |from: &str| {
+                Email::extract_address_from_header(from)
+                    .unwrap_err()
+                    .to_string()
+            };
+            assert_eq!(extract("Name <hello@aa.aa>>"), "Unexpected email format");
+            assert_eq!(extract("Name hello@aa.aa>"), "Unexpected email format");
+            assert_eq!(extract("Name <<hello@aa.aa>"), "Unexpected email format");
+            assert_eq!(extract("Name <hello@aa.aa"), "Unexpected email format");
+        }
+
+        #[test]
+        fn error_if_several_emails() {
+            let extract = |from: &str| {
+                Email::extract_address_from_header(from)
+                    .unwrap_err()
+                    .to_string()
+            };
+            assert_eq!(
+                extract("Name <hello@aa.aa>, Name2 <hello2@aa.aa>"),
+                "Unexpected email format"
+            );
         }
     }
 }
