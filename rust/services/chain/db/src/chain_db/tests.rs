@@ -16,7 +16,7 @@ fn chain_info_get_insert() -> Result<()> {
         first_block: 0,
         last_block: 1,
         merkle_root: B256::with_last_byte(1),
-        zk_proof: vec![0],
+        zk_proof: Bytes::from_static(&[0]),
     };
 
     assert_eq!(db.begin_ro()?.get_chain_info(chain_id)?, None);

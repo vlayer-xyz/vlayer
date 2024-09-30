@@ -1,6 +1,6 @@
 use std::ops::{Deref, DerefMut};
 
-use alloy_primitives::{keccak256, ChainId, B256};
+use alloy_primitives::{keccak256, Bytes, ChainId, B256};
 use alloy_rlp::{BytesMut, Decodable, Encodable, RlpDecodable, RlpEncodable};
 use mpt::{KeyNibbles, Node, NodeRef, EMPTY_ROOT_HASH};
 use thiserror::Error;
@@ -21,7 +21,7 @@ pub struct ChainInfo {
     pub first_block: u64,
     pub last_block: u64,
     pub merkle_root: B256,
-    pub zk_proof: Vec<u8>, // #[derive(RlpEncodable, RlpDecodable)] doesn't work for `Box<[u8]>`
+    pub zk_proof: Bytes,
 }
 
 pub struct ChainDb<DB: for<'a> Database<'a>> {
