@@ -102,10 +102,12 @@ mod test {
 
         #[test]
         fn parses_email() {
-            let email =
-                parsed_email(vec![("From", "me"), ("To", "you"), ("Subject", "hello")], "body")
-                    .unwrap();
-            assert_eq!(email.from, "me");
+            let email = parsed_email(
+                vec![("From", "me@aa.aa"), ("To", "you"), ("Subject", "hello")],
+                "body",
+            )
+            .unwrap();
+            assert_eq!(email.from, "me@aa.aa");
             assert_eq!(email.to, "you");
             assert_eq!(email.subject.unwrap(), "hello");
             assert_eq!(email.body, "body");
@@ -122,7 +124,7 @@ mod test {
 
         #[test]
         fn error_when_to_header_is_missing() {
-            let email = parsed_email(vec![("From", "me")], "body");
+            let email = parsed_email(vec![("From", "me@aa.aa")], "body");
             assert_eq!(
                 email.unwrap_err().to_string(),
                 MailParseError::Generic("\"To\" header is missing").to_string()
@@ -132,17 +134,17 @@ mod test {
         #[test]
         fn takes_first_header_if_multiple() {
             let email = parsed_email(
-                vec![("From", "me"), ("From", "you"), ("To", "you"), ("To", "me")],
+                vec![("From", "me@aa.aa"), ("From", "you@aa.aa"), ("To", "you"), ("To", "me")],
                 "body",
             )
             .unwrap();
-            assert_eq!(email.from, "me");
+            assert_eq!(email.from, "me@aa.aa");
             assert_eq!(email.to, "you");
         }
 
         #[test]
         fn works_when_body_is_missing() {
-            let email = parsed_email(vec![("From", "me"), ("To", "you")], "");
+            let email = parsed_email(vec![("From", "me@aa.aa"), ("To", "you")], "");
             assert_eq!(email.unwrap().body, "");
         }
     }
@@ -152,11 +154,13 @@ mod test {
 
         #[test]
         fn encodes_email_to_sol_type() {
-            let email =
-                parsed_email(vec![("From", "me"), ("To", "you"), ("Subject", "hello")], "body");
+            let email = parsed_email(
+                vec![("From", "me@aa.aa"), ("To", "you"), ("Subject", "hello")],
+                "body",
+            );
             let encoded = email.unwrap().abi_encode();
             let decoded = sol::SolEmail::abi_decode(&encoded, true).unwrap();
-            assert_eq!(decoded.from, "me".to_string());
+            assert_eq!(decoded.from, "me@aa.aa".to_string());
             assert_eq!(decoded.to, "you".to_string());
             assert_eq!(decoded.subject, "hello".to_string());
             assert_eq!(decoded.body, "body".to_string());
@@ -164,10 +168,10 @@ mod test {
 
         #[test]
         fn replaces_empty_subject_with_empty_string() {
-            let email = parsed_email(vec![("From", "me"), ("To", "you")], "body");
+            let email = parsed_email(vec![("From", "me@aa.aa"), ("To", "you")], "body");
             let encoded = email.unwrap().abi_encode();
             let decoded = sol::SolEmail::abi_decode(&encoded, true).unwrap();
-            assert_eq!(decoded.from, "me".to_string());
+            assert_eq!(decoded.from, "me@aa.aa".to_string());
             assert_eq!(decoded.to, "you".to_string());
             assert_eq!(decoded.subject, "".to_string());
             assert_eq!(decoded.body, "body".to_string());
