@@ -22,29 +22,40 @@ You do this by writing a Solidity smart contract (`Prover`) that has access to t
 Under the hood, we verify mail server signatures to ensure the authenticity and integrity of the content.
 
 ## Example
-Let's say someone wants to prove they are a GitHub user. One way to do this is to take a screenshot and send it to the verifier. However, this is not very reliable because screenshot images can be easily manipulated, and obviously such an image cannot be verified on-chain. 
+Let's say someone wants to prove they are part of company or organization. One way to do this is to take a screenshot and send it to the verifier. However, this is not very reliable because screenshot images can be easily manipulated, and obviously such an image cannot be verified on-chain. 
 
-A better option is to prove that GitHub's email servers sent a welcome email. Below is a sample `Prover` contract that verifies that the caller created a GitHub account.
+A better option is to prove that one can send email from it's organization domain. Below is a sample `Prover` contract that verifies that the sender sent email from a specific domain.
 
 Below is an example of such proof generation:
 
 ```solidity
-import {Prover} from "vlayer/Prover.sol";
-import {UnverifiedEmail, VerifiedEmail, EmailProofLib} from "vlayer/EmailProof.sol";
-import {StringUtils} "vlayer/StringUtils.sol";
+import {Strings} from "@openzeppelin-contracts-5.0.1/utils/Strings.sol";
+import {Prover} from "vlayer-0.1.0/src/Prover.sol";
+import {VerifiedEmail, UnverifiedEmail, EmailProofLib} from "vlayer-0.1.0/src/EmailProof.sol";
+import {EmailStrings} from "./EmailStrings.sol";
 
-contract GitHubEmail is Prover {
+contract EmailDomainProver is Prover {
+    using Strings for string;
+    using EmailStrings for string;
     using EmailProofLib for UnverifiedEmail;
-    using StringUtils for string;
 
-    function main(UnverifiedEmail calldata unverifiedEmail) public view returns (bool) {
+    string targetDomain;
+
+    constructor(string memory _targetDomain) {
+        targetDomain = _targetDomain;
+    }
+
+    function main(UnverifiedEmail calldata unverifiedEmail, address targetWallet)
+        public
+        view
+        returns (bytes32, address)
+    {
         VerifiedEmail memory email = unverifiedEmail.verify();
 
-        require(email.subject.equal("Welcome to GitHub"), "Incorrect subject");
-        require(email.from.equal("notifications@github.com"), "Incorrect sender");
-        require(email.to.equal("john.prover@gmail.com"), "Incorrect recipient");
+        require(email.from.contains(targetDomain), "incorrect sender domain");
+        require(email.subject.equal("Verify me for company NFT"), "incorrect subject");
 
-        return true;
+        return (sha256(abi.encodePacked(email.from)), targetWallet);
     }
 }
 ```
@@ -71,7 +82,7 @@ String comparison is handled by our `StringUtils` library (*described in more [d
 > To run the above example on your computer, type the following command in your terminal:
 > 
 > ```bash
-> vlayer init --template email_proof
+> vlayer init --template simple_email
 > ```
 > 
 > This command will download create and initialise a new project with sample email proof contracts.
