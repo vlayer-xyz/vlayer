@@ -7,5 +7,6 @@ use risc0_zkvm::guest::env;
 
 fn main() {
     let input: Input = env::read();
-    env::commit(&guest_main(input));
+    let guest_output = guest_main(input);
+    env::commit(&guest_output);
 }
