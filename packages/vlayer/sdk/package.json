@@ -19,6 +19,7 @@
     "typescript": "^5.0.0"
   },
   "dependencies": {
+    "dns-over-http-resolver": "^3.0.3",
     "mailparser": "^3.7.1",
     "viem": "^2.21.0"
   }
