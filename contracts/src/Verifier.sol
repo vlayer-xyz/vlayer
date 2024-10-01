@@ -11,6 +11,8 @@ abstract contract Verifier {
     uint256 private constant SELECTOR_LEN = 4;
     uint256 private constant PROOF_OFFSET = SELECTOR_LEN;
     uint256 private constant JOURNAL_OFFSET = PROOF_OFFSET + ProofLib.CALL_ASSUMPTIONS_OFFSET;
+    uint256 private constant CALL_ASSUMPTIONS_END =
+        JOURNAL_OFFSET + CallAssumptionsLib.CALL_ASSUMPTIONS_ENCODING_LENGTH;
 
     IProofVerifier public verifier;
 
@@ -33,12 +35,10 @@ abstract contract Verifier {
 
         uint256 journalEnd = JOURNAL_OFFSET + proof.length - ProofLib.PROOF_ENCODING_LENGTH;
 
-        bytes memory executionCommitment =
-            msg.data[JOURNAL_OFFSET:JOURNAL_OFFSET + ExecutionCommitmentLib.EXECUTION_COMMITMENT_ENCODING_LENGTH];
-        bytes memory param =
-            msg.data[JOURNAL_OFFSET + ExecutionCommitmentLib.EXECUTION_COMMITMENT_ENCODING_LENGTH:journalEnd];
+        bytes memory callAssumptions = msg.data[JOURNAL_OFFSET:CALL_ASSUMPTIONS_END];
+        bytes memory param = msg.data[CALL_ASSUMPTIONS_END:journalEnd];
 
-        bytes memory journalWithEmptyProof = bytes.concat(executionCommitment, abi.encode(ProofLib.emptyProof()), param);
+        bytes memory journalWithEmptyProof = bytes.concat(callAssumptions, abi.encode(ProofLib.emptyProof()), param);
         bytes32 journalHash = sha256(journalWithEmptyProof);
 
         return (proof, journalHash);

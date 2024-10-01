@@ -32,7 +32,7 @@ library ProofLib {
             0,
             SealLib.emptySeal(),
             [uint16(0), 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            CallAssumptions.emptyExecutionCommitment()
+            CallAssumptionsLib.emptyCallAssumptions()
         );
     }
 }
