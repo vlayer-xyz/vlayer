@@ -48,8 +48,9 @@ impl Email {
         let Some(start) = header.find('<') else {
             return Self::validate_email(header);
         };
-        let end = header.rfind('>');
-        match end {
+        let maybe_end = header.rfind('>');
+
+        match maybe_end {
             None => Err(Self::invalid_from_header()),
             Some(end) if end <= start => Err(Self::invalid_from_header()),
             Some(end) => Self::validate_email(&header[start + 1..end]),
@@ -236,6 +237,12 @@ mod test {
         fn works_for_not_named_field() {
             let extracted_email = Email::extract_address_from_header(" hello@aa.aa ").unwrap();
             assert_eq!(extracted_email, "hello@aa.aa");
+        }
+
+        #[test]
+        fn error_for_missing_brackets() {
+            let email = Email::extract_address_from_header("Name hello@aa.aa");
+            assert_eq!(email.unwrap_err().to_string(), Email::invalid_from_header().to_string());
         }
 
         #[test]
