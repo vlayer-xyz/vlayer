@@ -1,8 +1,7 @@
-import assert from "node:assert";
 import { describe, expect, test } from "vitest";
-import { getDkimSigners, parseEmail } from "./parseEmail.ts";
+import { getDkimSigners, parseEmail, parseParams } from "./parseEmail.ts";
 import { StructuredHeader } from "mailparser";
-import PostalMime from "postal-mime";
+
 const emailHeaders = `From: "John Doe" <john@d.oe>
 To: "Jane Doe" <jane@d.oe>
 Subject: Hello World
@@ -16,25 +15,13 @@ const body = "Hello, World!";
 
 const emailFixture = `${emailHeaders}${dkimHeader}\n\n${body}`;
 
-const dkimHeader2 =
-  "DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed; d=second.signer; h=from:to:subject; s=selector2; b=abcdef;";
-
-const email = await parseEmail(
-  `${emailHeaders}${dkimHeader}\n${dkimHeader2}\n\n${body}`,
-);
-const dkim = email.parsedHeaders.get(
-  "dkim-signature",
-)! as unknown as StructuredHeader[];
-
-console.log("a", email);
 describe("parseEmail", () => {
   test("should get dkim header from email", async () => {});
 
   test("correctly parses untrimmed email", async () => {
     const untrimmed = `\n   ${emailFixture}    \n`;
     const email = await parseEmail(untrimmed);
-    console.log("email", email);
-    expect(email.parsedHeaders.get("dkim-signature")).toBeDefined();
+    expect(email.headers.find((h) => h.key === "dkim-signature")).toBeDefined();
   });
 
   test("works well with multiple dkim headers", async () => {
@@ -44,17 +31,14 @@ describe("parseEmail", () => {
     const email = await parseEmail(
       `${emailHeaders}${dkimHeader}\n${dkimHeader2}\n\n${body}`,
     );
-    const dkim = email.parsedHeaders.get(
-      "dkim-signature",
-    )! as unknown as StructuredHeader[];
+    const dkim = email.headers.filter((h) => h.key === "dkim-signature")!;
 
-    console.log("dkim", dkim);
     expect(dkim).toHaveLength(2);
-    expect(dkim[0].params.s).toBe("selector1");
-    expect(dkim[1].params.s).toBe("selector2");
+    expect(parseParams(dkim[0].value).s).toBe("selector1");
+    expect(parseParams(dkim[1].value).s).toBe("selector2");
   });
 });
-//
+
 describe("getDkimSigners", () => {
   test("should get dkim signers from email", async () => {
     const email = await parseEmail(emailFixture);
@@ -109,5 +93,42 @@ describe("getDkimSigners", () => {
     expect(() => getDkimSigners(email)).toThrowError(
       "DKIM header missing selector",
     );
+  });
+});
+
+describe("parseParams", () => {
+  test("should parse single parameter", () => {
+    const params = parseParams("a=b");
+    expect(params).toEqual({ a: "b" });
+  });
+
+  test("should parse multiple parameters", () => {
+    const params = parseParams("a=b; c=d; e=f");
+    expect(params).toEqual({ a: "b", c: "d", e: "f" });
+  });
+
+  test("should trim spaces around parameters", () => {
+    const params = parseParams(" a = b ; c = d ; e = f ");
+    expect(params).toEqual({ a: "b", c: "d", e: "f" });
+  });
+
+  test("should handle empty values", () => {
+    const params = parseParams("a=; b=c");
+    expect(params).toEqual({ a: "", b: "c" });
+  });
+
+  test("should handle missing values", () => {
+    const params = parseParams("a; b=c");
+    expect(params).toEqual({ a: undefined, b: "c" });
+  });
+
+  test("should handle empty string", () => {
+    const params = parseParams("");
+    expect(params).toEqual({});
+  });
+
+  test("should handle parameters with extra semicolons", () => {
+    const params = parseParams("a=b;; c=d;");
+    expect(params).toEqual({ a: "b", c: "d" });
   });
 });
