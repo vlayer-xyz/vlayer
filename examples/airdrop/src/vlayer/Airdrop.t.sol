@@ -13,7 +13,7 @@ contract AirdropTest is VTest {
         NftOwnershipProver prover = new NftOwnershipProver();
         Airdrop airdrop = new Airdrop(address(prover));
         callProver();
-        address owner = prover.main(holder);
+        (Proof memory _emptyProof, address owner) = prover.main(holder);
         Proof memory proof = getProof();
         airdrop.claim(proof, owner);
     }
