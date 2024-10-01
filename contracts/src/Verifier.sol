@@ -48,8 +48,7 @@ abstract contract Verifier {
         pure
         returns (bytes memory)
     {
-        uint256 offsetPositionRelativeToJournal =
-            CallAssumptionsLib.CALL_ASSUMPTIONS_ENCODING_LENGTH + offsetPosition;
+        uint256 offsetPositionRelativeToJournal = CallAssumptionsLib.CALL_ASSUMPTIONS_ENCODING_LENGTH + offsetPosition;
 
         require(data.length >= offsetPositionRelativeToJournal, "Encoded data too short");
 
