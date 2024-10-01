@@ -20,7 +20,7 @@ fn call_guest_id() -> String {
     format!("CALL_GUEST_ID: {}", little_endian_hex)
 }
 
-fn version() -> String {
+pub(crate) fn version() -> String {
     let build_date = env!("VERGEN_BUILD_DATE");
     let build_date_without_dashes = build_date.replace('-', "");
 
