@@ -28,7 +28,7 @@ pub struct EvmEnv<DB> {
 }
 ```
 
-## EvnEnvFactory
+## EvmEnvFactory
 
 `EnvFactory` is a type, responsible for creation of `EvmEnv` and, in consequence, revm instances. There are two variants of `EnvFactory`:
 - `HostEnvFactory` creates `Databases` and `Headers` dynamically, utilizing Providers created from `MultiProvider`, by fetching data from Ethereum Nodes. Then, the data is serialized to be sent to Guest.
@@ -73,7 +73,7 @@ HostEnvFactory <.. MultiProvider
 `Engine`'s responsibility is to execute calls. To do so, `Engine` spawns revms instances on demand. 
 Engine calls are intercepted by `TravelInspector`. 
 
-The role of the `TravelInspector' is to intercept calls related to [time travel](/features/time-travel.html) and [teleport](/features/teleport.html) features.
+The role of the `TravelInspector` is to intercept calls related to [time travel](/features/time-travel.html) and [teleport](/features/teleport.html) features.
 It stores the destination location (set by `setBlock` and `setChain` calls) and delegates the call back to the `Engine` if needed.
 
 
