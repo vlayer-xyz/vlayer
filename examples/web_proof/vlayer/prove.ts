@@ -79,10 +79,7 @@ async function testFailedProving(prover: Address) {
     ]);
     throw new Error("Proving should have failed!");
   } catch (error) {
-    assert.ok(
-      error instanceof Error,
-      `Invalid error returned: ${error}`,
-    );
+    assert.ok(error instanceof Error, `Invalid error returned: ${error}`);
     assert.equal(
       error.message,
       "Error response: Host error: Engine error: EVM transact error: ASN.1 error: PEM error: PEM preamble contains invalid data (NUL byte) at line 1 column 22883",
