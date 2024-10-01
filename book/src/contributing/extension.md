@@ -46,11 +46,6 @@ cd packages
 bun install
 ```
 
-```sh
-cd packages/vlayer/sdk/src
-bun install
-```
-
 ## Local development
 
 Run anvil:
@@ -70,6 +65,7 @@ Deploy `WebProofProver` and `WebProofVerifier` contracts on anvil:
 
 ```sh
 cd examples/web_proof/vlayer
+cp .env.template .env.development
 bun run deploy.ts
 ```
 
