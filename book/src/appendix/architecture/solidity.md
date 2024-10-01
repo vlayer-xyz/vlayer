@@ -26,26 +26,26 @@ contract Example is Verifier {
 
 ## Data flow
 
-Proving data flow is composed of three steps. It starts at `Guest`, which returns `GuestOutput`. `GuestOutput` consist of two fields: `execution_commitment` and `evm_call_result`.
+Proving data flow is composed of three steps. It starts at `Guest`, which returns `GuestOutput`. `GuestOutput` consist of two fields: `call_assumptions` and `evm_call_result`.
 
 See the code snippets below for pseudocode:
 
 ```rust
 pub struct GuestOutput {
-    pub execution_commitment: ExecutionCommitment,
+    pub call_assumptions: CallAssumptions,
     pub evm_call_result: Vec<u8>,
 }
 ```
 
 ```solidity
-struct ExecutionCommitment {
+struct CallAssumptions {
     address proverContractAddress;
     bytes4 functionSelector;
     uint256 settleBlockNumber;
     bytes32 settleBlockHash;
 ```
 
-> Note that `ExecutionCommitment` structure is generated based on Solidity code from `Vlayer::Commitment`, with `sol!` macro.
+> Note that `CallAssumptions` structure is generated based on Solidity code from `Vlayer::Assumptions`, with `sol!` macro.
 
 Then the data is prepended on the `Host` with two additional fields `length` and `seal`. The `Host` returns it via JSON-RPC `v_call` method, as a string of bytes, in the `result` field.
 
@@ -59,7 +59,7 @@ struct Proof {
     uint32 length;
     Seal seal;
 
-    ExecutionCommitment executionCommitment;
+    CallAssumptions callAssumptions;
 }
 ```
 
@@ -85,7 +85,7 @@ To verify a zero-knowledge proof, vlayer uses a `verify` function, delivered by 
 function verify(Seal calldata seal, bytes32 imageId, bytes32 journalDigest)
 ```
 
-`Proof.length` represents the length of journal data, which is located in `msg.data`, starting at byte 0 of `executionCommitment` and ends with the last byte of the last verified argument.
+`Proof.length` represents the length of journal data, which is located in `msg.data`, starting at byte 0 of `CallAssumptions` and ends with the last byte of the last verified argument.
 
 `onlyVerified` gets `seal` and `journalDigest` by slicing it out of `msg.data`. This is where `length` is used.
 

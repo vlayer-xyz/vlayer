@@ -1,5 +1,5 @@
 mod private {
-    use crate::ExecutionCommitment;
+    use crate::CallAssumptions;
     use crate::Seal;
 
     alloy_sol_types::sol!("../../../../contracts/src/Proof.sol");

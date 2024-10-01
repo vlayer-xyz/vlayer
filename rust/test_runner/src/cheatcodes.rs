@@ -11,17 +11,17 @@ sol!(
         bytes19 rhv;
     }
     #[derive(Default)]
-    struct ExecutionCommitment {
+    struct CallAssumptions {
         address proverContractAddress;
         bytes4 functionSelector;
-        uint256 settleBlockNumber; // Block number at which the commitment was made.
+        uint256 settleBlockNumber; // Block number at which the assumptions was made.
         bytes32 settleBlockHash; // Hash of the block at the specified block number.
     }
     #[derive(Default)]
     struct Proof {
         uint256 length;
         Seal seal;
-        ExecutionCommitment commitment;
+        CallAssumptions assumptions;
     }
 
 

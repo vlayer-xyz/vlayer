@@ -8,7 +8,7 @@ use thiserror::Error;
 use crate::config::DEFAULT_CALLER;
 use crate::evm::env::location::ExecutionLocation;
 use crate::evm::input::MultiEvmInput;
-use crate::ExecutionCommitment;
+use crate::CallAssumptions;
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Input {
@@ -67,30 +67,28 @@ impl Call {
 
 #[derive(Error, Debug)]
 pub enum GuestOutputError {
-    #[error("Cannot decode execution commitment: {0}")]
-    CannonDecodeExecutionCommitment(String),
+    #[error("Cannot decode call assumptions: {0}")]
+    CannotDecodeCallAssumptions(String),
 }
 
 #[derive(Debug)]
 pub struct GuestOutput {
-    pub execution_commitment: ExecutionCommitment,
+    pub call_assumptions: CallAssumptions,
     pub evm_call_result: Vec<u8>,
 }
 
 impl GuestOutput {
     pub fn from_outputs(host_output: &[u8], guest_output: &[u8]) -> Result<Self, GuestOutputError> {
-        let execution_commitment_len = guest_output.len() - host_output.len();
+        let call_assumptions_len = guest_output.len() - host_output.len();
 
-        let (execution_commitment_abi_encoded, evm_call_result_abi_encoded) =
-            guest_output.split_at(execution_commitment_len);
+        let (call_assumptions_abi_encoded, evm_call_result_abi_encoded) =
+            guest_output.split_at(call_assumptions_len);
 
-        let execution_commitment =
-            ExecutionCommitment::abi_decode(execution_commitment_abi_encoded, true).map_err(
-                |err| GuestOutputError::CannonDecodeExecutionCommitment(err.to_string()),
-            )?;
+        let call_assumptions = CallAssumptions::abi_decode(call_assumptions_abi_encoded, true)
+            .map_err(|err| GuestOutputError::CannotDecodeCallAssumptions(err.to_string()))?;
 
         Ok(Self {
-            execution_commitment,
+            call_assumptions,
             evm_call_result: evm_call_result_abi_encoded.to_vec(),
         })
     }

@@ -15,7 +15,7 @@ blockhash(uint blockNumber) returns (bytes32)
 ```
 It returns a hash of the given block when `blockNumber` is one of the **256** most recent blocks; otherwise returns zero.
 
-We assert result of this function with the block hash found in the execution commitment of the call proof.
+We assert result of this function with the block hash found in the call assumptions of the call proof.
 
 ### blockhash limitations
 However, this method is limited, as it only works for the most recent 256 blocks on a given chain.

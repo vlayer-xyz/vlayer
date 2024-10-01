@@ -57,11 +57,11 @@ impl CallResult {
                     "mode": Into::<u8>::into(self.proof.seal.mode),
                 },
                 "dynamicParamsOffsets": self.proof.dynamicParamsOffsets,
-                "commitment": {
-                    "functionSelector": self.proof.commitment.functionSelector,
-                    "proverContractAddress": self.proof.commitment.proverContractAddress,
-                    "settleBlockNumber": u256_to_number(self.proof.commitment.settleBlockNumber),
-                    "settleBlockHash": self.proof.commitment.settleBlockHash,
+                "assumptions": {
+                    "functionSelector": self.proof.assumptions.functionSelector,
+                    "proverContractAddress": self.proof.assumptions.proverContractAddress,
+                    "settleBlockNumber": u256_to_number(self.proof.assumptions.settleBlockNumber),
+                    "settleBlockHash": self.proof.assumptions.settleBlockHash,
                 }
             },
         })
@@ -83,7 +83,7 @@ impl TryFrom<HostOutput> for CallResult {
             seal: decode_seal(seal)?,
             // Intentionally set to 0. These fields will be updated with the correct values by the prover script, based on the verifier ABI.
             dynamicParamsOffsets: [0_u16; 10],
-            commitment: guest_output.execution_commitment,
+            assumptions: guest_output.call_assumptions,
         };
         Ok(Self {
             proof,

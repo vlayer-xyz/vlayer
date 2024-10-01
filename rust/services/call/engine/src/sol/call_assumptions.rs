@@ -1,18 +1,18 @@
-// Keep everything in the vlayer library private except the commitment.
+// Keep everything in the vlayer library private except the assumptions.
 mod private {
-    alloy_sol_types::sol!(#![sol(all_derives)] "../../../../contracts/src/ExecutionCommitment.sol");
+    alloy_sol_types::sol!(#![sol(all_derives)] "../../../../contracts/src/CallAssumptions.sol");
 }
 
 use alloy_primitives::{Address, U256};
 use alloy_sol_types::SolType;
 use block_header::EvmBlockHeader;
 /// Solidity struct representing the committed block used for validation.
-pub use private::ExecutionCommitment;
+pub use private::CallAssumptions;
 
 use crate::io::CallSelector;
 
-impl ExecutionCommitment {
-    /// Returns the [SolCommitment] used to validate the environment.
+impl CallAssumptions {
+    /// Returns the [SolAssumptions] used to validate the environment.
     pub fn new(header: &dyn EvmBlockHeader, to: Address, selector: CallSelector) -> Self {
         Self {
             proverContractAddress: to,
@@ -23,6 +23,6 @@ impl ExecutionCommitment {
     }
 
     pub fn size() -> usize {
-        Self::ENCODED_SIZE.expect("ExecutionCommitment compiletime size does not exist")
+        Self::ENCODED_SIZE.expect("CallAssumptions compiletime size does not exist")
     }
 }

@@ -6,7 +6,7 @@ import {Test} from "forge-std-1.9.2/src/Test.sol";
 import {Prover} from "../../src/Prover.sol";
 import {Proof} from "../../src/Proof.sol";
 import {IProofVerifier} from "../../src/proof_verifier/IProofVerifier.sol";
-import {ExecutionCommitment} from "../../src/ExecutionCommitment.sol";
+import {CallAssumptions} from "../../src/CallAssumptions.sol";
 import {Seal, ProofMode} from "../../src/Seal.sol";
 
 import {FakeProofVerifier} from "../../src/proof_verifier/FakeProofVerifier.sol";
@@ -106,15 +106,15 @@ library ProofFixtures {
     }
 
     function generateProof(Seal memory seal) private pure returns (Proof memory, bytes32) {
-        ExecutionCommitment memory executionCommitment = ExecutionCommitment(
+        CallAssumptions memory callAssumptions = CallAssumptions(
             FIXED_PROVER_ADDRESS, FIXED_SELECTOR, FIXED_SETTLE_BLOCK_NUMBER, FIXED_SETTLE_BLOCK_HASH
         );
 
         uint256 length = 0; // it is not used in verification, so can be set to 0
         uint16[10] memory dynamicParamsOffsets = dynamicParams();
 
-        Proof memory proof = Proof(length, seal, dynamicParamsOffsets, executionCommitment);
-        return (proof, journalHash(executionCommitment, FIXED_LHS + FIXED_RHS));
+        Proof memory proof = Proof(length, seal, dynamicParamsOffsets, callAssumptions);
+        return (proof, journalHash(callAssumptions, FIXED_LHS + FIXED_RHS));
     }
 
     function dynamicParams() private pure returns (uint16[10] memory) {
@@ -134,11 +134,11 @@ library ProofFixtures {
         return dynamicParamsOffsets;
     }
 
-    function journalHash(ExecutionCommitment memory executionCommitment, uint256 proverResult)
+    function journalHash(CallAssumptions memory callAssumptions, uint256 proverResult)
         private
         pure
         returns (bytes32)
     {
-        return sha256(abi.encode(executionCommitment, proverResult));
+        return sha256(abi.encode(callAssumptions, proverResult));
     }
 }

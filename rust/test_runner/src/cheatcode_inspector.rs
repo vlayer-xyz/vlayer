@@ -85,7 +85,7 @@ impl CheatcodeInspector {
     }
 
     fn host_output_into_proof(host_output: &HostOutput) -> Proof {
-        let commitment = host_output.guest_output.execution_commitment.clone();
+        let assumptions = host_output.guest_output.call_assumptions.clone();
 
         let decoded_seal = Seal::abi_decode(&host_output.seal, true)
             .unwrap_or_else(|_| panic!("Failed to decode seal: {:x?}", host_output.seal));
@@ -94,7 +94,7 @@ impl CheatcodeInspector {
             length: U256::from(host_output.proof_len),
             seal: decoded_seal,
             dynamicParamsOffsets: [0_u16; 10],
-            commitment,
+            assumptions,
         }
     }
 }
