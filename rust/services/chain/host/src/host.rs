@@ -76,6 +76,7 @@ mod test {
 
     use super::*;
     use alloy_primitives::B256;
+    use alloy_rlp::encode_fixed_size;
     use ethers::{providers::Provider, types::Block};
     use lazy_static::lazy_static;
     use mpt::MerkleTrie;
@@ -124,8 +125,9 @@ mod test {
         let (provider, mock) = Provider::mocked();
         mock.push(rpc_block.clone())?;
 
+        let encoded_block_num = encode_fixed_size(&block.number());
         let expected_root_hash =
-            MerkleTrie::from_iter([(block.number().to_ne_bytes(), *block_hash)]).hash_slow();
+            MerkleTrie::from_iter([(encoded_block_num, *block_hash)]).hash_slow();
 
         let host = Host::new(&config);
         let HostOutput { receipt } = host.initialize(ChainId::default(), &provider).await?;

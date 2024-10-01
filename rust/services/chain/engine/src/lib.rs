@@ -1,11 +1,19 @@
 use block_header::EvmBlockHeader;
+use bytes::Bytes;
 use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Input {
     Initialize {
-        block: Box<dyn EvmBlockHeader>,
         elf_id: Digest,
+        block: Box<dyn EvmBlockHeader>,
+    },
+    AppendPrepend {
+        elf_id: Digest,
+        prepend_blocks: Vec<Box<dyn EvmBlockHeader>>,
+        append_blocks: Vec<Box<dyn EvmBlockHeader>>,
+        old_leftmost_block: Box<dyn EvmBlockHeader>,
+        mpt_nodes: Box<[Bytes]>,
     },
 }

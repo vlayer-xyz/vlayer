@@ -2,12 +2,11 @@
 
 risc0_zkvm::guest::entry!(main);
 
-use chain_guest::{initialize, Input};
+use chain_guest::{main as guest_main, Input};
 use risc0_zkvm::guest::env;
 
 fn main() {
-    let output = match env::read() {
-        Input::Initialize { block, elf_id } => initialize(elf_id, &*block),
-    };
-    env::commit(&output);
+    let input: Input = env::read();
+    let guest_output = guest_main(input);
+    env::commit(&guest_output);
 }

@@ -1,5 +1,3 @@
-#![recursion_limit = "512"]
-
 use axum::http::StatusCode;
 use serde_json::json;
 
