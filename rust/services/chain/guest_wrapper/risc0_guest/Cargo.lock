@@ -434,6 +434,7 @@ dependencies = [
  "alloy-rlp",
  "alloy-rlp-derive",
  "as-any",
+ "auto_impl",
  "dyn-clone",
  "revm",
  "serde",
@@ -485,9 +486,9 @@ checksum = "1fd0f2584146f6f2ef48085050886acf353beff7305ebd1ae69500e27c67f64b"
 
 [[package]]
 name = "bytes"
-version = "1.7.1"
+version = "1.7.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8318a53db07bb3f8dca91a600466bdb3f2eaadeedfdbcf02e1accbad9271ba50"
+checksum = "428d9aa8fbc0670b7b8d6030a7fadd0f86151cae55e4dbbece15f3780a3dfaf3"
 dependencies = [
  "serde",
 ]
@@ -527,6 +528,7 @@ name = "chain_engine"
 version = "0.1.0"
 dependencies = [
  "block_header",
+ "bytes",
  "risc0-zkp",
  "serde",
 ]
@@ -535,6 +537,7 @@ dependencies = [
 name = "chain_guest"
 version = "0.1.0"
 dependencies = [
+ "alloy-primitives",
  "alloy-rlp",
  "block_header",
  "chain_engine",

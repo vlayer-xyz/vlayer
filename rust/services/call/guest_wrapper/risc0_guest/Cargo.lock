@@ -659,6 +659,7 @@ dependencies = [
  "alloy-rlp",
  "alloy-rlp-derive",
  "as-any",
+ "auto_impl",
  "dyn-clone",
  "revm",
  "serde",

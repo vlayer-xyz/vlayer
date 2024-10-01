@@ -9,6 +9,7 @@ block_header = { workspace = true }
 serde = { workspace = true }
 mpt = { workspace = true }
 risc0-zkp = { workspace = true }
+alloy-primitives = { workspace = true }
 alloy-rlp = { workspace = true, features = ["arrayvec"] }
 
 [lints]

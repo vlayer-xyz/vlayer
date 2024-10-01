@@ -7,6 +7,7 @@ pub use forge::ForgeBlockHeader;
 
 use alloy_rlp::Encodable;
 use as_any::AsAny;
+use auto_impl::auto_impl;
 
 use alloy_primitives::{keccak256, BlockNumber, B256};
 
@@ -29,6 +30,7 @@ impl<H: EvmBlockHeader> Hashable for H {
 }
 
 /// An EVM abstraction of a block header.
+#[auto_impl(Box)]
 pub trait EvmBlockHeader: Hashable + Encodable + AsAny + Debug + DynClone + Send + Sync {
     /// Returns the hash of the parent block's header.
     fn parent_hash(&self) -> &B256;
