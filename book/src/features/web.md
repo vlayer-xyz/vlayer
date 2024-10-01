@@ -80,7 +80,8 @@ If no execution errors occured and proof was produced, we are ready for on-chain
 > vlayer init --template web_example
 > ```
 > 
-> This command will download all necessary artifacts to your project.
+> This command will download all necessary artifacts to your project.  
+> Next steps are described in README file in your new project.
 
 ## Example Verifier
 
