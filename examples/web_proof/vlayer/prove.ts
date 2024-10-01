@@ -3,54 +3,91 @@ import webProofProver from "../out/WebProofProver.sol/WebProofProver";
 import webProofVerifier from "../out/WebProofVerifier.sol/WebProofVerifier";
 import tls_proof from "./tls_gp_proof.json";
 import * as assert from "assert";
-import { encodePacked, keccak256 } from "viem";
+import { encodePacked, keccak256, type Address } from "viem";
 
 const notaryPubKey =
   "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExpX/4R4z40gI6C/j9zAM39u58LJu\n3Cx5tXTuqhhu/tirnBi5GniMmspOTEsps4ANnPLpMmMSfhJ+IFHbc3qVOA==\n-----END PUBLIC KEY-----\n";
-const webProof = { tls_proof: tls_proof, notary_pub_key: notaryPubKey };
 
 const [prover, verifier] = await testHelpers.deployProverVerifier(
   webProofProver,
   webProofVerifier,
 );
+testSuccessProvingAndVerification(prover, verifier);
+testFailedProving(prover);
 
-console.log("Proving...");
-const { proof, returnValue } = await prove(prover, webProofProver.abi, "main", [
-  {
-    webProofJson: JSON.stringify(webProof),
-  },
-]);
-console.log("Proof:", proof);
+async function testSuccessProvingAndVerification(
+  prover: Address,
+  verifier: Address,
+) {
+  console.log("Proving...");
 
-const twitterUserAddress = (await testHelpers.getTestAddresses())[0];
+  const webProof = { tls_proof: tls_proof, notary_pub_key: notaryPubKey };
 
-console.log("Verifying...");
-await testHelpers.writeContract(
-  verifier,
-  webProofVerifier.abi,
-  "verify",
-  [proof, returnValue],
-  twitterUserAddress,
-);
-console.log("Verified!");
+  const { proof, returnValue } = await prove(
+    prover,
+    webProofProver.abi,
+    "main",
+    [
+      {
+        webProofJson: JSON.stringify(webProof),
+      },
+    ],
+  );
+  console.log("Proof:", proof);
 
-const balance = await testHelpers.call(
-  webProofVerifier.abi,
-  verifier,
-  "balanceOf",
-  [twitterUserAddress],
-);
+  const twitterUserAddress = (await testHelpers.getTestAddresses())[0];
 
-assert.strictEqual(balance, 1n);
+  console.log("Verifying...");
+  await testHelpers.writeContract(
+    verifier,
+    webProofVerifier.abi,
+    "verify",
+    [proof, returnValue],
+    twitterUserAddress,
+  );
+  console.log("Verified!");
 
-const tokenOwnerAddress = await testHelpers.call(
-  webProofVerifier.abi,
-  verifier,
-  "ownerOf",
-  [generateTokenId("g_p_vlayer")],
-);
+  const balance = await testHelpers.call(
+    webProofVerifier.abi,
+    verifier,
+    "balanceOf",
+    [twitterUserAddress],
+  );
 
-assert.strictEqual(twitterUserAddress, tokenOwnerAddress);
+  assert.strictEqual(balance, 1n);
+
+  const tokenOwnerAddress = await testHelpers.call(
+    webProofVerifier.abi,
+    verifier,
+    "ownerOf",
+    [generateTokenId("g_p_vlayer")],
+  );
+
+  assert.strictEqual(twitterUserAddress, tokenOwnerAddress);
+}
+
+async function testFailedProving(prover: Address) {
+  console.log("Proving...");
+
+  const wrongWebProof = { tls_proof: tls_proof, notary_pub_key: "wrong" };
+
+  try {
+    await prove(prover, webProofProver.abi, "main", [
+      {
+        webProofJson: JSON.stringify(wrongWebProof),
+      },
+    ]);
+    throw new Error("Proving should have failed!");
+  } catch (error) {
+    assert.ok(error instanceof Error, `Invalid error returned: ${error}`);
+    assert.equal(
+      error.message,
+      "Error response: Host error: Engine error: EVM transact error: ASN.1 error: PEM error: PEM preamble contains invalid data (NUL byte) at line 1 column 22883",
+      `Error with wrong message returned: ${error.message}`,
+    );
+    console.log("Proving failed as expected with message:", error.message);
+  }
+}
 
 function generateTokenId(username: string): bigint {
   return BigInt(keccak256(encodePacked(["string"], [username])));
