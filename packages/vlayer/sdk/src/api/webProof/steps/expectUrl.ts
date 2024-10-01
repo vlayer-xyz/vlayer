@@ -1,6 +1,5 @@
-import { Branded } from "types/utils";
 
-import { WebProofStepExpectUrl } from "types/webProofProvider.ts";
+import { StepKind, WebProofStepExpectUrl } from "../../../api/lib/types/webProofProvider";
 
 export const expectUrl = (url: string, label: string) => {
   return {

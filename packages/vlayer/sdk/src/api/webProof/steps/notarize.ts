@@ -1,4 +1,4 @@
-import { WebProofStepNotarize } from "types/webProofProvider.ts";
+import { StepKind, WebProofStepNotarize } from "../../../api/lib/types/webProofProvider";
 
 export const notarize = (
   url: string,
