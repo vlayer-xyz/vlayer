@@ -22,10 +22,12 @@ abstract contract ProofVerifierBase is IProofVerifier {
         CALL_GUEST_ID = ImageID.RISC0_CALL_GUEST_ID;
     }
 
-    function verify(Proof calldata proof, bytes32 journalHash, address expectedProver, bytes4 expectedSelector)
-        external
-        view
-    {
+    function verify(
+        Proof calldata proof,
+        bytes32 journalHash,
+        address expectedProver,
+        bytes4 expectedSelector
+    ) external view {
         _verifyProofMode(proof);
         _verifyExecutionEnv(proof, expectedProver, expectedSelector);
         VERIFIER.verify(proof.seal.decode(), CALL_GUEST_ID, journalHash);
@@ -39,16 +41,35 @@ abstract contract ProofVerifierBase is IProofVerifier {
         require(proof.seal.proofMode() == PROOF_MODE, "Invalid proof mode");
     }
 
-    function _verifyExecutionEnv(Proof memory proof, address prover, bytes4 selector) private view {
-        require(proof.callAssumptions.proverContractAddress == prover, "Invalid prover");
-        require(proof.callAssumptions.functionSelector == selector, "Invalid selector");
-
-        require(proof.callAssumptions.settleBlockNumber < block.number, "Invalid block number: block from future");
+    function _verifyExecutionEnv(
+        Proof memory proof,
+        address prover,
+        bytes4 selector
+    ) private view {
         require(
-            proof.callAssumptions.settleBlockNumber + AVAILABLE_HISTORICAL_BLOCKS >= block.number,
+            proof.callAssumptions.proverContractAddress == prover,
+            "Invalid prover"
+        );
+        require(
+            proof.callAssumptions.functionSelector == selector,
+            "Invalid selector"
+        );
+
+        require(
+            proof.callAssumptions.settleBlockNumber < block.number,
+            "Invalid block number: block from future"
+        );
+        require(
+            proof.callAssumptions.settleBlockNumber +
+                AVAILABLE_HISTORICAL_BLOCKS >=
+                block.number,
             "Invalid block number: block too old"
         );
 
-        require(proof.callAssumptions.settleBlockHash == blockhash(proof.callAssumptions.settleBlockNumber), "Invalid block hash");
+        require(
+            proof.callAssumptions.settleBlockHash ==
+                blockhash(proof.callAssumptions.settleBlockNumber),
+            "Invalid block hash"
+        );
     }
 }
