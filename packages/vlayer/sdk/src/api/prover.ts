@@ -27,7 +27,7 @@ export async function prove<
   functionName: F,
   args: ContractFunctionArgs<T, AbiStateMutability, F>,
   chainId = testChainId1,
-): Promise<{ returnValue: `0x${string}`; proof: Proof }> {
+) {
   const calldata = encodeFunctionData({
     abi: abi as Abi,
     functionName: functionName as string,
@@ -43,11 +43,11 @@ export async function prove<
     result: { proof, evm_call_result },
   } = await v_call(call, context);
 
-  const [_emptyProof, returnValue] = decodeFunctionResult({
+  const [_emptyProof, ...returnValue] = decodeFunctionResult({
     abi: abi as Abi,
     data: evm_call_result,
     functionName: functionName as string,
-  }) as `0x${string}`[] ;
+  }) as any[];
 
   return { proof, returnValue};
 }

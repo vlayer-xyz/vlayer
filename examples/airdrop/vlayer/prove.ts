@@ -12,7 +12,7 @@ const [prover, verifier] = await testHelpers.deployProverVerifier(
 
 console.log("Proving...");
 const sender = testHelpers.getTestAccount().address;
-const { proof, returnValue: claimAddress } = await prove(
+const { proof, returnValue: [claimAddress] } = await prove(
   prover,
   nftOwnershipProver.abi,
   "main",

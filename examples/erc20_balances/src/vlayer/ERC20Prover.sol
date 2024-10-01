@@ -2,6 +2,7 @@
 pragma solidity ^0.8.13;
 
 import {IERC20} from "@openzeppelin-contracts-5.0.1/token/ERC20/IERC20.sol";
+import {Proof} from "vlayer-0.1.0/src/Proof.sol";
 import {Prover} from "vlayer-0.1.0/src/Prover.sol";
 
 contract ERC20Prover is Prover {
@@ -11,7 +12,7 @@ contract ERC20Prover is Prover {
         TOKEN = token;
     }
 
-    function prove(address[] calldata accounts) public view returns (uint256) {
+    function prove(address[] calldata accounts) public view returns (Proof memory, uint256) {
         uint256 sum = 0;
 
         for (uint256 i = 0; i < accounts.length; i++) {
@@ -20,6 +21,6 @@ contract ERC20Prover is Prover {
             sum += balance;
         }
 
-        return sum;
+        return (proof(), sum);
     }
 }
