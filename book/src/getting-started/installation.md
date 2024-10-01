@@ -18,7 +18,8 @@ curl -SL https://install.vlayer.xyz | bash
 
 This will install `vlayerup` and make it available in your CLI.
 
-Running `vlayerup` will install the latest (nightly) precompiled binary of `vlayer`:
+## Using vlayerup
+Running `vlayerup` will install the latest (nightly) precompiled binary of vlayer:
 ```sh
 vlayerup
 ```
