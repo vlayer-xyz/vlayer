@@ -1,4 +1,4 @@
-import { simpleParser, HeaderValue, type ParsedMail } from "mailparser";
+import PostalMime, { Email, Header } from "postal-mime";
 
 export class DkimParsingError extends Error {
   constructor(message: string) {
@@ -8,38 +8,42 @@ export class DkimParsingError extends Error {
 }
 
 export async function parseEmail(mime: string) {
-  return simpleParser(mime.trim(), {
-    skipHtmlToText: true,
-    skipTextToHtml: true,
-    skipTextLinks: true,
-    skipImageLinks: true,
-  });
+  return await PostalMime.parse(mime.trim());
 }
 
-export function getDkimSigners(mail: ParsedMail) {
-  const dkimHeader = mail.headers.get("dkim-signature");
-  if (!dkimHeader) throw new DkimParsingError("No DKIM header found");
-  if (Array.isArray(dkimHeader)) {
-    return dkimHeader.map(parseHeader);
-  }
-  return [parseHeader(dkimHeader)];
+export function getDkimSigners(mail: Email) {
+  const dkimHeader = mail.headers.filter((h) => h.key === "dkim-signature");
+  if (dkimHeader.length === 0)
+    throw new DkimParsingError("No DKIM header found");
+  return dkimHeader.map(parseHeader);
 }
 
-function parseHeader(header: HeaderValue) {
-  if (typeof header === "string" || !("params" in header)) {
+export function parseParams(str: string) {
+  return Object.fromEntries(
+    str.split(";").map((s) =>
+      s
+        .trim()
+        .split("=")
+        .map((v) => v && v.trim()),
+    ),
+  );
+}
+
+function parseHeader(header: Header) {
+  const params = parseParams(header.value);
+  if (!params) {
     throw new DkimParsingError(`Invalid DKIM header ${header}`);
   }
 
-  if (!header.params.d) {
+  if (!params.d) {
     throw new DkimParsingError("DKIM header missing domain");
   }
 
-  if (!header.params.s) {
+  if (!params.s) {
     throw new DkimParsingError("DKIM header missing selector");
   }
-
   return {
-    domain: header.params.d,
-    selector: header.params.s,
+    domain: params.d,
+    selector: params.s,
   };
 }

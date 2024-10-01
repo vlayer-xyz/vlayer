@@ -1,14 +1,7 @@
-import dns from "node:dns";
+import DnsResolver from "dns-over-http-resolver";
 
 export async function resolveDkimDns(domain: string, selector: string) {
-  return new Promise<string>((resolve, reject) => {
-    dns.resolveTxt(`${selector}._domainkey.${domain}`, (err, addresses) => {
-      if (err) {
-        reject(err);
-        return;
-      }
-
-      resolve(addresses.flat()[0]);
-    });
-  });
+  const resolver = new DnsResolver();
+  const address = await resolver.resolveTxt(`${selector}._domainkey.${domain}`);
+  return address.flat()[0];
 }
