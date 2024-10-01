@@ -5,7 +5,7 @@ pragma solidity ^0.8.13;
 struct CallAssumptions {
     address proverContractAddress;
     bytes4 functionSelector;
-    uint256 settleBlockNumber; // Block number at which the assumptions was made.
+    uint256 settleBlockNumber; // Block number for which assumptions was made.
     bytes32 settleBlockHash; // Hash of the block at the specified block number.
 }
 

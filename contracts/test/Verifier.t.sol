@@ -61,25 +61,25 @@ contract Verifier_OnlyVerified_Modifier_Tests is Test {
     ExampleVerifier exampleVerifier = new ExampleVerifier();
     TestHelpers helpers = new TestHelpers();
 
-    CallAssumptions assumptions;
+    CallAssumptions callAssumptions;
 
     function setUp() public {
         vm.roll(100); // have some historical blocks
 
-        assumptions = CallAssumptions(
+        callAssumptions = CallAssumptions(
             exampleVerifier.PROVER(), ExampleProver.doSomething.selector, block.number - 1, blockhash(block.number - 1)
         );
     }
 
     function test_verifySuccess() public view {
-        (Proof memory proof,) = helpers.createProof(assumptions);
+        (Proof memory proof,) = helpers.createProof(callAssumptions);
         exampleVerifier.verifySomething(proof);
     }
 
     function test_proofAndJournalDoNotMatch() public {
-        (Proof memory proof,) = helpers.createProof(assumptions);
-        proof.assumptions.settleBlockNumber -= 1;
-        proof.assumptions.settleBlockHash = blockhash(proof.assumptions.settleBlockNumber);
+        (Proof memory proof,) = helpers.createProof(callAssumptions);
+        proof.callAssumptions.settleBlockNumber -= 1;
+        proof.callAssumptions.settleBlockHash = blockhash(proof.callAssumptions.settleBlockNumber);
 
         vm.expectRevert(VerificationFailed.selector);
         exampleVerifier.verifySomething(proof);
@@ -87,14 +87,14 @@ contract Verifier_OnlyVerified_Modifier_Tests is Test {
 
     function test_journaledParams() public view {
         bool value = true;
-        (Proof memory proof,) = helpers.createProof(assumptions, abi.encode(value));
+        (Proof memory proof,) = helpers.createProof(callAssumptions, abi.encode(value));
 
         assertEq(exampleVerifier.verifySomethingElse(proof, value), value);
     }
 
     function test_journaledParamCannotBeChanged() public {
         bool value = true;
-        (Proof memory proof,) = helpers.createProof(assumptions, abi.encode(value));
+        (Proof memory proof,) = helpers.createProof(callAssumptions, abi.encode(value));
 
         value = !value;
 
@@ -103,7 +103,7 @@ contract Verifier_OnlyVerified_Modifier_Tests is Test {
     }
 
     function test_functionCanHaveNonJournaledParams() public view {
-        (Proof memory proof,) = helpers.createProof(assumptions);
+        (Proof memory proof,) = helpers.createProof(callAssumptions);
 
         assertEq(exampleVerifier.verifySomethingElse(proof, true), true);
         assertEq(exampleVerifier.verifySomethingElse(proof, false), false);
@@ -111,20 +111,20 @@ contract Verifier_OnlyVerified_Modifier_Tests is Test {
 
     function test_journaledStringParam() public view {
         string memory userParam = "abc";
-        (Proof memory proof,) = helpers.createProof(assumptions, userParam);
+        (Proof memory proof,) = helpers.createProof(callAssumptions, userParam);
 
         assertEq(exampleVerifier.verifyWithString(proof, userParam), userParam);
     }
 
     function test_functionCanHaveNonJournaledStringParams() public view {
-        (Proof memory proof,) = helpers.createProof(assumptions);
+        (Proof memory proof,) = helpers.createProof(callAssumptions);
 
         assertEq(exampleVerifier.verifyWithString(proof, "xyz"), "xyz");
     }
 
     function test_journaledStringParamCannotBeChanged() public {
         string memory value = "abc";
-        (Proof memory proof,) = helpers.createProof(assumptions, value);
+        (Proof memory proof,) = helpers.createProof(callAssumptions, value);
 
         value = "def";
 

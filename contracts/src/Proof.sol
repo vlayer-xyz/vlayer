@@ -14,7 +14,7 @@ struct Proof {
     // Using 10 instead of MAX_NUMBER_OF_DYNAMIC_PARAMS due to `sol!` macro not supporting generic expressions in array sizes.
     // TODO: Optimize space usage by packing values more efficiently
     uint16[10] dynamicParamsOffsets;
-    CallAssumptions assumptions;
+    CallAssumptions callAssumptions;
 }
 
 library ProofLib {
