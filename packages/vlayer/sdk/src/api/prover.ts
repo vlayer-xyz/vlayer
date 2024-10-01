@@ -9,7 +9,7 @@ import {
   encodeFunctionData,
 } from "viem";
 
-import { type CallContext, type CallParams, Proof } from "types/vlayer";
+import { type CallContext, type CallParams } from "types/vlayer";
 import { v_call } from "./v_call";
 import { testChainId1 } from "./helpers";
 import { ContractSpec } from "types/ethereum";
@@ -43,11 +43,12 @@ export async function prove<
     result: { proof, evm_call_result },
   } = await v_call(call, context);
 
-  const [_emptyProof, ...returnValue] = decodeFunctionResult({
+  const [, ...returnValue] = decodeFunctionResult({
     abi: abi as Abi,
     data: evm_call_result,
     functionName: functionName as string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   }) as any[];
 
-  return { proof, returnValue};
+  return { proof, returnValue };
 }
