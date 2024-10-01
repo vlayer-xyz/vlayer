@@ -31,15 +31,16 @@ abstract contract Verifier {
     function _decodeCalldata() private pure returns (Proof memory, bytes32) {
         Proof memory proof = abi.decode(msg.data[PROOF_OFFSET:], (Proof));
 
-        uint256 journalEnd = JOURNAL_OFFSET + proof.length;
-        bytes memory journal = msg.data[JOURNAL_OFFSET:journalEnd];
+        uint256 journalEnd = JOURNAL_OFFSET + proof.length - ProofLib.PROOF_ENCODING_LENGTH;
 
-        for (uint256 i = 0; i < MAX_NUMBER_OF_DYNAMIC_PARAMS; i++) {
-            if (proof.dynamicParamsOffsets[i] > 0) {
-                journal = shiftOffset(journal, ProofLib.PROOF_ENCODING_LENGTH, proof.dynamicParamsOffsets[i]);
-            }
-        }
-        bytes32 journalHash = sha256(journal);
+        bytes memory executionCommitment =
+            msg.data[JOURNAL_OFFSET:JOURNAL_OFFSET + ExecutionCommitmentLib.EXECUTION_COMMITMENT_ENCODING_LENGTH];
+        bytes memory param =
+            msg.data[JOURNAL_OFFSET + ExecutionCommitmentLib.EXECUTION_COMMITMENT_ENCODING_LENGTH:journalEnd];
+
+        bytes memory journalWithEmptyProof = bytes.concat(executionCommitment, abi.encode(ProofLib.emptyProof()), param);
+        bytes32 journalHash = sha256(journalWithEmptyProof);
+
         return (proof, journalHash);
     }
 

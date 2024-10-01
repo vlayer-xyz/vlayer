@@ -20,12 +20,12 @@ contract TestHelpers {
 
     uint256 private constant LENGTH_ABI_FIELD_LEN = 0x20;
 
-    function createProof(CallAssumptions memory assumptions, bytes memory journalParams)
+    function createProof(CallAssumptions memory assumptions, bool journalBoolParam)
         public
         view
         returns (Proof memory, bytes32)
     {
-        return createProof(assumptions, journalParams, 0);
+        return createProof(assumptions, abi.encode(ProofLib.emptyProof(), journalBoolParam));
     }
 
     function createProof(CallAssumptions memory assumptions, string memory journalStringParam)
@@ -33,32 +33,29 @@ contract TestHelpers {
         view
         returns (Proof memory, bytes32)
     {
-        return createProof(assumptions, abi.encode(journalStringParam), 32);
+        return createProof(assumptions, abi.encode(ProofLib.emptyProof(), journalStringParam));
     }
 
     function createProof(CallAssumptions memory assumptions) public view returns (Proof memory, bytes32) {
-        bytes memory emptyBytes = new bytes(0);
-        return createProof(assumptions, emptyBytes);
+        return createProof(assumptions, abi.encode(ProofLib.emptyProof()));
     }
 
     function createProof() public view returns (Proof memory, bytes32) {
         CallAssumptions memory assumptions =
-            CallAssumptions(PROVER, SELECTOR, block.number - 1, blockhash(block.number - 1));
-        bytes memory emptyBytes = new bytes(0);
-        return createProof(assumptions, emptyBytes);
+                        CallAssumptions(PROVER, SELECTOR, block.number - 1, blockhash(block.number - 1));
+        return createProof(assumptions);
     }
 
-    function createProof(CallAssumptions memory assumptions, bytes memory journalParams, uint16 journalParamOffset)
+    function createProof(CallAssumptions memory assumptions, bytes memory journalParamsWithProofPrefix)
         public
         view
         returns (Proof memory, bytes32)
     {
-        bytes memory journal = bytes.concat(abi.encode(assumptions), journalParams);
+        bytes memory journal = bytes.concat(abi.encode(assumptions), journalParamsWithProofPrefix);
         bytes32 journalHash = sha256(journal);
 
         bytes memory seal = mockVerifier.mockProve(ImageID.RISC0_CALL_GUEST_ID, journalHash).seal;
-        Proof memory proof =
-            Proof(journal.length, encodeSeal(seal), [journalParamOffset, 0, 0, 0, 0, 0, 0, 0, 0, 0], assumptions);
+        Proof memory proof = Proof(journal.length, encodeSeal(seal), [uint16(0), 0, 0, 0, 0, 0, 0, 0, 0, 0], assumptions);
 
         return (proof, journalHash);
     }

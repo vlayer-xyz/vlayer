@@ -42,4 +42,8 @@ library SealLib {
     function verifierSelector(Seal memory seal) internal pure returns (bytes4) {
         return seal.verifierSelector;
     }
+
+    function emptySeal() internal pure returns (Seal memory) {
+        return Seal(0, [bytes32(0), 0, 0, 0, 0, 0, 0, 0], ProofMode.FAKE);
+    }
 }
