@@ -29,9 +29,7 @@ contract ExampleVerifier is Verifier {
         PROVER = address(new ExampleProver());
     }
 
-    function verifySomething(
-        Proof calldata
-    )
+    function verifySomething(Proof calldata)
         external
         view
         onlyVerified(PROVER, SIMPLE_PROVER_SELECTOR)
@@ -40,10 +38,7 @@ contract ExampleVerifier is Verifier {
         return true;
     }
 
-    function verifySomethingElse(
-        Proof calldata,
-        bool value
-    )
+    function verifySomethingElse(Proof calldata, bool value)
         external
         view
         onlyVerified(PROVER, SIMPLE_PROVER_SELECTOR)
@@ -52,10 +47,7 @@ contract ExampleVerifier is Verifier {
         return value;
     }
 
-    function verifyWithString(
-        Proof calldata,
-        string calldata value
-    )
+    function verifyWithString(Proof calldata, string calldata value)
         external
         view
         onlyVerified(PROVER, SIMPLE_PROVER_SELECTOR)
@@ -75,24 +67,19 @@ contract Verifier_OnlyVerified_Modifier_Tests is Test {
         vm.roll(100); // have some historical blocks
 
         callAssumptions = CallAssumptions(
-            exampleVerifier.PROVER(),
-            ExampleProver.doSomething.selector,
-            block.number - 1,
-            blockhash(block.number - 1)
+            exampleVerifier.PROVER(), ExampleProver.doSomething.selector, block.number - 1, blockhash(block.number - 1)
         );
     }
 
     function test_verifySuccess() public view {
-        (Proof memory proof, ) = helpers.createProof(callAssumptions);
+        (Proof memory proof,) = helpers.createProof(callAssumptions);
         exampleVerifier.verifySomething(proof);
     }
 
     function test_proofAndJournalDoNotMatch() public {
-        (Proof memory proof, ) = helpers.createProof(callAssumptions);
+        (Proof memory proof,) = helpers.createProof(callAssumptions);
         proof.callAssumptions.settleBlockNumber -= 1;
-        proof.callAssumptions.settleBlockHash = blockhash(
-            proof.callAssumptions.settleBlockNumber
-        );
+        proof.callAssumptions.settleBlockHash = blockhash(proof.callAssumptions.settleBlockNumber);
 
         vm.expectRevert(VerificationFailed.selector);
         exampleVerifier.verifySomething(proof);
@@ -100,20 +87,14 @@ contract Verifier_OnlyVerified_Modifier_Tests is Test {
 
     function test_journaledParams() public view {
         bool value = true;
-        (Proof memory proof, ) = helpers.createProof(
-            callAssumptions,
-            abi.encode(value)
-        );
+        (Proof memory proof,) = helpers.createProof(callAssumptions, abi.encode(value));
 
         assertEq(exampleVerifier.verifySomethingElse(proof, value), value);
     }
 
     function test_journaledParamCannotBeChanged() public {
         bool value = true;
-        (Proof memory proof, ) = helpers.createProof(
-            callAssumptions,
-            abi.encode(value)
-        );
+        (Proof memory proof,) = helpers.createProof(callAssumptions, abi.encode(value));
 
         value = !value;
 
@@ -122,7 +103,7 @@ contract Verifier_OnlyVerified_Modifier_Tests is Test {
     }
 
     function test_functionCanHaveNonJournaledParams() public view {
-        (Proof memory proof, ) = helpers.createProof(callAssumptions);
+        (Proof memory proof,) = helpers.createProof(callAssumptions);
 
         assertEq(exampleVerifier.verifySomethingElse(proof, true), true);
         assertEq(exampleVerifier.verifySomethingElse(proof, false), false);
@@ -130,23 +111,20 @@ contract Verifier_OnlyVerified_Modifier_Tests is Test {
 
     function test_journaledStringParam() public view {
         string memory userParam = "abc";
-        (Proof memory proof, ) = helpers.createProof(
-            callAssumptions,
-            userParam
-        );
+        (Proof memory proof,) = helpers.createProof(callAssumptions, userParam);
 
         assertEq(exampleVerifier.verifyWithString(proof, userParam), userParam);
     }
 
     function test_functionCanHaveNonJournaledStringParams() public view {
-        (Proof memory proof, ) = helpers.createProof(callAssumptions);
+        (Proof memory proof,) = helpers.createProof(callAssumptions);
 
         assertEq(exampleVerifier.verifyWithString(proof, "xyz"), "xyz");
     }
 
     function test_journaledStringParamCannotBeChanged() public {
         string memory value = "abc";
-        (Proof memory proof, ) = helpers.createProof(callAssumptions, value);
+        (Proof memory proof,) = helpers.createProof(callAssumptions, value);
 
         value = "def";
 
