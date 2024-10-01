@@ -48,9 +48,7 @@ mod tests {
         let email = email_fixture();
         let parsed = parse_mime(&email).unwrap();
 
-        let expected_from: String =
-            "\"piro-test@clear-code.com\" <piro-test@clear-code.com>".into();
-        assert_eq!(expected_from, parsed.from);
+        assert_eq!(parsed.from, "piro-test@clear-code.com".to_string());
 
         let expected_to: String = "piro.outsider.reflex+1@gmail.com, \
                  piro.outsider.reflex+2@gmail.com, \
@@ -61,9 +59,9 @@ mod tests {
                  webmaster@example.jp, \
                  mailmaster@example.jp"
             .into();
-        assert_eq!(expected_to, parsed.to);
+        assert_eq!(parsed.to, expected_to);
 
-        assert_eq!(Some("test confirmation".into()), parsed.subject);
-        assert_eq!("This is a multi-part message in MIME format.\n", parsed.body);
+        assert_eq!(parsed.subject, Some("test confirmation".into()));
+        assert_eq!(parsed.body, "This is a multi-part message in MIME format.\n");
     }
 }
