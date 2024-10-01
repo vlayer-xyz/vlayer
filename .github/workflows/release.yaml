@@ -255,3 +255,28 @@ jobs:
 
           LOCAL_FILE: ./bash/vlayerup
           REMOTE_FILE: "" 
+  
+  publish-sdk-to-npm:
+    name: Publish SDK to NPM
+    needs: [build-release] 
+    runs-on: ubuntu-latest
+    steps:   
+    - uses: actions/checkout@v2
+    - uses: actions/setup-node@v4
+      with:
+        node-version: '20.x'
+        registry-url: 'https://registry.npmjs.org'
+    - name: Install dependencies
+      working-directory: packages/vlayer/sdk
+      run: npm install
+    - name: Update SDK version
+      working-directory: packages/vlayer/sdk
+      env: 
+        VLAYER_BUILD: ${{ needs.build-release.outputs.vlayer_build }}
+      run: npm version "${VLAYER_BUILD}"
+    - name: Publish to NPM
+      working-directory: packages/vlayer/sdk
+      env:
+        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+      run: npm publish --access public
+        
