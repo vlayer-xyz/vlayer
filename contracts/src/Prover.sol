@@ -1,6 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
+import {Proof, ProofLib} from "./Proof.sol";
+
 interface ITraveler {
     // These functions need to return something because otherwise Solidity compiler won't generate CALL opcode when they're called.
     function setBlock(uint256 blockNo) external returns (bool);
@@ -19,5 +21,9 @@ contract Prover {
 
     function setChain(uint256 chainId, uint256 blockNo) public {
         TRAVELER.setChain(chainId, blockNo);
+    }
+
+    function proof() public pure returns (Proof memory) {
+        return ProofLib.emptyProof();
     }
 }
