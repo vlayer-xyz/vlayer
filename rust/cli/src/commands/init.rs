@@ -26,13 +26,13 @@ lazy_static! {
             name: String::from("@openzeppelin-contracts"),
             version: String::from("5.0.1"),
             url: None,
-            remapping: Some(String::from("openzeppelin-contracts=dependencies/@openzeppelin-contracts-5.0.1/")),
+            remapping: Some("openzeppelin-contracts".into()),
         },
         SoldeerDep {
             name: String::from("forge-std"),
             version: String::from("1.9.2"),
             url: None,
-            remapping: Some(String::from("forge-std/=dependencies/forge-std-1.9.2/src")),
+            remapping: Some(("forge-std", "src").into()),
         },
         SoldeerDep {
             name: String::from("risc0-ethereum"),
@@ -53,7 +53,34 @@ struct SoldeerDep {
     name: String,
     version: String,
     url: Option<String>,
-    remapping: Option<String>,
+    remapping: Option<Remapping>,
+}
+
+struct Remapping {
+    key: String,
+    internal_path: Option<String>,
+}
+
+impl Remapping {
+    fn new(key: &str, internal_path: Option<&str>) -> Self {
+        let internal_path = internal_path.map(ToString::to_string);
+        Self {
+            key: key.to_string(),
+            internal_path,
+        }
+    }
+}
+
+impl From<(&str, &str)> for Remapping {
+    fn from(value: (&str, &str)) -> Self {
+        let (key, internal_path) = value;
+        Remapping::new(key, Some(internal_path))
+    }
+}
+impl From<&str> for Remapping {
+    fn from(value: &str) -> Self {
+        Remapping::new(value, None)
+    }
 }
 
 impl SoldeerDep {
@@ -91,6 +118,20 @@ impl SoldeerDep {
 
         Ok(output)
     }
+
+    fn remapping(&self) -> Option<String> {
+        let remapping = self.remapping.as_ref()?;
+        let internal_path = if let Some(internal_path) = &remapping.internal_path {
+            format!("{}/", internal_path)
+        } else {
+            String::default()
+        };
+
+        Some(format!(
+            "{}/=dependencies/{}-{}/{}",
+            remapping.key, self.name, self.version, internal_path
+        ))
+    }
 }
 
 fn install_dependencies() -> Result<(), CLIError> {
@@ -105,8 +146,8 @@ fn add_remappings(foundry_root: &Path) -> Result<(), CLIError> {
     let remappings_txt = foundry_root.join("remappings.txt");
     let mut file = OpenOptions::new().append(true).open(remappings_txt)?;
     for dep in DEPENDENCIES.iter() {
-        if let Some(remapping) = &dep.remapping {
-            writeln!(file, "{}", remapping)?;
+        if let Some(remapping) = dep.remapping() {
+            writeln!(file, "{remapping}")?;
         }
     }
 
@@ -315,7 +356,7 @@ mod tests {
 
         assert_eq!(
             contents,
-            "some initial remappings\nopenzeppelin-contracts=dependencies/@openzeppelin-contracts-5.0.1/\nforge-std/=dependencies/forge-std-1.9.2/src\n"
+            "some initial remappings\nopenzeppelin-contracts/=dependencies/@openzeppelin-contracts-5.0.1/\nforge-std/=dependencies/forge-std-1.9.2/src/\n"
         );
     }
 }
