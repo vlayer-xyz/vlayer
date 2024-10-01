@@ -31,7 +31,9 @@ fn append_prepend(
 
 fn append(mut mpt: BlockTrie, new_rightmost_block: &dyn EvmBlockHeader) -> BlockTrie {
     let parent_block_idx = new_rightmost_block.number() - 1;
-    let parent_block_hash = mpt.get(parent_block_idx).expect("get parent block hash");
+    let parent_block_hash = mpt
+        .get(parent_block_idx)
+        .expect("failed to get parent block hash");
     assert_eq!(parent_block_hash, new_rightmost_block.parent_hash(), "block hash mismatch");
     mpt.insert(new_rightmost_block.number(), &new_rightmost_block.hash_slow());
     mpt
@@ -40,7 +42,7 @@ fn append(mut mpt: BlockTrie, new_rightmost_block: &dyn EvmBlockHeader) -> Block
 fn prepend(mut mpt: BlockTrie, old_leftmost_block: &dyn EvmBlockHeader) -> BlockTrie {
     let old_leftmost_block_hash = mpt
         .get(old_leftmost_block.number())
-        .expect("get old leftmost block hash");
+        .expect("failed to get old leftmost block hash");
     assert_eq!(old_leftmost_block_hash, old_leftmost_block.hash_slow(), "block hash mismatch");
     mpt.insert(old_leftmost_block.number() - 1, old_leftmost_block.parent_hash());
     mpt
@@ -56,7 +58,8 @@ pub fn main(input: Input) -> (B256, Digest) {
             old_leftmost_block,
             mpt_nodes,
         } => {
-            let mpt = MerkleTrie::from_rlp_nodes(mpt_nodes.into_vec()).expect("MPT from RLP nodes");
+            let mpt = MerkleTrie::from_rlp_nodes(mpt_nodes.into_vec())
+                .expect("failed to construct MPT from RLP nodes");
             append_prepend(
                 elf_id,
                 prepend_blocks.into_iter(),
