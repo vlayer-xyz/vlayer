@@ -20,13 +20,9 @@ function cleanup() {
     echo "Cleaning up..."
     
     # Kill Anvil if running
-    if [[ -n "${ANVIL1_PID:-}" ]] && ps -p "$ANVIL1_PID" > /dev/null; then
-        echo "Killing anvil 1 (PID $ANVIL1_PID)..."
-        kill "$ANVIL1_PID"
-    fi
-    if [[ -n "${ANVIL2_PID:-}" ]] && ps -p "$ANVIL2_PID" > /dev/null; then
-        echo "Killing anvil 2 (PID $ANVIL2_PID)..."
-        kill "$ANVIL2_PID"
+    if [[ -n "${ANVIL_PID:-}" ]] && ps -p "$ANVIL_PID" > /dev/null; then
+        echo "Killing anvil 1 (PID $ANVIL_PID)..."
+        kill "$ANVIL_PID"
     fi
 
     # Kill vlayer server if running
@@ -36,12 +32,9 @@ function cleanup() {
     fi
 }
 
-function startup_anvils(){
-    echo "Starting Anvil 1"
-    startup_anvil "${LOGS_DIR}/anvil1.out" 8545 ANVIL1_PID
-
-    echo "Starting Anvil 2"
-    startup_anvil "${LOGS_DIR}/anvil2.out" 8546 ANVIL2_PID
+function startup_anvil(){
+    echo "Starting Anvil "
+    startup_anvil "${LOGS_DIR}/anvil.out" 8545 ANVIL_PID
 }
 
 function startup_vlayer(){
@@ -116,7 +109,7 @@ echo "SERVER_PROOF_ARG: ${SERVER_PROOF_ARG}"
 echo
 echo "Starting services..."
 
-startup_anvils
+startup_anvil
 startup_vlayer "${SERVER_PROOF_ARG}" ${EXTERNAL_RPC_URLS[@]+"${EXTERNAL_RPC_URLS[@]}"}
 
 echo "Services has been succesfully started..."
