@@ -2,7 +2,7 @@
 set -ueo pipefail
 
 # What this script will do: 
-# - download latest or specifc binary from vlayer 
+# - download latest binary from vlayer 
 # - sanity checks like curl/git/foundry/anvil installed 
 # - chmod +x the binary
 
@@ -13,6 +13,8 @@ VLAYER_BIN_DIR="$VLAYER_DIR/bin"
 main() {
   need_cmd git
   need_cmd curl
+  need_cmd forge
+  need_cmd anvil
 
   # Compute the URL of the release tarball in the vlayer repository (will work with public repo)
   # TODO: Add support for different platforms/architectures

@@ -17,18 +17,18 @@ See how to [time travel](/features/time-travel.html) across block numbers, [tele
 
 **From JavaScript**
 
-Lear how to [interact with vlayer](/javascript/javascript.html) from your JS code and how [generate web proofs](/javascript/webproofs.html) using our SDK.
+Learn how to [interact with vlayer](/javascript/javascript.html) from your JS code and how to [generate web proofs](/javascript/webproofs.html) using our SDK.
 
 **Advanced**
 
 Learn in-depth how:
- * [Prover](/advanced/prover.html) and [Verifier](/advanced/verifier.html) contracts are working 
- * Use [Global Variables]((./advanced/prover-global-variables.md))
- * Run [tests](/advanced/tests.html)
+ * [Prover](/advanced/prover.html) and [Verifier](/advanced/verifier.html) contracts are working.
+ * [Global Variables](./advanced/prover-global-variables.md) are set.
+ * [Tests](/advanced/tests.html) are run.
 
 **Contributing**
 
-Help us improve [vlayer](/contributing/vlayer.md) and [vlayer book](/contributing/book.md)!
+Help us improve [vlayer](/contributing/vlayer.md) and the [vlayer book](/contributing/book.md)!
 
 **Appendix**
 
