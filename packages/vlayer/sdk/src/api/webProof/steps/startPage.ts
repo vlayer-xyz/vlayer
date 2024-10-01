@@ -1,4 +1,7 @@
-import { StepKind, WebProofStepStartPage } from "../../../api/lib/types/webProofProvider";
+import {
+  StepKind,
+  WebProofStepStartPage,
+} from "../../../api/lib/types/webProofProvider";
 
 export const startPage = (url: string, label: string) => {
   return {
