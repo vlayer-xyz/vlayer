@@ -1,12 +1,5 @@
 import { WebProof } from "types/webProof.ts";
-import {
-  AbiFunction,
-  Hex,
-  Abi,
-  ContractFunctionName,
-  ContractFunctionArgs,
-  AbiStateMutability,
-} from "viem";
+import { AbiFunction, Hex, Abi, ContractFunctionName } from "viem";
 
 import { Branded } from "types/utils.ts";
 import type { ContractFunctionArgsWithout } from "./viem";
@@ -16,14 +9,22 @@ export type WebProofStepNotarize = Branded<
     url: string;
     method: string;
     label: string;
+    kind: StepKind.notarize;
   },
   "notarize"
 >;
+
+export enum StepKind {
+  expectUrl = "expectUrl",
+  startPage = "startPage",
+  notarize = "notarize",
+}
 
 export type WebProofStepExpectUrl = Branded<
   {
     url: string;
     label: string;
+    kind: StepKind.expectUrl;
   },
   "expectUrl"
 >;
@@ -32,6 +33,7 @@ export type WebProofStepStartPage = Branded<
   {
     url: string;
     label: string;
+    kind: StepKind.startPage;
   },
   "startPage"
 >;
@@ -39,6 +41,7 @@ export type WebProofStepStartPage = Branded<
 export type WebProofSetupInput = {
   logoUrl: string;
   steps: [WebProofStepExpectUrl, WebProofStepStartPage, WebProofStepStartPage];
+  kind: StepKind;
 };
 
 export type WebProofSetup = Branded<

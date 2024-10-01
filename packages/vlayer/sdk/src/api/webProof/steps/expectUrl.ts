@@ -6,5 +6,6 @@ export const expectUrl = (url: string, label: string) => {
   return {
     url,
     label,
+    kind: StepKind.expectUrl,
   } as WebProofStepExpectUrl;
 };

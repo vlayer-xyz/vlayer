@@ -9,5 +9,6 @@ export const notarize = (
     url,
     method,
     label,
+    kind: StepKind.notarize,
   } as WebProofStepNotarize;
 };
