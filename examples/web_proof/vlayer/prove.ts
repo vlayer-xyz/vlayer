@@ -79,9 +79,8 @@ async function testFailedProving(prover: Address) {
     ]);
     throw new Error("Proving should have failed!");
   } catch (error) {
-    assert.equal(
+    assert.ok(
       error instanceof Error,
-      true,
       `Invalid error returned: ${error}`,
     );
     assert.equal(
