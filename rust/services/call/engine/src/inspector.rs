@@ -1,18 +1,19 @@
-use alloy_primitives::hex::decode;
-use alloy_primitives::{address, b256, Address, ChainId, B256};
+use alloy_primitives::{address, b256, hex::decode, Address, ChainId, B256};
 use once_cell::sync::Lazy;
-use revm::primitives::ExecutionResult;
 use revm::{
     interpreter::{CallInputs, CallOutcome},
+    primitives::ExecutionResult,
     Database, EvmContext, Inspector,
 };
 use tracing::info;
 
-use crate::engine::EngineError;
-use crate::evm::env::location::ExecutionLocation;
-use crate::io::Call;
-use crate::utils::evm_call::{
-    create_encoded_return_outcome, execution_result_to_call_outcome, split_calldata,
+use crate::{
+    engine::EngineError,
+    evm::env::location::ExecutionLocation,
+    io::Call,
+    utils::evm_call::{
+        create_encoded_return_outcome, execution_result_to_call_outcome, split_calldata,
+    },
 };
 
 // The length of an argument in call data is 32 bytes.

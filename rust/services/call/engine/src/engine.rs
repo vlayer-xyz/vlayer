@@ -9,12 +9,12 @@ use revm::{
 use thiserror::Error;
 use tracing::{debug, error};
 
-use crate::utils::evm_call::format_failed_call_result;
-use crate::{evm::env::EvmEnv, precompiles::VLAYER_PRECOMPILES};
 use crate::{
-    evm::env::{cached::CachedEvmEnv, location::ExecutionLocation},
+    evm::env::{cached::CachedEvmEnv, location::ExecutionLocation, EvmEnv},
     inspector::TravelInspector,
     io::Call,
+    precompiles::VLAYER_PRECOMPILES,
+    utils::evm_call::format_failed_call_result,
 };
 
 pub struct Engine<'envs, D>

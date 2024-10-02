@@ -1,15 +1,16 @@
-use ethers_core::types::BlockNumber as BlockTag;
-use forge::revm::primitives::alloy_primitives::{
-    BlockNumber, ChainId, StorageKey, StorageValue, TxNumber,
-};
-use forge::revm::primitives::{Account, Address, Bytes, EvmState, B256, U256};
-
 use block_header::{EvmBlockHeader, ForgeBlockHeader};
 use call_host::db::proof::ProofDb;
+use ethers_core::types::BlockNumber as BlockTag;
+use forge::revm::primitives::{
+    alloy_primitives::{BlockNumber, ChainId, StorageKey, StorageValue, TxNumber},
+    Account, Address, Bytes, EvmState, B256, U256,
+};
 use provider::{BlockingProvider, EIP1186Proof, ProviderFactory, ProviderFactoryError};
 
-use crate::proof::{account_proof, prove_storage, storage_root};
-use crate::providers::test_provider::ProviderError;
+use crate::{
+    proof::{account_proof, prove_storage, storage_root},
+    providers::test_provider::ProviderError,
+};
 
 pub struct PendingStateProvider {
     state: EvmState,

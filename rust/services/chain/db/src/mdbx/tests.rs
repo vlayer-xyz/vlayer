@@ -3,9 +3,8 @@ use std::path::PathBuf;
 use anyhow::Result;
 use tempfile::{NamedTempFile, TempDir};
 
-use crate::Database;
-
 use super::*;
+use crate::Database;
 
 // Tests use only one table
 const TABLE: &str = "table";

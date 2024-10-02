@@ -1,7 +1,8 @@
-use crate::layers::request_id::request_id;
 use axum::http::Request;
 use tower_http::trace::{HttpMakeClassifier, TraceLayer};
 use tracing::{info_span, Span};
+
+use crate::layers::request_id::request_id;
 
 pub fn init_trace_layer<B>() -> TraceLayer<HttpMakeClassifier, impl Fn(&Request<B>) -> Span + Clone>
 {

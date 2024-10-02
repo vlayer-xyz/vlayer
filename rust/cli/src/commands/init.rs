@@ -1,20 +1,25 @@
-use crate::commands::args::TemplateOption;
-use crate::errors::CLIError;
-use crate::utils::parse_toml::{add_deps_to_foundry_toml, get_src_from_str};
-use crate::utils::path::{copy_dir_to, find_foundry_root};
+use std::{
+    fs,
+    fs::OpenOptions,
+    io::{Cursor, Write},
+    path::{Path, PathBuf},
+    process::Output,
+};
+
 use flate2::read::GzDecoder;
 use lazy_static::lazy_static;
 use reqwest::get;
-use std::fs;
-use std::fs::OpenOptions;
-use std::io::Cursor;
-use std::io::Write;
-use std::path::{Path, PathBuf};
-use std::process::Output;
 use tar::Archive;
 use tracing::{error, info};
 
-use crate::commands::version::version;
+use crate::{
+    commands::{args::TemplateOption, version::version},
+    errors::CLIError,
+    utils::{
+        parse_toml::{add_deps_to_foundry_toml, get_src_from_str},
+        path::{copy_dir_to, find_foundry_root},
+    },
+};
 
 const VLAYER_DIR_NAME: &str = "vlayer";
 const EXAMPLES_URL: &str =

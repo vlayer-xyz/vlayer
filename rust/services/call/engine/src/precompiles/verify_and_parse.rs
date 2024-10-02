@@ -1,8 +1,10 @@
-use crate::precompiles::{gas_used, map_to_fatal};
+use std::convert::Into;
+
 use alloy_primitives::Bytes;
 use revm::precompile::{Precompile, PrecompileOutput, PrecompileResult};
-use std::convert::Into;
 use web_proof::verifier::verify_and_parse;
+
+use crate::precompiles::{gas_used, map_to_fatal};
 
 pub(super) const VERIFY_AND_PARSE_PRECOMPILE: Precompile =
     Precompile::Standard(verify_and_parse_run);

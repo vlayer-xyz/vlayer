@@ -36,8 +36,9 @@ pub async fn v_chain(merkle_trie: MerkleTrie, params: Params) -> Result<ChainPro
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use lazy_static::lazy_static;
+
+    use super::*;
 
     #[tokio::test]
     async fn empty_block_hashes() {
@@ -50,11 +51,12 @@ mod tests {
     }
 
     mod two_consecutive_block_hashes {
-        use super::*;
         use alloy_primitives::{fixed_bytes, FixedBytes};
         use anyhow::Result;
         use risc0_zkp::verify::VerificationError;
         use risc0_zkvm::{InnerReceipt, Receipt};
+
+        use super::*;
 
         lazy_static! {
             static ref parent_hash: FixedBytes<32> = fixed_bytes!("88e96d4537bea4d9c05d12549907b32561d3bf31f45aae734cdc119f13406cb6"); // https://etherscan.io/block/1

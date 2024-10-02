@@ -1,15 +1,14 @@
+use std::{collections::HashMap, env};
+
 use alloy_chains::Chain;
 use alloy_primitives::{address, b256, uint, Address, ChainId};
 use alloy_sol_types::{sol, SolCall};
-use dotenv::dotenv;
-use ethers_core::types::BlockNumber as BlockTag;
-
 use call_host::{
     host::{config::HostConfig, error::HostError, Host},
     Call,
 };
+use ethers_core::types::BlockNumber as BlockTag;
 use provider::{BlockingProvider, CachedProviderFactory, FileProviderFactory, ProviderFactory};
-use std::{collections::HashMap, env};
 
 // To activate recording, set UPDATE_SNAPSHOTS to true.
 // Recording creates new testdata directory and writes return data from Alchemy into files in that directory.

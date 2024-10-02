@@ -1,12 +1,11 @@
-use crate::{BlockingProvider, EthersProvider};
+use std::{collections::HashMap, path::PathBuf};
+
 use alloy_primitives::ChainId;
-use std::collections::HashMap;
-use std::path::PathBuf;
 use thiserror::Error;
 use url::ParseError;
 
-use super::cache::CachedProvider;
-use super::{EthersClient, FileProvider};
+use super::{cache::CachedProvider, EthersClient, FileProvider};
+use crate::{BlockingProvider, EthersProvider};
 
 #[derive(Error, Debug)]
 pub enum ProviderFactoryError {
@@ -119,9 +118,10 @@ impl ProviderFactory<CachedProvider<EthProvider>> for CachedProviderFactory {
 
 #[cfg(test)]
 mod test {
-    use super::*;
     use alloy_chains::Chain;
     use ethers_core::types::BlockNumber::Latest;
+
+    use super::*;
 
     #[test]
     fn try_new_invalid_rpc_url() -> anyhow::Result<()> {

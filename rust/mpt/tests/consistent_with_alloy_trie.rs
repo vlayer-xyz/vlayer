@@ -1,9 +1,9 @@
-use alloy_primitives::{keccak256, U256};
-use alloy_trie::HashBuilder;
-use nybbles::Nibbles;
 use std::collections::BTreeMap;
 
+use alloy_primitives::{keccak256, U256};
+use alloy_trie::HashBuilder;
 use mpt::MerkleTrie;
+use nybbles::Nibbles;
 
 #[test]
 fn root_match() -> anyhow::Result<()> {

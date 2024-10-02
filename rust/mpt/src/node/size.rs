@@ -21,8 +21,9 @@ impl Node {
 
 #[cfg(test)]
 mod node_size {
-    use crate::node::Node;
     use std::array::from_fn;
+
+    use crate::node::Node;
 
     #[test]
     fn null() {

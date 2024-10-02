@@ -1,3 +1,5 @@
+use std::{fmt, path::Path};
+
 /**
  * This file was copied from https://github.com/foundry-rs/foundry/blob/6bb5c8ea8dcd00ccbc1811f1175cabed3cb4c116/crates/forge/bin/cmd/test/filter.rs
  * The original file is licensed under the Apache License, Version 2.0.
@@ -8,7 +10,6 @@ use foundry_common::TestFilter;
 use foundry_compilers::{FileFilter, ProjectPathsConfig};
 use foundry_config::{filter::GlobMatcher, Config};
 use regex::Regex;
-use std::{fmt, path::Path};
 
 /// The filter to use during testing.
 ///

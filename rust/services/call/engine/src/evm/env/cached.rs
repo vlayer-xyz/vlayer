@@ -3,9 +3,8 @@ use std::{cell::RefCell, collections::HashMap, rc::Rc};
 use anyhow::bail;
 use revm::DatabaseRef;
 
-use crate::utils::InteriorMutabilityCache;
-
 use super::{location::ExecutionLocation, EvmEnv, EvmEnvFactory};
+use crate::utils::InteriorMutabilityCache;
 
 pub struct NullEvmEnvFactory;
 

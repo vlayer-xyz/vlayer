@@ -1,11 +1,13 @@
-use crate::cheatcode_inspector::CheatcodeInspector;
 use alloy_sol_types::private::{Address, U256};
-use forge::revm::interpreter::{CallInputs, CallOutcome, CreateInputs, CreateOutcome, Interpreter};
-use forge::revm::precompile::Log;
-use forge::revm::{Database, EvmContext, Inspector};
+use forge::revm::{
+    interpreter::{CallInputs, CallOutcome, CreateInputs, CreateOutcome, Interpreter},
+    precompile::Log,
+    Database, EvmContext, Inspector,
+};
 use foundry_evm::inspectors::InspectorStack;
-use foundry_evm_core::backend::DatabaseExt;
-use foundry_evm_core::InspectorExt;
+use foundry_evm_core::{backend::DatabaseExt, InspectorExt};
+
+use crate::cheatcode_inspector::CheatcodeInspector;
 
 pub struct CompositeInspector {
     pub inspector_stack: InspectorStack,

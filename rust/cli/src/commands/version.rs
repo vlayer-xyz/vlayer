@@ -1,7 +1,6 @@
+use call_guest_wrapper::RISC0_CALL_GUEST_ID;
 use clap::builder::{IntoResettable, Resettable, Str};
 use risc0_zkp::core::digest::Digest;
-
-use call_guest_wrapper::RISC0_CALL_GUEST_ID;
 
 pub struct Version;
 
@@ -58,9 +57,9 @@ mod tests {
     }
 
     mod guest_id {
-        use super::*;
-
         use hex::FromHex;
+
+        use super::*;
 
         #[test]
         fn guest_id_equals_to_compiled_in_version() {
@@ -73,9 +72,9 @@ mod tests {
     }
 
     mod version {
-        use super::*;
-
         use regex::Regex;
+
+        use super::*;
 
         #[test]
         fn has_pkg_version() {

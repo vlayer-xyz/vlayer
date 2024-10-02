@@ -1,8 +1,9 @@
+use std::collections::HashMap;
+
 use alloy_primitives::ChainId;
 use chain::{TEST_CHAIN_ID_1, TEST_CHAIN_ID_2};
 use serde::{Deserialize, Serialize};
 use server_utils::ProofMode;
-use std::collections::HashMap;
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ServerConfig {

@@ -1,11 +1,12 @@
-use super::{BlockingProvider, EIP1186Proof};
-use alloy_primitives::BlockNumber;
-use alloy_primitives::{Address, Bytes, StorageKey, StorageValue, TxNumber, U256};
+use std::{cell::RefCell, collections::hash_map::Entry, path::PathBuf};
+
+use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256};
 use anyhow::bail;
 use block_header::EvmBlockHeader;
 use ethers_core::types::BlockNumber as BlockTag;
 use json::{AccountQuery, BlockQuery, JsonCache, ProofQuery, StorageQuery};
-use std::{cell::RefCell, collections::hash_map::Entry, path::PathBuf};
+
+use super::{BlockingProvider, EIP1186Proof};
 
 pub(crate) mod json;
 

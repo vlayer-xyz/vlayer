@@ -1,11 +1,14 @@
-use crate::db::proof::ProofDb;
-use anyhow::anyhow;
-use anyhow::{ensure, Ok};
-use block_header::EvmBlockHeader;
-use call_engine::evm::env::cached::CachedEvmEnv;
-use call_engine::evm::input::{EvmInput, MultiEvmInput};
-use provider::BlockingProvider;
 use std::rc::Rc;
+
+use anyhow::{anyhow, ensure, Ok};
+use block_header::EvmBlockHeader;
+use call_engine::evm::{
+    env::cached::CachedEvmEnv,
+    input::{EvmInput, MultiEvmInput},
+};
+use provider::BlockingProvider;
+
+use crate::db::proof::ProofDb;
 
 fn into_input<P: BlockingProvider>(
     db: &ProofDb<P>,

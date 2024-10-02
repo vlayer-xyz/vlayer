@@ -1,6 +1,7 @@
-use crate::errors::CLIError;
 use call_server::{serve, ProofMode, ServerConfig};
 use tracing::{info, warn};
+
+use crate::errors::CLIError;
 
 pub(crate) async fn run_serve(server_config: ServerConfig) -> Result<(), CLIError> {
     info!("Running vlayer serve...");

@@ -1,5 +1,7 @@
-use super::common::{crypto::HashAlgorithm, headers::Header};
-use super::dkim::{signature::Signature, Canonicalization};
+use super::{
+    common::{crypto::HashAlgorithm, headers::Header},
+    dkim::{signature::Signature, Canonicalization},
+};
 
 pub struct AuthenticatedMessage<'x> {
     pub headers: Vec<(&'x [u8], &'x [u8])>,

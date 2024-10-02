@@ -1,9 +1,8 @@
+use super::{Canonicalization, Flag};
 use crate::mail_auth::{
     common::{crypto::Algorithm, verify::VerifySignature},
     resolver::domain_key::DomainKey,
 };
-
-use super::{Canonicalization, Flag};
 
 #[derive(Debug, PartialEq, Eq, Clone, Default)]
 pub struct Signature {

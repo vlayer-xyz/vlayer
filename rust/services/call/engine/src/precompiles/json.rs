@@ -1,10 +1,11 @@
-use crate::precompiles::{gas_used, map_to_fatal};
+use std::convert::Into;
+
 use alloy_primitives::Bytes;
-use alloy_sol_types::SolType;
-use alloy_sol_types::{sol_data, SolValue};
+use alloy_sol_types::{sol_data, SolType, SolValue};
 use revm::precompile::{Precompile, PrecompileErrors, PrecompileOutput, PrecompileResult};
 use serde_json::Value;
-use std::convert::Into;
+
+use crate::precompiles::{gas_used, map_to_fatal};
 
 pub(super) const JSON_GET_STRING_PRECOMPILE: Precompile = Precompile::Standard(json_get_string_run);
 pub(super) const JSON_GET_INT_PRECOMPILE: Precompile = Precompile::Standard(json_get_int_run);
@@ -66,11 +67,12 @@ fn get_value_by_path<'a>(value: &'a Value, path: &str) -> Option<&'a Value> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use revm::precompile::{
         PrecompileError::OutOfGas,
         PrecompileErrors::{Error, Fatal},
     };
+
+    use super::*;
 
     const TEST_JSON: &str = r#"
             {

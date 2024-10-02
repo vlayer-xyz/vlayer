@@ -5,13 +5,11 @@ mod email;
 mod errors;
 mod mail_auth;
 
-pub use crate::email::Email;
-pub use crate::errors::Error;
-
 use dkim::verify;
 use email::sol::UnverifiedEmail;
-
 use mailparse::MailParseError;
+
+pub use crate::{email::Email, errors::Error};
 
 pub fn parse_and_verify(calldata: &[u8]) -> Result<Email, Error> {
     let (raw_email, dns_records) =
@@ -29,8 +27,7 @@ mod tests {
     use super::*;
 
     fn read_file(file: &str) -> Vec<u8> {
-        use std::fs::File;
-        use std::io::Read;
+        use std::{fs::File, io::Read};
 
         let mut f = File::open(file).unwrap();
         let mut buffer = Vec::new();

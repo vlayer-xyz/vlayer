@@ -1,3 +1,5 @@
+use std::ops::{Deref, DerefMut};
+
 /**
  * This file is in large part copied from https://github.com/foundry-rs/foundry/blob/65b3cb031336bccbfe7c32c26b8869d1b8654f68/crates/evm/evm/src/executors/mod.rs
  * The original file is licensed under the Apache License, Version 2.0.
@@ -9,21 +11,25 @@ use alloy_dyn_abi::JsonAbiExt;
 use alloy_json_abi::Function;
 use alloy_sol_types::private::{Address, Bytes, U256};
 use color_eyre::eyre;
-use forge::revm;
-use forge::revm::interpreter::{return_ok, InstructionResult};
-use forge::revm::primitives::{
-    BlockEnv, Env, EnvWithHandlerCfg, ExecutionResult, Output, ResultAndState, TxEnv, TxKind,
+use forge::{
+    revm,
+    revm::{
+        interpreter::{return_ok, InstructionResult},
+        primitives::{
+            BlockEnv, Env, EnvWithHandlerCfg, ExecutionResult, Output, ResultAndState, TxEnv,
+            TxKind,
+        },
+    },
 };
 use foundry_config::RpcEndpoints;
-use foundry_evm::executors::{CallResult, EvmError, Executor, RawCallResult};
-use foundry_evm::inspectors::{InspectorData, InspectorStack};
-use foundry_evm_core::backend::CowBackend;
-use foundry_evm_core::decode::RevertDecoder;
-use std::ops::{Deref, DerefMut};
+use foundry_evm::{
+    executors::{CallResult, EvmError, Executor, RawCallResult},
+    inspectors::{InspectorData, InspectorStack},
+};
+use foundry_evm_core::{backend::CowBackend, decode::RevertDecoder};
 use tracing::instrument;
 
-use crate::cheatcode_inspector::CheatcodeInspector;
-use crate::composite_inspector::CompositeInspector;
+use crate::{cheatcode_inspector::CheatcodeInspector, composite_inspector::CompositeInspector};
 
 /// MODIFICATION: This struct is a wrapper around the Executor struct from foundry_evm that adds our inspector that will be passed to the backend
 pub struct TestExecutor<'a> {

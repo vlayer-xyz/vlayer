@@ -1,25 +1,21 @@
-/**
- * This file is in large part copied from https://github.com/foundry-rs/foundry/blob/6bb5c8ea8dcd00ccbc1811f1175cabed3cb4c116/crates/forge/bin/cmd/test/mod.rs
- * The original file is licensed under the Apache License, Version 2.0.
- * The original file was modified for the purpose of this project.
- * All relevant modifications are commented with "MODIFICATION" comments.
- */
-use crate::{
-    contract_runner::ContractRunner, filter::FilterArgs, filter::ProjectPathsAwareFilter,
-    summary::TestSummaryReporter, test_executor::TestExecutor,
+use std::{
+    collections::{BTreeMap, BTreeSet},
+    path::PathBuf,
+    sync::Arc,
+    time::Instant,
 };
+
 use call_engine::inspector::{TRAVEL_CONTRACT_ADDR, TRAVEL_CONTRACT_HASH};
 use chain::TEST_CHAIN_ID_1;
 use clap::Parser;
 use color_eyre::eyre::{bail, Result};
-use forge::multi_runner::TestContract;
-use forge::revm::primitives::{Bytecode, Bytes};
 use forge::{
     decode::decode_console_logs,
     gas_report::GasReport,
-    multi_runner::matches_contract,
+    multi_runner::{matches_contract, TestContract},
     result::{SuiteResult, TestOutcome, TestStatus},
     revm,
+    revm::primitives::{Bytecode, Bytes},
     traces::{
         debug::{ContractSources, DebugTraceIdentifier},
         decode_trace_arena,
@@ -49,21 +45,25 @@ use foundry_config::{
     get_available_profiles, Config,
 };
 use foundry_debugger::Debugger;
-use foundry_evm::executors::ExecutorBuilder;
-use foundry_evm::traces::identifier::TraceIdentifiers;
-use foundry_evm::traces::TraceMode;
-use foundry_evm_core::backend::Backend;
-use foundry_evm_core::opts::EvmOpts;
-use rayon::iter::IntoParallelRefIterator;
-use rayon::iter::ParallelIterator;
-use regex::Regex;
-use std::{
-    collections::{BTreeMap, BTreeSet},
-    path::PathBuf,
-    sync::Arc,
-    time::Instant,
+use foundry_evm::{
+    executors::ExecutorBuilder,
+    traces::{identifier::TraceIdentifiers, TraceMode},
 };
+use foundry_evm_core::{backend::Backend, opts::EvmOpts};
+use rayon::iter::{IntoParallelRefIterator, ParallelIterator};
+use regex::Regex;
 use tracing::{debug, debug_span, enabled, error, trace};
+
+/**
+ * This file is in large part copied from https://github.com/foundry-rs/foundry/blob/6bb5c8ea8dcd00ccbc1811f1175cabed3cb4c116/crates/forge/bin/cmd/test/mod.rs
+ * The original file is licensed under the Apache License, Version 2.0.
+ * The original file was modified for the purpose of this project.
+ * All relevant modifications are commented with "MODIFICATION" comments.
+ */
+use crate::{
+    contract_runner::ContractRunner, filter::FilterArgs, filter::ProjectPathsAwareFilter,
+    summary::TestSummaryReporter, test_executor::TestExecutor,
+};
 
 // Loads project's figment and merges the build cli arguments into it
 foundry_config::merge_impl_figment_convert!(TestArgs, opts, evm_opts);

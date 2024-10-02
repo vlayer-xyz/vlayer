@@ -1,4 +1,5 @@
 use block_header::EvmBlockHeader;
+use chain::ChainSpec;
 use location::ExecutionLocation;
 use revm::{
     primitives::{CfgEnvWithHandlerCfg, SpecId},
@@ -6,7 +7,6 @@ use revm::{
 };
 
 use crate::engine::EngineError;
-use chain::ChainSpec;
 
 pub mod cached;
 pub mod location;

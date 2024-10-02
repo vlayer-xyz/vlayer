@@ -1,6 +1,5 @@
-use crate::node::{Node, NodeError};
-
 use super::entry::Entry;
+use crate::node::{Node, NodeError};
 
 impl Node {
     pub(crate) fn insert_entry_into_branch(

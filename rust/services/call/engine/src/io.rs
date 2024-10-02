@@ -1,14 +1,14 @@
 use alloy_primitives::{Address, TxKind};
 use alloy_sol_types::SolValue;
-use revm::interpreter::CallInputs;
-use revm::primitives::TxEnv;
+use revm::{interpreter::CallInputs, primitives::TxEnv};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-use crate::config::DEFAULT_CALLER;
-use crate::evm::env::location::ExecutionLocation;
-use crate::evm::input::MultiEvmInput;
-use crate::CallAssumptions;
+use crate::{
+    config::DEFAULT_CALLER,
+    evm::{env::location::ExecutionLocation, input::MultiEvmInput},
+    CallAssumptions,
+};
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Input {

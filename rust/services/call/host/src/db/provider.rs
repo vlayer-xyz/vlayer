@@ -1,11 +1,11 @@
+use std::{cell::RefCell, fmt::Debug, rc::Rc};
+
 use alloy_primitives::{Address, B256, U256};
 use provider::BlockingProvider;
 use revm::{
     primitives::{AccountInfo, Bytecode, HashMap, KECCAK_EMPTY},
     DatabaseRef,
 };
-use std::rc::Rc;
-use std::{cell::RefCell, fmt::Debug};
 use thiserror::Error;
 
 /// Error type for the [ProviderDb].

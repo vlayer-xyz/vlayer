@@ -1,7 +1,6 @@
 use std::collections::HashMap;
 
 use alloy_primitives::ChainId;
-
 use host_utils::ProofMode;
 
 #[derive(Default)]

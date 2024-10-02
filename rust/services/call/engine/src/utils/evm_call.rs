@@ -1,8 +1,10 @@
 use alloy_primitives::Bytes;
 use alloy_rlp::Buf;
 use alloy_sol_types::{decode_revert_reason, SolError, SolValue};
-use revm::interpreter::{CallInputs, CallOutcome, Gas, InstructionResult, InterpreterResult};
-use revm::primitives::ExecutionResult;
+use revm::{
+    interpreter::{CallInputs, CallOutcome, Gas, InstructionResult, InterpreterResult},
+    primitives::ExecutionResult,
+};
 
 const SELECTOR_LEN: usize = 4;
 

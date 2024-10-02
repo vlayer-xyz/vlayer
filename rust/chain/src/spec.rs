@@ -5,9 +5,7 @@ use anyhow::{bail, Context};
 use revm::primitives::SpecId;
 use serde::{Deserialize, Serialize};
 
-use crate::config::CHAIN_MAP;
-
-use crate::{eip1559::Eip1559Constants, error::ChainError, fork::ForkCondition};
+use crate::{config::CHAIN_MAP, eip1559::Eip1559Constants, error::ChainError, fork::ForkCondition};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ChainSpec {
@@ -31,6 +29,7 @@ impl ChainSpec {
             gas_constants,
         }
     }
+
     /// Creates a new configuration consisting of only one specification ID.
     pub fn new_single(
         chain_id: ChainId,
@@ -59,6 +58,7 @@ impl ChainSpec {
         }
         Ok(())
     }
+
     /// Returns the [SpecId] for a given block number and timestamp or an error if not
     /// supported.
     pub fn active_fork(&self, block_number: BlockNumber, timestamp: u64) -> anyhow::Result<SpecId> {
@@ -73,6 +73,7 @@ impl ChainSpec {
             None => bail!("no supported fork for block {}", block_number),
         }
     }
+
     /// Returns the Eip1559 constants for a given [SpecId].
     pub fn gas_constants(&self, spec_id: SpecId) -> Option<&Eip1559Constants> {
         self.gas_constants

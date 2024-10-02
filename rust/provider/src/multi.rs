@@ -1,11 +1,10 @@
-use crate::factory::ProviderFactoryError;
+use std::{cell::RefCell, collections::HashMap, rc::Rc};
 
-use super::factory::ProviderFactory;
-use super::BlockingProvider;
 use alloy_primitives::ChainId;
 use call_engine::utils::InteriorMutabilityCache;
-use std::cell::RefCell;
-use std::{collections::HashMap, rc::Rc};
+
+use super::{factory::ProviderFactory, BlockingProvider};
+use crate::factory::ProviderFactoryError;
 
 type MultiProvider<P> = HashMap<ChainId, Rc<P>>;
 
@@ -33,12 +32,13 @@ where
 
 #[cfg(test)]
 mod get {
-    use super::*;
     use std::path::PathBuf;
 
-    use crate::{factory::FileProviderFactory, FileProvider};
     use alloy_chains::Chain;
     use null_provider_factory::NullProviderFactory;
+
+    use super::*;
+    use crate::{factory::FileProviderFactory, FileProvider};
 
     mod null_provider_factory {
         use super::*;

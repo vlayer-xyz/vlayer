@@ -1,5 +1,4 @@
 use derive_more::Deref;
-
 use nybbles::Nibbles;
 use serde::{Deserialize, Serialize};
 
