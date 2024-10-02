@@ -39,12 +39,17 @@ impl EvmInput {
             .collect()
     }
 
-    pub fn validate_state_root(&self) {
+    pub fn assert_coherency(&self) {
+        self.assert_state_root_coherency();
+        self.assert_ancestors_coherency();
+    }
+
+    pub fn assert_state_root_coherency(&self) {
         let state_root = self.state_trie.hash_slow();
         assert_eq!(self.header.state_root(), &state_root, "State root mismatch");
     }
 
-    pub fn validate_ancestors(&self) {
+    pub fn assert_ancestors_coherency(&self) {
         let mut previous_header = &self.header;
         for ancestor in &self.ancestors {
             let ancestor_hash = ancestor.hash_slow();
@@ -104,7 +109,7 @@ mod test {
         }
     }
 
-    mod validate_state_root {
+    mod assert_state_root_coherency {
 
         use super::*;
 
@@ -118,18 +123,18 @@ mod test {
                 }),
                 ..Default::default()
             };
-            input.validate_state_root();
+            input.assert_state_root_coherency();
         }
 
         #[test]
         #[should_panic(expected = "State root mismatch")]
         fn mismatch() {
             let input = EvmInput::default();
-            input.validate_state_root();
+            input.assert_state_root_coherency();
         }
     }
 
-    mod validate_ancestors {
+    mod assert_ancestors_coherency {
         use super::*;
 
         #[test]
@@ -145,7 +150,7 @@ mod test {
                 ..Default::default()
             };
 
-            input.validate_ancestors();
+            input.assert_ancestors_coherency();
         }
 
         #[test]
@@ -159,7 +164,7 @@ mod test {
                 }),
                 ..Default::default()
             };
-            input.validate_ancestors();
+            input.assert_ancestors_coherency();
         }
     }
 }

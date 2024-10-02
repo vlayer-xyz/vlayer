@@ -6,8 +6,8 @@ pub struct ValidatedEvmInput(pub(crate) EvmInput);
 
 impl From<EvmInput> for ValidatedEvmInput {
     fn from(input: EvmInput) -> Self {
-        input.validate_state_root();
-        input.validate_ancestors();
+        input.assert_state_root_coherency();
+        input.assert_ancestors_coherency();
 
         ValidatedEvmInput(input)
     }
