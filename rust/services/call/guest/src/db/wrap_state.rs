@@ -1,6 +1,7 @@
 use std::{cell::RefCell, convert::Infallible, rc::Rc};
 
 use alloy_primitives::{keccak256, Address, B256, U256};
+use call_engine::evm::input::EvmInput;
 use mpt::MerkleTrie;
 use revm::{
     primitives::{AccountInfo, Bytecode, HashMap},
@@ -85,5 +86,16 @@ impl DatabaseRef for WrapStateDb {
     #[inline]
     fn block_hash_ref(&self, number: U256) -> Result<B256, Self::Error> {
         Ok(self.inner.block_hash(number))
+    }
+}
+
+impl From<EvmInput> for WrapStateDb {
+    fn from(input: EvmInput) -> Self {
+        // input.assert_coherency();
+        let block_hashes = input.block_hashes();
+        let state_db =
+            StateDb::new(input.state_trie, input.storage_tries, input.contracts, block_hashes);
+
+        WrapStateDb::new(state_db)
     }
 }
