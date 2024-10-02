@@ -42,7 +42,7 @@ contract TestHelpers {
 
     function createProof() public view returns (Proof memory, bytes32) {
         CallAssumptions memory assumptions =
-                        CallAssumptions(PROVER, SELECTOR, block.number - 1, blockhash(block.number - 1));
+            CallAssumptions(PROVER, SELECTOR, block.number - 1, blockhash(block.number - 1));
         return createProof(assumptions);
     }
 
@@ -55,7 +55,8 @@ contract TestHelpers {
         bytes32 journalHash = sha256(journal);
 
         bytes memory seal = mockVerifier.mockProve(ImageID.RISC0_CALL_GUEST_ID, journalHash).seal;
-        Proof memory proof = Proof(journal.length, encodeSeal(seal), [uint16(0), 0, 0, 0, 0, 0, 0, 0, 0, 0], assumptions);
+        Proof memory proof =
+            Proof(journal.length, encodeSeal(seal), [uint16(0), 0, 0, 0, 0, 0, 0, 0, 0, 0], assumptions);
 
         return (proof, journalHash);
     }

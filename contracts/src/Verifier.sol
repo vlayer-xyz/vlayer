@@ -11,8 +11,7 @@ abstract contract Verifier {
     uint256 private constant SELECTOR_LEN = 4;
     uint256 private constant PROOF_OFFSET = SELECTOR_LEN;
     uint256 private constant JOURNAL_OFFSET = PROOF_OFFSET + ProofLib.CALL_ASSUMPTIONS_OFFSET;
-    uint256 private constant CALL_ASSUMPTIONS_END =
-        JOURNAL_OFFSET + CallAssumptionsLib.CALL_ASSUMPTIONS_ENCODING_LENGTH;
+    uint256 private constant CALL_ASSUMPTIONS_END = JOURNAL_OFFSET + CallAssumptionsLib.CALL_ASSUMPTIONS_ENCODING_LENGTH;
 
     IProofVerifier public verifier;
 

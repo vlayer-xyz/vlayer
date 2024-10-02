@@ -29,10 +29,7 @@ library ProofLib {
 
     function emptyProof() internal pure returns (Proof memory) {
         return Proof(
-            0,
-            SealLib.emptySeal(),
-            [uint16(0), 0, 0, 0, 0, 0, 0, 0, 0, 0],
-            CallAssumptionsLib.emptyCallAssumptions()
+            0, SealLib.emptySeal(), [uint16(0), 0, 0, 0, 0, 0, 0, 0, 0, 0], CallAssumptionsLib.emptyCallAssumptions()
         );
     }
 }
