@@ -1,7 +1,8 @@
-export const MESSAGE = {
-  proof_request: "proof_request",
-  proof_done: "proof_done",
-  proof_error: "proof_error",
+export const EXTENSION_ACTION = {
+  requestWebProof: "requestWebProof",
 } as const;
 
-export type MessageType = (typeof MESSAGE)[keyof typeof MESSAGE];
+export const EXTENSION_MESSAGE = {
+  proofDone: "proofDone",
+  proofError: "proofError",
+} as const;

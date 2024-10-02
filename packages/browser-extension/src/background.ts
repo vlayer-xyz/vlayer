@@ -1,5 +1,5 @@
 import browser from "webextension-polyfill";
-import { MESSAGE } from "./constants/message";
+import { EXTENSION_ACTION, EXTENSION_MESSAGE } from "./constants/message";
 
 chrome.tabs.onActivated.addListener(function (activeInfo) {
   windowId = activeInfo.windowId;
@@ -26,8 +26,8 @@ browser.runtime.onMessageExternal.addListener(() => {
 
 browser.runtime.onMessage.addListener((message) => {
   if (
-    message.type === MESSAGE.proof_done ||
-    message.type === MESSAGE.proof_error
+    message.type === EXTENSION_MESSAGE.proofDone ||
+    message.type === EXTENSION_MESSAGE.proofError
   ) {
     try {
       port?.postMessage(message);
@@ -51,9 +51,9 @@ browser.tabs.onActivated.addListener(function (activeInfo) {
 browser.runtime.onMessageExternal.addListener((message) => {
   (async () => {
     console.log("Received message from external extension", message);
-    if (message.action === "open_side_panel") {
-      //We nned to use chrome specific API to open side panel
-      //as webextension-polyfill does not support it
+    if (message.action === EXTENSION_ACTION.requestWebProof) {
+      // We need to use chrome specific API to open side panel
+      // as webextension-polyfill does not support it
       if (chrome.sidePanel) {
         chrome.sidePanel.open({ windowId: windowId });
       }

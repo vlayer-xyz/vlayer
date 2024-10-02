@@ -10,7 +10,7 @@ import React, {
   PropsWithChildren,
 } from "react";
 import { formatTlsnHeaders } from "../lib/formatTlsnHeaders";
-import { MESSAGE } from "../constants/message";
+import { EXTENSION_MESSAGE } from "../constants/message";
 
 const TlsnProofContext = createContext({
   prove: () => {},
@@ -85,7 +85,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
       // when we wil connect vlayer contracts we will transfer this back to the SDK
 
       browser.runtime.sendMessage({
-        type: MESSAGE.proof_done,
+        type: EXTENSION_MESSAGE.proofDone,
         proof: tlsnProof,
       });
       setProof(proof);
@@ -94,7 +94,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
       console.error("error in tlsnotary", e);
 
       browser.runtime.sendMessage({
-        type: MESSAGE.proof_error,
+        type: EXTENSION_MESSAGE.proofError,
         error: e,
       });
 
