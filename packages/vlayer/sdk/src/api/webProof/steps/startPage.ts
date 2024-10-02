@@ -1,5 +1,5 @@
 import {
-  StepKind,
+  EXTENSION_STEP,
   WebProofStepStartPage,
 } from "../../../api/lib/types/webProofProvider";
 
@@ -7,6 +7,6 @@ export const startPage = (url: string, label: string) => {
   return {
     url,
     label,
-    kind: StepKind.startPage,
+    step: EXTENSION_STEP.startPage,
   } as WebProofStepStartPage;
 };

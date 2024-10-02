@@ -1,5 +1,5 @@
 import {
-  StepKind,
+  EXTENSION_STEP,
   WebProofStepNotarize,
 } from "../../../api/lib/types/webProofProvider";
 
@@ -12,6 +12,6 @@ export const notarize = (
     url,
     method,
     label,
-    kind: StepKind.notarize,
+    step: EXTENSION_STEP.notarize,
   } as WebProofStepNotarize;
 };

@@ -1,10 +1,18 @@
-import type {
-  WebProofProvider,
-  WebProofProviderSetup,
-  WebProofSetupInput,
+import {
+  EXTENSION_ACTION,
+  EXTENSION_MESSAGE,
+  type WebProofProvider,
+  type WebProofProviderSetup,
+  type WebProofSetupInput,
 } from "../../lib/types/webProofProvider";
 
 import { WebProof } from "../../lib/types/webProof";
+
+// NOTE @types/chrome and webextension-polyfill work only in the extension context
+// and looks that there is no community driven package providing typings for chrome.runtime
+// or polyfill logic for the browser APIs available in the browser context
+// we intentionally use chrome here instead of browser as we support only chrome for now
+// and there could be some differences in the API between browsers
 
 declare const chrome: {
   runtime: {
@@ -19,11 +27,12 @@ export const createExtensionWebProofProvider = ({
 }: WebProofProviderSetup): WebProofProvider => {
   return {
     getWebProof: async function (webProofSetup: WebProofSetupInput) {
-      //TODO: we cant assume that developer is using vite
+      // TODO: we cant assume that developer is using vite
       // EXTESION_ID value should be injected by the build system
+
       return new Promise<WebProof>((resolve, reject) => {
         chrome.runtime.sendMessage(import.meta.env.VITE_EXTENSION_ID, {
-          action: "open_side_panel",
+          action: EXTENSION_ACTION.openSidePanel,
           payload: {
             notaryUrl,
             wsProxyUrl,
@@ -35,8 +44,11 @@ export const createExtensionWebProofProvider = ({
         const port = chrome.runtime.connect(EXTENSION_ID);
         port.onMessage.addListener(
           (message: { type: string; proof: WebProof }) => {
-            if (message.type === "proof_done") {
+            if (message.type === EXTENSION_MESSAGE.proofDone) {
               resolve(message.proof);
+            }
+            if (message.type === EXTENSION_MESSAGE.proofError) {
+              reject(new Error("Proof generation failed"));
             }
           },
         );

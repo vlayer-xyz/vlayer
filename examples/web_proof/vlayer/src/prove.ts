@@ -27,7 +27,6 @@ const context: {
 export async function setupRequestProveButton(element: HTMLButtonElement) {
   element.addEventListener("click", async () => {
     const provider = createExtensionWebProofProvider({});
-    console.log("ddd");
     context.webProof = await provider.getWebProof({
       proverCallCommitment: {
         address: import.meta.env.VITE_PROVER_ADDRESS,
@@ -47,7 +46,6 @@ export async function setupRequestProveButton(element: HTMLButtonElement) {
         ),
       ],
     });
-    console.log("w", context.webProof);
   });
 }
 
