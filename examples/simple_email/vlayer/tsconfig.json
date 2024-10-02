@@ -23,10 +23,5 @@
     "noUnusedLocals": false,
     "noUnusedParameters": false,
     "noPropertyAccessFromIndexSignature": false,
-    "paths": {
-      "@vlayer/sdk": [
-        "../../../packages/vlayer/sdk/src/index.ts"
-      ]
-    }
   }
 }
