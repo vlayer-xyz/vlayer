@@ -9,6 +9,7 @@ on:
       - "packages/vlayer/**"
       - "bash/**"
       - ".github/workflows/**"
+      - "contracts/**"
 
 jobs:
   e2e-test:
