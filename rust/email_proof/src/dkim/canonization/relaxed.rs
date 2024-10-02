@@ -1,4 +1,4 @@
-use crate::canonization::simple;
+use super::simple;
 use regex::Regex;
 
 pub fn canonize_body(body: &str) -> String {
