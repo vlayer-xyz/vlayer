@@ -17,7 +17,8 @@ On top of access to vlayer JSON-RPC proving API, [vlayer client](./javascript.md
 
 ### vlayer browser extension
 
-vlayer provides a browser extension which can be launched (once installed in user's browser) from vlayer SDK and used to generate a Web Proof of a 3rd party website.
+vlayer provides a browser extension which can be launched (once installed in user's browser) from vlayer SDK and used to generate a Web Proof of a 3rd party website.  
+vlayer extension is compatible with Chrome and Brave browsers.
 
 We start by instantiating vlayer client.
 
