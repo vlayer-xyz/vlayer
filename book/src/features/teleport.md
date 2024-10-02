@@ -81,14 +81,14 @@ contract SimpleTravel is Verifier {
     {
         require(!claimed[claimer], "Already claimed");
 
-        if (crossChainBalance >= 10_000_000) {
+        if (crossChainBalance >= 10_000_000_000_00) { // 100 000 USD
             claimed[claimer] = true;
             reward.mint(claimer);
         }
     }
 }
 ```
-In this Verifier contract, the claim function lets users mint an NFT if their cross-chain USDC average balance is at least 10,000,000. The `onlyVerified` modifier ensures that the proof and public inputs (`claimer` and `crossChainBalance`) are correct.
+In this Verifier contract, the claim function lets users mint an NFT if their cross-chain USDC average balance is at least $100,000. The `onlyVerified` modifier ensures that the proof and public inputs (`claimer` and `crossChainBalance`) are correct.
 
 If the proof or inputs are invalid, the transaction will revert, and the NFT will not be awarded.
 
