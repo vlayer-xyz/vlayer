@@ -29,13 +29,8 @@ The vlayer directory structure resembles a typical Foundry project but with two 
 
 ## Running examples locally
 
-### Prerequisites
-
-You need to have the following installed:
-1. [vlayer binary](./installation.md).
-2. [Bun](https://bun.sh/) runtime.
-
 ### All examples
+You need to have [Bun](https://bun.sh/) installed to build and run the examples. 
 
 To run vlayer examples locally, first build the contracts by navigating to your project folder and running:
 ```bash
