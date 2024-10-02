@@ -60,7 +60,7 @@ async function testSuccessProvingAndVerification(
     webProofVerifier.abi,
     verifier,
     "ownerOf",
-    [generateTokenId("g_p_vlayer")],
+    [generateTokenId(returnValue[0])],
   );
 
   assert.strictEqual(twitterUserAddress, tokenOwnerAddress);
