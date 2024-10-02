@@ -1,16 +1,13 @@
-use crate::{key_nibbles::KeyNibbles, node::Node, MerkleTrie};
+use crate::{
+    key_nibbles::KeyNibbles,
+    node::{constructors::EMPTY_CHILDREN, Node},
+    MerkleTrie,
+};
 use alloy_primitives::B256;
 
 #[test]
 fn null() {
     let mpt = MerkleTrie(Node::Null);
-    let proof = mpt.to_rlp_nodes();
-    assert_eq!(mpt, MerkleTrie::from_rlp_nodes(proof).unwrap());
-}
-
-#[test]
-fn digest() {
-    let mpt = MerkleTrie(Node::Digest(B256::ZERO));
     let proof = mpt.to_rlp_nodes();
     assert_eq!(mpt, MerkleTrie::from_rlp_nodes(proof).unwrap());
 }
@@ -24,7 +21,16 @@ fn leaf() {
 }
 
 #[test]
-fn branch() {
+fn branch_empty() {
+    let mpt = MerkleTrie(Node::Branch(EMPTY_CHILDREN.clone(), None));
+    let proof = mpt.to_rlp_nodes();
+
+    let decoded_mpt = MerkleTrie::from_rlp_nodes(proof).unwrap();
+    assert_eq!(mpt, decoded_mpt);
+}
+#[test]
+
+fn branch_with_value() {
     let mpt = MerkleTrie(Node::branch_with_value([42]));
     let proof = mpt.to_rlp_nodes();
 

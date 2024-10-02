@@ -1,11 +1,12 @@
 use crate::node::Node;
 use crate::node::NodeError;
+use alloy_primitives::Bytes;
 use alloy_primitives::{keccak256, B256};
 use alloy_rlp::Decodable;
 use alloy_trie::EMPTY_ROOT_HASH;
 use nybbles::Nibbles;
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, fmt::Debug};
+use std::fmt::Debug;
 use thiserror::Error;
 use utils::{parse_node, resolve_trie};
 
@@ -21,7 +22,7 @@ pub enum ParseNodeError {
 
 /// A sparse Merkle Patricia trie storing byte values.
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
-pub struct MerkleTrie(pub(crate) Node);
+pub struct MerkleTrie(pub Node);
 
 impl MerkleTrie {
     /// Creates a new empty trie.
@@ -43,6 +44,9 @@ impl MerkleTrie {
         key: impl AsRef<[u8]>,
         value: impl AsRef<[u8]>,
     ) -> Result<(), MptError> {
+        if value.as_ref().is_empty() {
+            return Err(MptError::EmptyValue);
+        }
         let key = key.as_ref();
         let nibbles = &*Nibbles::unpack(key);
         match self.0.clone().insert(nibbles, value) {
@@ -94,30 +98,27 @@ impl MerkleTrie {
     pub fn from_rlp_nodes<T: AsRef<[u8]>>(
         nodes: impl IntoIterator<Item = T>,
     ) -> Result<Self, ParseNodeError> {
-        let mut nodes_by_hash = HashMap::new();
-        let mut root_node_opt = None;
+        nodes.into_iter().map(parse_node).collect()
+    }
 
-        for rlp in nodes {
-            let (hash, node) = parse_node(rlp)?;
+    pub fn to_rlp_nodes(&self) -> impl Iterator<Item = Bytes> + '_ {
+        self.0.to_rlp_nodes()
+    }
+}
 
-            // initialize with the first node if it hasn't been set
-            root_node_opt.get_or_insert(node.clone());
+impl FromIterator<(Option<B256>, Node)> for MerkleTrie {
+    fn from_iter<T: IntoIterator<Item = (Option<B256>, Node)>>(iter: T) -> Self {
+        let mut iter = iter.into_iter();
+        let (_, root_node) = iter.next().unwrap_or_default();
+        let nodes_by_hash = iter
+            .filter_map(|(hash, node)| hash.map(|hash| (hash, node)))
+            .collect();
 
-            if let Some(hash) = hash {
-                nodes_by_hash.insert(hash, node);
-            }
-        }
-
-        let root_node = root_node_opt.unwrap_or_default();
         let trie = MerkleTrie(resolve_trie(root_node.clone(), &nodes_by_hash));
         // Optional: Verify the resolved trie's hash matches the initial root's hash
         debug_assert!(trie.hash_slow() == MerkleTrie(root_node).hash_slow());
 
-        Ok(trie)
-    }
-
-    pub fn to_rlp_nodes(&self) -> impl Iterator<Item = Vec<u8>> {
-        self.0.to_rlp_nodes().into_iter()
+        trie
     }
 }
 
@@ -139,6 +140,8 @@ where
 pub enum MptError {
     #[error("Duplicate key: {0:?}")]
     DuplicateKey(Box<[u8]>),
+    #[error("Cannot insert empty value")]
+    EmptyValue,
 }
 
 #[cfg(test)]

@@ -1,4 +1,4 @@
-use alloy_primitives::B256;
+use alloy_primitives::{Bytes, B256};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
@@ -13,9 +13,9 @@ pub mod size;
 pub enum Node {
     #[default]
     Null,
-    Leaf(KeyNibbles, Box<[u8]>),
+    Leaf(KeyNibbles, Bytes),
     Extension(KeyNibbles, Box<Node>),
-    Branch([Option<Box<Node>>; 16], Option<Box<[u8]>>),
+    Branch([Option<Box<Node>>; 16], Option<Bytes>),
     Digest(B256),
 }
 
@@ -32,7 +32,7 @@ impl Node {
                 .and_then(|remaining| child.get(remaining)),
             Node::Branch(children, value) => {
                 if key_nibs.is_empty() {
-                    value.as_deref()
+                    value.as_deref().map(AsRef::as_ref)
                 } else {
                     let (idx, remaining) = key_nibs.split_first()?;
                     let child = children[*idx as usize].as_deref()?;
