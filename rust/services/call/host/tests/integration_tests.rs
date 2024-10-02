@@ -85,16 +85,16 @@ where
         ..Default::default()
     };
 
-    let raw_return_value = if UPDATE_SNAPSHOTS {
+    let host_output = if UPDATE_SNAPSHOTS {
         let provider_factory = CachedProviderFactory::new(rpc_urls(), rpc_file_cache(test_name));
         let host = create_host(provider_factory, &config, block_number)?;
-        host.run(call)?.guest_output.evm_call_result
+        host.run(call)?
     } else {
         let provider_factory = FileProviderFactory::new(rpc_file_cache(test_name));
         let host = create_host(provider_factory, &config, block_number)?;
-        host.run(call)?.guest_output.evm_call_result
+        host.run(call)?
     };
-    let return_value = C::abi_decode_returns(&raw_return_value, false)?;
+    let return_value = C::abi_decode_returns(&host_output.guest_output.evm_call_result, false)?;
     Ok(return_value)
 }
 
