@@ -18,7 +18,8 @@ export const EXTENSION_MESSAGE = {
   proofError: "proofError",
 } as const;
 
-type ExtensionStep = (typeof EXTENSION_STEP)[keyof typeof EXTENSION_STEP];
+export type ExtensionStep =
+  (typeof EXTENSION_STEP)[keyof typeof EXTENSION_STEP];
 
 export type WebProofStepNotarize = Branded<
   {

@@ -16,8 +16,12 @@ import { WebProof } from "../../lib/types/webProof";
 
 declare const chrome: {
   runtime: {
-    sendMessage: (extensionId: string | undefined, message: any) => void;
-    connect: (extensionId: string) => any;
+    sendMessage: (extensionId: string | undefined, message: unknown) => void;
+    connect: (extensionId: string) => {
+      onMessage: {
+        addListener: (message: unknown) => void;
+      };
+    };
   };
 };
 
