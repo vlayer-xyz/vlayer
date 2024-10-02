@@ -1,4 +1,4 @@
-# Contributing to vlayer browser extension
+# Contributing to the vlayer browser extension
 
 ## Prerequisites
 
@@ -10,7 +10,7 @@ To start working with the vlayer browser extension, you need to install the foll
 
 ## Building
 
-First build vlayer server with:
+First build the vlayer server with:
 
 ```sh
 cd rust
