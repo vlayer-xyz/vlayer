@@ -29,22 +29,28 @@ The vlayer directory structure resembles a typical Foundry project but with two 
 
 ## Running examples locally
 
+### Prerequisites
+
+You need to have the following installed:
+1. [vlayer binary](./installation.md).
+2. [Bun](https://bun.sh/) runtime.
+
 ### All examples
-You need to have [Bun](https://bun.sh/) installed.  
 
 To run vlayer examples locally, first build the contracts by navigating to your project folder and running:
 ```bash
 cd your-project
-forge soldeer install
 forge build
 ```
+This compiles the smart contracts and prepares them for deployment and testing.
 
-Then install dependencies in vlayer folder by running:
+> Please note that `vlayer init` installs Solidity dependencies and generates `remappings.txt`. Running `forge soldeer install` is not required to build the example and may break `remappings.txt`, preventing the project from building successfully.
+
+Then install Typescript dependencies in vlayer folder by running:
 ```bash
 cd vlayer
 bun install
 ```
-This compiles the smart contracts and prepares them for deployment and testing.
 
 Then launch a local Ethereum node:
 ```bash
