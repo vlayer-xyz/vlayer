@@ -7,6 +7,7 @@ use call_host::{
     host::{config::HostConfig, error::HostError, Host},
     Call,
 };
+use dotenv::dotenv;
 use ethers_core::types::BlockNumber as BlockTag;
 use provider::{BlockingProvider, CachedProviderFactory, FileProviderFactory, ProviderFactory};
 

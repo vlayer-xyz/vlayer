@@ -33,6 +33,9 @@ jobs:
             rust/call/guest_wrapper/risc0_guest
             rust/chain/guest_wrapper/risc0_guest
 
+      - name: Install nightly rustfmt
+        run: rustup toolchain install nightly -c rustfmt
+
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
