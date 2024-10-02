@@ -38,12 +38,19 @@ browser.runtime.onMessage.addListener((message) => {
 });
 
 let windowId = 0;
+
+browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
+  windowId = tabs[0].windowId || 0;
+});
+
 browser.tabs.onActivated.addListener(function (activeInfo) {
+  console.log("Active tab changed", activeInfo);
   windowId = activeInfo.windowId;
 });
 
 browser.runtime.onMessageExternal.addListener((message) => {
   (async () => {
+    console.log("Received message from external extension", message);
     if (message.action === "open_side_panel") {
       //We nned to use chrome specific API to open side panel
       //as webextension-polyfill does not support it

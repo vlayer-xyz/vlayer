@@ -29,6 +29,6 @@
       "@vlayer/sdk": [
         "../../../packages/vlayer/sdk/src/index.ts"
       ]
-    },
+    }
   }, 
 }

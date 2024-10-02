@@ -1,2 +1,2 @@
-# [install]
-# frozenLockfile = false
+[install]
+frozenLockfile = false

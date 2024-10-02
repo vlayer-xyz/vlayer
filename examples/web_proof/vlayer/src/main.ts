@@ -4,7 +4,6 @@ import {
   setupVerifyButton,
   setupVProverButton,
 } from "./prove";
-import { extensionConnector } from "./extensionConnector";
 document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
   <div class="container">
     <div class="logoContainer">
@@ -22,4 +21,3 @@ const vproveButton = document.querySelector<HTMLButtonElement>("#vprove")!;
 setupRequestProveButton(twitterProofButton);
 setupVProverButton(vproveButton);
 setupVerifyButton(document.querySelector<HTMLButtonElement>("#vverify")!);
-extensionConnector.connect();
