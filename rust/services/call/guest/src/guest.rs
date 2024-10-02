@@ -32,7 +32,8 @@ impl Guest {
         }
     }
 
-    pub fn run(&self, call: &Call) -> GuestOutput {
+    #[must_use]
+    pub fn run(self, call: &Call) -> GuestOutput {
         let evm_call_result = Engine::new(&self.evm_envs)
             .call(call, self.start_execution_location)
             .unwrap();
