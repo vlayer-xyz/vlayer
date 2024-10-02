@@ -5,6 +5,8 @@ mod email;
 mod errors;
 mod mail_auth;
 
+mod canonization;
+
 pub use crate::email::Email;
 pub use crate::errors::Error;
 
