@@ -35,7 +35,10 @@ To run vlayer examples locally, first build the contracts by navigating to your 
 cd your-project
 forge soldeer install
 forge build
+```
 
+Then install dependencies in vlayer folder by running:
+```bash
 cd vlayer
 bun install
 ```
