@@ -91,7 +91,7 @@ bun run dev
 This will open a web browser with the vlayer app and browser extension installed.
 Now all the saved changes will be applied in your browser automatically.
 
-There is [a script](https://github.com/vlayer-xyz/vlayer/blob/main/bash/run-web-example.sh), that runs all of the above steps.
+There is [a script](https://github.com/vlayer-xyz/vlayer/blob/main/bash/run-web-example.sh), that runs all of the steps above.
 
 ### Extension watch mode
 
