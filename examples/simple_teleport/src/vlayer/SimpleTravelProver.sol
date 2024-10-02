@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
+import {Proof} from "vlayer-0.1.0/src/Proof.sol";
 import {Prover} from "vlayer-0.1.0/src/Prover.sol";
 import {CrossChainBalance, Erc20Token} from "./CrossChainBalance.sol";
 
@@ -15,9 +16,9 @@ contract SimpleTravelProver is CrossChainBalance {
         return tokens;
     }
 
-    function crossChainBalanceOf(address _owner) public returns (address, uint256) {
+    function crossChainBalanceOf(address _owner) public returns (Proof memory, address, uint256) {
         uint256 balance = balanceOf(_owner, getTokens());
 
-        return (_owner, balance);
+        return (proof(), _owner, balance);
     }
 }

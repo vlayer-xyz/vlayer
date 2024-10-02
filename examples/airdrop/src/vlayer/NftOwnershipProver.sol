@@ -5,6 +5,7 @@ pragma solidity ^0.8.13;
 // tokenId and msg.sender would be privately provided to the prover
 // Such proof can be used by on-chain smart contract to claim airdrop or any other logic
 
+import {Proof} from "vlayer-0.1.0/src/Proof.sol";
 import {Prover} from "vlayer-0.1.0/src/Prover.sol";
 
 interface IERC721 {
@@ -19,13 +20,13 @@ contract NftOwnershipProver is Prover {
         require(IERC721(BYAC_NFT_ADDR).balanceOf(owner) > 0, "You are not owning any specified NFT");
     }
 
-    function main(address owner) public pure returns (address) {
+    function main(address owner) public pure returns (Proof memory, address) {
         // // 🔥 Teleport to chain on which the verification is happening
         //        setChain(1, 20_000_000);
 
         //        require_byac_nft(owner);
 
         // anything returned here would be visible to the public
-        return owner;
+        return (proof(), owner);
     }
 }

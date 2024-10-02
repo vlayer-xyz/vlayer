@@ -11,6 +11,7 @@ abstract contract Verifier {
     uint256 private constant SELECTOR_LEN = 4;
     uint256 private constant PROOF_OFFSET = SELECTOR_LEN;
     uint256 private constant JOURNAL_OFFSET = PROOF_OFFSET + ProofLib.CALL_ASSUMPTIONS_OFFSET;
+    uint256 private constant CALL_ASSUMPTIONS_END = JOURNAL_OFFSET + CallAssumptionsLib.CALL_ASSUMPTIONS_ENCODING_LENGTH;
 
     IProofVerifier public verifier;
 
@@ -31,15 +32,14 @@ abstract contract Verifier {
     function _decodeCalldata() private pure returns (Proof memory, bytes32) {
         Proof memory proof = abi.decode(msg.data[PROOF_OFFSET:], (Proof));
 
-        uint256 journalEnd = JOURNAL_OFFSET + proof.length;
-        bytes memory journal = msg.data[JOURNAL_OFFSET:journalEnd];
+        uint256 journalEnd = JOURNAL_OFFSET + proof.length - ProofLib.PROOF_ENCODING_LENGTH;
 
-        for (uint256 i = 0; i < MAX_NUMBER_OF_DYNAMIC_PARAMS; i++) {
-            if (proof.dynamicParamsOffsets[i] > 0) {
-                journal = shiftOffset(journal, ProofLib.PROOF_ENCODING_LENGTH, proof.dynamicParamsOffsets[i]);
-            }
-        }
-        bytes32 journalHash = sha256(journal);
+        bytes memory callAssumptions = msg.data[JOURNAL_OFFSET:CALL_ASSUMPTIONS_END];
+        bytes memory param = msg.data[CALL_ASSUMPTIONS_END:journalEnd];
+
+        bytes memory journalWithEmptyProof = bytes.concat(callAssumptions, abi.encode(ProofLib.emptyProof()), param);
+        bytes32 journalHash = sha256(journalWithEmptyProof);
+
         return (proof, journalHash);
     }
 

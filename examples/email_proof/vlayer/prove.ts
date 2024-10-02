@@ -15,17 +15,15 @@ const [prover, verifier] = await testHelpers.deployProverVerifier(
 );
 
 console.log("Proving...");
-const { proof, returnValue } = await prove(
-  prover,
-  emailProofProver.abi,
-  "main",
-  [unverifiedEmail],
-);
+const {
+  proof,
+  returnValue: [result],
+} = await prove(prover, emailProofProver.abi, "main", [unverifiedEmail]);
 console.log("Proof:", proof);
 
 console.log("Verifying...");
 await testHelpers.writeContract(verifier, emailProofVerifier.abi, "verify", [
   proof,
-  returnValue,
+  result,
 ]);
 console.log("Verified!");

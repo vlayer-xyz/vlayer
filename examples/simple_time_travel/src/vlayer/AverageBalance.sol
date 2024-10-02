@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
+import {Proof} from "vlayer-0.1.0/Proof.sol";
 import {Prover} from "vlayer-0.1.0/Prover.sol";
 import {IERC20} from "openzeppelin-contracts/token/ERC20/IERC20.sol";
 
@@ -19,7 +20,7 @@ contract AverageBalance is Prover {
         step = _step;
     }
 
-    function averageBalanceOf(address _owner) public returns (address, uint256) {
+    function averageBalanceOf(address _owner) public returns (Proof memory, address, uint256) {
         uint256 totalBalance = 0;
         uint256 iterations = 0;
 
@@ -28,6 +29,6 @@ contract AverageBalance is Prover {
             totalBalance += token.balanceOf(_owner);
             iterations += 1;
         }
-        return (_owner, totalBalance / iterations);
+        return (proof(), _owner, totalBalance / iterations);
     }
 }
