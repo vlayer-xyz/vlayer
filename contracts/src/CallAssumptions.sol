@@ -26,8 +26,4 @@ library CallAssumptionsLib {
     function validateAssumptions(CallAssumptions memory assumptions) internal view returns (bool isValid) {
         return assumptions.settleBlockHash == blockhash(assumptions.settleBlockNumber);
     }
-
-    function emptyCallAssumptions() internal pure returns (CallAssumptions memory) {
-        return CallAssumptions(address(0), bytes4(0), 0, bytes32(0));
-    }
 }

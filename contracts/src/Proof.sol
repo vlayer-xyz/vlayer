@@ -28,8 +28,7 @@ library ProofLib {
         + DYNAMIC_PARAMS_OFFSETS_LEN + CallAssumptionsLib.CALL_ASSUMPTIONS_ENCODING_LENGTH;
 
     function emptyProof() internal pure returns (Proof memory) {
-        return Proof(
-            0, SealLib.emptySeal(), [uint16(0), 0, 0, 0, 0, 0, 0, 0, 0, 0], CallAssumptionsLib.emptyCallAssumptions()
-        );
+        Proof memory proof;
+        return proof;
     }
 }
