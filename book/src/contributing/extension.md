@@ -85,10 +85,11 @@ cd examples/web_proof/vlayer
 bun run dev
 ```
 
-Then, start the browser extension:
+Before starting the browser extension, copy the `.env.template` file to `.env.development` in the `browser-extension` directory. Then, start the browser extension:
 
 ```sh
 cd packages/browser-extension
+cp .env.template .env.development
 bun run dev
 ```
 
