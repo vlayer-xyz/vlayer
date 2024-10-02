@@ -23,8 +23,6 @@ contract WebProofProver is Prover {
 
         string memory screenName = web.jsonGetString("screen_name");
 
-        require(screenName.equal("g_p_vlayer"), "Invalid screen_name");
-
         return (proof(), screenName);
     }
 }
