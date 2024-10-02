@@ -226,6 +226,8 @@ mod test {
         mod canonize_headers {
             use super::*;
 
+            const HEADERS: [(&str, &str); 2] = [("From ", " aa \r\n\r\n"), ("To", "bb\r\n")];
+
             #[test]
             fn empty_headers() {
                 let headers = vec![].into_iter();
@@ -234,8 +236,14 @@ mod test {
 
             #[test]
             fn joins_headers_into_canonized_sequence() {
-                let headers = vec![("From ", " aa \r\n\r\n"), ("To", "bb\r\n")].into_iter();
+                let headers = HEADERS.into_iter();
                 assert_eq!("from:aa\r\n\r\nto:bb\r\n", canonize_headers(headers));
+            }
+
+            #[test]
+            fn does_not_change_headers_order() {
+                let headers_reversed = HEADERS.into_iter().rev();
+                assert_eq!("to:bb\r\nfrom:aa\r\n\r\n", canonize_headers(headers_reversed));
             }
         }
     }
