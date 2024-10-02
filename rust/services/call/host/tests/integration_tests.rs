@@ -1,6 +1,6 @@
 use std::{collections::HashMap, env};
 
-use alloy_chains::Chain;
+use alloy_chains::{Chain, NamedChain};
 use alloy_primitives::{address, b256, uint, Address, ChainId};
 use alloy_sol_types::{sol, SolCall};
 use call_host::{
@@ -20,6 +20,10 @@ fn create_test_provider_factory(test_name: &str) -> FileProviderFactory {
     let rpc_file_cache: HashMap<_, _> = HashMap::from([
         (Chain::mainnet().id(), format!("testdata/mainnet_{test_name}_rpc_cache.json")),
         (Chain::sepolia().id(), format!("testdata/sepolia_{test_name}_rpc_cache.json")),
+        (
+            NamedChain::AnvilHardhat.into(),
+            format!("testdata/anvil_{test_name}_rpc_cache.json"),
+        ),
     ]);
 
     FileProviderFactory::new(rpc_file_cache)
@@ -29,6 +33,10 @@ fn create_recording_provider_factory(test_name: &str) -> CachedProviderFactory {
     let rpc_file_cache: HashMap<_, _> = HashMap::from([
         (Chain::mainnet().id(), format!("testdata/mainnet_{test_name}_rpc_cache.json")),
         (Chain::sepolia().id(), format!("testdata/sepolia_{test_name}_rpc_cache.json")),
+        (
+            NamedChain::AnvilHardhat.into(),
+            format!("testdata/anvil_{test_name}_rpc_cache.json"),
+        ),
     ]);
     dotenv().ok();
     let alchemy_key = env::var("ALCHEMY_KEY").expect(
@@ -36,8 +44,12 @@ fn create_recording_provider_factory(test_name: &str) -> CachedProviderFactory {
     );
     let mainnet_url = format!("https://eth-mainnet.g.alchemy.com/v2/{alchemy_key}");
     let sepolia_url = format!("https://eth-sepolia.g.alchemy.com/v2/{alchemy_key}");
-    let rpc_urls: HashMap<_, _> =
-        HashMap::from([(Chain::mainnet().id(), mainnet_url), (Chain::sepolia().id(), sepolia_url)]);
+    let anvil_url = format!("http://localhost:8545");
+    let rpc_urls: HashMap<_, _> = HashMap::from([
+        (Chain::mainnet().id(), mainnet_url),
+        (Chain::sepolia().id(), sepolia_url),
+        (NamedChain::AnvilHardhat.into(), anvil_url),
+    ]);
 
     CachedProviderFactory::new(rpc_urls, rpc_file_cache)
 }
