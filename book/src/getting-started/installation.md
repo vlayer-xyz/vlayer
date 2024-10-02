@@ -9,7 +9,12 @@
   <p>This feature is fully implemented and ready for use. If you encounter any issues, please <a href="https://github.com/vlayer-xyz/vlayer/issues/new">submit a bug report</a> to help us improve.</p>
 </div>
 
-The simplest way to install vlayer is to use `vlayerup`, the vlayer toolchain installer.
+The easiest way to install vlayer is by using `vlayerup`, the vlayer toolchain installer.
+
+## Prerequisites
+Before you can start working with vlayer and run examples, you need to install [Foundry](https://book.getfoundry.sh/getting-started/installation)
+
+## Get vlayerup
 
 To install `vlayerup`, run the following command in your terminal, then follow the onscreen instructions.
 ```sh
@@ -18,7 +23,8 @@ curl -SL https://install.vlayer.xyz | bash
 
 This will install `vlayerup` and make it available in your CLI.
 
-Running `vlayerup` will install the latest (nightly) precompiled binary of `vlayer`:
+## Using vlayerup
+Running `vlayerup` will install the latest (nightly) precompiled binary of vlayer:
 ```sh
 vlayerup
 ```

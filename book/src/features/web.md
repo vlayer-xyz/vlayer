@@ -77,7 +77,7 @@ If no execution errors occured and proof was produced, we are ready for on-chain
 > To run the above example on your computer, type the following command in your terminal:
 > 
 > ```bash
-> vlayer init --template web_example
+> vlayer init --template web-proof
 > ```
 > 
 > This command will download all necessary artifacts to your project.

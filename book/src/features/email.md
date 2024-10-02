@@ -82,7 +82,7 @@ String comparison is handled by our `StringUtils` library (*described in more [d
 > To run the above example on your computer, type the following command in your terminal:
 > 
 > ```bash
-> vlayer init --template simple-email
+> vlayer init --template email-proof
 > ```
 > 
 > This command will download create and initialise a new project with sample email proof contracts.
