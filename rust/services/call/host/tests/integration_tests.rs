@@ -9,12 +9,19 @@ use call_host::{
 };
 use dotenv::dotenv;
 use ethers_core::types::BlockNumber as BlockTag;
+use lazy_static::lazy_static;
 use provider::{BlockingProvider, CachedProviderFactory, FileProviderFactory, ProviderFactory};
 
 // To activate recording, set UPDATE_SNAPSHOTS to true.
 // Recording creates new testdata directory and writes return data from Alchemy into files in that directory.
 const UPDATE_SNAPSHOTS: bool = false;
 const LATEST_BLOCK: BlockTag = BlockTag::Latest;
+
+lazy_static! {
+    static ref mainnet_url: String = format!("https://eth-mainnet.g.alchemy.com/v2/{alchemy_key}");
+    static ref sepolia_url: String = format!("https://eth-sepolia.g.alchemy.com/v2/{alchemy_key}");
+    static ref anvil_url: String = format!("http://localhost:8545");
+}
 
 fn create_test_provider_factory(test_name: &str) -> FileProviderFactory {
     let rpc_file_cache: HashMap<_, _> = HashMap::from([
@@ -42,13 +49,10 @@ fn create_recording_provider_factory(test_name: &str) -> CachedProviderFactory {
     let alchemy_key = env::var("ALCHEMY_KEY").expect(
         "To use recording provider you need to set ALCHEMY_KEY in an .env file. See .env.example",
     );
-    let mainnet_url = format!("https://eth-mainnet.g.alchemy.com/v2/{alchemy_key}");
-    let sepolia_url = format!("https://eth-sepolia.g.alchemy.com/v2/{alchemy_key}");
-    let anvil_url = format!("http://localhost:8545");
     let rpc_urls: HashMap<_, _> = HashMap::from([
-        (Chain::mainnet().id(), mainnet_url),
-        (Chain::sepolia().id(), sepolia_url),
-        (NamedChain::AnvilHardhat.into(), anvil_url),
+        (Chain::mainnet().id(), mainnet_url.clone()),
+        (Chain::sepolia().id(), sepolia_url.clone()),
+        (NamedChain::AnvilHardhat.into(), anvil_url.clone()),
     ]);
 
     CachedProviderFactory::new(rpc_urls, rpc_file_cache)
