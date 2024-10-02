@@ -1,8 +1,8 @@
-# Contributing to vlayer browser extension
+# Contributing to the vlayer browser extension
 
 ## Prerequisites
 
-To start working with vlayer browser extension, you need to install following software:
+To start working with the vlayer browser extension, you need to install the following software:
 
 - [Bun](https://bun.sh/)
 - [Foundry](https://book.getfoundry.sh/getting-started/installation)
@@ -10,7 +10,7 @@ To start working with vlayer browser extension, you need to install following so
 
 ## Building
 
-First build vlayer server with:
+First build the vlayer server with:
 
 ```sh
 cd rust
@@ -55,7 +55,7 @@ Run anvil:
 anvil
 ```
 
-Run vlayer server:
+Run the vlayer server:
 
 ```sh
 cd rust
@@ -89,9 +89,9 @@ bun run dev
 ```
 
 This will open a web browser with the vlayer app and browser extension installed.
-Now all saved changes will be applied in browser.
+Now all the saved changes will be applied in your browser automatically.
 
-There is a script, `bash/run-web-example.sh`, that runs all of the above steps.
+There is [a script](https://github.com/vlayer-xyz/vlayer/blob/main/bash/run-web-example.sh), that runs all of the steps above.
 
 ### Extension watch mode
 
