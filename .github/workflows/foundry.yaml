@@ -10,15 +10,15 @@ on:
     branches:
       - '**'
   merge_group:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 env:
   FOUNDRY_PROFILE: ci
 
 jobs:
   forge-test:
-    strategy:
-      fail-fast: true
-
     name: Foundry project
     runs-on: aws-linux-small
     steps:
