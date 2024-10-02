@@ -14,11 +14,11 @@ use std::process::Output;
 use tar::Archive;
 use tracing::{error, info};
 
+use crate::commands::version::version;
+
 const VLAYER_DIR_NAME: &str = "vlayer";
 const EXAMPLES_URL: &str =
     "https://vlayer-releases.s3.eu-north-1.amazonaws.com/latest/examples.tar.gz";
-const CONTRACTS_URL: &str =
-    "https://vlayer-releases.s3.eu-north-1.amazonaws.com/latest/contracts.zip";
 
 lazy_static! {
     static ref DEPENDENCIES: Vec<SoldeerDep> = vec![
@@ -42,9 +42,9 @@ lazy_static! {
         },
         SoldeerDep {
             name: String::from("vlayer"),
-            version: String::from("0.1.0"),
-            url: Some(String::from(CONTRACTS_URL)),
-            remapping: None,
+            version: version(),
+            url: None,
+            remapping: Some(("vlayer-0.1.0", "src").into() ),
         }
     ];
 }
@@ -354,9 +354,14 @@ mod tests {
         let remappings_txt = root_path.join("remappings.txt");
         let contents = fs::read_to_string(remappings_txt).unwrap();
 
-        assert_eq!(
-            contents,
-            "some initial remappings\nopenzeppelin-contracts/=dependencies/@openzeppelin-contracts-5.0.1/\nforge-std/=dependencies/forge-std-1.9.2/src/\n"
+        let expected_remappings = format!(
+            "some initial remappings\n\
+            openzeppelin-contracts/=dependencies/@openzeppelin-contracts-5.0.1/\n\
+            forge-std/=dependencies/forge-std-1.9.2/src/\n\
+            vlayer-0.1.0/=dependencies/vlayer-{}/src/\n",
+            version()
         );
+
+        assert_eq!(contents, expected_remappings);
     }
 }

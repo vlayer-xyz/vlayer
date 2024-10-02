@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 serde = { workspace = true }
+bytes = { workspace = true }
 risc0-zkp = { workspace = true }
 block_header = { workspace = true }
 
