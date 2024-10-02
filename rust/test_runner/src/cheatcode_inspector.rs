@@ -8,7 +8,7 @@ use call_engine::{
     Proof, Seal,
 };
 use call_host::host::{config::HostConfig, Host};
-use chain::TEST_CHAIN_ID_1;
+use chain::TEST_CHAIN_ID;
 use foundry_config::RpcEndpoints;
 use foundry_evm::revm::{
     interpreter::{CallInputs, CallOutcome},
@@ -118,7 +118,7 @@ fn create_host<DB: Database>(
     Host::try_new_with_provider_factory(
         TestProviderFactory::new(pending_state_provider_factory, rpc_endpoints.clone()),
         &HostConfig {
-            start_chain_id: TEST_CHAIN_ID_1,
+            start_chain_id: TEST_CHAIN_ID,
             ..Default::default()
         },
     )

@@ -142,7 +142,7 @@ fn build_executor_env(input: impl Serialize) -> anyhow::Result<ExecutorEnv<'stat
 
 #[cfg(test)]
 mod test {
-    use chain::TEST_CHAIN_ID_1;
+    use chain::TEST_CHAIN_ID;
     use host_utils::ProofMode;
 
     use super::*;
@@ -174,12 +174,12 @@ mod test {
 
     #[test]
     fn try_new_invalid_rpc_url() -> anyhow::Result<()> {
-        let rpc_urls = [(TEST_CHAIN_ID_1, "http://localhost:123/".to_string())]
+        let rpc_urls = [(TEST_CHAIN_ID, "http://localhost:123/".to_string())]
             .into_iter()
             .collect();
         let config = HostConfig {
             rpc_urls,
-            start_chain_id: TEST_CHAIN_ID_1,
+            start_chain_id: TEST_CHAIN_ID,
             proof_mode: ProofMode::Fake,
         };
         let res = Host::try_new(&config);

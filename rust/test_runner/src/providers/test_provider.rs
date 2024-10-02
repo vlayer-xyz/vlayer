@@ -4,7 +4,7 @@ use alloy_primitives::{
     Address, BlockNumber, Bytes, ChainId, StorageKey, StorageValue, TxNumber, U256,
 };
 use block_header::EvmBlockHeader;
-use chain::{CHAIN_NAMES, TEST_CHAIN_ID_1};
+use chain::{CHAIN_NAMES, TEST_CHAIN_ID};
 use ethers_core::types::BlockNumber as BlockTag;
 use foundry_config::RpcEndpoints;
 use provider::{
@@ -93,7 +93,7 @@ impl TestProviderFactory {
 
 impl ProviderFactory<TestProvider> for TestProviderFactory {
     fn create(&self, chain_id: ChainId) -> Result<TestProvider, ProviderFactoryError> {
-        if chain_id == TEST_CHAIN_ID_1 {
+        if chain_id == TEST_CHAIN_ID {
             let pending_state_provider = self.pending_state_provider_factory.create(chain_id)?;
             Ok(TestProvider {
                 provider: Box::new(pending_state_provider),

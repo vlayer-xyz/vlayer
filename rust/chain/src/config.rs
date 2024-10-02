@@ -9,7 +9,7 @@ use revm::primitives::SpecId;
 use crate::{eip1559::Eip1559Constants, fork::ForkCondition, spec::ChainSpec};
 
 // Some unique chain ids for testing
-pub const TEST_CHAIN_ID_1: ChainId = 100001;
+pub const TEST_CHAIN_ID: ChainId = 31_337;
 
 pub const MAINNET_MERGE_BLOCK_NUMBER: u64 = 15537394;
 
@@ -17,7 +17,7 @@ pub static CHAIN_MAP: Lazy<HashMap<ChainId, &'static Lazy<ChainSpec>>> = Lazy::n
     HashMap::from([
         (Chain::mainnet().id(), &ETH_MAINNET_CHAIN_SPEC),
         (Chain::sepolia().id(), &ETH_SEPOLIA_CHAIN_SPEC),
-        (TEST_CHAIN_ID_1, &TESTING_CHAIN_SPEC),
+        (TEST_CHAIN_ID, &TESTING_CHAIN_SPEC),
         (Chain::base_mainnet().id(), &TESTING_CHAIN_SPEC),
         (Chain::optimism_mainnet().id(), &TESTING_CHAIN_SPEC),
     ])
@@ -58,7 +58,7 @@ pub static ETH_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
 
 pub static TESTING_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
     ChainSpec::new(
-        TEST_CHAIN_ID_1,
+        TEST_CHAIN_ID,
         SpecId::CANCUN,
         BTreeMap::from([
             (SpecId::MERGE, ForkCondition::Block(0)),
