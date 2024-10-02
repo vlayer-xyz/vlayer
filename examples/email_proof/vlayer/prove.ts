@@ -4,7 +4,7 @@ import emailProofProver from "../out/EmailProver.sol/EmailProver";
 import emailProofVerifier from "../out/EmailProofVerifier.sol/EmailProofVerifier";
 
 const mimeEmail = fs
-  .readFileSync("../testdata/real_signed_email.eml")
+  .readFileSync("./testdata/real_signed_email.eml")
   .toString();
 
 const unverifiedEmail = await preverifyEmail(mimeEmail);

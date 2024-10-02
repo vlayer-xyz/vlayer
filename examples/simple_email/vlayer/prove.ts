@@ -3,7 +3,7 @@ import { testHelpers, prove, preverifyEmail } from "@vlayer/sdk";
 import emailProofProver from "../out/EmailDomainProver.sol/EmailDomainProver";
 import emailProofVerifier from "../out/EmailProofVerifier.sol/EmailDomainVerifier";
 
-const mimeEmail = fs.readFileSync("../testdata/verify_vlayer.eml").toString();
+const mimeEmail = fs.readFileSync("./testdata/verify_vlayer.eml").toString();
 
 const prover = await testHelpers.deployContract(emailProofProver, [
   "@vlayer.xyz",
