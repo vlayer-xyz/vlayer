@@ -17,45 +17,39 @@ use provider::{BlockingProvider, CachedProviderFactory, FileProviderFactory, Pro
 const UPDATE_SNAPSHOTS: bool = false;
 const LATEST_BLOCK: BlockTag = BlockTag::Latest;
 
+fn get_alchemy_key() -> String {
+    dotenv().ok();
+    env::var("ALCHEMY_KEY").expect(
+        "To use recording provider you need to set ALCHEMY_KEY in an .env file. See .env.example",
+    )
+}
+
 lazy_static! {
-    static ref mainnet_url: String = format!("https://eth-mainnet.g.alchemy.com/v2/{alchemy_key}");
-    static ref sepolia_url: String = format!("https://eth-sepolia.g.alchemy.com/v2/{alchemy_key}");
+    static ref alchemy_key: String = get_alchemy_key();
+    static ref mainnet_url: String =
+        format!("https://eth-mainnet.g.alchemy.com/v2/{}", *alchemy_key);
+    static ref sepolia_url: String =
+        format!("https://eth-sepolia.g.alchemy.com/v2/{}", *alchemy_key);
     static ref anvil_url: String = format!("http://localhost:8545");
 }
 
-fn create_test_provider_factory(test_name: &str) -> FileProviderFactory {
-    let rpc_file_cache: HashMap<_, _> = HashMap::from([
+fn rpc_file_cache(test_name: &str) -> HashMap<ChainId, String> {
+    HashMap::from([
         (Chain::mainnet().id(), format!("testdata/mainnet_{test_name}_rpc_cache.json")),
         (Chain::sepolia().id(), format!("testdata/sepolia_{test_name}_rpc_cache.json")),
         (
             NamedChain::AnvilHardhat.into(),
             format!("testdata/anvil_{test_name}_rpc_cache.json"),
         ),
-    ]);
-
-    FileProviderFactory::new(rpc_file_cache)
+    ])
 }
 
-fn create_recording_provider_factory(test_name: &str) -> CachedProviderFactory {
-    let rpc_file_cache: HashMap<_, _> = HashMap::from([
-        (Chain::mainnet().id(), format!("testdata/mainnet_{test_name}_rpc_cache.json")),
-        (Chain::sepolia().id(), format!("testdata/sepolia_{test_name}_rpc_cache.json")),
-        (
-            NamedChain::AnvilHardhat.into(),
-            format!("testdata/anvil_{test_name}_rpc_cache.json"),
-        ),
-    ]);
-    dotenv().ok();
-    let alchemy_key = env::var("ALCHEMY_KEY").expect(
-        "To use recording provider you need to set ALCHEMY_KEY in an .env file. See .env.example",
-    );
-    let rpc_urls: HashMap<_, _> = HashMap::from([
+fn rpc_urls() -> HashMap<ChainId, String> {
+    HashMap::from([
         (Chain::mainnet().id(), mainnet_url.clone()),
         (Chain::sepolia().id(), sepolia_url.clone()),
         (NamedChain::AnvilHardhat.into(), anvil_url.clone()),
-    ]);
-
-    CachedProviderFactory::new(rpc_urls, rpc_file_cache)
+    ])
 }
 
 fn create_host<P>(
@@ -92,11 +86,11 @@ where
     };
 
     let raw_return_value = if UPDATE_SNAPSHOTS {
-        let provider_factory = create_recording_provider_factory(test_name);
+        let provider_factory = CachedProviderFactory::new(rpc_urls(), rpc_file_cache(test_name));
         let host = create_host(provider_factory, &config, block_number)?;
         host.run(call)?.guest_output.evm_call_result
     } else {
-        let provider_factory = create_test_provider_factory(test_name);
+        let provider_factory = FileProviderFactory::new(rpc_file_cache(test_name));
         let host = create_host(provider_factory, &config, block_number)?;
         host.run(call)?.guest_output.evm_call_result
     };
