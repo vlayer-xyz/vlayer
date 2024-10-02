@@ -6,6 +6,7 @@ To start working with vlayer browser extension, you need to install following so
 
 - [Bun](https://bun.sh/)
 - [Foundry](https://book.getfoundry.sh/getting-started/installation)
+- [Chrome Browser](https://www.google.com/chrome/)
 
 ## Building
 
@@ -13,7 +14,7 @@ First build vlayer server with:
 
 ```sh
 cd rust
-cargo build --release
+cargo build
 ```
 
 Then build vlayer contracts with:
@@ -83,6 +84,7 @@ Then, start the browser extension:
 
 ```sh
 cd packages/browser-extension
+cp .env.template .env.development
 bun run dev
 ```
 
