@@ -1,6 +1,7 @@
 import { VlayerClient } from "types/vlayer";
 import { WebProofProvider } from "types/webProofProvider";
 
+import { prove } from "../prover";
 export const createVlayerClient = ({
   url,
   webProofProvider,
@@ -9,10 +10,8 @@ export const createVlayerClient = ({
   webProofProvider: WebProofProvider;
 }): VlayerClient => {
   return {
-    prove: async () => {
-      console.log("prove");
-      console.log("url", url);
-      console.log("webProofProvider", webProofProvider);
+    prove: async ({ address, functionName, chainId, proverAbi, args }) => {
+      return prove(address, proverAbi, functionName, args, chainId);
     },
   };
 };
