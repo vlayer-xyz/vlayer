@@ -10,12 +10,12 @@ export const EXTENSION_STEP = {
 } as const;
 
 export const EXTENSION_ACTION = {
-  openSidePanel: "open_side_panel",
+  requestWebProof: "requestWebProof",
 } as const;
 
 export const EXTENSION_MESSAGE = {
-  proofDone: "proof_done",
-  proofError: "proof_error",
+  proofDone: "proofDone",
+  proofError: "proofError",
 } as const;
 
 type ExtensionStep = (typeof EXTENSION_STEP)[keyof typeof EXTENSION_STEP];

@@ -15,13 +15,13 @@ import { createTestClient, http, publicActions, walletActions } from "viem";
 import webProofVerifier from "../../out/WebProofVerifier.sol/WebProofVerifier";
 
 const context: {
-  webProof: WebProof;
-  zkProof: VCallResponse;
+  webProof: WebProof | null;
+  zkProof: VCallResponse | null;
   result: `0x${string}`[];
 } = {
-  webProof: {} as WebProof,
-  zkProof: {} as VCallResponse,
-  result: [`0x`],
+  webProof: null,
+  zkProof: null,
+  result: [],
 };
 
 export async function setupRequestProveButton(element: HTMLButtonElement) {

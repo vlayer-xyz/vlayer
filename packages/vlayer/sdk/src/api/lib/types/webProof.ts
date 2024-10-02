@@ -1,8 +1,6 @@
-//NOTE : this is copied from tlsn-js 5.4
-// for some reason newest vertsions doesnt not export this type (clarification is in progress)
-// probaly it should be reexported from tlsn-js
-
-import { z } from "zod";
+// NOTE : this is copied from tlsn-js 5.4
+// for some reason newest versions doesn't export this type (clarification is in progress)
+// probably it should be reexported from tlsn-js
 
 export interface WebProof {
   session: Session;
@@ -102,12 +100,12 @@ export interface Range {
   start: number;
   end: number;
 }
-
 export const assertWebProof = function (candidate: {
   notaryUrl?: string;
 }): asserts candidate is WebProof {
+  //for now only thing we check is notary url
+  //TODO: implement later once we known the conteact with tlsn-js
   if (!candidate.notaryUrl) {
-    throw new Error("ddd");
+    throw new Error("Missing required parameter");
   }
-  console.log("Implement webproof assertion");
 };

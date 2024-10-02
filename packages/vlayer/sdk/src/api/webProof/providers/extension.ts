@@ -32,7 +32,7 @@ export const createExtensionWebProofProvider = ({
 
       return new Promise<WebProof>((resolve, reject) => {
         chrome.runtime.sendMessage(import.meta.env.VITE_EXTENSION_ID, {
-          action: EXTENSION_ACTION.openSidePanel,
+          action: EXTENSION_ACTION.requestWebProof,
           payload: {
             notaryUrl,
             wsProxyUrl,
@@ -42,13 +42,24 @@ export const createExtensionWebProofProvider = ({
         });
         const EXTENSION_ID = import.meta.env.VITE_EXTENSION_ID as string;
         const port = chrome.runtime.connect(EXTENSION_ID);
+        //TODO : validate message in runtime
         port.onMessage.addListener(
-          (message: { type: string; proof: WebProof }) => {
+          (
+            message:
+              | {
+                  type: typeof EXTENSION_MESSAGE.proofDone;
+                  proof: WebProof;
+                }
+              | {
+                  type: typeof EXTENSION_MESSAGE.proofError;
+                  error: { message: string };
+                },
+          ) => {
             if (message.type === EXTENSION_MESSAGE.proofDone) {
               resolve(message.proof);
             }
             if (message.type === EXTENSION_MESSAGE.proofError) {
-              reject(new Error("Proof generation failed"));
+              reject(message.error);
             }
           },
         );
