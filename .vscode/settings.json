@@ -11,6 +11,9 @@
     "editor.defaultFormatter": "rust-lang.rust-analyzer",
     "editor.formatOnSave": true
   },
+  "rust-analyzer.rustfmt.extraArgs": [
+    "+nightly"
+  ],
   "rust-analyzer.check.workspace": false,
   "cSpell.words": [
     "Arbitrum",
