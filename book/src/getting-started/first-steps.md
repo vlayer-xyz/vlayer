@@ -47,7 +47,6 @@ vlayer serve
 For Provers using functionalities like teleports or time travel, configure the appropriate JSON-RPC URLs for each chain used:
 ```bash
 vlayer serve \
-  --rpc-url '100002:http://localhost:8546' \
   --rpc-url '100001:http://localhost:8545' \
   --rpc-url '11155111:https://eth-sepolia.g.alchemy.com/v2/{ALCHEMY_KEY}' \
   --rpc-url '1:https://eth-mainnet.g.alchemy.com/v2/{ALCHEMY_KEY}' \
