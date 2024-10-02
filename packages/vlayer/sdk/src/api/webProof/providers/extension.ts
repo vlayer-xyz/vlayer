@@ -31,8 +31,8 @@ export const createExtensionWebProofProvider = ({
 }: WebProofProviderSetup): WebProofProvider => {
   return {
     getWebProof: async function (webProofSetup: WebProofSetupInput) {
-      // TODO: we cant assume that developer is using vite
-      // EXTESION_ID value should be injected by the build system
+      // TODO: we can't assume that developer is using vite
+      // VITE_EXTENSION_ID value should be injected by the build system
 
       return new Promise<WebProof>((resolve, reject) => {
         chrome.runtime.sendMessage(import.meta.env.VITE_EXTENSION_ID, {
@@ -46,7 +46,7 @@ export const createExtensionWebProofProvider = ({
         });
         const EXTENSION_ID = import.meta.env.VITE_EXTENSION_ID as string;
         const port = chrome.runtime.connect(EXTENSION_ID);
-        //TODO : validate message in runtime
+        // TODO: validate message in runtime
         port.onMessage.addListener(
           (
             message:
