@@ -1,13 +1,13 @@
 use p256::PublicKey;
 use pkcs8::{DecodePublicKey, EncodePublicKey, LineEnding};
-use serde::de::Deserializer;
-use serde::{Deserialize, Serialize, Serializer};
+use serde::{de::Deserializer, Deserialize, Serialize, Serializer};
 use thiserror::Error;
-use tlsn_core::proof::{SessionProofError, SubstringsProofError, TlsProof};
-use tlsn_core::ServerName;
+use tlsn_core::{
+    proof::{SessionProofError, SubstringsProofError, TlsProof},
+    ServerName,
+};
 
-use crate::request_transcript::RequestTranscript;
-use crate::response_transcript::ResponseTranscript;
+use crate::{request_transcript::RequestTranscript, response_transcript::ResponseTranscript};
 
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]

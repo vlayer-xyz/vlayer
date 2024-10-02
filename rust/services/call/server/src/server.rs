@@ -1,11 +1,14 @@
 use std::{pin::Pin, sync::Arc};
 
-use crate::handlers::v_call::Params;
-use crate::{config::ServerConfig, handlers::v_call::v_call};
 use axum::{routing::post, Router};
 use server_utils::{init_trace_layer, route, RequestIdLayer};
 use tower_http::cors::CorsLayer;
 use tracing::info;
+
+use crate::{
+    config::ServerConfig,
+    handlers::v_call::{v_call, Params},
+};
 
 pub async fn serve(config: ServerConfig) -> anyhow::Result<()> {
     let listener =

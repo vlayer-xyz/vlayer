@@ -2,16 +2,18 @@ mod json;
 mod verify_and_parse;
 mod verify_and_parse_email;
 
-use crate::precompiles::json::{
-    JSON_GET_BOOL_PRECOMPILE, JSON_GET_INT_PRECOMPILE, JSON_GET_STRING_PRECOMPILE,
-};
-use crate::precompiles::verify_and_parse::VERIFY_AND_PARSE_PRECOMPILE;
-use crate::precompiles::verify_and_parse_email::VERIFY_EMAIL_PRECOMPILE;
-use revm::precompile::Error::OutOfGas;
-use revm::precompile::{calc_linear_cost_u32, u64_to_address};
 use revm::{
-    precompile::{PrecompileErrors::Error, PrecompileWithAddress},
+    precompile::{
+        calc_linear_cost_u32, u64_to_address, Error::OutOfGas, PrecompileErrors::Error,
+        PrecompileWithAddress,
+    },
     primitives::PrecompileErrors,
+};
+
+use crate::precompiles::{
+    json::{JSON_GET_BOOL_PRECOMPILE, JSON_GET_INT_PRECOMPILE, JSON_GET_STRING_PRECOMPILE},
+    verify_and_parse::VERIFY_AND_PARSE_PRECOMPILE,
+    verify_and_parse_email::VERIFY_EMAIL_PRECOMPILE,
 };
 
 pub(crate) const VLAYER_PRECOMPILES: [PrecompileWithAddress; 5] = [

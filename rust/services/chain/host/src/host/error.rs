@@ -1,5 +1,6 @@
-use derivative::Derivative;
 use std::array::TryFromSliceError;
+
+use derivative::Derivative;
 use thiserror::Error;
 
 #[derive(Error, Debug, Clone, Derivative)]

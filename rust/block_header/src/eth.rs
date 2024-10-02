@@ -67,14 +67,17 @@ impl EvmBlockHeader for EthBlockHeader {
     fn parent_hash(&self) -> &B256 {
         &self.parent_hash
     }
+
     #[inline]
     fn number(&self) -> BlockNumber {
         self.number
     }
+
     #[inline]
     fn timestamp(&self) -> u64 {
         self.timestamp
     }
+
     #[inline]
     fn state_root(&self) -> &B256 {
         &self.state_root

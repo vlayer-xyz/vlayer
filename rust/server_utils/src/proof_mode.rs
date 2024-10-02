@@ -1,6 +1,5 @@
-use serde::{Deserialize, Serialize};
-
 use host_utils::ProofMode as HostProofMode;
+use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Deserialize, Serialize, Copy)]
 pub enum ProofMode {

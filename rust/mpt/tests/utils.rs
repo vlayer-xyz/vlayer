@@ -1,7 +1,5 @@
 use itertools::Itertools;
-use rand::distributions::Uniform;
-use rand::rngs::StdRng;
-use rand::Rng;
+use rand::{distributions::Uniform, rngs::StdRng, Rng};
 
 const MAX_KEY_LENGTH: usize = 8;
 const MAX_VALUE_PER_BYTE: u8 = 5;

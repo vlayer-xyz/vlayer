@@ -1,12 +1,16 @@
-use crate::errors::CLIError;
 use call_server::{ProofMode, ServerConfig};
 use clap::{Parser, Subcommand};
-use commands::args::{InitArgs, ServeArgs};
-use commands::version::Version;
-use commands::{init::init, serve::run_serve};
+use commands::{
+    args::{InitArgs, ServeArgs},
+    init::init,
+    serve::run_serve,
+    version::Version,
+};
 use test_runner::cli::TestArgs;
 use tracing::{error, info};
 use tracing_subscriber::EnvFilter;
+
+use crate::errors::CLIError;
 
 mod commands;
 pub mod errors;

@@ -1,7 +1,12 @@
-use mail_auth::common::parse::TxtRecordParser;
-use mail_auth::common::resolve::{IntoFqdn, Resolve, UnwrapTxtRecord};
-use mail_auth::Txt;
 use std::sync::Arc;
+
+use mail_auth::{
+    common::{
+        parse::TxtRecordParser,
+        resolve::{IntoFqdn, Resolve, UnwrapTxtRecord},
+    },
+    Txt,
+};
 
 pub struct StaticResolver<'a> {
     dns_record: &'a [u8],

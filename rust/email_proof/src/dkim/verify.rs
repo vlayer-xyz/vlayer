@@ -1,6 +1,8 @@
+use mail_auth::{
+    dkim::verify::DkimVerifier, AuthenticatedMessage, DkimOutput, DkimResult, Error as AuthError,
+};
+
 use crate::dkim::static_resolver::StaticResolver;
-use mail_auth::dkim::verify::DkimVerifier;
-use mail_auth::{AuthenticatedMessage, DkimOutput, DkimResult, Error as AuthError};
 
 pub fn verify_dkim(email: &[u8], dns_records: &[String]) -> Result<(), AuthError> {
     let authenticated_message = AuthenticatedMessage::parse(email).ok_or(AuthError::ParseError)?;

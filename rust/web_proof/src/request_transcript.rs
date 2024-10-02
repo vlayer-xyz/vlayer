@@ -29,9 +29,10 @@ impl RequestTranscript {
 
 #[cfg(test)]
 mod tests {
+    use tlsn_core::TranscriptSlice;
+
     use super::*;
     use crate::fixtures::read_fixture;
-    use tlsn_core::TranscriptSlice;
 
     fn create_transcript(path: &str) -> RequestTranscript {
         let transcript = read_fixture(path).as_bytes().to_vec();

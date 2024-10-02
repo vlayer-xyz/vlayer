@@ -1,20 +1,27 @@
 use alloy_primitives::U256;
 use alloy_sol_types::{SolCall, SolType};
-use call_engine::io::{Call, HostOutput};
-use call_engine::utils::evm_call::{
-    create_encoded_return_outcome, create_return_outcome, create_revert_outcome, split_calldata,
+use call_engine::{
+    io::{Call, HostOutput},
+    utils::evm_call::{
+        create_encoded_return_outcome, create_return_outcome, create_revert_outcome, split_calldata,
+    },
+    Proof, Seal,
 };
-use call_engine::{Proof, Seal};
-use call_host::host::config::HostConfig;
-use call_host::host::Host;
-use foundry_config::RpcEndpoints;
-use foundry_evm::revm::interpreter::{CallInputs, CallOutcome};
-use foundry_evm::revm::{Database, EvmContext, Inspector};
-
-use crate::cheatcodes::{callProverCall, getProofCall, CHEATCODE_CALL_ADDR};
-use crate::providers::pending_state_provider::PendingStateProviderFactory;
-use crate::providers::test_provider::{TestProvider, TestProviderFactory};
+use call_host::host::{config::HostConfig, Host};
 use chain::TEST_CHAIN_ID_1;
+use foundry_config::RpcEndpoints;
+use foundry_evm::revm::{
+    interpreter::{CallInputs, CallOutcome},
+    Database, EvmContext, Inspector,
+};
+
+use crate::{
+    cheatcodes::{callProverCall, getProofCall, CHEATCODE_CALL_ADDR},
+    providers::{
+        pending_state_provider::PendingStateProviderFactory,
+        test_provider::{TestProvider, TestProviderFactory},
+    },
+};
 
 #[derive(Default)]
 pub struct CheatcodeInspector {

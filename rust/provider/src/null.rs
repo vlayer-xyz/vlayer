@@ -1,8 +1,10 @@
-use super::{BlockingProvider, EIP1186Proof};
+use std::{convert::Infallible, marker::PhantomData};
+
 use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256};
 use block_header::EvmBlockHeader;
 use ethers_core::types::BlockNumber as BlockTag;
-use std::{convert::Infallible, marker::PhantomData};
+
+use super::{BlockingProvider, EIP1186Proof};
 
 /// A simple provider that panics on all queries.
 #[derive(Debug, PartialEq)]
@@ -17,15 +19,19 @@ impl BlockingProvider for NullProvider {
     ) -> Result<Option<Box<dyn EvmBlockHeader>>, Self::Error> {
         panic!("Unexpected provider call")
     }
+
     fn get_transaction_count(&self, _: Address, _: BlockNumber) -> Result<TxNumber, Self::Error> {
         panic!("Unexpected provider call")
     }
+
     fn get_balance(&self, _: Address, _: BlockNumber) -> Result<U256, Self::Error> {
         panic!("Unexpected provider call")
     }
+
     fn get_code(&self, _: Address, _: BlockNumber) -> Result<Bytes, Self::Error> {
         panic!("Unexpected provider call")
     }
+
     fn get_storage_at(
         &self,
         _: Address,
@@ -34,6 +40,7 @@ impl BlockingProvider for NullProvider {
     ) -> Result<StorageValue, Self::Error> {
         panic!("Unexpected provider call")
     }
+
     fn get_proof(
         &self,
         _: Address,

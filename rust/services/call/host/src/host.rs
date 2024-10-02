@@ -1,13 +1,11 @@
-use crate::db::proof::ProofDb;
-use crate::encodable_receipt::EncodableReceipt;
-use crate::evm_env::factory::HostEvmEnvFactory;
-use crate::into_input::into_multi_input;
 use alloy_primitives::ChainId;
 use alloy_sol_types::SolValue;
-use call_engine::engine::Engine;
-use call_engine::evm::env::{cached::CachedEvmEnv, location::ExecutionLocation};
-use call_engine::io::{Call, GuestOutput, HostOutput, Input};
-use call_engine::Seal;
+use call_engine::{
+    engine::Engine,
+    evm::env::{cached::CachedEvmEnv, location::ExecutionLocation},
+    io::{Call, GuestOutput, HostOutput, Input},
+    Seal,
+};
 use call_guest_wrapper::RISC0_CALL_GUEST_ELF;
 use config::HostConfig;
 use error::HostError;
@@ -18,6 +16,11 @@ use provider::{
 };
 use risc0_zkvm::ExecutorEnv;
 use serde::Serialize;
+
+use crate::{
+    db::proof::ProofDb, encodable_receipt::EncodableReceipt, evm_env::factory::HostEvmEnvFactory,
+    into_input::into_multi_input,
+};
 
 pub mod config;
 pub mod error;
@@ -139,10 +142,10 @@ fn build_executor_env(input: impl Serialize) -> anyhow::Result<ExecutorEnv<'stat
 
 #[cfg(test)]
 mod test {
-    use super::*;
-
     use chain::TEST_CHAIN_ID_1;
     use host_utils::ProofMode;
+
+    use super::*;
 
     #[test]
     fn host_provably_execute_invalid_guest_elf() {

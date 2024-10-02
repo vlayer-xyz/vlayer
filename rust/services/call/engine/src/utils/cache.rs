@@ -1,8 +1,9 @@
-use std::cell::RefCell;
-use std::collections::hash_map::Entry;
-use std::collections::HashMap;
-use std::hash::Hash;
-use std::rc::Rc;
+use std::{
+    cell::RefCell,
+    collections::{hash_map::Entry, HashMap},
+    hash::Hash,
+    rc::Rc,
+};
 
 pub trait InteriorMutabilityCache<K, V>
 where
@@ -21,6 +22,7 @@ where
     fn get(&self, key: &K) -> Option<Rc<V>> {
         self.borrow().get(key).map(Rc::clone)
     }
+
     fn try_get_or_insert<F, E>(&self, key: K, f: F) -> Result<Rc<V>, E>
     where
         F: FnOnce() -> Result<V, E>,
@@ -39,9 +41,11 @@ where
 
 #[cfg(test)]
 mod interior_mutability_cache {
-    use super::InteriorMutabilityCache;
-    use anyhow::{anyhow, bail};
     use std::{cell::RefCell, collections::HashMap, rc::Rc};
+
+    use anyhow::{anyhow, bail};
+
+    use super::InteriorMutabilityCache;
 
     #[test]
     fn found() -> anyhow::Result<()> {

@@ -74,7 +74,6 @@ fn build_executor_env(input: impl Serialize) -> anyhow::Result<ExecutorEnv<'stat
 mod test {
     use std::sync::Arc;
 
-    use super::*;
     use alloy_primitives::B256;
     use alloy_rlp::encode_fixed_size;
     use ethers::{providers::Provider, types::Block};
@@ -83,6 +82,8 @@ mod test {
     use provider::EvmBlockHeader;
     use risc0_zkp::core::digest::Digest;
     use serde_json::{from_value, json, Value};
+
+    use super::*;
 
     lazy_static! {
         // All fields are zeroed out except for the block number

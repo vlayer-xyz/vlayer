@@ -1,8 +1,10 @@
-use super::ParseNodeError;
-use crate::node::Node;
+use std::collections::HashMap;
+
 use alloy_primitives::{keccak256, B256};
 use alloy_rlp::Decodable;
-use std::collections::HashMap;
+
+use super::ParseNodeError;
+use crate::node::Node;
 
 /// Returns the decoded node and its RLP hash.
 pub(crate) fn parse_node(rlp: impl AsRef<[u8]>) -> Result<(Option<B256>, Node), ParseNodeError> {
@@ -77,9 +79,8 @@ mod resolve_trie {
     use alloy_primitives::keccak256;
     use alloy_trie::HashMap;
 
-    use crate::{key_nibbles::KeyNibbles, node::Node};
-
     use super::resolve_trie;
+    use crate::{key_nibbles::KeyNibbles, node::Node};
 
     #[test]
     fn null() {

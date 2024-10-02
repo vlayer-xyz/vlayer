@@ -1,5 +1,6 @@
-use super::simple;
 use regex::Regex;
+
+use super::simple;
 
 pub fn canonize_body(body: &str) -> String {
     let with_replaced_whitespaces = replace_whitespace_sequences(body);

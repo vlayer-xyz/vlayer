@@ -1,5 +1,4 @@
-use crate::mail_auth::dkim::Canonicalization;
-use crate::mail_auth::Result;
+use crate::mail_auth::{dkim::Canonicalization, Result};
 
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub enum VerifyingKey {

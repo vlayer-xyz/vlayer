@@ -1,8 +1,9 @@
-use crate::ProofMode;
 use anyhow::Result;
 use risc0_zkvm::{
     BonsaiProver, ExecutorEnv, ExternalProver, ProveInfo, Prover as ProverTrait, ProverOpts,
 };
+
+use crate::ProofMode;
 
 #[derive(Debug, Default, Clone, Copy)]
 pub struct Prover {

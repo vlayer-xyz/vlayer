@@ -33,6 +33,9 @@ jobs:
             rust/call/guest_wrapper/risc0_guest
             rust/chain/guest_wrapper/risc0_guest
 
+      - name: Install nightly rustfmt
+        run: rustup toolchain install nightly -c rustfmt
+
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
@@ -43,7 +46,7 @@ jobs:
         env:
           RUSTFLAGS: "-Dwarnings"
         run: |
-          cargo fmt --check
+          cargo +nightly fmt --check
           cargo clippy --all-targets --all-features
 
       - name: Run Clippy Risc0 Call Guest
@@ -51,7 +54,7 @@ jobs:
         env:
           RUSTFLAGS: "-Dwarnings"
         run: |
-          cargo fmt --check
+          cargo +nightly fmt --check
           cargo clippy --all-targets --all-features
       
       - name: Run Clippy Risc0 Chain Guest
@@ -59,5 +62,5 @@ jobs:
         env:
           RUSTFLAGS: "-Dwarnings"
         run: |
-          cargo fmt --check
+          cargo +nightly fmt --check
           cargo clippy --all-targets --all-features

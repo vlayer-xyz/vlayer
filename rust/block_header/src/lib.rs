@@ -2,20 +2,18 @@ mod casting_utils;
 mod eth;
 mod forge;
 
-pub use eth::EthBlockHeader;
-pub use forge::ForgeBlockHeader;
+use std::fmt::Debug;
 
+use alloy_primitives::{keccak256, BlockNumber, B256};
 use alloy_rlp::Encodable;
 use as_any::AsAny;
 use auto_impl::auto_impl;
-
-use alloy_primitives::{keccak256, BlockNumber, B256};
-
 use casting_utils::is;
 use dyn_clone::{clone_trait_object, DynClone};
+pub use eth::EthBlockHeader;
+pub use forge::ForgeBlockHeader;
 use revm::primitives::BlockEnv;
 use serde::{Deserialize, Serialize};
-use std::fmt::Debug;
 
 pub trait Hashable {
     /// Calculate the hash, this may be slow.
@@ -103,8 +101,9 @@ impl<'de> Deserialize<'de> for Box<dyn EvmBlockHeader> {
 
 #[cfg(test)]
 mod header_to_dyn_header {
-    use super::*;
     use as_any::Downcast;
+
+    use super::*;
 
     #[test]
     fn eth() {
@@ -134,9 +133,10 @@ mod dyn_header_to_header {
 
 #[cfg(test)]
 mod serialize {
-    use super::*;
     use serde_json::to_string;
     use unsupported_block_header::UnsupportedBlockHeader;
+
+    use super::*;
 
     #[test]
     fn success() -> anyhow::Result<()> {
@@ -150,10 +150,11 @@ mod serialize {
 
     #[cfg(test)]
     mod unsupported_block_header {
-        use super::*;
         use alloy_primitives::B256;
         use alloy_rlp_derive::RlpEncodable;
         use revm::primitives::BlockEnv;
+
+        use super::*;
 
         #[derive(Debug, Clone, RlpEncodable)]
         pub struct UnsupportedBlockHeader;
@@ -162,15 +163,19 @@ mod serialize {
             fn parent_hash(&self) -> &B256 {
                 unimplemented!()
             }
+
             fn number(&self) -> BlockNumber {
                 unimplemented!()
             }
+
             fn timestamp(&self) -> u64 {
                 unimplemented!()
             }
+
             fn state_root(&self) -> &B256 {
                 unimplemented!()
             }
+
             fn fill_block_env(&self, _blk_env: &mut BlockEnv) {
                 unimplemented!()
             }
@@ -196,10 +201,12 @@ mod serialize {
 
 #[cfg(test)]
 mod deserialize {
-    use super::*;
+    use std::fs;
+
     use alloy_primitives::hex;
     use serde_json::{self, from_str, from_value, Value};
-    use std::fs;
+
+    use super::*;
 
     const BLOCK_HEADER_INDEX: usize = 1;
 
@@ -244,9 +251,10 @@ mod deserialize {
 
 #[cfg(test)]
 mod serialize_and_deserialize {
-    use super::*;
     use lazy_static::lazy_static;
     use serde_json::{from_str, to_string};
+
+    use super::*;
 
     lazy_static! {
         static ref ETH_BLOCK_HEADER: EthBlockHeader = EthBlockHeader::default();

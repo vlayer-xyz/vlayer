@@ -1,11 +1,10 @@
 //! Handling different blockchain specifications.
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, HashMap};
 
 use alloy_chains::Chain;
 use alloy_primitives::ChainId;
 use once_cell::sync::Lazy;
 use revm::primitives::SpecId;
-use std::collections::HashMap;
 
 use crate::{eip1559::Eip1559Constants, fork::ForkCondition, spec::ChainSpec};
 

@@ -1,12 +1,12 @@
-use crate::db::wrap_state::WrapStateDb;
+use std::{cell::RefCell, rc::Rc};
+
 use call_engine::evm::{
     env::{cached::MultiEvmEnv, EvmEnv},
     input::MultiEvmInput,
 };
-use std::cell::RefCell;
-use std::rc::Rc;
 
 use super::single::ValidatedEvmInput;
+use crate::db::wrap_state::WrapStateDb;
 
 pub struct ValidatedMultiEvmInput(MultiEvmInput);
 
@@ -45,13 +45,14 @@ impl From<ValidatedMultiEvmInput> for MultiEvmEnv<WrapStateDb> {
 #[cfg(test)]
 mod multi_evm_env_from_input {
 
-    use super::*;
     use alloy_chains::Chain;
     use as_any::Downcast;
     use block_header::EthBlockHeader;
     use call_engine::evm::{env::location::ExecutionLocation, input::EvmInput};
     use chain::MAINNET_MERGE_BLOCK_NUMBER;
     use mpt::EMPTY_ROOT_HASH;
+
+    use super::*;
 
     #[test]
     fn success() -> anyhow::Result<()> {

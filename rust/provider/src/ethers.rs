@@ -1,12 +1,11 @@
-use super::{BlockingProvider, EIP1186Proof};
-use alloy_primitives::BlockNumber;
-use alloy_primitives::{B256, U256};
+use alloy_primitives::{BlockNumber, B256, U256};
 use block_header::{EthBlockHeader, EvmBlockHeader};
-use ethers_core::types::Block;
-use ethers_core::types::BlockNumber as BlockTag;
+use ethers_core::types::{Block, BlockNumber as BlockTag};
 use ethers_providers::{Middleware, MiddlewareError};
 use thiserror::Error;
 use tokio::runtime::{Handle, Runtime};
+
+use super::{BlockingProvider, EIP1186Proof};
 
 /// An error that can occur when interacting with the provider.
 #[derive(Error, Debug)]

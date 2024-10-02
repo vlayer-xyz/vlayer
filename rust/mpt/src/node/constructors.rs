@@ -1,8 +1,7 @@
 use alloy_primitives::Bytes;
 
-use crate::key_nibbles::KeyNibbles;
-
 use super::Node;
+use crate::key_nibbles::KeyNibbles;
 
 pub const EMPTY_CHILD: std::option::Option<Box<Node>> = None;
 pub static EMPTY_CHILDREN: [Option<Box<Node>>; 16] = [EMPTY_CHILD; 16];

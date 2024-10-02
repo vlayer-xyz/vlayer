@@ -1,8 +1,9 @@
+use std::{cell::RefCell, marker::PhantomData, path::PathBuf};
+
 use super::{
     cache::{json::JsonCache, CachedProvider},
     null::NullProvider,
 };
-use std::{cell::RefCell, marker::PhantomData, path::PathBuf};
 
 /// A provider returning responses cached in a file.
 /// It panics if queries are not found in the cache.

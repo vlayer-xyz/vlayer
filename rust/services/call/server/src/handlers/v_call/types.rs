@@ -1,15 +1,13 @@
-use crate::error::AppError;
 use alloy_chains::Chain;
-use alloy_primitives::hex::ToHexExt;
-use alloy_primitives::{ChainId, U256};
+use alloy_primitives::{hex::ToHexExt, ChainId, U256};
 use alloy_sol_types::SolValue;
-use call_engine::io::HostOutput;
-use call_engine::{Proof, Seal};
-use call_host::host::error::HostError;
-use call_host::Call as HostCall;
+use call_engine::{io::HostOutput, Proof, Seal};
+use call_host::{host::error::HostError, Call as HostCall};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use server_utils::{parse_address_field, parse_hex_field};
+
+use crate::error::AppError;
 
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
@@ -103,9 +101,10 @@ fn u256_to_number(value: U256) -> u64 {
 
 #[cfg(test)]
 mod test {
+    use call_host::Call as HostCall;
+
     use super::Call;
     use crate::error::AppError;
-    use call_host::Call as HostCall;
 
     const TO: &str = "0x7Ad53bbA1004e46dd456316912D55dBc5D311a03";
     const DATA: &str = "0x0000";

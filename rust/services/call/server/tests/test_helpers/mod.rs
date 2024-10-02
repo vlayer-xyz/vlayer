@@ -1,6 +1,7 @@
+use std::{collections::HashMap, sync::Arc, time::Duration};
+
 use axum::{body::Body, http::Response};
-use call_server::server;
-use call_server::{ProofMode, ServerConfig};
+use call_server::{server, ProofMode, ServerConfig};
 use ethers::{
     contract::abigen,
     core::{
@@ -14,8 +15,6 @@ use ethers::{
 use example_prover::ExampleProver;
 use serde::Serialize;
 use server_utils::post;
-use std::collections::HashMap;
-use std::{sync::Arc, time::Duration};
 
 abigen!(ExampleProver, "./testdata/ExampleProver.json",);
 

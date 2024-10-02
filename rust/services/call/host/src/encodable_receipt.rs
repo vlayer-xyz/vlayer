@@ -1,4 +1,5 @@
 use alloy_primitives::FixedBytes;
+use call_engine::{ProofMode, Seal};
 use risc0_zkvm::{
     sha::Digestible,
     FakeReceipt, Groth16Receipt,
@@ -7,7 +8,6 @@ use risc0_zkvm::{
 };
 
 use crate::host::error::HostError;
-use call_engine::{ProofMode, Seal};
 
 const VERIFIER_SELECTOR_LENGTH: usize = 4;
 const GROTH16_PROOF_SIZE: usize = 256;
@@ -129,13 +129,13 @@ fn split_seal_into_bytes(bytes: SealBytesT) -> [FixedBytes<32>; 8] {
 
 #[cfg(test)]
 mod test {
-    use super::*;
-
-    use alloy_primitives::hex::FromHex;
-    use alloy_primitives::{Address, Uint};
+    use alloy_primitives::{hex::FromHex, Address, Uint};
     use alloy_sol_types::SolValue;
-    use risc0_zkvm::sha::Digestible;
-    use risc0_zkvm::{Groth16Receipt, Groth16ReceiptVerifierParameters, ReceiptClaim};
+    use risc0_zkvm::{
+        sha::Digestible, Groth16Receipt, Groth16ReceiptVerifierParameters, ReceiptClaim,
+    };
+
+    use super::*;
 
     const MOCK_CALL_GUEST_ID: [u8; 32] = [1; 32];
 
@@ -179,8 +179,9 @@ mod test {
     }
 
     fn mock_other_receipt() -> Receipt {
-        use risc0_zkvm::CompositeReceipt;
         use std::{mem::MaybeUninit, ptr::addr_of_mut};
+
+        use risc0_zkvm::CompositeReceipt;
 
         let mut uninit: std::mem::MaybeUninit<CompositeReceipt> = MaybeUninit::uninit();
         let ptr = uninit.as_mut_ptr();

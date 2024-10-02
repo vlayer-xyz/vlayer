@@ -1,8 +1,9 @@
 use std::rc::Rc;
 
-use crate::{db::proof::ProofDb, host::error::HostError};
 use call_engine::evm::env::{location::ExecutionLocation, EvmEnv, EvmEnvFactory};
 use provider::{BlockingProvider, CachedMultiProvider};
+
+use crate::{db::proof::ProofDb, host::error::HostError};
 
 pub(crate) struct HostEvmEnvFactory<P> {
     providers: CachedMultiProvider<P>,

@@ -1,7 +1,8 @@
+use std::fmt;
+
 use alloy_primitives::ChainId;
 use call_server::ProofMode;
 use clap::{ArgAction, Parser, ValueEnum};
-use std::fmt;
 
 #[derive(Clone, Debug, Parser)]
 pub(crate) struct InitArgs {

@@ -1,9 +1,11 @@
+use std::{cell::RefCell, convert::Infallible, rc::Rc};
+
 use alloy_primitives::{keccak256, Address, B256, U256};
 use mpt::MerkleTrie;
-use revm::primitives::{AccountInfo, Bytecode, HashMap};
-use revm::DatabaseRef;
-use std::cell::RefCell;
-use std::{convert::Infallible, rc::Rc};
+use revm::{
+    primitives::{AccountInfo, Bytecode, HashMap},
+    DatabaseRef,
+};
 
 use super::state::StateDb;
 

@@ -6,7 +6,14 @@ mod multi;
 mod null;
 mod proof;
 
+use std::error::Error as StdError;
+
+pub use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256};
+use auto_impl::auto_impl;
+pub use block_header::EvmBlockHeader;
 pub use ethers::{to_eth_block_header, EthersProvider, EthersProviderError};
+pub use ethers_core::types::BlockNumber as BlockTag;
+use ethers_providers::{Http, RetryClient};
 pub use factory::{
     CachedProviderFactory, EthProvider, EthersProviderFactory, FileProviderFactory,
     ProviderFactory, ProviderFactoryError,
@@ -14,13 +21,6 @@ pub use factory::{
 pub use file::FileProvider;
 pub use multi::CachedMultiProvider;
 pub use proof::{EIP1186Proof, StorageProof};
-
-pub use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256};
-use auto_impl::auto_impl;
-pub use block_header::EvmBlockHeader;
-pub use ethers_core::types::BlockNumber as BlockTag;
-use ethers_providers::{Http, RetryClient};
-use std::error::Error as StdError;
 
 /// The Ethers client type.
 pub type EthersClient = ethers_providers::Provider<RetryClient<Http>>;
