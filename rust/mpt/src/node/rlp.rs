@@ -44,16 +44,16 @@ impl Encodable for Node {
                     }
                 }
 
-                let value_len = value
-                    .as_ref()
-                    .map_or(1 /* EMPTY_STRING_CODE */, |v| v.len());
-                assert!(value_len > 0, "empty values are not allowed in MPT");
-                payload_length += value_len;
+                let value = match value.as_deref() {
+                    Some(val) if val.is_empty() => panic!("empty values are not allowed in MPT"),
+                    Some(val) => val.as_ref(),
+                    None => &[],
+                };
+                payload_length += value.length();
 
                 encode_header(true, payload_length, out);
                 child_refs.iter().for_each(|child| child.encode(out));
 
-                let value = value.as_deref().map(AsRef::as_ref).unwrap_or(&[]);
                 value.encode(out);
             }
             Node::Digest(digest) => digest.encode(out),
