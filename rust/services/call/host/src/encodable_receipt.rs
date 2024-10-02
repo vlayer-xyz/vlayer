@@ -149,14 +149,14 @@ mod test {
     const GROTH16_VERIFIER_SELECTOR: VerifierSelector = VerifierSelector([0x31, 0x0f, 0xe5, 0x98]);
 
     fn mock_journal() -> Vec<u8> {
-        let execution_commitment = call_engine::ExecutionCommitment {
+        let call_assumptions = call_engine::CallAssumptions {
             proverContractAddress: Address::from_hex("0x0000000000000000000000000000000000000001")
                 .unwrap(),
             functionSelector: FixedBytes::new([1, 2, 3, 4]),
             settleBlockNumber: Uint::<256, 4>::from(1),
             settleBlockHash: FixedBytes::new([0; 32]),
         };
-        execution_commitment.abi_encode()
+        call_assumptions.abi_encode()
     }
 
     fn mock_groth16_receipt() -> Receipt {

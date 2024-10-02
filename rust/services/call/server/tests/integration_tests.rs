@@ -126,7 +126,7 @@ mod server_tests {
                                     "verifierSelector": "0xdeafbeef",
                                     "mode": 1,
                                 },
-                                "commitment": {
+                                "callAssumptions": {
                                     "functionSelector": function_selector(&call_data),
                                     "proverContractAddress": helper.contract.address(),
                                 }
@@ -182,7 +182,7 @@ mod server_tests {
                                     "verifierSelector": "0xdeafbeef",
                                     "mode": 1,
                                 },
-                                "commitment": {
+                                "callAssumptions": {
                                     "functionSelector": function_selector(&call_data),
                                     "proverContractAddress": helper.contract.address(),
                                 }

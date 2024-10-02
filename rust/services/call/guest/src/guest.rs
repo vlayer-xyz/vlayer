@@ -9,7 +9,7 @@ use call_engine::{
         input::MultiEvmInput,
     },
     io::{Call, GuestOutput},
-    ExecutionCommitment,
+    CallAssumptions,
 };
 
 pub struct Guest {
@@ -40,12 +40,12 @@ impl Guest {
             .evm_envs
             .get(self.start_execution_location)
             .expect("cannot get start evm env");
-        let execution_commitment =
-            ExecutionCommitment::new(start_evm_env.header(), call.to, call.selector());
+        let call_assumptions =
+            CallAssumptions::new(start_evm_env.header(), call.to, call.selector());
 
         GuestOutput {
             evm_call_result,
-            execution_commitment,
+            call_assumptions,
         }
     }
 }

@@ -40,15 +40,18 @@ abstract contract ProofVerifierBase is IProofVerifier {
     }
 
     function _verifyExecutionEnv(Proof memory proof, address prover, bytes4 selector) private view {
-        require(proof.commitment.proverContractAddress == prover, "Invalid prover");
-        require(proof.commitment.functionSelector == selector, "Invalid selector");
+        require(proof.callAssumptions.proverContractAddress == prover, "Invalid prover");
+        require(proof.callAssumptions.functionSelector == selector, "Invalid selector");
 
-        require(proof.commitment.settleBlockNumber < block.number, "Invalid block number: block from future");
+        require(proof.callAssumptions.settleBlockNumber < block.number, "Invalid block number: block from future");
         require(
-            proof.commitment.settleBlockNumber + AVAILABLE_HISTORICAL_BLOCKS >= block.number,
+            proof.callAssumptions.settleBlockNumber + AVAILABLE_HISTORICAL_BLOCKS >= block.number,
             "Invalid block number: block too old"
         );
 
-        require(proof.commitment.settleBlockHash == blockhash(proof.commitment.settleBlockNumber), "Invalid block hash");
+        require(
+            proof.callAssumptions.settleBlockHash == blockhash(proof.callAssumptions.settleBlockNumber),
+            "Invalid block hash"
+        );
     }
 }

@@ -5,12 +5,12 @@ import {Proof, ProofLib, MAX_NUMBER_OF_DYNAMIC_PARAMS} from "./Proof.sol";
 
 import {IProofVerifier} from "./proof_verifier/IProofVerifier.sol";
 import {ProofVerifierFactory} from "./proof_verifier/ProofVerifierFactory.sol";
-import {ExecutionCommitmentLib} from "./ExecutionCommitment.sol";
+import {CallAssumptionsLib} from "./CallAssumptions.sol";
 
 abstract contract Verifier {
     uint256 private constant SELECTOR_LEN = 4;
     uint256 private constant PROOF_OFFSET = SELECTOR_LEN;
-    uint256 private constant JOURNAL_OFFSET = PROOF_OFFSET + ProofLib.COMMITMENT_OFFSET;
+    uint256 private constant JOURNAL_OFFSET = PROOF_OFFSET + ProofLib.CALL_ASSUMPTIONS_OFFSET;
 
     IProofVerifier public verifier;
 
@@ -48,8 +48,7 @@ abstract contract Verifier {
         pure
         returns (bytes memory)
     {
-        uint256 offsetPositionRelativeToJournal =
-            ExecutionCommitmentLib.EXECUTION_COMMITMENT_ENCODING_LENGTH + offsetPosition;
+        uint256 offsetPositionRelativeToJournal = CallAssumptionsLib.CALL_ASSUMPTIONS_ENCODING_LENGTH + offsetPosition;
 
         require(data.length >= offsetPositionRelativeToJournal, "Encoded data too short");
 
