@@ -99,7 +99,7 @@ mod test {
 
     fn parsed_email(headers: Vec<(&str, &str)>, body: &str) -> Result<Email, MailParseError> {
         let mime = build_mime_email(headers, body);
-        Email::try_from(mailparse::parse_mail(mime.as_bytes())?)
+        mailparse::parse_mail(mime.as_bytes()).and_then(Email::try_from)
     }
 
     mod try_from {
@@ -268,6 +268,7 @@ mod test {
             assert_eq!(extract("Name hello@aa.aa>"), Email::invalid_from_header().to_string());
             assert_eq!(extract("Name <<hello@aa.aa>"), Email::invalid_from_header().to_string());
             assert_eq!(extract("Name <hello@aa.aa"), Email::invalid_from_header().to_string());
+            assert_eq!(extract("Name <<hello@aa.aa>>"), Email::invalid_from_header().to_string());
         }
 
         #[test]
