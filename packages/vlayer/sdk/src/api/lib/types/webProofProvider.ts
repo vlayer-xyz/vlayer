@@ -1,12 +1,5 @@
 import { WebProof } from "types/webProof.ts";
-import {
-  AbiFunction,
-  Hex,
-  Abi,
-  ContractFunctionName,
-  ContractFunctionArgs,
-  AbiStateMutability,
-} from "viem";
+import { AbiFunction, Hex, Abi, ContractFunctionName } from "viem";
 import { Branded } from "types/utils.ts";
 import type { ContractFunctionArgsWithout } from "./viem";
 

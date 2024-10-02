@@ -7,12 +7,8 @@ import {
   ContractFunctionName,
   Hex,
 } from "viem";
-import { WebProof } from "types/webProof.ts";
 
-import {
-  type GetWebProofArgs,
-  type ProverCallCommitment,
-} from "types/webProofProvider.ts";
+import { type ProverCallCommitment } from "types/webProofProvider.ts";
 
 type Calldata = string;
 
