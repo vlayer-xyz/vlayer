@@ -21,6 +21,9 @@
 - [From JavaScript](./javascript/javascript.md)
   - [Vanilla JS/TS](./javascript/javascript.md)
   - [Web proofs](./javascript/webproofs.md)
+
+- [Running examples](./examples/intro.md)
+  - [Web Proof Example](./examples/web_proof.md)
 ---
 - [Appendix](./contributing/overview.md)
   - [Contributing](./contributing/overview.md)
