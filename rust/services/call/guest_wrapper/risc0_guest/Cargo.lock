@@ -1211,6 +1211,7 @@ dependencies = [
  "futures",
  "mail-auth",
  "mailparse",
+ "regex",
  "thiserror",
 ]
 

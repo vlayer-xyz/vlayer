@@ -3108,6 +3108,7 @@ dependencies = [
  "lazy_static",
  "mail-auth",
  "mailparse",
+ "regex",
  "thiserror",
 ]
 
