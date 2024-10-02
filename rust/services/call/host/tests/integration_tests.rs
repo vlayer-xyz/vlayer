@@ -362,8 +362,6 @@ mod teleport {
         }
     }
 
-    // This test fails for now. Will fix in the next PR
-    #[ignore]
     #[test]
     fn teleport_to_unknown_chain_returns_an_error_but_does_not_panic() -> anyhow::Result<()> {
         let sol_call = SimpleTravelProver::crossChainBalanceOfCall {
