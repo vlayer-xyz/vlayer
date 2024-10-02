@@ -44,6 +44,7 @@ where
     D: DatabaseRef,
     D::Error: std::fmt::Debug,
 {
+    #[must_use]
     pub fn new(envs: &'envs CachedEvmEnv<D>) -> Self {
         Self { envs }
     }

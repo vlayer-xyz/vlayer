@@ -18,6 +18,7 @@ pub struct Guest {
 }
 
 impl Guest {
+    #[must_use]
     pub fn new(
         multi_evm_input: MultiEvmInput,
         start_execution_location: ExecutionLocation,
