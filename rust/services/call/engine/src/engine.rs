@@ -82,7 +82,7 @@ where
     }
 
     pub fn call(
-        &'envs self,
+        self,
         tx: &Call,
         location: ExecutionLocation,
     ) -> Result<Vec<u8>, EngineError> {
