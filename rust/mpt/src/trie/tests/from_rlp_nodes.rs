@@ -28,8 +28,8 @@ fn branch_empty() {
     let decoded_mpt = MerkleTrie::from_rlp_nodes(proof).unwrap();
     assert_eq!(mpt, decoded_mpt);
 }
-#[test]
 
+#[test]
 fn branch_with_value() {
     let mpt = MerkleTrie(Node::branch_with_value([42]));
     let proof = mpt.to_rlp_nodes();

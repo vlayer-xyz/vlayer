@@ -97,11 +97,10 @@ mod encodable {
 
     #[test]
     fn hash_node() {
-        let rlp = Bytes::from_static(&[0; 32]);
+        let rlp = [0; 32].into();
         let hash = keccak256(&rlp);
-        let mut out = Vec::new();
         let node = NodeRef::Node(rlp);
-        node.encode(&mut out);
+        let out = alloy_rlp::encode(&node);
 
         assert_eq!(node.length(), 33);
         assert_eq!(out[0], EMPTY_STRING_CODE + 32);

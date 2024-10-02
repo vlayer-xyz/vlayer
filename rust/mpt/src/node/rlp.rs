@@ -44,12 +44,16 @@ impl Encodable for Node {
                     }
                 }
 
-                let value = value.as_deref().map(AsRef::as_ref).unwrap_or(&[]);
-                payload_length += value.length();
+                let value_len = value
+                    .as_ref()
+                    .map_or(1 /* EMPTY_STRING_CODE */, |v| v.len());
+                assert!(value_len > 0, "empty values are not allowed in MPT");
+                payload_length += value_len;
 
                 encode_header(true, payload_length, out);
                 child_refs.iter().for_each(|child| child.encode(out));
 
+                let value = value.as_deref().map(AsRef::as_ref).unwrap_or(&[]);
                 value.encode(out);
             }
             Node::Digest(digest) => digest.encode(out),
@@ -114,9 +118,10 @@ impl legacy_rlp::Decodable for Node {
                     }
                 }
 
-                // Empty values are not allowed, so empty bytes is interpreted as `None`
-                let val: alloy_rlp::Bytes = rlp.val_at(16)?;
-                let val = (!val.is_empty()).then_some(val.into());
+                let val = (!rlp.at(16)?.is_empty())
+                    .then(|| rlp.val_at::<Vec<u8>>(16))
+                    .transpose()?
+                    .map(Into::into);
 
                 Ok(Node::Branch(children, val))
             }

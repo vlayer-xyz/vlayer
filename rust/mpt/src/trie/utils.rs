@@ -74,7 +74,7 @@ mod parse_node {
 
 #[cfg(test)]
 mod resolve_trie {
-    use alloy_primitives::{keccak256, Bytes};
+    use alloy_primitives::keccak256;
     use alloy_trie::HashMap;
 
     use crate::{key_nibbles::KeyNibbles, node::Node};
@@ -152,6 +152,6 @@ mod resolve_trie {
             panic!("expected branch with value, got {:?}", resolved_node);
         };
 
-        assert_eq!(value, Bytes::from_static(&[42]));
+        assert_eq!(**value, [42]);
     }
 }

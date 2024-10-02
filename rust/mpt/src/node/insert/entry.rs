@@ -70,7 +70,7 @@ mod split_first_key_nibble {
         let (first, rest_entry) = entry.split_first_key_nibble();
 
         assert_eq!(first, 0x0);
-        assert_eq!(rest_entry.value, Bytes::from_static(&[]));
+        assert_eq!(**rest_entry.value, []);
     }
 
     #[test]
@@ -81,6 +81,6 @@ mod split_first_key_nibble {
 
         assert_eq!(first, 0x0);
         assert_eq!(*rest_entry.key, [0x1]);
-        assert_eq!(rest_entry.value, Bytes::from_static(&[]));
+        assert_eq!(**rest_entry.value, []);
     }
 }
