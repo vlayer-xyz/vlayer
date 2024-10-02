@@ -30,7 +30,7 @@ export interface Proof {
     bigint,
     bigint,
   ];
-  commitment: {
+  assumptions: {
     proverContractAddress: Address;
     functionSelector: Hex;
     settleBlockHash: Hex;

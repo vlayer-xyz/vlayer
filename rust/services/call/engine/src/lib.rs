@@ -6,7 +6,7 @@ pub mod inspector;
 pub mod io;
 pub mod sol;
 pub mod utils;
-pub use sol::execution_commitment::ExecutionCommitment;
+pub use sol::call_assumptions::CallAssumptions;
 pub use sol::proof::Proof;
 pub use sol::seal::{ProofMode, Seal};
 

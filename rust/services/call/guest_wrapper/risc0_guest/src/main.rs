@@ -15,6 +15,6 @@ fn main() {
 
     let output = Guest::new(multi_evm_input, start_execution_location).run(&call);
 
-    env::commit_slice(&output.execution_commitment.abi_encode());
+    env::commit_slice(&output.call_assumptions.abi_encode());
     env::commit_slice(&output.evm_call_result);
 }

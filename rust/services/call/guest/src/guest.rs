@@ -9,7 +9,7 @@ use call_engine::{
         input::MultiEvmInput,
     },
     io::{Call, GuestOutput},
-    ExecutionCommitment,
+    CallAssumptions,
 };
 
 pub struct Guest {
@@ -18,6 +18,7 @@ pub struct Guest {
 }
 
 impl Guest {
+    #[must_use]
     pub fn new(
         multi_evm_input: MultiEvmInput,
         start_execution_location: ExecutionLocation,
@@ -32,7 +33,7 @@ impl Guest {
         }
     }
 
-    pub fn run(&self, call: &Call) -> GuestOutput {
+    pub fn run(self, call: &Call) -> GuestOutput {
         let evm_call_result = Engine::new(&self.evm_envs)
             .call(call, self.start_execution_location)
             .unwrap();
@@ -40,12 +41,12 @@ impl Guest {
             .evm_envs
             .get(self.start_execution_location)
             .expect("cannot get start evm env");
-        let execution_commitment =
-            ExecutionCommitment::new(start_evm_env.header(), call.to, call.selector());
+        let call_assumptions =
+            CallAssumptions::new(start_evm_env.header(), call.to, call.selector());
 
         GuestOutput {
             evm_call_result,
-            execution_commitment,
+            call_assumptions,
         }
     }
 }

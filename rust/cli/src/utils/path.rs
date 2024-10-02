@@ -1,5 +1,6 @@
 use crate::errors::CLIError;
 use std::fs;
+use std::os::unix::fs as unix_fs;
 use std::path::{Path, PathBuf};
 use std::process::Command;
 use std::str::from_utf8;
@@ -18,10 +19,14 @@ pub(crate) fn copy_dir_to(src_dir: &Path, dst_dir: &Path) -> std::io::Result<()>
     for entry_result in src_dir.read_dir()? {
         let entry = entry_result?;
         let file_type = entry.file_type()?;
+        let file_name = entry.file_name();
         if file_type.is_dir() {
-            copy_dir_to(&entry.path(), &dst_dir.join(entry.file_name()))?;
+            copy_dir_to(&entry.path(), &dst_dir.join(file_name))?;
+        } else if file_type.is_symlink() {
+            let link = fs::read_link(entry.path())?;
+            unix_fs::symlink(link, dst_dir.join(file_name))?;
         } else {
-            fs::copy(entry.path(), dst_dir.join(entry.file_name()))?;
+            fs::copy(entry.path(), dst_dir.join(file_name))?;
         }
     }
 
@@ -65,8 +70,21 @@ pub fn find_git_root(relative_to: impl AsRef<Path>) -> Result<PathBuf, CLIError>
 
 #[cfg(test)]
 mod tests {
+    use anyhow::Result;
+    use tempfile::tempdir;
+
     use super::*;
     use crate::test_utils::create_temp_git_repo;
+
+    macro_rules! create_temp_dirs {
+        ($src_dir:ident, $dst_dir:ident) => {
+            let temp_dir = tempdir()?.into_path();
+            let $src_dir = temp_dir.join("src");
+            let $dst_dir = temp_dir.join("dst");
+
+            std::fs::create_dir(&$src_dir).unwrap();
+        };
+    }
 
     #[test]
     fn test_find_git_root() {
@@ -94,7 +112,7 @@ mod tests {
 
     #[test]
     fn test_find_git_root_fail() {
-        let temp_dir = tempfile::tempdir().unwrap();
+        let temp_dir = tempdir().unwrap();
         let result = find_git_root(temp_dir.path());
 
         let expected_error_msg =
@@ -106,7 +124,7 @@ mod tests {
 
     #[test]
     fn test_find_git_root_nonexistent_path() {
-        let temp_dir = tempfile::tempdir().unwrap();
+        let temp_dir = tempdir().unwrap();
         let nonexistent_path = temp_dir.path().join("not_a_real_dir");
         let result = find_git_root(nonexistent_path);
 
@@ -118,7 +136,7 @@ mod tests {
 
     #[test]
     fn test_find_foundry_root_from_no_git() {
-        let temp_dir = tempfile::tempdir().unwrap();
+        let temp_dir = tempdir().unwrap();
         let result = find_foundry_root(temp_dir.path());
 
         let expected_error_msg =
@@ -157,7 +175,7 @@ mod tests {
 
     #[test]
     fn test_find_foundry_root_from_nonexistent_path() {
-        let temp_dir = tempfile::tempdir().unwrap();
+        let temp_dir = tempdir().unwrap();
         let nonexistent_path = temp_dir.path().join("not_a_real_dir");
         let result = find_foundry_root(&nonexistent_path);
         assert!(matches!(
@@ -166,20 +184,46 @@ mod tests {
         ));
     }
 
-    #[test]
-    fn test_copy_dir_to() {
-        let temp_dir = tempfile::tempdir().unwrap();
-        let src_dir = temp_dir.path().join("src");
-        let dst_dir = temp_dir.path().join("dst");
+    mod copy_dir_to {
 
-        std::fs::create_dir(&src_dir).unwrap();
-        std::fs::write(src_dir.join("file1"), "file1").unwrap();
-        std::fs::write(src_dir.join("file2"), "file2").unwrap();
+        use super::*;
 
-        copy_dir_to(&src_dir, &dst_dir).unwrap();
+        #[test]
+        fn copies_all_files_from_src_to_dest() -> Result<()> {
+            create_temp_dirs!(src_dir, dst_dir);
 
-        assert!(dst_dir.exists());
-        assert!(dst_dir.join("file1").exists());
-        assert!(dst_dir.join("file2").exists());
+            std::fs::write(src_dir.join("file1"), "file1").unwrap();
+            std::fs::write(src_dir.join("file2"), "file2").unwrap();
+
+            copy_dir_to(&src_dir, &dst_dir).unwrap();
+
+            assert!(dst_dir.exists());
+            assert!(dst_dir.join("file1").exists());
+            assert!(dst_dir.join("file2").exists());
+
+            Ok(())
+        }
+
+        #[test]
+        fn handles_tangling_symlinks() -> anyhow::Result<()> {
+            create_temp_dirs!(src_dir, dst_dir);
+
+            let non_existent_file_path = PathBuf::from("/non/existent/file");
+            let dst_tangling_symlink_path = dst_dir.join("tangling-symlink");
+            let tangling_symlink_path = src_dir.join("tangling-symlink");
+
+            unix_fs::symlink(non_existent_file_path.clone(), tangling_symlink_path)?;
+
+            copy_dir_to(&src_dir, &dst_dir)?;
+
+            assert!(!non_existent_file_path.exists());
+            // Path::try_exists returns Ok(false) for broken symlinks
+            assert!(!dst_tangling_symlink_path.try_exists()?);
+            assert!(dst_tangling_symlink_path.is_symlink());
+
+            assert_eq!(std::fs::read_link(dst_tangling_symlink_path)?, non_existent_file_path);
+
+            Ok(())
+        }
     }
 }

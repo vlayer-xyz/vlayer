@@ -5,7 +5,7 @@ import {console} from "forge-std-1.9.2/src/console.sol";
 
 import {RiscZeroMockVerifier} from "risc0-ethereum-1.0.0/src/test/RiscZeroMockVerifier.sol";
 
-import {ExecutionCommitment} from "../../src/ExecutionCommitment.sol";
+import {CallAssumptions} from "../../src/CallAssumptions.sol";
 import {Proof, ProofLib} from "../../src/Proof.sol";
 import {ProofMode, Seal, SealLib} from "../../src/Seal.sol";
 import {ImageID} from "../../src/ImageID.sol";
@@ -20,45 +20,45 @@ contract TestHelpers {
 
     uint256 private constant LENGTH_ABI_FIELD_LEN = 0x20;
 
-    function createProof(ExecutionCommitment memory commitment, bytes memory journalParams)
+    function createProof(CallAssumptions memory assumptions, bytes memory journalParams)
         public
         view
         returns (Proof memory, bytes32)
     {
-        return createProof(commitment, journalParams, 0);
+        return createProof(assumptions, journalParams, 0);
     }
 
-    function createProof(ExecutionCommitment memory commitment, string memory journalStringParam)
+    function createProof(CallAssumptions memory assumptions, string memory journalStringParam)
         public
         view
         returns (Proof memory, bytes32)
     {
-        return createProof(commitment, abi.encode(journalStringParam), 32);
+        return createProof(assumptions, abi.encode(journalStringParam), 32);
     }
 
-    function createProof(ExecutionCommitment memory commitment) public view returns (Proof memory, bytes32) {
+    function createProof(CallAssumptions memory assumptions) public view returns (Proof memory, bytes32) {
         bytes memory emptyBytes = new bytes(0);
-        return createProof(commitment, emptyBytes);
+        return createProof(assumptions, emptyBytes);
     }
 
     function createProof() public view returns (Proof memory, bytes32) {
-        ExecutionCommitment memory commitment =
-            ExecutionCommitment(PROVER, SELECTOR, block.number - 1, blockhash(block.number - 1));
+        CallAssumptions memory assumptions =
+            CallAssumptions(PROVER, SELECTOR, block.number - 1, blockhash(block.number - 1));
         bytes memory emptyBytes = new bytes(0);
-        return createProof(commitment, emptyBytes);
+        return createProof(assumptions, emptyBytes);
     }
 
-    function createProof(ExecutionCommitment memory commitment, bytes memory journalParams, uint16 journalParamOffset)
+    function createProof(CallAssumptions memory assumptions, bytes memory journalParams, uint16 journalParamOffset)
         public
         view
         returns (Proof memory, bytes32)
     {
-        bytes memory journal = bytes.concat(abi.encode(commitment), journalParams);
+        bytes memory journal = bytes.concat(abi.encode(assumptions), journalParams);
         bytes32 journalHash = sha256(journal);
 
         bytes memory seal = mockVerifier.mockProve(ImageID.RISC0_CALL_GUEST_ID, journalHash).seal;
         Proof memory proof =
-            Proof(journal.length, encodeSeal(seal), [journalParamOffset, 0, 0, 0, 0, 0, 0, 0, 0, 0], commitment);
+            Proof(journal.length, encodeSeal(seal), [journalParamOffset, 0, 0, 0, 0, 0, 0, 0, 0, 0], assumptions);
 
         return (proof, journalHash);
     }

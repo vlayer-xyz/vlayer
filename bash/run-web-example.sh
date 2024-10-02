@@ -4,6 +4,11 @@ set -ueo pipefail
 
 VLAYER_HOME=$(git rev-parse --show-toplevel)
 
+function calculate_extension_id {
+    cd ${VLAYER_HOME}/examples/web_proof/vlayer
+    bun run calcExtensionId.ts
+}
+
 function run_services {
     source ${VLAYER_HOME}/bash/run-services.sh 
 }
@@ -31,5 +36,6 @@ function install_deps {
 install_deps
 run_services
 deploy_contracts
+calculate_extension_id
 run_web_app
 run_browser_extension
