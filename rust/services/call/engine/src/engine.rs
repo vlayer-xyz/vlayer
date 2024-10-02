@@ -82,11 +82,7 @@ where
         Ok(evm)
     }
 
-    pub fn call(
-        self,
-        tx: &Call,
-        location: ExecutionLocation,
-    ) -> Result<Vec<u8>, EngineError> {
+    pub fn call(self, tx: &Call, location: ExecutionLocation) -> Result<Vec<u8>, EngineError> {
         Self::assert_success_return_and_extract_return_data(self.internal_call(tx, location)?)
     }
 
