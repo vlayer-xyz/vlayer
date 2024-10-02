@@ -4,6 +4,11 @@ on:
     paths:
       - 'examples/**'
       - 'packages/**'
+  merge_group:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   ts-lint:
     runs-on: ubuntu-latest

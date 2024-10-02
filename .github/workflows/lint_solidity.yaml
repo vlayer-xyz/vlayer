@@ -4,6 +4,11 @@ on:
     paths:
       - 'examples/**'
       - 'contracts/**'
+  merge_group:
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
+
 jobs:
   sol-lint:
     runs-on: ubuntu-latest
