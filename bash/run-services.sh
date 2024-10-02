@@ -21,7 +21,7 @@ function cleanup() {
     
     # Kill Anvil if running
     if [[ -n "${ANVIL_PID:-}" ]] && ps -p "$ANVIL_PID" > /dev/null; then
-        echo "Killing anvil 1 (PID $ANVIL_PID)..."
+        echo "Killing anvil (PID $ANVIL_PID)..."
         kill "$ANVIL_PID"
     fi
 
@@ -32,9 +32,9 @@ function cleanup() {
     fi
 }
 
-function startup_anvil(){
+function start_anvil(){
     echo "Starting Anvil "
-    startup_anvil "${LOGS_DIR}/anvil.out" 8545 ANVIL_PID
+    startup_anvil "${LOGS_DIR}/anvil1.out" 8545 ANVIL_PID
 }
 
 function startup_vlayer(){
@@ -50,7 +50,6 @@ function startup_vlayer(){
     BONSAI_API_KEY="${BONSAI_API_KEY}" \
     cargo run --bin vlayer serve \
         --proof "${proof_arg}" \
-        --rpc-url 100002:http://localhost:8546 \
         --rpc-url 100001:http://localhost:8545 \
         ${external_urls[@]+"${external_urls[@]}"} \
         >"${LOGS_DIR}/vlayer_serve.out" &
@@ -109,7 +108,7 @@ echo "SERVER_PROOF_ARG: ${SERVER_PROOF_ARG}"
 echo
 echo "Starting services..."
 
-startup_anvil
+start_anvil
 startup_vlayer "${SERVER_PROOF_ARG}" ${EXTERNAL_RPC_URLS[@]+"${EXTERNAL_RPC_URLS[@]}"}
 
 echo "Services has been succesfully started..."
