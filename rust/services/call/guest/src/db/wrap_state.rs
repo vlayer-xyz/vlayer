@@ -91,7 +91,6 @@ impl DatabaseRef for WrapStateDb {
 
 impl From<EvmInput> for WrapStateDb {
     fn from(input: EvmInput) -> Self {
-        // input.assert_coherency();
         let block_hashes = input.block_hashes();
         let state_db =
             StateDb::new(input.state_trie, input.storage_tries, input.contracts, block_hashes);
