@@ -27,14 +27,26 @@ fn remove_end_of_line_spaces(text: &str) -> String {
 }
 
 fn canonize_header(name: &str, value: &str) -> String {
+    let canonized_name = canonize_header_name(name);
+    let canonized_value = canonize_header_value(value);
+    format!("{}:{}", canonized_name, canonized_value)
+}
+
+fn canonize_header_name(name: &str) -> String {
     let name = name.to_ascii_lowercase();
-    let value = unfold_continuation_lines(value);
     let name = replace_whitespace_sequences(&name);
+    let name = name.trim_end();
+
+    name.into()
+}
+
+fn canonize_header_value(value: &str) -> String {
+    let value = unfold_continuation_lines(value);
     let value = replace_whitespace_sequences(&value);
     let value = remove_end_of_line_spaces(&value);
-    let name_trimmed = name.trim_end();
-    let value_trimmed = value.trim_start();
-    format!("{}:{}", name_trimmed, value_trimmed)
+    let value = value.trim_start();
+
+    value.into()
 }
 
 fn unfold_continuation_lines(value: &str) -> String {
@@ -116,7 +128,7 @@ mod test {
             }
         }
 
-        mod canonize_body_relaxed {
+        mod canonize_body {
             use super::*;
 
             #[test]
@@ -172,7 +184,7 @@ mod test {
             }
         }
 
-        mod canonize_header {
+        mod canonize_single_header {
             use super::*;
 
             #[test]
