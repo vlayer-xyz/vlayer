@@ -81,7 +81,7 @@ If no execution errors occured and proof was produced, we are ready for on-chain
 > ```
 > 
 > This command will download all necessary artifacts to your project.  
-> Next steps are described in README file in your new project.
+> Next steps are described in [Running Web Proof example](../examples/web_proof.md)
 
 ## Example Verifier
 
