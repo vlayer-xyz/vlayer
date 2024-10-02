@@ -8,21 +8,23 @@
   </div>
   <p>This feature is fully implemented and ready for use. If you encounter any issues, please <a href="https://github.com/vlayer-xyz/vlayer/issues/new">submit a bug report</a> to help us improve.</p>
 </div>
+
 The simplest way to install vlayer is to use `vlayerup`, the vlayer toolchain installer.
 
 To install `vlayerup`, run the following command in your terminal, then follow the onscreen instructions.
 ```sh
-curl -SL  https://install.vlayer.xyz | bash
+curl -SL https://install.vlayer.xyz | bash
 ```
 
 This will install `vlayerup` and make it available in your CLI.
 
-Running `vlayerup` will install the latest (nightly) precompiled binary of vlayer:
+Running `vlayerup` will install the latest (nightly) precompiled binary of `vlayer`:
 ```sh
 vlayerup
 ```
 
-See `vlayerup --help` for more options, like installing from a specific version or commit.
+You can check that the binary has been successfully installed and inspect its version by running:
 
-
-
+```sh
+vlayer --version
+```

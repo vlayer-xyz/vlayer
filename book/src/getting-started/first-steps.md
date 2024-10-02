@@ -24,7 +24,7 @@ vlayer init my-airdrop --template private-airdrop
 ## Directory structure
 The vlayer directory structure resembles a typical Foundry project but with two additional folders: `src/vlayer` and `vlayer`.
 * `src/vlayer`: Contains the Prover and Verifier smart contracts.
-* `vlayer`: Has contract deployment scripts, client SDK calls to prover, and verifier transactions.
+* `vlayer`: Has contract deployment scripts, client SDK calls to the prover, and verifier transactions.
  
 
 ## Runing examples locally
@@ -39,7 +39,7 @@ Then launch a local Ethereum node:
 ```bash
 $ anvil 
 ```
-and in a separate terminal start [Prover server](/advanced/prover.html#prover-server):
+and in a separate terminal start the [Prover server](/advanced/prover.html#prover-server):
 
 ```bash
 vlayer serve
