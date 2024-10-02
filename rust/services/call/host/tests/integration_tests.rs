@@ -347,3 +347,39 @@ mod view {
         Ok(())
     }
 }
+
+mod teleport {
+    use alloy_chains::NamedChain;
+
+    use super::*;
+
+    const SIMPLE_TELEPORT: Address = address!("5fbdb2315678afecb367f032d93f642f64180aa3");
+    const BLOCK_NO: u64 = 3;
+    sol! {
+        contract SimpleTravelProver {
+            function crossChainBalanceOf(address owner) public returns (address, uint256);
+        }
+    }
+
+    // This test fails for now. Will fix in the next PR
+    #[ignore]
+    #[test]
+    fn teleport_to_unknown_chain_returns_an_error_but_does_not_panic() -> anyhow::Result<()> {
+        let sol_call = SimpleTravelProver::crossChainBalanceOfCall {
+            owner: Address::ZERO,
+        };
+        let call = Call {
+            to: SIMPLE_TELEPORT,
+            data: sol_call.abi_encode(),
+        };
+        let result = run::<SimpleTravelProver::crossChainBalanceOfCall>(
+            "simple_teleport",
+            call,
+            NamedChain::AnvilHardhat.into(),
+            BLOCK_NO.into(),
+        );
+        assert!(result.is_err());
+
+        Ok(())
+    }
+}
