@@ -353,6 +353,7 @@ mod teleport {
 
     use super::*;
 
+    // Generated using `simple_teleport` example
     const SIMPLE_TELEPORT: Address = address!("5fbdb2315678afecb367f032d93f642f64180aa3");
     const BLOCK_NO: u64 = 3;
     sol! {
