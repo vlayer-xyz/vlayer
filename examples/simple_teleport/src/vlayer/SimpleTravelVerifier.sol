@@ -23,7 +23,7 @@ contract SimpleTravel is Verifier {
     {
         require(!claimed[claimer], "Already claimed");
 
-        if (crossChainBalance >= 10_000_000) {
+        if (crossChainBalance >= 10_000_000_000_00) {
             claimed[claimer] = true;
             reward.mint(claimer);
         }
