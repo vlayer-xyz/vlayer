@@ -152,6 +152,6 @@ mod resolve_trie {
             panic!("expected branch with value, got {:?}", resolved_node);
         };
 
-        assert_eq!(value, [42u8].into());
+        assert_eq!(**value, [42]);
     }
 }

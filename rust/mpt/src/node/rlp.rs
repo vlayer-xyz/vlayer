@@ -1,4 +1,6 @@
-use alloy_primitives::B256;
+use std::iter;
+
+use alloy_primitives::{Bytes, B256};
 use alloy_rlp::{BufMut, Decodable, Encodable, Header};
 use rlp as legacy_rlp;
 
@@ -42,14 +44,16 @@ impl Encodable for Node {
                     }
                 }
 
-                payload_length += value
+                let value_len = value
                     .as_ref()
                     .map_or(1 /* EMPTY_STRING_CODE */, |v| v.len());
+                assert!(value_len > 0, "empty values are not allowed in MPT");
+                payload_length += value_len;
 
                 encode_header(true, payload_length, out);
                 child_refs.iter().for_each(|child| child.encode(out));
 
-                let value = value.as_deref().unwrap_or(&[]);
+                let value = value.as_deref().map(AsRef::as_ref).unwrap_or(&[]);
                 value.encode(out);
             }
             Node::Digest(digest) => digest.encode(out),
@@ -113,6 +117,7 @@ impl legacy_rlp::Decodable for Node {
                         _ => children[i] = Some(Box::new(Decodable::decode(&node_rlp)?)),
                     }
                 }
+
                 let val = (!rlp.at(16)?.is_empty())
                     .then(|| rlp.val_at::<Vec<u8>>(16))
                     .transpose()?
@@ -132,24 +137,27 @@ impl legacy_rlp::Decodable for Node {
 
 impl Node {
     /// Returns the RLP encoding of the node.
-    pub fn rlp_encoded(&self) -> Vec<u8> {
-        alloy_rlp::encode(self)
+    pub fn rlp_encoded(&self) -> Bytes {
+        alloy_rlp::encode(self).into()
     }
 
-    pub(crate) fn to_rlp_nodes(&self) -> Vec<Vec<u8>> {
-        let mut out = vec![self.rlp_encoded()];
+    pub(crate) fn to_rlp_nodes(&self) -> Box<dyn Iterator<Item = Bytes> + '_> {
+        if matches!(self, Node::Digest(..)) {
+            return Box::new(iter::empty());
+        }
+        let out = iter::once(self.rlp_encoded());
         match self {
-            Node::Branch(children, _) => {
-                for child in children.iter().flatten() {
-                    out.extend(child.to_rlp_nodes());
-                }
-            }
-            Node::Extension(_, child) => {
-                out.extend(child.to_rlp_nodes());
-            }
-            _ => {}
-        };
-        out
+            Node::Branch(children, _) => Box::new(
+                out.chain(
+                    children
+                        .iter()
+                        .flatten()
+                        .flat_map(|child| child.to_rlp_nodes()),
+                ),
+            ),
+            Node::Extension(_, child) => Box::new(out.chain(child.to_rlp_nodes())),
+            _ => Box::new(out),
+        }
     }
 }
 

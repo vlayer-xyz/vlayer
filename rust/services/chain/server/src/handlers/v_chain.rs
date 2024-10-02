@@ -30,7 +30,7 @@ pub async fn v_chain(merkle_trie: MerkleTrie, params: Params) -> Result<ChainPro
 
     Ok(ChainProof {
         proof: SOME_PROOF,
-        nodes: merkle_trie.to_rlp_nodes().map(Bytes::from).collect(),
+        nodes: merkle_trie.to_rlp_nodes().collect(),
     })
 }
 

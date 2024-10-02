@@ -2,6 +2,7 @@
 // The Entry struct provides a concise way to encapsulate both the key and the value, allowing them
 // to be handled as a single unit, thus reducing code clutter and unnecessary conversions.
 
+use alloy_primitives::Bytes;
 use nybbles::Nibbles;
 
 use crate::node::Node;
@@ -9,7 +10,7 @@ use crate::node::Node;
 #[derive(Debug, Clone, PartialEq)]
 pub struct Entry {
     pub key: Nibbles,
-    pub value: Box<[u8]>,
+    pub value: Bytes,
 }
 
 // From<(K, V)> for Entry implementation converts a (key, value) tuple into an Entry struct.
@@ -23,7 +24,7 @@ where
     fn from((key, value): (K, V)) -> Self {
         Entry {
             key: Nibbles::from_nibbles(key.as_ref()),
-            value: value.as_ref().into(),
+            value: Bytes::copy_from_slice(value.as_ref()),
         }
     }
 }
@@ -69,7 +70,7 @@ mod split_first_key_nibble {
         let (first, rest_entry) = entry.split_first_key_nibble();
 
         assert_eq!(first, 0x0);
-        assert_eq!(*rest_entry.value, []);
+        assert_eq!(**rest_entry.value, []);
     }
 
     #[test]
@@ -80,6 +81,6 @@ mod split_first_key_nibble {
 
         assert_eq!(first, 0x0);
         assert_eq!(*rest_entry.key, [0x1]);
-        assert_eq!(*rest_entry.value, []);
+        assert_eq!(**rest_entry.value, []);
     }
 }

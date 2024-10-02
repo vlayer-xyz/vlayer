@@ -1,4 +1,4 @@
-use alloy_primitives::{keccak256, B256};
+use alloy_primitives::{keccak256, Bytes, B256};
 use alloy_rlp::{BufMut, Encodable, EMPTY_STRING_CODE};
 
 use super::node::Node;
@@ -9,8 +9,8 @@ pub enum NodeRef {
     #[default]
     Empty,
     Digest(B256),
-    InlineNode(Vec<u8>),
-    Node(Vec<u8>),
+    InlineNode(Bytes),
+    Node(Bytes),
 }
 
 impl NodeRef {
@@ -97,11 +97,10 @@ mod encodable {
 
     #[test]
     fn hash_node() {
-        let rlp = vec![0x0; 32];
+        let rlp = [0; 32].into();
         let hash = keccak256(&rlp);
-        let mut out = Vec::new();
         let node = NodeRef::Node(rlp);
-        node.encode(&mut out);
+        let out = alloy_rlp::encode(&node);
 
         assert_eq!(node.length(), 33);
         assert_eq!(out[0], EMPTY_STRING_CODE + 32);

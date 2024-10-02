@@ -117,14 +117,15 @@ mod tests {
 
             #[test]
             fn nibble_remaining() -> anyhow::Result<()> {
-                let branch = Node::branch_with_child_and_value(0, Node::branch_with_value([]), []);
+                let branch =
+                    Node::branch_with_child_and_value(0, Node::branch_with_value([0]), [0]);
 
                 let node = branch.insert_entry_into_branch(([0x0, 0x0], [42]))?;
 
                 let expected_node = Node::branch_with_child_and_value(
                     0,
-                    Node::branch_with_child_and_value(0, Entry::from(([], [42])), []),
-                    [],
+                    Node::branch_with_child_and_value(0, Entry::from(([], [42])), [0]),
+                    [0],
                 );
 
                 assert_eq!(node, expected_node);

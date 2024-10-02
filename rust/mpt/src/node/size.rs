@@ -38,20 +38,20 @@ mod node_size {
 
     #[test]
     fn leaf() {
-        let node = Node::leaf([0x0], []);
+        let node = Node::leaf([0x0], [0]);
         assert_eq!(node.size(), 1);
     }
 
     #[test]
     fn extension() {
-        let leaf = Node::leaf([0x0], []);
+        let leaf = Node::leaf([0x0], [0]);
         let extension = Node::extension([0x0], leaf);
         assert_eq!(extension.size(), 2);
     }
 
     #[test]
     fn branch_one_child() {
-        let leaf = Node::leaf([0x0], []);
+        let leaf = Node::leaf([0x0], [0]);
         let branch = Node::branch_with_child(0, leaf);
 
         assert_eq!(branch.size(), 2);
@@ -59,7 +59,7 @@ mod node_size {
 
     #[test]
     fn branch_many_children() {
-        let leaf = Node::leaf([0x0], []);
+        let leaf = Node::leaf([0x0], [0]);
         let child = Some(Box::new(leaf));
         let children = from_fn(|_| child.clone());
         let branch = Node::Branch(children, None);

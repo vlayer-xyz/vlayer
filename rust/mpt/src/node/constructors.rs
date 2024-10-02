@@ -1,3 +1,5 @@
+use alloy_primitives::Bytes;
+
 use crate::key_nibbles::KeyNibbles;
 
 use super::Node;
@@ -8,7 +10,8 @@ pub static EMPTY_CHILDREN: [Option<Box<Node>>; 16] = [EMPTY_CHILD; 16];
 impl Node {
     #[allow(unused)]
     pub(crate) fn leaf(key_nibs: impl AsRef<[u8]>, value: impl AsRef<[u8]>) -> Node {
-        Node::Leaf(key_nibs.into(), value.as_ref().into())
+        assert!(!value.as_ref().is_empty(), "empty values are not allowed in MPT");
+        Node::Leaf(key_nibs.into(), Bytes::copy_from_slice(value.as_ref()))
     }
 
     pub(crate) fn extension(key_nibs: impl AsRef<[u8]>, value: impl Into<Node>) -> Node {
@@ -24,6 +27,7 @@ impl Node {
 
     #[allow(unused)]
     pub(crate) fn branch_with_value(value: impl AsRef<[u8]>) -> Node {
+        assert!(!value.as_ref().is_empty(), "empty values are not allowed in MPT");
         Node::branch_with_children_and_value(EMPTY_CHILDREN.clone(), value)
     }
 
@@ -32,6 +36,7 @@ impl Node {
         child: impl Into<Node>,
         value: impl AsRef<[u8]>,
     ) -> Node {
+        assert!(!value.as_ref().is_empty(), "empty values are not allowed in MPT");
         let mut children = EMPTY_CHILDREN.clone();
         children[idx as usize] = Some(Box::new(child.into()));
         Node::branch_with_children_and_value(children, value)
@@ -67,6 +72,7 @@ impl Node {
         children: [Option<Box<Node>>; 16],
         value: impl AsRef<[u8]>,
     ) -> Node {
-        Node::Branch(children, Some(value.as_ref().into()))
+        assert!(!value.as_ref().is_empty(), "empty values are not allowed in MPT");
+        Node::Branch(children, Some(Bytes::copy_from_slice(value.as_ref())))
     }
 }
