@@ -50,10 +50,7 @@ browser.tabs.onActivated.addListener(function (activeInfo) {
 
 browser.runtime.onMessageExternal.addListener((message) => {
   (async () => {
-    console.log("Received message from external extension", message);
     if (message.action === EXTENSION_ACTION.requestWebProof) {
-      // We need to use chrome specific API to open side panel
-      // as webextension-polyfill does not support it
       if (chrome.sidePanel) {
         chrome.sidePanel.open({ windowId: windowId });
       }
