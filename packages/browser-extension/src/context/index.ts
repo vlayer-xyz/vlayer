@@ -1,2 +1,2 @@
 export * from "./useProofContext";
-export * from "./useTlsnProover";
+export * from "./useTlsnProver";

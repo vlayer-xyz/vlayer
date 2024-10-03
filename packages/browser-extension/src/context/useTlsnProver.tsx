@@ -111,6 +111,6 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
   );
 };
 
-export const useTlsnProover = () => {
+export const useTlsnProver = () => {
   return useContext(TlsnProofContext);
 };
