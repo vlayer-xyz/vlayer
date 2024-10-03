@@ -2168,6 +2168,8 @@ dependencies = [
  "regex",
  "reqwest 0.12.5",
  "risc0-zkp",
+ "serde",
+ "serde_json",
  "tar",
  "tempfile",
  "test_runner",

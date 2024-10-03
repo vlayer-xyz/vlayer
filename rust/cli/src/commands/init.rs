@@ -1,7 +1,7 @@
 use std::{
     fs,
     fs::OpenOptions,
-    io::{Cursor, Write},
+    io::{Cursor, Read, Write},
     path::{Path, PathBuf},
     process::Output,
 };
@@ -9,6 +9,7 @@ use std::{
 use flate2::read::GzDecoder;
 use lazy_static::lazy_static;
 use reqwest::get;
+use serde_json::{Map, Value};
 use tar::Archive;
 use tracing::{error, info};
 
@@ -159,6 +160,31 @@ fn add_remappings(foundry_root: &Path) -> Result<(), CLIError> {
     Ok(())
 }
 
+fn change_sdk_dependency_to_npm(foundry_root: &Path) -> Result<(), CLIError> {
+    let package_json = foundry_root.join("vlayer").join("package.json");
+    let mut file = OpenOptions::new().read(true).open(package_json.clone())?;
+    let mut contents = String::new();
+    file.read_to_string(&mut contents)?;
+
+    let mut json: Value = serde_json::from_str(&contents)?;
+    let version = version();
+
+    if let Some(dependencies) = json.get_mut("dependencies") {
+        if let Some(dependencies_map) = dependencies.as_object_mut() {
+            dependencies_map.insert("@vlayer/sdk".to_string(), Value::String(version));
+        }
+    } else {
+        let mut dependencies_map = Map::new();
+        dependencies_map.insert("@vlayer/sdk".to_string(), Value::String(version));
+        json["dependencies"] = Value::Object(dependencies_map);
+    }
+
+    let new_contents = serde_json::to_string_pretty(&json)?;
+    fs::write(package_json, new_contents)?;
+
+    Ok(())
+}
+
 pub(crate) async fn init(
     mut cwd: PathBuf,
     template: TemplateOption,
@@ -212,6 +238,8 @@ pub(crate) async fn init_existing(cwd: PathBuf, template: TemplateOption) -> Res
     install_dependencies()?;
     info!("Successfully installed all dependencies");
     add_remappings(&root_path)?;
+
+    change_sdk_dependency_to_npm(&root_path)?;
 
     std::env::set_current_dir(&cwd)?;
 

@@ -22,4 +22,6 @@ pub enum CLIError {
     DownloadExamplesError(reqwest::Error),
     #[error("Failed initializing Forge: {0}")]
     ForgeInitError(String),
+    #[error("Error parsing package.json: {0}")]
+    PackageJsonError(#[from] serde_json::Error),
 }
