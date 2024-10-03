@@ -2,14 +2,14 @@ import React from "react";
 import { Button, Theme, Grid, Spinner, Card } from "@radix-ui/themes";
 import browser from "webextension-polyfill";
 import {
-  useTlsnProover,
+  useTlsnProver,
   useProofContext,
   TlsnProofContextProvider,
 } from "../context";
 
 const BackButton = () => {
   const { backUrl } = useProofContext();
-  const { proof } = useTlsnProover();
+  const { proof } = useTlsnProver();
   return proof ? (
     <Button
       onClick={() => {
@@ -22,7 +22,7 @@ const BackButton = () => {
 };
 
 const ProofButton = () => {
-  const { prove, proof, isProving, hasDataForProof } = useTlsnProover();
+  const { prove, proof, isProving, hasDataForProof } = useTlsnProver();
 
   return !proof ? (
     <Button
@@ -38,7 +38,7 @@ const ProofButton = () => {
 };
 
 const GoToPageButton = () => {
-  const { hasDataForProof } = { hasDataForProof: true }; //useTlsnProover();
+  const { hasDataForProof } = { hasDataForProof: true }; //useTlsnProver();
   const { redirectUrl } = useProofContext();
   return !hasDataForProof ? (
     <Button
@@ -54,7 +54,7 @@ const GoToPageButton = () => {
 };
 
 const Proof = () => {
-  const { proof } = useTlsnProover();
+  const { proof } = useTlsnProver();
   return proof ? (
     <Card>
       <pre
