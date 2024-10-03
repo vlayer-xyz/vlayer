@@ -87,14 +87,14 @@ contract Verifier_OnlyVerified_Modifier_Tests is Test {
 
     function test_journaledParams() public view {
         bool value = true;
-        (Proof memory proof,) = helpers.createProof(callAssumptions, abi.encode(value));
+        (Proof memory proof,) = helpers.createProof(callAssumptions, value);
 
         assertEq(exampleVerifier.verifySomethingElse(proof, value), value);
     }
 
     function test_journaledParamCannotBeChanged() public {
         bool value = true;
-        (Proof memory proof,) = helpers.createProof(callAssumptions, abi.encode(value));
+        (Proof memory proof,) = helpers.createProof(callAssumptions, value);
 
         value = !value;
 

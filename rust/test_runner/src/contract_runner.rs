@@ -1,16 +1,16 @@
-/**
- * This file is in large part copied from https://github.com/foundry-rs/foundry/blob/6bb5c8ea8dcd00ccbc1811f1175cabed3cb4c116/crates/forge/src/runner.rs
- * The original file is licensed under the Apache License, Version 2.0.
- * The original file was modified for the purpose of this project.
- * All relevant modifications are commented with "MODIFICATION" comments.
- */
-use crate::test_executor::TestExecutor;
+use std::{
+    collections::{BTreeMap, HashMap},
+    time::Instant,
+};
+
 use alloy_dyn_abi::DynSolValue;
 use alloy_sol_types::private::alloy_json_abi::Function;
 use color_eyre::eyre;
-use forge::multi_runner::TestContract;
-use forge::result::{SuiteResult, TestResult, TestSetup};
-use forge::revm::primitives::{address, Address, Bytes, U256};
+use forge::{
+    multi_runner::TestContract,
+    result::{SuiteResult, TestResult, TestSetup},
+    revm::primitives::{address, Address, Bytes, U256},
+};
 use foundry_common::{TestFilter, TestFunctionExt, TestFunctionKind};
 use foundry_evm::{
     constants::CALLER,
@@ -20,11 +20,15 @@ use foundry_evm::{
     traces::{TraceKind, TraceMode},
 };
 use rayon::prelude::*;
-use std::{
-    collections::{BTreeMap, HashMap},
-    time::Instant,
-};
 use tracing::{debug, debug_span, enabled, trace};
+
+/**
+ * This file is in large part copied from https://github.com/foundry-rs/foundry/blob/6bb5c8ea8dcd00ccbc1811f1175cabed3cb4c116/crates/forge/src/runner.rs
+ * The original file is licensed under the Apache License, Version 2.0.
+ * The original file was modified for the purpose of this project.
+ * All relevant modifications are commented with "MODIFICATION" comments.
+ */
+use crate::test_executor::TestExecutor;
 
 /// When running tests, we deploy all external libraries present in the project. To avoid additional
 /// libraries affecting nonces of senders used in tests, we are using separate address to

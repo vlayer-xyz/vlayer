@@ -1,7 +1,8 @@
 use core::str;
+use std::fs;
+
 use p256::PublicKey;
 use pkcs8::DecodePublicKey;
-use std::fs;
 use tlsn_core::proof::TlsProof;
 
 use crate::web_proof::WebProof;

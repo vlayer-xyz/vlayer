@@ -1,5 +1,4 @@
-use alloy_sol_types::private::Address;
-use alloy_sol_types::sol;
+use alloy_sol_types::{private::Address, sol};
 use forge::revm::primitives::address;
 
 pub const CHEATCODE_CALL_ADDR: Address = address!("e5F6E4A8da66436561059673919648CdEa4e486B");

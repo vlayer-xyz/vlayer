@@ -1,10 +1,10 @@
+use std::{collections::HashMap, iter::once};
+
 use alloy_primitives::{Bytes, B256};
+use block_header::EvmBlockHeader;
 use mpt::MerkleTrie;
 use serde::{Deserialize, Serialize};
-use std::{collections::HashMap, iter::once};
 use tracing::debug;
-
-use block_header::EvmBlockHeader;
 
 use super::env::location::ExecutionLocation;
 
@@ -64,12 +64,10 @@ pub type MultiEvmInput = HashMap<ExecutionLocation, EvmInput>;
 
 #[cfg(test)]
 mod test {
-    use mpt::EMPTY_ROOT_HASH;
+    use block_header::{EthBlockHeader, Hashable};
+    use mpt::{MerkleTrie, EMPTY_ROOT_HASH};
 
     use super::EvmInput;
-    use block_header::{EthBlockHeader, Hashable};
-
-    use mpt::MerkleTrie;
 
     impl Default for EvmInput {
         fn default() -> Self {

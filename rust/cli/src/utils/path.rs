@@ -1,9 +1,12 @@
+use std::{
+    fs,
+    os::unix::fs as unix_fs,
+    path::{Path, PathBuf},
+    process::Command,
+    str::from_utf8,
+};
+
 use crate::errors::CLIError;
-use std::fs;
-use std::os::unix::fs as unix_fs;
-use std::path::{Path, PathBuf};
-use std::process::Command;
-use std::str::from_utf8;
 
 pub(crate) fn find_foundry_root(start: &Path) -> Result<PathBuf, CLIError> {
     let start = start.canonicalize()?;

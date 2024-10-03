@@ -1,7 +1,8 @@
-use crate::{key_nibbles::KeyNibbles, node::Node, MerkleTrie};
 use alloy_primitives::{b256, B256};
 use alloy_trie::EMPTY_ROOT_HASH;
 use lazy_static::lazy_static;
+
+use crate::{key_nibbles::KeyNibbles, node::Node, MerkleTrie};
 
 lazy_static! {
     static ref MPT_BRANCH_WITH_TWO_CHILDREN: MerkleTrie = {

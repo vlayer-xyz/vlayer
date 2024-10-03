@@ -1,9 +1,10 @@
+use alloy_primitives::B256;
+
 use crate::{
     key_nibbles::KeyNibbles,
     node::{constructors::EMPTY_CHILDREN, Node},
     MerkleTrie,
 };
-use alloy_primitives::B256;
 
 #[test]
 fn null() {

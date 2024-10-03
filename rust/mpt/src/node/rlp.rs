@@ -4,13 +4,12 @@ use alloy_primitives::{Bytes, B256};
 use alloy_rlp::{BufMut, Decodable, Encodable, Header};
 use rlp as legacy_rlp;
 
+use super::Node;
 use crate::{
     node::constructors::EMPTY_CHILDREN,
     node_ref::NodeRef,
     path::{Path, PathKind},
 };
-
-use super::Node;
 
 impl Encodable for Node {
     fn encode(&self, out: &mut dyn BufMut) {

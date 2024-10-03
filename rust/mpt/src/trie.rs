@@ -1,14 +1,14 @@
-use crate::node::Node;
-use crate::node::NodeError;
-use alloy_primitives::Bytes;
-use alloy_primitives::{keccak256, B256};
+use std::fmt::Debug;
+
+use alloy_primitives::{keccak256, Bytes, B256};
 use alloy_rlp::Decodable;
 use alloy_trie::EMPTY_ROOT_HASH;
 use nybbles::Nibbles;
 use serde::{Deserialize, Serialize};
-use std::fmt::Debug;
 use thiserror::Error;
 use utils::{parse_node, resolve_trie};
+
+use crate::node::{Node, NodeError};
 
 mod utils;
 

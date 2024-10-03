@@ -2,9 +2,8 @@
 // the number of cases to handle - we convert Leaf's key and value into an Entry struct and then use from_two_entries which
 // treats both new entry and Leaf's entry symmetrically.
 
-use crate::node::{Node, NodeError};
-
 use super::entry::Entry;
+use crate::node::{Node, NodeError};
 
 pub(crate) fn from_two_entries(
     lhs: impl Into<Entry>,

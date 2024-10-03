@@ -1,6 +1,5 @@
 use alloy_sol_types::SolValue;
-use mailparse::headers::Headers;
-use mailparse::{MailHeaderMap, MailParseError, ParsedMail};
+use mailparse::{headers::Headers, MailHeaderMap, MailParseError, ParsedMail};
 use regex::Regex;
 
 pub(crate) mod sol;

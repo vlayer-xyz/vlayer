@@ -5,5 +5,4 @@ mod private {
     );
 }
 
-pub use private::ProofMode;
-pub use private::Seal;
+pub use private::{ProofMode, Seal};

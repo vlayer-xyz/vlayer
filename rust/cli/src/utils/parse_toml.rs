@@ -1,5 +1,6 @@
-use crate::errors::CLIError;
 use std::path::Path;
+
+use crate::errors::CLIError;
 
 pub(crate) fn get_src_from_str(contents: impl AsRef<str>) -> Result<String, CLIError> {
     let config =

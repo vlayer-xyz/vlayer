@@ -1,7 +1,8 @@
+use std::fmt;
+
 use alloy_primitives::ChainId;
 use call_server::ProofMode;
 use clap::{ArgAction, Parser, ValueEnum};
-use std::fmt;
 
 #[derive(Clone, Debug, Parser)]
 pub(crate) struct InitArgs {
@@ -28,6 +29,7 @@ pub(crate) enum TemplateOption {
     Simple,
     Airdrop,
     PrivateAirdrop,
+    SimpleEmail,
     SimpleTeleport,
     SimpleTimeTravel,
     ERC20Balances,
@@ -57,6 +59,7 @@ impl fmt::Display for TemplateOption {
             TemplateOption::Simple => write!(f, "simple"),
             TemplateOption::Airdrop => write!(f, "airdrop"),
             TemplateOption::PrivateAirdrop => write!(f, "private_airdrop"),
+            TemplateOption::SimpleEmail => write!(f, "simple_email"),
             TemplateOption::SimpleTeleport => write!(f, "simple_teleport"),
             TemplateOption::SimpleTimeTravel => write!(f, "simple_time_travel"),
             TemplateOption::ERC20Balances => write!(f, "erc20_balances"),

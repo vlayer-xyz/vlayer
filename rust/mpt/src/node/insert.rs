@@ -1,6 +1,4 @@
-use self::entry::Entry;
-use self::from_two_entries::from_two_entries;
-
+use self::{entry::Entry, from_two_entries::from_two_entries};
 use super::{Node, NodeError};
 
 mod entry;

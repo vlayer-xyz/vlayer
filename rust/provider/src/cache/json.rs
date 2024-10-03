@@ -1,15 +1,17 @@
-use super::EIP1186Proof;
-use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256};
-use anyhow::Context;
-use block_header::EvmBlockHeader;
-use ethers_core::types::BlockNumber as BlockTag;
-use serde::{Deserialize, Serialize};
 use std::{
     collections::{BTreeSet, HashMap},
     fs::File,
     io::{BufReader, BufWriter},
     path::PathBuf,
 };
+
+use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256};
+use anyhow::Context;
+use block_header::EvmBlockHeader;
+use ethers_core::types::BlockNumber as BlockTag;
+use serde::{Deserialize, Serialize};
+
+use super::EIP1186Proof;
 
 #[derive(Clone, Debug, PartialEq, Eq, Ord, PartialOrd, Hash, Serialize, Deserialize)]
 pub(crate) enum SerializableBlockTag {

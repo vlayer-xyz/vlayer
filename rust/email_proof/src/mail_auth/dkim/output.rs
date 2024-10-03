@@ -1,5 +1,4 @@
-use super::result::Result;
-use super::Signature;
+use super::{result::Result, Signature};
 use crate::mail_auth::Error;
 
 #[allow(dead_code)]

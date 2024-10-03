@@ -1,11 +1,13 @@
 use std::sync::Arc;
 
-use crate::config::ServerConfig;
-use crate::error::AppError;
-use call_host::host::{config::HostConfig, Host};
-use call_host::Call as HostCall;
+use call_host::{
+    host::{config::HostConfig, Host},
+    Call as HostCall,
+};
 use serde::{Deserialize, Serialize};
 use types::{Call, CallContext, CallResult};
+
+use crate::{config::ServerConfig, error::AppError};
 
 pub mod types;
 

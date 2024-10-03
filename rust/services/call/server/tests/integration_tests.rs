@@ -46,13 +46,16 @@ mod server_tests {
     }
 
     mod v_call {
-        use crate::test_helpers::WebProof;
         use assert_json_diff::assert_json_include;
+        use ethers::{
+            abi::AbiEncode,
+            types::{Uint8, U256},
+        };
         use server_utils::function_selector;
         use web_proof::fixtures::{load_web_proof_fixture, NOTARY_PUB_KEY_PEM_EXAMPLE};
 
         use super::*;
-        use ethers::{abi::AbiEncode, types::Uint8, types::U256};
+        use crate::test_helpers::WebProof;
 
         #[tokio::test]
         async fn field_validation_error() {

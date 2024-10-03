@@ -1,3 +1,5 @@
+use std::collections::HashMap;
+
 use alloy_primitives::{
     Address, BlockNumber, Bytes, ChainId, StorageKey, StorageValue, TxNumber, U256,
 };
@@ -9,7 +11,6 @@ use provider::{
     BlockingProvider, EIP1186Proof, EthProvider, EthersProviderFactory, ProviderFactory,
     ProviderFactoryError,
 };
-use std::collections::HashMap;
 
 use crate::providers::pending_state_provider::PendingStateProviderFactory;
 

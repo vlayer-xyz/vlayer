@@ -97,7 +97,7 @@ If the proof or inputs are invalid, the transaction will revert, and the NFT wil
 > To run the above example on your computer, type the following command in your terminal:
 > 
 > ```bash
-> vlayer init --template simple_teleport
+> vlayer init --template simple-teleport
 > ```
 > 
 > This command will download all the necessary artefacts into your current directory (which must be empty). Make sure you have [Bun](https://bun.sh/) and [Foundry](https://book.getfoundry.sh/getting-started/installation) installed on your system.

@@ -1,5 +1,6 @@
-use crate::email::Email;
 use alloy_sol_types::{Error, SolValue};
+
+use crate::email::Email;
 
 mod private {
     use alloy_sol_types::sol;
@@ -7,8 +8,7 @@ mod private {
     sol!("../../contracts/src/EmailProof.sol");
 }
 
-pub(crate) use private::UnverifiedEmail;
-pub(crate) use private::VerifiedEmail as SolEmail;
+pub(crate) use private::{UnverifiedEmail, VerifiedEmail as SolEmail};
 
 impl From<Email> for SolEmail {
     fn from(email: Email) -> SolEmail {

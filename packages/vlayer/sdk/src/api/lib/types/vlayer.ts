@@ -1,4 +1,14 @@
-import { Address, Hex } from "viem";
+import {
+  Abi,
+  AbiFunction,
+  AbiStateMutability,
+  Address,
+  ContractFunctionArgs,
+  ContractFunctionName,
+  Hex,
+} from "viem";
+
+import { type ProverCallCommitment } from "types/webProofProvider.ts";
 
 type Calldata = string;
 
@@ -51,5 +61,17 @@ export interface VCallResponse {
 
 // Add more methods here
 export type VlayerClient = {
-  prove: () => void;
+  prove: <
+    T extends readonly [AbiFunction, ...Abi[number][]],
+    F extends ContractFunctionName<T>,
+  >(
+    args: VlayerClientProveArgs<T, F>,
+  ) => void;
+};
+
+export type VlayerClientProveArgs<
+  T extends readonly [AbiFunction, ...Abi[number][]],
+  F extends ContractFunctionName<T>,
+> = ProverCallCommitment<T, F> & {
+  args: ContractFunctionArgs<T, AbiStateMutability, F>;
 };

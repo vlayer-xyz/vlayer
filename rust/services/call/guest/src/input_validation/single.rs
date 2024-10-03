@@ -1,5 +1,6 @@
-use crate::db::{state::StateDb, wrap_state::WrapStateDb};
 use call_engine::evm::{env::EvmEnv, input::EvmInput};
+
+use crate::db::{state::StateDb, wrap_state::WrapStateDb};
 
 pub struct ValidatedEvmInput(pub(crate) EvmInput);
 
@@ -30,10 +31,11 @@ impl From<ValidatedEvmInput> for EvmEnv<WrapStateDb> {
 #[cfg(test)]
 mod evm_env_from_input {
 
-    use super::*;
     use as_any::Downcast;
     use block_header::EthBlockHeader;
     use mpt::EMPTY_ROOT_HASH;
+
+    use super::*;
 
     #[test]
     fn success() {

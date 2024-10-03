@@ -1,8 +1,9 @@
+use std::collections::HashMap;
+
 use alloy_primitives::ChainId;
-use chain::{TEST_CHAIN_ID_1, TEST_CHAIN_ID_2};
+use chain::TEST_CHAIN_ID_1;
 use serde::{Deserialize, Serialize};
 use server_utils::ProofMode;
-use std::collections::HashMap;
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ServerConfig {
@@ -14,12 +15,8 @@ pub struct ServerConfig {
 impl Default for ServerConfig {
     fn default() -> Self {
         let anvil_1_url = "http://localhost:8545";
-        let anvil_2_url = "http://localhost:8546";
         Self {
-            rpc_urls: HashMap::from([
-                (TEST_CHAIN_ID_1, anvil_1_url.to_string()),
-                (TEST_CHAIN_ID_2, anvil_2_url.to_string()),
-            ]),
+            rpc_urls: HashMap::from([(TEST_CHAIN_ID_1, anvil_1_url.to_string())]),
             port: 3000,
             proof_mode: ProofMode::Groth16,
         }

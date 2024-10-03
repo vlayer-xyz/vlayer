@@ -1,12 +1,13 @@
+use std::collections::{BTreeMap, HashMap};
+
 use alloy_primitives::{keccak256, Address, Bytes, FixedBytes, B256, U256};
 use alloy_rlp::encode;
-use alloy_trie::proof::ProofRetainer;
-use alloy_trie::{HashBuilder, Nibbles};
-use forge::revm::primitives::alloy_primitives::private::alloy_rlp;
-use forge::revm::primitives::alloy_primitives::private::alloy_rlp::Encodable;
-use forge::revm::primitives::{Account, AccountInfo, EvmState, EvmStorageSlot};
+use alloy_trie::{proof::ProofRetainer, HashBuilder, Nibbles};
+use forge::revm::primitives::{
+    alloy_primitives::private::{alloy_rlp, alloy_rlp::Encodable},
+    Account, AccountInfo, EvmState, EvmStorageSlot,
+};
 use provider::StorageProof;
-use std::collections::{BTreeMap, HashMap};
 
 fn to_nibbles<T: AsRef<[u8]>>(word: T) -> Nibbles {
     Nibbles::unpack(keccak256(word))
@@ -110,12 +111,14 @@ pub fn prove_storage(
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use std::fs;
+
     use alloy_primitives::{address, b256, hex, U160};
     use alloy_rlp::RlpDecodable;
     use mpt::MerkleTrie;
     use serde_json::{from_str, from_value, Value};
-    use std::fs;
+
+    use super::*;
 
     #[derive(Debug, Clone, PartialEq, Eq, RlpDecodable)]
     struct StateAccount {

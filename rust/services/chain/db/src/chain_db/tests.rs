@@ -1,9 +1,9 @@
-use crate::in_memory::InMemoryDatabase;
 use alloy_primitives::BlockNumber;
 use anyhow::Result;
 use mpt::MerkleTrie;
 
 use super::*;
+use crate::in_memory::InMemoryDatabase;
 
 fn get_test_db() -> ChainDb<InMemoryDatabase> {
     let db = InMemoryDatabase::new();

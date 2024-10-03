@@ -1,4 +1,5 @@
-use super::provider::{ProviderDb, ProviderDbError};
+use std::{cell::RefCell, rc::Rc};
+
 use alloy_primitives::{Address, Bytes, B256, U256};
 use anyhow::Context;
 use block_header::EvmBlockHeader;
@@ -8,7 +9,8 @@ use revm::{
     primitives::{AccountInfo, Bytecode, HashMap, HashSet},
     DatabaseRef,
 };
-use std::{cell::RefCell, rc::Rc};
+
+use super::provider::{ProviderDb, ProviderDbError};
 
 #[derive(Default, Debug)]
 struct State {

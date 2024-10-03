@@ -1,11 +1,12 @@
 use std::{collections::HashMap, time::SystemTime};
 
-use crate::mail_auth::dkim::{output::Output as DkimOutput, verify::Verifier};
 use domain_key::DomainKey;
 
-use super::authenticated_message::AuthenticatedMessage;
-use super::error::Error;
-use crate::mail_auth::common::{crypto::HashAlgorithm, verify::VerifySignature};
+use super::{authenticated_message::AuthenticatedMessage, error::Error};
+use crate::mail_auth::{
+    common::{crypto::HashAlgorithm, verify::VerifySignature},
+    dkim::{output::Output as DkimOutput, verify::Verifier},
+};
 
 pub(crate) mod domain_key;
 
@@ -117,9 +118,9 @@ impl From<Vec<(Domain, DomainKey)>> for Resolver {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
-
     use lazy_static::lazy_static;
+
+    use super::*;
 
     lazy_static! {
         static ref NEWENGLAND_SELECTOR_KEY: DomainKey = "v=DKIM1; \

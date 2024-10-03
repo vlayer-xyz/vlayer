@@ -1,6 +1,5 @@
 use mpt::MerkleTrie;
-use rand::rngs::StdRng;
-use rand::SeedableRng;
+use rand::{rngs::StdRng, SeedableRng};
 use utils::generate_entries_with_unique_keys;
 
 mod utils;

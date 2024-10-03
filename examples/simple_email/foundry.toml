@@ -7,7 +7,7 @@ libs = [
     "../../rust/target",
 ]
 
-fs_permissions = [{ access = "read", path = "./testdata" }]
+fs_permissions = [{ access = "read", path = "./vlayer/testdata" }]
 
 [dependencies]
 "@openzeppelin-contracts" = "5.0.1"

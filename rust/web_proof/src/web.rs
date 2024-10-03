@@ -21,11 +21,10 @@ impl Web {
 
 #[cfg(test)]
 mod tests {
-    use crate::fixtures::NOTARY_PUB_KEY_PEM_EXAMPLE;
+    use alloy_primitives::hex;
 
     use super::*;
-
-    use alloy_primitives::hex;
+    use crate::fixtures::NOTARY_PUB_KEY_PEM_EXAMPLE;
 
     #[test]
     fn test_abi_encoding() {

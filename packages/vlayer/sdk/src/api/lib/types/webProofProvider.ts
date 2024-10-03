@@ -71,8 +71,7 @@ export type ProverCallCommitment<
   commitmentArgs: ContractFunctionArgsWithout<T, F, { name: "webProof" }>;
   chainId: number;
 };
-
-type GetWebProofArgs<
+export type GetWebProofArgs<
   T extends readonly [AbiFunction, ...Abi[number][]],
   F extends ContractFunctionName<T>,
 > = {

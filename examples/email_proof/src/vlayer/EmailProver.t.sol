@@ -20,7 +20,7 @@ contract EmailProverTest is VTest {
         "newengland._domainkey.example.com v=DKIM1; p=MIGJAoGBALVI635dLK4cJJAH3Lx6upo3X/Lm1tQz3mezcWTA3BUBnyIsdnRf57aD5BtNmhPrYYDlWlzw3UgnKisIxktkk5+iMQMlFtAS10JB8L3YadXNJY+JBcbeSi5TgJe4WFzNgW95FWDAuSTRXSWZfA/8xjflbTLDx0euFZOM7C4T0GwLAgMBAAE=";
 
     function getTestEmail() public view returns (UnverifiedEmail memory) {
-        string memory mime = vm.readFile("./testdata/test_email.txt");
+        string memory mime = vm.readFile("./vlayer/testdata/test_email.txt");
         string[] memory dnsRecords = new string[](1);
         dnsRecords[0] = HARDCODED_DNS_RECORD;
         return UnverifiedEmail(mime, dnsRecords);

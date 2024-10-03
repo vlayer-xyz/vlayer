@@ -1,7 +1,5 @@
 use mpt::MerkleTrie;
-use rand::rngs::StdRng;
-use rand::seq::SliceRandom;
-use rand::SeedableRng;
+use rand::{rngs::StdRng, seq::SliceRandom, SeedableRng};
 
 use crate::utils::generate_entries_with_unique_keys;
 
