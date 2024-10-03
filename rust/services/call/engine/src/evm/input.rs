@@ -3,6 +3,7 @@ use std::{cell::RefCell, collections::HashMap, iter::once, rc::Rc};
 use alloy_primitives::{Bytes, B256};
 use block_header::EvmBlockHeader;
 use derive_more::{From, Into, IntoIterator};
+use derive_new::new;
 use mpt::MerkleTrie;
 use serde::{Deserialize, Serialize};
 use tracing::debug;
@@ -70,23 +71,18 @@ impl<D> From<EvmInput> for EvmEnv<D>
 where
     D: From<EvmInput>,
 {
-    #[inline]
     fn from(input: EvmInput) -> Self {
         let header = input.header.clone();
         EvmEnv::new(D::from(input), header)
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone, From, Into, IntoIterator)]
+#[derive(Debug, Serialize, Deserialize, Clone, From, Into, IntoIterator, new)]
 pub struct MultiEvmInput {
     pub inputs: HashMap<ExecutionLocation, EvmInput>,
 }
 
 impl MultiEvmInput {
-    pub fn new(inputs: HashMap<ExecutionLocation, EvmInput>) -> Self {
-        Self { inputs }
-    }
-
     pub fn from_entries<I>(iter: I) -> Self
     where
         I: IntoIterator<Item = (ExecutionLocation, EvmInput)>,

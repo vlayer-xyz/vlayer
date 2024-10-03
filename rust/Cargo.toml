@@ -68,6 +68,7 @@ ctor = "0.2.8"
 dotenv = "0.15.0"
 dyn-clone = "1.0.17"
 derive_more = "0.99.18"
+derive-new = "0.7.0"
 derivative = "2.2.0"
 ethers = "2.0"
 ethers-core = { version = "2.0", default-features = false }
