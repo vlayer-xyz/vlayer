@@ -1,8 +1,8 @@
-export const EXTENSION_ACTION = {
-  requestWebProof: "requestWebProof",
-} as const;
+export const enum ExtensionAction {
+  RequestWebProof
+}
 
-export const EXTENSION_MESSAGE_TYPE = {
-  proofDone: "proofDone",
-  proofError: "proofError",
-} as const;
+export const enum ExtensionMessage {
+  ProofDone,
+  ProofError
+}

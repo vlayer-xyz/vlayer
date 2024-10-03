@@ -4,10 +4,7 @@ import {
   type WebProofSetupInput,
 } from "../../lib/types/webProofProvider";
 
-import {
-  EXTENSION_ACTION,
-  EXTENSION_MESSAGE_TYPE,
-} from "@vlayer/web-proof-commons/constants/message";
+import { ExtensionAction, ExtensionMessage } from "@vlayer/web-proof-commons/constants/message";
 
 import { WebProof } from "../../lib/types/webProof";
 
@@ -39,7 +36,7 @@ export const createExtensionWebProofProvider = ({
 
       return new Promise<WebProof>((resolve, reject) => {
         chrome.runtime.sendMessage(import.meta.env.VITE_EXTENSION_ID, {
-          action: EXTENSION_ACTION.requestWebProof,
+          action: ExtensionAction.RequestWebProof,
           payload: {
             notaryUrl,
             wsProxyUrl,
@@ -54,18 +51,18 @@ export const createExtensionWebProofProvider = ({
           (
             message:
               | {
-                  type: typeof EXTENSION_MESSAGE_TYPE.proofDone;
+                  type: ExtensionMessage.ProofDone;
                   proof: WebProof;
                 }
               | {
-                  type: typeof EXTENSION_MESSAGE_TYPE.proofError;
+                  type: ExtensionMessage.ProofError;
                   error: { message: string };
                 },
           ) => {
-            if (message.type === EXTENSION_MESSAGE_TYPE.proofDone) {
+            if (message.type === ExtensionMessage.ProofDone) {
               resolve(message.proof);
             }
-            if (message.type === EXTENSION_MESSAGE_TYPE.proofError) {
+            if (message.type === ExtensionMessage.ProofError) {
               reject(message.error);
             }
           },
