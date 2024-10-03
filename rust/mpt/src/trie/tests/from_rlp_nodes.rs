@@ -38,3 +38,15 @@ fn branch_with_value() {
     let decoded_mpt = MerkleTrie::from_rlp_nodes(proof).unwrap();
     assert_eq!(mpt, decoded_mpt);
 }
+
+#[test]
+fn nested_brach_with_multibyte_value() {
+    // There was a bug in RLP encoding that occured when a branch contained a nested brach,
+    // wich contained a value that serialized to more than one byte.
+    let mpt =
+        MerkleTrie(Node::branch_with_child_and_value(0, Node::branch_with_value([0, 0]), [0]));
+    let proof = mpt.to_rlp_nodes();
+
+    let decoded_mpt = MerkleTrie::from_rlp_nodes(proof).unwrap();
+    assert_eq!(mpt, decoded_mpt);
+}
