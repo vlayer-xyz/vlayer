@@ -125,8 +125,8 @@ fn proof_extension() -> Result<()> {
     let proof = db.get_merkle_proof(root_hash, 1_000_000)?;
     let proof_trie: MerkleTrie = proof.into_vec().into_iter().collect();
     assert_eq!(
-        proof_trie.get(alloy_rlp::encode(1_000_000u64)).unwrap(),
-        &block_header(1_000_000u64)
+        proof_trie.get(alloy_rlp::encode(1_000_000_u64)).unwrap(),
+        &block_header(1_000_000)
     );
 
     // The tree should be sparse - block 0 not included

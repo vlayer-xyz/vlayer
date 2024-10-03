@@ -97,11 +97,14 @@ mod tests {
     #[test]
     fn nibbles_strip_prefix() -> Result<()> {
         let nibbles = Nibbles::new();
-        assert_eq!(strip_prefix(&nibbles, &*Nibbles::unpack([0])), None);
+        assert_eq!(strip_prefix(&nibbles, &*Nibbles::from_nibbles([0])), None);
 
-        let nibbles = Nibbles::unpack([0, 1]);
+        let nibbles = Nibbles::from_nibbles([0, 1]);
         assert_eq!(strip_prefix(&nibbles, []).unwrap(), nibbles);
-        assert_eq!(strip_prefix(&nibbles, &*Nibbles::unpack([0])).unwrap(), Nibbles::unpack([1]));
+        assert_eq!(
+            strip_prefix(&nibbles, &*Nibbles::from_nibbles([0])).unwrap(),
+            Nibbles::from_nibbles([1])
+        );
 
         Ok(())
     }
