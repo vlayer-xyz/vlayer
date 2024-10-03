@@ -129,6 +129,7 @@ jobs:
 
   build-extension:
     name: Build browser extension
+    needs: [build-release]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -141,6 +142,11 @@ jobs:
       - name: Install dependencies
         working-directory: packages/browser-extension
         run: npm install
+      - name: Update extension version
+        working-directory: packages/browser-extension
+        env: 
+          VLAYER_BUILD: ${{ needs.build-release.outputs.vlayer_build }}
+        run: npm version "${VLAYER_BUILD}"
       - name: Build and compress
         working-directory: packages/browser-extension
         run: |
