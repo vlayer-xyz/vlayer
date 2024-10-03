@@ -1,6 +1,6 @@
 pub(crate) mod static_resolver;
 pub(crate) mod verify;
 
-mod canonization;
+mod canonicalization;
 mod parse_header;
 mod tags;
