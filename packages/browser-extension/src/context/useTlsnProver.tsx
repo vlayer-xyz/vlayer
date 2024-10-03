@@ -10,7 +10,7 @@ import React, {
   PropsWithChildren,
 } from "react";
 import { formatTlsnHeaders } from "../lib/formatTlsnHeaders";
-import { EXTENSION_MESSAGE } from "../constants/message";
+import { EXTENSION_MESSAGE } from "@vlayer/web-proof-commons/constants/message";
 
 const TlsnProofContext = createContext({
   prove: () => {},

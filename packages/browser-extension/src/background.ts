@@ -1,5 +1,5 @@
 import browser from "webextension-polyfill";
-import { EXTENSION_ACTION, EXTENSION_MESSAGE } from "./constants/message";
+import { EXTENSION_ACTION, EXTENSION_MESSAGE } from "@vlayer/web-proof-commons/constants/message";
 
 chrome.tabs.onActivated.addListener(function (activeInfo) {
   windowId = activeInfo.windowId;
