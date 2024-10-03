@@ -3,45 +3,47 @@ mod relaxed;
 mod simple;
 
 #[derive(Debug, PartialEq)]
-enum CanonizationType {
+enum CanonicalizationType {
     Relaxed,
     Simple,
 }
 
 #[derive(Debug, PartialEq)]
-pub struct Canonization {
-    headers: CanonizationType,
-    body: CanonizationType,
+pub struct Canonicalization {
+    headers: CanonicalizationType,
+    body: CanonicalizationType,
 }
 
-impl TryFrom<&str> for CanonizationType {
+impl TryFrom<&str> for CanonicalizationType {
     type Error = &'static str;
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
         match value.trim() {
-            "relaxed" => Ok(CanonizationType::Relaxed),
-            "simple" => Ok(CanonizationType::Simple),
-            _ => Err("Invalid canonization type"),
+            "relaxed" => Ok(CanonicalizationType::Relaxed),
+            "simple" => Ok(CanonicalizationType::Simple),
+            _ => Err("Invalid canonicalization type"),
         }
     }
 }
 
-impl TryFrom<&str> for Canonization {
+impl TryFrom<&str> for Canonicalization {
     type Error = &'static str;
 
     fn try_from(value: &str) -> Result<Self, Self::Error> {
-        let (header, body) = value.split_once('/').ok_or("Invalid canonization type")?;
-        let headers = CanonizationType::try_from(header)?;
-        let body = CanonizationType::try_from(body)?;
+        let (header, body) = value
+            .split_once('/')
+            .ok_or("Invalid canonicalization type")?;
+        let headers = CanonicalizationType::try_from(header)?;
+        let body = CanonicalizationType::try_from(body)?;
         Ok(Self { headers, body })
     }
 }
 
-impl Canonization {
+impl Canonicalization {
     pub fn canonize_body(&self, body: &str) -> String {
         match self.body {
-            CanonizationType::Relaxed => relaxed::canonize_body(body),
-            CanonizationType::Simple => simple::canonize_body(body),
+            CanonicalizationType::Relaxed => relaxed::canonize_body(body),
+            CanonicalizationType::Simple => simple::canonize_body(body),
         }
     }
 
@@ -50,8 +52,8 @@ impl Canonization {
         headers: impl Iterator<Item = (&'a str, &'a str)>,
     ) -> String {
         match self.headers {
-            CanonizationType::Relaxed => relaxed::canonize_headers(headers),
-            CanonizationType::Simple => simple::canonize_headers(headers),
+            CanonicalizationType::Relaxed => relaxed::canonize_headers(headers),
+            CanonicalizationType::Simple => simple::canonize_headers(headers),
         }
     }
 }
@@ -136,9 +138,9 @@ mod test {
     ];
 
     #[test]
-    fn canonization_all_types() {
-        let simple_simple = Canonization::try_from("simple/simple").unwrap();
-        let relaxed_relaxed = Canonization::try_from("relaxed/relaxed").unwrap();
+    fn canonicalization_all_types() {
+        let simple_simple = Canonicalization::try_from("simple/simple").unwrap();
+        let relaxed_relaxed = Canonicalization::try_from("relaxed/relaxed").unwrap();
 
         for TestCase {
             headers,
@@ -162,56 +164,56 @@ mod test {
 
         #[test]
         fn simple_simple() {
-            let canonization = Canonization::try_from("simple/simple");
+            let canonicalization = Canonicalization::try_from("simple/simple");
             assert_eq!(
-                canonization,
-                Ok(Canonization {
-                    body: CanonizationType::Simple,
-                    headers: CanonizationType::Simple,
+                canonicalization,
+                Ok(Canonicalization {
+                    body: CanonicalizationType::Simple,
+                    headers: CanonicalizationType::Simple,
                 })
             );
         }
 
         #[test]
         fn relaxed_relaxed() {
-            let canonization = Canonization::try_from("relaxed/relaxed");
+            let canonicalization = Canonicalization::try_from("relaxed/relaxed");
             assert_eq!(
-                canonization,
-                Ok(Canonization {
-                    body: CanonizationType::Relaxed,
-                    headers: CanonizationType::Relaxed,
+                canonicalization,
+                Ok(Canonicalization {
+                    body: CanonicalizationType::Relaxed,
+                    headers: CanonicalizationType::Relaxed,
                 })
             );
         }
 
         #[test]
         fn simple_relaxed() {
-            let canonization = Canonization::try_from("simple/relaxed");
+            let canonicalization = Canonicalization::try_from("simple/relaxed");
             assert_eq!(
-                canonization,
-                Ok(Canonization {
-                    headers: CanonizationType::Simple,
-                    body: CanonizationType::Relaxed,
+                canonicalization,
+                Ok(Canonicalization {
+                    headers: CanonicalizationType::Simple,
+                    body: CanonicalizationType::Relaxed,
                 })
             );
         }
 
         #[test]
         fn relaxed_simple() {
-            let canonization = Canonization::try_from("relaxed/simple");
+            let canonicalization = Canonicalization::try_from("relaxed/simple");
             assert_eq!(
-                canonization,
-                Ok(Canonization {
-                    headers: CanonizationType::Relaxed,
-                    body: CanonizationType::Simple,
+                canonicalization,
+                Ok(Canonicalization {
+                    headers: CanonicalizationType::Relaxed,
+                    body: CanonicalizationType::Simple,
                 })
             );
         }
 
         #[test]
         fn invalid() {
-            let canonization = Canonization::try_from("relaxed");
-            assert_eq!(canonization, Err("Invalid canonization type"));
+            let canonicalization = Canonicalization::try_from("relaxed");
+            assert_eq!(canonicalization, Err("Invalid canonicalization type"));
         }
     }
 }

@@ -13,7 +13,7 @@ pub fn canonize_headers<'a>(headers: impl Iterator<Item = (&'a str, &'a str)>) -
 mod test {
     use super::*;
 
-    mod simple_canonization {
+    mod simple_canonicalization {
         use super::*;
 
         mod canonize_body {
