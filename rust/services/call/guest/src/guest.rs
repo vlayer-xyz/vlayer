@@ -1,17 +1,14 @@
 use call_engine::{
     engine::Engine,
     evm::{
-        env::{
-            cached::{CachedEvmEnv, MultiEvmEnv},
-            location::ExecutionLocation,
-        },
+        env::{cached::CachedEvmEnv, location::ExecutionLocation},
         input::MultiEvmInput,
     },
     io::{Call, GuestOutput},
     CallAssumptions,
 };
 
-use crate::{db::wrap_state::WrapStateDb, input_validation::ValidatedMultiEvmInput};
+use crate::db::wrap_state::WrapStateDb;
 
 pub struct Guest {
     start_execution_location: ExecutionLocation,
@@ -24,8 +21,8 @@ impl Guest {
         multi_evm_input: MultiEvmInput,
         start_execution_location: ExecutionLocation,
     ) -> Self {
-        let validated_multi_evm_input: ValidatedMultiEvmInput = multi_evm_input.into();
-        let multi_evm_env = MultiEvmEnv::from(validated_multi_evm_input);
+        multi_evm_input.assert_coherency();
+        let multi_evm_env = multi_evm_input.into();
         let evm_envs = CachedEvmEnv::from_envs(multi_evm_env);
 
         Guest {

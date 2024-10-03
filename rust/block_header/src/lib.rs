@@ -21,7 +21,6 @@ pub trait Hashable {
 }
 
 impl<H: EvmBlockHeader> Hashable for H {
-    #[inline]
     fn hash_slow(&self) -> B256 {
         keccak256(alloy_rlp::encode(self))
     }

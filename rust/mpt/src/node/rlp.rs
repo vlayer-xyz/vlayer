@@ -160,7 +160,6 @@ impl Node {
     }
 }
 
-#[inline]
 fn encode_header(list: bool, payload_length: usize, out: &mut dyn BufMut) {
     debug_assert!(payload_length > 0);
     let header = Header {

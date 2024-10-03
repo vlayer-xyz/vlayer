@@ -1,12 +1,14 @@
-use std::{collections::HashMap, iter::once};
+use std::{cell::RefCell, collections::HashMap, iter::once, rc::Rc};
 
 use alloy_primitives::{Bytes, B256};
 use block_header::EvmBlockHeader;
+use derive_more::{From, Into, IntoIterator};
+use derive_new::new;
 use mpt::MerkleTrie;
 use serde::{Deserialize, Serialize};
 use tracing::debug;
 
-use super::env::location::ExecutionLocation;
+use super::env::{cached::MultiEvmEnv, location::ExecutionLocation, EvmEnv};
 
 /// The serializable input to derive and validate a [EvmEnv].
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -39,12 +41,17 @@ impl EvmInput {
             .collect()
     }
 
-    pub fn validate_state_root(&self) {
+    pub fn assert_coherency(&self) {
+        self.assert_state_root_coherency();
+        self.assert_ancestors_coherency();
+    }
+
+    fn assert_state_root_coherency(&self) {
         let state_root = self.state_trie.hash_slow();
         assert_eq!(self.header.state_root(), &state_root, "State root mismatch");
     }
 
-    pub fn validate_ancestors(&self) {
+    fn assert_ancestors_coherency(&self) {
         let mut previous_header = &self.header;
         for ancestor in &self.ancestors {
             let ancestor_hash = ancestor.hash_slow();
@@ -60,7 +67,58 @@ impl EvmInput {
     }
 }
 
-pub type MultiEvmInput = HashMap<ExecutionLocation, EvmInput>;
+impl<D> From<EvmInput> for EvmEnv<D>
+where
+    D: From<EvmInput>,
+{
+    fn from(input: EvmInput) -> Self {
+        let header = input.header.clone();
+        EvmEnv::new(D::from(input), header)
+    }
+}
+
+#[derive(Debug, Serialize, Deserialize, Clone, From, Into, IntoIterator, new)]
+pub struct MultiEvmInput {
+    pub inputs: HashMap<ExecutionLocation, EvmInput>,
+}
+
+impl MultiEvmInput {
+    pub fn from_entries<I>(iter: I) -> Self
+    where
+        I: IntoIterator<Item = (ExecutionLocation, EvmInput)>,
+    {
+        let inputs = iter.into_iter().collect();
+        Self { inputs }
+    }
+
+    pub fn assert_coherency(&self) {
+        self.inputs.values().for_each(EvmInput::assert_coherency);
+    }
+}
+
+impl FromIterator<(ExecutionLocation, EvmInput)> for MultiEvmInput {
+    fn from_iter<I: IntoIterator<Item = (ExecutionLocation, EvmInput)>>(iter: I) -> Self {
+        let inputs = iter.into_iter().collect();
+        Self { inputs }
+    }
+}
+
+impl<D> From<MultiEvmInput> for MultiEvmEnv<D>
+where
+    D: From<EvmInput>,
+{
+    fn from(input: MultiEvmInput) -> Self {
+        RefCell::new(
+            input
+                .into_iter()
+                .map(|(location, input)| {
+                    let chain_spec = &location.chain_id.try_into().expect("cannot get chain spec");
+                    (location, Rc::new(EvmEnv::from(input).with_chain_spec(chain_spec).unwrap()))
+                })
+                .collect(),
+        )
+    }
+}
 
 #[cfg(test)]
 mod test {
@@ -104,8 +162,7 @@ mod test {
         }
     }
 
-    mod validate_state_root {
-
+    mod assert_state_root_coherency {
         use super::*;
 
         #[test]
@@ -118,18 +175,18 @@ mod test {
                 }),
                 ..Default::default()
             };
-            input.validate_state_root();
+            input.assert_state_root_coherency();
         }
 
         #[test]
         #[should_panic(expected = "State root mismatch")]
         fn mismatch() {
             let input = EvmInput::default();
-            input.validate_state_root();
+            input.assert_state_root_coherency();
         }
     }
 
-    mod validate_ancestors {
+    mod assert_ancestors_coherency {
         use super::*;
 
         #[test]
@@ -145,7 +202,7 @@ mod test {
                 ..Default::default()
             };
 
-            input.validate_ancestors();
+            input.assert_ancestors_coherency();
         }
 
         #[test]
@@ -159,7 +216,7 @@ mod test {
                 }),
                 ..Default::default()
             };
-            input.validate_ancestors();
+            input.assert_ancestors_coherency();
         }
     }
 }
