@@ -9,6 +9,7 @@ on:
       - "packages/vlayer/**"
       - "bash/**"
       - ".github/workflows/**"
+      - "contracts/**"
   merge_group:
 concurrency:
   group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
