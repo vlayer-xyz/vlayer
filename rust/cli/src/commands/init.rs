@@ -159,6 +159,22 @@ fn add_remappings(foundry_root: &Path) -> Result<(), CLIError> {
     Ok(())
 }
 
+fn change_sdk_dependency_to_npm(foundry_root: &Path) -> Result<(), CLIError> {
+    let package_json = foundry_root.join("package.json");
+    let mut file = OpenOptions::new().read(true).open(package_json)?;
+    let mut contents = String::new();
+    file.read_to_string(&mut contents)?;
+
+    let target = r#""@vlayer/sdk": "../../../packages/vlayer/sdk""#;
+    let replacement = format!(r#""@vlayer/sdk": "@vlayer/sdk-{}""#, version());
+
+    let new_contents = contents.replace(target, &replacement);
+
+    fs::write(file_path, new_contents)?;
+
+    Ok(())
+}
+
 pub(crate) async fn init(
     mut cwd: PathBuf,
     template: TemplateOption,
@@ -212,6 +228,8 @@ pub(crate) async fn init_existing(cwd: PathBuf, template: TemplateOption) -> Res
     install_dependencies()?;
     info!("Successfully installed all dependencies");
     add_remappings(&root_path)?;
+
+    change_sdk_dependency_to_npm(&root_path)?;
 
     std::env::set_current_dir(&cwd)?;
 
