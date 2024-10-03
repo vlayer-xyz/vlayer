@@ -3,10 +3,13 @@ use std::ops::{Deref, DerefMut};
 use alloy_primitives::{keccak256, Bytes, ChainId, B256};
 use alloy_rlp::{BytesMut, Decodable, Encodable, RlpDecodable, RlpEncodable};
 use mpt::{KeyNibbles, Node, NodeRef, EMPTY_ROOT_HASH};
+use nybbles::Nibbles;
+use proof_builder::{MerkleProofBuilder, ProofResult};
 use thiserror::Error;
 
 use crate::{Database, DbError, DbResult, ReadTx, WriteTx};
 
+mod proof_builder;
 #[cfg(test)]
 mod tests;
 
@@ -63,30 +66,18 @@ impl<DB: for<'a> Database<'a>> ChainDb<DB> {
         self.begin_ro()?.get_chain_info(chain_id)
     }
 
-    pub fn get_merkle_proof(&self, root_hash: B256, block_num: u64) -> ChainDbResult<Box<[Node]>> {
+    pub fn get_merkle_proof(&self, root_hash: B256, block_num: u64) -> ProofResult {
         let tx = self.begin_ro()?;
-        let mut node_hash = root_hash;
-        let mut nodes = vec![];
-        let mut key_nibbles = KeyNibbles::unpack(alloy_rlp::encode(block_num));
-        let mut nibbles: &[u8] = key_nibbles.as_ref();
-
-        loop {
-            let node = tx.get_node(node_hash)?;
-
-            // TODO: Traverse MPT
-
-            nodes.push(node);
-        }
-
-        Ok(nodes.into_boxed_slice())
+        let proof_builder = MerkleProofBuilder::new(|node_hash| tx.get_node(node_hash));
+        proof_builder.build_proof(root_hash, block_num)
     }
 
-    pub fn update_chain<'a>(
+    pub fn update_chain(
         &mut self,
         chain_id: ChainId,
         chain_info: &ChainInfo,
         removed_nodes: impl IntoIterator<Item = B256>,
-        added_nodes: impl IntoIterator<Item = &'a Node>,
+        added_nodes_rlp: impl IntoIterator<Item = Bytes>,
     ) -> ChainDbResult<()> {
         let mut tx = self.begin_rw()?;
 
@@ -96,7 +87,7 @@ impl<DB: for<'a> Database<'a>> ChainDb<DB> {
             tx.delete_node(node_hash)?;
         }
 
-        for node in added_nodes {
+        for node in added_nodes_rlp {
             tx.insert_node(node)?;
         }
 
@@ -141,9 +132,8 @@ impl<TX: WriteTx> ChainDbTx<TX> {
         Ok(())
     }
 
-    pub fn insert_node(&mut self, node: &Node) -> ChainDbResult<()> {
-        let node_rlp = node.rlp_encoded();
-        let node_hash = node_hash(node, &node_rlp);
+    pub fn insert_node(&mut self, node_rlp: Bytes) -> ChainDbResult<()> {
+        let node_hash = keccak256(&node_rlp);
         self.tx.insert(NODES, node_hash, node_rlp)?;
         Ok(())
     }
@@ -156,13 +146,5 @@ impl<TX: WriteTx> ChainDbTx<TX> {
     pub fn commit(self) -> ChainDbResult<()> {
         self.tx.commit()?;
         Ok(())
-    }
-}
-
-fn node_hash(node: &Node, node_rlp: impl AsRef<[u8]>) -> B256 {
-    match node {
-        Node::Null => EMPTY_ROOT_HASH,
-        Node::Digest(digest) => *digest,
-        _ => keccak256(node_rlp.as_ref()),
     }
 }

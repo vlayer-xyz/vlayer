@@ -1954,6 +1954,7 @@ dependencies = [
  "anyhow",
  "libmdbx",
  "mpt",
+ "nybbles",
  "tempfile",
  "thiserror",
 ]
