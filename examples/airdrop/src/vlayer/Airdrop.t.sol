@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {VTest, Proof} from "vlayer-0.1.0/src/testing/VTest.sol";
+import {VTest, Proof} from "vlayer-0.1.0/testing/VTest.sol";
 import {NftOwnershipProver} from "./NftOwnershipProver.sol";
 import {Airdrop} from "./AirdropVerifier.sol";
 

@@ -3,8 +3,8 @@ pragma solidity ^0.8.13;
 
 import {WebProofProver} from "./WebProofProver.sol";
 
-import {Proof} from "vlayer-0.1.0/src/Proof.sol";
-import {Verifier} from "vlayer-0.1.0/src/Verifier.sol";
+import {Proof} from "vlayer-0.1.0/Proof.sol";
+import {Verifier} from "vlayer-0.1.0/Verifier.sol";
 
 import {ERC721} from "@openzeppelin-contracts/token/ERC721/ERC721.sol";
 

@@ -2,9 +2,9 @@
 pragma solidity ^0.8.13;
 
 import {Strings} from "@openzeppelin-contracts-5.0.1/utils/Strings.sol";
-import {Proof} from "vlayer-0.1.0/src/Proof.sol";
-import {Prover} from "vlayer-0.1.0/src/Prover.sol";
-import {VerifiedEmail, UnverifiedEmail, EmailProofLib} from "vlayer-0.1.0/src/EmailProof.sol";
+import {Proof} from "vlayer-0.1.0/Proof.sol";
+import {Prover} from "vlayer-0.1.0/Prover.sol";
+import {VerifiedEmail, UnverifiedEmail, EmailProofLib} from "vlayer-0.1.0/EmailProof.sol";
 import {EmailStrings} from "./EmailStrings.sol";
 
 contract EmailDomainProver is Prover {

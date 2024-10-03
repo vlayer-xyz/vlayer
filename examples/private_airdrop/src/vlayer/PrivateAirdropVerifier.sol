@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: MIT
 pragma solidity ^0.8.13;
 
-import {Proof} from "vlayer-0.1.0/src/Proof.sol";
-import {Verifier} from "vlayer-0.1.0/src/Verifier.sol";
+import {Proof} from "vlayer-0.1.0/Proof.sol";
+import {Verifier} from "vlayer-0.1.0/Verifier.sol";
 import {PrivateAirdropProver} from "./PrivateAirdropProver.sol";
 import {IERC20} from "@openzeppelin-contracts-5.0.1/token/ERC20/IERC20.sol";
 

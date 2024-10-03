@@ -4,8 +4,8 @@ pragma solidity ^0.8.13;
 import {EmailDomainProver} from "./EmailDomainProver.sol";
 import {CompanyNFT} from "./CompanyNFT.sol";
 
-import {Proof} from "vlayer-0.1.0/src/Proof.sol";
-import {Verifier} from "vlayer-0.1.0/src/Verifier.sol";
+import {Proof} from "vlayer-0.1.0/Proof.sol";
+import {Verifier} from "vlayer-0.1.0/Verifier.sol";
 
 contract EmailDomainVerifier is Verifier {
     address public prover;

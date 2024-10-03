@@ -4,8 +4,8 @@ pragma solidity ^0.8.13;
 import {ECDSA} from "@openzeppelin-contracts-5.0.1/utils/cryptography/ECDSA.sol";
 import {MessageHashUtils} from "@openzeppelin-contracts-5.0.1/utils/cryptography/MessageHashUtils.sol";
 import {IERC20} from "@openzeppelin-contracts-5.0.1/token/ERC20/IERC20.sol";
-import {Proof} from "vlayer-0.1.0/src/Proof.sol";
-import {Prover} from "vlayer-0.1.0/src/Prover.sol";
+import {Proof} from "vlayer-0.1.0/Proof.sol";
+import {Prover} from "vlayer-0.1.0/Prover.sol";
 
 contract PrivateAirdropProver is Prover {
     using ECDSA for bytes32;
