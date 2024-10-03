@@ -4,10 +4,10 @@ use alloy_primitives::{keccak256, Bytes, ChainId, B256};
 use alloy_rlp::{BytesMut, Decodable, Encodable, RlpDecodable, RlpEncodable};
 use mpt::{KeyNibbles, Node, NodeRef, EMPTY_ROOT_HASH};
 use nybbles::Nibbles;
+use proof_builder::{MerkleProofBuilder, ProofResult};
 use thiserror::Error;
 
 use crate::{Database, DbError, DbResult, ReadTx, WriteTx};
-use proof_builder::{MerkleProofBuilder, ProofResult};
 
 mod proof_builder;
 #[cfg(test)]

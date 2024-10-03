@@ -90,8 +90,9 @@ fn strip_prefix(nibbles: &Nibbles, prefix: impl AsRef<[u8]>) -> Option<Nibbles> 
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use anyhow::Result;
+
+    use super::*;
 
     #[test]
     fn nibbles_strip_prefix() -> Result<()> {
