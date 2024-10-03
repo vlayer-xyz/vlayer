@@ -11,8 +11,8 @@ import {
 
 import { type CallContext, type CallParams } from "types/vlayer";
 import { v_call } from "./v_call";
-import { testChainId1 } from "./helpers";
 import { ContractSpec } from "types/ethereum";
+import { foundry } from "viem/chains";
 
 export async function getContractSpec(file: string): Promise<ContractSpec> {
   return Bun.file(file).json();
@@ -26,7 +26,7 @@ export async function prove<
   abi: T,
   functionName: F,
   args: ContractFunctionArgs<T, AbiStateMutability, F>,
-  chainId = testChainId1,
+  chainId: number = foundry.id,
 ) {
   const calldata = encodeFunctionData({
     abi: abi as Abi,

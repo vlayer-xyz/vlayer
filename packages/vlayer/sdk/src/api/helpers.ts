@@ -17,14 +17,12 @@ import { foundry } from "viem/chains";
 
 import type { ContractSpec, ContractArg } from "types/ethereum";
 
-export const testChainId1 = 100001;
+const rpcUrls: Map<number, HttpTransport> = new Map([[foundry.id, http()]]);
 
-const rpcUrls: Map<number, HttpTransport> = new Map([[testChainId1, http()]]);
-
-export const chainIds = [testChainId1];
+export const chainIds = [foundry.id];
 
 export function client(
-  chainId: number = testChainId1,
+  chainId: number = foundry.id,
 ): ReturnType<typeof walletActions> & PublicClient {
   const transport = rpcUrls.get(chainId);
   if (transport == undefined) {
@@ -43,7 +41,7 @@ export function client(
 export async function deployContract(
   contractSpec: ContractSpec,
   args: ContractArg[] = [],
-  chainId: number = testChainId1,
+  chainId: number = foundry.id,
 ): Promise<Address> {
   const ethClient = client(chainId);
 
@@ -84,7 +82,7 @@ export async function deployProverVerifier<P extends Abi, V extends Abi>(
     prover?: ContractArg[];
     verifier?: Tail<ContractArg>[];
   } = {},
-  chainId: number = testChainId1,
+  chainId: number = foundry.id,
 ) {
   console.log("Deploying prover");
   const proverAddress = await deployContract(
@@ -113,7 +111,7 @@ export async function call<
   address: Address,
   functionName: F,
   args?: ContractFunctionArgs<T, "pure" | "view", F>,
-  chainId: number = testChainId1,
+  chainId: number = foundry.id,
 ) {
   const ethClient = client(chainId);
 
@@ -134,7 +132,7 @@ export async function writeContract<
   functionName: F,
   args: ContractFunctionArgs<T, "payable" | "nonpayable", F>,
   sender?: Address,
-  chainId: number = testChainId1,
+  chainId: number = foundry.id,
 ) {
   const ethClient = client(chainId);
   const selectedSender = sender || (await ethClient.getAddresses())[0];
@@ -161,5 +159,5 @@ export async function writeContract<
 export const getTestAccount = () => privateKeyToAccount(generatePrivateKey());
 
 export const getTestAddresses = (
-  chainId: number = testChainId1,
+  chainId: number = foundry.id,
 ): Promise<Address[]> => client(chainId).getAddresses();
