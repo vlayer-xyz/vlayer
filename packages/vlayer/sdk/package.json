@@ -23,5 +23,6 @@
     "postal-mime": "^2.3.2",
     "viem": "^2.21.0",
     "@vlayer/web-proof-commons": "file:../../web-proof-commons"
-  }
+  },
+  "bundleDependencies": ["@vlayer/web-proof-commons"]
 }
