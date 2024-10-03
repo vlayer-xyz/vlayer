@@ -72,7 +72,6 @@ where
 {
     fn from(input: EvmInput) -> Self {
         let db = D::from(input.clone());
-
         EvmEnv::new(db, input.header)
     }
 }
@@ -138,7 +137,8 @@ where
 #[cfg(test)]
 mod test {
     use block_header::{EthBlockHeader, Hashable};
-    use mpt::{MerkleTrie, EMPTY_ROOT_HASH};
+    use mpt::MerkleTrie;
+    use mpt::EMPTY_ROOT_HASH;
 
     use super::EvmInput;
 
