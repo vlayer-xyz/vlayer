@@ -1,4 +1,3 @@
-use crate::db::wrap_state::WrapStateDb;
 use call_engine::{
     engine::Engine,
     evm::{
@@ -8,6 +7,8 @@ use call_engine::{
     io::{Call, GuestOutput},
     CallAssumptions,
 };
+
+use crate::db::wrap_state::WrapStateDb;
 
 pub struct Guest {
     start_execution_location: ExecutionLocation,

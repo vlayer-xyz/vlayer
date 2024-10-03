@@ -1,10 +1,9 @@
-use std::{collections::HashMap, iter::once};
+use std::{cell::RefCell, collections::HashMap, iter::once, rc::Rc};
 
 use alloy_primitives::{Bytes, B256};
 use block_header::EvmBlockHeader;
 use mpt::MerkleTrie;
 use serde::{Deserialize, Serialize};
-use std::{cell::RefCell, rc::Rc};
 use tracing::debug;
 
 use super::env::{cached::MultiEvmEnv, location::ExecutionLocation, EvmEnv};
@@ -109,8 +108,8 @@ impl FromIterator<(ExecutionLocation, EvmInput)> for MultiEvmInput {
 }
 
 impl IntoIterator for MultiEvmInput {
-    type Item = (ExecutionLocation, EvmInput);
     type IntoIter = std::collections::hash_map::IntoIter<ExecutionLocation, EvmInput>;
+    type Item = (ExecutionLocation, EvmInput);
 
     fn into_iter(self) -> Self::IntoIter {
         self.inputs.into_iter()
@@ -137,8 +136,7 @@ where
 #[cfg(test)]
 mod test {
     use block_header::{EthBlockHeader, Hashable};
-    use mpt::MerkleTrie;
-    use mpt::EMPTY_ROOT_HASH;
+    use mpt::{MerkleTrie, EMPTY_ROOT_HASH};
 
     use super::EvmInput;
 
