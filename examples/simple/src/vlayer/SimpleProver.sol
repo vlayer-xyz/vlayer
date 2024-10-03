@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {Proof} from "vlayer-0.1.0/src/Proof.sol";
-import {Prover} from "vlayer-0.1.0/src/Prover.sol";
+import {Proof} from "vlayer-0.1.0/Proof.sol";
+import {Prover} from "vlayer-0.1.0/Prover.sol";
 import {IERC20} from "openzeppelin-contracts/token/ERC20/IERC20.sol";
 
 contract SimpleProver is Prover {

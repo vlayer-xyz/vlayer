@@ -1,9 +1,9 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {VTest} from "vlayer-0.1.0/src/testing/VTest.sol";
+import {VTest} from "vlayer-0.1.0/testing/VTest.sol";
 import "./EmailProver.sol";
-import {UnverifiedEmail, EmailProofLib, VerifiedEmail} from "vlayer-0.1.0/src/EmailProof.sol";
+import {UnverifiedEmail, EmailProofLib, VerifiedEmail} from "vlayer-0.1.0/EmailProof.sol";
 
 contract EmailProofLibWrapper {
     using EmailProofLib for UnverifiedEmail;
