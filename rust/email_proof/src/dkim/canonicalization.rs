@@ -3,6 +3,12 @@ mod relaxed;
 mod simple;
 
 #[derive(Debug, PartialEq)]
+pub struct CanonicalHeaders(Vec<u8>);
+
+#[derive(Debug, PartialEq)]
+pub struct CanonicalBody(Vec<u8>);
+
+#[derive(Debug, PartialEq)]
 enum CanonicalizationType {
     Relaxed,
     Simple,
@@ -39,22 +45,38 @@ impl TryFrom<&str> for Canonicalization {
     }
 }
 
+impl CanonicalHeaders {
+    fn new(value: String) -> Self {
+        Self(value.into_bytes())
+    }
+}
+
+impl CanonicalBody {
+    fn new(value: String) -> Self {
+        Self(value.into_bytes())
+    }
+}
+
 impl Canonicalization {
-    pub fn canonize_body(&self, body: &str) -> String {
-        match self.body {
+    pub fn canonize_body(&self, body: &str) -> CanonicalBody {
+        let canonical_body = match self.body {
             CanonicalizationType::Relaxed => relaxed::canonize_body(body),
             CanonicalizationType::Simple => simple::canonize_body(body),
-        }
+        };
+
+        CanonicalBody::new(canonical_body)
     }
 
     pub fn canonize_headers<'a>(
         &self,
         headers: impl Iterator<Item = (&'a str, &'a str)>,
-    ) -> String {
-        match self.headers {
+    ) -> CanonicalHeaders {
+        let canonical_headers = match self.headers {
             CanonicalizationType::Relaxed => relaxed::canonize_headers(headers),
             CanonicalizationType::Simple => simple::canonize_headers(headers),
-        }
+        };
+
+        CanonicalHeaders::new(canonical_headers)
     }
 }
 
@@ -151,11 +173,17 @@ mod test {
             relaxed_headers,
         } in TEST_FIXTURES
         {
-            assert_eq!(simple_simple.canonize_headers(headers.iter().copied()), simple_headers);
-            assert_eq!(simple_simple.canonize_body(body), simple_body);
+            assert_eq!(
+                simple_simple.canonize_headers(headers.iter().copied()).0,
+                simple_headers.as_bytes()
+            );
+            assert_eq!(simple_simple.canonize_body(body).0, simple_body.as_bytes());
 
-            assert_eq!(relaxed_relaxed.canonize_headers(headers.iter().copied()), relaxed_headers);
-            assert_eq!(relaxed_relaxed.canonize_body(body), relaxed_body);
+            assert_eq!(
+                relaxed_relaxed.canonize_headers(headers.iter().copied()).0,
+                relaxed_headers.as_bytes()
+            );
+            assert_eq!(relaxed_relaxed.canonize_body(body).0, relaxed_body.as_bytes());
         }
     }
 
