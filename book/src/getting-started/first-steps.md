@@ -27,13 +27,25 @@ The vlayer directory structure resembles a typical Foundry project but with two 
 * `vlayer`: Has contract deployment scripts, client SDK calls to the prover, and verifier transactions.
  
 
-## Runing examples locally
+## Running examples locally
+
+### All examples
+You need to install [Bun](https://bun.sh/) to build and run the examples.
+
 To run vlayer examples locally, first build the contracts by navigating to your project folder and running:
 ```bash
 cd your-project
 forge build
 ```
 This compiles the smart contracts and prepares them for deployment and testing.
+
+> Please note that `vlayer init` installs Solidity dependencies and generates `remappings.txt`. Running `forge soldeer install` is not needed to build the example and may overwrite remappings, which can cause build errors.
+
+Then install Typescript dependencies in vlayer folder by running:
+```bash
+cd vlayer
+bun install
+```
 
 Then launch a local Ethereum node:
 ```bash
@@ -53,3 +65,23 @@ vlayer serve \
   --rpc-url '8453:https://base-mainnet.g.alchemy.com/v2/{ALCHEMY_KEY}' \
   --rpc-url '10:https://opt-mainnet.g.alchemy.com/v2/{ALCHEMY_KEY}'
 ```
+
+### Web Proof example
+
+Deploy the `WebProofProver` and `WebProofVerifier` contracts on local anvil testnet:
+
+```sh
+cd vlayer
+bun run deploy.ts
+```
+
+Start web app on localhost:
+
+```sh
+cd vlayer
+bun run dev
+```
+
+The app will be available at `http://localhost:5174`.
+
+Browser extension should be installed.
