@@ -1,10 +1,10 @@
 import {
-  EXTENSION_ACTION,
-  EXTENSION_MESSAGE,
   type WebProofProvider,
   type WebProofProviderSetup,
   type WebProofSetupInput,
 } from "../../lib/types/webProofProvider";
+
+import { EXTENSION_ACTION, EXTENSION_MESSAGE } from "@vlayer/web-proof-commons/constants/message";
 
 import { WebProof } from "../../lib/types/webProof";
 
