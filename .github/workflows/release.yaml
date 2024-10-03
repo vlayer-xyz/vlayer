@@ -126,6 +126,33 @@ jobs:
         with:
           name: examples
           path: out/examples.tar.gz
+
+  build-extension:
+    name: Build browser extension
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20.x'
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install dependencies
+        working-directory: packages/browser-extension
+        run: npm install
+      - name: Build and compress
+        working-directory: packages/browser-extension
+        run: |
+          npm run build
+          mv dist browser-extension
+          tar -czvf browser-extension.tar.gz browser-extension
+
+      - name: Push artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: browser-extension
+          path: packages/browser-extension/browser-extension.tar.gz
   
   push-contracts:
     name: Push vlayer contracts
