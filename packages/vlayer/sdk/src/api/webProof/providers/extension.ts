@@ -4,7 +4,10 @@ import {
   type WebProofSetupInput,
 } from "../../lib/types/webProofProvider";
 
-import { ExtensionAction, ExtensionMessage } from "@vlayer/web-proof-commons/constants/message";
+import {
+  ExtensionAction,
+  ExtensionMessage,
+} from "@vlayer/web-proof-commons/constants/message";
 
 import { WebProof } from "../../lib/types/webProof";
 

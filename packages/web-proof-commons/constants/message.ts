@@ -1,8 +1,8 @@
 export const enum ExtensionAction {
-  RequestWebProof
+  RequestWebProof,
 }
 
 export const enum ExtensionMessage {
   ProofDone,
-  ProofError
+  ProofError,
 }
