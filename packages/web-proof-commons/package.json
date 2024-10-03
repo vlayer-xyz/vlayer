@@ -1,5 +1,7 @@
 {
   "name": "@vlayer/web-proof-commons",
+  "private": true,
+  "version": "1.0.0",
   "module": "index.ts",
   "type": "module",
   "devDependencies": {
