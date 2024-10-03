@@ -7,6 +7,8 @@ import {
   TlsnProofContextProvider,
 } from "../context";
 
+import { Steps } from "components/organisms/Steps";
+
 const BackButton = () => {
   const { backUrl } = useProofContext();
   const { proof } = useTlsnProver();
@@ -73,17 +75,19 @@ const SidePanel = () => {
   return (
     <TlsnProofContextProvider>
       <Theme accentColor="violet">
-        <Grid columns="8" gapY="4" top="16" style={{ marginTop: "80px" }}>
-          <div style={{ gridColumn: "span 1" }}></div>
-          <div style={{ gridColumn: "span 6" }}>
-            <Grid columns="1" gapY="4">
-              <GoToPageButton />
-              <ProofButton />
-              <BackButton />
-              <Proof />
-            </Grid>
-          </div>
-        </Grid>
+        <div style={{ fontFamily: "Sora" }}>
+          <Grid columns="10" gapY="4" top="16" style={{ marginTop: "80px" }}>
+            <div style={{ gridColumn: "span 9" }}>
+              {/*<Grid columns="1" gapY="4">*/}
+              {/*  <GoToPageButton />*/}
+              {/*  <ProofButton />*/}
+              {/*  <BackButton />*/}
+              {/*  <Proof />*/}
+              {/*</Grid>*/}
+              <Steps />
+            </div>
+          </Grid>
+        </div>
       </Theme>
     </TlsnProofContextProvider>
   );

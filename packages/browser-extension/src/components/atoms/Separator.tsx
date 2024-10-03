@@ -1,0 +1,21 @@
+import React from "react";
+export const Separator = () => {
+  return (
+    <div
+      style={{
+        textAlign: "center",
+        marginTop: "4px",
+      }}
+    >
+      <svg
+        xmlns="http://www.w3.org/2000/svg"
+        width="2"
+        height="24"
+        viewBox="0 0 2 24"
+        fill="none"
+      >
+        <path d="M1 0L1 24" stroke="#CECECE" />
+      </svg>
+    </div>
+  );
+};

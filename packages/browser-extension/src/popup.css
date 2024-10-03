@@ -39,3 +39,13 @@ code {
     background-color: #ffffff24;
     border-radius: 2px;
 }
+
+enum Roles {
+    Admin,
+    Writer,
+    Reader
+  }
+  
+  declare function hasAccess(role: Roles): void;
+  
+  hasAccess(10);

@@ -1,12 +1,12 @@
 import { defineConfig } from "vite";
 import webExtension, { readJsonFile } from "vite-plugin-web-extension";
 import { viteStaticCopy } from "vite-plugin-static-copy";
+import tsconfigPaths from "vite-tsconfig-paths";
 
 function generateManifest() {
   const manifest = readJsonFile("src/manifest.json");
   const pkg = readJsonFile("package.json");
   return {
-    name: pkg.name,
     description: pkg.description,
     version: pkg.version.split("-")[0], // The version in manifest.json can only have numbers.
     version_name: pkg.version,
@@ -15,7 +15,9 @@ function generateManifest() {
 }
 
 export default defineConfig({
+  base: "/",
   plugins: [
+    tsconfigPaths(),
     webExtension({
       manifest: generateManifest,
       watchFilePaths: ["package.json", "manifest.json"],

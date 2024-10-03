@@ -14,7 +14,14 @@
     "noUnusedLocals": true,
     "noUnusedParameters": true,
     "noImplicitReturns": true,
-    "skipLibCheck": true
+    "skipLibCheck": true,
+    "baseUrl": "./",
+    "paths" : {
+      "components/*" : ["./src/components/*"],
+      "constants/*" : ["./src/constants/*"],
+      "hooks/*" : ["./src/hooks/*"]
+    }
   },
-  "include": ["src"]
+  "include": ["src"],
+
 }

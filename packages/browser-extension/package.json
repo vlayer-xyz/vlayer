@@ -1,5 +1,5 @@
 {
-  "name": "@vlayer/browser-plugin",
+  "name": "@vlayer/browser-how-this-title-is-here",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -21,6 +21,7 @@
     "webextension-polyfill": "^0.10.0"
   },
   "dependencies": {
+    "@radix-ui/react-icons": "^1.3.0",
     "@radix-ui/themes": "^3.1.3",
     "@types/chrome": "^0.0.271",
     "@vlayer/extension-hooks": "file:../extension-hooks",
@@ -28,6 +29,8 @@
     "monorepo": "radix-ui/themes",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "tlsn-js": "v0.1.0-alpha.5.4"
+    "tlsn-js": "v0.1.0-alpha.5.4",
+    "ts-pattern": "^5.4.0",
+    "vite-tsconfig-paths": "^5.0.1"
   }
 }
