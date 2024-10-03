@@ -22,7 +22,9 @@ async function testSuccessProvingAndVerification(
   console.log("Proving...");
 
   const webProof = { tls_proof: tls_proof, notary_pub_key: notaryPubKey };
-
+  
+  const twitterUserAddress = (await testHelpers.getTestAddresses())[0];
+  
   const { proof, returnValue } = await prove(
     prover,
     webProofProver.abi,
@@ -31,18 +33,17 @@ async function testSuccessProvingAndVerification(
       {
         webProofJson: JSON.stringify(webProof),
       },
+      twitterUserAddress
     ],
   );
   console.log("Proof:", proof);
-
-  const twitterUserAddress = (await testHelpers.getTestAddresses())[0];
-
+  
   console.log("Verifying...");
   await testHelpers.writeContract(
     verifier,
     webProofVerifier.abi,
     "verify",
-    [proof, returnValue],
+    [proof, ...returnValue],
     twitterUserAddress,
   );
   console.log("Verified!");
@@ -70,13 +71,20 @@ async function testFailedProving(prover: Address) {
   console.log("Proving...");
 
   const wrongWebProof = { tls_proof: tls_proof, notary_pub_key: "wrong" };
-
+  const twitterUserAddress = (await testHelpers.getTestAddresses())[0];
+  
   try {
-    await prove(prover, webProofProver.abi, "main", [
-      {
-        webProofJson: JSON.stringify(wrongWebProof),
-      },
-    ]);
+    await prove(
+      prover,
+      webProofProver.abi,
+      "main",
+      [
+        {
+          webProofJson: JSON.stringify(wrongWebProof)
+        },
+        twitterUserAddress
+      ],
+    );
     throw new Error("Proving should have failed!");
   } catch (error) {
     assert.ok(error instanceof Error, `Invalid error returned: ${error}`);
