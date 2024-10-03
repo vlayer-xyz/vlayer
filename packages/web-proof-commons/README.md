@@ -1,15 +1,4 @@
 # @vlayer/web-proof-commons
 
-To install dependencies:
-
-```bash
-bun install
-```
-
-To run:
-
-```bash
-bun run index.ts
-```
-
-This project was created using `bun init` in bun v1.1.27. [Bun](https://bun.sh) is a fast all-in-one JavaScript runtime.
+`web-proof-commons` is a TypeScript package that provides common type definitions and utilities shared between the 
+`browser-extension` and `@vlayer/sdk` projects.
