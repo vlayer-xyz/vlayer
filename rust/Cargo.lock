@@ -3106,10 +3106,12 @@ version = "0.1.0"
 dependencies = [
  "alloy-sol-types",
  "futures",
+ "hex-literal",
  "lazy_static",
  "mail-auth",
  "mailparse",
  "regex",
+ "ring 0.17.8",
  "thiserror",
 ]
 
