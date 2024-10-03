@@ -1,5 +1,5 @@
 import browser from "webextension-polyfill";
-import { EXTENSION_ACTION, EXTENSION_MESSAGE } from "@vlayer/web-proof-commons/constants/message";
+import { EXTENSION_ACTION, EXTENSION_MESSAGE_TYPE } from "@vlayer/web-proof-commons/constants/message";
 
 chrome.tabs.onActivated.addListener(function (activeInfo) {
   windowId = activeInfo.windowId;
@@ -26,8 +26,8 @@ browser.runtime.onMessageExternal.addListener(() => {
 
 browser.runtime.onMessage.addListener((message) => {
   if (
-    message.type === EXTENSION_MESSAGE.proofDone ||
-    message.type === EXTENSION_MESSAGE.proofError
+    message.type === EXTENSION_MESSAGE_TYPE.proofDone ||
+    message.type === EXTENSION_MESSAGE_TYPE.proofError
   ) {
     try {
       port?.postMessage(message);

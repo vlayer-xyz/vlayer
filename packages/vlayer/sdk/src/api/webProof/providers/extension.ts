@@ -4,7 +4,7 @@ import {
   type WebProofSetupInput,
 } from "../../lib/types/webProofProvider";
 
-import { EXTENSION_ACTION, EXTENSION_MESSAGE } from "@vlayer/web-proof-commons/constants/message";
+import { EXTENSION_ACTION, EXTENSION_MESSAGE_TYPE } from "@vlayer/web-proof-commons/constants/message";
 
 import { WebProof } from "../../lib/types/webProof";
 
@@ -51,18 +51,18 @@ export const createExtensionWebProofProvider = ({
           (
             message:
               | {
-                  type: typeof EXTENSION_MESSAGE.proofDone;
+                  type: typeof EXTENSION_MESSAGE_TYPE.proofDone;
                   proof: WebProof;
                 }
               | {
-                  type: typeof EXTENSION_MESSAGE.proofError;
+                  type: typeof EXTENSION_MESSAGE_TYPE.proofError;
                   error: { message: string };
                 },
           ) => {
-            if (message.type === EXTENSION_MESSAGE.proofDone) {
+            if (message.type === EXTENSION_MESSAGE_TYPE.proofDone) {
               resolve(message.proof);
             }
-            if (message.type === EXTENSION_MESSAGE.proofError) {
+            if (message.type === EXTENSION_MESSAGE_TYPE.proofError) {
               reject(message.error);
             }
           },
