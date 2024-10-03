@@ -30,7 +30,6 @@ impl DatabaseRef for WrapStateDb {
     type Error = Infallible;
 
     /// Get basic account information.
-    #[inline]
     fn basic_ref(&self, address: Address) -> Result<Option<AccountInfo>, Self::Error> {
         let account = self.inner.account(address);
         match account {
@@ -58,14 +57,12 @@ impl DatabaseRef for WrapStateDb {
     }
 
     /// Get account code by its hash.
-    #[inline]
     fn code_by_hash_ref(&self, code_hash: B256) -> Result<Bytecode, Self::Error> {
         let code = self.inner.code_by_hash(code_hash);
         Ok(Bytecode::new_raw(code.clone()))
     }
 
     /// Get storage value of address at index.
-    #[inline]
     fn storage_ref(&self, address: Address, index: U256) -> Result<U256, Self::Error> {
         let account_storage = self.account_storage.borrow();
         let storage = account_storage
@@ -83,7 +80,6 @@ impl DatabaseRef for WrapStateDb {
     }
 
     /// Get block hash by block number.
-    #[inline]
     fn block_hash_ref(&self, number: U256) -> Result<B256, Self::Error> {
         Ok(self.inner.block_hash(number))
     }

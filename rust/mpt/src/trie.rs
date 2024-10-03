@@ -33,7 +33,6 @@ impl MerkleTrie {
     /// Returns a reference to the byte value corresponding to the key.
     ///
     /// It panics when neither inclusion nor exclusion of the key can be guaranteed.
-    #[inline]
     pub fn get(&self, key: impl AsRef<[u8]>) -> Option<&[u8]> {
         self.0.get(Nibbles::unpack(key).as_slice())
     }
@@ -62,7 +61,6 @@ impl MerkleTrie {
     ///
     /// It panics when neither inclusion nor exclusion of the key can be guaranteed or when the
     /// value is not RLP decodable.
-    #[inline]
     pub fn get_rlp<T: Decodable>(&self, key: impl AsRef<[u8]>) -> alloy_rlp::Result<Option<T>> {
         match self.get(key) {
             Some(mut bytes) => Ok(Some(T::decode(&mut bytes)?)),
@@ -73,13 +71,11 @@ impl MerkleTrie {
     /// Returns the number of full nodes in the trie.
     ///
     /// A full node is a node that needs to be fully encoded to compute the root hash.
-    #[inline]
     pub fn size(&self) -> usize {
         self.0.size()
     }
 
     /// Returns the hash of the trie's root node.
-    #[inline]
     pub fn hash_slow(&self) -> B256 {
         // compute the keccak hash of the RLP encoded root node
         match self.0 {

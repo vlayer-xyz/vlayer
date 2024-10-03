@@ -45,12 +45,10 @@ impl<DB: Database + DatabaseExt> Inspector<DB> for CompositeInspector {
         self.inspector_stack.call_end(ecx, inputs, outcome)
     }
 
-    #[inline]
     fn step(&mut self, interpreter: &mut Interpreter, ecx: &mut EvmContext<DB>) {
         self.inspector_stack.step(interpreter, ecx)
     }
 
-    #[inline]
     fn step_end(&mut self, interpreter: &mut Interpreter, ecx: &mut EvmContext<DB>) {
         self.inspector_stack.step_end(interpreter, ecx)
     }

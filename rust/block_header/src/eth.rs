@@ -63,27 +63,22 @@ impl TryFrom<&dyn EvmBlockHeader> for EthBlockHeader {
 }
 
 impl EvmBlockHeader for EthBlockHeader {
-    #[inline]
     fn parent_hash(&self) -> &B256 {
         &self.parent_hash
     }
 
-    #[inline]
     fn number(&self) -> BlockNumber {
         self.number
     }
 
-    #[inline]
     fn timestamp(&self) -> u64 {
         self.timestamp
     }
 
-    #[inline]
     fn state_root(&self) -> &B256 {
         &self.state_root
     }
 
-    #[inline]
     fn fill_block_env(&self, blk_env: &mut BlockEnv) {
         blk_env.number = U256::from(self.number);
         blk_env.coinbase = self.beneficiary;

@@ -14,7 +14,6 @@ pub enum NodeRef {
 }
 
 impl NodeRef {
-    #[inline]
     pub fn from_node(node: &Node) -> NodeRef {
         match node {
             Node::Null => NodeRef::Empty,
@@ -32,7 +31,6 @@ impl NodeRef {
 }
 
 impl Encodable for NodeRef {
-    #[inline]
     fn encode(&self, out: &mut dyn BufMut) {
         match self {
             NodeRef::Empty => out.put_u8(EMPTY_STRING_CODE),
@@ -42,7 +40,6 @@ impl Encodable for NodeRef {
         }
     }
 
-    #[inline]
     fn length(&self) -> usize {
         // hash length + 1 byte for the RLP header
         const DIGEST_LENGTH: usize = 1 + B256::len_bytes();
