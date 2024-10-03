@@ -28,6 +28,8 @@ alloy-primitives = { workspace = true, features = ["rlp"] }
 risc0-zkp = { workspace = true }
 hex = { workspace = true }
 lazy_static = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
 
 [dev-dependencies]
 regex = "1.10.6"
