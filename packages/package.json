@@ -21,7 +21,8 @@
   "workspaces": [
     "browser-extension/",
     "vlayer/*",
-    "extension-hooks/"
+    "extension-hooks/",
+    "web-proof-commons/"
   ],
   "trustedDependencies": [
     "viem"
