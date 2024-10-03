@@ -1,5 +1,5 @@
 {
-  "name": "airdrop",
+  "name": "web_proof",
   "type": "module",
   "scripts": {
     "lint:solidity": "solhint '../src/**/*.sol'",

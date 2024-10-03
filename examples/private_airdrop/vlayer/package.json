@@ -1,5 +1,5 @@
 {
-  "name": "erc20_balances",
+  "name": "private_airdrop",
   "module": "prove.ts",
   "type": "module",
   "scripts": {

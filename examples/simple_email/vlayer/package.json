@@ -1,5 +1,5 @@
 {
-  "name": "airdrop",
+  "name": "simple_email",
   "module": "prove.ts",
   "type": "module",
   "scripts": {
