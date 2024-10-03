@@ -52,7 +52,7 @@ fn db_flow() -> Result<()> {
 #[test]
 fn get_no_table() {
     temp_db!(db);
-    assert_eq!(get(&db, [0]).unwrap_err(), DbError::NonExistingTable);
+    assert_eq!(get(&db, [0]).unwrap_err(), DbError::non_existing_table(TABLE));
 }
 
 #[test]
@@ -70,7 +70,18 @@ fn insert_duplicate_key() -> Result<()> {
     temp_db!(db);
 
     crate_and_insert(&mut db, [0], [1])?;
-    assert_eq!(insert(&mut db, [0], [1]).unwrap_err(), DbError::DuplicateKey);
+    assert_eq!(insert(&mut db, [0], [1]).unwrap_err(), DbError::duplicate_key(TABLE, [0]));
+
+    Ok(())
+}
+
+#[test]
+fn upsert() -> Result<()> {
+    temp_db!(db);
+
+    crate_and_insert(&mut db, [0], [0]);
+    db.with_rw_tx(|tx| tx.upsert(TABLE, [0], [1]))?;
+    assert_eq!(get(&db, [0])?.unwrap().as_ref(), [1]);
 
     Ok(())
 }
@@ -78,7 +89,7 @@ fn insert_duplicate_key() -> Result<()> {
 #[test]
 fn delete_no_table() {
     temp_db!(db);
-    assert_eq!(delete(&mut db, [0]).unwrap_err(), DbError::NonExistingTable);
+    assert_eq!(delete(&mut db, [0]).unwrap_err(), DbError::non_existing_table(TABLE));
 }
 
 #[test]
@@ -86,7 +97,7 @@ fn delete_missing_key() -> Result<()> {
     temp_db!(db);
 
     crate_and_insert(&mut db, [0], [1])?;
-    assert_eq!(delete(&mut db, [2]).unwrap_err(), DbError::NonExistingKey);
+    assert_eq!(delete(&mut db, [2]).unwrap_err(), DbError::non_existing_key(TABLE, [2]));
 
     Ok(())
 }
@@ -103,7 +114,7 @@ fn rollback_on_drop() -> Result<()> {
     }
 
     // Table should not exist
-    assert_eq!(get(&db, [0]).unwrap_err(), DbError::NonExistingTable);
+    assert_eq!(get(&db, [0]).unwrap_err(), DbError::non_existing_table(TABLE));
 
     Ok(())
 }
@@ -124,7 +135,7 @@ fn persistence() -> Result<()> {
     drop(db);
     drop(db_dir);
     let db = Mdbx::open(&path)?;
-    assert_eq!(get(&db, [0]).unwrap_err(), DbError::NonExistingTable);
+    assert_eq!(get(&db, [0]).unwrap_err(), DbError::non_existing_table(TABLE));
 
     Ok(())
 }

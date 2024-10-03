@@ -128,7 +128,7 @@ impl<TX: WriteTx> ChainDbTx<TX> {
     ) -> ChainDbResult<()> {
         let chain_id = chain_id.to_be_bytes();
         let chain_info_rlp = alloy_rlp::encode(chain_info);
-        self.tx.insert(CHAINS, chain_id, chain_info_rlp)?;
+        self.tx.upsert(CHAINS, chain_id, chain_info_rlp)?;
         Ok(())
     }
 
