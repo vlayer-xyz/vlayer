@@ -1757,6 +1757,7 @@ dependencies = [
  "anyhow",
  "block_header",
  "chain",
+ "derive_more 0.99.18",
  "email_proof",
  "mpt",
  "once_cell",

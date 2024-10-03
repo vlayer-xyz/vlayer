@@ -13,6 +13,7 @@ alloy-primitives = { workspace = true, features = ["rlp", "serde"] }
 alloy-rlp = { workspace = true }
 alloy-sol-types = { workspace = true }
 anyhow = { workspace = true }
+derive_more = { workspace = true }
 once_cell = { workspace = true }
 risc0-zkvm = { workspace = true }
 revm = { workspace = true, features = ["serde", "std"] }

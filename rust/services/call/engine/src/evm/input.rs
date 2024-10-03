@@ -2,6 +2,7 @@ use std::{cell::RefCell, collections::HashMap, iter::once, rc::Rc};
 
 use alloy_primitives::{Bytes, B256};
 use block_header::EvmBlockHeader;
+use derive_more::{From, Into, IntoIterator};
 use mpt::MerkleTrie;
 use serde::{Deserialize, Serialize};
 use tracing::debug;
@@ -69,13 +70,14 @@ impl<D> From<EvmInput> for EvmEnv<D>
 where
     D: From<EvmInput>,
 {
+    #[inline]
     fn from(input: EvmInput) -> Self {
-        let db = D::from(input.clone());
-        EvmEnv::new(db, input.header)
+        let header = input.header.clone();
+        EvmEnv::new(D::from(input), header)
     }
 }
 
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Deserialize, Clone, From, Into, IntoIterator)]
 pub struct MultiEvmInput {
     pub inputs: HashMap<ExecutionLocation, EvmInput>,
 }
@@ -94,9 +96,7 @@ impl MultiEvmInput {
     }
 
     pub fn assert_coherency(&self) {
-        for input in self.inputs.values() {
-            input.assert_coherency();
-        }
+        self.inputs.values().for_each(EvmInput::assert_coherency);
     }
 }
 
@@ -104,15 +104,6 @@ impl FromIterator<(ExecutionLocation, EvmInput)> for MultiEvmInput {
     fn from_iter<I: IntoIterator<Item = (ExecutionLocation, EvmInput)>>(iter: I) -> Self {
         let inputs = iter.into_iter().collect();
         Self { inputs }
-    }
-}
-
-impl IntoIterator for MultiEvmInput {
-    type IntoIter = std::collections::hash_map::IntoIter<ExecutionLocation, EvmInput>;
-    type Item = (ExecutionLocation, EvmInput);
-
-    fn into_iter(self) -> Self::IntoIter {
-        self.inputs.into_iter()
     }
 }
 
