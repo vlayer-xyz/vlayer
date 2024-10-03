@@ -1,6 +1,7 @@
 import { testHelpers } from "@vlayer/sdk";
 import Bun from "bun";
 import path from "node:path";
+import fs from "node:fs/promises";
 import webProofProver from "../out/WebProofProver.sol/WebProofProver";
 import webProofVerifier from "../out/WebProofVerifier.sol/WebProofVerifier";
 
@@ -12,6 +13,7 @@ const [prover, verifier] = await testHelpers.deployProverVerifier(
 const envPath = path.resolve(__dirname, ".env.development");
 
 try {
+  await fs.appendFile(envPath, "");
   const envFile = Bun.file(envPath);
   let envContent = await envFile.text();
 
