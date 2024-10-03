@@ -34,7 +34,7 @@ function cleanup() {
 
 function start_anvil(){
     echo "Starting Anvil "
-    startup_anvil "${LOGS_DIR}/anvil1.out" 8545 ANVIL_PID
+    startup_anvil "${LOGS_DIR}/anvil.out" 8545 ANVIL_PID
 }
 
 function startup_vlayer(){
@@ -50,7 +50,7 @@ function startup_vlayer(){
     BONSAI_API_KEY="${BONSAI_API_KEY}" \
     cargo run --bin vlayer serve \
         --proof "${proof_arg}" \
-        --rpc-url 100001:http://localhost:8545 \
+        --rpc-url 31337:http://localhost:8545 \
         ${external_urls[@]+"${external_urls[@]}"} \
         >"${LOGS_DIR}/vlayer_serve.out" &
 

@@ -1,6 +1,6 @@
 use std::{collections::HashMap, env};
 
-use alloy_chains::Chain;
+use alloy_chains::{Chain, NamedChain};
 use alloy_primitives::{address, b256, uint, Address, ChainId};
 use alloy_sol_types::{sol, SolCall};
 use call_host::{
@@ -9,6 +9,7 @@ use call_host::{
 };
 use dotenv::dotenv;
 use ethers_core::types::BlockNumber as BlockTag;
+use lazy_static::lazy_static;
 use provider::{BlockingProvider, CachedProviderFactory, FileProviderFactory, ProviderFactory};
 
 // To activate recording, set UPDATE_SNAPSHOTS to true.
@@ -16,30 +17,39 @@ use provider::{BlockingProvider, CachedProviderFactory, FileProviderFactory, Pro
 const UPDATE_SNAPSHOTS: bool = false;
 const LATEST_BLOCK: BlockTag = BlockTag::Latest;
 
-fn create_test_provider_factory(test_name: &str) -> FileProviderFactory {
-    let rpc_file_cache: HashMap<_, _> = HashMap::from([
-        (Chain::mainnet().id(), format!("testdata/mainnet_{test_name}_rpc_cache.json")),
-        (Chain::sepolia().id(), format!("testdata/sepolia_{test_name}_rpc_cache.json")),
-    ]);
-
-    FileProviderFactory::new(rpc_file_cache)
+fn get_alchemy_key() -> String {
+    dotenv().ok();
+    env::var("ALCHEMY_KEY").expect(
+        "To use recording provider you need to set ALCHEMY_KEY in an .env file. See .env.example",
+    )
 }
 
-fn create_recording_provider_factory(test_name: &str) -> CachedProviderFactory {
-    let rpc_file_cache: HashMap<_, _> = HashMap::from([
+lazy_static! {
+    static ref alchemy_key: String = get_alchemy_key();
+    static ref mainnet_url: String =
+        format!("https://eth-mainnet.g.alchemy.com/v2/{}", *alchemy_key);
+    static ref sepolia_url: String =
+        format!("https://eth-sepolia.g.alchemy.com/v2/{}", *alchemy_key);
+    static ref anvil_url: String = format!("http://localhost:8545");
+}
+
+fn rpc_file_cache(test_name: &str) -> HashMap<ChainId, String> {
+    HashMap::from([
         (Chain::mainnet().id(), format!("testdata/mainnet_{test_name}_rpc_cache.json")),
         (Chain::sepolia().id(), format!("testdata/sepolia_{test_name}_rpc_cache.json")),
-    ]);
-    dotenv().ok();
-    let alchemy_key = env::var("ALCHEMY_KEY").expect(
-        "To use recording provider you need to set ALCHEMY_KEY in an .env file. See .env.example",
-    );
-    let mainnet_url = format!("https://eth-mainnet.g.alchemy.com/v2/{alchemy_key}");
-    let sepolia_url = format!("https://eth-sepolia.g.alchemy.com/v2/{alchemy_key}");
-    let rpc_urls: HashMap<_, _> =
-        HashMap::from([(Chain::mainnet().id(), mainnet_url), (Chain::sepolia().id(), sepolia_url)]);
+        (
+            NamedChain::AnvilHardhat.into(),
+            format!("testdata/anvil_{test_name}_rpc_cache.json"),
+        ),
+    ])
+}
 
-    CachedProviderFactory::new(rpc_urls, rpc_file_cache)
+fn rpc_urls() -> HashMap<ChainId, String> {
+    HashMap::from([
+        (Chain::mainnet().id(), mainnet_url.clone()),
+        (Chain::sepolia().id(), sepolia_url.clone()),
+        (NamedChain::AnvilHardhat.into(), anvil_url.clone()),
+    ])
 }
 
 fn create_host<P>(
@@ -75,16 +85,16 @@ where
         ..Default::default()
     };
 
-    let raw_return_value = if UPDATE_SNAPSHOTS {
-        let provider_factory = create_recording_provider_factory(test_name);
+    let host_output = if UPDATE_SNAPSHOTS {
+        let provider_factory = CachedProviderFactory::new(rpc_urls(), rpc_file_cache(test_name));
         let host = create_host(provider_factory, &config, block_number)?;
-        host.run(call)?.guest_output.evm_call_result
+        host.run(call)?
     } else {
-        let provider_factory = create_test_provider_factory(test_name);
+        let provider_factory = FileProviderFactory::new(rpc_file_cache(test_name));
         let host = create_host(provider_factory, &config, block_number)?;
-        host.run(call)?.guest_output.evm_call_result
+        host.run(call)?
     };
-    let return_value = C::abi_decode_returns(&raw_return_value, false)?;
+    let return_value = C::abi_decode_returns(&host_output.guest_output.evm_call_result, false)?;
     Ok(return_value)
 }
 
@@ -333,6 +343,43 @@ mod view {
             LATEST_BLOCK,
         )
         .expect_err("calling an EOA should fail");
+
+        Ok(())
+    }
+}
+
+mod teleport {
+    use alloy_chains::NamedChain;
+
+    use super::*;
+
+    // Generated using `simple_teleport` example
+    const SIMPLE_TELEPORT: Address = address!("5fbdb2315678afecb367f032d93f642f64180aa3");
+    const BLOCK_NO: u64 = 3;
+    sol! {
+        contract SimpleTravelProver {
+            function crossChainBalanceOf(address owner) public returns (address, uint256);
+        }
+    }
+
+    // This test fails for now. Will fix in the next PR
+    #[ignore]
+    #[test]
+    fn teleport_to_unknown_chain_returns_an_error_but_does_not_panic() -> anyhow::Result<()> {
+        let sol_call = SimpleTravelProver::crossChainBalanceOfCall {
+            owner: Address::ZERO,
+        };
+        let call = Call {
+            to: SIMPLE_TELEPORT,
+            data: sol_call.abi_encode(),
+        };
+        let result = run::<SimpleTravelProver::crossChainBalanceOfCall>(
+            "simple_teleport",
+            call,
+            NamedChain::AnvilHardhat.into(),
+            BLOCK_NO.into(),
+        );
+        assert!(result.is_err());
 
         Ok(())
     }

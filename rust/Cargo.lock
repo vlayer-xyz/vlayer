@@ -1812,6 +1812,7 @@ dependencies = [
  "dotenv",
  "ethers-core",
  "host_utils",
+ "lazy_static",
  "mpt",
  "provider",
  "revm",

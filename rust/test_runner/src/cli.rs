@@ -6,7 +6,7 @@ use std::{
 };
 
 use call_engine::inspector::{TRAVEL_CONTRACT_ADDR, TRAVEL_CONTRACT_HASH};
-use chain::TEST_CHAIN_ID_1;
+use chain::TEST_CHAIN_ID;
 use clap::Parser;
 use color_eyre::eyre::{bail, Result};
 use forge::{
@@ -256,7 +256,7 @@ impl TestArgs {
             return Err(color_eyre::eyre::eyre!("cannot change chainId in vlayer tests"));
         }
 
-        evm_opts.env.chain_id = Some(TEST_CHAIN_ID_1);
+        evm_opts.env.chain_id = Some(TEST_CHAIN_ID);
         Ok(())
     }
 
