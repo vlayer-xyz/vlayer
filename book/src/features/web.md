@@ -80,8 +80,8 @@ If no execution errors occured and proof was produced, we are ready for on-chain
 > vlayer init --template web-proof
 > ```
 > 
-> This command will download all necessary artifacts to your project.  
-> Next steps are described in [Running example](../getting-started/first-steps.md#running-examples-locally)
+> This command will download all the necessary artifacts to your project.  
+> The next steps are explained in [Running example](../getting-started/first-steps.md#running-examples-locally)
 
 ## Example Verifier
 

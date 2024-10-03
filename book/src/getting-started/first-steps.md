@@ -30,7 +30,7 @@ The vlayer directory structure resembles a typical Foundry project but with two 
 ## Running examples locally
 
 ### All examples
-You need to have [Bun](https://bun.sh/) installed to build and run the examples. 
+You need to install [Bun](https://bun.sh/) to build and run the examples.
 
 To run vlayer examples locally, first build the contracts by navigating to your project folder and running:
 ```bash
@@ -39,7 +39,7 @@ forge build
 ```
 This compiles the smart contracts and prepares them for deployment and testing.
 
-> Please note that `vlayer init` installs Solidity dependencies and generates `remappings.txt`. Running `forge soldeer install` is not required to build the example and may break `remappings.txt`, preventing the project from building successfully.
+> Please note that `vlayer init` installs Solidity dependencies and generates `remappings.txt`. Running `forge soldeer install` is not needed to build the example and may overwrite remappings, which can cause build errors.
 
 Then install Typescript dependencies in vlayer folder by running:
 ```bash
@@ -69,7 +69,7 @@ vlayer serve \
 
 ### Web Proof example
 
-Deploy `WebProofProver` and `WebProofVerifier` contracts on anvil:
+Deploy the `WebProofProver` and `WebProofVerifier` contracts on local anvil testnet:
 
 ```sh
 cd vlayer
@@ -83,6 +83,6 @@ cd vlayer
 bun run dev
 ```
 
-App available at `http://localhost:5174/`
+The app will be available at `http://localhost:5174`.
 
 Browser extension should be installed.
