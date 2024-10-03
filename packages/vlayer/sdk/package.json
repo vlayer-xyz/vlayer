@@ -22,7 +22,6 @@
     "dns-over-http-resolver": "^3.0.3",
     "postal-mime": "^2.3.2",
     "viem": "^2.21.0",
-    "zod": "^3.23.8",
     "@vlayer/web-proof-commons": "file:../../web-proof-commons"
   }
 }
