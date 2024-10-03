@@ -215,7 +215,7 @@ jobs:
   create-release:
     name: Create GH releases
     runs-on: aws-linux-small
-    needs: [build-examples, push-contracts]
+    needs: [build-examples, build-extension, push-contracts]
     steps:
       - run: mkdir -p dist
       - uses: actions/download-artifact@v4
@@ -241,7 +241,7 @@ jobs:
   push-artifacts-to-s3:
     name: Push artifacts to AWS S3
     runs-on: ubuntu-latest
-    needs: [build-release, build-examples, push-contracts] 
+    needs: [build-release, build-examples, build-extension, push-contracts] 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
