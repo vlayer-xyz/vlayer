@@ -8,7 +8,8 @@ function generateManifest() {
   return {
     name: pkg.name,
     description: pkg.description,
-    version: pkg.version,
+    version: pkg.version.split("-")[0], // The version in manifest.json can only have numbers.
+    version_name: pkg.version,
     ...manifest,
   };
 }
