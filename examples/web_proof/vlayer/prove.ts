@@ -1,4 +1,4 @@
-import { prove, testHelpers } from "@vlayer/sdk";
+import { testHelpers, createVlayerClient } from "@vlayer/sdk";
 import webProofProver from "../out/WebProofProver.sol/WebProofProver";
 import webProofVerifier from "../out/WebProofVerifier.sol/WebProofVerifier";
 import tls_proof from "./tls_gp_proof.json";
@@ -22,17 +22,19 @@ async function testSuccessProvingAndVerification() {
   console.log("Proving...");
 
   const webProof = { tls_proof: tls_proof, notary_pub_key: notaryPubKey };
+  const client = createVlayerClient({ url: "x.com", webProofProvider: webProof });
 
-  const { proof, returnValue } = await prove(
-    prover,
-    webProofProver.abi,
-    "main",
-    [
+  const { proof, returnValue } = await client.prove({
+    address: prover,
+    functionName: "main",
+    proverAbi: webProofProver.abi,
+    args:[
       {
         webProofJson: JSON.stringify(webProof),
       },
       twitterUserAddress,
     ],
+  }
   );
   console.log("Proof:", proof);
 
@@ -69,14 +71,21 @@ async function testFailedProving() {
   console.log("Proving...");
 
   const wrongWebProof = { tls_proof: tls_proof, notary_pub_key: "wrong" };
+  const client = createVlayerClient({ url: "x.com", webProofProvider: wrongWebProof });
 
   try {
-    await prove(prover, webProofProver.abi, "main", [
-      {
-        webProofJson: JSON.stringify(wrongWebProof),
-      },
-      twitterUserAddress,
-    ]);
+    await client.prove({
+      address: prover,
+      functionName: "main",
+      proverAbi: webProofProver.abi,
+      args:[
+        {
+          webProofJson: JSON.stringify(wrongWebProof),
+        },
+        twitterUserAddress,
+      ],
+    }
+    );
     throw new Error("Proving should have failed!");
   } catch (error) {
     assert.ok(error instanceof Error, `Invalid error returned: ${error}`);
