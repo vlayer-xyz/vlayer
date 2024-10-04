@@ -24,6 +24,7 @@ async function testSuccessProvingAndVerification() {
   console.log("Proving...");
 
   const webProof = { tls_proof: tls_proof, notary_pub_key: notaryPubKey };
+  const client = createVlayerClient({ url: "x.com", webProofProvider: webProof });
 
   const { proof, returnValue } = await client.prove({
     address: prover,
@@ -71,6 +72,7 @@ async function testFailedProving() {
   console.log("Proving...");
 
   const wrongWebProof = { tls_proof: tls_proof, notary_pub_key: "wrong" };
+  const client = createVlayerClient({ url: "x.com", webProofProvider: wrongWebProof });
 
   try {
     await client.prove({
