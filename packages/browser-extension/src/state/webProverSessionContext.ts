@@ -27,4 +27,8 @@ export class WebProverSessionContextManager extends Store<WebProverSessionContex
   ): Promise<void> {
     await this.set("webProverSessionConfig", config);
   }
+
+  async getWebProverSessionConfig(): Promise<WebProverSessionConfig> {
+    return await this.get("webProverSessionConfig");
+  }
 }
