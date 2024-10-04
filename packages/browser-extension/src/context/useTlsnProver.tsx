@@ -12,6 +12,7 @@ import React, {
 import { formatTlsnHeaders } from "../lib/formatTlsnHeaders";
 import { ExtensionMessage } from "@vlayer/web-proof-commons/constants/message";
 import { WebProverSessionContextManager } from "../state/webProverSessionContext";
+import { contextManager } from "../state/context";
 
 const TlsnProofContext = createContext({
   prove: () => {},
@@ -68,6 +69,45 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
       },
       { urls: ["<all_urls>"] },
       ["requestHeaders"],
+    );
+  }, []);
+
+  // TODO: replaee above mechanism. This is new mechanism, added instead of replacing to keep working
+
+  useEffect(() => {
+    // Record headers of all interesting urls
+    browser.webRequest.onResponseStarted.addListener(
+      (details) => {
+        contextManager.updateHistory({
+          url: details.url,
+          headers: headers,
+        });
+      },
+      { urls: contextManager.getUrls() },
+    );
+    // Record cookies of all interesting url
+    browser.webRequest.onBeforeSendHeaders.addListener(
+      (details) => {
+        contextManager.updateHistory({
+          url: details.url,
+          headers: headers,
+        });
+      },
+      { urls: contextManager.getUrls() },
+      ["requestHeaders"],
+    );
+
+    // Mark url as ready to use on request compltion
+    browser.webRequest.onCompleted.addListener(
+      (details) => {
+        contextManager.updateHistory({
+          url: details.url,
+          ready: true,
+        });
+      },
+      {
+        urls: contextManager.getUrls(),
+      },
     );
   }, []);
 
