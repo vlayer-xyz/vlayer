@@ -1,4 +1,6 @@
-use std::{cell::RefCell, marker::PhantomData, path::PathBuf};
+use std::{marker::PhantomData, path::PathBuf};
+
+use parking_lot::RwLock;
 
 use super::{
     cache::{json::JsonCache, CachedProvider},
@@ -15,7 +17,7 @@ impl FileProvider {
         let cache = JsonCache::load(file_path)?;
         Ok(Self {
             inner: NullProvider(PhantomData),
-            cache: RefCell::new(cache),
+            cache: RwLock::new(cache),
         })
     }
 }

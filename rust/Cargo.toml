@@ -89,6 +89,7 @@ lazy_static = "1.5.0"
 mime = "0.3.17"
 nybbles = "0.2.1"
 once_cell = "1.19"
+parking_lot = "0.12.3"
 p256 = { version = "0.13.2", features = ["ecdsa"] }
 pkcs8 = "0.10.2"
 rayon = "1.10.0"
