@@ -1,5 +1,5 @@
 export enum StepStatus {
-  Completed,
-  Current,
-  Further,
+  Completed = "completed",
+  Current = "current",
+  Further = "further",
 }

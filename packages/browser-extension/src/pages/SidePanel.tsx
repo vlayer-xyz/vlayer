@@ -78,12 +78,12 @@ const SidePanel = () => {
         <div style={{ fontFamily: "Sora" }}>
           <Grid columns="10" gapY="4" top="16" style={{ marginTop: "80px" }}>
             <div style={{ gridColumn: "span 9" }}>
-              {/*<Grid columns="1" gapY="4">*/}
-              {/*  <GoToPageButton />*/}
-              {/*  <ProofButton />*/}
-              {/*  <BackButton />*/}
-              {/*  <Proof />*/}
-              {/*</Grid>*/}
+              <Grid columns="1" gapY="4">
+                <GoToPageButton />
+                <ProofButton />
+                <BackButton />
+                <Proof />
+              </Grid>
               <Steps />
             </div>
           </Grid>

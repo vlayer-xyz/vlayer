@@ -1,21 +1,23 @@
 .circle {
-    color: var(--vlayer-violet);
-    border-style: solid;
-    width: 32px;
-    height: 32px;
-    border-radius: 50%;
-    line-height: 32px;
-    border-width: 2px;
-    justify-content: center;
-    align-items: center;
-    display: flex;
+  color: var(--vlayer-violet);
+  border-style: solid;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  line-height: 32px;
+  border-width: 2px;
+  justify-content: center;
+  align-items: center;
+  display: flex;
+  flex-grow: 1;
+  max-height: 32px;
 }
 
 .solidCircle {
-    background-color:  var(--vlayer-violet);
+  background-color:  var(--vlayer-violet);
 }
 
 .disabled {
-    color: var(--gray-8);
+  color: var(--gray-8);
 }
 

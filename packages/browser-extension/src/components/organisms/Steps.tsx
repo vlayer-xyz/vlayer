@@ -1,7 +1,6 @@
 import { useSteps } from "hooks/useSteps";
 import { Step } from "components/molecules/Step";
 import React from "react";
-import { Separator } from "components/atoms/Separator";
 export const Steps = () => {
   const steps = useSteps();
 
@@ -13,6 +12,7 @@ export const Steps = () => {
           index={index}
           key={`${step.label}`}
           showSeparator={index < steps.length - 1}
+          link={step.link}
         />,
       ])}
     </>

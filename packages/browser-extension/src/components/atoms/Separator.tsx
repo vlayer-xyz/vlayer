@@ -1,21 +1,17 @@
 import React from "react";
+
 export const Separator = () => {
   return (
     <div
       style={{
-        textAlign: "center",
+        flexGrow: 3,
+        backgroundColor: "#CECECE",
+        width: "1px",
+        minHeight: "24px",
         marginTop: "4px",
+        marginBottom: "4px",
+        // height: "100%",
       }}
-    >
-      <svg
-        xmlns="http://www.w3.org/2000/svg"
-        width="2"
-        height="24"
-        viewBox="0 0 2 24"
-        fill="none"
-      >
-        <path d="M1 0L1 24" stroke="#CECECE" />
-      </svg>
-    </div>
+    ></div>
   );
 };

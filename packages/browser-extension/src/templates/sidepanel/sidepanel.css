@@ -4,10 +4,12 @@
      src:  url('/fonts/Sora-Regular.ttf')
  }
 
+body{
+    margin: 0;
+}
 .radix-themes {
     --vlayer-violet: #7235E5;
-    --violet-9: var(--vlayer-violet);
-    --violet-a9: var(--vlayer-violet);
+    --violet: var(--vlayer-violet);
     --default-font-family: Sora;
     --heading-font-family: Sora;
     --code-font-family:  Sora;
