@@ -9,15 +9,6 @@ export const EXTENSION_STEP = {
   notarize: "notarize",
 } as const;
 
-export const EXTENSION_ACTION = {
-  requestWebProof: "requestWebProof",
-} as const;
-
-export const EXTENSION_MESSAGE = {
-  proofDone: "proofDone",
-  proofError: "proofError",
-} as const;
-
 export type ExtensionStep =
   (typeof EXTENSION_STEP)[keyof typeof EXTENSION_STEP];
 

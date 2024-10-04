@@ -1,5 +1,8 @@
 import browser from "webextension-polyfill";
-import { EXTENSION_ACTION, EXTENSION_MESSAGE } from "./constants/message";
+import {
+  ExtensionAction,
+  ExtensionMessage,
+} from "@vlayer/web-proof-commons/constants/message";
 
 chrome.tabs.onActivated.addListener(function (activeInfo) {
   windowId = activeInfo.windowId;
@@ -26,8 +29,8 @@ browser.runtime.onMessageExternal.addListener(() => {
 
 browser.runtime.onMessage.addListener((message) => {
   if (
-    message.type === EXTENSION_MESSAGE.proofDone ||
-    message.type === EXTENSION_MESSAGE.proofError
+    message.type === ExtensionMessage.ProofDone ||
+    message.type === ExtensionMessage.ProofError
   ) {
     try {
       port?.postMessage(message);
@@ -50,7 +53,7 @@ browser.tabs.onActivated.addListener(function (activeInfo) {
 
 browser.runtime.onMessageExternal.addListener((message) => {
   (async () => {
-    if (message.action === EXTENSION_ACTION.requestWebProof) {
+    if (message.action === ExtensionAction.RequestWebProof) {
       if (chrome.sidePanel) {
         chrome.sidePanel.open({ windowId: windowId });
       }
