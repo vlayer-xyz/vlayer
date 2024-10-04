@@ -37,7 +37,6 @@ export const createExtensionWebProofProvider = ({
 }: WebProofProviderSetup): WebProofProvider => {
   return {
     getWebProof: async function (webProofSetup: WebProofSetupInput) {
-
       return new Promise<WebProof>((resolve, reject) => {
         chrome.runtime.sendMessage(EXTENSION_ID, {
           action: ExtensionAction.RequestWebProof,
