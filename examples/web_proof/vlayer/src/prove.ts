@@ -13,6 +13,7 @@ import {
 } from "@vlayer/sdk";
 import { createTestClient, http, publicActions, walletActions } from "viem";
 import webProofVerifier from "../../out/WebProofVerifier.sol/WebProofVerifier";
+import { testHelpers } from "@vlayer/sdk";
 
 const context: {
   webProof: WebProof | null;
@@ -23,6 +24,8 @@ const context: {
   zkProof: null,
   result: [],
 };
+
+const twitterUserAddress = (await testHelpers.getTestAddresses())[0];
 
 export async function setupRequestProveButton(element: HTMLButtonElement) {
   element.addEventListener("click", async () => {
@@ -67,6 +70,7 @@ export const setupVProverButton = (element: HTMLButtonElement) => {
         {
           webProofJson: JSON.stringify(webProof),
         },
+        twitterUserAddress,
       ],
     );
 
@@ -88,9 +92,8 @@ export const setupVerifyButton = (element: HTMLButtonElement) => {
         address: import.meta.env.VITE_VERIFIER_ADDRESS,
         abi: webProofVerifier.abi,
         functionName: "verify",
-        //@ts-expect-error TODO : check typing here
-        args: [context.zkProof, context.result],
-        account: "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266",
+        args: [context.zkProof, ...context.result],
+        account: twitterUserAddress,
       });
     console.log("Verified!", verification);
   });

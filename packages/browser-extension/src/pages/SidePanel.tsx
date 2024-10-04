@@ -38,7 +38,7 @@ const ProofButton = () => {
 };
 
 const GoToPageButton = () => {
-  const { hasDataForProof } = { hasDataForProof: true }; //useTlsnProver();
+  const { hasDataForProof } = { hasDataForProof: false }; //useTlsnProver();
   const { redirectUrl } = useProofContext();
   return !hasDataForProof ? (
     <Button
