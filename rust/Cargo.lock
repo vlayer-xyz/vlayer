@@ -7068,7 +7068,6 @@ dependencies = [
  "derivative",
  "ethers-core",
  "ethers-providers",
- "parking_lot",
  "serde",
  "serde_json",
  "thiserror",

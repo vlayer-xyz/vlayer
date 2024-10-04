@@ -1,6 +1,6 @@
 use std::{
     any::Any,
-    panic::{self, AssertUnwindSafe},
+    panic::{self},
 };
 
 use alloy_primitives::ChainId;
@@ -94,18 +94,13 @@ where
     }
 
     pub fn run(self, call: Call) -> Result<HostOutput, HostError> {
-        // This closure is not unwind-safe because it captures `self.envs`.
-        // Envs contain interior mutability and can get into corrupted state if panic occurs.
-        // If panic occurs - we don't use envs anymore, so it's safe to ignore this.
-        // Compiler would also not allow one to use envs after panic because it's moved into closure.
-        let (host_output, envs) = panic::catch_unwind(AssertUnwindSafe(move || {
-            let host_output = Engine::new(&self.envs).call(&call, self.start_execution_location)?;
-            Ok::<_, EngineError>((host_output, self.envs))
-        }))
+        let host_output = panic::catch_unwind({
+            || Engine::new(&self.envs).call(&call, self.start_execution_location)
+        })
         .map_err(wrap_engine_panic)??;
 
         let multi_evm_input =
-            into_multi_input(envs).map_err(|err| HostError::CreatingInput(err.to_string()))?;
+            into_multi_input(self.envs).map_err(|err| HostError::CreatingInput(err.to_string()))?;
         let input = Input {
             call,
             multi_evm_input,
@@ -136,11 +131,11 @@ where
 }
 
 fn wrap_engine_panic(err: Box<dyn Any + Send>) -> EngineError {
-    EngineError::Panic(
-        err.downcast_ref::<String>()
-            .cloned()
-            .unwrap_or_else(|| "Panic occurred".to_string()),
-    )
+    let panic_msg = err
+        .downcast::<String>()
+        .map(|x| *x)
+        .unwrap_or("Panic occurred".to_string());
+    EngineError::Panic(panic_msg)
 }
 
 fn provably_execute(

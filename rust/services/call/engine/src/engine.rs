@@ -1,4 +1,4 @@
-use std::{rc::Rc, sync::Arc};
+use std::sync::Arc;
 
 use revm::{
     db::WrapDatabaseRef,
@@ -52,7 +52,7 @@ where
         Self { envs }
     }
 
-    fn get_env(&self, location: ExecutionLocation) -> Result<Rc<EvmEnv<D>>, EngineError> {
+    fn get_env(&self, location: ExecutionLocation) -> Result<Arc<EvmEnv<D>>, EngineError> {
         self.envs
             .get(location)
             .map_err(|err| EngineError::EvmEnv(err.to_string()))

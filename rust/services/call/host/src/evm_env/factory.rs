@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::sync::Arc;
 
 use call_engine::evm::env::{location::ExecutionLocation, EvmEnv, EvmEnvFactory};
 use provider::{BlockingProvider, CachedMultiProvider};
@@ -35,7 +35,7 @@ where
             .map_err(|err| HostError::Provider(err.to_string()))?
             .ok_or(HostError::BlockNotFound(block_number))?;
 
-        let db = ProofDb::new(Rc::clone(&provider), block_number);
+        let db = ProofDb::new(Arc::clone(&provider), block_number);
         let chain_spec = chain_id.try_into()?;
         let env = EvmEnv::new(db, header).with_chain_spec(&chain_spec)?;
         Ok(env)

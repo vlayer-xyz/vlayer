@@ -1,6 +1,4 @@
-use std::{marker::PhantomData, path::PathBuf};
-
-use parking_lot::RwLock;
+use std::{marker::PhantomData, path::PathBuf, sync::RwLock};
 
 use super::{
     cache::{json::JsonCache, CachedProvider},

@@ -1,4 +1,4 @@
-use std::{cell::RefCell, rc::Rc};
+use std::sync::{Arc, RwLock};
 
 use alloy_primitives::{Address, Bytes, B256, U256};
 use anyhow::Context;
@@ -26,7 +26,7 @@ where
     P: BlockingProvider,
 {
     db: ProviderDb<P>,
-    state: RefCell<State>,
+    state: RwLock<State>,
 }
 
 impl<P> DatabaseRef for ProofDb<P>
@@ -37,7 +37,7 @@ where
 
     fn basic_ref(&self, address: Address) -> Result<Option<AccountInfo>, Self::Error> {
         let basic = self.db.basic_ref(address)?;
-        let mut state = self.state.borrow_mut();
+        let mut state = self.state.write().expect("poisoned lock");
         state.accounts.entry(address).or_default();
 
         Ok(basic)
@@ -45,7 +45,7 @@ where
 
     fn code_by_hash_ref(&self, code_hash: B256) -> Result<Bytecode, Self::Error> {
         let code = self.db.code_by_hash_ref(code_hash)?;
-        let mut state = self.state.borrow_mut();
+        let mut state = self.state.write().expect("poisoned lock");
         state.contracts.insert(code_hash, code.original_bytes());
 
         Ok(code)
@@ -53,7 +53,7 @@ where
 
     fn storage_ref(&self, address: Address, index: U256) -> Result<U256, Self::Error> {
         let storage = self.db.storage_ref(address, index)?;
-        let mut state = self.state.borrow_mut();
+        let mut state = self.state.write().expect("poisoned lock");
         state.accounts.entry(address).or_default().insert(index);
 
         Ok(storage)
@@ -61,7 +61,7 @@ where
 
     fn block_hash_ref(&self, number: U256) -> Result<B256, Self::Error> {
         let block_hash = self.db.block_hash_ref(number)?;
-        let mut state = self.state.borrow_mut();
+        let mut state = self.state.write().expect("poisoned lock");
         state.block_hash_numbers.insert(number);
 
         Ok(block_hash)
@@ -72,8 +72,8 @@ impl<P> ProofDb<P>
 where
     P: BlockingProvider,
 {
-    pub(crate) fn new(provider: Rc<P>, block_number: u64) -> Self {
-        let state = RefCell::new(State::default());
+    pub(crate) fn new(provider: Arc<P>, block_number: u64) -> Self {
+        let state = RwLock::new(State::default());
         Self {
             state,
             db: ProviderDb::new(provider, block_number),
@@ -81,12 +81,12 @@ where
     }
 
     pub(crate) fn contracts(&self) -> Vec<Bytes> {
-        let state = self.state.borrow();
+        let state = self.state.read().expect("poisoned lock");
         state.contracts.values().cloned().collect()
     }
 
     pub(crate) fn fetch_ancestors(&self) -> anyhow::Result<Vec<Box<dyn EvmBlockHeader>>> {
-        let state = self.state.borrow();
+        let state = self.state.read().expect("poisoned lock");
         let provider = &self.db.provider;
         let mut ancestors = Vec::new();
         if let Some(block_hash_min_number) = state.block_hash_numbers.iter().min() {
@@ -111,7 +111,7 @@ where
     }
 
     fn fetch_proofs(&self) -> anyhow::Result<Vec<EIP1186Proof>> {
-        let state = self.state.borrow();
+        let state = self.state.read().expect("poisoned lock");
         let mut proofs = Vec::new();
         for (address, storage_keys) in &state.accounts {
             let proof = self.db.provider.get_proof(

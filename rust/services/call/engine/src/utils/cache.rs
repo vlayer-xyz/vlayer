@@ -1,47 +1,49 @@
 use std::{
-    cell::RefCell,
     collections::{hash_map::Entry, HashMap},
     hash::Hash,
-    rc::Rc,
+    sync::{Arc, RwLock},
 };
 
 pub trait InteriorMutabilityCache<K, V>
 where
     K: Hash + Eq,
 {
-    fn get(&self, key: &K) -> Option<Rc<V>>;
-    fn try_get_or_insert<F, E>(&self, key: K, f: F) -> Result<Rc<V>, E>
+    fn get(&self, key: &K) -> Option<Arc<V>>;
+    fn try_get_or_insert<F, E>(&self, key: K, f: F) -> Result<Arc<V>, E>
     where
         F: FnOnce() -> Result<V, E>;
 }
 
-impl<K, V> InteriorMutabilityCache<K, V> for RefCell<HashMap<K, Rc<V>>>
+impl<K, V> InteriorMutabilityCache<K, V> for RwLock<HashMap<K, Arc<V>>>
 where
     K: Hash + Eq,
 {
-    fn get(&self, key: &K) -> Option<Rc<V>> {
-        self.borrow().get(key).map(Rc::clone)
+    fn get(&self, key: &K) -> Option<Arc<V>> {
+        self.read().expect("poisoned lock").get(key).map(Arc::clone)
     }
 
-    fn try_get_or_insert<F, E>(&self, key: K, f: F) -> Result<Rc<V>, E>
+    fn try_get_or_insert<F, E>(&self, key: K, f: F) -> Result<Arc<V>, E>
     where
         F: FnOnce() -> Result<V, E>,
     {
-        let mut cache = self.borrow_mut();
+        let mut cache = self.write().expect("poisoned lock");
         let value = match cache.entry(key) {
             Entry::Occupied(value) => Ok(value.into_mut()),
             Entry::Vacant(entry) => {
-                let value = Rc::new(f()?);
+                let value = Arc::new(f()?);
                 Ok(entry.insert(value))
             }
         }?;
-        Ok(Rc::clone(value))
+        Ok(Arc::clone(value))
     }
 }
 
 #[cfg(test)]
 mod interior_mutability_cache {
-    use std::{cell::RefCell, collections::HashMap, rc::Rc};
+    use std::{
+        collections::HashMap,
+        sync::{Arc, RwLock},
+    };
 
     use anyhow::{anyhow, bail};
 
@@ -49,7 +51,7 @@ mod interior_mutability_cache {
 
     #[test]
     fn found() -> anyhow::Result<()> {
-        let cache = RefCell::new(HashMap::from([("key", Rc::new(42))]));
+        let cache = RwLock::new(HashMap::from([("key", Arc::new(42))]));
 
         let value = cache.try_get_or_insert("key", || bail!("should not be called"))?;
         assert_eq!(*value, 42);
@@ -58,27 +60,27 @@ mod interior_mutability_cache {
 
     #[test]
     fn created() -> anyhow::Result<()> {
-        let cache = RefCell::new(HashMap::new());
+        let cache = RwLock::new(HashMap::new());
         let value = cache.try_get_or_insert("key", || Ok::<_, anyhow::Error>(42))?;
         assert_eq!(*value, 42);
-        assert_eq!(**cache.borrow().get("key").unwrap(), 42);
+        assert_eq!(**cache.read().expect("poisoned lock").get("key").unwrap(), 42);
         Ok(())
     }
 
     #[test]
     fn failed() -> anyhow::Result<()> {
-        let cache = RefCell::new(HashMap::<_, Rc<()>, _>::new());
+        let cache = RwLock::new(HashMap::<_, Arc<()>, _>::new());
         let error = cache
             .try_get_or_insert("key", || bail!("error"))
             .unwrap_err();
         assert_eq!(error.to_string(), "error");
-        assert_eq!(cache.borrow().get("key"), None);
+        assert_eq!(cache.read().expect("poisoned lock").get("key"), None);
         Ok(())
     }
 
     #[test]
     fn idempotence() -> anyhow::Result<()> {
-        let cache = RefCell::new(HashMap::new());
+        let cache = RwLock::new(HashMap::new());
         let call_count = &mut 0;
         let mut return_once = || {
             *call_count += 1;
@@ -90,7 +92,7 @@ mod interior_mutability_cache {
         };
         cache.try_get_or_insert("key", &mut return_once)?;
         cache.try_get_or_insert("key", &mut return_once)?;
-        assert_eq!(**cache.borrow().get("key").unwrap(), 42);
+        assert_eq!(**cache.read().expect("poisoned lock").get("key").unwrap(), 42);
         Ok(())
     }
 }

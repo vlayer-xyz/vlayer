@@ -16,8 +16,6 @@ disallowed-methods = [
 
 disallowed-types = [
     # parking_lot create offers more efficient and posion-free synchronization primitives
-    { path = "std::sync::Mutex", reason = "use parking_lot::Mutex instead" },
-    { path = "std::sync::RwLock", reason = "use parking_lot::RwLock instead" },
     { path = "std::sync::Condvar", reason = "use parking_lot::Condvar instead" },
     { path = "std::sync::Once", reason = "use parking_lot::Once instead" },
 ]

@@ -1,4 +1,7 @@
-use std::{cell::RefCell, fmt::Debug, rc::Rc};
+use std::{
+    fmt::Debug,
+    sync::{Arc, RwLock},
+};
 
 use alloy_primitives::{Address, B256, U256};
 use provider::BlockingProvider;
@@ -21,20 +24,20 @@ pub enum ProviderDbError<E: std::error::Error> {
 
 /// A revm [Database] backed by a [Provider].
 pub(crate) struct ProviderDb<P> {
-    pub(crate) provider: Rc<P>,
+    pub(crate) provider: Arc<P>,
     pub(crate) block_number: u64,
 
     /// Cache for code hashes to contract addresses.
-    code_hashes: RefCell<HashMap<B256, Address>>,
+    code_hashes: RwLock<HashMap<B256, Address>>,
 }
 
 impl<P: BlockingProvider> ProviderDb<P> {
     /// Creates a new [ProviderDb] with the given provider and block number.
-    pub(crate) fn new(provider: Rc<P>, block_number: u64) -> Self {
+    pub(crate) fn new(provider: Arc<P>, block_number: u64) -> Self {
         Self {
             provider,
             block_number,
-            code_hashes: RefCell::new(HashMap::new()),
+            code_hashes: RwLock::new(HashMap::new()),
         }
     }
 }
@@ -54,7 +57,8 @@ impl<P: BlockingProvider> DatabaseRef for ProviderDb<P> {
         }
         // cache the code hash to address mapping, so we can later retrieve the code
         self.code_hashes
-            .borrow_mut()
+            .write()
+            .expect("poisoned lock")
             .insert(proof.code_hash.0.into(), proof.address);
 
         Ok(Some(AccountInfo {
@@ -74,7 +78,8 @@ impl<P: BlockingProvider> DatabaseRef for ProviderDb<P> {
         // this works because we always call `basic_ref` first
         let contract_address = *self
             .code_hashes
-            .borrow()
+            .read()
+            .expect("poisoned lock")
             .get(&code_hash)
             .expect("`basic` must be called first for the corresponding account");
         let code = self
