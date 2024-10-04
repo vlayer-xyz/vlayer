@@ -1,7 +1,6 @@
 use alloy_primitives::B256;
 use block_header::EvmBlockHeader;
-use chain_engine::BlockTrie;
-pub use chain_engine::Input;
+pub use chain_engine::{BlockTrie, Input};
 use mpt::MerkleTrie;
 use risc0_zkp::core::digest::Digest;
 

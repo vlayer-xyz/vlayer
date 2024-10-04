@@ -1,15 +1,24 @@
-use std::ops::{Deref, DerefMut, Range};
+use std::{
+    collections::HashSet,
+    ops::{Deref, DerefMut, Range},
+};
 
 use alloy_primitives::{keccak256, ChainId, B256};
-use alloy_rlp::{Bytes as RlpBytes, BytesMut, Decodable, Encodable, RlpDecodable, RlpEncodable};
+use alloy_rlp::{
+    bytes::buf::Chain, Bytes as RlpBytes, BytesMut, Decodable, Encodable, RlpDecodable,
+    RlpEncodable,
+};
 use bytes::Bytes;
-use mpt::{KeyNibbles, Node, NodeRef, EMPTY_ROOT_HASH};
+use chain_engine::BlockTrie;
+pub use chain_trie::{ChainTrie, ChainTrieError, ChainUpdate};
+use mpt::{KeyNibbles, MerkleTrie, Node, NodeRef, EMPTY_ROOT_HASH};
 use nybbles::Nibbles;
 use proof_builder::{MerkleProofBuilder, ProofResult};
 use thiserror::Error;
 
 use crate::{Database, DbError, DbResult, ReadTx, WriteTx};
 
+mod chain_trie;
 mod proof_builder;
 #[cfg(test)]
 mod tests;
@@ -24,16 +33,20 @@ const CHAINS: &str = "chains";
 pub struct ChainInfo {
     pub first_block: u64,
     pub last_block: u64,
-    pub merkle_root: B256,
+    pub root_hash: B256,
     pub zk_proof: RlpBytes,
 }
 
 impl ChainInfo {
-    pub fn new(range: Range<u64>, merkle_root: B256, zk_proof: impl Into<Bytes>) -> Self {
+    pub fn new(
+        block_range: Range<u64>,
+        root_hash: impl Into<B256>,
+        zk_proof: impl Into<Bytes>,
+    ) -> Self {
         Self {
-            first_block: range.start,
-            last_block: range.end - 1,
-            merkle_root,
+            first_block: block_range.start,
+            last_block: block_range.end - 1,
+            root_hash: root_hash.into(),
             zk_proof: zk_proof.into(),
         }
     }
@@ -79,27 +92,48 @@ impl<DB: for<'a> Database<'a>> ChainDb<DB> {
     }
 
     pub fn get_merkle_proof(&self, root_hash: B256, block_num: u64) -> ProofResult {
+        self.begin_ro()?.get_merkle_proof(root_hash, block_num)
+    }
+
+    pub fn get_chain_trie(&self, chain_id: ChainId) -> ChainDbResult<Option<ChainTrie>> {
         let tx = self.begin_ro()?;
-        let proof_builder = MerkleProofBuilder::new(|node_hash| tx.get_node(node_hash));
-        proof_builder.build_proof(root_hash, block_num)
+        let Some(ChainInfo {
+            first_block,
+            last_block,
+            root_hash,
+            ..
+        }) = self.get_chain_info(chain_id)?
+        else {
+            return Ok(None);
+        };
+        let first_block_proof = tx.get_merkle_proof(root_hash, first_block)?;
+        let last_block_proof = tx.get_merkle_proof(root_hash, last_block)?;
+        let trie: MerkleTrie = first_block_proof
+            .into_vec()
+            .into_iter()
+            .chain(last_block_proof)
+            .collect();
+        Ok(Some(ChainTrie::new(first_block..last_block, trie)))
     }
 
     pub fn update_chain(
         &mut self,
         chain_id: ChainId,
-        chain_info: &ChainInfo,
-        removed_nodes: impl IntoIterator<Item = B256>,
-        added_nodes_rlp: impl IntoIterator<Item = Bytes>,
+        ChainUpdate {
+            chain_info,
+            added_nodes,
+            removed_nodes,
+        }: ChainUpdate,
     ) -> ChainDbResult<()> {
         let mut tx = self.begin_rw()?;
 
-        tx.upsert_chain_info(chain_id, chain_info)?;
+        tx.upsert_chain_info(chain_id, &chain_info)?;
 
         for node_hash in removed_nodes {
             tx.delete_node(node_hash)?;
         }
 
-        for node in added_nodes_rlp {
+        for node in added_nodes {
             tx.insert_node(node)?;
         }
 
@@ -129,6 +163,11 @@ impl<TX: ReadTx> ChainDbTx<TX> {
             .ok_or(ChainDbError::NodeNotFound)?;
         let node = Node::decode(&mut node_rlp.as_ref())?;
         Ok(node)
+    }
+
+    pub fn get_merkle_proof(&self, root_hash: B256, block_num: u64) -> ProofResult {
+        MerkleProofBuilder::new(|node_hash| self.get_node(node_hash))
+            .build_proof(root_hash, block_num)
     }
 }
 

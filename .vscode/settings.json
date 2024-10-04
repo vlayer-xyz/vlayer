@@ -11,6 +11,7 @@
     "editor.defaultFormatter": "rust-lang.rust-analyzer",
     "editor.formatOnSave": true
   },
+  "rust-analyzer.cargo.allTargets": true,
   "rust-analyzer.rustfmt.extraArgs": [
     "+nightly"
   ],

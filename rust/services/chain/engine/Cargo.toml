@@ -4,13 +4,13 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-serde = { workspace = true }
+alloy-primitives = { workspace = true }
+alloy-rlp = { workspace = true, features = ["arrayvec"] }
+serde = { workspace = true, features = ["derive"] }
 bytes = { workspace = true }
 risc0-zkp = { workspace = true }
 block_header = { workspace = true }
 mpt = { workspace = true }
-alloy-primitives = { workspace = true }
-alloy-rlp = { workspace = true, features = ["arrayvec"] }
 
 [lints]
 workspace = true

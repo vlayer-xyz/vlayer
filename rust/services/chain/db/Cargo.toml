@@ -5,12 +5,12 @@ edition = "2021"
 
 [dependencies]
 anyhow = { workspace = true }
+chain_engine = { workspace = true }
 thiserror = { workspace = true }
 libmdbx = "0.5.2"
 mpt = { workspace = true }
 alloy-rlp = { workspace = true }
 alloy-primitives = { workspace = true }
-chain_engine = { workspace = true }
 nybbles = { workspace = true }
 bytes = { workspace = true }
 

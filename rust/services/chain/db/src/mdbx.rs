@@ -95,11 +95,8 @@ impl<'a> WriteTx for MdbxTx<'a, RW> {
     ) -> DbResult<()> {
         let mdbx_table = self.get_table(&table)?;
         self.tx
-            .put(&mdbx_table, &key, value, WriteFlags::UPSERT)
-            .map_err(|err| match err {
-                libmdbx::Error::KeyExist => unreachable!("KeyExist should not happen with UPSERT"),
-                _ => DbError::custom(err),
-            })
+            .put(&mdbx_table, &key, value, WriteFlags::default())
+            .map_err(DbError::custom)
     }
 
     fn delete(&mut self, table: impl AsRef<str>, key: impl AsRef<[u8]>) -> DbResult<()> {
