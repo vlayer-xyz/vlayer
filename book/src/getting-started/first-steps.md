@@ -68,7 +68,7 @@ vlayer serve \
 
 ### Web Proof example
 
-First you need to install the vlayer browser extension:
+First, install the vlayer browser extension:
 1. Download the extension [here](https://vlayer-releases.s3.eu-north-1.amazonaws.com/latest/browser-extension.tar.gz) and extract the archive.
 2. Go to `chrome://extensions/` or `brave://extensions/` in Chrome or Brave, respectively (currently only these two browsers are supported).
 3. Enable `Developer mode`.
