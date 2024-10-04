@@ -3,5 +3,6 @@ pub(crate) mod verify;
 
 mod canonicalization;
 mod crypto;
+mod parse;
 mod parse_header;
 mod tags;
