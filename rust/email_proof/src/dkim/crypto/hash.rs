@@ -12,8 +12,21 @@ pub trait Hashable {
     }
 }
 
+#[derive(Debug, PartialEq)]
 pub enum HashAlgorithm {
     Sha256,
+}
+
+impl TryFrom<&str> for HashAlgorithm {
+    type Error = &'static str;
+
+    fn try_from(sig_a_tag_h: &str) -> Result<Self, Self::Error> {
+        match sig_a_tag_h {
+            "sha256" => Ok(Self::Sha256),
+            "sha1" => Err("Unsupported signature hashing algorithm: sha1"),
+            _ => Err("Invalid header sig-a-tag-h value"),
+        }
+    }
 }
 
 #[derive(Debug, PartialEq, Eq)]
@@ -44,6 +57,52 @@ mod tests {
     impl Hashable for &str {
         fn hashable_bytes(&self) -> &[u8] {
             self.as_bytes()
+        }
+    }
+
+    mod hash_algorithm {
+        use super::*;
+
+        mod from_tag_a {
+            use lazy_static::lazy_static;
+
+            use super::*;
+
+            const INVALID_TAG_A_VALUE_ERR: std::result::Result<HashAlgorithm, &'static str> =
+                Err("Invalid header sig-a-tag-h value");
+
+            #[test]
+            fn succeeds_for_sha256() {
+                let tag_value = "sha256";
+                assert_eq!(HashAlgorithm::try_from(tag_value), Ok(HashAlgorithm::Sha256))
+            }
+
+            #[test]
+            fn disable_support_for_sha1() {
+                let tag_value = "sha1";
+                assert_eq!(
+                    HashAlgorithm::try_from(tag_value),
+                    Err("Unsupported signature hashing algorithm: sha1")
+                )
+            }
+
+            #[test]
+            fn fails_for_upper_case() {
+                let tag_value = "sha256".to_uppercase();
+                assert_eq!(HashAlgorithm::try_from(tag_value.as_str()), INVALID_TAG_A_VALUE_ERR)
+            }
+
+            #[test]
+            fn fails_when_passed_whole_a_tag() {
+                let tag_value = "rsa-sha256";
+                assert_eq!(HashAlgorithm::try_from(tag_value), INVALID_TAG_A_VALUE_ERR);
+            }
+
+            #[test]
+            fn fails_for_empty_value() {
+                let tag_value = "";
+                assert_eq!(HashAlgorithm::try_from(tag_value), INVALID_TAG_A_VALUE_ERR);
+            }
         }
     }
 
