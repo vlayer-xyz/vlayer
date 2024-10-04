@@ -92,7 +92,6 @@ export const setupVerifyButton = (element: HTMLButtonElement) => {
         address: import.meta.env.VITE_VERIFIER_ADDRESS,
         abi: webProofVerifier.abi,
         functionName: "verify",
-        //@ts-expect-error TODO : check typing here
         args: [context.zkProof, ...context.result],
         account: twitterUserAddress,
       });
