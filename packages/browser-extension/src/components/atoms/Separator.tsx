@@ -10,7 +10,6 @@ export const Separator = () => {
         minHeight: "24px",
         marginTop: "4px",
         marginBottom: "4px",
-        // height: "100%",
       }}
     ></div>
   );
