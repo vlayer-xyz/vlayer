@@ -1,4 +1,5 @@
 {
+
   "compilerOptions": {
     "jsx": "react",
     "target": "ESNext",
@@ -16,11 +17,6 @@
     "noImplicitReturns": true,
     "skipLibCheck": true,
     "baseUrl": "./",
-    "paths" : {
-      "components/*" : ["./src/components/*"],
-      "constants/*" : ["./src/constants/*"],
-      "hooks/*" : ["./src/hooks/*"]
-    }
-  },
 
+  },
 }
