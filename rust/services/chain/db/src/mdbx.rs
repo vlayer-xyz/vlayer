@@ -96,11 +96,9 @@ impl<'a> WriteTx for MdbxTx<'a, RW> {
         value: impl AsRef<[u8]>,
     ) -> DbResult<()> {
         let mdbx_table = self.get_table(&table)?;
-        match self.tx.put(&mdbx_table, &key, value, WriteFlags::default()) {
-            Ok(()) => Ok(()),
-            Err(libmdbx::Error::KeyExist) => Err(DbError::duplicate_key(table, key)),
-            Err(err) => Err(DbError::custom(err)),
-        }
+        self.tx
+            .put(&mdbx_table, &key, value, WriteFlags::default())
+            .map_err(DbError::custom)
     }
 
     fn delete(&mut self, table: impl AsRef<str>, key: impl AsRef<[u8]>) -> DbResult<()> {

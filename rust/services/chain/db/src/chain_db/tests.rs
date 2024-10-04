@@ -25,27 +25,26 @@ fn delete_node(db: &mut ChainDb<InMemoryDatabase>, node_hash: B256) {
     tx.commit().expect("commit failed");
 }
 
-// Fake block header to insert in MPT (must be big enough not to get inlined, so we can test if a tree is sparse)
-fn block_header(block_num: u64) -> Bytes {
-    keccak256(alloy_rlp::encode(block_num)).into()
+// Fake block hash that is just a hash of the RLP-encoded block number
+fn block_hash(block_num: u64) -> B256 {
+    keccak256(alloy_rlp::encode(block_num))
 }
 
 fn insert_blocks(
     db: &mut ChainDb<InMemoryDatabase>,
     blocks: impl IntoIterator<Item = BlockNumber>,
 ) -> (B256, Node) {
-    let mut mpt = MerkleTrie::new();
+    let mut trie = BlockTrie::new();
     for block_num in blocks {
-        mpt.insert(alloy_rlp::encode(block_num), block_header(block_num))
-            .expect("insert failed");
+        trie.insert(block_num, &block_hash(block_num));
     }
 
     let mut tx = db.begin_rw().expect("begin_rw failed");
-    for node_rlp in mpt.to_rlp_nodes() {
+    for node_rlp in trie.to_rlp_nodes() {
         tx.insert_node(node_rlp).expect("insert_node failed");
     }
     tx.commit().expect("commit failed");
-    (mpt.hash_slow(), mpt.0)
+    (trie.hash_slow(), trie.into_root())
 }
 
 fn check_proof(db: &ChainDb<InMemoryDatabase>, root_hash: B256, block_num: u64) -> MerkleTrie {
@@ -53,7 +52,7 @@ fn check_proof(db: &ChainDb<InMemoryDatabase>, root_hash: B256, block_num: u64) 
         .get_merkle_proof(root_hash, block_num)
         .expect("get_merkle_proof failed");
     let proof_trie: MerkleTrie = proof.into_vec().into_iter().collect();
-    assert_eq!(proof_trie.get(alloy_rlp::encode(block_num)).unwrap(), &block_header(block_num));
+    assert_eq!(proof_trie.get(alloy_rlp::encode(block_num)).unwrap(), &block_hash(block_num));
     proof_trie
 }
 
@@ -64,14 +63,14 @@ fn chain_info_get_insert() -> Result<()> {
     let chain_info = ChainInfo {
         first_block: 0,
         last_block: 1,
-        merkle_root: B256::with_last_byte(1),
+        root_hash: B256::with_last_byte(1),
         zk_proof: [0].into(),
     };
 
     assert_eq!(db.begin_ro()?.get_chain_info(chain_id)?, None);
 
     let mut tx = db.begin_rw()?;
-    tx.insert_chain_info(chain_id, &chain_info)?;
+    tx.upsert_chain_info(chain_id, &chain_info)?;
     tx.commit()?;
 
     assert_eq!(db.begin_ro()?.get_chain_info(chain_id)?.unwrap(), chain_info);
@@ -159,49 +158,57 @@ fn proof_random_blocks() -> Result<()> {
     Ok(())
 }
 
+fn trie_and_chain_info(blocks: &[BlockNumber]) -> (BlockTrie, B256, ChainInfo) {
+    let block_trie: BlockTrie = blocks
+        .iter()
+        .map(|block_num| (*block_num, block_hash(*block_num)))
+        .collect();
+    let root_hash = block_trie.hash_slow();
+    let chain_info = ChainInfo {
+        first_block: blocks[0],
+        last_block: *blocks.last().unwrap(),
+        root_hash,
+        zk_proof: [].into(),
+    };
+    (block_trie, root_hash, chain_info)
+}
+
+fn update_chain(
+    db: &mut ChainDb<InMemoryDatabase>,
+    chain_id: ChainId,
+    chain_info: &ChainInfo,
+    addded_nodes: impl IntoIterator<Item = Bytes>,
+    removed_nodes: impl IntoIterator<Item = Bytes>,
+) {
+    let chain_update = ChainUpdate {
+        chain_info: chain_info.clone(),
+        added_nodes: addded_nodes.into_iter().collect(),
+        removed_nodes: removed_nodes.into_iter().map(keccak256).collect(),
+    };
+    db.update_chain(chain_id, chain_update)
+        .expect("update_chain_failed");
+}
+
 #[test]
-fn update_chain() -> Result<()> {
+fn test_update_chain() -> Result<()> {
     let mut db = get_test_db();
 
-    let mut trie = MerkleTrie::new();
-    trie.insert(alloy_rlp::encode(1u64), block_header(1))?;
-    trie.insert(alloy_rlp::encode(2u64), block_header(2))?;
-    let root_hash = trie.hash_slow();
-    let rlp_nodes: HashSet<Bytes> = trie.to_rlp_nodes().collect();
-    let chain_info = ChainInfo {
-        first_block: 1,
-        last_block: 2,
-        merkle_root: root_hash,
-        zk_proof: [0].into(),
-    };
-    db.update_chain(0, &chain_info, [], rlp_nodes.iter().cloned())?;
-    for block_num in [1, 2] {
-        check_proof(&db, root_hash, block_num);
-    }
+    let (block_trie, root_hash, chain_info) = trie_and_chain_info(&[0]);
+    update_chain(&mut db, 0, &chain_info, block_trie.to_rlp_nodes(), []);
+    assert_eq!(db.get_chain_info(0)?.unwrap(), chain_info);
+    assert_eq!(db.begin_ro()?.get_node(root_hash)?, block_trie.clone().into_root());
 
-    trie.insert(alloy_rlp::encode(0u64), block_header(0));
-    trie.insert(alloy_rlp::encode(3u64), block_header(3));
-    let new_root_hash = trie.hash_slow();
-    let new_rlp_nodes: HashSet<Bytes> = trie.to_rlp_nodes().collect();
-    let removed_nodes: Vec<B256> = rlp_nodes
-        .difference(&new_rlp_nodes)
-        .map(keccak256)
-        .collect();
-    let added_nodes: Vec<Bytes> = new_rlp_nodes.difference(&rlp_nodes).cloned().collect();
-    let chain_info = ChainInfo {
-        first_block: 0,
-        last_block: 1,
-        merkle_root: new_root_hash,
-        zk_proof: [0].into(),
-    };
-    db.update_chain(0, &chain_info, removed_nodes.clone(), added_nodes)?;
-    for block_num in [0, 1, 2, 3] {
-        check_proof(&db, new_root_hash, block_num);
-    }
-    assert!(!removed_nodes.is_empty());
-    for node_hash in removed_nodes {
-        assert_eq!(db.begin_ro()?.get_node(node_hash).unwrap_err(), ChainDbError::NodeNotFound);
-    }
+    let (new_block_trie, new_root_hash, chain_info) = trie_and_chain_info(&[1]);
+    update_chain(
+        &mut db,
+        0,
+        &chain_info,
+        new_block_trie.to_rlp_nodes(),
+        block_trie.to_rlp_nodes(),
+    );
+    assert_eq!(db.get_chain_info(0)?.unwrap(), chain_info);
+    assert_eq!(db.begin_ro()?.get_node(new_root_hash)?, new_block_trie.into_root());
+    assert_eq!(db.begin_ro()?.get_node(root_hash).unwrap_err(), ChainDbError::NodeNotFound);
 
     Ok(())
 }

@@ -1,7 +1,11 @@
-use alloy_primitives::B256;
-use alloy_rlp::encode_fixed_size;
-use mpt::MerkleTrie;
+use std::borrow::Borrow;
 
+use alloy_primitives::{Bytes, B256};
+use alloy_rlp::encode_fixed_size;
+use mpt::{MerkleTrie, Node};
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct BlockTrie(MerkleTrie);
 
 impl BlockTrie {
@@ -26,10 +30,28 @@ impl BlockTrie {
     pub fn encode_key(block_number: u64) -> impl AsRef<[u8]> {
         encode_fixed_size(&block_number)
     }
+
+    pub fn to_rlp_nodes(&self) -> impl Iterator<Item = Bytes> + '_ {
+        self.0.to_rlp_nodes()
+    }
+
+    pub fn into_root(self) -> Node {
+        self.0 .0
+    }
 }
 
 impl From<MerkleTrie> for BlockTrie {
     fn from(mpt: MerkleTrie) -> Self {
         Self(mpt)
+    }
+}
+
+impl<T: Borrow<B256>> FromIterator<(u64, T)> for BlockTrie {
+    fn from_iter<I: IntoIterator<Item = (u64, T)>>(iter: I) -> Self {
+        let mut trie = BlockTrie::new();
+        for (key, value) in iter {
+            trie.insert(key, value.borrow())
+        }
+        trie
     }
 }

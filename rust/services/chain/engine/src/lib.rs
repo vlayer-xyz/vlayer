@@ -3,6 +3,9 @@ use bytes::Bytes;
 use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Serialize};
 
+mod block_trie;
+pub use block_trie::BlockTrie;
+
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Input {
     Initialize {
