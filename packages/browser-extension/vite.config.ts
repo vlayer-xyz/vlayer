@@ -1,6 +1,7 @@
 import { defineConfig } from "vite";
 import webExtension, { readJsonFile } from "vite-plugin-web-extension";
 import { viteStaticCopy } from "vite-plugin-static-copy";
+import tsconfigPaths from "vite-tsconfig-paths";
 
 function generateManifest() {
   const manifest = readJsonFile("src/manifest.json");
@@ -16,6 +17,7 @@ function generateManifest() {
 
 export default defineConfig({
   plugins: [
+    tsconfigPaths(),
     webExtension({
       manifest: generateManifest,
       watchFilePaths: ["package.json", "manifest.json"],

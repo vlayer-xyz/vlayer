@@ -1,1 +1,20 @@
-import '@radix-ui/themes/styles.css';
+
+@font-face {
+     font-family: 'Sora';
+     src:  url('/fonts/Sora-Regular.ttf')
+ }
+
+body{
+    margin: 0;
+}
+.radix-themes {
+    --vlayer-violet: #7235E5;
+    --violet: var(--vlayer-violet);
+    --default-font-family: Sora;
+    --heading-font-family: Sora;
+    --code-font-family:  Sora;
+    --strong-font-family:  Sora;
+    --em-font-family: Sora;
+    --quote-font-family: Sora;
+}
+

@@ -47,7 +47,6 @@ browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
 });
 
 browser.tabs.onActivated.addListener(function (activeInfo) {
-  console.log("Active tab changed", activeInfo);
   windowId = activeInfo.windowId;
 });
 

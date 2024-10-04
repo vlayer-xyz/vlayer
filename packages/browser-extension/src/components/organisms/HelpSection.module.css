@@ -1,0 +1,18 @@
+
+.spacer {
+  display: flex;
+  min-height: 16px;
+  width: 16px;
+  gap: 10px;
+}
+  
+.container {
+  flex-direction:column;
+  justify-items: start;
+  align-items: center;
+  position: fixed;
+  bottom: 20px
+}
+.separator {
+  margin-bottom: 20px;
+}
