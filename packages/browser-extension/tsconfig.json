@@ -17,6 +17,10 @@
     "noImplicitReturns": true,
     "skipLibCheck": true,
     "baseUrl": "./",
-
+    "paths": {
+      "components/*" : ["./browser-extension/src/components/*"],
+      "constants/*" : ["./browser-extension/src/constants/*"],
+      "hooks/*" : ["./browser-extension/src/hooks/*"]
+    }
   },
 }

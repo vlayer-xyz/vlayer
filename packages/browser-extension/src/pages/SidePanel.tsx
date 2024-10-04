@@ -7,7 +7,7 @@ import {
   TlsnProofContextProvider,
 } from "../context";
 
-import { Steps } from "components/organisms/Steps";
+// import { Steps } from "components/organisms/Steps";
 
 const BackButton = () => {
   const { backUrl } = useProofContext();
@@ -84,7 +84,7 @@ const SidePanel = () => {
                 <BackButton />
                 <Proof />
               </Grid>
-              <Steps />
+              {/*<Steps />*/}
             </div>
           </Grid>
         </div>
