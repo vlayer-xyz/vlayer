@@ -3,6 +3,7 @@ import {
   ExtensionAction,
   ExtensionMessage,
 } from "@vlayer/web-proof-commons/constants/message";
+import { WebProverSessionContextManager } from "./state/webProverSessionContext";
 
 chrome.tabs.onActivated.addListener(function (activeInfo) {
   windowId = activeInfo.windowId;
@@ -56,6 +57,9 @@ browser.runtime.onMessageExternal.addListener((message) => {
       if (chrome.sidePanel) {
         chrome.sidePanel.open({ windowId: windowId });
       }
+      await WebProverSessionContextManager.instance.setWebProverSessionConfig(
+        message.payload,
+      );
     }
   })();
 });

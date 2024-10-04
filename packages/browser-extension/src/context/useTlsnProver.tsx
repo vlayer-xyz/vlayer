@@ -11,6 +11,7 @@ import React, {
 } from "react";
 import { formatTlsnHeaders } from "../lib/formatTlsnHeaders";
 import { ExtensionMessage } from "@vlayer/web-proof-commons/constants/message";
+import { WebProverSessionContextManager } from "../state/webProverSessionContext";
 
 const TlsnProofContext = createContext({
   prove: () => {},
@@ -73,10 +74,14 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
   const prove = useCallback(async () => {
     setIsProving(true);
 
+    // TODO useProofContext() to get webProverSessionConfig
+    const webProverSessionConfig =
+      await WebProverSessionContextManager.instance.getWebProverSessionConfig();
+
     try {
       const tlsnProof = await tlsnProve(proofUrl, {
-        notaryUrl: import.meta.env.VITE_NOTARY_URL,
-        websocketProxyUrl: `${import.meta.env.VITE_WEBSOCKET_PROXY_URL}?token=${new URL(proofUrl).host}`,
+        notaryUrl: webProverSessionConfig.notaryUrl,
+        websocketProxyUrl: webProverSessionConfig.wsProxyUrl,
         method: "GET",
         headers: formattedHeaders?.headers,
         secretHeaders: formattedHeaders?.secretHeaders,
