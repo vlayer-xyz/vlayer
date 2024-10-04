@@ -58,7 +58,9 @@ browser.runtime.onMessageExternal.addListener((message) => {
       if (chrome.sidePanel) {
         chrome.sidePanel.open({ windowId: windowId });
       }
-      await WebProverSessionContextManager.instance.setWebProverSessionConfig(message.payload);
+      await WebProverSessionContextManager.instance.setWebProverSessionConfig(
+        message.payload,
+      );
     }
   })();
 });

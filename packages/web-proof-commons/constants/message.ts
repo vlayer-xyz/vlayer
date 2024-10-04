@@ -7,7 +7,7 @@ export const enum ExtensionMessage {
   ProofError,
 }
 
-export type WebProverSessionConfig ={
+export type WebProverSessionConfig = {
   notaryUrl: string;
   wsProxyUrl: string;
-}
+};

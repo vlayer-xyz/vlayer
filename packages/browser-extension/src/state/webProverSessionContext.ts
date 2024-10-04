@@ -3,7 +3,7 @@ import browser from "webextension-polyfill";
 import { WebProverSessionConfig } from "@vlayer/web-proof-commons/constants/message";
 
 type WebProverSessionContext = {
-  webProverSessionConfig: WebProverSessionConfig
+  webProverSessionConfig: WebProverSessionConfig;
 };
 
 export class WebProverSessionContextManager extends Store<WebProverSessionContext> {
@@ -15,12 +15,16 @@ export class WebProverSessionContextManager extends Store<WebProverSessionContex
 
   public static get instance(): WebProverSessionContextManager {
     if (!this.#instance) {
-      this.#instance = new WebProverSessionContextManager(browser.storage.local);
+      this.#instance = new WebProverSessionContextManager(
+        browser.storage.local,
+      );
     }
     return this.#instance;
   }
 
-  async setWebProverSessionConfig(config: WebProverSessionConfig): Promise<void> {
+  async setWebProverSessionConfig(
+    config: WebProverSessionConfig,
+  ): Promise<void> {
     await this.set("webProverSessionConfig", config);
   }
 }
