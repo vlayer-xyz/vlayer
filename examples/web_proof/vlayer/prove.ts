@@ -12,18 +12,16 @@ const [prover, verifier] = await testHelpers.deployProverVerifier(
   webProofProver,
   webProofVerifier,
 );
-testSuccessProvingAndVerification(prover, verifier);
-testFailedProving(prover);
 
-async function testSuccessProvingAndVerification(
-  prover: Address,
-  verifier: Address,
-) {
+const twitterUserAddress = (await testHelpers.getTestAddresses())[0];
+
+testSuccessProvingAndVerification();
+testFailedProving();
+
+async function testSuccessProvingAndVerification() {
   console.log("Proving...");
 
   const webProof = { tls_proof: tls_proof, notary_pub_key: notaryPubKey };
-
-  const twitterUserAddress = (await testHelpers.getTestAddresses())[0];
 
   const { proof, returnValue } = await prove(
     prover,
@@ -67,11 +65,10 @@ async function testSuccessProvingAndVerification(
   assert.strictEqual(twitterUserAddress, tokenOwnerAddress);
 }
 
-async function testFailedProving(prover: Address) {
+async function testFailedProving() {
   console.log("Proving...");
 
   const wrongWebProof = { tls_proof: tls_proof, notary_pub_key: "wrong" };
-  const twitterUserAddress = (await testHelpers.getTestAddresses())[0];
 
   try {
     await prove(prover, webProofProver.abi, "main", [
