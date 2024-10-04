@@ -1,5 +1,5 @@
 {
-  "name": "private_airdrop",
+  "name": "private-airdrop",
   "module": "prove.ts",
   "type": "module",
   "scripts": {

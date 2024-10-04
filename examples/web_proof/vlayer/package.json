@@ -1,5 +1,5 @@
 {
-  "name": "web_proof",
+  "name": "web-proof",
   "type": "module",
   "scripts": {
     "lint:solidity": "solhint '../src/**/*.sol'",

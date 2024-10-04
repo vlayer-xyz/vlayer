@@ -1,5 +1,5 @@
 {
-  "name": "simple_time_travel",
+  "name": "simple-time-travel",
   "module": "prove.ts",
   "type": "module",
   "dependencies": {
