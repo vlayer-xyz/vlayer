@@ -1225,6 +1225,7 @@ dependencies = [
  "mail-auth",
  "mailparse",
  "regex",
+ "ring",
  "thiserror",
 ]
 

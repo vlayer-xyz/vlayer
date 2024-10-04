@@ -1,4 +1,5 @@
 import { useLocalStorage } from "@vlayer/extension-hooks";
+import { useTrackHistory } from "./useTrackHistory";
 
 //default are set to twitter just for now
 
@@ -9,6 +10,8 @@ export const useProofContext = () => {
   const [redirectUrl] = useLocalStorage("redirectUrl", defaultRedirectUrl);
   const [proofUrl] = useLocalStorage("proofUrl", defaultProofUrl);
   const [backUrl] = useLocalStorage("backUrl", defaultBackUrl);
+
+  useTrackHistory();
   return {
     redirectUrl,
     proofUrl,

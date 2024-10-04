@@ -32,3 +32,6 @@ export class WebProverSessionContextManager extends Store<WebProverSessionContex
     return await this.get("webProverSessionConfig");
   }
 }
+
+export const webProverSessionContextManager =
+  WebProverSessionContextManager.instance;
