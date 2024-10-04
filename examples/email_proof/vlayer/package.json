@@ -1,5 +1,5 @@
 {
-  "name": "airdrop",
+  "name": "email-proof",
   "module": "prove.ts",
   "type": "module",
   "scripts": {

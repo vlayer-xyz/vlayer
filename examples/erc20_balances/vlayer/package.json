@@ -1,5 +1,5 @@
 {
-  "name": "erc20_balances",
+  "name": "erc20-balances",
   "module": "prove.ts",
   "type": "module",
   "scripts": {
