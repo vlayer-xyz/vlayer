@@ -37,6 +37,9 @@ pub enum EngineError {
 
     #[error("Failed to get EvmEnv: {0}")]
     EvmEnv(String),
+
+    #[error("Panic: {0}")]
+    Panic(String),
 }
 
 impl<'envs, D> Engine<'envs, D>

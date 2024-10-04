@@ -358,6 +358,7 @@ mod teleport {
     const BLOCK_NO: u64 = 3;
     sol! {
         contract SimpleTravelProver {
+            #[derive(Debug)]
             function crossChainBalanceOf(address owner) public returns (address, uint256);
         }
     }
@@ -377,7 +378,10 @@ mod teleport {
             NamedChain::AnvilHardhat.into(),
             BLOCK_NO.into(),
         );
-        assert!(result.is_err());
+        assert_eq!(
+            result.unwrap_err().to_string(),
+            "Engine error: Panic: Intercepted call failed: EvmEnv(\"No rpc cache for chain: 8453\")"
+        );
 
         Ok(())
     }
