@@ -70,6 +70,7 @@ export const setupVProverButton = (element: HTMLButtonElement) => {
         {
           webProofJson: JSON.stringify(webProof),
         },
+        twitterUserAddress,
       ],
     );
 
@@ -92,7 +93,7 @@ export const setupVerifyButton = (element: HTMLButtonElement) => {
         abi: webProofVerifier.abi,
         functionName: "verify",
         //@ts-expect-error TODO : check typing here
-        args: [context.zkProof, context.result],
+        args: [context.zkProof, ...context.result],
         account: twitterUserAddress,
       });
     console.log("Verified!", verification);
