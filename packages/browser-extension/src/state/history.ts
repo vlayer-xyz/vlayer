@@ -2,14 +2,15 @@ import { Store } from "./store";
 import browser from "webextension-polyfill";
 import { webProverSessionContextManager } from "./webProverSessionContext";
 import * as R from "ramda";
-type HistoryItem = {
+
+export type HistoryItem = {
   url: string;
   headers?: browser.WebRequest.HttpHeadersItemType[];
   cookies?: browser.Cookies.Cookie[];
   ready?: boolean;
 };
 
-type History = {
+export type History = {
   currentUrl: string;
   history: HistoryItem[];
 };
@@ -33,7 +34,7 @@ export class HistoryContextManager {
     const config =
       await webProverSessionContextManager.getWebProverSessionConfig();
     //@ts-expect-error this is error till we refactor common types
-    return config.steps.map((step: { url: string }) => step.url);
+    return config?.steps?.map((step: { url: string }) => step.url) ?? [];
   };
 
   async updateHistory(item: HistoryItem): Promise<void> {

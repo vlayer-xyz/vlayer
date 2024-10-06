@@ -4,6 +4,8 @@ export class Store<T extends Record<string, unknown>> {
   constructor(private storage: browser.Storage.StorageArea) {}
 
   async set<S extends keyof T>(key: S, value: T[S]): Promise<void> {
+    
+    console.log("setting in Store",typeof this.storage,key,value);
     return await this.storage.set({
       [key]: value,
     });

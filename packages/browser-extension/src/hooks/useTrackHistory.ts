@@ -8,12 +8,11 @@ import { historyContextManager } from "../state/history";
 
 function urlToMatchPattern(url: string): string {
   const parsedUrl = new URL(url);
-  const protocol = parsedUrl.protocol === "https:" ? "https" : "http";
+  const protocol = parsedUrl.protocol;
   const domain = parsedUrl.hostname;
-  const path = parsedUrl.pathname.endsWith("/")
-    ? parsedUrl.pathname + "*"
-    : parsedUrl.pathname + "*";
-  return `${protocol}://${domain}${path}`;
+  const path =  parsedUrl.pathname + "*";
+
+  return `${protocol}//${domain}${path}`;
 }
 
 export const useTrackHeaders = () => {
