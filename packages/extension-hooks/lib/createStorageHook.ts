@@ -14,7 +14,6 @@ function createStorageHook(storage: browser.Storage.StorageArea) {
 
     useEffect(() => {
       storage.get(storageKey).then((result) => {
-        console.log("Storage key", storageKey,result)
         if (result[storageKey] !== undefined) {
           setStoredValue(result[storageKey] as T);
         }

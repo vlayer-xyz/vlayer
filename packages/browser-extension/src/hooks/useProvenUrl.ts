@@ -12,10 +12,11 @@ export const useProvenUrl = () => {
   const [provenUrl, setProvenUrl] = useState<HistoryItem>();
   const [browsingHistory] = useBrowsingHistory();
 
+  console.log("steps", steps);
   useEffect(() => {
     setProvenUrlAddress(
-      steps.find(({ step }) => {
-        return step === "notaryUrl";
+      steps?.find(({ step }) => {
+        return step === "notarize";
       })?.url || "",
     );
   }, [steps]);
@@ -26,7 +27,7 @@ export const useProvenUrl = () => {
         return item.url === provenUrlAddress;
       }),
     );
-  }, [browsingHistory]);
+  }, [browsingHistory, provenUrlAddress]);
 
   return provenUrl;
 };

@@ -8,9 +8,7 @@ import React, {
   PropsWithChildren,
   useEffect,
 } from "react";
-
 import { formatTlsnHeaders } from "../lib/formatTlsnHeaders";
-
 import { ExtensionMessage } from "@vlayer/web-proof-commons/constants/message";
 import { useProvingSessionConfig } from "./useProvingSessionConfig";
 import { useProvenUrl } from "./useProvenUrl";
@@ -23,7 +21,7 @@ const TlsnProofContext = createContext({
 });
 
 export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
-  useTrackHistory();
+  //Internal component state representing proving mechanism
   const [proof, setProof] = useState<object | null>(null);
   const [isProving, setIsProving] = useState(false);
   const [formattedHeaders, setFormattedHeaders] = useState<{
@@ -33,20 +31,21 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
     headers: {},
     secretHeaders: [],
   });
-
+  // hook history and config into provider
+  // TODO : consider renaming parent component as it makes more than just tlsn proof provider
+  useTrackHistory();
+  const [provingSessionConfig] = useProvingSessionConfig();
   const provenUrl = useProvenUrl();
 
+  // format headers to make it accepted by tlsn js api
   useEffect(() => {
     setFormattedHeaders(
       formatTlsnHeaders(provenUrl?.headers ?? [], provenUrl?.cookies ?? []),
     );
-  }, []);
+  }, [provenUrl?.headers, provenUrl?.cookies]);
 
   const prove = useCallback(async () => {
     setIsProving(true);
-
-    const [provingSessionConfig] = useProvingSessionConfig();
-
     try {
       //TODO : make sure on hooks level its defined
       if (!provenUrl?.url) {
@@ -59,21 +58,22 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
         headers: formattedHeaders?.headers,
         secretHeaders: formattedHeaders?.secretHeaders,
       });
+
+      // let service worker know proof is done
       browser.runtime.sendMessage({
         type: ExtensionMessage.ProofDone,
         proof: tlsnProof,
       });
-      setProof(proof);
+      setProof(tlsnProof);
       setIsProving(false);
     } catch (e) {
-      console.error("error in tlsnotary", e);
       browser.runtime.sendMessage({
         type: ExtensionMessage.ProofError,
         error: e,
       });
       setIsProving(false);
     }
-  }, []);
+  }, [provenUrl?.url]);
 
   return (
     <TlsnProofContext.Provider value={{ prove, proof, isProving }}>

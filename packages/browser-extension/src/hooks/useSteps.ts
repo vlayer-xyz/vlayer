@@ -1,7 +1,7 @@
 // // this is placeholder implementation
 
 import { useLocalStorage } from "@vlayer/extension-hooks";
-import { HistoryItem } from "src/state/history";
+import { HistoryItem } from "../state/history";
 import { Step, StepStatus } from "../constants";
 import { useTlsnProver } from "hooks/useTlsnProver";
 
@@ -79,6 +79,7 @@ export const useSteps = (): Step[] => {
 
   return steps.reduce((accumulator, currentStep) => {
     const hasUncompletedStep =
+      accumulator.length > 0 &&
       accumulator[accumulator.length - 1]?.status !== StepStatus.Completed;
     const mappedStep = {
       label: currentStep.label,

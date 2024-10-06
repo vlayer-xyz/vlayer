@@ -10,7 +10,7 @@ function urlToMatchPattern(url: string): string {
   const parsedUrl = new URL(url);
   const protocol = parsedUrl.protocol;
   const domain = parsedUrl.hostname;
-  const path =  parsedUrl.pathname + "*";
+  const path = parsedUrl.pathname + "*";
 
   return `${protocol}//${domain}${path}`;
 }
