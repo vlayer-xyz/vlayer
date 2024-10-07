@@ -67,7 +67,7 @@ export const setupVProverButton = (element: HTMLButtonElement) => {
       notary_pub_key: notaryPubKey,
     };
     const client = createVlayerClient({
-      url: "x.com",
+      url: "127.0.0.1:3000",
     });
 
     console.log("Generating proof...");

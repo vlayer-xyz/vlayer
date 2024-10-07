@@ -19,7 +19,7 @@ const [prover, verifier] = await testHelpers.deployProverVerifier(
 const twitterUserAddress = (await testHelpers.getTestAddresses())[0];
 
 const client = createVlayerClient({
-  url: "x.com",
+  url: "127.0.0.1:3000",
 });
 
 testSuccessProvingAndVerification();
