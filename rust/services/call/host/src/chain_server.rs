@@ -28,6 +28,7 @@ impl ChainServer {
         _chain_id: ChainId,
         _block_numbers: &HashSet<BlockNumber>,
     ) -> Result<ChainProof, HostError> {
+        let _ = self;
         //todo: fetch real ChainProof data
         Ok(ChainProof::default())
     }

@@ -104,7 +104,7 @@ impl MultiEvmInput {
 
         for loc in self.inputs.keys() {
             map.entry(loc.chain_id)
-                .or_insert_with(HashSet::new)
+                .or_default()
                 .insert(loc.block_number);
         }
 

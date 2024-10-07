@@ -10,19 +10,10 @@ pub struct Params {
     block_numbers: Vec<BlockNumber>,
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Default, Deserialize, Debug, PartialEq)]
 pub struct ChainProof {
     proof: Bytes,
     nodes: Vec<Bytes>,
-}
-
-impl Default for ChainProof {
-    fn default() -> Self {
-        ChainProof {
-            proof: Bytes::default(),
-            nodes: Vec::default(),
-        }
-    }
 }
 
 // Server reads proofs from DB, but for now we just use a hardcoded proof genrated by the bonsai
