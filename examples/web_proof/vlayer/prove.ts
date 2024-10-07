@@ -34,8 +34,7 @@ async function testSuccessProvingAndVerification() {
       },
       twitterUserAddress,
     ],
-  }
-  );
+  });
   console.log("Proof:", proof);
 
   console.log("Verifying...");
