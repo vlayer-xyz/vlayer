@@ -55,6 +55,7 @@ export async function setupRequestProveButton(element: HTMLButtonElement) {
 
     console.log("WebProof generated!", webproof);
     context.webProof = webproof;
+    context.provider = provider;
   });
 }
 
