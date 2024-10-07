@@ -55,7 +55,8 @@ export class HistoryContextManager {
           (i) => i.name,
           [...(existingItem.cookies || []), ...(item.cookies || [])],
         ),
-        ready: item.ready ?? existingItem.ready ?? false,
+        ready: true,
+        // ready: item.ready ?? existingItem.ready ?? false,
       };
       history = history.map((historyItem, index) => {
         return index === existingItemIndex ? newItem : historyItem;
