@@ -81,7 +81,7 @@ impl<DB: for<'a> Database<'a>> ChainDb<DB> {
     ) -> ChainDbResult<()> {
         let mut tx = self.begin_rw()?;
 
-        tx.insert_chain_info(chain_id, chain_info)?;
+        tx.upsert_chain_info(chain_id, chain_info)?;
 
         for node_hash in removed_nodes {
             tx.delete_node(node_hash)?;
@@ -121,7 +121,7 @@ impl<TX: ReadTx> ChainDbTx<TX> {
 }
 
 impl<TX: WriteTx> ChainDbTx<TX> {
-    pub fn insert_chain_info(
+    pub fn upsert_chain_info(
         &mut self,
         chain_id: ChainId,
         chain_info: &ChainInfo,

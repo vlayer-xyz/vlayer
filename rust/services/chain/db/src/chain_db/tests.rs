@@ -71,7 +71,7 @@ fn chain_info_get_insert() -> Result<()> {
     assert_eq!(db.begin_ro()?.get_chain_info(chain_id)?, None);
 
     let mut tx = db.begin_rw()?;
-    tx.insert_chain_info(chain_id, &chain_info)?;
+    tx.upsert_chain_info(chain_id, &chain_info)?;
     tx.commit()?;
 
     assert_eq!(db.begin_ro()?.get_chain_info(chain_id)?.unwrap(), chain_info);
