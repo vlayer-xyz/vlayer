@@ -2,6 +2,7 @@ use std::collections::HashSet;
 
 use alloy_primitives::BlockNumber;
 use anyhow::Result;
+use chain_engine::BlockTrie;
 use mpt::MerkleTrie;
 use rand::{rngs::StdRng, RngCore, SeedableRng};
 
@@ -26,7 +27,7 @@ fn delete_node(db: &mut ChainDb<InMemoryDatabase>, node_hash: B256) {
 }
 
 // Fake block header to insert in MPT (must be big enough not to get inlined, so we can test if a tree is sparse)
-fn block_header(block_num: u64) -> Bytes {
+fn block_header(block_num: u64) -> B256 {
     keccak256(alloy_rlp::encode(block_num)).into()
 }
 
@@ -34,18 +35,17 @@ fn insert_blocks(
     db: &mut ChainDb<InMemoryDatabase>,
     blocks: impl IntoIterator<Item = BlockNumber>,
 ) -> (B256, Node) {
-    let mut mpt = MerkleTrie::new();
+    let mut block_trie = BlockTrie::new();
     for block_num in blocks {
-        mpt.insert(alloy_rlp::encode(block_num), block_header(block_num))
-            .expect("insert failed");
+        block_trie.insert(block_num, &block_header(block_num))
     }
 
     let mut tx = db.begin_rw().expect("begin_rw failed");
-    for node_rlp in mpt.to_rlp_nodes() {
+    for node_rlp in block_trie.to_rlp_nodes() {
         tx.insert_node(node_rlp).expect("insert_node failed");
     }
     tx.commit().expect("commit failed");
-    (mpt.hash_slow(), mpt.0)
+    (block_trie.hash_slow(), block_trie.root_node())
 }
 
 fn check_proof(db: &ChainDb<InMemoryDatabase>, root_hash: B256, block_num: u64) -> MerkleTrie {
@@ -57,16 +57,13 @@ fn check_proof(db: &ChainDb<InMemoryDatabase>, root_hash: B256, block_num: u64) 
     proof_trie
 }
 
+static EMPTY_PROOF: &'static [u8] = &[];
+
 #[test]
 fn chain_info_get_insert() -> Result<()> {
     let mut db = get_test_db();
     let chain_id = 1;
-    let chain_info = ChainInfo {
-        first_block: 0,
-        last_block: 1,
-        merkle_root: B256::with_last_byte(1),
-        zk_proof: [0].into(),
-    };
+    let chain_info = ChainInfo::new((0..2), B256::with_last_byte(1), EMPTY_PROOF);
 
     assert_eq!(db.begin_ro()?.get_chain_info(chain_id)?, None);
 
@@ -168,7 +165,7 @@ fn update_chain() -> Result<()> {
     trie.insert(alloy_rlp::encode(2_u64), block_header(2))?;
     let root_hash = trie.hash_slow();
     let rlp_nodes: HashSet<Bytes> = trie.to_rlp_nodes().collect();
-    let chain_info = ChainInfo::new((1..3), root_hash, [0]);
+    let chain_info = ChainInfo::new((1..3), root_hash, EMPTY_PROOF);
     db.update_chain(0, &chain_info, [], rlp_nodes.iter().cloned())?;
     for block_num in [1, 2] {
         check_proof(&db, root_hash, block_num);
@@ -183,7 +180,7 @@ fn update_chain() -> Result<()> {
         .map(keccak256)
         .collect();
     let added_nodes: Vec<Bytes> = new_rlp_nodes.difference(&rlp_nodes).cloned().collect();
-    let chain_info = ChainInfo::new((0..2), new_root_hash, [0]);
+    let chain_info = ChainInfo::new((0..2), new_root_hash, EMPTY_PROOF);
     db.update_chain(0, &chain_info, removed_nodes.clone(), added_nodes)?;
     for block_num in [0, 1, 2, 3] {
         check_proof(&db, new_root_hash, block_num);

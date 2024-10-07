@@ -1,7 +1,8 @@
 use std::ops::{Deref, DerefMut, Range};
 
-use alloy_primitives::{keccak256, Bytes, ChainId, B256};
-use alloy_rlp::{BytesMut, Decodable, Encodable, RlpDecodable, RlpEncodable};
+use alloy_primitives::{keccak256, ChainId, B256};
+use alloy_rlp::{Bytes as RlpBytes, BytesMut, Decodable, Encodable, RlpDecodable, RlpEncodable};
+use bytes::Bytes;
 use mpt::{KeyNibbles, Node, NodeRef, EMPTY_ROOT_HASH};
 use nybbles::Nibbles;
 use proof_builder::{MerkleProofBuilder, ProofResult};
@@ -24,7 +25,7 @@ pub struct ChainInfo {
     pub first_block: u64,
     pub last_block: u64,
     pub merkle_root: B256,
-    pub zk_proof: Bytes,
+    pub zk_proof: RlpBytes,
 }
 
 impl ChainInfo {

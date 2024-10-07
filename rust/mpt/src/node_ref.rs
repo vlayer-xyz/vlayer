@@ -1,5 +1,6 @@
-use alloy_primitives::{keccak256, Bytes, B256};
+use alloy_primitives::{keccak256, B256};
 use alloy_rlp::{BufMut, Encodable, EMPTY_STRING_CODE};
+use bytes::Bytes;
 
 use super::node::Node;
 
