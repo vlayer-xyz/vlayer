@@ -16,8 +16,10 @@ fn regex_match_run(input: &Bytes, gas_limit: u64) -> PrecompileResult {
     let gas_used = gas_used(input.len(), BASE_COST, PER_WORD_COST, gas_limit)?;
 
     let [source, pattern] = InputType::abi_decode(input, true).map_err(map_to_fatal)?;
+
     let regex = Regex::new(&pattern).map_err(map_to_fatal)?;
     let is_match = regex.is_match(&source);
+
     Ok(PrecompileOutput::new(gas_used, is_match.abi_encode().into()))
 }
 
@@ -37,7 +39,7 @@ mod test {
         let result = regex_match_run(&Bytes::from(input), 1000).unwrap();
         let result = bool::abi_decode(&result.bytes, true).unwrap();
 
-        assert_eq!(result, true);
+        assert!(result);
     }
 
     #[test]
@@ -50,7 +52,7 @@ mod test {
         let result = regex_match_run(&Bytes::from(input), 1000).unwrap();
         let result = bool::abi_decode(&result.bytes, true).unwrap();
 
-        assert_eq!(result, false);
+        assert!(!result);
     }
 
     #[test]
