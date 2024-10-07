@@ -115,7 +115,7 @@ where
             start_execution_location: self.start_execution_location,
         };
 
-        let rt = Runtime::new().map_err(|e| HostError::ExecutorEnvBuilder(e.to_string()))?;
+        let rt = Runtime::new().map_err(|e| HostError::RuntimeInitError(e.to_string()))?;
         // todo: use chain proofs in provably_execute
         let _chain_proofs = rt.block_on(
             self.chain_proof_client

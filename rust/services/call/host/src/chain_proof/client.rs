@@ -14,12 +14,8 @@ pub struct ChainProofClient {
 
 impl ChainProofClient {
     pub fn new(chain_proof_url: String) -> Self {
-        let http_client = Client::builder()
-            .timeout(std::time::Duration::from_secs(10))
-            .build()
-            .expect("failed to build http client");
+        let http_client = Client::new();
         let fetcher = ChainProofFetcher::new(chain_proof_url, http_client);
-
         Self {
             fetcher: Box::new(fetcher),
         }
@@ -47,11 +43,9 @@ impl ChainProofClient {
 
         let results = join_all(futures).await;
 
-        let mut chain_proofs = HashMap::new();
-        for result in results {
-            let (chain_id, proof) = result?;
-            chain_proofs.insert(chain_id, proof);
-        }
+        let chain_proofs: HashMap<ChainId, ChainProof> = results
+            .into_iter()
+            .collect::<Result<HashMap<_, _>, _>>()?;
 
         Ok(chain_proofs)
     }

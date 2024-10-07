@@ -62,4 +62,7 @@ pub enum HostError {
 
     #[error("Failed to parse response JSON: {0}")]
     JsonParseError(String),
+
+    #[error("Runtime initialization error: {0}")]
+    RuntimeInitError(String),
 }
