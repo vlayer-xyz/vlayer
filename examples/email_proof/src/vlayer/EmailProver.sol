@@ -21,7 +21,9 @@ contract EmailProver is Prover {
         VerifiedEmail memory email = unverifiedEmail.verify();
 
         require(email.subject.equal("Is dinner ready?"), "subject must be 'Is dinner ready?'");
-        require(email.from.matches("@(vlayer.xyz)|(football.example.com)$"), "from must be a vlayer or football address");
+
+        require(email.from.matches("@(vlayer.xyz)|(foo.example.com)$"), "from must be a vlayer or football address");
+
         return proof();
     }
 }

@@ -13,5 +13,5 @@ contract EmailProofVerifier is Verifier {
         prover = _prover;
     }
 
-    function verify(Proof calldata, bool) public onlyVerified(prover, EmailProver.main.selector) {}
+    function verify(Proof calldata) public onlyVerified(prover, EmailProver.main.selector) {}
 }
