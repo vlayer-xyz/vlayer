@@ -1,7 +1,6 @@
 import {
   testHelpers,
   createVlayerClient,
-  createExtensionWebProofProvider,
 } from "@vlayer/sdk";
 import webProofProver from "../out/WebProofProver.sol/WebProofProver";
 import webProofVerifier from "../out/WebProofVerifier.sol/WebProofVerifier";
@@ -21,7 +20,6 @@ const twitterUserAddress = (await testHelpers.getTestAddresses())[0];
 
 const client = createVlayerClient({
   url: "x.com",
-  webProofProvider: createExtensionWebProofProvider({}),
 });
 
 testSuccessProvingAndVerification();
