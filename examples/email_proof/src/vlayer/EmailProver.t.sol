@@ -31,7 +31,14 @@ contract EmailProverTest is VTest {
         UnverifiedEmail memory email = getTestEmail();
         callProver();
         VerifiedEmail memory verifiedEmail = wrapper.verify(email);
-        assertEq(verifiedEmail.from, "Joe SixPack <joe@football.example.com>");
+        assertEq(verifiedEmail.from, "joe@football.example.com");
         assertEq(verifiedEmail.body, "Hi.\r\n\r\nWe lost the game. Are you hungry yet?\r\n\r\nJoe.\r\n");
+    }
+
+    function test_provesEmail() public {
+        UnverifiedEmail memory email = getTestEmail();
+        EmailProver prover = new EmailProver();
+        callProver();
+        prover.main(email);
     }
 }
