@@ -34,7 +34,6 @@ const twitterUserAddress = (await testHelpers.getTestAddresses())[0];
 export async function setupRequestProveButton(element: HTMLButtonElement) {
   element.addEventListener("click", async () => {
     const provider = createExtensionWebProofProvider({});
-    context.provider = provider;
     const webproof = await provider.getWebProof({
       proverCallCommitment: {
         address: import.meta.env.VITE_PROVER_ADDRESS,
@@ -57,6 +56,7 @@ export async function setupRequestProveButton(element: HTMLButtonElement) {
 
     console.log("WebProof generated!", webproof);
     context.webProof = webproof;
+    context.provider = provider;
   });
 }
 
