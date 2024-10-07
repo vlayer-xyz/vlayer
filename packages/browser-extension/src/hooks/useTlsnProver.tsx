@@ -13,6 +13,7 @@ import { ExtensionMessage } from "@vlayer/web-proof-commons/constants/message";
 import { useProvingSessionConfig } from "./useProvingSessionConfig";
 import { useProvenUrl } from "./useProvenUrl";
 import { useTrackHistory } from "hooks/useTrackHistory";
+import { removeQueryParams } from "../lib/removeQueryParams";
 
 const TlsnProofContext = createContext({
   prove: () => {},
@@ -52,7 +53,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
         throw new Error("Missing URL to proove");
       }
 
-      const tlsnProof = await tlsnProve(provenUrl?.url, {
+      const tlsnProof = await tlsnProve(removeQueryParams(provenUrl?.url), {
         notaryUrl: provingSessionConfig.notaryUrl,
         websocketProxyUrl: `${provingSessionConfig.wsProxyUrl}?token=${new URL(provenUrl.url).host}`,
         method: "GET",
@@ -60,6 +61,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
         secretHeaders: formattedHeaders?.secretHeaders,
       });
       // let service worker know proof is done
+      console.log("sending proof to background", tlsnProof);
       browser.runtime.sendMessage({
         type: ExtensionMessage.ProofDone,
         proof: tlsnProof,
