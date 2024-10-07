@@ -12,7 +12,7 @@ pub struct Params {
     block_numbers: Vec<BlockNumber>,
 }
 
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Default, Deserialize, Debug, PartialEq)]
 pub struct ChainProof {
     proof: Bytes,
     nodes: Vec<Bytes>,

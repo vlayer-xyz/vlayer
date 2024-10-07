@@ -22,6 +22,7 @@ use provider::{
 use risc0_zkvm::ExecutorEnv;
 use serde::Serialize;
 
+pub use crate::chain_client::ChainProofClient;
 use crate::{
     db::proof::ProofDb, encodable_receipt::EncodableReceipt, evm_env::factory::HostEvmEnvFactory,
     into_input::into_multi_input,
@@ -34,6 +35,7 @@ pub struct Host<P: BlockingProvider> {
     start_execution_location: ExecutionLocation,
     envs: CachedEvmEnv<ProofDb<P>>,
     prover: Prover,
+    chain_server: ChainProofClient,
 }
 
 impl Host<EthProvider> {
@@ -68,11 +70,13 @@ where
         let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
         let start_execution_location = (block_number, config.start_chain_id).into();
         let prover = Prover::new(config.proof_mode);
+        let chain_server = ChainProofClient {};
 
         Ok(Host {
             envs,
             start_execution_location,
             prover,
+            chain_server,
         })
     }
 
@@ -85,11 +89,13 @@ where
         let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
         let start_execution_location = (block_number, config.start_chain_id).into();
         let prover = Prover::new(config.proof_mode);
+        let chain_server = ChainProofClient {};
 
         Ok(Host {
             envs,
             start_execution_location,
             prover,
+            chain_server,
         })
     }
 
@@ -103,9 +109,14 @@ where
             into_multi_input(self.envs).map_err(|err| HostError::CreatingInput(err.to_string()))?;
         let input = Input {
             call,
-            multi_evm_input,
+            multi_evm_input: multi_evm_input.clone(),
             start_execution_location: self.start_execution_location,
         };
+
+        // todo: use chain proofs in provably_execute
+        let _chain_proofs = self
+            .chain_server
+            .get_chain_proofs(multi_evm_input.group_blocks_by_chain())?;
 
         let env = build_executor_env(input)
             .map_err(|err| HostError::ExecutorEnvBuilder(err.to_string()))?;

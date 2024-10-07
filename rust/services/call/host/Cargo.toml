@@ -22,6 +22,7 @@ revm = { workspace = true, features = ["serde", "std"] }
 serde = { workspace = true }
 dotenv = { workspace = true }
 chain = { workspace = true }
+chain_server = { workspace = true }
 provider = { workspace = true }
 lazy_static = { workspace = true}
 
