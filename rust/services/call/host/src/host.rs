@@ -21,10 +21,12 @@ use provider::{
 };
 use risc0_zkvm::ExecutorEnv;
 use serde::Serialize;
+use tokio::runtime::Runtime;
 
-pub use crate::chain_client::ChainProofClient;
+pub use crate::chain_proof::client::ChainProofClient;
 use crate::{
-    db::proof::ProofDb, encodable_receipt::EncodableReceipt, evm_env::factory::HostEvmEnvFactory,
+    chain_proof::fetcher::MockChainProofFetcher, db::proof::ProofDb,
+    encodable_receipt::EncodableReceipt, evm_env::factory::HostEvmEnvFactory,
     into_input::into_multi_input,
 };
 
@@ -70,7 +72,7 @@ where
         let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
         let start_execution_location = (block_number, config.start_chain_id).into();
         let prover = Prover::new(config.proof_mode);
-        let chain_proof_client = ChainProofClient {};
+        let chain_proof_client = ChainProofClient::with_fetcher(MockChainProofFetcher {});
 
         Ok(Host {
             envs,
@@ -89,7 +91,7 @@ where
         let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
         let start_execution_location = (block_number, config.start_chain_id).into();
         let prover = Prover::new(config.proof_mode);
-        let chain_proof_client = ChainProofClient {};
+        let chain_proof_client = ChainProofClient::with_fetcher(MockChainProofFetcher {});
 
         Ok(Host {
             envs,
@@ -113,10 +115,12 @@ where
             start_execution_location: self.start_execution_location,
         };
 
+        let rt = Runtime::new().map_err(|e| HostError::ExecutorEnvBuilder(e.to_string()))?;
         // todo: use chain proofs in provably_execute
-        let _chain_proofs = self
-            .chain_proof_client
-            .get_chain_proofs(multi_evm_input.group_blocks_by_chain())?;
+        let _chain_proofs = rt.block_on(
+            self.chain_proof_client
+                .get_chain_proofs(multi_evm_input.group_blocks_by_chain()),
+        )?;
 
         let env = build_executor_env(input)
             .map_err(|err| HostError::ExecutorEnvBuilder(err.to_string()))?;

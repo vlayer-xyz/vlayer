@@ -53,4 +53,13 @@ pub enum HostError {
 
     #[error("Seal encoding error: {0}")]
     SealEncodingError(String),
+
+    #[error("HTTP request failed: {0}")]
+    HttpRequestFailed(String),
+
+    #[error("Server returned error status: {0}")]
+    ServerErrorStatus(reqwest::StatusCode),
+
+    #[error("Failed to parse response JSON: {0}")]
+    JsonParseError(String),
 }

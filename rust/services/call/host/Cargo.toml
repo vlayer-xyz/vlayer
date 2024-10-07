@@ -24,7 +24,11 @@ dotenv = { workspace = true }
 chain = { workspace = true }
 chain_server = { workspace = true }
 provider = { workspace = true }
-lazy_static = { workspace = true}
+lazy_static = { workspace = true }
+reqwest = { workspace = true }
+futures = "0.3.31"
+tokio = { workspace = true }
+async-trait = "0.1.83"
 
 [dev-dependencies]
 alloy-sol-types = { workspace = true }
