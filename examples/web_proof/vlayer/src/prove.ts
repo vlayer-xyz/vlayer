@@ -11,7 +11,7 @@ import {
   type WebProof,
   type VCallResponse,
   type WebProofProvider,
-  testHelpers
+  testHelpers,
 } from "@vlayer/sdk";
 import { createTestClient, http, publicActions, walletActions } from "viem";
 import webProofVerifier from "../../out/WebProofVerifier.sol/WebProofVerifier";
@@ -69,20 +69,23 @@ export const setupVProverButton = (element: HTMLButtonElement) => {
       tls_proof: context.webProof,
       notary_pub_key: notaryPubKey,
     };
-    const client = createVlayerClient({ url: "x.com", webProofProvider: context.provider });
+    const client = createVlayerClient({
+      url: "x.com",
+      webProofProvider: context.provider,
+    });
 
-    console.log("Generating proof...");    
+    console.log("Generating proof...");
     const { proof, returnValue } = await client.prove({
       address: import.meta.env.VITE_PROVER_ADDRESS,
       functionName: "main",
       proverAbi: webProofProver.abi,
-      args:[
+      args: [
         {
           webProofJson: JSON.stringify(webProof),
         },
         twitterUserAddress,
       ],
-  });
+    });
     console.log("Proof generated!", proof, returnValue);
     context.zkProof = proof;
     context.result = returnValue;
