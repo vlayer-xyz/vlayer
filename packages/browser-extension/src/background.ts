@@ -17,18 +17,10 @@ browser.runtime.onInstalled.addListener((details) => {
 });
 
 browser.runtime.onConnectExternal.addListener((connectedPort) => {
-  console.log("Connected to external port", connectedPort);
   port = connectedPort;
 });
 
-browser.runtime.onMessageExternal.addListener(() => {
-  //  for now we only work with connection request
-  // and we use hardcoded twitter
-  // in the future we will read message here and create proper execution context based
-  // on the payload
-});
-
-browser.runtime.onMessage.addListener((message) => {
+browser.runtime.onMessage.addListener(async (message) => {
   if (
     message.type === ExtensionMessage.ProofDone ||
     message.type === ExtensionMessage.ProofError
@@ -38,6 +30,17 @@ browser.runtime.onMessage.addListener((message) => {
     } catch (e) {
       console.log("Could not send message to webpage", e);
     }
+  }
+  console.log(message);
+  //REFACTOR : once commons are ready use ExtensionMessage.Redirect
+  if (message.type === "redirectBack") {
+    console.log("Redirect back to webpage", port?.sender?.tab?.id);
+    //close current
+    const currentTab = (await browser.tabs.query({ active: true }))[0];
+    await (currentTab.id && currentTab.id !== port?.sender?.tab?.id
+      ? browser.tabs.remove(currentTab?.id)
+      : Promise.resolve());
+    browser.tabs.update(port?.sender?.tab?.id, { active: true });
   }
 });
 
