@@ -1,5 +1,3 @@
-use std::borrow::Borrow;
-
 use alloy_primitives::B256;
 use alloy_rlp::encode_fixed_size;
 use bytes::Bytes;
@@ -47,14 +45,14 @@ impl From<MerkleTrie> for BlockTrie {
     }
 }
 
-impl<T: Borrow<B256>> FromIterator<(u64, T)> for BlockTrie {
+impl FromIterator<(u64, B256)> for BlockTrie {
     fn from_iter<I>(iter: I) -> Self
     where
-        I: IntoIterator<Item = (u64, T)>,
+        I: IntoIterator<Item = (u64, B256)>,
     {
         let mut trie = BlockTrie::new();
         for (key, value) in iter {
-            trie.insert(key, value.borrow())
+            trie.insert(key, &value)
         }
         trie
     }

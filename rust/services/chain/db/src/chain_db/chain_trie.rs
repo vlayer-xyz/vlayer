@@ -20,9 +20,9 @@ impl ChainTrie {
         }
     }
 
-    pub fn update<T: AsRef<B256>>(
+    pub fn update(
         &mut self,
-        new_blocks: impl IntoIterator<Item = (u64, T)>,
+        new_blocks: impl IntoIterator<Item = (u64, B256)>,
         zk_proof: impl Into<Bytes>,
     ) -> Result<ChainUpdate, ChainTrieError> {
         let mut updated_trie = self.trie.clone();
@@ -36,7 +36,7 @@ impl ChainTrie {
             updated_range.start = std::cmp::min(updated_range.start, block_num);
             updated_range.end = std::cmp::max(updated_range.end, block_num);
 
-            updated_trie.insert(block_num, block_hash.as_ref());
+            updated_trie.insert(block_num, &block_hash);
         }
 
         let root_hash = updated_trie.hash_slow();
