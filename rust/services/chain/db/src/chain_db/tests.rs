@@ -138,7 +138,7 @@ fn proof_extension() -> Result<()> {
     let proof_trie = check_proof(&db, root_hash, 1_000_000);
 
     // The tree should be sparse - block 0 not included
-    let res = std::panic::catch_unwind(|| proof_trie.get(alloy_rlp::encode(0u64)));
+    let res = std::panic::catch_unwind(|| proof_trie.get(alloy_rlp::encode(0_u64)));
     assert!(res.is_err());
 
     Ok(())
@@ -164,8 +164,8 @@ fn update_chain() -> Result<()> {
     let mut db = get_test_db();
 
     let mut trie = MerkleTrie::new();
-    trie.insert(alloy_rlp::encode(1u64), block_header(1))?;
-    trie.insert(alloy_rlp::encode(2u64), block_header(2))?;
+    trie.insert(alloy_rlp::encode(1_u64), block_header(1))?;
+    trie.insert(alloy_rlp::encode(2_u64), block_header(2))?;
     let root_hash = trie.hash_slow();
     let rlp_nodes: HashSet<Bytes> = trie.to_rlp_nodes().collect();
     let chain_info = ChainInfo {
@@ -179,8 +179,8 @@ fn update_chain() -> Result<()> {
         check_proof(&db, root_hash, block_num);
     }
 
-    trie.insert(alloy_rlp::encode(0u64), block_header(0));
-    trie.insert(alloy_rlp::encode(3u64), block_header(3));
+    trie.insert(alloy_rlp::encode(0_u64), block_header(0));
+    trie.insert(alloy_rlp::encode(3_u64), block_header(3));
     let new_root_hash = trie.hash_slow();
     let new_rlp_nodes: HashSet<Bytes> = trie.to_rlp_nodes().collect();
     let removed_nodes: Vec<B256> = rlp_nodes
