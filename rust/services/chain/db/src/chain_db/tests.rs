@@ -168,12 +168,7 @@ fn update_chain() -> Result<()> {
     trie.insert(alloy_rlp::encode(2_u64), block_header(2))?;
     let root_hash = trie.hash_slow();
     let rlp_nodes: HashSet<Bytes> = trie.to_rlp_nodes().collect();
-    let chain_info = ChainInfo {
-        first_block: 1,
-        last_block: 2,
-        merkle_root: root_hash,
-        zk_proof: [0].into(),
-    };
+    let chain_info = ChainInfo::new((1..3), root_hash, [0]);
     db.update_chain(0, &chain_info, [], rlp_nodes.iter().cloned())?;
     for block_num in [1, 2] {
         check_proof(&db, root_hash, block_num);
@@ -188,12 +183,7 @@ fn update_chain() -> Result<()> {
         .map(keccak256)
         .collect();
     let added_nodes: Vec<Bytes> = new_rlp_nodes.difference(&rlp_nodes).cloned().collect();
-    let chain_info = ChainInfo {
-        first_block: 0,
-        last_block: 1,
-        merkle_root: new_root_hash,
-        zk_proof: [0].into(),
-    };
+    let chain_info = ChainInfo::new((0..2), new_root_hash, [0]);
     db.update_chain(0, &chain_info, removed_nodes.clone(), added_nodes)?;
     for block_num in [0, 1, 2, 3] {
         check_proof(&db, new_root_hash, block_num);

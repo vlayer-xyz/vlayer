@@ -1,4 +1,4 @@
-use std::ops::{Deref, DerefMut};
+use std::ops::{Deref, DerefMut, Range};
 
 use alloy_primitives::{keccak256, Bytes, ChainId, B256};
 use alloy_rlp::{BytesMut, Decodable, Encodable, RlpDecodable, RlpEncodable};
@@ -25,6 +25,17 @@ pub struct ChainInfo {
     pub last_block: u64,
     pub merkle_root: B256,
     pub zk_proof: Bytes,
+}
+
+impl ChainInfo {
+    pub fn new(range: Range<u64>, merkle_root: B256, zk_proof: impl Into<Bytes>) -> Self {
+        Self {
+            first_block: range.start,
+            last_block: range.end - 1,
+            merkle_root,
+            zk_proof: zk_proof.into(),
+        }
+    }
 }
 
 pub struct ChainDb<DB: for<'a> Database<'a>> {
