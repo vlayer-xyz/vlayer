@@ -15,6 +15,7 @@ import { createTestClient, http, publicActions, walletActions } from "viem";
 import webProofVerifier from "../../out/WebProofVerifier.sol/WebProofVerifier";
 import { testHelpers } from "@vlayer/sdk";
 
+console.log("Hello from VLayer!");
 const context: {
   webProof: WebProof | null;
   zkProof: VCallResponse | null;
@@ -30,13 +31,13 @@ const twitterUserAddress = (await testHelpers.getTestAddresses())[0];
 export async function setupRequestProveButton(element: HTMLButtonElement) {
   element.addEventListener("click", async () => {
     const provider = createExtensionWebProofProvider({});
-    context.webProof = await provider.getWebProof({
+    const webproof = await provider.getWebProof({
       proverCallCommitment: {
         address: import.meta.env.VITE_PROVER_ADDRESS,
         proverAbi: webProofProver.abi,
         chainId: foundry.id,
         functionName: "main",
-        commitmentArgs: [],
+        commitmentArgs: ["0x"],
       },
       logoUrl: "http://twitterswap.com/logo.png",
       steps: [
@@ -49,6 +50,9 @@ export async function setupRequestProveButton(element: HTMLButtonElement) {
         ),
       ],
     });
+
+    console.log("WebProof generated!", webproof);
+    context.webProof = webproof;
   });
 }
 
@@ -62,6 +66,7 @@ export const setupVProverButton = (element: HTMLButtonElement) => {
       notary_pub_key: notaryPubKey,
     };
 
+    console.log("Generating proof...");
     const { proof, returnValue } = await prove(
       import.meta.env.VITE_PROVER_ADDRESS,
       webProofProver.abi,
@@ -73,7 +78,7 @@ export const setupVProverButton = (element: HTMLButtonElement) => {
         twitterUserAddress,
       ],
     );
-
+    console.log("Proof generated!", proof, returnValue);
     context.zkProof = proof;
     context.result = returnValue;
   });

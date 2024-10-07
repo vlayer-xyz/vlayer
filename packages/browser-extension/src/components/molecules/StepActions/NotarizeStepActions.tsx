@@ -6,7 +6,6 @@ import { Button } from "components/atoms";
 import { useTlsnProver } from "hooks/useTlsnProver";
 import browser from "webextension-polyfill";
 import { motion, AnimatePresence } from "framer-motion";
-import { useProvenUrl } from "hooks/useProvenUrl";
 
 type NotarizeStepActionProps = {
   isVisited: boolean;
@@ -16,13 +15,12 @@ type NotarizeStepActionProps = {
 };
 
 const RedirectCallout: FC = () => {
-  const [timeout, setTimeout] = useState(4);
+  const [timeout, setTimeout] = useState(10);
   const [show, setShow] = useState(true);
   useEffect(() => {
     const interval = setInterval(() => {
       setTimeout((timeout) => {
         if (timeout === 0) {
-          console.log("stting show");
           // hide callout
           setShow(false);
           // tell service worker to redirect back to orginal page
@@ -41,16 +39,16 @@ const RedirectCallout: FC = () => {
     <AnimatePresence>
       {show && (
         <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
+          initial={{ opacity: 0, height: 0 }}
+          animate={{ opacity: 1, height: "auto" }}
+          exit={{ opacity: 0, height: 0 }}
         >
           <Callout.Root>
             <Callout.Icon>
               <InfoCircledIcon />
             </Callout.Icon>
             <Callout.Text>
-              You will be redirected to www.user.dapp.com in a {timeout} seconds
+              You will be redirected back in a <b>{timeout}</b> seconds
               {timeout > 1 ? "s" : ""}.
             </Callout.Text>
           </Callout.Root>
@@ -63,7 +61,6 @@ const RedirectCallout: FC = () => {
 const ProvingProgress = () => {
   const { proof } = useTlsnProver();
   const [progress, setProgress] = useState(0);
-  const provenUrl = useProvenUrl();
   useEffect(() => {
     let interval: Timer;
     if (!proof) {
@@ -76,7 +73,7 @@ const ProvingProgress = () => {
           }
           return newProgress;
         });
-      }, 1200);
+      }, 600);
     } else {
       setProgress(100);
     }
@@ -93,7 +90,7 @@ const ProvingProgress = () => {
         Generating Web Proof
       </Text>
       <Text weight={"light"} size={"3"}>
-        This usually takes 1-2 min. Don’t close your browser.
+        This usually takes up to 1 min. Don’t close your browser.
       </Text>
       <Progress value={progress} />
     </Flex>
@@ -145,9 +142,9 @@ export const NotarizeStepActions: FC<NotarizeStepActionProps> = ({
       <AnimatePresence>
         {showProgress && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
           >
             <ProvingProgress />
           </motion.div>
@@ -156,9 +153,9 @@ export const NotarizeStepActions: FC<NotarizeStepActionProps> = ({
       <AnimatePresence>
         {proof && (
           <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
+            initial={{ opacity: 0, height: 0 }}
+            animate={{ opacity: 1, height: "auto" }}
+            exit={{ opacity: 0, height: 0 }}
           >
             <FinishCallout />
           </motion.div>

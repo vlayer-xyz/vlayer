@@ -25,6 +25,7 @@ browser.runtime.onMessage.addListener(async (message) => {
     message.type === ExtensionMessage.ProofDone ||
     message.type === ExtensionMessage.ProofError
   ) {
+    console.log("sending message to webpage", message);
     try {
       port?.postMessage(message);
     } catch (e) {
