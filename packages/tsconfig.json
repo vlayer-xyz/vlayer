@@ -1,5 +1,4 @@
 {
-
     "compilerOptions": {
         // Enable latest features
         "lib": ["ESNext", "DOM"],
@@ -29,7 +28,6 @@
             "components/*" : ["./browser-extension/src/components/*"],
             "constants/*" : ["./browser-extension/src/constants/*"],
             "hooks/*" : ["./browser-extension/src/hooks/*"]
-
         }
     }
 }

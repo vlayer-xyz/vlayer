@@ -55,8 +55,11 @@ browser.runtime.onMessageExternal.addListener((message) => {
   (async () => {
     if (message.action === ExtensionAction.RequestWebProof) {
       if (chrome.sidePanel) {
-        chrome.sidePanel.open({ windowId: windowId });
+        await chrome.sidePanel.open({ windowId: windowId });
       }
+      //TODO make cleanup logic separated method
+      await browser.storage.local.clear();
+      await browser.storage.session.clear();
       await WebProverSessionContextManager.instance.setWebProverSessionConfig(
         message.payload,
       );

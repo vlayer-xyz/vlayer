@@ -9,7 +9,7 @@ type WebProverSessionContext = {
 export class WebProverSessionContextManager extends Store<WebProverSessionContext> {
   static #instance: WebProverSessionContextManager;
 
-  private constructor(storage: typeof browser.storage.local) {
+  private constructor(storage: browser.Storage.StorageArea) {
     super(storage);
   }
 
@@ -32,3 +32,6 @@ export class WebProverSessionContextManager extends Store<WebProverSessionContex
     return await this.get("webProverSessionConfig");
   }
 }
+
+export const webProverSessionContextManager =
+  WebProverSessionContextManager.instance;
