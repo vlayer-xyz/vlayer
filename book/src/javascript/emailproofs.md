@@ -13,7 +13,7 @@
 
 ## Email Proofs
 
-In order to proof the content of an email, we firstly need to prepare it to be passed into the smart contract. 
+In order to prove the content of an email, we firstly need to prepare it to be passed into the smart contract. 
 We provide a handy function for it in the SDK, `preverifyEmail`. 
 
 ```ts
