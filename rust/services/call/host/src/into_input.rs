@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::sync::Arc;
 
 use anyhow::{anyhow, ensure, Ok};
 use block_header::EvmBlockHeader;
@@ -38,10 +38,10 @@ pub(crate) fn into_multi_input<P: BlockingProvider>(
     envs.into_inner()
         .into_iter()
         .map(|(location, env)| {
-            let env = Rc::try_unwrap(env).map_err(|rc| {
+            let env = Arc::try_unwrap(env).map_err(|rc| {
                 anyhow!(
-                    "Can't unwrap EvmEnv Rc as it still has {} strong references",
-                    Rc::strong_count(&rc)
+                    "Can't unwrap EvmEnv Arc as it still has {} strong references",
+                    Arc::strong_count(&rc)
                 )
             })?;
             Ok((location, into_input(&env.db, env.header)?))

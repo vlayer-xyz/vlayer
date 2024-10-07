@@ -358,12 +358,11 @@ mod teleport {
     const BLOCK_NO: u64 = 3;
     sol! {
         contract SimpleTravelProver {
+            #[derive(Debug)]
             function crossChainBalanceOf(address owner) public returns (address, uint256);
         }
     }
 
-    // This test fails for now. Will fix in the next PR
-    #[ignore]
     #[test]
     fn teleport_to_unknown_chain_returns_an_error_but_does_not_panic() -> anyhow::Result<()> {
         let sol_call = SimpleTravelProver::crossChainBalanceOfCall {
@@ -379,7 +378,10 @@ mod teleport {
             NamedChain::AnvilHardhat.into(),
             BLOCK_NO.into(),
         );
-        assert!(result.is_err());
+        assert_eq!(
+            result.unwrap_err().to_string(),
+            "Engine error: Panic: Intercepted call failed: EvmEnv(\"No rpc cache for chain: 8453\")"
+        );
 
         Ok(())
     }

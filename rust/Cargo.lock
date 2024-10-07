@@ -7065,6 +7065,7 @@ dependencies = [
  "auto_impl",
  "block_header",
  "call_engine",
+ "derivative",
  "ethers-core",
  "ethers-providers",
  "serde",

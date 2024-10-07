@@ -1,8 +1,9 @@
-use std::{cell::RefCell, collections::hash_map::Entry, path::PathBuf};
+use std::{collections::hash_map::Entry, path::PathBuf, sync::RwLock};
 
 use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256};
 use anyhow::bail;
 use block_header::EvmBlockHeader;
+use derivative::Derivative;
 use ethers_core::types::BlockNumber as BlockTag;
 use json::{AccountQuery, BlockQuery, JsonCache, ProofQuery, StorageQuery};
 
@@ -13,10 +14,12 @@ pub(crate) mod json;
 /// A provider that caches responses from an underlying provider in a JSON file.
 /// Queries are first checked against the cache, and if not found, the provider is invoked.
 /// The cache is saved when the provider is dropped.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, Derivative)]
+#[derivative(PartialEq)]
 pub struct CachedProvider<P: BlockingProvider> {
     pub(super) inner: P,
-    pub(super) cache: RefCell<JsonCache>,
+    #[derivative(PartialEq = "ignore")]
+    pub(super) cache: RwLock<JsonCache>,
 }
 
 impl<P: BlockingProvider> CachedProvider<P> {
@@ -40,7 +43,7 @@ impl<P: BlockingProvider> CachedProvider<P> {
         let cache = JsonCache::empty(cache_path);
         Ok(Self {
             inner: provider,
-            cache: RefCell::new(cache),
+            cache: RwLock::new(cache),
         })
     }
 }
@@ -52,7 +55,8 @@ impl<P: BlockingProvider> BlockingProvider for CachedProvider<P> {
         &self,
         block: BlockTag,
     ) -> Result<Option<Box<dyn EvmBlockHeader>>, Self::Error> {
-        match self.cache.borrow_mut().partial_blocks.entry(BlockQuery {
+        let mut cache = self.cache.write().expect("poisoned RwLock");
+        match cache.partial_blocks.entry(BlockQuery {
             block_no: block.into(),
         }) {
             Entry::Occupied(entry) => Ok(entry.get().clone()),
@@ -68,14 +72,11 @@ impl<P: BlockingProvider> BlockingProvider for CachedProvider<P> {
         address: Address,
         block: BlockNumber,
     ) -> Result<TxNumber, Self::Error> {
-        match self
-            .cache
-            .borrow_mut()
-            .transaction_count
-            .entry(AccountQuery {
-                block_no: block,
-                address,
-            }) {
+        let mut cache = self.cache.write().expect("poisoned RwLock");
+        match cache.transaction_count.entry(AccountQuery {
+            block_no: block,
+            address,
+        }) {
             Entry::Occupied(entry) => Ok(*entry.get()),
             Entry::Vacant(entry) => {
                 let count = self.inner.get_transaction_count(address, block)?;
@@ -85,7 +86,8 @@ impl<P: BlockingProvider> BlockingProvider for CachedProvider<P> {
     }
 
     fn get_balance(&self, address: Address, block: BlockNumber) -> Result<U256, Self::Error> {
-        match self.cache.borrow_mut().balance.entry(AccountQuery {
+        let mut cache = self.cache.write().expect("poisoned RwLock");
+        match cache.balance.entry(AccountQuery {
             block_no: block,
             address,
         }) {
@@ -98,7 +100,8 @@ impl<P: BlockingProvider> BlockingProvider for CachedProvider<P> {
     }
 
     fn get_code(&self, address: Address, block: BlockNumber) -> Result<Bytes, Self::Error> {
-        match self.cache.borrow_mut().code.entry(AccountQuery {
+        let mut cache = self.cache.write().expect("poisoned RwLock");
+        match cache.code.entry(AccountQuery {
             block_no: block,
             address,
         }) {
@@ -116,7 +119,8 @@ impl<P: BlockingProvider> BlockingProvider for CachedProvider<P> {
         key: StorageKey,
         block: BlockNumber,
     ) -> Result<StorageValue, Self::Error> {
-        match self.cache.borrow_mut().storage.entry(StorageQuery {
+        let mut cache = self.cache.write().expect("poisoned RwLock");
+        match cache.storage.entry(StorageQuery {
             block_no: block,
             address,
             key,
@@ -135,7 +139,8 @@ impl<P: BlockingProvider> BlockingProvider for CachedProvider<P> {
         storage_keys: Vec<StorageKey>,
         block: BlockNumber,
     ) -> Result<EIP1186Proof, Self::Error> {
-        match self.cache.borrow_mut().proofs.entry(ProofQuery {
+        let mut cache = self.cache.write().expect("poisoned RwLock");
+        match cache.proofs.entry(ProofQuery {
             block_no: block,
             address,
             storage_keys: storage_keys.iter().cloned().collect(),

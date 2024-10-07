@@ -1,4 +1,8 @@
-use std::{cell::RefCell, collections::HashMap, iter::once, rc::Rc};
+use std::{
+    collections::HashMap,
+    iter::once,
+    sync::{Arc, RwLock},
+};
 
 use alloy_primitives::{Bytes, B256};
 use block_header::EvmBlockHeader;
@@ -108,12 +112,12 @@ where
     D: From<EvmInput>,
 {
     fn from(input: MultiEvmInput) -> Self {
-        RefCell::new(
+        RwLock::new(
             input
                 .into_iter()
                 .map(|(location, input)| {
                     let chain_spec = &location.chain_id.try_into().expect("cannot get chain spec");
-                    (location, Rc::new(EvmEnv::from(input).with_chain_spec(chain_spec).unwrap()))
+                    (location, Arc::new(EvmEnv::from(input).with_chain_spec(chain_spec).unwrap()))
                 })
                 .collect(),
         )

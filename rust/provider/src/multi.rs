@@ -1,4 +1,7 @@
-use std::{cell::RefCell, collections::HashMap, rc::Rc};
+use std::{
+    collections::HashMap,
+    sync::{Arc, RwLock},
+};
 
 use alloy_primitives::ChainId;
 use call_engine::utils::InteriorMutabilityCache;
@@ -6,10 +9,10 @@ use call_engine::utils::InteriorMutabilityCache;
 use super::{factory::ProviderFactory, BlockingProvider};
 use crate::factory::ProviderFactoryError;
 
-type MultiProvider<P> = HashMap<ChainId, Rc<P>>;
+type MultiProvider<P> = HashMap<ChainId, Arc<P>>;
 
 pub struct CachedMultiProvider<P> {
-    cache: RefCell<MultiProvider<P>>,
+    cache: RwLock<MultiProvider<P>>,
     factory: Box<dyn ProviderFactory<P>>,
 }
 
@@ -19,12 +22,12 @@ where
 {
     pub fn new(factory: impl ProviderFactory<P> + 'static) -> Self {
         CachedMultiProvider {
-            cache: RefCell::new(HashMap::new()),
+            cache: RwLock::new(HashMap::new()),
             factory: Box::new(factory),
         }
     }
 
-    pub fn get(&self, chain_id: ChainId) -> Result<Rc<P>, ProviderFactoryError> {
+    pub fn get(&self, chain_id: ChainId) -> Result<Arc<P>, ProviderFactoryError> {
         self.cache
             .try_get_or_insert(chain_id, || self.factory.create(chain_id))
     }
@@ -55,9 +58,9 @@ mod get {
     #[test]
     fn gets_cached_provider() -> anyhow::Result<()> {
         let path_buf = PathBuf::from("testdata/cache.json");
-        let provider = Rc::new(FileProvider::from_file(&path_buf)?);
+        let provider = Arc::new(FileProvider::from_file(&path_buf)?);
 
-        let cache = RefCell::new(HashMap::from([(Chain::mainnet().id(), Rc::clone(&provider))]));
+        let cache = RwLock::new(HashMap::from([(Chain::mainnet().id(), Arc::clone(&provider))]));
 
         // NullProviderFactory returns an error when it tries to create a provider.
         // If no error was returned, it means the factory did not try to create a provider and used cached provider.

@@ -1,7 +1,12 @@
+use std::{
+    any::Any,
+    panic::{self},
+};
+
 use alloy_primitives::ChainId;
 use alloy_sol_types::SolValue;
 use call_engine::{
-    engine::Engine,
+    engine::{Engine, EngineError},
     evm::env::{cached::CachedEvmEnv, location::ExecutionLocation},
     io::{Call, GuestOutput, HostOutput, Input},
     Seal,
@@ -89,7 +94,10 @@ where
     }
 
     pub fn run(self, call: Call) -> Result<HostOutput, HostError> {
-        let host_output = Engine::new(&self.envs).call(&call, self.start_execution_location)?;
+        let host_output = panic::catch_unwind({
+            || Engine::new(&self.envs).call(&call, self.start_execution_location)
+        })
+        .map_err(wrap_engine_panic)??;
 
         let multi_evm_input =
             into_multi_input(self.envs).map_err(|err| HostError::CreatingInput(err.to_string()))?;
@@ -120,6 +128,14 @@ where
             proof_len,
         })
     }
+}
+
+fn wrap_engine_panic(err: Box<dyn Any + Send>) -> EngineError {
+    let panic_msg = err
+        .downcast::<String>()
+        .map(|x| *x)
+        .unwrap_or("Panic occurred".to_string());
+    EngineError::Panic(panic_msg)
 }
 
 fn provably_execute(
