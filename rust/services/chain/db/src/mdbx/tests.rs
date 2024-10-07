@@ -41,7 +41,7 @@ fn db_flow() -> Result<()> {
     temp_db!(db);
 
     crate_and_insert(&mut db, [0], [1])?;
-    assert_eq!(get(&db, [0])?.unwrap().as_ref(), [1]);
+    assert_eq!(*get(&db, [0])?.unwrap(), [1]);
 
     delete(&mut db, [0])?;
     assert_eq!(get(&db, [0])?, None);
@@ -81,7 +81,7 @@ fn upsert() -> Result<()> {
 
     crate_and_insert(&mut db, [0], [0]);
     db.with_rw_tx(|tx| tx.upsert(TABLE, [0], [1]))?;
-    assert_eq!(get(&db, [0])?.unwrap().as_ref(), [1]);
+    assert_eq!(*get(&db, [0])?.unwrap(), [1]);
 
     Ok(())
 }
@@ -129,7 +129,7 @@ fn persistence() -> Result<()> {
     // After reopening, the data is still there
     drop(db);
     let db = Mdbx::open(&path)?;
-    assert_eq!(get(&db, [0])?.unwrap().as_ref(), [1]);
+    assert_eq!(*get(&db, [0])?.unwrap(), [1]);
 
     // But it's gone if we delete the directory
     drop(db);
