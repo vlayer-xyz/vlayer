@@ -1,32 +1,16 @@
 import { useBrowsingHistory } from "./useBrowsingHistory";
-import { useEffect, useState } from "react";
+import { useMemo } from "react";
 import { useProvingSessionConfig } from "./useProvingSessionConfig";
-import { HistoryItem } from "../state/history";
 
 // NOTE this will need to be refactored
 // if one day we will decide to support multiple parallel proves scenario
 
 export const useProvenUrl = () => {
   const [{ steps }] = useProvingSessionConfig();
-  const [provenUrlAddress, setProvenUrlAddress] = useState("");
-  const [provenUrl, setProvenUrl] = useState<HistoryItem>();
   const [browsingHistory] = useBrowsingHistory();
-
-  useEffect(() => {
-    setProvenUrlAddress(
-      steps?.find(({ step }) => {
-        return step === "notarize";
-      })?.url || "",
-    );
-  }, [steps]);
-
-  useEffect(() => {
-    setProvenUrl(
-      browsingHistory.find((item) => {
-        return item.url.includes(provenUrlAddress);
-      }),
-    );
-  }, [browsingHistory, provenUrlAddress]);
-
-  return provenUrl;
+  return useMemo(() => {
+    const provenUrlAddress =
+      steps?.find(({ step }) => step === "notarize")?.url || "";
+    return browsingHistory.find((item) => item.url.includes(provenUrlAddress));
+  }, [steps, browsingHistory]);
 };

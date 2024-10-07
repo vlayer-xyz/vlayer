@@ -12,10 +12,9 @@ const isStartPageStepCompleted = (
   step: { url: string },
 ): boolean => {
   // REFACTOR:  i would rename top level history to browsing to avoid history.history
-  const x = !!browsingHistory.find((item: HistoryItem) => {
+  return !!browsingHistory.find((item: HistoryItem) => {
     return item.url.startsWith(step.url) && item.ready;
   });
-  return x;
 };
 
 const isStartPageStepReady = () => true;
