@@ -7,7 +7,7 @@ import { Separator } from "components/atoms/Separator";
 import { StepActions } from "components/molecules/StepActions/StepActions";
 import styles from "./Step.module.css";
 import { match } from "ts-pattern";
-
+import { motion } from "framer-motion";
 type StepProps = {
   label: string;
   status: StepStatus;
@@ -35,6 +35,10 @@ const StepStatusIndicator = (props: StepProps) => {
 const StepLabel = (props: StepProps) => {
   return (
     <Text
+      as={motion.span}
+      transition={{
+        duration: 3,
+      }}
       size={"3"}
       weight={"medium"}
       className={match(props.status)

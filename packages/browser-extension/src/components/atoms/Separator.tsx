@@ -1,16 +1,5 @@
 import React from "react";
-
+import styles from "./Separator.module.css";
 export const Separator = () => {
-  return (
-    <div
-      style={{
-        flexGrow: 3,
-        backgroundColor: "#CECECE",
-        width: "1px",
-        minHeight: "24px",
-        marginTop: "4px",
-        marginBottom: "4px",
-      }}
-    ></div>
-  );
+  return <div className={styles.separator}></div>;
 };

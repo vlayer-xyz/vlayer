@@ -3,7 +3,6 @@ import { Step } from "components/molecules/Step";
 import React from "react";
 export const Steps = () => {
   const steps = useSteps();
-  console.log("USSSE STEP", steps);
   return (
     <>
       {steps.map((step, index) => [
