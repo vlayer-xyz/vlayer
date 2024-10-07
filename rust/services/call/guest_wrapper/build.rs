@@ -5,7 +5,7 @@ fn main() -> Result<()> {
     {
         use std::{
             env,
-            fs::{create_dir_all, remove_file},
+            fs::{create_dir_all, remove_file, copy},
             path::Path,
         };
 
@@ -31,6 +31,15 @@ fn main() -> Result<()> {
             .with_elf_sol_path(&elf_path);
 
         generate_solidity_files(&*guests, &solidity_opts)?;
+
+        if env::var("RISC0_REPLACE_METHOD_RS_PATH").is_ok() {
+            let method_rs_replacement = env::var("RISC0_REPLACE_METHOD_RS_PATH").unwrap();
+            let method_rs_replacement_path = Path::new(&method_rs_replacement);
+
+            let out_dir = env::var("OUT_DIR").unwrap();
+            let out_dir_path = Path::new(&out_dir);
+            copy(&method_rs_replacement_path, out_dir_path.join("methods.rs"))?;
+        }
     }
 
     Ok(())

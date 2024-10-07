@@ -7,11 +7,78 @@ concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: false
 jobs:
+  build-guest-wrapper:
+    defaults:
+      run:
+        working-directory: rust
+    name: Build guest wrapper and save guest replacements for later use
+    runs-on: aws-linux-medium
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache-workspaces: |
+            rust
+            rust/services/call/guest_wrapper/risc0_guest
+            rust/services/chain/guest_wrapper/risc0_guest
+
+      - name: Install cargo-binstall
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
+
+      - name: Install risc0 installer
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: cargo binstall -y cargo-risczero@1.0.5 --force
+
+      - name: Install risc0 toolchain
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: cargo risczero install
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly-d75318c9c7a1c6af5404fe96f63ca890dcdd588d # 2024-09-05
+          
+      - name: Install LLVM and Clang
+        uses: KyleMayes/install-llvm-action@v2.0.4
+        with:
+          version: "17.0.6"
+
+      - name: "Build guest wrapper"
+        run: cargo build --release --target x86_64-unknown-linux-gnu --package call_guest_wrapper
+
+      - name: "Save methods.rs"
+        run: |
+          find target -name "methods.rs" -exec cp -n {} ./ \;
+
+      - name: Push methods.rs artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-methods.rs
+          path: rust/methods.rs
+
+      - name: Push ImageID artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: linux-ImageID.sol
+          path: rust/target/assets/ImageID.sol
+
   build-release:
     defaults:
       run:
         working-directory: rust
     name: Release nightly for ${{ matrix.platform }} ${{ matrix.arch }}
+    needs: [build-guest-wrapper]
     runs-on: ${{ matrix.runner }}
     outputs:
       vlayer_build: ${{ steps.vlayer_build.outputs.vlayer_build }}
@@ -67,10 +134,17 @@ jobs:
         with:
           version: "17.0.6"
 
+      - uses: actions/download-artifact@v4
+        with:
+          name: linux-methods.rs
+          path: rust/methods.rs
+
       - name: "Build binaries"
         env:
           VLAYER_RELEASE: "nightly"
-        run: cargo build --release --target ${{ matrix.target }} --package cli 
+        run: |
+          export RISC0_REPLACE_METHOD_RS_PATH="$(pwd)/methods.rs"
+          cargo build --release --target ${{ matrix.target }} --package cli 
 
       - name: "Print build version"
         id: vlayer_build
@@ -104,12 +178,6 @@ jobs:
         with:
           name: ${{ matrix.target }}
           path: ${{ steps.package-release.outputs.output_file }}
-
-      - name: Push ImageID artifact
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ matrix.platform }}-ImageID.sol
-          path: contracts/src/ImageID.sol
 
   build-examples:
     name: Build examples
@@ -179,10 +247,10 @@ jobs:
         run: |
           echo -n "${{ secrets.SOLDEER_API_KEY }}" > "${SOLDEER_LOGIN_FILE}"
 
-      - name: Download ImageID.sol - Darwin
+      - name: Download ImageID.sol - Linux
         uses: actions/download-artifact@v4
         with:
-          name: darwin-ImageID.sol
+          name: linux-ImageID.sol
           path: ./imageid
 
       - name: Copy ImageID to contracts
