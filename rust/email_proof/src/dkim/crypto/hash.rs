@@ -64,8 +64,6 @@ mod tests {
         use super::*;
 
         mod from_tag_a {
-            use lazy_static::lazy_static;
-
             use super::*;
 
             const INVALID_TAG_A_VALUE_ERR: std::result::Result<HashAlgorithm, &'static str> =

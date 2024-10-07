@@ -1,4 +1,5 @@
 mod hash;
+mod signature;
 
 use hash::HashAlgorithm;
 
