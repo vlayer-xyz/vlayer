@@ -27,6 +27,7 @@
     "@types/ramda": "^0.30.2",
     "@vlayer/extension-hooks": "file:../extension-hooks",
     "@vlayer/web-proof-commons": "file:../web-proof-commons",
+    "framer-motion": "^11.11.1",
     "monorepo": "radix-ui/themes",
     "ramda": "^0.30.1",
     "react": "^18.3.1",

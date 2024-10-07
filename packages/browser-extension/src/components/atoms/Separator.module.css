@@ -1,0 +1,9 @@
+.separator {
+  flex-grow: 3;
+  background-color: #CECECE;
+  width: 1px;
+  min-height: 24px;
+  margin-top: 4px;
+  margin-bottom: 4px;
+  transition: all 2s ease;
+}

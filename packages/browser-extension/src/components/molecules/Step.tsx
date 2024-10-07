@@ -1,5 +1,13 @@
 import React from "react";
 
+import { Flex, Text } from "@radix-ui/themes";
+import { StepCircle } from "components/molecules/StepCircle/StepCircle";
+import { StepStatus } from "constants/step";
+import { Separator } from "components/atoms/Separator";
+import { StepActions } from "components/molecules/StepActions/StepActions";
+import styles from "./Step.module.css";
+import { match } from "ts-pattern";
+
 type StepProps = {
   label: string;
   status: StepStatus;
@@ -8,13 +16,6 @@ type StepProps = {
   link?: string;
   kind: "expectUrl" | "notarize" | "startPage";
 };
-
-import { Flex, Text } from "@radix-ui/themes";
-import { StepCircle } from "components/molecules/StepCircle/StepCircle";
-import { StepStatus } from "constants/step";
-import { Separator } from "components/atoms/Separator";
-import { StepActions } from "components/molecules/StepActions/StepActions";
-
 const StepStatusIndicator = (props: StepProps) => {
   return (
     <Flex
@@ -33,7 +34,15 @@ const StepStatusIndicator = (props: StepProps) => {
 
 const StepLabel = (props: StepProps) => {
   return (
-    <Text size={"3"} weight={"medium"}>
+    <Text
+      size={"3"}
+      weight={"medium"}
+      className={match(props.status)
+        .with(StepStatus.Further, () => styles.textFurther)
+        .with(StepStatus.Completed, () => styles.textCompleted)
+        .with(StepStatus.Current, () => styles.textCurrent)
+        .exhaustive()}
+    >
       {props.label}
     </Text>
   );

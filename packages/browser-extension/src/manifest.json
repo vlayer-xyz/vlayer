@@ -33,12 +33,6 @@
   "side_panel": {
     "default_path": "src/templates/sidepanel/sidepanel.html"
   },
-  "content_scripts": [
-    {
-      "matches": ["*://*/*"],
-      "js": ["src/content.ts"]
-    }
-  ],
   "content_security_policy": {
         "extension_pages": "script-src 'self' 'wasm-unsafe-eval'; object-src 'self';"
   },
