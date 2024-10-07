@@ -10,7 +10,6 @@ import {
   createVlayerClient,
   type WebProof,
   type VCallResponse,
-  type WebProofProvider,
   testHelpers,
 } from "@vlayer/sdk";
 import { createTestClient, http, publicActions, walletActions } from "viem";
