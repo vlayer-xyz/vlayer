@@ -42,10 +42,8 @@ impl ChainTrie {
         let root_hash = updated_trie.hash_slow();
         let chain_info = ChainInfo::new(updated_range.clone(), root_hash, zk_proof);
 
-        let old_nodes: HashSet<Bytes> = self.trie.to_rlp_nodes().collect();
-        let new_nodes: HashSet<Bytes> = updated_trie.to_rlp_nodes().collect();
-        let added_nodes = new_nodes.difference(&old_nodes).cloned().collect();
-        let removed_nodes = old_nodes.difference(&new_nodes).map(keccak256).collect();
+        let (added_nodes, removed_nodes) =
+            difference(self.trie.to_rlp_nodes(), updated_trie.to_rlp_nodes());
 
         self.block_range = updated_range;
         self.trie = updated_trie;
@@ -56,6 +54,18 @@ impl ChainTrie {
             removed_nodes,
         })
     }
+}
+
+fn difference(
+    old: impl Iterator<Item = Bytes>,
+    new: impl Iterator<Item = Bytes>,
+) -> (Box<[Bytes]>, Box<[B256]>) {
+    let old_set: HashSet<_> = old.collect();
+    let new_set: HashSet<_> = new.collect();
+    let added = new_set.difference(&old_set).cloned().collect();
+    let removed = old_set.difference(&new_set).map(keccak256).collect();
+
+    (added, removed)
 }
 
 pub struct ChainUpdate {
