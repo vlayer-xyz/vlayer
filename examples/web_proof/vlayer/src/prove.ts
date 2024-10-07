@@ -10,20 +10,23 @@ import {
   prove,
   type WebProof,
   type VCallResponse,
+  type WebProofProvider,
+  testHelpers
 } from "@vlayer/sdk";
 import { createTestClient, http, publicActions, walletActions } from "viem";
 import webProofVerifier from "../../out/WebProofVerifier.sol/WebProofVerifier";
-import { testHelpers } from "@vlayer/sdk";
 
 console.log("Hello from VLayer!");
 const context: {
   webProof: WebProof | null;
   zkProof: VCallResponse | null;
   result: `0x${string}`[];
+  provider: WebProofProvider | null;
 } = {
   webProof: null,
   zkProof: null,
   result: [],
+  provider: null,
 };
 
 const twitterUserAddress = (await testHelpers.getTestAddresses())[0];
@@ -31,7 +34,8 @@ const twitterUserAddress = (await testHelpers.getTestAddresses())[0];
 export async function setupRequestProveButton(element: HTMLButtonElement) {
   element.addEventListener("click", async () => {
     const provider = createExtensionWebProofProvider({});
-    const webproof = await provider.getWebProof({
+    context.provider = provider;
+    const webProof = await provider.getWebProof({
       proverCallCommitment: {
         address: import.meta.env.VITE_PROVER_ADDRESS,
         proverAbi: webProofProver.abi,
