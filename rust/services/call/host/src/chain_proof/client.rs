@@ -3,19 +3,19 @@ use std::collections::{HashMap, HashSet};
 use alloy_primitives::ChainId;
 use chain_server::server::ChainProof;
 use futures::future::join_all;
+use provider::BlockNumber;
 use reqwest::Client;
 
 use super::fetcher::{ChainProofFetcher, ChainProofFetcherTrait};
 use crate::host::error::HostError;
 
 pub struct ChainProofClient {
-    fetcher: Box<dyn ChainProofFetcherTrait + Send + Sync>,
+    fetcher: Box<dyn ChainProofFetcherTrait>,
 }
 
 impl ChainProofClient {
     pub fn new(chain_proof_url: String) -> Self {
-        let http_client = Client::new();
-        let fetcher = ChainProofFetcher::new(chain_proof_url, http_client);
+        let fetcher = ChainProofFetcher::new(chain_proof_url, Client::new());
         Self {
             fetcher: Box::new(fetcher),
         }
@@ -29,7 +29,7 @@ impl ChainProofClient {
 
     pub async fn get_chain_proofs(
         &self,
-        blocks_by_chain: HashMap<ChainId, HashSet<u64>>,
+        blocks_by_chain: HashMap<ChainId, HashSet<BlockNumber>>,
     ) -> Result<HashMap<ChainId, ChainProof>, HostError> {
         let futures = blocks_by_chain
             .into_iter()
@@ -43,9 +43,8 @@ impl ChainProofClient {
 
         let results = join_all(futures).await;
 
-        let chain_proofs: HashMap<ChainId, ChainProof> = results
-            .into_iter()
-            .collect::<Result<HashMap<_, _>, _>>()?;
+        let chain_proofs: HashMap<ChainId, ChainProof> =
+            results.into_iter().collect::<Result<HashMap<_, _>, _>>()?;
 
         Ok(chain_proofs)
     }
