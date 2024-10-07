@@ -28,7 +28,7 @@ fn delete_node(db: &mut ChainDb<InMemoryDatabase>, node_hash: B256) {
 
 // Fake block header to insert in MPT (must be big enough not to get inlined, so we can test if a tree is sparse)
 fn block_header(block_num: u64) -> B256 {
-    keccak256(alloy_rlp::encode(block_num)).into()
+    keccak256(alloy_rlp::encode(block_num))
 }
 
 fn insert_blocks(
@@ -57,7 +57,7 @@ fn check_proof(db: &ChainDb<InMemoryDatabase>, root_hash: B256, block_num: u64) 
     proof_trie
 }
 
-static EMPTY_PROOF: &'static [u8] = &[];
+static EMPTY_PROOF: &[u8] = &[];
 
 #[test]
 fn chain_info_get_insert() -> Result<()> {

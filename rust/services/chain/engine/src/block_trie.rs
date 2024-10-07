@@ -3,6 +3,7 @@ use alloy_rlp::encode_fixed_size;
 use bytes::Bytes;
 use mpt::{MerkleTrie, Node};
 
+#[derive(Debug, Default, Clone)]
 pub struct BlockTrie(MerkleTrie);
 
 impl BlockTrie {

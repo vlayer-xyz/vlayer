@@ -95,7 +95,7 @@ mod encodable {
 
     #[test]
     fn hash_node() {
-        let rlp = [0; 32].into();
+        let rlp = Bytes::from_static(&[0; 32]);
         let hash = keccak256(&rlp);
         let node = NodeRef::Node(rlp);
         let out = alloy_rlp::encode(&node);
