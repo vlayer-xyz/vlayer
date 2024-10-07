@@ -5,7 +5,7 @@ import {
   useTlsnProver,
   useProofContext,
   TlsnProofContextProvider,
-} from "../context";
+} from "../../context";
 
 // import { Steps } from "components/organisms/Steps";
 
