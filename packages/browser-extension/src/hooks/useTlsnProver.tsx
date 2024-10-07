@@ -42,7 +42,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
     setFormattedHeaders(
       formatTlsnHeaders(provenUrl?.headers ?? [], provenUrl?.cookies ?? []),
     );
-  }, [provenUrl?.headers, provenUrl?.cookies]);
+  }, [provenUrl]);
 
   const prove = useCallback(async () => {
     setIsProving(true);
@@ -51,14 +51,14 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
       if (!provenUrl?.url) {
         throw new Error("Missing URL to proove");
       }
+
       const tlsnProof = await tlsnProve(provenUrl?.url, {
         notaryUrl: provingSessionConfig.notaryUrl,
-        websocketProxyUrl: provingSessionConfig.wsProxyUrl,
+        websocketProxyUrl: `${provingSessionConfig.wsProxyUrl}?token=${new URL(provenUrl.url).host}`,
         method: "GET",
         headers: formattedHeaders?.headers,
         secretHeaders: formattedHeaders?.secretHeaders,
       });
-
       // let service worker know proof is done
       browser.runtime.sendMessage({
         type: ExtensionMessage.ProofDone,
@@ -67,13 +67,14 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
       setProof(tlsnProof);
       setIsProving(false);
     } catch (e) {
+      console.error("error in tlsnotary", e);
       browser.runtime.sendMessage({
         type: ExtensionMessage.ProofError,
         error: e,
       });
       setIsProving(false);
     }
-  }, [provenUrl?.url]);
+  }, [provenUrl, formattedHeaders]);
 
   return (
     <TlsnProofContext.Provider value={{ prove, proof, isProving }}>

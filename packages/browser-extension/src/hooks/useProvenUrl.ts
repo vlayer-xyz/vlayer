@@ -12,7 +12,6 @@ export const useProvenUrl = () => {
   const [provenUrl, setProvenUrl] = useState<HistoryItem>();
   const [browsingHistory] = useBrowsingHistory();
 
-  console.log("steps", steps);
   useEffect(() => {
     setProvenUrlAddress(
       steps?.find(({ step }) => {
@@ -24,7 +23,7 @@ export const useProvenUrl = () => {
   useEffect(() => {
     setProvenUrl(
       browsingHistory.find((item) => {
-        return item.url === provenUrlAddress;
+        return item.url.includes(provenUrlAddress);
       }),
     );
   }, [browsingHistory, provenUrlAddress]);

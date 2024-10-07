@@ -15,7 +15,6 @@ const isStartPageStepCompleted = (
   const x = !!browsingHistory.find((item: HistoryItem) => {
     return item.url.startsWith(step.url) && item.ready;
   });
-  console.log("x", x);
   return x;
 };
 
