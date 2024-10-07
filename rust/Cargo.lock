@@ -2028,7 +2028,6 @@ dependencies = [
  "axum",
  "axum-jrpc",
  "bincode",
- "chain_host",
  "lazy_static",
  "mpt",
  "risc0-zkp",
