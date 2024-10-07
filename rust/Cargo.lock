@@ -1762,6 +1762,7 @@ dependencies = [
  "email_proof",
  "mpt",
  "once_cell",
+ "regex",
  "revm",
  "risc0-zkvm",
  "serde",
