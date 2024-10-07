@@ -1,4 +1,4 @@
-use std::{collections::HashSet, ops::Range};
+use std::{collections::HashSet, hash::Hash, ops::Range};
 
 use alloy_primitives::{keccak256, B256};
 use bytes::Bytes;
@@ -42,36 +42,46 @@ impl ChainTrie {
         let root_hash = updated_trie.hash_slow();
         let chain_info = ChainInfo::new(updated_range.clone(), root_hash, zk_proof);
 
-        let (added_nodes, removed_nodes) =
-            difference(self.trie.to_rlp_nodes(), updated_trie.to_rlp_nodes());
+        let (added_nodes, removed_nodes) = difference(&self.trie, &updated_trie);
 
         self.block_range = updated_range;
         self.trie = updated_trie;
 
-        Ok(ChainUpdate {
-            chain_info,
-            added_nodes,
-            removed_nodes,
-        })
+        Ok(ChainUpdate::new(chain_info, added_nodes, removed_nodes))
     }
 }
 
-fn difference(
-    old: impl Iterator<Item = Bytes>,
-    new: impl Iterator<Item = Bytes>,
-) -> (Box<[Bytes]>, Box<[B256]>) {
-    let old_set: HashSet<_> = old.collect();
-    let new_set: HashSet<_> = new.collect();
+fn difference<T: Eq + Clone + Hash>(
+    old: impl IntoIterator<Item = T>,
+    new: impl IntoIterator<Item = T>,
+) -> (Box<[T]>, Box<[T]>) {
+    let old_set: HashSet<_> = old.into_iter().collect();
+    let new_set: HashSet<_> = new.into_iter().collect();
     let added = new_set.difference(&old_set).cloned().collect();
-    let removed = old_set.difference(&new_set).map(keccak256).collect();
+    let removed = old_set.difference(&new_set).cloned().collect();
 
     (added, removed)
 }
 
+#[derive(Debug, Default)]
 pub struct ChainUpdate {
     pub chain_info: ChainInfo,
     pub added_nodes: Box<[Bytes]>,
-    pub removed_nodes: Box<[B256]>,
+    pub removed_nodes: Box<[Bytes]>,
+}
+
+impl ChainUpdate {
+    pub fn new(
+        chain_info: ChainInfo,
+        added_nodes: impl IntoIterator<Item = Bytes>,
+        removed_nodes: impl IntoIterator<Item = Bytes>,
+    ) -> Self {
+        Self {
+            chain_info,
+            added_nodes: added_nodes.into_iter().collect(),
+            removed_nodes: removed_nodes.into_iter().collect(),
+        }
+    }
 }
 
 #[derive(Error, Debug, PartialEq)]

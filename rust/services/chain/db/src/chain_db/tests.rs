@@ -41,7 +41,7 @@ fn insert_blocks(
     }
 
     let mut tx = db.begin_rw().expect("begin_rw failed");
-    for node_rlp in trie.to_rlp_nodes() {
+    for node_rlp in &trie {
         tx.insert_node(node_rlp).expect("insert_node failed");
     }
     tx.commit().expect("commit failed");
@@ -174,11 +174,7 @@ fn update_chain(
     added_nodes: impl IntoIterator<Item = Bytes>,
     removed_nodes: impl IntoIterator<Item = Bytes>,
 ) {
-    let chain_update = ChainUpdate {
-        chain_info: chain_info.clone(),
-        added_nodes: added_nodes.into_iter().collect(),
-        removed_nodes: removed_nodes.into_iter().map(keccak256).collect(),
-    };
+    let chain_update = ChainUpdate::new(chain_info.clone(), added_nodes, removed_nodes);
     db.update_chain(chain_id, chain_update)
         .expect("update_chain_failed");
 }
@@ -188,18 +184,12 @@ fn test_update_chain() -> Result<()> {
     let mut db = get_test_db();
 
     let (block_trie, root_hash, chain_info) = trie_and_chain_info(&[0]);
-    update_chain(&mut db, 0, &chain_info, block_trie.to_rlp_nodes(), []);
+    update_chain(&mut db, 0, &chain_info, &block_trie, []);
     assert_eq!(db.get_chain_info(0)?.unwrap(), chain_info);
     assert_eq!(db.begin_ro()?.get_node(root_hash)?, block_trie.clone().into_root());
 
     let (new_block_trie, new_root_hash, chain_info) = trie_and_chain_info(&[1]);
-    update_chain(
-        &mut db,
-        0,
-        &chain_info,
-        new_block_trie.to_rlp_nodes(),
-        block_trie.to_rlp_nodes(),
-    );
+    update_chain(&mut db, 0, &chain_info, &new_block_trie, &block_trie);
     assert_eq!(db.get_chain_info(0)?.unwrap(), chain_info);
     assert_eq!(db.begin_ro()?.get_node(new_root_hash)?, new_block_trie.into_root());
     assert_eq!(db.begin_ro()?.get_node(root_hash).unwrap_err(), ChainDbError::NodeNotFound);

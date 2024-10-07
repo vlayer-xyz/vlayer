@@ -29,7 +29,7 @@ const NODES: &str = "nodes";
 /// Chains table. Holds `chain_id -> chain_info` mapping
 const CHAINS: &str = "chains";
 
-#[derive(Debug, Clone, PartialEq, Eq, RlpEncodable, RlpDecodable)]
+#[derive(Debug, Clone, PartialEq, Eq, RlpEncodable, RlpDecodable, Default)]
 pub struct ChainInfo {
     pub first_block: u64,
     pub last_block: u64,
@@ -129,8 +129,8 @@ impl<DB: for<'a> Database<'a>> ChainDb<DB> {
 
         tx.upsert_chain_info(chain_id, &chain_info)?;
 
-        for node_hash in removed_nodes {
-            tx.delete_node(node_hash)?;
+        for node in removed_nodes {
+            tx.delete_node(keccak256(node))?;
         }
 
         for node in added_nodes {
