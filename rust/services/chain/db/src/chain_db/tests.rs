@@ -48,12 +48,12 @@ fn insert_blocks(
     (block_trie.hash_slow(), block_trie.root_node())
 }
 
-fn check_proof(db: &ChainDb<InMemoryDatabase>, root_hash: B256, block_num: u64) -> MerkleTrie {
+fn check_proof(db: &ChainDb<InMemoryDatabase>, root_hash: B256, block_num: u64) -> BlockTrie {
     let proof = db
         .get_merkle_proof(root_hash, block_num)
         .expect("get_merkle_proof failed");
-    let proof_trie: MerkleTrie = proof.into_vec().into_iter().collect();
-    assert_eq!(proof_trie.get(alloy_rlp::encode(block_num)).unwrap(), &block_header(block_num));
+    let proof_trie: BlockTrie = proof.into_vec().into_iter().collect::<MerkleTrie>().into();
+    assert_eq!(proof_trie.get(block_num).unwrap(), &block_header(block_num));
     proof_trie
 }
 
@@ -135,7 +135,7 @@ fn proof_extension() -> Result<()> {
     let proof_trie = check_proof(&db, root_hash, 1_000_000);
 
     // The tree should be sparse - block 0 not included
-    let res = std::panic::catch_unwind(|| proof_trie.get(alloy_rlp::encode(0_u64)));
+    let res = std::panic::catch_unwind(|| proof_trie.get(0));
     assert!(res.is_err());
 
     Ok(())
@@ -160,9 +160,9 @@ fn proof_random_blocks() -> Result<()> {
 fn update_chain() -> Result<()> {
     let mut db = get_test_db();
 
-    let mut trie = MerkleTrie::new();
-    trie.insert(alloy_rlp::encode(1_u64), block_header(1))?;
-    trie.insert(alloy_rlp::encode(2_u64), block_header(2))?;
+    let mut trie = BlockTrie::new();
+    trie.insert(1, &block_header(1));
+    trie.insert(2, &block_header(2));
     let root_hash = trie.hash_slow();
     let rlp_nodes: HashSet<Bytes> = trie.to_rlp_nodes().collect();
     let chain_info = ChainInfo::new((1..3), root_hash, EMPTY_PROOF);
@@ -171,8 +171,8 @@ fn update_chain() -> Result<()> {
         check_proof(&db, root_hash, block_num);
     }
 
-    trie.insert(alloy_rlp::encode(0_u64), block_header(0));
-    trie.insert(alloy_rlp::encode(3_u64), block_header(3));
+    trie.insert(0, &block_header(0));
+    trie.insert(3, &block_header(3));
     let new_root_hash = trie.hash_slow();
     let new_rlp_nodes: HashSet<Bytes> = trie.to_rlp_nodes().collect();
     let removed_nodes: Vec<B256> = rlp_nodes
