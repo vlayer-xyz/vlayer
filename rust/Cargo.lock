@@ -1952,9 +1952,12 @@ dependencies = [
  "alloy-primitives",
  "alloy-rlp",
  "anyhow",
+ "bytes",
+ "chain_engine",
  "libmdbx",
  "mpt",
  "nybbles",
+ "rand",
  "tempfile",
  "thiserror",
 ]
@@ -1963,8 +1966,11 @@ dependencies = [
 name = "chain_engine"
 version = "0.1.0"
 dependencies = [
+ "alloy-primitives",
+ "alloy-rlp",
  "block_header",
  "bytes",
+ "mpt",
  "risc0-zkp",
  "serde",
 ]
@@ -1974,7 +1980,6 @@ name = "chain_guest"
 version = "0.1.0"
 dependencies = [
  "alloy-primitives",
- "alloy-rlp",
  "block_header",
  "chain_engine",
  "mpt",
@@ -6040,6 +6045,7 @@ dependencies = [
  "alloy-rlp-derive",
  "alloy-trie",
  "anyhow",
+ "bytes",
  "derive_more 0.99.18",
  "itertools 0.13.0",
  "lazy_static",

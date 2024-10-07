@@ -1,7 +1,9 @@
 use alloy_primitives::B256;
 use alloy_rlp::encode_fixed_size;
-use mpt::MerkleTrie;
+use bytes::Bytes;
+use mpt::{MerkleTrie, Node};
 
+#[derive(Debug, Default, Clone)]
 pub struct BlockTrie(MerkleTrie);
 
 impl BlockTrie {
@@ -25,6 +27,14 @@ impl BlockTrie {
 
     pub fn encode_key(block_number: u64) -> impl AsRef<[u8]> {
         encode_fixed_size(&block_number)
+    }
+
+    pub fn to_rlp_nodes(&self) -> impl Iterator<Item = Bytes> + '_ {
+        self.0.to_rlp_nodes()
+    }
+
+    pub fn root_node(self) -> Node {
+        self.0 .0
     }
 }
 

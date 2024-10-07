@@ -1,10 +1,9 @@
 use alloy_primitives::B256;
 use block_header::EvmBlockHeader;
-use block_trie::BlockTrie;
+use chain_engine::BlockTrie;
 pub use chain_engine::Input;
 use mpt::MerkleTrie;
 use risc0_zkp::core::digest::Digest;
-mod block_trie;
 
 fn initialize(elf_id: Digest, block: &dyn EvmBlockHeader) -> (B256, Digest) {
     let mut trie = BlockTrie::new();

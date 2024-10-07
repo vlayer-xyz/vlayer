@@ -1,7 +1,8 @@
 use std::iter;
 
-use alloy_primitives::{Bytes, B256};
+use alloy_primitives::B256;
 use alloy_rlp::{BufMut, Decodable, Encodable, Header};
+use bytes::Bytes;
 use rlp as legacy_rlp;
 
 use super::Node;

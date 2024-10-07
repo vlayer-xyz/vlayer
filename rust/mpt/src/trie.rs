@@ -1,8 +1,9 @@
 use std::fmt::Debug;
 
-use alloy_primitives::{keccak256, Bytes, B256};
+use alloy_primitives::{keccak256, B256};
 use alloy_rlp::Decodable;
 use alloy_trie::EMPTY_ROOT_HASH;
+use bytes::Bytes;
 use nybbles::Nibbles;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;

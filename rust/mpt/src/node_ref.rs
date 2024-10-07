@@ -1,5 +1,6 @@
-use alloy_primitives::{keccak256, Bytes, B256};
+use alloy_primitives::{keccak256, B256};
 use alloy_rlp::{BufMut, Encodable, EMPTY_STRING_CODE};
+use bytes::Bytes;
 
 use super::node::Node;
 
@@ -94,7 +95,7 @@ mod encodable {
 
     #[test]
     fn hash_node() {
-        let rlp = [0; 32].into();
+        let rlp = Bytes::from_static(&[0; 32]);
         let hash = keccak256(&rlp);
         let node = NodeRef::Node(rlp);
         let out = alloy_rlp::encode(&node);

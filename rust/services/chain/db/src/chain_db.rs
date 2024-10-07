@@ -1,7 +1,8 @@
-use std::ops::{Deref, DerefMut};
+use std::ops::{Deref, DerefMut, Range};
 
-use alloy_primitives::{keccak256, Bytes, ChainId, B256};
-use alloy_rlp::{BytesMut, Decodable, Encodable, RlpDecodable, RlpEncodable};
+use alloy_primitives::{keccak256, ChainId, B256};
+use alloy_rlp::{Bytes as RlpBytes, BytesMut, Decodable, Encodable, RlpDecodable, RlpEncodable};
+use bytes::Bytes;
 use mpt::{KeyNibbles, Node, NodeRef, EMPTY_ROOT_HASH};
 use nybbles::Nibbles;
 use proof_builder::{MerkleProofBuilder, ProofResult};
@@ -24,7 +25,18 @@ pub struct ChainInfo {
     pub first_block: u64,
     pub last_block: u64,
     pub merkle_root: B256,
-    pub zk_proof: Bytes,
+    pub zk_proof: RlpBytes,
+}
+
+impl ChainInfo {
+    pub fn new(range: Range<u64>, merkle_root: B256, zk_proof: impl Into<Bytes>) -> Self {
+        Self {
+            first_block: range.start,
+            last_block: range.end - 1,
+            merkle_root,
+            zk_proof: zk_proof.into(),
+        }
+    }
 }
 
 pub struct ChainDb<DB: for<'a> Database<'a>> {
@@ -81,7 +93,7 @@ impl<DB: for<'a> Database<'a>> ChainDb<DB> {
     ) -> ChainDbResult<()> {
         let mut tx = self.begin_rw()?;
 
-        tx.insert_chain_info(chain_id, chain_info)?;
+        tx.upsert_chain_info(chain_id, chain_info)?;
 
         for node_hash in removed_nodes {
             tx.delete_node(node_hash)?;
@@ -121,14 +133,14 @@ impl<TX: ReadTx> ChainDbTx<TX> {
 }
 
 impl<TX: WriteTx> ChainDbTx<TX> {
-    pub fn insert_chain_info(
+    pub fn upsert_chain_info(
         &mut self,
         chain_id: ChainId,
         chain_info: &ChainInfo,
     ) -> ChainDbResult<()> {
         let chain_id = chain_id.to_be_bytes();
         let chain_info_rlp = alloy_rlp::encode(chain_info);
-        self.tx.insert(CHAINS, chain_id, chain_info_rlp)?;
+        self.tx.upsert(CHAINS, chain_id, chain_info_rlp)?;
         Ok(())
     }
 
