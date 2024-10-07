@@ -6,19 +6,20 @@ use provider::BlockNumber;
 
 use crate::host::error::HostError;
 
-pub struct ChainServer;
+pub struct ChainProofClient;
 
-impl ChainServer {
+impl ChainProofClient {
     pub fn get_chain_proofs(
         &self,
         blocks_by_chain: HashMap<ChainId, HashSet<u64>>,
     ) -> Result<HashMap<ChainId, ChainProof>, HostError> {
-        let mut chain_proofs = HashMap::new();
-
-        for (chain_id, block_numbers) in blocks_by_chain {
-            let chain_proof = self.fetch_chain_proofs(chain_id, &block_numbers)?;
-            chain_proofs.insert(chain_id, chain_proof);
-        }
+        let chain_proofs = blocks_by_chain
+            .into_iter()
+            .map(|(chain_id, block_numbers)| {
+                self.fetch_chain_proofs(chain_id, &block_numbers)
+                    .map(|proof| (chain_id, proof))
+            })
+            .collect::<Result<HashMap<_, _>, _>>()?;
 
         Ok(chain_proofs)
     }

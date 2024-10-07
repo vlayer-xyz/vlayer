@@ -22,7 +22,7 @@ use provider::{
 use risc0_zkvm::ExecutorEnv;
 use serde::Serialize;
 
-pub use crate::chain_server::ChainServer;
+pub use crate::chain_client::ChainProofClient;
 use crate::{
     db::proof::ProofDb, encodable_receipt::EncodableReceipt, evm_env::factory::HostEvmEnvFactory,
     into_input::into_multi_input,
@@ -35,7 +35,7 @@ pub struct Host<P: BlockingProvider> {
     start_execution_location: ExecutionLocation,
     envs: CachedEvmEnv<ProofDb<P>>,
     prover: Prover,
-    chain_server: ChainServer,
+    chain_server: ChainProofClient,
 }
 
 impl Host<EthProvider> {
@@ -70,7 +70,7 @@ where
         let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
         let start_execution_location = (block_number, config.start_chain_id).into();
         let prover = Prover::new(config.proof_mode);
-        let chain_server = ChainServer {};
+        let chain_server = ChainProofClient {};
 
         Ok(Host {
             envs,
@@ -89,7 +89,7 @@ where
         let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
         let start_execution_location = (block_number, config.start_chain_id).into();
         let prover = Prover::new(config.proof_mode);
-        let chain_server = ChainServer {};
+        let chain_server = ChainProofClient {};
 
         Ok(Host {
             envs,
