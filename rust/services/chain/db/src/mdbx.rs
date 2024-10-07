@@ -79,14 +79,12 @@ impl<'a> WriteTx for MdbxTx<'a, RW> {
         value: impl AsRef<[u8]>,
     ) -> DbResult<()> {
         let mdbx_table = self.get_table(&table)?;
-        match self
-            .tx
+        self.tx
             .put(&mdbx_table, &key, value, WriteFlags::NO_OVERWRITE)
-        {
-            Ok(()) => Ok(()),
-            Err(libmdbx::Error::KeyExist) => Err(DbError::duplicate_key(table, key)),
-            Err(err) => Err(DbError::custom(err)),
-        }
+            .map_err(|err| match err {
+                libmdbx::Error::KeyExist => DbError::duplicate_key(table, key),
+                _ => DbError::custom(err),
+            })
     }
 
     fn upsert(
@@ -96,11 +94,12 @@ impl<'a> WriteTx for MdbxTx<'a, RW> {
         value: impl AsRef<[u8]>,
     ) -> DbResult<()> {
         let mdbx_table = self.get_table(&table)?;
-        match self.tx.put(&mdbx_table, &key, value, WriteFlags::default()) {
-            Ok(()) => Ok(()),
-            Err(libmdbx::Error::KeyExist) => Err(DbError::duplicate_key(table, key)),
-            Err(err) => Err(DbError::custom(err)),
-        }
+        self.tx
+            .put(&mdbx_table, &key, value, WriteFlags::UPSERT)
+            .map_err(|err| match err {
+                libmdbx::Error::KeyExist => unreachable!("KeyExist should not happen with UPSERT"),
+                _ => DbError::custom(err),
+            })
     }
 
     fn delete(&mut self, table: impl AsRef<str>, key: impl AsRef<[u8]>) -> DbResult<()> {
