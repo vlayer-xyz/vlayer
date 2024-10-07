@@ -1,4 +1,4 @@
-import { testHelpers, createVlayerClient } from "@vlayer/sdk";
+import { testHelpers, createVlayerClient, createExtensionWebProofProvider } from "@vlayer/sdk";
 import webProofProver from "../out/WebProofProver.sol/WebProofProver";
 import webProofVerifier from "../out/WebProofVerifier.sol/WebProofVerifier";
 import tls_proof from "./tls_gp_proof.json";
@@ -22,7 +22,7 @@ async function testSuccessProvingAndVerification() {
   console.log("Proving...");
 
   const webProof = { tls_proof: tls_proof, notary_pub_key: notaryPubKey };
-  const client = createVlayerClient({ url: "x.com", webProofProvider: webProof });
+  const client = createVlayerClient({ url: "x.com", webProofProvider: createExtensionWebProofProvider({}) });
 
   const { proof, returnValue } = await client.prove({
     address: prover,
