@@ -20,12 +20,10 @@ const context: {
   webProof: WebProof | null;
   zkProof: VCallResponse | null;
   result: `0x${string}`[];
-  provider: WebProofProvider | null;
 } = {
   webProof: null,
   zkProof: null,
   result: [],
-  provider: null,
 };
 
 const twitterUserAddress = (await testHelpers.getTestAddresses())[0];
@@ -55,7 +53,6 @@ export async function setupRequestProveButton(element: HTMLButtonElement) {
 
     console.log("WebProof generated!", webproof);
     context.webProof = webproof;
-    context.provider = provider;
   });
 }
 

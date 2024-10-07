@@ -1,7 +1,6 @@
 import {
   testHelpers,
   createVlayerClient,
-  createExtensionWebProofProvider,
 } from "@vlayer/sdk";
 import webProofProver from "../out/WebProofProver.sol/WebProofProver";
 import webProofVerifier from "../out/WebProofVerifier.sol/WebProofVerifier";
