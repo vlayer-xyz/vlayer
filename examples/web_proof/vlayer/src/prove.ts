@@ -7,7 +7,7 @@ import {
   expectUrl,
   notarize,
   startPage,
-  prove,
+  createVlayerClient,
   type WebProof,
   type VCallResponse,
   type WebProofProvider,
@@ -35,7 +35,7 @@ export async function setupRequestProveButton(element: HTMLButtonElement) {
   element.addEventListener("click", async () => {
     const provider = createExtensionWebProofProvider({});
     context.provider = provider;
-    const webProof = await provider.getWebProof({
+    const webproof = await provider.getWebProof({
       proverCallCommitment: {
         address: import.meta.env.VITE_PROVER_ADDRESS,
         proverAbi: webProofProver.abi,
@@ -69,19 +69,20 @@ export const setupVProverButton = (element: HTMLButtonElement) => {
       tls_proof: context.webProof,
       notary_pub_key: notaryPubKey,
     };
+    const client = createVlayerClient({ url: "x.com", webProofProvider: context.provider });
 
-    console.log("Generating proof...");
-    const { proof, returnValue } = await prove(
-      import.meta.env.VITE_PROVER_ADDRESS,
-      webProofProver.abi,
-      "main",
-      [
+    console.log("Generating proof...");    
+    const { proof, returnValue } = await client.prove({
+      address: import.meta.env.VITE_PROVER_ADDRESS,
+      functionName: "main",
+      proverAbi: webProofProver.abi,
+      args:[
         {
           webProofJson: JSON.stringify(webProof),
         },
         twitterUserAddress,
       ],
-    );
+  });
     console.log("Proof generated!", proof, returnValue);
     context.zkProof = proof;
     context.result = returnValue;
