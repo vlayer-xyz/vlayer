@@ -57,20 +57,13 @@ jobs:
 
       - name: "Save methods.rs"
         run: |
-          find target -name "methods.rs" -exec cp -n {} ./ \;
+          find target -name "methods.rs" -exec cp -n {} ./target/assets/ \;
 
-      - name: Push methods.rs artifact
+      - name: Push guest artifacts
         uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
         with:
-          name: linux-methods.rs
-          path: rust/methods.rs
-          if-no-files-found: error
-
-      - name: Push ImageID artifact
-        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
-        with:
-          name: linux-ImageID.sol
-          path: rust/target/assets/ImageID.sol
+          name: guest-artifacts
+          path: rust/target/assets
           if-no-files-found: error
 
   build-release:
@@ -136,12 +129,13 @@ jobs:
 
       - uses: actions/download-artifact@v4
         with:
-          name: linux-methods.rs
-          path: rust/call_guest_replacement/methods.rs
-      - uses: actions/download-artifact@v4
-        with:
-          name: linux-ImageID.sol
-          path: rust/call_guest_replacement/ImageID.sol
+          name: guest-artifacts
+          path: rust/call_guest_replacement
+      - name: Extract guest artifacts
+        run: |
+          mv call_guest_replacement/linux-methods.rs call_guest_replacement/methods.rs
+          mv call_guest_replacement/linux-ImageID.sol call_guest_replacement/ImageID.sol
+          ls -al call_guest_replacement
 
       - name: "Build binaries"
         env:
@@ -264,13 +258,13 @@ jobs:
   #     - name: Download ImageID.sol - Linux
   #       uses: actions/download-artifact@v4
   #       with:
-  #         name: linux-ImageID.sol
-  #         path: ./imageid
+  #         name: guest-artifacts
+  #         path: ./guest-artifacts
 
   #     - name: Copy ImageID to contracts
   #       run: |
   #         rm contracts/src/ImageID.sol;
-  #         cp imageid/ImageID.sol contracts/src/ImageID.sol
+  #         cp guest-artifacts/linux-ImageID.sol contracts/src/ImageID.sol
 
   #     - name: Release contracts to Soldeer
   #       working-directory: contracts
