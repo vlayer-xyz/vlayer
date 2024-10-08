@@ -22,7 +22,7 @@ contract EmailProver is Prover {
 
         require(email.subject.equal("Is dinner ready?"), "subject must be 'Is dinner ready?'");
 
-        require(email.from.matches("@(vlayer.xyz)|(football.example.com)$"), "from must be a vlayer or football address");
+        require(email.from.matches("@vlayer.xyz$"), "from must be a vlayer address");
 
         return proof();
     }
