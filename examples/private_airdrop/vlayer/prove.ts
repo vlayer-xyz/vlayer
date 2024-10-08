@@ -53,7 +53,7 @@ const generateTestSignature = async (account: Account) => {
 const generateProof = async (prover: Address, tokenOwner: Account) => {
   const signature = await generateTestSignature(tokenOwner);
 
-  const { proof, returnValue } = await prove(
+  const { proof, result } = await prove(
     prover,
     privateAirdropProver.abi,
     "main",
@@ -61,7 +61,7 @@ const generateProof = async (prover: Address, tokenOwner: Account) => {
   );
   console.log("Proof:", proof);
 
-  return { proof, returnValue };
+  return { proof, result };
 };
 
 const tokenOwner = testHelpers.getTestAccount();
@@ -69,7 +69,7 @@ const [proverAddress, verifierAddress, token] =
   await deployContracts(tokenOwner);
 const {
   proof,
-  returnValue: [account, nullifier],
+  result: [account, nullifier],
 } = await generateProof(proverAddress, tokenOwner);
 
 const balanceBefore = await testHelpers.call(

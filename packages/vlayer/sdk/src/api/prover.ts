@@ -44,12 +44,12 @@ export async function prove<
     result: { proof, evm_call_result },
   } = await v_call(call, context, url);
 
-  const [, ...returnValue] = decodeFunctionResult({
+  const [, ...result] = decodeFunctionResult({
     abi: abi as Abi,
     data: evm_call_result,
     functionName: functionName as string,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
   }) as any[];
 
-  return { proof, returnValue };
+  return { proof, result };
 }
