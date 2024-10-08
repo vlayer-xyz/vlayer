@@ -1,4 +1,8 @@
-use std::ops::{Deref, DerefMut, Range};
+use std::{
+    collections::HashSet,
+    hash::Hash,
+    ops::{Deref, DerefMut, Range},
+};
 
 use alloy_primitives::{keccak256, ChainId, B256};
 use alloy_rlp::{Bytes as RlpBytes, BytesMut, Decodable, Encodable, RlpDecodable, RlpEncodable};
@@ -108,19 +112,21 @@ impl<DB: for<'a> Database<'a>> ChainDb<DB> {
     pub fn update_chain(
         &mut self,
         chain_id: ChainId,
-        chain_info: &ChainInfo,
-        removed_nodes: impl IntoIterator<Item = B256>,
-        added_nodes_rlp: impl IntoIterator<Item = Bytes>,
+        ChainUpdate {
+            chain_info,
+            added_nodes,
+            removed_nodes,
+        }: ChainUpdate,
     ) -> ChainDbResult<()> {
         let mut tx = self.begin_rw()?;
 
-        tx.upsert_chain_info(chain_id, chain_info)?;
+        tx.upsert_chain_info(chain_id, &chain_info)?;
 
-        for node_hash in removed_nodes {
-            tx.delete_node(node_hash)?;
+        for node in removed_nodes {
+            tx.delete_node(keccak256(node))?;
         }
 
-        for node in added_nodes_rlp {
+        for node in added_nodes {
             tx.insert_node(node)?;
         }
 
@@ -185,4 +191,19 @@ impl<TX: WriteTx> ChainDbTx<TX> {
         self.tx.commit()?;
         Ok(())
     }
+}
+
+fn difference<T>(
+    old: impl IntoIterator<Item = T>,
+    new: impl IntoIterator<Item = T>,
+) -> (Box<[T]>, Box<[T]>)
+where
+    T: Eq + Clone + Hash,
+{
+    let old_set: HashSet<_> = old.into_iter().collect();
+    let new_set: HashSet<_> = new.into_iter().collect();
+    let added = new_set.difference(&old_set).cloned().collect();
+    let removed = old_set.difference(&new_set).cloned().collect();
+
+    (added, removed)
 }

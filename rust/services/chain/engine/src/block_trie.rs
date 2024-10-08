@@ -30,10 +30,6 @@ impl BlockTrie {
         encode_fixed_size(&block_number)
     }
 
-    pub fn to_rlp_nodes(&self) -> impl Iterator<Item = Bytes> + '_ {
-        self.0.to_rlp_nodes()
-    }
-
     pub fn into_root(self) -> Node {
         self.0 .0
     }
@@ -59,10 +55,10 @@ impl FromIterator<(u64, B256)> for BlockTrie {
 }
 
 impl<'a> IntoIterator for &'a BlockTrie {
-    type IntoIter = Box<dyn Iterator<Item = Bytes> + 'a>;
+    type IntoIter = std::vec::IntoIter<Bytes>;
     type Item = Bytes;
 
     fn into_iter(self) -> Self::IntoIter {
-        Box::new(self.to_rlp_nodes())
+        self.0.into_iter()
     }
 }

@@ -41,8 +41,8 @@ fn insert_blocks(
     }
 
     let mut tx = db.begin_rw().expect("begin_rw failed");
-    for node_rlp in block_trie.to_rlp_nodes() {
-        tx.insert_node(node_rlp).expect("insert_node failed");
+    for node in &block_trie {
+        tx.insert_node(node).expect("insert_node failed");
     }
     tx.commit().expect("commit failed");
     (block_trie.hash_slow(), block_trie.into_root())
@@ -162,9 +162,10 @@ fn update_chain() -> Result<()> {
     trie.insert(1, &block_header(1));
     trie.insert(2, &block_header(2));
     let root_hash = trie.hash_slow();
-    let rlp_nodes: HashSet<Bytes> = trie.to_rlp_nodes().collect();
+    let rlp_nodes = (&trie).into_iter();
     let chain_info = ChainInfo::new((1..3), root_hash, EMPTY_PROOF);
-    db.update_chain(0, &chain_info, [], rlp_nodes.iter().cloned())?;
+
+    db.update_chain(0, ChainUpdate::new(chain_info, &trie, []))?;
     for block_num in [1, 2] {
         check_proof(&db, root_hash, block_num);
     }
@@ -172,20 +173,20 @@ fn update_chain() -> Result<()> {
     trie.insert(0, &block_header(0));
     trie.insert(3, &block_header(3));
     let new_root_hash = trie.hash_slow();
-    let new_rlp_nodes: HashSet<Bytes> = trie.to_rlp_nodes().collect();
-    let removed_nodes: Vec<B256> = rlp_nodes
-        .difference(&new_rlp_nodes)
-        .map(keccak256)
-        .collect();
-    let added_nodes: Vec<Bytes> = new_rlp_nodes.difference(&rlp_nodes).cloned().collect();
+    let (added_nodes, removed_nodes) = difference(rlp_nodes, &trie);
     let chain_info = ChainInfo::new((0..2), new_root_hash, EMPTY_PROOF);
-    db.update_chain(0, &chain_info, removed_nodes.clone(), added_nodes)?;
+
+    db.update_chain(0, ChainUpdate::new(chain_info, added_nodes, removed_nodes.clone()))?;
     for block_num in [0, 1, 2, 3] {
         check_proof(&db, new_root_hash, block_num);
     }
+
     assert!(!removed_nodes.is_empty());
-    for node_hash in removed_nodes {
-        assert_eq!(db.begin_ro()?.get_node(node_hash).unwrap_err(), ChainDbError::NodeNotFound);
+    for node in removed_nodes {
+        assert_eq!(
+            db.begin_ro()?.get_node(keccak256(node)).unwrap_err(),
+            ChainDbError::NodeNotFound
+        );
     }
 
     Ok(())
