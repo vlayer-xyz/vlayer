@@ -139,13 +139,17 @@ jobs:
       - uses: actions/download-artifact@v4
         with:
           name: linux-methods.rs
-          path: rust/methods.rs
+          path: rust/call_guest_replacement/methods.rs
+      - uses: actions/download-artifact@v4
+        with:
+          name: linux-ImageID.sol
+          path: rust/call_guest_replacement/ImageID.sol
 
       - name: "Build binaries"
         env:
           VLAYER_RELEASE: "nightly"
         run: |
-          export RISC0_REPLACE_METHOD_RS_PATH="$(pwd)/methods.rs"
+          export RISC0_EXISTING_CALL_GUEST="$(pwd)/call_guest_replacement"
           cargo build --release --target ${{ matrix.target }} --package cli 
 
       - name: "Print build version"
