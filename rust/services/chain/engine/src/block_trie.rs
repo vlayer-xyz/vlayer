@@ -56,3 +56,12 @@ impl FromIterator<(u64, B256)> for BlockTrie {
         trie
     }
 }
+
+impl<'a> IntoIterator for &'a BlockTrie {
+    type IntoIter = Box<dyn Iterator<Item = Bytes> + 'a>;
+    type Item = Bytes;
+
+    fn into_iter(self) -> Self::IntoIter {
+        Box::new(self.to_rlp_nodes())
+    }
+}
