@@ -66,12 +66,14 @@ jobs:
         with:
           name: linux-methods.rs
           path: rust/methods.rs
+          if-no-files-found: error
 
       - name: Push ImageID artifact
         uses: actions/upload-artifact@v4
         with:
           name: linux-ImageID.sol
           path: rust/target/assets/ImageID.sol
+          if-no-files-found: error
 
   build-release:
     defaults:
@@ -178,6 +180,7 @@ jobs:
         with:
           name: ${{ matrix.target }}
           path: ${{ steps.package-release.outputs.output_file }}
+          if-no-files-found: error
 
   build-examples:
     name: Build examples
@@ -194,6 +197,7 @@ jobs:
         with:
           name: examples
           path: out/examples.tar.gz
+          if-no-files-found: error
 
   build-extension:
     name: Build browser extension
@@ -227,6 +231,7 @@ jobs:
         with:
           name: browser-extension
           path: packages/browser-extension/browser-extension.tar.gz
+          if-no-files-found: error
   
   push-contracts:
     name: Push vlayer contracts
@@ -278,6 +283,7 @@ jobs:
         with:
           name: vlayer-contracts
           path: contracts/contracts.zip
+          if-no-files-found: error
 
 
   create-release:
