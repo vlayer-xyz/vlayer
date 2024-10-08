@@ -107,6 +107,6 @@ Finality, in the context of blockchains, is a point at which a transaction or bl
 
 One should be aware that different chains may have different finality thresholds. For example, Ethereum Mainnet blocks are final after no more than about 12 minutes.
 
-In the case of L2 chains, things are a bit more complicated. For example in case of optimistic rollup, like Optimism and Arbitrum, after L2 blocks are submitted to L1, there's a challenge period (often 7 days). If there is no evidence of an invalid state transistion during this period, the L2 block is considered final.
+In the case of L2 chains, things are a bit more complicated. For example in case of optimistic rollup, like Optimism and Arbitrum, after L2 blocks are submitted to L1, there's a challenge period (often 7 days). If there is no evidence of an invalid state transition during this period, the L2 block is considered final.
 
 Now consider teleporting to blocks that are not yet final in the destination chain. This can lead to situations where we are proving things that can be rolled back. It is important to include this risk in a protocol. The simplest way is to only teleport to blocks that are final and cannot be reorganized.
