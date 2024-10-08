@@ -32,7 +32,7 @@ fn main() -> Result<()> {
 
         generate_solidity_files(&*guests, &solidity_opts)?;
 
-        if env::var("RISC0_REPLACE_METHOD_RS_PATH").is_ok() {
+        if let Ok(method_rs_replacement) = env::var("RISC0_REPLACE_METHOD_RS_PATH") {
             let method_rs_replacement = env::var("RISC0_REPLACE_METHOD_RS_PATH").unwrap();
             let method_rs_replacement_path = Path::new(&method_rs_replacement);
 
