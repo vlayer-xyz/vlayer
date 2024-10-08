@@ -36,7 +36,7 @@ fn main() -> Result<()> {
             let method_rs_replacement = env::var("RISC0_REPLACE_METHOD_RS_PATH").unwrap();
             let method_rs_replacement_path = Path::new(&method_rs_replacement);
 
-            let out_dir = env::var("OUT_DIR").unwrap();
+            let out_dir = env::var("OUT_DIR").expect("'OUT_DIR' is not set");
             let out_dir_path = Path::new(&out_dir);
             copy(&method_rs_replacement_path, out_dir_path.join("methods.rs"))?;
         }
