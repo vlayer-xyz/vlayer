@@ -1,11 +1,12 @@
 import React, { FC, useEffect, useState } from "react";
-import { Callout, Flex, Text, Progress } from "@radix-ui/themes";
+import { Callout, Flex, Progress, Text } from "@radix-ui/themes";
 import { InfoCircledIcon } from "@radix-ui/react-icons";
 import { StepStatus } from "constants/step";
 import { Button } from "components/atoms";
 import { useTlsnProver } from "hooks/useTlsnProver";
-import browser from "webextension-polyfill";
-import { motion, AnimatePresence } from "framer-motion";
+import { AnimatePresence, motion } from "framer-motion";
+import sendMessageToSdk from "lib/sendMessageToSdk";
+import { ExtensionMessageType } from "@vlayer/web-proof-commons";
 
 type NotarizeStepActionProps = {
   isVisited: boolean;
@@ -24,8 +25,8 @@ const RedirectCallout: FC = () => {
           // hide callout
           setShow(false);
           // tell service worker to redirect back to orginal page
-          browser.runtime.sendMessage({
-            type: "redirectBack",
+          sendMessageToSdk({
+            type: ExtensionMessageType.RedirectBack,
           });
           clearInterval(interval);
         }

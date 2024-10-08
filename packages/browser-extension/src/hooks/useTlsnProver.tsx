@@ -1,19 +1,19 @@
 import { prove as tlsnProve } from "tlsn-js";
-import browser from "webextension-polyfill";
 import React, {
-  useContext,
   createContext,
-  useCallback,
-  useState,
   PropsWithChildren,
+  useCallback,
+  useContext,
   useEffect,
+  useState,
 } from "react";
-import { formatTlsnHeaders } from "../lib/formatTlsnHeaders";
-import { ExtensionMessage } from "@vlayer/web-proof-commons/constants/message";
+import { formatTlsnHeaders } from "lib/formatTlsnHeaders";
+import { ExtensionMessageType } from "@vlayer/web-proof-commons";
 import { useProvingSessionConfig } from "./useProvingSessionConfig";
 import { useProvenUrl } from "./useProvenUrl";
 import { useTrackHistory } from "hooks/useTrackHistory";
-import { removeQueryParams } from "../lib/removeQueryParams";
+import { removeQueryParams } from "lib/removeQueryParams";
+import sendMessageToSdk from "lib/sendMessageToSdk";
 
 const TlsnProofContext = createContext({
   prove: () => {},
@@ -62,17 +62,17 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
       });
       // let service worker know proof is done
       console.log("sending proof to background", tlsnProof);
-      browser.runtime.sendMessage({
-        type: ExtensionMessage.ProofDone,
+      sendMessageToSdk({
+        type: ExtensionMessageType.ProofDone,
         proof: tlsnProof,
       });
       setProof(tlsnProof);
       setIsProving(false);
-    } catch (e) {
+    } catch (e: unknown) {
       console.error("error in tlsnotary", e);
-      browser.runtime.sendMessage({
-        type: ExtensionMessage.ProofError,
-        error: e,
+      sendMessageToSdk({
+        type: ExtensionMessageType.ProofError,
+        error: e instanceof Error ? e.message : String(e),
       });
       setIsProving(false);
     }

@@ -4,6 +4,10 @@
   "version": "1.0.0",
   "module": "index.ts",
   "type": "module",
+  "scripts": {
+    "lint": "eslint lib",
+    "lint:fix": "eslint --fix lib"
+  },
   "devDependencies": {
     "@types/bun": "latest"
   },

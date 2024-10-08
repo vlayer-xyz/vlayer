@@ -2,16 +2,17 @@ import { prove as tlsnProve } from "tlsn-js";
 import browser from "webextension-polyfill";
 import { useProofContext } from "./useProofContext";
 import React, {
-  useContext,
   createContext,
+  PropsWithChildren,
   useCallback,
+  useContext,
   useEffect,
   useState,
-  PropsWithChildren,
 } from "react";
-import { formatTlsnHeaders } from "../lib/formatTlsnHeaders";
-import { ExtensionMessage } from "@vlayer/web-proof-commons/constants/message";
+import { formatTlsnHeaders } from "lib/formatTlsnHeaders";
+import { ExtensionMessageType } from "@vlayer/web-proof-commons";
 import { WebProverSessionContextManager } from "../state/webProverSessionContext";
+import sendMessageToSdk from "lib/sendMessageToSdk";
 
 const TlsnProofContext = createContext({
   prove: () => {},
@@ -91,18 +92,18 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
       // this is temporary verification call
       // when we wil connect vlayer contracts we will transfer this back to the SDK
 
-      browser.runtime.sendMessage({
-        type: ExtensionMessage.ProofDone,
+      sendMessageToSdk({
+        type: ExtensionMessageType.ProofDone,
         proof: tlsnProof,
       });
       setProof(proof);
       setIsProving(false);
-    } catch (e) {
+    } catch (e: unknown) {
       console.error("error in tlsnotary", e);
 
-      browser.runtime.sendMessage({
-        type: ExtensionMessage.ProofError,
-        error: e,
+      sendMessageToSdk({
+        type: ExtensionMessageType.ProofError,
+        error: e instanceof Error ? e.message : String(e),
       });
 
       setIsProving(false);

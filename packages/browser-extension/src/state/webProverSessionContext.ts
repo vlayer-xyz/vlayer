@@ -1,6 +1,6 @@
 import { Store } from "./store";
 import browser from "webextension-polyfill";
-import { WebProverSessionConfig } from "@vlayer/web-proof-commons/constants/message";
+import { WebProverSessionConfig } from "@vlayer/web-proof-commons";
 
 type WebProverSessionContext = {
   webProverSessionConfig: WebProverSessionConfig;
