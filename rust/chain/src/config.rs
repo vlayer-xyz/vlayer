@@ -20,7 +20,7 @@ pub static CHAIN_MAP: Lazy<HashMap<ChainId, &'static Lazy<ChainSpec>>> = Lazy::n
         (TEST_CHAIN_ID, &TESTING_CHAIN_SPEC),
         (Chain::base_mainnet().id(), &TESTING_CHAIN_SPEC),
         (Chain::optimism_mainnet().id(), &TESTING_CHAIN_SPEC),
-        (Chain::optimism_sepolia().id(), &TESTING_CHAIN_SPEC)
+        (Chain::optimism_sepolia().id(), &OP_SEPOLIA_CHAIN_SPEC),
     ])
 });
 
@@ -47,6 +47,19 @@ pub static ETH_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
 pub static ETH_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
     ChainSpec::new(
         Chain::sepolia().id(),
+        SpecId::CANCUN,
+        BTreeMap::from([
+            (SpecId::MERGE, ForkCondition::Block(1735371)),
+            (SpecId::SHANGHAI, ForkCondition::Timestamp(1677557088)),
+            (SpecId::CANCUN, ForkCondition::Timestamp(1706655072)),
+        ]),
+        BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
+    )
+});
+
+pub static OP_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
+    ChainSpec::new(
+        Chain::optimism_sepolia().id(),
         SpecId::CANCUN,
         BTreeMap::from([
             (SpecId::MERGE, ForkCondition::Block(1735371)),
