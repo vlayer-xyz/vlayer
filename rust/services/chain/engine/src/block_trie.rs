@@ -2,8 +2,9 @@ use alloy_primitives::B256;
 use alloy_rlp::encode_fixed_size;
 use bytes::Bytes;
 use mpt::{MerkleTrie, Node};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct BlockTrie(MerkleTrie);
 
 impl BlockTrie {
