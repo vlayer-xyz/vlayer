@@ -20,8 +20,8 @@
     "storage",
     "webRequest",
     "cookies",
-    "nativeMessaging", 
-    "tabs",
+    "nativeMessaging",
+    "activeTab",
     "notifications"
   ],
   "externally_connectable": {
