@@ -30,7 +30,7 @@ const twitterUserAddress = (await testHelpers.getTestAddresses())[0];
 
 export async function setupRequestProveButton(element: HTMLButtonElement) {
   element.addEventListener("click", async () => {
-    const provider = createExtensionWebProofProvider({});
+    const provider = createExtensionWebProofProvider();
     const webproof = await provider.getWebProof({
       proverCallCommitment: {
         address: import.meta.env.VITE_PROVER_ADDRESS,
@@ -65,7 +65,7 @@ export const setupVProverButton = (element: HTMLButtonElement) => {
       tls_proof: context.webProof,
       notary_pub_key: notaryPubKey,
     };
-    const client = createVlayerClient({});
+    const client = createVlayerClient();
 
     console.log("Generating proof...");
     const { proof, returnValue } = await client.prove({

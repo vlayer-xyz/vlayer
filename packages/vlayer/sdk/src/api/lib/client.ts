@@ -5,10 +5,13 @@ import { prove } from "../prover";
 import { createExtensionWebProofProvider } from "../webProof";
 export const createVlayerClient = ({
   url = "127.0.0.1:3000",
-  webProofProvider = createExtensionWebProofProvider({}),
+  webProofProvider = createExtensionWebProofProvider(),
 }: {
   url?: string;
   webProofProvider?: WebProofProvider;
+} = {
+  url: "127.0.0.1:3000",
+  webProofProvider: createExtensionWebProofProvider(),
 }): VlayerClient => {
   // TODO : implement high level api
   console.log("createVlayerClient with", url, webProofProvider);

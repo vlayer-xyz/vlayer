@@ -15,7 +15,7 @@ const [prover, verifier] = await testHelpers.deployProverVerifier(
 
 const twitterUserAddress = (await testHelpers.getTestAddresses())[0];
 
-const client = createVlayerClient({});
+const client = createVlayerClient();
 
 testSuccessProvingAndVerification();
 testFailedProving();

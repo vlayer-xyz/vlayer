@@ -34,7 +34,10 @@ const EXTENSION_ID = "ghigbilfcgeibjkkajaekabeldkmijcd";
 export const createExtensionWebProofProvider = ({
   notaryUrl = "https://notary.pse.dev/v0.1.0-alpha.5/",
   wsProxyUrl = "wss://notary.pse.dev/proxy",
-}: WebProofProviderSetup): WebProofProvider => {
+}: WebProofProviderSetup = {
+  notaryUrl: "https://notary.pse.dev/v0.1.0-alpha.5/",
+  wsProxyUrl: "wss://notary.pse.dev/proxy",
+}): WebProofProvider => {
   return {
     getWebProof: async function (webProofSetup: WebProofSetupInput) {
       return new Promise<WebProof>((resolve, reject) => {
