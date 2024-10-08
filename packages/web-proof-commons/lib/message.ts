@@ -3,9 +3,9 @@ export const enum ExtensionAction {
 }
 
 export const enum ExtensionMessageType {
-  ProofDone,
-  ProofError,
-  RedirectBack,
+  ProofDone = "ProofDone",
+  ProofError = "ProofError",
+  RedirectBack = "RedirectBack",
 }
 
 export type ExtensionMessage =
