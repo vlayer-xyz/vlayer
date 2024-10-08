@@ -130,6 +130,11 @@ impl<TX: ReadTx> ChainDbTx<TX> {
         let node = Node::decode(&mut node_rlp.as_ref())?;
         Ok(node)
     }
+
+    pub fn get_merkle_proof(&self, root_hash: B256, block_num: u64) -> ProofResult {
+        MerkleProofBuilder::new(|node_hash| self.get_node(node_hash))
+            .build_proof(root_hash, block_num)
+    }
 }
 
 impl<TX: WriteTx> ChainDbTx<TX> {
