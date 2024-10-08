@@ -65,12 +65,12 @@ What happens in the above code?
   * retrieval of plaintext transcript from the Web Proof and returns it as `Web` for further processing.
 
 * Then we have to ensure that the delivered data makes sense for our case:
-  * `web.jsonGetInt("channel.estimatedEarnings") > 1_000_000` parses JSON body of the HTTP response, retrieves the `channel.estimatedEarnings` path of the JSON and checks if estimated earnings are higher than 10k USD (parsed JSON contains amount in cents).
+  * `web.jsonGetInt("channel.estimatedEarnings") > 1_000_000` [parses JSON body](./regex-and-json.md#json-parsing) of the HTTP response, retrieves the `channel.estimatedEarnings` path of the JSON and checks if estimated earnings are higher than 10k USD (parsed JSON contains amount in cents).
 
 Finally, we can return public input:
 * The `influencerAddr` and the `web.jsonGetString("channel.id")` will be returned if all checks have passed.
 
-If no execution errors occured and proof was produced, we are ready for on-chain verification. 
+If no execution errors occurred and the proof has been produced, we are ready for on-chain verification. 
 
 > 💡 **Try it Now**
 > 
@@ -143,6 +143,6 @@ From privacy perspective, it is important to note that the *Notary* server never
 
 It is important to understand that the *Notary* is a trusted party in the above setup. Since the *Notary* certifies the data, a malicious *Notary* could collude with a malicious client to create fake proofs that would still be successfully verified by `Prover`. Currently vlayer runs it's own *Notary* server, which means that vlayer needs to be trusted to certify HTTPS sessions.
 
- Currently vlayer also needs to be trused when passing additional data (data other than the Web Proof itself) to `Prover` smart contract, e.g. `influencerAddr` in the example above. The Web Proof could be hijacked before running `Prover` and additional data, different from the original, could be passed to `Prover`, e.g. an attacker could pass their own address as `influencerAddr` in our `YouTubeRevenue` example. Before going to production this will be addressed by making the setup trustless through an association of the additional data with a particular Web Proof in a way that's impossible to forge.
+ Currently vlayer also needs to be trusted when passing additional data (data other than the Web Proof itself) to `Prover` smart contract, e.g. `influencerAddr` in the example above. The Web Proof could be hijacked before running `Prover` and additional data, different from the original, could be passed to `Prover`, e.g. an attacker could pass their own address as `influencerAddr` in our `YouTubeRevenue` example. Before going to production this will be addressed by making the setup trustless through an association of the additional data with a particular Web Proof in a way that's impossible to forge.
 
 vlayer will publish a roadmap outlining how it will achieve a high level of security when using the *Notary* service.

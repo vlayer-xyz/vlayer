@@ -11,6 +11,7 @@
   - [Teleport](./features/teleport.md)
   - [Web proof](./features/web.md)
   - [Email proof](./features/email.md)
+  - [JSON parsing & Regex](./features/regex-and-json.md)
 
 - [Advanced](./advanced/prover.md)
   - [Prover](./advanced/prover.md)
