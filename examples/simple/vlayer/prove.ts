@@ -22,12 +22,9 @@ const verifier = await testHelpers.deployContract(SimpleVerifier, [
 ]);
 
 console.log("Proving...");
-const { proof, result } = await prove(
-  prover,
-  SimpleProver.abi,
-  "balance",
-  [john.address],
-);
+const { proof, result } = await prove(prover, SimpleProver.abi, "balance", [
+  john.address,
+]);
 console.log("Proof result:");
 console.log(proof, result);
 
