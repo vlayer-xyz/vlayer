@@ -9,7 +9,8 @@ library ChainIdLibrary {
     }
 
     function is_testnet() internal view returns (bool) {
-        return block.chainid == 11155111; // Sepolia testnet
+        return block.chainid == 11155111 // Ethereum Sepolia testnet
+            || block.chainid == 11155420; // Optimism Sepolia testnet
     }
 
     function is_mainnet() internal view returns (bool) {
