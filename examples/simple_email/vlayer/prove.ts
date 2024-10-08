@@ -17,12 +17,10 @@ const verifier = await testHelpers.deployContract(emailProofVerifier, [
 const john = testHelpers.getTestAccount();
 
 console.log("Proving...");
-const { proof, result } = await prove(
-  prover,
-  emailProofProver.abi,
-  "main",
-  [await preverifyEmail(mimeEmail), john.address],
-);
+const { proof, result } = await prove(prover, emailProofProver.abi, "main", [
+  await preverifyEmail(mimeEmail),
+  john.address,
+]);
 console.log("Proof:", proof);
 
 console.log("Verifying...");
