@@ -173,13 +173,6 @@ jobs:
           path: ${{ steps.package-release.outputs.output_file }}
           if-no-files-found: error
 
-      - name: Push ImageID artifact
-        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
-        with:
-          name: ${{ matrix.platform }}-ImageID.sol
-          path: contracts/src/ImageID.sol
-          if-no-files-found: error
-
   # build-examples:
   #   name: Build examples
   #   runs-on: ubuntu-latest
@@ -250,7 +243,7 @@ jobs:
   #       run: |
   #         echo -n "${{ secrets.SOLDEER_API_KEY }}" > "${SOLDEER_LOGIN_FILE}"
 
-  #     - name: Download ImageID.sol - Linux
+  #     - name: Download guest artifacts
   #       uses: actions/download-artifact@v4
   #       with:
   #         name: guest-artifacts
