@@ -1,10 +1,10 @@
 use std::{
-    collections::HashMap,
+    collections::{HashMap, HashSet},
     iter::once,
     sync::{Arc, RwLock},
 };
 
-use alloy_primitives::{Bytes, B256};
+use alloy_primitives::{BlockNumber, Bytes, ChainId, B256};
 use block_header::EvmBlockHeader;
 use derive_more::{From, Into, IntoIterator};
 use derive_new::new;
@@ -97,6 +97,18 @@ impl MultiEvmInput {
 
     pub fn assert_coherency(&self) {
         self.inputs.values().for_each(EvmInput::assert_coherency);
+    }
+
+    pub fn group_blocks_by_chain(&self) -> HashMap<ChainId, HashSet<BlockNumber>> {
+        let mut map: HashMap<ChainId, HashSet<BlockNumber>> = HashMap::new();
+
+        for loc in self.inputs.keys() {
+            map.entry(loc.chain_id)
+                .or_default()
+                .insert(loc.block_number);
+        }
+
+        map
     }
 }
 

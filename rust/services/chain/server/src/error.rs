@@ -2,7 +2,6 @@ use axum_jrpc::{
     error::{JsonRpcError, JsonRpcErrorReason},
     Value,
 };
-use chain_host::HostError;
 use mpt::MptError;
 use server_utils::FieldValidationError;
 use thiserror::Error;
@@ -13,9 +12,6 @@ pub enum AppError {
     NoBlockNumbers,
     #[error("Invalid field: {0}")]
     FieldValidation(#[from] FieldValidationError),
-
-    #[error("Host error: {0}")]
-    Host(#[from] HostError),
 
     #[error("Bincode error: {0}")]
     Bincode(String),
@@ -28,7 +24,6 @@ impl From<AppError> for JsonRpcError {
     fn from(error: AppError) -> Self {
         match error {
             AppError::Bincode(..)
-            | AppError::Host(..)
             | AppError::Mpt(..)
             | AppError::NoBlockNumbers
             | AppError::FieldValidation(..) => {

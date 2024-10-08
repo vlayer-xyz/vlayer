@@ -128,17 +128,15 @@ fn proof_one_node() -> Result<()> {
 }
 
 #[test]
-fn proof_extension() -> Result<()> {
+#[should_panic(expected = "Attempted to access unresolved node")]
+fn proof_extension() {
     let mut db = get_test_db();
 
     let (root_hash, root) = insert_blocks(&mut db, vec![0, 1_000_000]);
     let proof_trie = check_proof(&db, root_hash, 1_000_000);
 
     // The tree should be sparse - block 0 not included
-    let res = std::panic::catch_unwind(|| proof_trie.get(0));
-    assert!(res.is_err());
-
-    Ok(())
+    proof_trie.get(0);
 }
 
 #[test]

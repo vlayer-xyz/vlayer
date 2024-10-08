@@ -16,6 +16,10 @@ function generateManifest() {
 }
 
 export default defineConfig({
+  build: {
+    minify: false,
+    terserOptions: { compress: false, mangle: false },
+  },
   plugins: [
     tsconfigPaths(),
     webExtension({

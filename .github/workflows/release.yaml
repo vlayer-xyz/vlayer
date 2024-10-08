@@ -62,14 +62,14 @@ jobs:
           find target -name "methods.rs" -exec cp -n {} ./ \;
 
       - name: Push methods.rs artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
         with:
           name: linux-methods.rs
           path: rust/methods.rs
           if-no-files-found: error
 
       - name: Push ImageID artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
         with:
           name: linux-ImageID.sol
           path: rust/target/assets/ImageID.sol
@@ -176,10 +176,17 @@ jobs:
           echo "output_file_suffix=${OUTPUT_FILE_SUFFIX}" >> $GITHUB_OUTPUT
 
       - name: Push artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
         with:
           name: ${{ matrix.target }}
           path: ${{ steps.package-release.outputs.output_file }}
+          if-no-files-found: error
+
+      - name: Push ImageID artifact
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
+        with:
+          name: ${{ matrix.platform }}-ImageID.sol
+          path: contracts/src/ImageID.sol
           if-no-files-found: error
 
   build-examples:
@@ -193,7 +200,7 @@ jobs:
         run: ./bash/pack-examples.sh
 
       - name: Push artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
         with:
           name: examples
           path: out/examples.tar.gz
@@ -227,7 +234,7 @@ jobs:
           tar -czvf browser-extension.tar.gz browser-extension
 
       - name: Push artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
         with:
           name: browser-extension
           path: packages/browser-extension/browser-extension.tar.gz
@@ -279,7 +286,7 @@ jobs:
           forge soldeer push "vlayer~${VLAYER_BUILD}" --dry-run
 
       - name: Push contracts artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
         with:
           name: vlayer-contracts
           path: contracts/contracts.zip
