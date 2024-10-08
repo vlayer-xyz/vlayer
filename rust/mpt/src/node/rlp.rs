@@ -143,6 +143,7 @@ impl Node {
         if matches!(self, Node::Digest(..)) {
             return vec![];
         }
+        let mut nodes = vec![self.rlp_encoded()];
         let mut children = match self {
             Node::Branch(children, _) => children
                 .iter()
@@ -152,8 +153,8 @@ impl Node {
             Node::Extension(_, child) => child.to_rlp_nodes(),
             _ => vec![],
         };
-        children.push(self.rlp_encoded());
-        children
+        nodes.append(&mut children);
+        nodes
     }
 }
 
