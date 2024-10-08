@@ -30,12 +30,14 @@ fn main() -> Result<()> {
         };
 
         if env::var("RISC0_SKIP_BUILD").is_ok() {
+            println!("cargo::warning=Skipped build of call_guest");
             return Ok(());
         }
 
         clean_assets_dir()?;
 
         if let Ok(guest_artifacts_path) = env::var("RISC0_EXISTING_CALL_GUEST") {
+            println!("cargo::warning=Using existing call_guest from {}", &guest_artifacts_path);
             let guest_artifacts_path = Path::new(&guest_artifacts_path);
 
             let methods_rs_path = guest_artifacts_path.join("methods.rs");
