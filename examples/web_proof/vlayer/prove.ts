@@ -25,7 +25,7 @@ async function testSuccessProvingAndVerification() {
 
   const webProof = { tls_proof: tls_proof, notary_pub_key: notaryPubKey };
 
-  const { proof, returnValue } = await client.prove({
+  const { proof, result } = await client.prove({
     address: prover,
     functionName: "main",
     proverAbi: webProofProver.abi,
@@ -43,7 +43,7 @@ async function testSuccessProvingAndVerification() {
     verifier,
     webProofVerifier.abi,
     "verify",
-    [proof, ...returnValue],
+    [proof, ...result],
     twitterUserAddress,
   );
   console.log("Verified!");
@@ -61,7 +61,7 @@ async function testSuccessProvingAndVerification() {
     webProofVerifier.abi,
     verifier,
     "ownerOf",
-    [generateTokenId(returnValue[0])],
+    [generateTokenId(result[0])],
   );
 
   assert.strictEqual(twitterUserAddress, tokenOwnerAddress);

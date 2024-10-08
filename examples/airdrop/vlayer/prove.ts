@@ -14,7 +14,7 @@ console.log("Proving...");
 const sender = testHelpers.getTestAccount().address;
 const {
   proof,
-  returnValue: [claimAddress],
+  result: [claimAddress],
 } = await prove(prover, nftOwnershipProver.abi, "main", [sender]);
 console.log("Proof:");
 console.log(proof);
