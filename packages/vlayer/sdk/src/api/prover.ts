@@ -27,6 +27,7 @@ export async function prove<
   functionName: F,
   args: ContractFunctionArgs<T, AbiStateMutability, F>,
   chainId: number = foundry.id,
+  url: string = "http://127.0.0.1:3000",
 ) {
   const calldata = encodeFunctionData({
     abi: abi as Abi,
@@ -41,7 +42,7 @@ export async function prove<
 
   const {
     result: { proof, evm_call_result },
-  } = await v_call(call, context);
+  } = await v_call(call, context, url);
 
   const [, ...returnValue] = decodeFunctionResult({
     abi: abi as Abi,

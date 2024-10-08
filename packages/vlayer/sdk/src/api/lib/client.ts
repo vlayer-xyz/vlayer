@@ -13,7 +13,7 @@ export const createVlayerClient = ({
   console.log("createVlayerClient with", url, webProofProvider);
   return {
     prove: async ({ address, functionName, chainId, proverAbi, args }) => {
-      return prove(address, proverAbi, functionName, args, chainId);
+      return prove(address, proverAbi, functionName, args, chainId, url);
     },
   };
 };
