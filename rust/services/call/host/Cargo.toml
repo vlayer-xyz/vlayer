@@ -29,6 +29,7 @@ reqwest = { workspace = true }
 futures = "0.3.31"
 tokio = { workspace = true }
 async-trait = "0.1.83"
+tracing = { workspace = true }
 
 [dev-dependencies]
 alloy-sol-types = { workspace = true }

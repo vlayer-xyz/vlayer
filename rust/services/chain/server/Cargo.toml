@@ -19,6 +19,7 @@ risc0-zkp = { workspace = true }
 bincode = "1.3.3"
 mpt = { workspace = true }
 lazy_static.workspace = true
+tracing = { workspace = true }
 
 [lints]
 workspace = true

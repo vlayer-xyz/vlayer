@@ -5,6 +5,7 @@ use chain_server::server::ChainProof;
 use futures::future::join_all;
 use provider::BlockNumber;
 use reqwest::Client;
+use tokio::runtime::Runtime;
 
 use super::fetcher::{ChainProofFetcher, ChainProofFetcherTrait};
 use crate::host::error::HostError;
@@ -27,25 +28,29 @@ impl ChainProofClient {
         }
     }
 
-    pub async fn get_chain_proofs(
+    pub fn get_chain_proofs(
         &self,
         blocks_by_chain: HashMap<ChainId, HashSet<BlockNumber>>,
     ) -> Result<HashMap<ChainId, ChainProof>, HostError> {
-        let futures = blocks_by_chain
-            .into_iter()
-            .map(|(chain_id, block_numbers)| async move {
-                let proof = self
-                    .fetcher
-                    .fetch_chain_proof(chain_id, &block_numbers)
-                    .await?;
-                Ok((chain_id, proof)) as Result<(ChainId, ChainProof), HostError>
-            });
+        let rt = Runtime::new().map_err(|e| HostError::RuntimeInitError(e.to_string()))?;
 
-        let results = join_all(futures).await;
+        rt.block_on(async {
+            let futures = blocks_by_chain
+                .into_iter()
+                .map(|(chain_id, block_numbers)| async move {
+                    let proof = self
+                        .fetcher
+                        .fetch_chain_proof(chain_id, &block_numbers)
+                        .await?;
+                    Ok((chain_id, proof)) as Result<(ChainId, ChainProof), HostError>
+                });
 
-        let chain_proofs: HashMap<ChainId, ChainProof> =
-            results.into_iter().collect::<Result<HashMap<_, _>, _>>()?;
+            let results = join_all(futures).await;
 
-        Ok(chain_proofs)
+            let chain_proofs: HashMap<ChainId, ChainProof> =
+                results.into_iter().collect::<Result<HashMap<_, _>, _>>()?;
+
+            Ok(chain_proofs)
+        })
     }
 }

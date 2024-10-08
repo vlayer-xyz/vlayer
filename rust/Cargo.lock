@@ -1828,6 +1828,7 @@ dependencies = [
  "test-log",
  "thiserror",
  "tokio",
+ "tracing",
  "url",
 ]
 
@@ -2042,6 +2043,7 @@ dependencies = [
  "server_utils",
  "thiserror",
  "tokio",
+ "tracing",
 ]
 
 [[package]]

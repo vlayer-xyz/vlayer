@@ -5,6 +5,7 @@ use chain_server::server::ChainProof;
 use provider::BlockNumber;
 use reqwest::Client;
 use serde::{Deserialize, Serialize};
+use tracing::info;
 
 use crate::host::error::HostError;
 
@@ -62,6 +63,7 @@ impl ChainProofFetcherTrait for ChainProofFetcher {
         chain_id: ChainId,
         block_numbers: &HashSet<BlockNumber>,
     ) -> Result<ChainProof, HostError> {
+        info!("Fetching chain proof for chain_id: {}", chain_id);
         let request_body = ChainProofRequest {
             chain_id,
             block_numbers: block_numbers.clone(),

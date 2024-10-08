@@ -21,7 +21,6 @@ use provider::{
 };
 use risc0_zkvm::ExecutorEnv;
 use serde::Serialize;
-use tokio::runtime::Runtime;
 
 pub use crate::chain_proof::client::ChainProofClient;
 use crate::{
@@ -115,12 +114,10 @@ where
             start_execution_location: self.start_execution_location,
         };
 
-        let rt = Runtime::new().map_err(|e| HostError::RuntimeInitError(e.to_string()))?;
         // todo: use chain proofs in provably_execute
-        let _chain_proofs = rt.block_on(
-            self.chain_proof_client
-                .get_chain_proofs(multi_evm_input.group_blocks_by_chain()),
-        )?;
+        let _chain_proofs = self
+            .chain_proof_client
+            .get_chain_proofs(multi_evm_input.group_blocks_by_chain())?;
 
         let env = build_executor_env(input)
             .map_err(|err| HostError::ExecutorEnvBuilder(err.to_string()))?;
