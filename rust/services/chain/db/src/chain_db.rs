@@ -7,7 +7,8 @@ use std::{
 use alloy_primitives::{keccak256, ChainId, B256};
 use alloy_rlp::{Bytes as RlpBytes, BytesMut, Decodable, Encodable, RlpDecodable, RlpEncodable};
 use bytes::Bytes;
-use mpt::{KeyNibbles, Node, NodeRef, EMPTY_ROOT_HASH};
+use chain_engine::BlockTrie;
+use mpt::{KeyNibbles, MerkleTrie, Node, NodeRef, EMPTY_ROOT_HASH};
 use nybbles::Nibbles;
 use proof_builder::{MerkleProofBuilder, ProofResult};
 use thiserror::Error;
@@ -40,6 +41,10 @@ impl ChainInfo {
             root_hash,
             zk_proof: zk_proof.into(),
         }
+    }
+
+    pub fn block_range(&self) -> Range<u64> {
+        self.first_block..self.last_block + 1
     }
 }
 
@@ -104,9 +109,28 @@ impl<DB: for<'a> Database<'a>> ChainDb<DB> {
     }
 
     pub fn get_merkle_proof(&self, root_hash: B256, block_num: u64) -> ProofResult {
+        self.begin_ro()?.get_merkle_proof(root_hash, block_num)
+    }
+
+    pub fn get_chain_trie(&self, chain_id: ChainId) -> ChainDbResult<Option<ChainTrie>> {
         let tx = self.begin_ro()?;
-        let proof_builder = MerkleProofBuilder::new(|node_hash| tx.get_node(node_hash));
-        proof_builder.build_proof(root_hash, block_num)
+        let Some(ChainInfo {
+            first_block,
+            last_block,
+            root_hash,
+            ..
+        }) = self.get_chain_info(chain_id)?
+        else {
+            return Ok(None);
+        };
+        let first_block_proof = tx.get_merkle_proof(root_hash, first_block)?;
+        let last_block_proof = tx.get_merkle_proof(root_hash, last_block)?;
+        let trie: MerkleTrie = first_block_proof
+            .into_vec()
+            .into_iter()
+            .chain(last_block_proof)
+            .collect();
+        Ok(Some(ChainTrie::new(first_block..last_block, trie)))
     }
 
     pub fn update_chain(
@@ -206,4 +230,18 @@ where
     let removed = old_set.difference(&new_set).cloned().collect();
 
     (added, removed)
+}
+
+pub struct ChainTrie {
+    block_range: Range<u64>,
+    trie: BlockTrie,
+}
+
+impl ChainTrie {
+    pub fn new(block_range: Range<u64>, trie: impl Into<BlockTrie>) -> Self {
+        Self {
+            block_range,
+            trie: trie.into(),
+        }
+    }
 }
