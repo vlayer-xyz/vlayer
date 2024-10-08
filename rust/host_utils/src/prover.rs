@@ -1,6 +1,6 @@
 use anyhow::Result;
 use risc0_zkvm::{
-    BonsaiProver, ExecutorEnv, ExternalProver, ProveInfo, Prover as ProverTrait, ProverOpts,
+    BonsaiProver, ExecutorEnv, LocalProver, ProveInfo, Prover as ProverTrait, ProverOpts,
 };
 
 use crate::ProofMode;
@@ -38,5 +38,5 @@ fn prove_fake(env: ExecutorEnv<'_>, elf: &[u8]) -> Result<ProveInfo> {
         std::env::set_var("RISC0_DEV_MODE", "1");
     }
 
-    ExternalProver::new("vlayer: ipc", "r0vm").prove(env, elf)
+    LocalProver::new("vlayer").prove(env, elf)
 }
