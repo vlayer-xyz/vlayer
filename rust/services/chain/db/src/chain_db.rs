@@ -20,7 +20,7 @@ const NODES: &str = "nodes";
 /// Chains table. Holds `chain_id -> chain_info` mapping
 const CHAINS: &str = "chains";
 
-#[derive(Debug, Clone, PartialEq, Eq, RlpEncodable, RlpDecodable)]
+#[derive(Debug, Clone, PartialEq, Eq, RlpEncodable, RlpDecodable, Default)]
 pub struct ChainInfo {
     pub first_block: u64,
     pub last_block: u64,
@@ -35,6 +35,27 @@ impl ChainInfo {
             last_block: range.end - 1,
             merkle_root,
             zk_proof: zk_proof.into(),
+        }
+    }
+}
+
+#[derive(Debug, Default)]
+pub struct ChainUpdate {
+    pub chain_info: ChainInfo,
+    pub added_nodes: Box<[Bytes]>,
+    pub removed_nodes: Box<[Bytes]>,
+}
+
+impl ChainUpdate {
+    pub fn new(
+        chain_info: ChainInfo,
+        added_nodes: impl IntoIterator<Item = Bytes>,
+        removed_nodes: impl IntoIterator<Item = Bytes>,
+    ) -> Self {
+        Self {
+            chain_info,
+            added_nodes: added_nodes.into_iter().collect(),
+            removed_nodes: removed_nodes.into_iter().collect(),
         }
     }
 }
