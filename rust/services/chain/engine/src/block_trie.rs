@@ -34,7 +34,7 @@ impl BlockTrie {
         self.0.to_rlp_nodes()
     }
 
-    pub fn root_node(self) -> Node {
+    pub fn into_root(self) -> Node {
         self.0 .0
     }
 }

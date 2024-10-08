@@ -45,7 +45,7 @@ fn insert_blocks(
         tx.insert_node(node_rlp).expect("insert_node failed");
     }
     tx.commit().expect("commit failed");
-    (block_trie.hash_slow(), block_trie.root_node())
+    (block_trie.hash_slow(), block_trie.into_root())
 }
 
 fn check_proof(db: &ChainDb<InMemoryDatabase>, root_hash: B256, block_num: u64) -> BlockTrie {
