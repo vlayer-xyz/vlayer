@@ -5,7 +5,7 @@ fn main() -> Result<()> {
     {
         use std::{
             env,
-            fs::{create_dir_all, remove_file, copy},
+            fs::{copy, create_dir_all, remove_file},
             path::Path,
         };
 
