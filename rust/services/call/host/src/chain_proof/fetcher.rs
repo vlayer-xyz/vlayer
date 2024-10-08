@@ -63,7 +63,11 @@ impl ChainProofFetcherTrait for ChainProofFetcher {
         chain_id: ChainId,
         block_numbers: &HashSet<BlockNumber>,
     ) -> Result<ChainProof, HostError> {
-        info!("Fetching chain proof for chain_id: {}", chain_id);
+        info!(
+            "Fetching chain proof for chain_id: {}, number of block_numbers: {}",
+            chain_id,
+            block_numbers.len()
+        );
         let request_body = ChainProofRequest {
             chain_id,
             block_numbers: block_numbers.clone(),

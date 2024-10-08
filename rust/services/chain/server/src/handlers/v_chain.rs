@@ -29,7 +29,11 @@ const SOME_RISC0_CHAIN_GUEST_ID: [u32; 8] = [
 ];
 
 pub async fn v_chain(merkle_trie: MerkleTrie, params: Params) -> Result<ChainProof, AppError> {
-    info!("v_chain called with chain_id: {}", params.chain_id,);
+    info!(
+        "v_chain called with chain_id: {}, number of block_numbers: {}",
+        params.chain_id,
+        params.block_numbers.len()
+    );
     if params.block_numbers.is_empty() {
         return Err(AppError::NoBlockNumbers);
     };
