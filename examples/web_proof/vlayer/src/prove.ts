@@ -65,9 +65,7 @@ export const setupVProverButton = (element: HTMLButtonElement) => {
       tls_proof: context.webProof,
       notary_pub_key: notaryPubKey,
     };
-    const client = createVlayerClient({
-      url: "127.0.0.1:3000",
-    });
+    const client = createVlayerClient({});
 
     console.log("Generating proof...");
     const { proof, returnValue } = await client.prove({
