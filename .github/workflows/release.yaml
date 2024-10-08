@@ -287,7 +287,7 @@ jobs:
         with:
           path: ./dist
           merge-multiple: true
-      - run: rm ./dist/ImageID.sol
+      - run: rm ./dist/{ImageID.sol,Elf.sol,methods.rs} || true
 
       - name: Release tagged nightly
         uses: ncipollo/release-action@v1
@@ -316,7 +316,7 @@ jobs:
         with:
           path: ./dist/latest
           merge-multiple: true
-      - run: rm ./dist/latest/*ImageID.sol
+      - run: rm ./dist/latest/{ImageID.sol,Elf.sol,methods.rs} || true
       - run: cp -r "./dist/latest" "./dist/${{ github.sha }}"
 
       - name: Push tagged binaries to AWS S3
