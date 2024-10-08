@@ -65,7 +65,7 @@ What happens in the above code?
   * retrieval of plaintext transcript from the Web Proof and returns it as `Web` for further processing.
 
 * Then we have to ensure that the delivered data makes sense for our case:
-  * `web.jsonGetInt("channel.estimatedEarnings") > 1_000_000` parses JSON body of the HTTP response, retrieves the `channel.estimatedEarnings` path of the JSON and checks if estimated earnings are higher than 10k USD (parsed JSON contains amount in cents).
+  * `web.jsonGetInt("channel.estimatedEarnings") > 1_000_000` [parses JSON body](./regex-and-json.md#json-parsing) of the HTTP response, retrieves the `channel.estimatedEarnings` path of the JSON and checks if estimated earnings are higher than 10k USD (parsed JSON contains amount in cents).
 
 Finally, we can return public input:
 * The `influencerAddr` and the `web.jsonGetString("channel.id")` will be returned if all checks have passed.
