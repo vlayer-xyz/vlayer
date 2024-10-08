@@ -48,6 +48,8 @@ Paths to the fields are separated by dots. The above code will extract the value
     }
   }
 }
+```
+
 Functions will revert in case the field under the path does not exist or the value is not of the expected type.
 
 Accessing fields inside an array is not currently supported.
