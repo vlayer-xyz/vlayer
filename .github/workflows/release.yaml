@@ -51,11 +51,6 @@ jobs:
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: nightly-d75318c9c7a1c6af5404fe96f63ca890dcdd588d # 2024-09-05
-          
-      - name: Install LLVM and Clang
-        uses: KyleMayes/install-llvm-action@v2.0.4
-        with:
-          version: "17.0.6"
 
       - name: "Build guest wrapper"
         run: cargo build --release --target x86_64-unknown-linux-gnu --package call_guest_wrapper
