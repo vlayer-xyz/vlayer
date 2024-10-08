@@ -43,3 +43,16 @@ impl From<MerkleTrie> for BlockTrie {
         Self(mpt)
     }
 }
+
+impl FromIterator<(u64, B256)> for BlockTrie {
+    fn from_iter<I>(iter: I) -> Self
+    where
+        I: IntoIterator<Item = (u64, B256)>,
+    {
+        let mut trie = BlockTrie::new();
+        for (key, value) in iter {
+            trie.insert(key, &value)
+        }
+        trie
+    }
+}
