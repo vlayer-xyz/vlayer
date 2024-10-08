@@ -24,16 +24,16 @@ const CHAINS: &str = "chains";
 pub struct ChainInfo {
     pub first_block: u64,
     pub last_block: u64,
-    pub merkle_root: B256,
+    pub root_hash: B256,
     pub zk_proof: RlpBytes,
 }
 
 impl ChainInfo {
-    pub fn new(range: Range<u64>, merkle_root: B256, zk_proof: impl Into<Bytes>) -> Self {
+    pub fn new(block_range: Range<u64>, root_hash: B256, zk_proof: impl Into<Bytes>) -> Self {
         Self {
-            first_block: range.start,
-            last_block: range.end - 1,
-            merkle_root,
+            first_block: block_range.start,
+            last_block: block_range.end - 1,
+            root_hash,
             zk_proof: zk_proof.into(),
         }
     }
