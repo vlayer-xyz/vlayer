@@ -7,7 +7,8 @@ import {
 import {
   ExtensionAction,
   ExtensionMessage,
-} from "@vlayer/web-proof-commons/constants/message";
+  ExtensionMessageType,
+} from "@vlayer/web-proof-commons";
 
 import { WebProof } from "../../lib/types/webProof";
 
@@ -49,26 +50,14 @@ export const createExtensionWebProofProvider = ({
         });
         const port = chrome.runtime.connect(EXTENSION_ID);
         // TODO: validate message in runtime
-        port.onMessage.addListener(
-          (
-            message:
-              | {
-                  type: ExtensionMessage.ProofDone;
-                  proof: WebProof;
-                }
-              | {
-                  type: ExtensionMessage.ProofError;
-                  error: { message: string };
-                },
-          ) => {
-            if (message.type === ExtensionMessage.ProofDone) {
-              resolve(message.proof);
-            }
-            if (message.type === ExtensionMessage.ProofError) {
-              reject(message.error);
-            }
-          },
-        );
+        port.onMessage.addListener((message: ExtensionMessage) => {
+          if (message.type === ExtensionMessageType.ProofDone) {
+            resolve(message.proof);
+          }
+          if (message.type === ExtensionMessageType.ProofError) {
+            reject(message.error);
+          }
+        });
       });
     },
   };

@@ -27,7 +27,8 @@
             "types/*": ["./vlayer/sdk/src/api/lib/types/*"],
             "components/*" : ["./browser-extension/src/components/*"],
             "constants/*" : ["./browser-extension/src/constants/*"],
-            "hooks/*" : ["./browser-extension/src/hooks/*"]
+            "hooks/*" : ["./browser-extension/src/hooks/*"],
+            "lib/*" : ["./browser-extension/src/lib/*"]
         }
     }
 }

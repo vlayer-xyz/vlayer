@@ -1,8 +1,8 @@
 import browser from "webextension-polyfill";
 import {
   ExtensionAction,
-  ExtensionMessage,
-} from "@vlayer/web-proof-commons/constants/message";
+  ExtensionMessageType,
+} from "@vlayer/web-proof-commons";
 import { WebProverSessionContextManager } from "./state/webProverSessionContext";
 
 chrome.tabs.onActivated.addListener(function (activeInfo) {
@@ -22,8 +22,8 @@ browser.runtime.onConnectExternal.addListener((connectedPort) => {
 
 browser.runtime.onMessage.addListener(async (message) => {
   if (
-    message.type === ExtensionMessage.ProofDone ||
-    message.type === ExtensionMessage.ProofError
+    message.type === ExtensionMessageType.ProofDone ||
+    message.type === ExtensionMessageType.ProofError
   ) {
     console.log("sending message to webpage", message);
     try {
@@ -33,8 +33,7 @@ browser.runtime.onMessage.addListener(async (message) => {
     }
   }
   console.log(message);
-  //REFACTOR : once commons are ready use ExtensionMessage.Redirect
-  if (message.type === "redirectBack") {
+  if (message.type === ExtensionMessageType.RedirectBack) {
     console.log("Redirect back to webpage", port?.sender?.tab?.id);
     //close current
     const currentTab = (await browser.tabs.query({ active: true }))[0];
