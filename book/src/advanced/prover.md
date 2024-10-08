@@ -35,7 +35,7 @@ Note that `web.content` becomes a public input for on-chain verification because
 
 > The list of returned arguments must match the arguments used by the `Verifier` (see the [Verifier page](/advanced/verifier.html) for details).  
 
-vlayer `Prover` returns an empty proof as its first argument to enable passing dynamical arguments from `Prover` to `Verifier`. Abi encoding of dynamical arguments sets a starting position of each argument and it gets disrupted when the proof is added to `Verifier`'s arguments. Empty `Proof` returned by `Prover` is created by its method `proof()`.
+vlayer `Prover` returns an empty proof as its first argument to enable passing non-fixed-size arguments from `Prover` to `Verifier`. ABI encoding of non-fixed-size types sets a starting position of each argument and it gets disrupted when the proof is added to `Verifier`'s arguments. Empty `Proof` returned by `Prover` is created by its method `proof()`.
 
 ## Deployment 
 The `Prover` contract code must be deployed before use. To do so, just use regular [Foundry](https://book.getfoundry.sh/tutorials/solidity-scripting) workflow. 
