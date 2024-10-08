@@ -8,6 +8,7 @@ use server_utils::ProofMode;
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct ServerConfig {
     pub rpc_urls: HashMap<ChainId, String>,
+    pub host: String,
     pub port: u16,
     pub proof_mode: ProofMode,
 }
@@ -17,6 +18,7 @@ impl Default for ServerConfig {
         let anvil_url = "http://localhost:8545";
         Self {
             rpc_urls: HashMap::from([(TEST_CHAIN_ID, anvil_url.to_string())]),
+            host: "127.0.0.1".into(),
             port: 3000,
             proof_mode: ProofMode::Groth16,
         }
@@ -24,7 +26,12 @@ impl Default for ServerConfig {
 }
 
 impl ServerConfig {
-    pub fn new(rpc_mappings: Vec<(ChainId, String)>, proof_mode: ProofMode) -> ServerConfig {
+    pub fn new(
+        rpc_mappings: Vec<(ChainId, String)>,
+        proof_mode: ProofMode,
+        host: Option<String>,
+        port: Option<u16>,
+    ) -> ServerConfig {
         let default = ServerConfig::default();
         ServerConfig {
             rpc_urls: if rpc_mappings.is_empty() {
@@ -32,7 +39,8 @@ impl ServerConfig {
             } else {
                 rpc_mappings.into_iter().collect()
             },
-            port: default.port,
+            host: host.unwrap_or(default.host),
+            port: port.unwrap_or(default.port),
             proof_mode,
         }
     }

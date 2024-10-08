@@ -12,7 +12,7 @@ use crate::{
 
 pub async fn serve(config: ServerConfig) -> anyhow::Result<()> {
     let listener =
-        tokio::net::TcpListener::bind(format!("{}:{}", "127.0.0.1", config.port)).await?;
+        tokio::net::TcpListener::bind(format!("{}:{}", config.host, config.port)).await?;
 
     info!("listening on {}", listener.local_addr()?);
     axum::serve(listener, server(config)).await?;
