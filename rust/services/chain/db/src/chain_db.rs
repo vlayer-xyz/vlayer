@@ -130,7 +130,7 @@ impl<DB: for<'a> Database<'a>> ChainDb<DB> {
             .into_iter()
             .chain(last_block_proof)
             .collect();
-        Ok(Some(ChainTrie::new(first_block..last_block, trie)))
+        Ok(Some(ChainTrie::new(first_block..last_block + 1, trie)))
     }
 
     pub fn update_chain(
