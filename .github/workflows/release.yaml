@@ -131,11 +131,6 @@ jobs:
         with:
           name: guest-artifacts
           path: rust/call_guest_replacement
-      - name: Extract guest artifacts
-        run: |
-          mv call_guest_replacement/linux-methods.rs call_guest_replacement/methods.rs
-          mv call_guest_replacement/linux-ImageID.sol call_guest_replacement/ImageID.sol
-          ls -al call_guest_replacement
 
       - name: "Build binaries"
         env:
@@ -264,7 +259,7 @@ jobs:
   #     - name: Copy ImageID to contracts
   #       run: |
   #         rm contracts/src/ImageID.sol;
-  #         cp guest-artifacts/linux-ImageID.sol contracts/src/ImageID.sol
+  #         cp guest-artifacts/ImageID.sol contracts/src/ImageID.sol
 
   #     - name: Release contracts to Soldeer
   #       working-directory: contracts
