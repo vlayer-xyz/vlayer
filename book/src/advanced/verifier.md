@@ -43,14 +43,14 @@ The `onlyVerified` modifier takes two arguments:
 Passing `Proof` as the first argument to the *verification function* is mandatory. Note that even though the proof is not used directly in the body of the verified function, `onlyVerified` will have access to it via `msg.data`.
 
 ### Verified arguments
-After the proof, we need to pass verified arguments. Verified arguments are the values returned by the `Prover` contract function. We need to pass all the arguments return by prover, in the same order and each of the same type.
+After the proof, we need to pass verified arguments. Verified arguments are the values returned by the `Prover` contract function. We need to pass all the arguments returned by prover, in the same order and each of the same type.
 
 See the example below.
 
 ```solidity
 contract Prover {
 
-  function p() return (address verifiedArg1, uint256 verifiedArg2, bytes32 verifiedArg3) {
+  function p() return (Proof p, address verifiedArg1, uint256 verifiedArg2, bytes32 verifiedArg3) {
     ...
   }
 }
@@ -61,19 +61,17 @@ contract Verifier {
 
 ```
 
-> Note: Arrays are not yet supported as return values from the Prover function, so public inputs cannot be arrays. 
-
 > Note: Passing different variables (in terms of type, name, or order) would either revert execution or cause undefined behavior and should be avoided for security reasons.
 
 
 ### Extra arguments
-After proof and verified arguments, additional arguments can be passed if needed.
+Extra arguments can be passed to `Verifier` by using additional function. This function manages all additional operations connected with extra arguments and then calls the actual verification function.  
 
-In general, *verification function* should look like this:
+See the example below:
+
 ```solidity
-function v(Proof _p, verifiedArg1, verifiedArg2, ..., verifiedArgN, extraArg1, extraArg2, ..., extraArgM) {
+function f(Proof _p, verifiedArg1, verifiedArg2, extraArg1, extraArg2) {
   ...
+  v(_p, verifiedArg1, verifiedArg2);
 }
 ```
-
-Extra arguments have no effect on the verification process.
