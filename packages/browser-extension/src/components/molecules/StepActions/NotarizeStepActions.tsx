@@ -5,7 +5,7 @@ import { StepStatus } from "constants/step";
 import { Button } from "components/atoms";
 import { useTlsnProver } from "hooks/useTlsnProver";
 import { AnimatePresence, motion } from "framer-motion";
-import sendMessageToSdk from "lib/sendMessageToSdk";
+import sendMessageToServiceWorker from "lib/sendMessageToServiceWorker";
 import { ExtensionMessageType } from "@vlayer/web-proof-commons";
 
 type NotarizeStepActionProps = {
@@ -25,7 +25,7 @@ const RedirectCallout: FC = () => {
           // hide callout
           setShow(false);
           // tell service worker to redirect back to orginal page
-          sendMessageToSdk({
+          sendMessageToServiceWorker({
             type: ExtensionMessageType.RedirectBack,
           });
           clearInterval(interval);

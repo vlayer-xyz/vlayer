@@ -13,7 +13,7 @@ import { useProvingSessionConfig } from "./useProvingSessionConfig";
 import { useProvenUrl } from "./useProvenUrl";
 import { useTrackHistory } from "hooks/useTrackHistory";
 import { removeQueryParams } from "lib/removeQueryParams";
-import sendMessageToSdk from "lib/sendMessageToSdk";
+import sendMessageToServiceWorker from "lib/sendMessageToServiceWorker";
 
 const TlsnProofContext = createContext({
   prove: () => {},
@@ -62,7 +62,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
       });
       // let service worker know proof is done
       console.log("sending proof to background", tlsnProof);
-      sendMessageToSdk({
+      sendMessageToServiceWorker({
         type: ExtensionMessageType.ProofDone,
         proof: tlsnProof,
       });
@@ -70,7 +70,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
       setIsProving(false);
     } catch (e: unknown) {
       console.error("error in tlsnotary", e);
-      sendMessageToSdk({
+      sendMessageToServiceWorker({
         type: ExtensionMessageType.ProofError,
         error: e instanceof Error ? e.message : String(e),
       });
