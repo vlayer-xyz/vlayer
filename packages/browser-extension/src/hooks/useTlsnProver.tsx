@@ -8,7 +8,7 @@ import React, {
   useState,
 } from "react";
 import { formatTlsnHeaders } from "lib/formatTlsnHeaders";
-import { ExtensionMessageType } from "@vlayer/web-proof-commons";
+import { ensure, ExtensionMessageType } from "@vlayer/web-proof-commons";
 import { useProvingSessionConfig } from "./useProvingSessionConfig";
 import { useProvenUrl } from "./useProvenUrl";
 import { useTrackHistory } from "hooks/useTrackHistory";
@@ -47,11 +47,11 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
 
   const prove = useCallback(async () => {
     setIsProving(true);
+
     try {
       //TODO : make sure on hooks level its defined
-      if (!provenUrl?.url) {
-        throw new Error("Missing URL to proove");
-      }
+      ensure(provenUrl?.url, "Missing URL to prove");
+      ensure(provingSessionConfig, "Missing proving session config");
 
       const tlsnProof = await tlsnProve(removeQueryParams(provenUrl?.url), {
         notaryUrl: provingSessionConfig.notaryUrl,

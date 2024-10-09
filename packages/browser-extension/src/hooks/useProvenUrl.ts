@@ -6,7 +6,8 @@ import { useProvingSessionConfig } from "./useProvingSessionConfig";
 // if one day we will decide to support multiple parallel proves scenario
 
 export const useProvenUrl = () => {
-  const [{ steps }] = useProvingSessionConfig();
+  const [config] = useProvingSessionConfig();
+  const steps = config?.steps || [];
   const [browsingHistory] = useBrowsingHistory();
   return useMemo(() => {
     const provenUrlAddress =
