@@ -1,4 +1,4 @@
-import { testHelpers, prove } from "@vlayer/sdk";
+import { testHelpers, createVlayerClient } from "@vlayer/sdk";
 
 import SimpleProver from "../out/SimpleProver.sol/SimpleProver";
 import SimpleVerifier from "../out/SimpleVerifier.sol/SimpleVerifier";
@@ -22,9 +22,13 @@ const verifier = await testHelpers.deployContract(SimpleVerifier, [
 ]);
 
 console.log("Proving...");
-const { proof, result } = await prove(prover, SimpleProver.abi, "balance", [
-  john.address,
-]);
+const vlayer = createVlayerClient();
+const { proof, result } = await vlayer.prove({
+  address: prover,
+  proverAbi: SimpleProver.abi,
+  functionName: "balance",
+  args: [john.address],
+});
 console.log("Proof result:");
 console.log(proof, result);
 

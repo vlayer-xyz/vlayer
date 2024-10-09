@@ -1,7 +1,7 @@
 import { type Address, erc20Abi } from "viem";
 import assert from "node:assert";
 
-import { testHelpers, prove } from "@vlayer/sdk";
+import { testHelpers, createVlayerClient } from "@vlayer/sdk";
 import nftOwnershipProver from "../out/NftOwnershipProver.sol/NftOwnershipProver";
 import airdropVerifier from "../out/AirdropVerifier.sol/Airdrop";
 
@@ -12,10 +12,16 @@ const [prover, verifier] = await testHelpers.deployProverVerifier(
 
 console.log("Proving...");
 const sender = testHelpers.getTestAccount().address;
+const vlayer = createVlayerClient();
 const {
   proof,
   result: [claimAddress],
-} = await prove(prover, nftOwnershipProver.abi, "main", [sender]);
+} = await vlayer.prove({
+  address: prover,
+  proverAbi: nftOwnershipProver.abi,
+  functionName: "main",
+  args: [sender],
+});
 console.log("Proof:");
 console.log(proof);
 assert.equal(claimAddress, sender);
