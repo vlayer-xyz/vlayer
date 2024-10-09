@@ -22,6 +22,7 @@ additional-js = ["mermaid.min.js", "mermaid-init.js", "src/static/solidity.min.j
 additional-css = ["theme/tabs.css", "theme/aside.css", "theme/menu.css"]
 git-repository-url = "https://github.com/vlayer-xyz/vlayer"
 git-repository-icon = "fa-github"
+edit-url-template = "https://github.com/vlayer-xyz/vlayer/edit/main/book/{path}"
 
 [output.html.fold]
 enable = true    # whether or not to enable section folding

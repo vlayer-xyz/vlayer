@@ -8,7 +8,7 @@
     </svg>
     Actively in Development
   </div>
-  <p>Our team is currently working on this feature. In case of any bug please retry in 1-2 weeks. We appreciate your patience. </p>
+  <p>Our team is currently working on this feature. If you experience any bugs, please let us know <a href="https://discord.gg/JS6whdessP" target="_blank">on our Discord</a>. We appreciate your patience. </p>
 </div>
 
 vlayer `Prover` contracts are almost the same as regular Solidity smart contracts, with two main differences:

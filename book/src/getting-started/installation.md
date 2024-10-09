@@ -6,7 +6,7 @@
 </svg>
     Ready to Use
   </div>
-  <p>This feature is fully implemented and ready for use. If you encounter any issues, please <a href="https://github.com/vlayer-xyz/vlayer/issues/new">submit a bug report</a> to help us improve.</p>
+  <p>This feature is fully implemented and ready for use. If you encounter any issues, please <a href="https://discord.gg/JS6whdessP" target="_blank">submit a bug report on our Discord</a> to help us improve.</p>
 </div>
 
 The easiest way to install vlayer is by using `vlayerup`, the vlayer toolchain installer.
