@@ -54,7 +54,7 @@ jobs:
 
       - name: "Save methods.rs"
         run: |
-          find target -name "methods.rs" -exec cp -n {} ./target/assets/ \;
+          find target -type f -name "methods.rs" -exec cp -n {} ./target/assets/ \;
 
       - name: Push guest artifacts
         uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
@@ -248,7 +248,7 @@ jobs:
 
       - name: Copy ImageID to contracts
         run: |
-          rm contracts/src/ImageID.sol;
+          rm contracts/src/ImageID.sol
           cp guest-artifacts/ImageID.sol contracts/src/ImageID.sol
 
       - name: Release contracts to Soldeer
