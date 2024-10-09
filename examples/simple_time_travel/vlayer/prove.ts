@@ -6,18 +6,17 @@ import { createVlayerClient } from "@vlayer/sdk";
 import averageBalance from "../out/AverageBalance.sol/AverageBalance";
 import averageBalanceVerifier from "../out/AverageBalanceVerifier.sol/AverageBalanceVerifier";
 
-const chainId = optimismSepolia.id;
 const tokenOwner = "0xE6b08c02Dbf3a0a4D3763136285B85A9B492E391";
 
 console.log("Proving...");
 const vlayer = createVlayerClient();
 
 const { hash } = await vlayer.prove({
-  address: "0x32A68f66789B12c96f1e2486D73bd33f4070F49b",
+  address: "0x80d97726548fedae6ad7cf8df4f2b514fd24afba",,
   proverAbi: averageBalance.abi,
   functionName: "averageBalanceOf",
   args: [tokenOwner],
-  chainId,
+  optimismSepolia.id,
 });
 const { proof, result } = await vlayer.waitForProvingResult({ hash });
 console.log("Response:", proof, result);
@@ -40,7 +39,7 @@ if (!privateKey) {
 const deployer = privateKeyToAccount(`0x${privateKey}`);
 
 const txHash = await walletClient.writeContract({
-  address: "0x0fb5a31f0c3155911bc30be7d0867337a1bfe483",
+  address: "0xdc4fe5c34573d9ddb76d8ec1197bf7b0a5d3cdd1",
   abi: averageBalanceVerifier.abi,
   functionName: "claim",
   args: [proof, ...result],

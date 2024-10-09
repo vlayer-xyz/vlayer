@@ -28,6 +28,7 @@ pub static CHAIN_NAMES: Lazy<HashMap<String, ChainId>> = Lazy::new(|| {
     HashMap::from([
         ("mainnet".into(), Chain::mainnet().id()),
         ("sepolia".into(), Chain::sepolia().id()),
+        ("optimism-sepolia".into(), Chain::optimism_sepolia().id()),
     ])
 });
 
