@@ -37,7 +37,7 @@ contract YouTubeRevenue is Prover {
     
     public string dataUrl = "https://studio.youtube.com/creator/get_channel_dashboard";
     
-    function main(WebProof calldata webProof, address influencerAddr) public returns (address, string) {
+    function main(WebProof calldata webProof, address influencerAddr) public returns (Proof, address, string) {
       Web memory web = webProof.verify(dataUrl);
 
       require(
@@ -45,7 +45,7 @@ contract YouTubeRevenue is Prover {
         "Earnings less than $10000"
       );
 
-      return (influencerAddr, webProof.jsonGetString("channel.id"));
+      return (proof(), influencerAddr, webProof.jsonGetString("channel.id"));
     }
 } 
 ```

@@ -48,14 +48,14 @@ contract EmailDomainProver is Prover {
     function main(UnverifiedEmail calldata unverifiedEmail, address targetWallet)
         public
         view
-        returns (bytes32, address)
+        returns (Proof, bytes32, address)
     {
         VerifiedEmail memory email = unverifiedEmail.verify();
 
         require(email.from.contains(targetDomain), "incorrect sender domain");
         require(email.subject.equal("Verify me for company NFT"), "incorrect subject");
 
-        return (sha256(abi.encodePacked(email.from)), targetWallet);
+        return (proof(), sha256(abi.encodePacked(email.from)), targetWallet);
     }
 }
 ```

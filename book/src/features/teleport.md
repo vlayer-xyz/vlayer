@@ -42,7 +42,7 @@ contract CrossChainBalance is Prover {
         tokens[2] = Erc20Token(0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85, 10, 124962954); 
     }
 
-    function balanceOf(address _owner) public returns (address, uint256) {
+    function balanceOf(address _owner) public returns (Proof, address, uint256) {
         uint256 balance = 0;
 
         for (uint256 i = 0; i < tokens.length; i++) {
@@ -50,7 +50,7 @@ contract CrossChainBalance is Prover {
             balance += IERC20(tokens[i].addr).balanceOf(_owner);
         }
 
-        return (_owner_, balance);
+        return (proof(), _owner_, balance);
     }
 }
 ```

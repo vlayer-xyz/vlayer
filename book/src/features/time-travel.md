@@ -38,7 +38,7 @@ contract AverageBalance is Prover {
         step = 10000;
     }
 
-    function averageBalanceOf(address _owner) public returns (address, uint256) {
+    function averageBalanceOf(address _owner) public returns (Proof, address, uint256) {
         uint256 totalBalance = 0;
         uint256 iterations = 0;
 
@@ -47,7 +47,7 @@ contract AverageBalance is Prover {
             totalBalance += token.balanceOf(_owner); // USDC balance
             iterations += 1;
         }
-        return (_owner, totalBalance / iterations);
+        return (proof(), _owner, totalBalance / iterations);
     }
 }
 ```
