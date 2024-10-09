@@ -1,6 +1,6 @@
 import { type Address } from "viem";
 
-import { testHelpers, prove } from "@vlayer/sdk";
+import { testHelpers, createVlayerClient } from "@vlayer/sdk";
 import vToyken from "../out/VToyken.sol/VToyken";
 import erc20Prover from "../out/ERC20Prover.sol/ERC20Prover";
 
@@ -12,6 +12,12 @@ const prover: Address = await testHelpers.deployContract(erc20Prover, [token]);
 console.log(`Prover has been deployed on ${prover} address`);
 
 console.log("Proving...");
-const response = await prove(prover, erc20Prover.abi, "prove", [tokenOwners]);
+const vlayer = createVlayerClient();
+const response = await vlayer.prove({
+  address: prover,
+  proverAbi: erc20Prover.abi,
+  functionName: "prove",
+  args: [tokenOwners],
+});
 console.log("Response:");
 console.log(response);

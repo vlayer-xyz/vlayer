@@ -1,5 +1,5 @@
 import fs from "fs";
-import { testHelpers, prove, preverifyEmail } from "@vlayer/sdk";
+import { testHelpers, createVlayerClient, preverifyEmail } from "@vlayer/sdk";
 import emailProofProver from "../out/EmailDomainProver.sol/EmailDomainProver";
 import emailProofVerifier from "../out/EmailProofVerifier.sol/EmailDomainVerifier";
 
@@ -17,10 +17,13 @@ const verifier = await testHelpers.deployContract(emailProofVerifier, [
 const john = testHelpers.getTestAccount();
 
 console.log("Proving...");
-const { proof, result } = await prove(prover, emailProofProver.abi, "main", [
-  await preverifyEmail(mimeEmail),
-  john.address,
-]);
+const vlayer = createVlayerClient();
+const { proof, result } = await vlayer.prove({
+  address: prover,
+  proverAbi: emailProofProver.abi,
+  functionName: "main",
+  args: [await preverifyEmail(mimeEmail), john.address],
+});
 console.log("Proof:", proof);
 
 console.log("Verifying...");

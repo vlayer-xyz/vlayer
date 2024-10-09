@@ -2,7 +2,7 @@ import type { Address } from "viem";
 
 import { sepolia } from "viem/chains";
 
-import { testHelpers, prove } from "@vlayer/sdk";
+import { testHelpers, createVlayerClient } from "@vlayer/sdk";
 import averageBalance from "../out/AverageBalance.sol/AverageBalance";
 import averageBalanceVerifier from "../out/AverageBalanceVerifier.sol/AverageBalanceVerifier";
 import hodlerBadge from "../out/HodlerBadgeNFT.sol/HodlerBadgeNFT";
@@ -39,13 +39,14 @@ const deployVerifier = async (prover: Address) => {
 
 console.log("Proving...");
 const proverAddr = await deployProver();
+const vlayer = createVlayerClient();
 
-const { proof, result } = await prove(
-  proverAddr,
-  averageBalance.abi,
-  "averageBalanceOf",
-  [tokenOwner],
-);
+const { proof, result } = await vlayer.prove({
+  address: proverAddr,
+  proverAbi: averageBalance.abi,
+  functionName: "averageBalanceOf",
+  args: [tokenOwner],
+});
 console.log("Response:", proof, result);
 
 const verifierAddr = await deployVerifier(proverAddr);

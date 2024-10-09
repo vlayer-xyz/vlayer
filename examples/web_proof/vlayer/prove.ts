@@ -15,7 +15,7 @@ const [prover, verifier] = await testHelpers.deployProverVerifier(
 
 const twitterUserAddress = (await testHelpers.getTestAddresses())[0];
 
-const client = createVlayerClient();
+const vlayer = createVlayerClient();
 
 testSuccessProvingAndVerification();
 testFailedProving();
@@ -25,7 +25,7 @@ async function testSuccessProvingAndVerification() {
 
   const webProof = { tls_proof: tls_proof, notary_pub_key: notaryPubKey };
 
-  const { proof, result } = await client.prove({
+  const { proof, result } = await vlayer.prove({
     address: prover,
     functionName: "main",
     proverAbi: webProofProver.abi,
@@ -73,7 +73,7 @@ async function testFailedProving() {
   const wrongWebProof = { tls_proof: tls_proof, notary_pub_key: "wrong" };
 
   try {
-    await client.prove({
+    await vlayer.prove({
       address: prover,
       functionName: "main",
       proverAbi: webProofProver.abi,

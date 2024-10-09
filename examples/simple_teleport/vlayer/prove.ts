@@ -1,6 +1,6 @@
 import type { Address } from "viem";
 
-import { testHelpers, prove } from "@vlayer/sdk";
+import { testHelpers, createVlayerClient } from "@vlayer/sdk";
 import simpleTravelProver from "../out/SimpleTravelProver.sol/SimpleTravelProver";
 import simpleTravelVerifier from "../out/SimpleTravelVerifier.sol/SimpleTravel";
 import whaleBadgeNFT from "../out/WhaleBadgeNFT.sol/WhaleBadgeNFT";
@@ -32,13 +32,14 @@ const deployVerifier = async (prover: Address) => {
 
 console.log("Proving...");
 const proverAddr = await deployProver();
+const vlayer = createVlayerClient();
 
-const { proof, result } = await prove(
-  proverAddr,
-  simpleTravelProver.abi,
-  "crossChainBalanceOf",
-  [john.address],
-);
+const { proof, result } = await vlayer.prove({
+  address: proverAddr,
+  proverAbi: simpleTravelProver.abi,
+  functionName: "crossChainBalanceOf",
+  args: [john.address],
+});
 console.log("Response:", proof, result);
 
 const verifierAddr = await deployVerifier(proverAddr);

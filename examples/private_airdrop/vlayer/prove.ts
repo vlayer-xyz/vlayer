@@ -1,7 +1,7 @@
 import type { Address, Account } from "viem";
 import assert from "node:assert";
 
-import { testHelpers, createTestClient, prove } from "@vlayer/sdk";
+import { testHelpers, createTestClient, createVlayerClient } from "@vlayer/sdk";
 import exampleToken from "../out/ExampleToken.sol/ExampleToken";
 import privateAirdropProver from "../out/PrivateAirdropProver.sol/PrivateAirdropProver";
 import privateAirdropVerifier from "../out/PrivateAirdropVerifier.sol/PrivateAirdropVerifier";
@@ -53,12 +53,14 @@ const generateTestSignature = async (account: Account) => {
 const generateProof = async (prover: Address, tokenOwner: Account) => {
   const signature = await generateTestSignature(tokenOwner);
 
-  const { proof, result } = await prove(
-    prover,
-    privateAirdropProver.abi,
-    "main",
-    [tokenOwner.address, signature],
-  );
+  const vlayer = createVlayerClient();
+
+  const { proof, result } = await vlayer.prove({
+    address: prover,
+    proverAbi: privateAirdropProver.abi,
+    functionName: "main",
+    args: [tokenOwner.address, signature],
+  });
   console.log("Proof:", proof);
 
   return { proof, result };

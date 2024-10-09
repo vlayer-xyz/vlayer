@@ -27,10 +27,13 @@ const email = fs.readFileSync("email.eml").toString();
 // Prepare the email for verification
 const unverifiedEmail = await preverifyEmail(email);
 
+// Create vlayer server client
+const vlayer = createVlayerClient();
+
 const {
   proof,
   returnValue: [result],
-} = await prove(prover, emailProofProver.abi, "main", [unverifiedEmail]);
+} = await vlayer.prove(prover, emailProofProver.abi, "main", [unverifiedEmail]);
 ```
 
 The `email.eml` file should be a valid email, probably exported from your email client.
