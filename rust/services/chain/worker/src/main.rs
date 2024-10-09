@@ -1,5 +1,3 @@
-use std::sync::{Arc, RwLock};
-
 use alloy_primitives::{ChainId, B256};
 use chain_db::{ChainDb, ChainInfo, ChainUpdate, Database};
 use lazy_static::lazy_static;
@@ -12,12 +10,15 @@ fn main() -> anyhow::Result<()> {
 #[allow(dead_code)]
 struct Worker<DB: for<'a> Database<'a>> {
     chain_id: ChainId,
-    db: Arc<RwLock<ChainDb<DB>>>,
+    db: ChainDb<DB>,
     provider: (),
 }
 
 lazy_static! {
     static ref EMPTY_PROOF: Vec<u8> = vec![];
+    static ref SOME_CHAIN_INFO: ChainInfo =
+        ChainInfo::new(1..=2, B256::with_last_byte(1), EMPTY_PROOF.as_slice());
+    static ref SOME_CHAIN_UPDATE: ChainUpdate = ChainUpdate::new(SOME_CHAIN_INFO.clone(), [], []);
 }
 
 #[derive(Debug, Error)]
@@ -31,7 +32,7 @@ where
     DB: for<'a> Database<'a>,
 {
     #[allow(dead_code)]
-    pub fn new(db: Arc<RwLock<ChainDb<DB>>>, chain_id: ChainId) -> Self {
+    pub fn new(db: ChainDb<DB>, chain_id: ChainId) -> Self {
         Worker {
             chain_id,
             db,
@@ -41,13 +42,14 @@ where
 
     #[allow(dead_code)]
     pub fn init(&mut self) -> Result<(), WorkerError> {
-        let chain_info = ChainInfo::new(1..=2, B256::with_last_byte(1), EMPTY_PROOF.as_slice());
-        let chain_update = ChainUpdate::new(chain_info, [], []);
         Ok(self
             .db
-            .write()
-            .expect("poisoned lock")
-            .update_chain(self.chain_id, chain_update)?)
+            .update_chain(self.chain_id, SOME_CHAIN_UPDATE.clone())?)
+    }
+
+    #[allow(dead_code)]
+    pub fn db(&self) -> &ChainDb<DB> {
+        &self.db
     }
 }
 
@@ -58,27 +60,13 @@ mod test {
 
     use super::*;
 
-    fn get_chain_info(db: Arc<RwLock<ChainDb<InMemoryDatabase>>>) -> Option<ChainInfo> {
-        let db = db.read().expect("poisoned lock");
-        db.get_chain_info(1).expect("get_chain_info failed")
-    }
-
-    fn setup_worker() -> Worker<InMemoryDatabase> {
-        let db = InMemoryDatabase::new();
-        let chain_db = Arc::new(RwLock::new(ChainDb::new(db)));
-        Worker::new(chain_db.clone(), 1)
-    }
-
     #[test]
     fn db_has_chain_info_after_init() -> Result<()> {
-        let mut worker = setup_worker();
+        let mut worker = Worker::new(ChainDb::new(InMemoryDatabase::new()), 1);
 
         worker.init()?;
 
-        assert_eq!(
-            get_chain_info(worker.db.clone()),
-            Some(ChainInfo::new(1..=2, B256::with_last_byte(1), EMPTY_PROOF.as_slice()))
-        );
+        assert_eq!(worker.db().get_chain_info(1)?, Some(SOME_CHAIN_INFO.clone()));
 
         Ok(())
     }

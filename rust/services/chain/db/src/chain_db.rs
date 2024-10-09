@@ -52,7 +52,7 @@ impl ChainInfo {
     }
 }
 
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Clone)]
 pub struct ChainUpdate {
     pub chain_info: ChainInfo,
     pub added_nodes: Box<[Bytes]>,
