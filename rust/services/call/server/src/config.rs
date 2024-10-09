@@ -10,6 +10,7 @@ pub struct ServerConfig {
     pub rpc_urls: HashMap<ChainId, String>,
     pub port: u16,
     pub proof_mode: ProofMode,
+    pub chain_proof_url: String,
 }
 
 impl Default for ServerConfig {
@@ -19,12 +20,17 @@ impl Default for ServerConfig {
             rpc_urls: HashMap::from([(TEST_CHAIN_ID, anvil_url.to_string())]),
             port: 3000,
             proof_mode: ProofMode::Groth16,
+            chain_proof_url: String::default(),
         }
     }
 }
 
 impl ServerConfig {
-    pub fn new(rpc_mappings: Vec<(ChainId, String)>, proof_mode: ProofMode) -> ServerConfig {
+    pub fn new(
+        rpc_mappings: Vec<(ChainId, String)>,
+        proof_mode: ProofMode,
+        chain_proof_url: String,
+    ) -> ServerConfig {
         let default = ServerConfig::default();
         ServerConfig {
             rpc_urls: if rpc_mappings.is_empty() {
@@ -34,6 +40,7 @@ impl ServerConfig {
             },
             port: default.port,
             proof_mode,
+            chain_proof_url,
         }
     }
 }

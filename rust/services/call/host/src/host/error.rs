@@ -53,4 +53,13 @@ pub enum HostError {
 
     #[error("Seal encoding error: {0}")]
     SealEncodingError(String),
+
+    #[error("Error parsing JSON: {0}")]
+    JsonParseError(String),
+
+    #[error("HTTP request failed: {0}")]
+    HttpRequestFailed(String),
+
+    #[error("JSON-RPC error: {0}")]
+    JsonRpcError(String),
 }

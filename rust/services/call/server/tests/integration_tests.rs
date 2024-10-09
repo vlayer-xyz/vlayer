@@ -117,6 +117,8 @@ mod server_tests {
             let response = helper.post("/", &req).await;
 
             assert_eq!(StatusCode::OK, response.status());
+            let parsed_response = body_to_json(response.into_body()).await;
+            dbg!(&parsed_response);
             assert_json_include!(
                 expected: json!({
                         "jsonrpc": "2.0",
@@ -136,7 +138,7 @@ mod server_tests {
                             },
                         }
                     }),
-                actual: body_to_json(response.into_body()).await,
+                actual: parsed_response,
             );
         }
 

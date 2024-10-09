@@ -140,7 +140,7 @@ fn create_host<DB: Database>(
     };
     let block_number =
         get_block_number(&providers, config.start_chain_id).expect("failed to get block number");
-    let chain_proof_client = ChainProofClient;
+    let chain_proof_client = ChainProofClient::new(config.chain_proof_url.clone());
 
     Host::try_new_with_components(providers, block_number, chain_proof_client, &config)
         .expect("failed to create host")

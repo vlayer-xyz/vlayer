@@ -8,4 +8,5 @@ pub struct HostConfig {
     pub rpc_urls: HashMap<ChainId, String>,
     pub start_chain_id: ChainId,
     pub proof_mode: ProofMode,
+    pub chain_proof_url: String,
 }
