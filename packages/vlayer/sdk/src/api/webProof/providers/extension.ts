@@ -32,10 +32,15 @@ declare const chrome: {
 // this id is fixed in the extension by the key in manifest.json
 const EXTENSION_ID = "ghigbilfcgeibjkkajaekabeldkmijcd";
 
-export const createExtensionWebProofProvider = ({
-  notaryUrl = "https://notary.pse.dev/v0.1.0-alpha.5/",
-  wsProxyUrl = "wss://notary.pse.dev/proxy",
-}: WebProofProviderSetup): WebProofProvider => {
+export const createExtensionWebProofProvider = (
+  {
+    notaryUrl = "https://notary.pse.dev/v0.1.0-alpha.5/",
+    wsProxyUrl = "wss://notary.pse.dev/proxy",
+  }: WebProofProviderSetup = {
+    notaryUrl: "https://notary.pse.dev/v0.1.0-alpha.5/",
+    wsProxyUrl: "wss://notary.pse.dev/proxy",
+  },
+): WebProofProvider => {
   return {
     getWebProof: async function (webProofSetup: WebProofSetupInput) {
       return new Promise<WebProof>((resolve, reject) => {

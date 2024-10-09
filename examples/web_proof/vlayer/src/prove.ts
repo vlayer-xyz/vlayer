@@ -7,13 +7,13 @@ import {
   expectUrl,
   notarize,
   startPage,
-  prove,
+  createVlayerClient,
   type WebProof,
   type VCallResponse,
+  testHelpers,
 } from "@vlayer/sdk";
 import { createTestClient, http, publicActions, walletActions } from "viem";
 import webProofVerifier from "../../out/WebProofVerifier.sol/WebProofVerifier";
-import { testHelpers } from "@vlayer/sdk";
 
 console.log("Hello from VLayer!");
 const context: {
@@ -30,7 +30,7 @@ const twitterUserAddress = (await testHelpers.getTestAddresses())[0];
 
 export async function setupRequestProveButton(element: HTMLButtonElement) {
   element.addEventListener("click", async () => {
-    const provider = createExtensionWebProofProvider({});
+    const provider = createExtensionWebProofProvider();
     const webproof = await provider.getWebProof({
       proverCallCommitment: {
         address: import.meta.env.VITE_PROVER_ADDRESS,
@@ -65,19 +65,20 @@ export const setupVProverButton = (element: HTMLButtonElement) => {
       tls_proof: context.webProof,
       notary_pub_key: notaryPubKey,
     };
+    const client = createVlayerClient();
 
     console.log("Generating proof...");
-    const { proof, returnValue } = await prove(
-      import.meta.env.VITE_PROVER_ADDRESS,
-      webProofProver.abi,
-      "main",
-      [
+    const { proof, returnValue } = await client.prove({
+      address: import.meta.env.VITE_PROVER_ADDRESS,
+      functionName: "main",
+      proverAbi: webProofProver.abi,
+      args: [
         {
           webProofJson: JSON.stringify(webProof),
         },
         twitterUserAddress,
       ],
-    );
+    });
     console.log("Proof generated!", proof, returnValue);
     context.zkProof = proof;
     context.result = returnValue;
