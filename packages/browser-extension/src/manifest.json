@@ -20,15 +20,16 @@
     "storage",
     "webRequest",
     "cookies",
-    "nativeMessaging", 
-    "tabs",
+    "nativeMessaging",
+    "activeTab",
     "notifications"
   ],
   "externally_connectable": {
     "matches": ["<all_urls>"]
   },
   "host_permissions": [
-    "*://*/*"
+    "https://x.com/*",
+    "https://api.x.com/*"
   ],
   "side_panel": {
     "default_path": "src/templates/sidepanel/sidepanel.html"
