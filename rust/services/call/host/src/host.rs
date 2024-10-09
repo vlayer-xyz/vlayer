@@ -48,7 +48,7 @@ impl Host<EthProvider> {
 }
 
 pub fn get_block_number(
-    providers: &CachedMultiProvider<impl BlockingProvider + 'static>,
+    providers: &CachedMultiProvider<impl BlockingProvider>,
     chain_id: ChainId,
 ) -> Result<ChainId, HostError> {
     let provider = providers.get(chain_id)?;

@@ -58,22 +58,30 @@ fn rpc_urls() -> HashMap<ChainId, String> {
 fn create_host<P>(
     provider_factory: impl ProviderFactory<P> + 'static,
     config: &HostConfig,
-    block_number: BlockTag,
+    block_tag: BlockTag,
 ) -> Result<Host<P>, HostError>
 where
     P: BlockingProvider + 'static,
 {
     let providers = CachedMultiProvider::new(provider_factory);
     let chain_proof_client = ChainProofClient;
-    match block_number {
-        BlockTag::Latest => {
-            let block_number = get_block_number(&providers, config.start_chain_id)?;
-            Host::try_new_with_components(providers, block_number, chain_proof_client, config)
-        }
-        BlockTag::Number(block_no) => {
-            Host::try_new_with_components(providers, block_no.as_u64(), chain_proof_client, config)
-        }
-        _ => panic!("Only Latest and specific block numbers are supported, got {:?}", block_number),
+    let block_number = compute_block_number(&providers, config.start_chain_id, block_tag)?;
+
+    Host::try_new_with_components(providers, block_number, chain_proof_client, config)
+}
+
+fn compute_block_number<P>(
+    providers: &CachedMultiProvider<P>,
+    chain_id: u64,
+    block_tag: BlockTag,
+) -> Result<u64, HostError>
+where
+    P: BlockingProvider + 'static,
+{
+    match block_tag {
+        BlockTag::Latest => get_block_number(providers, chain_id),
+        BlockTag::Number(block_no) => Ok(block_no.as_u64()),
+        _ => panic!("Only Latest and specific block numbers are supported, got {:?}", block_tag),
     }
 }
 

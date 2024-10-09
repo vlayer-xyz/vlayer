@@ -77,13 +77,8 @@ impl CheatcodeInspector {
         context: &&mut EvmContext<DB>,
         inputs: &CallInputs,
     ) -> CallOutcome {
-        // Check if we're inside a Tokio runtime
-        if let Ok(handle) = tokio::runtime::Handle::try_current() {
-            handle.block_on(async { self.run_host(context, inputs).await })
-        } else {
-            let rt = tokio::runtime::Runtime::new().expect("Failed to create Tokio runtime");
-            rt.block_on(async { self.run_host(context, inputs).await })
-        }
+        let handle = tokio::runtime::Handle::try_current().expect("no tokio runtime");
+        handle.block_on(async { self.run_host(context, inputs).await })
     }
 
     async fn run_host<DB: Database>(
