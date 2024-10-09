@@ -8,8 +8,9 @@
     </svg>
     Actively in Development
   </div>
-  <p>Our team is currently working on this feature. In case of any bug please retry in 1-2 weeks. We appreciate your patience. </p>
+  <p>Our team is currently working on this feature. If you experience any bugs, please let us know <a href="https://discord.gg/JS6whdessP" target="_blank">on our Discord</a>. We appreciate your patience. </p>
 </div>
+
 Existing web applications including finance, social media, government, ecommerce and many other types of services contain valuable information and can be turned into great data sources.
 
 With vlayer, it is possible to leverage **this data** with smart contracts.

@@ -8,7 +8,7 @@
     </svg>
     Actively in Development
   </div>
-  <p>Our team is currently working on this feature. In case of any bug please let us know <a href="https://discord.gg/JS6whdessP" target="_blank">on our Discord</a>. We appreciate your patience. </p>
+  <p>Our team is currently working on this feature. If you experience any bugs, please let us know <a href="https://discord.gg/JS6whdessP" target="_blank">on our Discord</a>. We appreciate your patience. </p>
 </div>
 
 ## Email Proofs
