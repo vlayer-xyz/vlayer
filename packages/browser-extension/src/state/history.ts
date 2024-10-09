@@ -30,11 +30,10 @@ export class HistoryContextManager {
     return HistoryContextManager.#instance;
   }
 
-  getUrls = async () => {
+  async getUrls(): Promise<string[]>  {
     const config =
       await webProverSessionContextManager.getWebProverSessionConfig();
-    //@ts-expect-error this is error till we refactor common types
-    return config?.steps?.map((step: { url: string }) => step.url) ?? [];
+    return config.steps.map((step: { url: string }) => step.url);
   };
 
   async updateHistory(item: HistoryItem): Promise<void> {

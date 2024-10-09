@@ -6,8 +6,9 @@ import {
 
 import {
   ExtensionAction,
-  ExtensionMessage,
+  type ExtensionMessage,
   ExtensionMessageType,
+  type MessageToExtension,
 } from "@vlayer/web-proof-commons";
 
 import { WebProof } from "../../lib/types/webProof";
@@ -20,7 +21,7 @@ import { WebProof } from "../../lib/types/webProof";
 
 declare const chrome: {
   runtime: {
-    sendMessage: (extensionId: string | undefined, message: unknown) => void;
+    sendMessage: (extensionId: string | undefined, message: MessageToExtension) => void;
     connect: (extensionId: string) => {
       onMessage: {
         addListener: (message: unknown) => void;

@@ -1,49 +1,7 @@
 import { WebProof } from "types/webProof.ts";
 import { AbiFunction, Hex, Abi, ContractFunctionName } from "viem";
-import { Branded } from "types/utils.ts";
 import type { ContractFunctionArgsWithout } from "./viem";
-
-export const EXTENSION_STEP = {
-  expectUrl: "expectUrl",
-  startPage: "startPage",
-  notarize: "notarize",
-} as const;
-
-export type ExtensionStep =
-  (typeof EXTENSION_STEP)[keyof typeof EXTENSION_STEP];
-
-export type WebProofStepNotarize = Branded<
-  {
-    url: string;
-    method: string;
-    label: string;
-    step: typeof EXTENSION_STEP.notarize;
-  },
-  "notarize"
->;
-
-export type WebProofStepExpectUrl = Branded<
-  {
-    url: string;
-    label: string;
-    step: typeof EXTENSION_STEP.expectUrl;
-  },
-  "expectUrl"
->;
-
-export type WebProofStepStartPage = Branded<
-  {
-    url: string;
-    label: string;
-    step: typeof EXTENSION_STEP.startPage;
-  },
-  "startPage"
->;
-
-export type WebProofSetupInput = {
-  logoUrl: string;
-  steps: [WebProofStepExpectUrl, WebProofStepStartPage, WebProofStepStartPage];
-};
+import { Branded, WebProofStepExpectUrl, WebProofStepStartPage } from "@vlayer/web-proof-commons";
 
 export type WebProofSetup = Branded<
   WebProofSetupInput & {
@@ -62,6 +20,12 @@ export type ProverCallCommitment<
   commitmentArgs: ContractFunctionArgsWithout<T, F, { name: "webProof" }>;
   chainId: number;
 };
+
+export type WebProofSetupInput = {
+  logoUrl: string;
+  steps: [WebProofStepExpectUrl, WebProofStepStartPage, WebProofStepStartPage];
+};
+
 export type GetWebProofArgs<
   T extends readonly [AbiFunction, ...Abi[number][]],
   F extends ContractFunctionName<T>,

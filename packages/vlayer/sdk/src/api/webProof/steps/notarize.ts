@@ -1,7 +1,5 @@
-import {
-  EXTENSION_STEP,
-  WebProofStepNotarize,
-} from "../../../api/lib/types/webProofProvider";
+import { EXTENSION_STEP, WebProofStepNotarize } from "@vlayer/web-proof-commons";
+
 
 export const notarize = (
   url: string,
