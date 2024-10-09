@@ -17,7 +17,7 @@ See how to [time travel](/features/time-travel.html) across block numbers, [tele
 
 **From JavaScript**
 
-Learn how to [interact with vlayer](/javascript/javascript.html) from your JS code and how to [generate web proofs](/javascript/webproofs.html) using our SDK.
+Learn how to [interact with vlayer](/javascript/javascript.html) from your JS code and how to [generate web proofs](/javascript/web-proofs.html) using our SDK.
 
 **Advanced**
 

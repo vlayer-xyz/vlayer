@@ -74,7 +74,7 @@ First, install the vlayer browser extension:
 3. Enable `Developer mode`.
 4. Click `Load unpacked` and select the directory containing the extension files.
 
-For more details about the extension, see the [Web Proofs](../javascript/webproofs.md) section.
+For more details about the extension, see the [Web Proofs](../javascript/web-proofs.md) section.
 
 Then deploy the `WebProofProver` and `WebProofVerifier` contracts on local anvil testnet:
 

@@ -21,8 +21,8 @@
 
 - [From JavaScript]()
   - [Vanilla JS/TS](./javascript/javascript.md)
-  - [Web proofs](./javascript/webproofs.md)
-  - [Email proofs](./javascript/emailproofs.md)
+  - [Web proofs](./javascript/web-proofs.md)
+  - [Email proofs](./javascript/email-proofs.md)
 ---
 - [Appendix]()
   - [Contributing](./contributing/overview.md)
