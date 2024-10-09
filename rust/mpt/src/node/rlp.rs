@@ -151,7 +151,7 @@ impl Node {
                 .flat_map(|child| child.to_rlp_nodes())
                 .collect(),
             Node::Extension(_, child) => child.to_rlp_nodes(),
-            _ => vec![],
+            Node::Null | Node::Leaf(..) | Node::Digest(..) => vec![],
         };
         nodes.append(&mut children);
         nodes
