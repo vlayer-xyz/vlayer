@@ -86,14 +86,13 @@ export const setupVProverButton = (element: HTMLButtonElement) => {
 
 export const setupVerifyButton = (element: HTMLButtonElement) => {
   element.addEventListener("click", async () => {
-    const verification = await testHelpers.createAnvilClient()
-      .writeContract({
-        address: import.meta.env.VITE_VERIFIER_ADDRESS,
-        abi: webProofVerifier.abi,
-        functionName: "verify",
-        args: [context.zkProof, ...context.result],
-        account: twitterUserAddress,
-      });
+    const verification = await testHelpers.createAnvilClient().writeContract({
+      address: import.meta.env.VITE_VERIFIER_ADDRESS,
+      abi: webProofVerifier.abi,
+      functionName: "verify",
+      args: [context.zkProof, ...context.result],
+      account: twitterUserAddress,
+    });
     console.log("Verified!", verification);
   });
 };
