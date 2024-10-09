@@ -37,7 +37,7 @@ export const HelpSection: FC = () => {
       <Text>
         Feel free to&nbsp;
         <Link href="https://discord.gg/JS6whdessP" target="_blank">
-          contact us
+          join our discord
         </Link>
         , if you need help through the process.
       </Text>
