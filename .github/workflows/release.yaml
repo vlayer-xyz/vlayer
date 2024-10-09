@@ -3,15 +3,75 @@ on:
   schedule:
     - cron: '0 22 * * 1-5' # Mon-Fri at 22:00 UTC
   workflow_dispatch:
+  push:
+    branches:
+      - rzadp/guest-replacements
 concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: false
 jobs:
+  build-guest-wrapper:
+    defaults:
+      run:
+        working-directory: rust
+    name: Build guest wrapper and save guest replacements for later use
+    runs-on: aws-linux-medium
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Set up Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache-workspaces: |
+            rust
+            rust/services/call/guest_wrapper/risc0_guest
+            rust/services/chain/guest_wrapper/risc0_guest
+
+      - name: Install cargo-binstall
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
+
+      - name: Install risc0 installer
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: cargo binstall -y cargo-risczero@1.0.5 --force
+
+      - name: Install risc0 toolchain
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: cargo risczero install
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly-d75318c9c7a1c6af5404fe96f63ca890dcdd588d # 2024-09-05
+
+      - name: "Build guest wrapper"
+        run: cargo build --release --target x86_64-unknown-linux-gnu --package call_guest_wrapper
+
+      - name: "Save methods.rs"
+        run: |
+          find target -type f -name "methods.rs" -exec cp -n {} ./target/assets/ \;
+
+      - name: Push guest artifacts
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
+        with:
+          name: guest-artifacts
+          path: rust/target/assets
+          if-no-files-found: error
+
   build-release:
     defaults:
       run:
         working-directory: rust
     name: Release nightly for ${{ matrix.platform }} ${{ matrix.arch }}
+    needs: [build-guest-wrapper]
     runs-on: ${{ matrix.runner }}
     outputs:
       vlayer_build: ${{ steps.vlayer_build.outputs.vlayer_build }}
@@ -67,10 +127,17 @@ jobs:
         with:
           version: "17.0.6"
 
+      - uses: actions/download-artifact@v4
+        with:
+          name: guest-artifacts
+          path: rust/call_guest_replacement
+
       - name: "Build binaries"
         env:
           VLAYER_RELEASE: "nightly"
-        run: cargo build --release --target ${{ matrix.target }} --package cli 
+        run: |
+          export RISC0_EXISTING_CALL_GUEST="$(pwd)/call_guest_replacement"
+          cargo build --release --target ${{ matrix.target }} --package cli 
 
       - name: "Print build version"
         id: vlayer_build
@@ -104,12 +171,7 @@ jobs:
         with:
           name: ${{ matrix.target }}
           path: ${{ steps.package-release.outputs.output_file }}
-
-      - name: Push ImageID artifact
-        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
-        with:
-          name: ${{ matrix.platform }}-ImageID.sol
-          path: contracts/src/ImageID.sol
+          if-no-files-found: error
 
   build-examples:
     name: Build examples
@@ -126,6 +188,7 @@ jobs:
         with:
           name: examples
           path: out/examples.tar.gz
+          if-no-files-found: error
 
   build-extension:
     name: Build browser extension
@@ -159,6 +222,7 @@ jobs:
         with:
           name: browser-extension
           path: packages/browser-extension/browser-extension.tar.gz
+          if-no-files-found: error
   
   push-contracts:
     name: Push vlayer contracts
@@ -179,16 +243,16 @@ jobs:
         run: |
           echo -n "${{ secrets.SOLDEER_API_KEY }}" > "${SOLDEER_LOGIN_FILE}"
 
-      - name: Download ImageID.sol - Darwin
+      - name: Download guest artifacts
         uses: actions/download-artifact@v4
         with:
-          name: darwin-ImageID.sol
-          path: ./imageid
+          name: guest-artifacts
+          path: ./guest-artifacts
 
       - name: Copy ImageID to contracts
         run: |
-          rm contracts/src/ImageID.sol;
-          cp imageid/ImageID.sol contracts/src/ImageID.sol
+          rm contracts/src/ImageID.sol
+          cp guest-artifacts/ImageID.sol contracts/src/ImageID.sol
 
       - name: Release contracts to Soldeer
         working-directory: contracts
@@ -210,6 +274,7 @@ jobs:
         with:
           name: vlayer-contracts
           path: contracts/contracts.zip
+          if-no-files-found: error
 
 
   create-release:
@@ -222,7 +287,7 @@ jobs:
         with:
           path: ./dist
           merge-multiple: true
-      - run: rm ./dist/ImageID.sol
+      - run: rm ./dist/{ImageID.sol,Elf.sol,methods.rs} || true
 
       - name: Release tagged nightly
         uses: ncipollo/release-action@v1
@@ -251,7 +316,7 @@ jobs:
         with:
           path: ./dist/latest
           merge-multiple: true
-      - run: rm ./dist/latest/*ImageID.sol
+      - run: rm ./dist/latest/{ImageID.sol,Elf.sol,methods.rs} || true
       - run: cp -r "./dist/latest" "./dist/${{ github.sha }}"
 
       - name: Push tagged binaries to AWS S3
