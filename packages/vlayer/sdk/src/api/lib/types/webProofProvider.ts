@@ -7,6 +7,11 @@ import {
   WebProofStepStartPage,
 } from "@vlayer/web-proof-commons";
 
+export type WebProofSetupInput = {
+  logoUrl: string;
+  steps: [WebProofStepExpectUrl, WebProofStepStartPage, WebProofStepStartPage];
+};
+
 export type WebProofSetup = Branded<
   WebProofSetupInput & {
     isWebProof: true;
@@ -23,11 +28,6 @@ export type ProverCallCommitment<
   functionName: F;
   commitmentArgs: ContractFunctionArgsWithout<T, F, { name: "webProof" }>;
   chainId: number;
-};
-
-export type WebProofSetupInput = {
-  logoUrl: string;
-  steps: [WebProofStepExpectUrl, WebProofStepStartPage, WebProofStepStartPage];
 };
 
 export type GetWebProofArgs<
