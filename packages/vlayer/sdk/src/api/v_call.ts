@@ -12,8 +12,9 @@ function v_callBody(call: CallParams, context: CallContext) {
 export async function v_call(
   call: CallParams,
   context: CallContext,
+  url: string = "http://127.0.0.1:3000",
 ): Promise<VCallResponse> {
-  const response = await fetch("http://127.0.0.1:3000", {
+  const response = await fetch(url, {
     method: "POST",
     body: JSON.stringify(v_callBody(call, context)),
     headers: { "Content-Type": "application/json" },
