@@ -81,14 +81,14 @@ vlayer serve
 See [JSON-RPC API appendix](/appendix/api.md) for more detailed call specification.
 
 ### Network Specific Configuration 
-The vlayer prover server can use different RPC node providers to query blockchain data. RPC urls for specific chains can be provided by passing the `rpc-url' configuration parameter:
+The vlayer prover server can use different RPC node providers to query blockchain data. RPC urls for specific chains can be provided by passing the `rpc-url` configuration parameter:
 ```sh 
 vlayer serve --rpc-url <chain-id>:<url>
 ```
 
 Configuring multiple RPC URLs at once is also possible:
 ```sh
-vlayer serve --rpc-url 11155111:https://eth-sepolia.g.alchemy.com/v2/  --rpc-url 1:https://eth-mainnet.alchemyapi.io/v2/
+vlayer serve --rpc-url 11155111:https://eth-sepolia.g.alchemy.com/v2/ --rpc-url 1:https://eth-mainnet.alchemyapi.io/v2/
 ```
 
 ## Proving Modes
