@@ -35,7 +35,7 @@ export const HelpSection: FC = () => {
       </Flex>
       <Box className={styles.spacer} />
       <Text>
-        Feel free to <Link href="https://discord.gg/JS6whdessP">contact us</Link>, if you need help
+        Feel free to <Link href="https://discord.gg/JS6whdessP" target="_blank">contact us</Link>, if you need help
         through the process.
       </Text>
       <Box className={styles.spacer} />
