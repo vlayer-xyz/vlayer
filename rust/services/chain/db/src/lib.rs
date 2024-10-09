@@ -6,6 +6,7 @@ mod chain_db;
 mod in_memory;
 mod mdbx;
 
+pub use chain_db::{ChainDb, ChainDbError, ChainDbResult, ChainInfo, ChainTrie, ChainUpdate};
 pub use in_memory::InMemoryDatabase;
 pub use mdbx::Mdbx;
 
@@ -19,7 +20,7 @@ pub trait Database<'a> {
 
     fn with_ro_tx<T, F>(&'a self, f: F) -> DbResult<T>
     where
-        F: FnOnce(&Self::ReadTx) -> DbResult<T>,
+        F: FnOnce(&Self::ReadTx) -> DbResult<T> + Sized,
     {
         let tx = self.begin_ro()?;
         f(&tx)
