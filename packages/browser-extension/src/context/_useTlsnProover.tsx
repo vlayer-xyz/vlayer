@@ -12,7 +12,7 @@ import React, {
 import { formatTlsnHeaders } from "lib/formatTlsnHeaders";
 import { ExtensionMessageType } from "@vlayer/web-proof-commons";
 import { WebProverSessionContextManager } from "../state/webProverSessionContext";
-import sendMessageToSdk from "lib/sendMessageToSdk";
+import sendMessageToServiceWorker from "lib/sendMessageToServiceWorker";
 
 const TlsnProofContext = createContext({
   prove: () => {},
@@ -92,7 +92,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
       // this is temporary verification call
       // when we wil connect vlayer contracts we will transfer this back to the SDK
 
-      sendMessageToSdk({
+      sendMessageToServiceWorker({
         type: ExtensionMessageType.ProofDone,
         proof: tlsnProof,
       });
@@ -101,7 +101,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
     } catch (e: unknown) {
       console.error("error in tlsnotary", e);
 
-      sendMessageToSdk({
+      sendMessageToServiceWorker({
         type: ExtensionMessageType.ProofError,
         error: e instanceof Error ? e.message : String(e),
       });
