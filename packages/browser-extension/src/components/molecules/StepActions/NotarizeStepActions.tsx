@@ -49,8 +49,8 @@ const RedirectCallout: FC = () => {
               <InfoCircledIcon />
             </Callout.Icon>
             <Callout.Text>
-              You will be redirected back in a <b>{timeout}</b> seconds
-              {timeout > 1 ? "s" : ""}.
+              You will be redirected back in <b>{timeout}</b> second
+              {timeout != 1 ? "s" : ""}.
             </Callout.Text>
           </Callout.Root>
         </motion.div>
