@@ -1,7 +1,7 @@
 use std::{
     collections::HashSet,
     hash::Hash,
-    ops::{Deref, DerefMut, Range},
+    ops::{Deref, DerefMut, Range, RangeInclusive},
 };
 
 use alloy_primitives::{keccak256, ChainId, B256};
@@ -34,17 +34,21 @@ pub struct ChainInfo {
 }
 
 impl ChainInfo {
-    pub fn new(block_range: Range<u64>, root_hash: B256, zk_proof: impl Into<Bytes>) -> Self {
+    pub fn new(
+        block_range: RangeInclusive<u64>,
+        root_hash: B256,
+        zk_proof: impl Into<Bytes>,
+    ) -> Self {
         Self {
-            first_block: block_range.start,
-            last_block: block_range.end - 1,
+            first_block: *block_range.start(),
+            last_block: *block_range.end(),
             root_hash,
             zk_proof: zk_proof.into(),
         }
     }
 
-    pub fn block_range(&self) -> Range<u64> {
-        self.first_block..self.last_block + 1
+    pub fn block_range(&self) -> RangeInclusive<u64> {
+        self.first_block..=self.last_block
     }
 }
 
@@ -114,15 +118,16 @@ impl<DB: for<'a> Database<'a>> ChainDb<DB> {
 
     pub fn get_chain_trie(&self, chain_id: ChainId) -> ChainDbResult<Option<ChainTrie>> {
         let tx = self.begin_ro()?;
-        let Some(ChainInfo {
-            first_block,
-            last_block,
-            root_hash,
-            ..
-        }) = self.get_chain_info(chain_id)?
-        else {
+        let Some(chain_info) = self.get_chain_info(chain_id)? else {
             return Ok(None);
         };
+        let ChainInfo {
+            root_hash,
+            first_block,
+            last_block,
+            ..
+        } = chain_info;
+
         let first_block_proof = tx.get_merkle_proof(root_hash, first_block)?;
         let last_block_proof = tx.get_merkle_proof(root_hash, last_block)?;
         let trie: MerkleTrie = first_block_proof
@@ -130,7 +135,8 @@ impl<DB: for<'a> Database<'a>> ChainDb<DB> {
             .into_iter()
             .chain(last_block_proof)
             .collect();
-        Ok(Some(ChainTrie::new(first_block..last_block + 1, trie)))
+
+        Ok(Some(ChainTrie::new(chain_info.block_range(), trie)))
     }
 
     pub fn update_chain(
@@ -233,12 +239,12 @@ where
 }
 
 pub struct ChainTrie {
-    block_range: Range<u64>,
+    block_range: RangeInclusive<u64>,
     trie: BlockTrie,
 }
 
 impl ChainTrie {
-    pub fn new(block_range: Range<u64>, trie: impl Into<BlockTrie>) -> Self {
+    pub fn new(block_range: RangeInclusive<u64>, trie: impl Into<BlockTrie>) -> Self {
         Self {
             block_range,
             trie: trie.into(),
