@@ -30,11 +30,11 @@ export class HistoryContextManager {
     return HistoryContextManager.#instance;
   }
 
-  async getUrls(): Promise<string[]>  {
+  async getUrls(): Promise<string[]> {
     const config =
       await webProverSessionContextManager.getWebProverSessionConfig();
     return config.steps.map((step: { url: string }) => step.url);
-  };
+  }
 
   async updateHistory(item: HistoryItem): Promise<void> {
     let newItem = item;

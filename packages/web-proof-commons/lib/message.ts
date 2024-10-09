@@ -16,7 +16,7 @@ export const enum ExtensionAction {
 export type MessageToExtension = {
   action: ExtensionAction.RequestWebProof;
   payload: WebProverSessionConfig;
-}
+};
 
 export const enum ExtensionMessageType {
   ProofDone = "ProofDone",
@@ -37,7 +37,10 @@ export type WebProverSessionConfig = {
   steps: WebProofStep[];
 };
 
-export type WebProofStep = WebProofStepNotarize | WebProofStepExpectUrl | WebProofStepStartPage;
+export type WebProofStep =
+  | WebProofStepNotarize
+  | WebProofStepExpectUrl
+  | WebProofStepStartPage;
 
 export type WebProofStepNotarize = Branded<
   {
@@ -66,5 +69,3 @@ export type WebProofStepStartPage = Branded<
   },
   "startPage"
 >;
-
-
