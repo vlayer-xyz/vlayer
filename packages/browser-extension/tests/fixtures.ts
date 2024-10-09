@@ -1,6 +1,8 @@
 import { test as base, chromium, type BrowserContext } from "@playwright/test";
 import path from "path";
 
+process.env.PW_CHROMIUM_ATTACH_TO_OTHER = "1";
+
 export const test = base.extend<{
   context: BrowserContext;
   extensionId: string;
