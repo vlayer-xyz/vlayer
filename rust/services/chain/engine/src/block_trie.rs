@@ -2,8 +2,9 @@ use alloy_primitives::B256;
 use alloy_rlp::encode_fixed_size;
 use bytes::Bytes;
 use mpt::{MerkleTrie, Node};
+use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Default, Clone)]
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct BlockTrie(MerkleTrie);
 
 impl BlockTrie {
@@ -29,11 +30,7 @@ impl BlockTrie {
         encode_fixed_size(&block_number)
     }
 
-    pub fn to_rlp_nodes(&self) -> impl Iterator<Item = Bytes> + '_ {
-        self.0.to_rlp_nodes()
-    }
-
-    pub fn root_node(self) -> Node {
+    pub fn into_root(self) -> Node {
         self.0 .0
     }
 }
@@ -41,5 +38,27 @@ impl BlockTrie {
 impl From<MerkleTrie> for BlockTrie {
     fn from(mpt: MerkleTrie) -> Self {
         Self(mpt)
+    }
+}
+
+impl FromIterator<(u64, B256)> for BlockTrie {
+    fn from_iter<I>(iter: I) -> Self
+    where
+        I: IntoIterator<Item = (u64, B256)>,
+    {
+        let mut trie = BlockTrie::new();
+        for (key, value) in iter {
+            trie.insert(key, &value)
+        }
+        trie
+    }
+}
+
+impl<'a> IntoIterator for &'a BlockTrie {
+    type IntoIter = std::vec::IntoIter<Bytes>;
+    type Item = Bytes;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_iter()
     }
 }

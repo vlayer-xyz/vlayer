@@ -1,5 +1,3 @@
-use std::iter;
-
 use alloy_primitives::B256;
 use alloy_rlp::{BufMut, Decodable, Encodable, Header};
 use bytes::Bytes;
@@ -141,23 +139,22 @@ impl Node {
         alloy_rlp::encode(self).into()
     }
 
-    pub(crate) fn to_rlp_nodes(&self) -> Box<dyn Iterator<Item = Bytes> + '_> {
+    pub(crate) fn to_rlp_nodes(&self) -> Vec<Bytes> {
         if matches!(self, Node::Digest(..)) {
-            return Box::new(iter::empty());
+            return vec![];
         }
-        let out = iter::once(self.rlp_encoded());
-        match self {
-            Node::Branch(children, _) => Box::new(
-                out.chain(
-                    children
-                        .iter()
-                        .flatten()
-                        .flat_map(|child| child.to_rlp_nodes()),
-                ),
-            ),
-            Node::Extension(_, child) => Box::new(out.chain(child.to_rlp_nodes())),
-            _ => Box::new(out),
-        }
+        let mut nodes = vec![self.rlp_encoded()];
+        let mut children = match self {
+            Node::Branch(children, _) => children
+                .iter()
+                .flatten()
+                .flat_map(|child| child.to_rlp_nodes())
+                .collect(),
+            Node::Extension(_, child) => child.to_rlp_nodes(),
+            Node::Null | Node::Leaf(..) | Node::Digest(..) => vec![],
+        };
+        nodes.append(&mut children);
+        nodes
     }
 }
 

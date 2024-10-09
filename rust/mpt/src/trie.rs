@@ -97,9 +97,14 @@ impl MerkleTrie {
     ) -> Result<Self, ParseNodeError> {
         nodes.into_iter().map(parse_node).collect()
     }
+}
 
-    pub fn to_rlp_nodes(&self) -> impl Iterator<Item = Bytes> + '_ {
-        self.0.to_rlp_nodes()
+impl<'a> IntoIterator for &'a MerkleTrie {
+    type IntoIter = std::vec::IntoIter<Bytes>;
+    type Item = Bytes;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.to_rlp_nodes().into_iter()
     }
 }
 
