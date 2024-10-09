@@ -21,7 +21,7 @@ const rpcUrls: Map<number, HttpTransport> = new Map([[foundry.id, http()]]);
 
 export const chainIds = [foundry.id];
 
-export function client(
+export function createAnvilClient(
   chainId: number = foundry.id,
 ): ReturnType<typeof walletActions> & PublicClient {
   const transport = rpcUrls.get(chainId);
@@ -43,7 +43,7 @@ export async function deployContract(
   args: ContractArg[] = [],
   chainId: number = foundry.id,
 ): Promise<Address> {
-  const ethClient = client(chainId);
+  const ethClient = createAnvilClient(chainId);
 
   const [deployer] = await ethClient.getAddresses();
 
@@ -113,7 +113,7 @@ export async function call<
   args?: ContractFunctionArgs<T, "pure" | "view", F>,
   chainId: number = foundry.id,
 ) {
-  const ethClient = client(chainId);
+  const ethClient = createAnvilClient(chainId);
 
   return ethClient.readContract({
     abi,
@@ -134,7 +134,7 @@ export async function writeContract<
   sender?: Address,
   chainId: number = foundry.id,
 ) {
-  const ethClient = client(chainId);
+  const ethClient = createAnvilClient(chainId);
   const selectedSender = sender || (await ethClient.getAddresses())[0];
 
   const txHash = await ethClient.writeContract({
@@ -160,4 +160,4 @@ export const getTestAccount = () => privateKeyToAccount(generatePrivateKey());
 
 export const getTestAddresses = (
   chainId: number = foundry.id,
-): Promise<Address[]> => client(chainId).getAddresses();
+): Promise<Address[]> => createAnvilClient(chainId).getAddresses();

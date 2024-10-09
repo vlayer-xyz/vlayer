@@ -1,12 +1,12 @@
 import type { Address, Account } from "viem";
 import assert from "node:assert";
 
-import { testHelpers, createTestClient, createVlayerClient } from "@vlayer/sdk";
+import { testHelpers, createVlayerClient } from "@vlayer/sdk";
 import exampleToken from "../out/ExampleToken.sol/ExampleToken";
 import privateAirdropProver from "../out/PrivateAirdropProver.sol/PrivateAirdropProver";
 import privateAirdropVerifier from "../out/PrivateAirdropVerifier.sol/PrivateAirdropVerifier";
 
-const client = createTestClient();
+const client = testHelpers.createAnvilClient();
 
 const deployContracts = async (account: Account) => {
   const sender = (await client.getAddresses())[0];

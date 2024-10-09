@@ -12,7 +12,6 @@ import {
   type VCallResponse,
   testHelpers,
 } from "@vlayer/sdk";
-import { createTestClient, http, publicActions, walletActions } from "viem";
 import webProofVerifier from "../../out/WebProofVerifier.sol/WebProofVerifier";
 
 console.log("Hello from VLayer!");
@@ -87,20 +86,13 @@ export const setupVProverButton = (element: HTMLButtonElement) => {
 
 export const setupVerifyButton = (element: HTMLButtonElement) => {
   element.addEventListener("click", async () => {
-    const verification = await createTestClient({
-      chain: foundry,
-      mode: "anvil",
-      transport: http(),
-    })
-      .extend(publicActions)
-      .extend(walletActions)
-      .writeContract({
-        address: import.meta.env.VITE_VERIFIER_ADDRESS,
-        abi: webProofVerifier.abi,
-        functionName: "verify",
-        args: [context.zkProof, ...context.result],
-        account: twitterUserAddress,
-      });
+    const verification = await testHelpers.createAnvilClient().writeContract({
+      address: import.meta.env.VITE_VERIFIER_ADDRESS,
+      abi: webProofVerifier.abi,
+      functionName: "verify",
+      args: [context.zkProof, ...context.result],
+      account: twitterUserAddress,
+    });
     console.log("Verified!", verification);
   });
 };
