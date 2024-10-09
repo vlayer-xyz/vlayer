@@ -1,29 +1,29 @@
 # Summary
 [Introduction](./introduction.md)
 
-- [Getting Started](./getting-started/installation.md)
+- [Getting Started]()
   - [Installation](./getting-started/installation.md)
   - [First Steps](./getting-started/first-steps.md)
   - [How it works](./getting-started/how-it-works.md)
 
-- [Features](./features/time-travel.md)
+- [Features]()
   - [Time travel](./features/time-travel.md)
   - [Teleport](./features/teleport.md)
   - [Web proof](./features/web.md)
   - [Email proof](./features/email.md)
   - [JSON parsing & Regex](./features/regex-and-json.md)
 
-- [Advanced](./advanced/prover.md)
+- [Advanced]()
   - [Prover](./advanced/prover.md)
   - [Verifier](./advanced/verifier.md)
   - [Global variables](./advanced/prover-global-variables.md)
   - [Tests](./advanced/tests.md)
 
-- [From JavaScript](./javascript/javascript.md)
+- [From JavaScript]()
   - [Vanilla JS/TS](./javascript/javascript.md)
   - [Web proofs](./javascript/webproofs.md)
 ---
-- [Appendix](./contributing/overview.md)
+- [Appendix]()
   - [Contributing](./contributing/overview.md)
     - [Rust](./contributing/rust.md)
     - [Javascript](./contributing/javascript.md)
