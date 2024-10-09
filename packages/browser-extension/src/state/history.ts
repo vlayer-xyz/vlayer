@@ -1,7 +1,6 @@
 import { Store } from "./store";
 import browser from "webextension-polyfill";
 import { webProverSessionContextManager } from "./webProverSessionContext";
-import * as R from "ramda";
 
 export type HistoryItem = {
   url: string;
@@ -46,17 +45,10 @@ export class HistoryContextManager {
     if (existingItemIndex !== -1) {
       const existingItem = history[existingItemIndex];
       newItem = {
-        url: item.url,
-        headers: R.uniqBy(
-          (i) => i?.name,
-          [...(existingItem.headers || []), ...(item.headers || [])],
-        ),
-        cookies: R.uniqBy(
-          (i) => i.name,
-          [...(existingItem.cookies || []), ...(item.cookies || [])],
-        ),
+        ...existingItem,
+        ...item,
+        // the item becomes ready once it's updated twice (with headers and cookies)
         ready: true,
-        // ready: item.ready ?? existingItem.ready ?? false,
       };
       history = history.map((historyItem, index) => {
         return index === existingItemIndex ? newItem : historyItem;
