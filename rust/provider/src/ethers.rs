@@ -29,7 +29,7 @@ impl<M: Middleware> EthersProvider<M> {
     }
 }
 
-// internal utility function to call tokio feature and wait for output
+// Blocks current runtime to execute the future. Panics if called outside of the runtime
 fn block_on<F: Future>(f: F) -> F::Output {
     let handle = Handle::try_current().expect("no tokio runtime");
     tokio::task::block_in_place(|| handle.block_on(f))

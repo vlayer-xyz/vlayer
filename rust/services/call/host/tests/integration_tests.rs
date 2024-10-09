@@ -65,12 +65,12 @@ where
 {
     let providers = CachedMultiProvider::new(provider_factory);
     let chain_proof_client = ChainProofClient;
-    let block_number = compute_block_number(&providers, config.start_chain_id, block_tag)?;
+    let block_number = block_tag_to_block_number(&providers, config.start_chain_id, block_tag)?;
 
     Host::try_new_with_components(providers, block_number, chain_proof_client, config)
 }
 
-fn compute_block_number<P>(
+fn block_tag_to_block_number<P>(
     providers: &CachedMultiProvider<P>,
     chain_id: u64,
     block_tag: BlockTag,

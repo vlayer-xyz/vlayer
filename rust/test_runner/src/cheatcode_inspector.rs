@@ -78,7 +78,7 @@ impl CheatcodeInspector {
         inputs: &CallInputs,
     ) -> CallOutcome {
         let handle = tokio::runtime::Handle::try_current().expect("no tokio runtime");
-        handle.block_on(async { self.run_host(context, inputs).await })
+        handle.block_on(self.run_host(context, inputs))
     }
 
     async fn run_host<DB: Database>(
