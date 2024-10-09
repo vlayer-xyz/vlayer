@@ -14,7 +14,7 @@ export const enum ExtensionAction {
 }
 
 export type MessageToExtension = {
-  action: ExtensionAction.RequestWebProof;
+  action: ExtensionAction;
   payload: WebProverSessionConfig;
 };
 
