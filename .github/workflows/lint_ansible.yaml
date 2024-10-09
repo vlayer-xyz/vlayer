@@ -1,0 +1,21 @@
+name: Ansible Lint
+on: 
+  push:
+    paths:
+      - 'ansible/**'
+      - '.github/workflows/lint_ansible.yaml'
+  merge_group:
+concurrency:
+  # Do not cancel jobs on main by forcing a unique group name.
+  group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
+  cancel-in-progress: true
+jobs:
+  build:
+    name: Ansible Lint
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Run ansible-lint
+        uses: ansible/ansible-lint@v24.9.2
+        with:
+          working_directory: "ansible"

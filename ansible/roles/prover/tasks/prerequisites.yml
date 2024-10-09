@@ -1,0 +1,12 @@
+---
+- name: Install Foundryup
+  ansible.builtin.shell: |
+    set -o pipefail
+    curl -L https://foundry.paradigm.xyz | bash
+  args:
+    creates: ~/.foundry/bin/foundryup
+- name: Install Foundry
+  ansible.builtin.shell: ~/.foundry/bin/foundryup
+  args:
+    executable: /bin/bash
+    creates: ~/.foundry/bin/forge
