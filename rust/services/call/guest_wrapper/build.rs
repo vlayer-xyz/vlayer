@@ -1,3 +1,5 @@
+use std::{fs, io, path::PathBuf};
+
 use anyhow::Result;
 
 fn main() -> Result<()> {
@@ -5,8 +7,7 @@ fn main() -> Result<()> {
     {
         use std::{
             env,
-            fs::{copy, create_dir_all, remove_file},
-            io,
+            fs::{copy, create_dir_all},
             path::Path,
         };
 
@@ -22,19 +23,14 @@ fn main() -> Result<()> {
             .with_image_id_sol_path(&image_id_sol_output_path)
             .with_elf_sol_path(&elf_sol_output_path);
 
-        let clean_assets_dir = || -> io::Result<()> {
-            create_dir_all(&assets_dir)?;
-            let _ = remove_file(&image_id_sol_output_path);
-            let _ = remove_file(&elf_sol_output_path);
-            Ok(())
-        };
-
         if env::var("RISC0_SKIP_BUILD").is_ok() {
             println!("cargo::warning=Skipped build of call_guest");
             return Ok(());
         }
 
-        clean_assets_dir()?;
+        create_dir_all(&assets_dir)?;
+        _remove_file_if_exists(&image_id_sol_output_path)?;
+        _remove_file_if_exists(&elf_sol_output_path)?;
 
         if let Ok(guest_artifacts_path) = env::var("RISC0_EXISTING_CALL_GUEST") {
             println!("cargo::warning=Using existing call_guest from {}", &guest_artifacts_path);
@@ -52,4 +48,12 @@ fn main() -> Result<()> {
     }
 
     Ok(())
+}
+
+fn _remove_file_if_exists(path: &PathBuf) -> Result<(), io::Error> {
+    match fs::remove_file(path) {
+        Ok(_) => Ok(()),
+        Err(e) if e.kind() == io::ErrorKind::NotFound => Ok(()),
+        Err(e) => Err(e),
+    }
 }
