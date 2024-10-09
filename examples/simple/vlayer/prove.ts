@@ -10,7 +10,7 @@ const exampleToken = await testHelpers.deployContract(ExampleToken, [
   john.address,
   10_000_000,
 ]);
-const blockNumber = await testHelpers.client().getBlockNumber();
+const blockNumber = await testHelpers.createAnvilClient().getBlockNumber();
 const rewardNFT = await testHelpers.deployContract(ExampleNftAbi, []);
 const prover = await testHelpers.deployContract(SimpleProver, [
   exampleToken,
