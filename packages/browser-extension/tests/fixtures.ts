@@ -5,15 +5,29 @@ export const test = base.extend<{
   context: BrowserContext;
   extensionId: string;
 }>({
-  context: async ({ context: _context }, use) => {
+  // eslint-disable-next-line
+  context: async ({}, use) => {
     const pathToExtension = path.join(import.meta.dirname, "../dist");
-    const context = await chromium.launchPersistentContext("", {
-      headless: false,
-      args: [
-        `--disable-extensions-except=${pathToExtension}`,
-        `--load-extension=${pathToExtension}`,
-      ],
-    });
+
+    const context = await chromium.launchPersistentContext(
+      "",
+      process.env.TEST_MODE === "headed"
+        ? {
+            headless: false,
+            args: [
+              `--disable-extensions-except=${pathToExtension}`,
+              `--load-extension=${pathToExtension}`,
+            ],
+          }
+        : {
+            headless: true,
+            args: [
+              `--headless=new`,
+              `--disable-extensions-except=${pathToExtension}`,
+              `--load-extension=${pathToExtension}`,
+            ],
+          },
+    );
     await use(context);
     await context.close();
   },
