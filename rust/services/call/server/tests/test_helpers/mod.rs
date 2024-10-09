@@ -35,6 +35,7 @@ impl TestHelper {
     pub(crate) async fn post<T: Serialize>(&self, url: &str, body: &T) -> Response<Body> {
         let app = server(ServerConfig {
             rpc_urls: HashMap::from([(self.anvil.chain_id(), self.anvil.endpoint())]),
+            host: "127.0.0.1".into(),
             port: 3000,
             proof_mode: ProofMode::Fake,
         });

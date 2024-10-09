@@ -21,6 +21,14 @@ pub(crate) struct ServeArgs {
 
     #[arg(long, value_enum)]
     pub(crate) proof: Option<ProofModeArg>,
+
+    /// Host to listen on.
+    #[arg(long, default_value = "127.0.0.1")]
+    pub(crate) host: Option<String>,
+
+    /// Port to listen on.
+    #[arg(long, short, default_value = "3000")]
+    pub(crate) port: Option<u16>,
 }
 
 #[derive(Clone, Debug, ValueEnum, Default)]
