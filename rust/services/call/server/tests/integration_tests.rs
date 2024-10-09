@@ -91,7 +91,7 @@ mod server_tests {
             );
         }
 
-        #[tokio::test]
+        #[tokio::test(flavor = "multi_thread")]
         async fn success_simple_contract_call() {
             let helper = TestHelper::create().await;
             let call_data = helper
@@ -140,7 +140,7 @@ mod server_tests {
             );
         }
 
-        #[tokio::test]
+        #[tokio::test(flavor = "multi_thread")]
         async fn success_web_proof() {
             let helper = TestHelper::create().await;
             let call_data = helper

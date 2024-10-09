@@ -16,9 +16,7 @@ use config::HostConfig;
 use error::HostError;
 use ethers_core::types::BlockNumber;
 use host_utils::Prover;
-use provider::{
-    BlockingProvider, CachedMultiProvider, EthProvider, EthersProviderFactory, ProviderFactory,
-};
+use provider::{BlockingProvider, CachedMultiProvider, EthProvider, EthersProviderFactory};
 use risc0_zkvm::ExecutorEnv;
 use serde::Serialize;
 
@@ -35,73 +33,61 @@ pub struct Host<P: BlockingProvider> {
     start_execution_location: ExecutionLocation,
     envs: CachedEvmEnv<ProofDb<P>>,
     prover: Prover,
-    chain_server: ChainProofClient,
+    chain_proof_client: ChainProofClient,
 }
 
 impl Host<EthProvider> {
     pub fn try_new(config: &HostConfig) -> Result<Self, HostError> {
         let provider_factory = EthersProviderFactory::new(config.rpc_urls.clone());
-        Host::try_new_with_provider_factory(provider_factory, config)
+        let providers = CachedMultiProvider::new(provider_factory);
+        let block_number = get_block_number(&providers, config.start_chain_id)?;
+        let chain_proof_client = ChainProofClient;
+
+        Host::try_new_with_components(providers, block_number, chain_proof_client, config)
     }
 }
 
-fn get_block_number(
-    providers: &CachedMultiProvider<impl BlockingProvider>,
+pub fn get_block_number(
+    providers: &CachedMultiProvider<impl BlockingProvider + 'static>,
     chain_id: ChainId,
 ) -> Result<ChainId, HostError> {
     let provider = providers.get(chain_id)?;
-    let block_header = provider
+
+    let block_number = provider
         .get_block_header(BlockNumber::Latest)
         .map_err(|e| HostError::Provider(format!("Error fetching block header: {:?}", e)))?
-        .ok_or_else(|| HostError::Provider(String::from("Block header not found")))?;
-    Ok((*block_header).number())
+        .ok_or_else(|| HostError::Provider(String::from("Block header not found")))
+        .map(|block_header| (*block_header).number())?;
+
+    Ok(block_number)
 }
 
 impl<P> Host<P>
 where
     P: BlockingProvider + 'static,
 {
-    pub fn try_new_with_provider_factory(
-        provider_factory: impl ProviderFactory<P> + 'static,
-        config: &HostConfig,
-    ) -> Result<Self, HostError> {
-        let providers = CachedMultiProvider::new(provider_factory);
-        let block_number = get_block_number(&providers, config.start_chain_id)?;
-        let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
-        let start_execution_location = (block_number, config.start_chain_id).into();
-        let prover = Prover::new(config.proof_mode);
-        let chain_server = ChainProofClient {};
-
-        Ok(Host {
-            envs,
-            start_execution_location,
-            prover,
-            chain_server,
-        })
-    }
-
-    pub fn try_new_with_provider_factory_and_block_number(
-        provider_factory: impl ProviderFactory<P> + 'static,
-        config: &HostConfig,
+    pub fn try_new_with_components(
+        providers: CachedMultiProvider<P>,
         block_number: u64,
+        chain_proof_client: ChainProofClient,
+        config: &HostConfig,
     ) -> Result<Self, HostError> {
-        let providers = CachedMultiProvider::new(provider_factory);
         let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
         let start_execution_location = (block_number, config.start_chain_id).into();
         let prover = Prover::new(config.proof_mode);
-        let chain_server = ChainProofClient {};
 
         Ok(Host {
             envs,
             start_execution_location,
             prover,
-            chain_server,
+            chain_proof_client,
         })
     }
 
-    pub fn run(self, call: Call) -> Result<HostOutput, HostError> {
-        let host_output = panic::catch_unwind({
-            || Engine::new(&self.envs).call(&call, self.start_execution_location)
+    #[allow(clippy::unused_async)]
+    pub async fn run(self, call: Call) -> Result<HostOutput, HostError> {
+        let host_output = panic::catch_unwind(|| {
+            Engine::new(&self.envs).call(&call, self.start_execution_location)
         })
         .map_err(wrap_engine_panic)??;
 
@@ -115,7 +101,7 @@ where
 
         // todo: use chain proofs in provably_execute
         let _chain_proofs = self
-            .chain_server
+            .chain_proof_client
             .get_chain_proofs(multi_evm_input.group_blocks_by_chain())?;
 
         let env = build_executor_env(input)
@@ -199,8 +185,8 @@ mod test {
         ));
     }
 
-    #[test]
-    fn try_new_invalid_rpc_url() -> anyhow::Result<()> {
+    #[tokio::test(flavor = "multi_thread")]
+    async fn try_new_invalid_rpc_url() -> anyhow::Result<()> {
         let rpc_urls = [(TEST_CHAIN_ID, "http://localhost:123/".to_string())]
             .into_iter()
             .collect();

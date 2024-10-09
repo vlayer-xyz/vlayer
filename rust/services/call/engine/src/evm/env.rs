@@ -46,7 +46,7 @@ impl<D> EvmEnv<D> {
     }
 }
 
-pub trait EvmEnvFactory<D>
+pub trait EvmEnvFactory<D>: Send + Sync
 where
     D: DatabaseRef,
 {

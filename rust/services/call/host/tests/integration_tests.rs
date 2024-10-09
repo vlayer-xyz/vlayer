@@ -4,13 +4,16 @@ use alloy_chains::{Chain, NamedChain};
 use alloy_primitives::{address, b256, uint, Address, ChainId};
 use alloy_sol_types::{sol, SolCall};
 use call_host::{
-    host::{config::HostConfig, error::HostError, Host},
+    host::{config::HostConfig, error::HostError, get_block_number, ChainProofClient, Host},
     Call,
 };
 use dotenv::dotenv;
 use ethers_core::types::BlockNumber as BlockTag;
 use lazy_static::lazy_static;
-use provider::{BlockingProvider, CachedProviderFactory, FileProviderFactory, ProviderFactory};
+use provider::{
+    BlockingProvider, CachedMultiProvider, CachedProviderFactory, FileProviderFactory,
+    ProviderFactory,
+};
 
 // To activate recording, set UPDATE_SNAPSHOTS to true.
 // Recording creates new testdata directory and writes return data from Alchemy into files in that directory.
@@ -60,18 +63,21 @@ fn create_host<P>(
 where
     P: BlockingProvider + 'static,
 {
+    let providers = CachedMultiProvider::new(provider_factory);
+    let chain_proof_client = ChainProofClient;
     match block_number {
-        BlockTag::Latest => Host::try_new_with_provider_factory(provider_factory, config),
-        BlockTag::Number(block_no) => Host::try_new_with_provider_factory_and_block_number(
-            provider_factory,
-            config,
-            block_no.as_u64(),
-        ),
+        BlockTag::Latest => {
+            let block_number = get_block_number(&providers, config.start_chain_id)?;
+            Host::try_new_with_components(providers, block_number, chain_proof_client, config)
+        }
+        BlockTag::Number(block_no) => {
+            Host::try_new_with_components(providers, block_no.as_u64(), chain_proof_client, config)
+        }
         _ => panic!("Only Latest and specific block numbers are supported, got {:?}", block_number),
     }
 }
 
-fn run<C>(
+async fn run<C>(
     test_name: &str,
     call: Call,
     chain_id: ChainId,
@@ -88,11 +94,11 @@ where
     let host_output = if UPDATE_SNAPSHOTS {
         let provider_factory = CachedProviderFactory::new(rpc_urls(), rpc_file_cache(test_name));
         let host = create_host(provider_factory, &config, block_number)?;
-        host.run(call)?
+        host.run(call).await?
     } else {
         let provider_factory = FileProviderFactory::new(rpc_file_cache(test_name));
         let host = create_host(provider_factory, &config, block_number)?;
-        host.run(call)?
+        host.run(call).await?
     };
     let return_value = C::abi_decode_returns(&host_output.guest_output.evm_call_result, false)?;
     Ok(return_value)
@@ -122,8 +128,8 @@ mod usdt {
         }
     }
 
-    #[test]
-    fn erc20_balance_of() -> anyhow::Result<()> {
+    #[tokio::test]
+    async fn erc20_balance_of() -> anyhow::Result<()> {
         let sol_call = IERC20::balanceOfCall {
             account: address!("F977814e90dA44bFA03b6295A0616a897441aceC"), // Binance 8
         };
@@ -136,7 +142,8 @@ mod usdt {
             call,
             Chain::mainnet().id(),
             USDT_BLOCK_NO.into(),
-        )?;
+        )
+        .await?;
         assert_eq!(result._0, uint!(3_000_000_000_000_000_U256));
         Ok(())
     }
@@ -153,8 +160,8 @@ mod uniswap {
         }
     }
 
-    #[test]
-    fn factory_owner() -> anyhow::Result<()> {
+    #[tokio::test]
+    async fn factory_owner() -> anyhow::Result<()> {
         let sol_call = IUniswapV3Factory::ownerCall {};
         let call = Call {
             to: UNISWAP,
@@ -165,7 +172,8 @@ mod uniswap {
             call,
             Chain::mainnet().id(),
             LATEST_BLOCK,
-        )?;
+        )
+        .await?;
         assert_eq!(
             result._0,
             address!("1a9c8182c09f50c8318d769245bea52c32be35bc") // Uniswap V2: UNI Timelock is the current owner of the factory.
@@ -222,8 +230,8 @@ mod view {
         }
     );
 
-    #[test]
-    fn precompile() -> anyhow::Result<()> {
+    #[tokio::test]
+    async fn precompile() -> anyhow::Result<()> {
         let sol_call = ViewCallTest::testPrecompileCall {};
         let call = Call {
             to: VIEW_CALL,
@@ -234,7 +242,8 @@ mod view {
             call,
             Chain::sepolia().id(),
             LATEST_BLOCK,
-        )?;
+        )
+        .await?;
         assert_eq!(
             result._0,
             b256!("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
@@ -242,8 +251,8 @@ mod view {
         Ok(())
     }
 
-    #[test]
-    fn nonexistent_account() -> anyhow::Result<()> {
+    #[tokio::test]
+    async fn nonexistent_account() -> anyhow::Result<()> {
         let sol_call = ViewCallTest::testNonexistentAccountCall {};
         let call = Call {
             to: VIEW_CALL,
@@ -254,13 +263,14 @@ mod view {
             call,
             Chain::sepolia().id(),
             LATEST_BLOCK,
-        )?;
+        )
+        .await?;
         assert_eq!(result.size, uint!(0_U256));
         Ok(())
     }
 
-    #[test]
-    fn eoa_account() -> anyhow::Result<()> {
+    #[tokio::test]
+    async fn eoa_account() -> anyhow::Result<()> {
         let sol_call = ViewCallTest::testEoaAccountCall {};
         let call = Call {
             to: VIEW_CALL,
@@ -271,13 +281,14 @@ mod view {
             call,
             Chain::sepolia().id(),
             LATEST_BLOCK,
-        )?;
+        )
+        .await?;
         assert_eq!(result.size, uint!(0_U256));
         Ok(())
     }
 
-    #[test]
-    fn blockhash() -> anyhow::Result<()> {
+    #[tokio::test]
+    async fn blockhash() -> anyhow::Result<()> {
         let sol_call = ViewCallTest::testBlockhashCall {};
         let call = Call {
             to: VIEW_CALL,
@@ -288,7 +299,8 @@ mod view {
             call,
             Chain::sepolia().id(),
             VIEW_CALL_BLOCK_NO.into(),
-        )?;
+        )
+        .await?;
         assert_eq!(
             result._0,
             b256!("7703fe4a3d6031a579d52ce9e493e7907d376cfc3b41f9bc7710b0dae8c67f68")
@@ -296,8 +308,8 @@ mod view {
         Ok(())
     }
 
-    #[test]
-    fn chainid() -> anyhow::Result<()> {
+    #[tokio::test]
+    async fn chainid() -> anyhow::Result<()> {
         let sol_call = ViewCallTest::testChainidCall {};
         let call = Call {
             to: VIEW_CALL,
@@ -308,13 +320,14 @@ mod view {
             call,
             Chain::sepolia().id(),
             LATEST_BLOCK,
-        )?;
+        )
+        .await?;
         assert_eq!(result._0, uint!(11_155_111_U256));
         Ok(())
     }
 
-    #[test]
-    fn multi_contract_calls() -> anyhow::Result<()> {
+    #[tokio::test]
+    async fn multi_contract_calls() -> anyhow::Result<()> {
         let sol_call = ViewCallTest::testMuliContractCallsCall {};
         let call = Call {
             to: VIEW_CALL,
@@ -325,13 +338,14 @@ mod view {
             call,
             Chain::sepolia().id(),
             LATEST_BLOCK,
-        )?;
+        )
+        .await?;
         assert_eq!(result._0, uint!(84_U256));
         Ok(())
     }
 
-    #[test]
-    fn call_eoa() -> anyhow::Result<()> {
+    #[tokio::test]
+    async fn call_eoa() -> anyhow::Result<()> {
         let call = Call {
             to: address!("d8dA6BF26964aF9D7eEd9e03E53415D37aA96045"), // vitalik.eth
             ..Default::default()
@@ -342,6 +356,7 @@ mod view {
             Chain::sepolia().id(),
             LATEST_BLOCK,
         )
+        .await
         .expect_err("calling an EOA should fail");
 
         Ok(())
@@ -363,8 +378,8 @@ mod teleport {
         }
     }
 
-    #[test]
-    fn teleport_to_unknown_chain_returns_an_error_but_does_not_panic() -> anyhow::Result<()> {
+    #[tokio::test]
+    async fn teleport_to_unknown_chain_returns_an_error_but_does_not_panic() -> anyhow::Result<()> {
         let sol_call = SimpleTravelProver::crossChainBalanceOfCall {
             owner: Address::ZERO,
         };
@@ -377,7 +392,8 @@ mod teleport {
             call,
             NamedChain::AnvilHardhat.into(),
             BLOCK_NO.into(),
-        );
+        )
+        .await;
         assert_eq!(
             result.unwrap_err().to_string(),
             "Engine error: Panic: Intercepted call failed: EvmEnv(\"No rpc cache for chain: 8453\")"
