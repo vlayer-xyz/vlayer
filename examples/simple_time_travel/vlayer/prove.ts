@@ -45,7 +45,9 @@ const txHash = await walletClient.writeContract({
   args: [proof, ...result],
   account: deployer,
 });
-
+console.log(
+  `Verification tx: https://sepolia-optimism.etherscan.io/tx/${txHash}`,
+);
 const receipt = await client.waitForTransactionReceipt({ hash: txHash });
 
 console.log(`Verification result: ${receipt.status}`);

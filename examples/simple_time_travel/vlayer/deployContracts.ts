@@ -70,8 +70,12 @@ const deployVerifier = async (prover: Address) => {
 
 console.log("Deploying Prover...");
 const proverAddr = await deployProver();
-console.log(`Prover deployed: ${proverAddr}`);
+console.log(
+  `Prover deployed: https://sepolia-optimism.etherscan.io/address/${proverAddr}`,
+);
 
 console.log("Deploying Verifier...");
 const verifierAddr = await deployVerifier(proverAddr);
-console.log(`Verifier deployed: ${verifierAddr}`);
+console.log(
+  `Verifier deployed: https://sepolia-optimism.etherscan.io/address/${verifierAddr}`,
+);
