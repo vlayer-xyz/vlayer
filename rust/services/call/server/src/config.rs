@@ -11,6 +11,7 @@ pub struct ServerConfig {
     pub host: String,
     pub port: u16,
     pub proof_mode: ProofMode,
+    pub chain_proof_url: String,
 }
 
 impl Default for ServerConfig {
@@ -21,6 +22,7 @@ impl Default for ServerConfig {
             host: "127.0.0.1".into(),
             port: 3000,
             proof_mode: ProofMode::Groth16,
+            chain_proof_url: String::default(),
         }
     }
 }
@@ -31,6 +33,7 @@ impl ServerConfig {
         proof_mode: ProofMode,
         host: Option<String>,
         port: Option<u16>,
+        chain_proof_url: String,
     ) -> ServerConfig {
         let default = ServerConfig::default();
         ServerConfig {
@@ -42,6 +45,7 @@ impl ServerConfig {
             host: host.unwrap_or(default.host),
             port: port.unwrap_or(default.port),
             proof_mode,
+            chain_proof_url,
         }
     }
 }

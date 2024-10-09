@@ -7,13 +7,16 @@ use call_host::{
     host::{config::HostConfig, error::HostError, get_block_number, ChainProofClient, Host},
     Call,
 };
+use chain_server::server::ChainProof;
 use dotenv::dotenv;
 use ethers_core::types::BlockNumber as BlockTag;
+use httpmock::MockServer;
 use lazy_static::lazy_static;
 use provider::{
     BlockingProvider, CachedMultiProvider, CachedProviderFactory, FileProviderFactory,
     ProviderFactory,
 };
+use serde_json::json;
 
 // To activate recording, set UPDATE_SNAPSHOTS to true.
 // Recording creates new testdata directory and writes return data from Alchemy into files in that directory.
@@ -57,14 +60,15 @@ fn rpc_urls() -> HashMap<ChainId, String> {
 
 fn create_host<P>(
     provider_factory: impl ProviderFactory<P> + 'static,
-    config: &HostConfig,
     block_tag: BlockTag,
+    chain_proof_url: String,
+    config: &HostConfig,
 ) -> Result<Host<P>, HostError>
 where
     P: BlockingProvider + 'static,
 {
     let providers = CachedMultiProvider::new(provider_factory);
-    let chain_proof_client = ChainProofClient;
+    let chain_proof_client = ChainProofClient::new(chain_proof_url);
     let block_number = block_tag_to_block_number(&providers, config.start_chain_id, block_tag)?;
 
     Host::try_new_with_components(providers, block_number, chain_proof_client, config)
@@ -99,15 +103,47 @@ where
         ..Default::default()
     };
 
+    let mock_server = MockServer::start();
+    let chain_proof_url = mock_server.url("/");
+
+    let chain_proof = ChainProof::default();
+    let chain_proof_json = serde_json::to_value(&chain_proof).unwrap();
+
+    let mock = mock_server.mock(|when, then| {
+        when.method("POST")
+            .path("/")
+            .header("Content-Type", "application/json")
+            .json_body_partial(
+                serde_json::to_string(&json!({
+                    "method": "v_chain"
+                }))
+                .unwrap(),
+            );
+
+        then.status(200)
+            .header("Content-Type", "application/json")
+            .body(
+                serde_json::to_string(&json!({
+                    "jsonrpc": "2.0",
+                    "result": chain_proof_json,
+                    "id": 1
+                }))
+                .unwrap(),
+            );
+    });
+
     let host_output = if UPDATE_SNAPSHOTS {
         let provider_factory = CachedProviderFactory::new(rpc_urls(), rpc_file_cache(test_name));
-        let host = create_host(provider_factory, &config, block_number)?;
+        let host = create_host(provider_factory, block_number, chain_proof_url, &config)?;
         host.run(call).await?
     } else {
         let provider_factory = FileProviderFactory::new(rpc_file_cache(test_name));
-        let host = create_host(provider_factory, &config, block_number)?;
+        let host = create_host(provider_factory, block_number, chain_proof_url, &config)?;
         host.run(call).await?
     };
+
+    mock.assert();
+
     let return_value = C::abi_decode_returns(&host_output.guest_output.evm_call_result, false)?;
     Ok(return_value)
 }

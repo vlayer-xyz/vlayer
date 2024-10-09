@@ -57,7 +57,7 @@ async fn run() -> Result<(), CLIError> {
         Commands::Serve(serve_args) => {
             let proof_mode: ProofMode = serve_args.proof.unwrap_or_default().map();
             let server_config: ServerConfig =
-                ServerConfig::new(serve_args.rpc_url, proof_mode, serve_args.host, serve_args.port);
+                ServerConfig::new(serve_args.rpc_url, proof_mode, serve_args.host, serve_args.port, String::default());
             run_serve(server_config).await?;
         }
         Commands::Init(init_args) => {

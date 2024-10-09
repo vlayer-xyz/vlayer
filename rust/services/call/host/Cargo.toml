@@ -16,6 +16,7 @@ alloy-chains = { workspace = true }
 alloy-primitives = { workspace = true, features = ["rlp", "serde"] }
 ethers-core = { workspace = true }
 thiserror = { workspace = true }
+httpmock = { workspace = true }
 url = { workspace = true }
 alloy-sol-types = { workspace = true }
 anyhow = { workspace = true }
@@ -26,7 +27,6 @@ chain = { workspace = true }
 chain_server = { workspace = true }
 provider = { workspace = true }
 lazy_static = { workspace = true}
-httpmock = "0.7.0"
 tracing = { workspace = true }
 reqwest = { workspace = true }
 serde_json = { workspace = true }

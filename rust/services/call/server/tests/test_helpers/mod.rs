@@ -2,6 +2,7 @@ use std::{collections::HashMap, sync::Arc, time::Duration};
 
 use axum::{body::Body, http::Response};
 use call_server::{server, ProofMode, ServerConfig};
+use chain_server::server::ChainProof;
 use ethers::{
     contract::abigen,
     core::{
@@ -13,7 +14,9 @@ use ethers::{
     signers::{LocalWallet, Signer, Wallet},
 };
 use example_prover::ExampleProver;
+use httpmock::MockServer;
 use serde::Serialize;
+use serde_json::json;
 use server_utils::post;
 
 abigen!(ExampleProver, "./testdata/ExampleProver.json",);
@@ -33,11 +36,41 @@ impl TestHelper {
     }
 
     pub(crate) async fn post<T: Serialize>(&self, url: &str, body: &T) -> Response<Body> {
+        let mock_server = MockServer::start();
+        let chain_proof_url = mock_server.url("/");
+
+        let chain_proof = ChainProof::default();
+        let chain_proof_json = serde_json::to_value(&chain_proof).unwrap();
+
+        mock_server.mock(|when, then| {
+            when.method("POST")
+                .path("/")
+                .header("Content-Type", "application/json")
+                .json_body_partial(
+                    serde_json::to_string(&json!({
+                        "method": "v_chain"
+                    }))
+                    .unwrap(),
+                );
+
+            then.status(200)
+                .header("Content-Type", "application/json")
+                .body(
+                    serde_json::to_string(&json!({
+                        "jsonrpc": "2.0",
+                        "result": chain_proof_json,
+                        "id": 1
+                    }))
+                    .unwrap(),
+                );
+        });
+
         let app = server(ServerConfig {
             rpc_urls: HashMap::from([(self.anvil.chain_id(), self.anvil.endpoint())]),
             host: "127.0.0.1".into(),
             port: 3000,
             proof_mode: ProofMode::Fake,
+            chain_proof_url,
         });
         post(app, url, body).await
     }
