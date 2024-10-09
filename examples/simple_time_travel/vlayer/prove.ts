@@ -40,19 +40,19 @@ const deployVerifier = async (prover: Address) => {
 console.log("Proving...");
 const proverAddr = await deployProver();
 
-const { proof, returnValue } = await prove(
+const { proof, result } = await prove(
   proverAddr,
   averageBalance.abi,
   "averageBalanceOf",
   [tokenOwner],
 );
-console.log("Response:", proof, returnValue);
+console.log("Response:", proof, result);
 
 const verifierAddr = await deployVerifier(proverAddr);
 const receipt = await testHelpers.writeContract(
   verifierAddr,
   averageBalanceVerifier.abi,
   "claim",
-  [proof, ...returnValue],
+  [proof, ...result],
 );
 console.log(`Verification result: ${receipt.status}`);

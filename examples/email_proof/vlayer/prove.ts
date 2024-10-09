@@ -17,7 +17,7 @@ const [prover, verifier] = await testHelpers.deployProverVerifier(
 console.log("Proving...");
 const {
   proof,
-  returnValue: [result],
+  result: [result],
 } = await prove(prover, emailProofProver.abi, "main", [unverifiedEmail]);
 console.log("Proof:", proof);
 

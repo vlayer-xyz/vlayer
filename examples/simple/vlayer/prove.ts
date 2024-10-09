@@ -22,20 +22,17 @@ const verifier = await testHelpers.deployContract(SimpleVerifier, [
 ]);
 
 console.log("Proving...");
-const { proof, returnValue } = await prove(
-  prover,
-  SimpleProver.abi,
-  "balance",
-  [john.address],
-);
+const { proof, result } = await prove(prover, SimpleProver.abi, "balance", [
+  john.address,
+]);
 console.log("Proof result:");
-console.log(proof, returnValue);
+console.log(proof, result);
 
 const receipt = await testHelpers.writeContract(
   verifier,
   SimpleVerifier.abi,
   "claimWhale",
-  [proof, ...returnValue],
+  [proof, ...result],
 );
 
 console.log(`Verification result: ${receipt.status}`);
