@@ -22,10 +22,7 @@ const { hash } = vlayer.prove({
   functionName: "main",
   args: [unverifiedEmail],
 });
-const {
-  proof,
-  result: [result],
-} = await vlayer.waitForProvingResult({ hash });
+const { proof } = await vlayer.waitForProvingResult({ hash });
 console.log("Proof:", proof);
 
 console.log("Verifying...");

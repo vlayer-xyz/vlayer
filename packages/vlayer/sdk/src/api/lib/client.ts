@@ -4,6 +4,14 @@ import { WebProofProvider } from "types/webProofProvider";
 import { prove } from "../prover";
 import { createExtensionWebProofProvider } from "../webProof";
 import { type Abi, decodeFunctionResult } from "viem";
+
+function dropProofFromArgs(args: unknown) {
+  if (Array.isArray(args)) {
+    return args.slice(1);
+  }
+  return [];
+}
+
 export const createVlayerClient = (
   {
     url = "http://127.0.0.1:3000",
@@ -46,12 +54,13 @@ export const createVlayerClient = (
         result: { proof, evm_call_result },
       } = await savedProvingData[0];
 
-      const [, ...result] = decodeFunctionResult({
-        abi: savedProvingData[1] as Abi,
-        data: evm_call_result,
-        functionName: savedProvingData[2] as string,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      }) as any[];
+      const result = dropProofFromArgs(
+        decodeFunctionResult({
+          abi: savedProvingData[1] as Abi,
+          data: evm_call_result,
+          functionName: savedProvingData[2] as string,
+        }),
+      );
 
       return { proof, result };
     },
