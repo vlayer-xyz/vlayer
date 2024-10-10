@@ -8,7 +8,7 @@ import React, {
   useState,
 } from "react";
 import { formatTlsnHeaders } from "lib/formatTlsnHeaders";
-import { ensure, ExtensionMessageType } from "@vlayer/web-proof-commons";
+import { isDefined, ExtensionMessageType } from "@vlayer/web-proof-commons";
 import { useProvingSessionConfig } from "./useProvingSessionConfig";
 import { useProvenUrl } from "./useProvenUrl";
 import { useTrackHistory } from "hooks/useTrackHistory";
@@ -50,8 +50,8 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
 
     try {
       //TODO : make sure on hooks level its defined
-      ensure(provenUrl?.url, "Missing URL to prove");
-      ensure(provingSessionConfig, "Missing proving session config");
+      isDefined(provenUrl?.url, "Missing URL to prove");
+      isDefined(provingSessionConfig, "Missing proving session config");
 
       const tlsnProof = await tlsnProve(removeQueryParams(provenUrl?.url), {
         notaryUrl: provingSessionConfig.notaryUrl,
