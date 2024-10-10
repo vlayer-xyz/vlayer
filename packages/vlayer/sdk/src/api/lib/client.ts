@@ -12,6 +12,14 @@ function dropProofFromArgs(args: unknown) {
   return [];
 }
 
+function generateRandomHash() {
+  let hash = "0x";
+  for (let i = 0; i < 40; ++i) {
+    hash += Math.floor(Math.random() * 16).toString(16);
+  }
+  return hash;
+}
+
 export const createVlayerClient = (
   {
     url = "http://127.0.0.1:3000",
@@ -41,7 +49,7 @@ export const createVlayerClient = (
         chainId,
         url,
       );
-      const hash = address + functionName + args;
+      const hash = generateRandomHash();
       resultHashMap.set(hash, [result_promise, proverAbi, functionName]);
       return { hash };
     },
