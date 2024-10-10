@@ -72,90 +72,95 @@ fn build_executor_env(input: impl Serialize) -> anyhow::Result<ExecutorEnv<'stat
 
 #[cfg(test)]
 mod test {
-    use std::sync::Arc;
-
-    use alloy_primitives::B256;
-    use alloy_rlp::encode_fixed_size;
-    use ethers::{providers::Provider, types::Block};
-    use lazy_static::lazy_static;
-    use mpt::MerkleTrie;
-    use provider::EvmBlockHeader;
-    use risc0_zkp::core::digest::Digest;
-    use serde_json::{from_value, json, Value};
-
     use super::*;
+    mod provably_execute {
+        use super::*;
+        #[test]
+        fn host_prove_invalid_guest_elf() {
+            let prover = Prover::default();
+            let env = ExecutorEnv::default();
+            let invalid_guest_elf = &[];
+            let res = provably_execute(&prover, env, invalid_guest_elf);
 
-    lazy_static! {
-        // All fields are zeroed out except for the block number
-        static ref rpc_block: Block<()> = from_value(json!(
-        {
-            "number": "0x42",
-
-            "baseFeePerGas": "0x0",
-            "miner": "0x0000000000000000000000000000000000000000",
-            "hash": "0x0000000000000000000000000000000000000000000000000000000000000000",
-            "parentHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
-            "mixHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
-            "nonce": "0x0000000000000000",
-            "sealFields": [],
-            "sha3Uncles": "0x0000000000000000000000000000000000000000000000000000000000000000",
-            "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-            "transactionsRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
-            "receiptsRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
-            "stateRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
-            "difficulty": "0x0",
-            "totalDifficulty": "0x0",
-            "extraData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-            "size": "0x0",
-            "gasLimit": "0x0",
-            "minGasPrice": "0x0",
-            "gasUsed": "0x0",
-            "timestamp": "0x0",
-            "transactions": [],
-            "uncles": []
-          }
-        )).unwrap();
-        static ref block: Arc<dyn EvmBlockHeader> = Arc::new(to_eth_block_header(rpc_block.clone()).unwrap());
-        static ref block_hash: B256 = block.hash_slow();
-
-        static ref config: HostConfig = HostConfig::default();
+            assert!(matches!(
+                res.map(|_| ()).unwrap_err(),
+                HostError::Prover(ref msg) if msg == "Elf parse error: Could not read bytes in range [0x0, 0x10)"
+            ));
+        }
     }
+    mod host {
+        use std::sync::Arc;
 
-    #[tokio::test]
-    async fn initialize() -> anyhow::Result<()> {
-        let (provider, mock) = Provider::mocked();
-        mock.push(rpc_block.clone())?;
+        use alloy_primitives::B256;
+        use alloy_rlp::encode_fixed_size;
+        use ethers::{providers::Provider, types::Block};
+        use lazy_static::lazy_static;
+        use mpt::MerkleTrie;
+        use provider::EvmBlockHeader;
+        use risc0_zkp::core::digest::Digest;
+        use serde_json::{from_value, json, Value};
 
-        let encoded_block_num = encode_fixed_size(&block.number());
-        let expected_root_hash =
-            MerkleTrie::from_iter([(encoded_block_num, *block_hash)]).hash_slow();
+        use super::*;
 
-        let host = Host::new(&config);
-        let HostOutput { receipt } = host.initialize(ChainId::default(), &provider).await?;
+        lazy_static! {
+            // All fields are zeroed out except for the block number
+            static ref rpc_block: Block<()> = from_value(json!(
+            {
+                "number": "0x42",
 
-        mock.assert_request(
-            "eth_getBlockByNumber",
-            Value::Array(vec!["latest".into(), false.into()]),
-        )?;
+                "baseFeePerGas": "0x0",
+                "miner": "0x0000000000000000000000000000000000000000",
+                "hash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                "parentHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                "mixHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                "nonce": "0x0000000000000000",
+                "sealFields": [],
+                "sha3Uncles": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+                "transactionsRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                "receiptsRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                "stateRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                "difficulty": "0x0",
+                "totalDifficulty": "0x0",
+                "extraData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                "size": "0x0",
+                "gasLimit": "0x0",
+                "minGasPrice": "0x0",
+                "gasUsed": "0x0",
+                "timestamp": "0x0",
+                "transactions": [],
+                "uncles": []
+              }
+            )).unwrap();
+            static ref block: Arc<dyn EvmBlockHeader> = Arc::new(to_eth_block_header(rpc_block.clone()).unwrap());
+            static ref block_hash: B256 = block.hash_slow();
 
-        let (root_hash, elf_id): (B256, Digest) = receipt.journal.decode()?;
+            static ref config: HostConfig = HostConfig::default();
+        }
 
-        assert_eq!(root_hash, expected_root_hash);
-        assert_eq!(elf_id, RISC0_CHAIN_GUEST_ID.into());
+        #[tokio::test]
+        async fn initialize() -> anyhow::Result<()> {
+            let (provider, mock) = Provider::mocked();
+            mock.push(rpc_block.clone())?;
 
-        Ok(())
-    }
+            let encoded_block_num = encode_fixed_size(&block.number());
+            let expected_root_hash =
+                MerkleTrie::from_iter([(encoded_block_num, *block_hash)]).hash_slow();
 
-    #[test]
-    fn host_prove_invalid_guest_elf() {
-        let prover = Prover::default();
-        let env = ExecutorEnv::default();
-        let invalid_guest_elf = &[];
-        let res = provably_execute(&prover, env, invalid_guest_elf);
+            let host = Host::new(&config);
+            let HostOutput { receipt } = host.initialize(ChainId::default(), &provider).await?;
 
-        assert!(matches!(
-            res.map(|_| ()).unwrap_err(),
-            HostError::Prover(ref msg) if msg == "Elf parse error: Could not read bytes in range [0x0, 0x10)"
-        ));
+            mock.assert_request(
+                "eth_getBlockByNumber",
+                Value::Array(vec!["latest".into(), false.into()]),
+            )?;
+
+            let (root_hash, elf_id): (B256, Digest) = receipt.journal.decode()?;
+
+            assert_eq!(root_hash, expected_root_hash);
+            assert_eq!(elf_id, RISC0_CHAIN_GUEST_ID.into());
+
+            Ok(())
+        }
     }
 }
