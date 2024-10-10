@@ -20,9 +20,7 @@
     "storage",
     "webRequest",
     "cookies",
-    "nativeMessaging",
-    "activeTab",
-    "notifications"
+    "activeTab"
   ],
   "externally_connectable": {
     "matches": ["<all_urls>"]
