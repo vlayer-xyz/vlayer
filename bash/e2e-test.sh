@@ -19,8 +19,8 @@ cd ${VLAYER_HOME}/packages/sdk && bun install
 # if the key is not available
 EXAMPLES_REQUIRING_ALCHEMY=("simple_teleport")
 
-# these examples require TEST_PRIVATE_KEY, which may not be available locally, so we don't run them
-# if the key is not available
+# these examples require TEST_PRIVATE_KEY and ALCHEMY_API_KEY, 
+# which may not be available locally, so we don't run them if the key is not available
 EXAMPLES_REQUIRING_PRIV_KEY=("simple_time_travel")
 
 # check if ALCHEMY_API_KEY is set in GitHub actions; running in GH is detected by checking RUNNER_OS env var
@@ -36,7 +36,7 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
       continue
     fi
 
-    if [[ "${EXAMPLES_REQUIRING_PRIV_KEY[@]}" =~ "${example_name}" ]] && [[ -z "${TEST_PRIVATE_KEY:-}" ]]; then
+    if [[ "${EXAMPLES_REQUIRING_PRIV_KEY[@]}" =~ "${example_name}" ]] && [[ -z "${TEST_PRIVATE_KEY:-}" ]] && [[ -z "${ALCHEMY_API_KEY:-}" ]]; then
       continue
     fi
 
