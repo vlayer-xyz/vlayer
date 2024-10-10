@@ -54,15 +54,16 @@ function install_deps {
     cd ${VLAYER_HOME}/examples/web_proof/vlayer && bun install --frozen-lock-file
 }
 
-install_deps
-run_services
-deploy_contracts
-calculate_extension_id
-run_web_app
-
 if [ "$MODE" = "headless" ]; then
+    install_deps
+    run_web_app
     build_browser_extension
     wait
 else
+    install_deps
+    run_services
+    deploy_contracts
+    calculate_extension_id
+    run_web_app
     run_browser_extension
 fi
