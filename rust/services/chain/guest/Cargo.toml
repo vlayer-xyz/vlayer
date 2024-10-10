@@ -10,6 +10,7 @@ serde = { workspace = true }
 mpt = { workspace = true }
 risc0-zkp = { workspace = true }
 alloy-primitives = { workspace = true }
+bytes = { workspace = true }
 
 [lints]
 workspace = true

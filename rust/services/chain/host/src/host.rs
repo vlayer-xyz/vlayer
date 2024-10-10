@@ -2,7 +2,7 @@ pub mod config;
 pub mod error;
 
 use alloy_primitives::ChainId;
-use block_trie::Input;
+use chain_guest::Input;
 use chain_guest_wrapper::{RISC0_CHAIN_GUEST_ELF, RISC0_CHAIN_GUEST_ID};
 pub use config::HostConfig;
 pub use error::HostError;

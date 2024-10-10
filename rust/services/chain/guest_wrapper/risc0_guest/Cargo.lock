@@ -543,6 +543,7 @@ dependencies = [
  "alloy-primitives",
  "block_header",
  "block_trie",
+ "bytes",
  "mpt",
  "risc0-zkp",
  "serde",
