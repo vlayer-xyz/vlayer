@@ -17,7 +17,7 @@ export default defineConfig({
   reporter: "html",
   webServer: {
     command: "bash ../../bash/run-web-example.sh --mode headless", // Run your bash script
-    url: "http://127.0.0.1:5174",
+    url: "http://localhost:5174",
     stdout: "pipe", // Capture stdout
     stderr: "pipe", // Capture stderr
     timeout: 360000,
@@ -26,7 +26,7 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: "http://127.0.0.1:5174",
+    baseURL: "http://localhost:5174",
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "on-first-retry",
