@@ -27,13 +27,7 @@ impl RpcServerMock {
     {
         let result = result.into();
 
-        let mut request_map = Map::new();
-        request_map.insert("method".to_string(), Value::String(self.method.clone()));
-        if let Some(params) = params {
-            request_map.insert("params".to_string(), params.into());
-        }
-
-        let request_body = serde_json::to_string(&Value::Object(request_map)).unwrap();
+        let request_body = self.build_request_body(params);
 
         let mock = self.mock_server.mock(|when, then| {
             when.method("POST")
@@ -54,6 +48,20 @@ impl RpcServerMock {
         });
 
         mock
+    }
+
+    fn build_request_body<P>(&self, params: Option<P>) -> String
+    where
+        P: Into<Value>,
+    {
+        let mut request_map = Map::new();
+        request_map.insert("method".to_string(), Value::String(self.method.clone()));
+
+        if let Some(params) = params {
+            request_map.insert("params".to_string(), params.into());
+        }
+
+        serde_json::to_string(&Value::Object(request_map)).unwrap()
     }
 }
 
