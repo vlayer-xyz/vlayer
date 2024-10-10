@@ -17,8 +17,8 @@ const twitterUserAddress = (await testHelpers.getTestAddresses())[0];
 
 const vlayer = createVlayerClient();
 
-testSuccessProvingAndVerification();
-testFailedProving();
+await testSuccessProvingAndVerification();
+await testFailedProving();
 
 async function testSuccessProvingAndVerification() {
   console.log("Proving...");
