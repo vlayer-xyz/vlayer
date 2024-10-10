@@ -1,15 +1,6 @@
 use std::sync::Arc;
 
-#[cfg(not(feature = "sha2-risc0"))]
 use mail_auth::{
-    common::{
-        parse::TxtRecordParser,
-        resolve::{IntoFqdn, Resolve, UnwrapTxtRecord},
-    },
-    Result, Txt,
-};
-#[cfg(feature = "sha2-risc0")]
-use sha2_risc0::{
     common::{
         parse::TxtRecordParser,
         resolve::{IntoFqdn, Resolve, UnwrapTxtRecord},

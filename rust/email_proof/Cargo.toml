@@ -3,15 +3,12 @@ name = "email_proof"
 version = "0.1.0"
 edition = "2021"
 
-[features]
-default = ["sha2-risc0"]
 
 [dependencies]
 alloy-sol-types = { workspace = true }
 mailparse = "0.15.0"
 thiserror = { workspace = true }
-mail-auth = { git = "https://github.com/vlayer-xyz/mail-auth", rev = "3c4bb85ef39494fc774d3aaacd01f9bcd2afab3b", default-features = false, features = ["rust-crypto", "rustls-pemfile"] }
-sha2-risc0 = { package = "mail-auth", git = "https://github.com/vlayer-xyz/mail-auth", rev = "800b8bc6c6ccca1f2e0d3a594a445ebdaae3198e", default-features = false, features = ["rust-crypto", "rustls-pemfile"], optional = true }
+mail-auth = { git = "https://github.com/vlayer-xyz/mail-auth", rev = "800b8bc6c6ccca1f2e0d3a594a445ebdaae3198e", default-features = false, features = ["rust-crypto", "rustls-pemfile"] }
 futures = "0.3.30"
 regex = { workspace = true }
 ring = "0.17.8"

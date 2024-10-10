@@ -3336,8 +3336,7 @@ dependencies = [
  "futures",
  "hex-literal",
  "lazy_static",
- "mail-auth 0.5.0 (git+https://github.com/vlayer-xyz/mail-auth?rev=3c4bb85ef39494fc774d3aaacd01f9bcd2afab3b)",
- "mail-auth 0.5.0 (git+https://github.com/vlayer-xyz/mail-auth?rev=800b8bc6c6ccca1f2e0d3a594a445ebdaae3198e)",
+ "mail-auth",
  "mailparse",
  "regex",
  "ring 0.17.8",
@@ -6115,28 +6114,6 @@ name = "mac"
 version = "0.1.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c41e0c4fef86961ac6d6f8a82609f55f31b05e4fce149ac5710e439df7619ba4"
-
-[[package]]
-name = "mail-auth"
-version = "0.5.0"
-source = "git+https://github.com/vlayer-xyz/mail-auth?rev=3c4bb85ef39494fc774d3aaacd01f9bcd2afab3b#3c4bb85ef39494fc774d3aaacd01f9bcd2afab3b"
-dependencies = [
- "ahash",
- "ed25519-dalek",
- "flate2",
- "futures",
- "lru-cache",
- "mail-builder",
- "mail-parser",
- "parking_lot",
- "quick-xml 0.36.1",
- "rsa",
- "rustls-pemfile 2.1.2",
- "serde",
- "serde_json",
- "sha1",
- "sha2 0.10.8 (registry+https://github.com/rust-lang/crates.io-index)",
-]
 
 [[package]]
 name = "mail-auth"

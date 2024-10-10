@@ -1,9 +1,4 @@
-#[cfg(not(feature = "sha2-risc0"))]
 use mail_auth::{
-    dkim::verify::DkimVerifier, AuthenticatedMessage, DkimOutput, DkimResult, Error as AuthError,
-};
-#[cfg(feature = "sha2-risc0")]
-use sha2_risc0::{
     dkim::verify::DkimVerifier, AuthenticatedMessage, DkimOutput, DkimResult, Error as AuthError,
 };
 
