@@ -1,4 +1,4 @@
-# Text Parsing
+# JSON Parsing and Regular Expressions
 
 <div class="feature-card feature-in-dev">
   <div class="title">
@@ -12,16 +12,16 @@
   <p>Our team is currently working on this feature. If you experience any bugs, please let us know <a href="https://discord.gg/JS6whdessP" target="_blank">on our Discord</a>. We appreciate your patience. </p>
 </div>
 
-Finding patterns in text can be extremely useful while making proofs. When verifying Web Proofs, it is also essential to be able to parse JSON data.
-To make it possible, we provide tools to parse text using regular expressions and JSON data directly in Solidity contracts.
+When dealing with [Web Proofs](/features/web.html), the ability to parse JSON data is essential. Similarly, finding specific strings or patterns in the subject or body of an email is crucial for [Email Proofs](/features/email.html). 
+
+To support these use cases, we provide helpers for parsing text using [regular expressions](https://en.wikipedia.org/wiki/Regular_expression) and extracting data from JSON directly within vlayer `Prover` contracts.
 
 ## JSON Parsing
 
-We currently provide 3 functions to extract data from JSON depending on the type of field:
-
-- `jsonGetInt` - extracts an integer value from a JSON field, returns `int256`.
-- `jsonGetBool` - extracts a boolean value from a JSON field, returns `bool`.
-- `jsonGetString` - extracts a string value from a JSON field, returns `string memory`.
+We provide three functions to extract data from JSON based on the field type:
+- `jsonGetInt`: Extracts an integer value and returns `int256`.
+- `jsonGetBool`: Extracts a boolean value and returns `bool`.
+- `jsonGetString`: Extracts a string value and returns `string memory`.
 
 ```solidity
 import {Prover} from "vlayer/Prover.sol";
@@ -40,7 +40,7 @@ contract JSONContainsFieldProof is Prover {
 }
 ```
 
-Paths to the fields are separated by dots. The above code will extract the value of the field `deep.nested.field` from the JSON-formatted string, compare it with `42`.
+In the example above, the function extracts the value of the field `deep.nested.field` from the JSON string below and checks if it equals `42`.
 
 ```json
 {
@@ -52,16 +52,15 @@ Paths to the fields are separated by dots. The above code will extract the value
 }
 ```
 
-Functions will revert in case the field under the path does not exist or the value is not of the expected type.
+The functions will revert if the field does not exist or if the value is of the wrong type. 
 
-Accessing fields inside an array is not currently supported.
+Currently, accessing fields inside arrays is not supported.
 
 ## Regular Expressions
+Regular expressions are a powerful tool for finding patterns in text.
 
-[Regular expressions](https://en.wikipedia.org/wiki/Regular_expression) are a powerful tool for finding patterns in text.
 We provide a function to match a regular expression against a string:
-
-- `matches` - matches a regular expression against a string, returns `true` only if a match exists.
+- `matches` checks if a string matches a regular expression and returns `true` if a match is found.
 
 ```solidity
 import {Prover} from "vlayer/Prover.sol";
@@ -71,10 +70,10 @@ contract RegexMatchProof is Prover {
     using RegexLib for string;
 
     function main(string calldata text) public returns (Proof memory, string memory) {
-        // The regex is passed as a normal string
-        require(text.matches("^[a-zA-Z0-9]*$"), "text contains invalid characters");
-        
-        // Return text back to prove it contains only alphanumeric characters
+        // The regex pattern is passed as a string
+        require(text.matches("^[a-zA-Z0-9]*$"), "text must be alphanumeric only");
+
+        // Return proof and provided text if it matches the pattern
         return (proof(), text);
     }
 }
