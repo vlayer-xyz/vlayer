@@ -27,34 +27,34 @@ jobs:
         with:
           submodules: recursive
 
-      - name: Set up Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          cache-workspaces: |
-            rust
-            rust/services/call/guest_wrapper/risc0_guest
-            rust/services/chain/guest_wrapper/risc0_guest
+#      - name: Set up Rust
+#        uses: actions-rust-lang/setup-rust-toolchain@v1
+#        with:
+#          cache-workspaces: |
+#            rust
+#            rust/services/call/guest_wrapper/risc0_guest
+#            rust/services/chain/guest_wrapper/risc0_guest
 
-      - uses: cargo-bins/cargo-binstall@main
+#      - uses: cargo-bins/cargo-binstall@main
+#
+#      - name: Install risc0 toolchain
+#        run: |
+#          cargo binstall -y cargo-risczero@1.0.5 --force
+#          cargo risczero install
 
-      - name: Install risc0 toolchain
-        run: |
-          cargo binstall -y cargo-risczero@1.0.5 --force
-          cargo risczero install
+#      - name: Install Foundry
+#        uses: foundry-rs/foundry-toolchain@v1
+#        with:
+#          version: nightly-d75318c9c7a1c6af5404fe96f63ca890dcdd588d # 2024-09-05
 
-      - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
-        with:
-          version: nightly-d75318c9c7a1c6af5404fe96f63ca890dcdd588d # 2024-09-05
+#      - name: Install LLVM and Clang
+#        uses: KyleMayes/install-llvm-action@v2
+#        with:
+#          version: "18.1"
 
-      - name: Install LLVM and Clang
-        uses: KyleMayes/install-llvm-action@v2
-        with:
-          version: "18.1"
-
-      - name: Install contracts' dependencies
-        working-directory: ./contracts
-        run: forge soldeer install
+#      - name: Install contracts' dependencies
+#        working-directory: ./contracts
+#        run: forge soldeer install
 
       - name: Install dependencies
         run: bun install
