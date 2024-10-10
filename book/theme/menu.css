@@ -1,3 +1,7 @@
+.chapter li.chapter-item {
+  cursor: pointer;
+}
+
 .chapter li {
   color: var(--sidebar-fg);
 }
