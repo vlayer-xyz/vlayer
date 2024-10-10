@@ -12,12 +12,11 @@ export function useProvenUrl(): HistoryItem | undefined {
   const [browsingHistory] = useBrowsingHistory();
   return useMemo(() => {
     const provenUrlAddress = steps.find(({ step }) => step === "notarize")?.url;
-    if (provenUrlAddress) {
-      return browsingHistory.find((item) =>
-        item.url.includes(provenUrlAddress),
-      );
-    } else {
+
+    if (!provenUrlAddress) {
       return undefined;
     }
+
+    return browsingHistory.find((item) => item.url.includes(provenUrlAddress));
   }, [steps, browsingHistory]);
 }
