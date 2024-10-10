@@ -1,4 +1,5 @@
-import type { Branded } from "./utils.ts";
+import type { Branded } from "../utils.ts";
+import type { WebProof } from "./webProof.ts";
 
 export const EXTENSION_STEP = {
   expectUrl: "expectUrl",
@@ -25,8 +26,7 @@ export const enum ExtensionMessageType {
 }
 
 export type ExtensionMessage =
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  | { type: ExtensionMessageType.ProofDone; proof: any } // Change to WebProof
+  | { type: ExtensionMessageType.ProofDone; proof: WebProof }
   | { type: ExtensionMessageType.ProofError; error: string }
   | { type: ExtensionMessageType.RedirectBack };
 
