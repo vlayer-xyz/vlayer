@@ -4,6 +4,7 @@ import {
   chromium,
   type BrowserContext,
 } from "@playwright/test";
+import path from "path";
 
 // NOTE: this env make sidepanel accessible vis context.pages()
 // https://github.com/microsoft/playwright/blob/8f3353865d8d98e9b40c15497e60d5e2583410b6/packages/playwright-core/src/server/chromium/crBrowser.ts#L169C11-L169C27
@@ -15,8 +16,8 @@ export const test = base.extend<{
 }>({
   // eslint-disable-next-line
   context: async ({}, use) => {
-    const pathToExtension =
-      "/home/runner/work/vlayer/vlayer/packages/browser-extension/dist";
+    console.log("Import meta", import.meta);
+    const pathToExtension = path.join(import.meta.dirname, "../dist");
 
     const context = await chromium.launchPersistentContext(
       "",
