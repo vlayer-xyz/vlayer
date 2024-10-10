@@ -14,7 +14,6 @@ import {
 } from "@vlayer/sdk";
 import webProofVerifier from "../../out/WebProofVerifier.sol/WebProofVerifier";
 
-console.log("Hello from VLayer!");
 const context: {
   webProof: WebProof | null;
   zkProof: VCallResponse | null;
@@ -24,8 +23,6 @@ const context: {
   zkProof: null,
   result: [],
 };
-
-const twitterUserAddress = (await testHelpers.getTestAddresses())[0];
 
 export async function setupRequestProveButton(element: HTMLButtonElement) {
   element.addEventListener("click", async () => {
@@ -50,12 +47,11 @@ export async function setupRequestProveButton(element: HTMLButtonElement) {
       ],
     });
 
-    console.log("WebProof generated!", webproof);
     context.webProof = webproof;
   });
 }
 
-export const setupVProverButton = (element: HTMLButtonElement) => {
+export const setupVProverButton = async (element: HTMLButtonElement) => {
   element.addEventListener("click", async () => {
     const notaryPubKey =
       "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExpX/4R4z40gI6C/j9zAM39u58LJu\n3Cx5tXTuqhhu/tirnBi5GniMmspOTEsps4ANnPLpMmMSfhJ+IFHbc3qVOA==\n-----END PUBLIC KEY-----\n";
@@ -67,11 +63,21 @@ export const setupVProverButton = (element: HTMLButtonElement) => {
     const vlayer = createVlayerClient();
 
     console.log("Generating proof...");
+<<<<<<< HEAD
     const { hash } = await vlayer.prove({
       address: import.meta.env.VITE_PROVER_ADDRESS,
       functionName: "main",
       proverAbi: webProofProver.abi,
       args: [
+=======
+    const twitterUserAddress = (await testHelpers.getTestAddresses())[0];
+
+    const { proof, returnValue } = await prove(
+      import.meta.env.VITE_PROVER_ADDRESS,
+      webProofProver.abi,
+      "main",
+      [
+>>>>>>> 43f93efe (Add logic to run headless tests on CI)
         {
           webProofJson: JSON.stringify(webProof),
         },
@@ -85,8 +91,9 @@ export const setupVProverButton = (element: HTMLButtonElement) => {
   });
 };
 
-export const setupVerifyButton = (element: HTMLButtonElement) => {
+export const setupVerifyButton = async (element: HTMLButtonElement) => {
   element.addEventListener("click", async () => {
+<<<<<<< HEAD
     const verification = await testHelpers.createAnvilClient().writeContract({
       address: import.meta.env.VITE_VERIFIER_ADDRESS,
       abi: webProofVerifier.abi,
@@ -94,6 +101,23 @@ export const setupVerifyButton = (element: HTMLButtonElement) => {
       args: [context.zkProof, ...context.result],
       account: twitterUserAddress,
     });
+=======
+    const twitterUserAddress = (await testHelpers.getTestAddresses())[0];
+    const verification = await createTestClient({
+      chain: foundry,
+      mode: "anvil",
+      transport: http(),
+    })
+      .extend(publicActions)
+      .extend(walletActions)
+      .writeContract({
+        address: import.meta.env.VITE_VERIFIER_ADDRESS,
+        abi: webProofVerifier.abi,
+        functionName: "verify",
+        args: [context.zkProof, ...context.result],
+        account: twitterUserAddress,
+      });
+>>>>>>> 43f93efe (Add logic to run headless tests on CI)
     console.log("Verified!", verification);
   });
 };

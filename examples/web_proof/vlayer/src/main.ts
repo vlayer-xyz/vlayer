@@ -9,9 +9,9 @@ document.querySelector<HTMLDivElement>("#app")!.innerHTML = `
     <div class="logoContainer">
       <img src="vlayer_logo.svg" />
     </div>
-    <button data-testid="prove" id="prove">Request webproof of twitter account</button>
-    <button id="vprove" style="margin-top: 10px">Call vlayer prover</button>
-    <button id="verify" style="margin-top: 10px">Call vlayer verifier</button>
+    <button data-testid="request-webproof-button" id="prove">Request webproof of twitter account</button>
+    <button data-testid="vprove-button" id="vprove" style="margin-top: 10px">Call vlayer prover</button>
+    <button data-testid="verify-button" id="verify" style="margin-top: 10px">Call vlayer verifier</button>
 
   </div>
 `;

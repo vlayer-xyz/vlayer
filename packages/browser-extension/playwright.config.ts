@@ -16,9 +16,8 @@ export default defineConfig({
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: "html",
   webServer: {
-    command: "bash ../../bash/run-web-example.sh", // Run your bash script
+    command: "bash ../../bash/run-web-example.sh --mode headless", // Run your bash script
     url: "http://127.0.0.1:5174",
-    reuseExistingServer: !process.env.CI,
     stdout: "pipe", // Capture stdout
     stderr: "pipe", // Capture stderr
   },
@@ -37,16 +36,6 @@ export default defineConfig({
     {
       name: "chromium",
       use: { ...devices["Desktop Chrome"] },
-    },
-
-    {
-      name: "firefox",
-      use: { ...devices["Desktop Firefox"] },
-    },
-
-    {
-      name: "webkit",
-      use: { ...devices["Desktop Safari"] },
     },
   ],
 });
