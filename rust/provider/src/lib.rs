@@ -27,7 +27,7 @@ pub type EthersClient = ethers_providers::Provider<RetryClient<Http>>;
 
 /// A trait for providers that fetch data from the Ethereum blockchain.
 #[auto_impl(Rc)]
-pub trait BlockingProvider {
+pub trait BlockingProvider: Send + Sync {
     type Error: StdError + Send + Sync + 'static;
 
     fn get_balance(&self, address: Address, block: BlockNumber) -> Result<U256, Self::Error>;

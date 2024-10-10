@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+axum-jrpc = { workspace = true }
 risc0-zkp = { workspace = true }
 risc0-zkvm = { workspace = true }
 host_utils = { workspace = true }
@@ -25,6 +26,11 @@ chain = { workspace = true }
 chain_server = { workspace = true }
 provider = { workspace = true }
 lazy_static = { workspace = true}
+httpmock = "0.7.0"
+tracing = { workspace = true }
+reqwest = { workspace = true }
+serde_json = { workspace = true }
+tokio = { workspace = true, features = ["macros"] }
 
 [dev-dependencies]
 alloy-sol-types = { workspace = true }

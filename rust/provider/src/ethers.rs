@@ -1,9 +1,11 @@
+use core::future::Future;
+
 use alloy_primitives::{BlockNumber, B256, U256};
 use block_header::{EthBlockHeader, EvmBlockHeader};
 use ethers_core::types::{Block, BlockNumber as BlockTag};
 use ethers_providers::{Middleware, MiddlewareError};
 use thiserror::Error;
-use tokio::runtime::{Handle, Runtime};
+use tokio::runtime::Handle;
 
 use super::{BlockingProvider, EIP1186Proof};
 
@@ -19,31 +21,18 @@ pub enum EthersProviderError<M: MiddlewareError> {
 /// A provider that fetches data from an Ethereum node using the ethers crate.
 pub struct EthersProvider<M: Middleware> {
     client: M,
-    runtime_handle: (Handle, Option<Runtime>),
 }
 
 impl<M: Middleware> EthersProvider<M> {
     pub(crate) fn new(client: M) -> Self {
-        // if we are not in a tokio runtime, we need to create a new handle
-        let runtime_handle = match Handle::try_current() {
-            Ok(handle) => (handle, None),
-            Err(_) => {
-                #[allow(clippy::unwrap_used)]
-                let runtime = Runtime::new().unwrap();
-                (runtime.handle().clone(), Some(runtime))
-            }
-        };
-
-        Self {
-            client,
-            runtime_handle,
-        }
+        Self { client }
     }
+}
 
-    /// internal utility function to call tokio feature and wait for output
-    fn block_on<F: core::future::Future>(&self, f: F) -> F::Output {
-        self.runtime_handle.0.block_on(f)
-    }
+// Blocks current runtime to execute the future. Panics if called outside of the runtime
+fn block_on<F: Future>(f: F) -> F::Output {
+    let handle = Handle::try_current().expect("no tokio runtime");
+    tokio::task::block_in_place(|| handle.block_on(f))
 }
 
 impl<M: Middleware> BlockingProvider for EthersProvider<M>
@@ -56,7 +45,7 @@ where
         &self,
         block: BlockTag,
     ) -> Result<Option<Box<dyn EvmBlockHeader>>, Self::Error> {
-        let block = self.block_on(self.client.get_block(block))?;
+        let block = block_on(self.client.get_block(block))?;
         match block {
             Some(block) => {
                 let eth_block_header = to_eth_block_header(block)
@@ -73,12 +62,11 @@ where
         block: BlockNumber,
     ) -> Result<alloy_primitives::TxNumber, Self::Error> {
         let address = to_ethers_h160(address);
-        let count = self
-            .block_on(
-                self.client
-                    .get_transaction_count(address, Some(block.into())),
-            )
-            .map(from_ethers_u256)?;
+        let count = block_on(
+            self.client
+                .get_transaction_count(address, Some(block.into())),
+        )
+        .map(from_ethers_u256)?;
         Ok(count.to())
     }
 
@@ -88,9 +76,9 @@ where
         block: BlockNumber,
     ) -> Result<alloy_primitives::U256, Self::Error> {
         let address = to_ethers_h160(address);
-        Ok(from_ethers_u256(
-            self.block_on(self.client.get_balance(address, Some(block.into())))?,
-        ))
+        Ok(from_ethers_u256(block_on(
+            self.client.get_balance(address, Some(block.into())),
+        )?))
     }
 
     fn get_code(
@@ -99,9 +87,7 @@ where
         block: BlockNumber,
     ) -> Result<alloy_primitives::Bytes, Self::Error> {
         let address = to_ethers_h160(address);
-        Ok(from_ethers_bytes(
-            self.block_on(self.client.get_code(address, Some(block.into())))?,
-        ))
+        Ok(from_ethers_bytes(block_on(self.client.get_code(address, Some(block.into())))?))
     }
 
     fn get_storage_at(
@@ -112,7 +98,7 @@ where
     ) -> Result<alloy_primitives::StorageValue, Self::Error> {
         let address = to_ethers_h160(address);
         let key = to_ethers_h256(key);
-        let value = self.block_on(self.client.get_storage_at(address, key, Some(block.into())))?;
+        let value = block_on(self.client.get_storage_at(address, key, Some(block.into())))?;
 
         Ok(from_ethers_h256(value).into())
     }
@@ -125,11 +111,10 @@ where
     ) -> Result<EIP1186Proof, Self::Error> {
         let address = to_ethers_h160(address);
         let storage_keys = storage_keys.into_iter().map(to_ethers_h256).collect();
-        let proof = self.block_on(self.client.get_proof(
-            address,
-            storage_keys,
-            Some(block.into()),
-        ))?;
+        let proof = block_on(
+            self.client
+                .get_proof(address, storage_keys, Some(block.into())),
+        )?;
 
         Ok(EIP1186Proof {
             address: address.0.into(),

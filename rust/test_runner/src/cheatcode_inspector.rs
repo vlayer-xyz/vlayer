@@ -7,13 +7,14 @@ use call_engine::{
     },
     Proof, Seal,
 };
-use call_host::host::{config::HostConfig, Host};
+use call_host::host::{config::HostConfig, get_block_number, ChainProofClient, Host};
 use chain::TEST_CHAIN_ID;
 use foundry_config::RpcEndpoints;
 use foundry_evm::revm::{
     interpreter::{CallInputs, CallOutcome},
     Database, EvmContext, Inspector,
 };
+use provider::CachedMultiProvider;
 
 use crate::{
     cheatcodes::{callProverCall, getProofCall, CHEATCODE_CALL_ADDR},
@@ -47,7 +48,7 @@ impl<DB: Database> Inspector<DB> for CheatcodeInspector {
     ) -> Option<CallOutcome> {
         if self.should_start_proving {
             self.should_start_proving = false;
-            return Some(self.run_host(&context, inputs));
+            return Some(self.run_host_sync(&context, inputs));
         }
         if inputs.target_address == CHEATCODE_CALL_ADDR {
             let (selector, _) = split_calldata(inputs);
@@ -71,16 +72,27 @@ impl<DB: Database> Inspector<DB> for CheatcodeInspector {
 }
 
 impl CheatcodeInspector {
-    fn run_host<DB: Database>(
+    fn run_host_sync<DB: Database>(
+        &mut self,
+        context: &&mut EvmContext<DB>,
+        inputs: &CallInputs,
+    ) -> CallOutcome {
+        let handle = tokio::runtime::Handle::try_current().expect("no tokio runtime");
+        handle.block_on(self.run_host(context, inputs))
+    }
+
+    async fn run_host<DB: Database>(
         &mut self,
         context: &&mut EvmContext<DB>,
         inputs: &CallInputs,
     ) -> CallOutcome {
         let host = create_host(context, &self.rpc_endpoints);
-        let call_result = host.run(Call {
-            to: inputs.target_address,
-            data: inputs.input.clone().into(),
-        });
+        let call_result = host
+            .run(Call {
+                to: inputs.target_address,
+                data: inputs.input.clone().into(),
+            })
+            .await;
 
         match call_result {
             Ok(host_output) => {
@@ -114,13 +126,17 @@ fn create_host<DB: Database>(
         block_number: ctx.env.block.number.try_into().unwrap(),
         state: ctx.journaled_state.state.clone(),
     };
+    let provider_factory =
+        TestProviderFactory::new(pending_state_provider_factory, rpc_endpoints.clone());
+    let providers = CachedMultiProvider::new(provider_factory);
+    let config = HostConfig {
+        start_chain_id: TEST_CHAIN_ID,
+        ..Default::default()
+    };
+    let block_number =
+        get_block_number(&providers, config.start_chain_id).expect("failed to get block number");
+    let chain_proof_client = ChainProofClient;
 
-    Host::try_new_with_provider_factory(
-        TestProviderFactory::new(pending_state_provider_factory, rpc_endpoints.clone()),
-        &HostConfig {
-            start_chain_id: TEST_CHAIN_ID,
-            ..Default::default()
-        },
-    )
-    .expect("Failed to create host")
+    Host::try_new_with_components(providers, block_number, chain_proof_client, &config)
+        .expect("failed to create host")
 }
