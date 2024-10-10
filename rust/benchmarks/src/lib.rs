@@ -1,3 +1,7 @@
+mod bencher;
 mod guest;
 
-mod bencher;
+mod benchmarks;
+
+pub use bencher::*;
+pub use guest::*;
