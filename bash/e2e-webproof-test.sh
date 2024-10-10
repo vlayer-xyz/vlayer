@@ -11,3 +11,4 @@ cd "${VLAYER_HOME}/packages/browser-extension/"
 echo 'going to install playwright deps'
 bunx playwright install --with-deps
 bun run test:headless
+
