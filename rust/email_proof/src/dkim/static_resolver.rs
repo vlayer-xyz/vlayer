@@ -5,7 +5,7 @@ use mail_auth::{
         parse::TxtRecordParser,
         resolve::{IntoFqdn, Resolve, UnwrapTxtRecord},
     },
-    Txt,
+    Result, Txt,
 };
 
 pub struct StaticResolver<'a> {
@@ -24,7 +24,7 @@ impl Resolve for StaticResolver<'_> {
     async fn txt_lookup<'x, T: TxtRecordParser + Into<Txt> + UnwrapTxtRecord>(
         &self,
         _key: impl IntoFqdn<'x>,
-    ) -> mail_auth::Result<Arc<T>> {
+    ) -> Result<Arc<T>> {
         Ok(Arc::new(T::parse(self.dns_record)?))
     }
 }
