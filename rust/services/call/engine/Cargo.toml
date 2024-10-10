@@ -27,6 +27,7 @@ email_proof = { workspace = true }
 web_proof = { workspace = true }
 chain = { workspace = true }
 block_header = { workspace = true }
+regex = { workspace = true }
 
 [dev-dependencies]
 alloy-trie = { workspace = true }
