@@ -13,15 +13,16 @@ const [prover, verifier] = await testHelpers.deployProverVerifier(
 console.log("Proving...");
 const sender = testHelpers.getTestAccount().address;
 const vlayer = createVlayerClient();
-const {
-  proof,
-  result: [claimAddress],
-} = await vlayer.prove({
+const { hash } = await vlayer.prove({
   address: prover,
   proverAbi: nftOwnershipProver.abi,
   functionName: "main",
   args: [sender],
 });
+const {
+  proof,
+  result: [claimAddress],
+} = await vlayer.waitForProvingResult({ hash });
 console.log("Proof:");
 console.log(proof);
 assert.equal(claimAddress, sender);

@@ -23,12 +23,13 @@ const verifier = await testHelpers.deployContract(SimpleVerifier, [
 
 console.log("Proving...");
 const vlayer = createVlayerClient();
-const { proof, result } = await vlayer.prove({
+const { hash } = await vlayer.prove({
   address: prover,
   proverAbi: SimpleProver.abi,
   functionName: "balance",
   args: [john.address],
 });
+const { proof, result } = await vlayer.waitForProvingResult({ hash });
 console.log("Proof result:");
 console.log(proof, result);
 

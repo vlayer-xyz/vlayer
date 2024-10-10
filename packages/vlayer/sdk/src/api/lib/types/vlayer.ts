@@ -66,7 +66,12 @@ export type VlayerClient = {
     F extends ContractFunctionName<T>,
   >(
     args: VlayerClientProveArgs<T, F>,
-  ) => void;
+  ) => Promise<{ hash: string }>;
+  waitForProvingResult: ({
+    hash,
+  }: {
+    hash: string;
+  }) => Promise<{ proof: Proof; result: unknown[] }>;
 };
 
 export type VlayerClientProveArgs<
