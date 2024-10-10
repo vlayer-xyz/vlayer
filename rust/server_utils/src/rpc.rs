@@ -3,8 +3,8 @@ use reqwest::blocking::Client;
 use serde_json::{json, Map, Value};
 
 pub struct RpcServerMock {
-    pub mock_server: MockServer,
-    pub method: String,
+    mock_server: MockServer,
+    method: String,
 }
 
 impl RpcServerMock {
