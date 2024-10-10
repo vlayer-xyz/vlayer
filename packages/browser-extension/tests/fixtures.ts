@@ -16,7 +16,7 @@ export const test = base.extend<{
 }>({
   // eslint-disable-next-line
   context: async ({}, use) => {
-    const pathToExtension = path.join(import.meta.dirname, "../dist");
+    const pathToExtension = path.join(import.meta.dir, "../dist");
 
     const context = await chromium.launchPersistentContext(
       "",
