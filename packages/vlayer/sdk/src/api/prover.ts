@@ -44,11 +44,10 @@ export async function prove<
       abi: abi as Abi,
       data: evm_call_result,
       functionName: functionName as string,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     }),
   );
 
-  return { proof, result };
+  return { proof, returnValue };
 }
 
 function dropProofFromArgs(args: unknown) {
