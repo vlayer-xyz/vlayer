@@ -13,7 +13,7 @@ console.log(`Prover has been deployed on ${prover} address`);
 
 console.log("Proving...");
 const vlayer = createVlayerClient();
-const { hash } = vlayer.prove({
+const { hash } = await vlayer.prove({
   address: prover,
   proverAbi: erc20Prover.abi,
   functionName: "prove",

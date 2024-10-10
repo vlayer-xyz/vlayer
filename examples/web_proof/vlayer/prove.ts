@@ -25,7 +25,7 @@ async function testSuccessProvingAndVerification() {
 
   const webProof = { tls_proof: tls_proof, notary_pub_key: notaryPubKey };
 
-  const { hash } = vlayer.prove({
+  const { hash } = await vlayer.prove({
     address: prover,
     functionName: "main",
     proverAbi: webProofProver.abi,
@@ -74,7 +74,7 @@ async function testFailedProving() {
   const wrongWebProof = { tls_proof: tls_proof, notary_pub_key: "wrong" };
 
   try {
-    const { hash } = vlayer.prove({
+    const { hash } = await vlayer.prove({
       address: prover,
       functionName: "main",
       proverAbi: webProofProver.abi,

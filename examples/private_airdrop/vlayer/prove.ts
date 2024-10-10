@@ -55,7 +55,7 @@ const generateProof = async (prover: Address, tokenOwner: Account) => {
 
   const vlayer = createVlayerClient();
 
-  const { hash } = vlayer.prove({
+  const { hash } = await vlayer.prove({
     address: prover,
     proverAbi: privateAirdropProver.abi,
     functionName: "main",

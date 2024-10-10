@@ -18,7 +18,7 @@ const john = testHelpers.getTestAccount();
 
 console.log("Proving...");
 const vlayer = createVlayerClient();
-const { hash } = vlayer.prove({
+const { hash } = await vlayer.prove({
   address: prover,
   proverAbi: emailProofProver.abi,
   functionName: "main",

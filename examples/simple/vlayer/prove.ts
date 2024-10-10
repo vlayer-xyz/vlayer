@@ -23,7 +23,7 @@ const verifier = await testHelpers.deployContract(SimpleVerifier, [
 
 console.log("Proving...");
 const vlayer = createVlayerClient();
-const { hash } = vlayer.prove({
+const { hash } = await vlayer.prove({
   address: prover,
   proverAbi: SimpleProver.abi,
   functionName: "balance",

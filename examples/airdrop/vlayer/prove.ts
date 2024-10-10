@@ -13,7 +13,7 @@ const [prover, verifier] = await testHelpers.deployProverVerifier(
 console.log("Proving...");
 const sender = testHelpers.getTestAccount().address;
 const vlayer = createVlayerClient();
-const { hash } = vlayer.prove({
+const { hash } = await vlayer.prove({
   address: prover,
   proverAbi: nftOwnershipProver.abi,
   functionName: "main",

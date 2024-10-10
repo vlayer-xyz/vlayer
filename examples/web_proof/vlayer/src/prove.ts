@@ -67,7 +67,7 @@ export const setupVProverButton = (element: HTMLButtonElement) => {
     const vlayer = createVlayerClient();
 
     console.log("Generating proof...");
-    const { hash } = vlayer.prove({
+    const { hash } = await vlayer.prove({
       address: import.meta.env.VITE_PROVER_ADDRESS,
       functionName: "main",
       proverAbi: webProofProver.abi,

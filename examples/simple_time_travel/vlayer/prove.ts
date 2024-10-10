@@ -41,7 +41,7 @@ console.log("Proving...");
 const proverAddr = await deployProver();
 const vlayer = createVlayerClient();
 
-const { hash } = vlayer.prove({
+const { hash } = await vlayer.prove({
   address: proverAddr,
   proverAbi: averageBalance.abi,
   functionName: "averageBalanceOf",

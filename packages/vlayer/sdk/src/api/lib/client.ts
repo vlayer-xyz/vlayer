@@ -32,7 +32,7 @@ export const createVlayerClient = (
   >();
 
   return {
-    prove: ({ address, functionName, chainId, proverAbi, args }) => {
+    prove: async ({ address, functionName, chainId, proverAbi, args }) => {
       const result_promise = prove(
         address,
         proverAbi,
