@@ -2,11 +2,12 @@ pub mod config;
 pub mod error;
 
 use alloy_primitives::B256;
-use chain_db::{ChainInfo, ChainUpdate};
+use chain_db::{ChainDb, ChainInfo, ChainUpdate, Database, Mdbx};
 pub use config::HostConfig;
 pub use error::HostError;
 use ethers::{
-    providers::{Http, JsonRpcClient, Middleware, Provider},
+    middleware::Middleware,
+    providers::{Http, JsonRpcClient, Provider},
     types::BlockNumber,
 };
 use host_utils::Prover;
@@ -19,30 +20,39 @@ lazy_static! {
     static ref EMPTY_PROOF: Vec<u8> = vec![];
 }
 
-pub struct Host<P>
+pub struct Host<P, DB>
 where
     P: JsonRpcClient,
+    DB: for<'a> Database<'a>,
 {
     _prover: Prover,
     provider: Provider<P>,
+    _db: ChainDb<DB>,
 }
 
-impl Host<Http> {
-    pub fn new(config: &HostConfig) -> Self {
+impl Host<Http, Mdbx> {
+    pub fn try_new(config: HostConfig) -> Result<Self, HostError> {
         let provider = Provider::<Http>::try_from(config.rpc_url.as_str())
             .expect("could not instantiate HTTP Provider");
         let prover = Prover::new(config.proof_mode);
+        let mdbx = Mdbx::open(config.db_path)?;
+        let db = ChainDb::new(mdbx);
 
-        Host::from_parts(prover, provider)
+        Ok(Host::from_parts(prover, provider, db))
     }
 }
 
-impl<P> Host<P>
+impl<P, DB> Host<P, DB>
 where
     P: JsonRpcClient,
+    DB: for<'a> Database<'a>,
 {
-    pub fn from_parts(_prover: Prover, provider: Provider<P>) -> Self {
-        Host { _prover, provider }
+    pub fn from_parts(_prover: Prover, provider: Provider<P>, db: ChainDb<DB>) -> Self {
+        Host {
+            _prover,
+            provider,
+            _db: db,
+        }
     }
 
     pub async fn poll(&self) -> Result<ChainUpdate, HostError> {
@@ -105,6 +115,7 @@ mod test {
     mod host_poll {
 
         use alloy_primitives::BlockNumber;
+        use chain_db::InMemoryDatabase;
         use ethers::{
             providers::{MockProvider, Provider},
             types::Block,
@@ -156,7 +167,11 @@ mod test {
         #[tokio::test]
         async fn initialize() -> anyhow::Result<()> {
             let latest_block = 20_000_000;
-            let host = Host::from_parts(Prover::default(), mock_provider([latest_block]));
+            let host = Host::from_parts(
+                Prover::default(),
+                mock_provider([latest_block]),
+                ChainDb::new(InMemoryDatabase::new()),
+            );
 
             let chain_update = host.poll().await?;
 

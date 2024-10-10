@@ -5,8 +5,10 @@ use ethers::types::BlockNumber;
 use thiserror::Error;
 
 #[derive(Error, Debug, Clone, Derivative)]
-#[derivative(PartialEq)]
+#[derivative(PartialEq, Eq)]
 pub enum HostError {
+    #[error("ChainDB error: {0}")]
+    ChainDb(#[from] chain_db::DbError),
     #[error("ExecutorEnvBuilder: {0}")]
     ExecutorEnvBuilder(String),
     #[error("Prover: {0}")]

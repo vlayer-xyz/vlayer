@@ -71,7 +71,7 @@ pub trait ReadWriteTx: ReadTx + WriteTx {}
 
 impl<T: ReadTx + WriteTx> ReadWriteTx for T {}
 
-#[derive(Error, Debug, PartialEq)]
+#[derive(Error, Debug, PartialEq, Eq, Clone)]
 pub enum DbError {
     #[error("Specified key already exists. table='{table}' key='{key:?}'")]
     DuplicateKey { table: Box<str>, key: Box<[u8]> },
