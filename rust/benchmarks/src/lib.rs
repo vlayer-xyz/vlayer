@@ -1,8 +1,3 @@
-#[cfg(not(clippy))]
-include!(concat!(env!("OUT_DIR"), "/methods.rs"));
+mod guest;
 
-#[cfg(clippy)]
-pub const RISC0_BENCHMARK_GUEST_ELF: &[u8] = &[];
-
-#[cfg(clippy)]
-pub const RISC0_BENCHMARK_GUEST_ID: [u32; 8] = [0; 8];
+mod bencher;
