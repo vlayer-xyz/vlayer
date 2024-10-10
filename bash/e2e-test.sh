@@ -36,8 +36,12 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
       continue
     fi
 
-    if [[ "${EXAMPLES_REQUIRING_PRIV_KEY[@]}" =~ "${example_name}" ]] && [[ -z "${TEST_PRIVATE_KEY:-}" ]] && [[ -z "${ALCHEMY_API_KEY:-}" ]]; then
-      continue
+    if [[ " ${EXAMPLES_REQUIRING_PRIV_KEY[*]} " == *" ${example_name} "* ]]; then
+      echo "${example_name} requires private key"
+      if [[ -z "${TEST_PRIVATE_KEY:-}" ]] || [[ -z "${ALCHEMY_API_KEY:-}" ]]; then
+          echo "Skipping ${example_name} due to missing TEST_PRIVATE_KEY or ALCHEMY_API_KEY"
+          continue
+      fi
     fi
 
     echo "Running tests of: ${example}"
