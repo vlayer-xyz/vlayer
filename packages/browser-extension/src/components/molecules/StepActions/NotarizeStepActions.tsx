@@ -131,7 +131,7 @@ export const NotarizeStepActions: FC<NotarizeStepActionProps> = ({
   ) : (
     <Flex direction="column" gap={"4"}>
       {!proof && !isProving && (
-        <Button onClick={prove}>
+        <Button onClick={prove} data-testid="prove-button">
           <Text>Generate proof </Text>
         </Button>
       )}

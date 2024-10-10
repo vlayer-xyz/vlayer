@@ -1,21 +1,15 @@
-import { test, expect } from "./fixtures";
-
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
-
-test.describe("side panel", () => {
-  test("happy path", async ({ page, extensionId }) => {
-    await page.goto("http://localhost:5174");
-    const requestProofButton = await page.locator("body").getByTestId("prove");
-    await requestProofButton.click();
-    //TODO : find better way to await sidepanel open
-    await sleep(1000);
-    const extension = page
-      .context()
-      .pages()
-      .find((page) => {
-        return page.url().includes(extensionId);
-      });
-
-    expect(extension).toBeDefined();
-  });
+import { expect, test } from "./fixtures";
+import { sidePanel } from "./helpers";
+test("happy path", async ({ page, context }) => {
+  await page.goto("/");
+  const requestProofButton = page
+    .locator("body")
+    .getByTestId("request-webproof-button");
+  await requestProofButton.click();
+  const extension = await sidePanel(context);
+  if (!extension) {
+    throw new Error("No sidepanel ");
+  }
+  const redirectButton = extension.getByTestId("start-page-button");
+  await expect(redirectButton).toHaveText("Redirect");
 });

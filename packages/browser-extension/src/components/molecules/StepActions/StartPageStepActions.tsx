@@ -22,6 +22,7 @@ export const StartPageStepActions: FC<StartPageStepActionProps> = ({
         <Grid columns={"5"}>
           <motion.div>
             <Button
+              data-testid="start-page-button"
               variant={"soft"}
               style={{
                 gridColumn: "1 / 5",
