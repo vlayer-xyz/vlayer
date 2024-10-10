@@ -15,6 +15,7 @@ members = [
     "services/call/guest_wrapper",
     "services/call/engine",
     "services/call/server",
+    "benchmarks",
     "cli",
     "mpt",
     "test_runner",
