@@ -5,7 +5,6 @@ import {
   type Address,
   ContractFunctionArgs,
   ContractFunctionName,
-  decodeFunctionResult,
   encodeFunctionData,
 } from "viem";
 
@@ -35,24 +34,7 @@ export async function prove<
     chain_id: chainId,
   };
 
-  const {
-    result: { proof, evm_call_result },
-  } = await v_call(call, context, url);
+  const result_promise = v_call(call, context, url);
 
-  const returnValue = dropProofFromArgs(
-    decodeFunctionResult({
-      abi: abi as Abi,
-      data: evm_call_result,
-      functionName: functionName as string,
-    }),
-  );
-
-  return { proof, returnValue };
-}
-
-function dropProofFromArgs(args: unknown) {
-  if (Array.isArray(args)) {
-    return args.slice(1);
-  }
-  return [];
+  return result_promise;
 }

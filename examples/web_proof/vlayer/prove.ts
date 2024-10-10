@@ -25,7 +25,7 @@ async function testSuccessProvingAndVerification() {
 
   const webProof = { tls_proof: tls_proof, notary_pub_key: notaryPubKey };
 
-  const { proof, result } = await vlayer.prove({
+  const { hash } = vlayer.prove({
     address: prover,
     functionName: "main",
     proverAbi: webProofProver.abi,
@@ -36,6 +36,7 @@ async function testSuccessProvingAndVerification() {
       twitterUserAddress,
     ],
   });
+  const { proof, result } = await vlayer.waitForProvingResult({ hash });
   console.log("Proof:", proof);
 
   console.log("Verifying...");
@@ -73,7 +74,7 @@ async function testFailedProving() {
   const wrongWebProof = { tls_proof: tls_proof, notary_pub_key: "wrong" };
 
   try {
-    await vlayer.prove({
+    const { hash } = vlayer.prove({
       address: prover,
       functionName: "main",
       proverAbi: webProofProver.abi,
@@ -84,6 +85,7 @@ async function testFailedProving() {
         twitterUserAddress,
       ],
     });
+    await vlayer.waitForProvingResult({ hash });
     throw new Error("Proving should have failed!");
   } catch (error) {
     assert.ok(error instanceof Error, `Invalid error returned: ${error}`);

@@ -16,12 +16,16 @@ const [prover, verifier] = await testHelpers.deployProverVerifier(
 
 console.log("Proving...");
 const vlayer = createVlayerClient();
-const { proof } = await vlayer.prove({
+const { hash } = vlayer.prove({
   address: prover,
   proverAbi: emailProofProver.abi,
   functionName: "main",
   args: [unverifiedEmail],
 });
+const {
+  proof,
+  result: [result],
+} = await vlayer.waitForProvingResult({ hash });
 console.log("Proof:", proof);
 
 console.log("Verifying...");

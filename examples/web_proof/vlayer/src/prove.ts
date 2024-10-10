@@ -67,7 +67,7 @@ export const setupVProverButton = (element: HTMLButtonElement) => {
     const vlayer = createVlayerClient();
 
     console.log("Generating proof...");
-    const { proof, result } = await vlayer.prove({
+    const { hash } = vlayer.prove({
       address: import.meta.env.VITE_PROVER_ADDRESS,
       functionName: "main",
       proverAbi: webProofProver.abi,
@@ -78,6 +78,7 @@ export const setupVProverButton = (element: HTMLButtonElement) => {
         twitterUserAddress,
       ],
     });
+    const { proof, result } = await vlayer.waitForProvingResult({ hash });
     console.log("Proof generated!", proof, result);
     context.zkProof = proof;
     context.result = result;

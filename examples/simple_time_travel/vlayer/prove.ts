@@ -41,12 +41,13 @@ console.log("Proving...");
 const proverAddr = await deployProver();
 const vlayer = createVlayerClient();
 
-const { proof, result } = await vlayer.prove({
+const { hash } = vlayer.prove({
   address: proverAddr,
   proverAbi: averageBalance.abi,
   functionName: "averageBalanceOf",
   args: [tokenOwner],
 });
+const { proof, result } = await vlayer.waitForProvingResult({ hash });
 console.log("Response:", proof, result);
 
 const verifierAddr = await deployVerifier(proverAddr);

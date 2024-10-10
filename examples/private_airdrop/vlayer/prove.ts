@@ -55,12 +55,13 @@ const generateProof = async (prover: Address, tokenOwner: Account) => {
 
   const vlayer = createVlayerClient();
 
-  const { proof, result } = await vlayer.prove({
+  const { hash } = vlayer.prove({
     address: prover,
     proverAbi: privateAirdropProver.abi,
     functionName: "main",
     args: [tokenOwner.address, signature],
   });
+  const { proof, result } = await vlayer.waitForProvingResult({ hash });
   console.log("Proof:", proof);
 
   return { proof, result };
