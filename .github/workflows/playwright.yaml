@@ -44,10 +44,10 @@ jobs:
         with:
           version: nightly-d75318c9c7a1c6af5404fe96f63ca890dcdd588d # 2024-09-05
 
-      - name: Check clang and LLVM version
-        env:
-          EXPECTED_LLVM_VERSION: "18.1"
-        run: bash/check_llvm_clang.sh
+      - name: Install LLVM and Clang
+        uses: KyleMayes/install-llvm-action@v2
+        with:
+          version: "18.1"
 
       - name: Install contracts' dependencies
         working-directory: ./contracts
