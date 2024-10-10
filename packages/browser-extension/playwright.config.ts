@@ -20,6 +20,7 @@ export default defineConfig({
     url: "http://127.0.0.1:5174",
     stdout: "pipe", // Capture stdout
     stderr: "pipe", // Capture stderr
+    timeout: 360000,
   },
 
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
