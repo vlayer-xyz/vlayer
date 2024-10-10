@@ -10625,8 +10625,12 @@ version = "0.1.0"
 dependencies = [
  "alloy-primitives",
  "anyhow",
+ "chain_db",
  "clap",
+ "ethers-providers",
+ "lazy_static",
  "provider",
+ "thiserror",
 ]
 
 [[package]]
