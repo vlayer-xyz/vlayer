@@ -16,10 +16,7 @@ const [prover, verifier] = await testHelpers.deployProverVerifier(
 
 console.log("Proving...");
 const vlayer = createVlayerClient();
-const {
-  proof,
-  result: [result],
-} = await vlayer.prove({
+const { proof } = await vlayer.prove({
   address: prover,
   proverAbi: emailProofProver.abi,
   functionName: "main",
@@ -30,6 +27,5 @@ console.log("Proof:", proof);
 console.log("Verifying...");
 await testHelpers.writeContract(verifier, emailProofVerifier.abi, "verify", [
   proof,
-  result,
 ]);
 console.log("Verified!");

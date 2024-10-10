@@ -39,12 +39,20 @@ export async function prove<
     result: { proof, evm_call_result },
   } = await v_call(call, context, url);
 
-  const [, ...result] = decodeFunctionResult({
-    abi: abi as Abi,
-    data: evm_call_result,
-    functionName: functionName as string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  }) as any[];
+  const returnValue = dropProofFromArgs(
+    decodeFunctionResult({
+      abi: abi as Abi,
+      data: evm_call_result,
+      functionName: functionName as string,
+    }),
+  );
 
-  return { proof, result };
+  return { proof, returnValue };
+}
+
+function dropProofFromArgs(args: unknown) {
+  if (Array.isArray(args)) {
+    return args.slice(1);
+  }
+  return [];
 }
