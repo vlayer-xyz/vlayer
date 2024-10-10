@@ -56,8 +56,8 @@ function install_deps {
 
 if [ "$MODE" = "headless" ]; then
     install_deps
-    run_web_app
     build_browser_extension
+    run_web_app
     wait
 else
     install_deps
