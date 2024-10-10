@@ -1790,6 +1790,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "block_trie"
+version = "0.1.0"
+dependencies = [
+ "alloy-primitives",
+ "alloy-rlp",
+ "block_header",
+ "bytes",
+ "mpt",
+ "risc0-zkp",
+ "serde",
+]
+
+[[package]]
 name = "blocking"
 version = "1.6.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2160,8 +2173,8 @@ dependencies = [
  "alloy-primitives",
  "alloy-rlp",
  "anyhow",
+ "block_trie",
  "bytes",
- "chain_engine",
  "libmdbx",
  "mpt",
  "nybbles",
@@ -2171,25 +2184,12 @@ dependencies = [
 ]
 
 [[package]]
-name = "chain_engine"
-version = "0.1.0"
-dependencies = [
- "alloy-primitives",
- "alloy-rlp",
- "block_header",
- "bytes",
- "mpt",
- "risc0-zkp",
- "serde",
-]
-
-[[package]]
 name = "chain_guest"
 version = "0.1.0"
 dependencies = [
  "alloy-primitives",
  "block_header",
- "chain_engine",
+ "block_trie",
  "mpt",
  "risc0-zkp",
  "serde",
@@ -2209,8 +2209,8 @@ dependencies = [
  "alloy-primitives",
  "alloy-rlp",
  "anyhow",
+ "block_trie",
  "chain_db",
- "chain_engine",
  "chain_guest_wrapper",
  "derivative",
  "ethers",

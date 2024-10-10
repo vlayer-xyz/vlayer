@@ -1,5 +1,5 @@
 [package]
-name = "chain_engine"
+name = "block_trie"
 version = "0.1.0"
 edition = "2021"
 

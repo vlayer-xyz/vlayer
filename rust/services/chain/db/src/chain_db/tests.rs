@@ -2,7 +2,7 @@ use std::collections::HashSet;
 
 use alloy_primitives::BlockNumber;
 use anyhow::Result;
-use chain_engine::BlockTrie;
+use block_trie::BlockTrie;
 use mpt::MerkleTrie;
 use rand::{rngs::StdRng, RngCore, SeedableRng};
 
