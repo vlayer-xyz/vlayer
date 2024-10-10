@@ -247,15 +247,15 @@ classDiagram
       }
     }
 
-    Provider --> EthersProvider
-    Provider --> MockProvider
+    Provider <|-- EthersProvider
+    Provider <|-- MockProvider
 
     class Worker {
       // E2E test on Temp MDBX and anvil
     }
 
-    Database --> MDBX
-    Database --> InMemoryDatabase
+    Database <|-- MDBX
+    Database <|-- InMemoryDatabase
     ChainDB --> Database
     ChainDB --> MerkleProofBuilder
     ChainDB -- ChainInfo
