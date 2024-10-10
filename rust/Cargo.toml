@@ -5,7 +5,7 @@ members = [
     "services/chain/host",
     "services/chain/guest",
     "services/chain/guest_wrapper",
-    "services/chain/engine",
+    "services/chain/block_trie",
     "services/chain/server",
     "services/chain/worker",
     "services/call/host",
@@ -127,7 +127,7 @@ call_server = { path = "services/call/server" }
 
 chain_host = { path = "services/chain/host" }
 chain_guest = { path = "services/chain/guest" }
-chain_engine = { path = "services/chain/engine" }
+block_trie = { path = "services/chain/block_trie" }
 chain_guest_wrapper = { path = "services/chain/guest_wrapper" }
 chain_server = { path = "services/chain/server" }
 chain_worker = { path = "services/chain/worker" }

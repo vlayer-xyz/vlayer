@@ -6,8 +6,8 @@ use std::{
 
 use alloy_primitives::{keccak256, ChainId, B256};
 use alloy_rlp::{Bytes as RlpBytes, BytesMut, Decodable, Encodable, RlpDecodable, RlpEncodable};
+use block_trie::BlockTrie;
 use bytes::Bytes;
-use chain_engine::BlockTrie;
 use mpt::{KeyNibbles, MerkleTrie, Node, NodeRef, EMPTY_ROOT_HASH};
 use nybbles::Nibbles;
 use proof_builder::{MerkleProofBuilder, ProofResult};

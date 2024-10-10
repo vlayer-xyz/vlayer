@@ -4,12 +4,13 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-chain_engine = { workspace = true }
+block_trie = { workspace = true }
 block_header = { workspace = true }
 serde = { workspace = true }
 mpt = { workspace = true }
 risc0-zkp = { workspace = true }
 alloy-primitives = { workspace = true }
+bytes = { workspace = true }
 
 [lints]
 workspace = true

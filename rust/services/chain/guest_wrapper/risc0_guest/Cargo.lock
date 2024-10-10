@@ -441,6 +441,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "block_trie"
+version = "0.1.0"
+dependencies = [
+ "alloy-primitives",
+ "alloy-rlp",
+ "block_header",
+ "bytes",
+ "mpt",
+ "risc0-zkp",
+ "serde",
+]
+
+[[package]]
 name = "blst"
 version = "0.3.13"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -524,25 +537,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "baf1de4339761588bc0619e3cbc0120ee582ebb74b53b4efbf79117bd2da40fd"
 
 [[package]]
-name = "chain_engine"
-version = "0.1.0"
-dependencies = [
- "alloy-primitives",
- "alloy-rlp",
- "block_header",
- "bytes",
- "mpt",
- "risc0-zkp",
- "serde",
-]
-
-[[package]]
 name = "chain_guest"
 version = "0.1.0"
 dependencies = [
  "alloy-primitives",
  "block_header",
- "chain_engine",
+ "block_trie",
+ "bytes",
  "mpt",
  "risc0-zkp",
  "serde",

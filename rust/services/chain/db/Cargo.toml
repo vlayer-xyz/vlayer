@@ -10,7 +10,7 @@ libmdbx = "0.5.2"
 mpt = { workspace = true }
 alloy-rlp = { workspace = true }
 alloy-primitives = { workspace = true }
-chain_engine = { workspace = true }
+block_trie = { workspace = true }
 nybbles = { workspace = true }
 bytes = { workspace = true }
 

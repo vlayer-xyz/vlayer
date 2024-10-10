@@ -166,67 +166,99 @@ Block Proof Cache structure is stored in a distinct type of vlayer node, specifi
 ```mermaid
 %%{init: {'theme':'dark'}}%%
 classDiagram
-    class MDBX
-    class InMemoryDatabase
-    class Database {
-        <<Interface>>
+    namespace DB {
+        class MDBX {
+          // Unit tests
+        }
+
+        class InMemoryDatabase {
+        }
+
+        class Database {
+            <<Interface>>
+        }
+
+      class MerkleProofBuilder {
+        build_proof(root, key) Proof
+      }
+
+      class ChainDB {
+          // Unit tests using InMemoryDatabase
+          get_chain_info(id) ChainInfo
+          get_sparse_merkle_trie(root, [block_num]) MerkleTrie
+          update_chain(id, chain_info, new_nodes, removed_nodes)
+      }
+
+      class ChainInfo {
+        BlockNum left
+        BlockNum right
+        Hash root
+        ZK proof
+      }
     }
 
-    class ChainDB {
-        get_chain_info(id) ChainInfo
-        get_sparse_merkle_trie(root, [block_num]) MerkleTrie
-        update_chain(id, chain_info, new_nodes, removed_nodes)
-    }
+    namespace ZKVM {
+      class MerkleTrie {
+          // Unit tests
+          get(key) Value
+          insert(key, value)
+      }
 
-    class MerkleTrie {
-        get(key) Value
-        insert(key, value)
-    }
+      class BlockTrie {
+          // Does not check ZK proofs
+          // Unit test for each assertion
+          MerkleTrie trie
 
-    class BlockTrie {
-        // Does not check ZK proofs
-        MerkleTrie trie
+          new(trie)
+          init(block)
+          append(new_rightmost_block)
+          prepend(old_leftmost_block)
+      }
 
-        new(trie)
-        init(block)
-        append(new_rightmost_block)
-        prepend(old_leftmost_block)
-    }
-
-    class Guest {
-        init(elf_id, block) (elf_id, Hash)
-        append_prepend(elf_id, mpt, old_leftmost, new_leftmost, new_rightmost)
+      class Guest {
+          init(elf_id, block) (elf_id, Hash)
+          append_prepend(elf_id, mpt, old_leftmost, new_leftmost, new_rightmost)
+      }
     }
 
     class Host {
         // Checks that BlockTrie and Guest returned the same root hash
+        // Integration tests
         poll()
     }
 
     class Server {
+        // E2E tests
         v_chain(id, [block_num]) [ZkProof, SparseMerkleTrie]
     }
 
-    class ChainInfo {
-      BlockNum left
-      BlockNum right
-      Hash root
-      ZK proof
+    namespace Providers {
+      class Provider {
+        <<Interface>>
+        get_block(number/hash)
+        get_latest_block()
+      }
+
+      class EthersProvider {
+      }
+
+      class MockProvider {
+        mock(request, response)
+      }
     }
 
-    class MerkleProofBuilder {
-      build_proof(root, key) Proof
+    Provider <|-- EthersProvider
+    Provider <|-- MockProvider
+
+    class Worker {
+      // E2E test on Temp MDBX and anvil
     }
 
-    class Provider {
-      get_block(number/hash)
-      get_latest_block()
-    }
-
-    Database --> MDBX
-    Database --> InMemoryDatabase
+    Database <|-- MDBX
+    Database <|-- InMemoryDatabase
     ChainDB --> Database
     ChainDB --> MerkleProofBuilder
+    ChainDB -- ChainInfo
     MerkleProofBuilder --> Database
     Worker --> Host
     Host --> ChainDB
@@ -236,5 +268,5 @@ classDiagram
     BlockTrie --> MerkleTrie
     Guest --> BlockTrie
     Host --> BlockTrie
-    ChainInfo -- ChainDB
+    
 ```

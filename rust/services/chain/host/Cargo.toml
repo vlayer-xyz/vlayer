@@ -10,8 +10,9 @@ risc0-zkvm = { workspace = true }
 risc0-zkp = { workspace = true }
 serde = { workspace = true }
 anyhow = { workspace = true }
-chain_engine = { workspace = true }
+block_trie = { workspace = true }
 thiserror = { workspace = true }
+chain_guest = { workspace = true }
 chain_guest_wrapper = { workspace = true }
 mpt = { workspace = true }
 chain_db = { workspace = true }
