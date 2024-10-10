@@ -1,7 +1,7 @@
 import {
   EXTENSION_STEP,
   WebProofStepExpectUrl,
-} from "../../../api/lib/types/webProofProvider";
+} from "@vlayer/web-proof-commons";
 
 export const expectUrl = (url: string, label: string) => {
   return {
