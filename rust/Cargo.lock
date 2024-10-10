@@ -1666,7 +1666,9 @@ name = "benchmarks"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "host_utils",
  "risc0-build",
+ "risc0-zkvm",
 ]
 
 [[package]]

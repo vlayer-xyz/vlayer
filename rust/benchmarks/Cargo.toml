@@ -3,6 +3,11 @@ name = "benchmarks"
 version = "0.1.0"
 edition = "2021"
 
+[dependencies]
+anyhow = { workspace = true }
+risc0-zkvm = { workspace = true }
+host_utils = { workspace = true }
+
 [build-dependencies]
 risc0-build = { workspace = true }
 anyhow = { workspace = true }
