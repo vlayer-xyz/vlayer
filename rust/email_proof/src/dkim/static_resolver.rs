@@ -1,11 +1,20 @@
 use std::sync::Arc;
 
+#[cfg(not(feature = "sha2-risc0"))]
 use mail_auth::{
     common::{
         parse::TxtRecordParser,
         resolve::{IntoFqdn, Resolve, UnwrapTxtRecord},
     },
-    Txt,
+    Result, Txt,
+};
+#[cfg(feature = "sha2-risc0")]
+use sha2_risc0::{
+    common::{
+        parse::TxtRecordParser,
+        resolve::{IntoFqdn, Resolve, UnwrapTxtRecord},
+    },
+    Result, Txt,
 };
 
 pub struct StaticResolver<'a> {
@@ -24,7 +33,7 @@ impl Resolve for StaticResolver<'_> {
     async fn txt_lookup<'x, T: TxtRecordParser + Into<Txt> + UnwrapTxtRecord>(
         &self,
         _key: impl IntoFqdn<'x>,
-    ) -> mail_auth::Result<Arc<T>> {
+    ) -> Result<Arc<T>> {
         Ok(Arc::new(T::parse(self.dns_record)?))
     }
 }
