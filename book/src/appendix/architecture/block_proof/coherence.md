@@ -204,7 +204,18 @@ classDiagram
     }
 
     class Server {
-        v_call(id, [block_num])
+        v_chain(id, [block_num]) [ZkProof, SparseMerkleTrie]
+    }
+
+    class ChainInfo {
+      BlockNum left
+      BlockNum right
+      Hash root
+      ZK proof
+    }
+
+    class MerkleProofBuilder {
+      build_proof(root, key) Proof
     }
 
     class Provider {
@@ -215,6 +226,8 @@ classDiagram
     Database --> MDBX
     Database --> InMemoryDatabase
     ChainDB --> Database
+    ChainDB --> MerkleProofBuilder
+    MerkleProofBuilder --> Database
     Worker --> Host
     Host --> ChainDB
     Host --> Guest
@@ -223,4 +236,5 @@ classDiagram
     BlockTrie --> MerkleTrie
     Guest --> BlockTrie
     Host --> BlockTrie
+    ChainInfo -- ChainDB
 ```
