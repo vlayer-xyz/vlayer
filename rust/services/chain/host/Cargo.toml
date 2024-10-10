@@ -20,10 +20,10 @@ ethers = { workspace = true }
 provider = { workspace = true }
 derivative = { workspace = true }
 tokio = { workspace = true, features = ["macros"] }
+lazy_static = { workspace = true }
 
 [dev-dependencies]
 serde_json = { workspace = true }
-lazy_static = { workspace = true }
 alloy-rlp = { workspace = true, features = ["arrayvec"] }
 
 [lints]

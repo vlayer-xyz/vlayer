@@ -1,6 +1,7 @@
 use std::array::TryFromSliceError;
 
 use derivative::Derivative;
+use ethers::types::BlockNumber;
 use thiserror::Error;
 
 #[derive(Error, Debug, Clone, Derivative)]
@@ -12,8 +13,8 @@ pub enum HostError {
     Prover(String),
     #[error("Provider: {0}")]
     Provider(String),
-    #[error("Failed to fetch latest block")]
-    NoLatestBlock,
+    #[error("BlockNotFound: {0}")]
+    BlockNotFound(BlockNumber),
     #[error("Block conversion error: {0}")]
     BlockConversion(String),
     #[error("Digest conversion error: {0}")]
