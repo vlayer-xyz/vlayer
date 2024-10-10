@@ -34,7 +34,5 @@ export async function prove<
     chain_id: chainId,
   };
 
-  const result_promise = v_call(call, context, url);
-
-  return result_promise;
+  return v_call(call, context, url);
 }
