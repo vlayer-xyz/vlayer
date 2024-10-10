@@ -4,8 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [features]
-default = []
-use_v2 = ["sha2-risc0"]
+default = ["sha2-risc0"]
 
 [dependencies]
 alloy-sol-types = { workspace = true }
