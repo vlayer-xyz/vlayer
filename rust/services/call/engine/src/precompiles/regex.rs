@@ -70,4 +70,32 @@ mod test {
             })
         );
     }
+
+    #[test]
+    fn returns_error_when_no_regex_provided() {
+        let source = "Hello, World!";
+
+        let input = [source].abi_encode();
+
+        let result = regex_match_run(&Bytes::from(input), 1000);
+        assert_eq!(
+            result,
+            Err(PrecompileErrors::Fatal {
+                msg: r#"type check failed for "offset (usize)" with data: 0000000000000000000000000000000000002000000000000000000000000000"#.into()
+            })
+        );
+    }
+
+    #[test]
+    fn returns_error_args_are_not_strings() {
+        let input = [1, 2].abi_encode();
+
+        let result = regex_match_run(&Bytes::from(input), 1000);
+        assert_eq!(
+            result,
+            Err(PrecompileErrors::Fatal {
+                msg: "buffer overrun while deserializing".into()
+            })
+        );
+    }
 }
