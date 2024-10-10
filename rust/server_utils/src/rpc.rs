@@ -26,9 +26,8 @@ impl RpcServerMock {
         P: Into<Value>,
     {
         let result = result.into();
-
+        
         let request_body = self.build_request_body(params);
-
         let mock = self.mock_server.mock(|when, then| {
             when.method("POST")
                 .path("/")
