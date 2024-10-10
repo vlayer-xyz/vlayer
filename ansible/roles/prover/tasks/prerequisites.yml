@@ -1,7 +1,7 @@
 ---
 - name: Install Foundryup
   ansible.builtin.shell: |
-    set -o pipefail
+    set -ueo pipefail
     curl -L https://foundry.paradigm.xyz | bash
   args:
     creates: ~/.foundry/bin/foundryup
