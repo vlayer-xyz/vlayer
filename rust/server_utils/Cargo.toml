@@ -5,11 +5,13 @@ edition = "2021"
 
 [dependencies]
 alloy-primitives = { workspace = true }
+anyhow = { workspace = true }
 axum = { workspace = true, features = ["macros"] }
 axum-jrpc = { workspace = true }
 ethers = { workspace = true }
 hex = { workspace = true }
 http-body-util = { workspace = true }
+httpmock = { workspace = true }
 mime = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
@@ -19,6 +21,7 @@ tower-http = { workspace = true, features = ["trace"] }
 tower-request-id = { workspace = true }
 tracing = { workspace = true }
 host_utils = { workspace = true }
+reqwest = { workspace = true }
 
 [lints]
 workspace = true
