@@ -44,7 +44,7 @@ bun i @vlayer/sdk
 
 ## vlayer client
 
-A vlayer client is an interface to vlayer JSON-RPC API methods to trigger and follow the status of proving. It also provides convenient access to specific vlayer features such as [Web Proofs](./web-proofs.md).
+A vlayer client is an interface to vlayer JSON-RPC API methods to trigger and follow the status of proving. It also provides convenient access to specific vlayer features such as [Web Proofs](./web-proofs.md) and [Email Proofs](./email-proofs.md).
 
 Initialize a client with default prover.
 
