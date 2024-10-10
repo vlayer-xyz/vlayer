@@ -13,65 +13,66 @@
 
 Existing web applications including finance, social media, government, ecommerce and many other types of services contain valuable information and can be turned into great data sources.
 
-With vlayer, it is possible to leverage **this data** with smart contracts.
+With vlayer, you can leverage **this data** in smart contracts.
 
 ## Web Proofs
-Web Proofs provide cryptographic proof of web data served by any HTTPS server, allowing developers to use this data in their smart contracts. Only a small subset of data required by a smart contract is published on-chain.
+Web Proofs provide cryptographic proof of web data served by any HTTPS server, allowing developers to use this data in smart contracts. Only a small subset of the required data is published on-chain.
 
-They guarantee that the web data received has not been tampered with. Proving such claims on-chain without Web Proofs is difficult. Especially if we want to implement an automated and trusted solution. 
+Web Proofs ensure that the data received has not been tampered with. Without Web Proofs, proving this on-chain is difficult, especially when aiming for an automated and trusted solution.
 
 ## Example Prover
-Let's say we want to create an influencer DAO (_Decentralized Autonomous Organization_) for content creators who make at least $10,000 a month on  YouTube. 
+Let’s say we want to prove ownership of a specific Twitter/X handle.
 
-Below is sample code for such a `Prover` contract:
+Here’s a sample Prover contract:
 
 ```solidity
-import "openzeppelin/contracts/utils/Strings.sol";
-
+import {Strings} from "@openzeppelin-contracts/utils/Strings.sol";
+import {Proof} from "vlayer/Proof.sol";
 import {Prover} from "vlayer/Prover.sol";
 import {Web, WebProof, WebProofLib, WebLib} from "vlayer/WebProof.sol";
 
-contract YouTubeRevenue is Prover {
+contract WebProofProver is Prover {
     using Strings for string;
     using WebProofLib for WebProof;
     using WebLib for Web;
-    
-    public string dataUrl = "https://studio.youtube.com/creator/get_channel_dashboard";
-    
-    function main(WebProof calldata webProof, address influencerAddr) public returns (Proof, address, string) {
-      Web memory web = webProof.verify(dataUrl);
 
-      require(
-        web.jsonGetInt("channel.estimatedEarnings") > 1_000_000, 
-        "Earnings less than $10000"
-      );
+    string dataUrl = "https://api.x.com/1.1/account/settings.json";
 
-      return (proof(), influencerAddr, webProof.jsonGetString("channel.id"));
+    function main(WebProof calldata webProof, address twitterUserAddress)
+        public
+        view
+        returns (Proof memory, string memory, address)
+    {
+        Web memory web = webProof.verify(dataUrl);
+
+        string memory screenName = web.jsonGetString("screen_name");
+
+        return (proof(), screenName, twitterUserAddress);
     }
-} 
+}
 ```
 
 What happens in the above code?  
 
-* First, we need to set up the `Prover` contract:
-  * `YouTubeRevenue` inherits from `Prover` vlayer contract that allows off-chain proving of web data.
-  * `main` receives `WebProof` as argument, which contains a transcript of an HTTPS session signed by a *Notary* (see section [Security Considerations](#security-considerations) below for details about TLS *Notary*).
+1. **Setup the `Prover` contract**:
+   - `WebProofProver` inherits from the `Prover` contract, enabling off-chain proving of web data.
+   - The `main` function receives a `WebProof`, which contains a signed transcript of an HTTPS session (see the [Security Considerations](#security-considerations) section for details about the TLS *Notary*).
 
-* Then, we need to make sure that the Web Proof is valid - the call `webProof.verify(dataUrl)` performs:
-  * verification of the validity of the HTTPS transcript.
-  * verification of the signature of the *Notary* who signed the transcript.
-  * a check whether the *Notary* is the one we trust (we verify this by checking their key used to sign the data).
-  * a check that the HTTPS data comes from a server whose identity (server name specified in the server's SSL certificate) is the one we expect (in this case `studio.youtube.com`, which is the domain name in `dataUrl`).
-  * a check whether the HTTPS data comes from the expected `dataUrl`.
-  * retrieval of plaintext transcript from the Web Proof and returns it as `Web` for further processing.
+2. **Verify the Web Proof**:
+   - The call to `webProof.verify(dataUrl)` does the following:
+     - Verifies the HTTPS transcript.
+     - Verifies the *Notary*'s signature on the transcript.
+     - Ensures the *Notary* is trusted (via their signing key).
+     - Confirms the data comes from the expected domain (`api.x.com` in this case).
+     - Retrieves the plain text transcript for further processing.
 
-* Then we have to ensure that the delivered data makes sense for our case:
-  * `web.jsonGetInt("channel.estimatedEarnings") > 1_000_000` [parses JSON body](./regex-and-json.md#json-parsing) of the HTTP response, retrieves the `channel.estimatedEarnings` path of the JSON and checks if estimated earnings are higher than 10k USD (parsed JSON contains amount in cents).
+3. **Extract the relevant data**:
+   - `web.jsonGetString("screen_name")` extracts the `screen_name` from the JSON response.
 
-Finally, we can return public input:
-* The `influencerAddr` and the `web.jsonGetString("channel.id")` will be returned if all checks have passed.
+4. **Return the results**:
+   - If everything checks out, the function returns the `proof`, `screenName`, and the `twitterUserAddress`.
 
-If no execution errors occurred and the proof has been produced, we are ready for on-chain verification. 
+If there are no errors and the proof is valid, the data is ready for on-chain verification.
 
 > 💡 **Try it Now**
 > 
@@ -85,54 +86,54 @@ If no execution errors occurred and the proof has been produced, we are ready fo
 > The next steps are explained in [Running example](../getting-started/first-steps.md#running-examples-locally)
 
 ## Example Verifier
-
-Contract below is responsible for adding caller's wallet address to the list of DAO members. 
+The contract below mints a unique NFT for the Twitter/X handle owner’s wallet address.
 
 ```solidity
-import { YouTubeRevenue } from "./v/YouTubeRevenue.v.sol";
+import {WebProofProver} from "./WebProofProver.sol";
+import {Proof} from "vlayer/Proof.sol";
+import {Verifier} from "vlayer/Verifier.sol";
 
-address constant PROVER_ADDR = 0xd7141F4954c0B082b184542B8b3Bd00Dc58F5E05;
-bytes4 constant  PROVER_FUNC_SELECTOR = YouTubeRevenue.main.selector;
+import {ERC721} from "@openzeppelin-contracts/token/ERC721/ERC721.sol";
 
-contract InfluencerDao is Verifier {
-  mapping(address => bool) public authorizedMembers; 
-  mapping(string => bool) public claimedChannels;
+contract WebProofVerifier is Verifier, ERC721 {
+    address public prover;
 
-  function join(Proof _p, address influencerAddr, string calldata channelId) 
-    public 
-    onlyVerified(PROVER_ADDR, PROVER_FUNC_SELECTOR)  
-  { 
-    require(influencerAddr == msg.sender, "Wrong caller");
-    require(!claimedChannels[channelId], "ChannelId already used");
+    constructor(address _prover) ERC721("TwitterNFT", "TNFT") {
+        prover = _prover;
+    }
 
-    authorizedMembers[influencerAddr] = true;
-    claimedChannels[channelId] = true;
-  }
+    function verify(Proof calldata, string memory username, address twitterUserAddress)
+        public
+        onlyVerified(prover, WebProofProver.main.selector)
+    {
+        require(twitterUserAddress == msg.sender, "Wrong caller");
+
+        uint256 tokenId = uint256(keccak256(abi.encodePacked(username)));
+        require(_ownerOf(tokenId) == address(0), "User has already minted a TwitterNFT");
+
+        _safeMint(msg.sender, tokenId);
+    }
 }
+
 ```
-What exactly was going on in the snippet above?
+What’s happening here?
 
-* First, note that we need to tell the `Verifier` which `Prover` contract to verify:
-  * The `PROVER_ADDR` constant holds the address of the `Prover` contract that generated the proof. 
-  * The `PROVER_FUNC_SELECTOR` constant holds the selector for the `Prover.main()` function. 
-  * `InfluencerDao` inherits from Verifier, so we can call the `onlyVerified` modifier, which ensures that the `Proof` we pass is correct.
+1. **Set up the `Verifier`**:
+   - The `prover` variable stores the address of the `Prover` contract that generated the proof.
+   - The `WebProofProver.main.selector` gets the selector for the `WebProofProver.main()` function.
+   - `WebProofVerifier` inherits from `Verifier` to access the `onlyVerified` modifier, which ensures the proof is valid.
+   - `WebProofVerifier` also inherits from `ERC721` to support NFTs.
 
-> You don't need to pass `Proof` as an argument to `onlyVerified` because it is automatically extracted from `msg.data`.
+2. **Verification checks**:
+   - The `msg.sender` must match the address previously associated with the handle.
+   - The `tokenId` (a hash of the handle) must not already be minted.
 
-* Next, we add two fields needed to track DAO members:
-  * The `authorizedMembers` mapping holds the addresses of DAO members.
-  * The `claimedChannels` mapping holds already claimed channels.
-
-* Finally, we need logic to add new members to the DAO:   
-  * `Proof` must be first argument to `join`, such that `onlyVerified` has access to it and can verify it.
-  * `influencerAddr == msg.sender` checks if it's the YouTube channel owner who is trying to join the DAO.
-  * The `!claimedChannels[channelId]` assertion prevents the same channel from being used more than once.
-  * `authorizedMembers[msg.sender] = true` adds new member to DAO.
-  * `claimedChannels[channelId] = true` marks `channelId` as a claimed channel.
+3. **Mint the NFT**:
+   - Once verified, a unique `TwitterNFT` is minted for the user.
 
 And that's it! 
 
-As you can see, Web Proofs can be useful for building dApps. 
+As you can see, Web Proofs can be a powerful tool for building decentralized applications by allowing trusted off-chain data to interact with smart contracts.
 
 ## Security Considerations
 
