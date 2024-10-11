@@ -153,7 +153,7 @@ cargo install websocat
 websocat --binary -v ws-l:0.0.0.0:55688 tcp:api.x.com:443
 ```
 
-replacing `api.x.com` with the domain you'd like to use. Then use your local WS proxy (running at port 55688) when creating Web Proof provider: 
+Replace `api.x.com` with the domain you'd like to use. Then, configure your Web Proof provider to use your local WebSocket proxy (running on port 55688):
 
 ```ts
 import { createExtensionWebProofProvider } from '@vlayer/sdk/web_proof'
