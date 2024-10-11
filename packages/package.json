@@ -19,6 +19,7 @@
   },
   "type": "module",
   "workspaces": [
+    "test-web-app/",
     "browser-extension/",
     "vlayer/*",
     "extension-hooks/",

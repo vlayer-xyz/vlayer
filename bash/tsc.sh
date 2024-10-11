@@ -6,5 +6,5 @@ VLAYER_HOME=$(git rev-parse --show-toplevel)
 
 cd "${VLAYER_HOME}/packages"
 echo "Running tsc for: $VLAYER_HOME/packages"
-bun install
+bun install --frozen-lock-file
 bun tsc  --noEmit
