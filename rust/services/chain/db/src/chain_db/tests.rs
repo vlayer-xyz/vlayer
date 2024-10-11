@@ -11,7 +11,7 @@ use crate::in_memory::InMemoryDatabase;
 
 fn get_test_db() -> ChainDb<InMemoryDatabase> {
     let db = InMemoryDatabase::new();
-    ChainDb::new(db)
+    ChainDb::from_db(db)
 }
 
 fn insert_node(db: &mut ChainDb<InMemoryDatabase>, node_rlp: Bytes) {

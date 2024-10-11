@@ -62,7 +62,7 @@ mod test {
 
     #[test]
     fn db_has_chain_info_after_init() -> Result<()> {
-        let mut worker = Worker::new(ChainDb::new(InMemoryDatabase::new()), 1);
+        let mut worker = Worker::new(ChainDb::from_db(InMemoryDatabase::new()), 1);
 
         worker.init()?;
 

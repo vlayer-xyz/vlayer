@@ -1,61 +1,84 @@
 pub mod config;
 pub mod error;
 
-use alloy_primitives::ChainId;
-use chain_guest::Input;
-use chain_guest_wrapper::{RISC0_CHAIN_GUEST_ELF, RISC0_CHAIN_GUEST_ID};
+use alloy_primitives::B256;
+use chain_db::{ChainDb, ChainInfo, ChainUpdate, Database, Mdbx};
 pub use config::HostConfig;
 pub use error::HostError;
 use ethers::{
-    providers::{JsonRpcClient, Middleware, Provider},
+    middleware::Middleware,
+    providers::{Http, JsonRpcClient, Provider},
     types::BlockNumber,
 };
 use host_utils::Prover;
-use provider::to_eth_block_header;
-use risc0_zkvm::{ExecutorEnv, ProveInfo, Receipt};
+use lazy_static::lazy_static;
+use provider::{to_eth_block_header, EvmBlockHeader};
+use risc0_zkvm::{ExecutorEnv, ProveInfo};
 use serde::Serialize;
 
-pub struct Host {
-    prover: Prover,
+lazy_static! {
+    static ref EMPTY_PROOF: Vec<u8> = vec![];
 }
 
-pub struct HostOutput {
-    pub receipt: Receipt,
+pub struct Host<P, DB>
+where
+    P: JsonRpcClient,
+    DB: for<'a> Database<'a>,
+{
+    _prover: Prover,
+    provider: Provider<P>,
+    _db: ChainDb<DB>,
 }
 
-impl Host {
-    pub fn new(config: &HostConfig) -> Self {
+impl Host<Http, Mdbx> {
+    pub fn try_new(config: HostConfig) -> Result<Self, HostError> {
+        let provider = Provider::<Http>::try_from(config.rpc_url.as_str())
+            .expect("could not instantiate HTTP Provider");
         let prover = Prover::new(config.proof_mode);
+        let db = ChainDb::new(config.db_path)?;
 
-        Host { prover }
+        Ok(Host::from_parts(prover, provider, db))
+    }
+}
+
+impl<P, DB> Host<P, DB>
+where
+    P: JsonRpcClient,
+    DB: for<'a> Database<'a>,
+{
+    pub fn from_parts(prover: Prover, provider: Provider<P>, db: ChainDb<DB>) -> Self {
+        Host {
+            _prover: prover,
+            provider,
+            _db: db,
+        }
     }
 
-    pub async fn initialize<P: JsonRpcClient>(
-        self,
-        _chain_id: ChainId,
-        provider: &Provider<P>,
-    ) -> Result<HostOutput, HostError> {
-        let ethers_block = provider
-            .get_block(BlockNumber::Latest)
+    pub async fn poll(&self) -> Result<ChainUpdate, HostError> {
+        self.initialize().await
+    }
+
+    async fn initialize(&self) -> Result<ChainUpdate, HostError> {
+        let block = self.get_block(BlockNumber::Latest).await?;
+        let chain_info =
+            ChainInfo::new(block.number()..=block.number(), B256::ZERO, EMPTY_PROOF.as_slice());
+        let chain_update = ChainUpdate::new(chain_info, [], []);
+        Ok(chain_update)
+    }
+
+    async fn get_block(&self, number: BlockNumber) -> Result<Box<dyn EvmBlockHeader>, HostError> {
+        let ethers_block = self
+            .provider
+            .get_block(number)
             .await
             .map_err(|err| HostError::Provider(err.to_string()))?
-            .ok_or(HostError::NoLatestBlock)?;
-
+            .ok_or(HostError::BlockNotFound(number))?;
         let block = to_eth_block_header(ethers_block).map_err(HostError::BlockConversion)?;
-
-        let input = Input::Initialize {
-            block: Box::new(block),
-            elf_id: RISC0_CHAIN_GUEST_ID.into(),
-        };
-
-        let env = build_executor_env(input)
-            .map_err(|err| HostError::ExecutorEnvBuilder(err.to_string()))?;
-        let ProveInfo { receipt, .. } = provably_execute(&self.prover, env, RISC0_CHAIN_GUEST_ELF)?;
-
-        Ok(HostOutput { receipt })
+        Ok(Box::new(block))
     }
 }
 
+#[allow(unused)]
 fn provably_execute(
     prover: &Prover,
     env: ExecutorEnv,
@@ -66,96 +89,114 @@ fn provably_execute(
         .map_err(|err| HostError::Prover(err.to_string()))
 }
 
-fn build_executor_env(input: impl Serialize) -> anyhow::Result<ExecutorEnv<'static>> {
+fn _build_executor_env(input: impl Serialize) -> anyhow::Result<ExecutorEnv<'static>> {
     ExecutorEnv::builder().write(&input)?.build()
 }
 
 #[cfg(test)]
 mod test {
-    use std::sync::Arc;
-
-    use alloy_primitives::B256;
-    use alloy_rlp::encode_fixed_size;
-    use ethers::{providers::Provider, types::Block};
-    use lazy_static::lazy_static;
-    use mpt::MerkleTrie;
-    use provider::EvmBlockHeader;
-    use risc0_zkp::core::digest::Digest;
-    use serde_json::{from_value, json, Value};
-
     use super::*;
+    mod provably_execute {
+        use super::*;
+        #[test]
+        fn host_prove_invalid_guest_elf() {
+            let prover = Prover::default();
+            let env = ExecutorEnv::default();
+            let invalid_guest_elf = &[];
+            let res = provably_execute(&prover, env, invalid_guest_elf);
 
-    lazy_static! {
-        // All fields are zeroed out except for the block number
-        static ref rpc_block: Block<()> = from_value(json!(
-        {
-            "number": "0x42",
-
-            "baseFeePerGas": "0x0",
-            "miner": "0x0000000000000000000000000000000000000000",
-            "hash": "0x0000000000000000000000000000000000000000000000000000000000000000",
-            "parentHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
-            "mixHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
-            "nonce": "0x0000000000000000",
-            "sealFields": [],
-            "sha3Uncles": "0x0000000000000000000000000000000000000000000000000000000000000000",
-            "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-            "transactionsRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
-            "receiptsRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
-            "stateRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
-            "difficulty": "0x0",
-            "totalDifficulty": "0x0",
-            "extraData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-            "size": "0x0",
-            "gasLimit": "0x0",
-            "minGasPrice": "0x0",
-            "gasUsed": "0x0",
-            "timestamp": "0x0",
-            "transactions": [],
-            "uncles": []
-          }
-        )).unwrap();
-        static ref block: Arc<dyn EvmBlockHeader> = Arc::new(to_eth_block_header(rpc_block.clone()).unwrap());
-        static ref block_hash: B256 = block.hash_slow();
-
-        static ref config: HostConfig = HostConfig::default();
+            assert!(matches!(
+                res.map(|_| ()).unwrap_err(),
+                HostError::Prover(ref msg) if msg == "Elf parse error: Could not read bytes in range [0x0, 0x10)"
+            ));
+        }
     }
+    mod host_poll {
 
-    #[tokio::test]
-    async fn initialize() -> anyhow::Result<()> {
-        let (provider, mock) = Provider::mocked();
-        mock.push(rpc_block.clone())?;
+        use alloy_primitives::BlockNumber;
+        use chain_db::InMemoryDatabase;
+        use ethers::{
+            providers::{MockProvider, Provider},
+            types::Block,
+        };
+        use serde_json::{from_value, json, Value};
 
-        let encoded_block_num = encode_fixed_size(&block.number());
-        let expected_root_hash =
-            MerkleTrie::from_iter([(encoded_block_num, *block_hash)]).hash_slow();
+        use super::*;
 
-        let host = Host::new(&config);
-        let HostOutput { receipt } = host.initialize(ChainId::default(), &provider).await?;
+        fn fake_rpc_block(number: BlockNumber) -> Block<()> {
+            // All fields are zeroed out except for the block number
+            from_value(json!({
+              "number": format!("{:x}", number),
+              "baseFeePerGas": "0x0",
+              "miner": "0x0000000000000000000000000000000000000000",
+              "hash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "parentHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "mixHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "nonce": "0x0000000000000000",
+              "sealFields": [],
+              "sha3Uncles": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
+              "transactionsRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "receiptsRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "stateRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "difficulty": "0x0",
+              "totalDifficulty": "0x0",
+              "extraData": "0x0000000000000000000000000000000000000000000000000000000000000000",
+              "size": "0x0",
+              "gasLimit": "0x0",
+              "minGasPrice": "0x0",
+              "gasUsed": "0x0",
+              "timestamp": "0x0",
+              "transactions": [],
+              "uncles": []
+            })).unwrap()
+        }
 
-        mock.assert_request(
-            "eth_getBlockByNumber",
-            Value::Array(vec!["latest".into(), false.into()]),
-        )?;
+        fn mock_provider(
+            block_numbers: impl IntoIterator<Item = BlockNumber>,
+        ) -> Provider<MockProvider> {
+            let (provider, mock) = Provider::mocked();
+            for block_number in block_numbers {
+                mock.push(fake_rpc_block(block_number))
+                    .expect("could not push block");
+            }
+            provider
+        }
 
-        let (root_hash, elf_id): (B256, Digest) = receipt.journal.decode()?;
+        #[tokio::test]
+        async fn initialize() -> anyhow::Result<()> {
+            let latest_block = 20_000_000;
+            let host = Host::from_parts(
+                Prover::default(),
+                mock_provider([latest_block]),
+                ChainDb::from_db(InMemoryDatabase::new()),
+            );
 
-        assert_eq!(root_hash, expected_root_hash);
-        assert_eq!(elf_id, RISC0_CHAIN_GUEST_ID.into());
+            let chain_update = host.poll().await?;
 
-        Ok(())
-    }
+            let mock = host.provider.as_ref();
+            mock.assert_request(
+                "eth_getBlockByNumber",
+                Value::Array(vec!["latest".into(), false.into()]),
+            )?;
+            assert_eq!(
+                chain_update,
+                ChainUpdate::new(
+                    ChainInfo::new(latest_block..=latest_block, B256::ZERO, EMPTY_PROOF.as_slice()),
+                    [],
+                    []
+                )
+            );
 
-    #[test]
-    fn host_prove_invalid_guest_elf() {
-        let prover = Prover::default();
-        let env = ExecutorEnv::default();
-        let invalid_guest_elf = &[];
-        let res = provably_execute(&prover, env, invalid_guest_elf);
+            Ok(())
+        }
 
-        assert!(matches!(
-            res.map(|_| ()).unwrap_err(),
-            HostError::Prover(ref msg) if msg == "Elf parse error: Could not read bytes in range [0x0, 0x10)"
-        ));
+        mod append_prepend {
+            // No new work
+            // New head blocks, back propagation finished
+            // New head blocks, back propagation in progress
+            // Too many new blocks
+            // Reorg
+        }
     }
 }

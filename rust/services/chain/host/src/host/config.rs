@@ -1,10 +1,8 @@
-use std::collections::HashMap;
-
-use alloy_primitives::ChainId;
 use host_utils::ProofMode;
 
 #[derive(Default)]
 pub struct HostConfig {
-    pub rpc_urls: HashMap<ChainId, String>,
+    pub rpc_url: String,
     pub proof_mode: ProofMode,
+    pub db_path: String,
 }
