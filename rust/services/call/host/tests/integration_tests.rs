@@ -108,7 +108,7 @@ where
     let chain_proof = ChainProof::default();
 
     let mock = rpc_server_mock
-        .mock_partial(json!({}), to_value(&chain_proof).unwrap())
+        .mock(true, json!({}), to_value(&chain_proof).unwrap())
         .await;
 
     let host_output = if UPDATE_SNAPSHOTS {

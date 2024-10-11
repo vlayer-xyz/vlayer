@@ -22,7 +22,7 @@ impl Default for ServerConfig {
             host: "127.0.0.1".into(),
             port: 3000,
             proof_mode: ProofMode::Groth16,
-            chain_proof_url: String::default(),  // TODO: Update default chain proof URL
+            chain_proof_url: String::default(),
         }
     }
 }

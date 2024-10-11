@@ -40,7 +40,7 @@ impl TestHelper {
         let chain_proof = ChainProof::default();
 
         rpc_server_mock
-            .mock_partial(json!({}), to_value(&chain_proof).unwrap())
+            .mock(true, json!({}), to_value(&chain_proof).unwrap())
             .await;
 
         let app = server(ServerConfig {
