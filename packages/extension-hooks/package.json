@@ -1,6 +1,6 @@
 {
   "name": "@vlayer/extension-hooks",
-  "module": "index.ts",
+  "exports": "./src/index.ts",
   "type": "module",
   "devDependencies": {
     "@types/bun": "latest",

@@ -2,7 +2,7 @@
   "name": "@vlayer/web-proof-commons",
   "private": true,
   "version": "1.0.0",
-  "module": "index.ts",
+  "exports": "./src/index.ts",
   "type": "module",
   "scripts": {
     "lint": "eslint lib",

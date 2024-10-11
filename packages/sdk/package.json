@@ -1,7 +1,7 @@
 {
   "name": "@vlayer/sdk",
   "type": "module",
-  "module": "src/index.ts",
+  "exports": "./src/index.ts",
   "version": "0.1.0",
   "types": "src/index.ts",
   "scripts": {
