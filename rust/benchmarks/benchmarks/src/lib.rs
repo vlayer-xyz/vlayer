@@ -1,3 +1,5 @@
+#![cfg(test)]
+
 mod bencher;
 mod guest;
 
