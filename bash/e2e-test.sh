@@ -13,7 +13,7 @@ echo Running services...
 source ${VLAYER_HOME}/bash/run-services.sh
 
 echo Setting up SDK 
-cd ${VLAYER_HOME}/packages/vlayer/sdk && bun install
+cd ${VLAYER_HOME}/packages/sdk && bun install
 
 # these examples require ALCHEMY_API_KEY, which may not be available locally, so we don't run them
 # if the key is not available

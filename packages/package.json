@@ -20,7 +20,8 @@
   "type": "module",
   "workspaces": [
     "browser-extension/",
-    "vlayer/*",
+    "sdk/",
+    "web-components/",
     "extension-hooks/",
     "web-proof-commons/"
   ],
