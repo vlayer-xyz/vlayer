@@ -35,8 +35,7 @@ impl Host<Http, Mdbx> {
         let provider = Provider::<Http>::try_from(config.rpc_url.as_str())
             .expect("could not instantiate HTTP Provider");
         let prover = Prover::new(config.proof_mode);
-        let mdbx = Mdbx::open(config.db_path)?;
-        let db = ChainDb::new(mdbx);
+        let db = ChainDb::new(config.db_path)?;
 
         Ok(Host::from_parts(prover, provider, db))
     }
@@ -170,7 +169,7 @@ mod test {
             let host = Host::from_parts(
                 Prover::default(),
                 mock_provider([latest_block]),
-                ChainDb::new(InMemoryDatabase::new()),
+                ChainDb::from_db(InMemoryDatabase::new()),
             );
 
             let chain_update = host.poll().await?;

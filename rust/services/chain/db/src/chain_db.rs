@@ -2,6 +2,7 @@ use std::{
     collections::HashSet,
     hash::Hash,
     ops::{Deref, DerefMut, Range, RangeInclusive},
+    path::Path,
 };
 
 use alloy_primitives::{keccak256, ChainId, B256};
@@ -13,7 +14,7 @@ use nybbles::Nibbles;
 use proof_builder::{MerkleProofBuilder, ProofResult};
 use thiserror::Error;
 
-use crate::{Database, DbError, DbResult, ReadTx, WriteTx};
+use crate::{Database, DbError, DbResult, Mdbx, ReadTx, WriteTx};
 
 mod proof_builder;
 #[cfg(test)]
@@ -77,7 +78,7 @@ pub struct ChainDb<DB: for<'a> Database<'a>> {
     db: DB,
 }
 
-#[derive(Error, Debug, PartialEq)]
+#[derive(Error, Debug, PartialEq, Clone)]
 pub enum ChainDbError {
     #[error("Database error: {0}")]
     Db(#[from] DbError),
@@ -93,8 +94,15 @@ pub enum ChainDbError {
 
 pub type ChainDbResult<T> = Result<T, ChainDbError>;
 
+impl ChainDb<Mdbx> {
+    pub fn new(path: impl AsRef<Path>) -> ChainDbResult<Self> {
+        let db = Mdbx::open(path)?;
+        Ok(Self { db })
+    }
+}
+
 impl<DB: for<'a> Database<'a>> ChainDb<DB> {
-    pub fn new(db: DB) -> Self {
+    pub fn from_db(db: DB) -> Self {
         Self { db }
     }
 
