@@ -1,5 +1,5 @@
 use call_server::ServerConfig;
-use chain_server::server::ChainProof;
+use chain_server::server::{ChainProof, ChainProofServerMock};
 use clap::{Parser, Subcommand};
 use commands::{
     args::{InitArgs, ServeArgs},
@@ -56,12 +56,9 @@ async fn main() {
 async fn run() -> Result<(), CLIError> {
     let cli = Cli::parse();
 
-    let rpc_server_mock = RpcServerMock::start("v_chain").await;
-    let chain_proof_url = rpc_server_mock.url();
-    let chain_proof = ChainProof::default();
-
-    rpc_server_mock
-        .mock(true, json!({}), to_value(&chain_proof).unwrap())
+    let chain_proof_server_mock = ChainProofServerMock::start().await;
+    chain_proof_server_mock
+        .mock(json!({}), ChainProof::default())
         .await;
 
     match cli.command {
@@ -72,7 +69,7 @@ async fn run() -> Result<(), CLIError> {
                 proof_mode,
                 serve_args.host,
                 serve_args.port,
-                chain_proof_url,
+                chain_proof_server_mock.url(),
             );
             run_serve(server_config).await?;
         }
