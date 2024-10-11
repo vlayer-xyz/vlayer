@@ -118,5 +118,5 @@ bun run build
 Finally, run tests:
 ```sh
 cd packages/browser-extension
-TEST_MODE=headless bunx playwright test
+bun run test:headless
 ```
