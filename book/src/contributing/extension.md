@@ -10,14 +10,7 @@ To start working with the vlayer browser extension, you need to install the foll
 
 ## Building
 
-First build the vlayer server with:
-
-```sh
-cd rust
-cargo build
-```
-
-Then build vlayer contracts with:
+First build vlayer contracts with:
 
 ```sh
 cd contracts
@@ -71,13 +64,6 @@ bun run deploy.ts
 
 `deploy.ts` script deploys the Prover and Verifier contracts. Their addresses are saved in the `.env.development` file and later used by the web app.
 
-Then save extension id in `.env.development` file by running:
-
-```sh
-cd examples/web_proof/vlayer
-bun run calcExtensionId.ts
-```
-
 Start web app on localhost:
 
 ```sh
@@ -85,11 +71,10 @@ cd examples/web_proof/vlayer
 bun run dev
 ```
 
-Before starting the browser extension, copy the `.env.template` file to `.env.development` in the `browser-extension` directory. Then, start the browser extension:
+Then, start the browser extension:
 
 ```sh
 cd packages/browser-extension
-cp .env.template .env.development
 bun run dev
 ```
 
