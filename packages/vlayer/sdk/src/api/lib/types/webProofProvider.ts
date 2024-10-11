@@ -1,8 +1,8 @@
-import { WebProof } from "types/webProof.ts";
 import { AbiFunction, Hex, Abi, ContractFunctionName } from "viem";
 import type { ContractFunctionArgsWithout } from "./viem";
 import {
   Branded,
+  WebProof,
   WebProofStepExpectUrl,
   WebProofStepStartPage,
 } from "@vlayer/web-proof-commons";
