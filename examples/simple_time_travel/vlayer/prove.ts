@@ -11,12 +11,13 @@ import { createVlayerClient } from "@vlayer/sdk";
 import averageBalance from "../out/AverageBalance.sol/AverageBalance";
 import averageBalanceVerifier from "../out/AverageBalanceVerifier.sol/AverageBalanceVerifier";
 
-const privateKey = process.env.TEST_PRIVATE_KEY;
+let privateKey = process.env.EXAMPLES_TEST_PRIVATE_KEY;
 
 if (!privateKey) {
-  throw new Error("TEST_PRIVATE_KEY environment variable is not set.");
+  throw new Error("EXAMPLES_TEST_PRIVATE_KEY environment variable is not set.");
 }
-const deployer = privateKeyToAccount(`0x${privateKey}`);
+privateKey = privateKey.startsWith("0x") ? privateKey : `0x${privateKey}`;
+const deployer = privateKeyToAccount(privateKey as `0x${string}`);
 
 const tokenOwner = "0xE6b08c02Dbf3a0a4D3763136285B85A9B492E391";
 
@@ -90,14 +91,13 @@ console.log(
 console.log("Proving...");
 const vlayer = createVlayerClient();
 
-const { hash } = await vlayer.prove(
-  proverAddr,
-  averageBalance.abi,
-  "averageBalanceOf",
-  [tokenOwner],
-  optimismSepolia.id,
-);
-
+const { hash } = await vlayer.prove({
+  address: proverAddr,
+  proverAbi: averageBalance.abi,
+  functionName: "averageBalanceOf",
+  args: [tokenOwner],
+  chainId: optimismSepolia.id,
+});
 console.log("Waiting for proving result: ", hash);
 
 const { proof, result } = await vlayer.waitForProvingResult({ hash });

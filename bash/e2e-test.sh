@@ -19,7 +19,7 @@ cd ${VLAYER_HOME}/packages/sdk && bun install
 # if the key is not available
 EXAMPLES_REQUIRING_ALCHEMY=("simple_teleport")
 
-# these examples require TEST_PRIVATE_KEY and ALCHEMY_API_KEY, 
+# these examples require EXAMPLES_TEST_PRIVATE_KEY and ALCHEMY_API_KEY, 
 # which may not be available locally, so we don't run them if the key is not available
 EXAMPLES_REQUIRING_PRIV_KEY=("simple_time_travel")
 
@@ -38,8 +38,8 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
 
     if [[ " ${EXAMPLES_REQUIRING_PRIV_KEY[*]} " == *" ${example_name} "* ]]; then
       echo "${example_name} requires private key"
-      if [[ -z "${TEST_PRIVATE_KEY:-}" ]] || [[ -z "${ALCHEMY_API_KEY:-}" ]]; then
-          echo "Skipping ${example_name} due to missing TEST_PRIVATE_KEY or ALCHEMY_API_KEY"
+      if [[ -z "${EXAMPLES_TEST_PRIVATE_KEY:-}" ]] || [[ -z "${ALCHEMY_API_KEY:-}" ]]; then
+          echo "Skipping ${example_name} due to missing EXAMPLES_TEST_PRIVATE_KEY or ALCHEMY_API_KEY"
           continue
       fi
     fi
