@@ -1,4 +1,4 @@
-// import webProofProver from "../../out/WebProofProver.sol/WebProofProver";
+import webProofProver from "../../out/WebProofProver.sol/WebProofProver";
 
 import { foundry } from "viem/chains";
 
@@ -12,16 +12,9 @@ import {
   type VCallResponse,
   testHelpers,
 } from "@vlayer/sdk";
-<<<<<<< HEAD
 import webProofVerifier from "../../out/WebProofVerifier.sol/WebProofVerifier";
-=======
-import { createTestClient, http, publicActions, walletActions } from "viem";
-// import webProofVerifier from "../../out/WebProofVerifier.sol/WebProofVerifier";
-import { testHelpers } from "@vlayer/sdk";
->>>>>>> 0fda372f (Temporary mock wevProofVerifier)
 
-const webProofProver = { abi: [] };
-const webProofVerifier = { abi: [] };
+console.log("Hello from VLayer!");
 const context: {
   webProof: WebProof | null;
   zkProof: VCallResponse | null;
@@ -31,6 +24,8 @@ const context: {
   zkProof: null,
   result: [],
 };
+
+const twitterUserAddress = (await testHelpers.getTestAddresses())[0];
 
 export async function setupRequestProveButton(element: HTMLButtonElement) {
   element.addEventListener("click", async () => {
@@ -55,11 +50,12 @@ export async function setupRequestProveButton(element: HTMLButtonElement) {
       ],
     });
 
+    console.log("WebProof generated!", webproof);
     context.webProof = webproof;
   });
 }
 
-export const setupVProverButton = async (element: HTMLButtonElement) => {
+export const setupVProverButton = (element: HTMLButtonElement) => {
   element.addEventListener("click", async () => {
     const notaryPubKey =
       "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExpX/4R4z40gI6C/j9zAM39u58LJu\n3Cx5tXTuqhhu/tirnBi5GniMmspOTEsps4ANnPLpMmMSfhJ+IFHbc3qVOA==\n-----END PUBLIC KEY-----\n";
@@ -89,7 +85,7 @@ export const setupVProverButton = async (element: HTMLButtonElement) => {
   });
 };
 
-export const setupVerifyButton = async (element: HTMLButtonElement) => {
+export const setupVerifyButton = (element: HTMLButtonElement) => {
   element.addEventListener("click", async () => {
     const verification = await testHelpers.createAnvilClient().writeContract({
       address: import.meta.env.VITE_VERIFIER_ADDRESS,
