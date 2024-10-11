@@ -7,7 +7,7 @@ use call_host::{
     host::{config::HostConfig, error::HostError, get_block_number, ChainProofClient, Host},
     Call,
 };
-use chain_server::server::ChainProof;
+use chain_server::server::{ChainProof, ChainProofServerMock};
 use dotenv::dotenv;
 use ethers_core::types::BlockNumber as BlockTag;
 use lazy_static::lazy_static;
@@ -15,8 +15,7 @@ use provider::{
     BlockingProvider, CachedMultiProvider, CachedProviderFactory, FileProviderFactory,
     ProviderFactory,
 };
-use serde_json::{json, to_value};
-use server_utils::RpcServerMock;
+use serde_json::json;
 
 // To activate recording, set UPDATE_SNAPSHOTS to true.
 // Recording creates new testdata directory and writes return data from Alchemy into files in that directory.
@@ -103,21 +102,20 @@ where
         ..Default::default()
     };
 
-    let rpc_server_mock = RpcServerMock::start("v_chain").await;
-    let chain_proof_url = rpc_server_mock.url();
-    let chain_proof = ChainProof::default();
-
-    let mock = rpc_server_mock
-        .mock(true, json!({}), to_value(&chain_proof).unwrap())
+    let chain_proof_server_mock = ChainProofServerMock::start().await;
+    let mock = chain_proof_server_mock
+        .mock(json!({}), ChainProof::default())
         .await;
 
     let host_output = if UPDATE_SNAPSHOTS {
         let provider_factory = CachedProviderFactory::new(rpc_urls(), rpc_file_cache(test_name));
-        let host = create_host(provider_factory, block_number, chain_proof_url, &config)?;
+        let host =
+            create_host(provider_factory, block_number, chain_proof_server_mock.url(), &config)?;
         host.run(call).await?
     } else {
         let provider_factory = FileProviderFactory::new(rpc_file_cache(test_name));
-        let host = create_host(provider_factory, block_number, chain_proof_url, &config)?;
+        let host =
+            create_host(provider_factory, block_number, chain_proof_server_mock.url(), &config)?;
         host.run(call).await?
     };
 

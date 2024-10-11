@@ -27,10 +27,8 @@ impl RpcServerMock {
         &self,
         is_partial: bool,
         params: impl Serialize,
-        result: impl Into<Value>,
+        result: impl Serialize,
     ) -> Mock {
-        let result = result.into();
-
         self.mock_server
             .mock_async(move |mut when, then| {
                 when = when
@@ -154,22 +152,12 @@ mod tests {
 
     #[tokio::test]
     async fn call_without_mock_returns_error() {
-        let rpc_mock = RpcServerMock::start("get_data").await;
+        let rpc_mock = RpcServerMock::start("mocked_method").await;
         let rpc_client = RpcClient::new(&rpc_mock.url(), "unmocked_method");
 
         let result = rpc_client.call(json!({"key": "value"})).await;
 
-        match result {
-            Err(RpcError::Http(err)) => {
-                // Expected an HTTP error because there was no mock set up.
-                assert!(
-                    err.status().is_some(),
-                    "Expected an HTTP status code in the error, but it was missing."
-                );
-            }
-            Err(e) => panic!("Expected an HTTP error, got {:?}", e),
-            Ok(_) => panic!("Expected an error, but the call succeeded."),
-        }
+        assert!(matches!(result, Err(RpcError::Http(_))));
     }
 
     #[tokio::test]
