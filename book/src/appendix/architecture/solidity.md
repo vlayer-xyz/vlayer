@@ -49,7 +49,7 @@ struct CallAssumptions {
 
 Then the data is prepended on the `Host` with two additional fields `length` and `seal`. The `Host` returns it via JSON-RPC `v_call` method, as a string of bytes, in the `result` field.
 
-Finally, the method on the on-chain smart contract is called. For that purpose, it is prepended with a function selector and might be additionally appended with custom user arguments.
+Finally, the method on the on-chain smart contract is called. For that purpose, it is prepended with a function selector.
 
 The `Proof` structure looks as follows:
 
