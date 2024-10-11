@@ -94,6 +94,9 @@ fn _build_executor_env(input: impl Serialize) -> anyhow::Result<ExecutorEnv<'sta
 }
 
 #[cfg(test)]
+mod test_utils;
+
+#[cfg(test)]
 mod test {
     use super::*;
     mod provably_execute {
@@ -111,92 +114,50 @@ mod test {
             ));
         }
     }
-    mod host_poll {
-
-        use alloy_primitives::BlockNumber;
+    mod host {
         use chain_db::InMemoryDatabase;
-        use ethers::{
-            providers::{MockProvider, Provider},
-            types::Block,
-        };
-        use serde_json::{from_value, json, Value};
+        use serde_json::Value;
+        use test_utils::mock_provider;
 
         use super::*;
 
-        fn fake_rpc_block(number: BlockNumber) -> Block<()> {
-            // All fields are zeroed out except for the block number
-            from_value(json!({
-              "number": format!("{:x}", number),
-              "baseFeePerGas": "0x0",
-              "miner": "0x0000000000000000000000000000000000000000",
-              "hash": "0x0000000000000000000000000000000000000000000000000000000000000000",
-              "parentHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
-              "mixHash": "0x0000000000000000000000000000000000000000000000000000000000000000",
-              "nonce": "0x0000000000000000",
-              "sealFields": [],
-              "sha3Uncles": "0x0000000000000000000000000000000000000000000000000000000000000000",
-              "logsBloom": "0x00000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000000",
-              "transactionsRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
-              "receiptsRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
-              "stateRoot": "0x0000000000000000000000000000000000000000000000000000000000000000",
-              "difficulty": "0x0",
-              "totalDifficulty": "0x0",
-              "extraData": "0x0000000000000000000000000000000000000000000000000000000000000000",
-              "size": "0x0",
-              "gasLimit": "0x0",
-              "minGasPrice": "0x0",
-              "gasUsed": "0x0",
-              "timestamp": "0x0",
-              "transactions": [],
-              "uncles": []
-            })).unwrap()
+        fn test_db() -> ChainDb<InMemoryDatabase> {
+            ChainDb::from_db(InMemoryDatabase::new())
         }
 
-        fn mock_provider(
-            block_numbers: impl IntoIterator<Item = BlockNumber>,
-        ) -> Provider<MockProvider> {
-            let (provider, mock) = Provider::mocked();
-            for block_number in block_numbers {
-                mock.push(fake_rpc_block(block_number))
-                    .expect("could not push block");
+        mod poll {
+            use super::*;
+
+            #[tokio::test]
+            async fn initialize() -> anyhow::Result<()> {
+                let host =
+                    Host::from_parts(Prover::default(), mock_provider([20_000_000]), test_db());
+
+                let chain_update = host.poll().await?;
+
+                host.provider.as_ref().assert_request(
+                    "eth_getBlockByNumber",
+                    Value::Array(vec!["latest".into(), false.into()]),
+                )?;
+                assert_eq!(
+                    chain_update,
+                    ChainUpdate::new(
+                        ChainInfo::new(20_000_000..=20_000_000, B256::ZERO, EMPTY_PROOF.as_slice()),
+                        [],
+                        []
+                    )
+                );
+
+                Ok(())
             }
-            provider
-        }
 
-        #[tokio::test]
-        async fn initialize() -> anyhow::Result<()> {
-            let latest_block = 20_000_000;
-            let host = Host::from_parts(
-                Prover::default(),
-                mock_provider([latest_block]),
-                ChainDb::from_db(InMemoryDatabase::new()),
-            );
-
-            let chain_update = host.poll().await?;
-
-            let mock = host.provider.as_ref();
-            mock.assert_request(
-                "eth_getBlockByNumber",
-                Value::Array(vec!["latest".into(), false.into()]),
-            )?;
-            assert_eq!(
-                chain_update,
-                ChainUpdate::new(
-                    ChainInfo::new(latest_block..=latest_block, B256::ZERO, EMPTY_PROOF.as_slice()),
-                    [],
-                    []
-                )
-            );
-
-            Ok(())
-        }
-
-        mod append_prepend {
-            // No new work
-            // New head blocks, back propagation finished
-            // New head blocks, back propagation in progress
-            // Too many new blocks
-            // Reorg
+            mod append_prepend {
+                // No new work
+                // New head blocks, back propagation finished
+                // New head blocks, back propagation in progress
+                // Too many new blocks
+                // Reorg
+            }
         }
     }
 }
