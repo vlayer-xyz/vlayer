@@ -11,7 +11,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  ts-lint:
+  tsc:
     runs-on: ubuntu-latest
     steps:
     - uses: oven-sh/setup-bun@v2      
