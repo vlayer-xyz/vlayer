@@ -2,6 +2,7 @@ use std::{collections::HashMap, sync::Arc, time::Duration};
 
 use axum::{body::Body, http::Response};
 use call_server::{server, ProofMode, ServerConfig};
+use chain_server::server::ChainProof;
 use ethers::{
     contract::abigen,
     core::{
@@ -14,7 +15,8 @@ use ethers::{
 };
 use example_prover::ExampleProver;
 use serde::Serialize;
-use server_utils::post;
+use serde_json::{json, to_value};
+use server_utils::{post, RpcServerMock};
 
 abigen!(ExampleProver, "./testdata/ExampleProver.json",);
 
@@ -33,11 +35,20 @@ impl TestHelper {
     }
 
     pub(crate) async fn post<T: Serialize>(&self, url: &str, body: &T) -> Response<Body> {
+        let rpc_server_mock = RpcServerMock::start("v_chain").await;
+        let chain_proof_url = rpc_server_mock.url();
+        let chain_proof = ChainProof::default();
+
+        rpc_server_mock
+            .mock_partial(json!({}), to_value(&chain_proof).unwrap())
+            .await;
+
         let app = server(ServerConfig {
             rpc_urls: HashMap::from([(self.anvil.chain_id(), self.anvil.endpoint())]),
             host: "127.0.0.1".into(),
             port: 3000,
             proof_mode: ProofMode::Fake,
+            chain_proof_url,
         });
         post(app, url, body).await
     }

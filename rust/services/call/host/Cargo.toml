@@ -30,6 +30,7 @@ lazy_static = { workspace = true}
 tracing = { workspace = true }
 reqwest = { workspace = true }
 serde_json = { workspace = true }
+server_utils = { workspace = true }
 tokio = { workspace = true, features = ["macros"] }
 
 [dev-dependencies]

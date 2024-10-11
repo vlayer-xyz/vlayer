@@ -1,4 +1,5 @@
 use call_server::{ProofMode, ServerConfig};
+use chain_server::server::ChainProof;
 use clap::{Parser, Subcommand};
 use commands::{
     args::{InitArgs, ServeArgs},
@@ -6,6 +7,7 @@ use commands::{
     serve::run_serve,
     version::Version,
 };
+use server_utils::RpcServerMock;
 use test_runner::cli::TestArgs;
 use tracing::{error, info};
 use tracing_subscriber::EnvFilter;
@@ -53,11 +55,24 @@ async fn main() {
 async fn run() -> Result<(), CLIError> {
     let cli = Cli::parse();
 
+    let rpc_server_mock = RpcServerMock::start("v_chain").await;
+    let chain_proof_url = rpc_server_mock.url();
+    let chain_proof = ChainProof::default();
+
+    rpc_server_mock
+        .mock_partial(serde_json::json!({}), serde_json::to_value(&chain_proof).unwrap())
+        .await;
+
     match cli.command {
         Commands::Serve(serve_args) => {
             let proof_mode: ProofMode = serve_args.proof.unwrap_or_default().map();
-            let server_config: ServerConfig =
-                ServerConfig::new(serve_args.rpc_url, proof_mode, serve_args.host, serve_args.port);
+            let server_config: ServerConfig = ServerConfig::new(
+                serve_args.rpc_url,
+                proof_mode,
+                serve_args.host,
+                serve_args.port,
+                chain_proof_url,
+            );
             run_serve(server_config).await?;
         }
         Commands::Init(init_args) => {

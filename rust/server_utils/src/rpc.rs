@@ -2,6 +2,7 @@ use httpmock::{Mock, MockServer};
 use reqwest::Client;
 use serde::Serialize;
 use serde_json::{json, Value};
+use thiserror::Error;
 
 pub struct RpcServerMock {
     mock_server: MockServer,
@@ -25,8 +26,7 @@ impl RpcServerMock {
     pub async fn mock(&self, params: impl Serialize, result: impl Into<Value>) -> Mock {
         let result = result.into();
 
-        let mock = self
-            .mock_server
+        self.mock_server
             .mock_async(|when, then| {
                 when.method("POST")
                     .path("/")
@@ -49,9 +49,35 @@ impl RpcServerMock {
                         .unwrap(),
                     );
             })
-            .await;
+            .await
+    }
 
-        mock
+    pub async fn mock_partial(
+        &self,
+        partial_body: impl Serialize,
+        result: impl Into<Value>,
+    ) -> Mock {
+        let result = result.into();
+
+        self.mock_server
+            .mock_async(|when, then| {
+                when.method("POST")
+                    .path("/")
+                    .header("Content-Type", "application/json")
+                    .json_body_partial(serde_json::to_string(&partial_body).unwrap());
+
+                then.status(200)
+                    .header("Content-Type", "application/json")
+                    .body(
+                        serde_json::to_string(&json!({
+                            "jsonrpc": "2.0",
+                            "result": result,
+                            "id": 1
+                        }))
+                        .unwrap(),
+                    );
+            })
+            .await
     }
 }
 
@@ -59,6 +85,16 @@ pub struct RpcClient {
     url: String,
     method: String,
     client: Client,
+}
+
+#[derive(Debug, Error)]
+pub enum RpcError {
+    #[error("HTTP error: {0}")]
+    Http(#[from] reqwest::Error),
+    #[error("JSON-RPC error: {0}")]
+    JsonRpc(Value),
+    #[error("Missing 'result' field in the response")]
+    MissingResult,
 }
 
 impl RpcClient {
@@ -70,13 +106,14 @@ impl RpcClient {
         }
     }
 
-    pub async fn call(&self, params: impl Serialize) -> Result<Value, reqwest::Error> {
+    pub async fn call(&self, params: impl Serialize) -> Result<Value, RpcError> {
         let request_body = json!({
             "jsonrpc": "2.0",
             "method": self.method,
             "params": params,
             "id": 1
         });
+        dbg!(&request_body);
 
         let response = self
             .client
@@ -85,15 +122,19 @@ impl RpcClient {
             .json(&request_body)
             .send()
             .await?
-            .error_for_status()?
-            .json::<Value>()
-            .await?;
+            .error_for_status()?;
 
-        if let Some(error) = response.get("error") {
-            panic!("JSON-RPC Error: {}", error);
+        let response_body = response.json::<Value>().await?;
+
+        if let Some(error) = response_body.get("error") {
+            return Err(RpcError::JsonRpc(error.clone()));
         }
 
-        Ok(response["result"].clone())
+        if let Some(result) = response_body.get("result") {
+            Ok(result.clone())
+        } else {
+            Err(RpcError::MissingResult)
+        }
     }
 }
 
@@ -105,11 +146,11 @@ mod tests {
     async fn mock_with_params() -> anyhow::Result<()> {
         let rpc_mock = RpcServerMock::start("get_data").await;
         let mock = rpc_mock
-            .mock(Some(json!({"key": "value"})), json!({"data": "some data"}))
+            .mock(json!({"key": "value"}), json!({"data": "some data"}))
             .await;
         let rpc_client = RpcClient::new(&rpc_mock.url(), "get_data");
 
-        let result = rpc_client.call(Some(json!({"key": "value"}))).await?;
+        let result = rpc_client.call(json!({"key": "value"})).await?;
 
         mock.assert();
 
@@ -123,9 +164,8 @@ mod tests {
     async fn mock_not_called_panics() {
         let rpc_mock = RpcServerMock::start("get_data").await;
         let mock = rpc_mock
-            .mock(Some(json!({"key": "value"})), json!({"data": "some data"}))
+            .mock(json!({"key": "value"}), json!({"data": "some data"}))
             .await;
-        RpcClient::new(&rpc_mock.url(), "get_data");
 
         mock.assert();
     }
@@ -135,11 +175,64 @@ mod tests {
         let rpc_mock = RpcServerMock::start("get_data").await;
         let rpc_client = RpcClient::new(&rpc_mock.url(), "unmocked_method");
 
-        let result = rpc_client.call(Some(json!({"key": "value"}))).await;
+        let result = rpc_client.call(json!({"key": "value"})).await;
 
-        assert!(
-            result.unwrap_err().status().is_some(),
-            "Expected an HTTP status code in the error, but it was missing."
-        );
+        match result {
+            Err(RpcError::Http(err)) => {
+                // Expected an HTTP error because there was no mock set up.
+                assert!(
+                    err.status().is_some(),
+                    "Expected an HTTP status code in the error, but it was missing."
+                );
+            }
+            Err(e) => panic!("Expected an HTTP error, got {:?}", e),
+            Ok(_) => panic!("Expected an error, but the call succeeded."),
+        }
+    }
+
+    #[tokio::test]
+    async fn mock_partial_matches_partial_body() -> anyhow::Result<()> {
+        let rpc_mock = RpcServerMock::start("get_data").await;
+        let partial_body = json!({
+            "params": {
+                "key": "value"
+            }
+        });
+        let mock = rpc_mock
+            .mock_partial(partial_body, json!({"data": "some data"}))
+            .await;
+        let rpc_client = RpcClient::new(&rpc_mock.url(), "get_data");
+
+        let result = rpc_client.call(json!({"key": "value"})).await?;
+
+        mock.assert();
+
+        assert_eq!(result, json!({"data": "some data"}));
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn mock_doesnt_match_partial_body() -> anyhow::Result<()> {
+        let rpc_mock = RpcServerMock::start("get_data").await;
+        let partial_body = json!({
+            "params": {
+                "key_1": "value_1",
+            }
+        });
+        let full_body = json!({
+            "params": {
+                "key_1": "value_1",
+                "key_2": "value_2",
+            }
+        });
+        rpc_mock.mock_partial(partial_body, json!({"data": "some data"})).await;
+        let rpc_client = RpcClient::new(&rpc_mock.url(), "get_data");
+
+        let result = rpc_client.call(full_body).await;
+
+        assert!(result.is_err());
+
+        Ok(())
     }
 }
