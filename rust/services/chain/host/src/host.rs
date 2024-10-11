@@ -46,9 +46,9 @@ where
     P: JsonRpcClient,
     DB: for<'a> Database<'a>,
 {
-    pub fn from_parts(_prover: Prover, provider: Provider<P>, db: ChainDb<DB>) -> Self {
+    pub fn from_parts(prover: Prover, provider: Provider<P>, db: ChainDb<DB>) -> Self {
         Host {
-            _prover,
+            _prover: prover,
             provider,
             _db: db,
         }
