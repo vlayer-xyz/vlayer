@@ -12,6 +12,7 @@ const requestWebProof = async () => {
   await provider.getWebProof({
     //@ts-expect-error this part is not impelmented yet in our tlsn flow
     proverCallCommitment: {},
+    //@ts-expect-error fix common types
     steps: [startPage("", ""), expectUrl("", ""), notarize("", "", "")],
   });
 };
