@@ -55,24 +55,27 @@ contract WebProofProver is Prover {
 What happens in the above code?  
 
 1. **Setup the `Prover` contract**:
-- `WebProofProver` inherits from the `Prover` contract, enabling off-chain proving of web data.
-- The `main` function receives a `WebProof`, which contains a signed transcript of an HTTPS session (see the chapter from JS section on how to obtain `WebProof` [Security Considerations](#security-considerations) section for details about the TLS *Notary*).
+    - `WebProofProver` inherits from the `Prover` contract, enabling off-chain proving of web data.
+    - The `main` function receives a `WebProof`, which contains a signed transcript of an HTTPS session (see the chapter from JS section on how to obtain `WebProof` [Security Considerations](#security-considerations) section for details about the TLS *Notary*).
 
 2. **Verify the Web Proof**:
-The call to `webProof.verify(dataUrl)` does the following:
-- Verifies the HTTPS transcript.
-- Verifies the *Notary*'s signature on the transcript.
-- Ensures the *Notary* is on the list of trusted notaries (via their signing key).
-- Confirms the data comes from the expected domain (`api.x.com` in this case).
-- Check whether the HTTPS data comes from the expected `dataUrl`.
-- Ensures that the server's SSL certificate and its chain of authority are verified.
-- Retrieves the plain text transcript for further processing.
+    
+    The call to `webProof.verify(dataUrl)` does the following:
+    - Verifies the HTTPS transcript.
+    - Verifies the *Notary*'s signature on the transcript.
+    - Ensures the *Notary* is on the list of trusted notaries (via their signing key).
+    - Confirms the data comes from the expected domain (`api.x.com` in this case).
+    - Check whether the HTTPS data comes from the expected `dataUrl`.
+    - Ensures that the server's SSL certificate and its chain of authority are verified.
+    - Retrieves the plain text transcript for further processing.
 
 3. **Extract the relevant data**:
-`web.jsonGetString("screen_name")` extracts the `screen_name` from the JSON response.
+    
+    `web.jsonGetString("screen_name")` extracts the `screen_name` from the JSON response.
 
 4. **Return the results**:
-If everything checks out, the function returns the `proof` placeholder, `screenName`, and the `twitterUserAddress`.
+
+    If everything checks out, the function returns the `proof` placeholder, `screenName`, and the `twitterUserAddress`.
 
 If there are no errors and the proof is valid, the data is ready for on-chain verification. 
 
@@ -119,16 +122,18 @@ contract WebProofVerifier is Verifier, ERC721 {
 What’s happening here?
 
 1. **Set up the `Verifier`**:
-- The `prover` variable stores the address of the `Prover` contract that generated the proof.
-- The `WebProofProver.main.selector` gets the selector for the `WebProofProver.main()` function.
-- `WebProofVerifier` inherits from `Verifier` to access the `onlyVerified` modifier, which ensures the proof is valid.
-- `WebProofVerifier` also inherits from `ERC721` to support NFTs.
+    - The `prover` variable stores the address of the `Prover` contract that generated the proof.
+    - The `WebProofProver.main.selector` gets the selector for the `WebProofProver.main()` function.
+    - `WebProofVerifier` inherits from `Verifier` to access the `onlyVerified` modifier, which ensures the proof is valid.
+    - `WebProofVerifier` also inherits from `ERC721` to support NFTs.
 
 2. **Verification checks**:
-The `tokenId` (a hash of the handle) must not already be minted.
+
+    The `tokenId` (a hash of the handle) must not already be minted.
 
 3. **Mint the NFT**:
-Once verified, a unique `TwitterNFT` is minted for the user.
+
+    Once verified, a unique `TwitterNFT` is minted for the user.
 
 And that's it! 
 
