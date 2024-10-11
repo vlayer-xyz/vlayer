@@ -16,6 +16,8 @@
     "noImplicitReturns": true,
     "skipLibCheck": true,
     "baseUrl": "./",
+    "composite": true,
+    "allowImportingTsExtensions": true,
     "paths": {
       "components/*" : ["./src/components/*"],
       "constants/*" : ["./src/constants/*"],
