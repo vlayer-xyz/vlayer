@@ -27,9 +27,9 @@ Here’s a sample Prover contract:
 
 ```solidity
 import {Strings} from "@openzeppelin-contracts/utils/Strings.sol";
-import {Proof} from "vlayer/Proof.sol";
-import {Prover} from "vlayer/Prover.sol";
-import {Web, WebProof, WebProofLib, WebLib} from "vlayer/WebProof.sol";
+import {Proof} from "vlayer-0.1.0/Proof.sol";
+import {Prover} from "vlayer-0.1.0/Prover.sol";
+import {Web, WebProof, WebProofLib, WebLib} from "vlayer-0.1.0/WebProof.sol";
 
 contract WebProofProver is Prover {
     using Strings for string;
@@ -64,13 +64,15 @@ What happens in the above code?
      - Verifies the *Notary*'s signature on the transcript.
      - Ensures the *Notary* is trusted (via their signing key).
      - Confirms the data comes from the expected domain (`api.x.com` in this case).
+     - Check whether the HTTPS data comes from the expected `dataUrl`.
+     - Ensures that the server's SSL certificate and its chain of authority are verified.
      - Retrieves the plain text transcript for further processing.
 
 3. **Extract the relevant data**:
    - `web.jsonGetString("screen_name")` extracts the `screen_name` from the JSON response.
 
 4. **Return the results**:
-   - If everything checks out, the function returns the `proof`, `screenName`, and the `twitterUserAddress`.
+   - If everything checks out, the function returns the `proof` placeholder, `screenName`, and the `twitterUserAddress`.
 
 If there are no errors and the proof is valid, the data is ready for on-chain verification.
 
