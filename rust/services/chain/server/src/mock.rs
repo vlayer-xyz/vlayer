@@ -8,7 +8,7 @@ pub struct ChainProofServerMock {
 
 impl ChainProofServerMock {
     pub async fn start() -> Self {
-        let mock_server = RpcServerMock::start("chain_proof").await;
+        let mock_server = RpcServerMock::start("v_chain").await;
 
         ChainProofServerMock { mock_server }
     }
