@@ -19,7 +19,7 @@
   },
   "type": "module",
   "workspaces": [
-    "browser-extension/tests/web-app/",
+    "test-web-app/",
     "browser-extension/",
     "vlayer/*",
     "extension-hooks/",

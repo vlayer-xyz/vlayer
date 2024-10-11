@@ -16,7 +16,7 @@ export default defineConfig({
   /* Reporter to use. See https://playwright.dev/docs/test-reporters */
   reporter: "html",
   webServer: {
-    command: "cd tests/web-app && bun run dev", // Run your bash script
+    command: "cd ../test-web-app && bun run dev", // Run your bash script
     url: "http://localhost:5174/",
     stdout: "pipe", // Capture stdout
     stderr: "pipe", // Capture stderr

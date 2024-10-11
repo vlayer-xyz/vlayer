@@ -10,7 +10,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
-    "@vlayer/sdk": "file:../../../../packages/vlayer/sdk",
+    "@vlayer/sdk": "file:../vlayer/sdk",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
     "viem": "^2.21.22"
