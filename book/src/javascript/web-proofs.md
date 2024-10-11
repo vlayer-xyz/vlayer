@@ -161,4 +161,4 @@ const webProofProvider = createExtensionWebProofProvider({
 })
 ```
 
-Now the notarized HTTPS request will be routed through your localy proxy server.
+Now the notarized HTTPS request will be routed through your local proxy server.
