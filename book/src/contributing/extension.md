@@ -103,7 +103,7 @@ Testing uses Playwright web testing library. Install it with:
 bunx playwright install --with-deps chromium
 ```
 
-To run tests, firstly, install javascript dependencies in `packages` folder:
+To run tests, firstly, install Typescript dependencies in `packages` folder:
 ```sh
 cd packages
 bun install
