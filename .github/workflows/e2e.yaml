@@ -57,8 +57,7 @@ jobs:
         
       - name: Run e2e test
         env:
-          # PROVING_MODE: ${{ github.ref == 'refs/heads/main' && 'prod' || 'dev' }}
-          PROVING_MODE: 'dev'
+          PROVING_MODE: 'prod'
           BONSAI_API_URL: ${{ vars.BONSAI_API_URL }}
           BONSAI_API_KEY: ${{ secrets.BONSAI_API_KEY }}
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
