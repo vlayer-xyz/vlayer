@@ -1,6 +1,21 @@
 ---
 - name: Install vlayer prover
   hosts: provers
+  gather_facts: false
+
+  pre_tasks:
+    - name: Ensure .ssh exists
+      delegate_to: 127.0.0.1
+      ansible.builtin.file:
+        path: ~/.ssh
+        state: directory
+        mode: '700'
+    - name: Save host public key to ssh known hosts
+      delegate_to: 127.0.0.1
+      ansible.builtin.known_hosts:
+        path: ~/.ssh/known_hosts
+        name: "{{ inventory_hostname }}"
+        key: "{{ inventory_hostname }},{{ ansible_host }} {{ ansible_host_public_key }}"
 
   roles:
     - role: prover
