@@ -60,7 +60,7 @@ fn rpc_urls() -> HashMap<ChainId, String> {
 fn create_host<P>(
     provider_factory: impl ProviderFactory<P> + 'static,
     block_tag: BlockTag,
-    chain_proof_url: String,
+    chain_proof_url: impl AsRef<str>,
     config: &HostConfig,
 ) -> Result<Host<P>, HostError>
 where

@@ -7,8 +7,7 @@ use commands::{
     serve::run_serve,
     version::Version,
 };
-use serde_json::{json, to_value};
-use server_utils::RpcServerMock;
+use serde_json::json;
 use test_runner::cli::TestArgs;
 use tracing::{error, info};
 use tracing_subscriber::EnvFilter;

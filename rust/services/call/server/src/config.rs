@@ -33,7 +33,7 @@ impl ServerConfig {
         proof_mode: ProofMode,
         host: Option<String>,
         port: Option<u16>,
-        chain_proof_url: String,
+        chain_proof_url: impl AsRef<str>,
     ) -> ServerConfig {
         let default = ServerConfig::default();
         ServerConfig {
@@ -45,7 +45,7 @@ impl ServerConfig {
             host: host.unwrap_or(default.host),
             port: port.unwrap_or(default.port),
             proof_mode,
-            chain_proof_url,
+            chain_proof_url: chain_proof_url.as_ref().to_string(),
         }
     }
 }
