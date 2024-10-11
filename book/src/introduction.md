@@ -2,7 +2,7 @@
 
 # Introduction
 
-vlayer provides tools and infrastructure that give smart contracts super powers like [time travel](/features/time-travel.html) to past blocks, [teleport](/features/teleport.html) to different chains, and access to real data from the [web](/features/web.html) and [email](/features/email.html).
+vlayer provides tools and infrastructure that give smart contracts super powers like [time travel](/features/time-travel.html) to past blocks, [teleport](/features/teleport.html) to different chains, access to real data from the [web](/features/web.html), and [email](/features/email.html).
 
 vlayer allows smart contracts to be executed [off-chain](/advanced/prover.html). The result of the execution can then be used by [on-chain contracts](/advanced/verifier.html).
 
@@ -13,11 +13,11 @@ To get started with vlayer, [install vlayer](/getting-started/installation.html)
 
 **Features**
 
-See how to [time travel](/features/time-travel.html) across block numbers, [teleport](/features/teleport.html) from one chain to another, prove data coming from [email](/features/email.html) or [web](/features/web.html).
+See how to [time travel](/features/time-travel.html) across block numbers, [teleport](/features/teleport.html) from one chain to another, prove data coming from [email](/features/email.html) or [web](/features/web.html) and use helpers for [JSON and Regex](/features/json-and-regex.html).
 
 **From JavaScript**
 
-Learn how to [interact with vlayer](/javascript/javascript.html) from your JS code and how to [generate web proofs](/javascript/web-proofs.html) using our SDK.
+Learn how to [interact with vlayer](/javascript/javascript.html) from your JS code and how to [generate web proofs](/javascript/web-proofs.html) and [email proofs](/javascript/email-proofs.html) using our SDK.
 
 **Advanced**
 
@@ -26,17 +26,18 @@ Learn in-depth how:
  * [Global Variables](./advanced/prover-global-variables.md) are set.
  * [Tests](/advanced/tests.html) are run.
 
-**Contributing**
-
-Help us improve [vlayer](/contributing/vlayer.md) and the [vlayer book](/contributing/book.md)!
-
 **Appendix**
 
 References for:
+- [Contributing](/contributing/overview.html)
+  - [Rust](./contributing/rust.html)
+  - [Javascript](./contributing/javascript.html)
+  - [Book](./contributing/book.html)
+  - [Extension](./contributing/extension.html)
 - [Architecture](/appendix/architecture/overview.html)
   - [Prover](/appendix/architecture/prover.html)
   - [Multichain](/appendix/architecture/multi.html)
   - [Solidity](/appendix/architecture/solidity.html)
   - [Releasing](/appendix/architecture/releasing.html)
   - [Block proofs](/appendix/architecture/block_proof.html)
-- [JSON-RPC API](/appendix/api.md)
+- [JSON-RPC API](/appendix/api.html)
