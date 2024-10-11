@@ -1,0 +1,6 @@
+---
+- name: Install vlayer prover
+  hosts: provers
+
+  roles:
+    - role: prover

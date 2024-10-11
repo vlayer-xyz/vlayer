@@ -1,0 +1,34 @@
+---
+- name: Install prerequisites
+  ansible.builtin.import_tasks: prerequisites.yml
+
+- name: Install vlayerup
+  ansible.builtin.shell: |
+    set -ueo pipefail
+    curl -SL https://install.vlayer.xyz | bash
+  args:
+    creates: ~/.vlayer/bin/vlayerup
+
+# We're installing a most-recent nightly version every time.
+- name: Install vlayer
+  ansible.builtin.shell: |
+    export PATH="$PATH:~/.foundry/bin"
+    ~/.vlayer/bin/vlayerup
+  args:
+    executable: /bin/bash
+  notify: "Restart vlayer"
+
+- name: Install vlayer service file
+  become: true
+  ansible.builtin.template:
+    src: vlayer.service.j2
+    dest: /etc/systemd/system/vlayer.service
+    mode: '644'
+  notify: "Restart vlayer"
+
+- name: Enable and start the vlayer service
+  become: true
+  ansible.builtin.systemd_service:
+    name: vlayer
+    enabled: true
+    state: started
