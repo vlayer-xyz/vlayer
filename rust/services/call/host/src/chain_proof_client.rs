@@ -3,17 +3,10 @@ use std::collections::{HashMap, HashSet};
 use alloy_primitives::ChainId;
 use chain_server::server::ChainProof;
 use provider::BlockNumber;
-use serde::Serialize;
 use server_utils::{RpcClient, RpcError};
 use tracing::info;
 
 use crate::host::error::HostError;
-
-#[derive(Debug, Serialize)]
-struct ChainProofParams {
-    chain_id: ChainId,
-    block_numbers: HashSet<BlockNumber>,
-}
 
 pub struct ChainProofClient {
     rpc_client: RpcClient,
@@ -50,20 +43,17 @@ impl ChainProofClient {
             block_numbers.len()
         );
 
-        let params = ChainProofParams {
-            chain_id,
-            block_numbers: block_numbers.clone(),
-        };
+        let params = (chain_id, block_numbers.clone());
 
         let result_value = self.rpc_client.call(&params).await.map_err(|e| match e {
             RpcError::Http(err) => HostError::HttpRequestFailed(err.to_string()),
-            RpcError::JsonRpc(error) => HostError::JsonRpcError(error.to_string()),
+            RpcError::JsonRpc(err) => HostError::JsonRpcError(err.to_string()),
             RpcError::MissingResult => {
                 HostError::JsonParseError("Missing 'result' field in response".to_string())
             }
         })?;
 
-        let chain_proof: ChainProof = serde_json::from_value(result_value)
+        let chain_proof = serde_json::from_value(result_value)
             .map_err(|e| HostError::JsonParseError(e.to_string()))?;
 
         Ok(chain_proof)
