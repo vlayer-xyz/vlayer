@@ -5,7 +5,6 @@ import {
   startPage,
 } from "@vlayer/sdk";
 import React from "react";
-import "./App.css";
 
 const requestWebProof = async () => {
   const provider = createExtensionWebProofProvider({});

@@ -1,6 +1,9 @@
 import { expect, test } from "./fixtures";
 import { sidePanel } from "./helpers";
-test("happy path", async ({ page, context }) => {
+test("web-app is able to properly open sidepanel via SDK call ", async ({
+  page,
+  context,
+}) => {
   await page.goto("/");
   const requestProofButton = page
     .locator("body")
