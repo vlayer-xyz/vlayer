@@ -12,10 +12,10 @@ To start working with the vlayer browser extension, you need to install the foll
 
 First build the vlayer server with:
 
- ```sh
- cd rust
- cargo build
- ```
+```sh
+cd rust
+cargo build
+```
 
  Then build vlayer contracts with:
 
