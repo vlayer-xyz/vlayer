@@ -9,7 +9,7 @@ use server_utils::{parse_address_field, parse_hex_field};
 
 use crate::error::AppError;
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Debug)]
 #[serde(deny_unknown_fields)]
 pub struct Call {
     to: String,
@@ -31,7 +31,7 @@ fn mainnet_chain_id() -> ChainId {
     Chain::mainnet().id()
 }
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Debug)]
 #[serde(deny_unknown_fields)]
 pub struct CallContext {
     #[serde(default = "mainnet_chain_id")]

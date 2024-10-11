@@ -11,7 +11,7 @@ use crate::{config::ServerConfig, error::AppError};
 
 pub mod types;
 
-#[derive(Deserialize, Serialize)]
+#[derive(Deserialize, Serialize, Debug)]
 pub struct Params {
     call: Call,
     context: CallContext,

@@ -27,7 +27,7 @@ struct Cli {
     command: Commands,
 }
 
-#[derive(Subcommand)]
+#[derive(Subcommand, Debug)]
 enum Commands {
     Init(InitArgs),
     Serve(ServeArgs),
