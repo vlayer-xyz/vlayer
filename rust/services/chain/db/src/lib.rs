@@ -1,5 +1,6 @@
 #![allow(unused)]
 
+use static_assertions::assert_obj_safe;
 use thiserror::Error;
 
 mod chain_db;
@@ -41,6 +42,8 @@ pub trait ReadTx {
     fn get(&self, table: impl AsRef<str>, key: impl AsRef<[u8]>) -> DbResult<Option<Box<[u8]>>>;
 }
 
+assert_obj_safe!(ReadTx);
+
 // While nothing in code require a mutable reference in insert and delete, we want to
 // discourage the user from sharing a write transaction as this can lead to db data races
 pub trait WriteTx {
@@ -67,7 +70,11 @@ pub trait WriteTx {
     fn commit(self) -> DbResult<()>;
 }
 
+assert_obj_safe!(WriteTx);
+
 pub trait ReadWriteTx: ReadTx + WriteTx {}
+
+assert_obj_safe!(ReadWriteTx);
 
 impl<T: ReadTx + WriteTx> ReadWriteTx for T {}
 
