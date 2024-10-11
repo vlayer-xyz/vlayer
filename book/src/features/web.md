@@ -74,7 +74,7 @@ The call to `webProof.verify(dataUrl)` does the following:
 4. **Return the results**:
 If everything checks out, the function returns the `proof` placeholder, `screenName`, and the `twitterUserAddress`.
 
-If there are no errors and the proof is valid, the data is ready for on-chain verification.
+If there are no errors and the proof is valid, the data is ready for on-chain verification. 
 
 > 💡 **Try it Now**
 > 
@@ -108,12 +108,10 @@ contract WebProofVerifier is Verifier, ERC721 {
         public
         onlyVerified(prover, WebProofProver.main.selector)
     {
-        require(twitterUserAddress == msg.sender, "Wrong caller");
-
         uint256 tokenId = uint256(keccak256(abi.encodePacked(username)));
         require(_ownerOf(tokenId) == address(0), "User has already minted a TwitterNFT");
 
-        _safeMint(msg.sender, tokenId);
+        _safeMint(twitterUserAddress, tokenId);
     }
 }
 
@@ -121,17 +119,16 @@ contract WebProofVerifier is Verifier, ERC721 {
 What’s happening here?
 
 1. **Set up the `Verifier`**:
-   - The `prover` variable stores the address of the `Prover` contract that generated the proof.
-   - The `WebProofProver.main.selector` gets the selector for the `WebProofProver.main()` function.
-   - `WebProofVerifier` inherits from `Verifier` to access the `onlyVerified` modifier, which ensures the proof is valid.
-   - `WebProofVerifier` also inherits from `ERC721` to support NFTs.
+- The `prover` variable stores the address of the `Prover` contract that generated the proof.
+- The `WebProofProver.main.selector` gets the selector for the `WebProofProver.main()` function.
+- `WebProofVerifier` inherits from `Verifier` to access the `onlyVerified` modifier, which ensures the proof is valid.
+- `WebProofVerifier` also inherits from `ERC721` to support NFTs.
 
 2. **Verification checks**:
-   - The `msg.sender` must match the address previously associated with the handle.
-   - The `tokenId` (a hash of the handle) must not already be minted.
+The `tokenId` (a hash of the handle) must not already be minted.
 
 3. **Mint the NFT**:
-   - Once verified, a unique `TwitterNFT` is minted for the user.
+Once verified, a unique `TwitterNFT` is minted for the user.
 
 And that's it! 
 
