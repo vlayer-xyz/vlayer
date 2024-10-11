@@ -17,8 +17,9 @@ jobs:
   sdk-test:
     runs-on: ubuntu-latest
     steps:
-      - uses: oven-sh/setup-bun@v2
       - uses: actions/checkout@v2
+      - name: Install TypeScript prerequisites
+        uses: ./.github/actions/ts-prerequisites
       - name: Install packages
         working-directory: packages/vlayer/sdk
         run: bun install

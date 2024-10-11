@@ -1,0 +1,9 @@
+name: Contract prerequisites
+description: Installs contracts compilation prerequisites
+runs:
+  using: "composite"
+  steps:
+    - name: Install Foundry
+      uses: foundry-rs/foundry-toolchain@v1
+      with:
+        version: nightly-d75318c9c7a1c6af5404fe96f63ca890dcdd588d # 2024-09-05

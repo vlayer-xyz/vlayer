@@ -22,31 +22,14 @@ jobs:
     runs-on: aws-linux-small
 
     steps:
-      - uses: cargo-bins/cargo-binstall@main
-
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           submodules: recursive
-
-      - name: Set up Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          cache-workspaces: |
-            rust
-            rust/services/call/guest_wrapper/risc0_guest
-            rust/services/chain/guest_wrapper/risc0_guest
-
-      - name: Install risc0 installer
-        run: cargo binstall -y cargo-risczero@1.0.5 --force
-
-      - name: Install risc0 toolchain
-        run: cargo risczero install
-
-      - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
-        with:
-          version: nightly-d75318c9c7a1c6af5404fe96f63ca890dcdd588d # 2024-09-05
+      - name: Install Rust prerequisites
+        uses: ./.github/actions/rust-prerequisites
+      - name: Install contracts prerequisites
+        uses: ./.github/actions/contracts-prerequisites
 
       - name: Run Forge build
         working-directory: ./contracts

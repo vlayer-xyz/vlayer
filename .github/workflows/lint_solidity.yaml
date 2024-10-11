@@ -13,9 +13,10 @@ concurrency:
 jobs:
   sol-lint:
     runs-on: ubuntu-latest
-    steps:
-      - uses: oven-sh/setup-bun@v2      
+    steps: 
       - uses: actions/checkout@v2
+      - name: Install TypeScript prerequisites
+        uses: ./.github/actions/ts-prerequisites
       - name: Mock ImageId.sol
         run: ./bash/mock-imageid.sh
       - name: Run install bun 
