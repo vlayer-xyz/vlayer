@@ -92,3 +92,31 @@ bun run build:watch
 ```
 
 in `packages/browser-extension` directory. It enables hot-reload of the extension.
+
+
+## Testing
+
+Extension end-to-end tests are stored in `packages/browser-extension/tests` folder.  
+
+Testing uses Playwright web testing library. Install it with:
+```sh
+bunx playwright install --with-deps chromium
+```
+
+To run tests, firstly, install javascript dependencies in `packages` folder:
+```sh
+cd packages
+bun install
+```
+
+Then, build the extension:
+```sh
+cd packages/browser-extension
+bun run build
+```
+
+Finally, run tests:
+```sh
+cd packages/browser-extension
+TEST_MODE=headless bunx playwright test
+```
