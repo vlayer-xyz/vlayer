@@ -96,18 +96,13 @@ const { proof, result } = await vlayer.waitForProvingResult({ hash });
 
 ## Verification
 
-Once we have obtained proving result, we can call verifier contract (below example demontrates how to use `viem` for that purpose).
+Once we have obtained proving result, we can call verifier contract (below example demonstrates how to use `createAnvilClient` function  for that purpose).
 
 ```ts
-import { createTestClient, http } from 'viem'
 import { verifierAbi } from './verifierAbi'
+import { testHelpers } from '@vlayer/sdk'
 
-
-createTestClient({
-   mode: 'anvil',
-   chain: foundry,
-   transport: http(),
-}).writeContract({
+testHelpers.createAnvilClient().writeContract({
     abi: verifierAbi,
     address,
     account
