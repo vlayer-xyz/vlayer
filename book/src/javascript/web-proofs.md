@@ -72,7 +72,7 @@ const hash = await vlayer.proveWeb({
 ```
 
 The above snippet:
-* Opens vlayer browser extension and guides the user throught the steps defined above. The Web Proof is generated using vlayer default *Notary* server and WebSocket proxy (the proxy is necessary to give browser access to low-level TLS connection of the HTTPS request we are generating Web Proof for).
+* Opens vlayer browser extension and guides the user through the steps defined above. The Web Proof is generated using vlayer default *Notary* server and WebSocket proxy (see section [WebSocket proxy](#role-of-websocket-proxy) below for more details).
 * Once the Web Proof is successfully generated, it is submitted to prover contract:
   * with address `0x70997970c51812dc3a010c7d01b50e0d17dc79c8`,
   * whose interface is defined by `proverAbi`,
@@ -141,3 +141,26 @@ const { hash } = await vlayer.prove({
     args: [webProof, ...commitmentArgs],
 })
 ```
+
+### WebSocket proxy
+
+The WebSocket proxy is required in the Web Proofs setup to allow the vlayer extension to access the low-level TLS connection of the HTTPS request for which we are generating a Web Proof (browsers do not provide this access by default). The default WebSocket proxy, `wss://notary.pse.dev/proxy`, used in our SDK and hosted by the TLSN team, supports a limited number of domains (you can view the list [here](https://docs.tlsnotary.org/developers/notary_server.html#websocket-proxy-server)). 
+
+If you'd like to notarize a request for a different domain, you can run your own proxy server. To do this locally, install and run websocat:
+
+```bash
+cargo install websocat
+websocat --binary -v ws-l:0.0.0.0:55688 tcp:api.x.com:443
+```
+
+Replace `api.x.com` with the domain you'd like to use. Then, configure your Web Proof provider to use your local WebSocket proxy (running on port 55688):
+
+```ts
+import { createExtensionWebProofProvider } from '@vlayer/sdk/web_proof'
+
+const webProofProvider = createExtensionWebProofProvider({
+  wsProxyUrl: "ws://localhost:55688"
+})
+```
+
+Now the notarized HTTPS request will be routed through your local proxy server.
