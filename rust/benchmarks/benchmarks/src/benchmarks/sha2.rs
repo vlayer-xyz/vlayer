@@ -2,7 +2,7 @@
 
 use anyhow::Result;
 
-use super::Bencher;
+use crate::Bencher;
 
 #[test]
 fn empty_benchmark() -> Result<()> {
@@ -11,7 +11,7 @@ fn empty_benchmark() -> Result<()> {
     let input = ();
     let result = bencher.run(input)?;
 
-    assert_eq!(result, ());
+    assert!(result.total_cycles < 120);
 
     Ok(())
 }

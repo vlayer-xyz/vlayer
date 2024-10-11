@@ -1669,6 +1669,7 @@ dependencies = [
  "host_utils",
  "risc0-build",
  "risc0-zkvm",
+ "zkvm-bencher-types",
 ]
 
 [[package]]
@@ -10807,6 +10808,14 @@ dependencies = [
  "log",
  "thiserror",
  "zip 0.6.6",
+]
+
+[[package]]
+name = "zkvm-bencher-types"
+version = "0.1.0"
+dependencies = [
+ "bincode",
+ "serde",
 ]
 
 [[package]]

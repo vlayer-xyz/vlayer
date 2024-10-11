@@ -9,3 +9,5 @@ edition = "2021"
 
 [dependencies]
 risc0-zkvm = { version = "1.0.1", default-features = false, features = ["std"] }
+
+zkvm-bencher-types = { path = "../../zkvm-bencher-types" }

@@ -13,7 +13,8 @@ members = [
     "services/call/guest_wrapper",
     "services/call/engine",
     "services/call/server",
-    "benchmarks",
+    "benchmarks/benchmarks",
+    "benchmarks/zkvm-bencher-types",
     "cli",
     "mpt",
     "test_runner",
@@ -133,6 +134,8 @@ chain_guest_wrapper = { path = "services/chain/guest_wrapper" }
 chain_server = { path = "services/chain/server" }
 chain_worker = { path = "services/chain/worker" }
 chain_db = { path = "services/chain/db" }
+
+zkvm-bencher-types = { path = "benchmarks/zkvm-bencher-types" }
 
 [workspace.lints.clippy]
 as_ptr_cast_mut = "warn"
