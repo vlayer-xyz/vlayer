@@ -181,7 +181,7 @@ impl<TX: ReadTx> ChainDbTx<TX> {
         let chain_id = chain_id.to_be_bytes();
         let chain_info = self
             .tx
-            .get(CHAINS, chain_id)?
+            .get(CHAINS, &chain_id[..])?
             .map(|rlp| ChainInfo::decode(&mut rlp.deref()))
             .transpose()?;
         Ok(chain_info)
@@ -190,7 +190,7 @@ impl<TX: ReadTx> ChainDbTx<TX> {
     pub fn get_node(&self, node_hash: B256) -> ChainDbResult<Node> {
         let node_rlp = self
             .tx
-            .get(NODES, node_hash)?
+            .get(NODES, &node_hash[..])?
             .ok_or(ChainDbError::NodeNotFound)?;
         let node = Node::decode(&mut node_rlp.as_ref())?;
         Ok(node)
@@ -210,18 +210,18 @@ impl<TX: WriteTx> ChainDbTx<TX> {
     ) -> ChainDbResult<()> {
         let chain_id = chain_id.to_be_bytes();
         let chain_info_rlp = alloy_rlp::encode(chain_info);
-        self.tx.upsert(CHAINS, chain_id, chain_info_rlp)?;
+        self.tx.upsert(CHAINS, &chain_id[..], &chain_info_rlp[..])?;
         Ok(())
     }
 
     pub fn insert_node(&mut self, node_rlp: Bytes) -> ChainDbResult<()> {
         let node_hash = keccak256(&node_rlp);
-        self.tx.insert(NODES, node_hash, node_rlp)?;
+        self.tx.insert(NODES, &node_hash[..], &node_rlp[..])?;
         Ok(())
     }
 
     pub fn delete_node(&mut self, node_hash: B256) -> ChainDbResult<()> {
-        self.tx.delete(NODES, node_hash)?;
+        self.tx.delete(NODES, &node_hash[..])?;
         Ok(())
     }
 

@@ -16,7 +16,6 @@ pub trait Database<'a> {
     type ReadWriteTx: ReadWriteTx + 'a;
 
     fn begin_ro(&'a self) -> DbResult<Self::ReadTx>;
-
     fn begin_rw(&'a mut self) -> DbResult<Self::ReadWriteTx>;
 
     fn with_ro_tx<T, F>(&'a self, f: F) -> DbResult<T>
@@ -39,7 +38,7 @@ pub trait Database<'a> {
 }
 
 pub trait ReadTx {
-    fn get(&self, table: impl AsRef<str>, key: impl AsRef<[u8]>) -> DbResult<Option<Box<[u8]>>>;
+    fn get(&self, table: &str, key: &[u8]) -> DbResult<Option<Box<[u8]>>>;
 }
 
 assert_obj_safe!(ReadTx);
@@ -47,26 +46,12 @@ assert_obj_safe!(ReadTx);
 // While nothing in code require a mutable reference in insert and delete, we want to
 // discourage the user from sharing a write transaction as this can lead to db data races
 pub trait WriteTx {
-    fn create_table(&mut self, table: impl AsRef<str>) -> DbResult<()>;
-
+    fn create_table(&mut self, table: &str) -> DbResult<()>;
     /// Insert `(key, value)` into `table`. Returns `DbError::DuplicateKey` if `key` alredy exists in `table`.
-    fn insert(
-        &mut self,
-        table: impl AsRef<str>,
-        key: impl AsRef<[u8]>,
-        value: impl AsRef<[u8]>,
-    ) -> DbResult<()>;
-
+    fn insert(&mut self, table: &str, key: &[u8], value: &[u8]) -> DbResult<()>;
     /// Insert `(key, value)` into `table` or update to value if `key` already exists in `table`.
-    fn upsert(
-        &mut self,
-        table: impl AsRef<str>,
-        key: impl AsRef<[u8]>,
-        value: impl AsRef<[u8]>,
-    ) -> DbResult<()>;
-
-    fn delete(&mut self, table: impl AsRef<str>, key: impl AsRef<[u8]>) -> DbResult<()>;
-
+    fn upsert(&mut self, table: &str, key: &[u8], value: &[u8]) -> DbResult<()>;
+    fn delete(&mut self, table: &str, key: &[u8]) -> DbResult<()>;
     fn commit(self) -> DbResult<()>;
 }
 

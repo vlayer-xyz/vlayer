@@ -53,7 +53,7 @@ impl<'a, TK: TransactionKind> MdbxTx<'a, TK> {
 }
 
 impl<'a, TK: TransactionKind> ReadTx for MdbxTx<'a, TK> {
-    fn get(&self, table: impl AsRef<str>, key: impl AsRef<[u8]>) -> DbResult<Option<Box<[u8]>>> {
+    fn get(&self, table: &str, key: &[u8]) -> DbResult<Option<Box<[u8]>>> {
         let table = self.get_table(table)?;
         Ok(self
             .tx
@@ -64,20 +64,15 @@ impl<'a, TK: TransactionKind> ReadTx for MdbxTx<'a, TK> {
 }
 
 impl<'a> WriteTx for MdbxTx<'a, RW> {
-    fn create_table(&mut self, table: impl AsRef<str>) -> DbResult<()> {
+    fn create_table(&mut self, table: &str) -> DbResult<()> {
         // `create_table` creates only if the table doesn't exist
         self.tx
-            .create_table(table.as_ref().into(), TableFlags::CREATE)
+            .create_table(table.into(), TableFlags::CREATE)
             .map_err(DbError::custom)?;
         Ok(())
     }
 
-    fn insert(
-        &mut self,
-        table: impl AsRef<str>,
-        key: impl AsRef<[u8]>,
-        value: impl AsRef<[u8]>,
-    ) -> DbResult<()> {
+    fn insert(&mut self, table: &str, key: &[u8], value: &[u8]) -> DbResult<()> {
         let mdbx_table = self.get_table(&table)?;
         self.tx
             .put(&mdbx_table, &key, value, WriteFlags::NO_OVERWRITE)
@@ -87,19 +82,14 @@ impl<'a> WriteTx for MdbxTx<'a, RW> {
             })
     }
 
-    fn upsert(
-        &mut self,
-        table: impl AsRef<str>,
-        key: impl AsRef<[u8]>,
-        value: impl AsRef<[u8]>,
-    ) -> DbResult<()> {
+    fn upsert(&mut self, table: &str, key: &[u8], value: &[u8]) -> DbResult<()> {
         let mdbx_table = self.get_table(&table)?;
         self.tx
             .put(&mdbx_table, &key, value, WriteFlags::UPSERT)
             .map_err(DbError::custom)
     }
 
-    fn delete(&mut self, table: impl AsRef<str>, key: impl AsRef<[u8]>) -> DbResult<()> {
+    fn delete(&mut self, table: &str, key: &[u8]) -> DbResult<()> {
         let mdbx_table = self.get_table(&table)?;
         self.tx
             .del(&mdbx_table, &key, None)

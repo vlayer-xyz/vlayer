@@ -20,20 +20,20 @@ macro_rules! temp_db {
 fn crate_and_insert(db: &mut Mdbx, key: impl AsRef<[u8]>, value: impl AsRef<[u8]>) -> DbResult<()> {
     db.with_rw_tx(|tx| {
         tx.create_table(TABLE)?;
-        tx.insert(TABLE, key, value)
+        tx.insert(TABLE, key.as_ref(), value.as_ref())
     })
 }
 
 fn insert(db: &mut Mdbx, key: impl AsRef<[u8]>, value: impl AsRef<[u8]>) -> DbResult<()> {
-    db.with_rw_tx(|tx| tx.insert(TABLE, key, value))
+    db.with_rw_tx(|tx| tx.insert(TABLE, key.as_ref(), value.as_ref()))
 }
 
 fn delete(db: &mut Mdbx, key: impl AsRef<[u8]>) -> DbResult<()> {
-    db.with_rw_tx(|tx| tx.delete(TABLE, key))
+    db.with_rw_tx(|tx| tx.delete(TABLE, key.as_ref()))
 }
 
 fn get(db: &Mdbx, key: impl AsRef<[u8]>) -> DbResult<Option<Box<[u8]>>> {
-    db.with_ro_tx(|tx| tx.get(TABLE, key))
+    db.with_ro_tx(|tx| tx.get(TABLE, key.as_ref()))
 }
 
 #[test]
@@ -80,7 +80,7 @@ fn upsert() -> Result<()> {
     temp_db!(db);
 
     crate_and_insert(&mut db, [0], [0]);
-    db.with_rw_tx(|tx| tx.upsert(TABLE, [0], [1]))?;
+    db.with_rw_tx(|tx| tx.upsert(TABLE, &[0][..], &[1][..]))?;
     assert_eq!(*get(&db, [0])?.unwrap(), [1]);
 
     Ok(())
@@ -110,7 +110,7 @@ fn rollback_on_drop() -> Result<()> {
         // Insert without commit
         let mut tx = db.begin_rw()?;
         tx.create_table(TABLE)?;
-        tx.insert(TABLE, [0], [1])?;
+        tx.insert(TABLE, &[0][..], &[1][..])?;
     }
 
     // Table should not exist
