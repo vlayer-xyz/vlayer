@@ -67,7 +67,7 @@ const ProvingProgress = () => {
     if (!proof) {
       interval = setInterval(() => {
         setProgress((progress) => {
-          const newProgress = progress + 1;
+          const newProgress = Math.min(100, progress + 1);
           if (proof) {
             clearInterval(interval!);
             return progress;
