@@ -3,6 +3,7 @@ use std::collections::{HashMap, HashSet};
 use alloy_primitives::ChainId;
 use chain_server::server::ChainProof;
 use provider::BlockNumber;
+use serde_json::json;
 use server_utils::{RpcClient, RpcError};
 use tracing::info;
 
@@ -43,7 +44,11 @@ impl ChainProofClient {
             block_numbers.len()
         );
 
-        let params = (chain_id, block_numbers.clone());
+        // let params = (chain_id, block_numbers.clone());
+        let params = json!({
+            "chain_id": chain_id,
+            "block_numbers": block_numbers.clone(),
+        });
 
         let result_value = self.rpc_client.call(&params).await.map_err(|e| match e {
             RpcError::Http(err) => HostError::HttpRequestFailed(err.to_string()),
@@ -51,6 +56,7 @@ impl ChainProofClient {
             RpcError::MissingResult => {
                 HostError::JsonParseError("Missing 'result' field in response".to_string())
             }
+            RpcError::InvalidResponse(value) => HostError::JsonParseError(value.to_string()),
         })?;
 
         let chain_proof = serde_json::from_value(result_value)
