@@ -44,24 +44,27 @@ impl ChainProofClient {
             block_numbers.len()
         );
 
-        // let params = (chain_id, block_numbers.clone());
         let params = json!({
             "chain_id": chain_id,
             "block_numbers": block_numbers.clone(),
         });
 
-        let result_value = self.rpc_client.call(&params).await.map_err(|e| match e {
-            RpcError::Http(err) => HostError::HttpRequestFailed(err.to_string()),
-            RpcError::JsonRpc(err) => HostError::JsonRpcError(err.to_string()),
-            RpcError::MissingResult => {
-                HostError::JsonParseError("Missing 'result' field in response".to_string())
-            }
-            RpcError::InvalidResponse(value) => HostError::JsonParseError(value.to_string()),
-        })?;
+        let result_value = self.rpc_client.call(&params).await.map_err(map_error)?;
 
         let chain_proof = serde_json::from_value(result_value)
             .map_err(|e| HostError::JsonParseError(e.to_string()))?;
 
         Ok(chain_proof)
+    }
+}
+
+fn map_error(rpc_error: RpcError) -> HostError {
+    match rpc_error {
+        RpcError::Http(err) => HostError::HttpRequestFailed(err.to_string()),
+        RpcError::JsonRpc(err) => HostError::JsonRpcError(err.to_string()),
+        RpcError::MissingResult => {
+            HostError::JsonParseError("Missing 'result' field in response".to_string())
+        }
+        RpcError::InvalidResponse(value) => HostError::JsonParseError(value.to_string()),
     }
 }
