@@ -57,18 +57,28 @@ fn rpc_urls() -> HashMap<ChainId, String> {
     ])
 }
 
-fn create_host<P>(
+async fn create_host<P>(
     provider_factory: impl ProviderFactory<P> + 'static,
     block_tag: BlockTag,
-    chain_proof_url: impl AsRef<str>,
     config: &HostConfig,
 ) -> Result<Host<P>, HostError>
 where
     P: BlockingProvider + 'static,
 {
     let providers = CachedMultiProvider::new(provider_factory);
-    let chain_proof_client = ChainProofClient::new(chain_proof_url);
+    let chain_proof_server_mock = ChainProofServerMock::start().await;
+    let chain_proof_client = ChainProofClient::new(chain_proof_server_mock.url());
     let block_number = block_tag_to_block_number(&providers, config.start_chain_id, block_tag)?;
+
+    chain_proof_server_mock
+        .mock(
+            json!({
+                "chain_id": config.start_chain_id,
+                "block_numbers": [block_number]
+            }),
+            ChainProof::default(),
+        )
+        .await;
 
     Host::try_new_with_components(providers, block_number, chain_proof_client, config)
 }
@@ -102,24 +112,15 @@ where
         ..Default::default()
     };
 
-    let chain_proof_server_mock = ChainProofServerMock::start().await;
-    let mock = chain_proof_server_mock
-        .mock(json!({}), ChainProof::default())
-        .await;
-
     let host_output = if UPDATE_SNAPSHOTS {
         let provider_factory = CachedProviderFactory::new(rpc_urls(), rpc_file_cache(test_name));
-        let host =
-            create_host(provider_factory, block_number, chain_proof_server_mock.url(), &config)?;
+        let host = create_host(provider_factory, block_number, &config).await?;
         host.run(call).await?
     } else {
         let provider_factory = FileProviderFactory::new(rpc_file_cache(test_name));
-        let host =
-            create_host(provider_factory, block_number, chain_proof_server_mock.url(), &config)?;
+        let host = create_host(provider_factory, block_number, &config).await?;
         host.run(call).await?
     };
-
-    mock.assert();
 
     let return_value = C::abi_decode_returns(&host_output.guest_output.evm_call_result, false)?;
     Ok(return_value)

@@ -37,7 +37,13 @@ impl RpcServerMock {
                     .header("Content-Type", "application/json");
 
                 if is_partial {
-                    when.json_body_partial(serde_json::to_string(&params).unwrap());
+                    let partial_body = json!({
+                        "jsonrpc": "2.0",
+                        "method": self.method,
+                        "params": params,
+                        "id": 1
+                    });
+                    when.json_body_partial(serde_json::to_string(&partial_body).unwrap());
                 } else {
                     when.json_body(json!({
                         "jsonrpc": "2.0",
@@ -76,6 +82,8 @@ pub enum RpcError {
     JsonRpc(Value),
     #[error("Missing 'result' field in the response")]
     MissingResult,
+    #[error("Invalid response: {0}")]
+    InvalidResponse(Value),
 }
 
 impl RpcClient {
@@ -107,7 +115,8 @@ impl RpcClient {
         let response_body = response.json::<Value>().await?;
 
         match (response_body.get("error"), response_body.get("result")) {
-            (Some(error), _) => Err(RpcError::JsonRpc(error.clone())),
+            (Some(_), Some(_)) => Err(RpcError::InvalidResponse(response_body)),
+            (Some(error), None) => Err(RpcError::JsonRpc(error.clone())),
             (None, Some(result)) => Ok(result.clone()),
             (None, None) => Err(RpcError::MissingResult),
         }
@@ -163,9 +172,7 @@ mod tests {
             .mock(
                 true,
                 json!({
-                    "params": {
-                        "key": "value"
-                    }
+                    "key": "value"
                 }),
                 json!({"data": "some data"}),
             )
@@ -191,10 +198,9 @@ mod tests {
 
         let result = rpc_client
             .call(json!({
-                "params": {
                     "key": "value",
                 }
-            }))
+            ))
             .await;
 
         assert!(result.is_err());
