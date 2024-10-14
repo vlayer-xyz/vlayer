@@ -1,0 +1,28 @@
+name: Test npm pack
+on:
+  push:
+    paths:
+      - "packages/**"
+      - ".github/workflows/**"
+  merge_group:
+jobs:
+  test-npm-pack:
+    timeout-minutes: 60
+    runs-on: aws-linux-medium
+    steps:
+      - uses: oven-sh/setup-bun@v2
+        with:
+          node-version: lts/*
+
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install dependencies
+        working-directory: packages/vlayer/sdk
+        run: bun install
+      - name: pack NPM
+        working-directory: packages/vlayer/sdk
+        run: npm pack
+      - name: Setup upterm session
+        uses: lhotari/action-upterm@v1

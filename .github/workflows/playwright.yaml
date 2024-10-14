@@ -35,3 +35,4 @@ jobs:
           name: playwright-report
           path: ./packages/browser-extension/playwright-report/
           retention-days: 30
+
