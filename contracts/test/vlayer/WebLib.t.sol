@@ -16,6 +16,24 @@ contract JsonParsingTest is VTest {
         assertEq(keccak256(bytes(assetName)), keccak256(bytes("FDUSD")));
     }
 
+    function test_parsingIntFromSimpleJson() public {
+        Web memory web = Web("{\"asset\":\"FDUSD\",\"test\":5}");
+
+        callProver();
+        int value = web.jsonGetInt("test");
+
+        assertEq(value, 5);
+    }
+
+    function test_parsingBoolFromSimpleJson() public {
+        Web memory web = Web("{\"asset\":\"FDUSD\",\"test\":true}");
+
+        callProver();
+        bool value = web.jsonGetBool("test");
+
+        assertTrue(value);
+    }
+
     function test_parsingStringFromArray() public {
         Web memory web = Web("{\"asset\":[\"FDUSD\",\"test\"]}");
 

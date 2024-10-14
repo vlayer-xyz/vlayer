@@ -15,7 +15,6 @@ library WebProofLib {
     using Strings for string;
 
     address private constant VERIFY_AND_PARSE_PRECOMPILE = address(0x100);
-    address private constant JSON_GET_STRING_PRECOMPILE = address(0x102);
 
     string private constant NOTARY_PUB_KEY =
         "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExpX/4R4z40gI6C/j9zAM39u58LJu\n3Cx5tXTuqhhu/tirnBi5GniMmspOTEsps4ANnPLpMmMSfhJ+IFHbc3qVOA==\n-----END PUBLIC KEY-----\n";
@@ -36,6 +35,8 @@ library WebProofLib {
 
 library WebLib {
     address private constant JSON_GET_STRING_PRECOMPILE = address(0x102);
+    address private constant JSON_GET_INT_PRECOMPILE = address(0x103);
+    address private constant JSON_GET_BOOL_PRECOMPILE = address(0x104);
 
     function jsonGetString(Web memory web, string memory jsonPath) internal view returns (string memory) {
         require(bytes(web.body).length > 0, "Body is empty");
@@ -45,5 +46,25 @@ library WebLib {
         require(success, "json_get_string precompile call failed");
 
         return abi.decode(returnData, (string));
+    }
+
+    function jsonGetInt(Web memory web, string memory jsonPath) internal view returns (int) {
+        require(bytes(web.body).length > 0, "Body is empty");
+
+        bytes memory encodedParams = abi.encode([web.body, jsonPath]);
+        (bool success, bytes memory returnData) = JSON_GET_INT_PRECOMPILE.staticcall(encodedParams);
+        require(success, "json_get_string precompile call failed");
+
+        return abi.decode(returnData, (int));
+    }
+
+    function jsonGetBool(Web memory web, string memory jsonPath) internal view returns (bool) {
+        require(bytes(web.body).length > 0, "Body is empty");
+
+        bytes memory encodedParams = abi.encode([web.body, jsonPath]);
+        (bool success, bytes memory returnData) = JSON_GET_BOOL_PRECOMPILE.staticcall(encodedParams);
+        require(success, "json_get_string precompile call failed");
+
+        return abi.decode(returnData, (bool));
     }
 }
