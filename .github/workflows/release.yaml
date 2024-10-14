@@ -371,7 +371,7 @@ jobs:
       working-directory: packages/vlayer/sdk
       env: 
         VLAYER_BUILD: ${{ needs.build-release.outputs.vlayer_build }}
-      run: npm version "${VLAYER_BUILD}"
+      run: npm version "${VLAYER_BUILD}" --no-workspaces-update
     - name: Install dependencies
       working-directory: packages/vlayer/sdk
       run: bun install
