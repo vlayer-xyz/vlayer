@@ -93,13 +93,6 @@ Configuring multiple RPC URLs at once is also possible:
 vlayer serve --rpc-url 11155111:https://eth-sepolia.g.alchemy.com/v2/ --rpc-url 1:https://eth-mainnet.alchemyapi.io/v2/
 ```
 
-## Proving Modes
+## Development and going on production
 
-The vlayer node provides two proving modes:
-
-- `DEVELOPMENT` - For development and testing only. It executes code and verifies the correctness of the execution, but doesn't perform any actual proving. In this mode, the `Verifier` contract verifies the correctness of computations, but it can be cheated by a malicious `Prover`.
-- `PRODUCTION` - Intended for production and final testing. It performs the actual proving.
-
-> By default, the vlayer node operates in the `DEVELOPMENT` mode.
-> Note that the `PRODUCTION` mode is much slower than the `DEVELOPMENT` mode. It is important to design protocols with proving execution time in mind, which takes at least a few minutes.
-> The `DEVELOPMENT` mode only works on development and test chains to avoid accidental errors.
+Learn more about proving modes at [Dev & Production](/advanced/dev-and-production.html) chapter.
