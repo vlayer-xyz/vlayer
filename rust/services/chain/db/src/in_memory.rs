@@ -61,7 +61,7 @@ impl<'a> WriteTx for InMemoryReadWriteTx<'a> {
     }
 
     fn insert(&mut self, table: &str, key: &[u8], value: &[u8]) -> DbResult<()> {
-        let prefixed_key = add_table_prefix(&table, &key);
+        let prefixed_key = add_table_prefix(table, key);
         if self.store.contains_key(prefixed_key.as_slice()) {
             return Err(DbError::duplicate_key(table, key));
         }
@@ -71,14 +71,14 @@ impl<'a> WriteTx for InMemoryReadWriteTx<'a> {
     }
 
     fn upsert(&mut self, table: &str, key: &[u8], value: &[u8]) -> DbResult<()> {
-        let prefixed_key = add_table_prefix(&table, &key);
+        let prefixed_key = add_table_prefix(table, key);
         self.store
             .insert(prefixed_key.into(), value.as_ref().into());
         Ok(())
     }
 
     fn delete(&mut self, table: &str, key: &[u8]) -> DbResult<()> {
-        let prefixed_key = add_table_prefix(&table, &key);
+        let prefixed_key = add_table_prefix(table, key);
         if self.store.remove(prefixed_key.as_slice()).is_some() {
             Ok(())
         } else {

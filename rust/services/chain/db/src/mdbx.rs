@@ -71,9 +71,9 @@ impl<'a> WriteTx for MdbxTx<'a, RW> {
     }
 
     fn insert(&mut self, table: &str, key: &[u8], value: &[u8]) -> DbResult<()> {
-        let mdbx_table = self.get_table(&table)?;
+        let mdbx_table = self.get_table(table)?;
         self.tx
-            .put(&mdbx_table, &key, value, WriteFlags::NO_OVERWRITE)
+            .put(&mdbx_table, key, value, WriteFlags::NO_OVERWRITE)
             .map_err(|err| match err {
                 libmdbx::Error::KeyExist => DbError::duplicate_key(table, key),
                 _ => DbError::custom(err),
@@ -81,16 +81,16 @@ impl<'a> WriteTx for MdbxTx<'a, RW> {
     }
 
     fn upsert(&mut self, table: &str, key: &[u8], value: &[u8]) -> DbResult<()> {
-        let mdbx_table = self.get_table(&table)?;
+        let mdbx_table = self.get_table(table)?;
         self.tx
-            .put(&mdbx_table, &key, value, WriteFlags::UPSERT)
+            .put(&mdbx_table, key, value, WriteFlags::UPSERT)
             .map_err(DbError::custom)
     }
 
     fn delete(&mut self, table: &str, key: &[u8]) -> DbResult<()> {
-        let mdbx_table = self.get_table(&table)?;
+        let mdbx_table = self.get_table(table)?;
         self.tx
-            .del(&mdbx_table, &key, None)
+            .del(&mdbx_table, key, None)
             .map_err(DbError::custom)?
             .then_some(())
             .ok_or(DbError::non_existing_key(table, key))

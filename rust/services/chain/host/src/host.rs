@@ -68,8 +68,8 @@ where
     }
 
     async fn initialize(&self) -> Result<ChainUpdate, HostError> {
-        let block = self.get_block(BlockTag::Latest).await?;
-        let range = block.number()..=block.number();
+        let latest_block = self.get_block(BlockTag::Latest).await?;
+        let range = latest_block.number()..=latest_block.number();
         let chain_info = ChainInfo::new(range, B256::ZERO, EMPTY_PROOF.clone());
         let chain_update = ChainUpdate::new(chain_info, [], []);
         Ok(chain_update)
@@ -79,6 +79,7 @@ where
         &self,
         current_chain_info: ChainInfo,
     ) -> Result<ChainUpdate, HostError> {
+        let _latest_block = self.get_block(BlockTag::Latest).await?;
         let chain_update = ChainUpdate::new(current_chain_info, [], []);
         Ok(chain_update)
     }

@@ -14,7 +14,7 @@ fn get_test_db() -> ChainDb {
     ChainDb::from_db(db)
 }
 
-fn insert_node(db: &mut ChainDb, node_rlp: Bytes) {
+fn insert_node(db: &mut ChainDb, node_rlp: &Bytes) {
     let mut tx = db.begin_rw().expect("begin_rw failed");
     tx.insert_node(node_rlp).expect("insert_node failed");
     Box::new(tx).commit().expect("commit failed");
@@ -39,7 +39,7 @@ fn insert_blocks(db: &mut ChainDb, blocks: impl IntoIterator<Item = BlockNumber>
 
     let mut tx = db.begin_rw().expect("begin_rw failed");
     for node in &block_trie {
-        tx.insert_node(node).expect("insert_node failed");
+        tx.insert_node(&node).expect("insert_node failed");
     }
     Box::new(tx).commit().expect("commit failed");
     (block_trie.hash_slow(), block_trie.into_root())
@@ -82,7 +82,7 @@ fn node_get_insert_delete() -> Result<()> {
 
     assert_eq!(db.begin_ro()?.get_node(node_hash).unwrap_err(), ChainDbError::NodeNotFound);
 
-    insert_node(&mut db, node_rlp);
+    insert_node(&mut db, &node_rlp);
     assert_eq!(db.begin_ro()?.get_node(node_hash)?, node);
 
     delete_node(&mut db, node_hash);
@@ -104,7 +104,7 @@ fn proof_empty_db() -> Result<()> {
 #[test]
 fn proof_empty_root() -> Result<()> {
     let mut db = get_test_db();
-    insert_node(&mut db, Node::Null.rlp_encoded());
+    insert_node(&mut db, &Node::Null.rlp_encoded());
     assert_eq!(
         db.get_merkle_proof(EMPTY_ROOT_HASH, 0).unwrap_err(),
         ChainDbError::BlockNotFound

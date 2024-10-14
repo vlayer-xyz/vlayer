@@ -168,7 +168,7 @@ impl ChainDb {
         }
 
         for node in added_nodes {
-            tx.insert_node(node)?;
+            tx.insert_node(&node)?;
         }
 
         Box::new(tx).commit()
@@ -217,8 +217,8 @@ impl<TX: WriteTx + ?Sized> ChainDbTx<TX> {
         Ok(())
     }
 
-    pub fn insert_node(&mut self, node_rlp: Bytes) -> ChainDbResult<()> {
-        let node_hash = keccak256(&node_rlp);
+    pub fn insert_node(&mut self, node_rlp: &Bytes) -> ChainDbResult<()> {
+        let node_hash = keccak256(node_rlp);
         self.tx.insert(NODES, &node_hash[..], &node_rlp[..])?;
         Ok(())
     }
@@ -228,7 +228,7 @@ impl<TX: WriteTx + ?Sized> ChainDbTx<TX> {
         Ok(())
     }
 
-    pub fn commit(self: Box<Self>) -> ChainDbResult<()> {
+    pub fn commit(self) -> ChainDbResult<()> {
         self.tx.commit()?;
         Ok(())
     }
