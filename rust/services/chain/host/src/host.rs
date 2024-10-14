@@ -8,7 +8,7 @@ pub use error::HostError;
 use ethers::{
     middleware::Middleware,
     providers::{Http, JsonRpcClient, Provider},
-    types::BlockNumber,
+    types::BlockNumber as BlockTag,
 };
 use host_utils::Prover;
 use lazy_static::lazy_static;
@@ -63,24 +63,28 @@ where
 
     pub async fn poll(&self) -> Result<ChainUpdate, HostError> {
         match self.db.get_chain_info(self.chain_id)? {
-            Some(chain_info) => self.append_prepend(chain_info).await,
             None => self.initialize().await,
+            Some(chain_info) => self.append_prepend(chain_info).await,
         }
     }
 
     async fn initialize(&self) -> Result<ChainUpdate, HostError> {
-        let block = self.get_block(BlockNumber::Latest).await?;
+        let block = self.get_block(BlockTag::Latest).await?;
         let chain_info =
             ChainInfo::new(block.number()..=block.number(), B256::ZERO, EMPTY_PROOF.as_slice());
         let chain_update = ChainUpdate::new(chain_info, [], []);
         Ok(chain_update)
     }
 
-    async fn append_prepend(&self, _chain_info: ChainInfo) -> Result<ChainUpdate, HostError> {
-        unimplemented!()
+    async fn append_prepend(
+        &self,
+        current_chain_info: ChainInfo,
+    ) -> Result<ChainUpdate, HostError> {
+        let chain_update = ChainUpdate::new(current_chain_info, [], []);
+        Ok(chain_update)
     }
 
-    async fn get_block(&self, number: BlockNumber) -> Result<Box<dyn EvmBlockHeader>, HostError> {
+    async fn get_block(&self, number: BlockTag) -> Result<Box<dyn EvmBlockHeader>, HostError> {
         let ethers_block = self
             .provider
             .get_block(number)
@@ -166,13 +170,19 @@ mod test {
             }
 
             mod append_prepend {
+                use alloy_primitives::BlockNumber;
+
                 use super::*;
+                const GENERIS_BLOCK_NUMBER: BlockNumber = 0;
 
                 #[tokio::test]
                 async fn no_new_work_back_propagation_finished() -> anyhow::Result<()> {
                     let mut db = test_db();
-                    let chain_info =
-                        ChainInfo::new(1..=20_000_000, B256::ZERO, EMPTY_PROOF.as_slice());
+                    let chain_info = ChainInfo::new(
+                        GENERIS_BLOCK_NUMBER..=20_000_000,
+                        B256::ZERO,
+                        EMPTY_PROOF.as_slice(),
+                    );
                     let chain_update = ChainUpdate::new(chain_info, [], []);
                     db.update_chain(1, chain_update)?;
                     let host =
@@ -183,7 +193,11 @@ mod test {
                     assert_eq!(
                         chain_update,
                         ChainUpdate::new(
-                            ChainInfo::new(1..=20_000_000, B256::ZERO, EMPTY_PROOF.as_slice()),
+                            ChainInfo::new(
+                                GENERIS_BLOCK_NUMBER..=20_000_000,
+                                B256::ZERO,
+                                EMPTY_PROOF.as_slice()
+                            ),
                             [],
                             []
                         )
