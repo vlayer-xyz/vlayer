@@ -13,7 +13,6 @@ alloy-primitives = { workspace = true, features = ["rlp", "serde"] }
 alloy-rlp = { workspace = true }
 alloy-sol-types = { workspace = true }
 anyhow = { workspace = true }
-chain_server = { workspace = true }
 derive_more = { workspace = true }
 derive-new = { workspace = true }
 once_cell = { workspace = true }

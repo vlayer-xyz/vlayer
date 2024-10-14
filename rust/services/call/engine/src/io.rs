@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
-use alloy_primitives::{Address, ChainId, TxKind};
+use alloy_primitives::{bytes::Bytes, Address, ChainId, TxKind};
 use alloy_sol_types::SolValue;
-use chain_server::server::ChainProof;
+use mpt::MerkleTrie;
 use revm::{interpreter::CallInputs, primitives::TxEnv};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
@@ -18,8 +18,24 @@ pub struct GuestInput {
     pub multi_evm_input: MultiEvmInput,
     pub call: Call,
     pub start_execution_location: ExecutionLocation,
-    pub chain_id_to_chain_proof: HashMap<ChainId, ChainProof>,
+    pub chain_id_to_chain_proof: HashMap<ChainId, ChainProofData>,
 }
+
+#[derive(Deserialize, Serialize, Debug)]
+pub struct ChainProofData {
+    pub proof: Bytes,
+    pub mpt: MerkleTrie,
+}
+
+// impl From<ChainProof> for ChainProofData {
+//     fn from(chain_proof: ChainProof) -> Self {
+//         let mpt = MerkleTrie::from_rlp_nodes(chain_proof.nodes).unwrap();
+//         ChainProofData {
+//             proof: chain_proof.proof,
+//             mpt,
+//         }
+//     }
+// }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
 pub struct Call {
