@@ -8,6 +8,7 @@
     curl -SL https://install.vlayer.xyz | bash
   args:
     creates: ~/.vlayer/bin/vlayerup
+    executable: /bin/bash
 
 # We're installing a most-recent nightly version every time.
 - name: Install vlayer

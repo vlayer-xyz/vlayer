@@ -11,6 +11,7 @@ User=ubuntu
 ExecStart=/home/{{ ansible_user }}/.vlayer/bin/vlayer serve
 {{- ' --host ' ~ vlayer_prover_host if vlayer_prover_host is defined else '' }}
 {{- ' --port ' ~ vlayer_prover_port if vlayer_prover_port is defined else '' }}
+{{- ' --proof ' ~ vlayer_proof_type if vlayer_proof_type is defined else '' }}
 {%- for url in vlayer_prover_rpc_urls|default([]) %}
 {{-  ' --rpc-url ' ~ url | trim -}}
 {% endfor %}
