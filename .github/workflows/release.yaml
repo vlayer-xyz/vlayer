@@ -47,7 +47,7 @@ jobs:
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
-          version: nightly-d75318c9c7a1c6af5404fe96f63ca890dcdd588d # 2024-09-05
+          version: nightly-bcacf39e43812e50a124e3ba60d1becd9866534d # 2024-10-11
 
       - name: "Build guest wrapper"
         run: cargo build --release --target x86_64-unknown-linux-gnu --package call_guest_wrapper
@@ -117,7 +117,7 @@ jobs:
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
-          version: nightly-d75318c9c7a1c6af5404fe96f63ca890dcdd588d # 2024-09-05
+          version: nightly-bcacf39e43812e50a124e3ba60d1becd9866534d # 2024-10-11
           
       - name: Install LLVM and Clang
         uses: KyleMayes/install-llvm-action@v2.0.4
@@ -232,7 +232,7 @@ jobs:
       - name: Install Foundry
         uses: foundry-rs/foundry-toolchain@v1
         with:
-          version: nightly-d75318c9c7a1c6af5404fe96f63ca890dcdd588d # 2024-09-05
+          version: nightly-bcacf39e43812e50a124e3ba60d1becd9866534d # 2024-10-11
 
       - name: Set up Soldeer login
         env:
