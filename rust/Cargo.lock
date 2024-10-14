@@ -1662,17 +1662,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d86b93f97252c47b41663388e6d155714a9d0c398b99f1005cbc5f978b29f445"
 
 [[package]]
-name = "benchmarks"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "host_utils",
- "risc0-build",
- "risc0-zkvm",
- "zkvm-bencher-types",
-]
-
-[[package]]
 name = "bimap"
 version = "0.6.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -10855,11 +10844,22 @@ dependencies = [
 ]
 
 [[package]]
-name = "zkvm-bencher-types"
+name = "zkvm-benchmarks-common"
 version = "0.1.0"
 dependencies = [
  "bincode",
  "serde",
+]
+
+[[package]]
+name = "zkvm-benchmarks-runner"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "host_utils",
+ "risc0-build",
+ "risc0-zkvm",
+ "zkvm-benchmarks-common",
 ]
 
 [[package]]

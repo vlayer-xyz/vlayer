@@ -1,5 +1,5 @@
 [package]
-name = "zkvm-bencher-types"
+name = "zkvm-benchmarks-common"
 version = "0.1.0"
 edition = "2021"
 

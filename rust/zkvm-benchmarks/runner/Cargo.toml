@@ -1,5 +1,5 @@
 [package]
-name = "benchmarks"
+name = "zkvm-benchmarks-runner"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,7 +7,7 @@ edition = "2021"
 anyhow = { workspace = true }
 risc0-zkvm = { workspace = true }
 host_utils = { workspace = true }
-zkvm-bencher-types = { workspace = true }
+zkvm-benchmarks-common = { workspace = true }
 
 [build-dependencies]
 risc0-build = { workspace = true }
