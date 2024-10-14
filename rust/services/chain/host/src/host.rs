@@ -27,8 +27,8 @@ where
 {
     _prover: Prover,
     provider: Provider<P>,
-    _db: ChainDb<DB>,
-    _chain_id: ChainId,
+    db: ChainDb<DB>,
+    chain_id: ChainId,
 }
 
 impl Host<Http, Mdbx> {
@@ -56,13 +56,16 @@ where
         Host {
             _prover: prover,
             provider,
-            _db: db,
-            _chain_id: chain_id,
+            db,
+            chain_id,
         }
     }
 
     pub async fn poll(&self) -> Result<ChainUpdate, HostError> {
-        self.initialize().await
+        match self.db.get_chain_info(self.chain_id)? {
+            Some(chain_info) => self.append_prepend(chain_info).await,
+            None => self.initialize().await,
+        }
     }
 
     async fn initialize(&self) -> Result<ChainUpdate, HostError> {
@@ -71,6 +74,10 @@ where
             ChainInfo::new(block.number()..=block.number(), B256::ZERO, EMPTY_PROOF.as_slice());
         let chain_update = ChainUpdate::new(chain_info, [], []);
         Ok(chain_update)
+    }
+
+    async fn append_prepend(&self, _chain_info: ChainInfo) -> Result<ChainUpdate, HostError> {
+        unimplemented!()
     }
 
     async fn get_block(&self, number: BlockNumber) -> Result<Box<dyn EvmBlockHeader>, HostError> {
