@@ -10844,6 +10844,13 @@ dependencies = [
 ]
 
 [[package]]
+name = "zkvm-benchmarks"
+version = "0.1.0"
+dependencies = [
+ "risc0-zkvm",
+]
+
+[[package]]
 name = "zkvm-benchmarks-common"
 version = "0.1.0"
 dependencies = [

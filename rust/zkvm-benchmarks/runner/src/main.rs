@@ -1,7 +1,14 @@
+use std::process::exit;
+
 use zkvm_benchmarks_runner::Runner;
 
 fn main() {
     let runner: Runner = Default::default();
-    runner.run(()).expect("❌ Failed to run benchmarks:");
-    println!("✅ Successfully run all benchmarks ")
+    let result = runner.run(());
+
+    if let Err(err) = result {
+        eprintln!("❌ Failed to run benchmarks: {}", err);
+        exit(1);
+    }
+    println!("✅ Successfully run all benchmarks")
 }

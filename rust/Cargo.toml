@@ -15,8 +15,9 @@ members = [
     "services/call/guest_wrapper",
     "services/call/engine",
     "services/call/server",
-    "zkvm-benchmarks/runner",
+    "zkvm-benchmarks/benchmarks",
     "zkvm-benchmarks/common",
+    "zkvm-benchmarks/runner",
     "cli",
     "mpt",
     "test_runner",
@@ -141,7 +142,7 @@ chain_db = { path = "services/chain/db" }
 chain_types = { path = "services/chain/types" }
 
 zkvm-benchmarks-common = { path = "zkvm-benchmarks/common" }
-# zkvm-benchmarks = { path = "zkvm-benchmarks/benchmarks } 
+zkvm-benchmarks = { path = "zkvm-benchmarks/benchmarks" } 
 
 [workspace.lints.clippy]
 as_ptr_cast_mut = "warn"
