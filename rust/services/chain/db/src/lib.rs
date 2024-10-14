@@ -1,5 +1,6 @@
 #![allow(unused)]
 
+use auto_impl::auto_impl;
 use static_assertions::assert_obj_safe;
 use thiserror::Error;
 
@@ -12,31 +13,29 @@ pub use in_memory::InMemoryDatabase;
 pub use mdbx::Mdbx;
 
 pub trait Database<'a> {
-    type ReadTx: ReadTx + 'a;
-    type ReadWriteTx: ReadWriteTx + 'a;
-
-    fn begin_ro(&'a self) -> DbResult<Self::ReadTx>;
-    fn begin_rw(&'a mut self) -> DbResult<Self::ReadWriteTx>;
+    fn begin_ro(&'a self) -> DbResult<Box<dyn ReadTx + 'a>>;
+    fn begin_rw(&'a mut self) -> DbResult<Box<dyn ReadWriteTx + 'a>>;
 
     fn with_ro_tx<T, F>(&'a self, f: F) -> DbResult<T>
     where
-        F: FnOnce(&Self::ReadTx) -> DbResult<T> + Sized,
+        F: FnOnce(Box<dyn ReadTx + 'a>) -> DbResult<T> + Sized,
     {
         let tx = self.begin_ro()?;
-        f(&tx)
+        f(tx)
     }
 
     fn with_rw_tx<T, F>(&'a mut self, f: F) -> DbResult<T>
     where
-        F: FnOnce(&mut Self::ReadWriteTx) -> DbResult<T>,
+        F: FnOnce(&mut dyn ReadWriteTx) -> DbResult<T>,
     {
         let mut tx = self.begin_rw()?;
-        let res = f(&mut tx)?;
+        let res = f(tx.as_mut())?;
         tx.commit()?;
         Ok(res)
     }
 }
 
+#[auto_impl(Box)]
 pub trait ReadTx {
     fn get(&self, table: &str, key: &[u8]) -> DbResult<Option<Box<[u8]>>>;
 }
@@ -45,6 +44,7 @@ assert_obj_safe!(ReadTx);
 
 // While nothing in code require a mutable reference in insert and delete, we want to
 // discourage the user from sharing a write transaction as this can lead to db data races
+#[auto_impl(Box)]
 pub trait WriteTx {
     fn create_table(&mut self, table: &str) -> DbResult<()>;
     /// Insert `(key, value)` into `table`. Returns `DbError::DuplicateKey` if `key` alredy exists in `table`.
@@ -52,7 +52,8 @@ pub trait WriteTx {
     /// Insert `(key, value)` into `table` or update to value if `key` already exists in `table`.
     fn upsert(&mut self, table: &str, key: &[u8], value: &[u8]) -> DbResult<()>;
     fn delete(&mut self, table: &str, key: &[u8]) -> DbResult<()>;
-    fn commit(self) -> DbResult<()>;
+    // Box wrapping is needed for a trait to be object-safe
+    fn commit(self: Box<Self>) -> DbResult<()>;
 }
 
 assert_obj_safe!(WriteTx);
@@ -61,7 +62,7 @@ pub trait ReadWriteTx: ReadTx + WriteTx {}
 
 assert_obj_safe!(ReadWriteTx);
 
-impl<T: ReadTx + WriteTx> ReadWriteTx for T {}
+impl<T: ReadTx + WriteTx + ?Sized> ReadWriteTx for T {}
 
 #[derive(Error, Debug, PartialEq, Eq, Clone)]
 pub enum DbError {

@@ -1,10 +1,11 @@
-use std::{f32::consts::E, path::Path};
+use std::{f32::consts::E, io::Read, path::Path};
 
 use libmdbx::{
     DatabaseOptions, Table, TableFlags, Transaction, TransactionKind, WriteFlags, WriteMap, RO, RW,
 };
 
 use super::{DbError, DbResult, ReadTx, WriteTx};
+use crate::ReadWriteTx;
 
 pub const MAX_TABLES: u64 = 1024;
 
@@ -24,17 +25,14 @@ impl Mdbx {
 }
 
 impl<'a> crate::Database<'a> for Mdbx {
-    type ReadTx = MdbxTx<'a, RO>;
-    type ReadWriteTx = MdbxTx<'a, RW>;
-
-    fn begin_ro(&'a self) -> DbResult<Self::ReadTx> {
+    fn begin_ro(&'a self) -> DbResult<Box<dyn ReadTx + 'a>> {
         let tx = self.db.begin_ro_txn().map_err(DbError::custom)?;
-        Ok(MdbxTx { tx })
+        Ok(Box::new(MdbxTx { tx }))
     }
 
-    fn begin_rw(&'a mut self) -> DbResult<Self::ReadWriteTx> {
+    fn begin_rw(&'a mut self) -> DbResult<Box<dyn ReadWriteTx + 'a>> {
         let tx = self.db.begin_rw_txn().map_err(DbError::custom)?;
-        Ok(MdbxTx { tx })
+        Ok(Box::new(MdbxTx { tx }))
     }
 }
 
@@ -98,7 +96,7 @@ impl<'a> WriteTx for MdbxTx<'a, RW> {
             .ok_or(DbError::non_existing_key(table, key))
     }
 
-    fn commit(self) -> DbResult<()> {
+    fn commit(self: Box<Self>) -> DbResult<()> {
         self.tx.commit().map_err(DbError::custom)?;
         Ok(())
     }

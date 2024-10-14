@@ -2174,6 +2174,7 @@ dependencies = [
  "alloy-primitives",
  "alloy-rlp",
  "anyhow",
+ "auto_impl",
  "block_trie",
  "bytes",
  "libmdbx",

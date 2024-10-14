@@ -17,13 +17,13 @@ fn get_test_db() -> ChainDb<InMemoryDatabase> {
 fn insert_node(db: &mut ChainDb<InMemoryDatabase>, node_rlp: Bytes) {
     let mut tx = db.begin_rw().expect("begin_rw failed");
     tx.insert_node(node_rlp).expect("insert_node failed");
-    tx.commit().expect("commit failed");
+    Box::new(tx).commit().expect("commit failed");
 }
 
 fn delete_node(db: &mut ChainDb<InMemoryDatabase>, node_hash: B256) {
     let mut tx = db.begin_rw().expect("begin_rw failed");
     tx.delete_node(node_hash).expect("delete_node failed");
-    tx.commit().expect("commit failed");
+    Box::new(tx).commit().expect("commit failed");
 }
 
 // Fake block header to insert in MPT (must be big enough not to get inlined, so we can test if a tree is sparse)
@@ -44,7 +44,7 @@ fn insert_blocks(
     for node in &block_trie {
         tx.insert_node(node).expect("insert_node failed");
     }
-    tx.commit().expect("commit failed");
+    Box::new(tx).commit().expect("commit failed");
     (block_trie.hash_slow(), block_trie.into_root())
 }
 
@@ -69,7 +69,7 @@ fn chain_info_get_insert() -> Result<()> {
 
     let mut tx = db.begin_rw()?;
     tx.upsert_chain_info(chain_id, &chain_info)?;
-    tx.commit()?;
+    Box::new(tx).commit()?;
 
     assert_eq!(db.begin_ro()?.get_chain_info(chain_id)?.unwrap(), chain_info);
 
@@ -163,7 +163,7 @@ fn get_chain_trie() -> Result<()> {
 
     let mut tx = db.begin_rw()?;
     tx.upsert_chain_info(1, &chain_info)?;
-    tx.commit()?;
+    Box::new(tx).commit()?;
 
     let chain_trie = db.get_chain_trie(1)?.unwrap();
     assert_eq!(chain_trie.block_range, (0..=10));

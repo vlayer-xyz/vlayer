@@ -18,17 +18,14 @@ pub struct InMemoryReadWriteTx<'a> {
 }
 
 impl<'a> Database<'a> for InMemoryDatabase {
-    type ReadTx = InMemoryReadTx<'a>;
-    type ReadWriteTx = InMemoryReadWriteTx<'a>;
-
-    fn begin_ro(&'a self) -> DbResult<Self::ReadTx> {
-        Ok(InMemoryReadTx { store: &self.store })
+    fn begin_ro(&'a self) -> DbResult<Box<dyn ReadTx + 'a>> {
+        Ok(Box::new(InMemoryReadTx { store: &self.store }))
     }
 
-    fn begin_rw(&'a mut self) -> DbResult<Self::ReadWriteTx> {
-        Ok(InMemoryReadWriteTx {
+    fn begin_rw(&'a mut self) -> DbResult<Box<dyn ReadWriteTx + 'a>> {
+        Ok(Box::new(InMemoryReadWriteTx {
             store: &mut self.store,
-        })
+        }))
     }
 }
 
@@ -89,7 +86,7 @@ impl<'a> WriteTx for InMemoryReadWriteTx<'a> {
         }
     }
 
-    fn commit(self) -> DbResult<()> {
+    fn commit(self: Box<Self>) -> DbResult<()> {
         Ok(())
     }
 }

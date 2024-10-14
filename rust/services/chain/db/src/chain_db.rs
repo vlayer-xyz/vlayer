@@ -1,6 +1,7 @@
 use std::{
     collections::HashSet,
     hash::Hash,
+    io::Read,
     ops::{Deref, DerefMut, Range, RangeInclusive},
     path::Path,
 };
@@ -14,7 +15,7 @@ use nybbles::Nibbles;
 use proof_builder::{MerkleProofBuilder, ProofResult};
 use thiserror::Error;
 
-use crate::{Database, DbError, DbResult, Mdbx, ReadTx, WriteTx};
+use crate::{Database, DbError, DbResult, Mdbx, ReadTx, ReadWriteTx, WriteTx};
 
 mod proof_builder;
 #[cfg(test)]
@@ -106,12 +107,12 @@ impl<DB: for<'a> Database<'a>> ChainDb<DB> {
         Self { db }
     }
 
-    fn begin_ro(&self) -> ChainDbResult<ChainDbTx<<DB as Database<'_>>::ReadTx>> {
+    fn begin_ro(&self) -> ChainDbResult<ChainDbTx<dyn ReadTx + '_>> {
         let tx = self.db.begin_ro()?;
         Ok(ChainDbTx { tx })
     }
 
-    fn begin_rw(&mut self) -> ChainDbResult<ChainDbTx<<DB as Database<'_>>::ReadWriteTx>> {
+    fn begin_rw(&mut self) -> ChainDbResult<ChainDbTx<dyn ReadWriteTx + '_>> {
         let tx = self.db.begin_rw()?;
         Ok(ChainDbTx { tx })
     }
@@ -168,15 +169,15 @@ impl<DB: for<'a> Database<'a>> ChainDb<DB> {
             tx.insert_node(node)?;
         }
 
-        tx.commit()
+        Box::new(tx).commit()
     }
 }
 
-struct ChainDbTx<TX> {
-    tx: TX,
+struct ChainDbTx<TX: ?Sized> {
+    tx: Box<TX>,
 }
 
-impl<TX: ReadTx> ChainDbTx<TX> {
+impl<TX: ReadTx + ?Sized> ChainDbTx<TX> {
     pub fn get_chain_info(&self, chain_id: ChainId) -> ChainDbResult<Option<ChainInfo>> {
         let chain_id = chain_id.to_be_bytes();
         let chain_info = self
@@ -202,7 +203,7 @@ impl<TX: ReadTx> ChainDbTx<TX> {
     }
 }
 
-impl<TX: WriteTx> ChainDbTx<TX> {
+impl<TX: WriteTx + ?Sized> ChainDbTx<TX> {
     pub fn upsert_chain_info(
         &mut self,
         chain_id: ChainId,
@@ -225,7 +226,7 @@ impl<TX: WriteTx> ChainDbTx<TX> {
         Ok(())
     }
 
-    pub fn commit(self) -> ChainDbResult<()> {
+    pub fn commit(self: Box<Self>) -> ChainDbResult<()> {
         self.tx.commit()?;
         Ok(())
     }
