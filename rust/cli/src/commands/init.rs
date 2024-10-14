@@ -90,10 +90,10 @@ impl From<&str> for Remapping {
 }
 
 impl SoldeerDep {
-    pub fn install(&self) -> Result<(), CLIError> {
+    pub fn install(&self, foundry_root: &Path) -> Result<(), CLIError> {
         let output = match &self.url {
-            Some(url) => Self::install_url_dep(&self.name, &self.version, url)?,
-            None => Self::install_dep(&self.name, &self.version)?,
+            Some(url) => Self::install_url_dep(foundry_root, &self.name, &self.version, url)?,
+            None => Self::install_dep(foundry_root, &self.name, &self.version)?,
         };
 
         if !output.status.success() {
@@ -104,22 +104,33 @@ impl SoldeerDep {
         Ok(())
     }
 
-    fn install_dep(name: &String, version: &String) -> Result<Output, CLIError> {
+    fn install_dep(
+        foundry_root: &Path,
+        name: &String,
+        version: &String,
+    ) -> Result<Output, CLIError> {
         let output = std::process::Command::new("forge")
             .arg("soldeer")
             .arg("install")
             .arg(format!("{}~{}", name, version))
+            .current_dir(foundry_root)
             .output()?;
 
         Ok(output)
     }
 
-    fn install_url_dep(name: &String, version: &String, url: &String) -> Result<Output, CLIError> {
+    fn install_url_dep(
+        foundry_root: &Path,
+        name: &String,
+        version: &String,
+        url: &String,
+    ) -> Result<Output, CLIError> {
         let output = std::process::Command::new("forge")
             .arg("soldeer")
             .arg("install")
             .arg(format!("{}~{}", name, version))
             .arg(url)
+            .current_dir(foundry_root)
             .output()?;
 
         Ok(output)
@@ -140,9 +151,9 @@ impl SoldeerDep {
     }
 }
 
-fn install_dependencies() -> Result<(), CLIError> {
+fn install_dependencies(foundry_root: &Path) -> Result<(), CLIError> {
     for dep in DEPENDENCIES.iter() {
-        dep.install()?;
+        dep.install(foundry_root)?;
     }
 
     Ok(())
@@ -234,14 +245,42 @@ pub(crate) async fn init_existing(cwd: PathBuf, template: TemplateOption) -> Res
 
     std::env::set_current_dir(&root_path)?;
 
+    info!("Initialising soldeer");
+    init_soldeer(&root_path)?;
+
     info!("Installing dependencies");
-    install_dependencies()?;
+    install_dependencies(&root_path)?;
     info!("Successfully installed all dependencies");
     add_remappings(&root_path)?;
 
     change_sdk_dependency_to_npm(&root_path)?;
 
     std::env::set_current_dir(&cwd)?;
+
+    Ok(())
+}
+
+fn init_soldeer(root_path: &Path) -> Result<(), CLIError> {
+    add_deps_to_gitignore(root_path)?;
+    add_deps_section_to_foundry_toml(root_path)?;
+
+    Ok(())
+}
+
+fn add_deps_section_to_foundry_toml(root_path: &Path) -> Result<(), std::io::Error> {
+    let gitignore_path = root_path.join("foundry.toml");
+    append_file(&gitignore_path, "[dependencies]")
+}
+
+fn add_deps_to_gitignore(root_path: &Path) -> Result<(), std::io::Error> {
+    let gitignore_path = root_path.join(".gitignore");
+    append_file(&gitignore_path, "**/dependencies/")
+}
+
+fn append_file(file: &Path, suffix: &str) -> Result<(), std::io::Error> {
+    let mut file = OpenOptions::new().append(true).open(file)?;
+
+    writeln!(file, "{}", suffix)?;
 
     Ok(())
 }
@@ -328,6 +367,7 @@ mod tests {
         let root_path = temp_dir.path().to_path_buf();
         let src_dir_path = root_path.join(src_name);
         std::fs::create_dir_all(&src_dir_path).unwrap();
+        std::fs::write(root_path.join(".gitignore"), "").unwrap(); // empty gitignore
         (temp_dir, src_dir_path, root_path)
     }
 
@@ -396,5 +436,29 @@ mod tests {
         );
 
         assert_eq!(contents, expected_remappings);
+    }
+
+    mod init_soldeer {
+        use super::*;
+
+        #[test]
+        fn adds_dependencies_dir_to_gitignore() {
+            let (_temp_dir, _, root_path) = prepare_foundry_dir("src");
+
+            init_soldeer(&root_path).unwrap();
+
+            let gitignore = fs::read_to_string(root_path.join(".gitignore")).unwrap();
+            assert!(gitignore.contains("**/dependencies/"));
+        }
+
+        #[test]
+        fn adds_dependencies_section_in_foundry_toml() {
+            let (_temp_dir, _, root_path) = prepare_foundry_dir("src");
+
+            init_soldeer(&root_path).unwrap();
+
+            let foundry_toml = fs::read_to_string(root_path.join("foundry.toml")).unwrap();
+            assert!(foundry_toml.contains("[dependencies]"));
+        }
     }
 }
