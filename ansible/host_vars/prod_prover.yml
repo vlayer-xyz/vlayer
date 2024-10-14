@@ -1,0 +1,20 @@
+---
+ansible_host: 3.87.178.21
+ansible_host_public_key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIM3zLjdbqkLNdlrunXcSyUkEjWpTSfJ9AIU1tkAUUwZs
+ansible_user: ubuntu
+vlayer_prover_host: 0.0.0.0
+vlayer_prover_port: 3000
+vlayer_alchemy_api_key: !vault |
+  $ANSIBLE_VAULT;1.1;AES256
+  30653339336433326133363333376638626339643363353332353238633630643730393233666564
+  3161643066643238623134613435323666353664373866660a356566656437356237323461393134
+  65653366653138363666376338383937336431373564323731333062653534383461636438383732
+  3834383930633437640a343839623938666362343331343361316234393264643065333763343731
+  32383431303831333565643864393230656531366134376337316633633138636365383165343932
+  3763623233653161396139633032356631356433343539383832
+vlayer_prover_rpc_urls:
+ - "11155111:https://eth-sepolia.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
+ - "1:https://eth-mainnet.g.alchemy.com/v2/${{ vlayer_alchemy_api_key }}"
+ - "8453:https://base-mainnet.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
+ - "10:https://opt-mainnet.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
+vlayer_proof_type: groth16

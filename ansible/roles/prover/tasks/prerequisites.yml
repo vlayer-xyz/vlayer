@@ -5,6 +5,7 @@
     curl -L https://foundry.paradigm.xyz | bash
   args:
     creates: ~/.foundry/bin/foundryup
+    executable: /bin/bash
 - name: Install Foundry
   ansible.builtin.shell: ~/.foundry/bin/foundryup
   args:
