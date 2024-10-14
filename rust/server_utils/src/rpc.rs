@@ -1,3 +1,5 @@
+use std::mem::take;
+
 use httpmock::{Mock, MockServer};
 use reqwest::Client;
 use serde::Serialize;
@@ -120,8 +122,8 @@ impl RpcClient {
 
 fn parse_json_rpc_response(response_body: Value) -> Result<Value, RpcError> {
     let mut response = response_body;
-    let error = extract_field(&mut response, "error");
-    let result = extract_field(&mut response, "result");
+    let error = response.get_mut("error").map(take);
+    let result = response.get_mut("result").map(take);
 
     match (error, result) {
         (Some(_), Some(_)) => Err(RpcError::InvalidResponse(response)),
@@ -129,12 +131,6 @@ fn parse_json_rpc_response(response_body: Value) -> Result<Value, RpcError> {
         (None, Some(result)) => Ok(result),
         (None, None) => Err(RpcError::MissingResult),
     }
-}
-
-fn extract_field(response: &mut Value, field: &str) -> Option<Value> {
-    response
-        .get_mut(field)
-        .and_then(|v| (!v.is_null()).then(|| std::mem::take(v)))
 }
 
 #[cfg(test)]
