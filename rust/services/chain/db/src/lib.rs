@@ -15,25 +15,9 @@ pub use mdbx::Mdbx;
 pub trait Database<'a> {
     fn begin_ro(&'a self) -> DbResult<Box<dyn ReadTx + 'a>>;
     fn begin_rw(&'a mut self) -> DbResult<Box<dyn ReadWriteTx + 'a>>;
-
-    fn with_ro_tx<T, F>(&'a self, f: F) -> DbResult<T>
-    where
-        F: FnOnce(Box<dyn ReadTx + 'a>) -> DbResult<T> + Sized,
-    {
-        let tx = self.begin_ro()?;
-        f(tx)
-    }
-
-    fn with_rw_tx<T, F>(&'a mut self, f: F) -> DbResult<T>
-    where
-        F: FnOnce(&mut dyn ReadWriteTx) -> DbResult<T>,
-    {
-        let mut tx = self.begin_rw()?;
-        let res = f(tx.as_mut())?;
-        tx.commit()?;
-        Ok(res)
-    }
 }
+
+assert_obj_safe!(Database);
 
 #[auto_impl(Box)]
 pub trait ReadTx {

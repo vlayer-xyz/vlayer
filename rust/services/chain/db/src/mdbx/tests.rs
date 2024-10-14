@@ -18,22 +18,36 @@ macro_rules! temp_db {
 }
 
 fn crate_and_insert(db: &mut Mdbx, key: impl AsRef<[u8]>, value: impl AsRef<[u8]>) -> DbResult<()> {
-    db.with_rw_tx(|tx| {
-        tx.create_table(TABLE)?;
-        tx.insert(TABLE, key.as_ref(), value.as_ref())
-    })
+    let mut tx = db.begin_rw()?;
+    tx.create_table(TABLE)?;
+    tx.insert(TABLE, key.as_ref(), value.as_ref())?;
+    tx.commit();
+    Ok(())
 }
 
 fn insert(db: &mut Mdbx, key: impl AsRef<[u8]>, value: impl AsRef<[u8]>) -> DbResult<()> {
-    db.with_rw_tx(|tx| tx.insert(TABLE, key.as_ref(), value.as_ref()))
+    let mut tx = db.begin_rw()?;
+    tx.insert(TABLE, key.as_ref(), value.as_ref())?;
+    tx.commit();
+    Ok(())
+}
+
+fn upsert(db: &mut Mdbx, key: impl AsRef<[u8]>, value: impl AsRef<[u8]>) -> DbResult<()> {
+    let mut tx = db.begin_rw()?;
+    tx.upsert(TABLE, key.as_ref(), value.as_ref())?;
+    tx.commit();
+    Ok(())
 }
 
 fn delete(db: &mut Mdbx, key: impl AsRef<[u8]>) -> DbResult<()> {
-    db.with_rw_tx(|tx| tx.delete(TABLE, key.as_ref()))
+    let mut tx = db.begin_rw()?;
+    tx.delete(TABLE, key.as_ref())?;
+    tx.commit();
+    Ok(())
 }
 
 fn get(db: &Mdbx, key: impl AsRef<[u8]>) -> DbResult<Option<Box<[u8]>>> {
-    db.with_ro_tx(|tx| tx.get(TABLE, key.as_ref()))
+    db.begin_ro()?.get(TABLE, key.as_ref())
 }
 
 #[test]
@@ -76,11 +90,11 @@ fn insert_duplicate_key() -> Result<()> {
 }
 
 #[test]
-fn upsert() -> Result<()> {
+fn insert_upsert() -> Result<()> {
     temp_db!(db);
 
     crate_and_insert(&mut db, [0], [0]);
-    db.with_rw_tx(|tx| tx.upsert(TABLE, &[0][..], &[1][..]))?;
+    upsert(&mut db, [0], [1]);
     assert_eq!(*get(&db, [0])?.unwrap(), [1]);
 
     Ok(())
