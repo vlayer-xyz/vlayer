@@ -146,12 +146,6 @@ fn parse_json_rpc_response(response_body: Value) -> Result<Value, RpcError> {
     }
 }
 
-fn extract_field(response: &mut Value, field: &str) -> Option<Value> {
-    response
-        .get_mut(field)
-        .and_then(|v| (!v.is_null()).then(|| std::mem::take(v)))
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
