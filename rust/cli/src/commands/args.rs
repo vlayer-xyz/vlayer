@@ -14,7 +14,7 @@ pub(crate) struct InitArgs {
     pub(crate) project_name: Option<String>,
 }
 
-#[derive(Parser, Default)]
+#[derive(Parser, Default, Debug)]
 pub(crate) struct ServeArgs {
     #[arg(long, action = ArgAction::Append, value_parser = parse_rpc_url)]
     pub(crate) rpc_url: Vec<(ChainId, String)>,
