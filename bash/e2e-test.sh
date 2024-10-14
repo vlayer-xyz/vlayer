@@ -15,34 +15,16 @@ source ${VLAYER_HOME}/bash/run-services.sh
 echo Setting up SDK 
 cd ${VLAYER_HOME}/packages/sdk && bun install
 
-# these examples require ALCHEMY_API_KEY, which may not be available locally, so we don't run them
-# if the key is not available
-EXAMPLES_REQUIRING_ALCHEMY=("simple_teleport")
-
-# these examples require EXAMPLES_TEST_PRIVATE_KEY and ALCHEMY_API_KEY, 
-# which may not be available locally, so we don't run them if the key is not available
-EXAMPLES_REQUIRING_PRIV_KEY=("simple_time_travel")
-
-# check if ALCHEMY_API_KEY is set in GitHub actions; running in GH is detected by checking RUNNER_OS env var
-if [[  -n "${RUNNER_OS:-}" ]] && [[ -z "${ALCHEMY_API_KEY:-}" ]] ;then 
-  echo "ALCHEMY_API_KEY must be set in GitHub actions. Exiting." >&2
+# check if ALCHEMY_API_KEY and EXAMPLES_TEST_PRIVATE_KEY is set in GitHub actions; 
+# running in GH is detected by checking RUNNER_OS env var
+if [[  -n "${RUNNER_OS:-}" ]] && [[ -z "${ALCHEMY_API_KEY:-}" ]] && [[ -z "${EXAMPLES_TEST_PRIVATE_KEY:-}" ]] ;then 
+  echo "ALCHEMY_API_KEY and EXAMPLES_TEST_PRIVATE_KEY must be set in GitHub actions. Exiting." >&2
   exit 1
 fi
 
 for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ; do
-
+  (
     example_name=$(basename "${example}")
-    if [[ "${EXAMPLES_REQUIRING_ALCHEMY[@]}" =~ "${example_name}" ]] && [[ -z "${ALCHEMY_API_KEY:-}" ]]; then
-      continue
-    fi
-
-    if [[ " ${EXAMPLES_REQUIRING_PRIV_KEY[*]} " == *" ${example_name} "* ]]; then
-      echo "${example_name} requires private key"
-      if [[ -z "${EXAMPLES_TEST_PRIVATE_KEY:-}" ]] || [[ -z "${ALCHEMY_API_KEY:-}" ]]; then
-          echo "Skipping ${example_name} due to missing EXAMPLES_TEST_PRIVATE_KEY or ALCHEMY_API_KEY"
-          continue
-      fi
-    fi
 
     echo "Running tests of: ${example}"
     cd "${example}"
@@ -53,6 +35,6 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
     cd vlayer
     bun install
     bun run prove.ts 
-
+  )
 done
 
