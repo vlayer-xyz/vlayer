@@ -37,6 +37,7 @@ library WebLib {
     address private constant JSON_GET_STRING_PRECOMPILE = address(0x102);
     address private constant JSON_GET_INT_PRECOMPILE = address(0x103);
     address private constant JSON_GET_BOOL_PRECOMPILE = address(0x104);
+    address private constant JSON_GET_ARRAY_LENGTH = address(0x105);
 
     function jsonGetString(Web memory web, string memory jsonPath) internal view returns (string memory) {
         require(bytes(web.body).length > 0, "Body is empty");
@@ -53,7 +54,7 @@ library WebLib {
 
         bytes memory encodedParams = abi.encode([web.body, jsonPath]);
         (bool success, bytes memory returnData) = JSON_GET_INT_PRECOMPILE.staticcall(encodedParams);
-        require(success, "json_get_string precompile call failed");
+        require(success, "json_get_int precompile call failed");
 
         return abi.decode(returnData, (int256));
     }
@@ -63,8 +64,18 @@ library WebLib {
 
         bytes memory encodedParams = abi.encode([web.body, jsonPath]);
         (bool success, bytes memory returnData) = JSON_GET_BOOL_PRECOMPILE.staticcall(encodedParams);
-        require(success, "json_get_string precompile call failed");
+        require(success, "json_get_bool precompile call failed");
 
         return abi.decode(returnData, (bool));
+    }
+
+    function jsonGetArrayLength(Web memory web, string memory jsonPath) internal view returns (uint256) {
+        require(bytes(web.body).length > 0, "Body is empty");
+
+        bytes memory encodedParams = abi.encode([web.body, jsonPath]);
+        (bool success, bytes memory returnData) = JSON_GET_ARRAY_LENGTH.staticcall(encodedParams);
+        require(success, "json_get_array_length precompile call failed");
+
+        return abi.decode(returnData, (uint256));
     }
 }

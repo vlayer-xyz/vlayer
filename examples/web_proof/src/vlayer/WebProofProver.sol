@@ -17,16 +17,18 @@ contract WebProofProver is Prover {
     function main(WebProof calldata webProof)
         public
         view
-        returns (Proof memory, string[2] memory, int[2] memory)
+        returns (Proof memory, string[] memory, int[] memory)
     {
         Web memory web = webProof.verify(dataUrl);
 
-        string[2] memory assetNames;
-        int[2] memory assetValues;
+        uint256 len = web.jsonGetArrayLength("");
+        require(len == 4, "Expected 4 assets");
 
-        int len = web.
+        string[] memory assetNames = new string[](len);
+        int[] memory assetValues = new int[](len);
+    
 
-        for (uint i = 0; i < 2; i++) {
+        for (uint i = 0; i < len; i++) {
             string memory indexStr = Strings.toString(i);
             string memory assetKey = string(abi.encodePacked("[", indexStr, "].asset"));
             string memory valueKey = string(abi.encodePacked("[", indexStr, "].free"));
