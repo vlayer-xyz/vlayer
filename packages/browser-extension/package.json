@@ -8,6 +8,7 @@
     "compile": "tsc --noEmit",
     "dev": "vite --port 5173",
     "build": "vite build",
+    "build:playwright":"vite build --watch --mode test",
     "build:watch": "vite build --watch --mode development",
     "lint:fix": "eslint --fix src",
     "test:headed": "TEST_MODE=headed bunx playwright test --ui",

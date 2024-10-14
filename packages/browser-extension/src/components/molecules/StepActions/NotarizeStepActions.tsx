@@ -16,7 +16,9 @@ type NotarizeStepActionProps = {
 };
 
 const RedirectCallout: FC = () => {
-  const [timeout, setTimeout] = useState(10);
+  const [timeout, setTimeout] = useState(
+    import.meta.env.REDIRECT_DELAY_SECONDS || 10,
+  );
   const [show, setShow] = useState(true);
   useEffect(() => {
     const interval = setInterval(() => {
@@ -24,7 +26,7 @@ const RedirectCallout: FC = () => {
         if (timeout === 0) {
           // hide callout
           setShow(false);
-          // tell service worker to redirect back to orginal page
+          // tell service worker to redirect back to original page
           sendMessageToServiceWorker({
             type: ExtensionMessageType.RedirectBack,
           }).catch(console.error);
