@@ -63,7 +63,7 @@ fn extract_host(url: &str) -> Result<String, WebProofError> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::fixtures::{load_web_proof_fixture, NOTARY_PUB_KEY_PEM_EXAMPLE};
+    use crate::fixtures::{load_web_proof_fixture, NOTARY_PUB_KEY_PEM_EXAMPLE, NOTARY_PUB_KEY_PEM_EXAMPLE2};
 
     const TEST_URL: &str = "https://api.x.com/1.1/account/settings.json?include_ext_sharing_audiospaces_listening_data_with_followers=true&include_mention_filter=true&include_nsfw_user_flag=true&include_nsfw_admin_flag=true&include_ranked_timeline=true&include_alt_text_compose=true&ext=ssoConnections&include_country_code=true&include_ext_dm_nsfw_media_filter=true";
 
@@ -136,6 +136,15 @@ mod tests {
             let web = verify_and_parse(web_proof).unwrap();
 
             assert_eq!(web.notary_pub_key, NOTARY_PUB_KEY_PEM_EXAMPLE);
+        }
+
+        #[test]
+        fn parses_accountable() {
+            let web_proof =
+                load_web_proof_fixture("./testdata/accountable_tls_proof.json", NOTARY_PUB_KEY_PEM_EXAMPLE2);
+            let web = verify_and_parse(web_proof).unwrap();
+
+            assert_eq!(web.notary_pub_key, NOTARY_PUB_KEY_PEM_EXAMPLE2);
         }
     }
 

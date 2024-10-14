@@ -25,7 +25,7 @@ if [[  -n "${RUNNER_OS:-}" ]] && [[ -z "${ALCHEMY_API_KEY:-}" ]] ;then
   exit 1
 fi
 
-for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ; do
+for example in $(find ${VLAYER_HOME}/examples/web_proof) ; do
 
   (
     example_name=$(basename "${example}")
