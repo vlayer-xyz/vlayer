@@ -1,5 +1,6 @@
 {
   "name": "@vlayer/browser-extension",
+  "description": "Generate Web Proofs of your private data from any website.",
   "private": true,
   "version": "1.0.0",
   "type": "module",
