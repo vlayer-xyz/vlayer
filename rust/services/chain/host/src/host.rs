@@ -152,6 +152,30 @@ mod test {
             }
 
             mod append_prepend {
+                use super::*;
+
+                #[tokio::test]
+                async fn no_new_work_back_propagation_finished() -> anyhow::Result<()> {
+                    let mut db = test_db();
+                    let chain_info =
+                        ChainInfo::new(1..=20_000_000, B256::ZERO, EMPTY_PROOF.as_slice());
+                    let chain_update = ChainUpdate::new(chain_info, [], []);
+                    db.update_chain(1, chain_update)?;
+                    let host = Host::from_parts(Prover::default(), mock_provider([20_000_000]), db);
+
+                    let chain_update = host.poll().await?;
+
+                    assert_eq!(
+                        chain_update,
+                        ChainUpdate::new(
+                            ChainInfo::new(1..=20_000_000, B256::ZERO, EMPTY_PROOF.as_slice()),
+                            [],
+                            []
+                        )
+                    );
+
+                    Ok(())
+                }
                 // No new work
                 // New head blocks, back propagation finished
                 // New head blocks, back propagation in progress
