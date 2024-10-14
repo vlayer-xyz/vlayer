@@ -14,7 +14,7 @@ contract WebProofProver is Prover {
 
     string dataUrl = "https://api.x.com/1.1/account/settings.json";
 
-    function main(WebProof calldata webProof, address twitterUserAddress)
+    function main(WebProof calldata webProof, address account)
         public
         view
         returns (Proof memory, string memory, address)
@@ -23,6 +23,6 @@ contract WebProofProver is Prover {
 
         string memory screenName = web.jsonGetString("screen_name");
 
-        return (proof(), screenName, twitterUserAddress);
+        return (proof(), screenName, account);
     }
 }

@@ -21,7 +21,7 @@ Web Proofs provide cryptographic proof of web data served by any HTTPS server, a
 Web Proofs ensure that the data received has not been tampered with. Without Web Proofs, proving this on-chain is difficult, especially when aiming for an automated and trusted solution.
 
 ## Example Prover
-Let’s say we want to prove ownership of a specific Twitter/X handle.
+Let's say we want to mint an NFT for a wallet address linked to a specific X/Twitter handle.
 
 Here’s a sample Prover contract:
 
@@ -38,7 +38,7 @@ contract WebProofProver is Prover {
 
     string dataUrl = "https://api.x.com/1.1/account/settings.json";
 
-    function main(WebProof calldata webProof, address twitterUserAddress)
+    function main(WebProof calldata webProof, address account)
         public
         view
         returns (Proof memory, string memory, address)
@@ -47,7 +47,7 @@ contract WebProofProver is Prover {
 
         string memory screenName = web.jsonGetString("screen_name");
 
-        return (proof(), screenName, twitterUserAddress);
+        return (proof(), screenName, account);
     }
 }
 ```
@@ -75,7 +75,7 @@ What happens in the above code?
 
 4. **Return the results**:
 
-    If everything checks out, the function returns the `proof` placeholder, `screenName`, and the `twitterUserAddress`.
+    If everything checks out, the function returns the `proof` placeholder, `screenName`, and the `account`.
 
 If there are no errors and the proof is valid, the data is ready for on-chain verification. 
 
@@ -91,7 +91,7 @@ If there are no errors and the proof is valid, the data is ready for on-chain ve
 > The next steps are explained in [Running example](../getting-started/first-steps.md#running-examples-locally)
 
 ## Example Verifier
-The contract below mints a unique NFT for the Twitter/X handle owner’s wallet address.
+The contract below verifies provided Web Proof and mints a unique NFT for the Twitter/X handle owner’s wallet address.
 
 ```solidity
 import {WebProofProver} from "./WebProofProver.sol";
@@ -107,14 +107,14 @@ contract WebProofVerifier is Verifier, ERC721 {
         prover = _prover;
     }
 
-    function verify(Proof calldata, string memory username, address twitterUserAddress)
+    function verify(Proof calldata, string memory username, address account)
         public
         onlyVerified(prover, WebProofProver.main.selector)
     {
         uint256 tokenId = uint256(keccak256(abi.encodePacked(username)));
         require(_ownerOf(tokenId) == address(0), "User has already minted a TwitterNFT");
 
-        _safeMint(twitterUserAddress, tokenId);
+        _safeMint(account, tokenId);
     }
 }
 
@@ -149,6 +149,6 @@ From privacy perspective, it is important to note that the *Notary* server never
 
 It is important to understand that the *Notary* is a trusted party in the above setup. Since the *Notary* certifies the data, a malicious *Notary* could collude with a malicious client to create fake proofs that would still be successfully verified by `Prover`. Currently vlayer runs it's own *Notary* server, which means that vlayer needs to be trusted to certify HTTPS sessions.
 
- Currently vlayer also needs to be trusted when passing additional data (data other than the Web Proof itself) to `Prover` smart contract, e.g. `twitterUserAddress` in the example above. The Web Proof could be hijacked before running `Prover` and additional data, different from the original, could be passed to `Prover`, e.g. an attacker could pass their own address as `twitterUserAddress` in our `WebProofProver` example. Before going to production this will be addressed by making the setup trustless through an association of the additional data with a particular Web Proof in a way that's impossible to forge.
+ Currently vlayer also needs to be trusted when passing additional data (data other than the Web Proof itself) to `Prover` smart contract, e.g. `account` in the example above. The Web Proof could be hijacked before running `Prover` and additional data, different from the original, could be passed to `Prover`, e.g. an attacker could pass their own address as `account` in our `WebProofProver` example. Before going to production this will be addressed by making the setup trustless through an association of the additional data with a particular Web Proof in a way that's impossible to forge.
 
 vlayer will publish a roadmap outlining how it will achieve a high level of security when using the *Notary* service.
