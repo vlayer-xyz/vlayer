@@ -1,7 +1,7 @@
 pub mod config;
 pub mod error;
 
-use alloy_primitives::B256;
+use alloy_primitives::{ChainId, B256};
 use chain_db::{ChainDb, ChainInfo, ChainUpdate, Database, Mdbx};
 pub use config::HostConfig;
 pub use error::HostError;
@@ -28,6 +28,7 @@ where
     _prover: Prover,
     provider: Provider<P>,
     _db: ChainDb<DB>,
+    _chain_id: ChainId,
 }
 
 impl Host<Http, Mdbx> {
@@ -37,7 +38,7 @@ impl Host<Http, Mdbx> {
         let prover = Prover::new(config.proof_mode);
         let db = ChainDb::new(config.db_path)?;
 
-        Ok(Host::from_parts(prover, provider, db))
+        Ok(Host::from_parts(prover, provider, db, config.chain_id))
     }
 }
 
@@ -46,11 +47,17 @@ where
     P: JsonRpcClient,
     DB: for<'a> Database<'a>,
 {
-    pub fn from_parts(prover: Prover, provider: Provider<P>, db: ChainDb<DB>) -> Self {
+    pub fn from_parts(
+        prover: Prover,
+        provider: Provider<P>,
+        db: ChainDb<DB>,
+        chain_id: ChainId,
+    ) -> Self {
         Host {
             _prover: prover,
             provider,
             _db: db,
+            _chain_id: chain_id,
         }
     }
 
@@ -131,7 +138,7 @@ mod test {
             #[tokio::test]
             async fn initialize() -> anyhow::Result<()> {
                 let host =
-                    Host::from_parts(Prover::default(), mock_provider([20_000_000]), test_db());
+                    Host::from_parts(Prover::default(), mock_provider([20_000_000]), test_db(), 1);
 
                 let chain_update = host.poll().await?;
 
@@ -161,7 +168,8 @@ mod test {
                         ChainInfo::new(1..=20_000_000, B256::ZERO, EMPTY_PROOF.as_slice());
                     let chain_update = ChainUpdate::new(chain_info, [], []);
                     db.update_chain(1, chain_update)?;
-                    let host = Host::from_parts(Prover::default(), mock_provider([20_000_000]), db);
+                    let host =
+                        Host::from_parts(Prover::default(), mock_provider([20_000_000]), db, 1);
 
                     let chain_update = host.poll().await?;
 
