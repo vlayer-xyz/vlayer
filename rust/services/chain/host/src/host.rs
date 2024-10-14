@@ -3,7 +3,7 @@ pub mod error;
 
 use alloy_primitives::{ChainId, B256};
 use bytes::Bytes;
-use chain_db::{ChainDb, ChainInfo, ChainUpdate, Database, Mdbx};
+use chain_db::{ChainDb, ChainInfo, ChainUpdate};
 pub use config::HostConfig;
 pub use error::HostError;
 use ethers::{
@@ -21,18 +21,17 @@ lazy_static! {
     static ref EMPTY_PROOF: Bytes = Bytes::new();
 }
 
-pub struct Host<P, DB>
+pub struct Host<P>
 where
     P: JsonRpcClient,
-    DB: for<'a> Database<'a>,
 {
     _prover: Prover,
     provider: Provider<P>,
-    db: ChainDb<DB>,
+    db: ChainDb,
     chain_id: ChainId,
 }
 
-impl Host<Http, Mdbx> {
+impl Host<Http> {
     pub fn try_new(config: HostConfig) -> Result<Self, HostError> {
         let provider = Provider::<Http>::try_from(config.rpc_url.as_str())
             .expect("could not instantiate HTTP Provider");
@@ -43,15 +42,14 @@ impl Host<Http, Mdbx> {
     }
 }
 
-impl<P, DB> Host<P, DB>
+impl<P> Host<P>
 where
     P: JsonRpcClient,
-    DB: for<'a> Database<'a>,
 {
     pub fn from_parts(
         prover: Prover,
         provider: Provider<P>,
-        db: ChainDb<DB>,
+        db: ChainDb,
         chain_id: ChainId,
     ) -> Self {
         Host {
@@ -140,7 +138,7 @@ mod test {
 
         use super::*;
 
-        fn test_db() -> ChainDb<InMemoryDatabase> {
+        fn test_db() -> ChainDb {
             ChainDb::from_db(InMemoryDatabase::new())
         }
 

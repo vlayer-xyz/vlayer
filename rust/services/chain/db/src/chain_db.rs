@@ -75,7 +75,9 @@ impl ChainUpdate {
     }
 }
 
-pub struct ChainDb<DB: for<'a> Database<'a>> {
+type DB = Box<dyn for<'a> Database<'a>>;
+
+pub struct ChainDb {
     db: DB,
 }
 
@@ -95,16 +97,16 @@ pub enum ChainDbError {
 
 pub type ChainDbResult<T> = Result<T, ChainDbError>;
 
-impl ChainDb<Mdbx> {
+impl ChainDb {
     pub fn new(path: impl AsRef<Path>) -> ChainDbResult<Self> {
-        let db = Mdbx::open(path)?;
+        let db = Box::new(Mdbx::open(path)?);
         Ok(Self { db })
     }
 }
 
-impl<DB: for<'a> Database<'a>> ChainDb<DB> {
-    pub fn from_db(db: DB) -> Self {
-        Self { db }
+impl ChainDb {
+    pub fn from_db(db: impl for<'a> Database<'a> + 'static) -> Self {
+        Self { db: Box::new(db) }
     }
 
     fn begin_ro(&self) -> ChainDbResult<ChainDbTx<dyn ReadTx + '_>> {

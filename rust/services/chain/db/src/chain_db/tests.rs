@@ -9,18 +9,18 @@ use rand::{rngs::StdRng, RngCore, SeedableRng};
 use super::*;
 use crate::in_memory::InMemoryDatabase;
 
-fn get_test_db() -> ChainDb<InMemoryDatabase> {
+fn get_test_db() -> ChainDb {
     let db = InMemoryDatabase::new();
     ChainDb::from_db(db)
 }
 
-fn insert_node(db: &mut ChainDb<InMemoryDatabase>, node_rlp: Bytes) {
+fn insert_node(db: &mut ChainDb, node_rlp: Bytes) {
     let mut tx = db.begin_rw().expect("begin_rw failed");
     tx.insert_node(node_rlp).expect("insert_node failed");
     Box::new(tx).commit().expect("commit failed");
 }
 
-fn delete_node(db: &mut ChainDb<InMemoryDatabase>, node_hash: B256) {
+fn delete_node(db: &mut ChainDb, node_hash: B256) {
     let mut tx = db.begin_rw().expect("begin_rw failed");
     tx.delete_node(node_hash).expect("delete_node failed");
     Box::new(tx).commit().expect("commit failed");
@@ -31,10 +31,7 @@ fn block_header(block_num: u64) -> B256 {
     keccak256(alloy_rlp::encode(block_num))
 }
 
-fn insert_blocks(
-    db: &mut ChainDb<InMemoryDatabase>,
-    blocks: impl IntoIterator<Item = BlockNumber>,
-) -> (B256, Node) {
+fn insert_blocks(db: &mut ChainDb, blocks: impl IntoIterator<Item = BlockNumber>) -> (B256, Node) {
     let mut block_trie = BlockTrie::new();
     for block_num in blocks {
         block_trie.insert(block_num, &block_header(block_num))
@@ -48,7 +45,7 @@ fn insert_blocks(
     (block_trie.hash_slow(), block_trie.into_root())
 }
 
-fn check_proof(db: &ChainDb<InMemoryDatabase>, root_hash: B256, block_num: u64) -> BlockTrie {
+fn check_proof(db: &ChainDb, root_hash: B256, block_num: u64) -> BlockTrie {
     let proof = db
         .get_merkle_proof(root_hash, block_num)
         .expect("get_merkle_proof failed");
