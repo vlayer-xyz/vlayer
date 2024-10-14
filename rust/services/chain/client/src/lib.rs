@@ -1,6 +1,6 @@
-use std::collections::{HashMap, HashSet};
+use std::collections::HashMap;
 
-use alloy_primitives::ChainId;
+use alloy_primitives::{BlockHash, ChainId};
 use chain_server::server::ChainProof;
 use provider::BlockNumber;
 use serde_json::json;
@@ -43,12 +43,13 @@ impl ChainProofClient {
 
     pub async fn get_chain_proofs(
         &self,
-        blocks_by_chain: HashMap<ChainId, HashSet<u64>>,
+        blocks_by_chain: HashMap<ChainId, HashMap<BlockNumber, BlockHash>>,
     ) -> Result<HashMap<ChainId, ChainProof>, ChainProofClientError> {
         let mut chain_proofs = HashMap::new();
 
-        for (chain_id, block_numbers) in blocks_by_chain {
-            let proof = self.fetch_chain_proof(chain_id, &block_numbers).await?;
+        for (chain_id, blocks) in blocks_by_chain {
+            let block_numbers: Vec<BlockNumber> = blocks.into_keys().collect();
+            let proof = self.fetch_chain_proof(chain_id, block_numbers).await?;
             chain_proofs.insert(chain_id, proof);
         }
 
@@ -58,7 +59,7 @@ impl ChainProofClient {
     async fn fetch_chain_proof(
         &self,
         chain_id: ChainId,
-        block_numbers: &HashSet<BlockNumber>,
+        block_numbers: Vec<BlockNumber>,
     ) -> Result<ChainProof, ChainProofClientError> {
         info!(
             "Fetching chain proof for chain_id: {}, block_numbers.len(): {}",

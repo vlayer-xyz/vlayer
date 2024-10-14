@@ -1971,6 +1971,7 @@ dependencies = [
  "anyhow",
  "block_header",
  "chain",
+ "chain_server",
  "derive-new",
  "derive_more 0.99.18",
  "email_proof",
