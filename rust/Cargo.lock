@@ -2212,6 +2212,7 @@ dependencies = [
  "alloy-rlp",
  "anyhow",
  "block_trie",
+ "bytes",
  "chain_db",
  "chain_guest",
  "chain_guest_wrapper",

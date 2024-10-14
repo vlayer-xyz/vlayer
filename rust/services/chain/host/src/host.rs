@@ -2,6 +2,7 @@ pub mod config;
 pub mod error;
 
 use alloy_primitives::{ChainId, B256};
+use bytes::Bytes;
 use chain_db::{ChainDb, ChainInfo, ChainUpdate, Database, Mdbx};
 pub use config::HostConfig;
 pub use error::HostError;
@@ -17,7 +18,7 @@ use risc0_zkvm::{ExecutorEnv, ProveInfo};
 use serde::Serialize;
 
 lazy_static! {
-    static ref EMPTY_PROOF: Vec<u8> = vec![];
+    static ref EMPTY_PROOF: Bytes = Bytes::new();
 }
 
 pub struct Host<P, DB>
@@ -70,8 +71,8 @@ where
 
     async fn initialize(&self) -> Result<ChainUpdate, HostError> {
         let block = self.get_block(BlockTag::Latest).await?;
-        let chain_info =
-            ChainInfo::new(block.number()..=block.number(), B256::ZERO, EMPTY_PROOF.as_slice());
+        let range = block.number()..=block.number();
+        let chain_info = ChainInfo::new(range, B256::ZERO, EMPTY_PROOF.clone());
         let chain_update = ChainUpdate::new(chain_info, [], []);
         Ok(chain_update)
     }
@@ -160,7 +161,7 @@ mod test {
                 assert_eq!(
                     chain_update,
                     ChainUpdate::new(
-                        ChainInfo::new(20_000_000..=20_000_000, B256::ZERO, EMPTY_PROOF.as_slice()),
+                        ChainInfo::new(20_000_000..=20_000_000, B256::ZERO, EMPTY_PROOF.clone()),
                         [],
                         []
                     )
@@ -181,27 +182,16 @@ mod test {
                     let chain_info = ChainInfo::new(
                         GENERIS_BLOCK_NUMBER..=20_000_000,
                         B256::ZERO,
-                        EMPTY_PROOF.as_slice(),
+                        EMPTY_PROOF.clone(),
                     );
-                    let chain_update = ChainUpdate::new(chain_info, [], []);
+                    let chain_update = ChainUpdate::new(chain_info.clone(), [], []);
                     db.update_chain(1, chain_update)?;
                     let host =
                         Host::from_parts(Prover::default(), mock_provider([20_000_000]), db, 1);
 
                     let chain_update = host.poll().await?;
 
-                    assert_eq!(
-                        chain_update,
-                        ChainUpdate::new(
-                            ChainInfo::new(
-                                GENERIS_BLOCK_NUMBER..=20_000_000,
-                                B256::ZERO,
-                                EMPTY_PROOF.as_slice()
-                            ),
-                            [],
-                            []
-                        )
-                    );
+                    assert_eq!(chain_update, ChainUpdate::new(chain_info, [], []));
 
                     Ok(())
                 }

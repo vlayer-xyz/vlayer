@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 host_utils = { workspace = true }
+bytes = { workspace = true }
 alloy-primitives = { workspace = true }
 risc0-zkvm = { workspace = true }
 risc0-zkp = { workspace = true }
