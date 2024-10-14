@@ -3,6 +3,10 @@ name = "zkvm-benchmarks-runner"
 version = "0.1.0"
 edition = "2021"
 
+[[bin]]
+name = "benchmarks"
+path = "src/main.rs"
+
 [dependencies]
 anyhow = { workspace = true }
 risc0-zkvm = { workspace = true }

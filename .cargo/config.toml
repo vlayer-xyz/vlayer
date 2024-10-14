@@ -1,5 +1,6 @@
 [alias]
 lint = "clippy --workspace --all-targets --all-features"
+zkvm-bench = "run --bin benchmarks"
 
 [env]
 # Should be in sync with ./vscode/settings.json "rust-analyzer.server.extraEnv" section to avoid recompilation of guest_wrapper

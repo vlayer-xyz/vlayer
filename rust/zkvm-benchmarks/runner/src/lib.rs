@@ -1,9 +1,5 @@
-#![cfg(test)]
-
-mod bencher;
 mod guest;
+mod runner;
 
-mod benchmarks;
-
-pub use bencher::*;
 pub use guest::*;
+pub use runner::*;
