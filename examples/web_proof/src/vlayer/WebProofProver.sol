@@ -16,17 +16,85 @@ contract WebProofProver is Prover {
     using WebProofLib for WebProof;
     using WebLib for Web;
 
-    string dataUrl = "https://api.x.com/1.1/account/settings.json";
+    string dataUrl = "https://www.accountable.capital:10443/binance";
 
-    function main(WebProof calldata webProof, address twitterUserAddress)
+    function main(WebProof calldata webProof)
         public
         view
-        returns (Proof memory, string memory, address)
+        returns (Proof memory, string[2] memory, int[2] memory)
     {
         Web memory web = webProof.verify(dataUrl);
 
-        string memory screenName = web.jsonGetString("screen_name");
+        string[2] memory assetNames;
+        int[2] memory assetValues;
 
-        return (proof(), screenName, twitterUserAddress);
+        int len = web.
+
+        for (uint i = 0; i < 2; i++) {
+            string memory indexStr = Strings.toString(i);
+            string memory assetKey = string(abi.encodePacked("[", indexStr, "].asset"));
+            string memory valueKey = string(abi.encodePacked("[", indexStr, "].free"));
+
+            string memory assetName = web.jsonGetString(assetKey);
+            int assetValue = parseDecimal(web.jsonGetString(valueKey), 8);
+
+            assetNames[i] = assetName;
+            assetValues[i] = assetValue;
+        }
+
+        return (proof(), assetNames, assetValues);
+    }
+
+    function parseDecimal(string memory input, uint decimalPlaces) internal pure returns (int) {
+        bytes memory inputBytes = bytes(input);
+        if (inputBytes.length == 0) {
+            return 0;
+        }
+
+        int result = 0;
+        bool isNegative = false;
+        uint i = 0;
+
+        // Check for negative sign
+        if (inputBytes[0] == '-') {
+            isNegative = true;
+            i = 1;
+        }
+
+        bool decimalFound = false;
+        uint decimalIndex = 0;
+        for (; i < inputBytes.length; i++) {
+            if (inputBytes[i] == '.') {
+                decimalFound = true;
+                decimalIndex = i;
+                break;
+            }
+        }
+
+        if (!decimalFound) {
+            decimalIndex = inputBytes.length;
+        }
+
+        uint factor = 10 ** decimalPlaces;
+        uint integerPart = 0;
+        uint fractionalPart = 0;
+
+        for (i = isNegative ? 1 : 0; i < decimalIndex; i++) {
+            require(inputBytes[i] >= '0' && inputBytes[i] <= '9', "Invalid character in integer part");
+            integerPart = integerPart * 10 + (uint8(inputBytes[i]) - 48);
+        }
+
+        for (i = decimalIndex + 1; i < inputBytes.length && i < decimalIndex + 1 + decimalPlaces; i++) {
+            require(inputBytes[i] >= '0' && inputBytes[i] <= '9', "Invalid character in fractional part");
+            fractionalPart = fractionalPart * 10 + (uint8(inputBytes[i]) - 48);
+        }
+
+        uint fractionalLength = inputBytes.length > decimalIndex + 1 ? inputBytes.length - (decimalIndex + 1) : 0;
+        if (fractionalLength < decimalPlaces) {
+            fractionalPart *= 10 ** (decimalPlaces - fractionalLength);
+        }
+
+        result = int(integerPart * factor + fractionalPart);
+        return isNegative ? -result : result;
     }
 }
