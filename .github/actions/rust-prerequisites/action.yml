@@ -13,7 +13,7 @@ runs:
 
     - uses: cargo-bins/cargo-binstall@main
     - name: Install risc0 toolchain
+      shell: bash
       run: |
         cargo binstall -y cargo-risczero@1.0.5 --force
         cargo risczero install
-      shell: bash
