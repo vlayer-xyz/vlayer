@@ -27,7 +27,7 @@ jobs:
         run: bun install
         working-directory: ./packages/test-web-app
       - name: Build extension
-        run: bun run build
+        run: bun run build:playwright
         working-directory: ./packages/browser-extension
       - name: Install Playwright Browsers
         run: bunx playwright install --with-deps chromium

@@ -13,9 +13,15 @@
     "@vlayer/sdk": "file:../sdk",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
+<<<<<<< HEAD
     "react-router-dom": "^6.27.0",
     "viem": "^2.21.22",
     "vite-tsconfig-paths": "^5.0.1"
+=======
+    "vite-tsconfig-paths": "^5.0.1",
+    "react-router-dom": "^6.27.0",
+    "viem": "^2.21.22"
+>>>>>>> 90924b5c (Add part of e2e that doesnt touch the vlayer infra)
   },
   "devDependencies": {
     "@eslint/js": "^9.11.1",
