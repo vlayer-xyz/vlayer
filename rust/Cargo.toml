@@ -1,6 +1,7 @@
 [workspace]
 resolver = "2"
 members = [
+    "services/chain/client",
     "services/chain/db",
     "services/chain/host",
     "services/chain/guest",
@@ -129,6 +130,7 @@ call_server = { path = "services/call/server" }
 chain_host = { path = "services/chain/host" }
 chain_guest = { path = "services/chain/guest" }
 block_trie = { path = "services/chain/block_trie" }
+chain_client = { path = "services/chain/client" }
 chain_guest_wrapper = { path = "services/chain/guest_wrapper" }
 chain_server = { path = "services/chain/server" }
 chain_worker = { path = "services/chain/worker" }

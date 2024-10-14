@@ -12,6 +12,7 @@ use call_engine::{
     Seal,
 };
 use call_guest_wrapper::RISC0_CALL_GUEST_ELF;
+use chain_client::ChainProofClient;
 use config::HostConfig;
 use error::HostError;
 use ethers_core::types::BlockNumber;
@@ -20,7 +21,6 @@ use provider::{BlockingProvider, CachedMultiProvider, EthProvider, EthersProvide
 use risc0_zkvm::ExecutorEnv;
 use serde::Serialize;
 
-pub use crate::chain_proof_client::ChainProofClient;
 use crate::{
     db::proof::ProofDb, encodable_receipt::EncodableReceipt, evm_env::factory::HostEvmEnvFactory,
     into_input::into_multi_input,

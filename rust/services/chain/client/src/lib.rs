@@ -5,12 +5,34 @@ use chain_server::server::ChainProof;
 use provider::BlockNumber;
 use serde_json::json;
 use server_utils::{RpcClient, RpcError};
+use thiserror::Error;
 use tracing::info;
-
-use crate::host::error::HostError;
 
 pub struct ChainProofClient {
     rpc_client: RpcClient,
+}
+
+#[derive(Debug, Error)]
+pub enum ChainProofClientError {
+    #[error("HTTP request failed: {0}")]
+    HttpRequestFailed(String),
+    #[error("JSON-RPC error: {0}")]
+    JsonRpcError(String),
+    #[error("JSON parse error: {0}")]
+    JsonParseError(String),
+}
+
+impl From<RpcError> for ChainProofClientError {
+    fn from(err: RpcError) -> Self {
+        match err {
+            RpcError::Http(err) => Self::HttpRequestFailed(err.to_string()),
+            RpcError::JsonRpc(err) => Self::JsonRpcError(err.to_string()),
+            RpcError::MissingResult => {
+                Self::JsonParseError("Missing 'result' field in response".to_string())
+            }
+            RpcError::InvalidResponse(value) => Self::JsonParseError(value.to_string()),
+        }
+    }
 }
 
 impl ChainProofClient {
@@ -22,7 +44,7 @@ impl ChainProofClient {
     pub async fn get_chain_proofs(
         &self,
         blocks_by_chain: HashMap<ChainId, HashSet<u64>>,
-    ) -> Result<HashMap<ChainId, ChainProof>, HostError> {
+    ) -> Result<HashMap<ChainId, ChainProof>, ChainProofClientError> {
         let mut chain_proofs = HashMap::new();
 
         for (chain_id, block_numbers) in blocks_by_chain {
@@ -37,7 +59,7 @@ impl ChainProofClient {
         &self,
         chain_id: ChainId,
         block_numbers: &HashSet<BlockNumber>,
-    ) -> Result<ChainProof, HostError> {
+    ) -> Result<ChainProof, ChainProofClientError> {
         info!(
             "Fetching chain proof for chain_id: {}, block_numbers.len(): {}",
             chain_id,
@@ -49,22 +71,15 @@ impl ChainProofClient {
             "block_numbers": block_numbers.clone(),
         });
 
-        let result_value = self.rpc_client.call(&params).await.map_err(map_error)?;
+        let result_value = self
+            .rpc_client
+            .call(&params)
+            .await
+            .map_err(ChainProofClientError::from)?;
 
         let chain_proof = serde_json::from_value(result_value)
-            .map_err(|e| HostError::JsonParseError(e.to_string()))?;
+            .map_err(|e| ChainProofClientError::JsonParseError(e.to_string()))?;
 
         Ok(chain_proof)
-    }
-}
-
-fn map_error(rpc_error: RpcError) -> HostError {
-    match rpc_error {
-        RpcError::Http(err) => HostError::HttpRequestFailed(err.to_string()),
-        RpcError::JsonRpc(err) => HostError::JsonRpcError(err.to_string()),
-        RpcError::MissingResult => {
-            HostError::JsonParseError("Missing 'result' field in response".to_string())
-        }
-        RpcError::InvalidResponse(value) => HostError::JsonParseError(value.to_string()),
     }
 }

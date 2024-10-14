@@ -1,0 +1,13 @@
+[package]
+name = "chain_client"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+alloy-primitives = { workspace = true }
+chain_server = { workspace = true }
+provider = { workspace = true }
+serde_json = { workspace = true }
+server_utils = { workspace = true }
+thiserror = { workspace = true }
+tracing = { workspace = true }

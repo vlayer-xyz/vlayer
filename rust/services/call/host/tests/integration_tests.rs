@@ -4,9 +4,10 @@ use alloy_chains::{Chain, NamedChain};
 use alloy_primitives::{address, b256, uint, Address, ChainId};
 use alloy_sol_types::{sol, SolCall};
 use call_host::{
-    host::{config::HostConfig, error::HostError, get_block_number, ChainProofClient, Host},
+    host::{config::HostConfig, error::HostError, get_block_number, Host},
     Call,
 };
+use chain_client::ChainProofClient;
 use chain_server::server::{ChainProof, ChainProofServerMock};
 use dotenv::dotenv;
 use ethers_core::types::BlockNumber as BlockTag;

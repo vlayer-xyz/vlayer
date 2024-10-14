@@ -114,13 +114,27 @@ impl RpcClient {
 
         let response_body = response.json::<Value>().await?;
 
-        match (response_body.get("error"), response_body.get("result")) {
-            (Some(_), Some(_)) => Err(RpcError::InvalidResponse(response_body)),
-            (Some(error), None) => Err(RpcError::JsonRpc(error.clone())),
-            (None, Some(result)) => Ok(result.clone()),
-            (None, None) => Err(RpcError::MissingResult),
-        }
+        parse_json_rpc_response(response_body)
     }
+}
+
+fn parse_json_rpc_response(response_body: Value) -> Result<Value, RpcError> {
+    let mut response = response_body;
+    let error = extract_field(&mut response, "error");
+    let result = extract_field(&mut response, "result");
+
+    match (error, result) {
+        (Some(_), Some(_)) => Err(RpcError::InvalidResponse(response)),
+        (Some(error), None) => Err(RpcError::JsonRpc(error)),
+        (None, Some(result)) => Ok(result),
+        (None, None) => Err(RpcError::MissingResult),
+    }
+}
+
+fn extract_field(response: &mut Value, field: &str) -> Option<Value> {
+    response
+        .get_mut(field)
+        .and_then(|v| (!v.is_null()).then(|| std::mem::take(v)))
 }
 
 #[cfg(test)]

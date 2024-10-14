@@ -2026,6 +2026,7 @@ dependencies = [
  "call_engine",
  "call_guest_wrapper",
  "chain",
+ "chain_client",
  "chain_server",
  "ctor",
  "dotenv",
@@ -2168,6 +2169,19 @@ dependencies = [
  "revm",
  "serde",
  "thiserror",
+]
+
+[[package]]
+name = "chain_client"
+version = "0.1.0"
+dependencies = [
+ "alloy-primitives",
+ "chain_server",
+ "provider",
+ "serde_json",
+ "server_utils",
+ "thiserror",
+ "tracing",
 ]
 
 [[package]]
@@ -9297,6 +9311,7 @@ dependencies = [
  "call_engine",
  "call_host",
  "chain",
+ "chain_client",
  "clap",
  "color-eyre",
  "comfy-table",

@@ -7,8 +7,9 @@ use call_engine::{
     },
     Proof, Seal,
 };
-use call_host::host::{config::HostConfig, get_block_number, ChainProofClient, Host};
+use call_host::host::{config::HostConfig, get_block_number, Host};
 use chain::TEST_CHAIN_ID;
+use chain_client::ChainProofClient;
 use foundry_config::RpcEndpoints;
 use foundry_evm::revm::{
     interpreter::{CallInputs, CallOutcome},
