@@ -819,7 +819,7 @@ name = "risc0_benchmark_guest"
 version = "0.1.0"
 dependencies = [
  "risc0-zkvm",
- "zkvm-bencher-types",
+ "zkvm-benchmarks-common",
 ]
 
 [[package]]
@@ -1067,7 +1067,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "zkvm-bencher-types"
+name = "zkvm-benchmarks-common"
 version = "0.1.0"
 dependencies = [
  "bincode",
