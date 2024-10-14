@@ -1,5 +1,8 @@
-use alloy_primitives::{Address, TxKind};
+use std::collections::HashMap;
+
+use alloy_primitives::{Address, ChainId, TxKind};
 use alloy_sol_types::SolValue;
+use chain_server::server::ChainProof;
 use revm::{interpreter::CallInputs, primitives::TxEnv};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
@@ -11,10 +14,11 @@ use crate::{
 };
 
 #[derive(Deserialize, Serialize, Debug)]
-pub struct Input {
+pub struct GuestInput {
     pub multi_evm_input: MultiEvmInput,
     pub call: Call,
     pub start_execution_location: ExecutionLocation,
+    pub chain_id_to_chain_proof: HashMap<ChainId, ChainProof>,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]

@@ -8,7 +8,7 @@ use alloy_sol_types::SolValue;
 use call_engine::{
     engine::{Engine, EngineError},
     evm::env::{cached::CachedEvmEnv, location::ExecutionLocation},
-    io::{Call, GuestOutput, HostOutput, Input},
+    io::{Call, GuestInput, GuestOutput, HostOutput},
     Seal,
 };
 use call_guest_wrapper::RISC0_CALL_GUEST_ELF;
@@ -93,17 +93,16 @@ where
 
         let multi_evm_input =
             into_multi_input(self.envs).map_err(|err| HostError::CreatingInput(err.to_string()))?;
-        let input = Input {
-            call,
-            multi_evm_input: multi_evm_input.clone(),
-            start_execution_location: self.start_execution_location,
-        };
-
-        // todo: use chain proofs in provably_execute
-        let _chain_proofs = self
+        let chain_id_to_chain_proof = self
             .chain_proof_client
             .get_chain_proofs(multi_evm_input.group_blocks_by_chain())
             .await?;
+        let input = GuestInput {
+            call,
+            multi_evm_input: multi_evm_input.clone(),
+            start_execution_location: self.start_execution_location,
+            chain_id_to_chain_proof
+        };
 
         let env = build_executor_env(input)
             .map_err(|err| HostError::ExecutorEnvBuilder(err.to_string()))?;
