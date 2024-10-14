@@ -26,7 +26,9 @@ contract JsonParsingTest is VTest {
     }
 
     function test_parsingJsonArrayOfObjects() public {
-        Web memory web = Web("[ { \"asset\": \"FDUSD\", \"free\": \"0.10620008\", \"locked\": \"0\", \"freeze\": \"0\", \"withdrawing\": \"0\", \"ipoable\": \"0\", \"btcValuation\": \"0\" }, { \"asset\": \"MOVR\", \"free\": \"0.0649415\", \"locked\": \"0\", \"freeze\": \"0\", \"withdrawing\": \"0\", \"ipoable\": \"0\", \"btcValuation\": \"0\" }, { \"asset\": \"PYR\", \"free\": \"0.9991\", \"locked\": \"0\", \"freeze\": \"0\", \"withdrawing\": \"0\", \"ipoable\": \"0\", \"btcValuation\": \"0\" }, { \"asset\": \"USDC\", \"free\": \"15.00047635\", \"locked\": \"0\", \"freeze\": \"0\", \"withdrawing\": \"0\", \"ipoable\": \"0\", \"btcValuation\": \"0\" } ]");
+        Web memory web = Web(
+            "[ { \"asset\": \"FDUSD\", \"free\": \"0.10620008\", \"locked\": \"0\", \"freeze\": \"0\", \"withdrawing\": \"0\", \"ipoable\": \"0\", \"btcValuation\": \"0\" }, { \"asset\": \"MOVR\", \"free\": \"0.0649415\", \"locked\": \"0\", \"freeze\": \"0\", \"withdrawing\": \"0\", \"ipoable\": \"0\", \"btcValuation\": \"0\" }, { \"asset\": \"PYR\", \"free\": \"0.9991\", \"locked\": \"0\", \"freeze\": \"0\", \"withdrawing\": \"0\", \"ipoable\": \"0\", \"btcValuation\": \"0\" }, { \"asset\": \"USDC\", \"free\": \"15.00047635\", \"locked\": \"0\", \"freeze\": \"0\", \"withdrawing\": \"0\", \"ipoable\": \"0\", \"btcValuation\": \"0\" } ]"
+        );
 
         callProver();
         string memory assetName = web.jsonGetString("[0].asset");
