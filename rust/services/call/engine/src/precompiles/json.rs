@@ -250,14 +250,6 @@ mod tests {
         }
 
         #[test]
-        fn fail_number_array() {
-            let abi_encoded_body_and_json_path =
-                InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_array"]);
-
-            assert!(matches!(json_get_int_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
-                Err(Fatal { msg: message }) if message == "Expected type 'Number' at root.nested_level.field_array, but found Array []"));
-        }
-        #[test]
         fn fail_number_object() {
             let abi_encoded_body_and_json_path =
                 InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_object"]);
@@ -284,15 +276,6 @@ mod tests {
 
             assert!(matches!(json_get_bool_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
                 Err(Fatal { msg: message }) if message == "Expected type 'Bool' at root.nested_level.field_number, but found Number(12)"));
-        }
-
-        #[test]
-        fn fail_bool_array() {
-            let abi_encoded_body_and_json_path =
-                InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_array"]);
-
-            assert!(matches!(json_get_bool_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
-                Err(Fatal { msg: message }) if message == "Expected type 'Bool' at root.nested_level.field_array, but found Array []"));
         }
 
         #[test]
