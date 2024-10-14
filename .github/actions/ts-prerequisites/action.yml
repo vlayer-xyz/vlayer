@@ -1,0 +1,6 @@
+name: TS prerequisites
+description: Installs TypeScript prerequisites
+runs:
+  using: "composite"
+  steps:
+    - uses: oven-sh/setup-bun@v2

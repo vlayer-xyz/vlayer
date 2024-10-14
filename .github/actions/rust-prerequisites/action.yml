@@ -1,0 +1,19 @@
+name: Rust prerequisites
+description: Installs Rust compilation prerequisites
+runs:
+  using: "composite"
+  steps:
+    - name: Set up Rust
+      uses: actions-rust-lang/setup-rust-toolchain@v1
+      with:
+        cache-workspaces: |
+          rust
+          rust/call/guest_wrapper/risc0_guest
+          rust/chain/guest_wrapper/risc0_guest
+
+    - uses: cargo-bins/cargo-binstall@main
+    - name: Install risc0 toolchain
+      shell: bash
+      run: |
+        cargo binstall -y cargo-risczero@1.0.5 --force
+        cargo risczero install
