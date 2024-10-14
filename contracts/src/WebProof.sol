@@ -48,14 +48,14 @@ library WebLib {
         return abi.decode(returnData, (string));
     }
 
-    function jsonGetInt(Web memory web, string memory jsonPath) internal view returns (int) {
+    function jsonGetInt(Web memory web, string memory jsonPath) internal view returns (int256) {
         require(bytes(web.body).length > 0, "Body is empty");
 
         bytes memory encodedParams = abi.encode([web.body, jsonPath]);
         (bool success, bytes memory returnData) = JSON_GET_INT_PRECOMPILE.staticcall(encodedParams);
         require(success, "json_get_string precompile call failed");
 
-        return abi.decode(returnData, (int));
+        return abi.decode(returnData, (int256));
     }
 
     function jsonGetBool(Web memory web, string memory jsonPath) internal view returns (bool) {

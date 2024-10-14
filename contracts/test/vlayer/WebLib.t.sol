@@ -20,7 +20,7 @@ contract JsonParsingTest is VTest {
         Web memory web = Web("{\"asset\":\"FDUSD\",\"test\":5}");
 
         callProver();
-        int value = web.jsonGetInt("test");
+        int256 value = web.jsonGetInt("test");
 
         assertEq(value, 5);
     }
