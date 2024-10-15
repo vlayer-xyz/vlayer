@@ -38,10 +38,13 @@ impl TestHelper {
     pub(crate) async fn post<T: Serialize>(&self, url: &str, body: &T) -> Response<Body> {
         let chain_proof_server_mock = ChainProofServerMock::start().await;
         chain_proof_server_mock
-            .mock(json!({}), json!({
-                "proof": Bytes::default(),
-                "nodes": Vec::<Bytes>::default()
-            }))
+            .mock(
+                json!({}),
+                json!({
+                    "proof": Bytes::default(),
+                    "nodes": Vec::<Bytes>::default()
+                }),
+            )
             .await;
 
         let app = server(ServerConfig {

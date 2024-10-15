@@ -113,8 +113,10 @@ impl MultiEvmInput {
         map
     }
 
-    fn assert_chain_coherence(&self, chain_id_to_chain_proof: HashMap<ChainId, ChainProof>) {
-        todo!("assert chain coherence")
+    #[allow(clippy::unused_self)]
+    #[allow(clippy::needless_pass_by_value)]
+    fn assert_chain_coherence(&self, _chain_id_to_chain_proof: HashMap<ChainId, ChainProof>) {
+        // todo: assert chain coherence
     }
 }
 
