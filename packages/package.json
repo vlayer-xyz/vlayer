@@ -14,8 +14,8 @@
     "typescript": "^5.0.0"
   },
   "scripts": {
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix"
+    "lint": "eslint ./*/src/** ",
+    "lint:fix": "eslint ./*/src/** --fix"
   },
   "type": "module",
   "workspaces": [
