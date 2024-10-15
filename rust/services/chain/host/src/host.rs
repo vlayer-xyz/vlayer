@@ -1,7 +1,8 @@
 pub mod config;
 pub mod error;
 
-use alloy_primitives::{ChainId, B256};
+use alloy_primitives::ChainId;
+use block_trie::BlockTrie;
 use bytes::Bytes;
 use chain_db::{ChainDb, ChainInfo, ChainUpdate};
 pub use config::HostConfig;
@@ -69,9 +70,10 @@ where
 
     async fn initialize(&self) -> Result<ChainUpdate, HostError> {
         let latest_block = self.get_block(BlockTag::Latest).await?;
+        let block_trie = BlockTrie::init(&*latest_block);
         let range = latest_block.number()..=latest_block.number();
-        let chain_info = ChainInfo::new(range, B256::ZERO, EMPTY_PROOF.clone());
-        let chain_update = ChainUpdate::new(chain_info, [], []);
+        let chain_info = ChainInfo::new(range, block_trie.hash_slow(), EMPTY_PROOF.clone());
+        let chain_update = ChainUpdate::new(chain_info, &block_trie, []);
         Ok(chain_update)
     }
 
@@ -146,10 +148,13 @@ mod test {
         }
 
         mod poll {
+            use test_utils::fake_block;
+
             use super::*;
 
             #[tokio::test]
             async fn initialize() -> anyhow::Result<()> {
+                let block_trie = BlockTrie::init(&*fake_block(20_000_000));
                 let host =
                     Host::from_parts(Prover::default(), mock_provider([LATEST]), test_db(), 1);
 
@@ -162,8 +167,12 @@ mod test {
                 assert_eq!(
                     chain_update,
                     ChainUpdate::new(
-                        ChainInfo::new(LATEST..=LATEST, B256::ZERO, EMPTY_PROOF.clone()),
-                        [],
+                        ChainInfo::new(
+                            LATEST..=LATEST,
+                            block_trie.hash_slow(),
+                            EMPTY_PROOF.clone()
+                        ),
+                        &block_trie,
                         []
                     )
                 );

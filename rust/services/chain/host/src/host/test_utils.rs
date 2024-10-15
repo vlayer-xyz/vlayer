@@ -2,7 +2,7 @@ use ethers::{
     providers::{MockProvider, Provider},
     types::Block,
 };
-use provider::BlockNumber;
+use provider::{to_eth_block_header, BlockNumber, EvmBlockHeader};
 use serde_json::{from_value, json};
 
 fn fake_rpc_block(number: BlockNumber) -> Block<()> {
@@ -32,6 +32,12 @@ fn fake_rpc_block(number: BlockNumber) -> Block<()> {
         "transactions": [],
         "uncles": []
     })).unwrap()
+}
+
+pub fn fake_block(number: BlockNumber) -> Box<dyn EvmBlockHeader> {
+    let rpc_block = fake_rpc_block(number);
+    let block = to_eth_block_header(rpc_block).expect("could not convert block");
+    Box::new(block)
 }
 
 pub fn mock_provider(
