@@ -1,5 +1,6 @@
 use alloy_primitives::B256;
 use alloy_rlp::encode_fixed_size;
+use block_header::EvmBlockHeader;
 use bytes::Bytes;
 use mpt::{MerkleTrie, Node};
 use serde::{Deserialize, Serialize};
@@ -8,6 +9,29 @@ use serde::{Deserialize, Serialize};
 pub struct BlockTrie(MerkleTrie);
 
 impl BlockTrie {
+    pub fn init(block: &dyn EvmBlockHeader) -> Self {
+        let mut trie = Self(MerkleTrie::new());
+        trie.insert_unchecked(block.number(), &block.hash_slow());
+        trie
+    }
+
+    pub fn append(&mut self, new_rightmost_block: &dyn EvmBlockHeader) {
+        let parent_block_idx = new_rightmost_block.number() - 1;
+        let parent_block_hash = self
+            .get(parent_block_idx)
+            .expect("failed to get parent block hash");
+        assert_eq!(parent_block_hash, new_rightmost_block.parent_hash(), "block hash mismatch");
+        self.insert_unchecked(new_rightmost_block.number(), &new_rightmost_block.hash_slow());
+    }
+
+    pub fn prepend(&mut self, old_leftmost_block: &dyn EvmBlockHeader) {
+        let old_leftmost_block_hash = self
+            .get(old_leftmost_block.number())
+            .expect("failed to get old leftmost block hash");
+        assert_eq!(old_leftmost_block_hash, old_leftmost_block.hash_slow(), "block hash mismatch");
+        self.insert_unchecked(old_leftmost_block.number() - 1, &old_leftmost_block.parent_hash());
+    }
+
     #[deprecated(note = "please use `init` instead")]
     pub fn new() -> Self {
         Self(MerkleTrie::new())
@@ -20,6 +44,10 @@ impl BlockTrie {
 
     #[deprecated(note = "please use `append/prepend` instead")]
     pub fn insert(&mut self, block_number: u64, hash: &B256) {
+        self.insert_unchecked(block_number, hash)
+    }
+
+    fn insert_unchecked(&mut self, block_number: u64, hash: &B256) {
         let key = Self::encode_key(block_number);
         self.0.insert(key, hash).expect("insert block number");
     }
