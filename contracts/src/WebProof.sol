@@ -21,16 +21,11 @@ library WebProofLib {
         "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExpX/4R4z40gI6C/j9zAM39u58LJu\n3Cx5tXTuqhhu/tirnBi5GniMmspOTEsps4ANnPLpMmMSfhJ+IFHbc3qVOA==\n-----END PUBLIC KEY-----\n";
 
     function verify(WebProof memory webProof, string memory dataUrl) internal view returns (Web memory) {
-        (bool success, bytes memory returnData) = VERIFY_AND_PARSE_PRECOMPILE.staticcall(bytes(webProof.webProofJson));
+        Web memory web = doVerify(webProof, dataUrl);
 
-        require(success, "verify_and_parse precompile call failed");
+        require(NOTARY_PUB_KEY.equal(web.notaryPubKey), "Incorrect notary public key");
 
-        string[4] memory data = abi.decode(returnData, (string[4]));
-
-        require(dataUrl.equal(data[0]), "Incorrect URL");
-        require(NOTARY_PUB_KEY.equal(data[3]), "Incorrect notary public key");
-
-        return Web(data[2], data[3]);
+        return web;
     }
 
     function doVerify(WebProof memory webProof, string memory dataUrl) internal view returns (Web memory) {
