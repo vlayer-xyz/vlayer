@@ -365,7 +365,7 @@ jobs:
       uses: ./.github/actions/ts-prerequisites
     - uses: actions/setup-node@v4
       with:
-        node-version: '20.x'
+        node-version: '20.x' 
         registry-url: 'https://registry.npmjs.org'
     - name: Update SDK version
       working-directory: packages/sdk
@@ -375,6 +375,9 @@ jobs:
     - name: Install dependencies
       working-directory: packages/sdk
       run: bun install
+    - name: replace symlinks 
+      run: ./bash/replace-symlinks.sh
+      working-directory: packages/sdk
     - name: Publish to NPM
       working-directory: packages/sdk
       env:
