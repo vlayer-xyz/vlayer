@@ -1,0 +1,26 @@
+# https://prometheus.io/docs/prometheus/latest/configuration/configuration/#configuration-file
+global:
+  scrape_interval: 60s
+
+scrape_configs:
+
+# Localhost (monitoring server itself)
+  - job_name: 'local-node-exporter'
+    static_configs:
+      - targets: ['localhost:9100']
+        labels:
+          host_address: localhost
+          host_name: monitoring
+
+
+# prover servers
+  - job_name: 'provers-node-exporter'
+    scrape_interval: 2m
+    static_configs:
+{% for host in groups['provers'] %}
+      - targets:
+          - '{{ hostvars[host].ansible_host }}:9100'
+        labels:
+          host_address: {{ hostvars[host].ansible_host }}
+          host_name: {{ host }}
+{% endfor %}

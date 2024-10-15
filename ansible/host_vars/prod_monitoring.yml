@@ -1,0 +1,4 @@
+---
+ansible_host: 18.221.181.113
+ansible_host_public_key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIHMnHzfvoIgovGipWsuocNcfcy5up7FStd/n6lEYvj9S
+ansible_user: ubuntu

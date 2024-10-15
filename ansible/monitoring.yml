@@ -1,0 +1,50 @@
+---
+- name: Install and update monitoring server
+  hosts: monitoring
+  gather_facts: false
+
+  pre_tasks:
+    - name: Ensure .ssh exists
+      delegate_to: 127.0.0.1
+      ansible.builtin.file:
+        path: ~/.ssh
+        state: directory
+        mode: '700'
+    - name: Save host public key to ssh known hosts
+      delegate_to: 127.0.0.1
+      ansible.builtin.known_hosts:
+        path: ~/.ssh/known_hosts
+        name: "{{ inventory_hostname }}"
+        key: "{{ inventory_hostname }},{{ ansible_host }} {{ ansible_host_public_key }}"
+    - name: Gather facts
+      ansible.builtin.gather_facts:
+
+  roles:
+    # https://prometheus-community.github.io/ansible/branch/main/prometheus_role.html#ansible-collections-prometheus-prometheus-prometheus-role
+    - role: prometheus.prometheus.prometheus
+      vars:
+        prometheus_config_file: "roles/monitoring/templates/prometheus.yml.j2"
+        prometheus_storage_retention: "1y"
+        prometheus_storage_retention_size: "10GB"
+        prometheus_version: "2.54.1"
+      tags:
+        - prometheus-update
+    - role: prometheus.prometheus.node_exporter
+
+    # https://galaxy.ansible.com/ui/repo/published/grafana/grafana/content/role/grafana/
+    - role: grafana.grafana.grafana
+      vars:
+        grafana_version: "9.1.7"
+        grafana_security:
+          admin_user: admin
+          admin_password: !vault |
+            $ANSIBLE_VAULT;1.1;AES256
+            61646239656131323031353436386236353438353131663362633230323566323736363433396465
+            6134666162633336626135336438353836663335663066390a363737343339373337323736386438
+            33386232636336366333353934316632376461326164333730383831663166396631663963393863
+            3535346336613266320a303135666537346632356139373131633737653834303565666330303936
+            62646635396430643732326165383131333965353866343231326663623934313031
+        grafana_datasources:
+          - name: prometheus
+            type: prometheus
+            url: http://127.0.0.1:9090
