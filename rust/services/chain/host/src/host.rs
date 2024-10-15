@@ -139,6 +139,8 @@ mod test {
 
         use super::*;
 
+        const LATEST: u64 = 20_000_000;
+
         fn test_db() -> ChainDb {
             ChainDb::from_db(InMemoryDatabase::new())
         }
@@ -149,7 +151,7 @@ mod test {
             #[tokio::test]
             async fn initialize() -> anyhow::Result<()> {
                 let host =
-                    Host::from_parts(Prover::default(), mock_provider([20_000_000]), test_db(), 1);
+                    Host::from_parts(Prover::default(), mock_provider([LATEST]), test_db(), 1);
 
                 let chain_update = host.poll().await?;
 
@@ -160,7 +162,7 @@ mod test {
                 assert_eq!(
                     chain_update,
                     ChainUpdate::new(
-                        ChainInfo::new(20_000_000..=20_000_000, B256::ZERO, EMPTY_PROOF.clone()),
+                        ChainInfo::new(LATEST..=LATEST, B256::ZERO, EMPTY_PROOF.clone()),
                         [],
                         []
                     )
@@ -173,20 +175,16 @@ mod test {
                 use alloy_primitives::BlockNumber;
 
                 use super::*;
-                const GENERIS_BLOCK_NUMBER: BlockNumber = 0;
+                const GENERIS: BlockNumber = 0;
 
                 #[tokio::test]
                 async fn no_new_work_back_propagation_finished() -> anyhow::Result<()> {
                     let mut db = test_db();
-                    let chain_info = ChainInfo::new(
-                        GENERIS_BLOCK_NUMBER..=20_000_000,
-                        B256::ZERO,
-                        EMPTY_PROOF.clone(),
-                    );
+                    let chain_info =
+                        ChainInfo::new(GENERIS..=LATEST, B256::ZERO, EMPTY_PROOF.clone());
                     let chain_update = ChainUpdate::new(chain_info.clone(), [], []);
                     db.update_chain(1, chain_update)?;
-                    let host =
-                        Host::from_parts(Prover::default(), mock_provider([20_000_000]), db, 1);
+                    let host = Host::from_parts(Prover::default(), mock_provider([LATEST]), db, 1);
 
                     let chain_update = host.poll().await?;
 
