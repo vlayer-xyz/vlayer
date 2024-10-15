@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use alloy_primitives::{BlockHash, ChainId};
-use chain_server::server::ChainProof as ChainProofRpc;
+use chain_server::server::ChainProof as ChainProofRpcServer;
 use chain_types::ChainProof;
 use mpt::MerkleTrie;
 use provider::BlockNumber;
@@ -14,7 +14,7 @@ pub struct ChainProofClient {
     rpc_client: RpcClient,
 }
 
-fn from_chain_proof_rpc(chain_proof_rpc: ChainProofRpc) -> ChainProof {
+fn from_chain_proof_rpc_server(chain_proof_rpc: ChainProofRpcServer) -> ChainProof {
     ChainProof {
         proof: chain_proof_rpc.proof,
         mpt: MerkleTrie::from_rlp_nodes(chain_proof_rpc.nodes).unwrap(),
@@ -87,10 +87,10 @@ impl ChainProofClient {
             .await
             .map_err(ChainProofClientError::from)?;
 
-        let chain_proof_rpc: ChainProofRpc = serde_json::from_value(result_value)
+        let chain_proof_rpc = serde_json::from_value(result_value)
             .map_err(|e| ChainProofClientError::JsonParseError(e.to_string()))?;
 
-        let chain_proof = from_chain_proof_rpc(chain_proof_rpc);
+        let chain_proof = from_chain_proof_rpc_server(chain_proof_rpc);
 
         Ok(chain_proof)
     }

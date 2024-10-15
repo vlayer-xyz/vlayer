@@ -102,15 +102,14 @@ impl MultiEvmInput {
     }
 
     pub fn group_blocks_by_chain(&self) -> HashMap<ChainId, HashMap<BlockNumber, BlockHash>> {
-        let mut map: HashMap<ChainId, HashMap<BlockNumber, BlockHash>> = HashMap::new();
-
-        for (loc, evm_input) in &self.inputs {
-            map.entry(loc.chain_id)
-                .or_default()
-                .insert(loc.block_number, evm_input.header.hash_slow());
-        }
-
-        map
+        self.inputs
+            .iter()
+            .fold(HashMap::new(), |mut acc, (loc, evm_input)| {
+                acc.entry(loc.chain_id)
+                    .or_default()
+                    .insert(loc.block_number, evm_input.header.hash_slow());
+                acc
+            })
     }
 
     #[allow(clippy::unused_self)]
