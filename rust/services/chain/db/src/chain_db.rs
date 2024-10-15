@@ -1,5 +1,6 @@
 use std::{
     collections::HashSet,
+    fmt,
     hash::Hash,
     io::Read,
     ops::{Deref, DerefMut, Range, RangeInclusive},
@@ -54,11 +55,28 @@ impl ChainInfo {
     }
 }
 
-#[derive(Debug, Default, Clone, Eq, PartialEq)]
+#[derive(Default, Clone, Eq, PartialEq)]
 pub struct ChainUpdate {
     pub chain_info: ChainInfo,
     pub added_nodes: Box<[Bytes]>,
     pub removed_nodes: Box<[Bytes]>,
+}
+
+// Manually implement Debug to format added_nodes and removed_nodes as UpperHex
+impl fmt::Debug for ChainUpdate {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let format_nodes = |nodes: &Box<[Bytes]>| {
+            nodes
+                .iter()
+                .map(|bytes| format!("0x{:x}", bytes))
+                .collect::<Vec<_>>()
+        };
+        f.debug_struct("ChainUpdate")
+            .field("chain_info", &self.chain_info)
+            .field("added_nodes", &format_nodes(&self.added_nodes))
+            .field("removed_nodes", &format_nodes(&self.removed_nodes))
+            .finish()
+    }
 }
 
 impl ChainUpdate {
