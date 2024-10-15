@@ -2026,6 +2026,7 @@ dependencies = [
  "call_engine",
  "call_guest_wrapper",
  "chain",
+ "chain_client",
  "chain_server",
  "ctor",
  "dotenv",
@@ -2041,6 +2042,7 @@ dependencies = [
  "risc0-zkvm",
  "serde",
  "serde_json",
+ "server_utils",
  "test-log",
  "thiserror",
  "tokio",
@@ -2062,8 +2064,10 @@ dependencies = [
  "call_engine",
  "call_host",
  "chain",
+ "chain_server",
  "ethers",
  "hex",
+ "httpmock",
  "lazy_static",
  "reqwest 0.12.5",
  "serde",
@@ -2168,6 +2172,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "chain_client"
+version = "0.1.0"
+dependencies = [
+ "alloy-primitives",
+ "chain_server",
+ "provider",
+ "serde_json",
+ "server_utils",
+ "thiserror",
+ "tracing",
+]
+
+[[package]]
 name = "chain_db"
 version = "0.1.0"
 dependencies = [
@@ -2238,6 +2255,7 @@ dependencies = [
  "axum",
  "axum-jrpc",
  "bincode",
+ "httpmock",
  "lazy_static",
  "mpt",
  "risc0-zkp",
@@ -2376,6 +2394,7 @@ dependencies = [
  "anyhow",
  "call_guest_wrapper",
  "call_server",
+ "chain_server",
  "clap",
  "flate2",
  "hex",
@@ -2385,6 +2404,7 @@ dependencies = [
  "risc0-zkp",
  "serde",
  "serde_json",
+ "server_utils",
  "tar",
  "tempfile",
  "test_runner",
@@ -8694,6 +8714,7 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror",
+ "tokio",
  "tower",
  "tower-http",
  "tower-request-id",
@@ -9291,6 +9312,7 @@ dependencies = [
  "call_engine",
  "call_host",
  "chain",
+ "chain_client",
  "clap",
  "color-eyre",
  "comfy-table",

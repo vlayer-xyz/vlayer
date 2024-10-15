@@ -1,4 +1,5 @@
-use call_server::{ProofMode, ServerConfig};
+use call_server::ServerConfig;
+use chain_server::server::{ChainProof, ChainProofServerMock};
 use clap::{Parser, Subcommand};
 use commands::{
     args::{InitArgs, ServeArgs},
@@ -6,6 +7,7 @@ use commands::{
     serve::run_serve,
     version::Version,
 };
+use serde_json::json;
 use test_runner::cli::TestArgs;
 use tracing::{error, info};
 use tracing_subscriber::EnvFilter;
@@ -53,11 +55,21 @@ async fn main() {
 async fn run() -> Result<(), CLIError> {
     let cli = Cli::parse();
 
+    let chain_proof_server_mock = ChainProofServerMock::start().await;
+    chain_proof_server_mock
+        .mock(json!({}), ChainProof::default())
+        .await;
+
     match cli.command {
         Commands::Serve(serve_args) => {
-            let proof_mode: ProofMode = serve_args.proof.unwrap_or_default().map();
-            let server_config: ServerConfig =
-                ServerConfig::new(serve_args.rpc_url, proof_mode, serve_args.host, serve_args.port);
+            let proof_mode = serve_args.proof.unwrap_or_default().map();
+            let server_config = ServerConfig::new(
+                serve_args.rpc_url,
+                proof_mode,
+                serve_args.host,
+                serve_args.port,
+                chain_proof_server_mock.url(),
+            );
             run_serve(server_config).await?;
         }
         Commands::Init(init_args) => {

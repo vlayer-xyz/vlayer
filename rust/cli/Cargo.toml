@@ -30,6 +30,8 @@ hex = { workspace = true }
 lazy_static = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
+server_utils = { workspace = true }
+chain_server = { workspace = true }
 
 [dev-dependencies]
 regex = "1.10.6"

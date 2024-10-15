@@ -12,6 +12,7 @@ use call_engine::{
     Seal,
 };
 use call_guest_wrapper::RISC0_CALL_GUEST_ELF;
+use chain_client::ChainProofClient;
 use config::HostConfig;
 use error::HostError;
 use ethers_core::types::BlockNumber;
@@ -20,7 +21,6 @@ use provider::{BlockingProvider, CachedMultiProvider, EthProvider, EthersProvide
 use risc0_zkvm::ExecutorEnv;
 use serde::Serialize;
 
-pub use crate::chain_client::ChainProofClient;
 use crate::{
     db::proof::ProofDb, encodable_receipt::EncodableReceipt, evm_env::factory::HostEvmEnvFactory,
     into_input::into_multi_input,
@@ -41,7 +41,7 @@ impl Host<EthProvider> {
         let provider_factory = EthersProviderFactory::new(config.rpc_urls.clone());
         let providers = CachedMultiProvider::new(provider_factory);
         let block_number = get_block_number(&providers, config.start_chain_id)?;
-        let chain_proof_client = ChainProofClient;
+        let chain_proof_client = ChainProofClient::new(config.chain_proof_url.clone());
 
         Host::try_new_with_components(providers, block_number, chain_proof_client, config)
     }
@@ -102,7 +102,8 @@ where
         // todo: use chain proofs in provably_execute
         let _chain_proofs = self
             .chain_proof_client
-            .get_chain_proofs(multi_evm_input.group_blocks_by_chain())?;
+            .get_chain_proofs(multi_evm_input.group_blocks_by_chain())
+            .await?;
 
         let env = build_executor_env(input)
             .map_err(|err| HostError::ExecutorEnvBuilder(err.to_string()))?;
@@ -194,6 +195,7 @@ mod test {
             rpc_urls,
             start_chain_id: TEST_CHAIN_ID,
             proof_mode: ProofMode::Fake,
+            chain_proof_url: String::default(),
         };
         let res = Host::try_new(&config);
 

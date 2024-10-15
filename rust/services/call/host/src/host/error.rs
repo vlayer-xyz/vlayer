@@ -1,5 +1,6 @@
 use alloy_primitives::ChainId;
 use call_engine::{engine::EngineError, io::GuestOutputError};
+use chain_client::ChainProofClientError;
 use provider::ProviderFactoryError;
 use risc0_zkp::verify::VerificationError;
 use thiserror::Error;
@@ -53,4 +54,7 @@ pub enum HostError {
 
     #[error("Seal encoding error: {0}")]
     SealEncodingError(String),
+
+    #[error("Chain Proof Client error: {0}")]
+    ChainProofClient(#[from] ChainProofClientError),
 }
