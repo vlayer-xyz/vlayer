@@ -4,7 +4,7 @@ on:
   push:
     paths:
       - "packages/sdk/**"
-      - ".github/workflows/**"
+      - ".github/workflows/sdk_test.yaml"
     branches:
       - "**"
   merge_group:
