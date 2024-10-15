@@ -9,6 +9,7 @@ struct WebProof {
 
 struct Web {
     string body;
+    string notaryPubKey;
 }
 
 library WebProofLib {
@@ -29,7 +30,19 @@ library WebProofLib {
         require(dataUrl.equal(data[0]), "Incorrect URL");
         require(NOTARY_PUB_KEY.equal(data[3]), "Incorrect notary public key");
 
-        return Web(data[2]);
+        return Web(data[2], data[3]);
+    }
+
+    function doVerify(WebProof memory webProof, string memory dataUrl) internal view returns (Web memory) {
+        (bool success, bytes memory returnData) = VERIFY_AND_PARSE_PRECOMPILE.staticcall(bytes(webProof.webProofJson));
+
+        require(success, "verify_and_parse precompile call failed");
+
+        string[4] memory data = abi.decode(returnData, (string[4]));
+
+        require(dataUrl.equal(data[0]), "Incorrect URL");
+
+        return Web(data[2], data[3]);
     }
 }
 
