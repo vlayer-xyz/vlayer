@@ -8,6 +8,12 @@ Type=simple
 Restart=on-failure
 RestartSec=10
 User=ubuntu
+{% if vlayer_bonsai_api_url is defined %}
+Environment='BONSAI_API_URL={{ vlayer_bonsai_api_url }}'
+{% endif %}
+{% if vlayer_bonsai_api_key is defined %}
+Environment='BONSAI_API_KEY={{ vlayer_bonsai_api_key }}'
+{% endif %}
 ExecStart=/home/{{ ansible_user }}/.vlayer/bin/vlayer serve
 {{- ' --host ' ~ vlayer_prover_host if vlayer_prover_host is defined else '' }}
 {{- ' --port ' ~ vlayer_prover_port if vlayer_prover_port is defined else '' }}
