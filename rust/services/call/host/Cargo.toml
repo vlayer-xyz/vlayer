@@ -11,6 +11,7 @@ host_utils = { workspace = true }
 block_header = { workspace = true }
 call_engine = { workspace = true }
 call_guest_wrapper = { workspace = true }
+chain_types = { workspace = true }
 mpt = { workspace = true }
 alloy-chains = { workspace = true }
 alloy-primitives = { workspace = true, features = ["rlp", "serde"] }

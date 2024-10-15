@@ -1,8 +1,9 @@
 use std::{collections::HashMap, sync::Arc, time::Duration};
 
+use alloy_primitives::Bytes;
 use axum::{body::Body, http::Response};
 use call_server::{server, ProofMode, ServerConfig};
-use chain_server::server::{ChainProof, ChainProofServerMock};
+use chain_server::server::ChainProofServerMock;
 use ethers::{
     contract::abigen,
     core::{
@@ -37,7 +38,10 @@ impl TestHelper {
     pub(crate) async fn post<T: Serialize>(&self, url: &str, body: &T) -> Response<Body> {
         let chain_proof_server_mock = ChainProofServerMock::start().await;
         chain_proof_server_mock
-            .mock(json!({}), ChainProof::default())
+            .mock(json!({}), json!({
+                "proof": Bytes::default(),
+                "nodes": Vec::<Bytes>::default()
+            }))
             .await;
 
         let app = server(ServerConfig {

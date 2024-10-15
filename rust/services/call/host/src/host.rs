@@ -8,7 +8,7 @@ use alloy_sol_types::SolValue;
 use call_engine::{
     engine::{Engine, EngineError},
     evm::env::{cached::CachedEvmEnv, location::ExecutionLocation},
-    io::{Call, GuestInput, GuestOutput, HostOutput},
+    io::{Call, GuestOutput, HostOutput, Input},
     Seal,
 };
 use call_guest_wrapper::RISC0_CALL_GUEST_ELF;
@@ -97,11 +97,11 @@ where
             .chain_proof_client
             .get_chain_proofs(multi_evm_input.group_blocks_by_chain())
             .await?;
-        let input = GuestInput {
+        let input = Input {
             call,
             multi_evm_input: multi_evm_input.clone(),
             start_execution_location: self.start_execution_location,
-            chain_id_to_chain_proof
+            chain_id_to_chain_proof,
         };
 
         let env = build_executor_env(input)

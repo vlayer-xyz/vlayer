@@ -133,19 +133,6 @@ fn parse_json_rpc_response(response_body: Value) -> Result<Value, RpcError> {
     }
 }
 
-fn parse_json_rpc_response(response_body: Value) -> Result<Value, RpcError> {
-    let mut response = response_body;
-    let error = extract_field(&mut response, "error");
-    let result = extract_field(&mut response, "result");
-
-    match (error, result) {
-        (Some(_), Some(_)) => Err(RpcError::InvalidResponse(response)),
-        (Some(error), None) => Err(RpcError::JsonRpc(error)),
-        (None, Some(result)) => Ok(result),
-        (None, None) => Err(RpcError::MissingResult),
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;

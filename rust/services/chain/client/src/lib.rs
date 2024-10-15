@@ -1,8 +1,8 @@
 use std::collections::HashMap;
 
 use alloy_primitives::{BlockHash, ChainId};
-use call_engine::io::ChainProofData;
-use chain_server::server::ChainProof;
+use chain_server::server::ChainProof as ChainProofRpc;
+use chain_types::ChainProof;
 use mpt::MerkleTrie;
 use provider::BlockNumber;
 use serde_json::json;
@@ -12,6 +12,13 @@ use tracing::info;
 
 pub struct ChainProofClient {
     rpc_client: RpcClient,
+}
+
+fn from_chain_proof_rpc(chain_proof_rpc: ChainProofRpc) -> ChainProof {
+    ChainProof {
+        proof: chain_proof_rpc.proof,
+        mpt: MerkleTrie::from_rlp_nodes(chain_proof_rpc.nodes).unwrap(),
+    }
 }
 
 #[derive(Debug, Error)]
@@ -62,7 +69,7 @@ impl ChainProofClient {
         &self,
         chain_id: ChainId,
         block_numbers: Vec<BlockNumber>,
-    ) -> Result<ChainProofData, ChainProofClientError> {
+    ) -> Result<ChainProof, ChainProofClientError> {
         info!(
             "Fetching chain proof for chain_id: {}, block_numbers.len(): {}",
             chain_id,
@@ -80,14 +87,11 @@ impl ChainProofClient {
             .await
             .map_err(ChainProofClientError::from)?;
 
-        let chain_proof: ChainProof = serde_json::from_value(result_value)
+        let chain_proof_rpc: ChainProofRpc = serde_json::from_value(result_value)
             .map_err(|e| ChainProofClientError::JsonParseError(e.to_string()))?;
 
-        let chain_proof_data = ChainProofData {
-            proof: chain_proof.proof,
-            mpt: MerkleTrie::from_rlp_nodes(chain_proof.nodes).unwrap(),
-        };
+        let chain_proof = from_chain_proof_rpc(chain_proof_rpc);
 
-        Ok(chain_proof_data)
+        Ok(chain_proof)
     }
 }

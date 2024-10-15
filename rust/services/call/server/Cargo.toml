@@ -24,6 +24,7 @@ server_utils = { workspace = true }
 chain = { workspace = true }
 httpmock = { workspace = true }
 chain_server = { workspace = true }
+chain_types = { workspace = true }
 
 [dev-dependencies]
 reqwest = { workspace = true }

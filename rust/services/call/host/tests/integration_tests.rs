@@ -1,14 +1,16 @@
 use std::{collections::HashMap, env};
 
 use alloy_chains::{Chain, NamedChain};
-use alloy_primitives::{address, b256, uint, Address, ChainId};
+use alloy_primitives::{
+    address, b256, bytes::Bytes, uint, Address, ChainId,
+};
 use alloy_sol_types::{sol, SolCall};
 use call_host::{
     host::{config::HostConfig, error::HostError, get_block_number, Host},
     Call,
 };
 use chain_client::ChainProofClient;
-use chain_server::server::{ChainProof, ChainProofServerMock};
+use chain_server::server::ChainProofServerMock;
 use dotenv::dotenv;
 use ethers_core::types::BlockNumber as BlockTag;
 use lazy_static::lazy_static;
@@ -77,7 +79,10 @@ where
                 "chain_id": config.start_chain_id,
                 "block_numbers": [block_number]
             }),
-            ChainProof::default(),
+            json!({
+                "proof": Bytes::default(),
+                "nodes": Vec::<Bytes>::default()
+            }),
         )
         .await;
 
