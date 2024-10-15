@@ -10,7 +10,8 @@ use crate::precompiles::{gas_used, map_to_fatal};
 pub(super) const JSON_GET_STRING_PRECOMPILE: Precompile = Precompile::Standard(json_get_string_run);
 pub(super) const JSON_GET_INT_PRECOMPILE: Precompile = Precompile::Standard(json_get_int_run);
 pub(super) const JSON_GET_BOOL_PRECOMPILE: Precompile = Precompile::Standard(json_get_bool_run);
-pub(super) const JSON_GET_ARRAY_LENGTH_PRECOMPILE: Precompile = Precompile::Standard(json_get_array_length);
+pub(super) const JSON_GET_ARRAY_LENGTH_PRECOMPILE: Precompile =
+    Precompile::Standard(json_get_array_length);
 
 /// The base cost of the operation.
 const BASE_COST: u64 = 10;
@@ -53,7 +54,7 @@ fn json_get_bool_run(input: &Bytes, gas_limit: u64) -> PrecompileResult {
 }
 
 fn json_get_array_length(input: &Bytes, gas_limit: u64) -> PrecompileResult {
-    let (len, json_path, gas_used) = process_input_arr(input, gas_limit)?;
+    let (len, gas_used) = process_input_arr(input, gas_limit)?;
     Ok(PrecompileOutput::new(gas_used, len.abi_encode().into()))
 }
 
@@ -84,14 +85,17 @@ fn get_value_by_path<'a>(value: &'a Value, path: &str) -> Option<&'a Value> {
     })
 }
 
-fn process_input_arr(input: &Bytes, gas_limit: u64) -> Result<(u64, String, u64), PrecompileErrors> {
+fn process_input_arr(
+    input: &Bytes,
+    gas_limit: u64,
+) -> Result<(u64, u64), PrecompileErrors> {
     let gas_used = gas_used(input.len(), BASE_COST, PER_WORD_COST, gas_limit)?;
     let [body, json_path] = InputType::abi_decode(input, true).map_err(map_to_fatal)?;
     let body = serde_json::from_str(body.as_str())
         .map_err(|err| map_to_fatal(format!("Error converting string body to json: {}", err)))?;
     let value_by_path = get_array_length_by_path(&body, json_path.as_str())
         .ok_or(map_to_fatal(format!("Missing value at path {json_path}")))?;
-    Ok((value_by_path.try_into().unwrap(), json_path, gas_used))
+    Ok((value_by_path.try_into().unwrap(), gas_used))
 }
 
 fn get_array_length_by_path(value: &Value, path: &str) -> Option<usize> {
