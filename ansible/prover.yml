@@ -1,6 +1,9 @@
 ---
 - name: Install vlayer prover
   hosts: provers
+  # First, we skip gathering facts because on CI we need to
+  # Save all the known ssh hosts before initiating connections.
+  # Facts are gathered right after that.
   gather_facts: false
 
   pre_tasks:
@@ -16,6 +19,9 @@
         path: ~/.ssh/known_hosts
         name: "{{ inventory_hostname }}"
         key: "{{ inventory_hostname }},{{ ansible_host }} {{ ansible_host_public_key }}"
+    - name: Gather facts
+      ansible.builtin.gather_facts:
 
   roles:
     - role: prover
+    - role: prometheus.prometheus.node_exporter
