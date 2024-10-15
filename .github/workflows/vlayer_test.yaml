@@ -8,7 +8,7 @@ on:
       - "rust-toolchain.toml"
       - "rust/**"
       - "examples/**"
-      - ".github/workflows/**"
+      - ".github/workflows/vlayer_test.yaml"
     branches:
       - "**"
   merge_group:

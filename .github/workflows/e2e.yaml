@@ -8,7 +8,7 @@ on:
       - "examples/**"
       - "packages/vlayer/**"
       - "bash/**"
-      - ".github/workflows/**"
+      - ".github/workflows/e2e.yaml"
       - "contracts/**"
   merge_group:
 concurrency:
