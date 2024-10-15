@@ -178,7 +178,7 @@ mod test {
                 const GENERIS: BlockNumber = 0;
 
                 #[tokio::test]
-                async fn no_new_work_back_propagation_finished() -> anyhow::Result<()> {
+                async fn no_new_head_blocks_back_propagation_finished() -> anyhow::Result<()> {
                     let mut db = test_db();
                     let chain_info =
                         ChainInfo::new(GENERIS..=LATEST, B256::ZERO, EMPTY_PROOF.clone());
@@ -192,10 +192,10 @@ mod test {
 
                     Ok(())
                 }
-                // No new work
+                // No new head blocks, back propagation in progress
                 // New head blocks, back propagation finished
                 // New head blocks, back propagation in progress
-                // Too many new blocks
+                // Too many new head blocks
                 // Reorg
             }
         }
