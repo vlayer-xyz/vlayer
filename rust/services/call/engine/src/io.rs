@@ -18,7 +18,7 @@ pub struct Input {
     pub multi_evm_input: MultiEvmInput,
     pub call: Call,
     pub start_execution_location: ExecutionLocation,
-    pub chain_id_to_chain_proof: HashMap<ChainId, ChainProof>,
+    pub chain_proofs: HashMap<ChainId, ChainProof>,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]

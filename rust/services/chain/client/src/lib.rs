@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use alloy_primitives::{BlockHash, ChainId};
-use chain_server::server::ChainProof as ChainProofRpcServer;
+use chain_server::server::ChainProof as RpcChainProof;
 use chain_types::ChainProof;
 use mpt::MerkleTrie;
 use provider::BlockNumber;
@@ -14,10 +14,10 @@ pub struct ChainProofClient {
     rpc_client: RpcClient,
 }
 
-fn from_chain_proof_rpc_server(chain_proof_rpc: ChainProofRpcServer) -> ChainProof {
+fn from_rpc_chain_proof(rpc_chain_proof: RpcChainProof) -> ChainProof {
     ChainProof {
-        proof: chain_proof_rpc.proof,
-        mpt: MerkleTrie::from_rlp_nodes(chain_proof_rpc.nodes).unwrap(),
+        proof: rpc_chain_proof.proof,
+        mpt: MerkleTrie::from_rlp_nodes(rpc_chain_proof.nodes).unwrap(),
     }
 }
 
@@ -57,7 +57,7 @@ impl ChainProofClient {
         let mut chain_id_to_chain_proof = HashMap::new();
 
         for (chain_id, blocks) in blocks_by_chain {
-            let block_numbers: Vec<BlockNumber> = blocks.into_keys().collect();
+            let block_numbers: Vec<_> = blocks.into_keys().collect();
             let proof = self.fetch_chain_proof(chain_id, block_numbers).await?;
             chain_id_to_chain_proof.insert(chain_id, proof);
         }
@@ -87,10 +87,10 @@ impl ChainProofClient {
             .await
             .map_err(ChainProofClientError::from)?;
 
-        let chain_proof_rpc = serde_json::from_value(result_value)
+        let rpc_chain_proof = serde_json::from_value(result_value)
             .map_err(|e| ChainProofClientError::JsonParseError(e.to_string()))?;
 
-        let chain_proof = from_chain_proof_rpc_server(chain_proof_rpc);
+        let chain_proof = from_rpc_chain_proof(rpc_chain_proof);
 
         Ok(chain_proof)
     }

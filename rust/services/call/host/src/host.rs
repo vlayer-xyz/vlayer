@@ -93,7 +93,7 @@ where
 
         let multi_evm_input =
             into_multi_input(self.envs).map_err(|err| HostError::CreatingInput(err.to_string()))?;
-        let chain_id_to_chain_proof = self
+        let chain_proofs = self
             .chain_proof_client
             .get_chain_proofs(multi_evm_input.group_blocks_by_chain())
             .await?;
@@ -101,7 +101,7 @@ where
             call,
             multi_evm_input: multi_evm_input.clone(),
             start_execution_location: self.start_execution_location,
-            chain_id_to_chain_proof,
+            chain_proofs,
         };
 
         let env = build_executor_env(input)

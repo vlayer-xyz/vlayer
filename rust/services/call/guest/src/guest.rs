@@ -24,9 +24,9 @@ impl Guest {
     pub fn new(
         multi_evm_input: MultiEvmInput,
         start_execution_location: ExecutionLocation,
-        chain_id_to_chain_proof: HashMap<ChainId, ChainProof>,
+        chain_proofs: HashMap<ChainId, ChainProof>,
     ) -> Self {
-        multi_evm_input.assert_coherency(chain_id_to_chain_proof);
+        multi_evm_input.assert_coherency(chain_proofs);
         let multi_evm_env = multi_evm_input.into();
         let evm_envs = CachedEvmEnv::from_envs(multi_evm_env);
 
