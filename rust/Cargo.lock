@@ -2219,6 +2219,7 @@ dependencies = [
  "bytes",
  "mpt",
  "risc0-zkp",
+ "risc0-zkvm",
  "serde",
 ]
 

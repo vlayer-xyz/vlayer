@@ -9,6 +9,7 @@ block_header = { workspace = true }
 serde = { workspace = true }
 mpt = { workspace = true }
 risc0-zkp = { workspace = true }
+risc0-zkvm = { workspace = true }
 alloy-primitives = { workspace = true }
 bytes = { workspace = true }
 
