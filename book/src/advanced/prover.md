@@ -29,7 +29,7 @@ All data returned by functions is public. To make an argument public on-chain, r
 
 ### Proof
 
-Once the `WebProver` computation is complete, a proof is generated and made available along with the returned value (e.g., `web.content` in our example). This output can then be consumed and cryptographically verified by the `Verifier` on-chain smart contract.
+Once the `Prover` computation is complete, a proof is generated and made available along with the returned value (e.g., `web.content` in our example). This output can then be consumed and cryptographically verified by the `Verifier` on-chain smart contract.
 
 Note that `web.content` becomes a public input for on-chain verification because it was returned from the `main` function. All other input variables remain private.
 
@@ -71,28 +71,3 @@ The above command deploys the `SimpleProver` contract code to local network.
 If successful, the above command returns the contract address and the `Prover` is ready for generating proofs.
 
 > For production use proper RPC url and [encrypt private key](https://book.getfoundry.sh/reference/cast/cast-wallet-new) instead of using it via plain text
-
-## Prover server
-The vlayer node is an HTTP server that acts as a prover. By default, it accepts JSON-RPC client requests on port `3000`. 
-
-You can start it with the following command:
-```sh
-vlayer serve
-```
-
-See [JSON-RPC API appendix](/appendix/api.md) for more detailed call specification.
-
-### Network Specific Configuration 
-The vlayer prover server can use different RPC node providers to query blockchain data. RPC urls for specific chains can be provided by passing the `rpc-url` configuration parameter:
-```sh 
-vlayer serve --rpc-url <chain-id>:<url>
-```
-
-Configuring multiple RPC URLs at once is also possible:
-```sh
-vlayer serve --rpc-url 11155111:https://eth-sepolia.g.alchemy.com/v2/ --rpc-url 1:https://eth-mainnet.alchemyapi.io/v2/
-```
-
-## Development and going on production
-
-Learn more about proving modes at [Dev & Production](/advanced/dev-and-production.html) chapter.
