@@ -1,4 +1,3 @@
-use alloy_primitives::bytes::Bytes;
 use call_server::ServerConfig;
 use chain_server::server::ChainProofServerMock;
 use clap::{Parser, Subcommand};
@@ -61,8 +60,8 @@ async fn run() -> Result<(), CLIError> {
         .mock(
             json!({}),
             json!({
-                "proof": Bytes::default(),
-                "nodes": Vec::<Bytes>::default()
+                "proof": "",
+                "nodes": []
             }),
         )
         .await;

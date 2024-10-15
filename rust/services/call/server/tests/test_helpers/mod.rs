@@ -1,6 +1,5 @@
 use std::{collections::HashMap, sync::Arc, time::Duration};
 
-use alloy_primitives::Bytes;
 use axum::{body::Body, http::Response};
 use call_server::{server, ProofMode, ServerConfig};
 use chain_server::server::ChainProofServerMock;
@@ -41,8 +40,8 @@ impl TestHelper {
             .mock(
                 json!({}),
                 json!({
-                    "proof": Bytes::default(),
-                    "nodes": Vec::<Bytes>::default()
+                    "proof": "",
+                    "nodes": []
                 }),
             )
             .await;
