@@ -7,13 +7,11 @@ import {IERC20} from "openzeppelin-contracts/token/ERC20/IERC20.sol";
 
 contract AverageBalance is Prover {
     IERC20 immutable token;
-    uint256 immutable chainId;
     uint256 immutable startingBlock;
     uint256 immutable endingBlock;
     uint256 immutable step;
 
-    constructor(uint256 _chainId, IERC20 _token, uint256 _startBlockNo, uint256 _endingBlockNo, uint256 _step) {
-        chainId = _chainId;
+    constructor(IERC20 _token, uint256 _startBlockNo, uint256 _endingBlockNo, uint256 _step) {
         token = _token;
         startingBlock = _startBlockNo;
         endingBlock = _endingBlockNo;
@@ -25,7 +23,7 @@ contract AverageBalance is Prover {
         uint256 iterations = 0;
 
         for (uint256 blockNo = startingBlock; blockNo <= endingBlock; blockNo += step) {
-            setChain(chainId, blockNo);
+            setBlock(blockNo);
             totalBalance += token.balanceOf(_owner);
             iterations += 1;
         }

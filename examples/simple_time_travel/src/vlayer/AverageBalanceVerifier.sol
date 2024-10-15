@@ -12,9 +12,9 @@ contract AverageBalanceVerifier is Verifier {
     mapping(address => bool) public claimed;
     HodlerBadgeNFT public reward;
 
-    constructor(address _prover, HodlerBadgeNFT _nft) {
+    constructor(address _prover) {
         prover = _prover;
-        reward = _nft;
+        reward = new HodlerBadgeNFT();
     }
 
     function claim(Proof calldata, address claimer, uint256 average)
