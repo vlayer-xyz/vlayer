@@ -20,7 +20,7 @@ vlayer `Prover` contracts are almost the same as regular Solidity smart contract
 ## Prover in-depth
 
 ### Prover parent contract
-Any contract function can be run in the vlayer prover, but to access the additional features listed above, the contract should inherit from the `Prover` contract and any function can be used as proving function.
+Any contract function can be run in the vlayer prover, but to access the additional features listed above, the contract should inherit from the `Prover` contract and any function can be used as a proving function.
 
 ### Arguments and returned value
 Arbitrary arguments can be passed to Prover functions. All arguments are private, meaning they are not visible on-chain; however, they are visible to the prover server.
