@@ -28,7 +28,8 @@
             "components/*" : ["./browser-extension/src/components/*"],
             "constants/*" : ["./browser-extension/src/constants/*"],
             "hooks/*" : ["./browser-extension/src/hooks/*"],
-            "lib/*" : ["./browser-extension/src/lib/*"]
+            "lib/*" : ["./browser-extension/src/lib/*"],
+            "@vlayer/web-proof-commons" : ["./web-proof-commons"]
         }
     }
 }

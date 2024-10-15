@@ -16,5 +16,8 @@
     "noImplicitReturns": true,
     "skipLibCheck": true,
     "baseUrl": "./",
+    "paths": {
+      "@vlayer/web-proof-commons" : ["../web-proof-commons"]
+    }
   },
 }

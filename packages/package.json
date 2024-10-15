@@ -23,8 +23,7 @@
     "browser-extension/",
     "sdk/",
     "web-components/",
-    "extension-hooks/",
-    "web-proof-commons/"
+    "extension-hooks/"
   ],
   "trustedDependencies": [
     "viem"

@@ -22,7 +22,6 @@
     "dns-over-http-resolver": "^3.0.3",
     "postal-mime": "^2.3.2",
     "viem": "^2.21.0",
-    "@vlayer/web-proof-commons": "file:../web-proof-commons"
-  },
-  "bundleDependencies": ["@vlayer/web-proof-commons"]
+    "vite-tsconfig-paths": "^5.0.1"
+  }
 }
