@@ -97,9 +97,9 @@ fn process_input_arr(input: &Bytes, gas_limit: u64) -> Result<(u64, u64), Precom
 
 fn get_array_length_by_path(value: &Value, path: &str) -> Option<usize> {
     if path.is_empty() {
-        value.as_array().map(|arr| arr.len())
+        value.as_array().map(std::vec::Vec::len)
     } else {
-        get_value_by_path(value, path).and_then(|v| v.as_array().map(|arr| arr.len()))
+        get_value_by_path(value, path).and_then(|v| v.as_array().map(std::vec::Vec::len))
     }
 }
 
