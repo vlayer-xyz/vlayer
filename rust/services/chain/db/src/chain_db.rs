@@ -1,6 +1,7 @@
 use std::{
     collections::HashSet,
     hash::Hash,
+    io::Read,
     ops::{Deref, DerefMut, Range, RangeInclusive},
     path::Path,
 };
@@ -14,7 +15,7 @@ use nybbles::Nibbles;
 use proof_builder::{MerkleProofBuilder, ProofResult};
 use thiserror::Error;
 
-use crate::{Database, DbError, DbResult, Mdbx, ReadTx, WriteTx};
+use crate::{Database, DbError, DbResult, Mdbx, ReadTx, ReadWriteTx, WriteTx};
 
 mod proof_builder;
 #[cfg(test)]
@@ -74,7 +75,9 @@ impl ChainUpdate {
     }
 }
 
-pub struct ChainDb<DB: for<'a> Database<'a>> {
+type DB = Box<dyn for<'a> Database<'a>>;
+
+pub struct ChainDb {
     db: DB,
 }
 
@@ -94,24 +97,24 @@ pub enum ChainDbError {
 
 pub type ChainDbResult<T> = Result<T, ChainDbError>;
 
-impl ChainDb<Mdbx> {
+impl ChainDb {
     pub fn new(path: impl AsRef<Path>) -> ChainDbResult<Self> {
-        let db = Mdbx::open(path)?;
+        let db = Box::new(Mdbx::open(path)?);
         Ok(Self { db })
     }
 }
 
-impl<DB: for<'a> Database<'a>> ChainDb<DB> {
-    pub fn from_db(db: DB) -> Self {
-        Self { db }
+impl ChainDb {
+    pub fn from_db(db: impl for<'a> Database<'a> + 'static) -> Self {
+        Self { db: Box::new(db) }
     }
 
-    fn begin_ro(&self) -> ChainDbResult<ChainDbTx<<DB as Database<'_>>::ReadTx>> {
+    fn begin_ro(&self) -> ChainDbResult<ChainDbTx<dyn ReadTx + '_>> {
         let tx = self.db.begin_ro()?;
         Ok(ChainDbTx { tx })
     }
 
-    fn begin_rw(&mut self) -> ChainDbResult<ChainDbTx<<DB as Database<'_>>::ReadWriteTx>> {
+    fn begin_rw(&mut self) -> ChainDbResult<ChainDbTx<dyn ReadWriteTx + '_>> {
         let tx = self.db.begin_rw()?;
         Ok(ChainDbTx { tx })
     }
@@ -165,23 +168,23 @@ impl<DB: for<'a> Database<'a>> ChainDb<DB> {
         }
 
         for node in added_nodes {
-            tx.insert_node(node)?;
+            tx.insert_node(&node)?;
         }
 
-        tx.commit()
+        Box::new(tx).commit()
     }
 }
 
-struct ChainDbTx<TX> {
-    tx: TX,
+struct ChainDbTx<TX: ?Sized> {
+    tx: Box<TX>,
 }
 
-impl<TX: ReadTx> ChainDbTx<TX> {
+impl<TX: ReadTx + ?Sized> ChainDbTx<TX> {
     pub fn get_chain_info(&self, chain_id: ChainId) -> ChainDbResult<Option<ChainInfo>> {
         let chain_id = chain_id.to_be_bytes();
         let chain_info = self
             .tx
-            .get(CHAINS, chain_id)?
+            .get(CHAINS, &chain_id[..])?
             .map(|rlp| ChainInfo::decode(&mut rlp.deref()))
             .transpose()?;
         Ok(chain_info)
@@ -190,7 +193,7 @@ impl<TX: ReadTx> ChainDbTx<TX> {
     pub fn get_node(&self, node_hash: B256) -> ChainDbResult<Node> {
         let node_rlp = self
             .tx
-            .get(NODES, node_hash)?
+            .get(NODES, &node_hash[..])?
             .ok_or(ChainDbError::NodeNotFound)?;
         let node = Node::decode(&mut node_rlp.as_ref())?;
         Ok(node)
@@ -202,7 +205,7 @@ impl<TX: ReadTx> ChainDbTx<TX> {
     }
 }
 
-impl<TX: WriteTx> ChainDbTx<TX> {
+impl<TX: WriteTx + ?Sized> ChainDbTx<TX> {
     pub fn upsert_chain_info(
         &mut self,
         chain_id: ChainId,
@@ -210,18 +213,18 @@ impl<TX: WriteTx> ChainDbTx<TX> {
     ) -> ChainDbResult<()> {
         let chain_id = chain_id.to_be_bytes();
         let chain_info_rlp = alloy_rlp::encode(chain_info);
-        self.tx.upsert(CHAINS, chain_id, chain_info_rlp)?;
+        self.tx.upsert(CHAINS, &chain_id[..], &chain_info_rlp[..])?;
         Ok(())
     }
 
-    pub fn insert_node(&mut self, node_rlp: Bytes) -> ChainDbResult<()> {
-        let node_hash = keccak256(&node_rlp);
-        self.tx.insert(NODES, node_hash, node_rlp)?;
+    pub fn insert_node(&mut self, node_rlp: &Bytes) -> ChainDbResult<()> {
+        let node_hash = keccak256(node_rlp);
+        self.tx.insert(NODES, &node_hash[..], &node_rlp[..])?;
         Ok(())
     }
 
     pub fn delete_node(&mut self, node_hash: B256) -> ChainDbResult<()> {
-        self.tx.delete(NODES, node_hash)?;
+        self.tx.delete(NODES, &node_hash[..])?;
         Ok(())
     }
 

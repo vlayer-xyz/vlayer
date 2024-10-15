@@ -1,5 +1,5 @@
 use alloy_primitives::{ChainId, B256};
-use chain_db::{ChainDb, ChainInfo, ChainUpdate, Database};
+use chain_db::{ChainDb, ChainInfo, ChainUpdate};
 use lazy_static::lazy_static;
 use thiserror::Error;
 
@@ -8,9 +8,9 @@ fn main() -> anyhow::Result<()> {
 }
 
 #[allow(dead_code)]
-struct Worker<DB: for<'a> Database<'a>> {
+struct Worker {
     chain_id: ChainId,
-    db: ChainDb<DB>,
+    db: ChainDb,
     provider: (),
 }
 
@@ -27,12 +27,9 @@ enum WorkerError {
     ChainDb(#[from] chain_db::ChainDbError),
 }
 
-impl<DB> Worker<DB>
-where
-    DB: for<'a> Database<'a>,
-{
+impl Worker {
     #[allow(dead_code)]
-    pub fn new(db: ChainDb<DB>, chain_id: ChainId) -> Self {
+    pub fn new(db: ChainDb, chain_id: ChainId) -> Self {
         Worker {
             chain_id,
             db,
@@ -48,7 +45,7 @@ where
     }
 
     #[allow(dead_code)]
-    pub fn db(&self) -> &ChainDb<DB> {
+    pub fn db(&self) -> &ChainDb {
         &self.db
     }
 }

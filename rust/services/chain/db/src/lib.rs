@@ -1,5 +1,7 @@
 #![allow(unused)]
 
+use auto_impl::auto_impl;
+use static_assertions::assert_obj_safe;
 use thiserror::Error;
 
 mod chain_db;
@@ -11,65 +13,40 @@ pub use in_memory::InMemoryDatabase;
 pub use mdbx::Mdbx;
 
 pub trait Database<'a> {
-    type ReadTx: ReadTx + 'a;
-    type ReadWriteTx: ReadWriteTx + 'a;
-
-    fn begin_ro(&'a self) -> DbResult<Self::ReadTx>;
-
-    fn begin_rw(&'a mut self) -> DbResult<Self::ReadWriteTx>;
-
-    fn with_ro_tx<T, F>(&'a self, f: F) -> DbResult<T>
-    where
-        F: FnOnce(&Self::ReadTx) -> DbResult<T> + Sized,
-    {
-        let tx = self.begin_ro()?;
-        f(&tx)
-    }
-
-    fn with_rw_tx<T, F>(&'a mut self, f: F) -> DbResult<T>
-    where
-        F: FnOnce(&mut Self::ReadWriteTx) -> DbResult<T>,
-    {
-        let mut tx = self.begin_rw()?;
-        let res = f(&mut tx)?;
-        tx.commit()?;
-        Ok(res)
-    }
+    fn begin_ro(&'a self) -> DbResult<Box<dyn ReadTx + 'a>>;
+    fn begin_rw(&'a mut self) -> DbResult<Box<dyn ReadWriteTx + 'a>>;
 }
 
+assert_obj_safe!(Database);
+
+#[auto_impl(Box)]
 pub trait ReadTx {
-    fn get(&self, table: impl AsRef<str>, key: impl AsRef<[u8]>) -> DbResult<Option<Box<[u8]>>>;
+    fn get(&self, table: &str, key: &[u8]) -> DbResult<Option<Box<[u8]>>>;
 }
+
+assert_obj_safe!(ReadTx);
 
 // While nothing in code require a mutable reference in insert and delete, we want to
 // discourage the user from sharing a write transaction as this can lead to db data races
+#[auto_impl(Box)]
 pub trait WriteTx {
-    fn create_table(&mut self, table: impl AsRef<str>) -> DbResult<()>;
-
+    fn create_table(&mut self, table: &str) -> DbResult<()>;
     /// Insert `(key, value)` into `table`. Returns `DbError::DuplicateKey` if `key` alredy exists in `table`.
-    fn insert(
-        &mut self,
-        table: impl AsRef<str>,
-        key: impl AsRef<[u8]>,
-        value: impl AsRef<[u8]>,
-    ) -> DbResult<()>;
-
+    fn insert(&mut self, table: &str, key: &[u8], value: &[u8]) -> DbResult<()>;
     /// Insert `(key, value)` into `table` or update to value if `key` already exists in `table`.
-    fn upsert(
-        &mut self,
-        table: impl AsRef<str>,
-        key: impl AsRef<[u8]>,
-        value: impl AsRef<[u8]>,
-    ) -> DbResult<()>;
-
-    fn delete(&mut self, table: impl AsRef<str>, key: impl AsRef<[u8]>) -> DbResult<()>;
-
-    fn commit(self) -> DbResult<()>;
+    fn upsert(&mut self, table: &str, key: &[u8], value: &[u8]) -> DbResult<()>;
+    fn delete(&mut self, table: &str, key: &[u8]) -> DbResult<()>;
+    // Box wrapping is needed for a trait to be object-safe
+    fn commit(self: Box<Self>) -> DbResult<()>;
 }
+
+assert_obj_safe!(WriteTx);
 
 pub trait ReadWriteTx: ReadTx + WriteTx {}
 
-impl<T: ReadTx + WriteTx> ReadWriteTx for T {}
+assert_obj_safe!(ReadWriteTx);
+
+impl<T: ReadTx + WriteTx + ?Sized> ReadWriteTx for T {}
 
 #[derive(Error, Debug, PartialEq, Eq, Clone)]
 pub enum DbError {
