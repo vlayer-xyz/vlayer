@@ -8,24 +8,21 @@ const rustExecutable = "./tlsn-provider-rust/target/release/tlsn-provider"; // A
 async function runRustAndStreamOutput(url: string) {
   return new Promise<string>((resolve) => {
     const rustProcess = spawn(rustExecutable, [url]); // Pass the URL as an argument
+    rustProcess.stdout.pipe(process.stdout);
+    rustProcess.stderr.pipe(process.stderr);
 
-    rustProcess.on("close", (code) => {
-      console.log(`Rust process exited with code ${code}`);
-      const json = fs.readFileSync("./tlsn-provider-rust/proof.json", "utf8");
-      console.log("json", json);
-      resolve(json);
+    rustProcess.on("close", () => {
+      const json = fs.readFileSync("./proof.json", "utf8");
+      fs.unlinkSync("./proof.json");
+      resolve(JSON.parse(json));
     });
   });
 }
 
 // Run the function
 // runRustAndStreamOutput();
-const serverSideTlsnProofProvider = {
+export const serverSideTlsnProofProvider = {
   getWebProof(url: string) {
     return runRustAndStreamOutput(url);
   },
 };
-
-serverSideTlsnProofProvider.getWebProof(
-  " https://www.accountable.capital:10443/binance",
-);

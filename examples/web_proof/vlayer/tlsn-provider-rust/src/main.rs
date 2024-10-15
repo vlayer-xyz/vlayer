@@ -38,6 +38,7 @@ async fn main() {
     println!("Connecting to server: {}", server_domain);
     println!("Path: {}", path);
     println!("Port: {}", port);
+    println!("Notarizing...{}",parsed_url);
     // Start a local simple notary service
     tokio::spawn(run_notary(notary_socket.compat()));
 
@@ -80,7 +81,7 @@ async fn main() {
 
     // Build a simple HTTP request with common headers
     let request = Request::builder()
-        .uri(path)
+        .uri(parsed_url.as_str())
         .header("Host", server_domain)
         .header("Accept", "*/*")
         // Using "identity" instructs the Server not to use compression for its HTTP response.
