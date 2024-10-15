@@ -6,6 +6,7 @@ use std::{
 
 use alloy_primitives::{BlockHash, BlockNumber, Bytes, ChainId, B256};
 use block_header::EvmBlockHeader;
+use chain_types::ChainProof;
 use derive_more::{From, Into, IntoIterator};
 use derive_new::new;
 use mpt::MerkleTrie;
@@ -95,8 +96,9 @@ impl MultiEvmInput {
         Self { inputs }
     }
 
-    pub fn assert_coherency(&self) {
+    pub fn assert_coherency(&self, chain_id_to_chain_proof: HashMap<ChainId, ChainProof>) {
         self.inputs.values().for_each(EvmInput::assert_coherency);
+        self.assert_chain_coherence(chain_id_to_chain_proof);
     }
 
     pub fn group_blocks_by_chain(&self) -> HashMap<ChainId, HashMap<BlockNumber, BlockHash>> {
@@ -109,6 +111,10 @@ impl MultiEvmInput {
         }
 
         map
+    }
+
+    fn assert_chain_coherence(&self, chain_id_to_chain_proof: HashMap<ChainId, ChainProof>) {
+        todo!("assert chain coherence")
     }
 }
 
