@@ -55,5 +55,5 @@ vlayer serve --rpc-url <chain-id>:<url>
 
 You can also configure multiple RPC URLs at once:
 ```sh
-vlayer serve --rpc-url 11155111:https://eth-sepolia.g.alchemy.com/v2/ --rpc-url 1:https://eth-mainnet.alchemyapi.io/v2/
+vlayer serve --rpc-url 11155111:https://eth-sepolia.g.alchemy.com/v2/<mainnet_api_key> --rpc-url 1:https://eth-mainnet.alchemyapi.io/v2/<alchemy_api_key>
 ```
