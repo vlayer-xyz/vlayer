@@ -77,5 +77,5 @@ library WebLib {
         require(success, "json_get_array_length precompile call failed");
 
         return abi.decode(returnData, (uint256));
-     }
+    }
 }
