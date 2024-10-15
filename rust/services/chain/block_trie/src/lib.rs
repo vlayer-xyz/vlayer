@@ -8,6 +8,7 @@ use serde::{Deserialize, Serialize};
 pub struct BlockTrie(MerkleTrie);
 
 impl BlockTrie {
+    #[deprecated(note = "please use `init` instead")]
     pub fn new() -> Self {
         Self(MerkleTrie::new())
     }
@@ -17,6 +18,7 @@ impl BlockTrie {
         self.0.get(key)
     }
 
+    #[deprecated(note = "please use `append/prepend` instead")]
     pub fn insert(&mut self, block_number: u64, hash: &B256) {
         let key = Self::encode_key(block_number);
         self.0.insert(key, hash).expect("insert block number");
