@@ -12,18 +12,22 @@ use revm::{
 };
 
 use crate::precompiles::{
-    json::{JSON_GET_BOOL_PRECOMPILE, JSON_GET_INT_PRECOMPILE, JSON_GET_STRING_PRECOMPILE},
+    json::{
+        JSON_GET_ARRAY_LENGTH_PRECOMPILE, JSON_GET_BOOL_PRECOMPILE, JSON_GET_INT_PRECOMPILE,
+        JSON_GET_STRING_PRECOMPILE,
+    },
     regex::REGEX_MATCH_PRECOMPILE,
     verify_and_parse::VERIFY_AND_PARSE_PRECOMPILE,
     verify_and_parse_email::VERIFY_EMAIL_PRECOMPILE,
 };
 
-pub(crate) const VLAYER_PRECOMPILES: [PrecompileWithAddress; 6] = [
+pub(crate) const VLAYER_PRECOMPILES: [PrecompileWithAddress; 7] = [
     PrecompileWithAddress(u64_to_address(0x100), VERIFY_AND_PARSE_PRECOMPILE),
     PrecompileWithAddress(u64_to_address(0x101), VERIFY_EMAIL_PRECOMPILE),
     PrecompileWithAddress(u64_to_address(0x102), JSON_GET_STRING_PRECOMPILE),
     PrecompileWithAddress(u64_to_address(0x103), JSON_GET_INT_PRECOMPILE),
     PrecompileWithAddress(u64_to_address(0x104), JSON_GET_BOOL_PRECOMPILE),
+    PrecompileWithAddress(u64_to_address(0x105), JSON_GET_ARRAY_LENGTH_PRECOMPILE),
     PrecompileWithAddress(u64_to_address(0x110), REGEX_MATCH_PRECOMPILE),
 ];
 
