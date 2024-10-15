@@ -3,7 +3,7 @@ name: SDK Test
 on:
   push:
     paths:
-      - "packages/vlayer/sdk/**"
+      - "packages/sdk/**"
       - ".github/workflows/**"
     branches:
       - "**"
@@ -21,8 +21,8 @@ jobs:
       - name: Install TypeScript prerequisites
         uses: ./.github/actions/ts-prerequisites
       - name: Install packages
-        working-directory: packages/vlayer/sdk
+        working-directory: packages/sdk
         run: bun install
       - name: Run SDK tests
-        working-directory: packages/vlayer/sdk
+        working-directory: packages/sdk
         run: bun test

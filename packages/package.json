@@ -21,7 +21,8 @@
   "workspaces": [
     "test-web-app/",
     "browser-extension/",
-    "vlayer/*",
+    "sdk/",
+    "web-components/",
     "extension-hooks/",
     "web-proof-commons/"
   ],

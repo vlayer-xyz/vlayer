@@ -11,7 +11,7 @@
   "dependencies": {
     "@noble/hashes": "^1.4.0",
     "@types/node": "^22.5.4",
-    "@vlayer/sdk": "file:../../../packages/vlayer/sdk",
+    "@vlayer/sdk": "file:../../../packages/sdk",
     "solhint": "^5.0.3",
     "viem": "^2.21.9",
     "vite-tsconfig-paths": "^5.0.1"

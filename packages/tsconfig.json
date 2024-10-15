@@ -24,7 +24,7 @@
         "noUnusedParameters": false,
         "noPropertyAccessFromIndexSignature": false,
         "paths": {
-            "types/*": ["./vlayer/sdk/src/api/lib/types/*"],
+            "types/*": ["./sdk/src/api/lib/types/*"],
             "components/*" : ["./browser-extension/src/components/*"],
             "constants/*" : ["./browser-extension/src/constants/*"],
             "hooks/*" : ["./browser-extension/src/hooks/*"],
