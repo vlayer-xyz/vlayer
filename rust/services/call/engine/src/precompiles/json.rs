@@ -85,10 +85,7 @@ fn get_value_by_path<'a>(value: &'a Value, path: &str) -> Option<&'a Value> {
     })
 }
 
-fn process_input_arr(
-    input: &Bytes,
-    gas_limit: u64,
-) -> Result<(u64, u64), PrecompileErrors> {
+fn process_input_arr(input: &Bytes, gas_limit: u64) -> Result<(u64, u64), PrecompileErrors> {
     let gas_used = gas_used(input.len(), BASE_COST, PER_WORD_COST, gas_limit)?;
     let [body, json_path] = InputType::abi_decode(input, true).map_err(map_to_fatal)?;
     let body = serde_json::from_str(body.as_str())
