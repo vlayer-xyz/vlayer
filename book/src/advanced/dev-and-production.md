@@ -4,33 +4,21 @@ The vlayer node is an HTTP server that acts as a prover and supports two proving
 - **DEVELOPMENT**: Used for development and testing. It executes code and verifies the correctness of execution but does not perform actual proving. In this mode, the `Verifier` contract can confirm computations, but a malicious `Prover` could exploit the system.
 - **PRODUCTION**: Intended for production and final testing, this mode performs real proving.
 
-The vlayer prover node can be run locally, but it is not mandatory. By default, the vlayer client SDK communicates with a pre-deployed prover running in development mode.
+Prover node can be run locally, but it is not mandatory. By default, the vlayer client SDK communicates with a pre-deployed prover running in development mode.
 
-## Running the Prover Server
-Assuming vlayer is [installed](/getting-started/installation.html), you can start it with the following command:
+## Running prover in development mode
+Assuming vlayer is [installed](/getting-started/installation.html), you can start it in development mode with the following command:
 ```sh
 vlayer serve
 ```
-By default, it listens for JSON-RPC client requests on port `3000`.
-
-See the [JSON-RPC API appendix](/appendix/api.md) for detailed specifications on API calls.
-
-### Development Mode
-By default, the vlayer node runs in `DEVELOPMENT` mode:
-
-```sh
-vlayer serve
-```
-
-You can also specify the `--proof` argument explicitly:
-
+By default, it listens for JSON-RPC client requests on port `3000`. You can also specify the `--proof` argument explicitly:
 ```sh
 vlayer serve --proof fake
 ```
-
+See the [JSON-RPC API appendix](/appendix/api.md) for detailed specifications on API calls.
 > Note: Development mode is limited to test and dev chains to prevent accidental errors.
 
-### Production Mode
+## Production Mode
 Production mode is slower than development mode and requires significant computational resources. 
 
 To speed up proof generation, vlayer supports the use of infrastructure like the [Bonsai zk coprocessor](https://www.bonsai.xyz/) (and eventually Boundless) to offload heavy computations to high-performance machines.
