@@ -14,6 +14,7 @@ vlayer_alchemy_api_key: !vault |
   3763623233653161396139633032356631356433343539383832
 vlayer_prover_rpc_urls:
  - "11155111:https://eth-sepolia.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
+ - "11155420:https://opt-sepolia.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
  - "1:https://eth-mainnet.g.alchemy.com/v2/${{ vlayer_alchemy_api_key }}"
  - "8453:https://base-mainnet.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
  - "10:https://opt-mainnet.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
