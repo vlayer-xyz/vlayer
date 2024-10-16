@@ -50,4 +50,4 @@ vlayer serve --proof groth16
 
 You can request a `BONSAI_API_KEY` [here](https://docs.google.com/forms/d/e/1FAIpQLSf9mu18V65862GS4PLYd7tFTEKrl90J5GTyzw_d14ASxrruFQ/viewform).
 
-> Note: Protocols should be designed with proving execution times in mind, as it may take several minutes to generate proofs.
+> Note: Protocols should be designed with proving execution times in mind, as it may take a few minutes to generate proof.
