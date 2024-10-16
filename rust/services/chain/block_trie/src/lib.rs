@@ -29,7 +29,7 @@ impl BlockTrie {
             .get(old_leftmost_block.number())
             .expect("failed to get old leftmost block hash");
         assert_eq!(old_leftmost_block_hash, old_leftmost_block.hash_slow(), "block hash mismatch");
-        self.insert_unchecked(old_leftmost_block.number() - 1, &old_leftmost_block.parent_hash());
+        self.insert_unchecked(old_leftmost_block.number() - 1, old_leftmost_block.parent_hash());
     }
 
     pub fn from_unchecked(mpt: MerkleTrie) -> Self {

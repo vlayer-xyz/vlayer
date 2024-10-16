@@ -175,10 +175,10 @@ mod test {
             use super::*;
 
             fn assert_trie_proof(
-                proof: Bytes,
+                proof: &Bytes,
                 nodes: impl IntoIterator<Item = Bytes>,
             ) -> anyhow::Result<BlockTrie> {
-                let receipt: Receipt = bincode::deserialize(&proof)?;
+                let receipt: Receipt = bincode::deserialize(proof)?;
                 receipt.verify(*GUEST_ID)?;
 
                 let (proven_root, elf_id): (B256, Digest) = receipt.journal.decode()?;
@@ -215,7 +215,7 @@ mod test {
 
                 assert_eq!(first_block..=last_block, LATEST..=LATEST);
 
-                let block_trie = assert_trie_proof(zk_proof, added_nodes)?;
+                let block_trie = assert_trie_proof(&zk_proof, added_nodes)?;
                 assert_eq!(block_trie.hash_slow(), root_hash);
 
                 block_trie.get(LATEST).expect("block not found");
