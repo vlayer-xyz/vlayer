@@ -91,7 +91,7 @@ const { hash } = await vlayer.prove({
 Wait for the proving to be finished, and then retrieve the result along with Proof.
 
 ```ts
-const { proof, result } = await vlayer.waitForProvingResult({ hash });
+const result = await vlayer.waitForProvingResult({ hash });
 ```
 
 ## Verification
@@ -107,6 +107,6 @@ testHelpers.createAnvilClient().writeContract({
     address,
     account
     functionName: 'verify',
-    args: [proof, ...result, 'additional arg'],
+    args: result,
 })
 ```

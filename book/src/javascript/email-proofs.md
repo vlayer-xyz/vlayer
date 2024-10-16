@@ -31,10 +31,7 @@ const unverifiedEmail = await preverifyEmail(email);
 const vlayer = createVlayerClient();
 
 const { hash } = await vlayer.prove(prover, emailProofProver.abi, "main", [unverifiedEmail]);
-const {
-  proof,
-  returnValue: [result],
-} = await vlayer.waitForProvingResult({ hash });
+const result = await vlayer.waitForProvingResult({ hash });
 ```
 
 The `email.eml` file should be a valid email, probably exported from your email client.
