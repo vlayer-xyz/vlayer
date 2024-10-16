@@ -15,6 +15,8 @@ impl BlockTrie {
         trie
     }
 
+    /// `new_rightmost_block` is the header of the block to be appended, i.e. the next
+    /// block after the block with highest number currently stored in the trie
     pub fn append(&mut self, new_rightmost_block: &dyn EvmBlockHeader) {
         let parent_block_idx = new_rightmost_block.number() - 1;
         let parent_block_hash = self
