@@ -6,7 +6,7 @@ The vlayer node is an HTTP server that acts as a prover and supports two proving
 
 By default, the vlayer client SDK communicates with `http://127.0.0.1:3000`.
 
-## Running prover in development mode
+## Running prover for development
 Assuming vlayer is [installed](/getting-started/installation.html), you can start it in development mode with the following command:
 ```sh
 vlayer serve
@@ -18,10 +18,10 @@ vlayer serve --proof fake
 See the [JSON-RPC API appendix](/appendix/api.md) for detailed specifications on API calls.
 > Note: Development mode is limited to test and dev chains to prevent accidental errors.
 
-## Production Mode
+## GROTH16 Mode
 Production mode is slower than development mode and requires significant computational resources. 
 
-To speed up proof generation, vlayer supports the use of infrastructure like the [Bonsai zk coprocessor](https://www.bonsai.xyz/) (and eventually Boundless) to offload heavy computations to high-performance machines.
+To speed up proof generation, vlayer supports the use of infrastructure like the [Bonsai](https://www.bonsai.xyz/) (and eventually Boundless) to offload heavy computations to high-performance machines.
 
 To run a vlayer node in production mode, use this command:
 
@@ -36,14 +36,16 @@ You can request a `BONSAI_API_KEY` [here](https://docs.google.com/forms/d/e/1FAI
 > Note: Protocols should be designed with proving execution times in mind, as it may take several minutes to generate proofs.
 
 ## Network-Specific Configuration
-The vlayer prover server can use different RPC node providers to query blockchain data. You can pass specific RPC URLs for each chain using the `rpc-url` parameter:
+The vlayer prover server require urls of RPC node providers to query blockchain data. You can pass specific RPC URLs for each chain using the `--rpc-url` parameter:
 ```sh
 vlayer serve --rpc-url <chain-id>:<url>
 ```
 
-You can also configure multiple RPC URLs at once:
+To configure multiple RPC URLs use `--rpc-url` parameter many times:
 ```sh
-vlayer serve --rpc-url 11155111:https://eth-sepolia.g.alchemy.com/v2/<mainnet_api_key> --rpc-url 1:https://eth-mainnet.alchemyapi.io/v2/<alchemy_api_key>
+vlayer serve \
+  --rpc-url 1:https://eth-mainnet.alchemyapi.io/v2/<alchemy_api_key> \
+  --rpc-url 10:https://opt-mainnet.g.alchemy.com/v2/<optimism_api_key> 
 ```
 
-> Note: By default, no RPC node providers are configured. You will need to specify them manually using the --rpc-url parameter when running the vlayer prover.
+> Note: By default, no RPC node providers are configured. You will need to specify them manually using the --rpc-url parameter to run the vlayer prover.
