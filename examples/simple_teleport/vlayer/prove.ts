@@ -1,15 +1,15 @@
 import type { Address } from "viem";
 
 import { testHelpers, createVlayerClient } from "@vlayer/sdk";
-import simpleTravelProver from "../out/SimpleTravelProver.sol/SimpleTravelProver";
-import simpleTravelVerifier from "../out/SimpleTravelVerifier.sol/SimpleTravel";
+import simpleTeleportProver from "../out/SimpleTeleportProver.sol/SimpleTeleportProver";
+import simpleTeleportVerifier from "../out/SimpleTeleportVerifier.sol/SimpleTeleportVerifier";
 import whaleBadgeNFT from "../out/WhaleBadgeNFT.sol/WhaleBadgeNFT";
 
 const john = testHelpers.getTestAccount().address;
 
 const deployProver = async () => {
   const prover: Address = await testHelpers.deployContract(
-    simpleTravelProver,
+    simpleTeleportProver,
     [],
   );
 
@@ -23,7 +23,7 @@ const deployVerifier = async (prover: Address) => {
   );
 
   const verifier: Address = await testHelpers.deployContract(
-    simpleTravelVerifier,
+    simpleTeleportVerifier,
     [prover, rewardNFT],
   );
 
@@ -36,7 +36,7 @@ const vlayer = createVlayerClient();
 
 const { hash } = await vlayer.prove({
   address: proverAddr,
-  proverAbi: simpleTravelProver.abi,
+  proverAbi: simpleTeleportProver.abi,
   functionName: "crossChainBalanceOf",
   args: [john],
 });
@@ -46,7 +46,7 @@ console.log("Response:", proof, result);
 const verifierAddr = await deployVerifier(proverAddr);
 const receipt = await testHelpers.writeContract(
   verifierAddr,
-  simpleTravelVerifier.abi,
+  simpleTeleportVerifier.abi,
   "claim",
   [proof, ...result],
 );
