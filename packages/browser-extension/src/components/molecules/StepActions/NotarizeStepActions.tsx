@@ -6,7 +6,7 @@ import { Button } from "components/atoms";
 import { useTlsnProver } from "hooks/useTlsnProver";
 import { AnimatePresence, motion } from "framer-motion";
 import sendMessageToServiceWorker from "lib/sendMessageToServiceWorker";
-import { ExtensionMessageType } from "@vlayer/web-proof-commons";
+import { ExtensionMessageType } from "../../../web-proof-commons";
 
 type NotarizeStepActionProps = {
   isVisited: boolean;

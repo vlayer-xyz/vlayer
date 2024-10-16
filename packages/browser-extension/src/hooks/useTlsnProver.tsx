@@ -8,7 +8,7 @@ import React, {
   useState,
 } from "react";
 import { formatTlsnHeaders } from "lib/formatTlsnHeaders";
-import { isDefined, ExtensionMessageType } from "@vlayer/web-proof-commons";
+import { isDefined, ExtensionMessageType } from "../web-proof-commons";
 import { useProvingSessionConfig } from "./useProvingSessionConfig";
 import { useProvenUrl } from "./useProvenUrl";
 import { useTrackHistory } from "hooks/useTrackHistory";

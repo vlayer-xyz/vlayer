@@ -21,7 +21,6 @@
       "constants/*" : ["./src/constants/*"],
       "hooks/*" : ["./src/hooks/*"],
       "lib/*" : ["./src/lib/*"],
-      "@vlayer/web-proof-commons" : ["./web-proof-commons"]
     }
   },
 }
