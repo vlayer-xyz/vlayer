@@ -98,7 +98,7 @@ impl MultiEvmInput {
 
     pub fn assert_coherency(
         &self,
-        chain_proofs: HashMap<ChainId, ChainProof>,
+        chain_proofs: &HashMap<ChainId, ChainProof>,
         verify_chain_proofs: bool,
     ) {
         self.inputs.values().for_each(EvmInput::assert_coherency);
@@ -107,8 +107,7 @@ impl MultiEvmInput {
         }
     }
 
-    #[allow(clippy::needless_pass_by_value)]
-    fn assert_chain_coherence(&self, chain_proofs: HashMap<ChainId, ChainProof>) {
+    fn assert_chain_coherence(&self, chain_proofs: &HashMap<ChainId, ChainProof>) {
         for (chain_id, blocks) in self.group_blocks_by_chain() {
             let chain_proof = chain_proofs.get(&chain_id).expect("chain proof not found");
             for (block_number, block_hash) in blocks {
