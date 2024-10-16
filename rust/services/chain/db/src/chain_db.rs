@@ -76,7 +76,7 @@ pub struct ChainUpdate {
 // Manually implement Debug to format added_nodes and removed_nodes as LowerHex
 impl fmt::Debug for ChainUpdate {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let format_nodes = |nodes: &Box<[Bytes]>| {
+        let format_nodes = |nodes: &[Bytes]| {
             nodes
                 .iter()
                 .map(|bytes| format!("{:#x}", bytes))
@@ -175,7 +175,7 @@ impl ChainDb {
             .into_iter()
             .chain(last_block_proof)
             .collect();
-        // SAFETY - All data in DB is trusted
+        // SAFETY: All data in DB is trusted
         let block_trie = BlockTrie::from_unchecked(trie);
 
         Ok(Some(ChainTrie::new(chain_info.block_range(), block_trie)))
