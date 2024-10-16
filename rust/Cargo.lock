@@ -2179,6 +2179,7 @@ name = "chain_client"
 version = "0.1.0"
 dependencies = [
  "alloy-primitives",
+ "block_trie",
  "call_engine",
  "chain_server",
  "chain_types",
@@ -2278,7 +2279,7 @@ name = "chain_types"
 version = "0.1.0"
 dependencies = [
  "alloy-primitives",
- "mpt",
+ "block_trie",
  "serde",
 ]
 

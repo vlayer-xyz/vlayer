@@ -12,6 +12,10 @@ impl BlockTrie {
         Self(MerkleTrie::new())
     }
 
+    pub fn from_mpt(mpt: MerkleTrie) -> Self {
+        Self(mpt)
+    }
+
     pub fn get(&self, block_number: u64) -> Option<&[u8]> {
         let key = Self::encode_key(block_number);
         self.0.get(key)

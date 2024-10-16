@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use alloy_primitives::{BlockHash, ChainId};
+use block_trie::BlockTrie;
 use chain_server::server::ChainProof as ChainProofRpcServer;
 use chain_types::ChainProof;
 use mpt::MerkleTrie;
@@ -17,7 +18,7 @@ pub struct ChainProofClient {
 fn from_chain_proof_rpc_server(chain_proof_rpc: ChainProofRpcServer) -> ChainProof {
     ChainProof {
         proof: chain_proof_rpc.proof,
-        mpt: MerkleTrie::from_rlp_nodes(chain_proof_rpc.nodes).unwrap(),
+        mpt: BlockTrie::from_mpt(MerkleTrie::from_rlp_nodes(chain_proof_rpc.nodes).unwrap()),
     }
 }
 

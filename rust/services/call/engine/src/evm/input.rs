@@ -112,10 +112,23 @@ impl MultiEvmInput {
             })
     }
 
-    #[allow(clippy::unused_self)]
     #[allow(clippy::needless_pass_by_value)]
-    fn assert_chain_coherence(&self, _chain_id_to_chain_proof: HashMap<ChainId, ChainProof>) {
-        // todo: assert chain coherence
+    fn assert_chain_coherence(&self, chain_proofs: HashMap<ChainId, ChainProof>) {
+        let blocks_by_chain: HashMap<u64, HashMap<u64, alloy_primitives::FixedBytes<32>>> =
+            self.group_blocks_by_chain();
+        for (chain_id, blocks) in blocks_by_chain {
+            let chain_proof = chain_proofs.get(&chain_id).expect("chain proof not found");
+            for (block_number, block_hash) in blocks {
+                assert_eq!(
+                    chain_proof
+                        .mpt
+                        .get(block_number)
+                        .expect("block hash not found"),
+                    block_hash,
+                    "Block hash mismatch"
+                );
+            }
+        }
     }
 }
 

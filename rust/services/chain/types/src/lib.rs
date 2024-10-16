@@ -1,9 +1,9 @@
 use alloy_primitives::bytes::Bytes;
-use mpt::MerkleTrie;
+use block_trie::BlockTrie;
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Default, Serialize, Deserialize)]
 pub struct ChainProof {
     pub proof: Bytes,
-    pub mpt: MerkleTrie,
+    pub mpt: BlockTrie,
 }
