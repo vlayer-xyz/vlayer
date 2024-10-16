@@ -4,7 +4,7 @@ The vlayer node is an HTTP server that acts as a prover and supports two proving
 - **DEVELOPMENT**: Used for development and testing. It executes code and verifies the correctness of execution but does not perform actual proving. In this mode, the `Verifier` contract can confirm computations, but a malicious `Prover` could exploit the system.
 - **PRODUCTION**: Intended for production and final testing, this mode performs real proving.
 
-Prover node can be run locally, but it is not mandatory. By default, the vlayer client SDK communicates with a pre-deployed prover running in development mode.
+Prover node should be run locally, but in near future this would not be mandatory. By default, the vlayer client SDK communicates with `http://127.0.0.1:3000`.
 
 ## Running prover in development mode
 Assuming vlayer is [installed](/getting-started/installation.html), you can start it in development mode with the following command:
@@ -45,3 +45,5 @@ You can also configure multiple RPC URLs at once:
 ```sh
 vlayer serve --rpc-url 11155111:https://eth-sepolia.g.alchemy.com/v2/<mainnet_api_key> --rpc-url 1:https://eth-mainnet.alchemyapi.io/v2/<alchemy_api_key>
 ```
+
+> Note: By default, no RPC node providers are configured. You will need to specify them manually using the --rpc-url parameter when running the vlayer prover.
