@@ -11,7 +11,6 @@ axum-jrpc = { workspace = true }
 ethers = { workspace = true }
 hex = { workspace = true }
 http-body-util = { workspace = true }
-httpmock = { workspace = true }
 mime = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
@@ -23,6 +22,7 @@ tracing = { workspace = true }
 host_utils = { workspace = true }
 reqwest = { workspace = true }
 tokio = { workspace = true }
+mockito = "1.5.0"
 
 [lints]
 workspace = true

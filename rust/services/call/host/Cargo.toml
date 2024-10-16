@@ -17,7 +17,6 @@ alloy-chains = { workspace = true }
 alloy-primitives = { workspace = true, features = ["rlp", "serde"] }
 ethers-core = { workspace = true }
 thiserror = { workspace = true }
-httpmock = { workspace = true }
 url = { workspace = true }
 alloy-sol-types = { workspace = true }
 anyhow = { workspace = true }

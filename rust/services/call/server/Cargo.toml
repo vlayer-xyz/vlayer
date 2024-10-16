@@ -22,7 +22,6 @@ alloy-chains = { workspace = true }
 web_proof = { workspace = true }
 server_utils = { workspace = true }
 chain = { workspace = true }
-httpmock = { workspace = true }
 chain_server = { workspace = true }
 
 [dev-dependencies]
