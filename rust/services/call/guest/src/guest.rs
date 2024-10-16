@@ -14,6 +14,8 @@ use chain_types::ChainProof;
 
 use crate::db::wrap_state::WrapStateDb;
 
+const VERIFY_CHAIN_PROOFS: bool = false;
+
 pub struct Guest {
     start_execution_location: ExecutionLocation,
     evm_envs: CachedEvmEnv<WrapStateDb>,
@@ -26,7 +28,7 @@ impl Guest {
         start_execution_location: ExecutionLocation,
         chain_proofs: HashMap<ChainId, ChainProof>,
     ) -> Self {
-        multi_evm_input.assert_coherency(chain_proofs);
+        multi_evm_input.assert_coherency(chain_proofs, VERIFY_CHAIN_PROOFS);
         let multi_evm_env = multi_evm_input.into();
         let evm_envs = CachedEvmEnv::from_envs(multi_evm_env);
 
