@@ -10,7 +10,7 @@ import {
   ExtensionMessageType,
   type MessageToExtension,
   WebProof,
-} from "@vlayer/web-proof-commons";
+} from "../../../web-proof-commons";
 
 // NOTE @types/chrome and webextension-polyfill work only in the extension context
 // and looks that there is no community driven package providing typings for chrome.runtime

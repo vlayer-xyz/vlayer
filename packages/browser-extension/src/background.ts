@@ -3,7 +3,7 @@ import {
   ExtensionAction,
   ExtensionMessage,
   ExtensionMessageType,
-} from "@vlayer/web-proof-commons";
+} from "./web-proof-commons";
 import { WebProverSessionContextManager } from "./state/webProverSessionContext";
 import { match, P } from "ts-pattern";
 

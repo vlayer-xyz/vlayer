@@ -10,7 +10,7 @@ import React, {
   useState,
 } from "react";
 import { formatTlsnHeaders } from "lib/formatTlsnHeaders";
-import { ExtensionMessageType } from "@vlayer/web-proof-commons";
+import { ExtensionMessageType } from "../web-proof-commons";
 import { WebProverSessionContextManager } from "../state/webProverSessionContext";
 import sendMessageToServiceWorker from "lib/sendMessageToServiceWorker";
 

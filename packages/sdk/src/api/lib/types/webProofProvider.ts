@@ -5,7 +5,7 @@ import {
   WebProof,
   WebProofStepExpectUrl,
   WebProofStepStartPage,
-} from "@vlayer/web-proof-commons";
+} from "../../../web-proof-commons";
 
 export type WebProofSetupInput = {
   logoUrl: string;

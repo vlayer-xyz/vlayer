@@ -24,8 +24,6 @@
     "paths": {
       "types/*": ["./src/api/lib/types/*"],
       "testHelpers/*": ["./src/testHelpers/*"],
-      "@vlayer/web-proof-commons" : ["./web-proof-commons"],
     },
-
   }
 }
