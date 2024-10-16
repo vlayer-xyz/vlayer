@@ -1,6 +1,6 @@
 use std::{
     collections::HashSet,
-    fmt::{self, LowerHex},
+    fmt::{self, format, LowerHex},
     hash::Hash,
     io::Read,
     ops::{Deref, DerefMut, Range, RangeInclusive},
@@ -11,6 +11,7 @@ use alloy_primitives::{keccak256, ChainId, B256};
 use alloy_rlp::{Bytes as RlpBytes, BytesMut, Decodable, Encodable, RlpDecodable, RlpEncodable};
 use block_trie::BlockTrie;
 use bytes::Bytes;
+use derivative::Derivative;
 use mpt::{KeyNibbles, MerkleTrie, Node, NodeRef, EMPTY_ROOT_HASH};
 use nybbles::Nibbles;
 use proof_builder::{MerkleProofBuilder, ProofResult};
@@ -28,23 +29,24 @@ const NODES: &str = "nodes";
 /// Chains table. Holds `chain_id -> chain_info` mapping
 const CHAINS: &str = "chains";
 
-#[derive(Clone, PartialEq, Eq, RlpEncodable, RlpDecodable, Default)]
+fn lower_hex(bytes: impl LowerHex, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    write!(f, "{:#x}", bytes)
+}
+
+fn slice_lower_hex(slice: &[impl LowerHex], f: &mut fmt::Formatter<'_>) -> fmt::Result {
+    f.debug_list()
+        .entries(slice.iter().map(|item| format!("{:#x}", item)))
+        .finish()
+}
+
+#[derive(Clone, PartialEq, Eq, RlpEncodable, RlpDecodable, Default, Derivative)]
+#[derivative(Debug)]
 pub struct ChainInfo {
     pub first_block: u64,
     pub last_block: u64,
     pub root_hash: B256,
+    #[derivative(Debug(format_with = "lower_hex"))]
     pub zk_proof: RlpBytes,
-}
-
-// Manually implement Debug to format zk_proof as LowerHex
-impl fmt::Debug for ChainInfo {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        f.debug_struct("ChainInfo")
-            .field("range", &(self.first_block..=self.last_block))
-            .field("root_hash", &self.root_hash)
-            .field("zk_proof", &format!("{:#x}", self.zk_proof))
-            .finish()
-    }
 }
 
 impl ChainInfo {
@@ -66,28 +68,14 @@ impl ChainInfo {
     }
 }
 
-#[derive(Default, Clone, Eq, PartialEq)]
+#[derive(Default, Clone, Eq, PartialEq, Derivative)]
+#[derivative(Debug)]
 pub struct ChainUpdate {
     pub chain_info: ChainInfo,
+    #[derivative(Debug(format_with = "slice_lower_hex"))]
     pub added_nodes: Box<[Bytes]>,
+    #[derivative(Debug(format_with = "slice_lower_hex"))]
     pub removed_nodes: Box<[Bytes]>,
-}
-
-// Manually implement Debug to format added_nodes and removed_nodes as LowerHex
-impl fmt::Debug for ChainUpdate {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        let format_nodes = |nodes: &[Bytes]| {
-            nodes
-                .iter()
-                .map(|bytes| format!("{:#x}", bytes))
-                .collect::<Vec<_>>()
-        };
-        f.debug_struct("ChainUpdate")
-            .field("chain_info", &self.chain_info)
-            .field("added_nodes", &format_nodes(&self.added_nodes))
-            .field("removed_nodes", &format_nodes(&self.removed_nodes))
-            .finish()
-    }
 }
 
 impl ChainUpdate {

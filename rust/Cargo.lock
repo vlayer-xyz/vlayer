@@ -2200,6 +2200,7 @@ dependencies = [
  "auto_impl",
  "block_trie",
  "bytes",
+ "derivative",
  "libmdbx",
  "mpt",
  "nybbles",
