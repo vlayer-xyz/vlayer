@@ -5,6 +5,8 @@ use alloy_primitives::ChainId;
 use block_trie::BlockTrie;
 use bytes::Bytes;
 use chain_db::{ChainDb, ChainInfo, ChainUpdate};
+use chain_guest::Input;
+use chain_guest_wrapper::{RISC0_CHAIN_GUEST_ELF, RISC0_CHAIN_GUEST_ID};
 pub use config::HostConfig;
 pub use error::HostError;
 use ethers::{
@@ -15,18 +17,19 @@ use ethers::{
 use host_utils::Prover;
 use lazy_static::lazy_static;
 use provider::{to_eth_block_header, EvmBlockHeader};
-use risc0_zkvm::{ExecutorEnv, ProveInfo};
+use risc0_zkvm::{sha::Digest, ExecutorEnv, ProveInfo};
 use serde::Serialize;
 
 lazy_static! {
     static ref EMPTY_PROOF: Bytes = Bytes::new();
+    static ref GUEST_ID: Digest = RISC0_CHAIN_GUEST_ID.into();
 }
 
 pub struct Host<P>
 where
     P: JsonRpcClient,
 {
-    _prover: Prover,
+    prover: Prover,
     provider: Provider<P>,
     db: ChainDb,
     chain_id: ChainId,
@@ -54,7 +57,7 @@ where
         chain_id: ChainId,
     ) -> Self {
         Host {
-            _prover: prover,
+            prover,
             provider,
             db,
             chain_id,
@@ -70,9 +73,22 @@ where
 
     async fn initialize(&self) -> Result<ChainUpdate, HostError> {
         let latest_block = self.get_block(BlockTag::Latest).await?;
+        let latest_block_number = latest_block.number();
         let block_trie = BlockTrie::init(&*latest_block);
-        let range = latest_block.number()..=latest_block.number();
-        let chain_info = ChainInfo::new(range, block_trie.hash_slow(), EMPTY_PROOF.clone());
+
+        let input = Input::Initialize {
+            elf_id: *GUEST_ID,
+            block: latest_block,
+        };
+        let executor_env = build_executor_env(input)?;
+        let ProveInfo { receipt, .. } =
+            provably_execute(&self.prover, executor_env, RISC0_CHAIN_GUEST_ELF)?;
+
+        let receipt_bytes: Bytes = bincode::serialize(&receipt)
+            .expect("failed to serialize receipt")
+            .into();
+        let range = latest_block_number..=latest_block_number;
+        let chain_info = ChainInfo::new(range, block_trie.hash_slow(), receipt_bytes);
         let chain_update = ChainUpdate::new(chain_info, &block_trie, []);
         Ok(chain_update)
     }
@@ -109,8 +125,12 @@ fn provably_execute(
         .map_err(|err| HostError::Prover(err.to_string()))
 }
 
-fn _build_executor_env(input: impl Serialize) -> anyhow::Result<ExecutorEnv<'static>> {
-    ExecutorEnv::builder().write(&input)?.build()
+fn build_executor_env(input: impl Serialize) -> Result<ExecutorEnv<'static>, HostError> {
+    ExecutorEnv::builder()
+        .write(&input)
+        .map_err(|err| HostError::ExecutorEnvBuilder(err.to_string()))?
+        .build()
+        .map_err(|err| HostError::ExecutorEnvBuilder(err.to_string()))
 }
 
 #[cfg(test)]
@@ -148,40 +168,54 @@ mod test {
         }
 
         mod poll {
-            use test_utils::fake_block;
+            use alloy_primitives::B256;
+            use mpt::MerkleTrie;
+            use risc0_zkvm::Receipt;
 
             use super::*;
 
             #[tokio::test]
             async fn initialize() -> anyhow::Result<()> {
-                let block_trie = BlockTrie::init(&*fake_block(20_000_000));
                 let host =
                     Host::from_parts(Prover::default(), mock_provider([LATEST]), test_db(), 1);
 
-                let chain_update = host.poll().await?;
+                let ChainUpdate {
+                    chain_info:
+                        ChainInfo {
+                            first_block,
+                            last_block,
+                            root_hash,
+                            zk_proof,
+                        },
+                    added_nodes,
+                    removed_nodes,
+                } = host.poll().await?;
 
                 host.provider.as_ref().assert_request(
                     "eth_getBlockByNumber",
                     Value::Array(vec!["latest".into(), false.into()]),
                 )?;
-                assert_eq!(
-                    chain_update,
-                    ChainUpdate::new(
-                        ChainInfo::new(
-                            LATEST..=LATEST,
-                            block_trie.hash_slow(),
-                            EMPTY_PROOF.clone()
-                        ),
-                        &block_trie,
-                        []
-                    )
-                );
+
+                assert_eq!(first_block..=last_block, LATEST..=LATEST);
+
+                let receipt: Receipt = bincode::deserialize(&zk_proof)?;
+                receipt.verify(*GUEST_ID)?;
+
+                let (proven_root, elf_id): (B256, Digest) = receipt.journal.decode()?;
+                assert_eq!(elf_id, *GUEST_ID);
+                let merkle_trie = MerkleTrie::from_rlp_nodes(added_nodes)?;
+                assert_eq!(merkle_trie.hash_slow(), proven_root);
+                assert_eq!(root_hash, proven_root);
+
+                let block_trie = BlockTrie::from(merkle_trie);
+                block_trie.get(LATEST).expect("block not found");
+                assert!(removed_nodes.is_empty());
 
                 Ok(())
             }
 
             mod append_prepend {
-                use alloy_primitives::BlockNumber;
+                use alloy_primitives::{BlockNumber, B256};
 
                 use super::*;
                 const GENERIS: BlockNumber = 0;

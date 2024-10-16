@@ -1,6 +1,6 @@
 use std::{
     collections::HashSet,
-    fmt,
+    fmt::{self, LowerHex},
     hash::Hash,
     io::Read,
     ops::{Deref, DerefMut, Range, RangeInclusive},
@@ -28,12 +28,23 @@ const NODES: &str = "nodes";
 /// Chains table. Holds `chain_id -> chain_info` mapping
 const CHAINS: &str = "chains";
 
-#[derive(Debug, Clone, PartialEq, Eq, RlpEncodable, RlpDecodable, Default)]
+#[derive(Clone, PartialEq, Eq, RlpEncodable, RlpDecodable, Default)]
 pub struct ChainInfo {
     pub first_block: u64,
     pub last_block: u64,
     pub root_hash: B256,
     pub zk_proof: RlpBytes,
+}
+
+// Manually implement Debug to format zk_proof as LowerHex
+impl fmt::Debug for ChainInfo {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.debug_struct("ChainInfo")
+            .field("range", &(self.first_block..=self.last_block))
+            .field("root_hash", &self.root_hash)
+            .field("zk_proof", &format!("{:#x}", self.zk_proof))
+            .finish()
+    }
 }
 
 impl ChainInfo {
@@ -62,13 +73,13 @@ pub struct ChainUpdate {
     pub removed_nodes: Box<[Bytes]>,
 }
 
-// Manually implement Debug to format added_nodes and removed_nodes as UpperHex
+// Manually implement Debug to format added_nodes and removed_nodes as LowerHex
 impl fmt::Debug for ChainUpdate {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         let format_nodes = |nodes: &Box<[Bytes]>| {
             nodes
                 .iter()
-                .map(|bytes| format!("0x{:x}", bytes))
+                .map(|bytes| format!("{:#x}", bytes))
                 .collect::<Vec<_>>()
         };
         f.debug_struct("ChainUpdate")
