@@ -71,35 +71,3 @@ The above command deploys the `SimpleProver` contract code to local network.
 If successful, the above command returns the contract address and the `Prover` is ready for generating proofs.
 
 > For production use proper RPC url and [encrypt private key](https://book.getfoundry.sh/reference/cast/cast-wallet-new) instead of using it via plain text
-
-## Prover server
-The vlayer node is an HTTP server that acts as a prover. By default, it accepts JSON-RPC client requests on port `3000`. 
-
-You can start it with the following command:
-```sh
-vlayer serve
-```
-
-See [JSON-RPC API appendix](/appendix/api.md) for more detailed call specification.
-
-### Network Specific Configuration 
-The vlayer prover server can use different RPC node providers to query blockchain data. RPC urls for specific chains can be provided by passing the `rpc-url` configuration parameter:
-```sh 
-vlayer serve --rpc-url <chain-id>:<url>
-```
-
-Configuring multiple RPC URLs at once is also possible:
-```sh
-vlayer serve --rpc-url 11155111:https://eth-sepolia.g.alchemy.com/v2/ --rpc-url 1:https://eth-mainnet.alchemyapi.io/v2/
-```
-
-## Proving Modes
-
-The vlayer node provides two proving modes:
-
-- `DEVELOPMENT` - For development and testing only. It executes code and verifies the correctness of the execution, but doesn't perform any actual proving. In this mode, the `Verifier` contract verifies the correctness of computations, but it can be cheated by a malicious `Prover`.
-- `PRODUCTION` - Intended for production and final testing. It performs the actual proving.
-
-> By default, the vlayer node operates in the `DEVELOPMENT` mode.
-> Note that the `PRODUCTION` mode is much slower than the `DEVELOPMENT` mode. It is important to design protocols with proving execution time in mind, which takes at least a few minutes.
-> The `DEVELOPMENT` mode only works on development and test chains to avoid accidental errors.
