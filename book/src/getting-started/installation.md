@@ -12,7 +12,11 @@
 The easiest way to install vlayer is by using `vlayerup`, the vlayer toolchain installer.
 
 ## Prerequisites
-Before you can start working with vlayer and run examples, you need to install [Git](https://git-scm.com/downloads) and [Foundry](https://book.getfoundry.sh/getting-started/installation)
+Before working with vlayer, ensure the following tools are installed:
+- [Git](https://git-scm.com/downloads)
+- [Foundry](https://book.getfoundry.sh/getting-started/installation)
+
+Additionally, you'll need [Bun](https://bun.sh/) to run examples. For more details, refer to the [Running Examples Locally](/getting-started/first-steps.html#running-examples-locally) section.
 
 ## Get vlayerup
 
