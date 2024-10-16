@@ -26,6 +26,8 @@ impl BlockTrie {
         self.insert_unchecked(new_rightmost_block.number(), &new_rightmost_block.hash_slow());
     }
 
+    /// `old_leftmost_block` is the header of the block with lowest number currently
+    /// stored in the trie
     pub fn prepend(&mut self, old_leftmost_block: &dyn EvmBlockHeader) {
         let old_leftmost_block_hash = self
             .get(old_leftmost_block.number())
