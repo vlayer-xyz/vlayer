@@ -8,6 +8,7 @@ Type=simple
 Restart=on-failure
 RestartSec=10
 User=ubuntu
+Environment=PATH=/home/ubuntu/.cargo/bin/:$PATH
 {% if vlayer_bonsai_api_url is defined %}
 Environment='BONSAI_API_URL={{ vlayer_bonsai_api_url }}'
 {% endif %}
