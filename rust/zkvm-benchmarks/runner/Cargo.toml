@@ -1,0 +1,24 @@
+[package]
+name = "zkvm-benchmarks-runner"
+version = "0.1.0"
+edition = "2021"
+
+[[bin]]
+name = "benchmarks"
+path = "src/main.rs"
+
+[dependencies]
+anyhow = { workspace = true }
+risc0-zkvm = { workspace = true }
+host_utils = { workspace = true }
+zkvm-benchmarks-common = { workspace = true }
+
+[build-dependencies]
+risc0-build = { workspace = true }
+anyhow = { workspace = true }
+
+[package.metadata.risc0]
+methods = ["risc0_guest"]
+
+[lints]
+workspace = true

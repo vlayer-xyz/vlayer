@@ -10844,6 +10844,32 @@ dependencies = [
 ]
 
 [[package]]
+name = "zkvm-benchmarks"
+version = "0.1.0"
+dependencies = [
+ "risc0-zkvm",
+]
+
+[[package]]
+name = "zkvm-benchmarks-common"
+version = "0.1.0"
+dependencies = [
+ "bincode",
+ "serde",
+]
+
+[[package]]
+name = "zkvm-benchmarks-runner"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "host_utils",
+ "risc0-build",
+ "risc0-zkvm",
+ "zkvm-benchmarks-common",
+]
+
+[[package]]
 name = "zopfli"
 version = "0.8.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
