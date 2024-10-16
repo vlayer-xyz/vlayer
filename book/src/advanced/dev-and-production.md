@@ -21,7 +21,7 @@ See the [JSON-RPC API appendix](/appendix/api.md) for detailed specifications on
 ## GROTH16 Mode
 Production mode is slower than development mode and requires significant computational resources. 
 
-To speed up proof generation, vlayer supports the use of infrastructure like the [Bonsai](https://www.bonsai.xyz/) (and eventually Boundless) to offload heavy computations to high-performance machines.
+To speed up proof generation, vlayer supports the use of infrastructure like the [Bonsai](https://www.bonsai.xyz/) (and eventually [Boundless](https://beboundless.xyz/)) to offload heavy computations to high-performance machines.
 
 To run a vlayer node in production mode, use this command:
 
