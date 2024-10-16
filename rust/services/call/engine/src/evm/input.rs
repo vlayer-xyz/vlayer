@@ -111,14 +111,11 @@ impl MultiEvmInput {
         for (chain_id, blocks) in self.group_blocks_by_chain() {
             let chain_proof = chain_proofs.get(&chain_id).expect("chain proof not found");
             for (block_number, block_hash) in blocks {
-                assert_eq!(
-                    chain_proof
-                        .block_trie
-                        .get(block_number)
-                        .expect("block hash not found"),
-                    block_hash,
-                    "block hash mismatch"
-                );
+                let trie_block_hash = chain_proof
+                    .block_trie
+                    .get(block_number)
+                    .expect("block hash not found");
+                assert_eq!(trie_block_hash, block_hash, "block hash mismatch");
             }
         }
     }
