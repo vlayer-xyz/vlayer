@@ -5,6 +5,5 @@
         { "path": "extension-hooks/tsconfig.json" },
         { "path": "sdk/tsconfig.json" },
         { "path": "web-components/tsconfig.json" },
-        { "path": "web-proof-commons/tsconfig.json" }
     ]
 }
