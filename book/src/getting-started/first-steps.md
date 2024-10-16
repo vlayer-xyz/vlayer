@@ -30,7 +30,7 @@ The vlayer directory structure resembles a typical Foundry project but with two 
 ## Running examples locally
 
 ### All examples
-You need to install [Bun](https://bun.sh/) to build and run the examples.
+> ❗️ Make sure that you have [Bun](https://bun.sh/) installed in your system to build and run the examples.
 
 To run vlayer examples locally, first build the contracts by navigating to your project folder and running:
 ```bash
@@ -64,6 +64,11 @@ vlayer serve \
   --rpc-url '1:https://eth-mainnet.g.alchemy.com/v2/{ALCHEMY_KEY}' \
   --rpc-url '8453:https://base-mainnet.g.alchemy.com/v2/{ALCHEMY_KEY}' \
   --rpc-url '10:https://opt-mainnet.g.alchemy.com/v2/{ALCHEMY_KEY}'
+```
+
+To run the example from within the `vlayer` directory, use the following command:
+```sh
+bun run prove.ts
 ```
 
 ### Web Proof example
