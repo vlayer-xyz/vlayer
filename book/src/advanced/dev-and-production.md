@@ -1,7 +1,7 @@
 # Dev & Production Modes
 
 The vlayer node is an HTTP server that acts as a prover and supports two proving modes:
-- **DEVELOPMENT**: Used for development and testing. It executes code and verifies the correctness of execution but does not perform actual proving. In this mode, the `Verifier` contract can confirm computations, but a malicious `Prover` could exploit the system.
+- **FAKE**: Used for development and testing. It executes code and verifies the correctness of execution but does not perform actual proving. In this mode, the `Verifier` contract can confirm computations, but a malicious `Prover` could exploit the system.
 - **GROTH16**: Intended for production and final testing, this mode performs real proving.
 
 By default, the vlayer client SDK communicates with `http://127.0.0.1:3000`.
