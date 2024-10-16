@@ -80,9 +80,9 @@ where
             elf_id: *GUEST_ID,
             block: latest_block,
         };
-        let receipt = self.prove(input)?;
+        let zk_proof = self.prove(input)?;
         let range = latest_block_number..=latest_block_number;
-        let chain_info = ChainInfo::new(range, block_trie.hash_slow(), receipt);
+        let chain_info = ChainInfo::new(range, block_trie.hash_slow(), zk_proof);
         let chain_update = ChainUpdate::new(chain_info, &block_trie, []);
         Ok(chain_update)
     }
