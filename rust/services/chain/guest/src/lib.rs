@@ -1,9 +1,8 @@
 use alloy_primitives::B256;
 use block_header::EvmBlockHeader;
 use block_trie::BlockTrie;
-use bytes::Bytes;
-use mpt::MerkleTrie;
 use risc0_zkp::core::digest::Digest;
+use risc0_zkvm::{guest::env, serde::to_vec};
 use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Serialize, Deserialize)]
@@ -17,13 +16,12 @@ pub enum Input {
         prepend_blocks: Vec<Box<dyn EvmBlockHeader>>,
         append_blocks: Vec<Box<dyn EvmBlockHeader>>,
         old_leftmost_block: Box<dyn EvmBlockHeader>,
-        mpt_nodes: Box<[Bytes]>,
+        block_trie: BlockTrie,
     },
 }
 
 fn initialize(elf_id: Digest, block: &dyn EvmBlockHeader) -> (B256, Digest) {
-    let mut trie = BlockTrie::new();
-    trie.insert(block.number(), &block.hash_slow());
+    let trie = BlockTrie::init(block);
     (trie.hash_slow(), elf_id)
 }
 
@@ -32,35 +30,20 @@ fn append_prepend(
     prepend_blocks: impl DoubleEndedIterator<Item = Box<dyn EvmBlockHeader>>,
     append_blocks: impl Iterator<Item = Box<dyn EvmBlockHeader>>,
     mut old_leftmost_block: Box<dyn EvmBlockHeader>,
-    mut mpt: BlockTrie,
+    mut block_trie: BlockTrie,
 ) -> (B256, Digest) {
+    let prev_proof_output = to_vec(&(block_trie.hash_slow(), elf_id)).expect("failed to serialize");
+    env::verify(elf_id, &prev_proof_output).expect("failed to verify previous ZK proof");
+
     for block in append_blocks {
-        mpt = append(mpt, &*block);
+        block_trie.append(&*block);
     }
     for block in prepend_blocks.rev() {
-        mpt = prepend(mpt, &*old_leftmost_block);
+        block_trie.prepend(&*old_leftmost_block);
         old_leftmost_block = block;
     }
-    (mpt.hash_slow(), elf_id)
-}
 
-fn append(mut mpt: BlockTrie, new_rightmost_block: &dyn EvmBlockHeader) -> BlockTrie {
-    let parent_block_idx = new_rightmost_block.number() - 1;
-    let parent_block_hash = mpt
-        .get(parent_block_idx)
-        .expect("failed to get parent block hash");
-    assert_eq!(parent_block_hash, new_rightmost_block.parent_hash(), "block hash mismatch");
-    mpt.insert(new_rightmost_block.number(), &new_rightmost_block.hash_slow());
-    mpt
-}
-
-fn prepend(mut mpt: BlockTrie, old_leftmost_block: &dyn EvmBlockHeader) -> BlockTrie {
-    let old_leftmost_block_hash = mpt
-        .get(old_leftmost_block.number())
-        .expect("failed to get old leftmost block hash");
-    assert_eq!(old_leftmost_block_hash, old_leftmost_block.hash_slow(), "block hash mismatch");
-    mpt.insert(old_leftmost_block.number() - 1, old_leftmost_block.parent_hash());
-    mpt
+    (block_trie.hash_slow(), elf_id)
 }
 
 pub fn main(input: Input) -> (B256, Digest) {
@@ -71,17 +54,13 @@ pub fn main(input: Input) -> (B256, Digest) {
             prepend_blocks,
             append_blocks,
             old_leftmost_block,
-            mpt_nodes,
-        } => {
-            let mpt = MerkleTrie::from_rlp_nodes(mpt_nodes.into_vec())
-                .expect("failed to construct MPT from RLP nodes");
-            append_prepend(
-                elf_id,
-                prepend_blocks.into_iter(),
-                append_blocks.into_iter(),
-                old_leftmost_block,
-                mpt.into(),
-            )
-        }
+            block_trie,
+        } => append_prepend(
+            elf_id,
+            prepend_blocks.into_iter(),
+            append_blocks.into_iter(),
+            old_leftmost_block,
+            block_trie,
+        ),
     }
 }

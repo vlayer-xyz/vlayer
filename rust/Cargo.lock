@@ -1973,7 +1973,7 @@ dependencies = [
  "chain",
  "chain_types",
  "derive-new",
- "derive_more 0.99.18",
+ "derive_more 1.0.0",
  "email_proof",
  "mpt",
  "once_cell",
@@ -2179,6 +2179,7 @@ name = "chain_client"
 version = "0.1.0"
 dependencies = [
  "alloy-primitives",
+ "block_trie",
  "call_engine",
  "chain_server",
  "chain_types",
@@ -2200,6 +2201,7 @@ dependencies = [
  "auto_impl",
  "block_trie",
  "bytes",
+ "derive_more 1.0.0",
  "libmdbx",
  "mpt",
  "nybbles",
@@ -2219,6 +2221,7 @@ dependencies = [
  "bytes",
  "mpt",
  "risc0-zkp",
+ "risc0-zkvm",
  "serde",
 ]
 
@@ -2236,6 +2239,7 @@ dependencies = [
  "alloy-primitives",
  "alloy-rlp",
  "anyhow",
+ "bincode",
  "block_trie",
  "bytes",
  "chain_db",
@@ -6400,7 +6404,7 @@ dependencies = [
  "alloy-trie",
  "anyhow",
  "bytes",
- "derive_more 0.99.18",
+ "derive_more 1.0.0",
  "itertools 0.13.0",
  "lazy_static",
  "nybbles",

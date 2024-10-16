@@ -32,9 +32,9 @@ fn block_header(block_num: u64) -> B256 {
 }
 
 fn insert_blocks(db: &mut ChainDb, blocks: impl IntoIterator<Item = BlockNumber>) -> (B256, Node) {
-    let mut block_trie = BlockTrie::new();
+    let mut block_trie = BlockTrie::from_unchecked(MerkleTrie::new());
     for block_num in blocks {
-        block_trie.insert(block_num, &block_header(block_num))
+        block_trie.insert_unchecked(block_num, &block_header(block_num))
     }
 
     let mut tx = db.begin_rw().expect("begin_rw failed");
@@ -49,8 +49,9 @@ fn check_proof(db: &ChainDb, root_hash: B256, block_num: u64) -> BlockTrie {
     let proof = db
         .get_merkle_proof(root_hash, block_num)
         .expect("get_merkle_proof failed");
-    let proof_trie: BlockTrie = proof.into_vec().into_iter().collect::<MerkleTrie>().into();
-    assert_eq!(proof_trie.get(block_num).unwrap(), block_header(block_num));
+    let proof_trie: BlockTrie =
+        BlockTrie::from_unchecked(proof.into_vec().into_iter().collect::<MerkleTrie>());
+    assert_eq!(proof_trie.get(block_num).unwrap(), &block_header(block_num));
     proof_trie
 }
 
@@ -173,9 +174,11 @@ fn get_chain_trie() -> Result<()> {
 fn update_chain() -> Result<()> {
     let mut db = get_test_db();
 
-    let mut trie = BlockTrie::new();
-    trie.insert(1, &block_header(1));
-    trie.insert(2, &block_header(2));
+    let mut trie = BlockTrie::from_unchecked(MerkleTrie::new());
+
+    trie.insert_unchecked(1, &block_header(1));
+    trie.insert_unchecked(2, &block_header(2));
+
     let root_hash = trie.hash_slow();
     let rlp_nodes = (&trie).into_iter();
     let chain_info = ChainInfo::new((1..=3), root_hash, EMPTY_PROOF);
@@ -184,9 +187,8 @@ fn update_chain() -> Result<()> {
     for block_num in [1, 2] {
         check_proof(&db, root_hash, block_num);
     }
-
-    trie.insert(0, &block_header(0));
-    trie.insert(3, &block_header(3));
+    trie.insert_unchecked(0, &block_header(0));
+    trie.insert_unchecked(3, &block_header(3));
     let new_root_hash = trie.hash_slow();
     let (added_nodes, removed_nodes) = difference(rlp_nodes, &trie);
     let chain_info = ChainInfo::new((0..=2), new_root_hash, EMPTY_PROOF);
