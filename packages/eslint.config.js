@@ -26,7 +26,6 @@ export default [
       "@typescript-eslint/no-floating-promises": "warn",
       "@typescript-eslint/no-misused-promises": "warn",
       "@typescript-eslint/require-await": "warn",
-      "@typescript-eslint/prefer-promise-reject-errors": "warn",
     },
     languageOptions: {
       globals: {

@@ -63,7 +63,7 @@ export const createExtensionWebProofProvider = (
             resolve(message.proof);
           }
           if (message.type === ExtensionMessageType.ProofError) {
-            reject(message.error);
+            reject(new Error(message.error));
           }
         });
       });
