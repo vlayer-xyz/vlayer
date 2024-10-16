@@ -59,8 +59,54 @@ Currently, accessing fields inside arrays is not supported.
 ## Regular Expressions
 Regular expressions are a powerful tool for finding patterns in text.
 
-We provide a function to match a regular expression against a string:
-- `matches` checks if a string matches a regular expression and returns `true` if a match is found.
+We provide a set of functions to match a regular expression against a string.
+- `matches` checks if a string matches a regular expression and returns `true` if a match is found;
+- `find` - as an addition to `matches`, it returns a tuple `(bool, Match)`, where the second param indicates the index of the string where the matched substring starts, in case if many substrings match, the first one is returned;
+- `findAll` - `matches` and `find` functions return on the first match, whereas this function returns a list of tuples pointing to all starting positions of the matched substrings; 
+- `captures` -  TODO
+- `capturesAll` - TODO
+
+
+```solidity
+
+struct Match {
+  uint256 beginOffset;
+  uint256 endOffset; // first character not included in the match
+}
+
+struct CatureResult {
+  uint256 beginOffset;
+  uint256 endOffset; // first character not included in the match
+  Capture[] captures;
+}
+
+struct Capture {
+  string name;
+  uint256 beginOffset;
+  uint256 endOffset; // first character not included in the match
+}
+
+interface RegexLib {
+
+
+  function match(string memory text, string memory regex) returns (bool);
+  function find(string memory text, string memory regex) returns (bool, Match memory) ;
+
+  function captures(string memory text, string memory regex) returns (bool, CaptureResult memory);
+
+  function findAll(string memory text, string memory regex) returns (bool, Match[] memory) ;
+  function capturesAll(string memory text, string memory regex) returns (bool, CaptureResult[] memory);
+  
+}
+
+interface CaptureResultLib {
+
+  // search capture by its name
+  function get(CaptureResult memory capture, string memory name) returns (Capture memory); 
+
+}
+
+```
 
 ```solidity
 import {Prover} from "vlayer/Prover.sol";
@@ -79,4 +125,26 @@ contract RegexMatchProof is Prover {
 }
 ```
 
- 
+### Which function to use?
+It's worth noting that regular expressions can become computation intensive, which may significantly increase both execution and proving time.
+It's crucial to only ask for what is actually needed, which is the reasoning for providing not just a one, generic regex function, but a whole set of them; 
+so that one can decide which function suits the use-case.
+
+### Algorithm complexity (aka. Big-O notation)
+Given:
+- `m` - linear lenght of the regular expression, wher linear length is the lenght of the regex after all repetitions has been expanded ex. `a{5}` -> `aaaaa`;
+- `n` - lenght of the string matched against
+
+Then the complexity of each of the operation is as following:
+- `match`, `find`, `find_captures` - bound by `O(m*n)`;
+- `find_all`, `captures_all` - are bound by `O(m*n^2)`, since in worst case scenarios we have to make the whole computation `n` times, to find all occurences. 
+
+### Limits
+Upper limits are defined as below:
+- `m` is limited to 100;
+- `n` is limited to 5 242 880 characters (~5Mb);
+- `n*m` is limited to 5 242 880.
+
+### Syntax
+Underneath, vlayer uses [`regex`](https://docs.rs/regex/latest/regex) rust crate, so syntax if fully compatible with the library. 
+
