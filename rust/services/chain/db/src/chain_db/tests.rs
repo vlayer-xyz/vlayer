@@ -32,7 +32,7 @@ fn block_header(block_num: u64) -> B256 {
 }
 
 fn insert_blocks(db: &mut ChainDb, blocks: impl IntoIterator<Item = BlockNumber>) -> (B256, Node) {
-    let mut block_trie = BlockTrie::new();
+    let mut block_trie = BlockTrie::new_unchecked();
     for block_num in blocks {
         block_trie.insert(block_num, &block_header(block_num))
     }
@@ -49,8 +49,9 @@ fn check_proof(db: &ChainDb, root_hash: B256, block_num: u64) -> BlockTrie {
     let proof = db
         .get_merkle_proof(root_hash, block_num)
         .expect("get_merkle_proof failed");
-    let proof_trie: BlockTrie = proof.into_vec().into_iter().collect::<MerkleTrie>().into();
-    assert_eq!(proof_trie.get(block_num).unwrap(), block_header(block_num));
+    let proof_trie: BlockTrie =
+        BlockTrie::from_unchecked(proof.into_vec().into_iter().collect::<MerkleTrie>());
+    assert_eq!(proof_trie.get(block_num).unwrap(), &block_header(block_num));
     proof_trie
 }
 
@@ -173,7 +174,7 @@ fn get_chain_trie() -> Result<()> {
 fn update_chain() -> Result<()> {
     let mut db = get_test_db();
 
-    let mut trie = BlockTrie::new();
+    let mut trie = BlockTrie::new_unchecked();
     trie.insert(1, &block_header(1));
     trie.insert(2, &block_header(2));
     let root_hash = trie.hash_slow();

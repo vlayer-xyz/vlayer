@@ -186,7 +186,8 @@ mod test {
                 let merkle_trie = MerkleTrie::from_rlp_nodes(nodes)?;
                 assert_eq!(merkle_trie.hash_slow(), proven_root);
 
-                let block_trie = BlockTrie::from(merkle_trie);
+                // SAFETY: We verified the root against the proof
+                let block_trie = BlockTrie::from_unchecked(merkle_trie);
                 Ok(block_trie)
             }
 

@@ -175,8 +175,10 @@ impl ChainDb {
             .into_iter()
             .chain(last_block_proof)
             .collect();
+        // SAFETY - All data in DB is trusted
+        let block_trie = BlockTrie::from_unchecked(trie);
 
-        Ok(Some(ChainTrie::new(chain_info.block_range(), trie)))
+        Ok(Some(ChainTrie::new(chain_info.block_range(), block_trie)))
     }
 
     pub fn update_chain(
@@ -284,10 +286,7 @@ pub struct ChainTrie {
 }
 
 impl ChainTrie {
-    pub fn new(block_range: RangeInclusive<u64>, trie: impl Into<BlockTrie>) -> Self {
-        Self {
-            block_range,
-            trie: trie.into(),
-        }
+    pub fn new(block_range: RangeInclusive<u64>, trie: BlockTrie) -> Self {
+        Self { block_range, trie }
     }
 }

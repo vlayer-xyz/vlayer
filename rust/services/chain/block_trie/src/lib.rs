@@ -33,8 +33,12 @@ impl BlockTrie {
     }
 
     #[deprecated(note = "please use `init` instead")]
-    pub fn new() -> Self {
+    pub fn new_unchecked() -> Self {
         Self(MerkleTrie::new())
+    }
+
+    pub fn from_unchecked(mpt: MerkleTrie) -> Self {
+        Self(mpt)
     }
 
     pub fn get(&self, block_number: u64) -> Option<&[u8]> {
@@ -65,20 +69,14 @@ impl BlockTrie {
     }
 }
 
-impl From<MerkleTrie> for BlockTrie {
-    fn from(mpt: MerkleTrie) -> Self {
-        Self(mpt)
-    }
-}
-
 impl FromIterator<(u64, B256)> for BlockTrie {
     fn from_iter<I>(iter: I) -> Self
     where
         I: IntoIterator<Item = (u64, B256)>,
     {
-        let mut trie = BlockTrie::new();
+        let mut trie = BlockTrie::new_unchecked();
         for (key, value) in iter {
-            trie.insert(key, &value)
+            trie.insert_unchecked(key, &value)
         }
         trie
     }
