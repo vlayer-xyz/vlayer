@@ -27,7 +27,7 @@ const RedirectCallout: FC = () => {
           // tell service worker to redirect back to orginal page
           sendMessageToServiceWorker({
             type: ExtensionMessageType.RedirectBack,
-          });
+          }).catch(console.error);
           clearInterval(interval);
         }
         return timeout - 1;
