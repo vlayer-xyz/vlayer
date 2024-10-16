@@ -1,0 +1,47 @@
+---
+- name: Provision github runner
+  hosts: github_runners
+  become: true
+
+  pre_tasks:
+    - name: Install dependencies and utilities
+      ansible.builtin.apt:
+        update_cache: true
+        name:
+          - 'build-essential'
+          - 'libssl-dev'
+          - 'pkg-config'
+          - 'gcc'
+          - 'unzip'
+          - 'clang'
+          - 'llvm'
+          - 'curl'
+          - 'tmux'
+    - name: Install rustup
+      ansible.builtin.shell: |
+        set -ueo pipefail
+        curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-toolchain stable -y
+      args:
+        executable: /bin/bash
+        creates: .cargo/bin/rustup
+
+  roles:
+    # https://galaxy.ansible.com/ui/standalone/roles/geerlingguy/swap
+    - role: geerlingguy.swap
+      vars:
+        swap_file_size_mb: '4096'
+
+    # https://galaxy.ansible.com/ui/standalone/roles/geerlingguy/docker
+    - role: geerlingguy.docker
+      vars:
+        docker_users: "{{ ansible_user }}"
+
+    # https://galaxy.ansible.com/ui/standalone/roles/MonolithProjects/github_actions_runner/
+    - role: MonolithProjects.github_actions_runner
+      vars:
+        runner_user: "{{ ansible_user }}"
+        github_account: vlayer-xyz
+        github_repo: vlayer
+        runner_labels:
+          - "ansible-managed"
+          - "{{ github_runner_tag }}"

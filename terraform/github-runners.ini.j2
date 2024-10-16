@@ -1,0 +1,15 @@
+# Managed by Terraform
+
+[github_runners_medium]
+%{ for runner in github_runners_medium ~}
+${runner}
+%{ endfor ~}
+
+[github_runners_small]
+%{ for runner in github_runners_small ~}
+${runner}
+%{ endfor ~}
+
+[github_runners:children]
+github_runners_medium
+github_runners_small

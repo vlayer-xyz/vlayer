@@ -6,6 +6,7 @@ This is a collection of vlayer ansible scripts and roles.
 
 1. [Install Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html).
 2. Install galaxy collections: `ansible-galaxy collection install -r requirements.yml`
+3. Install galaxy roles: `ansible-galaxy role install -r requirements.yml`
 
 ## Available roles
 
@@ -26,10 +27,17 @@ Host variables may contain sensitive information, like secret API keys.
 
 ## Running playbooks
 
-Currently, there is one playbook for installing the Prover.
-
-To run it:
+1. Prover playbook
 
 ```sh
 ansible-playbook -i hosts.yml prover.yml --ask-vault-pass
+```
+
+2. Github runner playbook
+
+This requires the `PERSONAL_ACCESS_TOKEN` github token with `repo:write` access rights,
+in order to register repository runners.
+
+```sh
+PERSONAL_ACCESS_TOKEN='xxx' ansible-playbook -i ../terraform/github-runners.ini github_runners.yml
 ```
