@@ -32,8 +32,10 @@ fn block_header(block_num: u64) -> B256 {
 }
 
 fn insert_blocks(db: &mut ChainDb, blocks: impl IntoIterator<Item = BlockNumber>) -> (B256, Node) {
-    let mut block_trie = BlockTrie::new_unchecked();
+    // Safety: tests
+    let mut block_trie = BlockTrie::from_unchecked(MerkleTrie::new());
     for block_num in blocks {
+        #[allow(deprecated)]
         block_trie.insert(block_num, &block_header(block_num))
     }
 
@@ -174,9 +176,13 @@ fn get_chain_trie() -> Result<()> {
 fn update_chain() -> Result<()> {
     let mut db = get_test_db();
 
-    let mut trie = BlockTrie::new_unchecked();
-    trie.insert(1, &block_header(1));
-    trie.insert(2, &block_header(2));
+    // Safety: tests
+    let mut trie = BlockTrie::from_unchecked(MerkleTrie::new());
+    #[allow(deprecated)]
+    {
+        trie.insert(1, &block_header(1));
+        trie.insert(2, &block_header(2));
+    }
     let root_hash = trie.hash_slow();
     let rlp_nodes = (&trie).into_iter();
     let chain_info = ChainInfo::new((1..=3), root_hash, EMPTY_PROOF);
@@ -185,9 +191,11 @@ fn update_chain() -> Result<()> {
     for block_num in [1, 2] {
         check_proof(&db, root_hash, block_num);
     }
-
-    trie.insert(0, &block_header(0));
-    trie.insert(3, &block_header(3));
+    #[allow(deprecated)]
+    {
+        trie.insert(0, &block_header(0));
+        trie.insert(3, &block_header(3));
+    }
     let new_root_hash = trie.hash_slow();
     let (added_nodes, removed_nodes) = difference(rlp_nodes, &trie);
     let chain_info = ChainInfo::new((0..=2), new_root_hash, EMPTY_PROOF);

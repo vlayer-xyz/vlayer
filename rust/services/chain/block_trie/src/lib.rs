@@ -32,11 +32,6 @@ impl BlockTrie {
         self.insert_unchecked(old_leftmost_block.number() - 1, &old_leftmost_block.parent_hash());
     }
 
-    #[deprecated(note = "please use `init` instead")]
-    pub fn new_unchecked() -> Self {
-        Self(MerkleTrie::new())
-    }
-
     pub fn from_unchecked(mpt: MerkleTrie) -> Self {
         Self(mpt)
     }
@@ -60,25 +55,12 @@ impl BlockTrie {
         self.0.hash_slow()
     }
 
-    pub fn encode_key(block_number: u64) -> impl AsRef<[u8]> {
+    fn encode_key(block_number: u64) -> impl AsRef<[u8]> {
         encode_fixed_size(&block_number)
     }
 
     pub fn into_root(self) -> Node {
         self.0 .0
-    }
-}
-
-impl FromIterator<(u64, B256)> for BlockTrie {
-    fn from_iter<I>(iter: I) -> Self
-    where
-        I: IntoIterator<Item = (u64, B256)>,
-    {
-        let mut trie = BlockTrie::new_unchecked();
-        for (key, value) in iter {
-            trie.insert_unchecked(key, &value)
-        }
-        trie
     }
 }
 
