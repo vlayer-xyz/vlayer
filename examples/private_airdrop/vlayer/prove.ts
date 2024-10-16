@@ -61,7 +61,7 @@ const generateProof = async (prover: Address, tokenOwner: Account) => {
     functionName: "main",
     args: [tokenOwner.address, signature],
   });
-  const { proof, result } = await vlayer.waitForProvingResult({ hash });
+  const [proof, ...result] = await vlayer.waitForProvingResult({ hash });
   console.log("Proof:", proof);
 
   return { proof, result };

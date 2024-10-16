@@ -100,14 +100,14 @@ const { hash } = await vlayer.prove({
 });
 console.log("Waiting for proving result: ", hash);
 
-const { proof, result } = await vlayer.waitForProvingResult({ hash });
-console.log("Response:", proof, result);
+const result = await vlayer.waitForProvingResult({ hash });
+console.log("Response:", result);
 
 const txHash = await walletClient.writeContract({
   address: verifierAddr,
   abi: averageBalanceVerifier.abi,
   functionName: "claim",
-  args: [proof, ...result],
+  args: result,
   account: deployer,
 });
 console.log(

@@ -40,14 +40,14 @@ const { hash } = await vlayer.prove({
   functionName: "crossChainBalanceOf",
   args: [john.address],
 });
-const { proof, result } = await vlayer.waitForProvingResult({ hash });
-console.log("Response:", proof, result);
+const result = await vlayer.waitForProvingResult({ hash });
+console.log("Response:", result);
 
 const verifierAddr = await deployVerifier(proverAddr);
 const receipt = await testHelpers.writeContract(
   verifierAddr,
   simpleTravelVerifier.abi,
   "claim",
-  [proof, ...result],
+  result,
 );
 console.log(`Verification result: ${receipt.status}`);

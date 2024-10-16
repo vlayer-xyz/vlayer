@@ -5,7 +5,7 @@ import { prove } from "../prover";
 import { createExtensionWebProofProvider } from "../webProof";
 import { type Abi, decodeFunctionResult } from "viem";
 
-function dropProofFromArgs(args: unknown) {
+function dropEmptyProofFromArgs(args: unknown) {
   if (Array.isArray(args)) {
     return args.slice(1);
   }
@@ -32,7 +32,6 @@ export const createVlayerClient = (
     webProofProvider: createExtensionWebProofProvider(),
   },
 ): VlayerClient => {
-  // TODO : implement high level api
   console.log("createVlayerClient with", url, webProofProvider);
   const resultHashMap = new Map<
     string,
@@ -62,7 +61,7 @@ export const createVlayerClient = (
         result: { proof, evm_call_result },
       } = await savedProvingData[0];
 
-      const result = dropProofFromArgs(
+      const result = dropEmptyProofFromArgs(
         decodeFunctionResult({
           abi: savedProvingData[1],
           data: evm_call_result,
@@ -70,7 +69,7 @@ export const createVlayerClient = (
         }),
       );
 
-      return { proof, result };
+      return [proof, ...result];
     },
   };
 };

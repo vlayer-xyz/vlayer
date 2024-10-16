@@ -19,10 +19,7 @@ const { hash } = await vlayer.prove({
   functionName: "main",
   args: [sender],
 });
-const {
-  proof,
-  result: [claimAddress],
-} = await vlayer.waitForProvingResult({ hash });
+const [proof, claimAddress] = await vlayer.waitForProvingResult({ hash });
 console.log("Proof:");
 console.log(proof);
 assert.equal(claimAddress, sender);
