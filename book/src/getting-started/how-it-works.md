@@ -42,12 +42,13 @@ See the example Prover contract code below. It generates proof of ownership of t
 
 ```solidity
 contract BoredApeOwnership is Prover  {
-    function main(address _owner, uint256 _apeId) public returns (address) {  
-      setChainId(1, 12292922); // jumps to block 12292922 at ETH mainnet, when BYAC where minted
+    function main(address _owner, uint256 _apeId) public returns (Proof, address) {  
+      // jumps to block 12292922 at ETH mainnet (chainId=1), when BYAC where minted
+      setChainId(1, 12292922); 
 
       require(IERC721(BYAC_NFT_ADDR).ownerOf(_apeId) == _owner, "Given address not owning that BYAC");
 
-      return (_owner); 
+      return (proof(), _owner); 
     }
 }
 ```
