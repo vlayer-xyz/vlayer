@@ -1,13 +1,13 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.23;
 
-import {SimpleTravelProver} from "./SimpleTravelProver.sol";
+import {SimpleTeleportProver} from "./SimpleTeleportProver.sol";
 import {WhaleBadgeNFT} from "./WhaleBadgeNFT.sol";
 
 import {Proof} from "vlayer-0.1.0/Proof.sol";
 import {Verifier} from "vlayer-0.1.0/Verifier.sol";
 
-contract SimpleTravel is Verifier {
+contract SimpleTeleportVerifier is Verifier {
     address public prover;
     mapping(address => bool) public claimed;
     WhaleBadgeNFT public reward;
@@ -19,7 +19,7 @@ contract SimpleTravel is Verifier {
 
     function claim(Proof calldata, address claimer, uint256 crossChainBalance)
         public
-        onlyVerified(prover, SimpleTravelProver.crossChainBalanceOf.selector)
+        onlyVerified(prover, SimpleTeleportProver.crossChainBalanceOf.selector)
     {
         require(!claimed[claimer], "Already claimed");
 
