@@ -80,7 +80,7 @@ where
             elf_id: *GUEST_ID,
             block: latest_block,
         };
-        let receipt = self.prove(input).await?;
+        let receipt = self.prove(input)?;
         let range = latest_block_number..=latest_block_number;
         let chain_info = ChainInfo::new(range, block_trie.hash_slow(), receipt);
         let chain_update = ChainUpdate::new(chain_info, &block_trie, []);
@@ -96,7 +96,7 @@ where
         Ok(chain_update)
     }
 
-    async fn prove(&self, input: Input) -> Result<Bytes, HostError> {
+    fn prove(&self, input: Input) -> Result<Bytes, HostError> {
         let executor_env = build_executor_env(input)?;
         let ProveInfo { receipt, .. } =
             provably_execute(&self.prover, executor_env, RISC0_CHAIN_GUEST_ELF)?;
