@@ -11,7 +11,7 @@ Assuming vlayer is [installed](/getting-started/installation.html), you can star
 ```sh
 vlayer serve
 ```
-By default, it listens for JSON-RPC client requests on port `3000`. You can also specify the `--proof` argument explicitly:
+By default, it listens for JSON-RPC client requests on port `3000` in `FAKE` mode. You can also specify the `--proof` argument explicitly:
 ```sh
 vlayer serve --proof fake
 ```
