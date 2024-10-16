@@ -29,15 +29,15 @@ const { hash } = await vlayer.prove({
   functionName: "balance",
   args: [john.address],
 });
-const { proof, result } = await vlayer.waitForProvingResult({ hash });
+const result = await vlayer.waitForProvingResult({ hash });
 console.log("Proof result:");
-console.log(proof, result);
+console.log(result);
 
 const receipt = await testHelpers.writeContract(
   verifier,
   SimpleVerifier.abi,
   "claimWhale",
-  [proof, ...result],
+  result,
 );
 
 console.log(`Verification result: ${receipt.status}`);

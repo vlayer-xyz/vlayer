@@ -59,7 +59,6 @@ export interface VCallResponse {
   id: number;
 }
 
-// Add more methods here
 export type VlayerClient = {
   prove: <
     T extends readonly [AbiFunction, ...Abi[number][]],
@@ -71,7 +70,7 @@ export type VlayerClient = {
     hash,
   }: {
     hash: string;
-  }) => Promise<{ proof: Proof; result: unknown[] }>;
+  }) => Promise<[Proof, ...unknown[]]>;
 };
 
 export type VlayerClientProveArgs<

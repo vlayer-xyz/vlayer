@@ -36,7 +36,8 @@ async function testSuccessProvingAndVerification() {
       twitterUserAddress,
     ],
   });
-  const { proof, result } = await vlayer.waitForProvingResult({ hash });
+  const result = await vlayer.waitForProvingResult({ hash });
+  const [proof, twitterHandle] = result;
   console.log("Proof:", proof);
 
   console.log("Verifying...");
@@ -44,7 +45,7 @@ async function testSuccessProvingAndVerification() {
     verifier,
     webProofVerifier.abi,
     "verify",
-    [proof, ...result],
+    result,
     twitterUserAddress,
   );
   console.log("Verified!");
@@ -62,7 +63,7 @@ async function testSuccessProvingAndVerification() {
     webProofVerifier.abi,
     verifier,
     "ownerOf",
-    [generateTokenId(result[0])],
+    [generateTokenId(twitterHandle)],
   );
 
   assert.strictEqual(twitterUserAddress, tokenOwnerAddress);

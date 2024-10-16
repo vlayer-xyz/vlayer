@@ -24,12 +24,14 @@ const { hash } = await vlayer.prove({
   functionName: "main",
   args: [await preverifyEmail(mimeEmail), john.address],
 });
-const { proof, result } = await vlayer.waitForProvingResult({ hash });
-console.log("Proof:", proof);
+const result = await vlayer.waitForProvingResult({ hash });
+console.log("Proof:", result[0]);
 
 console.log("Verifying...");
-await testHelpers.writeContract(verifier, emailProofVerifier.abi, "verify", [
-  proof,
-  ...result,
-]);
+await testHelpers.writeContract(
+  verifier,
+  emailProofVerifier.abi,
+  "verify",
+  result,
+);
 console.log("Verified!");
