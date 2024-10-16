@@ -5,7 +5,7 @@
     "useDefineForClassFields": true,
     "module": "ESNext",
     "lib": ["ESNext", "DOM"],
-    "moduleResolution": "Node",
+    "moduleResolution": "bundler",
     "strict": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
@@ -16,6 +16,8 @@
     "noImplicitReturns": true,
     "skipLibCheck": true,
     "baseUrl": "./",
+    "composite": true,
+    "allowImportingTsExtensions": true,
     "paths": {
       "components/*" : ["./src/components/*"],
       "constants/*" : ["./src/constants/*"],

@@ -1,34 +1,9 @@
 {
-    "compilerOptions": {
-        // Enable latest features
-        "lib": ["ESNext", "DOM"],
-        "target": "ESNext",
-        "module": "ESNext",
-        "moduleDetection": "force",
-        "jsx": "react-jsx",
-        "allowJs": true,
-
-        // Bundler mode
-        "moduleResolution": "bundler",
-        "allowImportingTsExtensions": true,
-        "verbatimModuleSyntax": false,
-        "noEmit": true,
-
-        // Best practices
-        "strict": true,
-        "skipLibCheck": true,
-        "noFallthroughCasesInSwitch": true,
-
-        // Some stricter flags (disabled by default)
-        "noUnusedLocals": false,
-        "noUnusedParameters": false,
-        "noPropertyAccessFromIndexSignature": false,
-        "paths": {
-            "types/*": ["./sdk/src/api/lib/types/*"],
-            "components/*" : ["./browser-extension/src/components/*"],
-            "constants/*" : ["./browser-extension/src/constants/*"],
-            "hooks/*" : ["./browser-extension/src/hooks/*"],
-            "lib/*" : ["./browser-extension/src/lib/*"],
-        }
-    }
+    "files": [],
+    "references": [
+        { "path": "browser-extension/tsconfig.json" },
+        { "path": "extension-hooks/tsconfig.json" },
+        { "path": "sdk/tsconfig.json" },
+        { "path": "web-components/tsconfig.json" },
+    ]
 }
