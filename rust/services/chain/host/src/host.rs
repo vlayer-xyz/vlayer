@@ -174,6 +174,22 @@ mod test {
 
             use super::*;
 
+            fn assert_trie_proof(
+                proof: Bytes,
+                nodes: impl IntoIterator<Item = Bytes>,
+            ) -> anyhow::Result<BlockTrie> {
+                let receipt: Receipt = bincode::deserialize(&proof)?;
+                receipt.verify(*GUEST_ID)?;
+
+                let (proven_root, elf_id): (B256, Digest) = receipt.journal.decode()?;
+                assert_eq!(elf_id, *GUEST_ID);
+                let merkle_trie = MerkleTrie::from_rlp_nodes(nodes)?;
+                assert_eq!(merkle_trie.hash_slow(), proven_root);
+
+                let block_trie = BlockTrie::from(merkle_trie);
+                Ok(block_trie)
+            }
+
             #[tokio::test]
             async fn initialize() -> anyhow::Result<()> {
                 let host =
@@ -198,16 +214,9 @@ mod test {
 
                 assert_eq!(first_block..=last_block, LATEST..=LATEST);
 
-                let receipt: Receipt = bincode::deserialize(&zk_proof)?;
-                receipt.verify(*GUEST_ID)?;
+                let block_trie = assert_trie_proof(zk_proof, added_nodes)?;
+                assert_eq!(block_trie.hash_slow(), root_hash);
 
-                let (proven_root, elf_id): (B256, Digest) = receipt.journal.decode()?;
-                assert_eq!(elf_id, *GUEST_ID);
-                let merkle_trie = MerkleTrie::from_rlp_nodes(added_nodes)?;
-                assert_eq!(merkle_trie.hash_slow(), proven_root);
-                assert_eq!(root_hash, proven_root);
-
-                let block_trie = BlockTrie::from(merkle_trie);
                 block_trie.get(LATEST).expect("block not found");
                 assert!(removed_nodes.is_empty());
 
