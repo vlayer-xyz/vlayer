@@ -62,7 +62,7 @@ contract EmailDomainProver is Prover {
 }
 ```
 
-It can be convenient to use [Regular Expressions](./regex-and-json.md) to validate the content of the email.
+It can be convenient to use [Regular Expressions](./json-and-regex.md) to validate the content of the email.
 
 Email is passed to the Solidity contract as an `UnverifiedEmail` structure that can be created using the `preverifyEmail` function in the [SDK](../javascript/javascript.md).
 `preverifyEmail` should be called with the raw `.eml` file content as an argument. The email is also required to have "From" and ["DKIM-Signature"](https://datatracker.ietf.org/doc/html/rfc6376) headers.
