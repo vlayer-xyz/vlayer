@@ -14,3 +14,4 @@ serde_json = { workspace = true }
 server_utils = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true }
+block_trie = { workspace = true }

@@ -11,7 +11,7 @@ use alloy_primitives::{keccak256, ChainId, B256};
 use alloy_rlp::{Bytes as RlpBytes, BytesMut, Decodable, Encodable, RlpDecodable, RlpEncodable};
 use block_trie::BlockTrie;
 use bytes::Bytes;
-use derivative::Derivative;
+use derive_more::Debug;
 use mpt::{KeyNibbles, MerkleTrie, Node, NodeRef, EMPTY_ROOT_HASH};
 use nybbles::Nibbles;
 use proof_builder::{MerkleProofBuilder, ProofResult};
@@ -29,23 +29,12 @@ const NODES: &str = "nodes";
 /// Chains table. Holds `chain_id -> chain_info` mapping
 const CHAINS: &str = "chains";
 
-fn lower_hex(bytes: impl LowerHex, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    write!(f, "{:#x}", bytes)
-}
-
-fn slice_lower_hex(slice: &[impl LowerHex], f: &mut fmt::Formatter<'_>) -> fmt::Result {
-    f.debug_list()
-        .entries(slice.iter().map(|item| format!("{:#x}", item)))
-        .finish()
-}
-
-#[derive(Clone, PartialEq, Eq, RlpEncodable, RlpDecodable, Default, Derivative)]
-#[derivative(Debug)]
+#[derive(Clone, PartialEq, Eq, RlpEncodable, RlpDecodable, Default, Debug)]
 pub struct ChainInfo {
     pub first_block: u64,
     pub last_block: u64,
     pub root_hash: B256,
-    #[derivative(Debug(format_with = "lower_hex"))]
+    #[debug("{zk_proof:#x}")]
     pub zk_proof: RlpBytes,
 }
 
@@ -68,13 +57,31 @@ impl ChainInfo {
     }
 }
 
-#[derive(Default, Clone, Eq, PartialEq, Derivative)]
-#[derivative(Debug)]
+fn slice_lower_hex<T: fmt::LowerHex>(slice: &[T]) -> impl fmt::LowerHex + '_ {
+    struct SliceLowerHex<'a, T>(&'a [T]);
+
+    impl<T: fmt::LowerHex> fmt::LowerHex for SliceLowerHex<'_, T> {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            f.debug_list()
+                .entries(
+                    self.0
+                        .iter()
+                        .map(|x| format!("{:#x}", x))
+                        .collect::<Vec<_>>(),
+                )
+                .finish()
+        }
+    }
+
+    SliceLowerHex(slice)
+}
+
+#[derive(Default, Clone, Eq, PartialEq, Debug)]
 pub struct ChainUpdate {
     pub chain_info: ChainInfo,
-    #[derivative(Debug(format_with = "slice_lower_hex"))]
+    #[debug("{:#x}", slice_lower_hex(added_nodes))]
     pub added_nodes: Box<[Bytes]>,
-    #[derivative(Debug(format_with = "slice_lower_hex"))]
+    #[debug("{:#x}", slice_lower_hex(removed_nodes))]
     pub removed_nodes: Box<[Bytes]>,
 }
 
