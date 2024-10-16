@@ -80,15 +80,9 @@ where
             elf_id: *GUEST_ID,
             block: latest_block,
         };
-        let executor_env = build_executor_env(input)?;
-        let ProveInfo { receipt, .. } =
-            provably_execute(&self.prover, executor_env, RISC0_CHAIN_GUEST_ELF)?;
-
-        let receipt_bytes: Bytes = bincode::serialize(&receipt)
-            .expect("failed to serialize receipt")
-            .into();
+        let receipt = self.prove(input).await?;
         let range = latest_block_number..=latest_block_number;
-        let chain_info = ChainInfo::new(range, block_trie.hash_slow(), receipt_bytes);
+        let chain_info = ChainInfo::new(range, block_trie.hash_slow(), receipt);
         let chain_update = ChainUpdate::new(chain_info, &block_trie, []);
         Ok(chain_update)
     }
@@ -100,6 +94,17 @@ where
         let _latest_block = self.get_block(BlockTag::Latest).await?;
         let chain_update = ChainUpdate::new(current_chain_info, [], []);
         Ok(chain_update)
+    }
+
+    async fn prove(&self, input: Input) -> Result<Bytes, HostError> {
+        let executor_env = build_executor_env(input)?;
+        let ProveInfo { receipt, .. } =
+            provably_execute(&self.prover, executor_env, RISC0_CHAIN_GUEST_ELF)?;
+
+        let proof = bincode::serialize(&receipt)
+            .expect("failed to serialize receipt")
+            .into();
+        Ok(proof)
     }
 
     async fn get_block(&self, number: BlockTag) -> Result<Box<dyn EvmBlockHeader>, HostError> {
