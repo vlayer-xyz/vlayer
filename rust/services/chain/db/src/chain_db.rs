@@ -63,12 +63,7 @@ fn slice_lower_hex<T: fmt::LowerHex>(slice: &[T]) -> impl fmt::LowerHex + '_ {
     impl<T: fmt::LowerHex> fmt::LowerHex for SliceLowerHex<'_, T> {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
             f.debug_list()
-                .entries(
-                    self.0
-                        .iter()
-                        .map(|x| format!("{:#x}", x))
-                        .collect::<Vec<_>>(),
-                )
+                .entries(self.0.iter().map(|x| format!("{:#x}", x)))
                 .finish()
         }
     }
