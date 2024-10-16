@@ -67,22 +67,19 @@ where
     P: BlockingProvider + 'static,
 {
     let providers = CachedMultiProvider::new(provider_factory);
-    let chain_proof_server_mock = ChainProofServerMock::start().await;
-    let chain_proof_client = ChainProofClient::new(chain_proof_server_mock.url());
     let block_number = block_tag_to_block_number(&providers, config.start_chain_id, block_tag)?;
-
-    chain_proof_server_mock
-        .mock(
-            json!({
-                "chain_id": config.start_chain_id,
-                "block_numbers": [block_number]
-            }),
-            json!({
-                "proof": "",
-                "nodes": []
-            }),
-        )
-        .await;
+    let chain_proof_server_mock = ChainProofServerMock::start(
+        json!({
+            "chain_id": config.start_chain_id,
+            "block_numbers": [block_number]
+        }),
+        json!({
+            "proof": "",
+            "nodes": []
+        }),
+    )
+    .await;
+    let chain_proof_client = ChainProofClient::new(chain_proof_server_mock.url());
 
     Host::try_new_with_components(providers, block_number, chain_proof_client, config)
 }

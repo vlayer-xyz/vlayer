@@ -6,7 +6,7 @@ use serde::Serialize;
 use serde_json::{json, Value};
 use thiserror::Error;
 
-pub struct RpcServerMock 
+pub struct RpcServerMock {
     server: ServerGuard,
     mock: Mock,
 }
@@ -171,9 +171,8 @@ mod tests {
 
     #[tokio::test]
     async fn mock_partial_matches_full_body() -> anyhow::Result<()> {
-        let rpc_mock = RpcServerMock::start(METHOD, true, json!({
-        }),
-        json!({"data": "some data"}),).await;
+        let rpc_mock =
+            RpcServerMock::start(METHOD, true, json!({}), json!({"data": "some data"})).await;
         let rpc_client = RpcClient::new(&rpc_mock.url(), METHOD);
 
         let result = rpc_client.call(json!({"key": "value"})).await?;
@@ -187,7 +186,8 @@ mod tests {
 
     #[tokio::test]
     async fn mock_non_partial_doesnt_match_full_body() -> anyhow::Result<()> {
-        let rpc_mock = RpcServerMock::start(METHOD, false, json!({}), json!({"data": "some data"})).await;
+        let rpc_mock =
+            RpcServerMock::start(METHOD, false, json!({}), json!({"data": "some data"})).await;
         let rpc_client = RpcClient::new(&rpc_mock.url(), METHOD);
 
         let result = rpc_client

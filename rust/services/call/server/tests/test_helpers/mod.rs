@@ -35,16 +35,7 @@ impl TestHelper {
     }
 
     pub(crate) async fn post<T: Serialize>(&self, url: &str, body: &T) -> Response<Body> {
-        let chain_proof_server_mock = ChainProofServerMock::start().await;
-        chain_proof_server_mock
-            .mock(
-                json!({}),
-                json!({
-                    "proof": "",
-                    "nodes": []
-                }),
-            )
-            .await;
+        let chain_proof_server_mock = start_chain_proof_server().await;
 
         let app = server(ServerConfig {
             rpc_urls: HashMap::from([(self.anvil.chain_id(), self.anvil.endpoint())]),
@@ -55,6 +46,17 @@ impl TestHelper {
         });
         post(app, url, body).await
     }
+}
+
+async fn start_chain_proof_server() -> ChainProofServerMock {
+    ChainProofServerMock::start(
+        json!({}),
+        json!({
+            "proof": "",
+            "nodes": []
+        }),
+    )
+    .await
 }
 
 async fn setup_anvil() -> AnvilInstance {

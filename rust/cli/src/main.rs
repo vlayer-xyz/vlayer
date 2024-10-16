@@ -57,8 +57,7 @@ async fn run() -> Result<(), CLIError> {
 
     match cli.command {
         Commands::Serve(serve_args) => {
-            let chain_proof_server_mock = ChainProofServerMock::start().await;
-            mock_chain_proof_response(&chain_proof_server_mock).await;
+            let chain_proof_server_mock = start_chain_proof_server().await;
 
             let proof_mode = serve_args.proof.unwrap_or_default().map();
             let server_config = ServerConfig::new(
@@ -86,14 +85,13 @@ async fn run() -> Result<(), CLIError> {
     Ok(())
 }
 
-async fn mock_chain_proof_response(chain_proof_server_mock: &ChainProofServerMock) {
-    chain_proof_server_mock
-        .mock(
-            json!({}),
-            json!({
-                "proof": "",
-                "nodes": []
-            }),
-        )
-        .await;
+async fn start_chain_proof_server() -> ChainProofServerMock {
+    ChainProofServerMock::start(
+        json!({}),
+        json!({
+            "proof": "",
+            "nodes": []
+        }),
+    )
+    .await
 }
