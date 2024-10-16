@@ -20,7 +20,7 @@ vlayer `Prover` contracts are almost the same as regular Solidity smart contract
 ## Prover in-depth
 
 ### Prover parent contract
-Any contract function can be run in the vlayer prover, but to access the additional features listed above, the function must inherit from the `Prover` contract.
+Any contract function can be run in the vlayer prover, but to access the additional features listed above, the contract should inherit from the `Prover` contract and any function can be used as a proving function.
 
 ### Arguments and returned value
 Arbitrary arguments can be passed to Prover functions. All arguments are private, meaning they are not visible on-chain; however, they are visible to the prover server.
@@ -29,9 +29,9 @@ All data returned by functions is public. To make an argument public on-chain, r
 
 ### Proof
 
-Once the `WebProver` computation is complete, a proof is generated and made available along with the returned value (e.g., `web.content` in our example). This output can then be consumed and cryptographically verified by the `Verifier` on-chain smart contract.
+Once the `Prover` computation is complete, a proof is generated and made available along with the returned value. This output can then be consumed and cryptographically verified by the `Verifier` on-chain smart contract.
 
-Note that `web.content` becomes a public input for on-chain verification because it was returned from the `main` function. All other input variables remain private.
+Note that all values returned from `Prover` functions becomes a public input for on-chain verification. Arguments passed to `Prover` functions remain private.
 
 > The list of returned arguments must match the arguments used by the `Verifier` (see the [Verifier page](/advanced/verifier.html) for details).  
 > 
