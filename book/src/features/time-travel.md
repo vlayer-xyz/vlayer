@@ -43,7 +43,7 @@ contract AverageBalance is Prover {
         uint256 iterations = 0;
 
         for (uint256 blockNo = startingBlock; blockNo <= endingBlock; blockNo += step) {
-            setChain(chainId, blockNo);
+            setBlock(blockNo);
             totalBalance += token.balanceOf(_owner); // USDC balance
             iterations += 1;
         }
