@@ -17,7 +17,9 @@ pub struct ChainProofClient {
 fn parse_chain_proof(rpc_chain_proof: RpcChainProof) -> ChainProof {
     ChainProof {
         proof: rpc_chain_proof.proof,
-        mpt: MerkleTrie::from_rlp_nodes(rpc_chain_proof.nodes).unwrap(),
+        block_trie: MerkleTrie::from_rlp_nodes(rpc_chain_proof.nodes)
+            .unwrap()
+            .into(),
     }
 }
 

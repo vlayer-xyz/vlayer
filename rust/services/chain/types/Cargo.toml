@@ -5,5 +5,5 @@ edition = "2021"
 
 [dependencies]
 alloy-primitives = { workspace = true }
-mpt = { workspace = true }
+block_trie = { workspace = true }
 serde = { workspace = true }
