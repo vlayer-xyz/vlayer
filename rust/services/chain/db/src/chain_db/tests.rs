@@ -50,7 +50,7 @@ fn check_proof(db: &ChainDb, root_hash: B256, block_num: u64) -> BlockTrie {
         .get_merkle_proof(root_hash, block_num)
         .expect("get_merkle_proof failed");
     let proof_trie: BlockTrie = proof.into_vec().into_iter().collect::<MerkleTrie>().into();
-    assert_eq!(proof_trie.get(block_num).unwrap(), &block_header(block_num));
+    assert_eq!(proof_trie.get(block_num).unwrap(), block_header(block_num));
     proof_trie
 }
 

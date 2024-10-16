@@ -762,6 +762,7 @@ dependencies = [
  "anyhow",
  "block_header",
  "chain",
+ "chain_types",
  "derive-new",
  "derive_more",
  "email_proof",
@@ -790,6 +791,7 @@ dependencies = [
  "block_header",
  "call_engine",
  "chain",
+ "chain_types",
  "mpt",
  "revm",
 ]
@@ -817,6 +819,15 @@ dependencies = [
  "revm",
  "serde",
  "thiserror",
+]
+
+[[package]]
+name = "chain_types"
+version = "0.1.0"
+dependencies = [
+ "alloy-primitives",
+ "mpt",
+ "serde",
 ]
 
 [[package]]

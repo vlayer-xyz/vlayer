@@ -93,17 +93,16 @@ where
 
         let multi_evm_input =
             into_multi_input(self.envs).map_err(|err| HostError::CreatingInput(err.to_string()))?;
+        let chain_proofs = self
+            .chain_proof_client
+            .get_chain_proofs(multi_evm_input.group_blocks_by_chain())
+            .await?;
         let input = Input {
             call,
             multi_evm_input: multi_evm_input.clone(),
             start_execution_location: self.start_execution_location,
+            chain_proofs,
         };
-
-        // todo: use chain proofs in provably_execute
-        let _chain_proofs = self
-            .chain_proof_client
-            .get_chain_proofs(multi_evm_input.group_blocks_by_chain())
-            .await?;
 
         let env = build_executor_env(input)
             .map_err(|err| HostError::ExecutorEnvBuilder(err.to_string()))?;

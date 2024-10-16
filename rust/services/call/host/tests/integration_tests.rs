@@ -8,7 +8,7 @@ use call_host::{
     Call,
 };
 use chain_client::ChainProofClient;
-use chain_server::server::{ChainProof, ChainProofServerMock};
+use chain_server::server::ChainProofServerMock;
 use dotenv::dotenv;
 use ethers_core::types::BlockNumber as BlockTag;
 use lazy_static::lazy_static;
@@ -77,7 +77,10 @@ where
                 "chain_id": config.start_chain_id,
                 "block_numbers": [block_number]
             }),
-            ChainProof::default(),
+            json!({
+                "proof": "",
+                "nodes": []
+            }),
         )
         .await;
 

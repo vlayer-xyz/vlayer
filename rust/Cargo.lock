@@ -1971,6 +1971,7 @@ dependencies = [
  "anyhow",
  "block_header",
  "chain",
+ "chain_types",
  "derive-new",
  "derive_more 0.99.18",
  "email_proof",
@@ -2000,6 +2001,7 @@ dependencies = [
  "block_header",
  "call_engine",
  "chain",
+ "chain_types",
  "mpt",
  "revm",
 ]
@@ -2028,6 +2030,7 @@ dependencies = [
  "chain",
  "chain_client",
  "chain_server",
+ "chain_types",
  "ctor",
  "dotenv",
  "ethers-core",
@@ -2176,7 +2179,10 @@ name = "chain_client"
 version = "0.1.0"
 dependencies = [
  "alloy-primitives",
+ "call_engine",
  "chain_server",
+ "chain_types",
+ "mpt",
  "provider",
  "serde_json",
  "server_utils",
@@ -2268,6 +2274,15 @@ dependencies = [
  "server_utils",
  "thiserror",
  "tokio",
+]
+
+[[package]]
+name = "chain_types"
+version = "0.1.0"
+dependencies = [
+ "alloy-primitives",
+ "mpt",
+ "serde",
 ]
 
 [[package]]

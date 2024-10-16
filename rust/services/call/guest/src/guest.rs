@@ -1,3 +1,6 @@
+use std::collections::HashMap;
+
+use alloy_primitives::ChainId;
 use call_engine::{
     engine::Engine,
     evm::{
@@ -7,6 +10,7 @@ use call_engine::{
     io::{Call, GuestOutput},
     CallAssumptions,
 };
+use chain_types::ChainProof;
 
 use crate::db::wrap_state::WrapStateDb;
 
@@ -20,8 +24,9 @@ impl Guest {
     pub fn new(
         multi_evm_input: MultiEvmInput,
         start_execution_location: ExecutionLocation,
+        chain_proofs: HashMap<ChainId, ChainProof>,
     ) -> Self {
-        multi_evm_input.assert_coherency();
+        multi_evm_input.assert_coherency(chain_proofs);
         let multi_evm_env = multi_evm_input.into();
         let evm_envs = CachedEvmEnv::from_envs(multi_evm_env);
 

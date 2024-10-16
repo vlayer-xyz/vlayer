@@ -1,11 +1,12 @@
 use std::{
-    collections::{HashMap, HashSet},
+    collections::HashMap,
     iter::once,
     sync::{Arc, RwLock},
 };
 
-use alloy_primitives::{BlockNumber, Bytes, ChainId, B256};
+use alloy_primitives::{BlockHash, BlockNumber, Bytes, ChainId, B256};
 use block_header::EvmBlockHeader;
+use chain_types::ChainProof;
 use derive_more::{From, Into, IntoIterator};
 use derive_new::new;
 use mpt::MerkleTrie;
@@ -95,20 +96,26 @@ impl MultiEvmInput {
         Self { inputs }
     }
 
-    pub fn assert_coherency(&self) {
+    pub fn assert_coherency(&self, chain_proofs: HashMap<ChainId, ChainProof>) {
         self.inputs.values().for_each(EvmInput::assert_coherency);
+        self.assert_chain_coherence(chain_proofs);
     }
 
-    pub fn group_blocks_by_chain(&self) -> HashMap<ChainId, HashSet<BlockNumber>> {
-        let mut map: HashMap<ChainId, HashSet<BlockNumber>> = HashMap::new();
+    pub fn group_blocks_by_chain(&self) -> HashMap<ChainId, HashMap<BlockNumber, BlockHash>> {
+        self.inputs
+            .iter()
+            .fold(HashMap::new(), |mut acc, (loc, evm_input)| {
+                acc.entry(loc.chain_id)
+                    .or_default()
+                    .insert(loc.block_number, evm_input.header.hash_slow());
+                acc
+            })
+    }
 
-        for loc in self.inputs.keys() {
-            map.entry(loc.chain_id)
-                .or_default()
-                .insert(loc.block_number);
-        }
-
-        map
+    #[allow(clippy::unused_self)]
+    #[allow(clippy::needless_pass_by_value)]
+    fn assert_chain_coherence(&self, _chain_proofs: HashMap<ChainId, ChainProof>) {
+        // todo: assert chain coherence
     }
 }
 

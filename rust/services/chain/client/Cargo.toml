@@ -5,7 +5,10 @@ edition = "2021"
 
 [dependencies]
 alloy-primitives = { workspace = true }
+call_engine = { workspace = true }
 chain_server = { workspace = true }
+chain_types = { workspace = true }
+mpt = { workspace = true }
 provider = { workspace = true }
 serde_json = { workspace = true }
 server_utils = { workspace = true }

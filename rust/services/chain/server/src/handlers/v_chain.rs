@@ -14,8 +14,8 @@ pub struct Params {
 
 #[derive(Serialize, Default, Deserialize, Debug, PartialEq)]
 pub struct ChainProof {
-    proof: Bytes,
-    nodes: Vec<Bytes>,
+    pub proof: Bytes,
+    pub nodes: Vec<Bytes>,
 }
 
 lazy_static! {

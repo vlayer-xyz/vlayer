@@ -1,5 +1,5 @@
 use call_server::ServerConfig;
-use chain_server::server::{ChainProof, ChainProofServerMock};
+use chain_server::server::ChainProofServerMock;
 use clap::{Parser, Subcommand};
 use commands::{
     args::{InitArgs, ServeArgs},
@@ -57,7 +57,13 @@ async fn run() -> Result<(), CLIError> {
 
     let chain_proof_server_mock = ChainProofServerMock::start().await;
     chain_proof_server_mock
-        .mock(json!({}), ChainProof::default())
+        .mock(
+            json!({}),
+            json!({
+                "proof": "",
+                "nodes": []
+            }),
+        )
         .await;
 
     match cli.command {

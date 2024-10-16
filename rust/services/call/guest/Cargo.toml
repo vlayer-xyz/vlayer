@@ -15,6 +15,7 @@ as-any = { workspace = true }
 anyhow = { workspace = true }
 revm = { workspace = true }
 chain = { workspace = true }
+chain_types = { workspace = true }
 
 [lints]
 workspace = true
