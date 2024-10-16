@@ -5,7 +5,7 @@ import simpleTravelProver from "../out/SimpleTravelProver.sol/SimpleTravelProver
 import simpleTravelVerifier from "../out/SimpleTravelVerifier.sol/SimpleTravel";
 import whaleBadgeNFT from "../out/WhaleBadgeNFT.sol/WhaleBadgeNFT";
 
-const john = testHelpers.getTestAccount();
+const john = testHelpers.getTestAccount().address;
 
 const deployProver = async () => {
   const prover: Address = await testHelpers.deployContract(
@@ -38,7 +38,7 @@ const { hash } = await vlayer.prove({
   address: proverAddr,
   proverAbi: simpleTravelProver.abi,
   functionName: "crossChainBalanceOf",
-  args: [john.address],
+  args: [john],
 });
 const { proof, result } = await vlayer.waitForProvingResult({ hash });
 console.log("Response:", proof, result);
