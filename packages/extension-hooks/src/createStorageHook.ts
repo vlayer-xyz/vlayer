@@ -12,11 +12,14 @@ function createStorageHook(storage: browser.Storage.StorageArea) {
   ): [T, (newValue: T) => Promise<void>] {
     const [storedValue, setStoredValue] = useState<T>(initialValue);
     useEffect(() => {
-      storage.get(storageKey).then((result) => {
-        if (result[storageKey] !== undefined) {
-          setStoredValue(result[storageKey] as T);
-        }
-      });
+      storage
+        .get(storageKey)
+        .then((result) => {
+          if (result[storageKey] !== undefined) {
+            setStoredValue(result[storageKey] as T);
+          }
+        })
+        .catch(console.error);
     }, []);
 
     useEffect(() => {

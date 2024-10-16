@@ -19,10 +19,12 @@ export const useTrackHeaders = () => {
   return useCallback((urls: string[]) => {
     browser.webRequest.onBeforeSendHeaders.addListener(
       (details) => {
-        historyContextManager.updateHistory({
-          url: details.url,
-          headers: details.requestHeaders,
-        });
+        historyContextManager
+          .updateHistory({
+            url: details.url,
+            headers: details.requestHeaders,
+          })
+          .catch(console.error);
       },
       {
         urls: [...urls],
@@ -36,12 +38,17 @@ export const useTrackCookies = () => {
   return useCallback((urls: string[]) => {
     browser.webRequest.onResponseStarted.addListener(
       (details) => {
-        browser.cookies.getAll({ url: details.url }).then((cookies) => {
-          historyContextManager.updateHistory({
-            url: details.url,
-            cookies,
-          });
-        });
+        browser.cookies
+          .getAll({ url: details.url })
+          .then((cookies) => {
+            historyContextManager
+              .updateHistory({
+                url: details.url,
+                cookies,
+              })
+              .catch(console.error);
+          })
+          .catch(console.error);
       },
       { urls },
     );
@@ -52,10 +59,12 @@ export const useTrackCompleteness = () => {
   return useCallback((urls: string[]) => {
     browser.webRequest.onCompleted.addListener(
       (details) => {
-        historyContextManager.updateHistory({
-          url: details.url,
-          ready: true,
-        });
+        historyContextManager
+          .updateHistory({
+            url: details.url,
+            ready: true,
+          })
+          .catch(console.error);
       },
       {
         urls,
@@ -70,11 +79,14 @@ export const useTrackHistory = () => {
   const trackCompleteness = useTrackCompleteness();
   useEffect(() => {
     // Record headers of all interesting url
-    historyContextManager.getUrls().then((urlBases: string[]) => {
-      const urls = urlBases.map(urlToMatchPattern);
-      trackHeaders(urls);
-      trackCookies(urls);
-      trackCompleteness(urls);
-    });
+    historyContextManager
+      .getUrls()
+      .then((urlBases: string[]) => {
+        const urls = urlBases.map(urlToMatchPattern);
+        trackHeaders(urls);
+        trackCookies(urls);
+        trackCompleteness(urls);
+      })
+      .catch(console.error);
   }, []);
 };

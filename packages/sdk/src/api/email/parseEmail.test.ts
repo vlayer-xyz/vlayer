@@ -30,7 +30,7 @@ describe("parseEmail", () => {
     const email = await parseEmail(
       `${emailHeaders}${dkimHeader}\n${dkimHeader2}\n\n${body}`,
     );
-    const dkim = email.headers.filter((h) => h.key === "dkim-signature")!;
+    const dkim = email.headers.filter((h) => h.key === "dkim-signature");
 
     expect(dkim).toHaveLength(2);
     expect(parseParams(dkim[0].value).s).toBe("selector1");

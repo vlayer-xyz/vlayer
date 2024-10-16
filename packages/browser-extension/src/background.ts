@@ -54,9 +54,12 @@ browser.runtime.onMessage.addListener(async (message: ExtensionMessage) => {
 
 let windowId = 0;
 
-browser.tabs.query({ active: true, currentWindow: true }).then((tabs) => {
-  windowId = tabs[0].windowId || 0;
-});
+browser.tabs
+  .query({ active: true, currentWindow: true })
+  .then((tabs) => {
+    windowId = tabs[0].windowId || 0;
+  })
+  .catch(console.error);
 
 browser.tabs.onActivated.addListener(function (activeInfo) {
   windowId = activeInfo.windowId;
@@ -75,5 +78,5 @@ browser.runtime.onMessageExternal.addListener((message) => {
         message.payload,
       );
     }
-  })();
+  })().catch(console.error);
 });

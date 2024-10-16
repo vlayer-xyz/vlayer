@@ -92,7 +92,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
       // this is temporary verification call
       // when we wil connect vlayer contracts we will transfer this back to the SDK
 
-      sendMessageToServiceWorker({
+      await sendMessageToServiceWorker({
         type: ExtensionMessageType.ProofDone,
         proof: tlsnProof,
       });
@@ -101,7 +101,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
     } catch (e: unknown) {
       console.error("error in tlsnotary", e);
 
-      sendMessageToServiceWorker({
+      await sendMessageToServiceWorker({
         type: ExtensionMessageType.ProofError,
         error: e instanceof Error ? e.message : String(e),
       });

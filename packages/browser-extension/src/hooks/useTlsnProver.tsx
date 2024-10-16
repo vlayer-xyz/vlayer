@@ -62,7 +62,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
       });
       // let service worker know proof is done
       console.log("sending proof to background", tlsnProof);
-      sendMessageToServiceWorker({
+      await sendMessageToServiceWorker({
         type: ExtensionMessageType.ProofDone,
         proof: tlsnProof,
       });
@@ -70,7 +70,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
       setIsProving(false);
     } catch (e: unknown) {
       console.error("error in tlsnotary", e);
-      sendMessageToServiceWorker({
+      await sendMessageToServiceWorker({
         type: ExtensionMessageType.ProofError,
         error: e instanceof Error ? e.message : String(e),
       });

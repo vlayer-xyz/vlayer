@@ -14,8 +14,8 @@ const BackButton = () => {
   const { proof } = useTlsnProver();
   return proof ? (
     <Button
-      onClick={() => {
-        browser.tabs.create({ url: backUrl });
+      onClick={async () => {
+        await browser.tabs.create({ url: backUrl });
       }}
     >
       Back
@@ -45,8 +45,8 @@ const GoToPageButton = () => {
   return !hasDataForProof ? (
     <Button
       variant="soft"
-      onClick={() => {
-        browser.tabs.create({ url: redirectUrl });
+      onClick={async () => {
+        await browser.tabs.create({ url: redirectUrl });
       }}
     >
       {" "}

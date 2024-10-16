@@ -64,9 +64,9 @@ export const createVlayerClient = (
 
       const result = dropProofFromArgs(
         decodeFunctionResult({
-          abi: savedProvingData[1] as Abi,
+          abi: savedProvingData[1],
           data: evm_call_result,
-          functionName: savedProvingData[2] as string,
+          functionName: savedProvingData[2],
         }),
       );
 

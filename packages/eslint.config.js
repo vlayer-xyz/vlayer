@@ -23,7 +23,6 @@ export default [
       "@typescript-eslint/restrict-template-expressions": "warn",
       "@typescript-eslint/no-redundant-type-constituents": "warn",
 
-      "@typescript-eslint/no-floating-promises": "warn",
       "@typescript-eslint/no-misused-promises": "warn",
       "@typescript-eslint/require-await": "warn",
     },
