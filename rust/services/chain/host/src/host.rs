@@ -17,7 +17,7 @@ use ethers::{
 use host_utils::Prover;
 use lazy_static::lazy_static;
 use provider::{to_eth_block_header, EvmBlockHeader};
-use risc0_zkvm::{sha::Digest, ExecutorEnv, ProveInfo};
+use risc0_zkvm::{sha::Digest, ExecutorEnv, ProveInfo, Receipt};
 use serde::Serialize;
 
 lazy_static! {
@@ -80,10 +80,13 @@ where
             elf_id: *GUEST_ID,
             block: latest_block,
         };
-        let zk_proof = self.prove(input)?;
+        let receipt = self.prove(input)?;
+        let zk_proof = encode_proof(&receipt);
+
         let range = latest_block_number..=latest_block_number;
         let chain_info = ChainInfo::new(range, block_trie.hash_slow(), zk_proof);
         let chain_update = ChainUpdate::new(chain_info, &block_trie, []);
+
         Ok(chain_update)
     }
 
@@ -101,15 +104,11 @@ where
         Ok(chain_update)
     }
 
-    fn prove(&self, input: Input) -> Result<Bytes, HostError> {
+    fn prove(&self, input: Input) -> Result<Receipt, HostError> {
         let executor_env = build_executor_env(input)?;
         let ProveInfo { receipt, .. } =
             provably_execute(&self.prover, executor_env, RISC0_CHAIN_GUEST_ELF)?;
-
-        let proof = bincode::serialize(&receipt)
-            .expect("failed to serialize receipt")
-            .into();
-        Ok(proof)
+        Ok(receipt)
     }
 
     async fn get_block(&self, number: BlockTag) -> Result<Box<dyn EvmBlockHeader>, HostError> {
@@ -122,6 +121,12 @@ where
         let block = to_eth_block_header(ethers_block).map_err(HostError::BlockConversion)?;
         Ok(Box::new(block))
     }
+}
+
+fn encode_proof(receipt: &Receipt) -> Bytes {
+    bincode::serialize(receipt)
+        .expect("failed to serialize receipt")
+        .into()
 }
 
 #[allow(unused)]
