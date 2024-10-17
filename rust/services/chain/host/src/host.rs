@@ -6,7 +6,6 @@ use std::ops::RangeInclusive;
 use alloy_primitives::ChainId;
 use block_trie::BlockTrie;
 use bytes::Bytes;
-use chain_db::{difference, ChainDb, ChainInfo, ChainTrie, ChainUpdate};
 use chain_guest::Input;
 use chain_guest_wrapper::{RISC0_CHAIN_GUEST_ELF, RISC0_CHAIN_GUEST_ID};
 pub use config::HostConfig;
@@ -18,6 +17,7 @@ use ethers::{
 };
 use futures::future::join_all;
 use host_utils::Prover;
+use kv::{difference, ChainDb, ChainInfo, ChainTrie, ChainUpdate};
 use lazy_static::lazy_static;
 use provider::{to_eth_block_header, EvmBlockHeader};
 use risc0_zkvm::{sha::Digest, ExecutorEnv, ProveInfo, Receipt};
@@ -195,7 +195,7 @@ mod test {
         }
     }
     mod host {
-        use chain_db::InMemoryDatabase;
+        use kv::InMemoryDatabase;
         use serde_json::Value;
         use test_utils::mock_provider;
 

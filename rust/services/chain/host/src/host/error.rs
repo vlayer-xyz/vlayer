@@ -8,7 +8,7 @@ use thiserror::Error;
 #[derivative(PartialEq, Eq)]
 pub enum HostError {
     #[error("ChainDB error: {0}")]
-    ChainDb(#[from] chain_db::ChainDbError),
+    ChainDb(#[from] kv::ChainDbError),
     #[error("ExecutorEnvBuilder: {0}")]
     ExecutorEnvBuilder(String),
     #[error("Prover: {0}")]

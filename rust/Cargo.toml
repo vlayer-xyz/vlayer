@@ -2,7 +2,7 @@
 resolver = "2"
 members = [
     "services/chain/client",
-    "services/chain/db",
+    "services/chain/kv",
     "services/chain/host",
     "services/chain/guest",
     "services/chain/guest_wrapper",
@@ -139,7 +139,7 @@ chain_client = { path = "services/chain/client" }
 chain_guest_wrapper = { path = "services/chain/guest_wrapper" }
 chain_server = { path = "services/chain/server" }
 chain_worker = { path = "services/chain/worker" }
-chain_db = { path = "services/chain/db" }
+kv = { path = "services/chain/kv" }
 chain_types = { path = "services/chain/types" }
 
 zkvm-benchmarks-common = { path = "zkvm-benchmarks/common" }

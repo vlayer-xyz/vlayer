@@ -8,7 +8,7 @@ provider = { workspace = true }
 clap = { workspace = true, features = ["derive", "string"] }
 alloy-primitives = { workspace = true }
 anyhow = { workspace = true }
-chain_db = { workspace = true }
+kv = { workspace = true }
 ethers-providers = { workspace = true }
 lazy_static = { workspace = true }
 thiserror = { workspace = true }

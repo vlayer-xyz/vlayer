@@ -1,5 +1,5 @@
 use alloy_primitives::{ChainId, B256};
-use chain_db::{ChainDb, ChainInfo, ChainUpdate};
+use kv::{ChainDb, ChainInfo, ChainUpdate};
 use lazy_static::lazy_static;
 use thiserror::Error;
 
@@ -24,7 +24,7 @@ lazy_static! {
 #[derive(Debug, Error)]
 enum WorkerError {
     #[error("ChainDB error: {0}")]
-    ChainDb(#[from] chain_db::ChainDbError),
+    ChainDb(#[from] kv::ChainDbError),
 }
 
 impl Worker {
@@ -53,7 +53,7 @@ impl Worker {
 #[cfg(test)]
 mod test {
     use anyhow::Result;
-    use chain_db::InMemoryDatabase;
+    use kv::InMemoryDatabase;
 
     use super::*;
 
