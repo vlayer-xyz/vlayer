@@ -91,8 +91,13 @@ where
         &self,
         current_chain_info: ChainInfo,
     ) -> Result<ChainUpdate, HostError> {
-        let _latest_block = self.get_block(BlockTag::Latest).await?;
-        let chain_update = ChainUpdate::new(current_chain_info, [], []);
+        let latest_block = self.get_block(BlockTag::Latest).await?;
+        let latest_block_number = latest_block.number();
+        let append_range = current_chain_info.last_block + 1..=latest_block_number;
+        let block_range = *current_chain_info.block_range().start()..=latest_block_number;
+        let chain_info =
+            ChainInfo::new(block_range, current_chain_info.root_hash, current_chain_info.zk_proof);
+        let chain_update = ChainUpdate::new(chain_info, [], []);
         Ok(chain_update)
     }
 
@@ -295,24 +300,12 @@ mod test {
                     let host =
                         Host::from_parts(Prover::default(), mock_provider([new_block]), db, 1);
 
-                    let ChainUpdate {
-                        chain_info:
-                            ChainInfo {
-                                first_block,
-                                last_block,
-                                ..
-                            },
-                        ..
-                    } = host.poll().await?;
+                    let chain_update = host.poll().await?;
+                    let Host { mut db, .. } = host;
+                    db.update_chain(1, chain_update)?;
 
-                    assert_fetched_latest_block(host.provider.as_ref());
-                    assert_eq!(first_block..=last_block, GENESIS..=new_block);
-
-                    // let proven_root = assert_trie_proof(&zk_proof)?;
-                    // assert_eq!(proven_root, root_hash);
-
-                    // assert!(added_nodes.is_empty());
-                    // assert!(removed_nodes.is_empty());
+                    let chain_trie = db.get_chain_trie(1)?.expect("chain trie not found");
+                    assert_eq!(chain_trie.block_range, GENESIS..=new_block);
 
                     Ok(())
                 }

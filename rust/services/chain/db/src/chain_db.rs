@@ -271,7 +271,7 @@ where
 }
 
 pub struct ChainTrie {
-    block_range: RangeInclusive<u64>,
+    pub block_range: RangeInclusive<u64>,
     trie: BlockTrie,
 }
 
