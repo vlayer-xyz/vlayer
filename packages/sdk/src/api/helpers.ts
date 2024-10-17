@@ -13,7 +13,7 @@ import {
 } from "viem";
 
 import { privateKeyToAccount, generatePrivateKey } from "viem/accounts";
-import { 
+import {
   foundry,
   sepolia,
   optimismSepolia,
@@ -39,15 +39,15 @@ const rpcUrls: Map<number, HttpTransport> = new Map([
   [baseSepolia.id, http("https://sepolia.base.org")],
   [polygonAmoy.id, http("https://rpc-amoy.polygon.technology")],
   [polygon.id, http("https://polygon.llamarpc.com")],
-  [zksync.id, http("https://mainnet.era.zksync.io")], 
+  [zksync.id, http("https://mainnet.era.zksync.io")],
   [zksyncSepoliaTestnet.id, http("https://sepolia.era.zksync.dev")],
   [arbitrum.id, http("https://arbitrum.llamarpc.com")],
   [arbitrumNova.id, http("https://arbitrum-nova.gateway.tenderly.co")],
-  [arbitrumSepolia.id, http("https://arbitrum-sepolia.gateway.tenderly.co")]
+  [arbitrumSepolia.id, http("https://arbitrum-sepolia.gateway.tenderly.co")],
 ]);
 
 export const chainIds = [
-  foundry.id, 
+  foundry.id,
   sepolia.id,
   optimismSepolia.id,
   optimism.id,
@@ -55,7 +55,7 @@ export const chainIds = [
   baseSepolia.id,
   polygonAmoy.id,
   polygon.id,
-  zksync.id, 
+  zksync.id,
   zksyncSepoliaTestnet.id,
   arbitrum.id,
   arbitrumNova.id,
