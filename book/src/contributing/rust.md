@@ -63,3 +63,20 @@ RISC0_PPROF_OUT=./profile.pb cargo run --bin vlayer serve --proof fake
 ```
 
 which will start the vlayer server. Then just call the JSON RPC API and the server will write the profiling output to `profile.pb`, which can be later [visualised as explained in the risc0 Profiling Guide](https://dev.risczero.com/api/zkvm/profiling#step-3-visualization). Please note that the profile only contains data about the Guest execution, i.e. the execution inside the zkVM.
+
+## Troubleshooting
+
+### Error on macOS while `cargo build`: `assert.h` file doesn't exist
+
+In some cases while running `cargo build`, an error occurs with compiling `mdbx-sys`.  
+In that case install `xcode-select`:
+``` sh
+xcode-select --install
+```
+If you get the message `Command line tools are already installed`, but the problem persists, reinstall it:
+``` sh
+sudo rm -rf /Library/Developer/CommandLineTools
+xcode-select --install
+```
+Then, install updates by "Software Update" in System Settings and finally restart your computer.
+
