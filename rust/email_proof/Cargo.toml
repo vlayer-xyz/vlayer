@@ -9,7 +9,7 @@ alloy-sol-types = { workspace = true }
 mailparse = "0.15.0"
 thiserror = { workspace = true }
 mail-auth = { git = "https://github.com/vlayer-xyz/mail-auth", rev = "800b8bc6c6ccca1f2e0d3a594a445ebdaae3198e", default-features = false, features = ["rust-crypto", "rustls-pemfile"] }
-futures = "0.3.30"
+futures = "0.3.31"
 regex = { workspace = true }
 ring = "0.17.8"
 

@@ -34,7 +34,7 @@ server_utils = { workspace = true }
 chain_server = { workspace = true }
 
 [dev-dependencies]
-regex = "1.10.6"
+regex = "1.11.0"
 
 [build-dependencies]
 vergen = { workspace = true, features = ["build", "git", "gitcl"] }

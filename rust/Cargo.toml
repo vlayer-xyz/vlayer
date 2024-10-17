@@ -38,35 +38,35 @@ lto = true
 risc0-zkvm = "1.0.5"
 risc0-zkp = { version = "1.0.5", default-features = false }
 risc0-build = "1.0.5"
-serde = { version = "1.0", features = ["derive"] }
-serde_json = "1.0.120"
+serde = { version = "1.0.210", features = ["derive"] }
+serde_json = "1.0.128"
 alloy-sol-types = "0.7.7"
 alloy-primitives = { version = "0.7.7", default-features = false, features = [
     "serde",
 ] }
 ethers-providers = "2.0"
-anyhow = "1.0.86"
-tokio = { version = "1.38.0", default-features = false, features = [
+anyhow = "1.0.89"
+tokio = { version = "1.40.0", default-features = false, features = [
     "rt-multi-thread",
 ] }
-thiserror = "1.0.61"
+thiserror = "1.0.64"
 tracing = { version = "0.1", default-features = false }
 tracing-subscriber = { version = "0.3", features = [
     "env-filter",
     "fmt",
 ], default-features = false }
-alloy-chains = "0.1.23"
+alloy-chains = "0.1.38"
 alloy-dyn-abi = "0.7.7"
 alloy-json-abi = "0.7.7"
-alloy-rlp = { version = "0.3.7", default-features = false }
-alloy-rlp-derive = { version = "0.3.7", default-features = false }
+alloy-rlp = { version = "0.3.8", default-features = false }
+alloy-rlp-derive = { version = "0.3.8", default-features = false }
 alloy-trie = "0.4.1"
 as-any = "0.3.1"
 auto_impl = "1.2.0"
-axum = "0.7.5"
+axum = "0.7.7"
 axum-jrpc = "0.7.1"
 bytes = "1.7.2"
-clap = "4.5.9"
+clap = "4.5.20"
 color-eyre = "=0.6.3"
 comfy-table = "7.1.1"
 ctor = "0.2.8"
@@ -77,7 +77,7 @@ derive-new = "0.7.0"
 derivative = "2.2.0"
 ethers = "2.0"
 ethers-core = { version = "2.0", default-features = false }
-flate2 = "1.0.30"
+flate2 = "1.0.34"
 forge = { git = "https://github.com/foundry-rs/foundry", rev = "cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5", default-features = false }
 foundry-cheatcodes = { git = "https://github.com/foundry-rs/foundry", rev = "cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5" }
 foundry-cli = { git = "https://github.com/foundry-rs/foundry", rev = "cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5", default-features = false }
@@ -87,30 +87,30 @@ foundry-config = { git = "https://github.com/foundry-rs/foundry", rev = "cb9dfae
 foundry-debugger = { git = "https://github.com/foundry-rs/foundry", rev = "cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5" }
 foundry-evm = { git = "https://github.com/foundry-rs/foundry", rev = "cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5" }
 foundry-evm-core = { git = "https://github.com/foundry-rs/foundry", rev = "cb9dfae298fe0b5a5cdef2536955f50b8c7f0bf5" }
-httparse = "1.9.4"
+httparse = "1.9.5"
 httpmock = "0.7.0"
 hex = "0.4.3"
 http-body-util = "0.1.2"
 lazy_static = "1.5.0"
 mime = "0.3.17"
 nybbles = "0.2.1"
-once_cell = "1.19"
+once_cell = "1.20"
 parking_lot = "0.12.3"
 p256 = { version = "0.13.2", features = ["ecdsa"] }
 pkcs8 = "0.10.2"
 rayon = "1.10.0"
-regex = "1.10.4"
-reqwest = { version = "0.12.5", default-features = false }
+regex = "1.11.0"
+reqwest = { version = "0.12.8", default-features = false }
 revm = { version = "10.0.0", default-features = false, features = ["optimism"] }
 risc0-build-ethereum = "1.0.0"
-rlp = "0.5.2"
-tar = "0.4.41"
-tempfile = "3.10.1"
+rlp = "0.6.1"
+tar = "0.4.42"
+tempfile = "3.13.0"
 test-log = "0.2.16"
 tlsn-core = { git = "https://github.com/tlsnotary/tlsn.git", tag = "v0.1.0-alpha.6" }
-toml = "0.8.14"
-tower = "0.4.13"
-tower-http = "0.5.2"
+toml = "0.8.19"
+tower = "0.5.1"
+tower-http = "0.6.1"
 tower-request-id = "0.3.0"
 url = { version = "2.5", default-features = false }
 vergen = { version = "8", default-features = false }
