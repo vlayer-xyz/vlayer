@@ -23,6 +23,7 @@ derivative = { workspace = true }
 tokio = { workspace = true, features = ["macros"] }
 lazy_static = { workspace = true }
 bincode = { workspace = true }
+futures = { workspace = true }
 
 [dev-dependencies]
 serde_json = { workspace = true }
