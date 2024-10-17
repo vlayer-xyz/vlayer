@@ -32,7 +32,7 @@ export function parseParams(str: string) {
 function parseHeader(header: Header) {
   const params = parseParams(header.value);
   if (!params) {
-    throw new DkimParsingError(`Invalid DKIM header ${header}`);
+    throw new DkimParsingError(`Invalid DKIM header ${header.value}`);
   }
 
   if (!params.d) {
