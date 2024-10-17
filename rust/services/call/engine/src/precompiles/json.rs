@@ -230,10 +230,8 @@ mod tests {
 
     #[test]
     fn success_numbers_in_array() {
-        let abi_encoded_body_and_json_path = InputType::abi_encode(&[
-            TEST_JSON,
-            "root.nested_level.field_array_of_numbers[1]",
-        ]);
+        let abi_encoded_body_and_json_path =
+            InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_array_of_numbers[1]"]);
 
         let precompile_output =
             json_get_int_run(&abi_encoded_body_and_json_path.into(), u64::MAX).unwrap();
@@ -259,10 +257,7 @@ mod tests {
 
     #[test]
     fn success_number_in_top_level_array() {
-        let abi_encoded_body_and_json_path = InputType::abi_encode(&[
-            TEST_JSON_ARRAY,
-            "[2].key",
-        ]);
+        let abi_encoded_body_and_json_path = InputType::abi_encode(&[TEST_JSON_ARRAY, "[2].key"]);
 
         let precompile_output =
             json_get_int_run(&abi_encoded_body_and_json_path.into(), u64::MAX).unwrap();
