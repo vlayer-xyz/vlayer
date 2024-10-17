@@ -2,11 +2,12 @@
 pragma solidity ^0.8.13;
 
 import {VTest} from "../../src/testing/VTest.sol";
-import {Web, WebProof, WebProofLib, WebLib} from "../../src/WebProof.sol";
+import {Web, WebProof, WebProofLib} from "../../src/WebProof.sol";
 import {Strings} from "@openzeppelin-contracts-5.0.1/utils/Strings.sol";
+import {JsonParserLib} from "../../src/JsonParser.sol";
 
 contract JsonParsingTest is VTest {
-    using WebLib for Web;
+    using JsonParserLib for Web;
     using Strings for string;
 
     function test_parsingStringFromSimpleJson() public {
