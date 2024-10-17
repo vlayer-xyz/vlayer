@@ -1,6 +1,8 @@
 pub mod config;
 pub mod error;
 
+use std::ops::RangeInclusive;
+
 use alloy_primitives::ChainId;
 use block_trie::BlockTrie;
 use bytes::Bytes;
@@ -14,6 +16,7 @@ use ethers::{
     providers::{Http, JsonRpcClient, Provider},
     types::BlockNumber as BlockTag,
 };
+use futures::future::join_all;
 use host_utils::Prover;
 use lazy_static::lazy_static;
 use provider::{to_eth_block_header, EvmBlockHeader};
@@ -102,6 +105,8 @@ where
 
         let latest_block = self.get_block(BlockTag::Latest).await?;
         let latest_block_number = latest_block.number();
+        let append_range = block_range.end() + 1..=latest_block_number;
+        let append_blocks = self.get_blocks_range(append_range).await?;
 
         let block_range = *block_range.start()..=latest_block_number;
         let chain_info = ChainInfo::new(block_range, trie.hash_slow(), old_zk_proof);
@@ -115,6 +120,14 @@ where
         let ProveInfo { receipt, .. } =
             provably_execute(&self.prover, executor_env, RISC0_CHAIN_GUEST_ELF)?;
         Ok(receipt)
+    }
+
+    async fn get_blocks_range(
+        &self,
+        range: RangeInclusive<u64>,
+    ) -> Result<Vec<Box<dyn EvmBlockHeader>>, HostError> {
+        let blocks = join_all(range.map(|n| self.get_block(n.into()))).await;
+        blocks.into_iter().collect()
     }
 
     async fn get_block(&self, number: BlockTag) -> Result<Box<dyn EvmBlockHeader>, HostError> {
