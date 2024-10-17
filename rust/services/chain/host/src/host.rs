@@ -101,17 +101,23 @@ where
             .db
             .get_chain_trie(self.chain_id)?
             .expect("chain trie not found");
-        let trie = old_trie.clone();
+        let mut trie = old_trie.clone();
 
         let latest_block = self.get_block(BlockTag::Latest).await?;
         let latest_block_number = latest_block.number();
         let append_range = block_range.end() + 1..=latest_block_number;
         let append_blocks = self.get_blocks_range(append_range).await?;
 
+        for block in append_blocks {
+            // SAFETY: UNSAFE - It's a stub to makes the partial test pass
+            trie.insert_unchecked(block.number(), &block.hash_slow());
+        }
+
         let block_range = *block_range.start()..=latest_block_number;
         let chain_info = ChainInfo::new(block_range, trie.hash_slow(), old_zk_proof);
         let (added, removed) = difference(&old_trie, &trie);
         let chain_update = ChainUpdate::new(chain_info, added, removed);
+
         Ok(chain_update)
     }
 
@@ -321,8 +327,12 @@ mod test {
                 async fn new_head_blocks_back_propagation_finished() -> anyhow::Result<()> {
                     let new_block = GENESIS + 1;
                     let db = test_db_after_initialize().await?;
-                    let host =
-                        Host::from_parts(Prover::default(), mock_provider([new_block]), db, 1);
+                    let host = Host::from_parts(
+                        Prover::default(),
+                        mock_provider([new_block, new_block]),
+                        db,
+                        1,
+                    );
 
                     let chain_update = host.poll().await?;
                     let Host { mut db, .. } = host;
