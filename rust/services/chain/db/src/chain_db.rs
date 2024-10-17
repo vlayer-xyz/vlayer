@@ -255,7 +255,7 @@ impl<TX: WriteTx + ?Sized> ChainDbTx<TX> {
     }
 }
 
-fn difference<T>(
+pub fn difference<T>(
     old: impl IntoIterator<Item = T>,
     new: impl IntoIterator<Item = T>,
 ) -> (Box<[T]>, Box<[T]>)

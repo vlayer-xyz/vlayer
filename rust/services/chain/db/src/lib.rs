@@ -8,7 +8,9 @@ mod chain_db;
 mod in_memory;
 mod mdbx;
 
-pub use chain_db::{ChainDb, ChainDbError, ChainDbResult, ChainInfo, ChainTrie, ChainUpdate};
+pub use chain_db::{
+    difference, ChainDb, ChainDbError, ChainDbResult, ChainInfo, ChainTrie, ChainUpdate,
+};
 pub use in_memory::InMemoryDatabase;
 pub use mdbx::Mdbx;
 
