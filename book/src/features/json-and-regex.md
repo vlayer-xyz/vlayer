@@ -72,11 +72,13 @@ We provide a set of functions to match a regular expression against a string.
 struct Match {
   uint256 beginOffset;
   uint256 endOffset; // first character not included in the match
+  string value;
 }
 
 struct CatureResult {
   uint256 beginOffset;
   uint256 endOffset; // first character not included in the match
+  string value;
   Capture[] captures;
 }
 
@@ -84,6 +86,7 @@ struct Capture {
   string name;
   uint256 beginOffset;
   uint256 endOffset; // first character not included in the match
+  string value;
 }
 
 interface RegexLib {
@@ -132,8 +135,8 @@ so that one can decide which function suits the use-case.
 
 ### Algorithm complexity (aka. Big-O notation)
 Given:
-- `m` - linear lenght of the regular expression, wher linear length is the lenght of the regex after all repetitions has been expanded ex. `a{5}` -> `aaaaa`;
-- `n` - lenght of the string matched against
+- `m` - linear length of the regular expression, wher linear length is the length of the regex after all repetitions has been expanded ex. `a{5}` -> `aaaaa`;
+- `n` - length of the string matched against
 
 Then the complexity of each of the operation is as following:
 - `match`, `find`, `find_captures` - bound by `O(m*n)`;
@@ -146,5 +149,5 @@ Upper limits are defined as below:
 - `n*m` is limited to 5 242 880.
 
 ### Syntax
-Underneath, vlayer uses [`regex`](https://docs.rs/regex/latest/regex) rust crate, so syntax if fully compatible with the library. 
-
+Underneath, vlayer uses [`regex`](https://docs.rs/regex/latest/regex) rust crate, so syntax if fully compatible with the library.
+Regex playground is available [here](https://rustexp.lpil.uk).
