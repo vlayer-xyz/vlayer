@@ -24,7 +24,7 @@ export default [
       "@typescript-eslint/no-redundant-type-constituents": "warn",
 
       "@typescript-eslint/no-misused-promises": "warn",
-      "@typescript-eslint/require-await": "warn",
+      "@typescript-eslint/require-await": "warn", //VlayerClient.prove() is async for the future http request in it
     },
     languageOptions: {
       globals: {
