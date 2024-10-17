@@ -21,20 +21,20 @@ export type CallContext = {
   chain_id: number; // 31337
 };
 
-export interface Proof {
+export type Proof = {
   length: bigint;
   seal: {
     verifierSelector: Hex;
-    seal: [Hex, Hex, Hex, Hex, Hex, Hex, Hex, Hex];
+    seal: readonly [Hex, Hex, Hex, Hex, Hex, Hex, Hex, Hex];
     mode: number;
   };
-  assumptions: {
+  callAssumptions: {
     proverContractAddress: Address;
     functionSelector: Hex;
     settleBlockHash: Hex;
     settleBlockNumber: bigint;
   };
-}
+};
 
 export interface VCallResult {
   evm_call_result: Hex;
