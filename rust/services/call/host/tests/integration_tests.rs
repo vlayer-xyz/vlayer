@@ -59,7 +59,6 @@ fn rpc_urls() -> HashMap<ChainId, String> {
     ])
 }
 
-
 fn block_tag_to_block_number<P>(
     providers: &CachedMultiProvider<P>,
     chain_id: u64,
