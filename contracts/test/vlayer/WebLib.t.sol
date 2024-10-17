@@ -7,14 +7,13 @@ import {Strings} from "@openzeppelin-contracts-5.0.1/utils/Strings.sol";
 import {JsonParserLib} from "../../src/JsonParser.sol";
 
 contract JsonParsingTest is VTest {
-    using JsonParserLib for Web;
     using Strings for string;
 
     function test_parsingStringFromSimpleJson() public {
         Web memory web = Web("{\"asset\":\"FDUSD\",\"test\":5}", "");
 
         callProver();
-        string memory assetName = web.jsonGetString("asset");
+        string memory assetName = JsonParserLib.jsonGetString(web, "asset");
 
         assert(assetName.equal("FDUSD"));
     }
@@ -23,7 +22,7 @@ contract JsonParsingTest is VTest {
         Web memory web = Web("{\"asset\":\"FDUSD\",\"test\":5}", "");
 
         callProver();
-        int256 value = web.jsonGetInt("test");
+        int256 value = JsonParserLib.jsonGetInt(web, "test");
 
         assertEq(value, 5);
     }
@@ -32,7 +31,7 @@ contract JsonParsingTest is VTest {
         Web memory web = Web("{\"asset\":\"FDUSD\",\"test\":true}", "");
 
         callProver();
-        bool value = web.jsonGetBool("test");
+        bool value = JsonParserLib.jsonGetBool(web, "test");
 
         assertTrue(value);
     }
@@ -41,7 +40,7 @@ contract JsonParsingTest is VTest {
         Web memory web = Web("{\"asset\":[\"FDUSD\",\"test\"]}", "");
 
         callProver();
-        string memory assetName = web.jsonGetString("asset[0]");
+        string memory assetName = JsonParserLib.jsonGetString(web, "asset[0]");
 
         assertEq(keccak256(bytes(assetName)), keccak256(bytes("FDUSD")));
     }
@@ -53,7 +52,7 @@ contract JsonParsingTest is VTest {
         );
 
         callProver();
-        string memory assetName = web.jsonGetString("[0].asset");
+        string memory assetName = JsonParserLib.jsonGetString(web, "[0].asset");
 
         assertEq(keccak256(bytes(assetName)), keccak256(bytes("FDUSD")));
     }
