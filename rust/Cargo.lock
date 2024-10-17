@@ -2226,6 +2226,23 @@ dependencies = [
 ]
 
 [[package]]
+name = "chain_db"
+version = "0.1.0"
+dependencies = [
+ "alloy-primitives 0.7.7",
+ "alloy-rlp",
+ "anyhow",
+ "block_trie",
+ "bytes",
+ "derive_more 1.0.0",
+ "kv",
+ "mpt",
+ "nybbles",
+ "rand",
+ "thiserror",
+]
+
+[[package]]
 name = "chain_guest"
 version = "0.1.0"
 dependencies = [
@@ -2256,6 +2273,7 @@ dependencies = [
  "bincode",
  "block_trie",
  "bytes",
+ "chain_db",
  "chain_guest",
  "chain_guest_wrapper",
  "derivative",
@@ -6011,17 +6029,11 @@ dependencies = [
 name = "kv"
 version = "0.1.0"
 dependencies = [
- "alloy-primitives 0.7.7",
- "alloy-rlp",
  "anyhow",
  "auto_impl",
- "block_trie",
  "bytes",
  "derive_more 1.0.0",
  "libmdbx",
- "mpt",
- "nybbles",
- "rand",
  "static_assertions",
  "tempfile",
  "thiserror",
@@ -10841,14 +10853,7 @@ checksum = "d135d17ab770252ad95e9a872d365cf3090e3be864a34ab46f48555993efc904"
 name = "worker"
 version = "0.1.0"
 dependencies = [
- "alloy-primitives 0.7.7",
  "anyhow",
- "clap",
- "ethers-providers",
- "kv",
- "lazy_static",
- "provider",
- "thiserror",
 ]
 
 [[package]]

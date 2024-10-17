@@ -1,13 +1,11 @@
-use std::collections::HashSet;
-
 use alloy_primitives::BlockNumber;
 use anyhow::Result;
 use block_trie::BlockTrie;
-use mpt::MerkleTrie;
+use kv::InMemoryDatabase;
+use mpt::{MerkleTrie, EMPTY_ROOT_HASH};
 use rand::{rngs::StdRng, RngCore, SeedableRng};
 
 use super::*;
-use crate::in_memory::InMemoryDatabase;
 
 fn get_test_db() -> ChainDb {
     let db = InMemoryDatabase::new();
@@ -130,7 +128,7 @@ fn proof_one_node() -> Result<()> {
 fn proof_extension() {
     let mut db = get_test_db();
 
-    let (root_hash, root) = insert_blocks(&mut db, vec![0, 1_000_000]);
+    let (root_hash, _) = insert_blocks(&mut db, vec![0, 1_000_000]);
     let proof_trie = check_proof(&db, root_hash, 1_000_000);
 
     // The tree should be sparse - block 0 not included

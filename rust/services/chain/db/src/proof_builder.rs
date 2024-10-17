@@ -1,5 +1,3 @@
-use std::ops::Deref;
-
 use alloy_primitives::{BlockNumber, B256};
 use alloy_rlp::Decodable;
 use mpt::{Node, NodeRef};
@@ -29,7 +27,7 @@ impl<F: Fn(B256) -> ChainDbResult<Node>> MerkleProofBuilder<F> {
         self.visit_node_hash(root_hash)
     }
 
-    fn visit_node_hash(mut self, node_hash: B256) -> ProofResult {
+    fn visit_node_hash(self, node_hash: B256) -> ProofResult {
         let node = (self.load_node)(node_hash)?;
         self.visit_node(Some(node_hash), node)
     }
@@ -37,7 +35,7 @@ impl<F: Fn(B256) -> ChainDbResult<Node>> MerkleProofBuilder<F> {
     fn visit_node(mut self, node_hash: Option<B256>, node: Node) -> ProofResult {
         self.nodes.push((node_hash, node));
         match &self.nodes.last().expect("just pushed").1 {
-            Node::Leaf(prefix, value) if *prefix == &*self.nibbles => self.finalize(),
+            Node::Leaf(prefix, _) if *prefix == &*self.nibbles => self.finalize(),
             Node::Leaf(..) | Node::Null => Err(ChainDbError::BlockNotFound),
             Node::Extension(prefix, child) => {
                 self.nibbles = strip_prefix(&self.nibbles, prefix.as_slice())
@@ -64,7 +62,7 @@ impl<F: Fn(B256) -> ChainDbResult<Node>> MerkleProofBuilder<F> {
         }
     }
 
-    fn visit_child_node(mut self, child_ref: NodeRef) -> ProofResult {
+    fn visit_child_node(self, child_ref: NodeRef) -> ProofResult {
         match child_ref {
             NodeRef::Empty | NodeRef::Node(_) => Err(ChainDbError::InvalidNode),
             NodeRef::Digest(node_hash) => self.visit_node_hash(node_hash),

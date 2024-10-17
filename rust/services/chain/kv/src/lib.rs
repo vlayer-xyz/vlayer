@@ -4,13 +4,9 @@ use auto_impl::auto_impl;
 use static_assertions::assert_obj_safe;
 use thiserror::Error;
 
-mod chain_db;
 mod in_memory;
 mod mdbx;
 
-pub use chain_db::{
-    difference, ChainDb, ChainDbError, ChainDbResult, ChainInfo, ChainTrie, ChainUpdate,
-};
 pub use in_memory::InMemoryDatabase;
 pub use mdbx::Mdbx;
 

@@ -16,6 +16,7 @@ thiserror = { workspace = true }
 chain_guest = { workspace = true }
 chain_guest_wrapper = { workspace = true }
 mpt = { workspace = true }
+chain_db = { workspace = true }
 kv = { workspace = true }
 ethers = { workspace = true }
 provider = { workspace = true }

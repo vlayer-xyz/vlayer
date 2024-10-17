@@ -3,6 +3,7 @@ resolver = "2"
 members = [
     "services/chain/client",
     "services/chain/kv",
+    "services/chain/db",
     "services/chain/host",
     "services/chain/guest",
     "services/chain/guest_wrapper",
@@ -99,6 +100,7 @@ once_cell = "1.20"
 parking_lot = "0.12.3"
 p256 = { version = "0.13.2", features = ["ecdsa"] }
 pkcs8 = "0.10.2"
+rand = "0.8.5"
 rayon = "1.10.0"
 regex = "1.11.0"
 reqwest = { version = "0.12.8", default-features = false }
@@ -135,6 +137,7 @@ call_server = { path = "services/call/server" }
 chain_host = { path = "services/chain/host" }
 chain_guest = { path = "services/chain/guest" }
 block_trie = { path = "services/chain/block_trie" }
+chain_db = { path = "services/chain/db" }
 chain_client = { path = "services/chain/client" }
 chain_guest_wrapper = { path = "services/chain/guest_wrapper" }
 chain_server = { path = "services/chain/server" }

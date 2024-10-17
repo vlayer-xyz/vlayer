@@ -1,23 +1,20 @@
 use std::{
     collections::HashSet,
-    fmt::{self, format, LowerHex},
+    fmt::{self},
     hash::Hash,
-    io::Read,
-    ops::{Deref, DerefMut, Range, RangeInclusive},
+    ops::{Deref, RangeInclusive},
     path::Path,
 };
 
 use alloy_primitives::{keccak256, ChainId, B256};
-use alloy_rlp::{Bytes as RlpBytes, BytesMut, Decodable, Encodable, RlpDecodable, RlpEncodable};
+use alloy_rlp::{Bytes as RlpBytes, Decodable, RlpDecodable, RlpEncodable};
 use block_trie::BlockTrie;
 use bytes::Bytes;
 use derive_more::Debug;
-use mpt::{KeyNibbles, MerkleTrie, Node, NodeRef, EMPTY_ROOT_HASH};
-use nybbles::Nibbles;
+use kv::{Database, DbError, Mdbx, ReadTx, ReadWriteTx, WriteTx};
+use mpt::{MerkleTrie, Node};
 use proof_builder::{MerkleProofBuilder, ProofResult};
 use thiserror::Error;
-
-use crate::{Database, DbError, DbResult, Mdbx, ReadTx, ReadWriteTx, WriteTx};
 
 mod proof_builder;
 #[cfg(test)]
@@ -57,6 +54,7 @@ impl ChainInfo {
     }
 }
 
+#[allow(dead_code)] // Used by Debug derive
 fn slice_lower_hex<T: fmt::LowerHex>(slice: &[T]) -> impl fmt::LowerHex + '_ {
     struct SliceLowerHex<'a, T>(&'a [T]);
 
