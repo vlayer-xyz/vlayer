@@ -4,7 +4,7 @@ pub mod error;
 use alloy_primitives::ChainId;
 use block_trie::BlockTrie;
 use bytes::Bytes;
-use chain_db::{ChainDb, ChainInfo, ChainTrie, ChainUpdate};
+use chain_db::{difference, ChainDb, ChainInfo, ChainTrie, ChainUpdate};
 use chain_guest::Input;
 use chain_guest_wrapper::{RISC0_CHAIN_GUEST_ELF, RISC0_CHAIN_GUEST_ID};
 pub use config::HostConfig;
@@ -106,7 +106,8 @@ where
 
         let block_range = *block_range.start()..=latest_block_number;
         let chain_info = ChainInfo::new(block_range, trie.hash_slow(), old_zk_proof);
-        let chain_update = ChainUpdate::new(chain_info, [], []);
+        let (added, removed) = difference(&old_trie, &trie);
+        let chain_update = ChainUpdate::new(chain_info, added, removed);
         Ok(chain_update)
     }
 
