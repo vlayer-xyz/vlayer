@@ -13,16 +13,54 @@ import {
 } from "viem";
 
 import { privateKeyToAccount, generatePrivateKey } from "viem/accounts";
-import { foundry, optimismSepolia } from "viem/chains";
+import { 
+  foundry,
+  sepolia,
+  optimismSepolia,
+  optimism,
+  base,
+  baseSepolia,
+  polygon,
+  polygonAmoy,
+  arbitrumSepolia,
+  zksync,
+  zksyncSepoliaTestnet,
+  arbitrum,
+  arbitrumNova,
+} from "viem/chains";
 
 import type { ContractSpec, ContractArg } from "types/ethereum";
 
 const rpcUrls: Map<number, HttpTransport> = new Map([
   [foundry.id, http()],
   [optimismSepolia.id, http("https://sepolia.optimism.io")],
+  [optimism.id, http("https://mainnet.optimism.io")],
+  [base.id, http("https://mainnet.base.org")],
+  [baseSepolia.id, http("https://sepolia.base.org")],
+  [polygonAmoy.id, http("https://rpc-amoy.polygon.technology")],
+  [polygon.id, http("https://polygon.llamarpc.com")],
+  [zksync.id, http("https://mainnet.era.zksync.io")], 
+  [zksyncSepoliaTestnet.id, http("https://sepolia.era.zksync.dev")],
+  [arbitrum.id, http("https://arbitrum.llamarpc.com")],
+  [arbitrumNova.id, http("https://arbitrum-nova.gateway.tenderly.co")],
+  [arbitrumSepolia.id, http("https://arbitrum-sepolia.gateway.tenderly.co")]
 ]);
 
-export const chainIds = [foundry.id, optimismSepolia.id];
+export const chainIds = [
+  foundry.id, 
+  sepolia.id,
+  optimismSepolia.id,
+  optimism.id,
+  base.id,
+  baseSepolia.id,
+  polygonAmoy.id,
+  polygon.id,
+  zksync.id, 
+  zksyncSepoliaTestnet.id,
+  arbitrum.id,
+  arbitrumNova.id,
+  arbitrumSepolia.id,
+];
 
 export function createAnvilClient(
   chainId: number = foundry.id,
