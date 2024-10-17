@@ -163,8 +163,7 @@ impl ChainDb {
             .into_iter()
             .chain(last_block_proof)
             .collect();
-        // SAFETY: All data in DB is trusted
-        let block_trie = BlockTrie::from_unchecked(trie);
+        let block_trie = BlockTrie::from_proof(trie, &zk_proof);
 
         Ok(Some(ChainTrie::new(first_block..=last_block, block_trie, zk_proof)))
     }
