@@ -66,7 +66,7 @@ which will start the vlayer server. Then just call the JSON RPC API and the serv
 
 ## Troubleshooting
 
-### Error while `cargo build`: `assert.h` file doesn't exist
+### Error on macOS while `cargo build`: `assert.h` file doesn't exist
 
 In some cases while running `cargo build`, an error occurs with compiling `mdbx-sys`.  
 In that case install `xcode-select`:
