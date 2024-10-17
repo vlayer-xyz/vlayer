@@ -121,7 +121,8 @@ mod tests {
                         "field_boolean": true,
                         "field_array": ["val1", "val2"],
                         "field_object": {},
-                        "field_array_of_objects": [{"key": "val01"},{"key": "val02"}]
+                        "field_array_of_objects": [{"key": "val01"},{"key": "val02"}],
+                        "field_array_of_objects_with_numbers" : [{"key": 1}, {"key": 2}]
                     }
                 }
             }
@@ -194,6 +195,19 @@ mod tests {
             "val02",
             sol_data::String::abi_decode(precompile_output.bytes.as_ref(), true).unwrap()
         );
+    }
+
+    #[test]
+    fn success_number_in_an_array_of_objects() {
+        let abi_encoded_body_and_json_path = 
+            InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_array_of_objects_with_numbers[0].key"]);
+
+        let precompile_output =
+            json_get_int_run(&abi_encoded_body_and_json_path.into(), u64::MAX).unwrap();
+        
+        let result  = sol_data::Int::<256>::abi_decode(precompile_output.bytes.as_ref(), false).unwrap();
+        let parsed: alloy_primitives::I256 = "1".parse().unwrap();
+        assert_eq!(parsed, result);
     }
 
     #[test]
