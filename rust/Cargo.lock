@@ -1876,6 +1876,7 @@ dependencies = [
  "host_utils",
  "lazy_static",
  "mpt",
+ "once_cell",
  "provider",
  "reqwest 0.12.8",
  "revm",

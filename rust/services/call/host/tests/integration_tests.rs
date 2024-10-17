@@ -13,6 +13,7 @@ use chain_server::server::ChainProofServerMock;
 use dotenv::dotenv;
 use ethers_core::types::BlockNumber as BlockTag;
 use lazy_static::lazy_static;
+use once_cell::sync::Lazy;
 use provider::{
     BlockNumber, BlockingProvider, CachedMultiProvider, CachedProviderFactory, FileProviderFactory,
     ProviderFactory,
@@ -24,6 +25,8 @@ use serde_json::json;
 // Recording creates new testdata directory and writes return data from Alchemy into files in that directory.
 const UPDATE_SNAPSHOTS: bool = false;
 const LATEST_BLOCK: BlockTag = BlockTag::Latest;
+static SEPOLIA_LATEST_BLOCK_LOCATION: Lazy<ExecutionLocation> =
+    Lazy::new(|| ExecutionLocation::new(Chain::sepolia().id(), LATEST_BLOCK));
 
 struct ExecutionLocation {
     pub chain_id: ChainId,
@@ -92,7 +95,7 @@ where
 async fn run<C>(
     test_name: &str,
     call: Call,
-    location: ExecutionLocation,
+    location: &ExecutionLocation,
 ) -> anyhow::Result<C::Return>
 where
     C: SolCall,
@@ -112,14 +115,14 @@ where
 async fn setup_host_and_run_call<P, F>(
     call: Call,
     provider_factory: F,
-    execution_location: ExecutionLocation,
+    execution_location: &ExecutionLocation,
 ) -> Result<HostOutput, HostError>
 where
     P: BlockingProvider + 'static,
     F: ProviderFactory<P> + 'static,
 {
     let providers = CachedMultiProvider::new(provider_factory);
-    let chain_proof_server = create_chain_proof_server(&providers, &execution_location).await?;
+    let chain_proof_server = create_chain_proof_server(&providers, execution_location).await?;
     let host = create_host(providers, execution_location, chain_proof_server.url())?;
     let host_output = host.run(call).await?;
 
@@ -150,7 +153,7 @@ where
 
 fn create_host<P: BlockingProvider + 'static>(
     providers: CachedMultiProvider<P>,
-    location: ExecutionLocation,
+    location: &ExecutionLocation,
     chain_proof_server_url: impl AsRef<str>,
 ) -> Result<Host<P>, HostError> {
     let config = HostConfig {
@@ -197,7 +200,7 @@ mod usdt {
             data: sol_call.abi_encode(),
         };
         let location = ExecutionLocation::new(Chain::mainnet().id(), USDT_BLOCK_NO);
-        let result = run::<IERC20::balanceOfCall>("usdt_erc20_balance_of", call, location).await?;
+        let result = run::<IERC20::balanceOfCall>("usdt_erc20_balance_of", call, &location).await?;
         assert_eq!(result._0, uint!(3_000_000_000_000_000_U256));
         Ok(())
     }
@@ -223,7 +226,7 @@ mod uniswap {
         };
         let location = ExecutionLocation::new(Chain::mainnet().id(), LATEST_BLOCK);
         let result =
-            run::<IUniswapV3Factory::ownerCall>("uniswap_factory_owner", call, location).await?;
+            run::<IUniswapV3Factory::ownerCall>("uniswap_factory_owner", call, &location).await?;
         assert_eq!(
             result._0,
             address!("1a9c8182c09f50c8318d769245bea52c32be35bc") // Uniswap V2: UNI Timelock is the current owner of the factory.
@@ -287,9 +290,12 @@ mod view {
             to: VIEW_CALL,
             data: sol_call.abi_encode(),
         };
-        let location = ExecutionLocation::new(Chain::sepolia().id(), LATEST_BLOCK);
-        let result =
-            run::<ViewCallTest::testPrecompileCall>("view_precompile", call, location).await?;
+        let result = run::<ViewCallTest::testPrecompileCall>(
+            "view_precompile",
+            call,
+            &*SEPOLIA_LATEST_BLOCK_LOCATION,
+        )
+        .await?;
         assert_eq!(
             result._0,
             b256!("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
@@ -304,11 +310,10 @@ mod view {
             to: VIEW_CALL,
             data: sol_call.abi_encode(),
         };
-        let location = ExecutionLocation::new(Chain::sepolia().id(), LATEST_BLOCK);
         let result = run::<ViewCallTest::testNonexistentAccountCall>(
             "view_nonexistent_account",
             call,
-            location,
+            &*SEPOLIA_LATEST_BLOCK_LOCATION,
         )
         .await?;
         assert_eq!(result.size, uint!(0_U256));
@@ -322,9 +327,12 @@ mod view {
             to: VIEW_CALL,
             data: sol_call.abi_encode(),
         };
-        let location = ExecutionLocation::new(Chain::sepolia().id(), LATEST_BLOCK);
-        let result =
-            run::<ViewCallTest::testEoaAccountCall>("view_eoa_account", call, location).await?;
+        let result = run::<ViewCallTest::testEoaAccountCall>(
+            "view_eoa_account",
+            call,
+            &*SEPOLIA_LATEST_BLOCK_LOCATION,
+        )
+        .await?;
         assert_eq!(result.size, uint!(0_U256));
         Ok(())
     }
@@ -338,7 +346,7 @@ mod view {
         };
         let location = ExecutionLocation::new(Chain::sepolia().id(), VIEW_CALL_BLOCK_NO);
         let result =
-            run::<ViewCallTest::testBlockhashCall>("view_blockhash", call, location).await?;
+            run::<ViewCallTest::testBlockhashCall>("view_blockhash", call, &location).await?;
         assert_eq!(
             result._0,
             b256!("7703fe4a3d6031a579d52ce9e493e7907d376cfc3b41f9bc7710b0dae8c67f68")
@@ -353,8 +361,12 @@ mod view {
             to: VIEW_CALL,
             data: sol_call.abi_encode(),
         };
-        let location = ExecutionLocation::new(Chain::sepolia().id(), LATEST_BLOCK);
-        let result = run::<ViewCallTest::testChainidCall>("view_chainid", call, location).await?;
+        let result = run::<ViewCallTest::testChainidCall>(
+            "view_chainid",
+            call,
+            &*SEPOLIA_LATEST_BLOCK_LOCATION,
+        )
+        .await?;
         assert_eq!(result._0, uint!(11_155_111_U256));
         Ok(())
     }
@@ -366,11 +378,10 @@ mod view {
             to: VIEW_CALL,
             data: sol_call.abi_encode(),
         };
-        let location = ExecutionLocation::new(Chain::sepolia().id(), LATEST_BLOCK);
         let result = run::<ViewCallTest::testMuliContractCallsCall>(
             "view_multi_contract_calls",
             call,
-            location,
+            &*SEPOLIA_LATEST_BLOCK_LOCATION,
         )
         .await?;
         assert_eq!(result._0, uint!(84_U256));
@@ -383,10 +394,13 @@ mod view {
             to: address!("d8dA6BF26964aF9D7eEd9e03E53415D37aA96045"), // vitalik.eth
             ..Default::default()
         };
-        let location = ExecutionLocation::new(Chain::sepolia().id(), LATEST_BLOCK);
-        run::<ViewCallTest::testEoaAccountCall>("view_call_eoa", call, location)
-            .await
-            .expect_err("calling an EOA should fail");
+        run::<ViewCallTest::testEoaAccountCall>(
+            "view_call_eoa",
+            call,
+            &*SEPOLIA_LATEST_BLOCK_LOCATION,
+        )
+        .await
+        .expect_err("calling an EOA should fail");
 
         Ok(())
     }
@@ -418,7 +432,7 @@ mod teleport {
         };
         let location = ExecutionLocation::new(NamedChain::AnvilHardhat, BLOCK_NO);
         let result =
-            run::<SimpleTravelProver::crossChainBalanceOfCall>("simple_teleport", call, location)
+            run::<SimpleTravelProver::crossChainBalanceOfCall>("simple_teleport", call, &location)
                 .await;
         assert_eq!(
             result.unwrap_err().to_string(),
