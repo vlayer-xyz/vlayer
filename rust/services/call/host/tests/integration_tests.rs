@@ -3,6 +3,7 @@ use std::{collections::HashMap, env};
 use alloy_chains::{Chain, NamedChain};
 use alloy_primitives::{address, b256, uint, Address, ChainId};
 use alloy_sol_types::{sol, SolCall};
+use call_engine::io::HostOutput;
 use call_host::{
     host::{config::HostConfig, error::HostError, get_block_number, Host},
     Call,
@@ -13,7 +14,7 @@ use dotenv::dotenv;
 use ethers_core::types::BlockNumber as BlockTag;
 use lazy_static::lazy_static;
 use provider::{
-    BlockingProvider, CachedMultiProvider, CachedProviderFactory, FileProviderFactory,
+    BlockNumber, BlockingProvider, CachedMultiProvider, CachedProviderFactory, FileProviderFactory,
     ProviderFactory,
 };
 use serde_json::json;
@@ -58,31 +59,6 @@ fn rpc_urls() -> HashMap<ChainId, String> {
     ])
 }
 
-async fn create_host<P>(
-    provider_factory: impl ProviderFactory<P> + 'static,
-    block_tag: BlockTag,
-    config: &HostConfig,
-) -> Result<Host<P>, HostError>
-where
-    P: BlockingProvider + 'static,
-{
-    let providers = CachedMultiProvider::new(provider_factory);
-    let block_number = block_tag_to_block_number(&providers, config.start_chain_id, block_tag)?;
-    let chain_proof_server_mock = ChainProofServerMock::start(
-        json!({
-            "chain_id": config.start_chain_id,
-            "block_numbers": [block_number]
-        }),
-        json!({
-            "proof": "",
-            "nodes": []
-        }),
-    )
-    .await;
-    let chain_proof_client = ChainProofClient::new(chain_proof_server_mock.url());
-
-    Host::try_new_with_components(providers, block_number, chain_proof_client, config)
-}
 
 fn block_tag_to_block_number<P>(
     providers: &CachedMultiProvider<P>,
@@ -103,7 +79,7 @@ async fn run<C>(
     test_name: &str,
     call: Call,
     chain_id: ChainId,
-    block_number: BlockTag,
+    block_tag: BlockTag,
 ) -> anyhow::Result<C::Return>
 where
     C: SolCall,
@@ -115,16 +91,49 @@ where
 
     let host_output = if UPDATE_SNAPSHOTS {
         let provider_factory = CachedProviderFactory::new(rpc_urls(), rpc_file_cache(test_name));
-        let host = create_host(provider_factory, block_number, &config).await?;
-        host.run(call).await?
+        get_host_output(call, provider_factory, chain_id, block_tag, &config).await?
     } else {
         let provider_factory = FileProviderFactory::new(rpc_file_cache(test_name));
-        let host = create_host(provider_factory, block_number, &config).await?;
-        host.run(call).await?
+        get_host_output(call, provider_factory, chain_id, block_tag, &config).await?
     };
 
     let return_value = C::abi_decode_returns(&host_output.guest_output.evm_call_result, false)?;
     Ok(return_value)
+}
+
+async fn get_host_output<P, F>(
+    call: Call,
+    provider_factory: F,
+    chain_id: ChainId,
+    block_tag: BlockTag,
+    config: &HostConfig,
+) -> Result<HostOutput, HostError>
+where
+    P: BlockingProvider + 'static,
+    F: ProviderFactory<P> + 'static,
+{
+    let providers = CachedMultiProvider::new(provider_factory);
+    let block_number = block_tag_to_block_number(&providers, chain_id, block_tag)?;
+    let chain_proof_server = create_server_mock(chain_id, block_number).await;
+    let chain_proof_client = ChainProofClient::new(chain_proof_server.url());
+    let host = Host::try_new_with_components(providers, block_number, chain_proof_client, config)?;
+    let host_output = host.run(call).await?;
+
+    Ok(host_output)
+}
+
+async fn create_server_mock(chain_id: ChainId, block_number: BlockNumber) -> ChainProofServerMock {
+    ChainProofServerMock::start(
+        json!({
+            "chain_id": chain_id,
+            "block_numbers": [block_number]
+        }),
+        json!({
+            "proof": "",
+            "nodes": []
+        }),
+    )
+    .await
 }
 
 #[cfg(test)]
