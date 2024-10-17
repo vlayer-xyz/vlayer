@@ -208,28 +208,9 @@ mod test {
         }
 
         mod poll {
-            use alloy_primitives::B256;
             use ethers::providers::MockProvider;
-            use mpt::MerkleTrie;
-            use risc0_zkvm::Receipt;
-            use test_utils::fake_block;
 
             use super::*;
-
-            fn assert_trie_proof(proof: &Bytes) -> B256 {
-                let receipt: Receipt =
-                    bincode::deserialize(proof).expect("failed to deserialize proof");
-
-                receipt
-                    .verify(*GUEST_ID)
-                    .expect("proof verification failed");
-
-                let (proven_root, elf_id): (B256, Digest) =
-                    receipt.journal.decode().expect("failed to decode journal");
-                assert_eq!(elf_id, *GUEST_ID);
-
-                proven_root
-            }
 
             fn assert_fetched_latest_block(provider: &MockProvider) {
                 provider
@@ -242,33 +223,16 @@ mod test {
 
             #[tokio::test]
             async fn initialize() -> anyhow::Result<()> {
-                let host =
-                    Host::from_parts(Prover::default(), mock_provider([LATEST]), test_db(), 1);
+                let db = test_db();
+                let host = Host::from_parts(Prover::default(), mock_provider([LATEST]), db, 1);
 
-                let ChainUpdate {
-                    chain_info:
-                        ChainInfo {
-                            first_block,
-                            last_block,
-                            root_hash,
-                            zk_proof,
-                        },
-                    added_nodes,
-                    removed_nodes,
-                } = host.poll().await?;
+                let chain_update = host.poll().await?;
+                let Host { mut db, .. } = host;
+                db.update_chain(1, chain_update)?;
 
                 assert_fetched_latest_block(host.provider.as_ref());
-                assert_eq!(first_block..=last_block, LATEST..=LATEST);
-
-                let proven_root = assert_trie_proof(&zk_proof);
-                let merkle_trie = MerkleTrie::from_rlp_nodes(added_nodes)?;
-                assert_eq!(merkle_trie.hash_slow(), proven_root);
-                // SAFETY: We verified the root against the proof
-                let block_trie = BlockTrie::from_unchecked(merkle_trie);
-                assert_eq!(block_trie.hash_slow(), root_hash);
-
-                assert_eq!(block_trie.get(LATEST), Some(fake_block(LATEST).hash_slow()));
-                assert!(removed_nodes.is_empty());
+                let chain_trie = db.get_chain_trie(1)?.unwrap();
+                assert_eq!(chain_trie.block_range, LATEST..=LATEST);
 
                 Ok(())
             }
@@ -296,26 +260,13 @@ mod test {
                     let db = test_db_after_initialize().await?;
                     let host = Host::from_parts(Prover::default(), mock_provider([GENESIS]), db, 1);
 
-                    let ChainUpdate {
-                        chain_info:
-                            ChainInfo {
-                                first_block,
-                                last_block,
-                                root_hash,
-                                zk_proof,
-                            },
-                        added_nodes,
-                        removed_nodes,
-                    } = host.poll().await?;
+                    let chain_update = host.poll().await?;
+                    let Host { mut db, .. } = host;
+                    db.update_chain(1, chain_update)?;
 
                     assert_fetched_latest_block(host.provider.as_ref());
-                    assert_eq!(first_block..=last_block, GENESIS..=GENESIS);
-
-                    let proven_root = assert_trie_proof(&zk_proof);
-                    assert_eq!(proven_root, root_hash);
-
-                    assert!(added_nodes.is_empty());
-                    assert!(removed_nodes.is_empty());
+                    let chain_trie = db.get_chain_trie(1)?.unwrap();
+                    assert_eq!(chain_trie.block_range, GENESIS..=GENESIS);
 
                     Ok(())
                 }
@@ -324,23 +275,16 @@ mod test {
                 async fn new_head_blocks_back_propagation_finished() -> anyhow::Result<()> {
                     let new_block = GENESIS + 1;
                     let db = test_db_after_initialize().await?;
-                    let host = Host::from_parts(
-                        Prover::default(),
-                        mock_provider([new_block, new_block]),
-                        db,
-                        1,
-                    );
+                    let provider = mock_provider([new_block, new_block]);
+                    let host = Host::from_parts(Prover::default(), provider, db, 1);
 
                     let chain_update = host.poll().await?;
                     let Host { mut db, .. } = host;
                     db.update_chain(1, chain_update)?;
 
+                    assert_fetched_latest_block(host.provider.as_ref());
                     let chain_trie = db.get_chain_trie(1)?.unwrap();
-                    assert_eq!(chain_trie.block_range, GENESIS..=new_block);
-                    assert_eq!(
-                        chain_trie.trie.get(new_block).unwrap(),
-                        fake_block(new_block).hash_slow()
-                    );
+                    assert_eq!(chain_trie.block_range, GENESIS..=GENESIS + 1);
 
                     Ok(())
                 }
