@@ -2281,6 +2281,7 @@ dependencies = [
  "chain_guest_wrapper",
  "derivative",
  "ethers",
+ "futures",
  "host_utils",
  "lazy_static",
  "mpt",
