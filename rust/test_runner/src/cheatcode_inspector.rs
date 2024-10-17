@@ -113,7 +113,6 @@ impl CheatcodeInspector {
         Proof {
             length: U256::from(host_output.proof_len),
             seal: decoded_seal,
-            dynamicParamsOffsets: [0_u16; 10],
             callAssumptions: call_assumptions,
         }
     }
