@@ -127,11 +127,21 @@ mod tests {
                         "field_array": ["val1", "val2"],
                         "field_object": {},
                         "field_array_of_objects": [{"key": "val01"},{"key": "val02"}],
-                        "field_array_of_objects_with_numbers" : [{"key": 1}, {"key": 2}]
+                        "field_array_of_objects_with_numbers" : [{"key": 1}, {"key": 2}],
+                        "field_array_of_booleans": [false, false, true],
+                        "field_array_of_numbers": [1, 2, 3]
                     }
                 }
             }
             "#;
+    const TEST_JSON_ARRAY: &str = r#"
+            [
+                {"key": 1},
+                {"key": 2},
+                {"key": 3}
+            ]
+            "#;
+
     #[test]
     fn success_integer() {
         let abi_encoded_body_and_json_path =
@@ -215,6 +225,51 @@ mod tests {
         let result =
             sol_data::Int::<256>::abi_decode(precompile_output.bytes.as_ref(), false).unwrap();
         let parsed: alloy_primitives::I256 = "1".parse().unwrap();
+        assert_eq!(parsed, result);
+    }
+
+    #[test]
+    fn success_numbers_in_array() {
+        let abi_encoded_body_and_json_path = InputType::abi_encode(&[
+            TEST_JSON,
+            "root.nested_level.field_array_of_numbers[1]",
+        ]);
+
+        let precompile_output =
+            json_get_int_run(&abi_encoded_body_and_json_path.into(), u64::MAX).unwrap();
+
+        let result =
+            sol_data::Int::<256>::abi_decode(precompile_output.bytes.as_ref(), false).unwrap();
+        let parsed: alloy_primitives::I256 = "2".parse().unwrap();
+        assert_eq!(parsed, result);
+    }
+
+    #[test]
+    fn success_booleans_in_array() {
+        let abi_encoded_body_and_json_path =
+            InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_array_of_booleans[2]"]);
+
+        let precompile_output =
+            json_get_bool_run(&abi_encoded_body_and_json_path.into(), u64::MAX).unwrap();
+
+        let result = sol_data::Bool::abi_decode(precompile_output.bytes.as_ref(), false).unwrap();
+
+        assert!(result);
+    }
+
+    #[test]
+    fn success_number_in_top_level_array() {
+        let abi_encoded_body_and_json_path = InputType::abi_encode(&[
+            TEST_JSON_ARRAY,
+            "[2].key",
+        ]);
+
+        let precompile_output =
+            json_get_int_run(&abi_encoded_body_and_json_path.into(), u64::MAX).unwrap();
+
+        let result =
+            sol_data::Int::<256>::abi_decode(precompile_output.bytes.as_ref(), false).unwrap();
+        let parsed: alloy_primitives::I256 = "3".parse().unwrap();
         assert_eq!(parsed, result);
     }
 
