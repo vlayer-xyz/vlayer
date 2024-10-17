@@ -340,6 +340,10 @@ mod test {
 
                     let chain_trie = db.get_chain_trie(1)?.expect("chain trie not found");
                     assert_eq!(chain_trie.block_range, GENESIS..=new_block);
+                    assert_eq!(
+                        chain_trie.trie.get(new_block).unwrap(),
+                        fake_block(new_block).hash_slow()
+                    );
 
                     Ok(())
                 }
