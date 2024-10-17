@@ -57,7 +57,6 @@ browser.runtime.onMessage.addListener(async (message: ExtensionMessage) => {
     .exhaustive();
 });
 
-
 browser.tabs
   .query({ active: true, currentWindow: true })
   .then((tabs) => {
