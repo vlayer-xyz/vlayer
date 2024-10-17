@@ -59,26 +59,13 @@ Currently, accessing fields inside arrays is not supported.
 ## Regular Expressions
 Regular expressions are a powerful tool for finding patterns in text.
 
-We provide a set of functions to match a regular expression against a string.
-- `matches` checks if a string matches a regular expression and returns `true` if a match is found;
-- `find` - as an addition to `matches`, it returns a tuple `(bool, Match)`, where the second param indicates the index of the string where the matched substring starts, in case if many substrings match, the first one is returned;
-- `findAll` - `matches` and `find` functions return on the first match, whereas this function returns a list of tuples pointing to all starting positions of the matched substrings; 
-- `captures` -  TODO
-- `capturesAll` - TODO
-
+We provide a `match` function, that matches passed string against a regular expression, 
+returning list of captures if capture groups are defined within the regular expression.
+If the string does not match the given regular expression a revert is triggered. 
 
 ```solidity
 
-struct Match {
-  uint256 beginOffset;
-  uint256 endOffset; // first character not included in the match
-  string value;
-}
-
-struct CatureResult {
-  uint256 beginOffset;
-  uint256 endOffset; // first character not included in the match
-  string value;
+struct MatchResult {
   Capture[] captures;
 }
 
@@ -90,23 +77,7 @@ struct Capture {
 }
 
 interface RegexLib {
-
-
-  function match(string memory text, string memory regex) returns (bool);
-  function find(string memory text, string memory regex) returns (bool, Match memory) ;
-
-  function captures(string memory text, string memory regex) returns (bool, CaptureResult memory);
-
-  function findAll(string memory text, string memory regex) returns (bool, Match[] memory) ;
-  function capturesAll(string memory text, string memory regex) returns (bool, CaptureResult[] memory);
-  
-}
-
-interface CaptureResultLib {
-
-  // search capture by its name
-  function get(CaptureResult memory capture, string memory name) returns (Capture memory); 
-
+  function match(string memory text, string memory regex) returns (MatchResult);
 }
 
 ```
@@ -120,7 +91,7 @@ contract RegexMatchProof is Prover {
 
     function main(string calldata text) public returns (Proof memory, string memory) {
         // The regex pattern is passed as a string
-        require(text.matches("^[a-zA-Z0-9]*$"), "text must be alphanumeric only");
+        text.match("^[a-zA-Z0-9]*$");
 
         // Return proof and provided text if it matches the pattern
         return (proof(), text);
@@ -128,19 +99,37 @@ contract RegexMatchProof is Prover {
 }
 ```
 
-### Which function to use?
-It's worth noting that regular expressions can become computation intensive, which may significantly increase both execution and proving time.
-It's crucial to only ask for what is actually needed, which is the reasoning for providing not just a one, generic regex function, but a whole set of them; 
-so that one can decide which function suits the use-case.
+### Capture groups
+It is possible to capture certain substrings of a matched string, using so called capture groups functionality.
+Captured groups are returned as a result of `match` function, in the same order in which they were defined in regex.
+
+
+```solidity
+import {Prover} from "vlayer/Prover.sol";
+import {RegexLib} from "vlayer/Regex.sol";
+
+contract RegexMatchProof is Prover {
+    using RegexLib for string;
+
+    function main(string calldata text) public returns (Proof memory, string memory) {
+        // The regex pattern is passed as a string
+        MatchResult memory result = text.match("^([a-z]+)@example\.com$");
+
+        string memory user = result.captures[0].value;
+
+        // Return proof and provided text if it matches the pattern
+        return (proof(), user);
+    }
+}
+```
+
 
 ### Algorithm complexity (aka. Big-O notation)
 Given:
-- `m` - linear length of the regular expression, wher linear length is the length of the regex after all repetitions has been expanded ex. `a{5}` -> `aaaaa`;
-- `n` - length of the string matched against
+- `m` - linear length of the regular expression, where linear length is the length of the regex after all repetitions has been expanded ex. `a{5}` -> `aaaaa`;
+- `n` - length of the string matched against.
 
-Then the complexity of each of the operation is as following:
-- `match`, `find`, `find_captures` - bound by `O(m*n)`;
-- `find_all`, `captures_all` - are bound by `O(m*n^2)`, since in worst case scenarios we have to make the whole computation `n` times, to find all occurences. 
+Then the complexity of `match` operation is bound by `O(m*(n+1))`.
 
 ### Limits
 Upper limits are defined as below:
