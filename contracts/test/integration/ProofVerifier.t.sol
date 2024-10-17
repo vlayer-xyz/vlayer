@@ -110,27 +110,9 @@ library ProofFixtures {
             CallAssumptions(FIXED_PROVER_ADDRESS, FIXED_SELECTOR, FIXED_SETTLE_BLOCK_NUMBER, FIXED_SETTLE_BLOCK_HASH);
 
         uint256 length = 0; // it is not used in verification, so can be set to 0
-        uint16[10] memory dynamicParamsOffsets = dynamicParams();
 
-        Proof memory proof = Proof(length, seal, dynamicParamsOffsets, callAssumptions);
+        Proof memory proof = Proof(length, seal, callAssumptions);
         return (proof, journalHash(callAssumptions, FIXED_LHS + FIXED_RHS));
-    }
-
-    function dynamicParams() private pure returns (uint16[10] memory) {
-        uint16[10] memory dynamicParamsOffsets = [
-            uint16(0),
-            uint16(0),
-            uint16(0),
-            uint16(0),
-            uint16(0),
-            uint16(0),
-            uint16(0),
-            uint16(0),
-            uint16(0),
-            uint16(0)
-        ];
-
-        return dynamicParamsOffsets;
     }
 
     function journalHash(CallAssumptions memory callAssumptions, uint256 proverResult) private pure returns (bytes32) {

@@ -28,18 +28,6 @@ export interface Proof {
     seal: [Hex, Hex, Hex, Hex, Hex, Hex, Hex, Hex];
     mode: number;
   };
-  dynamicParamsOffsets: [
-    bigint,
-    bigint,
-    bigint,
-    bigint,
-    bigint,
-    bigint,
-    bigint,
-    bigint,
-    bigint,
-    bigint,
-  ];
   assumptions: {
     proverContractAddress: Address;
     functionSelector: Hex;

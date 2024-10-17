@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.13;
 
-import {Proof, ProofLib, MAX_NUMBER_OF_DYNAMIC_PARAMS} from "./Proof.sol";
+import {Proof, ProofLib} from "./Proof.sol";
 
 import {IProofVerifier} from "./proof_verifier/IProofVerifier.sol";
 import {ProofVerifierFactory} from "./proof_verifier/ProofVerifierFactory.sol";
