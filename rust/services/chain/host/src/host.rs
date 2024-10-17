@@ -282,8 +282,36 @@ mod test {
                     Ok(())
                 }
 
+                #[tokio::test]
+                async fn new_head_blocks_back_propagation_finished() -> anyhow::Result<()> {
+                    let new_block = GENESIS + 1;
+                    let db = test_db_after_initialize().await?;
+                    let host =
+                        Host::from_parts(Prover::default(), mock_provider([new_block]), db, 1);
+
+                    let ChainUpdate {
+                        chain_info:
+                            ChainInfo {
+                                first_block,
+                                last_block,
+                                ..
+                            },
+                        ..
+                    } = host.poll().await?;
+
+                    assert_fetched_latest_block(host.provider.as_ref());
+                    assert_eq!(first_block..=last_block, GENESIS..=new_block);
+
+                    // let proven_root = assert_trie_proof(&zk_proof)?;
+                    // assert_eq!(proven_root, root_hash);
+
+                    // assert!(added_nodes.is_empty());
+                    // assert!(removed_nodes.is_empty());
+
+                    Ok(())
+                }
+
                 // No new head blocks, back propagation in progress
-                // New head blocks, back propagation finished
                 // New head blocks, back propagation in progress
                 // Too many new head blocks
                 // Reorg
