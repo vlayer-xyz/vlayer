@@ -1,22 +1,13 @@
 use core::future::Future;
 
 use alloy_primitives::{BlockNumber, B256, U256};
+use anyhow::{anyhow, Context, Error as AnyError};
 use block_header::{EthBlockHeader, EvmBlockHeader};
 use ethers_core::types::{Block, BlockNumber as BlockTag};
-use ethers_providers::{Middleware, MiddlewareError};
-use thiserror::Error;
+use ethers_providers::Middleware;
 use tokio::runtime::Handle;
 
 use super::{BlockingProvider, EIP1186Proof};
-
-/// An error that can occur when interacting with the provider.
-#[derive(Error, Debug)]
-pub enum EthersProviderError<M: MiddlewareError> {
-    #[error("middleware error: {0}")]
-    MiddlewareError(#[from] M),
-    #[error("block conversion error: {0}")]
-    BlockConversionError(String),
-}
 
 /// A provider that fetches data from an Ethereum node using the ethers crate.
 pub struct EthersProvider<M: Middleware> {
@@ -37,19 +28,17 @@ fn block_on<F: Future>(f: F) -> F::Output {
 
 impl<M: Middleware> BlockingProvider for EthersProvider<M>
 where
-    M::Error: 'static,
+    M::Error: 'static + Send + Sync,
 {
-    type Error = EthersProviderError<M::Error>;
-
     fn get_block_header(
         &self,
         block: BlockTag,
-    ) -> Result<Option<Box<dyn EvmBlockHeader>>, Self::Error> {
-        let block = block_on(self.client.get_block(block))?;
+    ) -> Result<Option<Box<dyn EvmBlockHeader>>, AnyError> {
+        let block =
+            block_on(self.client.get_block(block)).context("Failed to get block from client")?;
         match block {
             Some(block) => {
-                let eth_block_header = to_eth_block_header(block)
-                    .map_err(EthersProviderError::BlockConversionError)?;
+                let eth_block_header = to_eth_block_header(block)?;
                 Ok(Some(Box::new(eth_block_header) as Box<dyn EvmBlockHeader>))
             }
             None => Ok(None),
@@ -60,34 +49,38 @@ where
         &self,
         address: alloy_primitives::Address,
         block: BlockNumber,
-    ) -> Result<alloy_primitives::TxNumber, Self::Error> {
+    ) -> Result<alloy_primitives::TxNumber, AnyError> {
         let address = to_ethers_h160(address);
         let count = block_on(
             self.client
                 .get_transaction_count(address, Some(block.into())),
         )
-        .map(from_ethers_u256)?;
-        Ok(count.to())
+        .context("Failed to get transaction count")?
+        .as_u64();
+
+        Ok(count)
     }
 
     fn get_balance(
         &self,
         address: alloy_primitives::Address,
         block: BlockNumber,
-    ) -> Result<alloy_primitives::U256, Self::Error> {
+    ) -> Result<alloy_primitives::U256, AnyError> {
         let address = to_ethers_h160(address);
-        Ok(from_ethers_u256(block_on(
-            self.client.get_balance(address, Some(block.into())),
-        )?))
+        let balance = block_on(self.client.get_balance(address, Some(block.into())))
+            .context("Failed to get balance")?;
+        Ok(from_ethers_u256(balance))
     }
 
     fn get_code(
         &self,
         address: alloy_primitives::Address,
         block: BlockNumber,
-    ) -> Result<alloy_primitives::Bytes, Self::Error> {
+    ) -> Result<alloy_primitives::Bytes, AnyError> {
         let address = to_ethers_h160(address);
-        Ok(from_ethers_bytes(block_on(self.client.get_code(address, Some(block.into())))?))
+        let code = block_on(self.client.get_code(address, Some(block.into())))
+            .context("Failed to get code")?;
+        Ok(from_ethers_bytes(code))
     }
 
     fn get_storage_at(
@@ -95,11 +88,11 @@ where
         address: alloy_primitives::Address,
         key: alloy_primitives::StorageKey,
         block: BlockNumber,
-    ) -> Result<alloy_primitives::StorageValue, Self::Error> {
+    ) -> Result<alloy_primitives::StorageValue, AnyError> {
         let address = to_ethers_h160(address);
         let key = to_ethers_h256(key);
-        let value = block_on(self.client.get_storage_at(address, key, Some(block.into())))?;
-
+        let value = block_on(self.client.get_storage_at(address, key, Some(block.into())))
+            .context("Failed to get storage at specified key")?;
         Ok(from_ethers_h256(value).into())
     }
 
@@ -108,13 +101,14 @@ where
         address: alloy_primitives::Address,
         storage_keys: Vec<alloy_primitives::StorageKey>,
         block: BlockNumber,
-    ) -> Result<EIP1186Proof, Self::Error> {
+    ) -> Result<EIP1186Proof, AnyError> {
         let address = to_ethers_h160(address);
         let storage_keys = storage_keys.into_iter().map(to_ethers_h256).collect();
         let proof = block_on(
             self.client
                 .get_proof(address, storage_keys, Some(block.into())),
-        )?;
+        )
+        .context("Failed to get account and storage proof")?;
 
         Ok(EIP1186Proof {
             address: address.0.into(),
@@ -132,39 +126,68 @@ where
     }
 }
 
-pub fn to_eth_block_header<T>(block: Block<T>) -> Result<EthBlockHeader, String> {
+pub fn to_eth_block_header<T>(block: Block<T>) -> Result<EthBlockHeader, AnyError> {
     Ok(EthBlockHeader {
         parent_hash: from_ethers_h256(block.parent_hash),
         ommers_hash: from_ethers_h256(block.uncles_hash),
-        beneficiary: block.author.ok_or("author missing")?.0.into(),
+        beneficiary: block
+            .author
+            .ok_or_else(|| anyhow!("author (beneficiary) is missing"))?
+            .0
+            .into(),
         state_root: from_ethers_h256(block.state_root),
         transactions_root: from_ethers_h256(block.transactions_root),
         receipts_root: from_ethers_h256(block.receipts_root),
         logs_bloom: alloy_primitives::Bloom::from_slice(
-            block.logs_bloom.ok_or("bloom missing")?.as_bytes(),
+            block
+                .logs_bloom
+                .ok_or_else(|| anyhow!("logs bloom is missing"))?
+                .as_bytes(),
         ),
         difficulty: from_ethers_u256(block.difficulty),
-        number: block.number.ok_or("number is missing")?.as_u64(),
+        number: block
+            .number
+            .ok_or_else(|| anyhow!("block number is missing"))?
+            .as_u64(),
         gas_limit: block
             .gas_limit
             .try_into()
-            .map_err(|_| "invalid gas limit")?,
-        gas_used: block.gas_used.try_into().map_err(|_| "invalid gas used")?,
+            .map_err(|_| anyhow!("invalid gas_limit"))?,
+        gas_used: block
+            .gas_used
+            .try_into()
+            .map_err(|_| anyhow!("invalid gas_used"))?,
         timestamp: block
             .timestamp
             .try_into()
-            .map_err(|_| "invalid timestamp")?,
+            .map_err(|_| anyhow!("invalid timestamp"))?,
         extra_data: block.extra_data.0.into(),
-        mix_hash: from_ethers_h256(block.mix_hash.ok_or("mix_hash is missing")?),
-        nonce: block.nonce.ok_or("nonce is missing")?.0.into(),
+        mix_hash: from_ethers_h256(
+            block
+                .mix_hash
+                .ok_or_else(|| anyhow!("mix_hash is missing"))?,
+        ),
+        nonce: block
+            .nonce
+            .ok_or_else(|| anyhow!("nonce is missing"))?
+            .0
+            .into(),
         base_fee_per_gas: from_ethers_u256(
             block
                 .base_fee_per_gas
-                .ok_or("base_fee_per_gas is missing")?,
+                .ok_or_else(|| anyhow!("base_fee_per_gas is missing"))?,
         ),
         withdrawals_root: block.withdrawals_root.map(from_ethers_h256),
-        blob_gas_used: block.blob_gas_used.map(TryInto::try_into).transpose()?,
-        excess_blob_gas: block.excess_blob_gas.map(TryInto::try_into).transpose()?,
+        blob_gas_used: block
+            .blob_gas_used
+            .map(TryInto::try_into)
+            .transpose()
+            .map_err(|_| anyhow!("error converting blob_gas_used"))?,
+        excess_blob_gas: block
+            .excess_blob_gas
+            .map(TryInto::try_into)
+            .transpose()
+            .map_err(|_| anyhow!("error converting blob_gas_used"))?,
         parent_beacon_block_root: block.parent_beacon_block_root.map(from_ethers_h256),
     })
 }

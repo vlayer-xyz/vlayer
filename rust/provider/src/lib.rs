@@ -6,12 +6,11 @@ mod multi;
 mod null;
 mod proof;
 
-use std::error::Error as StdError;
-
 pub use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256};
+use anyhow::Error;
 use auto_impl::auto_impl;
 pub use block_header::EvmBlockHeader;
-pub use ethers::{to_eth_block_header, EthersProvider, EthersProviderError};
+pub use ethers::{to_eth_block_header, EthersProvider};
 pub use ethers_core::types::BlockNumber as BlockTag;
 use ethers_providers::{Http, RetryClient};
 pub use factory::{
@@ -28,29 +27,29 @@ pub type EthersClient = ethers_providers::Provider<RetryClient<Http>>;
 /// A trait for providers that fetch data from the Ethereum blockchain.
 #[auto_impl(Rc)]
 pub trait BlockingProvider: Send + Sync {
-    type Error: StdError + Send + Sync + 'static;
+    fn get_balance(&self, address: Address, block: BlockNumber) -> Result<U256, Error>;
 
-    fn get_balance(&self, address: Address, block: BlockNumber) -> Result<U256, Self::Error>;
-    fn get_block_header(
-        &self,
-        block: BlockTag,
-    ) -> Result<Option<Box<dyn EvmBlockHeader>>, Self::Error>;
-    fn get_code(&self, address: Address, block: BlockNumber) -> Result<Bytes, Self::Error>;
+    fn get_block_header(&self, block: BlockTag) -> Result<Option<Box<dyn EvmBlockHeader>>, Error>;
+
+    fn get_code(&self, address: Address, block: BlockNumber) -> Result<Bytes, Error>;
+
     fn get_proof(
         &self,
         address: Address,
         storage_keys: Vec<StorageKey>,
         block: BlockNumber,
-    ) -> Result<EIP1186Proof, Self::Error>;
+    ) -> Result<EIP1186Proof, Error>;
+
     fn get_storage_at(
         &self,
         address: Address,
         key: StorageKey,
         block: BlockNumber,
-    ) -> Result<StorageValue, Self::Error>;
+    ) -> Result<StorageValue, Error>;
+
     fn get_transaction_count(
         &self,
         address: Address,
         block: BlockNumber,
-    ) -> Result<TxNumber, Self::Error>;
+    ) -> Result<TxNumber, Error>;
 }
