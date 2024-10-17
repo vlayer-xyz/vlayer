@@ -20,7 +20,7 @@ library JsonParserLib {
 
         bytes memory encodedParams = abi.encode([web.body, jsonPath]);
         (bool success, bytes memory returnData) = Precompiles.JSON_GET_INT_PRECOMPILE.staticcall(encodedParams);
-        require(success, "json_get_string precompile call failed");
+        require(success, "json_get_int precompile call failed");
 
         return abi.decode(returnData, (int256));
     }
@@ -30,7 +30,7 @@ library JsonParserLib {
 
         bytes memory encodedParams = abi.encode([web.body, jsonPath]);
         (bool success, bytes memory returnData) = Precompiles.JSON_GET_BOOL_PRECOMPILE.staticcall(encodedParams);
-        require(success, "json_get_string precompile call failed");
+        require(success, "json_get_bool precompile call failed");
 
         return abi.decode(returnData, (bool));
     }
