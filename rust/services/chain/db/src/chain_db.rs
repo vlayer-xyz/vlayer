@@ -155,7 +155,7 @@ impl ChainDb {
             root_hash,
             first_block,
             last_block,
-            ..
+            zk_proof,
         } = chain_info;
 
         let first_block_proof = tx.get_merkle_proof(root_hash, first_block)?;
@@ -168,7 +168,7 @@ impl ChainDb {
         // SAFETY: All data in DB is trusted
         let block_trie = BlockTrie::from_unchecked(trie);
 
-        Ok(Some(ChainTrie::new(chain_info.block_range(), block_trie)))
+        Ok(Some(ChainTrie::new(first_block..=last_block, block_trie, zk_proof)))
     }
 
     pub fn update_chain(
@@ -272,11 +272,16 @@ where
 
 pub struct ChainTrie {
     pub block_range: RangeInclusive<u64>,
-    trie: BlockTrie,
+    pub trie: BlockTrie,
+    pub zk_proof: Bytes,
 }
 
 impl ChainTrie {
-    pub fn new(block_range: RangeInclusive<u64>, trie: BlockTrie) -> Self {
-        Self { block_range, trie }
+    pub fn new(block_range: RangeInclusive<u64>, trie: BlockTrie, zk_proof: Bytes) -> Self {
+        Self {
+            block_range,
+            trie,
+            zk_proof,
+        }
     }
 }
