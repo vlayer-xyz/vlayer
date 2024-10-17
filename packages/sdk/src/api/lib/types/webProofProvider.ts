@@ -1,15 +1,10 @@
 import { AbiFunction, Hex, Abi, ContractFunctionName } from "viem";
 import type { ContractFunctionArgsWithout } from "./viem";
-import {
-  Branded,
-  WebProof,
-  WebProofStepExpectUrl,
-  WebProofStepStartPage,
-} from "../../../web-proof-commons";
+import { Branded, WebProof, WebProofStep } from "../../../web-proof-commons";
 
 export type WebProofSetupInput = {
   logoUrl: string;
-  steps: [WebProofStepExpectUrl, WebProofStepStartPage, WebProofStepStartPage];
+  steps: WebProofStep[];
 };
 
 export type WebProofSetup = Branded<

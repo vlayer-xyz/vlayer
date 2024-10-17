@@ -4,3 +4,5 @@ export { createVlayerClient } from "./api/lib/client.ts";
 
 export * from "./api/webProof";
 export * from "./api/lib/types";
+
+export * from "./web-proof-commons/types/webProof.ts";
