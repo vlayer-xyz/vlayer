@@ -176,6 +176,7 @@ mod test {
             use alloy_primitives::B256;
             use mpt::MerkleTrie;
             use risc0_zkvm::Receipt;
+            use test_utils::fake_block;
 
             use super::*;
 
@@ -223,7 +224,10 @@ mod test {
                 let block_trie = assert_trie_proof(&zk_proof, added_nodes)?;
                 assert_eq!(block_trie.hash_slow(), root_hash);
 
-                block_trie.get(LATEST).expect("block not found");
+                assert_eq!(
+                    block_trie.get(LATEST).expect("block not found"),
+                    fake_block(LATEST).hash_slow()
+                );
                 assert!(removed_nodes.is_empty());
 
                 Ok(())
