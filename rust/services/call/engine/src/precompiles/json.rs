@@ -59,10 +59,7 @@ fn json_get_array_length(input: &Bytes, gas_limit: u64) -> PrecompileResult {
 }
 
 fn process_input(input: &Bytes, gas_limit: u64) -> Result<(Value, String, u64), PrecompileErrors> {
-    let gas_used = gas_used(input.len(), BASE_COST, PER_WORD_COST, gas_limit)?;
-    let [body, json_path] = InputType::abi_decode(input, true).map_err(map_to_fatal)?;
-    let body = serde_json::from_str(body.as_str())
-        .map_err(|err| map_to_fatal(format!("Error converting string body to json: {}", err)))?;
+    let (gas_used, body, json_path) = pre_process_input(input, gas_limit)?;
     let value_by_path = get_value_by_path(&body, json_path.as_str())
         .ok_or(map_to_fatal(format!("Missing value at path {json_path}")))?;
     Ok((value_by_path.clone(), json_path, gas_used))
@@ -86,10 +83,7 @@ fn get_value_by_path<'a>(value: &'a Value, path: &str) -> Option<&'a Value> {
 }
 
 fn process_input_arr(input: &Bytes, gas_limit: u64) -> Result<(u64, u64), PrecompileErrors> {
-    let gas_used = gas_used(input.len(), BASE_COST, PER_WORD_COST, gas_limit)?;
-    let [body, json_path] = InputType::abi_decode(input, true).map_err(map_to_fatal)?;
-    let body = serde_json::from_str(body.as_str())
-        .map_err(|err| map_to_fatal(format!("Error converting string body to json: {}", err)))?;
+    let (gas_used, body, json_path) = pre_process_input(input, gas_limit)?;
     let value_by_path = get_array_length_by_path(&body, json_path.as_str())
         .ok_or(map_to_fatal(format!("Missing value at path {json_path}")))?;
     Ok((value_by_path.try_into().unwrap(), gas_used))
@@ -101,6 +95,14 @@ fn get_array_length_by_path(value: &Value, path: &str) -> Option<usize> {
     } else {
         get_value_by_path(value, path).and_then(|v| v.as_array().map(std::vec::Vec::len))
     }
+}
+
+fn pre_process_input(input: &Bytes, gas_limit: u64) -> Result<(u64, Value, String), PrecompileErrors>{
+    let gas_used = gas_used(input.len(), BASE_COST, PER_WORD_COST, gas_limit)?;
+    let [body, json_path] = InputType::abi_decode(input, true).map_err(map_to_fatal)?;
+    let body = serde_json::from_str(body.as_str())
+        .map_err(|err| map_to_fatal(format!("Error converting string body to json: {}", err)))?;
+    Ok((gas_used, body, json_path))
 }
 
 #[cfg(test)]
