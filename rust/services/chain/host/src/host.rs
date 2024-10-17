@@ -114,7 +114,8 @@ where
             .await
             .map_err(|err| HostError::Provider(err.to_string()))?
             .ok_or(HostError::BlockNotFound(number))?;
-        let block = to_eth_block_header(ethers_block).map_err(HostError::BlockConversion)?;
+        let block = to_eth_block_header(ethers_block)
+            .map_err(|e| HostError::BlockConversion(e.to_string()))?;
         Ok(Box::new(block))
     }
 }
