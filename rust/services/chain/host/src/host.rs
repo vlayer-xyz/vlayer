@@ -267,10 +267,7 @@ mod test {
                 let block_trie = BlockTrie::from_unchecked(merkle_trie);
                 assert_eq!(block_trie.hash_slow(), root_hash);
 
-                assert_eq!(
-                    block_trie.get(LATEST).expect("block not found"),
-                    fake_block(LATEST).hash_slow()
-                );
+                assert_eq!(block_trie.get(LATEST), Some(fake_block(LATEST).hash_slow()));
                 assert!(removed_nodes.is_empty());
 
                 Ok(())
@@ -338,7 +335,7 @@ mod test {
                     let Host { mut db, .. } = host;
                     db.update_chain(1, chain_update)?;
 
-                    let chain_trie = db.get_chain_trie(1)?.expect("chain trie not found");
+                    let chain_trie = db.get_chain_trie(1)?.unwrap();
                     assert_eq!(chain_trie.block_range, GENESIS..=new_block);
                     assert_eq!(
                         chain_trie.trie.get(new_block).unwrap(),
