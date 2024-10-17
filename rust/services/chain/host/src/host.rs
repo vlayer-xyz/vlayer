@@ -237,11 +237,14 @@ mod test {
 
             mod append_prepend {
 
+                use alloy_primitives::BlockNumber;
+
                 use super::*;
+                const GENESIS: BlockNumber = 0;
 
                 async fn test_db_after_initialize() -> Result<ChainDb, HostError> {
                     let db = test_db();
-                    let host = Host::from_parts(Prover::default(), mock_provider([LATEST]), db, 1);
+                    let host = Host::from_parts(Prover::default(), mock_provider([GENESIS]), db, 1);
 
                     let init_chain_update = host.poll().await?;
                     let Host { mut db, .. } = host;
@@ -253,7 +256,7 @@ mod test {
                 #[tokio::test]
                 async fn no_new_head_blocks_back_propagation_finished() -> anyhow::Result<()> {
                     let db = test_db_after_initialize().await?;
-                    let host = Host::from_parts(Prover::default(), mock_provider([LATEST]), db, 1);
+                    let host = Host::from_parts(Prover::default(), mock_provider([GENESIS]), db, 1);
 
                     let ChainUpdate {
                         chain_info:
@@ -268,7 +271,7 @@ mod test {
                     } = host.poll().await?;
 
                     assert_fetched_latest_block(host.provider.as_ref());
-                    assert_eq!(first_block..=last_block, LATEST..=LATEST);
+                    assert_eq!(first_block..=last_block, GENESIS..=GENESIS);
 
                     let proven_root = assert_trie_proof(&zk_proof)?;
                     assert_eq!(proven_root, root_hash);
