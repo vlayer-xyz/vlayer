@@ -1349,7 +1349,7 @@ dependencies = [
  "lazy_static",
  "nybbles",
  "rand",
- "rlp",
+ "rlp 0.6.1",
  "serde",
  "serde_json",
  "thiserror",
@@ -2074,6 +2074,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "rlp"
+version = "0.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fa24e92bb2a83198bb76d661a71df9f7076b8c420b8696e4d3d97d50d94479e3"
+dependencies = [
+ "bytes",
+ "rustc-hex",
+]
+
+[[package]]
 name = "rrs-lib"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -2100,7 +2110,7 @@ dependencies = [
  "primitive-types",
  "proptest",
  "rand",
- "rlp",
+ "rlp 0.5.2",
  "ruint-macro",
  "serde",
  "valuable",

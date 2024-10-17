@@ -2112,7 +2112,7 @@ dependencies = [
  "server_utils",
  "thiserror",
  "tokio",
- "tower-http",
+ "tower-http 0.6.1",
  "tracing",
  "web_proof",
 ]
@@ -3464,7 +3464,7 @@ dependencies = [
  "k256",
  "log",
  "rand",
- "rlp",
+ "rlp 0.5.2",
  "serde",
  "sha3",
  "zeroize",
@@ -3707,7 +3707,7 @@ dependencies = [
  "once_cell",
  "open-fastrlp",
  "rand",
- "rlp",
+ "rlp 0.5.2",
  "serde",
  "serde_json",
  "strum",
@@ -4083,7 +4083,7 @@ dependencies = [
  "tokio",
  "toml 0.8.19",
  "toml_edit 0.22.22",
- "tower-http",
+ "tower-http 0.5.2",
  "tracing",
  "vergen",
  "watchexec",
@@ -5732,7 +5732,7 @@ version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "f28220f89297a075ddc7245cd538076ee98b01f2a9c23a53a4f1105d5a322808"
 dependencies = [
- "rlp",
+ "rlp 0.5.2",
 ]
 
 [[package]]
@@ -6481,7 +6481,7 @@ dependencies = [
  "lazy_static",
  "nybbles",
  "rand",
- "rlp",
+ "rlp 0.6.1",
  "serde",
  "serde_json",
  "thiserror",
@@ -8225,6 +8225,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "rlp"
+version = "0.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "fa24e92bb2a83198bb76d661a71df9f7076b8c420b8696e4d3d97d50d94479e3"
+dependencies = [
+ "bytes",
+ "rustc-hex",
+]
+
+[[package]]
 name = "rlp-derive"
 version = "0.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -8313,7 +8323,7 @@ dependencies = [
  "primitive-types",
  "proptest",
  "rand",
- "rlp",
+ "rlp 0.5.2",
  "ruint-macro",
  "serde",
  "valuable",
@@ -8714,9 +8724,9 @@ checksum = "cd0b0ec5f1c1ca621c432a25813d8d60c88abe6d3e08a3eb9cf37d97a0fe3d73"
 
 [[package]]
 name = "serde"
-version = "1.0.204"
+version = "1.0.210"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bc76f558e0cbb2a839d37354c575f1dc3fdc6546b5be373ba43d95f231bf7c12"
+checksum = "c8e3592472072e6e22e0a54d5904d9febf8508f65fb8552499a1abc7d1078c3a"
 dependencies = [
  "serde_derive",
 ]
@@ -8732,9 +8742,9 @@ dependencies = [
 
 [[package]]
 name = "serde_derive"
-version = "1.0.204"
+version = "1.0.210"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "e0cd7e117be63d3c3678776753929474f3b04a43a080c744d6b0ae2a8c28e222"
+checksum = "243902eda00fad750862fc144cea25caca5e20d615af0a81bee94ca738f1df1f"
 dependencies = [
  "proc-macro2",
  "quote",
@@ -8824,8 +8834,8 @@ dependencies = [
  "serde_json",
  "thiserror",
  "tokio",
- "tower 0.4.13",
- "tower-http",
+ "tower 0.5.1",
+ "tower-http 0.6.1",
  "tower-request-id",
  "tracing",
 ]
@@ -9823,6 +9833,22 @@ dependencies = [
  "pin-project-lite",
  "tokio",
  "tokio-util",
+ "tower-layer",
+ "tower-service",
+ "tracing",
+]
+
+[[package]]
+name = "tower-http"
+version = "0.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "8437150ab6bbc8c5f0f519e3d5ed4aa883a83dd4cdd3d1b21f9482936046cb97"
+dependencies = [
+ "bitflags 2.6.0",
+ "bytes",
+ "http 1.1.0",
+ "http-body 1.0.1",
+ "pin-project-lite",
  "tower-layer",
  "tower-service",
  "tracing",
