@@ -28,7 +28,8 @@ library WebProofLib {
     }
 
     function recover(WebProof memory webProof, string memory dataUrl) internal view returns (Web memory) {
-        (bool success, bytes memory returnData) = Precompiles.VERIFY_AND_PARSE_PRECOMPILE.staticcall(bytes(webProof.webProofJson));
+        (bool success, bytes memory returnData) =
+            Precompiles.VERIFY_AND_PARSE_PRECOMPILE.staticcall(bytes(webProof.webProofJson));
 
         require(success, "verify_and_parse precompile call failed");
 
