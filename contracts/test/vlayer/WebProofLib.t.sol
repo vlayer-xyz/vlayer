@@ -2,7 +2,7 @@
 pragma solidity ^0.8.13;
 
 import {VTest} from "../../src/testing/VTest.sol";
-import {Web, WebProof, WebProofLib, WebLib} from "../../src/WebProof.sol";
+import {Web, WebProof, WebProofLib} from "../../src/WebProof.sol";
 
 contract WebProofLibWrapper {
     using WebProofLib for WebProof;

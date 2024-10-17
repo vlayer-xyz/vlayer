@@ -3,8 +3,10 @@ pragma solidity ^0.8.13;
 
 import {VTest} from "../../src/testing/VTest.sol";
 import {Web, WebProof, WebProofLib, WebLib} from "../../src/WebProof.sol";
+import {Strings} from "@openzeppelin-contracts-5.0.1/utils/Strings.sol";
 
 contract JsonParsingTest is VTest {
+    using Strings for string;
     using WebLib for Web;
 
     function test_parsingStringFromSimpleJson() public {
@@ -13,7 +15,7 @@ contract JsonParsingTest is VTest {
         callProver();
         string memory assetName = web.jsonGetString("asset");
 
-        assertEq(keccak256(bytes(assetName)), keccak256(bytes("FDUSD")));
+        assert(assetName.equal("FDUSD"));
     }
 
     function test_parsingIntFromSimpleJson() public {
