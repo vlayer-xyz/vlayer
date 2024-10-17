@@ -2,7 +2,6 @@
 resolver = "2"
 members = [
     "services/chain/client",
-    "services/chain/kv",
     "services/chain/db",
     "services/chain/host",
     "services/chain/guest",
@@ -21,6 +20,7 @@ members = [
     "zkvm-benchmarks/runner",
     "cli",
     "mpt",
+    "kv",
     "test_runner",
     "web_proof",
     "email_proof",
@@ -142,7 +142,7 @@ chain_client = { path = "services/chain/client" }
 chain_guest_wrapper = { path = "services/chain/guest_wrapper" }
 chain_server = { path = "services/chain/server" }
 chain_worker = { path = "services/chain/worker" }
-kv = { path = "services/chain/kv" }
+kv = { path = "kv" }
 chain_types = { path = "services/chain/types" }
 
 zkvm-benchmarks-common = { path = "zkvm-benchmarks/common" }
