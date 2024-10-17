@@ -17,7 +17,6 @@ export default [
       "@typescript-eslint/no-unsafe-member-access": "warn",
       "@typescript-eslint/no-unsafe-argument": "warn",
       "@typescript-eslint/no-unsafe-assignment": "warn",
-      "@typescript-eslint/no-unsafe-return": "warn",
 
       "@typescript-eslint/no-misused-promises": "warn",
       "@typescript-eslint/require-await": "warn", //VlayerClient.prove() is async for the future http request in it

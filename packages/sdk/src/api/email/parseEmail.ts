@@ -26,7 +26,7 @@ export function parseParams(str: string) {
         .split("=")
         .map((v) => v && v.trim()),
     ),
-  );
+  ) as Record<string, string>;
 }
 
 function parseHeader(header: Header) {
