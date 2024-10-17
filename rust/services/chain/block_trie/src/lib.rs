@@ -22,7 +22,7 @@ impl BlockTrie {
         let parent_block_hash = self
             .get(parent_block_idx)
             .expect("failed to get parent block hash");
-        assert_eq!(parent_block_hash, new_rightmost_block.parent_hash(), "block hash mismatch");
+        assert_eq!(parent_block_hash, *new_rightmost_block.parent_hash(), "block hash mismatch");
         self.insert_unchecked(new_rightmost_block.number(), &new_rightmost_block.hash_slow());
     }
 
@@ -40,9 +40,9 @@ impl BlockTrie {
         Self(mpt)
     }
 
-    pub fn get(&self, block_number: u64) -> Option<&[u8]> {
+    pub fn get(&self, block_number: u64) -> Option<B256> {
         let key = Self::encode_key(block_number);
-        self.0.get(key)
+        self.0.get(key).map(B256::from_slice)
     }
 
     pub fn insert_unchecked(&mut self, block_number: u64, hash: &B256) {
