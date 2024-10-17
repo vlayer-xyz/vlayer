@@ -6,3 +6,4 @@ export * from "./api/webProof";
 export * from "./api/lib/types";
 
 export * from "./web-proof-commons/types/webProof.ts";
+export * from "./web-proof-commons/utils.ts";
