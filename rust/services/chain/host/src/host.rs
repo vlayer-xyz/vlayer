@@ -174,27 +174,29 @@ mod test {
 
         mod poll {
             use alloy_primitives::B256;
+            use ethers::providers::MockProvider;
             use mpt::MerkleTrie;
             use risc0_zkvm::Receipt;
             use test_utils::fake_block;
 
             use super::*;
 
-            fn assert_trie_proof(
-                proof: &Bytes,
-                nodes: impl IntoIterator<Item = Bytes>,
-            ) -> anyhow::Result<BlockTrie> {
+            fn assert_trie_proof(proof: &Bytes) -> anyhow::Result<B256> {
                 let receipt: Receipt = bincode::deserialize(proof)?;
                 receipt.verify(*GUEST_ID)?;
 
                 let (proven_root, elf_id): (B256, Digest) = receipt.journal.decode()?;
                 assert_eq!(elf_id, *GUEST_ID);
-                let merkle_trie = MerkleTrie::from_rlp_nodes(nodes)?;
-                assert_eq!(merkle_trie.hash_slow(), proven_root);
+                Ok(proven_root)
+            }
 
-                // SAFETY: We verified the root against the proof
-                let block_trie = BlockTrie::from_unchecked(merkle_trie);
-                Ok(block_trie)
+            fn assert_fetched_latest_block(provider: &MockProvider) {
+                provider
+                    .assert_request(
+                        "eth_getBlockByNumber",
+                        Value::Array(vec!["latest".into(), false.into()]),
+                    )
+                    .expect("expected request to fetch latest block");
             }
 
             #[tokio::test]
@@ -214,14 +216,14 @@ mod test {
                     removed_nodes,
                 } = host.poll().await?;
 
-                host.provider.as_ref().assert_request(
-                    "eth_getBlockByNumber",
-                    Value::Array(vec!["latest".into(), false.into()]),
-                )?;
-
+                assert_fetched_latest_block(host.provider.as_ref());
                 assert_eq!(first_block..=last_block, LATEST..=LATEST);
 
-                let block_trie = assert_trie_proof(&zk_proof, added_nodes)?;
+                let proven_root = assert_trie_proof(&zk_proof)?;
+                let merkle_trie = MerkleTrie::from_rlp_nodes(added_nodes)?;
+                assert_eq!(merkle_trie.hash_slow(), proven_root);
+                // SAFETY: We verified the root against the proof
+                let block_trie = BlockTrie::from_unchecked(merkle_trie);
                 assert_eq!(block_trie.hash_slow(), root_hash);
 
                 assert_eq!(
@@ -234,26 +236,49 @@ mod test {
             }
 
             mod append_prepend {
-                use alloy_primitives::{BlockNumber, B256};
 
                 use super::*;
-                const GENERIS: BlockNumber = 0;
+
+                async fn test_db_after_initialize() -> Result<ChainDb, HostError> {
+                    let db = test_db();
+                    let host = Host::from_parts(Prover::default(), mock_provider([LATEST]), db, 1);
+
+                    let init_chain_update = host.poll().await?;
+                    let Host { mut db, .. } = host;
+                    db.update_chain(1, init_chain_update).unwrap();
+
+                    Ok(db)
+                }
 
                 #[tokio::test]
                 async fn no_new_head_blocks_back_propagation_finished() -> anyhow::Result<()> {
-                    let mut db = test_db();
-                    let chain_info =
-                        ChainInfo::new(GENERIS..=LATEST, B256::ZERO, EMPTY_PROOF.clone());
-                    let chain_update = ChainUpdate::new(chain_info.clone(), [], []);
-                    db.update_chain(1, chain_update)?;
+                    let db = test_db_after_initialize().await?;
                     let host = Host::from_parts(Prover::default(), mock_provider([LATEST]), db, 1);
 
-                    let chain_update = host.poll().await?;
+                    let ChainUpdate {
+                        chain_info:
+                            ChainInfo {
+                                first_block,
+                                last_block,
+                                root_hash,
+                                zk_proof,
+                            },
+                        added_nodes,
+                        removed_nodes,
+                    } = host.poll().await?;
 
-                    assert_eq!(chain_update, ChainUpdate::new(chain_info, [], []));
+                    assert_fetched_latest_block(host.provider.as_ref());
+                    assert_eq!(first_block..=last_block, LATEST..=LATEST);
+
+                    let proven_root = assert_trie_proof(&zk_proof)?;
+                    assert_eq!(proven_root, root_hash);
+
+                    assert!(added_nodes.is_empty());
+                    assert!(removed_nodes.is_empty());
 
                     Ok(())
                 }
+
                 // No new head blocks, back propagation in progress
                 // New head blocks, back propagation finished
                 // New head blocks, back propagation in progress
