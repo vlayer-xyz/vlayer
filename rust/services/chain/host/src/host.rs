@@ -21,7 +21,6 @@ use risc0_zkvm::{sha::Digest, ExecutorEnv, ProveInfo, Receipt};
 use serde::Serialize;
 
 lazy_static! {
-    static ref EMPTY_PROOF: Bytes = Bytes::new();
     static ref GUEST_ID: Digest = RISC0_CHAIN_GUEST_ID.into();
 }
 
