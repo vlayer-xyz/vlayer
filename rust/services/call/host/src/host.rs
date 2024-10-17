@@ -33,7 +33,7 @@ pub struct Host<P: BlockingProvider> {
     start_execution_location: ExecutionLocation,
     envs: CachedEvmEnv<ProofDb<P>>,
     prover: Prover,
-    _chain_proof_client: ChainProofClient,
+    chain_proof_client: ChainProofClient,
 }
 
 impl Host<EthProvider> {
@@ -80,7 +80,7 @@ where
             envs,
             start_execution_location,
             prover,
-            _chain_proof_client: chain_proof_client,
+            chain_proof_client: chain_proof_client,
         })
     }
 
@@ -93,10 +93,6 @@ where
 
         let multi_evm_input =
             into_multi_input(self.envs).map_err(|err| HostError::CreatingInput(err.to_string()))?;
-        // let chain_proofs: std::collections::HashMap<u64, chain_types::ChainProof> = self
-        //     .chain_proof_client
-        //     .get_chain_proofs(multi_evm_input.group_blocks_by_chain())
-        //     .await?;
         let chain_proofs: std::collections::HashMap<u64, chain_types::ChainProof> =
             std::collections::HashMap::new();
         let input = Input {

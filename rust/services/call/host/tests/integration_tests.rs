@@ -17,12 +17,27 @@ use provider::{
     BlockNumber, BlockingProvider, CachedMultiProvider, CachedProviderFactory, FileProviderFactory,
     ProviderFactory,
 };
+use revm::handler::execution;
 use serde_json::json;
 
 // To activate recording, set UPDATE_SNAPSHOTS to true.
 // Recording creates new testdata directory and writes return data from Alchemy into files in that directory.
 const UPDATE_SNAPSHOTS: bool = false;
 const LATEST_BLOCK: BlockTag = BlockTag::Latest;
+
+struct ExecutionLocation {
+    pub chain_id: ChainId,
+    pub block_tag: BlockTag,
+}
+
+impl ExecutionLocation {
+    fn new(chain_id: impl Into<ChainId>, block_tag: impl Into<BlockTag>) -> Self {
+        Self {
+            chain_id: chain_id.into(),
+            block_tag: block_tag.into(),
+        }
+    }
+}
 
 fn get_alchemy_key() -> String {
     dotenv().ok();
@@ -77,54 +92,52 @@ where
 async fn run<C>(
     test_name: &str,
     call: Call,
-    chain_id: ChainId,
-    block_tag: BlockTag,
+    location: ExecutionLocation,
 ) -> anyhow::Result<C::Return>
 where
     C: SolCall,
 {
-    let config = HostConfig {
-        start_chain_id: chain_id,
-        ..Default::default()
-    };
-
     let host_output = if UPDATE_SNAPSHOTS {
         let provider_factory = CachedProviderFactory::new(rpc_urls(), rpc_file_cache(test_name));
-        get_host_output(call, provider_factory, chain_id, block_tag, &config).await?
+        setup_host_and_run_call(call, provider_factory, location).await?
     } else {
         let provider_factory = FileProviderFactory::new(rpc_file_cache(test_name));
-        get_host_output(call, provider_factory, chain_id, block_tag, &config).await?
+        setup_host_and_run_call(call, provider_factory, location).await?
     };
 
     let return_value = C::abi_decode_returns(&host_output.guest_output.evm_call_result, false)?;
     Ok(return_value)
 }
 
-async fn get_host_output<P, F>(
+async fn setup_host_and_run_call<P, F>(
     call: Call,
     provider_factory: F,
-    chain_id: ChainId,
-    block_tag: BlockTag,
-    config: &HostConfig,
+    execution_location: ExecutionLocation,
 ) -> Result<HostOutput, HostError>
 where
     P: BlockingProvider + 'static,
     F: ProviderFactory<P> + 'static,
 {
     let providers = CachedMultiProvider::new(provider_factory);
-    let block_number = block_tag_to_block_number(&providers, chain_id, block_tag)?;
-    let chain_proof_server = create_server_mock(chain_id, block_number).await;
-    let chain_proof_client = ChainProofClient::new(chain_proof_server.url());
-    let host = Host::try_new_with_components(providers, block_number, chain_proof_client, config)?;
+    let chain_proof_server = create_chain_proof_server(&providers, &execution_location).await?;
+    let host = create_host(providers, execution_location, chain_proof_server.url())?;
     let host_output = host.run(call).await?;
 
     Ok(host_output)
 }
 
-async fn create_server_mock(chain_id: ChainId, block_number: BlockNumber) -> ChainProofServerMock {
-    ChainProofServerMock::start(
+async fn create_chain_proof_server<P>(
+    providers: &CachedMultiProvider<P>,
+    location: &ExecutionLocation,
+) -> Result<ChainProofServerMock, HostError>
+where
+    P: BlockingProvider + 'static,
+{
+    let block_number =
+        block_tag_to_block_number(&providers, location.chain_id, location.block_tag)?;
+    Ok(ChainProofServerMock::start(
         json!({
-            "chain_id": chain_id,
+            "chain_id": location.chain_id,
             "block_numbers": [block_number]
         }),
         json!({
@@ -132,7 +145,22 @@ async fn create_server_mock(chain_id: ChainId, block_number: BlockNumber) -> Cha
             "nodes": []
         }),
     )
-    .await
+    .await)
+}
+
+fn create_host<P: BlockingProvider + 'static>(
+    providers: CachedMultiProvider<P>,
+    location: ExecutionLocation,
+    chain_proof_server_url: impl AsRef<str>,
+) -> Result<Host<P>, HostError> {
+    let config = HostConfig {
+        start_chain_id: location.chain_id,
+        ..Default::default()
+    };
+    let block_number =
+        block_tag_to_block_number(&providers, location.chain_id, location.block_tag)?;
+    let chain_proof_client = ChainProofClient::new(chain_proof_server_url);
+    Host::try_new_with_components(providers, block_number, chain_proof_client, &config)
 }
 
 #[cfg(test)]
@@ -168,13 +196,8 @@ mod usdt {
             to: USDT,
             data: sol_call.abi_encode(),
         };
-        let result = run::<IERC20::balanceOfCall>(
-            "usdt_erc20_balance_of",
-            call,
-            Chain::mainnet().id(),
-            USDT_BLOCK_NO.into(),
-        )
-        .await?;
+        let location = ExecutionLocation::new(Chain::mainnet().id(), USDT_BLOCK_NO);
+        let result = run::<IERC20::balanceOfCall>("usdt_erc20_balance_of", call, location).await?;
         assert_eq!(result._0, uint!(3_000_000_000_000_000_U256));
         Ok(())
     }
@@ -198,13 +221,9 @@ mod uniswap {
             to: UNISWAP,
             data: sol_call.abi_encode(),
         };
-        let result = run::<IUniswapV3Factory::ownerCall>(
-            "uniswap_factory_owner",
-            call,
-            Chain::mainnet().id(),
-            LATEST_BLOCK,
-        )
-        .await?;
+        let location = ExecutionLocation::new(Chain::mainnet().id(), LATEST_BLOCK);
+        let result =
+            run::<IUniswapV3Factory::ownerCall>("uniswap_factory_owner", call, location).await?;
         assert_eq!(
             result._0,
             address!("1a9c8182c09f50c8318d769245bea52c32be35bc") // Uniswap V2: UNI Timelock is the current owner of the factory.
@@ -268,13 +287,9 @@ mod view {
             to: VIEW_CALL,
             data: sol_call.abi_encode(),
         };
-        let result = run::<ViewCallTest::testPrecompileCall>(
-            "view_precompile",
-            call,
-            Chain::sepolia().id(),
-            LATEST_BLOCK,
-        )
-        .await?;
+        let location = ExecutionLocation::new(Chain::sepolia().id(), LATEST_BLOCK);
+        let result =
+            run::<ViewCallTest::testPrecompileCall>("view_precompile", call, location).await?;
         assert_eq!(
             result._0,
             b256!("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
@@ -289,11 +304,11 @@ mod view {
             to: VIEW_CALL,
             data: sol_call.abi_encode(),
         };
+        let location = ExecutionLocation::new(Chain::sepolia().id(), LATEST_BLOCK);
         let result = run::<ViewCallTest::testNonexistentAccountCall>(
             "view_nonexistent_account",
             call,
-            Chain::sepolia().id(),
-            LATEST_BLOCK,
+            location,
         )
         .await?;
         assert_eq!(result.size, uint!(0_U256));
@@ -307,13 +322,9 @@ mod view {
             to: VIEW_CALL,
             data: sol_call.abi_encode(),
         };
-        let result = run::<ViewCallTest::testEoaAccountCall>(
-            "view_eoa_account",
-            call,
-            Chain::sepolia().id(),
-            LATEST_BLOCK,
-        )
-        .await?;
+        let location = ExecutionLocation::new(Chain::sepolia().id(), LATEST_BLOCK);
+        let result =
+            run::<ViewCallTest::testEoaAccountCall>("view_eoa_account", call, location).await?;
         assert_eq!(result.size, uint!(0_U256));
         Ok(())
     }
@@ -325,13 +336,9 @@ mod view {
             to: VIEW_CALL,
             data: sol_call.abi_encode(),
         };
-        let result = run::<ViewCallTest::testBlockhashCall>(
-            "view_blockhash",
-            call,
-            Chain::sepolia().id(),
-            VIEW_CALL_BLOCK_NO.into(),
-        )
-        .await?;
+        let location = ExecutionLocation::new(Chain::sepolia().id(), VIEW_CALL_BLOCK_NO);
+        let result =
+            run::<ViewCallTest::testBlockhashCall>("view_blockhash", call, location).await?;
         assert_eq!(
             result._0,
             b256!("7703fe4a3d6031a579d52ce9e493e7907d376cfc3b41f9bc7710b0dae8c67f68")
@@ -346,13 +353,8 @@ mod view {
             to: VIEW_CALL,
             data: sol_call.abi_encode(),
         };
-        let result = run::<ViewCallTest::testChainidCall>(
-            "view_chainid",
-            call,
-            Chain::sepolia().id(),
-            LATEST_BLOCK,
-        )
-        .await?;
+        let location = ExecutionLocation::new(Chain::sepolia().id(), LATEST_BLOCK);
+        let result = run::<ViewCallTest::testChainidCall>("view_chainid", call, location).await?;
         assert_eq!(result._0, uint!(11_155_111_U256));
         Ok(())
     }
@@ -364,11 +366,11 @@ mod view {
             to: VIEW_CALL,
             data: sol_call.abi_encode(),
         };
+        let location = ExecutionLocation::new(Chain::sepolia().id(), LATEST_BLOCK);
         let result = run::<ViewCallTest::testMuliContractCallsCall>(
             "view_multi_contract_calls",
             call,
-            Chain::sepolia().id(),
-            LATEST_BLOCK,
+            location,
         )
         .await?;
         assert_eq!(result._0, uint!(84_U256));
@@ -381,14 +383,10 @@ mod view {
             to: address!("d8dA6BF26964aF9D7eEd9e03E53415D37aA96045"), // vitalik.eth
             ..Default::default()
         };
-        run::<ViewCallTest::testEoaAccountCall>(
-            "view_call_eoa",
-            call,
-            Chain::sepolia().id(),
-            LATEST_BLOCK,
-        )
-        .await
-        .expect_err("calling an EOA should fail");
+        let location = ExecutionLocation::new(Chain::sepolia().id(), LATEST_BLOCK);
+        run::<ViewCallTest::testEoaAccountCall>("view_call_eoa", call, location)
+            .await
+            .expect_err("calling an EOA should fail");
 
         Ok(())
     }
@@ -418,13 +416,10 @@ mod teleport {
             to: SIMPLE_TELEPORT,
             data: sol_call.abi_encode(),
         };
-        let result = run::<SimpleTravelProver::crossChainBalanceOfCall>(
-            "simple_teleport",
-            call,
-            NamedChain::AnvilHardhat.into(),
-            BLOCK_NO.into(),
-        )
-        .await;
+        let location = ExecutionLocation::new(NamedChain::AnvilHardhat, BLOCK_NO);
+        let result =
+            run::<SimpleTravelProver::crossChainBalanceOfCall>("simple_teleport", call, location)
+                .await;
         assert_eq!(
             result.unwrap_err().to_string(),
             "Engine error: Panic: Intercepted call failed: EvmEnv(\"No rpc cache for chain: 8453\")"
