@@ -63,6 +63,9 @@ We provide a `match` function, that matches passed string against a regular expr
 returning list of captures if capture groups are defined within the regular expression.
 If the string does not match the given regular expression a revert is triggered. 
 
+It is important to note, that the whole given string must match the given regex, not just a substring of it.
+Begin and end marks (`^$`) should always be used, otherwise match will always fail. 
+
 ```solidity
 
 struct MatchResult {
