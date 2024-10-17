@@ -1,10 +1,10 @@
 import { testHelpers, createVlayerClient } from "@vlayer/sdk";
 
 //NOTE:
-//@ts-expect-error This should be replaced by actual  provider contract
+// This should be replaced by actual  provider contract
 import webProofProver from "../../out/WebProofProver.sol/WebProofProver";
 //NOTE:
-//@ts-expect-error This should be replaced by actual  verifier contract
+// This should be replaced by actual  verifier contract
 import webProofVerifier from "../../out/WebProofVerifier.sol/WebProofVerifier";
 import { serverSideTlsnProofProvider } from "./serverSideTlsProofProvider";
 
@@ -38,9 +38,10 @@ async function testSuccessProving() {
         webProofJson: JSON.stringify(webProof),
       },
     ],
-  });
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } as any);
 
-  const { proof, result } = await vlayer.waitForProvingResult({ hash });
+  const [proof, result] = await vlayer.waitForProvingResult({ hash });
 
   console.log("Proof generated!", proof, result);
   return { proof, result };
