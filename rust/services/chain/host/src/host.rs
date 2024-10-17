@@ -181,13 +181,19 @@ mod test {
 
             use super::*;
 
-            fn assert_trie_proof(proof: &Bytes) -> anyhow::Result<B256> {
-                let receipt: Receipt = bincode::deserialize(proof)?;
-                receipt.verify(*GUEST_ID)?;
+            fn assert_trie_proof(proof: &Bytes) -> B256 {
+                let receipt: Receipt =
+                    bincode::deserialize(proof).expect("failed to deserialize proof");
 
-                let (proven_root, elf_id): (B256, Digest) = receipt.journal.decode()?;
+                receipt
+                    .verify(*GUEST_ID)
+                    .expect("proof verification failed");
+
+                let (proven_root, elf_id): (B256, Digest) =
+                    receipt.journal.decode().expect("failed to decode journal");
                 assert_eq!(elf_id, *GUEST_ID);
-                Ok(proven_root)
+
+                proven_root
             }
 
             fn assert_fetched_latest_block(provider: &MockProvider) {
@@ -219,7 +225,7 @@ mod test {
                 assert_fetched_latest_block(host.provider.as_ref());
                 assert_eq!(first_block..=last_block, LATEST..=LATEST);
 
-                let proven_root = assert_trie_proof(&zk_proof)?;
+                let proven_root = assert_trie_proof(&zk_proof);
                 let merkle_trie = MerkleTrie::from_rlp_nodes(added_nodes)?;
                 assert_eq!(merkle_trie.hash_slow(), proven_root);
                 // SAFETY: We verified the root against the proof
@@ -273,7 +279,7 @@ mod test {
                     assert_fetched_latest_block(host.provider.as_ref());
                     assert_eq!(first_block..=last_block, GENESIS..=GENESIS);
 
-                    let proven_root = assert_trie_proof(&zk_proof)?;
+                    let proven_root = assert_trie_proof(&zk_proof);
                     assert_eq!(proven_root, root_hash);
 
                     assert!(added_nodes.is_empty());
