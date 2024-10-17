@@ -11,7 +11,6 @@ use std::error::Error as StdError;
 pub use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256};
 use auto_impl::auto_impl;
 pub use block_header::EvmBlockHeader;
-pub use cache::CachedProvider;
 pub use ethers::{to_eth_block_header, EthersProvider, EthersProviderError};
 pub use ethers_core::types::BlockNumber as BlockTag;
 use ethers_providers::{Http, RetryClient};

@@ -139,12 +139,12 @@ mod tests {
     async fn mock_with_params() -> anyhow::Result<()> {
         let params = json!({"key": "value"});
         let expected_response = json!({"data": "some data"});
-        let rpc_mock = RpcServerMock::start(METHOD, false, &params, &expected_response).await;
-        let rpc_client = RpcClient::new(&rpc_mock.url(), METHOD);
+        let mock = RpcServerMock::start(METHOD, false, &params, &expected_response).await;
+        let rpc_client = RpcClient::new(&mock.url(), METHOD);
 
         let response = rpc_client.call(params).await?;
 
-        rpc_mock.assert();
+        mock.assert();
 
         assert_eq!(response, expected_response);
 
@@ -154,15 +154,15 @@ mod tests {
     #[tokio::test]
     #[should_panic]
     async fn mock_not_called_panics() {
-        let rpc_mock = RpcServerMock::start(METHOD, false, json!({}), json!({})).await;
+        let mock = RpcServerMock::start(METHOD, false, json!({}), json!({})).await;
 
-        rpc_mock.assert();
+        mock.assert();
     }
 
     #[tokio::test]
     async fn call_without_mock_returns_error() {
-        let rpc_mock = RpcServerMock::start(METHOD, false, json!({}), json!({})).await;
-        let rpc_client = RpcClient::new(&rpc_mock.url(), METHOD);
+        let mock = RpcServerMock::start(METHOD, false, json!({}), json!({})).await;
+        let rpc_client = RpcClient::new(&mock.url(), METHOD);
 
         let result = rpc_client.call(json!({"key": "value"})).await;
 
@@ -171,13 +171,13 @@ mod tests {
 
     #[tokio::test]
     async fn mock_partial_matches_full_body() -> anyhow::Result<()> {
-        let rpc_mock =
+        let mock =
             RpcServerMock::start(METHOD, true, json!({}), json!({"data": "some data"})).await;
-        let rpc_client = RpcClient::new(&rpc_mock.url(), METHOD);
+        let rpc_client = RpcClient::new(&mock.url(), METHOD);
 
         let result = rpc_client.call(json!({"key": "value"})).await?;
 
-        rpc_mock.assert();
+        mock.assert();
 
         assert_eq!(result, json!({"data": "some data"}));
 
@@ -186,9 +186,9 @@ mod tests {
 
     #[tokio::test]
     async fn mock_non_partial_doesnt_match_full_body() -> anyhow::Result<()> {
-        let rpc_mock =
+        let mock =
             RpcServerMock::start(METHOD, false, json!({}), json!({"data": "some data"})).await;
-        let rpc_client = RpcClient::new(&rpc_mock.url(), METHOD);
+        let rpc_client = RpcClient::new(&mock.url(), METHOD);
 
         let result = rpc_client
             .call(json!({
