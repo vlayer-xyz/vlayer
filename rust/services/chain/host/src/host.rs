@@ -4,7 +4,7 @@ pub mod error;
 use alloy_primitives::ChainId;
 use block_trie::BlockTrie;
 use bytes::Bytes;
-use chain_db::{ChainDb, ChainInfo, ChainUpdate};
+use chain_db::{ChainDb, ChainInfo, ChainTrie, ChainUpdate};
 use chain_guest::Input;
 use chain_guest_wrapper::{RISC0_CHAIN_GUEST_ELF, RISC0_CHAIN_GUEST_ID};
 pub use config::HostConfig;
@@ -67,7 +67,7 @@ where
     pub async fn poll(&self) -> Result<ChainUpdate, HostError> {
         match self.db.get_chain_info(self.chain_id)? {
             None => self.initialize().await,
-            Some(chain_info) => self.append_prepend(chain_info).await,
+            Some(_) => self.append_prepend().await,
         }
     }
 
@@ -90,16 +90,22 @@ where
         Ok(chain_update)
     }
 
-    async fn append_prepend(
-        &self,
-        current_chain_info: ChainInfo,
-    ) -> Result<ChainUpdate, HostError> {
+    async fn append_prepend(&self) -> Result<ChainUpdate, HostError> {
+        let ChainTrie {
+            block_range,
+            trie: old_trie,
+            zk_proof: old_zk_proof,
+        } = self
+            .db
+            .get_chain_trie(self.chain_id)?
+            .expect("chain trie not found");
+        let trie = old_trie.clone();
+
         let latest_block = self.get_block(BlockTag::Latest).await?;
         let latest_block_number = latest_block.number();
-        let append_range = current_chain_info.last_block + 1..=latest_block_number;
-        let block_range = *current_chain_info.block_range().start()..=latest_block_number;
-        let chain_info =
-            ChainInfo::new(block_range, current_chain_info.root_hash, current_chain_info.zk_proof);
+
+        let block_range = *block_range.start()..=latest_block_number;
+        let chain_info = ChainInfo::new(block_range, trie.hash_slow(), old_zk_proof);
         let chain_update = ChainUpdate::new(chain_info, [], []);
         Ok(chain_update)
     }
