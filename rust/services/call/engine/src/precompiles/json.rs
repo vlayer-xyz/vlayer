@@ -97,7 +97,10 @@ fn get_array_length_by_path(value: &Value, path: &str) -> Option<usize> {
     }
 }
 
-fn pre_process_input(input: &Bytes, gas_limit: u64) -> Result<(u64, Value, String), PrecompileErrors>{
+fn pre_process_input(
+    input: &Bytes,
+    gas_limit: u64,
+) -> Result<(u64, Value, String), PrecompileErrors> {
     let gas_used = gas_used(input.len(), BASE_COST, PER_WORD_COST, gas_limit)?;
     let [body, json_path] = InputType::abi_decode(input, true).map_err(map_to_fatal)?;
     let body = serde_json::from_str(body.as_str())
@@ -201,13 +204,16 @@ mod tests {
 
     #[test]
     fn success_number_in_an_array_of_objects() {
-        let abi_encoded_body_and_json_path = 
-            InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_array_of_objects_with_numbers[0].key"]);
+        let abi_encoded_body_and_json_path = InputType::abi_encode(&[
+            TEST_JSON,
+            "root.nested_level.field_array_of_objects_with_numbers[0].key",
+        ]);
 
         let precompile_output =
             json_get_int_run(&abi_encoded_body_and_json_path.into(), u64::MAX).unwrap();
-        
-        let result  = sol_data::Int::<256>::abi_decode(precompile_output.bytes.as_ref(), false).unwrap();
+
+        let result =
+            sol_data::Int::<256>::abi_decode(precompile_output.bytes.as_ref(), false).unwrap();
         let parsed: alloy_primitives::I256 = "1".parse().unwrap();
         assert_eq!(parsed, result);
     }
