@@ -1,7 +1,7 @@
 use std::{collections::hash_map::Entry, path::PathBuf, sync::RwLock};
 
 use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256};
-use anyhow::{bail, Error};
+use anyhow::{bail, Error, Result};
 use block_header::EvmBlockHeader;
 use derivative::Derivative;
 use ethers_core::types::BlockNumber as BlockTag;
@@ -26,7 +26,7 @@ impl<P: BlockingProvider> CachedProvider<P> {
     /// Creates a new [CachedProvider]. At this point, the cache files
     /// directory should exist and the cache file itself should not.
     /// A new cache file will be created when dropped.
-    pub fn new(cache_path: PathBuf, provider: P) -> anyhow::Result<Self> {
+    pub fn new(cache_path: PathBuf, provider: P) -> Result<Self> {
         // Sanity checks.
         if let Some(parent) = cache_path.parent() {
             if !parent.exists() {
@@ -49,7 +49,7 @@ impl<P: BlockingProvider> CachedProvider<P> {
 }
 
 impl<P: BlockingProvider> BlockingProvider for CachedProvider<P> {
-    fn get_block_header(&self, block: BlockTag) -> Result<Option<Box<dyn EvmBlockHeader>>, Error> {
+    fn get_block_header(&self, block: BlockTag) -> Result<Option<Box<dyn EvmBlockHeader>>> {
         let mut cache = self.cache.write().expect("poisoned RwLock");
         match cache.partial_blocks.entry(BlockQuery {
             block_no: block.into(),
@@ -80,7 +80,7 @@ impl<P: BlockingProvider> BlockingProvider for CachedProvider<P> {
         }
     }
 
-    fn get_balance(&self, address: Address, block: BlockNumber) -> Result<U256, Error> {
+    fn get_balance(&self, address: Address, block: BlockNumber) -> Result<U256> {
         let mut cache = self.cache.write().expect("poisoned RwLock");
         match cache.balance.entry(AccountQuery {
             block_no: block,
@@ -94,7 +94,7 @@ impl<P: BlockingProvider> BlockingProvider for CachedProvider<P> {
         }
     }
 
-    fn get_code(&self, address: Address, block: BlockNumber) -> Result<Bytes, Error> {
+    fn get_code(&self, address: Address, block: BlockNumber) -> Result<Bytes> {
         let mut cache = self.cache.write().expect("poisoned RwLock");
         match cache.code.entry(AccountQuery {
             block_no: block,
@@ -113,7 +113,7 @@ impl<P: BlockingProvider> BlockingProvider for CachedProvider<P> {
         address: Address,
         key: StorageKey,
         block: BlockNumber,
-    ) -> Result<StorageValue, Error> {
+    ) -> Result<StorageValue> {
         let mut cache = self.cache.write().expect("poisoned RwLock");
         match cache.storage.entry(StorageQuery {
             block_no: block,
@@ -133,7 +133,7 @@ impl<P: BlockingProvider> BlockingProvider for CachedProvider<P> {
         address: Address,
         storage_keys: Vec<StorageKey>,
         block: BlockNumber,
-    ) -> Result<EIP1186Proof, Error> {
+    ) -> Result<EIP1186Proof> {
         let mut cache = self.cache.write().expect("poisoned RwLock");
         match cache.proofs.entry(ProofQuery {
             block_no: block,

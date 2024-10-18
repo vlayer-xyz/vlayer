@@ -1,7 +1,7 @@
 use core::future::Future;
 
 use alloy_primitives::{BlockNumber, B256, U256};
-use anyhow::anyhow;
+use anyhow::{anyhow, Result};
 use block_header::{EthBlockHeader, EvmBlockHeader};
 use ethers_core::types::{Block, BlockNumber as BlockTag};
 use ethers_providers::Middleware;
@@ -30,10 +30,7 @@ impl<M: Middleware> BlockingProvider for EthersProvider<M>
 where
     M::Error: 'static,
 {
-    fn get_block_header(
-        &self,
-        block: BlockTag,
-    ) -> Result<Option<Box<dyn EvmBlockHeader>>, anyhow::Error> {
+    fn get_block_header(&self, block: BlockTag) -> Result<Option<Box<dyn EvmBlockHeader>>> {
         let block = block_on(self.client.get_block(block))?;
         match block {
             Some(block) => {
@@ -48,7 +45,7 @@ where
         &self,
         address: alloy_primitives::Address,
         block: BlockNumber,
-    ) -> Result<alloy_primitives::TxNumber, anyhow::Error> {
+    ) -> Result<alloy_primitives::TxNumber> {
         let address = to_ethers_h160(address);
         let count = block_on(
             self.client
@@ -63,7 +60,7 @@ where
         &self,
         address: alloy_primitives::Address,
         block: BlockNumber,
-    ) -> Result<alloy_primitives::U256, anyhow::Error> {
+    ) -> Result<alloy_primitives::U256> {
         let address = to_ethers_h160(address);
         let balance = block_on(self.client.get_balance(address, Some(block.into())))?;
         Ok(from_ethers_u256(balance))
@@ -73,7 +70,7 @@ where
         &self,
         address: alloy_primitives::Address,
         block: BlockNumber,
-    ) -> Result<alloy_primitives::Bytes, anyhow::Error> {
+    ) -> Result<alloy_primitives::Bytes> {
         let address = to_ethers_h160(address);
         let code = block_on(self.client.get_code(address, Some(block.into())))?;
         Ok(from_ethers_bytes(code))
@@ -84,7 +81,7 @@ where
         address: alloy_primitives::Address,
         key: alloy_primitives::StorageKey,
         block: BlockNumber,
-    ) -> Result<alloy_primitives::StorageValue, anyhow::Error> {
+    ) -> Result<alloy_primitives::StorageValue> {
         let address = to_ethers_h160(address);
         let key = to_ethers_h256(key);
         let value = block_on(self.client.get_storage_at(address, key, Some(block.into())))?;
@@ -96,7 +93,7 @@ where
         address: alloy_primitives::Address,
         storage_keys: Vec<alloy_primitives::StorageKey>,
         block: BlockNumber,
-    ) -> Result<EIP1186Proof, anyhow::Error> {
+    ) -> Result<EIP1186Proof> {
         let address = to_ethers_h160(address);
         let storage_keys = storage_keys.into_iter().map(to_ethers_h256).collect();
         let proof = block_on(
@@ -120,7 +117,7 @@ where
     }
 }
 
-pub fn to_eth_block_header<T>(block: Block<T>) -> Result<EthBlockHeader, anyhow::Error> {
+pub fn to_eth_block_header<T>(block: Block<T>) -> Result<EthBlockHeader> {
     Ok(EthBlockHeader {
         parent_hash: from_ethers_h256(block.parent_hash),
         ommers_hash: from_ethers_h256(block.uncles_hash),

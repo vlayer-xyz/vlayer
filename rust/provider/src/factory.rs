@@ -1,6 +1,7 @@
 use std::{collections::HashMap, path::PathBuf};
 
 use alloy_primitives::ChainId;
+use anyhow::Result;
 use thiserror::Error;
 use url::ParseError;
 
@@ -124,7 +125,7 @@ mod test {
     use super::*;
 
     #[tokio::test(flavor = "multi_thread")]
-    async fn try_new_invalid_rpc_url() -> anyhow::Result<()> {
+    async fn try_new_invalid_rpc_url() -> Result<()> {
         let chain_id = Chain::mainnet().id();
         let rpc_urls = [(chain_id, "http://localhost:123".to_string())]
             .into_iter()
