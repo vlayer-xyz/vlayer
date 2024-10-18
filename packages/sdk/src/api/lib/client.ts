@@ -7,7 +7,7 @@ import { type Abi, decodeFunctionResult } from "viem";
 
 function dropEmptyProofFromArgs(args: unknown) {
   if (Array.isArray(args)) {
-    return args.slice(1);
+    return args.slice(1) as unknown[];
   }
   return [];
 }
@@ -39,6 +39,7 @@ export const createVlayerClient = (
   >();
 
   return {
+    // eslint-disable-next-line @typescript-eslint/require-await
     prove: async ({ address, functionName, chainId, proverAbi, args }) => {
       const result_promise = prove(
         address,
