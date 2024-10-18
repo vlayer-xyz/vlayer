@@ -28,25 +28,20 @@ pub type EthersClient = ethers_providers::Provider<RetryClient<Http>>;
 #[auto_impl(Rc)]
 pub trait BlockingProvider: Send + Sync {
     fn get_balance(&self, address: Address, block: BlockNumber) -> Result<U256, Error>;
-
     fn get_block_header(&self, block: BlockTag) -> Result<Option<Box<dyn EvmBlockHeader>>, Error>;
-
     fn get_code(&self, address: Address, block: BlockNumber) -> Result<Bytes, Error>;
-
     fn get_proof(
         &self,
         address: Address,
         storage_keys: Vec<StorageKey>,
         block: BlockNumber,
     ) -> Result<EIP1186Proof, Error>;
-
     fn get_storage_at(
         &self,
         address: Address,
         key: StorageKey,
         block: BlockNumber,
     ) -> Result<StorageValue, Error>;
-
     fn get_transaction_count(
         &self,
         address: Address,

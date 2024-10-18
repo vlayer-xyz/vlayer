@@ -1,7 +1,7 @@
 use core::future::Future;
 
 use alloy_primitives::{BlockNumber, B256, U256};
-use anyhow::{anyhow, Context, Error as AnyError};
+use anyhow::anyhow;
 use block_header::{EthBlockHeader, EvmBlockHeader};
 use ethers_core::types::{Block, BlockNumber as BlockTag};
 use ethers_providers::Middleware;
@@ -28,12 +28,12 @@ fn block_on<F: Future>(f: F) -> F::Output {
 
 impl<M: Middleware> BlockingProvider for EthersProvider<M>
 where
-    M::Error: 'static + Send + Sync,
+    M::Error: 'static,
 {
     fn get_block_header(
         &self,
         block: BlockTag,
-    ) -> Result<Option<Box<dyn EvmBlockHeader>>, AnyError> {
+    ) -> Result<Option<Box<dyn EvmBlockHeader>>, anyhow::Error> {
         let block = block_on(self.client.get_block(block))?;
         match block {
             Some(block) => {
@@ -48,13 +48,12 @@ where
         &self,
         address: alloy_primitives::Address,
         block: BlockNumber,
-    ) -> Result<alloy_primitives::TxNumber, AnyError> {
+    ) -> Result<alloy_primitives::TxNumber, anyhow::Error> {
         let address = to_ethers_h160(address);
         let count = block_on(
             self.client
                 .get_transaction_count(address, Some(block.into())),
-        )
-        .context("Failed to get transaction count")?
+        )?
         .as_u64();
 
         Ok(count)
@@ -64,10 +63,9 @@ where
         &self,
         address: alloy_primitives::Address,
         block: BlockNumber,
-    ) -> Result<alloy_primitives::U256, AnyError> {
+    ) -> Result<alloy_primitives::U256, anyhow::Error> {
         let address = to_ethers_h160(address);
-        let balance = block_on(self.client.get_balance(address, Some(block.into())))
-            .context("Failed to get balance")?;
+        let balance = block_on(self.client.get_balance(address, Some(block.into())))?;
         Ok(from_ethers_u256(balance))
     }
 
@@ -75,10 +73,9 @@ where
         &self,
         address: alloy_primitives::Address,
         block: BlockNumber,
-    ) -> Result<alloy_primitives::Bytes, AnyError> {
+    ) -> Result<alloy_primitives::Bytes, anyhow::Error> {
         let address = to_ethers_h160(address);
-        let code = block_on(self.client.get_code(address, Some(block.into())))
-            .context("Failed to get code")?;
+        let code = block_on(self.client.get_code(address, Some(block.into())))?;
         Ok(from_ethers_bytes(code))
     }
 
@@ -87,11 +84,10 @@ where
         address: alloy_primitives::Address,
         key: alloy_primitives::StorageKey,
         block: BlockNumber,
-    ) -> Result<alloy_primitives::StorageValue, AnyError> {
+    ) -> Result<alloy_primitives::StorageValue, anyhow::Error> {
         let address = to_ethers_h160(address);
         let key = to_ethers_h256(key);
-        let value = block_on(self.client.get_storage_at(address, key, Some(block.into())))
-            .context("Failed to get storage at specified key")?;
+        let value = block_on(self.client.get_storage_at(address, key, Some(block.into())))?;
         Ok(from_ethers_h256(value).into())
     }
 
@@ -100,14 +96,13 @@ where
         address: alloy_primitives::Address,
         storage_keys: Vec<alloy_primitives::StorageKey>,
         block: BlockNumber,
-    ) -> Result<EIP1186Proof, AnyError> {
+    ) -> Result<EIP1186Proof, anyhow::Error> {
         let address = to_ethers_h160(address);
         let storage_keys = storage_keys.into_iter().map(to_ethers_h256).collect();
         let proof = block_on(
             self.client
                 .get_proof(address, storage_keys, Some(block.into())),
-        )
-        .context("Failed to get account and storage proof")?;
+        )?;
 
         Ok(EIP1186Proof {
             address: address.0.into(),
@@ -125,7 +120,7 @@ where
     }
 }
 
-pub fn to_eth_block_header<T>(block: Block<T>) -> Result<EthBlockHeader, AnyError> {
+pub fn to_eth_block_header<T>(block: Block<T>) -> Result<EthBlockHeader, anyhow::Error> {
     Ok(EthBlockHeader {
         parent_hash: from_ethers_h256(block.parent_hash),
         ommers_hash: from_ethers_h256(block.uncles_hash),
