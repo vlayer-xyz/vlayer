@@ -13,16 +13,13 @@ import {
 } from "viem";
 
 import { privateKeyToAccount, generatePrivateKey } from "viem/accounts";
-import { foundry, optimismSepolia } from "viem/chains";
+import { foundry } from "viem/chains";
 
 import type { ContractSpec, ContractArg } from "types/ethereum";
 
-const rpcUrls: Map<number, HttpTransport> = new Map([
-  [foundry.id, http()],
-  [optimismSepolia.id, http("https://sepolia.optimism.io")],
-]);
+const rpcUrls: Map<number, HttpTransport> = new Map([[foundry.id, http()]]);
 
-export const chainIds = [foundry.id, optimismSepolia.id];
+export const chainIds = [foundry.id];
 
 export function createAnvilClient(
   chainId: number = foundry.id,
