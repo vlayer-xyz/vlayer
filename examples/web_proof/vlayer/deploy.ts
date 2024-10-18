@@ -72,7 +72,7 @@ try {
   const proverRegex = /^VITE_PROVER_ADDRESS=.*/m;
   const verifierRegex = /^VITE_VERIFIER_ADDRESS=.*/m;
 
-  if (proverRegex.test(envContent)) {
+  if (proverRegex.test(envContent) && prover) {
     envContent = envContent.replace(
       proverRegex,
       `VITE_PROVER_ADDRESS=${prover.trim()}`,
