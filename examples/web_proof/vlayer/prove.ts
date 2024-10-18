@@ -4,6 +4,7 @@ import webProofVerifier from "../out/WebProofVerifier.sol/WebProofVerifier";
 import tls_proof from "./tls_gp_proof.json";
 import * as assert from "assert";
 import { encodePacked, isAddress, keccak256 } from "viem";
+import { foundry } from "viem/chains";
 
 const notaryPubKey =
   "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExpX/4R4z40gI6C/j9zAM39u58LJu\n3Cx5tXTuqhhu/tirnBi5GniMmspOTEsps4ANnPLpMmMSfhJ+IFHbc3qVOA==\n-----END PUBLIC KEY-----\n";
@@ -35,8 +36,9 @@ async function testSuccessProvingAndVerification() {
       },
       twitterUserAddress,
     ],
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } as any);
+    commitmentArgs: [twitterUserAddress],
+    chainId: foundry.id,
+  });
   const result = await vlayer.waitForProvingResult({ hash });
   const [proof, twitterHandle, address] = result;
   console.log("Proof:", proof);
@@ -94,8 +96,9 @@ async function testFailedProving() {
         },
         twitterUserAddress,
       ],
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any);
+      commitmentArgs: [twitterUserAddress],
+      chainId: foundry.id,
+    });
     await vlayer.waitForProvingResult({ hash });
     throw new Error("Proving should have failed!");
   } catch (error) {

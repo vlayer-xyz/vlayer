@@ -75,8 +75,9 @@ export const setupVProverButton = (element: HTMLButtonElement) => {
         },
         twitterUserAddress,
       ],
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any);
+      commitmentArgs: [twitterUserAddress],
+      chainId: foundry.id,
+    });
     const provingResult = await vlayer.waitForProvingResult({
       hash,
     });

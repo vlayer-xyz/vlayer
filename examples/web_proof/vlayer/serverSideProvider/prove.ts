@@ -7,6 +7,7 @@ import webProofProver from "../../out/WebProofProver.sol/WebProofProver";
 // This should be replaced by actual  verifier contract
 import webProofVerifier from "../../out/WebProofVerifier.sol/WebProofVerifier";
 import { serverSideTlsnProofProvider } from "./serverSideTlsProofProvider";
+import { foundry } from "viem/chains";
 
 //NOTE  this uses tlsn fixture public key as serverSideTlsProofProvider uses default lokal tlsn provider for now
 //TODO: make serverSideTlsProofProvider able to accept notary server data as input
@@ -20,6 +21,8 @@ const [prover /*,_verifier*/] = await testHelpers.deployProverVerifier(
 );
 
 const vlayer = createVlayerClient();
+
+const twitterUserAddress = (await testHelpers.getTestAddresses())[0];
 
 async function testSuccessProving() {
   console.log("Started proving...");
@@ -37,9 +40,11 @@ async function testSuccessProving() {
       {
         webProofJson: JSON.stringify(webProof),
       },
+      twitterUserAddress,
     ],
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } as any);
+    commitmentArgs: [twitterUserAddress],
+    chainId: foundry.id,
+  });
 
   const [proof, result] = await vlayer.waitForProvingResult({ hash });
 
