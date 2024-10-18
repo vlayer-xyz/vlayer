@@ -1,7 +1,7 @@
 use std::{collections::hash_map::Entry, path::PathBuf, sync::RwLock};
 
 use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256};
-use anyhow::{bail, Error, Result};
+use anyhow::{bail, Result};
 use block_header::EvmBlockHeader;
 use derivative::Derivative;
 use ethers_core::types::BlockNumber as BlockTag;
@@ -62,11 +62,7 @@ impl<P: BlockingProvider> BlockingProvider for CachedProvider<P> {
         }
     }
 
-    fn get_transaction_count(
-        &self,
-        address: Address,
-        block: BlockNumber,
-    ) -> Result<TxNumber, Error> {
+    fn get_transaction_count(&self, address: Address, block: BlockNumber) -> Result<TxNumber> {
         let mut cache = self.cache.write().expect("poisoned RwLock");
         match cache.transaction_count.entry(AccountQuery {
             block_no: block,

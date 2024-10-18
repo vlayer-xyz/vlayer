@@ -3,7 +3,6 @@ use std::collections::HashMap;
 use alloy_primitives::{
     Address, BlockNumber, Bytes, ChainId, StorageKey, StorageValue, TxNumber, U256,
 };
-use anyhow::Error;
 use block_header::EvmBlockHeader;
 use chain::{CHAIN_NAMES, TEST_CHAIN_ID};
 use ethers_core::types::BlockNumber as BlockTag;
@@ -19,15 +18,15 @@ pub struct TestProvider {
 }
 
 impl BlockingProvider for TestProvider {
-    fn get_balance(&self, address: Address, block: BlockNumber) -> Result<U256, Error> {
+    fn get_balance(&self, address: Address, block: BlockNumber) -> anyhow::Result<U256> {
         self.provider.get_balance(address, block)
     }
 
-    fn get_block_header(&self, block: BlockTag) -> Result<Option<Box<dyn EvmBlockHeader>>, Error> {
+    fn get_block_header(&self, block: BlockTag) -> anyhow::Result<Option<Box<dyn EvmBlockHeader>>> {
         self.provider.get_block_header(block)
     }
 
-    fn get_code(&self, address: Address, block: BlockNumber) -> Result<Bytes, Error> {
+    fn get_code(&self, address: Address, block: BlockNumber) -> anyhow::Result<Bytes> {
         self.provider.get_code(address, block)
     }
 
@@ -36,7 +35,7 @@ impl BlockingProvider for TestProvider {
         address: Address,
         storage_keys: Vec<StorageKey>,
         block: BlockNumber,
-    ) -> Result<EIP1186Proof, Error> {
+    ) -> anyhow::Result<EIP1186Proof> {
         self.provider.get_proof(address, storage_keys, block)
     }
 
@@ -45,7 +44,7 @@ impl BlockingProvider for TestProvider {
         address: Address,
         key: StorageKey,
         block: BlockNumber,
-    ) -> Result<StorageValue, Error> {
+    ) -> anyhow::Result<StorageValue> {
         self.provider.get_storage_at(address, key, block)
     }
 
@@ -53,7 +52,7 @@ impl BlockingProvider for TestProvider {
         &self,
         address: Address,
         block: BlockNumber,
-    ) -> Result<TxNumber, Error> {
+    ) -> anyhow::Result<TxNumber> {
         self.provider.get_transaction_count(address, block)
     }
 }
