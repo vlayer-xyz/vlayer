@@ -131,11 +131,8 @@ where
     }
 
     fn prove(&self, input: Input, old_zk_proof: Option<Bytes>) -> Result<Receipt, HostError> {
-        let maybe_assumption_receipt = old_zk_proof.map(|zk_proof| {
-            let receipt: Receipt =
-                bincode::deserialize(&zk_proof).expect("failed to deserialize proof");
-            receipt.inner.into()
-        });
+        let maybe_assumption_receipt =
+            old_zk_proof.map(|zk_proof| decode_proof(&zk_proof).inner.into());
         let executor_env = build_executor_env(input, maybe_assumption_receipt)?;
         let ProveInfo { receipt, .. } =
             provably_execute(&self.prover, executor_env, RISC0_CHAIN_GUEST_ELF)?;
@@ -166,6 +163,10 @@ fn encode_proof(receipt: &Receipt) -> Bytes {
     bincode::serialize(receipt)
         .expect("failed to serialize receipt")
         .into()
+}
+
+fn decode_proof(proof: &Bytes) -> Receipt {
+    bincode::deserialize(proof).expect("failed to deserialize proof")
 }
 
 #[allow(unused)]
