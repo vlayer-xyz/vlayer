@@ -1,6 +1,6 @@
 import webProofProver from "../../out/WebProofProver.sol/WebProofProver";
 
-import { foundry } from "viem/chains";
+import { foundry, optimismSepolia } from "viem/chains";
 
 import {
   createExtensionWebProofProvider,
@@ -14,7 +14,8 @@ import {
   isDefined,
 } from "@vlayer/sdk";
 import webProofVerifier from "../../out/WebProofVerifier.sol/WebProofVerifier";
-import { Hex } from "viem";
+import { Hex, createWalletClient, http } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
 
 console.log("Hello from VLayer!");
 
@@ -32,7 +33,7 @@ export async function setupRequestProveButton(element: HTMLButtonElement) {
       proverCallCommitment: {
         address: import.meta.env.VITE_PROVER_ADDRESS,
         proverAbi: webProofProver.abi,
-        chainId: foundry.id,
+        chainId: import.meta.env.VITE_CHAIN_ID ?? foundry.id,
         functionName: "main",
         commitmentArgs: ["0x"],
       },
@@ -75,7 +76,8 @@ export const setupVProverButton = (element: HTMLButtonElement) => {
         },
         twitterUserAddress,
       ],
-      chainId: foundry.id,
+      commitmentArgs: [twitterUserAddress],
+      chainId: import.meta.env.VITE_CHAIN_ID ?? foundry.id,
     });
     const provingResult = await vlayer.waitForProvingResult({
       hash,
@@ -89,14 +91,36 @@ export const setupVerifyButton = (element: HTMLButtonElement) => {
   element.addEventListener("click", async () => {
     isDefined(context.provingResult, "Proving result is undefined");
 
-    const verification = await testHelpers.createAnvilClient().writeContract({
-      address: import.meta.env.VITE_VERIFIER_ADDRESS,
-      abi: webProofVerifier.abi,
-      functionName: "verify",
-      args: context.provingResult,
-      account: twitterUserAddress,
-      chain: undefined,
-    });
-    console.log("Verified!", verification);
+    if (import.meta.env.VITE_CHAIN_ID && import.meta.env.VITE_TEST_PRIV_KEY) {
+      const walletClient = createWalletClient({
+        chain: optimismSepolia,
+        transport: http("https://sepolia.optimism.io"),
+      });
+
+      const deployer = privateKeyToAccount(
+        import.meta.env.VITE_TEST_PRIV_KEY as `0x${string}`,
+      );
+
+      const txHash = await walletClient.writeContract({
+        address: import.meta.env.VITE_VERIFIER_ADDRESS,
+        abi: webProofVerifier.abi,
+        functionName: "verify",
+        args: context.provingResult,
+        account: deployer,
+      });
+      console.log(
+        `Verification tx: https://sepolia-optimism.etherscan.io/tx/${txHash}`,
+      );
+    } else {
+      const verification = await testHelpers.createAnvilClient().writeContract({
+        address: import.meta.env.VITE_VERIFIER_ADDRESS,
+        abi: webProofVerifier.abi,
+        functionName: "verify",
+        args: context.provingResult,
+        account: twitterUserAddress,
+        chain: undefined,
+      });
+      console.log("Verified!", verification);
+    }
   });
 };
