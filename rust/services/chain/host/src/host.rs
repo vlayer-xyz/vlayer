@@ -82,7 +82,7 @@ where
             elf_id: *GUEST_ID,
             block: latest_block,
         };
-        let receipt = self.prove(input, None)?;
+        let receipt = self.prove(input, &None)?;
         let zk_proof = encode_proof(&receipt);
 
         let range = latest_block_number..=latest_block_number;
@@ -120,7 +120,7 @@ where
             old_leftmost_block: latest_block,
             block_trie: old_trie.clone(),
         };
-        let receipt = self.prove(input, Some(old_zk_proof))?;
+        let receipt = self.prove(input, &Some(old_zk_proof))?;
         let zk_proof = encode_proof(&receipt);
 
         let range = *block_range.start()..=latest_block_number;
@@ -131,10 +131,9 @@ where
         Ok(chain_update)
     }
 
-    fn prove(&self, input: Input, old_zk_proof: Option<Bytes>) -> Result<Receipt, HostError> {
-        let maybe_assumption_receipt =
-            old_zk_proof.map(|zk_proof| decode_proof(&zk_proof).inner.into());
-        let executor_env = build_executor_env(input, maybe_assumption_receipt)?;
+    fn prove(&self, input: Input, old_zk_proof: &Option<Bytes>) -> Result<Receipt, HostError> {
+        let old_receipt = old_zk_proof.as_ref().map(decode_proof);
+        let executor_env = build_executor_env(input, old_receipt)?;
         let ProveInfo { receipt, .. } =
             provably_execute(&self.prover, executor_env, RISC0_CHAIN_GUEST_ELF)?;
         Ok(receipt)
@@ -181,10 +180,13 @@ fn provably_execute(
         .map_err(|err| HostError::Prover(err.to_string()))
 }
 
-fn build_executor_env(
+fn build_executor_env<A>(
     input: impl Serialize,
-    assumption: Option<AssumptionReceipt>,
-) -> Result<ExecutorEnv<'static>, HostError> {
+    assumption: Option<A>,
+) -> Result<ExecutorEnv<'static>, HostError>
+where
+    A: Into<AssumptionReceipt>,
+{
     let mut builder = ExecutorEnv::builder();
     if let Some(assumption) = assumption {
         builder.add_assumption(assumption);
