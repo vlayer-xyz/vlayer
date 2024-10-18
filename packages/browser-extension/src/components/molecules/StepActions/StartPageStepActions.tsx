@@ -4,6 +4,9 @@ import { StepStatus } from "constants/step";
 import { Button } from "components/atoms";
 import browser from "webextension-polyfill";
 import { motion, AnimatePresence } from "framer-motion";
+import sendMessageToServiceWorker from "lib/sendMessageToServiceWorker";
+import { ExtensionMessageType } from "../../../web-proof-commons";
+
 type StartPageStepActionProps = {
   isVisited: boolean;
   link: string;
@@ -30,8 +33,12 @@ export const StartPageStepActions: FC<StartPageStepActionProps> = ({
               }}
               // open app we gona take proof from in new tab
               onClick={async () => {
-                await browser.tabs.create({
+                const tab = await browser.tabs.create({
                   url: link,
+                });
+                await sendMessageToServiceWorker({
+                  type: ExtensionMessageType.TabOpened,
+                  tabId: tab.id!,
                 });
               }}
             >

@@ -7,12 +7,14 @@ import {
 import { WebProverSessionContextManager } from "./state/webProverSessionContext";
 import { match, P } from "ts-pattern";
 
+let windowId = 0;
+// to receive messages from popup script
+let port: browser.Runtime.Port | undefined = undefined;
+let openedTabId: number | undefined = undefined;
+
 chrome.tabs.onActivated.addListener(function (activeInfo) {
   windowId = activeInfo.windowId;
 });
-
-// to receive messages from popup script
-let port: browser.Runtime.Port | undefined = undefined;
 
 browser.runtime.onInstalled.addListener((details) => {
   console.log("Extension installed:", details);
@@ -41,18 +43,19 @@ browser.runtime.onMessage.addListener(async (message: ExtensionMessage) => {
       },
     )
     .with({ type: ExtensionMessageType.RedirectBack }, async () => {
+      if (openedTabId) {
+        console.log("Closing opened tab", openedTabId);
+        await browser.tabs.remove(openedTabId);
+      }
       console.log("Redirect back to webpage", port?.sender?.tab?.id);
-      //close current
-      const currentTab = (await browser.tabs.query({ active: true }))[0];
-      await (currentTab.id && currentTab.id !== port?.sender?.tab?.id
-        ? browser.tabs.remove(currentTab?.id)
-        : Promise.resolve());
       await browser.tabs.update(port?.sender?.tab?.id, { active: true });
+    })
+    .with({ type: ExtensionMessageType.TabOpened }, async ({ tabId }) => {
+      console.log("Tab opened", tabId);
+      openedTabId = tabId;
     })
     .exhaustive();
 });
-
-let windowId = 0;
 
 browser.tabs
   .query({ active: true, currentWindow: true })

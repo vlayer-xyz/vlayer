@@ -23,12 +23,14 @@ export const enum ExtensionMessageType {
   ProofDone = "ProofDone",
   ProofError = "ProofError",
   RedirectBack = "RedirectBack",
+  TabOpened = "TabOpened",
 }
 
 export type ExtensionMessage =
   | { type: ExtensionMessageType.ProofDone; proof: WebProof }
   | { type: ExtensionMessageType.ProofError; error: string }
-  | { type: ExtensionMessageType.RedirectBack };
+  | { type: ExtensionMessageType.RedirectBack }
+  | { type: ExtensionMessageType.TabOpened; tabId: number };
 
 export type WebProverSessionConfig = {
   notaryUrl: string;
