@@ -1,7 +1,7 @@
 use core::future::Future;
 
 use alloy_primitives::{BlockNumber, B256, U256};
-use anyhow::{anyhow, Result};
+use anyhow::{anyhow, Context, Result};
 use block_header::{EthBlockHeader, EvmBlockHeader};
 use ethers_core::types::{Block, BlockNumber as BlockTag};
 use ethers_providers::Middleware;
@@ -121,11 +121,7 @@ pub fn to_eth_block_header<T>(block: Block<T>) -> Result<EthBlockHeader> {
     Ok(EthBlockHeader {
         parent_hash: from_ethers_h256(block.parent_hash),
         ommers_hash: from_ethers_h256(block.uncles_hash),
-        beneficiary: block
-            .author
-            .ok_or_else(|| anyhow!("author (beneficiary) is missing"))?
-            .0
-            .into(),
+        beneficiary: block.author.context("author")?.0.into(),
         state_root: from_ethers_h256(block.state_root),
         transactions_root: from_ethers_h256(block.transactions_root),
         receipts_root: from_ethers_h256(block.receipts_root),
@@ -136,49 +132,25 @@ pub fn to_eth_block_header<T>(block: Block<T>) -> Result<EthBlockHeader> {
                 .as_bytes(),
         ),
         difficulty: from_ethers_u256(block.difficulty),
-        number: block
-            .number
-            .ok_or_else(|| anyhow!("block number is missing"))?
-            .as_u64(),
-        gas_limit: block
-            .gas_limit
-            .try_into()
-            .map_err(|_| anyhow!("invalid gas_limit"))?,
-        gas_used: block
-            .gas_used
-            .try_into()
-            .map_err(|_| anyhow!("invalid gas_used"))?,
-        timestamp: block
-            .timestamp
-            .try_into()
-            .map_err(|_| anyhow!("invalid timestamp"))?,
+        number: block.number.context("number")?.as_u64(),
+        gas_limit: block.gas_limit.as_u64(),
+        gas_used: block.gas_used.as_u64(),
+        timestamp: block.timestamp.as_u64(),
         extra_data: block.extra_data.0.into(),
-        mix_hash: from_ethers_h256(
-            block
-                .mix_hash
-                .ok_or_else(|| anyhow!("mix_hash is missing"))?,
-        ),
-        nonce: block
-            .nonce
-            .ok_or_else(|| anyhow!("nonce is missing"))?
-            .0
-            .into(),
-        base_fee_per_gas: from_ethers_u256(
-            block
-                .base_fee_per_gas
-                .ok_or_else(|| anyhow!("base_fee_per_gas is missing"))?,
-        ),
+        mix_hash: from_ethers_h256(block.mix_hash.context("mix_hash")?),
+        nonce: block.nonce.context("nonce")?.0.into(),
+        base_fee_per_gas: from_ethers_u256(block.base_fee_per_gas.context("base_fee_per_gas")?),
         withdrawals_root: block.withdrawals_root.map(from_ethers_h256),
         blob_gas_used: block
             .blob_gas_used
             .map(TryInto::try_into)
             .transpose()
-            .map_err(|_| anyhow!("error converting blob_gas_used"))?,
+            .map_err(|e: &str| anyhow!(e))?,
         excess_blob_gas: block
             .excess_blob_gas
             .map(TryInto::try_into)
             .transpose()
-            .map_err(|_| anyhow!("error converting blob_gas_used"))?,
+            .map_err(|e: &str| anyhow!(e))?,
         parent_beacon_block_root: block.parent_beacon_block_root.map(from_ethers_h256),
     })
 }
