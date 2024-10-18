@@ -151,7 +151,7 @@ fn proof_random_blocks() -> Result<()> {
 }
 
 #[test]
-fn get_chain_trie() -> Result<()> {
+fn get_chain_trie_inner() -> Result<()> {
     let mut db = get_test_db();
 
     let (root_hash, _) = insert_blocks(&mut db, 0..=10);
@@ -161,7 +161,7 @@ fn get_chain_trie() -> Result<()> {
     tx.upsert_chain_info(1, &chain_info)?;
     Box::new(tx).commit()?;
 
-    let chain_trie = db.get_chain_trie(1)?.unwrap();
+    let chain_trie = db.get_chain_trie_inner(1)?.unwrap();
     assert_eq!(chain_trie.block_range, (0..=10));
     assert_eq!(chain_trie.trie.hash_slow(), root_hash);
 

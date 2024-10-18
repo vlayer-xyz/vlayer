@@ -145,7 +145,11 @@ impl ChainDb {
         self.begin_ro()?.get_merkle_proof(root_hash, block_num)
     }
 
-    pub fn get_chain_trie(&self, chain_id: ChainId) -> ChainDbResult<Option<ChainTrie>> {
+    // Does not verify ZK proof
+    fn get_chain_trie_inner(
+        &self,
+        chain_id: ChainId,
+    ) -> ChainDbResult<Option<ChainTrie<MerkleTrie>>> {
         let tx = self.begin_ro()?;
         let Some(chain_info) = self.get_chain_info(chain_id)? else {
             return Ok(None);
@@ -159,14 +163,28 @@ impl ChainDb {
 
         let first_block_proof = tx.get_merkle_proof(root_hash, first_block)?;
         let last_block_proof = tx.get_merkle_proof(root_hash, last_block)?;
-        let trie: MerkleTrie = first_block_proof
+        let trie = first_block_proof
             .into_vec()
             .into_iter()
             .chain(last_block_proof)
             .collect();
-        let block_trie = BlockTrie::from_proof(trie, &zk_proof, RISC0_CHAIN_GUEST_ID);
 
-        Ok(Some(ChainTrie::new(first_block..=last_block, block_trie, zk_proof)))
+        Ok(Some(ChainTrie::new(first_block..=last_block, trie, zk_proof)))
+    }
+
+    pub fn get_chain_trie(&self, chain_id: ChainId) -> ChainDbResult<Option<ChainTrie<BlockTrie>>> {
+        self.get_chain_trie_inner(chain_id)?
+            .map(
+                |ChainTrie {
+                     block_range,
+                     trie,
+                     zk_proof,
+                 }| {
+                    let block_trie = BlockTrie::from_proof(trie, &zk_proof, RISC0_CHAIN_GUEST_ID);
+                    Ok(ChainTrie::new(block_range, block_trie, zk_proof))
+                },
+            )
+            .transpose()
     }
 
     pub fn update_chain(
@@ -268,14 +286,14 @@ where
     (added, removed)
 }
 
-pub struct ChainTrie {
+pub struct ChainTrie<T> {
     pub block_range: RangeInclusive<u64>,
-    pub trie: BlockTrie,
+    pub trie: T,
     pub zk_proof: Bytes,
 }
 
-impl ChainTrie {
-    pub fn new(block_range: RangeInclusive<u64>, trie: BlockTrie, zk_proof: Bytes) -> Self {
+impl<T> ChainTrie<T> {
+    pub fn new(block_range: RangeInclusive<u64>, trie: T, zk_proof: Bytes) -> Self {
         Self {
             block_range,
             trie,
