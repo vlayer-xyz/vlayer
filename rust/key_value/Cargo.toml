@@ -1,0 +1,19 @@
+[package]
+name = "key_value"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = { workspace = true }
+thiserror = { workspace = true }
+libmdbx = "0.5.2"
+bytes = { workspace = true }
+static_assertions = "1.1.0"
+auto_impl = { workspace = true }
+derive_more = { workspace = true }
+
+[dev-dependencies]
+tempfile = { workspace = true }
+
+[lints]
+workspace = true

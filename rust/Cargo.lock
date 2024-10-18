@@ -2232,16 +2232,13 @@ dependencies = [
  "alloy-primitives 0.7.7",
  "alloy-rlp",
  "anyhow",
- "auto_impl",
  "block_trie",
  "bytes",
  "derive_more 1.0.0",
- "libmdbx",
+ "key_value",
  "mpt",
  "nybbles",
  "rand",
- "static_assertions",
- "tempfile",
  "thiserror",
 ]
 
@@ -2283,6 +2280,7 @@ dependencies = [
  "ethers",
  "futures",
  "host_utils",
+ "key_value",
  "lazy_static",
  "mpt",
  "provider",
@@ -6005,6 +6003,20 @@ checksum = "47a3633291834c4fbebf8673acbc1b04ec9d151418ff9b8e26dcd79129928758"
 dependencies = [
  "digest 0.10.7",
  "sha3-asm",
+]
+
+[[package]]
+name = "key_value"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "auto_impl",
+ "bytes",
+ "derive_more 1.0.0",
+ "libmdbx",
+ "static_assertions",
+ "tempfile",
+ "thiserror",
 ]
 
 [[package]]
@@ -10841,14 +10853,7 @@ checksum = "d135d17ab770252ad95e9a872d365cf3090e3be864a34ab46f48555993efc904"
 name = "worker"
 version = "0.1.0"
 dependencies = [
- "alloy-primitives 0.7.7",
  "anyhow",
- "chain_db",
- "clap",
- "ethers-providers",
- "lazy_static",
- "provider",
- "thiserror",
 ]
 
 [[package]]

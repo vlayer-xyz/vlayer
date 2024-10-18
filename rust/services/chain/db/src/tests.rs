@@ -1,13 +1,11 @@
-use std::collections::HashSet;
-
 use alloy_primitives::BlockNumber;
 use anyhow::Result;
 use block_trie::BlockTrie;
-use mpt::MerkleTrie;
+use key_value::InMemoryDatabase;
+use mpt::{MerkleTrie, EMPTY_ROOT_HASH};
 use rand::{rngs::StdRng, RngCore, SeedableRng};
 
 use super::*;
-use crate::in_memory::InMemoryDatabase;
 
 fn get_test_db() -> ChainDb {
     let db = InMemoryDatabase::new();
@@ -61,7 +59,7 @@ static EMPTY_PROOF: &[u8] = &[];
 fn chain_info_get_insert() -> Result<()> {
     let mut db = get_test_db();
     let chain_id = 1;
-    let chain_info = ChainInfo::new((0..=2), B256::with_last_byte(1), EMPTY_PROOF);
+    let chain_info = ChainInfo::new(0..=2, B256::with_last_byte(1), EMPTY_PROOF);
 
     assert_eq!(db.begin_ro()?.get_chain_info(chain_id)?, None);
 
@@ -130,7 +128,7 @@ fn proof_one_node() -> Result<()> {
 fn proof_extension() {
     let mut db = get_test_db();
 
-    let (root_hash, root) = insert_blocks(&mut db, vec![0, 1_000_000]);
+    let (root_hash, _) = insert_blocks(&mut db, vec![0, 1_000_000]);
     let proof_trie = check_proof(&db, root_hash, 1_000_000);
 
     // The tree should be sparse - block 0 not included
@@ -157,7 +155,7 @@ fn get_chain_trie() -> Result<()> {
     let mut db = get_test_db();
 
     let (root_hash, _) = insert_blocks(&mut db, 0..=10);
-    let chain_info = ChainInfo::new((0..=10), root_hash, EMPTY_PROOF);
+    let chain_info = ChainInfo::new(0..=10, root_hash, EMPTY_PROOF);
 
     let mut tx = db.begin_rw()?;
     tx.upsert_chain_info(1, &chain_info)?;
@@ -181,7 +179,7 @@ fn update_chain() -> Result<()> {
 
     let root_hash = trie.hash_slow();
     let rlp_nodes = (&trie).into_iter();
-    let chain_info = ChainInfo::new((1..=3), root_hash, EMPTY_PROOF);
+    let chain_info = ChainInfo::new(1..=3, root_hash, EMPTY_PROOF);
 
     db.update_chain(0, ChainUpdate::new(chain_info, &trie, []))?;
     for block_num in [1, 2] {
@@ -191,7 +189,7 @@ fn update_chain() -> Result<()> {
     trie.insert_unchecked(3, &block_header(3));
     let new_root_hash = trie.hash_slow();
     let (added_nodes, removed_nodes) = difference(rlp_nodes, &trie);
-    let chain_info = ChainInfo::new((0..=2), new_root_hash, EMPTY_PROOF);
+    let chain_info = ChainInfo::new(0..=2, new_root_hash, EMPTY_PROOF);
 
     db.update_chain(0, ChainUpdate::new(chain_info, added_nodes, removed_nodes.clone()))?;
     for block_num in [0, 1, 2, 3] {

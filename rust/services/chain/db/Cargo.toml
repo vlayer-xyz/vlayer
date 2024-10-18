@@ -4,22 +4,20 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-anyhow = { workspace = true }
-thiserror = { workspace = true }
-libmdbx = "0.5.2"
+key_value = { workspace = true }
 mpt = { workspace = true }
 alloy-rlp = { workspace = true }
 alloy-primitives = { workspace = true }
 block_trie = { workspace = true }
 nybbles = { workspace = true }
+thiserror = { workspace = true }
 bytes = { workspace = true }
-static_assertions = "1.1.0"
-auto_impl = { workspace = true }
 derive_more = { workspace = true }
+anyhow = { workspace = true }
 
 [dev-dependencies]
-rand = "0.8.5"
-tempfile = { workspace = true }
+rand = { workspace = true }
+
 
 [lints]
 workspace = true

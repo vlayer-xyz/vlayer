@@ -20,6 +20,7 @@ members = [
     "zkvm-benchmarks/runner",
     "cli",
     "mpt",
+    "key_value",
     "test_runner",
     "web_proof",
     "email_proof",
@@ -99,6 +100,7 @@ once_cell = "1.20"
 parking_lot = "0.12.3"
 p256 = { version = "0.13.2", features = ["ecdsa"] }
 pkcs8 = "0.10.2"
+rand = "0.8.5"
 rayon = "1.10.0"
 regex = "1.11.0"
 reqwest = { version = "0.12.8", default-features = false }
@@ -135,11 +137,12 @@ call_server = { path = "services/call/server" }
 chain_host = { path = "services/chain/host" }
 chain_guest = { path = "services/chain/guest" }
 block_trie = { path = "services/chain/block_trie" }
+chain_db = { path = "services/chain/db" }
 chain_client = { path = "services/chain/client" }
 chain_guest_wrapper = { path = "services/chain/guest_wrapper" }
 chain_server = { path = "services/chain/server" }
 chain_worker = { path = "services/chain/worker" }
-chain_db = { path = "services/chain/db" }
+key_value = { path = "key_value" }
 chain_types = { path = "services/chain/types" }
 
 zkvm-benchmarks-common = { path = "zkvm-benchmarks/common" }
