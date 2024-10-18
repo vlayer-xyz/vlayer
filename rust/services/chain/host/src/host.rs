@@ -109,8 +109,7 @@ where
         let append_blocks = self.get_blocks_range(append_range).await?;
 
         for block in append_blocks {
-            // SAFETY: UNSAFE - It's a stub to makes the partial test pass
-            trie.insert_unchecked(block.number(), &block.hash_slow());
+            trie.append(&*block);
         }
 
         let block_range = *block_range.start()..=latest_block_number;
