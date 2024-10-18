@@ -20,7 +20,7 @@ use futures::future::join_all;
 use host_utils::Prover;
 use lazy_static::lazy_static;
 use provider::{to_eth_block_header, EvmBlockHeader};
-use risc0_zkvm::{sha::Digest, ExecutorEnv, ProveInfo, Receipt};
+use risc0_zkvm::{sha::Digest, AssumptionReceipt, ExecutorEnv, ProveInfo, Receipt};
 use serde::Serialize;
 
 lazy_static! {
@@ -82,7 +82,7 @@ where
             elf_id: *GUEST_ID,
             block: latest_block,
         };
-        let receipt = self.prove(input)?;
+        let receipt = self.prove(input, None)?;
         let zk_proof = encode_proof(&receipt);
 
         let range = latest_block_number..=latest_block_number;
@@ -108,20 +108,35 @@ where
         let append_range = block_range.end() + 1..=latest_block_number;
         let append_blocks = self.get_blocks_range(append_range).await?;
 
-        for block in append_blocks {
-            trie.append(&*block);
+        for block in &append_blocks {
+            trie.append(block.as_ref());
         }
 
+        let input = Input::AppendPrepend {
+            elf_id: *GUEST_ID,
+            prepend_blocks: vec![],
+            append_blocks,
+            old_leftmost_block: latest_block,
+            block_trie: old_trie.clone(),
+        };
+        let receipt = self.prove(input, Some(old_zk_proof))?;
+        let zk_proof = encode_proof(&receipt);
+
         let block_range = *block_range.start()..=latest_block_number;
-        let chain_info = ChainInfo::new(block_range, trie.hash_slow(), old_zk_proof);
+        let chain_info = ChainInfo::new(block_range, trie.hash_slow(), zk_proof);
         let (added, removed) = difference(&old_trie, &trie);
         let chain_update = ChainUpdate::new(chain_info, added, removed);
 
         Ok(chain_update)
     }
 
-    fn prove(&self, input: Input) -> Result<Receipt, HostError> {
-        let executor_env = build_executor_env(input)?;
+    fn prove(&self, input: Input, old_zk_proof: Option<Bytes>) -> Result<Receipt, HostError> {
+        let maybe_assumption_receipt = old_zk_proof.map(|zk_proof| {
+            let receipt: Receipt =
+                bincode::deserialize(&zk_proof).expect("failed to deserialize proof");
+            receipt.inner.into()
+        });
+        let executor_env = build_executor_env(input, maybe_assumption_receipt)?;
         let ProveInfo { receipt, .. } =
             provably_execute(&self.prover, executor_env, RISC0_CHAIN_GUEST_ELF)?;
         Ok(receipt)
@@ -164,8 +179,15 @@ fn provably_execute(
         .map_err(|err| HostError::Prover(err.to_string()))
 }
 
-fn build_executor_env(input: impl Serialize) -> Result<ExecutorEnv<'static>, HostError> {
-    ExecutorEnv::builder()
+fn build_executor_env(
+    input: impl Serialize,
+    assumption: Option<AssumptionReceipt>,
+) -> Result<ExecutorEnv<'static>, HostError> {
+    let mut builder = ExecutorEnv::builder();
+    if let Some(assumption) = assumption {
+        builder.add_assumption(assumption);
+    }
+    builder
         .write(&input)
         .map_err(|err| HostError::ExecutorEnvBuilder(err.to_string()))?
         .build()
