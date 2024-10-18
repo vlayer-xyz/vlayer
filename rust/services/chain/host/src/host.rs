@@ -195,7 +195,7 @@ mod test {
         }
     }
     mod host {
-        use kv::InMemoryDatabase;
+        use key_value::InMemoryDatabase;
         use serde_json::Value;
         use test_utils::mock_provider;
 

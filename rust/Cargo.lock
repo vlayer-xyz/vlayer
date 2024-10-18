@@ -2235,7 +2235,7 @@ dependencies = [
  "block_trie",
  "bytes",
  "derive_more 1.0.0",
- "kv",
+ "key_value",
  "mpt",
  "nybbles",
  "rand",
@@ -2280,7 +2280,7 @@ dependencies = [
  "ethers",
  "futures",
  "host_utils",
- "kv",
+ "key_value",
  "lazy_static",
  "mpt",
  "provider",
@@ -6006,6 +6006,20 @@ dependencies = [
 ]
 
 [[package]]
+name = "key_value"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "auto_impl",
+ "bytes",
+ "derive_more 1.0.0",
+ "libmdbx",
+ "static_assertions",
+ "tempfile",
+ "thiserror",
+]
+
+[[package]]
 name = "kqueue"
 version = "1.0.8"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -6023,20 +6037,6 @@ checksum = "ed9625ffda8729b85e45cf04090035ac368927b8cebc34898e7c120f52e4838b"
 dependencies = [
  "bitflags 1.3.2",
  "libc",
-]
-
-[[package]]
-name = "kv"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "auto_impl",
- "bytes",
- "derive_more 1.0.0",
- "libmdbx",
- "static_assertions",
- "tempfile",
- "thiserror",
 ]
 
 [[package]]

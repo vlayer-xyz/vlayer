@@ -20,7 +20,7 @@ members = [
     "zkvm-benchmarks/runner",
     "cli",
     "mpt",
-    "kv",
+    "key_value",
     "test_runner",
     "web_proof",
     "email_proof",
@@ -142,7 +142,7 @@ chain_client = { path = "services/chain/client" }
 chain_guest_wrapper = { path = "services/chain/guest_wrapper" }
 chain_server = { path = "services/chain/server" }
 chain_worker = { path = "services/chain/worker" }
-kv = { path = "kv" }
+key_value = { path = "key_value" }
 chain_types = { path = "services/chain/types" }
 
 zkvm-benchmarks-common = { path = "zkvm-benchmarks/common" }

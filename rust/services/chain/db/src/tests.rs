@@ -1,7 +1,7 @@
 use alloy_primitives::BlockNumber;
 use anyhow::Result;
 use block_trie::BlockTrie;
-use kv::InMemoryDatabase;
+use key_value::InMemoryDatabase;
 use mpt::{MerkleTrie, EMPTY_ROOT_HASH};
 use rand::{rngs::StdRng, RngCore, SeedableRng};
 

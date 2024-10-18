@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-kv = { workspace = true }
+key_value = { workspace = true }
 mpt = { workspace = true }
 alloy-rlp = { workspace = true }
 alloy-primitives = { workspace = true }

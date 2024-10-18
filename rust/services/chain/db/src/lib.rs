@@ -11,7 +11,7 @@ use alloy_rlp::{Bytes as RlpBytes, Decodable, RlpDecodable, RlpEncodable};
 use block_trie::BlockTrie;
 use bytes::Bytes;
 use derive_more::Debug;
-use kv::{Database, DbError, Mdbx, ReadTx, ReadWriteTx, WriteTx};
+use key_value::{Database, DbError, Mdbx, ReadTx, ReadWriteTx, WriteTx};
 use mpt::{MerkleTrie, Node};
 use proof_builder::{MerkleProofBuilder, ProofResult};
 use thiserror::Error;
