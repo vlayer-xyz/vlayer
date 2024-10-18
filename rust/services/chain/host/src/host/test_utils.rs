@@ -1,6 +1,6 @@
 use ethers::{
     providers::{MockProvider, Provider},
-    types::Block,
+    types::{Block, H256},
 };
 use provider::{to_eth_block_header, BlockNumber, EvmBlockHeader};
 use serde_json::{from_value, json};
@@ -34,6 +34,16 @@ fn fake_rpc_block(number: BlockNumber) -> Block<()> {
     })).unwrap()
 }
 
+fn fake_rpc_block_with_correct_parent_hash(number: BlockNumber) -> Block<()> {
+    let mut rpc_block = fake_rpc_block(number);
+    if number > 0 {
+        // Parent hash is only checked when prepending and you can't prepend to the genesis block
+        let parent_block = fake_block(number - 1 /* underflows for genesis */);
+        rpc_block.parent_hash = H256::from_slice(parent_block.hash_slow().as_slice());
+    }
+    rpc_block
+}
+
 pub fn fake_block(number: BlockNumber) -> Box<dyn EvmBlockHeader> {
     let rpc_block = fake_rpc_block(number);
     let block = to_eth_block_header(rpc_block).expect("could not convert block");
@@ -47,7 +57,7 @@ pub fn mock_provider(
     // Mock provider is a stack (LIFO). Therefore we need to push the mock values in reverse order
     let reverse_block_numbers = Vec::from_iter(block_numbers).into_iter().rev();
     for block_number in reverse_block_numbers {
-        mock.push(fake_rpc_block(block_number))
+        mock.push(fake_rpc_block_with_correct_parent_hash(block_number))
             .expect("could not push block");
     }
     provider
