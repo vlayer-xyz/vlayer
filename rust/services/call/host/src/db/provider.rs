@@ -13,9 +13,9 @@ use thiserror::Error;
 
 /// Error type for the [ProviderDb].
 #[derive(Error, Debug)]
-pub enum ProviderDbError<E: std::error::Error> {
+pub enum ProviderDbError {
     #[error("provider error")]
-    Provider(#[from] E),
+    Provider(#[from] anyhow::Error),
     #[error("invalid block number: {0}")]
     InvalidBlockNumber(U256),
     #[error("hash missing for block: {0}")]
@@ -43,7 +43,7 @@ impl<P: BlockingProvider> ProviderDb<P> {
 }
 
 impl<P: BlockingProvider> DatabaseRef for ProviderDb<P> {
-    type Error = ProviderDbError<P::Error>;
+    type Error = ProviderDbError;
 
     fn basic_ref(&self, address: Address) -> Result<Option<AccountInfo>, Self::Error> {
         // use `eth_getProof` to get all the account info with a single call

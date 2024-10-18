@@ -1,4 +1,4 @@
-use std::{convert::Infallible, marker::PhantomData};
+use std::marker::PhantomData;
 
 use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256};
 use anyhow::Error;
@@ -12,19 +12,15 @@ use super::{BlockingProvider, EIP1186Proof};
 pub struct NullProvider(pub(crate) PhantomData<Box<dyn EvmBlockHeader>>);
 
 impl BlockingProvider for NullProvider {
-
-    fn get_block_header(
-        &self,
-        _: BlockTag,
-    ) -> Result<Option<Box<dyn EvmBlockHeader>>, Error> {
+    fn get_block_header(&self, _: BlockTag) -> Result<Option<Box<dyn EvmBlockHeader>>, Error> {
         panic!("Unexpected provider call")
     }
 
-    fn get_transaction_count(&self, _: Address, _: BlockNumber) -> Result<TxNumber,Error> {
+    fn get_transaction_count(&self, _: Address, _: BlockNumber) -> Result<TxNumber, Error> {
         panic!("Unexpected provider call")
     }
 
-    fn get_balance(&self, _: Address, _: BlockNumber) -> Result<U256,Error> {
+    fn get_balance(&self, _: Address, _: BlockNumber) -> Result<U256, Error> {
         panic!("Unexpected provider call")
     }
 

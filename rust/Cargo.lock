@@ -9430,6 +9430,7 @@ dependencies = [
  "alloy-rlp",
  "alloy-sol-types",
  "alloy-trie",
+ "anyhow",
  "block_header",
  "call_engine",
  "call_host",

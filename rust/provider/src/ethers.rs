@@ -34,8 +34,7 @@ where
         &self,
         block: BlockTag,
     ) -> Result<Option<Box<dyn EvmBlockHeader>>, AnyError> {
-        let block =
-            block_on(self.client.get_block(block)).context("Failed to get block from client")?;
+        let block = block_on(self.client.get_block(block))?;
         match block {
             Some(block) => {
                 let eth_block_header = to_eth_block_header(block)?;

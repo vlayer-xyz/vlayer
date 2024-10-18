@@ -3,38 +3,31 @@ use std::collections::HashMap;
 use alloy_primitives::{
     Address, BlockNumber, Bytes, ChainId, StorageKey, StorageValue, TxNumber, U256,
 };
+use anyhow::Error;
 use block_header::EvmBlockHeader;
 use chain::{CHAIN_NAMES, TEST_CHAIN_ID};
 use ethers_core::types::BlockNumber as BlockTag;
 use foundry_config::RpcEndpoints;
 use provider::{
-    BlockingProvider, EIP1186Proof, EthProvider, EthersProviderFactory, ProviderFactory,
-    ProviderFactoryError,
+    BlockingProvider, EIP1186Proof, EthersProviderFactory, ProviderFactory, ProviderFactoryError,
 };
 
 use crate::providers::pending_state_provider::PendingStateProviderFactory;
 
-pub type ProviderError = <EthProvider as BlockingProvider>::Error;
-
 pub struct TestProvider {
-    provider: Box<dyn BlockingProvider<Error = ProviderError>>,
+    provider: Box<dyn BlockingProvider>,
 }
 
 impl BlockingProvider for TestProvider {
-    type Error = ProviderError;
-
-    fn get_balance(&self, address: Address, block: BlockNumber) -> Result<U256, Self::Error> {
+    fn get_balance(&self, address: Address, block: BlockNumber) -> Result<U256, Error> {
         self.provider.get_balance(address, block)
     }
 
-    fn get_block_header(
-        &self,
-        block: BlockTag,
-    ) -> Result<Option<Box<dyn EvmBlockHeader>>, Self::Error> {
+    fn get_block_header(&self, block: BlockTag) -> Result<Option<Box<dyn EvmBlockHeader>>, Error> {
         self.provider.get_block_header(block)
     }
 
-    fn get_code(&self, address: Address, block: BlockNumber) -> Result<Bytes, Self::Error> {
+    fn get_code(&self, address: Address, block: BlockNumber) -> Result<Bytes, Error> {
         self.provider.get_code(address, block)
     }
 
@@ -43,7 +36,7 @@ impl BlockingProvider for TestProvider {
         address: Address,
         storage_keys: Vec<StorageKey>,
         block: BlockNumber,
-    ) -> Result<EIP1186Proof, Self::Error> {
+    ) -> Result<EIP1186Proof, Error> {
         self.provider.get_proof(address, storage_keys, block)
     }
 
@@ -52,7 +45,7 @@ impl BlockingProvider for TestProvider {
         address: Address,
         key: StorageKey,
         block: BlockNumber,
-    ) -> Result<StorageValue, Self::Error> {
+    ) -> Result<StorageValue, Error> {
         self.provider.get_storage_at(address, key, block)
     }
 
@@ -60,7 +53,7 @@ impl BlockingProvider for TestProvider {
         &self,
         address: Address,
         block: BlockNumber,
-    ) -> Result<TxNumber, Self::Error> {
+    ) -> Result<TxNumber, Error> {
         self.provider.get_transaction_count(address, block)
     }
 }
