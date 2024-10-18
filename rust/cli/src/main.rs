@@ -33,7 +33,7 @@ struct Cli {
 enum Commands {
     Init(InitArgs),
     Serve(ServeArgs),
-    Test(TestArgs),
+    Test(Box<TestArgs>),
 }
 
 #[tokio::main]
