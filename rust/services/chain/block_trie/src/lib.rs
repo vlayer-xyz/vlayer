@@ -2,15 +2,9 @@ use alloy_primitives::B256;
 use alloy_rlp::encode_fixed_size;
 use block_header::EvmBlockHeader;
 use bytes::Bytes;
-use chain_guest_wrapper::RISC0_CHAIN_GUEST_ID;
-use lazy_static::lazy_static;
 use mpt::{MerkleTrie, Node};
 use risc0_zkvm::{sha::Digest, Receipt};
 use serde::{Deserialize, Serialize};
-
-lazy_static! {
-    static ref GUEST_ID: Digest = RISC0_CHAIN_GUEST_ID.into();
-}
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct BlockTrie(MerkleTrie);
@@ -47,16 +41,15 @@ impl BlockTrie {
         Self(mpt)
     }
 
-    pub fn from_proof(mpt: MerkleTrie, zk_proof: &Bytes) -> Self {
+    pub fn from_proof(mpt: MerkleTrie, zk_proof: &Bytes, guest_id: impl Into<Digest>) -> Self {
+        let guest_id = guest_id.into();
         let receipt: Receipt = bincode::deserialize(zk_proof).expect("failed to deserialize proof");
-        receipt
-            .verify(*GUEST_ID)
-            .expect("proof verification failed");
+        receipt.verify(guest_id).expect("proof verification failed");
 
         let (proven_root, elf_id): (B256, Digest) =
             receipt.journal.decode().expect("failed to decode journal");
 
-        assert_eq!(elf_id, *GUEST_ID);
+        assert_eq!(elf_id, guest_id);
         assert_eq!(mpt.hash_slow(), proven_root);
 
         BlockTrie(mpt)

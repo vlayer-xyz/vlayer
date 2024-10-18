@@ -14,6 +14,7 @@ thiserror = { workspace = true }
 bytes = { workspace = true }
 derive_more = { workspace = true }
 anyhow = { workspace = true }
+chain_guest_wrapper = { workspace = true }
 
 [dev-dependencies]
 rand = { workspace = true }

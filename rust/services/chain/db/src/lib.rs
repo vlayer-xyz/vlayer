@@ -10,6 +10,7 @@ use alloy_primitives::{keccak256, ChainId, B256};
 use alloy_rlp::{Bytes as RlpBytes, Decodable, RlpDecodable, RlpEncodable};
 use block_trie::BlockTrie;
 use bytes::Bytes;
+use chain_guest_wrapper::RISC0_CHAIN_GUEST_ID;
 use derive_more::Debug;
 use key_value::{Database, DbError, Mdbx, ReadTx, ReadWriteTx, WriteTx};
 use mpt::{MerkleTrie, Node};
@@ -163,7 +164,7 @@ impl ChainDb {
             .into_iter()
             .chain(last_block_proof)
             .collect();
-        let block_trie = BlockTrie::from_proof(trie, &zk_proof);
+        let block_trie = BlockTrie::from_proof(trie, &zk_proof, RISC0_CHAIN_GUEST_ID);
 
         Ok(Some(ChainTrie::new(first_block..=last_block, block_trie, zk_proof)))
     }
