@@ -50,7 +50,7 @@ browser.runtime.onMessage.addListener(async (message: ExtensionMessage) => {
       console.log("Redirect back to webpage", port?.sender?.tab?.id);
       await browser.tabs.update(port?.sender?.tab?.id, { active: true });
     })
-    .with({ type: ExtensionMessageType.TabOpened }, async ({ tabId }) => {
+    .with({ type: ExtensionMessageType.TabOpened }, ({ tabId }) => {
       console.log("Tab opened", tabId);
       openedTabId = tabId;
     })
