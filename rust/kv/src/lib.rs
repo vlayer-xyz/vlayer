@@ -55,7 +55,7 @@ pub enum DbError {
     #[error("Specified table doesn't exist: {0}")]
     NonExistingTable(Box<str>),
     #[error("{0}")]
-    Custom(Box<str>), //todo: Implement associated error type for KeyValueDB (?)
+    Custom(Box<str>),
 }
 
 impl DbError {
