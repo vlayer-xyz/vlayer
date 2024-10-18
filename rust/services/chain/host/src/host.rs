@@ -76,7 +76,7 @@ where
     async fn initialize(&self) -> Result<ChainUpdate, HostError> {
         let latest_block = self.get_block(BlockTag::Latest).await?;
         let latest_block_number = latest_block.number();
-        let block_trie = BlockTrie::init(&*latest_block);
+        let trie = BlockTrie::init(&*latest_block);
 
         let input = Input::Initialize {
             elf_id: *GUEST_ID,
@@ -86,8 +86,9 @@ where
         let zk_proof = encode_proof(&receipt);
 
         let range = latest_block_number..=latest_block_number;
-        let chain_info = ChainInfo::new(range, block_trie.hash_slow(), zk_proof);
-        let chain_update = ChainUpdate::new(chain_info, &block_trie, []);
+        let chain_info = ChainInfo::new(range, trie.hash_slow(), zk_proof);
+        let (added, removed) = difference([], &trie);
+        let chain_update = ChainUpdate::new(chain_info, added, removed);
 
         Ok(chain_update)
     }
@@ -122,8 +123,8 @@ where
         let receipt = self.prove(input, Some(old_zk_proof))?;
         let zk_proof = encode_proof(&receipt);
 
-        let block_range = *block_range.start()..=latest_block_number;
-        let chain_info = ChainInfo::new(block_range, trie.hash_slow(), zk_proof);
+        let range = *block_range.start()..=latest_block_number;
+        let chain_info = ChainInfo::new(range, trie.hash_slow(), zk_proof);
         let (added, removed) = difference(&old_trie, &trie);
         let chain_update = ChainUpdate::new(chain_info, added, removed);
 
