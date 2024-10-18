@@ -39,6 +39,7 @@ export const createVlayerClient = (
   >();
 
   return {
+    // eslint-disable-next-line @typescript-eslint/require-await
     prove: async ({ address, functionName, chainId, proverAbi, args }) => {
       const result_promise = prove(
         address,
