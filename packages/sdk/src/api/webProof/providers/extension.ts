@@ -33,7 +33,7 @@ declare const chrome: {
 };
 
 // this id is fixed in the extension by the key in manifest.json
-const EXTENSION_ID = "ghigbilfcgeibjkkajaekabeldkmijcd";
+const EXTENSION_ID = "jbchhcgphfokabmfacnkafoeeeppjmpl";
 
 export const createExtensionWebProofProvider = (
   {
