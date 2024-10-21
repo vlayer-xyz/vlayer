@@ -32,7 +32,9 @@ fn block_header(block_num: u64) -> B256 {
 fn insert_blocks(db: &mut ChainDb, blocks: impl IntoIterator<Item = BlockNumber>) -> (B256, Node) {
     let mut block_trie = BlockTrie::from_unchecked(MerkleTrie::new());
     for block_num in blocks {
-        block_trie.insert_unchecked(block_num, &block_header(block_num))
+        block_trie
+            .insert_unchecked(block_num, &block_header(block_num))
+            .expect("insert_unchecked failed");
     }
 
     let mut tx = db.begin_rw().expect("begin_rw failed");
@@ -174,8 +176,8 @@ fn update_chain() -> Result<()> {
 
     let mut trie = BlockTrie::from_unchecked(MerkleTrie::new());
 
-    trie.insert_unchecked(1, &block_header(1));
-    trie.insert_unchecked(2, &block_header(2));
+    trie.insert_unchecked(1, &block_header(1))?;
+    trie.insert_unchecked(2, &block_header(2))?;
 
     let root_hash = trie.hash_slow();
     let rlp_nodes = (&trie).into_iter();
@@ -185,8 +187,8 @@ fn update_chain() -> Result<()> {
     for block_num in [1, 2] {
         check_proof(&db, root_hash, block_num);
     }
-    trie.insert_unchecked(0, &block_header(0));
-    trie.insert_unchecked(3, &block_header(3));
+    trie.insert_unchecked(0, &block_header(0))?;
+    trie.insert_unchecked(3, &block_header(3))?;
     let new_root_hash = trie.hash_slow();
     let (added_nodes, removed_nodes) = difference(rlp_nodes, &trie);
     let chain_info = ChainInfo::new(0..=2, new_root_hash, EMPTY_PROOF);

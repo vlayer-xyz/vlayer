@@ -4,7 +4,7 @@ use derivative::Derivative;
 use ethers::types::BlockNumber;
 use thiserror::Error;
 
-#[derive(Error, Debug, Clone, Derivative)]
+#[derive(Error, Debug, Derivative)]
 #[derivative(PartialEq, Eq)]
 pub enum HostError {
     #[error("ChainDB error: {0}")]
@@ -25,4 +25,6 @@ pub enum HostError {
         #[derivative(PartialEq = "ignore")]
         TryFromSliceError,
     ),
+    #[error("Block trie error: {0}")]
+    BlockTrieError(#[from] block_trie::BlockTrieError),
 }

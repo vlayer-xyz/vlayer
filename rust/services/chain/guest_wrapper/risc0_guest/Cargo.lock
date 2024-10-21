@@ -494,10 +494,12 @@ dependencies = [
  "bincode",
  "block_header",
  "bytes",
+ "derivative",
  "mpt",
  "risc0-zkp",
  "risc0-zkvm",
  "serde",
+ "thiserror",
 ]
 
 [[package]]

@@ -76,7 +76,7 @@ where
     async fn initialize(&self) -> Result<ChainUpdate, HostError> {
         let latest_block = self.get_block(BlockTag::Latest).await?;
         let latest_block_number = latest_block.number();
-        let trie = BlockTrie::init(&*latest_block);
+        let trie = BlockTrie::init(&*latest_block)?;
 
         let input = Input::Initialize {
             elf_id: *GUEST_ID,
@@ -110,7 +110,7 @@ where
         let append_blocks = self.get_blocks_range(append_range).await?;
 
         for block in &append_blocks {
-            trie.append(block.as_ref());
+            trie.append(block.as_ref())?;
         }
 
         let input = Input::AppendPrepend {

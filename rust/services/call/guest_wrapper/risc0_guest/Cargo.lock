@@ -699,11 +699,15 @@ version = "0.1.0"
 dependencies = [
  "alloy-primitives 0.7.7",
  "alloy-rlp",
+ "bincode",
  "block_header",
  "bytes",
+ "derivative",
  "mpt",
  "risc0-zkp",
+ "risc0-zkvm",
  "serde",
+ "thiserror",
 ]
 
 [[package]]

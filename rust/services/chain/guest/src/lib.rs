@@ -21,7 +21,7 @@ pub enum Input {
 }
 
 fn initialize(elf_id: Digest, block: &dyn EvmBlockHeader) -> (B256, Digest) {
-    let trie = BlockTrie::init(block);
+    let trie = BlockTrie::init(block).expect("init failed");
     (trie.hash_slow(), elf_id)
 }
 
@@ -36,10 +36,13 @@ fn append_prepend(
     env::verify(elf_id, &prev_proof_output).expect("failed to verify previous ZK proof");
 
     for block in append_blocks {
-        block_trie.append(&*block);
+        block_trie.append(&*block).expect("append failed");
     }
     for block in prepend_blocks.rev() {
-        block_trie.prepend(&*old_leftmost_block);
+        block_trie
+            .prepend(&*old_leftmost_block)
+            .expect("prepend failed");
+
         old_leftmost_block = block;
     }
 
