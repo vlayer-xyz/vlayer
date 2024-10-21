@@ -24,9 +24,10 @@ const StepStatusIndicator = (props: StepProps) => {
       style={{
         height: "100%",
       }}
+      data-testid={`step-${props.kind}`}
+      data-status={props.status}
     >
       <StepCircle {...props} />
-
       {props.showSeparator && <Separator />}
     </Flex>
   );

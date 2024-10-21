@@ -4,6 +4,7 @@ import { defineConfig, devices } from "@playwright/test";
  * See https://playwright.dev/docs/test-configuration.
  */
 export default defineConfig({
+  timeout: 5000,
   testDir: "./tests",
   /* Run tests in files in parallel */
   fullyParallel: true,
@@ -17,7 +18,7 @@ export default defineConfig({
   reporter: "html",
   webServer: {
     command: "cd ../test-web-app && bun run dev", // Run your bash script
-    url: "http://localhost:5174/",
+    url: "http://localhost:5175/",
     stdout: "pipe", // Capture stdout
     stderr: "pipe", // Capture stderr
     timeout: 6000,
@@ -26,7 +27,7 @@ export default defineConfig({
   /* Shared settings for all the projects below. See https://playwright.dev/docs/api/class-testoptions. */
   use: {
     /* Base URL to use in actions like `await page.goto('/')`. */
-    baseURL: "http://localhost:5174",
+    baseURL: "http://localhost:5175",
 
     /* Collect trace when retrying the failed test. See https://playwright.dev/docs/trace-viewer */
     trace: "on-first-retry",

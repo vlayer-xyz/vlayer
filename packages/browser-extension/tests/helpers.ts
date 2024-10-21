@@ -15,7 +15,7 @@ export const sidePanel = async (context: BrowserContext) => {
   const sidepanel = pageByUrlRegex(context, regex);
   if (!sidepanel) {
     await context.waitForEvent("page"); // Wait for a new page to open
-    return pageByUrlRegex(context, regex);
+    return pageByUrlRegex(context, regex) as Page;
   } else {
     return sidepanel;
   }
