@@ -36,7 +36,6 @@ async function testSuccessProvingAndVerification() {
       },
       twitterUserAddress,
     ],
-    commitmentArgs: [twitterUserAddress],
     chainId: foundry.id,
   });
   const result = await vlayer.waitForProvingResult({ hash });
@@ -96,7 +95,6 @@ async function testFailedProving() {
         },
         twitterUserAddress,
       ],
-      commitmentArgs: [twitterUserAddress],
       chainId: foundry.id,
     });
     await vlayer.waitForProvingResult({ hash });

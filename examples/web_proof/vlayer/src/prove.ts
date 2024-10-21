@@ -75,7 +75,6 @@ export const setupVProverButton = (element: HTMLButtonElement) => {
         },
         twitterUserAddress,
       ],
-      commitmentArgs: [twitterUserAddress],
       chainId: foundry.id,
     });
     const provingResult = await vlayer.waitForProvingResult({

@@ -42,7 +42,6 @@ async function testSuccessProving() {
       },
       twitterUserAddress,
     ],
-    commitmentArgs: [twitterUserAddress],
     chainId: foundry.id,
   });
 
