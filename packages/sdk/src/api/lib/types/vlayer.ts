@@ -8,8 +8,6 @@ import {
   Hex,
 } from "viem";
 
-import { type ProverCallCommitment } from "types/webProofProvider.ts";
-
 type Calldata = string;
 
 export type CallParams = {
@@ -51,19 +49,16 @@ export type VlayerClient = {
   prove: <
     T extends readonly [AbiFunction, ...Abi[number][]],
     F extends ContractFunctionName<T>,
-  >(
-    args: VlayerClientProveArgs<T, F>,
-  ) => Promise<{ hash: string }>;
+  >(args: {
+    address: Hex;
+    proverAbi: T;
+    functionName: F;
+    chainId: number;
+    args: ContractFunctionArgs<T, AbiStateMutability, F>;
+  }) => Promise<{ hash: string }>;
   waitForProvingResult: ({
     hash,
   }: {
     hash: string;
   }) => Promise<[Proof, ...unknown[]]>;
-};
-
-export type VlayerClientProveArgs<
-  T extends readonly [AbiFunction, ...Abi[number][]],
-  F extends ContractFunctionName<T>,
-> = ProverCallCommitment<T, F> & {
-  args: ContractFunctionArgs<T, AbiStateMutability, F>;
 };
