@@ -89,7 +89,9 @@ console.log(
 );
 
 console.log("Proving...");
-const vlayer = createVlayerClient();
+const vlayer = createVlayerClient({
+  url: `http://44.223.25.167:3000`,
+});
 
 const { hash } = await vlayer.prove({
   address: proverAddr,
