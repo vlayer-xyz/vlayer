@@ -126,10 +126,7 @@ pub fn to_eth_block_header<T>(block: Block<T>) -> Result<EthBlockHeader> {
         transactions_root: from_ethers_h256(block.transactions_root),
         receipts_root: from_ethers_h256(block.receipts_root),
         logs_bloom: alloy_primitives::Bloom::from_slice(
-            block
-                .logs_bloom
-                .ok_or_else(|| anyhow!("logs bloom is missing"))?
-                .as_bytes(),
+            block.logs_bloom.context("logs bloom")?.as_bytes(),
         ),
         difficulty: from_ethers_u256(block.difficulty),
         number: block.number.context("number")?.as_u64(),
