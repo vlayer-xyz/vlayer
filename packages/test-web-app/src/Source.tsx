@@ -7,7 +7,10 @@ import {
 import React from "react";
 
 const requestWebProof = async () => {
-  const provider = createExtensionWebProofProvider({});
+  const provider = createExtensionWebProofProvider({
+    notaryUrl: "http://localhost:7047",
+    wsProxyUrl: "ws://localhost:55688",
+  });
   const loginUrl = `${window.location.origin}${import.meta.env.BASE_URL}login`;
   const targetUrl = `${window.location.origin}${import.meta.env.BASE_URL}target`;
 
