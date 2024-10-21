@@ -22,6 +22,7 @@ use lazy_static::lazy_static;
 use provider::{to_eth_block_header, EvmBlockHeader};
 use risc0_zkvm::{sha::Digest, AssumptionReceipt, ExecutorEnv, ProveInfo, Receipt};
 use serde::Serialize;
+use tracing::instrument;
 
 lazy_static! {
     static ref GUEST_ID: Digest = RISC0_CHAIN_GUEST_ID.into();
@@ -66,6 +67,7 @@ where
         }
     }
 
+    #[instrument(skip(self))]
     pub async fn poll(&self) -> Result<ChainUpdate, HostError> {
         match self.db.get_chain_info(self.chain_id)? {
             None => self.initialize().await,
@@ -73,6 +75,7 @@ where
         }
     }
 
+    #[instrument(skip(self))]
     async fn initialize(&self) -> Result<ChainUpdate, HostError> {
         let latest_block = self.get_block(BlockTag::Latest).await?;
         let latest_block_number = latest_block.number();
@@ -93,6 +96,7 @@ where
         Ok(chain_update)
     }
 
+    #[instrument(skip(self))]
     async fn append_prepend(&self) -> Result<ChainUpdate, HostError> {
         let ChainTrie {
             block_range,
@@ -131,6 +135,7 @@ where
         Ok(chain_update)
     }
 
+    #[instrument(skip(self))]
     fn prove(&self, input: Input, old_zk_proof: &Option<Bytes>) -> Result<Receipt, HostError> {
         let old_receipt = old_zk_proof.as_ref().map(decode_proof);
         let executor_env = build_executor_env(input, old_receipt)?;
@@ -139,6 +144,7 @@ where
         Ok(receipt)
     }
 
+    #[instrument(skip(self))]
     async fn get_blocks_range(
         &self,
         range: RangeInclusive<u64>,
@@ -147,6 +153,7 @@ where
         blocks.into_iter().collect()
     }
 
+    #[instrument(skip(self))]
     async fn get_block(&self, number: BlockTag) -> Result<Box<dyn EvmBlockHeader>, HostError> {
         let ethers_block = self
             .provider
@@ -171,6 +178,7 @@ fn decode_proof(proof: &Bytes) -> Receipt {
 }
 
 #[allow(unused)]
+#[instrument(skip_all)]
 fn provably_execute(
     prover: &Prover,
     env: ExecutorEnv,
