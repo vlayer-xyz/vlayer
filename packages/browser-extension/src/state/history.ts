@@ -47,7 +47,7 @@ export class HistoryContextManager {
         ...existingItem,
         ...item,
         // the item becomes ready once it's updated twice (with headers and cookies)
-        ready: true,
+        // ready: true,
       };
       history = history.map((historyItem, index) => {
         return index === existingItemIndex ? newItem : historyItem;

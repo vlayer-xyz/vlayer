@@ -25,10 +25,7 @@
   "externally_connectable": {
     "matches": ["<all_urls>"]
   },
-  "host_permissions": [
-    "https://x.com/*",
-    "https://api.x.com/*"
-  ],
+  "host_permissions": ["<all_urls>"],
   "side_panel": {
     "default_path": "src/templates/sidepanel/sidepanel.html"
   },

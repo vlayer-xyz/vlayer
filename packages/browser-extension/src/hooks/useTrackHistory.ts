@@ -19,10 +19,12 @@ export const useTrackHeaders = () => {
   return useCallback((urls: string[]) => {
     browser.webRequest.onBeforeSendHeaders.addListener(
       (details) => {
+        console.log("saving url", details.url);
         historyContextManager
           .updateHistory({
             url: details.url,
             headers: details.requestHeaders,
+            ready: true,
           })
           .catch(console.error);
       },
