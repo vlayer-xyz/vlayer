@@ -19,7 +19,6 @@
   },
   "type": "module",
   "workspaces": [
-    "test-web-app/",
     "browser-extension/",
     "sdk/",
     "web-components/",
