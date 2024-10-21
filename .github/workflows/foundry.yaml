@@ -6,7 +6,7 @@ on:
       - 'bash/**'
       - 'contracts/**'
       - 'examples/**'
-      - '.github/workflows/**'
+      - '.github/workflows/foundry.yaml'
     branches:
       - '**'
   merge_group:
