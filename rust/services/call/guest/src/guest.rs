@@ -50,7 +50,7 @@ impl Guest {
             CallAssumptions::new(start_evm_env.header(), call.to, call.selector());
 
         GuestOutput {
-            evm_call_result,
+            evm_call_result: evm_call_result.output,
             call_assumptions,
         }
     }

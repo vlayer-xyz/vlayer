@@ -85,8 +85,12 @@ where
         Ok(evm)
     }
 
-    pub fn call(self, tx: &Call, location: ExecutionLocation) -> Result<Vec<u8>, EngineError> {
-        Self::assert_success_return_and_extract_return_data(self.internal_call(tx, location)?)
+    pub fn call(
+        self,
+        tx: &Call,
+        location: ExecutionLocation,
+    ) -> Result<SuccessfulExecutionResult, EngineError> {
+        self.internal_call(tx, location)?.try_into()
     }
 
     pub fn internal_call(
@@ -103,19 +107,6 @@ where
 
         Ok(result)
     }
-
-    fn assert_success_return_and_extract_return_data(
-        result: ExecutionResult,
-    ) -> Result<Vec<u8>, EngineError> {
-        match result {
-            ExecutionResult::Success {
-                reason: SuccessReason::Return,
-                output,
-                ..
-            } => Ok(output.into_data().into()),
-            _ => Err(EngineError::TransactError(format_failed_call_result(result))),
-        }
-    }
 }
 
 impl<D: std::fmt::Debug> From<EVMError<D>> for EngineError {
@@ -128,6 +119,30 @@ impl<D: std::fmt::Debug> From<EVMError<D>> for EngineError {
                 }
             })),
             _ => EngineError::TransactPreverifiedError(format!("{:?}", err)),
+        }
+    }
+}
+
+pub struct SuccessfulExecutionResult {
+    pub output: Vec<u8>,
+    pub gas_used: u64,
+}
+
+impl TryFrom<ExecutionResult> for SuccessfulExecutionResult {
+    type Error = EngineError;
+
+    fn try_from(execution_result: ExecutionResult) -> Result<Self, Self::Error> {
+        match execution_result {
+            ExecutionResult::Success {
+                reason: SuccessReason::Return,
+                output,
+                gas_used,
+                ..
+            } => Ok(Self {
+                output: output.into_data().into(),
+                gas_used,
+            }),
+            _ => Err(EngineError::TransactError(format_failed_call_result(execution_result))),
         }
     }
 }

@@ -6,7 +6,7 @@ use std::{
 use alloy_primitives::ChainId;
 use alloy_sol_types::SolValue;
 use call_engine::{
-    engine::{Engine, EngineError},
+    engine::{Engine, EngineError, SuccessfulExecutionResult},
     evm::env::{cached::CachedEvmEnv, location::ExecutionLocation},
     io::{Call, GuestOutput, HostOutput, Input},
     Seal,
@@ -20,6 +20,7 @@ use host_utils::Prover;
 use provider::{BlockingProvider, CachedMultiProvider, EthProvider, EthersProviderFactory};
 use risc0_zkvm::ExecutorEnv;
 use serde::Serialize;
+use tracing::info;
 
 use crate::{
     db::proof::ProofDb, encodable_receipt::EncodableReceipt, evm_env::factory::HostEvmEnvFactory,
@@ -86,10 +87,15 @@ where
 
     #[allow(clippy::unused_async)]
     pub async fn run(self, call: Call) -> Result<HostOutput, HostError> {
-        let host_output = panic::catch_unwind(|| {
+        let SuccessfulExecutionResult {
+            output: host_output,
+            gas_used,
+        } = panic::catch_unwind(|| {
             Engine::new(&self.envs).call(&call, self.start_execution_location)
         })
         .map_err(wrap_engine_panic)??;
+
+        info!("Gas used in preflight: {}", gas_used);
 
         let multi_evm_input =
             into_multi_input(self.envs).map_err(|err| HostError::CreatingInput(err.to_string()))?;
