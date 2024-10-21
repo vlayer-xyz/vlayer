@@ -8,7 +8,7 @@ use std::{
 
 use alloy_primitives::{keccak256, ChainId, B256};
 use alloy_rlp::{Bytes as RlpBytes, Decodable, RlpDecodable, RlpEncodable};
-use block_trie::{BlockTrie, BlockTrieError};
+use block_trie::{BlockTrie, ProofVerificationError};
 use bytes::Bytes;
 use chain_guest_wrapper::RISC0_CHAIN_GUEST_ID;
 use derive_more::Debug;
@@ -112,7 +112,7 @@ pub enum ChainDbError {
     #[error("Block not found")]
     BlockNotFound,
     #[error("ZK proof verification failed: {0}")]
-    ZkProofVerificationFailed(#[from] BlockTrieError),
+    ZkProofVerificationFailed(#[from] ProofVerificationError),
 }
 
 pub type ChainDbResult<T> = Result<T, ChainDbError>;
@@ -182,7 +182,11 @@ impl ChainDb {
                      trie,
                      zk_proof,
                  }| {
-                    let block_trie = BlockTrie::from_proof(trie, &zk_proof, RISC0_CHAIN_GUEST_ID)?;
+                    let block_trie = BlockTrie::from_mpt_verifying_the_proof(
+                        trie,
+                        &zk_proof,
+                        RISC0_CHAIN_GUEST_ID,
+                    )?;
                     Ok(ChainTrie::new(block_range, block_trie, zk_proof))
                 },
             )

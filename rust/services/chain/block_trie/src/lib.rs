@@ -11,7 +11,7 @@ use thiserror::Error;
 
 #[derive(Debug, Error, Derivative)]
 #[derivative(PartialEq)]
-pub enum BlockTrieError {
+pub enum ProofVerificationError {
     #[error("proof verification failed: {0}")]
     ProofVerificationFailed(#[from] VerificationError),
     #[error("failed to deserialize receipt: {0}")]
@@ -26,6 +26,10 @@ pub enum BlockTrieError {
     ElfIdMismatch { expected: Digest, decoded: Digest },
     #[error("mpt root mismatch: expected: {expected} != decoded: {decoded}")]
     MptRootMismatch { expected: B256, decoded: B256 },
+}
+
+#[derive(Debug, Error, PartialEq)]
+pub enum BlockTrieError {
     #[error("failed to get block hash: {0}")]
     GetBlockHashFailed(u64),
     #[error("block hash mismatch: expected: {expected} != actual: {actual}")]
@@ -83,30 +87,12 @@ impl BlockTrie {
         Self(mpt)
     }
 
-    pub fn from_proof(
+    pub fn from_mpt_verifying_the_proof(
         mpt: MerkleTrie,
         zk_proof: &Bytes,
         guest_id: impl Into<Digest>,
-    ) -> BlockTrieResult<Self> {
-        let guest_id = guest_id.into();
-        let receipt: Receipt = bincode::deserialize(zk_proof)?;
-        receipt.verify(guest_id)?;
-
-        let (proven_root, elf_id): (B256, Digest) = receipt.journal.decode()?;
-
-        if elf_id != guest_id {
-            return Err(BlockTrieError::ElfIdMismatch {
-                expected: guest_id,
-                decoded: elf_id,
-            });
-        }
-        if mpt.hash_slow() != proven_root {
-            return Err(BlockTrieError::MptRootMismatch {
-                expected: mpt.hash_slow(),
-                decoded: proven_root,
-            });
-        }
-
+    ) -> Result<Self, ProofVerificationError> {
+        verify_mpt_proof(&mpt, zk_proof, guest_id)?;
         Ok(BlockTrie(mpt))
     }
 
@@ -132,6 +118,32 @@ impl BlockTrie {
     pub fn into_root(self) -> Node {
         self.0 .0
     }
+}
+
+fn verify_mpt_proof(
+    mpt: &MerkleTrie,
+    zk_proof: &Bytes,
+    guest_id: impl Into<Digest>,
+) -> Result<(), ProofVerificationError> {
+    let guest_id = guest_id.into();
+    let receipt: Receipt = bincode::deserialize(zk_proof)?;
+    receipt.verify(guest_id)?;
+
+    let (proven_root, elf_id): (B256, Digest) = receipt.journal.decode()?;
+
+    if elf_id != guest_id {
+        return Err(ProofVerificationError::ElfIdMismatch {
+            expected: guest_id,
+            decoded: elf_id,
+        });
+    }
+    if mpt.hash_slow() != proven_root {
+        return Err(ProofVerificationError::MptRootMismatch {
+            expected: mpt.hash_slow(),
+            decoded: proven_root,
+        });
+    }
+    Ok(())
 }
 
 impl<'a> IntoIterator for &'a BlockTrie {
