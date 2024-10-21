@@ -16,7 +16,7 @@ import { removeQueryParams } from "lib/removeQueryParams";
 import sendMessageToServiceWorker from "lib/sendMessageToServiceWorker";
 
 const TlsnProofContext = createContext({
-  prove: () => {},
+  prove: async () => {},
   proof: null as object | null,
   isProving: false,
 });

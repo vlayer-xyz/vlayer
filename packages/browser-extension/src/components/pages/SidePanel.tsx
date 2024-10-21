@@ -9,17 +9,15 @@ import {
 
 // import { Steps } from "components/organisms/Steps";
 
+const createTab = async (url: string) => {
+  await browser.tabs.create({ url });
+};
+
 const BackButton = () => {
   const { backUrl } = useProofContext();
   const { proof } = useTlsnProver();
   return proof ? (
-    <Button
-      onClick={async () => {
-        await browser.tabs.create({ url: backUrl });
-      }}
-    >
-      Back
-    </Button>
+    <Button onClick={() => void createTab(backUrl)}>Back</Button>
   ) : null;
 };
 
@@ -29,9 +27,7 @@ const ProofButton = () => {
   return !proof ? (
     <Button
       disabled={hasDataForProof ? false : true}
-      onClick={() => {
-        prove();
-      }}
+      onClick={() => void prove()}
     >
       {" "}
       {isProving ? <Spinner /> : "Make Proof"}{" "}
@@ -43,12 +39,7 @@ const GoToPageButton = () => {
   const { hasDataForProof } = { hasDataForProof: false }; //useTlsnProver();
   const { redirectUrl } = useProofContext();
   return !hasDataForProof ? (
-    <Button
-      variant="soft"
-      onClick={async () => {
-        await browser.tabs.create({ url: redirectUrl });
-      }}
-    >
+    <Button variant="soft" onClick={() => void createTab(redirectUrl)}>
       {" "}
       Go to page {redirectUrl}{" "}
     </Button>
