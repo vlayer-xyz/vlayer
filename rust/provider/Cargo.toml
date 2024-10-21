@@ -11,7 +11,7 @@ ethers-core = { workspace = true }
 call_engine = { workspace = true }
 block_header = { workspace = true }
 anyhow = { workspace = true }
-tokio = { workspace = true }
+tokio = { workspace = true, features = ["macros"]}
 thiserror = { workspace = true }
 auto_impl = { workspace = true }
 serde = { workspace = true }

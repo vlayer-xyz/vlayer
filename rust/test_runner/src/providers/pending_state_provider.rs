@@ -1,3 +1,4 @@
+use anyhow::Error;
 use block_header::{EvmBlockHeader, ForgeBlockHeader};
 use call_host::db::proof::ProofDb;
 use ethers_core::types::BlockNumber as BlockTag;
@@ -7,10 +8,7 @@ use forge::revm::primitives::{
 };
 use provider::{BlockingProvider, EIP1186Proof, ProviderFactory, ProviderFactoryError};
 
-use crate::{
-    proof::{account_proof, prove_storage, storage_root},
-    providers::test_provider::ProviderError,
-};
+use crate::proof::{account_proof, prove_storage, storage_root};
 
 pub struct PendingStateProvider {
     state: EvmState,
@@ -40,16 +38,11 @@ impl PendingStateProvider {
 }
 
 impl BlockingProvider for PendingStateProvider {
-    type Error = ProviderError;
-
-    fn get_balance(&self, address: Address, _block: BlockNumber) -> Result<U256, Self::Error> {
+    fn get_balance(&self, address: Address, _block: BlockNumber) -> Result<U256, Error> {
         Ok(self.account(address).info.balance)
     }
 
-    fn get_block_header(
-        &self,
-        block: BlockTag,
-    ) -> Result<Option<Box<dyn EvmBlockHeader>>, Self::Error> {
+    fn get_block_header(&self, block: BlockTag) -> Result<Option<Box<dyn EvmBlockHeader>>, Error> {
         let block_number: u64 = match block {
             BlockTag::Number(n) => n.as_u64(),
             _ => self.block_number,
@@ -57,7 +50,7 @@ impl BlockingProvider for PendingStateProvider {
         Ok(Some(Box::new(ForgeBlockHeader::new(block_number, self.get_state_root()))))
     }
 
-    fn get_code(&self, address: Address, _block: BlockNumber) -> Result<Bytes, Self::Error> {
+    fn get_code(&self, address: Address, _block: BlockNumber) -> Result<Bytes, Error> {
         Ok(self
             .account(address)
             .info
@@ -70,7 +63,7 @@ impl BlockingProvider for PendingStateProvider {
         address: Address,
         storage_keys: Vec<StorageKey>,
         _block: BlockNumber,
-    ) -> Result<EIP1186Proof, Self::Error> {
+    ) -> Result<EIP1186Proof, Error> {
         let account = self.account(address);
 
         let account_proof = EIP1186Proof {
@@ -91,7 +84,7 @@ impl BlockingProvider for PendingStateProvider {
         address: Address,
         key: StorageKey,
         _block: BlockNumber,
-    ) -> Result<StorageValue, Self::Error> {
+    ) -> Result<StorageValue, Error> {
         let storage_value = self
             .account(address)
             .storage
@@ -104,7 +97,7 @@ impl BlockingProvider for PendingStateProvider {
         &self,
         address: Address,
         _block: BlockNumber,
-    ) -> Result<TxNumber, Self::Error> {
+    ) -> Result<TxNumber, Error> {
         Ok(self.account(address).info.nonce)
     }
 }

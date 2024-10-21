@@ -33,7 +33,7 @@ impl<P> DatabaseRef for ProofDb<P>
 where
     P: BlockingProvider,
 {
-    type Error = ProviderDbError<P::Error>;
+    type Error = ProviderDbError;
 
     fn basic_ref(&self, address: Address) -> Result<Option<AccountInfo>, Self::Error> {
         let basic = self.db.basic_ref(address)?;
