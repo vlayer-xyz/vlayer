@@ -12,7 +12,7 @@ const requestWebProof = async () => {
   const targetUrl = `${window.location.origin}${import.meta.env.BASE_URL}target`;
 
   await provider.getWebProof({
-    //@ts-expect-error this part is not impelmented yet in our tlsn flow
+    //@ts-expect-error this part is not implemented yet in our tlsn flow
     proverCallCommitment: {},
     steps: [
       startPage(loginUrl, "Go to login"),

@@ -7,6 +7,7 @@ import { useTlsnProver } from "hooks/useTlsnProver";
 import { AnimatePresence, motion } from "framer-motion";
 import sendMessageToServiceWorker from "lib/sendMessageToServiceWorker";
 import { ExtensionMessageType } from "../../../web-proof-commons";
+import { DEFAULT_REDIRECT_DELAY_SECONDS } from "constants/defaults";
 
 type NotarizeStepActionProps = {
   isVisited: boolean;
@@ -17,7 +18,7 @@ type NotarizeStepActionProps = {
 
 const RedirectCallout: FC = () => {
   const [timeout, setTimeout] = useState(
-    import.meta.env.REDIRECT_DELAY_SECONDS || 10,
+    import.meta.env.REDIRECT_DELAY_SECONDS || DEFAULT_REDIRECT_DELAY_SECONDS,
   );
   const [show, setShow] = useState(true);
   useEffect(() => {

@@ -15,7 +15,7 @@ function run_services {
 
 function deploy_contracts {
     cd ${VLAYER_HOME}/examples/web_proof/vlayer
-    bun run deploy.ts &
+    bun run deploy.ts
 }
 
 function run_web_app {

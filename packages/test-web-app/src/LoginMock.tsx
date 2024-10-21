@@ -7,7 +7,6 @@ export const LoginMock = () => {
       onClick={() => {
         console.log("clicked");
         window.location.href = "/target";
-        // navigate("/target");
       }}
     >
       Login
