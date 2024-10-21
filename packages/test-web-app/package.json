@@ -16,6 +16,7 @@
     "react-router-dom": "^6.27.0",
     "vite-tsconfig-paths": "^5.0.1",
     "viem": "^2.21.22"
+
   },
   "devDependencies": {
     "@eslint/js": "^9.11.1",
