@@ -33,7 +33,7 @@ export async function setupRequestProveButton(element: HTMLButtonElement) {
       proverCallCommitment: {
         address: import.meta.env.VITE_PROVER_ADDRESS,
         proverAbi: webProofProver.abi,
-        chainId: import.meta.env.VITE_CHAIN_ID ?? foundry.id,
+        chainId: Number(import.meta.env.VITE_CHAIN_ID) || foundry.id,
         functionName: "main",
         commitmentArgs: ["0x"],
       },
@@ -76,8 +76,7 @@ export const setupVProverButton = (element: HTMLButtonElement) => {
         },
         twitterUserAddress,
       ],
-      commitmentArgs: [twitterUserAddress],
-      chainId: import.meta.env.VITE_CHAIN_ID ?? foundry.id,
+      chainId: Number(import.meta.env.VITE_CHAIN_ID) || foundry.id,
     });
     const provingResult = await vlayer.waitForProvingResult({
       hash,
