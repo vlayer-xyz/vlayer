@@ -151,7 +151,7 @@ impl ChainDb {
     fn get_chain_trie_inner(
         &self,
         chain_id: ChainId,
-    ) -> ChainDbResult<Option<ChainTrie<MerkleTrie>>> {
+    ) -> ChainDbResult<Option<UnverifiedChainTrie>> {
         let tx = self.begin_ro()?;
         let Some(chain_info) = self.get_chain_info(chain_id)? else {
             return Ok(None);
@@ -171,26 +171,14 @@ impl ChainDb {
             .chain(last_block_proof)
             .collect();
 
-        Ok(Some(ChainTrie::new(first_block..=last_block, trie, zk_proof)))
+        Ok(Some(UnverifiedChainTrie::new(first_block..=last_block, trie, zk_proof)))
     }
 
-    pub fn get_chain_trie(&self, chain_id: ChainId) -> ChainDbResult<Option<ChainTrie<BlockTrie>>> {
-        self.get_chain_trie_inner(chain_id)?
-            .map(
-                |ChainTrie {
-                     block_range,
-                     trie,
-                     zk_proof,
-                 }| {
-                    let block_trie = BlockTrie::from_mpt_verifying_the_proof(
-                        trie,
-                        &zk_proof,
-                        RISC0_CHAIN_GUEST_ID,
-                    )?;
-                    Ok(ChainTrie::new(block_range, block_trie, zk_proof))
-                },
-            )
-            .transpose()
+    pub fn get_chain_trie(&self, chain_id: ChainId) -> ChainDbResult<Option<ChainTrie>> {
+        Ok(self
+            .get_chain_trie_inner(chain_id)?
+            .map(TryFrom::try_from) // Verifies ZK proof
+            .transpose()?)
     }
 
     pub fn update_chain(
@@ -292,18 +280,50 @@ where
     (added, removed)
 }
 
-pub struct ChainTrie<T> {
+struct UnverifiedChainTrie {
     pub block_range: RangeInclusive<u64>,
-    pub trie: T,
+    pub trie: MerkleTrie,
     pub zk_proof: Bytes,
 }
 
-impl<T> ChainTrie<T> {
-    pub fn new(block_range: RangeInclusive<u64>, trie: T, zk_proof: Bytes) -> Self {
+impl UnverifiedChainTrie {
+    pub fn new(block_range: RangeInclusive<u64>, trie: MerkleTrie, zk_proof: Bytes) -> Self {
         Self {
             block_range,
             trie,
             zk_proof,
         }
+    }
+}
+
+pub struct ChainTrie {
+    pub block_range: RangeInclusive<u64>,
+    pub trie: BlockTrie,
+    pub zk_proof: Bytes,
+}
+
+impl ChainTrie {
+    pub fn new(block_range: RangeInclusive<u64>, trie: BlockTrie, zk_proof: Bytes) -> Self {
+        Self {
+            block_range,
+            trie,
+            zk_proof,
+        }
+    }
+}
+
+impl TryFrom<UnverifiedChainTrie> for ChainTrie {
+    type Error = ProofVerificationError;
+
+    fn try_from(
+        UnverifiedChainTrie {
+            block_range,
+            trie,
+            zk_proof,
+        }: UnverifiedChainTrie,
+    ) -> Result<Self, Self::Error> {
+        let block_trie =
+            BlockTrie::from_mpt_verifying_the_proof(trie, &zk_proof, RISC0_CHAIN_GUEST_ID)?;
+        Ok(ChainTrie::new(block_range, block_trie, zk_proof))
     }
 }
