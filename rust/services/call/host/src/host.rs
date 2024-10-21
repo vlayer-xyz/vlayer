@@ -35,7 +35,7 @@ pub struct Host<P: BlockingProvider> {
     envs: CachedEvmEnv<ProofDb<P>>,
     prover: Prover,
     _chain_proof_client: ChainProofClient,
-    max_request_size: usize,
+    max_calldata_size: usize,
 }
 
 impl Host<EthProvider> {
@@ -83,7 +83,7 @@ where
             start_execution_location,
             prover,
             _chain_proof_client: chain_proof_client,
-            max_request_size: config.max_calldata_size,
+            max_calldata_size: config.max_calldata_size,
         })
     }
 
@@ -139,7 +139,7 @@ where
     }
 
     fn validate_calldata_size(&self, call: &Call) -> Result<(), HostError> {
-        if call.data.len() > self.max_request_size {
+        if call.data.len() > self.max_calldata_size {
             return Err(HostError::CalldataTooLargeError(call.data.len()));
         }
 

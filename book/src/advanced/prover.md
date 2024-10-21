@@ -31,7 +31,7 @@ All data returned by functions is public. To make an argument public on-chain, r
 
 We impose the following restrictions on the proof:
 
-- The calldata passed into the `Prover` cannot exceed 5MB. 
+- Calldata passed into the `Prover` cannot exceed 5 MB. 
 
 ### Proof
 
