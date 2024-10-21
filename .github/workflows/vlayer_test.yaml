@@ -1,7 +1,7 @@
 name: Vlayer test
 
 on:
-  push:
+  pull_request:
     paths:
       - 'bash/**'
       - 'contracts/**'
@@ -9,9 +9,10 @@ on:
       - "rust/**"
       - "examples/**"
       - ".github/workflows/vlayer_test.yaml"
-    branches:
-      - "**"
   merge_group:
+  push:
+    branches:
+      - main
 concurrency:
   # Do not cancel jobs on main by forcing a unique group name.
   group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}

@@ -1,13 +1,14 @@
 name: SDK Test
 
 on:
-  push:
+  pull_request:
     paths:
       - "packages/sdk/**"
       - ".github/workflows/sdk_test.yaml"
-    branches:
-      - "**"
   merge_group:
+  push:
+    branches:
+      - main
 concurrency:
   # Do not cancel jobs on main by forcing a unique group name.
   group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}

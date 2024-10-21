@@ -3,14 +3,13 @@ on:
   pull_request:
     paths:
       - 'book/**'
-      - '.github/workflows/**'
-    branches:
-      - '**'  # Run on pull requests to any branch
+      - '.github/workflows/book.yaml'
   push:
     paths:
       - 'book/**'
+      - '.github/workflows/book.yaml'
     branches:
-      - main  # Run on push to main branch
+      - main
 
 defaults:
   run:

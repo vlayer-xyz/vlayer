@@ -87,7 +87,7 @@ fi
 
 # set external rpc urls
 if [[ -z "${ALCHEMY_API_KEY:-}" ]] ; then
-    echo ALCHEMY_API_KEY is not configured. Using using only local rpc-urls. >&2
+    echo ALCHEMY_API_KEY is not configured. Using only local rpc-urls. >&2
 else 
 
     EXTERNAL_RPC_URLS=(

@@ -15,13 +15,6 @@ source ${VLAYER_HOME}/bash/run-services.sh
 echo Setting up SDK 
 cd ${VLAYER_HOME}/packages/sdk && bun install
 
-# check if ALCHEMY_API_KEY and EXAMPLES_TEST_PRIVATE_KEY is set in GitHub actions; 
-# running in GH is detected by checking RUNNER_OS env var
-if [[  -n "${RUNNER_OS:-}" ]] && [[ -z "${ALCHEMY_API_KEY:-}" ]] && [[ -z "${EXAMPLES_TEST_PRIVATE_KEY:-}" ]] ;then 
-  echo "ALCHEMY_API_KEY and EXAMPLES_TEST_PRIVATE_KEY must be set in GitHub actions. Exiting." >&2
-  exit 1
-fi
-
 EXAMPLES_REQUIRING_ALCHEMY=("simple_time_travel" "simple_teleport")
 EXAMPLES_REQUIRING_PRIV_KEY=("simple_time_travel")
 
