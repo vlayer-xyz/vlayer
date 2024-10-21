@@ -83,13 +83,13 @@ where
             start_execution_location,
             prover,
             _chain_proof_client: chain_proof_client,
-            max_request_size: config.max_request_size,
+            max_request_size: config.max_calldata_size,
         })
     }
 
     #[allow(clippy::unused_async)]
     pub async fn run(self, call: Call) -> Result<HostOutput, HostError> {
-        self.validate_call_size(&call)?;
+        self.validate_calldata_size(&call)?;
 
         let SuccessfulExecutionResult {
             output: host_output,
@@ -138,9 +138,9 @@ where
         })
     }
 
-    fn validate_call_size(&self, call: &Call) -> Result<(), HostError> {
+    fn validate_calldata_size(&self, call: &Call) -> Result<(), HostError> {
         if call.data.len() > self.max_request_size {
-            return Err(HostError::InputTooLargeError(call.data.len()));
+            return Err(HostError::CalldataTooLargeError(call.data.len()));
         }
 
         Ok(())
@@ -229,11 +229,11 @@ mod test {
         )?;
         let call = Call {
             to: Default::default(),
-            data: vec![0; config.max_request_size + 1],
+            data: vec![0; config.max_calldata_size + 1],
         };
         assert_eq!(
             host.run(call).await.unwrap_err().to_string(),
-            format!("Call input too large: {} bytes", config.max_request_size + 1)
+            format!("Calldata too large: {} bytes", config.max_calldata_size + 1)
         );
 
         Ok(())

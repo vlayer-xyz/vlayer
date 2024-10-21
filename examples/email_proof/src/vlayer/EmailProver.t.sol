@@ -49,7 +49,7 @@ contract EmailProverTest is VTest {
         try prover.main(email) {
             revert("Did not revert as expected");
         } catch Error(string memory reason) {
-            assertEq(reason, "InputTooLargeError(5243524)");
+            assertEq(reason, "CalldataTooLargeError(5243524)");
         }
     }
 }

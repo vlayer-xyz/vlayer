@@ -25,7 +25,7 @@ pub async fn v_call(config: Arc<ServerConfig>, params: Params) -> Result<CallRes
         start_chain_id: params.context.chain_id,
         proof_mode: config.proof_mode.into(),
         chain_proof_url: config.chain_proof_url.clone(),
-        max_request_size: config.max_request_size,
+        max_calldata_size: config.max_request_size,
     };
 
     let return_data = Host::try_new(&host_config)?.run(call).await?;
