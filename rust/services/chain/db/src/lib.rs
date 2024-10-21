@@ -296,6 +296,7 @@ impl UnverifiedChainTrie {
     }
 }
 
+// `trie` held by this struct is proven by `zk_proof` to be correctly constructed
 pub struct ChainTrie {
     pub block_range: RangeInclusive<u64>,
     pub trie: BlockTrie,
