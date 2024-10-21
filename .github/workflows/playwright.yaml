@@ -15,7 +15,6 @@ jobs:
       - uses: oven-sh/setup-bun@v2
         with:
           node-version: lts/*
-
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -32,6 +31,9 @@ jobs:
       - name: Install Playwright Browsers
         run: bunx playwright install --with-deps chromium
         working-directory: ./packages/browser-extension
+      - name: Run docker
+        run: docker compose up -d
+        working-directory: docker/web-proof
       - name: Run Playwright tests
         run: TEST_MODE=headless bunx playwright test
         working-directory: ./packages/browser-extension
