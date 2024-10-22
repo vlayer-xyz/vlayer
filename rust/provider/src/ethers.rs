@@ -10,6 +10,7 @@ use tokio::runtime::Handle;
 use super::{BlockingProvider, EIP1186Proof};
 
 /// A provider that fetches data from an Ethereum node using the ethers crate.
+#[derive(Debug)]
 pub struct EthersProvider<M: Middleware> {
     client: M,
 }

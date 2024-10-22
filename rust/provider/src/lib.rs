@@ -6,6 +6,8 @@ mod multi;
 mod null;
 mod proof;
 
+use std::fmt::Debug;
+
 pub use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256};
 use anyhow::Result;
 use auto_impl::auto_impl;
@@ -26,7 +28,7 @@ pub type EthersClient = ethers_providers::Provider<RetryClient<Http>>;
 
 /// A trait for providers that fetch data from the Ethereum blockchain.
 #[auto_impl(Rc)]
-pub trait BlockingProvider: Send + Sync {
+pub trait BlockingProvider: Debug + Send + Sync {
     fn get_balance(&self, address: Address, block: BlockNumber) -> Result<U256>;
     fn get_block_header(&self, block: BlockTag) -> Result<Option<Box<dyn EvmBlockHeader>>>;
     fn get_code(&self, address: Address, block: BlockNumber) -> Result<Bytes>;

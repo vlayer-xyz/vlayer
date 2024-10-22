@@ -3,7 +3,6 @@ use std::{collections::hash_map::Entry, path::PathBuf, sync::RwLock};
 use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256};
 use anyhow::{bail, Result};
 use block_header::EvmBlockHeader;
-use derivative::Derivative;
 use ethers_core::types::BlockNumber as BlockTag;
 use json::{AccountQuery, BlockQuery, JsonCache, ProofQuery, StorageQuery};
 
@@ -14,19 +13,17 @@ pub(crate) mod json;
 /// A provider that caches responses from an underlying provider in a JSON file.
 /// Queries are first checked against the cache, and if not found, the provider is invoked.
 /// The cache is saved when the provider is dropped.
-#[derive(Debug, Derivative)]
-#[derivative(PartialEq)]
-pub struct CachedProvider<P: BlockingProvider> {
-    pub(super) inner: P,
-    #[derivative(PartialEq = "ignore")]
+#[derive(Debug)]
+pub struct CachedProvider {
+    pub(super) inner: Box<dyn BlockingProvider>,
     pub(super) cache: RwLock<JsonCache>,
 }
 
-impl<P: BlockingProvider> CachedProvider<P> {
+impl CachedProvider {
     /// Creates a new [CachedProvider]. At this point, the cache files
     /// directory should exist and the cache file itself should not.
     /// A new cache file will be created when dropped.
-    pub fn new(cache_path: PathBuf, provider: P) -> Result<Self> {
+    pub fn new(cache_path: PathBuf, provider: Box<dyn BlockingProvider>) -> Result<Self> {
         // Sanity checks.
         if let Some(parent) = cache_path.parent() {
             if !parent.exists() {
@@ -48,7 +45,7 @@ impl<P: BlockingProvider> CachedProvider<P> {
     }
 }
 
-impl<P: BlockingProvider> BlockingProvider for CachedProvider<P> {
+impl BlockingProvider for CachedProvider {
     fn get_block_header(&self, block: BlockTag) -> Result<Option<Box<dyn EvmBlockHeader>>> {
         let mut cache = self.cache.write().expect("poisoned RwLock");
         match cache.partial_blocks.entry(BlockQuery {

@@ -13,6 +13,7 @@ use provider::{
 
 use crate::providers::pending_state_provider::PendingStateProviderFactory;
 
+#[derive(Debug)]
 pub struct TestProvider {
     provider: Box<dyn BlockingProvider>,
 }

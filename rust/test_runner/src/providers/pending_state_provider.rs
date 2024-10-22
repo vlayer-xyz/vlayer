@@ -10,6 +10,7 @@ use provider::{BlockingProvider, EIP1186Proof, ProviderFactory, ProviderFactoryE
 
 use crate::proof::{account_proof, prove_storage, storage_root};
 
+#[derive(Debug)]
 pub struct PendingStateProvider {
     state: EvmState,
     block_number: u64,
@@ -102,6 +103,7 @@ impl BlockingProvider for PendingStateProvider {
     }
 }
 
+#[derive(Debug)]
 pub struct PendingStateProviderFactory {
     pub block_number: u64,
     pub state: EvmState,
