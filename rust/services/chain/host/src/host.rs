@@ -84,7 +84,7 @@ where
 
     #[instrument(skip(self))]
     async fn initialize(&self) -> Result<ChainUpdate, HostError> {
-        info!("Initializing chain");
+        info!("initializing chain");
         let latest_block = self.get_block(BlockTag::Latest).await?;
         let latest_block_number = latest_block.number();
         let trie = BlockTrie::init(&*latest_block)?;
@@ -106,7 +106,7 @@ where
 
     #[instrument(skip(self))]
     async fn append_prepend(&self) -> Result<ChainUpdate, HostError> {
-        info!("Appending and prepending blocks");
+        info!("appending and prepending blocks");
         let ChainTrie {
             block_range,
             trie: old_trie,
@@ -151,7 +151,7 @@ where
         let ProveInfo { receipt, stats } =
             provably_execute(&self.prover, executor_env, RISC0_CHAIN_GUEST_ELF)?;
         debug!(
-            "Prover stats. Segments: {}, cycles: {}, user cycles: {}",
+            "prover stats. Segments: {}, cycles: {}, user cycles: {}",
             stats.segments, stats.total_cycles, stats.user_cycles
         );
         Ok(receipt)
@@ -168,7 +168,7 @@ where
 
     #[instrument(skip(self))]
     async fn get_block(&self, number: BlockTag) -> Result<Box<dyn EvmBlockHeader>, HostError> {
-        info!("Fetching block {}", number);
+        info!("fetching block {}", number);
         let ethers_block = self
             .provider
             .get_block(number)
@@ -177,7 +177,7 @@ where
             .ok_or(HostError::BlockNotFound(number))?;
         let block = to_eth_block_header(ethers_block)
             .map_err(|e| HostError::BlockConversion(e.to_string()))?;
-        info!("Fetched block {}", block.number());
+        info!("fetched block {}", block.number());
         Ok(Box::new(block))
     }
 }
