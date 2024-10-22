@@ -10,7 +10,7 @@ on:
 jobs:
   test-extension:
     timeout-minutes: 60
-    runs-on: ubuntu-latest
+    runs-on: aws-linux-medium
     steps:
       - uses: oven-sh/setup-bun@v2
         with:
