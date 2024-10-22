@@ -61,39 +61,18 @@ fn get_path(
     Ok(PathBuf::from(file_path_str))
 }
 
-pub struct FileProviderFactory {
-    rpc_file_cache: HashMap<ChainId, String>,
-}
-
-impl FileProviderFactory {
-    pub fn new(rpc_file_cache: HashMap<ChainId, String>) -> Self {
-        FileProviderFactory { rpc_file_cache }
-    }
-}
-
-impl ProviderFactory for FileProviderFactory {
-    fn create(&self, chain_id: ChainId) -> Result<Box<dyn BlockingProvider>, ProviderFactoryError> {
-        let file_path = get_path(&self.rpc_file_cache, chain_id)?;
-
-        Ok(Box::new(
-            CachedProvider::from_file(&file_path)
-                .map_err(|err| ProviderFactoryError::CachedProvider(err.to_string()))?,
-        ))
-    }
-}
-
 pub struct CachedProviderFactory {
-    ethers_provider_factory: EthersProviderFactory,
     rpc_file_cache: HashMap<ChainId, String>,
+    ethers_provider_factory: Option<EthersProviderFactory>,
 }
 
 impl CachedProviderFactory {
     pub fn new(
-        rpc_urls: HashMap<ChainId, String>,
         rpc_file_cache: HashMap<ChainId, String>,
+        ethers_provider_factory: Option<EthersProviderFactory>,
     ) -> Self {
         CachedProviderFactory {
-            ethers_provider_factory: EthersProviderFactory::new(rpc_urls),
+            ethers_provider_factory,
             rpc_file_cache,
         }
     }
@@ -103,11 +82,19 @@ impl ProviderFactory for CachedProviderFactory {
     fn create(&self, chain_id: ChainId) -> Result<Box<dyn BlockingProvider>, ProviderFactoryError> {
         let file_path = get_path(&self.rpc_file_cache, chain_id)?;
 
-        let provider = self.ethers_provider_factory.create(chain_id)?;
-        Ok(Box::new(
-            CachedProvider::new(file_path, provider)
-                .map_err(|err| ProviderFactoryError::CachedProvider(err.to_string()))?,
-        ))
+        match &self.ethers_provider_factory {
+            Some(ethers_factory) => {
+                let provider = ethers_factory.create(chain_id)?;
+                Ok(Box::new(
+                    CachedProvider::new(file_path, provider)
+                        .map_err(|err| ProviderFactoryError::CachedProvider(err.to_string()))?,
+                ))
+            }
+            None => Ok(Box::new(
+                CachedProvider::from_file(&file_path)
+                    .map_err(|err| ProviderFactoryError::CachedProvider(err.to_string()))?,
+            )),
+        }
     }
 }
 

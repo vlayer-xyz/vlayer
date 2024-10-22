@@ -12,7 +12,7 @@ use chain_server::server::ChainProofServerMock;
 use dotenv::dotenv;
 use ethers_core::types::BlockNumber as BlockTag;
 use lazy_static::lazy_static;
-use provider::{CachedMultiProvider, CachedProviderFactory, FileProviderFactory, ProviderFactory};
+use provider::{CachedMultiProvider, CachedProviderFactory, ProviderFactory};
 use serde_json::json;
 
 // To activate recording, set UPDATE_SNAPSHOTS to true.
@@ -107,15 +107,23 @@ where
         ..Default::default()
     };
 
-    let provider_factory: Box<dyn ProviderFactory> = if UPDATE_SNAPSHOTS {
-        Box::new(CachedProviderFactory::new(rpc_urls(), rpc_file_cache(test_name)))
-    } else {
-        Box::new(FileProviderFactory::new(rpc_file_cache(test_name)))
-    };
+    let provider_factory = create_provider_factory(test_name);
     let host = create_host(provider_factory, block_number, &config).await?;
     let host_output = host.run(call).await?;
     let return_value = C::abi_decode_returns(&host_output.guest_output.evm_call_result, false)?;
     Ok(return_value)
+}
+
+fn create_provider_factory(test_name: &str) -> Box<dyn ProviderFactory> {
+    if UPDATE_SNAPSHOTS {
+        let ethers_provider_factory = provider::EthersProviderFactory::new(rpc_urls());
+        Box::new(CachedProviderFactory::new(
+            rpc_file_cache(test_name),
+            Some(ethers_provider_factory),
+        ))
+    } else {
+        Box::new(CachedProviderFactory::new(rpc_file_cache(test_name), None))
+    }
 }
 
 #[cfg(test)]

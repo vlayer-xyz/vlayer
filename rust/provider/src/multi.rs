@@ -41,7 +41,7 @@ mod get {
     use null_provider_factory::NullProviderFactory;
 
     use super::*;
-    use crate::{cache::CachedProvider, factory::FileProviderFactory};
+    use crate::{cache::CachedProvider, CachedProviderFactory};
 
     mod null_provider_factory {
         use super::*;
@@ -85,7 +85,7 @@ mod get {
         let rpc_file_cache =
             HashMap::from([(Chain::mainnet().id(), "testdata/cache.json".to_string())]);
 
-        let provider_factory = FileProviderFactory::new(rpc_file_cache);
+        let provider_factory = CachedProviderFactory::new(rpc_file_cache, None);
         let cached_multi_provider = CachedMultiProvider::new(Box::new(provider_factory));
         cached_multi_provider.get(Chain::mainnet().id())?;
 
