@@ -11,3 +11,26 @@
   args:
     executable: /bin/bash
     creates: ~/.foundry/bin/forge
+
+- name: Install rustup
+  ansible.builtin.shell: |
+    set -ueo pipefail
+    curl --proto '=https' --tlsv1.2 -sSf https://sh.rustup.rs | sh -s -- --default-toolchain stable -y
+  args:
+    executable: /bin/bash
+    creates: .cargo/bin/rustup
+- name: Install Cargo binstall
+  ansible.builtin.shell: |
+    set -ueo pipefail
+    curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
+  args:
+    executable: /bin/bash
+    creates: ~/.cargo/bin/cargo-binstall
+- name: Install risc0
+  ansible.builtin.shell: |
+    set -ueo pipefail
+    ~/.cargo/bin/cargo binstall -y cargo-risczero@{{ vlayer_risc0_version }} --force
+    ~/.cargo/bin/cargo risczero install
+  args:
+    executable: /bin/bash
+    creates: ~/.cargo/bin/r0vm

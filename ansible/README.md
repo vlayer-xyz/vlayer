@@ -6,6 +6,7 @@ This is a collection of vlayer ansible scripts and roles.
 
 1. [Install Ansible](https://docs.ansible.com/ansible/latest/installation_guide/intro_installation.html).
 2. Install galaxy collections: `ansible-galaxy collection install -r requirements.yml`
+3. Install galaxy roles: `ansible-galaxy role install -r requirements.yml`
 
 ## Available roles
 
