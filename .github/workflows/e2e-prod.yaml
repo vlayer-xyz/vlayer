@@ -1,26 +1,26 @@
-name: End-to-end integration test in dev mode
+name: End-to-end integration test in prod mode
+
+# This workflow has additional constraints to run on `main`,
+# because it uses external API resources.
 
 on:
-  pull_request:
-    paths:
-      - "rust-toolchain.toml"
-      - "rust/**"
-      - "examples/**"
-      - "packages/vlayer/**"
-      - "bash/**"
-      - ".github/workflows/e2e.yaml"
-      - "contracts/**"
-  merge_group:
   push:
     branches:
       - main
+    # If any path names do not match patterns in paths-ignore,
+    # even if some path names match the patterns,
+    # the workflow will run.
+    paths-ignore:
+      - "README.md"
+      - "LICENSE"
+      - "book/**"
+  workflow_dispatch:
 concurrency:
-  # Do not cancel jobs on main by forcing a unique group name.
-  group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-main
+  cancel-in-progress: false
 
 jobs:
-  e2e-test:
+  e2e-prod-test:
     runs-on: aws-linux-medium
     steps:
       - name: Checkout repository
@@ -43,9 +43,13 @@ jobs:
         working-directory: ./contracts
         run: forge soldeer install
         
-      - name: Run e2e test
+      - name: Run e2e test in prod mode
         env:
-          PROVING_MODE: 'dev'
+          PROVING_MODE: 'prod'
+          BONSAI_API_URL: ${{ vars.BONSAI_API_URL }}
+          BONSAI_API_KEY: ${{ secrets.BONSAI_API_KEY }}
+          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+          EXAMPLES_TEST_PRIVATE_KEY: ${{ secrets.EXAMPLES_TEST_PRIVATE_KEY }}
           VLAYER_TMP_DIR: ./artifacts
         run: bash/e2e-test.sh
 
