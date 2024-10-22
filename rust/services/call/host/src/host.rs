@@ -35,6 +35,7 @@ pub struct Host<P: BlockingProvider> {
     envs: CachedEvmEnv<ProofDb<P>>,
     prover: Prover,
     _chain_proof_client: ChainProofClient,
+    max_calldata_size: usize,
 }
 
 impl Host<EthProvider> {
@@ -82,11 +83,14 @@ where
             start_execution_location,
             prover,
             _chain_proof_client: chain_proof_client,
+            max_calldata_size: config.max_calldata_size,
         })
     }
 
     #[allow(clippy::unused_async)]
     pub async fn run(self, call: Call) -> Result<HostOutput, HostError> {
+        self.validate_calldata_size(&call)?;
+
         let SuccessfulExecutionResult {
             output: host_output,
             gas_used,
@@ -133,6 +137,14 @@ where
             proof_len,
         })
     }
+
+    fn validate_calldata_size(&self, call: &Call) -> Result<(), HostError> {
+        if call.data.len() > self.max_calldata_size {
+            return Err(HostError::CalldataTooLargeError(call.data.len()));
+        }
+
+        Ok(())
+    }
 }
 
 fn wrap_engine_panic(err: Box<dyn Any + Send>) -> EngineError {
@@ -163,10 +175,18 @@ fn build_executor_env(input: impl Serialize) -> anyhow::Result<ExecutorEnv<'stat
 
 #[cfg(test)]
 mod test {
+    use std::collections::HashMap;
+
     use chain::TEST_CHAIN_ID;
     use host_utils::ProofMode;
 
     use super::*;
+
+    fn test_rpc_urls() -> HashMap<ChainId, String> {
+        [(TEST_CHAIN_ID, "http://localhost:123/".to_string())]
+            .into_iter()
+            .collect()
+    }
 
     #[test]
     fn host_provably_execute_invalid_guest_elf() {
@@ -194,15 +214,38 @@ mod test {
     }
 
     #[tokio::test(flavor = "multi_thread")]
-    async fn try_new_invalid_rpc_url() -> anyhow::Result<()> {
-        let rpc_urls = [(TEST_CHAIN_ID, "http://localhost:123/".to_string())]
-            .into_iter()
-            .collect();
+    async fn host_does_not_accept_calls_longer_than_limit() -> anyhow::Result<()> {
         let config = HostConfig {
-            rpc_urls,
+            rpc_urls: test_rpc_urls(),
             start_chain_id: TEST_CHAIN_ID,
             proof_mode: ProofMode::Fake,
-            chain_proof_url: String::default(),
+            ..HostConfig::default()
+        };
+        let host = Host::try_new_with_components(
+            CachedMultiProvider::new(EthersProviderFactory::new(test_rpc_urls())),
+            0,
+            ChainProofClient::new(""),
+            &config,
+        )?;
+        let call = Call {
+            to: Default::default(),
+            data: vec![0; config.max_calldata_size + 1],
+        };
+        assert_eq!(
+            host.run(call).await.unwrap_err().to_string(),
+            format!("Calldata too large: {} bytes", config.max_calldata_size + 1)
+        );
+
+        Ok(())
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn try_new_invalid_rpc_url() -> anyhow::Result<()> {
+        let config = HostConfig {
+            rpc_urls: test_rpc_urls(),
+            start_chain_id: TEST_CHAIN_ID,
+            proof_mode: ProofMode::Fake,
+            ..HostConfig::default()
         };
         let res = Host::try_new(&config);
 

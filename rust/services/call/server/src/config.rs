@@ -1,6 +1,7 @@
 use std::collections::HashMap;
 
 use alloy_primitives::ChainId;
+use call_host::host::config::DEFAULT_MAX_CALLDATA_SIZE;
 use chain::TEST_CHAIN_ID;
 use serde::{Deserialize, Serialize};
 use server_utils::ProofMode;
@@ -12,6 +13,7 @@ pub struct ServerConfig {
     pub port: u16,
     pub proof_mode: ProofMode,
     pub chain_proof_url: String,
+    pub max_request_size: usize,
 }
 
 impl Default for ServerConfig {
@@ -23,6 +25,7 @@ impl Default for ServerConfig {
             port: 3000,
             proof_mode: ProofMode::Groth16,
             chain_proof_url: String::default(),
+            max_request_size: DEFAULT_MAX_CALLDATA_SIZE,
         }
     }
 }
@@ -46,6 +49,7 @@ impl ServerConfig {
             port: port.unwrap_or(default.port),
             proof_mode,
             chain_proof_url: chain_proof_url.as_ref().to_string(),
+            max_request_size: DEFAULT_MAX_CALLDATA_SIZE,
         }
     }
 }

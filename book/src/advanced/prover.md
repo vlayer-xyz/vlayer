@@ -27,6 +27,12 @@ Arbitrary arguments can be passed to Prover functions. All arguments are private
 
 All data returned by functions is public. To make an argument public on-chain, return it from the function.
 
+### Limits
+
+We impose the following restrictions on the proof:
+
+- Calldata passed into the `Prover` cannot exceed 5 MB. 
+
 ### Proof
 
 Once the `Prover` computation is complete, a proof is generated and made available along with the returned value. This output can then be consumed and cryptographically verified by the `Verifier` on-chain smart contract.

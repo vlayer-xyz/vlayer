@@ -57,4 +57,7 @@ pub enum HostError {
 
     #[error("Chain Proof Client error: {0}")]
     ChainProofClient(#[from] ChainProofClientError),
+
+    #[error("Calldata too large: {0} bytes")]
+    CalldataTooLargeError(usize),
 }

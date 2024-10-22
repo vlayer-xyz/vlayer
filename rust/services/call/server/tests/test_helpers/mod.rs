@@ -48,10 +48,9 @@ impl TestHelper {
 
         let app = server(ServerConfig {
             rpc_urls: HashMap::from([(self.anvil.chain_id(), self.anvil.endpoint())]),
-            host: "127.0.0.1".into(),
-            port: 3000,
             proof_mode: ProofMode::Fake,
             chain_proof_url: chain_proof_server_mock.url(),
+            ..ServerConfig::default()
         });
         post(app, url, body).await
     }
