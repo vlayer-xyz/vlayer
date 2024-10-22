@@ -1,9 +1,9 @@
 {
+  "extends": "../tsconfig.base.json",
   "compilerOptions": {
     "jsx": "react",
     "target": "ESNext",
     "useDefineForClassFields": true,
-    "module": "ESNext",
     "lib": ["ESNext", "DOM"],
     "moduleResolution": "bundler",
     "strict": true,
