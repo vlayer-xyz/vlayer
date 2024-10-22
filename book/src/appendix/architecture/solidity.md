@@ -2,14 +2,16 @@
 
 ## Proving
 
-On-chain verification is implemented by using a customized function with the following arguments:
-- the `Proof` structure, which contains data required to verify arguments from the point below
-- a list of arguments in the same order as returned by the `Prover` (public output)
-- optionally, user defined additional arguments
+On-chain verification is implemented by using a customized verification function with the following arguments:
+- a list of arguments in the same order as returned by the `Prover` (public output);
+- optionally, user defined additional arguments.
+
+> `Proof` structure must always be returned from the `Prover` as the first returned element (more on that [here](../../prover.md#proof)),
+> which means that `Proof` structure must also be passed as the first argument to the verification function. 
 
 The verification function should use the `onlyVerified()` modifier, which takes two arguments, the address of a smart contract and a selector of function that was executed in the `Prover` contract.
 
-See example verification function below:
+See an example verification function below:
 
 ```solidity
 contract Example is Verifier {
@@ -22,11 +24,12 @@ contract Example is Verifier {
 }
 ```
 
-> `proof` is not an argument to `onlyVerified` because it is automatically extracted from `msg.data`.
+>`proof` is not an argument to `onlyVerified` because it is automatically extracted from `msg.data`.
 
 ## Data flow
 
-Proving data flow is composed of three steps. It starts at `Guest`, which returns `GuestOutput`. `GuestOutput` consist of two fields: `call_assumptions` and `evm_call_result`.
+Proving data flow is consists of three steps. It starts at `Guest`, which returns `GuestOutput`. 
+`GuestOutput` consist of two fields: `call_assumptions` and `evm_call_result`.
 
 See the code snippets below for pseudocode:
 
@@ -43,11 +46,15 @@ struct CallAssumptions {
     bytes4 functionSelector;
     uint256 settleBlockNumber;
     bytes32 settleBlockHash;
+}
 ```
 
 > Note that `CallAssumptions` structure is generated based on Solidity code from `Vlayer::Assumptions`, with `sol!` macro.
 
-Then the data is prepended on the `Host` with two additional fields `length` and `seal`. The `Host` returns it via JSON-RPC `v_call` method, as a string of bytes, in the `result` field.
+Since, `evm_call_result` returned from the `Prover`, includes `Proof` placeholder; 
+`Host` replaces the placeholder `Proof` bytes with an actual `length`, a valid `seal` and `callAssumptions`.
+The `Host` returns it via JSON-RPC `v_call` method, as a string of bytes, in the `result` field.
+The approach above, enables the smart-contract developer, to decode `v_call` result as if they decoded directly the `Prover` function result. 
 
 Finally, the method on the on-chain smart contract is called. For that purpose, it is prepended with a function selector.
 
@@ -85,7 +92,7 @@ To verify a zero-knowledge proof, vlayer uses a `verify` function, delivered by 
 function verify(Seal calldata seal, bytes32 imageId, bytes32 journalDigest)
 ```
 
-`Proof.length` represents the length of journal data, which is located in `msg.data`, starting at byte 0 of `CallAssumptions` and ends with the last byte of the last verified argument.
+`Proof.length` represents the length of journal data, which is located in `msg.data`, starting at byte 0 of `CallAssumptions`, spanning across proof placeholder bytes and ending with the last byte of the last verified argument.
 
 `onlyVerified` gets `seal` and `journalDigest` by slicing it out of `msg.data`. This is where `length` is used.
 
