@@ -41,7 +41,7 @@ pub struct Host {
 impl Host {
     pub fn try_new(config: &HostConfig) -> Result<Self, HostError> {
         let provider_factory = EthersProviderFactory::new(config.rpc_urls.clone());
-        let providers = CachedMultiProvider::new(provider_factory);
+        let providers = CachedMultiProvider::new(Box::new(provider_factory));
         let block_number = get_block_number(&providers, config.start_chain_id)?;
         let chain_proof_client = ChainProofClient::new(config.chain_proof_url.clone());
 
@@ -219,7 +219,7 @@ mod test {
             ..HostConfig::default()
         };
         let host = Host::try_new_with_components(
-            CachedMultiProvider::new(EthersProviderFactory::new(test_rpc_urls())),
+            CachedMultiProvider::new(Box::new(EthersProviderFactory::new(test_rpc_urls()))),
             0,
             ChainProofClient::new(""),
             &config,

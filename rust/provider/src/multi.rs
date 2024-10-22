@@ -17,10 +17,10 @@ pub struct CachedMultiProvider {
 }
 
 impl CachedMultiProvider {
-    pub fn new(factory: impl ProviderFactory + 'static) -> Self {
+    pub fn new(factory: Box<dyn ProviderFactory>) -> Self {
         CachedMultiProvider {
             cache: RwLock::new(HashMap::new()),
-            factory: Box::new(factory),
+            factory,
         }
     }
 
@@ -86,7 +86,7 @@ mod get {
             HashMap::from([(Chain::mainnet().id(), "testdata/cache.json".to_string())]);
 
         let provider_factory = FileProviderFactory::new(rpc_file_cache);
-        let cached_multi_provider = CachedMultiProvider::new(provider_factory);
+        let cached_multi_provider = CachedMultiProvider::new(Box::new(provider_factory));
         cached_multi_provider.get(Chain::mainnet().id())?;
 
         Ok(())

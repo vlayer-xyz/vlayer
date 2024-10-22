@@ -56,7 +56,7 @@ fn rpc_urls() -> HashMap<ChainId, String> {
 }
 
 async fn create_host(
-    provider_factory: impl ProviderFactory + 'static,
+    provider_factory: Box<dyn ProviderFactory>,
     block_tag: BlockTag,
     config: &HostConfig,
 ) -> Result<Host, HostError> {
@@ -107,16 +107,13 @@ where
         ..Default::default()
     };
 
-    let host_output = if UPDATE_SNAPSHOTS {
-        let provider_factory = CachedProviderFactory::new(rpc_urls(), rpc_file_cache(test_name));
-        let host = create_host(provider_factory, block_number, &config).await?;
-        host.run(call).await?
+    let provider_factory: Box<dyn ProviderFactory> = Box::new(if UPDATE_SNAPSHOTS {
+        CachedProviderFactory::new(rpc_urls(), file_cache)
     } else {
-        let provider_factory = FileProviderFactory::new(rpc_file_cache(test_name));
-        let host = create_host(provider_factory, block_number, &config).await?;
-        host.run(call).await?
-    };
-
+        FileProviderFactory::new(file_cache)
+    });
+    let host = create_host(provider_factory, block_number, &config).await?;
+    let host_output = host.run(call).await?;
     let return_value = C::abi_decode_returns(&host_output.guest_output.evm_call_result, false)?;
     Ok(return_value)
 }
