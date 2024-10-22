@@ -25,18 +25,17 @@ We start by instantiating vlayer client.
 ```ts
 import { createVlayerClient } from '@vlayer/sdk'
 
-
 const vlayer = createVlayerClient()
 ```
 
 Next, we can define how the vlayer extension should generate the Web Proof. We do this in a declarative way, by specifying the steps the extension should guide the user through.
 
 ```ts
-import { 
-  createWebProof, 
-  startPage, 
-  expectUrl, 
-  notarize 
+import {
+  createWebProof,
+  startPage,
+  expectUrl,
+  notarize,
 } from '@vlayer/sdk/web_proof'
 
 const webProof = createWebProof({
@@ -102,10 +101,10 @@ In the future, vlayer is planning to provide additional Web Proof provider imple
 The Web Proof provider exposes a low-level API to directly define `proverCallCommitment` (commitment to use the generated Web Proof only with the specified prover contract call details, so it's not possible to submit it in a different context) and to explicitly generate the Web Proof by calling `getWebProof`.
 
 ```ts
-import { 
-  startPage, 
-  expectUrl, 
-  notarize 
+import {
+  startPage,
+  expectUrl,
+  notarize,
 } from '@vlayer/sdk/web_proof'
 
 // all args required by prover contract function except webProof itself
@@ -113,10 +112,10 @@ const commitmentArgs = ['0x0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', 123]
 
 const proverCallCommitment = {
   address: '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
-  functionName: 'proveTwitterProfile', 
-  commitmentArgs, 
-  chainId: sepolia
-  proverAbi
+  functionName: 'proveTwitterProfile',
+  commitmentArgs,
+  chainId: sepolia,
+  proverAbi,
 }
 
 const webProof = await webProofProvider.getWebProof({
@@ -159,7 +158,7 @@ Replace `api.x.com` with the domain you'd like to use. Then, configure your Web 
 import { createExtensionWebProofProvider } from '@vlayer/sdk/web_proof'
 
 const webProofProvider = createExtensionWebProofProvider({
-  wsProxyUrl: "ws://localhost:55688"
+  wsProxyUrl: "ws://localhost:55688",
 })
 ```
 

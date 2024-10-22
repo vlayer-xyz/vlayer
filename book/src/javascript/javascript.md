@@ -79,8 +79,8 @@ import { proverAbi } from './proverAbi'
 
 const { hash } = await vlayer.prove({
     address: '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
-    proverAbi
-    functionName: 'main', 
+    proverAbi,
+    functionName: 'main',
     args: ['0x0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', 123],
     chainId: foundry,
 })
@@ -105,7 +105,7 @@ import { testHelpers } from '@vlayer/sdk'
 testHelpers.createAnvilClient().writeContract({
     abi: verifierAbi,
     address,
-    account
+    account,
     functionName: 'verify',
     args: result,
 })
