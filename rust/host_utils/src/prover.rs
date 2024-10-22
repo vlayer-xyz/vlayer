@@ -2,6 +2,7 @@ use anyhow::Result;
 use risc0_zkvm::{
     BonsaiProver, ExecutorEnv, ExternalProver, ProveInfo, Prover as ProverTrait, ProverOpts,
 };
+use tracing::info;
 
 use crate::ProofMode;
 
@@ -24,10 +25,15 @@ impl Prover {
 }
 
 fn prove_bonsai(env: ExecutorEnv<'_>, elf: &[u8]) -> Result<ProveInfo> {
+    info!("Proving with Bonsai");
     let bonsai_prover = BonsaiProver::new("vlayer: bonsai");
     // block_in_place is used to avoid tokio runtime panic, since bonsai_prover.prove_with_opts is blocking.
     // https://github.com/risc0/risc0/issues/2049
-    tokio::task::block_in_place(|| bonsai_prover.prove_with_opts(env, elf, &ProverOpts::groth16()))
+    let prove_info = tokio::task::block_in_place(|| {
+        bonsai_prover.prove_with_opts(env, elf, &ProverOpts::groth16())
+    });
+    info!("Proving with Bonsai done");
+    prove_info
 }
 
 fn prove_fake(env: ExecutorEnv<'_>, elf: &[u8]) -> Result<ProveInfo> {

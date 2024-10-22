@@ -111,6 +111,10 @@ impl BlockTrie {
         self.0.hash_slow()
     }
 
+    pub fn size(&self) -> usize {
+        self.0.size()
+    }
+
     fn encode_key(block_number: u64) -> impl AsRef<[u8]> {
         encode_fixed_size(&block_number)
     }

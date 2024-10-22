@@ -22,7 +22,7 @@ use lazy_static::lazy_static;
 use provider::{to_eth_block_header, EvmBlockHeader};
 use risc0_zkvm::{sha::Digest, AssumptionReceipt, ExecutorEnv, ProveInfo, Receipt};
 use serde::Serialize;
-use tracing::instrument;
+use tracing::{info, instrument};
 
 lazy_static! {
     static ref GUEST_ID: Digest = RISC0_CHAIN_GUEST_ID.into();
@@ -32,9 +32,9 @@ pub struct Host<P>
 where
     P: JsonRpcClient,
 {
+    pub db: ChainDb,
     prover: Prover,
     provider: Provider<P>,
-    db: ChainDb,
     chain_id: ChainId,
 }
 
@@ -77,6 +77,7 @@ where
 
     #[instrument(skip(self))]
     async fn initialize(&self) -> Result<ChainUpdate, HostError> {
+        info!("Initializing chain");
         let latest_block = self.get_block(BlockTag::Latest).await?;
         let latest_block_number = latest_block.number();
         let trie = BlockTrie::init(&*latest_block)?;
@@ -98,6 +99,7 @@ where
 
     #[instrument(skip(self))]
     async fn append_prepend(&self) -> Result<ChainUpdate, HostError> {
+        info!("Appending and prepending blocks");
         let ChainTrie {
             block_range,
             trie: old_trie,
@@ -135,12 +137,16 @@ where
         Ok(chain_update)
     }
 
-    #[instrument(skip(self))]
+    #[instrument(skip_all)]
     fn prove(&self, input: Input, old_zk_proof: &Option<Bytes>) -> Result<Receipt, HostError> {
         let old_receipt = old_zk_proof.as_ref().map(decode_proof);
         let executor_env = build_executor_env(input, old_receipt)?;
-        let ProveInfo { receipt, .. } =
+        let ProveInfo { receipt, stats } =
             provably_execute(&self.prover, executor_env, RISC0_CHAIN_GUEST_ELF)?;
+        info!(
+            "Prover stats. Segments: {}, cycles: {}, user cycles: {}",
+            stats.segments, stats.total_cycles, stats.user_cycles
+        );
         Ok(receipt)
     }
 
@@ -155,6 +161,7 @@ where
 
     #[instrument(skip(self))]
     async fn get_block(&self, number: BlockTag) -> Result<Box<dyn EvmBlockHeader>, HostError> {
+        info!("Fetching block {}", number);
         let ethers_block = self
             .provider
             .get_block(number)
@@ -163,6 +170,7 @@ where
             .ok_or(HostError::BlockNotFound(number))?;
         let block = to_eth_block_header(ethers_block)
             .map_err(|e| HostError::BlockConversion(e.to_string()))?;
+        info!("Fetched block {}", block.number());
         Ok(Box::new(block))
     }
 }
