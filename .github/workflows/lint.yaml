@@ -33,7 +33,7 @@ jobs:
         run: rustup toolchain install nightly -c rustfmt
 
       - name: Install cargo sort
-        run: cargo install cargo-sort
+        run: cargo install --force cargo-sort
           
       - name: Run Host lints
         working-directory: rust
