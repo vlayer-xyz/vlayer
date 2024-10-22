@@ -97,10 +97,18 @@ type DB = Box<dyn for<'a> Database<'a>>;
 
 pub struct ChainDb {
     db: DB,
+    mode: Mode,
+}
+
+pub enum Mode {
+    ReadOnly,
+    ReadWrite,
 }
 
 #[derive(Error, Debug, PartialEq)]
 pub enum ChainDbError {
+    #[error("Attempted write on read-only database")]
+    ReadOnly,
     #[error("Database error: {0}")]
     Db(#[from] DbError),
     #[error("RLP error: {0}")]
@@ -118,15 +126,16 @@ pub enum ChainDbError {
 pub type ChainDbResult<T> = Result<T, ChainDbError>;
 
 impl ChainDb {
-    pub fn new(path: impl AsRef<Path>) -> ChainDbResult<Self> {
+    pub fn new(path: impl AsRef<Path>, mode: Mode) -> ChainDbResult<Self> {
         let db = Box::new(Mdbx::open(path)?);
-        Ok(Self { db })
+        Ok(Self { db, mode })
     }
-}
 
-impl ChainDb {
-    pub fn from_db(db: impl for<'a> Database<'a> + 'static) -> Self {
-        Self { db: Box::new(db) }
+    pub fn from_db(db: impl for<'a> Database<'a> + 'static, mode: Mode) -> Self {
+        Self {
+            db: Box::new(db),
+            mode,
+        }
     }
 
     fn begin_ro(&self) -> ChainDbResult<ChainDbTx<dyn ReadTx + '_>> {
@@ -135,8 +144,12 @@ impl ChainDb {
     }
 
     fn begin_rw(&mut self) -> ChainDbResult<ChainDbTx<dyn ReadWriteTx + '_>> {
-        let tx = self.db.begin_rw()?;
-        Ok(ChainDbTx { tx })
+        match self.mode {
+            Mode::ReadOnly => Err(ChainDbError::ReadOnly),
+            Mode::ReadWrite => Ok(ChainDbTx {
+                tx: self.db.begin_rw()?,
+            }),
+        }
     }
 
     pub fn get_chain_info(&self, chain_id: ChainId) -> ChainDbResult<Option<ChainInfo>> {
