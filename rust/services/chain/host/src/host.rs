@@ -6,7 +6,7 @@ use std::ops::RangeInclusive;
 use alloy_primitives::ChainId;
 use block_trie::BlockTrie;
 use bytes::Bytes;
-use chain_db::{difference, ChainDb, ChainInfo, ChainTrie, ChainUpdate};
+use chain_db::{difference, ChainDb, ChainInfo, ChainTrie, ChainUpdate, Mode};
 use chain_guest::Input;
 use chain_guest_wrapper::{RISC0_CHAIN_GUEST_ELF, RISC0_CHAIN_GUEST_ID};
 pub use config::HostConfig;
@@ -42,7 +42,7 @@ impl Host<Http> {
         let provider = Provider::<Http>::try_from(config.rpc_url.as_str())
             .expect("could not instantiate HTTP Provider");
         let prover = Prover::new(config.proof_mode);
-        let db = ChainDb::new(config.db_path)?;
+        let db = ChainDb::new(config.db_path, Mode::ReadWrite)?;
 
         Ok(Host::from_parts(prover, provider, db, config.chain_id))
     }
@@ -230,7 +230,7 @@ mod test {
         const LATEST: u64 = 20_000_000;
 
         fn test_db() -> ChainDb {
-            ChainDb::from_db(InMemoryDatabase::new())
+            ChainDb::from_db(InMemoryDatabase::new(), Mode::ReadWrite)
         }
 
         mod poll {

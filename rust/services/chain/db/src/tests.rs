@@ -9,7 +9,7 @@ use super::*;
 
 fn get_test_db() -> ChainDb {
     let db = InMemoryDatabase::new();
-    ChainDb::from_db(db)
+    ChainDb::from_db(db, Mode::ReadWrite)
 }
 
 fn insert_node(db: &mut ChainDb, node_rlp: &Bytes) {
@@ -56,6 +56,15 @@ fn check_proof(db: &ChainDb, root_hash: B256, block_num: u64) -> BlockTrie {
 }
 
 static EMPTY_PROOF: &[u8] = &[];
+
+#[test]
+fn read_only_error_on_write() -> Result<()> {
+    let mut db = ChainDb::from_db(InMemoryDatabase::new(), Mode::ReadOnly);
+    let res = db.begin_rw();
+    // Not using .unwrap_err() because res is not Debug
+    assert!(res.is_err_and(|e| e == ChainDbError::ReadOnly));
+    Ok(())
+}
 
 #[test]
 fn chain_info_get_insert() -> Result<()> {
