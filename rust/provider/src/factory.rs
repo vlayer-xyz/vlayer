@@ -109,7 +109,7 @@ impl ProviderFactory<CachedProvider> for CachedProviderFactory {
         let file_path = get_path(&self.rpc_file_cache, chain_id)?;
 
         let provider = self.ethers_provider_factory.create(chain_id)?;
-        CachedProvider::new(file_path, Box::new(provider))
+        CachedProvider::new(file_path, provider)
             .map_err(|err| ProviderFactoryError::CachedProvider(err.to_string()))
     }
 }
