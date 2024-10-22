@@ -22,7 +22,7 @@ use lazy_static::lazy_static;
 use provider::{to_eth_block_header, EvmBlockHeader};
 use risc0_zkvm::{sha::Digest, AssumptionReceipt, ExecutorEnv, ProveInfo, Receipt};
 use serde::Serialize;
-use tracing::{info, instrument};
+use tracing::{debug, info, instrument};
 
 lazy_static! {
     static ref GUEST_ID: Digest = RISC0_CHAIN_GUEST_ID.into();
@@ -143,7 +143,7 @@ where
         let executor_env = build_executor_env(input, old_receipt)?;
         let ProveInfo { receipt, stats } =
             provably_execute(&self.prover, executor_env, RISC0_CHAIN_GUEST_ELF)?;
-        info!(
+        debug!(
             "Prover stats. Segments: {}, cycles: {}, user cycles: {}",
             stats.segments, stats.total_cycles, stats.user_cycles
         );
