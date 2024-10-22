@@ -41,7 +41,7 @@ mod get {
     use null_provider_factory::NullProviderFactory;
 
     use super::*;
-    use crate::{factory::FileProviderFactory, FileProvider};
+    use crate::{cache::CachedProvider, factory::FileProviderFactory};
 
     mod null_provider_factory {
         use super::*;
@@ -62,7 +62,7 @@ mod get {
     fn gets_cached_provider() -> anyhow::Result<()> {
         let path_buf = PathBuf::from("testdata/cache.json");
         let provider =
-            Arc::new(Box::new(FileProvider::from_file(&path_buf)?) as Box<dyn BlockingProvider>);
+            Arc::new(Box::new(CachedProvider::from_file(&path_buf)?) as Box<dyn BlockingProvider>);
 
         let cache = RwLock::new(HashMap::from([(Chain::mainnet().id(), Arc::clone(&provider))]));
 

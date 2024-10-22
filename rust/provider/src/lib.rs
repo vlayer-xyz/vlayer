@@ -1,7 +1,6 @@
 mod cache;
 mod ethers;
 mod factory;
-mod file;
 mod multi;
 mod null;
 mod proof;
@@ -19,7 +18,6 @@ pub use factory::{
     CachedProviderFactory, EthersProviderFactory, FileProviderFactory, ProviderFactory,
     ProviderFactoryError,
 };
-pub use file::FileProvider;
 pub use multi::CachedMultiProvider;
 pub use proof::{EIP1186Proof, StorageProof};
 

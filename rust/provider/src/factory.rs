@@ -6,7 +6,7 @@ use thiserror::Error;
 use url::ParseError;
 
 use super::{cache::CachedProvider, EthersClient};
-use crate::{BlockingProvider, EthersProvider, FileProvider};
+use crate::{BlockingProvider, EthersProvider};
 
 #[derive(Error, Debug)]
 pub enum ProviderFactoryError {
@@ -76,7 +76,7 @@ impl ProviderFactory for FileProviderFactory {
         let file_path = get_path(&self.rpc_file_cache, chain_id)?;
 
         Ok(Box::new(
-            FileProvider::from_file(&file_path)
+            CachedProvider::from_file(&file_path)
                 .map_err(|err| ProviderFactoryError::CachedProvider(err.to_string()))?,
         ))
     }
