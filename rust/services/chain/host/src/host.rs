@@ -32,7 +32,7 @@ pub struct Host<P>
 where
     P: JsonRpcClient,
 {
-    pub db: ChainDb,
+    db: ChainDb,
     prover: Prover,
     provider: Provider<P>,
     chain_id: ChainId,
@@ -68,11 +68,18 @@ where
     }
 
     #[instrument(skip(self))]
-    pub async fn poll(&self) -> Result<ChainUpdate, HostError> {
+    async fn poll(&self) -> Result<ChainUpdate, HostError> {
         match self.db.get_chain_info(self.chain_id)? {
             None => self.initialize().await,
             Some(_) => self.append_prepend().await,
         }
+    }
+
+    #[instrument(skip(self))]
+    pub async fn poll_commit(&mut self) -> Result<(), HostError> {
+        let chain_update = self.poll().await?;
+        self.db.update_chain(self.chain_id, chain_update)?;
+        Ok(())
     }
 
     #[instrument(skip(self))]
