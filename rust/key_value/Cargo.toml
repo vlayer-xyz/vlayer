@@ -5,12 +5,12 @@ edition = "2021"
 
 [dependencies]
 anyhow = { workspace = true }
-thiserror = { workspace = true }
-libmdbx = "0.5.2"
-bytes = { workspace = true }
-static_assertions = "1.1.0"
 auto_impl = { workspace = true }
+bytes = { workspace = true }
 derive_more = { workspace = true }
+libmdbx = "0.5.2"
+static_assertions = "1.1.0"
+thiserror = { workspace = true }
 
 [dev-dependencies]
 tempfile = { workspace = true }

@@ -4,18 +4,18 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-call_engine = { workspace = true }
-block_header = { workspace = true }
 alloy-chains = { workspace = true }
 alloy-primitives = { workspace = true }
-alloy-rlp-derive = { workspace = true }
 alloy-rlp = { workspace = true }
-mpt = { workspace = true }
-as-any = { workspace = true }
+alloy-rlp-derive = { workspace = true }
 anyhow = { workspace = true }
-revm = { workspace = true }
+as-any = { workspace = true }
+block_header = { workspace = true }
+call_engine = { workspace = true }
 chain = { workspace = true }
 chain_types = { workspace = true }
+mpt = { workspace = true }
+revm = { workspace = true }
 
 [lints]
 workspace = true

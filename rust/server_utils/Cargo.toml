@@ -10,19 +10,19 @@ axum = { workspace = true, features = ["macros"] }
 axum-jrpc = { workspace = true }
 ethers = { workspace = true }
 hex = { workspace = true }
+host_utils = { workspace = true }
 http-body-util = { workspace = true }
 httpmock = { workspace = true }
 mime = { workspace = true }
+reqwest = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 thiserror = { workspace = true }
+tokio = { workspace = true }
 tower = { workspace = true }
 tower-http = { workspace = true, features = ["trace"] }
 tower-request-id = { workspace = true }
 tracing = { workspace = true }
-host_utils = { workspace = true }
-reqwest = { workspace = true }
-tokio = { workspace = true }
 
 [lints]
 workspace = true

@@ -6,17 +6,17 @@ edition = "2021"
 [dependencies]
 alloy-primitives = { workspace = true, features = ["rlp", "serde"] }
 alloy-rlp = { workspace = true }
+alloy-rlp-derive = { workspace = true }
 as-any = { workspace = true }
 auto_impl = { workspace = true }
+dyn-clone = { workspace = true }
 revm = { workspace = true, features = ["serde", "std"] }
 serde = { workspace = true }
-alloy-rlp-derive = { workspace = true }
-dyn-clone = { workspace = true }
 
 [dev-dependencies]
-serde_json = { workspace = true }
 anyhow = { workspace = true }
 lazy_static = { workspace = true }
+serde_json = { workspace = true }
 
 [lints]
 workspace = true

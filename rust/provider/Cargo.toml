@@ -6,18 +6,18 @@ edition = "2021"
 [dependencies]
 alloy-chains = { workspace = true }
 alloy-primitives = { workspace = true, features = ["rlp", "serde"] }
-ethers-providers = { workspace = true }
-ethers-core = { workspace = true }
-call_engine = { workspace = true }
-block_header = { workspace = true }
 anyhow = { workspace = true }
-tokio = { workspace = true, features = ["macros"]}
-thiserror = { workspace = true }
 auto_impl = { workspace = true }
+block_header = { workspace = true }
+call_engine = { workspace = true }
+derivative = { workspace = true }
+ethers-core = { workspace = true }
+ethers-providers = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true, features = ["macros"] }
 url = { workspace = true }
-derivative = { workspace = true }
 
 [lints]
 workspace = true

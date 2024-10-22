@@ -4,10 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-serde = { workspace = true, features = ["derive"] }
-anyhow = { workspace = true }
-alloy-primitives = { workspace = true, features = ["rlp", "serde"] }
-thiserror = { workspace = true }
-revm = { workspace = true, features = ["serde", "std"] }
 alloy-chains = { workspace = true }
+alloy-primitives = { workspace = true, features = ["rlp", "serde"] }
+anyhow = { workspace = true }
 once_cell = { workspace = true }
+revm = { workspace = true, features = ["serde", "std"] }
+serde = { workspace = true, features = ["derive"] }
+thiserror = { workspace = true }

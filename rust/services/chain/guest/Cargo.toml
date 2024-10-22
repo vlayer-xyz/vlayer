@@ -4,14 +4,14 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-block_trie = { workspace = true }
+alloy-primitives = { workspace = true }
 block_header = { workspace = true }
-serde = { workspace = true }
+block_trie = { workspace = true }
+bytes = { workspace = true }
 mpt = { workspace = true }
 risc0-zkp = { workspace = true }
 risc0-zkvm = { workspace = true }
-alloy-primitives = { workspace = true }
-bytes = { workspace = true }
+serde = { workspace = true }
 
 [lints]
 workspace = true
