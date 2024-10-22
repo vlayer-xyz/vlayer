@@ -107,11 +107,11 @@ where
         ..Default::default()
     };
 
-    let provider_factory: Box<dyn ProviderFactory> = Box::new(if UPDATE_SNAPSHOTS {
-        CachedProviderFactory::new(rpc_urls(), file_cache)
+    let provider_factory: Box<dyn ProviderFactory> = if UPDATE_SNAPSHOTS {
+        Box::new(CachedProviderFactory::new(rpc_urls(), rpc_file_cache(test_name)))
     } else {
-        FileProviderFactory::new(file_cache)
-    });
+        Box::new(FileProviderFactory::new(rpc_file_cache(test_name)))
+    };
     let host = create_host(provider_factory, block_number, &config).await?;
     let host_output = host.run(call).await?;
     let return_value = C::abi_decode_returns(&host_output.guest_output.evm_call_result, false)?;
