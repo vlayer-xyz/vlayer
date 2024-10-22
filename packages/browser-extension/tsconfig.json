@@ -2,18 +2,13 @@
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
     "jsx": "react",
-    "target": "ESNext",
     "useDefineForClassFields": true,
     "lib": ["ESNext", "DOM"],
     "moduleResolution": "bundler",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "esModuleInterop": true,
-    "noUnusedLocals": true,
-    "noUnusedParameters": true,
-    "noImplicitReturns": true,
     "baseUrl": "./",
-    "composite": true,
     "allowImportingTsExtensions": true,
     "paths": {
       "components/*" : ["./src/components/*"],

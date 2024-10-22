@@ -3,7 +3,6 @@
   "compilerOptions": {
     // Enable latest features
     "lib": ["ESNext", "DOM"],
-    "target": "ESNext",
     "moduleDetection": "force",
     "jsx": "react-jsx",
     "allowJs": true,
@@ -12,15 +11,5 @@
     "moduleResolution": "bundler",
     "allowImportingTsExtensions": true,
     "verbatimModuleSyntax": true,
-
-    // Best practices
-    "noFallthroughCasesInSwitch": true,
-
-    // Some stricter flags (disabled by default)
-    "noUnusedLocals": false,
-    "noUnusedParameters": false,
-    "noPropertyAccessFromIndexSignature": false,
-
-    "composite": true,
   }
 }
