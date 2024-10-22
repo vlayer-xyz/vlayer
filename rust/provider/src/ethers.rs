@@ -4,19 +4,21 @@ use alloy_primitives::{BlockNumber, B256, U256};
 use anyhow::{anyhow, Context, Result};
 use block_header::{EthBlockHeader, EvmBlockHeader};
 use ethers_core::types::{Block, BlockNumber as BlockTag};
-use ethers_providers::Middleware;
+use ethers_providers::{Http, Middleware, RetryClient};
 use tokio::runtime::Handle;
 
 use super::{BlockingProvider, EIP1186Proof};
 
+pub type EthersClient = ethers_providers::Provider<RetryClient<Http>>;
+
 /// A provider that fetches data from an Ethereum node using the ethers crate.
 #[derive(Debug)]
-pub struct EthersProvider<M: Middleware> {
-    client: M,
+pub struct EthersProvider {
+    client: EthersClient,
 }
 
-impl<M: Middleware> EthersProvider<M> {
-    pub(crate) fn new(client: M) -> Self {
+impl EthersProvider {
+    pub(crate) fn new(client: EthersClient) -> Self {
         Self { client }
     }
 }
@@ -27,10 +29,7 @@ fn block_on<F: Future>(f: F) -> F::Output {
     tokio::task::block_in_place(|| handle.block_on(f))
 }
 
-impl<M: Middleware> BlockingProvider for EthersProvider<M>
-where
-    M::Error: 'static,
-{
+impl BlockingProvider for EthersProvider {
     fn get_block_header(&self, block: BlockTag) -> Result<Option<Box<dyn EvmBlockHeader>>> {
         let block = block_on(self.client.get_block(block))?;
         match block {

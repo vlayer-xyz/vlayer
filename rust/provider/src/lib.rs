@@ -16,8 +16,8 @@ pub use ethers::{to_eth_block_header, EthersProvider};
 pub use ethers_core::types::BlockNumber as BlockTag;
 use ethers_providers::{Http, RetryClient};
 pub use factory::{
-    CachedProviderFactory, EthProvider, EthersProviderFactory, FileProviderFactory,
-    ProviderFactory, ProviderFactoryError,
+    CachedProviderFactory, EthersProviderFactory, FileProviderFactory, ProviderFactory,
+    ProviderFactoryError,
 };
 pub use file::FileProvider;
 pub use multi::CachedMultiProvider;

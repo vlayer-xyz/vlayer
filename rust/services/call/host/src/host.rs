@@ -17,7 +17,7 @@ use config::HostConfig;
 use error::HostError;
 use ethers_core::types::BlockNumber;
 use host_utils::Prover;
-use provider::{BlockingProvider, CachedMultiProvider, EthProvider, EthersProviderFactory};
+use provider::{CachedMultiProvider, EthersProviderFactory};
 use risc0_zkvm::ExecutorEnv;
 use serde::Serialize;
 use tracing::info;
@@ -30,15 +30,15 @@ use crate::{
 pub mod config;
 pub mod error;
 
-pub struct Host<P: BlockingProvider> {
+pub struct Host {
     start_execution_location: ExecutionLocation,
-    envs: CachedEvmEnv<ProofDb<P>>,
+    envs: CachedEvmEnv<ProofDb>,
     prover: Prover,
     _chain_proof_client: ChainProofClient,
     max_calldata_size: usize,
 }
 
-impl Host<EthProvider> {
+impl Host {
     pub fn try_new(config: &HostConfig) -> Result<Self, HostError> {
         let provider_factory = EthersProviderFactory::new(config.rpc_urls.clone());
         let providers = CachedMultiProvider::new(provider_factory);
@@ -50,7 +50,7 @@ impl Host<EthProvider> {
 }
 
 pub fn get_block_number(
-    providers: &CachedMultiProvider<impl BlockingProvider>,
+    providers: &CachedMultiProvider,
     chain_id: ChainId,
 ) -> Result<ChainId, HostError> {
     let provider = providers.get(chain_id)?;
@@ -64,12 +64,9 @@ pub fn get_block_number(
     Ok(block_number)
 }
 
-impl<P> Host<P>
-where
-    P: BlockingProvider + 'static,
-{
+impl Host {
     pub fn try_new_with_components(
-        providers: CachedMultiProvider<P>,
+        providers: CachedMultiProvider,
         block_number: u64,
         chain_proof_client: ChainProofClient,
         config: &HostConfig,

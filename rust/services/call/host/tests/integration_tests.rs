@@ -12,10 +12,7 @@ use chain_server::server::ChainProofServerMock;
 use dotenv::dotenv;
 use ethers_core::types::BlockNumber as BlockTag;
 use lazy_static::lazy_static;
-use provider::{
-    BlockingProvider, CachedMultiProvider, CachedProviderFactory, FileProviderFactory,
-    ProviderFactory,
-};
+use provider::{CachedMultiProvider, CachedProviderFactory, FileProviderFactory, ProviderFactory};
 use serde_json::json;
 
 // To activate recording, set UPDATE_SNAPSHOTS to true.
@@ -58,14 +55,11 @@ fn rpc_urls() -> HashMap<ChainId, String> {
     ])
 }
 
-async fn create_host<P>(
-    provider_factory: impl ProviderFactory<P> + 'static,
+async fn create_host(
+    provider_factory: impl ProviderFactory + 'static,
     block_tag: BlockTag,
     config: &HostConfig,
-) -> Result<Host<P>, HostError>
-where
-    P: BlockingProvider + 'static,
-{
+) -> Result<Host, HostError> {
     let providers = CachedMultiProvider::new(provider_factory);
     let chain_proof_server_mock = ChainProofServerMock::start().await;
     let chain_proof_client = ChainProofClient::new(chain_proof_server_mock.url());
@@ -87,14 +81,11 @@ where
     Host::try_new_with_components(providers, block_number, chain_proof_client, config)
 }
 
-fn block_tag_to_block_number<P>(
-    providers: &CachedMultiProvider<P>,
+fn block_tag_to_block_number(
+    providers: &CachedMultiProvider,
     chain_id: u64,
     block_tag: BlockTag,
-) -> Result<u64, HostError>
-where
-    P: BlockingProvider + 'static,
-{
+) -> Result<u64, HostError> {
     match block_tag {
         BlockTag::Latest => get_block_number(providers, chain_id),
         BlockTag::Number(block_no) => Ok(block_no.as_u64()),

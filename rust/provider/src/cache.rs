@@ -1,4 +1,4 @@
-use std::{collections::hash_map::Entry, path::PathBuf, sync::RwLock};
+use std::{collections::hash_map::Entry, marker::PhantomData, path::PathBuf, sync::RwLock};
 
 use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256};
 use anyhow::{bail, Result};
@@ -7,6 +7,7 @@ use ethers_core::types::BlockNumber as BlockTag;
 use json::{AccountQuery, BlockQuery, JsonCache, ProofQuery, StorageQuery};
 
 use super::{BlockingProvider, EIP1186Proof};
+use crate::null::NullProvider;
 
 pub(crate) mod json;
 
@@ -23,7 +24,7 @@ impl CachedProvider {
     /// Creates a new [CachedProvider]. At this point, the cache files
     /// directory should exist and the cache file itself should not.
     /// A new cache file will be created when dropped.
-    pub fn new(cache_path: PathBuf, provider: impl BlockingProvider + 'static) -> Result<Self> {
+    pub fn new(cache_path: PathBuf, provider: Box<dyn BlockingProvider>) -> Result<Self> {
         // Sanity checks.
         if let Some(parent) = cache_path.parent() {
             if !parent.exists() {
@@ -39,7 +40,15 @@ impl CachedProvider {
 
         let cache = JsonCache::empty(cache_path);
         Ok(Self {
-            inner: Box::new(provider),
+            inner: provider,
+            cache: RwLock::new(cache),
+        })
+    }
+
+    pub fn from_file(file_path: &PathBuf) -> Result<Self> {
+        let cache = JsonCache::load(file_path)?;
+        Ok(Self {
+            inner: Box::new(NullProvider(PhantomData)),
             cache: RwLock::new(cache),
         })
     }

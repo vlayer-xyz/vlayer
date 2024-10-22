@@ -33,7 +33,7 @@ impl PendingStateProvider {
 
     fn get_state_root(&self) -> B256 {
         let proofs = self.all_account_proofs();
-        let state_trie = ProofDb::<PendingStateProvider>::state_trie(&proofs);
+        let state_trie = ProofDb::state_trie(&proofs);
         state_trie.map_or(Default::default(), |trie| trie.hash_slow())
     }
 }
@@ -109,11 +109,14 @@ pub struct PendingStateProviderFactory {
     pub state: EvmState,
 }
 
-impl ProviderFactory<PendingStateProvider> for PendingStateProviderFactory {
-    fn create(&self, _chain_id: ChainId) -> Result<PendingStateProvider, ProviderFactoryError> {
-        Ok(PendingStateProvider {
+impl ProviderFactory for PendingStateProviderFactory {
+    fn create(
+        &self,
+        _chain_id: ChainId,
+    ) -> Result<Box<dyn BlockingProvider>, ProviderFactoryError> {
+        Ok(Box::new(PendingStateProvider {
             state: self.state.clone(),
             block_number: self.block_number,
-        })
+        }))
     }
 }

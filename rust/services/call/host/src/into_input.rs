@@ -6,14 +6,10 @@ use call_engine::evm::{
     env::cached::CachedEvmEnv,
     input::{EvmInput, MultiEvmInput},
 };
-use provider::BlockingProvider;
 
 use crate::db::proof::ProofDb;
 
-fn into_input<P: BlockingProvider>(
-    db: &ProofDb<P>,
-    header: Box<dyn EvmBlockHeader>,
-) -> anyhow::Result<EvmInput> {
+fn into_input(db: &ProofDb, header: Box<dyn EvmBlockHeader>) -> anyhow::Result<EvmInput> {
     let (state_trie, storage_tries) = db.prepare_state_storage_tries()?;
     ensure!(
         header.state_root() == &state_trie.hash_slow(),
@@ -32,9 +28,7 @@ fn into_input<P: BlockingProvider>(
     Ok(evm_input)
 }
 
-pub(crate) fn into_multi_input<P: BlockingProvider>(
-    envs: CachedEvmEnv<ProofDb<P>>,
-) -> anyhow::Result<MultiEvmInput> {
+pub(crate) fn into_multi_input(envs: CachedEvmEnv<ProofDb>) -> anyhow::Result<MultiEvmInput> {
     envs.into_inner()
         .into_iter()
         .map(|(location, env)| {

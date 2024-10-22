@@ -21,18 +21,12 @@ struct State {
 }
 
 /// A revm [Database] backed by a [Provider] that caches all queries needed for a state proof.
-pub struct ProofDb<P>
-where
-    P: BlockingProvider,
-{
-    db: ProviderDb<P>,
+pub struct ProofDb {
+    db: ProviderDb,
     state: RwLock<State>,
 }
 
-impl<P> DatabaseRef for ProofDb<P>
-where
-    P: BlockingProvider,
-{
+impl DatabaseRef for ProofDb {
     type Error = ProviderDbError;
 
     fn basic_ref(&self, address: Address) -> Result<Option<AccountInfo>, Self::Error> {
@@ -68,11 +62,8 @@ where
     }
 }
 
-impl<P> ProofDb<P>
-where
-    P: BlockingProvider,
-{
-    pub(crate) fn new(provider: Arc<P>, block_number: u64) -> Self {
+impl ProofDb {
+    pub(crate) fn new(provider: Arc<Box<dyn BlockingProvider>>, block_number: u64) -> Self {
         let state = RwLock::new(State::default());
         Self {
             state,
