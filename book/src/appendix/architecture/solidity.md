@@ -28,44 +28,67 @@ contract Example is Verifier {
 
 ## Data flow
 
-Proving data flow is consists of three steps. It starts at `Guest`, which returns `GuestOutput`. 
-`GuestOutput` consist of two fields: `call_assumptions` and `evm_call_result`.
+Proving data flow consists of three steps. 
+
+### GuestOutput
+
+It starts at `Guest`, which returns `GuestOutput`. 
+`GuestOutput` consists of one field `evm_call_result`. `evm_call_result` field is abi encoded `Prover` function output. 
+Since `Prover` returns `Proof` placeholder as its first returned value, `GuestOutput` pre-fills `length` and `call_assumptions` fields of `Proof` structuture. 
+
+`length` field of `Proof` structure is equal to the length of abi encoded _verified args_, not including size of `Proof` placeholder.  
 
 See the code snippets below for pseudocode:
 
 ```rust
 pub struct GuestOutput {
-    pub call_assumptions: CallAssumptions,
     pub evm_call_result: Vec<u8>,
 }
 ```
 
-```solidity
-struct CallAssumptions {
-    address proverContractAddress;
-    bytes4 functionSelector;
-    uint256 settleBlockNumber;
-    bytes32 settleBlockHash;
-}
-```
+![Schema](/images/architecture/guest-output.png)
 
-> Note that `CallAssumptions` structure is generated based on Solidity code from `Vlayer::Assumptions`, with `sol!` macro.
 
-Since, `evm_call_result` returned from the `Prover`, includes `Proof` placeholder; 
-`Host` replaces the placeholder `Proof` bytes with an actual `length`, a valid `seal` and `callAssumptions`.
+### Host output - `v_call` result
+
+Since, `evm_call_result` returned from the `Prover` includes `Proof` placeholder; `Host` replaces the last field of `Proof` placeholder bytes the actual `seal`.
 The `Host` returns it via JSON-RPC `v_call` method, as a string of bytes, in the `result` field.
 The approach above, enables the smart-contract developer, to decode `v_call` result as if they decoded directly the `Prover` function result. 
+In other words, `v_call` result is compatible, and decodable, with `ABI` specification of the called `Prover` fundtion. 
 
+### Verifier call
 Finally, the method on the on-chain smart contract is called. For that purpose, it is prepended with a function selector.
 
-The `Proof` structure looks as follows:
 
+## Zero-knowledge proof verification
+
+To verify a zero-knowledge proof, vlayer uses a `verify` function, delivered by Risc-0.
+
+```solidity
+function verify(Seal calldata seal, bytes32 imageId, bytes32 journalDigest)
+```
+
+`onlyVerified` gets `seal` and `journalDigest` by slicing it out of `msg.data`. 
+
+`length` field of `Proof` structure is used, when guest output bytes are restored in `Solidity`
+in order to compute `journalDigets`. `length` field hints the verifier, which bytes should be included in theh journal, since they belong to encoding of the _verified args_, 
+and which bytes belong _unverified args_ passed additionally in calldata. 
+
+`imageId` is fixed on blockchain and updated on each new version of vlayer.
+
+## Data encoding summary
+
+Below, is a schema of how a block of data is encoded in different structures at different stages.
+
+![Schema](/images/architecture/transaction-data.png)
+
+## Structures
+The `Proof` structure looks as follows:
 
 ```solidity
 struct Proof {
     uint32 length;
     Seal seal;
-
     CallAssumptions callAssumptions;
 }
 ```
@@ -84,28 +107,19 @@ struct Seal {
 }
 ```
 
-## Zero-knowledge proof verification
-
-To verify a zero-knowledge proof, vlayer uses a `verify` function, delivered by Risc-0.
+and the following structure of `CallAssumptions`:
 
 ```solidity
-function verify(Seal calldata seal, bytes32 imageId, bytes32 journalDigest)
+struct CallAssumptions {
+    address proverContractAddress;
+    bytes4 functionSelector;
+    uint256 settleBlockNumber;
+    bytes32 settleBlockHash;
+}
 ```
 
-`Proof.length` represents the length of journal data, which is located in `msg.data`, starting at byte 0 of `CallAssumptions`, spanning across proof placeholder bytes and ending with the last byte of the last verified argument.
+> Note that `Proof`, `Seal` and `CallAssumptions` structures are generated based on Solidity code from  with `sol!` macro.
 
-`onlyVerified` gets `seal` and `journalDigest` by slicing it out of `msg.data`. This is where `length` is used.
-
-`imageId` is fixed on blockchain and updated on each new version of vlayer.
-
-## Data encoding summary
-
-Below, is a schema of how a block of data is encoded in different structures at different stages.
-
-![Schema](/images/architecture/transaction-data.png)
-
-
-> Thanks to clever slicing of data, there is no need for additional repackaging or recoding. The smart contracts, can be called with arguments, that can be easily manipulated, without extra deserialization process. JavaScript client which calls JSON-RPC API, have easy access to the variables as well.
 
 ## Two Proving Modes
 
