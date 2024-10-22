@@ -1,6 +1,7 @@
 use ::regex::Regex;
 use alloy_primitives::Bytes;
 use alloy_sol_types::{sol_data, SolType, SolValue};
+use regex::{Captures, Match};
 use revm::precompile::{Precompile, PrecompileErrors, PrecompileOutput, PrecompileResult};
 
 use crate::precompiles::{gas_used, map_to_fatal};
@@ -26,22 +27,27 @@ fn regex_capture_run(input: &Bytes, gas_limit: u64) -> PrecompileResult {
     let gas_used = gas_used(input.len(), BASE_COST, PER_WORD_COST, gas_limit)?;
 
     let (source, regex) = source_and_regex(input)?;
-
-    let captures = regex.captures(&source).map_or_else(Vec::new, |captures| {
-        captures
-            .iter()
-            .filter_map(|capture| capture.map(|c| c.as_str().to_string()))
-            .collect()
-    });
+    let captures = regex
+        .captures(&source)
+        .map_or_else(Vec::new, captures_to_strings);
 
     Ok(PrecompileOutput::new(gas_used, captures.abi_encode().into()))
 }
 
+fn captures_to_strings(captures: Captures) -> Vec<String> {
+    captures.iter().map(match_into_string).collect()
+}
+
+fn match_into_string(maybe_match: Option<Match>) -> String {
+    match maybe_match {
+        None => "".into(),
+        Some(m) => m.as_str().into(),
+    }
+}
+
 fn source_and_regex(input: &Bytes) -> Result<(String, Regex), PrecompileErrors> {
     let [source, pattern] = InputType::abi_decode(input, true).map_err(map_to_fatal)?;
-
     let regex = Regex::new(&pattern).map_err(map_to_fatal)?;
-
     Ok((source, regex))
 }
 
@@ -142,12 +148,12 @@ mod capture_test {
 
     #[test]
     fn first_capture_is_whole_match_even_without_captured_groups() {
-        let source = "Hello, World!";
-        let regex = r"^Hello,(f)? World!$";
+        let source = "Hello World!";
+        let regex = r"^Hello(,)? World!$";
 
         let result = capture(source, regex);
 
-        assert_eq!(result, vec![source.to_string()]);
+        assert_eq!(result, vec![source.to_string(), "".to_string()]);
     }
 
     #[test]

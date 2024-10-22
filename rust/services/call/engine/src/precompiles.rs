@@ -34,7 +34,6 @@ pub(crate) const VLAYER_PRECOMPILES: [PrecompileWithAddress; 8] = [
 
 #[allow(clippy::needless_pass_by_value)] // More convenient to use in map_err
 fn map_to_fatal<E: ToString>(err: E) -> PrecompileErrors {
-    dbg!(&err.to_string());
     PrecompileErrors::Fatal {
         msg: err.to_string(),
     }
