@@ -5,7 +5,6 @@
     "jsx" : "react-jsx",
     "esModuleInterop": true,
     "moduleResolution": "node",
-    "skipLibCheck": true,
     "noUnusedLocals": true,
     "noImplicitAny": true,
     "allowJs": true,

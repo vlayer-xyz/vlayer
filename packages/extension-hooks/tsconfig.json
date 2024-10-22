@@ -14,7 +14,6 @@
     "verbatimModuleSyntax": true,
 
     // Best practices
-    "skipLibCheck": true,
     "noFallthroughCasesInSwitch": true,
 
     // Some stricter flags (disabled by default)

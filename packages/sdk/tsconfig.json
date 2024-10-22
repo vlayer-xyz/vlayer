@@ -9,7 +9,6 @@
     "moduleDetection": "force",
     "allowImportingTsExtensions": true,
     "downlevelIteration": true,
-    "skipLibCheck": true,
     "jsx": "preserve",
     "allowSyntheticDefaultImports": true,
     "forceConsistentCasingInFileNames": true,
