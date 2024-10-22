@@ -6,7 +6,7 @@ On-chain verification is implemented by using a customized verification function
 - a list of arguments in the same order as returned by the `Prover` (public output);
 - optionally, user defined additional arguments.
 
-> `Proof` structure must always be returned from the `Prover` as the first returned element (more on that [here](../../prover.md#proof)),
+> `Proof` structure must always be returned from the `Prover` as the first returned element (more on that [here](/advanced/prover.html#proof)),
 > which means that `Proof` structure must also be passed as the first argument to the verification function. 
 
 The verification function should use the `onlyVerified()` modifier, which takes two arguments, the address of a smart contract and a selector of function that was executed in the `Prover` contract.
