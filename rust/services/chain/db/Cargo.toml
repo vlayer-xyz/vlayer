@@ -4,21 +4,20 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+alloy-primitives = { workspace = true }
+alloy-rlp = { workspace = true }
+anyhow = { workspace = true }
+block_trie = { workspace = true }
+bytes = { workspace = true }
+chain_guest_wrapper = { workspace = true }
+derive_more = { workspace = true }
 key_value = { workspace = true }
 mpt = { workspace = true }
-alloy-rlp = { workspace = true }
-alloy-primitives = { workspace = true }
-block_trie = { workspace = true }
 nybbles = { workspace = true }
 thiserror = { workspace = true }
-bytes = { workspace = true }
-derive_more = { workspace = true }
-anyhow = { workspace = true }
-chain_guest_wrapper = { workspace = true }
 
 [dev-dependencies]
 rand = { workspace = true }
-
 
 [lints]
 workspace = true

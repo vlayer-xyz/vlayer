@@ -31,27 +31,33 @@ jobs:
 
       - name: Install nightly rustfmt
         run: rustup toolchain install nightly -c rustfmt
+
+      - name: Install cargo sort
+        run: cargo install --force cargo-sort
           
-      - name: Run Clippy Host
+      - name: Run Host lints
         working-directory: rust
         env:
           RUSTFLAGS: "-Dwarnings"
         run: |
           cargo +nightly fmt --check
+          cargo sort --check --grouped --workspace
           cargo clippy --all-targets --all-features
 
-      - name: Run Clippy Risc0 Call Guest
+      - name: Run Risc0 Call Guest lints
         working-directory: rust/services/call/guest_wrapper/risc0_guest
         env:
           RUSTFLAGS: "-Dwarnings"
         run: |
           cargo +nightly fmt --check
+          cargo sort --check --grouped
           cargo clippy --all-targets --all-features
       
-      - name: Run Clippy Risc0 Chain Guest
+      - name: Run Risc0 Chain Guest lints
         working-directory: rust/services/chain/guest_wrapper/risc0_guest
         env:
           RUSTFLAGS: "-Dwarnings"
         run: |
           cargo +nightly fmt --check
+          cargo sort --check --grouped
           cargo clippy --all-targets --all-features

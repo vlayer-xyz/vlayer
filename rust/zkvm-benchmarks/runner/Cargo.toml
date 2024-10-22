@@ -9,13 +9,13 @@ path = "src/main.rs"
 
 [dependencies]
 anyhow = { workspace = true }
-risc0-zkvm = { workspace = true }
 host_utils = { workspace = true }
+risc0-zkvm = { workspace = true }
 zkvm-benchmarks-common = { workspace = true }
 
 [build-dependencies]
-risc0-build = { workspace = true }
 anyhow = { workspace = true }
+risc0-build = { workspace = true }
 
 [package.metadata.risc0]
 methods = ["risc0_guest"]

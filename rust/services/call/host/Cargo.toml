@@ -4,42 +4,42 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+alloy-chains = { workspace = true }
+alloy-primitives = { workspace = true, features = ["rlp", "serde"] }
+alloy-sol-types = { workspace = true }
+anyhow = { workspace = true }
 axum-jrpc = { workspace = true }
-risc0-zkp = { workspace = true }
-risc0-zkvm = { workspace = true }
-host_utils = { workspace = true }
 block_header = { workspace = true }
 call_engine = { workspace = true }
 call_guest_wrapper = { workspace = true }
-chain_types = { workspace = true }
-mpt = { workspace = true }
-alloy-chains = { workspace = true }
-alloy-primitives = { workspace = true, features = ["rlp", "serde"] }
-ethers-core = { workspace = true }
-thiserror = { workspace = true }
-httpmock = { workspace = true }
-url = { workspace = true }
-alloy-sol-types = { workspace = true }
-anyhow = { workspace = true }
-revm = { workspace = true, features = ["serde", "std"] }
-serde = { workspace = true }
-dotenv = { workspace = true }
 chain = { workspace = true }
 chain_client = { workspace = true }
 chain_server = { workspace = true }
+chain_types = { workspace = true }
+dotenv = { workspace = true }
+ethers-core = { workspace = true }
+host_utils = { workspace = true }
+httpmock = { workspace = true }
+lazy_static = { workspace = true }
+mpt = { workspace = true }
 provider = { workspace = true }
-lazy_static = { workspace = true}
-tracing = { workspace = true }
 reqwest = { workspace = true }
+revm = { workspace = true, features = ["serde", "std"] }
+risc0-zkp = { workspace = true }
+risc0-zkvm = { workspace = true }
+serde = { workspace = true }
 serde_json = { workspace = true }
 server_utils = { workspace = true }
+thiserror = { workspace = true }
 tokio = { workspace = true, features = ["macros"] }
+tracing = { workspace = true }
+url = { workspace = true }
 
 [dev-dependencies]
 alloy-sol-types = { workspace = true }
-test-log = { workspace = true }
 anyhow = { workspace = true }
 ctor = { workspace = true }
+test-log = { workspace = true }
 
 [lints]
 workspace = true

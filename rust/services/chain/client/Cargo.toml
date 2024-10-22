@@ -5,6 +5,7 @@ edition = "2021"
 
 [dependencies]
 alloy-primitives = { workspace = true }
+block_trie = { workspace = true }
 call_engine = { workspace = true }
 chain_server = { workspace = true }
 chain_types = { workspace = true }
@@ -14,4 +15,3 @@ serde_json = { workspace = true }
 server_utils = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true }
-block_trie = { workspace = true }

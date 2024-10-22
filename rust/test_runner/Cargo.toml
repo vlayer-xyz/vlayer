@@ -4,19 +4,21 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-provider = { workspace = true }
-call_host = { workspace = true }
-call_engine = { workspace = true }
 block_header = { workspace = true }
+call_engine = { workspace = true }
+call_host = { workspace = true }
 mpt = { workspace = true }
+provider = { workspace = true }
 
 alloy-dyn-abi = { workspace = true }
 alloy-json-abi = { workspace = true }
-alloy-sol-types = { workspace = true }
 alloy-primitives = { workspace = true }
 alloy-rlp = { workspace = true }
+alloy-sol-types = { workspace = true }
 alloy-trie = { workspace = true }
 anyhow = { workspace = true }
+chain = { workspace = true }
+chain_client = { workspace = true }
 clap = { workspace = true, features = ["derive"] }
 color-eyre = { workspace = true }
 comfy-table = { workspace = true }
@@ -33,10 +35,8 @@ foundry-evm-core = { workspace = true }
 rayon = { workspace = true }
 regex = { workspace = true }
 serde_json = { workspace = true }
-tracing = { workspace = true }
 tokio = { workspace = true }
-chain = { workspace = true }
-chain_client = { workspace = true }
+tracing = { workspace = true }
 
 [lints]
 workspace = true

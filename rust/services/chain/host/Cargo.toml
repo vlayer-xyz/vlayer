@@ -4,31 +4,31 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-host_utils = { workspace = true }
-bytes = { workspace = true }
 alloy-primitives = { workspace = true }
-risc0-zkvm = { workspace = true }
-risc0-zkp = { workspace = true }
-serde = { workspace = true }
 anyhow = { workspace = true }
+bincode = { workspace = true }
 block_trie = { workspace = true }
-thiserror = { workspace = true }
+bytes = { workspace = true }
+chain_db = { workspace = true }
 chain_guest = { workspace = true }
 chain_guest_wrapper = { workspace = true }
-mpt = { workspace = true }
-chain_db = { workspace = true }
-key_value = { workspace = true }
-ethers = { workspace = true }
-provider = { workspace = true }
 derivative = { workspace = true }
-tokio = { workspace = true, features = ["macros"] }
-lazy_static = { workspace = true }
-bincode = { workspace = true }
+ethers = { workspace = true }
 futures = { workspace = true }
+host_utils = { workspace = true }
+key_value = { workspace = true }
+lazy_static = { workspace = true }
+mpt = { workspace = true }
+provider = { workspace = true }
+risc0-zkp = { workspace = true }
+risc0-zkvm = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
+tokio = { workspace = true, features = ["macros"] }
 
 [dev-dependencies]
-serde_json = { workspace = true }
 alloy-rlp = { workspace = true, features = ["arrayvec"] }
+serde_json = { workspace = true }
 
 [lints]
 workspace = true

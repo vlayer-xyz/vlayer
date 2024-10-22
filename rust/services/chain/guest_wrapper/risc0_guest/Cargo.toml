@@ -1,11 +1,9 @@
 [workspace]
 
-
 [package]
 name = "risc0_chain_guest"
 version = "0.1.0"
 edition = "2021"
-
 
 [dependencies]
 chain_guest = { path = "../../guest" }

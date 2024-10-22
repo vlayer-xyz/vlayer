@@ -4,17 +4,17 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-serde = { workspace = true }
-bytes = { workspace = true }
-risc0-zkp = { workspace = true }
-block_header = { workspace = true }
-mpt = { workspace = true }
 alloy-primitives = { workspace = true }
 alloy-rlp = { workspace = true, features = ["arrayvec"] }
-risc0-zkvm = { workspace = true }
 bincode = { workspace = true }
-thiserror = { workspace = true }
+block_header = { workspace = true }
+bytes = { workspace = true }
 derivative = { workspace = true }
+mpt = { workspace = true }
+risc0-zkp = { workspace = true }
+risc0-zkvm = { workspace = true }
+serde = { workspace = true }
+thiserror = { workspace = true }
 
 [lints]
 workspace = true
