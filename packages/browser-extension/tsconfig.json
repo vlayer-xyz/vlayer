@@ -6,7 +6,6 @@
     "useDefineForClassFields": true,
     "lib": ["ESNext", "DOM"],
     "moduleResolution": "bundler",
-    "strict": true,
     "resolveJsonModule": true,
     "isolatedModules": true,
     "esModuleInterop": true,

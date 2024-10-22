@@ -8,7 +8,6 @@
     "moduleResolution": "bundler",
     "moduleDetection": "force",
     "allowImportingTsExtensions": true,
-    "strict": true,
     "downlevelIteration": true,
     "skipLibCheck": true,
     "jsx": "preserve",
