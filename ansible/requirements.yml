@@ -4,3 +4,6 @@ collections:
   - name: prometheus.prometheus
     version: 0.19.0
     source: https://galaxy.ansible.com
+  - name: grafana.grafana
+    version: 5.5.1
+    source: https://galaxy.ansible.com
