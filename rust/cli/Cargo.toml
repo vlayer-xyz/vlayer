@@ -9,10 +9,10 @@ edition = "2021"
 build = "build.rs"
 
 [dependencies]
+alloy-primitives = { workspace = true, features = ["rlp"] }
 call_guest_wrapper = { workspace = true }
 call_server = { workspace = true }
 test_runner = { workspace = true }
-alloy-primitives = { workspace = true, features = ["rlp"] }
 
 anyhow = { workspace = true }
 chain_server = { workspace = true }
