@@ -71,7 +71,7 @@ mod get {
 
         let returned_provider = cached_multi_provider.get(Chain::mainnet().id())?;
 
-        assert_eq!(*provider, *returned_provider);
+        assert!(Arc::ptr_eq(&provider, &returned_provider));
 
         Ok(())
     }

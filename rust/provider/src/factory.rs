@@ -104,11 +104,8 @@ impl CachedProviderFactory {
     }
 }
 
-impl ProviderFactory<CachedProvider<EthProvider>> for CachedProviderFactory {
-    fn create(
-        &self,
-        chain_id: ChainId,
-    ) -> Result<CachedProvider<EthProvider>, ProviderFactoryError> {
+impl ProviderFactory<CachedProvider> for CachedProviderFactory {
+    fn create(&self, chain_id: ChainId) -> Result<CachedProvider, ProviderFactoryError> {
         let file_path = get_path(&self.rpc_file_cache, chain_id)?;
 
         let provider = self.ethers_provider_factory.create(chain_id)?;
