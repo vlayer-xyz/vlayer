@@ -37,8 +37,6 @@ jobs:
       - uses: hoverkraft-tech/compose-action@v2.0.2
         with:
           compose-file: docker/web-proof/docker-compose.yaml
-
-
       - name: Set up Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
@@ -46,8 +44,7 @@ jobs:
             rust
             rust/services/call/guest_wrapper/risc0_guest
             rust/services/chain/guest_wrapper/risc0_guest
-        
-
+      
       - name: Install cargo-binstall
         run: |
           curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
@@ -101,8 +98,4 @@ jobs:
         with:
           name: playwright-report
           path: ./packages/browser-extension/playwright-report/
-<<<<<<< HEAD
           retention-days: 30
-=======
-          retention-days: 30
->>>>>>> 56822bd8 (Build rust outside the docker)
