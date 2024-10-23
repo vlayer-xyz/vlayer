@@ -1,18 +1,43 @@
 "use client";
 
-import { useState } from 'react';
-
+import { useState, useEffect, useRef, useMemo } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import { Button } from "@/components/ui/button"
-import { Upload } from "lucide-react"
+import { Upload, MailCheck } from "lucide-react"
+import { usePrivy, useWallets } from '@privy-io/react-auth';
+import { getStrFromFile } from '@/utils';
+import { createVlayerClient, preverifyEmail } from '@vlayer/sdk';
+import { optimismSepolia } from 'viem/chains';
+import { createWalletClient, custom } from 'viem';
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "@/components/ui/accordion"
+
+import emailProofProver from "../../../out/EmailDomainProver.sol/EmailDomainProver";
+import emailProofVerifier from "../../../out/EmailProofVerifier.sol/EmailDomainVerifier";
 
 export default function Home() {
-  const [contractAddress, setContractAddress] = useState('');
+  const [currentStep, setCurrentStep] = useState("Submitting...")
+  const [proverAddress, setProverAddress] = useState('');
+  const [verifierAddress, setVerifierAddress] = useState('');
+  const [claimerAddress, setClaimerAddress] = useState('');
+  const [proverUrl, setProverUrl] = useState('http://127.0.0.1:4000');
   const [file, setFile] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const { ready, authenticated, login, user, logout } = usePrivy();
+  const { wallets } = useWallets();
+  const params = new URLSearchParams(window.location.search);
+
+  const vlayer = useMemo(() => createVlayerClient({
+    url: proverUrl
+  }), [proverUrl]);
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -41,55 +66,97 @@ export default function Home() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsSubmitting(true);
+    setCurrentStep("Submitting...");
 
     try {
-      // Here you would typically send the data to your backend
-      // Example using FormData:
-      const formData = new FormData();
-      formData.append('contractAddress', contractAddress);
-      if (file) {
-        formData.append('file', file);
-      }
+      if(ready && !authenticated) throw new Error("not_authenticated");
+      if(!file) throw new Error("no_eml_file_uploaded");
+      setCurrentStep("Parsing eml...");
+      const eml = await getStrFromFile(file);
+      const email = await preverifyEmail(eml);
 
-      // Simulated API call
-      await new Promise(resolve => setTimeout(resolve, 1000));
       console.log('Form submitted:', {
-        contractAddress,
-        fileName: file?.name
+        verifierAddress,
+        proverAddress,
+        fileName: file?.name,
+        unverifiedEmail: eml,
+        email,
+      });
+      setCurrentStep("Sending to prover...");
+
+      const { hash } = await vlayer.prove({
+        address: proverAddress,
+        proverAbi: emailProofProver.abi,
+        functionName: "main",
+        args: [await preverifyEmail(eml), claimerAddress],
+        chainId: optimismSepolia.id,
+      });
+      setCurrentStep("Waiting for proof...");
+      console.log("Waiting for proving result: ", hash);
+      const result = await vlayer.waitForProvingResult({ hash });
+      console.log("Response:", result);
+      setCurrentStep("Verifying on-chain...");
+
+      const wallet = wallets[0];
+      const provider = await wallet.getEthereumProvider();
+      const walletClient = createWalletClient({
+        chain: optimismSepolia,
+        transport: custom(provider),
+      });
+      const [account] = await walletClient.getAddresses()
+      const txHash = await walletClient.writeContract({
+        address: verifierAddress as `0x${string}`,
+        abi: emailProofVerifier.abi,
+        functionName: "verify",
+        args: result,
+        account
       });
 
-      // Reset form after successful submission
-      setContractAddress('');
+      console.log({ txHash });
       setFile(null);
+      if (fileInputRef.current && fileInputRef.current.value) {
+        fileInputRef.current.value = '';
+      }
+      setCurrentStep("Success!");
     } catch (error) {
       console.error('Error submitting form:', error);
+      if(error?.message === "not_authenticated") {
+        login();
+      }
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  useEffect(() => {
+    const verifierAddr = params.get('verifierAddr');
+    const proverAddr = params.get('proverAddr');
+  
+    if (verifierAddr) {
+      setVerifierAddress(verifierAddr);
+    }
+    if (proverAddr) {
+      setProverAddress(proverAddr);
+    }    
+  }, [params]);
+
+  useEffect(() => {
+    console.log({ user })
+    setClaimerAddress(user?.wallet?.address ?? "")   
+  }, [user]);
+
   return (
     <div className="flex justify-center items-center min-h-screen p-4 bg-gray-950">
       <Card className="w-full max-w-md border-violet-500 bg-gray-900 text-white">
         <CardHeader>
-          <CardTitle className="text-violet-400">Contract Upload</CardTitle>
+          <CardTitle className="text-violet-400">
+            Generate proof of <i className='text-white'>@vlayer.xyz</i>
+          </CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-            <div className="space-y-2">
-              <Label htmlFor="contractAddress" className="text-violet-300">Contract Address</Label>
-              <Input
-                id="contractAddress"
-                placeholder="Enter contract address"
-                value={contractAddress}
-                onChange={(e) => setContractAddress(e.target.value)}
-                className="bg-gray-800 border-violet-500 text-white placeholder:text-gray-400 focus:ring-violet-500 focus:border-violet-500"
-                required
-              />
-            </div>
-            
-            <div className="space-y-2">
-              <Label className="text-violet-300">Upload File</Label>
+          <div className="space-y-2">
+              <Label className="text-violet-300">Upload EML file</Label>
               <div
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
@@ -101,7 +168,9 @@ export default function Home() {
                 }`}
               >
                 <input
+                  ref={fileInputRef}
                   type="file"
+                  name="fileInput"
                   onChange={handleFileChange}
                   className="hidden"
                   id="fileInput"
@@ -109,24 +178,93 @@ export default function Home() {
                 />
                 <label htmlFor="fileInput" className="cursor-pointer">
                   <div className="flex flex-col items-center gap-2">
-                    <Upload className="w-8 h-8 text-violet-400" />
+                    {file 
+                      ? <MailCheck className="w-8 h-8 text-green-400" /> 
+                      : <Upload className="w-8 h-8 text-violet-400" />
+                    }
                     <div className="text-sm text-gray-300">
-                      {file ? file.name : 'Drag and drop a file here, or click to select'}
+                      {file 
+                        ? file.name 
+                        : 'Drag and drop a file here, or click to select'
+                      }
                     </div>
                   </div>
                 </label>
               </div>
             </div>
 
+            <div className="space-y-2">
+              <Label htmlFor="claimerAddr" className="text-violet-300">
+                Address to claim NFT
+              </Label>
+              <Input
+                id="claimerAddr"
+                onChange={(e) => setClaimerAddress(e.target.value)}
+                value={claimerAddress}
+                className="bg-gray-800 border-violet-500 text-white placeholder:text-gray-400 focus:ring-violet-500 focus:border-violet-500"
+                required
+              />
+            </div>  
+
+            <Accordion type="single" collapsible>
+              <AccordionItem value="item-1">
+                <AccordionTrigger>
+                  Prover / Verifier / Wallet configuration
+                </AccordionTrigger>
+                <AccordionContent>
+                  <Label htmlFor="proverAddr" className="text-violet-300">Prover Contract</Label>
+                  <Input
+                    id="proverAddr"
+                    value={proverAddress}
+                    disabled
+                    className="bg-gray-800 border-violet-500 text-white placeholder:text-gray-400 focus:ring-violet-500 focus:border-violet-500 mt-2 mb-2"
+                    required
+                  />
+                  <Label htmlFor="verifierAddr" className="text-violet-300">Verifier Contract</Label>
+                  <Input
+                    id="verifierAddr"
+                    value={verifierAddress}
+                    disabled
+                    className="bg-gray-800 border-violet-500 text-white placeholder:text-gray-400 focus:ring-violet-500 focus:border-violet-500 mt-2 mb-2"
+                    required
+                  />     
+                  <Label htmlFor="verifierAddr" className="text-violet-300">Verifier Contract</Label>
+                  <Input
+                    id="verifierAddr"
+                    value={proverUrl}
+                    onChange={(e) => setProverUrl(e.target.value)}
+                    className="bg-gray-800 border-violet-500 text-white placeholder:text-gray-400 focus:ring-violet-500 focus:border-violet-500 mt-2 mb-2"
+                    required
+                  />          
+                  {user && (
+                    <div className='text-center text-sm'>
+                      Connected as {" "}
+                      {user?.wallet && (
+                        <div>
+                          {`${user.wallet.address.slice(0, 6)}...${user.wallet.address.slice(-4)}`} 
+                          {" "}({user.wallet.walletClientType})<br/><br/>
+                        </div>
+                      )}
+                      {user?.email && (<div>{user.email.address}</div>)}
+
+                      <Button onClick={logout} className="w-1/4 rounded-full bg-gray-700 hover:bg-gray-800 text-white font-medium py-2 px-4 transition-colors mb-5 mt-5">
+                        Log out
+                      </Button>
+                    </div>
+                  )}   
+                </AccordionContent>
+              </AccordionItem>
+            </Accordion>
+
             <Button
               type="submit"
-              disabled={isSubmitting || !contractAddress || !file}
+              disabled={isSubmitting || !proverAddress || !file}
               className="w-full rounded-full bg-violet-600 hover:bg-violet-700 text-white font-medium py-2 px-4 transition-colors"
             >
               {isSubmitting ? (
                 <div className="flex items-center justify-center gap-2">
                   <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
-                  Submitting...
+                  {currentStep}
                 </div>
               ) : (
                 'Submit'
