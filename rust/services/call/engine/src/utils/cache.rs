@@ -4,17 +4,18 @@ use std::{
     sync::{Arc, RwLock},
 };
 
-pub trait InteriorMutabilityCache<K, V>
+pub trait InteriorMutabilityCache<K, V: ?Sized>
 where
     K: Hash + Eq,
 {
     fn get(&self, key: &K) -> Option<Arc<V>>;
-    fn try_get_or_insert<F, E>(&self, key: K, f: F) -> Result<Arc<V>, E>
+    fn try_get_or_insert<F, RV, E>(&self, key: K, f: F) -> Result<Arc<V>, E>
     where
-        F: FnOnce() -> Result<V, E>;
+        RV: Into<Arc<V>>,
+        F: FnOnce() -> Result<RV, E>;
 }
 
-impl<K, V> InteriorMutabilityCache<K, V> for RwLock<HashMap<K, Arc<V>>>
+impl<K, V: ?Sized> InteriorMutabilityCache<K, V> for RwLock<HashMap<K, Arc<V>>>
 where
     K: Hash + Eq,
 {
@@ -22,15 +23,16 @@ where
         self.read().expect("poisoned lock").get(key).map(Arc::clone)
     }
 
-    fn try_get_or_insert<F, E>(&self, key: K, f: F) -> Result<Arc<V>, E>
+    fn try_get_or_insert<F, RV, E>(&self, key: K, f: F) -> Result<Arc<V>, E>
     where
-        F: FnOnce() -> Result<V, E>,
+        F: FnOnce() -> Result<RV, E>,
+        RV: Into<Arc<V>>,
     {
         let mut cache = self.write().expect("poisoned lock");
         let value = match cache.entry(key) {
             Entry::Occupied(value) => Ok(value.into_mut()),
             Entry::Vacant(entry) => {
-                let value = Arc::new(f()?);
+                let value = f()?.into();
                 Ok(entry.insert(value))
             }
         }?;
@@ -53,7 +55,8 @@ mod interior_mutability_cache {
     fn found() -> anyhow::Result<()> {
         let cache = RwLock::new(HashMap::from([("key", Arc::new(42))]));
 
-        let value = cache.try_get_or_insert("key", || bail!("should not be called"))?;
+        let value = cache
+            .try_get_or_insert::<_, i32, anyhow::Error>("key", || bail!("should not be called"))?;
         assert_eq!(*value, 42);
         Ok(())
     }
@@ -61,7 +64,8 @@ mod interior_mutability_cache {
     #[test]
     fn created() -> anyhow::Result<()> {
         let cache = RwLock::new(HashMap::new());
-        let value = cache.try_get_or_insert("key", || Ok::<_, anyhow::Error>(42))?;
+        let value = cache
+            .try_get_or_insert::<_, i32, anyhow::Error>("key", || Ok::<_, anyhow::Error>(42))?;
         assert_eq!(*value, 42);
         assert_eq!(**cache.read().expect("poisoned lock").get("key").unwrap(), 42);
         Ok(())
@@ -71,7 +75,7 @@ mod interior_mutability_cache {
     fn failed() -> anyhow::Result<()> {
         let cache = RwLock::new(HashMap::<_, Arc<()>, _>::new());
         let error = cache
-            .try_get_or_insert("key", || bail!("error"))
+            .try_get_or_insert::<_, (), anyhow::Error>("key", || bail!("error"))
             .unwrap_err();
         assert_eq!(error.to_string(), "error");
         assert_eq!(cache.read().expect("poisoned lock").get("key"), None);
