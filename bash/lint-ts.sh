@@ -11,7 +11,7 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
     echo "Running eslint for: ${example}"
     cd "${example}/vlayer"
 
-    bun install
+    bun install --frozen-lockfile
     bun run eslint .
 
   )
@@ -20,5 +20,5 @@ done
 echo "Running eslint for: $VLAYER_HOME/packages"
 cd "${VLAYER_HOME}/packages"
 
-bun install
+bun install --frozen-lockfile
 bun run lint

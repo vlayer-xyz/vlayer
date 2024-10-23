@@ -20,7 +20,7 @@ function deploy_address() {
     (
     cd packages
     bun init > /dev/null
-    bun install > /dev/null
+    bun install --frozen-lockfile > /dev/null
     bun run ./src/tests/deployVerifier.ts
     )
 }

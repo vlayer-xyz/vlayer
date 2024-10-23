@@ -374,7 +374,7 @@ jobs:
       run: npm version "${VLAYER_BUILD}" --no-workspaces-update
     - name: Install dependencies
       working-directory: packages/sdk
-      run: bun install
+      run: bun install --frozen-lockfile
     - name: replace symlinks 
       run: ./bash/replace-symlinks.sh
     - name: Publish to NPM
