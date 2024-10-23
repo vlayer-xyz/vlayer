@@ -13,9 +13,9 @@ services:
     volumes:
       - ./notary-config:/root/.notary-server/config
   anvil:
-    build:
-      context: ../..
-      dockerfile: docker/web-proof/anvil/Dockerfile
+    image: ghcr.io/foundry-rs/foundry
+    platform: linux/amd64
+    command: "anvil"
     ports:
       - "8545:8545"
   vlayer:

@@ -7,6 +7,8 @@ on:
   push:
     branches:
       - main
+permissions: read-all
+
 jobs:
   test-extension:
     timeout-minutes: 60
@@ -15,57 +17,32 @@ jobs:
       run:
         working-directory: rust
     steps:
+    
       - uses: oven-sh/setup-bun@v2
         with:
           node-version: lts/*
+    
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           submodules: recursive
+    
       - name: Install dependencies
         run: bun install
         working-directory: ./packages
+    
       - name: Install dependencies of test-web-app
         run: bun install
         working-directory: ./packages/test-web-app
+    
       - name: Build extension
         run: bun run build
         working-directory: ./packages/browser-extension
+    
       - name: Install Playwright Browsers
         run: bunx playwright install --with-deps chromium
         working-directory: ./packages/browser-extension
-      - name: Set up Rust
-        uses: actions-rust-lang/setup-rust-toolchain@v1
-        with:
-          cache-workspaces: |
-            rust
-            rust/services/call/guest_wrapper/risc0_guest
-            rust/services/chain/guest_wrapper/risc0_guest
-      
-      - name: Install cargo-binstall
-        run: |
-          curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
-
-      - name: Install risc0 installer
-        run: cargo binstall -y cargo-risczero@1.0.5 --force
-
-      - name: Install risc0 toolchain
-        run: cargo risczero install
-
-      - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
-        with:
-          version: nightly-bcacf39e43812e50a124e3ba60d1becd9866534d # 2024-10-11
-          
-      - name: Install LLVM and Clang
-        uses: KyleMayes/install-llvm-action@v2.0.4
-        with:
-          version: "17.0.6"
-
-      - name: "Build binaries"
-        run: |
-          cargo build --release --target x86_64-unknown-linux-gnu
-      
+    
       - uses: hoverkraft-tech/compose-action@v2.0.2
         with:
           compose-file: docker/web-proof/docker-compose.yaml
@@ -73,6 +50,7 @@ jobs:
       - name: Run Playwright tests
         run: TEST_MODE=headless bunx playwright test
         working-directory: ./packages/browser-extension
+    
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
