@@ -1,0 +1,14 @@
+
+services:
+  websockify:
+    image: jwnmulder/websockify
+    platform: linux/amd64
+    ports:
+      - "55688:80"
+    command: "80 swapi.dev:443"
+  notary-server:
+    image: ghcr.io/tlsnotary/tlsn/notary-server:v0.1.0-alpha.5
+    ports:
+      - "7047:7047"
+    volumes:
+      - ./notary-config:/root/.notary-server/config

@@ -64,5 +64,15 @@ test.describe("Full flow of webproof using extension", () => {
       const proveButton = extension.getByTestId("prove-button");
       expect(proveButton).toBeDefined();
     });
+
+    await test.step("Click button should generate webproof", async () => {
+      const extension = await sidePanel(context);
+      const proveButton = extension.getByTestId("prove-button");
+      await proveButton.click();
+      const title = await page.waitForSelector(
+        'h1[data-testid="has-webproof"]',
+      );
+      expect(title).toBeDefined();
+    });
   });
 });
