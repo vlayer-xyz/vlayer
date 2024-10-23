@@ -18,9 +18,9 @@ services:
     command: "anvil"
     ports:
       - "8545:8545"
-  # vlayer:
-  #   build:
-  #     context: ../..
-  #     dockerfile: docker/web-proof/vlayer/Dockerfile  #
-  #   ports:
-  #     - "3000:30000"
+  vlayer:
+    build:
+      context: ../..
+      dockerfile: docker/web-proof/vlayer/Dockerfile 
+    ports:
+      - "3000:30000"
