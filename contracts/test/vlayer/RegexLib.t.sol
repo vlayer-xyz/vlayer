@@ -29,6 +29,6 @@ contract RegexTest is VTest {
         assertEq(captures.length, 3);
         assertEq(captures[0], "hello world");
         assertEq(captures[1], "hello");
-        assertEq(captures[2], "orld");
+        assertEq(captures[2], "world");
     }
 }
