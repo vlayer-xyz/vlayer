@@ -14,6 +14,7 @@ use ethers_core::types::BlockNumber as BlockTag;
 use lazy_static::lazy_static;
 use provider::{CachedMultiProvider, CachedProviderFactory};
 use serde_json::json;
+use server_utils::EMPTY_PROOF_RESPONSE;
 
 // To activate recording, set UPDATE_SNAPSHOTS to true.
 // Recording creates new testdata directory and writes return data from Alchemy into files in that directory.
@@ -106,10 +107,7 @@ async fn create_chain_proof_server(
             "chain_id": location.chain_id,
             "block_numbers": [block_number]
         }),
-        json!({
-            "proof": "",
-            "nodes": []
-        }),
+        EMPTY_PROOF_RESPONSE.clone(),
     )
     .await)
 }
