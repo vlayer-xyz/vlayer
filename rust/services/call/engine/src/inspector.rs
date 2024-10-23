@@ -5,7 +5,7 @@ use revm::{
     primitives::ExecutionResult,
     Database, EvmContext, Inspector,
 };
-use tracing::info;
+use tracing::{debug, info};
 
 use crate::{
     engine::EngineError,
@@ -149,10 +149,8 @@ where
         _context: &mut EvmContext<DB>,
         inputs: &mut CallInputs,
     ) -> Option<CallOutcome> {
-        info!(
-            "Address: {:?}, caller:{:?}, input:{:?}",
-            inputs.bytecode_address, inputs.caller, inputs.input,
-        );
+        info!("Address: {:?}, caller:{:?}", inputs.bytecode_address, inputs.caller);
+        debug!("Input: {:?}", inputs.input);
         match inputs.bytecode_address {
             TRAVEL_CONTRACT_ADDR => self.on_travel_call(inputs),
             _ => self.on_call(inputs),
