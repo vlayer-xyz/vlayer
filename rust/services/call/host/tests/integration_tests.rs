@@ -49,7 +49,7 @@ lazy_static! {
     static ref sepolia_url: String =
         format!("https://eth-sepolia.g.alchemy.com/v2/{}", *alchemy_key);
     static ref anvil_url: String = format!("http://localhost:8545");
-    static ref sepolia_latest_block_location: ExecutionLocation =
+    static ref sepolia_latest_block: ExecutionLocation =
         ExecutionLocation::new(Chain::sepolia().id(), LATEST_BLOCK);
 }
 
@@ -266,7 +266,7 @@ mod view {
         let result = run::<ViewCallTest::testPrecompileCall>(
             "view_precompile",
             call,
-            &sepolia_latest_block_location,
+            &sepolia_latest_block,
         )
         .await?;
         assert_eq!(
@@ -286,7 +286,7 @@ mod view {
         let result = run::<ViewCallTest::testNonexistentAccountCall>(
             "view_nonexistent_account",
             call,
-            &sepolia_latest_block_location,
+            &sepolia_latest_block,
         )
         .await?;
         assert_eq!(result.size, uint!(0_U256));
@@ -303,7 +303,7 @@ mod view {
         let result = run::<ViewCallTest::testEoaAccountCall>(
             "view_eoa_account",
             call,
-            &sepolia_latest_block_location,
+            &sepolia_latest_block,
         )
         .await?;
         assert_eq!(result.size, uint!(0_U256));
@@ -337,7 +337,7 @@ mod view {
         let result = run::<ViewCallTest::testChainidCall>(
             "view_chainid",
             call,
-            &sepolia_latest_block_location,
+            &sepolia_latest_block,
         )
         .await?;
         assert_eq!(result._0, uint!(11_155_111_U256));
@@ -354,7 +354,7 @@ mod view {
         let result = run::<ViewCallTest::testMuliContractCallsCall>(
             "view_multi_contract_calls",
             call,
-            &sepolia_latest_block_location,
+            &sepolia_latest_block,
         )
         .await?;
         assert_eq!(result._0, uint!(84_U256));
@@ -370,7 +370,7 @@ mod view {
         run::<ViewCallTest::testEoaAccountCall>(
             "view_call_eoa",
             call,
-            &sepolia_latest_block_location,
+            &sepolia_latest_block,
         )
         .await
         .expect_err("calling an EOA should fail");
