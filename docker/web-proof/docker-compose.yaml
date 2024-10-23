@@ -3,7 +3,7 @@ services:
   websockify:
     image: jwnmulder/websockify
     platform: linux/amd64
-    ports:s
+    ports:
       - "55688:80"
     command: "80 swapi.dev:443"
   notary-server:
@@ -12,12 +12,12 @@ services:
       - "7047:7047"
     volumes:
       - ./notary-config:/root/.notary-server/config
-#  anvil:
-#    build:
-#      context: ../..anvil
-#      dockerfile: docker/web-proof/anvil/Dockerfile
-#    ports:
-#      - "8545:8545"
+  anvil:
+    build:
+      context: ../..anvil
+      dockerfile: docker/web-proof/anvil/Dockerfile
+    ports:
+      - "8545:8545"
   vlayer:
     build:
       context: ../..

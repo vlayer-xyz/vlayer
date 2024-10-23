@@ -22,23 +22,12 @@ RUN PATH="/usr/bin/clang:${PATH}"
 RUN clang --version  
 RUN clang -print-targets
 
-# to avoid warnings 
-# COPY .git /vlayer/.git
-
-COPY rust/ /vlayer/rust
+COPY rust/target /vlayer/rust/target
 COPY contracts/ /vlayer/contracts
+COPY .cargo/ /vlayer/.cargo
 
-WORKDIR /vlayer/rust
-
-# RUN apt-get update && apt-get install -y gcc-riscv64-unknown-elf
-# RUN find / -name "riscv32-unknown-elf-gcc"
-
-# ENV PATH="/root/.risc0/toolchains/2024.01.05-risc0-cpp-x86_64-unknown-linux-gnu/bin:${PATH}"
-
-
-RUN cargo build
+RUN ls '/vlayer/rust/target/debug'
+CMD ["/vlayer/rust/target/x86_64-unknown-linux-gnu/vlayer", "serve"]
 
 
 
-
-# Copy .git directory (make sure it's in the root of the project)

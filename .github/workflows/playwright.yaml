@@ -11,6 +11,9 @@ jobs:
   test-extension:
     timeout-minutes: 60
     runs-on: aws-linux-medium
+    defaults:
+      run:
+        working-directory: rust
     steps:
       - uses: oven-sh/setup-bun@v2
         with:
@@ -34,6 +37,59 @@ jobs:
       - uses: hoverkraft-tech/compose-action@v2.0.2
         with:
           compose-file: docker/web-proof/docker-compose.yaml
+
+
+      - name: Set up Rust
+        uses: actions-rust-lang/setup-rust-toolchain@v1
+        with:
+          cache-workspaces: |
+            rust
+            rust/services/call/guest_wrapper/risc0_guest
+            rust/services/chain/guest_wrapper/risc0_guest
+        
+
+      - name: Install cargo-binstall
+        run: |
+          curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
+
+      - name: Install risc0 installer
+        run: cargo binstall -y cargo-risczero@1.0.5 --force
+
+      - name: Install risc0 toolchain
+        run: cargo risczero install
+
+      - name: Install Foundry
+        uses: foundry-rs/foundry-toolchain@v1
+        with:
+          version: nightly-bcacf39e43812e50a124e3ba60d1becd9866534d # 2024-10-11
+          
+      - name: Install LLVM and Clang
+        uses: KyleMayes/install-llvm-action@v2.0.4
+        with:
+          version: "17.0.6"
+
+      - uses: actions/download-artifact@v4
+        with:
+          name: guest-artifacts
+          path: rust/call_guest_replacement
+
+      - name: "Build binaries"
+        env:
+          VLAYER_RELEASE: "nightly"
+        run: |
+          export RISC0_EXISTING_CALL_GUEST="$(pwd)/call_guest_replacement"
+          cargo build --release --target ${{ matrix.target }} --package cli 
+
+      - name: "Print build version"
+        id: vlayer_build
+        if:  matrix.runner == 'aws-linux-medium' 
+        env:
+          VLAYER_RELEASE: "nightly"
+        run: |
+          BUILD=$(./target/${{ matrix.target }}/release/vlayer --version | awk '/vlayer/ {print $2}')
+          echo "vlayer_build=${BUILD}" | tee -a ${GITHUB_OUTPUT}
+    
+
       - name: Run docker
         run: docker compose up -d
         working-directory: docker/web-proof
@@ -45,4 +101,8 @@ jobs:
         with:
           name: playwright-report
           path: ./packages/browser-extension/playwright-report/
+<<<<<<< HEAD
           retention-days: 30
+=======
+          retention-days: 30
+>>>>>>> 56822bd8 (Build rust outside the docker)
