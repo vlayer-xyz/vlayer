@@ -27,19 +27,20 @@ fn regex_capture_run(input: &Bytes, gas_limit: u64) -> PrecompileResult {
     let gas_used = gas_used(input.len(), BASE_COST, PER_WORD_COST, gas_limit)?;
 
     let (source, regex) = decode_regex_args(input)?;
-    let captures = do_capture(&source, regex);
+    let captures = do_capture(&source, &regex);
 
     Ok(PrecompileOutput::new(gas_used, captures.abi_encode().into()))
 }
 
-fn do_capture(source: &str, regex: Regex) -> Vec<String> {
+fn do_capture(source: &str, regex: &Regex) -> Vec<String> {
     regex
         .captures(&source)
+        .as_ref()
         .map_or_else(Vec::new, captures_to_strings)
 }
 
-fn captures_to_strings(captures: Captures) -> Vec<String> {
-    captures.iter().into_iter().map(match_into_string).collect()
+fn captures_to_strings(captures: &Captures) -> Vec<String> {
+    captures.iter().map(match_into_string).collect()
 }
 
 fn match_into_string(maybe_match: Option<Match>) -> String {
