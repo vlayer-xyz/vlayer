@@ -56,7 +56,6 @@ contract WebProverTest is VTest {
     }
 
     function test_missingSignature() public {
-        assertTrue(false, "Failed as expected");
         WebProof memory webProof = WebProof(vm.readFile("testdata/web_proof_missing_signature.json"));
 
         callProver();
