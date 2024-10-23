@@ -29,12 +29,12 @@ fn regex_capture_run(input: &Bytes, gas_limit: u64) -> PrecompileResult {
     let (source, regex) = source_and_regex(input)?;
     let captures = regex
         .captures(&source)
-        .map_or_else(Vec::new, captures_to_strings);
+        .map_or_else(Vec::new, |capture| captures_to_strings(&capture));
 
     Ok(PrecompileOutput::new(gas_used, captures.abi_encode().into()))
 }
 
-fn captures_to_strings(captures: Captures) -> Vec<String> {
+fn captures_to_strings(captures: &Captures) -> Vec<String> {
     captures.iter().map(match_into_string).collect()
 }
 
