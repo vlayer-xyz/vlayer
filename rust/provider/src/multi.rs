@@ -9,7 +9,7 @@ use call_engine::utils::InteriorMutabilityCache;
 use super::{factory::ProviderFactory, BlockingProvider};
 use crate::factory::ProviderFactoryError;
 
-type MultiProvider = HashMap<ChainId, Arc<Box<dyn BlockingProvider>>>;
+type MultiProvider = HashMap<ChainId, Arc<dyn BlockingProvider>>;
 
 pub struct CachedMultiProvider {
     cache: RwLock<MultiProvider>,
@@ -27,7 +27,7 @@ impl CachedMultiProvider {
     pub fn get(
         &self,
         chain_id: ChainId,
-    ) -> Result<Arc<Box<dyn BlockingProvider>>, ProviderFactoryError> {
+    ) -> Result<Arc<dyn BlockingProvider>, ProviderFactoryError> {
         self.cache
             .try_get_or_insert(chain_id, || self.factory.create(chain_id))
     }
@@ -61,8 +61,7 @@ mod get {
     #[test]
     fn gets_cached_provider() -> anyhow::Result<()> {
         let path_buf = PathBuf::from("testdata/cache.json");
-        let provider =
-            Arc::new(Box::new(CachedProvider::from_file(&path_buf)?) as Box<dyn BlockingProvider>);
+        let provider = Arc::new(CachedProvider::from_file(&path_buf)?) as Arc<dyn BlockingProvider>;
 
         let cache = RwLock::new(HashMap::from([(Chain::mainnet().id(), Arc::clone(&provider))]));
 

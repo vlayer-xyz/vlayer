@@ -24,7 +24,7 @@ pub enum ProviderDbError {
 
 /// A revm [Database] backed by a [Provider].
 pub(crate) struct ProviderDb {
-    pub(crate) provider: Arc<Box<dyn BlockingProvider>>,
+    pub(crate) provider: Arc<dyn BlockingProvider>,
     pub(crate) block_number: u64,
 
     /// Cache for code hashes to contract addresses.
@@ -33,7 +33,7 @@ pub(crate) struct ProviderDb {
 
 impl ProviderDb {
     /// Creates a new [ProviderDb] with the given provider and block number.
-    pub(crate) fn new(provider: Arc<Box<dyn BlockingProvider>>, block_number: u64) -> Self {
+    pub(crate) fn new(provider: Arc<dyn BlockingProvider>, block_number: u64) -> Self {
         Self {
             provider,
             block_number,

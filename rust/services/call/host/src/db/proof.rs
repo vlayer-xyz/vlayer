@@ -63,7 +63,7 @@ impl DatabaseRef for ProofDb {
 }
 
 impl ProofDb {
-    pub(crate) fn new(provider: Arc<Box<dyn BlockingProvider>>, block_number: u64) -> Self {
+    pub(crate) fn new(provider: Arc<dyn BlockingProvider>, block_number: u64) -> Self {
         let state = RwLock::new(State::default());
         Self {
             state,
