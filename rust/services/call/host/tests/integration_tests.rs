@@ -85,6 +85,9 @@ where
     let host = create_host(multi_provider, location, chain_proof_server.url())?;
     let host_output = host.run(call).await?;
     let return_value = C::abi_decode_returns(&host_output.guest_output.evm_call_result, false)?;
+
+    chain_proof_server.assert();
+    
     Ok(return_value)
 }
 

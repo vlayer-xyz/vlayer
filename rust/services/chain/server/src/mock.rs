@@ -15,4 +15,8 @@ impl ChainProofServerMock {
     pub fn url(&self) -> String {
         self.mock_server.url()
     }
+
+    pub fn assert(&self) {
+        self.mock_server.assert();
+    }
 }
