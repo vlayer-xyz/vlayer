@@ -64,8 +64,8 @@ import { sepolia } from 'viem/chains'
 const hash = await vlayer.proveWeb({
     address: '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
     proverAbi,
-    functionName: 'proveTwitterProfile',
-    args: [webProof, 42, 'eth'],
+    functionName: 'main',
+    args: [webProof, '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'],
     chainId: sepolia,
 })
 ```
@@ -108,11 +108,11 @@ import {
 } from '@vlayer/sdk/web_proof'
 
 // all args required by prover contract function except webProof itself
-const commitmentArgs = ['0x0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', 123]
+const commitmentArgs = ['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045']
 
 const proverCallCommitment = {
   address: '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
-  functionName: 'proveTwitterProfile',
+  functionName: 'main',
   commitmentArgs,
   chainId: sepolia,
   proverAbi,

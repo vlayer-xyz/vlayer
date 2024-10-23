@@ -81,7 +81,7 @@ const { hash } = await vlayer.prove({
     address: '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
     proverAbi,
     functionName: 'main',
-    args: ['0x0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', 123],
+    args: ['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', 123],
     chainId: foundry,
 })
 ```
