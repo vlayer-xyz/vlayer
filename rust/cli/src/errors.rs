@@ -31,7 +31,9 @@ pub enum CLIError {
 impl CLIError {
     pub fn error_code(&self) -> i32 {
         match self {
-            CLIError::TestFailed(failed) => *failed as i32,
+            CLIError::TestFailed(failed) => {
+                i32::try_from(*failed).expect("Failed tests count is too large")
+            }
             _ => 1,
         }
     }
