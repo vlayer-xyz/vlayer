@@ -100,7 +100,7 @@ async fn create_chain_proof_server(
     location: &ExecutionLocation,
 ) -> Result<ChainProofServerMock, HostError> {
     let block_number =
-        block_tag_to_block_number(&multi_provider, location.chain_id, location.block_tag)?;
+        block_tag_to_block_number(multi_provider, location.chain_id, location.block_tag)?;
     Ok(ChainProofServerMock::start(
         json!({
             "chain_id": location.chain_id,
