@@ -34,7 +34,7 @@ fn regex_capture_run(input: &Bytes, gas_limit: u64) -> PrecompileResult {
 
 fn do_capture(source: &str, regex: &Regex) -> Vec<String> {
     regex
-        .captures(&source)
+        .captures(source)
         .as_ref()
         .map_or_else(Vec::new, captures_to_strings)
 }
@@ -140,7 +140,7 @@ mod capture_test {
         let source = "Hello, World!";
         let regex = Regex::new(r"^(\w+), (\w+)!$").unwrap();
 
-        let result = do_capture(source, regex);
+        let result = do_capture(source, &regex);
 
         assert_eq!(result, vec![source.to_string(), "Hello".to_string(), "World".to_string()]);
     }
@@ -150,7 +150,7 @@ mod capture_test {
         let source = "Hello World!";
         let regex = Regex::new(r"^Hello(,)? World!$").unwrap();
 
-        let result = do_capture(source, regex);
+        let result = do_capture(source, &regex);
 
         assert_eq!(result, vec![source.to_string(), "".to_string()]);
     }
@@ -160,7 +160,7 @@ mod capture_test {
         let source = "Hello, World!";
         let regex = Regex::new(r"^(Hello), Galaxy!$").unwrap();
 
-        let result = do_capture(source, regex);
+        let result = do_capture(source, &regex);
 
         assert!(result.is_empty());
     }
