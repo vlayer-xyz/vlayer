@@ -1,9 +1,7 @@
-use std::{
-    collections::{BTreeMap, HashMap},
-    time::Instant,
-};
+use std::{collections::BTreeMap, time::Instant};
 
 use alloy_dyn_abi::DynSolValue;
+use alloy_primitives::map::HashMap;
 use alloy_sol_types::private::alloy_json_abi::Function;
 use color_eyre::eyre;
 use forge::{
@@ -161,9 +159,13 @@ impl<'a> ContractRunner<'a> {
                     } = *err;
                     (logs, traces, labels, Some(format!("setup failed: {reason}")), coverage)
                 }
-                Err(err) => {
-                    (Vec::new(), None, HashMap::new(), Some(format!("setup failed: {err}")), None)
-                }
+                Err(err) => (
+                    Vec::new(),
+                    None,
+                    Default::default(),
+                    Some(format!("setup failed: {err}")),
+                    None,
+                ),
             };
             traces.extend(setup_traces.map(|traces| (TraceKind::Setup, traces)));
             logs.extend(setup_logs);
@@ -206,8 +208,8 @@ impl<'a> ContractRunner<'a> {
     /// `function fixture_owner() public returns (address[] memory){}`
     /// returns an array of addresses to be used for fuzzing `owner` named parameter in scope of the
     /// current test.
-    fn fuzz_fixtures(&self, address: Address) -> FuzzFixtures {
-        let mut fixtures = HashMap::new();
+    fn fuzz_fixtures(&mut self, address: Address) -> FuzzFixtures {
+        let mut fixtures = HashMap::default();
         let fixture_functions = self
             .contract
             .abi
@@ -216,9 +218,12 @@ impl<'a> ContractRunner<'a> {
         for func in fixture_functions {
             if func.inputs.is_empty() {
                 // Read fixtures declared as functions.
-                if let Ok(CallResult { decoded_result, .. }) =
-                    self.executor
-                        .call(CALLER, address, func, &[], U256::ZERO, None)
+                if let Ok(CallResult {
+                    raw: _,
+                    decoded_result,
+                }) = self
+                    .executor
+                    .call(CALLER, address, func, &[], U256::ZERO, None)
                 {
                     fixtures.insert(fixture_name(func.name.clone()), decoded_result);
                 }
@@ -228,7 +233,10 @@ impl<'a> ContractRunner<'a> {
                 let mut vals = Vec::new();
                 let mut index = 0;
                 loop {
-                    if let Ok(CallResult { decoded_result, .. }) = self.executor.call(
+                    if let Ok(CallResult {
+                        raw: _,
+                        decoded_result,
+                    }) = self.executor.call(
                         CALLER,
                         address,
                         func,
@@ -426,8 +434,8 @@ impl<'a> ContractRunner<'a> {
         ) {
             Ok(res) => (res.raw, None),
             Err(EvmError::Execution(err)) => (err.raw, Some(err.reason)),
-            Err(EvmError::SkipError) => return test_result.single_skip(),
-            Err(err) => return test_result.single_fail(err),
+            Err(EvmError::Skip(reason)) => return test_result.single_skip(reason),
+            Err(err) => return test_result.single_fail(Some(err.to_string())),
         };
 
         let success =

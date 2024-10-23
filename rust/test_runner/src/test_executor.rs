@@ -99,7 +99,7 @@ impl<'a> TestExecutor<'a> {
             env,
             composite_inspector.inspector_stack,
             result,
-            backend.has_snapshot_failure(),
+            backend.has_state_snapshot_failure(),
         )
     }
 
@@ -135,7 +135,7 @@ fn convert_executed_result(
     env: EnvWithHandlerCfg,
     inspector: InspectorStack,
     ResultAndState { result, state }: ResultAndState,
-    has_snapshot_failure: bool,
+    has_state_snapshot_failure: bool,
 ) -> eyre::Result<RawCallResult> {
     let (exit_reason, gas_refunded, gas_used, out, exec_logs) = match result {
         ExecutionResult::Success {
@@ -159,6 +159,7 @@ fn convert_executed_result(
         &env.tx.data,
         env.tx.transact_to.is_create(),
         &env.tx.access_list,
+        0,
     );
 
     let result = match &out {
@@ -187,7 +188,7 @@ fn convert_executed_result(
     Ok(RawCallResult {
         exit_reason,
         reverted: !matches!(exit_reason, return_ok!()),
-        has_snapshot_failure,
+        has_state_snapshot_failure,
         result,
         gas_used,
         gas_refunded,

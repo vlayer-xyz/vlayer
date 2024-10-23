@@ -14,7 +14,7 @@ alloy-dyn-abi = { workspace = true }
 alloy-json-abi = { workspace = true }
 alloy-primitives = { workspace = true }
 alloy-rlp = { workspace = true }
-alloy-sol-types = { workspace = true }
+alloy-sol-types = { workspace = true, features = ["json"] }
 alloy-trie = { workspace = true }
 anyhow = { workspace = true }
 chain = { workspace = true }

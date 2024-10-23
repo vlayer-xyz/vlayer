@@ -1,6 +1,4 @@
-use std::collections::{BTreeMap, HashMap};
-
-use alloy_primitives::{keccak256, Address, Bytes, FixedBytes, B256, U256};
+use alloy_primitives::{keccak256, map::HashMap, Address, Bytes, FixedBytes, B256, U256};
 use alloy_rlp::encode;
 use alloy_trie::{proof::ProofRetainer, HashBuilder, Nibbles};
 use forge::revm::primitives::{
@@ -13,7 +11,7 @@ fn to_nibbles<T: AsRef<[u8]>>(word: T) -> Nibbles {
     Nibbles::unpack(keccak256(word))
 }
 
-fn build_proof(targets: Vec<Nibbles>, leafs: Vec<(Nibbles, Vec<u8>)>) -> BTreeMap<Nibbles, Bytes> {
+fn build_proof(targets: Vec<Nibbles>, leafs: Vec<(Nibbles, Vec<u8>)>) -> HashMap<Nibbles, Bytes> {
     let mut builder = HashBuilder::default().with_proof_retainer(ProofRetainer::new(targets));
 
     for (key, value) in leafs {
@@ -22,7 +20,7 @@ fn build_proof(targets: Vec<Nibbles>, leafs: Vec<(Nibbles, Vec<u8>)>) -> BTreeMa
 
     let _ = builder.root();
 
-    builder.take_proofs()
+    builder.take_proof_nodes().into_inner()
 }
 
 pub fn account_proof(address: Address, evm_state: &EvmState) -> Vec<Bytes> {
