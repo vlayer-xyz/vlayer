@@ -31,4 +31,21 @@ contract RegexTest is VTest {
         assertEq(captures[1], "hello");
         assertEq(captures[2], "world");
     }
+
+    function test_capture_returns_empty_list_when_no_match() public {
+        RegexWrapper regex = new RegexWrapper();
+        callProver();
+        string[] memory captures = regex.capture("hello world", "goodbye world");
+        assertEq(captures.length, 0);
+    }
+
+    function test_capture_returns_empty_string_when_no_match_for_group() public {
+        RegexWrapper regex = new RegexWrapper();
+        callProver();
+        string[] memory captures = regex.capture("hello world", "hello(,)? (world)");
+        assertEq(captures.length, 3);
+        assertEq(captures[0], "hello world");
+        assertEq(captures[1], "");
+        assertEq(captures[2], "world");
+    }
 }
