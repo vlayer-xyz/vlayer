@@ -6,7 +6,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-alloy-sol-types = { version = "0.7.5", default-features = false }
+alloy-sol-types = { version = "0.8.8", default-features = false }
 call_guest = { path = "../../guest" }
 risc0-zkvm = { version = "1.0.1", default-features = false }
 
