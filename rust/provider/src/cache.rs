@@ -24,7 +24,7 @@ impl CachedProvider {
     /// Creates a new [CachedProvider]. At this point, the cache files
     /// directory should exist and the cache file itself should not.
     /// A new cache file will be created when dropped.
-    pub fn new(cache_path: PathBuf, provider: Box<dyn BlockingProvider>) -> Result<Self> {
+    pub fn new(cache_path: PathBuf, provider: impl BlockingProvider + 'static) -> Result<Self> {
         // Sanity checks.
         if let Some(parent) = cache_path.parent() {
             if !parent.exists() {
@@ -39,18 +39,19 @@ impl CachedProvider {
         }
 
         let cache = JsonCache::empty(cache_path);
-        Ok(Self {
-            inner: provider,
-            cache: RwLock::new(cache),
-        })
+        Ok(Self::from_components(cache, provider))
     }
 
     pub fn from_file(file_path: &PathBuf) -> Result<Self> {
         let cache = JsonCache::load(file_path)?;
-        Ok(Self {
-            inner: Box::new(NullProvider(PhantomData)),
+        Ok(Self::from_components(cache, NullProvider(PhantomData)))
+    }
+
+    fn from_components(cache: JsonCache, provider: impl BlockingProvider + 'static) -> Self {
+        Self {
+            inner: Box::new(provider),
             cache: RwLock::new(cache),
-        })
+        }
     }
 }
 

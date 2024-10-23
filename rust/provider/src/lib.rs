@@ -24,7 +24,7 @@ pub use proof::{EIP1186Proof, StorageProof};
 pub type EthersClient = ethers_providers::Provider<RetryClient<Http>>;
 
 /// A trait for providers that fetch data from the Ethereum blockchain.
-#[auto_impl(Rc)]
+#[auto_impl(Rc, Box)]
 pub trait BlockingProvider: Debug + Send + Sync {
     fn get_balance(&self, address: Address, block: BlockNumber) -> Result<U256>;
     fn get_block_header(&self, block: BlockTag) -> Result<Option<Box<dyn EvmBlockHeader>>>;
