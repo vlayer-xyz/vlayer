@@ -7,50 +7,36 @@ on:
   push:
     branches:
       - main
-permissions: read-all
-
 jobs:
   test-extension:
     timeout-minutes: 60
-    runs-on: aws-linux-medium
-    defaults:
-      run:
-        working-directory: rust
+    runs-on: ubuntu-latest
     steps:
-    
       - uses: oven-sh/setup-bun@v2
         with:
           node-version: lts/*
-    
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
           submodules: recursive
-    
       - name: Install dependencies
         run: bun install
         working-directory: ./packages
-    
       - name: Install dependencies of test-web-app
         run: bun install
         working-directory: ./packages/test-web-app
-    
       - name: Build extension
         run: bun run build
         working-directory: ./packages/browser-extension
-    
       - name: Install Playwright Browsers
         run: bunx playwright install --with-deps chromium
         working-directory: ./packages/browser-extension
-    
       - uses: hoverkraft-tech/compose-action@v2.0.2
         with:
           compose-file: docker/web-proof/docker-compose.yaml
-
       - name: Run Playwright tests
         run: TEST_MODE=headless bunx playwright test
         working-directory: ./packages/browser-extension
-    
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
