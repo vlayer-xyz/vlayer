@@ -33,27 +33,22 @@ impl RpcServerMock {
             "id": 1
         });
 
-        let mock = if is_partial {
-            server
-                .mock("POST", "/")
-                .match_header("Content-Type", "application/json")
-                .match_body(Matcher::PartialJson(request_body.clone()))
-                .with_status(200)
-                .with_header("Content-Type", "application/json")
-                .with_body(response_body.to_string())
-                .create_async()
-                .await
+        let mut mock = server
+            .mock("POST", "/")
+            .match_header("Content-Type", "application/json");
+
+        mock = mock.match_body(if is_partial {
+            Matcher::PartialJson(request_body.clone())
         } else {
-            server
-                .mock("POST", "/")
-                .match_header("Content-Type", "application/json")
-                .match_body(Matcher::Json(request_body))
-                .with_status(200)
-                .with_header("Content-Type", "application/json")
-                .with_body(response_body.to_string())
-                .create_async()
-                .await
-        };
+            Matcher::Json(request_body)
+        });
+        
+        mock = mock
+            .with_status(200)
+            .with_header("Content-Type", "application/json")
+            .with_body(response_body.to_string())
+            .create_async()
+            .await;
 
         RpcServerMock { server, mock }
     }
