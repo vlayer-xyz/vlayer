@@ -1,6 +1,7 @@
 import {
   type Abi,
   type Address,
+  type Chain,
   type ContractFunctionArgs,
   type ContractFunctionName,
   createTestClient,
@@ -132,20 +133,19 @@ export async function writeContract<
   functionName: F,
   args: ContractFunctionArgs<T, "payable" | "nonpayable", F>,
   sender?: Address,
-  chainId: number = foundry.id,
+  chain: Chain = foundry,
 ) {
-  const ethClient = createAnvilClient(chainId);
+  const ethClient = createAnvilClient(chain.id);
   const selectedSender = sender || (await ethClient.getAddresses())[0];
 
   const txHash = await ethClient.writeContract({
-    abi,
+    abi: abi as Abi,
     address,
     functionName,
-    args,
+    args: args as readonly unknown[],
+    chain,
     account: selectedSender,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  } as any);
-  // TODO: fix any to viem type
+  });
 
   const txReceipt = await ethClient.waitForTransactionReceipt({ hash: txHash });
 
