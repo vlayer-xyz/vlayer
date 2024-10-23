@@ -56,7 +56,7 @@ fn rpc_urls() -> HashMap<ChainId, String> {
 }
 
 async fn create_host(
-    provider_factory: Box<dyn ProviderFactory>,
+    provider_factory: impl ProviderFactory + 'static,
     block_tag: BlockTag,
     config: &HostConfig,
 ) -> Result<Host, HostError> {
@@ -114,16 +114,10 @@ where
     Ok(return_value)
 }
 
-fn create_provider_factory(test_name: &str) -> Box<dyn ProviderFactory> {
-    if UPDATE_SNAPSHOTS {
-        let ethers_provider_factory = provider::EthersProviderFactory::new(rpc_urls());
-        Box::new(CachedProviderFactory::new(
-            rpc_file_cache(test_name),
-            Some(ethers_provider_factory),
-        ))
-    } else {
-        Box::new(CachedProviderFactory::new(rpc_file_cache(test_name), None))
-    }
+fn create_provider_factory(test_name: &str) -> CachedProviderFactory {
+    let maybe_ethers_provider_factory =
+        UPDATE_SNAPSHOTS.then(|| provider::EthersProviderFactory::new(rpc_urls()));
+    CachedProviderFactory::new(rpc_file_cache(test_name), maybe_ethers_provider_factory)
 }
 
 #[cfg(test)]

@@ -124,7 +124,7 @@ fn create_host<DB: Database>(ctx: &EvmContext<DB>, rpc_endpoints: &RpcEndpoints)
     };
     let provider_factory =
         TestProviderFactory::new(pending_state_provider_factory, rpc_endpoints.clone());
-    let providers = CachedMultiProvider::new(Box::new(provider_factory));
+    let providers = CachedMultiProvider::new(provider_factory);
     let config = HostConfig {
         start_chain_id: TEST_CHAIN_ID,
         ..Default::default()

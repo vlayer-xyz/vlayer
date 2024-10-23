@@ -17,10 +17,10 @@ pub struct CachedMultiProvider {
 }
 
 impl CachedMultiProvider {
-    pub fn new(factory: Box<dyn ProviderFactory>) -> Self {
+    pub fn new(factory: impl ProviderFactory + 'static) -> Self {
         CachedMultiProvider {
             cache: RwLock::new(HashMap::new()),
-            factory,
+            factory: Box::new(factory),
         }
     }
 

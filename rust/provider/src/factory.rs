@@ -2,6 +2,7 @@ use std::{collections::HashMap, path::PathBuf};
 
 use alloy_primitives::ChainId;
 use anyhow::Result;
+use auto_impl::auto_impl;
 use thiserror::Error;
 use url::ParseError;
 
@@ -20,6 +21,7 @@ pub enum ProviderFactoryError {
     RpcProvider(#[from] ParseError),
 }
 
+#[auto_impl(Box)]
 pub trait ProviderFactory: Send + Sync {
     fn create(&self, chain_id: ChainId) -> Result<Box<dyn BlockingProvider>, ProviderFactoryError>;
 }
