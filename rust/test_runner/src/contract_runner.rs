@@ -1,3 +1,10 @@
+#![allow(
+    clippy::unneeded_field_pattern,
+    clippy::explicit_iter_loop,
+    clippy::redundant_closure_for_method_calls,
+    clippy::needless_pass_by_ref_mut
+)]
+
 use std::{collections::BTreeMap, time::Instant};
 
 use alloy_dyn_abi::DynSolValue;
