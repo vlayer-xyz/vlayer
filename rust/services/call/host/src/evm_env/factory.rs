@@ -1,34 +1,28 @@
 use std::sync::Arc;
 
 use call_engine::evm::env::{location::ExecutionLocation, EvmEnv, EvmEnvFactory};
-use provider::{BlockingProvider, CachedMultiProvider};
+use provider::CachedMultiProvider;
 
 use crate::{db::proof::ProofDb, host::error::HostError};
 
-pub(crate) struct HostEvmEnvFactory<P> {
-    providers: CachedMultiProvider<P>,
+pub(crate) struct HostEvmEnvFactory {
+    providers: CachedMultiProvider,
 }
 
-impl<P> HostEvmEnvFactory<P>
-where
-    P: BlockingProvider,
-{
-    pub(crate) fn new(providers: CachedMultiProvider<P>) -> Self {
+impl HostEvmEnvFactory {
+    pub(crate) fn new(providers: CachedMultiProvider) -> Self {
         HostEvmEnvFactory { providers }
     }
 }
 
-impl<P> EvmEnvFactory<ProofDb<P>> for HostEvmEnvFactory<P>
-where
-    P: BlockingProvider,
-{
+impl EvmEnvFactory<ProofDb> for HostEvmEnvFactory {
     fn create(
         &self,
         ExecutionLocation {
             block_number,
             chain_id,
         }: ExecutionLocation,
-    ) -> anyhow::Result<EvmEnv<ProofDb<P>>> {
+    ) -> anyhow::Result<EvmEnv<ProofDb>> {
         let provider = self.providers.get(chain_id)?;
         let header = provider
             .get_block_header(block_number.into())

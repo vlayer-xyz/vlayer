@@ -1,7 +1,6 @@
 mod cache;
 mod ethers;
 mod factory;
-mod file;
 mod multi;
 mod null;
 mod proof;
@@ -16,10 +15,8 @@ pub use ethers::{to_eth_block_header, EthersProvider};
 pub use ethers_core::types::BlockNumber as BlockTag;
 use ethers_providers::{Http, RetryClient};
 pub use factory::{
-    CachedProviderFactory, EthProvider, EthersProviderFactory, FileProviderFactory,
-    ProviderFactory, ProviderFactoryError,
+    CachedProviderFactory, EthersProviderFactory, ProviderFactory, ProviderFactoryError,
 };
-pub use file::FileProvider;
 pub use multi::CachedMultiProvider;
 pub use proof::{EIP1186Proof, StorageProof};
 
@@ -27,7 +24,7 @@ pub use proof::{EIP1186Proof, StorageProof};
 pub type EthersClient = ethers_providers::Provider<RetryClient<Http>>;
 
 /// A trait for providers that fetch data from the Ethereum blockchain.
-#[auto_impl(Rc)]
+#[auto_impl(Rc, Box)]
 pub trait BlockingProvider: Debug + Send + Sync {
     fn get_balance(&self, address: Address, block: BlockNumber) -> Result<U256>;
     fn get_block_header(&self, block: BlockTag) -> Result<Option<Box<dyn EvmBlockHeader>>>;

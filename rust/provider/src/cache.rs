@@ -1,4 +1,4 @@
-use std::{collections::hash_map::Entry, path::PathBuf, sync::RwLock};
+use std::{collections::hash_map::Entry, marker::PhantomData, path::PathBuf, sync::RwLock};
 
 use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256};
 use anyhow::{bail, Result};
@@ -7,6 +7,7 @@ use ethers_core::types::BlockNumber as BlockTag;
 use json::{AccountQuery, BlockQuery, JsonCache, ProofQuery, StorageQuery};
 
 use super::{BlockingProvider, EIP1186Proof};
+use crate::null::NullProvider;
 
 pub(crate) mod json;
 
@@ -38,10 +39,19 @@ impl CachedProvider {
         }
 
         let cache = JsonCache::empty(cache_path);
-        Ok(Self {
+        Ok(Self::from_components(cache, provider))
+    }
+
+    pub fn from_file(file_path: &PathBuf) -> Result<Self> {
+        let cache = JsonCache::load(file_path)?;
+        Ok(Self::from_components(cache, NullProvider(PhantomData)))
+    }
+
+    fn from_components(cache: JsonCache, provider: impl BlockingProvider + 'static) -> Self {
+        Self {
             inner: Box::new(provider),
             cache: RwLock::new(cache),
-        })
+        }
     }
 }
 

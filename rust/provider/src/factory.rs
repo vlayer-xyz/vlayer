@@ -2,10 +2,11 @@ use std::{collections::HashMap, path::PathBuf};
 
 use alloy_primitives::ChainId;
 use anyhow::Result;
+use auto_impl::auto_impl;
 use thiserror::Error;
 use url::ParseError;
 
-use super::{cache::CachedProvider, EthersClient, FileProvider};
+use super::{cache::CachedProvider, EthersClient};
 use crate::{BlockingProvider, EthersProvider};
 
 #[derive(Error, Debug)]
@@ -14,19 +15,15 @@ pub enum ProviderFactoryError {
     NoRpcUrl(ChainId),
     #[error("No rpc cache for chain: {0}")]
     NoRpcCache(ChainId),
-    #[error("Failed to load file cache: {0}")]
-    FileProvider(String),
     #[error("Failed to create cached provider: {0}")]
     CachedProvider(String),
     #[error("Failed to create rpc provider: {0}")]
     RpcProvider(#[from] ParseError),
 }
 
-pub trait ProviderFactory<P>: Send + Sync
-where
-    P: BlockingProvider,
-{
-    fn create(&self, chain_id: ChainId) -> Result<P, ProviderFactoryError>;
+#[auto_impl(Box)]
+pub trait ProviderFactory: Send + Sync {
+    fn create(&self, chain_id: ChainId) -> Result<Box<dyn BlockingProvider>, ProviderFactoryError>;
 }
 
 pub struct EthersProviderFactory {
@@ -36,16 +33,14 @@ pub struct EthersProviderFactory {
 const MAX_RETRY: u32 = 3;
 const INITIAL_BACKOFF: u64 = 500;
 
-pub type EthProvider = EthersProvider<EthersClient>;
-
 impl EthersProviderFactory {
     pub fn new(rpc_urls: HashMap<ChainId, String>) -> Self {
         EthersProviderFactory { rpc_urls }
     }
 }
 
-impl ProviderFactory<EthProvider> for EthersProviderFactory {
-    fn create(&self, chain_id: ChainId) -> Result<EthProvider, ProviderFactoryError> {
+impl ProviderFactory for EthersProviderFactory {
+    fn create(&self, chain_id: ChainId) -> Result<Box<dyn BlockingProvider>, ProviderFactoryError> {
         let url = self
             .rpc_urls
             .get(&chain_id)
@@ -53,7 +48,7 @@ impl ProviderFactory<EthProvider> for EthersProviderFactory {
 
         let client = EthersClient::new_client(url, MAX_RETRY, INITIAL_BACKOFF)?;
 
-        Ok(EthersProvider::new(client))
+        Ok(Box::new(EthersProvider::new(client)))
     }
 }
 
@@ -68,49 +63,36 @@ fn get_path(
     Ok(PathBuf::from(file_path_str))
 }
 
-pub struct FileProviderFactory {
-    rpc_file_cache: HashMap<ChainId, String>,
-}
-
-impl FileProviderFactory {
-    pub fn new(rpc_file_cache: HashMap<ChainId, String>) -> Self {
-        FileProviderFactory { rpc_file_cache }
-    }
-}
-
-impl ProviderFactory<FileProvider> for FileProviderFactory {
-    fn create(&self, chain_id: ChainId) -> Result<FileProvider, ProviderFactoryError> {
-        let file_path = get_path(&self.rpc_file_cache, chain_id)?;
-
-        FileProvider::from_file(&file_path)
-            .map_err(|err| ProviderFactoryError::FileProvider(err.to_string()))
-    }
-}
-
 pub struct CachedProviderFactory {
-    ethers_provider_factory: EthersProviderFactory,
     rpc_file_cache: HashMap<ChainId, String>,
+    ethers_provider_factory: Option<EthersProviderFactory>,
 }
 
 impl CachedProviderFactory {
     pub fn new(
-        rpc_urls: HashMap<ChainId, String>,
         rpc_file_cache: HashMap<ChainId, String>,
+        ethers_provider_factory: Option<EthersProviderFactory>,
     ) -> Self {
         CachedProviderFactory {
-            ethers_provider_factory: EthersProviderFactory::new(rpc_urls),
+            ethers_provider_factory,
             rpc_file_cache,
         }
     }
 }
 
-impl ProviderFactory<CachedProvider> for CachedProviderFactory {
-    fn create(&self, chain_id: ChainId) -> Result<CachedProvider, ProviderFactoryError> {
+impl ProviderFactory for CachedProviderFactory {
+    fn create(&self, chain_id: ChainId) -> Result<Box<dyn BlockingProvider>, ProviderFactoryError> {
         let file_path = get_path(&self.rpc_file_cache, chain_id)?;
 
-        let provider = self.ethers_provider_factory.create(chain_id)?;
-        CachedProvider::new(file_path, provider)
-            .map_err(|err| ProviderFactoryError::CachedProvider(err.to_string()))
+        let cached_provider = match &self.ethers_provider_factory {
+            Some(ethers_factory) => {
+                let provider = ethers_factory.create(chain_id)?;
+                CachedProvider::new(file_path, provider)
+            }
+            None => CachedProvider::from_file(&file_path),
+        }
+        .map_err(|err| ProviderFactoryError::CachedProvider(err.to_string()))?;
+        Ok(Box::new(cached_provider))
     }
 }
 

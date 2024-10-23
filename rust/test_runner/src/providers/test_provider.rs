@@ -84,19 +84,19 @@ impl TestProviderFactory {
     }
 }
 
-impl ProviderFactory<TestProvider> for TestProviderFactory {
-    fn create(&self, chain_id: ChainId) -> Result<TestProvider, ProviderFactoryError> {
+impl ProviderFactory for TestProviderFactory {
+    fn create(&self, chain_id: ChainId) -> Result<Box<dyn BlockingProvider>, ProviderFactoryError> {
         if chain_id == TEST_CHAIN_ID {
             let pending_state_provider = self.pending_state_provider_factory.create(chain_id)?;
-            Ok(TestProvider {
-                provider: Box::new(pending_state_provider),
-            })
+            Ok(Box::new(TestProvider {
+                provider: pending_state_provider,
+            }))
         } else {
             let ethers_provider_factory = EthersProviderFactory::new(self.get_rpc_url(chain_id));
             let ethers_provider = ethers_provider_factory.create(chain_id)?;
-            Ok(TestProvider {
-                provider: Box::new(ethers_provider),
-            })
+            Ok(Box::new(TestProvider {
+                provider: ethers_provider,
+            }))
         }
     }
 }

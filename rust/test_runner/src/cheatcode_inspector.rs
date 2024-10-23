@@ -20,8 +20,7 @@ use provider::CachedMultiProvider;
 use crate::{
     cheatcodes::{callProverCall, getProofCall, CHEATCODE_CALL_ADDR},
     providers::{
-        pending_state_provider::PendingStateProviderFactory,
-        test_provider::{TestProvider, TestProviderFactory},
+        pending_state_provider::PendingStateProviderFactory, test_provider::TestProviderFactory,
     },
 };
 
@@ -118,10 +117,7 @@ impl CheatcodeInspector {
     }
 }
 
-fn create_host<DB: Database>(
-    ctx: &EvmContext<DB>,
-    rpc_endpoints: &RpcEndpoints,
-) -> Host<TestProvider> {
+fn create_host<DB: Database>(ctx: &EvmContext<DB>, rpc_endpoints: &RpcEndpoints) -> Host {
     let pending_state_provider_factory = PendingStateProviderFactory {
         block_number: ctx.env.block.number.try_into().unwrap(),
         state: ctx.journaled_state.state.clone(),

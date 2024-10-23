@@ -9,25 +9,25 @@ use call_engine::utils::InteriorMutabilityCache;
 use super::{factory::ProviderFactory, BlockingProvider};
 use crate::factory::ProviderFactoryError;
 
-type MultiProvider<P> = HashMap<ChainId, Arc<P>>;
+type MultiProvider = HashMap<ChainId, Arc<Box<dyn BlockingProvider>>>;
 
-pub struct CachedMultiProvider<P> {
-    cache: RwLock<MultiProvider<P>>,
-    factory: Box<dyn ProviderFactory<P>>,
+pub struct CachedMultiProvider {
+    cache: RwLock<MultiProvider>,
+    factory: Box<dyn ProviderFactory>,
 }
 
-impl<P> CachedMultiProvider<P>
-where
-    P: BlockingProvider,
-{
-    pub fn new(factory: impl ProviderFactory<P> + 'static) -> Self {
+impl CachedMultiProvider {
+    pub fn new(factory: impl ProviderFactory + 'static) -> Self {
         CachedMultiProvider {
             cache: RwLock::new(HashMap::new()),
             factory: Box::new(factory),
         }
     }
 
-    pub fn get(&self, chain_id: ChainId) -> Result<Arc<P>, ProviderFactoryError> {
+    pub fn get(
+        &self,
+        chain_id: ChainId,
+    ) -> Result<Arc<Box<dyn BlockingProvider>>, ProviderFactoryError> {
         self.cache
             .try_get_or_insert(chain_id, || self.factory.create(chain_id))
     }
@@ -41,16 +41,19 @@ mod get {
     use null_provider_factory::NullProviderFactory;
 
     use super::*;
-    use crate::{factory::FileProviderFactory, FileProvider};
+    use crate::{cache::CachedProvider, CachedProviderFactory};
 
     mod null_provider_factory {
         use super::*;
 
         pub(crate) struct NullProviderFactory;
 
-        impl ProviderFactory<FileProvider> for NullProviderFactory {
-            fn create(&self, _chain_id: ChainId) -> Result<FileProvider, ProviderFactoryError> {
-                Err(ProviderFactoryError::FileProvider("Forced error for testing".to_string()))
+        impl ProviderFactory for NullProviderFactory {
+            fn create(
+                &self,
+                _chain_id: ChainId,
+            ) -> Result<Box<dyn BlockingProvider>, ProviderFactoryError> {
+                Err(ProviderFactoryError::CachedProvider("Forced error for testing".to_string()))
             }
         }
     }
@@ -58,7 +61,8 @@ mod get {
     #[test]
     fn gets_cached_provider() -> anyhow::Result<()> {
         let path_buf = PathBuf::from("testdata/cache.json");
-        let provider = Arc::new(FileProvider::from_file(&path_buf)?);
+        let provider =
+            Arc::new(Box::new(CachedProvider::from_file(&path_buf)?) as Box<dyn BlockingProvider>);
 
         let cache = RwLock::new(HashMap::from([(Chain::mainnet().id(), Arc::clone(&provider))]));
 
@@ -81,8 +85,8 @@ mod get {
         let rpc_file_cache =
             HashMap::from([(Chain::mainnet().id(), "testdata/cache.json".to_string())]);
 
-        let provider_factory = FileProviderFactory::new(rpc_file_cache);
-        let cached_multi_provider = CachedMultiProvider::new(provider_factory);
+        let provider_factory = CachedProviderFactory::new(rpc_file_cache, None);
+        let cached_multi_provider = CachedMultiProvider::new(Box::new(provider_factory));
         cached_multi_provider.get(Chain::mainnet().id())?;
 
         Ok(())

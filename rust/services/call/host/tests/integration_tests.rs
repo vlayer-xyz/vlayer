@@ -12,10 +12,7 @@ use chain_server::server::ChainProofServerMock;
 use dotenv::dotenv;
 use ethers_core::types::BlockNumber as BlockTag;
 use lazy_static::lazy_static;
-use provider::{
-    BlockingProvider, CachedMultiProvider, CachedProviderFactory, FileProviderFactory,
-    ProviderFactory,
-};
+use provider::{CachedMultiProvider, CachedProviderFactory, ProviderFactory};
 use serde_json::json;
 
 // To activate recording, set UPDATE_SNAPSHOTS to true.
@@ -58,14 +55,11 @@ fn rpc_urls() -> HashMap<ChainId, String> {
     ])
 }
 
-async fn create_host<P>(
-    provider_factory: impl ProviderFactory<P> + 'static,
+async fn create_host(
+    provider_factory: impl ProviderFactory + 'static,
     block_tag: BlockTag,
     config: &HostConfig,
-) -> Result<Host<P>, HostError>
-where
-    P: BlockingProvider + 'static,
-{
+) -> Result<Host, HostError> {
     let providers = CachedMultiProvider::new(provider_factory);
     let chain_proof_server_mock = ChainProofServerMock::start().await;
     let chain_proof_client = ChainProofClient::new(chain_proof_server_mock.url());
@@ -87,14 +81,11 @@ where
     Host::try_new_with_components(providers, block_number, chain_proof_client, config)
 }
 
-fn block_tag_to_block_number<P>(
-    providers: &CachedMultiProvider<P>,
+fn block_tag_to_block_number(
+    providers: &CachedMultiProvider,
     chain_id: u64,
     block_tag: BlockTag,
-) -> Result<u64, HostError>
-where
-    P: BlockingProvider + 'static,
-{
+) -> Result<u64, HostError> {
     match block_tag {
         BlockTag::Latest => get_block_number(providers, chain_id),
         BlockTag::Number(block_no) => Ok(block_no.as_u64()),
@@ -116,18 +107,17 @@ where
         ..Default::default()
     };
 
-    let host_output = if UPDATE_SNAPSHOTS {
-        let provider_factory = CachedProviderFactory::new(rpc_urls(), rpc_file_cache(test_name));
-        let host = create_host(provider_factory, block_number, &config).await?;
-        host.run(call).await?
-    } else {
-        let provider_factory = FileProviderFactory::new(rpc_file_cache(test_name));
-        let host = create_host(provider_factory, block_number, &config).await?;
-        host.run(call).await?
-    };
-
+    let provider_factory = create_provider_factory(test_name);
+    let host = create_host(provider_factory, block_number, &config).await?;
+    let host_output = host.run(call).await?;
     let return_value = C::abi_decode_returns(&host_output.guest_output.evm_call_result, false)?;
     Ok(return_value)
+}
+
+fn create_provider_factory(test_name: &str) -> CachedProviderFactory {
+    let maybe_ethers_provider_factory =
+        UPDATE_SNAPSHOTS.then(|| provider::EthersProviderFactory::new(rpc_urls()));
+    CachedProviderFactory::new(rpc_file_cache(test_name), maybe_ethers_provider_factory)
 }
 
 #[cfg(test)]
