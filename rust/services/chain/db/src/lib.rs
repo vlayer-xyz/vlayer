@@ -12,7 +12,7 @@ use block_trie::{BlockTrie, ProofVerificationError};
 use bytes::Bytes;
 use chain_guest_wrapper::RISC0_CHAIN_GUEST_ID;
 use derive_more::Debug;
-use key_value::{Database, DbError, Mdbx, ReadTx, ReadWriteTx, WriteTx};
+use key_value::{Database, DbError, InMemoryDatabase, Mdbx, ReadTx, ReadWriteTx, WriteTx};
 use mpt::{MerkleTrie, Node};
 use proof_builder::{MerkleProofBuilder, ProofResult};
 use thiserror::Error;
@@ -93,12 +93,7 @@ impl ChainUpdate {
     }
 }
 
-type DB = Box<dyn for<'a> Database<'a>>;
-
-pub struct ChainDb {
-    db: DB,
-    mode: Mode,
-}
+type DB = Box<dyn for<'a> Database<'a> + Send + Sync + 'static>;
 
 pub enum Mode {
     ReadOnly,
@@ -125,13 +120,24 @@ pub enum ChainDbError {
 
 pub type ChainDbResult<T> = Result<T, ChainDbError>;
 
+pub struct ChainDb {
+    db: DB,
+    mode: Mode,
+}
+
 impl ChainDb {
-    pub fn new(path: impl AsRef<Path>, mode: Mode) -> ChainDbResult<Self> {
+    pub fn in_memory() -> Self {
+        let db = Box::new(InMemoryDatabase::new());
+        let mode = Mode::ReadWrite;
+        Self { db, mode }
+    }
+
+    pub fn mdbx(path: impl AsRef<Path>, mode: Mode) -> ChainDbResult<Self> {
         let db = Box::new(Mdbx::open(path)?);
         Ok(Self { db, mode })
     }
 
-    pub fn from_db(db: impl for<'a> Database<'a> + 'static, mode: Mode) -> Self {
+    pub fn new(db: impl for<'a> Database<'a> + Send + Sync + 'static, mode: Mode) -> Self {
         Self {
             db: Box::new(db),
             mode,
