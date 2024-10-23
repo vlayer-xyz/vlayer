@@ -1,3 +1,4 @@
+#![allow(clippy::redundant_closure_for_method_calls, clippy::explicit_iter_loop)]
 /**
  * This file was copied from https://github.com/foundry-rs/foundry/blob/2044faec64f99a21f0e5f0094458a973612d0712/crates/forge/bin/cmd/test/filter.rs
  * The original file is licensed under the Apache License, Version 2.0.

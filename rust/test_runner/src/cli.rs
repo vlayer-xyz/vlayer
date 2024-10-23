@@ -1,3 +1,4 @@
+#![allow(clippy::explicit_iter_loop)]
 use std::{
     collections::{BTreeMap, BTreeSet},
     path::PathBuf,
