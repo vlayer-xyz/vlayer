@@ -9,4 +9,5 @@ library Precompiles {
     address public constant JSON_GET_BOOL_PRECOMPILE = address(0x104);
     address public constant JSON_GET_ARRAY_LENGTH = address(0x105);
     address public constant REGEX_MATCH_PRECOMPILE = address(0x110);
+    address public constant REGEX_CAPTURE_PRECOMPILE = address(0x111);
 }

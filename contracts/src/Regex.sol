@@ -11,4 +11,11 @@ library RegexLib {
         bool isMatch = abi.decode(matchResult, (bool));
         return isMatch;
     }
+
+    function capture(string memory source, string memory pattern) internal view returns (string[] memory) {
+        (bool success, bytes memory matchResult) =
+            Precompiles.REGEX_CAPTURE_PRECOMPILE.staticcall(abi.encode([source, pattern]));
+        require(success, "regex capture precompile call failed");
+        return abi.decode(matchResult, (string[]));
+    }
 }
