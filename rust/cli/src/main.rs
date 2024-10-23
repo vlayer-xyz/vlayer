@@ -47,7 +47,7 @@ async fn main() {
         Ok(_) => (),
         Err(e) => {
             error!("Error: {}", e);
-            std::process::exit(1);
+            std::process::exit(e.error_code());
         }
     }
 }
@@ -80,7 +80,11 @@ async fn run() -> Result<(), CLIError> {
         }
         Commands::Test(cmd) => {
             info!("Running vlayer tests");
-            cmd.run().await.unwrap();
+            let test_result = cmd.run().await.unwrap();
+            let failed_tests_count = test_result.failed();
+            if !test_result.allow_failure && failed_tests_count > 0 {
+                return Err(CLIError::TestFailed(failed_tests_count));
+            }
         }
     }
     Ok(())
