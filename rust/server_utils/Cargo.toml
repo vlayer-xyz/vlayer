@@ -12,8 +12,8 @@ ethers = { workspace = true }
 hex = { workspace = true }
 host_utils = { workspace = true }
 http-body-util = { workspace = true }
-httpmock = { workspace = true }
 mime = { workspace = true }
+mockito = { workspace = true }
 reqwest = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }

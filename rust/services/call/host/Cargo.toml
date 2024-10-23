@@ -19,7 +19,6 @@ chain_types = { workspace = true }
 dotenv = { workspace = true }
 ethers-core = { workspace = true }
 host_utils = { workspace = true }
-httpmock = { workspace = true }
 lazy_static = { workspace = true }
 mpt = { workspace = true }
 provider = { workspace = true }

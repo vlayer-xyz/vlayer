@@ -15,7 +15,6 @@ call_host = { workspace = true }
 chain = { workspace = true }
 chain_server = { workspace = true }
 hex = { workspace = true }
-httpmock = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 server_utils = { workspace = true }
