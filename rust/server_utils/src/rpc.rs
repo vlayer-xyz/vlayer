@@ -147,7 +147,7 @@ mod tests {
     }
 
     #[tokio::test]
-    #[should_panic]
+    #[should_panic(expected = "Expected 1 request(s) to:")]
     async fn mock_not_called_panics() {
         let mock = RpcServerMock::start(METHOD, false, json!({}), json!({})).await;
 
