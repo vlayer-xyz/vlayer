@@ -8,7 +8,7 @@ import React, { useCallback, useEffect, useState } from "react";
 
 function Source() {
   const [hasProof, setHasProof] = useState(true);
-  const [proof, setProof] = useState({});
+  const [proof, setProof] = useState<unknown>(null);
   const requestWebProof = useCallback(async () => {
     const provider = createExtensionWebProofProvider({
       notaryUrl: "http://localhost:7047",
@@ -26,7 +26,7 @@ function Source() {
         notarize("https://swapi.dev/api/people/1", "GET", "Prove"),
       ],
     });
-
+    console.log("webproof", webproof);
     setProof(webproof);
   }, []);
 
