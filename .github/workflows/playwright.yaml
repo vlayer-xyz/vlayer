@@ -31,9 +31,12 @@ jobs:
       - name: Install Playwright Browsers
         run: bunx playwright install --with-deps chromium
         working-directory: ./packages/browser-extension
-      - name: Run docker
-        run: docker compose up -d
-        working-directory: docker/web-proof
+      - uses: hoverkraft-tech/compose-action@v2.0.2
+        with:
+          compose-file: docker/web-proof/docker-compose.yaml
+          
+        # run: docker compose up -d
+        # working-directory: docker/web-proof
       - name: Run Playwright tests
         run: TEST_MODE=headless bunx playwright test
         working-directory: ./packages/browser-extension
