@@ -8,6 +8,7 @@ use commands::{
     version::Version,
 };
 use serde_json::json;
+use server_utils::EMPTY_PROOF_RESPONSE;
 use test_runner::cli::TestArgs;
 use tracing::{error, info};
 use tracing_subscriber::EnvFilter;
@@ -90,12 +91,5 @@ async fn run() -> Result<(), CLIError> {
 }
 
 async fn start_chain_proof_server() -> ChainProofServerMock {
-    ChainProofServerMock::start(
-        json!({}),
-        json!({
-            "proof": "",
-            "nodes": []
-        }),
-    )
-    .await
+    ChainProofServerMock::start(json!({}), EMPTY_PROOF_RESPONSE.clone()).await
 }

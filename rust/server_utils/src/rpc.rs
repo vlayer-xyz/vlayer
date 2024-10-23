@@ -1,4 +1,4 @@
-use std::mem::take;
+use std::{mem::take, sync::LazyLock};
 
 use mockito::{Matcher, Mock, ServerGuard};
 use reqwest::Client;
@@ -10,6 +10,13 @@ pub struct RpcServerMock {
     server: ServerGuard,
     mock: Mock,
 }
+
+pub static EMPTY_PROOF_RESPONSE: LazyLock<Value> = LazyLock::new(|| {
+    json!({
+        "proof": "",
+        "nodes": []
+    })
+});
 
 impl RpcServerMock {
     pub async fn start(

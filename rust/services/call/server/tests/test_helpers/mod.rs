@@ -16,7 +16,7 @@ use ethers::{
 use example_prover::ExampleProver;
 use serde::Serialize;
 use serde_json::json;
-use server_utils::post;
+use server_utils::{post, EMPTY_PROOF_RESPONSE};
 
 abigen!(ExampleProver, "./testdata/ExampleProver.json",);
 
@@ -48,14 +48,7 @@ impl TestHelper {
 }
 
 async fn start_chain_proof_server() -> ChainProofServerMock {
-    ChainProofServerMock::start(
-        json!({}),
-        json!({
-            "proof": "",
-            "nodes": []
-        }),
-    )
-    .await
+    ChainProofServerMock::start(json!({}), EMPTY_PROOF_RESPONSE.clone()).await
 }
 
 async fn setup_anvil() -> AnvilInstance {
