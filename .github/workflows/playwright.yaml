@@ -34,9 +34,6 @@ jobs:
       - name: Install Playwright Browsers
         run: bunx playwright install --with-deps chromium
         working-directory: ./packages/browser-extension
-      - uses: hoverkraft-tech/compose-action@v2.0.2
-        with:
-          compose-file: docker/web-proof/docker-compose.yaml
       - name: Set up Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
@@ -75,21 +72,14 @@ jobs:
           VLAYER_RELEASE: "nightly"
         run: |
           export RISC0_EXISTING_CALL_GUEST="$(pwd)/call_guest_replacement"
-          cargo build --release --target ${{ matrix.target }} --package cli 
+          cargo build --release --target x86_64-unknown-linux-gnu --package cli 
 
-      - name: "Print build version"
-        id: vlayer_build
-        if:  matrix.runner == 'aws-linux-medium' 
-        env:
-          VLAYER_RELEASE: "nightly"
-        run: |
-          BUILD=$(./target/${{ matrix.target }}/release/vlayer --version | awk '/vlayer/ {print $2}')
-          echo "vlayer_build=${BUILD}" | tee -a ${GITHUB_OUTPUT}
-    
 
-      - name: Run docker
-        run: docker compose up -d
-        working-directory: docker/web-proof
+      
+      - uses: hoverkraft-tech/compose-action@v2.0.2
+        with:
+          compose-file: docker/web-proof/docker-compose.yaml
+
       - name: Run Playwright tests
         run: TEST_MODE=headless bunx playwright test
         working-directory: ./packages/browser-extension

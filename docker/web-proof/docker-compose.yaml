@@ -14,7 +14,7 @@ services:
       - ./notary-config:/root/.notary-server/config
   anvil:
     build:
-      context: ../..anvil
+      context: ../..
       dockerfile: docker/web-proof/anvil/Dockerfile
     ports:
       - "8545:8545"
