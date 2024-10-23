@@ -62,19 +62,9 @@ jobs:
         with:
           version: "17.0.6"
 
-      - uses: actions/download-artifact@v4
-        with:
-          name: guest-artifacts
-          path: rust/call_guest_replacement
-
       - name: "Build binaries"
-        env:
-          VLAYER_RELEASE: "nightly"
         run: |
-          export RISC0_EXISTING_CALL_GUEST="$(pwd)/call_guest_replacement"
-          cargo build --release --target x86_64-unknown-linux-gnu --package cli 
-
-
+          cargo build --release --target x86_64-unknown-linux-gnu
       
       - uses: hoverkraft-tech/compose-action@v2.0.2
         with:
