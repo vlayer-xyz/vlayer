@@ -263,12 +263,9 @@ mod view {
             to: VIEW_CALL,
             data: sol_call.abi_encode(),
         };
-        let result = run::<ViewCallTest::testPrecompileCall>(
-            "view_precompile",
-            call,
-            &sepolia_latest_block,
-        )
-        .await?;
+        let result =
+            run::<ViewCallTest::testPrecompileCall>("view_precompile", call, &sepolia_latest_block)
+                .await?;
         assert_eq!(
             result._0,
             b256!("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
@@ -334,12 +331,9 @@ mod view {
             to: VIEW_CALL,
             data: sol_call.abi_encode(),
         };
-        let result = run::<ViewCallTest::testChainidCall>(
-            "view_chainid",
-            call,
-            &sepolia_latest_block,
-        )
-        .await?;
+        let result =
+            run::<ViewCallTest::testChainidCall>("view_chainid", call, &sepolia_latest_block)
+                .await?;
         assert_eq!(result._0, uint!(11_155_111_U256));
         Ok(())
     }
@@ -367,13 +361,9 @@ mod view {
             to: address!("d8dA6BF26964aF9D7eEd9e03E53415D37aA96045"), // vitalik.eth
             ..Default::default()
         };
-        run::<ViewCallTest::testEoaAccountCall>(
-            "view_call_eoa",
-            call,
-            &sepolia_latest_block,
-        )
-        .await
-        .expect_err("calling an EOA should fail");
+        run::<ViewCallTest::testEoaAccountCall>("view_call_eoa", call, &sepolia_latest_block)
+            .await
+            .expect_err("calling an EOA should fail");
 
         Ok(())
     }
