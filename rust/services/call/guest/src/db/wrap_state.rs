@@ -1,10 +1,10 @@
-use std::{cell::RefCell, convert::Infallible, rc::Rc};
+use std::{cell::RefCell, collections::HashMap, convert::Infallible, rc::Rc};
 
 use alloy_primitives::{keccak256, Address, B256, U256};
 use call_engine::evm::input::EvmInput;
 use mpt::MerkleTrie;
 use revm::{
-    primitives::{AccountInfo, Bytecode, HashMap},
+    primitives::{AccountInfo, Bytecode},
     DatabaseRef,
 };
 
@@ -80,7 +80,7 @@ impl DatabaseRef for WrapStateDb {
     }
 
     /// Get block hash by block number.
-    fn block_hash_ref(&self, number: U256) -> Result<B256, Self::Error> {
+    fn block_hash_ref(&self, number: u64) -> Result<B256, Self::Error> {
         Ok(self.inner.block_hash(number))
     }
 }

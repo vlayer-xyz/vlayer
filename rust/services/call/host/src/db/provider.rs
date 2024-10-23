@@ -1,4 +1,5 @@
 use std::{
+    collections::HashMap,
     fmt::Debug,
     sync::{Arc, RwLock},
 };
@@ -6,7 +7,7 @@ use std::{
 use alloy_primitives::{Address, B256, U256};
 use provider::BlockingProvider;
 use revm::{
-    primitives::{AccountInfo, Bytecode, HashMap, KECCAK_EMPTY},
+    primitives::{AccountInfo, Bytecode, KECCAK_EMPTY},
     DatabaseRef,
 };
 use thiserror::Error;
@@ -17,7 +18,7 @@ pub enum ProviderDbError {
     #[error("provider error")]
     Provider(#[from] anyhow::Error),
     #[error("invalid block number: {0}")]
-    InvalidBlockNumber(U256),
+    InvalidBlockNumber(u64),
     #[error("hash missing for block: {0}")]
     BlockHashMissing(U256),
 }
@@ -99,13 +100,10 @@ impl<P: BlockingProvider> DatabaseRef for ProviderDb<P> {
         Ok(storage)
     }
 
-    fn block_hash_ref(&self, number: U256) -> Result<B256, Self::Error> {
-        let block_number: u64 = number
-            .try_into()
-            .map_err(|_| ProviderDbError::InvalidBlockNumber(number))?;
+    fn block_hash_ref(&self, number: u64) -> Result<B256, Self::Error> {
         let header = self
             .provider
-            .get_block_header(block_number.into())?
+            .get_block_header(number.into())?
             .ok_or(ProviderDbError::InvalidBlockNumber(number))?;
 
         Ok(header.hash_slow())
