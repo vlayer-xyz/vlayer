@@ -24,7 +24,7 @@ fn root_match() -> anyhow::Result<()> {
         hash_builder.add_leaf(key, &value);
     }
     let root = hash_builder.root();
-    let proofs = hash_builder.take_proofs();
+    let proofs = hash_builder.take_proof_nodes().into_inner();
 
     // reconstruct the trie from the RLP encoded proofs and verify the root hash
     let mpt = MerkleTrie::from_rlp_nodes(proofs.into_values())?;
