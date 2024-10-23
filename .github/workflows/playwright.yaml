@@ -10,7 +10,7 @@ on:
 jobs:
   test-extension:
     timeout-minutes: 60
-    runs-on: aws-linux-medium
+    runs-on: ubuntu-latest
     steps:
       - uses: oven-sh/setup-bun@v2
         with:
@@ -43,3 +43,6 @@ jobs:
           name: playwright-report
           path: ./packages/browser-extension/playwright-report/
           retention-days: 30
+      - name: Stop docker containers
+        if: always()
+        run: docker compose down

@@ -55,7 +55,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
 
       const tlsnProof = await tlsnProve(removeQueryParams(provenUrl?.url), {
         notaryUrl: provingSessionConfig.notaryUrl,
-        websocketProxyUrl: `${provingSessionConfig.wsProxyUrl}`,
+        websocketProxyUrl: `${provingSessionConfig.wsProxyUrl}?token=${new URL(provenUrl.url).host}`,
         method: "GET",
         headers: formattedHeaders?.headers,
         secretHeaders: formattedHeaders?.secretHeaders,
