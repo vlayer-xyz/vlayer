@@ -52,8 +52,7 @@ function startup_vlayer(){
         --proof "${proof_arg}" \
         --rpc-url 31337:http://localhost:8545 \
         ${external_urls[@]+"${external_urls[@]}"} \
-        >"${LOGS
-_DIR}/vlayer_serve.out" &
+        >"${LOGS_DIR}/vlayer_serve.out" &
     VLAYER_SERVER_PID=$!
 
     echo "vlayer server started with PID ${VLAYER_SERVER_PID}."
