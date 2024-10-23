@@ -42,7 +42,7 @@ impl RpcServerMock {
         } else {
             Matcher::Json(request_body)
         });
-        
+
         mock = mock
             .with_status(200)
             .with_header("Content-Type", "application/json")
