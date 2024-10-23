@@ -82,19 +82,15 @@ impl ProviderFactory for CachedProviderFactory {
     fn create(&self, chain_id: ChainId) -> Result<Box<dyn BlockingProvider>, ProviderFactoryError> {
         let file_path = get_path(&self.rpc_file_cache, chain_id)?;
 
-        match &self.ethers_provider_factory {
+        let cached_provider = match &self.ethers_provider_factory {
             Some(ethers_factory) => {
                 let provider = ethers_factory.create(chain_id)?;
-                Ok(Box::new(
-                    CachedProvider::new(file_path, provider)
-                        .map_err(|err| ProviderFactoryError::CachedProvider(err.to_string()))?,
-                ))
+                CachedProvider::new(file_path, provider)
             }
-            None => Ok(Box::new(
-                CachedProvider::from_file(&file_path)
-                    .map_err(|err| ProviderFactoryError::CachedProvider(err.to_string()))?,
-            )),
+            None => CachedProvider::from_file(&file_path),
         }
+        .map_err(|err| ProviderFactoryError::CachedProvider(err.to_string()))?;
+        Ok(Box::new(cached_provider))
     }
 }
 
