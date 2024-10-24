@@ -33,7 +33,7 @@ use tracing::{debug, debug_span, enabled, trace};
  * The original file was modified for the purpose of this project.
  * All relevant modifications are commented with "MODIFICATION" comments.
  */
-use crate::test_executor::TestExecutor;
+use crate::forked::test_executor::TestExecutor;
 
 /// When running tests, we deploy all external libraries present in the project. To avoid additional
 /// libraries affecting nonces of senders used in tests, we are using separate address to

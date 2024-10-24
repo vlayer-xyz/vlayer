@@ -63,7 +63,7 @@ use tracing::{debug, debug_span, enabled, error, trace};
  * The original file was modified for the purpose of this project.
  * All relevant modifications are commented with "MODIFICATION" comments.
  */
-use crate::{
+use super::{
     contract_runner::ContractRunner, filter::FilterArgs, filter::ProjectPathsAwareFilter,
     summary::TestSummaryReporter, test_executor::TestExecutor,
 };
