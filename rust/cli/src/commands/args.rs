@@ -53,7 +53,7 @@ pub(crate) enum ProofModeArg {
 }
 
 impl ProofModeArg {
-    pub(crate) fn map(self) -> ProofMode {
+    pub(crate) const fn map(self) -> ProofMode {
         match self {
             ProofModeArg::Groth16 => ProofMode::Groth16,
             ProofModeArg::Fake => ProofMode::Fake,

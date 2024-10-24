@@ -24,7 +24,7 @@ struct VerifierSelector([u8; VERIFIER_SELECTOR_LENGTH]);
 pub(crate) struct EncodableReceipt(InnerReceipt);
 
 impl EncodableReceipt {
-    fn proof_mode(&self) -> Option<ProofMode> {
+    const fn proof_mode(&self) -> Option<ProofMode> {
         match self.0 {
             Groth16(_) => Some(ProofMode::GROTH16),
             Fake(_) => Some(ProofMode::FAKE),

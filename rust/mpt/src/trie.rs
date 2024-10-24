@@ -27,7 +27,7 @@ pub struct MerkleTrie(pub Node);
 
 impl MerkleTrie {
     /// Creates a new empty trie.
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         MerkleTrie(Node::Null)
     }
 

@@ -15,7 +15,10 @@ pub struct CompositeInspector {
 }
 
 impl CompositeInspector {
-    pub fn new(inspector_stack: InspectorStack, cheatcode_inspector: CheatcodeInspector) -> Self {
+    pub const fn new(
+        inspector_stack: InspectorStack,
+        cheatcode_inspector: CheatcodeInspector,
+    ) -> Self {
         Self {
             inspector_stack,
             cheatcode_inspector,

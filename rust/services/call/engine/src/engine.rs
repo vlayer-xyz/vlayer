@@ -48,7 +48,7 @@ where
     D::Error: std::fmt::Debug,
 {
     #[must_use]
-    pub fn new(envs: &'envs CachedEvmEnv<D>) -> Self {
+    pub const fn new(envs: &'envs CachedEvmEnv<D>) -> Self {
         Self { envs }
     }
 

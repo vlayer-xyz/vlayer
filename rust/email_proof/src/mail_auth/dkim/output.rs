@@ -10,7 +10,7 @@ pub struct Output<'x> {
 }
 
 impl<'x> Output<'x> {
-    pub(crate) fn perm_err(err: Error) -> Self {
+    pub(crate) const fn perm_err(err: Error) -> Self {
         Self {
             result: Result::PermError(err),
             signature: None,
@@ -18,7 +18,7 @@ impl<'x> Output<'x> {
         }
     }
 
-    pub(crate) fn temp_err(err: Error) -> Self {
+    pub(crate) const fn temp_err(err: Error) -> Self {
         Self {
             result: Result::TempError(err),
             signature: None,
@@ -26,7 +26,7 @@ impl<'x> Output<'x> {
         }
     }
 
-    pub(crate) fn fail(err: Error) -> Self {
+    pub(crate) const fn fail(err: Error) -> Self {
         Self {
             result: Result::Fail(err),
             signature: None,
@@ -34,7 +34,7 @@ impl<'x> Output<'x> {
         }
     }
 
-    pub(crate) fn neutral(err: Error) -> Self {
+    pub(crate) const fn neutral(err: Error) -> Self {
         Self {
             result: Result::Neutral(err),
             signature: None,
@@ -42,7 +42,7 @@ impl<'x> Output<'x> {
         }
     }
 
-    pub(crate) fn dns_error(err: Error) -> Self {
+    pub(crate) const fn dns_error(err: Error) -> Self {
         if matches!(&err, Error::Dns(_)) {
             Self::temp_err(err)
         } else {

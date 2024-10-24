@@ -285,7 +285,7 @@ fn append_file(file: &Path, suffix: &str) -> Result<(), std::io::Error> {
     Ok(())
 }
 
-fn map_reqwest_error(e: reqwest::Error) -> CLIError {
+const fn map_reqwest_error(e: reqwest::Error) -> CLIError {
     CLIError::DownloadExamplesError(e)
 }
 

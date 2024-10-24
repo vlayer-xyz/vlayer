@@ -50,7 +50,7 @@ impl ChainInfo {
         }
     }
 
-    pub fn block_range(&self) -> RangeInclusive<BlockNumber> {
+    pub const fn block_range(&self) -> RangeInclusive<BlockNumber> {
         self.first_block..=self.last_block
     }
 }
@@ -310,7 +310,7 @@ struct UnverifiedChainTrie {
 }
 
 impl UnverifiedChainTrie {
-    pub fn new(block_range: RangeInclusive<u64>, trie: MerkleTrie, zk_proof: Bytes) -> Self {
+    pub const fn new(block_range: RangeInclusive<u64>, trie: MerkleTrie, zk_proof: Bytes) -> Self {
         Self {
             block_range,
             trie,
@@ -327,7 +327,7 @@ pub struct ChainTrie {
 }
 
 impl ChainTrie {
-    pub fn new(block_range: RangeInclusive<u64>, trie: BlockTrie, zk_proof: Bytes) -> Self {
+    pub const fn new(block_range: RangeInclusive<u64>, trie: BlockTrie, zk_proof: Bytes) -> Self {
         Self {
             block_range,
             trie,

@@ -12,7 +12,7 @@ pub struct ForgeBlockHeader {
 }
 
 impl ForgeBlockHeader {
-    pub fn new(number: BlockNumber, state_root: B256) -> Self {
+    pub const fn new(number: BlockNumber, state_root: B256) -> Self {
         Self { number, state_root }
     }
 }

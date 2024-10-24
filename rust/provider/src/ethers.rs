@@ -18,7 +18,7 @@ pub struct EthersProvider {
 }
 
 impl EthersProvider {
-    pub(crate) fn new(client: EthersClient) -> Self {
+    pub(crate) const fn new(client: EthersClient) -> Self {
         Self { client }
     }
 }
@@ -164,7 +164,7 @@ pub(crate) fn from_ethers_h256(v: ethers_core::types::H256) -> B256 {
     v.0.into()
 }
 
-pub(crate) fn from_ethers_u256(v: ethers_core::types::U256) -> U256 {
+pub(crate) const fn from_ethers_u256(v: ethers_core::types::U256) -> U256 {
     alloy_primitives::U256::from_limbs(v.0)
 }
 

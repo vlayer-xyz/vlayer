@@ -11,7 +11,7 @@ pub(crate) struct RequestTranscript {
 }
 
 impl RequestTranscript {
-    pub fn new(transcript: RedactedTranscript) -> Self {
+    pub const fn new(transcript: RedactedTranscript) -> Self {
         Self { transcript }
     }
 
