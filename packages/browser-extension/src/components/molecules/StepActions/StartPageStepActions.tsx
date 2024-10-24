@@ -29,6 +29,11 @@ export const StartPageStepActions: FC<StartPageStepActionProps> = ({
   link,
   status,
 }) => {
+  const handleClick = () => {
+    openApp(link).catch((error) => {
+      console.error("Error during opening app:", error);
+    });
+  };
   return (
     <AnimatePresence>
       {!isVisited && status == StepStatus.Current && (
@@ -42,7 +47,7 @@ export const StartPageStepActions: FC<StartPageStepActionProps> = ({
                 marginBottom: "1rem",
               }}
               // open app we gona take proof from in new tab
-              onClick={() => void openApp(link)}
+              onClick={handleClick}
             >
               <Text>Redirect</Text>
             </Button>

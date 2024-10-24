@@ -16,9 +16,12 @@ const createTab = async (url: string) => {
 const BackButton = () => {
   const { backUrl } = useProofContext();
   const { proof } = useTlsnProver();
-  return proof ? (
-    <Button onClick={() => void createTab(backUrl)}>Back</Button>
-  ) : null;
+  const handleClick = () => {
+    createTab(backUrl).catch((error) => {
+      console.error("Error during creating new tab:", error);
+    });
+  };
+  return proof ? <Button onClick={handleClick}>Back</Button> : null;
 };
 
 const ProofButton = () => {
@@ -40,8 +43,13 @@ const ProofButton = () => {
 const GoToPageButton = () => {
   const { hasDataForProof } = { hasDataForProof: false }; //useTlsnProver();
   const { redirectUrl } = useProofContext();
+  const handleClick = () => {
+    createTab(redirectUrl).catch((error) => {
+      console.error("Error during creating new tab:", error);
+    });
+  };
   return !hasDataForProof ? (
-    <Button variant="soft" onClick={() => void createTab(redirectUrl)}>
+    <Button variant="soft" onClick={handleClick}>
       {" "}
       Go to page {redirectUrl}{" "}
     </Button>

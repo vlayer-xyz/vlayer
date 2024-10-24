@@ -29,13 +29,18 @@ function Source() {
 
     setProof(webproof);
   }, []);
+  const handleClick = () => {
+    requestWebProof().catch((error) => {
+      console.error("Error during requesting web proof:", error);
+    });
+  };
 
   useEffect(() => {
     setHasProof(!!proof);
   }, [proof]);
   return (
     <>
-      <button data-testid="request-webproof-button" onClick={requestWebProof}>
+      <button data-testid="request-webproof-button" onClick={handleClick}>
         Request web proof
       </button>
       {hasProof ? (
