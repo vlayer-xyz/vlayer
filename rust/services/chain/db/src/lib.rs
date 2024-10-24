@@ -8,18 +8,23 @@ use std::{
 
 use alloy_primitives::{keccak256, BlockNumber, ChainId, B256};
 use alloy_rlp::{Bytes as RlpBytes, Decodable, RlpDecodable, RlpEncodable};
-use block_trie::{BlockTrie, ProofVerificationError};
 use bytes::Bytes;
-use chain_guest_wrapper::RISC0_CHAIN_GUEST_ID;
+use chain_trie::UnverifiedChainTrie;
 use derive_more::Debug;
-use key_value::{Database, DbError, InMemoryDatabase, Mdbx, ReadTx, ReadWriteTx, WriteTx};
-use mpt::{MerkleTrie, Node};
+use key_value::{Database, InMemoryDatabase, Mdbx, ReadTx, ReadWriteTx, WriteTx};
 use proof_builder::{MerkleProofBuilder, ProofResult};
-use thiserror::Error;
 
+mod chain_trie;
+mod db_node;
+mod error;
 mod proof_builder;
 #[cfg(test)]
 mod tests;
+
+pub use chain_trie::ChainTrie;
+pub use db_node::DbNode;
+pub use error::{ChainDbError, ChainDbResult};
+pub use proof_builder::MerkleProof;
 
 /// Merkle trie nodes table. Holds `node_hash -> rlp_node` mapping
 const NODES: &str = "nodes";
@@ -100,26 +105,6 @@ pub enum Mode {
     ReadWrite,
 }
 
-#[derive(Error, Debug, PartialEq)]
-pub enum ChainDbError {
-    #[error("Attempted write on read-only database")]
-    ReadOnly,
-    #[error("Database error: {0}")]
-    Db(#[from] DbError),
-    #[error("RLP error: {0}")]
-    Node(#[from] alloy_rlp::Error),
-    #[error("Node not found")]
-    NodeNotFound,
-    #[error("Invalid node")]
-    InvalidNode,
-    #[error("Block not found")]
-    BlockNotFound,
-    #[error("ZK proof verification failed: {0}")]
-    ZkProofVerificationFailed(#[from] ProofVerificationError),
-}
-
-pub type ChainDbResult<T> = Result<T, ChainDbError>;
-
 pub struct ChainDb {
     db: DB,
     mode: Mode,
@@ -170,6 +155,14 @@ impl ChainDb {
         self.begin_ro()?.get_merkle_proof(root_hash, block_num)
     }
 
+    pub fn get_chain_proof(
+        &self,
+        chain_id: ChainId,
+        block_numbers: impl IntoIterator<Item = BlockNumber>,
+    ) -> ProofResult {
+        self.begin_ro()?.get_chain_proof(chain_id, block_numbers)
+    }
+
     // Does not verify ZK proof
     fn get_chain_trie_inner(
         &self,
@@ -188,11 +181,7 @@ impl ChainDb {
 
         let first_block_proof = tx.get_merkle_proof(root_hash, first_block)?;
         let last_block_proof = tx.get_merkle_proof(root_hash, last_block)?;
-        let trie = first_block_proof
-            .into_vec()
-            .into_iter()
-            .chain(last_block_proof)
-            .collect();
+        let trie = first_block_proof.join_into_trie(last_block_proof);
 
         Ok(Some(UnverifiedChainTrie::new(first_block..=last_block, trie, zk_proof)))
     }
@@ -244,18 +233,43 @@ impl<TX: ReadTx + ?Sized> ChainDbTx<TX> {
         Ok(chain_info)
     }
 
-    pub fn get_node(&self, node_hash: B256) -> ChainDbResult<Node> {
+    pub fn get_node(&self, node_hash: B256) -> ChainDbResult<DbNode> {
         let node_rlp = self
             .tx
             .get(NODES, &node_hash[..])?
             .ok_or(ChainDbError::NodeNotFound)?;
-        let node = Node::decode(&mut node_rlp.as_ref())?;
+        let node = DbNode::decode(node_hash, node_rlp)?;
         Ok(node)
     }
 
-    pub fn get_merkle_proof(&self, root_hash: B256, block_num: u64) -> ProofResult {
+    pub fn get_merkle_proof(&self, root_hash: B256, block_num: BlockNumber) -> ProofResult {
         MerkleProofBuilder::new(|node_hash| self.get_node(node_hash))
             .build_proof(root_hash, block_num)
+    }
+
+    pub fn get_chain_proof(
+        &self,
+        chain_id: ChainId,
+        block_numbers: impl IntoIterator<Item = BlockNumber>,
+    ) -> ProofResult {
+        let chain_info = self
+            .get_chain_info(chain_id)?
+            .ok_or(ChainDbError::ChainNotFound(chain_id))?;
+        let root_hash = chain_info.root_hash;
+        let block_range = chain_info.block_range();
+
+        let mut nodes = HashSet::new();
+        for block_num in block_numbers {
+            if !block_range.contains(&block_num) {
+                return Err(ChainDbError::BlockNumberOutsideRange {
+                    block_num,
+                    block_range,
+                });
+            }
+            let merkle_proof = self.get_merkle_proof(root_hash, block_num)?;
+            nodes.extend(merkle_proof.into_iter())
+        }
+        Ok(MerkleProof(nodes.into_iter().collect()))
     }
 }
 
@@ -301,53 +315,4 @@ where
     let removed = old_set.difference(&new_set).cloned().collect();
 
     (added, removed)
-}
-
-struct UnverifiedChainTrie {
-    pub block_range: RangeInclusive<u64>,
-    pub trie: MerkleTrie,
-    pub zk_proof: Bytes,
-}
-
-impl UnverifiedChainTrie {
-    pub const fn new(block_range: RangeInclusive<u64>, trie: MerkleTrie, zk_proof: Bytes) -> Self {
-        Self {
-            block_range,
-            trie,
-            zk_proof,
-        }
-    }
-}
-
-// `trie` held by this struct is proven by `zk_proof` to be correctly constructed
-pub struct ChainTrie {
-    pub block_range: RangeInclusive<u64>,
-    pub trie: BlockTrie,
-    pub zk_proof: Bytes,
-}
-
-impl ChainTrie {
-    pub const fn new(block_range: RangeInclusive<u64>, trie: BlockTrie, zk_proof: Bytes) -> Self {
-        Self {
-            block_range,
-            trie,
-            zk_proof,
-        }
-    }
-}
-
-impl TryFrom<UnverifiedChainTrie> for ChainTrie {
-    type Error = ProofVerificationError;
-
-    fn try_from(
-        UnverifiedChainTrie {
-            block_range,
-            trie,
-            zk_proof,
-        }: UnverifiedChainTrie,
-    ) -> Result<Self, Self::Error> {
-        let block_trie =
-            BlockTrie::from_mpt_verifying_the_proof(trie, &zk_proof, RISC0_CHAIN_GUEST_ID)?;
-        Ok(ChainTrie::new(block_range, block_trie, zk_proof))
-    }
 }

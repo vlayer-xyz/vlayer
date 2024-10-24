@@ -26,7 +26,23 @@ pub enum AppError {
     #[error("MPT error: {0}")]
     Mpt(#[from] MptError),
     #[error("Chain db error: {0}")]
-    ChainDb(#[from] ChainDbError),
+    ChainDb(ChainDbError),
+}
+
+impl From<ChainDbError> for AppError {
+    fn from(err: ChainDbError) -> Self {
+        match err {
+            ChainDbError::ChainNotFound(chain_id) => Self::UnsupportedChainId(chain_id),
+            ChainDbError::BlockNumberOutsideRange {
+                block_num,
+                block_range,
+            } => Self::BlockNumberOutsideRange {
+                block_num,
+                block_range,
+            },
+            err => Self::ChainDb(err),
+        }
+    }
 }
 
 impl From<AppError> for JsonRpcError {
