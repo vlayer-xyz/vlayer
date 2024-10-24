@@ -83,7 +83,7 @@ impl BlockTrie {
         Ok(())
     }
 
-    pub fn from_unchecked(mpt: MerkleTrie) -> Self {
+    pub const fn from_unchecked(mpt: MerkleTrie) -> Self {
         Self(mpt)
     }
 

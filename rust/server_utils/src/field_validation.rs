@@ -52,7 +52,7 @@ pub fn parse_hex_field(field_name: &str, hex: String) -> Result<Vec<u8>, FieldVa
     })
 }
 
-fn alloy_hex_error_to_standard_hex_error(err: AlloyFromHexError) -> FromHexError {
+const fn alloy_hex_error_to_standard_hex_error(err: AlloyFromHexError) -> FromHexError {
     match err {
         AlloyFromHexError::InvalidHexCharacter { c, index } => {
             FromHexError::InvalidHexCharacter { c, index }

@@ -8,7 +8,7 @@ pub struct ExecutionLocation {
 }
 
 impl ExecutionLocation {
-    pub fn new(block_number: BlockNumber, chain_id: ChainId) -> Self {
+    pub const fn new(block_number: BlockNumber, chain_id: ChainId) -> Self {
         Self {
             block_number,
             chain_id,

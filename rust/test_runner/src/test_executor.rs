@@ -54,7 +54,7 @@ impl<'a> DerefMut for TestExecutor<'a> {
 
 // MODIFICATION: Only keep functions relevant to test execution
 impl<'a> TestExecutor<'a> {
-    pub fn new(inner: Executor, rpc_endpoints: &'a RpcEndpoints) -> Self {
+    pub const fn new(inner: Executor, rpc_endpoints: &'a RpcEndpoints) -> Self {
         Self {
             inner,
             rpc_endpoints,

@@ -1,5 +1,5 @@
 impl<'x, T> Header<'x, T> {
-    pub fn new(name: &'x [u8], value: &'x [u8], header: T) -> Self {
+    pub const fn new(name: &'x [u8], value: &'x [u8], header: T) -> Self {
         Header {
             name,
             value,

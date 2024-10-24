@@ -13,7 +13,7 @@ pub struct StaticResolver<'a> {
 }
 
 impl<'a> StaticResolver<'a> {
-    pub fn new(dns_record: &'a str) -> Self {
+    pub const fn new(dns_record: &'a str) -> Self {
         Self {
             dns_record: dns_record.as_bytes(),
         }

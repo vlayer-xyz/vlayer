@@ -169,7 +169,7 @@ pub struct TestArgs {
 
 impl TestArgs {
     /// Returns the flattened [`CoreBuildArgs`].
-    pub fn build_args(&self) -> &CoreBuildArgs {
+    pub const fn build_args(&self) -> &CoreBuildArgs {
         &self.opts
     }
 

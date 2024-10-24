@@ -34,7 +34,7 @@ const MAX_RETRY: u32 = 3;
 const INITIAL_BACKOFF: u64 = 500;
 
 impl EthersProviderFactory {
-    pub fn new(rpc_urls: HashMap<ChainId, String>) -> Self {
+    pub const fn new(rpc_urls: HashMap<ChainId, String>) -> Self {
         EthersProviderFactory { rpc_urls }
     }
 }
@@ -69,7 +69,7 @@ pub struct CachedProviderFactory {
 }
 
 impl CachedProviderFactory {
-    pub fn new(
+    pub const fn new(
         rpc_file_cache: HashMap<ChainId, String>,
         ethers_provider_factory: Option<EthersProviderFactory>,
     ) -> Self {

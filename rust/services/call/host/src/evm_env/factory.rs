@@ -10,7 +10,7 @@ pub(crate) struct HostEvmEnvFactory {
 }
 
 impl HostEvmEnvFactory {
-    pub(crate) fn new(providers: CachedMultiProvider) -> Self {
+    pub(crate) const fn new(providers: CachedMultiProvider) -> Self {
         HostEvmEnvFactory { providers }
     }
 }

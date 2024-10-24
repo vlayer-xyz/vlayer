@@ -64,7 +64,7 @@ pub struct TestProviderFactory {
 }
 
 impl TestProviderFactory {
-    pub fn new(
+    pub const fn new(
         pending_state_provider_factory: PendingStateProviderFactory,
         rpc_endpoints: RpcEndpoints,
     ) -> Self {

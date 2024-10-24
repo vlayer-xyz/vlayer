@@ -67,7 +67,7 @@ impl Decodable for Node {
 }
 
 #[allow(clippy::needless_pass_by_value)]
-fn map_rlp_error(err: legacy_rlp::DecoderError) -> alloy_rlp::Error {
+const fn map_rlp_error(err: legacy_rlp::DecoderError) -> alloy_rlp::Error {
     match err {
         rlp::DecoderError::RlpIsTooBig | rlp::DecoderError::RlpInconsistentLengthAndData => {
             alloy_rlp::Error::UnexpectedLength
