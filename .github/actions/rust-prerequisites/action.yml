@@ -4,16 +4,36 @@ runs:
   using: "composite"
   steps:
     - name: Set up Rust
-      uses: actions-rust-lang/setup-rust-toolchain@v1
+      uses: actions-rust-lang/setup-rust-toolchain@11df97af8e8102fd60b60a77dfbf58d40cd843b8 # v1.10.1
       with:
-        cache-workspaces: |
-          rust
-          rust/call/guest_wrapper/risc0_guest
-          rust/chain/guest_wrapper/risc0_guest
+        toolchain: nightly,stable
+        components: clippy,rustfmt
+        cache: false
 
-    - uses: cargo-bins/cargo-binstall@main
+    - name: Setup Rust Caching
+      uses: Swatinem/rust-cache@82a92a6e8fbeee089604da2575dc567ae9ddeaab # v2.7.5
+      with:
+        workspaces: |
+          rust
+          rust/services/call/guest_wrapper/risc0_guest
+          rust/services/chain/guest_wrapper/risc0_guest
+        cache-on-failure: false
+
+    - name: Install cargo binstall
+      uses: taiki-e/cache-cargo-install-action@caa6f48d18d42462f9c30df89e2b4f71a42b7c2c # v2.0.1
+      with:
+        tool: cargo-binstall@1.10.8
+          
+    - name: Install cargo sort
+      uses: taiki-e/cache-cargo-install-action@caa6f48d18d42462f9c30df89e2b4f71a42b7c2c # v2.0.1
+      with:
+        tool: cargo-sort@1.0.9
+
     - name: Install risc0 toolchain
+      uses: taiki-e/cache-cargo-install-action@caa6f48d18d42462f9c30df89e2b4f71a42b7c2c # v2.0.1
+      with:
+        tool: cargo-risczero@1.0.5
+
+    - name: Initialize risc0 toolchain
       shell: bash
-      run: |
-        cargo binstall -y cargo-risczero@1.0.5 --force
-        cargo risczero install
+      run: rustup toolchain list -v | grep -q 'risc0' || cargo risczero install
