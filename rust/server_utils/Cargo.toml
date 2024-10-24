@@ -9,6 +9,7 @@ anyhow = { workspace = true }
 axum = { workspace = true, features = ["macros"] }
 axum-jrpc = { workspace = true }
 ethers = { workspace = true }
+futures = { workspace = true }
 hex = { workspace = true }
 host_utils = { workspace = true }
 http-body-util = { workspace = true }

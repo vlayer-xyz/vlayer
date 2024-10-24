@@ -21,10 +21,10 @@ impl RpcServerMock {
         let mut server = mockito::Server::new_async().await;
 
         let request_body = json!({
+            "id": 1,
             "jsonrpc": "2.0",
             "method": method.as_ref(),
             "params": params,
-            "id": 1
         });
 
         let response_body = json!({
@@ -91,10 +91,10 @@ impl RpcClient {
 
     pub async fn call(&self, params: impl Serialize) -> Result<Value, RpcError> {
         let request_body = json!({
+            "id": 1,
             "jsonrpc": "2.0",
             "method": self.method,
             "params": params,
-            "id": 1
         });
 
         let response = self
@@ -127,6 +127,10 @@ fn parse_json_rpc_response(response_body: Value) -> Result<Value, RpcError> {
 
 #[cfg(test)]
 mod tests {
+    use std::panic::AssertUnwindSafe;
+
+    use futures::FutureExt;
+
     use super::*;
     const METHOD: &str = "get_data";
 
@@ -147,11 +151,18 @@ mod tests {
     }
 
     #[tokio::test]
-    #[should_panic(expected = "Expected 1 request(s) to:")]
     async fn mock_not_called_panics() {
         let mock = RpcServerMock::start(METHOD, false, json!({}), json!({})).await;
 
-        mock.assert();
+        let result = AssertUnwindSafe(async move {
+            mock.assert();
+        })
+        .catch_unwind()
+        .await
+        .unwrap_err();
+        let msg = result.downcast_ref::<String>().unwrap();
+        let expected_msg = "\n> Expected 1 request(s) to:\n\r\nPOST /\r\ncontent-type: application/json\r\n{\"id\":1,\"jsonrpc\":\"2.0\",\"method\":\"get_data\",\"params\":{}}\r\n\n...but received 0\n\n".to_string();
+        assert_eq!(msg, &expected_msg);
     }
 
     #[tokio::test]
