@@ -6,13 +6,13 @@ use std::{
     path::Path,
 };
 
-use alloy_primitives::{keccak256, ChainId, B256};
+use alloy_primitives::{keccak256, BlockNumber, ChainId, B256};
 use alloy_rlp::{Bytes as RlpBytes, Decodable, RlpDecodable, RlpEncodable};
 use block_trie::{BlockTrie, ProofVerificationError};
 use bytes::Bytes;
 use chain_guest_wrapper::RISC0_CHAIN_GUEST_ID;
 use derive_more::Debug;
-use key_value::{Database, DbError, Mdbx, ReadTx, ReadWriteTx, WriteTx};
+use key_value::{Database, DbError, InMemoryDatabase, Mdbx, ReadTx, ReadWriteTx, WriteTx};
 use mpt::{MerkleTrie, Node};
 use proof_builder::{MerkleProofBuilder, ProofResult};
 use thiserror::Error;
@@ -29,8 +29,8 @@ const CHAINS: &str = "chains";
 
 #[derive(Clone, PartialEq, Eq, RlpEncodable, RlpDecodable, Default, Debug)]
 pub struct ChainInfo {
-    pub first_block: u64,
-    pub last_block: u64,
+    pub first_block: BlockNumber,
+    pub last_block: BlockNumber,
     pub root_hash: B256,
     #[debug("{zk_proof:#x}")]
     pub zk_proof: RlpBytes,
@@ -38,7 +38,7 @@ pub struct ChainInfo {
 
 impl ChainInfo {
     pub fn new(
-        block_range: RangeInclusive<u64>,
+        block_range: RangeInclusive<BlockNumber>,
         root_hash: B256,
         zk_proof: impl Into<Bytes>,
     ) -> Self {
@@ -50,7 +50,7 @@ impl ChainInfo {
         }
     }
 
-    pub fn block_range(&self) -> RangeInclusive<u64> {
+    pub fn block_range(&self) -> RangeInclusive<BlockNumber> {
         self.first_block..=self.last_block
     }
 }
@@ -93,12 +93,7 @@ impl ChainUpdate {
     }
 }
 
-type DB = Box<dyn for<'a> Database<'a>>;
-
-pub struct ChainDb {
-    db: DB,
-    mode: Mode,
-}
+type DB = Box<dyn for<'a> Database<'a> + Send + Sync + 'static>;
 
 pub enum Mode {
     ReadOnly,
@@ -125,13 +120,24 @@ pub enum ChainDbError {
 
 pub type ChainDbResult<T> = Result<T, ChainDbError>;
 
+pub struct ChainDb {
+    db: DB,
+    mode: Mode,
+}
+
 impl ChainDb {
-    pub fn new(path: impl AsRef<Path>, mode: Mode) -> ChainDbResult<Self> {
-        let db = Box::new(Mdbx::open(path)?);
-        Ok(Self { db, mode })
+    pub fn in_memory() -> Self {
+        let db = InMemoryDatabase::new();
+        let mode = Mode::ReadWrite;
+        Self::new(db, mode)
     }
 
-    pub fn from_db(db: impl for<'a> Database<'a> + 'static, mode: Mode) -> Self {
+    pub fn mdbx(path: impl AsRef<Path>, mode: Mode) -> ChainDbResult<Self> {
+        let db = Mdbx::open(path)?;
+        Ok(Self::new(db, mode))
+    }
+
+    fn new(db: impl for<'a> Database<'a> + Send + Sync + 'static, mode: Mode) -> Self {
         Self {
             db: Box::new(db),
             mode,

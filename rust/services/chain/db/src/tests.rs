@@ -8,8 +8,7 @@ use rand::{rngs::StdRng, RngCore, SeedableRng};
 use super::*;
 
 fn get_test_db() -> ChainDb {
-    let db = InMemoryDatabase::new();
-    ChainDb::from_db(db, Mode::ReadWrite)
+    ChainDb::in_memory()
 }
 
 fn insert_node(db: &mut ChainDb, node_rlp: &Bytes) {
@@ -59,7 +58,7 @@ static EMPTY_PROOF: &[u8] = &[];
 
 #[test]
 fn read_only_error_on_write() -> Result<()> {
-    let mut db = ChainDb::from_db(InMemoryDatabase::new(), Mode::ReadOnly);
+    let mut db = ChainDb::new(InMemoryDatabase::new(), Mode::ReadOnly);
     let res = db.begin_rw();
     // Not using .unwrap_err() because res is not Debug
     assert!(res.is_err_and(|e| e == ChainDbError::ReadOnly));

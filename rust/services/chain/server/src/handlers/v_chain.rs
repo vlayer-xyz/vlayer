@@ -1,7 +1,10 @@
+use std::{collections::HashSet, sync::Arc};
+
 use alloy_primitives::{bytes, BlockNumber, ChainId};
 use bytes::Bytes;
+use chain_db::ChainDb;
 use lazy_static::lazy_static;
-use mpt::MerkleTrie;
+use parking_lot::RwLock;
 use serde::{Deserialize, Serialize};
 
 use crate::error::AppError;
@@ -27,14 +30,41 @@ const SOME_RISC0_CHAIN_GUEST_ID: [u32; 8] = [
     2663174293, 2024089015, 3465834372, 887420448, 2606376422, 1669533029, 1010997213, 2366700158,
 ];
 
-pub async fn v_chain(merkle_trie: MerkleTrie, params: Params) -> Result<ChainProof, AppError> {
-    if params.block_numbers.is_empty() {
+pub async fn v_chain(
+    chain_db: Arc<RwLock<ChainDb>>,
+    Params {
+        chain_id,
+        block_numbers,
+    }: Params,
+) -> Result<ChainProof, AppError> {
+    if block_numbers.is_empty() {
         return Err(AppError::NoBlockNumbers);
     };
 
+    let chain_info = chain_db
+        .read()
+        .get_chain_info(chain_id)?
+        .ok_or(AppError::UnsupportedChainId(chain_id))?;
+    let root_hash = chain_info.root_hash;
+    let block_range = chain_info.block_range();
+
+    let mut nodes = HashSet::new();
+    for block_num in block_numbers {
+        if !block_range.contains(&block_num) {
+            return Err(AppError::BlockNumberOutsideRange {
+                block_num,
+                block_range,
+            });
+        }
+        let merkle_proof = chain_db.read().get_merkle_proof(root_hash, block_num)?;
+        for (_, node) in merkle_proof {
+            nodes.insert(node.rlp_encoded());
+        }
+    }
+
     Ok(ChainProof {
         proof: SOME_PROOF.clone(),
-        nodes: (&merkle_trie).into_iter().collect(),
+        nodes: nodes.into_iter().collect(),
     })
 }
 
@@ -50,13 +80,18 @@ mod tests {
             chain_id: 1,
             block_numbers: vec![],
         };
-        let trie = MerkleTrie::default();
-        assert_eq!(v_chain(trie, empty_block_hashes).await.unwrap_err(), AppError::NoBlockNumbers);
+        let chain_db = Arc::new(RwLock::new(ChainDb::in_memory()));
+        assert_eq!(
+            v_chain(chain_db, empty_block_hashes).await.unwrap_err(),
+            AppError::NoBlockNumbers
+        );
     }
 
     mod two_consecutive_block_hashes {
+        use ::chain_db::{ChainInfo, ChainUpdate};
         use alloy_primitives::{fixed_bytes, FixedBytes};
         use anyhow::Result;
+        use mpt::MerkleTrie;
         use risc0_zkp::verify::VerificationError;
         use risc0_zkvm::{InnerReceipt, Receipt};
 
@@ -67,6 +102,12 @@ mod tests {
             static ref child_hash: FixedBytes<32> = fixed_bytes!("b495a1d7e6663152ae92708da4843337b958146015a2802f4193a410044698c9"); // https://etherscan.io/block/2
             static ref db_trie: MerkleTrie =
                 MerkleTrie::from_iter([([1], *parent_hash), ([2], *child_hash)]);
+            static ref chain_db: Arc<RwLock<ChainDb>> = {
+                let db = Arc::new(RwLock::new(ChainDb::in_memory()));
+                let chain_info = ChainInfo::new(1..=2, db_trie.hash_slow(), Bytes::default());
+                db.write().update_chain(1, ChainUpdate::new(chain_info, &*db_trie, [])).expect("update_chain failed");
+                db
+            };
             static ref params: Params = Params {
                 chain_id: 1,
                 block_numbers: vec![1, 2],
@@ -76,7 +117,7 @@ mod tests {
         #[ignore = "MPT hashes changed because of RLP encoding fix"]
         #[tokio::test]
         async fn trie_contains_proofs() -> Result<()> {
-            let response = v_chain(db_trie.clone(), params.clone()).await?;
+            let response = v_chain(chain_db.clone(), params.clone()).await?;
 
             let ChainProof { nodes, .. } = response;
             let trie = MerkleTrie::from_rlp_nodes(nodes)?;
@@ -94,7 +135,7 @@ mod tests {
         #[ignore = "MPT hashes changed because of RLP encoding fix"]
         #[tokio::test]
         async fn proof_does_verify() -> Result<()> {
-            let response = v_chain(db_trie.clone(), params.clone()).await?;
+            let response = v_chain(chain_db.clone(), params.clone()).await?;
 
             let ChainProof { proof, nodes } = response;
             let trie = MerkleTrie::from_rlp_nodes(nodes)?;
@@ -108,7 +149,7 @@ mod tests {
 
         #[tokio::test]
         async fn proof_does_not_verify_with_invalid_elf_id() -> Result<()> {
-            let response = v_chain(db_trie.clone(), params.clone()).await?;
+            let response = v_chain(chain_db.clone(), params.clone()).await?;
 
             let ChainProof { proof, nodes } = response;
             let trie = MerkleTrie::from_rlp_nodes(nodes)?;

@@ -42,7 +42,7 @@ impl Host<Http> {
         let provider = Provider::<Http>::try_from(config.rpc_url.as_str())
             .expect("could not instantiate HTTP Provider");
         let prover = Prover::new(config.proof_mode);
-        let db = ChainDb::new(config.db_path, Mode::ReadWrite)?;
+        let db = ChainDb::mdbx(config.db_path, Mode::ReadWrite)?;
 
         Ok(Host::from_parts(prover, provider, db, config.chain_id))
     }
@@ -221,7 +221,6 @@ mod test {
         }
     }
     mod host {
-        use key_value::InMemoryDatabase;
         use serde_json::Value;
         use test_utils::mock_provider;
 
@@ -230,7 +229,7 @@ mod test {
         const LATEST: u64 = 20_000_000;
 
         fn test_db() -> ChainDb {
-            ChainDb::from_db(InMemoryDatabase::new(), Mode::ReadWrite)
+            ChainDb::in_memory()
         }
 
         mod poll {
