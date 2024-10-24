@@ -1,6 +1,5 @@
 import {
   type Abi,
-  AbiFunction,
   AbiStateMutability,
   type Address,
   ContractFunctionArgs,
@@ -12,10 +11,7 @@ import { type CallContext, type CallParams } from "types/vlayer";
 import { v_call } from "./v_call";
 import { foundry } from "viem/chains";
 
-export async function prove<
-  T extends readonly [AbiFunction, ...Abi[number][]],
-  F extends ContractFunctionName<T>,
->(
+export async function prove<T extends Abi, F extends ContractFunctionName<T>>(
   prover: Address,
   abi: T,
   functionName: F,
