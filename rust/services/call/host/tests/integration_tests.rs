@@ -25,22 +25,16 @@ struct ExecutionLocation {
     pub block_tag: BlockTag,
 }
 
-impl ExecutionLocation {
-    fn new(chain_id: impl Into<ChainId>, block_tag: impl Into<BlockTag>) -> Self {
-        Self {
-            chain_id: chain_id.into(),
-            block_tag: block_tag.into(),
-        }
-    }
-}
-
 impl<C, B> From<(C, B)> for ExecutionLocation
 where
     C: Into<ChainId>,
     B: Into<BlockTag>,
 {
     fn from(tuple: (C, B)) -> Self {
-        ExecutionLocation::new(tuple.0, tuple.1)
+        ExecutionLocation {
+            chain_id: tuple.0.into(),
+            block_tag: tuple.1.into(),
+        }
     }
 }
 
@@ -186,8 +180,12 @@ mod usdt {
             to: USDT,
             data: sol_call.abi_encode(),
         };
-        let location = ExecutionLocation::new(Chain::mainnet().id(), USDT_BLOCK_NO);
-        let result = run::<IERC20::balanceOfCall>("usdt_erc20_balance_of", call, &location).await?;
+        let result = run::<IERC20::balanceOfCall>(
+            "usdt_erc20_balance_of",
+            call,
+            &(Chain::mainnet().id(), USDT_BLOCK_NO).into(),
+        )
+        .await?;
         assert_eq!(result._0, uint!(3_000_000_000_000_000_U256));
         Ok(())
     }
@@ -211,9 +209,12 @@ mod uniswap {
             to: UNISWAP,
             data: sol_call.abi_encode(),
         };
-        let location = ExecutionLocation::new(Chain::mainnet().id(), LATEST_BLOCK);
-        let result =
-            run::<IUniswapV3Factory::ownerCall>("uniswap_factory_owner", call, &location).await?;
+        let result = run::<IUniswapV3Factory::ownerCall>(
+            "uniswap_factory_owner",
+            call,
+            &(Chain::mainnet().id(), LATEST_BLOCK).into(),
+        )
+        .await?;
         assert_eq!(
             result._0,
             address!("1a9c8182c09f50c8318d769245bea52c32be35bc") // Uniswap V2: UNI Timelock is the current owner of the factory.
@@ -328,9 +329,12 @@ mod view {
             to: VIEW_CALL,
             data: sol_call.abi_encode(),
         };
-        let location = ExecutionLocation::new(Chain::sepolia().id(), VIEW_CALL_BLOCK_NO);
-        let result =
-            run::<ViewCallTest::testBlockhashCall>("view_blockhash", call, &location).await?;
+        let result = run::<ViewCallTest::testBlockhashCall>(
+            "view_blockhash",
+            call,
+            &(Chain::sepolia().id(), VIEW_CALL_BLOCK_NO).into(),
+        )
+        .await?;
         assert_eq!(
             result._0,
             b256!("7703fe4a3d6031a579d52ce9e493e7907d376cfc3b41f9bc7710b0dae8c67f68")
@@ -407,10 +411,12 @@ mod teleport {
             to: SIMPLE_TELEPORT,
             data: sol_call.abi_encode(),
         };
-        let location = ExecutionLocation::new(NamedChain::AnvilHardhat, BLOCK_NO);
-        let result =
-            run::<SimpleTravelProver::crossChainBalanceOfCall>("simple_teleport", call, &location)
-                .await;
+        let result = run::<SimpleTravelProver::crossChainBalanceOfCall>(
+            "simple_teleport",
+            call,
+            &(NamedChain::AnvilHardhat, BLOCK_NO).into(),
+        )
+        .await;
         assert_eq!(
             result.unwrap_err().to_string(),
             "Engine error: Panic: Intercepted call failed: EvmEnv(\"No rpc cache for chain: 8453\")"
