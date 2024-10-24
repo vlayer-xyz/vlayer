@@ -13,7 +13,7 @@ echo Running services...
 source ${VLAYER_HOME}/bash/run-services.sh
 
 echo Setting up SDK 
-cd ${VLAYER_HOME}/packages/sdk && bun install
+cd ${VLAYER_HOME}/packages/sdk && bun install --frozen-lockfile
 
 EXAMPLES_REQUIRING_ALCHEMY=("simple_time_travel" "simple_teleport")
 EXAMPLES_REQUIRING_PRIV_KEY=("simple_time_travel")
@@ -38,7 +38,7 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
   forge build
 
   cd vlayer
-  bun install
+  bun install --frozen-lockfile
   bun run prove.ts 
 done
 

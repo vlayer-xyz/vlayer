@@ -23,7 +23,7 @@ jobs:
         uses: ./.github/actions/ts-prerequisites
       - name: Install packages
         working-directory: packages/sdk
-        run: bun install
+        run: bun install --frozen-lockfile
       - name: Run SDK tests
         working-directory: packages/sdk
         run: bun test

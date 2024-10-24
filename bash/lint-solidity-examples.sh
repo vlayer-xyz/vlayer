@@ -10,7 +10,7 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
     echo "Running solhint of: ${example}"
     cd "${example}/vlayer"
 
-    bun install
+    bun install --frozen-lockfile
     bun run lint:solidity
   )
 done

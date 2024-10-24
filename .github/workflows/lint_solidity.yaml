@@ -24,7 +24,7 @@ jobs:
         run: ./bash/mock-imageid.sh
       - name: Run install bun 
         working-directory: contracts
-        run: bun install
+        run: bun install --frozen-lockfile
       - name: lint:solidity
         working-directory: contracts
         run: bun run lint:solidity
