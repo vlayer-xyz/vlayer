@@ -30,10 +30,7 @@ const ProofButton = () => {
   };
 
   return !proof ? (
-    <Button
-      disabled={hasDataForProof ? false : true}
-      onClick={handleClick}
-    >
+    <Button disabled={hasDataForProof ? false : true} onClick={handleClick}>
       {" "}
       {isProving ? <Spinner /> : "Make Proof"}{" "}
     </Button>
