@@ -7,7 +7,10 @@ use parking_lot::RwLock;
 use server_utils::route;
 
 use crate::handlers::v_chain::v_chain;
-pub use crate::{handlers::v_chain::ChainProof, mock::ChainProofServerMock};
+pub use crate::{
+    handlers::v_chain::ChainProof,
+    mock::{ChainProofServerMock, EMPTY_PROOF_RESPONSE},
+};
 
 async fn handle_jrpc(
     State(chain_db): State<Arc<RwLock<ChainDb>>>,

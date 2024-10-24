@@ -1,5 +1,5 @@
 use call_server::ServerConfig;
-use chain_server::server::ChainProofServerMock;
+use chain_server::server::{ChainProofServerMock, EMPTY_PROOF_RESPONSE};
 use clap::{Parser, Subcommand};
 use commands::{
     args::{InitArgs, ServeArgs},
@@ -8,7 +8,6 @@ use commands::{
     version::Version,
 };
 use serde_json::json;
-use server_utils::EMPTY_PROOF_RESPONSE;
 use test_runner::cli::TestArgs;
 use tracing::{error, info};
 use tracing_subscriber::EnvFilter;
@@ -59,7 +58,6 @@ async fn run() -> Result<(), CLIError> {
     match cli.command {
         Commands::Serve(serve_args) => {
             let chain_proof_server_mock = start_chain_proof_server().await;
-
             let proof_mode = serve_args.proof.unwrap_or_default().map();
             let server_config = ServerConfig::new(
                 serve_args.rpc_url,

@@ -8,13 +8,12 @@ use call_host::{
     Call,
 };
 use chain_client::ChainProofClient;
-use chain_server::server::ChainProofServerMock;
+use chain_server::server::{ChainProofServerMock, EMPTY_PROOF_RESPONSE};
 use dotenv::dotenv;
 use ethers_core::types::BlockNumber as BlockTag;
 use lazy_static::lazy_static;
 use provider::{CachedMultiProvider, CachedProviderFactory};
 use serde_json::json;
-use server_utils::EMPTY_PROOF_RESPONSE;
 
 // To activate recording, set UPDATE_SNAPSHOTS to true.
 // Recording creates new testdata directory and writes return data from Alchemy into files in that directory.
@@ -87,7 +86,7 @@ where
     let return_value = C::abi_decode_returns(&host_output.guest_output.evm_call_result, false)?;
 
     chain_proof_server.assert();
-    
+
     Ok(return_value)
 }
 

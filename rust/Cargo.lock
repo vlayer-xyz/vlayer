@@ -9445,6 +9445,7 @@ dependencies = [
  "call_host",
  "chain",
  "chain_client",
+ "chain_server",
  "clap",
  "color-eyre",
  "comfy-table",

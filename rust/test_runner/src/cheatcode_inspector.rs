@@ -10,12 +10,14 @@ use call_engine::{
 use call_host::host::{config::HostConfig, get_block_number, Host};
 use chain::TEST_CHAIN_ID;
 use chain_client::ChainProofClient;
+use chain_server::server::{ChainProofServerMock, EMPTY_PROOF_RESPONSE};
 use foundry_config::RpcEndpoints;
 use foundry_evm::revm::{
     interpreter::{CallInputs, CallOutcome},
     Database, EvmContext, Inspector,
 };
 use provider::CachedMultiProvider;
+use serde_json::json;
 
 use crate::{
     cheatcodes::{callProverCall, getProofCall, CHEATCODE_CALL_ADDR},
@@ -86,7 +88,8 @@ impl CheatcodeInspector {
         context: &&mut EvmContext<DB>,
         inputs: &CallInputs,
     ) -> CallOutcome {
-        let host = create_host(context, &self.rpc_endpoints);
+        let chain_proof_server = start_chain_proof_server().await;
+        let host = create_host(context, &self.rpc_endpoints, chain_proof_server.url());
         let call_result = host
             .run(Call {
                 to: inputs.target_address,
@@ -117,7 +120,15 @@ impl CheatcodeInspector {
     }
 }
 
-fn create_host<DB: Database>(ctx: &EvmContext<DB>, rpc_endpoints: &RpcEndpoints) -> Host {
+async fn start_chain_proof_server() -> ChainProofServerMock {
+    ChainProofServerMock::start(json!({}), EMPTY_PROOF_RESPONSE.clone()).await
+}
+
+fn create_host<DB: Database>(
+    ctx: &EvmContext<DB>,
+    rpc_endpoints: &RpcEndpoints,
+    chain_proof_url: String,
+) -> Host {
     let pending_state_provider_factory = PendingStateProviderFactory {
         block_number: ctx.env.block.number.try_into().unwrap(),
         state: ctx.journaled_state.state.clone(),
@@ -127,6 +138,7 @@ fn create_host<DB: Database>(ctx: &EvmContext<DB>, rpc_endpoints: &RpcEndpoints)
     let providers = CachedMultiProvider::new(provider_factory);
     let config = HostConfig {
         start_chain_id: TEST_CHAIN_ID,
+        chain_proof_url,
         ..Default::default()
     };
     let block_number =
