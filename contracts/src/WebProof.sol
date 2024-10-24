@@ -2,6 +2,8 @@
 pragma solidity ^0.8.13;
 
 import {Strings} from "@openzeppelin-contracts-5.0.1/utils/Strings.sol";
+import {Address} from "@openzeppelin-contracts-5.0.1/utils/Address.sol";
+
 import {Precompiles} from "./PrecompilesAddresses.sol";
 
 struct WebProof {
@@ -31,7 +33,7 @@ library WebProofLib {
         (bool success, bytes memory returnData) =
             Precompiles.VERIFY_AND_PARSE_PRECOMPILE.staticcall(bytes(webProof.webProofJson));
 
-        require(success, "verify_and_parse precompile call failed");
+        Address.verifyCallResult(success, returnData);
 
         string[4] memory data = abi.decode(returnData, (string[4]));
 
@@ -52,7 +54,7 @@ library WebLib {
 
         bytes memory encodedParams = abi.encode([web.body, jsonPath]);
         (bool success, bytes memory returnData) = JSON_GET_STRING_PRECOMPILE.staticcall(encodedParams);
-        require(success, "json_get_string precompile call failed");
+        Address.verifyCallResult(success, returnData);
 
         return abi.decode(returnData, (string));
     }
@@ -62,7 +64,7 @@ library WebLib {
 
         bytes memory encodedParams = abi.encode([web.body, jsonPath]);
         (bool success, bytes memory returnData) = JSON_GET_INT_PRECOMPILE.staticcall(encodedParams);
-        require(success, "json_get_string precompile call failed");
+        Address.verifyCallResult(success, returnData);
 
         return abi.decode(returnData, (int256));
     }
@@ -72,7 +74,7 @@ library WebLib {
 
         bytes memory encodedParams = abi.encode([web.body, jsonPath]);
         (bool success, bytes memory returnData) = JSON_GET_BOOL_PRECOMPILE.staticcall(encodedParams);
-        require(success, "json_get_string precompile call failed");
+        Address.verifyCallResult(success, returnData);
 
         return abi.decode(returnData, (bool));
     }
@@ -82,7 +84,7 @@ library WebLib {
 
         bytes memory encodedParams = abi.encode([web.body, jsonPath]);
         (bool success, bytes memory returnData) = JSON_GET_ARRAY_LENGTH.staticcall(encodedParams);
-        require(success, "json_get_array_length precompile call failed");
+        Address.verifyCallResult(success, returnData);
 
         return abi.decode(returnData, (uint256));
     }
