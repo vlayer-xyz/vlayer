@@ -8,7 +8,7 @@ import React, { useCallback, useEffect, useState } from "react";
 
 function Source() {
   const [hasProof, setHasProof] = useState(true);
-  const [proof, setProof] = useState({});
+  const [proof, setProof] = useState<unknown>();
   const requestWebProof = useCallback(async () => {
     const provider = createExtensionWebProofProvider({
       notaryUrl: "http://localhost:7047",
