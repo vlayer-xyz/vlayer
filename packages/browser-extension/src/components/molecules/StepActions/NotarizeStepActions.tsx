@@ -118,6 +118,11 @@ export const NotarizeStepActions: FC<NotarizeStepActionProps> = ({
 }) => {
   const { prove, isProving, proof } = useTlsnProver();
   const [showProgress, setShowProgress] = useState(false);
+  const handleClick = () => {
+    prove().catch((error) => {
+      console.error("Error during prove:", error);
+    });
+  };
   // defer progress hiding
   useEffect(() => {
     if (proof) {
@@ -134,7 +139,7 @@ export const NotarizeStepActions: FC<NotarizeStepActionProps> = ({
   ) : (
     <Flex direction="column" gap={"4"}>
       {!proof && !isProving && (
-        <Button onClick={() => void prove()} data-testid="prove-button">
+        <Button onClick={handleClick} data-testid="prove-button">
           <Text>Generate proof </Text>
         </Button>
       )}

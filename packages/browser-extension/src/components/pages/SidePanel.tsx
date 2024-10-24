@@ -23,11 +23,16 @@ const BackButton = () => {
 
 const ProofButton = () => {
   const { prove, proof, isProving, hasDataForProof } = useTlsnProver();
+  const handleClick = () => {
+    prove().catch((error) => {
+      console.error("Error during prove:", error);
+    });
+  };
 
   return !proof ? (
     <Button
       disabled={hasDataForProof ? false : true}
-      onClick={() => void prove()}
+      onClick={handleClick}
     >
       {" "}
       {isProving ? <Spinner /> : "Make Proof"}{" "}
