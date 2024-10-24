@@ -25,14 +25,14 @@ impl Prover {
 }
 
 fn prove_bonsai(env: ExecutorEnv<'_>, elf: &[u8]) -> Result<ProveInfo> {
-    info!("proving with Bonsai");
+    info!("Proving with Bonsai");
     let bonsai_prover = BonsaiProver::new("vlayer: bonsai");
     // block_in_place is used to avoid tokio runtime panic, since bonsai_prover.prove_with_opts is blocking.
     // https://github.com/risc0/risc0/issues/2049
     let prove_info = tokio::task::block_in_place(|| {
         bonsai_prover.prove_with_opts(env, elf, &ProverOpts::groth16())
     });
-    info!("proving with Bonsai done");
+    info!("Proving with Bonsai done");
     prove_info
 }
 
