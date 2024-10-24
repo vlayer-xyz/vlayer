@@ -1,33 +1,37 @@
-use std::collections::{BTreeMap, HashMap};
-
-use alloy_primitives::{keccak256, Address, Bytes, FixedBytes, B256, U256};
+use alloy_primitives::{keccak256, map::HashMap, Address, Bytes, FixedBytes, B256, U256};
 use alloy_rlp::encode;
 use alloy_trie::{proof::ProofRetainer, HashBuilder, Nibbles};
 use forge::revm::primitives::{
     alloy_primitives::private::{alloy_rlp, alloy_rlp::Encodable},
     Account, AccountInfo, EvmState, EvmStorageSlot,
 };
+use mpt::reorder_with_root_as_first;
 use provider::StorageProof;
 
 fn to_nibbles<T: AsRef<[u8]>>(word: T) -> Nibbles {
     Nibbles::unpack(keccak256(word))
 }
 
-fn build_proof(targets: Vec<Nibbles>, leafs: Vec<(Nibbles, Vec<u8>)>) -> BTreeMap<Nibbles, Bytes> {
+fn build_proof(
+    targets: Vec<Nibbles>,
+    leafs: Vec<(Nibbles, Vec<u8>)>,
+) -> (B256, HashMap<Nibbles, Bytes>) {
     let mut builder = HashBuilder::default().with_proof_retainer(ProofRetainer::new(targets));
 
     for (key, value) in leafs {
         builder.add_leaf(key, &value);
     }
 
-    let _ = builder.root();
+    let root = builder.root();
 
-    builder.take_proofs()
+    let proof_nodes = builder.take_proof_nodes().into_inner();
+    (root, proof_nodes)
 }
 
 pub fn account_proof(address: Address, evm_state: &EvmState) -> Vec<Bytes> {
-    build_proof(vec![to_nibbles(address)], trie_accounts(evm_state))
-        .values()
+    let (root, proof_nodes) = build_proof(vec![to_nibbles(address)], trie_accounts(evm_state));
+    reorder_with_root_as_first(proof_nodes.values(), root)
+        .into_iter()
         .cloned()
         .collect::<Vec<_>>()
 }
@@ -82,7 +86,7 @@ pub fn prove_storage(
 ) -> Vec<StorageProof> {
     let keys: Vec<_> = storage_keys.iter().map(to_nibbles).collect();
 
-    let all_proof_nodes = build_proof(keys.clone(), trie_storage(storage));
+    let all_proof_nodes = build_proof(keys.clone(), trie_storage(storage)).1;
 
     let mut proofs = Vec::new();
     for proof_key in keys {

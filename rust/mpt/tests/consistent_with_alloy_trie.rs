@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 
 use alloy_primitives::{keccak256, U256};
 use alloy_trie::HashBuilder;
-use mpt::MerkleTrie;
+use mpt::{reorder_with_root_as_first, MerkleTrie};
 use nybbles::Nibbles;
 
 #[test]
@@ -24,10 +24,11 @@ fn root_match() -> anyhow::Result<()> {
         hash_builder.add_leaf(key, &value);
     }
     let root = hash_builder.root();
-    let proofs = hash_builder.take_proofs();
+    let proofs = hash_builder.take_proof_nodes().into_inner();
+    let nodes = reorder_with_root_as_first(proofs.values(), root);
 
     // reconstruct the trie from the RLP encoded proofs and verify the root hash
-    let mpt = MerkleTrie::from_rlp_nodes(proofs.into_values())?;
+    let mpt = MerkleTrie::from_rlp_nodes(nodes)?;
 
     assert_eq!(mpt.hash_slow(), root);
     Ok(())

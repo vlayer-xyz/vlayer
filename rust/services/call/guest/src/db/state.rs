@@ -1,9 +1,8 @@
-use std::rc::Rc;
+use std::{collections::HashMap, rc::Rc};
 
 use alloy_primitives::{b256, keccak256, Address, Bytes, TxNumber, B256, U256};
 use alloy_rlp_derive::{RlpDecodable, RlpEncodable};
 use mpt::MerkleTrie;
-use revm::primitives::HashMap;
 
 /// Hash of an empty byte array, i.e. `keccak256([])`.
 pub const KECCAK_EMPTY: B256 =
@@ -81,9 +80,7 @@ impl StateDb {
             .unwrap_or_else(|| panic!("code not found: {}", hash))
     }
 
-    pub fn block_hash(&self, number: U256) -> B256 {
-        // block number is never bigger then u64::MAX
-        let number: u64 = number.to();
+    pub fn block_hash(&self, number: u64) -> B256 {
         let hash = self
             .block_hashes
             .get(&number)

@@ -1,3 +1,4 @@
+#![allow(clippy::explicit_iter_loop)]
 use std::{
     collections::{BTreeMap, BTreeSet},
     path::PathBuf,
@@ -11,11 +12,13 @@ use clap::Parser;
 use color_eyre::eyre::{bail, Result};
 use forge::{
     decode::decode_console_logs,
-    gas_report::GasReport,
+    gas_report::{GasReport, GasReportKind},
     multi_runner::{matches_contract, TestContract},
     result::{SuiteResult, TestOutcome, TestStatus},
-    revm,
-    revm::primitives::{Bytecode, Bytes},
+    revm::{
+        self,
+        primitives::{Bytecode, Bytes},
+    },
     traces::{
         debug::{ContractSources, DebugTraceIdentifier},
         decode_trace_arena,
@@ -482,15 +485,28 @@ impl TestArgs {
         }
 
         if self.decode_internal.is_some() {
-            let sources =
-                ContractSources::from_project_output(output, &config.root, Some(&libraries))?;
+            let sources = ContractSources::from_project_output(
+                output,
+                config.root.as_ref(),
+                Some(&libraries),
+            )?;
             builder = builder.with_debug_identifier(DebugTraceIdentifier::new(sources));
         }
         let mut decoder = builder.build();
 
-        let mut gas_report = self
-            .gas_report
-            .then(|| GasReport::new(config.gas_reports.clone(), config.gas_reports_ignore.clone()));
+        let mut gas_report = self.gas_report.then(|| {
+            GasReport::new(
+                config.gas_reports.clone(),
+                config.gas_reports_ignore.clone(),
+                if self.json {
+                    GasReportKind::JSON
+                } else {
+                    GasReportKind::Markdown
+                },
+            )
+        });
+
+        let mut gas_snapshots = BTreeMap::<String, BTreeMap<String, String>>::new();
 
         let mut outcome = TestOutcome::empty(self.allow_failure);
 
@@ -582,10 +598,10 @@ impl TestArgs {
 
                 if let Some(gas_report) = &mut gas_report {
                     gas_report
-                        .analyze(result.traces.iter().map(|(_, arena)| arena), &decoder)
+                        .analyze(result.traces.iter().map(|(_, a)| &a.arena), &decoder)
                         .await;
 
-                    for trace in &result.gas_report_traces {
+                    for trace in result.gas_report_traces.iter() {
                         decoder.clear_addresses();
 
                         // Re-execute setup and deployment traces to collect identities created in
@@ -601,6 +617,14 @@ impl TestArgs {
                             gas_report.analyze([arena], &decoder).await;
                         }
                     }
+                }
+
+                // Collect and merge gas snapshots.
+                for (group, new_snapshots) in result.gas_snapshots.iter() {
+                    gas_snapshots
+                        .entry(group.clone())
+                        .or_default()
+                        .extend(new_snapshots.clone());
                 }
             }
 

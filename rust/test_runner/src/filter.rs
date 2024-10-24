@@ -1,15 +1,15 @@
-use std::{fmt, path::Path};
-
+#![allow(clippy::redundant_closure_for_method_calls, clippy::explicit_iter_loop)]
 /**
- * This file was copied from https://github.com/foundry-rs/foundry/blob/6bb5c8ea8dcd00ccbc1811f1175cabed3cb4c116/crates/forge/bin/cmd/test/filter.rs
+ * This file was copied from https://github.com/foundry-rs/foundry/blob/2044faec64f99a21f0e5f0094458a973612d0712/crates/forge/bin/cmd/test/filter.rs
  * The original file is licensed under the Apache License, Version 2.0.
  * It wasn't modified, but it wasn't exported from foundry lib
  */
+use std::{fmt, path::Path};
+
 use clap::Parser;
 use foundry_common::TestFilter;
 use foundry_compilers::{FileFilter, ProjectPathsConfig};
 use foundry_config::{filter::GlobMatcher, Config};
-use regex::Regex;
 
 /// The filter to use during testing.
 ///
@@ -103,13 +103,13 @@ impl FilterArgs {
 impl fmt::Debug for FilterArgs {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.debug_struct("FilterArgs")
-            .field("match-test", &self.test_pattern.as_ref().map(Regex::as_str))
-            .field("no-match-test", &self.test_pattern_inverse.as_ref().map(Regex::as_str))
-            .field("match-contract", &self.contract_pattern.as_ref().map(Regex::as_str))
-            .field("no-match-contract", &self.contract_pattern_inverse.as_ref().map(Regex::as_str))
-            .field("match-path", &self.path_pattern.as_ref().map(GlobMatcher::as_str))
-            .field("no-match-path", &self.path_pattern_inverse.as_ref().map(GlobMatcher::as_str))
-            .field("no-match-coverage", &self.coverage_pattern_inverse.as_ref().map(Regex::as_str))
+            .field("match-test", &self.test_pattern.as_ref().map(|r| r.as_str()))
+            .field("no-match-test", &self.test_pattern_inverse.as_ref().map(|r| r.as_str()))
+            .field("match-contract", &self.contract_pattern.as_ref().map(|r| r.as_str()))
+            .field("no-match-contract", &self.contract_pattern_inverse.as_ref().map(|r| r.as_str()))
+            .field("match-path", &self.path_pattern.as_ref().map(|g| g.as_str()))
+            .field("no-match-path", &self.path_pattern_inverse.as_ref().map(|g| g.as_str()))
+            .field("no-match-coverage", &self.coverage_pattern_inverse.as_ref().map(|g| g.as_str()))
             .finish_non_exhaustive()
     }
 }

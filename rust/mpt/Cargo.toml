@@ -10,6 +10,7 @@ alloy-rlp-derive = { workspace = true }
 alloy-trie = { workspace = true }
 bytes = { workspace = true }
 derive_more = { workspace = true }
+itertools = { workspace = true }
 lazy_static = { workspace = true }
 nybbles = { workspace = true, features = ["serde"] }
 rand = "0.8.5"
@@ -20,7 +21,6 @@ thiserror = { workspace = true }
 
 [dev-dependencies]
 anyhow = { workspace = true }
-itertools = { version = "0.13.0" }
 
 [lints]
 workspace = true

@@ -17,7 +17,7 @@ struct State {
     accounts: HashMap<Address, HashSet<U256>>,
     contracts: HashMap<B256, Bytes>,
     // Numbers of all block hashes requested by `blockhash(number)` calls.
-    block_hash_numbers: HashSet<U256>,
+    block_hash_numbers: HashSet<u64>,
 }
 
 /// A revm [Database] backed by a [Provider] that caches all queries needed for a state proof.
@@ -53,7 +53,7 @@ impl DatabaseRef for ProofDb {
         Ok(storage)
     }
 
-    fn block_hash_ref(&self, number: U256) -> Result<B256, Self::Error> {
+    fn block_hash_ref(&self, number: u64) -> Result<B256, Self::Error> {
         let block_hash = self.db.block_hash_ref(number)?;
         let mut state = self.state.write().expect("poisoned lock");
         state.block_hash_numbers.insert(number);
@@ -81,8 +81,7 @@ impl ProofDb {
         let provider = &self.db.provider;
         let mut ancestors = Vec::new();
         if let Some(block_hash_min_number) = state.block_hash_numbers.iter().min() {
-            let block_hash_min_number: u64 = block_hash_min_number.to();
-            for number in (block_hash_min_number..self.db.block_number).rev() {
+            for number in (*block_hash_min_number..self.db.block_number).rev() {
                 let header = provider
                     .get_block_header(number.into())?
                     .with_context(|| format!("block {number} not found"))?;

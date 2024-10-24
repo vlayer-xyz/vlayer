@@ -23,7 +23,10 @@ impl CompositeInspector {
     }
 }
 
-impl<DB: Database + DatabaseExt> Inspector<DB> for CompositeInspector {
+impl<DB: Database + DatabaseExt> Inspector<DB> for CompositeInspector
+where
+    InspectorStack: Inspector<DB>,
+{
     fn call(
         &mut self,
         context: &mut EvmContext<DB>,
@@ -74,8 +77,8 @@ impl<DB: Database + DatabaseExt> Inspector<DB> for CompositeInspector {
         self.inspector_stack.initialize_interp(interpreter, ecx)
     }
 
-    fn log(&mut self, ecx: &mut EvmContext<DB>, log: &Log) {
-        self.inspector_stack.log(ecx, log)
+    fn log(&mut self, interpreter: &mut Interpreter, ecx: &mut EvmContext<DB>, log: &Log) {
+        self.inspector_stack.log(interpreter, ecx, log)
     }
 
     fn selfdestruct(&mut self, contract: Address, target: Address, value: U256) {
@@ -88,4 +91,4 @@ impl<DB: Database + DatabaseExt> Inspector<DB> for CompositeInspector {
     }
 }
 
-impl<DB: Database + DatabaseExt> InspectorExt<DB> for CompositeInspector {}
+impl InspectorExt for CompositeInspector {}
