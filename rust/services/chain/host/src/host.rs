@@ -221,7 +221,6 @@ mod test {
         }
     }
     mod host {
-        use key_value::InMemoryDatabase;
         use serde_json::Value;
         use test_utils::mock_provider;
 
@@ -230,7 +229,7 @@ mod test {
         const LATEST: u64 = 20_000_000;
 
         fn test_db() -> ChainDb {
-            ChainDb::new(InMemoryDatabase::new(), Mode::ReadWrite)
+            ChainDb::in_memory()
         }
 
         mod poll {

@@ -6,7 +6,7 @@ use std::{
     path::Path,
 };
 
-use alloy_primitives::{keccak256, ChainId, B256};
+use alloy_primitives::{keccak256, BlockNumber, ChainId, B256};
 use alloy_rlp::{Bytes as RlpBytes, Decodable, RlpDecodable, RlpEncodable};
 use block_trie::{BlockTrie, ProofVerificationError};
 use bytes::Bytes;
@@ -29,8 +29,8 @@ const CHAINS: &str = "chains";
 
 #[derive(Clone, PartialEq, Eq, RlpEncodable, RlpDecodable, Default, Debug)]
 pub struct ChainInfo {
-    pub first_block: u64,
-    pub last_block: u64,
+    pub first_block: BlockNumber,
+    pub last_block: BlockNumber,
     pub root_hash: B256,
     #[debug("{zk_proof:#x}")]
     pub zk_proof: RlpBytes,
@@ -38,7 +38,7 @@ pub struct ChainInfo {
 
 impl ChainInfo {
     pub fn new(
-        block_range: RangeInclusive<u64>,
+        block_range: RangeInclusive<BlockNumber>,
         root_hash: B256,
         zk_proof: impl Into<Bytes>,
     ) -> Self {
@@ -50,7 +50,7 @@ impl ChainInfo {
         }
     }
 
-    pub fn block_range(&self) -> RangeInclusive<u64> {
+    pub fn block_range(&self) -> RangeInclusive<BlockNumber> {
         self.first_block..=self.last_block
     }
 }
@@ -127,17 +127,17 @@ pub struct ChainDb {
 
 impl ChainDb {
     pub fn in_memory() -> Self {
-        let db = Box::new(InMemoryDatabase::new());
+        let db = InMemoryDatabase::new();
         let mode = Mode::ReadWrite;
-        Self { db, mode }
+        Self::new(db, mode)
     }
 
     pub fn mdbx(path: impl AsRef<Path>, mode: Mode) -> ChainDbResult<Self> {
-        let db = Box::new(Mdbx::open(path)?);
-        Ok(Self { db, mode })
+        let db = Mdbx::open(path)?;
+        Ok(Self::new(db, mode))
     }
 
-    pub fn new(db: impl for<'a> Database<'a> + Send + Sync + 'static, mode: Mode) -> Self {
+    fn new(db: impl for<'a> Database<'a> + Send + Sync + 'static, mode: Mode) -> Self {
         Self {
             db: Box::new(db),
             mode,

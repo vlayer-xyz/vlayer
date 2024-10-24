@@ -1,3 +1,5 @@
+use std::ops::RangeInclusive;
+
 use alloy_primitives::{BlockNumber, ChainId};
 use axum_jrpc::{
     error::{JsonRpcError, JsonRpcErrorReason},
@@ -12,10 +14,13 @@ use thiserror::Error;
 pub enum AppError {
     #[error("Invalid params: empty list of block numbers provided - nothing to prove")]
     NoBlockNumbers,
-    #[error("Block number outside stored range: {0}")]
-    BlockNumberOutsideRange(BlockNumber),
-    #[error("Unknown chain ID: {0}")]
-    UnknownChainId(ChainId),
+    #[error("Block number {block_num} outside stored range: {block_range:?}")]
+    BlockNumberOutsideRange {
+        block_num: BlockNumber,
+        block_range: RangeInclusive<BlockNumber>,
+    },
+    #[error("Unsupported chain ID: {0}")]
+    UnsupportedChainId(ChainId),
     #[error("Invalid field: {0}")]
     FieldValidation(#[from] FieldValidationError),
     #[error("MPT error: {0}")]
@@ -28,8 +33,8 @@ impl From<AppError> for JsonRpcError {
     fn from(error: AppError) -> Self {
         match error {
             AppError::NoBlockNumbers
-            | AppError::BlockNumberOutsideRange(..)
-            | AppError::UnknownChainId(..)
+            | AppError::BlockNumberOutsideRange { .. }
+            | AppError::UnsupportedChainId(..)
             | AppError::FieldValidation(..) => {
                 JsonRpcError::new(JsonRpcErrorReason::InvalidParams, error.to_string(), Value::Null)
             }

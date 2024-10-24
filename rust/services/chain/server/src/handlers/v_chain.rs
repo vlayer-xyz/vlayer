@@ -44,13 +44,17 @@ pub async fn v_chain(
     let chain_info = chain_db
         .read()
         .get_chain_info(chain_id)?
-        .ok_or(AppError::UnknownChainId(chain_id))?;
+        .ok_or(AppError::UnsupportedChainId(chain_id))?;
     let root_hash = chain_info.root_hash;
+    let block_range = chain_info.block_range();
 
     let mut nodes = HashSet::new();
     for block_num in block_numbers {
-        if !chain_info.block_range().contains(&block_num) {
-            return Err(AppError::BlockNumberOutsideRange(block_num));
+        if !block_range.contains(&block_num) {
+            return Err(AppError::BlockNumberOutsideRange {
+                block_num,
+                block_range,
+            });
         }
         let merkle_proof = chain_db.read().get_merkle_proof(root_hash, block_num)?;
         for (_, node) in merkle_proof {
@@ -100,7 +104,7 @@ mod tests {
                 MerkleTrie::from_iter([([1], *parent_hash), ([2], *child_hash)]);
             static ref chain_db: Arc<RwLock<ChainDb>> = {
                 let db = Arc::new(RwLock::new(ChainDb::in_memory()));
-                let chain_info = ChainInfo::new(1_u64..=2_u64, db_trie.hash_slow(), Bytes::default());
+                let chain_info = ChainInfo::new(1..=2, db_trie.hash_slow(), Bytes::default());
                 db.write().update_chain(1, ChainUpdate::new(chain_info, &*db_trie, [])).expect("update_chain failed");
                 db
             };
