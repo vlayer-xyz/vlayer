@@ -3,12 +3,12 @@ import {
   expectUrl,
   notarize,
   startPage,
+  WebProof,
 } from "@vlayer/sdk";
-import React, { useCallback, useEffect, useState } from "react";
+import React, { useCallback, useState } from "react";
 
 function Source() {
-  const [hasProof, setHasProof] = useState(true);
-  const [proof, setProof] = useState<unknown>();
+  const [proof, setProof] = useState<WebProof>();
   const requestWebProof = useCallback(async () => {
     const provider = createExtensionWebProofProvider({
       notaryUrl: "http://localhost:7047",
@@ -30,15 +30,12 @@ function Source() {
     setProof(webproof);
   }, []);
 
-  useEffect(() => {
-    setHasProof(!!proof);
-  }, [proof]);
   return (
     <>
       <button data-testid="request-webproof-button" onClick={requestWebProof}>
         Request web proof
       </button>
-      {hasProof ? (
+      {proof ? (
         <h1 data-testid="has-webproof">Has web proof</h1>
       ) : (
         <h1> No web proof </h1>
