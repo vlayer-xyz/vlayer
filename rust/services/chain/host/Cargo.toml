@@ -25,6 +25,7 @@ risc0-zkvm = { workspace = true }
 serde = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true, features = ["macros"] }
+tracing = { workspace = true }
 
 [dev-dependencies]
 alloy-rlp = { workspace = true, features = ["arrayvec"] }

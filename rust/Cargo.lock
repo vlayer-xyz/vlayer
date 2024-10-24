@@ -2295,6 +2295,7 @@ dependencies = [
  "serde_json",
  "thiserror",
  "tokio",
+ "tracing",
 ]
 
 [[package]]
@@ -5416,6 +5417,7 @@ dependencies = [
  "anyhow",
  "risc0-zkvm",
  "tokio",
+ "tracing",
 ]
 
 [[package]]
@@ -10862,6 +10864,10 @@ name = "worker"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "chain_host",
+ "tokio",
+ "tracing",
+ "tracing-subscriber 0.3.18",
 ]
 
 [[package]]

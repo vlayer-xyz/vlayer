@@ -133,7 +133,11 @@ impl ChainDb {
     }
 
     pub fn mdbx(path: impl AsRef<Path>, mode: Mode) -> ChainDbResult<Self> {
-        let db = Mdbx::open(path)?;
+        let mut db = Mdbx::open(path)?;
+        let mut tx = db.begin_rw()?;
+        tx.create_table(NODES)?;
+        tx.create_table(CHAINS)?;
+        Box::new(tx).commit()?;
         Ok(Self::new(db, mode))
     }
 

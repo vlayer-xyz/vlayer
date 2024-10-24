@@ -5,6 +5,10 @@ edition = "2021"
 
 [dependencies]
 anyhow = { workspace = true }
+chain_host = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+tracing-subscriber = { workspace = true, features = ["ansi"] }
 
 [lints]
 workspace = true
