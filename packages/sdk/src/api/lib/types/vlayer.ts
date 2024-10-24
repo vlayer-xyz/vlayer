@@ -1,6 +1,5 @@
 import {
   Abi,
-  AbiFunction,
   AbiStateMutability,
   Address,
   ContractFunctionArgs,
@@ -46,10 +45,7 @@ export interface VCallResponse {
 }
 
 export type VlayerClient = {
-  prove: <
-    T extends readonly [AbiFunction, ...Abi[number][]],
-    F extends ContractFunctionName<T>,
-  >(args: {
+  prove: <T extends Abi, F extends ContractFunctionName<T>>(args: {
     address: Hex;
     proverAbi: T;
     functionName: F;
