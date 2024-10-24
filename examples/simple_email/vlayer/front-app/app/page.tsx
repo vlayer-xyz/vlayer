@@ -1,32 +1,32 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo } from 'react';
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
-import { Input } from "@/components/ui/input"
-import { Label } from "@/components/ui/label"
-import { Button } from "@/components/ui/button"
-import { Upload, MailCheck } from "lucide-react"
-import { usePrivy, useWallets } from '@privy-io/react-auth';
-import { getStrFromFile } from '@/utils';
-import { createVlayerClient, preverifyEmail } from '@vlayer/sdk';
-import { optimismSepolia } from 'viem/chains';
-import { createWalletClient, custom } from 'viem';
+import { useState, useEffect, useRef, useMemo } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Button } from "@/components/ui/button";
+import { Upload, MailCheck } from "lucide-react";
+import { usePrivy, useWallets } from "@privy-io/react-auth";
+import { getStrFromFile } from "@/utils";
+import { createVlayerClient, preverifyEmail } from "@vlayer/sdk";
+import { optimismSepolia } from "viem/chains";
+import { createWalletClient, custom } from "viem";
 import {
   Accordion,
   AccordionContent,
   AccordionItem,
   AccordionTrigger,
-} from "@/components/ui/accordion"
+} from "@/components/ui/accordion";
 
 import emailProofProver from "../../../out/EmailDomainProver.sol/EmailDomainProver";
 import emailProofVerifier from "../../../out/EmailProofVerifier.sol/EmailDomainVerifier";
 
 export default function Home() {
-  const [currentStep, setCurrentStep] = useState("Submitting...")
-  const [proverAddress, setProverAddress] = useState('');
-  const [verifierAddress, setVerifierAddress] = useState('');
-  const [claimerAddress, setClaimerAddress] = useState('');
-  const [proverUrl, setProverUrl] = useState('http://127.0.0.1:4000');
+  const [currentStep, setCurrentStep] = useState("Submitting...");
+  const [proverAddress, setProverAddress] = useState("");
+  const [verifierAddress, setVerifierAddress] = useState("");
+  const [claimerAddress, setClaimerAddress] = useState("");
+  const [proverUrl, setProverUrl] = useState("http://127.0.0.1:4000");
   const [file, setFile] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -35,9 +35,13 @@ export default function Home() {
   const { wallets } = useWallets();
   const params = new URLSearchParams(window.location.search);
 
-  const vlayer = useMemo(() => createVlayerClient({
-    url: proverUrl
-  }), [proverUrl]);
+  const vlayer = useMemo(
+    () =>
+      createVlayerClient({
+        url: proverUrl,
+      }),
+    [proverUrl],
+  );
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -51,7 +55,7 @@ export default function Home() {
   const handleDrop = (e) => {
     e.preventDefault();
     setIsDragging(false);
-    
+
     if (e.dataTransfer.files && e.dataTransfer.files[0]) {
       setFile(e.dataTransfer.files[0]);
     }
@@ -69,13 +73,13 @@ export default function Home() {
     setCurrentStep("Submitting...");
 
     try {
-      if(ready && !authenticated) throw new Error("not_authenticated");
-      if(!file) throw new Error("no_eml_file_uploaded");
+      if (ready && !authenticated) throw new Error("not_authenticated");
+      if (!file) throw new Error("no_eml_file_uploaded");
       setCurrentStep("Parsing eml...");
       const eml = await getStrFromFile(file);
       const email = await preverifyEmail(eml);
 
-      console.log('Form submitted:', {
+      console.log("Form submitted:", {
         verifierAddress,
         proverAddress,
         fileName: file?.name,
@@ -103,24 +107,24 @@ export default function Home() {
         chain: optimismSepolia,
         transport: custom(provider),
       });
-      const [account] = await walletClient.getAddresses()
+      const [account] = await walletClient.getAddresses();
       const txHash = await walletClient.writeContract({
         address: verifierAddress as `0x${string}`,
         abi: emailProofVerifier.abi,
         functionName: "verify",
         args: result,
-        account
+        account,
       });
 
       console.log({ txHash });
       setFile(null);
       if (fileInputRef.current && fileInputRef.current.value) {
-        fileInputRef.current.value = '';
+        fileInputRef.current.value = "";
       }
       setCurrentStep("Success!");
     } catch (error) {
-      console.error('Error submitting form:', error);
-      if(error?.message === "not_authenticated") {
+      console.error("Error submitting form:", error);
+      if (error?.message === "not_authenticated") {
         login();
       }
     } finally {
@@ -129,20 +133,20 @@ export default function Home() {
   };
 
   useEffect(() => {
-    const verifierAddr = params.get('verifierAddr');
-    const proverAddr = params.get('proverAddr');
-  
+    const verifierAddr = params.get("verifierAddr");
+    const proverAddr = params.get("proverAddr");
+
     if (verifierAddr) {
       setVerifierAddress(verifierAddr);
     }
     if (proverAddr) {
       setProverAddress(proverAddr);
-    }    
+    }
   }, [params]);
 
   useEffect(() => {
-    console.log({ user })
-    setClaimerAddress(user?.wallet?.address ?? "")   
+    console.log({ user });
+    setClaimerAddress(user?.wallet?.address ?? "");
   }, [user]);
 
   return (
@@ -150,21 +154,21 @@ export default function Home() {
       <Card className="w-full max-w-md border-violet-500 bg-gray-900 text-white">
         <CardHeader>
           <CardTitle className="text-violet-400">
-            Generate proof of <i className='text-white'>@vlayer.xyz</i>
+            Generate proof of <i className="text-white">@vlayer.xyz</i>
           </CardTitle>
         </CardHeader>
         <CardContent>
           <form onSubmit={handleSubmit} className="space-y-4">
-          <div className="space-y-2">
+            <div className="space-y-2">
               <Label className="text-violet-300">Upload EML file</Label>
               <div
                 onDragOver={handleDragOver}
                 onDragLeave={handleDragLeave}
                 onDrop={handleDrop}
                 className={`border-2 border-dashed rounded-lg p-6 text-center cursor-pointer transition-all ${
-                  isDragging 
-                    ? 'border-violet-400 bg-violet-500/10' 
-                    : 'border-violet-500 hover:border-violet-400 hover:bg-violet-500/5'
+                  isDragging
+                    ? "border-violet-400 bg-violet-500/10"
+                    : "border-violet-500 hover:border-violet-400 hover:bg-violet-500/5"
                 }`}
               >
                 <input
@@ -178,15 +182,15 @@ export default function Home() {
                 />
                 <label htmlFor="fileInput" className="cursor-pointer">
                   <div className="flex flex-col items-center gap-2">
-                    {file 
-                      ? <MailCheck className="w-8 h-8 text-green-400" /> 
-                      : <Upload className="w-8 h-8 text-violet-400" />
-                    }
+                    {file ? (
+                      <MailCheck className="w-8 h-8 text-green-400" />
+                    ) : (
+                      <Upload className="w-8 h-8 text-violet-400" />
+                    )}
                     <div className="text-sm text-gray-300">
-                      {file 
-                        ? file.name 
-                        : 'Drag and drop a file here, or click to select'
-                      }
+                      {file
+                        ? file.name
+                        : "Drag and drop a file here, or click to select"}
                     </div>
                   </div>
                 </label>
@@ -204,7 +208,7 @@ export default function Home() {
                 className="bg-gray-800 border-violet-500 text-white placeholder:text-gray-400 focus:ring-violet-500 focus:border-violet-500"
                 required
               />
-            </div>  
+            </div>
 
             <Accordion type="single" collapsible>
               <AccordionItem value="item-1">
@@ -212,7 +216,9 @@ export default function Home() {
                   Prover / Verifier / Wallet configuration
                 </AccordionTrigger>
                 <AccordionContent>
-                  <Label htmlFor="proverAddr" className="text-violet-300">Prover Contract</Label>
+                  <Label htmlFor="proverAddr" className="text-violet-300">
+                    Prover Contract
+                  </Label>
                   <Input
                     id="proverAddr"
                     value={proverAddress}
@@ -220,38 +226,45 @@ export default function Home() {
                     className="bg-gray-800 border-violet-500 text-white placeholder:text-gray-400 focus:ring-violet-500 focus:border-violet-500 mt-2 mb-2"
                     required
                   />
-                  <Label htmlFor="verifierAddr" className="text-violet-300">Verifier Contract</Label>
+                  <Label htmlFor="verifierAddr" className="text-violet-300">
+                    Verifier Contract
+                  </Label>
                   <Input
                     id="verifierAddr"
                     value={verifierAddress}
                     disabled
                     className="bg-gray-800 border-violet-500 text-white placeholder:text-gray-400 focus:ring-violet-500 focus:border-violet-500 mt-2 mb-2"
                     required
-                  />     
-                  <Label htmlFor="verifierAddr" className="text-violet-300">Verifier Contract</Label>
+                  />
+                  <Label htmlFor="verifierAddr" className="text-violet-300">
+                    Verifier Contract
+                  </Label>
                   <Input
                     id="verifierAddr"
                     value={proverUrl}
                     onChange={(e) => setProverUrl(e.target.value)}
                     className="bg-gray-800 border-violet-500 text-white placeholder:text-gray-400 focus:ring-violet-500 focus:border-violet-500 mt-2 mb-2"
                     required
-                  />          
+                  />
                   {user && (
-                    <div className='text-center text-sm'>
-                      Connected as {" "}
+                    <div className="text-center text-sm">
+                      Connected as{" "}
                       {user?.wallet && (
                         <div>
-                          {`${user.wallet.address.slice(0, 6)}...${user.wallet.address.slice(-4)}`} 
-                          {" "}({user.wallet.walletClientType})<br/><br/>
+                          {`${user.wallet.address.slice(0, 6)}...${user.wallet.address.slice(-4)}`}{" "}
+                          ({user.wallet.walletClientType})<br />
+                          <br />
                         </div>
                       )}
-                      {user?.email && (<div>{user.email.address}</div>)}
-
-                      <Button onClick={logout} className="w-1/4 rounded-full bg-gray-700 hover:bg-gray-800 text-white font-medium py-2 px-4 transition-colors mb-5 mt-5">
+                      {user?.email && <div>{user.email.address}</div>}
+                      <Button
+                        onClick={logout}
+                        className="w-1/4 rounded-full bg-gray-700 hover:bg-gray-800 text-white font-medium py-2 px-4 transition-colors mb-5 mt-5"
+                      >
                         Log out
                       </Button>
                     </div>
-                  )}   
+                  )}
                 </AccordionContent>
               </AccordionItem>
             </Accordion>
@@ -267,7 +280,7 @@ export default function Home() {
                   {currentStep}
                 </div>
               ) : (
-                'Submit'
+                "Submit"
               )}
             </Button>
           </form>
