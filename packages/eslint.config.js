@@ -8,17 +8,6 @@ export default [
   ...ts.configs.recommendedTypeChecked,
   prettierRecommended,
   {
-    rules: {
-      "no-unused-vars": "warn",
-      "no-undef": "warn",
-
-       // Rules enabled as a baseline after enabling recommendedTypeChecked.
-       // These should be eventually upgraded to "error" and all related issues should be resolved.
-      "@typescript-eslint/no-unsafe-member-access": "warn",
-      "@typescript-eslint/no-unsafe-argument": "warn",
-
-      "@typescript-eslint/no-misused-promises": "warn",
-    },
     languageOptions: {
       globals: {
         ...globals.browser,

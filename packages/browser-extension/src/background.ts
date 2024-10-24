@@ -3,6 +3,7 @@ import {
   ExtensionAction,
   ExtensionMessage,
   ExtensionMessageType,
+  MessageToExtension,
 } from "./web-proof-commons";
 import { WebProverSessionContextManager } from "./state/webProverSessionContext";
 import { match, P } from "ts-pattern";
@@ -68,7 +69,7 @@ browser.tabs.onActivated.addListener(function (activeInfo) {
   windowId = activeInfo.windowId;
 });
 
-browser.runtime.onMessageExternal.addListener((message) => {
+browser.runtime.onMessageExternal.addListener((message: MessageToExtension) => {
   (async () => {
     if (message.action === ExtensionAction.RequestWebProof) {
       if (chrome.sidePanel) {

@@ -14,11 +14,26 @@ type StartPageStepActionProps = {
   buttonText: string;
 };
 
+const openApp = async (link: string): Promise<void> => {
+  const tab = await browser.tabs.create({
+    url: link,
+  });
+  await sendMessageToServiceWorker({
+    type: ExtensionMessageType.TabOpened,
+    tabId: tab.id!,
+  });
+};
+
 export const StartPageStepActions: FC<StartPageStepActionProps> = ({
   isVisited,
   link,
   status,
 }) => {
+  const handleClick = () => {
+    openApp(link).catch((error) => {
+      console.error("Error during opening app:", error);
+    });
+  };
   return (
     <AnimatePresence>
       {!isVisited && status == StepStatus.Current && (
@@ -32,15 +47,7 @@ export const StartPageStepActions: FC<StartPageStepActionProps> = ({
                 marginBottom: "1rem",
               }}
               // open app we gona take proof from in new tab
-              onClick={async () => {
-                const tab = await browser.tabs.create({
-                  url: link,
-                });
-                await sendMessageToServiceWorker({
-                  type: ExtensionMessageType.TabOpened,
-                  tabId: tab.id!,
-                });
-              }}
+              onClick={handleClick}
             >
               <Text>Redirect</Text>
             </Button>

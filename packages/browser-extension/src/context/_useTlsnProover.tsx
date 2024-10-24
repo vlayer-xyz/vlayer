@@ -15,7 +15,7 @@ import { WebProverSessionContextManager } from "../state/webProverSessionContext
 import sendMessageToServiceWorker from "lib/sendMessageToServiceWorker";
 
 const TlsnProofContext = createContext({
-  prove: () => {},
+  prove: async () => {},
   proof: null as object | null,
   isProving: false,
   hasDataForProof: false,
@@ -30,6 +30,13 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
   const [headers, setHeaders] = useState<
     browser.WebRequest.HttpHeadersItemType[]
   >([]);
+
+  const setCookiesIfProofUrl = async (url: string) => {
+    if (url.includes(proofUrl)) {
+      const cookies = await browser.cookies.getAll({ url });
+      setCookies(cookies);
+    }
+  };
 
   const [formattedHeaders, setFormattedHeaders] = useState<{
     headers: Record<string, string>;
@@ -49,12 +56,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
 
   useEffect(() => {
     browser.webRequest.onResponseStarted.addListener(
-      async (details) => {
-        if (details.url.includes(proofUrl)) {
-          const cookies = await browser.cookies.getAll({ url: details.url });
-          setCookies(cookies);
-        }
-      },
+      (details) => void setCookiesIfProofUrl(details.url),
       { urls: ["<all_urls>"] },
     );
     browser.webRequest.onBeforeSendHeaders.addListener(

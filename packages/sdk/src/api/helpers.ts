@@ -1,5 +1,6 @@
 import {
   type Abi,
+  Account,
   type Address,
   type Chain,
   type ContractFunctionArgs,
@@ -11,6 +12,7 @@ import {
   publicActions,
   PublicClient,
   walletActions,
+  WriteContractParameters,
 } from "viem";
 
 import { privateKeyToAccount, generatePrivateKey } from "viem/accounts";
@@ -139,13 +141,21 @@ export async function writeContract<
   const selectedSender = sender || (await ethClient.getAddresses())[0];
 
   const txHash = await ethClient.writeContract({
-    abi: abi as Abi,
     address,
+    abi: abi as Abi,
     functionName,
     args: args as readonly unknown[],
     chain,
     account: selectedSender,
-  });
+    chainOverride: undefined,
+  } as WriteContractParameters<
+    Abi,
+    ContractFunctionName<Abi, "nonpayable" | "payable">,
+    ContractFunctionArgs<Abi, "nonpayable" | "payable", F>,
+    Chain | undefined,
+    Account | undefined,
+    Chain | undefined
+  >);
 
   const txReceipt = await ethClient.waitForTransactionReceipt({ hash: txHash });
 
