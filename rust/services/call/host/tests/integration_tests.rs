@@ -278,7 +278,7 @@ mod view {
             data: sol_call.abi_encode(),
         };
         let result =
-            run::<ViewCallTest::testPrecompileCall>("view_precompile", call, &SEPOLIA_LATEST_BLOCK)
+            run::<ViewCallTest::testPrecompileCall>("view_precompile", call, &sepolia_latest_block)
                 .await?;
         assert_eq!(
             result._0,
