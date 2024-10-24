@@ -34,6 +34,16 @@ impl ExecutionLocation {
     }
 }
 
+impl<C, B> From<(C, B)> for ExecutionLocation
+where
+    C: Into<ChainId>,
+    B: Into<BlockTag>,
+{
+    fn from(tuple: (C, B)) -> Self {
+        ExecutionLocation::new(tuple.0, tuple.1)
+    }
+}
+
 fn get_alchemy_key() -> String {
     dotenv().ok();
     env::var("ALCHEMY_KEY").expect(
@@ -49,7 +59,7 @@ lazy_static! {
         format!("https://eth-sepolia.g.alchemy.com/v2/{}", *alchemy_key);
     static ref anvil_url: String = format!("http://localhost:8545");
     static ref sepolia_latest_block: ExecutionLocation =
-        ExecutionLocation::new(Chain::sepolia().id(), LATEST_BLOCK);
+        (Chain::sepolia().id(), LATEST_BLOCK).into();
 }
 
 fn rpc_file_cache(test_name: &str) -> HashMap<ChainId, String> {
@@ -104,14 +114,16 @@ async fn create_chain_proof_server(
 ) -> Result<ChainProofServerMock, HostError> {
     let block_number =
         block_tag_to_block_number(multi_provider, location.chain_id, location.block_tag)?;
-    Ok(ChainProofServerMock::start(
+    let chain_proof_server_mock = ChainProofServerMock::start(
         json!({
             "chain_id": location.chain_id,
             "block_numbers": [block_number]
         }),
         EMPTY_PROOF_RESPONSE.clone(),
     )
-    .await)
+    .await;
+
+    Ok(chain_proof_server_mock)
 }
 
 fn create_host(
@@ -266,7 +278,7 @@ mod view {
             data: sol_call.abi_encode(),
         };
         let result =
-            run::<ViewCallTest::testPrecompileCall>("view_precompile", call, &sepolia_latest_block)
+            run::<ViewCallTest::testPrecompileCall>("view_precompile", call, &SEPOLIA_LATEST_BLOCK)
                 .await?;
         assert_eq!(
             result._0,

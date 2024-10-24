@@ -161,7 +161,18 @@ mod tests {
         .await
         .unwrap_err();
         let msg = result.downcast_ref::<String>().unwrap();
-        let expected_msg = "\n> Expected 1 request(s) to:\n\r\nPOST /\r\ncontent-type: application/json\r\n{\"id\":1,\"jsonrpc\":\"2.0\",\"method\":\"get_data\",\"params\":{}}\r\n\n...but received 0\n\n".to_string();
+
+        let expected_msg = "
+> Expected 1 request(s) to:
+\r
+POST /\r
+content-type: application/json\r
+{\"id\":1,\"jsonrpc\":\"2.0\",\"method\":\"get_data\",\"params\":{}}\r
+
+...but received 0
+
+";
+
         assert_eq!(msg, &expected_msg);
     }
 

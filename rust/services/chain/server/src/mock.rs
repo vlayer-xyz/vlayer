@@ -1,16 +1,15 @@
-use std::sync::LazyLock;
-
 use axum_jrpc::Value;
+use lazy_static::lazy_static;
 use serde::Serialize;
 use serde_json::json;
 use server_utils::RpcServerMock;
 
-pub static EMPTY_PROOF_RESPONSE: LazyLock<Value> = LazyLock::new(|| {
-    json!({
+lazy_static! {
+    pub static ref EMPTY_PROOF_RESPONSE: Value = json!({
         "proof": "",
         "nodes": []
-    })
-});
+    });
+}
 
 pub struct ChainProofServerMock {
     mock_server: RpcServerMock,
