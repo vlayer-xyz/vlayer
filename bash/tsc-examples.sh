@@ -4,9 +4,10 @@ set -ueo pipefail
 
 VLAYER_HOME=$(git rev-parse --show-toplevel)
 
+echo "::group::Running bun install for: $VLAYER_HOME/packages"
 cd "${VLAYER_HOME}/packages"
-echo "Running bun install for: $VLAYER_HOME/packages"
 bun install --frozen-lockfile
+echo '::endgroup::'
 
 EXAMPLES="simple web_proof"
 
@@ -14,7 +15,7 @@ for example_name in ${EXAMPLES}; do
 
   example="${VLAYER_HOME}/examples/${example_name}"
 
-  echo "Running tsc for: ${example}"
+  echo ""::group::Running tsc for: ${example}""
   cd "${example}"
 
   forge soldeer install
@@ -27,4 +28,5 @@ for example_name in ${EXAMPLES}; do
 
   bun install --frozen-lockfile
   bun tsc --noEmit
+  echo '::endgroup::'
 done
