@@ -2099,6 +2099,7 @@ dependencies = [
  "mpt",
  "nybbles",
  "rand",
+ "serde",
  "thiserror",
 ]
 

@@ -2,7 +2,7 @@ use alloy_primitives::BlockNumber;
 use anyhow::Result;
 use block_trie::BlockTrie;
 use key_value::InMemoryDatabase;
-use mpt::{MerkleTrie, EMPTY_ROOT_HASH};
+use mpt::{MerkleTrie, Node, EMPTY_ROOT_HASH};
 use rand::{rngs::StdRng, RngCore, SeedableRng};
 
 use super::*;
@@ -48,8 +48,8 @@ fn check_proof(db: &ChainDb, root_hash: B256, block_num: u64) -> BlockTrie {
     let proof = db
         .get_merkle_proof(root_hash, block_num)
         .expect("get_merkle_proof failed");
-    let proof_trie: BlockTrie =
-        BlockTrie::from_unchecked(proof.into_vec().into_iter().collect::<MerkleTrie>());
+    let merkle_trie: MerkleTrie = proof.into();
+    let proof_trie = BlockTrie::from_unchecked(merkle_trie);
     assert_eq!(proof_trie.get(block_num).unwrap(), block_header(block_num));
     proof_trie
 }
@@ -92,7 +92,12 @@ fn node_get_insert_delete() -> Result<()> {
     assert_eq!(db.begin_ro()?.get_node(node_hash).unwrap_err(), ChainDbError::NodeNotFound);
 
     insert_node(&mut db, &node_rlp);
-    assert_eq!(db.begin_ro()?.get_node(node_hash)?, node);
+    let db_node = DbNode {
+        hash: Some(node_hash),
+        node,
+        rlp: node_rlp,
+    };
+    assert_eq!(db.begin_ro()?.get_node(node_hash)?, db_node);
 
     delete_node(&mut db, node_hash);
     assert_eq!(db.begin_ro()?.get_node(node_hash).unwrap_err(), ChainDbError::NodeNotFound);
@@ -127,7 +132,7 @@ fn proof_one_node() -> Result<()> {
 
     let (root_hash, root) = insert_blocks(&mut db, vec![0]);
     let proof = db.get_merkle_proof(root_hash, 0)?;
-    let proof_trie: MerkleTrie = proof.into_vec().into_iter().collect();
+    let proof_trie: MerkleTrie = proof.into();
     assert_eq!(proof_trie.0, root);
 
     Ok(())

@@ -1,4 +1,4 @@
-use std::{collections::HashSet, sync::Arc};
+use std::sync::Arc;
 
 use alloy_primitives::{bytes, BlockNumber, ChainId};
 use bytes::Bytes;
@@ -41,30 +41,15 @@ pub async fn v_chain(
         return Err(AppError::NoBlockNumbers);
     };
 
-    let chain_info = chain_db
-        .read()
-        .get_chain_info(chain_id)?
-        .ok_or(AppError::UnsupportedChainId(chain_id))?;
-    let root_hash = chain_info.root_hash;
-    let block_range = chain_info.block_range();
-
-    let mut nodes = HashSet::new();
-    for block_num in block_numbers {
-        if !block_range.contains(&block_num) {
-            return Err(AppError::BlockNumberOutsideRange {
-                block_num,
-                block_range,
-            });
-        }
-        let merkle_proof = chain_db.read().get_merkle_proof(root_hash, block_num)?;
-        for (_, node) in merkle_proof {
-            nodes.insert(node.rlp_encoded());
-        }
-    }
+    let merkle_proof = chain_db.read().get_chain_proof(chain_id, block_numbers)?;
+    let nodes = merkle_proof
+        .into_iter()
+        .map(|db_node| db_node.rlp)
+        .collect();
 
     Ok(ChainProof {
         proof: SOME_PROOF.clone(),
-        nodes: nodes.into_iter().collect(),
+        nodes,
     })
 }
 

@@ -1,19 +1,47 @@
 use alloy_primitives::{BlockNumber, B256};
-use alloy_rlp::Decodable;
-use mpt::{Node, NodeRef};
+use mpt::{MerkleTrie, Node, NodeRef};
 use nybbles::Nibbles;
 
-use super::{ChainDbError, ChainDbResult};
+use crate::{ChainDbError, ChainDbResult, DbNode};
 
-pub type ProofResult = ChainDbResult<Box<[(Option<B256>, Node)]>>;
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct MerkleProof(pub Box<[DbNode]>);
 
-pub struct MerkleProofBuilder<F: Fn(B256) -> ChainDbResult<Node>> {
+impl IntoIterator for MerkleProof {
+    type IntoIter = <Vec<DbNode> as IntoIterator>::IntoIter;
+    type Item = DbNode;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.0.into_vec().into_iter()
+    }
+}
+
+pub fn mpt_from_proofs(lhs: MerkleProof, rhs: MerkleProof) -> MerkleTrie {
+    // Cannot be done by From<(MerkleProof, MerkleProof)> because of orphan rule
+    lhs.into_iter()
+        .chain(rhs)
+        .map(|db_node| (db_node.hash, db_node.node))
+        .collect()
+}
+
+impl From<MerkleProof> for MerkleTrie {
+    fn from(proof: MerkleProof) -> Self {
+        proof
+            .into_iter()
+            .map(|db_node| (db_node.hash, db_node.node))
+            .collect()
+    }
+}
+
+pub type ProofResult = ChainDbResult<MerkleProof>;
+
+pub struct MerkleProofBuilder<F: Fn(B256) -> ChainDbResult<DbNode>> {
     load_node: F,
-    nodes: Vec<(Option<B256>, Node)>,
+    nodes: Vec<DbNode>,
     nibbles: Nibbles,
 }
 
-impl<F: Fn(B256) -> ChainDbResult<Node>> MerkleProofBuilder<F> {
+impl<F: Fn(B256) -> ChainDbResult<DbNode>> MerkleProofBuilder<F> {
     pub fn new(load_node: F) -> Self {
         Self {
             load_node,
@@ -29,12 +57,12 @@ impl<F: Fn(B256) -> ChainDbResult<Node>> MerkleProofBuilder<F> {
 
     fn visit_node_hash(self, node_hash: B256) -> ProofResult {
         let node = (self.load_node)(node_hash)?;
-        self.visit_node(Some(node_hash), node)
+        self.visit_node(node)
     }
 
-    fn visit_node(mut self, node_hash: Option<B256>, node: Node) -> ProofResult {
-        self.nodes.push((node_hash, node));
-        match &self.nodes.last().expect("just pushed").1 {
+    fn visit_node(mut self, node: DbNode) -> ProofResult {
+        self.nodes.push(node);
+        match &self.nodes.last().expect("just pushed").node {
             Node::Leaf(prefix, _) if *prefix == &*self.nibbles => self.finalize(),
             Node::Leaf(..) | Node::Null => Err(ChainDbError::BlockNotFound),
             Node::Extension(prefix, child) => {
@@ -67,15 +95,14 @@ impl<F: Fn(B256) -> ChainDbResult<Node>> MerkleProofBuilder<F> {
             NodeRef::Empty | NodeRef::Node(_) => Err(ChainDbError::InvalidNode),
             NodeRef::Digest(node_hash) => self.visit_node_hash(node_hash),
             NodeRef::InlineNode(node_rlp) => {
-                let mut node_rlp: &[u8] = &node_rlp;
-                let node = Node::decode(&mut node_rlp)?;
-                self.visit_node(None, node)
+                let node = DbNode::decode(None, node_rlp)?;
+                self.visit_node(node)
             }
         }
     }
 
     fn finalize(self) -> ProofResult {
-        Ok(self.nodes.into_boxed_slice())
+        Ok(MerkleProof(self.nodes.into_boxed_slice()))
     }
 }
 
