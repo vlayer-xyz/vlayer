@@ -8,7 +8,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 export default function Success() {
   const router = useRouter();
   const searchParams = useSearchParams();
-  const txHash = searchParams.get("txHash");
 
   return (
     <div className="flex justify-center items-center min-h-screen p-4 bg-gray-950">
@@ -25,7 +24,7 @@ export default function Success() {
 
           <div className="flex space-x-4 mt-4 justify-center">
             <Link
-              href={`https://sepolia-optimism.etherscan.io/tx/${txHash}`}
+              href={`https://sepolia-optimism.etherscan.io/tx/${searchParams.get("txHash")}`}
               className="px-4 py-2 bg-gray-600 text-white rounded"
             >
               Block explorer

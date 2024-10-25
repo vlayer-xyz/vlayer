@@ -1,13 +1,13 @@
 "use client";
 
-import { useState, useEffect, useRef, useMemo } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Upload, MailCheck } from "lucide-react";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
-import { getStrFromFile } from "@/lib/utils";
+import { getStrFromFile, shorterEthAddr } from "@/lib/utils";
 import { createVlayerClient, preverifyEmail } from "@vlayer/sdk";
 import { optimismSepolia } from "viem/chains";
 import { createWalletClient, custom } from "viem";
@@ -24,10 +24,7 @@ import emailProofVerifier from "../../../out/EmailProofVerifier.sol/EmailDomainV
 
 export default function Home() {
   const [currentStep, setCurrentStep] = useState("Submitting...");
-  const [proverAddress, setProverAddress] = useState("");
-  const [verifierAddress, setVerifierAddress] = useState("");
   const [claimerAddress, setClaimerAddress] = useState("");
-  const [proverUrl, setProverUrl] = useState("http://127.0.0.1:4000");
   const [file, setFile] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -36,13 +33,9 @@ export default function Home() {
   const { wallets } = useWallets();
   const router = useRouter();
 
-  const vlayer = useMemo(
-    () =>
-      createVlayerClient({
-        url: proverUrl,
-      }),
-    [proverUrl],
-  );
+  const vlayer = createVlayerClient({
+    url: process.env.NEXT_PUBLIC_PROVER_URL,
+  });
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -81,8 +74,8 @@ export default function Home() {
       const email = await preverifyEmail(eml);
 
       console.log("Form submitted:", {
-        verifierAddress,
-        proverAddress,
+        verifierAddress: process.env.NEXT_PUBLIC_VERIFIER_ADDR,
+        proverAddress: process.env.NEXT_PUBLIC_PROVER_ADDR,
         fileName: file?.name,
         unverifiedEmail: eml,
         email,
@@ -90,11 +83,11 @@ export default function Home() {
       setCurrentStep("Sending to prover...");
 
       const { hash } = await vlayer.prove({
-        address: proverAddress,
+        address: process.env.NEXT_PUBLIC_PROVER_ADDR,
         proverAbi: emailProofProver.abi,
         functionName: "main",
         args: [await preverifyEmail(eml), claimerAddress],
-        chainId: optimismSepolia.id,
+        chainId: Number(process.env.NEXT_PUBLIC_CHAIN_ID),
       });
       setCurrentStep("Waiting for proof...");
       console.log("Waiting for proving result: ", hash);
@@ -110,7 +103,7 @@ export default function Home() {
       });
       const [account] = await walletClient.getAddresses();
       const txHash = await walletClient.writeContract({
-        address: verifierAddress as `0x${string}`,
+        address: process.env.NEXT_PUBLIC_VERIFIER_ADDR as `0x${string}`,
         abi: emailProofVerifier.abi,
         functionName: "verify",
         args: result,
@@ -123,7 +116,7 @@ export default function Home() {
         fileInputRef.current.value = "";
       }
       setCurrentStep("Success!");
-      router.push(`/success?txHash=${txHash}`)
+      router.push(`/success?txHash=${txHash}`);
     } catch (error) {
       console.error("Error submitting form:", error);
       if (error?.message === "not_authenticated") {
@@ -133,21 +126,6 @@ export default function Home() {
       setIsSubmitting(false);
     }
   };
-
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const params = new URLSearchParams(window.location.search);
-      const verifierAddr = params.get("verifierAddr");
-      const proverAddr = params.get("proverAddr");
-
-      if (verifierAddr) {
-        setVerifierAddress(verifierAddr);
-      }
-      if (proverAddr) {
-        setProverAddress(proverAddr);
-      }
-    }
-  }, []);
 
   useEffect(() => {
     console.log({ user });
@@ -217,47 +195,15 @@ export default function Home() {
 
             <Accordion type="single" collapsible>
               <AccordionItem value="item-1">
-                <AccordionTrigger>
-                  Prover / Verifier / Wallet configuration
-                </AccordionTrigger>
+                <AccordionTrigger>Wallet Info</AccordionTrigger>
                 <AccordionContent>
-                  <Label htmlFor="proverAddr" className="text-violet-300">
-                    Prover Contract
-                  </Label>
-                  <Input
-                    id="proverAddr"
-                    value={proverAddress}
-                    disabled
-                    className="bg-gray-800 border-violet-500 text-white placeholder:text-gray-400 focus:ring-violet-500 focus:border-violet-500 mt-2 mb-2"
-                    required
-                  />
-                  <Label htmlFor="verifierAddr" className="text-violet-300">
-                    Verifier Contract
-                  </Label>
-                  <Input
-                    id="verifierAddr"
-                    value={verifierAddress}
-                    disabled
-                    className="bg-gray-800 border-violet-500 text-white placeholder:text-gray-400 focus:ring-violet-500 focus:border-violet-500 mt-2 mb-2"
-                    required
-                  />
-                  <Label htmlFor="proverUrl" className="text-violet-300">
-                    Prover URL
-                  </Label>
-                  <Input
-                    id="proverUrl"
-                    value={proverUrl}
-                    onChange={(e) => setProverUrl(e.target.value)}
-                    className="bg-gray-800 border-violet-500 text-white placeholder:text-gray-400 focus:ring-violet-500 focus:border-violet-500 mt-2 mb-2"
-                    required
-                  />
                   {user && (
                     <div className="text-center text-sm">
                       Connected as{" "}
                       {user?.wallet && (
                         <div>
-                          {`${user.wallet.address.slice(0, 6)}...${user.wallet.address.slice(-4)}`}{" "}
-                          ({user.wallet.walletClientType})<br />
+                          {shorterEthAddr(user.wallet.address)} (
+                          {user.wallet.walletClientType})<br />
                           <br />
                         </div>
                       )}
@@ -276,7 +222,7 @@ export default function Home() {
 
             <Button
               type="submit"
-              disabled={isSubmitting || !proverAddress || !file}
+              disabled={isSubmitting || !file}
               className="w-full rounded-full bg-violet-600 hover:bg-violet-700 text-white font-medium py-2 px-4 transition-colors"
             >
               {isSubmitting ? (
