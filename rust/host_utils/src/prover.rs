@@ -18,20 +18,19 @@ impl Prover {
 
     pub fn prove(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<ProveInfo> {
         match self.mode {
-            ProofMode::Groth16 => prove_bonsai(env, elf),
+            ProofMode::Groth16 => prove_bonsai(env, elf, &ProverOpts::groth16()),
+            ProofMode::Succinct => prove_bonsai(env, elf, &ProverOpts::succinct()),
             ProofMode::Fake => prove_fake(env, elf),
         }
     }
 }
 
-fn prove_bonsai(env: ExecutorEnv<'_>, elf: &[u8]) -> Result<ProveInfo> {
+fn prove_bonsai(env: ExecutorEnv<'_>, elf: &[u8], opts: &ProverOpts) -> Result<ProveInfo> {
     info!("Proving with Bonsai");
     let bonsai_prover = BonsaiProver::new("vlayer: bonsai");
     // block_in_place is used to avoid tokio runtime panic, since bonsai_prover.prove_with_opts is blocking.
     // https://github.com/risc0/risc0/issues/2049
-    let prove_info = tokio::task::block_in_place(|| {
-        bonsai_prover.prove_with_opts(env, elf, &ProverOpts::groth16())
-    });
+    let prove_info = tokio::task::block_in_place(|| bonsai_prover.prove_with_opts(env, elf, opts));
     info!("Proving with Bonsai done");
     prove_info
 }

@@ -20,9 +20,9 @@ use futures::future::join_all;
 use host_utils::Prover;
 use lazy_static::lazy_static;
 use provider::{to_eth_block_header, EvmBlockHeader};
-use risc0_zkvm::{sha::Digest, AssumptionReceipt, ExecutorEnv, ProveInfo, Receipt};
+use risc0_zkvm::{sha::Digest, AssumptionReceipt, ExecutorEnv, ProveInfo, Receipt, SessionStats};
 use serde::Serialize;
-use tracing::{debug, info, instrument};
+use tracing::{info, instrument};
 
 lazy_static! {
     static ref GUEST_ID: Digest = RISC0_CHAIN_GUEST_ID.into();
@@ -150,10 +150,12 @@ where
         let executor_env = build_executor_env(input, old_receipt)?;
         let ProveInfo { receipt, stats } =
             provably_execute(&self.prover, executor_env, RISC0_CHAIN_GUEST_ELF)?;
-        debug!(
-            "Prover stats. Segments: {}, cycles: {}, user cycles: {}",
-            stats.segments, stats.total_cycles, stats.user_cycles
-        );
+        let SessionStats {
+            total_cycles,
+            user_cycles,
+            segments,
+        } = stats;
+        info!("Prover stats. Segments: {segments}, cycles: {total_cycles}, user cycles: {user_cycles}");
         Ok(receipt)
     }
 
