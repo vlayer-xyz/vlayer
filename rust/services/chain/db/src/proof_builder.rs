@@ -16,14 +16,12 @@ impl IntoIterator for MerkleProof {
     }
 }
 
-impl MerkleProof {
-    pub fn join_into_trie(self, other: MerkleProof) -> MerkleTrie {
-        // Cannot be done by From<(MerkleProof, MerkleProof)> because of orphan rule
-        self.into_iter()
-            .chain(other)
-            .map(|db_node| (db_node.hash, db_node.node))
-            .collect()
-    }
+pub fn mpt_from_proofs(lhs: MerkleProof, rhs: MerkleProof) -> MerkleTrie {
+    // Cannot be done by From<(MerkleProof, MerkleProof)> because of orphan rule
+    lhs.into_iter()
+        .chain(rhs)
+        .map(|db_node| (db_node.hash, db_node.node))
+        .collect()
 }
 
 impl From<MerkleProof> for MerkleTrie {

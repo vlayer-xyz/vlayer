@@ -12,7 +12,7 @@ use bytes::Bytes;
 use chain_trie::UnverifiedChainTrie;
 use derive_more::Debug;
 use key_value::{Database, InMemoryDatabase, Mdbx, ReadTx, ReadWriteTx, WriteTx};
-use proof_builder::{MerkleProofBuilder, ProofResult};
+use proof_builder::{mpt_from_proofs, MerkleProofBuilder, ProofResult};
 
 mod chain_trie;
 mod db_node;
@@ -181,7 +181,7 @@ impl ChainDb {
 
         let first_block_proof = tx.get_merkle_proof(root_hash, first_block)?;
         let last_block_proof = tx.get_merkle_proof(root_hash, last_block)?;
-        let trie = first_block_proof.join_into_trie(last_block_proof);
+        let trie = mpt_from_proofs(first_block_proof, last_block_proof);
 
         Ok(Some(UnverifiedChainTrie::new(first_block..=last_block, trie, zk_proof)))
     }
