@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Upload, MailCheck } from "lucide-react";
 import { usePrivy, useWallets } from "@privy-io/react-auth";
-import { getStrFromFile } from "@/utils";
+import { getStrFromFile } from "@/lib/utils";
 import { createVlayerClient, preverifyEmail } from "@vlayer/sdk";
 import { optimismSepolia } from "viem/chains";
 import { createWalletClient, custom } from "viem";
@@ -33,7 +33,6 @@ export default function Home() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const { ready, authenticated, login, user, logout } = usePrivy();
   const { wallets } = useWallets();
-  const params = new URLSearchParams(window.location.search);
 
   const vlayer = useMemo(
     () =>
@@ -133,16 +132,19 @@ export default function Home() {
   };
 
   useEffect(() => {
-    const verifierAddr = params.get("verifierAddr");
-    const proverAddr = params.get("proverAddr");
+    if (typeof window !== "undefined") {
+      const params = new URLSearchParams(window.location.search);
+      const verifierAddr = params.get("verifierAddr");
+      const proverAddr = params.get("proverAddr");
 
-    if (verifierAddr) {
-      setVerifierAddress(verifierAddr);
+      if (verifierAddr) {
+        setVerifierAddress(verifierAddr);
+      }
+      if (proverAddr) {
+        setProverAddress(proverAddr);
+      }
     }
-    if (proverAddr) {
-      setProverAddress(proverAddr);
-    }
-  }, [params]);
+  }, []);
 
   useEffect(() => {
     console.log({ user });
@@ -236,11 +238,11 @@ export default function Home() {
                     className="bg-gray-800 border-violet-500 text-white placeholder:text-gray-400 focus:ring-violet-500 focus:border-violet-500 mt-2 mb-2"
                     required
                   />
-                  <Label htmlFor="verifierAddr" className="text-violet-300">
-                    Verifier Contract
+                  <Label htmlFor="proverUrl" className="text-violet-300">
+                    Prover URL
                   </Label>
                   <Input
-                    id="verifierAddr"
+                    id="proverUrl"
                     value={proverUrl}
                     onChange={(e) => setProverUrl(e.target.value)}
                     className="bg-gray-800 border-violet-500 text-white placeholder:text-gray-400 focus:ring-violet-500 focus:border-violet-500 mt-2 mb-2"
