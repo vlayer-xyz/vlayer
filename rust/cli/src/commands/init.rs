@@ -442,7 +442,7 @@ mod tests {
     fn test_change_sdk_dependency_to_npm() {
         let temp_dir = tempfile::tempdir().unwrap();
         let root_path = temp_dir.path().to_path_buf();
-        
+
         let vlayer_dir = root_path.join("vlayer");
         std::fs::create_dir(&vlayer_dir).unwrap();
 
