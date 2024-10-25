@@ -32,8 +32,9 @@ fn append_prepend(
     mut old_leftmost_block: Box<dyn EvmBlockHeader>,
     mut block_trie: BlockTrie,
 ) -> (B256, Digest) {
-    let prev_proof_output = to_vec(&(block_trie.hash_slow(), elf_id)).expect("failed to serialize");
-    env::verify(elf_id, &prev_proof_output).expect("failed to verify previous ZK proof");
+    let expected_prev_proof_output =
+        to_vec(&(block_trie.hash_slow(), elf_id)).expect("failed to serialize");
+    env::verify(elf_id, &expected_prev_proof_output).expect("failed to verify previous ZK proof");
 
     for block in append_blocks {
         block_trie.append(&*block).expect("append failed");
