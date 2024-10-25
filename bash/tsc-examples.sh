@@ -4,21 +4,29 @@ set -ueo pipefail
 
 VLAYER_HOME=$(git rev-parse --show-toplevel)
 
+echo "::group::Running bun install for: $VLAYER_HOME/packages"
 cd "${VLAYER_HOME}/packages"
-echo "Running bun install for: $VLAYER_HOME/packages"
 bun install --frozen-lockfile
+echo '::endgroup::'
 
-EXAMPLE="${VLAYER_HOME}/examples/web_proof"
-cd ${EXAMPLE}
+EXAMPLES="simple web_proof"
 
-forge soldeer install
-forge build
+for example_name in ${EXAMPLES}; do
 
-echo Generating typescript bidings ...
-${VLAYER_HOME}/bash/build_ts_types.sh >/dev/null
+  example="${VLAYER_HOME}/examples/${example_name}"
 
-cd ${EXAMPLE}/vlayer
+  echo ""::group::Running tsc for: ${example}""
+  cd "${example}"
 
-echo "Running tsc for: ${EXAMPLE}"
-bun install --frozen-lockfile
-bun tsc --noEmit
+  forge soldeer install
+  forge build
+
+  echo Generating typescript bidings ...
+  ${VLAYER_HOME}/bash/build_ts_types.sh >/dev/null
+
+  cd ${example}/vlayer
+
+  bun install --frozen-lockfile
+  bun tsc --noEmit
+  echo '::endgroup::'
+done

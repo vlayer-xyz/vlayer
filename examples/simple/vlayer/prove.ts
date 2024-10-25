@@ -4,6 +4,8 @@ import SimpleProver from "../out/SimpleProver.sol/SimpleProver";
 import SimpleVerifier from "../out/SimpleVerifier.sol/SimpleVerifier";
 import ExampleNftAbi from "../out/ExampleNFT.sol/ExampleNFT";
 import ExampleToken from "../out/ExampleToken.sol/ExampleToken";
+import { foundry } from "viem/chains";
+import { isAddress } from "viem";
 
 const john = testHelpers.getTestAccount();
 const exampleToken = await testHelpers.deployContract(ExampleToken, [
@@ -28,8 +30,19 @@ const { hash } = await vlayer.prove({
   proverAbi: SimpleProver.abi,
   functionName: "balance",
   args: [john.address],
+  chainId: foundry.id,
 });
 const result = await vlayer.waitForProvingResult({ hash });
+const [proof, owner, balance] = result;
+
+if (typeof balance !== "bigint") {
+  throw new Error("Balance is not a bigint");
+}
+
+if (typeof owner !== "string" || !isAddress(owner)) {
+  throw new Error(`${owner} is not a valid address`);
+}
+
 console.log("Proof result:");
 console.log(result);
 
@@ -37,7 +50,7 @@ const receipt = await testHelpers.writeContract(
   verifier,
   SimpleVerifier.abi,
   "claimWhale",
-  result,
+  [proof, owner, balance],
 );
 
 console.log(`Verification result: ${receipt.status}`);
