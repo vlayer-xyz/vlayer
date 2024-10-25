@@ -384,4 +384,16 @@ jobs:
       run: |
         PACKAGE_NAME=$(npm pack)
         npm publish --access public ${PACKAGE_NAME}
-        
+
+  test-release:
+    name: Test release
+    needs: [push-artifacts-to-s3, publish-sdk-to-npm]
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Test release
+        run: bash/test_release.sh
+     
