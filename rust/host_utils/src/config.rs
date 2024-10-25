@@ -3,4 +3,5 @@ pub enum ProofMode {
     #[default]
     Fake,
     Groth16,
+    Succinct,
 }
