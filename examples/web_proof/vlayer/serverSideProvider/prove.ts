@@ -32,7 +32,7 @@ async function testSuccessProving() {
 
   const webProof = { tls_proof: tls_proof, notary_pub_key: notaryPubKey };
 
-  const { hash } = await vlayer.prove({
+  const [proof, result] = await vlayer.prove({
     address: prover,
     functionName: "main",
     proverAbi: webProofProver.abi,
@@ -44,8 +44,6 @@ async function testSuccessProving() {
     ],
     chainId: foundry.id,
   });
-
-  const [proof, result] = await vlayer.waitForProvingResult({ hash });
 
   console.log("Proof generated!", proof, result);
   return { proof, result };

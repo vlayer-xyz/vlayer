@@ -4,6 +4,7 @@ import {
   Address,
   ContractFunctionArgs,
   ContractFunctionName,
+  ContractFunctionReturnType,
   Hex,
 } from "viem";
 
@@ -51,10 +52,5 @@ export type VlayerClient = {
     functionName: F;
     chainId: number;
     args: ContractFunctionArgs<T, AbiStateMutability, F>;
-  }) => Promise<{ hash: string }>;
-  waitForProvingResult: ({
-    hash,
-  }: {
-    hash: string;
-  }) => Promise<[Proof, ...unknown[]]>;
+  }) => Promise<ContractFunctionReturnType<T, AbiStateMutability, F>>;
 };

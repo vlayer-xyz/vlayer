@@ -3,7 +3,7 @@ import webProofProver from "../out/WebProofProver.sol/WebProofProver";
 import webProofVerifier from "../out/WebProofVerifier.sol/WebProofVerifier";
 import tls_proof from "./tls_gp_proof.json";
 import * as assert from "assert";
-import { encodePacked, isAddress, keccak256 } from "viem";
+import { encodePacked, keccak256 } from "viem";
 import { foundry } from "viem/chains";
 
 const notaryPubKey =
@@ -26,7 +26,7 @@ async function testSuccessProvingAndVerification() {
 
   const webProof = { tls_proof: tls_proof, notary_pub_key: notaryPubKey };
 
-  const { hash } = await vlayer.prove({
+  const result = await vlayer.prove({
     address: prover,
     functionName: "main",
     proverAbi: webProofProver.abi,
@@ -38,17 +38,10 @@ async function testSuccessProvingAndVerification() {
     ],
     chainId: foundry.id,
   });
-  const result = await vlayer.waitForProvingResult({ hash });
+
   const [proof, twitterHandle, address] = result;
+
   console.log("Proof:", proof);
-
-  if (typeof twitterHandle !== "string") {
-    throw new Error("Twitter handle is not a string");
-  }
-
-  if (typeof address !== "string" || !isAddress(address)) {
-    throw new Error(`${address} is not a valid address`);
-  }
 
   console.log("Verifying...");
   await testHelpers.writeContract(
@@ -85,7 +78,7 @@ async function testFailedProving() {
   const wrongWebProof = { tls_proof: tls_proof, notary_pub_key: "wrong" };
 
   try {
-    const { hash } = await vlayer.prove({
+    await vlayer.prove({
       address: prover,
       functionName: "main",
       proverAbi: webProofProver.abi,
@@ -97,7 +90,6 @@ async function testFailedProving() {
       ],
       chainId: foundry.id,
     });
-    await vlayer.waitForProvingResult({ hash });
     throw new Error("Proving should have failed!");
   } catch (error) {
     assert.ok(error instanceof Error, `Invalid error returned: ${error}`);

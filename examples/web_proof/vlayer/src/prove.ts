@@ -20,7 +20,7 @@ console.log("Hello from VLayer!");
 
 const context: {
   webProof: WebProof | undefined;
-  provingResult: [Proof, string, Hex] | undefined;
+  provingResult: Readonly<[Proof, string, Hex]> | undefined;
 } = { webProof: undefined, provingResult: undefined };
 
 const twitterUserAddress = (await testHelpers.getTestAddresses())[0];
@@ -65,7 +65,7 @@ export const setupVProverButton = (element: HTMLButtonElement) => {
     const vlayer = createVlayerClient();
 
     console.log("Generating proof...");
-    const { hash } = await vlayer.prove({
+    const provingResult = await vlayer.prove({
       address: import.meta.env.VITE_PROVER_ADDRESS,
       functionName: "main",
       proverAbi: webProofProver.abi,
@@ -77,11 +77,8 @@ export const setupVProverButton = (element: HTMLButtonElement) => {
       ],
       chainId: foundry.id,
     });
-    const provingResult = await vlayer.waitForProvingResult({
-      hash,
-    });
     console.log("Proof generated!", provingResult);
-    context.provingResult = provingResult as [Proof, string, Hex];
+    context.provingResult = provingResult;
   });
 };
 
