@@ -9,7 +9,7 @@ cd "${VLAYER_HOME}/packages"
 bun install --frozen-lockfile
 echo '::endgroup::'
 
-EXAMPLES="simple web_proof airdrop"
+EXAMPLES="simple web_proof simple_teleport"
 
 for example_name in ${EXAMPLES}; do
 
