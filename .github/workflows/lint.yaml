@@ -29,12 +29,6 @@ jobs:
       - name: Install contracts prerequisites
         uses: ./.github/actions/contracts-prerequisites
 
-      - name: Install nightly rustfmt
-        run: rustup toolchain install nightly -c rustfmt
-
-      - name: Install cargo sort
-        run: cargo install --force cargo-sort
-          
       - name: Run Host lints
         working-directory: rust
         env:
@@ -42,7 +36,7 @@ jobs:
         run: |
           cargo +nightly fmt --check
           cargo sort --check --grouped --workspace
-          cargo clippy --all-targets --all-features
+          cargo clippy --all-targets --all-features --locked
 
       - name: Run Risc0 Call Guest lints
         working-directory: rust/services/call/guest_wrapper/risc0_guest
@@ -51,7 +45,7 @@ jobs:
         run: |
           cargo +nightly fmt --check
           cargo sort --check --grouped
-          cargo clippy --all-targets --all-features
+          cargo clippy --all-targets --all-features --locked
       
       - name: Run Risc0 Chain Guest lints
         working-directory: rust/services/chain/guest_wrapper/risc0_guest
@@ -60,4 +54,4 @@ jobs:
         run: |
           cargo +nightly fmt --check
           cargo sort --check --grouped
-          cargo clippy --all-targets --all-features
+          cargo clippy --all-targets --all-features --locked
