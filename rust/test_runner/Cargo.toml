@@ -19,6 +19,7 @@ alloy-trie = { workspace = true }
 anyhow = { workspace = true }
 chain = { workspace = true }
 chain_client = { workspace = true }
+chain_server = { workspace = true }
 clap = { workspace = true, features = ["derive"] }
 color-eyre = { workspace = true }
 comfy-table = { workspace = true }

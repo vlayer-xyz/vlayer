@@ -1,14 +1,23 @@
-use httpmock::Mock;
+use axum_jrpc::Value;
+use lazy_static::lazy_static;
 use serde::Serialize;
+use serde_json::json;
 use server_utils::RpcServerMock;
+
+lazy_static! {
+    pub static ref EMPTY_PROOF_RESPONSE: Value = json!({
+        "proof": "",
+        "nodes": []
+    });
+}
 
 pub struct ChainProofServerMock {
     mock_server: RpcServerMock,
 }
 
 impl ChainProofServerMock {
-    pub async fn start() -> Self {
-        let mock_server = RpcServerMock::start("v_chain").await;
+    pub async fn start(params: impl Serialize, result: impl Serialize) -> Self {
+        let mock_server = RpcServerMock::start("v_chain", true, params, result).await;
 
         ChainProofServerMock { mock_server }
     }
@@ -17,7 +26,7 @@ impl ChainProofServerMock {
         self.mock_server.url()
     }
 
-    pub async fn mock(&self, params: impl Serialize, result: impl Serialize) -> Mock {
-        self.mock_server.mock(true, params, result).await
+    pub fn assert(&self) {
+        self.mock_server.assert();
     }
 }

@@ -2,7 +2,7 @@ use std::{collections::HashMap, sync::Arc, time::Duration};
 
 use axum::{body::Body, http::Response};
 use call_server::{server, ProofMode, ServerConfig};
-use chain_server::server::ChainProofServerMock;
+use chain_server::server::{ChainProofServerMock, EMPTY_PROOF_RESPONSE};
 use ethers::{
     contract::abigen,
     core::{
@@ -35,16 +35,7 @@ impl TestHelper {
     }
 
     pub(crate) async fn post<T: Serialize>(&self, url: &str, body: &T) -> Response<Body> {
-        let chain_proof_server_mock = ChainProofServerMock::start().await;
-        chain_proof_server_mock
-            .mock(
-                json!({}),
-                json!({
-                    "proof": "",
-                    "nodes": []
-                }),
-            )
-            .await;
+        let chain_proof_server_mock = start_chain_proof_server().await;
 
         let app = server(ServerConfig {
             rpc_urls: HashMap::from([(self.anvil.chain_id(), self.anvil.endpoint())]),
@@ -54,6 +45,10 @@ impl TestHelper {
         });
         post(app, url, body).await
     }
+}
+
+async fn start_chain_proof_server() -> ChainProofServerMock {
+    ChainProofServerMock::start(json!({}), EMPTY_PROOF_RESPONSE.clone()).await
 }
 
 async fn setup_anvil() -> AnvilInstance {

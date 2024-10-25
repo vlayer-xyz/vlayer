@@ -1,5 +1,6 @@
 use std::{
     any::Any,
+    collections::HashMap,
     panic::{self},
 };
 
@@ -13,6 +14,7 @@ use call_engine::{
 };
 use call_guest_wrapper::RISC0_CALL_GUEST_ELF;
 use chain_client::ChainProofClient;
+use chain_types::ChainProof;
 use config::HostConfig;
 use error::HostError;
 use ethers_core::types::BlockNumber;
@@ -34,7 +36,7 @@ pub struct Host {
     start_execution_location: ExecutionLocation,
     envs: CachedEvmEnv<ProofDb>,
     prover: Prover,
-    _chain_proof_client: ChainProofClient,
+    chain_proof_client: ChainProofClient,
     max_calldata_size: usize,
 }
 
@@ -79,7 +81,7 @@ impl Host {
             envs,
             start_execution_location,
             prover,
-            _chain_proof_client: chain_proof_client,
+            chain_proof_client,
             max_calldata_size: config.max_calldata_size,
         })
     }
@@ -100,12 +102,10 @@ impl Host {
 
         let multi_evm_input =
             into_multi_input(self.envs).map_err(|err| HostError::CreatingInput(err.to_string()))?;
-        // let chain_proofs: std::collections::HashMap<u64, chain_types::ChainProof> = self
-        //     .chain_proof_client
-        //     .get_chain_proofs(multi_evm_input.group_blocks_by_chain())
-        //     .await?;
-        let chain_proofs: std::collections::HashMap<u64, chain_types::ChainProof> =
-            std::collections::HashMap::new();
+        let chain_proofs: HashMap<u64, ChainProof> = self
+            .chain_proof_client
+            .get_chain_proofs(multi_evm_input.group_blocks_by_chain())
+            .await?;
         let input = Input {
             call,
             multi_evm_input,
