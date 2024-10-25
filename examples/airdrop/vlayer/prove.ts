@@ -4,6 +4,7 @@ import assert from "node:assert";
 import { testHelpers, createVlayerClient } from "@vlayer/sdk";
 import nftOwnershipProver from "../out/NftOwnershipProver.sol/NftOwnershipProver";
 import airdropVerifier from "../out/AirdropVerifier.sol/Airdrop";
+import { foundry } from "viem/chains";
 
 const [prover, verifier] = await testHelpers.deployProverVerifier(
   nftOwnershipProver,
@@ -17,6 +18,7 @@ const { hash } = await vlayer.prove({
   address: prover,
   proverAbi: nftOwnershipProver.abi,
   functionName: "main",
+  chainId: foundry.id,
   args: [sender],
 });
 const [proof, claimAddress] = await vlayer.waitForProvingResult({ hash });
