@@ -20,8 +20,7 @@
     "sidePanel",
     "storage",
     "webRequest",
-    "cookies",
-    "activeTab"
+    "cookies"
   ],
   "externally_connectable": {
     "matches": ["<all_urls>"]
