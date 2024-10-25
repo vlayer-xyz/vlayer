@@ -8,8 +8,10 @@ alloy-primitives = { workspace = true }
 block_trie = { workspace = true }
 ethers = { workspace = true, optional = true }
 provider = { workspace = true, optional = true }
+risc0-zkvm = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
+static_assertions = { workspace = true }
 
 [features]
 test_utils = ["ethers", "provider"]

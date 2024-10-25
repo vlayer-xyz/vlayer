@@ -6,7 +6,6 @@ use std::{
 
 use alloy_primitives::{BlockHash, BlockNumber, Bytes, ChainId, B256};
 use block_header::{EvmBlockHeader, Hashable};
-use chain_common::ChainProof;
 use derive_more::{From, Into, IntoIterator};
 use derive_new::new;
 use itertools::Itertools;
@@ -95,30 +94,6 @@ impl MultiEvmInput {
     {
         let inputs = iter.into_iter().collect();
         Self { inputs }
-    }
-
-    pub fn assert_coherency(
-        &self,
-        chain_proofs: &HashMap<ChainId, ChainProof>,
-        verify_chain_proofs: bool,
-    ) {
-        self.inputs.values().for_each(EvmInput::assert_coherency);
-        if verify_chain_proofs {
-            self.assert_chain_coherence(chain_proofs);
-        }
-    }
-
-    fn assert_chain_coherence(&self, chain_proofs: &HashMap<ChainId, ChainProof>) {
-        for (chain_id, blocks) in self.blocks_by_chain() {
-            let chain_proof = chain_proofs.get(&chain_id).expect("chain proof not found");
-            for (block_number, block_hash) in blocks {
-                let trie_block_hash = chain_proof
-                    .block_trie
-                    .get(block_number)
-                    .expect("block hash not found");
-                assert_eq!(trie_block_hash, block_hash, "block hash mismatch");
-            }
-        }
     }
 
     fn group_blocks<F, T>(&self, f: F) -> HashMap<ChainId, Vec<T>>

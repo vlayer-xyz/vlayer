@@ -599,9 +599,9 @@ checksum = "c3ac9f8b63eca6fd385229b3675f6cc0dc5c8a5c8a54a59d4f52ffd670d87b0c"
 
 [[package]]
 name = "bytemuck"
-version = "1.18.0"
+version = "1.19.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "94bbb0ad554ad961ddc5da507a12a29b14e4ae5bda06b19f575a3e6079d2e2ae"
+checksum = "8334215b81e418a0a7bdb8ef0849474f40bb10c8b71f1c4ed315cff49f32494d"
 dependencies = [
  "bytemuck_derive",
 ]
@@ -669,12 +669,26 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "613afe47fcd5fac7ccf1db93babcb082c5994d996f20b8b159f2ad1658eb5724"
 
 [[package]]
+name = "chain_common"
+version = "0.1.0"
+dependencies = [
+ "alloy-primitives",
+ "block_trie",
+ "risc0-zkvm",
+ "serde",
+ "serde_json",
+ "static_assertions",
+]
+
+[[package]]
 name = "chain_guest"
 version = "0.1.0"
 dependencies = [
  "alloy-primitives",
  "block_header",
  "block_trie",
+ "bytemuck",
+ "chain_common",
  "risc0-zkp",
  "risc0-zkvm",
  "serde",

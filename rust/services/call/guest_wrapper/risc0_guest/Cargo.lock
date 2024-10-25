@@ -912,8 +912,10 @@ version = "0.1.0"
 dependencies = [
  "alloy-primitives",
  "block_trie",
+ "risc0-zkvm",
  "serde",
  "serde_json",
+ "static_assertions",
 ]
 
 [[package]]

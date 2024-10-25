@@ -4,7 +4,7 @@ use alloy_primitives::ChainId;
 use call_engine::{
     evm::{
         env::{cached::CachedEvmEnv, location::ExecutionLocation},
-        input::MultiEvmInput,
+        input::{EvmInput, MultiEvmInput},
     },
     io::{Call, GuestOutput},
     travel_call_executor::TravelCallExecutor,
@@ -28,7 +28,7 @@ impl Guest {
         start_execution_location: ExecutionLocation,
         chain_proofs: &HashMap<ChainId, ChainProof>,
     ) -> Self {
-        multi_evm_input.assert_coherency(chain_proofs, VERIFY_CHAIN_PROOFS);
+        assert_coherency(&multi_evm_input, chain_proofs, VERIFY_CHAIN_PROOFS);
         let multi_evm_env = multi_evm_input.into();
         let evm_envs = CachedEvmEnv::from_envs(multi_evm_env);
 
@@ -53,6 +53,36 @@ impl Guest {
         GuestOutput {
             evm_call_result: evm_call_result.output,
             call_assumptions,
+        }
+    }
+}
+
+fn assert_coherency(
+    multi_evm_input: &MultiEvmInput,
+    chain_proofs: &HashMap<ChainId, ChainProof>,
+    verify_chain_proofs: bool,
+) {
+    multi_evm_input
+        .inputs
+        .values()
+        .for_each(EvmInput::assert_coherency);
+    if verify_chain_proofs {
+        assert_chain_coherence(multi_evm_input, chain_proofs);
+    }
+}
+
+fn assert_chain_coherence(
+    multi_evm_input: &MultiEvmInput,
+    chain_proofs: &HashMap<ChainId, ChainProof>,
+) {
+    for (chain_id, blocks) in multi_evm_input.blocks_by_chain() {
+        let chain_proof = chain_proofs.get(&chain_id).expect("chain proof not found");
+        for (block_number, block_hash) in blocks {
+            let trie_block_hash = chain_proof
+                .block_trie
+                .get(block_number)
+                .expect("block hash not found");
+            assert_eq!(trie_block_hash, block_hash, "block hash mismatch");
         }
     }
 }
