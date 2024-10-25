@@ -3,7 +3,14 @@ import { WebProofProvider } from "types/webProofProvider";
 
 import { prove } from "../prover";
 import { createExtensionWebProofProvider } from "../webProof";
-import { type Abi, decodeFunctionResult } from "viem";
+import {
+  type Abi,
+  decodeFunctionResult,
+  ContractFunctionReturnType,
+  AbiStateMutability,
+  ContractFunctionName,
+} from "viem";
+import { Branded } from "../../web-proof-commons/utils.ts";
 
 function dropEmptyProofFromArgs(args: unknown) {
   if (Array.isArray(args)) {
@@ -53,24 +60,38 @@ export const createVlayerClient = (
       resultHashMap.set(hash, [result_promise, proverAbi, functionName]);
       return { hash };
     },
-    waitForProvingResult: async ({ hash }) => {
+
+    waitForProvingResult: async <
+      T extends Abi,
+      F extends ContractFunctionName<T>,
+    >({
+      hash,
+    }: Branded<{ hash: string }, [T, F]>): Promise<
+      ContractFunctionReturnType<T, AbiStateMutability, F>
+    > => {
       const savedProvingData = resultHashMap.get(hash);
       if (!savedProvingData) {
         throw new Error("No result found for hash " + hash);
       }
+
+      const [result_promise, proverAbi, functionName] = savedProvingData;
       const {
         result: { proof, evm_call_result },
-      } = await savedProvingData[0];
+      } = await result_promise;
 
       const result = dropEmptyProofFromArgs(
         decodeFunctionResult({
-          abi: savedProvingData[1],
+          abi: proverAbi,
           data: evm_call_result,
-          functionName: savedProvingData[2],
+          functionName: functionName,
         }),
       );
 
-      return [proof, ...result];
+      return [proof, ...result] as ContractFunctionReturnType<
+        T,
+        AbiStateMutability,
+        F
+      >;
     },
   };
 };

@@ -12,6 +12,7 @@ import {
   testHelpers,
   type Proof,
   isDefined,
+  Branded,
 } from "@vlayer/sdk";
 import webProofVerifier from "../../out/WebProofVerifier.sol/WebProofVerifier";
 import { Hex } from "viem";
@@ -20,7 +21,7 @@ console.log("Hello from VLayer!");
 
 const context: {
   webProof: WebProof | undefined;
-  provingResult: [Proof, string, Hex] | undefined;
+  provingResult: Readonly<[Proof, string, Hex]> | undefined;
 } = { webProof: undefined, provingResult: undefined };
 
 const twitterUserAddress = (await testHelpers.getTestAddresses())[0];
@@ -79,9 +80,9 @@ export const setupVProverButton = (element: HTMLButtonElement) => {
     });
     const provingResult = await vlayer.waitForProvingResult({
       hash,
-    });
+    } as Branded<{ hash: string }, [typeof webProofProver.abi, "main"]>);
     console.log("Proof generated!", provingResult);
-    context.provingResult = provingResult as [Proof, string, Hex];
+    context.provingResult = provingResult;
   });
 };
 
