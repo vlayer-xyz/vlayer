@@ -30,10 +30,10 @@ where
     C: Into<ChainId>,
     B: Into<BlockTag>,
 {
-    fn from(tuple: (C, B)) -> Self {
+    fn from((chain_id, block_tag): (C, B)) -> Self {
         ExecutionLocation {
-            chain_id: tuple.0.into(),
-            block_tag: tuple.1.into(),
+            chain_id: chain_id.into(),
+            block_tag: block_tag.into(),
         }
     }
 }
