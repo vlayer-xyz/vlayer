@@ -23,5 +23,9 @@
       ansible.builtin.gather_facts:
 
   roles:
+    - role: geerlingguy.swap
+      become: true
+      vars:
+        swap_file_size_mb: '4096'
     - role: prover
     - role: prometheus.prometheus.node_exporter

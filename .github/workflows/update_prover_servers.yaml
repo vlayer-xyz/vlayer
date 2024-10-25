@@ -22,7 +22,9 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Install ansible galaxy collections
-        run: ansible-galaxy collection install -r requirements.yml
+        run: |
+          ansible-galaxy collection install -r requirements.yml
+          ansible-galaxy role install -r requirements.yml
       - name: Add deployer ssh key and run the Ansible playbook
         run: |
           eval "$(ssh-agent -s)"
