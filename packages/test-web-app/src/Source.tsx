@@ -36,7 +36,8 @@ function Source() {
   };
 
   return (
-    <>
+    <div className="container">
+      <div>
       <button data-testid="request-webproof-button" onClick={handleClick}>
         Request web proof
       </button>
@@ -45,7 +46,9 @@ function Source() {
       ) : (
         <h1> No web proof </h1>
       )}
-    </>
+      </div>
+
+    </div>
   );
 }
 

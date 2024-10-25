@@ -7,9 +7,9 @@ function Target() {
     getLukeSkywalker().catch(console.error);
   }, []);
   return (
-    <>
+    <div className="container">
       <h1> Target </h1>
-    </>
+    </div>
   );
 }
 

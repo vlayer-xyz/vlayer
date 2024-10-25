@@ -7,6 +7,8 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Target from "./Target";
 import { LoginMock } from "./LoginMock";
 
+import './main.css';
+
 const router = createBrowserRouter([
   {
     path: "/source",

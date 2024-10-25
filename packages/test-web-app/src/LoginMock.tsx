@@ -2,6 +2,7 @@ import React from "react";
 
 export const LoginMock = () => {
   return (
+    <div className="container">
     <button
       data-testid="login-button"
       onClick={() => {
@@ -11,5 +12,6 @@ export const LoginMock = () => {
     >
       Login
     </button>
+    </div>
   );
 };
