@@ -11,6 +11,7 @@ import { getStrFromFile } from "@/lib/utils";
 import { createVlayerClient, preverifyEmail } from "@vlayer/sdk";
 import { optimismSepolia } from "viem/chains";
 import { createWalletClient, custom } from "viem";
+import { useRouter } from "next/navigation";
 import {
   Accordion,
   AccordionContent,
@@ -33,6 +34,7 @@ export default function Home() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const { ready, authenticated, login, user, logout } = usePrivy();
   const { wallets } = useWallets();
+  const router = useRouter();
 
   const vlayer = useMemo(
     () =>
@@ -121,6 +123,7 @@ export default function Home() {
         fileInputRef.current.value = "";
       }
       setCurrentStep("Success!");
+      router.push(`/success?txHash=${txHash}`)
     } catch (error) {
       console.error("Error submitting form:", error);
       if (error?.message === "not_authenticated") {
