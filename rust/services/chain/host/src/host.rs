@@ -22,7 +22,7 @@ use lazy_static::lazy_static;
 use provider::{to_eth_block_header, EvmBlockHeader};
 use risc0_zkvm::{sha::Digest, AssumptionReceipt, ExecutorEnv, ProveInfo, Receipt, SessionStats};
 use serde::Serialize;
-use tracing::{debug, info, instrument};
+use tracing::{info, instrument};
 
 lazy_static! {
     static ref GUEST_ID: Digest = RISC0_CHAIN_GUEST_ID.into();
