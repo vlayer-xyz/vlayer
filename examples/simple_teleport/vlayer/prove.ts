@@ -4,6 +4,7 @@ import { testHelpers, createVlayerClient } from "@vlayer/sdk";
 import simpleTeleportProver from "../out/SimpleTeleportProver.sol/SimpleTeleportProver";
 import simpleTeleportVerifier from "../out/SimpleTeleportVerifier.sol/SimpleTeleportVerifier";
 import whaleBadgeNFT from "../out/WhaleBadgeNFT.sol/WhaleBadgeNFT";
+import { foundry } from "viem/chains";
 
 const john = testHelpers.getTestAccount().address;
 
@@ -38,6 +39,7 @@ const { hash } = await vlayer.prove({
   address: proverAddr,
   proverAbi: simpleTeleportProver.abi,
   functionName: "crossChainBalanceOf",
+  chainId: foundry.id,
   args: [john],
 });
 const result = await vlayer.waitForProvingResult({ hash });
