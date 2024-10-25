@@ -80,7 +80,7 @@ and which bytes belong to _[extra arguments](/advanced/verifier.html#extra-argum
 
 Below, is a schema of how a block of data is encoded in different structures at different stages.
 
-![Schema](/images/architecture/transaction-data.png)
+![Schema](/images/architecture/prover-verifier-data-ecoding.png)
 
 ## Structures
 The `Proof` structure looks as follows:
