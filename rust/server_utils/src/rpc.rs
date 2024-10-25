@@ -58,7 +58,9 @@ impl RpcServerMock {
     }
 
     pub fn assert(&self) {
-        self.mock.assert();
+        if !self.mock.matched() {
+            panic!("wrong number of requests. expected 1");
+        }
     }
 }
 
@@ -127,10 +129,6 @@ fn parse_json_rpc_response(response_body: Value) -> Result<Value, RpcError> {
 
 #[cfg(test)]
 mod tests {
-    use std::panic::AssertUnwindSafe;
-
-    use futures::FutureExt;
-
     use super::*;
     const METHOD: &str = "get_data";
 
@@ -151,29 +149,11 @@ mod tests {
     }
 
     #[tokio::test]
+    #[should_panic(expected = "wrong number of requests. expected 1")]
     async fn mock_not_called_panics() {
         let mock = RpcServerMock::start(METHOD, false, json!({}), json!({})).await;
 
-        let result = AssertUnwindSafe(async move {
-            mock.assert();
-        })
-        .catch_unwind()
-        .await
-        .unwrap_err();
-        let msg = result.downcast_ref::<String>().unwrap();
-
-        let expected_msg = "
-> Expected 1 request(s) to:
-\r
-POST /\r
-content-type: application/json\r
-{\"id\":1,\"jsonrpc\":\"2.0\",\"method\":\"get_data\",\"params\":{}}\r
-
-...but received 0
-
-";
-
-        assert_eq!(msg, &expected_msg);
+        mock.assert();
     }
 
     #[tokio::test]
