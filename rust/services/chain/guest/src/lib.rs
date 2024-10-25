@@ -20,21 +20,20 @@ pub enum Input {
     },
 }
 
-fn initialize(elf_id: Digest, block: &dyn EvmBlockHeader) -> (B256, Digest) {
+fn initialize(block: &dyn EvmBlockHeader) -> B256 {
     let trie = BlockTrie::init(block).expect("init failed");
-    (trie.hash_slow(), elf_id)
+    trie.hash_slow()
 }
 
 fn append_prepend(
     elf_id: Digest,
+    verifier: &ChainGuestVerifier,
     prepend_blocks: impl DoubleEndedIterator<Item = Box<dyn EvmBlockHeader>>,
     append_blocks: impl Iterator<Item = Box<dyn EvmBlockHeader>>,
     mut old_leftmost_block: Box<dyn EvmBlockHeader>,
     mut block_trie: BlockTrie,
-) -> (B256, Digest) {
-    let expected_prev_proof_output =
-        to_vec(&(block_trie.hash_slow(), elf_id)).expect("failed to serialize");
-    env::verify(elf_id, &expected_prev_proof_output).expect("failed to verify previous ZK proof");
+) -> B256 {
+    verifier.verify_prev_output(block_trie.hash_slow(), elf_id);
 
     for block in append_blocks {
         block_trie.append(&*block).expect("append failed");
@@ -47,24 +46,80 @@ fn append_prepend(
         old_leftmost_block = block;
     }
 
-    (block_trie.hash_slow(), elf_id)
+    block_trie.hash_slow()
 }
 
-pub fn main(input: Input) -> (B256, Digest) {
+pub fn main(input: Input, verifier: &ChainGuestVerifier) -> (B256, Digest) {
     match input {
-        Input::Initialize { elf_id, block } => initialize(elf_id, &*block),
+        Input::Initialize { elf_id, block } => (initialize(&*block), elf_id),
         Input::AppendPrepend {
             elf_id,
             prepend_blocks,
             append_blocks,
             old_leftmost_block,
             block_trie,
-        } => append_prepend(
+        } => (
+            append_prepend(
+                elf_id,
+                verifier,
+                prepend_blocks.into_iter(),
+                append_blocks.into_iter(),
+                old_leftmost_block,
+                block_trie,
+            ),
             elf_id,
-            prepend_blocks.into_iter(),
-            append_blocks.into_iter(),
-            old_leftmost_block,
-            block_trie,
         ),
+    }
+}
+
+pub struct ChainGuestVerifier(Box<dyn GuestVerifier>);
+
+impl ChainGuestVerifier {
+    pub fn new(verifier: impl GuestVerifier) -> Self {
+        Self(Box::new(verifier))
+    }
+
+    pub fn verify_prev_output(&self, prev_hash: B256, elf_id: Digest) {
+        let prev_proof_output = to_vec(&(prev_hash, elf_id)).expect("failed to serialize");
+        self.0
+            .verify(elf_id, bytemuck::cast_slice(&prev_proof_output));
+    }
+}
+
+pub trait GuestVerifier: Send + Sync + 'static {
+    /// Verify ZK proof from guest code. This entails that verifying the receipt of the currently
+    /// executing guest code will also guarantee that the given proof is valid.
+    /// Panic if proof is invalid.
+    fn verify(&self, elf_id: Digest, proof: &[u8]);
+}
+
+pub struct Risc0Verifier;
+
+impl GuestVerifier for Risc0Verifier {
+    fn verify(&self, elf_id: Digest, proof: &[u8]) {
+        env::verify(elf_id, proof).expect("infallible");
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[allow(dead_code)]
+    struct MockVerifier {
+        verification_ok: bool,
+    }
+
+    impl MockVerifier {
+        #[allow(dead_code)]
+        pub const fn new(verification_ok: bool) -> Self {
+            Self { verification_ok }
+        }
+    }
+
+    impl GuestVerifier for MockVerifier {
+        fn verify(&self, _elf_id: Digest, _proof: &[u8]) {
+            assert!(self.verification_ok, "proof verification failed")
+        }
     }
 }

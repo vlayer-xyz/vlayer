@@ -7,6 +7,7 @@ edition = "2021"
 alloy-primitives = { workspace = true }
 block_header = { workspace = true }
 block_trie = { workspace = true }
+bytemuck = "1.19.0"
 bytes = { workspace = true }
 mpt = { workspace = true }
 risc0-zkp = { workspace = true }
