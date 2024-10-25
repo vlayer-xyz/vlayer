@@ -33,9 +33,9 @@ const client = createPublicClient({
 
 const deployProver = async () => {
   const usdcTokenAddr = "0x5fd84259d66Cd46123540766Be93DFE6D43130D7"; // Test USDC at OP Sepolia
-  const startBlock = 17915294;
-  const endBlock = 17985294;
-  const step = 9000;
+  const startBlock = 17915294n;
+  const endBlock = 17985294n;
+  const step = 9000n;
 
   const txHash = await walletClient.deployContract({
     abi: averageBalance.abi,
