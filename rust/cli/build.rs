@@ -1,13 +1,25 @@
 use std::env;
 
-fn main() {
+use vergen_gitcl::{
+    BuildBuilder, CargoBuilder, Emitter, GitclBuilder, RustcBuilder, SysinfoBuilder,
+};
+
+fn main() -> anyhow::Result<()> {
     if env::var("VLAYER_RELEASE").is_err() {
         println!("cargo:rustc-env=VLAYER_RELEASE=dev");
     }
 
-    vergen::EmitBuilder::builder()
-        .build_date()
-        .git_sha(true)
+    let mut git_cl_builder = GitclBuilder::default();
+    git_cl_builder.all().sha(true);
+
+    Emitter::default()
+        .add_instructions(&BuildBuilder::all_build()?)?
+        .add_instructions(&CargoBuilder::all_cargo()?)?
+        .add_instructions(&git_cl_builder.build()?)?
+        .add_instructions(&RustcBuilder::all_rustc()?)?
+        .add_instructions(&SysinfoBuilder::all_sysinfo()?)?
         .emit()
         .unwrap();
+
+    Ok(())
 }

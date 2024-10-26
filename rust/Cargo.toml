@@ -111,7 +111,7 @@ tower-request-id = "0.3.0"
 tracing = { version = "0.1", default-features = false }
 tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"], default-features = false }
 url = { version = "2.5", default-features = false }
-vergen = { version = "=8", default-features = false }
+vergen-gitcl = { version = "1.0.1", default-features = false }
 
 block_header = { path = "block_header" }
 block_trie = { path = "services/chain/block_trie" }
