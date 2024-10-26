@@ -410,7 +410,7 @@ impl TestArgs {
             }
 
             let mut debugger = builder.build();
-            debugger.try_run()?;
+            debugger.try_run_tui()?;
         }
 
         Ok(outcome)

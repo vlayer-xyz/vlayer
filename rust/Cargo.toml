@@ -64,15 +64,15 @@ ethers = "2.0"
 ethers-core = { version = "2.0", default-features = false }
 ethers-providers = "2.0"
 flate2 = "1.0.34"
-forge = { git = "https://github.com/foundry-rs/foundry", rev = "2044faec64f99a21f0e5f0094458a973612d0712", default-features = false }
-foundry-cheatcodes = { git = "https://github.com/foundry-rs/foundry", rev = "2044faec64f99a21f0e5f0094458a973612d0712" }
-foundry-cli = { git = "https://github.com/foundry-rs/foundry", rev = "2044faec64f99a21f0e5f0094458a973612d0712", default-features = false }
-foundry-common = { git = "https://github.com/foundry-rs/foundry", rev = "2044faec64f99a21f0e5f0094458a973612d0712" }
+forge = { git = "https://github.com/foundry-rs/foundry", rev = "3b2e57a2907657ba666034c2b6fd33dea8b6566c", default-features = false }
+foundry-cheatcodes = { git = "https://github.com/foundry-rs/foundry", rev = "3b2e57a2907657ba666034c2b6fd33dea8b6566c" }
+foundry-cli = { git = "https://github.com/foundry-rs/foundry", rev = "3b2e57a2907657ba666034c2b6fd33dea8b6566c", default-features = false }
+foundry-common = { git = "https://github.com/foundry-rs/foundry", rev = "3b2e57a2907657ba666034c2b6fd33dea8b6566c" }
 foundry-compilers = { version = "0.11.6", default-features = false }
-foundry-config = { git = "https://github.com/foundry-rs/foundry", rev = "2044faec64f99a21f0e5f0094458a973612d0712", default-features = false }
-foundry-debugger = { git = "https://github.com/foundry-rs/foundry", rev = "2044faec64f99a21f0e5f0094458a973612d0712" }
-foundry-evm = { git = "https://github.com/foundry-rs/foundry", rev = "2044faec64f99a21f0e5f0094458a973612d0712" }
-foundry-evm-core = { git = "https://github.com/foundry-rs/foundry", rev = "2044faec64f99a21f0e5f0094458a973612d0712" }
+foundry-config = { git = "https://github.com/foundry-rs/foundry", rev = "3b2e57a2907657ba666034c2b6fd33dea8b6566c", default-features = false }
+foundry-debugger = { git = "https://github.com/foundry-rs/foundry", rev = "3b2e57a2907657ba666034c2b6fd33dea8b6566c" }
+foundry-evm = { git = "https://github.com/foundry-rs/foundry", rev = "3b2e57a2907657ba666034c2b6fd33dea8b6566c" }
+foundry-evm-core = { git = "https://github.com/foundry-rs/foundry", rev = "3b2e57a2907657ba666034c2b6fd33dea8b6566c" }
 futures = { version = "0.3.31", default-features = false }
 hex = "0.4.3"
 http-body-util = "0.1.2"
