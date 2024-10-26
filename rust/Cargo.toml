@@ -36,50 +36,34 @@ debug = 1
 lto = true
 
 [workspace.dependencies]
-risc0-zkvm = "=1.0.5"
-risc0-zkp = { version = "=1.0.5", default-features = false }
-risc0-build = "=1.0.5"
-serde = { version = "1.0.210", features = ["derive"] }
-serde_json = "1.0.128"
-alloy-sol-types = "=0.8.8"
-alloy-primitives = { version = "=0.8.8", default-features = false, features = [
-    "serde",
-] }
-ethers-providers = "2.0"
-anyhow = "1.0.89"
-tokio = { version = "1.40.0", default-features = false, features = [
-    "rt-multi-thread",
-] }
-thiserror = "1.0.64"
-tracing = { version = "0.1", default-features = false }
-tracing-subscriber = { version = "0.3", features = [
-    "env-filter",
-    "fmt",
-], default-features = false }
 alloy-chains = "0.1.38"
 alloy-dyn-abi = "=0.8.8"
 alloy-json-abi = "=0.8.8"
+alloy-primitives = { version = "=0.8.8", default-features = false, features = ["serde"] }
 alloy-rlp = { version = "0.3.8", default-features = false }
 alloy-rlp-derive = { version = "0.3.8", default-features = false }
+alloy-sol-types = "=0.8.8"
 alloy-trie = "=0.7.2"
+anyhow = "1.0.89"
 as-any = "0.3.1"
 auto_impl = "1.2.0"
 axum = "0.7.7"
 axum-jrpc = "0.7.1"
+bincode = { version = "1.3.3", default-features = false }
 bytes = "=1.7.2"
 clap = "4.5.20"
 color-eyre = "=0.6.3"
 comfy-table = "7.1.1"
 ctor = "0.2.8"
-dotenv = "=0.15.0"
-dyn-clone = "1.0.17"
 derive_more = { version = "1.0.0", features = ["debug", "into", "from", "into_iterator", "deref"] }
 derive-new = "0.7.0"
 derivative = "2.2.0"
+dotenv = "=0.15.0"
+dyn-clone = "1.0.17"
 ethers = "2.0"
 ethers-core = { version = "2.0", default-features = false }
+ethers-providers = "2.0"
 flate2 = "1.0.34"
-futures = { version = "0.3.31", default-features = false }
 forge = { git = "https://github.com/foundry-rs/foundry", rev = "2044faec64f99a21f0e5f0094458a973612d0712", default-features = false }
 foundry-cheatcodes = { git = "https://github.com/foundry-rs/foundry", rev = "2044faec64f99a21f0e5f0094458a973612d0712" }
 foundry-cli = { git = "https://github.com/foundry-rs/foundry", rev = "2044faec64f99a21f0e5f0094458a973612d0712", default-features = false }
@@ -89,65 +73,72 @@ foundry-config = { git = "https://github.com/foundry-rs/foundry", rev = "2044fae
 foundry-debugger = { git = "https://github.com/foundry-rs/foundry", rev = "2044faec64f99a21f0e5f0094458a973612d0712" }
 foundry-evm = { git = "https://github.com/foundry-rs/foundry", rev = "2044faec64f99a21f0e5f0094458a973612d0712" }
 foundry-evm-core = { git = "https://github.com/foundry-rs/foundry", rev = "2044faec64f99a21f0e5f0094458a973612d0712" }
-httparse = "1.9.5"
+futures = { version = "0.3.31", default-features = false }
 hex = "0.4.3"
 http-body-util = "0.1.2"
+httparse = "1.9.5"
+itertools = { version = "0.13.0" }
 lazy_static = "1.5.0"
 mime = "0.3.17"
 mockito = "1.5.0"
 nybbles = "0.2.1"
 once_cell = "1.20"
-parking_lot = "0.12.3"
 p256 = { version = "0.13.2", features = ["ecdsa"] }
+parking_lot = "0.12.3"
 pkcs8 = "0.10.2"
 rand = "0.8.5"
 rayon = "1.10.0"
 regex = "1.11.0"
 reqwest = { version = "0.12.8", default-features = false }
 revm = { version = "=14.0.3", default-features = false, features = ["optimism"] }
+risc0-build = "=1.0.5"
 risc0-build-ethereum = "=1.0.0"
+risc0-zkp = { version = "=1.0.5", default-features = false }
+risc0-zkvm = "=1.0.5"
 rlp = "0.6.1"
+serde = { version = "1.0.210", features = ["derive"] }
+serde_json = "1.0.128"
 tar = "0.4.42"
 tempfile = "3.13.0"
 test-log = "0.2.16"
+thiserror = "1.0.64"
 tlsn-core = { git = "https://github.com/tlsnotary/tlsn.git", tag = "v0.1.0-alpha.6" }
+tokio = { version = "1.40.0", default-features = false, features = ["rt-multi-thread"] }
 toml = "0.8.19"
 tower = "0.5.1"
 tower-http = "0.6.1"
 tower-request-id = "0.3.0"
+tracing = { version = "0.1", default-features = false }
+tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"], default-features = false }
 url = { version = "2.5", default-features = false }
 vergen = { version = "=8", default-features = false }
-bincode = { version = "1.3.3", default-features = false }
-server_utils = { path = "server_utils" }
-mpt = { path = "mpt" }
-email_proof = { path = "email_proof" }
-web_proof = { path = "web_proof" }
-test_runner = { path = "test_runner" }
-host_utils = { path = "host_utils" }
-itertools = { version = "0.13.0" }
-chain = { path = "chain" }
-provider = { path = "provider" }
+
 block_header = { path = "block_header" }
-
-call_host = { path = "services/call/host" }
-call_guest = { path = "services/call/guest" }
-call_engine = { path = "services/call/engine" }
-call_guest_wrapper = { path = "services/call/guest_wrapper" }
-call_server = { path = "services/call/server" }
-
-chain_host = { path = "services/chain/host" }
-chain_guest = { path = "services/chain/guest" }
 block_trie = { path = "services/chain/block_trie" }
-chain_db = { path = "services/chain/db" }
+call_engine = { path = "services/call/engine" }
+call_guest = { path = "services/call/guest" }
+call_guest_wrapper = { path = "services/call/guest_wrapper" }
+call_host = { path = "services/call/host" }
+call_server = { path = "services/call/server" }
+chain = { path = "chain" }
 chain_client = { path = "services/chain/client" }
+chain_db = { path = "services/chain/db" }
+chain_guest = { path = "services/chain/guest" }
 chain_guest_wrapper = { path = "services/chain/guest_wrapper" }
+chain_host = { path = "services/chain/host" }
 chain_server = { path = "services/chain/server" }
-chain_worker = { path = "services/chain/worker" }
-key_value = { path = "key_value" }
 chain_types = { path = "services/chain/types" }
-
+chain_worker = { path = "services/chain/worker" }
+email_proof = { path = "email_proof" }
+host_utils = { path = "host_utils" }
+key_value = { path = "key_value" }
+mpt = { path = "mpt" }
+provider = { path = "provider" }
+server_utils = { path = "server_utils" }
+test_runner = { path = "test_runner" }
+web_proof = { path = "web_proof" }
+zkvm-benchmarks = { path = "zkvm-benchmarks/benchmarks" }
 zkvm-benchmarks-common = { path = "zkvm-benchmarks/common" }
-zkvm-benchmarks = { path = "zkvm-benchmarks/benchmarks" } 
 
 [workspace.lints.clippy]
 as_ptr_cast_mut = "warn"
