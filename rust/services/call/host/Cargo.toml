@@ -16,7 +16,7 @@ chain = { workspace = true }
 chain_client = { workspace = true }
 chain_server = { workspace = true }
 chain_types = { workspace = true }
-dotenv = { workspace = true }
+dotenvy = { workspace = true }
 ethers-core = { workspace = true }
 host_utils = { workspace = true }
 lazy_static = { workspace = true }
