@@ -9,7 +9,7 @@ use call_host::{
 };
 use chain_client::ChainProofClient;
 use chain_server::server::{ChainProofServerMock, EMPTY_PROOF_RESPONSE};
-use dotenv::dotenv;
+use dotenvy::dotenv;
 use ethers_core::types::BlockNumber as BlockTag;
 use lazy_static::lazy_static;
 use provider::{CachedMultiProvider, CachedProviderFactory};
