@@ -25,9 +25,13 @@ export default function Home() {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
   const router = useRouter();
 
-  const vlayer = useMemo(() => createVlayerClient({
-    url: process.env.NEXT_PUBLIC_PROVER_URL,
-  }), []);
+  const vlayer = useMemo(
+    () =>
+      createVlayerClient({
+        url: process.env.NEXT_PUBLIC_PROVER_URL,
+      }),
+    [],
+  );
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -93,10 +97,10 @@ export default function Home() {
 
       const walletClient = createWalletClient({
         chain,
-        transport: custom(window.ethereum!)
+        transport: custom(window.ethereum!),
       });
-      await walletClient.switchChain({ id: chain.id }) 
-      const [account] = await walletClient.requestAddresses() 
+      await walletClient.switchChain({ id: chain.id });
+      const [account] = await walletClient.requestAddresses();
       setClaimerAddress(account ?? "");
 
       const txHash = await walletClient.writeContract({
@@ -117,7 +121,11 @@ export default function Home() {
       router.push(`/success?txHash=${txHash}`);
     } catch (error) {
       console.error("Error submitting form:", error);
-      setErrorMsg(error?.shortMessage || error?.message || "Something went wrong, check console")
+      setErrorMsg(
+        error?.shortMessage ||
+          error?.message ||
+          "Something went wrong, check console",
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -198,7 +206,7 @@ export default function Home() {
                 "Submit"
               )}
             </Button>
-            {errorMsg && (<p className="text-center text-red-400">{errorMsg}</p>)}
+            {errorMsg && <p className="text-center text-red-400">{errorMsg}</p>}
           </form>
         </CardContent>
       </Card>
