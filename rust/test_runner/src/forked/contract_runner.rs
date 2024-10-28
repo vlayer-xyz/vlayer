@@ -397,10 +397,10 @@ impl<'a> ContractRunner<'a> {
                         self.run_unit_test(func, should_fail, setup)
                     }
                     TestFunctionKind::FuzzTest { .. } => {
-                        unimplemented!("fuzz tests are not supported yet");
+                        unimplemented!("fuzz tests are not supported yet, function: {}", sig);
                     }
                     TestFunctionKind::InvariantTest => {
-                        unimplemented!("invariant tests are not supported yet");
+                        unimplemented!("invariant tests are not supported yet, function: {}", sig);
                     }
                     _ => unreachable!(),
                 };
