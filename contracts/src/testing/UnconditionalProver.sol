@@ -10,8 +10,10 @@ contract UnconditionalProver is Prover {
     using Strings for string;
     using WebProofLib for WebProof;
     using WebLib for Web;
+
     constructor() {}
-    function web_proof(WebProof calldata webProof) public view returns (bool) {
+
+    function web_proof(WebProof calldata) public view returns (bool) {
         return true;
     }
 }
