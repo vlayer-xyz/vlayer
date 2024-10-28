@@ -76,14 +76,12 @@ type DeploySpec<T extends Abi> = {
   };
 };
 
-type Tail<T> = T extends readonly [unknown, ...infer U] ? U : [];
-
 export async function deployProverVerifier<P extends Abi, V extends Abi>(
   proverSpec: DeploySpec<P>,
   verifierSpec: DeploySpec<V>,
   args: {
     prover?: ContractArg[];
-    verifier?: Tail<ContractArg>[];
+    verifier?: ContractArg[];
   } = {},
   chainId: number = foundry.id,
 ) {

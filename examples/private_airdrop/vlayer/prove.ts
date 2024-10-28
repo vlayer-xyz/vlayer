@@ -1,17 +1,18 @@
-import type { Address, Account } from "viem";
+import type { Address } from "viem";
 import assert from "node:assert";
 
 import { testHelpers, createVlayerClient } from "@vlayer/sdk";
 import exampleToken from "../out/ExampleToken.sol/ExampleToken";
 import privateAirdropProver from "../out/PrivateAirdropProver.sol/PrivateAirdropProver";
 import privateAirdropVerifier from "../out/PrivateAirdropVerifier.sol/PrivateAirdropVerifier";
+import { foundry } from "viem/chains";
 
 const client = testHelpers.createAnvilClient();
 
-const deployContracts = async (account: Account) => {
+const deployContracts = async (account: Address) => {
   const sender = (await client.getAddresses())[0];
   const exampleErc20: Address = await testHelpers.deployContract(exampleToken, [
-    [account.address, sender],
+    [account, sender],
   ]);
 
   const [prover, verifier] = await testHelpers.deployProverVerifier(
@@ -41,16 +42,16 @@ const transferTokens = async (token: Address, to: Address, amount: bigint) => {
   ]);
 };
 
-const generateTestSignature = async (account: Account) => {
+const generateTestSignature = async (account: Address) => {
   const signature = await client.signMessage({
-    account,
+    account: account,
     message: "I own ExampleToken and I want to privately claim my airdrop",
   });
 
   return signature;
 };
 
-const generateProof = async (prover: Address, tokenOwner: Account) => {
+const generateProof = async (prover: Address, tokenOwner: Address) => {
   const signature = await generateTestSignature(tokenOwner);
 
   const vlayer = createVlayerClient();
@@ -59,7 +60,8 @@ const generateProof = async (prover: Address, tokenOwner: Account) => {
     address: prover,
     proverAbi: privateAirdropProver.abi,
     functionName: "main",
-    args: [tokenOwner.address, signature],
+    chainId: foundry.id,
+    args: [tokenOwner, signature],
   });
   const [proof, ...result] = await vlayer.waitForProvingResult({ hash });
   console.log("Proof:", proof);
@@ -67,7 +69,7 @@ const generateProof = async (prover: Address, tokenOwner: Account) => {
   return { proof, result };
 };
 
-const tokenOwner = testHelpers.getTestAccount();
+const tokenOwner = testHelpers.getTestAccount().address;
 const [proverAddress, verifierAddress, token] =
   await deployContracts(tokenOwner);
 const {
