@@ -14,7 +14,11 @@ fn main() {
         chain_proofs,
     } = env::read();
 
-    let output = Guest::new(multi_evm_input, start_execution_location, &chain_proofs).run(&call);
+    let guest = Guest::new(multi_evm_input, start_execution_location, &chain_proofs);
+    let runtime = tokio::runtime::Builder::new_current_thread()
+        .build()
+        .expect("failed to create tokio runtime");
+    let output = runtime.block_on(guest.run(&call));
 
     env::commit_slice(&output.call_assumptions.abi_encode());
     env::commit_slice(&output.evm_call_result);

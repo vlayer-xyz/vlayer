@@ -7,6 +7,9 @@ use risc0_zkvm::guest::env;
 
 fn main() {
     let input: Input = env::read();
-    let guest_output = guest_main(input);
+    let runtime = tokio::runtime::Builder::new_current_thread()
+        .build()
+        .expect("failed to create tokio runtime");
+    let guest_output = runtime.block_on(guest_main(input));
     env::commit(&guest_output);
 }
