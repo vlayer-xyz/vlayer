@@ -20,7 +20,3 @@ export const getStrFromFile = (file: File): Promise<string> =>
     };
     reader.readAsText(file);
   });
-
-export const shorterEthAddr = (addr: string) => {
-  return `${addr.slice(0, 6)}...${addr.slice(-4)}`;
-};

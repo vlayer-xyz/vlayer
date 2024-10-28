@@ -1,41 +1,33 @@
 "use client";
 
-import { useState, useEffect, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Upload, MailCheck } from "lucide-react";
-import { usePrivy, useWallets } from "@privy-io/react-auth";
-import { getStrFromFile, shorterEthAddr } from "@/lib/utils";
+import { getStrFromFile } from "@/lib/utils";
+import { getChainConfig } from "@/lib/supportedChains";
 import { createVlayerClient, preverifyEmail } from "@vlayer/sdk";
-import { optimismSepolia } from "viem/chains";
 import { createWalletClient, custom } from "viem";
 import { useRouter } from "next/navigation";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "@/components/ui/accordion";
 
 import emailProofProver from "../../../out/EmailDomainProver.sol/EmailDomainProver";
 import emailProofVerifier from "../../../out/EmailProofVerifier.sol/EmailDomainVerifier";
 
 export default function Home() {
+  const [errorMsg, setErrorMsg] = useState("");
   const [currentStep, setCurrentStep] = useState("Submitting...");
   const [claimerAddress, setClaimerAddress] = useState("");
   const [file, setFile] = useState(null);
   const [isDragging, setIsDragging] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-  const { ready, authenticated, login, user, logout } = usePrivy();
-  const { wallets } = useWallets();
   const router = useRouter();
 
-  const vlayer = createVlayerClient({
+  const vlayer = useMemo(() => createVlayerClient({
     url: process.env.NEXT_PUBLIC_PROVER_URL,
-  });
+  }), []);
 
   const handleDragOver = (e) => {
     e.preventDefault();
@@ -65,9 +57,11 @@ export default function Home() {
     e.preventDefault();
     setIsSubmitting(true);
     setCurrentStep("Submitting...");
+    setErrorMsg("");
 
     try {
-      if (ready && !authenticated) throw new Error("not_authenticated");
+      if (window && !window.ethereum) throw new Error("no_wallet_detected");
+
       if (!file) throw new Error("no_eml_file_uploaded");
       setCurrentStep("Parsing eml...");
       const eml = await getStrFromFile(file);
@@ -95,18 +89,22 @@ export default function Home() {
       console.log("Response:", result);
       setCurrentStep("Verifying on-chain...");
 
-      const wallet = wallets[0];
-      const provider = await wallet.getEthereumProvider();
+      const chain = getChainConfig(Number(process.env.NEXT_PUBLIC_CHAIN_ID));
+
       const walletClient = createWalletClient({
-        chain: optimismSepolia,
-        transport: custom(provider),
+        chain,
+        transport: custom(window.ethereum!)
       });
-      const [account] = await walletClient.getAddresses();
+      await walletClient.switchChain({ id: chain.id }) 
+      const [account] = await walletClient.requestAddresses() 
+      setClaimerAddress(account ?? "");
+
       const txHash = await walletClient.writeContract({
         address: process.env.NEXT_PUBLIC_VERIFIER_ADDR as `0x${string}`,
         abi: emailProofVerifier.abi,
         functionName: "verify",
         args: result,
+        chain,
         account,
       });
 
@@ -119,18 +117,11 @@ export default function Home() {
       router.push(`/success?txHash=${txHash}`);
     } catch (error) {
       console.error("Error submitting form:", error);
-      if (error?.message === "not_authenticated") {
-        login();
-      }
+      setErrorMsg(error?.shortMessage || error?.message || "Something went wrong, check console")
     } finally {
       setIsSubmitting(false);
     }
   };
-
-  useEffect(() => {
-    console.log({ user });
-    setClaimerAddress(user?.wallet?.address ?? "");
-  }, [user]);
 
   return (
     <div className="flex justify-center items-center min-h-screen p-4 bg-gray-950">
@@ -193,33 +184,6 @@ export default function Home() {
               />
             </div>
 
-            <Accordion type="single" collapsible>
-              <AccordionItem value="item-1">
-                <AccordionTrigger>Wallet Info</AccordionTrigger>
-                <AccordionContent>
-                  {user && (
-                    <div className="text-center text-sm">
-                      Connected as{" "}
-                      {user?.wallet && (
-                        <div>
-                          {shorterEthAddr(user.wallet.address)} (
-                          {user.wallet.walletClientType})<br />
-                          <br />
-                        </div>
-                      )}
-                      {user?.email && <div>{user.email.address}</div>}
-                      <Button
-                        onClick={logout}
-                        className="w-1/4 rounded-full bg-gray-700 hover:bg-gray-800 text-white font-medium py-2 px-4 transition-colors mb-5 mt-5"
-                      >
-                        Log out
-                      </Button>
-                    </div>
-                  )}
-                </AccordionContent>
-              </AccordionItem>
-            </Accordion>
-
             <Button
               type="submit"
               disabled={isSubmitting || !file}
@@ -234,6 +198,7 @@ export default function Home() {
                 "Submit"
               )}
             </Button>
+            {errorMsg && (<p className="text-center text-red-400">{errorMsg}</p>)}
           </form>
         </CardContent>
       </Card>
