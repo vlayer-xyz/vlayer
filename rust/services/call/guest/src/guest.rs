@@ -38,7 +38,8 @@ impl Guest {
         }
     }
 
-    pub fn run(self, call: &Call) -> GuestOutput {
+    #[allow(clippy::unused_async)]
+    pub async fn run(self, call: &Call) -> GuestOutput {
         let evm_call_result = TravelCallExecutor::new(&self.evm_envs)
             .call(call, self.start_execution_location)
             .unwrap();

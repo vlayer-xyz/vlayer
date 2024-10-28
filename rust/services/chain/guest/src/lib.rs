@@ -50,7 +50,8 @@ fn append_prepend(
     (block_trie.hash_slow(), elf_id)
 }
 
-pub fn main(input: Input) -> (B256, Digest) {
+#[allow(clippy::unused_async)]
+pub async fn main(input: Input) -> (B256, Digest) {
     match input {
         Input::Initialize { elf_id, block } => initialize(elf_id, &*block),
         Input::AppendPrepend {
