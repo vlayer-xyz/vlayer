@@ -8156,15 +8156,14 @@ dependencies = [
 
 [[package]]
 name = "risc0-build"
-version = "1.1.2"
+version = "1.0.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "c328bea983ffed4cf3721c92b06fa5076cc38c9e326e1488a9ae792e67a054c7"
+checksum = "452836a801f4c304c567f88855184f941d778d971cb94bee25b72d4255b56f09"
 dependencies = [
  "anyhow",
  "cargo_metadata",
  "dirs 5.0.1",
  "docker-generate",
- "hex",
  "risc0-binfmt",
  "risc0-zkp",
  "risc0-zkvm-platform",
@@ -8175,9 +8174,9 @@ dependencies = [
 
 [[package]]
 name = "risc0-build-ethereum"
-version = "1.1.4"
+version = "1.0.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "6d8e8421d119e7cdab2b3be263cd28835d5671705553c03f33476cdafd93dc8b"
+checksum = "e64f88dfb7915cf349ed3fcff5cc35904068087b1ffb28d7fbb5fcd94335f10d"
 dependencies = [
  "anyhow",
  "hex",
