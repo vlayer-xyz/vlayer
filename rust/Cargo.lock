@@ -11200,6 +11200,10 @@ dependencies = [
 name = "zkvm-benchmarks"
 version = "0.1.0"
 dependencies = [
+ "alloy-primitives",
+ "alloy-sol-types",
+ "call_engine",
+ "email_proof",
  "risc0-zkvm",
 ]
 

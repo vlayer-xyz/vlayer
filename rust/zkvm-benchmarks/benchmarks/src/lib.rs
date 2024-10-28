@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use benchmarks::hello;
+use benchmarks::precompiles::email;
 use risc0_zkvm::guest::env;
 
 mod benchmarks;
@@ -24,7 +24,11 @@ impl Display for BenchmarkResult {
 
 impl BenchmarkRunner {
     pub fn new() -> Self {
-        let benchmarks = [Benchmark::new("hello", hello as Workload, 10)];
+        let benchmarks = [Benchmark::new(
+            "email_verification",
+            email::test_email_verification as Workload,
+            32750000,
+        )];
 
         Self(benchmarks.into())
     }

@@ -12,4 +12,4 @@ pub use sol::{
     seal::{ProofMode, Seal},
 };
 
-mod precompiles;
+pub mod precompiles;
