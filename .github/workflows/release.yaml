@@ -90,6 +90,10 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Darwin prerequisites
+        uses: ./.github/actions/darwin-prerequisites
+        if: matrix.platform == 'darwin' 
+
       - name: Set up Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
@@ -128,12 +132,6 @@ jobs:
         with:
           name: guest-artifacts
           path: rust/call_guest_replacement
-
-      - name: Include C headers
-        if: matrix.platform == 'darwin' 
-        run: |
-          sudo mkdir -p /usr/local/include/
-          sudo ln -s /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/* /usr/local/include/
 
       - name: "Build binaries"
         env:
