@@ -1,4 +1,1 @@
-pub(crate) fn hello() -> Result<(), ()> {
-    println!("Hello World");
-    Ok(())
-}
+pub(crate) mod precompiles;
