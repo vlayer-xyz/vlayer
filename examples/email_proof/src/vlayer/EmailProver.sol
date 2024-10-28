@@ -76,7 +76,7 @@ contract EmailProver is Prover {
         string[] memory captures = email.subject.capture("^Welcome to vlayer, 0x([a-fA-F0-9]{40})!$");
         require(captures.length == 2, "subject must match the expected pattern");
         require(bytes(captures[1]).length > 0, "email header must contain a valid Ethereum address");
-        require(email.from.matches("@vlayer.xyz$"), "from must be a vlayer address");
+        require(email.from.matches("^.*@vlayer.xyz$"), "from must be a vlayer address");
 
         return (proof(), captures[1].parseAddress());
     }
