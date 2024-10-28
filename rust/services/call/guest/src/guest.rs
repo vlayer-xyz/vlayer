@@ -2,12 +2,12 @@ use std::collections::HashMap;
 
 use alloy_primitives::ChainId;
 use call_engine::{
-    engine::Engine,
     evm::{
         env::{cached::CachedEvmEnv, location::ExecutionLocation},
         input::MultiEvmInput,
     },
     io::{Call, GuestOutput},
+    travel_call_executor::TravelCallExecutor,
     CallAssumptions,
 };
 use chain_types::ChainProof;
@@ -39,7 +39,7 @@ impl Guest {
     }
 
     pub fn run(self, call: &Call) -> GuestOutput {
-        let evm_call_result = Engine::new(&self.evm_envs)
+        let evm_call_result = TravelCallExecutor::new(&self.evm_envs)
             .call(call, self.start_execution_location)
             .unwrap();
         let start_evm_env = self

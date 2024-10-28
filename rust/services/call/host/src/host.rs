@@ -7,9 +7,11 @@ use std::{
 use alloy_primitives::ChainId;
 use alloy_sol_types::SolValue;
 use call_engine::{
-    engine::{Engine, EngineError, SuccessfulExecutionResult},
     evm::env::{cached::CachedEvmEnv, location::ExecutionLocation},
     io::{Call, GuestOutput, HostOutput, Input},
+    travel_call_executor::{
+        SuccessfulExecutionResult, TravelCallExecutor, TravelCallExecutorError,
+    },
     Seal,
 };
 use call_guest_wrapper::RISC0_CALL_GUEST_ELF;
@@ -94,7 +96,7 @@ impl Host {
             output: host_output,
             gas_used,
         } = panic::catch_unwind(|| {
-            Engine::new(&self.envs).call(&call, self.start_execution_location)
+            TravelCallExecutor::new(&self.envs).call(&call, self.start_execution_location)
         })
         .map_err(wrap_engine_panic)??;
 
@@ -144,12 +146,12 @@ impl Host {
     }
 }
 
-fn wrap_engine_panic(err: Box<dyn Any + Send>) -> EngineError {
+fn wrap_engine_panic(err: Box<dyn Any + Send>) -> TravelCallExecutorError {
     let panic_msg = err
         .downcast::<String>()
         .map(|x| *x)
         .unwrap_or("Panic occurred".to_string());
-    EngineError::Panic(panic_msg)
+    TravelCallExecutorError::Panic(panic_msg)
 }
 
 fn provably_execute(

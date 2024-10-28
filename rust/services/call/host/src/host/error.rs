@@ -1,5 +1,5 @@
 use alloy_primitives::ChainId;
-use call_engine::{engine::EngineError, io::GuestOutputError};
+use call_engine::{io::GuestOutputError, travel_call_executor::TravelCallExecutorError};
 use chain_client::ChainProofClientError;
 use provider::ProviderFactoryError;
 use risc0_zkp::verify::VerificationError;
@@ -14,7 +14,7 @@ pub enum HostError {
     CreatingInput(String),
 
     #[error("Engine error: {0}")]
-    Engine(#[from] EngineError),
+    Engine(#[from] TravelCallExecutorError),
 
     #[error("Provider factory error: {0}")]
     ProviderFactory(#[from] ProviderFactoryError),

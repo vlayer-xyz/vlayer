@@ -6,7 +6,7 @@ use revm::{
     DatabaseRef,
 };
 
-use crate::engine::EngineError;
+use crate::travel_call_executor::TravelCallExecutorError;
 
 pub mod cached;
 pub mod location;
@@ -32,11 +32,14 @@ impl<D> EvmEnv<D> {
     }
 
     /// Sets the chain ID and specification ID from the given chain spec.
-    pub fn with_chain_spec(mut self, chain_spec: &ChainSpec) -> Result<Self, EngineError> {
+    pub fn with_chain_spec(
+        mut self,
+        chain_spec: &ChainSpec,
+    ) -> Result<Self, TravelCallExecutorError> {
         self.cfg_env.chain_id = chain_spec.chain_id();
         self.cfg_env.handler_cfg.spec_id = chain_spec
             .active_fork(self.header.number(), self.header.timestamp())
-            .map_err(|err| EngineError::ChainSpecError(err.to_string()))?;
+            .map_err(|err| TravelCallExecutorError::ChainSpecError(err.to_string()))?;
         Ok(self)
     }
 

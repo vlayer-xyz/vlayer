@@ -8,9 +8,9 @@ use revm::{
 use tracing::{debug, info};
 
 use crate::{
-    engine::EngineError,
     evm::env::location::ExecutionLocation,
     io::Call,
+    travel_call_executor::TravelCallExecutorError,
     utils::evm_call::{
         create_encoded_return_outcome, execution_result_to_call_outcome, split_calldata,
     },
@@ -38,7 +38,7 @@ static SET_CHAIN_SELECTOR: Lazy<Box<[u8]>> = Lazy::new(|| {
 });
 
 type TransactionCallback<'a> =
-    dyn Fn(&Call, ExecutionLocation) -> Result<ExecutionResult, EngineError> + 'a;
+    dyn Fn(&Call, ExecutionLocation) -> Result<ExecutionResult, TravelCallExecutorError> + 'a;
 
 enum TravelCall {
     SetBlock { block_number: u64 },
@@ -83,7 +83,7 @@ pub struct TravelInspector<'a> {
 impl<'a> TravelInspector<'a> {
     pub fn new(
         start_chain_id: ChainId,
-        transaction_callback: impl Fn(&Call, ExecutionLocation) -> Result<ExecutionResult, EngineError>
+        transaction_callback: impl Fn(&Call, ExecutionLocation) -> Result<ExecutionResult, TravelCallExecutorError>
             + 'a,
     ) -> Self {
         Self {
@@ -176,8 +176,9 @@ mod test {
     const MAINNET_BLOCK: BlockNumber = 20_000_000;
     const SEPOLIA_BLOCK: BlockNumber = 6_000_000;
 
-    type StaticTransactionCallback =
-        dyn Fn(&Call, ExecutionLocation) -> Result<ExecutionResult, EngineError> + Send + Sync;
+    type StaticTransactionCallback = dyn Fn(&Call, ExecutionLocation) -> Result<ExecutionResult, TravelCallExecutorError>
+        + Send
+        + Sync;
 
     static TRANSACTION_CALLBACK: &StaticTransactionCallback = &|_, _| {
         Ok(ExecutionResult::Success {
