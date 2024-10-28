@@ -90,6 +90,10 @@ jobs:
         with:
           submodules: recursive
 
+      - name: Darwin prerequisites
+        uses: ./.github/actions/darwin-prerequisites
+        if: matrix.platform == 'darwin' 
+
       - name: Set up Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
@@ -138,7 +142,7 @@ jobs:
 
       - name: "Print build version"
         id: vlayer_build
-        if:  matrix.runner == 'aws-linux-medium' 
+        if: matrix.runner == 'aws-linux-medium' 
         env:
           VLAYER_RELEASE: "nightly"
         run: |

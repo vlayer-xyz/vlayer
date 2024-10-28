@@ -1,0 +1,10 @@
+name: Darwin prerequisites
+description: Prerequisites specific to Darwin
+runs:
+  using: "composite"
+  steps:
+    - name: Include C headers
+      run: |
+        sudo mkdir -p /usr/local/include/
+        sudo ln -s /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/* /usr/local/include/
+      shell: bash
