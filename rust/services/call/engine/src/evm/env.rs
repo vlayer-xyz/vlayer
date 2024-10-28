@@ -6,7 +6,7 @@ use revm::{
     DatabaseRef,
 };
 
-use crate::travel_call_executor::TravelCallExecutorError;
+use crate::travel_call_executor::Error as TravelCallExecutorError;
 
 pub mod cached;
 pub mod location;

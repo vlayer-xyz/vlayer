@@ -1,5 +1,5 @@
 use alloy_primitives::ChainId;
-use call_engine::{io::GuestOutputError, travel_call_executor::TravelCallExecutorError};
+use call_engine::{io::GuestOutputError, travel_call_executor::Error as TravelCallExecutorError};
 use chain_client::ChainProofClientError;
 use provider::ProviderFactoryError;
 use risc0_zkp::verify::VerificationError;

@@ -6,7 +6,6 @@ use revm::{
     primitives::{EVMError, ExecutionResult, ResultAndState, SuccessReason},
     DatabaseRef, Evm, Handler,
 };
-use thiserror::Error;
 use tracing::{debug, error};
 
 use crate::{
@@ -24,8 +23,8 @@ where
     envs: &'envs CachedEvmEnv<D>,
 }
 
-#[derive(Error, Debug, PartialEq)]
-pub enum TravelCallExecutorError {
+#[derive(thiserror::Error, Debug, PartialEq)]
+pub enum Error {
     #[error("EVM transact preverified error: {0}")]
     TransactPreverifiedError(String),
 
@@ -42,6 +41,8 @@ pub enum TravelCallExecutorError {
     Panic(String),
 }
 
+type Result<T> = std::result::Result<T, Error>;
+
 impl<'envs, D> TravelCallExecutor<'envs, D>
 where
     D: DatabaseRef,
@@ -52,20 +53,13 @@ where
         Self { envs }
     }
 
-    fn get_env(
-        &self,
-        location: ExecutionLocation,
-    ) -> Result<Arc<EvmEnv<D>>, TravelCallExecutorError> {
+    fn get_env(&self, location: ExecutionLocation) -> Result<Arc<EvmEnv<D>>> {
         self.envs
             .get(location)
-            .map_err(|err| TravelCallExecutorError::EvmEnv(err.to_string()))
+            .map_err(|err| Error::EvmEnv(err.to_string()))
     }
 
-    pub fn call(
-        self,
-        tx: &Call,
-        location: ExecutionLocation,
-    ) -> Result<SuccessfulExecutionResult, TravelCallExecutorError> {
+    pub fn call(self, tx: &Call, location: ExecutionLocation) -> Result<SuccessfulExecutionResult> {
         self.internal_call(tx, location)?.try_into()
     }
 
@@ -73,7 +67,7 @@ where
         &'envs self,
         tx: &Call,
         location: ExecutionLocation,
-    ) -> Result<ExecutionResult, TravelCallExecutorError> {
+    ) -> Result<ExecutionResult> {
         let env = self.get_env(location)?;
         let transaction_callback = |call: &_, location| self.internal_call(call, location);
         let inspector = TravelInspector::new(env.cfg_env.chain_id, transaction_callback);
@@ -89,10 +83,7 @@ fn build_evm<'inspector, 'envs, D>(
     env: &'envs EvmEnv<D>,
     tx: &Call,
     inspector: TravelInspector<'inspector>,
-) -> Result<
-    Evm<'inspector, TravelInspector<'inspector>, WrapDatabaseRef<&'envs D>>,
-    TravelCallExecutorError,
->
+) -> Result<Evm<'inspector, TravelInspector<'inspector>, WrapDatabaseRef<&'envs D>>>
 where
     D: DatabaseRef,
     D::Error: std::fmt::Debug,
@@ -119,18 +110,16 @@ where
     Ok(evm)
 }
 
-impl<D: std::fmt::Debug> From<EVMError<D>> for TravelCallExecutorError {
+impl<D: std::fmt::Debug> From<EVMError<D>> for Error {
     fn from(err: EVMError<D>) -> Self {
         match err {
-            EVMError::Precompile(err) => {
-                TravelCallExecutorError::TransactError(format_failed_call_result({
-                    ExecutionResult::Revert {
-                        gas_used: 0,
-                        output: err.into_bytes().into(),
-                    }
-                }))
-            }
-            _ => TravelCallExecutorError::TransactPreverifiedError(format!("{:?}", err)),
+            EVMError::Precompile(err) => Error::TransactError(format_failed_call_result({
+                ExecutionResult::Revert {
+                    gas_used: 0,
+                    output: err.into_bytes().into(),
+                }
+            })),
+            _ => Error::TransactPreverifiedError(format!("{:?}", err)),
         }
     }
 }
@@ -141,9 +130,9 @@ pub struct SuccessfulExecutionResult {
 }
 
 impl TryFrom<ExecutionResult> for SuccessfulExecutionResult {
-    type Error = TravelCallExecutorError;
+    type Error = Error;
 
-    fn try_from(execution_result: ExecutionResult) -> Result<Self, Self::Error> {
+    fn try_from(execution_result: ExecutionResult) -> Result<Self> {
         match execution_result {
             ExecutionResult::Success {
                 reason: SuccessReason::Return,
@@ -154,9 +143,7 @@ impl TryFrom<ExecutionResult> for SuccessfulExecutionResult {
                 output: output.into_data().into(),
                 gas_used,
             }),
-            _ => Err(TravelCallExecutorError::TransactError(format_failed_call_result(
-                execution_result,
-            ))),
+            _ => Err(Error::TransactError(format_failed_call_result(execution_result))),
         }
     }
 }

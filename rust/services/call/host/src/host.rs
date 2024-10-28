@@ -10,7 +10,7 @@ use call_engine::{
     evm::env::{cached::CachedEvmEnv, location::ExecutionLocation},
     io::{Call, GuestOutput, HostOutput, Input},
     travel_call_executor::{
-        SuccessfulExecutionResult, TravelCallExecutor, TravelCallExecutorError,
+        Error as TravelCallExecutorError, SuccessfulExecutionResult, TravelCallExecutor,
     },
     Seal,
 };

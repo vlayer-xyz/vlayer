@@ -10,7 +10,7 @@ use tracing::{debug, info};
 use crate::{
     evm::env::location::ExecutionLocation,
     io::Call,
-    travel_call_executor::TravelCallExecutorError,
+    travel_call_executor::Error as TravelCallExecutorError,
     utils::evm_call::{
         create_encoded_return_outcome, execution_result_to_call_outcome, split_calldata,
     },
