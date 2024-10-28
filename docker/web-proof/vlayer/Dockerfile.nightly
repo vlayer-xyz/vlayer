@@ -1,6 +1,6 @@
 FROM --platform=linux/amd64 ubuntu:latest as vlayer-builder
 RUN apt-get update
-RUN apt-get install -y --no-install-recommends  curl  ca-certificates
+RUN apt-get install -y --no-install-recommends curl ca-certificates
 
 RUN curl --proto '=https' --tlsv1.2 --retry 10 --retry-connrefused -fsSL 'https://sh.rustup.rs' | sh -s -- -y
 ENV PATH="/root/.cargo/bin:${PATH}"
