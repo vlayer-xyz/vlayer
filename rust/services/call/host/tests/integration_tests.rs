@@ -419,7 +419,7 @@ mod teleport {
         .await;
         assert_eq!(
             result.unwrap_err().to_string(),
-            "Engine error: Panic: Intercepted call failed: EvmEnv(\"No rpc cache for chain: 8453\")"
+            "TravelCallExecutor error: Panic: Intercepted call failed: EvmEnv(\"No rpc cache for chain: 8453\")"
         );
 
         Ok(())

@@ -19,4 +19,10 @@ services:
     platform: linux/amd64
     ports:
       - "8545:8545"
+  vlayer:
+    build:
+      context: ../..
+      dockerfile: docker/web-proof/vlayer/Dockerfile.nightly
+    ports:
+      - "3000:3000"
 
