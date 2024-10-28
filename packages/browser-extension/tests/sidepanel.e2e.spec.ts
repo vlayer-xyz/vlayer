@@ -9,6 +9,7 @@ const config = {
   notarizeUrl: "https://www.swapi.dev/api/people/1",
 };
 
+
 test.describe("Full flow of webproof using extension", () => {
   test("Full flow from opening sidepanel to redirection", async ({
     page,
