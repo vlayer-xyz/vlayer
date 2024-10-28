@@ -4,6 +4,9 @@ import prettierRecommended from "eslint-plugin-prettier/recommended";
 import globals from "globals";
 
 export default [
+  {
+    ignores: ["dist"],
+  },
   js.configs.recommended,
   ...ts.configs.recommendedTypeChecked,
   prettierRecommended,
