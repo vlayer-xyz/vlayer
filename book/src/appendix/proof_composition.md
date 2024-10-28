@@ -1,0 +1,57 @@
+# Proof composition
+
+Proof composition is described in Risc0 docs. In particular:
+* [terminology](https://dev.risczero.com/terminology)
+* [receipts](https://dev.risczero.com/api/zkvm/receipts)
+* [composition](https://dev.risczero.com/api/zkvm/composition)
+
+This page aims to describe it from a practical perspective focusing on our use-case.
+
+## Usage
+
+We use proof composition in Chain Proofs. The trie is correct if:
+* the previous trie was correct;
+* the operation executed is correct.
+
+In order to verify first point - we need to verify a ZK proof from within a ZK proof.
+
+## Implementation
+
+Proofs that we store in the DB are `bincode` serialized `Receipts`.
+
+`Receipt` contains:
+* `Journal` - proof output: Bytes
+* `Inner receipt` - polymorphic receipt
+
+```rs
+enum InnerReceipt {
+    /// Linear size receipt. We don't use that
+    Composite,
+    /// Constant size STARK receipt
+    Succinct,
+    /// Constant size SNARK receipt
+    Groth16,
+    /// Fake receipt
+    Fake,
+}
+```
+
+In order to use one proof within another in ZKVM - we need to convert a `Receipt` into an [`Assumption`](https://dev.risczero.com/terminology#assumption).
+This is trivial as `AssumptionReceipt` implements `From<Receipt>`.
+```rs
+executor_env_builder.add_assumption(receipt.into());
+```
+
+Within Guest - one should use [env::verify](https://docs.rs/risc0-zkvm/1.1.2/risc0_zkvm/guest/env/fn.verify.html) function:
+```rs
+use risc0_zkvm::guest::env;
+
+env::verify(HELLO_WORLD_ID, b"journal".as_slice()).unwrap();
+```
+
+This function accepts guest ID, journal and not the proof as all the available proofs are stored within `env`.
+
+**Important**
+Proof composition only works on `Succinct` proofs and not `Groth16` proofs.
+
+In Chain Proofs - we store all proofs as `Succinct` receipts. Chain Proof gets injected into Call Proof as `Succinct` receipt and only in the end Call Proof gets converted into a `Groth16` receipt to be verified in a Smart Contract

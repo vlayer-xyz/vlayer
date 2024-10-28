@@ -40,3 +40,4 @@
     - [Solidity](./appendix/architecture/solidity.md)
     - [Releasing](./appendix/architecture/releasing.md)
   - [JSON-RPC API](./appendix/api.md)
+  - [Proof composition](./appendix/proof_composition.md)
