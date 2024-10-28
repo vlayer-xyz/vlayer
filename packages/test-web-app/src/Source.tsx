@@ -29,6 +29,7 @@ function Source() {
 
     setProof(webproof);
   }, []);
+
   const handleClick = () => {
     requestWebProof().catch((error) => {
       console.error("Error during requesting web proof:", error);
@@ -36,16 +37,18 @@ function Source() {
   };
 
   return (
-    <>
-      <button data-testid="request-webproof-button" onClick={handleClick}>
-        Request web proof
-      </button>
-      {proof ? (
-        <h1 data-testid="has-webproof">Has web proof</h1>
-      ) : (
-        <h1> No web proof </h1>
-      )}
-    </>
+    <div className="container">
+      <div>
+        <button data-testid="request-webproof-button" onClick={handleClick}>
+          Request web proof
+        </button>
+        {proof ? (
+          <h1 data-testid="has-webproof">Has web proof</h1>
+        ) : (
+          <h1> No web proof </h1>
+        )}
+      </div>
+    </div>
   );
 }
 
