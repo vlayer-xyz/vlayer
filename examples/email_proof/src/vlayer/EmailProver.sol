@@ -17,16 +17,11 @@ library AddressParser {
         return address(uint160(parseHexUint(addr)));
     }
 
-
     function parseHexUint(string memory input) internal pure returns (uint256) {
         return parseHexUint(input, 0, bytes(input).length);
     }
 
-    function parseHexUint(
-        string memory input,
-        uint256 begin,
-        uint256 end
-    ) internal pure returns (uint256 value) {
+    function parseHexUint(string memory input, uint256 begin, uint256 end) internal pure returns (uint256 value) {
         bytes memory buffer = bytes(input);
 
         uint256 result = 0;
@@ -35,8 +30,8 @@ library AddressParser {
             if (chr > 15) return 0;
             result *= 16;
             unchecked {
-            // Multiplying by 16 is equivalent to a shift of 4 bits (with additional overflow check).
-            // This guaratees that adding a value < 16 will not cause an overflow, hence the unchecked.
+                // Multiplying by 16 is equivalent to a shift of 4 bits (with additional overflow check).
+                // This guaratees that adding a value < 16 will not cause an overflow, hence the unchecked.
                 result += chr;
             }
         }
@@ -85,5 +80,4 @@ contract EmailProver is Prover {
 
         return (proof(), captures[1].parseAddress());
     }
-
 }
