@@ -13,7 +13,7 @@ pub enum HostError {
     #[error("Invalid input")]
     CreatingInput(String),
 
-    #[error("Engine error: {0}")]
+    #[error("TravelCallExecutor error: {0}")]
     Engine(#[from] TravelCallExecutorError),
 
     #[error("Provider factory error: {0}")]
