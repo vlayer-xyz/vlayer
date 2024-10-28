@@ -58,7 +58,10 @@ contract RegexTest is VTest {
         try regex.matches("hello world", "hello.+$") {
             revert("Did not revert as expected");
         } catch Error(string memory reason) {
-            assertEq(reason, "Engine(TransactError(\"Regex must be surrounded by \\\"^\\\" and \\\"$\\\" pair to match the whole string\"))");
+            assertEq(
+                reason,
+                "Engine(TransactError(\"Regex must be surrounded by \\\"^\\\" and \\\"$\\\" pair to match the whole string\"))"
+            );
         }
     }
 }
