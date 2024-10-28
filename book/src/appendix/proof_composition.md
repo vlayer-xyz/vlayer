@@ -13,7 +13,7 @@ We use proof composition in Chain Proofs. The trie is correct if:
 * the previous trie was correct;
 * the operation executed is correct.
 
-In order to verify first point - we need to verify a ZK proof from within a ZK proof.
+In order to verify first point - we need to verify a ZK proof (correctness of the previous step) from within a ZK proof (correctness of this step).
 
 ## Implementation
 
