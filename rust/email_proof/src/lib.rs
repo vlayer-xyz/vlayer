@@ -6,7 +6,7 @@ mod errors;
 mod mail_auth;
 
 use dkim::verify;
-use email::sol::UnverifiedEmail;
+pub use email::sol::UnverifiedEmail;
 use mailparse::MailParseError;
 
 pub use crate::{email::Email, errors::Error};

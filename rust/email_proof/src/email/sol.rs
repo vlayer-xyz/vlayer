@@ -8,7 +8,7 @@ mod private {
     sol!("../../contracts/src/EmailProof.sol");
 }
 
-pub(crate) use private::{UnverifiedEmail, VerifiedEmail as SolEmail};
+pub use private::{UnverifiedEmail, VerifiedEmail as SolEmail};
 
 impl From<Email> for SolEmail {
     fn from(email: Email) -> SolEmail {
