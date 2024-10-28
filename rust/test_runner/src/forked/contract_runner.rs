@@ -470,7 +470,7 @@ fn warn_about_unsupported_tests(functions: &Vec<&Function>) {
         println!("\t {}", func.signature().yellow());
     }
 
-    println!("\n");
+    println!();
 }
 
 fn is_matching_test(func: &Function, filter: &dyn TestFilter) -> bool {
