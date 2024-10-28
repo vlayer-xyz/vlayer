@@ -3,6 +3,7 @@ import { type Address } from "viem";
 import { testHelpers, createVlayerClient } from "@vlayer/sdk";
 import vToyken from "../out/VToyken.sol/VToyken";
 import erc20Prover from "../out/ERC20Prover.sol/ERC20Prover";
+import { foundry } from "viem/chains";
 
 const tokenOwners: Address[] = ["0x3C44CdDdB6a900fa2b585dd299e03d12FA4293BC"];
 
@@ -17,6 +18,7 @@ const { hash } = await vlayer.prove({
   address: prover,
   proverAbi: erc20Prover.abi,
   functionName: "prove",
+  chainId: foundry.id,
   args: [tokenOwners],
 });
 const response = await vlayer.waitForProvingResult({ hash });
