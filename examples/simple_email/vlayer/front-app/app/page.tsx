@@ -96,8 +96,6 @@ export default function Home() {
         Number(process.env.NEXT_PUBLIC_CHAIN_ID),
       );
 
-      if(!chain) throw new Error("wrong chain provided")
-
       const walletClient = createWalletClient({
         chain,
         transport: custom(window.ethereum!),

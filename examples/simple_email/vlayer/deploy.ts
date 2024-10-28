@@ -1,25 +1,11 @@
 import {
-  mainnet,
-  sepolia,
-  base,
-  baseSepolia,
-  optimism,
-  optimismSepolia,
-  polygon,
-  polygonAmoy,
-  arbitrum,
-  arbitrumNova,
-  arbitrumSepolia,
-  zksync,
-  zksyncSepoliaTestnet,
-} from "viem/chains";
-import {
   createPublicClient,
   createWalletClient,
   http,
   type Address,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
+import { testHelpers } from "@vlayer/sdk";
 
 import emailDomainProver from "../out/EmailDomainProver.sol/EmailDomainProver";
 import emailDomainVerifier from "../out/EmailProofVerifier.sol/EmailDomainVerifier";
@@ -48,23 +34,7 @@ if (!chainId) {
   throw new Error("NEXT_PUBLIC_CHAIN_ID environment variable is not set.");
 }
 
-const supportedChains = {
-  [optimismSepolia.id]: optimismSepolia,
-  [mainnet.id]: mainnet,
-  [sepolia.id]: sepolia,
-  [base.id]: base,
-  [baseSepolia.id]: baseSepolia,
-  [optimism.id]: optimism,
-  [polygon.id]: polygon,
-  [polygonAmoy.id]: polygonAmoy,
-  [arbitrum.id]: arbitrum,
-  [arbitrumNova.id]: arbitrumNova,
-  [arbitrumSepolia.id]: arbitrumSepolia,
-  [zksync.id]: zksync,
-  [zksyncSepoliaTestnet.id]: zksyncSepoliaTestnet,
-};
-
-const chain = supportedChains[chainId as keyof typeof supportedChains];
+const chain = testHelpers.getChainConfig(chainId);
 
 privateKey = privateKey.startsWith("0x") ? privateKey : `0x${privateKey}`;
 const deployer = privateKeyToAccount(privateKey as `0x${string}`);

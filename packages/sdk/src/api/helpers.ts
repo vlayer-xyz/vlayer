@@ -197,6 +197,7 @@ export const supportedChains = {
   [arbitrumSepolia.id]: arbitrumSepolia,
   [zksync.id]: zksync,
   [zksyncSepoliaTestnet.id]: zksyncSepoliaTestnet,
+  [foundry.id]: foundry,
 };
 
 export const getChainConfig = (chainId: number): Chain => {
