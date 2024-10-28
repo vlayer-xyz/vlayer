@@ -450,7 +450,7 @@ impl<'a> ContractRunner<'a> {
     }
 }
 
-fn warn_about_unsupported_tests(functions: &Vec<&Function>) {
+fn warn_about_unsupported_tests(functions: &[&Function]) {
     let unsupported_functions: Vec<_> = functions
         .iter()
         .filter(|func| !func.test_function_kind().is_unit_test())
