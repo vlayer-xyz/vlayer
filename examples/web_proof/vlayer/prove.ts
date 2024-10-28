@@ -103,7 +103,7 @@ async function testFailedProving() {
     assert.ok(error instanceof Error, `Invalid error returned: ${error}`);
     assert.equal(
       error.message,
-      "Error response: Host error: Engine error: EVM transact error: ASN.1 error: PEM error: PEM preamble contains invalid data (NUL byte) at line 1 column 22883",
+      "Error response: Host error: TravelCallExecutor error: EVM transact error: ASN.1 error: PEM error: PEM preamble contains invalid data (NUL byte) at line 1 column 22883",
       `Error with wrong message returned: ${error.message}`,
     );
     console.log("Proving failed as expected with message:", error.message);
