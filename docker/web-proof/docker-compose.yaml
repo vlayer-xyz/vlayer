@@ -12,3 +12,11 @@ services:
       - "7047:7047"
     volumes:
       - ./notary-config:/root/.notary-server/config
+  anvil:
+    build:
+      context: ../..
+      dockerfile: docker/web-proof/anvil/Dockerfile
+    platform: linux/amd64
+    ports:
+      - "8545:8545"
+
