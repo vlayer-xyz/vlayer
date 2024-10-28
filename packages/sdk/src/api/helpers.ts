@@ -8,7 +8,6 @@ import {
   createTestClient,
   type Hex,
   http,
-  HttpTransport,
   publicActions,
   PublicClient,
   walletActions,
@@ -16,26 +15,38 @@ import {
 } from "viem";
 
 import { privateKeyToAccount, generatePrivateKey } from "viem/accounts";
-import { foundry } from "viem/chains";
+import {
+  mainnet,
+  sepolia,
+  base,
+  baseSepolia,
+  optimism,
+  optimismSepolia,
+  polygon,
+  polygonAmoy,
+  arbitrum,
+  arbitrumNova,
+  arbitrumSepolia,
+  zksync,
+  zksyncSepoliaTestnet,
+  foundry,
+} from "viem/chains";
 
 import type { ContractSpec, ContractArg } from "types/ethereum";
-
-const rpcUrls: Map<number, HttpTransport> = new Map([[foundry.id, http()]]);
-
-export const chainIds = [foundry.id];
 
 export function createAnvilClient(
   chainId: number = foundry.id,
 ): ReturnType<typeof walletActions> & PublicClient {
-  const transport = rpcUrls.get(chainId);
-  if (transport == undefined) {
-    throw Error(`No url for chainId ${chainId}`);
+  const chain = getChainConfig(chainId);
+  const rpcUrl = chain.rpcUrls.default.http[0];
+  if (rpcUrl == undefined) {
+    throw Error(`No rpcUrl for chainId ${chainId}`);
   }
 
   return createTestClient({
     chain: foundry,
     mode: "anvil",
-    transport: transport,
+    transport: http(rpcUrl),
   })
     .extend(publicActions)
     .extend(walletActions);
@@ -171,3 +182,27 @@ export const getTestAccount = () => privateKeyToAccount(generatePrivateKey());
 export const getTestAddresses = (
   chainId: number = foundry.id,
 ): Promise<Address[]> => createAnvilClient(chainId).getAddresses();
+
+export const supportedChains = {
+  [optimismSepolia.id]: optimismSepolia,
+  [mainnet.id]: mainnet,
+  [sepolia.id]: sepolia,
+  [base.id]: base,
+  [baseSepolia.id]: baseSepolia,
+  [optimism.id]: optimism,
+  [polygon.id]: polygon,
+  [polygonAmoy.id]: polygonAmoy,
+  [arbitrum.id]: arbitrum,
+  [arbitrumNova.id]: arbitrumNova,
+  [arbitrumSepolia.id]: arbitrumSepolia,
+  [zksync.id]: zksync,
+  [zksyncSepoliaTestnet.id]: zksyncSepoliaTestnet,
+};
+
+export const getChainConfig = (chainId: number): Chain => {
+  const chain = supportedChains[chainId as keyof typeof supportedChains];
+
+  if (!chain) throw new Error(`given chainId (${chainId}) is not supported`);
+
+  return chain;
+};

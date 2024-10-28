@@ -7,8 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Button } from "@/components/ui/button";
 import { Upload, MailCheck } from "lucide-react";
 import { getStrFromFile } from "@/lib/utils";
-import { getChainConfig } from "@/lib/supportedChains";
-import { createVlayerClient, preverifyEmail } from "@vlayer/sdk";
+import { createVlayerClient, preverifyEmail, testHelpers } from "@vlayer/sdk";
 import { createWalletClient, custom } from "viem";
 import { useRouter } from "next/navigation";
 
@@ -93,7 +92,11 @@ export default function Home() {
       console.log("Response:", result);
       setCurrentStep("Verifying on-chain...");
 
-      const chain = getChainConfig(Number(process.env.NEXT_PUBLIC_CHAIN_ID));
+      const chain = testHelpers.getChainConfig(
+        Number(process.env.NEXT_PUBLIC_CHAIN_ID),
+      );
+
+      if(!chain) throw new Error("wrong chain provided")
 
       const walletClient = createWalletClient({
         chain,
