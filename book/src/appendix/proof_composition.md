@@ -54,4 +54,4 @@ This function accepts guest ID, journal and not the proof as all the available p
 **Important**
 Proof composition only works on `Succinct` proofs and not `Groth16` proofs.
 
-In Chain Proofs - we store all proofs as `Succinct` receipts. Chain Proof gets injected into Call Proof as `Succinct` receipt and only in the end Call Proof gets converted into a `Groth16` receipt to be verified in a Smart Contract
+In Chain Proofs - we store all proofs as `Succinct` receipts. Chain Proof gets injected into Call Proof as `Succinct` receipt. In the end Call Proof gets converted into a `Groth16` receipt to be verified in a Smart Contract
