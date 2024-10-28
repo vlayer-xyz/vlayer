@@ -5,7 +5,7 @@ edition = "2021"
 
 [dependencies]
 anyhow = { workspace = true }
-risc0-zkvm = { workspace = true }
+risc0-zkvm = { workspace = true, features = ["prove"] }
 tokio = { workspace = true }
 tracing = { workspace = true }
 
