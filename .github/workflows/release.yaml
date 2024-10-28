@@ -129,6 +129,12 @@ jobs:
           name: guest-artifacts
           path: rust/call_guest_replacement
 
+      - name: Include C headers
+        if: matrix.platform == 'darwin' 
+        run: |
+          sudo mkdir -p /usr/local/include/
+          sudo ln -s /Library/Developer/CommandLineTools/SDKs/MacOSX.sdk/usr/include/* /usr/local/include/
+
       - name: "Build binaries"
         env:
           VLAYER_RELEASE: "nightly"
@@ -138,7 +144,7 @@ jobs:
 
       - name: "Print build version"
         id: vlayer_build
-        if:  matrix.runner == 'aws-linux-medium' 
+        if: matrix.runner == 'aws-linux-medium' 
         env:
           VLAYER_RELEASE: "nightly"
         run: |
