@@ -9,7 +9,7 @@
     </svg>
     Actively in Development
   </div>
-  <p>Our team is currently working on this feature. If you experience any bugs, please let us know <a href="https://discord.gg/JS6whdessP" target="_blank">on our Discord</a>. We appreciate your patience. </p>
+  <p>Currently, you can time travel to any past block. The proving code isn’t fully complete yet, so there may be limits on how far back you can go once it’s finished. In this version, a malicious user could fake time travel proofs.</p>
 </div>
 
 ## Access to historical data 
