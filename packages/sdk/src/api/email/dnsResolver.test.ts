@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { resolveDkimDns } from "./dnsResolver.ts";
+import { resolveDkimDns } from "./dnsResolver";
 
 describe("resolveDkimDns Integration", () => {
   test("resolves VLayer DNS", async () => {

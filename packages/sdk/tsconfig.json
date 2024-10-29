@@ -1,24 +1,28 @@
 {
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
+    "rootDir": "./src",
+    "outDir": "./dist",
     "lib": [
       "ESNext"
     ],
     "moduleResolution": "bundler",
     "moduleDetection": "force",
-    "allowImportingTsExtensions": true,
     "downlevelIteration": true,
     "jsx": "preserve",
-    "allowSyntheticDefaultImports": true,
+    "noEmit": false,
     "forceConsistentCasingInFileNames": true,
     "allowJs": true,
     "types": [
-      "bun" // add Bun global
+      "bun"
     ],
     "baseUrl": "./",
     "paths": {
       "types/*": ["./src/api/lib/types/*"],
       "testHelpers/*": ["./src/testHelpers/*"],
     },
-  }
+  }, 
+  "include": [
+    "src"
+  ],
 }

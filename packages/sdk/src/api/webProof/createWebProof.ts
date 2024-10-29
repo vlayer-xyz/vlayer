@@ -1,4 +1,4 @@
-import { WebProofSetup, WebProofSetupInput } from "types/webProofProvider.ts";
+import { WebProofSetup, WebProofSetupInput } from "types/webProofProvider";
 
 export const createWebProof = ({ logoUrl, steps }: WebProofSetupInput) => {
   return {
