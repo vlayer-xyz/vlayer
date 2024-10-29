@@ -1,18 +1,15 @@
-use call_server::ServerConfig;
-use chain_server::server::{ChainProofServerMock, EMPTY_PROOF_RESPONSE};
 use clap::{Parser, Subcommand};
 use commands::{
     args::{InitArgs, ServeArgs},
-    init::init,
+    init::run_init,
     serve::run_serve,
     version::Version,
 };
-use serde_json::json;
 use test_runner::cli::TestArgs;
-use tracing::{error, info};
+use tracing::error;
 use tracing_subscriber::EnvFilter;
 
-use crate::errors::CLIError;
+use crate::{commands::test::run_test, errors::CLIError};
 
 mod commands;
 pub mod errors;
@@ -53,41 +50,9 @@ async fn main() {
 }
 
 async fn run() -> Result<(), CLIError> {
-    let cli = Cli::parse();
-
-    match cli.command {
-        Commands::Serve(serve_args) => {
-            let chain_proof_server_mock = start_chain_proof_server().await;
-            let proof_mode = serve_args.proof.unwrap_or_default().map();
-            let server_config = ServerConfig::new(
-                serve_args.rpc_url,
-                proof_mode,
-                serve_args.host,
-                serve_args.port,
-                chain_proof_server_mock.url(),
-            );
-            run_serve(server_config).await?;
-        }
-        Commands::Init(init_args) => {
-            let existing = init_args.existing;
-            let project_name = init_args.project_name;
-            let template = init_args.template.unwrap_or_default();
-
-            let cwd = std::env::current_dir()?;
-            init(cwd, template, existing, project_name).await?;
-        }
-        Commands::Test(cmd) => {
-            info!("Running vlayer tests");
-            let test_result = cmd.run().await.unwrap();
-            let failed_tests_count = test_result.failed();
-            if !test_result.allow_failure && failed_tests_count > 0 {
-                return Err(CLIError::TestFailed(failed_tests_count));
-            }
-        }
+    match Cli::parse().command {
+        Commands::Serve(args) => run_serve(args).await,
+        Commands::Init(args) => run_init(args).await,
+        Commands::Test(args) => run_test(args).await,
     }
-    Ok(())
-}
-
-async fn start_chain_proof_server() -> ChainProofServerMock {
-    ChainProofServerMock::start(json!({}), EMPTY_PROOF_RESPONSE.clone()).await
 }

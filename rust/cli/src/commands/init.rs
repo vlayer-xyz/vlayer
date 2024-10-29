@@ -14,7 +14,10 @@ use tar::Archive;
 use tracing::{error, info};
 
 use crate::{
-    commands::{args::TemplateOption, version::version},
+    commands::{
+        args::{InitArgs, TemplateOption},
+        version::version,
+    },
     errors::CLIError,
     utils::{
         parse_toml::{add_deps_to_foundry_toml, get_src_from_str},
@@ -196,16 +199,13 @@ fn change_sdk_dependency_to_npm(foundry_root: &Path) -> Result<(), CLIError> {
     Ok(())
 }
 
-pub(crate) async fn init(
-    mut cwd: PathBuf,
-    template: TemplateOption,
-    existing: bool,
-    project_name: Option<String>,
-) -> Result<(), CLIError> {
-    if !existing {
+pub(crate) async fn run_init(args: InitArgs) -> Result<(), CLIError> {
+    let mut cwd = std::env::current_dir()?;
+
+    if !args.existing {
         let mut command = std::process::Command::new("forge");
         command.arg("init");
-        if let Some(project_name) = project_name {
+        if let Some(project_name) = args.project_name {
             cwd.push(&project_name);
             command.arg(project_name);
         }
@@ -217,7 +217,7 @@ pub(crate) async fn init(
         }
     }
 
-    init_existing(cwd, template).await
+    init_existing(cwd, args.template.unwrap_or_default()).await
 }
 
 pub(crate) async fn init_existing(cwd: PathBuf, template: TemplateOption) -> Result<(), CLIError> {

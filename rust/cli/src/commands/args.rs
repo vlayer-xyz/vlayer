@@ -1,7 +1,7 @@
 use std::fmt;
 
 use alloy_primitives::ChainId;
-use call_server::ProofMode;
+use call_server::{ProofMode, ServerConfig};
 use clap::{ArgAction, Parser, ValueEnum};
 
 #[derive(Clone, Debug, Parser)]
@@ -29,6 +29,13 @@ pub(crate) struct ServeArgs {
     /// Port to listen on.
     #[arg(long, short, default_value = "3000")]
     pub(crate) port: Option<u16>,
+}
+
+impl ServeArgs {
+    pub fn into_server_config(self, chain_proof_server_url: &str) -> ServerConfig {
+        let proof_mode = self.proof.unwrap_or_default().map();
+        ServerConfig::new(self.rpc_url, proof_mode, self.host, self.port, chain_proof_server_url)
+    }
 }
 
 #[derive(Clone, Debug, ValueEnum, Default)]
