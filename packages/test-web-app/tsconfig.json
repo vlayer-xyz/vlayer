@@ -10,4 +10,9 @@
     "baseUrl": "./",
     "moduleResolution": "bundler",
   },
+  "include": [
+    "../../../contracts/**/*.ts",
+    "./src/**/*.ts",
+    "./src/**/*.tsx"
+  ]
 }
