@@ -1,4 +1,3 @@
-/* eslint-disable */
 import React, { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
 import Source from "./Source";
@@ -7,7 +6,7 @@ import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Target from "./Target";
 import { LoginMock } from "./LoginMock";
 
-import './main.css';
+import "./main.css";
 
 const router = createBrowserRouter([
   {
