@@ -2377,6 +2377,7 @@ dependencies = [
  "call_server",
  "chain_server",
  "clap",
+ "colored",
  "flate2",
  "hex",
  "lazy_static",
