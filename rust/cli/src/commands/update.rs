@@ -10,6 +10,10 @@ pub async fn run_update() -> Result<(), CLIError> {
     update_cli()?;
     update_sdk()?;
     update_soldeer()?;
+
+    println!("{} Update complete.", "🎉");
+    println!("{}", "Build your contracts now and have fun!".bold());
+
     Ok(())
 }
 
