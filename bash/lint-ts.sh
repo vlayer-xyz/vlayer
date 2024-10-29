@@ -4,6 +4,8 @@ set -ueo pipefail
 
 VLAYER_HOME=$(git rev-parse --show-toplevel)
 
+
+
 for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ; do
 
   (
@@ -16,7 +18,12 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
   )
 done
 
+
 echo "::group::Running eslint for: $VLAYER_HOME/packages"
+
+echo "::group::building contracts"
+cd "${VLAYER_HOME}/packages/browser-extension"
+
 
 echo "::group::Building sdk"
 cd "${VLAYER_HOME}/packages/sdk"

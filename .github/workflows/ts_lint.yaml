@@ -20,5 +20,16 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install TypeScript prerequisites
       uses: ./.github/actions/ts-prerequisites
+    # mocking is need for contract build to pass
+    - name: Mock ImageId.sol
+      run: ./bash/mock-imageid.sh 
+    # contracts need to be built to run the linter
+    - name: Run Forge build
+      working-directory: ./contracts
+      run: |
+        forge soldeer install
+        forge build --sizes
+    - name: Build abi types 
+      run: ./bash/build_ts_types.sh
     - name: Run ESLint
       run: bash/lint-ts.sh
