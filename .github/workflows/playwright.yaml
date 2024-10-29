@@ -4,6 +4,7 @@ on:
     paths:
       - "packages/**"
       - ".github/workflows/playwright.yaml"
+      - "docker/web-proof"
   merge_group:
   push:
     branches:
@@ -38,7 +39,7 @@ jobs:
         working-directory: ./packages/browser-extension
       - uses: hoverkraft-tech/compose-action@v2.0.2
         with:
-          compose-file: docker/web-proof/docker-compose.yaml
+          compose-file: docker/web-proof/docker-compose-release.yaml
       - name: Run Playwright tests
         run: TEST_MODE=headless bunx playwright test
         working-directory: ./packages/browser-extension
