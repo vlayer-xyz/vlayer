@@ -73,13 +73,7 @@ bun run prove.ts
 
 ### Web Proof example
 
-First, install the vlayer browser extension:
-1. Download the extension [here](https://vlayer-releases.s3.eu-north-1.amazonaws.com/latest/browser-extension.tar.gz) and extract the archive.
-2. Open `chrome://extensions/` (in Chrome) or `brave://extensions/` (in Brave). Only these two browsers are supported.
-3. Enable `Developer mode`.
-4. Click `Load unpacked` and select the directory containing the extension files.
-
-For more details about the extension, see the [Web Proofs](../javascript/web-proofs.md) section.
+First, install the vlayer browser extension from [Chrome Store](https://chromewebstore.google.com/detail/vlayer/jbchhcgphfokabmfacnkafoeeeppjmpl) (works with Chrome and Brave browsers). For more details about the extension, see the [Web Proofs](../javascript/web-proofs.md) section.
 
 Then deploy the `WebProofProver` and `WebProofVerifier` contracts on local anvil testnet:
 
@@ -95,4 +89,4 @@ cd vlayer
 bun run dev
 ```
 
-The app will be available at `http://localhost:5174` and will display buttons that will let you interact with the extension and vlayer server.
+The app will be available at `http://localhost:5174` and will display buttons that will let you interact with the extension and vlayer server (open browser developer console to see the app activity).
