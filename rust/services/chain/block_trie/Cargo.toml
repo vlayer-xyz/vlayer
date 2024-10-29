@@ -6,13 +6,9 @@ edition = "2021"
 [dependencies]
 alloy-primitives = { workspace = true }
 alloy-rlp = { workspace = true, features = ["arrayvec"] }
-bincode = { workspace = true }
 block_header = { workspace = true }
 bytes = { workspace = true }
-derivative = { workspace = true }
 mpt = { workspace = true }
-risc0-zkp = { workspace = true }
-risc0-zkvm = { workspace = true }
 serde = { workspace = true }
 thiserror = { workspace = true }
 traits = { workspace = true }
