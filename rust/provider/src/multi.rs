@@ -4,7 +4,7 @@ use std::{
 };
 
 use alloy_primitives::ChainId;
-use common::InteriorMutabilityCache;
+use common::cache::InteriorMutabilityCache;
 
 use super::{factory::ProviderFactory, BlockingProvider};
 use crate::factory::ProviderFactoryError;
