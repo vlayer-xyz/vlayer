@@ -3,6 +3,7 @@ description: Prerequisites specific to Darwin
 runs:
   using: "composite"
   steps:
+    # This is necessary for building some crates written in C/C++, such as mdbx-sys.
     - name: Include C headers
       run: |
         sudo mkdir -p /usr/local/include/
