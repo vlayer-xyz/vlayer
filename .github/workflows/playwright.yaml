@@ -43,6 +43,16 @@ jobs:
       - uses: hoverkraft-tech/compose-action@v2.0.2
         with:
           compose-file: docker/web-proof/docker-compose-release.yaml
+      - name: Install contracts prerequisites
+        uses: ./.github/actions/contracts-prerequisites
+      - name: Mock ImageId.sol
+        run: ./bash/mock-imageid.sh 
+        # contracts need to be built to run the linter
+      - name: Run Forge build
+        working-directory: ./contracts
+        run: |
+          forge soldeer install
+          forge build --sizes
       - name: Run Playwright tests
         run: TEST_MODE=headless bunx playwright test
         working-directory: ./packages/browser-extension
