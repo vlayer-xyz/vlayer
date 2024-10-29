@@ -9,7 +9,7 @@ cd "${VLAYER_HOME}/packages"
 bun install --frozen-lockfile
 echo '::endgroup::'
 
-EXAMPLES="erc20_balances"
+EXAMPLES="erc20_balances airdrop simple_teleport simple_time_travel simple_email private_airdrop"
 
 for example_name in ${EXAMPLES}; do
 
