@@ -144,14 +144,8 @@ where
         previous_proof: Option<ChainProof>,
     ) -> Result<ChainProof, HostError> {
         let executor_env = build_executor_env(input, previous_proof)?;
-        let ProveInfo { receipt, stats } =
+        let ProveInfo { receipt, .. } =
             provably_execute(&self.prover, executor_env, RISC0_CHAIN_GUEST_ELF)?;
-        let SessionStats {
-            total_cycles,
-            user_cycles,
-            segments,
-        } = stats;
-        info!("Prover stats. Segments: {segments}, cycles: {total_cycles}, user cycles: {user_cycles}");
         Ok(receipt.into())
     }
 
