@@ -20,6 +20,8 @@ jobs:
     - uses: actions/checkout@v2
     - name: Install TypeScript prerequisites
       uses: ./.github/actions/ts-prerequisites
+    - name: Install contracts prerequisites
+      uses: ./.github/actions/contracts-prerequisites
     # mocking is need for contract build to pass
     - name: Mock ImageId.sol
       run: ./bash/mock-imageid.sh 
