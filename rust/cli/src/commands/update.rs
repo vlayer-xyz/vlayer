@@ -134,9 +134,9 @@ fn select_package_manager(package_path: &Path) -> PackageManager {
     if package_path.join("bun.lockb").exists() {
         PackageManager::Bun
     } else if package_path.join("pnpm-lock.yaml").exists() {
-        PackageManager::Yarn
-    } else if package_path.join("yarn.lock").exists() {
         PackageManager::Pnpm
+    } else if package_path.join("yarn.lock").exists() {
+        PackageManager::Yarn
     } else {
         PackageManager::Npm
     }
