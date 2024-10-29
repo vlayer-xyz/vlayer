@@ -30,6 +30,7 @@ jobs:
         working-directory: ./packages
       - name: Build sdk
         run: bun run build
+        working-directory: ./packages/sdk
       - name: Install dependencies of test-web-app
         run: bun install --frozen-lockfile
         working-directory: ./packages/test-web-app
