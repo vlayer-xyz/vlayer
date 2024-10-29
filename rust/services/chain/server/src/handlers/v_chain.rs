@@ -79,6 +79,7 @@ mod tests {
         use mpt::MerkleTrie;
         use risc0_zkp::verify::VerificationError;
         use risc0_zkvm::{InnerReceipt, Receipt};
+        use traits::Hashable;
 
         use super::*;
 

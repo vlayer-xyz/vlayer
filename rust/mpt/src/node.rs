@@ -52,7 +52,7 @@ impl Hashable for Node {
         match self {
             Node::Null => EMPTY_ROOT_HASH,
             Node::Digest(digest) => *digest,
-            ref node => keccak256(node.rlp_encoded()),
+            node => keccak256(node.rlp_encoded()),
         }
     }
 }

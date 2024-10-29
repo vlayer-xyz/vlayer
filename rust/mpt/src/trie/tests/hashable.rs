@@ -1,6 +1,7 @@
 use alloy_primitives::{b256, B256};
 use alloy_trie::EMPTY_ROOT_HASH;
 use lazy_static::lazy_static;
+use traits::Hashable;
 
 use crate::{key_nibbles::KeyNibbles, node::Node, MerkleTrie};
 

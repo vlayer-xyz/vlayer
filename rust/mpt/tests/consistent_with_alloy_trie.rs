@@ -4,6 +4,7 @@ use alloy_primitives::{keccak256, U256};
 use alloy_trie::HashBuilder;
 use mpt::{reorder_with_root_as_first, MerkleTrie};
 use nybbles::Nibbles;
+use traits::Hashable;
 
 #[test]
 fn root_match() -> anyhow::Result<()> {

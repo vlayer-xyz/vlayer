@@ -5,7 +5,7 @@ mod prover;
 use std::ops::RangeInclusive;
 
 use alloy_primitives::ChainId;
-use block_trie::{BlockTrie, EMPTY_TRIE};
+use block_trie::BlockTrie;
 use chain_db::{ChainDb, ChainTrie, ChainUpdate, Mode};
 use chain_guest::Input;
 use chain_guest_wrapper::RISC0_CHAIN_GUEST_ID;
@@ -92,7 +92,7 @@ where
             elf_id: *GUEST_ID,
             block: latest_block,
         };
-        let receipt = self.prover.prove(input, None)?;
+        let receipt = self.prover.prove(&input, None)?;
 
         let range = latest_block_number..=latest_block_number;
         let chain_update = ChainUpdate::from_two_tries(range, vec![], &trie, receipt);
@@ -129,7 +129,7 @@ where
             old_leftmost_block: latest_block,
             block_trie: old_trie.clone(),
         };
-        let receipt = self.prover.prove(input, Some(old_zk_proof))?;
+        let receipt = self.prover.prove(&input, Some(old_zk_proof))?;
 
         let range = *block_range.start()..=latest_block_number;
         let chain_update = ChainUpdate::from_two_tries(range, &old_trie, &trie, receipt);

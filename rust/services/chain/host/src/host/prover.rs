@@ -26,7 +26,7 @@ impl Prover {
 
     /// Wrapper around Risc0Prover which specifier the chain guest ELF and accepts the previous proof
     #[instrument(skip_all)]
-    pub fn prove(&self, input: Input, previous_proof: Option<ChainProof>) -> Result<ChainProof> {
+    pub fn prove(&self, input: &Input, previous_proof: Option<ChainProof>) -> Result<ChainProof> {
         let executor_env = build_executor_env(input, previous_proof)
             .map_err(|err| Error::ExecutorEnvBuilder(err.to_string()))?;
 
@@ -39,7 +39,7 @@ impl Prover {
 }
 
 fn build_executor_env(
-    input: Input,
+    input: &Input,
     assumption: Option<ChainProof>,
 ) -> anyhow::Result<ExecutorEnv<'static>> {
     let mut builder = ExecutorEnv::builder();

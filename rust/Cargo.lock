@@ -2209,6 +2209,7 @@ dependencies = [
  "server_utils",
  "thiserror",
  "tokio",
+ "traits",
 ]
 
 [[package]]

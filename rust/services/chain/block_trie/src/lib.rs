@@ -44,8 +44,6 @@ pub type BlockTrieResult<T> = Result<T, BlockTrieError>;
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
 pub struct BlockTrie(MerkleTrie);
 
-pub const EMPTY_TRIE: BlockTrie = BlockTrie(MerkleTrie::new());
-
 impl BlockTrie {
     pub fn init(block: &dyn EvmBlockHeader) -> BlockTrieResult<Self> {
         let mut trie = Self(MerkleTrie::new());
