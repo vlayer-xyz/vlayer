@@ -53,7 +53,7 @@ fn append_prepend(
 
 #[allow(clippy::unused_async)]
 pub async fn main(input: Input) -> (B256, Digest) {
-match input {
+    match input {
         Input::Initialize { elf_id, block } => initialize(elf_id, &*block),
         Input::AppendPrepend {
             elf_id,
