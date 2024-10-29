@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 alloy-primitives = { workspace = true }
 anyhow = { workspace = true }
+bincode = { workspace = true }
 block_trie = { workspace = true }
 chain_db = { workspace = true }
 chain_guest = { workspace = true }
@@ -21,7 +22,6 @@ serde = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true, features = ["macros"] }
 tracing = { workspace = true }
-bincode = { workspace = true }
 
 [dev-dependencies]
 alloy-rlp = { workspace = true, features = ["arrayvec"] }

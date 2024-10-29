@@ -7,6 +7,7 @@ edition = "2021"
 alloy-primitives = { workspace = true }
 alloy-rlp = { workspace = true }
 anyhow = { workspace = true }
+bincode = { workspace = true }
 block_trie = { workspace = true }
 bytes = { workspace = true }
 chain_guest_wrapper = { workspace = true }
@@ -15,11 +16,10 @@ derive_more = { workspace = true }
 key_value = { workspace = true }
 mpt = { workspace = true }
 nybbles = { workspace = true }
+risc0-zkp = { workspace = true }
+risc0-zkvm = { workspace = true }
 serde = { workspace = true }
 thiserror = { workspace = true }
-risc0-zkvm = { workspace = true }
-risc0-zkp = { workspace = true }
-bincode = { workspace = true }
 traits = { workspace = true }
 
 [dev-dependencies]
