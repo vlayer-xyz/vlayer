@@ -1,9 +1,11 @@
 use std::sync::Arc;
 
 use alloy_primitives::{bytes, BlockNumber, ChainId};
+use block_trie::BlockTrie;
 use bytes::Bytes;
 use chain_db::ChainDb;
 use lazy_static::lazy_static;
+use mpt::{MerkleTrie, ParseNodeError};
 use parking_lot::RwLock;
 use serde::{Deserialize, Serialize};
 
@@ -19,6 +21,19 @@ pub struct Params {
 pub struct ChainProof {
     pub proof: Bytes,
     pub nodes: Vec<Bytes>,
+}
+
+impl TryFrom<ChainProof> for chain_types::ChainProof {
+    type Error = ParseNodeError;
+
+    fn try_from(rpc_chain_proof: ChainProof) -> Result<Self, Self::Error> {
+        let block_trie =
+            BlockTrie::from_unchecked(MerkleTrie::from_rlp_nodes(rpc_chain_proof.nodes)?);
+        Ok(Self {
+            proof: rpc_chain_proof.proof,
+            block_trie,
+        })
+    }
 }
 
 lazy_static! {

@@ -839,6 +839,7 @@ dependencies = [
  "derive-new",
  "derive_more",
  "email_proof",
+ "itertools 0.13.0",
  "mpt",
  "once_cell",
  "regex",
