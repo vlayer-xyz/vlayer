@@ -9,7 +9,10 @@ use test_runner::cli::TestArgs;
 use tracing::error;
 use tracing_subscriber::EnvFilter;
 
-use crate::{commands::test::run_test, errors::CLIError};
+use crate::{
+    commands::{test::run_test, update::run_update},
+    errors::CLIError,
+};
 
 mod commands;
 pub mod errors;
@@ -31,6 +34,7 @@ enum Commands {
     Init(InitArgs),
     Serve(ServeArgs),
     Test(Box<TestArgs>),
+    Update,
 }
 
 #[tokio::main]
@@ -54,5 +58,6 @@ async fn run() -> Result<(), CLIError> {
         Commands::Serve(args) => run_serve(args).await,
         Commands::Init(args) => run_init(args).await,
         Commands::Test(args) => run_test(args).await,
+        Commands::Update => run_update().await,
     }
 }
