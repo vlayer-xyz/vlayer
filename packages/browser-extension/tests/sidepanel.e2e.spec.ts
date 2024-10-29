@@ -72,7 +72,7 @@ test.describe("Full flow of webproof using extension", () => {
       const extension = await sidePanel(context);
       const proveButton = extension.getByTestId("prove-button");
       await proveButton.click();
-      const title = await page.waitForSelector(
+      await page.waitForSelector(
         'h1[data-testid="has-webproof"]',
       );
     });
