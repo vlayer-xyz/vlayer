@@ -9,7 +9,7 @@
     </svg>
     Actively in Development
   </div>
-  <p>Currently, you can teleport between any chains. Since the proving code isn’t fully complete, this will change once it’s ready, and only certain network pairs will support teleportation. In this version, a malicious user could fake teleport proofs.</p>
+  <p>Currently, it’s possible to teleport between any blockchain networks. However, this will change once the proving code is fully developed. After that, only specific network pairs will support teleportation. Until this update is complete, a malicious prover could potentially create fake teleportation proofs.</p>
 </div>
 
 ## Ethereum ecosystem of chains
