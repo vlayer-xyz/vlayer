@@ -1,4 +1,4 @@
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use colored::Colorize;
 use serde_json::Value;
@@ -11,7 +11,7 @@ pub async fn run_update() -> Result<(), CLIError> {
     update_sdk()?;
     update_soldeer()?;
 
-    println!("{} Update complete.", "🎉");
+    println!("🎉 Update complete.");
     println!("{}", "Build your contracts now and have fun!".bold());
 
     Ok(())
@@ -51,14 +51,14 @@ fn update_cli() -> Result<(), CLIError> {
 
 fn update_sdk() -> Result<(), CLIError> {
     if let Some((path, json)) = find_package_json()? {
-        do_update_sdk(path, json)
+        do_update_sdk(&path, &json)
     } else {
         println!("{} package.json not found. Skipping SDK update.", "⚠".yellow().bold());
         Ok(())
     }
 }
 
-fn do_update_sdk(path: PathBuf, package_json: Value) -> Result<(), CLIError> {
+fn do_update_sdk(path: &Path, package_json: &Value) -> Result<(), CLIError> {
     if package_json["dependencies"]["@vlayer/sdk"].is_null() {
         println!("{} @vlayer/sdk not found in package.json", "⚠".yellow().bold());
         return Ok(());
@@ -101,7 +101,7 @@ enum PackageManager {
 }
 
 impl PackageManager {
-    fn command_args(&self) -> (&str, &str) {
+    const fn command_args(&self) -> (&str, &str) {
         match self {
             PackageManager::Npm => ("npm", "install"),
             PackageManager::Yarn => ("yarn", "add"),
@@ -130,7 +130,7 @@ impl PackageManager {
     }
 }
 
-fn select_package_manager(package_path: PathBuf) -> PackageManager {
+fn select_package_manager(package_path: &Path) -> PackageManager {
     if package_path.join("bun.lockb").exists() {
         PackageManager::Bun
     } else if package_path.join("pnpm-lock.yaml").exists() {
