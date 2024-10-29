@@ -199,7 +199,7 @@ fn change_sdk_dependency_to_npm(foundry_root: &Path) -> Result<(), CLIError> {
     Ok(())
 }
 
-pub(crate) async fn init(args: InitArgs) -> Result<(), CLIError> {
+pub(crate) async fn run_init(args: InitArgs) -> Result<(), CLIError> {
     let mut cwd = std::env::current_dir()?;
 
     if !args.existing {

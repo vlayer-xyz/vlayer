@@ -1,7 +1,7 @@
 use clap::{Parser, Subcommand};
 use commands::{
     args::{InitArgs, ServeArgs},
-    init::init,
+    init::run_init,
     serve::run_serve,
     version::Version,
 };
@@ -52,7 +52,7 @@ async fn main() {
 async fn run() -> Result<(), CLIError> {
     match Cli::parse().command {
         Commands::Serve(args) => run_serve(args).await,
-        Commands::Init(args) => init(args).await,
+        Commands::Init(args) => run_init(args).await,
         Commands::Test(args) => run_test(args).await,
     }
 }
