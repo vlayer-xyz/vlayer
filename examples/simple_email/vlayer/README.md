@@ -1,5 +1,6 @@
-# Email Proof Example
-This example demonstrates how to use Email Proofs. It allows to mint NFT only by email owners from certain domain (@vlayer.xyz). 
+# Email Proof example
+This example shows how to use Email Proofs to mint a unique NFT. Only email owners from specific domains, like `@vlayer.xyz` or `@ethereum.org`, can mint the NFT.
 
-Learn how to run this example here:
+## How to run?
+Learn how to run this example here:  
 https://book.vlayer.xyz/getting-started/first-steps.html
