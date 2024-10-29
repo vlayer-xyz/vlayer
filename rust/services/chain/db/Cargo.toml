@@ -16,6 +16,8 @@ mpt = { workspace = true }
 nybbles = { workspace = true }
 serde = { workspace = true }
 thiserror = { workspace = true }
+risc0-zkvm = { workspace = true }
+bincode = { workspace = true }
 
 [dev-dependencies]
 rand = { workspace = true }

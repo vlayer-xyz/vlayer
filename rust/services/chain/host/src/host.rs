@@ -5,8 +5,7 @@ use std::ops::RangeInclusive;
 
 use alloy_primitives::ChainId;
 use block_trie::{BlockTrie, EMPTY_TRIE};
-use bytes::Bytes;
-use chain_db::{ChainDb, ChainTrie, ChainUpdate, Mode};
+use chain_db::{ChainDb, ChainProof, ChainTrie, ChainUpdate, Mode};
 use chain_guest::Input;
 use chain_guest_wrapper::{RISC0_CHAIN_GUEST_ELF, RISC0_CHAIN_GUEST_ID};
 pub use config::HostConfig;
@@ -20,7 +19,7 @@ use futures::future::join_all;
 use host_utils::Prover;
 use lazy_static::lazy_static;
 use provider::{to_eth_block_header, EvmBlockHeader};
-use risc0_zkvm::{sha::Digest, AssumptionReceipt, ExecutorEnv, ProveInfo, Receipt, SessionStats};
+use risc0_zkvm::{sha::Digest, AssumptionReceipt, ExecutorEnv, ProveInfo, SessionStats};
 use serde::Serialize;
 use tracing::{info, instrument};
 
@@ -93,11 +92,10 @@ where
             elf_id: *GUEST_ID,
             block: latest_block,
         };
-        let receipt = self.prove(input, &None)?;
-        let zk_proof = encode_proof(&receipt);
+        let receipt = self.prove(input, None)?;
 
         let range = latest_block_number..=latest_block_number;
-        let chain_update = ChainUpdate::from_two_tries(range, &EMPTY_TRIE, &trie, zk_proof);
+        let chain_update = ChainUpdate::from_two_tries(range, &EMPTY_TRIE, &trie, receipt);
 
         Ok(chain_update)
     }
@@ -131,19 +129,21 @@ where
             old_leftmost_block: latest_block,
             block_trie: old_trie.clone(),
         };
-        let receipt = self.prove(input, &Some(old_zk_proof))?;
-        let zk_proof = encode_proof(&receipt);
+        let receipt = self.prove(input, Some(old_zk_proof))?;
 
         let range = *block_range.start()..=latest_block_number;
-        let chain_update = ChainUpdate::from_two_tries(range, &old_trie, &trie, zk_proof);
+        let chain_update = ChainUpdate::from_two_tries(range, &old_trie, &trie, receipt);
 
         Ok(chain_update)
     }
 
     #[instrument(skip_all)]
-    fn prove(&self, input: Input, old_zk_proof: &Option<Bytes>) -> Result<Receipt, HostError> {
-        let old_receipt = old_zk_proof.as_ref().map(decode_proof);
-        let executor_env = build_executor_env(input, old_receipt)?;
+    fn prove(
+        &self,
+        input: Input,
+        previous_proof: Option<ChainProof>,
+    ) -> Result<ChainProof, HostError> {
+        let executor_env = build_executor_env(input, previous_proof)?;
         let ProveInfo { receipt, stats } =
             provably_execute(&self.prover, executor_env, RISC0_CHAIN_GUEST_ELF)?;
         let SessionStats {
@@ -152,7 +152,7 @@ where
             segments,
         } = stats;
         info!("Prover stats. Segments: {segments}, cycles: {total_cycles}, user cycles: {user_cycles}");
-        Ok(receipt)
+        Ok(receipt.into())
     }
 
     #[instrument(skip(self))]
@@ -178,16 +178,6 @@ where
         info!("Fetched block {}", block.number());
         Ok(Box::new(block))
     }
-}
-
-fn encode_proof(receipt: &Receipt) -> Bytes {
-    bincode::serialize(receipt)
-        .expect("failed to serialize receipt")
-        .into()
-}
-
-fn decode_proof(proof: &Bytes) -> Receipt {
-    bincode::deserialize(proof).expect("failed to deserialize proof")
 }
 
 #[allow(unused)]

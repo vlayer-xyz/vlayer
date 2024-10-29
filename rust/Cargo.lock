@@ -2127,6 +2127,7 @@ dependencies = [
  "alloy-primitives",
  "alloy-rlp",
  "anyhow",
+ "bincode",
  "block_trie",
  "bytes",
  "chain_guest_wrapper",
@@ -2135,6 +2136,7 @@ dependencies = [
  "mpt",
  "nybbles",
  "rand",
+ "risc0-zkvm",
  "serde",
  "thiserror",
 ]
@@ -2174,6 +2176,7 @@ dependencies = [
  "chain_guest",
  "chain_guest_wrapper",
  "derivative",
+ "derive_more 1.0.0",
  "ethers",
  "futures",
  "host_utils",

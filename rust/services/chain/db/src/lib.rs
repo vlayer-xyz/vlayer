@@ -19,6 +19,7 @@ mod chain_trie;
 mod db_node;
 mod error;
 mod proof_builder;
+mod receipt;
 #[cfg(test)]
 mod tests;
 
@@ -26,6 +27,7 @@ pub use chain_trie::ChainTrie;
 pub use db_node::DbNode;
 pub use error::{ChainDbError, ChainDbResult};
 pub use proof_builder::MerkleProof;
+pub use receipt::ChainProof;
 
 /// Merkle trie nodes table. Holds `node_hash -> rlp_node` mapping
 const NODES: &str = "nodes";
