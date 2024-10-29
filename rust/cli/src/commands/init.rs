@@ -200,16 +200,12 @@ fn change_sdk_dependency_to_npm(foundry_root: &Path) -> Result<(), CLIError> {
 }
 
 pub(crate) async fn init(args: InitArgs) -> Result<(), CLIError> {
-    let existing = args.existing;
-    let project_name = args.project_name;
-    let template = args.template.unwrap_or_default();
-
     let mut cwd = std::env::current_dir()?;
 
-    if !existing {
+    if !args.existing {
         let mut command = std::process::Command::new("forge");
         command.arg("init");
-        if let Some(project_name) = project_name {
+        if let Some(project_name) = args.project_name {
             cwd.push(&project_name);
             command.arg(project_name);
         }
@@ -221,7 +217,7 @@ pub(crate) async fn init(args: InitArgs) -> Result<(), CLIError> {
         }
     }
 
-    init_existing(cwd, template).await
+    init_existing(cwd, args.template.unwrap_or_default()).await
 }
 
 pub(crate) async fn init_existing(cwd: PathBuf, template: TemplateOption) -> Result<(), CLIError> {
