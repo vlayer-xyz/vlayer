@@ -16,7 +16,7 @@ use call_engine::{
 };
 use call_guest_wrapper::RISC0_CALL_GUEST_ELF;
 use chain_client::{Client as ChainProofClient, RpcClient as RpcChainProofClient};
-use chain_shared::ChainProof;
+use chain_shared::types::ChainProof;
 use config::HostConfig;
 use error::HostError;
 use ethers_core::types::BlockNumber;
