@@ -25,13 +25,15 @@ pub enum CLIError {
     #[error("Error parsing package.json: {0}")]
     PackageJsonError(#[from] serde_json::Error),
     #[error("{0} tests failed")]
-    TestFailed(usize),
+    TestsFailed(usize),
+    #[error("{0}")]
+    TestsExecutionError(#[from] test_runner::Report),
 }
 
 impl CLIError {
     pub fn error_code(&self) -> i32 {
         match self {
-            CLIError::TestFailed(failed) => {
+            CLIError::TestsFailed(failed) => {
                 i32::try_from(*failed).expect("Failed tests count is too large")
             }
             _ => 1,
