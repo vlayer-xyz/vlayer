@@ -4,7 +4,6 @@ set -ueo pipefail
 
 VLAYER_HOME=$(git rev-parse --show-toplevel)
 
-
 for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ; do
 
   (
@@ -17,8 +16,12 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
   )
 done
 
-echo "Running eslint for: $VLAYER_HOME/packages"
+echo "::group::Running eslint for: $VLAYER_HOME/packages"
+echo "::group::Building sdk"
+cd "${VLAYER_HOME}/packages/sdk"
+bun run build
+echo '::endgroup::'
 cd "${VLAYER_HOME}/packages"
-
 bun install --frozen-lockfile
 bun run lint
+echo '::endgroup::'
