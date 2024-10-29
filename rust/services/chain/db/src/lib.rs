@@ -7,7 +7,7 @@ use std::{
 };
 
 use alloy_primitives::{keccak256, BlockNumber, ChainId, B256};
-use alloy_rlp::{Bytes as RlpBytes, Decodable, RlpDecodable, RlpEncodable};
+use alloy_rlp::{Decodable, RlpDecodable, RlpEncodable};
 use bytes::Bytes;
 use chain_trie::UnverifiedChainTrie;
 use derive_more::Debug;
@@ -41,20 +41,20 @@ pub struct ChainInfo {
     pub last_block: BlockNumber,
     pub root_hash: B256,
     #[debug("{zk_proof:#x}")]
-    pub zk_proof: RlpBytes,
+    pub zk_proof: Bytes,
 }
 
 impl ChainInfo {
-    pub fn new(
+    pub const fn new(
         block_range: RangeInclusive<BlockNumber>,
         root_hash: B256,
-        zk_proof: impl Into<Bytes>,
+        zk_proof: Bytes,
     ) -> Self {
         Self {
             first_block: *block_range.start(),
             last_block: *block_range.end(),
             root_hash,
-            zk_proof: zk_proof.into(),
+            zk_proof,
         }
     }
 
@@ -104,10 +104,9 @@ impl ChainUpdate {
         range: RangeInclusive<BlockNumber>,
         old: impl IntoIterator<Item = Bytes>,
         new: impl IntoIterator<Item = Bytes> + Hashable,
-        zk_proof: ChainProofReceipt,
+        receipt: &ChainProofReceipt,
     ) -> Result<Self, bincode::Error> {
-        let proof_bytes: Bytes = zk_proof.try_into()?;
-        let chain_info = ChainInfo::new(range, new.hash_slow(), proof_bytes);
+        let chain_info = ChainInfo::new(range, new.hash_slow(), receipt.try_into()?);
         let (added_nodes, removed_nodes) = difference(old, new);
         Ok(Self::new(chain_info, added_nodes, removed_nodes))
     }

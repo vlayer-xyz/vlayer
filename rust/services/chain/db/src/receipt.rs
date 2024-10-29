@@ -52,10 +52,10 @@ impl ChainProofReceipt {
     }
 }
 
-impl TryFrom<ChainProofReceipt> for Bytes {
+impl TryFrom<&ChainProofReceipt> for Bytes {
     type Error = bincode::Error;
 
-    fn try_from(receipt: ChainProofReceipt) -> Result<Self, Self::Error> {
+    fn try_from(receipt: &ChainProofReceipt) -> Result<Self, Self::Error> {
         Ok(bincode::serialize(&receipt.0)?.into())
     }
 }
