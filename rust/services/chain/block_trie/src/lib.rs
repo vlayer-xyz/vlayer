@@ -94,7 +94,7 @@ impl BlockTrie {
         new_blocks: impl IntoIterator<Item = &'a dyn EvmBlockHeader>,
     ) -> BlockTrieResult<()> {
         for block in new_blocks {
-            self.append_single(block).expect("single_append failed");
+            self.append_single(block)?;
         }
         Ok(())
     }
@@ -105,8 +105,7 @@ impl BlockTrie {
         mut old_leftmost_block: &'a dyn EvmBlockHeader,
     ) -> BlockTrieResult<()> {
         for block in old_blocks.rev() {
-            self.prepend_single(old_leftmost_block)
-                .expect("single_prepend failed");
+            self.prepend_single(old_leftmost_block)?;
 
             old_leftmost_block = block;
         }
