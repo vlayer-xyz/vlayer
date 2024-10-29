@@ -5,6 +5,12 @@ fs_permissions = [{ access = "read", path = "./testdata"}]
 
 libs = ["dependencies"]
 
+[profile.no-vlayer]
+no-match-path="test/vlayer/*"
+
+[profile.vlayer]
+match-path="test/vlayer/*"
+
 [dependencies]
 forge-std = "1.9.2"
 "@openzeppelin-contracts" = "5.0.1"

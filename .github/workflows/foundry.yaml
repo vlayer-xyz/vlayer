@@ -46,8 +46,10 @@ jobs:
 
       - name: Run Forge tests
         working-directory: ./contracts
+        env:
+          FOUNDRY_PROFILE: no-vlayer
         run: |
-          forge test --no-match-path "test/vlayer/*" -vvv
+          forge test -vvv
 
       - name: Run Forge formatter (examples)
         run: |
