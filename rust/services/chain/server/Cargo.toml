@@ -11,7 +11,7 @@ axum-jrpc = { workspace = true }
 bincode = "1.3.3"
 block_trie = { workspace = true }
 chain_db = { workspace = true }
-chain_types = { workspace = true }
+chain_shared = { workspace = true }
 lazy_static = { workspace = true }
 mpt = { workspace = true }
 parking_lot = { workspace = true }

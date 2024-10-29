@@ -13,7 +13,7 @@ as-any = { workspace = true }
 block_header = { workspace = true }
 call_engine = { workspace = true }
 chain = { workspace = true }
-chain_types = { workspace = true }
+chain_shared = { workspace = true }
 mpt = { workspace = true }
 revm = { workspace = true }
 

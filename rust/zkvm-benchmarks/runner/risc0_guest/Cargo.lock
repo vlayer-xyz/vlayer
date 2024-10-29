@@ -833,7 +833,7 @@ dependencies = [
  "anyhow",
  "block_header",
  "chain",
- "chain_types",
+ "chain_shared",
  "derive-new",
  "derive_more",
  "email_proof",
@@ -885,7 +885,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "chain_types"
+name = "chain_shared"
 version = "0.1.0"
 dependencies = [
  "alloy-primitives",

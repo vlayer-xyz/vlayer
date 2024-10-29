@@ -15,7 +15,7 @@ call_guest_wrapper = { workspace = true }
 chain = { workspace = true }
 chain_client = { workspace = true }
 chain_server = { workspace = true }
-chain_types = { workspace = true }
+chain_shared = { workspace = true }
 dotenvy = { workspace = true }
 ethers-core = { workspace = true }
 host_utils = { workspace = true }

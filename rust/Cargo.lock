@@ -1894,7 +1894,7 @@ dependencies = [
  "anyhow",
  "block_header",
  "chain",
- "chain_types",
+ "chain_shared",
  "derive-new",
  "derive_more 1.0.0",
  "email_proof",
@@ -1925,7 +1925,7 @@ dependencies = [
  "block_header",
  "call_engine",
  "chain",
- "chain_types",
+ "chain_shared",
  "mpt",
  "revm",
 ]
@@ -1954,7 +1954,7 @@ dependencies = [
  "chain",
  "chain_client",
  "chain_server",
- "chain_types",
+ "chain_shared",
  "ctor",
  "dotenvy",
  "ethers-core",
@@ -2111,7 +2111,7 @@ dependencies = [
  "async-trait",
  "block_trie",
  "chain_server",
- "chain_types",
+ "chain_shared",
  "futures",
  "mpt",
  "parking_lot",
@@ -2204,7 +2204,7 @@ dependencies = [
  "bincode",
  "block_trie",
  "chain_db",
- "chain_types",
+ "chain_shared",
  "lazy_static",
  "mpt",
  "parking_lot",
@@ -2219,7 +2219,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "chain_types"
+name = "chain_shared"
 version = "0.1.0"
 dependencies = [
  "alloy-primitives",
