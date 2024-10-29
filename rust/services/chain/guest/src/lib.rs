@@ -29,23 +29,17 @@ fn append_prepend(
     elf_id: Digest,
     prepend_blocks: impl DoubleEndedIterator<Item = Box<dyn EvmBlockHeader>>,
     append_blocks: impl Iterator<Item = Box<dyn EvmBlockHeader>>,
-    mut old_leftmost_block: Box<dyn EvmBlockHeader>,
+    old_leftmost_block: Box<dyn EvmBlockHeader>,
     mut block_trie: BlockTrie,
 ) -> (B256, Digest) {
     let expected_prev_proof_output =
         to_vec(&(block_trie.hash_slow(), elf_id)).expect("failed to serialize");
     env::verify(elf_id, &expected_prev_proof_output).expect("failed to verify previous ZK proof");
 
-    for block in append_blocks {
-        block_trie.append(&*block).expect("append failed");
-    }
-    for block in prepend_blocks.rev() {
-        block_trie
-            .prepend(&*old_leftmost_block)
-            .expect("prepend failed");
-
-        old_leftmost_block = block;
-    }
+    block_trie.append(append_blocks).expect("append failed");
+    block_trie
+        .prepend(prepend_blocks, old_leftmost_block)
+        .expect("prepend failed");
 
     (block_trie.hash_slow(), elf_id)
 }

@@ -122,9 +122,7 @@ where
         let append_range = block_range.end() + 1..=latest_block_number;
         let append_blocks = self.get_blocks_range(append_range).await?;
 
-        for block in &append_blocks {
-            trie.append(block.as_ref())?;
-        }
+        trie.append(append_blocks.iter())?;
 
         let input = Input::AppendPrepend {
             elf_id: *GUEST_ID,

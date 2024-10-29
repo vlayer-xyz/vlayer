@@ -52,7 +52,10 @@ impl BlockTrie {
 
     /// `new_rightmost_block` is the header of the block to be appended, i.e. the next
     /// block after the block with highest number currently stored in the trie
-    pub fn append(&mut self, new_rightmost_block: &dyn EvmBlockHeader) -> BlockTrieResult<()> {
+    pub fn append_single(
+        &mut self,
+        new_rightmost_block: &dyn EvmBlockHeader,
+    ) -> BlockTrieResult<()> {
         let parent_block_idx = new_rightmost_block.number() - 1;
         let parent_block_hash = self
             .get(parent_block_idx)
@@ -69,7 +72,10 @@ impl BlockTrie {
 
     /// `old_leftmost_block` is the header of the block with lowest number currently
     /// stored in the trie
-    pub fn prepend(&mut self, old_leftmost_block: &dyn EvmBlockHeader) -> BlockTrieResult<()> {
+    pub fn prepend_single(
+        &mut self,
+        old_leftmost_block: &dyn EvmBlockHeader,
+    ) -> BlockTrieResult<()> {
         let old_leftmost_block_hash = self
             .get(old_leftmost_block.number())
             .ok_or(BlockTrieError::GetBlockHashFailed(old_leftmost_block.number()))?;
@@ -80,6 +86,32 @@ impl BlockTrie {
             });
         }
         self.insert_unchecked(old_leftmost_block.number() - 1, old_leftmost_block.parent_hash())?;
+        Ok(())
+    }
+
+    pub fn append<B>(&mut self, blocks: impl Iterator<Item = B>) -> BlockTrieResult<()>
+    where
+        B: AsRef<dyn EvmBlockHeader>,
+    {
+        for block in blocks {
+            self.append_single(block.as_ref())?;
+        }
+        Ok(())
+    }
+
+    pub fn prepend<B>(
+        &mut self,
+        blocks: impl DoubleEndedIterator<Item = B>,
+        mut old_leftmost_block: B,
+    ) -> BlockTrieResult<()>
+    where
+        B: AsRef<dyn EvmBlockHeader>,
+    {
+        for block in blocks.rev() {
+            self.prepend_single(old_leftmost_block.as_ref())?;
+
+            old_leftmost_block = block;
+        }
         Ok(())
     }
 
