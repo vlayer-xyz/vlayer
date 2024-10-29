@@ -1,3 +1,3 @@
-export * from "./types/message.ts";
-export * from "./types/webProof.ts";
+export * from "./types/message";
+export * from "./types/webProof";
 export * from "./utils";

@@ -9,6 +9,12 @@ cd "${VLAYER_HOME}/packages"
 bun install --frozen-lockfile
 echo '::endgroup::'
 
+echo "::group::Building sdk"
+cd "${VLAYER_HOME}/packages/sdk"
+bun run build
+echo '::endgroup::'
+
+
 EXAMPLES="simple web_proof"
 
 for example_name in ${EXAMPLES}; do

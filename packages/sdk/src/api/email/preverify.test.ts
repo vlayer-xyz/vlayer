@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { preverifyEmail } from "./preverify.ts";
+import { preverifyEmail } from "./preverify";
 import { readFile } from "../../testHelpers/readFile";
 
 describe("Preverify email: integration", () => {

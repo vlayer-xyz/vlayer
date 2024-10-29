@@ -4,10 +4,10 @@
     "jsx": "react",
     "useDefineForClassFields": true,
     "lib": ["ESNext", "DOM"],
-    "moduleResolution": "Node",
     "resolveJsonModule": true,
     "isolatedModules": true,
     "esModuleInterop": true,
     "baseUrl": "./",
+    "moduleResolution": "bundler",
   },
 }

@@ -18,6 +18,11 @@ cd ${VLAYER_HOME}/packages/sdk && bun install --frozen-lockfile
 EXAMPLES_REQUIRING_ALCHEMY=("simple_time_travel" "simple_teleport")
 EXAMPLES_REQUIRING_PRIV_KEY=("simple_time_travel")
 
+echo "::group::Building sdk"
+cd "${VLAYER_HOME}/packages/sdk"
+bun run build
+echo '::endgroup::'
+
 for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ; do
   example_name=$(basename "${example}")
 

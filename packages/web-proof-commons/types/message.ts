@@ -1,5 +1,5 @@
-import type { Branded } from "../utils.ts";
-import type { WebProof } from "./webProof.ts";
+import type { Branded } from "../utils";
+import type { WebProof } from "./webProof";
 
 export const EXTENSION_STEP = {
   expectUrl: "expectUrl",

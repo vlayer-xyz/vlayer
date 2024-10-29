@@ -1,5 +1,5 @@
-import { parseEmail, getDkimSigners } from "./parseEmail.ts";
-import { resolveDkimDns } from "./dnsResolver.ts";
+import { parseEmail, getDkimSigners } from "./parseEmail";
+import { resolveDkimDns } from "./dnsResolver";
 
 export async function preverifyEmail(mimeEmail: string) {
   const parsedEmail = await parseEmail(mimeEmail);

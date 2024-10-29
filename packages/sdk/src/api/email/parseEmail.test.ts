@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { getDkimSigners, parseEmail, parseParams } from "./parseEmail.ts";
+import { getDkimSigners, parseEmail, parseParams } from "./parseEmail";
 
 const emailHeaders = `From: "John Doe" <john@d.oe>
 To: "Jane Doe" <jane@d.oe>

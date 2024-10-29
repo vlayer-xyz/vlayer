@@ -386,6 +386,9 @@ jobs:
       run: bun install --frozen-lockfile
     - name: replace symlinks 
       run: ./bash/replace-symlinks.sh
+    - name: Build
+      working-directory: packages/sdk
+      run: bun run build
     - name: Publish to NPM
       working-directory: packages/sdk
       env:

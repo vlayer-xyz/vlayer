@@ -1,6 +1,6 @@
-import { expectUrl } from "./expectUrl.ts";
-import { startPage } from "./startPage.ts";
-import { notarize } from "./notarize.ts";
+import { expectUrl } from "./expectUrl";
+import { startPage } from "./startPage";
+import { notarize } from "./notarize";
 
 const steps = {
   expectUrl,

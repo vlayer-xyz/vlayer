@@ -1,9 +1,9 @@
 export * as testHelpers from "./api/helpers";
-export { preverifyEmail } from "./api/email/preverify.ts";
-export { createVlayerClient } from "./api/lib/client.ts";
+export { preverifyEmail } from "./api/email/preverify";
+export { createVlayerClient } from "./api/lib/client";
 
 export * from "./api/webProof";
 export * from "./api/lib/types";
 
-export * from "./web-proof-commons/types/webProof.ts";
-export * from "./web-proof-commons/utils.ts";
+export * from "./web-proof-commons/types/webProof";
+export * from "./web-proof-commons/utils";
