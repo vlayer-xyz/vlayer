@@ -25,6 +25,7 @@ members = [
     "services/chain/types",
     "services/chain/worker",
     "test_runner",
+    "traits",
     "web_proof",
     "zkvm-benchmarks/benchmarks",
     "zkvm-benchmarks/common",
@@ -136,6 +137,7 @@ mpt = { path = "mpt" }
 provider = { path = "provider" }
 server_utils = { path = "server_utils" }
 test_runner = { path = "test_runner" }
+traits = { path = "traits" }
 web_proof = { path = "web_proof" }
 zkvm-benchmarks = { path = "zkvm-benchmarks/benchmarks" }
 zkvm-benchmarks-common = { path = "zkvm-benchmarks/common" }

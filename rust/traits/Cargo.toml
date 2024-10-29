@@ -1,0 +1,11 @@
+[package]
+name = "traits"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+alloy-primitives ={ workspace = true }
+auto_impl = { workspace = true }
+
+[lints]
+workspace = true

@@ -18,6 +18,7 @@ serde = { workspace = true }
 thiserror = { workspace = true }
 risc0-zkvm = { workspace = true }
 bincode = { workspace = true }
+traits = { workspace = true }
 
 [dev-dependencies]
 rand = { workspace = true }

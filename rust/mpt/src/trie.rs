@@ -1,12 +1,12 @@
 use std::fmt::Debug;
 
-use alloy_primitives::{keccak256, B256};
+use alloy_primitives::B256;
 use alloy_rlp::Decodable;
-use alloy_trie::EMPTY_ROOT_HASH;
 use bytes::Bytes;
 use nybbles::Nibbles;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
+use traits::Hashable;
 use utils::{parse_node, resolve_trie};
 
 use crate::node::{Node, NodeError};
@@ -76,16 +76,6 @@ impl MerkleTrie {
         self.0.size()
     }
 
-    /// Returns the hash of the trie's root node.
-    pub fn hash_slow(&self) -> B256 {
-        // compute the keccak hash of the RLP encoded root node
-        match self.0 {
-            Node::Null => EMPTY_ROOT_HASH,
-            Node::Digest(digest) => digest,
-            ref node => keccak256(node.rlp_encoded()),
-        }
-    }
-
     /// Creates a new trie from the given RLP encoded nodes.
     ///
     /// The first node provided must always be the root node. The remaining nodes can be in any
@@ -96,6 +86,13 @@ impl MerkleTrie {
         nodes: impl IntoIterator<Item = T>,
     ) -> Result<Self, ParseNodeError> {
         nodes.into_iter().map(parse_node).collect()
+    }
+}
+
+impl Hashable for MerkleTrie {
+    /// Returns the hash of the trie's root node.
+    fn hash_slow(&self) -> B256 {
+        self.0.hash_slow()
     }
 }
 

@@ -8,6 +8,7 @@ use risc0_zkp::verify::VerificationError;
 use risc0_zkvm::{sha::Digest, Receipt};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
+use traits::Hashable;
 
 #[derive(Debug, Error, Derivative)]
 #[derivative(PartialEq)]
@@ -109,10 +110,6 @@ impl BlockTrie {
         Ok(())
     }
 
-    pub fn hash_slow(&self) -> B256 {
-        self.0.hash_slow()
-    }
-
     pub fn size(&self) -> usize {
         self.0.size()
     }
@@ -123,6 +120,12 @@ impl BlockTrie {
 
     pub fn into_root(self) -> Node {
         self.0 .0
+    }
+}
+
+impl Hashable for BlockTrie {
+    fn hash_slow(&self) -> B256 {
+        self.0.hash_slow()
     }
 }
 

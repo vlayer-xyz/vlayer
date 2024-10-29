@@ -518,6 +518,7 @@ dependencies = [
  "dyn-clone",
  "revm",
  "serde",
+ "traits",
 ]
 
 [[package]]
@@ -535,6 +536,7 @@ dependencies = [
  "risc0-zkvm",
  "serde",
  "thiserror",
+ "traits",
 ]
 
 [[package]]
@@ -682,6 +684,7 @@ dependencies = [
  "risc0-zkp",
  "risc0-zkvm",
  "serde",
+ "traits",
 ]
 
 [[package]]
@@ -1512,6 +1515,7 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror",
+ "traits",
 ]
 
 [[package]]
@@ -2862,6 +2866,15 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0e0d2eaa99c3c2e41547cfa109e910a68ea03823cccad4a0525dcbc9b01e8c71"
 dependencies = [
  "tracing-core",
+]
+
+[[package]]
+name = "traits"
+version = "0.1.0"
+dependencies = [
+ "alloy-primitives",
+ "alloy-rlp",
+ "auto_impl",
 ]
 
 [[package]]

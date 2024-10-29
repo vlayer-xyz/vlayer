@@ -7,11 +7,10 @@ edition = "2021"
 alloy-primitives = { workspace = true }
 block_header = { workspace = true }
 block_trie = { workspace = true }
-bytes = { workspace = true }
-mpt = { workspace = true }
 risc0-zkp = { workspace = true }
 risc0-zkvm = { workspace = true }
 serde = { workspace = true }
+traits = { workspace = true }
 
 [lints]
 workspace = true

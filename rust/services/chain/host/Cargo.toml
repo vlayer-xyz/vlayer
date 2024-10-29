@@ -6,22 +6,16 @@ edition = "2021"
 [dependencies]
 alloy-primitives = { workspace = true }
 anyhow = { workspace = true }
-bincode = { workspace = true }
 block_trie = { workspace = true }
-bytes = { workspace = true }
 chain_db = { workspace = true }
 chain_guest = { workspace = true }
 chain_guest_wrapper = { workspace = true }
 derivative = { workspace = true }
-derive_more ={ workspace = true }
 ethers = { workspace = true }
 futures = { workspace = true }
 host_utils = { workspace = true }
-key_value = { workspace = true }
 lazy_static = { workspace = true }
-mpt = { workspace = true }
 provider = { workspace = true }
-risc0-zkp = { workspace = true }
 risc0-zkvm = { workspace = true }
 serde = { workspace = true }
 thiserror = { workspace = true }

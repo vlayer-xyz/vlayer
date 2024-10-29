@@ -4,6 +4,7 @@ use block_trie::BlockTrie;
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm::{guest::env, serde::to_vec};
 use serde::{Deserialize, Serialize};
+use traits::Hashable;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Input {
@@ -52,7 +53,7 @@ fn append_prepend(
 
 #[allow(clippy::unused_async)]
 pub async fn main(input: Input) -> (B256, Digest) {
-    match input {
+match input {
         Input::Initialize { elf_id, block } => initialize(elf_id, &*block),
         Input::AppendPrepend {
             elf_id,

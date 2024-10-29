@@ -12,6 +12,7 @@ auto_impl = { workspace = true }
 dyn-clone = { workspace = true }
 revm = { workspace = true, features = ["serde", "std"] }
 serde = { workspace = true }
+traits = { workspace = true }
 
 [dev-dependencies]
 anyhow = { workspace = true }

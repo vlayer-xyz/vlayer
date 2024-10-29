@@ -1,8 +1,9 @@
 //! Type aliases for Ethereum.
-use alloy_primitives::{Address, BlockHash, BlockNumber, Bloom, Bytes, B256, B64, U256};
+use alloy_primitives::{keccak256, Address, BlockHash, BlockNumber, Bloom, Bytes, B256, B64, U256};
 use alloy_rlp_derive::RlpEncodable;
 use revm::primitives::BlockEnv;
 use serde::{Deserialize, Serialize};
+use traits::Hashable;
 
 use super::EvmBlockHeader;
 use crate::casting_utils::try_downcast;
@@ -87,6 +88,12 @@ impl EvmBlockHeader for EthBlockHeader {
         blk_env.prevrandao = Some(self.mix_hash);
         blk_env.basefee = self.base_fee_per_gas;
         blk_env.gas_limit = U256::from(self.gas_limit);
+    }
+}
+
+impl Hashable for EthBlockHeader {
+    fn hash_slow(&self) -> B256 {
+        keccak256(alloy_rlp::encode(self))
     }
 }
 

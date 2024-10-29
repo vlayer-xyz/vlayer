@@ -8,7 +8,6 @@ use std::{
 
 use alloy_primitives::{keccak256, BlockNumber, ChainId, B256};
 use alloy_rlp::{Bytes as RlpBytes, Decodable, RlpDecodable, RlpEncodable};
-use block_trie::BlockTrie;
 use bytes::Bytes;
 use chain_trie::UnverifiedChainTrie;
 use derive_more::Debug;
@@ -28,6 +27,7 @@ pub use db_node::DbNode;
 pub use error::{ChainDbError, ChainDbResult};
 pub use proof_builder::MerkleProof;
 pub use receipt::ChainProof;
+use traits::Hashable;
 
 /// Merkle trie nodes table. Holds `node_hash -> rlp_node` mapping
 const NODES: &str = "nodes";
@@ -102,8 +102,8 @@ impl ChainUpdate {
 
     pub fn from_two_tries(
         range: RangeInclusive<BlockNumber>,
-        old: &BlockTrie,
-        new: &BlockTrie,
+        old: impl IntoIterator<Item = Bytes>,
+        new: impl IntoIterator<Item = Bytes> + Hashable,
         zk_proof: impl Into<Bytes>,
     ) -> Self {
         let chain_info = ChainInfo::new(range, new.hash_slow(), zk_proof);
