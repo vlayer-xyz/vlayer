@@ -1,24 +1,23 @@
 use std::ops::RangeInclusive;
 
 use alloy_primitives::BlockNumber;
-use block_trie::{BlockTrie, ProofVerificationError};
-use bytes::Bytes;
-use chain_guest_wrapper::RISC0_CHAIN_GUEST_ID;
+use block_trie::BlockTrie;
 use mpt::MerkleTrie;
+use traits::Hashable;
 
-use crate::ChainProof;
+use crate::{receipt::ProofVerificationError, ChainProofReceipt};
 
 pub struct UnverifiedChainTrie {
     pub block_range: RangeInclusive<BlockNumber>,
     pub trie: MerkleTrie,
-    pub zk_proof: Bytes,
+    pub zk_proof: ChainProofReceipt,
 }
 
 impl UnverifiedChainTrie {
     pub const fn new(
         block_range: RangeInclusive<BlockNumber>,
         trie: MerkleTrie,
-        zk_proof: Bytes,
+        zk_proof: ChainProofReceipt,
     ) -> Self {
         Self {
             block_range,
@@ -32,14 +31,14 @@ impl UnverifiedChainTrie {
 pub struct ChainTrie {
     pub block_range: RangeInclusive<BlockNumber>,
     pub trie: BlockTrie,
-    pub zk_proof: ChainProof,
+    pub zk_proof: ChainProofReceipt,
 }
 
 impl ChainTrie {
     pub fn new(
         block_range: RangeInclusive<BlockNumber>,
         trie: BlockTrie,
-        zk_proof: impl Into<ChainProof>,
+        zk_proof: impl Into<ChainProofReceipt>,
     ) -> Self {
         Self {
             block_range,
@@ -59,8 +58,8 @@ impl TryFrom<UnverifiedChainTrie> for ChainTrie {
             zk_proof,
         }: UnverifiedChainTrie,
     ) -> Result<Self, Self::Error> {
-        let block_trie =
-            BlockTrie::from_mpt_verifying_the_proof(trie, &zk_proof, RISC0_CHAIN_GUEST_ID)?;
-        Ok(ChainTrie::new(block_range, block_trie, &zk_proof))
+        zk_proof.verify(trie.hash_slow())?;
+        let block_trie = BlockTrie::from_unchecked(trie);
+        Ok(ChainTrie::new(block_range, block_trie, zk_proof))
     }
 }

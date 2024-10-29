@@ -10,6 +10,7 @@ anyhow = { workspace = true }
 block_trie = { workspace = true }
 bytes = { workspace = true }
 chain_guest_wrapper = { workspace = true }
+derivative = { workspace = true }
 derive_more = { workspace = true }
 key_value = { workspace = true }
 mpt = { workspace = true }
@@ -17,6 +18,7 @@ nybbles = { workspace = true }
 serde = { workspace = true }
 thiserror = { workspace = true }
 risc0-zkvm = { workspace = true }
+risc0-zkp = { workspace = true }
 bincode = { workspace = true }
 traits = { workspace = true }
 

@@ -26,7 +26,7 @@ pub use chain_trie::ChainTrie;
 pub use db_node::DbNode;
 pub use error::{ChainDbError, ChainDbResult};
 pub use proof_builder::MerkleProof;
-pub use receipt::ChainProof;
+pub use receipt::ChainProofReceipt;
 use traits::Hashable;
 
 /// Merkle trie nodes table. Holds `node_hash -> rlp_node` mapping
@@ -104,11 +104,12 @@ impl ChainUpdate {
         range: RangeInclusive<BlockNumber>,
         old: impl IntoIterator<Item = Bytes>,
         new: impl IntoIterator<Item = Bytes> + Hashable,
-        zk_proof: impl Into<Bytes>,
-    ) -> Self {
-        let chain_info = ChainInfo::new(range, new.hash_slow(), zk_proof);
+        zk_proof: ChainProofReceipt,
+    ) -> Result<Self, bincode::Error> {
+        let proof_bytes: Bytes = zk_proof.try_into()?;
+        let chain_info = ChainInfo::new(range, new.hash_slow(), proof_bytes);
         let (added_nodes, removed_nodes) = difference(old, new);
-        Self::new(chain_info, added_nodes, removed_nodes)
+        Ok(Self::new(chain_info, added_nodes, removed_nodes))
     }
 }
 
@@ -192,12 +193,13 @@ impl ChainDb {
             last_block,
             zk_proof,
         } = chain_info;
+        let chain_proof = (&zk_proof).try_into()?;
 
         let first_block_proof = tx.get_merkle_proof(root_hash, first_block)?;
         let last_block_proof = tx.get_merkle_proof(root_hash, last_block)?;
         let trie = mpt_from_proofs(first_block_proof, last_block_proof);
 
-        Ok(Some(UnverifiedChainTrie::new(first_block..=last_block, trie, zk_proof)))
+        Ok(Some(UnverifiedChainTrie::new(first_block..=last_block, trie, chain_proof)))
     }
 
     pub fn get_chain_trie(&self, chain_id: ChainId) -> ChainDbResult<Option<ChainTrie>> {

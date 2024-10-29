@@ -27,4 +27,10 @@ pub enum HostError {
     ),
     #[error("Block trie error: {0}")]
     BlockTrieError(#[from] block_trie::BlockTrieError),
+    #[error("Proof serialization error: {0}")]
+    ProofSerializationError(
+        #[from]
+        #[derivative(PartialEq = "ignore")]
+        bincode::Error,
+    ),
 }

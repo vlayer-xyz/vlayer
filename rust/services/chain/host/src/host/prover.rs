@@ -1,4 +1,4 @@
-use chain_db::ChainProof;
+use chain_db::ChainProofReceipt;
 use chain_guest::Input;
 use chain_guest_wrapper::RISC0_CHAIN_GUEST_ELF;
 use host_utils::{ProofMode, Prover as Risc0Prover};
@@ -26,7 +26,11 @@ impl Prover {
 
     /// Wrapper around Risc0Prover which specifier the chain guest ELF and accepts the previous proof
     #[instrument(skip_all)]
-    pub fn prove(&self, input: &Input, previous_proof: Option<ChainProof>) -> Result<ChainProof> {
+    pub fn prove(
+        &self,
+        input: &Input,
+        previous_proof: Option<ChainProofReceipt>,
+    ) -> Result<ChainProofReceipt> {
         let executor_env = build_executor_env(input, previous_proof)
             .map_err(|err| Error::ExecutorEnvBuilder(err.to_string()))?;
 
@@ -40,7 +44,7 @@ impl Prover {
 
 fn build_executor_env(
     input: &Input,
-    assumption: Option<ChainProof>,
+    assumption: Option<ChainProofReceipt>,
 ) -> anyhow::Result<ExecutorEnv<'static>> {
     let mut builder = ExecutorEnv::builder();
     if let Some(assumption) = assumption {

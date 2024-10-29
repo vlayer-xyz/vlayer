@@ -95,7 +95,7 @@ where
         let receipt = self.prover.prove(&input, None)?;
 
         let range = latest_block_number..=latest_block_number;
-        let chain_update = ChainUpdate::from_two_tries(range, vec![], &trie, receipt);
+        let chain_update = ChainUpdate::from_two_tries(range, vec![], &trie, receipt)?;
 
         Ok(chain_update)
     }
@@ -132,7 +132,7 @@ where
         let receipt = self.prover.prove(&input, Some(old_zk_proof))?;
 
         let range = *block_range.start()..=latest_block_number;
-        let chain_update = ChainUpdate::from_two_tries(range, &old_trie, &trie, receipt);
+        let chain_update = ChainUpdate::from_two_tries(range, &old_trie, &trie, receipt)?;
 
         Ok(chain_update)
     }
