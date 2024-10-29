@@ -15,7 +15,7 @@ alloy-sol-types = { workspace = true }
 anyhow = { workspace = true }
 block_header = { workspace = true }
 chain = { workspace = true }
-chain_shared = { workspace = true }
+chain_common = { workspace = true }
 common = { workspace = true }
 derive-new = { workspace = true }
 derive_more = { workspace = true }

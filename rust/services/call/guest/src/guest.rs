@@ -10,7 +10,7 @@ use call_engine::{
     travel_call_executor::TravelCallExecutor,
     CallAssumptions,
 };
-use chain_shared::types::ChainProof;
+use chain_common::types::ChainProof;
 
 use crate::db::wrap_state::WrapStateDb;
 

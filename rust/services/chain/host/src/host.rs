@@ -164,7 +164,6 @@ where
 mod test {
 
     use serde_json::Value;
-    use test_utils::mock_provider;
 
     use super::*;
 
@@ -175,6 +174,7 @@ mod test {
     }
 
     mod poll {
+        use chain_common::test_utils::mock_provider;
         use ethers::providers::MockProvider;
 
         use super::*;

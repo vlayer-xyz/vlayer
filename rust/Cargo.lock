@@ -1894,7 +1894,7 @@ dependencies = [
  "anyhow",
  "block_header",
  "chain",
- "chain_shared",
+ "chain_common",
  "common",
  "derive-new",
  "derive_more 1.0.0",
@@ -1926,7 +1926,7 @@ dependencies = [
  "block_header",
  "call_engine",
  "chain",
- "chain_shared",
+ "chain_common",
  "mpt",
  "revm",
 ]
@@ -1954,8 +1954,8 @@ dependencies = [
  "call_guest_wrapper",
  "chain",
  "chain_client",
+ "chain_common",
  "chain_server",
- "chain_shared",
  "ctor",
  "dotenvy",
  "ethers-core",
@@ -2111,8 +2111,8 @@ dependencies = [
  "anyhow",
  "async-trait",
  "block_trie",
+ "chain_common",
  "chain_server",
- "chain_shared",
  "futures",
  "mpt",
  "parking_lot",
@@ -2122,6 +2122,18 @@ dependencies = [
  "thiserror",
  "tokio",
  "tracing",
+]
+
+[[package]]
+name = "chain_common"
+version = "0.1.0"
+dependencies = [
+ "alloy-primitives",
+ "block_trie",
+ "ethers",
+ "provider",
+ "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -2177,10 +2189,10 @@ dependencies = [
  "anyhow",
  "bincode",
  "block_trie",
+ "chain_common",
  "chain_db",
  "chain_guest",
  "chain_guest_wrapper",
- "chain_shared",
  "derivative",
  "ethers",
  "futures",
@@ -2205,8 +2217,8 @@ dependencies = [
  "axum-jrpc",
  "bincode",
  "block_trie",
+ "chain_common",
  "chain_db",
- "chain_shared",
  "lazy_static",
  "mpt",
  "parking_lot",
@@ -2218,18 +2230,6 @@ dependencies = [
  "thiserror",
  "tokio",
  "traits",
-]
-
-[[package]]
-name = "chain_shared"
-version = "0.1.0"
-dependencies = [
- "alloy-primitives",
- "block_trie",
- "ethers",
- "provider",
- "serde",
- "serde_json",
 ]
 
 [[package]]
