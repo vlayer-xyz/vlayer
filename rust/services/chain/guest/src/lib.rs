@@ -29,7 +29,7 @@ fn append_prepend(
     elf_id: Digest,
     prepend_blocks: impl DoubleEndedIterator<Item = Box<dyn EvmBlockHeader>>,
     append_blocks: impl Iterator<Item = Box<dyn EvmBlockHeader>>,
-    old_leftmost_block: &'_ dyn EvmBlockHeader,
+    old_leftmost_block: &dyn EvmBlockHeader,
     mut block_trie: BlockTrie,
 ) -> (B256, Digest) {
     let expected_prev_proof_output =
