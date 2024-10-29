@@ -23,12 +23,12 @@ impl Prover {
             ProofMode::Succinct => prove_bonsai(env, elf, &ProverOpts::succinct()),
             ProofMode::Fake => prove_fake(env, elf),
         }?;
-        print_stats(&prove_info.stats);
+        log_stats(&prove_info.stats);
         Ok(prove_info)
     }
 }
 
-fn print_stats(stats: &SessionStats) {
+fn log_stats(stats: &SessionStats) {
     let SessionStats {
         total_cycles,
         user_cycles,
