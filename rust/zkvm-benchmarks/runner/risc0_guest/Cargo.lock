@@ -834,6 +834,7 @@ dependencies = [
  "block_header",
  "chain",
  "chain_shared",
+ "common",
  "derive-new",
  "derive_more",
  "email_proof",
@@ -921,6 +922,13 @@ dependencies = [
  "bytemuck",
  "cfg-if",
  "cpufeatures",
+]
+
+[[package]]
+name = "common"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
 ]
 
 [[package]]

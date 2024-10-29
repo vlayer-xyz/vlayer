@@ -1895,6 +1895,7 @@ dependencies = [
  "block_header",
  "chain",
  "chain_shared",
+ "common",
  "derive-new",
  "derive_more 1.0.0",
  "email_proof",
@@ -2611,6 +2612,9 @@ dependencies = [
 [[package]]
 name = "common"
 version = "0.1.0"
+dependencies = [
+ "anyhow",
+]
 
 [[package]]
 name = "compact_str"
@@ -7601,6 +7605,7 @@ dependencies = [
  "auto_impl",
  "block_header",
  "call_engine",
+ "common",
  "derivative",
  "ethers-core",
  "ethers-providers",

@@ -5,9 +5,9 @@ use std::{
 
 use anyhow::bail;
 use revm::DatabaseRef;
+use common::InteriorMutabilityCache;
 
 use super::{location::ExecutionLocation, EvmEnv, EvmEnvFactory};
-use crate::utils::InteriorMutabilityCache;
 
 pub struct NullEvmEnvFactory;
 
