@@ -1,8 +1,8 @@
 use chain_db::ChainProof;
+use chain_guest::Input;
 use chain_guest_wrapper::RISC0_CHAIN_GUEST_ELF;
 use host_utils::{ProofMode, Prover as Risc0Prover};
 use risc0_zkvm::{ExecutorEnv, ProveInfo};
-use serde::Serialize;
 use thiserror::Error;
 use tracing::instrument;
 
@@ -24,12 +24,9 @@ impl Prover {
         Self(Risc0Prover::new(proof_mode))
     }
 
+    /// Wrapper around Risc0Prover which specifier the chain guest ELF and accepts the previous proof
     #[instrument(skip_all)]
-    pub fn prove(
-        &self,
-        input: impl Serialize,
-        previous_proof: Option<ChainProof>,
-    ) -> Result<ChainProof> {
+    pub fn prove(&self, input: Input, previous_proof: Option<ChainProof>) -> Result<ChainProof> {
         let executor_env = build_executor_env(input, previous_proof)
             .map_err(|err| Error::ExecutorEnvBuilder(err.to_string()))?;
 
@@ -42,7 +39,7 @@ impl Prover {
 }
 
 fn build_executor_env(
-    input: impl Serialize,
+    input: Input,
     assumption: Option<ChainProof>,
 ) -> anyhow::Result<ExecutorEnv<'static>> {
     let mut builder = ExecutorEnv::builder();
