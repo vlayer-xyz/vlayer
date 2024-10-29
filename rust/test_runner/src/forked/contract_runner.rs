@@ -10,7 +10,7 @@ use std::{collections::BTreeMap, time::Instant};
 use alloy_dyn_abi::DynSolValue;
 use alloy_primitives::map::HashMap;
 use alloy_sol_types::private::alloy_json_abi::Function;
-use color_eyre::eyre;
+use color_eyre::{eyre, owo_colors::OwoColorize};
 use forge::{
     multi_runner::TestContract,
     result::{SuiteResult, TestResult, TestSetup},
@@ -368,8 +368,12 @@ impl<'a> ContractRunner<'a> {
             find_time,
         );
 
+        // MODIFIED: Added a warning for unsupported test types
+        warn_about_unsupported_tests(&functions);
+
         let test_results = functions
             .par_iter()
+            .filter(|&func| func.test_function_kind().is_unit_test())
             .map(|&func| {
                 let start = Instant::now();
 
@@ -396,13 +400,7 @@ impl<'a> ContractRunner<'a> {
                     TestFunctionKind::UnitTest { should_fail } => {
                         self.run_unit_test(func, should_fail, setup)
                     }
-                    TestFunctionKind::FuzzTest { .. } => {
-                        unimplemented!("fuzz tests are not supported yet");
-                    }
-                    TestFunctionKind::InvariantTest => {
-                        unimplemented!("invariant tests are not supported yet");
-                    }
-                    _ => unreachable!(),
+                    _ => unreachable!("Unsupported test type"),
                 };
 
                 res.duration = start.elapsed();
@@ -450,6 +448,29 @@ impl<'a> ContractRunner<'a> {
                 .is_raw_call_mut_success(address, &mut raw_call_result, should_fail);
         test_result.single_result(success, reason, raw_call_result)
     }
+}
+
+fn warn_about_unsupported_tests(functions: &[&Function]) {
+    let unsupported_functions: Vec<_> = functions
+        .iter()
+        .filter(|func| !func.test_function_kind().is_unit_test())
+        .collect();
+
+    if unsupported_functions.is_empty() {
+        return;
+    }
+
+    println!(
+        "{}: {}",
+        "Warning".yellow().bold(),
+        "Only unit tests are currently supported. The following test were not run:".bold()
+    );
+
+    for func in unsupported_functions {
+        println!("\t {}", func.signature().yellow());
+    }
+
+    println!();
 }
 
 fn is_matching_test(func: &Function, filter: &dyn TestFilter) -> bool {
