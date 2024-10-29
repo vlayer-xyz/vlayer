@@ -5,8 +5,8 @@
     "lint:solidity": "solhint '../src/**/*.sol'",
     "dev": "vite --port 5174",
     "build": "tsc -b && vite build",
-    "lint": "eslint .",
-    "lint:fix": "eslint . --fix",
+    "lint": "NODE_OPTIONS='--preserve-symlinks' eslint .",
+    "lint:fix": "NODE_OPTIONS='--preserve-symlinks' eslint . --fix",
     "preview": "vite preview"
   },
   "dependencies": {
