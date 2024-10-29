@@ -7,6 +7,8 @@ import {
 } from "@vlayer/sdk";
 import React, { useCallback, useState } from "react";
 
+/* eslint-disable */
+
 function Source() {
   const [proof, setProof] = useState<WebProof>();
   const requestWebProof = useCallback(async () => {
