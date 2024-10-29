@@ -40,10 +40,10 @@ fn append_prepend(
     let prepend_blocks_vec: Vec<_> = prepend_blocks.collect();
 
     block_trie
-        .append(append_blocks_vec.iter().map(std::convert::AsRef::as_ref))
+        .append(append_blocks_vec.iter().map(AsRef::as_ref))
         .expect("append failed");
     block_trie
-        .prepend(prepend_blocks_vec.iter().map(std::convert::AsRef::as_ref), old_leftmost_block)
+        .prepend(prepend_blocks_vec.iter().map(AsRef::as_ref), old_leftmost_block)
         .expect("prepend failed");
 
     (block_trie.hash_slow(), elf_id)

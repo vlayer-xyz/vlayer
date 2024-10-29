@@ -122,7 +122,7 @@ where
         let append_range = block_range.end() + 1..=latest_block_number;
         let append_blocks = self.get_blocks_range(append_range).await?;
 
-        trie.append(append_blocks.iter().map(std::convert::AsRef::as_ref))?;
+        trie.append(append_blocks.iter().map(AsRef::as_ref))?;
 
         let input = Input::AppendPrepend {
             elf_id: *GUEST_ID,
