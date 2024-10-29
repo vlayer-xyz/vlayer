@@ -2,6 +2,7 @@ use alloy_primitives::ChainId;
 use call_engine::{io::GuestOutputError, travel_call_executor::Error as TravelCallExecutorError};
 use provider::ProviderFactoryError;
 use risc0_zkp::verify::VerificationError;
+use risc0_zkvm::sha::Digest;
 use thiserror::Error;
 
 #[derive(Error, Debug)]
@@ -59,4 +60,7 @@ pub enum HostError {
 
     #[error("Calldata too large: {0} bytes")]
     CalldataTooLargeError(usize),
+
+    #[error("Unsupported Image ID: expected {0}, received {1}")]
+    UnsupportedImageId(Digest, Digest),
 }
