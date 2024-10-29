@@ -91,9 +91,9 @@ impl BlockTrie {
 
     pub fn append<'a>(
         &mut self,
-        new_blocks: impl IntoIterator<Item = &'a dyn EvmBlockHeader>,
+        blocks: impl IntoIterator<Item = &'a dyn EvmBlockHeader>,
     ) -> BlockTrieResult<()> {
-        for block in new_blocks {
+        for block in blocks {
             self.append_single(block)?;
         }
         Ok(())
@@ -101,10 +101,10 @@ impl BlockTrie {
 
     pub fn prepend<'a>(
         &mut self,
-        old_blocks: impl DoubleEndedIterator<Item = &'a dyn EvmBlockHeader>,
+        blocks: impl DoubleEndedIterator<Item = &'a dyn EvmBlockHeader>,
         mut old_leftmost_block: &'a dyn EvmBlockHeader,
     ) -> BlockTrieResult<()> {
-        for block in old_blocks.rev() {
+        for block in blocks.rev() {
             self.prepend_single(old_leftmost_block)?;
 
             old_leftmost_block = block;
