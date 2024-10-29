@@ -62,6 +62,7 @@ jobs:
           name: guest-artifacts
           path: rust/target/assets
           if-no-files-found: error
+          retention-days: 3
 
   build-release:
     defaults:
@@ -173,6 +174,7 @@ jobs:
           name: ${{ matrix.target }}
           path: ${{ steps.package-release.outputs.output_file }}
           if-no-files-found: error
+          retention-days: 3
 
   build-examples:
     name: Build examples
@@ -190,6 +192,7 @@ jobs:
           name: examples
           path: out/examples.tar.gz
           if-no-files-found: error
+          retention-days: 3
 
   build-extension:
     name: Build browser extension
@@ -224,6 +227,7 @@ jobs:
           name: browser-extension
           path: packages/browser-extension/browser-extension.tar.gz
           if-no-files-found: error
+          retention-days: 3
   
   push-contracts:
     name: Push vlayer contracts
@@ -276,6 +280,7 @@ jobs:
           name: vlayer-contracts
           path: contracts/contracts.zip
           if-no-files-found: error
+          retention-days: 3
 
 
   create-release:
