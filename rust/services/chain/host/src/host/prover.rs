@@ -20,7 +20,7 @@ type Result<T> = std::result::Result<T, Error>;
 pub struct Prover(Risc0Prover);
 
 impl Prover {
-    pub fn new(proof_mode: ProofMode) -> Self {
+    pub const fn new(proof_mode: ProofMode) -> Self {
         Self(Risc0Prover::new(proof_mode))
     }
 
