@@ -2180,6 +2180,7 @@ dependencies = [
  "chain_db",
  "chain_guest",
  "chain_guest_wrapper",
+ "chain_shared",
  "derivative",
  "ethers",
  "futures",
@@ -2225,7 +2226,10 @@ version = "0.1.0"
 dependencies = [
  "alloy-primitives",
  "block_trie",
+ "ethers",
+ "provider",
  "serde",
+ "serde_json",
 ]
 
 [[package]]

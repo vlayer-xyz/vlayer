@@ -161,9 +161,6 @@ where
 }
 
 #[cfg(test)]
-mod test_utils;
-
-#[cfg(test)]
 mod test {
 
     use serde_json::Value;

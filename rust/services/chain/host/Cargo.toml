@@ -11,6 +11,7 @@ block_trie = { workspace = true }
 chain_db = { workspace = true }
 chain_guest = { workspace = true }
 chain_guest_wrapper = { workspace = true }
+chain_shared = { workspace = true, features = ["test_utils"] }
 derivative = { workspace = true }
 ethers = { workspace = true }
 futures = { workspace = true }

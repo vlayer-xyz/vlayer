@@ -913,6 +913,7 @@ dependencies = [
  "alloy-primitives",
  "block_trie",
  "serde",
+ "serde_json",
 ]
 
 [[package]]
