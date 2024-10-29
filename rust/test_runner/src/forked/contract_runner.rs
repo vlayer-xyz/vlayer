@@ -463,7 +463,7 @@ fn warn_about_unsupported_tests(functions: &[&Function]) {
     println!(
         "{}: {}",
         "Warning".yellow().bold(),
-        "This test types are not supported yet:".bold()
+        "Only unit tests are currently supported. The following test were not run:".bold()
     );
 
     for func in unsupported_functions {
