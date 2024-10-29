@@ -8,6 +8,7 @@ use std::{
 
 use alloy_primitives::{keccak256, BlockNumber, ChainId, B256};
 use alloy_rlp::{Bytes as RlpBytes, Decodable, RlpDecodable, RlpEncodable};
+use block_trie::BlockTrie;
 use bytes::Bytes;
 use chain_trie::UnverifiedChainTrie;
 use derive_more::Debug;
@@ -95,6 +96,17 @@ impl ChainUpdate {
             added_nodes: added_nodes.into_iter().collect(),
             removed_nodes: removed_nodes.into_iter().collect(),
         }
+    }
+
+    pub fn from_two_tries(
+        range: RangeInclusive<BlockNumber>,
+        old: &BlockTrie,
+        new: &BlockTrie,
+        zk_proof: impl Into<Bytes>,
+    ) -> Self {
+        let chain_info = ChainInfo::new(range, new.hash_slow(), zk_proof);
+        let (added_nodes, removed_nodes) = difference(old, new);
+        Self::new(chain_info, added_nodes, removed_nodes)
     }
 }
 

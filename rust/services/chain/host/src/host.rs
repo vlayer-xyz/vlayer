@@ -4,9 +4,9 @@ pub mod error;
 use std::ops::RangeInclusive;
 
 use alloy_primitives::ChainId;
-use block_trie::BlockTrie;
+use block_trie::{BlockTrie, EMPTY_TRIE};
 use bytes::Bytes;
-use chain_db::{difference, ChainDb, ChainInfo, ChainTrie, ChainUpdate, Mode};
+use chain_db::{ChainDb, ChainTrie, ChainUpdate, Mode};
 use chain_guest::Input;
 use chain_guest_wrapper::{RISC0_CHAIN_GUEST_ELF, RISC0_CHAIN_GUEST_ID};
 pub use config::HostConfig;
@@ -97,9 +97,7 @@ where
         let zk_proof = encode_proof(&receipt);
 
         let range = latest_block_number..=latest_block_number;
-        let chain_info = ChainInfo::new(range, trie.hash_slow(), zk_proof);
-        let (added, removed) = difference([], &trie);
-        let chain_update = ChainUpdate::new(chain_info, added, removed);
+        let chain_update = ChainUpdate::from_two_tries(range, &EMPTY_TRIE, &trie, zk_proof);
 
         Ok(chain_update)
     }
@@ -137,9 +135,7 @@ where
         let zk_proof = encode_proof(&receipt);
 
         let range = *block_range.start()..=latest_block_number;
-        let chain_info = ChainInfo::new(range, trie.hash_slow(), zk_proof);
-        let (added, removed) = difference(&old_trie, &trie);
-        let chain_update = ChainUpdate::new(chain_info, added, removed);
+        let chain_update = ChainUpdate::from_two_tries(range, &old_trie, &trie, zk_proof);
 
         Ok(chain_update)
     }
