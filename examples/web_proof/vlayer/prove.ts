@@ -1,4 +1,4 @@
-import { testHelpers, createVlayerClient } from "@vlayer/sdk";
+import { createVlayerClient, testHelpers } from "@vlayer/sdk";
 import webProofProver from "../out/WebProofProver.sol/WebProofProver";
 import webProofVerifier from "../out/WebProofVerifier.sol/WebProofVerifier";
 import tls_proof from "./tls_proof.json";
@@ -47,7 +47,7 @@ async function testSuccessProvingAndVerification() {
   }
 
   if (typeof address !== "string" || !isAddress(address)) {
-    throw new Error(`${address} is not a valid address`);
+    throw new Error(`${String(address)} is not a valid address`);
   }
 
   console.log("Verifying...");
@@ -100,7 +100,10 @@ async function testFailedProving() {
     await vlayer.waitForProvingResult({ hash });
     throw new Error("Proving should have failed!");
   } catch (error) {
-    assert.ok(error instanceof Error, `Invalid error returned: ${error}`);
+    assert.ok(
+      error instanceof Error,
+      `Invalid error returned: ${String(error)}`,
+    );
     assert.equal(
       error.message,
       "Error response: Host error: TravelCallExecutor error: EVM transact error: ASN.1 error: PEM error: PEM preamble contains invalid data (NUL byte) at line 1 column 22883",
