@@ -7604,7 +7604,6 @@ dependencies = [
  "anyhow",
  "auto_impl",
  "block_header",
- "call_engine",
  "common",
  "derivative",
  "ethers-core",
