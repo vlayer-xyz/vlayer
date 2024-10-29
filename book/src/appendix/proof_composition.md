@@ -1,7 +1,7 @@
 # Proof composition
 
 Proof composition is explained in Risc0 documentation, the verifiable computation tooling used by vlayer. For more details, refer to their resources:
-* [terminology](https://dev.risczero.com/terminology)
+* [terminology](https://dev.risczero.com/terminology#composition)
 * [receipts](https://dev.risczero.com/api/zkvm/receipts)
 * [composition](https://dev.risczero.com/api/zkvm/composition)
 
