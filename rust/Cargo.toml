@@ -4,6 +4,7 @@ members = [
     "block_header",
     "chain",
     "cli",
+    "common",
     "email_proof",
     "host_utils",
     "key_value",
@@ -131,6 +132,7 @@ chain_host = { path = "services/chain/host" }
 chain_server = { path = "services/chain/server" }
 chain_shared = { path = "services/chain/shared" }
 chain_worker = { path = "services/chain/worker" }
+common = { path = "common" }
 email_proof = { path = "email_proof" }
 host_utils = { path = "host_utils" }
 key_value = { path = "key_value" }
