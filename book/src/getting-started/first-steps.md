@@ -1,10 +1,10 @@
 # First steps with vlayer
 
-## Creating new project
+## Creating a new project
 
 Run this command to initialize a new vlayer project:
 ```bash
-$ vlayer init project-name
+vlayer init project-name
 ```
 
 It creates a folder with sample contracts.
@@ -41,13 +41,13 @@ This compiles the smart contracts and prepares them for deployment and testing.
 
 > Please note that `vlayer init` installs Solidity dependencies and generates `remappings.txt`. Running `forge soldeer install` is not needed to build the example and may overwrite remappings, which can cause build errors.
 
-Then install Typescript dependencies in vlayer folder by running:
+Then, install Typescript dependencies in vlayer folder by running:
 ```bash
 cd vlayer
 bun install
 ```
 
-Then launch a local Ethereum node:
+Next, launch a local Ethereum node:
 ```bash
 $ anvil 
 ```
