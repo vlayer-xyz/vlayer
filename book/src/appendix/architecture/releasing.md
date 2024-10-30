@@ -13,7 +13,6 @@ The diagram below illustrates these environments, along with associated artifact
 
 ![Schema](/images/architecture/releasing.png)
 
-
 ## Developer Experience 
 
 ### Alpha and Beta Versions
@@ -74,3 +73,25 @@ Updating these artifacts is encouraged or enforced through vlayer CLI commands (
 - **Additional Components** - Includes monitoring infrastructure and networked proving systems
 
 All server infrastructure may undergo daily deployments to accommodate updates.
+
+|Artefact          |Destination|Release|Installation|Update|
+|------------------|-----------|-------|------------|------|
+|**User**|         |           |       |            |      |
+|Extension	       |Chrome Web Store|periodic|store|auto + enforce|
+|SDK| 	Developers' app	| uncontrollable	|  |	uncontrollable |
+|**Developer**|
+|Smart Contracts package | Soldeer | daily| `soldeer` | `vlayer update` |
+|vlayer (cli + prover) | GitHub | daily | `vlayerup` | `vlayer update` |
+|SDK|  Npm | daily | `npm install` | `vlayer update` |
+|foundry|  | foundryup |  `foundry up` | `vlayer update` |
+|**Chains**|   |  |  |  |  |
+|User's contracts | Blockchain | uncontrollable | - | uncontrollable |
+|vlayer contracts  | Blockchain | daily | - | - |
+| **vlayer infrastructure** |  |  |  |  |
+|user dashboard | Server | daily | - | - |
+|vlayer prover | Server | daily | - | - |
+|block cache | Server | daily | - | - |
+|notary| Server | daily | - | - |
+|web socket proxy | Server | daily | | | |
+|monitoring|  Server | daily | - | - |
+|proving network (Bonsai) | Server| | | uncontrollable |
