@@ -1,6 +1,5 @@
 use alloy_primitives::ChainId;
 use call_engine::{io::GuestOutputError, travel_call_executor::Error as TravelCallExecutorError};
-use chain_client::ChainProofClientError;
 use provider::ProviderFactoryError;
 use risc0_zkp::verify::VerificationError;
 use thiserror::Error;
@@ -56,7 +55,7 @@ pub enum HostError {
     SealEncodingError(String),
 
     #[error("Chain Proof Client error: {0}")]
-    ChainProofClient(#[from] ChainProofClientError),
+    ChainProofClient(#[from] chain_client::Error),
 
     #[error("Calldata too large: {0} bytes")]
     CalldataTooLargeError(usize),

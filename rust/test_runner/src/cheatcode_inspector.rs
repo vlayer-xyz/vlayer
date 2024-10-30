@@ -9,7 +9,7 @@ use call_engine::{
 };
 use call_host::host::{config::HostConfig, get_block_number, Host};
 use chain::TEST_CHAIN_ID;
-use chain_client::RpcChainProofClient;
+use chain_client::RpcClient as RpcChainProofClient;
 use chain_server::server::{ChainProofServerMock, EMPTY_PROOF_RESPONSE};
 use foundry_config::RpcEndpoints;
 use foundry_evm::revm::{
