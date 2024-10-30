@@ -2233,6 +2233,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "chain_test_utils"
+version = "0.1.0"
+dependencies = [
+ "ethers",
+ "provider",
+ "serde_json",
+]
+
+[[package]]
 name = "charset"
 version = "0.1.5"
 source = "registry+https://github.com/rust-lang/crates.io-index"
