@@ -9,7 +9,7 @@
     </svg>
     Actively in Development
   </div>
-  <p>Our team is currently working on this feature. If you experience any bugs, please let us know <a href="https://discord.gg/JS6whdessP" target="_blank">on our Discord</a>. We appreciate your patience. </p>
+  <p>Currently, it’s possible to teleport between any blockchain networks. However, this will change once the proving code is fully developed. After that, only specific network pairs will support teleportation. Until this update is complete, a malicious prover could potentially create fake teleportation proofs.</p>
 </div>
 
 ## Ethereum ecosystem of chains
