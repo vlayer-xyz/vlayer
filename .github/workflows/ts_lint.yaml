@@ -32,6 +32,6 @@ jobs:
         forge soldeer install
         forge build --sizes
     - name: Build abi types 
-      run: ./bash/build_ts_types.sh
+      run: ./bash/build-ts-types.sh
     - name: Run ESLint
       run: bash/lint-ts.sh
