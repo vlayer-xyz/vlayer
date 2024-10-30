@@ -8,18 +8,20 @@ import {Seal, SealLib} from "./Seal.sol";
 uint256 constant WORD_SIZE = 32;
 
 struct Proof {
-    uint256 length;
     Seal seal;
+    bytes32 callGuestId;
+    uint256 length;
     CallAssumptions callAssumptions;
 }
 
 library ProofLib {
     uint256 private constant LENGTH_LEN = WORD_SIZE;
+    uint256 private constant CALL_GUEST_ID_LEN = WORD_SIZE;
 
-    uint256 public constant CALL_ASSUMPTIONS_OFFSET = LENGTH_LEN + SealLib.SEAL_ENCODING_LENGTH;
+    uint256 public constant CALL_ASSUMPTIONS_OFFSET = SealLib.SEAL_ENCODING_LENGTH + CALL_GUEST_ID_LEN + LENGTH_LEN;
 
-    uint256 public constant PROOF_ENCODING_LENGTH =
-        LENGTH_LEN + SealLib.SEAL_ENCODING_LENGTH + CallAssumptionsLib.CALL_ASSUMPTIONS_ENCODING_LENGTH;
+    uint256 public constant PROOF_ENCODING_LENGTH = SealLib.SEAL_ENCODING_LENGTH + CALL_GUEST_ID_LEN + LENGTH_LEN
+        + CallAssumptionsLib.CALL_ASSUMPTIONS_ENCODING_LENGTH;
 
     function emptyProof() internal pure returns (Proof memory) {
         Proof memory proof;
