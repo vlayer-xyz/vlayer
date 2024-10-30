@@ -21,13 +21,14 @@ echo "::group::Running eslint for: $VLAYER_HOME/packages"
 
 echo "::group::building contracts"
 cd "${VLAYER_HOME}/packages/browser-extension"
-
+echo '::endgroup::'
 
 echo "::group::Building sdk"
 cd "${VLAYER_HOME}/packages/sdk"
 bun install --frozen-lockfile
 bun run build
 echo '::endgroup::'
+
 cd "${VLAYER_HOME}/packages"
 bun install --frozen-lockfile
 bun run lint
