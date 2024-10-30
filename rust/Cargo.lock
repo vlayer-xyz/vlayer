@@ -2130,8 +2130,6 @@ version = "0.1.0"
 dependencies = [
  "alloy-primitives",
  "block_trie",
- "ethers",
- "provider",
  "serde",
  "serde_json",
 ]

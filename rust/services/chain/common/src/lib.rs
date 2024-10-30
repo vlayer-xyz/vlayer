@@ -1,8 +1,9 @@
-mod types;
+use alloy_primitives::bytes::Bytes;
+use block_trie::BlockTrie;
+use serde::{Deserialize, Serialize};
 
-pub use types::ChainProof;
-
-mod test_utils;
-
-#[cfg(feature = "test_utils")]
-pub use test_utils::*;
+#[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize)]
+pub struct ChainProof {
+    pub proof: Bytes,
+    pub block_trie: BlockTrie,
+}
