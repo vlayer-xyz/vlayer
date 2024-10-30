@@ -11,7 +11,7 @@
   "scripts": {
     "build": "bun tsc",
     "test": "vitest --run",
-    "gen:types": "sh ../../bash/build_ts_types.sh"
+    "gen:types": "sh ../../bash/build-ts-types.sh"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.7",

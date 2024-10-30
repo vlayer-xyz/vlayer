@@ -32,7 +32,7 @@ jobs:
       - name: Check clang and LLVM version
         env:
           EXPECTED_LLVM_VERSION: "18.1"
-        run: bash/check_llvm_clang.sh
+        run: bash/check-llvm-clang.sh
 
       - name: Run workspace rust tests
         working-directory: rust
