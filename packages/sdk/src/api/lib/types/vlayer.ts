@@ -19,12 +19,13 @@ export type CallContext = {
 };
 
 export type Proof = {
-  length: bigint;
   seal: {
     verifierSelector: Hex;
     seal: readonly [Hex, Hex, Hex, Hex, Hex, Hex, Hex, Hex];
     mode: number;
   };
+  callGuestId: Hex;
+  length: bigint;
   callAssumptions: {
     proverContractAddress: Address;
     functionSelector: Hex;
