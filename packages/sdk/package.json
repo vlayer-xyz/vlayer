@@ -11,7 +11,8 @@
   "scripts": {
     "build": "bun tsc",
     "test": "vitest --run",
-    "gen:types": "sh ../../bash/build-ts-types.sh"
+    "gen:types": "sh ../../bash/build_ts_types.sh",
+    "replaceCommonsSymlink": "mv ./src/web-proof-commons ./src/web-proof-commons.bak && cp -r $(readlink -f ./src/web-proof-commons.bak) src/web-proof-commons && rm ./src/web-proof-commons.bak"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.7",
@@ -28,5 +29,10 @@
     "viem": "2.21.0",
     "vite-tsconfig-paths": "^5.0.1",
     "@vitejs/plugin-react": "^4.3.2"
-  }
+  },
+  "files": [
+    "dist/",
+    "package.json",
+    "README.md"
+  ]
 }
