@@ -1,11 +1,16 @@
+/// <reference types="vitest/config" />
 import { defineConfig } from "vite";
 import webExtension, { readJsonFile } from "vite-plugin-web-extension";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 import tsconfigPaths from "vite-tsconfig-paths";
 
 function generateManifest() {
-  const manifest = readJsonFile("src/manifest.json");
-  const pkg = readJsonFile("package.json");
+  const manifest = readJsonFile("src/manifest.json") as object;
+  const pkg = readJsonFile("package.json") as {
+    name: string;
+    version: string;
+    description: string;
+  };
   return {
     name: pkg.name,
     description: pkg.description,
@@ -16,6 +21,11 @@ function generateManifest() {
 }
 
 export default defineConfig({
+  test: {
+    environment: "jsdom",
+    include: ["src/**/*.test.ts"],
+    setupFiles: "./vitest.setup.ts", // Path to your setup file
+  },
   build: {
     minify: false,
     terserOptions: { compress: false, mangle: false },
