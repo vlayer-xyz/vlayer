@@ -1,9 +1,10 @@
 use std::collections::HashMap;
 
-use alloy_primitives::{Address, ChainId, TxKind};
+use alloy_primitives::{Address, ChainId, FixedBytes, TxKind};
 use alloy_sol_types::SolValue;
 use chain_common::ChainProof;
 use revm::{interpreter::CallInputs, primitives::TxEnv};
+use risc0_zkvm::sha::Digest;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
@@ -104,6 +105,25 @@ pub struct HostOutput {
     pub seal: Vec<u8>,
     pub guest_output: GuestOutput,
     pub proof_len: usize,
+    pub call_guest_id: CallGuestId,
+}
+
+#[derive(Debug)]
+pub struct CallGuestId(Digest);
+
+impl From<Digest> for CallGuestId {
+    fn from(value: Digest) -> Self {
+        Self(value)
+    }
+}
+
+impl From<CallGuestId> for FixedBytes<32> {
+    fn from(value: CallGuestId) -> Self {
+        let mut bytes = [0u8; 32];
+        bytes.copy_from_slice(value.0.as_bytes());
+
+        Self::new(bytes)
+    }
 }
 
 #[cfg(test)]

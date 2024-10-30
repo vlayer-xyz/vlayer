@@ -131,12 +131,14 @@ impl Host {
             ));
         }
 
+        let call_guest_id: Digest = RISC0_CALL_GUEST_ID.into();
+
         Ok(HostOutput {
             guest_output,
             seal,
             raw_abi: raw_guest_output,
             proof_len,
-            call_guest_id: RISC0_CALL_GUEST_ID.into(),
+            call_guest_id: call_guest_id.into(),
         })
     }
 
