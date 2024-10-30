@@ -28,4 +28,6 @@
       vars:
         swap_file_size_mb: '4096'
     - role: prover
+    - role: prover_nginx
+      become: true
     - role: prometheus.prometheus.node_exporter

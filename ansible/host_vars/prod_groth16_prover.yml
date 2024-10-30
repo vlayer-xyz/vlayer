@@ -2,7 +2,7 @@
 ansible_host: 3.87.178.21
 ansible_host_public_key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIM3zLjdbqkLNdlrunXcSyUkEjWpTSfJ9AIU1tkAUUwZs
 ansible_user: ubuntu
-vlayer_prover_host: 0.0.0.0
+vlayer_prover_host: 127.0.0.1
 vlayer_prover_port: 3000
 vlayer_alchemy_api_key: !vault |
   $ANSIBLE_VAULT;1.1;AES256
