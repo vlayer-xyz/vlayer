@@ -7,3 +7,5 @@ Updating the `Verifier` infrastructure can be a bit tricky:
 3. Next, modify the address of the main supporting contract variable in `Verifier`.
 4. After that, release a new version of the vlayer Solidity contracts library.
 5. Finally, release a new version of the vlayer node.
+
+![Schema](/images/architecture/releasing.png)
