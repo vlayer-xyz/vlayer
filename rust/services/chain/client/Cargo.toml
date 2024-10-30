@@ -5,12 +5,19 @@ edition = "2021"
 
 [dependencies]
 alloy-primitives = { workspace = true }
+async-trait = { workspace = true }
 block_trie = { workspace = true }
 chain_server = { workspace = true }
 chain_types = { workspace = true }
+futures = { workspace = true }
 mpt = { workspace = true }
+parking_lot = { workspace = true }
 provider = { workspace = true }
 serde_json = { workspace = true }
 server_utils = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true }
+
+[dev-dependencies]
+anyhow = { workspace = true }
+tokio = { workspace = true, features = ["rt", "macros"] }

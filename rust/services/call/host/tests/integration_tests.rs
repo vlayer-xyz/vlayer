@@ -7,7 +7,7 @@ use call_host::{
     host::{config::HostConfig, error::HostError, get_block_number, Host},
     Call,
 };
-use chain_client::ChainProofClient;
+use chain_client::RpcChainProofClient;
 use chain_server::server::{ChainProofServerMock, EMPTY_PROOF_RESPONSE};
 use dotenvy::dotenv;
 use ethers_core::types::BlockNumber as BlockTag;
@@ -131,7 +131,7 @@ fn create_host(
     };
     let block_number =
         block_tag_to_block_number(&multi_provider, location.chain_id, location.block_tag)?;
-    let chain_proof_client = ChainProofClient::new(chain_proof_server_url);
+    let chain_proof_client = RpcChainProofClient::new(chain_proof_server_url);
     Host::try_new_with_components(multi_provider, block_number, chain_proof_client, &config)
 }
 

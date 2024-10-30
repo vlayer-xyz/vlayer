@@ -9,7 +9,7 @@ use call_engine::{
 };
 use call_host::host::{config::HostConfig, get_block_number, Host};
 use chain::TEST_CHAIN_ID;
-use chain_client::ChainProofClient;
+use chain_client::RpcChainProofClient;
 use chain_server::server::{ChainProofServerMock, EMPTY_PROOF_RESPONSE};
 use foundry_config::RpcEndpoints;
 use foundry_evm::revm::{
@@ -143,7 +143,7 @@ fn create_host<DB: Database>(
     };
     let block_number =
         get_block_number(&providers, config.start_chain_id).expect("failed to get block number");
-    let chain_proof_client = ChainProofClient::new(config.chain_proof_url.clone());
+    let chain_proof_client = RpcChainProofClient::new(config.chain_proof_url.clone());
 
     Host::try_new_with_components(providers, block_number, chain_proof_client, &config)
         .expect("failed to create host")

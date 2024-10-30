@@ -15,7 +15,7 @@ use call_engine::{
     Seal,
 };
 use call_guest_wrapper::RISC0_CALL_GUEST_ELF;
-use chain_client::ChainProofClient;
+use chain_client::{ChainProofClient, RpcChainProofClient};
 use chain_types::ChainProof;
 use config::HostConfig;
 use error::HostError;
@@ -38,7 +38,7 @@ pub struct Host {
     start_execution_location: ExecutionLocation,
     envs: CachedEvmEnv<ProofDb>,
     prover: Prover,
-    chain_proof_client: ChainProofClient,
+    chain_proof_client: RpcChainProofClient,
     max_calldata_size: usize,
 }
 
@@ -47,7 +47,7 @@ impl Host {
         let provider_factory = EthersProviderFactory::new(config.rpc_urls.clone());
         let providers = CachedMultiProvider::new(provider_factory);
         let block_number = get_block_number(&providers, config.start_chain_id)?;
-        let chain_proof_client = ChainProofClient::new(config.chain_proof_url.clone());
+        let chain_proof_client = RpcChainProofClient::new(&config.chain_proof_url);
 
         Host::try_new_with_components(providers, block_number, chain_proof_client, config)
     }
@@ -72,7 +72,7 @@ impl Host {
     pub fn try_new_with_components(
         providers: CachedMultiProvider,
         block_number: u64,
-        chain_proof_client: ChainProofClient,
+        chain_proof_client: RpcChainProofClient,
         config: &HostConfig,
     ) -> Result<Self, HostError> {
         let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
@@ -106,7 +106,7 @@ impl Host {
             into_multi_input(self.envs).map_err(|err| HostError::CreatingInput(err.to_string()))?;
         let chain_proofs: HashMap<u64, ChainProof> = self
             .chain_proof_client
-            .get_chain_proofs(multi_evm_input.group_blocks_by_chain())
+            .get_chain_proofs(multi_evm_input.block_nums_by_chain())
             .await?;
         let input = Input {
             call,
@@ -223,7 +223,7 @@ mod test {
         let host = Host::try_new_with_components(
             CachedMultiProvider::new(EthersProviderFactory::new(test_rpc_urls())),
             0,
-            ChainProofClient::new(""),
+            RpcChainProofClient::new(""),
             &config,
         )?;
         let call = Call {
