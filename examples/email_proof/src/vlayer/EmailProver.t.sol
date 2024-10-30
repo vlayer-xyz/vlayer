@@ -4,6 +4,7 @@ pragma solidity ^0.8.13;
 import "vlayer-0.1.0/testing/VTest.sol";
 import "./EmailProver.sol";
 import {UnverifiedEmail, EmailProofLib, VerifiedEmail} from "vlayer-0.1.0/EmailProof.sol";
+import {EmailProofVerifier} from "./EmailProofVerifier.sol";
 
 contract EmailProofLibWrapper {
     using EmailProofLib for UnverifiedEmail;
@@ -35,21 +36,40 @@ contract EmailProverTest is VTest {
         assertEq(verifiedEmail.subject, "Is dinner ready?");
     }
 
-    function test_provesEmail() public {
-        UnverifiedEmail memory email = getTestEmail("./vlayer/testdata/real_signed_email.eml");
-        EmailProver prover = new EmailProver();
-        callProver();
-        prover.main(email);
-    }
-
     function test_doesNotAcceptTooLargeEmail() public {
         UnverifiedEmail memory email = getTestEmail("./vlayer/testdata/email_over_max_size.eml");
-        EmailProver prover = new EmailProver();
+        EmailProofLibWrapper wrapper = new EmailProofLibWrapper();
         callProver();
-        try prover.main(email) {
+        try wrapper.verify(email) {
             revert("Did not revert as expected");
         } catch Error(string memory reason) {
             assertEq(reason, "CalldataTooLargeError(5243524)");
         }
+    }
+
+    function test_provesAndVerifiesEmail() public {
+        EmailProver prover = new EmailProver();
+        UnverifiedEmail memory email = getTestEmail("./vlayer/testdata/vlayer_welcome.eml");
+        EmailProofVerifier verifier = new EmailProofVerifier(address(prover));
+
+        callProver();
+        (, address registeredWallet) = prover.main(email);
+        Proof memory proof = getProof();
+
+        vm.prank(registeredWallet);
+        verifier.verify(proof, registeredWallet);
+    }
+
+    function test_revertsWhenSenderDoesNotMatchProvedAddress() public {
+        EmailProver prover = new EmailProver();
+        UnverifiedEmail memory email = getTestEmail("./vlayer/testdata/vlayer_welcome.eml");
+        EmailProofVerifier verifier = new EmailProofVerifier(address(prover));
+
+        callProver();
+        (, address registeredWallet) = prover.main(email);
+        Proof memory proof = getProof();
+
+        vm.expectRevert("Must be called from the same wallet as the registered address");
+        verifier.verify(proof, registeredWallet);
     }
 }
