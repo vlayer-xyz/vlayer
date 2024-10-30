@@ -9,6 +9,7 @@ const config = {
   notarizeUrl: "https://www.swapi.dev/api/people/1",
 };
 
+const VLAYER_SERVER_URL = "http://127.0.0.1:3000";
 
 test.describe("Full flow of webproof using extension", () => {
   test("Full flow from opening sidepanel to redirection", async ({
@@ -20,6 +21,7 @@ test.describe("Full flow of webproof using extension", () => {
       const requestProofButton = page
         .locator("body")
         .getByTestId("request-webproof-button");
+      
       await requestProofButton.click();
       const extension = await sidePanel(context);
       expect(extension).toBeDefined();
@@ -70,10 +72,22 @@ test.describe("Full flow of webproof using extension", () => {
       const extension = await sidePanel(context);
       const proveButton = extension.getByTestId("prove-button");
       await proveButton.click();
-      const title = await page.waitForSelector(
+      await page.waitForSelector(
         'h1[data-testid="has-webproof"]',
       );
-      expect(title).toBeDefined();
+    });
+
+    await test.step("Zk prove button should appear after receiving webProof", async () => {
+      const proveButton = page.locator("body").getByTestId("zk-prove-button");
+      expect(proveButton).toBeVisible(); 
+    });
+
+    await test.step("Proving request has succeeded", async () => {
+      const proveButton = page.locator("body").getByTestId("zk-prove-button");
+      await proveButton.click();
+
+      const response = await page.waitForResponse(VLAYER_SERVER_URL);
+      expect(response.ok()).toBeTruthy();
     });
   });
 });
