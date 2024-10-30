@@ -24,7 +24,7 @@ fn check_if_vlayerup_exists() -> Result<(), CLIError> {
     let output = std::process::Command::new("which")
         .arg("vlayerup")
         .output()
-        .map_err(|e| CLIError::UpgradeError(e.to_string()))?;
+        .map_err(into_update_err)?;
 
     if output.status.success() {
         Ok(())
@@ -77,7 +77,7 @@ fn do_update_soldeer(foundry_toml_path: &Path) -> Result<(), CLIError> {
         .current_dir(foundry_toml_path)
         .spawn()
         .and_then(|mut child| child.wait())
-        .map_err(|e| CLIError::UpgradeError(e.to_string()))?;
+        .map_err(into_update_err)?;
 
     ensure_success(status, "vlayer contracts")
 }
@@ -138,9 +138,8 @@ fn find_file_up_tree(name: &str) -> Result<Option<PathBuf>, CLIError> {
 
 fn find_package_json() -> Result<Option<(PathBuf, Value)>, CLIError> {
     if let Some(mut path) = find_file_up_tree("package.json")? {
-        let value = serde_json::from_str(
-            &std::fs::read_to_string(&path).map_err(|e| CLIError::UpgradeError(e.to_string()))?,
-        )?;
+        let value =
+            serde_json::from_str(&std::fs::read_to_string(&path).map_err(into_update_err)?)?;
         path.pop();
         Ok(Some((path, value)))
     } else {
@@ -153,7 +152,7 @@ fn spawn(command: &str, args: &[&str]) -> Result<ExitStatus, CLIError> {
         .args(args)
         .spawn()
         .and_then(|mut child| child.wait())
-        .map_err(|e| CLIError::UpgradeError(e.to_string()))
+        .map_err(into_update_err)
 }
 
 fn ensure_success(exist_status: ExitStatus, package_name: &str) -> Result<(), CLIError> {
@@ -181,4 +180,9 @@ fn print_successful_update(package_name: &str) -> Result<(), CLIError> {
         "successfully".green()
     );
     Ok(())
+}
+
+#[allow(clippy::needless_pass_by_value)]
+fn into_update_err(e: std::io::Error) -> CLIError {
+    CLIError::UpgradeError(e.to_string())
 }
