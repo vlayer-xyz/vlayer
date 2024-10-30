@@ -78,6 +78,7 @@ impl TryFrom<HostOutput> for CallResult {
         let proof = Proof {
             length: U256::from(proof_len),
             seal: decode_seal(seal)?,
+            callGuestId: Default::default(),
             // Intentionally set to 0. These fields will be updated with the correct values by the prover script, based on the verifier ABI.
             callAssumptions: guest_output.call_assumptions,
         };

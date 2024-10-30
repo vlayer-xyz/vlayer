@@ -116,6 +116,7 @@ impl CheatcodeInspector {
             length: U256::from(host_output.proof_len),
             seal: decoded_seal,
             callAssumptions: call_assumptions,
+            callGuestId: Default::default(),
         }
     }
 }
