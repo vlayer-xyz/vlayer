@@ -4,10 +4,10 @@ use std::{
 };
 
 use anyhow::bail;
+use common::InteriorMutabilityCache;
 use revm::DatabaseRef;
 
 use super::{location::ExecutionLocation, EvmEnv, EvmEnvFactory};
-use crate::utils::InteriorMutabilityCache;
 
 pub struct NullEvmEnvFactory;
 

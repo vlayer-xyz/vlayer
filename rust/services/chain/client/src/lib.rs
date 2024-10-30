@@ -2,8 +2,8 @@ use std::collections::HashMap;
 
 use alloy_primitives::ChainId;
 use async_trait::async_trait;
+use chain_common::ChainProof;
 use chain_server::server::ChainProof as RpcChainProof;
-use chain_types::ChainProof;
 use futures::stream::{self, StreamExt, TryStreamExt};
 use mpt::ParseNodeError;
 use parking_lot::RwLock;

@@ -4,6 +4,7 @@ members = [
     "block_header",
     "chain",
     "cli",
+    "common",
     "email_proof",
     "host_utils",
     "key_value",
@@ -17,12 +18,12 @@ members = [
     "services/call/server",
     "services/chain/block_trie",
     "services/chain/client",
+    "services/chain/common",
     "services/chain/db",
     "services/chain/guest",
     "services/chain/guest_wrapper",
     "services/chain/host",
     "services/chain/server",
-    "services/chain/types",
     "services/chain/worker",
     "test_runner",
     "traits",
@@ -129,8 +130,9 @@ chain_guest = { path = "services/chain/guest" }
 chain_guest_wrapper = { path = "services/chain/guest_wrapper" }
 chain_host = { path = "services/chain/host" }
 chain_server = { path = "services/chain/server" }
-chain_types = { path = "services/chain/types" }
+chain_common = { path = "services/chain/common" }
 chain_worker = { path = "services/chain/worker" }
+common = { path = "common" }
 email_proof = { path = "email_proof" }
 host_utils = { path = "host_utils" }
 key_value = { path = "key_value" }

@@ -23,7 +23,7 @@ pub struct ChainProof {
     pub nodes: Vec<Bytes>,
 }
 
-impl TryFrom<ChainProof> for chain_types::ChainProof {
+impl TryFrom<ChainProof> for chain_common::ChainProof {
     type Error = ParseNodeError;
 
     fn try_from(rpc_chain_proof: ChainProof) -> Result<Self, Self::Error> {

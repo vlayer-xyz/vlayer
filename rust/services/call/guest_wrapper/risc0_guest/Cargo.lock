@@ -839,7 +839,8 @@ dependencies = [
  "anyhow",
  "block_header",
  "chain",
- "chain_types",
+ "chain_common",
+ "common",
  "derive-new",
  "derive_more",
  "email_proof",
@@ -869,7 +870,7 @@ dependencies = [
  "block_header",
  "call_engine",
  "chain",
- "chain_types",
+ "chain_common",
  "mpt",
  "revm",
 ]
@@ -906,12 +907,13 @@ dependencies = [
 ]
 
 [[package]]
-name = "chain_types"
+name = "chain_common"
 version = "0.1.0"
 dependencies = [
  "alloy-primitives",
  "block_trie",
  "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -942,6 +944,13 @@ dependencies = [
  "bytemuck",
  "cfg-if",
  "cpufeatures",
+]
+
+[[package]]
+name = "common"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
 ]
 
 [[package]]

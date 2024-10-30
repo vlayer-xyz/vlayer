@@ -1,9 +1,0 @@
-[package]
-name = "chain_types"
-version = "0.1.0"
-edition = "2021"
-
-[dependencies]
-alloy-primitives = { workspace = true }
-block_trie = { workspace = true }
-serde = { workspace = true }

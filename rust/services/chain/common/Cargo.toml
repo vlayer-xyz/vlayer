@@ -1,0 +1,15 @@
+[package]
+name = "chain_common"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+alloy-primitives = { workspace = true }
+block_trie = { workspace = true }
+ethers = { workspace = true, optional = true }
+provider = { workspace = true, optional = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+
+[features]
+test_utils = ["ethers", "provider"]
