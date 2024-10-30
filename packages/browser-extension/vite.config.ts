@@ -24,7 +24,11 @@ export default defineConfig({
   test: {
     environment: "jsdom",
     include: ["src/**/*.test.ts"],
+<<<<<<< HEAD
     setupFiles: "./vitest.setup.ts",
+=======
+    setupFiles: "./vitest.setup.ts", // Path to your setup file
+>>>>>>> 77a13b46 (WIP)
   },
   build: {
     minify: false,
