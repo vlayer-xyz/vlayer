@@ -1,6 +1,5 @@
 import { vi } from "vitest";
 
-<<<<<<< HEAD
 const mockStore = function () {
   const store = new Map<string, unknown>();
   const callbacks = new Set<(change: { [key: string]: unknown }) => unknown>();
@@ -58,14 +57,3 @@ vi.doMock("webextension-polyfill", () => {
     },
   };
 });
-=======
-vi.mock("webextension-polyfill", () => {
-  return {
-    default: {},
-  };
-});
-
-vi.mock(import("@vlayer/extension-hooks"), () => {
-  return {};
-});
->>>>>>> 77a13b46 (WIP)

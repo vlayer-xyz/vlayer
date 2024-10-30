@@ -1,5 +1,6 @@
 import { useState, useEffect, useCallback } from "react";
 import browser from "webextension-polyfill";
+
 function createStorageHook(storage: browser.Storage.StorageArea) {
   // for now this implementation is enough
   // to add later:
@@ -28,6 +29,7 @@ function createStorageHook(storage: browser.Storage.StorageArea) {
       const handleStorageChange = (changes: {
         [key: string]: browser.Storage.StorageChange;
       }) => {
+        console.log("storage change", changes);
         Object.entries(changes).forEach(([key, change]) => {
           if (key === storageKey) {
             setStoredValue(change.newValue as T);
