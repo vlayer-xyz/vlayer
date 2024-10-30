@@ -13,7 +13,7 @@ pub struct HostConfig {
     pub proof_mode: ProofMode,
     pub chain_proof_url: String,
     pub max_calldata_size: usize,
-    pub image_id: Digest,
+    pub call_guest_id: Digest,
 }
 
 impl Default for HostConfig {
@@ -24,7 +24,7 @@ impl Default for HostConfig {
             proof_mode: ProofMode::default(),
             chain_proof_url: String::default(),
             max_calldata_size: DEFAULT_MAX_CALLDATA_SIZE,
-            image_id: RISC0_CALL_GUEST_ID.into(),
+            call_guest_id: RISC0_CALL_GUEST_ID.into(),
         }
     }
 }

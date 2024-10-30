@@ -61,6 +61,6 @@ pub enum HostError {
     #[error("Calldata too large: {0} bytes")]
     CalldataTooLargeError(usize),
 
-    #[error("Unsupported Image ID: expected {0}, received {1}")]
-    UnsupportedImageId(Digest, Digest),
+    #[error("Unsupported CallGuestID: expected {0}, received {1}")]
+    UnsupportedCallGuestId(Digest, Digest),
 }
