@@ -73,7 +73,7 @@ bun run prove.ts
 
 ### Web Proof example
 
-First, install the vlayer browser extension from [Chrome Store](https://chromewebstore.google.com/detail/vlayer/jbchhcgphfokabmfacnkafoeeeppjmpl) (works with Chrome and Brave browsers). For more details about the extension, see the [Web Proofs](../javascript/web-proofs.md) section.
+First, install the vlayer browser extension from the [Chrome Web Store](https://chromewebstore.google.com/detail/vlayer/jbchhcgphfokabmfacnkafoeeeppjmpl) (works with Chrome and Brave browsers). For more details about the extension, see the [Web Proofs](../javascript/web-proofs.md) section.
 
 Then deploy the `WebProofProver` and `WebProofVerifier` contracts on local anvil testnet:
 
