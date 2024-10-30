@@ -1,13 +1,10 @@
-// import { render, screen } from "@testing-library/react";
-import { describe, it, expect, re } from "vitest";
+import { describe, it, expect } from "vitest";
 import { renderHook } from "@testing-library/react-hooks";
 import { useSteps } from "./useSteps";
-import { vi } from "vitest";
 
-describe("App", () => {
-  it("renders headline", () => {
+describe("Use steps hook", () => {
+  it("should initialize setps as empty array", () => {
     const { result } = renderHook(() => useSteps());
-
     expect(result.current).toBeDefined();
   });
 });
