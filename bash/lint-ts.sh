@@ -12,7 +12,7 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
     cd "${example}/vlayer"
 
     bun install --frozen-lockfile
-    bun run eslint .
+    NODE_OPTIONS="--preserve-symlinks" bun run eslint .
 
   )
 done
