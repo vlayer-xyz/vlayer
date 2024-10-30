@@ -19,8 +19,8 @@ library AddressParser {
             if (chr > 15) return 0;
             result *= 16;
             unchecked {
-            // Multiplying by 16 is equivalent to a shift of 4 bits (with additional overflow check).
-            // This guaratees that adding a value < 16 will not cause an overflow, hence the unchecked.
+                // Multiplying by 16 is equivalent to a shift of 4 bits (with additional overflow check).
+                // This guaratees that adding a value < 16 will not cause an overflow, hence the unchecked.
                 result += chr;
             }
         }

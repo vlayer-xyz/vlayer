@@ -14,7 +14,6 @@ interface IExample {
     function exampleFunction() external returns (uint256);
 }
 
-
 contract EmailProver is Prover {
     using Strings for string;
     using RegexLib for string;
