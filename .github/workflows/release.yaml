@@ -384,7 +384,8 @@ jobs:
     - name: Install dependencies
       working-directory: packages/sdk
       run: bun install --frozen-lockfile
-    - name: replace symlinks 
+    - name: replace symlinks
+      working-directory: packages/sdk
       run: bun run replaceCommonsSymlink
     - name: Build
       working-directory: packages/sdk
