@@ -26,29 +26,46 @@ const context: {
 
 const twitterUserAddress = (await testHelpers.getTestAddresses())[0];
 
+async function callProver() {
+  const webProof = createWebProof({
+    proverCallCommitment: {
+      address: import.meta.env.VITE_PROVER_ADDRESS,
+      proverAbi: webProofProver.abi,
+      chainId: foundry.id,
+      functionName: "main",
+      commitmentArgs: ["0x"],
+    },
+    logoUrl: "http://twitterswap.com/logo.png",
+    steps: [
+      startPage("https://x.com/i/flow/login", "Go to x.com login page"),
+      expectUrl("https://x.com/home", "Log in"),
+      notarize(
+        "https://api.x.com/1.1/account/settings.json",
+        "GET",
+        "Generate Proof of Twitter profile",
+      ),
+    ],
+  });
+
+  const vlayer = createVlayerClient();
+
+  const result = await vlayer.proveWeb({
+    address: import.meta.env.VITE_PROVER_ADDRESS,
+    functionName: "main",
+    proverAbi: webProofProver.abi,
+    args: [
+      {
+        webProofJson: JSON.stringify(webProof),
+      },
+      twitterUserAddress,
+    ],
+    chainId: foundry.id,
+  })
+}
+
 export async function setupRequestProveButton(element: HTMLButtonElement) {
   element.addEventListener("click", async () => {
     const provider = createExtensionWebProofProvider();
-
-    const webProof2= createWebProof({
-      proverCallCommitment: {
-        address: import.meta.env.VITE_PROVER_ADDRESS,
-        proverAbi: webProofProver.abi,
-        chainId: foundry.id,
-        functionName: "main",
-        commitmentArgs: ["0x"],
-      },
-      logoUrl: "http://twitterswap.com/logo.png",
-      steps: [
-        startPage("https://x.com/i/flow/login", "Go to x.com login page"),
-        expectUrl("https://x.com/home", "Log in"),
-        notarize(
-          "https://api.x.com/1.1/account/settings.json",
-          "GET",
-          "Generate Proof of Twitter profile",
-        ),
-      ],
-    });
 
     const webProof = await provider.getWebProof({
       proverCallCommitment: {
