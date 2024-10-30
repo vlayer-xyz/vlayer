@@ -6,7 +6,7 @@ import { type Page } from "playwright";
 const config = {
   startPage: "/login",
   expectUrl: "/target",
-  notarizeUrl: "https://www.swapi.dev/api/people/1",
+  notarizeUrl: "https://swapi.dev/api/people/1",
 };
 
 const VLAYER_SERVER_URL = "http://127.0.0.1:3000";
