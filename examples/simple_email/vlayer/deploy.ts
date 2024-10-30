@@ -14,7 +14,7 @@ import path from "node:path";
 import fs from "node:fs/promises";
 import dotenv from "dotenv";
 
-const envPath = path.resolve(`${__dirname}/front-app`, ".env.development");
+const envPath = path.resolve(`${__dirname}/front-app`, ".env.local");
 dotenv.config({ path: envPath });
 
 const getConfig = () => {
@@ -24,7 +24,7 @@ const getConfig = () => {
     ),
     domain: "@vlayer.xyz",
     chain: optimismSepolia,
-    jsonRpcUrl: process.env.NEXT_PUBLIC_JSON_RPC_URL,
+    jsonRpcUrl: process.env.VITE_JSON_RPC_URL,
   };
   if (!config.jsonRpcUrl)
     config.jsonRpcUrl = config.chain.rpcUrls.default.http[0];
@@ -116,9 +116,9 @@ const updateDotFile = async (
 console.log("Deploying Prover...");
 const proverAddr = await deployProver();
 console.log(`Prover deployed: ${proverAddr}`);
-await updateDotFile(envPath, { NEXT_PUBLIC_PROVER_ADDR: proverAddr });
+await updateDotFile(envPath, { VITE_PROVER_ADDR: proverAddr });
 
 console.log("Deploying Verifier...");
 const verifierAddr = await deployVerifier(proverAddr);
 console.log(`Verifier deployed: ${verifierAddr}`);
-await updateDotFile(envPath, { NEXT_PUBLIC_VERIFIER_ADDR: verifierAddr });
+await updateDotFile(envPath, { VITE_VERIFIER_ADDR: verifierAddr });
