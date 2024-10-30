@@ -54,9 +54,7 @@ async function callProver() {
     functionName: "main",
     proverAbi: webProofProver.abi,
     args: [
-      {
-        webProofJson: JSON.stringify(webProof),
-      },
+      // webProof,
       twitterUserAddress,
     ],
     chainId: foundry.id,

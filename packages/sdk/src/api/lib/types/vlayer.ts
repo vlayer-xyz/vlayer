@@ -6,6 +6,7 @@ import {
   ContractFunctionName,
   Hex,
 } from "viem";
+import { ContractFunctionArgsWithout } from "types/viem";
 
 type Calldata = string;
 
@@ -31,21 +32,6 @@ export type Proof = {
     settleBlockHash: Hex;
     settleBlockNumber: bigint;
   };
-};
-
-export const EMPTY_PROOF: Proof = {
-  length: BigInt(0),
-  seal: {
-    verifierSelector: "0x",
-    seal: ["0x", "0x", "0x", "0x", "0x", "0x", "0x", "0x"],
-    mode: 0,
-  },
-  callAssumptions: {
-    proverContractAddress: "0x",
-    functionSelector: "0x",
-    settleBlockHash: "0x",
-    settleBlockNumber: BigInt(0),
-  },
 };
 
 export interface VCallResult {
@@ -80,6 +66,6 @@ export type VlayerClient = {
     proverAbi: T;
     functionName: F;
     chainId: number;
-    args: ContractFunctionArgs<T, AbiStateMutability, F>;
-  }) => Promise<[Proof, ...unknown[]]>;
+    args: ContractFunctionArgsWithout<T, F, { name: "webProof" }>;
+  }) => Promise<{ hash: string }>;
 };

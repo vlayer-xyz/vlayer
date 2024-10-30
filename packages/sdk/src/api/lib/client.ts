@@ -1,4 +1,4 @@
-import { EMPTY_PROOF, VCallResponse, VlayerClient } from "types/vlayer";
+import { VCallResponse, VlayerClient } from "types/vlayer";
 import { WebProofProvider } from "types/webProofProvider";
 
 import { prove } from "../prover";
@@ -75,7 +75,7 @@ export const createVlayerClient = (
     },
 
     proveWeb: ({}) => {
-      return Promise.resolve([EMPTY_PROOF]);
+      return Promise.resolve({hash: "0x"});
     }
   };
 };

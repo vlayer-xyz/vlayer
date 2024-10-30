@@ -10,6 +10,12 @@ type Without<T extends readonly unknown[], P> = T extends readonly [
     : readonly [F, ...Without<R, P>]
   : [];
 
+type ReplaceFirst<T extends readonly unknown [], P> = T extends readonly [
+    unknown,
+    ...infer R,
+  ] ? readonly [P, ...R]
+  : [];
+
 export type ContractFunctionArgsWithout<
   abi extends Abi,
   functionName extends ContractFunctionName<abi>,
@@ -19,6 +25,23 @@ export type ContractFunctionArgsWithout<
     Without<
       ExtractAbiFunction<abi extends Abi ? abi : Abi, functionName>["inputs"],
       without
+    >,
+    "inputs"
+  > extends infer args
+    ? [args] extends [never]
+      ? readonly unknown[]
+      : args
+    : readonly unknown[];
+
+export type ContractFunctionArgsFirstReplaced<
+  abi extends Abi,
+  functionName extends ContractFunctionName<abi>,
+  replacement,
+> =
+  AbiParametersToPrimitiveTypes<
+    ReplaceFirst<
+      ExtractAbiFunction<abi extends Abi ? abi : Abi, functionName>["inputs"],
+      replacement
     >,
     "inputs"
   > extends infer args
