@@ -1,4 +1,4 @@
-import { VCallResponse, VlayerClient } from "types/vlayer";
+import { EMPTY_PROOF, VCallResponse, VlayerClient } from "types/vlayer";
 import { WebProofProvider } from "types/webProofProvider";
 
 import { prove } from "../prover";
@@ -53,6 +53,7 @@ export const createVlayerClient = (
       resultHashMap.set(hash, [result_promise, proverAbi, functionName]);
       return { hash };
     },
+
     waitForProvingResult: async ({ hash }) => {
       const savedProvingData = resultHashMap.get(hash);
       if (!savedProvingData) {
@@ -72,5 +73,9 @@ export const createVlayerClient = (
 
       return [proof, ...result];
     },
+
+    proveWeb: ({}) => {
+      return Promise.resolve([EMPTY_PROOF]);
+    }
   };
 };

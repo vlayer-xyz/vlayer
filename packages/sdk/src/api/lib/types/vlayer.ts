@@ -33,6 +33,21 @@ export type Proof = {
   };
 };
 
+export const EMPTY_PROOF: Proof = {
+  length: BigInt(0),
+  seal: {
+    verifierSelector: "0x",
+    seal: ["0x", "0x", "0x", "0x", "0x", "0x", "0x", "0x"],
+    mode: 0,
+  },
+  callAssumptions: {
+    proverContractAddress: "0x",
+    functionSelector: "0x",
+    settleBlockHash: "0x",
+    settleBlockNumber: BigInt(0),
+  },
+};
+
 export interface VCallResult {
   evm_call_result: Hex;
   proof: Proof;
@@ -45,6 +60,7 @@ export interface VCallResponse {
 }
 
 export type VlayerClient = {
+
   prove: <T extends Abi, F extends ContractFunctionName<T>>(args: {
     address: Hex;
     proverAbi: T;
@@ -52,9 +68,18 @@ export type VlayerClient = {
     chainId: number;
     args: ContractFunctionArgs<T, AbiStateMutability, F>;
   }) => Promise<{ hash: string }>;
+
   waitForProvingResult: ({
     hash,
   }: {
     hash: string;
+  }) => Promise<[Proof, ...unknown[]]>;
+
+  proveWeb: <T extends Abi, F extends ContractFunctionName<T>>(args: {
+    address: Hex;
+    proverAbi: T;
+    functionName: F;
+    chainId: number;
+    args: ContractFunctionArgs<T, AbiStateMutability, F>;
   }) => Promise<[Proof, ...unknown[]]>;
 };
