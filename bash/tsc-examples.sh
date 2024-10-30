@@ -28,7 +28,7 @@ for example_name in ${EXAMPLES}; do
   forge build
 
   echo Generating typescript bidings ...
-  ${VLAYER_HOME}/bash/build_ts_types.sh >/dev/null
+  ${VLAYER_HOME}/bash/build-ts-types.sh >/dev/null
 
   cd ${example}/vlayer
 
