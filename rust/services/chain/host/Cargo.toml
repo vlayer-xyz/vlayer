@@ -8,10 +8,10 @@ alloy-primitives = { workspace = true }
 anyhow = { workspace = true }
 bincode = { workspace = true }
 block_trie = { workspace = true }
-chain_common = { workspace = true, features = ["test_utils"] }
 chain_db = { workspace = true }
 chain_guest = { workspace = true }
 chain_guest_wrapper = { workspace = true }
+chain_test_utils = { workspace = true }
 derivative = { workspace = true }
 ethers = { workspace = true }
 futures = { workspace = true }
