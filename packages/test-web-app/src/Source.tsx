@@ -12,7 +12,8 @@ import React, { useCallback, useRef, useState } from "react";
 import unconditionalProver from "../../../contracts/out/UnconditionalProver.sol/UnconditionalProver";
 
 const PROVER_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
-const NOTARY_PUB_KEY = "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEBv36FI4ZFszJa0DQFJ3wWCXvVLFr\ncRzMG5kaTeHGoSzDu6cFqx3uEWYpFGo6C0EOUgf+mEgbktLrXocv5yHzKg==\n-----END PUBLIC KEY-----";
+const NOTARY_PUB_KEY =
+  "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEBv36FI4ZFszJa0DQFJ3wWCXvVLFr\ncRzMG5kaTeHGoSzDu6cFqx3uEWYpFGo6C0EOUgf+mEgbktLrXocv5yHzKg==\n-----END PUBLIC KEY-----";
 
 function Source() {
   const [proof, setProof] = useState<WebProof>();
@@ -57,7 +58,10 @@ function Source() {
       chainId: foundry.id,
       args: [
         {
-          webProofJson: JSON.stringify({tls_proof: proof, notary_pub_key: NOTARY_PUB_KEY}),
+          webProofJson: JSON.stringify({
+            tls_proof: proof,
+            notary_pub_key: NOTARY_PUB_KEY,
+          }),
         },
       ],
     });
