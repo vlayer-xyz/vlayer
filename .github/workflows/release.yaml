@@ -378,7 +378,7 @@ jobs:
     - name: Update SDK version
       working-directory: packages/sdk
       env: 
-        VLAYER_BUILD: '0.1.0-nightly-20241029-42360cf'
+        VLAYER_BUILD: '0.1.0-nightly-202410292-42360cf'
       run: npm version "${VLAYER_BUILD}" --no-workspaces-update
     - name: Install dependencies
       working-directory: packages/sdk
