@@ -31,8 +31,14 @@ function Source() {
     }) as VlayerClient;
 
     const webproof = await provider.getWebProof({
-      //@ts-expect-error this part is not implemented yet in our tlsn flow
-      proverCallCommitment: {},
+      proverCallCommitment: {
+        address: PROVER_ADDRESS,
+        proverAbi: unconditionalProver.abi,
+        chainId: foundry.id,
+        functionName: "web_proof",
+        commitmentArgs: [],
+      },
+      logoUrl: "",
       steps: [
         startPage(loginUrl, "Go to login"),
         expectUrl(targetUrl, "Logged in and appear at target page"),
