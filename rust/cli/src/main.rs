@@ -58,6 +58,6 @@ async fn run() -> Result<(), CLIError> {
         Commands::Serve(args) => run_serve(args).await,
         Commands::Init(args) => run_init(args).await,
         Commands::Test(args) => run_test(args).await,
-        Commands::Update => run_update().await,
+        Commands::Update => run_update(),
     }
 }

@@ -5,7 +5,7 @@ use serde_json::Value;
 
 use crate::errors::CLIError;
 
-pub async fn run_update() -> Result<(), CLIError> {
+pub fn run_update() -> Result<(), CLIError> {
     check_if_vlayerup_exists()?;
     update_cli()?;
     update_sdk()?;
