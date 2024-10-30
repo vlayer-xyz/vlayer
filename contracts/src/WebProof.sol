@@ -29,6 +29,14 @@ library WebProofLib {
         return web;
     }
 
+    function verify(WebProof memory webProof, string memory dataUrl, string memory notaryPubKey) internal view returns (Web memory) {
+        Web memory web = recover(webProof, dataUrl);
+
+        require(notaryPubKey.equal(web.notaryPubKey), "Notary public key different than provided");
+
+        return web;
+    }
+
     function recover(WebProof memory webProof, string memory dataUrl) internal view returns (Web memory) {
         (bool success, bytes memory returnData) =
             Precompiles.VERIFY_AND_PARSE_PRECOMPILE.staticcall(bytes(webProof.webProofJson));
