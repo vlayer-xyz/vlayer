@@ -29,7 +29,11 @@ library WebProofLib {
         return web;
     }
 
-    function verify(WebProof memory webProof, string memory dataUrl, string memory notaryPubKey) internal view returns (Web memory) {
+    function verify(WebProof memory webProof, string memory dataUrl, string memory notaryPubKey)
+        internal
+        view
+        returns (Web memory)
+    {
         Web memory web = recover(webProof, dataUrl);
 
         require(notaryPubKey.equal(web.notaryPubKey), "Notary public key different than provided");
