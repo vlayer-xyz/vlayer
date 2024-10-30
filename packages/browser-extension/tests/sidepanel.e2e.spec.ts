@@ -88,6 +88,9 @@ test.describe("Full flow of webproof using extension", () => {
 
       const response = await page.waitForResponse(VLAYER_SERVER_URL);
       expect(response.ok()).toBeTruthy();
+
+      const response_json = await response.json();
+      expect(response_json).toHaveProperty("result.proof");
     });
   });
 });
