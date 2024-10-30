@@ -1,6 +1,8 @@
-use alloy_primitives::{Bytes, B256};
+use alloy_primitives::{keccak256, Bytes, B256};
+use alloy_trie::EMPTY_ROOT_HASH;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
+use traits::Hashable;
 
 use crate::key_nibbles::KeyNibbles;
 
@@ -40,6 +42,17 @@ impl Node {
                 }
             }
             Node::Digest(_) => panic!("Attempted to access unresolved node"),
+        }
+    }
+}
+
+impl Hashable for Node {
+    fn hash_slow(&self) -> B256 {
+        // compute the keccak hash of the RLP encoded root node
+        match self {
+            Node::Null => EMPTY_ROOT_HASH,
+            Node::Digest(digest) => *digest,
+            node => keccak256(node.rlp_encoded()),
         }
     }
 }

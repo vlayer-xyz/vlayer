@@ -1673,6 +1673,7 @@ dependencies = [
  "revm",
  "serde",
  "serde_json",
+ "traits",
 ]
 
 [[package]]
@@ -1681,15 +1682,12 @@ version = "0.1.0"
 dependencies = [
  "alloy-primitives",
  "alloy-rlp",
- "bincode",
  "block_header",
  "bytes",
- "derivative",
  "mpt",
- "risc0-zkp",
- "risc0-zkvm",
  "serde",
  "thiserror",
+ "traits",
 ]
 
 [[package]]
@@ -2109,7 +2107,6 @@ version = "0.1.0"
 dependencies = [
  "alloy-primitives",
  "block_trie",
- "call_engine",
  "chain_server",
  "chain_types",
  "mpt",
@@ -2127,16 +2124,21 @@ dependencies = [
  "alloy-primitives",
  "alloy-rlp",
  "anyhow",
+ "bincode",
  "block_trie",
  "bytes",
  "chain_guest_wrapper",
+ "derivative",
  "derive_more 1.0.0",
  "key_value",
  "mpt",
  "nybbles",
  "rand",
+ "risc0-zkp",
+ "risc0-zkvm",
  "serde",
  "thiserror",
+ "traits",
 ]
 
 [[package]]
@@ -2146,11 +2148,10 @@ dependencies = [
  "alloy-primitives",
  "block_header",
  "block_trie",
- "bytes",
- "mpt",
  "risc0-zkp",
  "risc0-zkvm",
  "serde",
+ "traits",
 ]
 
 [[package]]
@@ -2169,7 +2170,6 @@ dependencies = [
  "anyhow",
  "bincode",
  "block_trie",
- "bytes",
  "chain_db",
  "chain_guest",
  "chain_guest_wrapper",
@@ -2177,11 +2177,8 @@ dependencies = [
  "ethers",
  "futures",
  "host_utils",
- "key_value",
  "lazy_static",
- "mpt",
  "provider",
- "risc0-zkp",
  "risc0-zkvm",
  "serde",
  "serde_json",
@@ -2210,6 +2207,7 @@ dependencies = [
  "server_utils",
  "thiserror",
  "tokio",
+ "traits",
 ]
 
 [[package]]
@@ -6525,6 +6523,7 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror",
+ "traits",
 ]
 
 [[package]]
@@ -10130,6 +10129,14 @@ dependencies = [
  "tracing",
  "tracing-core",
  "tracing-log",
+]
+
+[[package]]
+name = "traits"
+version = "0.1.0"
+dependencies = [
+ "alloy-primitives",
+ "auto_impl",
 ]
 
 [[package]]

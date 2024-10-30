@@ -4,15 +4,15 @@ use derivative::Derivative;
 use ethers::types::BlockNumber;
 use thiserror::Error;
 
+use super::prover::Error as ProverError;
+
 #[derive(Error, Debug, Derivative)]
 #[derivative(PartialEq, Eq)]
 pub enum HostError {
     #[error("ChainDB error: {0}")]
     ChainDb(#[from] chain_db::ChainDbError),
-    #[error("ExecutorEnvBuilder: {0}")]
-    ExecutorEnvBuilder(String),
-    #[error("Prover: {0}")]
-    Prover(String),
+    #[error("Prover error: {0}")]
+    Prover(#[from] ProverError),
     #[error("Provider: {0}")]
     Provider(String),
     #[error("BlockNotFound: {0}")]
@@ -27,4 +27,10 @@ pub enum HostError {
     ),
     #[error("Block trie error: {0}")]
     BlockTrieError(#[from] block_trie::BlockTrieError),
+    #[error("Proof serialization error: {0}")]
+    ProofSerializationError(
+        #[from]
+        #[derivative(PartialEq = "ignore")]
+        bincode::Error,
+    ),
 }

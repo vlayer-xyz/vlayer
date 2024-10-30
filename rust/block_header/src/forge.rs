@@ -1,7 +1,8 @@
-use alloy_primitives::{BlockNumber, B256};
+use alloy_primitives::{keccak256, BlockNumber, B256};
 use alloy_rlp::Encodable;
 use revm::primitives::BlockEnv;
 use serde::{Deserialize, Serialize};
+use traits::Hashable;
 
 use crate::{casting_utils::try_downcast, EvmBlockHeader};
 
@@ -49,6 +50,12 @@ impl EvmBlockHeader for ForgeBlockHeader {
     }
 
     fn fill_block_env(&self, _blk_env: &mut BlockEnv) {}
+}
+
+impl Hashable for ForgeBlockHeader {
+    fn hash_slow(&self) -> B256 {
+        keccak256(alloy_rlp::encode(self))
+    }
 }
 
 #[cfg(test)]

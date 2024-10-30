@@ -5,7 +5,7 @@ use std::{
 };
 
 use alloy_primitives::{BlockHash, BlockNumber, Bytes, ChainId, B256};
-use block_header::EvmBlockHeader;
+use block_header::{EvmBlockHeader, Hashable};
 use chain_types::ChainProof;
 use derive_more::{From, Into, IntoIterator};
 use derive_new::new;

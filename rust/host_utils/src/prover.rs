@@ -1,6 +1,7 @@
 use anyhow::Result;
 use risc0_zkvm::{
     BonsaiProver, ExecutorEnv, ExternalProver, ProveInfo, Prover as ProverTrait, ProverOpts,
+    SessionStats,
 };
 use tracing::info;
 
@@ -17,12 +18,23 @@ impl Prover {
     }
 
     pub fn prove(&self, env: ExecutorEnv<'_>, elf: &[u8]) -> Result<ProveInfo> {
-        match self.mode {
+        let prove_info = match self.mode {
             ProofMode::Groth16 => prove_bonsai(env, elf, &ProverOpts::groth16()),
             ProofMode::Succinct => prove_bonsai(env, elf, &ProverOpts::succinct()),
             ProofMode::Fake => prove_fake(env, elf),
-        }
+        }?;
+        log_stats(&prove_info.stats);
+        Ok(prove_info)
     }
+}
+
+fn log_stats(stats: &SessionStats) {
+    let SessionStats {
+        total_cycles,
+        user_cycles,
+        segments,
+    } = stats;
+    info!("Prover stats. Segments: {segments}, cycles: {total_cycles}, user cycles: {user_cycles}");
 }
 
 fn prove_bonsai(env: ExecutorEnv<'_>, elf: &[u8], opts: &ProverOpts) -> Result<ProveInfo> {

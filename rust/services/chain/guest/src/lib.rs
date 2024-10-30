@@ -4,6 +4,7 @@ use block_trie::BlockTrie;
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm::{guest::env, serde::to_vec};
 use serde::{Deserialize, Serialize};
+use traits::Hashable;
 
 #[derive(Debug, Serialize, Deserialize)]
 pub enum Input {

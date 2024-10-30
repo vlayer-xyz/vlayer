@@ -1,14 +1,14 @@
 pub mod config;
 pub mod error;
+mod prover;
 
 use std::ops::RangeInclusive;
 
 use alloy_primitives::ChainId;
 use block_trie::BlockTrie;
-use bytes::Bytes;
-use chain_db::{difference, ChainDb, ChainInfo, ChainTrie, ChainUpdate, Mode};
+use chain_db::{ChainDb, ChainTrie, ChainUpdate, Mode};
 use chain_guest::Input;
-use chain_guest_wrapper::{RISC0_CHAIN_GUEST_ELF, RISC0_CHAIN_GUEST_ID};
+use chain_guest_wrapper::RISC0_CHAIN_GUEST_ID;
 pub use config::HostConfig;
 pub use error::HostError;
 use ethers::{
@@ -17,11 +17,10 @@ use ethers::{
     types::BlockNumber as BlockTag,
 };
 use futures::future::join_all;
-use host_utils::Prover;
 use lazy_static::lazy_static;
+use prover::Prover;
 use provider::{to_eth_block_header, EvmBlockHeader};
-use risc0_zkvm::{sha::Digest, AssumptionReceipt, ExecutorEnv, ProveInfo, Receipt, SessionStats};
-use serde::Serialize;
+use risc0_zkvm::sha::Digest;
 use tracing::{info, instrument};
 
 lazy_static! {
@@ -93,13 +92,10 @@ where
             elf_id: *GUEST_ID,
             block: latest_block,
         };
-        let receipt = self.prove(input, &None)?;
-        let zk_proof = encode_proof(&receipt);
+        let receipt = self.prover.prove(&input, None)?;
 
         let range = latest_block_number..=latest_block_number;
-        let chain_info = ChainInfo::new(range, trie.hash_slow(), zk_proof);
-        let (added, removed) = difference([], &trie);
-        let chain_update = ChainUpdate::new(chain_info, added, removed);
+        let chain_update = ChainUpdate::from_two_tries(range, vec![], &trie, &receipt)?;
 
         Ok(chain_update)
     }
@@ -131,30 +127,12 @@ where
             old_leftmost_block: latest_block,
             block_trie: old_trie.clone(),
         };
-        let receipt = self.prove(input, &Some(old_zk_proof))?;
-        let zk_proof = encode_proof(&receipt);
+        let receipt = self.prover.prove(&input, Some(old_zk_proof))?;
 
         let range = *block_range.start()..=latest_block_number;
-        let chain_info = ChainInfo::new(range, trie.hash_slow(), zk_proof);
-        let (added, removed) = difference(&old_trie, &trie);
-        let chain_update = ChainUpdate::new(chain_info, added, removed);
+        let chain_update = ChainUpdate::from_two_tries(range, &old_trie, &trie, &receipt)?;
 
         Ok(chain_update)
-    }
-
-    #[instrument(skip_all)]
-    fn prove(&self, input: Input, old_zk_proof: &Option<Bytes>) -> Result<Receipt, HostError> {
-        let old_receipt = old_zk_proof.as_ref().map(decode_proof);
-        let executor_env = build_executor_env(input, old_receipt)?;
-        let ProveInfo { receipt, stats } =
-            provably_execute(&self.prover, executor_env, RISC0_CHAIN_GUEST_ELF)?;
-        let SessionStats {
-            total_cycles,
-            user_cycles,
-            segments,
-        } = stats;
-        info!("Prover stats. Segments: {segments}, cycles: {total_cycles}, user cycles: {user_cycles}");
-        Ok(receipt)
     }
 
     #[instrument(skip(self))]
@@ -182,97 +160,75 @@ where
     }
 }
 
-fn encode_proof(receipt: &Receipt) -> Bytes {
-    bincode::serialize(receipt)
-        .expect("failed to serialize receipt")
-        .into()
-}
-
-fn decode_proof(proof: &Bytes) -> Receipt {
-    bincode::deserialize(proof).expect("failed to deserialize proof")
-}
-
-#[allow(unused)]
-#[instrument(skip_all)]
-fn provably_execute(
-    prover: &Prover,
-    env: ExecutorEnv,
-    guest_elf: &[u8],
-) -> Result<ProveInfo, HostError> {
-    prover
-        .prove(env, guest_elf)
-        .map_err(|err| HostError::Prover(err.to_string()))
-}
-
-fn build_executor_env<A>(
-    input: impl Serialize,
-    assumption: Option<A>,
-) -> Result<ExecutorEnv<'static>, HostError>
-where
-    A: Into<AssumptionReceipt>,
-{
-    let mut builder = ExecutorEnv::builder();
-    if let Some(assumption) = assumption {
-        builder.add_assumption(assumption);
-    }
-    builder
-        .write(&input)
-        .map_err(|err| HostError::ExecutorEnvBuilder(err.to_string()))?
-        .build()
-        .map_err(|err| HostError::ExecutorEnvBuilder(err.to_string()))
-}
-
 #[cfg(test)]
 mod test_utils;
 
 #[cfg(test)]
 mod test {
+
+    use serde_json::Value;
+    use test_utils::mock_provider;
+
     use super::*;
-    mod provably_execute {
-        use super::*;
-        #[test]
-        fn host_prove_invalid_guest_elf() {
-            let prover = Prover::default();
-            let env = ExecutorEnv::default();
-            let invalid_guest_elf = &[];
-            let res = provably_execute(&prover, env, invalid_guest_elf);
 
-            assert!(matches!(
-                res.map(|_| ()).unwrap_err(),
-                HostError::Prover(ref msg) if msg == "Elf parse error: Could not read bytes in range [0x0, 0x10)"
-            ));
-        }
+    const LATEST: u64 = 20_000_000;
+
+    fn test_db() -> ChainDb {
+        ChainDb::in_memory()
     }
-    mod host {
-        use serde_json::Value;
-        use test_utils::mock_provider;
+
+    mod poll {
+        use ethers::providers::MockProvider;
 
         use super::*;
 
-        const LATEST: u64 = 20_000_000;
-
-        fn test_db() -> ChainDb {
-            ChainDb::in_memory()
+        fn assert_fetched_latest_block(provider: &MockProvider) {
+            provider
+                .assert_request(
+                    "eth_getBlockByNumber",
+                    Value::Array(vec!["latest".into(), false.into()]),
+                )
+                .expect("expected request to fetch latest block");
         }
 
-        mod poll {
-            use ethers::providers::MockProvider;
+        #[tokio::test]
+        async fn initialize() -> anyhow::Result<()> {
+            let db = test_db();
+            let host = Host::from_parts(Prover::default(), mock_provider([LATEST]), db, 1);
+
+            let chain_update = host.poll().await?;
+            let Host { mut db, .. } = host;
+            db.update_chain(1, chain_update)?;
+
+            assert_fetched_latest_block(host.provider.as_ref());
+            let chain_trie = db.get_chain_trie(1)?.unwrap();
+            assert_eq!(chain_trie.block_range, LATEST..=LATEST);
+
+            Ok(())
+        }
+
+        mod append_prepend {
+
+            use alloy_primitives::BlockNumber;
 
             use super::*;
+            const GENESIS: BlockNumber = 0;
 
-            fn assert_fetched_latest_block(provider: &MockProvider) {
-                provider
-                    .assert_request(
-                        "eth_getBlockByNumber",
-                        Value::Array(vec!["latest".into(), false.into()]),
-                    )
-                    .expect("expected request to fetch latest block");
+            async fn test_db_after_initialize() -> Result<ChainDb, HostError> {
+                let db = test_db();
+                let host = Host::from_parts(Prover::default(), mock_provider([GENESIS]), db, 1);
+
+                let init_chain_update = host.poll().await?;
+                let Host { mut db, .. } = host;
+                db.update_chain(1, init_chain_update).unwrap();
+
+                Ok(db)
             }
 
             #[tokio::test]
-            async fn initialize() -> anyhow::Result<()> {
-                let db = test_db();
-                let host = Host::from_parts(Prover::default(), mock_provider([LATEST]), db, 1);
+            async fn no_new_head_blocks_back_propagation_finished() -> anyhow::Result<()> {
+                let db = test_db_after_initialize().await?;
+                let host = Host::from_parts(Prover::default(), mock_provider([GENESIS]), db, 1);
 
                 let chain_update = host.poll().await?;
                 let Host { mut db, .. } = host;
@@ -280,68 +236,33 @@ mod test {
 
                 assert_fetched_latest_block(host.provider.as_ref());
                 let chain_trie = db.get_chain_trie(1)?.unwrap();
-                assert_eq!(chain_trie.block_range, LATEST..=LATEST);
+                assert_eq!(chain_trie.block_range, GENESIS..=GENESIS);
 
                 Ok(())
             }
 
-            mod append_prepend {
+            #[tokio::test]
+            async fn new_head_blocks_back_propagation_finished() -> anyhow::Result<()> {
+                let new_block = GENESIS + 1;
+                let db = test_db_after_initialize().await?;
+                let provider = mock_provider([new_block, new_block]);
+                let host = Host::from_parts(Prover::default(), provider, db, 1);
 
-                use alloy_primitives::BlockNumber;
+                let chain_update = host.poll().await?;
+                let Host { mut db, .. } = host;
+                db.update_chain(1, chain_update)?;
 
-                use super::*;
-                const GENESIS: BlockNumber = 0;
+                assert_fetched_latest_block(host.provider.as_ref());
+                let chain_trie = db.get_chain_trie(1)?.unwrap();
+                assert_eq!(chain_trie.block_range, GENESIS..=GENESIS + 1);
 
-                async fn test_db_after_initialize() -> Result<ChainDb, HostError> {
-                    let db = test_db();
-                    let host = Host::from_parts(Prover::default(), mock_provider([GENESIS]), db, 1);
-
-                    let init_chain_update = host.poll().await?;
-                    let Host { mut db, .. } = host;
-                    db.update_chain(1, init_chain_update).unwrap();
-
-                    Ok(db)
-                }
-
-                #[tokio::test]
-                async fn no_new_head_blocks_back_propagation_finished() -> anyhow::Result<()> {
-                    let db = test_db_after_initialize().await?;
-                    let host = Host::from_parts(Prover::default(), mock_provider([GENESIS]), db, 1);
-
-                    let chain_update = host.poll().await?;
-                    let Host { mut db, .. } = host;
-                    db.update_chain(1, chain_update)?;
-
-                    assert_fetched_latest_block(host.provider.as_ref());
-                    let chain_trie = db.get_chain_trie(1)?.unwrap();
-                    assert_eq!(chain_trie.block_range, GENESIS..=GENESIS);
-
-                    Ok(())
-                }
-
-                #[tokio::test]
-                async fn new_head_blocks_back_propagation_finished() -> anyhow::Result<()> {
-                    let new_block = GENESIS + 1;
-                    let db = test_db_after_initialize().await?;
-                    let provider = mock_provider([new_block, new_block]);
-                    let host = Host::from_parts(Prover::default(), provider, db, 1);
-
-                    let chain_update = host.poll().await?;
-                    let Host { mut db, .. } = host;
-                    db.update_chain(1, chain_update)?;
-
-                    assert_fetched_latest_block(host.provider.as_ref());
-                    let chain_trie = db.get_chain_trie(1)?.unwrap();
-                    assert_eq!(chain_trie.block_range, GENESIS..=GENESIS + 1);
-
-                    Ok(())
-                }
-
-                // No new head blocks, back propagation in progress
-                // New head blocks, back propagation in progress
-                // Too many new head blocks
-                // Reorg
+                Ok(())
             }
+
+            // No new head blocks, back propagation in progress
+            // New head blocks, back propagation in progress
+            // Too many new head blocks
+            // Reorg
         }
     }
 }

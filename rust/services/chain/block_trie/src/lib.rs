@@ -2,31 +2,10 @@ use alloy_primitives::B256;
 use alloy_rlp::encode_fixed_size;
 use block_header::EvmBlockHeader;
 use bytes::Bytes;
-use derivative::Derivative;
 use mpt::{MerkleTrie, Node};
-use risc0_zkp::verify::VerificationError;
-use risc0_zkvm::{sha::Digest, Receipt};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
-
-#[derive(Debug, Error, Derivative)]
-#[derivative(PartialEq)]
-pub enum ProofVerificationError {
-    #[error("proof verification failed: {0}")]
-    ProofVerificationFailed(#[from] VerificationError),
-    #[error("failed to deserialize receipt: {0}")]
-    DeserializeReceiptFailed(
-        #[from]
-        #[derivative(PartialEq = "ignore")]
-        bincode::Error,
-    ),
-    #[error("failed to deserialize journal: {0}")]
-    DeserializeJournalFailed(#[from] risc0_zkvm::serde::Error),
-    #[error("elf id mismatch: expected: {expected} != decoded: {decoded}")]
-    ElfIdMismatch { expected: Digest, decoded: Digest },
-    #[error("mpt root mismatch: expected: {expected} != decoded: {decoded}")]
-    MptRootMismatch { expected: B256, decoded: B256 },
-}
+use traits::Hashable;
 
 #[derive(Debug, Error, PartialEq)]
 pub enum BlockTrieError {
@@ -119,15 +98,6 @@ impl BlockTrie {
         Self(mpt)
     }
 
-    pub fn from_mpt_verifying_the_proof(
-        mpt: MerkleTrie,
-        zk_proof: &Bytes,
-        guest_id: impl Into<Digest>,
-    ) -> Result<Self, ProofVerificationError> {
-        verify_mpt_proof(&mpt, zk_proof, guest_id)?;
-        Ok(BlockTrie(mpt))
-    }
-
     pub fn get(&self, block_number: u64) -> Option<B256> {
         let key = Self::encode_key(block_number);
         self.0.get(key).map(B256::from_slice)
@@ -137,10 +107,6 @@ impl BlockTrie {
         let key = Self::encode_key(block_number);
         self.0.insert(key, hash)?;
         Ok(())
-    }
-
-    pub fn hash_slow(&self) -> B256 {
-        self.0.hash_slow()
     }
 
     pub fn size(&self) -> usize {
@@ -156,30 +122,10 @@ impl BlockTrie {
     }
 }
 
-fn verify_mpt_proof(
-    mpt: &MerkleTrie,
-    zk_proof: &Bytes,
-    guest_id: impl Into<Digest>,
-) -> Result<(), ProofVerificationError> {
-    let guest_id = guest_id.into();
-    let receipt: Receipt = bincode::deserialize(zk_proof)?;
-    receipt.verify(guest_id)?;
-
-    let (proven_root, elf_id): (B256, Digest) = receipt.journal.decode()?;
-
-    if elf_id != guest_id {
-        return Err(ProofVerificationError::ElfIdMismatch {
-            expected: guest_id,
-            decoded: elf_id,
-        });
+impl Hashable for BlockTrie {
+    fn hash_slow(&self) -> B256 {
+        self.0.hash_slow()
     }
-    if mpt.hash_slow() != proven_root {
-        return Err(ProofVerificationError::MptRootMismatch {
-            expected: mpt.hash_slow(),
-            decoded: proven_root,
-        });
-    }
-    Ok(())
 }
 
 impl<'a> IntoIterator for &'a BlockTrie {

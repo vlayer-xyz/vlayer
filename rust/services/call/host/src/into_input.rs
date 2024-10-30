@@ -1,7 +1,7 @@
 use std::sync::Arc;
 
 use anyhow::{anyhow, ensure, Ok};
-use block_header::EvmBlockHeader;
+use block_header::{EvmBlockHeader, Hashable};
 use call_engine::evm::{
     env::cached::CachedEvmEnv,
     input::{EvmInput, MultiEvmInput},

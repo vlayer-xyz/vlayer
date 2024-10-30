@@ -4,7 +4,7 @@ mod forge;
 
 use std::fmt::Debug;
 
-use alloy_primitives::{keccak256, BlockNumber, B256};
+use alloy_primitives::{BlockNumber, B256};
 use alloy_rlp::Encodable;
 use as_any::AsAny;
 use auto_impl::auto_impl;
@@ -14,17 +14,7 @@ pub use eth::EthBlockHeader;
 pub use forge::ForgeBlockHeader;
 use revm::primitives::BlockEnv;
 use serde::{Deserialize, Serialize};
-
-pub trait Hashable {
-    /// Calculate the hash, this may be slow.
-    fn hash_slow(&self) -> B256;
-}
-
-impl<H: EvmBlockHeader> Hashable for H {
-    fn hash_slow(&self) -> B256 {
-        keccak256(alloy_rlp::encode(self))
-    }
-}
+pub use traits::Hashable;
 
 /// An EVM abstraction of a block header.
 #[auto_impl(Box)]
@@ -149,7 +139,7 @@ mod serialize {
 
     #[cfg(test)]
     mod unsupported_block_header {
-        use alloy_primitives::B256;
+        use alloy_primitives::{keccak256, B256};
         use alloy_rlp_derive::RlpEncodable;
         use revm::primitives::BlockEnv;
 
@@ -157,6 +147,12 @@ mod serialize {
 
         #[derive(Debug, Clone, RlpEncodable)]
         pub struct UnsupportedBlockHeader;
+
+        impl Hashable for UnsupportedBlockHeader {
+            fn hash_slow(&self) -> B256 {
+                keccak256(alloy_rlp::encode(self))
+            }
+        }
 
         impl EvmBlockHeader for UnsupportedBlockHeader {
             fn parent_hash(&self) -> &B256 {

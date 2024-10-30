@@ -1,9 +1,13 @@
 use std::ops::RangeInclusive;
 
 use alloy_primitives::{BlockNumber, ChainId};
+use derivative::Derivative;
 use thiserror::Error;
 
-#[derive(Error, Debug, PartialEq)]
+use crate::receipt::ProofVerificationError;
+
+#[derive(Error, Debug, Derivative)]
+#[derivative(PartialEq)]
 pub enum ChainDbError {
     #[error("Attempted write on read-only database")]
     ReadOnly,
@@ -18,7 +22,7 @@ pub enum ChainDbError {
     #[error("Block not found")]
     BlockNotFound,
     #[error("ZK proof verification failed: {0}")]
-    ZkProofVerificationFailed(#[from] block_trie::ProofVerificationError),
+    ZkProofVerificationFailed(#[from] ProofVerificationError),
     #[error("Chain not found: {0}")]
     ChainNotFound(ChainId),
     #[error("Block number {block_num} outside stored range: {block_range:?}")]
@@ -26,6 +30,12 @@ pub enum ChainDbError {
         block_num: BlockNumber,
         block_range: RangeInclusive<BlockNumber>,
     },
+    #[error("Malformed proof: {0}")]
+    MalformedProof(
+        #[from]
+        #[derivative(PartialEq = "ignore")]
+        bincode::Error,
+    ),
 }
 
 pub type ChainDbResult<T> = Result<T, ChainDbError>;

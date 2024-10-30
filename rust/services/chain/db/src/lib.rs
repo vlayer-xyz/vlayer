@@ -7,7 +7,7 @@ use std::{
 };
 
 use alloy_primitives::{keccak256, BlockNumber, ChainId, B256};
-use alloy_rlp::{Bytes as RlpBytes, Decodable, RlpDecodable, RlpEncodable};
+use alloy_rlp::{Decodable, RlpDecodable, RlpEncodable};
 use bytes::Bytes;
 use chain_trie::UnverifiedChainTrie;
 use derive_more::Debug;
@@ -18,6 +18,7 @@ mod chain_trie;
 mod db_node;
 mod error;
 mod proof_builder;
+mod receipt;
 #[cfg(test)]
 mod tests;
 
@@ -25,6 +26,8 @@ pub use chain_trie::ChainTrie;
 pub use db_node::DbNode;
 pub use error::{ChainDbError, ChainDbResult};
 pub use proof_builder::MerkleProof;
+pub use receipt::ChainProofReceipt;
+use traits::Hashable;
 
 /// Merkle trie nodes table. Holds `node_hash -> rlp_node` mapping
 const NODES: &str = "nodes";
@@ -38,20 +41,20 @@ pub struct ChainInfo {
     pub last_block: BlockNumber,
     pub root_hash: B256,
     #[debug("{zk_proof:#x}")]
-    pub zk_proof: RlpBytes,
+    pub zk_proof: Bytes,
 }
 
 impl ChainInfo {
-    pub fn new(
+    pub const fn new(
         block_range: RangeInclusive<BlockNumber>,
         root_hash: B256,
-        zk_proof: impl Into<Bytes>,
+        zk_proof: Bytes,
     ) -> Self {
         Self {
             first_block: *block_range.start(),
             last_block: *block_range.end(),
             root_hash,
-            zk_proof: zk_proof.into(),
+            zk_proof,
         }
     }
 
@@ -95,6 +98,17 @@ impl ChainUpdate {
             added_nodes: added_nodes.into_iter().collect(),
             removed_nodes: removed_nodes.into_iter().collect(),
         }
+    }
+
+    pub fn from_two_tries(
+        range: RangeInclusive<BlockNumber>,
+        old: impl IntoIterator<Item = Bytes>,
+        new: impl IntoIterator<Item = Bytes> + Hashable,
+        receipt: &ChainProofReceipt,
+    ) -> Result<Self, bincode::Error> {
+        let chain_info = ChainInfo::new(range, new.hash_slow(), receipt.try_into()?);
+        let (added_nodes, removed_nodes) = difference(old, new);
+        Ok(Self::new(chain_info, added_nodes, removed_nodes))
     }
 }
 
@@ -178,12 +192,13 @@ impl ChainDb {
             last_block,
             zk_proof,
         } = chain_info;
+        let chain_proof = (&zk_proof).try_into()?;
 
         let first_block_proof = tx.get_merkle_proof(root_hash, first_block)?;
         let last_block_proof = tx.get_merkle_proof(root_hash, last_block)?;
         let trie = mpt_from_proofs(first_block_proof, last_block_proof);
 
-        Ok(Some(UnverifiedChainTrie::new(first_block..=last_block, trie, zk_proof)))
+        Ok(Some(UnverifiedChainTrie::new(first_block..=last_block, trie, chain_proof)))
     }
 
     pub fn get_chain_trie(&self, chain_id: ChainId) -> ChainDbResult<Option<ChainTrie>> {
