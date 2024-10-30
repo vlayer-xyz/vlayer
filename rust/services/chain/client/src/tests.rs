@@ -18,7 +18,7 @@ fn mock_chain_proof(block_numbers: &[BlockNumber]) -> ChainProof {
 
 fn get_cached_client(
     blocks_by_chain: impl IntoIterator<Item = (ChainId, Vec<BlockNumber>)>,
-) -> CachedChainProofClient {
+) -> CachedClient {
     let cache = blocks_by_chain
         .into_iter()
         .map(|(chain_id, block_numbers)| {
@@ -26,24 +26,17 @@ fn get_cached_client(
             (chain_id, (block_numbers, proof))
         })
         .collect();
-    CachedChainProofClient::new(cache)
+    CachedClient::new(cache)
 }
 
-fn assert_cache_miss(
-    err: ChainProofClientError,
-    exp_chain_id: ChainId,
-    exp_block_nums: &[BlockNumber],
-) {
-    match err {
-        ChainProofClientError::CacheMiss {
+fn assert_cache_miss(err: Error, exp_chain_id: ChainId, exp_block_nums: &[BlockNumber]) {
+    assert!(matches!(
+        err,
+        Error::CacheMiss {
             chain_id,
-            block_numbers,
-        } => {
-            assert_eq!(chain_id, exp_chain_id);
-            assert_eq!(block_numbers, exp_block_nums);
-        }
-        err => panic!("Unexpected error: {err:?}"),
-    }
+            block_numbers
+        } if chain_id == exp_chain_id && block_numbers == exp_block_nums
+    ));
 }
 
 mod cached_client {
@@ -52,21 +45,21 @@ mod cached_client {
     #[tokio::test]
     async fn empty_cache() {
         let client = get_cached_client([]);
-        let res = client.fetch_chain_proof(1, vec![1]).await;
+        let res = client.get_chain_proof(1, vec![1]).await;
         assert_cache_miss(res.unwrap_err(), 1, &[1]);
     }
 
     #[tokio::test]
     async fn cache_miss() {
         let client = get_cached_client([(1, vec![1])]);
-        let res = client.fetch_chain_proof(2, vec![1]).await;
+        let res = client.get_chain_proof(2, vec![1]).await;
         assert_cache_miss(res.unwrap_err(), 2, &[1]);
     }
 
     #[tokio::test]
     async fn cache_hit() -> anyhow::Result<()> {
         let client = get_cached_client([(1, vec![1])]);
-        let proof = client.fetch_chain_proof(1, vec![1]).await?;
+        let proof = client.get_chain_proof(1, vec![1]).await?;
         assert_eq!(proof, mock_chain_proof(&[1]));
         Ok(())
     }
@@ -78,8 +71,8 @@ mod caching_client {
     #[tokio::test]
     async fn calls_cached() -> anyhow::Result<()> {
         let mock_client = get_cached_client([(1, vec![1])]);
-        let client = CachingChainProofClient::new(mock_client);
-        let proof = client.fetch_chain_proof(1, vec![1]).await?;
+        let client = RecordingClient::new(mock_client);
+        let proof = client.get_chain_proof(1, vec![1]).await?;
         assert_eq!(proof, mock_chain_proof(&[1]));
         let mut cache = client.into_cache();
         assert_eq!(cache.len(), 1);

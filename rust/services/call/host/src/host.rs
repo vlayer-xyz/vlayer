@@ -15,7 +15,7 @@ use call_engine::{
     Seal,
 };
 use call_guest_wrapper::RISC0_CALL_GUEST_ELF;
-use chain_client::{ChainProofClient, RpcChainProofClient};
+use chain_client::{Client as ChainProofClient, RpcClient as RpcChainProofClient};
 use chain_types::ChainProof;
 use config::HostConfig;
 use error::HostError;

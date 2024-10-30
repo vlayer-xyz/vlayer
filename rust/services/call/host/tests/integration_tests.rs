@@ -7,7 +7,7 @@ use call_host::{
     host::{config::HostConfig, error::HostError, get_block_number, Host},
     Call,
 };
-use chain_client::RpcChainProofClient;
+use chain_client::RpcClient as RpcChainProofClient;
 use chain_server::server::{ChainProofServerMock, EMPTY_PROOF_RESPONSE};
 use dotenvy::dotenv;
 use ethers_core::types::BlockNumber as BlockTag;
