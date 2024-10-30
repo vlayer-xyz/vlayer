@@ -12,6 +12,7 @@ import {
   testHelpers,
   type Proof,
   isDefined,
+  createWebProof,
 } from "@vlayer/sdk";
 import webProofVerifier from "../../out/WebProofVerifier.sol/WebProofVerifier";
 import { Hex } from "viem";
@@ -28,6 +29,27 @@ const twitterUserAddress = (await testHelpers.getTestAddresses())[0];
 export async function setupRequestProveButton(element: HTMLButtonElement) {
   element.addEventListener("click", async () => {
     const provider = createExtensionWebProofProvider();
+
+    const webProof2= createWebProof({
+      proverCallCommitment: {
+        address: import.meta.env.VITE_PROVER_ADDRESS,
+        proverAbi: webProofProver.abi,
+        chainId: foundry.id,
+        functionName: "main",
+        commitmentArgs: ["0x"],
+      },
+      logoUrl: "http://twitterswap.com/logo.png",
+      steps: [
+        startPage("https://x.com/i/flow/login", "Go to x.com login page"),
+        expectUrl("https://x.com/home", "Log in"),
+        notarize(
+          "https://api.x.com/1.1/account/settings.json",
+          "GET",
+          "Generate Proof of Twitter profile",
+        ),
+      ],
+    });
+
     const webProof = await provider.getWebProof({
       proverCallCommitment: {
         address: import.meta.env.VITE_PROVER_ADDRESS,

@@ -1,9 +1,12 @@
-import { WebProofSetup, WebProofSetupInput } from "types/webProofProvider";
+import { GetWebProofArgs, WebProofSetup } from "../../api/lib/types/webProofProvider";
+import { Abi, ContractFunctionName } from "viem";
 
-export const createWebProof = ({ logoUrl, steps }: WebProofSetupInput) => {
+export function createWebProof<T extends Abi, F extends ContractFunctionName<T>>(
+  args: GetWebProofArgs<T, F>,
+): WebProofSetup {
   return {
-    logoUrl,
-    steps,
+    logoUrl: args.logoUrl,
+    steps: args.steps,
     isWebProof: true,
   } as WebProofSetup;
-};
+}
