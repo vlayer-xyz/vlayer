@@ -46,7 +46,7 @@ fn fake_rpc_block_with_correct_parent_hash(number: BlockNumber) -> Block<()> {
     rpc_block
 }
 
-pub fn fake_block(number: BlockNumber) -> Box<dyn EvmBlockHeader> {
+fn fake_block(number: BlockNumber) -> Box<dyn EvmBlockHeader> {
     let rpc_block = fake_rpc_block(number);
     let block = to_eth_block_header(rpc_block).expect("could not convert block");
     Box::new(block)

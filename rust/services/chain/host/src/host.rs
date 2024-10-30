@@ -174,7 +174,7 @@ mod test {
     }
 
     mod poll {
-        use chain_common::test_utils::mock_provider;
+        use chain_common::mock_provider;
         use ethers::providers::MockProvider;
 
         use super::*;

@@ -4,7 +4,7 @@ use std::{
 };
 
 use anyhow::bail;
-use common::cache::InteriorMutabilityCache;
+use common::InteriorMutabilityCache;
 use revm::DatabaseRef;
 
 use super::{location::ExecutionLocation, EvmEnv, EvmEnvFactory};

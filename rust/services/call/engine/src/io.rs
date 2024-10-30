@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use alloy_primitives::{Address, ChainId, TxKind};
 use alloy_sol_types::SolValue;
-use chain_common::types::ChainProof;
+use chain_common::ChainProof;
 use revm::{interpreter::CallInputs, primitives::TxEnv};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
