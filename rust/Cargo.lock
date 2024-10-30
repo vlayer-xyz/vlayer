@@ -1684,6 +1684,7 @@ dependencies = [
  "alloy-rlp",
  "block_header",
  "bytes",
+ "chain_test_utils",
  "mpt",
  "serde",
  "thiserror",
@@ -2237,6 +2238,7 @@ dependencies = [
  "ethers",
  "provider",
  "serde_json",
+ "traits",
 ]
 
 [[package]]

@@ -13,5 +13,8 @@ serde = { workspace = true }
 thiserror = { workspace = true }
 traits = { workspace = true }
 
+[dev-dependencies]
+chain_test_utils = { workspace = true }
+
 [lints]
 workspace = true

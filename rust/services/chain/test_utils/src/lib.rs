@@ -4,6 +4,7 @@ use ethers::{
 };
 use provider::{to_eth_block_header, BlockNumber, EvmBlockHeader};
 use serde_json::{from_value, json};
+use traits::Hashable;
 
 fn fake_rpc_block(number: BlockNumber) -> Block<()> {
     // All fields are zeroed out except for the block number
@@ -38,14 +39,26 @@ fn fake_rpc_block_with_correct_parent_hash(number: BlockNumber) -> Block<()> {
     let mut rpc_block = fake_rpc_block(number);
     if number > 0 {
         // Parent hash is only checked when prepending and you can't prepend to the genesis block
-        let parent_block = fake_block(number - 1 /* underflows for genesis */);
-        rpc_block.parent_hash = H256::from_slice(parent_block.hash_slow().as_slice());
+        let parent_block =
+            fake_block_with_correct_parent_hash(number - 1 /* underflows for genesis */);
+        rpc_block.parent_hash = compute_hash(parent_block.as_ref());
     }
+
+    // Compute the actual hash of the current block
+    let eth_header = to_eth_block_header(rpc_block.clone()).expect("Could not convert block");
+    let actual_hash = compute_hash(&eth_header);
+
+    rpc_block.hash = Some(actual_hash);
+
     rpc_block
 }
 
-fn fake_block(number: BlockNumber) -> Box<dyn EvmBlockHeader> {
-    let rpc_block = fake_rpc_block(number);
+fn compute_hash(block: &dyn EvmBlockHeader) -> H256 {
+    H256::from_slice(block.hash_slow().as_slice())
+}
+
+pub fn fake_block_with_correct_parent_hash(number: BlockNumber) -> Box<dyn EvmBlockHeader> {
+    let rpc_block = fake_rpc_block_with_correct_parent_hash(number);
     let block = to_eth_block_header(rpc_block).expect("could not convert block");
     Box::new(block)
 }

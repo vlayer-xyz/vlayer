@@ -136,3 +136,18 @@ impl<'a> IntoIterator for &'a BlockTrie {
         self.0.into_iter()
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use chain_test_utils::fake_block_with_correct_parent_hash as numbered_block;
+
+    use super::*;
+
+    #[test]
+    fn append_single() {
+        let first_block = numbered_block(1);
+        let mut trie = BlockTrie::init(&*first_block).unwrap();
+        let second_block = numbered_block(2);
+        trie.append_single(&*second_block).unwrap();
+    }
+}
