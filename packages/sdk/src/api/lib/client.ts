@@ -1,5 +1,5 @@
-import { VCallResponse, VlayerClient } from "types/vlayer";
-import { WebProofProvider } from "types/webProofProvider";
+import { VCallResponse, VlayerClient } from "./types/vlayer";
+import { WebProofProvider } from "./types/webProofProvider";
 
 import { prove } from "../prover";
 import { createExtensionWebProofProvider } from "../webProof";
@@ -74,8 +74,8 @@ export const createVlayerClient = (
       return [proof, ...result];
     },
 
-    proveWeb: ({}) => {
-      return Promise.resolve({hash: "0x"});
-    }
+    proveWeb: () => {
+      return Promise.resolve({ hash: "0x" });
+    },
   };
 };

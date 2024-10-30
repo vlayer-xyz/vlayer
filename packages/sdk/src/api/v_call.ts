@@ -1,4 +1,4 @@
-import { CallContext, CallParams, VCallResponse } from "types/vlayer";
+import { CallContext, CallParams, VCallResponse } from "./lib/types/vlayer";
 
 function v_callBody(call: CallParams, context: CallContext) {
   return {

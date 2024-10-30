@@ -10,10 +10,11 @@ type Without<T extends readonly unknown[], P> = T extends readonly [
     : readonly [F, ...Without<R, P>]
   : [];
 
-type ReplaceFirst<T extends readonly unknown [], P> = T extends readonly [
-    unknown,
-    ...infer R,
-  ] ? readonly [P, ...R]
+type ReplaceFirst<T extends readonly unknown[], P> = T extends readonly [
+  unknown,
+  ...infer R,
+]
+  ? readonly [P, ...R]
   : [];
 
 export type ContractFunctionArgsWithout<

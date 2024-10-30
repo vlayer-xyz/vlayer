@@ -7,7 +7,7 @@ import {
   encodeFunctionData,
 } from "viem";
 
-import { type CallContext, type CallParams } from "types/vlayer";
+import { type CallContext, type CallParams } from "./lib/types/vlayer";
 import { v_call } from "./v_call";
 import { foundry } from "viem/chains";
 

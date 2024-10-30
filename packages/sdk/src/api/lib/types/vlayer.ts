@@ -6,7 +6,8 @@ import {
   ContractFunctionName,
   Hex,
 } from "viem";
-import { ContractFunctionArgsWithout } from "types/viem";
+import { ContractFunctionArgsWithout } from "./viem";
+import { WebProofSetup } from "./webProofProvider";
 
 type Calldata = string;
 
@@ -46,7 +47,6 @@ export interface VCallResponse {
 }
 
 export type VlayerClient = {
-
   prove: <T extends Abi, F extends ContractFunctionName<T>>(args: {
     address: Hex;
     proverAbi: T;
@@ -66,6 +66,12 @@ export type VlayerClient = {
     proverAbi: T;
     functionName: F;
     chainId: number;
-    args: ContractFunctionArgsWithout<T, F, { name: "webProof" }>;
+    args: PrependWebProofSetup<
+      ContractFunctionArgsWithout<T, F, { name: "webProof" }>
+    >;
   }) => Promise<{ hash: string }>;
 };
+
+type PrependWebProofSetup<T> = T extends readonly unknown[]
+  ? [WebProofSetup, ...T]
+  : never;

@@ -26,7 +26,8 @@ const context: {
 
 const twitterUserAddress = (await testHelpers.getTestAddresses())[0];
 
-async function callProver() {
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
+async function callProver(): Promise<{ hash: string }> {
   const webProof = createWebProof({
     proverCallCommitment: {
       address: import.meta.env.VITE_PROVER_ADDRESS,
@@ -53,12 +54,11 @@ async function callProver() {
     address: import.meta.env.VITE_PROVER_ADDRESS,
     functionName: "main",
     proverAbi: webProofProver.abi,
-    args: [
-      // webProof,
-      twitterUserAddress,
-    ],
+    args: [webProof, twitterUserAddress],
     chainId: foundry.id,
-  })
+  });
+
+  return result;
 }
 
 export async function setupRequestProveButton(element: HTMLButtonElement) {
