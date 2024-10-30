@@ -86,4 +86,14 @@ contract ProofVerifier_Verify_Tests is Test {
         vm.expectRevert("Invalid block hash");
         verifier.verify(proof, journalHash, PROVER, SELECTOR);
     }
+
+    function test_invalidCallImageId() public {
+        (Proof memory proof, bytes32 journalHash) = helpers.createProof(assumptions);
+
+        uint256 fakeGuestId = uint256(proof.callGuestId) + 1;
+        proof.callGuestId = bytes32(fakeGuestId);
+
+        vm.expectRevert("CallGuestId mismatched");
+        verifier.verify(proof, journalHash, PROVER, SELECTOR);
+    }
 }
