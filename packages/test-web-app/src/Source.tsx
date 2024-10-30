@@ -50,12 +50,12 @@ function Source() {
       chainId: foundry.id,
       args: [
         {
-          webProofJson: JSON.stringify(proof || {}),
+          webProofJson: JSON.stringify({tls_proof: proof, notary_pub_key: NOTARY_PUB_KEY}),
         },
       ],
     });
     console.log("ZK proof", zkProof);
-  }, []);
+  }, [proof]);
 
   const handleWebProofRequestClick = () => {
     requestWebProof().catch((error) => {
