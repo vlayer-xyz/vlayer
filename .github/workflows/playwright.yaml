@@ -47,7 +47,6 @@ jobs:
         uses: ./.github/actions/contracts-prerequisites
       - name: Mock ImageId.sol
         run: ./bash/mock-imageid.sh 
-        # contracts need to be built to run the linter
       - name: Run Forge build
         working-directory: ./contracts
         run: |
