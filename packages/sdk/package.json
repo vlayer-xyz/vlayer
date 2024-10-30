@@ -12,7 +12,7 @@
     "build": "bun tsc",
     "test": "vitest --run",
     "gen:types": "sh ../../bash/build_ts_types.sh",
-    "prebuild": "mv ./src/web-proof-commons ./src/web-proof-commons.bak && cp -r $(readlink -f ./src/web-proof-commons.bak) src/web-proof-commons && rm ./src/web-proof-commons.bak"
+    "replaceCommonsSymlink": "mv ./src/web-proof-commons ./src/web-proof-commons.bak && cp -r $(readlink -f ./src/web-proof-commons.bak) src/web-proof-commons && rm ./src/web-proof-commons.bak"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.7",
