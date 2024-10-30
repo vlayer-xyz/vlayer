@@ -13,6 +13,23 @@ The diagram below illustrates these environments, along with associated artifact
 
 ![Schema](/images/architecture/releasing.png)
 
+
+## Developer Experience 
+
+### Alpha and Beta Versions
+
+To ensure developers have the best possible experience, we will encourage and/or require them to always update to the most recent version of vlayer. Our goal is to release new versions daily. This approach ensures that:
+
+- Developers have access to the latest features and bug fixes.
+- We can guarantee compatibility among various artifacts.
+
+### Production
+
+In the production environment, we still want to encourage developers to update to the latest version; however, we may choose to:
+
+- Release new versions less frequently (e.g., weekly).
+- Avoid introducing breaking changes related to audited code or any of its dependencies.
+
 ## Artifacts and Deployment Cycles
 
 Each environment includes multiple artifacts, each with distinct deployment cycle limitations, as detailed below.
