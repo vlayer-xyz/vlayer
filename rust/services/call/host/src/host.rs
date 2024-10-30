@@ -14,7 +14,7 @@ use call_engine::{
     },
     Seal,
 };
-use call_guest_wrapper::RISC0_CALL_GUEST_ELF;
+use call_guest_wrapper::{RISC0_CALL_GUEST_ELF, RISC0_CALL_GUEST_ID};
 use chain_client::{Client as ChainProofClient, RpcClient as RpcChainProofClient};
 use chain_common::ChainProof;
 use config::HostConfig;
@@ -22,7 +22,7 @@ use error::HostError;
 use ethers_core::types::BlockNumber;
 use host_utils::Prover;
 use provider::{CachedMultiProvider, EthersProviderFactory};
-use risc0_zkvm::ExecutorEnv;
+use risc0_zkvm::{sha::Digest, ExecutorEnv};
 use serde::Serialize;
 use tracing::info;
 
@@ -75,6 +75,8 @@ impl Host {
         chain_proof_client: RpcChainProofClient,
         config: &HostConfig,
     ) -> Result<Self, HostError> {
+        validate_guest_image_id(config.image_id)?;
+
         let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
         let start_execution_location = (block_number, config.start_chain_id).into();
         let prover = Prover::new(config.proof_mode);
@@ -172,6 +174,14 @@ fn build_executor_env(input: impl Serialize) -> anyhow::Result<ExecutorEnv<'stat
     ExecutorEnv::builder().write(&input)?.build()
 }
 
+fn validate_guest_image_id(image_id: Digest) -> Result<(), HostError> {
+    if image_id != RISC0_CALL_GUEST_ID.into() {
+        return Err(HostError::UnsupportedImageId(RISC0_CALL_GUEST_ID.into(), image_id));
+    }
+
+    Ok(())
+}
+
 #[cfg(test)]
 mod test {
     use std::collections::HashMap;
@@ -238,23 +248,47 @@ mod test {
         Ok(())
     }
 
-    #[tokio::test(flavor = "multi_thread")]
-    async fn try_new_invalid_rpc_url() -> anyhow::Result<()> {
-        let config = HostConfig {
-            rpc_urls: test_rpc_urls(),
-            start_chain_id: TEST_CHAIN_ID,
-            proof_mode: ProofMode::Fake,
-            ..HostConfig::default()
-        };
-        let res = Host::try_new(&config);
+    mod try_new {
+        use super::*;
 
-        assert!(matches!(
-            res.map(|_| ()).unwrap_err(),
-            HostError::Provider(ref msg) if msg.to_string().contains(
-                "Error fetching block header"
-            )
-        ));
+        #[tokio::test(flavor = "multi_thread")]
+        async fn try_new_invalid_rpc_url() -> anyhow::Result<()> {
+            let config = HostConfig {
+                rpc_urls: test_rpc_urls(),
+                start_chain_id: TEST_CHAIN_ID,
+                proof_mode: ProofMode::Fake,
+                ..HostConfig::default()
+            };
+            let res = Host::try_new(&config);
 
-        Ok(())
+            assert!(matches!(
+                res.map(|_| ()).unwrap_err(),
+                HostError::Provider(ref msg) if msg.to_string().contains(
+                    "Error fetching block header"
+                )
+            ));
+
+            Ok(())
+        }
+
+        #[test]
+        fn fails_with_mismatched_image_id() {
+            let config = HostConfig {
+                image_id: Default::default(),
+                ..HostConfig::default()
+            };
+
+            let res = Host::try_new_with_components(
+                CachedMultiProvider::new(EthersProviderFactory::new(test_rpc_urls())),
+                0,
+                RpcChainProofClient::new(""),
+                &config,
+            );
+
+            assert!(matches!(
+                res.map(|_| ()).unwrap_err(),
+                HostError::UnsupportedImageId(ref expected, ref received) if expected == &(RISC0_CALL_GUEST_ID.into()) && received == &Default::default()
+            ));
+        }
     }
 }
