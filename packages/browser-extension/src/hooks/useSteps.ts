@@ -4,6 +4,7 @@ import { useLocalStorage } from "@vlayer/extension-hooks";
 import { HistoryItem } from "../state/history";
 import { Step, StepStatus } from "../constants";
 import { useTlsnProver } from "hooks/useTlsnProver";
+import { WebProofStep } from "../web-proof-commons";
 
 // NOTE : here we should use proper types imported from commons once those are ready
 
@@ -59,23 +60,16 @@ const checkStepReadiness = {
   notarize: isNotarizeStepReady,
 };
 
-export const useSteps = (): Step[] => {
-  // get steps config
-  const [{ steps }] = useLocalStorage<{
-    steps: {
-      url: string;
-      label: string;
-      step: "expectUrl" | "notarize" | "startPage";
-    }[];
-  }>("webProverSessionConfig", { steps: [] });
-
-  //read browsing history
-  const [history] = useLocalStorage<HistoryItem[]>("history", []);
-
-  //get tlsn proof
-  const { proof } = useTlsnProver();
-
-  return steps.reduce((accumulator, currentStep) => {
+export const calculateSteps = ({
+  stepsSetup,
+  proof,
+  history,
+}: {
+  stepsSetup: WebProofStep[];
+  history: HistoryItem[];
+  proof: object | null;
+}) => {
+  return stepsSetup.reduce((accumulator, currentStep) => {
     const hasUncompletedStep =
       accumulator.length > 0 &&
       accumulator[accumulator.length - 1]?.status !== StepStatus.Completed;
@@ -95,4 +89,20 @@ export const useSteps = (): Step[] => {
     };
     return [...accumulator, mappedStep];
   }, [] as Step[]);
+};
+
+export const useSteps = (): Step[] => {
+  //get steps setting
+  const [{ steps: stepsSetup }] = useLocalStorage<{ steps: WebProofStep[] }>(
+    "webProverSessionConfig",
+    {
+      steps: [],
+    },
+  );
+  //read browsing history
+  const [history] = useLocalStorage<HistoryItem[]>("history", []);
+  //get tlsn proof
+  const { proof } = useTlsnProver();
+  //do the calculations
+  return calculateSteps({ stepsSetup, proof, history });
 };
