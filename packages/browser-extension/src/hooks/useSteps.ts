@@ -1,12 +1,9 @@
-// // this is placeholder implementation
-
-import { useLocalStorage } from "@vlayer/extension-hooks";
 import { HistoryItem } from "../state/history";
 import { Step, StepStatus } from "../constants";
 import { useTlsnProver } from "hooks/useTlsnProver";
 import { WebProofStep } from "../web-proof-commons";
-
-// NOTE : here we should use proper types imported from commons once those are ready
+import { useProvingSessionConfig } from "hooks/useProvingSessionConfig.ts";
+import { useBrowsingHistory } from "hooks/useBrowsingHistory.ts";
 
 const isStartPageStepCompleted = (
   browsingHistory: HistoryItem[],
@@ -24,7 +21,6 @@ const isExpectUrlStepCompleted = (
   browsingHistory: HistoryItem[],
   step: { url: string },
 ): boolean => {
-  // REFACTOR:  i would rename top level history to browsing to avoid history.history
   return !!browsingHistory.find((item: HistoryItem) => {
     return item.url.startsWith(step.url) && item.ready;
   });
@@ -40,6 +36,7 @@ const isNotarizeStepReady = (
     return item.url.startsWith(step.url) && item.ready;
   });
 };
+
 const isNotarizeStepCompleted = (
   _browsingHistory: HistoryItem[],
   _step: { url: string },
@@ -61,7 +58,7 @@ const checkStepReadiness = {
 };
 
 export const calculateSteps = ({
-  stepsSetup,
+  stepsSetup = [],
   proof,
   history,
 }: {
@@ -77,7 +74,6 @@ export const calculateSteps = ({
       label: currentStep.label,
       link: currentStep.url,
       kind: currentStep.step,
-
       // all steps after first uncompleted are further
       status: hasUncompletedStep
         ? StepStatus.Further
@@ -92,17 +88,8 @@ export const calculateSteps = ({
 };
 
 export const useSteps = (): Step[] => {
-  //get steps setting
-  const [{ steps: stepsSetup }] = useLocalStorage<{ steps: WebProofStep[] }>(
-    "webProverSessionConfig",
-    {
-      steps: [],
-    },
-  );
-  //read browsing history
-  const [history] = useLocalStorage<HistoryItem[]>("history", []);
-  //get tlsn proof
+  const [{ steps: stepsSetup }] = useProvingSessionConfig();
+  const [history] = useBrowsingHistory();
   const { proof } = useTlsnProver();
-  //do the calculations
   return calculateSteps({ stepsSetup, proof, history });
 };

@@ -33,9 +33,9 @@ export type ExtensionMessage =
   | { type: ExtensionMessageType.TabOpened; tabId: number };
 
 export type WebProverSessionConfig = {
-  notaryUrl: string;
-  wsProxyUrl: string;
-  logoUrl: string;
+  notaryUrl: string | null;
+  wsProxyUrl: string | null;
+  logoUrl: string | null;
   steps: WebProofStep[];
 };
 
