@@ -139,15 +139,31 @@ impl<'a> IntoIterator for &'a BlockTrie {
 
 #[cfg(test)]
 mod tests {
-    use chain_test_utils::fake_block_with_correct_parent_hash as numbered_block;
+    use anyhow::Result;
+    use chain_test_utils::fake_block_with_correct_parent_hash as block;
 
     use super::*;
 
     #[test]
-    fn append_single() {
-        let first_block = numbered_block(1);
-        let mut trie = BlockTrie::init(&*first_block).unwrap();
-        let second_block = numbered_block(2);
-        trie.append_single(&*second_block).unwrap();
+    fn append_single() -> Result<()> {
+        let block_zero = block(0);
+        let block_one = block(1);
+        let mut trie = BlockTrie::init(&*block_zero)?;
+
+        trie.append_single(&*block_one)?;
+
+        assert_eq!(trie.get(1).unwrap(), block_one.hash_slow());
+        Ok(())
+    }
+
+    #[test]
+    fn prepend_single() -> Result<()> {
+        let block_one = block(1);
+        let mut trie = BlockTrie::init(&*block_one)?;
+        
+        trie.prepend_single(&*block_one)?;
+
+        assert_eq!(trie.get(0).unwrap(), block(0).hash_slow());
+        Ok(())
     }
 }

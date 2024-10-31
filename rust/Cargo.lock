@@ -1682,6 +1682,7 @@ version = "0.1.0"
 dependencies = [
  "alloy-primitives",
  "alloy-rlp",
+ "anyhow",
  "block_header",
  "bytes",
  "chain_test_utils",
@@ -2238,7 +2239,6 @@ dependencies = [
  "ethers",
  "provider",
  "serde_json",
- "traits",
 ]
 
 [[package]]

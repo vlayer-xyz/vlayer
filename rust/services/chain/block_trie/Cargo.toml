@@ -14,6 +14,7 @@ thiserror = { workspace = true }
 traits = { workspace = true }
 
 [dev-dependencies]
+anyhow = { workspace = true }
 chain_test_utils = { workspace = true }
 
 [lints]
