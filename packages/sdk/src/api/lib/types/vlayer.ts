@@ -6,8 +6,8 @@ import {
   ContractFunctionName,
   Hex,
 } from "viem";
-import { ContractFunctionArgsWithout } from "./viem";
 import { WebProofSetup } from "./webProofProvider";
+import { ArraySplice, UnknownArray } from "type-fest";
 
 type Calldata = string;
 
@@ -61,17 +61,15 @@ export type VlayerClient = {
     hash: string;
   }) => Promise<[Proof, ...unknown[]]>;
 
-  proveWeb: <T extends Abi, F extends ContractFunctionName<T>>(args: {
+  proveWeb: <
+    T extends Abi,
+    F extends ContractFunctionName<T>,
+    A extends ContractFunctionArgs<T, AbiStateMutability, F> & UnknownArray,
+  >(args: {
     address: Hex;
     proverAbi: T;
     functionName: F;
     chainId: number;
-    args: PrependWebProofSetup<
-      ContractFunctionArgsWithout<T, F, { name: "webProof" }>
-    >;
+    args: ArraySplice<A, 0, 1, [WebProofSetup]>;
   }) => Promise<{ hash: string }>;
 };
-
-type PrependWebProofSetup<T> = T extends readonly unknown[]
-  ? [WebProofSetup, ...T]
-  : never;

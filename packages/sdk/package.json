@@ -26,6 +26,7 @@
   "dependencies": {
     "dns-over-http-resolver": "^3.0.3",
     "postal-mime": "^2.3.2",
+    "type-fest": "^4.26.1",
     "viem": "2.21.0",
     "vite-tsconfig-paths": "^5.0.1",
     "@vitejs/plugin-react": "^4.3.2"
