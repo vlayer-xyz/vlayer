@@ -4,7 +4,6 @@ use ethers::{
 };
 use provider::{to_eth_block_header, BlockNumber, EvmBlockHeader};
 use serde_json::{from_value, json};
-use traits::Hashable;
 
 fn fake_rpc_block(number: BlockNumber) -> Block<()> {
     // All fields are zeroed out except for the block number
@@ -35,6 +34,7 @@ fn fake_rpc_block(number: BlockNumber) -> Block<()> {
     })).unwrap()
 }
 
+// complexity O(n) where n is the block number because the function is recursive
 fn fake_rpc_block_with_correct_parent_hash(number: BlockNumber) -> Block<()> {
     let mut rpc_block = fake_rpc_block(number);
     if number > 0 {
@@ -43,12 +43,6 @@ fn fake_rpc_block_with_correct_parent_hash(number: BlockNumber) -> Block<()> {
             fake_block_with_correct_parent_hash(number - 1 /* underflows for genesis */);
         rpc_block.parent_hash = compute_hash(parent_block.as_ref());
     }
-
-    // Compute the actual hash of the current block
-    let eth_header = to_eth_block_header(rpc_block.clone()).expect("Could not convert block");
-    let actual_hash = compute_hash(&eth_header);
-
-    rpc_block.hash = Some(actual_hash);
 
     rpc_block
 }
@@ -74,4 +68,25 @@ pub fn mock_provider(
             .expect("could not push block");
     }
     provider
+}
+
+#[cfg(test)]
+mod fake_rpc_block_with_correct_parent_hash {
+    use super::*;
+
+    #[test]
+    fn genesis_block() -> Result<(), Box<dyn std::error::Error>> {
+        let block_zero = fake_block_with_correct_parent_hash(0);
+        let block_one = fake_block_with_correct_parent_hash(1);
+        assert_eq!(&block_zero.hash_slow(), block_one.parent_hash(),);
+        Ok(())
+    }
+
+    #[test]
+    fn normal_block() -> Result<(), Box<dyn std::error::Error>> {
+        let block_one = fake_block_with_correct_parent_hash(1);
+        let block_two = fake_block_with_correct_parent_hash(2);
+        assert_eq!(&block_one.hash_slow(), block_two.parent_hash(),);
+        Ok(())
+    }
 }

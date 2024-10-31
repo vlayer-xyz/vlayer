@@ -7,4 +7,3 @@ edition = "2021"
 ethers = { workspace = true }
 provider = { workspace = true }
 serde_json = { workspace = true }
-traits = { workspace = true }
