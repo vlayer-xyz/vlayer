@@ -47,7 +47,6 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
 
   const prove = useCallback(async () => {
     setIsProving(true);
-
     try {
       //TODO : make sure on hooks level its defined
       isDefined(provenUrl?.url, "Missing URL to prove");

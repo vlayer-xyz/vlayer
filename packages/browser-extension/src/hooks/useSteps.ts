@@ -71,7 +71,6 @@ export const useSteps = (): Step[] => {
 
   //read browsing history
   const [history] = useLocalStorage<HistoryItem[]>("history", []);
-
   //get tlsn proof
   const { proof } = useTlsnProver();
 
