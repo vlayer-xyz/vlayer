@@ -49,7 +49,7 @@ describe("Use steps hook", () => {
     const { result } = renderHook(() => useSteps());
     expect(result.current).toEqual([]);
   });
-  
+
   it("should properly initialize steps", async () => {
     const { result } = renderHook(() => useSteps());
     await act(async () => {
