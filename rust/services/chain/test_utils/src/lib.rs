@@ -1,8 +1,8 @@
 use ethers::{
     providers::{MockProvider, Provider},
-    types::{Block, H256},
+    types::Block,
 };
-use provider::{to_eth_block_header, BlockNumber, EvmBlockHeader};
+use provider::{to_eth_block_header, to_ethers_h256, BlockNumber, EvmBlockHeader};
 use serde_json::{from_value, json};
 
 fn fake_rpc_block(number: BlockNumber) -> Block<()> {
@@ -41,14 +41,10 @@ fn fake_rpc_block_with_correct_parent_hash(number: BlockNumber) -> Block<()> {
         // Parent hash is only checked when prepending and you can't prepend to the genesis block
         let parent_block =
             fake_block_with_correct_parent_hash(number - 1 /* underflows for genesis */);
-        rpc_block.parent_hash = compute_hash(parent_block.as_ref());
+        rpc_block.parent_hash = to_ethers_h256(parent_block.hash_slow());
     }
 
     rpc_block
-}
-
-fn compute_hash(block: &dyn EvmBlockHeader) -> H256 {
-    H256::from_slice(block.hash_slow().as_slice())
 }
 
 pub fn fake_block_with_correct_parent_hash(number: BlockNumber) -> Box<dyn EvmBlockHeader> {
@@ -57,7 +53,7 @@ pub fn fake_block_with_correct_parent_hash(number: BlockNumber) -> Box<dyn EvmBl
     Box::new(block)
 }
 
-pub fn fake_block_with_wrong_parent_hash(number: BlockNumber) -> Box<dyn EvmBlockHeader> {
+pub fn fake_block_with_incorrect_parent_hash(number: BlockNumber) -> Box<dyn EvmBlockHeader> {
     let rpc_block = fake_rpc_block(number);
     let block = to_eth_block_header(rpc_block).expect("could not convert block");
     Box::new(block)
@@ -84,7 +80,7 @@ mod fake_rpc_block_with_correct_parent_hash {
     fn genesis_block() -> Result<(), Box<dyn std::error::Error>> {
         let block_zero = fake_block_with_correct_parent_hash(0);
         let block_one = fake_block_with_correct_parent_hash(1);
-        assert_eq!(&block_zero.hash_slow(), block_one.parent_hash(),);
+        assert_eq!(&block_zero.hash_slow(), block_one.parent_hash());
         Ok(())
     }
 
@@ -92,7 +88,7 @@ mod fake_rpc_block_with_correct_parent_hash {
     fn normal_block() -> Result<(), Box<dyn std::error::Error>> {
         let block_one = fake_block_with_correct_parent_hash(1);
         let block_two = fake_block_with_correct_parent_hash(2);
-        assert_eq!(&block_one.hash_slow(), block_two.parent_hash(),);
+        assert_eq!(&block_one.hash_slow(), block_two.parent_hash());
         Ok(())
     }
 }

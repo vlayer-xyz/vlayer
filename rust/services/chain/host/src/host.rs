@@ -86,7 +86,7 @@ where
         info!("Initializing chain");
         let latest_block = self.get_block(BlockTag::Latest).await?;
         let latest_block_number = latest_block.number();
-        let trie = BlockTrie::init(&*latest_block)?;
+        let trie = BlockTrie::init(&latest_block)?;
 
         let input = Input::Initialize {
             elf_id: *GUEST_ID,
