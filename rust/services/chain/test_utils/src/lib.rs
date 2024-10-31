@@ -57,6 +57,12 @@ pub fn fake_block_with_correct_parent_hash(number: BlockNumber) -> Box<dyn EvmBl
     Box::new(block)
 }
 
+pub fn fake_block_with_wrong_parent_hash(number: BlockNumber) -> Box<dyn EvmBlockHeader> {
+    let mut rpc_block = fake_rpc_block(number);
+    let block = to_eth_block_header(rpc_block).expect("could not convert block");
+    Box::new(block)
+}
+
 pub fn mock_provider(
     block_numbers: impl IntoIterator<Item = BlockNumber>,
 ) -> Provider<MockProvider> {

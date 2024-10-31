@@ -140,30 +140,64 @@ impl<'a> IntoIterator for &'a BlockTrie {
 #[cfg(test)]
 mod tests {
     use anyhow::Result;
-    use chain_test_utils::fake_block_with_correct_parent_hash as block;
+    use chain_test_utils::{
+        fake_block_with_correct_parent_hash as block,
+        fake_block_with_wrong_parent_hash as block_with_wrong_parent_hash,
+    };
 
     use super::*;
 
-    #[test]
-    fn append_single() -> Result<()> {
-        let block_zero = block(0);
-        let block_one = block(1);
-        let mut trie = BlockTrie::init(&*block_zero)?;
+    mod append_single {
+        use super::*;
 
-        trie.append_single(&*block_one)?;
+        #[test]
+        fn correct_hash() -> Result<()> {
+            let block_zero = block(0);
+            let block_one = block(1);
+            let mut trie = BlockTrie::init(&*block_zero)?;
 
-        assert_eq!(trie.get(1).unwrap(), block_one.hash_slow());
-        Ok(())
+            trie.append_single(&*block_one)?;
+
+            assert_eq!(trie.get(1).unwrap(), block_one.hash_slow());
+            Ok(())
+        }
+
+        #[test]
+        fn incorrect_hash() -> Result<()> {
+            let block_zero = block(0);
+            let block_one = block_with_wrong_parent_hash(1);
+            let mut trie = BlockTrie::init(&*block_zero)?;
+
+            let result = trie.append_single(&*block_one);
+
+            assert!(matches!(result.unwrap_err(), BlockTrieError::BlockHashMismatch { .. }));
+            Ok(())
+        }
     }
 
-    #[test]
-    fn prepend_single() -> Result<()> {
-        let block_one = block(1);
-        let mut trie = BlockTrie::init(&*block_one)?;
+    mod prepend_single {
+        use super::*;
 
-        trie.prepend_single(&*block_one)?;
+        #[test]
+        fn correct_hash() -> Result<()> {
+            let block_one = block(1);
+            let mut trie = BlockTrie::init(&*block_one)?;
 
-        assert_eq!(trie.get(0).unwrap(), block(0).hash_slow());
-        Ok(())
+            trie.prepend_single(&*block_one)?;
+
+            assert_eq!(trie.get(0).unwrap(), block(0).hash_slow());
+            Ok(())
+        }
+
+        #[test]
+        fn incorrect_hash() -> Result<()> {
+            let block_one = block(1);
+            let mut trie = BlockTrie::init(&*block_one)?;
+
+            let result = trie.prepend_single(&*block_with_wrong_parent_hash(1));
+
+            assert!(matches!(result.unwrap_err(), BlockTrieError::BlockHashMismatch { .. }));
+            Ok(())
+        }
     }
 }
