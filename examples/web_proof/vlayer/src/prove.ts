@@ -43,7 +43,7 @@ async function callProver(): Promise<{ hash: string }> {
       notarize(
         "https://api.x.com/1.1/account/settings.json",
         "GET",
-        "Generate Proof of Twitter profile"
+        "Generate Proof of Twitter profile",
       ),
     ],
   });
@@ -80,7 +80,7 @@ export async function setupRequestProveButton(element: HTMLButtonElement) {
         notarize(
           "https://api.x.com/1.1/account/settings.json",
           "GET",
-          "Generate Proof of Twitter profile"
+          "Generate Proof of Twitter profile",
         ),
       ],
     });
