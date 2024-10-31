@@ -86,7 +86,7 @@ where
         info!("Initializing chain");
         let latest_block = self.get_block(BlockTag::Latest).await?;
         let latest_block_number = latest_block.number();
-        let trie = BlockTrie::init(&*latest_block)?;
+        let trie = BlockTrie::init(&latest_block)?;
 
         let input = Input::Initialize {
             elf_id: *GUEST_ID,
@@ -167,14 +167,14 @@ mod test {
 
     use super::*;
 
-    const LATEST: u64 = 20_000_000;
+    const LATEST: u64 = 500;
 
     fn test_db() -> ChainDb {
         ChainDb::in_memory()
     }
 
     mod poll {
-        use chain_common::mock_provider;
+        use chain_test_utils::mock_provider;
         use ethers::providers::MockProvider;
 
         use super::*;

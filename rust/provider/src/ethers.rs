@@ -152,22 +152,22 @@ pub fn to_eth_block_header<T>(block: Block<T>) -> Result<EthBlockHeader> {
     })
 }
 
-pub(crate) fn from_ethers_bytes(v: ethers_core::types::Bytes) -> alloy_primitives::Bytes {
+pub fn from_ethers_bytes(v: ethers_core::types::Bytes) -> alloy_primitives::Bytes {
     v.0.into()
 }
 
-pub(crate) fn to_ethers_h256(v: alloy_primitives::B256) -> ethers_core::types::H256 {
+pub fn to_ethers_h256(v: alloy_primitives::B256) -> ethers_core::types::H256 {
     v.0.into()
 }
 
-pub(crate) fn from_ethers_h256(v: ethers_core::types::H256) -> B256 {
+pub fn from_ethers_h256(v: ethers_core::types::H256) -> B256 {
     v.0.into()
 }
 
-pub(crate) const fn from_ethers_u256(v: ethers_core::types::U256) -> U256 {
+pub const fn from_ethers_u256(v: ethers_core::types::U256) -> U256 {
     alloy_primitives::U256::from_limbs(v.0)
 }
 
-pub(crate) fn to_ethers_h160(v: alloy_primitives::Address) -> ethers_core::types::H160 {
+pub fn to_ethers_h160(v: alloy_primitives::Address) -> ethers_core::types::H160 {
     v.into_array().into()
 }

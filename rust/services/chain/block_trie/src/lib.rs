@@ -23,7 +23,8 @@ pub type BlockTrieResult<T> = Result<T, BlockTrieError>;
 pub struct BlockTrie(MerkleTrie);
 
 impl BlockTrie {
-    pub fn init(block: &dyn EvmBlockHeader) -> BlockTrieResult<Self> {
+    pub fn init(block: impl AsRef<dyn EvmBlockHeader>) -> BlockTrieResult<Self> {
+        let block = block.as_ref();
         let mut trie = Self(MerkleTrie::new());
         trie.insert_unchecked(block.number(), &block.hash_slow())?;
         Ok(trie)
@@ -33,8 +34,9 @@ impl BlockTrie {
     /// block after the block with highest number currently stored in the trie
     pub fn append_single(
         &mut self,
-        new_rightmost_block: &dyn EvmBlockHeader,
+        new_rightmost_block: impl AsRef<dyn EvmBlockHeader>,
     ) -> BlockTrieResult<()> {
+        let new_rightmost_block = new_rightmost_block.as_ref();
         let parent_block_idx = new_rightmost_block.number() - 1;
         let parent_block_hash = self
             .get(parent_block_idx)
@@ -53,8 +55,9 @@ impl BlockTrie {
     /// stored in the trie
     pub fn prepend_single(
         &mut self,
-        old_leftmost_block: &dyn EvmBlockHeader,
+        old_leftmost_block: impl AsRef<dyn EvmBlockHeader>,
     ) -> BlockTrieResult<()> {
+        let old_leftmost_block = old_leftmost_block.as_ref();
         let old_leftmost_block_hash = self
             .get(old_leftmost_block.number())
             .ok_or(BlockTrieError::GetBlockHashFailed(old_leftmost_block.number()))?;
@@ -73,7 +76,7 @@ impl BlockTrie {
         B: AsRef<dyn EvmBlockHeader>,
     {
         for block in blocks {
-            self.append_single(block.as_ref())?;
+            self.append_single(block)?;
         }
         Ok(())
     }
@@ -87,7 +90,7 @@ impl BlockTrie {
         B: AsRef<dyn EvmBlockHeader>,
     {
         for block in blocks.rev() {
-            self.prepend_single(old_leftmost_block.as_ref())?;
+            self.prepend_single(old_leftmost_block)?;
 
             old_leftmost_block = block;
         }
@@ -134,5 +137,71 @@ impl<'a> IntoIterator for &'a BlockTrie {
 
     fn into_iter(self) -> Self::IntoIter {
         self.0.into_iter()
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use anyhow::Result;
+    use chain_test_utils::{
+        fake_block_with_correct_parent_hash as block,
+        fake_block_with_incorrect_parent_hash as block_with_incorrect_hash,
+    };
+
+    use super::*;
+
+    mod append_single {
+        use super::*;
+
+        #[test]
+        fn correct_hash() -> Result<()> {
+            let block_zero = block(0);
+            let block_one = block(1);
+            let mut trie = BlockTrie::init(block_zero)?;
+
+            trie.append_single(&block_one)?;
+
+            assert_eq!(trie.get(1).unwrap(), block_one.hash_slow());
+            Ok(())
+        }
+
+        #[test]
+        fn incorrect_hash() -> Result<()> {
+            let block_zero = block(0);
+            let block_one = block_with_incorrect_hash(1);
+            let mut trie = BlockTrie::init(block_zero)?;
+
+            let result = trie.append_single(block_one);
+
+            assert!(matches!(result.unwrap_err(), BlockTrieError::BlockHashMismatch { .. }));
+            Ok(())
+        }
+    }
+
+    mod prepend_single {
+        use super::*;
+
+        #[test]
+        fn correct_hash() -> Result<()> {
+            let block_one = block(1);
+            let mut trie = BlockTrie::init(&block_one)?;
+            let old_leftmost_block = block_one;
+
+            trie.prepend_single(old_leftmost_block)?;
+
+            assert_eq!(trie.get(0).unwrap(), block(0).hash_slow());
+            Ok(())
+        }
+
+        #[test]
+        fn incorrect_hash() -> Result<()> {
+            let block_one = block(1);
+            let mut trie = BlockTrie::init(block_one)?;
+
+            let result = trie.prepend_single(block_with_incorrect_hash(1));
+
+            assert!(matches!(result.unwrap_err(), BlockTrieError::BlockHashMismatch { .. }));
+            Ok(())
+        }
     }
 }

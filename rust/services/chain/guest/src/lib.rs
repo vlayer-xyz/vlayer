@@ -21,7 +21,7 @@ pub enum Input {
     },
 }
 
-fn initialize(elf_id: Digest, block: &dyn EvmBlockHeader) -> (B256, Digest) {
+fn initialize(elf_id: Digest, block: impl AsRef<dyn EvmBlockHeader>) -> (B256, Digest) {
     let trie = BlockTrie::init(block).expect("init failed");
     (trie.hash_slow(), elf_id)
 }
@@ -48,7 +48,7 @@ fn append_prepend(
 #[allow(clippy::unused_async)]
 pub async fn main(input: Input) -> (B256, Digest) {
     match input {
-        Input::Initialize { elf_id, block } => initialize(elf_id, &*block),
+        Input::Initialize { elf_id, block } => initialize(elf_id, block),
         Input::AppendPrepend {
             elf_id,
             prepend_blocks,

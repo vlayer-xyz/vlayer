@@ -1682,8 +1682,10 @@ version = "0.1.0"
 dependencies = [
  "alloy-primitives",
  "alloy-rlp",
+ "anyhow",
  "block_header",
  "bytes",
+ "chain_test_utils",
  "mpt",
  "serde",
  "thiserror",
@@ -2130,8 +2132,6 @@ version = "0.1.0"
 dependencies = [
  "alloy-primitives",
  "block_trie",
- "ethers",
- "provider",
  "serde",
  "serde_json",
 ]
@@ -2189,10 +2189,10 @@ dependencies = [
  "anyhow",
  "bincode",
  "block_trie",
- "chain_common",
  "chain_db",
  "chain_guest",
  "chain_guest_wrapper",
+ "chain_test_utils",
  "derivative",
  "ethers",
  "futures",
@@ -2230,6 +2230,15 @@ dependencies = [
  "thiserror",
  "tokio",
  "traits",
+]
+
+[[package]]
+name = "chain_test_utils"
+version = "0.1.0"
+dependencies = [
+ "ethers",
+ "provider",
+ "serde_json",
 ]
 
 [[package]]
