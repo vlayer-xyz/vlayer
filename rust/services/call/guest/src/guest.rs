@@ -1,34 +1,30 @@
-use std::collections::HashMap;
-
-use alloy_primitives::ChainId;
+use alloy_primitives::{BlockNumber, ChainId, B256};
+use block_header::Hashable;
 use call_engine::{
     evm::{
         env::{cached::CachedEvmEnv, location::ExecutionLocation},
-        input::{EvmInput, MultiEvmInput},
+        input::MultiEvmInput,
     },
     io::{Call, GuestOutput},
     travel_call_executor::TravelCallExecutor,
     CallAssumptions,
 };
-use chain_common::ChainProof;
+use chain_client::Client as ChainProofClient;
+use chain_common::{ChainProof, GuestVerifier};
+use risc0_zkvm::{sha::Digest, Receipt};
 
 use crate::db::wrap_state::WrapStateDb;
-
-const VERIFY_CHAIN_PROOFS: bool = false;
 
 pub struct Guest {
     start_execution_location: ExecutionLocation,
     evm_envs: CachedEvmEnv<WrapStateDb>,
 }
 
+struct VerifiedEnv(CachedEvmEnv<WrapStateDb>);
+
 impl Guest {
     #[must_use]
-    pub fn new(
-        multi_evm_input: MultiEvmInput,
-        start_execution_location: ExecutionLocation,
-        chain_proofs: &HashMap<ChainId, ChainProof>,
-    ) -> Self {
-        assert_coherency(&multi_evm_input, chain_proofs, VERIFY_CHAIN_PROOFS);
+    fn new(multi_evm_input: MultiEvmInput, start_execution_location: ExecutionLocation) -> Self {
         let multi_evm_env = multi_evm_input.into();
         let evm_envs = CachedEvmEnv::from_envs(multi_evm_env);
 
@@ -57,32 +53,83 @@ impl Guest {
     }
 }
 
-fn assert_coherency(
-    multi_evm_input: &MultiEvmInput,
-    chain_proofs: &HashMap<ChainId, ChainProof>,
-    verify_chain_proofs: bool,
-) {
-    multi_evm_input
-        .inputs
-        .values()
-        .for_each(EvmInput::assert_coherency);
-    if verify_chain_proofs {
-        assert_chain_coherence(multi_evm_input, chain_proofs);
+pub struct ChainProofVerifier {
+    verifier: Box<dyn GuestVerifier>,
+    elf_id: Digest,
+}
+
+impl ChainProofVerifier {
+    #[must_use]
+    pub fn new(verifier: impl GuestVerifier, elf_id: Digest) -> Self {
+        Self {
+            verifier: Box::new(verifier),
+            elf_id,
+        }
+    }
+
+    pub fn verify(&self, proof: &ChainProof) {
+        self.verifier.verify(self.elf_id, &proof.proof);
+        let receipt: Receipt =
+            bincode::deserialize(&proof.proof).expect("proof deserialization failed");
+        let (proven_root, elf_id): (B256, Digest) = receipt
+            .journal
+            .decode()
+            .expect("journal deserialization failed");
+        assert_eq!(elf_id, self.elf_id, "elf_id mismatch in proof");
+        assert_eq!(proven_root, proof.block_trie.hash_slow(), "root hash mismatch in proof");
     }
 }
 
-fn assert_chain_coherence(
-    multi_evm_input: &MultiEvmInput,
-    chain_proofs: &HashMap<ChainId, ChainProof>,
-) {
-    for (chain_id, blocks) in multi_evm_input.blocks_by_chain() {
-        let chain_proof = chain_proofs.get(&chain_id).expect("chain proof not found");
-        for (block_number, block_hash) in blocks {
-            let trie_block_hash = chain_proof
-                .block_trie
-                .get(block_number)
-                .expect("block hash not found");
-            assert_eq!(trie_block_hash, block_hash, "block hash mismatch");
+pub struct GuestBuilder {
+    proof_client: Box<dyn ChainProofClient>,
+    proof_verifier: ChainProofVerifier,
+}
+
+impl GuestBuilder {
+    #[must_use]
+    pub fn new(proof_client: impl ChainProofClient, proof_verifier: ChainProofVerifier) -> Self {
+        Self {
+            proof_client: Box::new(proof_client),
+            proof_verifier,
+        }
+    }
+
+    /// Verify the input and build guest. Panics if input is invalid
+    #[must_use]
+    pub async fn build_guest(
+        &self,
+        multi_evm_input: MultiEvmInput,
+        start_execution_location: ExecutionLocation,
+    ) -> Guest {
+        self.assert_coherency(&multi_evm_input).await;
+        Guest::new(multi_evm_input, start_execution_location)
+    }
+
+    async fn get_chain_proof(
+        &self,
+        chain_id: ChainId,
+        block_numbers: Vec<BlockNumber>,
+    ) -> ChainProof {
+        self.proof_client
+            .get_chain_proof(chain_id, block_numbers)
+            .await
+            .unwrap()
+    }
+
+    async fn assert_coherency(&self, multi_evm_input: &MultiEvmInput) {
+        multi_evm_input.assert_coherency();
+
+        for (chain_id, blocks) in multi_evm_input.blocks_by_chain() {
+            let block_numbers = blocks.iter().map(|(block_num, _)| *block_num).collect();
+            let chain_proof = self.get_chain_proof(chain_id, block_numbers).await;
+            self.proof_verifier.verify(&chain_proof);
+            for (block_number, block_hash) in blocks {
+                let trie_block_hash = chain_proof
+                    .block_trie
+                    .get(block_number)
+                    .expect("block hash not found");
+                assert_eq!(trie_block_hash, block_hash, "block hash mismatch");
+            }
         }
     }
 }

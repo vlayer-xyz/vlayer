@@ -46,6 +46,10 @@ impl EvmInput {
             .collect()
     }
 
+    /// Assert that:
+    ///   * state root hash in header matches the actual hash of the state trie
+    ///   * parent hash in header matches the actual hash of the parent block header
+    ///     (and so on for all headers in the ancestors chain)
     pub fn assert_coherency(&self) {
         self.assert_state_root_coherency();
         self.assert_ancestors_coherency();
@@ -112,6 +116,11 @@ impl MultiEvmInput {
 
     pub fn block_nums_by_chain(&self) -> HashMap<ChainId, Vec<BlockNumber>> {
         self.group_blocks(|loc, _| loc.block_number)
+    }
+
+    /// Assert coherency for each input (see `EvmInput::assert_coherency`)
+    pub fn assert_coherency(&self) {
+        self.inputs.values().for_each(EvmInput::assert_coherency)
     }
 }
 

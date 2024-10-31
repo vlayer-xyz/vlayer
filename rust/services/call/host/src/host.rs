@@ -1,6 +1,5 @@
 use std::{
     any::Any,
-    collections::HashMap,
     panic::{self},
 };
 
@@ -15,8 +14,7 @@ use call_engine::{
     Seal,
 };
 use call_guest_wrapper::{RISC0_CALL_GUEST_ELF, RISC0_CALL_GUEST_ID};
-use chain_client::{Client as ChainProofClient, RpcClient as RpcChainProofClient};
-use chain_common::ChainProof;
+use chain_client::{Client as ChainProofClient, RpcClient as RpcChainProofClient, RecordingClient};
 use config::HostConfig;
 use error::HostError;
 use ethers_core::types::BlockNumber;
@@ -38,7 +36,7 @@ pub struct Host {
     start_execution_location: ExecutionLocation,
     envs: CachedEvmEnv<ProofDb>,
     prover: Prover,
-    chain_proof_client: RpcChainProofClient,
+    chain_proof_client: RecordingClient,
     max_calldata_size: usize,
 }
 
@@ -72,7 +70,7 @@ impl Host {
     pub fn try_new_with_components(
         providers: CachedMultiProvider,
         block_number: u64,
-        chain_proof_client: RpcChainProofClient,
+        chain_proof_client: impl ChainProofClient,
         config: &HostConfig,
     ) -> Result<Self, HostError> {
         validate_guest_image_id(config.image_id)?;
@@ -80,6 +78,7 @@ impl Host {
         let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
         let start_execution_location = (block_number, config.start_chain_id).into();
         let prover = Prover::new(config.proof_mode);
+        let chain_proof_client = RecordingClient::new(chain_proof_client);
 
         Ok(Host {
             envs,
@@ -106,10 +105,11 @@ impl Host {
 
         let multi_evm_input =
             into_multi_input(self.envs).map_err(|err| HostError::CreatingInput(err.to_string()))?;
-        let chain_proofs: HashMap<u64, ChainProof> = self
+        let _ = self
             .chain_proof_client
             .get_chain_proofs(multi_evm_input.block_nums_by_chain())
             .await?;
+        let chain_proofs = self.chain_proof_client.into_cache();
         let input = Input {
             call,
             multi_evm_input,

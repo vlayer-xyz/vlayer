@@ -13,8 +13,7 @@ block_header = { workspace = true }
 call_engine = { workspace = true }
 call_guest_wrapper = { workspace = true }
 chain = { workspace = true }
-chain_client = { workspace = true }
-chain_common = { workspace = true }
+chain_client = { workspace = true, features = ["rpc"] }
 chain_server = { workspace = true }
 dotenvy = { workspace = true }
 ethers-core = { workspace = true }
