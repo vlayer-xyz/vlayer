@@ -67,7 +67,7 @@ impl DatabaseRef for WrapStateDb {
         let account_storage = self.account_storage.borrow();
         let storage = account_storage
             .get(&address)
-            .unwrap_or_else(|| panic!("storage not found: {:?}", address));
+            .unwrap_or_else(|| panic!("storage not found: {:?}@{}", address, index));
         match storage {
             Some(storage) => {
                 let val = storage
