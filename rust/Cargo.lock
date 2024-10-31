@@ -2239,6 +2239,7 @@ dependencies = [
  "ethers",
  "provider",
  "serde_json",
+ "tokio",
 ]
 
 [[package]]

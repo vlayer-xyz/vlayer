@@ -160,7 +160,7 @@ mod tests {
     fn prepend_single() -> Result<()> {
         let block_one = block(1);
         let mut trie = BlockTrie::init(&*block_one)?;
-        
+
         trie.prepend_single(&*block_one)?;
 
         assert_eq!(trie.get(0).unwrap(), block(0).hash_slow());

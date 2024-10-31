@@ -167,7 +167,7 @@ mod test {
 
     use super::*;
 
-    const LATEST: u64 = 20_000_000;
+    const LATEST: u64 = 500;
 
     fn test_db() -> ChainDb {
         ChainDb::in_memory()
