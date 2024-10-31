@@ -1,11 +1,9 @@
-// // this is placeholder implementation
-
-import { useLocalStorage } from "@vlayer/extension-hooks";
 import { HistoryItem } from "../state/history";
 import { Step, StepStatus } from "../constants";
 import { useTlsnProver } from "hooks/useTlsnProver";
-
-// NOTE : here we should use proper types imported from commons once those are ready
+import { WebProofStep } from "../web-proof-commons";
+import { useProvingSessionConfig } from "hooks/useProvingSessionConfig.ts";
+import { useBrowsingHistory } from "hooks/useBrowsingHistory.ts";
 
 const isStartPageStepCompleted = (
   browsingHistory: HistoryItem[],
@@ -23,7 +21,6 @@ const isExpectUrlStepCompleted = (
   browsingHistory: HistoryItem[],
   step: { url: string },
 ): boolean => {
-  // REFACTOR:  i would rename top level history to browsing to avoid history.history
   return !!browsingHistory.find((item: HistoryItem) => {
     return item.url.startsWith(step.url) && item.ready;
   });
@@ -39,6 +36,7 @@ const isNotarizeStepReady = (
     return item.url.startsWith(step.url) && item.ready;
   });
 };
+
 const isNotarizeStepCompleted = (
   _browsingHistory: HistoryItem[],
   _step: { url: string },
@@ -59,23 +57,16 @@ const checkStepReadiness = {
   notarize: isNotarizeStepReady,
 };
 
-export const useSteps = (): Step[] => {
-  // get steps config
-  const [{ steps }] = useLocalStorage<{
-    steps: {
-      url: string;
-      label: string;
-      step: "expectUrl" | "notarize" | "startPage";
-    }[];
-  }>("webProverSessionConfig", { steps: [] });
-
-  //read browsing history
-  const [history] = useLocalStorage<HistoryItem[]>("history", []);
-
-  //get tlsn proof
-  const { proof } = useTlsnProver();
-
-  return steps.reduce((accumulator, currentStep) => {
+export const calculateSteps = ({
+  stepsSetup = [],
+  proof,
+  history,
+}: {
+  stepsSetup: WebProofStep[];
+  history: HistoryItem[];
+  proof: object | null;
+}) => {
+  return stepsSetup.reduce((accumulator, currentStep) => {
     const hasUncompletedStep =
       accumulator.length > 0 &&
       accumulator[accumulator.length - 1]?.status !== StepStatus.Completed;
@@ -83,7 +74,6 @@ export const useSteps = (): Step[] => {
       label: currentStep.label,
       link: currentStep.url,
       kind: currentStep.step,
-
       // all steps after first uncompleted are further
       status: hasUncompletedStep
         ? StepStatus.Further
@@ -95,4 +85,11 @@ export const useSteps = (): Step[] => {
     };
     return [...accumulator, mappedStep];
   }, [] as Step[]);
+};
+
+export const useSteps = (): Step[] => {
+  const [{ steps: stepsSetup }] = useProvingSessionConfig();
+  const [history] = useBrowsingHistory();
+  const { proof } = useTlsnProver();
+  return calculateSteps({ stepsSetup, proof, history });
 };
