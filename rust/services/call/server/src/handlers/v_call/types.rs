@@ -48,12 +48,13 @@ impl CallResult {
         json!({
             "evm_call_result": self.evm_call_result.encode_hex_with_prefix(),
             "proof": {
-                "length": u256_to_number(self.proof.length),
                 "seal": {
                     "verifierSelector": self.proof.seal.verifierSelector,
                     "seal": self.proof.seal.seal,
                     "mode": Into::<u8>::into(self.proof.seal.mode),
                 },
+                "callGuestId": self.proof.callGuestId.encode_hex_with_prefix(),
+                "length": u256_to_number(self.proof.length),
                 "callAssumptions": {
                     "functionSelector": self.proof.callAssumptions.functionSelector,
                     "proverContractAddress": self.proof.callAssumptions.proverContractAddress,
@@ -73,11 +74,14 @@ impl TryFrom<HostOutput> for CallResult {
             guest_output,
             seal,
             proof_len,
+            call_guest_id,
             ..
         } = host_output;
+
         let proof = Proof {
             length: U256::from(proof_len),
             seal: decode_seal(seal)?,
+            callGuestId: call_guest_id.into(),
             // Intentionally set to 0. These fields will be updated with the correct values by the prover script, based on the verifier ABI.
             callAssumptions: guest_output.call_assumptions,
         };

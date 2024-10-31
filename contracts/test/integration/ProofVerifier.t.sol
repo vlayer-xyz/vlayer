@@ -111,7 +111,7 @@ library ProofFixtures {
 
         uint256 length = 0; // it is not used in verification, so can be set to 0
 
-        Proof memory proof = Proof(length, seal, callAssumptions);
+        Proof memory proof = Proof(seal, FIXED_CALL_GUEST_ID, length, callAssumptions);
         return (proof, journalHash(callAssumptions, FIXED_LHS + FIXED_RHS));
     }
 

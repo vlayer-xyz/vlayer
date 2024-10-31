@@ -29,7 +29,9 @@ pub async fn v_call(config: Arc<ServerConfig>, params: Params) -> Result<CallRes
         ..Default::default()
     };
 
-    let return_data = Host::try_new(&host_config)?.run(call).await?;
-
-    return_data.try_into().map_err(AppError::Host)
+    Host::try_new(&host_config)?
+        .run(call)
+        .await?
+        .try_into()
+        .map_err(AppError::Host)
 }

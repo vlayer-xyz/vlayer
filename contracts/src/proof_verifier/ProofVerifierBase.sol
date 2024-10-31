@@ -53,5 +53,9 @@ abstract contract ProofVerifierBase is IProofVerifier {
             proof.callAssumptions.settleBlockHash == blockhash(proof.callAssumptions.settleBlockNumber),
             "Invalid block hash"
         );
+
+        // CALL_GUEST_ID is not a part of the verified arguments
+        // and the following require is just to enable better error handling.
+        require(proof.callGuestId == CALL_GUEST_ID, "CallGuestId mismatched");
     }
 }

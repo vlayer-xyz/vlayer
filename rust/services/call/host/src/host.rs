@@ -75,7 +75,7 @@ impl Host {
         chain_proof_client: RpcChainProofClient,
         config: &HostConfig,
     ) -> Result<Self, HostError> {
-        validate_guest_image_id(config.image_id)?;
+        validate_guest_image_id(config.call_guest_id)?;
 
         let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
         let start_execution_location = (block_number, config.start_chain_id).into();
@@ -131,11 +131,14 @@ impl Host {
             ));
         }
 
+        let call_guest_id: Digest = RISC0_CALL_GUEST_ID.into();
+
         Ok(HostOutput {
             guest_output,
             seal,
             raw_abi: raw_guest_output,
             proof_len,
+            call_guest_id: call_guest_id.into(),
         })
     }
 
@@ -176,7 +179,7 @@ fn build_executor_env(input: impl Serialize) -> anyhow::Result<ExecutorEnv<'stat
 
 fn validate_guest_image_id(image_id: Digest) -> Result<(), HostError> {
     if image_id != RISC0_CALL_GUEST_ID.into() {
-        return Err(HostError::UnsupportedImageId(RISC0_CALL_GUEST_ID.into(), image_id));
+        return Err(HostError::UnsupportedCallGuestId(RISC0_CALL_GUEST_ID.into(), image_id));
     }
 
     Ok(())
@@ -274,7 +277,7 @@ mod test {
         #[test]
         fn fails_with_mismatched_image_id() {
             let config = HostConfig {
-                image_id: Default::default(),
+                call_guest_id: Default::default(),
                 ..HostConfig::default()
             };
 
@@ -287,7 +290,7 @@ mod test {
 
             assert!(matches!(
                 res.map(|_| ()).unwrap_err(),
-                HostError::UnsupportedImageId(ref expected, ref received) if expected == &(RISC0_CALL_GUEST_ID.into()) && received == &Default::default()
+                HostError::UnsupportedCallGuestId(ref expected, ref received) if expected == &(RISC0_CALL_GUEST_ID.into()) && received == &Default::default()
             ));
         }
     }
