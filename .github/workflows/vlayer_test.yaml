@@ -42,3 +42,6 @@ jobs:
         run: |
           # vlayer test
           cargo run --locked --manifest-path ../rust/Cargo.toml --package cli -- test -vvv
+      
+      - name: Run vlayer tests for examples
+        run: bash/vlayer-test-examples.sh

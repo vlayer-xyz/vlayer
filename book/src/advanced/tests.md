@@ -29,6 +29,8 @@ vlayer introduces additional cheatcodes:
 ### Example Usage
 
 ```solidity
+import {VTest} from "vlayer-0.1.0/testing/VTest.sol";
+
 contract WebProverTest is VTest {
     WebProver prover;
     WebVerifier verifier;

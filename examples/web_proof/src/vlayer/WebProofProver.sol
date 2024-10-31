@@ -12,7 +12,7 @@ contract WebProofProver is Prover {
     using WebProofLib for WebProof;
     using WebLib for Web;
 
-    string dataUrl = "https://api.x.com/1.1/account/settings.json";
+    string constant dataUrl = "https://api.x.com/1.1/account/settings.json";
 
     function main(WebProof calldata webProof, address account)
         public
