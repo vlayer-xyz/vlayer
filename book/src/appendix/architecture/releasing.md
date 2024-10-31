@@ -13,6 +13,21 @@ The diagram below illustrates these environments, along with associated artifact
 
 ![Schema](/images/architecture/releasing.png)
 
+## User Experience
+
+From a delivery perspective, the key aspects of user experience are:
+- Reliable, functioning software
+- Clear error messages when issues arise
+- An easy update process for deprecated software
+
+Users primarily interact with two main artifacts:
+- The SDK, embedded within the developer's web application
+- The developer's smart contracts, which interface with vlayer smart contracts
+- Optionally, a browser extension if the user is engaging with Web Proofs
+
+Unfortunately, both the user and vlayer have limited control over the SDK version in use. The SDK is implemented by the developer and updated only at the developer’s discretion.
+
+
 ## Developer Experience 
 
 ### Alpha and Beta Versions
@@ -22,12 +37,14 @@ To ensure developers have the best possible experience, we will encourage and/or
 - Developers have access to the latest features and bug fixes.
 - We can guarantee compatibility among various artifacts.
 
+A potential downside of this approach is that it may require developers to address bugs in their code caused by breaking changes in vlayer.
+
 ### Production
 
 In the production environment, we still want to encourage developers to update to the latest version; however, we may choose to:
 
 - Release new versions less frequently (e.g., weekly).
-- Avoid introducing breaking changes related to audited code or any of its dependencies.
+- Avoid introducing breaking changes and changes to audited code.
 
 ## Artifacts and Deployment Cycles
 
