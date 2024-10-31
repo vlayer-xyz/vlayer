@@ -7,13 +7,17 @@ const mockStore = function () {
     get: vi.fn().mockImplementation(async function (key: string) {
       return Promise.resolve({ key: store.get(key) });
     }),
-    set: vi.fn().mockImplementation(async (key: string, value: unknown) => {
-      if (store.has(key)) {
-        callbacks.forEach((callback) => {
-          callback({ [key]: { newValue: value } });
-        });
-      }
-      store.set(key, value);
+    set: vi.fn().mockImplementation(async (keys: Record<string, unknown>) => {
+      Object.keys(keys).forEach((key: string) => {
+        const value = keys[key];
+        if (store.has(key)) {
+          callbacks.forEach((callback) => {
+            callback({ [key]: { newValue: value } });
+          });
+        }
+        store.set(key, value);
+      });
+      return Promise.resolve();
     }),
     remove: vi.fn().mockImplementation(async (key: string) => {
       store.delete(key);
