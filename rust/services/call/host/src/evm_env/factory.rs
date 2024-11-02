@@ -1,18 +1,14 @@
 use std::sync::Arc;
 
 use call_engine::evm::env::{location::ExecutionLocation, EvmEnv, EvmEnvFactory};
+use derive_new::new;
 use provider::CachedMultiProvider;
 
 use crate::{db::proof::ProofDb, host::error::HostError};
 
+#[derive(new)]
 pub(crate) struct HostEvmEnvFactory {
     providers: CachedMultiProvider,
-}
-
-impl HostEvmEnvFactory {
-    pub(crate) const fn new(providers: CachedMultiProvider) -> Self {
-        HostEvmEnvFactory { providers }
-    }
 }
 
 impl EvmEnvFactory<ProofDb> for HostEvmEnvFactory {

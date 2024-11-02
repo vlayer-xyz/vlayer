@@ -4,6 +4,7 @@ use alloy_primitives::ChainId;
 use async_trait::async_trait;
 use chain_common::ChainProof;
 use chain_server::server::ChainProof as RpcChainProof;
+use derive_new::new;
 use futures::stream::{self, StreamExt, TryStreamExt};
 use mpt::ParseNodeError;
 use parking_lot::RwLock;
@@ -138,14 +139,9 @@ impl<T: Client> Client for RecordingClient<T> {
 }
 
 /// `Client` implementation which only reads proofs from cache.
+#[derive(new)]
 pub struct CachedClient {
     cache: ChainProofCache,
-}
-
-impl CachedClient {
-    pub fn new(cache: ChainProofCache) -> Self {
-        Self { cache }
-    }
 }
 
 #[async_trait]

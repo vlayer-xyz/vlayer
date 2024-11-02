@@ -13,6 +13,7 @@ bytes = { workspace = true }
 chain_guest_wrapper = { workspace = true }
 derivative = { workspace = true }
 derive_more = { workspace = true }
+derive-new = { workspace = true }
 key_value = { workspace = true }
 mpt = { workspace = true }
 nybbles = { workspace = true }

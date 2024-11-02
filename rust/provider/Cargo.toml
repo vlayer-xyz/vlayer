@@ -11,6 +11,7 @@ auto_impl = { workspace = true }
 block_header = { workspace = true }
 common = { workspace = true }
 derivative = { workspace = true }
+derive-new = { workspace = true }
 ethers-core = { workspace = true }
 ethers-providers = { workspace = true }
 serde = { workspace = true }

@@ -1,3 +1,4 @@
+use derive_new::new;
 use httparse::{Response, Status, EMPTY_HEADER};
 use tlsn_core::RedactedTranscript;
 
@@ -5,16 +6,12 @@ use crate::errors::ParsingError;
 
 const MAX_HEADERS_NUMBER: usize = 40;
 
-#[derive(Debug)]
+#[derive(Debug, new)]
 pub(crate) struct ResponseTranscript {
     pub(crate) transcript: RedactedTranscript,
 }
 
 impl ResponseTranscript {
-    pub const fn new(transcript: RedactedTranscript) -> Self {
-        Self { transcript }
-    }
-
     pub(crate) fn parse_body(self) -> Result<String, ParsingError> {
         let response_string = String::from_utf8(self.transcript.data().to_vec())?;
 

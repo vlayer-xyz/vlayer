@@ -1,21 +1,16 @@
 use alloy_primitives::{keccak256, BlockNumber, B256};
 use alloy_rlp::Encodable;
+use derive_new::new;
 use revm::primitives::BlockEnv;
 use serde::{Deserialize, Serialize};
 use traits::Hashable;
 
 use crate::{casting_utils::try_downcast, EvmBlockHeader};
 
-#[derive(Debug, Clone, Serialize, Deserialize)]
+#[derive(Debug, Clone, Serialize, Deserialize, new)]
 pub struct ForgeBlockHeader {
     number: BlockNumber,
     state_root: B256,
-}
-
-impl ForgeBlockHeader {
-    pub const fn new(number: BlockNumber, state_root: B256) -> Self {
-        Self { number, state_root }
-    }
 }
 
 impl Encodable for ForgeBlockHeader {

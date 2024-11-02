@@ -1668,6 +1668,7 @@ dependencies = [
  "anyhow",
  "as-any",
  "auto_impl",
+ "derive-new",
  "dyn-clone",
  "lazy_static",
  "revm",
@@ -1959,6 +1960,7 @@ dependencies = [
  "chain_common",
  "chain_server",
  "ctor",
+ "derive-new",
  "dotenvy",
  "ethers-core",
  "host_utils",
@@ -2099,6 +2101,7 @@ dependencies = [
  "alloy-chains",
  "alloy-primitives",
  "anyhow",
+ "derive-new",
  "once_cell",
  "revm",
  "serde",
@@ -2115,6 +2118,7 @@ dependencies = [
  "block_trie",
  "chain_common",
  "chain_server",
+ "derive-new",
  "futures",
  "mpt",
  "parking_lot",
@@ -2148,6 +2152,7 @@ dependencies = [
  "bytes",
  "chain_guest_wrapper",
  "derivative",
+ "derive-new",
  "derive_more 1.0.0",
  "key_value",
  "mpt",
@@ -3422,6 +3427,7 @@ name = "email_proof"
 version = "0.1.0"
 dependencies = [
  "alloy-sol-types",
+ "derive-new",
  "futures",
  "hex-literal",
  "lazy_static",
@@ -5430,6 +5436,7 @@ name = "host_utils"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "derive-new",
  "risc0-zkvm",
  "tokio",
  "tracing",
@@ -7631,6 +7638,7 @@ dependencies = [
  "block_header",
  "common",
  "derivative",
+ "derive-new",
  "ethers-core",
  "ethers-providers",
  "serde",
@@ -10734,6 +10742,7 @@ version = "0.1.0"
 dependencies = [
  "alloy-dyn-abi",
  "alloy-primitives",
+ "derive-new",
  "httparse",
  "p256",
  "pkcs8",
@@ -11253,6 +11262,7 @@ dependencies = [
  "alloy-primitives",
  "alloy-sol-types",
  "call_engine",
+ "derive-new",
  "email_proof",
  "risc0-zkvm",
 ]

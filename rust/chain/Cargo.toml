@@ -7,6 +7,7 @@ edition = "2021"
 alloy-chains = { workspace = true }
 alloy-primitives = { workspace = true, features = ["rlp", "serde"] }
 anyhow = { workspace = true }
+derive-new = { workspace = true }
 once_cell = { workspace = true }
 revm = { workspace = true, features = ["serde", "std"] }
 serde = { workspace = true, features = ["derive"] }
