@@ -1,8 +1,8 @@
 use std::fmt::Display;
 
 use benchmarks::precompiles::email;
+use derive_new::new;
 use risc0_zkvm::guest::env;
-
 mod benchmarks;
 
 pub struct BenchmarkRunner(Vec<Benchmark>);
@@ -62,6 +62,7 @@ impl Default for BenchmarkRunner {
     }
 }
 
+#[derive(new)]
 pub struct Benchmark {
     name: &'static str,
     workload: Workload,
@@ -69,14 +70,6 @@ pub struct Benchmark {
 }
 
 impl Benchmark {
-    fn new(name: &'static str, workload: Workload, total_cycles_limit: u64) -> Self {
-        Self {
-            name,
-            workload,
-            total_cycles_limit,
-        }
-    }
-
     fn run(self) -> Result<BenchmarkResult, ()> {
         let start = env::cycle_count();
         (self.workload)()?;

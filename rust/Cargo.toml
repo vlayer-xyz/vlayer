@@ -60,6 +60,7 @@ color-eyre = "0.6.3"
 colored = "2.1.0"
 comfy-table = "7.1.1"
 ctor = "0.2.8"
+delegate = "0.13.1"
 derive_more = { version = "1.0.0", features = ["debug", "into", "from", "into_iterator", "deref"] }
 derive-new = "0.7.0"
 derivative = "2.2.0"

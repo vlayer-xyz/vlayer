@@ -12,6 +12,7 @@ block_trie = { workspace = true }
 bytes = { workspace = true }
 chain_guest_wrapper = { workspace = true }
 derivative = { workspace = true }
+derive-new = { workspace = true }
 derive_more = { workspace = true }
 key_value = { workspace = true }
 mpt = { workspace = true }

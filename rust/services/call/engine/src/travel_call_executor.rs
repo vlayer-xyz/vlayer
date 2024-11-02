@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use derive_new::new;
 use revm::{
     db::WrapDatabaseRef,
     inspector_handle_register,
@@ -16,6 +17,7 @@ use crate::{
     utils::evm_call::format_failed_call_result,
 };
 
+#[derive(new)]
 pub struct TravelCallExecutor<'envs, D>
 where
     D: DatabaseRef,
@@ -48,11 +50,6 @@ where
     D: DatabaseRef,
     D::Error: std::fmt::Debug,
 {
-    #[must_use]
-    pub const fn new(envs: &'envs CachedEvmEnv<D>) -> Self {
-        Self { envs }
-    }
-
     fn get_env(&self, location: ExecutionLocation) -> Result<Arc<EvmEnv<D>>> {
         self.envs
             .get(location)

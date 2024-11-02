@@ -3,6 +3,7 @@ use std::{collections::HashMap, path::PathBuf};
 use alloy_primitives::ChainId;
 use anyhow::Result;
 use auto_impl::auto_impl;
+use derive_new::new;
 use thiserror::Error;
 use url::ParseError;
 
@@ -26,18 +27,13 @@ pub trait ProviderFactory: Send + Sync {
     fn create(&self, chain_id: ChainId) -> Result<Box<dyn BlockingProvider>, ProviderFactoryError>;
 }
 
+#[derive(new)]
 pub struct EthersProviderFactory {
     rpc_urls: HashMap<ChainId, String>,
 }
 
 const MAX_RETRY: u32 = 3;
 const INITIAL_BACKOFF: u64 = 500;
-
-impl EthersProviderFactory {
-    pub const fn new(rpc_urls: HashMap<ChainId, String>) -> Self {
-        EthersProviderFactory { rpc_urls }
-    }
-}
 
 impl ProviderFactory for EthersProviderFactory {
     fn create(&self, chain_id: ChainId) -> Result<Box<dyn BlockingProvider>, ProviderFactoryError> {
@@ -63,21 +59,10 @@ fn get_path(
     Ok(PathBuf::from(file_path_str))
 }
 
+#[derive(new)]
 pub struct CachedProviderFactory {
     rpc_file_cache: HashMap<ChainId, String>,
     ethers_provider_factory: Option<EthersProviderFactory>,
-}
-
-impl CachedProviderFactory {
-    pub const fn new(
-        rpc_file_cache: HashMap<ChainId, String>,
-        ethers_provider_factory: Option<EthersProviderFactory>,
-    ) -> Self {
-        CachedProviderFactory {
-            ethers_provider_factory,
-            rpc_file_cache,
-        }
-    }
 }
 
 impl ProviderFactory for CachedProviderFactory {

@@ -3,6 +3,7 @@ use core::future::Future;
 use alloy_primitives::{BlockNumber, B256, U256};
 use anyhow::{anyhow, Context, Result};
 use block_header::{EthBlockHeader, EvmBlockHeader};
+use derive_new::new;
 use ethers_core::types::{Block, BlockNumber as BlockTag};
 use ethers_providers::{Http, Middleware, RetryClient};
 use tokio::runtime::Handle;
@@ -12,15 +13,9 @@ use super::{BlockingProvider, EIP1186Proof};
 pub type EthersClient = ethers_providers::Provider<RetryClient<Http>>;
 
 /// A provider that fetches data from an Ethereum node using the ethers crate.
-#[derive(Debug)]
+#[derive(Debug, new)]
 pub struct EthersProvider {
     client: EthersClient,
-}
-
-impl EthersProvider {
-    pub(crate) const fn new(client: EthersClient) -> Self {
-        Self { client }
-    }
 }
 
 // Blocks current runtime to execute the future. Panics if called outside of the runtime

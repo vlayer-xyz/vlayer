@@ -691,6 +691,7 @@ dependencies = [
  "alloy-rlp-derive",
  "as-any",
  "auto_impl",
+ "derive-new",
  "dyn-clone",
  "revm",
  "serde",
@@ -879,6 +880,7 @@ dependencies = [
  "alloy-chains",
  "alloy-primitives",
  "anyhow",
+ "derive-new",
  "once_cell",
  "revm",
  "serde",
@@ -1334,6 +1336,7 @@ name = "email_proof"
 version = "0.1.0"
 dependencies = [
  "alloy-sol-types",
+ "derive-new",
  "futures",
  "mail-auth",
  "mailparse",
@@ -4126,6 +4129,7 @@ name = "web_proof"
 version = "0.1.0"
 dependencies = [
  "alloy-dyn-abi",
+ "derive-new",
  "httparse",
  "p256",
  "pkcs8",
@@ -4333,6 +4337,7 @@ dependencies = [
  "alloy-primitives",
  "alloy-sol-types",
  "call_engine",
+ "derive-new",
  "email_proof",
  "risc0-zkvm",
 ]

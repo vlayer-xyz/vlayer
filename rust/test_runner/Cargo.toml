@@ -23,6 +23,8 @@ chain_server = { workspace = true }
 clap = { workspace = true, features = ["derive"] }
 color-eyre = { workspace = true }
 comfy-table = { workspace = true }
+delegate = { workspace = true }
+derive-new = { workspace = true }
 ethers-core = { workspace = true }
 forge = { workspace = true }
 foundry-cheatcodes = { workspace = true }
