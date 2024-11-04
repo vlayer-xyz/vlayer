@@ -1,30 +1,33 @@
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, type Dispatch, type SetStateAction} from "react";
 import browser from "webextension-polyfill";
-function createStorageHook(storage: browser.Storage.StorageArea) {
-  // for now this implementation is enough
-  // to add later:
-  // - serialize and deserialize the value
-  // - sync WebStorage support
+import { LOADING } from "./constants";
 
+type HookValue<T> = (T | typeof LOADING | undefined); 
+type SetHookValue<T> = ((value: HookValue<T> ) => T)| T;  
+
+
+function createStorageHook(storage: browser.Storage.StorageArea) {
   return function useStorage<T>(
     storageKey: string,
-    initialValue: T,
-  ): [T, (newValue: T) => Promise<void>] {
-    const [storedValue, setStoredValue] = useState<T>(initialValue);
+    initialValue?: T,
+  ): [HookValue<T>, Dispatch<SetStateAction<HookValue<T>>>] {
+    
+    const [storedValue, setStoredValue] = useState<HookValue<T>>(LOADING);
+
     useEffect(() => {
       storage
         .get(storageKey)
         .then((result) => {
           if (result[storageKey] !== undefined) {
             setStoredValue(result[storageKey] as T);
+          } else {
+            setStoredValue(initialValue);
           }
         })
         .catch(console.error);
-    }, []);
+    }, [storageKey, initialValue]);
 
     useEffect(() => {
-      // observe storage changes
-
       const handleStorageChange = (changes: {
         [key: string]: browser.Storage.StorageChange;
       }) => {
@@ -40,16 +43,15 @@ function createStorageHook(storage: browser.Storage.StorageArea) {
       return () => {
         storage.onChanged.removeListener(handleStorageChange);
       };
-    }, []);
+    }, [storageKey]);
 
-    // sync storage value with state
-
-    const setValue = useCallback(
-      async (newValue: T) => {
-        setStoredValue(newValue);
-        await storage.set({ [storageKey]: newValue });
+    const setValue : Dispatch<SetStateAction<HookValue<T>>>  = useCallback(
+      async (newValue) => {
+        const updatedValue = typeof newValue === "function" ? (newValue as Function)(storedValue) : newValue;
+        setStoredValue(newValue); 
+        await storage.set({ [storageKey]: updatedValue });
       },
-      [storageKey, storage],
+      [storageKey, storage, storedValue],
     );
 
     return [storedValue, setValue];
