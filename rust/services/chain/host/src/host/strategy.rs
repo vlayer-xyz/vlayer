@@ -4,13 +4,20 @@ use super::range_utils::limit_right;
 
 pub const MAX_HEAD_BLOCKS: u64 = 10;
 pub const CONFIRMATIONS: u64 = 2;
+#[allow(clippy::reversed_empty_ranges)]
 const EMPTY_RANGE: RangeInclusive<u64> = 1..=0;
 
-pub struct Strategy {}
+pub struct Strategy {
+    max_head_blocks: u64,
+    confirmations: u64,
+}
 
 impl Strategy {
     pub const fn new() -> Self {
-        Strategy {}
+        Strategy {
+            max_head_blocks: MAX_HEAD_BLOCKS,
+            confirmations: CONFIRMATIONS,
+        }
     }
 
     pub fn get_append_prepend_ranges(
@@ -22,14 +29,14 @@ impl Strategy {
     }
 
     fn get_append_range(&self, range: &RangeInclusive<u64>, latest: u64) -> RangeInclusive<u64> {
-        if latest + 1 < CONFIRMATIONS {
+        if latest + 1 < self.confirmations {
             // With CONFIRMATIONS set at 2 - this only happens if latest == 0
             // Should not happen on any reasonable chain.
             return EMPTY_RANGE;
         }
-        let confirmed = latest + 1 - CONFIRMATIONS;
+        let confirmed = latest + 1 - self.confirmations;
         let range = range.end() + 1..=confirmed;
-        limit_right(range, MAX_HEAD_BLOCKS)
+        limit_right(range, self.max_head_blocks)
     }
 }
 
@@ -41,17 +48,20 @@ mod test {
         use super::*;
 
         #[test]
+        #[allow(clippy::reversed_empty_ranges)]
         fn latest_is_genesis_does_not_cause_an_underflow_panic() {
             assert_eq!(Strategy::new().get_append_range(&(0..=0), 0), 1..=0);
         }
 
         #[test]
+        #[allow(clippy::reversed_empty_ranges)]
         fn same_block() {
             // Could happen after init or on 1-depth reorg
             assert_eq!(Strategy::new().get_append_range(&(1..=1), 1), 2..=0);
         }
 
         #[test]
+        #[allow(clippy::reversed_empty_ranges)]
         fn new_block_not_enough_confirmations() {
             assert_eq!(Strategy::new().get_append_range(&(0..=0), 1), 1..=0);
         }

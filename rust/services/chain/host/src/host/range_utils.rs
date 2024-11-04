@@ -26,6 +26,7 @@ mod tests {
         }
 
         #[test]
+        #[allow(clippy::reversed_empty_ranges)]
         fn empty_range() {
             assert_eq!(limit_right(1..=0, 0), 1..=0)
         }
