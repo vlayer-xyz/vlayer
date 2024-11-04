@@ -137,7 +137,7 @@ const setAuthCookie = async (login) => {
 
   const hash = await hashString(`${login}${COOKIE_SALT}`);
 
-  responseCookies.set('authenticated', `${login}|${hash}`, {
+  responseCookies.set('isAuthenticated', `${login}|${hash}`, {
     httpOnly: false, 
     maxAge: 60 * 60 * 24
   }) // make cookie persistent for 24h
@@ -148,9 +148,9 @@ const setAuthCookie = async (login) => {
 const isAuthCookieValid = async (headers) => {
   try {
     const cookies = new RequestCookies(headers)
-    if(!cookies.has('authenticated')) return false;
+    if(!cookies.has('isAuthenticated')) return false;
     
-    const [login, cookieHash] = cookies.get('authenticated')?.value.split('|');
+    const [login, cookieHash] = cookies.get('isAuthenticated')?.value.split('|');
     const validHash = await hashString(`${login}${COOKIE_SALT}`);
   
     return cookieHash === validHash;
