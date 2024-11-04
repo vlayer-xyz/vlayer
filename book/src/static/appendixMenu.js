@@ -7,7 +7,7 @@ function getCookie(name) {
 }
 
 document.addEventListener("DOMContentLoaded", function() {
-  if(!getCookie('authenticated')) {
+  if(!getCookie('isAuthenticated')) {
     const spacerElement = document.querySelector('.spacer');
     if (spacerElement) {
       let nextElement = spacerElement.nextElementSibling;
