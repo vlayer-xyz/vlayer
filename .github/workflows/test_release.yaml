@@ -11,4 +11,4 @@ jobs:
           with:
             submodules: recursive
         - name: Test release
-          run: bash/test_release.sh
+          run: bash/test-release.sh
