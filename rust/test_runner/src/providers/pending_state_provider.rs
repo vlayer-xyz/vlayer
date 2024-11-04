@@ -120,3 +120,41 @@ impl ProviderFactory for PendingStateProviderFactory {
         }))
     }
 }
+
+#[cfg(test)]
+mod test {
+    use std::fs;
+
+    use forge::revm::primitives::{address, b256};
+    use mpt::MerkleTrie;
+    use serde_json::{from_str, from_value, Value};
+
+    use super::*;
+
+    fn read_and_parse_json_file(file_path: &str) -> Value {
+        let file_content = fs::read_to_string(file_path).expect("Failed to read the file");
+        from_str(&file_content).expect("Failed to parse JSON from file")
+    }
+
+    fn build_state() -> EvmState {
+        let json_value = read_and_parse_json_file("testdata/dumped_evm_state.json");
+        let evm_state: EvmState = from_value(json_value).expect("Failed to parse EVM state");
+        evm_state
+    }
+
+    #[test]
+    fn storage_proof_is_correctly_created_and_checked_by_mpt() {
+        let state = build_state();
+        let address = address!("5615deb798bb3e4dfa0139dfa1b3d433cc23b72f");
+        let storage_keys =
+            vec![b256!("db302bf24b1ad5f23949da8e6b05747dc699499a995361a7bf40ec7204696d6f")];
+
+        let provider = PendingStateProvider {
+            state,
+            block_number: 0,
+        };
+        let proof = provider.get_proof(address, storage_keys, 0).unwrap();
+        MerkleTrie::from_rlp_nodes(proof.storage_proof.iter().flat_map(|x| x.proof.clone()))
+            .expect("Invalid proof");
+    }
+}

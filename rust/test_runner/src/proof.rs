@@ -86,16 +86,15 @@ pub fn prove_storage(
 ) -> Vec<StorageProof> {
     let keys: Vec<_> = storage_keys.iter().map(to_nibbles).collect();
 
-    let all_proof_nodes = build_proof(keys.clone(), trie_storage(storage)).1;
+    let (root, all_proof_nodes) = build_proof(keys.clone(), trie_storage(storage));
 
     let mut proofs = Vec::new();
     for proof_key in keys {
         let matching_proof_nodes = all_proof_nodes
             .iter()
             .filter(|(path, _)| proof_key.starts_with(path))
-            .map(|(_, node)| node.clone())
-            .collect();
-        proofs.push(matching_proof_nodes);
+            .map(|(_, node)| node.clone());
+        proofs.push(reorder_with_root_as_first(matching_proof_nodes, root));
     }
 
     storage_keys
@@ -115,14 +114,16 @@ pub fn prove_storage(
 
 #[cfg(test)]
 mod tests {
-    use std::fs;
+    use std::{collections::BTreeMap, fs};
 
     use alloy_primitives::{address, b256, hex, U160};
     use alloy_rlp::RlpDecodable;
+    use block_header::Hashable;
     use mpt::MerkleTrie;
     use serde_json::{from_str, from_value, Value};
 
     use super::*;
+    use crate::providers::pending_state_provider::PendingStateProvider;
 
     #[derive(Debug, Clone, PartialEq, Eq, RlpDecodable)]
     struct StateAccount {
