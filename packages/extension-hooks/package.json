@@ -3,7 +3,7 @@
   "exports": "./src/index.ts",
   "type": "module",
   "scripts": {
-    "test:unit": "vitest"
+    "test:unit": "vitest --run"
   },
   "devDependencies": {
     "@types/bun": "latest",
