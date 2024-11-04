@@ -47,7 +47,7 @@ lazy_static! {
             name: String::from("risc0-ethereum"),
             version: String::from("1.0.0"),
             url: Some(String::from("https://github.com/vlayer-xyz/risc0-ethereum/releases/download/v1.0.0-soldeer-no-remappings/contracts.zip")),
-            remapping: None,
+            remapping: Some(("risc0-ethereum-1.0.0").into()),
         },
         SoldeerDep {
             name: String::from("vlayer"),
@@ -164,7 +164,10 @@ fn install_dependencies(foundry_root: &Path) -> Result<(), CLIError> {
 
 fn add_remappings(foundry_root: &Path) -> Result<(), CLIError> {
     let remappings_txt = foundry_root.join("remappings.txt");
-    let mut file = OpenOptions::new().append(true).open(remappings_txt)?;
+    let mut file = OpenOptions::new()
+        .create(true)
+        .append(true)
+        .open(remappings_txt)?;
     for dep in DEPENDENCIES.iter() {
         if let Some(remapping) = dep.remapping() {
             writeln!(file, "{remapping}")?;
@@ -263,13 +266,25 @@ pub(crate) async fn init_existing(cwd: PathBuf, template: TemplateOption) -> Res
 fn init_soldeer(root_path: &Path) -> Result<(), CLIError> {
     add_deps_to_gitignore(root_path)?;
     add_deps_section_to_foundry_toml(root_path)?;
+    add_soldeer_config_to_foundry_toml(root_path)?;
 
     Ok(())
 }
 
 fn add_deps_section_to_foundry_toml(root_path: &Path) -> Result<(), std::io::Error> {
-    let gitignore_path = root_path.join("foundry.toml");
-    append_file(&gitignore_path, "[dependencies]")
+    let foundry_toml_path = root_path.join("foundry.toml");
+    append_file(&foundry_toml_path, "\n[dependencies]")
+}
+
+fn add_soldeer_config_to_foundry_toml(root_path: &Path) -> Result<(), std::io::Error> {
+    let foundry_toml_path = root_path.join("foundry.toml");
+    let soldeer_section = "\n[soldeer]\n\
+                        # whether soldeer manages remappings\n\
+                        remappings_generate = false\n\
+                        # whether soldeer re-generates all remappings when installing, updating or uninstalling deps\n\
+                        remappings_regenerate = false";
+
+    append_file(&foundry_toml_path, soldeer_section)
 }
 
 fn add_deps_to_gitignore(root_path: &Path) -> Result<(), std::io::Error> {
@@ -431,6 +446,7 @@ mod tests {
             "some initial remappings\n\
             openzeppelin-contracts/=dependencies/@openzeppelin-contracts-5.0.1/\n\
             forge-std/=dependencies/forge-std-1.9.2/src/\n\
+            risc0-ethereum-1.0.0/=dependencies/risc0-ethereum-1.0.0/\n\
             vlayer-0.1.0/=dependencies/vlayer-{}/src/\n",
             version()
         );
@@ -492,13 +508,26 @@ mod tests {
         }
 
         #[test]
-        fn adds_dependencies_section_in_foundry_toml() {
+        fn adds_dependencies_section_to_foundry_toml() {
             let (_temp_dir, _, root_path) = prepare_foundry_dir("src");
 
             init_soldeer(&root_path).unwrap();
 
             let foundry_toml = fs::read_to_string(root_path.join("foundry.toml")).unwrap();
             assert!(foundry_toml.contains("[dependencies]"));
+        }
+
+        #[test]
+        fn adds_soldeer_section_to_foundry_toml() {
+            let (_temp_dir, _, root_path) = prepare_foundry_dir("src");
+
+            init_soldeer(&root_path).unwrap();
+
+            let foundry_toml = fs::read_to_string(root_path.join("foundry.toml")).unwrap();
+
+            assert!(foundry_toml.contains("[soldeer]"));
+            assert!(foundry_toml.contains("remappings_generate = false"));
+            assert!(foundry_toml.contains("remappings_regenerate = false"));
         }
     }
 }
