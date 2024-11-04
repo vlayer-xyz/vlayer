@@ -38,8 +38,6 @@ And the response format below.
         "to": "<contract address>",
         "data": "0x<abi encoded calldata>",
         "chain_id": "<desired chain id>",
-        "email": "<optional email proof structure>",
-        "web": "<optional web proof structure>",
     }]
 }
 ```
