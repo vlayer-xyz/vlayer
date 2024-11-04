@@ -1,15 +1,10 @@
-use std::ops::RangeInclusive;
+use std::{cmp::min, ops::RangeInclusive};
 
 pub fn limit_right(range: RangeInclusive<u64>, limit: u64) -> RangeInclusive<u64> {
     if range.is_empty() {
         return range;
     }
-    let size = range.end() - range.start() + 1;
-    if size < limit {
-        return range;
-    }
-    let end = range.start() + limit - 1;
-    *range.start()..=end
+    *range.start()..=min(*range.end(), *range.start() + limit - 1)
 }
 
 #[cfg(test)]
