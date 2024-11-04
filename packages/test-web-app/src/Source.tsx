@@ -1,12 +1,16 @@
 import {
-  createExtensionWebProofProvider,
-  expectUrl,
-  notarize,
-  startPage,
   WebProof,
   createVlayerClient,
   VlayerClient,
 } from "@vlayer/sdk";
+
+import {
+  createExtensionWebProofProvider,
+  expectUrl,
+  notarize,
+  startPage,
+} from "@vlayer/sdk/web_proof";
+
 import { foundry } from "viem/chains";
 import React, { useCallback, useRef, useState } from "react";
 import unconditionalProver from "../../../contracts/out/UnconditionalProver.sol/UnconditionalProver";
