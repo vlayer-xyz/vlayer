@@ -5,6 +5,10 @@
     ".": {
       "import": "./dist/index.js",
       "types": "./dist/index.d.ts"
+    },
+    "./web_proof": {
+      "import": "./dist/api/webProof/index.js",
+      "types": "./dist/api/webProof/index.d.ts"
     }
   },
   "version": "0.1.0",

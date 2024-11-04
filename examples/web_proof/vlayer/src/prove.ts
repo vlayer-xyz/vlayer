@@ -3,16 +3,20 @@ import webProofProver from "../../out/WebProofProver.sol/WebProofProver";
 import { foundry } from "viem/chains";
 
 import {
-  createExtensionWebProofProvider,
-  expectUrl,
-  notarize,
-  startPage,
   createVlayerClient,
   type WebProof,
   testHelpers,
   type Proof,
   isDefined,
 } from "@vlayer/sdk";
+
+import {
+  createExtensionWebProofProvider,
+  expectUrl,
+  notarize,
+  startPage,
+} from "@vlayer/sdk/web_proof";
+
 import webProofVerifier from "../../out/WebProofVerifier.sol/WebProofVerifier";
 import { Hex } from "viem";
 
