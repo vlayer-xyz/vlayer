@@ -4,7 +4,7 @@ mod prover;
 mod range_utils;
 mod strategy;
 
-use std::ops::RangeInclusive;
+use std::{cmp::max, ops::RangeInclusive};
 
 use alloy_primitives::ChainId;
 use block_trie::BlockTrie;
@@ -136,7 +136,7 @@ where
         };
         let receipt = self.prover.prove(&input, Some(old_zk_proof))?;
 
-        let range = *block_range.start()..=*append_range.end();
+        let range = *block_range.start()..=max(*append_range.end(), *block_range.end());
         let chain_update = ChainUpdate::from_two_tries(range, &old_trie, &trie, &receipt)?;
 
         Ok(chain_update)
