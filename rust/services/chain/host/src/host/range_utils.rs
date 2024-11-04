@@ -1,7 +1,7 @@
 use std::ops::RangeInclusive;
 
 pub fn limit_right(range: RangeInclusive<u64>, limit: u64) -> RangeInclusive<u64> {
-    if range.end() < range.start() {
+    if range.is_empty() {
         return range;
     }
     let size = range.end() - range.start() + 1;
