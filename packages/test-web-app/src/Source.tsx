@@ -1,8 +1,4 @@
-import {
-  WebProof,
-  createVlayerClient,
-  VlayerClient,
-} from "@vlayer/sdk";
+import { WebProof, createVlayerClient, VlayerClient } from "@vlayer/sdk";
 
 import {
   createExtensionWebProofProvider,
