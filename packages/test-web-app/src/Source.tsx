@@ -12,6 +12,8 @@ import React, { useCallback, useRef, useState } from "react";
 import unconditionalProver from "../../../contracts/out/UnconditionalProver.sol/UnconditionalProver";
 
 const PROVER_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
+const NOTARY_PUB_KEY =
+  "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEBv36FI4ZFszJa0DQFJ3wWCXvVLFr\ncRzMG5kaTeHGoSzDu6cFqx3uEWYpFGo6C0EOUgf+mEgbktLrXocv5yHzKg==\n-----END PUBLIC KEY-----";
 
 function Source() {
   const [proof, setProof] = useState<WebProof>();
@@ -30,8 +32,14 @@ function Source() {
     }) as VlayerClient;
 
     const webproof = await provider.getWebProof({
-      //@ts-expect-error this part is not implemented yet in our tlsn flow
-      proverCallCommitment: {},
+      proverCallCommitment: {
+        address: PROVER_ADDRESS,
+        proverAbi: unconditionalProver.abi,
+        chainId: foundry.id,
+        functionName: "web_proof",
+        commitmentArgs: [],
+      },
+      logoUrl: "",
       steps: [
         startPage(loginUrl, "Go to login"),
         expectUrl(targetUrl, "Logged in and appear at target page"),
@@ -50,12 +58,15 @@ function Source() {
       chainId: foundry.id,
       args: [
         {
-          webProofJson: JSON.stringify(proof || {}),
+          webProofJson: JSON.stringify({
+            tls_proof: proof,
+            notary_pub_key: NOTARY_PUB_KEY,
+          }),
         },
       ],
     });
     console.log("ZK proof", zkProof);
-  }, []);
+  }, [proof]);
 
   const handleWebProofRequestClick = () => {
     requestWebProof().catch((error) => {

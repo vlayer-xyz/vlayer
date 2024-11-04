@@ -53,7 +53,7 @@ jobs:
           forge soldeer install
           forge build --sizes
       - name: Run Playwright tests
-        run: TEST_MODE=headless bunx playwright test
+        run: bun run test:headless
         working-directory: ./packages/browser-extension
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}

@@ -6,7 +6,7 @@ import { type Page } from "playwright";
 const config = {
   startPage: "/login",
   expectUrl: "/target",
-  notarizeUrl: "https://www.swapi.dev/api/people/1",
+  notarizeUrl: "https://swapi.dev/api/people/1",
 };
 
 const VLAYER_SERVER_URL = "http://127.0.0.1:3000";
@@ -88,6 +88,9 @@ test.describe("Full flow of webproof using extension", () => {
 
       const response = await page.waitForResponse(VLAYER_SERVER_URL);
       expect(response.ok()).toBeTruthy();
+
+      const response_json = await response.json();
+      expect(response_json).toHaveProperty("result.proof");
     });
   });
 });
