@@ -1,26 +1,25 @@
 import { useMemo, useEffect, useState } from "react";
-import { createVlayerClient, preverifyEmail, VCallResult } from "@vlayer/sdk";
-import { getStrFromFile } from "../lib/utils";
+import { createVlayerClient, VCallResult } from "@vlayer/sdk";
 
 import { type Address, type Abi } from "viem";
-interface UseEmailProofParams {
-  proverAddr: Address;
-  proverAbi: Abi;
-  proverFunc: string;
+interface UseProverParams {
+  addr: Address;
+  abi: Abi;
+  func: string;
   chainId: number;
 }
-interface UseEmailProofReturn {
-  prove: (emlFile: File, proverArgs: [string]) => Promise<string | undefined>;
+interface UseProverReturn {
+  prove: (proverArgs: string[]) => Promise<string | undefined>;
   provingError: string | null;
-  proof: VCallResult;
+  proof: VCallResult | null;
 }
 
-const useEmailProof = ({
-  proverAddr,
-  proverAbi,
-  proverFunc,
+const useProver = ({
+  addr,
+  abi,
+  func,
   chainId,
-}: UseEmailProofParams): UseEmailProofReturn => {
+}: UseProverParams): UseProverReturn => {
   const [provingHash, setProvingHash] = useState<string | null>(null);
   const [provingError, setProvingError] = useState<string | null>(null);
   const [proof, setProof] = useState(null);
@@ -33,16 +32,13 @@ const useEmailProof = ({
     [],
   );
 
-  const prove = async (emlFile: File, proverArgs: [string]) => {
+  const prove = async (args: string[]) => {
     try {
-      const eml = await getStrFromFile(emlFile);
-      const email = await preverifyEmail(eml);
-
       const { hash } = await vlayer.prove({
-        address: proverAddr,
-        proverAbi: proverAbi,
-        functionName: proverFunc,
-        args: [email, ...proverArgs],
+        address: addr,
+        proverAbi: abi,
+        functionName: func,
+        args,
         chainId,
       });
 
@@ -78,4 +74,4 @@ const useEmailProof = ({
   };
 };
 
-export default useEmailProof;
+export default useProver;

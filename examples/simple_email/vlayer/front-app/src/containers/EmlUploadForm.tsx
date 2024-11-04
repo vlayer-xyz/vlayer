@@ -1,7 +1,9 @@
 import { useState, useMemo, useEffect } from "react";
 import { createWalletClient, custom } from "viem";
 import { optimismSepolia } from "viem/chains";
-import useEmailProof from "../hooks/useEmailProof";
+import useProver from "../hooks/useProver";
+import { preverifyEmail } from "@vlayer/sdk";
+import { getStrFromFile } from "../lib/utils";
 
 import emailProofProver from "../../../../out/EmailDomainProver.sol/EmailDomainProver";
 import emailProofVerifier from "../../../../out/EmailProofVerifier.sol/EmailDomainVerifier";
@@ -24,10 +26,10 @@ const EmlUploadForm = () => {
     [],
   );
 
-  const { prove, proof, provingError } = useEmailProof({
-    proverAddr: import.meta.env.VITE_PROVER_ADDR,
-    proverAbi: emailProofProver.abi,
-    proverFunc: "main",
+  const { prove, proof, provingError } = useProver({
+    addr: import.meta.env.VITE_PROVER_ADDR,
+    abi: emailProofProver.abi,
+    func: "main",
     chainId: chain.id,
   });
 
@@ -68,6 +70,15 @@ const EmlUploadForm = () => {
     }
   };
 
+  const startProving = async (uploadedEmlFile: File, claimerAddr: string) => {
+    setCurrentStep("Sending to prover...");
+
+    const eml = await getStrFromFile(uploadedEmlFile);
+    const email = await preverifyEmail(eml);
+    await prove([email, claimerAddr]);
+    setCurrentStep("Waiting for proof...");
+  };
+
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     try {
       e.preventDefault();
@@ -86,9 +97,7 @@ const EmlUploadForm = () => {
         fileName: emlFile?.name,
         claimerAddr: addr,
       });
-      setCurrentStep("Sending to prover...");
-
-      await prove(emlFile, [addr]);
+      await startProving(emlFile, addr);
       setCurrentStep("Waiting for proof...");
     } catch (err) {
       console.log({ err });
