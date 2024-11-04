@@ -64,7 +64,7 @@ describe(useLocalStorage, () => {
     expect(result.current[0]).toBeUndefined();
   });
 
-  it("should prperly return new value ", async () => {
+  it("should properly return new value ", async () => {
     const { result } = renderHook(() => useLocalStorage("foo", "bar"));
     await waitFor(() => {
       expect(result.current[0]).not.toBe(LOADING);
