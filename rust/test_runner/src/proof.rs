@@ -114,16 +114,14 @@ pub fn prove_storage(
 
 #[cfg(test)]
 mod tests {
-    use std::{collections::BTreeMap, fs};
+    use std::fs;
 
     use alloy_primitives::{address, b256, hex, U160};
     use alloy_rlp::RlpDecodable;
-    use block_header::Hashable;
     use mpt::MerkleTrie;
     use serde_json::{from_str, from_value, Value};
 
     use super::*;
-    use crate::providers::pending_state_provider::PendingStateProvider;
 
     #[derive(Debug, Clone, PartialEq, Eq, RlpDecodable)]
     struct StateAccount {
