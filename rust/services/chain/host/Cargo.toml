@@ -12,6 +12,7 @@ chain_db = { workspace = true }
 chain_guest = { workspace = true }
 chain_guest_wrapper = { workspace = true }
 derivative = { workspace = true }
+derive-new ={ workspace = true }
 ethers = { workspace = true }
 futures = { workspace = true }
 host_utils = { workspace = true }

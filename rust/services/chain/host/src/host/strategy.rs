@@ -1,5 +1,7 @@
 use std::ops::RangeInclusive;
 
+use derive_new::new;
+
 use super::range_utils::limit_right;
 
 pub const MAX_HEAD_BLOCKS: u64 = 10;
@@ -7,19 +9,15 @@ pub const CONFIRMATIONS: u64 = 2;
 #[allow(clippy::reversed_empty_ranges)]
 const EMPTY_RANGE: RangeInclusive<u64> = 1..=0;
 
+#[derive(new)]
 pub struct Strategy {
+    #[new(value = "MAX_HEAD_BLOCKS")]
     max_head_blocks: u64,
+    #[new(value = "CONFIRMATIONS")]
     confirmations: u64,
 }
 
 impl Strategy {
-    pub const fn new() -> Self {
-        Strategy {
-            max_head_blocks: MAX_HEAD_BLOCKS,
-            confirmations: CONFIRMATIONS,
-        }
-    }
-
     pub fn get_append_prepend_ranges(
         &self,
         range: &RangeInclusive<u64>,

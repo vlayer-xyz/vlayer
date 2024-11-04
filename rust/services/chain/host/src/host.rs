@@ -56,7 +56,7 @@ impl<P> Host<P>
 where
     P: JsonRpcClient,
 {
-    pub const fn from_parts(
+    pub fn from_parts(
         prover: Prover,
         provider: Provider<P>,
         db: ChainDb,
