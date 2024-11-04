@@ -7,7 +7,7 @@ Our architecture is inspired by RISC Zero [steel](https://github.com/risc0/risc0
 - **Host** - (in `host`) - accepts the request, runs a preflight, during which it collects all data required by the guest. Then, guest proving is triggered.
 - **Guest** - performs execution of the code inside zkEVM. Consists of three crates:
     * guest - (in `guest`) - Library that contains code for EVM execution and input validation
-    * risc0_guest - (in `guest_wrapper/risc0_guest`) - Thin wrapper that uses Risc0 ZKVM IO and delegates work to `guest`
+    * risc0_guest - (in `guest_wrapper/risc0_guest`) - Thin wrapper that uses RISC Zero ZKVM IO and delegates work to `guest`
     * guest_wrapper - (in `guest_wrapper`) - Compiles the `risc0_guest` to [RISC Zero](https://doc.rust-lang.org/rustc/platform-support/riscv32im-risc0-zkvm-elf.html) target and makes it available to be run inside the host. It can be considered Rust equivalent of a code generation script.
 
 In addition, there are several other crates in the `rust/` directory:
