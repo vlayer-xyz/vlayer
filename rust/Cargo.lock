@@ -9661,7 +9661,6 @@ dependencies = [
  "foundry-debugger",
  "foundry-evm",
  "foundry-evm-core",
- "itertools 0.13.0",
  "mpt",
  "provider",
  "rayon",

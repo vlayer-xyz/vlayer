@@ -5,7 +5,6 @@ use forge::revm::primitives::{
     alloy_primitives::private::{alloy_rlp, alloy_rlp::Encodable},
     Account, AccountInfo, EvmState, EvmStorageSlot,
 };
-use itertools::Itertools;
 use mpt::reorder_with_root_as_first;
 use provider::StorageProof;
 
@@ -93,7 +92,6 @@ pub fn prove_storage(
     for proof_key in keys {
         let matching_proof_nodes = all_proof_nodes
             .iter()
-            .sorted_by_key(|(path, _)| *path)
             .filter(|(path, _)| proof_key.starts_with(path))
             .map(|(_, node)| node.clone());
         proofs.push(reorder_with_root_as_first(matching_proof_nodes, root));
