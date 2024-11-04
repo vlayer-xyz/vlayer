@@ -23,7 +23,7 @@ cd "${VLAYER_HOME}/packages/sdk"
 bun run build
 echo '::endgroup::'
 
-for example in $(find ${VLAYER_HOME}/examples/web_proof) ; do
+for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ; do
   example_name=$(basename "${example}")
 
   if [[ "${EXAMPLES_REQUIRING_ALCHEMY[@]}" =~ "${example_name}" ]] && [[ -z "${ALCHEMY_API_KEY:-}" ]]; then
