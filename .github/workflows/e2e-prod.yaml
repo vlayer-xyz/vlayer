@@ -6,7 +6,7 @@ name: End-to-end integration test in prod mode
 on:
   push:
     branches:
-      - main
+      # - main
     # If any path names do not match patterns in paths-ignore,
     # even if some path names match the patterns,
     # the workflow will run.
