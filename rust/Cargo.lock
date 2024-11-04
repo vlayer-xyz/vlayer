@@ -2122,7 +2122,6 @@ dependencies = [
  "futures",
  "mpt",
  "parking_lot",
- "provider",
  "serde_json",
  "server_utils",
  "thiserror",
