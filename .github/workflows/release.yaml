@@ -1,4 +1,4 @@
-name: Release binaries
+name: Release vlayer artifacts
 on: 
   schedule:
     - cron: '0 22 * * 1-5' # Mon-Fri at 22:00 UTC
@@ -366,7 +366,7 @@ jobs:
   
   publish-sdk-to-npm:
     name: Publish SDK to NPM
-    needs: [build-release] 
+    needs: [build-release, build-examples, build-extension, push-contracts] 
     runs-on: ubuntu-latest
     steps:   
     - uses: actions/checkout@v2
