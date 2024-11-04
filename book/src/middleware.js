@@ -138,7 +138,7 @@ const setAuthCookie = async (login) => {
   const hash = await hashString(`${login}${COOKIE_SALT}`);
 
   responseCookies.set('authenticated', `${login}|${hash}`, {
-    httpOnly: true, 
+    httpOnly: false, 
     maxAge: 60 * 60 * 24
   }) // make cookie persistent for 24h
 
@@ -161,17 +161,6 @@ const isAuthCookieValid = async (headers) => {
 
 }
 
-const checkArchDocsAccess = (pathname, headers) => {
-  if(pathname.includes('appendix/architecture')) {
-    const { login } = parseCreds(headers);
-    // No access for logins without email domain
-    if(!login.includes('@')) {
-      console.log("Architecture docs not permitted:", [login, pathname])
-      throw new Error("restricted");
-    }
-  }
-}
-
 export default async function middleware(request) {
   const url = new URL(request.url);
 
@@ -187,8 +176,12 @@ export default async function middleware(request) {
       });
     }
 
+    if (!url.pathname.includes("appendix/")) {
+      console.log("Docs Auth path skipped: ", url.pathname)
+      return next();
+    }    
+
     if(await isAuthCookieValid(request.headers)) {
-      checkArchDocsAccess(url.pathname, request.headers);
       console.log("Docs Auth path skipped: already authenticated")
       return next();
     }
