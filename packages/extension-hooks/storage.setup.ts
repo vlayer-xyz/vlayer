@@ -1,7 +1,7 @@
 import { vi } from "vitest";
 
 
-export const mockStore = function ()  {
+export const mockStore: () => browser.Storage.StorageArea = function () {
   const store = new Map<string, unknown>();
   const callbacks = new Set<(change: { [key: string]: unknown }) => unknown>();
 
