@@ -1,24 +1,24 @@
 use std::collections::HashMap;
 
-use alloy_primitives::ChainId;
+use alloy_primitives::{BlockNumber, ChainId};
 use async_trait::async_trait;
 use chain_common::ChainProof;
-use chain_server::server::ChainProof as RpcChainProof;
 use derive_new::new;
 use futures::stream::{self, StreamExt, TryStreamExt};
-use mpt::ParseNodeError;
 use parking_lot::RwLock;
-use provider::BlockNumber;
-use serde_json::json;
-use server_utils::{RpcClient as RawRpcClient, RpcError};
 use thiserror::Error;
-use tracing::info;
+
+#[cfg(feature = "rpc")]
+mod rpc;
+
+#[cfg(feature = "rpc")]
+pub use rpc::RpcClient;
 
 #[cfg(test)]
 mod tests;
 
 #[async_trait]
-pub trait Client: Send + Sync {
+pub trait Client: Send + Sync + 'static {
     async fn get_chain_proof(
         &self,
         chain_id: ChainId,
@@ -40,12 +40,15 @@ pub trait Client: Send + Sync {
 
 #[derive(Debug, Error)]
 pub enum Error {
+    #[cfg(feature = "rpc")]
     #[error("RPC error: {0}")]
-    Rpc(#[from] RpcError),
+    Rpc(#[from] server_utils::RpcError),
+    #[cfg(feature = "rpc")]
     #[error("JSON parse error: {0}")]
     Json(#[from] serde_json::Error),
+    #[cfg(feature = "rpc")]
     #[error("MPT node parse error: {0}")]
-    MptNode(#[from] ParseNodeError),
+    MptNode(#[from] mpt::ParseNodeError),
     #[error("Proof not found in cache. chain_id={chain_id} block_numbers={block_numbers:?}")]
     CacheMiss {
         chain_id: ChainId,
@@ -53,60 +56,21 @@ pub enum Error {
     },
 }
 
-/// `Client` implementation which fetches proofs from server via JSON RPC.
-pub struct RpcClient {
-    rpc_client: RawRpcClient,
-}
-
-impl RpcClient {
-    pub fn new(base_url: impl AsRef<str>) -> Self {
-        let rpc_client = RawRpcClient::new(base_url.as_ref(), "v_chain");
-        Self { rpc_client }
-    }
-}
-
-#[async_trait]
-impl Client for RpcClient {
-    async fn get_chain_proof(
-        &self,
-        chain_id: ChainId,
-        block_numbers: Vec<BlockNumber>,
-    ) -> Result<ChainProof, Error> {
-        info!(
-            "Fetching chain proof for chain_id: {}, block_numbers.len(): {}",
-            chain_id,
-            block_numbers.len()
-        );
-
-        let params = json!({
-            "chain_id": chain_id,
-            "block_numbers": block_numbers.clone(),
-        });
-
-        let result_value = self.rpc_client.call(&params).await.map_err(Error::from)?;
-
-        let rpc_chain_proof: RpcChainProof = serde_json::from_value(result_value)?;
-        let chain_proof = rpc_chain_proof.try_into()?;
-
-        Ok(chain_proof)
-    }
-}
-
-type ChainProofCache = HashMap<ChainId, (Vec<BlockNumber>, ChainProof)>;
+pub type ChainProofCache = HashMap<ChainId, (Vec<BlockNumber>, ChainProof)>;
 
 /// `Client` implementation which wraps around another client (e.g. `RpcClient`) and stores
 /// all obtained proofs in a `ChainProofCache`. The cache can be dumped via `into_cache`
 /// and used to create an instance of `CachedClient`.
-pub struct RecordingClient<T: Client> {
-    inner: T,
+pub struct RecordingClient {
+    inner: Box<dyn Client>,
     cache: RwLock<ChainProofCache>,
 }
 
-impl<T: Client> RecordingClient<T> {
+impl RecordingClient {
     #[must_use]
-    pub fn new(inner: T) -> Self {
+    pub fn new(inner: impl Client) -> Self {
         Self {
-            inner,
+            inner: Box::new(inner),
             cache: RwLock::new(Default::default()),
         }
     }
@@ -121,7 +85,7 @@ impl<T: Client> RecordingClient<T> {
 }
 
 #[async_trait]
-impl<T: Client> Client for RecordingClient<T> {
+impl Client for RecordingClient {
     async fn get_chain_proof(
         &self,
         chain_id: ChainId,
