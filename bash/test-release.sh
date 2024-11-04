@@ -34,6 +34,7 @@ cd ${HOME}/web_proof_test
 
 vlayer init --template web-proof
 forge build
+vlayer test
 
 cd vlayer
 bun install
