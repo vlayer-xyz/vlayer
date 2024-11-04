@@ -14,15 +14,13 @@ services:
       - ./notary-config:/root/.notary-server/config
   anvil:
     build:
-      context: ../..
-      dockerfile: docker/web-proof/anvil/Dockerfile
+      dockerfile: ../anvil/Dockerfile
     platform: linux/amd64
     ports:
       - "8545:8545"
   vlayer:
     build:
-      context: ../..
-      dockerfile: docker/web-proof/vlayer/Dockerfile.nightly
+      dockerfile: ../vlayer/Dockerfile.nightly
     ports:
       - "3000:3000"
 

@@ -1,0 +1,18 @@
+FROM --platform=linux/amd64 ubuntu:latest as vlayer-builder
+RUN apt-get update
+RUN apt-get install -y --no-install-recommends curl ca-certificates dumb-init
+
+RUN useradd -m -s /bin/bash -u 1001 vlayer
+USER vlayer
+WORKDIR /home/vlayer
+
+RUN curl --proto '=https' --tlsv1.2 --retry 10 --retry-connrefused -fsSL 'https://sh.rustup.rs' | sh -s -- -y
+ENV PATH="/home/vlayer/.cargo/bin:${PATH}"
+
+RUN curl -L https://risczero.com/install | bash
+ENV PATH="/home/vlayer/.risc0/bin:${PATH}"
+RUN rzup install cargo-risczero v1.0.5
+
+RUN curl -L https://vlayer-releases.s3.eu-north-1.amazonaws.com/latest/nightly-linux-amd64.tar.gz -o nightly-linux-amd64.tar.gz
+RUN tar -xvf nightly-linux-amd64.tar.gz
+ENTRYPOINT ["/usr/bin/dumb-init","--","/home/vlayer/bin/vlayer","serve","--proof","fake","--host","0.0.0.0","--rpc-url","31337:http://anvil:8545"]
