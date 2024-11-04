@@ -39,6 +39,12 @@ const webProofProvider = createExtensionWebProofProvider({
 })
 ```
 
+Both `notaryUrl` and `wsProxyUrl` have default values, so the provider can be initialized without any configuration as:
+
+```ts
+const webProofProvider = createExtensionWebProofProvider();
+```
+
 In the future, vlayer is planning to provide additional Web Proof provider implementations, which can be e.g. ran server-side and don't require vlayer browser extension for the purpose of Web Proof generation.
 
 The Web Proof provider exposes a low-level API to directly define `proverCallCommitment` (commitment to use the generated Web Proof only with the specified prover contract call details, so it's not possible to submit it in a different context) and to explicitly generate the Web Proof by calling `getWebProof`.
