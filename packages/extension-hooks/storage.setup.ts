@@ -1,15 +1,13 @@
 import { vi } from "vitest";
 
-
-export const mockStore: () => browser.Storage.StorageArea = function () {
+export const mockStore = () => {
   const store = new Map<string, unknown>();
   const callbacks = new Set<(change: { [key: string]: unknown }) => unknown>();
 
   return {
-    __store__ : store, 
     get: vi.fn().mockImplementation(async function (key: string) {
-      const value = store.get(key); 
-      return  Promise.resolve({ [key]: value })
+      const value = store.get(key);
+      return Promise.resolve({ [key]: value });
     }),
     set: vi.fn().mockImplementation(async (keys: Record<string, unknown>) => {
       Object.keys(keys).forEach((key: string) => {

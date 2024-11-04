@@ -4,6 +4,7 @@ import browser from "webextension-polyfill";
 import { describe, afterEach, it, expect } from "vitest";
 import createStorageHook from "./createStorageHook";
 import { LOADING } from "./constants";
+//this works same for sync and session storage
 const localStorage = browser.storage.local;
 const useLocalStorage = createStorageHook(localStorage);
 
