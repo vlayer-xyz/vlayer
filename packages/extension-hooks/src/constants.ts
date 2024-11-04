@@ -1,1 +1,1 @@
-export const LOADING = Symbol('LOADING') 
+export const LOADING = Symbol('LOADING')

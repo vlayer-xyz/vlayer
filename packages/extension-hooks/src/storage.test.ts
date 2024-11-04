@@ -86,5 +86,4 @@ describe(useLocalStorage, () => {
     const [value] = result.current;
     expect(value).toEqual('bar_bar');
   });
-
 });
