@@ -22,7 +22,7 @@ const TlsnProofContext = createContext({
 });
 
 export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
-  const { proofUrl } = useProofContext();
+  const { proofUrl } = useProofContext() as { proofUrl: string };
   const [proof, setProof] = useState<object | null>(null);
   const [isProving, setIsProving] = useState(false);
   const [hasDataForProof, setHasDataForProof] = useState(false);
