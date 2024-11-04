@@ -2,8 +2,6 @@ import { useBrowsingHistory } from "./useBrowsingHistory";
 import { useProvingSessionConfig } from "./useProvingSessionConfig";
 import { HistoryItem } from "../state/history";
 
-// NOTE this will need to be refactored
-// if one day we will decide to support multiple parallel proves scenario
 export function useProvenUrl(): HistoryItem | undefined {
   const [config] = useProvingSessionConfig();
   const [browsingHistory] = useBrowsingHistory();

@@ -17,7 +17,7 @@ const BackButton = () => {
   const { backUrl } = useProofContext();
   const { proof } = useTlsnProver();
   const handleClick = () => {
-    createTab(backUrl).catch((error) => {
+    createTab(backUrl as string).catch((error) => {
       console.error("Error during creating new tab:", error);
     });
   };
@@ -42,7 +42,7 @@ const ProofButton = () => {
 
 const GoToPageButton = () => {
   const { hasDataForProof } = { hasDataForProof: false }; //useTlsnProver();
-  const { redirectUrl } = useProofContext();
+  const { redirectUrl } = useProofContext() as { redirectUrl: string };
   const handleClick = () => {
     createTab(redirectUrl).catch((error) => {
       console.error("Error during creating new tab:", error);

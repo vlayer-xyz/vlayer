@@ -1,5 +1,6 @@
-import { useLocalStorage } from "@vlayer/extension-hooks";
+import { LOADING, useLocalStorage } from "@vlayer/extension-hooks";
 import { HistoryItem } from "../state/history";
 export const useBrowsingHistory = () => {
-  return useLocalStorage<HistoryItem[]>("history", []);
+  const [history] = useLocalStorage<HistoryItem[]>("history", []);
+  return [history === LOADING ? [] : history];
 };

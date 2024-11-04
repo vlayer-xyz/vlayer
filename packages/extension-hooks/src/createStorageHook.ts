@@ -1,30 +1,34 @@
-import { useState, useEffect, useCallback } from "react";
+import {
+  useState,
+  useEffect,
+  useCallback,
+  type Dispatch,
+  type SetStateAction,
+} from "react";
 import browser from "webextension-polyfill";
-function createStorageHook(storage: browser.Storage.StorageArea) {
-  // for now this implementation is enough
-  // to add later:
-  // - serialize and deserialize the value
-  // - sync WebStorage support
+import { LOADING } from "./constants";
 
+function createStorageHook(storage: browser.Storage.StorageArea) {
   return function useStorage<T>(
     storageKey: string,
-    initialValue: T,
-  ): [T, (newValue: T) => Promise<void>] {
-    const [storedValue, setStoredValue] = useState<T>(initialValue);
+    initialValue?: T,
+  ): [T | typeof LOADING, Dispatch<SetStateAction<T | typeof LOADING>>] {
+    const [storedValue, setStoredValue] = useState<T | typeof LOADING>(LOADING);
+
     useEffect(() => {
       storage
         .get(storageKey)
         .then((result) => {
           if (result[storageKey] !== undefined) {
             setStoredValue(result[storageKey] as T);
+          } else {
+            setStoredValue(initialValue as T);
           }
         })
         .catch(console.error);
-    }, []);
+    }, [storageKey, initialValue]);
 
     useEffect(() => {
-      // observe storage changes
-
       const handleStorageChange = (changes: {
         [key: string]: browser.Storage.StorageChange;
       }) => {
@@ -40,16 +44,20 @@ function createStorageHook(storage: browser.Storage.StorageArea) {
       return () => {
         storage.onChanged.removeListener(handleStorageChange);
       };
-    }, []);
+    }, [storageKey]);
 
-    // sync storage value with state
-
-    const setValue = useCallback(
-      async (newValue: T) => {
+    const setValue: Dispatch<SetStateAction<T | typeof LOADING>> = useCallback(
+      (newValue) => {
+        const updatedValue =
+          typeof newValue === "function"
+            ? (newValue as (x: T | typeof LOADING) => T | undefined)(
+                storedValue,
+              )
+            : newValue;
         setStoredValue(newValue);
-        await storage.set({ [storageKey]: newValue });
+        storage.set({ [storageKey]: updatedValue }).catch(console.error);
       },
-      [storageKey, storage],
+      [storageKey, storage, storedValue],
     );
 
     return [storedValue, setValue];

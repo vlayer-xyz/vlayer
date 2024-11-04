@@ -32,8 +32,6 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
     headers: {},
     secretHeaders: [],
   });
-  // hook history and config into provider
-  // TODO : consider renaming parent component as it makes more than just tlsn proof provider
   useTrackHistory();
   const [provingSessionConfig] = useProvingSessionConfig();
   const provenUrl = useProvenUrl();
@@ -49,7 +47,6 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
     setIsProving(true);
 
     try {
-      //TODO : make sure on hooks level its defined
       isDefined(provenUrl?.url, "Missing URL to prove");
       isDefined(provingSessionConfig, "Missing proving session config");
 
@@ -61,7 +58,6 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
         secretHeaders: formattedHeaders?.secretHeaders,
       });
       // let service worker know proof is done
-      console.log("sending proof to background", tlsnProof);
       await sendMessageToServiceWorker({
         type: ExtensionMessageType.ProofDone,
         proof: tlsnProof,
@@ -69,7 +65,6 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
       setProof(tlsnProof);
       setIsProving(false);
     } catch (e: unknown) {
-      console.error("error in tlsnotary", e);
       await sendMessageToServiceWorker({
         type: ExtensionMessageType.ProofError,
         error: e instanceof Error ? e.message : String(e),

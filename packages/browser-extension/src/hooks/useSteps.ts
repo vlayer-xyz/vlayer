@@ -88,8 +88,9 @@ export const calculateSteps = ({
 };
 
 export const useSteps = (): Step[] => {
-  const [{ steps: stepsSetup }] = useProvingSessionConfig();
+  const [config] = useProvingSessionConfig();
   const [history] = useBrowsingHistory();
   const { proof } = useTlsnProver();
-  return calculateSteps({ stepsSetup, proof, history });
+
+  return calculateSteps({ stepsSetup: config.steps, history, proof });
 };
