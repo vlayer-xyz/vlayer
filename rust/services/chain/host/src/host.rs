@@ -1,6 +1,8 @@
 pub mod config;
 pub mod error;
 mod prover;
+mod range_utils;
+mod strategy;
 
 use std::ops::RangeInclusive;
 
@@ -21,6 +23,7 @@ use lazy_static::lazy_static;
 use prover::Prover;
 use provider::{to_eth_block_header, EvmBlockHeader};
 use risc0_zkvm::sha::Digest;
+use strategy::Strategy;
 use tracing::{info, instrument};
 
 lazy_static! {
@@ -35,6 +38,7 @@ where
     prover: Prover,
     provider: Provider<P>,
     chain_id: ChainId,
+    strategy: Strategy,
 }
 
 impl Host<Http> {
@@ -63,6 +67,7 @@ where
             provider,
             db,
             chain_id,
+            strategy: Strategy::new(),
         }
     }
 
@@ -115,8 +120,10 @@ where
 
         let latest_block = self.get_block(BlockTag::Latest).await?;
         let latest_block_number = latest_block.number();
-        let append_range = block_range.end() + 1..=latest_block_number;
-        let append_blocks = self.get_blocks_range(append_range).await?;
+        let (_, append_range) = self
+            .strategy
+            .get_append_prepend_ranges(&block_range, latest_block_number);
+        let append_blocks = self.get_blocks_range(&append_range).await?;
 
         trie.append(append_blocks.iter())?;
 
@@ -129,7 +136,7 @@ where
         };
         let receipt = self.prover.prove(&input, Some(old_zk_proof))?;
 
-        let range = *block_range.start()..=latest_block_number;
+        let range = *block_range.start()..=*append_range.end();
         let chain_update = ChainUpdate::from_two_tries(range, &old_trie, &trie, &receipt)?;
 
         Ok(chain_update)
@@ -138,9 +145,9 @@ where
     #[instrument(skip(self))]
     async fn get_blocks_range(
         &self,
-        range: RangeInclusive<u64>,
+        range: &RangeInclusive<u64>,
     ) -> Result<Vec<Box<dyn EvmBlockHeader>>, HostError> {
-        let blocks = join_all(range.map(|n| self.get_block(n.into()))).await;
+        let blocks = join_all(range.clone().map(|n| self.get_block(n.into()))).await;
         blocks.into_iter().collect()
     }
 
@@ -210,6 +217,7 @@ mod test {
         mod append_prepend {
 
             use alloy_primitives::BlockNumber;
+            use strategy::CONFIRMATIONS;
 
             use super::*;
             const GENESIS: BlockNumber = 0;
@@ -242,10 +250,11 @@ mod test {
             }
 
             #[tokio::test]
-            async fn new_head_blocks_back_propagation_finished() -> anyhow::Result<()> {
-                let new_block = GENESIS + 1;
+            async fn new_confirmed_head_blocks_back_propagation_finished() -> anyhow::Result<()> {
+                let latest = GENESIS + CONFIRMATIONS;
+                let new_confirmed_block = latest - CONFIRMATIONS + 1;
                 let db = test_db_after_initialize().await?;
-                let provider = mock_provider([new_block, new_block]);
+                let provider = mock_provider([latest, new_confirmed_block]);
                 let host = Host::from_parts(Prover::default(), provider, db, 1);
 
                 let chain_update = host.poll().await?;
@@ -254,14 +263,11 @@ mod test {
 
                 assert_fetched_latest_block(host.provider.as_ref());
                 let chain_trie = db.get_chain_trie(1)?.unwrap();
-                assert_eq!(chain_trie.block_range, GENESIS..=GENESIS + 1);
+                assert_eq!(chain_trie.block_range, GENESIS..=new_confirmed_block);
 
                 Ok(())
             }
 
-            // No new head blocks, back propagation in progress
-            // New head blocks, back propagation in progress
-            // Too many new head blocks
             // Reorg
         }
     }
