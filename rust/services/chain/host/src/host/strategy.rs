@@ -5,8 +5,10 @@ use std::{
 
 use alloy_primitives::BlockNumber;
 use derive_new::new;
+use tracing::info;
 
 use super::range_utils::{limit_left, limit_right};
+use crate::host::range_utils::len;
 
 pub const MAX_HEAD_BLOCKS: u64 = 10;
 pub const MAX_BACK_PROPAGATION_BLOCKS: u64 = 10;
@@ -32,6 +34,10 @@ pub struct AppendPrependRanges {
     pub new_range: RangeInclusive<BlockNumber>,
 }
 
+fn print_range_with_size(range: &RangeInclusive<BlockNumber>) -> String {
+    format!("{:?} ({})", range, len(range))
+}
+
 impl Strategy {
     // Tells Host - which blocks to append and prepend.
     // The ranges returned are touching the current range. [prepend][range][append]
@@ -44,6 +50,12 @@ impl Strategy {
         let prepend = self.get_prepend_range(range);
         let append = self.get_append_range(range, latest);
         let new_range = *min(prepend.start(), range.start())..=*max(append.end(), range.end());
+        info!(
+            "Prepend: {}, Append: {}, New range: {}",
+            print_range_with_size(&prepend),
+            print_range_with_size(&append),
+            print_range_with_size(&new_range)
+        );
         AppendPrependRanges {
             prepend,
             append,

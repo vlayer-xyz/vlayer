@@ -3,6 +3,10 @@ use std::{
     ops::RangeInclusive,
 };
 
+pub fn len(range: &RangeInclusive<u64>) -> u64 {
+    (range.end() + 1).saturating_sub(*range.start())
+}
+
 pub fn limit_right(range: RangeInclusive<u64>, limit: u64) -> RangeInclusive<u64> {
     if range.is_empty() {
         return range;
@@ -20,6 +24,21 @@ pub fn limit_left(range: RangeInclusive<u64>, limit: u64) -> RangeInclusive<u64>
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    mod len {
+        use super::*;
+
+        #[test]
+        #[allow(clippy::reversed_empty_ranges)]
+        fn empty_range() {
+            assert_eq!(len(&(1..=0)), 0)
+        }
+
+        #[test]
+        fn non_empty_range() {
+            assert_eq!(len(&(0..=0)), 1)
+        }
+    }
 
     mod limit_right {
         use super::*;
