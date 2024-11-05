@@ -27,6 +27,7 @@ beforeEach(() => {
     },
   };
 });
+
 describe("Success zk-proving", () => {
   beforeEach(() => {
     fetchMocker.mockResponseOnce((req) => {
