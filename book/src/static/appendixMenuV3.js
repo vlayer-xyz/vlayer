@@ -1,4 +1,4 @@
-// Hide appendx/architecture stuff from menu when not authenticated
+// Get cookie value by it's name
 function getCookie(name) {
   const value = `; ${document.cookie}`;
   const parts = value.split(`; ${name}=`);
@@ -7,18 +7,16 @@ function getCookie(name) {
 }
 
 document.addEventListener("DOMContentLoaded", function() {
-  if(!getCookie('isAuthenticated')) {
+  // Hide appendx/architecture stuff from menu when not authenticated.
+  if(getCookie('isAuthenticated')) {
+    console.log("authenticated")
     const spacerElement = document.querySelector('.spacer');
     if (spacerElement) {
       let nextElement = spacerElement.nextElementSibling;
       for (let i = 0; i < 2 && nextElement; i++) {
-        nextElement.style.display = 'none';
+        nextElement.classList.add('flex');
         nextElement = nextElement.nextElementSibling;
       }
     }
-    spacerElement.style.display = 'none';
   }
 });
-
-
-
