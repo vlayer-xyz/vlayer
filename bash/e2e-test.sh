@@ -36,7 +36,7 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
     continue
   fi
 
-  echo "Running tests of: ${example}"
+  echo "::group::Running tests of: ${example}"
   cd "${example}"
   forge soldeer install
   forge clean
@@ -44,6 +44,7 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
 
   cd vlayer
   bun install --frozen-lockfile
-  bun run prove.ts 
+  bun run prove.ts
+  echo '::endgroup::'
 done
 
