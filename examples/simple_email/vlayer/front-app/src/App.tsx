@@ -1,5 +1,7 @@
+import EmlUploadForm from "./containers/EmlUploadForm";
+
 function App() {
-  return <button className="btn btn-primary">Hello World</button>;
+  return <EmlUploadForm />;
 }
 
 export default App;
