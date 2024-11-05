@@ -1,6 +1,11 @@
 import { Hex, Abi, ContractFunctionName } from "viem";
 import type { ContractFunctionArgsWithout } from "./viem";
-import { Branded, WebProof, WebProofStep } from "../../../web-proof-commons";
+import {
+  Branded,
+  WebProof,
+  WebProofStep,
+  ZkProvingStatus,
+} from "../../../web-proof-commons";
 
 export type WebProofSetupInput = {
   logoUrl: string;
@@ -36,6 +41,7 @@ export type WebProofProvider = {
   getWebProof: <T extends Abi, F extends ContractFunctionName<T>>(
     args: GetWebProofArgs<T, F>,
   ) => Promise<WebProof>;
+  notifyZkProvingStatus: (status: ZkProvingStatus) => void;
 };
 
 export type WebProofProviderSetup = {

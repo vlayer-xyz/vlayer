@@ -4,6 +4,7 @@ import { WebProofProvider } from "types/webProofProvider";
 import { prove } from "../prover";
 import { createExtensionWebProofProvider } from "../webProof";
 import { type Abi, decodeFunctionResult } from "viem";
+import { ZkProvingStatus } from "../../web-proof-commons";
 
 function dropEmptyProofFromArgs(args: unknown) {
   if (Array.isArray(args)) {
@@ -20,6 +21,10 @@ function generateRandomHash() {
   return hash;
 }
 
+async function getHash() {
+  return Promise.resolve(generateRandomHash());
+}
+
 export const createVlayerClient = (
   {
     url = "http://127.0.0.1:3000",
@@ -32,15 +37,14 @@ export const createVlayerClient = (
     webProofProvider: createExtensionWebProofProvider(),
   },
 ): VlayerClient => {
-  console.log("createVlayerClient with", url, webProofProvider);
   const resultHashMap = new Map<
     string,
     [Promise<VCallResponse>, Abi, string]
   >();
 
   return {
-    // eslint-disable-next-line @typescript-eslint/require-await
     prove: async ({ address, functionName, chainId, proverAbi, args }) => {
+      webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Proving);
       const result_promise = prove(
         address,
         proverAbi,
@@ -48,8 +52,16 @@ export const createVlayerClient = (
         args,
         chainId,
         url,
-      );
-      const hash = generateRandomHash();
+      )
+        .catch((error) => {
+          webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Error);
+          throw error;
+        })
+        .then((result) => {
+          webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Done);
+          return result;
+        });
+      const hash = await getHash();
       resultHashMap.set(hash, [result_promise, proverAbi, functionName]);
       return { hash };
     },
