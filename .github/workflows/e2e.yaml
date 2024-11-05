@@ -6,7 +6,7 @@ on:
       - "rust-toolchain.toml"
       - "rust/**"
       - "examples/**"
-      - "packages/vlayer/**"
+      - "packages/**"
       - "bash/**"
       - ".github/workflows/e2e.yaml"
       - "contracts/**"
