@@ -64,29 +64,17 @@ const RedirectCallout: FC = () => {
 const ProvingProgress = () => {
   const { proof } = useTlsnProver();
   const [progress, setProgress] = useState(0);
-  useEffect(() => {
-    let interval: Timer;
-    if (!proof) {
-      interval = setInterval(() => {
-        setProgress((progress) => {
-          const newProgress = Math.min(100, progress + 1);
-          if (proof) {
-            clearInterval(interval!);
-            return progress;
-          }
-          return newProgress;
-        });
-      }, 600);
-    } else {
-      setProgress(100);
-    }
-
-    return () => {
-      if (interval) {
-        clearInterval(interval);
+  useInterval(
+    () => {
+      if (proof) {
+        setProgress(100);
+      } else {
+        setProgress(progress + 1);
       }
-    };
-  }, [proof]);
+    },
+    progress == 100 ? null : 600,
+  );
+
   return (
     <Flex direction={"column"} gap={"3"}>
       <Text weight={"bold"} size={"3"}>
