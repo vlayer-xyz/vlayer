@@ -1,10 +1,20 @@
-use std::{cmp::min, ops::RangeInclusive};
+use std::{
+    cmp::{max, min},
+    ops::RangeInclusive,
+};
 
 pub fn limit_right(range: RangeInclusive<u64>, limit: u64) -> RangeInclusive<u64> {
     if range.is_empty() {
         return range;
     }
     *range.start()..=min(*range.end(), *range.start() + limit - 1)
+}
+
+pub fn limit_left(range: RangeInclusive<u64>, limit: u64) -> RangeInclusive<u64> {
+    if range.is_empty() {
+        return range;
+    }
+    max((*range.end() + 1).saturating_sub(limit), *range.start())..=*range.end()
 }
 
 #[cfg(test)]
@@ -39,6 +49,31 @@ mod tests {
         #[test]
         fn range_larger_than_limit() {
             assert_eq!(limit_right(0..=1, 1), 0..=0)
+        }
+    }
+
+    mod limit_left {
+        use super::*;
+
+        #[test]
+        #[allow(clippy::reversed_empty_ranges)]
+        fn empty_range() {
+            assert_eq!(limit_left(1..=0, 0), 1..=0)
+        }
+
+        #[test]
+        fn range_smaller_than_limit() {
+            assert_eq!(limit_left(0..=0, 2), 0..=0)
+        }
+
+        #[test]
+        fn range_equal_to_limit() {
+            assert_eq!(limit_left(0..=0, 1), 0..=0)
+        }
+
+        #[test]
+        fn range_larger_than_limit() {
+            assert_eq!(limit_left(0..=1, 1), 1..=1)
         }
     }
 }
