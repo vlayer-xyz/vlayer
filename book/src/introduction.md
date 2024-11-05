@@ -29,11 +29,11 @@ Learn in-depth how:
 **Appendix**
 
 References for:
-- [Contributing](/contributing/overview.html)
-  - [Rust](./contributing/rust.html)
-  - [Javascript](./contributing/javascript.html)
-  - [Book](./contributing/book.html)
-  - [Extension](./contributing/extension.html)
+- [Contributing](/appendix/contributing/overview.html)
+  - [Rust](/appendix//contributing/rust.html)
+  - [Javascript](/appendix//contributing/javascript.html)
+  - [Book](/appendix//contributing/book.html)
+  - [Extension](/appendix//contributing/extension.html)
 - [Architecture](/appendix/architecture/overview.html)
   - [Prover](/appendix/architecture/prover.html)
   - [Multichain](/appendix/architecture/multi.html)
