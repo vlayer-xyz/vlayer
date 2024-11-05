@@ -1,22 +1,47 @@
-import { testHelpers, createVlayerClient } from "@vlayer/sdk";
+import { createVlayerClient } from "@vlayer/sdk";
 import webProofProver from "../out/WebProofProver.sol/WebProofProver";
 import webProofVerifier from "../out/WebProofVerifier.sol/WebProofVerifier";
 import tls_proof from "./tls_proof.json";
 import * as assert from "assert";
 import { encodePacked, isAddress, keccak256 } from "viem";
 import { foundry } from "viem/chains";
+import { getConfig } from "./helpers";
+
+const config = await getConfig();
 
 const notaryPubKey =
   "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExpX/4R4z40gI6C/j9zAM39u58LJu\n3Cx5tXTuqhhu/tirnBi5GniMmspOTEsps4ANnPLpMmMSfhJ+IFHbc3qVOA==\n-----END PUBLIC KEY-----\n";
+let txHash = await config.walletClient.deployContract({
+  abi: webProofProver.abi,
+  bytecode: webProofProver.bytecode.object,
+  account: config.deployer,
+  args: [],
+  chain: config.chain,
+});
+let receipt = await config.publicClient.waitForTransactionReceipt({
+  hash: txHash,
+});
+if (receipt.status != "success") {
+  throw new Error(`Prover deployment failed with status: ${receipt.status}`);
+}
+const prover = receipt.contractAddress;
 
-const [prover, verifier] = await testHelpers.deployProverVerifier(
-  webProofProver,
-  webProofVerifier,
-);
+txHash = await config.walletClient.deployContract({
+  abi: webProofVerifier.abi,
+  bytecode: webProofVerifier.bytecode.object,
+  account: config.deployer,
+  args: [prover],
+  chain: config.chain,
+});
 
-const twitterUserAddress = (await testHelpers.getTestAddresses())[0];
+receipt = await config.publicClient.waitForTransactionReceipt({ hash: txHash });
+const verifier = receipt.contractAddress;
 
-const vlayer = createVlayerClient();
+const twitterUserAddress = config.deployer.address;
+
+const vlayer = createVlayerClient({
+  url: config.proverUrl,
+});
 
 await testSuccessProvingAndVerification();
 await testFailedProving();
@@ -36,7 +61,7 @@ async function testSuccessProvingAndVerification() {
       },
       twitterUserAddress,
     ],
-    chainId: foundry.id,
+    chainId: config.chain.id,
   });
   const result = await vlayer.waitForProvingResult({ hash });
   const [proof, twitterHandle, address] = result;
@@ -51,30 +76,33 @@ async function testSuccessProvingAndVerification() {
   }
 
   console.log("Verifying...");
-  await testHelpers.writeContract(
-    verifier,
-    webProofVerifier.abi,
-    "verify",
-    [proof, twitterHandle, address],
-    twitterUserAddress,
-  );
+
+  await config.walletClient.writeContract({
+    address: verifier as `0x${string}`,
+    abi: webProofVerifier.abi,
+    functionName: "verify",
+    args: [proof, twitterHandle, address],
+    chain: config.chain,
+    account: config.deployer,
+  });
+
   console.log("Verified!");
 
-  const balance = await testHelpers.call(
-    webProofVerifier.abi,
-    verifier,
-    "balanceOf",
-    [twitterUserAddress],
-  );
+  const balance = await config.publicClient.readContract({
+    address: verifier,
+    abi: webProofVerifier.abi,
+    functionName: "balanceOf",
+    args: [twitterUserAddress],
+  });
 
   assert.strictEqual(balance, 1n);
 
-  const tokenOwnerAddress = await testHelpers.call(
-    webProofVerifier.abi,
-    verifier,
-    "ownerOf",
-    [generateTokenId(twitterHandle)],
-  );
+  const tokenOwnerAddress = await config.publicClient.readContract({
+    address: verifier,
+    abi: webProofVerifier.abi,
+    functionName: "ownerOf",
+    args: [generateTokenId(twitterHandle)],
+  });
 
   assert.strictEqual(twitterUserAddress, tokenOwnerAddress);
 }

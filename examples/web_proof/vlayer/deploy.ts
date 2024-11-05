@@ -1,49 +1,53 @@
-import { testHelpers } from "@vlayer/sdk";
-import Bun from "bun";
 import path from "node:path";
-import fs from "node:fs/promises";
 import webProofProver from "../out/WebProofProver.sol/WebProofProver";
 import webProofVerifier from "../out/WebProofVerifier.sol/WebProofVerifier";
-
-const [prover, verifier] = await testHelpers.deployProverVerifier(
-  webProofProver,
-  webProofVerifier,
-);
-
-const envPath = path.resolve(__dirname, ".env.development");
+import { updateDotFile, loadDotFile, getConfig } from "./helpers";
 
 try {
-  await fs.appendFile(envPath, "");
-  const envFile = Bun.file(envPath);
-  let envContent = await envFile.text();
+  const envPath = path.resolve(__dirname, ".env.development");
+  await loadDotFile(envPath);
+  const config = await getConfig();
 
-  if (!envContent) {
-    envContent = "";
+  let txHash = await config.walletClient.deployContract({
+    abi: webProofProver.abi,
+    bytecode: webProofProver.bytecode.object,
+    account: config.deployer,
+    args: [],
+    chain: config.chain,
+  });
+  let receipt = await config.publicClient.waitForTransactionReceipt({
+    hash: txHash,
+  });
+  if (receipt.status != "success") {
+    throw new Error(`Prover deployment failed with status: ${receipt.status}`);
   }
+  const prover = receipt.contractAddress;
+  console.log(`Prover deployed to ${config.chainName}`, prover);
 
-  const proverRegex = /^VITE_PROVER_ADDRESS=.*/m;
-  const verifierRegex = /^VITE_VERIFIER_ADDRESS=.*/m;
+  txHash = await config.walletClient.deployContract({
+    abi: webProofVerifier.abi,
+    bytecode: webProofVerifier.bytecode.object,
+    account: config.deployer,
+    args: [prover],
+    chain: config.chain,
+  });
 
-  if (proverRegex.test(envContent)) {
-    envContent = envContent.replace(
-      proverRegex,
-      `VITE_PROVER_ADDRESS=${prover.trim()}`,
+  receipt = await config.publicClient.waitForTransactionReceipt({
+    hash: txHash,
+  });
+  const verifier = receipt.contractAddress;
+  console.log(`Verifier deployed to ${config.chainName}`, verifier);
+
+  if (receipt.status != "success") {
+    throw new Error(
+      `Verifier deployment failed with status: ${receipt.status}`,
     );
-  } else {
-    envContent += `VITE_PROVER_ADDRESS=${prover}\n`;
   }
 
-  if (verifierRegex.test(envContent)) {
-    envContent = envContent.replace(
-      verifierRegex,
-      `VITE_VERIFIER_ADDRESS=${verifier}`,
-    );
-  } else {
-    envContent += `VITE_VERIFIER_ADDRESS=${verifier}\n`;
-  }
-
-  await Bun.write(envPath, envContent);
-  console.log("Successfully updated the .env.development file");
+  await updateDotFile(envPath, {
+    VITE_PROVER_ADDRESS: prover,
+    VITE_VERIFIER_ADDRESS: verifier,
+  });
 } catch (err) {
   console.error("Error updating the .env.development file:", err);
 }
