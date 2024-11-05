@@ -1,7 +1,6 @@
 use std::{
-    fs,
-    fs::OpenOptions,
-    io::{Cursor, Read, Write},
+    fs::{self, OpenOptions},
+    io::{BufRead, BufReader, Cursor, Read, Write},
     path::{Path, PathBuf},
     process::Output,
 };
@@ -32,25 +31,25 @@ const EXAMPLES_URL: &str =
 lazy_static! {
     static ref DEPENDENCIES: Vec<SoldeerDep> = vec![
         SoldeerDep {
-            name: String::from("@openzeppelin-contracts"),
-            version: String::from("5.0.1"),
+            name: "@openzeppelin-contracts".into(),
+            version: "5.0.1".into(),
             url: None,
             remapping: Some("openzeppelin-contracts".into()),
         },
         SoldeerDep {
-            name: String::from("forge-std"),
-            version: String::from("1.9.2"),
+            name: "forge-std".into(),
+            version: "1.9.2".into(),
             url: None,
             remapping: Some(("forge-std", "src").into()),
         },
         SoldeerDep {
-            name: String::from("risc0-ethereum"),
-            version: String::from("1.0.0"),
-            url: Some(String::from("https://github.com/vlayer-xyz/risc0-ethereum/releases/download/v1.0.0-soldeer-no-remappings/contracts.zip")),
-            remapping: None,
+            name: "risc0-ethereum".into(),
+            version: "1.0.0".into(),
+            url: Some("https://github.com/vlayer-xyz/risc0-ethereum/releases/download/v1.0.0-soldeer-no-remappings/contracts.zip".into()),
+            remapping: Some(("risc0-ethereum-1.0.0").into()),
         },
         SoldeerDep {
-            name: String::from("vlayer"),
+            name: "vlayer".into(),
             version: version(),
             url: None,
             remapping: Some(("vlayer-0.1.0", "src").into() ),
@@ -58,14 +57,14 @@ lazy_static! {
     ];
 }
 
-struct SoldeerDep {
-    name: String,
-    version: String,
-    url: Option<String>,
-    remapping: Option<Remapping>,
+pub(super) struct SoldeerDep {
+    pub name: String,
+    pub version: String,
+    pub url: Option<String>,
+    pub remapping: Option<Remapping>,
 }
 
-struct Remapping {
+pub(super) struct Remapping {
     key: String,
     internal_path: Option<String>,
 }
@@ -139,7 +138,7 @@ impl SoldeerDep {
         Ok(output)
     }
 
-    fn remapping(&self) -> Option<String> {
+    fn remapping(&self) -> Option<(String, String)> {
         let remapping = self.remapping.as_ref()?;
         let internal_path = if let Some(internal_path) = &remapping.internal_path {
             format!("{}/", internal_path)
@@ -147,9 +146,9 @@ impl SoldeerDep {
             String::default()
         };
 
-        Some(format!(
-            "{}/=dependencies/{}-{}/{}",
-            remapping.key, self.name, self.version, internal_path
+        Some((
+            remapping.key.clone(),
+            format!("dependencies/{}-{}/{}", self.name, self.version, internal_path),
         ))
     }
 }
@@ -162,16 +161,58 @@ fn install_dependencies(foundry_root: &Path) -> Result<(), CLIError> {
     Ok(())
 }
 
-fn add_remappings(foundry_root: &Path) -> Result<(), CLIError> {
-    let remappings_txt = foundry_root.join("remappings.txt");
-    let mut file = OpenOptions::new().append(true).open(remappings_txt)?;
-    for dep in DEPENDENCIES.iter() {
-        if let Some(remapping) = dep.remapping() {
-            writeln!(file, "{remapping}")?;
-        }
-    }
+fn add_default_remappings(foundry_root: &Path) -> Result<(), CLIError> {
+    add_remappings(foundry_root, DEPENDENCIES.as_slice())
+}
+
+pub(super) fn add_remappings(foundry_root: &Path, deps: &[SoldeerDep]) -> Result<(), CLIError> {
+    let remappings_path = foundry_root.join("remappings.txt");
+
+    let (keys, mut new_remappings) = build_new_remappings(deps);
+    let mut remappings = filter_existing_remappings(&remappings_path, &keys)?;
+
+    remappings.append(&mut new_remappings);
+
+    let mut file = OpenOptions::new()
+        .create(true)
+        .truncate(true)
+        .write(true)
+        .open(&remappings_path)?;
+
+    writeln!(file, "{}", remappings.join("\n"))?;
 
     Ok(())
+}
+
+fn filter_existing_remappings(
+    remappings_path: &PathBuf,
+    keys: &[String],
+) -> Result<Vec<String>, CLIError> {
+    let remappings = OpenOptions::new()
+        .create(true)
+        .append(true)
+        .read(true)
+        .open(remappings_path)?;
+    let curr_remappings = BufReader::new(remappings).lines();
+    let matches_no_key = |line: &String| keys.iter().all(|key| !line.starts_with(key));
+    let filtered_remappings = curr_remappings
+        .map_while(Result::ok)
+        .filter(matches_no_key)
+        .collect();
+    Ok(filtered_remappings)
+}
+
+fn build_new_remappings(deps: &[SoldeerDep]) -> (Vec<String>, Vec<String>) {
+    let mut keys: Vec<String> = Default::default();
+    let mut new_remappings: Vec<String> = Default::default();
+
+    for dep in deps {
+        if let Some((key, remapping)) = dep.remapping() {
+            new_remappings.push(format!("{key}/={remapping}"));
+            keys.push(key);
+        }
+    }
+    (keys, new_remappings)
 }
 
 fn change_sdk_dependency_to_npm(foundry_root: &Path) -> Result<(), CLIError> {
@@ -251,7 +292,7 @@ pub(crate) async fn init_existing(cwd: PathBuf, template: TemplateOption) -> Res
     info!("Installing dependencies");
     install_dependencies(&root_path)?;
     info!("Successfully installed all dependencies");
-    add_remappings(&root_path)?;
+    add_default_remappings(&root_path)?;
 
     change_sdk_dependency_to_npm(&root_path)?;
 
@@ -263,13 +304,27 @@ pub(crate) async fn init_existing(cwd: PathBuf, template: TemplateOption) -> Res
 fn init_soldeer(root_path: &Path) -> Result<(), CLIError> {
     add_deps_to_gitignore(root_path)?;
     add_deps_section_to_foundry_toml(root_path)?;
+    add_soldeer_config_to_foundry_toml(root_path)?;
 
     Ok(())
 }
 
 fn add_deps_section_to_foundry_toml(root_path: &Path) -> Result<(), std::io::Error> {
-    let gitignore_path = root_path.join("foundry.toml");
-    append_file(&gitignore_path, "[dependencies]")
+    let foundry_toml_path = root_path.join("foundry.toml");
+    append_file(&foundry_toml_path, "\n[dependencies]")
+}
+
+fn add_soldeer_config_to_foundry_toml(root_path: &Path) -> Result<(), std::io::Error> {
+    let foundry_toml_path = root_path.join("foundry.toml");
+    let soldeer_section = "
+[soldeer]
+# whether soldeer manages remappings
+remappings_generate = false
+# whether soldeer re-generates all remappings when installing, updating or uninstalling deps
+remappings_regenerate = false
+";
+
+    append_file(&foundry_toml_path, soldeer_section)
 }
 
 fn add_deps_to_gitignore(root_path: &Path) -> Result<(), std::io::Error> {
@@ -422,7 +477,7 @@ mod tests {
         let remappings_txt = root_path.join("remappings.txt");
         std::fs::write(&remappings_txt, "some initial remappings\n").unwrap();
 
-        add_remappings(&root_path).unwrap();
+        add_default_remappings(&root_path).unwrap();
 
         let remappings_txt = root_path.join("remappings.txt");
         let contents = fs::read_to_string(remappings_txt).unwrap();
@@ -431,6 +486,30 @@ mod tests {
             "some initial remappings\n\
             openzeppelin-contracts/=dependencies/@openzeppelin-contracts-5.0.1/\n\
             forge-std/=dependencies/forge-std-1.9.2/src/\n\
+            risc0-ethereum-1.0.0/=dependencies/risc0-ethereum-1.0.0/\n\
+            vlayer-0.1.0/=dependencies/vlayer-{}/src/\n",
+            version()
+        );
+
+        assert_eq!(contents, expected_remappings);
+    }
+
+    #[test]
+    fn test_upsert_remapping() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let root_path = temp_dir.path().to_path_buf();
+        let remappings_txt = root_path.join("remappings.txt");
+        std::fs::write(&remappings_txt, "vlayer-0.1.0/=dependencies/vlayer-0.0.0/src/\n").unwrap();
+
+        add_default_remappings(&root_path).unwrap();
+
+        let remappings_txt = root_path.join("remappings.txt");
+        let contents = fs::read_to_string(remappings_txt).unwrap();
+
+        let expected_remappings = format!(
+            "openzeppelin-contracts/=dependencies/@openzeppelin-contracts-5.0.1/\n\
+            forge-std/=dependencies/forge-std-1.9.2/src/\n\
+            risc0-ethereum-1.0.0/=dependencies/risc0-ethereum-1.0.0/\n\
             vlayer-0.1.0/=dependencies/vlayer-{}/src/\n",
             version()
         );
@@ -492,13 +571,26 @@ mod tests {
         }
 
         #[test]
-        fn adds_dependencies_section_in_foundry_toml() {
+        fn adds_dependencies_section_to_foundry_toml() {
             let (_temp_dir, _, root_path) = prepare_foundry_dir("src");
 
             init_soldeer(&root_path).unwrap();
 
             let foundry_toml = fs::read_to_string(root_path.join("foundry.toml")).unwrap();
             assert!(foundry_toml.contains("[dependencies]"));
+        }
+
+        #[test]
+        fn adds_soldeer_section_to_foundry_toml() {
+            let (_temp_dir, _, root_path) = prepare_foundry_dir("src");
+
+            init_soldeer(&root_path).unwrap();
+
+            let foundry_toml = fs::read_to_string(root_path.join("foundry.toml")).unwrap();
+
+            assert!(foundry_toml.contains("[soldeer]"));
+            assert!(foundry_toml.contains("remappings_generate = false"));
+            assert!(foundry_toml.contains("remappings_regenerate = false"));
         }
     }
 }
