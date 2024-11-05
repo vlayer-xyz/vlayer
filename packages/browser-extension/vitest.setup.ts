@@ -1,4 +1,5 @@
 import { vi } from "vitest";
+import { MessageToExtension } from "./src/web-proof-commons";
 
 const mockStore = function () {
   const store = new Map<string, unknown>();
@@ -47,12 +48,52 @@ const mockStore = function () {
 };
 
 vi.doMock("webextension-polyfill", () => {
+  const callbacks: ((message: MessageToExtension) => void)[] = [];
+
   return {
     default: {
       storage: {
         local: mockStore(),
         sync: mockStore(),
         session: mockStore(),
+      },
+      tabs: {
+        query: vi.fn().mockImplementation(() => {
+          return Promise.resolve([{ windowId: 0 }]);
+        }),
+        onActivated: {
+          addListener: vi.fn().mockImplementation(() => {}),
+        },
+      },
+      runtime: {
+        onInstalled: {
+          addListener: vi.fn().mockImplementation(() => {}),
+        },
+        onConnectExternal: {
+          addListener: vi.fn().mockImplementation(() => {}),
+        },
+        onMessage: {
+          addListener: vi.fn().mockImplementation(() => {}),
+        },
+
+        callbacks: [],
+        sendMessage: vi
+          .fn()
+          .mockImplementation((message: MessageToExtension) => {
+            callbacks.forEach((callback) => {
+              callback(message);
+            });
+          }),
+        onMessageExternal: {
+          addListener: vi
+            .fn()
+            .mockImplementation(
+              (callback: (message: MessageToExtension) => void) => {
+                console.log("Adding listener");
+                callbacks.push(callback);
+              },
+            ),
+        },
       },
     },
   };

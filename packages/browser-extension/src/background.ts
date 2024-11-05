@@ -7,15 +7,12 @@ import {
 } from "./web-proof-commons";
 import { WebProverSessionContextManager } from "./state/webProverSessionContext";
 import { match, P } from "ts-pattern";
+import { zkProvingStatusManager } from "./state/zkStatus";
 
 let windowId = 0;
 // to receive messages from popup script
 let port: browser.Runtime.Port | undefined = undefined;
 let openedTabId: number | undefined = undefined;
-
-chrome.tabs.onActivated.addListener(function (activeInfo) {
-  windowId = activeInfo.windowId;
-});
 
 browser.runtime.onInstalled.addListener((details) => {
   console.log("Extension installed:", details);
@@ -58,6 +55,10 @@ browser.runtime.onMessage.addListener(async (message: ExtensionMessage) => {
     .exhaustive();
 });
 
+browser.tabs.onActivated.addListener(function (activeInfo) {
+  windowId = activeInfo.windowId;
+});
+
 browser.tabs
   .query({ active: true, currentWindow: true })
   .then((tabs) => {
@@ -65,11 +66,8 @@ browser.tabs
   })
   .catch(console.error);
 
-browser.tabs.onActivated.addListener(function (activeInfo) {
-  windowId = activeInfo.windowId;
-});
-
 browser.runtime.onMessageExternal.addListener((message: MessageToExtension) => {
+  console.log("Received message from webpage", message);
   (async () => {
     if (message.action === ExtensionAction.RequestWebProof) {
       if (chrome.sidePanel) {
@@ -81,6 +79,9 @@ browser.runtime.onMessageExternal.addListener((message: MessageToExtension) => {
       await WebProverSessionContextManager.instance.setWebProverSessionConfig(
         message.payload,
       );
+    } else if (message.action === ExtensionAction.NotifyZkProvingStatus) {
+      console.log("Received zk proving status", message.payload);
+      await zkProvingStatusManager.setProvingStatus(message.payload);
     }
   })().catch(console.error);
 });
