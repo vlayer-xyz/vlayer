@@ -61,3 +61,15 @@
     font-weight: 600;
   }  
 }
+
+.flex {
+  display: flex !important;
+}
+
+#sidebar > div.sidebar-scrollbox > ol > li:nth-child(12) {
+  display: none;
+}
+
+#sidebar > div.sidebar-scrollbox > ol > li:nth-child(13) {
+  display: none;
+}
