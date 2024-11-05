@@ -1,0 +1,25 @@
+name: Post release testing
+on:
+  push:
+    branches:
+      - "**"
+  pull_request:
+    branches:
+      - "**"
+jobs:
+  test-release:
+    name: Test release
+    runs-on: ubuntu-24.04
+    timeout-minutes: 2
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - uses: hoverkraft-tech/compose-action@v2.0.2
+        with:
+          compose-file: docker/web-proof/docker-compose-test-release.yaml
+
+      - name: Test release
+        run: bash/test-release.sh
