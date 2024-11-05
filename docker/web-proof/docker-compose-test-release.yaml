@@ -8,5 +8,6 @@ services:
   vlayer:
     image: ghcr.io/vlayer-xyz/vlayer:latest
     pull_policy: always
+    command: "serve --proof fake --host 0.0.0.0 --rpc-url 31337:http://anvil:8545"
     ports:
       - "3000:3000"
