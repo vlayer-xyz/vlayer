@@ -1,7 +1,7 @@
 {
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
-    "rootDir": "./",
+    "rootDir": "./src",
     "outDir": "./dist",
     "lib": [
       "ESNext"
@@ -24,7 +24,5 @@
   }, 
   "include": [
     "src",
-    "./vite.config.ts",
-    "./vitest.setup.ts",
   ],
 }
