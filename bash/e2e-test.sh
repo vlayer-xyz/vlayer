@@ -4,6 +4,11 @@ set -ueo pipefail
 
 VLAYER_HOME=$(git rev-parse --show-toplevel)
 
+PROFILLING_DIR="${VLAYER_HOME}/profilling"
+echo "Saving profilling data to ${PROFILLING_DIR}"
+mkdir -p "${PROFILLING_DIR}"
+export RISC0_PPROF_OUT="${PROFILLING_DIR}/profile.pb"
+
 PROVING_MODE=${PROVING_MODE:-dev}
 
 echo Generating typescript bidings ...
@@ -45,6 +50,10 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
   cd vlayer
   bun install --frozen-lockfile
   bun run prove.ts
+
+  mv "${RISC0_PPROF_OUT}" "${PROFILLING_DIR}/${example_name}.pb"
+  ls "${PROFILLING_DIR}"
+
   echo '::endgroup::'
 done
 
