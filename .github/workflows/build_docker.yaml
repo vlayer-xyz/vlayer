@@ -1,0 +1,19 @@
+name: Build docker images
+on:
+  pull_request:
+    paths:
+      - "docker/**"
+      - ".github/workflows/build_docker.yaml"
+  merge_group:
+  push:
+    branches:
+      - main
+jobs:
+  build-nightly-docker:
+    name: Build nightly docker image
+    runs-on: aws-linux-small
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Build the nightly docker image
+        run: docker build -f docker/vlayer/Dockerfile.nightly --no-cache .
