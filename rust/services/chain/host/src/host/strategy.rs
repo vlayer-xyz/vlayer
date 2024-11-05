@@ -111,30 +111,30 @@ mod test {
         #[test]
         #[allow(clippy::reversed_empty_ranges)]
         fn latest_is_genesis_does_not_cause_an_underflow_panic() {
-            assert_eq!(Strategy::new().get_append_range(&(0..=0), 0), 1..=0);
+            assert_eq!(Strategy::default().get_append_range(&(0..=0), 0), 1..=0);
         }
 
         #[test]
         #[allow(clippy::reversed_empty_ranges)]
         fn same_block() {
             // Could happen after init or on 1-depth reorg
-            assert_eq!(Strategy::new().get_append_range(&(1..=1), 1), 2..=0);
+            assert_eq!(Strategy::default().get_append_range(&(1..=1), 1), 2..=0);
         }
 
         #[test]
         #[allow(clippy::reversed_empty_ranges)]
         fn new_block_not_enough_confirmations() {
-            assert_eq!(Strategy::new().get_append_range(&(0..=0), 1), 1..=0);
+            assert_eq!(Strategy::default().get_append_range(&(0..=0), 1), 1..=0);
         }
 
         #[test]
         fn new_confirmed_block() {
-            assert_eq!(Strategy::new().get_append_range(&(0..=0), CONFIRMATIONS), 1..=1);
+            assert_eq!(Strategy::default().get_append_range(&(0..=0), CONFIRMATIONS), 1..=1);
         }
 
         #[test]
         fn many_new_confirmed_blocks() {
-            assert_eq!(Strategy::new().get_append_range(&(0..=0), 100), 1..=MAX_HEAD_BLOCKS);
+            assert_eq!(Strategy::default().get_append_range(&(0..=0), 100), 1..=MAX_HEAD_BLOCKS);
         }
     }
 
@@ -144,13 +144,13 @@ mod test {
         #[test]
         #[allow(clippy::reversed_empty_ranges)]
         fn reached_genesis() {
-            assert_eq!(Strategy::new().get_prepend_range(&(0..=0)), 1..=0);
+            assert_eq!(Strategy::default().get_prepend_range(&(0..=0)), 1..=0);
         }
 
         #[test]
         fn full_chunk() {
             assert_eq!(
-                Strategy::new().get_prepend_range(
+                Strategy::default().get_prepend_range(
                     &(MAX_BACK_PROPAGATION_BLOCKS..=MAX_BACK_PROPAGATION_BLOCKS)
                 ),
                 0..=MAX_BACK_PROPAGATION_BLOCKS - 1
@@ -160,7 +160,7 @@ mod test {
         #[test]
         fn partial_chunk() {
             assert_eq!(
-                Strategy::new().get_prepend_range(
+                Strategy::default().get_prepend_range(
                     &(MAX_BACK_PROPAGATION_BLOCKS - 1..=MAX_BACK_PROPAGATION_BLOCKS - 1)
                 ),
                 0..=MAX_BACK_PROPAGATION_BLOCKS - 2
@@ -174,7 +174,7 @@ mod test {
         #[test]
         fn success() {
             assert_eq!(
-                Strategy::new().get_append_prepend_ranges(&(100..=100), 105),
+                Strategy::default().get_append_prepend_ranges(&(100..=100), 105),
                 AppendPrependRanges {
                     prepend: 90..=99,
                     append: 101..=104,
