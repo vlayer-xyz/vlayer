@@ -3,22 +3,35 @@ use std::{
     ops::RangeInclusive,
 };
 
+#[allow(clippy::reversed_empty_ranges)]
+pub const EMPTY_RANGE: RangeInclusive<u64> = 1..=0;
+
 pub fn len(range: &RangeInclusive<u64>) -> u64 {
-    (range.end() + 1).saturating_sub(*range.start())
+    if range.is_empty() {
+        return 0;
+    }
+    assert_ne!(range, &(0..=u64::MAX), "Range length overflow");
+    *range.end() - *range.start() + 1
 }
 
 pub fn limit_right(range: RangeInclusive<u64>, limit: u64) -> RangeInclusive<u64> {
     if range.is_empty() {
         return range;
     }
-    *range.start()..=min(*range.end(), *range.start() + limit - 1)
+    if limit == 0 {
+        return EMPTY_RANGE;
+    }
+    *range.start()..=min(*range.end(), (*range.start()).saturating_add(limit - 1))
 }
 
 pub fn limit_left(range: RangeInclusive<u64>, limit: u64) -> RangeInclusive<u64> {
     if range.is_empty() {
         return range;
     }
-    max((*range.end() + 1).saturating_sub(limit), *range.start())..=*range.end()
+    if limit == 0 {
+        return EMPTY_RANGE;
+    }
+    max((*range.end()).saturating_sub(limit - 1), *range.start())..=*range.end()
 }
 
 #[cfg(test)]
@@ -35,6 +48,12 @@ mod tests {
         }
 
         #[test]
+        #[should_panic(expected = "Range length overflow")]
+        fn panics_on_len_overflow() {
+            len(&(0..=u64::MAX));
+        }
+
+        #[test]
         fn non_empty_range() {
             assert_eq!(len(&(0..=0)), 1)
         }
@@ -44,9 +63,14 @@ mod tests {
         use super::*;
 
         #[test]
-        #[should_panic(expected = "attempt to subtract with overflow")]
-        fn panics_when_limit_is_zero_and_range_starts_with_zero() {
-            limit_right(0..=0, 0);
+        #[allow(clippy::reversed_empty_ranges)]
+        fn return_empty_range_when_limit_is_zero() {
+            assert_eq!(limit_right(0..=0, 0), 1..=0);
+        }
+
+        #[test]
+        fn overflow_does_not_panic_but_saturates() {
+            assert_eq!(limit_right(u64::MAX..=u64::MAX, 100), u64::MAX..=u64::MAX);
         }
 
         #[test]

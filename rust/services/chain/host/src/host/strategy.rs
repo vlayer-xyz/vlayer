@@ -8,14 +8,12 @@ use alloy_primitives::BlockNumber;
 use derive_new::new;
 use tracing::info;
 
-use super::range_utils::{limit_left, limit_right};
+use super::range_utils::{limit_left, limit_right, EMPTY_RANGE};
 use crate::host::range_utils::len;
 
 pub const MAX_HEAD_BLOCKS: u64 = 10;
 pub const MAX_BACK_PROPAGATION_BLOCKS: u64 = 10;
 pub const CONFIRMATIONS: u64 = 2;
-#[allow(clippy::reversed_empty_ranges)]
-const EMPTY_RANGE: RangeInclusive<BlockNumber> = 1..=0;
 const GENESIS: BlockNumber = 0;
 
 #[derive(new)]
