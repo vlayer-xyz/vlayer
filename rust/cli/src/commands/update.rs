@@ -6,6 +6,7 @@ use std::{
 use colored::Colorize;
 use serde_json::Value;
 
+use super::init::{add_remappings, SoldeerDep};
 use crate::errors::CLIError;
 
 pub fn run_update() -> Result<(), CLIError> {
@@ -69,17 +70,41 @@ fn update_soldeer() -> Result<(), CLIError> {
 }
 
 fn do_update_soldeer(foundry_toml_path: &Path) -> Result<(), CLIError> {
-    print_update_intention("vlayer contracts");
-    let status = std::process::Command::new("forge")
-        .arg("soldeer")
-        .arg("install")
-        .arg("vlayer~latest")
-        .current_dir(foundry_toml_path)
-        .spawn()
-        .and_then(|mut child| child.wait())
+    let version = newest_vlayer_version()?;
+
+    print_update_intention(&format!("vlayer contracts into {}", &version));
+
+    let updated_dep = SoldeerDep {
+        name: String::from("vlayer"),
+        version,
+        url: None,
+        remapping: Some(("vlayer-0.1.0", "src").into()),
+    };
+
+    updated_dep.install(foundry_toml_path)?;
+    add_remappings(foundry_toml_path, &[updated_dep])?;
+
+    Ok(())
+}
+
+fn newest_vlayer_version() -> Result<String, CLIError> {
+    let output = std::process::Command::new("vlayer")
+        .arg("--version")
+        .output()
         .map_err(into_update_err)?;
 
-    ensure_success(status, "vlayer contracts")
+    if !output.status.success() {
+        return Err(CLIError::UpgradeError(format!(
+            "Failed to run newest vlayer: {}",
+            String::from_utf8_lossy(&output.stderr)
+        )));
+    }
+
+    String::from_utf8_lossy(&output.stdout)
+        .split_ascii_whitespace()
+        .nth(1)
+        .map(String::from)
+        .ok_or(CLIError::UpgradeError("Corrupted vlayer binary".to_string()))
 }
 
 enum PackageManager {
