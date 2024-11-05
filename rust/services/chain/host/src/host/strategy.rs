@@ -35,6 +35,22 @@ pub struct AppendPrependRanges {
     pub new_range: RangeInclusive<BlockNumber>,
 }
 
+impl AppendPrependRanges {
+    pub fn new(
+        old_range: &RangeInclusive<BlockNumber>,
+        append: RangeInclusive<BlockNumber>,
+        prepend: RangeInclusive<BlockNumber>,
+    ) -> Self {
+        let new_range =
+            *min(prepend.start(), old_range.start())..=*max(append.end(), old_range.end());
+        Self {
+            prepend,
+            append,
+            new_range,
+        }
+    }
+}
+
 fn display_range_with_size(range: &RangeInclusive<BlockNumber>) -> String {
     format!("{:?} ({})", range, len(range))
 }
@@ -62,12 +78,7 @@ impl Strategy {
     ) -> AppendPrependRanges {
         let prepend = self.get_prepend_range(range);
         let append = self.get_append_range(range, latest);
-        let new_range = *min(prepend.start(), range.start())..=*max(append.end(), range.end());
-        let ranges = AppendPrependRanges {
-            prepend,
-            append,
-            new_range,
-        };
+        let ranges = AppendPrependRanges::new(range, append, prepend);
         info!("Append prepend ranges: {}", ranges);
         ranges
     }
