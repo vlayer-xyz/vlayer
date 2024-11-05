@@ -4,7 +4,7 @@ mod prover;
 mod range_utils;
 mod strategy;
 
-use std::{cmp::max, ops::RangeInclusive};
+use std::ops::RangeInclusive;
 
 use alloy_primitives::ChainId;
 use block_trie::BlockTrie;
@@ -23,7 +23,7 @@ use lazy_static::lazy_static;
 use prover::Prover;
 use provider::{to_eth_block_header, EvmBlockHeader};
 use risc0_zkvm::sha::Digest;
-use strategy::Strategy;
+use strategy::{AppendPrependRanges, Strategy};
 use tracing::{info, instrument};
 
 lazy_static! {
@@ -109,7 +109,7 @@ where
     async fn append_prepend(&self) -> Result<ChainUpdate, HostError> {
         info!("Appending and prepending blocks");
         let ChainTrie {
-            block_range,
+            block_range: old_range,
             trie: old_trie,
             zk_proof: old_zk_proof,
         } = self
@@ -120,24 +120,30 @@ where
 
         let latest_block = self.get_block(BlockTag::Latest).await?;
         let latest_block_number = latest_block.number();
-        let (_, append_range) = self
+        let AppendPrependRanges {
+            prepend,
+            append,
+            new_range,
+            ..
+        } = self
             .strategy
-            .get_append_prepend_ranges(&block_range, latest_block_number);
-        let append_blocks = self.get_blocks_range(&append_range).await?;
+            .get_append_prepend_ranges(&old_range, latest_block_number);
+        let append_blocks = self.get_blocks_range(&append).await?;
+        let prepend_blocks = self.get_blocks_range(&prepend).await?;
+        let old_leftmost_block = self.get_block((*old_range.start()).into()).await?;
 
         trie.append(append_blocks.iter())?;
+        trie.prepend(prepend_blocks.iter(), &old_leftmost_block)?;
 
         let input = Input::AppendPrepend {
             elf_id: *GUEST_ID,
-            prepend_blocks: vec![],
+            prepend_blocks,
             append_blocks,
-            old_leftmost_block: latest_block,
+            old_leftmost_block,
             block_trie: old_trie.clone(),
         };
         let receipt = self.prover.prove(&input, Some(old_zk_proof))?;
-
-        let range = *block_range.start()..=max(*append_range.end(), *block_range.end());
-        let chain_update = ChainUpdate::from_two_tries(range, &old_trie, &trie, &receipt)?;
+        let chain_update = ChainUpdate::from_two_tries(new_range, &old_trie, &trie, &receipt)?;
 
         Ok(chain_update)
     }
@@ -236,7 +242,8 @@ mod test {
             #[tokio::test]
             async fn no_new_head_blocks_back_propagation_finished() -> anyhow::Result<()> {
                 let db = test_db_after_initialize().await?;
-                let host = Host::from_parts(Prover::default(), mock_provider([GENESIS]), db, 1);
+                let host =
+                    Host::from_parts(Prover::default(), mock_provider([GENESIS, GENESIS]), db, 1);
 
                 let chain_update = host.poll().await?;
                 let Host { mut db, .. } = host;
@@ -254,7 +261,7 @@ mod test {
                 let latest = GENESIS + CONFIRMATIONS;
                 let new_confirmed_block = latest - CONFIRMATIONS + 1;
                 let db = test_db_after_initialize().await?;
-                let provider = mock_provider([latest, new_confirmed_block]);
+                let provider = mock_provider([latest, new_confirmed_block, GENESIS]);
                 let host = Host::from_parts(Prover::default(), provider, db, 1);
 
                 let chain_update = host.poll().await?;
