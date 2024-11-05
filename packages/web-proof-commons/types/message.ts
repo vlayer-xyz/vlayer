@@ -12,14 +12,28 @@ export type ExtensionStep =
 
 export const enum ExtensionAction {
   RequestWebProof,
+  NotifyZkProvingStatus,
 }
 
-export type MessageToExtension = {
-  action: ExtensionAction;
-  payload: WebProverSessionConfig;
-};
+export enum ZkProvingStatus {
+  Proving = "proving",
+  Done = "done",
+  Error = "error",
+}
 
-export const enum ExtensionMessageType {
+export type MessageToExtension =
+  | {
+      action: ExtensionAction.RequestWebProof;
+      payload: WebProverSessionConfig;
+    }
+  | {
+      action: ExtensionAction.NotifyZkProvingStatus;
+      payload: {
+        status: ZkProvingStatus;
+      };
+    };
+
+export enum ExtensionMessageType {
   ProofDone = "ProofDone",
   ProofError = "ProofError",
   RedirectBack = "RedirectBack",

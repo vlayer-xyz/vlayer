@@ -19,14 +19,11 @@ export async function v_call(
     body: JSON.stringify(v_callBody(call, context)),
     headers: { "Content-Type": "application/json" },
   });
-
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
 
   const response_json = await response.json();
-
-  //TODO we should launch some schema validation here
   assertObject(response_json);
 
   if ("error" in response_json) {

@@ -10,6 +10,7 @@ import {
   ExtensionMessageType,
   type MessageToExtension,
   WebProof,
+  ZkProvingStatus,
 } from "../../../web-proof-commons";
 
 // NOTE @types/chrome and webextension-polyfill work only in the extension context
@@ -28,6 +29,7 @@ declare const chrome: {
       onMessage: {
         addListener: (message: unknown) => void;
       };
+      postMessage: (message: MessageToExtension) => void;
     };
   };
 };
@@ -35,38 +37,54 @@ declare const chrome: {
 // this id is fixed in the extension by the key in manifest.json
 const EXTENSION_ID = "jbchhcgphfokabmfacnkafoeeeppjmpl";
 
-export const createExtensionWebProofProvider = (
-  {
-    notaryUrl = "https://notary.pse.dev/v0.1.0-alpha.5/",
-    wsProxyUrl = "wss://notary.pse.dev/proxy",
-  }: WebProofProviderSetup = {
-    notaryUrl: "https://notary.pse.dev/v0.1.0-alpha.5/",
-    wsProxyUrl: "wss://notary.pse.dev/proxy",
-  },
-): WebProofProvider => {
-  return {
-    getWebProof: async function (webProofSetup: WebProofSetupInput) {
-      return new Promise<WebProof>((resolve, reject) => {
-        chrome.runtime.sendMessage(EXTENSION_ID, {
-          action: ExtensionAction.RequestWebProof,
-          payload: {
-            notaryUrl,
-            wsProxyUrl,
-            logoUrl: webProofSetup.logoUrl,
-            steps: webProofSetup.steps,
-          },
-        });
-        const port = chrome.runtime.connect(EXTENSION_ID);
-        // TODO: validate message in runtime
-        port.onMessage.addListener((message: ExtensionMessage) => {
+class ExtensionWebProofProvider implements WebProofProvider {
+  private port: ReturnType<typeof chrome.runtime.connect> | null = null;
+  constructor(
+    private notaryUrl: string,
+    private wsProxyUrl: string,
+  ) {}
+
+  public notifyZkProvingStatus(status: ZkProvingStatus) {
+    this.connectToExtension().postMessage({
+      action: ExtensionAction.NotifyZkProvingStatus,
+      payload: { status },
+    });
+  }
+  private connectToExtension() {
+    if (!this.port) {
+      this.port = chrome.runtime.connect(EXTENSION_ID);
+    }
+    return this.port;
+  }
+  public async getWebProof(webProofSetup: WebProofSetupInput) {
+    return new Promise<WebProof>((resolve, reject) => {
+      chrome.runtime.sendMessage(EXTENSION_ID, {
+        action: ExtensionAction.RequestWebProof,
+        payload: {
+          notaryUrl: this.notaryUrl,
+          wsProxyUrl: this.wsProxyUrl,
+          logoUrl: webProofSetup.logoUrl,
+          steps: webProofSetup.steps,
+        },
+      });
+
+      this.connectToExtension().onMessage.addListener(
+        (message: ExtensionMessage) => {
           if (message.type === ExtensionMessageType.ProofDone) {
             resolve(message.proof);
           }
           if (message.type === ExtensionMessageType.ProofError) {
             reject(new Error(message.error));
           }
-        });
-      });
-    },
-  };
+        },
+      );
+    });
+  }
+}
+export const createExtensionWebProofProvider = ({
+  notaryUrl = "https://notary.pse.dev/v0.1.0-alpha.5/",
+  wsProxyUrl = "wss://notary.pse.dev/proxy",
+}: WebProofProviderSetup = {}): WebProofProvider => {
+  console.log("Creating extension web proof provider");
+  return new ExtensionWebProofProvider(notaryUrl, wsProxyUrl);
 };
