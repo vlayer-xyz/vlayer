@@ -1807,9 +1807,9 @@ checksum = "c3ac9f8b63eca6fd385229b3675f6cc0dc5c8a5c8a54a59d4f52ffd670d87b0c"
 
 [[package]]
 name = "bytemuck"
-version = "1.16.1"
+version = "1.19.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "b236fc92302c97ed75b38da1f4917b5cdda4984745740f153a5d3059e48d725e"
+checksum = "8334215b81e418a0a7bdb8ef0849474f40bb10c8b71f1c4ed315cff49f32494d"
 dependencies = [
  "bytemuck_derive",
 ]
@@ -1895,8 +1895,13 @@ dependencies = [
  "alloy-sol-types",
  "alloy-trie",
  "anyhow",
+ "auto_impl",
+ "bincode",
  "block_header",
+ "block_trie",
+ "bytemuck",
  "chain",
+ "chain_client",
  "chain_common",
  "common",
  "derive-new",
@@ -1907,12 +1912,16 @@ dependencies = [
  "once_cell",
  "regex",
  "revm",
+ "risc0-zkp",
  "risc0-zkvm",
  "serde",
  "serde_json",
+ "static_assertions",
  "test-log",
  "thiserror",
+ "tokio",
  "tracing",
+ "traits",
  "web_proof",
 ]
 
