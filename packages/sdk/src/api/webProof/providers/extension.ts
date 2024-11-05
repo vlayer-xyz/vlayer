@@ -45,10 +45,14 @@ class ExtensionWebProofProvider implements WebProofProvider {
   ) {}
 
   public notifyZkProvingStatus(status: ZkProvingStatus) {
-    this.connectToExtension().postMessage({
-      action: ExtensionAction.NotifyZkProvingStatus,
-      payload: { status },
-    });
+    if (typeof chrome !== "undefined") {
+      this.connectToExtension().postMessage({
+        action: ExtensionAction.NotifyZkProvingStatus,
+        payload: { status },
+      });
+    } else {
+      console.log("Run out of chrome context");
+    }
   }
   private connectToExtension() {
     if (!this.port) {
@@ -57,6 +61,7 @@ class ExtensionWebProofProvider implements WebProofProvider {
     return this.port;
   }
   public async getWebProof(webProofSetup: WebProofSetupInput) {
+    console.log("getWebProof");
     return new Promise<WebProof>((resolve, reject) => {
       chrome.runtime.sendMessage(EXTENSION_ID, {
         action: ExtensionAction.RequestWebProof,
