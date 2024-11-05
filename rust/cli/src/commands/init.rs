@@ -245,6 +245,8 @@ pub(crate) async fn init_existing(cwd: PathBuf, template: TemplateOption) -> Res
 
     std::env::set_current_dir(&root_path)?;
 
+    add_fs_permissions_to_foundry_toml(&root_path)?;
+
     info!("Initialising soldeer");
     init_soldeer(&root_path)?;
 
@@ -258,6 +260,14 @@ pub(crate) async fn init_existing(cwd: PathBuf, template: TemplateOption) -> Res
     std::env::set_current_dir(&cwd)?;
 
     Ok(())
+}
+
+fn add_fs_permissions_to_foundry_toml(root_path: &Path) -> Result<(), std::io::Error> {
+    let foundry_toml_path = root_path.join("foundry.toml");
+    append_file(
+        &foundry_toml_path,
+        "fs_permissions = [{ access = \"read\", path = \"./testdata\"}]",
+    )
 }
 
 fn init_soldeer(root_path: &Path) -> Result<(), CLIError> {
@@ -476,6 +486,18 @@ mod tests {
 
         assert!(!new_contents.contains("file:../../../packages/sdk"));
         assert!(new_contents.contains(&expected_sdk_dependency));
+    }
+
+    #[test]
+    fn test_adding_fs_permissions_to_foundry_toml() {
+        let (_temp_dir, _, root_path) = prepare_foundry_dir("src");
+
+        add_fs_permissions_to_foundry_toml(&root_path).unwrap();
+
+        let foundry_toml = fs::read_to_string(root_path.join("foundry.toml")).unwrap();
+        assert!(
+            foundry_toml.contains("fs_permissions = [{ access = \"read\", path = \"./testdata\"}]")
+        );
     }
 
     mod init_soldeer {
