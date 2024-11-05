@@ -19,13 +19,29 @@ touch "${ARCHIVE}"
     cd "${VLAYER_HOME}/examples"
 
     for example in $(find . -type d -maxdepth 1 -mindepth 1) ; do
+        echo "::group::Packing example: ${example}"
 
         scripts="${example}/vlayer"
         contracts="${example}/src/vlayer"
+        contracts_tests="${example}/test/vlayer"
+        testdata="${example}/testdata"
 
         tar --append --file=$ARCHIVE --strip 1 --exclude-from "${VLAYER_HOME}/examples/.gitignore" --dereference "${contracts}"
         tar --append --file=$ARCHIVE --strip 1 --exclude-from "${VLAYER_HOME}/examples/.gitignore" --dereference "${scripts}"
 
+        if [ -d "${contracts_tests}" ]; then
+            tar --append --file=$ARCHIVE --strip 1 --exclude-from "${VLAYER_HOME}/examples/.gitignore" --dereference "${contracts_tests}"
+        else
+            echo "No tests found for ${example}"
+        fi
+
+        if [ -d "${testdata}" ]; then
+            tar --append --file=$ARCHIVE --strip 1 --exclude-from "${VLAYER_HOME}/examples/.gitignore" --dereference "${testdata}"
+        else
+            echo "No testdata found for ${example}"
+        fi
+        
+        echo '::endgroup::'
     done
 )
 
