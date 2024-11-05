@@ -1,5 +1,6 @@
 use std::{
     cmp::{max, min},
+    fmt::{Display, Formatter},
     ops::RangeInclusive,
 };
 
@@ -34,8 +35,20 @@ pub struct AppendPrependRanges {
     pub new_range: RangeInclusive<BlockNumber>,
 }
 
-fn print_range_with_size(range: &RangeInclusive<BlockNumber>) -> String {
+fn display_range_with_size(range: &RangeInclusive<BlockNumber>) -> String {
     format!("{:?} ({})", range, len(range))
+}
+
+impl Display for AppendPrependRanges {
+    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), std::fmt::Error> {
+        write!(
+            f,
+            "Prepend: {}, Append: {}, New range: {}",
+            display_range_with_size(&self.prepend),
+            display_range_with_size(&self.append),
+            display_range_with_size(&self.new_range)
+        )
+    }
 }
 
 impl Strategy {
@@ -50,17 +63,13 @@ impl Strategy {
         let prepend = self.get_prepend_range(range);
         let append = self.get_append_range(range, latest);
         let new_range = *min(prepend.start(), range.start())..=*max(append.end(), range.end());
-        info!(
-            "Prepend: {}, Append: {}, New range: {}",
-            print_range_with_size(&prepend),
-            print_range_with_size(&append),
-            print_range_with_size(&new_range)
-        );
-        AppendPrependRanges {
+        let ranges = AppendPrependRanges {
             prepend,
             append,
             new_range,
-        }
+        };
+        info!("Append prepend ranges: {}", ranges);
+        ranges
     }
 
     fn get_prepend_range(&self, range: &RangeInclusive<BlockNumber>) -> RangeInclusive<u64> {
