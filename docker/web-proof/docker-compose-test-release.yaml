@@ -1,0 +1,12 @@
+services:
+  anvil:
+    build:
+      dockerfile: ../anvil/Dockerfile
+    platform: linux/amd64
+    ports:
+      - "8545:8545"
+  vlayer:
+    image: ghcr.io/vlayer-xyz/vlayer:latest
+    pull_policy: always
+    ports:
+      - "3000:3000"

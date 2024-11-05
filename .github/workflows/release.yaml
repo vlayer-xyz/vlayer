@@ -444,6 +444,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
+      - uses: hoverkraft-tech/compose-action@v2.0.2
+        with:
+          compose-file: docker/web-proof/docker-compose-test-release.yaml
       - name: Test release
         run: bash/test-release.sh
-     
+
