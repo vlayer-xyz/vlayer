@@ -2198,6 +2198,7 @@ dependencies = [
  "chain_guest_wrapper",
  "chain_test_utils",
  "derivative",
+ "derive-new",
  "ethers",
  "futures",
  "host_utils",
