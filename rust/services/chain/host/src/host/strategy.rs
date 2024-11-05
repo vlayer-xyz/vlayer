@@ -18,12 +18,19 @@ pub struct Strategy {
 }
 
 impl Strategy {
+    // Tells Host - which blocks to append and prepend.
+    // The ranges returned are touching the current range. [prepend][range][append]
+    // Returned ranges can be empty.
     pub fn get_append_prepend_ranges(
         &self,
         range: &RangeInclusive<u64>,
         latest: u64,
     ) -> (RangeInclusive<u64>, RangeInclusive<u64>) {
-        (EMPTY_RANGE, self.get_append_range(range, latest))
+        let append = self.get_append_range(range, latest);
+        let prepend = EMPTY_RANGE;
+        assert_eq!(*prepend.end() + 1, *range.start());
+        assert_eq!(*range.end() + 1, *append.start());
+        (append, prepend)
     }
 
     fn get_append_range(&self, range: &RangeInclusive<u64>, latest: u64) -> RangeInclusive<u64> {
