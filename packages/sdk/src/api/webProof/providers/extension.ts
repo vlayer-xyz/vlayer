@@ -45,10 +45,14 @@ class ExtensionWebProofProvider implements WebProofProvider {
   ) {}
 
   public notifyZkProvingStatus(status: ZkProvingStatus) {
-    this.connectToExtension().postMessage({
-      action: ExtensionAction.NotifyZkProvingStatus,
-      payload: { status },
-    });
+    if (typeof chrome !== "undefined") {
+      this.connectToExtension().postMessage({
+        action: ExtensionAction.NotifyZkProvingStatus,
+        payload: { status },
+      });
+    } else {
+      console.log("Run out of chrome context");
+    }
   }
   private connectToExtension() {
     if (!this.port) {
@@ -85,6 +89,5 @@ export const createExtensionWebProofProvider = ({
   notaryUrl = "https://notary.pse.dev/v0.1.0-alpha.5/",
   wsProxyUrl = "wss://notary.pse.dev/proxy",
 }: WebProofProviderSetup = {}): WebProofProvider => {
-  console.log("Creating extension web proof provider");
   return new ExtensionWebProofProvider(notaryUrl, wsProxyUrl);
 };
