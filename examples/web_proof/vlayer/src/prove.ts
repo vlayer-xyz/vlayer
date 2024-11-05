@@ -20,8 +20,6 @@ import {
 import webProofVerifier from "../../out/WebProofVerifier.sol/WebProofVerifier";
 import { Hex } from "viem";
 
-console.log("Hello from VLayer!");
-
 const context: {
   webProof: WebProof | undefined;
   provingResult: [Proof, string, Hex] | undefined;

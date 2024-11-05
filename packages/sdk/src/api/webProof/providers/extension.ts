@@ -61,7 +61,6 @@ class ExtensionWebProofProvider implements WebProofProvider {
     return this.port;
   }
   public async getWebProof(webProofSetup: WebProofSetupInput) {
-    console.log("getWebProof");
     return new Promise<WebProof>((resolve, reject) => {
       chrome.runtime.sendMessage(EXTENSION_ID, {
         action: ExtensionAction.RequestWebProof,
@@ -90,6 +89,5 @@ export const createExtensionWebProofProvider = ({
   notaryUrl = "https://notary.pse.dev/v0.1.0-alpha.5/",
   wsProxyUrl = "wss://notary.pse.dev/proxy",
 }: WebProofProviderSetup = {}): WebProofProvider => {
-  console.log("Creating extension web proof provider");
   return new ExtensionWebProofProvider(notaryUrl, wsProxyUrl);
 };
