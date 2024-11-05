@@ -67,7 +67,7 @@ where
             provider,
             db,
             chain_id,
-            strategy: Strategy::new(),
+            strategy: Strategy::default(),
         }
     }
 

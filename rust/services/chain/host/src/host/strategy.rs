@@ -5,7 +5,7 @@ use std::{
 };
 
 use alloy_primitives::BlockNumber;
-use derive_new::new;
+use derivative::Derivative;
 use tracing::info;
 
 use super::range_utils::{limit_left, limit_right, EMPTY_RANGE};
@@ -16,13 +16,14 @@ pub const MAX_BACK_PROPAGATION_BLOCKS: u64 = 10;
 pub const CONFIRMATIONS: u64 = 2;
 const GENESIS: BlockNumber = 0;
 
-#[derive(new)]
+#[derive(Derivative)]
+#[derivative(Default)]
 pub struct Strategy {
-    #[new(value = "MAX_HEAD_BLOCKS")]
+    #[derivative(Default(value = "MAX_HEAD_BLOCKS"))]
     max_head_blocks: u64,
-    #[new(value = "MAX_BACK_PROPAGATION_BLOCKS")]
+    #[derivative(Default(value = "MAX_BACK_PROPAGATION_BLOCKS"))]
     max_back_propagation_blocks: u64,
-    #[new(value = "CONFIRMATIONS")]
+    #[derivative(Default(value = "CONFIRMATIONS"))]
     confirmations: u64,
 }
 
