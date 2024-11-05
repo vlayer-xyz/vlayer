@@ -8,6 +8,7 @@ import { AnimatePresence, motion } from "framer-motion";
 import sendMessageToServiceWorker from "lib/sendMessageToServiceWorker";
 import { ExtensionMessageType } from "../../../web-proof-commons";
 import { DEFAULT_REDIRECT_DELAY_SECONDS } from "constants/defaults";
+import { useInterval } from "usehooks-ts";
 
 type NotarizeStepActionProps = {
   isVisited: boolean;
@@ -21,23 +22,21 @@ const RedirectCallout: FC = () => {
     import.meta.env.REDIRECT_DELAY_SECONDS || DEFAULT_REDIRECT_DELAY_SECONDS,
   );
   const [show, setShow] = useState(true);
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setTimeout((timeout) => {
-        if (timeout === 0) {
-          // hide callout
-          setShow(false);
-          // tell service worker to redirect back to original page
-          sendMessageToServiceWorker({
-            type: ExtensionMessageType.RedirectBack,
-          }).catch(console.error);
-          clearInterval(interval);
-        }
-        return timeout - 1;
-      });
-    }, 1000);
-    return () => clearInterval(interval);
-  }, []);
+
+  useInterval(
+    () => {
+      setTimeout(timeout - 1);
+      if (timeout === 0) {
+        // hide callout
+        setShow(false);
+        // tell service worker to redirect back to original page
+        sendMessageToServiceWorker({
+          type: ExtensionMessageType.RedirectBack,
+        }).catch(console.error);
+      }
+    },
+    show ? 1000 : null,
+  );
 
   return (
     <AnimatePresence>
