@@ -3,7 +3,7 @@
 name: Update Prover Servers
 on: 
   workflow_run:
-    workflows: ["Release binaries"]
+    workflows: ["Release vlayer artifacts"]
     types: [completed]
   workflow_dispatch:
 concurrency:
