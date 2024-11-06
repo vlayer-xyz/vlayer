@@ -83,7 +83,10 @@ async function testSuccessProvingAndVerification() {
     account: config.deployer,
   });
 
-  await ethClient.waitForTransactionReceipt({ hash: txHash, confirmations: 5 });
+  await ethClient.waitForTransactionReceipt({
+    hash: txHash,
+    confirmations: config.chainName === "anvil" ? 1 : 5,
+  });
 
   console.log("Verified!");
 
