@@ -23,7 +23,7 @@ describe("useZkProvingState", () => {
     expect(result.current.value).toBe(ZkProvingStatus.NotStarted);
   });
 
-  it("should indicated that value is wrong", () => {
+  it("should indicate that value is wrong", () => {
     mocks.useLocalStorage.mockImplementation(() => ["somethingStrange"]);
     const { result } = renderHook(() => useZkProvingState());
     expect(result.current.isError).toBe(true);
