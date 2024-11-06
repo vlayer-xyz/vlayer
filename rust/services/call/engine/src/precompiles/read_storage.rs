@@ -39,7 +39,7 @@ impl<D: Database> ContextStatefulPrecompile<D> for StoragePrecompile {
             "{:?}",
             &context
                 .db
-                .basic(address!("9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"))
+                .basic(address!("5FC8d32690cc91D4c39d9d3abcBD16989F875707"))
                 .map_err(|_| "Error".to_string())
         );
         get_balance_slot(address!("BFF7D6bA1201304aF302f12265CfA435539D5502"));
@@ -48,7 +48,7 @@ impl<D: Database> ContextStatefulPrecompile<D> for StoragePrecompile {
             &context
                 .db
                 .storage(
-                    address!("9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"),
+                    address!("5FC8d32690cc91D4c39d9d3abcBD16989F875707"),
                     get_balance_slot(address!("BFF7D6bA1201304aF302f12265CfA435539D5502"))
                 )
                 .map_err(|_| "Error".to_string())

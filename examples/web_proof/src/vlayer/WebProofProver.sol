@@ -12,14 +12,14 @@ contract WebProofProver is Prover {
     using WebProofLib for WebProof;
     using WebLib for Web;
 
-    string DATA_URL = "https://api.x.com/1.1/account/settings.json";
+    string public data_url = "https://api.x.com/1.1/account/settings.json";
 
     function main(WebProof calldata webProof, address account)
         public
         view
         returns (Proof memory, string memory, address)
     {
-        Web memory web = webProof.verify(DATA_URL);
+        Web memory web = webProof.verify(data_url);
 
         string memory screenName = web.jsonGetString("screen_name");
         address(0x120).staticcall("");
