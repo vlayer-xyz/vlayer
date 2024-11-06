@@ -11,7 +11,7 @@ const config = await getConfig();
 
 const notaryPubKey =
   "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExpX/4R4z40gI6C/j9zAM39u58LJu\n3Cx5tXTuqhhu/tirnBi5GniMmspOTEsps4ANnPLpMmMSfhJ+IFHbc3qVOA==\n-----END PUBLIC KEY-----\n";
-let txHash = await config.walletClient.deployContract({
+let hash = await config.walletClient.deployContract({
   abi: webProofProver.abi,
   bytecode: webProofProver.bytecode.object,
   account: config.deployer,
@@ -19,14 +19,14 @@ let txHash = await config.walletClient.deployContract({
   chain: config.chain,
 });
 let receipt = await config.publicClient.waitForTransactionReceipt({
-  hash: txHash,
+  hash,
 });
 if (receipt.status != "success") {
   throw new Error(`Prover deployment failed with status: ${receipt.status}`);
 }
 const prover = receipt.contractAddress;
 
-txHash = await config.walletClient.deployContract({
+hash = await config.walletClient.deployContract({
   abi: webProofVerifier.abi,
   bytecode: webProofVerifier.bytecode.object,
   account: config.deployer,
@@ -34,7 +34,7 @@ txHash = await config.walletClient.deployContract({
   chain: config.chain,
 });
 
-receipt = await config.publicClient.waitForTransactionReceipt({ hash: txHash });
+receipt = await config.publicClient.waitForTransactionReceipt({ hash });
 const verifier = receipt.contractAddress;
 
 const twitterUserAddress = config.deployer.address;

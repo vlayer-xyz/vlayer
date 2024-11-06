@@ -8,7 +8,7 @@ try {
   await loadDotFile(envPath);
   const config = await getConfig();
 
-  let txHash = await config.walletClient.deployContract({
+  let hash = await config.walletClient.deployContract({
     abi: webProofProver.abi,
     bytecode: webProofProver.bytecode.object,
     account: config.deployer,
@@ -16,7 +16,7 @@ try {
     chain: config.chain,
   });
   let receipt = await config.publicClient.waitForTransactionReceipt({
-    hash: txHash,
+    hash,
   });
   if (receipt.status != "success") {
     throw new Error(`Prover deployment failed with status: ${receipt.status}`);
@@ -24,7 +24,7 @@ try {
   const prover = receipt.contractAddress;
   console.log(`Prover deployed to ${config.chainName}`, prover);
 
-  txHash = await config.walletClient.deployContract({
+  hash = await config.walletClient.deployContract({
     abi: webProofVerifier.abi,
     bytecode: webProofVerifier.bytecode.object,
     account: config.deployer,
@@ -33,7 +33,7 @@ try {
   });
 
   receipt = await config.publicClient.waitForTransactionReceipt({
-    hash: txHash,
+    hash,
   });
   const verifier = receipt.contractAddress;
   console.log(`Verifier deployed to ${config.chainName}`, verifier);
