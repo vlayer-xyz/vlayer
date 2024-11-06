@@ -24,8 +24,8 @@ function run_browser_extension {
 }
 
 function install_deps {
-    cd ${VLAYER_HOME}/packages && bun install --frozen-lockfile
-    cd ${VLAYER_HOME}/examples/web_proof/vlayer && bun install --frozen-lockfile
+    cd ${VLAYER_HOME}/packages && bun install 
+    cd ${VLAYER_HOME}/examples/web_proof/vlayer && bun install 
 }
 
 install_deps

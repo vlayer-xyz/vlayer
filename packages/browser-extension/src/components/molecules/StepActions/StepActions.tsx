@@ -7,7 +7,7 @@ import { StartPageStepActions } from "./StartPageStepActions";
 import { StepStatus } from "constants/step";
 
 export const StepActions: React.FC<{
-  kind: "notarize" | "expectUrl" | "startPage";
+  kind: "notarize" | "expectUrl" | "startPage" | "notarizeGql";
   index: number;
   link?: string;
   label: string;
@@ -34,7 +34,17 @@ export const StepActions: React.FC<{
             status={status}
           />
         ))
-        .exhaustive()}
+        .with("notarizeGql", () => (
+          <NotarizeStepActions
+            isVisited={false}
+            link={link || ""}
+            buttonText={buttonText || ""}
+            status={status}
+          />
+        ))
+        .otherwise(() => (
+          <>Unknown step</>
+        ))}
     </>
   );
 };

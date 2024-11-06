@@ -35,7 +35,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
   useTrackHistory();
   const [provingSessionConfig] = useProvingSessionConfig();
   const provenUrl = useProvenUrl();
-
+  console.log("provenUrl", provenUrl);
   // format headers to make it accepted by tlsn js api
   useEffect(() => {
     setFormattedHeaders(
@@ -49,8 +49,8 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
     try {
       isDefined(provenUrl?.url, "Missing URL to prove");
       isDefined(provingSessionConfig, "Missing proving session config");
-
-      const tlsnProof = await tlsnProve(removeQueryParams(provenUrl?.url), {
+      console.log("proving", provingSessionConfig.wsProxyUrl);
+      const tlsnProof = await tlsnProve(provenUrl?.url, {
         notaryUrl: provingSessionConfig.notaryUrl || "",
         websocketProxyUrl: `${provingSessionConfig.wsProxyUrl}?token=${new URL(provenUrl.url).host}`,
         method: "GET",

@@ -5,6 +5,7 @@ export const EXTENSION_STEP = {
   expectUrl: "expectUrl",
   startPage: "startPage",
   notarize: "notarize",
+  notarizeGql: "notarizeGql",
 } as const;
 
 export type ExtensionStep =
@@ -56,7 +57,8 @@ export type WebProverSessionConfig = {
 export type WebProofStep =
   | WebProofStepNotarize
   | WebProofStepExpectUrl
-  | WebProofStepStartPage;
+  | WebProofStepStartPage
+  | WebProofStepNotarizeGql;
 
 export type WebProofStepNotarize = Branded<
   {
@@ -66,6 +68,17 @@ export type WebProofStepNotarize = Branded<
     step: typeof EXTENSION_STEP.notarize;
   },
   "notarize"
+>;
+
+export type WebProofStepNotarizeGql = Branded<
+  {
+    url: string;
+    method: string;
+    label: string;
+    step: typeof EXTENSION_STEP.notarizeGql;
+    query: object;
+  },
+  "notarizeGql"
 >;
 
 export type WebProofStepExpectUrl = Branded<

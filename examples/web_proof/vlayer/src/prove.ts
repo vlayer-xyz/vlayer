@@ -14,6 +14,7 @@ import {
   createExtensionWebProofProvider,
   expectUrl,
   notarize,
+  notarizeGql,
   startPage,
 } from "@vlayer/sdk/web_proof";
 
@@ -39,18 +40,29 @@ export async function setupRequestProveButton(element: HTMLButtonElement) {
         commitmentArgs: ["0x"],
       },
       logoUrl: "http://twitterswap.com/logo.png",
+      // steps: [
+      //   startPage("https://x.com/i/flow/login", "Go to x.com login page"),
+      //   expectUrl("https://x.com/home", "Log in"),
+      //   notarize(
+      //     "https://api.x.com/1.1/account/settings.json",
+      //     "GET",
+      //     "Generate Proof of Twitter profile",
+      //   ),
+      // ],
       steps: [
         startPage("https://x.com/i/flow/login", "Go to x.com login page"),
         expectUrl("https://x.com/home", "Log in"),
-        notarize(
-          "https://api.x.com/1.1/account/settings.json",
-          "GET",
+        startPage("https://x.com/vlayer_xyz", "Go to vlayer_xyz"),
+        notarizeGql(
+          "https://x.com/i/api/graphql/*/UserByScreenName",
+          {
+            variables: { screen_name: "vlayer_xyz" },
+          },
           "Generate Proof of Twitter profile",
         ),
       ],
     });
 
-    console.log("WebProof generated!", webProof);
     context.webProof = webProof;
   });
 }

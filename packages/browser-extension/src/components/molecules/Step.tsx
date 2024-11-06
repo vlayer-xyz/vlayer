@@ -14,7 +14,7 @@ type StepProps = {
   index: number;
   showSeparator: boolean;
   link?: string;
-  kind: "expectUrl" | "notarize" | "startPage";
+  kind: "expectUrl" | "notarize" | "startPage" | "notarizeGql";
 };
 const StepStatusIndicator = (props: StepProps) => {
   return (

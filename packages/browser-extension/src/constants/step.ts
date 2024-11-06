@@ -7,7 +7,7 @@ export enum StepStatus {
 export type Step = {
   status: StepStatus;
   label: string;
-  kind: "expectUrl" | "notarize" | "startPage";
+  kind: "expectUrl" | "notarize" | "startPage" | "notarizeGql";
   link?: string;
   buttonText?: string;
 };

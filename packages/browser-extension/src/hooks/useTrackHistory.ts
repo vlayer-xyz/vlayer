@@ -19,6 +19,7 @@ export const useTrackHeaders = () => {
   return useCallback((urls: string[]) => {
     browser.webRequest.onBeforeSendHeaders.addListener(
       (details) => {
+        console.log("Tracking headers", details);
         historyContextManager
           .updateHistory({
             url: details.url,
@@ -83,6 +84,7 @@ export const useTrackHistory = () => {
       .getUrls()
       .then((urlBases: string[]) => {
         const urls = urlBases.map(urlToMatchPattern);
+        console.log("Tracking urls", urls);
         trackHeaders(urls);
         trackCookies(urls);
         trackCompleteness(urls);

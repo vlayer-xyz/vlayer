@@ -8,13 +8,13 @@ import {
 import browser from "webextension-polyfill";
 import { LOADING } from "./constants";
 
+console.log(browser);
 function createStorageHook(storage: browser.Storage.StorageArea) {
   return function useStorage<T>(
     storageKey: string,
     initialValue?: T,
   ): [T | typeof LOADING, Dispatch<SetStateAction<T | typeof LOADING>>] {
     const [storedValue, setStoredValue] = useState<T | typeof LOADING>(LOADING);
-
     useEffect(() => {
       storage
         .get(storageKey)
@@ -26,7 +26,7 @@ function createStorageHook(storage: browser.Storage.StorageArea) {
           }
         })
         .catch(console.error);
-    }, [storageKey, initialValue]);
+    }, [storageKey, JSON.stringify(initialValue)]);
 
     useEffect(() => {
       const handleStorageChange = (changes: {
