@@ -21,7 +21,6 @@ let hash = await ethClient.deployContract({
   chain: config.chain,
 });
 const prover = await getContractAddr(ethClient, hash);
-if (!prover) throw new Error("prover not deployed");
 
 hash = await ethClient.deployContract({
   abi: webProofVerifier.abi,
@@ -47,7 +46,7 @@ async function testSuccessProvingAndVerification() {
   const webProof = { tls_proof: tls_proof, notary_pub_key: notaryPubKey };
 
   const { hash } = await vlayer.prove({
-    address: prover as `0x${string}`,
+    address: prover,
     functionName: "main",
     proverAbi: webProofProver.abi,
     args: [
@@ -73,7 +72,7 @@ async function testSuccessProvingAndVerification() {
   console.log("Verifying...");
 
   await ethClient.writeContract({
-    address: verifier as `0x${string}`,
+    address: verifier,
     abi: webProofVerifier.abi,
     functionName: "verify",
     args: [proof, twitterHandle, address],
@@ -84,7 +83,7 @@ async function testSuccessProvingAndVerification() {
   console.log("Verified!");
 
   const balance = await ethClient.readContract({
-    address: verifier as `0x${string}`,
+    address: verifier,
     abi: webProofVerifier.abi,
     functionName: "balanceOf",
     args: [twitterUserAddress],
@@ -93,7 +92,7 @@ async function testSuccessProvingAndVerification() {
   assert.strictEqual(balance, 1n);
 
   const tokenOwnerAddress = await ethClient.readContract({
-    address: verifier as `0x${string}`,
+    address: verifier,
     abi: webProofVerifier.abi,
     functionName: "ownerOf",
     args: [generateTokenId(twitterHandle)],
@@ -109,7 +108,7 @@ async function testFailedProving() {
 
   try {
     const { hash } = await vlayer.prove({
-      address: prover as `0x${string}`,
+      address: prover,
       functionName: "main",
       proverAbi: webProofProver.abi,
       args: [

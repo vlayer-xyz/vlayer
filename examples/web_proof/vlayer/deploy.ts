@@ -14,7 +14,6 @@ let hash = await ethClient.deployContract({
   chain: config.chain,
 });
 const prover = await getContractAddr(ethClient, hash);
-if (!prover) throw new Error("prover not deployed");
 console.log(`Prover deployed to ${config.chainName}`, prover);
 
 hash = await ethClient.deployContract({
@@ -25,7 +24,6 @@ hash = await ethClient.deployContract({
   chain: config.chain,
 });
 const verifier = await getContractAddr(ethClient, hash);
-if (!verifier) throw new Error("verifier not deployed");
 console.log(`Verifier deployed to ${config.chainName}`, verifier);
 
 await updateDotFile(config.envPath, {
