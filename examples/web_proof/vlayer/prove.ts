@@ -6,7 +6,7 @@ import * as assert from "assert";
 import { encodePacked, isAddress, keccak256 } from "viem";
 import { foundry } from "viem/chains";
 import { getConfig } from "./config";
-import { getEthClient } from "./helpers";
+import { getEthClient, getContractAddr } from "./helpers";
 
 const config = await getConfig();
 const ethClient = getEthClient(config.chain, config.jsonRpcUrl);
@@ -20,13 +20,8 @@ let hash = await ethClient.deployContract({
   args: [],
   chain: config.chain,
 });
-let receipt = await ethClient.waitForTransactionReceipt({
-  hash,
-});
-if (receipt.status != "success") {
-  throw new Error(`Prover deployment failed with status: ${receipt.status}`);
-}
-const prover = receipt.contractAddress;
+const prover = await getContractAddr(ethClient, hash);
+if (!prover) throw new Error("prover not deployed");
 
 hash = await ethClient.deployContract({
   abi: webProofVerifier.abi,
@@ -36,9 +31,7 @@ hash = await ethClient.deployContract({
   chain: config.chain,
 });
 
-receipt = await ethClient.waitForTransactionReceipt({ hash });
-const verifier = receipt.contractAddress;
-
+const verifier = await getContractAddr(ethClient, hash);
 const twitterUserAddress = config.deployer.address;
 
 const vlayer = createVlayerClient({
@@ -54,7 +47,7 @@ async function testSuccessProvingAndVerification() {
   const webProof = { tls_proof: tls_proof, notary_pub_key: notaryPubKey };
 
   const { hash } = await vlayer.prove({
-    address: prover,
+    address: prover as `0x${string}`,
     functionName: "main",
     proverAbi: webProofProver.abi,
     args: [
@@ -91,7 +84,7 @@ async function testSuccessProvingAndVerification() {
   console.log("Verified!");
 
   const balance = await ethClient.readContract({
-    address: verifier,
+    address: verifier as `0x${string}`,
     abi: webProofVerifier.abi,
     functionName: "balanceOf",
     args: [twitterUserAddress],
@@ -100,7 +93,7 @@ async function testSuccessProvingAndVerification() {
   assert.strictEqual(balance, 1n);
 
   const tokenOwnerAddress = await ethClient.readContract({
-    address: verifier,
+    address: verifier as `0x${string}`,
     abi: webProofVerifier.abi,
     functionName: "ownerOf",
     args: [generateTokenId(twitterHandle)],
@@ -116,7 +109,7 @@ async function testFailedProving() {
 
   try {
     const { hash } = await vlayer.prove({
-      address: prover,
+      address: prover as `0x${string}`,
       functionName: "main",
       proverAbi: webProofProver.abi,
       args: [

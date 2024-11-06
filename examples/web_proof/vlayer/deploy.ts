@@ -1,6 +1,6 @@
 import webProofProver from "../out/WebProofProver.sol/WebProofProver";
 import webProofVerifier from "../out/WebProofVerifier.sol/WebProofVerifier";
-import { updateDotFile, getEthClient } from "./helpers";
+import { updateDotFile, getEthClient, getContractAddr } from "./helpers";
 import { getConfig } from "./config";
 
 const config = await getConfig();
@@ -13,13 +13,8 @@ let hash = await ethClient.deployContract({
   args: [],
   chain: config.chain,
 });
-let receipt = await ethClient.waitForTransactionReceipt({
-  hash,
-});
-if (receipt.status != "success") {
-  throw new Error(`Prover deployment failed with status: ${receipt.status}`);
-}
-const prover = receipt.contractAddress;
+const prover = await getContractAddr(ethClient, hash);
+if (!prover) throw new Error("prover not deployed");
 console.log(`Prover deployed to ${config.chainName}`, prover);
 
 hash = await ethClient.deployContract({
@@ -29,18 +24,9 @@ hash = await ethClient.deployContract({
   args: [prover],
   chain: config.chain,
 });
-
-receipt = await ethClient.waitForTransactionReceipt({
-  hash,
-});
-const verifier = receipt.contractAddress;
+const verifier = await getContractAddr(ethClient, hash);
+if (!verifier) throw new Error("verifier not deployed");
 console.log(`Verifier deployed to ${config.chainName}`, verifier);
-
-if (receipt.status != "success") {
-  throw new Error(`Verifier deployment failed with status: ${receipt.status}`);
-}
-
-if (!verifier || !prover) throw new Error("verifier or prover not deployed");
 
 await updateDotFile(config.envPath, {
   VITE_PROVER_ADDRESS: prover,

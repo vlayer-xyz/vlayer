@@ -1,4 +1,4 @@
-import { createWalletClient, publicActions, http, type Chain } from "viem";
+import { createWalletClient, publicActions, http, type Chain, type PublicClient } from "viem";
 import Bun from "bun";
 import fs from "node:fs/promises";
 import dotenv from "dotenv";
@@ -8,6 +8,18 @@ export const getEthClient = (chain: Chain, jsonRpcUrl: string) =>
     chain,
     transport: http(jsonRpcUrl),
   }).extend(publicActions);
+
+export const getContractAddr = async (
+  client: PublicClient,
+  hash: `0x${string}`,
+) => {
+  const receipt = await client.waitForTransactionReceipt({ hash });
+  if (receipt.status != "success") {
+    throw new Error(`Prover deployment failed with status: ${receipt.status}`);
+  }
+
+  return receipt.contractAddress;
+};
 
 export const updateDotFile = async (
   envPath: string,
