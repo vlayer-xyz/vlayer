@@ -5,20 +5,22 @@ import tls_proof from "./tls_proof.json";
 import * as assert from "assert";
 import { encodePacked, isAddress, keccak256 } from "viem";
 import { foundry } from "viem/chains";
-import { getConfig } from "./helpers";
+import { getConfig } from "./config";
+import { getEthClient } from "./helpers";
 
 const config = await getConfig();
+const ethClient = getEthClient(config.chain, config.jsonRpcUrl);
 
 const notaryPubKey =
   "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExpX/4R4z40gI6C/j9zAM39u58LJu\n3Cx5tXTuqhhu/tirnBi5GniMmspOTEsps4ANnPLpMmMSfhJ+IFHbc3qVOA==\n-----END PUBLIC KEY-----\n";
-let hash = await config.walletClient.deployContract({
+let hash = await ethClient.deployContract({
   abi: webProofProver.abi,
   bytecode: webProofProver.bytecode.object,
   account: config.deployer,
   args: [],
   chain: config.chain,
 });
-let receipt = await config.publicClient.waitForTransactionReceipt({
+let receipt = await ethClient.waitForTransactionReceipt({
   hash,
 });
 if (receipt.status != "success") {
@@ -26,7 +28,7 @@ if (receipt.status != "success") {
 }
 const prover = receipt.contractAddress;
 
-hash = await config.walletClient.deployContract({
+hash = await ethClient.deployContract({
   abi: webProofVerifier.abi,
   bytecode: webProofVerifier.bytecode.object,
   account: config.deployer,
@@ -34,7 +36,7 @@ hash = await config.walletClient.deployContract({
   chain: config.chain,
 });
 
-receipt = await config.publicClient.waitForTransactionReceipt({ hash });
+receipt = await ethClient.waitForTransactionReceipt({ hash });
 const verifier = receipt.contractAddress;
 
 const twitterUserAddress = config.deployer.address;
@@ -77,7 +79,7 @@ async function testSuccessProvingAndVerification() {
 
   console.log("Verifying...");
 
-  await config.walletClient.writeContract({
+  await ethClient.writeContract({
     address: verifier as `0x${string}`,
     abi: webProofVerifier.abi,
     functionName: "verify",
@@ -88,7 +90,7 @@ async function testSuccessProvingAndVerification() {
 
   console.log("Verified!");
 
-  const balance = await config.publicClient.readContract({
+  const balance = await ethClient.readContract({
     address: verifier,
     abi: webProofVerifier.abi,
     functionName: "balanceOf",
@@ -97,7 +99,7 @@ async function testSuccessProvingAndVerification() {
 
   assert.strictEqual(balance, 1n);
 
-  const tokenOwnerAddress = await config.publicClient.readContract({
+  const tokenOwnerAddress = await ethClient.readContract({
     address: verifier,
     abi: webProofVerifier.abi,
     functionName: "ownerOf",
