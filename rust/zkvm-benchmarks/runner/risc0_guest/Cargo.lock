@@ -843,7 +843,6 @@ dependencies = [
  "alloy-rlp",
  "alloy-sol-types",
  "anyhow",
- "auto_impl",
  "bincode",
  "block_header",
  "chain",

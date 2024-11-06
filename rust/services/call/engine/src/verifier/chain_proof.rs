@@ -1,4 +1,5 @@
 use alloy_primitives::B256;
+#[cfg(test)]
 use auto_impl::auto_impl;
 use block_header::Hashable;
 use chain_common::ChainProof;
@@ -22,8 +23,17 @@ pub enum ChainProofError {
     RootHash { proven: B256, actual: B256 },
 }
 
-#[auto_impl(Fn)]
-pub trait ChainProofVerifier: Send + Sync + 'static {
+mod seal {
+    // This trait prevents adding new implementations of ChainProofVerifier
+    pub trait Sealed {}
+
+    // Useful to mock verifier in tests
+    #[cfg(test)]
+    impl<F: Fn(&super::ChainProof) -> Result<(), super::ChainProofError>> Sealed for F {}
+}
+
+#[cfg_attr(test, auto_impl(Fn))]
+pub trait ChainProofVerifier: seal::Sealed + Send + Sync + 'static {
     fn verify(&self, proof: &ChainProof) -> Result<(), ChainProofError>;
 }
 
@@ -42,8 +52,11 @@ impl ZkChainProofVerifier {
             zk_verifier: Box::new(zk_verifier),
         }
     }
+}
 
-    pub fn verify(&self, proof: &ChainProof) -> Result<(), ChainProofError> {
+impl seal::Sealed for ZkChainProofVerifier {}
+impl ChainProofVerifier for ZkChainProofVerifier {
+    fn verify(&self, proof: &ChainProof) -> Result<(), ChainProofError> {
         let receipt = bincode::deserialize(&proof.proof)?;
         self.zk_verifier.verify(&receipt, self.chain_guest_id)?;
         let (proven_root, elf_id) = receipt.journal.decode()?;
