@@ -18,6 +18,7 @@ runs:
           rust/services/call/guest_wrapper/risc0_guest
           rust/services/chain/guest_wrapper/risc0_guest
         cache-on-failure: false
+        save-if: ${{ github.ref == 'refs/heads/main' }}
 
     - name: Install cargo binstall
       uses: taiki-e/cache-cargo-install-action@caa6f48d18d42462f9c30df89e2b4f71a42b7c2c # v2.0.1
