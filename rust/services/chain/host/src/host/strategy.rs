@@ -1,16 +1,10 @@
-use std::{
-    cmp::{max, min},
-    fmt::{Display, Formatter},
-    ops::RangeInclusive,
-};
+use std::fmt::{Display, Formatter};
 
 use alloy_primitives::BlockNumber;
 use derivative::Derivative;
 use derive_new::new;
+use range::{NonEmptyRange, Range};
 use tracing::info;
-
-use super::range_utils::{limit_left, limit_right, EMPTY_RANGE};
-use crate::host::range_utils::len;
 
 const GENESIS: BlockNumber = 0;
 
@@ -23,19 +17,15 @@ pub struct Strategy {
 
 #[derive(Debug, Eq, PartialEq)]
 pub struct AppendPrependRanges {
-    pub prepend: RangeInclusive<BlockNumber>,
-    pub append: RangeInclusive<BlockNumber>,
-    pub new_range: RangeInclusive<BlockNumber>,
+    pub prepend: Range,
+    pub append: Range,
+    pub new_range: NonEmptyRange,
 }
 
 impl AppendPrependRanges {
-    pub fn new(
-        old_range: &RangeInclusive<BlockNumber>,
-        append: RangeInclusive<BlockNumber>,
-        prepend: RangeInclusive<BlockNumber>,
-    ) -> Self {
-        let new_range =
-            *min(prepend.start(), old_range.start())..=*max(append.end(), old_range.end());
+    pub fn new(old_range: NonEmptyRange, append_count: u64, prepend_count: u64) -> Self {
+        let (new_range, append) = old_range.add_right(append_count).expect("Append overflow");
+        let (new_range, prepend) = new_range.add_left(prepend_count).expect("Prepend overflow");
         Self {
             prepend,
             append,
@@ -44,18 +34,12 @@ impl AppendPrependRanges {
     }
 }
 
-fn display_range_with_size(range: &RangeInclusive<BlockNumber>) -> String {
-    format!("{:?} ({})", range, len(range))
-}
-
 impl Display for AppendPrependRanges {
-    fn fmt(&self, f: &mut Formatter<'_>) -> Result<(), std::fmt::Error> {
+    fn fmt(&self, f: &mut Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "Prepend: {}, Append: {}, New range: {}",
-            display_range_with_size(&self.prepend),
-            display_range_with_size(&self.append),
-            display_range_with_size(&self.new_range)
+            "Prepend: {}, Range: {}, Append: {}",
+            self.prepend, self.new_range, self.append
         )
     }
 }
@@ -66,37 +50,37 @@ impl Strategy {
     // Returned ranges can be empty.
     pub fn get_append_prepend_ranges(
         &self,
-        range: &RangeInclusive<BlockNumber>,
+        range: NonEmptyRange,
         latest: BlockNumber,
     ) -> AppendPrependRanges {
-        let prepend = self.get_prepend_range(range);
-        let append = self.get_append_range(range, latest);
-        let ranges = AppendPrependRanges::new(range, append, prepend);
+        let ranges = AppendPrependRanges::new(
+            range,
+            self.get_append_count(range, latest),
+            self.get_prepend_count(range),
+        );
         info!("Append prepend ranges: {}", ranges);
         ranges
     }
 
-    fn get_prepend_range(&self, range: &RangeInclusive<BlockNumber>) -> RangeInclusive<u64> {
-        if *range.start() == GENESIS {
-            return EMPTY_RANGE;
+    fn get_prepend_count(&self, range: NonEmptyRange) -> u64 {
+        if range.start() == GENESIS {
+            return 0;
         }
-        let range = 0..=range.start() - 1; // SAFETY: No underflow. Genesis is handled above
-        limit_left(range, self.max_back_propagation_blocks)
+        let range = NonEmptyRange::try_from_range(GENESIS..=range.start() - 1).unwrap(); // SAFETY: start > 0
+        range.trim_left(self.max_back_propagation_blocks).len()
     }
 
-    fn get_append_range(
-        &self,
-        range: &RangeInclusive<BlockNumber>,
-        latest: BlockNumber,
-    ) -> RangeInclusive<u64> {
+    fn get_append_count(&self, range: NonEmptyRange, latest: BlockNumber) -> u64 {
         let confirmed = (latest + 1).saturating_sub(self.confirmations); // Genesis block is always confirmed
-        let range = range.end() + 1..=confirmed;
-        limit_right(range, self.max_head_blocks)
+        let range: Range = (range.end() + 1..=confirmed).into();
+        range.trim_right(self.max_head_blocks).len()
     }
 }
 
 #[cfg(test)]
 mod test {
+    use std::ops::RangeInclusive;
+
     use lazy_static::lazy_static;
 
     use super::*;
@@ -110,36 +94,38 @@ mod test {
             Strategy::new(MAX_HEAD_BLOCKS, MAX_BACK_PROPAGATION_BLOCKS, CONFIRMATIONS);
     }
 
+    fn r(range: RangeInclusive<u64>) -> NonEmptyRange {
+        NonEmptyRange::try_from_range(range).unwrap()
+    }
+
     mod append {
+
         use super::*;
 
         #[test]
-        #[allow(clippy::reversed_empty_ranges)]
-        fn latest_is_genesis_no_underflow_panic() {
-            assert_eq!(STRATEGY.get_append_range(&(0..=0), 0), 1..=0);
+        fn latest_is_genesis_does_not_cause_an_underflow_panic() {
+            assert_eq!(STRATEGY.get_append_count(r(0..=0), 0), 0);
         }
 
         #[test]
-        #[allow(clippy::reversed_empty_ranges)]
         fn same_block() {
             // Could happen after init or on 1-depth reorg
-            assert_eq!(STRATEGY.get_append_range(&(1..=1), 1), 2..=0);
+            assert_eq!(STRATEGY.get_append_count(r(1..=1), 1), 0);
         }
 
         #[test]
-        #[allow(clippy::reversed_empty_ranges)]
         fn new_block_not_enough_confirmations() {
-            assert_eq!(STRATEGY.get_append_range(&(0..=0), 1), 1..=0);
+            assert_eq!(STRATEGY.get_append_count(r(0..=0), 1), 0);
         }
 
         #[test]
         fn new_confirmed_block() {
-            assert_eq!(STRATEGY.get_append_range(&(0..=0), CONFIRMATIONS), 1..=1);
+            assert_eq!(STRATEGY.get_append_count(r(0..=0), CONFIRMATIONS), 1);
         }
 
         #[test]
         fn many_new_confirmed_blocks() {
-            assert_eq!(STRATEGY.get_append_range(&(0..=0), 100), 1..=MAX_HEAD_BLOCKS);
+            assert_eq!(STRATEGY.get_append_count(r(0..=0), 100), MAX_HEAD_BLOCKS);
         }
     }
 
@@ -149,26 +135,26 @@ mod test {
         #[test]
         #[allow(clippy::reversed_empty_ranges)]
         fn reached_genesis() {
-            assert_eq!(STRATEGY.get_prepend_range(&(0..=0)), 1..=0);
+            assert_eq!(STRATEGY.get_prepend_count(r(0..=0)), 0);
         }
 
         #[test]
         fn full_chunk() {
             assert_eq!(
-                STRATEGY.get_prepend_range(
-                    &(MAX_BACK_PROPAGATION_BLOCKS..=MAX_BACK_PROPAGATION_BLOCKS)
-                ),
-                0..=MAX_BACK_PROPAGATION_BLOCKS - 1
+                STRATEGY.get_prepend_count(r(
+                    MAX_BACK_PROPAGATION_BLOCKS..=MAX_BACK_PROPAGATION_BLOCKS
+                )),
+                MAX_BACK_PROPAGATION_BLOCKS
             );
         }
 
         #[test]
         fn partial_chunk() {
             assert_eq!(
-                STRATEGY.get_prepend_range(
-                    &(MAX_BACK_PROPAGATION_BLOCKS - 1..=MAX_BACK_PROPAGATION_BLOCKS - 1)
-                ),
-                0..=MAX_BACK_PROPAGATION_BLOCKS - 2
+                STRATEGY.get_prepend_count(r(
+                    MAX_BACK_PROPAGATION_BLOCKS - 1..=MAX_BACK_PROPAGATION_BLOCKS - 1
+                )),
+                MAX_BACK_PROPAGATION_BLOCKS - 1
             );
         }
     }
@@ -179,11 +165,11 @@ mod test {
         #[test]
         fn success() {
             assert_eq!(
-                STRATEGY.get_append_prepend_ranges(&(100..=100), 105),
+                STRATEGY.get_append_prepend_ranges(r(100..=100), 105),
                 AppendPrependRanges {
-                    prepend: 90..=99,
-                    append: 101..=104,
-                    new_range: 90..=104
+                    prepend: (90..=99).into(),
+                    append: (101..=104).into(),
+                    new_range: r(90..=104)
                 }
             );
         }

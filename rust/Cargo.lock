@@ -2166,6 +2166,7 @@ dependencies = [
  "mpt",
  "nybbles",
  "rand",
+ "range",
  "risc0-zkp",
  "risc0-zkvm",
  "serde",
@@ -2214,6 +2215,7 @@ dependencies = [
  "host_utils",
  "lazy_static",
  "provider",
+ "range",
  "risc0-zkvm",
  "serde",
  "serde_json",
@@ -2237,6 +2239,7 @@ dependencies = [
  "lazy_static",
  "mpt",
  "parking_lot",
+ "range",
  "risc0-zkp",
  "risc0-zkvm",
  "serde",
@@ -7840,6 +7843,13 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "d25bf25ec5ae4a3f1b92f929810509a2f53d7dca2f50b794ff57e3face536c8f"
 dependencies = [
  "rand_core",
+]
+
+[[package]]
+name = "range"
+version = "0.1.0"
+dependencies = [
+ "derive_more 1.0.0",
 ]
 
 [[package]]

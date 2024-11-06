@@ -2,7 +2,7 @@ use std::{
     collections::HashSet,
     fmt::{self},
     hash::Hash,
-    ops::{Deref, RangeInclusive},
+    ops::Deref,
     path::Path,
 };
 
@@ -26,6 +26,7 @@ pub use chain_trie::ChainTrie;
 pub use db_node::DbNode;
 pub use error::{ChainDbError, ChainDbResult};
 pub use proof_builder::MerkleProof;
+use range::NonEmptyRange;
 pub use receipt::ChainProofReceipt;
 use traits::Hashable;
 
@@ -37,29 +38,30 @@ const CHAINS: &str = "chains";
 
 #[derive(Clone, PartialEq, Eq, RlpEncodable, RlpDecodable, Default, Debug)]
 pub struct ChainInfo {
-    pub first_block: BlockNumber,
-    pub last_block: BlockNumber,
-    pub root_hash: B256,
+    first_block: BlockNumber,
+    last_block: BlockNumber,
+    root_hash: B256,
     #[debug("{zk_proof:#x}")]
-    pub zk_proof: Bytes,
+    zk_proof: Bytes,
 }
 
 impl ChainInfo {
-    pub const fn new(
-        block_range: RangeInclusive<BlockNumber>,
-        root_hash: B256,
-        zk_proof: Bytes,
-    ) -> Self {
+    pub const fn new(block_range: NonEmptyRange, root_hash: B256, zk_proof: Bytes) -> Self {
         Self {
-            first_block: *block_range.start(),
-            last_block: *block_range.end(),
+            first_block: block_range.start(),
+            last_block: block_range.end(),
             root_hash,
             zk_proof,
         }
     }
 
-    pub const fn block_range(&self) -> RangeInclusive<BlockNumber> {
-        self.first_block..=self.last_block
+    pub fn into_parts(self) -> (NonEmptyRange, B256, Bytes) {
+        (self.block_range(), self.root_hash, self.zk_proof)
+    }
+
+    pub fn block_range(&self) -> NonEmptyRange {
+        // SAFETY: was created from `NonEmptyRange`
+        NonEmptyRange::try_from_range(self.first_block..=self.last_block).unwrap()
     }
 }
 
@@ -101,7 +103,7 @@ impl ChainUpdate {
     }
 
     pub fn from_two_tries(
-        range: RangeInclusive<BlockNumber>,
+        range: NonEmptyRange,
         old: impl IntoIterator<Item = Bytes>,
         new: impl IntoIterator<Item = Bytes> + Hashable,
         receipt: &ChainProofReceipt,
@@ -186,19 +188,14 @@ impl ChainDb {
         let Some(chain_info) = self.get_chain_info(chain_id)? else {
             return Ok(None);
         };
-        let ChainInfo {
-            root_hash,
-            first_block,
-            last_block,
-            zk_proof,
-        } = chain_info;
+        let (range, root_hash, zk_proof) = chain_info.into_parts();
         let chain_proof = (&zk_proof).try_into()?;
 
-        let first_block_proof = tx.get_merkle_proof(root_hash, first_block)?;
-        let last_block_proof = tx.get_merkle_proof(root_hash, last_block)?;
+        let first_block_proof = tx.get_merkle_proof(root_hash, range.start())?;
+        let last_block_proof = tx.get_merkle_proof(root_hash, range.end())?;
         let trie = mpt_from_proofs(first_block_proof, last_block_proof);
 
-        Ok(Some(UnverifiedChainTrie::new(first_block..=last_block, trie, chain_proof)))
+        Ok(Some(UnverifiedChainTrie::new(range, trie, chain_proof)))
     }
 
     pub fn get_chain_trie(&self, chain_id: ChainId) -> ChainDbResult<Option<ChainTrie>> {
@@ -275,7 +272,7 @@ impl<TX: ReadTx + ?Sized> ChainDbTx<TX> {
 
         let mut nodes = HashSet::new();
         for block_num in block_numbers {
-            if !block_range.contains(&block_num) {
+            if !block_range.contains(block_num) {
                 return Err(ChainDbError::BlockNumberOutsideRange {
                     block_num,
                     block_range,

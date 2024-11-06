@@ -1,0 +1,221 @@
+use std::{
+    borrow::Borrow,
+    cmp::{max, min},
+    fmt::Display,
+    ops::RangeInclusive,
+};
+
+use crate::Range;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub struct NonEmptyRange {
+    start: u64,
+    end: u64,
+}
+
+impl NonEmptyRange {
+    pub const fn from_value(value: u64) -> Self {
+        Self {
+            start: value,
+            end: value,
+        }
+    }
+
+    pub fn try_from_range(range: RangeInclusive<u64>) -> Option<Self> {
+        (range.start() <= range.end()).then(|| Self {
+            start: *range.start(),
+            end: *range.end(),
+        })
+    }
+
+    pub const fn start(&self) -> u64 {
+        self.start
+    }
+
+    pub const fn end(&self) -> u64 {
+        self.end
+    }
+
+    pub fn len(&self) -> u64 {
+        if self.end - self.start == u64::MAX {
+            panic!("Range length overflow");
+        }
+        self.end - self.start + 1
+    }
+
+    pub const fn is_empty(&self) -> bool {
+        false
+    }
+
+    pub fn trim_left(&self, limit: u64) -> Range {
+        if limit == 0 {
+            return Range::EMPTY;
+        }
+        let start = self.end.saturating_sub(limit - 1);
+        let start = max(start, self.start);
+        NonEmptyRange::try_from_range(start..=self.end).into()
+    }
+
+    pub fn trim_right(&self, limit: u64) -> Range {
+        if limit == 0 {
+            return Range::EMPTY;
+        }
+        let end = self.start.saturating_add(limit - 1);
+        let end = min(end, self.end);
+        NonEmptyRange::try_from_range(self.start..=end).into()
+    }
+
+    pub fn add_right(&self, count: u64) -> Option<(NonEmptyRange, Range)> {
+        if count == 0 {
+            return Some((*self, Range::EMPTY));
+        }
+        let new_end = self.end.checked_add(count)?;
+        let new_range = NonEmptyRange::try_from_range(self.start..=new_end)
+            .expect("Extending non-empty range yields a non-empty range");
+        let append = (self.end.checked_add(1)?..=new_end).into();
+        Some((new_range, append))
+    }
+
+    pub fn add_left(&self, count: u64) -> Option<(NonEmptyRange, Range)> {
+        if count == 0 {
+            return Some((*self, Range::EMPTY));
+        }
+        let new_start = self.start.checked_sub(count)?;
+        let new_range = NonEmptyRange::try_from_range(new_start..=self.end)
+            .expect("Extending non-empty range yields a non-empty range");
+        let prepend = (new_start..=self.start.checked_sub(1)?).into();
+        Some((new_range, prepend))
+    }
+
+    pub const fn contains(&self, value: u64) -> bool {
+        self.start <= value && value <= self.end
+    }
+}
+
+impl From<u64> for NonEmptyRange {
+    fn from(value: u64) -> Self {
+        Self::from_value(value)
+    }
+}
+
+impl From<NonEmptyRange> for RangeInclusive<u64> {
+    fn from(range: NonEmptyRange) -> Self {
+        range.start..=range.end
+    }
+}
+
+impl From<&NonEmptyRange> for RangeInclusive<u64> {
+    fn from(range: &NonEmptyRange) -> Self {
+        range.start..=range.end
+    }
+}
+
+impl<R: Borrow<RangeInclusive<u64>>> PartialEq<R> for NonEmptyRange {
+    fn eq(&self, other: &R) -> bool {
+        &<NonEmptyRange as Into<RangeInclusive<u64>>>::into(*self) == other.borrow()
+    }
+}
+
+impl Display for NonEmptyRange {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "[{}..{}] ({})", self.start, self.end, self.len())
+    }
+}
+
+impl IntoIterator for NonEmptyRange {
+    type IntoIter = std::ops::Range<u64>;
+    type Item = u64;
+
+    fn into_iter(self) -> Self::IntoIter {
+        self.start..self.end
+    }
+}
+
+#[cfg(test)]
+#[allow(clippy::reversed_empty_ranges)]
+mod tests {
+
+    use super::*;
+
+    fn r(range: RangeInclusive<u64>) -> NonEmptyRange {
+        NonEmptyRange::try_from_range(range).unwrap()
+    }
+
+    #[test]
+    fn try_from_range() {
+        assert_eq!(NonEmptyRange::try_from_range(1..=1), Some(NonEmptyRange { start: 1, end: 1 }));
+        assert_eq!(NonEmptyRange::try_from_range(1..=0), None);
+    }
+
+    mod len {
+        use super::*;
+
+        #[test]
+        fn success() {
+            assert_eq!(NonEmptyRange { start: 1, end: 1 }.len(), 1);
+            assert_eq!(
+                NonEmptyRange {
+                    start: 0,
+                    end: u64::MAX - 1
+                }
+                .len(),
+                u64::MAX
+            );
+        }
+
+        #[test]
+        #[should_panic(expected = "Range length overflow")]
+        fn overflow() {
+            NonEmptyRange {
+                start: 0,
+                end: u64::MAX,
+            }
+            .len();
+        }
+    }
+
+    #[test]
+    fn is_empty() {
+        assert!(!NonEmptyRange::from_value(1).is_empty());
+    }
+
+    #[test]
+    fn trim_left() {
+        assert_eq!(r(0..=1).trim_left(0), Range::EMPTY);
+        assert_eq!(r(0..=1).trim_left(1), 1..=1);
+        assert_eq!(r(0..=1).trim_left(2), 0..=1);
+        assert_eq!(r(0..=1).trim_left(3), 0..=1);
+    }
+
+    #[test]
+    fn trim_right() {
+        assert_eq!(r(0..=1).trim_right(0), Range::EMPTY);
+        assert_eq!(r(0..=1).trim_right(1), 0..=0);
+        assert_eq!(r(0..=1).trim_right(2), 0..=1);
+        assert_eq!(r(0..=1).trim_right(3), 0..=1);
+    }
+
+    #[test]
+    fn add_right() {
+        assert_eq!(r(0..=1).add_right(0), Some((r(0..=1), Range::EMPTY)));
+        assert_eq!(r(0..=1).add_right(1), Some((r(0..=2), (2..=2).into())));
+        assert_eq!(r(0..=1).add_right(2), Some((r(0..=3), (2..=3).into())));
+        assert_eq!(r(0..=u64::MAX).add_right(1), None);
+    }
+
+    #[test]
+    fn add_left() {
+        assert_eq!(r(2..=3).add_left(0), Some((r(2..=3), Range::EMPTY)));
+        assert_eq!(r(2..=3).add_left(1), Some((r(1..=3), (1..=1).into())));
+        assert_eq!(r(2..=3).add_left(2), Some((r(0..=3), (0..=1).into())));
+        assert_eq!(r(2..=3).add_left(3), None);
+    }
+
+    #[test]
+    fn contains() {
+        assert!(!r(1..=2).contains(0));
+        assert!(r(1..=2).contains(1));
+        assert!(r(1..=2).contains(2));
+        assert!(!r(1..=2).contains(3));
+    }
+}

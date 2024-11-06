@@ -1,0 +1,10 @@
+[package]
+name = "range"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+derive_more = { workspace = true }
+
+[lints]
+workspace = true
