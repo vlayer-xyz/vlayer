@@ -1,3 +1,4 @@
+import { Branded } from "src/web-proof-commons";
 import {
   Abi,
   AbiStateMutability,
@@ -17,6 +18,8 @@ export type CallParams = {
 export type CallContext = {
   chain_id: number; // 31337
 };
+
+export type BrandedHash<T, F> = Branded<{ hash: string }, [T, F]>;
 
 export type Proof = {
   seal: {
