@@ -23,7 +23,8 @@ use lazy_static::lazy_static;
 use prover::Prover;
 use provider::{to_eth_block_header, EvmBlockHeader};
 use risc0_zkvm::sha::Digest;
-use strategy::{AppendPrependRanges, Strategy};
+use strategy::AppendPrependRanges;
+pub use strategy::Strategy;
 use tracing::{info, instrument};
 
 lazy_static! {
@@ -48,7 +49,7 @@ impl Host<Http> {
         let prover = Prover::new(config.proof_mode);
         let db = ChainDb::mdbx(config.db_path, Mode::ReadWrite)?;
 
-        Ok(Host::from_parts(prover, provider, db, config.chain_id))
+        Ok(Host::from_parts(prover, provider, db, config.chain_id, config.strategy))
     }
 }
 
@@ -56,18 +57,19 @@ impl<P> Host<P>
 where
     P: JsonRpcClient,
 {
-    pub fn from_parts(
+    pub const fn from_parts(
         prover: Prover,
         provider: Provider<P>,
         db: ChainDb,
         chain_id: ChainId,
+        strategy: Strategy,
     ) -> Self {
         Host {
             prover,
             provider,
             db,
             chain_id,
-            strategy: Strategy::default(),
+            strategy,
         }
     }
 
@@ -175,12 +177,20 @@ where
 
 #[cfg(test)]
 mod test {
-
+    use lazy_static::lazy_static;
     use serde_json::Value;
 
     use super::*;
 
+    const MAX_HEAD_BLOCKS: u64 = 10;
+    const MAX_BACK_PROPAGATION_BLOCKS: u64 = 10;
+    const CONFIRMATIONS: u64 = 2;
     const LATEST: u64 = 500;
+
+    lazy_static! {
+        static ref STRATEGY: Strategy =
+            Strategy::new(MAX_HEAD_BLOCKS, MAX_BACK_PROPAGATION_BLOCKS, CONFIRMATIONS);
+    }
 
     fn test_db() -> ChainDb {
         ChainDb::in_memory()
@@ -204,7 +214,13 @@ mod test {
         #[tokio::test]
         async fn initialize() -> anyhow::Result<()> {
             let db = test_db();
-            let host = Host::from_parts(Prover::default(), mock_provider([LATEST]), db, 1);
+            let host = Host::from_parts(
+                Prover::default(),
+                mock_provider([LATEST]),
+                db,
+                1,
+                STRATEGY.clone(),
+            );
 
             let chain_update = host.poll().await?;
             let Host { mut db, .. } = host;
@@ -218,16 +234,21 @@ mod test {
         }
 
         mod append_prepend {
-
             use alloy_primitives::BlockNumber;
-            use strategy::CONFIRMATIONS;
 
             use super::*;
             const GENESIS: BlockNumber = 0;
+            const CONFIRMATIONS: u64 = 2;
 
             async fn test_db_after_initialize() -> Result<ChainDb, HostError> {
                 let db = test_db();
-                let host = Host::from_parts(Prover::default(), mock_provider([GENESIS]), db, 1);
+                let host = Host::from_parts(
+                    Prover::default(),
+                    mock_provider([GENESIS]),
+                    db,
+                    1,
+                    STRATEGY.clone(),
+                );
 
                 let init_chain_update = host.poll().await?;
                 let Host { mut db, .. } = host;
@@ -239,8 +260,13 @@ mod test {
             #[tokio::test]
             async fn no_new_head_blocks_back_propagation_finished() -> anyhow::Result<()> {
                 let db = test_db_after_initialize().await?;
-                let host =
-                    Host::from_parts(Prover::default(), mock_provider([GENESIS, GENESIS]), db, 1);
+                let host = Host::from_parts(
+                    Prover::default(),
+                    mock_provider([GENESIS, GENESIS]),
+                    db,
+                    1,
+                    STRATEGY.clone(),
+                );
 
                 let chain_update = host.poll().await?;
                 let Host { mut db, .. } = host;
@@ -259,7 +285,7 @@ mod test {
                 let new_confirmed_block = latest - CONFIRMATIONS + 1;
                 let db = test_db_after_initialize().await?;
                 let provider = mock_provider([latest, new_confirmed_block, GENESIS]);
-                let host = Host::from_parts(Prover::default(), provider, db, 1);
+                let host = Host::from_parts(Prover::default(), provider, db, 1, STRATEGY.clone());
 
                 let chain_update = host.poll().await?;
                 let Host { mut db, .. } = host;

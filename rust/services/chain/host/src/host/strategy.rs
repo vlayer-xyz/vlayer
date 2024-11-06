@@ -6,24 +6,18 @@ use std::{
 
 use alloy_primitives::BlockNumber;
 use derivative::Derivative;
+use derive_new::new;
 use tracing::info;
 
 use super::range_utils::{limit_left, limit_right, EMPTY_RANGE};
 use crate::host::range_utils::len;
 
-pub const MAX_HEAD_BLOCKS: u64 = 10;
-pub const MAX_BACK_PROPAGATION_BLOCKS: u64 = 10;
-pub const CONFIRMATIONS: u64 = 2;
 const GENESIS: BlockNumber = 0;
 
-#[derive(Derivative)]
-#[derivative(Default)]
+#[derive(Clone, Derivative, Debug, new)]
 pub struct Strategy {
-    #[derivative(Default(value = "MAX_HEAD_BLOCKS"))]
     max_head_blocks: u64,
-    #[derivative(Default(value = "MAX_BACK_PROPAGATION_BLOCKS"))]
     max_back_propagation_blocks: u64,
-    #[derivative(Default(value = "CONFIRMATIONS"))]
     confirmations: u64,
 }
 
@@ -67,8 +61,8 @@ impl Display for AppendPrependRanges {
 }
 
 impl Strategy {
-    // Tells Host - which blocks to append and prepend.
-    // The ranges returned are touching the current range. [prepend][range][append]
+    // Tells Host which blocks to append and prepend.
+    // The returned ranges are adjacent to the current range. [prepend][range][append]
     // Returned ranges can be empty.
     pub fn get_append_prepend_ranges(
         &self,
@@ -103,38 +97,49 @@ impl Strategy {
 
 #[cfg(test)]
 mod test {
+    use lazy_static::lazy_static;
+
     use super::*;
+
+    const MAX_HEAD_BLOCKS: u64 = 10;
+    const MAX_BACK_PROPAGATION_BLOCKS: u64 = 10;
+    const CONFIRMATIONS: u64 = 2;
+
+    lazy_static! {
+        static ref STRATEGY: Strategy =
+            Strategy::new(MAX_HEAD_BLOCKS, MAX_BACK_PROPAGATION_BLOCKS, CONFIRMATIONS);
+    }
 
     mod append {
         use super::*;
 
         #[test]
         #[allow(clippy::reversed_empty_ranges)]
-        fn latest_is_genesis_does_not_cause_an_underflow_panic() {
-            assert_eq!(Strategy::default().get_append_range(&(0..=0), 0), 1..=0);
+        fn latest_is_genesis_no_underflow_panic() {
+            assert_eq!(STRATEGY.get_append_range(&(0..=0), 0), 1..=0);
         }
 
         #[test]
         #[allow(clippy::reversed_empty_ranges)]
         fn same_block() {
             // Could happen after init or on 1-depth reorg
-            assert_eq!(Strategy::default().get_append_range(&(1..=1), 1), 2..=0);
+            assert_eq!(STRATEGY.get_append_range(&(1..=1), 1), 2..=0);
         }
 
         #[test]
         #[allow(clippy::reversed_empty_ranges)]
         fn new_block_not_enough_confirmations() {
-            assert_eq!(Strategy::default().get_append_range(&(0..=0), 1), 1..=0);
+            assert_eq!(STRATEGY.get_append_range(&(0..=0), 1), 1..=0);
         }
 
         #[test]
         fn new_confirmed_block() {
-            assert_eq!(Strategy::default().get_append_range(&(0..=0), CONFIRMATIONS), 1..=1);
+            assert_eq!(STRATEGY.get_append_range(&(0..=0), CONFIRMATIONS), 1..=1);
         }
 
         #[test]
         fn many_new_confirmed_blocks() {
-            assert_eq!(Strategy::default().get_append_range(&(0..=0), 100), 1..=MAX_HEAD_BLOCKS);
+            assert_eq!(STRATEGY.get_append_range(&(0..=0), 100), 1..=MAX_HEAD_BLOCKS);
         }
     }
 
@@ -144,13 +149,13 @@ mod test {
         #[test]
         #[allow(clippy::reversed_empty_ranges)]
         fn reached_genesis() {
-            assert_eq!(Strategy::default().get_prepend_range(&(0..=0)), 1..=0);
+            assert_eq!(STRATEGY.get_prepend_range(&(0..=0)), 1..=0);
         }
 
         #[test]
         fn full_chunk() {
             assert_eq!(
-                Strategy::default().get_prepend_range(
+                STRATEGY.get_prepend_range(
                     &(MAX_BACK_PROPAGATION_BLOCKS..=MAX_BACK_PROPAGATION_BLOCKS)
                 ),
                 0..=MAX_BACK_PROPAGATION_BLOCKS - 1
@@ -160,7 +165,7 @@ mod test {
         #[test]
         fn partial_chunk() {
             assert_eq!(
-                Strategy::default().get_prepend_range(
+                STRATEGY.get_prepend_range(
                     &(MAX_BACK_PROPAGATION_BLOCKS - 1..=MAX_BACK_PROPAGATION_BLOCKS - 1)
                 ),
                 0..=MAX_BACK_PROPAGATION_BLOCKS - 2
@@ -174,7 +179,7 @@ mod test {
         #[test]
         fn success() {
             assert_eq!(
-                Strategy::default().get_append_prepend_ranges(&(100..=100), 105),
+                STRATEGY.get_append_prepend_ranges(&(100..=100), 105),
                 AppendPrependRanges {
                     prepend: 90..=99,
                     append: 101..=104,

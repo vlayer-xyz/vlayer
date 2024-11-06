@@ -2208,6 +2208,7 @@ dependencies = [
  "chain_test_utils",
  "derivative",
  "derive-new",
+ "dotenvy",
  "ethers",
  "futures",
  "host_utils",
@@ -11116,6 +11117,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "chain_host",
+ "dotenvy",
  "tokio",
  "tracing",
  "tracing-subscriber 0.3.18",
