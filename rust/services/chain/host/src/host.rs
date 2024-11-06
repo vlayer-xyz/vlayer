@@ -69,9 +69,9 @@ where
             db,
             chain_id,
             strategy: Strategy::new(
-                var("CONFIRMATIONS")?.parse()?,
                 var("MAX_HEAD_BLOCKS")?.parse()?,
                 var("MAX_BACK_PROPAGATION_BLOCKS")?.parse()?,
+                var("CONFIRMATIONS")?.parse()?,
             ),
         })
     }
@@ -223,16 +223,12 @@ mod test {
         }
 
         mod append_prepend {
-
-            use std::env;
-
             use alloy_primitives::BlockNumber;
             use dotenvy::dotenv;
             use lazy_static::lazy_static;
 
             lazy_static! {
-                static ref block_confirmations: u64 =
-                    var("CONFIRMATIONS").unwrap().parse().unwrap();
+                static ref confirmations: u64 = var("CONFIRMATIONS").unwrap().parse().unwrap();
             }
 
             use super::*;
@@ -252,9 +248,6 @@ mod test {
             #[tokio::test]
             async fn no_new_head_blocks_back_propagation_finished() -> anyhow::Result<()> {
                 dotenv().ok();
-                for (key, value) in env::vars() {
-                    println!("{}: {}", key, value);
-                }
                 let db = test_db_after_initialize().await?;
                 let host =
                     Host::from_parts(Prover::default(), mock_provider([GENESIS, GENESIS]), db, 1)?;
@@ -273,8 +266,8 @@ mod test {
             #[tokio::test]
             async fn new_confirmed_head_blocks_back_propagation_finished() -> anyhow::Result<()> {
                 dotenv().ok();
-                let latest = GENESIS + *block_confirmations;
-                let new_confirmed_block = latest - *block_confirmations + 1;
+                let latest = GENESIS + *confirmations;
+                let new_confirmed_block = latest - *confirmations + 1;
                 let db = test_db_after_initialize().await?;
                 let provider = mock_provider([latest, new_confirmed_block, GENESIS]);
                 let host = Host::from_parts(Prover::default(), provider, db, 1)?;

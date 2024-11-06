@@ -109,9 +109,9 @@ mod test {
             dotenv().ok();
 
             Strategy::new(
-                parse_env_var("CONFIRMATIONS"),
                 parse_env_var("MAX_HEAD_BLOCKS"),
                 parse_env_var("MAX_BACK_PROPAGATION_BLOCKS"),
+                parse_env_var("CONFIRMATIONS"),
             )
         };
     }
