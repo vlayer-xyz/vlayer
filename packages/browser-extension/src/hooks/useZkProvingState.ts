@@ -25,7 +25,7 @@ export const useZkProvingState = (): {
 
   return {
     value: state === LOADING ? ZkProvingStatus.NotStarted : state,
-    isError: state !== LOADING && !isValidZkProvingStatus(state) ? true : false,
+    isError: state !== LOADING && !isValidZkProvingStatus(state),
     error:
       state !== LOADING && !isValidZkProvingStatus(state)
         ? new InvalidZkProvingStatus(state)
