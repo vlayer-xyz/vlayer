@@ -1,0 +1,28 @@
+name: Test Release
+on: 
+  workflow_run:
+    workflows: ["Release vlayer artifacts"]
+    types: [completed]
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - ".github/workflows/test-release.yaml"
+      - "docker/web-proof/docker-compose-test-release.yaml"
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
+jobs:
+  test-release:
+    name: Test release
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - uses: hoverkraft-tech/compose-action@v2.0.2
+        with:
+          compose-file: docker/web-proof/docker-compose-test-release.yaml
+      - name: Test release
+        run: bash/test-release.sh

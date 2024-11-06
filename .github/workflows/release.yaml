@@ -434,19 +434,3 @@ jobs:
           subject-name: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
           subject-digest: ${{ steps.push.outputs.digest }}
           push-to-registry: true
-
-  test-release:
-    name: Test release
-    needs: [push-artifacts-to-s3, publish-sdk-to-npm, push-docker-image]
-    runs-on: ubuntu-24.04
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-      - uses: hoverkraft-tech/compose-action@v2.0.2
-        with:
-          compose-file: docker/web-proof/docker-compose-test-release.yaml
-      - name: Test release
-        run: bash/test-release.sh
-
