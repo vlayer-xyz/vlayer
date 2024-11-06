@@ -1,4 +1,4 @@
-use std::array::TryFromSliceError;
+use std::{array::TryFromSliceError, env::VarError, num::ParseIntError};
 
 use derivative::Derivative;
 use ethers::types::BlockNumber;
@@ -33,4 +33,8 @@ pub enum HostError {
         #[derivative(PartialEq = "ignore")]
         bincode::Error,
     ),
+    #[error("Environment variable error: {0}")]
+    EnvVar(#[from] VarError),
+    #[error("Integer parsing error: {0}")]
+    ParseInt(#[from] ParseIntError),
 }

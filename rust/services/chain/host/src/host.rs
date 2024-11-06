@@ -4,7 +4,7 @@ mod prover;
 mod range_utils;
 mod strategy;
 
-use std::ops::RangeInclusive;
+use std::{env::var, ops::RangeInclusive};
 
 use alloy_primitives::ChainId;
 use block_trie::BlockTrie;
@@ -23,7 +23,8 @@ use lazy_static::lazy_static;
 use prover::Prover;
 use provider::{to_eth_block_header, EvmBlockHeader};
 use risc0_zkvm::sha::Digest;
-use strategy::{AppendPrependRanges, Strategy};
+use strategy::AppendPrependRanges;
+pub use strategy::Strategy;
 use tracing::{info, instrument};
 
 lazy_static! {
@@ -48,7 +49,7 @@ impl Host<Http> {
         let prover = Prover::new(config.proof_mode);
         let db = ChainDb::mdbx(config.db_path, Mode::ReadWrite)?;
 
-        Ok(Host::from_parts(prover, provider, db, config.chain_id))
+        Ok(Host::from_parts(prover, provider, db, config.chain_id)?)
     }
 }
 
@@ -61,14 +62,18 @@ where
         provider: Provider<P>,
         db: ChainDb,
         chain_id: ChainId,
-    ) -> Self {
-        Host {
+    ) -> Result<Self, HostError> {
+        Ok(Host {
             prover,
             provider,
             db,
             chain_id,
-            strategy: Strategy::default(),
-        }
+            strategy: Strategy::new(
+                var("CONFIRMATIONS")?.parse()?,
+                var("MAX_HEAD_BLOCKS")?.parse()?,
+                var("MAX_BACK_PROPAGATION_BLOCKS")?.parse()?,
+            ),
+        })
     }
 
     #[instrument(skip(self))]
@@ -204,7 +209,7 @@ mod test {
         #[tokio::test]
         async fn initialize() -> anyhow::Result<()> {
             let db = test_db();
-            let host = Host::from_parts(Prover::default(), mock_provider([LATEST]), db, 1);
+            let host = Host::from_parts(Prover::default(), mock_provider([LATEST]), db, 1)?;
 
             let chain_update = host.poll().await?;
             let Host { mut db, .. } = host;
@@ -219,15 +224,22 @@ mod test {
 
         mod append_prepend {
 
+            use std::env;
+
             use alloy_primitives::BlockNumber;
-            use strategy::CONFIRMATIONS;
+            use lazy_static::lazy_static;
+            use dotenvy::dotenv;
+
+            lazy_static! {
+                static ref block_confirmations: u64 = var("CONFIRMATIONS").unwrap().parse().unwrap();
+            }
 
             use super::*;
             const GENESIS: BlockNumber = 0;
 
             async fn test_db_after_initialize() -> Result<ChainDb, HostError> {
                 let db = test_db();
-                let host = Host::from_parts(Prover::default(), mock_provider([GENESIS]), db, 1);
+                let host = Host::from_parts(Prover::default(), mock_provider([GENESIS]), db, 1)?;
 
                 let init_chain_update = host.poll().await?;
                 let Host { mut db, .. } = host;
@@ -238,9 +250,13 @@ mod test {
 
             #[tokio::test]
             async fn no_new_head_blocks_back_propagation_finished() -> anyhow::Result<()> {
+                dotenv().ok();
+                for (key, value) in env::vars() {
+                    println!("{}: {}", key, value);
+                }
                 let db = test_db_after_initialize().await?;
                 let host =
-                    Host::from_parts(Prover::default(), mock_provider([GENESIS, GENESIS]), db, 1);
+                    Host::from_parts(Prover::default(), mock_provider([GENESIS, GENESIS]), db, 1)?;
 
                 let chain_update = host.poll().await?;
                 let Host { mut db, .. } = host;
@@ -255,11 +271,12 @@ mod test {
 
             #[tokio::test]
             async fn new_confirmed_head_blocks_back_propagation_finished() -> anyhow::Result<()> {
-                let latest = GENESIS + CONFIRMATIONS;
-                let new_confirmed_block = latest - CONFIRMATIONS + 1;
+                dotenv().ok();
+                let latest = GENESIS + *block_confirmations;
+                let new_confirmed_block = latest - *block_confirmations + 1;
                 let db = test_db_after_initialize().await?;
                 let provider = mock_provider([latest, new_confirmed_block, GENESIS]);
-                let host = Host::from_parts(Prover::default(), provider, db, 1);
+                let host = Host::from_parts(Prover::default(), provider, db, 1)?;
 
                 let chain_update = host.poll().await?;
                 let Host { mut db, .. } = host;
