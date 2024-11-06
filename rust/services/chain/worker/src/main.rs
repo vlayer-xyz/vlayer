@@ -16,9 +16,9 @@ async fn main() -> anyhow::Result<()> {
         proof_mode: ProofMode::Fake,
         db_path: "chain_db".to_string(),
         strategy: Strategy::new(
-            parse_env_var("CONFIRMATIONS")?,
-            parse_env_var("MAX_HEAD_BLOCKS")?,
-            parse_env_var("MAX_BACK_PROPAGATION_BLOCKS")?,
+            parse_env_u64("CONFIRMATIONS")?,
+            parse_env_u64("MAX_HEAD_BLOCKS")?,
+            parse_env_u64("MAX_BACK_PROPAGATION_BLOCKS")?,
         ),
     };
 
@@ -28,6 +28,6 @@ async fn main() -> anyhow::Result<()> {
     }
 }
 
-fn parse_env_var(key: &str) -> anyhow::Result<u64> {
+fn parse_env_u64(key: &str) -> anyhow::Result<u64> {
     var(key)?.parse().map_err(Into::into)
 }
