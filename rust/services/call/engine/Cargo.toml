@@ -40,7 +40,7 @@ web_proof = { workspace = true }
 [dev-dependencies]
 alloy-trie = { workspace = true }
 block_trie = { workspace = true }
-bytemuck = "1.19.0"
+bytemuck = { workspace = true }
 serde_json = { workspace = true }
 test-log = { workspace = true }
 tokio = { workspace = true, features = ["rt", "macros"] }

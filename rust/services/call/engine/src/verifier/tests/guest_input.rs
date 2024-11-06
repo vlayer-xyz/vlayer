@@ -21,8 +21,8 @@ fn mock_chain_client(
 
 fn mock_chain_proof(block_trie: BlockTrie) -> ChainProof {
     ChainProof {
-        proof: Default::default(),
         block_trie,
+        ..Default::default()
     }
 }
 

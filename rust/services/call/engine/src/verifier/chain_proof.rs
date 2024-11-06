@@ -3,10 +3,10 @@ use auto_impl::auto_impl;
 use block_header::Hashable;
 use chain_common::ChainProof;
 use risc0_zkp::verify::VerificationError;
-use risc0_zkvm::{sha::Digest, Receipt};
+use risc0_zkvm::sha::Digest;
 use static_assertions::assert_obj_safe;
 
-use super::ZkProofVerifier;
+use super::ZkpVerifier;
 
 #[derive(thiserror::Error, Debug)]
 pub enum ChainProofError {
@@ -31,12 +31,12 @@ assert_obj_safe!(ChainProofVerifier);
 
 pub struct ZkChainProofVerifier {
     chain_guest_id: Digest,
-    zk_verifier: Box<dyn ZkProofVerifier>,
+    zk_verifier: Box<dyn ZkpVerifier>,
 }
 
 impl ZkChainProofVerifier {
     #[must_use]
-    pub fn new(chain_guest_id: impl Into<Digest>, zk_verifier: impl ZkProofVerifier) -> Self {
+    pub fn new(chain_guest_id: impl Into<Digest>, zk_verifier: impl ZkpVerifier) -> Self {
         Self {
             chain_guest_id: chain_guest_id.into(),
             zk_verifier: Box::new(zk_verifier),
@@ -44,22 +44,22 @@ impl ZkChainProofVerifier {
     }
 
     pub fn verify(&self, proof: &ChainProof) -> Result<(), ChainProofError> {
-        let receipt: Receipt = bincode::deserialize(&proof.proof)?;
+        let receipt = bincode::deserialize(&proof.proof)?;
         self.zk_verifier.verify(&receipt, self.chain_guest_id)?;
-        let (proven_root, elf_id): (B256, Digest) = receipt.journal.decode()?;
+        let (proven_root, elf_id) = receipt.journal.decode()?;
         let root_hash = proof.block_trie.hash_slow();
         if elf_id != self.chain_guest_id {
-            Err(ChainProofError::ElfId {
+            return Err(ChainProofError::ElfId {
                 expected: self.chain_guest_id,
                 got: elf_id,
-            })
-        } else if proven_root != root_hash {
-            Err(ChainProofError::RootHash {
+            });
+        }
+        if proven_root != root_hash {
+            return Err(ChainProofError::RootHash {
                 proven: proven_root,
                 actual: root_hash,
-            })
-        } else {
-            Ok(())
+            });
         }
+        Ok(())
     }
 }
