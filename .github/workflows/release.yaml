@@ -437,7 +437,7 @@ jobs:
 
   test-release:
     name: Test release
-    needs: [push-artifacts-to-s3, publish-sdk-to-npm]
+    needs: [push-artifacts-to-s3, publish-sdk-to-npm, push-docker-image]
     runs-on: ubuntu-24.04
     steps:
       - name: Checkout repository
