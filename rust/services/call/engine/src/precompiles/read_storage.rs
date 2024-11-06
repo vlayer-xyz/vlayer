@@ -15,7 +15,6 @@ impl StoragePrecompile {
         Self {}
     }
 
-    /// Create a new stateful fatal precompile
     pub fn new_precompile<D: Database>() -> ContextPrecompile<D> {
         ContextPrecompile::ContextStateful(Arc::new(Self::new()))
     }
