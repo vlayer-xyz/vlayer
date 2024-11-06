@@ -28,6 +28,7 @@ cd ${VLAYER_TEMP_DIR}
 
 vlayer init --template web-proof
 forge build
+vlayer test
 
 cd vlayer
 bun install
