@@ -182,9 +182,14 @@ mod test {
 
     use super::*;
 
+    const MAX_HEAD_BLOCKS: u64 = 10;
+    const MAX_BACK_PROPAGATION_BLOCKS: u64 = 10;
+    const CONFIRMATIONS: u64 = 2;
     const LATEST: u64 = 500;
+
     lazy_static! {
-        static ref STRATEGY: Strategy = Strategy::new(10, 10, 2);
+        static ref STRATEGY: Strategy =
+            Strategy::new(MAX_HEAD_BLOCKS, MAX_BACK_PROPAGATION_BLOCKS, CONFIRMATIONS);
     }
 
     fn test_db() -> ChainDb {

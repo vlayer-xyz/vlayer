@@ -101,8 +101,13 @@ mod test {
 
     use super::*;
 
+    const MAX_HEAD_BLOCKS: u64 = 10;
+    const MAX_BACK_PROPAGATION_BLOCKS: u64 = 10;
+    const CONFIRMATIONS: u64 = 2;
+
     lazy_static! {
-        static ref STRATEGY: Strategy = Strategy::new(10, 10, 2);
+        static ref STRATEGY: Strategy =
+            Strategy::new(MAX_HEAD_BLOCKS, MAX_BACK_PROPAGATION_BLOCKS, CONFIRMATIONS);
     }
 
     mod append {
@@ -129,12 +134,12 @@ mod test {
 
         #[test]
         fn new_confirmed_block() {
-            assert_eq!(STRATEGY.get_append_range(&(0..=0), STRATEGY.confirmations), 1..=1);
+            assert_eq!(STRATEGY.get_append_range(&(0..=0), CONFIRMATIONS), 1..=1);
         }
 
         #[test]
         fn many_new_confirmed_blocks() {
-            assert_eq!(STRATEGY.get_append_range(&(0..=0), 100), 1..=STRATEGY.max_head_blocks);
+            assert_eq!(STRATEGY.get_append_range(&(0..=0), 100), 1..=MAX_HEAD_BLOCKS);
         }
     }
 
@@ -151,9 +156,9 @@ mod test {
         fn full_chunk() {
             assert_eq!(
                 STRATEGY.get_prepend_range(
-                    &(STRATEGY.max_back_propagation_blocks..=STRATEGY.max_back_propagation_blocks)
+                    &(MAX_BACK_PROPAGATION_BLOCKS..=MAX_BACK_PROPAGATION_BLOCKS)
                 ),
-                0..=STRATEGY.max_back_propagation_blocks - 1
+                0..=MAX_BACK_PROPAGATION_BLOCKS - 1
             );
         }
 
@@ -161,10 +166,9 @@ mod test {
         fn partial_chunk() {
             assert_eq!(
                 STRATEGY.get_prepend_range(
-                    &(STRATEGY.max_back_propagation_blocks - 1
-                        ..=STRATEGY.max_back_propagation_blocks - 1)
+                    &(MAX_BACK_PROPAGATION_BLOCKS - 1..=MAX_BACK_PROPAGATION_BLOCKS - 1)
                 ),
-                0..=STRATEGY.max_back_propagation_blocks - 2
+                0..=MAX_BACK_PROPAGATION_BLOCKS - 2
             );
         }
     }
