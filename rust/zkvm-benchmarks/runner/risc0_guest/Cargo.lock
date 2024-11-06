@@ -509,6 +509,17 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "5b8a30a44e99a1c83ccb2a6298c563c888952a1c9134953db26876528f84c93a"
 
 [[package]]
+name = "async-trait"
+version = "0.1.83"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "721cae7de5c34fbb2acd27e21e6d2cf7b886dce0c27388d46c4e6c47ea4318dd"
+dependencies = [
+ "proc-macro2",
+ "quote",
+ "syn 2.0.85",
+]
+
+[[package]]
 name = "aurora-engine-modexp"
 version = "1.1.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -832,8 +843,11 @@ dependencies = [
  "alloy-rlp",
  "alloy-sol-types",
  "anyhow",
+ "auto_impl",
+ "bincode",
  "block_header",
  "chain",
+ "chain_client",
  "chain_common",
  "common",
  "derive-new",
@@ -844,9 +858,11 @@ dependencies = [
  "once_cell",
  "regex",
  "revm",
+ "risc0-zkp",
  "risc0-zkvm",
  "serde",
  "serde_json",
+ "static_assertions",
  "thiserror",
  "tracing",
  "web_proof",
@@ -884,6 +900,19 @@ dependencies = [
  "once_cell",
  "revm",
  "serde",
+ "thiserror",
+]
+
+[[package]]
+name = "chain_client"
+version = "0.1.0"
+dependencies = [
+ "alloy-primitives",
+ "async-trait",
+ "chain_common",
+ "derive-new",
+ "futures",
+ "parking_lot",
  "thiserror",
 ]
 

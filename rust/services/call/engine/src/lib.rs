@@ -13,3 +13,4 @@ pub use sol::{
 };
 
 pub mod precompiles;
+pub mod verifier;

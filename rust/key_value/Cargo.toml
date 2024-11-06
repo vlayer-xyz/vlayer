@@ -8,8 +8,8 @@ anyhow = { workspace = true }
 auto_impl = { workspace = true }
 bytes = { workspace = true }
 derive_more = { workspace = true }
-libmdbx = "0.5.2"
-static_assertions = "1.1.0"
+libmdbx = { workspace = true }
+static_assertions = { workspace = true }
 thiserror = { workspace = true }
 
 [dev-dependencies]
