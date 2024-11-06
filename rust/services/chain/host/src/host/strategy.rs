@@ -14,7 +14,7 @@ use crate::host::range_utils::len;
 
 const GENESIS: BlockNumber = 0;
 
-#[derive(Derivative, Debug, new)]
+#[derive(Clone, Derivative, Debug, new)]
 pub struct Strategy {
     max_head_blocks: u64,
     max_back_propagation_blocks: u64,
@@ -97,27 +97,12 @@ impl Strategy {
 
 #[cfg(test)]
 mod test {
-    use std::env::var;
-
-    use dotenvy::dotenv;
     use lazy_static::lazy_static;
 
     use super::*;
 
     lazy_static! {
-        static ref STRATEGY: Strategy = {
-            dotenv().ok();
-
-            Strategy::new(
-                parse_env_var("MAX_HEAD_BLOCKS"),
-                parse_env_var("MAX_BACK_PROPAGATION_BLOCKS"),
-                parse_env_var("CONFIRMATIONS"),
-            )
-        };
-    }
-
-    fn parse_env_var(key: &str) -> u64 {
-        var(key).unwrap().parse().unwrap()
+        static ref STRATEGY: Strategy = Strategy::new(10, 10, 2,);
     }
 
     mod append {
