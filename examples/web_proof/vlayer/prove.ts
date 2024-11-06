@@ -5,6 +5,7 @@ import tls_proof from "./tls_proof.json";
 import * as assert from "assert";
 import { encodePacked, isAddress, keccak256 } from "viem";
 import { foundry } from "viem/chains";
+import TestMapping from "../out/TestMapping.sol/TestMapping";
 
 const notaryPubKey =
   "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExpX/4R4z40gI6C/j9zAM39u58LJu\n3Cx5tXTuqhhu/tirnBi5GniMmspOTEsps4ANnPLpMmMSfhJ+IFHbc3qVOA==\n-----END PUBLIC KEY-----\n";
@@ -13,6 +14,18 @@ const [prover, verifier] = await testHelpers.deployProverVerifier(
   webProofProver,
   webProofVerifier,
 );
+
+const testMapping = await testHelpers.deployContract(
+  TestMapping,
+  [],
+  foundry.id,
+);
+console.log(testMapping);
+
+await testHelpers.writeContract(testMapping, TestMapping.abi, "setBalance", [
+  "0xBFF7D6bA1201304aF302f12265CfA435539D5502",
+  213n,
+]);
 
 const twitterUserAddress = (await testHelpers.getTestAddresses())[0];
 

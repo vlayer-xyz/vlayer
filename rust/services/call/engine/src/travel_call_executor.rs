@@ -13,7 +13,7 @@ use crate::{
     evm::env::{cached::CachedEvmEnv, location::ExecutionLocation, EvmEnv},
     inspector::TravelInspector,
     io::Call,
-    precompiles::VLAYER_PRECOMPILES,
+    precompiles::{STATEFUL_PRECOMPILES, VLAYER_PRECOMPILES},
     utils::evm_call::format_failed_call_result,
 };
 
@@ -90,6 +90,7 @@ where
         handler.pre_execution.load_precompiles = Arc::new(move || {
             let mut precompiles = precompiles.clone();
             precompiles.extend(VLAYER_PRECOMPILES);
+            precompiles.extend(STATEFUL_PRECOMPILES::<WrapDatabaseRef<&'envs D>>());
             precompiles
         });
     };

@@ -1,14 +1,17 @@
 mod json;
 mod regex;
 mod verify_and_parse;
+
+mod read_storage;
 pub mod verify_and_parse_email;
 
 use revm::{
     precompile::{
-        calc_linear_cost_u32, u64_to_address, Error::OutOfGas, PrecompileErrors::Error,
+        calc_linear_cost_u32, u64_to_address, Address, Error::OutOfGas, PrecompileErrors::Error,
         PrecompileWithAddress,
     },
     primitives::PrecompileErrors,
+    ContextPrecompile, Database,
 };
 
 use crate::precompiles::{
@@ -31,6 +34,12 @@ pub(crate) const VLAYER_PRECOMPILES: [PrecompileWithAddress; 8] = [
     PrecompileWithAddress(u64_to_address(0x110), REGEX_MATCH_PRECOMPILE),
     PrecompileWithAddress(u64_to_address(0x111), REGEX_CAPTURE_PRECOMPILE),
 ];
+
+/// We need to append stateful precompiles separately, because it's a different precompile type
+#[allow(non_snake_case)]
+pub(crate) fn STATEFUL_PRECOMPILES<D: Database>() -> [(Address, ContextPrecompile<D>); 1] {
+    [(u64_to_address(0x120), read_storage::stateful_precompile::<D>())]
+}
 
 #[allow(clippy::needless_pass_by_value)] // More convenient to use in map_err
 fn map_to_fatal<E: ToString>(err: E) -> PrecompileErrors {

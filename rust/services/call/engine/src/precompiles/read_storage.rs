@@ -1,0 +1,56 @@
+use std::sync::Arc;
+
+use alloy_primitives::{keccak256, Bytes, U256};
+use alloy_sol_types::SolValue;
+use revm::{
+    precompile::{PrecompileOutput, PrecompileResult},
+    primitives::address,
+    ContextPrecompile, ContextStatefulPrecompile, Database, InnerEvmContext,
+};
+
+pub struct StoragePrecompile;
+
+impl StoragePrecompile {
+    pub fn new() -> Self {
+        Self {}
+    }
+
+    /// Create a new stateful fatal precompile
+    pub fn new_precompile<D: Database>() -> ContextPrecompile<D> {
+        ContextPrecompile::ContextStateful(Arc::new(Self::new()))
+    }
+}
+
+fn get_balance_slot(addr: alloy_primitives::Address) -> U256 {
+    let base_slot = U256::from(0);
+    let mut key = addr.abi_encode();
+    key.extend(base_slot.abi_encode());
+    keccak256(key).into()
+}
+
+impl<D: Database> ContextStatefulPrecompile<D> for StoragePrecompile {
+    fn call(
+        &self,
+        _input: &Bytes,
+        _gas_limit: u64,
+        _context: &mut InnerEvmContext<D>,
+    ) -> PrecompileResult {
+        dbg!(&_context
+            .db
+            .basic(address!("9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"))
+            .map_err(|_| "Error".to_string()));
+        get_balance_slot(address!("BFF7D6bA1201304aF302f12265CfA435539D5502"));
+        dbg!(&_context
+            .db
+            .storage(
+                address!("9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"),
+                get_balance_slot(address!("BFF7D6bA1201304aF302f12265CfA435539D5502"))
+            )
+            .map_err(|_| "Error".to_string()));
+        Ok(PrecompileOutput::new(10, Bytes::new()))
+    }
+}
+
+pub(super) fn stateful_precompile<D: Database>() -> ContextPrecompile<D> {
+    StoragePrecompile::new_precompile::<D>()
+}
