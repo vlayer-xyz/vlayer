@@ -15,4 +15,4 @@ RUN rzup install cargo-risczero v1.0.5
 
 RUN curl -L https://vlayer-releases.s3.eu-north-1.amazonaws.com/latest/nightly-linux-amd64.tar.gz -o nightly-linux-amd64.tar.gz
 RUN tar -xvf nightly-linux-amd64.tar.gz
-ENTRYPOINT ["/usr/bin/dumb-init","--","/home/vlayer/bin/vlayer","serve","--proof","fake","--host","0.0.0.0","--rpc-url","31337:http://anvil:8545"]
+ENTRYPOINT ["/usr/bin/dumb-init", "--", "/home/vlayer/bin/vlayer"]
