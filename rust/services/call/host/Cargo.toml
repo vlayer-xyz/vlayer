@@ -38,7 +38,6 @@ url = { workspace = true }
 [dev-dependencies]
 alloy-sol-types = { workspace = true }
 anyhow = { workspace = true }
-ctor = { workspace = true }
 test-log = { workspace = true }
 
 [lints]

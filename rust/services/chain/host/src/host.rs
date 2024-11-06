@@ -224,6 +224,7 @@ mod test {
 
         mod append_prepend {
             use alloy_primitives::BlockNumber;
+            use ctor::ctor;
             use dotenvy::dotenv;
             use lazy_static::lazy_static;
 
@@ -233,6 +234,11 @@ mod test {
 
             use super::*;
             const GENESIS: BlockNumber = 0;
+
+            #[ctor]
+            fn test_setup() {
+                dotenv().ok();
+            }
 
             async fn test_db_after_initialize() -> Result<ChainDb, HostError> {
                 let db = test_db();
@@ -247,7 +253,6 @@ mod test {
 
             #[tokio::test]
             async fn no_new_head_blocks_back_propagation_finished() -> anyhow::Result<()> {
-                dotenv().ok();
                 let db = test_db_after_initialize().await?;
                 let host =
                     Host::from_parts(Prover::default(), mock_provider([GENESIS, GENESIS]), db, 1)?;
@@ -265,7 +270,6 @@ mod test {
 
             #[tokio::test]
             async fn new_confirmed_head_blocks_back_propagation_finished() -> anyhow::Result<()> {
-                dotenv().ok();
                 let latest = GENESIS + *confirmations;
                 let new_confirmed_block = latest - *confirmations + 1;
                 let db = test_db_after_initialize().await?;
