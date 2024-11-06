@@ -22,4 +22,21 @@ contract WebProverTest is VTest {
         assert(screenName.equal("g_p_vlayer"));
         assertEq(addr, account);
     }
+
+    function test_failedVerificationBecauseOfBadWebProofSignature() public {
+        // this web proof has some bytes modified to make the signature invalid
+        WebProof memory webProof = WebProof(vm.readFile("testdata/bad_web_proof_signature.json"));
+        WebProofProver prover = new WebProofProver();
+        address account = vm.addr(1);
+
+        callProver();
+        try prover.main(webProof, account) returns (Proof memory, string memory, address) {
+            revert("Expected error");
+        } catch Error(string memory reason) {
+            assertEq(
+                reason,
+                "Engine(TransactError(\"Verification error: Session proof error: signature verification failed: signature error\"))"
+            );
+        }
+    }
 }
