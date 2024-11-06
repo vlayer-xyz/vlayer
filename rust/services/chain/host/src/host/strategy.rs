@@ -102,7 +102,7 @@ mod test {
     use super::*;
 
     lazy_static! {
-        static ref STRATEGY: Strategy = Strategy::new(10, 10, 2,);
+        static ref STRATEGY: Strategy = Strategy::new(10, 10, 2);
     }
 
     mod append {

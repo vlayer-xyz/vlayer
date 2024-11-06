@@ -184,7 +184,7 @@ mod test {
 
     const LATEST: u64 = 500;
     lazy_static! {
-        static ref STRATEGY: Strategy = Strategy::new(10, 10, 2,);
+        static ref STRATEGY: Strategy = Strategy::new(10, 10, 2);
     }
 
     fn test_db() -> ChainDb {
