@@ -11,7 +11,7 @@ use revm::{
 pub struct StoragePrecompile;
 
 impl StoragePrecompile {
-    pub fn new() -> Self {
+    pub const fn new() -> Self {
         Self {}
     }
 
@@ -33,20 +33,26 @@ impl<D: Database> ContextStatefulPrecompile<D> for StoragePrecompile {
         &self,
         _input: &Bytes,
         _gas_limit: u64,
-        _context: &mut InnerEvmContext<D>,
+        context: &mut InnerEvmContext<D>,
     ) -> PrecompileResult {
-        dbg!(&_context
-            .db
-            .basic(address!("9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"))
-            .map_err(|_| "Error".to_string()));
+        println!(
+            "{:?}",
+            &context
+                .db
+                .basic(address!("9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"))
+                .map_err(|_| "Error".to_string())
+        );
         get_balance_slot(address!("BFF7D6bA1201304aF302f12265CfA435539D5502"));
-        dbg!(&_context
-            .db
-            .storage(
-                address!("9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"),
-                get_balance_slot(address!("BFF7D6bA1201304aF302f12265CfA435539D5502"))
-            )
-            .map_err(|_| "Error".to_string()));
+        println!(
+            "{:?}",
+            &context
+                .db
+                .storage(
+                    address!("9fe46736679d2d9a65f0992f2272de9f3c7fa6e0"),
+                    get_balance_slot(address!("BFF7D6bA1201304aF302f12265CfA435539D5502"))
+                )
+                .map_err(|_| "Error".to_string())
+        );
         Ok(PrecompileOutput::new(10, Bytes::new()))
     }
 }
