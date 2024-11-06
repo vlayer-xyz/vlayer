@@ -49,7 +49,7 @@ impl Host<Http> {
         let prover = Prover::new(config.proof_mode);
         let db = ChainDb::mdbx(config.db_path, Mode::ReadWrite)?;
 
-        Ok(Host::from_parts(prover, provider, db, config.chain_id)?)
+        Host::from_parts(prover, provider, db, config.chain_id)
     }
 }
 
@@ -227,11 +227,12 @@ mod test {
             use std::env;
 
             use alloy_primitives::BlockNumber;
-            use lazy_static::lazy_static;
             use dotenvy::dotenv;
+            use lazy_static::lazy_static;
 
             lazy_static! {
-                static ref block_confirmations: u64 = var("CONFIRMATIONS").unwrap().parse().unwrap();
+                static ref block_confirmations: u64 =
+                    var("CONFIRMATIONS").unwrap().parse().unwrap();
             }
 
             use super::*;
