@@ -18,13 +18,13 @@ const john = testHelpers.getTestAccount();
 
 console.log("Proving...");
 const vlayer = createVlayerClient();
-const { hash } = await vlayer.prove({
+const hash = await vlayer.prove({
   address: prover,
   proverAbi: emailProofProver.abi,
   functionName: "main",
   args: [await preverifyEmail(mimeEmail), john.address],
 });
-const result = await vlayer.waitForProvingResult({ hash });
+const result = await vlayer.waitForProvingResult(hash);
 console.log("Proof:", result[0]);
 
 console.log("Verifying...");

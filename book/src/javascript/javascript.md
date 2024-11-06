@@ -77,7 +77,7 @@ In order to start proving, we will need to provide:
 import { foundry } from 'viem/chains'
 import { proverAbi } from './proverAbi'
 
-const { hash } = await vlayer.prove({
+const hash = await vlayer.prove({
     address: '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
     proverAbi,
     functionName: 'main',
@@ -91,7 +91,7 @@ const { hash } = await vlayer.prove({
 Wait for the proving to be finished, and then retrieve the result along with Proof.
 
 ```ts
-const result = await vlayer.waitForProvingResult({ hash });
+const result = await vlayer.waitForProvingResult(hash);
 ```
 
 ## Verification

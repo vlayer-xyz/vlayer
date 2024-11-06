@@ -34,7 +34,7 @@ const useProver = ({
 
   const prove = async (args: string[]) => {
     try {
-      const { hash } = await vlayer.prove({
+      const hash = await vlayer.prove({
         address: addr,
         proverAbi: abi,
         functionName: func,
@@ -54,7 +54,7 @@ const useProver = ({
   const waitForProof = async (hash: string) => {
     try {
       console.log("Waiting for proving result: ", hash);
-      const result = await vlayer.waitForProvingResult({ hash });
+      const result = await vlayer.waitForProvingResult(hash);
       setProof(result);
       console.log("Proof ready:", result);
     } catch (err) {

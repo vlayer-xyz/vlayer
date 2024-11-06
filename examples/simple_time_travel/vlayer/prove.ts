@@ -91,7 +91,7 @@ console.log(
 console.log("Proving...");
 const vlayer = createVlayerClient();
 
-const { hash } = await vlayer.prove({
+const hash = await vlayer.prove({
   address: proverAddr,
   proverAbi: averageBalance.abi,
   functionName: "averageBalanceOf",
@@ -100,7 +100,7 @@ const { hash } = await vlayer.prove({
 });
 console.log("Waiting for proving result: ", hash);
 
-const result = await vlayer.waitForProvingResult({ hash });
+const result = await vlayer.waitForProvingResult(hash);
 console.log("Response:", result);
 
 const txHash = await walletClient.writeContract({

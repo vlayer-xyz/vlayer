@@ -93,7 +93,7 @@ Once we have the Web Proof available we can directly call vlayer client `prove` 
 import { sepolia } from 'viem/chains'
 import { proverAbi } from './proverAbi'
 
-const { hash } = await vlayer.prove({
+const hash = await vlayer.prove({
     ...proverCallCommitment,
     args: [webProof, ...commitmentArgs],
 })
