@@ -45,7 +45,10 @@ const deployProver = async () => {
     chain: optimismSepolia,
   });
 
-  const receipt = await client.waitForTransactionReceipt({ hash: txHash });
+  const receipt = await client.waitForTransactionReceipt({
+    hash: txHash,
+    confirmations: 5,
+  });
 
   if (receipt.status != "success") {
     throw new Error(
@@ -65,7 +68,10 @@ const deployVerifier = async (prover: Address) => {
     chain: optimismSepolia,
   });
 
-  const receipt = await client.waitForTransactionReceipt({ hash: txHash });
+  const receipt = await client.waitForTransactionReceipt({
+    hash: txHash,
+    confirmations: 5,
+  });
 
   if (receipt.status != "success") {
     throw new Error(
@@ -113,6 +119,9 @@ const txHash = await walletClient.writeContract({
 console.log(
   `Verification tx: https://sepolia-optimism.etherscan.io/tx/${txHash}`,
 );
-const receipt = await client.waitForTransactionReceipt({ hash: txHash });
+const receipt = await client.waitForTransactionReceipt({
+  hash: txHash,
+  confirmations: 5,
+});
 
 console.log(`Verification result: ${receipt.status}`);
