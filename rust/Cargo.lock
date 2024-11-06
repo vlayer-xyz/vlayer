@@ -1959,6 +1959,7 @@ dependencies = [
  "chain_client",
  "chain_common",
  "chain_server",
+ "ctor",
  "derive-new",
  "dotenvy",
  "ethers-core",
