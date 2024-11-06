@@ -1,3 +1,4 @@
+use alloy_rlp::Bytes;
 use chain_common::ChainProof;
 use risc0_zkp::verify::VerificationError;
 use risc0_zkvm::Receipt;
@@ -39,6 +40,17 @@ fn ok() {
     let journal = mock_journal(block_trie.hash_slow(), CHAIN_GUEST_ID);
     let proof = mock_chain_proof(block_trie, journal);
     verifier.verify(&proof).expect("verfication should succeed");
+}
+
+#[test]
+fn invalid_receipt() {
+    let verifier = ZkChainProofVerifier::new(CHAIN_GUEST_ID, proof_ok);
+    let proof = ChainProof {
+        proof: Bytes::new(),
+        block_trie: Default::default(),
+    };
+    let res = verifier.verify(&proof);
+    assert!(matches!(res.unwrap_err(), ChainProofError::Receipt(..)));
 }
 
 #[test]
