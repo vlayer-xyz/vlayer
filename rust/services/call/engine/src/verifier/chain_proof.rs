@@ -1,0 +1,65 @@
+use alloy_primitives::B256;
+use auto_impl::auto_impl;
+use block_header::Hashable;
+use chain_common::ChainProof;
+use risc0_zkp::verify::VerificationError;
+use risc0_zkvm::{sha::Digest, Receipt};
+use static_assertions::assert_obj_safe;
+
+use super::ZkProofVerifier;
+
+#[derive(thiserror::Error, Debug)]
+pub enum ChainProofError {
+    #[error("Receipt deserialization error: {0}")]
+    Receipt(#[from] bincode::Error),
+    #[error("ZK verification error: {0}")]
+    Zk(#[from] VerificationError),
+    #[error("Journal decoding error: {0}")]
+    Journal(#[from] risc0_zkvm::serde::Error),
+    #[error("ELF ID mismatch: expected={expected} got={got}")]
+    ElfId { expected: Digest, got: Digest },
+    #[error("Root hash mismatch: proven={proven} actual={actual}")]
+    RootHash { proven: B256, actual: B256 },
+}
+
+#[auto_impl(Fn)]
+pub trait ChainProofVerifier: Send + Sync + 'static {
+    fn verify(&self, proof: &ChainProof) -> Result<(), ChainProofError>;
+}
+
+assert_obj_safe!(ChainProofVerifier);
+
+pub struct ZkChainProofVerifier {
+    chain_guest_id: Digest,
+    zk_verifier: Box<dyn ZkProofVerifier>,
+}
+
+impl ZkChainProofVerifier {
+    #[must_use]
+    pub fn new(chain_guest_id: impl Into<Digest>, zk_verifier: impl ZkProofVerifier) -> Self {
+        Self {
+            chain_guest_id: chain_guest_id.into(),
+            zk_verifier: Box::new(zk_verifier),
+        }
+    }
+
+    pub fn verify(&self, proof: &ChainProof) -> Result<(), ChainProofError> {
+        let receipt: Receipt = bincode::deserialize(&proof.proof)?;
+        self.zk_verifier.verify(&receipt, self.chain_guest_id)?;
+        let (proven_root, elf_id): (B256, Digest) = receipt.journal.decode()?;
+        let root_hash = proof.block_trie.hash_slow();
+        if elf_id != self.chain_guest_id {
+            Err(ChainProofError::ElfId {
+                expected: self.chain_guest_id,
+                got: elf_id,
+            })
+        } else if proven_root != root_hash {
+            Err(ChainProofError::RootHash {
+                proven: proven_root,
+                actual: root_hash,
+            })
+        } else {
+            Ok(())
+        }
+    }
+}
