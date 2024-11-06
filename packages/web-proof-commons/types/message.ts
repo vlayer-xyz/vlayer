@@ -16,6 +16,7 @@ export const enum ExtensionAction {
 }
 
 export enum ZkProvingStatus {
+  NotStarted = "notStarted",
   Proving = "proving",
   Done = "done",
   Error = "error",
