@@ -40,7 +40,7 @@ lazy_static! {
             name: "forge-std".into(),
             version: "1.9.2".into(),
             url: None,
-            remapping: Some((vec!["forge-std", "forge-std-1.9.2/src"], "src").into()),
+            remapping: Some((["forge-std", "forge-std-1.9.2/src"].as_slice(), "src").into()),
         },
         SoldeerDep {
             name: "risc0-ethereum".into(),
@@ -76,8 +76,8 @@ impl From<&str> for Key {
     }
 }
 
-impl From<Vec<&str>> for Key {
-    fn from(value: Vec<&str>) -> Self {
+impl From<&[&str]> for Key {
+    fn from(value: &[&str]) -> Self {
         Key::Multi(value.iter().map(ToString::to_string).collect())
     }
 }
@@ -101,8 +101,8 @@ impl From<(&str, &str)> for Remapping {
     }
 }
 
-impl From<(Vec<&str>, &str)> for Remapping {
-    fn from(value: (Vec<&str>, &str)) -> Self {
+impl From<(&[&str], &str)> for Remapping {
+    fn from(value: (&[&str], &str)) -> Self {
         let (key, internal_path) = value;
         Remapping::new(key.into(), Some(internal_path))
     }
