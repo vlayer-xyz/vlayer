@@ -29,7 +29,7 @@ impl<P> EvmBlockFetcher<P>
 where
     P: JsonRpcClient,
 {
-    pub fn from_provider(provider: Provider<P>) -> Self {
+    pub const fn from_provider(provider: Provider<P>) -> Self {
         EvmBlockFetcher { provider }
     }
 
