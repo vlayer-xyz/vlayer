@@ -92,10 +92,10 @@ mod tests {
         use alloy_primitives::{fixed_bytes, FixedBytes};
         use anyhow::Result;
         use mpt::MerkleTrie;
-        use range::NonEmptyRange;
         use risc0_zkp::verify::VerificationError;
         use risc0_zkvm::{InnerReceipt, Receipt};
         use traits::Hashable;
+        use u64_range::NonEmptyRange;
 
         use super::*;
 
