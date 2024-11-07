@@ -20,15 +20,19 @@ export const getContractAddr = async (
   client: PublicClient,
   hash: `0x${string}`,
 ): Promise<Address> => {
+  // 1 confirm at devnet, at least 6 for others
+  const confirmations = client?.chain?.name === "Anvil" ? 1 : 6;
+
   const receipt = await client.waitForTransactionReceipt({
     hash,
-    confirmations: client?.chain?.name === "Anvil" ? 1 : 5,
+    confirmations,
+    retryCount: 12,
   });
-  if (receipt.status != "success") {
-    throw new Error(`Prover deployment failed with status: ${receipt.status}`);
-  }
-  if (!receipt.contractAddress)
-    throw new Error("cannot get contract address from receipt");
+
+  if (!receipt.contractAddress || receipt.status != "success")
+    throw new Error(
+      `Cannot get contract address from receipt: ${receipt.status}`,
+    );
 
   return receipt.contractAddress;
 };
