@@ -1,5 +1,6 @@
 pub mod config;
 pub mod error;
+mod evm_block_fetcher;
 mod prover;
 mod strategy;
 
@@ -11,14 +12,13 @@ use chain_guest_wrapper::RISC0_CHAIN_GUEST_ID;
 pub use config::HostConfig;
 pub use error::HostError;
 use ethers::{
-    middleware::Middleware,
-    providers::{Http, JsonRpcClient, Provider},
+    providers::{Http, JsonRpcClient},
     types::BlockNumber as BlockTag,
 };
-use futures::future::join_all;
+use evm_block_fetcher::EvmBlockFetcher;
 use lazy_static::lazy_static;
 use prover::Prover;
-use provider::{to_eth_block_header, EvmBlockHeader};
+use provider::EvmBlockHeader;
 use risc0_zkvm::sha::Digest;
 use strategy::AppendPrependRanges;
 pub use strategy::Strategy;
@@ -35,19 +35,18 @@ where
 {
     db: ChainDb,
     prover: Prover,
-    provider: Provider<P>,
+    block_fetcher: EvmBlockFetcher<P>,
     chain_id: ChainId,
     strategy: Strategy,
 }
 
 impl Host<Http> {
     pub fn try_new(config: HostConfig) -> Result<Self, HostError> {
-        let provider = Provider::<Http>::try_from(config.rpc_url.as_str())
-            .expect("could not instantiate HTTP Provider");
+        let block_fetcher = EvmBlockFetcher::<Http>::new(config.rpc_url);
         let prover = Prover::new(config.proof_mode);
         let db = ChainDb::mdbx(config.db_path, Mode::ReadWrite)?;
 
-        Ok(Host::from_parts(prover, provider, db, config.chain_id, config.strategy))
+        Ok(Host::from_parts(prover, block_fetcher, db, config.chain_id, config.strategy))
     }
 }
 
@@ -57,14 +56,14 @@ where
 {
     pub const fn from_parts(
         prover: Prover,
-        provider: Provider<P>,
+        block_fetcher: EvmBlockFetcher<P>,
         db: ChainDb,
         chain_id: ChainId,
         strategy: Strategy,
     ) -> Self {
         Host {
             prover,
-            provider,
+            block_fetcher,
             db,
             chain_id,
             strategy,
@@ -153,30 +152,21 @@ where
         &self,
         range: Range,
     ) -> Result<Vec<Box<dyn EvmBlockHeader>>, HostError> {
-        let blocks = join_all(range.into_iter().map(|n| self.get_block(n.into()))).await;
-        blocks.into_iter().collect()
+        self.block_fetcher.get_blocks_range(range).await
     }
 
     #[instrument(skip(self))]
     async fn get_block(&self, number: BlockTag) -> Result<Box<dyn EvmBlockHeader>, HostError> {
-        info!("Fetching block {}", number);
-        let ethers_block = self
-            .provider
-            .get_block(number)
-            .await
-            .map_err(|err| HostError::Provider(err.to_string()))?
-            .ok_or(HostError::BlockNotFound(number))?;
-        let block = to_eth_block_header(ethers_block)
-            .map_err(|e| HostError::BlockConversion(e.to_string()))?;
-        info!("Fetched block {}", block.number());
-        Ok(Box::new(block))
+        self.block_fetcher.get_block(number).await
     }
 }
 
 #[cfg(test)]
 mod test {
+    use alloy_primitives::BlockNumber;
+    use chain_test_utils::mock_provider;
+    use ethers::providers::{MockProvider, Provider};
     use lazy_static::lazy_static;
-    use serde_json::Value;
 
     use super::*;
 
@@ -184,6 +174,7 @@ mod test {
     const MAX_BACK_PROPAGATION_BLOCKS: u64 = 10;
     const CONFIRMATIONS: u64 = 2;
     const LATEST: u64 = 500;
+    const GENESIS: BlockNumber = 0;
 
     lazy_static! {
         static ref STRATEGY: Strategy =
@@ -194,37 +185,37 @@ mod test {
         ChainDb::in_memory()
     }
 
+    async fn db_after_initialize() -> Result<ChainDb, HostError> {
+        let host = create_host(test_db(), mock_provider([GENESIS]));
+
+        let init_chain_update = host.poll().await?;
+        let Host { mut db, .. } = host;
+        db.update_chain(1, init_chain_update).unwrap();
+
+        Ok(db)
+    }
+
+    fn create_host(db: ChainDb, provider: Provider<MockProvider>) -> Host<MockProvider> {
+        Host::from_parts(
+            Prover::default(),
+            EvmBlockFetcher::from_provider(provider),
+            db,
+            1,
+            STRATEGY.clone(),
+        )
+    }
+
     mod poll {
-        use chain_test_utils::mock_provider;
-        use ethers::providers::MockProvider;
-
         use super::*;
-
-        fn assert_fetched_latest_block(provider: &MockProvider) {
-            provider
-                .assert_request(
-                    "eth_getBlockByNumber",
-                    Value::Array(vec!["latest".into(), false.into()]),
-                )
-                .expect("expected request to fetch latest block");
-        }
 
         #[tokio::test]
         async fn initialize() -> anyhow::Result<()> {
-            let db = test_db();
-            let host = Host::from_parts(
-                Prover::default(),
-                mock_provider([LATEST]),
-                db,
-                1,
-                STRATEGY.clone(),
-            );
+            let host = create_host(test_db(), mock_provider([LATEST]));
 
             let chain_update = host.poll().await?;
             let Host { mut db, .. } = host;
             db.update_chain(1, chain_update)?;
 
-            assert_fetched_latest_block(host.provider.as_ref());
             let chain_trie = db.get_chain_trie(1)?.unwrap();
             assert_eq!(chain_trie.block_range, LATEST..=LATEST);
 
@@ -232,45 +223,17 @@ mod test {
         }
 
         mod append_prepend {
-            use alloy_primitives::BlockNumber;
-
             use super::*;
-            const GENESIS: BlockNumber = 0;
-            const CONFIRMATIONS: u64 = 2;
-
-            async fn test_db_after_initialize() -> Result<ChainDb, HostError> {
-                let db = test_db();
-                let host = Host::from_parts(
-                    Prover::default(),
-                    mock_provider([GENESIS]),
-                    db,
-                    1,
-                    STRATEGY.clone(),
-                );
-
-                let init_chain_update = host.poll().await?;
-                let Host { mut db, .. } = host;
-                db.update_chain(1, init_chain_update).unwrap();
-
-                Ok(db)
-            }
 
             #[tokio::test]
             async fn no_new_head_blocks_back_propagation_finished() -> anyhow::Result<()> {
-                let db = test_db_after_initialize().await?;
-                let host = Host::from_parts(
-                    Prover::default(),
-                    mock_provider([GENESIS, GENESIS]),
-                    db,
-                    1,
-                    STRATEGY.clone(),
-                );
+                let host =
+                    create_host(db_after_initialize().await?, mock_provider([GENESIS, GENESIS]));
 
                 let chain_update = host.poll().await?;
                 let Host { mut db, .. } = host;
                 db.update_chain(1, chain_update)?;
 
-                assert_fetched_latest_block(host.provider.as_ref());
                 let chain_trie = db.get_chain_trie(1)?.unwrap();
                 assert_eq!(chain_trie.block_range, GENESIS..=GENESIS);
 
@@ -281,15 +244,15 @@ mod test {
             async fn new_confirmed_head_blocks_back_propagation_finished() -> anyhow::Result<()> {
                 let latest = GENESIS + CONFIRMATIONS;
                 let new_confirmed_block = latest - CONFIRMATIONS + 1;
-                let db = test_db_after_initialize().await?;
-                let provider = mock_provider([latest, new_confirmed_block, GENESIS]);
-                let host = Host::from_parts(Prover::default(), provider, db, 1, STRATEGY.clone());
+                let host = create_host(
+                    db_after_initialize().await?,
+                    mock_provider([latest, new_confirmed_block, GENESIS]),
+                );
 
                 let chain_update = host.poll().await?;
                 let Host { mut db, .. } = host;
                 db.update_chain(1, chain_update)?;
 
-                assert_fetched_latest_block(host.provider.as_ref());
                 let chain_trie = db.get_chain_trie(1)?.unwrap();
                 assert_eq!(chain_trie.block_range, GENESIS..=new_confirmed_block);
 

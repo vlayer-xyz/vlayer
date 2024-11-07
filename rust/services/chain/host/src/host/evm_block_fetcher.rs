@@ -1,5 +1,3 @@
-use std::ops::RangeInclusive;
-
 use ethers::{
     middleware::Middleware,
     providers::{Http, JsonRpcClient, Provider},
@@ -8,6 +6,7 @@ use ethers::{
 use futures::future::join_all;
 use provider::{to_eth_block_header, EvmBlockHeader};
 use tracing::{info, instrument};
+use u64_range::Range;
 
 use super::HostError;
 
@@ -37,9 +36,9 @@ where
     #[instrument(skip(self))]
     pub async fn get_blocks_range(
         &self,
-        range: &RangeInclusive<u64>,
+        range: Range,
     ) -> Result<Vec<Box<dyn EvmBlockHeader>>, HostError> {
-        let blocks = join_all(range.clone().map(|n| self.get_block(n.into()))).await;
+        let blocks = join_all(range.into_iter().map(|n| self.get_block(n.into()))).await;
         blocks.into_iter().collect()
     }
 
