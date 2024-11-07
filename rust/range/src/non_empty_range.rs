@@ -104,12 +104,6 @@ impl From<NonEmptyRange> for RangeInclusive<u64> {
     }
 }
 
-impl From<&NonEmptyRange> for RangeInclusive<u64> {
-    fn from(range: &NonEmptyRange) -> Self {
-        range.start..=range.end
-    }
-}
-
 impl<R: Borrow<RangeInclusive<u64>>> PartialEq<R> for NonEmptyRange {
     fn eq(&self, other: &R) -> bool {
         &<NonEmptyRange as Into<RangeInclusive<u64>>>::into(*self) == other.borrow()
