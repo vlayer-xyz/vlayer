@@ -1,10 +1,7 @@
 pub mod config;
 pub mod error;
 mod prover;
-mod range_utils;
 mod strategy;
-
-use std::ops::RangeInclusive;
 
 use alloy_primitives::ChainId;
 use block_trie::BlockTrie;
@@ -26,6 +23,7 @@ use risc0_zkvm::sha::Digest;
 use strategy::AppendPrependRanges;
 pub use strategy::Strategy;
 use tracing::{info, instrument};
+use u64_range::{NonEmptyRange, Range};
 
 lazy_static! {
     static ref GUEST_ID: Digest = RISC0_CHAIN_GUEST_ID.into();
@@ -101,7 +99,7 @@ where
         };
         let receipt = self.prover.prove(&input, None)?;
 
-        let range = latest_block_number..=latest_block_number;
+        let range = NonEmptyRange::from_single_value(latest_block_number);
         let chain_update = ChainUpdate::from_two_tries(range, vec![], &trie, &receipt)?;
 
         Ok(chain_update)
@@ -129,10 +127,10 @@ where
             ..
         } = self
             .strategy
-            .get_append_prepend_ranges(&old_range, latest_block_number);
-        let append_blocks = self.get_blocks_range(&append).await?;
-        let prepend_blocks = self.get_blocks_range(&prepend).await?;
-        let old_leftmost_block = self.get_block((*old_range.start()).into()).await?;
+            .get_append_prepend_ranges(old_range, latest_block_number);
+        let append_blocks = self.get_blocks_range(append).await?;
+        let prepend_blocks = self.get_blocks_range(prepend).await?;
+        let old_leftmost_block = self.get_block(old_range.start().into()).await?;
 
         trie.append(append_blocks.iter())?;
         trie.prepend(prepend_blocks.iter(), &old_leftmost_block)?;
@@ -153,9 +151,9 @@ where
     #[instrument(skip(self))]
     async fn get_blocks_range(
         &self,
-        range: &RangeInclusive<u64>,
+        range: Range,
     ) -> Result<Vec<Box<dyn EvmBlockHeader>>, HostError> {
-        let blocks = join_all(range.clone().map(|n| self.get_block(n.into()))).await;
+        let blocks = join_all(range.into_iter().map(|n| self.get_block(n.into()))).await;
         blocks.into_iter().collect()
     }
 

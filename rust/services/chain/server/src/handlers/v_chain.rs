@@ -75,6 +75,7 @@ mod tests {
         use risc0_zkp::verify::VerificationError;
         use risc0_zkvm::{InnerReceipt, Receipt};
         use traits::Hashable;
+        use u64_range::NonEmptyRange;
 
         use super::*;
 
@@ -85,7 +86,8 @@ mod tests {
                 MerkleTrie::from_iter([([1], *parent_hash), ([2], *child_hash)]);
             static ref chain_db: Arc<RwLock<ChainDb>> = {
                 let db = Arc::new(RwLock::new(ChainDb::in_memory()));
-                let chain_info = ChainInfo::new(1..=2, db_trie.hash_slow(), Bytes::default());
+                let range = NonEmptyRange::try_from_range(1..=2).unwrap();
+                let chain_info = ChainInfo::new(range, db_trie.hash_slow(), Bytes::default());
                 db.write().update_chain(1, ChainUpdate::new(chain_info, &*db_trie, [])).expect("update_chain failed");
                 db
             };

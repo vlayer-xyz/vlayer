@@ -1,30 +1,28 @@
-use std::ops::RangeInclusive;
-
-use alloy_primitives::BlockNumber;
 use block_trie::BlockTrie;
 use derive_new::new;
 use mpt::MerkleTrie;
 use traits::Hashable;
+use u64_range::NonEmptyRange;
 
 use crate::{receipt::ProofVerificationError, ChainProofReceipt};
 
 #[derive(new)]
 pub struct UnverifiedChainTrie {
-    pub block_range: RangeInclusive<BlockNumber>,
+    pub block_range: NonEmptyRange,
     pub trie: MerkleTrie,
     pub zk_proof: ChainProofReceipt,
 }
 
 // `trie` held by this struct is proven by `zk_proof` to be correctly constructed
 pub struct ChainTrie {
-    pub block_range: RangeInclusive<BlockNumber>,
+    pub block_range: NonEmptyRange,
     pub trie: BlockTrie,
     pub zk_proof: ChainProofReceipt,
 }
 
 impl ChainTrie {
     pub fn new(
-        block_range: RangeInclusive<BlockNumber>,
+        block_range: NonEmptyRange,
         trie: BlockTrie,
         zk_proof: impl Into<ChainProofReceipt>,
     ) -> Self {

@@ -1,5 +1,3 @@
-use std::ops::RangeInclusive;
-
 use alloy_primitives::{BlockNumber, ChainId};
 use axum_jrpc::{
     error::{JsonRpcError, JsonRpcErrorReason},
@@ -9,6 +7,7 @@ use chain_db::ChainDbError;
 use mpt::MptError;
 use server_utils::FieldValidationError;
 use thiserror::Error;
+use u64_range::NonEmptyRange;
 
 #[derive(Debug, Error, PartialEq)]
 pub enum AppError {
@@ -17,7 +16,7 @@ pub enum AppError {
     #[error("Block number {block_num} outside stored range: {block_range:?}")]
     BlockNumberOutsideRange {
         block_num: BlockNumber,
-        block_range: RangeInclusive<BlockNumber>,
+        block_range: NonEmptyRange,
     },
     #[error("Unsupported chain ID: {0}")]
     UnsupportedChainId(ChainId),

@@ -1,8 +1,7 @@
-use std::ops::RangeInclusive;
-
 use alloy_primitives::{BlockNumber, ChainId};
 use derivative::Derivative;
 use thiserror::Error;
+use u64_range::NonEmptyRange;
 
 use crate::receipt::ProofVerificationError;
 
@@ -28,7 +27,7 @@ pub enum ChainDbError {
     #[error("Block number {block_num} outside stored range: {block_range:?}")]
     BlockNumberOutsideRange {
         block_num: BlockNumber,
-        block_range: RangeInclusive<BlockNumber>,
+        block_range: NonEmptyRange,
     },
     #[error("Malformed proof: {0}")]
     MalformedProof(

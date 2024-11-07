@@ -22,6 +22,7 @@ risc0-zkvm = { workspace = true }
 serde = { workspace = true }
 thiserror = { workspace = true }
 traits = { workspace = true }
+u64_range = { workspace = true }
 
 [dev-dependencies]
 rand = { workspace = true }
