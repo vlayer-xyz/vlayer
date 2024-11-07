@@ -29,7 +29,7 @@ function Source() {
 
     vlayerClient.current = createVlayerClient({
       webProofProvider: provider,
-    }) as VlayerClient;
+    });
 
     const webproof = await provider.getWebProof({
       proverCallCommitment: {

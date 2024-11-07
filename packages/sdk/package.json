@@ -13,7 +13,7 @@
   },
   "version": "0.1.0",
   "scripts": {
-    "build": "bun tsc",
+    "build": "bun tsc && bun tsc-alias",
     "test:unit": "vitest --run",
     "gen:types": "sh ../../bash/build_ts_types.sh",
     "replaceCommonsSymlink": "mv ./src/web-proof-commons ./src/web-proof-commons.bak && cp -r $(readlink -f ./src/web-proof-commons.bak) src/web-proof-commons && rm ./src/web-proof-commons.bak"
@@ -29,11 +29,12 @@
     "typescript": "^5.6.3"
   },
   "dependencies": {
+    "@vitejs/plugin-react": "^4.3.2",
     "dns-over-http-resolver": "^3.0.3",
     "postal-mime": "^2.3.2",
+    "tsc-alias": "^1.8.10",
     "viem": "2.21.0",
-    "vite-tsconfig-paths": "^5.0.1",
-    "@vitejs/plugin-react": "^4.3.2"
+    "vite-tsconfig-paths": "^5.0.1"
   },
   "files": [
     "dist/",
