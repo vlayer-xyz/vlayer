@@ -2,7 +2,6 @@ use std::{collections::HashMap, sync::Arc, time::Duration};
 
 use axum::{body::Body, http::Response};
 use call_server::{server, ProofMode, ServerConfig};
-use chain_server::server::{ChainProofServerMock, EMPTY_PROOF_RESPONSE};
 use ethers::{
     contract::abigen,
     core::{
@@ -14,6 +13,7 @@ use ethers::{
     signers::{LocalWallet, Signer, Wallet},
 };
 use example_prover::ExampleProver;
+use mock_chain_server::{ChainProofServerMock, EMPTY_PROOF_RESPONSE};
 use serde::Serialize;
 use serde_json::json;
 use server_utils::post;

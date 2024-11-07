@@ -1,8 +1,8 @@
-pub mod server;
-
 mod config;
 mod error;
 mod handlers;
-mod mock;
+mod server;
 
+pub use chain_common::RpcChainProof;
 pub use config::ServerConfig;
+pub use server::server;

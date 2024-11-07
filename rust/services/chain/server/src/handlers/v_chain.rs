@@ -1,11 +1,10 @@
 use std::sync::Arc;
 
 use alloy_primitives::{bytes, BlockNumber, ChainId};
-use block_trie::BlockTrie;
 use bytes::Bytes;
+use chain_common::RpcChainProof;
 use chain_db::ChainDb;
 use lazy_static::lazy_static;
-use mpt::{MerkleTrie, ParseNodeError};
 use parking_lot::RwLock;
 use serde::{Deserialize, Serialize};
 
@@ -15,25 +14,6 @@ use crate::error::AppError;
 pub struct Params {
     chain_id: ChainId,
     block_numbers: Vec<BlockNumber>,
-}
-
-#[derive(Serialize, Default, Deserialize, Debug, PartialEq)]
-pub struct ChainProof {
-    pub proof: Bytes,
-    pub nodes: Vec<Bytes>,
-}
-
-impl TryFrom<ChainProof> for chain_common::ChainProof {
-    type Error = ParseNodeError;
-
-    fn try_from(rpc_chain_proof: ChainProof) -> Result<Self, Self::Error> {
-        let block_trie =
-            BlockTrie::from_unchecked(MerkleTrie::from_rlp_nodes(rpc_chain_proof.nodes)?);
-        Ok(Self {
-            proof: rpc_chain_proof.proof,
-            block_trie,
-        })
-    }
 }
 
 lazy_static! {
@@ -51,7 +31,7 @@ pub async fn v_chain(
         chain_id,
         block_numbers,
     }: Params,
-) -> Result<ChainProof, AppError> {
+) -> Result<RpcChainProof, AppError> {
     if block_numbers.is_empty() {
         return Err(AppError::NoBlockNumbers);
     };
@@ -62,7 +42,7 @@ pub async fn v_chain(
         .map(|db_node| db_node.rlp)
         .collect();
 
-    Ok(ChainProof {
+    Ok(RpcChainProof {
         proof: SOME_PROOF.clone(),
         nodes,
     })
@@ -120,7 +100,7 @@ mod tests {
         async fn trie_contains_proofs() -> Result<()> {
             let response = v_chain(chain_db.clone(), params.clone()).await?;
 
-            let ChainProof { nodes, .. } = response;
+            let RpcChainProof { nodes, .. } = response;
             let trie = MerkleTrie::from_rlp_nodes(nodes)?;
 
             assert_eq!(
@@ -138,7 +118,7 @@ mod tests {
         async fn proof_does_verify() -> Result<()> {
             let response = v_chain(chain_db.clone(), params.clone()).await?;
 
-            let ChainProof { proof, nodes } = response;
+            let RpcChainProof { proof, nodes } = response;
             let trie = MerkleTrie::from_rlp_nodes(nodes)?;
 
             let inner_receipt: InnerReceipt = bincode::deserialize(&proof)?;
@@ -152,7 +132,7 @@ mod tests {
         async fn proof_does_not_verify_with_invalid_elf_id() -> Result<()> {
             let response = v_chain(chain_db.clone(), params.clone()).await?;
 
-            let ChainProof { proof, nodes } = response;
+            let RpcChainProof { proof, nodes } = response;
             let trie = MerkleTrie::from_rlp_nodes(nodes)?;
 
             let inner_receipt: InnerReceipt = bincode::deserialize(&proof)?;

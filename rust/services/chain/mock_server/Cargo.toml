@@ -1,0 +1,14 @@
+[package]
+name = "mock_chain_server"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+axum-jrpc = { workspace = true }
+lazy_static = { workspace = true }
+serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
+server_utils = { workspace = true }
+
+[lints]
+workspace = true

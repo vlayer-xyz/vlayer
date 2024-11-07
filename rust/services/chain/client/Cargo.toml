@@ -13,7 +13,6 @@ parking_lot = { workspace = true }
 thiserror = { workspace = true }
 
 # RPC dependencies (disabled for guest)
-chain_server = { workspace = true, optional = true }
 mpt = { workspace = true, optional = true }
 serde_json = { workspace = true, optional = true }
 server_utils = { workspace = true, optional = true }
@@ -25,4 +24,4 @@ block_trie = { workspace = true }
 tokio = { workspace = true, features = ["rt", "macros"] }
 
 [features]
-rpc = ["chain_server", "mpt", "serde_json", "server_utils", "tracing"]
+rpc = ["mpt", "serde_json", "server_utils", "tracing"]
