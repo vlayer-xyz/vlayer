@@ -40,13 +40,13 @@ lazy_static! {
             name: "forge-std".into(),
             version: "1.9.2".into(),
             url: None,
-            remapping: Some(("forge-std", "src").into()),
+            remapping: Some((vec!["forge-std", "forge-std-1.9.2/src"], "src").into()),
         },
         SoldeerDep {
             name: "risc0-ethereum".into(),
             version: "1.0.0".into(),
             url: Some("https://github.com/vlayer-xyz/risc0-ethereum/releases/download/v1.0.0-soldeer-no-remappings/contracts.zip".into()),
-            remapping: Some(("risc0-ethereum-1.0.0").into()),
+            remapping: Some("risc0-ethereum-1.0.0".into()),
         },
         SoldeerDep {
             name: "vlayer".into(),
@@ -64,30 +64,53 @@ pub(super) struct SoldeerDep {
     pub remapping: Option<Remapping>,
 }
 
+#[derive(Debug, Clone)]
+enum Key {
+    Single(String),
+    Multi(Vec<String>),
+}
+
+impl From<&str> for Key {
+    fn from(value: &str) -> Self {
+        Key::Single(value.into())
+    }
+}
+
+impl From<Vec<&str>> for Key {
+    fn from(value: Vec<&str>) -> Self {
+        Key::Multi(value.iter().map(ToString::to_string).collect())
+    }
+}
+
 pub(super) struct Remapping {
-    key: String,
+    key: Key,
     internal_path: Option<String>,
 }
 
 impl Remapping {
-    fn new(key: &str, internal_path: Option<&str>) -> Self {
+    fn new(key: Key, internal_path: Option<&str>) -> Self {
         let internal_path = internal_path.map(ToString::to_string);
-        Self {
-            key: key.to_string(),
-            internal_path,
-        }
+        Self { key, internal_path }
     }
 }
 
 impl From<(&str, &str)> for Remapping {
     fn from(value: (&str, &str)) -> Self {
         let (key, internal_path) = value;
-        Remapping::new(key, Some(internal_path))
+        Remapping::new(key.into(), Some(internal_path))
     }
 }
+
+impl From<(Vec<&str>, &str)> for Remapping {
+    fn from(value: (Vec<&str>, &str)) -> Self {
+        let (key, internal_path) = value;
+        Remapping::new(key.into(), Some(internal_path))
+    }
+}
+
 impl From<&str> for Remapping {
-    fn from(value: &str) -> Self {
-        Remapping::new(value, None)
+    fn from(key: &str) -> Self {
+        Remapping::new(key.into(), None)
     }
 }
 
@@ -138,7 +161,7 @@ impl SoldeerDep {
         Ok(output)
     }
 
-    fn remapping(&self) -> Option<(String, String)> {
+    fn remapping(&self) -> Option<Vec<(String, String)>> {
         let remapping = self.remapping.as_ref()?;
         let internal_path = if let Some(internal_path) = &remapping.internal_path {
             format!("{}/", internal_path)
@@ -146,10 +169,17 @@ impl SoldeerDep {
             String::default()
         };
 
-        Some((
-            remapping.key.clone(),
-            format!("dependencies/{}-{}/{}", self.name, self.version, internal_path),
-        ))
+        let key = remapping.key.clone();
+        let dependency = format!("dependencies/{}-{}/{}", self.name, self.version, internal_path);
+        let remappings = match key {
+            Key::Single(key) => vec![(key.clone(), format!("{key}/={dependency}"))],
+            Key::Multi(keys) => keys
+                .iter()
+                .map(|key| (key.clone(), format!("{key}/={dependency}")))
+                .collect(),
+        };
+
+        Some(remappings)
     }
 }
 
@@ -203,16 +233,10 @@ fn filter_existing_remappings(
 }
 
 fn build_new_remappings(deps: &[SoldeerDep]) -> (Vec<String>, Vec<String>) {
-    let mut keys: Vec<String> = Default::default();
-    let mut new_remappings: Vec<String> = Default::default();
-
-    for dep in deps {
-        if let Some((key, remapping)) = dep.remapping() {
-            new_remappings.push(format!("{key}/={remapping}"));
-            keys.push(key);
-        }
-    }
-    (keys, new_remappings)
+    deps.iter()
+        .filter_map(SoldeerDep::remapping)
+        .flatten()
+        .unzip()
 }
 
 fn change_sdk_dependency_to_npm(foundry_root: &Path) -> Result<(), CLIError> {
@@ -496,6 +520,7 @@ mod tests {
             "some initial remappings\n\
             openzeppelin-contracts/=dependencies/@openzeppelin-contracts-5.0.1/\n\
             forge-std/=dependencies/forge-std-1.9.2/src/\n\
+            forge-std-1.9.2/src/=dependencies/forge-std-1.9.2/src/\n\
             risc0-ethereum-1.0.0/=dependencies/risc0-ethereum-1.0.0/\n\
             vlayer-0.1.0/=dependencies/vlayer-{}/src/\n",
             version()
@@ -519,6 +544,7 @@ mod tests {
         let expected_remappings = format!(
             "openzeppelin-contracts/=dependencies/@openzeppelin-contracts-5.0.1/\n\
             forge-std/=dependencies/forge-std-1.9.2/src/\n\
+            forge-std-1.9.2/src/=dependencies/forge-std-1.9.2/src/\n\
             risc0-ethereum-1.0.0/=dependencies/risc0-ethereum-1.0.0/\n\
             vlayer-0.1.0/=dependencies/vlayer-{}/src/\n",
             version()
