@@ -15,7 +15,6 @@ chain_db = { workspace = true }
 lazy_static = { workspace = true }
 mpt = { workspace = true }
 parking_lot = { workspace = true }
-u64_range = { workspace = true }
 risc0-zkp = { workspace = true }
 risc0-zkvm = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
@@ -24,6 +23,7 @@ server_utils = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
 traits = { workspace = true }
+u64_range = { workspace = true }
 
 [lints]
 workspace = true
