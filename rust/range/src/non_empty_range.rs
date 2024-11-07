@@ -53,7 +53,7 @@ impl NonEmptyRange {
         }
         let start = self.end.saturating_sub(limit - 1);
         let start = max(start, self.start);
-        NonEmptyRange::try_from_range(start..=self.end).into()
+        Self::try_from_range(start..=self.end).into()
     }
 
     pub fn trim_right(&self, limit: u64) -> Range {
@@ -62,7 +62,7 @@ impl NonEmptyRange {
         }
         let end = self.start.saturating_add(limit - 1);
         let end = min(end, self.end);
-        NonEmptyRange::try_from_range(self.start..=end).into()
+        Self::try_from_range(self.start..=end).into()
     }
 
     pub fn add_right(&self, count: u64) -> Option<(NonEmptyRange, Range)> {
@@ -70,7 +70,7 @@ impl NonEmptyRange {
             return Some((*self, Range::EMPTY));
         }
         let new_end = self.end.checked_add(count)?;
-        let new_range = NonEmptyRange::try_from_range(self.start..=new_end)
+        let new_range = Self::try_from_range(self.start..=new_end)
             .expect("Extending non-empty range yields a non-empty range");
         let append = (self.end.checked_add(1)?..=new_end).into();
         Some((new_range, append))
@@ -81,7 +81,7 @@ impl NonEmptyRange {
             return Some((*self, Range::EMPTY));
         }
         let new_start = self.start.checked_sub(count)?;
-        let new_range = NonEmptyRange::try_from_range(new_start..=self.end)
+        let new_range = Self::try_from_range(new_start..=self.end)
             .expect("Extending non-empty range yields a non-empty range");
         let prepend = (new_start..=self.start.checked_sub(1)?).into();
         Some((new_range, prepend))
