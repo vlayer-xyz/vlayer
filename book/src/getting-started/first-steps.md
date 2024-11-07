@@ -18,7 +18,7 @@ cd ./your-project && vlayer init --existing
 ### Example project
 To initialize vlayer project with example prover and verifier contracts use `--template` flag:
 ```bash
-vlayer init my-airdrop --template private-airdrop
+vlayer init simple --template simple
 ``` 
 
 ## Directory structure
