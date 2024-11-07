@@ -8,6 +8,7 @@ use std::{
 use crate::Range;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
+/// Inclusive range that is guaranteed to be non-empty
 pub struct NonEmptyRange {
     start: u64,
     end: u64,
@@ -26,6 +27,15 @@ impl NonEmptyRange {
             start: *range.start(),
             end: *range.end(),
         })
+    }
+
+    /// Panics if the range is empty
+    fn from_range(range: RangeInclusive<u64>) -> Self {
+        assert!(range.start() <= range.end());
+        Self {
+            start: *range.start(),
+            end: *range.end(),
+        }
     }
 
     pub const fn start(&self) -> u64 {
@@ -70,8 +80,8 @@ impl NonEmptyRange {
             return Some((*self, Range::EMPTY));
         }
         let new_end = self.end.checked_add(count)?;
-        let new_range = Self::try_from_range(self.start..=new_end)
-            .expect("Extending non-empty range yields a non-empty range");
+        // Extending non-empty range yields a non-empty range
+        let new_range = Self::from_range(self.start..=new_end);
         let append = (self.end.checked_add(1)?..=new_end).into();
         Some((new_range, append))
     }
@@ -81,8 +91,8 @@ impl NonEmptyRange {
             return Some((*self, Range::EMPTY));
         }
         let new_start = self.start.checked_sub(count)?;
-        let new_range = Self::try_from_range(new_start..=self.end)
-            .expect("Extending non-empty range yields a non-empty range");
+        // Extending non-empty range yields a non-empty range
+        let new_range = Self::from_range(new_start..=self.end);
         let prepend = (new_start..=self.start.checked_sub(1)?).into();
         Some((new_range, prepend))
     }
