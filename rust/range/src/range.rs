@@ -83,6 +83,27 @@ mod tests {
     use super::*;
 
     #[test]
+    fn is_empty() {
+        assert!(Range::EMPTY.is_empty());
+        assert!(!Range::from_range(1..=1).is_empty());
+    }
+
+    #[test]
+    fn as_non_empty() {
+        assert_eq!(Range::EMPTY.as_non_empty(), None);
+        assert_eq!(
+            Range::from_range(1..=1).as_non_empty(),
+            Some(NonEmptyRange::from_single_value(1))
+        );
+    }
+
+    #[test]
+    fn len() {
+        assert_eq!(Range::EMPTY.len(), 0);
+        assert_eq!(Range::from_range(1..=1).len(), 1);
+    }
+
+    #[test]
     fn from_range() {
         assert_eq!(Range::from_range(1..=1), Range(Some(NonEmptyRange::from_single_value(1))));
         assert_eq!(Range::from_range(1..=0), Range::EMPTY);
