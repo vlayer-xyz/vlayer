@@ -1,4 +1,7 @@
-use std::fmt::{Display, Formatter};
+use std::{
+    cmp::min,
+    fmt::{Display, Formatter},
+};
 
 use alloy_primitives::BlockNumber;
 use derivative::Derivative;
@@ -67,13 +70,13 @@ impl Strategy {
             return 0;
         }
         let range = NonEmptyRange::try_from_range(GENESIS..=range.start() - 1).unwrap(); // SAFETY: start > 0
-        range.trim_left(self.max_back_propagation_blocks).len()
+        min(self.max_back_propagation_blocks, range.len())
     }
 
     fn get_append_count(&self, range: NonEmptyRange, latest: BlockNumber) -> u64 {
         let confirmed = (latest + 1).saturating_sub(self.confirmations); // Genesis block is always confirmed
         let range: Range = (range.end() + 1..=confirmed).into();
-        range.trim_right(self.max_head_blocks).len()
+        min(self.max_head_blocks, range.len())
     }
 }
 

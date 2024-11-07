@@ -1,9 +1,4 @@
-use std::{
-    borrow::Borrow,
-    cmp::{max, min},
-    fmt::Display,
-    ops::RangeInclusive,
-};
+use std::{borrow::Borrow, fmt::Display, ops::RangeInclusive};
 
 use crate::Range;
 
@@ -55,24 +50,6 @@ impl NonEmptyRange {
 
     pub const fn is_empty(&self) -> bool {
         false
-    }
-
-    pub fn trim_left(&self, limit: u64) -> Range {
-        if limit == 0 {
-            return Range::EMPTY;
-        }
-        let start = self.end.saturating_sub(limit - 1);
-        let start = max(start, self.start);
-        Self::try_from_range(start..=self.end).into()
-    }
-
-    pub fn trim_right(&self, limit: u64) -> Range {
-        if limit == 0 {
-            return Range::EMPTY;
-        }
-        let end = self.start.saturating_add(limit - 1);
-        let end = min(end, self.end);
-        Self::try_from_range(self.start..=end).into()
     }
 
     pub fn add_right(&self, count: u64) -> Option<(NonEmptyRange, Range)> {
@@ -191,22 +168,6 @@ mod tests {
     #[test]
     fn is_empty() {
         assert!(!NonEmptyRange::from_single_value(1).is_empty());
-    }
-
-    #[test]
-    fn trim_left() {
-        assert_eq!(r(0..=1).trim_left(0), Range::EMPTY);
-        assert_eq!(r(0..=1).trim_left(1), 1..=1);
-        assert_eq!(r(0..=1).trim_left(2), 0..=1);
-        assert_eq!(r(0..=1).trim_left(3), 0..=1);
-    }
-
-    #[test]
-    fn trim_right() {
-        assert_eq!(r(0..=1).trim_right(0), Range::EMPTY);
-        assert_eq!(r(0..=1).trim_right(1), 0..=0);
-        assert_eq!(r(0..=1).trim_right(2), 0..=1);
-        assert_eq!(r(0..=1).trim_right(3), 0..=1);
     }
 
     #[test]

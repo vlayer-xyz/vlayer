@@ -33,14 +33,6 @@ impl Range {
     pub fn len(&self) -> u64 {
         self.0.map(|range| range.len()).unwrap_or(0)
     }
-
-    pub fn trim_left(&self, limit: u64) -> Self {
-        Self(self.0.and_then(|range| range.trim_left(limit).0))
-    }
-
-    pub fn trim_right(&self, limit: u64) -> Self {
-        Self(self.0.and_then(|range| range.trim_right(limit).0))
-    }
 }
 
 impl From<RangeInclusive<u64>> for Range {
@@ -107,21 +99,5 @@ mod tests {
     fn from_range() {
         assert_eq!(Range::from_range(1..=1), Range(Some(NonEmptyRange::from_single_value(1))));
         assert_eq!(Range::from_range(1..=0), Range::EMPTY);
-    }
-
-    #[test]
-    fn trim_left() {
-        assert_eq!(Range::from_range(1..=2).trim_left(0), Range::EMPTY);
-        assert_eq!(Range::from_range(1..=2).trim_left(1), Range::from_range(2..=2));
-        assert_eq!(Range::from_range(1..=2).trim_left(2), Range::from_range(1..=2));
-        assert_eq!(Range::from_range(1..=2).trim_left(3), Range::from_range(1..=2));
-    }
-
-    #[test]
-    fn trim_right() {
-        assert_eq!(Range::from_range(1..=2).trim_right(0), Range::EMPTY);
-        assert_eq!(Range::from_range(1..=2).trim_right(1), Range::from_range(1..=1));
-        assert_eq!(Range::from_range(1..=2).trim_right(2), Range::from_range(1..=2));
-        assert_eq!(Range::from_range(1..=2).trim_right(3), Range::from_range(1..=2));
     }
 }
