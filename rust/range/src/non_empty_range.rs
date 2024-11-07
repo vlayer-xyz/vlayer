@@ -131,6 +131,10 @@ mod tests {
 
     use super::*;
 
+    // Helper function to create a NonEmptyRange from RangeInclusive<u64>
+    // Panics if the range is empty
+    // It's named `r` to not clutter the tests
+    // assert_eq!(r(0..=1).trim_left(1), 1..=1) is more readable than assert_eq!(NonEmptyRange::try_from_range(0..=1).unwrap().trim_left(1), 1..=1)
     fn r(range: RangeInclusive<u64>) -> NonEmptyRange {
         NonEmptyRange::try_from_range(range).unwrap()
     }
