@@ -84,7 +84,7 @@ mod tests {
 
     #[test]
     fn from_range() {
-        assert_eq!(Range::from_range(1..=1), Range(Some(NonEmptyRange::from_value(1))));
+        assert_eq!(Range::from_range(1..=1), Range(Some(NonEmptyRange::from_single_value(1))));
         assert_eq!(Range::from_range(1..=0), Range::EMPTY);
     }
 

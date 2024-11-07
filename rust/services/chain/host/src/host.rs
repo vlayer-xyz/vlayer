@@ -99,7 +99,7 @@ where
         };
         let receipt = self.prover.prove(&input, None)?;
 
-        let range = NonEmptyRange::from_value(latest_block_number);
+        let range = NonEmptyRange::from_single_value(latest_block_number);
         let chain_update = ChainUpdate::from_two_tries(range, vec![], &trie, &receipt)?;
 
         Ok(chain_update)

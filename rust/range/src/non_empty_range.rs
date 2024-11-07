@@ -14,7 +14,7 @@ pub struct NonEmptyRange {
 }
 
 impl NonEmptyRange {
-    pub const fn from_value(value: u64) -> Self {
+    pub const fn from_single_value(value: u64) -> Self {
         Self {
             start: value,
             end: value,
@@ -94,7 +94,7 @@ impl NonEmptyRange {
 
 impl From<u64> for NonEmptyRange {
     fn from(value: u64) -> Self {
-        Self::from_value(value)
+        Self::from_single_value(value)
     }
 }
 
@@ -176,7 +176,7 @@ mod tests {
 
     #[test]
     fn is_empty() {
-        assert!(!NonEmptyRange::from_value(1).is_empty());
+        assert!(!NonEmptyRange::from_single_value(1).is_empty());
     }
 
     #[test]
