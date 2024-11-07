@@ -55,3 +55,7 @@ jobs:
           cargo +nightly fmt --check
           cargo sort --check --grouped
           cargo clippy --all-targets --all-features --locked
+
+      - name: Run cargo deny
+        working-directory: rust/cli
+        run: cargo deny check bans

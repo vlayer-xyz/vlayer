@@ -1,0 +1,5 @@
+[bans]
+multiple-versions = "allow"
+deny = [
+    { crate = "libmdbx", reason = "CLI should be portable and not depend on C code" },
+]
