@@ -25,4 +25,7 @@
   "include": [
     "src",
   ],
+  "tsc-alias" : {
+    "resolveFullPaths": true,
+  }
 }
