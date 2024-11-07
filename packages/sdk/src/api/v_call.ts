@@ -1,4 +1,5 @@
 import { CallContext, CallParams, VCallResponse } from "types/vlayer";
+import { VersionError } from "./lib/errors";
 
 function v_callBody(call: CallParams, context: CallContext) {
   return {
@@ -31,13 +32,6 @@ export async function v_call(
   }
 
   return response_json as Promise<VCallResponse>;
-}
-
-export class VersionError extends Error {
-  constructor(message: string) {
-    super(message);
-    this.name = "VersionError";
-  }
 }
 
 function parseError({ message }: { message: string | undefined }): Error {
