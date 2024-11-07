@@ -4,7 +4,6 @@ import webProofVerifier from "../out/WebProofVerifier.sol/WebProofVerifier";
 import tls_proof from "./tls_proof.json";
 import * as assert from "assert";
 import { encodePacked, isAddress, keccak256 } from "viem";
-import { foundry } from "viem/chains";
 import { getConfig } from "./config";
 import { getEthClient, getContractAddr } from "./helpers";
 
@@ -20,8 +19,11 @@ let hash = await ethClient.deployContract({
   args: [],
   chain: config.chain,
 });
+console.log("Deploying Prover...");
 const prover = await getContractAddr(ethClient, hash);
+console.log("Prover deployed:", prover);
 
+console.log("Deploying Verifier...");
 hash = await ethClient.deployContract({
   abi: webProofVerifier.abi,
   bytecode: webProofVerifier.bytecode.object,
@@ -29,8 +31,9 @@ hash = await ethClient.deployContract({
   args: [prover],
   chain: config.chain,
 });
-
 const verifier = await getContractAddr(ethClient, hash);
+console.log("Verifier deployed:", verifier);
+
 const twitterUserAddress = config.deployer.address;
 
 const vlayer = createVlayerClient({
@@ -71,13 +74,18 @@ async function testSuccessProvingAndVerification() {
 
   console.log("Verifying...");
 
-  await ethClient.writeContract({
+  const txHash = await ethClient.writeContract({
     address: verifier,
     abi: webProofVerifier.abi,
     functionName: "verify",
     args: [proof, twitterHandle, address],
     chain: config.chain,
     account: config.deployer,
+  });
+
+  await ethClient.waitForTransactionReceipt({
+    hash: txHash,
+    confirmations: config.chainName === "anvil" ? 1 : 5,
   });
 
   console.log("Verified!");
@@ -117,7 +125,7 @@ async function testFailedProving() {
         },
         twitterUserAddress,
       ],
-      chainId: foundry.id,
+      chainId: config.chain.id,
     });
     await vlayer.waitForProvingResult({ hash });
     throw new Error("Proving should have failed!");

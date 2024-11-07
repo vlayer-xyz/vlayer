@@ -20,7 +20,10 @@ export const getContractAddr = async (
   client: PublicClient,
   hash: `0x${string}`,
 ): Promise<Address> => {
-  const receipt = await client.waitForTransactionReceipt({ hash });
+  const receipt = await client.waitForTransactionReceipt({
+    hash,
+    confirmations: client?.chain?.name === "Anvil" ? 1 : 5,
+  });
   if (receipt.status != "success") {
     throw new Error(`Prover deployment failed with status: ${receipt.status}`);
   }

@@ -40,6 +40,7 @@ export const getConfig = async (envPath?: string) => {
   return {
     ...Object.assign(DEFAULT_CONFIG, {
       chainName,
+      chain,
       privateKey,
       deployer: privateKeyToAccount(privateKey),
       jsonRpcUrl,
