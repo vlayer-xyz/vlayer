@@ -52,6 +52,20 @@ impl NonEmptyRange {
         false
     }
 
+    /// Extends the range by adding the specified number of elements to the right.
+    ///
+    /// # Parameters
+    /// - `count`: The number of elements to add to the right of the range.
+    ///
+    /// # Returns
+    /// - `Some((NonEmptyRange, Range))` if the range can be successfully extended:
+    ///   - `NonEmptyRange`: The extended range, which includes the original range plus `count` elements to the right.
+    ///   - `Range`: A `Range` representing the newly added portion (i.e., the segment from `self.end + 1` to `new_end`).
+    /// - `None` if the extension would cause an overflow or if `count` is such that the new end is invalid.
+    ///
+    /// # Edge Cases
+    /// - If `count` is `0`, returns the original range and an empty appended range.
+    /// - If adding `count` to `self.end` causes an overflow, returns `None`.
     pub fn add_right(&self, count: u64) -> Option<(NonEmptyRange, Range)> {
         if count == 0 {
             return Some((*self, Range::EMPTY));
@@ -63,6 +77,20 @@ impl NonEmptyRange {
         Some((new_range, append))
     }
 
+    /// Extends the range by adding the specified number of elements to the left.
+    ///
+    /// # Parameters
+    /// - `count`: The number of elements to add to the left of the range.
+    ///
+    /// # Returns
+    /// - `Some((NonEmptyRange, Range))` if the range can be successfully extended:
+    ///   - `NonEmptyRange`: The extended range, which includes the original range plus `count` elements to the left.
+    ///   - `Range`: A `Range` representing the newly added portion (i.e., the segment from `new_start` to `self.start - 1`).
+    /// - `None` if the extension would cause an underflow or if `count` is such that the new start is invalid.
+    ///
+    /// # Edge Cases
+    /// - If `count` is `0`, returns the original range and an empty prepended range.
+    /// - If subtracting `count` from `self.start` causes an underflow, returns `None`.
     pub fn add_left(&self, count: u64) -> Option<(NonEmptyRange, Range)> {
         if count == 0 {
             return Some((*self, Range::EMPTY));
