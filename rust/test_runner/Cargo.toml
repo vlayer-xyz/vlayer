@@ -19,7 +19,6 @@ alloy-trie = { workspace = true }
 anyhow = { workspace = true }
 chain = { workspace = true }
 chain_client = { workspace = true }
-chain_server = { workspace = true }
 clap = { workspace = true, features = ["derive"] }
 color-eyre = { workspace = true }
 comfy-table = { workspace = true }
@@ -35,6 +34,7 @@ foundry-config = { workspace = true }
 foundry-debugger = { workspace = true }
 foundry-evm = { workspace = true }
 foundry-evm-core = { workspace = true }
+mock_chain_server = { workspace = true }
 rayon = { workspace = true }
 regex = { workspace = true }
 serde_json = { workspace = true }

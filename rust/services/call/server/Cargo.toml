@@ -13,7 +13,6 @@ axum-jrpc = { workspace = true }
 call_engine = { workspace = true }
 call_host = { workspace = true }
 chain = { workspace = true }
-chain_server = { workspace = true }
 hex = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
@@ -28,5 +27,6 @@ web_proof = { workspace = true }
 assert-json-diff = "2.0.2"
 ethers = { workspace = true }
 lazy_static = { workspace = true }
+mock_chain_server = { workspace = true }
 reqwest = { workspace = true }
 web_proof = { workspace = true, features = ["fixtures"] }

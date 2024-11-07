@@ -1,5 +1,5 @@
 use call_server::{serve, ProofMode};
-use chain_server::server::{ChainProofServerMock, EMPTY_PROOF_RESPONSE};
+use mock_chain_server::{ChainProofServerMock, EMPTY_PROOF_RESPONSE};
 use serde_json::json;
 use tracing::{info, warn};
 

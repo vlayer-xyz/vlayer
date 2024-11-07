@@ -1967,13 +1967,13 @@ dependencies = [
  "chain",
  "chain_client",
  "chain_common",
- "chain_server",
  "ctor",
  "derive-new",
  "dotenvy",
  "ethers-core",
  "host_utils",
  "lazy_static",
+ "mock_chain_server",
  "mpt",
  "provider",
  "reqwest 0.12.8",
@@ -2004,10 +2004,10 @@ dependencies = [
  "call_engine",
  "call_host",
  "chain",
- "chain_server",
  "ethers",
  "hex",
  "lazy_static",
+ "mock_chain_server",
  "reqwest 0.12.8",
  "serde",
  "serde_json",
@@ -2126,7 +2126,6 @@ dependencies = [
  "async-trait",
  "block_trie",
  "chain_common",
- "chain_server",
  "derive-new",
  "futures",
  "mpt",
@@ -2144,6 +2143,7 @@ version = "0.1.0"
 dependencies = [
  "alloy-primitives",
  "block_trie",
+ "mpt",
  "serde",
  "serde_json",
 ]
@@ -2410,12 +2410,12 @@ dependencies = [
  "anyhow",
  "call_guest_wrapper",
  "call_server",
- "chain_server",
  "clap",
  "colored",
  "flate2",
  "hex",
  "lazy_static",
+ "mock_chain_server",
  "regex",
  "reqwest 0.12.8",
  "risc0-zkp",
@@ -6539,6 +6539,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "mock_chain_server"
+version = "0.1.0"
+dependencies = [
+ "axum-jrpc",
+ "lazy_static",
+ "serde",
+ "serde_json",
+ "server_utils",
+]
+
+[[package]]
 name = "mockito"
 version = "1.5.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -9655,7 +9666,6 @@ dependencies = [
  "call_host",
  "chain",
  "chain_client",
- "chain_server",
  "clap",
  "color-eyre",
  "comfy-table",
@@ -9671,6 +9681,7 @@ dependencies = [
  "foundry-debugger",
  "foundry-evm",
  "foundry-evm-core",
+ "mock_chain_server",
  "mpt",
  "provider",
  "rayon",

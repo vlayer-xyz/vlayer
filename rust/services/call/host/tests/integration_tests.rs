@@ -8,10 +8,10 @@ use call_host::{
     Call,
 };
 use chain_client::RpcClient as RpcChainProofClient;
-use chain_server::server::{ChainProofServerMock, EMPTY_PROOF_RESPONSE};
 use dotenvy::dotenv;
 use ethers_core::types::BlockNumber as BlockTag;
 use lazy_static::lazy_static;
+use mock_chain_server::{ChainProofServerMock, EMPTY_PROOF_RESPONSE};
 use provider::{CachedMultiProvider, CachedProviderFactory};
 use serde_json::json;
 

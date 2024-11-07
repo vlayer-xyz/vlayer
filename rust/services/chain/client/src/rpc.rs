@@ -1,7 +1,6 @@
 use alloy_primitives::{BlockNumber, ChainId};
 use async_trait::async_trait;
-use chain_common::ChainProof;
-use chain_server::server::ChainProof as RpcChainProof;
+use chain_common::{ChainProof, RpcChainProof};
 use serde_json::json;
 use server_utils::RpcClient as RawRpcClient;
 use tracing::info;
