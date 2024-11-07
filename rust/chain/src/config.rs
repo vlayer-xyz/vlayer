@@ -55,6 +55,7 @@ pub static ETH_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
         Chain::mainnet().id(),
         SpecId::CANCUN,
         BTreeMap::from([
+            (SpecId::FRONTIER, ForkCondition::Block(0)),
             (SpecId::MERGE, ForkCondition::Block(MAINNET_MERGE_BLOCK_NUMBER)),
             (SpecId::SHANGHAI, ForkCondition::Timestamp(1681338455)),
             (SpecId::CANCUN, ForkCondition::Timestamp(1710338135)),
