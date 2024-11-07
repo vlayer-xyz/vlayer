@@ -6,9 +6,22 @@ import {
   type PublicClient,
   type Address,
 } from "viem";
+import { privateKeyToAccount } from "viem/accounts";
+
+import { type Config } from "./config";
 import Bun from "bun";
 import fs from "node:fs/promises";
 import dotenv from "dotenv";
+
+const importChainSpecs = async (chainName: string): Promise<Chain> => {
+  try {
+    const chains = await import(`viem/chains`);
+    const chain = chains[chainName as keyof typeof chains] as Chain;
+    return chain;
+  } catch {
+    throw Error(`Cannot import ${chainName} from viem/chains`);
+  }
+};
 
 export const getEthClient = (chain: Chain, jsonRpcUrl: string) =>
   createWalletClient({
@@ -16,16 +29,21 @@ export const getEthClient = (chain: Chain, jsonRpcUrl: string) =>
     transport: http(jsonRpcUrl),
   }).extend(publicActions);
 
-export const getContractAddr = async (
+const chainConfirmations = (chainName?: string): number => {
+  if (!chainName || chainName.toLowerCase() === "anvil") {
+    return 1;
+  } else {
+    return 6;
+  }
+};
+
+export const waitForContractAddr = async (
   client: PublicClient,
   hash: `0x${string}`,
 ): Promise<Address> => {
-  // 1 confirm at devnet, at least 6 for others
-  const confirmations = client?.chain?.name === "Anvil" ? 1 : 6;
-
   const receipt = await client.waitForTransactionReceipt({
     hash,
-    confirmations,
+    confirmations: chainConfirmations(client?.chain?.name),
     retryCount: 12,
   });
 
@@ -35,6 +53,21 @@ export const getContractAddr = async (
     );
 
   return receipt.contractAddress;
+};
+
+export const exampleContext = async (config: Config) => {
+  const chain = await importChainSpecs(config.chainName);
+  const jsonRpcUrl = config.jsonRpcUrl ?? chain.rpcUrls.default.http[0];
+
+  return {
+    ...Object.assign(config, {
+      chain,
+      deployer: privateKeyToAccount(config.privateKey),
+      jsonRpcUrl,
+      ethClient: await getEthClient(chain, jsonRpcUrl),
+      confirmations: chainConfirmations(config.chainName),
+    }),
+  };
 };
 
 export const updateDotFile = async (

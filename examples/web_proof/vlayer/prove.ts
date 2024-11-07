@@ -5,39 +5,40 @@ import tls_proof from "./tls_proof.json";
 import * as assert from "assert";
 import { encodePacked, isAddress, keccak256 } from "viem";
 import { getConfig } from "./config";
-import { getEthClient, getContractAddr } from "./helpers";
+import { waitForContractAddr, exampleContext } from "./helpers";
 
-const config = await getConfig();
-const ethClient = getEthClient(config.chain, config.jsonRpcUrl);
+const config = getConfig();
+const { chain, ethClient, deployer, proverUrl, confirmations } =
+  await exampleContext(config);
 
 const notaryPubKey =
   "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExpX/4R4z40gI6C/j9zAM39u58LJu\n3Cx5tXTuqhhu/tirnBi5GniMmspOTEsps4ANnPLpMmMSfhJ+IFHbc3qVOA==\n-----END PUBLIC KEY-----\n";
 let hash = await ethClient.deployContract({
   abi: webProofProver.abi,
   bytecode: webProofProver.bytecode.object,
-  account: config.deployer,
+  account: deployer,
   args: [],
-  chain: config.chain,
+  chain,
 });
 console.log("Deploying Prover...");
-const prover = await getContractAddr(ethClient, hash);
+const prover = await waitForContractAddr(ethClient, hash);
 console.log("Prover deployed:", prover);
 
 console.log("Deploying Verifier...");
 hash = await ethClient.deployContract({
   abi: webProofVerifier.abi,
   bytecode: webProofVerifier.bytecode.object,
-  account: config.deployer,
+  account: deployer,
   args: [prover],
-  chain: config.chain,
+  chain,
 });
-const verifier = await getContractAddr(ethClient, hash);
+const verifier = await waitForContractAddr(ethClient, hash);
 console.log("Verifier deployed:", verifier);
 
-const twitterUserAddress = config.deployer.address;
+const twitterUserAddress = deployer.address;
 
 const vlayer = createVlayerClient({
-  url: config.proverUrl,
+  url: proverUrl,
 });
 
 await testSuccessProvingAndVerification();
@@ -58,7 +59,7 @@ async function testSuccessProvingAndVerification() {
       },
       twitterUserAddress,
     ],
-    chainId: config.chain.id,
+    chainId: chain.id,
   });
   const result = await vlayer.waitForProvingResult({ hash });
   const [proof, twitterHandle, address] = result;
@@ -79,13 +80,13 @@ async function testSuccessProvingAndVerification() {
     abi: webProofVerifier.abi,
     functionName: "verify",
     args: [proof, twitterHandle, address],
-    chain: config.chain,
-    account: config.deployer,
+    chain,
+    account: deployer,
   });
 
   await ethClient.waitForTransactionReceipt({
     hash: txHash,
-    confirmations: config.chainName === "anvil" ? 1 : 5,
+    confirmations,
   });
 
   console.log("Verified!");
@@ -125,7 +126,7 @@ async function testFailedProving() {
         },
         twitterUserAddress,
       ],
-      chainId: config.chain.id,
+      chainId: chain.id,
     });
     await vlayer.waitForProvingResult({ hash });
     throw new Error("Proving should have failed!");
