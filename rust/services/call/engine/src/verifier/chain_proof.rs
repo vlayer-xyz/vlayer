@@ -1,6 +1,4 @@
 use alloy_primitives::B256;
-#[cfg(test)]
-use auto_impl::auto_impl;
 use block_header::Hashable;
 use chain_common::ChainProof;
 use risc0_zkp::verify::VerificationError;
@@ -32,7 +30,7 @@ mod seal {
     impl<F: Fn(&super::ChainProof) -> Result<(), super::ChainProofError>> Sealed for F {}
 }
 
-#[cfg_attr(test, auto_impl(Fn))]
+#[cfg_attr(test, auto_impl::auto_impl(Fn))]
 pub trait ChainProofVerifier: seal::Sealed + Send + Sync + 'static {
     fn verify(&self, proof: &ChainProof) -> Result<(), ChainProofError>;
 }

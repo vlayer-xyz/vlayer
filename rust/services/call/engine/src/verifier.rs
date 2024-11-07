@@ -6,5 +6,5 @@ mod zk_proof;
 mod tests;
 
 pub use chain_proof::{ChainProofError, ChainProofVerifier, ZkChainProofVerifier};
-pub use guest_input::{verify_guest_input, GuestInputError};
-pub use zk_proof::{GuestVerifier, HostVerifier, ZkpVerifier};
+pub use guest_input::{GuestInputError, GuestInputVerifier, ZkGuestInputVerifier};
+pub use zk_proof::{GuestVerifier, HostVerifier, VerificationError, ZkpVerifier};
