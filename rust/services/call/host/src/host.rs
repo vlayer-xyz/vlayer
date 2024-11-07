@@ -1,6 +1,5 @@
 use std::{
     any::Any,
-    collections::HashMap,
     panic::{self},
 };
 
@@ -15,8 +14,10 @@ use call_engine::{
     Seal,
 };
 use call_guest_wrapper::{RISC0_CALL_GUEST_ELF, RISC0_CALL_GUEST_ID};
-use chain_client::{Client as ChainProofClient, RpcClient as RpcChainProofClient};
-use chain_common::ChainProof;
+use chain_client::{
+    Client as ChainProofClient, RecordingClient as RecordingRpcClient,
+    RpcClient as RpcChainProofClient,
+};
 use config::HostConfig;
 use error::HostError;
 use ethers_core::types::BlockNumber;
@@ -38,7 +39,7 @@ pub struct Host {
     start_execution_location: ExecutionLocation,
     envs: CachedEvmEnv<ProofDb>,
     prover: Prover,
-    chain_proof_client: RpcChainProofClient,
+    chain_proof_client: RecordingRpcClient,
     max_calldata_size: usize,
 }
 
@@ -72,7 +73,7 @@ impl Host {
     pub fn try_new_with_components(
         providers: CachedMultiProvider,
         block_number: u64,
-        chain_proof_client: RpcChainProofClient,
+        chain_proof_client: impl ChainProofClient,
         config: &HostConfig,
     ) -> Result<Self, HostError> {
         validate_guest_image_id(config.call_guest_id)?;
@@ -80,6 +81,7 @@ impl Host {
         let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
         let start_execution_location = (block_number, config.start_chain_id).into();
         let prover = Prover::new(config.proof_mode);
+        let chain_proof_client = RecordingRpcClient::new(chain_proof_client);
 
         Ok(Host {
             envs,
@@ -106,15 +108,16 @@ impl Host {
 
         let multi_evm_input =
             into_multi_input(self.envs).map_err(|err| HostError::CreatingInput(err.to_string()))?;
-        let chain_proofs: HashMap<u64, ChainProof> = self
+        _ = self
             .chain_proof_client
             .get_chain_proofs(multi_evm_input.block_nums_by_chain())
             .await?;
+        let chain_proofs = self.chain_proof_client.into_cache();
         let input = Input {
-            call,
             multi_evm_input,
             start_execution_location: self.start_execution_location,
             chain_proofs,
+            call,
         };
 
         let env = build_executor_env(input)

@@ -1,8 +1,7 @@
-use std::collections::HashMap;
-
-use alloy_primitives::{Address, ChainId, FixedBytes, TxKind};
+use alloy_primitives::{Address, FixedBytes, TxKind};
 use alloy_sol_types::SolValue;
-use chain_common::ChainProof;
+use chain_client::ChainProofCache;
+use derive_new::new;
 use revm::{interpreter::CallInputs, primitives::TxEnv};
 use risc0_zkvm::sha::Digest;
 use serde::{Deserialize, Serialize};
@@ -17,9 +16,9 @@ use crate::{
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Input {
     pub multi_evm_input: MultiEvmInput,
-    pub call: Call,
     pub start_execution_location: ExecutionLocation,
-    pub chain_proofs: HashMap<ChainId, ChainProof>,
+    pub chain_proofs: ChainProofCache,
+    pub call: Call,
 }
 
 #[derive(Deserialize, Serialize, Debug, Clone)]
@@ -76,7 +75,7 @@ pub enum GuestOutputError {
     CannotDecodeCallAssumptions(String),
 }
 
-#[derive(Debug)]
+#[derive(Debug, new)]
 pub struct GuestOutput {
     pub call_assumptions: CallAssumptions,
     pub evm_call_result: Vec<u8>,

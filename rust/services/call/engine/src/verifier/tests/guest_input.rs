@@ -4,9 +4,12 @@ use chain_common::ChainProof;
 use risc0_zkp::verify::VerificationError;
 
 use super::*;
-use crate::evm::{
-    env::location::ExecutionLocation,
-    input::{EvmInput, MultiEvmInput},
+use crate::{
+    evm::{
+        env::location::ExecutionLocation,
+        input::{EvmInput, MultiEvmInput},
+    },
+    verifier::guest_input::{Error, Verifier, ZkVerifier},
 };
 
 const CHAIN_ID: ChainId = 1;
@@ -57,10 +60,8 @@ async fn verify_guest_input(
     chain_client: impl chain_client::Client,
     verifier: impl ChainProofVerifier,
     input: &MultiEvmInput,
-) -> Result<(), GuestInputError> {
-    ZkGuestInputVerifier::new(chain_client, verifier)
-        .verify(input)
-        .await
+) -> Result<(), Error> {
+    ZkVerifier::new(chain_client, verifier).verify(input).await
 }
 
 #[tokio::test]
@@ -81,7 +82,7 @@ async fn chain_proof_missing() {
     let input = mock_multi_evm_input(0..=0);
 
     let res = verify_guest_input(chain_client, proof_ok, &input).await;
-    assert!(matches!(res.unwrap_err(), GuestInputError::ChainClient(..)));
+    assert!(matches!(res.unwrap_err(), Error::ChainClient(..)));
 }
 
 #[tokio::test]
@@ -92,7 +93,7 @@ async fn chain_proof_invalid() {
     let input = mock_multi_evm_input(0..=0);
 
     let res = verify_guest_input(chain_client, proof_invalid, &input).await;
-    assert!(matches!(res.unwrap_err(), GuestInputError::ChainProof(..)));
+    assert!(matches!(res.unwrap_err(), Error::ChainProof(..)));
 }
 
 #[tokio::test]
@@ -102,7 +103,7 @@ async fn block_not_in_trie() {
     let input = mock_multi_evm_input(0..=0);
 
     let res = verify_guest_input(chain_client, proof_ok, &input).await;
-    assert!(matches!(res.unwrap_err(), GuestInputError::BlockNotFound { block_num: 0 }));
+    assert!(matches!(res.unwrap_err(), Error::BlockNotFound { block_num: 0 }));
 }
 
 #[tokio::test]
@@ -118,7 +119,7 @@ async fn block_hash_mismatch() {
     let res = verify_guest_input(chain_client, proof_ok, &input).await;
     assert!(matches!(
         res.unwrap_err(),
-        GuestInputError::BlockHash {
+        Error::BlockHash {
             block_num: 0,
             hash_in_input: _block_hash,
             proven_hash: INVALID_BLOCK_HASH
