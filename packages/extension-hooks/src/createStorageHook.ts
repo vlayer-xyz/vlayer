@@ -14,7 +14,6 @@ function createStorageHook(storage: browser.Storage.StorageArea) {
     initialValue?: T,
   ): [T | typeof LOADING, Dispatch<SetStateAction<T | typeof LOADING>>] {
     const [storedValue, setStoredValue] = useState<T | typeof LOADING>(LOADING);
-
     useEffect(() => {
       storage
         .get(storageKey)
@@ -26,7 +25,7 @@ function createStorageHook(storage: browser.Storage.StorageArea) {
           }
         })
         .catch(console.error);
-    }, [storageKey, initialValue]);
+    }, [storageKey, JSON.stringify(initialValue)]);
 
     useEffect(() => {
       const handleStorageChange = (changes: {
