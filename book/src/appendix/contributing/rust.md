@@ -5,7 +5,11 @@
 To start working with [this repository](https://github.com/vlayer-xyz/vlayer), you will need to install following software:
 
 - [Rust](https://www.rust-lang.org/tools/install) compiler
-- Rust risc-0 [toolchain](https://dev.risczero.com/api/zkvm/quickstart)
+- Rust risc-0 [toolchain](https://dev.risczero.com/api/zkvm/quickstart) version v1.0.5
+  ```
+  rzup install cargo-risczero v1.0.5
+  cargo risczero install
+  ```
 - [Foundry](https://book.getfoundry.sh/getting-started/installation)
 - [Bun](https://bun.sh)
 - [LLVM Clang](https://clang.llvm.org/) compiler version which supports [RISC-V build target](https://llvm.org/docs/RISCVUsage.html) available on the `PATH`
