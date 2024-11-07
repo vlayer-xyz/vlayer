@@ -28,11 +28,20 @@ export async function v_call(
 
   if ("error" in response_json) {
     throw new Error(
-      `Error response: ${(response_json.error as { message: string }).message || "unknown error"}`,
+      formatError(response_json.error as { message: string | undefined }),
     );
   }
 
   return response_json as Promise<VCallResponse>;
+}
+
+function formatError({ message }: { message: string | undefined }): string {
+  if (message?.startsWith("Unsupported CallGuestID")) {
+    return `${message}
+    vlayer uses the daily release cycle, and SDK version must match the proving server version.
+    Please run "vlayer update" to update the SDK to the latest version.`;
+  }
+  return `Error response: ${message ?? "unknown error"}`;
 }
 
 function assertObject(x: unknown): asserts x is object {
