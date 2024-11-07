@@ -42,11 +42,7 @@ async function testSuccessProvingAndVerification() {
   const [proof, twitterHandle, address] = result;
   console.log("Proof:", proof);
 
-  if (typeof twitterHandle !== "string") {
-    throw new Error("Twitter handle is not a string");
-  }
-
-  if (typeof address !== "string" || !isAddress(address)) {
+  if (!isAddress(address)) {
     throw new Error(`${address} is not a valid address`);
   }
 

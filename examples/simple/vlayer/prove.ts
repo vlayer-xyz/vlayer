@@ -35,11 +35,7 @@ const hash = await vlayer.prove({
 const result = await vlayer.waitForProvingResult(hash);
 const [proof, owner, balance] = result;
 
-if (typeof balance !== "bigint") {
-  throw new Error("Balance is not a bigint");
-}
-
-if (typeof owner !== "string" || !isAddress(owner)) {
+if (!isAddress(owner)) {
   throw new Error(`${owner} is not a valid address`);
 }
 
