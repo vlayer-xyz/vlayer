@@ -19,11 +19,11 @@ use futures::future::join_all;
 use lazy_static::lazy_static;
 use prover::Prover;
 use provider::{to_eth_block_header, EvmBlockHeader};
-use range::{NonEmptyRange, Range};
 use risc0_zkvm::sha::Digest;
 use strategy::AppendPrependRanges;
 pub use strategy::Strategy;
 use tracing::{info, instrument};
+use u64_range::{NonEmptyRange, Range};
 
 lazy_static! {
     static ref GUEST_ID: Digest = RISC0_CHAIN_GUEST_ID.into();

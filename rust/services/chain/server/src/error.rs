@@ -5,9 +5,9 @@ use axum_jrpc::{
 };
 use chain_db::ChainDbError;
 use mpt::MptError;
-use range::NonEmptyRange;
 use server_utils::FieldValidationError;
 use thiserror::Error;
+use u64_range::NonEmptyRange;
 
 #[derive(Debug, Error, PartialEq)]
 pub enum AppError {

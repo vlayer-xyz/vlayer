@@ -1,8 +1,8 @@
 use block_trie::BlockTrie;
 use derive_new::new;
 use mpt::MerkleTrie;
-use range::NonEmptyRange;
 use traits::Hashable;
+use u64_range::NonEmptyRange;
 
 use crate::{receipt::ProofVerificationError, ChainProofReceipt};
 

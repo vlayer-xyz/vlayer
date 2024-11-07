@@ -1,7 +1,7 @@
 use alloy_primitives::{BlockNumber, ChainId};
 use derivative::Derivative;
-use range::NonEmptyRange;
 use thiserror::Error;
+use u64_range::NonEmptyRange;
 
 use crate::receipt::ProofVerificationError;
 

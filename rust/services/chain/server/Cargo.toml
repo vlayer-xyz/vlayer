@@ -15,7 +15,7 @@ chain_db = { workspace = true }
 lazy_static = { workspace = true }
 mpt = { workspace = true }
 parking_lot = { workspace = true }
-range = { workspace = true }
+u64_range = { workspace = true }
 risc0-zkp = { workspace = true }
 risc0-zkvm = { workspace = true }
 serde = { workspace = true, features = ["derive"] }

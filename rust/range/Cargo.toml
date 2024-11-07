@@ -1,5 +1,5 @@
 [package]
-name = "range"
+name = "u64_range"
 version = "0.1.0"
 edition = "2021"
 

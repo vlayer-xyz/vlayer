@@ -146,7 +146,7 @@ host_utils = { path = "host_utils" }
 key_value = { path = "key_value" }
 mpt = { path = "mpt" }
 provider = { path = "provider" }
-range = { path = "range" }
+u64_range = { path = "range" }
 server_utils = { path = "server_utils" }
 test_runner = { path = "test_runner" }
 traits = { path = "traits" }

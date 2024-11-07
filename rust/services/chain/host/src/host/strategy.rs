@@ -3,8 +3,8 @@ use std::fmt::{Display, Formatter};
 use alloy_primitives::BlockNumber;
 use derivative::Derivative;
 use derive_new::new;
-use range::{NonEmptyRange, Range};
 use tracing::info;
+use u64_range::{NonEmptyRange, Range};
 
 const GENESIS: BlockNumber = 0;
 
