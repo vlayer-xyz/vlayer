@@ -14,7 +14,7 @@ pub struct BlockFetcher<P>
 where
     P: JsonRpcClient,
 {
-    pub(crate) provider: Provider<P>,
+    provider: Provider<P>,
 }
 
 impl BlockFetcher<Http> {
