@@ -7,7 +7,7 @@ import {
 } from "./web-proof-commons";
 import { WebProverSessionContextManager } from "./state/webProverSessionContext";
 import { match, P } from "ts-pattern";
-import { zkProvingStatusManager } from "./state/zkStatus";
+import { zkProvingStatusStore } from "./state/zkProvingStatusStore.ts";
 
 let windowId = 0;
 // to receive messages from popup script
@@ -76,7 +76,7 @@ browser.runtime.onMessageExternal.addListener((message: MessageToExtension) => {
         message.payload,
       );
     } else if (message.action === ExtensionAction.NotifyZkProvingStatus) {
-      await zkProvingStatusManager.setProvingStatus(message.payload);
+      await zkProvingStatusStore.setProvingStatus(message.payload);
     }
   })().catch(console.error);
 });

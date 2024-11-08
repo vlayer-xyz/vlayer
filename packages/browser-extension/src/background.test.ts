@@ -1,6 +1,6 @@
 import "./background";
 import { describe, it, expect, beforeEach, vi } from "vitest";
-import { zkProvingStatusManager } from "./state/zkStatus";
+import { zkProvingStatusStore } from "./state/zkProvingStatusStore.ts";
 import browser from "webextension-polyfill";
 import { ExtensionAction, ZkProvingStatus } from "./web-proof-commons";
 
@@ -28,7 +28,7 @@ describe("zk related messaging", () => {
   });
 
   it("should listen to zk proving status messages ", async () => {
-    const zkProvingSpy = vi.spyOn(zkProvingStatusManager, "setProvingStatus");
+    const zkProvingSpy = vi.spyOn(zkProvingStatusStore, "setProvingStatus");
     await browser.runtime.sendMessage({
       action: ExtensionAction.NotifyZkProvingStatus,
       payload: { status: ZkProvingStatus.Proving },

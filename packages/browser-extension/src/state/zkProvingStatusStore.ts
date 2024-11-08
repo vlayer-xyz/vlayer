@@ -2,18 +2,18 @@ import { Store } from "./store";
 import browser from "webextension-polyfill";
 import { ZkProvingStatus } from "../web-proof-commons";
 
-export class ZkProvingStatusManager extends Store<{
+export class ZkProvingStatusStore extends Store<{
   zkProvingStatus: ZkProvingStatus;
 }> {
-  static #instance: ZkProvingStatusManager;
+  static #instance: ZkProvingStatusStore;
 
   private constructor(storage: browser.Storage.StorageArea) {
     super(storage);
   }
 
-  public static get instance(): ZkProvingStatusManager {
+  public static get instance(): ZkProvingStatusStore {
     if (!this.#instance) {
-      this.#instance = new ZkProvingStatusManager(browser.storage.local);
+      this.#instance = new ZkProvingStatusStore(browser.storage.local);
     }
     return this.#instance;
   }
@@ -31,4 +31,4 @@ export class ZkProvingStatusManager extends Store<{
   }
 }
 
-export const zkProvingStatusManager = ZkProvingStatusManager.instance;
+export const zkProvingStatusStore = ZkProvingStatusStore.instance;
