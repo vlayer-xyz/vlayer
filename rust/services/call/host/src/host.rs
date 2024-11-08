@@ -3,7 +3,7 @@ use std::{
     panic::{self},
 };
 
-use alloy_primitives::ChainId;
+use alloy_primitives::{BlockNumber, ChainId};
 use alloy_sol_types::SolValue;
 use call_engine::{
     evm::env::{cached::CachedEvmEnv, location::ExecutionLocation},
@@ -19,9 +19,9 @@ use chain_client::{
 };
 use config::HostConfig;
 use error::HostError;
-use ethers_core::types::BlockNumber;
+use ethers_core::types::BlockNumber as BlockTag;
 use prover::Prover;
-use provider::{CachedMultiProvider, EthersProviderFactory};
+use provider::{CachedMultiProvider, EthersProviderFactory, EvmBlockHeader};
 use risc0_zkvm::sha::Digest;
 use tracing::info;
 
@@ -46,26 +46,33 @@ impl Host {
     pub fn try_new(config: &HostConfig) -> Result<Self, HostError> {
         let provider_factory = EthersProviderFactory::new(config.rpc_urls.clone());
         let providers = CachedMultiProvider::new(provider_factory);
-        let block_number = get_block_number(&providers, config.start_chain_id)?;
+        let block_number = get_latest_block_number(&providers, config.start_chain_id)?;
         let chain_proof_client = RpcChainProofClient::new(&config.chain_proof_url);
 
         Host::try_new_with_components(providers, block_number, chain_proof_client, config)
     }
 }
 
-pub fn get_block_number(
+pub fn get_latest_block_number(
     providers: &CachedMultiProvider,
     chain_id: ChainId,
-) -> Result<ChainId, HostError> {
+) -> Result<BlockNumber, HostError> {
+    get_block_header(providers, chain_id, BlockTag::Latest).map(|header| (*header).number())
+}
+
+pub fn get_block_header(
+    providers: &CachedMultiProvider,
+    chain_id: ChainId,
+    block_num: BlockTag,
+) -> Result<Box<dyn EvmBlockHeader>, HostError> {
     let provider = providers.get(chain_id)?;
 
-    let block_number = provider
-        .get_block_header(BlockNumber::Latest)
+    let block_header = provider
+        .get_block_header(block_num)
         .map_err(|e| HostError::Provider(format!("Error fetching block header: {:?}", e)))?
-        .ok_or_else(|| HostError::Provider(String::from("Block header not found")))
-        .map(|block_header| (*block_header).number())?;
+        .ok_or_else(|| HostError::Provider(String::from("Block header not found")))?;
 
-    Ok(block_number)
+    Ok(block_header)
 }
 
 impl Host {

@@ -25,8 +25,10 @@ web_proof = { workspace = true }
 
 [dev-dependencies]
 assert-json-diff = "2.0.2"
+block_header = { workspace = true }
 ethers = { workspace = true }
 lazy_static = { workspace = true }
 mock_chain_server = { workspace = true }
+provider = { workspace = true }
 reqwest = { workspace = true }
 web_proof = { workspace = true, features = ["fixtures"] }

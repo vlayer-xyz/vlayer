@@ -1,9 +1,8 @@
 use alloy_primitives::{BlockNumber, ChainId};
+use chain_common::ProofVerificationError;
 use derivative::Derivative;
 use thiserror::Error;
 use u64_range::NonEmptyRange;
-
-use crate::receipt::ProofVerificationError;
 
 #[derive(Error, Debug, Derivative)]
 #[derivative(PartialEq)]

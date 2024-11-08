@@ -2,9 +2,9 @@ use std::result;
 
 use call_engine::Input;
 use call_guest_wrapper::RISC0_CALL_GUEST_ELF;
+use chain_common::ChainProofReceipt;
 use host_utils::{ProofMode, Prover as Risc0Prover};
 use risc0_zkvm::{ExecutorEnv, ProveInfo, Receipt};
-use serde::Serialize;
 use thiserror::Error;
 use tracing::instrument;
 
@@ -40,8 +40,17 @@ impl Prover {
     }
 }
 
-fn build_executor_env(input: impl Serialize) -> anyhow::Result<ExecutorEnv<'static>> {
-    ExecutorEnv::builder().write(&input)?.build()
+fn build_executor_env(input: &Input) -> anyhow::Result<ExecutorEnv<'static>> {
+    input
+        .chain_proofs
+        .values()
+        .try_fold(ExecutorEnv::builder(), |mut builder, (_, proof)| {
+            let receipt: ChainProofReceipt = proof.try_into()?;
+            builder.add_assumption(receipt);
+            Ok::<_, anyhow::Error>(builder)
+        })?
+        .write(&input)?
+        .build()
 }
 
 #[cfg(test)]

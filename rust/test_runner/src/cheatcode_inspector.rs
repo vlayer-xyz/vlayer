@@ -6,7 +6,7 @@ use call_engine::{
     },
     Call, HostOutput, Proof, Seal,
 };
-use call_host::host::{config::HostConfig, get_block_number, Host};
+use call_host::host::{config::HostConfig, get_latest_block_number, Host};
 use chain::TEST_CHAIN_ID;
 use chain_client::RpcClient as RpcChainProofClient;
 use foundry_config::RpcEndpoints;
@@ -141,8 +141,8 @@ fn create_host<DB: Database>(
         chain_proof_url,
         ..Default::default()
     };
-    let block_number =
-        get_block_number(&providers, config.start_chain_id).expect("failed to get block number");
+    let block_number = get_latest_block_number(&providers, config.start_chain_id)
+        .expect("failed to get block number");
     let chain_proof_client = RpcChainProofClient::new(config.chain_proof_url.clone());
 
     Host::try_new_with_components(providers, block_number, chain_proof_client, &config)

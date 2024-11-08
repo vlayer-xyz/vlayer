@@ -12,9 +12,6 @@ use call_engine::{
 
 use crate::db::wrap_state::WrapStateDb;
 
-// Feature flag to be removed when integration tests are ready
-pub const VERIFY_CHAIN_PROOFS: bool = false;
-
 pub struct VerifiedInput(MultiEvmInput);
 
 pub async fn verify_input(
@@ -22,12 +19,11 @@ pub async fn verify_input(
     multi_evm_input: MultiEvmInput,
 ) -> VerifiedInput {
     multi_evm_input.assert_coherency();
-    if VERIFY_CHAIN_PROOFS {
-        verifier
-            .verify(&multi_evm_input)
-            .await
-            .expect("invalid guest input");
-    }
+    verifier
+        .verify(&multi_evm_input)
+        .await
+        .expect("invalid guest input");
+
     VerifiedInput(multi_evm_input)
 }
 
