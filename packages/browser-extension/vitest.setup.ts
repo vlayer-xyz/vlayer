@@ -1,6 +1,7 @@
 import { vi } from "vitest";
 import { MessageToExtension } from "./src/web-proof-commons";
-import "@testing-library/jest-dom";
+import '@testing-library/jest-dom/vitest';
+
 
 const mockStore = function () {
   const store = new Map<string, unknown>();
