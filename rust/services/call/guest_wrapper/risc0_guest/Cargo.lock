@@ -849,6 +849,7 @@ dependencies = [
  "alloy-rlp",
  "alloy-sol-types",
  "anyhow",
+ "async-trait",
  "bincode",
  "block_header",
  "chain",

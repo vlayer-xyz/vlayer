@@ -1,6 +1,4 @@
-#[cfg(test)]
-use auto_impl::auto_impl;
-use risc0_zkp::verify::VerificationError;
+pub use risc0_zkp::verify::VerificationError;
 use risc0_zkvm::{guest, sha::Digest, Receipt};
 use static_assertions::assert_obj_safe;
 
@@ -13,7 +11,7 @@ mod seal {
     impl<F: Fn(&super::Receipt, super::Digest) -> Result<(), super::VerificationError>> Sealed for F {}
 }
 
-#[cfg_attr(test, auto_impl(Fn))]
+#[cfg_attr(test, auto_impl::auto_impl(Fn))]
 pub trait ZkpVerifier: seal::Sealed + Send + Sync + 'static {
     fn verify(&self, receipt: &Receipt, elf_id: Digest) -> Result<(), VerificationError>;
 }

@@ -13,6 +13,7 @@ alloy-primitives = { workspace = true, features = ["rlp", "serde"] }
 alloy-rlp = { workspace = true }
 alloy-sol-types = { workspace = true }
 anyhow = { workspace = true }
+async-trait = { workspace = true }
 bincode = { workspace = true }
 block_header = { workspace = true }
 chain = { workspace = true }
@@ -45,6 +46,9 @@ serde_json = { workspace = true }
 test-log = { workspace = true }
 tokio = { workspace = true, features = ["rt", "macros"] }
 traits = { workspace = true }
+
+[features]
+testing = []
 
 [lints]
 workspace = true

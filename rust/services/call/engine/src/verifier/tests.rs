@@ -1,7 +1,7 @@
 use std::ops::RangeInclusive;
 
 use alloy_primitives::{BlockNumber, B256};
-use block_header::{BlockHeader, EthBlockHeader, EvmBlockHeader};
+use block_header::{EthBlockHeader, EvmBlockHeader};
 use block_trie::BlockTrie;
 use risc0_zkvm::{serde::to_vec, sha::Digest, FakeReceipt, InnerReceipt, ReceiptClaim};
 use traits::Hashable;
@@ -14,12 +14,11 @@ mod guest_input;
 const CHAIN_GUEST_ID: Digest = Digest::new([0, 0, 0, 0, 0, 0, 0, 1]);
 
 fn mock_block_header(number: BlockNumber, parent_hash: B256) -> Box<dyn EvmBlockHeader> {
-    let header = EthBlockHeader {
+    Box::new(EthBlockHeader {
         number,
         parent_hash,
         ..Default::default()
-    };
-    BlockHeader::Eth(header).into()
+    })
 }
 
 fn mock_block_headers(blocks: RangeInclusive<BlockNumber>) -> Vec<Box<dyn EvmBlockHeader>> {

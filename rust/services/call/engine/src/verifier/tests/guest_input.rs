@@ -53,6 +53,16 @@ const fn proof_invalid(_: &ChainProof) -> Result<(), ChainProofError> {
     Err(ChainProofError::Zk(VerificationError::InvalidProof))
 }
 
+async fn verify_guest_input(
+    chain_client: impl chain_client::Client,
+    verifier: impl ChainProofVerifier,
+    input: &MultiEvmInput,
+) -> Result<(), GuestInputError> {
+    ZkGuestInputVerifier::new(chain_client, verifier)
+        .verify(input)
+        .await
+}
+
 #[tokio::test]
 async fn ok() {
     let block_trie = mock_block_trie(0..=0);
