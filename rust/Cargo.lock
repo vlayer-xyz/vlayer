@@ -2222,6 +2222,7 @@ dependencies = [
  "tokio",
  "tracing",
  "u64_range",
+ "url",
 ]
 
 [[package]]

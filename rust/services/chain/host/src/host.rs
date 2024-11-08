@@ -42,7 +42,7 @@ where
 
 impl Host<Http> {
     pub fn try_new(config: HostConfig) -> Result<Self, HostError> {
-        let block_fetcher = BlockFetcher::<Http>::new(config.rpc_url);
+        let block_fetcher = BlockFetcher::<Http>::new(config.rpc_url)?;
         let prover = Prover::new(config.proof_mode);
         let db = ChainDb::mdbx(config.db_path, Mode::ReadWrite)?;
 

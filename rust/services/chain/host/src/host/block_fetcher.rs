@@ -9,6 +9,7 @@ use provider::{to_eth_block_header, EvmBlockHeader};
 use thiserror::Error;
 use tracing::{info, instrument};
 use u64_range::Range;
+use url::ParseError;
 
 pub struct BlockFetcher<P>
 where
@@ -18,10 +19,9 @@ where
 }
 
 impl BlockFetcher<Http> {
-    pub fn new(rpc_url: String) -> Self {
-        let provider =
-            Provider::<Http>::try_from(rpc_url).expect("could not instantiate HTTP Provider");
-        BlockFetcher { provider }
+    pub fn new(rpc_url: String) -> Result<Self, BlockFetcherError> {
+        let provider = Provider::<Http>::try_from(rpc_url)?;
+        Ok(BlockFetcher { provider })
     }
 }
 
@@ -34,6 +34,8 @@ pub enum BlockFetcherError {
     BlockNotFound(BlockTag),
     #[error("Block conversion error: {0}")]
     BlockConversion(String),
+    #[error("Parse error: {0}")]
+    ParseError(#[from] ParseError),
 }
 
 impl<P> BlockFetcher<P>
