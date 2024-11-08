@@ -1,12 +1,10 @@
-import { render, screen, cleanup } from "@testing-library/react";
+import { render, screen, cleanup, waitFor } from "@testing-library/react";
 import { vi, describe, it, expect, beforeEach } from "vitest";
 import { NotarizeStepActions } from "./NotarizeStepActions";
 import { ZkProvingStatus } from "../../../web-proof-commons";
 import { StepStatus } from "constants/step";
 
 import React from "react";
-
-const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
 
 const mocks = vi.hoisted(() => {
   return {
@@ -114,8 +112,10 @@ describe.only("NotarizeStepActions", () => {
         status={StepStatus.Current}
       />,
     );
-    await sleep(1000);
     const progressBar = screen.getByTestId("proving-progress");
-    expect(progressBar.getAttribute("data-value")).toBe("100");
+    await waitFor(
+      () => expect(progressBar.getAttribute("data-value")).toBe("100"),
+      { timeout: 1000 },
+    );
   });
 });

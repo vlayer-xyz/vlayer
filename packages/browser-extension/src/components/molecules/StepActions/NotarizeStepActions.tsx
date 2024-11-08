@@ -52,7 +52,6 @@ const RedirectCallout: FC = () => {
           exit={{ opacity: 0, height: 0 }}
         >
           <Callout.Root>
-            3
             <Callout.Icon>
               <InfoCircledIcon />
             </Callout.Icon>
