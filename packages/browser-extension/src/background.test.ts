@@ -31,8 +31,12 @@ describe("zk related messaging", () => {
     const zkProvingSpy = vi.spyOn(zkProvingStatusManager, "setProvingStatus");
     await browser.runtime.sendMessage({
       action: ExtensionAction.NotifyZkProvingStatus,
-      payload: ZkProvingStatus.Proving,
+      payload: { status: ZkProvingStatus.Proving },
     });
-    expect(zkProvingSpy).toHaveBeenCalledWith(ZkProvingStatus.Proving);
+    expect(zkProvingSpy).toHaveBeenCalledWith({
+      status: ZkProvingStatus.Proving,
+    });
+    const storedStatus = await browser.storage.local.get("zkProvingStatus");
+    expect(storedStatus.zkProvingStatus).toBe(ZkProvingStatus.Proving);
   });
 });

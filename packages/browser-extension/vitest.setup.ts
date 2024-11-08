@@ -6,7 +6,7 @@ const mockStore = function () {
   const callbacks = new Set<(change: { [key: string]: unknown }) => unknown>();
   return {
     get: vi.fn().mockImplementation(async function (key: string) {
-      return Promise.resolve({ key: store.get(key) });
+      return Promise.resolve({ [key]: store.get(key) });
     }),
     set: vi.fn().mockImplementation(async (keys: Record<string, unknown>) => {
       Object.keys(keys).forEach((key: string) => {
