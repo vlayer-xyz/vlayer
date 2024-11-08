@@ -35,7 +35,7 @@ where
 {
     db: ChainDb,
     prover: Prover,
-    block_fetcher: BlockFetcher<P>,
+    fetcher: BlockFetcher<P>,
     chain_id: ChainId,
     strategy: Strategy,
 }
@@ -63,7 +63,7 @@ where
     ) -> Self {
         Host {
             prover,
-            block_fetcher,
+            fetcher: block_fetcher,
             db,
             chain_id,
             strategy,
@@ -88,7 +88,7 @@ where
     #[instrument(skip(self))]
     async fn initialize(&self) -> Result<ChainUpdate, HostError> {
         info!("Initializing chain");
-        let latest_block = self.get_block(BlockTag::Latest).await?;
+        let latest_block = self.fetcher.get_block(BlockTag::Latest).await?;
         let latest_block_number = latest_block.number();
         let trie = BlockTrie::init(&latest_block)?;
 
@@ -117,7 +117,7 @@ where
             .expect("chain trie not found");
         let mut trie = old_trie.clone();
 
-        let latest_block = self.get_block(BlockTag::Latest).await?;
+        let latest_block = self.fetcher.get_block(BlockTag::Latest).await?;
         let latest_block_number = latest_block.number();
         let AppendPrependRanges {
             prepend,
@@ -127,9 +127,9 @@ where
         } = self
             .strategy
             .get_append_prepend_ranges(old_range, latest_block_number);
-        let append_blocks = self.get_blocks_range(append).await?;
-        let prepend_blocks = self.get_blocks_range(prepend).await?;
-        let old_leftmost_block = self.get_block(old_range.start().into()).await?;
+        let append_blocks = self.fetcher.get_blocks_range(append).await?;
+        let prepend_blocks = self.fetcher.get_blocks_range(prepend).await?;
+        let old_leftmost_block = self.fetcher.get_block(old_range.start().into()).await?;
 
         trie.append(append_blocks.iter())?;
         trie.prepend(prepend_blocks.iter(), &old_leftmost_block)?;
@@ -146,25 +146,10 @@ where
 
         Ok(chain_update)
     }
-
-    #[instrument(skip(self))]
-    async fn get_blocks_range(
-        &self,
-        range: Range,
-    ) -> Result<Vec<Box<dyn EvmBlockHeader>>, HostError> {
-        let range = self.block_fetcher.get_blocks_range(range).await?;
-        Ok(range)
-    }
-
-    #[instrument(skip(self))]
-    async fn get_block(&self, number: BlockTag) -> Result<Box<dyn EvmBlockHeader>, HostError> {
-        let block = self.block_fetcher.get_block(number).await?;
-        Ok(block)
-    }
 }
 
 #[cfg(test)]
-mod test {
+mod tests {
     use alloy_primitives::BlockNumber;
     use chain_test_utils::mock_provider;
     use ethers::providers::{MockProvider, Provider};
@@ -187,16 +172,6 @@ mod test {
         ChainDb::in_memory()
     }
 
-    async fn db_after_initialize() -> Result<ChainDb, HostError> {
-        let host = create_host(test_db(), mock_provider([GENESIS]));
-
-        let init_chain_update = host.poll().await?;
-        let Host { mut db, .. } = host;
-        db.update_chain(1, init_chain_update).unwrap();
-
-        Ok(db)
-    }
-
     fn create_host(db: ChainDb, provider: Provider<MockProvider>) -> Host<MockProvider> {
         Host::from_parts(
             Prover::default(),
@@ -207,61 +182,66 @@ mod test {
         )
     }
 
-    mod poll {
+    #[tokio::test]
+    async fn initialize() -> anyhow::Result<()> {
+        let host = create_host(test_db(), mock_provider([LATEST]));
+
+        let chain_update = host.poll().await?;
+        let Host { mut db, .. } = host;
+        db.update_chain(1, chain_update)?;
+
+        let chain_trie = db.get_chain_trie(1)?.unwrap();
+        assert_eq!(chain_trie.block_range, LATEST..=LATEST);
+
+        Ok(())
+    }
+
+    mod append_prepend {
         use super::*;
 
+        async fn db_after_initialize() -> Result<ChainDb, HostError> {
+            let host = create_host(test_db(), mock_provider([GENESIS]));
+
+            let init_chain_update = host.poll().await?;
+            let Host { mut db, .. } = host;
+            db.update_chain(1, init_chain_update).unwrap();
+
+            Ok(db)
+        }
+
         #[tokio::test]
-        async fn initialize() -> anyhow::Result<()> {
-            let host = create_host(test_db(), mock_provider([LATEST]));
+        async fn no_new_head_blocks_back_propagation_finished() -> anyhow::Result<()> {
+            let host = create_host(db_after_initialize().await?, mock_provider([GENESIS, GENESIS]));
 
             let chain_update = host.poll().await?;
             let Host { mut db, .. } = host;
             db.update_chain(1, chain_update)?;
 
             let chain_trie = db.get_chain_trie(1)?.unwrap();
-            assert_eq!(chain_trie.block_range, LATEST..=LATEST);
+            assert_eq!(chain_trie.block_range, GENESIS..=GENESIS);
 
             Ok(())
         }
 
-        mod append_prepend {
-            use super::*;
+        #[tokio::test]
+        async fn new_confirmed_head_blocks_back_propagation_finished() -> anyhow::Result<()> {
+            let latest = GENESIS + CONFIRMATIONS;
+            let new_confirmed_block = latest - CONFIRMATIONS + 1;
+            let host = create_host(
+                db_after_initialize().await?,
+                mock_provider([latest, new_confirmed_block, GENESIS]),
+            );
 
-            #[tokio::test]
-            async fn no_new_head_blocks_back_propagation_finished() -> anyhow::Result<()> {
-                let host =
-                    create_host(db_after_initialize().await?, mock_provider([GENESIS, GENESIS]));
+            let chain_update = host.poll().await?;
+            let Host { mut db, .. } = host;
+            db.update_chain(1, chain_update)?;
 
-                let chain_update = host.poll().await?;
-                let Host { mut db, .. } = host;
-                db.update_chain(1, chain_update)?;
+            let chain_trie = db.get_chain_trie(1)?.unwrap();
+            assert_eq!(chain_trie.block_range, GENESIS..=new_confirmed_block);
 
-                let chain_trie = db.get_chain_trie(1)?.unwrap();
-                assert_eq!(chain_trie.block_range, GENESIS..=GENESIS);
-
-                Ok(())
-            }
-
-            #[tokio::test]
-            async fn new_confirmed_head_blocks_back_propagation_finished() -> anyhow::Result<()> {
-                let latest = GENESIS + CONFIRMATIONS;
-                let new_confirmed_block = latest - CONFIRMATIONS + 1;
-                let host = create_host(
-                    db_after_initialize().await?,
-                    mock_provider([latest, new_confirmed_block, GENESIS]),
-                );
-
-                let chain_update = host.poll().await?;
-                let Host { mut db, .. } = host;
-                db.update_chain(1, chain_update)?;
-
-                let chain_trie = db.get_chain_trie(1)?.unwrap();
-                assert_eq!(chain_trie.block_range, GENESIS..=new_confirmed_block);
-
-                Ok(())
-            }
-
-            // Reorg
+            Ok(())
         }
+
+        // Reorg
     }
 }
