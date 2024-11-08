@@ -42,14 +42,11 @@ browser.runtime.onMessage.addListener(async (message: ExtensionMessage) => {
     )
     .with({ type: ExtensionMessageType.RedirectBack }, async () => {
       if (openedTabId) {
-        console.log("Closing opened tab", openedTabId);
         await browser.tabs.remove(openedTabId);
       }
-      console.log("Redirect back to webpage", port?.sender?.tab?.id);
       await browser.tabs.update(port?.sender?.tab?.id, { active: true });
     })
     .with({ type: ExtensionMessageType.TabOpened }, ({ tabId }) => {
-      console.log("Tab opened", tabId);
       openedTabId = tabId;
     })
     .exhaustive();
@@ -67,7 +64,6 @@ browser.tabs
   .catch(console.error);
 
 browser.runtime.onMessageExternal.addListener((message: MessageToExtension) => {
-  console.log("Received message from webpage", message);
   (async () => {
     if (message.action === ExtensionAction.RequestWebProof) {
       if (chrome.sidePanel) {
@@ -80,7 +76,6 @@ browser.runtime.onMessageExternal.addListener((message: MessageToExtension) => {
         message.payload,
       );
     } else if (message.action === ExtensionAction.NotifyZkProvingStatus) {
-      console.log("Received zk proving status", message.payload);
       await zkProvingStatusManager.setProvingStatus(message.payload);
     }
   })().catch(console.error);
