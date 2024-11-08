@@ -4,6 +4,7 @@
   "scripts": {
     "lint:solidity": "solhint '../src/**/*.sol'",
     "dev": "vite --port 5174",
+    "test": "VLAYER_ENV=test bun run prove.ts",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

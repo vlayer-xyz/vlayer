@@ -1,29 +1,29 @@
 import webProofProver from "../out/WebProofProver.sol/WebProofProver";
 import webProofVerifier from "../out/WebProofVerifier.sol/WebProofVerifier";
-import { updateDotFile, getEthClient, getContractAddr } from "./helpers";
+import { updateDotFile, exampleContext, waitForContractAddr } from "./helpers";
 import { getConfig } from "./config";
 
-const config = await getConfig();
-const ethClient = getEthClient(config.chain, config.jsonRpcUrl);
+const config = getConfig();
+const { chain, ethClient, deployer } = await exampleContext(config);
 
 let hash = await ethClient.deployContract({
   abi: webProofProver.abi,
   bytecode: webProofProver.bytecode.object,
-  account: config.deployer,
+  account: deployer,
   args: [],
-  chain: config.chain,
+  chain,
 });
-const prover = await getContractAddr(ethClient, hash);
+const prover = await waitForContractAddr(ethClient, hash);
 console.log(`Prover deployed to ${config.chainName}`, prover);
 
 hash = await ethClient.deployContract({
   abi: webProofVerifier.abi,
   bytecode: webProofVerifier.bytecode.object,
-  account: config.deployer,
+  account: deployer,
   args: [prover],
-  chain: config.chain,
+  chain,
 });
-const verifier = await getContractAddr(ethClient, hash);
+const verifier = await waitForContractAddr(ethClient, hash);
 console.log(`Verifier deployed to ${config.chainName}`, verifier);
 
 await updateDotFile(config.envPath, {
