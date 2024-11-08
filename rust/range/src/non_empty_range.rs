@@ -73,8 +73,8 @@ impl NonEmptyRange {
         let new_end = self.end.checked_add(count)?;
         // Extending non-empty range yields a non-empty range
         let new_range = Self::from_range(self.start..=new_end);
-        let append = (self.end.checked_add(1)?..=new_end).into();
-        Some((new_range, append))
+        let appended = (self.end.checked_add(1)?..=new_end).into();
+        Some((new_range, appended))
     }
 
     /// Extends the range by adding the specified number of elements to the left.
@@ -98,8 +98,8 @@ impl NonEmptyRange {
         let new_start = self.start.checked_sub(count)?;
         // Extending non-empty range yields a non-empty range
         let new_range = Self::from_range(new_start..=self.end);
-        let prepend = (new_start..=self.start.checked_sub(1)?).into();
-        Some((new_range, prepend))
+        let prepended = (new_start..=self.start.checked_sub(1)?).into();
+        Some((new_range, prepended))
     }
 
     pub const fn contains(&self, value: u64) -> bool {
