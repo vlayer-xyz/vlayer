@@ -2,11 +2,10 @@ use std::ops::RangeInclusive;
 
 use alloy_primitives::BlockNumber;
 use block_trie::BlockTrie;
+use chain_common::{ChainProofReceipt, ProofVerificationError};
 use derive_new::new;
 use mpt::MerkleTrie;
 use traits::Hashable;
-
-use crate::{receipt::ProofVerificationError, ChainProofReceipt};
 
 #[derive(new)]
 pub struct UnverifiedChainTrie {

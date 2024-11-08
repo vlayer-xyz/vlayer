@@ -5,6 +5,14 @@ edition = "2021"
 
 [dependencies]
 alloy-primitives = { workspace = true }
+bincode = { workspace = true }
 block_trie = { workspace = true }
+bytes = { workspace = true }
+chain_guest_wrapper = { workspace = true }
+derivative = { workspace = true }
+derive_more = { workspace = true }
+risc0-zkp = { workspace = true }
+risc0-zkvm = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
+thiserror = { workspace = true }

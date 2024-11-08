@@ -1,4 +1,4 @@
-use chain_db::ChainProofReceipt;
+use chain_common::ChainProofReceipt;
 use chain_guest::Input;
 use chain_guest_wrapper::RISC0_CHAIN_GUEST_ELF;
 use host_utils::{ProofMode, Prover as Risc0Prover};

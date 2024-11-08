@@ -3,16 +3,20 @@ use std::{collections::HashMap, env};
 use alloy_chains::{Chain, NamedChain};
 use alloy_primitives::{address, b256, uint, Address, ChainId};
 use alloy_sol_types::{sol, SolCall};
+use block_header::Hashable;
+use block_trie::BlockTrie;
 use call_host::{
-    host::{config::HostConfig, error::HostError, get_block_number, Host},
+    host::{config::HostConfig, error::HostError, get_block_header, Host},
     Call,
 };
 use chain_client::RpcClient as RpcChainProofClient;
-use chain_server::server::{ChainProofServerMock, EMPTY_PROOF_RESPONSE};
+use chain_guest_wrapper::RISC0_CHAIN_GUEST_ID;
+use chain_server::server::ChainProofServerMock;
 use dotenvy::dotenv;
 use ethers_core::types::BlockNumber as BlockTag;
 use lazy_static::lazy_static;
-use provider::{CachedMultiProvider, CachedProviderFactory};
+use provider::{BlockNumber, CachedMultiProvider, CachedProviderFactory, EvmBlockHeader};
+use risc0_zkvm::{serde::to_vec, Bytes, FakeReceipt, Receipt, ReceiptClaim};
 use serde_json::json;
 
 // To activate recording, set UPDATE_SNAPSHOTS to true.
@@ -102,18 +106,36 @@ fn create_multi_provider(test_name: &str) -> CachedMultiProvider {
     CachedMultiProvider::new(provider_factory)
 }
 
+fn create_chain_proof_result(block_header: Box<dyn EvmBlockHeader>) -> serde_json::Value {
+    let block_trie = BlockTrie::init(block_header).unwrap();
+    let root_hash = block_trie.hash_slow();
+    let proof_output = to_vec(&(root_hash, RISC0_CHAIN_GUEST_ID)).unwrap();
+    let journal: Vec<u8> = bytemuck::cast_slice(&proof_output).into();
+    let inner: FakeReceipt<ReceiptClaim> =
+        FakeReceipt::<ReceiptClaim>::new(ReceiptClaim::ok(RISC0_CHAIN_GUEST_ID, journal.clone()));
+    let receipt = Receipt::new(risc0_zkvm::InnerReceipt::Fake(inner), journal);
+    let encoded_proof = bincode::serialize(&receipt).unwrap();
+    let nodes: Vec<Bytes> = block_trie.into_iter().collect();
+    json!({
+        "proof": encoded_proof,
+        "nodes": nodes,
+    })
+}
+
 async fn create_chain_proof_server(
     multi_provider: &CachedMultiProvider,
     location: &ExecutionLocation,
 ) -> Result<ChainProofServerMock, HostError> {
-    let block_number =
-        block_tag_to_block_number(multi_provider, location.chain_id, location.block_tag)?;
+    let block_header = get_block_header(multi_provider, location.chain_id, location.block_tag)?;
+    let block_number = block_header.number();
+    let result = create_chain_proof_result(block_header);
+
     let chain_proof_server_mock = ChainProofServerMock::start(
         json!({
             "chain_id": location.chain_id,
             "block_numbers": [block_number]
         }),
-        EMPTY_PROOF_RESPONSE.clone(),
+        result,
     )
     .await;
 
@@ -137,11 +159,13 @@ fn create_host(
 
 fn block_tag_to_block_number(
     multi_provider: &CachedMultiProvider,
-    chain_id: u64,
+    chain_id: ChainId,
     block_tag: BlockTag,
-) -> Result<u64, HostError> {
+) -> Result<BlockNumber, HostError> {
     match block_tag {
-        BlockTag::Latest => get_block_number(multi_provider, chain_id),
+        BlockTag::Latest => {
+            Ok(get_block_header(multi_provider, chain_id, BlockTag::Latest)?.number())
+        }
         BlockTag::Number(block_no) => Ok(block_no.as_u64()),
         _ => panic!("Only Latest and specific block numbers are supported, got {:?}", block_tag),
     }

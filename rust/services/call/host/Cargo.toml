@@ -9,12 +9,16 @@ alloy-primitives = { workspace = true, features = ["rlp", "serde"] }
 alloy-sol-types = { workspace = true }
 anyhow = { workspace = true }
 axum-jrpc = { workspace = true }
+bincode = { workspace = true }
 block_header = { workspace = true }
+block_trie = { workspace = true }
+bytemuck = { workspace = true }
 call_engine = { workspace = true }
 call_guest_wrapper = { workspace = true }
 chain = { workspace = true }
 chain_client = { workspace = true, features = ["rpc"] }
 chain_common = { workspace = true }
+chain_guest_wrapper = { workspace = true }
 chain_server = { workspace = true }
 derive-new = { workspace = true }
 dotenvy = { workspace = true }
