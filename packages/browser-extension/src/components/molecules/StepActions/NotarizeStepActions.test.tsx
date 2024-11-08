@@ -21,7 +21,7 @@ vi.mock("hooks/useTlsnProver", () => ({
   useTlsnProver: mocks.useTlsnProver,
 }));
 
-describe.only("NotarizeStepActions", () => {
+describe("NotarizeStepActions", () => {
   beforeEach(() => {
     cleanup();
   });
