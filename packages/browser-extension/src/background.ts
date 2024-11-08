@@ -7,15 +7,12 @@ import {
 } from "./web-proof-commons";
 import { WebProverSessionContextManager } from "./state/webProverSessionContext";
 import { match, P } from "ts-pattern";
+import { zkProvingStatusStore } from "./state/zkProvingStatusStore.ts";
 
 let windowId = 0;
 // to receive messages from popup script
 let port: browser.Runtime.Port | undefined = undefined;
 let openedTabId: number | undefined = undefined;
-
-chrome.tabs.onActivated.addListener(function (activeInfo) {
-  windowId = activeInfo.windowId;
-});
 
 browser.runtime.onInstalled.addListener((details) => {
   console.log("Extension installed:", details);
@@ -45,17 +42,18 @@ browser.runtime.onMessage.addListener(async (message: ExtensionMessage) => {
     )
     .with({ type: ExtensionMessageType.RedirectBack }, async () => {
       if (openedTabId) {
-        console.log("Closing opened tab", openedTabId);
         await browser.tabs.remove(openedTabId);
       }
-      console.log("Redirect back to webpage", port?.sender?.tab?.id);
       await browser.tabs.update(port?.sender?.tab?.id, { active: true });
     })
     .with({ type: ExtensionMessageType.TabOpened }, ({ tabId }) => {
-      console.log("Tab opened", tabId);
       openedTabId = tabId;
     })
     .exhaustive();
+});
+
+browser.tabs.onActivated.addListener(function (activeInfo) {
+  windowId = activeInfo.windowId;
 });
 
 browser.tabs
@@ -64,10 +62,6 @@ browser.tabs
     windowId = tabs[0].windowId || 0;
   })
   .catch(console.error);
-
-browser.tabs.onActivated.addListener(function (activeInfo) {
-  windowId = activeInfo.windowId;
-});
 
 browser.runtime.onMessageExternal.addListener((message: MessageToExtension) => {
   (async () => {
@@ -81,6 +75,8 @@ browser.runtime.onMessageExternal.addListener((message: MessageToExtension) => {
       await WebProverSessionContextManager.instance.setWebProverSessionConfig(
         message.payload,
       );
+    } else if (message.action === ExtensionAction.NotifyZkProvingStatus) {
+      await zkProvingStatusStore.setProvingStatus(message.payload);
     }
   })().catch(console.error);
 });
