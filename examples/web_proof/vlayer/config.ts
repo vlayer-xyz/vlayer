@@ -21,6 +21,7 @@ export const getConfig = (envPath?: string): Config => {
   const dotEnvFileName = `.env.${process.env.VLAYER_ENV ?? "development"}`;
   if (!envPath) envPath = path.resolve(__dirname, dotEnvFileName);
   dotenv.config({ path: envPath, override: true });
+  dotenv.config({ path: `${envPath}.local`, override: true });
 
   const chainName = process.env.CHAIN_NAME;
 

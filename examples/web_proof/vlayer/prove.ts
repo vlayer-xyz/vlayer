@@ -87,6 +87,8 @@ async function testSuccessProvingAndVerification() {
   await ethClient.waitForTransactionReceipt({
     hash: txHash,
     confirmations,
+    retryCount: 20,
+    retryDelay: 500,
   });
 
   console.log("Verified!");

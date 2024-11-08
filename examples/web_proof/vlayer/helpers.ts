@@ -44,7 +44,8 @@ export const waitForContractAddr = async (
   const receipt = await client.waitForTransactionReceipt({
     hash,
     confirmations: chainConfirmations(client?.chain?.name),
-    retryCount: 12,
+    retryCount: 20,
+    retryDelay: 500,
   });
 
   if (!receipt.contractAddress || receipt.status != "success")

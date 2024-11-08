@@ -46,9 +46,8 @@ jobs:
       - name: Run e2e test
         env:
           PROVING_MODE: 'dev'
+          VLAYER_ENV: test
           VLAYER_TMP_DIR: ./artifacts
-          EXAMPLES_TEST_PRIVATE_KEY: "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80"
-          CHAIN_NAME: "anvil"
         run: bash/e2e-test.sh
 
       # Teardown
