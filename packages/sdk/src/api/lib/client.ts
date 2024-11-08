@@ -92,7 +92,7 @@ export const createVlayerClient = (
         decodeFunctionResult({
           abi: proverAbi,
           data: evm_call_result,
-          functionName: functionName,
+          functionName,
         }),
       );
 
