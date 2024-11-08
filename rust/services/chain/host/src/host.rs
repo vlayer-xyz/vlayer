@@ -1,10 +1,11 @@
+mod block_fetcher;
 pub mod config;
 pub mod error;
-mod evm_block_fetcher;
 mod prover;
 mod strategy;
 
 use alloy_primitives::ChainId;
+use block_fetcher::BlockFetcher;
 use block_trie::BlockTrie;
 use chain_db::{ChainDb, ChainTrie, ChainUpdate, Mode};
 use chain_guest::Input;
@@ -15,7 +16,6 @@ use ethers::{
     providers::{Http, JsonRpcClient},
     types::BlockNumber as BlockTag,
 };
-use evm_block_fetcher::EvmBlockFetcher;
 use lazy_static::lazy_static;
 use prover::Prover;
 use provider::EvmBlockHeader;
@@ -35,14 +35,14 @@ where
 {
     db: ChainDb,
     prover: Prover,
-    block_fetcher: EvmBlockFetcher<P>,
+    block_fetcher: BlockFetcher<P>,
     chain_id: ChainId,
     strategy: Strategy,
 }
 
 impl Host<Http> {
     pub fn try_new(config: HostConfig) -> Result<Self, HostError> {
-        let block_fetcher = EvmBlockFetcher::<Http>::new(config.rpc_url);
+        let block_fetcher = BlockFetcher::<Http>::new(config.rpc_url);
         let prover = Prover::new(config.proof_mode);
         let db = ChainDb::mdbx(config.db_path, Mode::ReadWrite)?;
 
@@ -56,7 +56,7 @@ where
 {
     pub const fn from_parts(
         prover: Prover,
-        block_fetcher: EvmBlockFetcher<P>,
+        block_fetcher: BlockFetcher<P>,
         db: ChainDb,
         chain_id: ChainId,
         strategy: Strategy,
@@ -152,12 +152,14 @@ where
         &self,
         range: Range,
     ) -> Result<Vec<Box<dyn EvmBlockHeader>>, HostError> {
-        self.block_fetcher.get_blocks_range(range).await
+        let range = self.block_fetcher.get_blocks_range(range).await?;
+        Ok(range)
     }
 
     #[instrument(skip(self))]
     async fn get_block(&self, number: BlockTag) -> Result<Box<dyn EvmBlockHeader>, HostError> {
-        self.block_fetcher.get_block(number).await
+        let block = self.block_fetcher.get_block(number).await?;
+        Ok(block)
     }
 }
 
@@ -198,7 +200,7 @@ mod test {
     fn create_host(db: ChainDb, provider: Provider<MockProvider>) -> Host<MockProvider> {
         Host::from_parts(
             Prover::default(),
-            EvmBlockFetcher::from_provider(provider),
+            BlockFetcher::from_provider(provider),
             db,
             1,
             STRATEGY.clone(),
