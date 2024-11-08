@@ -1,3 +1,5 @@
+use std::result;
+
 use chain_db::ChainProofReceipt;
 use chain_guest::Input;
 use chain_guest_wrapper::RISC0_CHAIN_GUEST_ELF;
@@ -14,7 +16,7 @@ pub enum Error {
     ExecutorEnvBuilder(String),
 }
 
-type Result<T> = std::result::Result<T, Error>;
+type Result<T> = result::Result<T, Error>;
 
 #[derive(Debug, Clone, Default)]
 pub struct Prover(Risc0Prover);

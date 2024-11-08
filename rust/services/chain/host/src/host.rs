@@ -18,12 +18,11 @@ use ethers::{
 };
 use lazy_static::lazy_static;
 use prover::Prover;
-use provider::EvmBlockHeader;
 use risc0_zkvm::sha::Digest;
 use strategy::AppendPrependRanges;
 pub use strategy::Strategy;
 use tracing::{info, instrument};
-use u64_range::{NonEmptyRange, Range};
+use u64_range::NonEmptyRange;
 
 lazy_static! {
     static ref GUEST_ID: Digest = RISC0_CHAIN_GUEST_ID.into();
