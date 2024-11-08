@@ -26,6 +26,7 @@ thiserror = { workspace = true }
 tokio = { workspace = true, features = ["macros"] }
 tracing = { workspace = true }
 u64_range = { workspace = true }
+url = { workspace = true }
 
 [dev-dependencies]
 alloy-rlp = { workspace = true, features = ["arrayvec"] }

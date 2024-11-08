@@ -1,40 +1,25 @@
-use std::{array::TryFromSliceError, env::VarError, num::ParseIntError};
-
+use block_trie::BlockTrieError;
+use chain_db::ChainDbError;
 use derivative::Derivative;
-use ethers::types::BlockNumber;
 use thiserror::Error;
 
-use super::prover::Error as ProverError;
+use super::{block_fetcher::BlockFetcherError, prover::Error as ProverError};
 
 #[derive(Error, Debug, Derivative)]
 #[derivative(PartialEq, Eq)]
 pub enum HostError {
     #[error("ChainDB error: {0}")]
-    ChainDb(#[from] chain_db::ChainDbError),
+    ChainDb(#[from] ChainDbError),
     #[error("Prover error: {0}")]
     Prover(#[from] ProverError),
-    #[error("Provider: {0}")]
-    Provider(String),
-    #[error("BlockNotFound: {0}")]
-    BlockNotFound(BlockNumber),
-    #[error("Block conversion error: {0}")]
-    BlockConversion(String),
-    #[error("Digest conversion error: {0}")]
-    DigestConversion(
-        #[from]
-        #[derivative(PartialEq = "ignore")]
-        TryFromSliceError,
-    ),
-    #[error("Block trie error: {0}")]
-    BlockTrieError(#[from] block_trie::BlockTrieError),
+    #[error("BlockTrie error: {0}")]
+    BlockTrieError(#[from] BlockTrieError),
     #[error("Proof serialization error: {0}")]
     ProofSerializationError(
         #[from]
         #[derivative(PartialEq = "ignore")]
         bincode::Error,
     ),
-    #[error("Environment variable error: {0}")]
-    EnvVar(#[from] VarError),
-    #[error("Integer parsing error: {0}")]
-    ParseInt(#[from] ParseIntError),
+    #[error("BlockFetcher error: {0}")]
+    BlockFetcher(#[from] BlockFetcherError),
 }
