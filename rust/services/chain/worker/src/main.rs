@@ -16,9 +16,9 @@ async fn main() -> anyhow::Result<()> {
         proof_mode: ProofMode::Fake,
         db_path: "chain_db".to_string(),
         strategy: Strategy::new(
-            parse_env_u64("CONFIRMATIONS")?,
             parse_env_u64("MAX_HEAD_BLOCKS")?,
             parse_env_u64("MAX_BACK_PROPAGATION_BLOCKS")?,
+            parse_env_u64("CONFIRMATIONS")?,
         ),
     };
 
