@@ -17,6 +17,7 @@ export const useZkProvingState = (): {
   isError: boolean;
   error: Error | undefined;
   isProving: boolean;
+  isDone: boolean;
 } => {
   const [state] = useLocalStorage<ZkProvingStatus>(
     "zkProvingStatus",
@@ -31,5 +32,6 @@ export const useZkProvingState = (): {
         ? new InvalidZkProvingStatus(state)
         : undefined,
     isProving: state === ZkProvingStatus.Proving,
+    isDone: state === ZkProvingStatus.Done,
   };
 };

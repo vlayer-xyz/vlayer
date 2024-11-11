@@ -1,7 +1,6 @@
-import { render, screen, cleanup, waitFor } from "@testing-library/react";
-import { vi, describe, it, expect, beforeEach } from "vitest";
+import { render, screen, cleanup, act } from "@testing-library/react";
+import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
 import { NotarizeStepActions } from "./NotarizeStepActions";
-import { ZkProvingStatus } from "../../../web-proof-commons";
 import { StepStatus } from "constants/step";
 
 import React from "react";
@@ -24,6 +23,11 @@ vi.mock("hooks/useTlsnProver", () => ({
 describe("NotarizeStepActions", () => {
   beforeEach(() => {
     cleanup();
+    vi.useFakeTimers();
+  });
+
+  afterEach(() => {
+    vi.useRealTimers();
   });
 
   it("should render webProvingIndicator when needed", () => {
@@ -85,7 +89,8 @@ describe("NotarizeStepActions", () => {
     expect(button).toBeInTheDocument();
   });
 
-  it("should render progress 100% when zlProving is done", async () => {
+  it("should render progress 100% when zkProving is done", () => {
+    vi.useFakeTimers();
     mocks.useZkProvingState.mockReturnValue({
       isProving: true,
     });
@@ -102,7 +107,7 @@ describe("NotarizeStepActions", () => {
     );
     mocks.useZkProvingState.mockReturnValue({
       isProving: false,
-      value: ZkProvingStatus.Done,
+      isDone: true,
     });
     rerender(
       <NotarizeStepActions
@@ -113,9 +118,87 @@ describe("NotarizeStepActions", () => {
       />,
     );
     const progressBar = screen.getByTestId("proving-progress");
-    await waitFor(
-      () => expect(progressBar.getAttribute("data-value")).toBe("100"),
-      { timeout: 1000 },
+    act(() => {
+      vi.advanceTimersByTime(1000);
+    });
+    expect(progressBar.getAttribute("data-value")).toBe("100");
+  });
+
+  it("should hide progress bar when zkProving is done", () => {
+    mocks.useZkProvingState.mockReturnValue({
+      isProving: true,
+    });
+    mocks.useTlsnProver.mockReturnValue({
+      isProving: false,
+    });
+    const { rerender } = render(
+      <NotarizeStepActions
+        buttonText={"click me "}
+        link={"https://example.com"}
+        isVisited={false}
+        status={StepStatus.Current}
+      />,
     );
+    mocks.useZkProvingState.mockReturnValue({
+      isProving: false,
+      isDone: true,
+    });
+    rerender(
+      <NotarizeStepActions
+        buttonText={"click me "}
+        link={"https://example.com"}
+        isVisited={false}
+        status={StepStatus.Current}
+      />,
+    );
+
+    const progressBar = screen.getByTestId("proving-progress");
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
+    expect(progressBar).not.toBeVisible();
+  });
+  it("should render finish callout when proof is generated", () => {
+    mocks.useZkProvingState.mockReturnValue({
+      isProving: false,
+      isDone: true,
+    });
+    render(
+      <NotarizeStepActions
+        buttonText={"click me "}
+        link={"https://example.com"}
+        isVisited={false}
+        status={StepStatus.Current}
+      />,
+    );
+    const finishCallout = screen.getByTestId("finish-callout");
+    expect(finishCallout).toBeInTheDocument();
+    expect(finishCallout).toHaveTextContent(
+      "Generating proof has been finished",
+    );
+  });
+
+  it("should hide finish callout", () => {
+    mocks.useZkProvingState.mockReturnValue({
+      isProving: false,
+      isDone: true,
+    });
+    render(
+      <NotarizeStepActions
+        buttonText={"click me "}
+        link={"https://example.com"}
+        isVisited={false}
+        status={StepStatus.Current}
+      />,
+    );
+    const finishCallout = screen.getByTestId("finish-callout");
+    expect(finishCallout).toBeInTheDocument();
+    expect(finishCallout).toHaveTextContent(
+      "Generating proof has been finished",
+    );
+    act(() => {
+      vi.advanceTimersByTime(3000);
+    });
+    expect(finishCallout).not.toBeVisible();
   });
 });

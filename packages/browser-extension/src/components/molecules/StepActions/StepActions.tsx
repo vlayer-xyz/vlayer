@@ -1,9 +1,9 @@
 import { match } from "ts-pattern";
 import React from "react";
 
-import { ExpectUrlStepActions } from "./ExpectUrlStepActions";
-import { NotarizeStepActions } from "./NotarizeStepActions";
-import { StartPageStepActions } from "./StartPageStepActions";
+import { ExpectUrlStepActions } from "./ExpectUrl";
+import { NotarizeStepActions } from "./Notarize";
+import { StartPageStepActions } from "./StartPage";
 import { StepStatus } from "constants/step";
 
 export const StepActions: React.FC<{
