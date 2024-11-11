@@ -46,7 +46,8 @@ class ExtensionWebProofProvider implements WebProofProvider {
 
   public notifyZkProvingStatus(status: ZkProvingStatus) {
     if (typeof chrome !== "undefined") {
-      this.connectToExtension().postMessage({
+      console.log("Notifying extension about zk proving status", status);
+      chrome.runtime.sendMessage(EXTENSION_ID, {
         action: ExtensionAction.NotifyZkProvingStatus,
         payload: { status },
       });

@@ -10,7 +10,7 @@ vi.mock("lib/sendMessageToServiceWorker", () => ({
   default: vi.fn().mockImplementation(() => Promise.resolve()),
 }));
 
-describe.only("RedirectCallout", () => {
+describe("RedirectCallout", () => {
   beforeEach(() => {
     vi.useFakeTimers();
   });

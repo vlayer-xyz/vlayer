@@ -50,6 +50,7 @@ export const createVlayerClient = (
 
   return {
     prove: async ({ address, functionName, chainId, proverAbi, args }) => {
+      console.log("Proving", address, functionName, chainId, proverAbi, args);
       webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Proving);
       const result_promise = prove(
         address,
@@ -60,10 +61,12 @@ export const createVlayerClient = (
         url,
       )
         .catch((error) => {
+          console.error("Proving error", error);
           webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Error);
           throw error;
         })
         .then((result) => {
+          console.log("Proving result", result);
           webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Done);
           return result;
         });

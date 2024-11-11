@@ -20,7 +20,6 @@ const TlsnProofContext = createContext({
   proof: null as object | null,
   isProving: false,
 });
-
 export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
   //Internal component state representing proving mechanism
   const [proof, setProof] = useState<object | null>(null);
@@ -41,14 +40,25 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
     setFormattedHeaders(
       formatTlsnHeaders(provenUrl?.headers ?? [], provenUrl?.cookies ?? []),
     );
-  }, [provenUrl]);
+  }, [provenUrl?.url, provenUrl?.headers, provenUrl?.cookies]);
 
   const prove = useCallback(async () => {
+    console.log("Proving...", provenUrl);
     setIsProving(true);
 
     try {
-      isDefined(provenUrl?.url, "Missing URL to prove");
+      isDefined(provenUrl?.url, "Missing URL to prove ");
       isDefined(provingSessionConfig, "Missing proving session config");
+
+      console.log("Proving", removeQueryParams(provenUrl?.url));
+      console.log("Proving", provingSessionConfig.notaryUrl);
+      console.log(
+        "Proving",
+        `${provingSessionConfig.wsProxyUrl}?token=${new URL(provenUrl.url).host}`,
+      );
+      console.log("Proving", "GET");
+      console.log("Proving", formattedHeaders?.headers);
+      console.log("Proving", formattedHeaders?.secretHeaders);
 
       const tlsnProof = await tlsnProve(removeQueryParams(provenUrl?.url), {
         notaryUrl: provingSessionConfig.notaryUrl || "",
@@ -71,7 +81,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
       });
       setIsProving(false);
     }
-  }, [provenUrl, formattedHeaders]);
+  }, [provenUrl?.url, formattedHeaders]);
 
   return (
     <TlsnProofContext.Provider value={{ prove, proof, isProving }}>

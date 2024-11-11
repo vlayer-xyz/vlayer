@@ -1,9 +1,9 @@
 import { HistoryItem } from "../state/history";
 import { Step, StepStatus } from "../constants";
-import { useTlsnProver } from "hooks/useTlsnProver";
 import { WebProofStep } from "../web-proof-commons";
 import { useProvingSessionConfig } from "hooks/useProvingSessionConfig.ts";
 import { useBrowsingHistory } from "hooks/useBrowsingHistory.ts";
+import { useZkProvingState } from "./useZkProvingState";
 
 const isStartPageStepCompleted = (
   browsingHistory: HistoryItem[],
@@ -59,12 +59,12 @@ const checkStepReadiness = {
 
 export const calculateSteps = ({
   stepsSetup = [],
-  proof,
   history,
+  isZkProvingDone,
 }: {
   stepsSetup: WebProofStep[];
   history: HistoryItem[];
-  proof: object | null;
+  isZkProvingDone: boolean;
 }) => {
   return stepsSetup.reduce((accumulator, currentStep) => {
     const hasUncompletedStep =
@@ -77,7 +77,11 @@ export const calculateSteps = ({
       // all steps after first uncompleted are further
       status: hasUncompletedStep
         ? StepStatus.Further
-        : checkStepCompletion[currentStep.step](history, currentStep, !!proof)
+        : checkStepCompletion[currentStep.step](
+              history,
+              currentStep,
+              isZkProvingDone,
+            )
           ? StepStatus.Completed
           : checkStepReadiness[currentStep.step](history, currentStep)
             ? StepStatus.Current
@@ -90,7 +94,10 @@ export const calculateSteps = ({
 export const useSteps = (): Step[] => {
   const [config] = useProvingSessionConfig();
   const [history] = useBrowsingHistory();
-  const { proof } = useTlsnProver();
-
-  return calculateSteps({ stepsSetup: config.steps, history, proof });
+  const { isDone: isZkProvingDone } = useZkProvingState();
+  return calculateSteps({
+    stepsSetup: config.steps,
+    history,
+    isZkProvingDone,
+  });
 };

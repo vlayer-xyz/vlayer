@@ -41,6 +41,7 @@ export const useTrackCookies = () => {
         browser.cookies
           .getAll({ url: details.url })
           .then((cookies) => {
+            console.log("Cookies", cookies, "for", details.url);
             historyContextManager
               .updateHistory({
                 url: details.url,

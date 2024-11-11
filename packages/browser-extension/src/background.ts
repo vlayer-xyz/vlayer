@@ -76,6 +76,7 @@ browser.runtime.onMessageExternal.addListener((message: MessageToExtension) => {
         message.payload,
       );
     } else if (message.action === ExtensionAction.NotifyZkProvingStatus) {
+      console.log("Received proving status", message.payload);
       await zkProvingStatusStore.setProvingStatus(message.payload);
     }
   })().catch(console.error);

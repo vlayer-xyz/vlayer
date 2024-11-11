@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState } from "react";
 import { StepStatus } from "constants/step";
 import { useTlsnProver } from "hooks/useTlsnProver";
 import { useZkProvingState } from "hooks/useZkProvingState";
@@ -6,13 +6,12 @@ import { ProvingStatus, type NotarizeStepActionProps } from "./types";
 
 const useProveButton = () => {
   const { prove, isProving: isWebProving, proof } = useTlsnProver();
-  const handleClick = useCallback(() => {
-    prove().catch((error) => {
-      console.error("Error during prove:", error);
-    });
-  }, []);
   return {
-    onButtonClick: handleClick,
+    onButtonClick: () => {
+      prove().catch((error) => {
+        console.error("error generating tlsn proof", error);
+      });
+    },
     isButtonVisible: !isWebProving && !proof,
   };
 };
