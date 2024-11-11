@@ -49,17 +49,6 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
     try {
       isDefined(provenUrl?.url, "Missing URL to prove ");
       isDefined(provingSessionConfig, "Missing proving session config");
-
-      console.log("Proving", removeQueryParams(provenUrl?.url));
-      console.log("Proving", provingSessionConfig.notaryUrl);
-      console.log(
-        "Proving",
-        `${provingSessionConfig.wsProxyUrl}?token=${new URL(provenUrl.url).host}`,
-      );
-      console.log("Proving", "GET");
-      console.log("Proving", formattedHeaders?.headers);
-      console.log("Proving", formattedHeaders?.secretHeaders);
-
       const tlsnProof = await tlsnProve(removeQueryParams(provenUrl?.url), {
         notaryUrl: provingSessionConfig.notaryUrl || "",
         websocketProxyUrl: `${provingSessionConfig.wsProxyUrl}?token=${new URL(provenUrl.url).host}`,
