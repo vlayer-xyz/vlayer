@@ -40,14 +40,13 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
     setFormattedHeaders(
       formatTlsnHeaders(provenUrl?.headers ?? [], provenUrl?.cookies ?? []),
     );
-  }, [provenUrl?.url, provenUrl?.headers, provenUrl?.cookies]);
+  }, [JSON.stringify(provenUrl)]);
 
   const prove = useCallback(async () => {
-    console.log("Proving...", provenUrl);
     setIsProving(true);
 
     try {
-      isDefined(provenUrl?.url, "Missing URL to prove ");
+      isDefined(provenUrl?.url, "Missing URL to prove");
       isDefined(provingSessionConfig, "Missing proving session config");
       const tlsnProof = await tlsnProve(removeQueryParams(provenUrl?.url), {
         notaryUrl: provingSessionConfig.notaryUrl || "",
@@ -70,7 +69,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
       });
       setIsProving(false);
     }
-  }, [provenUrl?.url, formattedHeaders]);
+  }, [JSON.stringify(provenUrl), JSON.stringify(formattedHeaders)]);
 
   return (
     <TlsnProofContext.Provider value={{ prove, proof, isProving }}>

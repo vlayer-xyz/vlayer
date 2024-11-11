@@ -1,10 +1,8 @@
 import { useBrowsingHistory } from "./useBrowsingHistory";
 import { useProvingSessionConfig } from "./useProvingSessionConfig";
 import { HistoryItem } from "../state/history";
-import { useTrackHistory } from "./useTrackHistory";
 
 export function useProvenUrl(): HistoryItem | null {
-  useTrackHistory();
   const [config] = useProvingSessionConfig();
   const [browsingHistory] = useBrowsingHistory();
   const steps = config?.steps || [];
