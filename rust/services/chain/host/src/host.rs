@@ -19,8 +19,7 @@ use ethers::{
 use lazy_static::lazy_static;
 use prover::Prover;
 use risc0_zkvm::sha::Digest;
-pub use strategy::Strategy;
-use strategy::{AppendStrategy, PrependStrategy};
+pub use strategy::{AppendStrategy, PrependStrategy};
 use tracing::{info, instrument};
 use u64_range::NonEmptyRange;
 
