@@ -22,18 +22,24 @@ echo '::endgroup::'
 git config --global user.email "test@example.com"
 git config --global user.name "Github Runner"
 
-echo '::group::vlayer template initialization'
-VLAYER_TEMP_DIR=$(mktemp -d -t vlayer-test-release-XXXXXX-)
-cd ${VLAYER_TEMP_DIR}
+VLAYER_HOME=$(git rev-parse --show-toplevel)
 
-vlayer init --template web-proof
-forge build
-vlayer test
+for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ; do
+    example_name=$(basename "${example}"  | tr '_' '-')
 
-cd vlayer
-bun install
-echo '::endgroup::'
+    echo "::group::Initializing vlayer template: ${example_name}"
+    VLAYER_TEMP_DIR=$(mktemp -d -t vlayer-test-release-XXXXXX-)
+    cd ${VLAYER_TEMP_DIR}
 
-echo '::group::vlayer run prove.ts'
-bun run prove.ts
-echo '::endgroup::'
+    vlayer init --template "${example_name}"
+    forge build
+    vlayer test
+
+    cd vlayer
+    bun install
+    echo '::endgroup::'
+
+    echo "::group::vlayer run prove.ts: ${example_name}"
+    bun run prove.ts
+    echo '::endgroup::'
+done
