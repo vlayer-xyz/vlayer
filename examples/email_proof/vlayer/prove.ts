@@ -14,13 +14,13 @@ const [prover, verifier] = await testHelpers.deployProverVerifier(
 
 console.log("Proving...");
 const vlayer = createVlayerClient();
-const { hash } = await vlayer.prove({
+const hash = await vlayer.prove({
   address: prover,
   proverAbi: emailProofProver.abi,
   functionName: "main",
   args: [unverifiedEmail],
 });
-const result = await vlayer.waitForProvingResult({ hash });
+const result = await vlayer.waitForProvingResult(hash);
 console.log("Proof:", result[0]);
 
 console.log("Verifying...");

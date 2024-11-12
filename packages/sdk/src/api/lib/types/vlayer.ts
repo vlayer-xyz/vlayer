@@ -1,9 +1,11 @@
+import { Branded } from "../../../web-proof-commons/utils";
 import {
   Abi,
   AbiStateMutability,
   Address,
   ContractFunctionArgs,
   ContractFunctionName,
+  ContractFunctionReturnType,
   Hex,
 } from "viem";
 
@@ -17,6 +19,8 @@ export type CallParams = {
 export type CallContext = {
   chain_id: number; // 31337
 };
+
+export type BrandedHash<T, F> = Branded<{ hash: string }, [T, F]>;
 
 export type Proof = {
   seal: {
@@ -52,10 +56,8 @@ export type VlayerClient = {
     functionName: F;
     chainId: number;
     args: ContractFunctionArgs<T, AbiStateMutability, F>;
-  }) => Promise<{ hash: string }>;
-  waitForProvingResult: ({
-    hash,
-  }: {
-    hash: string;
-  }) => Promise<[Proof, ...unknown[]]>;
+  }) => Promise<BrandedHash<T, F>>;
+  waitForProvingResult: <T extends Abi, F extends ContractFunctionName<T>>(
+    hash: BrandedHash<T, F>,
+  ) => Promise<ContractFunctionReturnType<T, AbiStateMutability, F>>;
 };

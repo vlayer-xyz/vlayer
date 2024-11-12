@@ -34,13 +34,13 @@ console.log("Proving...");
 const proverAddr = await deployProver();
 const vlayer = createVlayerClient();
 
-const { hash } = await vlayer.prove({
+const hash = await vlayer.prove({
   address: proverAddr,
   proverAbi: simpleTeleportProver.abi,
   functionName: "crossChainBalanceOf",
   args: [john],
 });
-const result = await vlayer.waitForProvingResult({ hash });
+const result = await vlayer.waitForProvingResult(hash);
 console.log("Response:", result);
 
 const verifierAddr = await deployVerifier(proverAddr);

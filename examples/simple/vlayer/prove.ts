@@ -25,21 +25,17 @@ const verifier = await testHelpers.deployContract(SimpleVerifier, [
 
 console.log("Proving...");
 const vlayer = createVlayerClient();
-const { hash } = await vlayer.prove({
+const hash = await vlayer.prove({
   address: prover,
   proverAbi: SimpleProver.abi,
   functionName: "balance",
   args: [john.address],
   chainId: foundry.id,
 });
-const result = await vlayer.waitForProvingResult({ hash });
+const result = await vlayer.waitForProvingResult(hash);
 const [proof, owner, balance] = result;
 
-if (typeof balance !== "bigint") {
-  throw new Error("Balance is not a bigint");
-}
-
-if (typeof owner !== "string" || !isAddress(owner)) {
+if (!isAddress(owner)) {
   throw new Error(`${owner} is not a valid address`);
 }
 

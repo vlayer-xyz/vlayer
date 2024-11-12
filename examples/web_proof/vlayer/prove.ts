@@ -49,7 +49,7 @@ async function testSuccessProvingAndVerification() {
 
   const webProof = { tls_proof: tls_proof, notary_pub_key: notaryPubKey };
 
-  const { hash } = await vlayer.prove({
+  const hash = await vlayer.prove({
     address: prover,
     functionName: "main",
     proverAbi: webProofProver.abi,
@@ -61,15 +61,11 @@ async function testSuccessProvingAndVerification() {
     ],
     chainId: chain.id,
   });
-  const result = await vlayer.waitForProvingResult({ hash });
+  const result = await vlayer.waitForProvingResult(hash);
   const [proof, twitterHandle, address] = result;
   console.log("Proof:", proof);
 
-  if (typeof twitterHandle !== "string") {
-    throw new Error("Twitter handle is not a string");
-  }
-
-  if (typeof address !== "string" || !isAddress(address)) {
+  if (!isAddress(address)) {
     throw new Error(`${address} is not a valid address`);
   }
 
@@ -118,7 +114,7 @@ async function testFailedProving() {
   const wrongWebProof = { tls_proof: tls_proof, notary_pub_key: "wrong" };
 
   try {
-    const { hash } = await vlayer.prove({
+    const hash = await vlayer.prove({
       address: prover,
       functionName: "main",
       proverAbi: webProofProver.abi,
@@ -130,7 +126,7 @@ async function testFailedProving() {
       ],
       chainId: chain.id,
     });
-    await vlayer.waitForProvingResult({ hash });
+    await vlayer.waitForProvingResult(hash);
     throw new Error("Proving should have failed!");
   } catch (error) {
     assert.ok(error instanceof Error, `Invalid error returned: ${error}`);

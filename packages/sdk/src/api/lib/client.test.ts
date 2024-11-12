@@ -49,14 +49,14 @@ describe("Success zk-proving", () => {
     const zkProvingSpy = vi.spyOn(webProofProvider, "notifyZkProvingStatus");
 
     const vlayer = createVlayerClient({ webProofProvider });
-    const { hash } = await vlayer.prove({
+    const hash = await vlayer.prove({
       address: `0x${"a".repeat(40)}`,
       functionName: "main",
       proverAbi: [],
       args: [],
       chainId: 42,
     });
-    await vlayer.waitForProvingResult({ hash });
+    await vlayer.waitForProvingResult(hash);
 
     expect(zkProvingSpy).toBeCalledTimes(2);
     expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Proving);
@@ -81,7 +81,7 @@ describe("Failed zk-proving", () => {
     const zkProvingSpy = vi.spyOn(webProofProvider, "notifyZkProvingStatus");
 
     const vlayer = createVlayerClient({ webProofProvider });
-    const { hash } = await vlayer.prove({
+    const hash = await vlayer.prove({
       address: `0x${"a".repeat(40)}`,
       functionName: "main",
       proverAbi: [],
@@ -89,7 +89,7 @@ describe("Failed zk-proving", () => {
       chainId: 42,
     });
     try {
-      await vlayer.waitForProvingResult({ hash });
+      await vlayer.waitForProvingResult(hash);
     } catch (e) {
       console.log("Error waiting for proving result", e);
     }
