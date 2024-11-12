@@ -19,25 +19,6 @@ pub struct Strategy {
 }
 
 #[derive(Clone, Derivative, Debug, new)]
-pub struct AppendStrategy {
-    max_head_blocks: u64,
-    confirmations: u64,
-}
-
-impl AppendStrategy {
-    fn append_count(&self, range: NonEmptyRange, latest: BlockNumber) -> u64 {
-        let confirmed = (latest + 1).saturating_sub(self.confirmations); // Genesis block is always confirmed
-        let range: Range = (range.end() + 1..=confirmed).into();
-        min(self.max_head_blocks, range.len())
-    }
-
-    pub fn range(&self, range: NonEmptyRange, latest: BlockNumber) -> Range {
-        let append_count = self.append_count(range, latest);
-        (range.end() + 1..=range.end() + append_count).into()
-    }
-}
-
-#[derive(Clone, Derivative, Debug, new)]
 pub struct PrependStrategy {
     max_back_propagation_blocks: u64,
 }
@@ -51,9 +32,28 @@ impl PrependStrategy {
         min(self.max_back_propagation_blocks, range.len())
     }
 
-    pub fn range(&self, range: NonEmptyRange) -> Range {
+    pub fn range(&self, range: NonEmptyRange) -> (NonEmptyRange, Range) {
         let prepend_count = self.prepend_count(range);
-        (range.end() + 1..=range.end() + prepend_count).into()
+        range.add_left(prepend_count).expect("Prepend overflow")
+    }
+}
+
+#[derive(Clone, Derivative, Debug, new)]
+pub struct AppendStrategy {
+    max_head_blocks: u64,
+    confirmations: u64,
+}
+
+impl AppendStrategy {
+    fn append_count(&self, range: NonEmptyRange, latest: BlockNumber) -> u64 {
+        let confirmed = (latest + 1).saturating_sub(self.confirmations); // Genesis block is always confirmed
+        let range: Range = (range.end() + 1..=confirmed).into();
+        min(self.max_head_blocks, range.len())
+    }
+
+    pub fn range(&self, range: NonEmptyRange, latest: BlockNumber) -> (NonEmptyRange, Range) {
+        let append_count = self.append_count(range, latest);
+        range.add_right(append_count).expect("Append overflow")
     }
 }
 
