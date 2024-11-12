@@ -19,8 +19,8 @@ use ethers::{
 use lazy_static::lazy_static;
 use prover::Prover;
 use risc0_zkvm::sha::Digest;
-use strategy::AppendPrependRanges;
 pub use strategy::Strategy;
+use strategy::{AppendPrependRanges, AppendStrategy, PrependStrategy};
 use tracing::{info, instrument};
 use u64_range::NonEmptyRange;
 
@@ -37,6 +37,8 @@ where
     fetcher: BlockFetcher<P>,
     chain_id: ChainId,
     strategy: Strategy,
+    append_strategy: AppendStrategy,
+    prepend_strategy: PrependStrategy,
 }
 
 impl Host<Http> {
@@ -45,7 +47,15 @@ impl Host<Http> {
         let prover = Prover::new(config.proof_mode);
         let db = ChainDb::mdbx(config.db_path, Mode::ReadWrite)?;
 
-        Ok(Host::from_parts(prover, block_fetcher, db, config.chain_id, config.strategy))
+        Ok(Host::from_parts(
+            prover,
+            block_fetcher,
+            db,
+            config.chain_id,
+            config.strategy,
+            config.prepend_strategy,
+            config.append_strategy,
+        ))
     }
 }
 
@@ -59,6 +69,8 @@ where
         db: ChainDb,
         chain_id: ChainId,
         strategy: Strategy,
+        prepend_strategy: PrependStrategy,
+        append_strategy: AppendStrategy,
     ) -> Self {
         Host {
             prover,
@@ -66,6 +78,8 @@ where
             db,
             chain_id,
             strategy,
+            append_strategy,
+            prepend_strategy,
         }
     }
 
@@ -166,6 +180,16 @@ mod tests {
             Strategy::new(MAX_HEAD_BLOCKS, MAX_BACK_PROPAGATION_BLOCKS, CONFIRMATIONS);
     }
 
+    lazy_static! {
+        static ref PREPEND_STRATEGY: PrependStrategy =
+            PrependStrategy::new(MAX_BACK_PROPAGATION_BLOCKS);
+    }
+
+    lazy_static! {
+        static ref APPEND_STRATEGY: AppendStrategy =
+            AppendStrategy::new(MAX_HEAD_BLOCKS, CONFIRMATIONS);
+    }
+
     fn test_db() -> ChainDb {
         ChainDb::in_memory()
     }
@@ -177,6 +201,8 @@ mod tests {
             db,
             1,
             STRATEGY.clone(),
+            PREPEND_STRATEGY.clone(),
+            APPEND_STRATEGY.clone(),
         )
     }
 

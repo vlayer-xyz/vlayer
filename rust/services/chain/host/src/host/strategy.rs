@@ -18,6 +18,45 @@ pub struct Strategy {
     confirmations: u64,
 }
 
+#[derive(Clone, Derivative, Debug, new)]
+pub struct AppendStrategy {
+    max_head_blocks: u64,
+    confirmations: u64,
+}
+
+impl AppendStrategy {
+    fn append_count(&self, range: NonEmptyRange, latest: BlockNumber) -> u64 {
+        let confirmed = (latest + 1).saturating_sub(self.confirmations); // Genesis block is always confirmed
+        let range: Range = (range.end() + 1..=confirmed).into();
+        min(self.max_head_blocks, range.len())
+    }
+
+    pub fn range(&self, range: NonEmptyRange, latest: BlockNumber) -> Range {
+        let append_count = self.append_count(range, latest);
+        (range.end() + 1..=range.end() + append_count).into()
+    }
+}
+
+#[derive(Clone, Derivative, Debug, new)]
+pub struct PrependStrategy {
+    max_back_propagation_blocks: u64,
+}
+
+impl PrependStrategy {
+    fn prepend_count(&self, range: NonEmptyRange) -> u64 {
+        if range.start() == GENESIS {
+            return 0;
+        }
+        let range = NonEmptyRange::try_from_range(GENESIS..=range.start() - 1).unwrap(); // SAFETY: start > 0
+        min(self.max_back_propagation_blocks, range.len())
+    }
+
+    pub fn range(&self, range: NonEmptyRange) -> Range {
+        let prepend_count = self.prepend_count(range);
+        (range.end() + 1..=range.end() + prepend_count).into()
+    }
+}
+
 #[derive(Debug, Eq, PartialEq)]
 pub struct AppendPrependRanges {
     pub prepend: Range,
