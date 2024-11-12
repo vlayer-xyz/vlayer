@@ -8,6 +8,7 @@ import { getConfig } from "./config";
 import { exampleContext } from "./helpers";
 import { deploy } from "./deploy";
 import debug from "debug";
+
 const log = debug("vlayer:prove");
 
 const notaryPubKey =
