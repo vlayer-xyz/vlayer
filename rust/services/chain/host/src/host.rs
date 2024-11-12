@@ -131,14 +131,9 @@ where
         let mut trie = old_trie.clone();
 
         let latest_block = self.fetcher.get_block(BlockTag::Latest).await?;
-        let AppendPrependRanges {
-            prepend,
-            append,
-            new_range,
-            ..
-        } = self
-            .strategy
-            .append_prepend_ranges(old_range, latest_block.number());
+
+        let (new_range, prepend) = self.prepend_strategy.range(old_range);
+        let (new_range, append) = self.append_strategy.range(new_range, latest_block.number());
         let append_blocks = self.fetcher.get_blocks_range(append).await?;
         let prepend_blocks = self.fetcher.get_blocks_range(prepend).await?;
         let old_leftmost_block = self.fetcher.get_block(old_range.start().into()).await?;
