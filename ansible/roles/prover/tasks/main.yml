@@ -10,6 +10,9 @@
     creates: ~/.vlayer/bin/vlayerup
     executable: /bin/bash
 
+- name: Install log configuration
+  ansible.builtin.import_tasks: logs.yml
+
 # We're installing a most-recent nightly version every time.
 - name: Install vlayer
   ansible.builtin.shell: |
