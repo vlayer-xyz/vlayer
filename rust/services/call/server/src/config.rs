@@ -3,7 +3,6 @@ use std::{collections::HashMap, net::SocketAddr};
 use alloy_primitives::ChainId;
 use call_host::host::config::DEFAULT_MAX_CALLDATA_SIZE;
 use chain::TEST_CHAIN_ID;
-use ethers::core::k256::elliptic_curve::rand_core::le;
 use serde::{Deserialize, Serialize};
 use server_utils::ProofMode;
 
@@ -21,7 +20,7 @@ impl Default for ServerConfig {
         let anvil_url = "http://localhost:8545";
         Self {
             rpc_urls: HashMap::from([(TEST_CHAIN_ID, anvil_url.to_string())]),
-            socket_addr: "127.0.0.1:3000".parse.unwrap(),
+            socket_addr: "127.0.0.1:3000".parse().unwrap(),
             proof_mode: ProofMode::Groth16,
             chain_proof_url: String::default(),
             max_request_size: DEFAULT_MAX_CALLDATA_SIZE,
@@ -38,13 +37,19 @@ impl ServerConfig {
         chain_proof_url: impl AsRef<str>,
     ) -> ServerConfig {
         let ServerConfig {
-            mut socket_addr, ..
+            mut socket_addr,
+            rpc_urls,
+            ..
         } = ServerConfig::default();
-        port.map(|p| socket_addr.set_port(p));
-        host.map(|h| socket_addr.set_ip(h.parse().unwrap()));
+        if let Some(p) = port {
+            socket_addr.set_port(p)
+        }
+        if let Some(h) = host {
+            socket_addr.set_ip(h.parse().unwrap())
+        };
         ServerConfig {
             rpc_urls: if rpc_mappings.is_empty() {
-                default.rpc_urls
+                rpc_urls
             } else {
                 rpc_mappings.into_iter().collect()
             },

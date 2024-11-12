@@ -1,6 +1,8 @@
 use std::net::SocketAddr;
 
-#[derive(Debug, Clone)]
+use serde::{Deserialize, Serialize};
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ServerConfig {
     pub socket_addr: SocketAddr,
 }
