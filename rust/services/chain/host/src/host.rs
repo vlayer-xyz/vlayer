@@ -35,8 +35,8 @@ where
     prover: Prover,
     fetcher: BlockFetcher<P>,
     chain_id: ChainId,
-    append_strategy: AppendStrategy,
     prepend_strategy: PrependStrategy,
+    append_strategy: AppendStrategy,
 }
 
 impl Host<Http> {
@@ -73,8 +73,8 @@ where
             fetcher: block_fetcher,
             db,
             chain_id,
-            append_strategy,
             prepend_strategy,
+            append_strategy,
         }
     }
 
