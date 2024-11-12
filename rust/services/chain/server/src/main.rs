@@ -14,8 +14,7 @@ use trace::init_tracing;
 use tracing::info;
 
 pub async fn serve(config: ServerConfig, db: ChainDb) -> anyhow::Result<()> {
-    let listener =
-        tokio::net::TcpListener::bind(format!("{}:{}", config.host, config.port)).await?;
+    let listener = tokio::net::TcpListener::bind(config.socket_addr).await?;
 
     info!("listening on {}", listener.local_addr()?);
     axum::serve(listener, server(db)).await?;

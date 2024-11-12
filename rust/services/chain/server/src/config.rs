@@ -1,16 +1,14 @@
-use serde::{Deserialize, Serialize};
+use std::net::SocketAddr;
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(Debug, Clone)]
 pub struct ServerConfig {
-    pub port: u16,
-    pub host: String,
+    pub socket_addr: SocketAddr,
 }
 
 impl Default for ServerConfig {
     fn default() -> Self {
         Self {
-            port: 3000,
-            host: "0.0.0.0".to_string(),
+            socket_addr: "0.0.0.0:3000".parse().unwrap(),
         }
     }
 }
