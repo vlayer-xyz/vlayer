@@ -1,0 +1,5 @@
+{
+  "dependencies": {
+    "dotenv-flow": "^4.1.0"
+  }
+}
