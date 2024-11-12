@@ -124,7 +124,7 @@ where
             ..
         } = self
             .strategy
-            .get_append_prepend_ranges(old_range, latest_block.number());
+            .append_prepend_ranges(old_range, latest_block.number());
         let append_blocks = self.fetcher.get_blocks_range(append).await?;
         let prepend_blocks = self.fetcher.get_blocks_range(prepend).await?;
         let old_leftmost_block = self.fetcher.get_block(old_range.start().into()).await?;

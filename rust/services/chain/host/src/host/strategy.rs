@@ -51,7 +51,7 @@ impl Strategy {
     // Tells Host which blocks to append and prepend.
     // The returned ranges are adjacent to the current range. [prepend][range][append]
     // Returned ranges can be empty.
-    pub fn get_append_prepend_ranges(
+    pub fn append_prepend_ranges(
         &self,
         range: NonEmptyRange,
         latest: BlockNumber,
@@ -172,7 +172,7 @@ mod test {
         #[test]
         fn success() {
             assert_eq!(
-                STRATEGY.get_append_prepend_ranges(r(100..=100), 105),
+                STRATEGY.append_prepend_ranges(r(100..=100), 105),
                 AppendPrependRanges {
                     prepend: (90..=99).into(),
                     append: (101..=104).into(),
