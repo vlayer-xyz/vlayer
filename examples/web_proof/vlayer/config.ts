@@ -1,42 +1,71 @@
-import path from "node:path";
-import dotenv from "dotenv";
+import dotenvflow from "dotenv-flow";
+import chalk from "chalk";
 
 export type Config = {
   chainName: string;
   proverUrl: string;
   jsonRpcUrl: string;
-  envPath: string;
   privateKey: `0x${string}`;
 };
 
-const DEFAULT_CONFIG: Config = {
-  chainName: "anvil",
-  proverUrl: "http://127.0.0.1:3000",
-  jsonRpcUrl: "",
-  envPath: "",
-  // anvil default private key
-  privateKey:
-    "0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
+const ensureEnvVariable = (envVar: string) => {
+  if (!process.env[envVar]) {
+    if (envVar === "PRIVATE_KEY") {
+      throw new Error(
+        chalk.bgBlue(
+          `${envVar} is not set. Please set it in your .env.local file`,
+        ),
+      );
+    }
+    throw new Error(`${envVar} is not set`);
+  }
+  return process.env[envVar];
 };
 
-export const getConfig = (envPath?: string): Config => {
-  const dotEnvFileName = `.env.${process.env.VLAYER_ENV ?? "development"}`;
-  if (!envPath) envPath = path.resolve(__dirname, dotEnvFileName);
-  dotenv.config({ path: envPath, override: true });
-  dotenv.config({ path: `${envPath}.local`, override: true });
+const ensureVlayerEnv = () => {
+  try {
+    if (!process.env.VLAYER_ENV) {
+      throw new Error("VLAYER_ENV is not set. Available options: testnet, dev");
+    }
+    if (!["testnet", "dev"].includes(process.env.VLAYER_ENV)) {
+      throw new Error(
+        `Invalid VLAYER_ENV: ${process.env.VLAYER_ENV}. Available options: testnet, anvil, mainnet`,
+      );
+    }
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  } catch (e) {
+    return "dev";
+  }
 
-  const chainName = process.env.CHAIN_NAME || DEFAULT_CONFIG.chainName;
+  return process.env.VLAYER_ENV;
+};
 
-  const privateKey =
-    (process.env.EXAMPLES_TEST_PRIVATE_KEY as `0x${string}`) ||
-    DEFAULT_CONFIG.privateKey;
+const dotEnvFlowConfig = () => {
+  dotenvflow.config({
+    node_env: ensureVlayerEnv(),
+  });
+};
 
-  return {
-    ...Object.assign(DEFAULT_CONFIG, {
-      chainName,
-      privateKey,
-      jsonRpcUrl: process.env.JSON_RPC_URL,
-      envPath,
-    }),
-  };
+export const toCamelCase = (str: string) =>
+  str
+    .toLowerCase()
+    .replace(/([-_][a-z])/g, (group) =>
+      group.toUpperCase().replace("-", "").replace("_", ""),
+    );
+
+const requiredEnvVars = [
+  { var: "CHAIN_NAME" },
+  { var: "PROVER_URL" },
+  { var: "JSON_RPC_URL" },
+  { var: "EXAMPLES_TEST_PRIVATE_KEY", to: "privateKey" },
+];
+
+export const getConfig = () => {
+  dotEnvFlowConfig();
+  return requiredEnvVars.reduce((config, envVar) => {
+    return {
+      ...config,
+      [envVar.to ?? toCamelCase(envVar.var)]: ensureEnvVariable(envVar.var),
+    };
+  }, {} as Config);
 };
