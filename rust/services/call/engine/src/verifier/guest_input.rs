@@ -6,7 +6,7 @@ use super::{ChainProofError, ChainProofVerifier};
 use crate::evm::input::MultiEvmInput;
 
 #[derive(thiserror::Error, Debug)]
-pub enum GuestInputError {
+pub enum Error {
     #[error("Chain proof error: {0}")]
     ChainProof(#[from] ChainProofError),
     #[error("Chain client error: {0}")]
@@ -28,38 +28,35 @@ mod seal {
 
     // Useful to mock verifier in tests
     #[cfg(feature = "testing")]
-    impl<
-            F: Fn(&super::MultiEvmInput) -> Result<(), super::GuestInputError> + Send + Sync + 'static,
-        > Sealed for F
+    impl<F> Sealed for F where
+        F: Fn(&super::MultiEvmInput) -> Result<(), super::Error> + Send + Sync + 'static
     {
     }
 }
 
 #[async_trait]
-pub trait GuestInputVerifier: seal::Sealed + Send + Sync + 'static {
-    async fn verify(&self, input: &MultiEvmInput) -> Result<(), GuestInputError>;
+pub trait Verifier: seal::Sealed + Send + Sync + 'static {
+    async fn verify(&self, input: &MultiEvmInput) -> Result<(), Error>;
 }
 
-assert_obj_safe!(GuestInputVerifier);
+assert_obj_safe!(Verifier);
 
 // Useful to mock verifier in tests
 // [auto_impl(Fn)] doesn't work with async_trait
 #[cfg(feature = "testing")]
 #[async_trait]
-impl<F: Fn(&MultiEvmInput) -> Result<(), GuestInputError> + Send + Sync + 'static>
-    GuestInputVerifier for F
-{
-    async fn verify(&self, input: &MultiEvmInput) -> Result<(), GuestInputError> {
+impl<F: Fn(&MultiEvmInput) -> Result<(), Error> + Send + Sync + 'static> Verifier for F {
+    async fn verify(&self, input: &MultiEvmInput) -> Result<(), Error> {
         self(input)
     }
 }
 
-pub struct ZkGuestInputVerifier {
+pub struct ZkVerifier {
     chain_client: Box<dyn chain_client::Client>,
     verifier: Box<dyn ChainProofVerifier>,
 }
 
-impl ZkGuestInputVerifier {
+impl ZkVerifier {
     pub fn new(chain_client: impl chain_client::Client, verifier: impl ChainProofVerifier) -> Self {
         Self {
             chain_client: Box::new(chain_client),
@@ -68,10 +65,10 @@ impl ZkGuestInputVerifier {
     }
 }
 
-impl seal::Sealed for ZkGuestInputVerifier {}
+impl seal::Sealed for ZkVerifier {}
 #[async_trait]
-impl GuestInputVerifier for ZkGuestInputVerifier {
-    async fn verify(&self, input: &MultiEvmInput) -> Result<(), GuestInputError> {
+impl Verifier for ZkVerifier {
+    async fn verify(&self, input: &MultiEvmInput) -> Result<(), Error> {
         for (chain_id, blocks) in input.blocks_by_chain() {
             let block_numbers = blocks.iter().map(|(block_num, _)| *block_num).collect();
             let chain_proof = self
@@ -83,9 +80,9 @@ impl GuestInputVerifier for ZkGuestInputVerifier {
                 let trie_block_hash = chain_proof
                     .block_trie
                     .get(block_num)
-                    .ok_or_else(|| GuestInputError::BlockNotFound { block_num })?;
+                    .ok_or_else(|| Error::BlockNotFound { block_num })?;
                 if trie_block_hash != block_hash {
-                    return Err(GuestInputError::BlockHash {
+                    return Err(Error::BlockHash {
                         block_num,
                         hash_in_input: block_hash,
                         proven_hash: trie_block_hash,

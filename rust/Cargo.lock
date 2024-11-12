@@ -1939,9 +1939,12 @@ dependencies = [
  "block_header",
  "call_engine",
  "chain",
+ "chain_client",
  "chain_common",
+ "chain_guest_wrapper",
  "mpt",
  "revm",
+ "tokio",
 ]
 
 [[package]]

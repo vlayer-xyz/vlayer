@@ -1,4 +1,5 @@
 pub mod db;
-pub mod guest;
+mod guest;
+
 pub use call_engine::io::Input;
-pub use guest::Guest;
+pub use guest::main;
