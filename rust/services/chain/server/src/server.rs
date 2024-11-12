@@ -4,7 +4,7 @@ use axum::{extract::State, response::IntoResponse, routing::post, Router};
 use axum_jrpc::JsonRpcExtractor;
 use chain_db::ChainDb;
 use parking_lot::RwLock;
-use server_utils::route;
+use server_utils::{init_trace_layer, route, RequestIdLayer};
 
 use crate::handlers::v_chain::v_chain;
 
@@ -24,4 +24,7 @@ pub fn server(chain_db: ChainDb) -> Router {
     Router::new()
         .route("/", post(handle_jrpc))
         .with_state(chain_db)
+        .layer(init_trace_layer())
+        // NOTE: RequestIdLayer should be added after the Trace layer
+        .layer(RequestIdLayer)
 }

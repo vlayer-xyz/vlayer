@@ -27,6 +27,7 @@
     "Httparse",
     "jrpc",
     "keccak",
+    "mdbx",
     "merkle",
     "multichain",
     "ommers",

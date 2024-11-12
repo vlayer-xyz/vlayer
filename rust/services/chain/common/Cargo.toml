@@ -9,3 +9,4 @@ block_trie = { workspace = true }
 mpt = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
+serde_with = { workspace = true, features = ["macros", "hex"] }
