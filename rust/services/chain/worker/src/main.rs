@@ -1,6 +1,6 @@
 use std::env::var;
 
-use chain_host::{Host, HostConfig, ProofMode, Strategy};
+use chain_host::{AppendStrategy, Host, HostConfig, PrependStrategy, ProofMode};
 use dotenvy::dotenv;
 use trace::init_tracing;
 
@@ -15,9 +15,9 @@ async fn main() -> anyhow::Result<()> {
         chain_id: 1,
         proof_mode: ProofMode::Fake,
         db_path: "chain_db".to_string(),
-        strategy: Strategy::new(
+        prepend_strategy: PrependStrategy::new(parse_env_u64("MAX_BACK_PROPAGATION_BLOCKS")?),
+        append_strategy: AppendStrategy::new(
             parse_env_u64("MAX_HEAD_BLOCKS")?,
-            parse_env_u64("MAX_BACK_PROPAGATION_BLOCKS")?,
             parse_env_u64("CONFIRMATIONS")?,
         ),
     };

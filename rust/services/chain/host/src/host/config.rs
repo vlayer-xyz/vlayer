@@ -1,7 +1,7 @@
 use alloy_primitives::ChainId;
 use host_utils::ProofMode;
 
-use super::strategy::Strategy;
+use super::strategy::{AppendStrategy, PrependStrategy};
 
 #[derive(Debug)]
 pub struct HostConfig {
@@ -9,5 +9,6 @@ pub struct HostConfig {
     pub chain_id: ChainId,
     pub proof_mode: ProofMode,
     pub db_path: String,
-    pub strategy: Strategy,
+    pub prepend_strategy: PrependStrategy,
+    pub append_strategy: AppendStrategy,
 }

@@ -19,8 +19,7 @@ use ethers::{
 use lazy_static::lazy_static;
 use prover::Prover;
 use risc0_zkvm::sha::Digest;
-use strategy::AppendPrependRanges;
-pub use strategy::Strategy;
+pub use strategy::{AppendStrategy, PrependStrategy};
 use tracing::{info, instrument};
 use u64_range::NonEmptyRange;
 
@@ -36,7 +35,8 @@ where
     prover: Prover,
     fetcher: BlockFetcher<P>,
     chain_id: ChainId,
-    strategy: Strategy,
+    prepend_strategy: PrependStrategy,
+    append_strategy: AppendStrategy,
 }
 
 impl Host<Http> {
@@ -45,7 +45,14 @@ impl Host<Http> {
         let prover = Prover::new(config.proof_mode);
         let db = ChainDb::mdbx(config.db_path, Mode::ReadWrite)?;
 
-        Ok(Host::from_parts(prover, block_fetcher, db, config.chain_id, config.strategy))
+        Ok(Host::from_parts(
+            prover,
+            block_fetcher,
+            db,
+            config.chain_id,
+            config.prepend_strategy,
+            config.append_strategy,
+        ))
     }
 }
 
@@ -58,14 +65,16 @@ where
         block_fetcher: BlockFetcher<P>,
         db: ChainDb,
         chain_id: ChainId,
-        strategy: Strategy,
+        prepend_strategy: PrependStrategy,
+        append_strategy: AppendStrategy,
     ) -> Self {
         Host {
             prover,
             fetcher: block_fetcher,
             db,
             chain_id,
-            strategy,
+            prepend_strategy,
+            append_strategy,
         }
     }
 
@@ -117,21 +126,17 @@ where
         let mut trie = old_trie.clone();
 
         let latest_block = self.fetcher.get_block(BlockTag::Latest).await?;
-        let latest_block_number = latest_block.number();
-        let AppendPrependRanges {
-            prepend,
-            append,
-            new_range,
-            ..
-        } = self
-            .strategy
-            .get_append_prepend_ranges(old_range, latest_block_number);
-        let append_blocks = self.fetcher.get_blocks_range(append).await?;
+
+        let (new_range, prepend) = self.prepend_strategy.compute_prepend_range(old_range);
+        let (new_range, append) = self
+            .append_strategy
+            .compute_append_range(new_range, latest_block.number());
         let prepend_blocks = self.fetcher.get_blocks_range(prepend).await?;
+        let append_blocks = self.fetcher.get_blocks_range(append).await?;
         let old_leftmost_block = self.fetcher.get_block(old_range.start().into()).await?;
 
-        trie.append(append_blocks.iter())?;
         trie.prepend(prepend_blocks.iter(), &old_leftmost_block)?;
+        trie.append(append_blocks.iter())?;
 
         let input = Input::AppendPrepend {
             elf_id: *GUEST_ID,
@@ -163,8 +168,13 @@ mod tests {
     const GENESIS: BlockNumber = 0;
 
     lazy_static! {
-        static ref STRATEGY: Strategy =
-            Strategy::new(MAX_HEAD_BLOCKS, MAX_BACK_PROPAGATION_BLOCKS, CONFIRMATIONS);
+        static ref PREPEND_STRATEGY: PrependStrategy =
+            PrependStrategy::new(MAX_BACK_PROPAGATION_BLOCKS);
+    }
+
+    lazy_static! {
+        static ref APPEND_STRATEGY: AppendStrategy =
+            AppendStrategy::new(MAX_HEAD_BLOCKS, CONFIRMATIONS);
     }
 
     fn test_db() -> ChainDb {
@@ -177,7 +187,8 @@ mod tests {
             BlockFetcher::from_provider(provider),
             db,
             1,
-            STRATEGY.clone(),
+            PREPEND_STRATEGY.clone(),
+            APPEND_STRATEGY.clone(),
         )
     }
 
