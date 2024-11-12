@@ -8,12 +8,16 @@
     "build": "tsc -b && vite build",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "prove:testnet": "VLAYER_ENV=testnet bun run prove.ts",
+    "prove:dev": "VLAYER_ENV=dev bun run prove.ts"
   },
   "dependencies": {
     "@noble/hashes": "^1.4.0",
     "@types/node": "^22.5.4",
     "@vlayer/sdk": "file:../../../packages/sdk",
+    "chalk": "^5.3.0",
+    "debug": "^4.3.7",
     "dotenv": "^16.4.5",
     "solhint": "^5.0.3",
     "viem": "^2.21.9",

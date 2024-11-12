@@ -5,38 +5,21 @@ import tls_proof from "./tls_proof.json";
 import * as assert from "assert";
 import { encodePacked, isAddress, keccak256 } from "viem";
 import { getConfig } from "./config";
-import { waitForContractAddr, exampleContext } from "./helpers";
+import { exampleContext } from "./helpers";
+import { deploy } from "./deploy";
+import debug from "debug";
+const log = debug("vlayer:prove");
+
+const notaryPubKey =
+  "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExpX/4R4z40gI6C/j9zAM39u58LJu\n3Cx5tXTuqhhu/tirnBi5GniMmspOTEsps4ANnPLpMmMSfhJ+IFHbc3qVOA==\n-----END PUBLIC KEY-----\n";
+
+const { prover, verifier } = await deploy();
 
 const config = getConfig();
 const { chain, ethClient, deployer, proverUrl, confirmations } =
   await exampleContext(config);
 
-const notaryPubKey =
-  "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExpX/4R4z40gI6C/j9zAM39u58LJu\n3Cx5tXTuqhhu/tirnBi5GniMmspOTEsps4ANnPLpMmMSfhJ+IFHbc3qVOA==\n-----END PUBLIC KEY-----\n";
-let hash = await ethClient.deployContract({
-  abi: webProofProver.abi,
-  bytecode: webProofProver.bytecode.object,
-  account: deployer,
-  args: [],
-  chain,
-});
-console.log("Deploying Prover...");
-const prover = await waitForContractAddr(ethClient, hash);
-console.log("Prover deployed:", prover);
-
-console.log("Deploying Verifier...");
-hash = await ethClient.deployContract({
-  abi: webProofVerifier.abi,
-  bytecode: webProofVerifier.bytecode.object,
-  account: deployer,
-  args: [prover],
-  chain,
-});
-const verifier = await waitForContractAddr(ethClient, hash);
-console.log("Verifier deployed:", verifier);
-
 const twitterUserAddress = deployer.address;
-
 const vlayer = createVlayerClient({
   url: proverUrl,
 });
@@ -45,7 +28,7 @@ await testSuccessProvingAndVerification();
 await testFailedProving();
 
 async function testSuccessProvingAndVerification() {
-  console.log("Proving...");
+  log("Proving...");
 
   const webProof = { tls_proof: tls_proof, notary_pub_key: notaryPubKey };
 
@@ -63,7 +46,7 @@ async function testSuccessProvingAndVerification() {
   });
   const result = await vlayer.waitForProvingResult({ hash });
   const [proof, twitterHandle, address] = result;
-  console.log("Proof:", proof);
+  log("Has Proof");
 
   if (typeof twitterHandle !== "string") {
     throw new Error("Twitter handle is not a string");
@@ -73,7 +56,7 @@ async function testSuccessProvingAndVerification() {
     throw new Error(`${address} is not a valid address`);
   }
 
-  console.log("Verifying...");
+  log("Verifying...");
 
   const txHash = await ethClient.writeContract({
     address: verifier,
@@ -113,7 +96,7 @@ async function testSuccessProvingAndVerification() {
 }
 
 async function testFailedProving() {
-  console.log("Proving...");
+  log("Proving...");
 
   const wrongWebProof = { tls_proof: tls_proof, notary_pub_key: "wrong" };
 

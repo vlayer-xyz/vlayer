@@ -12,6 +12,8 @@ import { type Config } from "./config";
 import Bun from "bun";
 import fs from "node:fs/promises";
 import dotenv from "dotenv";
+import debug from "debug";
+const log = debug("vlayer:config");
 
 const importChainSpecs = async (chainName: string): Promise<Chain> => {
   try {
@@ -91,5 +93,5 @@ export const updateDotFile = async (
 
   await Bun.write(envPath, envLines);
 
-  console.log(`Successfully updated the ${envPath} with: `, overrides);
+  log(`Successfully updated the ${envPath} with: `, overrides);
 };
