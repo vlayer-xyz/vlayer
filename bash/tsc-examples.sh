@@ -15,7 +15,7 @@ bun run build
 echo '::endgroup::'
 
 
-EXAMPLES="simple web_proof"
+EXAMPLES="simple web_proof simple_teleport"
 
 for example_name in ${EXAMPLES}; do
 
