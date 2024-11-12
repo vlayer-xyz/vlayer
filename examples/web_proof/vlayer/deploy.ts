@@ -3,7 +3,9 @@ import webProofVerifier from "../out/WebProofVerifier.sol/WebProofVerifier";
 import { updateDotFile, exampleContext, waitForContractAddr } from "./helpers";
 import { getConfig } from "./config";
 import debug from "debug";
+
 const log = debug("vlayer:deploy");
+
 export const deploy = async () => {
   const config = getConfig();
   const { chain, ethClient, deployer } = await exampleContext(config);
