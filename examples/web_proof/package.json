@@ -1,9 +1,0 @@
-{
-  "dependencies": {
-    "@types/debug": "^4.1.12",
-    "dotenv-flow": "^4.1.0"
-  },
-  "devDependencies": {
-    "@types/dotenv-flow": "^3.3.3"
-  }
-}
