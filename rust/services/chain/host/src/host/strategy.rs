@@ -13,17 +13,17 @@ pub struct PrependStrategy {
 }
 
 impl PrependStrategy {
+    pub fn compute_prepend_range(&self, range: NonEmptyRange) -> (NonEmptyRange, Range) {
+        let prepend_count = self.prepend_count(range);
+        range.add_left(prepend_count).expect("Prepend overflow")
+    }
+
     fn prepend_count(&self, range: NonEmptyRange) -> u64 {
         if range.start() == GENESIS {
             return 0;
         }
         let range = NonEmptyRange::try_from_range(GENESIS..=range.start() - 1).unwrap(); // SAFETY: start > 0
         min(self.max_back_propagation_blocks, range.len())
-    }
-
-    pub fn range(&self, range: NonEmptyRange) -> (NonEmptyRange, Range) {
-        let prepend_count = self.prepend_count(range);
-        range.add_left(prepend_count).expect("Prepend overflow")
     }
 }
 
@@ -34,16 +34,20 @@ pub struct AppendStrategy {
 }
 
 impl AppendStrategy {
+    pub fn compute_append_range(
+        &self,
+        range: NonEmptyRange,
+        latest: BlockNumber,
+    ) -> (NonEmptyRange, Range) {
+        let append_count = self.append_count(range, latest);
+        range.add_right(append_count).expect("Append overflow")
+    }
+
     fn append_count(&self, range: NonEmptyRange, latest: BlockNumber) -> u64 {
         let pending = latest + 1; // Pending block has 0 confirmations
         let confirmed = (pending).saturating_sub(self.confirmations); // Genesis block is always confirmed
         let range: Range = (range.end() + 1..=confirmed).into();
         min(self.max_head_blocks, range.len())
-    }
-
-    pub fn range(&self, range: NonEmptyRange, latest: BlockNumber) -> (NonEmptyRange, Range) {
-        let append_count = self.append_count(range, latest);
-        range.add_right(append_count).expect("Append overflow")
     }
 }
 

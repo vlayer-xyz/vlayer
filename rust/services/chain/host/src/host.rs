@@ -127,14 +127,16 @@ where
 
         let latest_block = self.fetcher.get_block(BlockTag::Latest).await?;
 
-        let (new_range, prepend) = self.prepend_strategy.range(old_range);
-        let (new_range, append) = self.append_strategy.range(new_range, latest_block.number());
-        let append_blocks = self.fetcher.get_blocks_range(append).await?;
+        let (new_range, prepend) = self.prepend_strategy.compute_prepend_range(old_range);
+        let (new_range, append) = self
+            .append_strategy
+            .compute_append_range(new_range, latest_block.number());
         let prepend_blocks = self.fetcher.get_blocks_range(prepend).await?;
+        let append_blocks = self.fetcher.get_blocks_range(append).await?;
         let old_leftmost_block = self.fetcher.get_block(old_range.start().into()).await?;
 
-        trie.append(append_blocks.iter())?;
         trie.prepend(prepend_blocks.iter(), &old_leftmost_block)?;
+        trie.append(append_blocks.iter())?;
 
         let input = Input::AppendPrepend {
             elf_id: *GUEST_ID,
