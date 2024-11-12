@@ -20,7 +20,7 @@ use lazy_static::lazy_static;
 use prover::Prover;
 use risc0_zkvm::sha::Digest;
 pub use strategy::Strategy;
-use strategy::{AppendPrependRanges, AppendStrategy, PrependStrategy};
+use strategy::{AppendStrategy, PrependStrategy};
 use tracing::{info, instrument};
 use u64_range::NonEmptyRange;
 
@@ -36,7 +36,6 @@ where
     prover: Prover,
     fetcher: BlockFetcher<P>,
     chain_id: ChainId,
-    strategy: Strategy,
     append_strategy: AppendStrategy,
     prepend_strategy: PrependStrategy,
 }
@@ -52,7 +51,6 @@ impl Host<Http> {
             block_fetcher,
             db,
             config.chain_id,
-            config.strategy,
             config.prepend_strategy,
             config.append_strategy,
         ))
@@ -68,7 +66,6 @@ where
         block_fetcher: BlockFetcher<P>,
         db: ChainDb,
         chain_id: ChainId,
-        strategy: Strategy,
         prepend_strategy: PrependStrategy,
         append_strategy: AppendStrategy,
     ) -> Self {
@@ -77,7 +74,6 @@ where
             fetcher: block_fetcher,
             db,
             chain_id,
-            strategy,
             append_strategy,
             prepend_strategy,
         }
@@ -171,11 +167,6 @@ mod tests {
     const GENESIS: BlockNumber = 0;
 
     lazy_static! {
-        static ref STRATEGY: Strategy =
-            Strategy::new(MAX_HEAD_BLOCKS, MAX_BACK_PROPAGATION_BLOCKS, CONFIRMATIONS);
-    }
-
-    lazy_static! {
         static ref PREPEND_STRATEGY: PrependStrategy =
             PrependStrategy::new(MAX_BACK_PROPAGATION_BLOCKS);
     }
@@ -195,7 +186,6 @@ mod tests {
             BlockFetcher::from_provider(provider),
             db,
             1,
-            STRATEGY.clone(),
             PREPEND_STRATEGY.clone(),
             APPEND_STRATEGY.clone(),
         )
