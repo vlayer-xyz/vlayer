@@ -1,5 +1,6 @@
 {
   "recommendations": [
+    "emeraldwalk.RunOnSave", // Runs `cargo sort` on save
     "kisstkondoros.vscode-gutter-preview",
     "rust-lang.rust-analyzer"
   ]

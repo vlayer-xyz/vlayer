@@ -15,6 +15,15 @@
     "+nightly"
   ],
   "rust-analyzer.check.workspace": false,
+  "emeraldwalk.runonsave": {
+    "commands": [
+      {
+        "match": "Cargo.toml",
+        "cmd": "cd ${fileDirname} && cargo sort --grouped",
+        "showElapsed": true,
+      }
+    ]
+  },
   "cSpell.words": [
     "Arbitrum",
     "augmentors",
