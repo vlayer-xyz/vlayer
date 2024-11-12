@@ -10,11 +10,12 @@ use chain_db::{ChainDb, Mode};
 use config::ServerConfig;
 use dotenvy::dotenv;
 use server::server;
+use tokio::net::TcpListener;
 use trace::init_tracing;
 use tracing::info;
 
 pub async fn serve(config: ServerConfig, db: ChainDb) -> anyhow::Result<()> {
-    let listener = tokio::net::TcpListener::bind(config.socket_addr).await?;
+    let listener = TcpListener::bind(config.socket_addr).await?;
 
     info!("Listening on {}", listener.local_addr()?);
     axum::serve(listener, server(db)).await?;

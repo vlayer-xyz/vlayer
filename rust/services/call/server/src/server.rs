@@ -2,6 +2,7 @@ use std::{pin::Pin, sync::Arc};
 
 use axum::{routing::post, Router};
 use server_utils::{init_trace_layer, route, RequestIdLayer};
+use tokio::net::TcpListener;
 use tower_http::cors::CorsLayer;
 use tracing::info;
 
@@ -11,7 +12,7 @@ use crate::{
 };
 
 pub async fn serve(config: ServerConfig) -> anyhow::Result<()> {
-    let listener = tokio::net::TcpListener::bind(config.socket_addr).await?;
+    let listener = TcpListener::bind(config.socket_addr).await?;
 
     info!("Listening on {}", listener.local_addr()?);
     axum::serve(listener, server(config)).await?;
