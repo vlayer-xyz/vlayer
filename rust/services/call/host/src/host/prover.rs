@@ -54,7 +54,7 @@ mod tests {
 
         assert!(matches!(
             res.map(|_| ()).unwrap_err(),
-            Error::Prover(ref msg) if msg == "Guest panicked: called `Result::unwrap()` on an `Err` value: EvmEnv(\"NullEvmEnvFactory cannot create EvmEnv\")"
+            Error::Prover(ref msg) if msg == "Guest panicked: travel call execution failed: EvmEnv(\"NullEvmEnvFactory cannot create EvmEnv\")"
         ));
     }
 }
