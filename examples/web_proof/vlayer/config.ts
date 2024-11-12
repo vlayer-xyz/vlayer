@@ -13,7 +13,7 @@ const ensureEnvVariable = (envVar: string) => {
     if (envVar === "PRIVATE_KEY") {
       throw new Error(
         chalk.bgBlue(
-          `${envVar} missing. Add a HEX private key with ETH in .env.local for deploy and verify transactions.`,
+          `${envVar} is not set. Please set it in your .env.local file`,
         ),
       );
     }
