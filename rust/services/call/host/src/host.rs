@@ -7,13 +7,12 @@ use alloy_primitives::ChainId;
 use alloy_sol_types::SolValue;
 use call_engine::{
     evm::env::{cached::CachedEvmEnv, location::ExecutionLocation},
-    io::{Call, GuestOutput, HostOutput, Input},
     travel_call_executor::{
         Error as TravelCallExecutorError, SuccessfulExecutionResult, TravelCallExecutor,
     },
-    Seal,
+    Call, GuestOutput, HostOutput, Input, Seal,
 };
-use call_guest_wrapper::{RISC0_CALL_GUEST_ELF, RISC0_CALL_GUEST_ID};
+use call_guest_wrapper::RISC0_CALL_GUEST_ID;
 use chain_client::{
     Client as ChainProofClient, RecordingClient as RecordingRpcClient,
     RpcClient as RpcChainProofClient,
@@ -21,10 +20,9 @@ use chain_client::{
 use config::HostConfig;
 use error::HostError;
 use ethers_core::types::BlockNumber;
-use host_utils::Prover;
+use prover::Prover;
 use provider::{CachedMultiProvider, EthersProviderFactory};
-use risc0_zkvm::{sha::Digest, ExecutorEnv};
-use serde::Serialize;
+use risc0_zkvm::sha::Digest;
 use tracing::info;
 
 use crate::{
@@ -34,6 +32,7 @@ use crate::{
 
 pub mod config;
 pub mod error;
+mod prover;
 
 pub struct Host {
     start_execution_location: ExecutionLocation,
@@ -92,8 +91,7 @@ impl Host {
         })
     }
 
-    #[allow(clippy::unused_async)]
-    pub async fn run(self, call: Call) -> Result<HostOutput, HostError> {
+    pub async fn main(self, call: Call) -> Result<HostOutput, HostError> {
         self.validate_calldata_size(&call)?;
 
         let SuccessfulExecutionResult {
@@ -120,9 +118,7 @@ impl Host {
             call,
         };
 
-        let env = build_executor_env(input)
-            .map_err(|err| HostError::ExecutorEnvBuilder(err.to_string()))?;
-        let (seal, raw_guest_output) = provably_execute(&self.prover, env, RISC0_CALL_GUEST_ELF)?;
+        let (seal, raw_guest_output) = provably_execute(&self.prover, &input)?;
 
         let proof_len = raw_guest_output.len();
         let guest_output = GuestOutput::from_outputs(&host_output, &raw_guest_output)?;
@@ -162,22 +158,12 @@ fn wrap_engine_panic(err: Box<dyn Any + Send>) -> TravelCallExecutorError {
     TravelCallExecutorError::Panic(panic_msg)
 }
 
-fn provably_execute(
-    prover: &Prover,
-    env: ExecutorEnv,
-    guest_elf: &[u8],
-) -> Result<(Vec<u8>, Vec<u8>), HostError> {
-    let result = prover
-        .prove(env, guest_elf)
-        .map_err(|err| HostError::Prover(err.to_string()))?;
+fn provably_execute(prover: &Prover, input: &Input) -> Result<(Vec<u8>, Vec<u8>), HostError> {
+    let receipt = prover.prove(input)?;
 
-    let seal: Seal = EncodableReceipt::from(result.receipt.clone()).try_into()?;
+    let seal: Seal = EncodableReceipt::from(receipt.clone()).try_into()?;
 
-    Ok((seal.abi_encode(), result.receipt.journal.bytes))
-}
-
-fn build_executor_env(input: impl Serialize) -> anyhow::Result<ExecutorEnv<'static>> {
-    ExecutorEnv::builder().write(&input)?.build()
+    Ok((seal.abi_encode(), receipt.journal.bytes))
 }
 
 fn validate_guest_image_id(image_id: Digest) -> Result<(), HostError> {
@@ -203,31 +189,6 @@ mod test {
             .collect()
     }
 
-    #[test]
-    fn host_provably_execute_invalid_guest_elf() {
-        let prover = Prover::default();
-        let env = ExecutorEnv::default();
-        let invalid_guest_elf = &[];
-        let res = provably_execute(&prover, env, invalid_guest_elf);
-
-        assert!(matches!(
-            res.map(|_| ()).unwrap_err(),
-            HostError::Prover(ref msg) if msg == "Elf parse error: Could not read bytes in range [0x0, 0x10)"
-        ));
-    }
-
-    #[test]
-    fn host_provably_execute_invalid_input() {
-        let prover = Prover::default();
-        let env = ExecutorEnv::default();
-        let res = provably_execute(&prover, env, RISC0_CALL_GUEST_ELF);
-
-        assert!(matches!(
-            res.map(|_| ()).unwrap_err(),
-            HostError::Prover(ref msg) if msg == "Guest panicked: called `Result::unwrap()` on an `Err` value: DeserializeUnexpectedEnd"
-        ));
-    }
-
     #[tokio::test(flavor = "multi_thread")]
     async fn host_does_not_accept_calls_longer_than_limit() -> anyhow::Result<()> {
         let config = HostConfig {
@@ -247,7 +208,7 @@ mod test {
             data: vec![0; config.max_calldata_size + 1],
         };
         assert_eq!(
-            host.run(call).await.unwrap_err().to_string(),
+            host.main(call).await.unwrap_err().to_string(),
             format!("Calldata too large: {} bytes", config.max_calldata_size + 1)
         );
 
