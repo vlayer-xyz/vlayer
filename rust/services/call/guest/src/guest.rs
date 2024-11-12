@@ -1,6 +1,6 @@
 use call_engine::{
-    io::{GuestOutput, Input},
     verifier::{guest_input, GuestVerifier, ZkChainProofVerifier},
+    GuestOutput, Input,
 };
 use chain_client::CachedClient;
 use chain_guest_wrapper::RISC0_CHAIN_GUEST_ID;

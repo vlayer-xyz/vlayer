@@ -5,10 +5,9 @@ use call_engine::{
         env::{cached::CachedEvmEnv, location::ExecutionLocation, EvmEnv},
         input::MultiEvmInput,
     },
-    io::{Call, GuestOutput},
     travel_call_executor::TravelCallExecutor,
     verifier::guest_input::Verifier,
-    CallAssumptions,
+    Call, CallAssumptions, GuestOutput,
 };
 
 use crate::db::wrap_state::WrapStateDb;

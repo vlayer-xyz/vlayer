@@ -26,7 +26,7 @@ impl Prover {
         Self(Risc0Prover::new(proof_mode))
     }
 
-    /// Wrapper around Risc0Prover which specifier the chain guest ELF and accepts the previous proof
+    /// Wrapper around Risc0Prover which specifies the chain guest ELF and accepts the previous proof
     #[instrument(skip_all)]
     pub fn prove(
         &self,

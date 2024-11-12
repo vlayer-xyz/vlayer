@@ -1,15 +1,14 @@
 use alloy_primitives::ChainId;
-use call_engine::{io::GuestOutputError, travel_call_executor::Error as TravelCallExecutorError};
+use call_engine::{travel_call_executor::Error as TravelCallExecutorError, GuestOutputError};
 use provider::ProviderFactoryError;
 use risc0_zkp::verify::VerificationError;
 use risc0_zkvm::sha::Digest;
 use thiserror::Error;
 
+use super::prover;
+
 #[derive(Error, Debug)]
 pub enum HostError {
-    #[error("ExecutorEnv builder error")]
-    ExecutorEnvBuilder(String),
-
     #[error("Invalid input")]
     CreatingInput(String),
 
@@ -29,7 +28,7 @@ pub enum HostError {
     NewClient(#[from] url::ParseError),
 
     #[error("Prover error: {0}")]
-    Prover(String),
+    Prover(#[from] prover::Error),
 
     #[error("Guest output error: {0}")]
     GuestOutput(#[from] GuestOutputError),

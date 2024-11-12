@@ -30,7 +30,7 @@ pub async fn v_call(config: Arc<ServerConfig>, params: Params) -> Result<CallRes
     };
 
     Host::try_new(&host_config)?
-        .run(call)
+        .main(call)
         .await?
         .try_into()
         .map_err(AppError::Host)

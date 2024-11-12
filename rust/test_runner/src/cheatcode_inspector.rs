@@ -1,11 +1,10 @@
 use alloy_primitives::U256;
 use alloy_sol_types::{SolCall, SolType};
 use call_engine::{
-    io::{Call, HostOutput},
     utils::evm_call::{
         create_encoded_return_outcome, create_return_outcome, create_revert_outcome, split_calldata,
     },
-    Proof, Seal,
+    Call, HostOutput, Proof, Seal,
 };
 use call_host::host::{config::HostConfig, get_block_number, Host};
 use chain::TEST_CHAIN_ID;
@@ -91,7 +90,7 @@ impl CheatcodeInspector {
         let chain_proof_server = start_chain_proof_server().await;
         let host = create_host(context, &self.rpc_endpoints, chain_proof_server.url());
         let call_result = host
-            .run(Call {
+            .main(Call {
                 to: inputs.target_address,
                 data: inputs.input.clone().into(),
             })

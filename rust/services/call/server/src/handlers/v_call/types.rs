@@ -1,7 +1,7 @@
 use alloy_chains::Chain;
 use alloy_primitives::{hex::ToHexExt, ChainId, U256};
 use alloy_sol_types::SolValue;
-use call_engine::{io::HostOutput, Proof, Seal};
+use call_engine::{HostOutput, Proof, Seal};
 use call_host::{host::error::HostError, Call as HostCall};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
