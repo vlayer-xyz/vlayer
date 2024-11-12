@@ -92,7 +92,6 @@ impl Host {
         })
     }
 
-    #[allow(clippy::unused_async)]
     pub async fn run(self, call: Call) -> Result<HostOutput, HostError> {
         self.validate_calldata_size(&call)?;
 
