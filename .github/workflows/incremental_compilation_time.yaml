@@ -1,0 +1,35 @@
+name: Incremental compilation time
+
+on:
+  pull_request:
+    paths:
+      - "rust-toolchain.toml"
+      - 'rust/**'
+      - '.github/workflows/incremental_compilation_time.yaml'
+  merge_group:
+  push:
+    branches:
+      - main
+concurrency:
+  # Do not cancel jobs on main by forcing a unique group name.
+  group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
+  cancel-in-progress: true
+
+jobs:
+  rust-incremental-compilation-time:
+    runs-on: aws-linux-small
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Install Rust prerequisites
+        uses: ./.github/actions/rust-prerequisites
+      - name: Install contracts prerequisites
+        uses: ./.github/actions/contracts-prerequisites
+
+      - name: Compilation
+        working-directory: rust
+        run: |
+          cargo build
