@@ -25,19 +25,14 @@ impl ChainSpec {
         }
     }
 
-    /// Returns the [SpecId] for a given block number and timestamp or an error if not
-    /// supported.
+    /// Returns the [SpecId] for a given block number and timestamp or an error if not supported.
     pub fn active_fork(&self, block_number: BlockNumber, timestamp: u64) -> anyhow::Result<SpecId> {
-        match self.spec_id(block_number, timestamp) {
-            Some(spec_id) => {
-                if spec_id > self.max_spec_id {
-                    bail!("expected <= {:?}, got {:?}", self.max_spec_id, spec_id);
-                } else {
-                    Ok(spec_id)
-                }
+        for (spec_id, fork) in self.hard_forks.iter().rev() {
+            if fork.active(block_number, timestamp) {
+                return Ok(*spec_id);
             }
-            None => bail!("no supported fork for block {}", block_number),
         }
+        bail!("no supported fork for block {}", block_number)
     }
 
     pub fn spec_id(&self, block_number: BlockNumber, timestamp: u64) -> Option<SpecId> {
