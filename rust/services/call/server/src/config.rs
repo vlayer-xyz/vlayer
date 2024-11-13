@@ -64,12 +64,12 @@ impl ServerConfig {
         }
     }
 
-    pub fn into_host_config(self, start_chain_id: ChainId) -> HostConfig {
+    pub fn into_host_config(&self, start_chain_id: ChainId) -> HostConfig {
         HostConfig {
-            rpc_urls: self.rpc_urls,
+            rpc_urls: self.rpc_urls.clone(),
             start_chain_id,
             proof_mode: self.proof_mode.into(),
-            chain_proof_url: self.chain_proof_url,
+            chain_proof_url: self.chain_proof_url.clone(),
             max_calldata_size: self.max_request_size,
             verify_chain_proofs: self.verify_chain_proofs,
             ..Default::default()

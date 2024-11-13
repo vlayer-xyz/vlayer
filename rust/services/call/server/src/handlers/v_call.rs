@@ -1,9 +1,6 @@
 use std::sync::Arc;
 
-use call_host::{
-    host::{config::HostConfig, Host},
-    Call as HostCall,
-};
+use call_host::host::Host;
 use serde::{Deserialize, Serialize};
 use types::{Call, CallContext, CallResult};
 
@@ -18,13 +15,10 @@ pub struct Params {
 }
 
 pub async fn v_call(config: Arc<ServerConfig>, params: Params) -> Result<CallResult, AppError> {
-    let call: HostCall = params.call.try_into()?;
-
+    let call = params.call.try_into()?;
     let host_config = config.into_host_config(params.context.chain_id);
+    let host = Host::try_new(&host_config)?;
+    let call_result = host.main(call).await?.try_into()?;
 
-    Host::try_new(&host_config)?
-        .main(call)
-        .await?
-        .try_into()
-        .map_err(AppError::Host)
+    Ok(call_result)
 }
