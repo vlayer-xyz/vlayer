@@ -29,6 +29,19 @@ pub static CHAIN_MAP: Lazy<HashMap<ChainId, &'static Lazy<ChainSpec>>> = Lazy::n
         (421614, &ARBITRUM_SEPOLIA_CHAIN_SPEC),
         (324, &ZKSYNC_CHAIN_SPEC),
         (300, &ZKSYNC_SEPOLIA_CHAIN_SPEC),
+        (747, &FLOW_MAINNET_CHAIN_SPEC),
+        (545, &FLOW_TESTNET_CHAIN_SPEC),
+        (534352, &SCROLL_MAINNET_CHAIN_SPEC),
+        (534351, &SCROLL_SEPOLIA_CHAIN_SPEC),
+        (5000, &MANTLE_MAINNET_CHAIN_SPEC),
+        (59144, &LINEA_MAINNET_CHAIN_SPEC),
+        (59141, &LINEA_SEPOLIA_CHAIN_SPEC),
+        (96, &BITKUB_CHAIN_CHAIN_SPEC),
+        (25925, &BITKUB_CHAIN_TESTNET_CHAIN_SPEC),
+        (7887, &KINTO_CHAIN_SPEC),
+        (42220, &CELO_CHAIN_SPEC),
+        (48900, &ZIRCUIT1_MAINNET_CHAIN_SPEC),
+        (48899, &ZIRCUIT1_TESTNET_CHAIN_SPEC),
     ])
 });
 
@@ -47,6 +60,19 @@ pub static CHAIN_NAMES: Lazy<HashMap<String, ChainId>> = Lazy::new(|| {
         ("arbitrum-sepolia".into(), 421614),
         ("zksync".into(), 324),
         ("zksync-sepolia".into(), 300),
+        ("flow".into(), 747),
+        ("flow-testnet".into(), 545),
+        ("scroll".into(), 534352),
+        ("scroll-sepolia".into(), 534351),
+        ("mantle".into(), 5000),
+        ("linea".into(), 59144),
+        ("linea-sepolia".into(), 59141),
+        ("bitkub-chain".into(), 96),
+        ("bitkub-chain-testnet".into(), 25925),
+        ("kinto".into(), 7887),
+        ("celo".into(), 42220),
+        ("zircuit1".into(), 48900),
+        ("zircuit1-testnet".into(), 48899),
     ])
 });
 
@@ -229,6 +255,123 @@ pub static TESTING_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
             (SpecId::SHANGHAI, ForkCondition::Block(0)),
             (SpecId::CANCUN, ForkCondition::Block(0)),
         ]),
+        BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
+    )
+});
+
+pub static FLOW_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
+    ChainSpec::new(
+        747,
+        SpecId::CANCUN,
+        BTreeMap::from([(SpecId::CANCUN, ForkCondition::Block(0))]),
+        BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
+    )
+});
+
+pub static FLOW_TESTNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
+    ChainSpec::new(
+        545,
+        SpecId::CANCUN,
+        BTreeMap::from([(SpecId::CANCUN, ForkCondition::Block(0))]),
+        BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
+    )
+});
+
+pub static SCROLL_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
+    ChainSpec::new(
+        534352,
+        SpecId::CANCUN,
+        BTreeMap::from([(SpecId::CANCUN, ForkCondition::Block(0))]),
+        BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
+    )
+});
+
+pub static SCROLL_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
+    ChainSpec::new(
+        534351,
+        SpecId::CANCUN,
+        BTreeMap::from([(SpecId::CANCUN, ForkCondition::Block(0))]),
+        BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
+    )
+});
+
+pub static MANTLE_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
+    ChainSpec::new(
+        5000,
+        SpecId::CANCUN,
+        BTreeMap::from([(SpecId::CANCUN, ForkCondition::Block(0))]),
+        BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
+    )
+});
+
+pub static LINEA_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
+    ChainSpec::new(
+        59144,
+        SpecId::CANCUN,
+        BTreeMap::from([(SpecId::CANCUN, ForkCondition::Block(0))]),
+        BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
+    )
+});
+
+pub static LINEA_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
+    ChainSpec::new(
+        59141,
+        SpecId::CANCUN,
+        BTreeMap::from([(SpecId::CANCUN, ForkCondition::Block(0))]),
+        BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
+    )
+});
+
+pub static BITKUB_CHAIN_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
+    ChainSpec::new(
+        96,
+        SpecId::CANCUN,
+        BTreeMap::from([(SpecId::CANCUN, ForkCondition::Block(0))]),
+        BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
+    )
+});
+
+pub static BITKUB_CHAIN_TESTNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
+    ChainSpec::new(
+        25925,
+        SpecId::CANCUN,
+        BTreeMap::from([(SpecId::CANCUN, ForkCondition::Block(0))]),
+        BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
+    )
+});
+
+pub static KINTO_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
+    ChainSpec::new(
+        7887,
+        SpecId::CANCUN,
+        BTreeMap::from([(SpecId::CANCUN, ForkCondition::Block(0))]),
+        BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
+    )
+});
+
+pub static CELO_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
+    ChainSpec::new(
+        42220,
+        SpecId::CANCUN,
+        BTreeMap::from([(SpecId::CANCUN, ForkCondition::Block(0))]),
+        BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
+    )
+});
+
+pub static ZIRCUIT1_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
+    ChainSpec::new(
+        48900,
+        SpecId::CANCUN,
+        BTreeMap::from([(SpecId::CANCUN, ForkCondition::Block(0))]),
+        BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
+    )
+});
+
+pub static ZIRCUIT1_TESTNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
+    ChainSpec::new(
+        48899,
+        SpecId::CANCUN,
+        BTreeMap::from([(SpecId::CANCUN, ForkCondition::Block(0))]),
         BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
     )
 });
