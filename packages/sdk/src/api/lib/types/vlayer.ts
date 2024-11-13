@@ -54,7 +54,7 @@ export type VlayerClient = {
     address: Hex;
     proverAbi: T;
     functionName: F;
-    chainId: number;
+    chainId?: number;
     args: ContractFunctionArgs<T, AbiStateMutability, F>;
   }) => Promise<BrandedHash<T, F>>;
   waitForProvingResult: <T extends Abi, F extends ContractFunctionName<T>>(

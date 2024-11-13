@@ -8,14 +8,17 @@ import { encodePacked, isAddress, keccak256 } from "viem";
 import {
   getConfig,
   createContext,
-  deploy,
+  deployVlayerContracts,
   writeEnvVariables,
 } from "@vlayer/sdk/config";
 
 const notaryPubKey =
   "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExpX/4R4z40gI6C/j9zAM39u58LJu\n3Cx5tXTuqhhu/tirnBi5GniMmspOTEsps4ANnPLpMmMSfhJ+IFHbc3qVOA==\n-----END PUBLIC KEY-----\n";
 
-const { prover, verifier } = await deploy({ proverSpec, verifierSpec });
+const { prover, verifier } = await deployVlayerContracts({
+  proverSpec,
+  verifierSpec,
+});
 
 writeEnvVariables(".env", {
   VITE_PROVER_ADDRESS: prover,
