@@ -27,7 +27,6 @@ use common::Hashable;
 pub use db_node::DbNode;
 pub use error::{ChainDbError, ChainDbResult};
 pub use proof_builder::MerkleProof;
-pub use receipt::ChainProofReceipt;
 use u64_range::NonEmptyRange;
 
 /// Merkle trie nodes table. Holds `node_hash -> rlp_node` mapping

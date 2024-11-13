@@ -6631,6 +6631,7 @@ dependencies = [
  "bytes",
  "chain_common",
  "chain_guest_wrapper",
+ "common",
  "lazy_static",
  "risc0-zkvm",
  "serde",
