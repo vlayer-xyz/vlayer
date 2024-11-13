@@ -9,6 +9,10 @@
     "./web_proof": {
       "import": "./dist/api/webProof/index.js",
       "types": "./dist/api/webProof/index.d.ts"
+    },
+    "./config": {
+      "import": "./dist/config/index.js",
+      "types": "./dist/config/index.d.ts"
     }
   },
   "version": "0.1.0",
@@ -31,6 +35,7 @@
   "dependencies": {
     "@vitejs/plugin-react": "^4.3.2",
     "dns-over-http-resolver": "^3.0.3",
+    "dotenv-flow": "^4.1.0",
     "postal-mime": "^2.3.2",
     "tsc-alias": "^1.8.10",
     "viem": "2.21.0",
