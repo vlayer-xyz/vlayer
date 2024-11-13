@@ -10,7 +10,7 @@ use crate::{config::CHAIN_MAP, eip1559::Eip1559Constants, error::ChainError, for
 
 #[derive(Debug, Clone, Serialize, Deserialize, new)]
 pub struct ChainSpec {
-    chain_id: ChainId,
+    pub chain_id: ChainId,
     max_spec_id: SpecId,
     hard_forks: BTreeMap<SpecId, ForkCondition>,
     gas_constants: BTreeMap<SpecId, Eip1559Constants>,
@@ -29,10 +29,6 @@ impl ChainSpec {
             hard_forks: BTreeMap::from([(spec_id, ForkCondition::Block(0))]),
             gas_constants: BTreeMap::from([(spec_id, eip_1559_constants)]),
         }
-    }
-
-    pub fn chain_id(&self) -> ChainId {
-        self.chain_id
     }
 
     /// Returns the [SpecId] for a given block number and timestamp or an error if not
