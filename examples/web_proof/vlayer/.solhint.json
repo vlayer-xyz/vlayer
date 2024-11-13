@@ -22,4 +22,4 @@
     "reason-string": ["warn", { "maxLength": 64 }],
     "one-contract-per-file": "off"
   }
-}
+} 

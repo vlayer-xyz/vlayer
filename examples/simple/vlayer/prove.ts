@@ -1,36 +1,62 @@
-import { testHelpers, createVlayerClient } from "@vlayer/sdk";
-
-import SimpleProver from "../out/SimpleProver.sol/SimpleProver";
-import SimpleVerifier from "../out/SimpleVerifier.sol/SimpleVerifier";
-import ExampleNftAbi from "../out/ExampleNFT.sol/ExampleNFT";
-import ExampleToken from "../out/ExampleToken.sol/ExampleToken";
-import { foundry } from "viem/chains";
+import { createVlayerClient } from "@vlayer/sdk";
+import nftSpec from "../out/ExampleNFT.sol/ExampleNFT";
+import tokenSpec from "../out/ExampleToken.sol/ExampleToken";
 import { isAddress } from "viem";
+import {
+  getConfig,
+  createContext,
+  deployVlayerContracts,
+  waitForContractDeploy,
+  waitForTransactionReceipt,
+} from "@vlayer/sdk/config";
 
-const john = testHelpers.getTestAccount();
-const exampleToken = await testHelpers.deployContract(ExampleToken, [
-  john.address,
-  10_000_000,
-]);
-const blockNumber = await testHelpers.createAnvilClient().getBlockNumber();
-const rewardNFT = await testHelpers.deployContract(ExampleNftAbi, []);
-const prover = await testHelpers.deployContract(SimpleProver, [
-  exampleToken,
-  blockNumber,
-]);
-const verifier = await testHelpers.deployContract(SimpleVerifier, [
-  prover,
-  rewardNFT,
-]);
+import proverSpec from "../out/SimpleProver.sol/SimpleProver";
+import verifierSpec from "../out/SimpleVerifier.sol/SimpleVerifier";
+
+const config = getConfig();
+const { ethClient, account: john } = await createContext(config);
+
+const INITIAL_TOKEN_SUPPLY = BigInt(10_000_000);
+
+const tokenDeployTransactionHash = await ethClient.deployContract({
+  abi: tokenSpec.abi,
+  bytecode: tokenSpec.bytecode.object,
+  account: john,
+  args: [john.address, INITIAL_TOKEN_SUPPLY],
+});
+
+const tokenAddress = await waitForContractDeploy({
+  hash: tokenDeployTransactionHash,
+});
+
+const nftDeployTransactionHash = await ethClient.deployContract({
+  abi: nftSpec.abi,
+  bytecode: nftSpec.bytecode.object,
+  account: john,
+  args: [],
+});
+
+const nftContractAddress = await waitForContractDeploy({
+  hash: nftDeployTransactionHash,
+});
+
+const currentBlockNumber = await ethClient.getBlockNumber();
+
+const { prover, verifier } = await deployVlayerContracts({
+  proverSpec,
+  verifierSpec,
+  proverArgs: [tokenAddress, currentBlockNumber],
+  verifierArgs: [nftContractAddress],
+});
 
 console.log("Proving...");
 const vlayer = createVlayerClient();
+
 const hash = await vlayer.prove({
   address: prover,
-  proverAbi: SimpleProver.abi,
+  proverAbi: proverSpec.abi,
   functionName: "balance",
   args: [john.address],
-  chainId: foundry.id,
 });
 const result = await vlayer.waitForProvingResult(hash);
 const [proof, owner, balance] = result;
@@ -39,14 +65,18 @@ if (!isAddress(owner)) {
   throw new Error(`${owner} is not a valid address`);
 }
 
-console.log("Proof result:");
-console.log(result);
+console.log("Proof result:", result);
 
-const receipt = await testHelpers.writeContract(
-  verifier,
-  SimpleVerifier.abi,
-  "claimWhale",
-  [proof, owner, balance],
-);
+const verificationHash = await ethClient.writeContract({
+  address: verifier,
+  abi: verifierSpec.abi,
+  functionName: "claimWhale",
+  args: [proof, owner, balance],
+  account: john,
+});
+
+const receipt = await waitForTransactionReceipt({
+  hash: verificationHash,
+});
 
 console.log(`Verification result: ${receipt.status}`);

@@ -1,55 +1,57 @@
-import type { Address } from "viem";
+import { createVlayerClient } from "@vlayer/sdk";
+import proverSpec from "../out/SimpleTeleportProver.sol/SimpleTeleportProver";
+import verifierSpec from "../out/SimpleTeleportVerifier.sol/SimpleTeleportVerifier";
+import whaleBadgeNFTSpec from "../out/WhaleBadgeNFT.sol/WhaleBadgeNFT";
+import {
+  createContext,
+  deployVlayerContracts,
+  getConfig,
+  waitForContractDeploy,
+  waitForTransactionReceipt,
+} from "@vlayer/sdk/config";
 
-import { testHelpers, createVlayerClient } from "@vlayer/sdk";
-import simpleTeleportProver from "../out/SimpleTeleportProver.sol/SimpleTeleportProver";
-import simpleTeleportVerifier from "../out/SimpleTeleportVerifier.sol/SimpleTeleportVerifier";
-import whaleBadgeNFT from "../out/WhaleBadgeNFT.sol/WhaleBadgeNFT";
-import { foundry } from "viem/chains";
-
-const john = testHelpers.getTestAccount().address;
-
-const deployProver = async () => {
-  const prover: Address = await testHelpers.deployContract(
-    simpleTeleportProver,
-    [],
-  );
-
-  return prover;
-};
-
-const deployVerifier = async (prover: Address) => {
-  const rewardNFT: Address = await testHelpers.deployContract(
-    whaleBadgeNFT,
-    [],
-  );
-
-  const verifier: Address = await testHelpers.deployContract(
-    simpleTeleportVerifier,
-    [prover, rewardNFT],
-  );
-
-  return verifier;
-};
-
-console.log("Proving...");
-const proverAddr = await deployProver();
+const config = getConfig();
+const { ethClient, account } = await createContext(config);
 const vlayer = createVlayerClient();
 
-const hash = await vlayer.prove({
-  address: proverAddr,
-  proverAbi: simpleTeleportProver.abi,
-  functionName: "crossChainBalanceOf",
-  chainId: foundry.id,
-  args: [john],
+const deployWhaleBadgeHash = await ethClient.deployContract({
+  abi: whaleBadgeNFTSpec.abi,
+  bytecode: whaleBadgeNFTSpec.bytecode.object,
+  account,
 });
-const result = await vlayer.waitForProvingResult(hash);
-console.log("Response:", result);
 
-const verifierAddr = await deployVerifier(proverAddr);
-const receipt = await testHelpers.writeContract(
-  verifierAddr,
-  simpleTeleportVerifier.abi,
-  "claim",
-  result,
-);
+const whaleBadgeNFTAddress = await waitForContractDeploy({
+  hash: deployWhaleBadgeHash,
+});
+
+const { prover, verifier } = await deployVlayerContracts({
+  proverSpec,
+  verifierSpec,
+  proverArgs: [],
+  verifierArgs: [whaleBadgeNFTAddress],
+});
+
+console.log("Proving...");
+const proofHash = await vlayer.prove({
+  address: prover,
+  proverAbi: proverSpec.abi,
+  functionName: "crossChainBalanceOf",
+  args: [account.address],
+});
+const result = await vlayer.waitForProvingResult(proofHash);
+console.log("Proof:", result[0]);
+console.log("Verifying...");
+
+const verificationHash = await ethClient.writeContract({
+  address: verifier,
+  abi: verifierSpec.abi,
+  functionName: "claim",
+  args: result,
+  account,
+});
+
+const receipt = await waitForTransactionReceipt({
+  hash: verificationHash,
+});
+
 console.log(`Verification result: ${receipt.status}`);

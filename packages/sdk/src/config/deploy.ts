@@ -1,14 +1,15 @@
 import { getConfig } from "./getConfig";
 import { createContext } from "./createContext";
-import { ContractSpec } from "types/ethereum";
-import { Address, PublicClient } from "viem";
+import { ContractArg, ContractSpec } from "types/ethereum";
+import { Address } from "viem";
 import { getChainConfirmations } from "./getChainConfirmations";
 
-export const waitForContracDeploy = async (
-  client: PublicClient,
-  hash: `0x${string}`,
-): Promise<Address> => {
-  console.log(`Waiting for contract deployment with hash: ${hash}`);
+export const waitForContractDeploy = async ({
+  hash,
+}: {
+  hash: `0x${string}`;
+}): Promise<Address> => {
+  const { ethClient: client } = await createContext(getConfig());
   const receipt = await client.waitForTransactionReceipt({
     hash,
     confirmations: getChainConfirmations(client.chain?.name),
@@ -25,37 +26,57 @@ export const waitForContracDeploy = async (
   return receipt.contractAddress;
 };
 
-export const deploy = async ({
+export const waitForTransactionReceipt = async ({
+  hash,
+}: {
+  hash: `0x${string}`;
+}) => {
+  const { ethClient } = await createContext(getConfig());
+  return ethClient.waitForTransactionReceipt({
+    hash,
+    confirmations: getChainConfirmations(ethClient.chain?.name),
+    retryCount: 120,
+    retryDelay: 1000,
+  });
+};
+
+export const deployVlayerContracts = async ({
   proverSpec,
   verifierSpec,
+  proverArgs,
+  verifierArgs,
 }: {
   proverSpec: ContractSpec;
   verifierSpec: ContractSpec;
+  proverArgs?: ContractArg[];
+  verifierArgs?: ContractArg[];
 }) => {
   console.log("Starting contract deployment process...");
   const config = getConfig();
   const { chain, ethClient, account } = await createContext(config);
 
   console.log("Deploying prover contract...");
+  console.log(proverArgs, verifierArgs, account);
   const proverHash = await ethClient.deployContract({
     chain,
     account,
-    args: [],
+    args: proverArgs,
     abi: proverSpec.abi,
     bytecode: proverSpec.bytecode.object,
   });
-  const prover = await waitForContracDeploy(ethClient, proverHash);
+  console.log(proverHash);
+  const prover = await waitForContractDeploy({ hash: proverHash });
   console.log(`Prover contract deployed at: ${prover}`);
 
   console.log("Deploying verifier contract...");
   const verifierHash = await ethClient.deployContract({
     chain,
     account,
-    args: [prover],
+    args: prover ? [prover, ...(verifierArgs ?? [])] : verifierArgs,
     abi: verifierSpec.abi,
     bytecode: verifierSpec.bytecode.object,
   });
-  const verifier = await waitForContracDeploy(ethClient, verifierHash);
+  const verifier = await waitForContractDeploy({ hash: verifierHash });
   console.log(`Verifier contract deployed at: ${verifier}`);
 
   console.log("Contract deployment completed successfully");

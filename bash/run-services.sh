@@ -114,7 +114,6 @@ echo "PROVING_MODE: ${PROVING_MODE}"
 echo "BONSAI_API_URL: ${BONSAI_API_URL}"
 echo "SERVER_PROOF_ARG: ${SERVER_PROOF_ARG}"
 
-
 echo
 echo "Starting services..."
 

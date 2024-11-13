@@ -1,8 +1,15 @@
 import proverSpec from "../out/WebProofProver.sol/WebProofProver";
 import verifierSpec from "../out/WebProofVerifier.sol/WebProofVerifier";
-import { deploy, writeEnvVariables, getConfig } from "@vlayer/sdk/config";
+import {
+  deployVlayerContracts,
+  writeEnvVariables,
+  getConfig,
+} from "@vlayer/sdk/config";
 
-const { prover, verifier } = await deploy({ proverSpec, verifierSpec });
+const { prover, verifier } = await deployVlayerContracts({
+  proverSpec,
+  verifierSpec,
+});
 
 const config = getConfig();
 
