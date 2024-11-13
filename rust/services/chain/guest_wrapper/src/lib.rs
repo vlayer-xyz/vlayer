@@ -1,11 +1,18 @@
+use common::Guest;
+
 #[cfg(not(clippy))]
-include!(concat!(env!("OUT_DIR"), "/methods.rs"));
+#[allow(dead_code)]
+mod private {
+    include!(concat!(env!("OUT_DIR"), "/methods.rs"));
+}
 
-#[cfg(clippy)]
-pub const RISC0_CHAIN_GUEST_ELF: &[u8] = &[];
-
-#[cfg(clippy)]
-pub const RISC0_CHAIN_GUEST_ID: [u32; 8] = [0; 8];
-
-#[cfg(clippy)]
-pub const RISC0_CHAIN_GUEST_PATH: &str = "";
+pub fn chain_guest() -> Guest {
+    #[cfg(not(clippy))]
+    {
+        Guest::new(private::RISC0_CHAIN_GUEST_ID, private::RISC0_CHAIN_GUEST_ELF)
+    }
+    #[cfg(clippy)]
+    {
+        Guest::default()
+    }
+}

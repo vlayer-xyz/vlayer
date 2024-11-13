@@ -1,6 +1,5 @@
 use call_guest_wrapper::call_guest;
 use clap::builder::{IntoResettable, Resettable, Str};
-use risc0_zkp::core::digest::Digest;
 
 pub struct Version;
 
@@ -58,6 +57,7 @@ mod tests {
 
     mod guest_id {
         use hex::FromHex;
+        use risc0_zkp::core::digest::Digest;
 
         use super::*;
 

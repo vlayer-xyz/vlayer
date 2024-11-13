@@ -9,23 +9,17 @@ use block_fetcher::BlockFetcher;
 use block_trie::BlockTrie;
 use chain_db::{ChainDb, ChainTrie, ChainUpdate, Mode};
 use chain_guest::Input;
-use chain_guest_wrapper::RISC0_CHAIN_GUEST_ID;
+use chain_guest_wrapper::chain_guest;
 pub use config::HostConfig;
 pub use error::HostError;
 use ethers::{
     providers::{Http, JsonRpcClient},
     types::BlockNumber as BlockTag,
 };
-use lazy_static::lazy_static;
 use prover::Prover;
-use risc0_zkvm::sha::Digest;
 pub use strategy::{AppendStrategy, PrependStrategy};
 use tracing::{info, instrument};
 use u64_range::NonEmptyRange;
-
-lazy_static! {
-    static ref GUEST_ID: Digest = RISC0_CHAIN_GUEST_ID.into();
-}
 
 pub struct Host<P>
 where
@@ -101,7 +95,7 @@ where
         let trie = BlockTrie::init(&latest_block)?;
 
         let input = Input::Initialize {
-            elf_id: *GUEST_ID,
+            elf_id: chain_guest().id,
             block: latest_block,
         };
         let receipt = self.prover.prove(&input, None)?;
@@ -139,7 +133,7 @@ where
         trie.append(append_blocks.iter())?;
 
         let input = Input::AppendPrepend {
-            elf_id: *GUEST_ID,
+            elf_id: chain_guest().id,
             prepend_blocks,
             append_blocks,
             old_leftmost_block,
