@@ -2684,6 +2684,7 @@ dependencies = [
  "anyhow",
  "auto_impl",
  "bytes",
+ "derive-new",
  "risc0-zkp",
 ]
 

@@ -8,4 +8,5 @@ alloy-primitives = { workspace = true }
 anyhow = { workspace = true }
 auto_impl = { workspace = true }
 bytes = { workspace = true }
+derive-new ={ workspace = true }
 risc0-zkp = { workspace = true }
