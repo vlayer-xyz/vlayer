@@ -2,7 +2,6 @@ use alloy_primitives::ChainId;
 use call_engine::{travel_call_executor::Error as TravelCallExecutorError, GuestOutputError};
 use provider::ProviderFactoryError;
 use risc0_zkp::verify::VerificationError;
-use risc0_zkvm::sha::Digest;
 use thiserror::Error;
 
 use super::prover;
@@ -59,7 +58,4 @@ pub enum HostError {
 
     #[error("Calldata too large: {0} bytes")]
     CalldataTooLargeError(usize),
-
-    #[error("Unsupported CallGuestID: expected {0}, received {1}")]
-    UnsupportedCallGuestId(Digest, Digest),
 }

@@ -3,6 +3,9 @@ name = "call_guest_wrapper"
 version = "0.1.0"
 edition = "2021"
 
+[dependencies]
+common = { workspace = true }
+
 [build-dependencies]
 anyhow = { workspace = true }
 risc0-build = { workspace = true }

@@ -13,6 +13,7 @@ axum-jrpc = { workspace = true }
 call_engine = { workspace = true }
 call_host = { workspace = true }
 chain = { workspace = true }
+common = { workspace = true }
 hex = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }

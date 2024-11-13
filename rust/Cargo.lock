@@ -1957,6 +1957,7 @@ name = "call_guest_wrapper"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "common",
  "risc0-build",
  "risc0-build-ethereum",
 ]
@@ -1977,6 +1978,7 @@ dependencies = [
  "chain_client",
  "chain_common",
  "chain_guest_wrapper",
+ "common",
  "ctor",
  "derive-new",
  "dotenvy",
@@ -2014,6 +2016,7 @@ dependencies = [
  "call_engine",
  "call_host",
  "chain",
+ "common",
  "ethers",
  "hex",
  "lazy_static",
@@ -2450,6 +2453,7 @@ dependencies = [
  "call_server",
  "clap",
  "colored",
+ "common",
  "flate2",
  "hex",
  "lazy_static",
@@ -2684,8 +2688,8 @@ dependencies = [
  "anyhow",
  "auto_impl",
  "bytes",
- "derive-new",
  "risc0-zkp",
+ "serde",
 ]
 
 [[package]]

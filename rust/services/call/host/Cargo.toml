@@ -16,6 +16,7 @@ chain = { workspace = true }
 chain_client = { workspace = true, features = ["rpc"] }
 chain_common = { workspace = true }
 chain_guest_wrapper = { workspace = true }
+common = { workspace = true }
 derive-new = { workspace = true }
 ethers-core = { workspace = true }
 host_utils = { workspace = true }

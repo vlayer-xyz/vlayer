@@ -1,9 +1,8 @@
 use std::collections::HashMap;
 
 use alloy_primitives::ChainId;
-use call_guest_wrapper::RISC0_CALL_GUEST_ID;
+use common::Guest;
 use host_utils::ProofMode;
-use risc0_zkvm::sha::Digest;
 
 pub const DEFAULT_MAX_CALLDATA_SIZE: usize = 5 * 1024 * 1024; // 5 MB
 
@@ -13,7 +12,7 @@ pub struct HostConfig {
     pub proof_mode: ProofMode,
     pub chain_proof_url: String,
     pub max_calldata_size: usize,
-    pub call_guest_id: Digest,
+    pub call_guest: Guest,
     pub verify_chain_proofs: bool,
 }
 
@@ -25,7 +24,7 @@ impl Default for HostConfig {
             proof_mode: ProofMode::default(),
             chain_proof_url: String::default(),
             max_calldata_size: DEFAULT_MAX_CALLDATA_SIZE,
-            call_guest_id: RISC0_CALL_GUEST_ID.into(),
+            call_guest: Guest::default(),
             verify_chain_proofs: false,
         }
     }

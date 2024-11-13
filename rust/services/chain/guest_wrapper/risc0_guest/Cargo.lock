@@ -692,6 +692,7 @@ dependencies = [
  "bytes",
  "derive-new",
  "risc0-zkp",
+ "serde",
 ]
 
 [[package]]
