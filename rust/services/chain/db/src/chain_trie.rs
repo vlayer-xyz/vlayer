@@ -2,7 +2,7 @@ use block_trie::BlockTrie;
 use chain_common::{ChainProofReceipt, ProofVerificationError};
 use derive_new::new;
 use mpt::MerkleTrie;
-use traits::Hashable;
+use common::Hashable;
 use u64_range::NonEmptyRange;
 
 #[derive(new)]

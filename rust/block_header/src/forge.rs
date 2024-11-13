@@ -3,7 +3,7 @@ use alloy_rlp::Encodable;
 use derive_new::new;
 use revm::primitives::BlockEnv;
 use serde::{Deserialize, Serialize};
-use traits::Hashable;
+use common::Hashable;
 
 use crate::{casting_utils::try_downcast, EvmBlockHeader};
 

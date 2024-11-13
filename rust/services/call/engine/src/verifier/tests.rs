@@ -4,7 +4,7 @@ use alloy_primitives::{BlockNumber, B256};
 use block_header::{EthBlockHeader, EvmBlockHeader};
 use block_trie::BlockTrie;
 use risc0_zkvm::{serde::to_vec, sha::Digest, FakeReceipt, InnerReceipt, ReceiptClaim};
-use traits::Hashable;
+use common::Hashable;
 
 use super::*;
 

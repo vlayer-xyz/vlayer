@@ -9,6 +9,7 @@ alloy-rlp = { workspace = true }
 alloy-rlp-derive = { workspace = true }
 alloy-trie = { workspace = true }
 bytes = { workspace = true }
+common = { workspace = true }
 derive_more = { workspace = true }
 itertools = { workspace = true }
 lazy_static = { workspace = true }
@@ -18,7 +19,6 @@ rlp = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }
 thiserror = { workspace = true }
-traits = { workspace = true }
 
 [dev-dependencies]
 anyhow = { workspace = true }

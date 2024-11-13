@@ -3,7 +3,7 @@ use alloy_primitives::{keccak256, Address, BlockHash, BlockNumber, Bloom, Bytes,
 use alloy_rlp_derive::RlpEncodable;
 use revm::primitives::BlockEnv;
 use serde::{Deserialize, Serialize};
-use traits::Hashable;
+use common::Hashable;
 
 use super::EvmBlockHeader;
 use crate::casting_utils::try_downcast;

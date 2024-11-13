@@ -12,6 +12,7 @@ block_trie = { workspace = true }
 bytes = { workspace = true }
 chain_common = { workspace = true }
 chain_guest_wrapper = { workspace = true }
+common = { workspace = true }
 derivative = { workspace = true }
 derive-new = { workspace = true }
 derive_more = { workspace = true }
@@ -22,7 +23,6 @@ risc0-zkp = { workspace = true }
 risc0-zkvm = { workspace = true }
 serde = { workspace = true }
 thiserror = { workspace = true }
-traits = { workspace = true }
 u64_range = { workspace = true }
 
 [dev-dependencies]

@@ -6,7 +6,7 @@ use bytes::Bytes;
 use nybbles::Nibbles;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
-use traits::Hashable;
+use common::Hashable;
 use utils::{parse_node, resolve_trie};
 
 use crate::node::{Node, NodeError};

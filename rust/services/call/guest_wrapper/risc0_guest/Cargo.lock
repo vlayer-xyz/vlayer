@@ -708,11 +708,11 @@ dependencies = [
  "alloy-rlp-derive",
  "as-any",
  "auto_impl",
+ "common",
  "derive-new",
  "dyn-clone",
  "revm",
  "serde",
- "traits",
 ]
 
 [[package]]
@@ -723,10 +723,10 @@ dependencies = [
  "alloy-rlp",
  "block_header",
  "bytes",
+ "common",
  "mpt",
  "serde",
  "thiserror",
- "traits",
 ]
 
 [[package]]
@@ -1043,7 +1043,9 @@ dependencies = [
 name = "common"
 version = "0.1.0"
 dependencies = [
+ "alloy-primitives",
  "anyhow",
+ "auto_impl",
 ]
 
 [[package]]
@@ -2302,6 +2304,7 @@ dependencies = [
  "alloy-rlp-derive",
  "alloy-trie",
  "bytes",
+ "common",
  "derive_more",
  "itertools 0.13.0",
  "lazy_static",
@@ -2311,7 +2314,6 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror",
- "traits",
 ]
 
 [[package]]
@@ -4235,14 +4237,6 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "0e0d2eaa99c3c2e41547cfa109e910a68ea03823cccad4a0525dcbc9b01e8c71"
 dependencies = [
  "tracing-core",
-]
-
-[[package]]
-name = "traits"
-version = "0.1.0"
-dependencies = [
- "alloy-primitives",
- "auto_impl",
 ]
 
 [[package]]

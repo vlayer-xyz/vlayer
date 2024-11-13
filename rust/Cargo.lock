@@ -1674,13 +1674,13 @@ dependencies = [
  "anyhow",
  "as-any",
  "auto_impl",
+ "common",
  "derive-new",
  "dyn-clone",
  "lazy_static",
  "revm",
  "serde",
  "serde_json",
- "traits",
 ]
 
 [[package]]
@@ -1693,10 +1693,10 @@ dependencies = [
  "block_header",
  "bytes",
  "chain_test_utils",
+ "common",
  "mpt",
  "serde",
  "thiserror",
- "traits",
 ]
 
 [[package]]
@@ -1928,7 +1928,6 @@ dependencies = [
  "thiserror",
  "tokio",
  "tracing",
- "traits",
  "web_proof",
 ]
 
@@ -2188,6 +2187,7 @@ dependencies = [
  "bytes",
  "chain_common",
  "chain_guest_wrapper",
+ "common",
  "derivative",
  "derive-new",
  "derive_more 1.0.0",
@@ -2199,7 +2199,6 @@ dependencies = [
  "risc0-zkvm",
  "serde",
  "thiserror",
- "traits",
  "u64_range",
 ]
 
@@ -2210,10 +2209,10 @@ dependencies = [
  "alloy-primitives",
  "block_header",
  "block_trie",
+ "common",
  "risc0-zkp",
  "risc0-zkvm",
  "serde",
- "traits",
 ]
 
 [[package]]
@@ -2269,6 +2268,7 @@ dependencies = [
  "chain_common",
  "chain_db",
  "chain_guest_wrapper",
+ "common",
  "dotenvy",
  "lazy_static",
  "mpt",
@@ -2282,7 +2282,6 @@ dependencies = [
  "tokio",
  "tracing",
  "tracing-subscriber 0.3.18",
- "traits",
  "u64_range",
 ]
 
@@ -2681,7 +2680,9 @@ dependencies = [
 name = "common"
 version = "0.1.0"
 dependencies = [
+ "alloy-primitives",
  "anyhow",
+ "auto_impl",
 ]
 
 [[package]]
@@ -6632,7 +6633,6 @@ dependencies = [
  "serde",
  "serde_json",
  "server_utils",
- "traits",
 ]
 
 [[package]]
@@ -6669,6 +6669,7 @@ dependencies = [
  "alloy-trie",
  "anyhow",
  "bytes",
+ "common",
  "derive_more 1.0.0",
  "itertools 0.13.0",
  "lazy_static",
@@ -6678,7 +6679,6 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror",
- "traits",
 ]
 
 [[package]]
@@ -10359,14 +10359,6 @@ dependencies = [
  "tracing",
  "tracing-core",
  "tracing-log",
-]
-
-[[package]]
-name = "traits"
-version = "0.1.0"
-dependencies = [
- "alloy-primitives",
- "auto_impl",
 ]
 
 [[package]]

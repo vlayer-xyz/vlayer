@@ -14,7 +14,7 @@ pub use eth::EthBlockHeader;
 pub use forge::ForgeBlockHeader;
 use revm::primitives::BlockEnv;
 use serde::{Deserialize, Serialize};
-pub use traits::Hashable;
+pub use common::Hashable;
 
 /// An EVM abstraction of a block header.
 #[auto_impl(Box, &)]
