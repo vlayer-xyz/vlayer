@@ -2683,6 +2683,8 @@ dependencies = [
  "alloy-primitives",
  "anyhow",
  "auto_impl",
+ "bytes",
+ "risc0-zkp",
 ]
 
 [[package]]

@@ -7,3 +7,5 @@ edition = "2021"
 alloy-primitives = { workspace = true }
 anyhow = { workspace = true }
 auto_impl = { workspace = true }
+bytes = { workspace = true }
+risc0-zkp = { workspace = true }
