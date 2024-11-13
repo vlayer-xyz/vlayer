@@ -37,7 +37,7 @@ jobs:
       - name: Incremental compilation
         working-directory: rust
         run: |
-          /usr/bin/time -f %E -o incremental_compilation_time cargo build
+          /usr/bin/time -f %E -o incremental_compilation_time cargo build --timings
       
       - name: Extract incremental compilation time
         working-directory: rust
@@ -46,13 +46,25 @@ jobs:
           echo "Incremental compilation time: $INCREMENTAL_COMPILATION_TIME"
           echo "incremental_compilation_time=$INCREMENTAL_COMPILATION_TIME" >> $GITHUB_ENV
       
+      - name: Upload HTML Timings Report
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
+        with:
+          name: timings-report
+          path: rust/target/cargo-timings/cargo-timing.html
+      
       - name: Comment Incremental Build Time on PR
         uses: actions/github-script@v6
         with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
+            const runId = process.env.GITHUB_RUN_ID;
+            const repo = context.repo;
+            const artifactUrl = `https://github.com/${repo.owner}/${repo.repo}/actions/runs/${runId}`;
+            const body = `🐢 **Incremental Compilation Time:** ${process.env.incremental_compilation_time}. [View the HTML report here](${artifactUrl})`;
+
             github.rest.issues.createComment({
               issue_number: context.issue.number,
               owner: context.repo.owner,
               repo: context.repo.repo,
-              body: `🐢 **Incremental Compilation Time:** ${process.env.incremental_compilation_time}`,
+              body,
             })
