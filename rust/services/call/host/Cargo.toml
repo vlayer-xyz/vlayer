@@ -15,19 +15,17 @@ call_guest_wrapper = { workspace = true }
 chain = { workspace = true }
 chain_client = { workspace = true, features = ["rpc"] }
 chain_common = { workspace = true }
+chain_guest_wrapper = { workspace = true }
 derive-new = { workspace = true }
-dotenvy = { workspace = true }
 ethers-core = { workspace = true }
 host_utils = { workspace = true }
 lazy_static = { workspace = true }
-mock_chain_server = { workspace = true }
 mpt = { workspace = true }
 provider = { workspace = true }
 reqwest = { workspace = true }
 revm = { workspace = true, features = ["serde", "std"] }
 risc0-zkp = { workspace = true }
 risc0-zkvm = { workspace = true }
-serde = { workspace = true }
 serde_json = { workspace = true }
 server_utils = { workspace = true }
 thiserror = { workspace = true }
@@ -39,6 +37,8 @@ url = { workspace = true }
 alloy-sol-types = { workspace = true }
 anyhow = { workspace = true }
 ctor = { workspace = true }
+dotenvy = { workspace = true }
+mock_chain_server = { workspace = true }
 test-log = { workspace = true }
 
 [lints]

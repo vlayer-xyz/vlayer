@@ -26,6 +26,7 @@ pub async fn v_call(config: Arc<ServerConfig>, params: Params) -> Result<CallRes
         proof_mode: config.proof_mode.into(),
         chain_proof_url: config.chain_proof_url.clone(),
         max_calldata_size: config.max_request_size,
+        verify_chain_proofs: config.verify_chain_proofs,
         ..Default::default()
     };
 

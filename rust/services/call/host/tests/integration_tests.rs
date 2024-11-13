@@ -4,15 +4,15 @@ use alloy_chains::{Chain, NamedChain};
 use alloy_primitives::{address, b256, uint, Address, ChainId};
 use alloy_sol_types::{sol, SolCall};
 use call_host::{
-    host::{config::HostConfig, error::HostError, get_block_number, Host},
+    host::{config::HostConfig, error::HostError, get_block_header, Host},
     Call,
 };
 use chain_client::RpcClient as RpcChainProofClient;
 use dotenvy::dotenv;
 use ethers_core::types::BlockNumber as BlockTag;
 use lazy_static::lazy_static;
-use mock_chain_server::{ChainProofServerMock, EMPTY_PROOF_RESPONSE};
-use provider::{CachedMultiProvider, CachedProviderFactory};
+use mock_chain_server::{fake_proof_result, ChainProofServerMock};
+use provider::{BlockNumber, CachedMultiProvider, CachedProviderFactory};
 use serde_json::json;
 
 // To activate recording, set UPDATE_SNAPSHOTS to true.
@@ -106,14 +106,16 @@ async fn create_chain_proof_server(
     multi_provider: &CachedMultiProvider,
     location: &ExecutionLocation,
 ) -> Result<ChainProofServerMock, HostError> {
-    let block_number =
-        block_tag_to_block_number(multi_provider, location.chain_id, location.block_tag)?;
+    let block_header = get_block_header(multi_provider, location.chain_id, location.block_tag)?;
+    let block_number = block_header.number();
+    let result = fake_proof_result(block_header);
+
     let chain_proof_server_mock = ChainProofServerMock::start(
         json!({
             "chain_id": location.chain_id,
             "block_numbers": [block_number]
         }),
-        EMPTY_PROOF_RESPONSE.clone(),
+        result,
     )
     .await;
 
@@ -137,11 +139,13 @@ fn create_host(
 
 fn block_tag_to_block_number(
     multi_provider: &CachedMultiProvider,
-    chain_id: u64,
+    chain_id: ChainId,
     block_tag: BlockTag,
-) -> Result<u64, HostError> {
+) -> Result<BlockNumber, HostError> {
     match block_tag {
-        BlockTag::Latest => get_block_number(multi_provider, chain_id),
+        BlockTag::Latest => {
+            Ok(get_block_header(multi_provider, chain_id, BlockTag::Latest)?.number())
+        }
         BlockTag::Number(block_no) => Ok(block_no.as_u64()),
         _ => panic!("Only Latest and specific block numbers are supported, got {:?}", block_tag),
     }

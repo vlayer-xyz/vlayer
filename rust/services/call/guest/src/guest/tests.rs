@@ -52,7 +52,6 @@ fn mock_multi_evm_input(state_trie: MerkleTrie, state_root: B256) -> MultiEvmInp
 
 mod verify_env {
     use block_header::Hashable;
-    use env::VERIFY_CHAIN_PROOFS;
 
     use super::*;
 
@@ -61,7 +60,7 @@ mod verify_env {
         let state_trie = MerkleTrie::new();
         let state_root = state_trie.hash_slow();
         let multi_evm_input = mock_multi_evm_input(state_trie, state_root);
-        _ = verify_input(input_ok, multi_evm_input).await;
+        _ = verify_input(Some(input_ok), multi_evm_input).await;
     }
 
     #[tokio::test]
@@ -70,18 +69,15 @@ mod verify_env {
         let state_trie = MerkleTrie::new();
         let state_root = B256::ZERO; // invalid state root hash
         let multi_evm_input = mock_multi_evm_input(state_trie, state_root);
-        _ = verify_input(input_ok, multi_evm_input).await;
+        _ = verify_input(Some(input_ok), multi_evm_input).await;
     }
 
     #[tokio::test]
     #[should_panic(expected = "invalid guest input")]
     async fn zk_verification_failed() {
-        if !VERIFY_CHAIN_PROOFS {
-            panic!("invalid guest input");
-        }
         let state_trie = MerkleTrie::new();
         let state_root = state_trie.hash_slow();
         let multi_evm_input = mock_multi_evm_input(state_trie, state_root);
-        _ = verify_input(input_invalid, multi_evm_input).await;
+        _ = verify_input(Some(input_invalid), multi_evm_input).await;
     }
 }

@@ -976,11 +976,20 @@ name = "chain_common"
 version = "0.1.0"
 dependencies = [
  "alloy-primitives",
+ "bincode",
  "block_trie",
+ "bytes",
+ "chain_guest_wrapper",
+ "derivative",
+ "derive-new",
+ "derive_more",
  "mpt",
+ "risc0-zkp",
+ "risc0-zkvm",
  "serde",
  "serde_json",
  "serde_with",
+ "thiserror",
 ]
 
 [[package]]

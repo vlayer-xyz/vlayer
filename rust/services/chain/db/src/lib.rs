@@ -9,6 +9,7 @@ use std::{
 use alloy_primitives::{keccak256, BlockNumber, ChainId, B256};
 use alloy_rlp::{Decodable, RlpDecodable, RlpEncodable};
 use bytes::Bytes;
+use chain_common::ChainProofReceipt;
 use chain_trie::UnverifiedChainTrie;
 use derive_more::Debug;
 use key_value::{Database, InMemoryDatabase, Mdbx, ReadTx, ReadWriteTx, WriteTx};
@@ -18,7 +19,6 @@ mod chain_trie;
 mod db_node;
 mod error;
 mod proof_builder;
-mod receipt;
 #[cfg(test)]
 mod tests;
 
@@ -26,7 +26,6 @@ pub use chain_trie::ChainTrie;
 pub use db_node::DbNode;
 pub use error::{ChainDbError, ChainDbResult};
 pub use proof_builder::MerkleProof;
-pub use receipt::ChainProofReceipt;
 use traits::Hashable;
 use u64_range::NonEmptyRange;
 

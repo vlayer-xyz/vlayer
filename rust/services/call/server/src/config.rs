@@ -13,6 +13,7 @@ pub struct ServerConfig {
     pub proof_mode: ProofMode,
     pub chain_proof_url: String,
     pub max_request_size: usize,
+    pub verify_chain_proofs: bool,
 }
 
 impl Default for ServerConfig {
@@ -24,6 +25,7 @@ impl Default for ServerConfig {
             proof_mode: ProofMode::Groth16,
             chain_proof_url: String::default(),
             max_request_size: DEFAULT_MAX_CALLDATA_SIZE,
+            verify_chain_proofs: false,
         }
     }
 }
@@ -35,6 +37,7 @@ impl ServerConfig {
         host: Option<String>,
         port: Option<u16>,
         chain_proof_url: impl AsRef<str>,
+        verify_chain_proofs: bool,
     ) -> ServerConfig {
         let ServerConfig {
             mut socket_addr,
@@ -57,6 +60,7 @@ impl ServerConfig {
             proof_mode,
             chain_proof_url: chain_proof_url.as_ref().to_string(),
             max_request_size: DEFAULT_MAX_CALLDATA_SIZE,
+            verify_chain_proofs,
         }
     }
 }
