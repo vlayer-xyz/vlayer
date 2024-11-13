@@ -1,7 +1,7 @@
 use std::collections::BTreeMap;
 
 use alloy_primitives::{BlockNumber, ChainId};
-use anyhow::{bail, Context};
+use anyhow::bail;
 use derive_new::new;
 use revm::primitives::SpecId;
 use serde::{Deserialize, Serialize};
@@ -33,17 +33,6 @@ impl ChainSpec {
 
     pub fn chain_id(&self) -> ChainId {
         self.chain_id
-    }
-
-    pub fn validate_spec_id(&self, spec_id: SpecId) -> anyhow::Result<()> {
-        let (min_spec_id, _) = self.hard_forks.first_key_value().context("no hard forks")?;
-        if spec_id < *min_spec_id {
-            bail!("expected >= {:?}, got {:?}", min_spec_id, spec_id);
-        }
-        if spec_id > self.max_spec_id {
-            bail!("expected <= {:?}, got {:?}", self.max_spec_id, spec_id);
-        }
-        Ok(())
     }
 
     /// Returns the [SpecId] for a given block number and timestamp or an error if not
