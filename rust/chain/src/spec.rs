@@ -11,7 +11,6 @@ use crate::{config::CHAIN_MAP, error::ChainError, fork::ForkCondition};
 #[derive(Debug, Clone, Serialize, Deserialize, new)]
 pub struct ChainSpec {
     pub chain_id: ChainId,
-    max_spec_id: SpecId,
     forks: BTreeMap<SpecId, ForkCondition>,
 }
 
@@ -20,7 +19,6 @@ impl ChainSpec {
     pub fn new_single(chain_id: ChainId, spec_id: SpecId) -> Self {
         ChainSpec {
             chain_id,
-            max_spec_id: spec_id,
             forks: BTreeMap::from([(spec_id, ForkCondition::Block(0))]),
         }
     }

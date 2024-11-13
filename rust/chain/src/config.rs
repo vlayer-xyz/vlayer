@@ -79,7 +79,6 @@ pub static CHAIN_NAMES: Lazy<HashMap<String, ChainId>> = Lazy::new(|| {
 pub static ETH_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
     ChainSpec::new(
         Chain::mainnet().id(),
-        SpecId::CANCUN,
         BTreeMap::from([
             (SpecId::FRONTIER, ForkCondition::Block(0)),
             (SpecId::MERGE, ForkCondition::Block(MAINNET_MERGE_BLOCK_NUMBER)),
@@ -92,7 +91,6 @@ pub static ETH_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
 pub static ETH_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
     ChainSpec::new(
         Chain::sepolia().id(),
-        SpecId::CANCUN,
         BTreeMap::from([
             (SpecId::MERGE, ForkCondition::Block(1735371)),
             (SpecId::SHANGHAI, ForkCondition::Timestamp(1677557088)),
@@ -104,7 +102,6 @@ pub static ETH_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
 pub static BASE_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
     ChainSpec::new(
         Chain::base_mainnet().id(),
-        SpecId::CANCUN,
         BTreeMap::from([
             (SpecId::MERGE, ForkCondition::Block(1735371)),
             (SpecId::SHANGHAI, ForkCondition::Timestamp(1677557088)),
@@ -116,7 +113,6 @@ pub static BASE_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
 pub static BASE_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
     ChainSpec::new(
         Chain::base_sepolia().id(),
-        SpecId::CANCUN,
         BTreeMap::from([
             (SpecId::MERGE, ForkCondition::Block(1735371)),
             (SpecId::SHANGHAI, ForkCondition::Timestamp(1677557088)),
@@ -128,7 +124,6 @@ pub static BASE_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
 pub static OP_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
     ChainSpec::new(
         Chain::optimism_mainnet().id(),
-        SpecId::CANCUN,
         BTreeMap::from([
             (SpecId::MERGE, ForkCondition::Block(1735371)),
             (SpecId::SHANGHAI, ForkCondition::Timestamp(1677557088)),
@@ -140,7 +135,6 @@ pub static OP_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
 pub static OP_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
     ChainSpec::new(
         Chain::optimism_sepolia().id(),
-        SpecId::CANCUN,
         BTreeMap::from([
             (SpecId::MERGE, ForkCondition::Block(1735371)),
             (SpecId::SHANGHAI, ForkCondition::Timestamp(1677557088)),
@@ -152,7 +146,6 @@ pub static OP_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
 pub static POLYGON_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
     ChainSpec::new(
         137,
-        SpecId::CANCUN,
         BTreeMap::from([
             (SpecId::MERGE, ForkCondition::Block(1735371)),
             (SpecId::SHANGHAI, ForkCondition::Timestamp(1677557088)),
@@ -164,7 +157,6 @@ pub static POLYGON_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
 pub static POLYGON_AMOY_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
     ChainSpec::new(
         80002,
-        SpecId::CANCUN,
         BTreeMap::from([
             (SpecId::MERGE, ForkCondition::Block(1735371)),
             (SpecId::SHANGHAI, ForkCondition::Timestamp(1677557088)),
@@ -176,7 +168,6 @@ pub static POLYGON_AMOY_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
 pub static ARBITRUM_NOVA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
     ChainSpec::new(
         42170,
-        SpecId::CANCUN,
         BTreeMap::from([
             (SpecId::MERGE, ForkCondition::Block(1735371)),
             (SpecId::SHANGHAI, ForkCondition::Timestamp(1677557088)),
@@ -188,7 +179,6 @@ pub static ARBITRUM_NOVA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
 pub static ARBITRUM_ONE_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
     ChainSpec::new(
         42161,
-        SpecId::CANCUN,
         BTreeMap::from([
             (SpecId::MERGE, ForkCondition::Block(1735371)),
             (SpecId::SHANGHAI, ForkCondition::Timestamp(1677557088)),
@@ -200,7 +190,6 @@ pub static ARBITRUM_ONE_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
 pub static ARBITRUM_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
     ChainSpec::new(
         421614,
-        SpecId::CANCUN,
         BTreeMap::from([
             (SpecId::MERGE, ForkCondition::Block(1735371)),
             (SpecId::SHANGHAI, ForkCondition::Timestamp(1677557088)),
@@ -212,7 +201,6 @@ pub static ARBITRUM_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
 pub static ZKSYNC_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
     ChainSpec::new(
         324,
-        SpecId::CANCUN,
         BTreeMap::from([
             (SpecId::MERGE, ForkCondition::Block(1735371)),
             (SpecId::SHANGHAI, ForkCondition::Timestamp(1677557088)),
@@ -224,7 +212,6 @@ pub static ZKSYNC_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
 pub static ZKSYNC_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
     ChainSpec::new(
         300,
-        SpecId::CANCUN,
         BTreeMap::from([
             (SpecId::MERGE, ForkCondition::Block(1735371)),
             (SpecId::SHANGHAI, ForkCondition::Timestamp(1677557088)),
@@ -236,7 +223,6 @@ pub static ZKSYNC_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
 pub static TESTING_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
     ChainSpec::new(
         TEST_CHAIN_ID,
-        SpecId::CANCUN,
         BTreeMap::from([
             (SpecId::MERGE, ForkCondition::Block(0)),
             (SpecId::SHANGHAI, ForkCondition::Block(0)),
