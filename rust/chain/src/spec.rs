@@ -32,15 +32,6 @@ impl ChainSpec {
         }
         bail!("unsupported fork for block {}", block_number)
     }
-
-    pub fn spec_id(&self, block_number: BlockNumber, timestamp: u64) -> Option<SpecId> {
-        for (spec_id, fork) in self.forks.iter().rev() {
-            if fork.active(block_number, timestamp) {
-                return Some(*spec_id);
-            }
-        }
-        None
-    }
 }
 
 impl TryFrom<ChainId> for ChainSpec {

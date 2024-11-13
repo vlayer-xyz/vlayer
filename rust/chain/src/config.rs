@@ -269,16 +269,3 @@ pub static ZIRCUIT1_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> =
 
 pub static ZIRCUIT1_TESTNET_CHAIN_SPEC: Lazy<ChainSpec> =
     Lazy::new(|| ChainSpec::new_single(48899, SpecId::CANCUN));
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn spec_id() {
-        assert_eq!(ETH_MAINNET_CHAIN_SPEC.spec_id(15537393, 0), Some(SpecId::FRONTIER));
-        assert_eq!(ETH_MAINNET_CHAIN_SPEC.spec_id(15537394, 0), Some(SpecId::MERGE));
-        assert_eq!(ETH_MAINNET_CHAIN_SPEC.spec_id(17034869, 0), Some(SpecId::MERGE));
-        assert_eq!(ETH_MAINNET_CHAIN_SPEC.spec_id(0, 1681338455), Some(SpecId::SHANGHAI));
-    }
-}
