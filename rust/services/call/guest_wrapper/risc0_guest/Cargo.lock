@@ -996,6 +996,7 @@ dependencies = [
 name = "chain_guest_wrapper"
 version = "0.1.0"
 dependencies = [
+ "common",
  "risc0-build",
 ]
 
@@ -1047,7 +1048,6 @@ dependencies = [
  "anyhow",
  "auto_impl",
  "bytes",
- "derive-new",
  "risc0-zkp",
  "serde",
 ]
