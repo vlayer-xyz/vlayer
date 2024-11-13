@@ -62,6 +62,7 @@ clap = "4.5.20"
 color-eyre = "0.6.3"
 colored = "2.1.0"
 comfy-table = "7.1.1"
+criterion = "0.5.1"
 ctor = "0.2.8"
 delegate = "0.13.1"
 derive_more = { version = "1.0.0", features = ["debug", "into", "from", "into_iterator", "deref"] }
