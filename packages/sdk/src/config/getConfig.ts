@@ -10,7 +10,7 @@ export type Config = {
 
 const ensureEnvVariable = (envVar: string) => {
   if (!process.env[envVar]) {
-    if (envVar === "PRIVATE_KEY") {
+    if (envVar === "EXAMPLES_TEST_PRIVATE_KEY") {
       throw new Error(
         chalk.bgBlue(
           `${envVar} missing. Add a HEX private key with ETH in .env.local for deploy and verify transactions.`,
