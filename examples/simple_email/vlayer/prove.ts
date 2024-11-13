@@ -2,6 +2,7 @@ import fs from "fs";
 import { testHelpers, createVlayerClient, preverifyEmail } from "@vlayer/sdk";
 import emailProofProver from "../out/EmailDomainProver.sol/EmailDomainProver";
 import emailProofVerifier from "../out/EmailProofVerifier.sol/EmailDomainVerifier";
+import { foundry } from "viem/chains";
 
 const mimeEmail = fs.readFileSync("./testdata/verify_vlayer.eml").toString();
 
@@ -22,6 +23,7 @@ const hash = await vlayer.prove({
   address: prover,
   proverAbi: emailProofProver.abi,
   functionName: "main",
+  chainId: foundry.id,
   args: [await preverifyEmail(mimeEmail), john.address],
 });
 const result = await vlayer.waitForProvingResult(hash);
