@@ -2,16 +2,25 @@ import fs from "fs";
 import { createVlayerClient, preverifyEmail } from "@vlayer/sdk";
 import proverSpec from "../out/EmailDomainProver.sol/EmailDomainProver";
 import verifierSpec from "../out/EmailProofVerifier.sol/EmailDomainVerifier";
+<<<<<<< HEAD
+=======
+import { foundry } from "viem/chains";
+>>>>>>> c7756e26 (Use new approach to config in all examples ... (#1108))
 import {
   createContext,
   deployVlayerContracts,
   getConfig,
+<<<<<<< HEAD
+=======
+  waitForTransactionReceipt,
+>>>>>>> c7756e26 (Use new approach to config in all examples ... (#1108))
 } from "@vlayer/sdk/config";
 
 const mimeEmail = fs.readFileSync("./testdata/verify_vlayer.eml").toString();
 
 const config = getConfig();
 
+<<<<<<< HEAD
 const {
   chain,
   ethClient,
@@ -19,6 +28,9 @@ const {
   proverUrl,
   confirmations,
 } = await createContext(config);
+=======
+const { ethClient, account: john } = await createContext(config);
+>>>>>>> c7756e26 (Use new approach to config in all examples ... (#1108))
 
 const { prover, verifier } = await deployVlayerContracts({
   proverSpec,
@@ -51,11 +63,16 @@ const verificationHash = await ethClient.writeContract({
   account: john,
 });
 
+<<<<<<< HEAD
 const receipt = await ethClient.waitForTransactionReceipt({
   hash: verificationHash,
   confirmations,
   retryCount: 60,
   retryDelay: 1000,
+=======
+const receipt = await waitForTransactionReceipt({
+  hash: verificationHash,
+>>>>>>> c7756e26 (Use new approach to config in all examples ... (#1108))
 });
 
 console.log(`Verification result: ${receipt.status}`);

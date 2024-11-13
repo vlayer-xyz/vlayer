@@ -7,12 +7,17 @@ import {
   createContext,
   deployVlayerContracts,
   waitForContractDeploy,
+<<<<<<< HEAD
+=======
+  waitForTransactionReceipt,
+>>>>>>> c7756e26 (Use new approach to config in all examples ... (#1108))
 } from "@vlayer/sdk/config";
 
 import proverSpec from "../out/SimpleProver.sol/SimpleProver";
 import verifierSpec from "../out/SimpleVerifier.sol/SimpleVerifier";
 
 const config = getConfig();
+<<<<<<< HEAD
 const {
   chain,
   ethClient,
@@ -20,6 +25,9 @@ const {
   proverUrl,
   confirmations,
 } = await createContext(config);
+=======
+const { ethClient, account: john } = await createContext(config);
+>>>>>>> c7756e26 (Use new approach to config in all examples ... (#1108))
 
 const INITIAL_TOKEN_SUPPLY = BigInt(10_000_000);
 
@@ -55,16 +63,23 @@ const { prover, verifier } = await deployVlayerContracts({
 });
 
 console.log("Proving...");
+<<<<<<< HEAD
 const vlayer = createVlayerClient({
   url: proverUrl,
 });
+=======
+const vlayer = createVlayerClient();
+>>>>>>> c7756e26 (Use new approach to config in all examples ... (#1108))
 
 const hash = await vlayer.prove({
   address: prover,
   proverAbi: proverSpec.abi,
   functionName: "balance",
   args: [john.address],
+<<<<<<< HEAD
   chainId: chain.id,
+=======
+>>>>>>> c7756e26 (Use new approach to config in all examples ... (#1108))
 });
 const result = await vlayer.waitForProvingResult(hash);
 const [proof, owner, balance] = result;
@@ -83,11 +98,16 @@ const verificationHash = await ethClient.writeContract({
   account: john,
 });
 
+<<<<<<< HEAD
 const receipt = await ethClient.waitForTransactionReceipt({
   hash: verificationHash,
   confirmations,
   retryCount: 60,
   retryDelay: 1000,
+=======
+const receipt = await waitForTransactionReceipt({
+  hash: verificationHash,
+>>>>>>> c7756e26 (Use new approach to config in all examples ... (#1108))
 });
 
 console.log(`Verification result: ${receipt.status}`);

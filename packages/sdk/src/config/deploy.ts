@@ -56,6 +56,7 @@ export const deployVlayerContracts = async ({
   const { chain, ethClient, account } = await createContext(config);
 
   console.log("Deploying prover contract...");
+  console.log(proverArgs, verifierArgs, account);
   const proverHash = await ethClient.deployContract({
     chain,
     account,
