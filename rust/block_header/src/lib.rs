@@ -17,7 +17,7 @@ use serde::{Deserialize, Serialize};
 pub use traits::Hashable;
 
 /// An EVM abstraction of a block header.
-#[auto_impl(Box)]
+#[auto_impl(Box, &)]
 pub trait EvmBlockHeader: Hashable + Encodable + AsAny + Debug + DynClone + Send + Sync {
     /// Returns the hash of the parent block's header.
     fn parent_hash(&self) -> &B256;

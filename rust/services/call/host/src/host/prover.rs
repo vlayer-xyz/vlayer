@@ -43,7 +43,8 @@ impl Prover {
 fn build_executor_env(input: &Input) -> anyhow::Result<ExecutorEnv<'static>> {
     input
         .chain_proofs
-        .values()
+        .iter()
+        .flat_map(|chain_proofs| chain_proofs.values())
         .try_fold(ExecutorEnv::builder(), |mut builder, (_, proof)| {
             let receipt: ChainProofReceipt = proof.try_into()?;
             builder.add_assumption(receipt);

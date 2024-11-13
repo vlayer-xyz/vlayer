@@ -14,6 +14,7 @@ pub struct HostConfig {
     pub chain_proof_url: String,
     pub max_calldata_size: usize,
     pub call_guest_id: Digest,
+    pub verify_chain_proofs: bool,
 }
 
 impl Default for HostConfig {
@@ -25,6 +26,7 @@ impl Default for HostConfig {
             chain_proof_url: String::default(),
             max_calldata_size: DEFAULT_MAX_CALLDATA_SIZE,
             call_guest_id: RISC0_CALL_GUEST_ID.into(),
+            verify_chain_proofs: false,
         }
     }
 }

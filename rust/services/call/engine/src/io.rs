@@ -17,7 +17,8 @@ use crate::{
 pub struct Input {
     pub multi_evm_input: MultiEvmInput,
     pub start_execution_location: ExecutionLocation,
-    pub chain_proofs: ChainProofCache,
+    /// If this is set to None, chain proofs are not verified in guest
+    pub chain_proofs: Option<ChainProofCache>,
     pub call: Call,
 }
 

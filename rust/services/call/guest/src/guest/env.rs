@@ -15,14 +15,16 @@ use crate::db::wrap_state::WrapStateDb;
 pub struct VerifiedInput(MultiEvmInput);
 
 pub async fn verify_input(
-    verifier: impl Verifier,
+    verifier: Option<impl Verifier>,
     multi_evm_input: MultiEvmInput,
 ) -> VerifiedInput {
     multi_evm_input.assert_coherency();
-    verifier
-        .verify(&multi_evm_input)
-        .await
-        .expect("invalid guest input");
+    if let Some(verifier) = verifier {
+        verifier
+            .verify(&multi_evm_input)
+            .await
+            .expect("invalid guest input");
+    }
 
     VerifiedInput(multi_evm_input)
 }

@@ -18,9 +18,11 @@ pub async fn main(
         call,
     }: Input,
 ) -> GuestOutput {
-    let chain_client = CachedClient::new(chain_proofs);
-    let chain_proof_verifier = ZkChainProofVerifier::new(RISC0_CHAIN_GUEST_ID, GuestVerifier);
-    let input_verifier = guest_input::ZkVerifier::new(chain_client, chain_proof_verifier);
+    let input_verifier = chain_proofs.map(|chain_proofs| {
+        let chain_client = CachedClient::new(chain_proofs);
+        let chain_proof_verifier = ZkChainProofVerifier::new(RISC0_CHAIN_GUEST_ID, GuestVerifier);
+        guest_input::ZkVerifier::new(chain_client, chain_proof_verifier)
+    });
     let verified_input = verify_input(input_verifier, multi_evm_input).await;
     VerifiedEnv::new(verified_input, start_execution_location).exec_call(&call)
 }

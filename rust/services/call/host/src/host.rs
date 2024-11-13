@@ -40,6 +40,7 @@ pub struct Host {
     prover: Prover,
     chain_proof_client: RecordingRpcClient,
     max_calldata_size: usize,
+    verify_chain_proofs: bool,
 }
 
 impl Host {
@@ -57,7 +58,7 @@ pub fn get_latest_block_number(
     providers: &CachedMultiProvider,
     chain_id: ChainId,
 ) -> Result<BlockNumber, HostError> {
-    get_block_header(providers, chain_id, BlockTag::Latest).map(|header| (*header).number())
+    get_block_header(providers, chain_id, BlockTag::Latest).map(|header| header.number())
 }
 
 pub fn get_block_header(
@@ -95,6 +96,7 @@ impl Host {
             prover,
             chain_proof_client,
             max_calldata_size: config.max_calldata_size,
+            verify_chain_proofs: config.verify_chain_proofs,
         })
     }
 
@@ -117,7 +119,9 @@ impl Host {
             .chain_proof_client
             .get_chain_proofs(multi_evm_input.block_nums_by_chain())
             .await?;
-        let chain_proofs = self.chain_proof_client.into_cache();
+        let chain_proofs = self
+            .verify_chain_proofs
+            .then_some(self.chain_proof_client.into_cache());
         let input = Input {
             multi_evm_input,
             start_execution_location: self.start_execution_location,
