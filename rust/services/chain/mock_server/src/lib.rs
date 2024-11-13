@@ -4,11 +4,11 @@ use block_trie::BlockTrie;
 use bytes::Bytes;
 use chain_common::RpcChainProof;
 use chain_guest_wrapper::RISC0_CHAIN_GUEST_ID;
+use common::Hashable;
 use lazy_static::lazy_static;
 use risc0_zkvm::{serde::to_vec, FakeReceipt, Receipt, ReceiptClaim};
 use serde::Serialize;
 use server_utils::RpcServerMock;
-use traits::Hashable;
 
 lazy_static! {
     pub static ref EMPTY_PROOF_RESPONSE: Value =

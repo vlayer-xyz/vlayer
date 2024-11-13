@@ -20,15 +20,7 @@ pub struct Params {
 pub async fn v_call(config: Arc<ServerConfig>, params: Params) -> Result<CallResult, AppError> {
     let call: HostCall = params.call.try_into()?;
 
-    let host_config = HostConfig {
-        rpc_urls: config.rpc_urls.clone(),
-        start_chain_id: params.context.chain_id,
-        proof_mode: config.proof_mode.into(),
-        chain_proof_url: config.chain_proof_url.clone(),
-        max_calldata_size: config.max_request_size,
-        verify_chain_proofs: config.verify_chain_proofs,
-        ..Default::default()
-    };
+    let host_config = config.into_host_config(params.context.chain_id);
 
     Host::try_new(&host_config)?
         .main(call)

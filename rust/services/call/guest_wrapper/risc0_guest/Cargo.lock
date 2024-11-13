@@ -1046,6 +1046,9 @@ dependencies = [
  "alloy-primitives",
  "anyhow",
  "auto_impl",
+ "bytes",
+ "derive-new",
+ "risc0-zkp",
 ]
 
 [[package]]
