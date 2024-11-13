@@ -1,5 +1,6 @@
 import fs from "fs";
 import dotenv from "dotenv";
+
 export const writeEnvVariables = async (
   envPath: string,
   overrides: { [key: string]: string },
