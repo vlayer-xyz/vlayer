@@ -6,7 +6,7 @@ use alloy_primitives::ChainId;
 use once_cell::sync::Lazy;
 use revm::primitives::SpecId;
 
-use crate::{eip1559::Eip1559Constants, fork::ForkCondition, spec::ChainSpec};
+use crate::{fork::ForkCondition, spec::ChainSpec};
 
 // Some unique chain ids for testing
 pub const TEST_CHAIN_ID: ChainId = 31_337;
@@ -86,7 +86,6 @@ pub static ETH_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
             (SpecId::SHANGHAI, ForkCondition::Timestamp(1681338455)),
             (SpecId::CANCUN, ForkCondition::Timestamp(1710338135)),
         ]),
-        BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
     )
 });
 
@@ -99,7 +98,6 @@ pub static ETH_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
             (SpecId::SHANGHAI, ForkCondition::Timestamp(1677557088)),
             (SpecId::CANCUN, ForkCondition::Timestamp(1706655072)),
         ]),
-        BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
     )
 });
 
@@ -112,7 +110,6 @@ pub static BASE_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
             (SpecId::SHANGHAI, ForkCondition::Timestamp(1677557088)),
             (SpecId::CANCUN, ForkCondition::Timestamp(1706655072)),
         ]),
-        BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
     )
 });
 
@@ -125,7 +122,6 @@ pub static BASE_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
             (SpecId::SHANGHAI, ForkCondition::Timestamp(1677557088)),
             (SpecId::CANCUN, ForkCondition::Timestamp(1706655072)),
         ]),
-        BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
     )
 });
 
@@ -138,7 +134,6 @@ pub static OP_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
             (SpecId::SHANGHAI, ForkCondition::Timestamp(1677557088)),
             (SpecId::CANCUN, ForkCondition::Timestamp(1706655072)),
         ]),
-        BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
     )
 });
 
@@ -151,7 +146,6 @@ pub static OP_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
             (SpecId::SHANGHAI, ForkCondition::Timestamp(1677557088)),
             (SpecId::CANCUN, ForkCondition::Timestamp(1706655072)),
         ]),
-        BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
     )
 });
 
@@ -164,7 +158,6 @@ pub static POLYGON_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
             (SpecId::SHANGHAI, ForkCondition::Timestamp(1677557088)),
             (SpecId::CANCUN, ForkCondition::Timestamp(1706655072)),
         ]),
-        BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
     )
 });
 
@@ -177,7 +170,6 @@ pub static POLYGON_AMOY_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
             (SpecId::SHANGHAI, ForkCondition::Timestamp(1677557088)),
             (SpecId::CANCUN, ForkCondition::Timestamp(1706655072)),
         ]),
-        BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
     )
 });
 
@@ -190,7 +182,6 @@ pub static ARBITRUM_NOVA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
             (SpecId::SHANGHAI, ForkCondition::Timestamp(1677557088)),
             (SpecId::CANCUN, ForkCondition::Timestamp(1706655072)),
         ]),
-        BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
     )
 });
 
@@ -203,7 +194,6 @@ pub static ARBITRUM_ONE_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
             (SpecId::SHANGHAI, ForkCondition::Timestamp(1677557088)),
             (SpecId::CANCUN, ForkCondition::Timestamp(1706655072)),
         ]),
-        BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
     )
 });
 
@@ -216,7 +206,6 @@ pub static ARBITRUM_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
             (SpecId::SHANGHAI, ForkCondition::Timestamp(1677557088)),
             (SpecId::CANCUN, ForkCondition::Timestamp(1706655072)),
         ]),
-        BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
     )
 });
 
@@ -229,7 +218,6 @@ pub static ZKSYNC_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
             (SpecId::SHANGHAI, ForkCondition::Timestamp(1677557088)),
             (SpecId::CANCUN, ForkCondition::Timestamp(1706655072)),
         ]),
-        BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
     )
 });
 
@@ -242,7 +230,6 @@ pub static ZKSYNC_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
             (SpecId::SHANGHAI, ForkCondition::Timestamp(1677557088)),
             (SpecId::CANCUN, ForkCondition::Timestamp(1706655072)),
         ]),
-        BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
     )
 });
 
@@ -255,26 +242,15 @@ pub static TESTING_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
             (SpecId::SHANGHAI, ForkCondition::Block(0)),
             (SpecId::CANCUN, ForkCondition::Block(0)),
         ]),
-        BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
     )
 });
 
 pub static FLOW_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
-    ChainSpec::new(
-        747,
-        SpecId::CANCUN,
-        BTreeMap::from([(SpecId::CANCUN, ForkCondition::Block(0))]),
-        BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
-    )
+    ChainSpec::new(747, SpecId::CANCUN, BTreeMap::from([(SpecId::CANCUN, ForkCondition::Block(0))]))
 });
 
 pub static FLOW_TESTNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
-    ChainSpec::new(
-        545,
-        SpecId::CANCUN,
-        BTreeMap::from([(SpecId::CANCUN, ForkCondition::Block(0))]),
-        BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
-    )
+    ChainSpec::new(545, SpecId::CANCUN, BTreeMap::from([(SpecId::CANCUN, ForkCondition::Block(0))]))
 });
 
 pub static SCROLL_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
@@ -282,7 +258,6 @@ pub static SCROLL_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
         534352,
         SpecId::CANCUN,
         BTreeMap::from([(SpecId::CANCUN, ForkCondition::Block(0))]),
-        BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
     )
 });
 
@@ -291,7 +266,6 @@ pub static SCROLL_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
         534351,
         SpecId::CANCUN,
         BTreeMap::from([(SpecId::CANCUN, ForkCondition::Block(0))]),
-        BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
     )
 });
 
@@ -300,7 +274,6 @@ pub static MANTLE_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
         5000,
         SpecId::CANCUN,
         BTreeMap::from([(SpecId::CANCUN, ForkCondition::Block(0))]),
-        BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
     )
 });
 
@@ -309,7 +282,6 @@ pub static LINEA_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
         59144,
         SpecId::CANCUN,
         BTreeMap::from([(SpecId::CANCUN, ForkCondition::Block(0))]),
-        BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
     )
 });
 
@@ -318,17 +290,11 @@ pub static LINEA_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
         59141,
         SpecId::CANCUN,
         BTreeMap::from([(SpecId::CANCUN, ForkCondition::Block(0))]),
-        BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
     )
 });
 
 pub static BITKUB_CHAIN_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
-    ChainSpec::new(
-        96,
-        SpecId::CANCUN,
-        BTreeMap::from([(SpecId::CANCUN, ForkCondition::Block(0))]),
-        BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
-    )
+    ChainSpec::new(96, SpecId::CANCUN, BTreeMap::from([(SpecId::CANCUN, ForkCondition::Block(0))]))
 });
 
 pub static BITKUB_CHAIN_TESTNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
@@ -336,7 +302,6 @@ pub static BITKUB_CHAIN_TESTNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
         25925,
         SpecId::CANCUN,
         BTreeMap::from([(SpecId::CANCUN, ForkCondition::Block(0))]),
-        BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
     )
 });
 
@@ -345,7 +310,6 @@ pub static KINTO_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
         7887,
         SpecId::CANCUN,
         BTreeMap::from([(SpecId::CANCUN, ForkCondition::Block(0))]),
-        BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
     )
 });
 
@@ -354,7 +318,6 @@ pub static CELO_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
         42220,
         SpecId::CANCUN,
         BTreeMap::from([(SpecId::CANCUN, ForkCondition::Block(0))]),
-        BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
     )
 });
 
@@ -363,7 +326,6 @@ pub static ZIRCUIT1_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
         48900,
         SpecId::CANCUN,
         BTreeMap::from([(SpecId::CANCUN, ForkCondition::Block(0))]),
-        BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
     )
 });
 
@@ -372,7 +334,6 @@ pub static ZIRCUIT1_TESTNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
         48899,
         SpecId::CANCUN,
         BTreeMap::from([(SpecId::CANCUN, ForkCondition::Block(0))]),
-        BTreeMap::from([(SpecId::LONDON, Eip1559Constants::default())]),
     )
 });
 

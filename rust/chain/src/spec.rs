@@ -6,28 +6,22 @@ use derive_new::new;
 use revm::primitives::SpecId;
 use serde::{Deserialize, Serialize};
 
-use crate::{config::CHAIN_MAP, eip1559::Eip1559Constants, error::ChainError, fork::ForkCondition};
+use crate::{config::CHAIN_MAP, error::ChainError, fork::ForkCondition};
 
 #[derive(Debug, Clone, Serialize, Deserialize, new)]
 pub struct ChainSpec {
     pub chain_id: ChainId,
     max_spec_id: SpecId,
     hard_forks: BTreeMap<SpecId, ForkCondition>,
-    gas_constants: BTreeMap<SpecId, Eip1559Constants>,
 }
 
 impl ChainSpec {
     /// Creates a new configuration consisting of only one specification ID.
-    pub fn new_single(
-        chain_id: ChainId,
-        spec_id: SpecId,
-        eip_1559_constants: Eip1559Constants,
-    ) -> Self {
+    pub fn new_single(chain_id: ChainId, spec_id: SpecId) -> Self {
         ChainSpec {
             chain_id,
             max_spec_id: spec_id,
             hard_forks: BTreeMap::from([(spec_id, ForkCondition::Block(0))]),
-            gas_constants: BTreeMap::from([(spec_id, eip_1559_constants)]),
         }
     }
 
