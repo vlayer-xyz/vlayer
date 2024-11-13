@@ -979,7 +979,6 @@ dependencies = [
  "bincode",
  "block_trie",
  "bytes",
- "chain_guest_wrapper",
  "derivative",
  "derive-new",
  "derive_more",
