@@ -26,6 +26,8 @@ jobs:
           submodules: recursive
       - name: Install Rust prerequisites
         uses: ./.github/actions/rust-prerequisites
+      - name: Install contracts prerequisites
+        uses: ./.github/actions/contracts-prerequisites
 
       - name: Compilation
         working-directory: rust
