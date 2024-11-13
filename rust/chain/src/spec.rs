@@ -12,7 +12,7 @@ use crate::{config::CHAIN_MAP, error::ChainError, fork::ForkCondition};
 pub struct ChainSpec {
     pub chain_id: ChainId,
     max_spec_id: SpecId,
-    hard_forks: BTreeMap<SpecId, ForkCondition>,
+    forks: BTreeMap<SpecId, ForkCondition>,
 }
 
 impl ChainSpec {
@@ -21,13 +21,13 @@ impl ChainSpec {
         ChainSpec {
             chain_id,
             max_spec_id: spec_id,
-            hard_forks: BTreeMap::from([(spec_id, ForkCondition::Block(0))]),
+            forks: BTreeMap::from([(spec_id, ForkCondition::Block(0))]),
         }
     }
 
     /// Returns the [SpecId] for a given block number and timestamp or an error if not supported.
     pub fn active_fork(&self, block_number: BlockNumber, timestamp: u64) -> anyhow::Result<SpecId> {
-        for (spec_id, fork) in self.hard_forks.iter().rev() {
+        for (spec_id, fork) in self.forks.iter().rev() {
             if fork.active(block_number, timestamp) {
                 return Ok(*spec_id);
             }
@@ -36,7 +36,7 @@ impl ChainSpec {
     }
 
     pub fn spec_id(&self, block_number: BlockNumber, timestamp: u64) -> Option<SpecId> {
-        for (spec_id, fork) in self.hard_forks.iter().rev() {
+        for (spec_id, fork) in self.forks.iter().rev() {
             if fork.active(block_number, timestamp) {
                 return Some(*spec_id);
             }
