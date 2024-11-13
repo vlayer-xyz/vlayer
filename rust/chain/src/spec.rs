@@ -6,12 +6,12 @@ use derive_new::new;
 use revm::primitives::SpecId;
 use serde::{Deserialize, Serialize};
 
-use crate::{config::CHAIN_MAP, error::ChainError, fork::ForkCondition};
+use crate::{config::CHAIN_MAP, error::ChainError};
 
 #[derive(Debug, Clone, Serialize, Deserialize, new)]
 pub struct ChainSpec {
     pub chain_id: ChainId,
-    forks: BTreeMap<SpecId, ForkCondition>,
+    forks: BTreeMap<SpecId, ActivationCondition>,
 }
 
 impl ChainSpec {
@@ -19,7 +19,7 @@ impl ChainSpec {
     pub fn new_single(chain_id: ChainId, spec_id: SpecId) -> Self {
         ChainSpec {
             chain_id,
-            forks: BTreeMap::from([(spec_id, ForkCondition::Block(0))]),
+            forks: BTreeMap::from([(spec_id, ActivationCondition::Block(0))]),
         }
     }
 
@@ -30,7 +30,7 @@ impl ChainSpec {
                 return Ok(*spec_id);
             }
         }
-        bail!("no supported fork for block {}", block_number)
+        bail!("unsupported fork for block {}", block_number)
     }
 
     pub fn spec_id(&self, block_number: BlockNumber, timestamp: u64) -> Option<SpecId> {
@@ -51,5 +51,20 @@ impl TryFrom<ChainId> for ChainSpec {
             .get(&chain_id)
             .ok_or(ChainError::UnsupportedChainId(chain_id))?;
         Ok((**chain_spec).clone())
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum ActivationCondition {
+    Block(BlockNumber),
+    Timestamp(u64),
+}
+
+impl ActivationCondition {
+    pub fn active(&self, block_number: BlockNumber, timestamp: u64) -> bool {
+        match self {
+            ActivationCondition::Block(block) => *block <= block_number,
+            ActivationCondition::Timestamp(ts) => *ts <= timestamp,
+        }
     }
 }
