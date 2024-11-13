@@ -17,6 +17,9 @@ cd ${VLAYER_HOME}/packages/sdk && bun install --frozen-lockfile
 
 EXAMPLES_REQUIRING_ALCHEMY=("simple_time_travel" "simple_teleport")
 EXAMPLES_REQUIRING_PRIV_KEY=("simple_time_travel")
+# Only run limited selection of examples in prod mode,
+# because they use real Bonsai resources.
+EXAMPLES_RUN_IN_PROD_MODE=("simple")
 
 echo "::group::Building sdk"
 cd "${VLAYER_HOME}/packages/sdk"
@@ -25,6 +28,11 @@ echo '::endgroup::'
 
 for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ; do
   example_name=$(basename "${example}")
+
+  if [[ "${PROVING_MODE}" = "prod" ]] && [[ ! "${EXAMPLES_RUN_IN_PROD_MODE[@]}" =~ "${example_name}" ]]; then
+    echo "Skipping: ${example} - not running it in prod mode."
+    continue
+  fi
 
   if [[ "${EXAMPLES_REQUIRING_ALCHEMY[@]}" =~ "${example_name}" ]] && [[ -z "${ALCHEMY_API_KEY:-}" ]]; then
     echo "Skipping: ${example} (configure ALCHEMY_API_KEY to run it)"
