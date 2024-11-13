@@ -1,4 +1,4 @@
-import { createVlayerClient } from "@vlayer/sdk";
+import { createVlayerClient, Proof } from "@vlayer/sdk";
 import proverSpec from "../out/WebProofProver.sol/WebProofProver";
 import verifierSpec from "../out/WebProofVerifier.sol/WebProofVerifier";
 import tls_proof from "./tls_proof.json";
@@ -52,7 +52,7 @@ async function testSuccessProvingAndVerification() {
     chainId: chain.id,
   });
   const result = await vlayer.waitForProvingResult(hash);
-  const [proof, twitterHandle, address] = result;
+  const [proof, twitterHandle, address] = result as [Proof, string, string];
   console.log("Has Proof");
 
   if (!isAddress(address)) {
