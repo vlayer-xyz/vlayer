@@ -245,97 +245,44 @@ pub static TESTING_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
     )
 });
 
-pub static FLOW_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
-    ChainSpec::new(747, SpecId::CANCUN, BTreeMap::from([(SpecId::CANCUN, ForkCondition::Block(0))]))
-});
+pub static FLOW_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> =
+    Lazy::new(|| ChainSpec::new_single(747, SpecId::CANCUN));
 
-pub static FLOW_TESTNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
-    ChainSpec::new(545, SpecId::CANCUN, BTreeMap::from([(SpecId::CANCUN, ForkCondition::Block(0))]))
-});
+pub static FLOW_TESTNET_CHAIN_SPEC: Lazy<ChainSpec> =
+    Lazy::new(|| ChainSpec::new_single(545, SpecId::CANCUN));
 
-pub static SCROLL_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
-    ChainSpec::new(
-        534352,
-        SpecId::CANCUN,
-        BTreeMap::from([(SpecId::CANCUN, ForkCondition::Block(0))]),
-    )
-});
+pub static SCROLL_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> =
+    Lazy::new(|| ChainSpec::new_single(534352, SpecId::CANCUN));
 
-pub static SCROLL_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
-    ChainSpec::new(
-        534351,
-        SpecId::CANCUN,
-        BTreeMap::from([(SpecId::CANCUN, ForkCondition::Block(0))]),
-    )
-});
+pub static SCROLL_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> =
+    Lazy::new(|| ChainSpec::new_single(534351, SpecId::CANCUN));
 
-pub static MANTLE_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
-    ChainSpec::new(
-        5000,
-        SpecId::CANCUN,
-        BTreeMap::from([(SpecId::CANCUN, ForkCondition::Block(0))]),
-    )
-});
+pub static MANTLE_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> =
+    Lazy::new(|| ChainSpec::new_single(5000, SpecId::CANCUN));
 
-pub static LINEA_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
-    ChainSpec::new(
-        59144,
-        SpecId::CANCUN,
-        BTreeMap::from([(SpecId::CANCUN, ForkCondition::Block(0))]),
-    )
-});
+pub static LINEA_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> =
+    Lazy::new(|| ChainSpec::new_single(59144, SpecId::CANCUN));
 
-pub static LINEA_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
-    ChainSpec::new(
-        59141,
-        SpecId::CANCUN,
-        BTreeMap::from([(SpecId::CANCUN, ForkCondition::Block(0))]),
-    )
-});
+pub static LINEA_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> =
+    Lazy::new(|| ChainSpec::new_single(59141, SpecId::CANCUN));
 
-pub static BITKUB_CHAIN_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
-    ChainSpec::new(96, SpecId::CANCUN, BTreeMap::from([(SpecId::CANCUN, ForkCondition::Block(0))]))
-});
+pub static BITKUB_CHAIN_CHAIN_SPEC: Lazy<ChainSpec> =
+    Lazy::new(|| ChainSpec::new_single(96, SpecId::CANCUN));
 
-pub static BITKUB_CHAIN_TESTNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
-    ChainSpec::new(
-        25925,
-        SpecId::CANCUN,
-        BTreeMap::from([(SpecId::CANCUN, ForkCondition::Block(0))]),
-    )
-});
+pub static BITKUB_CHAIN_TESTNET_CHAIN_SPEC: Lazy<ChainSpec> =
+    Lazy::new(|| ChainSpec::new_single(25925, SpecId::CANCUN));
 
-pub static KINTO_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
-    ChainSpec::new(
-        7887,
-        SpecId::CANCUN,
-        BTreeMap::from([(SpecId::CANCUN, ForkCondition::Block(0))]),
-    )
-});
+pub static KINTO_CHAIN_SPEC: Lazy<ChainSpec> =
+    Lazy::new(|| ChainSpec::new_single(7887, SpecId::CANCUN));
 
-pub static CELO_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
-    ChainSpec::new(
-        42220,
-        SpecId::CANCUN,
-        BTreeMap::from([(SpecId::CANCUN, ForkCondition::Block(0))]),
-    )
-});
+pub static CELO_CHAIN_SPEC: Lazy<ChainSpec> =
+    Lazy::new(|| ChainSpec::new_single(42220, SpecId::CANCUN));
 
-pub static ZIRCUIT1_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
-    ChainSpec::new(
-        48900,
-        SpecId::CANCUN,
-        BTreeMap::from([(SpecId::CANCUN, ForkCondition::Block(0))]),
-    )
-});
+pub static ZIRCUIT1_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> =
+    Lazy::new(|| ChainSpec::new_single(48900, SpecId::CANCUN));
 
-pub static ZIRCUIT1_TESTNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
-    ChainSpec::new(
-        48899,
-        SpecId::CANCUN,
-        BTreeMap::from([(SpecId::CANCUN, ForkCondition::Block(0))]),
-    )
-});
+pub static ZIRCUIT1_TESTNET_CHAIN_SPEC: Lazy<ChainSpec> =
+    Lazy::new(|| ChainSpec::new_single(48899, SpecId::CANCUN));
 
 #[cfg(test)]
 mod tests {
