@@ -1,38 +1,55 @@
 import { useMemo, useEffect, useState } from "react";
-import { createVlayerClient, VCallResult } from "@vlayer/sdk";
+import { BrandedHash, createVlayerClient } from "@vlayer/sdk";
+import {
+  type Address,
+  type Abi,
+  ContractFunctionName,
+  ContractFunctionReturnType,
+  AbiStateMutability,
+  ContractFunctionArgs,
+} from "viem";
 
-import { type Address, type Abi } from "viem";
-interface UseProverParams {
+interface UseProverParams<T extends Abi, F extends ContractFunctionName<T>> {
   addr: Address;
-  abi: Abi;
-  func: string;
+  abi: T;
+  func: F;
   chainId: number;
 }
-interface UseProverReturn {
-  prove: (proverArgs: string[]) => Promise<string | undefined>;
+interface UseProverReturn<T extends Abi, F extends ContractFunctionName<T>> {
+  prove: (
+    proverArgs: ContractFunctionArgs<T, AbiStateMutability, F>,
+  ) => Promise<BrandedHash<T, F> | undefined>;
   provingError: string | null;
-  proof: VCallResult | null;
+  proof: ContractFunctionReturnType<T, AbiStateMutability, F> | null;
 }
 
-const useProver = ({
+const useProver = <T extends Abi, F extends ContractFunctionName<T>>({
   addr,
   abi,
   func,
   chainId,
-}: UseProverParams): UseProverReturn => {
-  const [provingHash, setProvingHash] = useState<string | null>(null);
+}: UseProverParams<T, F>): UseProverReturn<T, F> => {
+  const [provingHash, setProvingHash] = useState<BrandedHash<T, F> | null>(
+    null,
+  );
   const [provingError, setProvingError] = useState<string | null>(null);
-  const [proof, setProof] = useState(null);
+  const [proof, setProof] = useState<ContractFunctionReturnType<
+    T,
+    AbiStateMutability,
+    F
+  > | null>(null);
 
   const vlayer = useMemo(
     () =>
       createVlayerClient({
-        url: import.meta.env.VITE_PROVER_URL,
+        url: import.meta.env.VITE_PROVER_URL as string,
       }),
     [],
   );
 
-  const prove = async (args: string[]) => {
+  const prove = async (
+    args: ContractFunctionArgs<T, AbiStateMutability, F>,
+  ) => {
     try {
       const hash = await vlayer.prove({
         address: addr,
@@ -51,20 +68,20 @@ const useProver = ({
     }
   };
 
-  const waitForProof = async (hash: string) => {
-    try {
-      console.log("Waiting for proving result: ", hash);
-      const result = await vlayer.waitForProvingResult(hash);
-      setProof(result);
-      console.log("Proof ready:", result);
-    } catch (err) {
-      setProvingError("Cannot finalize proving, check logs");
-      console.error(err);
-    }
-  };
-
   useEffect(() => {
-    if (provingHash) waitForProof(provingHash);
+    if (provingHash) {
+      const waitForProof = async () => {
+        console.log("Waiting for proving result: ", provingHash);
+        const result = await vlayer.waitForProvingResult(provingHash);
+        setProof(result);
+        console.log("Proof ready:", result);
+      };
+
+      waitForProof().catch((err) => {
+        setProvingError("Cannot finalize proving, check logs");
+        console.error(err);
+      });
+    }
   }, [provingHash]);
 
   return {
