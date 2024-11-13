@@ -1,81 +1,36 @@
 use std::collections::BTreeMap;
 
 use alloy_primitives::{BlockNumber, ChainId};
-use anyhow::{bail, Context};
+use anyhow::bail;
 use derive_new::new;
 use revm::primitives::SpecId;
 use serde::{Deserialize, Serialize};
 
-use crate::{config::CHAIN_MAP, eip1559::Eip1559Constants, error::ChainError, fork::ForkCondition};
+use crate::{config::CHAIN_MAP, error::ChainError};
 
 #[derive(Debug, Clone, Serialize, Deserialize, new)]
 pub struct ChainSpec {
-    chain_id: ChainId,
-    max_spec_id: SpecId,
-    hard_forks: BTreeMap<SpecId, ForkCondition>,
-    gas_constants: BTreeMap<SpecId, Eip1559Constants>,
+    pub chain_id: ChainId,
+    forks: BTreeMap<SpecId, ActivationCondition>,
 }
 
 impl ChainSpec {
     /// Creates a new configuration consisting of only one specification ID.
-    pub fn new_single(
-        chain_id: ChainId,
-        spec_id: SpecId,
-        eip_1559_constants: Eip1559Constants,
-    ) -> Self {
+    pub fn new_single(chain_id: ChainId, spec_id: SpecId) -> Self {
         ChainSpec {
             chain_id,
-            max_spec_id: spec_id,
-            hard_forks: BTreeMap::from([(spec_id, ForkCondition::Block(0))]),
-            gas_constants: BTreeMap::from([(spec_id, eip_1559_constants)]),
+            forks: BTreeMap::from([(spec_id, ActivationCondition::Block(0))]),
         }
     }
 
-    pub fn chain_id(&self) -> ChainId {
-        self.chain_id
-    }
-
-    pub fn validate_spec_id(&self, spec_id: SpecId) -> anyhow::Result<()> {
-        let (min_spec_id, _) = self.hard_forks.first_key_value().context("no hard forks")?;
-        if spec_id < *min_spec_id {
-            bail!("expected >= {:?}, got {:?}", min_spec_id, spec_id);
-        }
-        if spec_id > self.max_spec_id {
-            bail!("expected <= {:?}, got {:?}", self.max_spec_id, spec_id);
-        }
-        Ok(())
-    }
-
-    /// Returns the [SpecId] for a given block number and timestamp or an error if not
-    /// supported.
+    /// Returns the [SpecId] for a given block number and timestamp or an error if not supported.
     pub fn active_fork(&self, block_number: BlockNumber, timestamp: u64) -> anyhow::Result<SpecId> {
-        match self.spec_id(block_number, timestamp) {
-            Some(spec_id) => {
-                if spec_id > self.max_spec_id {
-                    bail!("expected <= {:?}, got {:?}", self.max_spec_id, spec_id);
-                } else {
-                    Ok(spec_id)
-                }
-            }
-            None => bail!("no supported fork for block {}", block_number),
-        }
-    }
-
-    /// Returns the Eip1559 constants for a given [SpecId].
-    pub fn gas_constants(&self, spec_id: SpecId) -> Option<&Eip1559Constants> {
-        self.gas_constants
-            .range(..=spec_id)
-            .next_back()
-            .map(|(_, v)| v)
-    }
-
-    pub fn spec_id(&self, block_number: BlockNumber, timestamp: u64) -> Option<SpecId> {
-        for (spec_id, fork) in self.hard_forks.iter().rev() {
+        for (spec_id, fork) in self.forks.iter().rev() {
             if fork.active(block_number, timestamp) {
-                return Some(*spec_id);
+                return Ok(*spec_id);
             }
         }
-        None
+        bail!("unsupported fork for block {}", block_number)
     }
 }
 
@@ -87,5 +42,20 @@ impl TryFrom<ChainId> for ChainSpec {
             .get(&chain_id)
             .ok_or(ChainError::UnsupportedChainId(chain_id))?;
         Ok((**chain_spec).clone())
+    }
+}
+
+#[derive(Debug, Clone, Serialize, Deserialize)]
+pub enum ActivationCondition {
+    Block(BlockNumber),
+    Timestamp(u64),
+}
+
+impl ActivationCondition {
+    pub fn active(&self, block_number: BlockNumber, timestamp: u64) -> bool {
+        match self {
+            ActivationCondition::Block(block) => *block <= block_number,
+            ActivationCondition::Timestamp(ts) => *ts <= timestamp,
+        }
     }
 }
