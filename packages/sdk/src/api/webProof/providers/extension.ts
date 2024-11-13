@@ -50,8 +50,6 @@ class ExtensionWebProofProvider implements WebProofProvider {
         action: ExtensionAction.NotifyZkProvingStatus,
         payload: { status },
       });
-    } else {
-      console.log("Run out of chrome context");
     }
   }
   private connectToExtension() {
