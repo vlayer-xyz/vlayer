@@ -26,7 +26,7 @@ export const createContext = async (config: Config) => {
   return {
     ...config,
     chain,
-    deployer: privateKeyToAccount(config.privateKey),
+    account: privateKeyToAccount(config.privateKey),
     jsonRpcUrl,
     ethClient: createEthClient(chain, jsonRpcUrl),
     confirmations: getChainConfirmations(config.chainName),

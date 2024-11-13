@@ -34,26 +34,26 @@ export const deploy = async ({
 }) => {
   console.log("Starting contract deployment process...");
   const config = getConfig();
-  const { chain, ethClient, deployer } = await createContext(config);
+  const { chain, ethClient, account } = await createContext(config);
 
   console.log("Deploying prover contract...");
   const proverHash = await ethClient.deployContract({
+    chain,
+    account,
+    args: [],
     abi: proverSpec.abi,
     bytecode: proverSpec.bytecode.object,
-    account: deployer,
-    args: [],
-    chain,
   });
   const prover = await waitForContracDeploy(ethClient, proverHash);
   console.log(`Prover contract deployed at: ${prover}`);
 
   console.log("Deploying verifier contract...");
   const verifierHash = await ethClient.deployContract({
+    chain,
+    account,
+    args: [prover],
     abi: verifierSpec.abi,
     bytecode: verifierSpec.bytecode.object,
-    account: deployer,
-    args: [prover],
-    chain,
   });
   const verifier = await waitForContracDeploy(ethClient, verifierHash);
   console.log(`Verifier contract deployed at: ${verifier}`);

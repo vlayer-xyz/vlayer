@@ -52,7 +52,7 @@ async function testSuccessProvingAndVerification() {
     chainId: chain.id,
   });
   const result = await vlayer.waitForProvingResult(hash);
-  const [proof, twitterHandle, address] = result as [Proof, string, string];
+  const [proof, twitterHandle, address] = result;
   console.log("Has Proof");
 
   if (!isAddress(address)) {
