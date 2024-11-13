@@ -1,4 +1,4 @@
-import { createVlayerClient, Proof } from "@vlayer/sdk";
+import { createVlayerClient } from "@vlayer/sdk";
 import proverSpec from "../out/WebProofProver.sol/WebProofProver";
 import verifierSpec from "../out/WebProofVerifier.sol/WebProofVerifier";
 import tls_proof from "./tls_proof.json";
@@ -23,10 +23,10 @@ writeEnvVariables(".env", {
 });
 
 const config = getConfig();
-const { chain, ethClient, deployer, proverUrl, confirmations } =
+const { chain, ethClient, account, proverUrl, confirmations } =
   await createContext(config);
 
-const twitterUserAddress = deployer.address;
+const twitterUserAddress = account.address;
 const vlayer = createVlayerClient({
   url: proverUrl,
 });
@@ -67,7 +67,7 @@ async function testSuccessProvingAndVerification() {
     functionName: "verify",
     args: [proof, twitterHandle, address],
     chain,
-    account: deployer,
+    account: account,
   });
 
   await ethClient.waitForTransactionReceipt({
