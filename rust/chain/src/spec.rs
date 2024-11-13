@@ -50,14 +50,6 @@ impl ChainSpec {
         }
     }
 
-    /// Returns the Eip1559 constants for a given [SpecId].
-    pub fn gas_constants(&self, spec_id: SpecId) -> Option<&Eip1559Constants> {
-        self.gas_constants
-            .range(..=spec_id)
-            .next_back()
-            .map(|(_, v)| v)
-    }
-
     pub fn spec_id(&self, block_number: BlockNumber, timestamp: u64) -> Option<SpecId> {
         for (spec_id, fork) in self.hard_forks.iter().rev() {
             if fork.active(block_number, timestamp) {

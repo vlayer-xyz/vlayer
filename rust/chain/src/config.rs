@@ -387,17 +387,4 @@ mod tests {
         assert_eq!(ETH_MAINNET_CHAIN_SPEC.spec_id(17034869, 0), Some(SpecId::MERGE));
         assert_eq!(ETH_MAINNET_CHAIN_SPEC.spec_id(0, 1681338455), Some(SpecId::SHANGHAI));
     }
-
-    #[test]
-    fn gas_constants() {
-        assert_eq!(ETH_MAINNET_CHAIN_SPEC.gas_constants(SpecId::BERLIN), None);
-        assert_eq!(
-            ETH_MAINNET_CHAIN_SPEC.gas_constants(SpecId::MERGE),
-            Some(&Eip1559Constants::default())
-        );
-        assert_eq!(
-            ETH_MAINNET_CHAIN_SPEC.gas_constants(SpecId::SHANGHAI),
-            Some(&Eip1559Constants::default())
-        );
-    }
 }
