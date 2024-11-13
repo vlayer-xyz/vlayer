@@ -1,9 +1,9 @@
 use alloy_primitives::{keccak256, BlockNumber, B256};
 use alloy_rlp::Encodable;
+use common_guest::Hashable;
 use derive_new::new;
 use revm::primitives::BlockEnv;
 use serde::{Deserialize, Serialize};
-use common::Hashable;
 
 use crate::{casting_utils::try_downcast, EvmBlockHeader};
 

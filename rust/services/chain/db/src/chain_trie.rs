@@ -1,8 +1,9 @@
 use block_trie::BlockTrie;
 use chain_common::{ChainProofReceipt, ProofVerificationError};
+use chain_guest_wrapper::chain_guest;
+use common::Hashable;
 use derive_new::new;
 use mpt::MerkleTrie;
-use common::Hashable;
 use u64_range::NonEmptyRange;
 
 #[derive(new)]
@@ -43,7 +44,7 @@ impl TryFrom<UnverifiedChainTrie> for ChainTrie {
             zk_proof,
         }: UnverifiedChainTrie,
     ) -> Result<Self, Self::Error> {
-        zk_proof.verify(trie.hash_slow())?;
+        zk_proof.verify(trie.hash_slow(), chain_guest().id)?;
         let block_trie = BlockTrie::from_unchecked(trie);
         Ok(ChainTrie::new(block_range, block_trie, zk_proof))
     }

@@ -1,8 +1,8 @@
 use alloy_primitives::{keccak256, Bytes, B256};
 use alloy_trie::EMPTY_ROOT_HASH;
+use common_guest::Hashable;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
-use common::Hashable;
 
 use crate::key_nibbles::KeyNibbles;
 

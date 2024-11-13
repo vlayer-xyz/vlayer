@@ -2,7 +2,7 @@ use alloy_primitives::B256;
 use alloy_rlp::encode_fixed_size;
 use block_header::EvmBlockHeader;
 use bytes::Bytes;
-use common::Hashable;
+use common_guest::Hashable;
 use mpt::{MerkleTrie, Node};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;

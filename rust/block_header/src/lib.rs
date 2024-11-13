@@ -9,12 +9,12 @@ use alloy_rlp::Encodable;
 use as_any::AsAny;
 use auto_impl::auto_impl;
 use casting_utils::is;
+pub use common_guest::Hashable;
 use dyn_clone::{clone_trait_object, DynClone};
 pub use eth::EthBlockHeader;
 pub use forge::ForgeBlockHeader;
 use revm::primitives::BlockEnv;
 use serde::{Deserialize, Serialize};
-pub use common::Hashable;
 
 /// An EVM abstraction of a block header.
 #[auto_impl(Box, &)]

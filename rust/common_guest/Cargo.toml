@@ -1,0 +1,9 @@
+[package]
+name = "common_guest"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+alloy-primitives = { workspace = true }
+anyhow = { workspace = true }
+auto_impl = { workspace = true }
