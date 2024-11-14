@@ -2,19 +2,18 @@ import fs from "fs";
 import { createVlayerClient, preverifyEmail } from "@vlayer/sdk";
 import proverSpec from "../out/EmailDomainProver.sol/EmailDomainProver";
 import verifierSpec from "../out/EmailProofVerifier.sol/EmailDomainVerifier";
-import { foundry } from "viem/chains";
 import {
   createContext,
   deployVlayerContracts,
   getConfig,
-  waitForTransactionReceipt,
 } from "@vlayer/sdk/config";
 
 const mimeEmail = fs.readFileSync("./testdata/verify_vlayer.eml").toString();
 
 const config = getConfig();
 
-const { ethClient, account: john } = await createContext(config);
+const { chain, ethClient, account: john, proverUrl, confirmations } =
+  await createContext(config);
 
 const { prover, verifier } = await deployVlayerContracts({
   proverSpec,
@@ -24,12 +23,14 @@ const { prover, verifier } = await deployVlayerContracts({
 });
 
 console.log("Proving...");
-const vlayer = createVlayerClient();
+const vlayer = createVlayerClient({
+  url: proverUrl,
+});
 const hash = await vlayer.prove({
   address: prover,
   proverAbi: proverSpec.abi,
   functionName: "main",
-  chainId: foundry.id,
+  chainId: chain.id,
   args: [await preverifyEmail(mimeEmail), john.address],
 });
 const result = await vlayer.waitForProvingResult(hash);
@@ -45,8 +46,11 @@ const verificationHash = await ethClient.writeContract({
   account: john,
 });
 
-const receipt = await waitForTransactionReceipt({
+const receipt = await ethClient.waitForTransactionReceipt({
   hash: verificationHash,
+  confirmations,
+  retryCount: 60,
+  retryDelay: 1000,
 });
 
 console.log(`Verification result: ${receipt.status}`);
