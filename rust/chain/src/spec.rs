@@ -42,17 +42,11 @@ impl ChainSpec {
         new_forks: Vec<Fork>,
     ) -> Self {
         assert_ne!(new_forks.len(), 0, "must have at least one fork");
-        let conditions = forks
-            .values()
-            .chain(new_forks.iter().map(|f| &f.activation));
-        let unique_conditions = conditions.clone().collect::<HashSet<_>>();
-        if unique_conditions.len() != new_forks.len() {
-            panic!("cannot have two forks with same activation condition");
-        }
         assert!(
-            is_ordered(&new_forks),
-            "forks are not ordered",
+            no_duplicated_activations(&new_forks),
+            "cannot have two forks with same activation condition",
         );
+        assert!(is_ordered(&new_forks), "forks are not ordered",);
 
         ChainSpec {
             chain_id,
@@ -89,6 +83,16 @@ fn is_ordered(forks: &Vec<Fork>) -> bool {
             return false;
         }
         last = fork;
+    }
+    true
+}
+
+fn no_duplicated_activations(forks: &Vec<Fork>) -> bool {
+    let mut set = HashSet::new();
+    for fork in forks {
+        if !set.insert(fork.activation.clone()) {
+            return false;
+        }
     }
     true
 }
@@ -141,9 +145,7 @@ mod tests {
         }
 
         #[test]
-        #[should_panic(
-            expected = "forks are not ordered"
-        )]
+        #[should_panic(expected = "forks are not ordered")]
         fn block_activation_should_go_before_timestamp_activation() {
             let fork_1 = Fork::new(SpecId::MERGE, ActivationCondition::Block(0));
             let fork_2 = Fork::new(SpecId::SHANGHAI, ActivationCondition::Timestamp(0));
