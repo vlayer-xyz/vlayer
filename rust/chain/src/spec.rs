@@ -27,7 +27,6 @@ impl ChainSpec {
             "cannot have two forks with same activation condition",
         );
         assert!(is_ordered(&forks), "forks are not ordered",);
-
         assert!(
             no_timestamps_before_2022(&forks),
             "forks cannot have activation timestamp earlier than 2022-01-01"
