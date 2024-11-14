@@ -3,7 +3,7 @@ use std::ops::RangeInclusive;
 use alloy_primitives::{BlockNumber, B256};
 use block_header::{EthBlockHeader, EvmBlockHeader};
 use block_trie::BlockTrie;
-use common_guest::Hashable;
+use common::Hashable;
 use risc0_zkvm::{serde::to_vec, sha::Digest, FakeReceipt, InnerReceipt, ReceiptClaim};
 
 use super::*;

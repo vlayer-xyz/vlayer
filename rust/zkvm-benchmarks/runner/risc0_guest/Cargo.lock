@@ -702,7 +702,7 @@ dependencies = [
  "alloy-rlp-derive",
  "as-any",
  "auto_impl",
- "common_guest",
+ "common",
  "derive-new",
  "dyn-clone",
  "revm",
@@ -717,7 +717,7 @@ dependencies = [
  "alloy-rlp",
  "block_header",
  "bytes",
- "common_guest",
+ "common",
  "mpt",
  "serde",
  "thiserror",
@@ -849,7 +849,7 @@ dependencies = [
  "chain",
  "chain_client",
  "chain_common",
- "common_guest",
+ "common",
  "derive-new",
  "derive_more",
  "email_proof",
@@ -977,12 +977,15 @@ dependencies = [
 ]
 
 [[package]]
-name = "common_guest"
+name = "common"
 version = "0.1.0"
 dependencies = [
  "alloy-primitives",
  "anyhow",
  "auto_impl",
+ "bytes",
+ "risc0-zkp",
+ "serde",
 ]
 
 [[package]]
@@ -2203,7 +2206,7 @@ dependencies = [
  "alloy-rlp-derive",
  "alloy-trie",
  "bytes",
- "common_guest",
+ "common",
  "derive_more",
  "itertools 0.13.0",
  "lazy_static",

@@ -9,7 +9,7 @@ alloy-rlp = { workspace = true }
 alloy-rlp-derive = { workspace = true }
 alloy-trie = { workspace = true }
 bytes = { workspace = true }
-common_guest = { workspace = true }
+common = { workspace = true }
 derive_more = { workspace = true }
 itertools = { workspace = true }
 lazy_static = { workspace = true }

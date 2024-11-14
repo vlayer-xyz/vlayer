@@ -1674,7 +1674,7 @@ dependencies = [
  "anyhow",
  "as-any",
  "auto_impl",
- "common_guest",
+ "common",
  "derive-new",
  "dyn-clone",
  "lazy_static",
@@ -1693,7 +1693,7 @@ dependencies = [
  "block_header",
  "bytes",
  "chain_test_utils",
- "common_guest",
+ "common",
  "mpt",
  "serde",
  "thiserror",
@@ -1910,7 +1910,7 @@ dependencies = [
  "chain",
  "chain_client",
  "chain_common",
- "common_guest",
+ "common",
  "derive-new",
  "derive_more 1.0.0",
  "email_proof",
@@ -2209,7 +2209,7 @@ dependencies = [
  "alloy-primitives",
  "block_header",
  "block_trie",
- "common_guest",
+ "common",
  "risc0-zkp",
  "risc0-zkvm",
  "serde",
@@ -2681,19 +2681,12 @@ dependencies = [
 name = "common"
 version = "0.1.0"
 dependencies = [
- "bytes",
- "common_guest",
- "risc0-zkp",
- "serde",
-]
-
-[[package]]
-name = "common_guest"
-version = "0.1.0"
-dependencies = [
  "alloy-primitives",
  "anyhow",
  "auto_impl",
+ "bytes",
+ "risc0-zkp",
+ "serde",
 ]
 
 [[package]]
@@ -6681,7 +6674,7 @@ dependencies = [
  "alloy-trie",
  "anyhow",
  "bytes",
- "common_guest",
+ "common",
  "derive_more 1.0.0",
  "itertools 0.13.0",
  "lazy_static",

@@ -4,7 +4,9 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+alloy-primitives = { workspace = true }
+anyhow = { workspace = true }
+auto_impl = { workspace = true }
 bytes = { workspace = true }
-common_guest = { workspace = true }
 risc0-zkp = { workspace = true }
 serde = { workspace = true }

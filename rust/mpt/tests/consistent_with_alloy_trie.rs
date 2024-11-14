@@ -2,7 +2,7 @@ use std::collections::BTreeMap;
 
 use alloy_primitives::{keccak256, U256};
 use alloy_trie::HashBuilder;
-use common_guest::Hashable;
+use common::Hashable;
 use mpt::{reorder_with_root_as_first, MerkleTrie};
 use nybbles::Nibbles;
 

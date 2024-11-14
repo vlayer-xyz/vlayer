@@ -19,7 +19,7 @@ block_header = { workspace = true }
 chain = { workspace = true }
 chain_client = { workspace = true }
 chain_common = { workspace = true }
-common_guest = { workspace = true }
+common = { workspace = true }
 derive-new = { workspace = true }
 derive_more = { workspace = true }
 email_proof = { workspace = true }
@@ -42,7 +42,7 @@ alloy-trie = { workspace = true }
 auto_impl = { workspace = true }
 block_trie = { workspace = true }
 bytemuck = { workspace = true }
-common_guest = { workspace = true }
+common = { workspace = true }
 serde_json = { workspace = true }
 test-log = { workspace = true }
 tokio = { workspace = true, features = ["rt", "macros"] }

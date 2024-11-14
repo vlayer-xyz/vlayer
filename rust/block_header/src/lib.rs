@@ -9,7 +9,7 @@ use alloy_rlp::Encodable;
 use as_any::AsAny;
 use auto_impl::auto_impl;
 use casting_utils::is;
-pub use common_guest::Hashable;
+pub use common::Hashable;
 use dyn_clone::{clone_trait_object, DynClone};
 pub use eth::EthBlockHeader;
 pub use forge::ForgeBlockHeader;
