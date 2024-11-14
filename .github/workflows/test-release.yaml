@@ -23,6 +23,8 @@ jobs:
         with:
           submodules: recursive
       - uses: hoverkraft-tech/compose-action@v2.0.2
+        env:
+          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
         with:
           compose-file: docker/web-proof/docker-compose-test-release.yaml
       - name: Test release
