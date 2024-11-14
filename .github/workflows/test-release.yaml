@@ -24,7 +24,13 @@ jobs:
       - uses: hoverkraft-tech/compose-action@v2.0.2
         with:
           compose-file: docker/web-proof/docker-compose-test-release.yaml
-      - name: Test release
+      - name: Test release on anvil
+        run: bash/test-release.sh
+      - name: Test release on OP Sepolia
+        env:
+          VLAYER_ENV: testnet
+          EXAMPLES_TEST_PRIVATE_KEY: ${{ secrets.EXAMPLES_TEST_PRIVATE_KEY }}
+          JSON_RPC_URL: "https://opt-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}"
         run: bash/test-release.sh
   test-js-sdk:
     name: Test js sdk release
