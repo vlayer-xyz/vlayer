@@ -26,7 +26,10 @@ impl ChainSpec {
             no_duplicated_activations(&forks),
             "duplicate activation conditions among forks are not allowed",
         );
-        assert!(is_ordered(&forks), "forks must be ordered by their activation conditions in ascending order",);
+        assert!(
+            is_ordered(&forks),
+            "forks must be ordered by their activation conditions in ascending order",
+        );
         assert!(
             no_timestamps_before_2022(&forks),
             "forks cannot have activation timestamp earlier than 2022-01-01"
@@ -163,7 +166,9 @@ mod tests {
         }
 
         #[test]
-        #[should_panic(expected = "forks must be ordered by their activation conditions in ascending order")]
+        #[should_panic(
+            expected = "forks must be ordered by their activation conditions in ascending order"
+        )]
         fn forks_should_be_ordered_by_activation() {
             ChainSpec::new(
                 1,
