@@ -3,8 +3,8 @@
 risc0_zkvm::guest::entry!(main);
 
 use alloy_sol_types::SolValue;
-use risc0_zkvm::guest::env;
 use chain_guest_wrapper::chain_guest;
+use risc0_zkvm::guest::env;
 
 #[tokio::main(flavor = "current_thread")]
 async fn main() {
