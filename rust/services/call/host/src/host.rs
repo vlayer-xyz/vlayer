@@ -16,6 +16,7 @@ use chain_client::{
     Client as ChainProofClient, RecordingClient as RecordingRpcClient,
     RpcClient as RpcChainProofClient,
 };
+use common::Guest;
 use config::HostConfig;
 use error::HostError;
 use ethers_core::types::BlockNumber as BlockTag;
@@ -39,6 +40,7 @@ pub struct Host {
     chain_proof_client: RecordingRpcClient,
     max_calldata_size: usize,
     verify_chain_proofs: bool,
+    guest: Guest,
 }
 
 impl Host {
@@ -83,7 +85,7 @@ impl Host {
     ) -> Result<Self, HostError> {
         let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
         let start_execution_location = (block_number, config.start_chain_id).into();
-        let prover = Prover::new(config.proof_mode, config.call_guest);
+        let prover = Prover::new(config.proof_mode, config.call_guest.elf.clone());
         let chain_proof_client = RecordingRpcClient::new(chain_proof_client);
 
         Ok(Host {
@@ -93,6 +95,7 @@ impl Host {
             chain_proof_client,
             max_calldata_size: config.max_calldata_size,
             verify_chain_proofs: config.verify_chain_proofs,
+            guest: config.call_guest,
         })
     }
 
@@ -142,7 +145,7 @@ impl Host {
             seal,
             raw_abi: raw_guest_output,
             proof_len,
-            call_guest_id: self.prover.guest.id.into(),
+            call_guest_id: self.guest.id.into(),
         })
     }
 

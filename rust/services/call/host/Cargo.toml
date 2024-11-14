@@ -9,6 +9,7 @@ alloy-primitives = { workspace = true, features = ["rlp", "serde"] }
 alloy-sol-types = { workspace = true }
 anyhow = { workspace = true }
 block_header = { workspace = true }
+bytes = { workspace = true }
 call_engine = { workspace = true }
 chain = { workspace = true }
 chain_client = { workspace = true, features = ["rpc"] }
@@ -32,6 +33,7 @@ url = { workspace = true }
 [dev-dependencies]
 alloy-sol-types = { workspace = true }
 anyhow = { workspace = true }
+call_guest_wrapper = { workspace = true }
 ctor = { workspace = true }
 dotenvy = { workspace = true }
 mock_chain_server = { workspace = true }
