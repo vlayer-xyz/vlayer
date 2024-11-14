@@ -65,7 +65,7 @@ const EmlUploadForm = () => {
     return addr;
   };
 
-  const manageError = (err: unknown) => {
+  const handleError = (err: unknown) => {
     console.log({ err });
     setIsSubmitting(false);
     if (err instanceof Error) {
@@ -106,7 +106,7 @@ const EmlUploadForm = () => {
         setSuccessMsg("Verified successfully.");
       }
     } catch (err) {
-      manageError(err);
+      handleError(err);
     }
   };
 
@@ -136,14 +136,14 @@ const EmlUploadForm = () => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     submit(e).catch((err) => {
-      manageError(err);
+      handleError(err);
     });
   };
 
   useEffect(() => {
     if (proof) {
       verifyProof().catch((err) => {
-        manageError(err);
+        handleError(err);
       });
     }
   }, [proof]);
