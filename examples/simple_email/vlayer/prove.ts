@@ -12,8 +12,13 @@ const mimeEmail = fs.readFileSync("./testdata/verify_vlayer.eml").toString();
 
 const config = getConfig();
 
-const { chain, ethClient, account: john, proverUrl, confirmations } =
-  await createContext(config);
+const {
+  chain,
+  ethClient,
+  account: john,
+  proverUrl,
+  confirmations,
+} = await createContext(config);
 
 const { prover, verifier } = await deployVlayerContracts({
   proverSpec,
