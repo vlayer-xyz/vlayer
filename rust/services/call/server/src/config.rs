@@ -77,7 +77,7 @@ impl ServerConfig {
             chain_proof_url: self.chain_proof_url.clone(),
             max_calldata_size: self.max_request_size,
             verify_chain_proofs: self.verify_chain_proofs,
-            call_guest: self.call_guest.clone(),
+            call_guest_elf: self.call_guest.clone(),
         }
     }
 }

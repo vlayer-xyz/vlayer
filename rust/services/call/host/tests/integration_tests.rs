@@ -130,7 +130,7 @@ fn create_host(
 ) -> Result<Host, HostError> {
     let config = HostConfig {
         start_chain_id: location.chain_id,
-        call_guest: GUEST_ELF.clone(),
+        call_guest_elf: GUEST_ELF.clone(),
         ..Default::default()
     };
     let block_number =

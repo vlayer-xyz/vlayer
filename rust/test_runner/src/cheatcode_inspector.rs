@@ -140,7 +140,7 @@ fn create_host<DB: Database>(
     let config = HostConfig {
         start_chain_id: TEST_CHAIN_ID,
         chain_proof_url,
-        call_guest: GUEST_ELF.clone(),
+        call_guest_elf: GUEST_ELF.clone(),
         ..Default::default()
     };
     let block_number = get_latest_block_number(&providers, config.start_chain_id)
