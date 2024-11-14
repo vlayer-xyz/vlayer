@@ -50,7 +50,7 @@ impl ChainSpec {
     }
 }
 
-fn is_ordered(forks: &Vec<Fork>) -> bool {
+fn is_ordered(forks: &[Fork]) -> bool {
     let mut iter = forks.iter();
     let mut last = iter.next().unwrap();
     for fork in iter {
@@ -92,8 +92,8 @@ pub struct Fork {
 impl Fork {
     fn cmp(&self, other: &Self) -> Ordering {
         match (&self.activation, &other.activation) {
-            (ActivationCondition::Block(a), ActivationCondition::Block(b)) => a.cmp(&b),
-            (ActivationCondition::Timestamp(a), ActivationCondition::Timestamp(b)) => a.cmp(&b),
+            (ActivationCondition::Block(a), ActivationCondition::Block(b)) => a.cmp(b),
+            (ActivationCondition::Timestamp(a), ActivationCondition::Timestamp(b)) => a.cmp(b),
             (ActivationCondition::Block(_), ActivationCondition::Timestamp(_)) => Ordering::Less,
             (ActivationCondition::Timestamp(_), ActivationCondition::Block(_)) => Ordering::Greater,
         }
