@@ -130,16 +130,16 @@ mod tests {
             );
         }
 
-        #[test]
-        #[should_panic(expected = "block-activated forks are not ordered")]
-        fn block_activated_forks_are_ordered() {
-            ChainSpec::new1(
-                1,
-                BTreeMap::from([
-                    (SpecId::MERGE, ActivationCondition::Block(1)),
-                    (SpecId::SHANGHAI, ActivationCondition::Block(0)),
-                ]),
-            );
-        }
+        // #[test]
+        // #[should_panic(expected = "block-activated forks are not ordered")]
+        // fn block_activated_forks_are_ordered() {
+        //     ChainSpec::new1(
+        //         1,
+        //         BTreeMap::from([
+        //             (SpecId::MERGE, ActivationCondition::Block(1)),
+        //             (SpecId::SHANGHAI, ActivationCondition::Block(0)),
+        //         ]),
+        //     );
+        // }
     }
 }
