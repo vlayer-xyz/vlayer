@@ -86,19 +86,21 @@ mod tests {
 
     mod fork_ord {
 
+        use SpecId::*;
+
         use super::*;
 
         #[test]
         fn ordered_by_activation() {
-            let merge_0 = Fork::new(SpecId::MERGE, Block(0));
-            let merge_1 = Fork::new(SpecId::MERGE, Block(1));
-            let shanghai_0 = Fork::new(SpecId::SHANGHAI, Block(0));
-            let shanghai_1 = Fork::new(SpecId::SHANGHAI, Block(1));
+            let merge_0 = Fork::new(MERGE, Block(0));
+            let merge_1 = Fork::new(MERGE, Block(1));
+            let shanghai_0 = Fork::new(SHANGHAI, Block(0));
+            let shanghai_1 = Fork::new(SHANGHAI, Block(1));
 
             assert!(merge_0 < merge_1);
+            assert!(shanghai_0 < shanghai_1);
             assert!(merge_0 == shanghai_0);
             assert!(!(merge_0 < shanghai_0));
-            assert!(shanghai_0 < shanghai_1);
         }
     }
 

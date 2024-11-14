@@ -16,12 +16,11 @@ pub struct ChainSpec {
 }
 
 impl ChainSpec {
-    pub fn new<V, F>(chain_id: ChainId, forks: V) -> Self
+    pub fn new<F>(chain_id: ChainId, forks: impl IntoIterator<Item = F>) -> Self
     where
-        V: Into<Vec<F>>,
         F: Into<Fork>,
     {
-        let forks: Vec<Fork> = forks.into().into_iter().map(|f| f.into()).collect();
+        let forks: Vec<Fork> = forks.into_iter().map(Into::into).collect();
         assert_ne!(forks.len(), 0, "chain spec must have at least one fork");
         assert!(
             forks.is_sorted_by(|a, b| a < b),

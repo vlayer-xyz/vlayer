@@ -4,7 +4,7 @@ use std::collections::HashMap;
 use alloy_chains::Chain;
 use alloy_primitives::ChainId;
 use once_cell::sync::Lazy;
-use revm::primitives::SpecId;
+use revm::primitives::SpecId::*;
 
 use crate::{
     fork::{after_block, after_timestamp},
@@ -91,10 +91,10 @@ pub static ETH_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
     ChainSpec::new(
         Chain::mainnet().id(),
         [
-            after_block(SpecId::FRONTIER, 0),
-            after_block(SpecId::MERGE, MAINNET_MERGE_BLOCK_NUMBER),
-            after_timestamp(SpecId::SHANGHAI, 1681338455),
-            after_timestamp(SpecId::CANCUN, 1710338135),
+            after_block(FRONTIER, 0),
+            after_block(MERGE, MAINNET_MERGE_BLOCK_NUMBER),
+            after_timestamp(SHANGHAI, 1681338455),
+            after_timestamp(CANCUN, 1710338135),
         ],
     )
 });
@@ -103,9 +103,9 @@ pub static ETH_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
     ChainSpec::new(
         Chain::sepolia().id(),
         [
-            after_block(SpecId::MERGE, 1735371),
-            after_timestamp(SpecId::SHANGHAI, 1677557088),
-            after_timestamp(SpecId::CANCUN, 1706655072),
+            after_block(MERGE, 1735371),
+            after_timestamp(SHANGHAI, 1677557088),
+            after_timestamp(CANCUN, 1706655072),
         ],
     )
 });
@@ -114,9 +114,9 @@ pub static BASE_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
     ChainSpec::new(
         Chain::base_mainnet().id(),
         [
-            after_block(SpecId::MERGE, 1735371),
-            after_timestamp(SpecId::SHANGHAI, 1677557088),
-            after_timestamp(SpecId::CANCUN, 1706655072),
+            after_block(MERGE, 1735371),
+            after_timestamp(SHANGHAI, 1677557088),
+            after_timestamp(CANCUN, 1706655072),
         ],
     )
 });
@@ -125,9 +125,9 @@ pub static BASE_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
     ChainSpec::new(
         Chain::base_sepolia().id(),
         [
-            after_block(SpecId::MERGE, 1735371),
-            after_timestamp(SpecId::SHANGHAI, 1677557088),
-            after_timestamp(SpecId::CANCUN, 1706655072),
+            after_block(MERGE, 1735371),
+            after_timestamp(SHANGHAI, 1677557088),
+            after_timestamp(CANCUN, 1706655072),
         ],
     )
 });
@@ -136,9 +136,9 @@ pub static OP_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
     ChainSpec::new(
         Chain::optimism_mainnet().id(),
         [
-            after_block(SpecId::MERGE, 1735371),
-            after_timestamp(SpecId::SHANGHAI, 1677557088),
-            after_timestamp(SpecId::CANCUN, 1706655072),
+            after_block(MERGE, 1735371),
+            after_timestamp(SHANGHAI, 1677557088),
+            after_timestamp(CANCUN, 1706655072),
         ],
     )
 });
@@ -147,9 +147,9 @@ pub static OP_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
     ChainSpec::new(
         Chain::optimism_sepolia().id(),
         [
-            after_block(SpecId::MERGE, 1735371),
-            after_timestamp(SpecId::SHANGHAI, 1677557088),
-            after_timestamp(SpecId::CANCUN, 1706655072),
+            after_block(MERGE, 1735371),
+            after_timestamp(SHANGHAI, 1677557088),
+            after_timestamp(CANCUN, 1706655072),
         ],
     )
 });
@@ -158,9 +158,9 @@ pub static POLYGON_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
     ChainSpec::new(
         137,
         [
-            after_block(SpecId::MERGE, 1735371),
-            after_timestamp(SpecId::SHANGHAI, 1677557088),
-            after_timestamp(SpecId::CANCUN, 1706655072),
+            after_block(MERGE, 1735371),
+            after_timestamp(SHANGHAI, 1677557088),
+            after_timestamp(CANCUN, 1706655072),
         ],
     )
 });
@@ -169,9 +169,9 @@ pub static POLYGON_AMOY_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
     ChainSpec::new(
         80002,
         [
-            after_block(SpecId::MERGE, 1735371),
-            after_timestamp(SpecId::SHANGHAI, 1677557088),
-            after_timestamp(SpecId::CANCUN, 1706655072),
+            after_block(MERGE, 1735371),
+            after_timestamp(SHANGHAI, 1677557088),
+            after_timestamp(CANCUN, 1706655072),
         ],
     )
 });
@@ -180,9 +180,9 @@ pub static ARBITRUM_NOVA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
     ChainSpec::new(
         42170,
         [
-            after_block(SpecId::MERGE, 1735371),
-            after_timestamp(SpecId::SHANGHAI, 1677557088),
-            after_timestamp(SpecId::CANCUN, 1706655072),
+            after_block(MERGE, 1735371),
+            after_timestamp(SHANGHAI, 1677557088),
+            after_timestamp(CANCUN, 1706655072),
         ],
     )
 });
@@ -191,9 +191,9 @@ pub static ARBITRUM_ONE_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
     ChainSpec::new(
         42161,
         [
-            after_block(SpecId::MERGE, 1735371),
-            after_timestamp(SpecId::SHANGHAI, 1677557088),
-            after_timestamp(SpecId::CANCUN, 1706655072),
+            after_block(MERGE, 1735371),
+            after_timestamp(SHANGHAI, 1677557088),
+            after_timestamp(CANCUN, 1706655072),
         ],
     )
 });
@@ -202,9 +202,9 @@ pub static ARBITRUM_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
     ChainSpec::new(
         421614,
         [
-            after_block(SpecId::MERGE, 1735371),
-            after_timestamp(SpecId::SHANGHAI, 1677557088),
-            after_timestamp(SpecId::CANCUN, 1706655072),
+            after_block(MERGE, 1735371),
+            after_timestamp(SHANGHAI, 1677557088),
+            after_timestamp(CANCUN, 1706655072),
         ],
     )
 });
@@ -213,9 +213,9 @@ pub static ZKSYNC_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
     ChainSpec::new(
         324,
         [
-            after_block(SpecId::MERGE, 1735371),
-            after_timestamp(SpecId::SHANGHAI, 1677557088),
-            after_timestamp(SpecId::CANCUN, 1706655072),
+            after_block(MERGE, 1735371),
+            after_timestamp(SHANGHAI, 1677557088),
+            after_timestamp(CANCUN, 1706655072),
         ],
     )
 });
@@ -224,60 +224,58 @@ pub static ZKSYNC_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
     ChainSpec::new(
         300,
         [
-            after_block(SpecId::MERGE, 1735371),
-            after_timestamp(SpecId::SHANGHAI, 1677557088),
-            after_timestamp(SpecId::CANCUN, 1706655072),
+            after_block(MERGE, 1735371),
+            after_timestamp(SHANGHAI, 1677557088),
+            after_timestamp(CANCUN, 1706655072),
         ],
     )
 });
 
 pub static TESTING_CHAIN_SPEC: Lazy<ChainSpec> =
-    Lazy::new(|| ChainSpec::new_single(TEST_CHAIN_ID, SpecId::MERGE));
+    Lazy::new(|| ChainSpec::new_single(TEST_CHAIN_ID, MERGE));
 
 pub static FLOW_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> =
-    Lazy::new(|| ChainSpec::new_single(747, SpecId::CANCUN));
+    Lazy::new(|| ChainSpec::new_single(747, CANCUN));
 
 pub static FLOW_TESTNET_CHAIN_SPEC: Lazy<ChainSpec> =
-    Lazy::new(|| ChainSpec::new_single(545, SpecId::CANCUN));
+    Lazy::new(|| ChainSpec::new_single(545, CANCUN));
 
 pub static SCROLL_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> =
-    Lazy::new(|| ChainSpec::new_single(534352, SpecId::CANCUN));
+    Lazy::new(|| ChainSpec::new_single(534352, CANCUN));
 
 pub static SCROLL_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> =
-    Lazy::new(|| ChainSpec::new_single(534351, SpecId::CANCUN));
+    Lazy::new(|| ChainSpec::new_single(534351, CANCUN));
 
 pub static MANTLE_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> =
-    Lazy::new(|| ChainSpec::new_single(5000, SpecId::CANCUN));
+    Lazy::new(|| ChainSpec::new_single(5000, CANCUN));
 
 pub static LINEA_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> =
-    Lazy::new(|| ChainSpec::new_single(59144, SpecId::CANCUN));
+    Lazy::new(|| ChainSpec::new_single(59144, CANCUN));
 
 pub static LINEA_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> =
-    Lazy::new(|| ChainSpec::new_single(59141, SpecId::CANCUN));
+    Lazy::new(|| ChainSpec::new_single(59141, CANCUN));
 
 pub static BITKUB_CHAIN_CHAIN_SPEC: Lazy<ChainSpec> =
-    Lazy::new(|| ChainSpec::new_single(96, SpecId::CANCUN));
+    Lazy::new(|| ChainSpec::new_single(96, CANCUN));
 
 pub static BITKUB_CHAIN_TESTNET_CHAIN_SPEC: Lazy<ChainSpec> =
-    Lazy::new(|| ChainSpec::new_single(25925, SpecId::CANCUN));
+    Lazy::new(|| ChainSpec::new_single(25925, CANCUN));
 
-pub static KINTO_CHAIN_SPEC: Lazy<ChainSpec> =
-    Lazy::new(|| ChainSpec::new_single(7887, SpecId::CANCUN));
+pub static KINTO_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| ChainSpec::new_single(7887, CANCUN));
 
-pub static CELO_CHAIN_SPEC: Lazy<ChainSpec> =
-    Lazy::new(|| ChainSpec::new_single(42220, SpecId::CANCUN));
+pub static CELO_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| ChainSpec::new_single(42220, CANCUN));
 
 pub static ZIRCUIT1_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> =
-    Lazy::new(|| ChainSpec::new_single(48900, SpecId::CANCUN));
+    Lazy::new(|| ChainSpec::new_single(48900, CANCUN));
 
 pub static ZIRCUIT1_TESTNET_CHAIN_SPEC: Lazy<ChainSpec> =
-    Lazy::new(|| ChainSpec::new_single(48899, SpecId::CANCUN));
+    Lazy::new(|| ChainSpec::new_single(48899, CANCUN));
 
 pub static GNOSIS_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> =
-    Lazy::new(|| ChainSpec::new_single(100, SpecId::CANCUN));
+    Lazy::new(|| ChainSpec::new_single(100, CANCUN));
 
 pub static GNOSIS_CHIADO_CHAIN_SPEC: Lazy<ChainSpec> =
-    Lazy::new(|| ChainSpec::new_single(10200, SpecId::CANCUN));
+    Lazy::new(|| ChainSpec::new_single(10200, CANCUN));
 
 pub static PHENIX_CHAIN_SPEC: Lazy<ChainSpec> =
-    Lazy::new(|| ChainSpec::new_single(8008135, SpecId::CANCUN));
+    Lazy::new(|| ChainSpec::new_single(8008135, CANCUN));
