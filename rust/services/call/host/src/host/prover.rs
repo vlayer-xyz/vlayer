@@ -21,7 +21,7 @@ type Result<T> = result::Result<T, Error>;
 #[derive(Debug, Clone, Default)]
 pub struct Prover {
     prover: Risc0Prover,
-    pub guest_elf: Bytes,
+    guest_elf: Bytes,
 }
 
 impl Prover {
