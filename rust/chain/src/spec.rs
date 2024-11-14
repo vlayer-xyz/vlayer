@@ -16,6 +16,23 @@ pub struct ChainSpec {
     forks: BTreeMap<SpecId, ActivationCondition>,
 }
 
+#[derive(Debug, PartialEq, Eq)]
+struct Fork {
+    spec: SpecId,
+    activation: ActivationCondition,
+}
+
+impl Fork {
+    fn cmp(&self, other: &Self) -> Ordering {
+        match (&self.activation, &other.activation) {
+            (ActivationCondition::Block(a), ActivationCondition::Block(b)) => a.cmp(&b),
+            (ActivationCondition::Timestamp(a), ActivationCondition::Timestamp(b)) => a.cmp(&b),
+            (ActivationCondition::Block(_), ActivationCondition::Timestamp(_)) => Ordering::Less,
+            (ActivationCondition::Timestamp(_), ActivationCondition::Block(_)) => Ordering::Greater,
+        }
+    }
+}
+
 impl ChainSpec {
     pub fn new1(chain_id: ChainId, forks: BTreeMap<SpecId, ActivationCondition>) -> Self {
         assert_ne!(forks.len(), 0, "must have at least one fork");
