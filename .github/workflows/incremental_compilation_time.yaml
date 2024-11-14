@@ -14,6 +14,8 @@ concurrency:
   # Do not cancel jobs on main by forcing a unique group name.
   group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
   cancel-in-progress: true
+permissions:
+  pull-requests: write
 
 jobs:
   rust-incremental-compilation-time:
@@ -33,3 +35,24 @@ jobs:
         working-directory: rust
         run: |
           cargo build
+
+      - name: Incremental compilation
+        working-directory: rust
+        run: |
+          /usr/bin/time -f %E -o incremental_compilation_time cargo build --timings
+          echo "INCREMENTAL_COMPILATION_TIME=$(cat incremental_compilation_time)" >> $GITHUB_ENV
+      
+      - name: Upload HTML Timings Report
+        uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
+        with:
+          name: timings-report.html
+          path: rust/target/cargo-timings/cargo-timing.html
+          retention-days: 7
+
+      - uses: marocchino/sticky-pull-request-comment@v2
+        if: github.event_name == 'pull_request'
+        with:
+          header: Incremental build timings
+          message: |
+            🐢 Incremental Compilation Time: **${{ env.INCREMENTAL_COMPILATION_TIME }}**.
+            [View the HTML report here](https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }})
