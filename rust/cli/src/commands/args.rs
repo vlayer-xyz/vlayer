@@ -52,12 +52,9 @@ impl ServeArgs {
 pub(crate) enum TemplateOption {
     #[default]
     Simple,
-    Airdrop,
-    PrivateAirdrop,
     SimpleEmail,
     SimpleTeleport,
     SimpleTimeTravel,
-    ERC20Balances,
     WebProof,
     EmailProof,
 }
@@ -82,12 +79,9 @@ impl fmt::Display for TemplateOption {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             TemplateOption::Simple => write!(f, "simple"),
-            TemplateOption::Airdrop => write!(f, "airdrop"),
-            TemplateOption::PrivateAirdrop => write!(f, "private_airdrop"),
             TemplateOption::SimpleEmail => write!(f, "simple_email"),
             TemplateOption::SimpleTeleport => write!(f, "simple_teleport"),
             TemplateOption::SimpleTimeTravel => write!(f, "simple_time_travel"),
-            TemplateOption::ERC20Balances => write!(f, "erc20_balances"),
             TemplateOption::WebProof => write!(f, "web_proof"),
             TemplateOption::EmailProof => write!(f, "email_proof"),
         }
