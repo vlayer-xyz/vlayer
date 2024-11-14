@@ -16,7 +16,7 @@ const endBlock = 17985294n;
 const step = 9000n;
 
 const config = getConfig();
-const { ethClient, account } = await createContext(config);
+const { ethClient, account, proverUrl } = await createContext(config);
 
 const { prover, verifier } = await deployVlayerContracts({
   proverSpec,
@@ -25,7 +25,9 @@ const { prover, verifier } = await deployVlayerContracts({
   verifierArgs: [],
 });
 
-const vlayer = createVlayerClient();
+const vlayer = createVlayerClient({
+  url: proverUrl,
+});
 
 const provingHash = await vlayer.prove({
   address: prover,
