@@ -14,9 +14,6 @@ cd "${VLAYER_HOME}/packages/sdk"
 bun run build
 echo '::endgroup::'
 
-
-EXAMPLES="email_proof simple simple_email simple_teleport simple_time_travel web_proof"
-
 for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ; do
   example_name=$(basename "${example}")
 
