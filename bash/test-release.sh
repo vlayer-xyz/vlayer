@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-set -ueo pipefail
+# set -ueo pipefail
 
 if [ -z "${VLAYER_ENV:-}" ]; then
     echo "Error: VLAYER_ENV is not set."
