@@ -21,12 +21,12 @@ impl ChainSpec {
         F: Into<Fork>,
     {
         let forks: Vec<Fork> = forks.into().into_iter().map(|f| f.into()).collect();
-        assert_ne!(forks.len(), 0, "must have at least one fork");
+        assert_ne!(forks.len(), 0, "chain spec must have at least one fork");
         assert!(
             no_duplicated_activations(&forks),
-            "cannot have two forks with same activation condition",
+            "duplicate activation conditions among forks are not allowed",
         );
-        assert!(is_ordered(&forks), "forks are not ordered",);
+        assert!(is_ordered(&forks), "forks must be ordered by their activation conditions in ascending order",);
         assert!(
             no_timestamps_before_2022(&forks),
             "forks cannot have activation timestamp earlier than 2022-01-01"
@@ -144,15 +144,15 @@ mod tests {
         use super::*;
 
         #[test]
-        #[should_panic(expected = "must have at least one fork")]
+        #[should_panic(expected = "chain spec must have at least one fork")]
         fn panics_if_no_forks() {
             let empty_forks: Vec<Fork> = vec![];
             ChainSpec::new(1, empty_forks);
         }
 
         #[test]
-        #[should_panic(expected = "cannot have two forks with same activation condition")]
-        fn cannot_have_two_forks_with_same_value() {
+        #[should_panic(expected = "duplicate activation conditions among forks are not allowed")]
+        fn duplicate_activations() {
             ChainSpec::new(
                 1,
                 [
@@ -163,7 +163,7 @@ mod tests {
         }
 
         #[test]
-        #[should_panic(expected = "forks are not ordered")]
+        #[should_panic(expected = "forks must be ordered by their activation conditions in ascending order")]
         fn forks_should_be_ordered_by_activation() {
             ChainSpec::new(
                 1,
