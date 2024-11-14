@@ -32,7 +32,7 @@ VLAYER_HOME=$(git rev-parse --show-toplevel)
 for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ; do
     example_name=$(basename "${example}"  | tr '_' '-')
 
-    if [ ! -f "${example}/.env.${VLAYER_ENV}" ]; then
+    if [ ! -f "${example}/vlayer/.env.${VLAYER_ENV}" ]; then
         echo "Skipping ${example_name} as .env.${VLAYER_ENV} file is not defined"
         continue
     fi
