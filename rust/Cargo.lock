@@ -2685,6 +2685,7 @@ dependencies = [
  "anyhow",
  "auto_impl",
  "bytes",
+ "derive_more 1.0.0",
  "risc0-zkp",
  "serde",
 ]

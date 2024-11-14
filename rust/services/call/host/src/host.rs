@@ -85,7 +85,7 @@ impl Host {
     ) -> Result<Self, HostError> {
         let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
         let start_execution_location = (block_number, config.start_chain_id).into();
-        let prover = Prover::new(config.proof_mode, config.call_guest.elf.clone());
+        let prover = Prover::new(config.proof_mode, &config.call_guest);
         let chain_proof_client = RecordingRpcClient::new(chain_proof_client);
 
         Ok(Host {

@@ -2,7 +2,7 @@ use std::result;
 
 use chain_common::ChainProofReceipt;
 use chain_guest::Input;
-use chain_guest_wrapper::chain_guest;
+use chain_guest_wrapper::GUEST;
 use host_utils::{ProofMode, Prover as Risc0Prover};
 use risc0_zkvm::{ExecutorEnv, ProveInfo};
 use thiserror::Error;
@@ -38,7 +38,7 @@ impl Prover {
 
         let ProveInfo { receipt, .. } = self
             .0
-            .prove(executor_env, &chain_guest().elf)
+            .prove(executor_env, &GUEST.elf)
             .map_err(|err| Error::Prover(err.to_string()))?;
         Ok(receipt.into())
     }

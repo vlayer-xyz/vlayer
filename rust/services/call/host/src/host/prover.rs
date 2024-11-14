@@ -25,10 +25,10 @@ pub struct Prover {
 }
 
 impl Prover {
-    pub fn new(proof_mode: ProofMode, guest_elf: impl Into<Bytes>) -> Self {
+    pub fn new(proof_mode: ProofMode, guest_elf: impl AsRef<Bytes>) -> Self {
         Self {
             prover: Risc0Prover::new(proof_mode),
-            guest_elf: guest_elf.into(),
+            guest_elf: guest_elf.as_ref().clone(), // Bytes is cheap to clone
         }
     }
 
@@ -62,13 +62,13 @@ fn build_executor_env(input: &Input) -> anyhow::Result<ExecutorEnv<'static>> {
 
 #[cfg(test)]
 mod tests {
-    use call_guest_wrapper::call_guest;
+    use call_guest_wrapper::GUEST;
 
     use super::*;
 
     #[test]
     fn invalid_input() {
-        let res = Prover::new(ProofMode::Fake, call_guest().elf).prove(&Input::default());
+        let res = Prover::new(ProofMode::Fake, &GUEST).prove(&Input::default());
 
         assert!(matches!(
             res.map(|_| ()).unwrap_err(),

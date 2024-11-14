@@ -6,7 +6,7 @@ use call_engine::{
     },
     Call, HostOutput, Proof, Seal,
 };
-use call_guest_wrapper::call_guest;
+use call_guest_wrapper::GUEST;
 use call_host::host::{config::HostConfig, get_latest_block_number, Host};
 use chain::TEST_CHAIN_ID;
 use chain_client::RpcClient as RpcChainProofClient;
@@ -140,7 +140,7 @@ fn create_host<DB: Database>(
     let config = HostConfig {
         start_chain_id: TEST_CHAIN_ID,
         chain_proof_url,
-        call_guest: call_guest(),
+        call_guest: GUEST.clone(),
         ..Default::default()
     };
     let block_number = get_latest_block_number(&providers, config.start_chain_id)

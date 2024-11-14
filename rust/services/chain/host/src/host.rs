@@ -9,7 +9,7 @@ use block_fetcher::BlockFetcher;
 use block_trie::BlockTrie;
 use chain_db::{ChainDb, ChainTrie, ChainUpdate, Mode};
 use chain_guest::Input;
-use chain_guest_wrapper::chain_guest;
+use chain_guest_wrapper::GUEST;
 pub use config::HostConfig;
 pub use error::HostError;
 use ethers::{
@@ -95,7 +95,7 @@ where
         let trie = BlockTrie::init(&latest_block)?;
 
         let input = Input::Initialize {
-            elf_id: chain_guest().id,
+            elf_id: GUEST.id,
             block: latest_block,
         };
         let receipt = self.prover.prove(&input, None)?;
@@ -133,7 +133,7 @@ where
         trie.append(append_blocks.iter())?;
 
         let input = Input::AppendPrepend {
-            elf_id: chain_guest().id,
+            elf_id: GUEST.id,
             prepend_blocks,
             append_blocks,
             old_leftmost_block,

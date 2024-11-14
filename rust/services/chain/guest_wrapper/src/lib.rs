@@ -6,13 +6,8 @@ mod private {
     include!(concat!(env!("OUT_DIR"), "/methods.rs"));
 }
 
-pub fn chain_guest() -> GuestElf {
-    #[cfg(not(clippy))]
-    {
-        GuestElf::new(private::RISC0_CHAIN_GUEST_ID, private::RISC0_CHAIN_GUEST_ELF)
-    }
-    #[cfg(clippy)]
-    {
-        GuestElf::default()
-    }
-}
+#[cfg(not(clippy))]
+pub static GUEST: GuestElf =
+    GuestElf::new(private::RISC0_CHAIN_GUEST_ID, private::RISC0_CHAIN_GUEST_ELF);
+#[cfg(clippy)]
+pub static GUEST: GuestElf = GuestElf::default();

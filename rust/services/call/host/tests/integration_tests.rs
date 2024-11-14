@@ -3,7 +3,7 @@ use std::{collections::HashMap, env};
 use alloy_chains::{Chain, NamedChain};
 use alloy_primitives::{address, b256, uint, Address, ChainId};
 use alloy_sol_types::{sol, SolCall};
-use call_guest_wrapper::call_guest;
+use call_guest_wrapper::GUEST;
 use call_host::{
     host::{config::HostConfig, error::HostError, get_block_header, Host},
     Call,
@@ -130,7 +130,7 @@ fn create_host(
 ) -> Result<Host, HostError> {
     let config = HostConfig {
         start_chain_id: location.chain_id,
-        call_guest: call_guest(),
+        call_guest: GUEST.clone(),
         ..Default::default()
     };
     let block_number =

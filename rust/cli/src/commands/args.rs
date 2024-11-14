@@ -1,7 +1,7 @@
 use std::fmt;
 
 use alloy_primitives::ChainId;
-use call_guest_wrapper::call_guest;
+use call_guest_wrapper::GUEST;
 use call_server::{ProofMode, ServerConfig};
 use clap::{ArgAction, Parser, ValueEnum};
 
@@ -45,7 +45,7 @@ impl ServeArgs {
             self.port,
             chain_proof_server_url,
             self.verify_chain_proofs,
-            call_guest(),
+            GUEST.clone(),
         )
     }
 }
