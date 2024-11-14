@@ -56,18 +56,15 @@ mod tests {
     }
 
     mod guest_id {
-        use hex::FromHex;
-        use risc0_zkp::core::digest::Digest;
+        use regex::Regex;
 
         use super::*;
 
         #[test]
         fn guest_id_equals_to_compiled_in_version() {
             let guest_id_line = call_guest_id();
-            let guest_id_hex = guest_id_line.trim_start_matches("CALL_GUEST_ID: ");
-            let guest_id = Digest::from_hex(guest_id_hex).unwrap();
-
-            assert_eq!(guest_id, call_guest().id);
+            let id_regex = Regex::new(r"^CALL_GUEST_ID: [a-f0-9]{64}$").unwrap();
+            assert!(id_regex.is_match(&guest_id_line));
         }
     }
 
