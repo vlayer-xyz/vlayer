@@ -2,6 +2,11 @@
 
 set -ueo pipefail
 
+if [ -z "${VLAYER_ENV:-}" ]; then
+    echo "Error: VLAYER_ENV is not set."
+    exit 1
+fi
+
 echo '::group::foundry installation'
 curl -L https://foundry.paradigm.xyz | bash
 export PATH="$PATH:$HOME/.config/.foundry/bin"
@@ -26,6 +31,11 @@ VLAYER_HOME=$(git rev-parse --show-toplevel)
 
 for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ; do
     example_name=$(basename "${example}"  | tr '_' '-')
+
+    if [ ! -f "${example}/.env.${VLAYER_ENV}" ]; then
+        echo "Skipping ${example_name} as .env.${VLAYER_ENV} file is not defined"
+        continue
+    fi
 
     echo "::group::Initializing vlayer template: ${example_name}"
     VLAYER_TEMP_DIR=$(mktemp -d -t vlayer-test-release-XXXXXX-)
