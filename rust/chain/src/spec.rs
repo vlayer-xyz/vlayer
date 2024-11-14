@@ -28,6 +28,17 @@ impl ChainSpec {
         );
         assert!(is_ordered(&forks), "forks are not ordered",);
 
+        const MIN_TIMESTAMP: u64 = 1640995200; // 2022-01-01 00:00:00 UTC
+
+        // Check that no fork has a timestamp activation earlier than 2022
+        assert!(
+            forks.iter().all(|fork| match fork.activation {
+                ActivationCondition::Timestamp(ts) => ts >= MIN_TIMESTAMP,
+                _ => true,
+            }),
+            "forks cannot have activation timestamp earlier than 2022-01-01"
+        );
+
         ChainSpec { chain_id, forks }
     }
 
@@ -51,9 +62,9 @@ impl ChainSpec {
 }
 
 fn is_ordered(forks: &[Fork]) -> bool {
-    let mut iter = forks.iter();
-    let mut last = iter.next().unwrap();
-    for fork in iter {
+    let mut forks = forks.iter();
+    let mut last = forks.next().unwrap();
+    for fork in forks {
         if last.cmp(fork) != Ordering::Less {
             return false;
         }
@@ -62,7 +73,7 @@ fn is_ordered(forks: &[Fork]) -> bool {
     true
 }
 
-fn no_duplicated_activations(forks: &Vec<Fork>) -> bool {
+fn no_duplicated_activations(forks: &[Fork]) -> bool {
     let mut set = HashSet::new();
     for fork in forks {
         if !set.insert(fork.activation) {
@@ -163,12 +174,18 @@ mod tests {
         }
 
         #[test]
+        #[should_panic(expected = "forks cannot have activation timestamp earlier than 2022-01-01")]
+        fn fork_timestamp_older_than_2022() {
+            ChainSpec::new(1, [(SpecId::MERGE, ActivationCondition::Timestamp(0))]);
+        }
+
+        #[test]
         fn success() {
             ChainSpec::new(
                 1,
                 [
                     (SpecId::MERGE, ActivationCondition::Block(0)),
-                    (SpecId::SHANGHAI, ActivationCondition::Timestamp(0)),
+                    (SpecId::SHANGHAI, ActivationCondition::Timestamp(1640995200)),
                 ],
             );
         }
