@@ -13,8 +13,8 @@ concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: false
 jobs:
-  test-release:
-    name: Test release
+  test-release-anvil:
+    name: Test release on anvil and local prover
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-24.04
     steps:
@@ -25,9 +25,20 @@ jobs:
       - uses: hoverkraft-tech/compose-action@v2.0.2
         with:
           compose-file: docker/web-proof/docker-compose-test-release.yaml
-      - name: Test release on anvil
+      - name: Test release
+        env:
+            VLAYER_ENV: dev
         run: bash/test-release.sh
-      - name: Test release on OP Sepolia
+  test-release:
+    name: Test release on OP Sepolia and remote prover
+    if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+      - name: Test release
         env:
           VLAYER_ENV: testnet
           EXAMPLES_TEST_PRIVATE_KEY: ${{ secrets.EXAMPLES_TEST_PRIVATE_KEY }}
