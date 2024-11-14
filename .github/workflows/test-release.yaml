@@ -25,6 +25,9 @@ jobs:
         with:
           compose-file: docker/web-proof/docker-compose-test-release.yaml
       - name: Test release
+        env:
+          EXAMPLES_TEST_PRIVATE_KEY: ${{ secrets.EXAMPLES_TEST_PRIVATE_KEY }}
+          JSON_RPC_URL: "https://opt-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}"
         run: bash/test-release.sh
   test-js-sdk:
     name: Test js sdk release
