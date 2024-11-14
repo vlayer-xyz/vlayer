@@ -1,5 +1,5 @@
 import { useState, useMemo, useEffect } from "react";
-import { createWalletClient, custom } from "viem";
+import { Address, createWalletClient, custom } from "viem";
 import { optimismSepolia } from "viem/chains";
 import useProver from "../hooks/useProver";
 import { preverifyEmail } from "@vlayer/sdk";
@@ -10,11 +10,17 @@ import emailProofVerifier from "../../../../out/EmailProofVerifier.sol/EmailDoma
 
 import EmlForm from "../components/EmlForm";
 
+declare global {
+  interface Window {
+    ethereum: { request: () => Promise<unknown> };
+  }
+}
+
 const EmlUploadForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentStep, setCurrentStep] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
-  const [claimerAddr, setClaimerAddr] = useState("");
+  const [claimerAddr, setClaimerAddr] = useState<Address>("0x");
   const chain = optimismSepolia;
 
   const walletClient = useMemo(
@@ -27,7 +33,7 @@ const EmlUploadForm = () => {
   );
 
   const { prove, proof, provingError } = useProver({
-    addr: import.meta.env.VITE_PROVER_ADDR,
+    addr: import.meta.env.VITE_PROVER_ADDR as Address,
     abi: emailProofProver.abi,
     func: "main",
     chainId: chain.id,
@@ -44,9 +50,21 @@ const EmlUploadForm = () => {
     return addr;
   };
 
+  const manageError = (err: unknown) => {
+    console.log({ err });
+    setIsSubmitting(false);
+    if (err instanceof Error) {
+      setErrorMsg(err.message);
+    } else {
+      setErrorMsg("Something went wrong, check logs");
+    }
+  };
+
   const verifyProof = async () => {
     try {
       setCurrentStep("Verifying on-chain...");
+
+      if (proof == null) throw new Error("no_proof_to_verify");
 
       const txHash = await walletClient.writeContract({
         address: import.meta.env.VITE_VERIFIER_ADDR as `0x${string}`,
@@ -62,15 +80,11 @@ const EmlUploadForm = () => {
       setIsSubmitting(false);
       window.location.href = `${chain.blockExplorers.default.url}/tx/${txHash}`;
     } catch (err) {
-      console.log({ err });
-      setIsSubmitting(false);
-      setErrorMsg(
-        err?.shortMessage || err?.message || "Something went wrong, check logs",
-      );
+      manageError(err);
     }
   };
 
-  const startProving = async (uploadedEmlFile: File, claimerAddr: string) => {
+  const startProving = async (uploadedEmlFile: File, claimerAddr: Address) => {
     setCurrentStep("Sending to prover...");
 
     const eml = await getStrFromFile(uploadedEmlFile);
@@ -79,37 +93,39 @@ const EmlUploadForm = () => {
     setCurrentStep("Waiting for proof...");
   };
 
-  const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
-    try {
-      e.preventDefault();
-      setIsSubmitting(true);
-      setErrorMsg("");
+  const submit = async (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    setIsSubmitting(true);
+    setErrorMsg("");
 
-      const formData = new FormData(e.currentTarget);
-      const emlFile = formData.get("emlFile") as File | null;
-      if (!emlFile) throw new Error("no_eml_file");
+    const formData = new FormData(e.currentTarget);
+    const emlFile = formData.get("emlFile") as File | null;
+    if (!emlFile) throw new Error("no_eml_file");
 
-      setCurrentStep("Connecting to wallet...");
-      const addr = await getClaimerAddr();
-      console.log("Form submitted:", {
-        verifierAddress: import.meta.env.VITE_VERIFIER_ADDR,
-        proverAddress: import.meta.env.VITE_PROVER_ADDR,
-        fileName: emlFile?.name,
-        claimerAddr: addr,
-      });
-      await startProving(emlFile, addr);
-      setCurrentStep("Waiting for proof...");
-    } catch (err) {
-      console.log({ err });
-      setIsSubmitting(false);
-      setErrorMsg(
-        err?.shortMessage || err?.message || "Something went wrong, check logs",
-      );
-    }
+    setCurrentStep("Connecting to wallet...");
+    const addr = await getClaimerAddr();
+    console.log("Form submitted:", {
+      verifierAddress: import.meta.env.VITE_VERIFIER_ADDR as Address,
+      proverAddress: import.meta.env.VITE_PROVER_ADDR as Address,
+      fileName: emlFile?.name,
+      claimerAddr: addr,
+    });
+    await startProving(emlFile, addr);
+    setCurrentStep("Waiting for proof...");
+  };
+
+  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+    submit(e).catch((err) => {
+      manageError(err);
+    });
   };
 
   useEffect(() => {
-    if (proof) verifyProof();
+    if (proof) {
+      verifyProof().catch((err) => {
+        manageError(err);
+      });
+    }
   }, [proof]);
 
   useEffect(() => {
