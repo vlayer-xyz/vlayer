@@ -5,7 +5,7 @@ use call_engine::{
         env::location::ExecutionLocation,
         input::{EvmInput, MultiEvmInput},
     },
-    verifier::{guest_input::Error as GuestInputError, ChainProofError, VerificationError},
+    verifier::{chain_proof, guest_input, zk_proof},
 };
 use mpt::MerkleTrie;
 
@@ -15,13 +15,13 @@ const CHAIN_ID: ChainId = 1;
 const BLOCK_NUM: BlockNumber = 0;
 const EXEC_LOCATION: ExecutionLocation = ExecutionLocation::new(BLOCK_NUM, CHAIN_ID);
 
-const fn input_ok(_: &MultiEvmInput) -> Result<(), GuestInputError> {
+const fn input_ok(_: &MultiEvmInput) -> guest_input::Result {
     Ok(())
 }
 
-const fn input_invalid(_: &MultiEvmInput) -> Result<(), GuestInputError> {
-    Err(GuestInputError::ChainProof(ChainProofError::Zk(
-        VerificationError::InvalidProof,
+const fn input_invalid(_: &MultiEvmInput) -> guest_input::Result {
+    Err(guest_input::Error::ChainProof(chain_proof::Error::Zk(
+        zk_proof::Error::InvalidProof,
     )))
 }
 
