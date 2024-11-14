@@ -46,7 +46,7 @@ const EmlUploadForm = () => {
   const chain = getChainByName(import.meta.env.VITE_CHAIN_NAME as string);
 
   const { prove, proof, provingError } = useProver({
-    addr: import.meta.env.VITE_PROVER_ADDRESS as Address,
+    addr: import.meta.env.VITE_PROVER_ADDRESS,
     abi: proverSpec.abi,
     func: "main",
     chainId: chain.id,
@@ -84,7 +84,7 @@ const EmlUploadForm = () => {
       }
 
       const txHash = await walletClient.writeContract({
-        address: import.meta.env.VITE_VERIFIER_ADDRESS as `0x${string}`,
+        address: import.meta.env.VITE_VERIFIER_ADDRESS,
         abi: verifierSpec.abi,
         functionName: "verify",
         args: proof,
