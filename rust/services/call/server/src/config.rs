@@ -3,7 +3,7 @@ use std::{collections::HashMap, net::SocketAddr};
 use alloy_primitives::ChainId;
 use call_host::host::config::{HostConfig, DEFAULT_MAX_CALLDATA_SIZE};
 use chain::TEST_CHAIN_ID;
-use common::Guest;
+use common::GuestElf;
 use serde::{Deserialize, Serialize};
 use server_utils::ProofMode;
 
@@ -15,7 +15,7 @@ pub struct ServerConfig {
     pub chain_proof_url: String,
     pub max_request_size: usize,
     pub verify_chain_proofs: bool,
-    pub call_guest: Guest,
+    pub call_guest: GuestElf,
 }
 
 impl Default for ServerConfig {
@@ -28,7 +28,7 @@ impl Default for ServerConfig {
             chain_proof_url: String::default(),
             max_request_size: DEFAULT_MAX_CALLDATA_SIZE,
             verify_chain_proofs: false,
-            call_guest: Guest::default(),
+            call_guest: GuestElf::default(),
         }
     }
 }
@@ -41,7 +41,7 @@ impl ServerConfig {
         port: Option<u16>,
         chain_proof_url: impl AsRef<str>,
         verify_chain_proofs: bool,
-        call_guest: Guest,
+        call_guest: GuestElf,
     ) -> ServerConfig {
         let ServerConfig {
             mut socket_addr,

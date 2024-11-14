@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use alloy_primitives::ChainId;
-use common::Guest;
+use common::GuestElf;
 use host_utils::ProofMode;
 
 pub const DEFAULT_MAX_CALLDATA_SIZE: usize = 5 * 1024 * 1024; // 5 MB
@@ -12,7 +12,7 @@ pub struct HostConfig {
     pub proof_mode: ProofMode,
     pub chain_proof_url: String,
     pub max_calldata_size: usize,
-    pub call_guest: Guest,
+    pub call_guest: GuestElf,
     pub verify_chain_proofs: bool,
 }
 
@@ -24,7 +24,7 @@ impl Default for HostConfig {
             proof_mode: ProofMode::default(),
             chain_proof_url: String::default(),
             max_calldata_size: DEFAULT_MAX_CALLDATA_SIZE,
-            call_guest: Guest::default(),
+            call_guest: GuestElf::default(),
             verify_chain_proofs: false,
         }
     }

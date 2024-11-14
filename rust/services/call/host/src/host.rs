@@ -16,7 +16,7 @@ use chain_client::{
     Client as ChainProofClient, RecordingClient as RecordingRpcClient,
     RpcClient as RpcChainProofClient,
 };
-use common::Guest;
+use common::GuestElf;
 use config::HostConfig;
 use error::HostError;
 use ethers_core::types::BlockNumber as BlockTag;
@@ -40,7 +40,7 @@ pub struct Host {
     chain_proof_client: RecordingRpcClient,
     max_calldata_size: usize,
     verify_chain_proofs: bool,
-    guest: Guest,
+    guest: GuestElf,
 }
 
 impl Host {
