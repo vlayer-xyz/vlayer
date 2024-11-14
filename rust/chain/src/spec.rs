@@ -11,7 +11,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{config::CHAIN_MAP, error::ChainError};
 
-#[derive(Debug, Clone, Serialize, Deserialize, new)]
+#[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ChainSpec {
     pub chain_id: ChainId,
     forks: BTreeMap<SpecId, ActivationCondition>,
@@ -36,7 +36,7 @@ impl Fork {
 }
 
 impl ChainSpec {
-    pub fn new1(
+    pub fn new(
         chain_id: ChainId,
         forks: BTreeMap<SpecId, ActivationCondition>,
         new_forks: Vec<Fork>,
@@ -51,7 +51,7 @@ impl ChainSpec {
         ChainSpec {
             chain_id,
             forks,
-            new_forks: Vec::new(),
+            new_forks,
         }
     }
 
@@ -59,16 +59,16 @@ impl ChainSpec {
     pub fn new_single(chain_id: ChainId, spec_id: SpecId) -> Self {
         ChainSpec {
             chain_id,
-            forks: BTreeMap::from([(spec_id, ActivationCondition::Block(0))]),
-            new_forks: Vec::new(),
+            forks: BTreeMap::new(),
+            new_forks: vec![Fork::new(spec_id, ActivationCondition::Block(0))],
         }
     }
 
     /// Returns the [SpecId] for a given block number and timestamp or an error if not supported.
     pub fn active_fork(&self, block_number: BlockNumber, timestamp: u64) -> anyhow::Result<SpecId> {
-        for (spec_id, fork) in self.forks.iter().rev() {
-            if fork.active(block_number, timestamp) {
-                return Ok(*spec_id);
+        for fork in self.new_forks.iter().rev() {
+            if fork.activation.active(block_number, timestamp) {
+                return Ok(fork.spec);
             }
         }
         bail!("unsupported fork for block {}", block_number)
@@ -133,7 +133,7 @@ mod tests {
         #[test]
         #[should_panic(expected = "must have at least one fork")]
         fn panics_if_no_forks() {
-            ChainSpec::new1(1, BTreeMap::new(), Vec::new());
+            ChainSpec::new(1, BTreeMap::new(), Vec::new());
         }
 
         #[test]
@@ -141,7 +141,7 @@ mod tests {
         fn cannot_have_two_forks_with_same_value() {
             let fork_1 = Fork::new(SpecId::MERGE, ActivationCondition::Timestamp(0));
             let fork_2 = Fork::new(SpecId::SHANGHAI, ActivationCondition::Timestamp(0));
-            ChainSpec::new1(1, BTreeMap::new(), vec![fork_1, fork_2]);
+            ChainSpec::new(1, BTreeMap::new(), vec![fork_1, fork_2]);
         }
 
         #[test]
@@ -149,7 +149,7 @@ mod tests {
         fn block_activation_should_go_before_timestamp_activation() {
             let fork_1 = Fork::new(SpecId::MERGE, ActivationCondition::Block(0));
             let fork_2 = Fork::new(SpecId::SHANGHAI, ActivationCondition::Timestamp(0));
-            ChainSpec::new1(1, BTreeMap::new(), vec![fork_2, fork_1]);
+            ChainSpec::new(1, BTreeMap::new(), vec![fork_2, fork_1]);
         }
     }
 }
