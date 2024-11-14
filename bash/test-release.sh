@@ -37,11 +37,3 @@ echo '::endgroup::'
 echo '::group::vlayer run prove.ts'
 bun run prove.ts
 echo '::endgroup::'
-
-echo '::group::vlayer run prove:dev'
-bun run prove:dev
-echo '::endgroup::'
-
-echo '::group::vlayer run prove:testnet'
-bun run prove:testnet
-echo '::endgroup::'
