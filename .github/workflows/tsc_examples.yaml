@@ -38,5 +38,3 @@ jobs:
 
     - name: Run tsc
       run: bash/tsc-examples.sh
-    - name: Setup upterm session
-      uses: lhotari/action-upterm@v1
