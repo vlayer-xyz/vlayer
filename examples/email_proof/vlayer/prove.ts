@@ -8,7 +8,6 @@ import {
 
 import proverSpec from "../out/EmailProver.sol/EmailProver";
 import verifierSpec from "../out/EmailProofVerifier.sol/EmailProofVerifier";
-import { foundry } from "viem/chains";
 
 const mimeEmail = fs.readFileSync("./testdata/vlayer_welcome.eml").toString();
 const unverifiedEmail = await preverifyEmail(mimeEmail);
@@ -19,16 +18,19 @@ const { prover, verifier } = await deployVlayerContracts({
 });
 
 const config = getConfig();
-const { chain, ethClient, account } = await createContext(config);
+const { chain, ethClient, account, proverUrl, confirmations } =
+  await createContext(config);
 
 console.log("Proving...");
 
-const vlayer = createVlayerClient();
+const vlayer = createVlayerClient({
+  url: proverUrl,
+});
 const hash = await vlayer.prove({
   address: prover,
   proverAbi: proverSpec.abi,
   functionName: "main",
-  chainId: foundry.id,
+  chainId: chain.id,
   args: [unverifiedEmail],
 });
 const result = await vlayer.waitForProvingResult(hash);
@@ -36,13 +38,20 @@ console.log("Proof:", result[0]);
 
 console.log("Verifying...");
 
-await ethClient.writeContract({
+const txHash = await ethClient.writeContract({
   address: verifier,
   abi: verifierSpec.abi,
   functionName: "verify",
   args: result,
   chain,
   account: account,
+});
+
+await ethClient.waitForTransactionReceipt({
+  hash: txHash,
+  confirmations,
+  retryCount: 60,
+  retryDelay: 1000,
 });
 
 console.log("Verified!");

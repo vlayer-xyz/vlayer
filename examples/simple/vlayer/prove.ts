@@ -13,7 +13,13 @@ import proverSpec from "../out/SimpleProver.sol/SimpleProver";
 import verifierSpec from "../out/SimpleVerifier.sol/SimpleVerifier";
 
 const config = getConfig();
-const { chain, ethClient, account: john, proverUrl, confirmations } = await createContext(config);
+const {
+  chain,
+  ethClient,
+  account: john,
+  proverUrl,
+  confirmations,
+} = await createContext(config);
 
 const INITIAL_TOKEN_SUPPLY = BigInt(10_000_000);
 
