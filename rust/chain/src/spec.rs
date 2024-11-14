@@ -1,7 +1,4 @@
-use std::{
-    cmp::Ordering,
-    collections::{BTreeMap, HashSet},
-};
+use std::{cmp::Ordering, collections::HashSet};
 
 use alloy_primitives::{BlockNumber, ChainId};
 use anyhow::bail;
@@ -14,42 +11,37 @@ use crate::{config::CHAIN_MAP, error::ChainError};
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ChainSpec {
     pub chain_id: ChainId,
-    forks: BTreeMap<SpecId, ActivationCondition>,
-    new_forks: Vec<Fork>,
+    forks: Vec<Fork>,
 }
 
 impl ChainSpec {
-    pub fn new(
-        chain_id: ChainId,
-        forks: BTreeMap<SpecId, ActivationCondition>,
-        new_forks: Vec<Fork>,
-    ) -> Self {
-        assert_ne!(new_forks.len(), 0, "must have at least one fork");
+    pub fn new<V, F>(chain_id: ChainId, forks: V) -> Self
+    where
+        V: Into<Vec<F>>,
+        F: Into<Fork>,
+    {
+        let forks: Vec<Fork> = forks.into().into_iter().map(|f| f.into()).collect();
+        assert_ne!(forks.len(), 0, "must have at least one fork");
         assert!(
-            no_duplicated_activations(&new_forks),
+            no_duplicated_activations(&forks),
             "cannot have two forks with same activation condition",
         );
-        assert!(is_ordered(&new_forks), "forks are not ordered",);
+        assert!(is_ordered(&forks), "forks are not ordered",);
 
-        ChainSpec {
-            chain_id,
-            forks,
-            new_forks,
-        }
+        ChainSpec { chain_id, forks }
     }
 
     /// Creates a new configuration consisting of only one specification ID.
     pub fn new_single(chain_id: ChainId, spec_id: SpecId) -> Self {
         ChainSpec {
             chain_id,
-            forks: BTreeMap::new(),
-            new_forks: vec![Fork::new(spec_id, ActivationCondition::Block(0))],
+            forks: vec![Fork::new(spec_id, ActivationCondition::Block(0))],
         }
     }
 
     /// Returns the [SpecId] for a given block number and timestamp or an error if not supported.
     pub fn active_fork(&self, block_number: BlockNumber, timestamp: u64) -> anyhow::Result<SpecId> {
-        for fork in self.new_forks.iter().rev() {
+        for fork in self.forks.iter().rev() {
             if fork.activation.active(block_number, timestamp) {
                 return Ok(fork.spec);
             }
@@ -73,7 +65,7 @@ fn is_ordered(forks: &Vec<Fork>) -> bool {
 fn no_duplicated_activations(forks: &Vec<Fork>) -> bool {
     let mut set = HashSet::new();
     for fork in forks {
-        if !set.insert(fork.activation.clone()) {
+        if !set.insert(fork.activation) {
             return false;
         }
     }
@@ -108,7 +100,16 @@ impl Fork {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, Hash)]
+impl From<(SpecId, ActivationCondition)> for Fork {
+    fn from(tuple: (SpecId, ActivationCondition)) -> Self {
+        Fork {
+            spec: tuple.0,
+            activation: tuple.1,
+        }
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Hash)]
 pub enum ActivationCondition {
     Block(BlockNumber),
     Timestamp(u64),
@@ -133,23 +134,43 @@ mod tests {
         #[test]
         #[should_panic(expected = "must have at least one fork")]
         fn panics_if_no_forks() {
-            ChainSpec::new(1, BTreeMap::new(), Vec::new());
+            let empty_forks: Vec<Fork> = vec![];
+            ChainSpec::new(1, empty_forks);
         }
 
         #[test]
         #[should_panic(expected = "cannot have two forks with same activation condition")]
         fn cannot_have_two_forks_with_same_value() {
-            let fork_1 = Fork::new(SpecId::MERGE, ActivationCondition::Timestamp(0));
-            let fork_2 = Fork::new(SpecId::SHANGHAI, ActivationCondition::Timestamp(0));
-            ChainSpec::new(1, BTreeMap::new(), vec![fork_1, fork_2]);
+            ChainSpec::new(
+                1,
+                [
+                    (SpecId::MERGE, ActivationCondition::Block(0)),
+                    (SpecId::SHANGHAI, ActivationCondition::Block(0)),
+                ],
+            );
         }
 
         #[test]
         #[should_panic(expected = "forks are not ordered")]
-        fn block_activation_should_go_before_timestamp_activation() {
-            let fork_1 = Fork::new(SpecId::MERGE, ActivationCondition::Block(0));
-            let fork_2 = Fork::new(SpecId::SHANGHAI, ActivationCondition::Timestamp(0));
-            ChainSpec::new(1, BTreeMap::new(), vec![fork_2, fork_1]);
+        fn forks_should_be_ordered_by_activation() {
+            ChainSpec::new(
+                1,
+                [
+                    (SpecId::MERGE, ActivationCondition::Timestamp(0)),
+                    (SpecId::SHANGHAI, ActivationCondition::Block(0)),
+                ],
+            );
+        }
+
+        #[test]
+        fn success() {
+            ChainSpec::new(
+                1,
+                [
+                    (SpecId::MERGE, ActivationCondition::Block(0)),
+                    (SpecId::SHANGHAI, ActivationCondition::Timestamp(0)),
+                ],
+            );
         }
     }
 }
