@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 import { Address } from "viem";
 import * as chains from "viem/chains";
 import useProver from "../hooks/useProver";
-import { preverifyEmail,  } from "@vlayer/sdk";
+import { preverifyEmail } from "@vlayer/sdk";
 import { getStrFromFile } from "../lib/utils";
 import proverSpec from "../../../../out/EmailDomainProver.sol/EmailDomainProver";
 import verifierSpec from "../../../../out/EmailProofVerifier.sol/EmailDomainVerifier";
