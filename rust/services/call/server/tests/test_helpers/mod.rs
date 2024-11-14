@@ -2,6 +2,7 @@ use std::{collections::HashMap, sync::Arc, time::Duration};
 
 use axum::{body::Body, http::Response};
 use block_header::EvmBlockHeader;
+use call_guest_wrapper::call_guest;
 use call_server::{server, ProofMode, ServerConfig};
 use ethers::{
     contract::abigen,
@@ -20,7 +21,6 @@ use provider::to_eth_block_header;
 use serde::Serialize;
 use serde_json::json;
 use server_utils::post;
-use call_guest_wrapper::call_guest;
 
 abigen!(ExampleProver, "./testdata/ExampleProver.json",);
 
