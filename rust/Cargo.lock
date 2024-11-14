@@ -9822,6 +9822,7 @@ dependencies = [
  "anyhow",
  "block_header",
  "call_engine",
+ "call_guest_wrapper",
  "call_host",
  "chain",
  "chain_client",

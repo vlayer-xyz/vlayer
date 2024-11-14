@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 block_header = { workspace = true }
 call_engine = { workspace = true }
+call_guest_wrapper = { workspace = true }
 call_host = { workspace = true }
 mpt = { workspace = true }
 provider = { workspace = true }
