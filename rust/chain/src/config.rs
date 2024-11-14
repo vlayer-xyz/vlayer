@@ -11,7 +11,9 @@ use crate::spec::{ActivationCondition, ChainSpec};
 // Some unique chain ids for testing
 pub const TEST_CHAIN_ID: ChainId = 31_337;
 
+// https://etherscan.io/block/15537394
 pub const MAINNET_MERGE_BLOCK_NUMBER: u64 = 15537394;
+pub const MAINNET_MERGE_BLOCK_TIMESTAMP: u64 = 1663224179;
 
 pub static CHAIN_MAP: Lazy<HashMap<ChainId, &'static Lazy<ChainSpec>>> = Lazy::new(|| {
     HashMap::from([
