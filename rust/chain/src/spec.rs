@@ -18,23 +18,6 @@ pub struct ChainSpec {
     new_forks: Vec<Fork>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, new, Hash)]
-pub struct Fork {
-    spec: SpecId,
-    activation: ActivationCondition,
-}
-
-impl Fork {
-    fn cmp(&self, other: &Self) -> Ordering {
-        match (&self.activation, &other.activation) {
-            (ActivationCondition::Block(a), ActivationCondition::Block(b)) => a.cmp(&b),
-            (ActivationCondition::Timestamp(a), ActivationCondition::Timestamp(b)) => a.cmp(&b),
-            (ActivationCondition::Block(_), ActivationCondition::Timestamp(_)) => Ordering::Less,
-            (ActivationCondition::Timestamp(_), ActivationCondition::Block(_)) => Ordering::Greater,
-        }
-    }
-}
-
 impl ChainSpec {
     pub fn new(
         chain_id: ChainId,
@@ -105,6 +88,23 @@ impl TryFrom<ChainId> for ChainSpec {
             .get(&chain_id)
             .ok_or(ChainError::UnsupportedChainId(chain_id))?;
         Ok((**chain_spec).clone())
+    }
+}
+
+#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, new, Hash)]
+pub struct Fork {
+    spec: SpecId,
+    activation: ActivationCondition,
+}
+
+impl Fork {
+    fn cmp(&self, other: &Self) -> Ordering {
+        match (&self.activation, &other.activation) {
+            (ActivationCondition::Block(a), ActivationCondition::Block(b)) => a.cmp(&b),
+            (ActivationCondition::Timestamp(a), ActivationCondition::Timestamp(b)) => a.cmp(&b),
+            (ActivationCondition::Block(_), ActivationCondition::Timestamp(_)) => Ordering::Less,
+            (ActivationCondition::Timestamp(_), ActivationCondition::Block(_)) => Ordering::Greater,
+        }
     }
 }
 
