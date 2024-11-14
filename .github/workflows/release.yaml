@@ -129,20 +129,20 @@ jobs:
           version: "17.0.6"
 
       - name: Check nixpkgs inputs
-        uses: DeterminateSystems/flake-checker-action@main
+        uses: DeterminateSystems/flake-checker-action@v9
         if: matrix.target == 'x86_64-unknown-linux-musl'
         with:
           flake-lock-path: ./.github/nix/flake.lock
           fail-mode: true
 
       - name: Install Nix
-        uses: DeterminateSystems/nix-installer-action@main
+        uses: DeterminateSystems/nix-installer-action@v15
         if: matrix.target == 'x86_64-unknown-linux-musl'
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
 
       - name: Set up Nix cache
-        uses: DeterminateSystems/magic-nix-cache-action@main
+        uses: DeterminateSystems/magic-nix-cache-action@v8
         if: matrix.target == 'x86_64-unknown-linux-musl'
 
       - uses: actions/download-artifact@v4
