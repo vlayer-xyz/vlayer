@@ -33,7 +33,7 @@ const EmlUploadForm = () => {
   );
 
   const { prove, proof, provingError } = useProver({
-    addr: import.meta.env.VITE_PROVER_ADDR as Address,
+    addr: import.meta.env.VITE_PROVER_ADDRESS as Address,
     abi: emailProofProver.abi,
     func: "main",
     chainId: chain.id,
@@ -67,7 +67,7 @@ const EmlUploadForm = () => {
       if (proof == null) throw new Error("no_proof_to_verify");
 
       const txHash = await walletClient.writeContract({
-        address: import.meta.env.VITE_VERIFIER_ADDR as `0x${string}`,
+        address: import.meta.env.VITE_VERIFIER_ADDRESS as `0x${string}`,
         abi: emailProofVerifier.abi,
         functionName: "verify",
         args: proof,
@@ -105,8 +105,8 @@ const EmlUploadForm = () => {
     setCurrentStep("Connecting to wallet...");
     const addr = await getClaimerAddr();
     console.log("Form submitted:", {
-      verifierAddress: import.meta.env.VITE_VERIFIER_ADDR as Address,
-      proverAddress: import.meta.env.VITE_PROVER_ADDR as Address,
+      verifierAddress: import.meta.env.VITE_VERIFIER_ADDRESS as Address,
+      proverAddress: import.meta.env.VITE_PROVER_ADDRESS as Address,
       fileName: emlFile?.name,
       claimerAddr: addr,
     });

@@ -44,13 +44,14 @@ const useProver = <T extends Abi, F extends ContractFunctionName<T>>({
       createVlayerClient({
         url: import.meta.env.VITE_PROVER_URL as string,
       }),
-    [],
+    [import.meta.env.VITE_PROVER_URL],
   );
 
   const prove = async (
     args: ContractFunctionArgs<T, AbiStateMutability, F>,
   ) => {
     try {
+      console.log("Proving...", args, addr, abi, func, chainId);
       const hash = await vlayer.prove({
         address: addr,
         proverAbi: abi,
