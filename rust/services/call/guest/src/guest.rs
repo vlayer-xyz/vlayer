@@ -3,8 +3,8 @@ use call_engine::{
     GuestOutput, Input,
 };
 use chain_client::CachedClient;
-use risc0_zkvm::sha::Digest;
 use env::{verify_input, VerifiedEnv};
+use risc0_zkvm::sha::Digest;
 
 mod env;
 #[cfg(test)]
