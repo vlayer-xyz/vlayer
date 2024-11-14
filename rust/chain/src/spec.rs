@@ -89,14 +89,15 @@ pub struct Fork {
     activation: ActivationCondition,
 }
 
-impl Fork {
+impl PartialOrd for Fork {
+    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
+        Some(self.activation.cmp(&other.activation))
+    }
+}
+
+impl Ord for Fork {
     fn cmp(&self, other: &Self) -> Ordering {
-        match (&self.activation, &other.activation) {
-            (ActivationCondition::Block(a), ActivationCondition::Block(b)) => a.cmp(b),
-            (ActivationCondition::Timestamp(a), ActivationCondition::Timestamp(b)) => a.cmp(b),
-            (ActivationCondition::Block(_), ActivationCondition::Timestamp(_)) => Ordering::Less,
-            (ActivationCondition::Timestamp(_), ActivationCondition::Block(_)) => Ordering::Greater,
-        }
+        self.partial_cmp(other).unwrap() // SAFETY: `partial_cmp` always returns `Some`
     }
 }
 
@@ -109,7 +110,7 @@ impl From<(SpecId, ActivationCondition)> for Fork {
     }
 }
 
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Hash)]
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Hash, Ord, PartialOrd)]
 pub enum ActivationCondition {
     Block(BlockNumber),
     Timestamp(u64),
