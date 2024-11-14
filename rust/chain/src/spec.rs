@@ -83,11 +83,19 @@ impl TryFrom<ChainId> for ChainSpec {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize, new, Hash)]
+#[derive(Debug, Clone, Serialize, Deserialize, new, Hash)]
 pub struct Fork {
-    spec: SpecId,
+    spec: SpecId, // Gets ignored when comparing forks
     activation: ActivationCondition,
 }
+
+impl PartialEq for Fork {
+    fn eq(&self, other: &Self) -> bool {
+        self.activation == other.activation
+    }
+}
+
+impl Eq for Fork {}
 
 impl PartialOrd for Fork {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
@@ -128,6 +136,24 @@ impl ActivationCondition {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    mod fork_ord {
+
+        use super::{ActivationCondition::*, *};
+
+        #[test]
+        fn ordered_by_activation() {
+            let merge_0 = Fork::new(SpecId::MERGE, Block(0));
+            let merge_1 = Fork::new(SpecId::MERGE, Block(1));
+            let shanghai_0 = Fork::new(SpecId::SHANGHAI, Block(0));
+            let shanghai_1 = Fork::new(SpecId::SHANGHAI, Block(1));
+
+            assert!(merge_0 < merge_1);
+            assert!(merge_0 == shanghai_0);
+            assert!(!(merge_0 < shanghai_0));
+            assert!(shanghai_0 < shanghai_1);
+        }
+    }
 
     mod new {
         use super::*;
