@@ -13,8 +13,9 @@ export async function parseEmail(mime: string) {
 
 export function getDkimSigners(mail: Email) {
   const dkimHeader = mail.headers.filter((h) => h.key === "dkim-signature");
-  if (dkimHeader.length === 0)
+  if (dkimHeader.length === 0) {
     throw new DkimParsingError("No DKIM header found");
+  }
   return dkimHeader.map(parseHeader);
 }
 
