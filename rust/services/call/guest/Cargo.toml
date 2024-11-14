@@ -15,9 +15,9 @@ call_engine = { workspace = true }
 chain = { workspace = true }
 chain_client = { workspace = true }
 chain_common = { workspace = true }
-chain_guest_wrapper = { workspace = true }
 mpt = { workspace = true }
 revm = { workspace = true }
+risc0-zkvm = { workspace = true }
 
 [dev-dependencies]
 call_engine = { workspace = true, features = ["testing"] }

@@ -889,9 +889,9 @@ dependencies = [
  "chain",
  "chain_client",
  "chain_common",
- "chain_guest_wrapper",
  "mpt",
  "revm",
+ "risc0-zkvm",
 ]
 
 [[package]]
@@ -3360,6 +3360,7 @@ version = "0.1.0"
 dependencies = [
  "alloy-sol-types",
  "call_guest",
+ "chain_guest_wrapper",
  "risc0-zkvm",
  "tokio",
 ]

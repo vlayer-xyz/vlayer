@@ -1946,9 +1946,9 @@ dependencies = [
  "chain",
  "chain_client",
  "chain_common",
- "chain_guest_wrapper",
  "mpt",
  "revm",
+ "risc0-zkvm",
  "tokio",
 ]
 
