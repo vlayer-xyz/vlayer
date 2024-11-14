@@ -1,14 +1,14 @@
 import { useState, useEffect } from "react";
-import { Address, type Chain, custom } from "viem";
+import { Address } from "viem";
 import * as chains from "viem/chains";
 import useProver from "../hooks/useProver";
-import { preverifyEmail } from "@vlayer/sdk";
+import { preverifyEmail,  } from "@vlayer/sdk";
 import { getStrFromFile } from "../lib/utils";
 import proverSpec from "../../../../out/EmailDomainProver.sol/EmailDomainProver";
 import verifierSpec from "../../../../out/EmailProofVerifier.sol/EmailDomainVerifier";
 
 import EmlForm from "../components/EmlForm";
-import { createContext } from "@vlayer/sdk/config";
+import { createContext, customTransport, type Chain } from "@vlayer/sdk/config";
 
 declare global {
   interface Window {
@@ -33,7 +33,7 @@ const { ethClient: walletClient } = await createContext(
     privateKey: import.meta.env.VITE_PRIVATE_KEY as `0x${string}`,
   },
   import.meta.env.VITE_USE_WINDOW_ETHEREUM_TRANSPORT
-    ? custom(window.ethereum)
+    ? customTransport(window.ethereum)
     : undefined,
 );
 
@@ -98,10 +98,9 @@ const EmlUploadForm = () => {
       setIsSubmitting(false);
       if (chain.blockExplorers && receipt.status === "success") {
         window.open(`${chain.blockExplorers?.default.url}/tx/${txHash}`);
-      } else if (receipt.status === 'reverted') {
-        setErrorMsg("Transaction reverted. Is email already used?")
+      } else if (receipt.status === "reverted") {
+        setErrorMsg("Transaction reverted. Is email already used?");
         window.open(`${chain.blockExplorers?.default.url}/tx/${txHash}`);
-
       } else {
         setSuccessMsg("Verified successfully.");
       }
