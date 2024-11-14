@@ -4,6 +4,7 @@ import {
   http,
   publicActions,
   type CustomTransport,
+  type Transport,
 } from "viem";
 import { Config } from "./getConfig";
 import { privateKeyToAccount } from "viem/accounts";
@@ -18,10 +19,11 @@ const getChainSpecs = async (chainName: string): Promise<Chain> => {
   }
 };
 
+export { CustomTransport };
 const createEthClient = (
   chain: Chain,
   jsonRpcUrl: string,
-  transport?: CustomTransport,
+  transport?: Transport,
 ) =>
   createWalletClient({
     chain,
@@ -30,7 +32,7 @@ const createEthClient = (
 
 export const createContext = async (
   config: Config,
-  transport?: CustomTransport,
+  transport?: Transport,
 ) => {
   const chain = await getChainSpecs(config.chainName);
   const jsonRpcUrl = config.jsonRpcUrl ?? chain.rpcUrls.default.http[0];

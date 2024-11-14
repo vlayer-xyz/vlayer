@@ -98,9 +98,10 @@ const EmlUploadForm = () => {
       setIsSubmitting(false);
       if (chain.blockExplorers && receipt.status === "success") {
         window.open(`${chain.blockExplorers?.default.url}/tx/${txHash}`);
-      } else if (receipt.status === "reverted") {
-        setErrorMsg("Transaction reverted. Is email already used?");
+      } else if (receipt.status === 'reverted') {
+        setErrorMsg("Transaction reverted. Is email already used?")
         window.open(`${chain.blockExplorers?.default.url}/tx/${txHash}`);
+
       } else {
         setSuccessMsg("Verified successfully.");
       }
