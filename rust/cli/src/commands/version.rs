@@ -1,4 +1,4 @@
-use call_guest_wrapper::GUEST;
+use call_guest_wrapper::GUEST_ELF;
 use clap::builder::{IntoResettable, Resettable, Str};
 
 pub struct Version;
@@ -14,7 +14,7 @@ fn version_msg() -> String {
 }
 
 fn call_guest_id() -> String {
-    let little_endian_hex = hex::encode(GUEST.id);
+    let little_endian_hex = hex::encode(GUEST_ELF.id);
     format!("CALL_GUEST_ID: {}", little_endian_hex)
 }
 

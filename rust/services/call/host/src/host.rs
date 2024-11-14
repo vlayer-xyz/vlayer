@@ -40,7 +40,7 @@ pub struct Host {
     chain_proof_client: RecordingRpcClient,
     max_calldata_size: usize,
     verify_chain_proofs: bool,
-    guest: GuestElf,
+    guest_elf: GuestElf,
 }
 
 impl Host {
@@ -95,7 +95,7 @@ impl Host {
             chain_proof_client,
             max_calldata_size: config.max_calldata_size,
             verify_chain_proofs: config.verify_chain_proofs,
-            guest: config.call_guest,
+            guest_elf: config.call_guest,
         })
     }
 
@@ -145,7 +145,7 @@ impl Host {
             seal,
             raw_abi: raw_guest_output,
             proof_len,
-            call_guest_id: self.guest.id.into(),
+            call_guest_id: self.guest_elf.id.into(),
         })
     }
 

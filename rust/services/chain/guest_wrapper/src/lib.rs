@@ -7,7 +7,7 @@ mod private {
 }
 
 #[cfg(not(clippy))]
-pub static GUEST: GuestElf =
+pub static GUEST_ELF: GuestElf =
     GuestElf::new(private::RISC0_CHAIN_GUEST_ID, private::RISC0_CHAIN_GUEST_ELF);
 #[cfg(clippy)]
-pub static GUEST: GuestElf = GuestElf::default();
+pub static GUEST_ELF: GuestElf = GuestElf::default();
