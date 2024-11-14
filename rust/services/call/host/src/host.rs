@@ -12,17 +12,16 @@ use call_engine::{
     },
     Call, GuestOutput, HostOutput, Input, Seal,
 };
-use call_guest_wrapper::RISC0_CALL_GUEST_ID;
 use chain_client::{
     Client as ChainProofClient, RecordingClient as RecordingRpcClient,
     RpcClient as RpcChainProofClient,
 };
+use common::GuestElf;
 use config::HostConfig;
 use error::HostError;
 use ethers_core::types::BlockNumber as BlockTag;
 use prover::Prover;
 use provider::{CachedMultiProvider, EthersProviderFactory, EvmBlockHeader};
-use risc0_zkvm::sha::Digest;
 use tracing::info;
 
 use crate::{
@@ -41,10 +40,11 @@ pub struct Host {
     chain_proof_client: RecordingRpcClient,
     max_calldata_size: usize,
     verify_chain_proofs: bool,
+    guest_elf: GuestElf,
 }
 
 impl Host {
-    pub fn try_new(config: &HostConfig) -> Result<Self, HostError> {
+    pub fn try_new(config: HostConfig) -> Result<Self, HostError> {
         let provider_factory = EthersProviderFactory::new(config.rpc_urls.clone());
         let providers = CachedMultiProvider::new(provider_factory);
         let block_number = get_latest_block_number(&providers, config.start_chain_id)?;
@@ -81,13 +81,11 @@ impl Host {
         providers: CachedMultiProvider,
         block_number: u64,
         chain_proof_client: impl ChainProofClient,
-        config: &HostConfig,
+        config: HostConfig,
     ) -> Result<Self, HostError> {
-        validate_guest_image_id(config.call_guest_id)?;
-
         let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
         let start_execution_location = (block_number, config.start_chain_id).into();
-        let prover = Prover::new(config.proof_mode);
+        let prover = Prover::new(config.proof_mode, &config.call_guest_elf);
         let chain_proof_client = RecordingRpcClient::new(chain_proof_client);
 
         Ok(Host {
@@ -97,6 +95,7 @@ impl Host {
             chain_proof_client,
             max_calldata_size: config.max_calldata_size,
             verify_chain_proofs: config.verify_chain_proofs,
+            guest_elf: config.call_guest_elf,
         })
     }
 
@@ -141,14 +140,12 @@ impl Host {
             ));
         }
 
-        let call_guest_id: Digest = RISC0_CALL_GUEST_ID.into();
-
         Ok(HostOutput {
             guest_output,
             seal,
             raw_abi: raw_guest_output,
             proof_len,
-            call_guest_id: call_guest_id.into(),
+            call_guest_id: self.guest_elf.id.into(),
         })
     }
 
@@ -177,14 +174,6 @@ fn provably_execute(prover: &Prover, input: &Input) -> Result<(Vec<u8>, Vec<u8>)
     Ok((seal.abi_encode(), receipt.journal.bytes))
 }
 
-fn validate_guest_image_id(image_id: Digest) -> Result<(), HostError> {
-    if image_id != RISC0_CALL_GUEST_ID.into() {
-        return Err(HostError::UnsupportedCallGuestId(RISC0_CALL_GUEST_ID.into(), image_id));
-    }
-
-    Ok(())
-}
-
 #[cfg(test)]
 mod test {
     use std::collections::HashMap;
@@ -208,19 +197,21 @@ mod test {
             proof_mode: ProofMode::Fake,
             ..HostConfig::default()
         };
+        let max_call_data_size = config.max_calldata_size;
         let host = Host::try_new_with_components(
             CachedMultiProvider::new(EthersProviderFactory::new(test_rpc_urls())),
             0,
             RpcChainProofClient::new(""),
-            &config,
+            config,
         )?;
         let call = Call {
             to: Default::default(),
-            data: vec![0; config.max_calldata_size + 1],
+            data: vec![0; max_call_data_size + 1],
         };
+
         assert_eq!(
             host.main(call).await.unwrap_err().to_string(),
-            format!("Calldata too large: {} bytes", config.max_calldata_size + 1)
+            format!("Calldata too large: {} bytes", max_call_data_size + 1)
         );
 
         Ok(())
@@ -237,7 +228,7 @@ mod test {
                 proof_mode: ProofMode::Fake,
                 ..HostConfig::default()
             };
-            let res = Host::try_new(&config);
+            let res = Host::try_new(config);
 
             assert!(matches!(
                 res.map(|_| ()).unwrap_err(),
@@ -247,26 +238,6 @@ mod test {
             ));
 
             Ok(())
-        }
-
-        #[test]
-        fn fails_with_mismatched_image_id() {
-            let config = HostConfig {
-                call_guest_id: Default::default(),
-                ..HostConfig::default()
-            };
-
-            let res = Host::try_new_with_components(
-                CachedMultiProvider::new(EthersProviderFactory::new(test_rpc_urls())),
-                0,
-                RpcChainProofClient::new(""),
-                &config,
-            );
-
-            assert!(matches!(
-                res.map(|_| ()).unwrap_err(),
-                HostError::UnsupportedCallGuestId(ref expected, ref received) if expected == &(RISC0_CALL_GUEST_ID.into()) && received == &Default::default()
-            ));
         }
     }
 }

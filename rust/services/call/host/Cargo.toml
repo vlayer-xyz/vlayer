@@ -8,26 +8,23 @@ alloy-chains = { workspace = true }
 alloy-primitives = { workspace = true, features = ["rlp", "serde"] }
 alloy-sol-types = { workspace = true }
 anyhow = { workspace = true }
-axum-jrpc = { workspace = true }
 block_header = { workspace = true }
+bytes = { workspace = true }
 call_engine = { workspace = true }
-call_guest_wrapper = { workspace = true }
 chain = { workspace = true }
 chain_client = { workspace = true, features = ["rpc"] }
 chain_common = { workspace = true }
-chain_guest_wrapper = { workspace = true }
+common = { workspace = true }
 derive-new = { workspace = true }
 ethers-core = { workspace = true }
 host_utils = { workspace = true }
 lazy_static = { workspace = true }
 mpt = { workspace = true }
 provider = { workspace = true }
-reqwest = { workspace = true }
 revm = { workspace = true, features = ["serde", "std"] }
 risc0-zkp = { workspace = true }
 risc0-zkvm = { workspace = true }
 serde_json = { workspace = true }
-server_utils = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true, features = ["macros"] }
 tracing = { workspace = true }
@@ -36,6 +33,7 @@ url = { workspace = true }
 [dev-dependencies]
 alloy-sol-types = { workspace = true }
 anyhow = { workspace = true }
+call_guest_wrapper = { workspace = true }
 ctor = { workspace = true }
 dotenvy = { workspace = true }
 mock_chain_server = { workspace = true }

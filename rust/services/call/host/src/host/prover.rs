@@ -1,7 +1,7 @@
 use std::result;
 
+use bytes::Bytes;
 use call_engine::Input;
-use call_guest_wrapper::RISC0_CALL_GUEST_ELF;
 use chain_common::ChainProofReceipt;
 use host_utils::{ProofMode, Prover as Risc0Prover};
 use risc0_zkvm::{ExecutorEnv, ProveInfo, Receipt};
@@ -19,11 +19,17 @@ pub enum Error {
 type Result<T> = result::Result<T, Error>;
 
 #[derive(Debug, Clone, Default)]
-pub struct Prover(Risc0Prover);
+pub struct Prover {
+    prover: Risc0Prover,
+    guest_elf: Bytes,
+}
 
 impl Prover {
-    pub const fn new(proof_mode: ProofMode) -> Self {
-        Self(Risc0Prover::new(proof_mode))
+    pub fn new(proof_mode: ProofMode, guest_elf: impl AsRef<Bytes>) -> Self {
+        Self {
+            prover: Risc0Prover::new(proof_mode),
+            guest_elf: guest_elf.as_ref().clone(), // Bytes is cheap to clone
+        }
     }
 
     /// Wrapper around Risc0Prover which specifies the call guest ELF
@@ -33,8 +39,8 @@ impl Prover {
             build_executor_env(input).map_err(|err| Error::ExecutorEnvBuilder(err.to_string()))?;
 
         let ProveInfo { receipt, .. } = self
-            .0
-            .prove(executor_env, RISC0_CALL_GUEST_ELF)
+            .prover
+            .prove(executor_env, &self.guest_elf)
             .map_err(|err| Error::Prover(err.to_string()))?;
         Ok(receipt)
     }
@@ -56,11 +62,13 @@ fn build_executor_env(input: &Input) -> anyhow::Result<ExecutorEnv<'static>> {
 
 #[cfg(test)]
 mod tests {
+    use call_guest_wrapper::GUEST_ELF;
+
     use super::*;
 
     #[test]
     fn invalid_input() {
-        let res = Prover::default().prove(&Input::default());
+        let res = Prover::new(ProofMode::Fake, &GUEST_ELF).prove(&Input::default());
 
         assert!(matches!(
             res.map(|_| ()).unwrap_err(),

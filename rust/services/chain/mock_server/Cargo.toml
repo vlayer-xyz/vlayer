@@ -12,12 +12,12 @@ bytemuck = { workspace = true }
 bytes = { workspace = true }
 chain_common = { workspace = true }
 chain_guest_wrapper = { workspace = true }
+common = { workspace = true }
 lazy_static = { workspace = true }
 risc0-zkvm = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 server_utils = { workspace = true }
-traits = { workspace = true }
 
 [lints]
 workspace = true

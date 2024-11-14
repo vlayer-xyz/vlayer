@@ -71,10 +71,10 @@ mod tests {
         use ::chain_db::{ChainInfo, ChainUpdate};
         use alloy_primitives::{fixed_bytes, FixedBytes};
         use anyhow::Result;
+        use common::Hashable;
         use mpt::MerkleTrie;
         use risc0_zkp::verify::VerificationError;
         use risc0_zkvm::{InnerReceipt, Receipt};
-        use traits::Hashable;
         use u64_range::NonEmptyRange;
 
         use super::*;

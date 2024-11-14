@@ -6,6 +6,7 @@ use call_engine::{
     },
     Call, HostOutput, Proof, Seal,
 };
+use call_guest_wrapper::GUEST_ELF;
 use call_host::host::{config::HostConfig, get_latest_block_number, Host};
 use chain::TEST_CHAIN_ID;
 use chain_client::RpcClient as RpcChainProofClient;
@@ -139,12 +140,13 @@ fn create_host<DB: Database>(
     let config = HostConfig {
         start_chain_id: TEST_CHAIN_ID,
         chain_proof_url,
+        call_guest_elf: GUEST_ELF.clone(),
         ..Default::default()
     };
     let block_number = get_latest_block_number(&providers, config.start_chain_id)
         .expect("failed to get block number");
     let chain_proof_client = RpcChainProofClient::new(config.chain_proof_url.clone());
 
-    Host::try_new_with_components(providers, block_number, chain_proof_client, &config)
+    Host::try_new_with_components(providers, block_number, chain_proof_client, config)
         .expect("failed to create host")
 }

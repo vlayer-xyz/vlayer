@@ -3,6 +3,7 @@ use std::{collections::HashMap, env};
 use alloy_chains::{Chain, NamedChain};
 use alloy_primitives::{address, b256, uint, Address, ChainId};
 use alloy_sol_types::{sol, SolCall};
+use call_guest_wrapper::GUEST_ELF;
 use call_host::{
     host::{config::HostConfig, error::HostError, get_block_header, Host},
     Call,
@@ -129,12 +130,13 @@ fn create_host(
 ) -> Result<Host, HostError> {
     let config = HostConfig {
         start_chain_id: location.chain_id,
+        call_guest_elf: GUEST_ELF.clone(),
         ..Default::default()
     };
     let block_number =
         block_tag_to_block_number(&multi_provider, location.chain_id, location.block_tag)?;
     let chain_proof_client = RpcChainProofClient::new(chain_proof_server_url);
-    Host::try_new_with_components(multi_provider, block_number, chain_proof_client, &config)
+    Host::try_new_with_components(multi_provider, block_number, chain_proof_client, config)
 }
 
 fn block_tag_to_block_number(

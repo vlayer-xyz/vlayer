@@ -2,6 +2,7 @@ use std::{collections::HashMap, sync::Arc, time::Duration};
 
 use axum::{body::Body, http::Response};
 use block_header::EvmBlockHeader;
+use call_guest_wrapper::GUEST_ELF;
 use call_server::{server, ProofMode, ServerConfig};
 use ethers::{
     contract::abigen,
@@ -53,6 +54,7 @@ impl TestHelper {
             rpc_urls: HashMap::from([(self.anvil.chain_id(), self.anvil.endpoint())]),
             proof_mode: ProofMode::Fake,
             chain_proof_url: chain_proof_server_mock.url(),
+            call_guest_elf: GUEST_ELF.clone(),
             ..ServerConfig::default()
         });
         post(app, url, body).await

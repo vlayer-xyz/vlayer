@@ -1,6 +1,5 @@
-use call_guest_wrapper::RISC0_CALL_GUEST_ID;
+use call_guest_wrapper::GUEST_ELF;
 use clap::builder::{IntoResettable, Resettable, Str};
-use risc0_zkp::core::digest::Digest;
 
 pub struct Version;
 
@@ -15,7 +14,7 @@ fn version_msg() -> String {
 }
 
 fn call_guest_id() -> String {
-    let little_endian_hex = hex::encode(Digest::from(RISC0_CALL_GUEST_ID));
+    let little_endian_hex = hex::encode(GUEST_ELF.id);
     format!("CALL_GUEST_ID: {}", little_endian_hex)
 }
 
@@ -57,17 +56,15 @@ mod tests {
     }
 
     mod guest_id {
-        use hex::FromHex;
+        use regex::Regex;
 
         use super::*;
 
         #[test]
         fn guest_id_equals_to_compiled_in_version() {
             let guest_id_line = call_guest_id();
-            let guest_id_hex = guest_id_line.trim_start_matches("CALL_GUEST_ID: ");
-            let guest_id: [u32; 8] = Digest::from_hex(guest_id_hex).unwrap().into();
-
-            assert_eq!(guest_id, RISC0_CALL_GUEST_ID);
+            let id_regex = Regex::new(r"^CALL_GUEST_ID: [a-f0-9]{64}$").unwrap();
+            assert!(id_regex.is_match(&guest_id_line));
         }
     }
 

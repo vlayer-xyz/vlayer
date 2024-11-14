@@ -17,6 +17,7 @@ test_runner = { workspace = true }
 anyhow = { workspace = true }
 clap = { workspace = true, features = ["derive", "string"] }
 colored = { workspace = true }
+common = { workspace = true }
 flate2 = { workspace = true }
 hex = { workspace = true }
 lazy_static = { workspace = true }

@@ -1,9 +1,9 @@
 //! Type aliases for Ethereum.
 use alloy_primitives::{keccak256, Address, BlockHash, BlockNumber, Bloom, Bytes, B256, B64, U256};
 use alloy_rlp_derive::RlpEncodable;
+use common::Hashable;
 use revm::primitives::BlockEnv;
 use serde::{Deserialize, Serialize};
-use traits::Hashable;
 
 use super::EvmBlockHeader;
 use crate::casting_utils::try_downcast;

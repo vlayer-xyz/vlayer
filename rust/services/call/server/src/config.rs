@@ -1,8 +1,9 @@
 use std::{collections::HashMap, net::SocketAddr};
 
 use alloy_primitives::ChainId;
-use call_host::host::config::DEFAULT_MAX_CALLDATA_SIZE;
+use call_host::host::config::{HostConfig, DEFAULT_MAX_CALLDATA_SIZE};
 use chain::TEST_CHAIN_ID;
+use common::GuestElf;
 use serde::{Deserialize, Serialize};
 use server_utils::ProofMode;
 
@@ -14,6 +15,7 @@ pub struct ServerConfig {
     pub chain_proof_url: String,
     pub max_request_size: usize,
     pub verify_chain_proofs: bool,
+    pub call_guest_elf: GuestElf,
 }
 
 impl Default for ServerConfig {
@@ -26,6 +28,7 @@ impl Default for ServerConfig {
             chain_proof_url: String::default(),
             max_request_size: DEFAULT_MAX_CALLDATA_SIZE,
             verify_chain_proofs: false,
+            call_guest_elf: GuestElf::default(),
         }
     }
 }
@@ -38,6 +41,7 @@ impl ServerConfig {
         port: Option<u16>,
         chain_proof_url: impl AsRef<str>,
         verify_chain_proofs: bool,
+        call_guest_elf: GuestElf,
     ) -> ServerConfig {
         let ServerConfig {
             mut socket_addr,
@@ -61,6 +65,19 @@ impl ServerConfig {
             chain_proof_url: chain_proof_url.as_ref().to_string(),
             max_request_size: DEFAULT_MAX_CALLDATA_SIZE,
             verify_chain_proofs,
+            call_guest_elf,
+        }
+    }
+
+    pub fn into_host_config(&self, start_chain_id: ChainId) -> HostConfig {
+        HostConfig {
+            rpc_urls: self.rpc_urls.clone(),
+            start_chain_id,
+            proof_mode: self.proof_mode.into(),
+            chain_proof_url: self.chain_proof_url.clone(),
+            max_calldata_size: self.max_request_size,
+            verify_chain_proofs: self.verify_chain_proofs,
+            call_guest_elf: self.call_guest_elf.clone(),
         }
     }
 }

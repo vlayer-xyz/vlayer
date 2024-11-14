@@ -3,8 +3,8 @@ use call_engine::{
     GuestOutput, Input,
 };
 use chain_client::CachedClient;
-use chain_guest_wrapper::RISC0_CHAIN_GUEST_ID;
 use env::{verify_input, VerifiedEnv};
+use risc0_zkvm::sha::Digest;
 
 mod env;
 #[cfg(test)]
@@ -17,11 +17,12 @@ pub async fn main(
         chain_proofs,
         call,
     }: Input,
+    chain_guest_id: Digest,
 ) -> GuestOutput {
     let input_verifier = chain_proofs.map(|chain_proofs| {
         let chain_client = CachedClient::new(chain_proofs);
         let chain_proof_verifier =
-            chain_proof::ZkVerifier::new(RISC0_CHAIN_GUEST_ID, zk_proof::GuestVerifier);
+            chain_proof::ZkVerifier::new(chain_guest_id, zk_proof::GuestVerifier);
         guest_input::ZkVerifier::new(chain_client, chain_proof_verifier)
     });
     let verified_input = verify_input(input_verifier, multi_evm_input).await;

@@ -3,10 +3,10 @@ use std::fmt::Debug;
 use alloy_primitives::B256;
 use alloy_rlp::Decodable;
 use bytes::Bytes;
+use common::Hashable;
 use nybbles::Nibbles;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
-use traits::Hashable;
 use utils::{parse_node, resolve_trie};
 
 use crate::node::{Node, NodeError};

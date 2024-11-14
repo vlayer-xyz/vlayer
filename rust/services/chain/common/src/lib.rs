@@ -1,7 +1,6 @@
 use alloy_primitives::B256;
 use block_trie::BlockTrie;
 use bytes::Bytes;
-use chain_guest_wrapper::RISC0_CHAIN_GUEST_ID;
 use derivative::Derivative;
 use derive_more::{AsRef, Deref, From, Into};
 use derive_new::new;
@@ -43,15 +42,18 @@ pub enum ProofVerificationError {
 pub struct ChainProofReceipt(Receipt);
 
 impl ChainProofReceipt {
-    pub fn verify(&self, expected_hash: B256) -> Result<(), ProofVerificationError> {
+    pub fn verify(
+        &self,
+        expected_hash: B256,
+        expected_elf_id: Digest,
+    ) -> Result<(), ProofVerificationError> {
         let receipt = &self.0;
-        let guest_id = RISC0_CHAIN_GUEST_ID.into();
-        receipt.verify(RISC0_CHAIN_GUEST_ID)?;
+        receipt.verify(expected_elf_id)?;
         let (proven_root, elf_id): (B256, Digest) = receipt.journal.decode()?;
 
-        if elf_id != guest_id {
+        if elf_id != expected_elf_id {
             return Err(ProofVerificationError::ElfIdMismatch {
-                expected: guest_id,
+                expected: expected_elf_id,
                 decoded: elf_id,
             });
         }

@@ -1674,13 +1674,13 @@ dependencies = [
  "anyhow",
  "as-any",
  "auto_impl",
+ "common",
  "derive-new",
  "dyn-clone",
  "lazy_static",
  "revm",
  "serde",
  "serde_json",
- "traits",
 ]
 
 [[package]]
@@ -1693,10 +1693,10 @@ dependencies = [
  "block_header",
  "bytes",
  "chain_test_utils",
+ "common",
  "mpt",
  "serde",
  "thiserror",
- "traits",
 ]
 
 [[package]]
@@ -1928,7 +1928,6 @@ dependencies = [
  "thiserror",
  "tokio",
  "tracing",
- "traits",
  "web_proof",
 ]
 
@@ -1947,9 +1946,9 @@ dependencies = [
  "chain",
  "chain_client",
  "chain_common",
- "chain_guest_wrapper",
  "mpt",
  "revm",
+ "risc0-zkvm",
  "tokio",
 ]
 
@@ -1958,6 +1957,7 @@ name = "call_guest_wrapper"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "common",
  "risc0-build",
  "risc0-build-ethereum",
 ]
@@ -1970,14 +1970,14 @@ dependencies = [
  "alloy-primitives",
  "alloy-sol-types",
  "anyhow",
- "axum-jrpc",
  "block_header",
+ "bytes",
  "call_engine",
  "call_guest_wrapper",
  "chain",
  "chain_client",
  "chain_common",
- "chain_guest_wrapper",
+ "common",
  "ctor",
  "derive-new",
  "dotenvy",
@@ -1987,12 +1987,10 @@ dependencies = [
  "mock_chain_server",
  "mpt",
  "provider",
- "reqwest 0.12.8",
  "revm",
  "risc0-zkp",
  "risc0-zkvm",
  "serde_json",
- "server_utils",
  "test-log",
  "thiserror",
  "tokio",
@@ -2013,8 +2011,10 @@ dependencies = [
  "axum-jrpc",
  "block_header",
  "call_engine",
+ "call_guest_wrapper",
  "call_host",
  "chain",
+ "common",
  "ethers",
  "hex",
  "lazy_static",
@@ -2163,7 +2163,6 @@ dependencies = [
  "bincode",
  "block_trie",
  "bytes",
- "chain_guest_wrapper",
  "derivative",
  "derive-new",
  "derive_more 1.0.0",
@@ -2188,6 +2187,7 @@ dependencies = [
  "bytes",
  "chain_common",
  "chain_guest_wrapper",
+ "common",
  "derivative",
  "derive-new",
  "derive_more 1.0.0",
@@ -2199,7 +2199,6 @@ dependencies = [
  "risc0-zkvm",
  "serde",
  "thiserror",
- "traits",
  "u64_range",
 ]
 
@@ -2210,16 +2209,17 @@ dependencies = [
  "alloy-primitives",
  "block_header",
  "block_trie",
+ "common",
  "risc0-zkp",
  "risc0-zkvm",
  "serde",
- "traits",
 ]
 
 [[package]]
 name = "chain_guest_wrapper"
 version = "0.1.0"
 dependencies = [
+ "common",
  "risc0-build",
 ]
 
@@ -2268,7 +2268,7 @@ dependencies = [
  "bytemuck",
  "chain_common",
  "chain_db",
- "chain_guest_wrapper",
+ "common",
  "dotenvy",
  "lazy_static",
  "mpt",
@@ -2282,7 +2282,6 @@ dependencies = [
  "tokio",
  "tracing",
  "tracing-subscriber 0.3.18",
- "traits",
  "u64_range",
 ]
 
@@ -2451,6 +2450,7 @@ dependencies = [
  "call_server",
  "clap",
  "colored",
+ "common",
  "flate2",
  "hex",
  "lazy_static",
@@ -2681,7 +2681,13 @@ dependencies = [
 name = "common"
 version = "0.1.0"
 dependencies = [
+ "alloy-primitives",
  "anyhow",
+ "auto_impl",
+ "bytes",
+ "derive_more 1.0.0",
+ "risc0-zkp",
+ "serde",
 ]
 
 [[package]]
@@ -6627,12 +6633,12 @@ dependencies = [
  "bytes",
  "chain_common",
  "chain_guest_wrapper",
+ "common",
  "lazy_static",
  "risc0-zkvm",
  "serde",
  "serde_json",
  "server_utils",
- "traits",
 ]
 
 [[package]]
@@ -6669,6 +6675,7 @@ dependencies = [
  "alloy-trie",
  "anyhow",
  "bytes",
+ "common",
  "derive_more 1.0.0",
  "itertools 0.13.0",
  "lazy_static",
@@ -6678,7 +6685,6 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror",
- "traits",
 ]
 
 [[package]]
@@ -9811,6 +9817,7 @@ dependencies = [
  "anyhow",
  "block_header",
  "call_engine",
+ "call_guest_wrapper",
  "call_host",
  "chain",
  "chain_client",
@@ -10359,14 +10366,6 @@ dependencies = [
  "tracing",
  "tracing-core",
  "tracing-log",
-]
-
-[[package]]
-name = "traits"
-version = "0.1.0"
-dependencies = [
- "alloy-primitives",
- "auto_impl",
 ]
 
 [[package]]
