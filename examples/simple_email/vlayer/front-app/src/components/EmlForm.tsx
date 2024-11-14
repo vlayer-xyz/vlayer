@@ -2,6 +2,7 @@ interface EmlFormProps {
   isSubmitting: boolean;
   currentStep: string;
   errorMsg: string;
+  successMsg: string;
   handleSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
 }
 
@@ -9,6 +10,7 @@ const EmlForm: React.FC<EmlFormProps> = ({
   isSubmitting,
   currentStep,
   errorMsg,
+  successMsg,
   handleSubmit,
 }) => {
   return (
@@ -45,6 +47,9 @@ const EmlForm: React.FC<EmlFormProps> = ({
           </div>
 
           <p className="text-block text-center text-red-400 mt-5">{errorMsg}</p>
+          <p className="text-block text-center text-green-400 mt-5">
+            {successMsg}
+          </p>
         </form>
       </div>
     </div>

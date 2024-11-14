@@ -44,7 +44,7 @@ const useProver = <T extends Abi, F extends ContractFunctionName<T>>({
       createVlayerClient({
         url: import.meta.env.VITE_PROVER_URL as string,
       }),
-    [],
+    [import.meta.env.VITE_PROVER_URL],
   );
 
   const prove = async (
