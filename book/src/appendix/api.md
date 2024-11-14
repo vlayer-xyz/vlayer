@@ -1,7 +1,7 @@
 # vlayer JSON-RPC API
 
 vlayer exposes one RPC endpoint under `/` with the following methods:
-- `v_prove`
+- `v_call`
 - `v_getProofReceipt`
 - `v_proveChain`
 
@@ -28,15 +28,16 @@ And the response format below.
 ```
 
 
-## v_prove
-`v_prove` is the core endpoint that vlayer provides, with the following format request:
+## v_call
+`v_call` is the core endpoint that vlayer provides, with the following format request:
 
 ```json
 {
-    "method": "v_prove",
-    "params": [{   
+    "method": "v_call",
+    "params": [{ // CallParams   
         "to": "<contract address>",
         "data": "0x<abi encoded calldata>",
+    }, { // CallContext
         "chain_id": "<desired chain id>",
     }]
 }
@@ -46,7 +47,7 @@ and the response:
 
 ```json
 {
-    "jsonrpc": "0.2",
+    "jsonrpc": "2.0",
     "result": {
         "id": "<proving_hash>",
         "result": "<abi encoded result of preflight execution>"
@@ -74,7 +75,7 @@ There are three possible results: `pending`, `success` and `error`.
 
 ```json
 {
-    "jsonrpc": "0.2",
+    "jsonrpc": "2.0",
     "status": "pending",
 }
 ```
@@ -83,7 +84,7 @@ There are three possible results: `pending`, `success` and `error`.
 
 ```json
 {
-    "jsonrpc": "0.2",
+    "jsonrpc": "2.0",
     "status": "success",
     "result": {        
         "proof": "<calldata encoded Proof structure>",
@@ -99,7 +100,7 @@ There are three possible results: `pending`, `success` and `error`.
 
 ```json
 {
-  "jsonrpc": "0.2",
+  "jsonrpc": "2.0",
   "status": "error",
   "error": {
     "message": "<error message>",
