@@ -28,14 +28,8 @@ impl ChainSpec {
         );
         assert!(is_ordered(&forks), "forks are not ordered",);
 
-        const MIN_TIMESTAMP: u64 = 1640995200; // 2022-01-01 00:00:00 UTC
-
-        // Check that no fork has a timestamp activation earlier than 2022
         assert!(
-            forks.iter().all(|fork| match fork.activation {
-                ActivationCondition::Timestamp(ts) => ts >= MIN_TIMESTAMP,
-                _ => true,
-            }),
+            no_timestamps_before_2022(&forks),
             "forks cannot have activation timestamp earlier than 2022-01-01"
         );
 
@@ -81,6 +75,14 @@ fn no_duplicated_activations(forks: &[Fork]) -> bool {
         }
     }
     true
+}
+
+fn no_timestamps_before_2022(forks: &[Fork]) -> bool {
+    const MIN_TIMESTAMP: u64 = 1640995200; // 2022-01-01 00:00:00 UTC
+    forks.iter().all(|fork| match fork.activation {
+        ActivationCondition::Timestamp(ts) => ts >= MIN_TIMESTAMP,
+        _ => true,
+    })
 }
 
 impl TryFrom<ChainId> for ChainSpec {
