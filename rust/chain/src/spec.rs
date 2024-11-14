@@ -40,10 +40,7 @@ impl ChainSpec {
 
     /// Creates a new configuration consisting of only one specification ID.
     pub fn new_single(chain_id: ChainId, spec_id: SpecId) -> Self {
-        ChainSpec {
-            chain_id,
-            forks: vec![Fork::new(spec_id, ActivationCondition::Block(0))],
-        }
+        ChainSpec::new(chain_id, [(spec_id, ActivationCondition::Block(0))])
     }
 
     /// Returns the [SpecId] for a given block number and timestamp or an error if not supported.
