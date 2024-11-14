@@ -93,7 +93,7 @@ const EmlUploadForm = () => {
       const receipt = await walletClient.waitForTransactionReceipt({
         hash: txHash,
       });
-      console.log("receiot", receipt);
+      console.log("receipt", receipt);
       setCurrentStep("Success!");
       setIsSubmitting(false);
       if (chain.blockExplorers && receipt.status === "success") {
