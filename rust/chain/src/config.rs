@@ -220,14 +220,8 @@ pub static ZKSYNC_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
     )
 });
 
-pub static TESTING_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
-    ChainSpec::new(
-        TEST_CHAIN_ID,
-        [
-            (SpecId::MERGE, ActivationCondition::Block(0)),
-        ],
-    )
-});
+pub static TESTING_CHAIN_SPEC: Lazy<ChainSpec> =
+    Lazy::new(|| ChainSpec::new_single(TEST_CHAIN_ID, SpecId::MERGE));
 
 pub static FLOW_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> =
     Lazy::new(|| ChainSpec::new_single(747, SpecId::CANCUN));
