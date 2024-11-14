@@ -15,11 +15,12 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
   cancel-in-progress: true
 permissions:
+  contents: read
   pull-requests: write
 
 jobs:
   rust-incremental-compilation-time:
-    runs-on: aws-linux-small
+    runs-on: aws-linux-medium
 
     steps:
       - name: Checkout repository

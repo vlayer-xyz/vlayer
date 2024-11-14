@@ -18,7 +18,7 @@ concurrency:
 
 jobs:
   rust-test:
-    runs-on: aws-linux-small
+    runs-on: aws-linux-medium
 
     steps:
       - name: Checkout repository
