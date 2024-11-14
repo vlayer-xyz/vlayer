@@ -80,25 +80,3 @@ mod caching_client {
         Ok(())
     }
 }
-
-mod get_chain_proofs {
-    use super::*;
-
-    #[tokio::test]
-    async fn fetch_failed() {
-        let client = get_cached_client([]);
-        let res = client.get_chain_proofs(HashMap::from([(1, vec![1])])).await;
-        assert!(res.is_err())
-    }
-
-    #[tokio::test]
-    async fn ok() -> anyhow::Result<()> {
-        let blocks_by_chain = [(1, vec![1]), (2, vec![1, 2])];
-        let client = get_cached_client(blocks_by_chain.clone());
-        let mut proof = client.get_chain_proofs(blocks_by_chain.into()).await?;
-        assert_eq!(proof.len(), 2);
-        assert_eq!(proof.remove(&1).unwrap(), mock_chain_proof(&[1]));
-        assert_eq!(proof.remove(&2).unwrap(), mock_chain_proof(&[1, 2]));
-        Ok(())
-    }
-}

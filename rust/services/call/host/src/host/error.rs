@@ -1,5 +1,7 @@
 use alloy_primitives::ChainId;
-use call_engine::{travel_call_executor::Error as TravelCallExecutorError, GuestOutputError};
+use call_engine::{
+    travel_call_executor::Error as TravelCallExecutorError, verifier::guest_input, GuestOutputError,
+};
 use provider::ProviderFactoryError;
 use risc0_zkp::verify::VerificationError;
 use thiserror::Error;
@@ -58,4 +60,7 @@ pub enum HostError {
 
     #[error("Calldata too large: {0} bytes")]
     CalldataTooLargeError(usize),
+
+    #[error("Guest input verification error: {0}")]
+    GuestInput(#[from] guest_input::Error),
 }

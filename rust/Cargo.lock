@@ -2145,7 +2145,6 @@ dependencies = [
  "block_trie",
  "chain_common",
  "derive-new",
- "futures",
  "mpt",
  "parking_lot",
  "serde_json",

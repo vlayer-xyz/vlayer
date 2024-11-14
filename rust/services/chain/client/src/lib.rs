@@ -4,7 +4,6 @@ use alloy_primitives::{BlockNumber, ChainId};
 use async_trait::async_trait;
 use chain_common::ChainProof;
 use derive_new::new;
-use futures::stream::{self, StreamExt, TryStreamExt};
 use parking_lot::RwLock;
 use thiserror::Error;
 
@@ -24,18 +23,6 @@ pub trait Client: Send + Sync + 'static {
         chain_id: ChainId,
         block_numbers: Vec<BlockNumber>,
     ) -> Result<ChainProof, Error>;
-
-    async fn get_chain_proofs(
-        &self,
-        blocks_by_chain: HashMap<ChainId, Vec<BlockNumber>>,
-    ) -> Result<HashMap<ChainId, ChainProof>, Error> {
-        stream::iter(blocks_by_chain)
-            .then(|(chain_id, block_numbers)| async move {
-                Ok((chain_id, self.get_chain_proof(chain_id, block_numbers).await?))
-            })
-            .try_collect()
-            .await
-    }
 }
 
 #[derive(Debug, Error)]

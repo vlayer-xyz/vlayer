@@ -10,6 +10,11 @@ use call_engine::{
     travel_call_executor::{
         Error as TravelCallExecutorError, SuccessfulExecutionResult, TravelCallExecutor,
     },
+    verifier::{
+        chain_proof,
+        guest_input::{self, Verifier},
+        zk_proof,
+    },
     Call, GuestOutput, HostOutput, Input, Seal,
 };
 use chain_client::{
@@ -114,13 +119,18 @@ impl Host {
 
         let multi_evm_input =
             into_multi_input(self.envs).map_err(|err| HostError::CreatingInput(err.to_string()))?;
-        _ = self
-            .chain_proof_client
-            .get_chain_proofs(multi_evm_input.block_nums_by_chain())
-            .await?;
-        let chain_proofs = self
-            .verify_chain_proofs
-            .then_some(self.chain_proof_client.into_cache());
+
+        let chain_proofs = if self.verify_chain_proofs {
+            let chain_proof_verifier =
+                chain_proof::ZkVerifier::new(self.guest_elf.id, zk_proof::HostVerifier);
+            let guest_input_verifier =
+                guest_input::ZkVerifier::new(&self.chain_proof_client, &chain_proof_verifier);
+            guest_input_verifier.verify(&multi_evm_input).await?;
+            Some(self.chain_proof_client.into_cache())
+        } else {
+            None
+        };
+
         let input = Input {
             multi_evm_input,
             start_execution_location: self.start_execution_location,
