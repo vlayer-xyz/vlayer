@@ -10,12 +10,6 @@ import verifierSpec from "../../../out/EmailProofVerifier.sol/EmailDomainVerifie
 import EmlForm from "../components/EmlForm";
 import { createContext, customTransport, type Chain } from "@vlayer/sdk/config";
 
-declare global {
-  interface Window {
-    ethereum: { request: () => Promise<unknown> };
-  }
-}
-
 function getChainByName(name: string) {
   const chain = (chains as Record<string, Chain>)[name];
   if (chain) {
