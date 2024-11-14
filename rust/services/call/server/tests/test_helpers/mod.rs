@@ -20,6 +20,7 @@ use provider::to_eth_block_header;
 use serde::Serialize;
 use serde_json::json;
 use server_utils::post;
+use call_guest_wrapper::call_guest;
 
 abigen!(ExampleProver, "./testdata/ExampleProver.json",);
 
@@ -53,6 +54,7 @@ impl TestHelper {
             rpc_urls: HashMap::from([(self.anvil.chain_id(), self.anvil.endpoint())]),
             proof_mode: ProofMode::Fake,
             chain_proof_url: chain_proof_server_mock.url(),
+            call_guest: call_guest(),
             ..ServerConfig::default()
         });
         post(app, url, body).await
