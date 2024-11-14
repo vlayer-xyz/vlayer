@@ -1,13 +1,17 @@
 use std::{f32::consts::E, io::Read, path::Path};
 
 use libmdbx::{
-    DatabaseOptions, Table, TableFlags, Transaction, TransactionKind, WriteFlags, WriteMap, RO, RW,
+    DatabaseOptions, ReadWriteOptions, Table, TableFlags, Transaction, TransactionKind, WriteFlags,
+    WriteMap, RO, RW,
 };
 
 use super::{DbError, DbResult, ReadTx, WriteTx};
 use crate::ReadWriteTx;
 
 pub const MAX_TABLES: u64 = 1024;
+pub const MIN_DB_SIZE: isize = 100_000_000;
+pub const MAX_DB_SIZE: isize = 10_000_000_000;
+pub const DB_GROWTH_STEP: isize = 100_000_000;
 
 pub struct Mdbx {
     db: libmdbx::Database<WriteMap>,
@@ -16,6 +20,12 @@ pub struct Mdbx {
 impl Mdbx {
     pub fn open(path: impl AsRef<Path>) -> DbResult<Self> {
         let db_opts = DatabaseOptions {
+            mode: libmdbx::Mode::ReadWrite(ReadWriteOptions {
+                min_size: Some(MIN_DB_SIZE),
+                max_size: Some(MAX_DB_SIZE),
+                growth_step: Some(DB_GROWTH_STEP),
+                ..Default::default()
+            }),
             max_tables: Some(MAX_TABLES),
             ..Default::default()
         };

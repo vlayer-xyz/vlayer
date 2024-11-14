@@ -13,7 +13,13 @@ static_assertions = { workspace = true }
 thiserror = { workspace = true }
 
 [dev-dependencies]
+criterion = { workspace = true }
+rand = { workspace = true }
 tempfile = { workspace = true }
 
 [lints]
 workspace = true
+
+[[bench]]
+name = "mdbx_insert"
+harness = false
