@@ -98,8 +98,9 @@ const EmlUploadForm = () => {
       setIsSubmitting(false);
       if (chain.blockExplorers && receipt.status === "success") {
         window.open(`${chain.blockExplorers?.default.url}/tx/${txHash}`);
-      } else if (receipt.status === 'reverted') {
-        setErrorMsg("Transaction reverted. Is email already used?")
+      } else if (receipt.status === "reverted") {
+        setErrorMsg("Transaction reverted. Is email already used?");
+        window.open(`${chain.blockExplorers?.default.url}/tx/${txHash}`);
       } else {
         setSuccessMsg("Verified successfully.");
       }
@@ -128,12 +129,6 @@ const EmlUploadForm = () => {
 
     setCurrentStep("Connecting to wallet...");
     const addr = await getClaimerAddr();
-    console.log("Form submitted:", {
-      verifierAddress: import.meta.env.VITE_VERIFIER_ADDRESS as Address,
-      proverAddress: import.meta.env.VITE_PROVER_ADDRESS as Address,
-      fileName: emlFile?.name,
-      claimerAddr: addr,
-    });
     await startProving(emlFile, addr);
     setCurrentStep("Waiting for proof...");
   };
