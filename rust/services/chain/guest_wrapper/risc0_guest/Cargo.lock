@@ -690,6 +690,7 @@ dependencies = [
  "anyhow",
  "auto_impl",
  "bytes",
+ "derive_more",
  "risc0-zkp",
  "serde",
 ]
