@@ -26,7 +26,7 @@ impl ChainSpec {
         let forks: Vec<Fork> = forks.into().into_iter().map(|f| f.into()).collect();
         assert_ne!(forks.len(), 0, "chain spec must have at least one fork");
         assert!(
-            is_strictly_growing(&forks),
+            forks.is_sorted_by(|a, b| a < b),
             "forks must be ordered by their activation conditions in ascending order",
         );
         assert!(
@@ -51,18 +51,6 @@ impl ChainSpec {
         }
         bail!("unsupported fork for block {}", block_number)
     }
-}
-
-fn is_strictly_growing(forks: &[Fork]) -> bool {
-    let mut forks = forks.iter();
-    let mut last = forks.next().unwrap();
-    for fork in forks {
-        if last.cmp(fork) != Ordering::Less {
-            return false;
-        }
-        last = fork;
-    }
-    true
 }
 
 fn no_timestamps_before_merge(forks: &[Fork]) -> bool {
