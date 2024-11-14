@@ -51,7 +51,6 @@ const useProver = <T extends Abi, F extends ContractFunctionName<T>>({
     args: ContractFunctionArgs<T, AbiStateMutability, F>,
   ) => {
     try {
-      console.log("Proving...", args, addr, abi, func, chainId);
       const hash = await vlayer.prove({
         address: addr,
         proverAbi: abi,

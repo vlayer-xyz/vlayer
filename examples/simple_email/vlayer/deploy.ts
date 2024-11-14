@@ -23,4 +23,6 @@ writeEnvVariables("front-app/.env", {
   VITE_PROVER_URL: config.proverUrl,
   VITE_JSON_RPC_URL: config.jsonRpcUrl,
   VITE_PRIVATE_KEY: config.privateKey,
+  VITE_USE_WINDOW_ETHEREUM_TRANSPORT:
+    process.env.USE_WINDOW_ETHEREUM_TRANSPORT || "",
 });

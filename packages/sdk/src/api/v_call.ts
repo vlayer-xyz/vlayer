@@ -19,19 +19,16 @@ export async function v_call(
     body: JSON.stringify(v_callBody(call, context)),
     headers: { "Content-Type": "application/json" },
   });
+  const response_json = await response.json();
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
-
-  const response_json = await response.json();
   assertObject(response_json);
-
   if ("error" in response_json) {
     throw new Error(
       `Error response: ${(response_json.error as { message: string }).message || "unknown error"}`,
     );
   }
-
   return response_json as Promise<VCallResponse>;
 }
 

@@ -28,8 +28,11 @@ function install_deps {
     cd ${VLAYER_HOME}/examples/web_proof/vlayer && bun install --frozen-lockfile
 }
 
-install_deps
+# install_deps
 run_services
-deploy_contracts
-run_web_app
-run_browser_extension
+
+# # deploy_contracts
+# run_web_app
+# run_browser_extension
+
+wait

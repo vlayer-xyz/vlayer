@@ -3,9 +3,13 @@
   "module": "prove.ts",
   "type": "module",
   "scripts": {
-    "lint:solidity": "solhint '../src/**/*.sol'",
-    "prove:testnet": "VLAYER_ENV=testnet bun run prove.ts",
-    "prove:dev": "VLAYER_ENV=dev bun run prove.ts"
+    "lint:solidity": "solhint '../src/**/*.sol'", 
+    "deploy:dev" : "VLAYER_ENV=dev bun run deploy.ts",
+    "deploy:testnet" : "VLAYER_ENV=testnet run deploy.ts", 
+    "prove:dev" : "VLAYER_ENV=dev bun run prove.ts",
+    "prove:testnet" : "VLAYER_ENV=testnet bun run prove.ts", 
+    "web:dev" : "VLAYER_ENV=dev bun run deploy.ts && cd front-app && bun run dev",
+    "web:testnet" : "VLAYER_ENV=testnet bun run deploy.ts && cd front-app && bun run dev"
   },
   "dependencies": {
     "@noble/hashes": "^1.4.0",
