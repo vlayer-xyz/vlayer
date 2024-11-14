@@ -77,10 +77,13 @@ jobs:
       matrix:
         include:
           - target: x86_64-unknown-linux-gnu
+            suffix: linux-amd64
             runner: aws-linux-medium
           - target: x86_64-unknown-linux-musl
+            suffix: linux-amd64-musl
             runner: aws-linux-medium
           - target: aarch64-apple-darwin
+            suffix: darwin-arm64
             runner: macos-14
 
     steps:
@@ -178,7 +181,7 @@ jobs:
       - name: Package release
         id: package-release
         env:
-          OUTPUT_FILE_SUFFIX: "${{ matrix.target }}.tar.gz"
+          OUTPUT_FILE_SUFFIX: "${{ matrix.suffix }}.tar.gz"
         run: |
           bins=(vlayer)
           mkdir -p target/${{ matrix.target }}/bin
