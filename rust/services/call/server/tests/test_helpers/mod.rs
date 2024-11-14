@@ -54,7 +54,7 @@ impl TestHelper {
             rpc_urls: HashMap::from([(self.anvil.chain_id(), self.anvil.endpoint())]),
             proof_mode: ProofMode::Fake,
             chain_proof_url: chain_proof_server_mock.url(),
-            call_guest: GUEST_ELF.clone(),
+            call_guest_elf: GUEST_ELF.clone(),
             ..ServerConfig::default()
         });
         post(app, url, body).await
