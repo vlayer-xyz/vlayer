@@ -1,4 +1,4 @@
-use std::{cmp::Ordering, collections::HashSet};
+use std::cmp::Ordering;
 
 use alloy_primitives::{BlockNumber, ChainId};
 use anyhow::bail;
@@ -6,7 +6,10 @@ use derive_new::new;
 use revm::primitives::SpecId;
 use serde::{Deserialize, Serialize};
 
-use crate::{config::CHAIN_MAP, error::ChainError};
+use crate::{
+    config::{CHAIN_MAP, MAINNET_MERGE_BLOCK_TIMESTAMP},
+    error::ChainError,
+};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ChainSpec {
@@ -23,15 +26,11 @@ impl ChainSpec {
         let forks: Vec<Fork> = forks.into().into_iter().map(|f| f.into()).collect();
         assert_ne!(forks.len(), 0, "chain spec must have at least one fork");
         assert!(
-            no_duplicated_activations(&forks),
-            "duplicate activation conditions among forks are not allowed",
-        );
-        assert!(
-            is_ordered(&forks),
+            is_strictly_growing(&forks),
             "forks must be ordered by their activation conditions in ascending order",
         );
         assert!(
-            no_timestamps_before_2022(&forks),
+            no_timestamps_before_merge(&forks),
             "forks cannot have activation timestamp earlier than 2022-01-01"
         );
 
@@ -54,7 +53,7 @@ impl ChainSpec {
     }
 }
 
-fn is_ordered(forks: &[Fork]) -> bool {
+fn is_strictly_growing(forks: &[Fork]) -> bool {
     let mut forks = forks.iter();
     let mut last = forks.next().unwrap();
     for fork in forks {
@@ -66,20 +65,9 @@ fn is_ordered(forks: &[Fork]) -> bool {
     true
 }
 
-fn no_duplicated_activations(forks: &[Fork]) -> bool {
-    let mut set = HashSet::new();
-    for fork in forks {
-        if !set.insert(fork.activation) {
-            return false;
-        }
-    }
-    true
-}
-
-fn no_timestamps_before_2022(forks: &[Fork]) -> bool {
-    const MIN_TIMESTAMP: u64 = 1640995200; // 2022-01-01 00:00:00 UTC
+fn no_timestamps_before_merge(forks: &[Fork]) -> bool {
     forks.iter().all(|fork| match fork.activation {
-        ActivationCondition::Timestamp(ts) => ts >= MIN_TIMESTAMP,
+        ActivationCondition::Timestamp(ts) => ts >= MAINNET_MERGE_BLOCK_TIMESTAMP,
         _ => true,
     })
 }
