@@ -16,6 +16,20 @@ main() {
   need_cmd forge
   need_cmd anvil
 
+  ABI="gnu"
+
+  for flag in "$@"
+  do
+  case $flag in
+    --musl)
+      ABI="musl"
+      ;;
+    *)
+      err "unknown option: $flag"
+      ;;
+  esac
+  done
+
   # Compute the URL of the release tarball in the vlayer repository (will work with public repo)
   # TODO: Add support for different platforms/architectures
     PLATFORM=$(tolower "$(uname -s)")
@@ -34,19 +48,31 @@ main() {
 
     ARCHITECTURE=$(uname -m)
     if [ "${ARCHITECTURE}" = "x86_64" ]; then
-      # Redirect stderr to /dev/null to avoid printing errors if non Rosetta.
-      if [ "$(sysctl -n sysctl.proc_translated 2>/dev/null)" = "1" ]; then
-        ARCHITECTURE="arm64" # Rosetta.
-      else
-        ARCHITECTURE="amd64" # Intel.
-      fi
-    elif [ "${ARCHITECTURE}" = "arm64" ] ||[ "${ARCHITECTURE}" = "aarch64" ] ; then
-      ARCHITECTURE="arm64" # Arm.
+       # Redirect stderr to /dev/null to avoid printing errors if non Rosetta.
+       if [ "${PLATFORM}" = "darwin" ] && [ "$(sysctl -n sysctl.proc_translated 2>/dev/null)" = "1" ]; then
+         ARCHITECTURE="aarch64" # Rosetta.
+       else
+         ARCHITECTURE="x86_64"
+       fi
+    elif [ "${ARCHITECTURE}" = "arm64" ] || [ "${ARCHITECTURE}" = "aarch64" ]; then
+      ARCHITECTURE="aarch64"
     else
-      ARCHITECTURE="amd64" # Amd.
+      err "unsupported CPU architecture: $ARCHITECTURE"
     fi
 
-  RELEASE_URL="https://vlayer-releases.s3.eu-north-1.amazonaws.com/latest/nightly-${PLATFORM}-${ARCHITECTURE}.${EXT}"
+    case $PLATFORM in
+      linux)
+        TRIPLE="${ARCHITECTURE}-unknown-${PLATFORM}-${ABI}"
+        ;;
+      darwin)
+        TRIPLE="${ARCHITECTURE}-apple-${PLATFORM}"
+        ;;
+      *)
+        err "How did we end up in here? Let's panic!"
+        ;;
+    esac
+
+  RELEASE_URL="https://vlayer-releases.s3.eu-north-1.amazonaws.com/latest/nightly-${TRIPLE}.${EXT}"
 
   say "Downloading vlayer..."
   ensure download "$RELEASE_URL" | ensure tar -xzC "$VLAYER_DIR"
