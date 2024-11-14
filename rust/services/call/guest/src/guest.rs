@@ -1,5 +1,5 @@
 use call_engine::{
-    verifier::{guest_input, GuestVerifier, ZkChainProofVerifier},
+    verifier::{chain_proof, guest_input, zk_proof},
     GuestOutput, Input,
 };
 use chain_client::CachedClient;
@@ -21,7 +21,8 @@ pub async fn main(
 ) -> GuestOutput {
     let input_verifier = chain_proofs.map(|chain_proofs| {
         let chain_client = CachedClient::new(chain_proofs);
-        let chain_proof_verifier = ZkChainProofVerifier::new(chain_guest_id, GuestVerifier);
+        let chain_proof_verifier =
+            chain_proof::ZkVerifier::new(chain_guest_id, zk_proof::GuestVerifier);
         guest_input::ZkVerifier::new(chain_client, chain_proof_verifier)
     });
     let verified_input = verify_input(input_verifier, multi_evm_input).await;

@@ -6,8 +6,6 @@ use block_trie::BlockTrie;
 use common::Hashable;
 use risc0_zkvm::{serde::to_vec, sha::Digest, FakeReceipt, InnerReceipt, ReceiptClaim};
 
-use super::*;
-
 mod chain_proof;
 mod guest_input;
 

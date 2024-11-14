@@ -9,7 +9,10 @@ use crate::{
         env::location::ExecutionLocation,
         input::{EvmInput, MultiEvmInput},
     },
-    verifier::guest_input::{Error, Verifier, ZkVerifier},
+    verifier::{
+        chain_proof,
+        guest_input::{Error, Verifier, ZkVerifier},
+    },
 };
 
 const CHAIN_ID: ChainId = 1;
@@ -48,17 +51,17 @@ fn mock_multi_evm_input(blocks: RangeInclusive<BlockNumber>) -> MultiEvmInput {
     MultiEvmInput { inputs }
 }
 
-const fn proof_ok(_: &ChainProof) -> Result<(), ChainProofError> {
+const fn proof_ok(_: &ChainProof) -> chain_proof::Result {
     Ok(())
 }
 
-const fn proof_invalid(_: &ChainProof) -> Result<(), ChainProofError> {
-    Err(ChainProofError::Zk(VerificationError::InvalidProof))
+const fn proof_invalid(_: &ChainProof) -> chain_proof::Result {
+    Err(chain_proof::Error::Zk(VerificationError::InvalidProof))
 }
 
 async fn verify_guest_input(
     chain_client: impl chain_client::Client,
-    verifier: impl ChainProofVerifier,
+    verifier: impl chain_proof::Verifier,
     input: &MultiEvmInput,
 ) -> Result<(), Error> {
     ZkVerifier::new(chain_client, verifier).verify(input).await

@@ -7,14 +7,19 @@ import {
   createContext,
   deployVlayerContracts,
   waitForContractDeploy,
-  waitForTransactionReceipt,
 } from "@vlayer/sdk/config";
 
 import proverSpec from "../out/SimpleProver.sol/SimpleProver";
 import verifierSpec from "../out/SimpleVerifier.sol/SimpleVerifier";
 
 const config = getConfig();
-const { ethClient, account: john } = await createContext(config);
+const {
+  chain,
+  ethClient,
+  account: john,
+  proverUrl,
+  confirmations,
+} = await createContext(config);
 
 const INITIAL_TOKEN_SUPPLY = BigInt(10_000_000);
 
@@ -50,13 +55,16 @@ const { prover, verifier } = await deployVlayerContracts({
 });
 
 console.log("Proving...");
-const vlayer = createVlayerClient();
+const vlayer = createVlayerClient({
+  url: proverUrl,
+});
 
 const hash = await vlayer.prove({
   address: prover,
   proverAbi: proverSpec.abi,
   functionName: "balance",
   args: [john.address],
+  chainId: chain.id,
 });
 const result = await vlayer.waitForProvingResult(hash);
 const [proof, owner, balance] = result;
@@ -75,8 +83,11 @@ const verificationHash = await ethClient.writeContract({
   account: john,
 });
 
-const receipt = await waitForTransactionReceipt({
+const receipt = await ethClient.waitForTransactionReceipt({
   hash: verificationHash,
+  confirmations,
+  retryCount: 60,
+  retryDelay: 1000,
 });
 
 console.log(`Verification result: ${receipt.status}`);

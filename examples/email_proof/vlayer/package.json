@@ -3,7 +3,9 @@
   "module": "prove.ts",
   "type": "module",
   "scripts": {
-    "lint:solidity": "solhint '../src/**/*.sol'"
+    "lint:solidity": "solhint '../src/**/*.sol'",
+    "prove:testnet": "VLAYER_ENV=testnet bun run prove.ts",
+    "prove:dev": "VLAYER_ENV=dev bun run prove.ts"
   },
   "dependencies": {
     "@noble/hashes": "^1.4.0",
