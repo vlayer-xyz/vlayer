@@ -7,12 +7,14 @@ import {
   deployVlayerContracts,
   getConfig,
   waitForContractDeploy,
-  waitForTransactionReceipt,
 } from "@vlayer/sdk/config";
 
 const config = getConfig();
-const { ethClient, account } = await createContext(config);
-const vlayer = createVlayerClient();
+const { chain, ethClient, account, proverUrl, confirmations } =
+  await createContext(config);
+const vlayer = createVlayerClient({
+  url: proverUrl,
+});
 
 const deployWhaleBadgeHash = await ethClient.deployContract({
   abi: whaleBadgeNFTSpec.abi,
@@ -37,6 +39,7 @@ const proofHash = await vlayer.prove({
   proverAbi: proverSpec.abi,
   functionName: "crossChainBalanceOf",
   args: [account.address],
+  chainId: chain.id,
 });
 const result = await vlayer.waitForProvingResult(proofHash);
 console.log("Proof:", result[0]);
@@ -50,8 +53,11 @@ const verificationHash = await ethClient.writeContract({
   account,
 });
 
-const receipt = await waitForTransactionReceipt({
+const receipt = await ethClient.waitForTransactionReceipt({
   hash: verificationHash,
+  confirmations,
+  retryCount: 60,
+  retryDelay: 1000,
 });
 
 console.log(`Verification result: ${receipt.status}`);
