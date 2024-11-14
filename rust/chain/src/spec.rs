@@ -1,14 +1,12 @@
-use std::cmp::Ordering;
-
 use alloy_primitives::{BlockNumber, ChainId};
 use anyhow::bail;
-use derive_new::new;
 use revm::primitives::SpecId;
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    config::{CHAIN_MAP, MAINNET_MERGE_BLOCK_TIMESTAMP},
+    config::CHAIN_MAP,
     error::ChainError,
+    fork::{after_block, Fork},
 };
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
@@ -29,35 +27,24 @@ impl ChainSpec {
             forks.is_sorted_by(|a, b| a < b),
             "forks must be ordered by their activation conditions in ascending order",
         );
-        assert!(
-            no_timestamps_before_merge(&forks),
-            "forks cannot have activation timestamp earlier than 2022-01-01"
-        );
 
         ChainSpec { chain_id, forks }
     }
 
     /// Creates a new configuration consisting of only one specification ID.
     pub fn new_single(chain_id: ChainId, spec_id: SpecId) -> Self {
-        ChainSpec::new(chain_id, [(spec_id, ActivationCondition::Block(0))])
+        ChainSpec::new(chain_id, [after_block(spec_id, 0)])
     }
 
     /// Returns the [SpecId] for a given block number and timestamp or an error if not supported.
     pub fn active_fork(&self, block_number: BlockNumber, timestamp: u64) -> anyhow::Result<SpecId> {
         for fork in self.forks.iter().rev() {
-            if fork.activation.active(block_number, timestamp) {
+            if fork.active(block_number, timestamp) {
                 return Ok(fork.spec);
             }
         }
         bail!("unsupported fork for block {}", block_number)
     }
-}
-
-fn no_timestamps_before_merge(forks: &[Fork]) -> bool {
-    forks.iter().all(|fork| match fork.activation {
-        ActivationCondition::Timestamp(ts) => ts >= MAINNET_MERGE_BLOCK_TIMESTAMP,
-        _ => true,
-    })
 }
 
 impl TryFrom<ChainId> for ChainSpec {
@@ -71,98 +58,19 @@ impl TryFrom<ChainId> for ChainSpec {
     }
 }
 
-#[derive(Debug, Clone, Serialize, Deserialize, new, Hash)]
-pub struct Fork {
-    spec: SpecId, // Gets ignored when comparing forks
-    activation: ActivationCondition,
-}
-
-impl PartialEq for Fork {
-    fn eq(&self, other: &Self) -> bool {
-        self.activation == other.activation
-    }
-}
-
-impl Eq for Fork {}
-
-impl PartialOrd for Fork {
-    fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.activation.cmp(&other.activation))
-    }
-}
-
-impl Ord for Fork {
-    fn cmp(&self, other: &Self) -> Ordering {
-        self.partial_cmp(other).unwrap() // SAFETY: `partial_cmp` always returns `Some`
-    }
-}
-
-impl From<(SpecId, ActivationCondition)> for Fork {
-    fn from(tuple: (SpecId, ActivationCondition)) -> Self {
-        Fork {
-            spec: tuple.0,
-            activation: tuple.1,
-        }
-    }
-}
-
-#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Hash, Ord, PartialOrd)]
-pub enum ActivationCondition {
-    Block(BlockNumber),
-    Timestamp(u64),
-}
-
-impl ActivationCondition {
-    pub fn active(&self, block_number: BlockNumber, timestamp: u64) -> bool {
-        match self {
-            ActivationCondition::Block(block) => *block <= block_number,
-            ActivationCondition::Timestamp(ts) => *ts <= timestamp,
-        }
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    mod fork_ord {
-
-        use super::{ActivationCondition::*, *};
-
-        #[test]
-        fn ordered_by_activation() {
-            let merge_0 = Fork::new(SpecId::MERGE, Block(0));
-            let merge_1 = Fork::new(SpecId::MERGE, Block(1));
-            let shanghai_0 = Fork::new(SpecId::SHANGHAI, Block(0));
-            let shanghai_1 = Fork::new(SpecId::SHANGHAI, Block(1));
-
-            assert!(merge_0 < merge_1);
-            assert!(merge_0 == shanghai_0);
-            assert!(!(merge_0 < shanghai_0));
-            assert!(shanghai_0 < shanghai_1);
-        }
-    }
-
     mod new {
         use super::*;
+        use crate::{config::MAINNET_MERGE_BLOCK_TIMESTAMP, fork::after_timestamp};
 
         #[test]
         #[should_panic(expected = "chain spec must have at least one fork")]
         fn panics_if_no_forks() {
             let empty_forks: Vec<Fork> = vec![];
             ChainSpec::new(1, empty_forks);
-        }
-
-        #[test]
-        #[should_panic(expected = "duplicate activation conditions among forks are not allowed")]
-        fn duplicate_activations() {
-            ChainSpec::new(
-                1,
-                [
-                    (SpecId::MERGE, ActivationCondition::Block(0)),
-                    (SpecId::SHANGHAI, ActivationCondition::Block(0)),
-                ],
-            );
         }
 
         #[test]
@@ -173,16 +81,10 @@ mod tests {
             ChainSpec::new(
                 1,
                 [
-                    (SpecId::MERGE, ActivationCondition::Timestamp(0)),
-                    (SpecId::SHANGHAI, ActivationCondition::Block(0)),
+                    after_timestamp(SpecId::MERGE, MAINNET_MERGE_BLOCK_TIMESTAMP),
+                    after_block(SpecId::SHANGHAI, 0),
                 ],
             );
-        }
-
-        #[test]
-        #[should_panic(expected = "forks cannot have activation timestamp earlier than 2022-01-01")]
-        fn fork_timestamp_older_than_2022() {
-            ChainSpec::new(1, [(SpecId::MERGE, ActivationCondition::Timestamp(0))]);
         }
 
         #[test]
@@ -190,8 +92,8 @@ mod tests {
             ChainSpec::new(
                 1,
                 [
-                    (SpecId::MERGE, ActivationCondition::Block(0)),
-                    (SpecId::SHANGHAI, ActivationCondition::Timestamp(1640995200)),
+                    after_block(SpecId::MERGE, 0),
+                    after_timestamp(SpecId::SHANGHAI, MAINNET_MERGE_BLOCK_TIMESTAMP),
                 ],
             );
         }
