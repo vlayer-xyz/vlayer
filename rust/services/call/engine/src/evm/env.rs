@@ -1,5 +1,3 @@
-use std::ops::Deref;
-
 use block_header::EvmBlockHeader;
 use chain::ChainSpec;
 use location::ExecutionLocation;
