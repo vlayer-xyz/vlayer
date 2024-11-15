@@ -34,6 +34,8 @@ vlayer_prover_rpc_urls:
  - "5000:https://mantle-mainnet.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
  - "59144:https://linea-mainnet.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
  - "59141:https://linea-sepolia.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
+ - "100:https://gnosis-mainnet.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
+ - "10200:https://gnosis-chiado.g.alchemy.com/v2/{{ vlayer_alchemy_api_key }}"
  # https://docs.bitkubchain.org/rpc-service/rpc
  # The rate limit of RPC endpoint on Mainnet and Testnet is 2K/1min.
  - "96:https://rpc.bitkubchain.io"
@@ -45,6 +47,8 @@ vlayer_prover_rpc_urls:
  # https://docs.zircuit.com/dev-tools/rpc-endpoints
  - "48900:https://zircuit1-mainnet.p2pify.com"
  - "48899:https://zircuit1-testnet.p2pify.com"
+ # https://docs.fhenix.zone/getting-started
+ - "8008135:https://api.helium.fhenix.zone"
 vlayer_proof_type: groth16
 vlayer_bonsai_api_url: "https://api.bonsai.xyz/"
 vlayer_bonsai_api_key: !vault |
