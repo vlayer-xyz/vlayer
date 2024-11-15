@@ -178,6 +178,7 @@ mod view {
     }
 }
 
+// Generated using `simple_teleport` example
 mod teleport {
     use alloy_chains::NamedChain;
     use harness::contracts::{SimpleTravelProver, BLOCK_NO, SIMPLE_TELEPORT};
@@ -208,11 +209,14 @@ mod teleport {
     }
 }
 
+// Generated using `simple_time_travel` example
+// Computes average balance of OP Sepolia USDC for TOKEN_OWNER on blocks from 17915294 to 17985294 with a step of 9000
+// Accesses 9 blocks in total
 mod time_travel {
     use alloy_chains::NamedChain;
     use harness::contracts::{
         AverageBalance::{self, averageBalanceOfReturn},
-        SIMPLE_TIME_TRAVEL,
+        SIMPLE_TIME_TRAVEL, TOKEN_OWNER,
     };
 
     use super::*;
@@ -221,7 +225,7 @@ mod time_travel {
     #[ignore = "Fails due to chain proofs issue"]
     async fn time_travel() -> anyhow::Result<()> {
         let sol_call = AverageBalance::averageBalanceOfCall {
-            _owner: Address::ZERO,
+            _owner: TOKEN_OWNER,
         };
         let call = Call {
             to: SIMPLE_TIME_TRAVEL,
