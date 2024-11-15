@@ -38,7 +38,7 @@ impl<D> EvmEnv<D> {
         mut self,
         chain_spec: &ChainSpec,
     ) -> Result<Self, TravelCallExecutorError> {
-        self.cfg_env.chain_id = *chain_spec.deref();
+        self.cfg_env.chain_id = **chain_spec;
         self.cfg_env.handler_cfg.spec_id = chain_spec
             .active_fork(self.header.number(), self.header.timestamp())
             .map_err(|err| TravelCallExecutorError::ChainSpecError(err.to_string()))?;

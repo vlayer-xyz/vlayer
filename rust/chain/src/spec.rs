@@ -37,7 +37,7 @@ impl ChainSpec {
     pub fn active_fork(&self, block_number: BlockNumber, timestamp: u64) -> anyhow::Result<SpecId> {
         for fork in self.forks.iter().rev() {
             if fork.active(block_number, timestamp) {
-                return Ok(*fork.deref());
+                return Ok(**fork);
             }
         }
         bail!("unsupported fork for block {}", block_number)
