@@ -30,11 +30,17 @@ const unverifiedEmail = await preverifyEmail(email);
 // Create vlayer server client
 const vlayer = createVlayerClient();
 
-const hash = await vlayer.prove(prover, emailProofProver.abi, "main", [unverifiedEmail]);
+const hash = await vlayer.prove({
+  address: prover,
+  proverAbi: emailProofProver.abi,
+  functionName: "main",
+  args: [unverifiedEmail],
+  chainId: foundry,
+});
 const result = await vlayer.waitForProvingResult(hash);
 ```
 
-The `email.eml` file should be a valid email, probably exported from your email client.
+The `email.eml` file should be a valid email. Usually it can be exported from your email client.
 
 <div class="warning">
 The email cannot be modified in any way (including whitespaces and line breaks), 
