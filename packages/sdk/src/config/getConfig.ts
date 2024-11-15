@@ -1,5 +1,4 @@
 import dotenvflow from "dotenv-flow";
-import chalk from "chalk";
 
 export type Config = {
   chainName: string;
@@ -12,9 +11,7 @@ const ensureEnvVariable = (envVar: string) => {
   if (!process.env[envVar]) {
     if (envVar === "EXAMPLES_TEST_PRIVATE_KEY") {
       throw new Error(
-        chalk.bgBlue(
-          `${envVar} missing. Add a HEX private key with ETH in .env.local for deploy and verify transactions.`,
-        ),
+        `${envVar} missing. Add a HEX private key with ETH in .env.local for deploy and verify transactions.`,
       );
     }
     throw new Error(`${envVar} is not set`);

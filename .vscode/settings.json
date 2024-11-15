@@ -54,5 +54,6 @@
     "tlsn",
     "vlayer",
     "zkvm"
-  ]
+  ],
+  "vitest.disableWorkspaceWarning": true
 }
