@@ -6,7 +6,7 @@ on:
   workflow_dispatch:
   pull_request:
     paths:
-      - ".github/workflows/test-release.yaml"
+      - ".github/workflows/test_release.yaml"
       - "docker/web-proof/docker-compose-test-release.yaml"
       - "bash/test-release.sh"
 concurrency:
@@ -31,7 +31,7 @@ jobs:
         env:
             VLAYER_ENV: dev
         run: bash/test-release.sh
-  test-release:
+  test-release-sepolia:
     name: Test release on OP Sepolia and remote prover
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-24.04
@@ -46,8 +46,8 @@ jobs:
           EXAMPLES_TEST_PRIVATE_KEY: ${{ secrets.EXAMPLES_TEST_PRIVATE_KEY }}
           JSON_RPC_URL: "https://opt-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}"
         run: bash/test-release.sh
-  test-js-sdk:
-    name: Test js sdk release
+  test-release-js-sdk:
+    name: Test JS SDK release
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     runs-on: ubuntu-24.04
     steps:

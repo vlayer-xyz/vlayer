@@ -1,4 +1,4 @@
-name: Ansible Lint
+name: Lint Ansible
 on: 
   pull_request:
     paths:
@@ -13,8 +13,8 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
   cancel-in-progress: true
 jobs:
-  build:
-    name: Ansible Lint
+  lint-ansible:
+    name: Lint Ansible
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4

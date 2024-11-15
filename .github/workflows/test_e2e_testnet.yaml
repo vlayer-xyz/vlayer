@@ -1,26 +1,27 @@
-name: End-to-end integration test in dev mode
+name: E2E test against testnet
+
+# This workflow has additional constraints to run on `main`,
+# because it uses external API resources.
 
 on:
-  pull_request:
-    paths:
-      - "rust-toolchain.toml"
-      - "rust/**"
-      - "examples/**"
-      - "packages/**"
-      - "bash/**"
-      - ".github/workflows/e2e.yaml"
-      - "contracts/**"
-  merge_group:
   push:
     branches:
       - main
+    # If any path names do not match patterns in paths-ignore,
+    # even if some path names match the patterns,
+    # the workflow will run.
+    paths-ignore:
+      - "README.md"
+      - "LICENSE"
+      - "book/**"
+  workflow_dispatch:
 concurrency:
-  # Do not cancel jobs on main by forcing a unique group name.
-  group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-main
+  cancel-in-progress: false
 
 jobs:
-  e2e-test:
+  test-e2e-testnet:
+    name: E2E test against testnet
     runs-on: aws-linux-medium
     steps:
       - name: Checkout repository
@@ -43,10 +44,17 @@ jobs:
         working-directory: ./contracts
         run: forge soldeer install
         
-      - name: Run e2e test
+      - name: Run e2e test in prod mode
         env:
-          PROVING_MODE: 'dev'
+          PROVING_MODE: 'prod'
+          BONSAI_API_URL: ${{ vars.BONSAI_API_URL }}
+          BONSAI_API_KEY: ${{ secrets.BONSAI_API_KEY }}
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+          EXAMPLES_TEST_PRIVATE_KEY: ${{ secrets.EXAMPLES_TEST_PRIVATE_KEY }}
+          VLAYER_ENV: testnet
+          CHAIN_NAME: "optimismSepolia"
+          JSON_RPC_URL: "https://opt-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}"
+          PROVER_URL: http://127.0.0.1:3000
           VLAYER_TMP_DIR: ./artifacts
         run: bash/e2e-test.sh
 

@@ -1,4 +1,4 @@
-name: Lint
+name: Lint Rust
 
 on:
   pull_request:
@@ -16,7 +16,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  rust-lint:
+  lint-rust:
+    name: Lint Rust
     runs-on: aws-linux-medium
 
     steps:

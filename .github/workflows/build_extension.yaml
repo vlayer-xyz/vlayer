@@ -1,4 +1,4 @@
-name: Check extension build
+name: Build extension
 on:
   pull_request:
     paths:

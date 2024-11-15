@@ -1,4 +1,4 @@
-name: Book
+name: Deploy book
 on:
   pull_request:
     paths:
@@ -16,7 +16,8 @@ defaults:
     working-directory: book
 
 jobs:
-  book:
+  deploy-book:
+    name: Deploy book
     runs-on: ubuntu-latest
 
     steps:

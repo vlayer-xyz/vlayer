@@ -1,5 +1,5 @@
 name: Rust prerequisites
-description: Installs Rust compilation prerequisites
+description: Installs Rust compilation prerequisites.
 runs:
   using: "composite"
   steps:
