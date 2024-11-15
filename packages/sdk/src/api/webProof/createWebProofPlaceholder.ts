@@ -1,6 +1,6 @@
 import { WebProofSetup, WebProofSetupInput } from "types/webProofProvider";
 
-export const createWebProof = ({ logoUrl, steps }: WebProofSetupInput) => {
+export const createWebProofPlaceholder = ({ logoUrl, steps }: WebProofSetupInput) => {
   return {
     logoUrl,
     steps,
