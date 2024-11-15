@@ -1,6 +1,10 @@
 import { vi } from "vitest";
 import { MessageToExtension } from "./src/web-proof-commons";
+<<<<<<< HEAD
 import "@testing-library/jest-dom/vitest";
+=======
+import "@testing-library/jest-dom";
+>>>>>>> ab61b2b0 (Render zkproving indicator in extension)
 
 const mockStore = function () {
   const store = new Map<string, unknown>();
