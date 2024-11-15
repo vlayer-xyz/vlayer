@@ -11,7 +11,7 @@
 
 In the global namespace, Solidity provides special variables and functions that primarily offer information about blocks, transactions, and gas.
 
-Since [Prover](/advanced/prover.html) contracts operate in the [vlayer zkEVM environment](/appendix/architecture/prover.html), some variables are either not implemented or behave differently, compared to standard EVM chains.
+Since Prover contracts operate in the vlayer zkEVM environment, some variables are either not implemented or behave differently, compared to standard EVM chains.
 
 ## Current Block and Chain
 vlayer extends Solidity with features like [time traveling](/features/time-travel.html) between block numbers and [teleporting](/features/teleport.html) to other chains. As a result, the values returned by `block.number` and `block.chainId` are influenced by these features.

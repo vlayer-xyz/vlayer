@@ -32,7 +32,6 @@ By default, it listens for JSON-RPC client requests on port `3000` in `FAKE` mod
 ```sh
 vlayer serve --proof fake
 ```
-See the [JSON-RPC API appendix](/appendix/api.md) for detailed specifications on API calls.
 > Note: FAKE mode is limited to test and dev chains to prevent accidental errors.
 
 ## GROTH16 Mode
