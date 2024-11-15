@@ -36,6 +36,7 @@ fn mainnet_chain_id() -> ChainId {
 pub struct CallContext {
     #[serde(default = "mainnet_chain_id")]
     pub chain_id: ChainId,
+    pub gas_limit: u64,
 }
 
 pub struct CallResult {
