@@ -25,19 +25,3 @@ Learn in-depth how:
  * [Prover](/advanced/prover.html) and [Verifier](/advanced/verifier.html) contracts are working.
  * [Global Variables](./advanced/prover-global-variables.md) are set.
  * [Tests](/advanced/tests.html) are run.
-
-**Appendix**
-
-References for:
-- [Contributing](/appendix/contributing/overview.html)
-  - [Rust](/appendix//contributing/rust.html)
-  - [Javascript](/appendix//contributing/javascript.html)
-  - [Book](/appendix//contributing/book.html)
-  - [Extension](/appendix//contributing/extension.html)
-- [Architecture](/appendix/architecture/overview.html)
-  - [Prover](/appendix/architecture/prover.html)
-  - [Multichain](/appendix/architecture/multi.html)
-  - [Solidity](/appendix/architecture/solidity.html)
-  - [Releasing](/appendix/architecture/releasing.html)
-  - [Block proofs](/appendix/architecture/block_proof.html)
-- [JSON-RPC API](/appendix/api.html)
