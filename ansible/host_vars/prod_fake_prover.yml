@@ -5,6 +5,7 @@ ansible_user: ubuntu
 vlayer_prover_host: 127.0.0.1
 vlayer_prover_port: 3000
 prover_nginx_ip_rate_limit_burst: 20
+prover_nginx_ip_rate_limit_per_minute: 60
 vlayer_alchemy_api_key: !vault |
   $ANSIBLE_VAULT;1.1;AES256
   39616235323862363630616335393437336663323731656630393035616463376539616230333434
