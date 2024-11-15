@@ -14,6 +14,6 @@ pragma solidity ^0.8.20;
 
 library ImageID {
     bytes32 public constant RISC0_CALL_GUEST_ID =
-        bytes32(0x032bba958a8e767c4193b1fe5a8514d6aa4d18e8fa9c5996a2ba905d47e7d850);
+        bytes32(0x0000000000000000000000000000000000000000000000000000000000000000);
 }
 EOF

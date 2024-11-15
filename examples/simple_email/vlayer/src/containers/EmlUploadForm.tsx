@@ -80,7 +80,6 @@ const EmlUploadForm = () => {
       setCurrentStep("Verifying on-chain...");
 
       if (proof == null) throw new Error("no_proof_to_verify");
-      console.log("proof", import.meta.env.VITE_VERIFIER_ADDRESS);
       const txHash = await walletClient.writeContract({
         address: import.meta.env.VITE_VERIFIER_ADDRESS as `0x${string}`,
         abi: verifierSpec.abi,
