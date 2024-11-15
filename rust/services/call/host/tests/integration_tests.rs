@@ -207,3 +207,37 @@ mod teleport {
         Ok(())
     }
 }
+
+mod time_travel {
+    use alloy_chains::NamedChain;
+    use harness::contracts::{
+        AverageBalance::{self, averageBalanceOfReturn},
+        SIMPLE_TIME_TRAVEL,
+    };
+
+    use super::*;
+
+    #[tokio::test]
+    #[ignore = "Fails due to chain proofs issue"]
+    async fn time_travel() -> anyhow::Result<()> {
+        let sol_call = AverageBalance::averageBalanceOfCall {
+            _owner: Address::ZERO,
+        };
+        let call = Call {
+            to: SIMPLE_TIME_TRAVEL,
+            data: sol_call.abi_encode(),
+        };
+        let averageBalanceOfReturn {
+            _2: average_balance,
+            ..
+        } = run::<AverageBalance::averageBalanceOfCall>(
+            "simple_time_travel",
+            call,
+            &(NamedChain::OptimismSepolia, LATEST_BLOCK).into(),
+        )
+        .await?;
+        assert_eq!(average_balance, uint!(1_874_845_031_590_000_U256));
+
+        Ok(())
+    }
+}
