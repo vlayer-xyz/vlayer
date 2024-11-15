@@ -16,11 +16,7 @@ const { prover, verifier } = await deployVlayerContracts({
 
 const config = getConfig();
 
-<<<<<<< HEAD
 writeEnvVariables(".env", {
-=======
-writeEnvVariables("front-app/.env", {
->>>>>>> 37cae046 (email front app migration (#1125))
   VITE_PROVER_ADDRESS: prover,
   VITE_VERIFIER_ADDRESS: verifier,
   VITE_CHAIN_NAME: config.chainName,

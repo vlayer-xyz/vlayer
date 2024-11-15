@@ -1,4 +1,4 @@
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { StepStatus } from "constants/step";
 import { useTlsnProver } from "hooks/useTlsnProver";
 import { useZkProvingState } from "hooks/useZkProvingState";
@@ -64,19 +64,11 @@ const useProvingStatus = () => {
   const { isProving: isZkProving, isDone: isZkProvingDone } =
     useZkProvingState();
 
-  const [provingStatus, setProvingStatus] = useState(ProvingStatus.NotStared);
-
-  useEffect(() => {
-    if (isZkProvingDone) {
-      setProvingStatus(ProvingStatus.Done);
-    } else if (isZkProving) {
-      setProvingStatus(ProvingStatus.Zk);
-    } else if (isWebProving) {
-      setProvingStatus(ProvingStatus.Web);
-    } else {
-      setProvingStatus(ProvingStatus.NotStared);
-    }
-    return () => {};
+  const provingStatus = useMemo(() => {
+    if (isZkProvingDone) return ProvingStatus.Done;
+    if (isZkProving) return ProvingStatus.Zk;
+    if (isWebProving) return ProvingStatus.Web;
+    return ProvingStatus.NotStared;
   }, [isZkProving, isZkProvingDone, isWebProving]);
 
   return {
