@@ -47,6 +47,9 @@ pub static CHAIN_MAP: Lazy<HashMap<ChainId, &'static Lazy<ChainSpec>>> = Lazy::n
         (42220, &CELO_CHAIN_SPEC),
         (48900, &ZIRCUIT1_MAINNET_CHAIN_SPEC),
         (48899, &ZIRCUIT1_TESTNET_CHAIN_SPEC),
+        (100, &GNOSIS_MAINNET_CHAIN_SPEC),
+        (10200, &GNOSIS_CHIADO_CHAIN_SPEC),
+        (8008135, &PHENIX_CHAIN_SPEC),
     ])
 });
 
@@ -78,6 +81,9 @@ pub static CHAIN_NAMES: Lazy<HashMap<String, ChainId>> = Lazy::new(|| {
         ("celo".into(), 42220),
         ("zircuit1".into(), 48900),
         ("zircuit1-testnet".into(), 48899),
+        ("gnosis".into(), 100),
+        ("gnosis-chiado".into(), 10200),
+        ("phenix".into(), 8008135),
     ])
 });
 
@@ -264,3 +270,12 @@ pub static ZIRCUIT1_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> =
 
 pub static ZIRCUIT1_TESTNET_CHAIN_SPEC: Lazy<ChainSpec> =
     Lazy::new(|| ChainSpec::new_single(48899, CANCUN));
+
+pub static GNOSIS_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> =
+    Lazy::new(|| ChainSpec::new_single(100, CANCUN));
+
+pub static GNOSIS_CHIADO_CHAIN_SPEC: Lazy<ChainSpec> =
+    Lazy::new(|| ChainSpec::new_single(10200, CANCUN));
+
+pub static PHENIX_CHAIN_SPEC: Lazy<ChainSpec> =
+    Lazy::new(|| ChainSpec::new_single(8008135, CANCUN));
