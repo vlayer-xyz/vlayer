@@ -7,12 +7,12 @@ use tower_http::cors::CorsLayer;
 use tracing::info;
 
 use crate::{
-    config::ServerConfig,
+    config::Config,
     handlers::v_call::{v_call, Params},
 };
 
-pub async fn serve(config: ServerConfig) -> anyhow::Result<()> {
-    let listener = TcpListener::bind(config.socket_addr).await?;
+pub async fn serve(config: Config) -> anyhow::Result<()> {
+    let listener = TcpListener::bind(config.socket_addr()).await?;
 
     info!("Listening on {}", listener.local_addr()?);
     axum::serve(listener, server(config)).await?;
@@ -20,9 +20,9 @@ pub async fn serve(config: ServerConfig) -> anyhow::Result<()> {
     Ok(())
 }
 
-pub fn server(config: ServerConfig) -> Router {
+pub fn server(config: Config) -> Router {
     let config = Arc::new(config);
-    let call_and_convert_to_json = |config: Arc<ServerConfig>, params: Params| async move {
+    let call_and_convert_to_json = |config: Arc<Config>, params: Params| async move {
         v_call(config.clone(), params).await.map(|x| x.to_json())
     };
     let v_call_handler =
