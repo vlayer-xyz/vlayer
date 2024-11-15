@@ -52,12 +52,14 @@ class ExtensionWebProofProvider implements WebProofProvider {
       });
     }
   }
+
   private connectToExtension() {
     if (!this.port) {
       this.port = chrome.runtime.connect(EXTENSION_ID);
     }
     return this.port;
   }
+  
   public async getWebProof(webProofSetup: WebProofSetupInput) {
     return new Promise<WebProof>((resolve, reject) => {
       chrome.runtime.sendMessage(EXTENSION_ID, {
@@ -83,6 +85,7 @@ class ExtensionWebProofProvider implements WebProofProvider {
     });
   }
 }
+
 export const createExtensionWebProofProvider = ({
   notaryUrl = "https://notary.pse.dev/v0.1.0-alpha.5/",
   wsProxyUrl = "wss://notary.pse.dev/proxy",
