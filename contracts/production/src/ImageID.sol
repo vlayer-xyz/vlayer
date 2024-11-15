@@ -1,1 +1,1 @@
-../../rust/target/assets/ImageID.sol
+../../../rust/target/assets/ImageID.sol

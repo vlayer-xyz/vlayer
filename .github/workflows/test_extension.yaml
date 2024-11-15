@@ -50,7 +50,7 @@ jobs:
       - name: Mock ImageId.sol
         run: ./bash/mock-imageid.sh 
       - name: Run Forge build
-        working-directory: ./contracts
+        working-directory: ./contracts/vlayer
         run: |
           forge soldeer install
           forge build --sizes

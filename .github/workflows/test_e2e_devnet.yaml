@@ -41,7 +41,7 @@ jobs:
         run: bash/check-llvm-clang.sh
 
       - name: Install contracts' dependencies
-        working-directory: ./contracts
+        working-directory: ./contracts/vlayer
         run: forge soldeer install
         
       - name: Run e2e test

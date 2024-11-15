@@ -37,7 +37,7 @@ jobs:
         run: ./bash/mock-imageid.sh
 
       - name: Run Forge build
-        working-directory: ./contracts
+        working-directory: ./contracts/vlayer
         run: |
           forge --version
 
@@ -45,7 +45,7 @@ jobs:
           forge build --sizes
 
       - name: Run Forge tests
-        working-directory: ./contracts
+        working-directory: ./contracts/vlayer
         env:
           FOUNDRY_PROFILE: no-vlayer
         run: |
@@ -56,6 +56,6 @@ jobs:
           forge fmt ./examples --check
 
       - name: Run Forge formatter (vlayer contracts)
-        working-directory: ./contracts
+        working-directory: ./contracts/vlayer
         run: |
           forge fmt --check

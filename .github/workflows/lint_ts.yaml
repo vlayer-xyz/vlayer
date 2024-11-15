@@ -28,7 +28,7 @@ jobs:
       run: ./bash/mock-imageid.sh 
     # contracts need to be built to run the linter
     - name: Run Forge build
-      working-directory: ./contracts
+      working-directory: ./contracts/vlayer
       run: |
         forge soldeer install
         forge build --sizes

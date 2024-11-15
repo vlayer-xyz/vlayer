@@ -5,7 +5,7 @@ use crate::email::Email;
 mod private {
     use alloy_sol_types::sol;
 
-    sol!("../../contracts/src/EmailProof.sol");
+    sol!("../../contracts/vlayer/src/EmailProof.sol");
 }
 
 pub use private::{UnverifiedEmail, VerifiedEmail as SolEmail};
