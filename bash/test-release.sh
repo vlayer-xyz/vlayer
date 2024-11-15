@@ -37,6 +37,11 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
         continue
     fi
 
+    if [ "${example_name}" = "email-proof" ] && [ "${VLAYER_ENV}" = "testnet" ]; then
+        echo "Skipping ${example_name} which does not support testnet"
+        continue
+    fi
+
     echo "::group::Initializing vlayer template: ${example_name}"
     VLAYER_TEMP_DIR=$(mktemp -d -t vlayer-test-release-XXXXXX-)
     cd ${VLAYER_TEMP_DIR}
