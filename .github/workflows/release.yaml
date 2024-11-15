@@ -23,6 +23,7 @@ jobs:
       - name: Set up Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
         with:
+          target: x86_64-unknown-linux-musl
           cache-workspaces: |
             rust
             rust/services/call/guest_wrapper/risc0_guest
