@@ -9,7 +9,7 @@ import {
 
 import { foundry } from "viem/chains";
 import React, { useCallback, useRef, useState } from "react";
-import unconditionalProver from "../../../contracts/vlayer/out/UnconditionalProver.sol/UnconditionalProver";
+import unconditionalProver from "../../../contracts/fixtures/out/UnconditionalProver.sol/UnconditionalProver";
 
 const PROVER_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 const NOTARY_PUB_KEY =
