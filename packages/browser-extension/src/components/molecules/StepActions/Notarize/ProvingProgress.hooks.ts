@@ -11,7 +11,7 @@ export const useProvingProgress = (props: {
   const [title, setTitle] = useState("");
   const [subtitle, setSubtitle] = useState("");
   const [stepIndex, setStepIndex] = useState<number | null>(null);
-  const [dataTestid, setDataTestid] = useState<string | null>(null);
+  const [dataTestId, setDataTestId] = useState<string | null>(null);
   useInterval(
     () => {
       if (props.provingStatus === ProvingStatus.Done) {
