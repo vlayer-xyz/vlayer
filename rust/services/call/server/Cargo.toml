@@ -28,6 +28,7 @@ web_proof = { workspace = true }
 assert-json-diff = "2.0.2"
 block_header = { workspace = true }
 call_guest_wrapper = { workspace = true }
+chain_guest_wrapper = { workspace = true }
 ethers = { workspace = true }
 lazy_static = { workspace = true }
 mock_chain_server = { workspace = true }

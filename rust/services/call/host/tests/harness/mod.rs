@@ -2,12 +2,13 @@ use std::env::set_var;
 
 use alloy_chains::Chain;
 use alloy_sol_types::SolCall;
-use call_guest_wrapper::GUEST_ELF;
+use call_guest_wrapper::GUEST_ELF as CALL_GUEST_ELF;
 use call_host::{
     host::{config::HostConfig, error::HostError, get_block_header, Host},
     Call,
 };
 use chain_client::RpcClient as RpcChainProofClient;
+use chain_guest_wrapper::GUEST_ELF as CHAIN_GUEST_ELF;
 use ethers_core::types::BlockNumber as BlockTag;
 use lazy_static::lazy_static;
 use mock_chain_server::{fake_proof_result, ChainProofServerMock};
@@ -73,7 +74,9 @@ fn create_host(
 ) -> Result<Host, HostError> {
     let config = HostConfig {
         start_chain_id: location.chain_id,
-        call_guest_elf: GUEST_ELF.clone(),
+        call_guest_elf: CALL_GUEST_ELF.clone(),
+        chain_guest_elf: CHAIN_GUEST_ELF.clone(),
+        verify_chain_proofs: true,
         ..Default::default()
     };
     let block_number =

@@ -13,6 +13,7 @@ pub struct HostConfig {
     pub chain_proof_url: String,
     pub max_calldata_size: usize,
     pub call_guest_elf: GuestElf,
+    pub chain_guest_elf: GuestElf,
     pub verify_chain_proofs: bool,
 }
 
@@ -25,6 +26,7 @@ impl Default for HostConfig {
             chain_proof_url: String::default(),
             max_calldata_size: DEFAULT_MAX_CALLDATA_SIZE,
             call_guest_elf: GuestElf::default(),
+            chain_guest_elf: GuestElf::default(),
             verify_chain_proofs: false,
         }
     }

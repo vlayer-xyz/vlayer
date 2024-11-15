@@ -1,9 +1,10 @@
-use std::{collections::HashMap, sync::Arc, time::Duration};
+use std::{sync::Arc, time::Duration};
 
 use axum::{body::Body, http::Response};
 use block_header::EvmBlockHeader;
-use call_guest_wrapper::GUEST_ELF;
-use call_server::{server, ProofMode, ServerConfig};
+use call_guest_wrapper::GUEST_ELF as CALL_GUEST_ELF;
+use call_server::{server, ProofMode};
+use chain_guest_wrapper::GUEST_ELF as CHAIN_GUEST_ELF;
 use ethers::{
     contract::abigen,
     core::{
@@ -50,13 +51,15 @@ impl TestHelper {
         let latest_block_header = get_latest_block_header(&self.client).await;
         let chain_proof_server_mock = start_chain_proof_server(latest_block_header).await;
 
-        let app = server(ServerConfig {
-            rpc_urls: HashMap::from([(self.anvil.chain_id(), self.anvil.endpoint())]),
-            proof_mode: ProofMode::Fake,
-            chain_proof_url: chain_proof_server_mock.url(),
-            call_guest_elf: GUEST_ELF.clone(),
-            ..ServerConfig::default()
-        });
+        let server_config = call_server::ConfigBuilder::new(
+            chain_proof_server_mock.url(),
+            CALL_GUEST_ELF.clone(),
+            CHAIN_GUEST_ELF.clone(),
+        )
+        .with_rpc_mappings([(self.anvil.chain_id(), self.anvil.endpoint())])
+        .with_proof_mode(ProofMode::Fake)
+        .build();
+        let app = server(server_config);
         post(app, url, body).await
     }
 }

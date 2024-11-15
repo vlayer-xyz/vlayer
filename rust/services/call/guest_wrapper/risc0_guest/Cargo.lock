@@ -966,7 +966,6 @@ dependencies = [
  "async-trait",
  "chain_common",
  "derive-new",
- "futures",
  "parking_lot",
  "thiserror",
 ]

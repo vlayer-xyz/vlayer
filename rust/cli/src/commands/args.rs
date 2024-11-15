@@ -1,8 +1,9 @@
 use std::fmt;
 
 use alloy_primitives::ChainId;
-use call_guest_wrapper::GUEST_ELF;
-use call_server::{ProofMode, ServerConfig};
+use call_guest_wrapper::GUEST_ELF as CALL_GUEST_ELF;
+use call_server::{Config, ProofMode};
+use chain_guest_wrapper::GUEST_ELF as CHAIN_GUEST_ELF;
 use clap::{ArgAction, Parser, ValueEnum};
 
 #[derive(Clone, Debug, Parser)]
@@ -36,17 +37,19 @@ pub(crate) struct ServeArgs {
 }
 
 impl ServeArgs {
-    pub fn into_server_config(self, chain_proof_server_url: &str) -> ServerConfig {
+    pub fn into_server_config(self, chain_proof_url: impl ToString) -> Config {
         let proof_mode = self.proof.unwrap_or_default().map();
-        ServerConfig::new(
-            self.rpc_url,
-            proof_mode,
-            self.host,
-            self.port,
-            chain_proof_server_url,
-            self.verify_chain_proofs,
-            GUEST_ELF.clone(),
+        call_server::ConfigBuilder::new(
+            chain_proof_url,
+            CALL_GUEST_ELF.clone(),
+            CHAIN_GUEST_ELF.clone(),
         )
+        .with_rpc_mappings(self.rpc_url)
+        .with_proof_mode(proof_mode)
+        .with_host(self.host)
+        .with_port(self.port)
+        .with_verify_chain_proofs(self.verify_chain_proofs)
+        .build()
     }
 }
 

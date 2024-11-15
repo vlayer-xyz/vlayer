@@ -1,5 +1,6 @@
 use alloy_primitives::{BlockNumber, B256};
 use async_trait::async_trait;
+use derive_new::new;
 use static_assertions::assert_obj_safe;
 
 use super::chain_proof;
@@ -30,11 +31,11 @@ mod seal {
 
     // Useful to mock verifier in tests
     #[cfg(feature = "testing")]
-    impl<F> Sealed for F where F: Fn(&super::MultiEvmInput) -> super::Result + Send + Sync + 'static {}
+    impl<F> Sealed for F where F: Fn(&super::MultiEvmInput) -> super::Result + Send + Sync {}
 }
 
 #[async_trait]
-pub trait Verifier: seal::Sealed + Send + Sync + 'static {
+pub trait Verifier: seal::Sealed + Send + Sync {
     async fn verify(&self, input: &MultiEvmInput) -> Result;
 }
 
@@ -44,32 +45,27 @@ assert_obj_safe!(Verifier);
 // [auto_impl(Fn)] doesn't work with async_trait
 #[cfg(feature = "testing")]
 #[async_trait]
-impl<F: Fn(&MultiEvmInput) -> Result + Send + Sync + 'static> Verifier for F {
+impl<F: Fn(&MultiEvmInput) -> Result + Send + Sync> Verifier for F {
     async fn verify(&self, input: &MultiEvmInput) -> Result {
         self(input)
     }
 }
 
-pub struct ZkVerifier {
-    chain_client: Box<dyn chain_client::Client>,
-    verifier: Box<dyn chain_proof::Verifier>,
+#[derive(new)]
+pub struct ZkVerifier<C: chain_client::Client, V: chain_proof::Verifier> {
+    chain_client: C,
+    verifier: V,
 }
 
-impl ZkVerifier {
-    pub fn new(
-        chain_client: impl chain_client::Client,
-        verifier: impl chain_proof::Verifier,
-    ) -> Self {
-        Self {
-            chain_client: Box::new(chain_client),
-            verifier: Box::new(verifier),
-        }
+impl<C: chain_client::Client, V: chain_proof::Verifier> ZkVerifier<C, V> {
+    pub fn into_parts(self) -> (C, V) {
+        (self.chain_client, self.verifier)
     }
 }
 
-impl seal::Sealed for ZkVerifier {}
+impl<C: chain_client::Client, V: chain_proof::Verifier> seal::Sealed for ZkVerifier<C, V> {}
 #[async_trait]
-impl Verifier for ZkVerifier {
+impl<C: chain_client::Client, V: chain_proof::Verifier> Verifier for ZkVerifier<C, V> {
     async fn verify(&self, input: &MultiEvmInput) -> Result {
         for (chain_id, blocks) in input.blocks_by_chain() {
             let block_numbers = blocks.iter().map(|(block_num, _)| *block_num).collect();
