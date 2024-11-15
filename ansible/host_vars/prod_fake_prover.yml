@@ -1,9 +1,10 @@
 ---
-ansible_host: 18.223.185.235
-ansible_host_public_key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIDhoY9QaIunqLsc3VxUFbk4JHHYF1IK/5nkLPndSkbkG
+ansible_host: 3.145.122.35
+ansible_host_public_key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIJvWwoaoycn7OqZH0+DYsWRyzXA6WYUUbN0SqTuyjtL7
 ansible_user: ubuntu
 vlayer_prover_host: 127.0.0.1
 vlayer_prover_port: 3000
+prover_nginx_ip_rate_limit_burst: 20
 vlayer_alchemy_api_key: !vault |
   $ANSIBLE_VAULT;1.1;AES256
   39616235323862363630616335393437336663323731656630393035616463376539616230333434
