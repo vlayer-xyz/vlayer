@@ -37,7 +37,7 @@ export const useProvingProgress = (props: {
           "This usually takes up to 1 min. Don’t close your browser.",
         );
         setStepIndex(1);
-        setDataTestid("step_proving_web");
+        setDataTestId("step_proving_web");
       })
       .with(ProvingStatus.Zk, () => {
         setTitle("Generating ZK Proof");
@@ -45,7 +45,7 @@ export const useProvingProgress = (props: {
           "This usually takes up to 1 min. Don’t close your browser.",
         );
         setStepIndex(2);
-        setDataTestid("step_proving_zk");
+        setDataTestId("step_proving_zk");
       });
   }, [props.provingStatus]);
 
@@ -57,6 +57,6 @@ export const useProvingProgress = (props: {
     stepIndex: stepIndex,
     stepCount: 2,
     showDescription: props.provingStatus !== ProvingStatus.Done,
-    dataTestid: dataTestid,
+    dataTestId: dataTestId,
   };
 };

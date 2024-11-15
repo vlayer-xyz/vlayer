@@ -1,10 +1,5 @@
-<<<<<<< HEAD:packages/browser-extension/src/components/molecules/StepActions/Notarize/NotarizeStepActions.test.tsx
-import { render, screen, cleanup, act } from "@testing-library/react";
+import { render, screen, cleanup } from "@testing-library/react";
 import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
-=======
-import { render, screen, cleanup, waitFor } from "@testing-library/react";
-import { vi, describe, it, expect, beforeEach } from "vitest";
->>>>>>> 258ae862 (Post review fixes):packages/browser-extension/src/components/molecules/StepActions/NotarizeStepActions.test.tsx
 import { NotarizeStepActions } from "./NotarizeStepActions";
 import { StepStatus } from "constants/step";
 

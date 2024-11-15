@@ -16,11 +16,11 @@ export const ProvingProgress: FC<{
     stepIndex,
     stepCount,
     showDescription,
-    dataTestid,
+    dataTestId,
   } = useProvingProgress(props);
   return (
     <AnimatedContainer isVisible={isVisible}>
-      <Flex data-testid={dataTestid} direction={"column"} gap={"3"}>
+      <Flex data-testid={dataTestId} direction={"column"} gap={"3"}>
         {showDescription && (
           <>
             <Text weight={"bold"} size={"2"} color={"violet"}>
