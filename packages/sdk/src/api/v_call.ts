@@ -19,10 +19,12 @@ export async function v_call(
     body: JSON.stringify(v_callBody(call, context)),
     headers: { "Content-Type": "application/json" },
   });
+  console.log("response", response);
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
   const response_json = await response.json();
+  console.log("response_json", response_json);
   assertObject(response_json);
   if ("error" in response_json) {
     throw new Error(

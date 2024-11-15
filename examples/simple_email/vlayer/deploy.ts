@@ -16,7 +16,7 @@ const { prover, verifier } = await deployVlayerContracts({
 
 const config = getConfig();
 
-writeEnvVariables("front-app/.env", {
+writeEnvVariables(".env", {
   VITE_PROVER_ADDRESS: prover,
   VITE_VERIFIER_ADDRESS: verifier,
   VITE_CHAIN_NAME: config.chainName,
