@@ -3,16 +3,12 @@ use anyhow::bail;
 use revm::primitives::SpecId;
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    config::CHAIN_MAP,
-    error::ChainError,
-    fork::{after_block, Fork},
-};
+use crate::{config::CHAIN_MAP, error::ChainError, fork::Fork};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ChainSpec {
     pub chain_id: ChainId,
-    forks: Vec<Fork>,
+    forks: Box<[Fork]>,
 }
 
 impl ChainSpec {
@@ -20,7 +16,7 @@ impl ChainSpec {
     where
         F: Into<Fork>,
     {
-        let forks: Vec<Fork> = forks.into_iter().map(Into::into).collect();
+        let forks: Box<[Fork]> = forks.into_iter().map(Into::into).collect();
         assert_ne!(forks.len(), 0, "chain spec must have at least one fork");
         assert!(
             forks.windows(2).all(|w| w[0] < w[1]),
@@ -32,7 +28,7 @@ impl ChainSpec {
 
     /// Creates a new configuration consisting of only one specification ID.
     pub fn new_single(chain_id: ChainId, spec_id: SpecId) -> Self {
-        ChainSpec::new(chain_id, [after_block(spec_id, 0)])
+        ChainSpec::new(chain_id, [Fork::after_block(spec_id, 0)])
     }
 
     /// Returns the [SpecId] for a given block number and timestamp or an error if not supported.
@@ -63,13 +59,12 @@ mod tests {
 
     mod new {
         use super::*;
-        use crate::{config::MAINNET_MERGE_BLOCK_TIMESTAMP, fork::after_timestamp};
+        use crate::config::MAINNET_MERGE_BLOCK_TIMESTAMP;
 
         #[test]
         #[should_panic(expected = "chain spec must have at least one fork")]
         fn panics_if_no_forks() {
-            let empty_forks: Vec<Fork> = vec![];
-            ChainSpec::new(1, empty_forks);
+            ChainSpec::new(1, [] as [Fork; 0]);
         }
 
         #[test]
@@ -80,8 +75,8 @@ mod tests {
             ChainSpec::new(
                 1,
                 [
-                    after_timestamp(SpecId::MERGE, MAINNET_MERGE_BLOCK_TIMESTAMP),
-                    after_block(SpecId::SHANGHAI, 0),
+                    Fork::after_timestamp(SpecId::MERGE, MAINNET_MERGE_BLOCK_TIMESTAMP),
+                    Fork::after_block(SpecId::SHANGHAI, 0),
                 ],
             );
         }
@@ -91,8 +86,8 @@ mod tests {
             ChainSpec::new(
                 1,
                 [
-                    after_block(SpecId::MERGE, 0),
-                    after_timestamp(SpecId::SHANGHAI, MAINNET_MERGE_BLOCK_TIMESTAMP),
+                    Fork::after_block(SpecId::MERGE, 0),
+                    Fork::after_timestamp(SpecId::SHANGHAI, MAINNET_MERGE_BLOCK_TIMESTAMP),
                 ],
             );
         }

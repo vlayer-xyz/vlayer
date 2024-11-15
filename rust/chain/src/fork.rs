@@ -1,7 +1,6 @@
 use std::cmp::Ordering;
 
 use alloy_primitives::BlockNumber;
-use delegate::delegate;
 use derive_new::new;
 use revm::primitives::SpecId;
 use serde::{Deserialize, Serialize};
@@ -16,10 +15,20 @@ pub struct Fork {
 }
 
 impl Fork {
-    delegate! {
-        to self.activation {
-            pub fn active(&self, block_number: BlockNumber, timestamp: u64) -> bool;
-        }
+    pub fn active(&self, block_number: BlockNumber, timestamp: u64) -> bool {
+        self.activation.active(block_number, timestamp)
+    }
+
+    pub fn after_block(spec_id: SpecId, block_number: BlockNumber) -> Self {
+        (spec_id, Block(block_number)).into()
+    }
+
+    pub fn after_timestamp(spec_id: SpecId, timestamp: u64) -> Self {
+        assert!(
+            timestamp >= MAINNET_MERGE_BLOCK_TIMESTAMP,
+            "fork activation timestamp must be after Merge"
+        );
+        (spec_id, Timestamp(timestamp)).into()
     }
 }
 
@@ -33,22 +42,19 @@ impl Eq for Fork {}
 
 impl PartialOrd for Fork {
     fn partial_cmp(&self, other: &Self) -> Option<Ordering> {
-        Some(self.activation.cmp(&other.activation))
+        Some(self.cmp(other))
     }
 }
 
 impl Ord for Fork {
     fn cmp(&self, other: &Self) -> Ordering {
-        self.partial_cmp(other).unwrap() // SAFETY: `partial_cmp` always returns `Some`
+        self.activation.cmp(&other.activation)
     }
 }
 
 impl From<(SpecId, ActivationCondition)> for Fork {
-    fn from(tuple: (SpecId, ActivationCondition)) -> Self {
-        Fork {
-            spec: tuple.0,
-            activation: tuple.1,
-        }
+    fn from((spec, activation): (SpecId, ActivationCondition)) -> Self {
+        Fork { spec, activation }
     }
 }
 
@@ -66,18 +72,6 @@ impl ActivationCondition {
             Timestamp(ts) => *ts <= timestamp,
         }
     }
-}
-
-pub fn after_block(spec_id: SpecId, block_number: BlockNumber) -> Fork {
-    (spec_id, Block(block_number)).into()
-}
-
-pub fn after_timestamp(spec_id: SpecId, timestamp: u64) -> Fork {
-    assert!(
-        timestamp >= MAINNET_MERGE_BLOCK_TIMESTAMP,
-        "fork activation timestamp must be after Merge"
-    );
-    (spec_id, Timestamp(timestamp)).into()
 }
 
 #[cfg(test)]
@@ -112,7 +106,7 @@ mod tests {
         #[should_panic(expected = "fork activation timestamp must be after Merge")]
         fn panics_if_timestamp_is_before_merge() {
             let timestamp = MAINNET_MERGE_BLOCK_TIMESTAMP - 1;
-            after_timestamp(SpecId::MERGE, timestamp);
+            Fork::after_timestamp(SpecId::MERGE, timestamp);
         }
     }
 }
