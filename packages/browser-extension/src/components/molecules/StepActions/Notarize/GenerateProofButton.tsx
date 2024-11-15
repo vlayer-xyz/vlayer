@@ -10,7 +10,7 @@ export const GenerateProofButton: FC<{
   return (
     <AnimatedContainer isVisible={props.isVisible}>
       <Button onClick={props.onClick} data-testid="prove-button">
-        <Text>Generate proof </Text>
+        <Text>Generate proof</Text>
       </Button>
     </AnimatedContainer>
   );
