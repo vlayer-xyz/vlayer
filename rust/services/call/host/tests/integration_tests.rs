@@ -131,6 +131,7 @@ fn create_host(
     let config = HostConfig {
         start_chain_id: location.chain_id,
         call_guest_elf: GUEST_ELF.clone(),
+        verify_chain_proofs: true,
         ..Default::default()
     };
     let block_number =

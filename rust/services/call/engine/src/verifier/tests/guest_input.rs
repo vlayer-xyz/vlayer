@@ -60,8 +60,8 @@ const fn proof_invalid(_: &ChainProof) -> chain_proof::Result {
 }
 
 async fn verify_guest_input(
-    chain_client: &dyn chain_client::Client,
-    verifier: &dyn chain_proof::Verifier,
+    chain_client: impl chain_client::Client,
+    verifier: impl chain_proof::Verifier,
     input: &MultiEvmInput,
 ) -> Result<(), Error> {
     ZkVerifier::new(chain_client, verifier).verify(input).await
@@ -74,7 +74,7 @@ async fn ok() {
     let chain_client = mock_chain_client(vec![(CHAIN_ID, (vec![0], chain_proof))]);
     let input = mock_multi_evm_input(0..=0);
 
-    verify_guest_input(&chain_client, &proof_ok, &input)
+    verify_guest_input(chain_client, proof_ok, &input)
         .await
         .expect("verfification should succeed");
 }
@@ -84,7 +84,7 @@ async fn chain_proof_missing() {
     let chain_client = mock_chain_client(vec![]);
     let input = mock_multi_evm_input(0..=0);
 
-    let res = verify_guest_input(&chain_client, &proof_ok, &input).await;
+    let res = verify_guest_input(chain_client, proof_ok, &input).await;
     assert!(matches!(res.unwrap_err(), Error::ChainClient(..)));
 }
 
@@ -95,7 +95,7 @@ async fn chain_proof_invalid() {
     let chain_client = mock_chain_client(vec![(CHAIN_ID, (vec![0], chain_proof))]);
     let input = mock_multi_evm_input(0..=0);
 
-    let res = verify_guest_input(&chain_client, &proof_invalid, &input).await;
+    let res = verify_guest_input(chain_client, proof_invalid, &input).await;
     assert!(matches!(res.unwrap_err(), Error::ChainProof(..)));
 }
 
@@ -105,7 +105,7 @@ async fn block_not_in_trie() {
     let chain_client = mock_chain_client(vec![(CHAIN_ID, (vec![0], chain_proof))]);
     let input = mock_multi_evm_input(0..=0);
 
-    let res = verify_guest_input(&chain_client, &proof_ok, &input).await;
+    let res = verify_guest_input(chain_client, proof_ok, &input).await;
     assert!(matches!(res.unwrap_err(), Error::BlockNotFound { block_num: 0 }));
 }
 
@@ -119,7 +119,7 @@ async fn block_hash_mismatch() {
     let chain_client = mock_chain_client(vec![(CHAIN_ID, (vec![0], chain_proof))]);
     let input = mock_multi_evm_input(0..=0);
 
-    let res = verify_guest_input(&chain_client, &proof_ok, &input).await;
+    let res = verify_guest_input(chain_client, proof_ok, &input).await;
     assert!(matches!(
         res.unwrap_err(),
         Error::BlockHash {

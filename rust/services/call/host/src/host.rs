@@ -17,10 +17,6 @@ use call_engine::{
     },
     Call, GuestOutput, HostOutput, Input, Seal,
 };
-use chain_client::{
-    Client as ChainProofClient, RecordingClient as RecordingRpcClient,
-    RpcClient as RpcChainProofClient,
-};
 use common::GuestElf;
 use config::HostConfig;
 use error::HostError;
@@ -42,7 +38,7 @@ pub struct Host {
     start_execution_location: ExecutionLocation,
     envs: CachedEvmEnv<ProofDb>,
     prover: Prover,
-    chain_proof_client: RecordingRpcClient,
+    verifier: guest_input::ZkVerifier<chain_client::RecordingClient, chain_proof::ZkVerifier>,
     max_calldata_size: usize,
     verify_chain_proofs: bool,
     guest_elf: GuestElf,
@@ -53,9 +49,8 @@ impl Host {
         let provider_factory = EthersProviderFactory::new(config.rpc_urls.clone());
         let providers = CachedMultiProvider::new(provider_factory);
         let block_number = get_latest_block_number(&providers, config.start_chain_id)?;
-        let chain_proof_client = RpcChainProofClient::new(&config.chain_proof_url);
-
-        Host::try_new_with_components(providers, block_number, chain_proof_client, config)
+        let chain_client = chain_client::RpcClient::new(&config.chain_proof_url);
+        Host::try_new_with_components(providers, block_number, chain_client, config)
     }
 }
 
@@ -85,19 +80,22 @@ impl Host {
     pub fn try_new_with_components(
         providers: CachedMultiProvider,
         block_number: u64,
-        chain_proof_client: impl ChainProofClient,
+        chain_client: impl chain_client::Client,
         config: HostConfig,
     ) -> Result<Self, HostError> {
         let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
         let start_execution_location = (block_number, config.start_chain_id).into();
         let prover = Prover::new(config.proof_mode, &config.call_guest_elf);
-        let chain_proof_client = RecordingRpcClient::new(chain_proof_client);
+        let chain_client = chain_client::RecordingClient::new(chain_client);
+        let chain_proof_verifier =
+            chain_proof::ZkVerifier::new(config.call_guest_elf.id, zk_proof::HostVerifier);
+        let verifier = guest_input::ZkVerifier::new(chain_client, chain_proof_verifier);
 
         Ok(Host {
             envs,
             start_execution_location,
             prover,
-            chain_proof_client,
+            verifier,
             max_calldata_size: config.max_calldata_size,
             verify_chain_proofs: config.verify_chain_proofs,
             guest_elf: config.call_guest_elf,
@@ -121,12 +119,9 @@ impl Host {
             into_multi_input(self.envs).map_err(|err| HostError::CreatingInput(err.to_string()))?;
 
         let chain_proofs = if self.verify_chain_proofs {
-            let chain_proof_verifier =
-                chain_proof::ZkVerifier::new(self.guest_elf.id, zk_proof::HostVerifier);
-            let guest_input_verifier =
-                guest_input::ZkVerifier::new(&self.chain_proof_client, &chain_proof_verifier);
-            guest_input_verifier.verify(&multi_evm_input).await?;
-            Some(self.chain_proof_client.into_cache())
+            self.verifier.verify(&multi_evm_input).await?;
+            let (chain_proof_client, _) = self.verifier.into_parts();
+            Some(chain_proof_client.into_cache())
         } else {
             None
         };
@@ -211,7 +206,7 @@ mod test {
         let host = Host::try_new_with_components(
             CachedMultiProvider::new(EthersProviderFactory::new(test_rpc_urls())),
             0,
-            RpcChainProofClient::new(""),
+            chain_client::RpcClient::new(""),
             config,
         )?;
         let call = Call {

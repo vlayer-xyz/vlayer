@@ -23,7 +23,7 @@ pub async fn main(
         let chain_client = CachedClient::new(chain_proofs);
         let chain_proof_verifier =
             chain_proof::ZkVerifier::new(chain_guest_id, zk_proof::GuestVerifier);
-        let input_verifier = guest_input::ZkVerifier::new(&chain_client, &chain_proof_verifier);
+        let input_verifier = guest_input::ZkVerifier::new(chain_client, chain_proof_verifier);
         verify_input(input_verifier, multi_evm_input).await
     } else {
         assert_input_coherency(multi_evm_input)

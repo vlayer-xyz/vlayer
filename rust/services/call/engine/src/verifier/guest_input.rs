@@ -1,5 +1,6 @@
 use alloy_primitives::{BlockNumber, B256};
 use async_trait::async_trait;
+use derive_new::new;
 use static_assertions::assert_obj_safe;
 
 use super::chain_proof;
@@ -50,26 +51,21 @@ impl<F: Fn(&MultiEvmInput) -> Result + Send + Sync> Verifier for F {
     }
 }
 
-pub struct ZkVerifier<'client, 'verifier> {
-    chain_client: &'client dyn chain_client::Client,
-    verifier: &'verifier dyn chain_proof::Verifier,
+#[derive(new)]
+pub struct ZkVerifier<C: chain_client::Client, V: chain_proof::Verifier> {
+    chain_client: C,
+    verifier: V,
 }
 
-impl<'client, 'verifier> ZkVerifier<'client, 'verifier> {
-    pub fn new(
-        chain_client: &'client dyn chain_client::Client,
-        verifier: &'verifier dyn chain_proof::Verifier,
-    ) -> Self {
-        Self {
-            chain_client,
-            verifier,
-        }
+impl<C: chain_client::Client, V: chain_proof::Verifier> ZkVerifier<C, V> {
+    pub fn into_parts(self) -> (C, V) {
+        (self.chain_client, self.verifier)
     }
 }
 
-impl seal::Sealed for ZkVerifier<'_, '_> {}
+impl<C: chain_client::Client, V: chain_proof::Verifier> seal::Sealed for ZkVerifier<C, V> {}
 #[async_trait]
-impl Verifier for ZkVerifier<'_, '_> {
+impl<C: chain_client::Client, V: chain_proof::Verifier> Verifier for ZkVerifier<C, V> {
     async fn verify(&self, input: &MultiEvmInput) -> Result {
         for (chain_id, blocks) in input.blocks_by_chain() {
             let block_numbers = blocks.iter().map(|(block_num, _)| *block_num).collect();
