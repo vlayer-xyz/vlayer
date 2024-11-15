@@ -60,16 +60,6 @@ class ExtensionWebProofProvider implements WebProofProvider {
   }
   public async getWebProof(webProofSetup: WebProofSetupInput) {
     return new Promise<WebProof>((resolve, reject) => {
-      chrome.runtime.sendMessage(EXTENSION_ID, {
-        action: ExtensionAction.RequestWebProof,
-        payload: {
-          notaryUrl: this.notaryUrl,
-          wsProxyUrl: this.wsProxyUrl,
-          logoUrl: webProofSetup.logoUrl,
-          steps: webProofSetup.steps,
-        },
-      });
-
       this.connectToExtension().onMessage.addListener(
         (message: ExtensionMessage) => {
           if (message.type === ExtensionMessageType.ProofDone) {
@@ -80,6 +70,16 @@ class ExtensionWebProofProvider implements WebProofProvider {
           }
         },
       );
+
+      this.connectToExtension().postMessage({
+        action: ExtensionAction.RequestWebProof,
+        payload: {
+          notaryUrl: this.notaryUrl,
+          wsProxyUrl: this.wsProxyUrl,
+          logoUrl: webProofSetup.logoUrl,
+          steps: webProofSetup.steps,
+        },
+      });
     });
   }
 }
