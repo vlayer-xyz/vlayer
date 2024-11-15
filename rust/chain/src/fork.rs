@@ -9,7 +9,7 @@ use ActivationCondition::*;
 
 use crate::config::MAINNET_MERGE_BLOCK_TIMESTAMP;
 
-#[derive(Debug, Clone, Serialize, Deserialize, new, Hash)]
+#[derive(Debug, Clone, Serialize, Deserialize, new)]
 pub struct Fork {
     pub spec: SpecId, // Gets ignored when comparing forks
     activation: ActivationCondition,
@@ -91,6 +91,7 @@ mod tests {
         use super::*;
 
         #[test]
+        #[allow(clippy::nonminimal_bool)]
         fn ordered_by_activation() {
             let merge_0 = Fork::new(MERGE, Block(0));
             let merge_1 = Fork::new(MERGE, Block(1));
