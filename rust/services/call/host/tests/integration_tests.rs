@@ -11,33 +11,18 @@ use call_host::{
 use chain_client::RpcClient as RpcChainProofClient;
 use dotenvy::dotenv;
 use ethers_core::types::BlockNumber as BlockTag;
+use harness::ExecutionLocation;
 use lazy_static::lazy_static;
 use mock_chain_server::{fake_proof_result, ChainProofServerMock};
 use provider::{BlockNumber, CachedMultiProvider, CachedProviderFactory};
 use serde_json::json;
 
+mod harness;
+
 // To activate recording, set UPDATE_SNAPSHOTS to true.
 // Recording creates new testdata directory and writes return data from Alchemy into files in that directory.
 const UPDATE_SNAPSHOTS: bool = false;
 const LATEST_BLOCK: BlockTag = BlockTag::Latest;
-
-struct ExecutionLocation {
-    pub chain_id: ChainId,
-    pub block_tag: BlockTag,
-}
-
-impl<C, B> From<(C, B)> for ExecutionLocation
-where
-    C: Into<ChainId>,
-    B: Into<BlockTag>,
-{
-    fn from((chain_id, block_tag): (C, B)) -> Self {
-        ExecutionLocation {
-            chain_id: chain_id.into(),
-            block_tag: block_tag.into(),
-        }
-    }
-}
 
 fn get_alchemy_key() -> String {
     dotenv().ok();
