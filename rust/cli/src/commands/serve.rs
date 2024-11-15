@@ -1,4 +1,4 @@
-use call_server::{serve, ProofMode};
+use call_server::serve;
 use mock_chain_server::{ChainProofServerMock, EMPTY_PROOF_RESPONSE};
 use serde_json::json;
 use tracing::{info, warn};
@@ -11,10 +11,10 @@ async fn start_chain_proof_server() -> ChainProofServerMock {
 
 pub(crate) async fn run_serve(serve_args: ServeArgs) -> Result<(), CLIError> {
     let chain_proof_server_mock = start_chain_proof_server().await;
-    let server_config = serve_args.into_server_config(&chain_proof_server_mock.url());
+    let server_config = serve_args.into_server_config(chain_proof_server_mock.url());
 
     info!("Running vlayer serve...");
-    if let ProofMode::Fake = server_config.proof_mode {
+    if server_config.fake_proofs() {
         warn!("Running in fake mode. Server will not generate real proofs.");
     }
     serve(server_config).await?;

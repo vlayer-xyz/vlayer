@@ -12,6 +12,7 @@ build = "build.rs"
 alloy-primitives = { workspace = true, features = ["rlp"] }
 call_guest_wrapper = { workspace = true }
 call_server = { workspace = true }
+chain_guest_wrapper = { workspace = true }
 test_runner = { workspace = true }
 
 anyhow = { workspace = true }

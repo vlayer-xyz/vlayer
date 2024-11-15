@@ -88,7 +88,7 @@ impl Host {
         let prover = Prover::new(config.proof_mode, &config.call_guest_elf);
         let chain_client = chain_client::RecordingClient::new(chain_client);
         let chain_proof_verifier =
-            chain_proof::ZkVerifier::new(config.call_guest_elf.id, zk_proof::HostVerifier);
+            chain_proof::ZkVerifier::new(config.chain_guest_elf.id, zk_proof::HostVerifier);
         let verifier = guest_input::ZkVerifier::new(chain_client, chain_proof_verifier);
 
         Ok(Host {
