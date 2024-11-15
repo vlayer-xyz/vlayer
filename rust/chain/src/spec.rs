@@ -23,7 +23,7 @@ impl ChainSpec {
         let forks: Vec<Fork> = forks.into_iter().map(Into::into).collect();
         assert_ne!(forks.len(), 0, "chain spec must have at least one fork");
         assert!(
-            forks.is_sorted_by(|a, b| a < b),
+            forks.windows(2).all(|w| w[0] < w[1]),
             "forks must be ordered by their activation conditions in ascending order",
         );
 
