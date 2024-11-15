@@ -6,9 +6,14 @@ import { Button } from "components/atoms";
 import { useTlsnProver } from "hooks/useTlsnProver";
 import { AnimatePresence, motion } from "framer-motion";
 import sendMessageToServiceWorker from "lib/sendMessageToServiceWorker";
-import { ExtensionMessageType } from "../../../web-proof-commons";
+import {
+  ExtensionMessageType,
+  ZkProvingStatus,
+} from "../../../web-proof-commons";
+
 import { DEFAULT_REDIRECT_DELAY_SECONDS } from "constants/defaults";
 import { useInterval } from "usehooks-ts";
+import { useZkProvingState } from "hooks/useZkProvingState";
 
 type NotarizeStepActionProps = {
   isVisited: boolean;
@@ -47,6 +52,7 @@ const RedirectCallout: FC = () => {
           exit={{ opacity: 0, height: 0 }}
         >
           <Callout.Root>
+            3
             <Callout.Icon>
               <InfoCircledIcon />
             </Callout.Icon>
@@ -61,12 +67,61 @@ const RedirectCallout: FC = () => {
   );
 };
 
+const ProvingStepWeb = ({ progress }: { progress: number }) => {
+  return (
+    <>
+      <Text
+        weight={"bold"}
+        size={"2"}
+        color={"violet"}
+        data-testid="step_proving_web"
+      >
+        Step 1 of 2
+      </Text>
+      <Text weight={"bold"} size={"3"}>
+        Generating Web Proof
+      </Text>
+      <Text weight={"light"} size={"3"}>
+        This usually takes up to 1 min. Don’t close your browser.
+      </Text>
+      <Progress value={progress} data-testid={"proving-progress"} />
+    </>
+  );
+};
+
+const ProvingStepZk = ({ progress }: { progress: number }) => {
+  return (
+    <>
+      <Text
+        weight={"bold"}
+        size={"2"}
+        color={"violet"}
+        data-testid="step_proving_zk"
+      >
+        Step 2 of 2
+      </Text>
+      <Text weight={"bold"} size={"3"}>
+        Generating ZK Proof
+      </Text>
+      <Text weight={"light"} size={"3"}>
+        This usually takes up to 1 min. Don’t close your browser.
+      </Text>
+      <Progress value={progress} data-testid={"proving-progress"} />
+    </>
+  );
+};
+
 const ProvingProgress = () => {
-  const { proof } = useTlsnProver();
+  const { isProving: isWebProving } = useTlsnProver();
   const [progress, setProgress] = useState(0);
+  const {
+    value: zkProvingStatus,
+  }: {
+    value: ZkProvingStatus;
+  } = useZkProvingState();
   useInterval(
     () => {
-      if (proof) {
+      if (zkProvingStatus === ZkProvingStatus.Done) {
         setProgress(100);
       } else {
         setProgress(progress + 1);
@@ -74,16 +129,13 @@ const ProvingProgress = () => {
     },
     progress == 100 ? null : 600,
   );
-
   return (
     <Flex direction={"column"} gap={"3"}>
-      <Text weight={"bold"} size={"3"}>
-        Generating Web Proof
-      </Text>
-      <Text weight={"light"} size={"3"}>
-        This usually takes up to 1 min. Don’t close your browser.
-      </Text>
-      <Progress value={progress} />
+      {isWebProving ? (
+        <ProvingStepWeb progress={progress} />
+      ) : (
+        <ProvingStepZk progress={progress} />
+      )}
     </Flex>
   );
 };
@@ -103,7 +155,9 @@ export const NotarizeStepActions: FC<NotarizeStepActionProps> = ({
   isVisited,
   status,
 }) => {
-  const { prove, isProving, proof } = useTlsnProver();
+  const { prove, isProving: isWebProving, proof } = useTlsnProver();
+  const { isProving: isZkProving, value } = useZkProvingState();
+
   const [showProgress, setShowProgress] = useState(false);
   const handleClick = () => {
     prove().catch((error) => {
@@ -112,25 +166,25 @@ export const NotarizeStepActions: FC<NotarizeStepActionProps> = ({
   };
   // defer progress hiding
   useEffect(() => {
-    if (proof) {
+    if (value === ZkProvingStatus.Done) {
       setTimeout(() => {
         setShowProgress(false);
       }, 2000);
     }
-    if (isProving) {
+    if (isWebProving || isZkProving) {
       setShowProgress(true);
     }
-  }, [proof, isProving]);
+  }, [value, isWebProving, isZkProving]);
   return isVisited || status === StepStatus.Further ? (
     <></>
   ) : (
     <Flex direction="column" gap={"4"}>
-      {!proof && !isProving && (
+      {!proof && !isWebProving && (
         <Button onClick={handleClick} data-testid="prove-button">
           <Text>Generate proof </Text>
         </Button>
       )}
-      {isProving && (
+      {isWebProving && (
         <>
           <RedirectCallout />
         </>

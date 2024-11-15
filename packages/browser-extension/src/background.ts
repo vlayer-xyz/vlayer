@@ -1,16 +1,17 @@
 import browser from "webextension-polyfill";
+
 import {
   ExtensionAction,
   ExtensionMessage,
   ExtensionMessageType,
   MessageToExtension,
 } from "./web-proof-commons";
+
 import { WebProverSessionContextManager } from "./state/webProverSessionContext";
 import { match, P } from "ts-pattern";
 import { zkProvingStatusStore } from "./state/zkProvingStatusStore.ts";
 
 let windowId = 0;
-// to receive messages from popup script
 let port: browser.Runtime.Port | undefined = undefined;
 let openedTabId: number | undefined = undefined;
 
@@ -69,7 +70,6 @@ browser.runtime.onMessageExternal.addListener((message: MessageToExtension) => {
       if (chrome.sidePanel) {
         await chrome.sidePanel.open({ windowId: windowId });
       }
-      //TODO make cleanup logic separated method
       await browser.storage.local.clear();
       await browser.storage.session.clear();
       await WebProverSessionContextManager.instance.setWebProverSessionConfig(

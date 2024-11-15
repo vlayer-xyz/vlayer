@@ -12,7 +12,6 @@ export class InvalidZkProvingStatus extends Error {
     super(`Invalid zk proving status ${value}`);
   }
 }
-
 export const useZkProvingState = (): {
   value: ZkProvingStatus;
   isError: boolean;
