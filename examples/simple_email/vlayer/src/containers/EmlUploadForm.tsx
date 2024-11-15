@@ -4,8 +4,8 @@ import * as chains from "viem/chains";
 import useProver from "../hooks/useProver";
 import { preverifyEmail } from "@vlayer/sdk";
 import { getStrFromFile } from "../lib/utils";
-import proverSpec from "../../../../out/EmailDomainProver.sol/EmailDomainProver";
-import verifierSpec from "../../../../out/EmailProofVerifier.sol/EmailDomainVerifier";
+import proverSpec from "../../../out/EmailDomainProver.sol/EmailDomainProver";
+import verifierSpec from "../../../out/EmailProofVerifier.sol/EmailDomainVerifier";
 
 import EmlForm from "../components/EmlForm";
 import { createContext, customTransport, type Chain } from "@vlayer/sdk/config";
@@ -80,7 +80,7 @@ const EmlUploadForm = () => {
       setCurrentStep("Verifying on-chain...");
 
       if (proof == null) throw new Error("no_proof_to_verify");
-
+      console.log("proof", import.meta.env.VITE_VERIFIER_ADDRESS);
       const txHash = await walletClient.writeContract({
         address: import.meta.env.VITE_VERIFIER_ADDRESS as `0x${string}`,
         abi: verifierSpec.abi,
@@ -100,7 +100,6 @@ const EmlUploadForm = () => {
         window.open(`${chain.blockExplorers?.default.url}/tx/${txHash}`);
       } else if (receipt.status === "reverted") {
         setErrorMsg("Transaction reverted. Is email already used?");
-        window.open(`${chain.blockExplorers?.default.url}/tx/${txHash}`);
       } else {
         setSuccessMsg("Verified successfully.");
       }
