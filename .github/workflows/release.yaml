@@ -75,7 +75,7 @@ jobs:
     defaults:
       run:
         working-directory: rust
-    name: Release nightly for ${{ matrix.platform }} ${{ matrix.arch }}
+    name: Release nightly for ${{ matrix.target }}
     needs: [build-guest-wrapper]
     runs-on: ${{ matrix.runner }}
     outputs:
@@ -84,12 +84,13 @@ jobs:
       matrix:
         include:
           - target: x86_64-unknown-linux-gnu
-            platform: linux
-            arch: amd64
+            suffix: linux-amd64
+            runner: aws-linux-medium
+          - target: x86_64-unknown-linux-musl
+            suffix: linux-amd64-musl
             runner: aws-linux-medium
           - target: aarch64-apple-darwin
-            platform: darwin
-            arch: arm64
+            suffix: darwin-arm64
             runner: macos-14
 
     steps:
@@ -100,7 +101,7 @@ jobs:
 
       - name: Darwin prerequisites
         uses: ./.github/actions/darwin-prerequisites
-        if: matrix.platform == 'darwin' 
+        if: matrix.target == 'aarch64-apple-darwin'
 
       - name: Set up Rust
         uses: actions-rust-lang/setup-rust-toolchain@v1
@@ -133,8 +134,26 @@ jobs:
           
       - name: Install LLVM and Clang
         uses: KyleMayes/install-llvm-action@v2.0.4
+        if: matrix.target != 'x86_64-unknown-linux-musl'
         with:
           version: "17.0.6"
+
+      - name: Check nixpkgs inputs
+        uses: DeterminateSystems/flake-checker-action@v9
+        if: matrix.target == 'x86_64-unknown-linux-musl'
+        with:
+          flake-lock-path: ./.github/nix/flake.lock
+          fail-mode: true
+
+      - name: Install Nix
+        uses: DeterminateSystems/nix-installer-action@v15
+        if: matrix.target == 'x86_64-unknown-linux-musl'
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Set up Nix cache
+        uses: DeterminateSystems/magic-nix-cache-action@v8
+        if: matrix.target == 'x86_64-unknown-linux-musl'
 
       - uses: actions/download-artifact@v4
         with:
@@ -144,24 +163,32 @@ jobs:
       - name: "Build binaries"
         env:
           VLAYER_RELEASE: "nightly"
+        if: matrix.target != 'x86_64-unknown-linux-musl'
         run: |
           export RISC0_EXISTING_CALL_GUEST="$(pwd)/call_guest_replacement"
           cargo build --release --target ${{ matrix.target }} --package cli 
 
+      - name: "Build binaries"
+        env:
+          VLAYER_RELEASE: "nightly"
+        if: matrix.target == 'x86_64-unknown-linux-musl'
+        run: |
+          export RISC0_EXISTING_CALL_GUEST="$(pwd)/call_guest_replacement"
+          nix develop ../.github/nix/. --command bash -c "cargo build --release -p cli"
+
       - name: "Print build version"
         id: vlayer_build
-        if: matrix.runner == 'aws-linux-medium' 
+        if: matrix.runner == 'aws-linux-medium' && matrix.target == 'x86_64-unknown-linux-gnu' # Run on any single aws-linux-medium instance
         env:
           VLAYER_RELEASE: "nightly"
         run: |
           BUILD=$(./target/${{ matrix.target }}/release/vlayer --version | awk '/vlayer/ {print $2}')
           echo "vlayer_build=${BUILD}" | tee -a ${GITHUB_OUTPUT}
 
-
       - name: Package release
         id: package-release
         env:
-          OUTPUT_FILE_SUFFIX: "${{ matrix.platform }}-${{ matrix.arch }}.tar.gz"
+          OUTPUT_FILE_SUFFIX: "${{ matrix.suffix }}.tar.gz"
         run: |
           bins=(vlayer)
           mkdir -p target/${{ matrix.target }}/bin
