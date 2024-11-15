@@ -1,3 +1,5 @@
+use std::ops::Deref;
+
 use alloy_primitives::{BlockNumber, ChainId};
 use anyhow::bail;
 use revm::primitives::SpecId;
@@ -7,7 +9,7 @@ use crate::{config::CHAIN_MAP, error::ChainError, fork::Fork};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ChainSpec {
-    pub chain_id: ChainId,
+    chain_id: ChainId,
     forks: Box<[Fork]>,
 }
 
@@ -35,10 +37,18 @@ impl ChainSpec {
     pub fn active_fork(&self, block_number: BlockNumber, timestamp: u64) -> anyhow::Result<SpecId> {
         for fork in self.forks.iter().rev() {
             if fork.active(block_number, timestamp) {
-                return Ok(fork.spec);
+                return Ok(*fork.deref());
             }
         }
         bail!("unsupported fork for block {}", block_number)
+    }
+}
+
+impl Deref for ChainSpec {
+    type Target = ChainId;
+
+    fn deref(&self) -> &Self::Target {
+        &self.chain_id
     }
 }
 

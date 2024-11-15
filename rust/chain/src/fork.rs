@@ -1,4 +1,4 @@
-use std::cmp::Ordering;
+use std::{cmp::Ordering, ops::Deref};
 
 use alloy_primitives::BlockNumber;
 use derive_new::new;
@@ -10,7 +10,7 @@ use crate::config::MAINNET_MERGE_BLOCK_TIMESTAMP;
 
 #[derive(Debug, Clone, Serialize, Deserialize, new)]
 pub struct Fork {
-    pub spec: SpecId, // Gets ignored when comparing forks
+    spec: SpecId, // Gets ignored when comparing forks
     activation: ActivationCondition,
 }
 
@@ -29,6 +29,14 @@ impl Fork {
             "fork activation timestamp must be after Merge"
         );
         (spec_id, Timestamp(timestamp)).into()
+    }
+}
+
+impl Deref for Fork {
+    type Target = SpecId;
+
+    fn deref(&self) -> &Self::Target {
+        &self.spec
     }
 }
 
