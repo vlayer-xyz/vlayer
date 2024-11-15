@@ -71,6 +71,7 @@ export const createVlayerClient = (
       ]);
       return { hash } as BrandedHash<typeof proverAbi, typeof functionName>;
     },
+
     waitForProvingResult: async <
       T extends Abi,
       F extends ContractFunctionName<T>,

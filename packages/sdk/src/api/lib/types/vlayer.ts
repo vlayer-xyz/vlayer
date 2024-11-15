@@ -58,6 +58,7 @@ export type VlayerClient = {
     chainId?: number;
     args: ContractFunctionArgs<T, AbiStateMutability, F>;
   }) => Promise<BrandedHash<T, F>>;
+
   waitForProvingResult: <T extends Abi, F extends ContractFunctionName<T>>(
     hash: BrandedHash<T, F>,
   ) => Promise<ContractFunctionReturnType<T, AbiStateMutability, F>>;
