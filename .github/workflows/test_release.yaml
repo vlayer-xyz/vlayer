@@ -1,7 +1,7 @@
 name: Test Release
-on: 
+on:
   workflow_run:
-    workflows: ["Release vlayer artifacts"]
+    workflows: ["Update Prover Servers"]
     types: [completed]
   workflow_dispatch:
   pull_request:
@@ -29,7 +29,7 @@ jobs:
           compose-file: docker/web-proof/docker-compose-test-release.yaml
       - name: Test release
         env:
-            VLAYER_ENV: dev
+          VLAYER_ENV: dev
         run: bash/test-release.sh
   test-release-sepolia:
     name: Test release on OP Sepolia and remote prover
