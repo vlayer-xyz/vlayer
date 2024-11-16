@@ -48,7 +48,7 @@ fn get_body_recursive(mail: &ParsedMail) -> Result<String, MailParseError> {
         let x: Result<Vec<String>, MailParseError> = mail
             .parts()
             .skip(1)
-            .map(|e| get_body_recursive(e))
+            .map(get_body_recursive)
             .collect();
         Ok(x?.join(""))
     } else {
