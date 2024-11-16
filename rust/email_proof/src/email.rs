@@ -45,12 +45,10 @@ impl TryFrom<ParsedMail<'_>> for Email {
 
 fn get_body_recursive(mail: &ParsedMail) -> Result<String, MailParseError> {
     if mail.ctype.mimetype.starts_with("multipart/") {
-        let x: Result<Vec<String>, MailParseError> = mail
-            .parts()
-            .skip(1)
-            .map(get_body_recursive)
-            .collect();
-        Ok(x?.join(""))
+        let x: Result<Vec<String>, MailParseError> =
+            mail.parts().skip(1).map(get_body_recursive).collect();
+
+        Ok(format!("{}{}", mail.get_body()?, x?.join("")))
     } else {
         mail.get_body()
     }
@@ -147,10 +145,10 @@ mod test {
                 .unwrap()
                 .try_into()
                 .unwrap();
-            let expected_body = "Welcome to vlayer, 0x0E8e5015042BeF1ccF2D449652C7A457a163ECB9\r
-\r
-<div dir=\"ltr\">Welcome to vlayer, 0x0E8e5015042BeF1ccF2D449652C7A457a163ECB9</div>\r
-\r
+            let expected_body = "Welcome to vlayer, 0x0E8e5015042BeF1ccF2D449652C7A457a163ECB9
+
+<div dir=\"ltr\">Welcome to vlayer, 0x0E8e5015042BeF1ccF2D449652C7A457a163ECB9</div>
+
 ";
             assert_eq!(email.body, expected_body);
             assert_eq!(email.from, "grzegorz@vlayer.xyz");
