@@ -12,6 +12,16 @@ describe("resolveDkimDns Integration", () => {
     expect(resolved).toBe(expected);
   });
 
+  test("resolves delegated dns", async () => {
+    const resolved = await resolveDkimDns(
+      "bolt.eu",
+      "el7njvpsjxbr7wk7l7dss5ejzvijzoeu",
+    );
+    const expected =
+      "v=DKIM1; k=rsa; p=MIGfMA0GCSqGSIb3DQEBAQUAA4GNADCBiQKBgQDQxwOEYMZS2rPORBB94iL47Ute8zb1SUNl7K0zCQMk+M83AJHcwKjnJVhA4F0rLbSxY7cxJgl57lN4Vp5k10HHOil00oIn1S0ChBKHiFCQAMHCNonwDOdJa6mXwe2VwEM7hnVpRc/Eo0F0acpNMeYJxyLcTcOuZBNzcPm6t+4uTwIDAQAB";
+    expect(resolved).toBe(expected);
+  });
+
   test("throws error if dns not found", async () => {
     await expect(resolveDkimDns("not-a-domain.com", "abcd")).rejects.toThrow();
   });
