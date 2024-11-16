@@ -97,7 +97,7 @@ else
         "--rpc-url" "10:https://opt-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}"
         "--rpc-url" "11155420:https://opt-sepolia.g.alchemy.com/v2/${ALCHEMY_API_KEY}"
         "--rpc-url" "84532:https://base-sepolia.g.alchemy.com/v2/${ALCHEMY_API_KEY}"
-        "--rpc-url" "80002:https://polygon-amoy-sepolia.g.alchemy.com/v2/${ALCHEMY_API_KEY}"
+        "--rpc-url" "80002:https://polygon-amoy.g.alchemy.com/v2/${ALCHEMY_API_KEY}"
         "--rpc-url" "421614:https://arb-sepolia.g.alchemy.com/v2/${ALCHEMY_API_KEY}"
         "--rpc-url" "300:https://zksync-sepolia.g.alchemy.com/v2/${ALCHEMY_API_KEY}"
         "--rpc-url" "8453:https://base-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}"
