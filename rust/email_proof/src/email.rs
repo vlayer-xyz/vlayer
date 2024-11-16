@@ -23,6 +23,7 @@ impl TryFrom<ParsedMail<'_>> for Email {
 
     fn try_from(mail: ParsedMail) -> Result<Self, Self::Error> {
         let headers = mail.get_headers();
+
         let get_header = header_getter(headers);
 
         let from_raw =
@@ -31,7 +32,7 @@ impl TryFrom<ParsedMail<'_>> for Email {
         let to = get_header("To").ok_or(MailParseError::Generic("\"To\" header is missing"))?;
         let subject = get_header("Subject");
 
-        let body = mail.get_body()?;
+        let body = get_body_recursive(&mail)?;
 
         Ok(Email {
             from: from_email,
@@ -39,6 +40,19 @@ impl TryFrom<ParsedMail<'_>> for Email {
             subject,
             body,
         })
+    }
+}
+
+fn get_body_recursive(mail: &ParsedMail) -> Result<String, MailParseError> {
+    if mail.ctype.mimetype.starts_with("multipart/") {
+        let x: Result<Vec<String>, MailParseError> = mail
+            .parts()
+            .skip(1)
+            .map(|e| get_body_recursive(e))
+            .collect();
+        Ok(x?.join(""))
+    } else {
+        mail.get_body()
     }
 }
 
@@ -103,6 +117,15 @@ mod test {
 
     mod try_from {
         use super::*;
+        fn read_file(file: &str) -> Vec<u8> {
+            use std::{fs::File, io::Read};
+
+            let mut f = File::open(file).unwrap();
+            let mut buffer = Vec::new();
+            f.read_to_end(&mut buffer).unwrap();
+
+            buffer
+        }
 
         #[test]
         fn parses_email() {
@@ -117,6 +140,26 @@ mod test {
             assert_eq!(email.body, "body");
         }
 
+        #[test]
+        fn parses_body_of_multipart_email() {
+            let multipart_email = read_file("testdata/multipart_email.eml");
+            let email: Email = mailparse::parse_mail(&multipart_email)
+                .unwrap()
+                .try_into()
+                .unwrap();
+            let expected_body = "Welcome to vlayer, 0x0E8e5015042BeF1ccF2D449652C7A457a163ECB9\r
+\r
+<div dir=\"ltr\">Welcome to vlayer, 0x0E8e5015042BeF1ccF2D449652C7A457a163ECB9</div>\r
+\r
+";
+            assert_eq!(email.body, expected_body);
+            assert_eq!(email.from, "grzegorz@vlayer.xyz");
+            assert_eq!(email.to, "Grzegorz Pociejewski <grzegorz@vlayer.xyz>");
+            assert_eq!(
+                email.subject.unwrap(),
+                "Welcome to vlayer, 0x0E8e5015042BeF1ccF2D449652C7A457a163ECB9"
+            );
+        }
         #[test]
         fn error_when_from_header_is_missing() {
             let email = parsed_email(vec![("To", "me")], "body");
