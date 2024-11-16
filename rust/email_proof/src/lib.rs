@@ -59,6 +59,12 @@ mod tests {
         assert_eq!(parsed.to, expected_to);
 
         assert_eq!(parsed.subject, Some("test confirmation".into()));
-        assert_eq!(parsed.body, "This is a multi-part message in MIME format.\n");
+        dbg!(&parsed.body);
+        assert!(parsed
+            .body
+            .contains("This is a multi-part message in MIME format."));
+        assert!(parsed
+            .body
+            .contains("testtest\ntesttest\ntesttest\ntesttest\ntesttest\ntesttest"));
     }
 }
