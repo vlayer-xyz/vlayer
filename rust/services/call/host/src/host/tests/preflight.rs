@@ -2,7 +2,6 @@ use alloy_chains::{Chain, NamedChain::AnvilHardhat};
 use alloy_primitives::{address, b256, uint, Address};
 use alloy_sol_types::SolCall;
 use ethers_core::types::BlockNumber as BlockTag;
-use lazy_static::lazy_static;
 
 use crate::{
     test_harness::{preflight, ExecutionLocation},
@@ -13,12 +12,9 @@ mod usdt {
     use super::*;
     use crate::test_harness::contracts::{IERC20::balanceOfCall, USDT, USDT_BLOCK_NO};
 
-    lazy_static! {
-        static ref LOCATION: ExecutionLocation = (Chain::mainnet().id(), USDT_BLOCK_NO).into();
-    }
-
     #[tokio::test]
     async fn erc20_balance_of() -> anyhow::Result<()> {
+        let location: ExecutionLocation = (Chain::mainnet().id(), USDT_BLOCK_NO).into();
         let binance_8 = address!("F977814e90dA44bFA03b6295A0616a897441aceC");
         let call = Call::new(USDT, balanceOfCall { account: binance_8 });
         let result = preflight::<balanceOfCall>("usdt_erc20_balance_of", call, &LOCATION).await?;
@@ -34,12 +30,9 @@ mod uniswap {
         UNISWAP,
     };
 
-    lazy_static! {
-        static ref LOCATION: ExecutionLocation = (Chain::mainnet().id(), BlockTag::Latest).into();
-    }
-
     #[tokio::test]
     async fn factory_owner() -> anyhow::Result<()> {
+        let location: ExecutionLocation = (Chain::mainnet().id(), BlockTag::Latest).into();
         let call = Call::new(UNISWAP, ownerCall {});
         let ownerReturn { _0: owner } =
             preflight::<ownerCall>("uniswap_factory_owner", call, &LOCATION).await?;
@@ -49,6 +42,8 @@ mod uniswap {
 }
 
 mod view {
+    use lazy_static::lazy_static;
+
     use super::*;
     use crate::test_harness::contracts::{
         ViewCallTest::{
@@ -148,12 +143,9 @@ mod teleport {
         SimpleTravelProver::crossChainBalanceOfCall, BLOCK_NO, SIMPLE_TELEPORT,
     };
 
-    lazy_static! {
-        static ref LOCATION: ExecutionLocation = (AnvilHardhat, BLOCK_NO).into();
-    }
-
     #[tokio::test]
     async fn teleport_to_unknown_chain_returns_an_error_but_does_not_panic() -> anyhow::Result<()> {
+        let location: ExecutionLocation = (Chain::anvil_hardhat().id(), BLOCK_NO).into();
         let owner = Address::ZERO;
         let call = Call::new(SIMPLE_TELEPORT, crossChainBalanceOfCall { owner });
         let result = preflight::<crossChainBalanceOfCall>("simple_teleport", call, &LOCATION).await;
@@ -176,14 +168,10 @@ mod time_travel {
         AVERAGE_BALANCE_OF_CALL, SIMPLE_TIME_TRAVEL,
     };
 
-    lazy_static! {
-        static ref LOCATION: ExecutionLocation =
-            (Chain::optimism_sepolia().id(), BlockTag::Latest).into();
-    }
-
     #[tokio::test]
     #[ignore = "Fails due to chain proofs issue"]
     async fn time_travel() -> anyhow::Result<()> {
+        let location: ExecutionLocation = (Chain::optimism_sepolia().id(), BlockTag::Latest).into();
         let call = Call::new(SIMPLE_TIME_TRAVEL, AVERAGE_BALANCE_OF_CALL);
 
         let averageBalanceOfReturn {

@@ -22,12 +22,9 @@ fn before_all() {
     set_var("RISC0_DEV_MODE", "1");
 }
 
-lazy_static! {
-    static ref LOCATION: ExecutionLocation = (Chain::mainnet().id(), USDT_BLOCK_NO).into();
-}
-
 #[tokio::test]
 async fn erc20_balance_of() -> anyhow::Result<()> {
+    let location: ExecutionLocation = (Chain::mainnet().id(), USDT_BLOCK_NO).into();
     let binance_8 = address!("F977814e90dA44bFA03b6295A0616a897441aceC");
     let call = Call::new(USDT, balanceOfCall { account: binance_8 });
     let result = run("usdt_erc20_balance_of", call, &LOCATION).await?;
