@@ -26,18 +26,14 @@ fn load_chain_specs() -> HashMap<ChainId, ChainSpec> {
     // include_str! loads chain_specs in compilation time
     let chain_specs: ChainSpecs =
         from_str(include_str!("../chain_specs.toml")).expect("failed to load chain specs");
-
+    let chain_specs_len = chain_specs.chains.len();
     let chain_id_to_chain_spec: HashMap<ChainId, ChainSpec> = chain_specs
         .chains
-        .clone()
         .into_iter()
         .map(|chain| (*chain, chain))
         .collect();
 
-    assert!(
-        chain_id_to_chain_spec.len() == chain_specs.chains.len(),
-        "duplicated chain specs",
-    );
+    assert!(chain_specs_len == chain_id_to_chain_spec.len(), "duplicated chain specs",);
 
     chain_id_to_chain_spec
 }
