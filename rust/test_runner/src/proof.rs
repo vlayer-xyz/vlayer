@@ -144,7 +144,7 @@ mod tests {
 
     #[test]
     fn test_address_to_nibbles() {
-        let address = Address::from(U160::from(0x123456));
+        let address = Address::from(U160::from(0x0012_3456));
         assert_eq!(
             keccak256(address),
             b256!("f5c7e89ecc8b4dced430a51ceb6cac1af1067e6aef60306400853e88334e023c")

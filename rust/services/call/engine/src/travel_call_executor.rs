@@ -116,7 +116,7 @@ impl<D: std::fmt::Debug> From<EVMError<D>> for Error {
                     output: err.into_bytes().into(),
                 }
             })),
-            _ => Error::TransactPreverifiedError(format!("{:?}", err)),
+            _ => Error::TransactPreverifiedError(format!("{err:?}")),
         }
     }
 }

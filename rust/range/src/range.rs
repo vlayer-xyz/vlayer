@@ -31,7 +31,7 @@ impl Range {
     }
 
     pub fn len(&self) -> u64 {
-        self.0.map(|range| range.len()).unwrap_or(0)
+        self.0.map_or(0, |range| range.len())
     }
 }
 
@@ -49,7 +49,7 @@ impl From<NonEmptyRange> for Range {
 
 impl PartialEq<RangeInclusive<u64>> for Range {
     fn eq(&self, other: &RangeInclusive<u64>) -> bool {
-        self.0.map(|range| range == other).unwrap_or(false)
+        self.0.map_or(false, |range| range == other)
     }
 }
 
@@ -65,7 +65,7 @@ impl IntoIterator for Range {
 
     fn into_iter(self) -> Self::IntoIter {
         #[allow(clippy::reversed_empty_ranges)]
-        self.0.map(Into::into).unwrap_or(1..=0)
+        self.0.map_or(1..=0, Into::into)
     }
 }
 

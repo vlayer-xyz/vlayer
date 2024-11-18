@@ -137,7 +137,7 @@ impl SoldeerDep {
         let output = std::process::Command::new("forge")
             .arg("soldeer")
             .arg("install")
-            .arg(format!("{}~{}", name, version))
+            .arg(format!("{name}~{version}"))
             .current_dir(foundry_root)
             .output()?;
 
@@ -153,7 +153,7 @@ impl SoldeerDep {
         let output = std::process::Command::new("forge")
             .arg("soldeer")
             .arg("install")
-            .arg(format!("{}~{}", name, version))
+            .arg(format!("{name}~{version}"))
             .arg(url)
             .current_dir(foundry_root)
             .output()?;
@@ -164,7 +164,7 @@ impl SoldeerDep {
     fn remapping(&self) -> Option<Vec<(String, String)>> {
         let remapping = self.remapping.as_ref()?;
         let internal_path = if let Some(internal_path) = &remapping.internal_path {
-            format!("{}/", internal_path)
+            format!("{internal_path}/")
         } else {
             String::default()
         };
@@ -369,7 +369,7 @@ fn add_deps_to_gitignore(root_path: &Path) -> Result<(), std::io::Error> {
 fn append_file(file: &Path, suffix: &str) -> Result<(), std::io::Error> {
     let mut file = OpenOptions::new().append(true).open(file)?;
 
-    writeln!(file, "{}", suffix)?;
+    writeln!(file, "{suffix}")?;
 
     Ok(())
 }

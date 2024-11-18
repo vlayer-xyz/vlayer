@@ -17,7 +17,7 @@ impl Runner {
         if status == 0 {
             Ok(())
         } else {
-            Err(Error::msg(format!("Execution failed for {} benchmarks", status)))
+            Err(Error::msg(format!("Execution failed for {status} benchmarks")))
         }
     }
 }

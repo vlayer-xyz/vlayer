@@ -1,12 +1,14 @@
+use std::fmt::Write;
+
 pub fn canonize_body(body: &str) -> String {
     format!("{}\r\n", body.trim_end_matches("\r\n"))
 }
 
 pub fn canonize_headers<'a>(headers: impl Iterator<Item = (&'a str, &'a str)>) -> String {
-    headers
-        .map(|(name, value)| format!("{}:{}", name, value))
-        .collect::<Vec<_>>()
-        .join("")
+    headers.fold(String::new(), |mut output, (name, value)| {
+        _ = write!(output, "{name}:{value}");
+        output
+    })
 }
 
 #[cfg(test)]

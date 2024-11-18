@@ -15,7 +15,7 @@ fn version_msg() -> String {
 
 fn call_guest_id() -> String {
     let little_endian_hex = hex::encode(GUEST_ELF.id);
-    format!("CALL_GUEST_ID: {}", little_endian_hex)
+    format!("CALL_GUEST_ID: {little_endian_hex}")
 }
 
 pub(crate) fn version() -> String {

@@ -78,14 +78,14 @@ impl StateDb {
     pub fn code_by_hash(&self, hash: B256) -> &Bytes {
         self.contracts
             .get(&hash)
-            .unwrap_or_else(|| panic!("code not found: {}", hash))
+            .unwrap_or_else(|| panic!("code not found: {hash}"))
     }
 
     pub fn block_hash(&self, number: u64) -> B256 {
         let hash = self
             .block_hashes
             .get(&number)
-            .unwrap_or_else(|| panic!("block not found: {}", number));
+            .unwrap_or_else(|| panic!("block not found: {number}"));
         *hash
     }
 
