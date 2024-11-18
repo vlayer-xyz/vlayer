@@ -4,8 +4,14 @@
     "gas-custom-errors": "off",
     "imports-on-top": "error",
     "no-unused-vars": "error",
-    "code-complexity": ["error", 9],
-    "compiler-version": ["error", "^0.8.0"],
+    "code-complexity": [
+      "error",
+      9
+    ],
+    "compiler-version": [
+      "error",
+      "^0.8.0"
+    ],
     "const-name-snakecase": "error",
     "event-name-camelcase": "error",
     "constructor-syntax": "error",
@@ -14,12 +20,22 @@
     "modifier-name-mixedcase": "error",
     "private-vars-leading-underscore": "off",
     "var-name-mixedcase": "error",
-    "func-visibility": ["error", { "ignoreConstructors": true }],
+    "func-visibility": [
+      "error",
+      {
+        "ignoreConstructors": true
+      }
+    ],
     "not-rely-on-time": "off",
     "no-empty-blocks": "off",
     "contract-name-camelcase": "off",
     "no-inline-assembly": "off",
-    "reason-string": ["warn", { "maxLength": 64 }],
+    "reason-string": [
+      "warn",
+      {
+        "maxLength": 64
+      }
+    ],
     "one-contract-per-file": "off"
   }
 }

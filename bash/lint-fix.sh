@@ -18,9 +18,9 @@ cd "${VLAYER_HOME}/packages"
 bun install --frozen-lockfile --no-save --silent
 bun run --silent lint:fix
 
-cd "${VLAYER_HOME}/contracts"
+cd "${VLAYER_HOME}/contracts/vlayer"
 bun install --frozen-lockfile --no-save --silent
 bun run --silent lint:solidity -- --fix --noPrompt
 
 forge fmt "${VLAYER_HOME}/examples" -- --write
-forge fmt "${VLAYER_HOME}/contracts/src" -- --write
+forge fmt "${VLAYER_HOME}/contracts/vlayer/src" -- --write

@@ -49,8 +49,13 @@ jobs:
         uses: ./.github/actions/contracts-prerequisites
       - name: Mock ImageId.sol
         run: ./bash/mock-imageid.sh 
-      - name: Run Forge build
-        working-directory: ./contracts
+      - name: Run Forge build vlayer
+        working-directory: ./contracts/vlayer
+        run: |
+          forge soldeer install
+          forge build --sizes
+      - name: Run Forge build fixtures
+        working-directory: ./contracts/fixtures
         run: |
           forge soldeer install
           forge build --sizes
