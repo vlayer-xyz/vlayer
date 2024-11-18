@@ -17,8 +17,8 @@ jobs:
   lint-contracts:
     name: Lint contracts
     runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v2
+    steps: 
+      - uses: actions/checkout@v4
       - name: Install TypeScript prerequisites
         uses: ./.github/actions/ts-prerequisites
       - name: Mock ImageId.sol
