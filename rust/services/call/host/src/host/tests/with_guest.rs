@@ -6,7 +6,10 @@ use alloy_sol_types::SolCall;
 
 use crate::{
     test_harness::{
-        contracts::{IERC20, USDT, USDT_BLOCK_NO},
+        contracts::{
+            IERC20::{balanceOfCall, balanceOfReturn},
+            USDT, USDT_BLOCK_NO,
+        },
         run,
     },
     Call,
@@ -18,21 +21,23 @@ fn before_all() {
     set_var("RISC0_DEV_MODE", "1");
 }
 
+lazy_static! {
+    static ref LOCATION: ExecutionLocation = (Chain::mainnet().id(), USDT_BLOCK_NO).into();
+}
+
 #[tokio::test]
 async fn erc20_balance_of() -> anyhow::Result<()> {
-    let sol_call = IERC20::balanceOfCall {
-        account: address!("F977814e90dA44bFA03b6295A0616a897441aceC"), // Binance 8
-    };
+    let binance_8 = address!("F977814e90dA44bFA03b6295A0616a897441aceC");
     let call = Call {
         to: USDT,
-        data: sol_call.abi_encode(),
+        data: balanceOfCall { account: binance_8 }.abi_encode(),
     };
-    let result =
-        run("usdt_erc20_balance_of", call, &(Chain::mainnet().id(), USDT_BLOCK_NO).into()).await?;
+    let result = run("usdt_erc20_balance_of", call, &LOCATION).await?;
     let raw_call_result = result.guest_output.evm_call_result;
-    let call_result = IERC20::balanceOfCall::abi_decode_returns(&raw_call_result, true)?;
+    let balanceOfReturn { _0: balance } =
+        balanceOfCall::abi_decode_returns(&raw_call_result, true)?;
 
-    assert_eq!(call_result._0, uint!(3_000_000_000_000_000_U256));
+    assert_eq!(balance, uint!(3_000_000_000_000_000_U256));
 
     Ok(())
 }
