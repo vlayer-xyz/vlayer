@@ -65,9 +65,15 @@ const useProvingStatus = () => {
     useZkProvingState();
 
   const provingStatus = useMemo(() => {
-    if (isZkProvingDone) return ProvingStatus.Done;
-    if (isZkProving) return ProvingStatus.Zk;
-    if (isWebProving) return ProvingStatus.Web;
+    if (isZkProvingDone) {
+      return ProvingStatus.Done;
+    }
+    if (isZkProving) {
+      return ProvingStatus.Zk;
+    }
+    if (isWebProving) {
+      return ProvingStatus.Web;
+    }
     return ProvingStatus.NotStared;
   }, [isZkProving, isZkProvingDone, isWebProving]);
 
