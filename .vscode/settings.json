@@ -32,6 +32,8 @@
     "binstall",
     "blockhash",
     "bytecodes",
+    "dotenv",
+    "dotenvy",
     "groth",
     "Hashable",
     "Httparse",
