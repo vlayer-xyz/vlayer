@@ -13,15 +13,15 @@ use lazy_static::lazy_static;
 use provider::{BlockNumber, CachedMultiProvider, CachedProviderFactory};
 
 // To activate recording, set UPDATE_SNAPSHOTS to true.
-// Recording creates new testdata directory and writes return data from Alchemy into files in that directory.
+// Recording creates new test data directory and writes return data from Alchemy into files in that directory.
 const UPDATE_SNAPSHOTS: bool = false;
 
 #[cfg(test)]
 #[ctor::ctor]
 fn before_all() {
     if UPDATE_SNAPSHOTS {
-        remove_dir_all("testdata").ok();
-        create_dir("testdata").ok();
+        remove_dir_all("test_data").ok();
+        create_dir("test_data").ok();
     }
 }
 
@@ -45,15 +45,15 @@ lazy_static! {
 
 fn rpc_file_cache(test_name: &str) -> HashMap<ChainId, String> {
     HashMap::from([
-        (Chain::mainnet().id(), format!("testdata/mainnet_{test_name}_rpc_cache.json")),
-        (Chain::sepolia().id(), format!("testdata/sepolia_{test_name}_rpc_cache.json")),
+        (Chain::mainnet().id(), format!("test_data/mainnet_{test_name}_rpc_cache.json")),
+        (Chain::sepolia().id(), format!("test_data/sepolia_{test_name}_rpc_cache.json")),
         (
             Chain::optimism_sepolia().id(),
-            format!("testdata/op_sepolia_{test_name}_rpc_cache.json"),
+            format!("test_data/op_sepolia_{test_name}_rpc_cache.json"),
         ),
         (
             NamedChain::AnvilHardhat.into(),
-            format!("testdata/anvil_{test_name}_rpc_cache.json"),
+            format!("test_data/anvil_{test_name}_rpc_cache.json"),
         ),
     ])
 }
