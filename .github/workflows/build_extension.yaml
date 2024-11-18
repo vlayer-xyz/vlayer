@@ -21,15 +21,15 @@ jobs:
 
       - name: Install dependencies
         working-directory: packages/browser-extension
-        run: npm install
+        run: bun install --frozen-lockfile 
       - name: Update extension version
         working-directory: packages/browser-extension
         env: 
           VLAYER_BUILD: '0.0.0-test'
-        run: npm version "${VLAYER_BUILD}"
+        run: npm version "${VLAYER_BUILD}" --no-workspaces-update 
       - name: Build and compress
         working-directory: packages/browser-extension
         run: |
-          npm run build
+          bun run build
           mv dist browser-extension
           tar -czvf browser-extension.tar.gz browser-extension
