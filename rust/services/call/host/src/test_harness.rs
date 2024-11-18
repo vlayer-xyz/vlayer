@@ -98,9 +98,3 @@ pub fn create_host(
     let chain_proof_client = RpcChainProofClient::new(chain_proof_server_url);
     Host::try_new_with_components(multi_provider, block_number, chain_proof_client, config)
 }
-
-#[cfg(test)]
-#[ctor::ctor]
-fn before_all() {
-    set_var("RISC0_DEV_MODE", "1");
-}

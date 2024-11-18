@@ -10,6 +10,12 @@ use crate::{
     Call,
 };
 
+#[cfg(test)]
+#[ctor::ctor]
+fn before_all() {
+    set_var("RISC0_DEV_MODE", "1");
+}
+
 #[tokio::test]
 async fn erc20_balance_of() -> anyhow::Result<()> {
     let sol_call = IERC20::balanceOfCall {
