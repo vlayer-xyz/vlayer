@@ -15,45 +15,84 @@ To start working with [this repository](https://github.com/vlayer-xyz/vlayer), y
 - [LLVM Clang](https://clang.llvm.org/) compiler version which supports [RISC-V build target](https://llvm.org/docs/RISCVUsage.html) available on the `PATH`
 - `timeout` terminal command (`brew install coreutils` on macOS)
 
-## Building
+## Building vlayer
+ 
+In this guide, we will focus on running `examples/simple` example.
 
-Before you build solidity smart contracts, make sure that dependencies are up to date:
+### Build solidity smart contracts
+
+First, make sure the dependencies are up-to-date:
+
 ```sh
 git submodule update --init --recursive
+```
 
+Next, navigate to `contracts` directory, and run:
+
+```sh
 cd contracts
 forge soldeer install
 ```
 
-To build vlayer project, first, navigate to the `rust` directory and type:
+###  Build vlayer proving server
+
+To build the project, first, navigate to the `rust` directory and run:
 
 ```sh
+cd rust
 cargo build
 ```
 
-## Running
+### Build JS/TS SDK
 
-Run anvil in the background:
+Navigate to `packages` directory and run:
+
+```sh
+cd packages
+bun install
+```
+
+Next, navigate to `packages/sdk` directory and run:
+
+```sh
+cd packages/sdk
+bun run build
+```
+
+## Running example
+
+
+### Run Anvil
+
+Open a new terminal and run:
+
 ```sh
 anvil
 ```
 
-Then, to run proving server, execute the following command:
+### Run vlayer proving server
+
+Open a new terminal, navigate to `rust` directory and run:
+
 ```sh
-RUST_LOG=info RISC0_DEV_MODE=1 cargo run -- serve
+RUST_LOG=info RISC0_DEV_MODE=1 cargo run --bin vlayer -- serve --rpc-url '31337:http://localhost:8545'
 ```
 
-Finally, to test proving navigate to any of the examples within `/examples` directory, run following commands to build example's contracts: 
-```bash
+### Build example contracts
+
+Finally, to test proving navigate to `examples/simple` directory, and run following commands to build example's contracts: 
+
+```sh
 forge soldeer install
 forge clean 
 forge build
 ```
 
-then navigate to `vlayer` directory within the selected example and run the following command:
+Next, navigate to `vlayer` directory, and run the following command:
+
 ```sh
 bun install 
-bun run prove.ts
+bun run prove:dev
 ``` 
 
 For guides about the project structure, check out [architecture appendix](/appendix/architecture/overview.html).
