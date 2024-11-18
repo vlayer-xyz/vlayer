@@ -11,6 +11,7 @@ members = [
     "mpt",
     "provider",
     "range",
+    "scripts/run_services",
     "server_utils",
     "services/call/engine",
     "services/call/guest",

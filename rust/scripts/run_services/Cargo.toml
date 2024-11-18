@@ -1,0 +1,14 @@
+[package]
+name = "run_services"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+anyhow = "1"
+async-tempfile = "0.6"
+clap = { version = "4", features = ["derive", "env"] }
+tokio = { version = "1", features = ["full"] }
+tokio-util = "0.7"
+
+[lints]
+workspace = true
