@@ -9,7 +9,7 @@ use thiserror::Error;
 use super::prover;
 
 #[derive(Error, Debug)]
-pub enum HostError {
+pub enum Error {
     #[error("Invalid input")]
     CreatingInput(String),
 

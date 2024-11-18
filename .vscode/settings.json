@@ -35,6 +35,7 @@
     "groth",
     "Hashable",
     "Httparse",
+    "IERC",
     "jrpc",
     "keccak",
     "mdbx",

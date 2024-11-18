@@ -2,11 +2,9 @@ use std::env::set_var;
 
 use alloy_chains::Chain;
 use alloy_sol_types::SolCall;
+use call_engine::HostOutput;
 use call_guest_wrapper::GUEST_ELF as CALL_GUEST_ELF;
-use call_host::{
-    host::{config::HostConfig, error::HostError, get_block_header, Host},
-    Call,
-};
+use call_host::{get_block_header, Call, Config, Error, Host, PreflightResult};
 use chain_client::RpcClient as RpcChainProofClient;
 use chain_guest_wrapper::GUEST_ELF as CHAIN_GUEST_ELF;
 use ethers_core::types::BlockNumber as BlockTag;
@@ -28,7 +26,7 @@ lazy_static! {
         (Chain::sepolia().id(), LATEST_BLOCK).into();
 }
 
-pub async fn run<C>(
+pub async fn preflight<C>(
     test_name: &str,
     call: Call,
     location: &ExecutionLocation,
@@ -39,18 +37,29 @@ where
     let multi_provider = create_multi_provider(test_name);
     let chain_proof_server = create_chain_proof_server(&multi_provider, location).await?;
     let host = create_host(multi_provider, location, chain_proof_server.url())?;
-    let host_output = host.main(call).await?;
-    let return_value = C::abi_decode_returns(&host_output.guest_output.evm_call_result, false)?;
+    let PreflightResult { host_output, .. } = host.preflight(call).await?;
+    let return_value = C::abi_decode_returns(&host_output, false)?;
 
     chain_proof_server.assert();
 
     Ok(return_value)
 }
 
+pub async fn run(
+    test_name: &str,
+    call: Call,
+    location: &ExecutionLocation,
+) -> Result<HostOutput, Error> {
+    let multi_provider = create_multi_provider(test_name);
+    let chain_proof_server = create_chain_proof_server(&multi_provider, location).await?;
+    let host = create_host(multi_provider, location, chain_proof_server.url())?;
+    host.main(call).await
+}
+
 async fn create_chain_proof_server(
     multi_provider: &CachedMultiProvider,
     location: &ExecutionLocation,
-) -> Result<ChainProofServerMock, HostError> {
+) -> Result<ChainProofServerMock, Error> {
     let block_header = get_block_header(multi_provider, location.chain_id, location.block_tag)?;
     let block_number = block_header.number();
     let result = fake_proof_result(block_header);
@@ -71,8 +80,8 @@ fn create_host(
     multi_provider: CachedMultiProvider,
     location: &ExecutionLocation,
     chain_proof_server_url: impl AsRef<str>,
-) -> Result<Host, HostError> {
-    let config = HostConfig {
+) -> Result<Host, Error> {
+    let config = Config {
         start_chain_id: location.chain_id,
         call_guest_elf: CALL_GUEST_ELF.clone(),
         chain_guest_elf: CHAIN_GUEST_ELF.clone(),

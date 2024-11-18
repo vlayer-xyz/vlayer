@@ -6,7 +6,7 @@ use host_utils::ProofMode;
 
 pub const DEFAULT_MAX_CALLDATA_SIZE: usize = 5 * 1024 * 1024; // 5 MB
 
-pub struct HostConfig {
+pub struct Config {
     pub rpc_urls: HashMap<ChainId, String>,
     pub start_chain_id: ChainId,
     pub proof_mode: ProofMode,
@@ -17,7 +17,7 @@ pub struct HostConfig {
     pub verify_chain_proofs: bool,
 }
 
-impl Default for HostConfig {
+impl Default for Config {
     fn default() -> Self {
         Self {
             rpc_urls: HashMap::default(),

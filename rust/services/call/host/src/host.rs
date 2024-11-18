@@ -5,6 +5,7 @@ use std::{
 
 use alloy_primitives::{BlockNumber, ChainId};
 use alloy_sol_types::SolValue;
+use bytes::Bytes;
 use call_engine::{
     evm::env::{cached::CachedEvmEnv, location::ExecutionLocation},
     travel_call_executor::{
@@ -18,20 +19,20 @@ use call_engine::{
     Call, GuestOutput, HostOutput, Input, Seal,
 };
 use common::GuestElf;
-use config::HostConfig;
-use error::HostError;
+pub use config::{Config, DEFAULT_MAX_CALLDATA_SIZE};
+pub use error::Error;
 use ethers_core::types::BlockNumber as BlockTag;
 use prover::Prover;
 use provider::{CachedMultiProvider, EthersProviderFactory, EvmBlockHeader};
 use tracing::info;
 
 use crate::{
-    db::proof::ProofDb, encodable_receipt::EncodableReceipt, evm_env::factory::HostEvmEnvFactory,
-    into_input::into_multi_input,
+    encodable_receipt::EncodableReceipt, evm_env::factory::HostEvmEnvFactory,
+    into_input::into_multi_input, ProofDb,
 };
 
-pub mod config;
-pub mod error;
+mod config;
+mod error;
 mod prover;
 
 pub struct Host {
@@ -45,7 +46,7 @@ pub struct Host {
 }
 
 impl Host {
-    pub fn try_new(config: HostConfig) -> Result<Self, HostError> {
+    pub fn try_new(config: Config) -> Result<Self, Error> {
         let provider_factory = EthersProviderFactory::new(config.rpc_urls.clone());
         let providers = CachedMultiProvider::new(provider_factory);
         let block_number = get_latest_block_number(&providers, config.start_chain_id)?;
@@ -57,7 +58,7 @@ impl Host {
 pub fn get_latest_block_number(
     providers: &CachedMultiProvider,
     chain_id: ChainId,
-) -> Result<BlockNumber, HostError> {
+) -> Result<BlockNumber, Error> {
     get_block_header(providers, chain_id, BlockTag::Latest).map(|header| header.number())
 }
 
@@ -65,15 +66,21 @@ pub fn get_block_header(
     providers: &CachedMultiProvider,
     chain_id: ChainId,
     block_num: BlockTag,
-) -> Result<Box<dyn EvmBlockHeader>, HostError> {
+) -> Result<Box<dyn EvmBlockHeader>, Error> {
     let provider = providers.get(chain_id)?;
 
     let block_header = provider
         .get_block_header(block_num)
-        .map_err(|e| HostError::Provider(format!("Error fetching block header: {e:?}")))?
-        .ok_or_else(|| HostError::Provider(String::from("Block header not found")))?;
+        .map_err(|e| Error::Provider(format!("Error fetching block header: {e:?}")))?
+        .ok_or_else(|| Error::Provider(String::from("Block header not found")))?;
 
     Ok(block_header)
+}
+
+#[derive(Debug, Clone)]
+pub struct PreflightResult {
+    pub host_output: Bytes,
+    pub input: Input,
 }
 
 impl Host {
@@ -81,8 +88,8 @@ impl Host {
         providers: CachedMultiProvider,
         block_number: u64,
         chain_client: impl chain_client::Client,
-        config: HostConfig,
-    ) -> Result<Self, HostError> {
+        config: Config,
+    ) -> Result<Self, Error> {
         let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
         let start_execution_location = (block_number, config.start_chain_id).into();
         let prover = Prover::new(config.proof_mode, &config.call_guest_elf);
@@ -102,7 +109,7 @@ impl Host {
         })
     }
 
-    pub async fn main(self, call: Call) -> Result<HostOutput, HostError> {
+    pub async fn preflight(self, call: Call) -> Result<PreflightResult, Error> {
         self.validate_calldata_size(&call)?;
 
         let SuccessfulExecutionResult {
@@ -116,7 +123,7 @@ impl Host {
         info!("Gas used in preflight: {}", gas_used);
 
         let multi_evm_input =
-            into_multi_input(self.envs).map_err(|err| HostError::CreatingInput(err.to_string()))?;
+            into_multi_input(self.envs).map_err(|err| Error::CreatingInput(err.to_string()))?;
 
         let chain_proofs = if self.verify_chain_proofs {
             self.verifier.verify(&multi_evm_input).await?;
@@ -133,14 +140,25 @@ impl Host {
             call,
         };
 
-        let (seal, raw_guest_output) = provably_execute(&self.prover, &input)?;
+        Ok(PreflightResult {
+            host_output: host_output.into(),
+            input,
+        })
+    }
+
+    pub async fn main(self, call: Call) -> Result<HostOutput, Error> {
+        let prover = self.prover.clone();
+        let call_guest_id = self.guest_elf.id.into();
+        let PreflightResult { host_output, input } = self.preflight(call).await?;
+
+        let (seal, raw_guest_output) = provably_execute(&prover, &input)?;
 
         let proof_len = raw_guest_output.len();
         let guest_output = GuestOutput::from_outputs(&host_output, &raw_guest_output)?;
 
         if guest_output.evm_call_result != host_output {
-            return Err(HostError::HostGuestOutputMismatch(
-                host_output,
+            return Err(Error::HostGuestOutputMismatch(
+                host_output.into(),
                 guest_output.evm_call_result,
             ));
         }
@@ -150,13 +168,13 @@ impl Host {
             seal,
             raw_abi: raw_guest_output,
             proof_len,
-            call_guest_id: self.guest_elf.id.into(),
+            call_guest_id,
         })
     }
 
-    fn validate_calldata_size(&self, call: &Call) -> Result<(), HostError> {
+    fn validate_calldata_size(&self, call: &Call) -> Result<(), Error> {
         if call.data.len() > self.max_calldata_size {
-            return Err(HostError::CalldataTooLargeError(call.data.len()));
+            return Err(Error::CalldataTooLargeError(call.data.len()));
         }
 
         Ok(())
@@ -171,7 +189,7 @@ fn wrap_engine_panic(err: Box<dyn Any + Send>) -> TravelCallExecutorError {
     TravelCallExecutorError::Panic(panic_msg)
 }
 
-fn provably_execute(prover: &Prover, input: &Input) -> Result<(Vec<u8>, Vec<u8>), HostError> {
+fn provably_execute(prover: &Prover, input: &Input) -> Result<(Vec<u8>, Vec<u8>), Error> {
     let receipt = prover.prove(input)?;
 
     let seal: Seal = EncodableReceipt::from(receipt.clone()).try_into()?;
@@ -196,11 +214,11 @@ mod test {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn host_does_not_accept_calls_longer_than_limit() -> anyhow::Result<()> {
-        let config = HostConfig {
+        let config = Config {
             rpc_urls: test_rpc_urls(),
             start_chain_id: TEST_CHAIN_ID,
             proof_mode: ProofMode::Fake,
-            ..HostConfig::default()
+            ..Config::default()
         };
         let max_call_data_size = config.max_calldata_size;
         let host = Host::try_new_with_components(
@@ -215,7 +233,7 @@ mod test {
         };
 
         assert_eq!(
-            host.main(call).await.unwrap_err().to_string(),
+            host.preflight(call).await.unwrap_err().to_string(),
             format!("Calldata too large: {} bytes", max_call_data_size + 1)
         );
 
@@ -227,17 +245,17 @@ mod test {
 
         #[tokio::test(flavor = "multi_thread")]
         async fn try_new_invalid_rpc_url() -> anyhow::Result<()> {
-            let config = HostConfig {
+            let config = Config {
                 rpc_urls: test_rpc_urls(),
                 start_chain_id: TEST_CHAIN_ID,
                 proof_mode: ProofMode::Fake,
-                ..HostConfig::default()
+                ..Config::default()
             };
             let res = Host::try_new(config);
 
             assert!(matches!(
                 res.map(|_| ()).unwrap_err(),
-                HostError::Provider(ref msg) if msg.to_string().contains(
+                Error::Provider(ref msg) if msg.to_string().contains(
                     "Error fetching block header"
                 )
             ));

@@ -13,7 +13,7 @@ use crate::{
     CallAssumptions,
 };
 
-#[derive(Deserialize, Serialize, Debug, Default)]
+#[derive(Deserialize, Serialize, Debug, Default, Clone)]
 pub struct Input {
     pub multi_evm_input: MultiEvmInput,
     pub start_execution_location: ExecutionLocation,

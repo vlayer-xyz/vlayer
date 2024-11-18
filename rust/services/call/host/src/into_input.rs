@@ -7,7 +7,7 @@ use call_engine::evm::{
     input::{EvmInput, MultiEvmInput},
 };
 
-use crate::db::proof::ProofDb;
+use crate::ProofDb;
 
 fn into_input(db: &ProofDb, header: Box<dyn EvmBlockHeader>) -> anyhow::Result<EvmInput> {
     let (state_trie, storage_tries) = db.prepare_state_storage_tries()?;

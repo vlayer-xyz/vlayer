@@ -7,7 +7,7 @@ use risc0_zkvm::{
     Receipt, ReceiptClaim,
 };
 
-use crate::host::error::HostError;
+use crate::Error;
 
 const VERIFIER_SELECTOR_LENGTH: usize = 4;
 const GROTH16_PROOF_SIZE: usize = 256;
@@ -86,21 +86,21 @@ impl From<Receipt> for EncodableReceipt {
 }
 
 impl TryFrom<EncodableReceipt> for Seal {
-    type Error = HostError;
+    type Error = Error;
 
     fn try_from(value: EncodableReceipt) -> Result<Self, Self::Error> {
         let seal_type = value
             .proof_mode()
-            .ok_or(HostError::SealEncodingError("Invalid proof type".into()))?;
+            .ok_or(Error::SealEncodingError("Invalid proof type".into()))?;
 
         let raw_seal = value
             .seal_bytes()
-            .ok_or(HostError::SealEncodingError("Could not retreive valid seal bytes".into()))
+            .ok_or(Error::SealEncodingError("Could not retreive valid seal bytes".into()))
             .map(split_seal_into_bytes)?;
 
         let verifier_selector: FixedBytes<VERIFIER_SELECTOR_LENGTH> = value
             .verifier_selector()
-            .ok_or(HostError::SealEncodingError("Could not retreive verifier selector".into()))
+            .ok_or(Error::SealEncodingError("Could not retreive verifier selector".into()))
             .map(|sel| sel.0.into())?;
 
         Ok(Seal {

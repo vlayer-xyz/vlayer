@@ -4,7 +4,7 @@ use call_engine::evm::env::{location::ExecutionLocation, EvmEnv, EvmEnvFactory};
 use derive_new::new;
 use provider::CachedMultiProvider;
 
-use crate::{db::proof::ProofDb, host::error::HostError};
+use crate::{Error, ProofDb};
 
 #[derive(new)]
 pub(crate) struct HostEvmEnvFactory {
@@ -22,8 +22,8 @@ impl EvmEnvFactory<ProofDb> for HostEvmEnvFactory {
         let provider = self.providers.get(chain_id)?;
         let header = provider
             .get_block_header(block_number.into())
-            .map_err(|err| HostError::Provider(err.to_string()))?
-            .ok_or(HostError::BlockNotFound(block_number))?;
+            .map_err(|err| Error::Provider(err.to_string()))?
+            .ok_or(Error::BlockNotFound(block_number))?;
 
         let db = ProofDb::new(Arc::clone(&provider), block_number);
         let chain_spec = chain_id.try_into()?;
