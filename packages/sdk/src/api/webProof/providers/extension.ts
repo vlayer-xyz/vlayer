@@ -59,7 +59,7 @@ class ExtensionWebProofProvider implements WebProofProvider {
     }
     return this.port;
   }
-  
+
   public async getWebProof(webProofSetup: WebProofSetupInput) {
     return new Promise<WebProof>((resolve, reject) => {
       chrome.runtime.sendMessage(EXTENSION_ID, {
