@@ -1,7 +1,7 @@
 use std::{collections::HashMap, net::SocketAddr};
 
 use alloy_primitives::ChainId;
-use call_host::{HostConfig, DEFAULT_MAX_CALLDATA_SIZE};
+use call_host::{Config as HostConfig, DEFAULT_MAX_CALLDATA_SIZE};
 use chain::TEST_CHAIN_ID;
 use common::GuestElf;
 use serde::{Deserialize, Serialize};

@@ -4,7 +4,7 @@ use alloy_chains::Chain;
 use alloy_sol_types::SolCall;
 use call_engine::HostOutput;
 use call_guest_wrapper::GUEST_ELF as CALL_GUEST_ELF;
-use call_host::{get_block_header, Call, Error, Host, HostConfig, PreflightResult};
+use call_host::{get_block_header, Call, Error, Host, Config, PreflightResult};
 use chain_client::RpcClient as RpcChainProofClient;
 use chain_guest_wrapper::GUEST_ELF as CHAIN_GUEST_ELF;
 use ethers_core::types::BlockNumber as BlockTag;
@@ -81,7 +81,7 @@ fn create_host(
     location: &ExecutionLocation,
     chain_proof_server_url: impl AsRef<str>,
 ) -> Result<Host, Error> {
-    let config = HostConfig {
+    let config = Config {
         start_chain_id: location.chain_id,
         call_guest_elf: CALL_GUEST_ELF.clone(),
         chain_guest_elf: CHAIN_GUEST_ELF.clone(),

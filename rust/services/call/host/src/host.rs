@@ -19,7 +19,7 @@ use call_engine::{
     Call, GuestOutput, HostOutput, Input, Seal,
 };
 use common::GuestElf;
-pub use config::{HostConfig, DEFAULT_MAX_CALLDATA_SIZE};
+pub use config::{Config, DEFAULT_MAX_CALLDATA_SIZE};
 pub use error::Error;
 use ethers_core::types::BlockNumber as BlockTag;
 use prover::Prover;
@@ -46,7 +46,7 @@ pub struct Host {
 }
 
 impl Host {
-    pub fn try_new(config: HostConfig) -> Result<Self, Error> {
+    pub fn try_new(config: Config) -> Result<Self, Error> {
         let provider_factory = EthersProviderFactory::new(config.rpc_urls.clone());
         let providers = CachedMultiProvider::new(provider_factory);
         let block_number = get_latest_block_number(&providers, config.start_chain_id)?;
@@ -88,7 +88,7 @@ impl Host {
         providers: CachedMultiProvider,
         block_number: u64,
         chain_client: impl chain_client::Client,
-        config: HostConfig,
+        config: Config,
     ) -> Result<Self, Error> {
         let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
         let start_execution_location = (block_number, config.start_chain_id).into();
@@ -214,11 +214,11 @@ mod test {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn host_does_not_accept_calls_longer_than_limit() -> anyhow::Result<()> {
-        let config = HostConfig {
+        let config = Config {
             rpc_urls: test_rpc_urls(),
             start_chain_id: TEST_CHAIN_ID,
             proof_mode: ProofMode::Fake,
-            ..HostConfig::default()
+            ..Config::default()
         };
         let max_call_data_size = config.max_calldata_size;
         let host = Host::try_new_with_components(
@@ -245,11 +245,11 @@ mod test {
 
         #[tokio::test(flavor = "multi_thread")]
         async fn try_new_invalid_rpc_url() -> anyhow::Result<()> {
-            let config = HostConfig {
+            let config = Config {
                 rpc_urls: test_rpc_urls(),
                 start_chain_id: TEST_CHAIN_ID,
                 proof_mode: ProofMode::Fake,
-                ..HostConfig::default()
+                ..Config::default()
             };
             let res = Host::try_new(config);
 
