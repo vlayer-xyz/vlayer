@@ -12,12 +12,12 @@ export class InvalidZkProvingStatus extends Error {
     super(`Invalid zk proving status ${value}`);
   }
 }
-
 export const useZkProvingState = (): {
   value: ZkProvingStatus;
   isError: boolean;
   error: Error | undefined;
   isProving: boolean;
+  isDone: boolean;
 } => {
   const [state] = useLocalStorage<ZkProvingStatus>(
     "zkProvingStatus",
@@ -32,5 +32,6 @@ export const useZkProvingState = (): {
         ? new InvalidZkProvingStatus(state)
         : undefined,
     isProving: state === ZkProvingStatus.Proving,
+    isDone: state === ZkProvingStatus.Done,
   };
 };

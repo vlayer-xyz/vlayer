@@ -23,7 +23,7 @@ function generateManifest() {
 export default defineConfig({
   test: {
     environment: "jsdom",
-    include: ["src/**/*.test.ts"],
+    include: ["src/**/*.test.ts", "src/**/*.test.tsx"],
     setupFiles: "./vitest.setup.ts",
   },
   build: {

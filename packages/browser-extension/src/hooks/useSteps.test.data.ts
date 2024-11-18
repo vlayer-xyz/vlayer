@@ -23,7 +23,7 @@ export const steps = [
 export const testData = [
   {
     input: {
-      proof: null,
+      isZkProvingDone: false,
       history: [] as HistoryItem[],
       id: "Empty history",
     },
@@ -31,7 +31,7 @@ export const testData = [
   },
   {
     input: {
-      proof: null,
+      isZkProvingDone: false,
       history: [
         { url: "https://example.com/start", ready: true },
       ] as HistoryItem[],
@@ -41,7 +41,7 @@ export const testData = [
   },
   {
     input: {
-      proof: null,
+      isZkProvingDone: false,
       history: [
         { url: "https://example.com/expect", ready: true },
       ] as HistoryItem[],
@@ -51,7 +51,7 @@ export const testData = [
   },
   {
     input: {
-      proof: {},
+      isZkProvingDone: true,
       history: [
         { url: "https://example.com/notarize", ready: true },
       ] as HistoryItem[],
@@ -61,7 +61,7 @@ export const testData = [
   },
   {
     input: {
-      proof: null,
+      isZkProvingDone: false,
       history: [
         { url: "https://example.com/start", ready: true },
         { url: "https://example.com/expect", ready: true },
@@ -72,7 +72,7 @@ export const testData = [
   },
   {
     input: {
-      proof: null,
+      isZkProvingDone: false,
       history: [
         { url: "https://example.com/start", ready: true },
         { url: "https://example.com/expect", ready: false },
@@ -83,7 +83,7 @@ export const testData = [
   },
   {
     input: {
-      proof: null,
+      isZkProvingDone: false,
       history: [
         { url: "https://example.com/start", ready: true },
         { url: "https://example.com/expect", ready: true },
@@ -95,7 +95,7 @@ export const testData = [
   },
   {
     input: {
-      proof: {},
+      isZkProvingDone: true,
       history: [
         { url: "https://example.com/start", ready: true },
         { url: "https://example.com/expect", ready: true },

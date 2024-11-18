@@ -1,5 +1,6 @@
 import { vi } from "vitest";
 import { MessageToExtension } from "./src/web-proof-commons";
+import "@testing-library/jest-dom/vitest";
 
 const mockStore = function () {
   const store = new Map<string, unknown>();
@@ -47,6 +48,8 @@ const mockStore = function () {
   };
 };
 
+vi.stubGlobal("scrollTo", vi.fn());
+
 vi.doMock("webextension-polyfill", () => {
   const callbacks: ((message: MessageToExtension) => void)[] = [];
 
@@ -89,7 +92,6 @@ vi.doMock("webextension-polyfill", () => {
             .fn()
             .mockImplementation(
               (callback: (message: MessageToExtension) => void) => {
-                console.log("Adding listener");
                 callbacks.push(callback);
               },
             ),

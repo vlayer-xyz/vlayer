@@ -10,7 +10,7 @@ export const expectedStatuses = ({
   output,
 }: {
   input: {
-    proof: object | null;
+    isZkProvingDone: boolean;
     history: HistoryItem[];
   };
   output: StepStatus[];

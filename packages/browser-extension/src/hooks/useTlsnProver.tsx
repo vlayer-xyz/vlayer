@@ -20,7 +20,6 @@ const TlsnProofContext = createContext({
   proof: null as object | null,
   isProving: false,
 });
-
 export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
   //Internal component state representing proving mechanism
   const [proof, setProof] = useState<object | null>(null);
@@ -41,7 +40,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
     setFormattedHeaders(
       formatTlsnHeaders(provenUrl?.headers ?? [], provenUrl?.cookies ?? []),
     );
-  }, [provenUrl]);
+  }, [JSON.stringify(provenUrl)]);
 
   const prove = useCallback(async () => {
     setIsProving(true);
@@ -49,8 +48,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
     try {
       isDefined(provenUrl?.url, "Missing URL to prove");
       isDefined(provingSessionConfig, "Missing proving session config");
-
-      const tlsnProof = await tlsnProve(removeQueryParams(provenUrl?.url), {
+      const tlsnProof = await tlsnProve(removeQueryParams(provenUrl.url), {
         notaryUrl: provingSessionConfig.notaryUrl || "",
         websocketProxyUrl: `${provingSessionConfig.wsProxyUrl}?token=${new URL(provenUrl.url).host}`,
         method: "GET",
@@ -71,7 +69,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
       });
       setIsProving(false);
     }
-  }, [provenUrl, formattedHeaders]);
+  }, [JSON.stringify(provenUrl), JSON.stringify(formattedHeaders)]);
 
   return (
     <TlsnProofContext.Provider value={{ prove, proof, isProving }}>
