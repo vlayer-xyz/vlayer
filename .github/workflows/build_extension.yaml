@@ -18,7 +18,8 @@ jobs:
         with:
           node-version: '20.x'
           registry-url: 'https://registry.npmjs.org'
-
+      - name: Install TypeScript prerequisites
+        uses: ./.github/actions/ts-prerequisites
       - name: Install dependencies
         working-directory: packages/browser-extension
         run: bun install --frozen-lockfile 
