@@ -2,12 +2,17 @@ use std::sync::Arc;
 
 use alloy_chains::{Chain, NamedChain};
 use alloy_sol_types::SolCall;
+use call_engine::{
+    evm::env::{cached::CachedEvmEnv, location::ExecutionLocation},
+    travel_call_executor::TravelCallExecutor,
+};
 use provider::{CachedMultiProvider, CachedProviderFactory, ProfilingProvider, ProviderFactory};
 
 use crate::{
+    evm_env::factory::HostEvmEnvFactory,
     test_harness::{
         contracts::{AVERAGE_BALANCE_OF_CALL, SIMPLE_TIME_TRAVEL},
-        create_chain_proof_server, create_host, rpc_file_cache, LATEST_BLOCK,
+        rpc_file_cache,
     },
     Call,
 };
@@ -22,16 +27,15 @@ async fn time_travel() -> anyhow::Result<()> {
     };
 
     let test_name = "simple_time_travel";
-    let location = &(NamedChain::OptimismSepolia, LATEST_BLOCK).into();
+    let location: ExecutionLocation = (20064547, NamedChain::OptimismSepolia.into()).into();
     let provider_factory = CachedProviderFactory::new(rpc_file_cache(test_name), None);
     let provider = provider_factory.create(chain_id)?;
     let profiling_provider = Arc::new(ProfilingProvider::new(provider));
     let multi_provider = CachedMultiProvider::from_provider(chain_id, profiling_provider.clone());
-    let chain_proof_server = create_chain_proof_server(&multi_provider, location).await?;
-    let host = create_host(multi_provider, location, chain_proof_server.url())?;
-    let _ = host.main(call).await;
+    let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(multi_provider));
+    let _ = TravelCallExecutor::new(&envs).call(&call, location);
 
-    assert_eq!(profiling_provider.call_count(), 127);
+    assert_eq!(profiling_provider.call_count(), 88);
 
     Ok(())
 }
