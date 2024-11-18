@@ -9,6 +9,7 @@
 #![allow(clippy::redundant_closure_for_method_calls)]
 #![allow(clippy::needless_pass_by_ref_mut)]
 #![allow(clippy::cast_lossless)]
+#![allow(clippy::large_futures)]
 
 #[rustfmt::skip]
 pub mod cli;
