@@ -1,0 +1,4 @@
+self-hosted-runner:
+  labels:
+    - aws-linux-small
+    - aws-linux-medium
