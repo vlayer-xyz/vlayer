@@ -5,6 +5,7 @@ use alloy_chains::Chain;
 use alloy_primitives::ChainId;
 use once_cell::sync::Lazy;
 use revm::primitives::SpecId::*;
+use toml::de::Error;
 
 use crate::{fork::Fork, spec::ChainSpec};
 
@@ -84,17 +85,8 @@ pub static CHAIN_NAME_TO_ID: Lazy<HashMap<String, ChainId>> = Lazy::new(|| {
     ])
 });
 
-pub static ETH_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
-    ChainSpec::new(
-        Chain::mainnet().id(),
-        [
-            Fork::after_block(FRONTIER, 0),
-            Fork::after_block(MERGE, MAINNET_MERGE_BLOCK_NUMBER),
-            Fork::after_timestamp(SHANGHAI, 1681338455),
-            Fork::after_timestamp(CANCUN, 1710338135),
-        ],
-    )
-});
+static ETH_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> =
+    Lazy::new(|| load_chain_spec_from_file().expect("Failed to load chain configuration"));
 
 pub static ETH_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
     ChainSpec::new(
@@ -276,3 +268,19 @@ pub static GNOSIS_CHIADO_CHAIN_SPEC: Lazy<ChainSpec> =
 
 pub static PHENIX_CHAIN_SPEC: Lazy<ChainSpec> =
     Lazy::new(|| ChainSpec::new_single(8008135, CANCUN));
+
+fn load_chain_spec_from_file() -> Result<ChainSpec, Error> {
+    let chain_spec = include_str!("../chain_spec.toml");
+    toml::from_str(chain_spec).map_err(Error::from)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn read_chain_spec_from_file() {
+        let chain_spec = load_chain_spec_from_file().expect("Failed to load chain spec from file");
+        dbg!(chain_spec);
+    }
+}

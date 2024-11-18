@@ -13,3 +13,4 @@ once_cell = { workspace = true }
 revm = { workspace = true, features = ["serde", "std"] }
 serde = { workspace = true, features = ["derive"] }
 thiserror = { workspace = true }
+toml = { workspace = true }

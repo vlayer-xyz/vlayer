@@ -2136,6 +2136,7 @@ dependencies = [
  "revm",
  "serde",
  "thiserror",
+ "toml 0.8.19",
 ]
 
 [[package]]
