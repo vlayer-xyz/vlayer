@@ -172,6 +172,7 @@ pub struct TestArgs {
 
 impl TestArgs {
     /// Returns the flattened [`CoreBuildArgs`].
+    #[must_use]
     pub const fn build_args(&self) -> &CoreBuildArgs {
         &self.opts
     }
@@ -676,6 +677,7 @@ impl TestArgs {
 
     /// Returns the flattened [`FilterArgs`] arguments merged with [`Config`].
     /// Loads and applies filter from file if only last test run failures performed.
+    #[must_use]
     pub fn filter(&self, config: &Config) -> ProjectPathsAwareFilter {
         let mut filter = self.filter.clone();
         if self.rerun {

@@ -33,6 +33,7 @@ pub enum CLIError {
 }
 
 impl CLIError {
+    #[must_use]
     pub fn error_code(&self) -> i32 {
         match self {
             CLIError::TestsFailed(failed) => {

@@ -63,6 +63,7 @@ impl From<&CallInputs> for Call {
 pub type CallSelector = [u8; 4];
 
 impl Call {
+    #[must_use]
     pub fn selector(&self) -> CallSelector {
         self.data[0..4]
             .try_into()

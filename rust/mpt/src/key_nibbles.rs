@@ -11,22 +11,26 @@ impl KeyNibbles {
         Self::from_nibbles(nibbles)
     }
 
+    #[must_use]
     pub fn as_slice(&self) -> &[u8] {
         self.0.as_slice()
     }
 
+    #[must_use]
     pub fn push_front(&self, nibble: u8) -> Self {
         let mut nibbles = vec![nibble];
         nibbles.extend_from_slice(self);
         KeyNibbles(Nibbles::from_vec(nibbles))
     }
 
+    #[must_use]
     pub fn split_first(&self) -> (u8, &[u8]) {
         let first = self.0[0];
         let rest = &self.0[1..];
         (first, rest)
     }
 
+    #[must_use]
     fn from_nibbles(nibbles: Nibbles) -> Self {
         if nibbles.is_empty() {
             panic!("KeyNibbles cannot be empty");

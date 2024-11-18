@@ -83,6 +83,7 @@ pub enum RpcError {
 }
 
 impl RpcClient {
+    #[must_use]
     pub fn new(url: &str, method: &str) -> Self {
         Self {
             url: url.into(),

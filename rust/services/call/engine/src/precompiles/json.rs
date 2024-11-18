@@ -104,7 +104,7 @@ fn pre_process_input(
     let gas_used = gas_used(input.len(), BASE_COST, PER_WORD_COST, gas_limit)?;
     let [body, json_path] = InputType::abi_decode(input, true).map_err(map_to_fatal)?;
     let body = serde_json::from_str(body.as_str())
-        .map_err(|err| map_to_fatal(format!("Error converting string body to json: {}", err)))?;
+        .map_err(|err| map_to_fatal(format!("Error converting string body to json: {err}")))?;
     Ok((gas_used, body, json_path))
 }
 

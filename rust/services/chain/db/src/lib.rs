@@ -2,7 +2,6 @@ use std::{
     collections::HashSet,
     fmt::{self},
     hash::Hash,
-    ops::Deref,
     path::Path,
 };
 
@@ -71,7 +70,7 @@ fn slice_lower_hex<T: fmt::LowerHex>(slice: &[T]) -> impl fmt::LowerHex + '_ {
     impl<T: fmt::LowerHex> fmt::LowerHex for SliceLowerHex<'_, T> {
         fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
             f.debug_list()
-                .entries(self.0.iter().map(|x| format!("{:#x}", x)))
+                .entries(self.0.iter().map(|x| format!("{x:#x}")))
                 .finish()
         }
     }
@@ -126,6 +125,7 @@ pub struct ChainDb {
 }
 
 impl ChainDb {
+    #[must_use]
     pub fn in_memory() -> Self {
         let db = InMemoryDatabase::new();
         let mode = Mode::ReadWrite;
@@ -141,6 +141,7 @@ impl ChainDb {
         Ok(Self::new(db, mode))
     }
 
+    #[must_use]
     fn new(db: impl for<'a> Database<'a> + Send + Sync + 'static, mode: Mode) -> Self {
         Self {
             db: Box::new(db),
@@ -239,7 +240,7 @@ impl<TX: ReadTx + ?Sized> ChainDbTx<TX> {
         let chain_info = self
             .tx
             .get(CHAINS, &chain_id[..])?
-            .map(|rlp| ChainInfo::decode(&mut rlp.deref()))
+            .map(|rlp| ChainInfo::decode(&mut &*rlp))
             .transpose()?;
         Ok(chain_info)
     }

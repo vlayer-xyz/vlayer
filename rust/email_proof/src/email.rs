@@ -13,6 +13,7 @@ pub struct Email {
 }
 
 impl Email {
+    #[must_use]
     pub fn abi_encode(self) -> Vec<u8> {
         sol::SolEmail::from(self).abi_encode()
     }
@@ -87,7 +88,7 @@ mod test {
     fn build_mime_email(headers: Vec<(&str, &str)>, body: &str) -> String {
         let mut email = String::new();
         for (key, value) in headers {
-            email.push_str(&format!("{}: {}\n", key, value));
+            email.push_str(&format!("{key}: {value}\n"));
         }
         if !body.is_empty() {
             email.push('\n');

@@ -63,7 +63,7 @@ impl TravelCall {
                 block_number,
             }
         } else {
-            panic!("Invalid travel call selector: {:?}", selector)
+            panic!("Invalid travel call selector: {selector:?}")
         }
     }
 }
@@ -172,6 +172,7 @@ mod test {
 
     const MOCK_CALLER: Address = address!("0000000000000000000000000000000000000000");
     const MAINNET_ID: ChainId = 1;
+    #[allow(clippy::unreadable_literal)]
     const SEPOLIA_ID: ChainId = 11155111;
     const MAINNET_BLOCK: BlockNumber = 20_000_000;
     const SEPOLIA_BLOCK: BlockNumber = 6_000_000;
@@ -268,13 +269,13 @@ mod test {
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(expected = "invalid selector")]
     fn call_invalid_selector() {
         inspector_call(TRAVEL_CONTRACT_ADDR, &[0; 4], &[]);
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(expected = "missing args")]
     fn call_missing_args() {
         inspector_call(TRAVEL_CONTRACT_ADDR, &SET_BLOCK_SELECTOR, &[]);
     }
@@ -295,7 +296,7 @@ mod test {
     }
 
     #[test]
-    #[should_panic]
+    #[should_panic(expected = "u64 invalid")]
     fn u64_from_invalid_slice() {
         let slice = [0];
         _ = u64_from_be_slice(&slice);

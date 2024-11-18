@@ -7,7 +7,7 @@ fn main() {
     let result = runner.run(());
 
     if let Err(err) = result {
-        eprintln!("❌ Failed to run benchmarks: {}", err);
+        eprintln!("❌ Failed to run benchmarks: {err}");
         exit(1);
     }
     println!("✅ Successfully run all benchmarks")

@@ -77,7 +77,7 @@ pub fn block_tag_to_block_number(
             Ok(get_block_header(multi_provider, chain_id, BlockTag::Latest)?.number())
         }
         BlockTag::Number(block_no) => Ok(block_no.as_u64()),
-        _ => panic!("Only Latest and specific block numbers are supported, got {:?}", block_tag),
+        _ => panic!("Only Latest and specific block numbers are supported, got {block_tag:?}"),
     }
 }
 

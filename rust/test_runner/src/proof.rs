@@ -144,6 +144,7 @@ mod tests {
 
     #[test]
     fn test_address_to_nibbles() {
+        #[allow(clippy::unreadable_literal)]
         let address = Address::from(U160::from(0x123456));
         assert_eq!(
             keccak256(address),
