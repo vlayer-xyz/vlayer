@@ -1,9 +1,9 @@
 name: Lint contracts
-on: 
+on:
   pull_request:
     paths:
-      - 'examples/**'
-      - 'contracts/**'
+      - "examples/**"
+      - "contracts/**"
   merge_group:
   push:
     branches:
@@ -17,7 +17,7 @@ jobs:
   lint-contracts:
     name: Lint contracts
     runs-on: ubuntu-latest
-    steps: 
+    steps:
       - uses: actions/checkout@v2
       - name: Install TypeScript prerequisites
         uses: ./.github/actions/ts-prerequisites

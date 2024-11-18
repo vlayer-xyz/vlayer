@@ -4,8 +4,8 @@ on:
   pull_request:
     paths:
       - "rust-toolchain.toml"
-      - 'rust/**'
-      - '.github/workflows/incremental_compilation_time.yaml'
+      - "rust/**"
+      - ".github/workflows/incremental_compilation_time.yaml"
   merge_group:
   push:
     branches:
@@ -43,7 +43,7 @@ jobs:
         run: |
           /usr/bin/time -f %E -o incremental_compilation_time cargo build --timings
           echo "INCREMENTAL_COMPILATION_TIME=$(cat incremental_compilation_time)" >> $GITHUB_ENV
-      
+
       - name: Upload HTML Timings Report
         uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
         with:

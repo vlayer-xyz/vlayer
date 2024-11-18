@@ -2,12 +2,12 @@ name: Deploy book
 on:
   pull_request:
     paths:
-      - 'book/**'
-      - '.github/workflows/book.yaml'
+      - "book/**"
+      - ".github/workflows/book.yaml"
   push:
     paths:
-      - 'book/**'
-      - '.github/workflows/book.yaml'
+      - "book/**"
+      - ".github/workflows/book.yaml"
     branches:
       - main
 
@@ -44,7 +44,6 @@ jobs:
             "mdbook@${MDBOOK_VERSION}" \
             "mdbook-mermaid@${MERMAID_VERSION}" \
             "mdbook-tabs@${TABS_VERSION}"
-
 
       - name: Build book
         run: |

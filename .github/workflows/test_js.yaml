@@ -28,4 +28,3 @@ jobs:
       - name: Run JS tests
         working-directory: packages
         run: "bun --filter '*' test:unit"
-

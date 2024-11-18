@@ -1,7 +1,7 @@
 name: Release vlayer artifacts
-on: 
+on:
   schedule:
-    - cron: '0 6 * * 1-5' # Mon-Fri at 06:00 UTC (07:00 CET / 08:00 CEST)
+    - cron: "0 6 * * 1-5" # Mon-Fri at 06:00 UTC (07:00 CET / 08:00 CEST)
   workflow_dispatch:
 concurrency:
   group: ${{ github.workflow }}
@@ -132,7 +132,7 @@ jobs:
         uses: foundry-rs/foundry-toolchain@v1
         with:
           version: nightly-bcacf39e43812e50a124e3ba60d1becd9866534d # 2024-10-11
-          
+
       - name: Install LLVM and Clang
         uses: KyleMayes/install-llvm-action@v2.0.4
         if: matrix.target != 'x86_64-unknown-linux-musl'
@@ -167,7 +167,7 @@ jobs:
         if: matrix.target != 'x86_64-unknown-linux-musl'
         run: |
           export RISC0_EXISTING_CALL_GUEST="$(pwd)/call_guest_replacement"
-          cargo build --release --target ${{ matrix.target }} --package cli 
+          cargo build --release --target ${{ matrix.target }} --package cli
 
       - name: "Build binaries"
         env:
@@ -243,7 +243,7 @@ jobs:
         run: bun install --frozen-lockfile
       - name: Update extension version
         working-directory: packages/browser-extension
-        env: 
+        env:
           VLAYER_BUILD: ${{ needs.build-release.outputs.vlayer_build }}
         run: npm version "${VLAYER_BUILD}" --no-workspaces-update
       - name: Build and compress
@@ -260,10 +260,10 @@ jobs:
           path: packages/browser-extension/browser-extension.tar.gz
           if-no-files-found: error
           retention-days: 3
-  
+
   push-contracts:
     name: Push vlayer contracts
-    needs: [build-release] 
+    needs: [build-release]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -276,7 +276,7 @@ jobs:
 
       - name: Set up Soldeer login
         env:
-            SOLDEER_LOGIN_FILE: "${{ runner.temp }}/.soldeer_login"
+          SOLDEER_LOGIN_FILE: "${{ runner.temp }}/.soldeer_login"
         run: |
           echo -n "${{ secrets.SOLDEER_API_KEY }}" > "${SOLDEER_LOGIN_FILE}"
 
@@ -294,15 +294,15 @@ jobs:
       - name: Release contracts to Soldeer
         working-directory: contracts/vlayer
         env:
-            SOLDEER_LOGIN_FILE: "${{ runner.temp }}/.soldeer_login"
-            VLAYER_BUILD: ${{ needs.build-release.outputs.vlayer_build }}
+          SOLDEER_LOGIN_FILE: "${{ runner.temp }}/.soldeer_login"
+          VLAYER_BUILD: ${{ needs.build-release.outputs.vlayer_build }}
         run: |
           forge soldeer push "vlayer~${VLAYER_BUILD}" --skip-warnings
 
       - name: Build vlayer contracts artifact
         working-directory: contracts/vlayer
         env:
-            VLAYER_BUILD: ${{ needs.build-release.outputs.vlayer_build }}
+          VLAYER_BUILD: ${{ needs.build-release.outputs.vlayer_build }}
         run: |
           forge soldeer push "vlayer~${VLAYER_BUILD}" --dry-run
 
@@ -313,7 +313,6 @@ jobs:
           path: contracts/vlayer/vlayer.zip
           if-no-files-found: error
           retention-days: 3
-
 
   create-release:
     name: Create GH releases
@@ -344,7 +343,7 @@ jobs:
   push-artifacts-to-s3:
     name: Push artifacts to AWS S3
     runs-on: ubuntu-latest
-    needs: [build-release, build-examples, build-extension, push-contracts] 
+    needs: [build-release, build-examples, build-extension, push-contracts]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -368,7 +367,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
           LOCAL_FILE: ./dist/${{ github.sha }}
-          REMOTE_FILE: "" 
+          REMOTE_FILE: ""
 
       - name: Push latest binaries to AWS S3
         uses: mostlytyped/s3-put-action@v1.0.0
@@ -381,7 +380,7 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
           LOCAL_FILE: ./dist/latest
-          REMOTE_FILE: "" 
+          REMOTE_FILE: ""
 
       - name: Push vlayerup scripts to AWS S3
         uses: mostlytyped/s3-put-action@v1.0.0
@@ -394,41 +393,41 @@ jobs:
           AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
 
           LOCAL_FILE: ./bash/vlayerup
-          REMOTE_FILE: "" 
-  
+          REMOTE_FILE: ""
+
   publish-sdk-to-npm:
     name: Publish SDK to NPM
-    needs: [build-release, build-examples, build-extension, push-contracts] 
+    needs: [build-release, build-examples, build-extension, push-contracts]
     runs-on: ubuntu-latest
-    steps:   
-    - uses: actions/checkout@v2
-    - name: Install TypeScript prerequisites
-      uses: ./.github/actions/ts-prerequisites
-    - uses: actions/setup-node@v4
-      with:
-        node-version: '20.x'
-        registry-url: 'https://registry.npmjs.org'
-    - name: Update SDK version
-      working-directory: packages/sdk
-      env: 
-        VLAYER_BUILD: ${{ needs.build-release.outputs.vlayer_build }}
-      run: npm version "${VLAYER_BUILD}" --no-workspaces-update
-    - name: Install dependencies
-      working-directory: packages/sdk
-      run: bun install --frozen-lockfile
-    - name: replace symlinks
-      working-directory: packages/sdk
-      run: bun run replaceCommonsSymlink
-    - name: Build
-      working-directory: packages/sdk
-      run: bun run build
-    - name: Publish to NPM
-      working-directory: packages/sdk
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      run: |
-        PACKAGE_NAME=$(npm pack)
-        npm publish --access public ${PACKAGE_NAME}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install TypeScript prerequisites
+        uses: ./.github/actions/ts-prerequisites
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+          registry-url: "https://registry.npmjs.org"
+      - name: Update SDK version
+        working-directory: packages/sdk
+        env:
+          VLAYER_BUILD: ${{ needs.build-release.outputs.vlayer_build }}
+        run: npm version "${VLAYER_BUILD}" --no-workspaces-update
+      - name: Install dependencies
+        working-directory: packages/sdk
+        run: bun install --frozen-lockfile
+      - name: replace symlinks
+        working-directory: packages/sdk
+        run: bun run replaceCommonsSymlink
+      - name: Build
+        working-directory: packages/sdk
+        run: bun run build
+      - name: Publish to NPM
+        working-directory: packages/sdk
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          PACKAGE_NAME=$(npm pack)
+          npm publish --access public ${PACKAGE_NAME}
 
   push-docker-image:
     name: Push docker image to github registry
