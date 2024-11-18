@@ -13,6 +13,7 @@ pub use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue
 use anyhow::Result;
 use auto_impl::auto_impl;
 pub use block_header::EvmBlockHeader;
+pub use cache::CachedProvider;
 pub use ethers::*;
 pub use ethers_core::types::BlockNumber as BlockTag;
 use ethers_providers::{Http, RetryClient};
