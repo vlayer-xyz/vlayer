@@ -26,7 +26,7 @@ fn load_chain_specs() -> HashMap<ChainId, ChainSpec> {
     let chain_specs: ChainSpecs =
         from_str(include_str!("../chain_specs.toml")).expect("failed to load chain specs");
 
-    let chain_specs_no_duplicates: HashMap<ChainId, ChainSpec> = chain_specs
+    let chain_id_to_chain_spec: HashMap<ChainId, ChainSpec> = chain_specs
         .chains
         .clone()
         .into_iter()
@@ -34,11 +34,11 @@ fn load_chain_specs() -> HashMap<ChainId, ChainSpec> {
         .collect();
 
     assert!(
-        chain_specs_no_duplicates.len() == chain_specs.chains.len(),
+        chain_id_to_chain_spec.len() == chain_specs.chains.len(),
         "duplicated chain specs",
     );
 
-    chain_specs_no_duplicates
+    chain_id_to_chain_spec
 }
 
 pub static CHAIN_MAP: Lazy<HashMap<ChainId, &'static Lazy<ChainSpec>>> = Lazy::new(|| {
