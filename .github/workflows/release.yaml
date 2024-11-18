@@ -237,8 +237,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Install TypeScript prerequisites
-      uses: ./.github/actions/ts-prerequisites
-
+        uses: ./.github/actions/ts-prerequisites
       - name: Install dependencies
         working-directory: packages/browser-extension
         run: bun install --frozen-lockfile
@@ -246,7 +245,7 @@ jobs:
         working-directory: packages/browser-extension
         env: 
           VLAYER_BUILD: ${{ needs.build-release.outputs.vlayer_build }}
-          run: npm version "${VLAYER_BUILD}" --no-workspaces-update
+        run: npm version "${VLAYER_BUILD}" --no-workspaces-update
       - name: Build and compress
         working-directory: packages/browser-extension
         run: |
