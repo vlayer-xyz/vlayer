@@ -37,7 +37,7 @@ fn load_chain_specs() -> HashMap<ChainId, ChainSpec> {
         chain_specs_no_duplicates.len() == chain_specs.chains.len(),
         "duplicated chain specs",
     );
-    
+
     chain_specs_no_duplicates
 }
 
@@ -110,23 +110,13 @@ pub static CHAIN_NAME_TO_ID: Lazy<HashMap<String, ChainId>> = Lazy::new(|| {
     ])
 });
 
-// static CHAIN_SPECS: Lazy<HashMap<ChainId, ChainSpec> = Lazy::new(|| load_chain_specs());
-
-static CHAIN_SPECS: Lazy<HashMap<ChainId, ChainSpec>> = Lazy::new(|| load_chain_specs());
+static CHAIN_SPECS: Lazy<HashMap<ChainId, ChainSpec>> = Lazy::new(load_chain_specs);
 
 static ETH_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> =
     Lazy::new(|| CHAIN_SPECS[&Chain::mainnet().id()].clone());
 
-pub static ETH_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
-    ChainSpec::new(
-        Chain::sepolia().id(),
-        [
-            Fork::after_block(MERGE, 1735371),
-            Fork::after_timestamp(SHANGHAI, 1677557088),
-            Fork::after_timestamp(CANCUN, 1706655072),
-        ],
-    )
-});
+pub static ETH_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> =
+    Lazy::new(|| CHAIN_SPECS[&Chain::sepolia().id()].clone());
 
 pub static BASE_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
     ChainSpec::new(
