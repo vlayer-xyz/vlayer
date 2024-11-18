@@ -1,5 +1,5 @@
+[[chains]]
 chain_id = 1
-
 forks = [
   { spec = "FRONTIER", activation = { Block = 0 } },
   { spec = "HOMESTEAD", activation = { Block = 1150000 } },
@@ -17,4 +17,12 @@ forks = [
   { spec = "MERGE", activation = { Block = 15537394 } },
   { spec = "SHANGHAI", activation = { Timestamp = 1681338455 } },
   { spec = "CANCUN", activation = { Timestamp = 1710338135 } }
+]
+
+[[chains]]
+chain_id = 11155111
+forks = [
+  { spec = "MERGE", activation = { Block = 1735371 } },
+  { spec = "SHANGHAI", activation = { Block = 1735371 } },
+  { spec = "CANCUN", activation = { Timestamp = 1681338455 } }
 ]

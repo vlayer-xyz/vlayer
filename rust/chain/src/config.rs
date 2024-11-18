@@ -5,7 +5,8 @@ use alloy_chains::Chain;
 use alloy_primitives::ChainId;
 use once_cell::sync::Lazy;
 use revm::primitives::SpecId::*;
-use toml::de::Error;
+use serde::Deserialize;
+use toml::from_str;
 
 use crate::{fork::Fork, spec::ChainSpec};
 
@@ -15,6 +16,26 @@ pub const TEST_CHAIN_ID: ChainId = 31_337;
 // https://etherscan.io/block/15537394
 pub const MAINNET_MERGE_BLOCK_NUMBER: u64 = 15537394;
 pub const MAINNET_MERGE_BLOCK_TIMESTAMP: u64 = 1663224179;
+
+#[derive(Debug, Deserialize)]
+struct ChainSpecs {
+    pub chains: Vec<ChainSpec>,
+}
+
+fn load_chain_specs() -> HashMap<ChainId, ChainSpec> {
+    let chain_specs: ChainSpecs =
+        from_str(include_str!("../chain_specs.toml")).expect("failed to parse chain specs");
+
+    let chain_specs_no_duplicates: HashMap<ChainId, ChainSpec> = chain_specs
+        .chains
+        .clone()
+        .into_iter()
+        .map(|chain| (*chain, chain))
+        .collect();
+
+    assert!(chain_specs_no_duplicates.len() == chain_specs.chains.len(), "duplicated chain specs",);
+    chain_specs_no_duplicates
+}
 
 pub static CHAIN_MAP: Lazy<HashMap<ChainId, &'static Lazy<ChainSpec>>> = Lazy::new(|| {
     HashMap::from([
@@ -85,8 +106,12 @@ pub static CHAIN_NAME_TO_ID: Lazy<HashMap<String, ChainId>> = Lazy::new(|| {
     ])
 });
 
+// static CHAIN_SPECS: Lazy<HashMap<ChainId, ChainSpec> = Lazy::new(|| load_chain_specs());
+
+static CHAIN_SPECS: Lazy<HashMap<ChainId, ChainSpec>> = Lazy::new(|| load_chain_specs());
+
 static ETH_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> =
-    Lazy::new(|| load_chain_spec_from_file().expect("Failed to load chain configuration"));
+    Lazy::new(|| CHAIN_SPECS[&Chain::mainnet().id()].clone());
 
 pub static ETH_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
     ChainSpec::new(
@@ -268,8 +293,3 @@ pub static GNOSIS_CHIADO_CHAIN_SPEC: Lazy<ChainSpec> =
 
 pub static PHENIX_CHAIN_SPEC: Lazy<ChainSpec> =
     Lazy::new(|| ChainSpec::new_single(8008135, CANCUN));
-
-fn load_chain_spec_from_file() -> Result<ChainSpec, Error> {
-    let chain_spec = include_str!("../chain_spec.toml");
-    toml::from_str(chain_spec).map_err(Error::from)
-}
