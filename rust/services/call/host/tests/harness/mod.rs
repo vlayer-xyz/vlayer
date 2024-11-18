@@ -2,6 +2,7 @@ use std::env::set_var;
 
 use alloy_chains::Chain;
 use alloy_sol_types::SolCall;
+use call_engine::HostOutput;
 use call_guest_wrapper::GUEST_ELF as CALL_GUEST_ELF;
 use call_host::{
     host::{config::HostConfig, error::HostError, get_block_header, Host, PreflightResult},
@@ -47,23 +48,15 @@ where
     Ok(return_value)
 }
 
-pub async fn run<C>(
+pub async fn run(
     test_name: &str,
     call: Call,
     location: &ExecutionLocation,
-) -> anyhow::Result<C::Return>
-where
-    C: SolCall,
-{
+) -> Result<HostOutput, HostError> {
     let multi_provider = create_multi_provider(test_name);
     let chain_proof_server = create_chain_proof_server(&multi_provider, location).await?;
     let host = create_host(multi_provider, location, chain_proof_server.url())?;
-    let host_output = host.main(call).await?;
-    let return_value = C::abi_decode_returns(&host_output.guest_output.evm_call_result, false)?;
-
-    chain_proof_server.assert();
-
-    Ok(return_value)
+    host.main(call).await
 }
 
 async fn create_chain_proof_server(
