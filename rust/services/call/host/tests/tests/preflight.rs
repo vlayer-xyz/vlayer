@@ -213,18 +213,15 @@ mod time_travel {
     use super::*;
     use crate::harness::contracts::{
         AverageBalance::{self, averageBalanceOfReturn},
-        SIMPLE_TIME_TRAVEL, TOKEN_OWNER,
+        AVERAGE_BALANCE_OF_CALL, SIMPLE_TIME_TRAVEL,
     };
 
     #[tokio::test]
     #[ignore = "Fails due to chain proofs issue"]
     async fn time_travel() -> anyhow::Result<()> {
-        let sol_call = AverageBalance::averageBalanceOfCall {
-            _owner: TOKEN_OWNER,
-        };
         let call = Call {
             to: SIMPLE_TIME_TRAVEL,
-            data: sol_call.abi_encode(),
+            data: AVERAGE_BALANCE_OF_CALL.abi_encode(),
         };
         let averageBalanceOfReturn {
             _2: average_balance,

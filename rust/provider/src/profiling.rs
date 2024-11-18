@@ -25,7 +25,7 @@ impl ProfilingProvider {
         self.state.fetch_add(1, Ordering::SeqCst);
     }
 
-    pub fn get(&self) -> usize {
+    pub fn call_count(&self) -> usize {
         self.state.load(Ordering::SeqCst)
     }
 }
@@ -81,25 +81,25 @@ mod tests {
     fn test_profiling() -> Result<()> {
         let provider = ProfilingProvider::new(DefaultProvider);
 
-        assert_eq!(provider.get(), 0);
+        assert_eq!(provider.call_count(), 0);
 
         provider.get_balance(Default::default(), Default::default())?;
-        assert_eq!(provider.get(), 1);
+        assert_eq!(provider.call_count(), 1);
 
         provider.get_block_header(Default::default())?;
-        assert_eq!(provider.get(), 2);
+        assert_eq!(provider.call_count(), 2);
 
         provider.get_code(Default::default(), Default::default())?;
-        assert_eq!(provider.get(), 3);
+        assert_eq!(provider.call_count(), 3);
 
         provider.get_proof(Default::default(), Default::default(), Default::default())?;
-        assert_eq!(provider.get(), 4);
+        assert_eq!(provider.call_count(), 4);
 
         provider.get_storage_at(Default::default(), Default::default(), Default::default())?;
-        assert_eq!(provider.get(), 5);
+        assert_eq!(provider.call_count(), 5);
 
         provider.get_transaction_count(Default::default(), Default::default())?;
-        assert_eq!(provider.get(), 6);
+        assert_eq!(provider.call_count(), 6);
 
         Ok(())
     }

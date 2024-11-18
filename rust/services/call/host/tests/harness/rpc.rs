@@ -43,7 +43,7 @@ lazy_static! {
     static ref anvil_url: String = format!("http://localhost:8545");
 }
 
-fn rpc_file_cache(test_name: &str) -> HashMap<ChainId, String> {
+pub fn rpc_file_cache(test_name: &str) -> HashMap<ChainId, String> {
     HashMap::from([
         (Chain::mainnet().id(), format!("test_data/mainnet_{test_name}_rpc_cache.json")),
         (Chain::sepolia().id(), format!("test_data/sepolia_{test_name}_rpc_cache.json")),

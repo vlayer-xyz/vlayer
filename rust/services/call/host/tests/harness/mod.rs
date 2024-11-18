@@ -11,7 +11,7 @@ use ethers_core::types::BlockNumber as BlockTag;
 use lazy_static::lazy_static;
 use mock_chain_server::{fake_proof_result, ChainProofServerMock};
 use provider::CachedMultiProvider;
-use rpc::{block_tag_to_block_number, create_multi_provider};
+pub use rpc::{block_tag_to_block_number, create_multi_provider, rpc_file_cache};
 use serde_json::json;
 use types::ExecutionLocation;
 
@@ -56,7 +56,7 @@ pub async fn run(
     host.main(call).await
 }
 
-async fn create_chain_proof_server(
+pub async fn create_chain_proof_server(
     multi_provider: &CachedMultiProvider,
     location: &ExecutionLocation,
 ) -> Result<ChainProofServerMock, Error> {
@@ -76,7 +76,7 @@ async fn create_chain_proof_server(
     Ok(chain_proof_server_mock)
 }
 
-fn create_host(
+pub fn create_host(
     multi_provider: CachedMultiProvider,
     location: &ExecutionLocation,
     chain_proof_server_url: impl AsRef<str>,
