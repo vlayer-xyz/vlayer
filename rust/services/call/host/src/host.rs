@@ -5,6 +5,7 @@ use std::{
 
 use alloy_primitives::{BlockNumber, ChainId};
 use alloy_sol_types::SolValue;
+use bytes::Bytes;
 use call_engine::{
     evm::env::{cached::CachedEvmEnv, location::ExecutionLocation},
     travel_call_executor::{
@@ -76,6 +77,11 @@ pub fn get_block_header(
     Ok(block_header)
 }
 
+pub struct PreflightResult {
+    host_output: Bytes,
+    input: Input,
+}
+
 impl Host {
     pub fn try_new_with_components(
         providers: CachedMultiProvider,
@@ -102,7 +108,7 @@ impl Host {
         })
     }
 
-    pub async fn main(self, call: Call) -> Result<HostOutput, HostError> {
+    pub async fn preflight(self, call: Call) -> Result<PreflightResult, HostError> {
         self.validate_calldata_size(&call)?;
 
         let SuccessfulExecutionResult {
@@ -133,14 +139,25 @@ impl Host {
             call,
         };
 
-        let (seal, raw_guest_output) = provably_execute(&self.prover, &input)?;
+        Ok(PreflightResult {
+            host_output: host_output.into(),
+            input,
+        })
+    }
+
+    pub async fn main(self, call: Call) -> Result<HostOutput, HostError> {
+        let prover = self.prover.clone();
+        let call_guest_id = self.guest_elf.id.into();
+        let PreflightResult { host_output, input } = self.preflight(call).await?;
+
+        let (seal, raw_guest_output) = provably_execute(&prover, &input)?;
 
         let proof_len = raw_guest_output.len();
         let guest_output = GuestOutput::from_outputs(&host_output, &raw_guest_output)?;
 
         if guest_output.evm_call_result != host_output {
             return Err(HostError::HostGuestOutputMismatch(
-                host_output,
+                host_output.into(),
                 guest_output.evm_call_result,
             ));
         }
@@ -150,7 +167,7 @@ impl Host {
             seal,
             raw_abi: raw_guest_output,
             proof_len,
-            call_guest_id: self.guest_elf.id.into(),
+            call_guest_id,
         })
     }
 
