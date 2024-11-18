@@ -33,7 +33,11 @@ fn load_chain_specs() -> HashMap<ChainId, ChainSpec> {
         .map(|chain| (*chain, chain))
         .collect();
 
-    assert!(chain_specs_no_duplicates.len() == chain_specs.chains.len(), "duplicated chain specs",);
+    assert!(
+        chain_specs_no_duplicates.len() == chain_specs.chains.len(),
+        "duplicated chain specs",
+    );
+    
     chain_specs_no_duplicates
 }
 
