@@ -9,13 +9,20 @@
 #![allow(clippy::redundant_closure_for_method_calls)]
 #![allow(clippy::needless_pass_by_ref_mut)]
 #![allow(clippy::cast_lossless)]
-#![rustfmt::skip]
 
+#[rustfmt::skip]
 pub mod cli;
+#[rustfmt::skip]
 mod contract_runner;
+#[rustfmt::skip]
 mod filter;
+#[rustfmt::skip]
 mod install;
+#[rustfmt::skip]
 mod multi_runner_run;
+#[rustfmt::skip]
 mod progress;
+#[rustfmt::skip]
 mod summary;
+#[rustfmt::skip]
 mod test_executor;
