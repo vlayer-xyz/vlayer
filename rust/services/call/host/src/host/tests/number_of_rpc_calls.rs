@@ -1,7 +1,6 @@
 use std::sync::Arc;
 
 use alloy_chains::{Chain, NamedChain};
-use alloy_sol_types::SolCall;
 use call_engine::{
     evm::env::{cached::CachedEvmEnv, location::ExecutionLocation},
     travel_call_executor::TravelCallExecutor,
@@ -21,10 +20,7 @@ use crate::{
 async fn time_travel() -> anyhow::Result<()> {
     let chain_id = Chain::optimism_sepolia().id();
 
-    let call = Call {
-        to: SIMPLE_TIME_TRAVEL,
-        data: AVERAGE_BALANCE_OF_CALL.abi_encode(),
-    };
+    let call = Call::new(SIMPLE_TIME_TRAVEL, AVERAGE_BALANCE_OF_CALL);
 
     let test_name = "simple_time_travel";
     let location: ExecutionLocation = (20064547, NamedChain::OptimismSepolia.into()).into();

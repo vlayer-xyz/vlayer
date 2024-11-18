@@ -1,5 +1,5 @@
 use alloy_primitives::{Address, FixedBytes, TxKind};
-use alloy_sol_types::SolValue;
+use alloy_sol_types::{SolCall, SolValue};
 use chain_client::ChainProofCache;
 use derive_new::new;
 use revm::{interpreter::CallInputs, primitives::TxEnv};
@@ -26,6 +26,15 @@ pub struct Input {
 pub struct Call {
     pub to: Address,
     pub data: Vec<u8>,
+}
+
+impl Call {
+    pub fn new(to: Address, call: impl SolCall) -> Self {
+        Self {
+            to,
+            data: call.abi_encode(),
+        }
+    }
 }
 
 impl Default for Call {
