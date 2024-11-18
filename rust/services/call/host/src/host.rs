@@ -77,6 +77,7 @@ pub fn get_block_header(
     Ok(block_header)
 }
 
+#[derive(Debug, Clone)]
 pub struct PreflightResult {
     host_output: Bytes,
     input: Input,
@@ -232,7 +233,7 @@ mod test {
         };
 
         assert_eq!(
-            host.main(call).await.unwrap_err().to_string(),
+            host.preflight(call).await.unwrap_err().to_string(),
             format!("Calldata too large: {} bytes", max_call_data_size + 1)
         );
 
