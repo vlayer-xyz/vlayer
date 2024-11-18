@@ -10,12 +10,6 @@ import verifierSpec from "../../../out/EmailProofVerifier.sol/EmailDomainVerifie
 import EmlForm from "../components/EmlForm";
 import { createContext, customTransport, type Chain } from "@vlayer/sdk/config";
 
-declare global {
-  interface Window {
-    ethereum: { request: () => Promise<unknown> };
-  }
-}
-
 function getChainByName(name: string) {
   const chain = (chains as Record<string, Chain>)[name];
   if (chain) {
@@ -46,7 +40,7 @@ const EmlUploadForm = () => {
   const chain = getChainByName(import.meta.env.VITE_CHAIN_NAME as string);
 
   const { prove, proof, provingError } = useProver({
-    addr: import.meta.env.VITE_PROVER_ADDRESS as Address,
+    addr: import.meta.env.VITE_PROVER_ADDRESS,
     abi: proverSpec.abi,
     func: "main",
     chainId: chain.id,
@@ -65,7 +59,7 @@ const EmlUploadForm = () => {
     return addr;
   };
 
-  const manageError = (err: unknown) => {
+  const handleError = (err: unknown) => {
     console.log({ err });
     setIsSubmitting(false);
     if (err instanceof Error) {
@@ -79,9 +73,12 @@ const EmlUploadForm = () => {
     try {
       setCurrentStep("Verifying on-chain...");
 
-      if (proof == null) throw new Error("no_proof_to_verify");
+      if (proof == null) {
+        throw new Error("no_proof_to_verify");
+      }
+
       const txHash = await walletClient.writeContract({
-        address: import.meta.env.VITE_VERIFIER_ADDRESS as `0x${string}`,
+        address: import.meta.env.VITE_VERIFIER_ADDRESS,
         abi: verifierSpec.abi,
         functionName: "verify",
         args: proof,
@@ -103,7 +100,7 @@ const EmlUploadForm = () => {
         setSuccessMsg("Verified successfully.");
       }
     } catch (err) {
-      manageError(err);
+      handleError(err);
     }
   };
 
@@ -133,14 +130,14 @@ const EmlUploadForm = () => {
 
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     submit(e).catch((err) => {
-      manageError(err);
+      handleError(err);
     });
   };
 
   useEffect(() => {
     if (proof) {
       verifyProof().catch((err) => {
-        manageError(err);
+        handleError(err);
       });
     }
   }, [proof]);

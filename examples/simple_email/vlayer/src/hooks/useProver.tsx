@@ -42,7 +42,7 @@ const useProver = <T extends Abi, F extends ContractFunctionName<T>>({
   const vlayer = useMemo(
     () =>
       createVlayerClient({
-        url: import.meta.env.VITE_PROVER_URL as string,
+        url: import.meta.env.VITE_PROVER_URL,
       }),
     [import.meta.env.VITE_PROVER_URL],
   );
