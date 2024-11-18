@@ -50,7 +50,7 @@ pub static CHAIN_MAP: Lazy<HashMap<ChainId, &'static Lazy<ChainSpec>>> = Lazy::n
     ])
 });
 
-pub static CHAIN_NAMES: Lazy<HashMap<String, ChainId>> = Lazy::new(|| {
+pub static CHAIN_NAME_TO_ID: Lazy<HashMap<String, ChainId>> = Lazy::new(|| {
     HashMap::from([
         ("mainnet".into(), Chain::mainnet().id()),
         ("sepolia".into(), Chain::sepolia().id()),
