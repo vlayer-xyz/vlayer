@@ -1,3 +1,4 @@
+# eth_mainnet
 [[chains]]
 chain_id = 1
 forks = [
@@ -19,6 +20,7 @@ forks = [
   { spec = "CANCUN", activation = { Timestamp = 1710338135 } }
 ]
 
+# eth_sepolia
 [[chains]]
 chain_id = 11155111
 forks = [

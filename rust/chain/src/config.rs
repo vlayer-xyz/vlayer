@@ -23,6 +23,7 @@ struct ChainSpecs {
 }
 
 fn load_chain_specs() -> HashMap<ChainId, ChainSpec> {
+    // include_str! loads chain_specs in compilation time
     let chain_specs: ChainSpecs =
         from_str(include_str!("../chain_specs.toml")).expect("failed to load chain specs");
 
