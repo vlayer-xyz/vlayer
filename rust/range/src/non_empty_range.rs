@@ -10,7 +10,6 @@ pub struct NonEmptyRange {
 }
 
 impl NonEmptyRange {
-    #[must_use]
     pub const fn from_single_value(value: u64) -> Self {
         Self {
             start: value,
@@ -18,7 +17,6 @@ impl NonEmptyRange {
         }
     }
 
-    #[must_use]
     pub fn try_from_range(range: RangeInclusive<u64>) -> Option<Self> {
         (range.start() <= range.end()).then(|| Self {
             start: *range.start(),
@@ -35,17 +33,14 @@ impl NonEmptyRange {
         }
     }
 
-    #[must_use]
     pub const fn start(&self) -> u64 {
         self.start
     }
 
-    #[must_use]
     pub const fn end(&self) -> u64 {
         self.end
     }
 
-    #[must_use]
     pub fn len(&self) -> u64 {
         if self.end - self.start == u64::MAX {
             panic!("Range length overflow");
@@ -53,7 +48,6 @@ impl NonEmptyRange {
         self.end - self.start + 1
     }
 
-    #[must_use]
     pub const fn is_empty(&self) -> bool {
         false
     }
@@ -72,7 +66,6 @@ impl NonEmptyRange {
     /// # Edge Cases
     /// - If `count` is `0`, returns the original range and an empty appended range.
     /// - If adding `count` to `self.end` causes an overflow, returns `None`.
-    #[must_use]
     pub fn add_right(&self, count: u64) -> Option<(NonEmptyRange, Range)> {
         if count == 0 {
             return Some((*self, Range::EMPTY));
@@ -98,7 +91,6 @@ impl NonEmptyRange {
     /// # Edge Cases
     /// - If `count` is `0`, returns the original range and an empty prepended range.
     /// - If subtracting `count` from `self.start` causes an underflow, returns `None`.
-    #[must_use]
     pub fn add_left(&self, count: u64) -> Option<(NonEmptyRange, Range)> {
         if count == 0 {
             return Some((*self, Range::EMPTY));
@@ -110,7 +102,6 @@ impl NonEmptyRange {
         Some((new_range, prepended))
     }
 
-    #[must_use]
     pub const fn contains(&self, value: u64) -> bool {
         self.start <= value && value <= self.end
     }
@@ -194,7 +185,7 @@ mod tests {
         #[test]
         #[should_panic(expected = "Range length overflow")]
         fn overflow() {
-            _ = NonEmptyRange {
+            NonEmptyRange {
                 start: 0,
                 end: u64::MAX,
             }

@@ -15,7 +15,6 @@ lazy_static! {
         serde_json::to_value(RpcChainProof::default()).unwrap();
 }
 
-#[must_use]
 pub fn fake_proof_result(block_header: Box<dyn EvmBlockHeader>) -> Value {
     let block_trie = BlockTrie::init(block_header).unwrap();
     let root_hash = block_trie.hash_slow();

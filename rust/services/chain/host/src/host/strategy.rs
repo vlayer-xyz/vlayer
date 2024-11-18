@@ -13,13 +13,11 @@ pub struct PrependStrategy {
 }
 
 impl PrependStrategy {
-    #[must_use]
     pub fn compute_prepend_range(&self, range: NonEmptyRange) -> (NonEmptyRange, Range) {
         let prepend_count = self.prepend_count(range);
         range.add_left(prepend_count).expect("Prepend overflow")
     }
 
-    #[must_use]
     fn prepend_count(&self, range: NonEmptyRange) -> u64 {
         if range.start() == GENESIS {
             return 0;
@@ -36,7 +34,6 @@ pub struct AppendStrategy {
 }
 
 impl AppendStrategy {
-    #[must_use]
     pub fn compute_append_range(
         &self,
         range: NonEmptyRange,
@@ -46,7 +43,6 @@ impl AppendStrategy {
         range.add_right(append_count).expect("Append overflow")
     }
 
-    #[must_use]
     fn append_count(&self, range: NonEmptyRange, latest: BlockNumber) -> u64 {
         let pending = latest + 1; // Pending block has 0 confirmations
         let confirmed = (pending).saturating_sub(self.confirmations); // Genesis block is always confirmed

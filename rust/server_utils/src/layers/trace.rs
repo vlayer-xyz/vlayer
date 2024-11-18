@@ -4,7 +4,6 @@ use tracing::{info_span, Span};
 
 use crate::layers::request_id::request_id;
 
-#[must_use]
 pub fn init_trace_layer<B>() -> TraceLayer<HttpMakeClassifier, impl Fn(&Request<B>) -> Span + Clone>
 {
     TraceLayer::new_for_http().make_span_with(|request: &Request<_>| {

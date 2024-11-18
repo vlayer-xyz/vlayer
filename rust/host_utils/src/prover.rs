@@ -13,7 +13,6 @@ pub struct Prover {
 }
 
 impl Prover {
-    #[must_use]
     pub const fn new(mode: ProofMode) -> Self {
         Prover { mode }
     }

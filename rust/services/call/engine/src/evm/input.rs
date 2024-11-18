@@ -88,7 +88,6 @@ pub struct MultiEvmInput {
 }
 
 impl MultiEvmInput {
-    #[must_use]
     pub fn from_entries<I>(iter: I) -> Self
     where
         I: IntoIterator<Item = (ExecutionLocation, EvmInput)>,
@@ -101,7 +100,6 @@ impl MultiEvmInput {
         self.inputs.values().for_each(EvmInput::assert_coherency);
     }
 
-    #[must_use]
     fn group_blocks<F, T>(&self, f: F) -> HashMap<ChainId, Vec<T>>
     where
         F: Fn(&ExecutionLocation, &EvmInput) -> T,
@@ -112,12 +110,10 @@ impl MultiEvmInput {
             .into_group_map()
     }
 
-    #[must_use]
     pub fn blocks_by_chain(&self) -> HashMap<ChainId, Vec<(BlockNumber, BlockHash)>> {
         self.group_blocks(|loc, evm_input| (loc.block_number, evm_input.header.hash_slow()))
     }
 
-    #[must_use]
     pub fn block_nums_by_chain(&self) -> HashMap<ChainId, Vec<BlockNumber>> {
         self.group_blocks(|loc, _| loc.block_number)
     }

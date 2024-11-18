@@ -172,7 +172,6 @@ pub struct TestArgs {
 
 impl TestArgs {
     /// Returns the flattened [`CoreBuildArgs`].
-    #[must_use]
     pub const fn build_args(&self) -> &CoreBuildArgs {
         &self.opts
     }
@@ -180,7 +179,7 @@ impl TestArgs {
     pub async fn run(self) -> Result<TestOutcome> {
         trace!(target: "forge::test", "executing test command");
         shell::set_shell(shell::Shell::from_args(self.opts.silent, self.json))?;
-        self.execute_tests().await
+        Box::pin(self.execute_tests()).await // Large future needs to be boxed
     }
 
     /// Returns sources which include any tests to be executed.
@@ -677,7 +676,6 @@ impl TestArgs {
 
     /// Returns the flattened [`FilterArgs`] arguments merged with [`Config`].
     /// Loads and applies filter from file if only last test run failures performed.
-    #[must_use]
     pub fn filter(&self, config: &Config) -> ProjectPathsAwareFilter {
         let mut filter = self.filter.clone();
         if self.rerun {

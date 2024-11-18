@@ -10,32 +10,26 @@ pub struct Range(Option<NonEmptyRange>);
 impl Range {
     pub const EMPTY: Range = Range(None);
 
-    #[must_use]
     pub fn from_range(range: RangeInclusive<u64>) -> Self {
         NonEmptyRange::try_from_range(range).into()
     }
 
-    #[must_use]
     pub const fn is_empty(&self) -> bool {
         self.0.is_none()
     }
 
-    #[must_use]
     pub const fn as_non_empty(&self) -> Option<NonEmptyRange> {
         self.0
     }
 
-    #[must_use]
     pub fn start(&self) -> Option<u64> {
         self.0.map(|range| range.start())
     }
 
-    #[must_use]
     pub fn end(&self) -> Option<u64> {
         self.0.map(|range| range.end())
     }
 
-    #[must_use]
     pub fn len(&self) -> u64 {
         self.0.map_or(0, |range| range.len())
     }

@@ -35,7 +35,6 @@ impl WebProof {
         Ok((RequestTranscript::new(sent), ResponseTranscript::new(received)))
     }
 
-    #[must_use]
     pub fn get_server_name(&self) -> String {
         let ServerName::Dns(server_name) = &self.tls_proof.session.session_info.server_name;
         server_name.to_string()

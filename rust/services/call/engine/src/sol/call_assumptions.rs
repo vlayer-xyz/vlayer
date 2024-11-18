@@ -13,7 +13,6 @@ use crate::io::CallSelector;
 
 impl CallAssumptions {
     /// Returns the [SolAssumptions] used to validate the environment.
-    #[must_use]
     pub fn new(header: &dyn EvmBlockHeader, to: Address, selector: CallSelector) -> Self {
         Self {
             proverContractAddress: to,
@@ -23,7 +22,6 @@ impl CallAssumptions {
         }
     }
 
-    #[must_use]
     pub fn size() -> usize {
         Self::ENCODED_SIZE.expect("CallAssumptions compiletime size does not exist")
     }

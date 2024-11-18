@@ -125,7 +125,6 @@ pub struct ChainDb {
 }
 
 impl ChainDb {
-    #[must_use]
     pub fn in_memory() -> Self {
         let db = InMemoryDatabase::new();
         let mode = Mode::ReadWrite;
@@ -141,7 +140,6 @@ impl ChainDb {
         Ok(Self::new(db, mode))
     }
 
-    #[must_use]
     fn new(db: impl for<'a> Database<'a> + Send + Sync + 'static, mode: Mode) -> Self {
         Self {
             db: Box::new(db),

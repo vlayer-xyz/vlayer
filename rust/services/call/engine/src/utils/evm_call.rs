@@ -8,12 +8,10 @@ use revm::{
 
 const SELECTOR_LEN: usize = 4;
 
-#[must_use]
 pub fn split_calldata(inputs: &CallInputs) -> (&[u8], &[u8]) {
     inputs.input.split_at(SELECTOR_LEN)
 }
 
-#[must_use]
 pub fn create_return_outcome<T: Into<Bytes>>(value: T, inputs: &CallInputs) -> CallOutcome {
     CallOutcome::new(
         InterpreterResult::new(InstructionResult::Return, value.into(), Gas::new(inputs.gas_limit)),
@@ -21,7 +19,6 @@ pub fn create_return_outcome<T: Into<Bytes>>(value: T, inputs: &CallInputs) -> C
     )
 }
 
-#[must_use]
 pub fn execution_result_to_call_outcome(
     result: &ExecutionResult,
     inputs: &CallInputs,
@@ -38,7 +35,6 @@ pub fn execution_result_to_call_outcome(
     }
 }
 
-#[must_use]
 fn execution_result_to_instruction_result(result: &ExecutionResult) -> InstructionResult {
     match result {
         ExecutionResult::Success { reason, .. } => (*reason).into(),
@@ -47,12 +43,10 @@ fn execution_result_to_instruction_result(result: &ExecutionResult) -> Instructi
     }
 }
 
-#[must_use]
 pub fn create_encoded_return_outcome<T: SolValue>(value: &T, inputs: &CallInputs) -> CallOutcome {
     create_return_outcome(value.abi_encode(), inputs)
 }
 
-#[must_use]
 pub fn create_revert_outcome(reason: &str) -> CallOutcome {
     CallOutcome::new(
         InterpreterResult::new(
@@ -64,7 +58,6 @@ pub fn create_revert_outcome(reason: &str) -> CallOutcome {
     )
 }
 
-#[must_use]
 pub fn format_failed_call_result(result: ExecutionResult) -> String {
     match result {
         ExecutionResult::Revert { output, .. } => {

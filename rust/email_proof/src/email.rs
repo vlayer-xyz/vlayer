@@ -13,7 +13,6 @@ pub struct Email {
 }
 
 impl Email {
-    #[must_use]
     pub fn abi_encode(self) -> Vec<u8> {
         sol::SolEmail::from(self).abi_encode()
     }
