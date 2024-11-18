@@ -1,7 +1,7 @@
 name: Test Release
 on:
   workflow_run:
-    workflows: ["Update Prover Servers"]
+    workflows: ["Deploy Provers"]
     types: [completed]
   workflow_dispatch:
   pull_request:
