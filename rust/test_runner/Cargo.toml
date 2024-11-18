@@ -4,12 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-block_header = { workspace = true }
-call_engine = { workspace = true }
-call_guest_wrapper = { workspace = true }
-call_host = { workspace = true }
-mpt = { workspace = true }
-provider = { workspace = true }
 
 alloy-dyn-abi = { workspace = true }
 alloy-json-abi = { workspace = true }
@@ -18,15 +12,20 @@ alloy-rlp = { workspace = true }
 alloy-sol-types = { workspace = true, features = ["json"] }
 alloy-trie = { workspace = true }
 anyhow = { workspace = true }
+block_header = { workspace = true }
+call_engine = { workspace = true }
+call_guest_wrapper = { workspace = true }
+call_host = { workspace = true }
 chain = { workspace = true }
 chain_client = { workspace = true }
+chrono = { workspace = true }
 clap = { workspace = true, features = ["derive"] }
 color-eyre = { workspace = true }
-eyre = "0.6.12"
 comfy-table = { workspace = true }
 delegate = { workspace = true }
 derive-new = { workspace = true }
 ethers-core = { workspace = true }
+eyre = "0.6.12"
 forge = { workspace = true }
 foundry-cheatcodes = { workspace = true }
 foundry-cli = { workspace = true }
@@ -36,23 +35,24 @@ foundry-config = { workspace = true }
 foundry-debugger = { workspace = true }
 foundry-evm = { workspace = true }
 foundry-evm-core = { workspace = true }
+hyper = { workspace = true }
+indicatif = { workspace = true }
+inferno = { workspace = true }
+itertools = { workspace = true }
 mock_chain_server = { workspace = true }
+mpt = { workspace = true }
+opener = { workspace = true }
+parking_lot = { workspace = true }
+proptest = { workspace = true }
+provider = { workspace = true }
+quick-junit = { workspace = true }
 rayon = { workspace = true }
 regex = { workspace = true }
+semver = { workspace = true }
 serde_json = { workspace = true }
 tokio = { workspace = true }
 tracing = { workspace = true }
-chrono = "0.4.38"
-indicatif = "0.17.8"
-parking_lot = "0.12.3"
-hyper = "1.5.0"
-yansi = "1.0.1"
-quick-junit = "0.5.0"
-semver = "1.0.23"
-inferno = "0.11.21"
-opener = "0.7"
-proptest = "1.5.0"
-itertools = { workspace = true }
+yansi = { workspace = true }
 
 [lints]
 workspace = true
