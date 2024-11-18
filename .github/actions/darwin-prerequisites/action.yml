@@ -1,5 +1,5 @@
 name: Darwin prerequisites
-description: Prerequisites specific to Darwin
+description: Prerequisites specific to Darwin.
 runs:
   using: "composite"
   steps:

@@ -1,4 +1,4 @@
-name: Js Test
+name: Test JS
 
 on:
   pull_request:
@@ -15,7 +15,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  unit-test:
+  test-js:
+    name: Test JS
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2

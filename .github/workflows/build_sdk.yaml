@@ -1,4 +1,4 @@
-name: sdk type check 
+name: Build SDK
 on: 
   pull_request:
     paths:
@@ -14,7 +14,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  tsc:
+  build-sdk:
+    name: Build SDK
     runs-on: ubuntu-latest
     steps:
     - uses: actions/checkout@v2

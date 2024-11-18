@@ -1,12 +1,14 @@
-name: Test
+name: Test vlayer
 
 on:
   pull_request:
     paths:
+      - 'bash/**'
+      - 'contracts/**'
       - "rust-toolchain.toml"
       - "rust/**"
       - "examples/**"
-      - ".github/workflows/rust_test.yaml"
+      - ".github/workflows/vlayer_test.yaml"
   merge_group:
   push:
     branches:
@@ -17,7 +19,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  rust-test:
+  test-vlayer:
+    name: Test vlayer
     runs-on: aws-linux-medium
 
     steps:
@@ -29,15 +32,17 @@ jobs:
         uses: ./.github/actions/rust-prerequisites
       - name: Install contracts prerequisites
         uses: ./.github/actions/contracts-prerequisites
-      - name: Check clang and LLVM version
-        env:
-          EXPECTED_LLVM_VERSION: "18.1"
-        run: bash/check-llvm-clang.sh
 
-      - name: Run workspace rust tests
-        working-directory: rust
+      - name: Run Forge build
+        working-directory: ./contracts
         run: |
-          cargo test --workspace --locked
-        env:
-          RUST_LOG: info
-          RISC0_DEV_MODE: 1
+          forge soldeer install
+
+      - name: Run vlayer tests for contracts
+        working-directory: ./contracts
+        run: |
+          # vlayer test
+          cargo run --locked --manifest-path ../rust/Cargo.toml --package cli -- test -vvv
+      
+      - name: Run vlayer tests for examples
+        run: bash/vlayer-test-examples.sh

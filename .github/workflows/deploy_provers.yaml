@@ -1,6 +1,6 @@
 # Auto-updates the Prover servers with a latest nightly vlayer release,
 # after a successful release.
-name: Update Prover Servers
+name: Deploy Provers
 on: 
   workflow_run:
     workflows: ["Release vlayer artifacts"]
@@ -10,8 +10,8 @@ concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: false
 jobs:
-  update-prover-servers:
-    name: Update Prover servers
+  deploy-provers:
+    name: Deploy Provers
     environment: Production
     if: ${{ github.event_name != 'workflow_run' || github.event.workflow_run.conclusion == 'success' }}
     defaults:

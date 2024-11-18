@@ -1,4 +1,4 @@
-name: Incremental compilation time
+name: Rust incremental compilation performance
 
 on:
   pull_request:
@@ -19,7 +19,8 @@ permissions:
   pull-requests: write
 
 jobs:
-  rust-incremental-compilation-time:
+  performance-rust-compilation:
+    name: Rust incremental compilation performance
     runs-on: aws-linux-medium
 
     steps:

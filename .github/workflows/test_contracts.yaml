@@ -1,4 +1,4 @@
-name: Forge test
+name: Test contracts
 
 on:
   pull_request:
@@ -22,8 +22,8 @@ env:
   FOUNDRY_PROFILE: ci
 
 jobs:
-  forge-test:
-    name: Foundry project
+  test-contracts:
+    name: Test contracts
     runs-on: aws-linux-small
     steps:
       - uses: actions/checkout@v4

@@ -1,5 +1,5 @@
-name: Contract prerequisites
-description: Installs contracts compilation prerequisites
+name: Contracts prerequisites
+description: Installs contracts compilation prerequisites.
 runs:
   using: "composite"
   steps:

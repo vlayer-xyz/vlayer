@@ -1,4 +1,4 @@
-name: Lint Solidity
+name: Lint contracts
 on: 
   pull_request:
     paths:
@@ -14,7 +14,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  sol-lint:
+  lint-contracts:
+    name: Lint contracts
     runs-on: ubuntu-latest
     steps: 
       - uses: actions/checkout@v2

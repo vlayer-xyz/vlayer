@@ -1,4 +1,4 @@
-name: Lint TS examples and sdk
+name: Lint TS
 on: 
   pull_request:
     paths:
@@ -14,7 +14,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  ts-lint:
+  lint-ts:
+    name: Lint TS
     runs-on: ubuntu-latest
     steps: 
     - uses: actions/checkout@v2
