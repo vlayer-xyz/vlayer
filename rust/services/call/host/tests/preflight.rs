@@ -2,7 +2,7 @@ use alloy_chains::Chain;
 use alloy_primitives::{address, b256, uint, Address};
 use alloy_sol_types::SolCall;
 use call_host::{self, Call};
-use harness::{run, sepolia_latest_block, LATEST_BLOCK};
+use harness::{preflight, sepolia_latest_block, LATEST_BLOCK};
 
 mod harness;
 
@@ -20,7 +20,7 @@ mod usdt {
             to: USDT,
             data: sol_call.abi_encode(),
         };
-        let result = run::<IERC20::balanceOfCall>(
+        let result = preflight::<IERC20::balanceOfCall>(
             "usdt_erc20_balance_of",
             call,
             &(Chain::mainnet().id(), USDT_BLOCK_NO).into(),
@@ -43,7 +43,7 @@ mod uniswap {
             to: UNISWAP,
             data: sol_call.abi_encode(),
         };
-        let result = run::<IUniswapV3Factory::ownerCall>(
+        let result = preflight::<IUniswapV3Factory::ownerCall>(
             "uniswap_factory_owner",
             call,
             &(Chain::mainnet().id(), LATEST_BLOCK).into(),
@@ -69,9 +69,12 @@ mod view {
             to: VIEW_CALL,
             data: sol_call.abi_encode(),
         };
-        let result =
-            run::<ViewCallTest::testPrecompileCall>("view_precompile", call, &sepolia_latest_block)
-                .await?;
+        let result = preflight::<ViewCallTest::testPrecompileCall>(
+            "view_precompile",
+            call,
+            &sepolia_latest_block,
+        )
+        .await?;
         assert_eq!(
             result._0,
             b256!("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
@@ -86,7 +89,7 @@ mod view {
             to: VIEW_CALL,
             data: sol_call.abi_encode(),
         };
-        let result = run::<ViewCallTest::testNonexistentAccountCall>(
+        let result = preflight::<ViewCallTest::testNonexistentAccountCall>(
             "view_nonexistent_account",
             call,
             &sepolia_latest_block,
@@ -103,7 +106,7 @@ mod view {
             to: VIEW_CALL,
             data: sol_call.abi_encode(),
         };
-        let result = run::<ViewCallTest::testEoaAccountCall>(
+        let result = preflight::<ViewCallTest::testEoaAccountCall>(
             "view_eoa_account",
             call,
             &sepolia_latest_block,
@@ -120,7 +123,7 @@ mod view {
             to: VIEW_CALL,
             data: sol_call.abi_encode(),
         };
-        let result = run::<ViewCallTest::testBlockhashCall>(
+        let result = preflight::<ViewCallTest::testBlockhashCall>(
             "view_blockhash",
             call,
             &(Chain::sepolia().id(), VIEW_CALL_BLOCK_NO).into(),
@@ -141,7 +144,7 @@ mod view {
             data: sol_call.abi_encode(),
         };
         let result =
-            run::<ViewCallTest::testChainidCall>("view_chainid", call, &sepolia_latest_block)
+            preflight::<ViewCallTest::testChainidCall>("view_chainid", call, &sepolia_latest_block)
                 .await?;
         assert_eq!(result._0, uint!(11_155_111_U256));
         Ok(())
@@ -154,7 +157,7 @@ mod view {
             to: VIEW_CALL,
             data: sol_call.abi_encode(),
         };
-        let result = run::<ViewCallTest::testMuliContractCallsCall>(
+        let result = preflight::<ViewCallTest::testMuliContractCallsCall>(
             "view_multi_contract_calls",
             call,
             &sepolia_latest_block,
@@ -170,7 +173,7 @@ mod view {
             to: address!("d8dA6BF26964aF9D7eEd9e03E53415D37aA96045"), // vitalik.eth
             ..Default::default()
         };
-        run::<ViewCallTest::testEoaAccountCall>("view_call_eoa", call, &sepolia_latest_block)
+        preflight::<ViewCallTest::testEoaAccountCall>("view_call_eoa", call, &sepolia_latest_block)
             .await
             .expect_err("calling an EOA should fail");
 
@@ -194,7 +197,7 @@ mod teleport {
             to: SIMPLE_TELEPORT,
             data: sol_call.abi_encode(),
         };
-        let result = run::<SimpleTravelProver::crossChainBalanceOfCall>(
+        let result = preflight::<SimpleTravelProver::crossChainBalanceOfCall>(
             "simple_teleport",
             call,
             &(NamedChain::AnvilHardhat, BLOCK_NO).into(),
@@ -234,7 +237,7 @@ mod time_travel {
         let averageBalanceOfReturn {
             _2: average_balance,
             ..
-        } = run::<AverageBalance::averageBalanceOfCall>(
+        } = preflight::<AverageBalance::averageBalanceOfCall>(
             "simple_time_travel",
             call,
             &(NamedChain::OptimismSepolia, LATEST_BLOCK).into(),

@@ -4,7 +4,7 @@ use alloy_chains::Chain;
 use alloy_sol_types::SolCall;
 use call_guest_wrapper::GUEST_ELF as CALL_GUEST_ELF;
 use call_host::{
-    host::{config::HostConfig, error::HostError, get_block_header, Host},
+    host::{config::HostConfig, error::HostError, get_block_header, Host, PreflightResult},
     Call,
 };
 use chain_client::RpcClient as RpcChainProofClient;
@@ -26,6 +26,25 @@ pub const LATEST_BLOCK: BlockTag = BlockTag::Latest;
 lazy_static! {
     pub static ref sepolia_latest_block: ExecutionLocation =
         (Chain::sepolia().id(), LATEST_BLOCK).into();
+}
+
+pub async fn preflight<C>(
+    test_name: &str,
+    call: Call,
+    location: &ExecutionLocation,
+) -> anyhow::Result<C::Return>
+where
+    C: SolCall,
+{
+    let multi_provider = create_multi_provider(test_name);
+    let chain_proof_server = create_chain_proof_server(&multi_provider, location).await?;
+    let host = create_host(multi_provider, location, chain_proof_server.url())?;
+    let PreflightResult { host_output, .. } = host.preflight(call).await?;
+    let return_value = C::abi_decode_returns(&host_output, false)?;
+
+    chain_proof_server.assert();
+
+    Ok(return_value)
 }
 
 pub async fn run<C>(

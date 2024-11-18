@@ -79,8 +79,8 @@ pub fn get_block_header(
 
 #[derive(Debug, Clone)]
 pub struct PreflightResult {
-    host_output: Bytes,
-    input: Input,
+    pub host_output: Bytes,
+    pub input: Input,
 }
 
 impl Host {
