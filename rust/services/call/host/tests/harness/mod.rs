@@ -53,7 +53,11 @@ pub async fn run(
     let multi_provider = create_multi_provider(test_name);
     let chain_proof_server = create_chain_proof_server(&multi_provider, location).await?;
     let host = create_host(multi_provider, location, chain_proof_server.url())?;
-    host.main(call).await
+    let result = host.main(call).await?;
+
+    chain_proof_server.assert();
+
+    Ok(result)
 }
 
 pub async fn create_chain_proof_server(
