@@ -273,14 +273,3 @@ fn load_chain_spec_from_file() -> Result<ChainSpec, Error> {
     let chain_spec = include_str!("../chain_spec.toml");
     toml::from_str(chain_spec).map_err(Error::from)
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn read_chain_spec_from_file() {
-        let chain_spec = load_chain_spec_from_file().expect("Failed to load chain spec from file");
-        dbg!(chain_spec);
-    }
-}
