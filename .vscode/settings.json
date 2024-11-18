@@ -8,6 +8,7 @@
     "LIBUSB_STATIC": "1"
   },
   "rust-analyzer.check.command": "clippy",
+  "rust-analyzer.cargo.allTargets": true,
   "[rust]": {
     "editor.defaultFormatter": "rust-lang.rust-analyzer",
     "editor.formatOnSave": true
