@@ -2,3 +2,10 @@ self-hosted-runner:
   labels:
     - aws-linux-small
     - aws-linux-medium
+paths:
+  .github/workflows/**/*.yaml:
+    ignore:
+      - 'shellcheck reported issue in this script: SC2086:.+'
+      - 'shellcheck reported issue in this script: SC2046:.+'
+      - 'shellcheck reported issue in this script: SC2155:.+'
+      - 'shellcheck reported issue in this script: SC2044:.+'
