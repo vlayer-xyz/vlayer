@@ -4,13 +4,15 @@ use alloy_chains::{
 };
 use alloy_primitives::{address, b256, uint, Address};
 use alloy_sol_types::SolCall;
-use call_host::{self, Call};
 
-use crate::harness::{preflight, sepolia_latest_block, LATEST_BLOCK};
+use crate::{
+    test_harness::{preflight, sepolia_latest_block, LATEST_BLOCK},
+    Call,
+};
 
 mod usdt {
     use super::*;
-    use crate::harness::contracts::{IERC20, USDT, USDT_BLOCK_NO};
+    use crate::test_harness::contracts::{IERC20, USDT, USDT_BLOCK_NO};
 
     #[tokio::test]
     async fn erc20_balance_of() -> anyhow::Result<()> {
@@ -34,7 +36,7 @@ mod usdt {
 
 mod uniswap {
     use super::*;
-    use crate::harness::contracts::{IUniswapV3Factory, UNISWAP};
+    use crate::test_harness::contracts::{IUniswapV3Factory, UNISWAP};
 
     #[tokio::test]
     async fn factory_owner() -> anyhow::Result<()> {
@@ -59,7 +61,7 @@ mod uniswap {
 
 mod view {
     use super::*;
-    use crate::harness::contracts::{ViewCallTest, VIEW_CALL, VIEW_CALL_BLOCK_NO};
+    use crate::test_harness::contracts::{ViewCallTest, VIEW_CALL, VIEW_CALL_BLOCK_NO};
 
     #[tokio::test]
     async fn precompile() -> anyhow::Result<()> {
@@ -183,7 +185,7 @@ mod view {
 // Generated using `simple_teleport` example
 mod teleport {
     use super::*;
-    use crate::harness::contracts::{SimpleTravelProver, BLOCK_NO, SIMPLE_TELEPORT};
+    use crate::test_harness::contracts::{SimpleTravelProver, BLOCK_NO, SIMPLE_TELEPORT};
 
     #[tokio::test]
     async fn teleport_to_unknown_chain_returns_an_error_but_does_not_panic() -> anyhow::Result<()> {
@@ -214,7 +216,7 @@ mod teleport {
 // Accesses 9 blocks in total
 mod time_travel {
     use super::*;
-    use crate::harness::contracts::{
+    use crate::test_harness::contracts::{
         AverageBalance::{self, averageBalanceOfReturn},
         AVERAGE_BALANCE_OF_CALL, SIMPLE_TIME_TRAVEL,
     };

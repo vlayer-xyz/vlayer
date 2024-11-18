@@ -2,12 +2,14 @@ use std::sync::Arc;
 
 use alloy_chains::{Chain, NamedChain};
 use alloy_sol_types::SolCall;
-use call_host::{self, Call};
 use provider::{CachedMultiProvider, CachedProviderFactory, ProfilingProvider, ProviderFactory};
 
-use crate::harness::{
-    contracts::{AVERAGE_BALANCE_OF_CALL, SIMPLE_TIME_TRAVEL},
-    create_chain_proof_server, create_host, rpc_file_cache, LATEST_BLOCK,
+use crate::{
+    test_harness::{
+        contracts::{AVERAGE_BALANCE_OF_CALL, SIMPLE_TIME_TRAVEL},
+        create_chain_proof_server, create_host, rpc_file_cache, LATEST_BLOCK,
+    },
+    Call,
 };
 
 #[tokio::test]

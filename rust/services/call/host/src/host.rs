@@ -34,6 +34,8 @@ use crate::{
 mod config;
 mod error;
 mod prover;
+#[cfg(test)]
+mod tests;
 
 pub struct Host {
     start_execution_location: ExecutionLocation,

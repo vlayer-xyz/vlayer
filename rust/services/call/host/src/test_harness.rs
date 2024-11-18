@@ -4,7 +4,6 @@ use alloy_chains::Chain;
 use alloy_sol_types::SolCall;
 use call_engine::HostOutput;
 use call_guest_wrapper::GUEST_ELF as CALL_GUEST_ELF;
-use call_host::{get_block_header, Call, Config, Error, Host, PreflightResult};
 use chain_client::RpcClient as RpcChainProofClient;
 use chain_guest_wrapper::GUEST_ELF as CHAIN_GUEST_ELF;
 use ethers_core::types::BlockNumber as BlockTag;
@@ -14,6 +13,8 @@ use provider::CachedMultiProvider;
 pub use rpc::{block_tag_to_block_number, create_multi_provider, rpc_file_cache};
 use serde_json::json;
 use types::ExecutionLocation;
+
+use crate::{get_block_header, Call, Config, Error, Host, PreflightResult};
 
 pub mod contracts;
 mod rpc;

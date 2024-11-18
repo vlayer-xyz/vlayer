@@ -6,11 +6,12 @@ use std::{
 
 use alloy_chains::{Chain, NamedChain};
 use alloy_primitives::ChainId;
-use call_host::{get_block_header, Error};
 use dotenvy::dotenv;
 use ethers_core::types::BlockNumber as BlockTag;
 use lazy_static::lazy_static;
 use provider::{BlockNumber, CachedMultiProvider, CachedProviderFactory};
+
+use crate::{get_block_header, Error};
 
 // To activate recording, set UPDATE_SNAPSHOTS to true.
 // Recording creates new test data directory and writes return data from Alchemy into files in that directory.

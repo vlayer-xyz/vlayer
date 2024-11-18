@@ -10,3 +10,6 @@ pub use host::{
     get_block_header, get_latest_block_number, Config, Error, Host, PreflightResult,
     DEFAULT_MAX_CALLDATA_SIZE,
 };
+
+#[cfg(test)]
+pub mod test_harness;
