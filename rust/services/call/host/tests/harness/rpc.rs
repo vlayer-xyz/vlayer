@@ -86,5 +86,5 @@ pub fn create_multi_provider(test_name: &str) -> CachedMultiProvider {
         UPDATE_SNAPSHOTS.then(|| provider::EthersProviderFactory::new(rpc_urls()));
     let provider_factory =
         CachedProviderFactory::new(rpc_file_cache(test_name), maybe_ethers_provider_factory);
-    CachedMultiProvider::new(provider_factory)
+    CachedMultiProvider::from_factory(provider_factory)
 }

@@ -48,7 +48,7 @@ pub struct Host {
 impl Host {
     pub fn try_new(config: Config) -> Result<Self, Error> {
         let provider_factory = EthersProviderFactory::new(config.rpc_urls.clone());
-        let providers = CachedMultiProvider::new(provider_factory);
+        let providers = CachedMultiProvider::from_factory(provider_factory);
         let block_number = get_latest_block_number(&providers, config.start_chain_id)?;
         let chain_client = chain_client::RpcClient::new(&config.chain_proof_url);
         Host::try_new_with_components(providers, block_number, chain_client, config)
@@ -222,7 +222,7 @@ mod test {
         };
         let max_call_data_size = config.max_calldata_size;
         let host = Host::try_new_with_components(
-            CachedMultiProvider::new(EthersProviderFactory::new(test_rpc_urls())),
+            CachedMultiProvider::from_factory(EthersProviderFactory::new(test_rpc_urls())),
             0,
             chain_client::RpcClient::new(""),
             config,

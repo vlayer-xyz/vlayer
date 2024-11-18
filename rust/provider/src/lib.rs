@@ -17,7 +17,8 @@ pub use ethers::*;
 pub use ethers_core::types::BlockNumber as BlockTag;
 use ethers_providers::{Http, RetryClient};
 pub use factory::{
-    CachedProviderFactory, EthersProviderFactory, ProviderFactory, ProviderFactoryError,
+    CachedProviderFactory, EthersProviderFactory, NullProviderFactory, ProviderFactory,
+    ProviderFactoryError,
 };
 pub use multi::CachedMultiProvider;
 pub use profiling::ProfilingProvider;
