@@ -3,6 +3,7 @@ mod ethers;
 mod factory;
 mod multi;
 mod null;
+mod profiling;
 mod proof;
 
 use std::fmt::Debug;
