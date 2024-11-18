@@ -7,7 +7,7 @@ use risc0_zkvm::{
     Receipt, ReceiptClaim,
 };
 
-use crate::host::error::HostError;
+use crate::HostError;
 
 const VERIFIER_SELECTOR_LENGTH: usize = 4;
 const GROTH16_PROOF_SIZE: usize = 256;

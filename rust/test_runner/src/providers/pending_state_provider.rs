@@ -1,6 +1,6 @@
 use anyhow::Error;
 use block_header::{EvmBlockHeader, ForgeBlockHeader, Hashable};
-use call_host::db::proof::ProofDb;
+use call_host::ProofDb;
 use ethers_core::types::BlockNumber as BlockTag;
 use forge::revm::primitives::{
     alloy_primitives::{BlockNumber, ChainId, StorageKey, StorageValue, TxNumber},

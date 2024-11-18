@@ -19,20 +19,20 @@ use call_engine::{
     Call, GuestOutput, HostOutput, Input, Seal,
 };
 use common::GuestElf;
-use config::HostConfig;
-use error::HostError;
+pub use config::{HostConfig, DEFAULT_MAX_CALLDATA_SIZE};
+pub use error::HostError;
 use ethers_core::types::BlockNumber as BlockTag;
 use prover::Prover;
 use provider::{CachedMultiProvider, EthersProviderFactory, EvmBlockHeader};
 use tracing::info;
 
 use crate::{
-    db::proof::ProofDb, encodable_receipt::EncodableReceipt, evm_env::factory::HostEvmEnvFactory,
-    into_input::into_multi_input,
+    encodable_receipt::EncodableReceipt, evm_env::factory::HostEvmEnvFactory,
+    into_input::into_multi_input, ProofDb,
 };
 
-pub mod config;
-pub mod error;
+mod config;
+mod error;
 mod prover;
 
 pub struct Host {

@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use call_host::host::Host;
+use call_host::Host;
 use serde::{Deserialize, Serialize};
 use types::{Call, CallContext, CallResult};
 

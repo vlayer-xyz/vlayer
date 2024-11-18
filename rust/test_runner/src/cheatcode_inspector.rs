@@ -7,7 +7,7 @@ use call_engine::{
     Call, HostOutput, Proof, Seal,
 };
 use call_guest_wrapper::GUEST_ELF;
-use call_host::host::{config::HostConfig, get_latest_block_number, Host};
+use call_host::{get_latest_block_number, Host, HostConfig};
 use chain::TEST_CHAIN_ID;
 use chain_client::RpcClient as RpcChainProofClient;
 use foundry_config::RpcEndpoints;

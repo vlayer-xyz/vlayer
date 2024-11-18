@@ -4,10 +4,7 @@ use alloy_chains::Chain;
 use alloy_sol_types::SolCall;
 use call_engine::HostOutput;
 use call_guest_wrapper::GUEST_ELF as CALL_GUEST_ELF;
-use call_host::{
-    host::{config::HostConfig, error::HostError, get_block_header, Host, PreflightResult},
-    Call,
-};
+use call_host::{get_block_header, Call, Host, HostConfig, HostError, PreflightResult};
 use chain_client::RpcClient as RpcChainProofClient;
 use chain_guest_wrapper::GUEST_ELF as CHAIN_GUEST_ELF;
 use ethers_core::types::BlockNumber as BlockTag;

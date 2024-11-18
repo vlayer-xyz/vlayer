@@ -2,7 +2,7 @@ use alloy_chains::Chain;
 use alloy_primitives::{hex::ToHexExt, ChainId, U256};
 use alloy_sol_types::SolValue;
 use call_engine::{HostOutput, Proof, Seal};
-use call_host::{host::error::HostError, Call as HostCall};
+use call_host::{Call as HostCall, HostError};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use server_utils::{parse_address_field, parse_hex_field};

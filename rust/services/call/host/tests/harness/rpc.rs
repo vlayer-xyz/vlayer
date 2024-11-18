@@ -6,7 +6,7 @@ use std::{
 
 use alloy_chains::{Chain, NamedChain};
 use alloy_primitives::ChainId;
-use call_host::host::{error::HostError, get_block_header};
+use call_host::{get_block_header, HostError};
 use dotenvy::dotenv;
 use ethers_core::types::BlockNumber as BlockTag;
 use lazy_static::lazy_static;
