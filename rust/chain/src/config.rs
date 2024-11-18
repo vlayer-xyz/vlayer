@@ -24,7 +24,7 @@ struct ChainSpecs {
 
 fn load_chain_specs() -> HashMap<ChainId, ChainSpec> {
     let chain_specs: ChainSpecs =
-        from_str(include_str!("../chain_specs.toml")).expect("failed to parse chain specs");
+        from_str(include_str!("../chain_specs.toml")).expect("failed to load chain specs");
 
     let chain_specs_no_duplicates: HashMap<ChainId, ChainSpec> = chain_specs
         .chains
