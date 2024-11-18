@@ -138,7 +138,7 @@ mod resolve_trie {
         let nodes_by_hash = HashMap::from([(digest, leaf.clone())]);
         let resolved_node = resolve_trie(branch, &nodes_by_hash);
         let Node::Branch(children, None) = resolved_node else {
-            panic!("expected branch, got {:?}", resolved_node);
+            panic!("expected branch, got {resolved_node:?}");
         };
 
         assert_eq!(children[0], Some(Box::new(leaf)));
@@ -150,7 +150,7 @@ mod resolve_trie {
         let nodes_by_hash = HashMap::new();
         let resolved_node = resolve_trie(branch, &nodes_by_hash);
         let Node::Branch(_, Some(value)) = resolved_node else {
-            panic!("expected branch with value, got {:?}", resolved_node);
+            panic!("expected branch with value, got {resolved_node:?}");
         };
 
         assert_eq!(**value, [42]);

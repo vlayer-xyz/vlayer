@@ -11,8 +11,7 @@ pub fn canonize_body(body: &str) -> String {
 pub fn canonize_headers<'a>(headers: impl Iterator<Item = (&'a str, &'a str)>) -> String {
     headers
         .map(|(name, value)| canonize_header(name, value))
-        .collect::<Vec<_>>()
-        .join("")
+        .collect()
 }
 
 // Replace sequences of WSP characters with a single space.
@@ -30,7 +29,7 @@ fn remove_end_of_line_spaces(text: &str) -> String {
 fn canonize_header(name: &str, value: &str) -> String {
     let canonized_name = canonize_header_name(name);
     let canonized_value = canonize_header_value(value);
-    format!("{}:{}", canonized_name, canonized_value)
+    format!("{canonized_name}:{canonized_value}")
 }
 
 fn canonize_header_name(name: &str) -> String {

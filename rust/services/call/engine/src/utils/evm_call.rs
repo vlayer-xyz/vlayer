@@ -64,6 +64,6 @@ pub fn format_failed_call_result(result: ExecutionResult) -> String {
             let reason = decode_revert_reason(output.chunk());
             reason.unwrap_or("revert: unknown reason".into())
         }
-        _ => format!("{:?}", result),
+        _ => format!("{result:?}"),
     }
 }

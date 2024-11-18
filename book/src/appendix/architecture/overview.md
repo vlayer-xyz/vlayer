@@ -2,10 +2,10 @@
 
 vlayer execution spans across three environments, each written in respective technologies and consisting of related components:
 - browser (js)
-    - **javascript SDK** - thin wrapper around the [vlayer JSON-RPC API](/appendix/api.md)
+    - **javascript SDK** - thin wrapper around the vlayer JSON-RPC API
     - **browser plugin** - used for notarization of TLS Connections
 - server infrastructure (rust)
-    - [**prover server**](./prover.md) - exposing vlayer functionality via [vlayer JSON-RPC API](/appendix/api.md)
+    - [**prover server**](./prover.md) - exposing vlayer functionality via vlayer JSON-RPC API
     - [**block proof cache**](./block_proof.md) - http server used as a cache for proofs of inclusion of a block in a chain
     - **notary server** - used to notarize TLS connections
     - **workers** - used to perform actual proving

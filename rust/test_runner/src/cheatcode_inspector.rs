@@ -102,7 +102,7 @@ impl CheatcodeInspector {
                 self.previous_proof = Some(Self::host_output_into_proof(&host_output));
                 create_return_outcome(host_output.guest_output.evm_call_result, inputs)
             }
-            Err(error) => create_revert_outcome(&format!("{:?}", error)),
+            Err(error) => create_revert_outcome(&format!("{error:?}")),
         }
     }
 

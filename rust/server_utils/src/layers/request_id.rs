@@ -5,6 +5,5 @@ pub fn request_id<B>(request: &Request<B>) -> String {
     request
         .extensions()
         .get::<RequestId>()
-        .map(ToString::to_string)
-        .unwrap_or_else(|| "unknown".into())
+        .map_or_else(|| "unknown".into(), ToString::to_string)
 }

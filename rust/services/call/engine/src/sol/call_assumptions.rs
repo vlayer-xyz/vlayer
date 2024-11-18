@@ -1,6 +1,6 @@
 // Keep everything in the vlayer library private except the assumptions.
 mod private {
-    alloy_sol_types::sol!(#![sol(all_derives)] "../../../../contracts/src/CallAssumptions.sol");
+    alloy_sol_types::sol!(#![sol(all_derives)] "../../../../contracts/vlayer/src/CallAssumptions.sol");
 }
 
 use alloy_primitives::{Address, U256};

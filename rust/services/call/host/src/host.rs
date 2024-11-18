@@ -71,7 +71,7 @@ pub fn get_block_header(
 
     let block_header = provider
         .get_block_header(block_num)
-        .map_err(|e| Error::Provider(format!("Error fetching block header: {:?}", e)))?
+        .map_err(|e| Error::Provider(format!("Error fetching block header: {e:?}")))?
         .ok_or_else(|| Error::Provider(String::from("Block header not found")))?;
 
     Ok(block_header)

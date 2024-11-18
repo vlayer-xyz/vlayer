@@ -136,8 +136,6 @@ mod tests {
     }
 
     mod dkim_key {
-        use std::ops::Deref;
-
         use super::*;
 
         #[test]
@@ -147,10 +145,7 @@ mod tests {
             let domain = "example.com";
             let selector = "newengland";
 
-            assert_eq!(
-                resolver.dkim_key(domain, selector).unwrap(),
-                NEWENGLAND_SELECTOR_KEY.deref()
-            )
+            assert_eq!(resolver.dkim_key(domain, selector).unwrap(), &*NEWENGLAND_SELECTOR_KEY)
         }
 
         #[test]

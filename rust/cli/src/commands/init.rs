@@ -137,7 +137,7 @@ impl SoldeerDep {
         let output = std::process::Command::new("forge")
             .arg("soldeer")
             .arg("install")
-            .arg(format!("{}~{}", name, version))
+            .arg(format!("{name}~{version}"))
             .current_dir(foundry_root)
             .output()?;
 
@@ -153,7 +153,7 @@ impl SoldeerDep {
         let output = std::process::Command::new("forge")
             .arg("soldeer")
             .arg("install")
-            .arg(format!("{}~{}", name, version))
+            .arg(format!("{name}~{version}"))
             .arg(url)
             .current_dir(foundry_root)
             .output()?;
@@ -164,7 +164,7 @@ impl SoldeerDep {
     fn remapping(&self) -> Option<Vec<(String, String)>> {
         let remapping = self.remapping.as_ref()?;
         let internal_path = if let Some(internal_path) = &remapping.internal_path {
-            format!("{}/", internal_path)
+            format!("{internal_path}/")
         } else {
             String::default()
         };
@@ -302,7 +302,16 @@ pub(crate) async fn init_existing(cwd: PathBuf, template: TemplateOption) -> Res
     } else {
         let scripts_dst = create_vlayer_dir(&root_path)?;
         let examples_dst = create_vlayer_dir(&src_path)?;
-        fetch_examples(&examples_dst, &scripts_dst, template.to_string()).await?;
+        let tests_dst = create_vlayer_dir(&root_path.join("test"))?;
+        let testdata_dst = root_path.join("testdata");
+        fetch_examples(
+            &examples_dst,
+            &scripts_dst,
+            &tests_dst,
+            &testdata_dst,
+            template.to_string(),
+        )
+        .await?;
         info!("Successfully downloaded vlayer template \"{}\"", template);
     }
 
@@ -369,7 +378,7 @@ fn add_deps_to_gitignore(root_path: &Path) -> Result<(), std::io::Error> {
 fn append_file(file: &Path, suffix: &str) -> Result<(), std::io::Error> {
     let mut file = OpenOptions::new().append(true).open(file)?;
 
-    writeln!(file, "{}", suffix)?;
+    writeln!(file, "{suffix}")?;
 
     Ok(())
 }
@@ -393,6 +402,8 @@ fn find_src_path(root_path: &Path) -> Result<PathBuf, CLIError> {
 async fn fetch_examples(
     examples_dst: &Path,
     scripts_dst: &Path,
+    tests_dst: &Path,
+    testdata_dst: &Path,
     template: String,
 ) -> Result<(), CLIError> {
     let response = get(EXAMPLES_URL)
@@ -409,9 +420,19 @@ async fn fetch_examples(
 
     let downloaded_scripts = temp_dir.path().join(&template).join("vlayer");
     let downloaded_examples = temp_dir.path().join(&template).join("src/vlayer");
+    let downloaded_tests = temp_dir.path().join(&template).join("test/vlayer");
+    let downloaded_testdata = temp_dir.path().join(&template).join("testdata");
 
     copy_dir_to(&downloaded_scripts, scripts_dst)?;
     copy_dir_to(&downloaded_examples, examples_dst)?;
+
+    // not all examples come with tests and testdata
+    if downloaded_tests.exists() {
+        copy_dir_to(&downloaded_tests, tests_dst)?;
+    }
+    if downloaded_testdata.exists() {
+        copy_dir_to(&downloaded_testdata, testdata_dst)?;
+    }
 
     Ok(())
 }

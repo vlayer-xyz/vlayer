@@ -87,7 +87,7 @@ mod test {
     fn build_mime_email(headers: Vec<(&str, &str)>, body: &str) -> String {
         let mut email = String::new();
         for (key, value) in headers {
-            email.push_str(&format!("{}: {}\n", key, value));
+            email.push_str(&format!("{key}: {value}\n"));
         }
         if !body.is_empty() {
             email.push('\n');
