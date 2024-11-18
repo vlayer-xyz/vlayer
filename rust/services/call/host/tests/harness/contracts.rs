@@ -72,3 +72,32 @@ sol! {
         function crossChainBalanceOf(address owner) public returns (address, uint256);
     }
 }
+
+// Generated using `simple_time_travel` example
+pub const SIMPLE_TIME_TRAVEL: Address = address!("0d5556591b2ffe5e7d54a4887638508f039771d3");
+pub const TOKEN_OWNER: Address = address!("E6b08c02Dbf3a0a4D3763136285B85A9B492E391");
+sol!(
+    #[sol(all_derives = true)]
+    struct Seal {
+        bytes18 lhv;
+        bytes19 rhv;
+    }
+    #[sol(all_derives = true)]
+    struct CallAssumptions {
+        address proverContractAddress;
+        bytes4 functionSelector;
+        uint256 settleBlockNumber; // Block number for which the assumptions was made.
+        bytes32 settleBlockHash; // Hash of the block at the specified block number.
+    }
+    #[sol(all_derives = true)]
+    struct Proof {
+        uint256 length;
+        Seal seal;
+        CallAssumptions call_assumptions;
+    }
+    #[sol(all_derives = true)]
+    contract AverageBalance {
+        #[sol(all_derives = true)]
+        function averageBalanceOf(address _owner) public returns (Proof memory, address, uint256);
+    }
+);

@@ -38,6 +38,8 @@ lazy_static! {
         format!("https://eth-mainnet.g.alchemy.com/v2/{}", *alchemy_key);
     static ref sepolia_url: String =
         format!("https://eth-sepolia.g.alchemy.com/v2/{}", *alchemy_key);
+    static ref op_sepolia_url: String =
+        format!("https://opt-sepolia.g.alchemy.com/v2/{}", *alchemy_key);
     static ref anvil_url: String = format!("http://localhost:8545");
 }
 
@@ -45,6 +47,10 @@ fn rpc_file_cache(test_name: &str) -> HashMap<ChainId, String> {
     HashMap::from([
         (Chain::mainnet().id(), format!("testdata/mainnet_{test_name}_rpc_cache.json")),
         (Chain::sepolia().id(), format!("testdata/sepolia_{test_name}_rpc_cache.json")),
+        (
+            Chain::optimism_sepolia().id(),
+            format!("testdata/op_sepolia_{test_name}_rpc_cache.json"),
+        ),
         (
             NamedChain::AnvilHardhat.into(),
             format!("testdata/anvil_{test_name}_rpc_cache.json"),
@@ -56,6 +62,7 @@ fn rpc_urls() -> HashMap<ChainId, String> {
     HashMap::from([
         (Chain::mainnet().id(), mainnet_url.clone()),
         (Chain::sepolia().id(), sepolia_url.clone()),
+        (Chain::optimism_sepolia().id(), op_sepolia_url.clone()),
         (NamedChain::AnvilHardhat.into(), anvil_url.clone()),
     ])
 }

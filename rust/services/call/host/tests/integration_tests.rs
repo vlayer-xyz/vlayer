@@ -178,6 +178,7 @@ mod view {
     }
 }
 
+// Generated using `simple_teleport` example
 mod teleport {
     use alloy_chains::NamedChain;
     use harness::contracts::{SimpleTravelProver, BLOCK_NO, SIMPLE_TELEPORT};
@@ -203,6 +204,43 @@ mod teleport {
             result.unwrap_err().to_string(),
             "TravelCallExecutor error: Panic: Intercepted call failed: EvmEnv(\"No rpc cache for chain: 8453\")"
         );
+
+        Ok(())
+    }
+}
+
+// Generated using `simple_time_travel` example
+// Computes average balance of OP Sepolia USDC for TOKEN_OWNER on blocks from 17915294 to 17985294 with a step of 9000
+// Accesses 9 blocks in total
+mod time_travel {
+    use alloy_chains::NamedChain;
+    use harness::contracts::{
+        AverageBalance::{self, averageBalanceOfReturn},
+        SIMPLE_TIME_TRAVEL, TOKEN_OWNER,
+    };
+
+    use super::*;
+
+    #[tokio::test]
+    #[ignore = "Fails due to chain proofs issue"]
+    async fn time_travel() -> anyhow::Result<()> {
+        let sol_call = AverageBalance::averageBalanceOfCall {
+            _owner: TOKEN_OWNER,
+        };
+        let call = Call {
+            to: SIMPLE_TIME_TRAVEL,
+            data: sol_call.abi_encode(),
+        };
+        let averageBalanceOfReturn {
+            _2: average_balance,
+            ..
+        } = run::<AverageBalance::averageBalanceOfCall>(
+            "simple_time_travel",
+            call,
+            &(NamedChain::OptimismSepolia, LATEST_BLOCK).into(),
+        )
+        .await?;
+        assert_eq!(average_balance, uint!(1_874_845_031_590_000_U256));
 
         Ok(())
     }
