@@ -30,11 +30,7 @@ pub struct FilterArgs {
     pub contract_pattern: Option<regex::Regex>,
 
     /// Only run tests in contracts that do not match the specified regex pattern.
-    #[arg(
-        long = "no-match-contract",
-        visible_alias = "nmc",
-        value_name = "REGEX"
-    )]
+    #[arg(long = "no-match-contract", visible_alias = "nmc", value_name = "REGEX")]
     pub contract_pattern_inverse: Option<regex::Regex>,
 
     /// Only run tests in source files matching the specified glob pattern.
@@ -51,23 +47,19 @@ pub struct FilterArgs {
     pub path_pattern_inverse: Option<GlobMatcher>,
 
     /// Only show coverage for files that do not match the specified regex pattern.
-    #[arg(
-        long = "no-match-coverage",
-        visible_alias = "nmco",
-        value_name = "REGEX"
-    )]
+    #[arg(long = "no-match-coverage", visible_alias = "nmco", value_name = "REGEX")]
     pub coverage_pattern_inverse: Option<regex::Regex>,
 }
 
 impl FilterArgs {
     /// Returns true if the filter is empty.
-    pub const fn is_empty(&self) -> bool {
-        self.test_pattern.is_none()
-            && self.test_pattern_inverse.is_none()
-            && self.contract_pattern.is_none()
-            && self.contract_pattern_inverse.is_none()
-            && self.path_pattern.is_none()
-            && self.path_pattern_inverse.is_none()
+    pub fn is_empty(&self) -> bool {
+        self.test_pattern.is_none() &&
+            self.test_pattern_inverse.is_none() &&
+            self.contract_pattern.is_none() &&
+            self.contract_pattern_inverse.is_none() &&
+            self.path_pattern.is_none() &&
+            self.path_pattern_inverse.is_none()
     }
 
     /// Merges the set filter globs with the config's values
@@ -93,10 +85,7 @@ impl FilterArgs {
         if self.coverage_pattern_inverse.is_none() {
             self.coverage_pattern_inverse = config.coverage_pattern_inverse.clone().map(Into::into);
         }
-        ProjectPathsAwareFilter {
-            args_filter: self,
-            paths: config.project_paths(),
-        }
+        ProjectPathsAwareFilter { args_filter: self, paths: config.project_paths() }
     }
 }
 
@@ -194,12 +183,12 @@ pub struct ProjectPathsAwareFilter {
 
 impl ProjectPathsAwareFilter {
     /// Returns true if the filter is empty.
-    pub const fn is_empty(&self) -> bool {
+    pub fn is_empty(&self) -> bool {
         self.args_filter.is_empty()
     }
 
     /// Returns the CLI arguments.
-    pub const fn args(&self) -> &FilterArgs {
+    pub fn args(&self) -> &FilterArgs {
         &self.args_filter
     }
 
@@ -209,7 +198,7 @@ impl ProjectPathsAwareFilter {
     }
 
     /// Returns the project paths.
-    pub const fn paths(&self) -> &ProjectPathsConfig {
+    pub fn paths(&self) -> &ProjectPathsConfig {
         &self.paths
     }
 }

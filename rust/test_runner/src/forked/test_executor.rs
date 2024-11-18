@@ -32,6 +32,7 @@ use tracing::instrument;
 use crate::{cheatcode_inspector::CheatcodeInspector, composite_inspector::CompositeInspector};
 
 /// MODIFICATION: This struct is a wrapper around the Executor struct from foundry_evm that adds our inspector that will be passed to the backend
+#[derive(Clone, Debug)]
 pub struct TestExecutor<'a> {
     pub inner: Executor,
     pub rpc_endpoints: &'a RpcEndpoints,
