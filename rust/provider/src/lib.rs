@@ -20,6 +20,7 @@ pub use factory::{
     CachedProviderFactory, EthersProviderFactory, ProviderFactory, ProviderFactoryError,
 };
 pub use multi::CachedMultiProvider;
+pub use profiling::ProfilingProvider;
 pub use proof::{EIP1186Proof, StorageProof};
 
 /// The Ethers client type.
