@@ -1,31 +1,19 @@
-use std::env::set_var;
-
-use alloy_chains::Chain;
 use alloy_sol_types::SolCall;
 use call_engine::HostOutput;
 use call_guest_wrapper::GUEST_ELF as CALL_GUEST_ELF;
 use chain_client::RpcClient as RpcChainProofClient;
 use chain_guest_wrapper::GUEST_ELF as CHAIN_GUEST_ELF;
-use ethers_core::types::BlockNumber as BlockTag;
-use lazy_static::lazy_static;
 use mock_chain_server::{fake_proof_result, ChainProofServerMock};
 use provider::CachedMultiProvider;
 pub use rpc::{block_tag_to_block_number, create_multi_provider, rpc_file_cache};
 use serde_json::json;
-use types::ExecutionLocation;
+pub use types::ExecutionLocation;
 
 use crate::{get_block_header, Call, Config, Error, Host, PreflightResult};
 
 pub mod contracts;
 mod rpc;
 mod types;
-
-pub const LATEST_BLOCK: BlockTag = BlockTag::Latest;
-
-lazy_static! {
-    pub static ref sepolia_latest_block: ExecutionLocation =
-        (Chain::sepolia().id(), LATEST_BLOCK).into();
-}
 
 pub async fn preflight<C>(
     test_name: &str,
