@@ -1,4 +1,7 @@
-use alloy_chains::{Chain, NamedChain};
+use alloy_chains::{
+    Chain,
+    NamedChain::{AnvilHardhat, OptimismSepolia},
+};
 use alloy_primitives::{address, b256, uint, Address};
 use alloy_sol_types::SolCall;
 use call_host::{self, Call};
@@ -194,7 +197,7 @@ mod teleport {
         let result = preflight::<SimpleTravelProver::crossChainBalanceOfCall>(
             "simple_teleport",
             call,
-            &(NamedChain::AnvilHardhat, BLOCK_NO).into(),
+            &(AnvilHardhat, BLOCK_NO).into(),
         )
         .await;
         assert_eq!(
@@ -229,7 +232,7 @@ mod time_travel {
         } = preflight::<AverageBalance::averageBalanceOfCall>(
             "simple_time_travel",
             call,
-            &(NamedChain::OptimismSepolia, LATEST_BLOCK).into(),
+            &(OptimismSepolia, LATEST_BLOCK).into(),
         )
         .await?;
         assert_eq!(average_balance, uint!(1_874_845_031_590_000_U256));
