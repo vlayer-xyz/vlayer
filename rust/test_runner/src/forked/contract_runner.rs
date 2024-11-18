@@ -14,7 +14,7 @@ use foundry_evm::{
         invariant::{
             check_sequence, replay_error, replay_run, InvariantExecutor, InvariantFuzzError,
         },
-        CallResult, EvmError, ExecutionErr, Executor, ITest, RawCallResult,
+        CallResult, EvmError, ExecutionErr, ITest, RawCallResult,
     },
     fuzz::{
         fixture_name,
@@ -60,8 +60,6 @@ pub struct ContractRunner<'a> {
     pub initial_balance: U256,
     /// The address which will be used as the `from` field in all EVM calls.
     pub sender: Address,
-    /// Whether debug traces should be generated.
-    pub debug: bool,
     /// Overall test run progress.
     pub progress: Option<&'a TestsProgress>,
     /// The handle to the tokio runtime.

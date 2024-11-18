@@ -146,7 +146,6 @@ fn run_test_suite(
         revert_decoder: &runner.revert_decoder,
         initial_balance: runner.evm_opts.initial_balance,
         sender: runner.sender.unwrap_or_default(),
-        debug: runner.debug,
         progress,
         tokio_handle,
         span,

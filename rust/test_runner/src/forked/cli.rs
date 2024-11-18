@@ -64,6 +64,7 @@ use crate::forked::{
     install, summary,
     summary::TestSummaryReporter,
 };
+use crate::forked::multi_runner_run::test;
 
 // Loads project's figment and merges the build cli arguments into it
 foundry_config::merge_impl_figment_convert!(TestArgs, opts, evm_opts);
@@ -581,7 +582,7 @@ impl TestArgs {
         let show_progress = config.show_progress;
         let handle = tokio::task::spawn_blocking({
             let filter = filter.clone();
-            move || runner.test(&filter, tx, show_progress)
+            move || test(runner, &filter, tx, show_progress)
         });
 
         // Set up trace identifiers.

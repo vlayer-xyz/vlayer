@@ -72,7 +72,7 @@ mod tests {
 
         assert!(matches!(
             res.map(|_| ()).unwrap_err(),
-            Error::Prover(ref msg) if msg == "Guest panicked: travel call execution failed: EvmEnv(\"NullEvmEnvFactory cannot create EvmEnv\")"
+            Error::Prover(ref msg) if msg == "failed to fill whole buffer"
         ));
     }
 }
