@@ -4,7 +4,7 @@ use alloy_chains::Chain;
 use alloy_sol_types::SolCall;
 use call_engine::HostOutput;
 use call_guest_wrapper::GUEST_ELF as CALL_GUEST_ELF;
-use call_host::{get_block_header, Call, Host, HostConfig, HostError, PreflightResult};
+use call_host::{get_block_header, Call, Error, Host, HostConfig, PreflightResult};
 use chain_client::RpcClient as RpcChainProofClient;
 use chain_guest_wrapper::GUEST_ELF as CHAIN_GUEST_ELF;
 use ethers_core::types::BlockNumber as BlockTag;
@@ -49,7 +49,7 @@ pub async fn run(
     test_name: &str,
     call: Call,
     location: &ExecutionLocation,
-) -> Result<HostOutput, HostError> {
+) -> Result<HostOutput, Error> {
     let multi_provider = create_multi_provider(test_name);
     let chain_proof_server = create_chain_proof_server(&multi_provider, location).await?;
     let host = create_host(multi_provider, location, chain_proof_server.url())?;
@@ -59,7 +59,7 @@ pub async fn run(
 async fn create_chain_proof_server(
     multi_provider: &CachedMultiProvider,
     location: &ExecutionLocation,
-) -> Result<ChainProofServerMock, HostError> {
+) -> Result<ChainProofServerMock, Error> {
     let block_header = get_block_header(multi_provider, location.chain_id, location.block_tag)?;
     let block_number = block_header.number();
     let result = fake_proof_result(block_header);
@@ -80,7 +80,7 @@ fn create_host(
     multi_provider: CachedMultiProvider,
     location: &ExecutionLocation,
     chain_proof_server_url: impl AsRef<str>,
-) -> Result<Host, HostError> {
+) -> Result<Host, Error> {
     let config = HostConfig {
         start_chain_id: location.chain_id,
         call_guest_elf: CALL_GUEST_ELF.clone(),

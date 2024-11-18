@@ -6,7 +6,7 @@ use std::{
 
 use alloy_chains::{Chain, NamedChain};
 use alloy_primitives::ChainId;
-use call_host::{get_block_header, HostError};
+use call_host::{get_block_header, Error};
 use dotenvy::dotenv;
 use ethers_core::types::BlockNumber as BlockTag;
 use lazy_static::lazy_static;
@@ -71,7 +71,7 @@ pub fn block_tag_to_block_number(
     multi_provider: &CachedMultiProvider,
     chain_id: ChainId,
     block_tag: BlockTag,
-) -> Result<BlockNumber, HostError> {
+) -> Result<BlockNumber, Error> {
     match block_tag {
         BlockTag::Latest => {
             Ok(get_block_header(multi_provider, chain_id, BlockTag::Latest)?.number())

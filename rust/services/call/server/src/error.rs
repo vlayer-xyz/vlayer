@@ -2,7 +2,7 @@ use axum_jrpc::{
     error::{JsonRpcError, JsonRpcErrorReason},
     Value,
 };
-use call_host::HostError;
+use call_host::Error as HostError;
 use server_utils::FieldValidationError;
 use thiserror::Error;
 use tokio::task::JoinError;
