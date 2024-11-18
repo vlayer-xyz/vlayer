@@ -8,6 +8,9 @@ export default [
   ...ts.configs.recommendedTypeChecked,
   prettierRecommended,
   {
+    rules: {
+      curly: "error",
+    },
     languageOptions: {
       globals: {
         ...globals.browser,

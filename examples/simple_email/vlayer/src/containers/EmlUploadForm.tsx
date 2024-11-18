@@ -47,8 +47,9 @@ const EmlUploadForm = () => {
   });
 
   const getClaimerAddr = async () => {
-    if (typeof window !== "undefined" && !window.ethereum)
+    if (typeof window !== "undefined" && !window.ethereum) {
       throw new Error("no_wallet_detected");
+    }
 
     if (chain.name !== chains.anvil.name) {
       await walletClient.switchChain({ id: chain.id });
@@ -120,7 +121,9 @@ const EmlUploadForm = () => {
 
     const formData = new FormData(e.currentTarget);
     const emlFile = formData.get("emlFile") as File | null;
-    if (!emlFile) throw new Error("no_eml_file");
+    if (!emlFile) {
+      throw new Error("no_eml_file");
+    }
 
     setCurrentStep("Connecting to wallet...");
     const addr = await getClaimerAddr();
