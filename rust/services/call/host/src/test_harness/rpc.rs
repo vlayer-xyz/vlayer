@@ -44,18 +44,16 @@ lazy_static! {
     static ref anvil_url: String = format!("http://localhost:8545");
 }
 
-pub fn rpc_file_cache(test_name: &str) -> HashMap<ChainId, String> {
+pub fn rpc_snapshot_file(chain: &str, test_name: &str) -> String {
+    format!("test_data/{chain}_{test_name}_rpc_cache.json")
+}
+
+pub fn rpc_snapshot_files(test_name: &str) -> HashMap<ChainId, String> {
     HashMap::from([
-        (Chain::mainnet().id(), format!("test_data/mainnet_{test_name}_rpc_cache.json")),
-        (Chain::sepolia().id(), format!("test_data/sepolia_{test_name}_rpc_cache.json")),
-        (
-            Chain::optimism_sepolia().id(),
-            format!("test_data/op_sepolia_{test_name}_rpc_cache.json"),
-        ),
-        (
-            NamedChain::AnvilHardhat.into(),
-            format!("test_data/anvil_{test_name}_rpc_cache.json"),
-        ),
+        (Chain::mainnet().id(), rpc_snapshot_file("mainnet", test_name)),
+        (Chain::sepolia().id(), rpc_snapshot_file("sepolia", test_name)),
+        (Chain::optimism_sepolia().id(), rpc_snapshot_file("op_sepolia", test_name)),
+        (NamedChain::AnvilHardhat.into(), rpc_snapshot_file("anvil", test_name)),
     ])
 }
 
@@ -83,9 +81,9 @@ pub fn block_tag_to_block_number(
 }
 
 pub fn create_multi_provider(test_name: &str) -> CachedMultiProvider {
+    let rpc_files = rpc_snapshot_files(test_name);
     let maybe_ethers_provider_factory =
         UPDATE_SNAPSHOTS.then(|| provider::EthersProviderFactory::new(rpc_urls()));
-    let provider_factory =
-        CachedProviderFactory::new(rpc_file_cache(test_name), maybe_ethers_provider_factory);
+    let provider_factory = CachedProviderFactory::new(rpc_files, maybe_ethers_provider_factory);
     CachedMultiProvider::from_factory(provider_factory)
 }

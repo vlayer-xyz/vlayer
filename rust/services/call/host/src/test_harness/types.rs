@@ -1,6 +1,7 @@
 use alloy_primitives::ChainId;
 use ethers_core::types::BlockNumber as BlockTag;
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
 pub struct ExecutionLocation {
     pub chain_id: ChainId,
     pub block_tag: BlockTag,

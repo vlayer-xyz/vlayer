@@ -5,7 +5,9 @@ use chain_client::RpcClient as RpcChainProofClient;
 use chain_guest_wrapper::GUEST_ELF as CHAIN_GUEST_ELF;
 use mock_chain_server::{fake_proof_result, ChainProofServerMock};
 use provider::CachedMultiProvider;
-pub use rpc::{block_tag_to_block_number, create_multi_provider, rpc_file_cache};
+pub use rpc::{
+    block_tag_to_block_number, create_multi_provider, rpc_snapshot_file, rpc_snapshot_files,
+};
 use serde_json::json;
 pub use types::ExecutionLocation;
 
