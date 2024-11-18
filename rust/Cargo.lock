@@ -2130,6 +2130,7 @@ dependencies = [
  "alloy-chains",
  "alloy-primitives",
  "anyhow",
+ "delegate",
  "derive-new",
  "once_cell",
  "revm",
