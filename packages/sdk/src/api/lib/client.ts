@@ -20,7 +20,9 @@ function dropEmptyProofFromArgs(args: unknown) {
   return [];
 }
 
-async function getHash(vcall_response: Promise<VCallResponse>): Promise<[Hex, VCallResponse]> {
+async function getHash(
+  vcall_response: Promise<VCallResponse>,
+): Promise<[Hex, VCallResponse]> {
   const result = await vcall_response;
   return [result.result.hash, result];
 }
@@ -33,9 +35,9 @@ export const createVlayerClient = (
     url?: string;
     webProofProvider?: WebProofProvider;
   } = {
-      url: "http://127.0.0.1:3000",
-      webProofProvider: createExtensionWebProofProvider(),
-    },
+    url: "http://127.0.0.1:3000",
+    webProofProvider: createExtensionWebProofProvider(),
+  },
 ): VlayerClient => {
   const resultHashMap = new Map<
     string,
@@ -62,7 +64,11 @@ export const createVlayerClient = (
           return result;
         });
       const [hash, result_promise] = await getHash(response);
-      resultHashMap.set(hash, [Promise.resolve(result_promise), proverAbi, functionName]);
+      resultHashMap.set(hash, [
+        Promise.resolve(result_promise),
+        proverAbi,
+        functionName,
+      ]);
       return { hash } as BrandedHash<typeof proverAbi, typeof functionName>;
     },
     waitForProvingResult: async <
