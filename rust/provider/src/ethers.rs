@@ -7,6 +7,7 @@ use derive_new::new;
 use ethers_core::types::{Block, BlockNumber as BlockTag};
 use ethers_providers::{Http, Middleware, RetryClient};
 use tokio::runtime::Handle;
+use tracing::instrument;
 
 use super::{BlockingProvider, EIP1186Proof};
 
@@ -25,6 +26,7 @@ fn block_on<F: Future>(f: F) -> F::Output {
 }
 
 impl BlockingProvider for EthersProvider {
+    #[instrument(skip(self))]
     fn get_block_header(&self, block: BlockTag) -> Result<Option<Box<dyn EvmBlockHeader>>> {
         let block = block_on(self.client.get_block(block))?;
         match block {
@@ -36,6 +38,7 @@ impl BlockingProvider for EthersProvider {
         }
     }
 
+    #[instrument(skip(self))]
     fn get_transaction_count(
         &self,
         address: alloy_primitives::Address,
@@ -51,6 +54,7 @@ impl BlockingProvider for EthersProvider {
         Ok(count)
     }
 
+    #[instrument(skip(self))]
     fn get_balance(
         &self,
         address: alloy_primitives::Address,
@@ -61,6 +65,7 @@ impl BlockingProvider for EthersProvider {
         Ok(from_ethers_u256(balance))
     }
 
+    #[instrument(skip(self))]
     fn get_code(
         &self,
         address: alloy_primitives::Address,
@@ -71,6 +76,7 @@ impl BlockingProvider for EthersProvider {
         Ok(from_ethers_bytes(code))
     }
 
+    #[instrument(skip(self))]
     fn get_storage_at(
         &self,
         address: alloy_primitives::Address,
@@ -83,6 +89,7 @@ impl BlockingProvider for EthersProvider {
         Ok(from_ethers_h256(value).into())
     }
 
+    #[instrument(skip(self))]
     fn get_proof(
         &self,
         address: alloy_primitives::Address,

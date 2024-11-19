@@ -1,8 +1,10 @@
 mod cache;
+mod default;
 mod ethers;
 mod factory;
 mod multi;
-mod null;
+mod never;
+mod profiling;
 mod proof;
 
 use std::fmt::Debug;
@@ -11,13 +13,16 @@ pub use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue
 use anyhow::Result;
 use auto_impl::auto_impl;
 pub use block_header::EvmBlockHeader;
+pub use cache::CachedProvider;
 pub use ethers::*;
 pub use ethers_core::types::BlockNumber as BlockTag;
 use ethers_providers::{Http, RetryClient};
 pub use factory::{
-    CachedProviderFactory, EthersProviderFactory, ProviderFactory, ProviderFactoryError,
+    CachedProviderFactory, EthersProviderFactory, NullProviderFactory, ProviderFactory,
+    ProviderFactoryError,
 };
 pub use multi::CachedMultiProvider;
+pub use profiling::ProfilingProvider;
 pub use proof::{EIP1186Proof, StorageProof};
 
 /// The Ethers client type.

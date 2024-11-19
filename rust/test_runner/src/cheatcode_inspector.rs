@@ -136,7 +136,7 @@ fn create_host<DB: Database>(
     };
     let provider_factory =
         TestProviderFactory::new(pending_state_provider_factory, rpc_endpoints.clone());
-    let providers = CachedMultiProvider::new(provider_factory);
+    let providers = CachedMultiProvider::from_factory(provider_factory);
     let config = HostConfig {
         start_chain_id: TEST_CHAIN_ID,
         chain_proof_url,

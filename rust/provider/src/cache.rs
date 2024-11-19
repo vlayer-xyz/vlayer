@@ -7,7 +7,7 @@ use ethers_core::types::BlockNumber as BlockTag;
 use json::{AccountQuery, BlockQuery, JsonCache, ProofQuery, StorageQuery};
 
 use super::{BlockingProvider, EIP1186Proof};
-use crate::null::NullProvider;
+use crate::never::NeverProvider;
 
 pub(crate) mod json;
 
@@ -44,7 +44,7 @@ impl CachedProvider {
 
     pub fn from_file(file_path: &PathBuf) -> Result<Self> {
         let cache = JsonCache::load(file_path)?;
-        Ok(Self::from_components(cache, NullProvider(PhantomData)))
+        Ok(Self::from_components(cache, NeverProvider(PhantomData)))
     }
 
     fn from_components(cache: JsonCache, provider: impl BlockingProvider + 'static) -> Self {

@@ -9,9 +9,9 @@ use super::{BlockingProvider, EIP1186Proof};
 
 /// A simple provider that panics on all queries.
 #[derive(Debug, PartialEq)]
-pub struct NullProvider(pub(crate) PhantomData<Box<dyn EvmBlockHeader>>);
+pub struct NeverProvider(pub(crate) PhantomData<Box<dyn EvmBlockHeader>>);
 
-impl BlockingProvider for NullProvider {
+impl BlockingProvider for NeverProvider {
     fn get_block_header(&self, _: BlockTag) -> Result<Option<Box<dyn EvmBlockHeader>>> {
         panic!("Unexpected provider call")
     }

@@ -27,6 +27,17 @@ pub trait ProviderFactory: Send + Sync {
     fn create(&self, chain_id: ChainId) -> Result<Box<dyn BlockingProvider>, ProviderFactoryError>;
 }
 
+pub struct NullProviderFactory;
+
+impl ProviderFactory for NullProviderFactory {
+    fn create(
+        &self,
+        _chain_id: ChainId,
+    ) -> Result<Box<dyn BlockingProvider>, ProviderFactoryError> {
+        Err(ProviderFactoryError::CachedProvider("Forced error for testing".to_string()))
+    }
+}
+
 #[derive(new)]
 pub struct EthersProviderFactory {
     rpc_urls: HashMap<ChainId, String>,

@@ -75,7 +75,7 @@ sol! {
 
 // Generated using `simple_time_travel` example
 pub const SIMPLE_TIME_TRAVEL: Address = address!("0d5556591b2ffe5e7d54a4887638508f039771d3");
-pub const TOKEN_OWNER: Address = address!("E6b08c02Dbf3a0a4D3763136285B85A9B492E391");
+const TOKEN_OWNER: Address = address!("E6b08c02Dbf3a0a4D3763136285B85A9B492E391");
 sol!(
     #[sol(all_derives = true)]
     struct Seal {
@@ -101,3 +101,8 @@ sol!(
         function averageBalanceOf(address _owner) public returns (Proof memory, address, uint256);
     }
 );
+
+pub const AVERAGE_BALANCE_OF_CALL: AverageBalance::averageBalanceOfCall =
+    AverageBalance::averageBalanceOfCall {
+        _owner: TOKEN_OWNER,
+    };
