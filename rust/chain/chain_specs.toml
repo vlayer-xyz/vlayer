@@ -21,6 +21,8 @@ forks = [
 ]
 
 # eth_sepolia
+# source:
+# https://github.com/ethereum/execution-specs/tree/5e8aeb3e5b4ba6d2ff2308b1ab9625ef0c38a4f6/network-upgrades/mainnet-upgrades
 [[chains]]
 chain_id = 11155111
 forks = [
