@@ -27,10 +27,10 @@ First, make sure the dependencies are up-to-date:
 git submodule update --init --recursive
 ```
 
-Next, navigate to `contracts` directory, and run:
+Next, navigate to `contracts/vlayer` directory, and run:
 
 ```sh
-cd contracts
+cd contracts/vlayer
 forge soldeer install
 ```
 
