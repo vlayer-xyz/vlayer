@@ -288,11 +288,11 @@ jobs:
 
       - name: Copy ImageID to contracts
         run: |
-          rm contracts/src/ImageID.sol
-          cp guest-artifacts/ImageID.sol contracts/src/ImageID.sol
+          rm contracts/vlayer/src/ImageID.sol
+          cp guest-artifacts/ImageID.sol contracts/vlayer/src/ImageID.sol
 
       - name: Release contracts to Soldeer
-        working-directory: contracts
+        working-directory: contracts/vlayer
         env:
             SOLDEER_LOGIN_FILE: "${{ runner.temp }}/.soldeer_login"
             VLAYER_BUILD: ${{ needs.build-release.outputs.vlayer_build }}
@@ -300,7 +300,7 @@ jobs:
           forge soldeer push "vlayer~${VLAYER_BUILD}" --skip-warnings
 
       - name: Build vlayer contracts artifact
-        working-directory: contracts
+        working-directory: contracts/vlayer
         env:
             VLAYER_BUILD: ${{ needs.build-release.outputs.vlayer_build }}
         run: |
@@ -310,7 +310,7 @@ jobs:
         uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
         with:
           name: vlayer-contracts
-          path: contracts/contracts.zip
+          path: contracts/vlayer/contracts.zip
           if-no-files-found: error
           retention-days: 3
 
