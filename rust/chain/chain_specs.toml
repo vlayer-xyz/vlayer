@@ -24,7 +24,7 @@ forks = [
 [[chains]]
 chain_id = 11155111
 forks = [
-  { spec = "MERGE", activation = { Block = 1735371 } },
-  { spec = "SHANGHAI", activation = { Block = 1735371 } },
-  { spec = "CANCUN", activation = { Timestamp = 1681338455 } }
+  { spec = "MERGE", activation = { Block = 0 } },
+  { spec = "SHANGHAI", activation = { Timestamp = 1677557088 } },
+  { spec = "CANCUN", activation = { Timestamp = 1706655072 } }
 ]
