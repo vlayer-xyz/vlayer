@@ -86,10 +86,10 @@ forks = [
 # optimism_sepolia
 # https://github.com/ethereum-optimism/op-geth/blob/3dd9b0274bae3d3d2c80ef517563a360108e8cf6/core/forkid/forkid_test.go#L88
 [[chains]]
-chain_id = 11155111
+chain_id = 11155420
 forks = [
-  { spec = "LONDON", activation = { Block = 0 } },                        # Includes all forks up to and including London
-  { spec = "MERGE", activation = { Block = 1735371 } },                   # Merge activation block
-  { spec = "SHANGHAI", activation = { Timestamp = 1677557088 } },         # Shanghai activation timestamp
-  { spec = "CANCUN", activation = { Timestamp = 1706655072 } }            # Cancun activation timestamp
+  { spec = "LONDON", activation = { Block = 0 } },
+  { spec = "MERGE", activation = { Block = 1735371 } },
+  { spec = "SHANGHAI", activation = { Timestamp = 1677557088 } },
+  { spec = "CANCUN", activation = { Timestamp = 1706655072 } }
 ]
