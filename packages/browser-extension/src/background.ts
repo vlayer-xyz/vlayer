@@ -11,7 +11,6 @@ import { WebProverSessionContextManager } from "./state/webProverSessionContext"
 import { match, P } from "ts-pattern";
 import { zkProvingStatusStore } from "./state/zkProvingStatusStore.ts";
 
-let windowId = 0;
 let port: browser.Runtime.Port | undefined = undefined;
 let openedTabId: number | undefined = undefined;
 
@@ -53,31 +52,23 @@ browser.runtime.onMessage.addListener(async (message: ExtensionMessage) => {
     .exhaustive();
 });
 
-browser.tabs.onActivated.addListener(function (activeInfo) {
-  windowId = activeInfo.windowId;
-});
-
-browser.tabs
-  .query({ active: true, currentWindow: true })
-  .then((tabs) => {
-    windowId = tabs[0].windowId || 0;
-  })
-  .catch(console.error);
-
-browser.runtime.onMessageExternal.addListener((message: MessageToExtension) => {
-  (async () => {
-    if (message.action === ExtensionAction.RequestWebProof) {
-      if (chrome.sidePanel) {
-        await chrome.sidePanel.open({ windowId: windowId });
+browser.runtime.onMessageExternal.addListener(
+  (message: MessageToExtension, sender) => {
+    (async () => {
+      if (message.action === ExtensionAction.RequestWebProof) {
+        // only open side panel if it is supported and sender is browser tab
+        if (chrome.sidePanel && sender.tab?.windowId) {
+          await chrome.sidePanel.open({ windowId: sender.tab?.windowId });
+        }
+        await browser.storage.local.clear();
+        await browser.storage.session.clear();
+        await WebProverSessionContextManager.instance.setWebProverSessionConfig(
+          message.payload,
+        );
+      } else if (message.action === ExtensionAction.NotifyZkProvingStatus) {
+        console.log("Received proving status", message.payload);
+        await zkProvingStatusStore.setProvingStatus(message.payload);
       }
-      await browser.storage.local.clear();
-      await browser.storage.session.clear();
-      await WebProverSessionContextManager.instance.setWebProverSessionConfig(
-        message.payload,
-      );
-    } else if (message.action === ExtensionAction.NotifyZkProvingStatus) {
-      console.log("Received proving status", message.payload);
-      await zkProvingStatusStore.setProvingStatus(message.payload);
-    }
-  })().catch(console.error);
-});
+    })().catch(console.error);
+  },
+);
