@@ -1,5 +1,5 @@
 import { VCallResponse, VlayerClient, BrandedHash } from "types/vlayer";
-import { WebProofProvider, WebProofSetupInput } from "types/webProofProvider";
+import { WebProofProvider, WebProofSetup } from "types/webProofProvider";
 
 import { prove } from "../prover";
 import { createExtensionWebProofProvider } from "../webProof";
@@ -116,7 +116,7 @@ export const createVlayerClient = (
       functionName: F;
       chainId: number;
       args: [
-        WebProofSetupInput,
+        WebProofSetup,
         ...ContractFunctionArgsWithout<T, F, { name: "webProof" }>,
       ];
       notary_pub_key: string;
