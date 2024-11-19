@@ -10,15 +10,19 @@ use crate::{
 
 mod usdt {
     use super::*;
-    use crate::test_harness::contracts::{IERC20::balanceOfCall, USDT, USDT_BLOCK_NO};
+    use crate::test_harness::contracts::{
+        IERC20::{balanceOfCall, balanceOfReturn},
+        USDT, USDT_BLOCK_NO,
+    };
 
     #[tokio::test]
     async fn erc20_balance_of() -> anyhow::Result<()> {
         let location: ExecutionLocation = (Chain::mainnet().id(), USDT_BLOCK_NO).into();
         let binance_8 = address!("F977814e90dA44bFA03b6295A0616a897441aceC");
         let call = Call::new(USDT, &balanceOfCall { account: binance_8 });
-        let result = preflight::<balanceOfCall>("usdt_erc20_balance_of", call, &location).await?;
-        assert_eq!(result._0, uint!(3_000_000_000_000_000_U256));
+        let balanceOfReturn { _0: balance } =
+            preflight("usdt_erc20_balance_of", call, &location).await?;
+        assert_eq!(balance, uint!(3_000_000_000_000_000_U256));
         Ok(())
     }
 }
@@ -34,8 +38,7 @@ mod uniswap {
     async fn factory_owner() -> anyhow::Result<()> {
         let location: ExecutionLocation = (Chain::mainnet().id(), BlockTag::Latest).into();
         let call = Call::new(UNISWAP, &ownerCall {});
-        let ownerReturn { _0: owner } =
-            preflight::<ownerCall>("uniswap_factory_owner", call, &location).await?;
+        let ownerReturn { _0: owner } = preflight("uniswap_factory_owner", call, &location).await?;
         assert_eq!(owner, address!("1a9c8182c09f50c8318d769245bea52c32be35bc")); // UNI Timelock
         Ok(())
     }
@@ -47,8 +50,10 @@ mod view {
     use super::*;
     use crate::test_harness::contracts::{
         ViewCallTest::{
-            testBlockhashCall, testChainidCall, testEoaAccountCall, testMuliContractCallsCall,
-            testNonexistentAccountCall, testPrecompileCall,
+            testBlockhashCall, testBlockhashReturn, testChainidCall, testChainidReturn,
+            testEoaAccountCall, testEoaAccountReturn, testMuliContractCallsCall,
+            testMuliContractCallsReturn, testNonexistentAccountCall, testNonexistentAccountReturn,
+            testPrecompileCall, testPrecompileReturn,
         },
         VIEW_CALL, VIEW_CALL_BLOCK_NO,
     };
@@ -60,11 +65,9 @@ mod view {
     #[tokio::test]
     async fn precompile() -> anyhow::Result<()> {
         let call = Call::new(VIEW_CALL, &testPrecompileCall {});
-        let result = preflight::<testPrecompileCall>("view_precompile", call, &LOCATION).await?;
-        assert_eq!(
-            result._0,
-            b256!("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
-        );
+        let testPrecompileReturn { _0: hash } =
+            preflight("view_precompile", call, &LOCATION).await?;
+        assert_eq!(hash, b256!("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"));
         Ok(())
     }
 
@@ -75,32 +78,28 @@ mod view {
             to: VIEW_CALL,
             data: sol_call.abi_encode(),
         };
-        let result =
-            preflight::<testNonexistentAccountCall>("view_nonexistent_account", call, &LOCATION)
-                .await?;
-        assert_eq!(result.size, uint!(0_U256));
+        let testNonexistentAccountReturn { size } =
+            preflight("view_nonexistent_account", call, &LOCATION).await?;
+        assert_eq!(size, uint!(0_U256));
         Ok(())
     }
 
     #[tokio::test]
     async fn eoa_account() -> anyhow::Result<()> {
         let call = Call::new(VIEW_CALL, &testEoaAccountCall {});
-        let result = preflight::<testEoaAccountCall>("view_eoa_account", call, &LOCATION).await?;
-        assert_eq!(result.size, uint!(0_U256));
+        let testEoaAccountReturn { size } = preflight("view_eoa_account", call, &LOCATION).await?;
+        assert_eq!(size, uint!(0_U256));
         Ok(())
     }
 
     #[tokio::test]
     async fn blockhash() -> anyhow::Result<()> {
         let call = Call::new(VIEW_CALL, &testBlockhashCall {});
-        let result = preflight::<testBlockhashCall>(
-            "view_blockhash",
-            call,
-            &(Chain::sepolia().id(), VIEW_CALL_BLOCK_NO).into(),
-        )
-        .await?;
+        let testBlockhashReturn { _0: block_hash } =
+            preflight("view_blockhash", call, &(Chain::sepolia().id(), VIEW_CALL_BLOCK_NO).into())
+                .await?;
         assert_eq!(
-            result._0,
+            block_hash,
             b256!("7703fe4a3d6031a579d52ce9e493e7907d376cfc3b41f9bc7710b0dae8c67f68")
         );
         Ok(())
@@ -109,18 +108,17 @@ mod view {
     #[tokio::test]
     async fn chainid() -> anyhow::Result<()> {
         let call = Call::new(VIEW_CALL, &testChainidCall {});
-        let result = preflight::<testChainidCall>("view_chainid", call, &LOCATION).await?;
-        assert_eq!(result._0, uint!(11_155_111_U256));
+        let testChainidReturn { _0: chain_id } = preflight("view_chainid", call, &LOCATION).await?;
+        assert_eq!(chain_id, uint!(11_155_111_U256));
         Ok(())
     }
 
     #[tokio::test]
     async fn multi_contract_calls() -> anyhow::Result<()> {
         let call = Call::new(VIEW_CALL, &testMuliContractCallsCall {});
-        let result =
-            preflight::<testMuliContractCallsCall>("view_multi_contract_calls", call, &LOCATION)
-                .await?;
-        assert_eq!(result._0, uint!(84_U256));
+        let testMuliContractCallsReturn { _0: value } =
+            preflight("view_multi_contract_calls", call, &LOCATION).await?;
+        assert_eq!(value, uint!(84_U256));
         Ok(())
     }
 
@@ -177,7 +175,7 @@ mod time_travel {
         let averageBalanceOfReturn {
             _2: average_balance,
             ..
-        } = preflight::<averageBalanceOfCall>("simple_time_travel", call, &location).await?;
+        } = preflight("simple_time_travel", call, &location).await?;
 
         assert_eq!(average_balance, uint!(1_874_845_031_590_000_U256));
 
