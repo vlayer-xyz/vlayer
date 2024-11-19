@@ -14,15 +14,10 @@ export type ContractFunctionArgsWithout<
   abi extends Abi,
   functionName extends ContractFunctionName<abi>,
   without,
-> =
-  AbiParametersToPrimitiveTypes<
-    Without<
-      ExtractAbiFunction<abi extends Abi ? abi : Abi, functionName>["inputs"],
-      without
-    >,
-    "inputs"
-  > extends infer args
-    ? [args] extends [never]
-      ? readonly unknown[]
-      : args
-    : readonly unknown[];
+> = AbiParametersToPrimitiveTypes<
+  Without<
+    ExtractAbiFunction<abi extends Abi ? abi : Abi, functionName>["inputs"],
+    without
+  >,
+  "inputs"
+>;
