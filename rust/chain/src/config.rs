@@ -121,27 +121,11 @@ pub static BASE_CHAIN_SPEC: Lazy<ChainSpec> =
 pub static BASE_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> =
     Lazy::new(|| CHAIN_SPECS[&Chain::base_sepolia().id()].clone());
 
-pub static OP_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
-    ChainSpec::new(
-        Chain::optimism_mainnet().id(),
-        [
-            Fork::after_block(MERGE, 1735371),
-            Fork::after_timestamp(SHANGHAI, 1677557088),
-            Fork::after_timestamp(CANCUN, 1706655072),
-        ],
-    )
-});
+pub static OP_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> =
+    Lazy::new(|| CHAIN_SPECS[&Chain::optimism_mainnet().id()].clone());
 
-pub static OP_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
-    ChainSpec::new(
-        Chain::optimism_sepolia().id(),
-        [
-            Fork::after_block(MERGE, 1735371),
-            Fork::after_timestamp(SHANGHAI, 1677557088),
-            Fork::after_timestamp(CANCUN, 1706655072),
-        ],
-    )
-});
+pub static OP_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> =
+    Lazy::new(|| CHAIN_SPECS[&Chain::optimism_sepolia().id()].clone());
 
 pub static POLYGON_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
     ChainSpec::new(
