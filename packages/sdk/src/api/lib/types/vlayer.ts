@@ -8,7 +8,7 @@ import {
   ContractFunctionReturnType,
   Hex,
 } from "viem";
-import { WebProofSetupInput } from "./webProofProvider";
+import { WebProofSetup } from "./webProofProvider";
 import { ContractFunctionArgsWithout } from "./viem";
 
 type Calldata = string;
@@ -71,7 +71,7 @@ export type VlayerClient = {
     functionName: F;
     chainId: number;
     args: [
-      WebProofSetupInput,
+      WebProofSetup,
       ...ContractFunctionArgsWithout<T, F, { name: "webProof" }>,
     ];
     notary_pub_key: string;
