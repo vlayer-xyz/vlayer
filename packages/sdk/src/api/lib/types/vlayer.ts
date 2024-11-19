@@ -73,6 +73,5 @@ export type VlayerClient = {
       WebProofSetup,
       ...ContractFunctionArgsWithout<T, F, { name: "webProof" }>,
     ];
-    notary_pub_key: string;
   }) => Promise<BrandedHash<T, F>>;
 };

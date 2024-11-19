@@ -119,7 +119,6 @@ export const createVlayerClient = (
         WebProofSetup,
         ...ContractFunctionArgsWithout<T, F, { name: "webProof" }>,
       ];
-      notary_pub_key: string;
     }) {
       const webProofPlaceholder = args.args[0];
       const contractArgs = args.args.slice(1) as ContractFunctionArgsWithout<
