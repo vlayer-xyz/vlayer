@@ -28,6 +28,14 @@ beforeEach(() => {
   };
 });
 
+function generateRandomHash() {
+  let hash = "0x";
+  for (let i = 0; i < 40; ++i) {
+    hash += Math.floor(Math.random() * 16).toString(16);
+  }
+  return hash;
+}
+
 describe("Success zk-proving", () => {
   beforeEach(() => {
     fetchMocker.mockResponseOnce((req) => {
@@ -35,6 +43,7 @@ describe("Success zk-proving", () => {
         return {
           body: JSON.stringify({
             result: {
+              hash: generateRandomHash(),
               proof: {},
             },
           }),
@@ -81,14 +90,14 @@ describe("Failed zk-proving", () => {
     const zkProvingSpy = vi.spyOn(webProofProvider, "notifyZkProvingStatus");
 
     const vlayer = createVlayerClient({ webProofProvider });
-    const hash = await vlayer.prove({
-      address: `0x${"a".repeat(40)}`,
-      functionName: "main",
-      proverAbi: [],
-      args: [],
-      chainId: 42,
-    });
     try {
+      const hash = await vlayer.prove({
+        address: `0x${"a".repeat(40)}`,
+        functionName: "main",
+        proverAbi: [],
+        args: [],
+        chainId: 42,
+      });
       await vlayer.waitForProvingResult(hash);
     } catch (e) {
       console.log("Error waiting for proving result", e);
