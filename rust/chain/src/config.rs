@@ -5,6 +5,8 @@ use alloy_chains::Chain;
 use alloy_primitives::ChainId;
 use once_cell::sync::Lazy;
 use revm::primitives::SpecId::*;
+use serde::Deserialize;
+use toml::from_str;
 
 use crate::{fork::Fork, spec::ChainSpec};
 
@@ -14,6 +16,27 @@ pub const TEST_CHAIN_ID: ChainId = 31_337;
 // https://etherscan.io/block/15537394
 pub const MAINNET_MERGE_BLOCK_NUMBER: u64 = 15537394;
 pub const MAINNET_MERGE_BLOCK_TIMESTAMP: u64 = 1663224179;
+
+#[derive(Debug, Deserialize)]
+struct ChainSpecs {
+    pub chains: Vec<ChainSpec>,
+}
+
+fn load_chain_specs() -> HashMap<ChainId, ChainSpec> {
+    // include_str! loads chain_specs in compilation time
+    let chain_specs: ChainSpecs =
+        from_str(include_str!("../chain_specs.toml")).expect("failed to load chain specs");
+    let chain_specs_len = chain_specs.chains.len();
+    let chain_id_to_chain_spec: HashMap<ChainId, ChainSpec> = chain_specs
+        .chains
+        .into_iter()
+        .map(|chain| (*chain, chain))
+        .collect();
+
+    assert!(chain_specs_len == chain_id_to_chain_spec.len(), "duplicated chain specs",);
+
+    chain_id_to_chain_spec
+}
 
 pub static CHAIN_MAP: Lazy<HashMap<ChainId, &'static Lazy<ChainSpec>>> = Lazy::new(|| {
     HashMap::from([
@@ -50,7 +73,7 @@ pub static CHAIN_MAP: Lazy<HashMap<ChainId, &'static Lazy<ChainSpec>>> = Lazy::n
     ])
 });
 
-pub static CHAIN_NAMES: Lazy<HashMap<String, ChainId>> = Lazy::new(|| {
+pub static CHAIN_NAME_TO_ID: Lazy<HashMap<String, ChainId>> = Lazy::new(|| {
     HashMap::from([
         ("mainnet".into(), Chain::mainnet().id()),
         ("sepolia".into(), Chain::sepolia().id()),
@@ -84,28 +107,13 @@ pub static CHAIN_NAMES: Lazy<HashMap<String, ChainId>> = Lazy::new(|| {
     ])
 });
 
-pub static ETH_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
-    ChainSpec::new(
-        Chain::mainnet().id(),
-        [
-            Fork::after_block(FRONTIER, 0),
-            Fork::after_block(MERGE, MAINNET_MERGE_BLOCK_NUMBER),
-            Fork::after_timestamp(SHANGHAI, 1681338455),
-            Fork::after_timestamp(CANCUN, 1710338135),
-        ],
-    )
-});
+static CHAIN_SPECS: Lazy<HashMap<ChainId, ChainSpec>> = Lazy::new(load_chain_specs);
 
-pub static ETH_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
-    ChainSpec::new(
-        Chain::sepolia().id(),
-        [
-            Fork::after_block(MERGE, 1735371),
-            Fork::after_timestamp(SHANGHAI, 1677557088),
-            Fork::after_timestamp(CANCUN, 1706655072),
-        ],
-    )
-});
+static ETH_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> =
+    Lazy::new(|| CHAIN_SPECS[&Chain::mainnet().id()].clone());
+
+pub static ETH_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> =
+    Lazy::new(|| CHAIN_SPECS[&Chain::sepolia().id()].clone());
 
 pub static BASE_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
     ChainSpec::new(

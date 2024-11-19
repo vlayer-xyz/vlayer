@@ -1,7 +1,7 @@
 use std::collections::HashMap;
 
 use alloy_primitives::ChainId;
-use chain::{CHAIN_NAMES, TEST_CHAIN_ID};
+use chain::{CHAIN_NAME_TO_ID, TEST_CHAIN_ID};
 use derive_new::new;
 use foundry_config::RpcEndpoints;
 use provider::{BlockingProvider, EthersProviderFactory, ProviderFactory, ProviderFactoryError};
@@ -16,8 +16,8 @@ pub struct TestProviderFactory {
 
 impl TestProviderFactory {
     fn get_rpc_url(&self, chain_id: ChainId) -> HashMap<ChainId, String> {
-        for (id, rpc_endpoint) in self.rpc_endpoints.iter() {
-            if CHAIN_NAMES.get(id) == Some(&chain_id) {
+        for (name, rpc_endpoint) in self.rpc_endpoints.iter() {
+            if CHAIN_NAME_TO_ID.get(name) == Some(&chain_id) {
                 return HashMap::from([(chain_id, rpc_endpoint.endpoint.as_url().unwrap().into())]);
             }
         }
