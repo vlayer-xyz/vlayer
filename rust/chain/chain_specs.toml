@@ -21,7 +21,6 @@ forks = [
 ]
 
 # eth_sepolia
-# source:
 # https://github.com/ethereum/execution-specs/tree/5e8aeb3e5b4ba6d2ff2308b1ab9625ef0c38a4f6/network-upgrades/mainnet-upgrades
 [[chains]]
 chain_id = 11155111
@@ -30,3 +29,51 @@ forks = [
   { spec = "SHANGHAI", activation = { Timestamp = 1677557088 } },
   { spec = "CANCUN", activation = { Timestamp = 1706655072 } }
 ]
+
+# base_mainnet
+# https://github.com/base-org/optimism/blob/f5221f4d1fae6f3da1bd4d1647e45f40e2b055c4/op-node/chaincfg/chains_test.go#L37
+[[chains]]
+chain_id = 8453
+forks = [
+  { spec = "REGOLITH", activation = { Block = 0 } },
+  { spec = "CANYON", activation = { Timestamp = 1704992401 } },
+  { spec = "ECOTONE", activation = { Timestamp = 1710374401 } },
+  { spec = "FJORD", activation = { Timestamp = 1720627201 } },
+]
+
+# base_sepolia
+# https://github.com/base-org/op-geth/blob/78436b6ae2a45a9c8449a9b0c93b062a37bd20da/core/forkid/forkid_test.go#L103
+[[chains]]
+chain_id = 84532
+forks = [
+  { spec = "CANYON", activation = { Block = 0 } },
+  { spec = "ECOTONE", activation = { Timestamp = 1706634000 } },
+  { spec = "FJORD", activation = { Timestamp = 1715961600 } },
+]
+
+# optimism_mainnet
+# https://docs.optimism.io/builders/node-operators/network-upgrades
+[[chains]]
+chain_id = 10
+forks = [
+  { spec = "MERGE", activation = { Block = 0 } },
+  { spec = "BEDROCK", activation = { Timestamp = 1686079703 } },
+  { spec = "CANYON", activation = { Timestamp = 1704992401 } },
+  { spec = "ECOTONE", activation = { Timestamp = 1710374401 } },
+  { spec = "FJORD", activation = { Timestamp = 1720627201 } },
+  { spec = "GRANITE", activation = { Timestamp = 1726070401 } },
+]
+
+# optimism_sepolia
+# https://github.com/ethereum-optimism/optimism/blob/8e0b89c116d0e294d9fb6e8c60a4bc70421b57d7/op-node/chaincfg/chains_test.go#L74
+[[chains]]
+chain_id = 11155420
+forks = [
+  { spec = "BEDROCK", activation = { Block = 0 } },
+  { spec = "CANYON", activation = { Timestamp = 1699981200 } },
+  { spec = "ECOTONE", activation = { Timestamp = 1708534800 } },
+  { spec = "FJORD", activation = { Timestamp = 1716998400 } },
+  { spec = "GRANITE", activation = { Timestamp = 1723478400 } },
+  { spec = "HOLOCENE", activation = { Timestamp = 1732633200 } },
+]
+
