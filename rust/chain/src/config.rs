@@ -25,7 +25,7 @@ struct ChainSpecs {
 fn load_chain_specs() -> HashMap<ChainId, ChainSpec> {
     // include_str! loads chain_specs in compilation time
     let chain_specs: ChainSpecs =
-        from_str(include_str!("../chain_specs.toml")).expect("failed to load chain specs");
+        from_str(include_str!("../chain_specs.toml")).expect("failed to parse chain specs");
     let chain_specs_len = chain_specs.chains.len();
     let chain_id_to_chain_spec: HashMap<ChainId, ChainSpec> = chain_specs
         .chains
@@ -115,27 +115,11 @@ static ETH_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> =
 pub static ETH_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> =
     Lazy::new(|| CHAIN_SPECS[&Chain::sepolia().id()].clone());
 
-pub static BASE_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
-    ChainSpec::new(
-        Chain::base_mainnet().id(),
-        [
-            Fork::after_block(MERGE, 1735371),
-            Fork::after_timestamp(SHANGHAI, 1677557088),
-            Fork::after_timestamp(CANCUN, 1706655072),
-        ],
-    )
-});
+pub static BASE_CHAIN_SPEC: Lazy<ChainSpec> =
+    Lazy::new(|| CHAIN_SPECS[&Chain::base_mainnet().id()].clone());
 
-pub static BASE_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
-    ChainSpec::new(
-        Chain::base_sepolia().id(),
-        [
-            Fork::after_block(MERGE, 1735371),
-            Fork::after_timestamp(SHANGHAI, 1677557088),
-            Fork::after_timestamp(CANCUN, 1706655072),
-        ],
-    )
-});
+pub static BASE_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> =
+    Lazy::new(|| CHAIN_SPECS[&Chain::base_sepolia().id()].clone());
 
 pub static OP_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
     ChainSpec::new(

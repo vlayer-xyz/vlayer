@@ -21,7 +21,6 @@ forks = [
 ]
 
 # eth_sepolia
-# source:
 # https://github.com/ethereum/execution-specs/tree/5e8aeb3e5b4ba6d2ff2308b1ab9625ef0c38a4f6/network-upgrades/mainnet-upgrades
 [[chains]]
 chain_id = 11155111
@@ -29,4 +28,35 @@ forks = [
   { spec = "MERGE", activation = { Block = 0 } },
   { spec = "SHANGHAI", activation = { Timestamp = 1677557088 } },
   { spec = "CANCUN", activation = { Timestamp = 1706655072 } }
+]
+
+# base_mainnet
+# https://github.com/base-org/op-geth/blob/78436b6ae2a45a9c8449a9b0c93b062a37bd20da/core/forkid/forkid_test.go#L51
+[[chains]]
+chain_id = 8453
+forks = [
+  { spec = "FRONTIER", activation = { Block = 0 } },
+  { spec = "HOMESTEAD", activation = { Block = 1150000 } },
+  { spec = "TANGERINE", activation = { Block = 2463000 } },
+  { spec = "SPURIOUS_DRAGON", activation = { Block = 2675000 } },
+  { spec = "BYZANTIUM", activation = { Block = 4370000 } },
+  { spec = "CONSTANTINOPLE", activation = { Block = 7280000 } },
+  { spec = "PETERSBURG", activation = { Block = 7280000 } },
+  { spec = "ISTANBUL", activation = { Block = 9069000 } },
+  { spec = "MUIR_GLACIER", activation = { Block = 9200000 } },
+  { spec = "BERLIN", activation = { Block = 12244000 } },
+  { spec = "LONDON", activation = { Block = 12965000 } },
+  { spec = "ARROW_GLACIER", activation = { Block = 13773000 } },
+  { spec = "GRAY_GLACIER", activation = { Block = 15050000 } },
+  { spec = "SHANGHAI", activation = { Timestamp = 1681338455 } }
+]
+
+# base_sepolia
+# https://github.com/base-org/op-geth/blob/78436b6ae2a45a9c8449a9b0c93b062a37bd20da/core/forkid/forkid_test.go#L103
+[[chains]]
+chain_id = 84532
+forks = [
+  { spec = "LONDON", activation = { Block = 0 } },
+  { spec = "MERGE", activation = { Block = 1735371 } },
+  { spec = "SHANGHAI", activation = { Timestamp = 1677557088 } }
 ]
