@@ -1,17 +1,19 @@
 import { VCallResponse, VlayerClient, BrandedHash } from "types/vlayer";
-import { WebProofProvider } from "types/webProofProvider";
+import { WebProofProvider, WebProofSetupInput } from "types/webProofProvider";
 
 import { prove } from "../prover";
 import { createExtensionWebProofProvider } from "../webProof";
 import {
   type Abi,
   AbiStateMutability,
+  ContractFunctionArgs,
   ContractFunctionName,
   ContractFunctionReturnType,
   decodeFunctionResult,
   Hex,
 } from "viem";
 import { ZkProvingStatus } from "../../web-proof-commons";
+import { ContractFunctionArgsWithout } from "types/viem";
 
 function dropEmptyProofFromArgs(args: unknown) {
   if (Array.isArray(args)) {
@@ -102,6 +104,57 @@ export const createVlayerClient = (
         AbiStateMutability,
         F
       >;
+    },
+
+    proveWeb: async function <
+      T extends Abi,
+      F extends ContractFunctionName<T>,
+    >(args: {
+      address: Hex;
+      proverAbi: T;
+      functionName: F;
+      chainId: number;
+      args: [
+        WebProofSetupInput,
+        ...ContractFunctionArgsWithout<T, F, { name: "webProof" }>,
+      ];
+      notary_pub_key: string;
+    }) {
+      const webProofPlaceholder = args.args[0];
+      const contractArgs = args.args.slice(1) as ContractFunctionArgsWithout<
+        T,
+        F,
+        { name: "webProof" }
+      >;
+
+      const webProof = await webProofProvider.getWebProof({
+        proverCallCommitment: {
+          address: args.address,
+          proverAbi: args.proverAbi,
+          functionName: args.functionName,
+          commitmentArgs: contractArgs,
+          chainId: args.chainId,
+        },
+        logoUrl: webProofPlaceholder.logoUrl,
+        steps: webProofPlaceholder.steps,
+      });
+
+      const hash = await this.prove({
+        address: args.address,
+        functionName: args.functionName,
+        chainId: args.chainId,
+        proverAbi: args.proverAbi,
+        args: [
+          {
+            webProofJson: JSON.stringify({
+              tls_proof: webProof,
+              notary_pub_key: webProofPlaceholder.notaryPubKey,
+            }),
+          },
+          ...contractArgs,
+        ] as ContractFunctionArgs<T, AbiStateMutability, F>,
+      });
+      return hash;
     },
   };
 };
