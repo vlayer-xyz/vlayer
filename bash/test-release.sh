@@ -24,6 +24,12 @@ curl -fsSL https://bun.sh/install | bash
 export PATH="$PATH:~/.bun/bin"
 echo '::endgroup::'
 
+echo '::group::risczero installation'
+curl -L https://risczero.com/install | bash
+export PATH="$PATH:~/.risc0/bin"
+rzup install cargo-risczero v1.0.5
+echo '::endgroup::'
+
 git config --global user.email "test@example.com"
 git config --global user.name "Github Runner"
 
