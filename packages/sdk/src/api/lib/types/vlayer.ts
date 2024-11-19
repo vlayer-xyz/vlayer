@@ -40,6 +40,7 @@ export type Proof = {
 };
 
 export interface VCallResult {
+  hash: Hex;
   evm_call_result: Hex;
   proof: Proof;
 }

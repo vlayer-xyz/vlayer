@@ -40,37 +40,13 @@ pub struct CallContext {
 }
 
 pub struct CallResult {
+    hash: String,
     proof: Proof,
     evm_call_result: Vec<u8>,
 }
 
 impl CallResult {
-    pub fn to_json(&self) -> Value {
-        json!({
-            "evm_call_result": self.evm_call_result.encode_hex_with_prefix(),
-            "proof": {
-                "seal": {
-                    "verifierSelector": self.proof.seal.verifierSelector,
-                    "seal": self.proof.seal.seal,
-                    "mode": Into::<u8>::into(self.proof.seal.mode),
-                },
-                "callGuestId": self.proof.callGuestId.encode_hex_with_prefix(),
-                "length": u256_to_number(self.proof.length),
-                "callAssumptions": {
-                    "functionSelector": self.proof.callAssumptions.functionSelector,
-                    "proverContractAddress": self.proof.callAssumptions.proverContractAddress,
-                    "settleBlockNumber": u256_to_number(self.proof.callAssumptions.settleBlockNumber),
-                    "settleBlockHash": self.proof.callAssumptions.settleBlockHash,
-                }
-            },
-        })
-    }
-}
-
-impl TryFrom<HostOutput> for CallResult {
-    type Error = HostError;
-
-    fn try_from(host_output: HostOutput) -> Result<Self, Self::Error> {
+    pub fn new(hash: String, host_output: HostOutput) -> Result<Self, HostError> {
         let HostOutput {
             guest_output,
             seal,
@@ -87,8 +63,31 @@ impl TryFrom<HostOutput> for CallResult {
             callAssumptions: guest_output.call_assumptions,
         };
         Ok(Self {
+            hash,
             proof,
             evm_call_result: guest_output.evm_call_result,
+        })
+    }
+
+    pub fn to_json(&self) -> Value {
+        json!({
+            "hash": self.hash,
+            "evm_call_result": self.evm_call_result.encode_hex_with_prefix(),
+            "proof": {
+                "seal": {
+                    "verifierSelector": self.proof.seal.verifierSelector,
+                    "seal": self.proof.seal.seal,
+                    "mode": Into::<u8>::into(self.proof.seal.mode),
+                },
+                "callGuestId": self.proof.callGuestId.encode_hex_with_prefix(),
+                "length": u256_to_number(self.proof.length),
+                "callAssumptions": {
+                    "functionSelector": self.proof.callAssumptions.functionSelector,
+                    "proverContractAddress": self.proof.callAssumptions.proverContractAddress,
+                    "settleBlockNumber": u256_to_number(self.proof.callAssumptions.settleBlockNumber),
+                    "settleBlockHash": self.proof.callAssumptions.settleBlockHash,
+                }
+            },
         })
     }
 }
