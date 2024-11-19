@@ -31,8 +31,9 @@ fn generate_hash(
     _execution_location: ExecutionLocation,
     _call: &EngineCall,
 ) -> Result<String, HostError> {
-    use rand::{distributions::Alphanumeric, thread_rng, Rng};
     use std::fmt::Write;
+
+    use rand::{distributions::Alphanumeric, thread_rng, Rng};
 
     let input: Vec<u8> = thread_rng().sample_iter(&Alphanumeric).take(40).collect();
     let mut hasher = Sha256::new();
@@ -41,10 +42,7 @@ fn generate_hash(
 
     let mut encoded = String::with_capacity(digest.len() * 2 + 2);
     write!(&mut encoded, "0x{:x}", digest).map_err(|_| {
-        HostError::ReturnHashEncoding(format!(
-            "failed to encode return hash as hex: {:x?}",
-            digest
-        ))
+        HostError::ReturnHashEncoding(format!("failed to encode return hash as hex: {:x?}", digest))
     })?;
     Ok(encoded)
 }
