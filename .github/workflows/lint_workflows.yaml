@@ -13,7 +13,8 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  check-yaml-formatting:
+  lint-workflows:
+    name: Check workflows YAML Formatting
     runs-on: ubuntu-latest
 
     steps:
