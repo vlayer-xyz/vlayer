@@ -29,7 +29,7 @@ pub struct Call {
 }
 
 impl Call {
-    pub fn new(to: Address, call: impl SolCall) -> Self {
+    pub fn new(to: Address, call: &impl SolCall) -> Self {
         Self {
             to,
             data: call.abi_encode(),

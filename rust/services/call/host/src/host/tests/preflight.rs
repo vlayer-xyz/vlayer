@@ -16,8 +16,8 @@ mod usdt {
     async fn erc20_balance_of() -> anyhow::Result<()> {
         let location: ExecutionLocation = (Chain::mainnet().id(), USDT_BLOCK_NO).into();
         let binance_8 = address!("F977814e90dA44bFA03b6295A0616a897441aceC");
-        let call = Call::new(USDT, balanceOfCall { account: binance_8 });
-        let result = preflight::<balanceOfCall>("usdt_erc20_balance_of", call, &LOCATION).await?;
+        let call = Call::new(USDT, &balanceOfCall { account: binance_8 });
+        let result = preflight::<balanceOfCall>("usdt_erc20_balance_of", call, &location).await?;
         assert_eq!(result._0, uint!(3_000_000_000_000_000_U256));
         Ok(())
     }
@@ -33,9 +33,9 @@ mod uniswap {
     #[tokio::test]
     async fn factory_owner() -> anyhow::Result<()> {
         let location: ExecutionLocation = (Chain::mainnet().id(), BlockTag::Latest).into();
-        let call = Call::new(UNISWAP, ownerCall {});
+        let call = Call::new(UNISWAP, &ownerCall {});
         let ownerReturn { _0: owner } =
-            preflight::<ownerCall>("uniswap_factory_owner", call, &LOCATION).await?;
+            preflight::<ownerCall>("uniswap_factory_owner", call, &location).await?;
         assert_eq!(owner, address!("1a9c8182c09f50c8318d769245bea52c32be35bc")); // UNI Timelock
         Ok(())
     }
@@ -59,7 +59,7 @@ mod view {
 
     #[tokio::test]
     async fn precompile() -> anyhow::Result<()> {
-        let call = Call::new(VIEW_CALL, testPrecompileCall {});
+        let call = Call::new(VIEW_CALL, &testPrecompileCall {});
         let result = preflight::<testPrecompileCall>("view_precompile", call, &LOCATION).await?;
         assert_eq!(
             result._0,
@@ -84,7 +84,7 @@ mod view {
 
     #[tokio::test]
     async fn eoa_account() -> anyhow::Result<()> {
-        let call = Call::new(VIEW_CALL, testEoaAccountCall {});
+        let call = Call::new(VIEW_CALL, &testEoaAccountCall {});
         let result = preflight::<testEoaAccountCall>("view_eoa_account", call, &LOCATION).await?;
         assert_eq!(result.size, uint!(0_U256));
         Ok(())
@@ -92,7 +92,7 @@ mod view {
 
     #[tokio::test]
     async fn blockhash() -> anyhow::Result<()> {
-        let call = Call::new(VIEW_CALL, testBlockhashCall {});
+        let call = Call::new(VIEW_CALL, &testBlockhashCall {});
         let result = preflight::<testBlockhashCall>(
             "view_blockhash",
             call,
@@ -108,7 +108,7 @@ mod view {
 
     #[tokio::test]
     async fn chainid() -> anyhow::Result<()> {
-        let call = Call::new(VIEW_CALL, testChainidCall {});
+        let call = Call::new(VIEW_CALL, &testChainidCall {});
         let result = preflight::<testChainidCall>("view_chainid", call, &LOCATION).await?;
         assert_eq!(result._0, uint!(11_155_111_U256));
         Ok(())
@@ -116,7 +116,7 @@ mod view {
 
     #[tokio::test]
     async fn multi_contract_calls() -> anyhow::Result<()> {
-        let call = Call::new(VIEW_CALL, testMuliContractCallsCall {});
+        let call = Call::new(VIEW_CALL, &testMuliContractCallsCall {});
         let result =
             preflight::<testMuliContractCallsCall>("view_multi_contract_calls", call, &LOCATION)
                 .await?;
@@ -127,7 +127,7 @@ mod view {
     #[tokio::test]
     async fn call_eoa() -> anyhow::Result<()> {
         let vitalik = address!("d8dA6BF26964aF9D7eEd9e03E53415D37aA96045");
-        let call = Call::new(vitalik, testEoaAccountCall {});
+        let call = Call::new(vitalik, &testEoaAccountCall {});
         preflight::<testEoaAccountCall>("view_call_eoa", call, &LOCATION)
             .await
             .expect_err("calling an EOA should fail");
@@ -145,10 +145,10 @@ mod teleport {
 
     #[tokio::test]
     async fn teleport_to_unknown_chain_returns_an_error_but_does_not_panic() -> anyhow::Result<()> {
-        let location: ExecutionLocation = (Chain::anvil_hardhat().id(), BLOCK_NO).into();
+        let location: ExecutionLocation = (AnvilHardhat, BLOCK_NO).into();
         let owner = Address::ZERO;
-        let call = Call::new(SIMPLE_TELEPORT, crossChainBalanceOfCall { owner });
-        let result = preflight::<crossChainBalanceOfCall>("simple_teleport", call, &LOCATION).await;
+        let call = Call::new(SIMPLE_TELEPORT, &crossChainBalanceOfCall { owner });
+        let result = preflight::<crossChainBalanceOfCall>("simple_teleport", call, &location).await;
         assert_eq!(
             result.unwrap_err().to_string(),
             "TravelCallExecutor error: Panic: Intercepted call failed: EvmEnv(\"No rpc cache for chain: 8453\")"
@@ -172,12 +172,12 @@ mod time_travel {
     #[ignore = "Fails due to chain proofs issue"]
     async fn time_travel() -> anyhow::Result<()> {
         let location: ExecutionLocation = (Chain::optimism_sepolia().id(), BlockTag::Latest).into();
-        let call = Call::new(SIMPLE_TIME_TRAVEL, AVERAGE_BALANCE_OF_CALL);
+        let call = Call::new(SIMPLE_TIME_TRAVEL, &AVERAGE_BALANCE_OF_CALL);
 
         let averageBalanceOfReturn {
             _2: average_balance,
             ..
-        } = preflight::<averageBalanceOfCall>("simple_time_travel", call, &LOCATION).await?;
+        } = preflight::<averageBalanceOfCall>("simple_time_travel", call, &location).await?;
 
         assert_eq!(average_balance, uint!(1_874_845_031_590_000_U256));
 

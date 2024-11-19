@@ -19,7 +19,7 @@ use crate::{
 #[tokio::test]
 async fn time_travel() -> anyhow::Result<()> {
     let location: ExecutionLocation = (20_064_547_u64, OptimismSepolia).into();
-    let call = Call::new(SIMPLE_TIME_TRAVEL, AVERAGE_BALANCE_OF_CALL);
+    let call = Call::new(SIMPLE_TIME_TRAVEL, &AVERAGE_BALANCE_OF_CALL);
 
     let rpc_file = PathBuf::from(rpc_snapshot_file("op_sepolia", "simple_time_travel"));
     let provider = CachedProvider::from_file(&rpc_file)?;

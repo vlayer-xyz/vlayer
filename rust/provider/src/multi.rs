@@ -56,7 +56,6 @@ mod get {
     use std::path::PathBuf;
 
     use alloy_chains::Chain;
-    use null_provider_factory::NullProviderFactory;
 
     use super::*;
     use crate::{cache::CachedProvider, CachedProviderFactory};
