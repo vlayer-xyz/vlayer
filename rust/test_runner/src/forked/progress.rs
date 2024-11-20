@@ -80,8 +80,8 @@ impl TestsProgressState {
                 indicatif::ProgressStyle::with_template(
                     "    ↪ {prefix:.bold.dim}: [{pos}/{len}]{msg} Runs",
                 )
-                    .unwrap()
-                    .tick_chars("⠁⠂⠄⡀⢀⠠⠐⠈ "),
+                .unwrap()
+                .tick_chars("⠁⠂⠄⡀⢀⠠⠐⠈ "),
             );
             fuzz_progress.set_prefix(test_name.to_string());
             Some(fuzz_progress)
