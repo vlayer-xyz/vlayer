@@ -1,6 +1,5 @@
-#![allow(clippy::redundant_closure_for_method_calls, clippy::explicit_iter_loop)]
 /**
- * This file was copied from https://github.com/foundry-rs/foundry/blob/2044faec64f99a21f0e5f0094458a973612d0712/crates/forge/bin/cmd/test/filter.rs
+ * This file was copied from https://github.com/foundry-rs/foundry/blob/e649e62f125244a3ef116be25dfdc81a2afbaf2a/crates/forge/bin/cmd/test/filter.rs
  * The original file is licensed under the Apache License, Version 2.0.
  * It wasn't modified, but it wasn't exported from foundry lib
  */
