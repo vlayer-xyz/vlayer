@@ -16,6 +16,8 @@ pub const TEST_CHAIN_ID: ChainId = 31_337;
 pub const MAINNET_MERGE_BLOCK_NUMBER: u64 = 15537394;
 pub const MAINNET_MERGE_BLOCK_TIMESTAMP: u64 = 1663224179;
 
+pub static CHAIN_MAP: Lazy<HashMap<ChainId, ChainSpec>> = Lazy::new(load_chain_specs);
+
 #[derive(Debug, Deserialize)]
 struct ChainSpecs {
     pub chains: Vec<ChainSpec>,
@@ -36,8 +38,6 @@ fn load_chain_specs() -> HashMap<ChainId, ChainSpec> {
 
     chain_id_to_chain_spec
 }
-
-pub static CHAIN_MAP: Lazy<HashMap<ChainId, ChainSpec>> = Lazy::new(load_chain_specs);
 
 pub static CHAIN_NAME_TO_ID: Lazy<HashMap<String, ChainId>> = Lazy::new(|| {
     HashMap::from([
