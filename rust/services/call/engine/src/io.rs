@@ -117,7 +117,7 @@ pub struct HostOutput {
     pub call_guest_id: CallGuestId,
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct CallGuestId(Digest);
 
 impl From<Digest> for CallGuestId {
