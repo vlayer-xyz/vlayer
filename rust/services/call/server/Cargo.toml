@@ -6,6 +6,8 @@ edition = "2021"
 [dependencies]
 alloy-chains = { workspace = true }
 alloy-primitives = { workspace = true }
+alloy-rlp = { workspace = true }
+alloy-rlp-derive = { workspace = true }
 alloy-sol-types = { workspace = true }
 anyhow = { workspace = true }
 axum = { workspace = true, features = ["macros"] }
@@ -14,6 +16,8 @@ call_engine = { workspace = true }
 call_host = { workspace = true }
 chain = { workspace = true }
 common = { workspace = true }
+derive_more = { workspace = true }
+derive-new = { workspace = true }
 hex = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }

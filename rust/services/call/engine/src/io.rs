@@ -1,4 +1,5 @@
 use alloy_primitives::{Address, FixedBytes, TxKind};
+use alloy_rlp::RlpEncodable;
 use alloy_sol_types::{SolCall, SolValue};
 use chain_client::ChainProofCache;
 use derive_new::new;
@@ -22,7 +23,7 @@ pub struct Input {
     pub call: Call,
 }
 
-#[derive(Deserialize, Serialize, Debug, Clone)]
+#[derive(Deserialize, Serialize, Debug, Clone, RlpEncodable)]
 pub struct Call {
     pub to: Address,
     pub data: Vec<u8>,

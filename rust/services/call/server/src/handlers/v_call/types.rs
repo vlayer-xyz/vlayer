@@ -1,10 +1,14 @@
 use alloy_chains::Chain;
-use alloy_primitives::{hex::ToHexExt, ChainId, Keccak256, B256, U256};
+use alloy_primitives::{hex::ToHexExt, keccak256, ChainId, B256, U256};
+use alloy_rlp::RlpEncodable;
 use alloy_sol_types::SolValue;
 use call_engine::{
     evm::env::location::ExecutionLocation, Call as EngineCall, HostOutput, Proof, Seal,
 };
 use call_host::{Call as HostCall, Error as HostError};
+use common::Hashable;
+use derive_more::From;
+use derive_new::new;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use server_utils::{parse_address_field, parse_hex_field};
@@ -93,24 +97,24 @@ impl CallResult {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Debug, From)]
 pub struct CallHash(B256);
-
-impl CallHash {
-    pub fn new(execution_location: ExecutionLocation, call: &EngineCall) -> Self {
-        // FIXME convert to keccak256(rlp(...))
-        let mut hasher = Keccak256::new();
-        hasher.update(execution_location.block_number.to_le_bytes());
-        hasher.update(execution_location.chain_id.to_le_bytes());
-        hasher.update(call.to);
-        hasher.update(call.data.as_slice());
-        Self(hasher.finalize())
-    }
-}
 
 impl std::fmt::Display for CallHash {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "{}", self.0.encode_hex_with_prefix())
+    }
+}
+
+#[derive(new, RlpEncodable)]
+pub struct CallHashData {
+    execution_location: ExecutionLocation,
+    call: EngineCall,
+}
+
+impl Hashable for CallHashData {
+    fn hash_slow(&self) -> B256 {
+        keccak256(alloy_rlp::encode(self))
     }
 }
 
