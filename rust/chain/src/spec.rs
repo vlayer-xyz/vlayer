@@ -5,7 +5,7 @@ use anyhow::bail;
 use revm::primitives::SpecId;
 use serde::{Deserialize, Serialize};
 
-use crate::{config::CHAIN_MAP, error::ChainError, fork::Fork};
+use crate::{config::CHAIN_ID_TO_CHAIN_SPEC, error::ChainError, fork::Fork};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ChainSpec {
@@ -56,10 +56,10 @@ impl TryFrom<ChainId> for ChainSpec {
     type Error = ChainError;
 
     fn try_from(chain_id: ChainId) -> Result<Self, Self::Error> {
-        let chain_spec = CHAIN_MAP
+        let chain_spec = CHAIN_ID_TO_CHAIN_SPEC
             .get(&chain_id)
             .ok_or(ChainError::UnsupportedChainId(chain_id))?;
-        Ok((**chain_spec).clone())
+        Ok((*chain_spec).clone())
     }
 }
 
