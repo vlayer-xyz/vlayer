@@ -40,21 +40,24 @@ fn load_chain_specs() -> HashMap<ChainId, ChainSpec> {
 }
 
 pub static CHAIN_NAME_TO_ID: Lazy<HashMap<String, ChainId>> = Lazy::new(|| {
-    HashMap::from([
-        ("mainnet".into(), Chain::mainnet().id()),
-        ("sepolia".into(), Chain::sepolia().id()),
-        ("base".into(), Chain::base_mainnet().id()),
-        ("base-sepolia".into(), Chain::base_sepolia().id()),
-        ("optimism".into(), Chain::optimism_mainnet().id()),
-        ("optimism-sepolia".into(), Chain::optimism_sepolia().id()),
-        ("polygon".into(), 137),
-        ("polygon-amoy".into(), 80002),
-        ("arbitrum-one".into(), 42161),
-        ("arbitrum-nova".into(), 42170),
-        ("arbitrum-sepolia".into(), 421614),
-        ("zksync".into(), 324),
-        ("zksync-sepolia".into(), 300),
-        ("linea".into(), 59144),
-        ("linea-sepolia".into(), 59141),
-    ])
+    [
+        ("mainnet", Chain::mainnet().id()),
+        ("sepolia", Chain::sepolia().id()),
+        ("base", Chain::base_mainnet().id()),
+        ("base-sepolia", Chain::base_sepolia().id()),
+        ("optimism", Chain::optimism_mainnet().id()),
+        ("optimism-sepolia", Chain::optimism_sepolia().id()),
+        ("polygon", 137),
+        ("polygon-amoy", 80002),
+        ("arbitrum-one", 42161),
+        ("arbitrum-nova", 42170),
+        ("arbitrum-sepolia", 421614),
+        ("zksync", 324),
+        ("zksync-sepolia", 300),
+        ("linea", 59144),
+        ("linea-sepolia", 59141),
+    ]
+    .iter()
+    .map(|(k, v)| (k.to_string(), *v))
+    .collect()
 });
