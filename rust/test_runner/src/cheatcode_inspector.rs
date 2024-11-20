@@ -1,4 +1,4 @@
-use alloy_primitives::{FixedBytes, U256};
+use alloy_primitives::U256;
 use alloy_sol_types::{SolCall, SolType};
 use call_engine::{
     utils::evm_call::{
@@ -112,11 +112,13 @@ impl CheatcodeInspector {
         let decoded_seal = Seal::abi_decode(&host_output.seal, true)
             .unwrap_or_else(|_| panic!("Failed to decode seal: {:x?}", host_output.seal));
 
+        let call_guest_id = host_output.call_guest_id.clone().into();
+
         Proof {
             length: U256::from(host_output.proof_len),
             seal: decoded_seal,
             callAssumptions: call_assumptions,
-            callGuestId: FixedBytes::<32>::from(host_output.call_guest_id.clone()),
+            callGuestId: call_guest_id,
         }
     }
 }
