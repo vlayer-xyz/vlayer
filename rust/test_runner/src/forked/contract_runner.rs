@@ -1,9 +1,16 @@
 //! The Forge test runner.
 
+/**
+ * This file is in large part copied from https://github.com/foundry-rs/foundry/blob/e649e62f125244a3ef116be25dfdc81a2afbaf2a/crates/forge/src/runner.rs
+ * The original file is licensed under the Apache License, Version 2.0.
+ * The original file was modified for the purpose of this project.
+ * All relevant modifications are commented with "MODIFICATION" comments.
+ */
+
 use alloy_dyn_abi::DynSolValue;
 use alloy_json_abi::Function;
 use alloy_primitives::{address, map::HashMap, Address, Bytes, U256};
-use color_eyre::eyre::Result;
+use eyre::Result;
 use foundry_common::{contracts::{ContractsByAddress, ContractsByArtifact}, sh_warn, TestFilter, TestFunctionExt, TestFunctionKind};
 use foundry_config::{FuzzConfig, InvariantConfig};
 use foundry_evm::{
@@ -19,22 +26,29 @@ use foundry_evm::{
     fuzz::{
         fixture_name,
         invariant::{CallDetails, InvariantContract},
-        CounterExample, FuzzFixtures,
+        CounterExample,
+        FuzzFixtures,
+        BaseCounterExample,
+        invariant::BasicTxDetails
     },
     traces::{load_contracts, TraceKind, TraceMode},
 };
 use proptest::test_runner::TestRunner;
 use rayon::prelude::*;
 use std::{borrow::Cow, cmp::min, collections::BTreeMap, time::Instant};
-use forge::multi_runner::TestContract;
-use forge::result::{SuiteResult, TestResult, TestSetup};
-use forge::TestOptions;
-use foundry_evm::fuzz::BaseCounterExample;
-use foundry_evm::fuzz::invariant::BasicTxDetails;
+use forge::{
+    multi_runner::TestContract,
+    result::{SuiteResult, TestResult, TestSetup},
+    TestOptions
+};
 use tracing::{debug, debug_span, enabled, error, trace};
-use crate::forked::multi_runner_run::is_matching_test;
-use crate::forked::progress::{start_fuzz_progress, TestsProgress};
-use crate::forked::test_executor::TestExecutor;
+use crate::{
+    forked::{
+        multi_runner_run::is_matching_test,
+        progress::{start_fuzz_progress, TestsProgress},
+        test_executor::TestExecutor
+    }
+};
 
 /// When running tests, we deploy all external libraries present in the project. To avoid additional
 /// libraries affecting nonces of senders used in tests, we are using separate address to
@@ -52,6 +66,7 @@ pub struct ContractRunner<'a> {
     pub contract: &'a TestContract,
     /// The libraries that need to be deployed before the contract.
     pub libs_to_deploy: &'a Vec<Bytes>,
+    // MODIFICATION: swapped Executor to TestExecutor
     /// The executor used by the runner.
     pub executor: TestExecutor<'a>,
     /// Revert decoder. Contains all known errors.
@@ -60,6 +75,7 @@ pub struct ContractRunner<'a> {
     pub initial_balance: U256,
     /// The address which will be used as the `from` field in all EVM calls.
     pub sender: Address,
+    // Modification: removed unused `debug`
     /// Overall test run progress.
     pub progress: Option<&'a TestsProgress>,
     /// The handle to the tokio runtime.
@@ -289,7 +305,7 @@ impl ContractRunner<'_> {
                     "afterInvariant()".to_string(),
                     TestResult::fail("multiple afterInvariant functions".to_string()),
                 )]
-                    .into(),
+                .into(),
                 warnings,
             )
         }
@@ -368,7 +384,7 @@ impl ContractRunner<'_> {
                     %kind,
                     name = %if enabled!(tracing::Level::TRACE) { &sig } else { &func.name },
                 )
-                    .entered();
+                .entered();
 
                 let setup = setup.clone();
                 let mut res = match kind {
@@ -475,6 +491,7 @@ impl ContractRunner<'_> {
         };
 
         let mut evm = InvariantExecutor::new(
+            // MODIFICATION: use inner executor
             self.executor.inner.clone(),
             runner,
             invariant_config.clone(),
@@ -507,6 +524,7 @@ impl ContractRunner<'_> {
                 })
                 .collect::<Vec<BasicTxDetails>>();
             if let Ok((success, replayed_entirely)) = check_sequence(
+                // MODIFICATION: use inner executor
                 self.executor.inner.clone(),
                 &txes,
                 (0..min(txes.len(), invariant_config.depth as usize)).collect(),
@@ -525,6 +543,7 @@ impl ContractRunner<'_> {
                     // exit without executing new runs.
                     let _ = replay_run(
                         &invariant_contract,
+                        // MODIFICATION: use inner executor
                         self.executor.inner.clone(),
                         known_contracts,
                         identified_contracts.clone(),
@@ -568,6 +587,7 @@ impl ContractRunner<'_> {
                     match replay_error(
                         &case_data,
                         &invariant_contract,
+                        // MODIFICATION: use inner executor
                         self.executor.inner.clone(),
                         known_contracts,
                         identified_contracts.clone(),
@@ -604,6 +624,7 @@ impl ContractRunner<'_> {
             _ => {
                 if let Err(err) = replay_run(
                     &invariant_contract,
+                    // MODIFICATION: use inner executor
                     self.executor.inner.clone(),
                     known_contracts,
                     identified_contracts.clone(),
@@ -657,6 +678,7 @@ impl ContractRunner<'_> {
 
         // Run fuzz test.
         let fuzzed_executor =
+            // MODIFICATION: use inner executor
             FuzzedExecutor::new(executor.into_owned().inner, runner, self.sender, fuzz_config);
         let result = fuzzed_executor.fuzz(
             func,
@@ -682,6 +704,7 @@ impl ContractRunner<'_> {
         &self,
         func: &Function,
         setup: TestSetup,
+    // MODIFICATION: return `TestExecutor instead of Executor
     ) -> Result<(Cow<'_, TestExecutor>, TestResult, Address), TestResult> {
         let address = setup.address;
         let mut executor = Cow::Borrowed(&self.executor);
