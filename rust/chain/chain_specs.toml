@@ -100,3 +100,20 @@ forks = [
   { spec = "SHANGHAI", activation = { Block = 73100 } },
   { spec = "CANCUN", activation = { Block = 5423600 } },
 ]
+
+# Time travel is not supported for arbitrum chains
+
+# aribtrum_nova
+forks = [
+  { spec = "CANCUN", activation = { Timestamp = 1710338135 } }
+]
+
+# aribtrum_one
+forks = [
+  { spec = "CANCUN", activation = { Timestamp = 1710338135 } }
+]
+
+# aribtrum_sepolia
+forks = [
+  { spec = "CANCUN", activation = { Timestamp = 1710338135 } }
+]
