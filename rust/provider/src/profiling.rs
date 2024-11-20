@@ -20,6 +20,32 @@ pub struct State {
     pub storage: HashMap<BlockNumber, HashMap<Address, HashMap<StorageKey, u64>>>,
 }
 
+fn flatten<K>(map: &HashMap<K, u64>) -> impl Iterator<Item = &u64> {
+    map.values()
+}
+
+fn flatten2<K1, K2>(map: &HashMap<K1, HashMap<K2, u64>>) -> impl Iterator<Item = &u64> {
+    map.values().flat_map(flatten)
+}
+
+fn flatten3<K1, K2, K3>(
+    map: &HashMap<K1, HashMap<K2, HashMap<K3, u64>>>,
+) -> impl Iterator<Item = &u64> {
+    map.values().flat_map(flatten2)
+}
+
+impl State {
+    pub fn total_count(&self) -> u64 {
+        flatten(&self.header)
+            .chain(flatten2(&self.balance))
+            .chain(flatten2(&self.code))
+            .chain(flatten2(&self.nonce))
+            .chain(flatten2(&self.proof))
+            .chain(flatten3(&self.storage))
+            .sum()
+    }
+}
+
 #[derive(Debug)]
 pub struct Provider {
     inner: Box<dyn BlockingProvider>,
