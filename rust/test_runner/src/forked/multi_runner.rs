@@ -21,7 +21,7 @@ use progress::TestsProgress;
 use rayon::prelude::*;
 use tracing::{debug, debug_span, enabled, trace};
 
-use crate::forked::{contract_runner::ContractRunner, progress, test_executor::TestExecutor};
+use crate::forked::{runner::ContractRunner, progress, test_executor::TestExecutor};
 
 /// Executes _all_ tests that match the given `filter`.
 ///

@@ -14,13 +14,13 @@
 #[rustfmt::skip]
 pub mod cli;
 #[rustfmt::skip]
-mod contract_runner;
+mod runner;
 #[rustfmt::skip]
 mod filter;
 #[rustfmt::skip]
 mod install;
 #[rustfmt::skip]
-mod multi_runner_run;
+mod multi_runner;
 #[rustfmt::skip]
 mod progress;
 #[rustfmt::skip]

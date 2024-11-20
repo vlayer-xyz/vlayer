@@ -44,7 +44,7 @@ use forge::{
 use tracing::{debug, debug_span, enabled, error, trace};
 use crate::{
     forked::{
-        multi_runner_run::is_matching_test,
+        multi_runner::is_matching_test,
         progress::{start_fuzz_progress, TestsProgress},
         test_executor::TestExecutor
     }

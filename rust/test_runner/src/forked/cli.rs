@@ -1,5 +1,5 @@
 /**
-     * This file is in large part copied from https://github.com/foundry-rs/foundry/blob/e649e62f125244a3ef116be25dfdc81a2afbaf2a/crates/forge/bin/cmd/test/mod.rs
+ * This file is in large part copied from https://github.com/foundry-rs/foundry/blob/e649e62f125244a3ef116be25dfdc81a2afbaf2a/crates/forge/bin/cmd/test/mod.rs
  * The original file is licensed under the Apache License, Version 2.0.
  * The original file was modified for the purpose of this project.
  * All relevant modifications are commented with "MODIFICATION" comments.
@@ -64,7 +64,7 @@ use tracing::trace;
 use crate::forked::{
     filter::{FilterArgs, ProjectPathsAwareFilter},
     install,
-    multi_runner_run::test,
+    multi_runner::test,
     summary,
     summary::TestSummaryReporter,
 };
@@ -279,7 +279,7 @@ impl TestArgs {
     // MODIFICATION: Swap CHAIN_ID in evm_opts with TESTING_CHAIN_ID
     fn validate_chain_id(evm_opts: &mut EvmOpts) -> Result<()> {
         if evm_opts.env.chain_id.is_some() {
-            return Err(color_eyre::eyre::eyre!("cannot change chainId in vlayer tests"));
+            return Err(eyre::eyre!("cannot change chainId in vlayer tests"));
         }
 
         evm_opts.env.chain_id = Some(TEST_CHAIN_ID);
