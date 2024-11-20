@@ -3,7 +3,7 @@ use derive_more::AsRef;
 use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize, AsRef)]
+#[derive(Debug, Clone, PartialEq, PartialOrd, Eq, Ord, Serialize, Deserialize, AsRef, Default)]
 pub struct GuestElf {
     #[as_ref]
     pub id: Digest,
