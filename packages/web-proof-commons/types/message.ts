@@ -45,7 +45,7 @@ export enum ExtensionMessageType {
 export type ExtensionMessage =
   | { type: ExtensionMessageType.ProofDone; payload: { proof: WebProof } }
   | { type: ExtensionMessageType.ProofError; payload: { error: string } }
-  | { type: ExtensionMessageType.RedirectBack; payload: never }
+  | { type: ExtensionMessageType.RedirectBack; }
   | { type: ExtensionMessageType.TabOpened; payload: { tabId: number } }
   | {
       type: ExtensionMessageType.ProofProcessing;
