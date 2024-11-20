@@ -18,4 +18,8 @@ impl GuestElf {
             elf: Bytes::from_static(elf),
         }
     }
+
+    pub const fn default() -> Self {
+        Self::new([0; 8], &[])
+    }
 }
