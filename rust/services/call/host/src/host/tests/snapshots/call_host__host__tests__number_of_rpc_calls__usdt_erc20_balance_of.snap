@@ -1,6 +1,6 @@
 ---
 source: services/call/host/src/host/tests/number_of_rpc_calls.rs
-expression: profiling_provider.state()
+expression: state
 ---
 header:
   "0x1297121": 1
@@ -11,7 +11,6 @@ code:
 nonce: {}
 proof:
   19493153:
-    "0x1111111111111111111111111111111111111111": 1
     "0x388c818ca8b9251b393131c08a736a67ccb19297": 1
     "0xdac17f958d2ee523a2206206994597c13d831ec7": 1
 storage:

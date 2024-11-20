@@ -45,7 +45,7 @@ async fn usdt_erc20_balance_of() -> anyhow::Result<()> {
 
     let state = profile("mainnet", "usdt_erc20_balance_of", location, &call)?;
 
-    assert_eq!(state.total_count(), 7);
+    assert_eq!(state.total_count(), 6);
     insta::with_settings!({sort_maps => true}, {
         insta::assert_yaml_snapshot!(state)
     });
@@ -60,7 +60,7 @@ async fn time_travel() -> anyhow::Result<()> {
 
     let state = profile("op_sepolia", "simple_time_travel", location, &call)?;
 
-    assert_eq!(state.total_count(), 88);
+    assert_eq!(state.total_count(), 79);
     insta::with_settings!({sort_maps => true}, {
         insta::assert_yaml_snapshot!(state)
     });
