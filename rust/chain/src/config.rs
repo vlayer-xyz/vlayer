@@ -16,12 +16,22 @@ pub const MAINNET_MERGE_BLOCK_NUMBER: u64 = 15_537_394;
 pub const MAINNET_MERGE_BLOCK_TIMESTAMP: u64 = 1_663_224_179;
 
 pub static CHAIN_ID_TO_CHAIN_SPEC: Lazy<HashMap<ChainId, ChainSpec>> =
-    Lazy::new(load_chain_id_to_chain_spec);
+    Lazy::new(build_chain_id_to_spec_map);
 
 pub static CHAIN_NAME_TO_CHAIN_ID: Lazy<HashMap<String, ChainId>> =
-    Lazy::new(load_chain_name_to_chain_id);
+    Lazy::new(build_chain_name_to_id_map);
 
-fn load_chain_id_to_chain_spec() -> HashMap<ChainId, ChainSpec> {
+#[derive(Debug, Deserialize)]
+struct ChainSpecs {
+    pub chains: Vec<ChainSpec>,
+}
+
+static CHAIN_SPECS: Lazy<ChainSpecs> = Lazy::new(|| {
+    // include_str! loads chain_specs in compilation time
+    from_str(include_str!("../chain_specs.toml")).expect("failed to parse chain specs")
+});
+
+fn build_chain_id_to_spec_map() -> HashMap<ChainId, ChainSpec> {
     let mut chain_id_to_chain_spec = HashMap::with_capacity(CHAIN_SPECS.chains.len());
 
     for chain in &CHAIN_SPECS.chains {
@@ -34,25 +44,15 @@ fn load_chain_id_to_chain_spec() -> HashMap<ChainId, ChainSpec> {
     chain_id_to_chain_spec
 }
 
-fn load_chain_name_to_chain_id() -> HashMap<String, ChainId> {
-    let mut chain_name_to_id = HashMap::with_capacity(CHAIN_SPECS.chains.len());
+fn build_chain_name_to_id_map() -> HashMap<String, ChainId> {
+    let mut chain_name_to_chain_id = HashMap::with_capacity(CHAIN_SPECS.chains.len());
 
     for chain in &CHAIN_SPECS.chains {
-        if chain_name_to_id.contains_key(&chain.name) {
+        if chain_name_to_chain_id.contains_key(&chain.name) {
             panic!("duplicated chain spec for name {}", chain.name);
         }
-        chain_name_to_id.insert(chain.name.clone(), chain.chain_id);
+        chain_name_to_chain_id.insert(chain.name.clone(), chain.chain_id);
     }
 
-    chain_name_to_id
+    chain_name_to_chain_id
 }
-
-#[derive(Debug, Deserialize)]
-struct ChainSpecs {
-    pub chains: Vec<ChainSpec>,
-}
-
-static CHAIN_SPECS: Lazy<ChainSpecs> = Lazy::new(|| {
-    // include_str! loads chain_specs in compilation time
-    from_str(include_str!("../chain_specs.toml")).expect("failed to parse chain specs")
-});
