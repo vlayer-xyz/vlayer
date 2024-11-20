@@ -1,6 +1,6 @@
 # eth_mainnet
 [[chains]]
-chain_id = 1
+id = 1
 name = "mainnet"
 forks = [
   { spec = "FRONTIER", activation = { Block = 0 } },
@@ -24,7 +24,7 @@ forks = [
 # eth_sepolia
 # https://github.com/ethereum/execution-specs/tree/5e8aeb3e5b4ba6d2ff2308b1ab9625ef0c38a4f6/network-upgrades/mainnet-upgrades
 [[chains]]
-chain_id = 11155111
+id = 11155111
 name = "sepolia"
 forks = [
   { spec = "MERGE", activation = { Block = 0 } },
@@ -35,7 +35,7 @@ forks = [
 # base_mainnet
 # https://github.com/base-org/optimism/blob/f5221f4d1fae6f3da1bd4d1647e45f40e2b055c4/op-node/chaincfg/chains_test.go#L37
 [[chains]]
-chain_id = 8453
+id = 8453
 name = "base"
 forks = [
   { spec = "REGOLITH", activation = { Block = 0 } },
@@ -47,7 +47,7 @@ forks = [
 # base_sepolia
 # https://github.com/base-org/op-geth/blob/78436b6ae2a45a9c8449a9b0c93b062a37bd20da/core/forkid/forkid_test.go#L103
 [[chains]]
-chain_id = 84532
+id = 84532
 name = "base-sepolia"
 forks = [
   { spec = "CANYON", activation = { Block = 0 } },
@@ -58,7 +58,7 @@ forks = [
 # optimism_mainnet
 # https://docs.optimism.io/builders/node-operators/network-upgrades
 [[chains]]
-chain_id = 10
+id = 10
 name = "optimism"
 forks = [
   { spec = "MERGE", activation = { Block = 0 } },
@@ -72,7 +72,7 @@ forks = [
 # optimism_sepolia
 # https://github.com/ethereum-optimism/optimism/blob/8e0b89c116d0e294d9fb6e8c60a4bc70421b57d7/op-node/chaincfg/chains_test.go#L74
 [[chains]]
-chain_id = 11155420
+id = 11155420
 name = "optimism-sepolia"
 forks = [
   { spec = "BEDROCK", activation = { Block = 0 } },
@@ -86,7 +86,7 @@ forks = [
 # polygon_mainnet
 # https://github.com/maticnetwork/bor/blob/16268f6608d09d5b6d0cd0e43f5ec076c3b92616/internal/cli/server/chains/mainnet.go#L11
 [[chains]]
-chain_id = 137
+id = 137
 name = "polygon"
 forks = [
   { spec = "PETERSBURG", activation = { Block = 0 } },
@@ -101,7 +101,7 @@ forks = [
 # polygon_amoy
 # https://github.com/maticnetwork/bor/blob/16268f6608d09d5b6d0cd0e43f5ec076c3b92616/internal/cli/server/chains/amoy.go#L11
 [[chains]]
-chain_id = 80002
+id = 80002
 name = "polygon-amoy"
 forks = [
   { spec = "BERLIN", activation = { Block = 0 } },
@@ -113,7 +113,7 @@ forks = [
 
 # arbitrum_one
 [[chains]]
-chain_id = 42161
+id = 42161
 name = "arbitrum-one"
 forks = [
   { spec = "CANCUN", activation = { Timestamp = 1710338135 } }
@@ -121,7 +121,7 @@ forks = [
 
 # arbitrum_nova
 [[chains]]
-chain_id = 42170
+id = 42170
 name = "arbitrum-nova"
 forks = [
   { spec = "CANCUN", activation = { Timestamp = 1710338135 } }
@@ -129,7 +129,7 @@ forks = [
 
 # arbitrum_sepolia
 [[chains]]
-chain_id = 421614
+id = 421614
 name = "arbitrum-sepolia"
 forks = [
   { spec = "CANCUN", activation = { Timestamp = 1710338135 } }
@@ -137,7 +137,7 @@ forks = [
 
 # zksync_mainnet
 [[chains]]
-chain_id = 324
+id = 324
 name = "zksync"
 forks = [
   { spec = "CANCUN", activation = { Timestamp = 1710338135 } }
@@ -145,7 +145,7 @@ forks = [
 
 # zksync_sepolia
 [[chains]]
-chain_id = 300
+id = 300
 name = "zksync-sepolia"
 forks = [
   { spec = "CANCUN", activation = { Timestamp = 1710338135 } }
@@ -154,7 +154,7 @@ forks = [
 # linea_mainnet
 # https://github.com/Consensys/linea-monorepo/blob/0615fa37b9f7aa42681a54bfc881e43914d9c0a1/docker/linea-mainnet/genesis.json
 [[chains]]
-chain_id = 59144
+id = 59144
 name = "linea"
 forks = [
   { spec = "LONDON", activation = { Block = 0 } }
@@ -163,7 +163,7 @@ forks = [
 # linea_sepolia
 # https://github.com/Consensys/linea-monorepo/blob/0615fa37b9f7aa42681a54bfc881e43914d9c0a1/docker/linea-sepolia/genesis.json#L3
 [[chains]]
-chain_id = 59141
+id = 59141
 name = "linea-sepolia"
 forks = [
   { spec = "LONDON", activation = { Block = 0 } }
@@ -172,7 +172,7 @@ forks = [
 # local testnet (hardhat/anvil)
 # unique chain id
 [[chains]]
-chain_id = 31337
+id = 31337
 name = "local-testnet"
 forks = [
   { spec = "CANCUN", activation = { Block = 0 } }

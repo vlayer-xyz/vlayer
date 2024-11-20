@@ -9,17 +9,13 @@ use crate::{config::CHAIN_ID_TO_CHAIN_SPEC, error::ChainError, fork::Fork};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ChainSpec {
-    pub chain_id: ChainId,
-    pub name: String,
+    id: ChainId,
+    name: String,
     forks: Box<[Fork]>,
 }
 
 impl ChainSpec {
-    pub fn new<F>(
-        chain_id: ChainId,
-        name: impl Into<String>,
-        forks: impl IntoIterator<Item = F>,
-    ) -> Self
+    pub fn new<F>(id: ChainId, name: impl Into<String>, forks: impl IntoIterator<Item = F>) -> Self
     where
         F: Into<Fork>,
     {
@@ -31,11 +27,15 @@ impl ChainSpec {
             "forks must be ordered by their activation conditions in ascending order",
         );
 
-        ChainSpec {
-            chain_id,
-            name,
-            forks,
-        }
+        ChainSpec { id, name, forks }
+    }
+
+    pub fn id(&self) -> ChainId {
+        self.id
+    }
+
+    pub fn name(&self) -> &str {
+        &self.name
     }
 
     /// Returns the [SpecId] for a given block number and timestamp or an error if not supported.
@@ -53,7 +53,7 @@ impl Deref for ChainSpec {
     type Target = ChainId;
 
     fn deref(&self) -> &Self::Target {
-        &self.chain_id
+        &self.id
     }
 }
 
