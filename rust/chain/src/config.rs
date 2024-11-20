@@ -2,7 +2,7 @@
 use std::collections::HashMap;
 
 use alloy_primitives::ChainId;
-use once_cell::sync::Lazy;
+use lazy_static::lazy_static;
 use serde::Deserialize;
 use toml::from_str;
 
@@ -15,21 +15,24 @@ pub const TEST_CHAIN_ID: ChainId = 31_337;
 pub const MAINNET_MERGE_BLOCK_NUMBER: u64 = 15_537_394;
 pub const MAINNET_MERGE_BLOCK_TIMESTAMP: u64 = 1_663_224_179;
 
-pub static CHAIN_ID_TO_CHAIN_SPEC: Lazy<HashMap<ChainId, ChainSpec>> =
-    Lazy::new(build_chain_id_to_spec_map);
+lazy_static! {
+    pub static ref CHAIN_ID_TO_CHAIN_SPEC: HashMap<ChainId, ChainSpec> =
+        build_chain_id_to_spec_map();
 
-pub static CHAIN_NAME_TO_CHAIN_ID: Lazy<HashMap<String, ChainId>> =
-    Lazy::new(build_chain_name_to_id_map);
+    pub static ref CHAIN_NAME_TO_CHAIN_ID: HashMap<String, ChainId> =
+        build_chain_name_to_id_map();
+
+    static ref CHAIN_SPECS: ChainSpecs = {
+        // `include_str!` includes the file contents at compile time
+        from_str(include_str!("../chain_specs.toml"))
+            .expect("failed to parse chain specs")
+    };
+}
 
 #[derive(Debug, Deserialize)]
 struct ChainSpecs {
     pub chains: Vec<ChainSpec>,
 }
-
-static CHAIN_SPECS: Lazy<ChainSpecs> = Lazy::new(|| {
-    // include_str! loads chain_specs in compilation time
-    from_str(include_str!("../chain_specs.toml")).expect("failed to parse chain specs")
-});
 
 fn build_chain_id_to_spec_map() -> HashMap<ChainId, ChainSpec> {
     let mut chain_id_to_chain_spec = HashMap::with_capacity(CHAIN_SPECS.chains.len());
