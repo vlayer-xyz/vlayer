@@ -51,7 +51,7 @@ function SourceNewWay() {
     );
   }, []);
 
-  const requestWebProof = useCallback(async () => {
+  const requestWebProof = useCallback(() => {
     const loginUrl = `${window.location.origin}${import.meta.env.BASE_URL}login`;
     const targetUrl = `${window.location.origin}${import.meta.env.BASE_URL}target`;
 
