@@ -34,7 +34,7 @@ jobs:
         uses: ./.github/actions/contracts-prerequisites
       - name: Install TypeScript prerequisites
         uses: ./.github/actions/ts-prerequisites
-          
+
       - name: Check clang and LLVM version
         env:
           EXPECTED_LLVM_VERSION: "18.1"
@@ -43,10 +43,10 @@ jobs:
       - name: Install contracts' dependencies
         working-directory: ./contracts/vlayer
         run: forge soldeer install
-        
+
       - name: Run e2e test in prod mode
         env:
-          PROVING_MODE: 'prod'
+          PROVING_MODE: "prod"
           BONSAI_API_URL: ${{ vars.BONSAI_API_URL }}
           BONSAI_API_KEY: ${{ secrets.BONSAI_API_KEY }}
           ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}

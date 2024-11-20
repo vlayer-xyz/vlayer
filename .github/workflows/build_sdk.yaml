@@ -1,9 +1,9 @@
 name: Build SDK
-on: 
+on:
   pull_request:
     paths:
-      - 'examples/**'
-      - 'packages/**'
+      - "examples/**"
+      - "packages/**"
   merge_group:
   push:
     branches:
@@ -18,8 +18,8 @@ jobs:
     name: Build SDK
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v2
-    - name: Install TypeScript prerequisites
-      uses: ./.github/actions/ts-prerequisites
-    - name: Run ESLint
-      run: bash/tsc.sh
+      - uses: actions/checkout@v2
+      - name: Install TypeScript prerequisites
+        uses: ./.github/actions/ts-prerequisites
+      - name: Run ESLint
+        run: bash/tsc.sh

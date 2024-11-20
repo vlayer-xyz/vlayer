@@ -1,9 +1,9 @@
 name: Build examples
-on: 
+on:
   pull_request:
     paths:
-      - 'examples/**'
-      - 'packages/**'
+      - "examples/**"
+      - "packages/**"
   merge_group:
   push:
     branches:
@@ -18,24 +18,24 @@ jobs:
     name: Build examples
     runs-on: ubuntu-latest
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v4
-      with:
-        submodules: recursive
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
 
-    - name: Install contracts prerequisites
-      uses: ./.github/actions/contracts-prerequisites
-    - name: Install TypeScript prerequisites
-      uses: ./.github/actions/ts-prerequisites
+      - name: Install contracts prerequisites
+        uses: ./.github/actions/contracts-prerequisites
+      - name: Install TypeScript prerequisites
+        uses: ./.github/actions/ts-prerequisites
 
-    - name: Mock ImageId.sol
-      run: ./bash/mock-imageid.sh
+      - name: Mock ImageId.sol
+        run: ./bash/mock-imageid.sh
 
-    - name: Forge build contracts
-      working-directory: ./contracts/vlayer
-      run: |
-        forge soldeer install
-        forge build
+      - name: Forge build contracts
+        working-directory: ./contracts/vlayer
+        run: |
+          forge soldeer install
+          forge build
 
-    - name: Run tsc
-      run: bash/tsc-examples.sh
+      - name: Run tsc
+        run: bash/tsc-examples.sh

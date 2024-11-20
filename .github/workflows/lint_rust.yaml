@@ -4,8 +4,8 @@ on:
   pull_request:
     paths:
       - "rust-toolchain.toml"
-      - 'rust/**'
-      - '.github/workflows/lint.yaml'
+      - "rust/**"
+      - ".github/workflows/lint.yaml"
   merge_group:
   push:
     branches:
@@ -47,7 +47,7 @@ jobs:
           cargo +nightly fmt --check
           cargo sort --check --grouped
           cargo clippy --all-targets --all-features --locked
-      
+
       - name: Run Risc0 Chain Guest lints
         working-directory: rust/services/chain/guest_wrapper/risc0_guest
         env:

@@ -3,8 +3,8 @@ name: Test vlayer
 on:
   pull_request:
     paths:
-      - 'bash/**'
-      - 'contracts/**'
+      - "bash/**"
+      - "contracts/**"
       - "rust-toolchain.toml"
       - "rust/**"
       - "examples/**"
