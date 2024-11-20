@@ -20,7 +20,7 @@ test.describe("Full flow of webproof using extension", () => {
       await page.goto("/source");
       const requestProofButton = page
         .locator("body")
-        .getByTestId("request-webproof-button");
+        .getByTestId("request-prove-web-button");
       
       await requestProofButton.click();
       const extension = await sidePanel(context);
@@ -68,22 +68,9 @@ test.describe("Full flow of webproof using extension", () => {
       expect(proveButton).toBeDefined();
     });
 
-    await test.step("Click button should generate webproof", async () => {
+    await test.step("Click button should generate both proofs", async () => {
       const extension = await sidePanel(context);
       const proveButton = extension.getByTestId("prove-button");
-      await proveButton.click();
-      await page.waitForSelector(
-        'h1[data-testid="has-webproof"]',
-      );
-    });
-
-    await test.step("Zk prove button should appear after receiving webProof", async () => {
-      const proveButton = page.locator("body").getByTestId("zk-prove-button");
-      expect(proveButton).toBeVisible(); 
-    });
-
-    await test.step("Proving request has succeeded", async () => {
-      const proveButton = page.locator("body").getByTestId("zk-prove-button");
       await proveButton.click();
 
       const response = await page.waitForResponse(VLAYER_SERVER_URL);
