@@ -34,7 +34,7 @@ jobs:
 
   actionlint:
     runs-on: ubuntu-latest
-    name: Actionlink check
+    name: Actionlint check
     steps:
       - uses: actions/checkout@v4
       - name: Download actionlint
