@@ -1,21 +1,26 @@
+/**
+ * This file was copied from https://github.com/foundry-rs/foundry/blob/e649e62f125244a3ef116be25dfdc81a2afbaf2a/crates/forge/bin/cmd/install.rs
+ * The original file is licensed under the Apache License, Version 2.0.
+ * It wasn't modified, but it wasn't exported from foundry lib
+ */
+
+use clap::{Parser, ValueHint};
+use eyre::{Context, Result};
+use foundry_cli::{
+    opts::Dependency,
+    utils::{CommandUtils, Git, LoadConfig},
+};
+use foundry_common::{fs, prompt, sh_println, sh_warn};
+use foundry_config::{impl_figment_convert_basic, Config};
+use regex::Regex;
+use semver::Version;
+use tracing::{trace, warn};
 use std::{
     io::IsTerminal,
     path::{Path, PathBuf},
     str,
     sync::LazyLock,
 };
-
-use clap::{Parser, ValueHint};
-use color_eyre::eyre::{eyre, Context, Result};
-use foundry_cli::{
-    opts::Dependency,
-    utils::{CommandUtils, Git, LoadConfig},
-};
-use foundry_common::*;
-use foundry_config::{impl_figment_convert_basic, Config};
-use regex::Regex;
-use semver::Version;
-use tracing::{trace, warn};
 use yansi::Paint;
 
 static DEPENDENCY_VERSION_TAG_REGEX: LazyLock<Regex> =
@@ -94,11 +99,7 @@ impl DependencyInstallOpts {
     /// Returns true if any dependency was installed.
     pub fn install_missing_dependencies(mut self, config: &mut Config) -> bool {
         let lib = config.install_lib_dir();
-        if self
-            .git(config)
-            .has_missing_dependencies(Some(lib))
-            .unwrap_or(false)
-        {
+        if self.git(config).has_missing_dependencies(Some(lib)).unwrap_or(false) {
             // The extra newline is needed, otherwise the compiler output will overwrite the message
             let _ = sh_println!("Missing dependencies found. Installing now...\n");
             self.no_commit = true;
@@ -114,9 +115,8 @@ impl DependencyInstallOpts {
 
     /// Installs all dependencies
     pub fn install(self, config: &mut Config, dependencies: Vec<Dependency>) -> Result<()> {
-        let Self {
-            no_git, no_commit, ..
-        } = self;
+        let Self { no_git, no_commit, .. } = self;
+
 
         let git = self.git(config);
 
@@ -293,10 +293,7 @@ impl Installer<'_> {
         if self.git.shallow {
             None
         } else {
-            self.git_semver_tags(path)
-                .ok()
-                .and_then(|mut tags| tags.pop())
-                .map(|(tag, _)| tag)
+            self.git_semver_tags(path).ok().and_then(|mut tags| tags.pop()).map(|(tag, _)| tag)
         }
     }
 
@@ -312,7 +309,7 @@ impl Installer<'_> {
             for &prefix in common_prefixes {
                 if let Some(rem) = tag.strip_prefix(prefix) {
                     maybe_semver = rem;
-                    break;
+                    break
                 }
             }
             match Version::parse(maybe_semver) {
@@ -346,9 +343,7 @@ impl Installer<'_> {
 
     fn git_checkout(self, dep: &Dependency, path: &Path, recurse: bool) -> Result<String> {
         // no need to checkout if there is no tag
-        let Some(mut tag) = dep.tag.clone() else {
-            return Ok(String::new());
-        };
+        let Some(mut tag) = dep.tag.clone() else { return Ok(String::new()) };
 
         let mut is_branch = false;
         // only try to match tag if current terminal is a tty
@@ -367,12 +362,10 @@ impl Installer<'_> {
         if let Err(mut e) = res {
             // remove dependency on failed checkout
             fs::remove_dir_all(path)?;
-            if e.to_string()
-                .contains("did not match any file(s) known to git")
-            {
-                e = eyre!("Tag: \"{tag}\" not found for repo \"{url}\"!")
+            if e.to_string().contains("did not match any file(s) known to git") {
+                e = eyre::eyre!("Tag: \"{tag}\" not found for repo \"{url}\"!")
             }
-            return Err(e);
+            return Err(e)
         }
 
         if is_branch {
@@ -386,7 +379,7 @@ impl Installer<'_> {
     fn match_tag(self, tag: &str, path: &Path) -> Result<String> {
         // only try to match if it looks like a version tag
         if !DEPENDENCY_VERSION_TAG_REGEX.is_match(tag) {
-            return Ok(tag.into());
+            return Ok(tag.into())
         }
 
         // generate candidate list by filtering `git tag` output, valid ones are those "starting
@@ -404,13 +397,13 @@ impl Installer<'_> {
 
         // no match found, fall back to the user-provided tag
         if candidates.is_empty() {
-            return Ok(tag.into());
+            return Ok(tag.into())
         }
 
         // have exact match
         for candidate in candidates.iter() {
             if candidate == tag {
-                return Ok(tag.into());
+                return Ok(tag.into())
             }
         }
 
@@ -420,11 +413,7 @@ impl Installer<'_> {
             let input = prompt!(
                 "Found a similar version tag: {matched_tag}, do you want to use this instead? [Y/n] "
             )?;
-            return if match_yn(input) {
-                Ok(matched_tag.clone())
-            } else {
-                Ok(tag.into())
-            };
+            return if match_yn(input) { Ok(matched_tag.clone()) } else { Ok(tag.into()) }
         }
 
         // multiple candidates, ask the user to choose one or skip
@@ -447,7 +436,7 @@ impl Installer<'_> {
                 Ok(i) if (1..=n_candidates).contains(&i) => {
                     let c = &candidates[i];
                     sh_println!("[{i}] {c} selected")?;
-                    return Ok(c.clone());
+                    return Ok(c.clone())
                 }
                 _ => continue,
             }
@@ -456,12 +445,7 @@ impl Installer<'_> {
 
     fn match_branch(self, tag: &str, path: &Path) -> Result<Option<String>> {
         // fetch remote branches and check for tag
-        let output = self
-            .git
-            .root(path)
-            .cmd()
-            .args(["branch", "-r"])
-            .get_stdout_lossy()?;
+        let output = self.git.root(path).cmd().args(["branch", "-r"]).get_stdout_lossy()?;
 
         let mut candidates = output
             .lines()
@@ -475,13 +459,13 @@ impl Installer<'_> {
 
         // no match found, fall back to the user-provided tag
         if candidates.is_empty() {
-            return Ok(None);
+            return Ok(None)
         }
 
         // have exact match
         for candidate in candidates.iter() {
             if candidate == tag {
-                return Ok(Some(tag.to_string()));
+                return Ok(Some(tag.to_string()))
             }
         }
 
@@ -491,11 +475,7 @@ impl Installer<'_> {
             let input = prompt!(
                 "Found a similar branch: {matched_tag}, do you want to use this instead? [Y/n] "
             )?;
-            return if match_yn(input) {
-                Ok(Some(matched_tag.clone()))
-            } else {
-                Ok(None)
-            };
+            return if match_yn(input) { Ok(Some(matched_tag.clone())) } else { Ok(None) }
         }
 
         // multiple candidates, ask the user to choose one or skip
@@ -515,7 +495,7 @@ impl Installer<'_> {
         // default selection, return None
         if input.is_empty() {
             sh_println!("Canceled branch matching")?;
-            return Ok(None);
+            return Ok(None)
         }
 
         // match user input, 0 indicates skipping and use original tag
@@ -537,4 +517,32 @@ impl Installer<'_> {
 fn match_yn(input: String) -> bool {
     let s = input.trim().to_lowercase();
     matches!(s.as_str(), "" | "y" | "yes")
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use tempfile::tempdir;
+
+    #[test]
+    #[ignore = "slow"]
+    fn get_oz_tags() {
+        let tmp = tempdir().unwrap();
+        let git = Git::new(tmp.path());
+        let installer = Installer { git, no_commit: true };
+
+        git.init().unwrap();
+
+        let dep: Dependency = "openzeppelin/openzeppelin-contracts".parse().unwrap();
+        let libs = tmp.path().join("libs");
+        fs::create_dir(&libs).unwrap();
+        let submodule = libs.join("openzeppelin-contracts");
+        installer.git_submodule(&dep, &submodule).unwrap();
+        assert!(submodule.exists());
+
+        let tags = installer.git_semver_tags(&submodule).unwrap();
+        assert!(!tags.is_empty());
+        let v480: Version = "4.8.0".parse().unwrap();
+        assert!(tags.iter().any(|(_, v)| v == &v480));
+    }
 }

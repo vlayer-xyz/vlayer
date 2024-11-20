@@ -9991,6 +9991,7 @@ dependencies = [
  "regex",
  "semver 1.0.23",
  "serde_json",
+ "tempfile",
  "tokio",
  "tracing",
  "yansi 1.0.1",
