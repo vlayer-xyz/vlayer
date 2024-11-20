@@ -121,21 +121,21 @@ export const createVlayerClient = (
 
       const webProof = await webProofProvider.getWebProof({
         proverCallCommitment: {
-          address: address,
-          proverAbi: proverAbi,
-          functionName: functionName,
+          address,
+          proverAbi,
+          functionName,
           commitmentArgs: contractArgs,
-          chainId: chainId,
+          chainId,
         },
         logoUrl: webProofPlaceholder.logoUrl,
         steps: webProofPlaceholder.steps,
       });
 
       const hash = await this.prove({
-        address: address,
-        functionName: functionName,
-        chainId: chainId,
-        proverAbi: proverAbi,
+        address,
+        functionName,
+        chainId,
+        proverAbi,
         args: [
           {
             webProofJson: JSON.stringify({
