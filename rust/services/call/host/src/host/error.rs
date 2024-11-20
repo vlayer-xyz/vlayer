@@ -63,7 +63,4 @@ pub enum Error {
 
     #[error("Guest input verification error: {0}")]
     GuestInput(#[from] guest_input::Error),
-
-    #[error("Could not calculate return hash: {0}")]
-    ReturnHashEncoding(String),
 }

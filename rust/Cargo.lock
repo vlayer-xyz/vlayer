@@ -2022,7 +2022,6 @@ dependencies = [
  "lazy_static",
  "mock_chain_server",
  "provider",
- "rand",
  "reqwest 0.12.8",
  "serde",
  "serde_json",

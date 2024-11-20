@@ -40,13 +40,13 @@ pub struct CallContext {
 }
 
 pub struct CallResult {
-    hash: String,
+    hash: Vec<u8>,
     proof: Proof,
     evm_call_result: Vec<u8>,
 }
 
 impl CallResult {
-    pub fn new(hash: String, host_output: HostOutput) -> Result<Self, HostError> {
+    pub fn new(hash: Vec<u8>, host_output: HostOutput) -> Result<Self, HostError> {
         let HostOutput {
             guest_output,
             seal,
@@ -71,7 +71,7 @@ impl CallResult {
 
     pub fn to_json(&self) -> Value {
         json!({
-            "hash": self.hash,
+            "hash": self.hash.encode_hex_with_prefix(),
             "evm_call_result": self.evm_call_result.encode_hex_with_prefix(),
             "proof": {
                 "seal": {
