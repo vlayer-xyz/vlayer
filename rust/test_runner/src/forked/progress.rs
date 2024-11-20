@@ -1,6 +1,12 @@
+/**
+ * This file was copied from https://github.com/foundry-rs/foundry/blob/e649e62f125244a3ef116be25dfdc81a2afbaf2a/crates/forge/src/progress.rs
+ * The original file is licensed under the Apache License, Version 2.0.
+ * It wasn't modified, but it wasn't exported from foundry lib
+ */
 use std::{sync::Arc, time::Duration};
 
 use alloy_primitives::map::HashMap;
+use foundry_common::sh_println;
 use indicatif::{MultiProgress, ProgressBar};
 use parking_lot::Mutex;
 /// State of [ProgressBar]s displayed for the given test run.
@@ -29,11 +35,7 @@ impl TestsProgressState {
                 .progress_chars("##-"),
         );
         overall_progress.set_message(format!("completed (with {} threads)", threads_no as u64));
-        Self {
-            multi,
-            overall_progress,
-            suites_progress: HashMap::default(),
-        }
+        Self { multi, overall_progress, suites_progress: HashMap::default() }
     }
 
     /// Creates new test suite progress and add it to overall progress.
@@ -46,15 +48,14 @@ impl TestsProgressState {
         );
         suite_progress.set_message(format!("{suite_name} "));
         suite_progress.enable_steady_tick(Duration::from_millis(100));
-        self.suites_progress
-            .insert(suite_name.to_owned(), suite_progress);
+        self.suites_progress.insert(suite_name.to_owned(), suite_progress);
     }
 
     /// Prints suite result summary and removes it from overall progress.
     pub fn end_suite_progress(&mut self, suite_name: &String, result_summary: String) {
         if let Some(suite_progress) = self.suites_progress.remove(suite_name) {
             self.multi.suspend(|| {
-                println!("{suite_name}\n  ↪ {result_summary}");
+                let _ = sh_println!("{suite_name}\n  ↪ {result_summary}");
             });
             suite_progress.finish_and_clear();
             // Increment test progress bar to reflect completed test suite.
@@ -73,15 +74,14 @@ impl TestsProgressState {
         runs: u32,
     ) -> Option<ProgressBar> {
         if let Some(suite_progress) = self.suites_progress.get(suite_name) {
-            let fuzz_progress = self
-                .multi
-                .insert_after(suite_progress, ProgressBar::new(runs as u64));
+            let fuzz_progress =
+                self.multi.insert_after(suite_progress, ProgressBar::new(runs as u64));
             fuzz_progress.set_style(
                 indicatif::ProgressStyle::with_template(
                     "    ↪ {prefix:.bold.dim}: [{pos}/{len}]{msg} Runs",
                 )
-                .unwrap()
-                .tick_chars("⠁⠂⠄⡀⢀⠠⠐⠈ "),
+                    .unwrap()
+                    .tick_chars("⠁⠂⠄⡀⢀⠠⠐⠈ "),
             );
             fuzz_progress.set_prefix(test_name.to_string());
             Some(fuzz_progress)
@@ -104,9 +104,7 @@ pub struct TestsProgress {
 
 impl TestsProgress {
     pub fn new(suites_len: usize, threads_no: usize) -> Self {
-        Self {
-            inner: Arc::new(Mutex::new(TestsProgressState::new(suites_len, threads_no))),
-        }
+        Self { inner: Arc::new(Mutex::new(TestsProgressState::new(suites_len, threads_no))) }
     }
 }
 
@@ -118,10 +116,7 @@ pub fn start_fuzz_progress(
     runs: u32,
 ) -> Option<ProgressBar> {
     if let Some(progress) = tests_progress {
-        progress
-            .inner
-            .lock()
-            .start_fuzz_progress(suite_name, test_name, runs)
+        progress.inner.lock().start_fuzz_progress(suite_name, test_name, runs)
     } else {
         None
     }
