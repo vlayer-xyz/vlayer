@@ -77,3 +77,26 @@ forks = [
   { spec = "HOLOCENE", activation = { Timestamp = 1732633200 } },
 ]
 
+# polygon_mainnet
+# https://github.com/maticnetwork/bor/blob/16268f6608d09d5b6d0cd0e43f5ec076c3b92616/internal/cli/server/chains/mainnet.go#L11
+[[chains]]
+chain_id = 137
+forks = [
+  { spec = "PETERSBURG", activation = { Block = 0 } },
+  { spec = "ISTANBUL", activation = { Block = 3395000 } },
+  { spec = "MUIR_GLACIER", activation = { Block = 3395000 } },
+  { spec = "BERLIN", activation = { Block = 14750000 } },
+  { spec = "LONDON", activation = { Block = 23850000 } },
+  { spec = "SHANGHAI", activation = { Block = 50523000 } },
+  { spec = "CANCUN", activation = { Block = 54876000 } },
+]
+
+# polygon_amoy
+# https://github.com/maticnetwork/bor/blob/16268f6608d09d5b6d0cd0e43f5ec076c3b92616/internal/cli/server/chains/amoy.go#L11
+[[chains]]
+chain_id = 80002
+forks = [
+  { spec = "BERLIN", activation = { Block = 0 } },
+  { spec = "SHANGHAI", activation = { Block = 73100 } },
+  { spec = "CANCUN", activation = { Block = 5423600 } },
+]
