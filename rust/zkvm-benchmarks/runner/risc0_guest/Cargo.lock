@@ -898,6 +898,7 @@ dependencies = [
  "anyhow",
  "delegate",
  "derive-new",
+ "lazy_static",
  "once_cell",
  "revm",
  "serde",

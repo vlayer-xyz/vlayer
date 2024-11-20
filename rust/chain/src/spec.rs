@@ -102,4 +102,39 @@ mod tests {
             );
         }
     }
+
+    mod active_fork {
+        use lazy_static::lazy_static;
+
+        use super::*;
+        use crate::MAINNET_MERGE_BLOCK_NUMBER;
+
+        lazy_static! {
+            static ref ETHEREUM_MAINNET: ChainSpec = ChainSpec::try_from(1).unwrap();
+        }
+
+        #[test]
+        fn frontier_at_genesis() -> anyhow::Result<()> {
+            let spec_id = ETHEREUM_MAINNET.active_fork(0, 0)?;
+            assert_eq!(spec_id, SpecId::FRONTIER);
+
+            Ok(())
+        }
+
+        #[test]
+        fn merge_block() -> anyhow::Result<()> {
+            let spec_id = ETHEREUM_MAINNET.active_fork(MAINNET_MERGE_BLOCK_NUMBER, 0)?;
+            assert_eq!(spec_id, SpecId::MERGE);
+
+            Ok(())
+        }
+
+        #[test]
+        fn cancun_at_latest() -> anyhow::Result<()> {
+            let spec_id = ETHEREUM_MAINNET.active_fork(0, u64::MAX)?;
+            assert_eq!(spec_id, SpecId::CANCUN);
+
+            Ok(())
+        }
+    }
 }

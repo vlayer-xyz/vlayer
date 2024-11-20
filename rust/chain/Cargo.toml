@@ -9,6 +9,7 @@ alloy-primitives = { workspace = true, features = ["rlp", "serde"] }
 anyhow = { workspace = true }
 delegate = { workspace = true }
 derive-new = { workspace = true }
+lazy_static = { workspace = true }
 once_cell = { workspace = true }
 revm = { workspace = true, features = ["serde", "std"] }
 serde = { workspace = true, features = ["derive"] }
