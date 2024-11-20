@@ -28,7 +28,7 @@ use tracing::info;
 
 use crate::{
     encodable_receipt::EncodableReceipt, evm_env::factory::HostEvmEnvFactory,
-    into_input::into_multi_input, ProofDb,
+    into_input::into_multi_input, HostDb,
 };
 
 mod config;
@@ -39,7 +39,7 @@ mod tests;
 
 pub struct Host {
     start_execution_location: ExecutionLocation,
-    envs: CachedEvmEnv<ProofDb>,
+    envs: CachedEvmEnv<HostDb>,
     prover: Prover,
     verifier: guest_input::ZkVerifier<chain_client::RecordingClient, chain_proof::ZkVerifier>,
     max_calldata_size: usize,

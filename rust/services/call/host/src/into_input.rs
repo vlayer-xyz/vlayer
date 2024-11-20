@@ -7,7 +7,7 @@ use call_engine::evm::{
     input::{EvmInput, MultiEvmInput},
 };
 
-use crate::ProofDb;
+use crate::{HostDb, ProofDb};
 
 fn into_input(db: &ProofDb, header: Box<dyn EvmBlockHeader>) -> anyhow::Result<EvmInput> {
     let (state_trie, storage_tries) = db.prepare_state_storage_tries()?;
@@ -28,7 +28,7 @@ fn into_input(db: &ProofDb, header: Box<dyn EvmBlockHeader>) -> anyhow::Result<E
     Ok(evm_input)
 }
 
-pub(crate) fn into_multi_input(envs: CachedEvmEnv<ProofDb>) -> anyhow::Result<MultiEvmInput> {
+pub(crate) fn into_multi_input(envs: CachedEvmEnv<HostDb>) -> anyhow::Result<MultiEvmInput> {
     envs.into_inner()
         .into_iter()
         .map(|(location, env)| {
@@ -38,7 +38,7 @@ pub(crate) fn into_multi_input(envs: CachedEvmEnv<ProofDb>) -> anyhow::Result<Mu
                     Arc::strong_count(&rc)
                 )
             })?;
-            Ok((location, into_input(&env.db, env.header)?))
+            Ok((location, into_input(&env.db.db, env.header)?))
         })
         .collect()
 }
