@@ -1,9 +1,13 @@
-use std::sync::Arc;
+use std::sync::{Arc, RwLock};
 
 use call_engine::{
     evm::{
-        env::{cached::CachedEvmEnv, location::ExecutionLocation, EvmEnv},
-        input::MultiEvmInput,
+        env::{
+            cached::{CachedEvmEnv, MultiEvmEnv},
+            location::ExecutionLocation,
+            EvmEnv,
+        },
+        input::{EvmInput, MultiEvmInput},
     },
     travel_call_executor::TravelCallExecutor,
     verifier::guest_input::Verifier,
@@ -31,6 +35,30 @@ pub fn assert_input_coherency(multi_evm_input: MultiEvmInput) -> VerifiedInput {
     VerifiedInput(multi_evm_input)
 }
 
+fn create_env_from_input(input: EvmInput) -> EvmEnv<WrapStateDb> {
+    let header = input.header.clone();
+    let db = WrapStateDb::from(input);
+    EvmEnv::new(db, header)
+}
+
+fn create_envs_from_input(input: MultiEvmInput) -> MultiEvmEnv<WrapStateDb> {
+    RwLock::new(
+        input
+            .into_iter()
+            .map(|(location, input)| {
+                let chain_spec = &location.chain_id.try_into().expect("cannot get chain spec");
+                #[allow(clippy::arc_with_non_send_sync)]
+                let input = Arc::new(
+                    create_env_from_input(input)
+                        .with_chain_spec(chain_spec)
+                        .unwrap(),
+                );
+                (location, input)
+            })
+            .collect(),
+    )
+}
+
 pub struct VerifiedEnv {
     multi_evm_env: CachedEvmEnv<WrapStateDb>,
     start_exec_location: ExecutionLocation,
@@ -39,8 +67,9 @@ pub struct VerifiedEnv {
 impl VerifiedEnv {
     #[must_use]
     pub fn new(verified_input: VerifiedInput, start_exec_location: ExecutionLocation) -> Self {
+        let multi_evm_env = create_envs_from_input(verified_input.0);
         Self {
-            multi_evm_env: CachedEvmEnv::from_envs(verified_input.0.into()),
+            multi_evm_env: CachedEvmEnv::from_envs(multi_evm_env),
             start_exec_location,
         }
     }
