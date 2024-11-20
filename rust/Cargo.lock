@@ -9178,6 +9178,7 @@ dependencies = [
  "http-body-util",
  "mime",
  "mockito",
+ "parking_lot",
  "reqwest 0.12.8",
  "serde",
  "serde_json",
