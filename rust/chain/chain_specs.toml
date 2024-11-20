@@ -154,7 +154,7 @@ forks = [
   { spec = "LONDON", activation = { Block = 0 } }
 ]
 
-# testing
+# local testnet (hardhat/anvil)
 # unique chain id
 [[chains]]
 chain_id = 31337
