@@ -1,3 +1,11 @@
+/**
+ * This file is in large part copied from https://github.com/foundry-rs/foundry/blob/e649e62f125244a3ef116be25dfdc81a2afbaf2a/crates/forge/src/multi_runner.rs
+ * The only copied functions are: test, run_test_suite and is_matching_test
+ * The original file is licensed under the Apache License, Version 2.0.
+ * The original file was modified for the purpose of this project.
+ * All relevant modifications are commented with "MODIFICATION" comments.
+ */
+
 use std::{
     sync::{mpsc, Arc},
     time::Instant,
@@ -21,6 +29,7 @@ use crate::forked::{contract_runner::ContractRunner, progress, test_executor::Te
 /// before executing all contracts and their tests in _parallel_.
 ///
 /// Each Executor gets its own instance of the `Backend`.
+// MODIFICATION: self replaced with runner
 pub fn test(
     mut runner: MultiContractRunner,
     filter: &dyn TestFilter,
@@ -30,15 +39,18 @@ pub fn test(
     let tokio_handle = tokio::runtime::Handle::current();
     trace!("running all tests");
 
+    // MODIFICATION: self replaced with runner
     // The DB backend that serves all the data.
     let db = Backend::spawn(runner.fork.take());
 
     let find_timer = Instant::now();
+    // MODIFICATION: self replaced with runner
     let contracts = runner.matching_contracts(filter).collect::<Vec<_>>();
     let find_time = find_timer.elapsed();
     debug!(
         "Found {} test contracts out of {} in {:?}",
         contracts.len(),
+        // MODIFICATION: self replaced with runner
         runner.contracts.len(),
         find_time,
     );
@@ -50,11 +62,9 @@ pub fn test(
             .par_iter()
             .map(|&(id, contract)| {
                 let _guard = tokio_handle.enter();
-                tests_progress
-                    .inner
-                    .lock()
-                    .start_suite_progress(&id.identifier());
+                tests_progress.inner.lock().start_suite_progress(&id.identifier());
 
+                // MODIFICATION: self replaced with runner
                 let result = run_test_suite(
                     &runner,
                     id,
@@ -82,6 +92,7 @@ pub fn test(
     } else {
         contracts.par_iter().for_each(|&(id, contract)| {
             let _guard = tokio_handle.enter();
+            // MODIFICATION: self replaced with runner
             let result =
                 run_test_suite(&runner, id, contract, db.clone(), filter, &tokio_handle, None);
             let _ = tx.send((id.identifier(), result));
@@ -89,6 +100,7 @@ pub fn test(
     }
 }
 
+// MODIFICATION: self replaced with runner
 fn run_test_suite(
     runner: &MultiContractRunner,
     artifact_id: &ArtifactId,
@@ -102,6 +114,7 @@ fn run_test_suite(
     let mut span_name = identifier.as_str();
 
     let cheats_config = CheatsConfig::new(
+        // MODIFICATION: self replaced with runner
         &runner.config,
         runner.evm_opts.clone(),
         Some(runner.known_contracts.clone()),
@@ -109,11 +122,13 @@ fn run_test_suite(
         Some(artifact_id.version.clone()),
     );
 
+    // MODIFICATION: self replaced with runner
     let trace_mode = TraceMode::default()
         .with_debug(runner.debug)
         .with_decode_internal(runner.decode_internal)
         .with_verbosity(runner.evm_opts.verbosity);
 
+    // MODIFICATION: self replaced with runner
     let executor = ExecutorBuilder::new()
         .inspectors(|stack| {
             stack
@@ -142,6 +157,7 @@ fn run_test_suite(
         name: &identifier,
         contract,
         libs_to_deploy: &runner.libs_to_deploy,
+        // MODIFICATION: Executor replaced with TestExecutor
         executor: TestExecutor::new(executor, &runner.config.rpc_endpoints),
         revert_decoder: &runner.revert_decoder,
         initial_balance: runner.evm_opts.initial_balance,
@@ -150,7 +166,8 @@ fn run_test_suite(
         tokio_handle,
         span,
     };
-    let r = contract_runner.run_tests(filter, &runner.test_options, runner.known_contracts.clone());
+    // MODIFICATION: self replaced with runner
+     let r = contract_runner.run_tests(filter, &runner.test_options, runner.known_contracts.clone());
 
     debug!(duration=?r.duration, "executed all tests in contract");
 
