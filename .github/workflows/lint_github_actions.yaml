@@ -1,8 +1,8 @@
 name: Lint GitHub Actions
-on: 
+on:
   pull_request:
     paths:
-      - '.github/**'
+      - ".github/**"
   merge_group:
   push:
     branches:
