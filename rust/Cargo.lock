@@ -1984,7 +1984,9 @@ dependencies = [
  "dotenvy",
  "ethers-core",
  "host_utils",
+ "insta",
  "lazy_static",
+ "maplit",
  "mock_chain_server",
  "mpt",
  "provider",
@@ -5937,6 +5939,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "insta"
+version = "1.41.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7e9ffc4d4892617c50a928c52b2961cb5174b6fc6ebf252b2fac9d21955c48b8"
+dependencies = [
+ "console",
+ "lazy_static",
+ "linked-hash-map",
+ "serde",
+ "similar",
+]
+
+[[package]]
 name = "instability"
 version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7792,6 +7807,7 @@ dependencies = [
  "derive-new",
  "ethers-core",
  "ethers-providers",
+ "maplit",
  "serde",
  "serde_json",
  "thiserror",

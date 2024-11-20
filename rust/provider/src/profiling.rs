@@ -1,48 +1,91 @@
-use std::sync::atomic::{AtomicUsize, Ordering};
+use std::{collections::HashMap, sync::RwLock};
 
 use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256};
 use anyhow::Result;
 use block_header::EvmBlockHeader;
 use ethers_core::types::BlockNumber as BlockTag;
+use serde::{Deserialize, Serialize};
 
 use super::{BlockingProvider, EIP1186Proof};
 
-#[derive(Debug)]
-pub struct ProfilingProvider {
-    inner: Box<dyn BlockingProvider>,
-    state: AtomicUsize,
+#[derive(Debug, Default, Clone, Eq, PartialEq, Serialize, Deserialize)]
+pub struct State {
+    pub header: HashMap<BlockTag, u64>,
+    pub balance: HashMap<BlockNumber, HashMap<Address, u64>>,
+    pub code: HashMap<BlockNumber, HashMap<Address, u64>>,
+    pub nonce: HashMap<BlockNumber, HashMap<Address, u64>>,
+    pub proof: HashMap<BlockNumber, HashMap<Address, u64>>,
+    pub storage: HashMap<BlockNumber, HashMap<Address, HashMap<StorageKey, u64>>>,
 }
 
-impl ProfilingProvider {
+fn flatten<K>(map: &HashMap<K, u64>) -> impl Iterator<Item = &u64> {
+    map.values()
+}
+
+fn flatten2<K1, K2>(map: &HashMap<K1, HashMap<K2, u64>>) -> impl Iterator<Item = &u64> {
+    map.values().flat_map(flatten)
+}
+
+fn flatten3<K1, K2, K3>(
+    map: &HashMap<K1, HashMap<K2, HashMap<K3, u64>>>,
+) -> impl Iterator<Item = &u64> {
+    map.values().flat_map(flatten2)
+}
+
+impl State {
+    pub fn total_count(&self) -> u64 {
+        flatten(&self.header)
+            .chain(flatten2(&self.balance))
+            .chain(flatten2(&self.code))
+            .chain(flatten2(&self.nonce))
+            .chain(flatten2(&self.proof))
+            .chain(flatten3(&self.storage))
+            .sum()
+    }
+}
+
+#[derive(Debug)]
+pub struct Provider {
+    inner: Box<dyn BlockingProvider>,
+    state: RwLock<State>,
+}
+
+impl Provider {
     pub fn new(inner: impl BlockingProvider + 'static) -> Self {
         Self {
             inner: Box::new(inner),
-            state: AtomicUsize::new(0),
+            state: Default::default(),
         }
     }
 
-    pub fn increment(&self) {
-        self.state.fetch_add(1, Ordering::SeqCst);
-    }
-
-    pub fn call_count(&self) -> usize {
-        self.state.load(Ordering::SeqCst)
+    pub fn state(&self) -> State {
+        self.state.read().expect("poisoned lock").clone()
     }
 }
 
-impl BlockingProvider for ProfilingProvider {
+macro_rules! inc {
+    ($val:expr, $field:ident, $($key:expr),+) => {{
+        let val = &mut $val.write().expect("poisoned lock").$field;
+        $(
+            let val = val.entry($key).or_default();
+        )+
+        *val += 1;
+    }};
+}
+
+impl BlockingProvider for Provider {
     fn get_balance(&self, address: Address, block: BlockNumber) -> Result<U256> {
-        self.increment();
+        inc!(self.state, balance, block, address);
         self.inner.get_balance(address, block)
     }
 
     fn get_block_header(&self, block: BlockTag) -> Result<Option<Box<dyn EvmBlockHeader>>> {
-        self.increment();
+        inc!(self.state, header, block);
         self.inner.get_block_header(block)
     }
 
     fn get_code(&self, address: Address, block: BlockNumber) -> Result<Bytes> {
-        self.increment();
+        inc!(self.state, code, block, address);
         self.inner.get_code(address, block)
     }
 
@@ -52,7 +95,7 @@ impl BlockingProvider for ProfilingProvider {
         storage_keys: Vec<StorageKey>,
         block: BlockNumber,
     ) -> Result<EIP1186Proof> {
-        self.increment();
+        inc!(self.state, proof, block, address);
         self.inner.get_proof(address, storage_keys, block)
     }
 
@@ -62,44 +105,43 @@ impl BlockingProvider for ProfilingProvider {
         key: StorageKey,
         block: BlockNumber,
     ) -> Result<StorageValue> {
-        self.increment();
+        inc!(self.state, storage, block, address, key);
         self.inner.get_storage_at(address, key, block)
     }
 
     fn get_transaction_count(&self, address: Address, block: BlockNumber) -> Result<TxNumber> {
-        self.increment();
+        inc!(self.state, nonce, block, address);
         self.inner.get_transaction_count(address, block)
     }
 }
 
 #[cfg(test)]
 mod tests {
+    use maplit::hashmap as m;
+
     use super::*;
     use crate::default::DefaultProvider;
 
     #[test]
     fn test_profiling() -> Result<()> {
-        let provider = ProfilingProvider::new(DefaultProvider);
-
-        assert_eq!(provider.call_count(), 0);
+        let provider = Provider::new(DefaultProvider);
 
         provider.get_balance(Default::default(), Default::default())?;
-        assert_eq!(provider.call_count(), 1);
-
         provider.get_block_header(Default::default())?;
-        assert_eq!(provider.call_count(), 2);
-
         provider.get_code(Default::default(), Default::default())?;
-        assert_eq!(provider.call_count(), 3);
-
         provider.get_proof(Default::default(), Default::default(), Default::default())?;
-        assert_eq!(provider.call_count(), 4);
-
         provider.get_storage_at(Default::default(), Default::default(), Default::default())?;
-        assert_eq!(provider.call_count(), 5);
-
         provider.get_transaction_count(Default::default(), Default::default())?;
-        assert_eq!(provider.call_count(), 6);
+
+        let expected_state = State {
+            header: m! { BlockTag::Latest => 1 },
+            balance: m! { 0 => m! { Address::ZERO => 1 } },
+            code: m! { 0 => m! { Address::ZERO => 1 } },
+            nonce: m! { 0 => m! { Address::ZERO => 1 } },
+            proof: m! { 0 => m! { Address::ZERO => 1 } },
+            storage: m! { 0 => m! { Address::ZERO => m! { StorageKey::ZERO => 1 } } },
+        };
+        assert_eq!(provider.state(), expected_state);
 
         Ok(())
     }

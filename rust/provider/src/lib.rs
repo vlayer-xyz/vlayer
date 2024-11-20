@@ -4,7 +4,7 @@ mod ethers;
 mod factory;
 mod multi;
 mod never;
-mod profiling;
+pub mod profiling;
 mod proof;
 
 use std::fmt::Debug;
@@ -22,7 +22,6 @@ pub use factory::{
     ProviderFactoryError,
 };
 pub use multi::CachedMultiProvider;
-pub use profiling::ProfilingProvider;
 pub use proof::{EIP1186Proof, StorageProof};
 
 /// The Ethers client type.
