@@ -83,6 +83,7 @@ foundry-config = { git = "https://github.com/foundry-rs/foundry", rev = "e649e62
 foundry-debugger = { git = "https://github.com/foundry-rs/foundry", rev = "e649e62f125244a3ef116be25dfdc81a2afbaf2a" }
 foundry-evm = { git = "https://github.com/foundry-rs/foundry", rev = "e649e62f125244a3ef116be25dfdc81a2afbaf2a" }
 foundry-evm-core = { git = "https://github.com/foundry-rs/foundry", rev = "e649e62f125244a3ef116be25dfdc81a2afbaf2a" }
+foundry-test-utils = { git = "https://github.com/foundry-rs/foundry", rev = "e649e62f125244a3ef116be25dfdc81a2afbaf2a" }
 futures = { version = "0.3.31", default-features = false }
 hex = "0.4.3"
 http-body-util = "0.1.2"

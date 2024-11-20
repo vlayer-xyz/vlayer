@@ -4012,6 +4012,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "fd-lock"
+version = "4.0.2"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "7e5768da2206272c81ef0b5e951a41862938a6070da63bcea197899942d3b947"
+dependencies = [
+ "cfg-if",
+ "rustix",
+ "windows-sys 0.52.0",
+]
+
+[[package]]
 name = "ff"
 version = "0.13.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -4553,12 +4564,14 @@ dependencies = [
  "dyn-clone",
  "foundry-compilers-artifacts",
  "foundry-compilers-core",
+ "fs_extra",
  "futures-util",
  "home",
  "itertools 0.13.0",
  "md-5",
  "once_cell",
  "path-slash",
+ "rand",
  "rayon",
  "semver 1.0.23",
  "serde",
@@ -4567,6 +4580,7 @@ dependencies = [
  "solang-parser",
  "svm-rs 0.5.4",
  "svm-rs-builds",
+ "tempfile",
  "thiserror",
  "tokio",
  "tracing",
@@ -4632,6 +4646,7 @@ dependencies = [
  "alloy-primitives",
  "cfg-if",
  "dunce",
+ "fs_extra",
  "once_cell",
  "path-slash",
  "regex",
@@ -4639,6 +4654,7 @@ dependencies = [
  "serde",
  "serde_json",
  "svm-rs 0.5.4",
+ "tempfile",
  "thiserror",
  "tokio",
  "walkdir",
@@ -4889,6 +4905,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "foundry-test-utils"
+version = "0.2.0"
+source = "git+https://github.com/foundry-rs/foundry?rev=e649e62f125244a3ef116be25dfdc81a2afbaf2a#e649e62f125244a3ef116be25dfdc81a2afbaf2a"
+dependencies = [
+ "alloy-primitives",
+ "alloy-provider",
+ "eyre",
+ "fd-lock",
+ "foundry-common",
+ "foundry-compilers",
+ "foundry-config",
+ "parking_lot",
+ "rand",
+ "regex",
+ "serde_json",
+ "snapbox",
+ "tracing",
+ "tracing-subscriber 0.3.18",
+]
+
+[[package]]
 name = "foundry-wallets"
 version = "0.2.0"
 source = "git+https://github.com/foundry-rs/foundry?rev=e649e62f125244a3ef116be25dfdc81a2afbaf2a#e649e62f125244a3ef116be25dfdc81a2afbaf2a"
@@ -4934,6 +4971,12 @@ dependencies = [
  "rustix",
  "windows-sys 0.52.0",
 ]
+
+[[package]]
+name = "fs_extra"
+version = "1.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "42703706b716c37f96a77aea830392ad231f44c9e9a67872fa5548707e11b11c"
 
 [[package]]
 name = "fsevent-sys"
@@ -6869,6 +6912,12 @@ dependencies = [
  "memchr",
  "minimal-lexical",
 ]
+
+[[package]]
+name = "normalize-line-endings"
+version = "0.3.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "61807f77802ff30975e01f4f071c8ba10c022052f98b3294119f3e615d13e5be"
 
 [[package]]
 name = "normalize-path"
@@ -9420,6 +9469,31 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b7c388c1b5e93756d0c740965c41e8822f866621d41acbdf6336a6a168f8840c"
 
 [[package]]
+name = "snapbox"
+version = "0.6.20"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "1373ce406dfad473059bbc31d807715642182bbc952a811952b58d1c9e41dcfa"
+dependencies = [
+ "anstream",
+ "anstyle",
+ "normalize-line-endings",
+ "regex",
+ "serde",
+ "serde_json",
+ "similar",
+ "snapbox-macros",
+]
+
+[[package]]
+name = "snapbox-macros"
+version = "0.3.10"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "16569f53ca23a41bb6f62e0a5084aa1661f4814a67fa33696a79073e03a664af"
+dependencies = [
+ "anstream",
+]
+
+[[package]]
 name = "socket2"
 version = "0.5.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -9901,6 +9975,7 @@ dependencies = [
  "foundry-debugger",
  "foundry-evm",
  "foundry-evm-core",
+ "foundry-test-utils",
  "hyper 1.5.0",
  "indicatif",
  "inferno",

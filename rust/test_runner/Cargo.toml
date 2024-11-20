@@ -4,7 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-
 alloy-dyn-abi = { workspace = true }
 alloy-json-abi = { workspace = true }
 alloy-primitives = { workspace = true }
@@ -53,6 +52,9 @@ serde_json = { workspace = true }
 tokio = { workspace = true }
 tracing = { workspace = true }
 yansi = { workspace = true }
+
+[dev-dependencies]
+foundry-test-utils = { workspace = true }
 
 [lints]
 workspace = true
