@@ -91,9 +91,7 @@ function SourceNewWay() {
   }, [proof]);
 
   const handleWebProofRequestClick = () => {
-    requestWebProof().catch((error) => {
-      console.error("Error during requesting web proof:", error);
-    });
+    requestWebProof();
   };
 
   const handleZkProofRequestClick = () => {
