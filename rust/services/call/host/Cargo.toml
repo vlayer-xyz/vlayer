@@ -37,6 +37,7 @@ call_guest_wrapper = { workspace = true }
 chain_guest_wrapper = { workspace = true }
 ctor = { workspace = true }
 dotenvy = { workspace = true }
+insta = { workspace = true, features = ["yaml"] }
 maplit = { workspace = true }
 mock_chain_server = { workspace = true }
 test-log = { workspace = true }

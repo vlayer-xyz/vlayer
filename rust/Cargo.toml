@@ -115,6 +115,7 @@ tempfile = "3.13.0"
 maplit = "1.0.2"
 test-log = "0.2.16"
 thiserror = "1.0.65"
+insta = "1.41.1"
 tlsn-core = { git = "https://github.com/tlsnotary/tlsn.git", tag = "v0.1.0-alpha.6" }
 tokio = { version = "1.41.0", default-features = false, features = ["rt-multi-thread"] }
 toml = "0.8.19"
@@ -215,3 +216,7 @@ used_underscore_binding = "warn"
 useless_let_if_seq = "warn"
 missing_const_for_fn = "warn"
 zero_sized_map_values = "warn"
+
+[profile.dev.package] # https://insta.rs/docs/quickstart/#optional-faster-runs
+insta.opt-level = 3
+similar.opt-level = 3

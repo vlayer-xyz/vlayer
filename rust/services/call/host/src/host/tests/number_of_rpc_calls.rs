@@ -30,7 +30,9 @@ async fn time_travel() -> anyhow::Result<()> {
 
     let _ = TravelCallExecutor::new(&envs).call(&call, location);
 
-    assert_eq!(profiling_provider.state(), profiling::State::default());
+    insta::with_settings!({sort_maps => true}, {
+        insta::assert_yaml_snapshot!(profiling_provider.state())
+    });
 
     Ok(())
 }
