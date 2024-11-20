@@ -9,15 +9,21 @@ use crate::{config::CHAIN_ID_TO_CHAIN_SPEC, error::ChainError, fork::Fork};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ChainSpec {
-    chain_id: ChainId,
+    pub chain_id: ChainId,
+    pub name: String,
     forks: Box<[Fork]>,
 }
 
 impl ChainSpec {
-    pub fn new<F>(chain_id: ChainId, forks: impl IntoIterator<Item = F>) -> Self
+    pub fn new<F>(
+        chain_id: ChainId,
+        name: impl Into<String>,
+        forks: impl IntoIterator<Item = F>,
+    ) -> Self
     where
         F: Into<Fork>,
     {
+        let name = name.into();
         let forks: Box<[Fork]> = forks.into_iter().map(Into::into).collect();
         assert!(!forks.is_empty(), "chain spec must have at least one fork");
         assert!(
@@ -25,12 +31,11 @@ impl ChainSpec {
             "forks must be ordered by their activation conditions in ascending order",
         );
 
-        ChainSpec { chain_id, forks }
-    }
-
-    /// Creates a new configuration consisting of only one specification ID.
-    pub fn new_single(chain_id: ChainId, spec_id: SpecId) -> Self {
-        ChainSpec::new(chain_id, [Fork::after_block(spec_id, 0)])
+        ChainSpec {
+            chain_id,
+            name,
+            forks,
+        }
     }
 
     /// Returns the [SpecId] for a given block number and timestamp or an error if not supported.
@@ -74,7 +79,7 @@ mod tests {
         #[test]
         #[should_panic(expected = "chain spec must have at least one fork")]
         fn panics_if_no_forks() {
-            ChainSpec::new(1, [] as [Fork; 0]);
+            ChainSpec::new(1, "", [] as [Fork; 0]);
         }
 
         #[test]
@@ -84,6 +89,7 @@ mod tests {
         fn forks_should_be_ordered_by_activation() {
             ChainSpec::new(
                 1,
+                "",
                 [
                     Fork::after_timestamp(SpecId::MERGE, MAINNET_MERGE_BLOCK_TIMESTAMP),
                     Fork::after_block(SpecId::SHANGHAI, 0),
@@ -95,6 +101,7 @@ mod tests {
         fn success() {
             ChainSpec::new(
                 1,
+                "",
                 [
                     Fork::after_block(SpecId::MERGE, 0),
                     Fork::after_timestamp(SpecId::SHANGHAI, MAINNET_MERGE_BLOCK_TIMESTAMP),
