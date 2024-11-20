@@ -22,7 +22,6 @@ lazy_static! {
     pub static ref CHAIN_NAME_TO_CHAIN_ID: HashMap<String, ChainId> =
         chain_name_to_id_map();
 
-
     static ref CHAIN_SPECS: ChainSpecs = {
         // `include_str!` includes the file contents at compile time
         let specs: ChainSpecs = from_str(include_str!("../chain_specs.toml"))

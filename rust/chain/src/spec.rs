@@ -1,5 +1,3 @@
-use std::ops::Deref;
-
 use alloy_primitives::{BlockNumber, ChainId};
 use anyhow::bail;
 use revm::primitives::SpecId;
