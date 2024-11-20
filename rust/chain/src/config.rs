@@ -26,7 +26,7 @@ fn load_chain_id_to_chain_spec() -> HashMap<ChainId, ChainSpec> {
 
     for chain in &CHAIN_SPECS.chains {
         if chain_id_to_chain_spec.contains_key(&chain.chain_id) {
-            panic!("Duplicated chain spec for ID {}", chain.chain_id);
+            panic!("duplicated chain spec for ID {}", chain.chain_id);
         }
         chain_id_to_chain_spec.insert(chain.chain_id, chain.clone());
     }
@@ -39,7 +39,7 @@ fn load_chain_name_to_chain_id() -> HashMap<String, ChainId> {
 
     for chain in &CHAIN_SPECS.chains {
         if chain_name_to_id.contains_key(&chain.name) {
-            panic!("Duplicated chain spec for name {}", chain.name);
+            panic!("duplicated chain spec for name {}", chain.name);
         }
         chain_name_to_id.insert(chain.name.clone(), chain.chain_id);
     }
@@ -54,5 +54,5 @@ struct ChainSpecs {
 
 static CHAIN_SPECS: Lazy<ChainSpecs> = Lazy::new(|| {
     // include_str! loads chain_specs in compilation time
-    from_str(include_str!("../chain_specs.toml")).expect("Failed to parse chain specs")
+    from_str(include_str!("../chain_specs.toml")).expect("failed to parse chain specs")
 });
