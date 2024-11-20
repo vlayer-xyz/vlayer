@@ -49,14 +49,6 @@ impl ChainSpec {
     }
 }
 
-impl Deref for ChainSpec {
-    type Target = ChainId;
-
-    fn deref(&self) -> &Self::Target {
-        &self.id
-    }
-}
-
 impl TryFrom<ChainId> for ChainSpec {
     type Error = ChainError;
 
