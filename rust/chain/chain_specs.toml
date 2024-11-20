@@ -153,3 +153,11 @@ chain_id = 59141
 forks = [
   { spec = "LONDON", activation = { Block = 0 } }
 ]
+
+# testing
+# unique chain id
+[[chains]]
+chain_id = 31337
+forks = [
+  { spec = "CANCUN", activation = { Block = 0 } }
+]
