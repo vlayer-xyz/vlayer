@@ -57,7 +57,7 @@ impl ConfigBuilder {
         mut self,
         mappings: impl IntoIterator<Item = (ChainId, String)>,
     ) -> Self {
-        self.config.rpc_urls = mappings.into_iter().collect();
+        self.config.rpc_urls.extend(mappings);
         self
     }
 
@@ -102,5 +102,28 @@ impl Config {
             call_guest_elf: self.call_guest_elf.clone(),
             chain_guest_elf: self.chain_guest_elf.clone(),
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn local_testnet_rpc_url_always_there() {
+        let config = ConfigBuilder::new("", Default::default(), Default::default())
+            .with_rpc_mappings(vec![])
+            .build();
+
+        assert_eq!(config.rpc_urls.get(&TEST_CHAIN_ID).unwrap(), "http://localhost:8545");
+    }
+
+    #[test]
+    fn local_testnet_rpc_url_can_be_overwritten() {
+        let config = ConfigBuilder::new("", Default::default(), Default::default())
+            .with_rpc_mappings(vec![(TEST_CHAIN_ID, "NEW".to_string())])
+            .build();
+
+        assert_eq!(config.rpc_urls.get(&TEST_CHAIN_ID).unwrap(), "NEW");
     }
 }
