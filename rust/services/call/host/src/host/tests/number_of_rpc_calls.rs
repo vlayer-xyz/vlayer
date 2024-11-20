@@ -5,7 +5,7 @@ use call_engine::{
     evm::env::{cached::CachedEvmEnv, location::ExecutionLocation},
     travel_call_executor::TravelCallExecutor,
 };
-use provider::{CachedMultiProvider, CachedProvider, ProfilingProvider};
+use provider::{profiling, CachedMultiProvider, CachedProvider};
 
 use crate::{
     evm_env::factory::HostEvmEnvFactory,
@@ -23,14 +23,14 @@ async fn time_travel() -> anyhow::Result<()> {
 
     let rpc_file = PathBuf::from(rpc_snapshot_file("op_sepolia", "simple_time_travel"));
     let provider = CachedProvider::from_file(&rpc_file)?;
-    let profiling_provider = Arc::new(ProfilingProvider::new(provider));
+    let profiling_provider = Arc::new(profiling::Provider::new(provider));
     let multi_provider =
         CachedMultiProvider::from_provider(location.chain_id, profiling_provider.clone());
     let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(multi_provider));
 
     let _ = TravelCallExecutor::new(&envs).call(&call, location);
 
-    assert_eq!(profiling_provider.call_count(), 88);
+    assert_eq!(profiling_provider.state(), profiling::State::default());
 
     Ok(())
 }

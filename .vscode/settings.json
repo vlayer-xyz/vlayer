@@ -41,6 +41,7 @@
     "IERC",
     "jrpc",
     "keccak",
+    "maplit",
     "mdbx",
     "merkle",
     "multichain",
