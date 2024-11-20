@@ -1,3 +1,8 @@
+/**
+ * This file was copied from https://github.com/foundry-rs/foundry/blob/e649e62f125244a3ef116be25dfdc81a2afbaf2a/crates/forge/bin/cmd/test/summary.rs
+ * The original file is licensed under the Apache License, Version 2.0.
+ * It wasn't modified, but it wasn't exported from foundry lib
+ */
 use std::collections::HashMap;
 
 use comfy_table::{
@@ -112,9 +117,8 @@ pub(crate) fn print_invariant_metrics(test_metrics: &HashMap<String, InvariantMe
         table.set_header(["Contract", "Selector", "Calls", "Reverts", "Discards"]);
 
         for name in test_metrics.keys().sorted() {
-            if let Some((contract, selector)) = name
-                .split_once(':')
-                .and_then(|(_, contract)| contract.split_once('.'))
+            if let Some((contract, selector)) =
+                name.split_once(':').and_then(|(_, contract)| contract.split_once('.'))
             {
                 let mut row = Row::new();
                 row.add_cell(Cell::new(contract).set_alignment(CellAlignment::Left));
