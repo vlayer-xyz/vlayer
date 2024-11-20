@@ -13,16 +13,16 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  lint-workflows:
-    name: Check workflows YAML Formatting
+  prettier:
+    name: Prettier check
     runs-on: ubuntu-latest
 
     steps:
       - name: Checkout Code
-        uses: actions/checkout@v3
+        uses: actions/checkout@v4
 
       - name: Set up Node.js
-        uses: actions/setup-node@v3
+        uses: actions/setup-node@v4
         with:
           node-version: "16"
 
@@ -31,3 +31,16 @@ jobs:
 
       - name: Check YAML Formatting
         run: prettier --check .github/workflows/**/*.yaml
+
+  actionlint:
+    runs-on: ubuntu-latest
+    name: Actionlint check
+    steps:
+      - uses: actions/checkout@v4
+      - name: Download actionlint
+        id: get_actionlint
+        run: bash <(curl https://raw.githubusercontent.com/rhysd/actionlint/main/scripts/download-actionlint.bash)
+        shell: bash
+      - name: Check workflow files
+        run: ${{ steps.get_actionlint.outputs.executable }}
+        shell: bash
