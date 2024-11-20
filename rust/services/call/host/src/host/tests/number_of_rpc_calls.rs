@@ -19,12 +19,13 @@ use crate::{
     Call,
 };
 
-#[tokio::test]
-async fn time_travel() -> anyhow::Result<()> {
-    let location: ExecutionLocation = (20_064_547_u64, OptimismSepolia).into();
-    let call = Call::new(SIMPLE_TIME_TRAVEL, &AVERAGE_BALANCE_OF_CALL);
-
-    let rpc_file = PathBuf::from(rpc_snapshot_file("op_sepolia", "simple_time_travel"));
+fn profile(
+    chain: &str,
+    test_name: &str,
+    location: ExecutionLocation,
+    call: Call,
+) -> anyhow::Result<profiling::State> {
+    let rpc_file = PathBuf::from(rpc_snapshot_file(chain, test_name));
     let provider = CachedProvider::from_file(&rpc_file)?;
     let profiling_provider = Arc::new(profiling::Provider::new(provider));
     let multi_provider =
@@ -33,9 +34,19 @@ async fn time_travel() -> anyhow::Result<()> {
 
     let _ = TravelCallExecutor::new(&envs).call(&call, location);
 
-    assert_eq!(profiling_provider.state().total_count(), 88);
+    Ok(profiling_provider.state())
+}
+
+#[tokio::test]
+async fn time_travel() -> anyhow::Result<()> {
+    let location: ExecutionLocation = (20_064_547_u64, OptimismSepolia).into();
+    let call = Call::new(SIMPLE_TIME_TRAVEL, &AVERAGE_BALANCE_OF_CALL);
+
+    let state = profile("op_sepolia", "simple_time_travel", location, call)?;
+
+    assert_eq!(state.total_count(), 88);
     insta::with_settings!({sort_maps => true}, {
-        insta::assert_yaml_snapshot!(profiling_provider.state())
+        insta::assert_yaml_snapshot!(state)
     });
 
     Ok(())
@@ -47,18 +58,11 @@ async fn usdt_erc20_balance_of() -> anyhow::Result<()> {
     let binance_8 = address!("F977814e90dA44bFA03b6295A0616a897441aceC");
     let call = Call::new(USDT, &balanceOfCall { account: binance_8 });
 
-    let rpc_file = PathBuf::from(rpc_snapshot_file("mainnet", "usdt_erc20_balance_of"));
-    let provider = CachedProvider::from_file(&rpc_file)?;
-    let profiling_provider = Arc::new(profiling::Provider::new(provider));
-    let multi_provider =
-        CachedMultiProvider::from_provider(location.chain_id, profiling_provider.clone());
-    let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(multi_provider));
+    let state = profile("mainnet", "usdt_erc20_balance_of", location, call)?;
 
-    let _ = TravelCallExecutor::new(&envs).call(&call, location);
-
-    assert_eq!(profiling_provider.state().total_count(), 7);
+    assert_eq!(state.total_count(), 7);
     insta::with_settings!({sort_maps => true}, {
-        insta::assert_yaml_snapshot!(profiling_provider.state())
+        insta::assert_yaml_snapshot!(state)
     });
 
     Ok(())
