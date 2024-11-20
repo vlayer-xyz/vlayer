@@ -1,5 +1,5 @@
 import { VCallResponse, VlayerClient, BrandedHash } from "types/vlayer";
-import { WebProofProvider, WebProofSetup } from "types/webProofProvider";
+import { WebProofProvider } from "types/webProofProvider";
 
 import { prove } from "../prover";
 import { createExtensionWebProofProvider } from "../webProof";
@@ -10,7 +10,6 @@ import {
   ContractFunctionName,
   ContractFunctionReturnType,
   decodeFunctionResult,
-  Hex,
 } from "viem";
 import { ZkProvingStatus } from "../../web-proof-commons";
 import { ContractFunctionArgsWithout } from "types/viem";
@@ -107,43 +106,37 @@ export const createVlayerClient = (
       >;
     },
 
-    proveWeb: async function <
-      T extends Abi,
-      F extends ContractFunctionName<T>,
-    >(args: {
-      address: Hex;
-      proverAbi: T;
-      functionName: F;
-      chainId: number;
-      args: [
-        WebProofSetup,
-        ...ContractFunctionArgsWithout<T, F, { name: "webProof" }>,
-      ];
+    proveWeb: async function ({
+      address,
+      proverAbi,
+      functionName,
+      chainId,
+      args,
     }) {
-      const webProofPlaceholder = args.args[0];
-      const contractArgs = args.args.slice(1) as ContractFunctionArgsWithout<
-        T,
-        F,
+      const webProofPlaceholder = args[0];
+      const contractArgs = args.slice(1) as ContractFunctionArgsWithout<
+        typeof proverAbi,
+        typeof functionName,
         { name: "webProof" }
       >;
 
       const webProof = await webProofProvider.getWebProof({
         proverCallCommitment: {
-          address: args.address,
-          proverAbi: args.proverAbi,
-          functionName: args.functionName,
+          address: address,
+          proverAbi: proverAbi,
+          functionName: functionName,
           commitmentArgs: contractArgs,
-          chainId: args.chainId,
+          chainId: chainId,
         },
         logoUrl: webProofPlaceholder.logoUrl,
         steps: webProofPlaceholder.steps,
       });
 
       const hash = await this.prove({
-        address: args.address,
-        functionName: args.functionName,
-        chainId: args.chainId,
-        proverAbi: args.proverAbi,
+        address: address,
+        functionName: functionName,
+        chainId: chainId,
+        proverAbi: proverAbi,
         args: [
           {
             webProofJson: JSON.stringify({
@@ -152,7 +145,11 @@ export const createVlayerClient = (
             }),
           },
           ...contractArgs,
-        ] as ContractFunctionArgs<T, AbiStateMutability, F>,
+        ] as ContractFunctionArgs<
+          typeof proverAbi,
+          AbiStateMutability,
+          typeof functionName
+        >,
       });
       return hash;
     },
