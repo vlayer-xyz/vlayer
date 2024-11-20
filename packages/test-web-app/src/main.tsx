@@ -1,6 +1,6 @@
 import React, { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import Source from "./Source";
+import { Source, SourceLegacy } from "./Source";
 
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
 import Target from "./Target";
@@ -12,6 +12,10 @@ const router = createBrowserRouter([
   {
     path: "/source",
     element: <Source />,
+  },
+  {
+    path: "/source-legacy",
+    element: <SourceLegacy />,
   },
   {
     path: "/target",
