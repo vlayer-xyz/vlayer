@@ -1,7 +1,9 @@
 use std::sync::Arc;
 
-use alloy_primitives::address;
-use call_engine::evm::env::{location::ExecutionLocation, EvmEnv, EvmEnvFactory};
+use call_engine::{
+    evm::env::{location::ExecutionLocation, EvmEnv, EvmEnvFactory},
+    seed_cache_db_with_trusted_data,
+};
 use derive_new::new;
 use provider::CachedMultiProvider;
 use revm::db::CacheDB;
@@ -11,13 +13,6 @@ use crate::{Error, HostDb, ProofDb};
 #[derive(new)]
 pub(crate) struct HostEvmEnvFactory {
     providers: CachedMultiProvider,
-}
-
-fn seed_cache_db<D>(db: &mut CacheDB<D>) {
-    db.insert_account_info(
-        address!("1111111111111111111111111111111111111111"),
-        Default::default(),
-    );
 }
 
 impl EvmEnvFactory<HostDb> for HostEvmEnvFactory {
@@ -36,7 +31,7 @@ impl EvmEnvFactory<HostDb> for HostEvmEnvFactory {
 
         let proof_db = ProofDb::new(Arc::clone(&provider), block_number);
         let mut db = CacheDB::new(proof_db);
-        seed_cache_db(&mut db);
+        seed_cache_db_with_trusted_data(&mut db);
 
         let chain_spec = chain_id.try_into()?;
         let env = EvmEnv::new(db, header).with_chain_spec(&chain_spec)?;

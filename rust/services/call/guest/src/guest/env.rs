@@ -9,12 +9,14 @@ use call_engine::{
         },
         input::{EvmInput, MultiEvmInput},
     },
+    seed_cache_db_with_trusted_data,
     travel_call_executor::TravelCallExecutor,
     verifier::guest_input::Verifier,
     Call, CallAssumptions, GuestOutput,
 };
+use revm::db::CacheDB;
 
-use crate::db::wrap_state::WrapStateDb;
+use crate::db::{wrap_state::WrapStateDb, GuestDb};
 
 pub struct VerifiedInput(MultiEvmInput);
 
@@ -35,13 +37,14 @@ pub fn assert_input_coherency(multi_evm_input: MultiEvmInput) -> VerifiedInput {
     VerifiedInput(multi_evm_input)
 }
 
-fn create_env_from_input(input: EvmInput) -> EvmEnv<WrapStateDb> {
+fn create_env_from_input(input: EvmInput) -> EvmEnv<GuestDb> {
     let header = input.header.clone();
-    let db = WrapStateDb::from(input);
+    let mut db = CacheDB::new(WrapStateDb::from(input));
+    seed_cache_db_with_trusted_data(&mut db);
     EvmEnv::new(db, header)
 }
 
-fn create_envs_from_input(input: MultiEvmInput) -> MultiEvmEnv<WrapStateDb> {
+fn create_envs_from_input(input: MultiEvmInput) -> MultiEvmEnv<GuestDb> {
     RwLock::new(
         input
             .into_iter()
@@ -60,7 +63,7 @@ fn create_envs_from_input(input: MultiEvmInput) -> MultiEvmEnv<WrapStateDb> {
 }
 
 pub struct VerifiedEnv {
-    multi_evm_env: CachedEvmEnv<WrapStateDb>,
+    multi_evm_env: CachedEvmEnv<GuestDb>,
     start_exec_location: ExecutionLocation,
 }
 
@@ -74,7 +77,7 @@ impl VerifiedEnv {
         }
     }
 
-    fn get_start_env(&self) -> Arc<EvmEnv<WrapStateDb>> {
+    fn get_start_env(&self) -> Arc<EvmEnv<GuestDb>> {
         self.multi_evm_env
             .get(self.start_exec_location)
             .expect("cannot get start evm env")
