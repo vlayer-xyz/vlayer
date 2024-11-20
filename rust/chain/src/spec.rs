@@ -59,7 +59,7 @@ impl TryFrom<ChainId> for ChainSpec {
         let chain_spec = CHAIN_MAP
             .get(&chain_id)
             .ok_or(ChainError::UnsupportedChainId(chain_id))?;
-        Ok((**chain_spec).clone())
+        Ok((*chain_spec).clone())
     }
 }
 
