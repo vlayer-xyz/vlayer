@@ -12,12 +12,12 @@ use super::{BlockingProvider, EIP1186Proof};
 
 #[derive(Debug, Default, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct State {
-    pub balance: HashMap<BlockNumber, HashMap<Address, u64>>,
     pub header: HashMap<BlockTag, u64>,
+    pub balance: HashMap<BlockNumber, HashMap<Address, u64>>,
     pub code: HashMap<BlockNumber, HashMap<Address, u64>>,
+    pub nonce: HashMap<BlockNumber, HashMap<Address, u64>>,
     pub proof: HashMap<BlockNumber, HashMap<Address, u64>>,
     pub storage: HashMap<BlockNumber, HashMap<Address, HashMap<StorageKey, u64>>>,
-    pub nonce: HashMap<BlockNumber, HashMap<Address, u64>>,
 }
 
 #[derive(Debug)]
