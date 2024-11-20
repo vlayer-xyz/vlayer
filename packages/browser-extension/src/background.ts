@@ -46,8 +46,14 @@ browser.runtime.onMessage.addListener(async (message: ExtensionMessage) => {
       }
       await browser.tabs.update(port?.sender?.tab?.id, { active: true });
     })
-    .with({ type: ExtensionMessageType.TabOpened }, ({ tabId }) => {
-      openedTabId = tabId;
+    .with({ type: ExtensionMessageType.TabOpened }, ({ payload }) => {
+      openedTabId = payload.tabId;
+    })
+    .with({ type: ExtensionMessageType.ProofProcessing }, () => {
+      port?.postMessage({
+        type: ExtensionMessageType.ProofProcessing,
+        payload: {},
+      });
     })
     .exhaustive();
 });

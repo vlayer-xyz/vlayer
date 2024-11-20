@@ -39,13 +39,21 @@ export enum ExtensionMessageType {
   ProofError = "ProofError",
   RedirectBack = "RedirectBack",
   TabOpened = "TabOpened",
+  ProofProcessing = "ProofProcessing",
 }
 
 export type ExtensionMessage =
-  | { type: ExtensionMessageType.ProofDone; proof: WebProof }
-  | { type: ExtensionMessageType.ProofError; error: string }
-  | { type: ExtensionMessageType.RedirectBack }
-  | { type: ExtensionMessageType.TabOpened; tabId: number };
+  | { type: ExtensionMessageType.ProofDone; payload: { proof: WebProof } }
+  | { type: ExtensionMessageType.ProofError; payload: { error: string } }
+  | { type: ExtensionMessageType.RedirectBack; payload: never }
+  | { type: ExtensionMessageType.TabOpened; payload: { tabId: number } }
+  | {
+      type: ExtensionMessageType.ProofProcessing;
+      payload: {
+        // as we dont have progress yet from tlsn this is optional
+        progress?: number;
+      };
+    };
 
 export type WebProverSessionConfig = {
   notaryUrl: string | null;

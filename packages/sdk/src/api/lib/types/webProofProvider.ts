@@ -2,6 +2,8 @@ import { Hex, Abi, ContractFunctionName } from "viem";
 import type { ContractFunctionArgsWithout } from "./viem";
 import {
   Branded,
+  ExtensionMessageType,
+  ExtensionMessage,
   WebProof,
   WebProofStep,
   ZkProvingStatus,
@@ -41,9 +43,13 @@ export type WebProofProvider = {
   getWebProof: <T extends Abi, F extends ContractFunctionName<T>>(
     args: GetWebProofArgs<T, F>,
   ) => Promise<WebProof>;
+
   notifyZkProvingStatus: (status: ZkProvingStatus) => void;
-  onWebProofDone: (callback: (proof: WebProof) => void) => void;
-  onWebProofError: (callback: (error: Error) => void) => void;
+
+  addEventListeners: <T extends ExtensionMessageType>(
+    messageType: T,
+    listener: (args: Extract<ExtensionMessage, { type: T }>) => void,
+  ) => void;
 };
 
 export type WebProofProviderSetup = {

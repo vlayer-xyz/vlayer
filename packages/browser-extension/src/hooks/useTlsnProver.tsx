@@ -21,7 +21,6 @@ const TlsnProofContext = createContext({
   isProving: false,
 });
 export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
-  //Internal component state representing proving mechanism
   const [proof, setProof] = useState<object | null>(null);
   const [isProving, setIsProving] = useState(false);
   const [formattedHeaders, setFormattedHeaders] = useState<{
@@ -31,23 +30,31 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
     headers: {},
     secretHeaders: [],
   });
+
   useTrackHistory();
   const [provingSessionConfig] = useProvingSessionConfig();
   const provenUrl = useProvenUrl();
 
-  // format headers to make it accepted by tlsn js api
   useEffect(() => {
     setFormattedHeaders(
       formatTlsnHeaders(provenUrl?.headers ?? [], provenUrl?.cookies ?? []),
     );
-  }, [JSON.stringify(provenUrl)]);
+  }, [provenUrl]);
 
   const prove = useCallback(async () => {
     setIsProving(true);
 
+    const progressInterval = setInterval(() => {
+      void sendMessageToServiceWorker({
+        type: ExtensionMessageType.ProofProcessing,
+        payload: {},
+      });
+    }, 1000);
+
     try {
       isDefined(provenUrl?.url, "Missing URL to prove");
       isDefined(provingSessionConfig, "Missing proving session config");
+
       const tlsnProof = await tlsnProve(removeQueryParams(provenUrl.url), {
         notaryUrl: provingSessionConfig.notaryUrl || "",
         websocketProxyUrl: `${provingSessionConfig.wsProxyUrl}?token=${new URL(provenUrl.url).host}`,
@@ -55,21 +62,27 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
         headers: formattedHeaders?.headers,
         secretHeaders: formattedHeaders?.secretHeaders,
       });
-      // let service worker know proof is done
-      await sendMessageToServiceWorker({
+
+      void sendMessageToServiceWorker({
         type: ExtensionMessageType.ProofDone,
-        proof: tlsnProof,
+        payload: {
+          proof: tlsnProof,
+        },
       });
+
       setProof(tlsnProof);
-      setIsProving(false);
     } catch (e: unknown) {
-      await sendMessageToServiceWorker({
+      void sendMessageToServiceWorker({
         type: ExtensionMessageType.ProofError,
-        error: e instanceof Error ? e.message : String(e),
+        payload: {
+          error: e instanceof Error ? e.message : String(e),
+        },
       });
+    } finally {
       setIsProving(false);
+      clearInterval(progressInterval);
     }
-  }, [JSON.stringify(provenUrl), JSON.stringify(formattedHeaders)]);
+  }, [provenUrl, formattedHeaders, provingSessionConfig]);
 
   return (
     <TlsnProofContext.Provider value={{ prove, proof, isProving }}>

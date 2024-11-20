@@ -34,10 +34,14 @@ const EXTENSION_ID = "jbchhcgphfokabmfacnkafoeeeppjmpl";
 class ExtensionWebProofProvider implements WebProofProvider {
   private port: ReturnType<typeof chrome.runtime.connect> | null = null;
 
-  private listeners = {
-    [ExtensionMessageType.ProofDone]: [] as ((proof: WebProof) => void)[],
-    [ExtensionMessageType.ProofError]: [] as ((error: Error) => void)[],
-  };
+  private listeners: Partial<
+    Record<
+      ExtensionMessageType,
+      ((
+        args: Extract<ExtensionMessage, { type: ExtensionMessageType }>,
+      ) => void)[]
+    >
+  > = {};
 
   constructor(
     private notaryUrl: string,
@@ -58,13 +62,13 @@ class ExtensionWebProofProvider implements WebProofProvider {
       this.port = chrome.runtime.connect(EXTENSION_ID);
       this.port.onMessage.addListener((message: ExtensionMessage) => {
         if (message.type === ExtensionMessageType.ProofDone) {
-          this.listeners[ExtensionMessageType.ProofDone].forEach((cb) => {
-            cb(message.proof);
+          this.listeners[ExtensionMessageType.ProofDone]?.forEach((cb) => {
+            cb(message);
           });
         }
         if (message.type === ExtensionMessageType.ProofError) {
-          this.listeners[ExtensionMessageType.ProofError].forEach((cb) => {
-            cb(new Error(message.error));
+          this.listeners[ExtensionMessageType.ProofError]?.forEach((cb) => {
+            cb(message);
           });
         }
       });
@@ -72,14 +76,16 @@ class ExtensionWebProofProvider implements WebProofProvider {
     return this.port;
   }
 
-  onWebProofDone(callback: (proof: WebProof) => void) {
-    this.connectToExtension();
-    this.listeners[ExtensionMessageType.ProofDone].push(callback);
-  }
-
-  onWebProofError(callback: (error: Error) => void) {
-    this.connectToExtension();
-    this.listeners[ExtensionMessageType.ProofError].push(callback);
+  public addEventListeners<T extends ExtensionMessageType>(
+    messageType: T,
+    listener: (args: Extract<ExtensionMessage, { type: T }>) => void,
+  ) {
+    if (!this.listeners[messageType]) {
+      this.listeners[messageType] = [];
+    }
+    this.listeners[messageType]!.push(
+      listener as (args: ExtensionMessage) => void,
+    );
   }
 
   public async getWebProof(
@@ -99,10 +105,10 @@ class ExtensionWebProofProvider implements WebProofProvider {
       this.connectToExtension().onMessage.addListener(
         (message: ExtensionMessage) => {
           if (message.type === ExtensionMessageType.ProofDone) {
-            resolve(message.proof);
+            resolve(message.payload.proof);
           }
           if (message.type === ExtensionMessageType.ProofError) {
-            reject(new Error(message.error));
+            reject(new Error(message.payload.error));
           }
         },
       );
