@@ -1,4 +1,5 @@
 import { CallContext, CallParams, VCallResponse } from "types/vlayer";
+import { parseVCallResponseError } from "./lib/errors";
 
 function v_callBody(call: CallParams, context: CallContext) {
   return {
@@ -27,8 +28,8 @@ export async function v_call(
   console.log("response_json", response_json);
   assertObject(response_json);
   if ("error" in response_json) {
-    throw new Error(
-      `Error response: ${(response_json.error as { message: string }).message || "unknown error"}`,
+    throw parseVCallResponseError(
+      response_json.error as { message: string | undefined },
     );
   }
   return response_json as Promise<VCallResponse>;
