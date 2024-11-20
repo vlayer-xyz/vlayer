@@ -39,6 +39,7 @@
     "Hashable",
     "Httparse",
     "IERC",
+    "insta",
     "jrpc",
     "keccak",
     "maplit",
