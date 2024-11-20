@@ -218,5 +218,5 @@ missing_const_for_fn = "warn"
 zero_sized_map_values = "warn"
 
 [profile.dev.package] # https://insta.rs/docs/quickstart/#optional-faster-runs
-insta.opt-level = 3
-similar.opt-level = 3
+insta = { opt-level = 3 }
+similar = { opt-level = 3 }
