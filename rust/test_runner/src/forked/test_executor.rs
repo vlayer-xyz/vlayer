@@ -1,11 +1,13 @@
-use std::ops::{Deref, DerefMut};
-
 /**
- * This file is in large part copied from https://github.com/foundry-rs/foundry/blob/65b3cb031336bccbfe7c32c26b8869d1b8654f68/crates/evm/evm/src/executors/mod.rs
+ * This file is in large part copied from https://github.com/foundry-rs/foundry/blob/e649e62f125244a3ef116be25dfdc81a2afbaf2a/crates/evm/evm/src/executors/mod.rs
+ * Only copied functions are: Executor::call and all it uses, and convert_executed_result
  * The original file is licensed under the Apache License, Version 2.0.
  * The original file was modified for the purpose of this project.
  * All relevant modifications are commented with "MODIFICATION" comments.
  */
+
+use std::ops::{Deref, DerefMut};
+
 use alloy_dyn_abi::DynSolValue;
 use alloy_dyn_abi::JsonAbiExt;
 use alloy_json_abi::Function;
@@ -96,14 +98,13 @@ impl<'a> TestExecutor<'a> {
             CheatcodeInspector::new(self.rpc_endpoints.clone()),
         );
         let result = backend.inspect(&mut env, &mut composite_inspector)?;
-        convert_executed_result(
-            env,
-            composite_inspector.inspector_stack,
-            result,
-            backend.has_state_snapshot_failure(),
-        )
+        convert_executed_result(env, composite_inspector.inspector_stack, result, backend.has_state_snapshot_failure())
     }
 
+    /// Creates the environment to use when executing a transaction in a test context
+    ///
+    /// If using a backend with cheatcodes, `tx.gas_price` and `block.number` will be overwritten by
+    /// the cheatcode state in between calls.
     fn build_test_env(
         &self,
         caller: Address,
@@ -113,6 +114,10 @@ impl<'a> TestExecutor<'a> {
     ) -> EnvWithHandlerCfg {
         let env = Env {
             cfg: self.env().cfg.clone(),
+            // We always set the gas price to 0 so we can execute the transaction regardless of
+            // network conditions - the actual gas price is kept in `self.block` and is applied by
+            // the cheatcode handler if it is enabled
+            // MODIFICATION: gas_limit is taken from block
             block: BlockEnv {
                 basefee: U256::ZERO,
                 ..self.env().block.clone()
@@ -132,21 +137,17 @@ impl<'a> TestExecutor<'a> {
     }
 }
 
+/// Converts the data aggregated in the `inspector` and `call` to a `RawCallResult`
 fn convert_executed_result(
     env: EnvWithHandlerCfg,
     inspector: InspectorStack,
-    ResultAndState { result, state }: ResultAndState,
+    ResultAndState { result, state: state_changeset }: ResultAndState,
     has_state_snapshot_failure: bool,
 ) -> eyre::Result<RawCallResult> {
     let (exit_reason, gas_refunded, gas_used, out, exec_logs) = match result {
-        ExecutionResult::Success {
-            reason,
-            gas_used,
-            gas_refunded,
-            output,
-            logs,
-            ..
-        } => (reason.into(), gas_refunded, gas_used, Some(output), logs),
+        ExecutionResult::Success { reason, gas_used, gas_refunded, output, logs, .. } => {
+            (reason.into(), gas_refunded, gas_used, Some(output), logs)
+        }
         ExecutionResult::Revert { gas_used, output } => {
             // Need to fetch the unused gas
             (InstructionResult::Revert, 0_u64, gas_used, Some(Output::Call(output)), vec![])
@@ -168,14 +169,8 @@ fn convert_executed_result(
         _ => Bytes::new(),
     };
 
-    let InspectorData {
-        mut logs,
-        labels,
-        traces,
-        coverage,
-        cheatcodes,
-        chisel_state,
-    } = inspector.collect();
+    let InspectorData { mut logs, labels, traces, coverage, cheatcodes, chisel_state } =
+        inspector.collect();
 
     if logs.is_empty() {
         logs = exec_logs;
@@ -199,7 +194,7 @@ fn convert_executed_result(
         traces,
         coverage,
         transactions,
-        state_changeset: state,
+        state_changeset,
         env,
         cheatcodes,
         out,

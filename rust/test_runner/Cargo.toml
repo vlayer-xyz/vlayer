@@ -24,7 +24,7 @@ comfy-table = { workspace = true }
 delegate = { workspace = true }
 derive-new = { workspace = true }
 ethers-core = { workspace = true }
-eyre = "0.6.12"
+eyre = { workspace = true }
 forge = { workspace = true }
 foundry-cheatcodes = { workspace = true }
 foundry-cli = { workspace = true }
