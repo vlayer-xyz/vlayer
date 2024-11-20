@@ -11,8 +11,8 @@ export type ExtensionStep =
   (typeof EXTENSION_STEP)[keyof typeof EXTENSION_STEP];
 
 export const enum ExtensionAction {
-  RequestWebProof,
-  NotifyZkProvingStatus,
+  RequestWebProof = "RequestWebProof",
+  NotifyZkProvingStatus = "NotifyZkProvingStatus",
 }
 
 export enum ZkProvingStatus {

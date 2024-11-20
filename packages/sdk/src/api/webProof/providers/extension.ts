@@ -88,6 +88,18 @@ class ExtensionWebProofProvider implements WebProofProvider {
     );
   }
 
+  public requestWebProof(webProofSetup: WebProofSetupInput) {
+    this.connectToExtension().postMessage({
+      action: ExtensionAction.RequestWebProof,
+      payload: {
+        notaryUrl: this.notaryUrl,
+        wsProxyUrl: this.wsProxyUrl,
+        logoUrl: webProofSetup.logoUrl,
+        steps: webProofSetup.steps,
+      },
+    });
+  }
+
   public async getWebProof(
     webProofSetup: WebProofSetupInput,
   ): Promise<WebProof> {

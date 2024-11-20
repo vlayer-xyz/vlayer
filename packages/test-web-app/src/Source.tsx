@@ -1,4 +1,9 @@
-import { WebProof, createVlayerClient, type VlayerClient } from "@vlayer/sdk";
+import {
+  WebProof,
+  createVlayerClient,
+  type VlayerClient,
+  ExtensionMessageType,
+} from "@vlayer/sdk";
 
 import {
   createExtensionWebProofProvider,
@@ -38,16 +43,19 @@ function SourceNewWay() {
   }, [webProofProvider]);
 
   useEffect(() => {
-    webProofProvider.onWebProofDone((proof) => {
-      setProof(proof);
-    });
+    webProofProvider.addEventListeners(
+      ExtensionMessageType.ProofDone,
+      ({ payload: { proof } }) => {
+        setProof(proof);
+      },
+    );
   }, []);
 
   const requestWebProof = useCallback(async () => {
     const loginUrl = `${window.location.origin}${import.meta.env.BASE_URL}login`;
     const targetUrl = `${window.location.origin}${import.meta.env.BASE_URL}target`;
 
-    await webProofProvider.getWebProof({
+    webProofProvider.requestWebProof({
       proverCallCommitment: {
         address: PROVER_ADDRESS,
         proverAbi: unconditionalProver.abi,
@@ -65,7 +73,6 @@ function SourceNewWay() {
   }, []);
 
   const requestZkProof = useCallback(async () => {
-    console.log("Proof", proof);
     const zkProof = await vlayerClient.prove({
       address: PROVER_ADDRESS,
       proverAbi: unconditionalProver.abi,

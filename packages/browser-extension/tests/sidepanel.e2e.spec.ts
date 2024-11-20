@@ -17,7 +17,7 @@ test.describe("Full flow of webproof using extension", () => {
     context,
   }) => {
     await test.step("Web-app should open sidepanel via SDK call", async () => {
-      await page.goto("/source");
+      await page.goto("/source-new-way");
       const requestProofButton = page
         .locator("body")
         .getByTestId("request-webproof-button");

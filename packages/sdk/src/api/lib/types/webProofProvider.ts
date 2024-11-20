@@ -44,6 +44,10 @@ export type WebProofProvider = {
     args: GetWebProofArgs<T, F>,
   ) => Promise<WebProof>;
 
+  requestWebProof: <T extends Abi, F extends ContractFunctionName<T>>(
+    args: GetWebProofArgs<T, F>,
+  ) => void;
+
   notifyZkProvingStatus: (status: ZkProvingStatus) => void;
 
   addEventListeners: <T extends ExtensionMessageType>(

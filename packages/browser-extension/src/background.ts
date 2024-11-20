@@ -14,12 +14,18 @@ import { zkProvingStatusStore } from "./state/zkProvingStatusStore.ts";
 let port: browser.Runtime.Port | undefined = undefined;
 let openedTabId: number | undefined = undefined;
 
-browser.runtime.onInstalled.addListener((details) => {
-  console.log("Extension installed:", details);
-});
-
 browser.runtime.onConnectExternal.addListener((connectedPort) => {
   port = connectedPort;
+  port.onMessage.addListener((message: MessageToExtension) => {
+    match(message)
+      .with({ action: ExtensionAction.RequestWebProof }, (msg) => {
+        void handleProofRequest(msg, connectedPort.sender);
+      })
+      .with({ action: ExtensionAction.NotifyZkProvingStatus }, (msg) => {
+        void handleProvingStatusNotification(msg);
+      })
+      .exhaustive();
+  });
 });
 
 browser.runtime.onMessage.addListener(async (message: ExtensionMessage) => {
@@ -60,21 +66,39 @@ browser.runtime.onMessage.addListener(async (message: ExtensionMessage) => {
 
 browser.runtime.onMessageExternal.addListener(
   (message: MessageToExtension, sender) => {
-    (async () => {
-      if (message.action === ExtensionAction.RequestWebProof) {
-        // only open side panel if it is supported and sender is browser tab
-        if (chrome.sidePanel && sender.tab?.windowId) {
-          await chrome.sidePanel.open({ windowId: sender.tab?.windowId });
-        }
-        await browser.storage.local.clear();
-        await browser.storage.session.clear();
-        await WebProverSessionContextManager.instance.setWebProverSessionConfig(
-          message.payload,
-        );
-      } else if (message.action === ExtensionAction.NotifyZkProvingStatus) {
-        console.log("Received proving status", message.payload);
-        await zkProvingStatusStore.setProvingStatus(message.payload);
-      }
-    })().catch(console.error);
+    return match(message)
+      .with({ action: ExtensionAction.RequestWebProof }, (msg) =>
+        handleProofRequest(msg, sender),
+      )
+      .with({ action: ExtensionAction.NotifyZkProvingStatus }, (msg) =>
+        handleProvingStatusNotification(msg),
+      )
+      .exhaustive();
   },
 );
+
+const handleProofRequest = async (
+  message: Extract<
+    MessageToExtension,
+    { action: ExtensionAction.RequestWebProof }
+  >,
+  sender?: browser.Runtime.MessageSender,
+) => {
+  if (chrome.sidePanel && sender?.tab?.windowId) {
+    await chrome.sidePanel.open({ windowId: sender.tab?.windowId });
+  }
+  await browser.storage.local.clear();
+  await browser.storage.session.clear();
+  await WebProverSessionContextManager.instance.setWebProverSessionConfig(
+    message.payload,
+  );
+};
+
+const handleProvingStatusNotification = async (
+  message: Extract<
+    MessageToExtension,
+    { action: ExtensionAction.NotifyZkProvingStatus }
+  >,
+) => {
+  await zkProvingStatusStore.setProvingStatus(message.payload);
+};
