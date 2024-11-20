@@ -42,22 +42,7 @@ class ExtensionWebProofProvider implements WebProofProvider {
   constructor(
     private notaryUrl: string,
     private wsProxyUrl: string,
-  ) {
-    this.connectToExtension().onMessage.addListener(
-      (message: ExtensionMessage) => {
-        if (message.type === ExtensionMessageType.ProofDone) {
-          this.listeners[ExtensionMessageType.ProofDone].forEach((cb) => {
-            cb(message.proof);
-          });
-        }
-        if (message.type === ExtensionMessageType.ProofError) {
-          this.listeners[ExtensionMessageType.ProofError].forEach((cb) => {
-            cb(new Error(message.error));
-          });
-        }
-      },
-    );
-  }
+  ) {}
 
   public notifyZkProvingStatus(status: ZkProvingStatus) {
     if (typeof chrome !== "undefined") {
@@ -71,15 +56,29 @@ class ExtensionWebProofProvider implements WebProofProvider {
   private connectToExtension() {
     if (!this.port) {
       this.port = chrome.runtime.connect(EXTENSION_ID);
+      this.port.onMessage.addListener((message: ExtensionMessage) => {
+        if (message.type === ExtensionMessageType.ProofDone) {
+          this.listeners[ExtensionMessageType.ProofDone].forEach((cb) => {
+            cb(message.proof);
+          });
+        }
+        if (message.type === ExtensionMessageType.ProofError) {
+          this.listeners[ExtensionMessageType.ProofError].forEach((cb) => {
+            cb(new Error(message.error));
+          });
+        }
+      });
     }
     return this.port;
   }
 
   onWebProofDone(callback: (proof: WebProof) => void) {
+    this.connectToExtension();
     this.listeners[ExtensionMessageType.ProofDone].push(callback);
   }
 
   onWebProofError(callback: (error: Error) => void) {
+    this.connectToExtension();
     this.listeners[ExtensionMessageType.ProofError].push(callback);
   }
 
