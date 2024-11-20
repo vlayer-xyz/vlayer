@@ -399,35 +399,35 @@ jobs:
     name: Publish SDK to NPM
     needs: [build-release, build-examples, build-extension, push-contracts]
     runs-on: ubuntu-latest
-    steps:   
-    - uses: actions/checkout@v4
-    - name: Install TypeScript prerequisites
-      uses: ./.github/actions/ts-prerequisites
-    - uses: actions/setup-node@v4
-      with:
-        node-version: '20.x'
-        registry-url: 'https://registry.npmjs.org'
-    - name: Update SDK version
-      working-directory: packages/sdk
-      env: 
-        VLAYER_BUILD: ${{ needs.build-release.outputs.vlayer_build }}
-      run: npm version "${VLAYER_BUILD}" --no-workspaces-update
-    - name: Install dependencies
-      working-directory: packages/sdk
-      run: bun install --frozen-lockfile
-    - name: replace symlinks
-      working-directory: packages/sdk
-      run: bun run replaceCommonsSymlink
-    - name: Build
-      working-directory: packages/sdk
-      run: bun run build
-    - name: Publish to NPM
-      working-directory: packages/sdk
-      env:
-        NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-      run: |
-        PACKAGE_NAME=$(npm pack)
-        npm publish --access public ${PACKAGE_NAME}
+    steps:
+      - uses: actions/checkout@v2
+      - name: Install TypeScript prerequisites
+        uses: ./.github/actions/ts-prerequisites
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "20.x"
+          registry-url: "https://registry.npmjs.org"
+      - name: Update SDK version
+        working-directory: packages/sdk
+        env:
+          VLAYER_BUILD: ${{ needs.build-release.outputs.vlayer_build }}
+        run: npm version "${VLAYER_BUILD}" --no-workspaces-update
+      - name: Install dependencies
+        working-directory: packages/sdk
+        run: bun install --frozen-lockfile
+      - name: replace symlinks
+        working-directory: packages/sdk
+        run: bun run replaceCommonsSymlink
+      - name: Build
+        working-directory: packages/sdk
+        run: bun run build
+      - name: Publish to NPM
+        working-directory: packages/sdk
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          PACKAGE_NAME=$(npm pack)
+          npm publish --access public ${PACKAGE_NAME}
 
   push-docker-image:
     name: Push docker image to github registry
