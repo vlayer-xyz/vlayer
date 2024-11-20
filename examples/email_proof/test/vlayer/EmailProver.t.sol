@@ -47,7 +47,7 @@ contract EmailProverTest is VTest {
         }
     }
 
-    function skip_test_provesAndVerifiesEmail() public {
+    function test_provesAndVerifiesEmail() public {
         EmailProver prover = new EmailProver();
         UnverifiedEmail memory email = getTestEmail("./testdata/vlayer_welcome.eml");
         EmailProofVerifier verifier = new EmailProofVerifier(address(prover));
