@@ -28,7 +28,7 @@ impl From<ChainInfo> for ChainStatus {
     }
 }
 
-pub async fn chain_sync_status(
+pub async fn v_sync_status(
     chain_db: Arc<RwLock<ChainDb>>,
     Params { chain_id }: Params,
 ) -> Result<ChainStatus, AppError> {
@@ -52,7 +52,7 @@ mod tests {
         let params = Params { chain_id: 1 };
         let chain_db = Arc::new(RwLock::new(ChainDb::in_memory()));
         assert_eq!(
-            chain_sync_status(chain_db, params).await.unwrap_err(),
+            v_sync_status(chain_db, params).await.unwrap_err(),
             AppError::UnsupportedChainId(1)
         );
     }
@@ -71,7 +71,7 @@ mod tests {
             .update_chain(1, ChainUpdate::new(chain_info, [], []))
             .expect("update_chain failed");
         assert_eq!(
-            chain_sync_status(chain_db, params).await.unwrap(),
+            v_sync_status(chain_db, params).await.unwrap(),
             ChainStatus {
                 first_block: 0,
                 last_block: 0

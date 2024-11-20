@@ -6,7 +6,7 @@ use chain_db::ChainDb;
 use parking_lot::RwLock;
 use server_utils::{init_trace_layer, RequestIdLayer};
 
-use crate::handlers::{status::chain_sync_status, v_chain::v_chain};
+use crate::handlers::{status::v_sync_status, v_chain::v_chain};
 
 async fn handle_jrpc(
     State(router): State<server_utils::Router>,
@@ -24,10 +24,10 @@ pub fn server(chain_db: ChainDb) -> axum::Router {
         Box::pin(v_chain(chain_db, params))
     });
     jrpc_router.add_handler(
-        "chain_sync_status",
+        "v_sync_status",
         move |params| -> Pin<Box<dyn Future<Output = _> + Send>> {
             let chain_db = chain_db_.clone();
-            Box::pin(chain_sync_status(chain_db, params))
+            Box::pin(v_sync_status(chain_db, params))
         },
     );
     axum::Router::new()
