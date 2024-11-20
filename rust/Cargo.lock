@@ -2026,7 +2026,6 @@ dependencies = [
  "serde",
  "serde_json",
  "server_utils",
- "sha2 0.10.8 (registry+https://github.com/rust-lang/crates.io-index)",
  "thiserror",
  "tokio",
  "tower-http 0.6.1",

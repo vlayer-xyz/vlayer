@@ -18,7 +18,6 @@ export async function prove<T extends Abi, F extends ContractFunctionName<T>>(
   args: ContractFunctionArgs<T, AbiStateMutability, F>,
   chainId: number = foundry.id,
   url: string = "http://127.0.0.1:3000",
-  gasLimit: number = 0,
 ) {
   const calldata = encodeFunctionData({
     abi: abi as Abi,
@@ -28,7 +27,6 @@ export async function prove<T extends Abi, F extends ContractFunctionName<T>>(
   const call: CallParams = { to: prover, data: calldata };
   const context: CallContext = {
     chain_id: chainId,
-    gas_limit: gasLimit,
   };
   return v_call(call, context, url);
 }

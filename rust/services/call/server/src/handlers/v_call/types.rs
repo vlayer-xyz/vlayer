@@ -1,7 +1,9 @@
 use alloy_chains::Chain;
-use alloy_primitives::{hex::ToHexExt, ChainId, U256};
+use alloy_primitives::{hex::ToHexExt, ChainId, Keccak256, B256, U256};
 use alloy_sol_types::SolValue;
-use call_engine::{HostOutput, Proof, Seal};
+use call_engine::{
+    evm::env::location::ExecutionLocation, Call as EngineCall, HostOutput, Proof, Seal,
+};
 use call_host::{Call as HostCall, Error as HostError};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
@@ -36,17 +38,16 @@ fn mainnet_chain_id() -> ChainId {
 pub struct CallContext {
     #[serde(default = "mainnet_chain_id")]
     pub chain_id: ChainId,
-    pub gas_limit: u64,
 }
 
 pub struct CallResult {
-    hash: Vec<u8>,
+    hash: CallHash,
     proof: Proof,
     evm_call_result: Vec<u8>,
 }
 
 impl CallResult {
-    pub fn new(hash: Vec<u8>, host_output: HostOutput) -> Result<Self, HostError> {
+    pub fn try_new(hash: CallHash, host_output: HostOutput) -> Result<Self, HostError> {
         let HostOutput {
             guest_output,
             seal,
@@ -71,7 +72,7 @@ impl CallResult {
 
     pub fn to_json(&self) -> Value {
         json!({
-            "hash": self.hash.encode_hex_with_prefix(),
+            "hash": self.hash,
             "evm_call_result": self.evm_call_result.encode_hex_with_prefix(),
             "proof": {
                 "seal": {
@@ -89,6 +90,27 @@ impl CallResult {
                 }
             },
         })
+    }
+}
+
+#[derive(Serialize, Deserialize, Debug)]
+pub struct CallHash(B256);
+
+impl CallHash {
+    pub fn new(execution_location: ExecutionLocation, call: &EngineCall) -> Self {
+        // FIXME convert to keccak256(rlp(...))
+        let mut hasher = Keccak256::new();
+        hasher.update(execution_location.block_number.to_le_bytes());
+        hasher.update(execution_location.chain_id.to_le_bytes());
+        hasher.update(call.to);
+        hasher.update(call.data.as_slice());
+        Self(hasher.finalize())
+    }
+}
+
+impl std::fmt::Display for CallHash {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0.encode_hex_with_prefix())
     }
 }
 

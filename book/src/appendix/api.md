@@ -39,7 +39,6 @@ And the response format below.
         "data": "0x<abi encoded calldata>",
     }, { // CallContext
         "chain_id": "<desired chain id>",
-        "gas_limit": "<gas limit as an unsigned integer>",
     }]
 }
 ```

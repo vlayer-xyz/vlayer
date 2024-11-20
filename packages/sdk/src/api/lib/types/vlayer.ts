@@ -17,8 +17,7 @@ export type CallParams = {
 };
 
 export type CallContext = {
-  chain_id: number; // 31337
-  gas_limit: number;
+  chain_id: number;
 };
 
 export type BrandedHash<T, F> = Branded<{ hash: string }, [T, F]>;
