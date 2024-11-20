@@ -1,4 +1,4 @@
-import { WebProof, createVlayerClient, VlayerClient } from "@vlayer/sdk";
+import { WebProof, createVlayerClient } from "@vlayer/sdk";
 
 import {
   createExtensionWebProofProvider,
@@ -8,7 +8,7 @@ import {
 } from "@vlayer/sdk/web_proof";
 
 import { foundry } from "viem/chains";
-import React, { useCallback, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import unconditionalProver from "../../../contracts/fixtures/out/UnconditionalProver.sol/UnconditionalProver";
 
 const PROVER_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
@@ -16,22 +16,32 @@ const NOTARY_PUB_KEY =
   "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEBv36FI4ZFszJa0DQFJ3wWCXvVLFr\ncRzMG5kaTeHGoSzDu6cFqx3uEWYpFGo6C0EOUgf+mEgbktLrXocv5yHzKg==\n-----END PUBLIC KEY-----";
 
 function Source() {
-  const [proof, setProof] = useState<WebProof>();
-  const vlayerClient = useRef<VlayerClient>();
+  const [proof, setProof] = useState<WebProof | null>(null);
 
-  const requestWebProof = useCallback(async () => {
-    const provider = createExtensionWebProofProvider({
+  const webProofProvider = useMemo(() => {
+    return createExtensionWebProofProvider({
       notaryUrl: "http://localhost:7047",
       wsProxyUrl: "ws://localhost:55688",
     });
+  }, []);
+
+  const vlayerClient = useMemo(() => {
+    return createVlayerClient({
+      webProofProvider,
+    });
+  }, [webProofProvider]);
+
+  useEffect(() => {
+    webProofProvider.onWebProofDone((proof) => {
+      setProof(proof);
+    });
+  }, []);
+
+  const requestWebProof = useCallback(async () => {
     const loginUrl = `${window.location.origin}${import.meta.env.BASE_URL}login`;
     const targetUrl = `${window.location.origin}${import.meta.env.BASE_URL}target`;
 
-    vlayerClient.current = createVlayerClient({
-      webProofProvider: provider,
-    });
-
-    const webproof = await provider.getWebProof({
+    await webProofProvider.getWebProof({
       proverCallCommitment: {
         address: PROVER_ADDRESS,
         proverAbi: unconditionalProver.abi,
@@ -46,12 +56,11 @@ function Source() {
         notarize("https://swapi.dev/api/people/1", "GET", "Prove"),
       ],
     });
-
-    setProof(webproof);
   }, []);
 
   const requestZkProof = useCallback(async () => {
-    const zkProof = await vlayerClient.current?.prove({
+    console.log("Proof", proof);
+    const zkProof = await vlayerClient.prove({
       address: PROVER_ADDRESS,
       proverAbi: unconditionalProver.abi,
       functionName: "web_proof",

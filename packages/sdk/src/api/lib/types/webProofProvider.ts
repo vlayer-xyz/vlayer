@@ -42,6 +42,8 @@ export type WebProofProvider = {
     args: GetWebProofArgs<T, F>,
   ) => Promise<WebProof>;
   notifyZkProvingStatus: (status: ZkProvingStatus) => void;
+  onWebProofDone: (callback: (proof: WebProof) => void) => void;
+  onWebProofError: (callback: (error: Error) => void) => void;
 };
 
 export type WebProofProviderSetup = {
