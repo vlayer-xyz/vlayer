@@ -17,10 +17,10 @@ pub const MAINNET_MERGE_BLOCK_TIMESTAMP: u64 = 1_663_224_179;
 
 lazy_static! {
     pub static ref CHAIN_ID_TO_CHAIN_SPEC: HashMap<ChainId, ChainSpec> =
-        build_chain_id_to_spec_map();
+        chain_id_to_spec_map();
 
     pub static ref CHAIN_NAME_TO_CHAIN_ID: HashMap<String, ChainId> =
-        build_chain_name_to_id_map();
+        chain_name_to_id_map();
 
 
     static ref CHAIN_SPECS: ChainSpecs = {
@@ -54,7 +54,7 @@ impl ChainSpecs {
     }
 }
 
-fn build_chain_id_to_spec_map() -> HashMap<ChainId, ChainSpec> {
+fn chain_id_to_spec_map() -> HashMap<ChainId, ChainSpec> {
     CHAIN_SPECS
         .chains
         .iter()
@@ -62,7 +62,7 @@ fn build_chain_id_to_spec_map() -> HashMap<ChainId, ChainSpec> {
         .collect()
 }
 
-fn build_chain_name_to_id_map() -> HashMap<String, ChainId> {
+fn chain_name_to_id_map() -> HashMap<String, ChainId> {
     CHAIN_SPECS
         .chains
         .iter()
