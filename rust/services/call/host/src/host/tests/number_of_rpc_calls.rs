@@ -38,21 +38,6 @@ fn profile(
 }
 
 #[tokio::test]
-async fn time_travel() -> anyhow::Result<()> {
-    let location: ExecutionLocation = (20_064_547_u64, OptimismSepolia).into();
-    let call = Call::new(SIMPLE_TIME_TRAVEL, &AVERAGE_BALANCE_OF_CALL);
-
-    let state = profile("op_sepolia", "simple_time_travel", location, &call)?;
-
-    assert_eq!(state.total_count(), 88);
-    insta::with_settings!({sort_maps => true}, {
-        insta::assert_yaml_snapshot!(state)
-    });
-
-    Ok(())
-}
-
-#[tokio::test]
 async fn usdt_erc20_balance_of() -> anyhow::Result<()> {
     let location: ExecutionLocation = (USDT_BLOCK_NO, Mainnet).into();
     let binance_8 = address!("F977814e90dA44bFA03b6295A0616a897441aceC");
@@ -61,6 +46,21 @@ async fn usdt_erc20_balance_of() -> anyhow::Result<()> {
     let state = profile("mainnet", "usdt_erc20_balance_of", location, &call)?;
 
     assert_eq!(state.total_count(), 7);
+    insta::with_settings!({sort_maps => true}, {
+        insta::assert_yaml_snapshot!(state)
+    });
+
+    Ok(())
+}
+
+#[tokio::test]
+async fn time_travel() -> anyhow::Result<()> {
+    let location: ExecutionLocation = (20_064_547_u64, OptimismSepolia).into();
+    let call = Call::new(SIMPLE_TIME_TRAVEL, &AVERAGE_BALANCE_OF_CALL);
+
+    let state = profile("op_sepolia", "simple_time_travel", location, &call)?;
+
+    assert_eq!(state.total_count(), 88);
     insta::with_settings!({sort_maps => true}, {
         insta::assert_yaml_snapshot!(state)
     });
