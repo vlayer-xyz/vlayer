@@ -1,7 +1,5 @@
 import webProofProver from "../../out/WebProofProver.sol/WebProofProver";
 
-import { foundry } from "viem/chains";
-
 import {
   createVlayerClient,
   type WebProof,
@@ -10,7 +8,7 @@ import {
 } from "@vlayer/sdk";
 
 import {
-  createExtensionWebProofProvider,
+  createWebProofPlaceholder,
   expectUrl,
   notarize,
   startPage,
@@ -36,17 +34,16 @@ const { chain, ethClient, account, proverUrl, confirmations } =
 
 const twitterUserAddress = account.address;
 
-export async function setupRequestProveButton(element: HTMLButtonElement) {
+export async function setupProveWebButton(element: HTMLButtonElement) {
   element.addEventListener("click", async () => {
-    const provider = createExtensionWebProofProvider();
-    const webProof = await provider.getWebProof({
-      proverCallCommitment: {
-        address: import.meta.env.VITE_PROVER_ADDRESS,
-        proverAbi: webProofProver.abi,
-        chainId: foundry.id,
-        functionName: "main",
-        commitmentArgs: ["0x"],
-      },
+    const notaryPubKey =
+      "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExpX/4R4z40gI6C/j9zAM39u58LJu\n3Cx5tXTuqhhu/tirnBi5GniMmspOTEsps4ANnPLpMmMSfhJ+IFHbc3qVOA==\n-----END PUBLIC KEY-----\n";
+
+    const vlayer = createVlayerClient({
+      url: proverUrl,
+    });
+
+    const webProofPlaceholder = createWebProofPlaceholder({
       logoUrl: "http://twitterswap.com/logo.png",
       steps: [
         startPage("https://x.com/i/flow/login", "Go to x.com login page"),
@@ -57,44 +54,23 @@ export async function setupRequestProveButton(element: HTMLButtonElement) {
           "Generate Proof of Twitter profile",
         ),
       ],
-    });
-
-    console.log("WebProof generated!", webProof);
-    context.webProof = webProof;
-  });
-}
-
-export const setupVProverButton = (element: HTMLButtonElement) => {
-  element.addEventListener("click", async () => {
-    const notaryPubKey =
-      "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExpX/4R4z40gI6C/j9zAM39u58LJu\n3Cx5tXTuqhhu/tirnBi5GniMmspOTEsps4ANnPLpMmMSfhJ+IFHbc3qVOA==\n-----END PUBLIC KEY-----\n";
-
-    const webProof = {
-      tls_proof: context.webProof,
-      notary_pub_key: notaryPubKey,
-    };
-    const vlayer = createVlayerClient({
-      url: proverUrl,
+      notaryPubKey: notaryPubKey,
     });
 
     console.log("Generating proof...");
-    const hash = await vlayer.prove({
+
+    const hash = await vlayer.proveWeb({
       address: import.meta.env.VITE_PROVER_ADDRESS,
       functionName: "main",
       proverAbi: webProofProver.abi,
-      args: [
-        {
-          webProofJson: JSON.stringify(webProof),
-        },
-        twitterUserAddress,
-      ],
+      args: [webProofPlaceholder, twitterUserAddress],
       chainId: chain.id,
     });
     const provingResult = await vlayer.waitForProvingResult(hash);
     console.log("Proof generated!", provingResult);
     context.provingResult = provingResult as [Proof, string, Hex];
   });
-};
+}
 
 export const setupVerifyButton = (element: HTMLButtonElement) => {
   element.addEventListener("click", async () => {
