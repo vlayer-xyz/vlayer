@@ -1,8 +1,6 @@
-use std::sync::RwLock;
+use std::{collections::HashMap, sync::RwLock};
 
-use alloy_primitives::{
-    map::HashMap, Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256,
-};
+use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256};
 use anyhow::Result;
 use block_header::EvmBlockHeader;
 use ethers_core::types::BlockNumber as BlockTag;
