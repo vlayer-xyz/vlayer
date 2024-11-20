@@ -113,7 +113,7 @@ export const createVlayerClient = (
       args,
     }) {
       const webProofPlaceholder = args[0];
-      const contractArgs = args.slice(1) as ContractFunctionArgsWithout<
+      const commitmentArgs = args.slice(1) as ContractFunctionArgsWithout<
         typeof proverAbi,
         typeof functionName,
         { name: "webProof" }
@@ -124,7 +124,7 @@ export const createVlayerClient = (
           address,
           proverAbi,
           functionName,
-          commitmentArgs: contractArgs,
+          commitmentArgs,
           chainId,
         },
         logoUrl: webProofPlaceholder.logoUrl,
@@ -143,7 +143,7 @@ export const createVlayerClient = (
               notary_pub_key: webProofPlaceholder.notaryPubKey,
             }),
           },
-          ...contractArgs,
+          ...commitmentArgs,
         ] as ContractFunctionArgs<
           typeof proverAbi,
           AbiStateMutability,
