@@ -8,7 +8,7 @@ use revm::primitives::SpecId::*;
 use serde::Deserialize;
 use toml::from_str;
 
-use crate::{fork::Fork, spec::ChainSpec};
+use crate::spec::ChainSpec;
 
 // Some unique chain ids for testing
 pub const TEST_CHAIN_ID: ChainId = 31_337;
@@ -133,31 +133,18 @@ pub static POLYGON_AMOY_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| CHAIN_SPECS[&
 
 pub static ARBITRUM_NOVA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| CHAIN_SPECS[&42170].clone());
 
-pub static ARBITRUM_ONE_CHAIN_SPEC: Lazy<ChainSpec> =  Lazy::new(|| CHAIN_SPECS[&42161].clone());
+pub static ARBITRUM_ONE_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| CHAIN_SPECS[&42161].clone());
 
-pub static ARBITRUM_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> =  Lazy::new(|| CHAIN_SPECS[&421614].clone());
+pub static ARBITRUM_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> =
+    Lazy::new(|| CHAIN_SPECS[&421614].clone());
 
-pub static ZKSYNC_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
-    ChainSpec::new(
-        324,
-        [
-            Fork::after_block(MERGE, 1735371),
-            Fork::after_timestamp(SHANGHAI, 1677557088),
-            Fork::after_timestamp(CANCUN, 1706655072),
-        ],
-    )
-});
+pub static ZKSYNC_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| CHAIN_SPECS[&324].clone());
 
-pub static ZKSYNC_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| {
-    ChainSpec::new(
-        300,
-        [
-            Fork::after_block(MERGE, 1735371),
-            Fork::after_timestamp(SHANGHAI, 1677557088),
-            Fork::after_timestamp(CANCUN, 1706655072),
-        ],
-    )
-});
+pub static ZKSYNC_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| CHAIN_SPECS[&300].clone());
+
+pub static LINEA_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| CHAIN_SPECS[&59144].clone());
+
+pub static LINEA_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> = Lazy::new(|| CHAIN_SPECS[&59141].clone());
 
 pub static TESTING_CHAIN_SPEC: Lazy<ChainSpec> =
     Lazy::new(|| ChainSpec::new_single(TEST_CHAIN_ID, MERGE));
@@ -176,12 +163,6 @@ pub static SCROLL_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> =
 
 pub static MANTLE_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> =
     Lazy::new(|| ChainSpec::new_single(5000, CANCUN));
-
-pub static LINEA_MAINNET_CHAIN_SPEC: Lazy<ChainSpec> =
-    Lazy::new(|| ChainSpec::new_single(59144, CANCUN));
-
-pub static LINEA_SEPOLIA_CHAIN_SPEC: Lazy<ChainSpec> =
-    Lazy::new(|| ChainSpec::new_single(59141, CANCUN));
 
 pub static BITKUB_CHAIN_CHAIN_SPEC: Lazy<ChainSpec> =
     Lazy::new(|| ChainSpec::new_single(96, CANCUN));

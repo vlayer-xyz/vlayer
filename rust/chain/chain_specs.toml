@@ -101,19 +101,55 @@ forks = [
   { spec = "CANCUN", activation = { Block = 5423600 } },
 ]
 
-# Time travel is not supported for arbitrum chains
+# Time travel is not supported for arbitrum and zksync chains
 
 # aribtrum_nova
+[[chains]]
+chain_id = 42161
 forks = [
   { spec = "CANCUN", activation = { Timestamp = 1710338135 } }
 ]
 
 # aribtrum_one
+[[chains]]
+chain_id = 42170
 forks = [
   { spec = "CANCUN", activation = { Timestamp = 1710338135 } }
 ]
 
 # aribtrum_sepolia
+[[chains]]
+chain_id = 421614
 forks = [
   { spec = "CANCUN", activation = { Timestamp = 1710338135 } }
+]
+
+# zksync_mainnet
+[[chains]]
+chain_id = 324
+forks = [
+  { spec = "CANCUN", activation = { Timestamp = 1710338135 } }
+]
+
+# zcsync_sepolia
+[[chains]]
+chain_id = 300
+forks = [
+  { spec = "CANCUN", activation = { Timestamp = 1710338135 } }
+]
+
+# linea_mainnet
+# https://github.com/Consensys/linea-monorepo/blob/0615fa37b9f7aa42681a54bfc881e43914d9c0a1/docker/linea-mainnet/genesis.json
+[[chains]]
+chain_id = 59144
+forks = [
+  { spec = "LONDON", activation = { Block = 0 } }
+]
+
+# linea_sepolia
+# https://github.com/Consensys/linea-monorepo/blob/0615fa37b9f7aa42681a54bfc881e43914d9c0a1/docker/linea-sepolia/genesis.json#L3
+[[chains]]
+chain_id = 59141
+forks = [
+  { spec = "LONDON", activation = { Block = 0 } }
 ]
