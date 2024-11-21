@@ -9,7 +9,7 @@ const config = {
   notarizeUrl: "https://swapi.dev/api/people/1",
 };
 
-// const VLAYER_SERVER_URL = "http://127.0.0.1:3000";
+const VLAYER_SERVER_URL = "http://127.0.0.1:3000";
 
 test.describe("Full flow of webproof using extension", () => {
   test("Full flow from opening sidepanel to redirection", async ({
@@ -80,15 +80,15 @@ test.describe("Full flow of webproof using extension", () => {
       expect(proveButton).toBeVisible();
     });
 
-    // await test.step("Proving request has succeeded", async () => {
-    //   const proveButton = page.locator("body").getByTestId("zk-prove-button");
-    //   await proveButton.click();
+    await test.step("Proving request has succeeded", async () => {
+      const proveButton = page.locator("body").getByTestId("zk-prove-button");
+      await proveButton.click();
 
-    //   const response = await page.waitForResponse(VLAYER_SERVER_URL);
-    //   expect(response.ok()).toBeTruthy();
+      const response = await page.waitForResponse(VLAYER_SERVER_URL);
+      expect(response.ok()).toBeTruthy();
 
-    //   const response_json = await response.json();
-    //   expect(response_json).toHaveProperty("result.proof");
-    // });
+      const response_json = await response.json();
+      expect(response_json).toHaveProperty("result.proof");
+    });
   });
 });
