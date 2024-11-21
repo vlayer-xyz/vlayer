@@ -1,18 +1,18 @@
 use axum::http::StatusCode;
 use serde_json::json;
+use test_helpers::TestHelper;
 
 mod test_helpers;
 
 use server_utils::{body_to_json, body_to_string};
 
 mod server_tests {
-    use test_helpers::create_test_helper_without_guests;
 
     use super::*;
 
     #[tokio::test]
     async fn http_not_found() {
-        let helper = create_test_helper_without_guests().await;
+        let helper = TestHelper::new().await;
         let response = helper.post("/non_existent_http_path", &()).await;
 
         assert_eq!(StatusCode::NOT_FOUND, response.status());
@@ -21,7 +21,7 @@ mod server_tests {
 
     #[tokio::test]
     async fn json_rpc_not_found() {
-        let helper = create_test_helper_without_guests().await;
+        let helper = TestHelper::new().await;
 
         let req = json!({
             "method": "non_existent_json_rpc_method",
@@ -46,6 +46,41 @@ mod server_tests {
         );
     }
 
+    mod v_versions {
+        use assert_json_diff::assert_json_include;
+        use common::GuestElf;
+
+        use super::*;
+
+        #[tokio::test]
+        async fn success() {
+            let call_elf = GuestElf::new([0; 8], &[]);
+            let chain_elf = GuestElf::new([1; 8], &[]);
+            let helper = TestHelper::new_with_guests(call_elf, chain_elf).await;
+
+            let req = json!({
+                "method": "v_versions",
+                "params": [],
+                "id": 1,
+                "jsonrpc": "2.0",
+            });
+            let response = helper.post("/", &req).await;
+
+            assert_eq!(StatusCode::OK, response.status());
+            assert_json_include!(
+                expected: json!({
+                    "jsonrpc": "2.0",
+                    "id": 1,
+                    "result": {
+                        "call_guest_id": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                        "chain_guest_id": "0x0100000001000000010000000100000001000000010000000100000001000000"
+                    }
+                }),
+                actual: body_to_json(response.into_body()).await,
+            );
+        }
+    }
+
     mod v_call {
         use assert_json_diff::assert_json_include;
         use ethers::{
@@ -53,7 +88,6 @@ mod server_tests {
             types::{Uint8, U256},
         };
         use server_utils::function_selector;
-        use test_helpers::create_test_helper;
         use web_proof::fixtures::{load_web_proof_fixture, NOTARY_PUB_KEY_PEM_EXAMPLE};
 
         use super::*;
@@ -61,7 +95,7 @@ mod server_tests {
 
         #[tokio::test]
         async fn field_validation_error() {
-            let helper = create_test_helper_without_guests().await;
+            let helper = TestHelper::new().await;
 
             let req = json!({
                 "method": "v_call",
@@ -95,7 +129,7 @@ mod server_tests {
 
         #[tokio::test(flavor = "multi_thread")]
         async fn success_simple_contract_call() {
-            let helper = create_test_helper().await;
+            let helper = TestHelper::new().await;
             let call_data = helper
                 .contract
                 .sum(U256::from(1), U256::from(2))
@@ -144,7 +178,7 @@ mod server_tests {
 
         #[tokio::test(flavor = "multi_thread")]
         async fn success_web_proof() {
-            let helper = create_test_helper().await;
+            let helper = TestHelper::new().await;
             let call_data = helper
                 .contract
                 .web_proof(WebProof {

@@ -29,16 +29,6 @@ abigen!(ExampleProver, "./testdata/ExampleProver.json",);
 type Client = Arc<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>>;
 type Contract = ExampleProver<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>>;
 
-// Requires compiled guest binaries
-pub async fn create_test_helper() -> TestHelper {
-    TestHelper::create(CALL_GUEST_ELF.clone(), CHAIN_GUEST_ELF.clone()).await
-}
-
-// Uses default guest binaries. Can be used for tests that don't require guests
-pub async fn create_test_helper_without_guests() -> TestHelper {
-    TestHelper::create(GuestElf::default(), GuestElf::default()).await
-}
-
 pub(crate) struct TestHelper {
     server_config: Config,
     pub(crate) contract: Contract,
@@ -50,7 +40,14 @@ pub(crate) struct TestHelper {
 }
 
 impl TestHelper {
-    pub(crate) async fn create(call_guest_elf: GuestElf, chain_guest_elf: GuestElf) -> Self {
+    pub(crate) async fn new() -> Self {
+        Self::new_with_guests(CALL_GUEST_ELF.clone(), CHAIN_GUEST_ELF.clone()).await
+    }
+
+    pub(crate) async fn new_with_guests(
+        call_guest_elf: GuestElf,
+        chain_guest_elf: GuestElf,
+    ) -> Self {
         let anvil = setup_anvil().await;
         let client = setup_client(&anvil).await;
         let contract = deploy_test_contract(client.clone()).await;
