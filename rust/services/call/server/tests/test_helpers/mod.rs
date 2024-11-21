@@ -40,14 +40,11 @@ pub(crate) struct TestHelper {
 }
 
 impl TestHelper {
-    pub(crate) async fn new() -> Self {
-        Self::new_with_guests(CALL_GUEST_ELF.clone(), CHAIN_GUEST_ELF.clone()).await
+    pub(crate) async fn default() -> Self {
+        Self::new(CALL_GUEST_ELF.clone(), CHAIN_GUEST_ELF.clone()).await
     }
 
-    pub(crate) async fn new_with_guests(
-        call_guest_elf: GuestElf,
-        chain_guest_elf: GuestElf,
-    ) -> Self {
+    pub(crate) async fn new(call_guest_elf: GuestElf, chain_guest_elf: GuestElf) -> Self {
         let anvil = setup_anvil().await;
         let client = setup_client(&anvil).await;
         let contract = deploy_test_contract(client.clone()).await;

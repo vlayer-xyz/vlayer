@@ -12,7 +12,7 @@ mod server_tests {
 
     #[tokio::test]
     async fn http_not_found() {
-        let helper = TestHelper::new().await;
+        let helper = TestHelper::default().await;
         let response = helper.post("/non_existent_http_path", &()).await;
 
         assert_eq!(StatusCode::NOT_FOUND, response.status());
@@ -21,7 +21,7 @@ mod server_tests {
 
     #[tokio::test]
     async fn json_rpc_not_found() {
-        let helper = TestHelper::new().await;
+        let helper = TestHelper::default().await;
 
         let req = json!({
             "method": "non_existent_json_rpc_method",
@@ -56,7 +56,7 @@ mod server_tests {
         async fn success() {
             let call_elf = GuestElf::new([0; 8], &[]);
             let chain_elf = GuestElf::new([1; 8], &[]);
-            let helper = TestHelper::new_with_guests(call_elf, chain_elf).await;
+            let helper = TestHelper::new(call_elf, chain_elf).await;
 
             let req = json!({
                 "method": "v_versions",
@@ -95,7 +95,7 @@ mod server_tests {
 
         #[tokio::test]
         async fn field_validation_error() {
-            let helper = TestHelper::new().await;
+            let helper = TestHelper::default().await;
 
             let req = json!({
                 "method": "v_call",
@@ -129,7 +129,7 @@ mod server_tests {
 
         #[tokio::test(flavor = "multi_thread")]
         async fn success_simple_contract_call() {
-            let helper = TestHelper::new().await;
+            let helper = TestHelper::default().await;
             let call_data = helper
                 .contract
                 .sum(U256::from(1), U256::from(2))
@@ -178,7 +178,7 @@ mod server_tests {
 
         #[tokio::test(flavor = "multi_thread")]
         async fn success_web_proof() {
-            let helper = TestHelper::new().await;
+            let helper = TestHelper::default().await;
             let call_data = helper
                 .contract
                 .web_proof(WebProof {

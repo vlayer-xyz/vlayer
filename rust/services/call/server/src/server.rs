@@ -40,7 +40,7 @@ pub fn server(cfg: Config) -> Router {
         "v_versions",
         move |params| -> Pin<Box<dyn Future<Output = _> + Send>> {
             let config = config_.clone();
-            Box::pin(async move { v_versions(config, params).await })
+            Box::pin(v_versions(config, params))
         },
     );
 
