@@ -1,7 +1,15 @@
 {
   "name": "vlayer",
   "module": "index.ts",
+  "scripts": {
+    "deploy_test_contracts": "cd ../contracts/fixtures && forge create src/vlayer/UnconditionalProver.sol:UnconditionalProver --private-key=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
+    "test:headed": "bun run deploy_test_contracts && TEST_MODE=headed bunx playwright test --ui",
+    "test:headless": "bun run deploy_test_contracts && TEST_MODE=headless bunx playwright test",
+    "lint": "eslint ./*/src/** ",
+    "lint:fix": "eslint ./*/src/** --fix"
+  },
   "devDependencies": {
+    "@playwright/test": "^1.48.0",
     "@types/bun": "latest",
     "@types/eslint__js": "^8.42.3",
     "@vitest/coverage-v8": "2.1.4",
@@ -15,10 +23,7 @@
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
-  "scripts": {
-    "lint": "eslint ./*/src/** ",
-    "lint:fix": "eslint ./*/src/** --fix"
-  },
+
   "type": "module",
   "workspaces": [
     "browser-extension/",

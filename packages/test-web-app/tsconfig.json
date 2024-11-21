@@ -1,6 +1,7 @@
 {
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
+    "composite": true,
     "jsx": "react",
     "useDefineForClassFields": true,
     "lib": ["ESNext", "DOM"],
@@ -11,9 +12,8 @@
     "moduleResolution": "bundler",
   },
   "include": [
-    "../../../contracts/vlayer/**/*.ts",
-    "../../../contracts/fixtures/out/UnconditionalProver.sol/UnconditionalProver.ts",
-    "./src/**/*.ts",
-    "./src/**/*.tsx"
-  ]
+    "src/**/*",
+    "../../contracts/fixtures/out/**/*.ts"
+  ],
+  "exclude": ["node_modules/**/*"]
 }
