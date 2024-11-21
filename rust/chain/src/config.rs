@@ -1,5 +1,5 @@
 //! Handling different blockchain specifications.
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
 use alloy_primitives::ChainId;
 use lazy_static::lazy_static;
@@ -38,8 +38,8 @@ struct ChainSpecs {
 
 impl ChainSpecs {
     pub fn assert_no_duplicates(&self) {
-        let mut chain_ids = std::collections::HashSet::new();
-        let mut chain_names = std::collections::HashSet::new();
+        let mut chain_ids = HashSet::new();
+        let mut chain_names = HashSet::new();
 
         for chain in &self.chains {
             if !chain_ids.insert(chain.id()) {
