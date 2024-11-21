@@ -10,6 +10,7 @@ import {
   ContractFunctionName,
   ContractFunctionReturnType,
   decodeFunctionResult,
+  Hex,
 } from "viem";
 import { ZkProvingStatus } from "../../web-proof-commons";
 import { ContractFunctionArgsWithout } from "types/viem";
