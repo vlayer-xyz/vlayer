@@ -1,17 +1,16 @@
-name: Test extension
+name: e2e test web flow
 on:
   pull_request:
     paths:
       - "packages/**"
-      - ".github/workflows/playwright.yaml"
+      - ".github/workflows/test_e2e_web_flow.yaml"
       - "docker/**"
   merge_group:
   push:
     branches:
       - main
 jobs:
-  test-extension:
-    name: Test extension
+  test-sdk-in-web:
     timeout-minutes: 60
     runs-on: [aws-linux-small]
     steps:
@@ -61,7 +60,7 @@ jobs:
           forge build --sizes
       - name: Run Playwright tests
         run: bun run test:headless
-        working-directory: ./packages/browser-extension
+        working-directory: ./packages
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
