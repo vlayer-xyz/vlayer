@@ -1,7 +1,10 @@
 use alloy_primitives::{BlockNumber, ChainId};
+use alloy_rlp::RlpEncodable;
 use serde::{Deserialize, Serialize};
 
-#[derive(Debug, Default, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize)]
+#[derive(
+    Debug, Default, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, RlpEncodable,
+)]
 pub struct ExecutionLocation {
     pub block_number: BlockNumber,
     pub chain_id: ChainId,

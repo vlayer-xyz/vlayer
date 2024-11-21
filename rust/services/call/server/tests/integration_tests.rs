@@ -66,9 +66,8 @@ mod server_tests {
                 "params": [
                     {
                         "to": "I am not a valid address!",
-                        "data": helper.contract.sum(U256::from(1), U256::from(2)).calldata().unwrap()
-                    },
-                    {
+                        "data": helper.contract.sum(U256::from(1), U256::from(2)).calldata().unwrap(),
+                    }, {
                     }
                     ],
                 "id": 1,
@@ -84,7 +83,7 @@ mod server_tests {
                     "error": {
                         "code": -32602,
                         "message": "Invalid field: `to` Odd number of digits `I am not a valid address!`",
-                        "data": null
+                        "data": null,
                     }
                 }),
                 body_to_json(response.into_body()).await
@@ -105,10 +104,10 @@ mod server_tests {
                 "params": [
                     {
                         "to": helper.contract.address(),
-                        "data": call_data
+                        "data": call_data,
                     },
                     {
-                        "chain_id": 11155111
+                        "chain_id": 11155111,
                     }
                     ],
                 "id": 1,
@@ -160,10 +159,10 @@ mod server_tests {
                 "params": [
                     {
                         "to": helper.contract.address(),
-                        "data": call_data
+                        "data": call_data,
                     },
                     {
-                        "chain_id": 11155111
+                        "chain_id": 11155111,
                     }
                     ],
                 "id": 1,

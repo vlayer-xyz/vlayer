@@ -1,8 +1,14 @@
 use alloy_chains::Chain;
-use alloy_primitives::{hex::ToHexExt, ChainId, U256};
+use alloy_primitives::{hex::ToHexExt, keccak256, ChainId, B256, U256};
+use alloy_rlp::RlpEncodable;
 use alloy_sol_types::SolValue;
-use call_engine::{HostOutput, Proof, Seal};
+use call_engine::{
+    evm::env::location::ExecutionLocation, Call as EngineCall, HostOutput, Proof, Seal,
+};
 use call_host::{Call as HostCall, Error as HostError};
+use common::Hashable;
+use derive_more::From;
+use derive_new::new;
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use server_utils::{parse_address_field, parse_hex_field};
@@ -39,13 +45,38 @@ pub struct CallContext {
 }
 
 pub struct CallResult {
+    hash: CallHash,
     proof: Proof,
     evm_call_result: Vec<u8>,
 }
 
 impl CallResult {
+    pub fn try_new(hash: CallHash, host_output: HostOutput) -> Result<Self, HostError> {
+        let HostOutput {
+            guest_output,
+            seal,
+            proof_len,
+            call_guest_id,
+            ..
+        } = host_output;
+
+        let proof = Proof {
+            length: U256::from(proof_len),
+            seal: decode_seal(seal)?,
+            callGuestId: call_guest_id.into(),
+            // Intentionally set to 0. These fields will be updated with the correct values by the prover script, based on the verifier ABI.
+            callAssumptions: guest_output.call_assumptions,
+        };
+        Ok(Self {
+            hash,
+            proof,
+            evm_call_result: guest_output.evm_call_result,
+        })
+    }
+
     pub fn to_json(&self) -> Value {
         json!({
+            "hash": self.hash,
             "evm_call_result": self.evm_call_result.encode_hex_with_prefix(),
             "proof": {
                 "seal": {
@@ -66,29 +97,24 @@ impl CallResult {
     }
 }
 
-impl TryFrom<HostOutput> for CallResult {
-    type Error = HostError;
+#[derive(Serialize, Deserialize, Debug, From)]
+pub struct CallHash(B256);
 
-    fn try_from(host_output: HostOutput) -> Result<Self, Self::Error> {
-        let HostOutput {
-            guest_output,
-            seal,
-            proof_len,
-            call_guest_id,
-            ..
-        } = host_output;
+impl std::fmt::Display for CallHash {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "{}", self.0.encode_hex_with_prefix())
+    }
+}
 
-        let proof = Proof {
-            length: U256::from(proof_len),
-            seal: decode_seal(seal)?,
-            callGuestId: call_guest_id.into(),
-            // Intentionally set to 0. These fields will be updated with the correct values by the prover script, based on the verifier ABI.
-            callAssumptions: guest_output.call_assumptions,
-        };
-        Ok(Self {
-            proof,
-            evm_call_result: guest_output.evm_call_result,
-        })
+#[derive(new, RlpEncodable)]
+pub struct CallHashData {
+    execution_location: ExecutionLocation,
+    call: EngineCall,
+}
+
+impl Hashable for CallHashData {
+    fn hash_slow(&self) -> B256 {
+        keccak256(alloy_rlp::encode(self))
     }
 }
 

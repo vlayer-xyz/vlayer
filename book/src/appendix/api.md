@@ -49,8 +49,9 @@ and the response:
 {
     "jsonrpc": "2.0",
     "result": {
-        "id": "<proving_hash>",
-        "result": "<abi encoded result of preflight execution>"
+        "hash": "<proving hash>",
+        "evm_call_result": "...",
+        "proof": "<abi encoded result of preflight execution>",
     }
 }
 ```

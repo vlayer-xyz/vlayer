@@ -9,6 +9,7 @@ import {
   ContractFunctionName,
   ContractFunctionReturnType,
   decodeFunctionResult,
+  Hex,
 } from "viem";
 import { ZkProvingStatus } from "../../web-proof-commons";
 
@@ -19,16 +20,11 @@ function dropEmptyProofFromArgs(args: unknown) {
   return [];
 }
 
-function generateRandomHash() {
-  let hash = "0x";
-  for (let i = 0; i < 40; ++i) {
-    hash += Math.floor(Math.random() * 16).toString(16);
-  }
-  return hash;
-}
-
-async function getHash() {
-  return Promise.resolve(generateRandomHash());
+async function getHash(
+  vcall_response: Promise<VCallResponse>,
+): Promise<[Hex, VCallResponse]> {
+  const result = await vcall_response;
+  return [result.result.hash, result];
 }
 
 export const createVlayerClient = (
@@ -51,7 +47,7 @@ export const createVlayerClient = (
   return {
     prove: async ({ address, functionName, chainId, proverAbi, args }) => {
       webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Proving);
-      const result_promise = prove(
+      const response = prove(
         address,
         proverAbi,
         functionName,
@@ -67,8 +63,12 @@ export const createVlayerClient = (
           webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Done);
           return result;
         });
-      const hash = await getHash();
-      resultHashMap.set(hash, [result_promise, proverAbi, functionName]);
+      const [hash, result_promise] = await getHash(response);
+      resultHashMap.set(hash, [
+        Promise.resolve(result_promise),
+        proverAbi,
+        functionName,
+      ]);
       return { hash } as BrandedHash<typeof proverAbi, typeof functionName>;
     },
     waitForProvingResult: async <

@@ -55,6 +55,10 @@ impl Host {
         let chain_client = chain_client::RpcClient::new(&config.chain_proof_url);
         Host::try_new_with_components(providers, block_number, chain_client, config)
     }
+
+    pub const fn start_execution_location(&self) -> ExecutionLocation {
+        self.start_execution_location
+    }
 }
 
 pub fn get_latest_block_number(

@@ -2013,6 +2013,8 @@ version = "0.1.0"
 dependencies = [
  "alloy-chains",
  "alloy-primitives",
+ "alloy-rlp",
+ "alloy-rlp-derive",
  "alloy-sol-types",
  "anyhow",
  "assert-json-diff",
@@ -2025,6 +2027,8 @@ dependencies = [
  "chain",
  "chain_guest_wrapper",
  "common",
+ "derive-new",
+ "derive_more 1.0.0",
  "ethers",
  "hex",
  "lazy_static",
