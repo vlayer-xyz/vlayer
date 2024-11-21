@@ -44,7 +44,7 @@ async fn main() {
     // In order to view logs, run `RUST_LOG=info cargo run`
     tracing_subscriber::fmt().with_env_filter(filter).init();
 
-    match run().await {
+    match Box::pin(run()).await {
         Ok(_) => (),
         Err(e) => {
             error!("Error: {}", e);
@@ -57,7 +57,7 @@ async fn run() -> Result<(), CLIError> {
     match Cli::parse().command {
         Commands::Serve(args) => run_serve(args).await,
         Commands::Init(args) => run_init(args).await,
-        Commands::Test(args) => run_test(args).await,
+        Commands::Test(args) => Box::pin(run_test(args)).await,
         Commands::Update => run_update(),
     }
 }
