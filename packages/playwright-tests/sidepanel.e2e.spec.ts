@@ -44,20 +44,23 @@ test.describe("Full flow of webproof using extension", () => {
       const extension = await sidePanel(context);
       const startPageStep = extension.getByTestId("step-startPage");
       const status = await startPageStep.getAttribute("data-status");
-      expect(status).toEqual(StepStatus.Completed);
+      expect(status).toEqual("completed");
     });
 
     await test.step("Side panel UI should indicate that  expectUrl step is completed after redirection", async () => {
       const loginPage = context.pages().find((page) => {
         return page.url().includes("login");
-      }) as Page;
+      });
+      if (!loginPage) {
+        throw new Error("No login page");
+      }
       const loginButton = loginPage.getByTestId("login-button");
       await loginButton.click();
       await loginPage.waitForURL(config.expectUrl);
       const extension = await sidePanel(context);
       const startPageStep = extension.getByTestId("step-expectUrl");
       const status = await startPageStep.getAttribute("data-status");
-      expect(status).toEqual(StepStatus.Completed);
+      expect(status).toEqual("completed");
     });
 
     await test.step("Prove button should appear after request to external api", async () => {
@@ -86,7 +89,7 @@ test.describe("Full flow of webproof using extension", () => {
       const response = await page.waitForResponse(VLAYER_SERVER_URL);
       expect(response.ok()).toBeTruthy();
 
-      const response_json = await response.json();
+      const response_json = (await response.json()) as object;
       expect(response_json).toHaveProperty("result.proof");
     });
   });
@@ -132,6 +135,9 @@ test.describe("Full flow of webproof using extension", () => {
       const loginPage = context.pages().find((page) => {
         return page.url().includes("login");
       });
+      if (!loginPage) {
+        throw new Error("No login page");
+      }
       const loginButton = loginPage.getByTestId("login-button");
       await loginButton.click();
       await loginPage.waitForURL(config.expectUrl);
