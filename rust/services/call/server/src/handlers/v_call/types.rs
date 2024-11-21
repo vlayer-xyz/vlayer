@@ -43,6 +43,7 @@ pub struct ClientVersion {
 pub struct CallContext {
     #[serde(default = "mainnet_chain_id")]
     pub chain_id: ChainId,
+    pub client_version: ClientVersion,
 }
 
 pub struct CallResult {

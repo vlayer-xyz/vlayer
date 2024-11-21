@@ -80,8 +80,9 @@ mod server_tests {
             });
             let response = helper.post("/", &req).await;
 
-            assert_eq!(StatusCode::OK, response.status());
+            assert_eq!(response.status(), StatusCode::OK);
             assert_eq!(
+                body_to_json(response.into_body()).await,
                 json!({
                     "jsonrpc": "2.0",
                     "id": 1,
@@ -90,8 +91,7 @@ mod server_tests {
                         "message": "Invalid field: `to` Odd number of digits `I am not a valid address!`",
                         "data": null
                     }
-                }),
-                body_to_json(response.into_body()).await
+                })
             );
         }
 
@@ -114,8 +114,9 @@ mod server_tests {
             });
             let response = helper.post("/", &req).await;
 
-            assert_eq!(StatusCode::OK, response.status());
+            assert_eq!(response.status(), StatusCode::OK);
             assert_eq!(
+                body_to_json(response.into_body()).await,
                 json!({
                     "jsonrpc": "2.0",
                     "id": 1,
@@ -124,8 +125,7 @@ mod server_tests {
                         "message": "missing field `client_version`",
                         "data": null
                     }
-                }),
-                body_to_json(response.into_body()).await
+                })
             );
         }
 
@@ -158,7 +158,7 @@ mod server_tests {
             });
             let response = helper.post("/", &req).await;
 
-            assert_eq!(StatusCode::OK, response.status());
+            assert_eq!(response.status(), StatusCode::OK);
             assert_json_include!(
                 expected: json!({
                         "jsonrpc": "2.0",
