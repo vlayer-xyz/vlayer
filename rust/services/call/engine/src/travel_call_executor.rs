@@ -14,7 +14,7 @@ use crate::{
     inspector::TravelInspector,
     io::Call,
     precompiles::VLAYER_PRECOMPILES,
-    utils::evm_call::format_failed_call_result,
+    utils::evm_call::{format_failed_call_result, TransactError},
 };
 
 #[derive(new)]
@@ -31,7 +31,7 @@ pub enum Error {
     TransactPreverifiedError(String),
 
     #[error("EVM transact error: {0}")]
-    TransactError(String),
+    TransactError(TransactError),
 
     #[error("Chain spec error: {0}")]
     ChainSpecError(String),
