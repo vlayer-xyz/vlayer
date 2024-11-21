@@ -35,7 +35,7 @@ contract WebProverTest is VTest {
         } catch Error(string memory reason) {
             assertEq(
                 reason,
-                "Engine(TransactError(\"Verification error: Session proof error: signature verification failed: signature error\"))"
+                "Engine(TransactError(Revert(\"Verification error: Session proof error: signature verification failed: signature error\")))"
             );
         }
     }
