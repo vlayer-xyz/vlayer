@@ -31,7 +31,7 @@ pub enum Error {
     TransactPreverifiedError(String),
 
     #[error("EVM transact error: {0}")]
-    TransactError(TransactError),
+    TransactError(#[from] TransactError),
 
     #[error("Chain spec error: {0}")]
     ChainSpecError(String),
@@ -110,12 +110,13 @@ where
 impl<D: std::fmt::Debug> From<EVMError<D>> for Error {
     fn from(err: EVMError<D>) -> Self {
         match err {
-            EVMError::Precompile(err) => Error::TransactError(format_failed_call_result({
+            EVMError::Precompile(err) => format_failed_call_result({
                 ExecutionResult::Revert {
                     gas_used: 0,
                     output: err.into_bytes().into(),
                 }
-            })),
+            })
+            .into(),
             _ => Error::TransactPreverifiedError(format!("{err:?}")),
         }
     }
