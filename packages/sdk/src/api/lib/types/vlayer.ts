@@ -20,6 +20,7 @@ export type CallParams = {
 
 export type CallContext = {
   chain_id: number;
+  gas_limit: number;
 };
 
 export type BrandedHash<T, F> = Branded<{ hash: string }, [T, F]>;
@@ -58,6 +59,7 @@ export type VlayerClient = {
     proverAbi: T;
     functionName: F;
     chainId?: number;
+    gasLimit?: number;
     args: ContractFunctionArgs<T, AbiStateMutability, F>;
   }) => Promise<BrandedHash<T, F>>;
 

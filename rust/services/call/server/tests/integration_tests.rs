@@ -104,6 +104,7 @@ mod server_tests {
                         "to": "I am not a valid address!",
                         "data": helper.contract.sum(U256::from(1), U256::from(2)).calldata().unwrap(),
                     }, {
+                        "gas_limit": 1_000_000,
                     }
                     ],
                 "id": 1,
@@ -144,6 +145,7 @@ mod server_tests {
                     },
                     {
                         "chain_id": 11155111,
+                        "gas_limit": 1_000_000,
                     }
                     ],
                 "id": 1,
@@ -199,6 +201,7 @@ mod server_tests {
                     },
                     {
                         "chain_id": 11155111,
+                        "gas_limit": 1_000_000,
                     }
                     ],
                 "id": 1,
