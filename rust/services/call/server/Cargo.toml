@@ -16,8 +16,8 @@ call_engine = { workspace = true }
 call_host = { workspace = true }
 chain = { workspace = true }
 common = { workspace = true }
-derive_more = { workspace = true }
 derive-new = { workspace = true }
+derive_more = { workspace = true }
 hex = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
