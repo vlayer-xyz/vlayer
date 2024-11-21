@@ -25,6 +25,18 @@ function cleanup() {
         kill "$ANVIL_PID"
     fi
 
+    # Kill chain worker if running
+    if [[ -n "${CHAIN_WORKER_PID:-}" ]] && ps -p "$CHAIN_WORKER_PID" > /dev/null; then
+        echo "Killing chain worker (PID $CHAIN_WORKER_PID)..."
+        kill "${CHAIN_WORKER_PID}"
+    fi
+
+    # Kill chain server if running
+    if [[ -n "${CHAIN_SERVER_PID:-}" ]] && ps -p "${CHAIN_SERVER_PID}" > /dev/null; then
+        echo "Killing chain server (PID ${CHAIN_SERVER_PID})..."
+        kill "${CHAIN_SERVER_PID}"
+    fi
+
     # Kill vlayer server if running
     if [[ -n "${VLAYER_SERVER_PID:-}" ]] && ps -p "$VLAYER_SERVER_PID" > /dev/null; then
         echo "Killing vlayer server (PID $VLAYER_SERVER_PID)..."
@@ -62,6 +74,84 @@ function startup_vlayer(){
     popd
 }
 
+function startup_chain_services() {
+    db_path="${VLAYER_TMP_DIR}/chain_db"
+    startup_chain_worker ${db_path} 
+    startup_chain_server ${db_path}
+}
+
+function startup_chain_worker() {
+    db_path="$1"
+    echo "Starting chain worker"
+    pushd "${VLAYER_HOME}/rust"
+
+    RUST_LOG=info \
+    CONFIRMATIONS=0 \
+    MAX_BACK_PROPAGATION_BLOCKS=20 \
+    MAX_HEAD_BLOCKS=10 \
+    RISC0_DEV_MODE=1 \
+    RPC_URL=${CHAIN_WORKER_RPC_URL} \
+    cargo run --bin worker \
+        --db-path "${db_path}" \
+        >"${LOGS_DIR}/chain_worker.out" &
+
+    CHAIN_WORKER_PID=$!
+
+    echo "Chain worker started with PID ${CHAIN_WORKER_PID}."
+
+    popd
+}
+
+function startup_chain_server() {
+    db_path="$1"
+    echo "Starting chain server"
+    pushd "${VLAYER_HOME}/rust"
+
+    RUST_LOG=info \
+    cargo run --bin chain_server \
+        --db-path "${db_path}" \
+        >"${LOGS_DIR}/chain_server.out" &
+
+    CHAIN_SERVER_PID=$!
+    
+    echo "Chain server started with PID ${CHAIN_SERVER_PID}."
+
+
+    echo "Waiting for chain worker sync..."
+
+    for i in `seq 1 10` ; do
+        FIRST_BLOCK_MAX=17915294
+        LAST_BLOCK_MIN=17985294
+
+        result=$(curl -s -X POST 127.0.0.1:3001 \
+                  --retry-connrefused \
+                  --retry 5 \
+                  --retry-delay 0 \
+                  --retry-max-time 30 \
+                  -H "Content-Type: application/json" \
+                  --data '{"jsonrpc": "2.0","id": 0,"method": "v_sync_status","params": [1]}' \
+                  | jq "(.result.first_block <= ${FIRST_BLOCK_MAX}) and (.result.last_block >= ${LAST_BLOCK_MIN})"
+        )
+
+        if [[ "${result}" == "true" ]] ; then
+            echo "Worker synced"
+            break
+        fi
+        echo "Syncing ..."
+        sleep 1
+    done
+
+    if [[ "${result}" != "true" ]] ; then
+        echo "Failed to sync chain worker" >&2
+        exit 1 
+    fi
+
+
+
+    popd
+}
+
+
 trap cleanup EXIT ERR INT
 
 # Default values
@@ -89,6 +179,8 @@ fi
 if [[ -z "${ALCHEMY_API_KEY:-}" ]] ; then
     echo ALCHEMY_API_KEY is not configured. Using only local rpc-urls. >&2
 else 
+    RUN_CHAIN_SERVICES="${RUN_CHAIN_SERVICES:-1}"
+    CHAIN_WORKER_RPC_URL="https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}"
 
     EXTERNAL_RPC_URLS=(
         "--rpc-url" "11155111:https://eth-sepolia.g.alchemy.com/v2/${ALCHEMY_API_KEY}"
@@ -118,6 +210,7 @@ echo
 echo "Starting services..."
 
 start_anvil
+if [[ "${RUN_CHAIN_SERVICES:-0}" == "1" ]] ; then startup_chain_services ; fi
 startup_vlayer "${SERVER_PROOF_ARG}" ${EXTERNAL_RPC_URLS[@]+"${EXTERNAL_RPC_URLS[@]}"}
 
 echo "Services has been succesfully started..."
