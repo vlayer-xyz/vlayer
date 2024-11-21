@@ -4,3 +4,9 @@ document.querySelectorAll("ol.chapter> li.chapter-item").forEach((el) => {
       this.classList.toggle("expanded")
   }
 })
+
+// Create the sticky div with link to Discord Support
+const stickyDiv = document.createElement('div');
+stickyDiv.id = 'stickyBottom';
+stickyDiv.innerHTML = '🛟 Need help? <a href="https://support.vlayer.xyz/" target="_blank">Discord Support</a>';
+document.body.appendChild(stickyDiv);
