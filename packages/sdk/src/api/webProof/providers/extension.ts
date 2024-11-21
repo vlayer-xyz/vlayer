@@ -89,20 +89,20 @@ class ExtensionWebProofProvider implements WebProofProvider {
     );
   }
 
-  public requestWebProof(webProofSetup: WebProofSetupInput) {
+  public requestWebProof(webProofRequest: WebProofRequestInput) {
     this.connectToExtension().postMessage({
       action: ExtensionAction.RequestWebProof,
       payload: {
         notaryUrl: this.notaryUrl,
         wsProxyUrl: this.wsProxyUrl,
-        logoUrl: webProofSetup.logoUrl,
-        steps: webProofSetup.steps,
+        logoUrl: webProofRequest.logoUrl,
+        steps: webProofRequest.steps,
       },
     });
   }
 
   public async getWebProof(
-    webProofSetup: WebProofSetupInput,
+    webProofRequest: WebProofRequestInput,
   ): Promise<WebProof> {
     return new Promise<WebProof>((resolve, reject) => {
       chrome.runtime.sendMessage(EXTENSION_ID, {
@@ -110,8 +110,8 @@ class ExtensionWebProofProvider implements WebProofProvider {
         payload: {
           notaryUrl: this.notaryUrl,
           wsProxyUrl: this.wsProxyUrl,
-          logoUrl: webProofSetup.logoUrl,
-          steps: webProofSetup.steps,
+          logoUrl: webProofRequest.logoUrl,
+          steps: webProofRequest.steps,
         },
       });
 
