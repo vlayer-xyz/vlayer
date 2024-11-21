@@ -102,7 +102,7 @@ mod format_failed_call_result {
 
         use super::*;
 
-        fn success_result(reason: SuccessReason) -> ExecutionResult {
+        const fn success_result(reason: SuccessReason) -> ExecutionResult {
             ExecutionResult::Success {
                 reason,
                 gas_used: 0,
@@ -168,7 +168,7 @@ mod format_failed_call_result {
 
         use super::*;
 
-        fn halt_result(reason: HaltReason) -> ExecutionResult {
+        const fn halt_result(reason: HaltReason) -> ExecutionResult {
             ExecutionResult::Halt {
                 reason,
                 gas_used: 0,
