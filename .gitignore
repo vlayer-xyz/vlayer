@@ -22,3 +22,6 @@ target/
 **/node_modules
 
 **/dependencies
+
+
+rust/chain_db
