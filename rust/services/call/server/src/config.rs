@@ -1,6 +1,6 @@
 use std::{collections::HashMap, net::SocketAddr};
 
-use alloy_primitives::ChainId;
+use alloy_primitives::{hex::ToHexExt, ChainId};
 use call_host::{Config as HostConfig, DEFAULT_MAX_CALLDATA_SIZE};
 use chain::TEST_CHAIN_ID;
 use common::GuestElf;
@@ -26,6 +26,14 @@ impl Config {
 
     pub fn fake_proofs(&self) -> bool {
         matches!(self.proof_mode, ProofMode::Fake)
+    }
+
+    pub fn call_guest_id(&self) -> String {
+        self.call_guest_elf.id.encode_hex_with_prefix()
+    }
+
+    pub fn chain_guest_id(&self) -> String {
+        self.chain_guest_elf.id.encode_hex_with_prefix()
     }
 }
 
@@ -125,5 +133,21 @@ mod tests {
             .build();
 
         assert_eq!(config.rpc_urls.get(&TEST_CHAIN_ID).unwrap(), "NEW");
+    }
+
+    #[test]
+    fn correctly_formats_guest_id() {
+        let call_elf = GuestElf::new([0; 8], &[]);
+        let chain_elf = GuestElf::new([1; 8], &[]);
+        let config = ConfigBuilder::new("", call_elf, chain_elf).build();
+
+        assert_eq!(
+            config.call_guest_id(),
+            "0x0000000000000000000000000000000000000000000000000000000000000000"
+        );
+        assert_eq!(
+            config.chain_guest_id(),
+            "0x0100000001000000010000000100000001000000010000000100000001000000"
+        );
     }
 }

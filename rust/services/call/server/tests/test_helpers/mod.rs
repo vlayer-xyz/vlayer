@@ -3,8 +3,9 @@ use std::{sync::Arc, time::Duration};
 use axum::{body::Body, http::Response};
 use block_header::EvmBlockHeader;
 use call_guest_wrapper::GUEST_ELF as CALL_GUEST_ELF;
-use call_server::{server, ProofMode};
+use call_server::{server, Config, ProofMode};
 use chain_guest_wrapper::GUEST_ELF as CHAIN_GUEST_ELF;
+use common::GuestElf;
 use ethers::{
     contract::abigen,
     core::{
@@ -29,37 +30,47 @@ type Client = Arc<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>>;
 type Contract = ExampleProver<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>>;
 
 pub(crate) struct TestHelper {
-    anvil: AnvilInstance,
-    client: Client,
+    server_config: Config,
     pub(crate) contract: Contract,
+
+    #[allow(dead_code)] // Keeps anvil alive
+    anvil: AnvilInstance,
+    #[allow(dead_code)] // Keeps chain proof server alive
+    chain_proof_server_mock: ChainProofServerMock,
 }
 
 impl TestHelper {
-    pub(crate) async fn create() -> Self {
+    pub(crate) async fn default() -> Self {
+        Self::new(CALL_GUEST_ELF.clone(), CHAIN_GUEST_ELF.clone()).await
+    }
+
+    pub(crate) async fn new(call_guest_elf: GuestElf, chain_guest_elf: GuestElf) -> Self {
         let anvil = setup_anvil().await;
         let client = setup_client(&anvil).await;
         let contract = deploy_test_contract(client.clone()).await;
-
-        Self {
-            anvil,
-            client,
-            contract,
-        }
-    }
-
-    pub(crate) async fn post<T: Serialize>(&self, url: &str, body: &T) -> Response<Body> {
-        let latest_block_header = get_latest_block_header(&self.client).await;
+        let latest_block_header = get_latest_block_header(&client).await;
         let chain_proof_server_mock = start_chain_proof_server(latest_block_header).await;
 
         let server_config = call_server::ConfigBuilder::new(
             chain_proof_server_mock.url(),
-            CALL_GUEST_ELF.clone(),
-            CHAIN_GUEST_ELF.clone(),
+            call_guest_elf,
+            chain_guest_elf,
         )
-        .with_rpc_mappings([(self.anvil.chain_id(), self.anvil.endpoint())])
+        .with_rpc_mappings([(anvil.chain_id(), anvil.endpoint())])
         .with_proof_mode(ProofMode::Fake)
         .build();
-        let app = server(server_config);
+
+        Self {
+            server_config,
+            contract,
+
+            anvil,
+            chain_proof_server_mock,
+        }
+    }
+
+    pub(crate) async fn post<T: Serialize>(&self, url: &str, body: &T) -> Response<Body> {
+        let app = server(self.server_config.clone());
         post(app, url, body).await
     }
 }
