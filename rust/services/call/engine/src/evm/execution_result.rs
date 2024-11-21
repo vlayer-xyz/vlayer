@@ -74,7 +74,7 @@ mod successful_execution_result_try_from {
 
         #[test]
         fn return_() -> Result<(), TransactError> {
-            let result = success_result(SuccessReason::Return, &[1]);
+            let result = success_result(SuccessReason::Return, [1]);
             let successful_result = SuccessfulExecutionResult::try_from(result)?;
 
             assert_eq!(successful_result.output, &[1]);
@@ -84,7 +84,7 @@ mod successful_execution_result_try_from {
 
         #[test]
         fn stop() {
-            let result = success_result(SuccessReason::Stop, &[]);
+            let result = success_result(SuccessReason::Stop, []);
             let error = SuccessfulExecutionResult::try_from(result)
                 .unwrap_err()
                 .to_string();
