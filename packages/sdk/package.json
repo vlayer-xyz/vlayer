@@ -1,5 +1,6 @@
 {
   "name": "@vlayer/sdk",
+  "version": "0.0.0",
   "type": "module",
   "exports": {
     ".": {
@@ -15,12 +16,12 @@
       "types": "./dist/config/index.d.ts"
     }
   },
-  "version": "0.1.0",
   "scripts": {
     "build": "bun tsc && bun tsc-alias",
     "test:unit": "vitest --run",
     "gen:types": "sh ../../bash/build_ts_types.sh",
-    "replaceCommonsSymlink": "mv ./src/web-proof-commons ./src/web-proof-commons.bak && cp -r $(readlink -f ./src/web-proof-commons.bak) src/web-proof-commons && rm ./src/web-proof-commons.bak"
+    "replaceCommonsSymlink": "mv ./src/web-proof-commons ./src/web-proof-commons.bak && cp -r $(readlink -f ./src/web-proof-commons.bak) src/web-proof-commons && rm ./src/web-proof-commons.bak",
+    "postversion": "npm pkg set '_imageId'=$IMAGE_ID"
   },
   "devDependencies": {
     "@changesets/cli": "^2.27.7",
@@ -45,5 +46,6 @@
     "dist/",
     "package.json",
     "README.md"
-  ]
+  ],
+  "_imageId": "IMAGE_ID_PLACEHOLDER"
 }
