@@ -10,10 +10,7 @@ pub struct Versions {
     chain_guest_id: String,
 }
 
-#[derive(Deserialize, Serialize, Debug)]
-pub struct Params {}
-
-pub async fn v_versions(config: Arc<ServerConfig>, _: Params) -> Result<Versions, AppError> {
+pub async fn v_versions(config: Arc<ServerConfig>) -> Result<Versions, AppError> {
     Ok(Versions {
         call_guest_id: config.call_guest_id(),
         chain_guest_id: config.chain_guest_id(),

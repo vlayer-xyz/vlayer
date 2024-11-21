@@ -38,9 +38,9 @@ pub fn server(cfg: Config) -> Router {
     });
     jrpc_router.add_handler(
         "v_versions",
-        move |params| -> Pin<Box<dyn Future<Output = _> + Send>> {
+        move |_: ()| -> Pin<Box<dyn Future<Output = _> + Send>> {
             let config = config_.clone();
-            Box::pin(v_versions(config, params))
+            Box::pin(v_versions(config))
         },
     );
 
