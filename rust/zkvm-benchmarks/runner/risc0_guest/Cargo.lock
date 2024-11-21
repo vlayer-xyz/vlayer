@@ -847,6 +847,7 @@ dependencies = [
  "async-trait",
  "bincode",
  "block_header",
+ "bytes",
  "chain",
  "chain_client",
  "chain_common",
