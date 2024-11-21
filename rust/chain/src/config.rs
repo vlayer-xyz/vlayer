@@ -1,9 +1,8 @@
 //! Handling different blockchain specifications.
-use std::collections::HashMap;
+use std::collections::{HashMap, HashSet};
 
-use alloy_chains::Chain;
 use alloy_primitives::ChainId;
-use once_cell::sync::Lazy;
+use lazy_static::lazy_static;
 use serde::Deserialize;
 use toml::from_str;
 
@@ -13,48 +12,59 @@ use crate::spec::ChainSpec;
 pub const TEST_CHAIN_ID: ChainId = 31_337;
 
 // https://etherscan.io/block/15537394
-pub const MAINNET_MERGE_BLOCK_NUMBER: u64 = 15537394;
-pub const MAINNET_MERGE_BLOCK_TIMESTAMP: u64 = 1663224179;
+pub const MAINNET_MERGE_BLOCK_NUMBER: u64 = 15_537_394;
+pub const MAINNET_MERGE_BLOCK_TIMESTAMP: u64 = 1_663_224_179;
 
-pub static CHAIN_ID_TO_CHAIN_SPEC: Lazy<HashMap<ChainId, ChainSpec>> = Lazy::new(load_chain_specs);
+lazy_static! {
+    pub static ref CHAIN_ID_TO_CHAIN_SPEC: HashMap<ChainId, ChainSpec> =
+        chain_id_to_spec_map();
+
+    pub static ref CHAIN_NAME_TO_CHAIN_ID: HashMap<String, ChainId> =
+        chain_name_to_id_map();
+
+    static ref CHAIN_SPECS: ChainSpecs = {
+        // `include_str!` includes the file contents at compile time
+        let specs: ChainSpecs = from_str(include_str!("../chain_specs.toml"))
+            .expect("failed to parse chain specs");
+        specs.assert_no_duplicates();
+        specs
+    };
+}
 
 #[derive(Debug, Deserialize)]
 struct ChainSpecs {
     pub chains: Vec<ChainSpec>,
 }
 
-fn load_chain_specs() -> HashMap<ChainId, ChainSpec> {
-    // include_str! loads chain_specs in compilation time
-    let chain_specs: ChainSpecs =
-        from_str(include_str!("../chain_specs.toml")).expect("failed to parse chain specs");
-    let chain_specs_len = chain_specs.chains.len();
-    let chain_id_to_chain_spec: HashMap<ChainId, ChainSpec> = chain_specs
-        .chains
-        .into_iter()
-        .map(|chain| (*chain, chain))
-        .collect();
+impl ChainSpecs {
+    pub fn assert_no_duplicates(&self) {
+        let mut chain_ids = HashSet::new();
+        let mut chain_names = HashSet::new();
 
-    assert!(chain_specs_len == chain_id_to_chain_spec.len(), "duplicated chain specs",);
+        for chain in &self.chains {
+            if !chain_ids.insert(chain.id()) {
+                panic!("duplicate chain id: {}", chain.id());
+            }
 
-    chain_id_to_chain_spec
+            if !chain_names.insert(chain.name()) {
+                panic!("duplicate chain name: {}", chain.name());
+            }
+        }
+    }
 }
 
-pub static CHAIN_NAME_TO_ID: Lazy<HashMap<String, ChainId>> = Lazy::new(|| {
-    HashMap::from([
-        ("mainnet".into(), Chain::mainnet().id()),
-        ("sepolia".into(), Chain::sepolia().id()),
-        ("base".into(), Chain::base_mainnet().id()),
-        ("base-sepolia".into(), Chain::base_sepolia().id()),
-        ("optimism".into(), Chain::optimism_mainnet().id()),
-        ("optimism-sepolia".into(), Chain::optimism_sepolia().id()),
-        ("polygon".into(), 137),
-        ("polygon-amoy".into(), 80002),
-        ("arbitrum-one".into(), 42161),
-        ("arbitrum-nova".into(), 42170),
-        ("arbitrum-sepolia".into(), 421614),
-        ("zksync".into(), 324),
-        ("zksync-sepolia".into(), 300),
-        ("linea".into(), 59144),
-        ("linea-sepolia".into(), 59141),
-    ])
-});
+fn chain_id_to_spec_map() -> HashMap<ChainId, ChainSpec> {
+    CHAIN_SPECS
+        .chains
+        .iter()
+        .map(|chain| (chain.id(), chain.clone()))
+        .collect()
+}
+
+fn chain_name_to_id_map() -> HashMap<String, ChainId> {
+    CHAIN_SPECS
+        .chains
+        .iter()
+        .map(|chain| (chain.name().to_string(), chain.id()))
+        .collect()
+}

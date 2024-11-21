@@ -953,7 +953,7 @@ dependencies = [
  "anyhow",
  "delegate",
  "derive-new",
- "once_cell",
+ "lazy_static",
  "revm",
  "serde",
  "thiserror",
