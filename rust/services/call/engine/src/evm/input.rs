@@ -1,8 +1,4 @@
-use std::{
-    collections::HashMap,
-    iter::once,
-    sync::{Arc, RwLock},
-};
+use std::{collections::HashMap, iter::once};
 
 use alloy_primitives::{BlockHash, BlockNumber, Bytes, ChainId, B256};
 use block_header::{EvmBlockHeader, Hashable};
@@ -13,7 +9,7 @@ use mpt::MerkleTrie;
 use serde::{Deserialize, Serialize};
 use tracing::debug;
 
-use super::env::{cached::MultiEvmEnv, location::ExecutionLocation, EvmEnv};
+use super::env::location::ExecutionLocation;
 
 /// The serializable input to derive and validate a [EvmEnv].
 #[derive(Debug, Serialize, Deserialize, Clone)]
@@ -72,16 +68,6 @@ impl EvmInput {
     }
 }
 
-impl<D> From<EvmInput> for EvmEnv<D>
-where
-    D: From<EvmInput>,
-{
-    fn from(input: EvmInput) -> Self {
-        let header = input.header.clone();
-        EvmEnv::new(D::from(input), header)
-    }
-}
-
 #[derive(Debug, Default, Serialize, Deserialize, Clone, From, Into, IntoIterator, new)]
 pub struct MultiEvmInput {
     pub inputs: HashMap<ExecutionLocation, EvmInput>,
@@ -123,23 +109,6 @@ impl FromIterator<(ExecutionLocation, EvmInput)> for MultiEvmInput {
     fn from_iter<I: IntoIterator<Item = (ExecutionLocation, EvmInput)>>(iter: I) -> Self {
         let inputs = iter.into_iter().collect();
         Self { inputs }
-    }
-}
-
-impl<D> From<MultiEvmInput> for MultiEvmEnv<D>
-where
-    D: From<EvmInput>,
-{
-    fn from(input: MultiEvmInput) -> Self {
-        RwLock::new(
-            input
-                .into_iter()
-                .map(|(location, input)| {
-                    let chain_spec = &location.chain_id.try_into().expect("cannot get chain spec");
-                    (location, Arc::new(EvmEnv::from(input).with_chain_spec(chain_spec).unwrap()))
-                })
-                .collect(),
-        )
     }
 }
 
