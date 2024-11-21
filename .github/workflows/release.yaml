@@ -76,7 +76,7 @@ jobs:
       run:
         working-directory: rust
     name: Release nightly for ${{ matrix.target }}
-    needs: [build-guest-wrapper]
+    needs: [ build-guest-wrapper ]
     runs-on: ${{ matrix.runner }}
     outputs:
       vlayer_build: ${{ steps.vlayer_build.outputs.vlayer_build }}
@@ -178,22 +178,18 @@ jobs:
           export RISC0_EXISTING_CALL_GUEST="$(pwd)/call_guest_replacement"
           nix develop ../.github/nix/. --command bash -c "cargo build --release -p cli"
 
-      - name: "Print build version"
+      - name: "Print build version and image ID"
         id: vlayer_build
         if: matrix.runner == 'aws-linux-medium' && matrix.target == 'x86_64-unknown-linux-gnu' # Run on any single aws-linux-medium instance
         env:
           VLAYER_RELEASE: "nightly"
         run: |
-          BUILD=$(./target/${{ matrix.target }}/release/vlayer --version | awk '/vlayer/ {print $2}')
+          VLAYER_VERSION_OUTPUT=$(./target/${{ matrix.target }}/release/vlayer --version)
+          
+          BUILD=$(echo $VLAYER_VERSION_OUTPUT | awk '/vlayer/ {print $2}')
           echo "vlayer_build=${BUILD}" | tee -a ${GITHUB_OUTPUT}
-
-      - name: "Print image ID"
-        id: image_id
-        if: matrix.runner == 'aws-linux-medium' && matrix.target == 'x86_64-unknown-linux-gnu' # Run on any single aws-linux-medium instance
-        env:
-          VLAYER_RELEASE: "nightly"
-        run: |
-          IMAGE_ID=$(./target/${{ matrix.target }}/release/vlayer --version | awk '/CALL_GUEST_ID:/ {print $2}')
+          
+          IMAGE_ID=$(echo $VLAYER_VERSION_OUTPUT | awk '/CALL_GUEST_ID:/ {print $2}')
           echo "image_id=${IMAGE_ID}" | tee -a ${GITHUB_OUTPUT}
 
       - name: Package release
@@ -241,7 +237,7 @@ jobs:
 
   build-extension:
     name: Build browser extension
-    needs: [build-release]
+    needs: [ build-release ]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -273,7 +269,7 @@ jobs:
 
   push-contracts:
     name: Push vlayer contracts
-    needs: [build-release]
+    needs: [ build-release ]
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
@@ -327,7 +323,7 @@ jobs:
   create-release:
     name: Create GH releases
     runs-on: aws-linux-small
-    needs: [build-examples, build-extension, push-contracts]
+    needs: [ build-examples, build-extension, push-contracts ]
     steps:
       - run: mkdir -p dist
       - uses: actions/download-artifact@v4
@@ -353,7 +349,7 @@ jobs:
   push-artifacts-to-s3:
     name: Push artifacts to AWS S3
     runs-on: ubuntu-latest
-    needs: [build-release, build-examples, build-extension, push-contracts]
+    needs: [ build-release, build-examples, build-extension, push-contracts ]
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
@@ -407,7 +403,7 @@ jobs:
 
   publish-sdk-to-npm:
     name: Publish SDK to NPM
-    needs: [build-release, build-examples, build-extension, push-contracts]
+    needs: [ build-release, build-examples, build-extension, push-contracts ]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
@@ -442,7 +438,7 @@ jobs:
 
   push-docker-image:
     name: Push docker image to github registry
-    needs: [build-release, push-artifacts-to-s3]
+    needs: [ build-release, push-artifacts-to-s3 ]
     runs-on: ubuntu-latest
     permissions:
       contents: read
