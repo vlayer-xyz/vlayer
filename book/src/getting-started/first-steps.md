@@ -16,10 +16,21 @@ cd ./your-project && vlayer init --existing
 ```
 
 ### Example project
-To initialize vlayer project with example prover and verifier contracts use `--template` flag:
+
+To initialize a vlayer project with example prover and verifier contracts, use the `--template` flag as shown below:
+
 ```bash
 vlayer init simple --template simple
-``` 
+```
+
+The following templates are available for quick project setup:
+
+- `simple`: Prove an ERC20 token balance at a specific block number.
+- `simple-email`: Mint an NFT to the owner of an email address from a specific domain.
+- `simple-teleport`: Prove a cross-chain ERC20 token balance.
+- `simple-time-travel`: Prove the average ERC20 token balance across multiple block numbers.
+- `web-proof`: Mint an NFT to the owner of a specific X/Twitter handle using Web Proofs.
+- `email-proof`: Link an email address to a wallet address by verifying the email subject.
 
 ## Directory structure
 The vlayer directory structure resembles a typical Foundry project but with two additional folders: `src/vlayer` and `vlayer`.
