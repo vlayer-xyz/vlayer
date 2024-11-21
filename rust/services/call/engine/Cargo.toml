@@ -16,6 +16,7 @@ anyhow = { workspace = true }
 async-trait = { workspace = true }
 bincode = { workspace = true }
 block_header = { workspace = true }
+bytes = { workspace = true }
 chain = { workspace = true }
 chain_client = { workspace = true }
 chain_common = { workspace = true }
