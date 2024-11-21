@@ -20,9 +20,9 @@ function cleanup() {
     echo "Cleaning up..."
     
     # Kill Anvil if running
-    if [[ -n "${ANVIL_PID:-}" ]] && ps -p "$ANVIL_PID" > /dev/null; then
-        echo "Killing anvil (PID $ANVIL_PID)..."
-        kill "$ANVIL_PID"
+    if [[ -n "${ANVIL_PID:-}" ]] && ps -p "${ANVIL_PID}" > /dev/null; then
+        echo "Killing anvil (PID ${ANVIL_PID})..."
+        kill "${ANVIL_PID}"
     fi
 
     # Kill chain worker if running
@@ -38,9 +38,9 @@ function cleanup() {
     fi
 
     # Kill vlayer server if running
-    if [[ -n "${VLAYER_SERVER_PID:-}" ]] && ps -p "$VLAYER_SERVER_PID" > /dev/null; then
-        echo "Killing vlayer server (PID $VLAYER_SERVER_PID)..."
-        kill "$VLAYER_SERVER_PID"
+    if [[ -n "${VLAYER_SERVER_PID:-}" ]] && ps -p "${VLAYER_SERVER_PID}" > /dev/null; then
+        echo "Killing vlayer server (PID ${VLAYER_SERVER_PID})..."
+        kill "${VLAYER_SERVER_PID}"
     fi
 }
 
