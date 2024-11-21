@@ -1,7 +1,6 @@
-# eth_mainnet
 [[chains]]
-id = 1
 name = "mainnet"
+id = 1
 forks = [
   { spec = "FRONTIER", activation = { Block = 0 } },
   { spec = "HOMESTEAD", activation = { Block = 1150000 } },
@@ -21,22 +20,20 @@ forks = [
   { spec = "CANCUN", activation = { Timestamp = 1710338135 } }
 ]
 
-# eth_sepolia
 # https://github.com/ethereum/execution-specs/tree/5e8aeb3e5b4ba6d2ff2308b1ab9625ef0c38a4f6/network-upgrades/mainnet-upgrades
 [[chains]]
-id = 11155111
 name = "sepolia"
+id = 11155111
 forks = [
   { spec = "MERGE", activation = { Block = 0 } },
   { spec = "SHANGHAI", activation = { Timestamp = 1677557088 } },
   { spec = "CANCUN", activation = { Timestamp = 1706655072 } }
 ]
 
-# base_mainnet
 # https://github.com/base-org/optimism/blob/f5221f4d1fae6f3da1bd4d1647e45f40e2b055c4/op-node/chaincfg/chains_test.go#L37
 [[chains]]
-id = 8453
 name = "base"
+id = 8453
 forks = [
   { spec = "REGOLITH", activation = { Block = 0 } },
   { spec = "CANYON", activation = { Timestamp = 1704992401 } },
@@ -44,22 +41,20 @@ forks = [
   { spec = "FJORD", activation = { Timestamp = 1720627201 } },
 ]
 
-# base_sepolia
 # https://github.com/base-org/op-geth/blob/78436b6ae2a45a9c8449a9b0c93b062a37bd20da/core/forkid/forkid_test.go#L103
 [[chains]]
-id = 84532
 name = "base-sepolia"
+id = 84532
 forks = [
   { spec = "CANYON", activation = { Block = 0 } },
   { spec = "ECOTONE", activation = { Timestamp = 1706634000 } },
   { spec = "FJORD", activation = { Timestamp = 1715961600 } },
 ]
 
-# optimism_mainnet
 # https://docs.optimism.io/builders/node-operators/network-upgrades
 [[chains]]
-id = 10
 name = "optimism"
+id = 10
 forks = [
   { spec = "MERGE", activation = { Block = 0 } },
   { spec = "BEDROCK", activation = { Timestamp = 1686079703 } },
@@ -69,11 +64,10 @@ forks = [
   { spec = "GRANITE", activation = { Timestamp = 1726070401 } },
 ]
 
-# optimism_sepolia
 # https://github.com/ethereum-optimism/optimism/blob/8e0b89c116d0e294d9fb6e8c60a4bc70421b57d7/op-node/chaincfg/chains_test.go#L74
 [[chains]]
-id = 11155420
 name = "optimism-sepolia"
+id = 11155420
 forks = [
   { spec = "BEDROCK", activation = { Block = 0 } },
   { spec = "CANYON", activation = { Timestamp = 1699981200 } },
@@ -83,11 +77,10 @@ forks = [
   { spec = "HOLOCENE", activation = { Timestamp = 1732633200 } },
 ]
 
-# polygon_mainnet
 # https://github.com/maticnetwork/bor/blob/16268f6608d09d5b6d0cd0e43f5ec076c3b92616/internal/cli/server/chains/mainnet.go#L11
 [[chains]]
-id = 137
 name = "polygon"
+id = 137
 forks = [
   { spec = "PETERSBURG", activation = { Block = 0 } },
   { spec = "ISTANBUL", activation = { Block = 3395000 } },
@@ -98,11 +91,10 @@ forks = [
   { spec = "CANCUN", activation = { Block = 54876000 } },
 ]
 
-# polygon_amoy
 # https://github.com/maticnetwork/bor/blob/16268f6608d09d5b6d0cd0e43f5ec076c3b92616/internal/cli/server/chains/amoy.go#L11
 [[chains]]
-id = 80002
 name = "polygon-amoy"
+id = 80002
 forks = [
   { spec = "BERLIN", activation = { Block = 0 } },
   { spec = "SHANGHAI", activation = { Block = 73100 } },
@@ -111,69 +103,61 @@ forks = [
 
 # Time travel is not supported for arbitrum and zksync chains
 
-# arbitrum_one
 [[chains]]
-id = 42161
 name = "arbitrum-one"
+id = 42161
 forks = [
   { spec = "CANCUN", activation = { Timestamp = 1710338135 } }
 ]
 
-# arbitrum_nova
 [[chains]]
-id = 42170
 name = "arbitrum-nova"
+id = 42170
 forks = [
   { spec = "CANCUN", activation = { Timestamp = 1710338135 } }
 ]
 
-# arbitrum_sepolia
 [[chains]]
-id = 421614
 name = "arbitrum-sepolia"
+id = 421614
 forks = [
   { spec = "CANCUN", activation = { Timestamp = 1710338135 } }
 ]
 
-# zksync_mainnet
 [[chains]]
-id = 324
 name = "zksync"
+id = 324
 forks = [
   { spec = "CANCUN", activation = { Timestamp = 1710338135 } }
 ]
 
-# zksync_sepolia
 [[chains]]
-id = 300
 name = "zksync-sepolia"
+id = 300
 forks = [
   { spec = "CANCUN", activation = { Timestamp = 1710338135 } }
 ]
 
-# linea_mainnet
 # https://github.com/Consensys/linea-monorepo/blob/0615fa37b9f7aa42681a54bfc881e43914d9c0a1/docker/linea-mainnet/genesis.json
 [[chains]]
-id = 59144
 name = "linea"
+id = 59144
 forks = [
   { spec = "LONDON", activation = { Block = 0 } }
 ]
 
-# linea_sepolia
 # https://github.com/Consensys/linea-monorepo/blob/0615fa37b9f7aa42681a54bfc881e43914d9c0a1/docker/linea-sepolia/genesis.json#L3
 [[chains]]
-id = 59141
 name = "linea-sepolia"
+id = 59141
 forks = [
   { spec = "LONDON", activation = { Block = 0 } }
 ]
 
-# local testnet (hardhat/anvil)
 # unique chain id
 [[chains]]
-id = 31337
 name = "local-testnet"
+id = 31337
 forks = [
   { spec = "CANCUN", activation = { Block = 0 } }
 ]
