@@ -9,10 +9,10 @@ import {
 import { Config } from "./getConfig";
 import { privateKeyToAccount } from "viem/accounts";
 import { getChainConfirmations } from "./getChainConfirmations";
+import * as chains from "viem/chains";
 
-const getChainSpecs = async (chainName: string): Promise<Chain> => {
+const getChainSpecs = (chainName: string): Chain => {
   try {
-    const chains = await import("viem/chains");
     return chains[chainName as keyof typeof chains] as Chain;
   } catch {
     throw Error(`Cannot import ${chainName} from viem/chains`);
@@ -31,11 +31,8 @@ const createEthClient = (
     transport: transport || http(jsonRpcUrl),
   }).extend(publicActions);
 
-export const createContext = async (
-  config: Config,
-  transport?: CustomTransport,
-) => {
-  const chain = await getChainSpecs(config.chainName);
+export const createContext = (config: Config, transport?: CustomTransport) => {
+  const chain = getChainSpecs(config.chainName);
   const jsonRpcUrl = config.jsonRpcUrl ?? chain.rpcUrls.default.http[0];
 
   return {

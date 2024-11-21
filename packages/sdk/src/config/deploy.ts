@@ -9,7 +9,7 @@ export const waitForContractDeploy = async ({
 }: {
   hash: `0x${string}`;
 }): Promise<Address> => {
-  const { ethClient: client } = await createContext(getConfig());
+  const { ethClient: client } = createContext(getConfig());
   const receipt = await client.waitForTransactionReceipt({
     hash,
     confirmations: getChainConfirmations(client.chain?.name),
@@ -31,7 +31,7 @@ export const waitForTransactionReceipt = async ({
 }: {
   hash: `0x${string}`;
 }) => {
-  const { ethClient } = await createContext(getConfig());
+  const { ethClient } = createContext(getConfig());
   return ethClient.waitForTransactionReceipt({
     hash,
     confirmations: getChainConfirmations(ethClient.chain?.name),
@@ -53,7 +53,7 @@ export const deployVlayerContracts = async ({
 }) => {
   console.log("Starting contract deployment process...");
   const config = getConfig();
-  const { chain, ethClient, account } = await createContext(config);
+  const { chain, ethClient, account } = createContext(config);
 
   console.log("Deploying prover contract...");
   const proverHash = await ethClient.deployContract({
