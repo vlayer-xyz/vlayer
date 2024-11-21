@@ -2,6 +2,7 @@
 
 vlayer exposes one RPC endpoint under `/` with the following methods:
 - `v_call`
+- `v_versions`
 - `v_getProofReceipt`
 - `v_proveChain`
 
@@ -51,6 +52,28 @@ and the response:
     "result": {
         "id": "<proving_hash>",
         "result": "<abi encoded result of preflight execution>"
+    }
+}
+```
+
+## v_versions
+`v_versions` is the health check/versions endpoint
+
+```json
+{
+    "method": "v_versions",
+    "params": []
+}
+```
+
+and the response:
+
+```json
+{
+    "jsonrpc": "2.0",
+    "result": {
+        "call_guest_id": "0x8400c1983ee247ec835e565f924e13103b7a6557efd25f6b899bf9ed0c7ca491",
+        "chain_guest_id": "0x9b330c5fda07d640226342a91272a661b9e51ad6713427777720bc26489dbc75"
     }
 }
 ```
