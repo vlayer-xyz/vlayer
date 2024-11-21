@@ -16,7 +16,7 @@ impl ServerConfig {
 impl Default for ServerConfig {
     fn default() -> Self {
         Self {
-            listen_addr: "0.0.0.0:3000".parse().unwrap(),
+            listen_addr: "0.0.0.0:3001".parse().unwrap(),
         }
     }
 }
