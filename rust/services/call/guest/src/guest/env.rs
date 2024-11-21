@@ -37,29 +37,27 @@ pub fn assert_input_coherency(multi_evm_input: MultiEvmInput) -> VerifiedInput {
     VerifiedInput(multi_evm_input)
 }
 
-fn create_env_from_input(input: EvmInput) -> EvmEnv<GuestDb> {
+fn create_env(location: ExecutionLocation, input: EvmInput) -> Arc<EvmEnv<GuestDb>> {
+    let chain_spec = &location.chain_id.try_into().expect("cannot get chain spec");
     let header = input.header.clone();
+
     let mut db = CacheDB::new(WrapStateDb::from(input));
     seed_cache_db_with_trusted_data(&mut db);
-    EvmEnv::new(db, header)
+
+    let env = EvmEnv::new(db, header)
+        .with_chain_spec(chain_spec)
+        .expect("failed to set chain spec");
+
+    #[allow(clippy::arc_with_non_send_sync)]
+    Arc::new(env)
 }
 
 fn create_envs_from_input(input: MultiEvmInput) -> MultiEvmEnv<GuestDb> {
-    RwLock::new(
-        input
-            .into_iter()
-            .map(|(location, input)| {
-                let chain_spec = &location.chain_id.try_into().expect("cannot get chain spec");
-                #[allow(clippy::arc_with_non_send_sync)]
-                let input = Arc::new(
-                    create_env_from_input(input)
-                        .with_chain_spec(chain_spec)
-                        .unwrap(),
-                );
-                (location, input)
-            })
-            .collect(),
-    )
+    let env_map = input
+        .into_iter()
+        .map(|(location, input)| (location, create_env(location, input)))
+        .collect();
+    RwLock::new(env_map)
 }
 
 pub struct VerifiedEnv {
