@@ -1,6 +1,7 @@
 {
   "extends": "../tsconfig.base.json",
   "compilerOptions": {
+    "composite": true,
     "jsx": "react",
     "useDefineForClassFields": true,
     "lib": ["ESNext", "DOM"],

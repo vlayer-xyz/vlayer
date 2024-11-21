@@ -11,10 +11,7 @@
     "build:playwright": "vite build --watch --mode test",
     "build:watch": "vite build --watch --mode development",
     "lint:fix": "eslint --fix src",
-    "deploy_test_contracts": "cd ../../contracts/fixtures && forge create src/vlayer/UnconditionalProver.sol:UnconditionalProver --private-key=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
-    "test:unit": "vitest --run",
-    "test:headed": "bun run deploy_test_contracts && TEST_MODE=headed bunx playwright test --ui",
-    "test:headless": "bun run deploy_test_contracts && TEST_MODE=headless bunx playwright test"
+    "test:unit": "vitest --run"
   },
   "devDependencies": {
     "@playwright/test": "^1.48.0",
