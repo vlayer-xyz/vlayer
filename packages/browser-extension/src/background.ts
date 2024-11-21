@@ -11,16 +11,21 @@ import { WebProverSessionContextManager } from "./state/webProverSessionContext"
 import { match, P } from "ts-pattern";
 import { zkProvingStatusStore } from "./state/zkProvingStatusStore.ts";
 
-let windowId = 0;
 let port: browser.Runtime.Port | undefined = undefined;
 let openedTabId: number | undefined = undefined;
 
-browser.runtime.onInstalled.addListener((details) => {
-  console.log("Extension installed:", details);
-});
-
 browser.runtime.onConnectExternal.addListener((connectedPort) => {
   port = connectedPort;
+  port.onMessage.addListener((message: MessageToExtension) => {
+    match(message)
+      .with({ action: ExtensionAction.RequestWebProof }, (msg) => {
+        void handleProofRequest(msg, connectedPort.sender);
+      })
+      .with({ action: ExtensionAction.NotifyZkProvingStatus }, (msg) => {
+        void handleProvingStatusNotification(msg);
+      })
+      .exhaustive();
+  });
 });
 
 browser.runtime.onMessage.addListener(async (message: ExtensionMessage) => {
@@ -47,37 +52,53 @@ browser.runtime.onMessage.addListener(async (message: ExtensionMessage) => {
       }
       await browser.tabs.update(port?.sender?.tab?.id, { active: true });
     })
-    .with({ type: ExtensionMessageType.TabOpened }, ({ tabId }) => {
-      openedTabId = tabId;
+    .with({ type: ExtensionMessageType.TabOpened }, ({ payload }) => {
+      openedTabId = payload.tabId;
+    })
+    .with({ type: ExtensionMessageType.ProofProcessing }, () => {
+      port?.postMessage({
+        type: ExtensionMessageType.ProofProcessing,
+        payload: {},
+      });
     })
     .exhaustive();
 });
 
-browser.tabs.onActivated.addListener(function (activeInfo) {
-  windowId = activeInfo.windowId;
-});
+browser.runtime.onMessageExternal.addListener(
+  (message: MessageToExtension, sender) => {
+    return match(message)
+      .with({ action: ExtensionAction.RequestWebProof }, (msg) =>
+        handleProofRequest(msg, sender),
+      )
+      .with({ action: ExtensionAction.NotifyZkProvingStatus }, (msg) =>
+        handleProvingStatusNotification(msg),
+      )
+      .exhaustive();
+  },
+);
 
-browser.tabs
-  .query({ active: true, currentWindow: true })
-  .then((tabs) => {
-    windowId = tabs[0].windowId || 0;
-  })
-  .catch(console.error);
+const handleProofRequest = async (
+  message: Extract<
+    MessageToExtension,
+    { action: ExtensionAction.RequestWebProof }
+  >,
+  sender?: browser.Runtime.MessageSender,
+) => {
+  if (chrome.sidePanel && sender?.tab?.windowId) {
+    await chrome.sidePanel.open({ windowId: sender.tab?.windowId });
+  }
+  await browser.storage.local.clear();
+  await browser.storage.session.clear();
+  await WebProverSessionContextManager.instance.setWebProverSessionConfig(
+    message.payload,
+  );
+};
 
-browser.runtime.onMessageExternal.addListener((message: MessageToExtension) => {
-  (async () => {
-    if (message.action === ExtensionAction.RequestWebProof) {
-      if (chrome.sidePanel) {
-        await chrome.sidePanel.open({ windowId: windowId });
-      }
-      await browser.storage.local.clear();
-      await browser.storage.session.clear();
-      await WebProverSessionContextManager.instance.setWebProverSessionConfig(
-        message.payload,
-      );
-    } else if (message.action === ExtensionAction.NotifyZkProvingStatus) {
-      console.log("Received proving status", message.payload);
-      await zkProvingStatusStore.setProvingStatus(message.payload);
-    }
-  })().catch(console.error);
-});
+const handleProvingStatusNotification = async (
+  message: Extract<
+    MessageToExtension,
+    { action: ExtensionAction.NotifyZkProvingStatus }
+  >,
+) => {
+  await zkProvingStatusStore.setProvingStatus(message.payload);
+};

@@ -9,7 +9,9 @@ export const pageByUrlRegex = (
 
 export const sidePanel = async (context: BrowserContext) => {
   let [background] = context.serviceWorkers();
-  if (!background) background = await context.waitForEvent("serviceworker");
+  if (!background) {
+    background = await context.waitForEvent("serviceworker");
+  }
   const extensionId = background.url().split("/")[2];
   const regex = new RegExp(`.*${extensionId}.*`);
   const sidepanel = pageByUrlRegex(context, regex);

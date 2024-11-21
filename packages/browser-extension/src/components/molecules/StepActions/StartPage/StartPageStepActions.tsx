@@ -20,7 +20,9 @@ const openApp = async (link: string): Promise<void> => {
   });
   await sendMessageToServiceWorker({
     type: ExtensionMessageType.TabOpened,
-    tabId: tab.id!,
+    payload: {
+      tabId: tab.id!,
+    },
   });
 };
 

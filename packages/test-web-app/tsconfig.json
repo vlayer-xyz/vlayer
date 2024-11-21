@@ -12,6 +12,7 @@
   },
   "include": [
     "../../../contracts/vlayer/**/*.ts",
+    "../../../contracts/fixtures/out/UnconditionalProver.sol/UnconditionalProver.ts",
     "./src/**/*.ts",
     "./src/**/*.tsx"
   ]
