@@ -4,14 +4,15 @@ use serde_json::json;
 mod test_helpers;
 
 use server_utils::{body_to_json, body_to_string};
-use test_helpers::TestHelper;
 
 mod server_tests {
+    use test_helpers::create_test_helper_without_guests;
+
     use super::*;
 
     #[tokio::test]
     async fn http_not_found() {
-        let helper = TestHelper::create().await;
+        let helper = create_test_helper_without_guests().await;
         let response = helper.post("/non_existent_http_path", &()).await;
 
         assert_eq!(StatusCode::NOT_FOUND, response.status());
@@ -20,7 +21,7 @@ mod server_tests {
 
     #[tokio::test]
     async fn json_rpc_not_found() {
-        let helper = TestHelper::create().await;
+        let helper = create_test_helper_without_guests().await;
 
         let req = json!({
             "method": "non_existent_json_rpc_method",
@@ -52,6 +53,7 @@ mod server_tests {
             types::{Uint8, U256},
         };
         use server_utils::function_selector;
+        use test_helpers::create_test_helper;
         use web_proof::fixtures::{load_web_proof_fixture, NOTARY_PUB_KEY_PEM_EXAMPLE};
 
         use super::*;
@@ -59,7 +61,7 @@ mod server_tests {
 
         #[tokio::test]
         async fn field_validation_error() {
-            let helper = TestHelper::create().await;
+            let helper = create_test_helper_without_guests().await;
 
             let req = json!({
                 "method": "v_call",
@@ -93,7 +95,7 @@ mod server_tests {
 
         #[tokio::test(flavor = "multi_thread")]
         async fn success_simple_contract_call() {
-            let helper = TestHelper::create().await;
+            let helper = create_test_helper().await;
             let call_data = helper
                 .contract
                 .sum(U256::from(1), U256::from(2))
@@ -142,7 +144,7 @@ mod server_tests {
 
         #[tokio::test(flavor = "multi_thread")]
         async fn success_web_proof() {
-            let helper = TestHelper::create().await;
+            let helper = create_test_helper().await;
             let call_data = helper
                 .contract
                 .web_proof(WebProof {
