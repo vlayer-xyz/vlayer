@@ -79,8 +79,8 @@ jobs:
     needs: [build-guest-wrapper]
     runs-on: ${{ matrix.runner }}
     outputs:
-      vlayer_build: ${{ steps.vlayer_build.outputs.vlayer_build }}
-      image_id: ${{ steps.image_id.outputs.image_id }}
+      vlayer_build: ${{ steps.vlayer_version.outputs.vlayer_build }}
+      image_id: ${{ steps.vlayer_version.outputs.image_id }}
     strategy:
       matrix:
         include:
@@ -179,7 +179,7 @@ jobs:
           nix develop ../.github/nix/. --command bash -c "cargo build --release -p cli"
 
       - name: "Print build version and image ID"
-        id: vlayer_build
+        id: vlayer_version
         if: matrix.runner == 'aws-linux-medium' && matrix.target == 'x86_64-unknown-linux-gnu' # Run on any single aws-linux-medium instance
         env:
           VLAYER_RELEASE: "nightly"
