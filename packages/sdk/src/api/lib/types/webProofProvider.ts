@@ -9,14 +9,14 @@ import {
   ZkProvingStatus,
 } from "../../../web-proof-commons";
 
-export type WebProofSetupInput = {
+export type WebProofRequestInput = {
   logoUrl: string;
   steps: WebProofStep[];
   notaryPubKey?: string;
 };
 
-export type WebProofSetup = Branded<
-  WebProofSetupInput & {
+export type WebProofRequest = Branded<
+  WebProofRequestInput & {
     isWebProof: true;
   },
   "webProof"
@@ -38,7 +38,7 @@ export type GetWebProofArgs<
   F extends ContractFunctionName<T>,
 > = {
   proverCallCommitment: ProverCallCommitment<T, F>;
-} & WebProofSetupInput;
+} & WebProofRequestInput;
 
 export type WebProofProvider = {
   getWebProof: <T extends Abi, F extends ContractFunctionName<T>>(

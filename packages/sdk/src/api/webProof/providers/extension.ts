@@ -1,7 +1,7 @@
 import {
   type WebProofProvider,
   type WebProofProviderSetup,
-  type WebProofSetupInput,
+  type WebProofRequestInput,
 } from "../../lib/types/webProofProvider";
 
 import {

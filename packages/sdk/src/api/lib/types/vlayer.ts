@@ -8,7 +8,7 @@ import {
   ContractFunctionReturnType,
   Hex,
 } from "viem";
-import { WebProofSetup } from "./webProofProvider";
+import { WebProofRequest } from "./webProofProvider";
 import { ContractFunctionArgsWithout } from "./viem";
 
 type Calldata = string;
@@ -71,7 +71,7 @@ export type VlayerClient = {
     functionName: F;
     chainId: number;
     args: [
-      WebProofSetup,
+      WebProofRequest,
       ...ContractFunctionArgsWithout<T, F, { name: "webProof" }>,
     ];
   }) => Promise<BrandedHash<T, F>>;
