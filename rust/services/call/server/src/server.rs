@@ -7,7 +7,10 @@ use tokio::net::TcpListener;
 use tower_http::cors::CorsLayer;
 use tracing::info;
 
-use crate::{config::Config, handlers::v_call::v_call};
+use crate::{
+    config::Config,
+    handlers::{v_call::v_call, v_versions::v_versions},
+};
 
 pub async fn serve(config: Config) -> anyhow::Result<()> {
     let listener = TcpListener::bind(config.socket_addr()).await?;
@@ -25,13 +28,21 @@ async fn handle_jrpc(
     router.handle_request(request).await
 }
 
-pub fn server(config: Config) -> Router {
-    let config = Arc::new(config);
+pub fn server(cfg: Config) -> Router {
+    let config = Arc::new(cfg);
+    let config_ = config.clone();
     let mut jrpc_router = server_utils::Router::default();
     jrpc_router.add_handler("v_call", move |params| -> Pin<Box<dyn Future<Output = _> + Send>> {
         let config = config.clone();
         Box::pin(async move { v_call(config, params).await.map(|x| x.to_json()) })
     });
+    jrpc_router.add_handler(
+        "v_versions",
+        move |params| -> Pin<Box<dyn Future<Output = _> + Send>> {
+            let config = config_.clone();
+            Box::pin(async move { v_versions(config, params).await })
+        },
+    );
 
     //TODO: Lets decide do we need strict CORS policy or not and update this eventually
     let cors = CorsLayer::permissive();
