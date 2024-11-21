@@ -58,7 +58,7 @@ mod server_tests {
         use crate::test_helpers::WebProof;
 
         #[tokio::test]
-        async fn field_validation_error() {
+        async fn to_field_validation_error() {
             let helper = TestHelper::create().await;
 
             let req = json!({
@@ -69,8 +69,12 @@ mod server_tests {
                         "data": helper.contract.sum(U256::from(1), U256::from(2)).calldata().unwrap()
                     },
                     {
+                        "client_version": {
+                            "version": "0.1.0",
+                            "image_id": "0xdeadbeef"
+                        }
                     }
-                    ],
+                ],
                 "id": 1,
                 "jsonrpc": "2.0",
             });
@@ -84,6 +88,40 @@ mod server_tests {
                     "error": {
                         "code": -32602,
                         "message": "Invalid field: `to` Odd number of digits `I am not a valid address!`",
+                        "data": null
+                    }
+                }),
+                body_to_json(response.into_body()).await
+            );
+        }
+
+        #[tokio::test]
+        async fn client_version_missing_validation_error() {
+            let helper = TestHelper::create().await;
+
+            let req = json!({
+                "method": "v_call",
+                "params": [
+                    {
+                        "to": helper.contract.address(),
+                        "data": helper.contract.sum(U256::from(1), U256::from(2)).calldata().unwrap()
+                    },
+                    {
+                    }
+                ],
+                "id": 1,
+                "jsonrpc": "2.0",
+            });
+            let response = helper.post("/", &req).await;
+
+            assert_eq!(StatusCode::OK, response.status());
+            assert_eq!(
+                json!({
+                    "jsonrpc": "2.0",
+                    "id": 1,
+                    "error": {
+                        "code": -32602,
+                        "message": "missing field `client_version`",
                         "data": null
                     }
                 }),
@@ -108,9 +146,13 @@ mod server_tests {
                         "data": call_data
                     },
                     {
-                        "chain_id": 11155111
+                        "chain_id": 11155111,
+                        "client_version": {
+                            "version": "0.1.0",
+                            "image_id": "0xdeadbeef"
+                        }
                     }
-                    ],
+                ],
                 "id": 1,
                 "jsonrpc": "2.0",
             });
@@ -163,9 +205,13 @@ mod server_tests {
                         "data": call_data
                     },
                     {
-                        "chain_id": 11155111
+                        "chain_id": 11155111,
+                        "client_version": {
+                            "version": "0.1.0",
+                            "image_id": "0xdeadbeef"
+                        }
                     }
-                    ],
+                ],
                 "id": 1,
                 "jsonrpc": "2.0",
             });

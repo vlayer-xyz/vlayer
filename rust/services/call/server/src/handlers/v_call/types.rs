@@ -33,6 +33,13 @@ fn mainnet_chain_id() -> ChainId {
 
 #[derive(Deserialize, Serialize, Debug)]
 #[serde(deny_unknown_fields)]
+pub struct ClientVersion {
+    version: String,
+    image_id: String,
+}
+
+#[derive(Deserialize, Serialize, Debug)]
+#[serde(deny_unknown_fields)]
 pub struct CallContext {
     #[serde(default = "mainnet_chain_id")]
     pub chain_id: ChainId,

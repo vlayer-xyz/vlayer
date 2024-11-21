@@ -18,6 +18,10 @@ export type CallParams = {
 
 export type CallContext = {
   chain_id: number; // 31337
+  client_version: {
+    image_id: string;
+    version: string;
+  };
 };
 
 export type BrandedHash<T, F> = Branded<{ hash: string }, [T, F]>;
