@@ -179,7 +179,6 @@ fi
 if [[ -z "${ALCHEMY_API_KEY:-}" ]] ; then
     echo ALCHEMY_API_KEY is not configured. Using only local rpc-urls. >&2
 else 
-    RUN_CHAIN_SERVICES="${RUN_CHAIN_SERVICES:-1}"
     CHAIN_WORKER_RPC_URL="https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}"
 
     EXTERNAL_RPC_URLS=(
