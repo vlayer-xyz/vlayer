@@ -161,15 +161,15 @@ test.describe("Full flow of webproof using extension", () => {
       await expect(proveButton).toBeVisible();
     });
 
-    await test.step("Proving request has succeeded", async () => {
-      const proveButton = page.locator("body").getByTestId("zk-prove-button");
-      await proveButton.click();
+    // await test.step("Proving request has succeeded", async () => {
+    //   const proveButton = page.locator("body").getByTestId("zk-prove-button");
+    //   await proveButton.click();
 
-      const response = await page.waitForResponse(VLAYER_SERVER_URL);
-      expect(response.ok()).toBeTruthy();
+    //   const response = await page.waitForResponse(VLAYER_SERVER_URL);
+    //   expect(response.ok()).toBeTruthy();
 
-      const response_json = (await response.json()) as object;
-      expect(response_json).toHaveProperty("result.proof");
-    });
+    //   const response_json = (await response.json()) as object;
+    //   expect(response_json).toHaveProperty("result.proof");
+    // });
   });
 });

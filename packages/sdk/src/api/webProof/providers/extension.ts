@@ -80,6 +80,7 @@ class ExtensionWebProofProvider implements WebProofProvider {
     messageType: T,
     listener: (args: Extract<ExtensionMessage, { type: T }>) => void,
   ) {
+    this.connectToExtension();
     if (!this.listeners[messageType]) {
       this.listeners[messageType] = [];
     }
