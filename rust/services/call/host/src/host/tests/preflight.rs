@@ -12,7 +12,7 @@ mod usdt {
     use super::*;
     use crate::test_harness::contracts::{IERC20::balanceOfCall, USDT, USDT_BLOCK_NO};
 
-    #[tokio::test]
+    #[tokio::test(flavor = "multi_thread")]
     async fn erc20_balance_of() -> anyhow::Result<()> {
         let location: ExecutionLocation = (Chain::mainnet().id(), USDT_BLOCK_NO).into();
         let binance_8 = address!("F977814e90dA44bFA03b6295A0616a897441aceC");
@@ -30,7 +30,7 @@ mod uniswap {
         UNISWAP,
     };
 
-    #[tokio::test]
+    #[tokio::test(flavor = "multi_thread")]
     async fn factory_owner() -> anyhow::Result<()> {
         let location: ExecutionLocation = (Chain::mainnet().id(), BlockTag::Latest).into();
         let call = Call::new(UNISWAP, &ownerCall {});
@@ -57,7 +57,7 @@ mod view {
         static ref LOCATION: ExecutionLocation = (Chain::sepolia().id(), BlockTag::Latest).into();
     }
 
-    #[tokio::test]
+    #[tokio::test(flavor = "multi_thread")]
     async fn precompile() -> anyhow::Result<()> {
         let call = Call::new(VIEW_CALL, &testPrecompileCall {});
         let result = preflight::<testPrecompileCall>("view_precompile", call, &LOCATION).await?;
@@ -68,7 +68,7 @@ mod view {
         Ok(())
     }
 
-    #[tokio::test]
+    #[tokio::test(flavor = "multi_thread")]
     async fn nonexistent_account() -> anyhow::Result<()> {
         let sol_call = testNonexistentAccountCall {};
         let call = Call {
@@ -82,7 +82,7 @@ mod view {
         Ok(())
     }
 
-    #[tokio::test]
+    #[tokio::test(flavor = "multi_thread")]
     async fn eoa_account() -> anyhow::Result<()> {
         let call = Call::new(VIEW_CALL, &testEoaAccountCall {});
         let result = preflight::<testEoaAccountCall>("view_eoa_account", call, &LOCATION).await?;
@@ -90,7 +90,7 @@ mod view {
         Ok(())
     }
 
-    #[tokio::test]
+    #[tokio::test(flavor = "multi_thread")]
     async fn blockhash() -> anyhow::Result<()> {
         let call = Call::new(VIEW_CALL, &testBlockhashCall {});
         let result = preflight::<testBlockhashCall>(
@@ -106,7 +106,7 @@ mod view {
         Ok(())
     }
 
-    #[tokio::test]
+    #[tokio::test(flavor = "multi_thread")]
     async fn chainid() -> anyhow::Result<()> {
         let call = Call::new(VIEW_CALL, &testChainidCall {});
         let result = preflight::<testChainidCall>("view_chainid", call, &LOCATION).await?;
@@ -114,7 +114,7 @@ mod view {
         Ok(())
     }
 
-    #[tokio::test]
+    #[tokio::test(flavor = "multi_thread")]
     async fn multi_contract_calls() -> anyhow::Result<()> {
         let call = Call::new(VIEW_CALL, &testMuliContractCallsCall {});
         let result =
@@ -124,7 +124,7 @@ mod view {
         Ok(())
     }
 
-    #[tokio::test]
+    #[tokio::test(flavor = "multi_thread")]
     async fn call_eoa() -> anyhow::Result<()> {
         let vitalik = address!("d8dA6BF26964aF9D7eEd9e03E53415D37aA96045");
         let call = Call::new(vitalik, &testEoaAccountCall {});
@@ -143,7 +143,7 @@ mod teleport {
         SimpleTravelProver::crossChainBalanceOfCall, BLOCK_NO, SIMPLE_TELEPORT,
     };
 
-    #[tokio::test]
+    #[tokio::test(flavor = "multi_thread")]
     async fn teleport_to_unknown_chain_returns_an_error_but_does_not_panic() -> anyhow::Result<()> {
         let location: ExecutionLocation = (AnvilHardhat, BLOCK_NO).into();
         let owner = Address::ZERO;
@@ -168,7 +168,7 @@ mod time_travel {
         AVERAGE_BALANCE_OF_CALL, SIMPLE_TIME_TRAVEL,
     };
 
-    #[tokio::test]
+    #[tokio::test(flavor = "multi_thread")]
     #[ignore = "Fails due to chain proofs issue"]
     async fn time_travel() -> anyhow::Result<()> {
         let location: ExecutionLocation = (Chain::optimism_sepolia().id(), BlockTag::Latest).into();
