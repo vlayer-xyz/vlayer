@@ -57,18 +57,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "alloy-chains"
-version = "0.1.42"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "dca4a1469a3e572e9ba362920ff145f5d0a00a3e71a64ddcb4a3659cf64c76a7"
-dependencies = [
- "alloy-primitives",
- "num_enum",
- "serde",
- "strum",
-]
-
-[[package]]
 name = "alloy-dyn-abi"
 version = "0.8.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -854,46 +842,51 @@ dependencies = [
  "bincode",
  "block_header",
  "bytes",
+ "call_precompiles",
  "chain",
  "chain_client",
  "chain_common",
  "common",
  "derive-new",
  "derive_more",
- "email_proof",
  "itertools 0.13.0",
  "mpt",
  "once_cell",
- "regex",
  "revm",
  "risc0-zkp",
  "risc0-zkvm",
  "serde",
- "serde_json",
  "static_assertions",
  "thiserror",
  "tracing",
- "web_proof",
 ]
 
 [[package]]
 name = "call_guest"
 version = "0.1.0"
 dependencies = [
- "alloy-chains",
  "alloy-primitives",
  "alloy-rlp",
  "alloy-rlp-derive",
- "anyhow",
- "as-any",
  "block_header",
  "call_engine",
- "chain",
  "chain_client",
- "chain_common",
  "mpt",
  "revm",
  "risc0-zkvm",
+]
+
+[[package]]
+name = "call_precompiles"
+version = "0.1.0"
+dependencies = [
+ "alloy-primitives",
+ "alloy-sol-types",
+ "email_proof",
+ "regex",
+ "revm",
+ "serde_json",
+ "web_proof",
 ]
 
 [[package]]
@@ -950,10 +943,8 @@ checksum = "613afe47fcd5fac7ccf1db93babcb082c5994d996f20b8b159f2ad1658eb5724"
 name = "chain"
 version = "0.1.0"
 dependencies = [
- "alloy-chains",
  "alloy-primitives",
  "anyhow",
- "delegate",
  "derive-new",
  "lazy_static",
  "revm",
@@ -989,7 +980,6 @@ dependencies = [
  "risc0-zkp",
  "risc0-zkvm",
  "serde",
- "serde_json",
  "serde_with",
  "thiserror",
 ]
@@ -1286,17 +1276,6 @@ name = "data-encoding"
 version = "2.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e8566979429cf69b49a5c740c60791108e86440e8be149bbea4fe54d2c32d6e2"
-
-[[package]]
-name = "delegate"
-version = "0.13.1"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "bc2323e10c92e1cf4d86e11538512e6dc03ceb586842970b6332af3d4046a046"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.85",
-]
 
 [[package]]
 name = "der"
@@ -2521,26 +2500,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "num_enum"
-version = "0.7.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4e613fc340b2220f734a8595782c551f1250e969d87d3be1ae0579e8d4065179"
-dependencies = [
- "num_enum_derive",
-]
-
-[[package]]
-name = "num_enum_derive"
-version = "0.7.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "af1844ef2428cc3e1cb900be36181049ef3d3193c63e43026cfe202983b27a56"
-dependencies = [
- "proc-macro2",
- "quote",
- "syn 2.0.85",
-]
-
-[[package]]
 name = "nybbles"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3568,12 +3527,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "rustversion"
-version = "1.0.17"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "955d28af4278de8121b7ebeb796b6a45735dc01436d898801014aced2773a3d6"
-
-[[package]]
 name = "rusty-fork"
 version = "0.3.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3902,28 +3855,6 @@ name = "strsim"
 version = "0.11.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "7da8b5736845d9f2fcb837ea5d9e2628564b3b043a70948a3f0b778838c5fb4f"
-
-[[package]]
-name = "strum"
-version = "0.26.3"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "8fec0f0aef304996cf250b31b5a10dee7980c85da9d759361292b8bca5a18f06"
-dependencies = [
- "strum_macros",
-]
-
-[[package]]
-name = "strum_macros"
-version = "0.26.4"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4c6bee85a5a24955dc440386795aa378cd9cf82acd5f764469152d2270e581be"
-dependencies = [
- "heck 0.5.0",
- "proc-macro2",
- "quote",
- "rustversion",
- "syn 2.0.85",
-]
 
 [[package]]
 name = "substrate-bn"
