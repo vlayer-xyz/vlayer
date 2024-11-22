@@ -5,13 +5,15 @@ const v_versionsBody = {
   jsonrpc: "2.0",
 };
 
+interface VVersionsResponseResult {
+  call_guest_id: string;
+  chain_guest_id: string;
+  semver: string;
+}
+
 export interface VVersionsResponse {
   jsonrpc: string;
-  result: {
-    call_guest_id: string;
-    chain_guest_id: string;
-    semver: string;
-  };
+  result: VVersionsResponseResult;
   id: number;
 }
 
@@ -32,8 +34,13 @@ export async function v_versions(
   return response_json;
 }
 
-function isFieldAString(x: object, field: string): boolean {
-  return field in x && typeof (x as any)[field] === "string";
+function isFieldAString(
+  x: object,
+  field: keyof VVersionsResponseResult,
+): boolean {
+  return (
+    field in x && typeof (x as VVersionsResponseResult)[field] === "string"
+  );
 }
 
 function assertResponseObject(x: unknown): asserts x is VVersionsResponse {
@@ -41,13 +48,17 @@ function assertResponseObject(x: unknown): asserts x is VVersionsResponse {
     throw new Error("Expected object");
   }
   if (!("result" in x) || !x.result || typeof x.result !== "object") {
-    throw new Error(`Unexpected \`v_versions\` response: ${x}`);
+    throw new Error(
+      `Unexpected \`v_versions\` response: ${JSON.stringify(x, null, 2)}`,
+    );
   }
   if (
     !isFieldAString(x.result, "call_guest_id") ||
     !isFieldAString(x.result, "chain_guest_id") ||
     !isFieldAString(x.result, "semver")
   ) {
-    throw new Error(`Unexpected \`v_versions\` response: ${x}`);
+    throw new Error(
+      `Unexpected \`v_versions\` response: ${JSON.stringify(x, null, 2)}`,
+    );
   }
 }
