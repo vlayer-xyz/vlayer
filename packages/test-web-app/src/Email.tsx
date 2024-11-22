@@ -23,13 +23,14 @@ const useEmailFileUpload = () => {
     const vlayer = createVlayerClient();
     const str = await getStrFromFile(file);
     const unverifiedEmail = await preverifyEmail(str);
-    await vlayer.prove({
+    const x = await vlayer.prove({
       address: PROVER_ADDRESS,
       proverAbi: proverSpec.abi,
       functionName: "main",
       chainId: foundry.id,
       args: [unverifiedEmail],
     });
+    console.log("c", x);
   }, []);
 };
 
@@ -38,7 +39,14 @@ export default function Email() {
   return (
     <>
       <h1>Email</h1>
-      <input name="file" type="file" onChange={void handleFileChange} />
+      <input
+        name="file"
+        type="file"
+        onChange={(evt) => {
+          console.log("File changed");
+          void handleFileChange(evt);
+        }}
+      />
     </>
   );
 }

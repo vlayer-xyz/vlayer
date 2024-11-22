@@ -1,4 +1,4 @@
-import { expect, test } from "./fixtures";
+import { expect, test } from "./config";
 import { sidePanel } from "./helpers";
 
 const config = {
