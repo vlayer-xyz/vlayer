@@ -37,7 +37,7 @@ pub(crate) struct ServeArgs {
 }
 
 impl ServeArgs {
-    pub fn into_server_config(self, chain_proof_url: impl ToString) -> Config {
+    pub fn into_server_config(self, chain_proof_url: impl ToString, semver: String) -> Config {
         let proof_mode = self.proof.unwrap_or_default().map();
         call_server::ConfigBuilder::new(
             chain_proof_url,
@@ -49,6 +49,7 @@ impl ServeArgs {
         .with_host(self.host)
         .with_port(self.port)
         .with_verify_chain_proofs(self.verify_chain_proofs)
+        .with_semver(semver)
         .build()
     }
 }

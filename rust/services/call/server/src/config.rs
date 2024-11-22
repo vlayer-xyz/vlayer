@@ -19,6 +19,7 @@ pub struct Config {
     verify_chain_proofs: bool,
     call_guest_elf: GuestElf,
     chain_guest_elf: GuestElf,
+    semver: String,
     gas_meter_config: Option<GasMeterConfig>,
 }
 
@@ -33,6 +34,10 @@ impl Config {
 
     pub fn call_guest_id(&self) -> String {
         self.call_guest_elf.id.encode_hex_with_prefix()
+    }
+
+    pub fn semver(&self) -> String {
+        self.semver.to_string()
     }
 
     pub fn chain_guest_id(&self) -> String {
@@ -64,6 +69,7 @@ impl ConfigBuilder {
                 proof_mode: ProofMode::Groth16,
                 max_request_size: DEFAULT_MAX_CALLDATA_SIZE,
                 verify_chain_proofs: false,
+                semver: String::default(),
                 gas_meter_config: None,
             },
         }
@@ -98,6 +104,11 @@ impl ConfigBuilder {
 
     pub fn with_verify_chain_proofs(mut self, verify: bool) -> Self {
         self.config.verify_chain_proofs = verify;
+        self
+    }
+
+    pub fn with_semver(mut self, semver: String) -> Self {
+        self.config.semver = semver;
         self
     }
 

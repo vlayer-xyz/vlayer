@@ -1,5 +1,3 @@
-import { VCallResponse } from "types/vlayer";
-
 const v_versionsBody = {
   method: "v_versions",
   params: [],
@@ -12,6 +10,7 @@ export interface VVersionsResponse {
   result: {
     call_guest_id: string;
     chain_guest_id: string;
+    semver: string;
   };
   id: number;
 }
@@ -33,6 +32,10 @@ export async function v_versions(
   return response_json;
 }
 
+function isFieldAString(x: object, field: string): boolean {
+  return field in x && typeof (x as any)[field] === "string";
+}
+
 function assertResponseObject(x: unknown): asserts x is VVersionsResponse {
   if (!x || typeof x !== "object") {
     throw new Error("Expected object");
@@ -41,8 +44,9 @@ function assertResponseObject(x: unknown): asserts x is VVersionsResponse {
     throw new Error(`Unexpected \`v_versions\` response: ${x}`);
   }
   if (
-    !("call_guest_id" in x.result) ||
-    typeof x.result.call_guest_id !== "string"
+    !isFieldAString(x.result, "call_guest_id") ||
+    !isFieldAString(x.result, "chain_guest_id") ||
+    !isFieldAString(x.result, "semver")
   ) {
     throw new Error(`Unexpected \`v_versions\` response: ${x}`);
   }
