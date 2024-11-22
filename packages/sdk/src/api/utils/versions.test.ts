@@ -10,6 +10,14 @@ describe("versions compatibility", () => {
     );
   });
 
+  test("throws if major version mismatches with metadata after dash", () => {
+    expect(() => {
+      checkVersionCompatibility("1.2.3-dev-123456-deadbeef", "2.1.3");
+    }).toThrowError(
+      "SDK version 2.1.3 is incompatible with prover version 1.2.3-dev-123456-deadbeef",
+    );
+  });
+
   test("throws if major version is 0 and minor version mismatches", () => {
     expect(() => {
       checkVersionCompatibility("0.2.3", "0.1.3");
@@ -30,9 +38,15 @@ describe("versions compatibility", () => {
     }).not.toThrow();
   });
 
-  test("does not throw if major version is 0 and minor matchs", () => {
+  test("does not throw if major version is 0 and minor matches", () => {
     expect(() => {
       checkVersionCompatibility("0.2.3", "0.2.7");
+    }).not.toThrow();
+  });
+
+  test("works for semvers with metadata after dash", () => {
+    expect(() => {
+      checkVersionCompatibility("0.2.3-dev-123456-deadbeef", "0.2.7");
     }).not.toThrow();
   });
 });
