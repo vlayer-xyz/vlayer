@@ -1,0 +1,89 @@
+Delivered-To: ivanruch@gmail.com
+Received: by 2002:a0c:fc43:0:b0:6cb:27cc:45ba with SMTP id w3csp1834130qvp;
+        Mon, 28 Oct 2024 03:25:32 -0700 (PDT)
+X-Received: by 2002:a5d:6b8d:0:b0:37d:4c40:699 with SMTP id ffacd0b85a97d-38061141816mr7257559f8f.5.1730111132046;
+        Mon, 28 Oct 2024 03:25:32 -0700 (PDT)
+ARC-Seal: i=1; a=rsa-sha256; t=1730111132; cv=none;
+        d=google.com; s=arc-20240605;
+        b=JVkUNHw+ApC2tkoT9/VC4Z00i0CWBa/rZoKAq6oJXntLSQzicDv55q+mVd49ATQWDy
+         +nwWkt8hvfq1UcipjVVtlI17+jJzn08VZ8PU5xmqgpXnh52kcvrN6BS6UEfhZi8tbwFm
+         2V1dcInJll+D94fWzCxBmkeGinq77q14GKKTLhaa2nLEQejhybnEIhgi5Rf2HDRIRSnZ
+         e/MNXSzY6mAVuzEbxwSK+NO0iRK+wJRp6LeU4RNOy3GEN4QL41tl9odhBptGKglqnsmG
+         v/FzzwQjvCF9xlUgEZtmIL9M2hszEFpEeRRdGDRB1GpzqfH+hmEd/tQbaqOxW4Lnaj5i
+         m+iw==
+ARC-Message-Signature: i=1; a=rsa-sha256; c=relaxed/relaxed; d=google.com; s=arc-20240605;
+        h=to:subject:message-id:date:from:mime-version:dkim-signature;
+        bh=jwwY2rhPhAOchvXDNCH2JGaPJHmPfKKGX/zdTc7217E=;
+        fh=3LUvcuUZaLqvahvUvchtCVlQobQXIXW53quuqPC6hCI=;
+        b=IV0WVrdq8rE5WV0q7JJpzgnXTMJua3XDVBbrQZqtsbw5TCDZ4aZI/cm39u80NG96t1
+         qvwbp0zZF8PUwxbOOIWBL3bNm5CnB6vZe/6PIoMiycVBquZmbUdT6wyTG/SpXsjCljiG
+         OENEnINzLoJHedYJse2+l1uIACrzUtbovRdSeIOmTCgbNZvFiRvwvoMvKmnzxM5QSh32
+         aPljbLpRiAUYnNPlE+IidlSj63DfC+Rbp8veBqyRGqX7AS49FBkZRHyUD4yaXNoeV7aZ
+         2uC5qR5XoMxpBpitAFXhOyCPpIoR2A82ZXNYRQryYFL6Dc5ZuDFhjaPxz118RCbUVojk
+         LNTQ==;
+        dara=google.com
+ARC-Authentication-Results: i=1; mx.google.com;
+       dkim=pass header.i=@vlayer-xyz.20230601.gappssmtp.com header.s=20230601 header.b=sybugZro;
+       spf=pass (google.com: domain of ivan@vlayer.xyz designates 209.85.220.41 as permitted sender) smtp.mailfrom=ivan@vlayer.xyz;
+       dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=vlayer.xyz;
+       dara=pass header.i=@gmail.com
+Return-Path: <ivan@vlayer.xyz>
+Received: from mail-sor-f41.google.com (mail-sor-f41.google.com. [209.85.220.41])
+        by mx.google.com with SMTPS id ffacd0b85a97d-38058b9cffbsor2675944f8f.5.2024.10.28.03.25.31
+        for <ivanruch@gmail.com>
+        (Google Transport Security);
+        Mon, 28 Oct 2024 03:25:31 -0700 (PDT)
+Received-SPF: pass (google.com: domain of ivan@vlayer.xyz designates 209.85.220.41 as permitted sender) client-ip=209.85.220.41;
+Authentication-Results: mx.google.com;
+       dkim=pass header.i=@vlayer-xyz.20230601.gappssmtp.com header.s=20230601 header.b=sybugZro;
+       spf=pass (google.com: domain of ivan@vlayer.xyz designates 209.85.220.41 as permitted sender) smtp.mailfrom=ivan@vlayer.xyz;
+       dmarc=pass (p=NONE sp=NONE dis=NONE) header.from=vlayer.xyz;
+       dara=pass header.i=@gmail.com
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=vlayer-xyz.20230601.gappssmtp.com; s=20230601; t=1730111131; x=1730715931; dara=google.com;
+        h=to:subject:message-id:date:from:mime-version:from:to:cc:subject
+         :date:message-id:reply-to;
+        bh=jwwY2rhPhAOchvXDNCH2JGaPJHmPfKKGX/zdTc7217E=;
+        b=sybugZroit88nwkaf8ORJkcfNVNkqTSxHZERXMZZeriweHlzhc9Uxincd6oBeb/5Q3
+         LzeJCrbEkw899ntkMllpIrB9hfKQNnDGvsxtGUdQECQqcA3X0mI56hMmbSajfPjSxkrD
+         VqCWlfPjlOX92THF8A/5QcXo9abWGbd6KPl2o2SPTuDu5ZLKRqGB5hMAs/0NL/zCZfF9
+         v/FDZiR2yQYt0i9pcZ76xCIIXoFoVs+L64sY0bNq6oO/0VXZXSfvGNs6uY4dNQSF/4Ap
+         CsDWVENF5v/YO5UyiciaWp0WvVWhqdcoH+G+N0RcHPJYQfCCHDzKeGqMF0Nb9iT1hRXB
+         4R4w==
+X-Google-DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=1e100.net; s=20230601; t=1730111131; x=1730715931;
+        h=to:subject:message-id:date:from:mime-version:x-gm-message-state
+         :from:to:cc:subject:date:message-id:reply-to;
+        bh=jwwY2rhPhAOchvXDNCH2JGaPJHmPfKKGX/zdTc7217E=;
+        b=p7leTFYfASef++jf4+J/5leU2pH/bEVk9P4hhw3tvF7hGGOZQ4CbigqcKdEPdPnD25
+         0m6ezc0EVgodQ0rZ+5hF1kVV1TOiDksGJ9jnuT/7psG+gzoSvV+THGpVAi9ZEAg4XX9Q
+         Rs7eXxmIpfpVnE9T7O7Egt+kyzKPbPxxGD0MPWoDSmk4MU0JSMbjvNdRHHYHUoNh3gfb
+         wmlM7dsv1j42NUnYfXFoIsBsRG4Jq0wkpyJbBVU/NXTuI8dITyTSw/F7wKx2UDHt7TxD
+         IuBLHyMBaQ0Z5YfQ7O3d1Ekelmou2nv4IL9YvXSeOEaap1Gfc565iPVgiQPTeSJ0mHfy
+         6fyA==
+X-Gm-Message-State: AOJu0YwHE+ezwgfSYMAq8ETcR/0XeFbKiCuNaCz9iIn1ETjQGA69b/dW
+	gm1JChoRQA4Y2xvgzA8QBccWeU52TNCW/MiVXyyKrUc75o4HaSu+bmChqaP1UjbHG6zmfsadmFy
+	6q/3OqnB6UVOEP6XQU50qu9XKP8xvIzbBCIrJnVkgKL/YMUic
+X-Google-Smtp-Source: AGHT+IEBaxRHGpt7mKAl8XucnPxaK5UG8nSmzXcA+1rqK7CXax5Z9xCAj0Vq7ETla8QOE+1bwPwmWoYda7z3et1cpwQ=
+X-Received: by 2002:a5d:49cb:0:b0:37d:5359:6753 with SMTP id
+ ffacd0b85a97d-3806117234bmr7005025f8f.15.1730111131109; Mon, 28 Oct 2024
+ 03:25:31 -0700 (PDT)
+MIME-Version: 1.0
+From: Ivan Rukhavets <ivan@vlayer.xyz>
+Date: Mon, 28 Oct 2024 11:25:20 +0100
+Message-ID: <CAM-4p2XtNJq8PzRJysYAOQsuOOvUk72YZktHp4a17ZaxygkmFg@mail.gmail.com>
+Subject: Welcome to vlayer, 0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266!
+To: Ivan Rukhavets <ivanruch@gmail.com>
+Content-Type: multipart/alternative; boundary="000000000000647048062586e3c2"
+
+--000000000000647048062586e3c2
+Content-Type: text/plain; charset="UTF-8"
+
+Hello
+
+--000000000000647048062586e3c2
+Content-Type: text/html; charset="UTF-8"
+
+<div dir="ltr">Hello</div>
+
+--000000000000647048062586e3c2--

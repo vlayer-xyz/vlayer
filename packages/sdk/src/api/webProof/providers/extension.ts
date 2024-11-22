@@ -50,10 +50,23 @@ class ExtensionWebProofProvider implements WebProofProvider {
 
   public notifyZkProvingStatus(status: ZkProvingStatus) {
     if (typeof chrome !== "undefined") {
-      chrome.runtime.sendMessage(EXTENSION_ID, {
-        action: ExtensionAction.NotifyZkProvingStatus,
-        payload: { status },
-      });
+      // Chrome does not provide reliable api to check if given extension is installed
+      // what we could do is to use management api but
+      // 1) this will need to provided extra permission
+      // 2) still is not reliable because this api becomes defined when first extension that uses it is installed
+      // so still will need to try catch
+      try {
+        chrome.runtime.sendMessage(EXTENSION_ID, {
+          action: ExtensionAction.NotifyZkProvingStatus,
+          payload: { status },
+        });
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      } catch (e) {
+        console.log(
+          "Cant send message",
+          "look that extension is not installed ",
+        );
+      }
     }
   }
 

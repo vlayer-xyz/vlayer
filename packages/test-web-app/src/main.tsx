@@ -7,7 +7,7 @@ import Target from "./Target";
 import { LoginMock } from "./LoginMock";
 
 import "./main.css";
-
+import Email from "./Email";
 const router = createBrowserRouter([
   {
     path: "/source",
@@ -24,6 +24,10 @@ const router = createBrowserRouter([
   {
     path: "/login",
     element: <LoginMock />,
+  },
+  {
+    path: "/email",
+    element: <Email />,
   },
 ]);
 
