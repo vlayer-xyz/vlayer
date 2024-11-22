@@ -3,7 +3,7 @@ use std::convert::Into;
 use alloy_primitives::Bytes;
 use revm::precompile::{Precompile, PrecompileOutput, PrecompileResult};
 
-use crate::precompiles::{gas_used, map_to_fatal};
+use crate::{gas_used, map_to_fatal};
 
 pub(super) const VERIFY_EMAIL_PRECOMPILE: Precompile = Precompile::Standard(verify_and_parse_run);
 

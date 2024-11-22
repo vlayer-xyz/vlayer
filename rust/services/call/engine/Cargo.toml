@@ -17,26 +17,23 @@ async-trait = { workspace = true }
 bincode = { workspace = true }
 block_header = { workspace = true }
 bytes = { workspace = true }
+call_precompiles = { workspace = true }
 chain = { workspace = true }
 chain_client = { workspace = true }
 chain_common = { workspace = true }
 common = { workspace = true }
 derive-new = { workspace = true }
 derive_more = { workspace = true }
-email_proof = { workspace = true }
 itertools = { workspace = true }
 mpt = { workspace = true }
 once_cell = { workspace = true }
-regex = { workspace = true }
 revm = { workspace = true, features = ["serde", "std"] }
 risc0-zkp = { workspace = true }
 risc0-zkvm = { workspace = true }
 serde = { workspace = true }
-serde_json = { workspace = true }
 static_assertions = { workspace = true }
 thiserror = { workspace = true }
 tracing = { workspace = true }
-web_proof = { workspace = true }
 
 [dev-dependencies]
 alloy-trie = { workspace = true }
@@ -54,5 +51,3 @@ testing = []
 [lints]
 workspace = true
 
-[package.metadata.cargo-machete]
-ignored = ["risc0-zkvm"]

@@ -1,5 +1,6 @@
 use std::sync::Arc;
 
+use call_precompiles::VLAYER_PRECOMPILES;
 use derive_new::new;
 use revm::{
     db::WrapDatabaseRef,
@@ -16,7 +17,6 @@ use crate::{
     },
     inspector::TravelInspector,
     io::Call,
-    precompiles::VLAYER_PRECOMPILES,
 };
 
 #[derive(new)]

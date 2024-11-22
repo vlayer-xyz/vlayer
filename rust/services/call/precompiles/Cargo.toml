@@ -1,0 +1,16 @@
+[package]
+name = "call_precompiles"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+alloy-primitives = { workspace = true }
+alloy-sol-types = { workspace = true }
+email_proof = { workspace = true }
+regex = { workspace = true }
+revm = { workspace = true }
+serde_json = { workspace = true }
+web_proof = { workspace = true }
+
+[lints]
+workspace = true

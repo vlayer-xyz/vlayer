@@ -1,7 +1,7 @@
 mod json;
 mod regex;
 mod verify_and_parse;
-pub mod verify_and_parse_email;
+mod verify_and_parse_email;
 
 use revm::{
     precompile::{
@@ -11,7 +11,7 @@ use revm::{
     primitives::PrecompileErrors,
 };
 
-use crate::precompiles::{
+use crate::{
     json::{
         JSON_GET_ARRAY_LENGTH_PRECOMPILE, JSON_GET_BOOL_PRECOMPILE, JSON_GET_INT_PRECOMPILE,
         JSON_GET_STRING_PRECOMPILE,
@@ -21,7 +21,7 @@ use crate::precompiles::{
     verify_and_parse_email::VERIFY_EMAIL_PRECOMPILE,
 };
 
-pub(crate) const VLAYER_PRECOMPILES: [PrecompileWithAddress; 8] = [
+pub const VLAYER_PRECOMPILES: [PrecompileWithAddress; 8] = [
     PrecompileWithAddress(u64_to_address(0x100), VERIFY_AND_PARSE_PRECOMPILE),
     PrecompileWithAddress(u64_to_address(0x101), VERIFY_EMAIL_PRECOMPILE),
     PrecompileWithAddress(u64_to_address(0x102), JSON_GET_STRING_PRECOMPILE),

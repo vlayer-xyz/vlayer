@@ -16,6 +16,7 @@ members = [
     "services/call/guest",
     "services/call/guest_wrapper",
     "services/call/host",
+    "services/call/precompiles",
     "services/call/server",
     "services/chain/block_trie",
     "services/chain/client",
@@ -141,6 +142,7 @@ yansi = "1.0.1"
 
 block_header = { path = "block_header" }
 block_trie = { path = "services/chain/block_trie" }
+call_precompiles = { path = "services/call/precompiles" }
 call_engine = { path = "services/call/engine" }
 call_guest = { path = "services/call/guest" }
 call_guest_wrapper = { path = "services/call/guest_wrapper" }
