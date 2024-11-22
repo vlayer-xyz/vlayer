@@ -15,4 +15,10 @@ pub enum ParsingError {
 
     #[error("Partial httparse error")]
     Partial,
+
+    #[error("Unsupported transfer encoding: {0}")]
+    UnsupportedTransferEncoding(String),
+
+    #[error("IO error: {0}")]
+    StdIoError(#[from] std::io::Error),
 }
