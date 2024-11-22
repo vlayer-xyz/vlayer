@@ -1,7 +1,8 @@
+use std::io::Read;
+
 use chunked_transfer::Decoder;
 use derive_new::new;
 use httparse::{Response, Status, EMPTY_HEADER};
-use std::io::Read;
 use tlsn_core::RedactedTranscript;
 
 use crate::errors::ParsingError;
