@@ -20,7 +20,7 @@ pub(crate) fn one_kb() -> WorkloadResult {
     Ok(())
 }
 
-pub(crate) fn four_kb() -> WorkloadResult {
+pub(crate) fn eight_kb() -> WorkloadResult {
     keccak256([0; 8_192]);
 
     Ok(())
