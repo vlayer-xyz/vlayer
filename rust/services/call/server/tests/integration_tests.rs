@@ -93,6 +93,9 @@ mod server_tests {
         use super::*;
         use crate::test_helpers::WebProof;
 
+        const DEFAULT_CHAIN_ID: u64 = 11155111;
+        const DEFAULT_GAS_LIMIT: u64 = 1_000_000;
+
         #[tokio::test]
         async fn field_validation_error() {
             let helper = TestHelper::default().await;
@@ -104,7 +107,7 @@ mod server_tests {
                         "to": "I am not a valid address!",
                         "data": helper.contract.sum(U256::from(1), U256::from(2)).calldata().unwrap(),
                     }, {
-                        "gas_limit": 1_000_000,
+                        "gas_limit": DEFAULT_GAS_LIMIT,
                     }
                     ],
                 "id": 1,
@@ -144,8 +147,8 @@ mod server_tests {
                         "data": call_data,
                     },
                     {
-                        "chain_id": 11155111,
-                        "gas_limit": 1_000_000,
+                        "chain_id": DEFAULT_CHAIN_ID ,
+                        "gas_limit": DEFAULT_GAS_LIMIT,
                     }
                     ],
                 "id": 1,
@@ -200,8 +203,8 @@ mod server_tests {
                         "data": call_data,
                     },
                     {
-                        "chain_id": 11155111,
-                        "gas_limit": 1_000_000,
+                        "chain_id": DEFAULT_CHAIN_ID,
+                        "gas_limit": DEFAULT_GAS_LIMIT,
                     }
                     ],
                 "id": 1,
