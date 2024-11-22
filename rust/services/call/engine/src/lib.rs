@@ -14,6 +14,4 @@ pub use sol::{
     proof::Proof,
     seal::{ProofMode, Seal},
 };
-
-pub mod precompiles;
 pub mod verifier;

@@ -37,14 +37,14 @@ impl InMemoryDatabase {
     }
 }
 
-impl<'a> ReadTx for InMemoryReadTx<'a> {
+impl ReadTx for InMemoryReadTx<'_> {
     fn get(&self, table: &str, key: &[u8]) -> DbResult<Option<Box<[u8]>>> {
         let prefixed_key = add_table_prefix(table, key);
         Ok(self.store.get(prefixed_key.as_slice()).cloned())
     }
 }
 
-impl<'a> ReadTx for InMemoryReadWriteTx<'a> {
+impl ReadTx for InMemoryReadWriteTx<'_> {
     fn get(&self, table: &str, key: &[u8]) -> DbResult<Option<Box<[u8]>>> {
         let prefixed_key = add_table_prefix(table, key);
         Ok(self.store.get(prefixed_key.as_slice()).cloned())
@@ -55,7 +55,7 @@ fn add_table_prefix(table: impl AsRef<str>, key: impl AsRef<[u8]>) -> Vec<u8> {
     [table.as_ref().as_bytes(), key.as_ref()].concat()
 }
 
-impl<'a> WriteTx for InMemoryReadWriteTx<'a> {
+impl WriteTx for InMemoryReadWriteTx<'_> {
     fn create_table(&mut self, table: &str) -> DbResult<()> {
         Ok(())
     }

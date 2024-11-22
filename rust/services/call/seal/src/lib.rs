@@ -7,8 +7,6 @@ use risc0_zkvm::{
     Receipt, ReceiptClaim,
 };
 
-use crate::Error;
-
 const VERIFIER_SELECTOR_LENGTH: usize = 4;
 const GROTH16_PROOF_SIZE: usize = 256;
 const SEAL_BYTES_SIZE: usize = GROTH16_PROOF_SIZE;
@@ -20,8 +18,20 @@ type SealBytesT = [u8; SEAL_BYTES_SIZE];
 #[derive(Debug, Default, PartialEq, Eq)]
 struct VerifierSelector([u8; VERIFIER_SELECTOR_LENGTH]);
 
+#[derive(thiserror::Error, Debug, PartialEq)]
+pub enum Error {
+    #[error("Invalid proof type")]
+    InvalidProofType,
+    #[error("Could not retrieve valid seal bytes")]
+    NoSealBytes,
+    #[error("Could not retrieve verifier selector")]
+    NoVerifierSelector,
+    #[error("Abi decoding error: {0}")]
+    AbiDecoding(#[from] alloy_sol_types::Error),
+}
+
 #[derive(Clone)]
-pub(crate) struct EncodableReceipt(InnerReceipt);
+pub struct EncodableReceipt(InnerReceipt);
 
 impl EncodableReceipt {
     const fn proof_mode(&self) -> Option<ProofMode> {
@@ -89,19 +99,17 @@ impl TryFrom<EncodableReceipt> for Seal {
     type Error = Error;
 
     fn try_from(value: EncodableReceipt) -> Result<Self, Self::Error> {
-        let seal_type = value
-            .proof_mode()
-            .ok_or(Error::SealEncodingError("Invalid proof type".into()))?;
+        let seal_type = value.proof_mode().ok_or(Error::InvalidProofType)?;
 
         let raw_seal = value
             .seal_bytes()
-            .ok_or(Error::SealEncodingError("Could not retreive valid seal bytes".into()))
+            .ok_or(Error::NoSealBytes)
             .map(split_seal_into_bytes)?;
 
         let verifier_selector: FixedBytes<VERIFIER_SELECTOR_LENGTH> = value
             .verifier_selector()
-            .ok_or(Error::SealEncodingError("Could not retreive verifier selector".into()))
-            .map(|sel| sel.0.into())?;
+            .ok_or(Error::NoVerifierSelector)
+            .map(|selector| selector.0.into())?;
 
         Ok(Seal {
             verifierSelector: verifier_selector,

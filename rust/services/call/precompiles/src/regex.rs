@@ -4,7 +4,7 @@ use alloy_sol_types::{sol_data, SolType, SolValue};
 use regex::{Captures, Match};
 use revm::precompile::{Precompile, PrecompileErrors, PrecompileOutput, PrecompileResult};
 
-use crate::precompiles::{gas_used, map_to_fatal};
+use crate::{gas_used, map_to_fatal};
 
 pub(super) const REGEX_MATCH_PRECOMPILE: Precompile = Precompile::Standard(regex_match_run);
 pub(super) const REGEX_CAPTURE_PRECOMPILE: Precompile = Precompile::Standard(regex_capture_run);

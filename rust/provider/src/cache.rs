@@ -12,6 +12,7 @@ use crate::never::NeverProvider;
 pub(crate) mod json;
 
 /// A provider that caches responses from an underlying provider in a JSON file.
+///
 /// Queries are first checked against the cache, and if not found, the provider is invoked.
 /// The cache is saved when the provider is dropped.
 #[derive(Debug)]

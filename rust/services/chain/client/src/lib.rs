@@ -45,9 +45,9 @@ pub enum Error {
 
 pub type ChainProofCache = HashMap<ChainId, (Vec<BlockNumber>, ChainProof)>;
 
-/// `Client` implementation which wraps around another client (e.g. `RpcClient`) and stores
-/// all obtained proofs in a `ChainProofCache`. The cache can be dumped via `into_cache`
-/// and used to create an instance of `CachedClient`.
+/// `Client` implementation which wraps around another client (e.g. `RpcClient`) and stores all obtained proofs in a `ChainProofCache`.
+///
+/// The cache can be dumped via `into_cache` and used to create an instance of `CachedClient`.
 pub struct RecordingClient {
     inner: Box<dyn Client>,
     cache: RwLock<ChainProofCache>,

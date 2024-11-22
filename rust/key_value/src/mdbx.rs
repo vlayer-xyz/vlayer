@@ -60,7 +60,7 @@ impl<'a, TK: TransactionKind> MdbxTx<'a, TK> {
     }
 }
 
-impl<'a, TK: TransactionKind> ReadTx for MdbxTx<'a, TK> {
+impl<TK: TransactionKind> ReadTx for MdbxTx<'_, TK> {
     fn get(&self, table: &str, key: &[u8]) -> DbResult<Option<Box<[u8]>>> {
         let table = self.get_table(table)?;
         Ok(self
@@ -71,7 +71,7 @@ impl<'a, TK: TransactionKind> ReadTx for MdbxTx<'a, TK> {
     }
 }
 
-impl<'a> WriteTx for MdbxTx<'a, RW> {
+impl WriteTx for MdbxTx<'_, RW> {
     fn create_table(&mut self, table: &str) -> DbResult<()> {
         // `create_table` creates only if the table doesn't exist
         self.tx

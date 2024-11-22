@@ -6,8 +6,6 @@ edition = "2021"
 [dependencies]
 anyhow = { workspace = true }
 auto_impl = { workspace = true }
-bytes = { workspace = true }
-derive_more = { workspace = true }
 libmdbx = { workspace = true }
 static_assertions = { workspace = true }
 thiserror = { workspace = true }

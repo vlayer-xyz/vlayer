@@ -10,7 +10,6 @@ chain_host = { workspace = true }
 clap = { workspace = true, features = ["derive", "env"] }
 dotenvy = { workspace = true }
 tokio = { workspace = true }
-tracing = { workspace = true }
 tracing-subscriber = { workspace = true, features = ["ansi"] }
 
 [lints]

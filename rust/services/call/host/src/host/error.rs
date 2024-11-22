@@ -53,7 +53,7 @@ pub enum Error {
     EvmEnvFactory(#[from] anyhow::Error),
 
     #[error("Seal encoding error: {0}")]
-    SealEncodingError(String),
+    SealEncodingError(#[from] seal::Error),
 
     #[error("Chain Proof Client error: {0}")]
     ChainProofClient(#[from] chain_client::Error),

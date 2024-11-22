@@ -118,9 +118,8 @@ impl Hashable for CallHashData {
     }
 }
 
-fn decode_seal(seal: Vec<u8>) -> Result<Seal, HostError> {
-    Seal::abi_decode(&seal, true)
-        .map_err(|_| HostError::SealEncodingError(format!("Invalid seal: {:x?}", seal)))
+fn decode_seal(seal: Vec<u8>) -> Result<Seal, seal::Error> {
+    Ok(Seal::abi_decode(&seal, true)?)
 }
 
 fn u256_to_number(value: U256) -> u64 {

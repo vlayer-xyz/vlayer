@@ -5,7 +5,7 @@ use alloy_sol_types::{sol_data, SolType, SolValue};
 use revm::precompile::{Precompile, PrecompileErrors, PrecompileOutput, PrecompileResult};
 use serde_json::Value;
 
-use crate::precompiles::{gas_used, map_to_fatal};
+use crate::{gas_used, map_to_fatal};
 
 pub(super) const JSON_GET_STRING_PRECOMPILE: Precompile = Precompile::Standard(json_get_string_run);
 pub(super) const JSON_GET_INT_PRECOMPILE: Precompile = Precompile::Standard(json_get_int_run);

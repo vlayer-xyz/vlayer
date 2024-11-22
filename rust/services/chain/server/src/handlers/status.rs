@@ -35,7 +35,7 @@ pub async fn v_sync_status(
     chain_db
         .read()
         .get_chain_info(chain_id)?
-        .ok_or_else(|| AppError::UnsupportedChainId(chain_id))
+        .ok_or(AppError::UnsupportedChainId(chain_id))
         .map(Into::into)
 }
 
