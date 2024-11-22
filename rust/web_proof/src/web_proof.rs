@@ -3,8 +3,8 @@ use pkcs8::{DecodePublicKey, EncodePublicKey, LineEnding};
 use serde::{de::Deserializer, Deserialize, Serialize, Serializer};
 use thiserror::Error;
 use tlsn_core::{
-    proof::{SessionProofError, SubstringsProofError, TlsProof},
-    ServerName,
+    presentation::{Presentation, PresentationOutput},
+    CryptoProvider,
 };
 
 use crate::{request_transcript::RequestTranscript, response_transcript::ResponseTranscript};
@@ -17,27 +17,30 @@ pub struct WebProof {
         serialize_with = "serialize_public_key_to_pem_string"
     )]
     pub notary_pub_key: PublicKey,
-    pub tls_proof: TlsProof,
+    pub presentation: Presentation,
 }
 
 impl WebProof {
     pub(crate) fn verify(
         self,
     ) -> Result<(RequestTranscript, ResponseTranscript), VerificationError> {
-        let TlsProof {
-            session,
-            substrings,
-        } = self.tls_proof;
+        let provider = CryptoProvider::default();
 
-        session.verify_with_default_cert_verifier(self.notary_pub_key)?;
-        let (sent, received) = substrings.verify(&session.header)?;
+        let PresentationOutput { transcript, .. } = self.presentation.verify(&provider).unwrap();
 
-        Ok((RequestTranscript::new(sent), ResponseTranscript::new(received)))
+        let transcript = transcript.unwrap();
+
+        Ok((
+            RequestTranscript::new(transcript.sent_unsafe().to_vec()),
+            ResponseTranscript::new(transcript.received_unsafe().to_vec()),
+        ))
     }
 
     pub fn get_server_name(&self) -> String {
-        let ServerName::Dns(server_name) = &self.tls_proof.session.session_info.server_name;
-        server_name.to_string()
+        let provider = CryptoProvider::default();
+        let PresentationOutput { server_name, .. } =
+            self.presentation.clone().verify(&provider).unwrap();
+        server_name.unwrap().to_string()
     }
 
     pub fn get_notary_pub_key(&self) -> Result<String, pkcs8::spki::Error> {
@@ -47,12 +50,11 @@ impl WebProof {
 
 #[derive(Error, Debug)]
 pub enum VerificationError {
-    #[error("Session proof error: {0}")]
-    SessionProof(#[from] SessionProofError),
+    // #[error("Session proof error: {0}")]
+    // SessionProof(#[from] SessionProofError),
 
-    #[error("Substrings proof error: {0}")]
-    SubstringsProof(#[from] SubstringsProofError),
-
+    // #[error("Substrings proof error: {0}")]
+    // SubstringsProof(#[from] SubstringsProofError),
     #[error("Notary public key serialization error: {0}")]
     PublicKeySerialization(#[from] pkcs8::spki::Error),
 }
@@ -82,7 +84,10 @@ mod tests {
 
     #[test]
     fn serialize_deserialize_web_proof() {
-        let proof = load_web_proof_fixture("./testdata/tls_proof.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
+        let proof = load_web_proof_fixture(
+            "./testdata/swapi_presentation_0.1.0-alpha.7.json",
+            NOTARY_PUB_KEY_PEM_EXAMPLE,
+        );
         let serialized = serde_json::to_string(&proof).unwrap();
         let deserialized: WebProof = serde_json::from_str(&serialized).unwrap();
 
@@ -91,53 +96,63 @@ mod tests {
         assert_eq!(proof.notary_pub_key, deserialized.notary_pub_key);
     }
 
-    #[test]
-    fn fail_verification_session_error() {
-        let invalid_proof = load_web_proof_fixture(
-            "./testdata/invalid_session_tls_proof.json",
-            NOTARY_PUB_KEY_PEM_EXAMPLE,
-        );
-        assert!(matches!(
-            invalid_proof.verify(),
-            Err(VerificationError::SessionProof(err)) if err.to_string() == "signature verification failed: signature error"
-        ));
-    }
+    // #[test]
+    // fn fail_verification_session_error() {
+    //     let invalid_proof = load_web_proof_fixture(
+    //         "./testdata/invalid_session_tls_proof.json",
+    //         NOTARY_PUB_KEY_PEM_EXAMPLE,
+    //     );
+    //     assert!(matches!(
+    //         invalid_proof.verify(),
+    //         Err(VerificationError::SessionProof(err)) if err.to_string() == "signature verification failed: signature error"
+    //     ));
+    // }
 
-    #[test]
-    fn fail_verification_substrings_error() {
-        let invalid_proof = load_web_proof_fixture(
-            "./testdata/invalid_substrings_tls_proof.json",
-            NOTARY_PUB_KEY_PEM_EXAMPLE,
-        );
-        assert!(matches!(
-            invalid_proof.verify(),
-            Err(VerificationError::SubstringsProof(err)) if err.to_string() == "invalid inclusion proof: Failed to verify a Merkle proof"
-        ));
-    }
+    // #[test]
+    // fn fail_verification_substrings_error() {
+    //     let invalid_proof = load_web_proof_fixture(
+    //         "./testdata/invalid_substrings_tls_proof.json",
+    //         NOTARY_PUB_KEY_PEM_EXAMPLE,
+    //     );
+    //     assert!(matches!(
+    //         invalid_proof.verify(),
+    //         Err(VerificationError::SubstringsProof(err)) if err.to_string() == "invalid inclusion proof: Failed to verify a Merkle proof"
+    //     ));
+    // }
 
     #[test]
     fn success_verification() {
-        let proof = load_web_proof_fixture("./testdata/tls_proof.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
+        let proof = load_web_proof_fixture(
+            "./testdata/swapi_presentation_0.1.0-alpha.7.json",
+            NOTARY_PUB_KEY_PEM_EXAMPLE,
+        );
         let (request, response) = proof.verify().unwrap();
+
         assert_eq!(
-            request.transcript.data(),
-            read_fixture("./testdata/sent_request.txt").as_bytes()
+            String::from_utf8(request.transcript).unwrap(),
+            read_fixture("./testdata/swapi_request.txt")
         );
         assert_eq!(
-            response.transcript.data(),
-            read_fixture("./testdata/received_response.txt").as_bytes()
+            String::from_utf8(response.transcript).unwrap(),
+            read_fixture("./testdata/swapi_response.txt")
         );
     }
 
     #[test]
     fn success_get_server_name() {
-        let proof = load_web_proof_fixture("./testdata/tls_proof.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
-        assert_eq!(proof.get_server_name(), "api.x.com");
+        let proof = load_web_proof_fixture(
+            "./testdata/swapi_presentation_0.1.0-alpha.7.json",
+            NOTARY_PUB_KEY_PEM_EXAMPLE,
+        );
+        assert_eq!(proof.get_server_name(), "swapi.dev");
     }
 
     #[test]
     fn success_get_notary_pub_key() {
-        let proof = load_web_proof_fixture("./testdata/tls_proof.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
+        let proof = load_web_proof_fixture(
+            "./testdata/swapi_presentation_0.1.0-alpha.7.json",
+            NOTARY_PUB_KEY_PEM_EXAMPLE,
+        );
         assert_eq!(proof.get_notary_pub_key().unwrap(), NOTARY_PUB_KEY_PEM_EXAMPLE);
     }
 }

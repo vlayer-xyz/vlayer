@@ -3,7 +3,6 @@ use std::fs;
 
 use p256::PublicKey;
 use pkcs8::DecodePublicKey;
-use tlsn_core::proof::TlsProof;
 
 use crate::web_proof::WebProof;
 
@@ -19,12 +18,12 @@ pub fn read_fixture(path: &str) -> String {
 
 pub fn load_web_proof_fixture(proof_path: &str, notary_pub_key_pem: &str) -> WebProof {
     WebProof {
-        tls_proof: serde_json::from_str(&read_fixture(proof_path)).unwrap(),
+        presentation: serde_json::from_str(&read_fixture(proof_path)).unwrap(),
         notary_pub_key: PublicKey::from_public_key_pem(notary_pub_key_pem).unwrap(),
     }
 }
 
-pub fn tls_proof_example() -> TlsProof {
-    serde_json::from_str(str::from_utf8(include_bytes!("../testdata/tls_proof.json")).unwrap())
-        .unwrap()
-}
+// pub fn tls_proof_example() -> TlsProof {
+//     serde_json::from_str(str::from_utf8(include_bytes!("../testdata/tls_proof.json")).unwrap())
+//         .unwrap()
+// }
