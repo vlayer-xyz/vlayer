@@ -8,32 +8,18 @@ import {
   ExtensionAction,
   type ExtensionMessage,
   ExtensionMessageType,
-  type MessageToExtension,
   WebProof,
   ZkProvingStatus,
 } from "../../../web-proof-commons";
 
 // Chrome runtime API types for browser context
-declare const chrome: {
-  runtime: {
-    sendMessage: (
-      extensionId: string | undefined,
-      message: MessageToExtension,
-    ) => void;
-    connect: (extensionId: string) => {
-      onMessage: {
-        addListener: (message: unknown) => void;
-      };
-      postMessage: (message: MessageToExtension) => void;
-    };
-  };
-};
 
-const EXTENSION_ID = "jbchhcgphfokabmfacnkafoeeeppjmpl";
+type ExtensionVersion = string | null;
+export const EXTENSION_ID = "jbchhcgphfokabmfacnkafoeeeppjmpl";
 
 class ExtensionWebProofProvider implements WebProofProvider {
   private port: ReturnType<typeof chrome.runtime.connect> | null = null;
-
+  private extensionVersion?: ExtensionVersion;
   private listeners: Partial<
     Record<
       ExtensionMessageType,
@@ -48,7 +34,7 @@ class ExtensionWebProofProvider implements WebProofProvider {
     private wsProxyUrl: string,
   ) {}
 
-  public notifyZkProvingStatus(status: ZkProvingStatus) {
+  public async notifyZkProvingStatus(status: ZkProvingStatus) {
     if (typeof chrome !== "undefined") {
       // Chrome does not provide reliable api to check if given extension is installed
       // what we could do is to use management api but
@@ -68,6 +54,40 @@ class ExtensionWebProofProvider implements WebProofProvider {
         );
       }
     }
+
+    return Promise.resolve();
+  }
+
+  public getExtensionVersion() {
+    return new Promise<ExtensionVersion>((resolve) => {
+      if (this.extensionVersion !== undefined) {
+        resolve(this.extensionVersion);
+        return;
+      }
+      try {
+        const port = this.connectToExtension();
+        port.postMessage({
+          action: ExtensionAction.RequestVersion,
+        });
+
+        const timeout = setTimeout(() => {
+          this.extensionVersion = null;
+          resolve(null);
+        }, 1000);
+
+        port.onMessage.addListener((message: ExtensionMessage) => {
+          console.log("onMessage", message);
+          if (message.type === ExtensionMessageType.Version) {
+            this.extensionVersion = message.payload.version;
+            clearTimeout(timeout);
+            resolve(message.payload.version);
+          }
+        });
+      } catch (err) {
+        console.error("Error getting extension version", err);
+        resolve(null);
+      }
+    });
   }
 
   private connectToExtension() {
@@ -146,5 +166,7 @@ export const createExtensionWebProofProvider = ({
   notaryUrl = "https://notary.pse.dev/v0.1.0-alpha.5/",
   wsProxyUrl = "wss://notary.pse.dev/proxy",
 }: WebProofProviderSetup = {}): WebProofProvider => {
-  return new ExtensionWebProofProvider(notaryUrl, wsProxyUrl);
+  const provider = new ExtensionWebProofProvider(notaryUrl, wsProxyUrl);
+  void provider.getExtensionVersion();
+  return provider;
 };

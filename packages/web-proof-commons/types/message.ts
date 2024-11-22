@@ -13,6 +13,7 @@ export type ExtensionStep =
 export const enum ExtensionAction {
   RequestWebProof = "RequestWebProof",
   NotifyZkProvingStatus = "NotifyZkProvingStatus",
+  RequestVersion = "RequestVersion",
 }
 
 export enum ZkProvingStatus {
@@ -40,6 +41,7 @@ export enum ExtensionMessageType {
   RedirectBack = "RedirectBack",
   TabOpened = "TabOpened",
   ProofProcessing = "ProofProcessing",
+  Version = "Version",
 }
 
 export type ExtensionMessage =
@@ -52,6 +54,12 @@ export type ExtensionMessage =
       payload: {
         // as we dont have progress yet from tlsn this is optional
         progress?: number;
+      };
+    }
+  | {
+      type: ExtensionMessageType.Version;
+      payload: {
+        version: string;
       };
     };
 

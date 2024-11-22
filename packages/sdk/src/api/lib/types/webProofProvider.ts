@@ -49,12 +49,14 @@ export type WebProofProvider = {
     args: GetWebProofArgs<T, F>,
   ) => void;
 
-  notifyZkProvingStatus: (status: ZkProvingStatus) => void;
+  notifyZkProvingStatus: (status: ZkProvingStatus) => Promise<void>;
 
   addEventListeners: <T extends ExtensionMessageType>(
     messageType: T,
     listener: (args: Extract<ExtensionMessage, { type: T }>) => void,
   ) => void;
+
+  getExtensionVersion: () => Promise<string | null>;
 };
 
 export type WebProofProviderSetup = {
