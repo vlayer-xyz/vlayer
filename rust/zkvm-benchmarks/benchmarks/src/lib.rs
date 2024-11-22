@@ -33,6 +33,7 @@ const BENCHMARKS: &[Benchmark] = &[
     Benchmark::new("keccak::empty", keccak::empty as Workload, 30_000),
     Benchmark::new("keccak::one_block", keccak::one_block as Workload, 250_000),
     Benchmark::new("keccak::one_kb", keccak::one_kb as Workload, 250_000),
+    Benchmark::new("keccak::four_kb", keccak::four_kb as Workload, 2_000_000),
     Benchmark::new("email_verification", email::test_email_verification as Workload, 32_750_000),
 ];
 
