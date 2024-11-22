@@ -16,4 +16,4 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Build the nightly docker image
-        run: docker build -f docker/vlayer/Dockerfile.nightly --no-cache .
+        run: docker build -f docker/vlayer/Dockerfile.nightly .
