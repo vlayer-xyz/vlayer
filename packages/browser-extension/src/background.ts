@@ -16,6 +16,7 @@ let port: browser.Runtime.Port | undefined = undefined;
 let openedTabId: number | undefined = undefined;
 
 browser.runtime.onConnectExternal.addListener((connectedPort) => {
+  console.log("onConnectExternal", connectedPort);
   port = connectedPort;
   port.onMessage.addListener((message: MessageToExtension) => {
     match(message)
@@ -26,6 +27,7 @@ browser.runtime.onConnectExternal.addListener((connectedPort) => {
         void handleProvingStatusNotification(msg);
       })
       .with({ action: ExtensionAction.RequestVersion }, () => {
+        console.log("RequestVersion", packageJson.version);
         void handleVersionRequest(connectedPort);
       })
       .exhaustive();

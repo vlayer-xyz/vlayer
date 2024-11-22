@@ -48,11 +48,42 @@ const mockStore = function () {
   };
 };
 
+const messageCallbacks: ((message: MessageToExtension) => void)[] = [];
+const connectionCallbacks: ((message: object) => void)[] = [];
+const portCallbacks: ((message: MessageToExtension) => void)[] = [];
+
+export const mockPort = {
+  postMessage: vi.fn().mockImplementation(() => {
+    console.log("reply to extension");
+  }),
+  onMessage: {
+    addListener: vi
+      .fn()
+      .mockImplementation((callback: (message: MessageToExtension) => void) => {
+        portCallbacks.push(callback);
+      }),
+  },
+};
+
+export const context = {
+  connectExternal: vi.fn().mockImplementation(() => {
+    connectionCallbacks.forEach((callback) => {
+      callback(mockPort);
+    });
+    return mockPort;
+  }),
+  sendMessageFromWebpage: vi
+    .fn()
+    .mockImplementation((message: MessageToExtension) => {
+      portCallbacks.forEach((callback) => {
+        callback(message);
+      });
+    }),
+};
+
 vi.stubGlobal("scrollTo", vi.fn());
 
 vi.doMock("webextension-polyfill", () => {
-  const callbacks: ((message: MessageToExtension) => void)[] = [];
-
   return {
     default: {
       storage: {
@@ -73,17 +104,21 @@ vi.doMock("webextension-polyfill", () => {
           addListener: vi.fn().mockImplementation(() => {}),
         },
         onConnectExternal: {
-          addListener: vi.fn().mockImplementation(() => {}),
+          addListener: vi
+            .fn()
+            .mockImplementation((callback: (message: object) => void) => {
+              connectionCallbacks.push(callback);
+            }),
+          postMessage: vi.fn(),
         },
         onMessage: {
           addListener: vi.fn().mockImplementation(() => {}),
         },
 
-        callbacks: [],
         sendMessage: vi
           .fn()
           .mockImplementation((message: MessageToExtension) => {
-            callbacks.forEach((callback) => {
+            messageCallbacks.forEach((callback) => {
               callback(message);
             });
           }),
@@ -92,7 +127,7 @@ vi.doMock("webextension-polyfill", () => {
             .fn()
             .mockImplementation(
               (callback: (message: MessageToExtension) => void) => {
-                callbacks.push(callback);
+                messageCallbacks.push(callback);
               },
             ),
         },

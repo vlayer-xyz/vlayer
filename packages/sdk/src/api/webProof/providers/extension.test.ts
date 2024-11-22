@@ -83,7 +83,7 @@ describe.only("ExtensionWebProofProvider with extension not installed", () => {
   });
 });
 
-describe.only("ExtensionWebProofProvider with extension installed", () => {
+describe("ExtensionWebProofProvider with extension installed", () => {
   beforeEach(() => {
     mocks.postMessage = vi
       .fn()

@@ -2,8 +2,13 @@ import "./background";
 import { describe, it, expect, beforeEach, vi } from "vitest";
 import { zkProvingStatusStore } from "./state/zkProvingStatusStore.ts";
 import browser from "webextension-polyfill";
-import { ExtensionAction, ZkProvingStatus } from "./web-proof-commons";
-
+import {
+  ExtensionAction,
+  ExtensionMessageType,
+  ZkProvingStatus,
+} from "./web-proof-commons";
+import { context, mockPort } from "../vitest.setup.ts";
+import packageJson from "../package.json";
 describe("zk related messaging", () => {
   beforeEach(() => {
     global.chrome = {
@@ -38,5 +43,17 @@ describe("zk related messaging", () => {
     });
     const storedStatus = await browser.storage.local.get("zkProvingStatus");
     expect(storedStatus.zkProvingStatus).toBe(ZkProvingStatus.Proving);
+  });
+
+  it("should return version equal to version stored in package.json", () => {
+    context.connectExternal();
+    context.sendMessageFromWebpage({
+      action: ExtensionAction.RequestVersion,
+    });
+
+    expect(mockPort.postMessage).toBeCalledWith({
+      payload: { version: packageJson.version },
+      type: ExtensionMessageType.Version,
+    });
   });
 });
