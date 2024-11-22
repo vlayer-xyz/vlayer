@@ -64,7 +64,7 @@ vi.stubGlobal("chrome", {
   },
 });
 
-describe.only("ExtensionWebProofProvider with extension not installed", () => {
+describe("ExtensionWebProofProvider with extension not installed", () => {
   beforeEach(() => {
     mocks.postMessage.mockImplementation(() => {});
   });
