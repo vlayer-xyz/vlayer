@@ -18,35 +18,16 @@ echo "Saving artifacts to: ${VLAYER_TMP_DIR}"
 
 function cleanup() {
     echo "Cleaning up..."
-    
-    # Kill Anvil if running
-    if [[ -n "${ANVIL_PID:-}" ]] && ps -p "${ANVIL_PID}" > /dev/null; then
-        echo "Killing anvil (PID ${ANVIL_PID})..."
-        kill "${ANVIL_PID}"
-    fi
 
-    # Kill chain worker if running
-    if [[ -n "${CHAIN_WORKER_PID:-}" ]] && ps -p "$CHAIN_WORKER_PID" > /dev/null; then
-        echo "Killing chain worker (PID $CHAIN_WORKER_PID)..."
-        kill "${CHAIN_WORKER_PID}"
-    fi
-
-    # Kill chain server if running
-    if [[ -n "${CHAIN_SERVER_PID:-}" ]] && ps -p "${CHAIN_SERVER_PID}" > /dev/null; then
-        echo "Killing chain server (PID ${CHAIN_SERVER_PID})..."
-        kill "${CHAIN_SERVER_PID}"
-    fi
-
-    # Kill vlayer server if running
-    if [[ -n "${VLAYER_SERVER_PID:-}" ]] && ps -p "${VLAYER_SERVER_PID}" > /dev/null; then
-        echo "Killing vlayer server (PID ${VLAYER_SERVER_PID})..."
-        kill "${VLAYER_SERVER_PID}"
-    fi
+    for service in ANVIL CHAIN_WORKER CHAIN_SERVER VLAYER_SERVER ; do 
+        kill_service "${service}"
+    done
+   
 }
 
 function start_anvil(){
     echo "Starting Anvil "
-    startup_anvil "${LOGS_DIR}/anvil.out" 8545 ANVIL_PID
+    startup_anvil "${LOGS_DIR}/anvil.out" 8545 ANVIL
 }
 
 function startup_vlayer(){
@@ -66,10 +47,10 @@ function startup_vlayer(){
         ${external_urls[@]+"${external_urls[@]}"} \
         >"${LOGS_DIR}/vlayer_serve.out" &
 
-    VLAYER_SERVER_PID=$!
+    VLAYER_SERVER=$!
 
-    echo "vlayer server started with PID ${VLAYER_SERVER_PID}."
-    wait_for_port_and_pid 3000 ${VLAYER_SERVER_PID} 30m "vlayer server"
+    echo "vlayer server started with PID ${VLAYER_SERVER}."
+    wait_for_port_and_pid 3000 ${VLAYER_SERVER} 30m "vlayer server"
 
     popd
 }
@@ -95,9 +76,9 @@ function startup_chain_worker() {
         --db-path "${db_path}" \
         >"${LOGS_DIR}/chain_worker.out" &
 
-    CHAIN_WORKER_PID=$!
+    CHAIN_WORKER=$!
 
-    echo "Chain worker started with PID ${CHAIN_WORKER_PID}."
+    echo "Chain worker started with PID ${CHAIN_WORKER}."
 
     popd
 }
@@ -112,9 +93,9 @@ function startup_chain_server() {
         --db-path "${db_path}" \
         >"${LOGS_DIR}/chain_server.out" &
 
-    CHAIN_SERVER_PID=$!
+    CHAIN_SERVER=$!
     
-    echo "Chain server started with PID ${CHAIN_SERVER_PID}."
+    echo "Chain server started with PID ${CHAIN_SERVER}."
 
 
     echo "Waiting for chain worker sync..."

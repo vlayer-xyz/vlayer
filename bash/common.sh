@@ -15,6 +15,20 @@ check_exit_status() {
   fi
 }
 
+kill_service() {
+  service_name=$1
+
+  echo "Killing ${service_name}..." 
+  service_pid=${!service_name:-}
+
+  if [[ -n "${service_pid}" ]] && ps -p "${service_pid}" >/dev/null; then
+      echo "Killing ${service_name} (PID ${service_pid})..."
+      kill "${service_pid}"
+  else
+      echo "Service ${service_name} is not alive. Skipping."
+  fi
+}
+
 wait_for_port_and_pid() {
     local port=$1
     local pid=$2
