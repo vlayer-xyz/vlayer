@@ -16,11 +16,7 @@ export const sidePanel = async (context: BrowserContext) => {
   const regex = new RegExp(`.*${extensionId}.*`);
   const sidepanel = pageByUrlRegex(context, regex);
   if (!sidepanel) {
-<<<<<<< HEAD
     await context.waitForEvent("page");
-=======
-    await context.waitForEvent("page"); // Wait for a new page to open
->>>>>>> 157f3e44 (Remove console logs)
     return pageByUrlRegex(context, regex) as Page;
   } else {
     return sidepanel;
