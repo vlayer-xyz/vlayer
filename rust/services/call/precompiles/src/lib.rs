@@ -1,7 +1,7 @@
 mod json;
 mod regex;
 mod verify_and_parse;
-mod verify_and_parse_email;
+pub mod verify_and_parse_email;
 
 use revm::{
     precompile::{

@@ -11654,7 +11654,7 @@ version = "0.1.0"
 dependencies = [
  "alloy-primitives",
  "alloy-sol-types",
- "call_engine",
+ "call_precompiles",
  "derive-new",
  "email_proof",
  "risc0-zkvm",

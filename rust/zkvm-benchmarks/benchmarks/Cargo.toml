@@ -6,8 +6,8 @@ edition = "2021"
 [dependencies]
 alloy-primitives = { workspace = true }
 alloy-sol-types = { workspace = true }
+call_precompiles = { workspace = true }
 derive-new = { workspace = true }
 risc0-zkvm = { workspace = true }
 
-call_engine = { workspace = true }
 email_proof = { workspace = true }
