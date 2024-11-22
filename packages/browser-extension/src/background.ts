@@ -16,7 +16,6 @@ let port: browser.Runtime.Port | undefined = undefined;
 let openedTabId: number | undefined = undefined;
 
 browser.runtime.onConnectExternal.addListener((connectedPort) => {
-  console.log("onConnectExternal", connectedPort);
   port = connectedPort;
   port.onMessage.addListener((message: MessageToExtension) => {
     match(message)
@@ -27,7 +26,6 @@ browser.runtime.onConnectExternal.addListener((connectedPort) => {
         void handleProvingStatusNotification(msg);
       })
       .with({ action: ExtensionAction.RequestVersion }, () => {
-        console.log("RequestVersion", packageJson.version);
         void handleVersionRequest(connectedPort);
       })
       .exhaustive();
@@ -44,7 +42,6 @@ browser.runtime.onMessage.addListener(async (message: ExtensionMessage) => {
         ),
       },
       () => {
-        console.log("sending message to webpage", message);
         try {
           port?.postMessage(message);
         } catch (e) {
@@ -68,7 +65,10 @@ browser.runtime.onMessage.addListener(async (message: ExtensionMessage) => {
       });
     })
     .with({ type: ExtensionMessageType.Version }, () => {
-      console.log("Version", packageJson.version);
+      return {
+        type: ExtensionMessageType.Version,
+        payload: { version: packageJson.version },
+      };
     })
     .exhaustive();
 });
@@ -82,10 +82,9 @@ browser.runtime.onMessageExternal.addListener(
       .with({ action: ExtensionAction.NotifyZkProvingStatus }, (msg) =>
         handleProvingStatusNotification(msg),
       )
-      .with({ action: ExtensionAction.RequestVersion }, () => {
-        console.log("RequestVersion", packageJson.version);
-      })
-      .exhaustive();
+      .otherwise((msg) => {
+        console.log("Unhandled message", msg);
+      });
   },
 );
 
