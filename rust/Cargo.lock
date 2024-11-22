@@ -1940,17 +1940,12 @@ dependencies = [
 name = "call_guest"
 version = "0.1.0"
 dependencies = [
- "alloy-chains",
  "alloy-primitives",
  "alloy-rlp",
  "alloy-rlp-derive",
- "anyhow",
- "as-any",
  "block_header",
  "call_engine",
- "chain",
  "chain_client",
- "chain_common",
  "mpt",
  "revm",
  "risc0-zkvm",
@@ -2027,7 +2022,6 @@ dependencies = [
  "alloy-chains",
  "alloy-primitives",
  "alloy-rlp",
- "alloy-rlp-derive",
  "alloy-sol-types",
  "anyhow",
  "assert-json-diff",
@@ -2153,10 +2147,8 @@ checksum = "613afe47fcd5fac7ccf1db93babcb082c5994d996f20b8b159f2ad1658eb5724"
 name = "chain"
 version = "0.1.0"
 dependencies = [
- "alloy-chains",
  "alloy-primitives",
  "anyhow",
- "delegate",
  "derive-new",
  "lazy_static",
  "revm",
@@ -2199,7 +2191,6 @@ dependencies = [
  "risc0-zkp",
  "risc0-zkvm",
  "serde",
- "serde_json",
  "serde_with",
  "thiserror",
 ]
@@ -2224,7 +2215,6 @@ dependencies = [
  "mpt",
  "nybbles",
  "rand",
- "risc0-zkp",
  "risc0-zkvm",
  "serde",
  "thiserror",
@@ -2268,14 +2258,12 @@ dependencies = [
  "chain_test_utils",
  "derivative",
  "derive-new",
- "dotenvy",
  "ethers",
  "futures",
  "host_utils",
  "lazy_static",
  "provider",
  "risc0-zkvm",
- "serde",
  "serde_json",
  "thiserror",
  "tokio",
@@ -2293,8 +2281,6 @@ dependencies = [
  "axum",
  "axum-jrpc",
  "bincode",
- "block_trie",
- "bytemuck",
  "chain_common",
  "chain_db",
  "common",
@@ -2488,17 +2474,13 @@ dependencies = [
  "chain_guest_wrapper",
  "clap",
  "colored",
- "common",
  "flate2",
  "hex",
  "lazy_static",
  "mock_chain_server",
  "regex",
  "reqwest 0.12.8",
- "risc0-zkp",
- "serde",
  "serde_json",
- "server_utils",
  "tar",
  "tempfile",
  "test_runner",
@@ -5617,7 +5599,6 @@ name = "host_utils"
 version = "0.1.0"
 dependencies = [
  "anyhow",
- "derive-new",
  "risc0-zkvm",
  "tokio",
  "tracing",
@@ -6268,9 +6249,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "auto_impl",
- "bytes",
  "criterion",
- "derive_more 1.0.0",
  "libmdbx",
  "rand",
  "static_assertions",
@@ -7924,7 +7903,6 @@ dependencies = [
  "auto_impl",
  "block_header",
  "common",
- "derivative",
  "derive-new",
  "ethers-core",
  "ethers-providers",
@@ -10030,7 +10008,6 @@ dependencies = [
  "foundry-evm",
  "foundry-evm-core",
  "foundry-test-utils",
- "hyper 1.5.0",
  "indicatif",
  "inferno",
  "itertools 0.13.0",
@@ -11514,7 +11491,6 @@ dependencies = [
  "chain_host",
  "dotenvy",
  "tokio",
- "tracing",
  "tracing-subscriber 0.3.18",
 ]
 
@@ -11689,7 +11665,6 @@ dependencies = [
  "host_utils",
  "risc0-build",
  "risc0-zkvm",
- "zkvm-benchmarks-common",
 ]
 
 [[package]]

@@ -4,17 +4,12 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-alloy-chains = { workspace = true }
 alloy-primitives = { workspace = true }
 alloy-rlp = { workspace = true }
 alloy-rlp-derive = { workspace = true }
-anyhow = { workspace = true }
-as-any = { workspace = true }
 block_header = { workspace = true }
 call_engine = { workspace = true }
-chain = { workspace = true }
 chain_client = { workspace = true }
-chain_common = { workspace = true }
 mpt = { workspace = true }
 revm = { workspace = true }
 risc0-zkvm = { workspace = true }

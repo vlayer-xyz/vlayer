@@ -7,7 +7,6 @@ edition = "2021"
 alloy-chains = { workspace = true }
 alloy-primitives = { workspace = true }
 alloy-rlp = { workspace = true }
-alloy-rlp-derive = { workspace = true }
 alloy-sol-types = { workspace = true }
 anyhow = { workspace = true }
 axum = { workspace = true, features = ["macros"] }

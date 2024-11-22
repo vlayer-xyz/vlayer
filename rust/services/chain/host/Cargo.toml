@@ -15,14 +15,12 @@ chain_guest_wrapper = { workspace = true }
 chain_test_utils = { workspace = true }
 derivative = { workspace = true }
 derive-new ={ workspace = true }
-dotenvy = { workspace = true }
 ethers = { workspace = true }
 futures = { workspace = true }
 host_utils = { workspace = true }
 lazy_static = { workspace = true }
 provider = { workspace = true }
 risc0-zkvm = { workspace = true }
-serde = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true, features = ["macros"] }
 tracing = { workspace = true }

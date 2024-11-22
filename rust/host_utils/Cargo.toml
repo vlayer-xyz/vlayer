@@ -5,7 +5,6 @@ edition = "2021"
 
 [dependencies]
 anyhow = { workspace = true }
-derive-new = { workspace = true }
 risc0-zkvm = { workspace = true }
 tokio = { workspace = true }
 tracing = { workspace = true }

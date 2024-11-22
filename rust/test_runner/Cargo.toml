@@ -34,7 +34,6 @@ foundry-config = { workspace = true }
 foundry-debugger = { workspace = true }
 foundry-evm = { workspace = true }
 foundry-evm-core = { workspace = true }
-hyper = { workspace = true }
 indicatif = { workspace = true }
 inferno = { workspace = true }
 itertools = { workspace = true }
