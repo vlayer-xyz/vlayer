@@ -33,6 +33,9 @@ export type MessageToExtension =
       payload: {
         status: ZkProvingStatus;
       };
+    }
+  | {
+      action: ExtensionAction.RequestVersion;
     };
 
 export enum ExtensionMessageType {

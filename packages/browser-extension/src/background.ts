@@ -10,6 +10,7 @@ import {
 import { WebProverSessionContextManager } from "./state/webProverSessionContext";
 import { match, P } from "ts-pattern";
 import { zkProvingStatusStore } from "./state/zkProvingStatusStore.ts";
+import packageJson from "../package.json";
 
 let port: browser.Runtime.Port | undefined = undefined;
 let openedTabId: number | undefined = undefined;
@@ -23,6 +24,9 @@ browser.runtime.onConnectExternal.addListener((connectedPort) => {
       })
       .with({ action: ExtensionAction.NotifyZkProvingStatus }, (msg) => {
         void handleProvingStatusNotification(msg);
+      })
+      .with({ action: ExtensionAction.RequestVersion }, () => {
+        void handleVersionRequest(connectedPort);
       })
       .exhaustive();
   });
@@ -61,6 +65,9 @@ browser.runtime.onMessage.addListener(async (message: ExtensionMessage) => {
         payload: {},
       });
     })
+    .with({ type: ExtensionMessageType.Version }, () => {
+      console.log("Version", packageJson.version);
+    })
     .exhaustive();
 });
 
@@ -73,6 +80,9 @@ browser.runtime.onMessageExternal.addListener(
       .with({ action: ExtensionAction.NotifyZkProvingStatus }, (msg) =>
         handleProvingStatusNotification(msg),
       )
+      .with({ action: ExtensionAction.RequestVersion }, () => {
+        console.log("RequestVersion", packageJson.version);
+      })
       .exhaustive();
   },
 );
@@ -101,4 +111,11 @@ const handleProvingStatusNotification = async (
   >,
 ) => {
   await zkProvingStatusStore.setProvingStatus(message.payload);
+};
+
+const handleVersionRequest = (port: browser.Runtime.Port) => {
+  port.postMessage({
+    type: ExtensionMessageType.Version,
+    payload: { version: packageJson.version },
+  });
 };

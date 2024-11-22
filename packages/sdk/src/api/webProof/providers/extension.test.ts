@@ -75,10 +75,10 @@ describe.only("ExtensionWebProofProvider with extension not installed", () => {
     await expect(provider.getExtensionVersion()).resolves.toBeNull();
   });
 
-  it("shouldnt notify about zk-proving status", async () => {
+  it("shouldnt notify about zk-proving status", () => {
     const provider = createExtensionWebProofProvider();
     vi.advanceTimersByTime(1000);
-    await provider.notifyZkProvingStatus(ZkProvingStatus.Proving);
+    provider.notifyZkProvingStatus(ZkProvingStatus.Proving);
     expect(mocks.sendMessage).not.toHaveBeenCalled();
   });
 });
@@ -117,10 +117,10 @@ describe.only("ExtensionWebProofProvider with extension installed", () => {
     await expect(provider.getExtensionVersion()).resolves.toBe("1.0.0");
   });
 
-  it("should notify about zk-proving status", async () => {
+  it("should notify about zk-proving status", () => {
     const provider = createExtensionWebProofProvider();
     vi.advanceTimersByTime(2000);
-    await provider.notifyZkProvingStatus(ZkProvingStatus.Proving);
+    provider.notifyZkProvingStatus(ZkProvingStatus.Proving);
     expect(mocks.sendMessage).toHaveBeenCalledWith(EXTENSION_ID, {
       action: ExtensionAction.NotifyZkProvingStatus,
       payload: { status: ZkProvingStatus.Proving },

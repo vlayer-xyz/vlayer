@@ -16,9 +16,6 @@
     "types": [
       "bun"
     ],
-    "typeRoots": [
-      "./src/chrome.d.ts"
-    ],
     "baseUrl": "./",
     "paths": {
       "types/*": ["./src/api/lib/types/*"],
