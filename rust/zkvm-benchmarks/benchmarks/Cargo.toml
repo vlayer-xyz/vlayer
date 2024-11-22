@@ -8,6 +8,7 @@ alloy-primitives = { workspace = true }
 alloy-sol-types = { workspace = true }
 call_precompiles = { workspace = true }
 risc0-zkvm = { workspace = true }
+thousands = { workspace = true }
 
 email_proof = { workspace = true }
-num-format = { workspace = true }
+

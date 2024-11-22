@@ -1,8 +1,8 @@
 use std::fmt::Display;
 
 use benchmarks::{keccak, precompiles::email};
-use num_format::{CustomFormat, ToFormattedString};
 use risc0_zkvm::guest::env;
+use thousands::Separable;
 mod benchmarks;
 
 pub struct BenchmarkRunner(Vec<Benchmark>);
@@ -18,13 +18,12 @@ struct BenchmarkResult {
 
 impl Display for BenchmarkResult {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        let number_format = CustomFormat::builder().separator("_").build().unwrap();
         write!(
             f,
             "{}: {} / {}",
             self.name,
-            self.used_cycles.to_formatted_string(&number_format),
-            self.limit_cycles.to_formatted_string(&number_format)
+            self.used_cycles.separate_with_underscores(),
+            self.limit_cycles.separate_with_underscores()
         )
     }
 }
@@ -114,7 +113,7 @@ mod tests {
     use super::*;
 
     #[test]
-    fn results_are_displayed_with_thousands_separator() {
+    fn thousands_separated() {
         let result = BenchmarkResult {
             name: "test",
             used_cycles: 1_000,
