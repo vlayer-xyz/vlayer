@@ -7,7 +7,6 @@ use risc0_zkp::verify::VerificationError;
 use thiserror::Error;
 
 use super::prover;
-use crate::encodable_receipt;
 
 #[derive(Error, Debug)]
 pub enum Error {
@@ -54,7 +53,7 @@ pub enum Error {
     EvmEnvFactory(#[from] anyhow::Error),
 
     #[error("Seal encoding error: {0}")]
-    SealEncodingError(#[from] encodable_receipt::Error),
+    SealEncodingError(#[from] seal::Error),
 
     #[error("Chain Proof Client error: {0}")]
     ChainProofClient(#[from] chain_client::Error),

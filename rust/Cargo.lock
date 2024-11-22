@@ -1998,6 +1998,7 @@ dependencies = [
  "revm",
  "risc0-zkp",
  "risc0-zkvm",
+ "seal",
  "serde_json",
  "test-log",
  "thiserror",
@@ -2047,6 +2048,7 @@ dependencies = [
  "mock_chain_server",
  "provider",
  "reqwest 0.12.8",
+ "seal",
  "serde",
  "serde_json",
  "server_utils",
@@ -9067,6 +9069,17 @@ checksum = "da046153aa2352493d6cb7da4b6e5c0c057d8a1d0a9aa8560baffdd945acd414"
 dependencies = [
  "ring 0.17.8",
  "untrusted 0.9.0",
+]
+
+[[package]]
+name = "seal"
+version = "0.1.0"
+dependencies = [
+ "alloy-primitives",
+ "alloy-sol-types",
+ "call_engine",
+ "risc0-zkvm",
+ "thiserror",
 ]
 
 [[package]]

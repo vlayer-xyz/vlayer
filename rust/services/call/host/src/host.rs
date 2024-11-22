@@ -25,12 +25,10 @@ pub use error::Error;
 use ethers_core::types::BlockNumber as BlockTag;
 use prover::Prover;
 use provider::{CachedMultiProvider, EthersProviderFactory, EvmBlockHeader};
+use seal::EncodableReceipt;
 use tracing::info;
 
-use crate::{
-    encodable_receipt::EncodableReceipt, evm_env::factory::HostEvmEnvFactory,
-    into_input::into_multi_input, HostDb,
-};
+use crate::{evm_env::factory::HostEvmEnvFactory, into_input::into_multi_input, HostDb};
 
 mod config;
 mod error;

@@ -31,7 +31,7 @@ pub enum Error {
 }
 
 #[derive(Clone)]
-pub(crate) struct EncodableReceipt(InnerReceipt);
+pub struct EncodableReceipt(InnerReceipt);
 
 impl EncodableReceipt {
     const fn proof_mode(&self) -> Option<ProofMode> {

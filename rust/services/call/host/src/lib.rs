@@ -1,5 +1,4 @@
 mod db;
-pub mod encodable_receipt;
 mod evm_env;
 mod host;
 mod into_input;

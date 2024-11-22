@@ -5,7 +5,7 @@ use alloy_sol_types::SolValue;
 use call_engine::{
     evm::env::location::ExecutionLocation, Call as EngineCall, HostOutput, Proof, Seal,
 };
-use call_host::{encodable_receipt, Call as HostCall, Error as HostError};
+use call_host::{Call as HostCall, Error as HostError};
 use common::Hashable;
 use derive_more::From;
 use derive_new::new;
@@ -118,7 +118,7 @@ impl Hashable for CallHashData {
     }
 }
 
-fn decode_seal(seal: Vec<u8>) -> Result<Seal, encodable_receipt::Error> {
+fn decode_seal(seal: Vec<u8>) -> Result<Seal, seal::Error> {
     Ok(Seal::abi_decode(&seal, true)?)
 }
 

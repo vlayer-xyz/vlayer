@@ -24,6 +24,7 @@ provider = { workspace = true }
 revm = { workspace = true, features = ["serde", "std"] }
 risc0-zkp = { workspace = true }
 risc0-zkvm = { workspace = true }
+seal = { workspace = true }
 serde_json = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true, features = ["macros"] }
