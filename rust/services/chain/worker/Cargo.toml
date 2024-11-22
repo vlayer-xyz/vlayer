@@ -4,8 +4,10 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+alloy-primitives = { workspace = true }
 anyhow = { workspace = true }
 chain_host = { workspace = true }
+clap = { workspace = true, features = ["derive", "env"] }
 dotenvy = { workspace = true }
 tokio = { workspace = true }
 tracing = { workspace = true }

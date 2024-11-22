@@ -13,6 +13,7 @@ block_trie = { workspace = true }
 bytemuck = { workspace = true }
 chain_common = { workspace = true }
 chain_db = { workspace = true }
+clap = { workspace = true, features = ["derive", "env"] }
 common = { workspace = true }
 dotenvy = { workspace = true }
 lazy_static = { workspace = true }

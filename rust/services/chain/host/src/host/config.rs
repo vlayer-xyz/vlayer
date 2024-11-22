@@ -1,3 +1,5 @@
+use std::path::PathBuf;
+
 use alloy_primitives::ChainId;
 use host_utils::ProofMode;
 
@@ -8,7 +10,7 @@ pub struct HostConfig {
     pub rpc_url: String,
     pub chain_id: ChainId,
     pub proof_mode: ProofMode,
-    pub db_path: String,
+    pub db_path: PathBuf,
     pub prepend_strategy: PrependStrategy,
     pub append_strategy: AppendStrategy,
 }

@@ -2284,6 +2284,7 @@ dependencies = [
  "bytemuck",
  "chain_common",
  "chain_db",
+ "clap",
  "common",
  "dotenvy",
  "lazy_static",
@@ -5606,6 +5607,7 @@ dependencies = [
  "anyhow",
  "derive-new",
  "risc0-zkvm",
+ "strum",
  "tokio",
  "tracing",
 ]
@@ -11486,8 +11488,10 @@ checksum = "d135d17ab770252ad95e9a872d365cf3090e3be864a34ab46f48555993efc904"
 name = "worker"
 version = "0.1.0"
 dependencies = [
+ "alloy-primitives",
  "anyhow",
  "chain_host",
+ "clap",
  "dotenvy",
  "tokio",
  "tracing",
