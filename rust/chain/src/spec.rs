@@ -10,10 +10,16 @@ pub struct ChainSpec {
     id: ChainId,
     name: String,
     forks: Box<[Fork]>,
+    is_optimism: bool,
 }
 
 impl ChainSpec {
-    pub fn new<F>(id: ChainId, name: impl Into<String>, forks: impl IntoIterator<Item = F>) -> Self
+    pub fn new<F>(
+        id: ChainId,
+        name: impl Into<String>,
+        forks: impl IntoIterator<Item = F>,
+        is_optimism: bool,
+    ) -> Self
     where
         F: Into<Fork>,
     {
@@ -25,15 +31,12 @@ impl ChainSpec {
             "forks must be ordered by their activation conditions in ascending order",
         );
 
-        ChainSpec { id, name, forks }
-    }
-
-    pub fn id(&self) -> ChainId {
-        self.id
-    }
-
-    pub fn name(&self) -> &str {
-        &self.name
+        ChainSpec {
+            id,
+            name,
+            forks,
+            is_optimism,
+        }
     }
 
     /// Returns the [SpecId] for a given block number and timestamp or an error if not supported.
@@ -44,6 +47,18 @@ impl ChainSpec {
             }
         }
         bail!("unsupported fork for block {}", block_number)
+    }
+
+    pub fn id(&self) -> ChainId {
+        self.id
+    }
+
+    pub fn name(&self) -> &str {
+        &self.name
+    }
+
+    pub fn is_optimism(&self) -> bool {
+        self.is_optimism
     }
 }
 
@@ -69,7 +84,7 @@ mod tests {
         #[test]
         #[should_panic(expected = "chain spec must have at least one fork")]
         fn panics_if_no_forks() {
-            ChainSpec::new(1, "", [] as [Fork; 0]);
+            ChainSpec::new(1, "", [] as [Fork; 0], false);
         }
 
         #[test]
@@ -84,6 +99,7 @@ mod tests {
                     Fork::after_timestamp(SpecId::MERGE, MAINNET_MERGE_BLOCK_TIMESTAMP),
                     Fork::after_block(SpecId::SHANGHAI, 0),
                 ],
+                false,
             );
         }
 
@@ -96,6 +112,7 @@ mod tests {
                     Fork::after_block(SpecId::MERGE, 0),
                     Fork::after_timestamp(SpecId::SHANGHAI, MAINNET_MERGE_BLOCK_TIMESTAMP),
                 ],
+                false,
             );
         }
     }
