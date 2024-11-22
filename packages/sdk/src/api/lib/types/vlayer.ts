@@ -8,6 +8,8 @@ import {
   ContractFunctionReturnType,
   Hex,
 } from "viem";
+import { WebProofRequest } from "./webProofProvider";
+import { ContractFunctionArgsWithout } from "./viem";
 
 type Calldata = string;
 
@@ -58,7 +60,19 @@ export type VlayerClient = {
     chainId?: number;
     args: ContractFunctionArgs<T, AbiStateMutability, F>;
   }) => Promise<BrandedHash<T, F>>;
+
   waitForProvingResult: <T extends Abi, F extends ContractFunctionName<T>>(
     hash: BrandedHash<T, F>,
   ) => Promise<ContractFunctionReturnType<T, AbiStateMutability, F>>;
+
+  proveWeb: <T extends Abi, F extends ContractFunctionName<T>>(args: {
+    address: Hex;
+    proverAbi: T;
+    functionName: F;
+    chainId: number;
+    args: [
+      WebProofRequest,
+      ...ContractFunctionArgsWithout<T, F, { name: "webProof" }>,
+    ];
+  }) => Promise<BrandedHash<T, F>>;
 };

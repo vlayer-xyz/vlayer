@@ -6,12 +6,14 @@ import { createExtensionWebProofProvider } from "../webProof";
 import {
   type Abi,
   AbiStateMutability,
+  ContractFunctionArgs,
   ContractFunctionName,
   ContractFunctionReturnType,
   decodeFunctionResult,
   Hex,
 } from "viem";
 import { ZkProvingStatus } from "../../web-proof-commons";
+import { ContractFunctionArgsWithout } from "types/viem";
 
 function dropEmptyProofFromArgs(args: unknown) {
   if (Array.isArray(args)) {
@@ -71,6 +73,7 @@ export const createVlayerClient = (
       ]);
       return { hash } as BrandedHash<typeof proverAbi, typeof functionName>;
     },
+
     waitForProvingResult: async <
       T extends Abi,
       F extends ContractFunctionName<T>,
@@ -101,6 +104,54 @@ export const createVlayerClient = (
         AbiStateMutability,
         F
       >;
+    },
+
+    proveWeb: async function ({
+      address,
+      proverAbi,
+      functionName,
+      chainId,
+      args,
+    }) {
+      const webProofPlaceholder = args[0];
+      const commitmentArgs = args.slice(1) as ContractFunctionArgsWithout<
+        typeof proverAbi,
+        typeof functionName,
+        { name: "webProof" }
+      >;
+
+      const webProof = await webProofProvider.getWebProof({
+        proverCallCommitment: {
+          address,
+          proverAbi,
+          functionName,
+          commitmentArgs,
+          chainId,
+        },
+        logoUrl: webProofPlaceholder.logoUrl,
+        steps: webProofPlaceholder.steps,
+      });
+
+      const hash = await this.prove({
+        address,
+        functionName,
+        chainId,
+        proverAbi,
+        args: [
+          {
+            webProofJson: JSON.stringify({
+              tls_proof: webProof,
+              notary_pub_key: webProofPlaceholder.notaryPubKey,
+            }),
+          },
+          ...commitmentArgs,
+        ] as ContractFunctionArgs<
+          typeof proverAbi,
+          AbiStateMutability,
+          typeof functionName
+        >,
+      });
+      return hash;
     },
   };
 };
