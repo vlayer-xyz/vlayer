@@ -4,10 +4,9 @@ import path from "path";
 import { fileURLToPath } from "url";
 const VLAYER_SERVER_URL = "http://127.0.0.1:3000";
 
-// Resolve current directory in an ESM module
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
-test("email", async ({ page }) => {
+test("Success email proof flow", async ({ page }) => {
   await page.goto("/email");
   await expect(page.locator("h1")).toHaveText("Email");
   const fileChooserPromise = page.waitForEvent("filechooser");
