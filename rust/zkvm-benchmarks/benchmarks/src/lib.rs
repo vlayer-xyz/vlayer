@@ -1,6 +1,7 @@
 use std::fmt::Display;
 
 use benchmarks::{keccak, precompiles::email};
+use num_format::{CustomFormat, ToFormattedString};
 use risc0_zkvm::guest::env;
 mod benchmarks;
 
@@ -17,7 +18,14 @@ struct BenchmarkResult {
 
 impl Display for BenchmarkResult {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}: {}/{}", self.name, self.used_cycles, self.limit_cycles)
+        let number_format = CustomFormat::builder().separator("_").build().unwrap();
+        write!(
+            f,
+            "{}: {}/{}",
+            self.name,
+            self.used_cycles.to_formatted_string(&number_format),
+            self.limit_cycles.to_formatted_string(&number_format)
+        )
     }
 }
 
@@ -97,5 +105,20 @@ impl Benchmark {
             used_cycles: total_cycles,
             limit_cycles: self.total_cycles_limit,
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn results_are_displayed_with_thousands_separator() {
+        let result = BenchmarkResult {
+            name: "test",
+            used_cycles: 1_000,
+            limit_cycles: 1_000_000,
+        };
+        assert_eq!(result.to_string(), "test: 1_000/1_000_000");
     }
 }

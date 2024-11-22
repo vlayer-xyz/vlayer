@@ -11649,6 +11649,7 @@ dependencies = [
  "alloy-sol-types",
  "call_precompiles",
  "email_proof",
+ "num-format",
  "risc0-zkvm",
 ]
 

@@ -10,3 +10,4 @@ call_precompiles = { workspace = true }
 risc0-zkvm = { workspace = true }
 
 email_proof = { workspace = true }
+num-format = { workspace = true }
