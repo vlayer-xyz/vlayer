@@ -30,6 +30,6 @@ function install_deps {
 
 install_deps
 run_services
-#deploy_contracts
+deploy_contracts
 run_web_app
 run_browser_extension
