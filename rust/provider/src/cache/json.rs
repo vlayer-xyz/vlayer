@@ -111,7 +111,8 @@ impl JsonCache {
 
     /// Loads a cache from a file. Nothing is saved when the cache is dropped.
     pub(crate) fn load(file_path: &PathBuf) -> anyhow::Result<Self> {
-        let file = File::open(file_path).context("failed to open cache file")?;
+        let file = File::open(file_path)
+            .with_context(|| format!("failed to open cache file: {:?}", &file_path))?;
         let reader = BufReader::new(file);
         serde_json::from_reader(reader).context("failed to deserialize cache")
     }
@@ -119,7 +120,8 @@ impl JsonCache {
     /// Saves the cache to the file.
     fn save(&self) -> anyhow::Result<()> {
         if let Some(file_path) = &self.file_path {
-            let file = File::create(file_path).context("failed to create cache file")?;
+            let file = File::create(file_path)
+                .with_context(|| format!("failed to create cache file: {:?}", &file_path))?;
             let writer = BufWriter::new(file);
             serde_json::to_writer_pretty(writer, self).context("failed to serialize cache")?;
         }
