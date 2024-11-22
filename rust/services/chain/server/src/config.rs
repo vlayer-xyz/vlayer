@@ -4,13 +4,19 @@ use serde::{Deserialize, Serialize};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ServerConfig {
-    pub socket_addr: SocketAddr,
+    pub listen_addr: SocketAddr,
+}
+
+impl ServerConfig {
+    pub const fn new(listen_addr: SocketAddr) -> Self {
+        Self { listen_addr }
+    }
 }
 
 impl Default for ServerConfig {
     fn default() -> Self {
         Self {
-            socket_addr: "0.0.0.0:3000".parse().unwrap(),
+            listen_addr: "0.0.0.0:3000".parse().unwrap(),
         }
     }
 }
