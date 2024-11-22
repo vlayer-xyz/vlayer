@@ -1,7 +1,6 @@
 use std::fmt::Display;
 
-use benchmarks::precompiles::email;
-use derive_new::new;
+use benchmarks::{keccak, precompiles::email};
 use risc0_zkvm::guest::env;
 mod benchmarks;
 
@@ -22,15 +21,16 @@ impl Display for BenchmarkResult {
     }
 }
 
+const BENCHMARKS: &[Benchmark] = &[
+    Benchmark::new("keccak::empty", keccak::empty as Workload, 30_000),
+    Benchmark::new("keccak::one_block", keccak::one_block as Workload, 250_000),
+    Benchmark::new("keccak::one_kb", keccak::one_kb as Workload, 250_000),
+    Benchmark::new("email_verification", email::test_email_verification as Workload, 32_750_000),
+];
+
 impl BenchmarkRunner {
     pub fn new() -> Self {
-        let benchmarks = [Benchmark::new(
-            "email_verification",
-            email::test_email_verification as Workload,
-            32750000,
-        )];
-
-        Self(benchmarks.into())
+        Self(BENCHMARKS.into())
     }
 
     pub fn run_all(self) -> Result<(), u64> {
@@ -62,7 +62,7 @@ impl Default for BenchmarkRunner {
     }
 }
 
-#[derive(new)]
+#[derive(Debug, Clone)]
 pub struct Benchmark {
     name: &'static str,
     workload: Workload,
@@ -70,6 +70,14 @@ pub struct Benchmark {
 }
 
 impl Benchmark {
+    pub const fn new(name: &'static str, workload: Workload, total_cycles_limit: u64) -> Self {
+        Self {
+            name,
+            workload,
+            total_cycles_limit,
+        }
+    }
+
     fn run(self) -> Result<BenchmarkResult, ()> {
         let start = env::cycle_count();
         (self.workload)()?;
