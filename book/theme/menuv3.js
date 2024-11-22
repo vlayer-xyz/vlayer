@@ -9,4 +9,5 @@ document.querySelectorAll("ol.chapter> li.chapter-item").forEach((el) => {
 const stickyDiv = document.createElement('div');
 stickyDiv.id = 'stickyBottom';
 stickyDiv.innerHTML = '🛟 Need help? <a href="https://support.vlayer.xyz/" target="_blank">Discord Support</a>';
-document.body.appendChild(stickyDiv);
+
+document.querySelector('.sidebar-scrollbox').appendChild(stickyDiv);
