@@ -21,7 +21,7 @@ impl Display for BenchmarkResult {
         let number_format = CustomFormat::builder().separator("_").build().unwrap();
         write!(
             f,
-            "{}: {}/{}",
+            "{}: {} / {}",
             self.name,
             self.used_cycles.to_formatted_string(&number_format),
             self.limit_cycles.to_formatted_string(&number_format)
@@ -120,6 +120,6 @@ mod tests {
             used_cycles: 1_000,
             limit_cycles: 1_000_000,
         };
-        assert_eq!(result.to_string(), "test: 1_000/1_000_000");
+        assert_eq!(result.to_string(), "test: 1_000 / 1_000_000");
     }
 }
