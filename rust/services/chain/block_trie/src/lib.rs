@@ -131,7 +131,7 @@ impl Hashable for BlockTrie {
     }
 }
 
-impl<'a> IntoIterator for &'a BlockTrie {
+impl IntoIterator for &BlockTrie {
     type IntoIter = std::vec::IntoIter<Bytes>;
     type Item = Bytes;
 

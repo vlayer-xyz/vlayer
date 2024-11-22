@@ -96,7 +96,7 @@ impl Hashable for MerkleTrie {
     }
 }
 
-impl<'a> IntoIterator for &'a MerkleTrie {
+impl IntoIterator for &MerkleTrie {
     type IntoIter = std::vec::IntoIter<Bytes>;
     type Item = Bytes;
 

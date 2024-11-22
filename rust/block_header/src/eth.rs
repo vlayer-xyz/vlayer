@@ -11,7 +11,6 @@ use crate::casting_utils::try_downcast;
 /// Ethereum post-merge block header.
 #[derive(Debug, Clone, Serialize, Deserialize, RlpEncodable, Default, PartialEq)]
 #[rlp(trailing)]
-
 pub struct EthBlockHeader {
     /// Hash of the parent block's header.
     pub parent_hash: BlockHash,

@@ -140,7 +140,7 @@ impl<'a> TravelInspector<'a> {
     }
 }
 
-impl<'a, DB> Inspector<DB> for TravelInspector<'a>
+impl<DB> Inspector<DB> for TravelInspector<'_>
 where
     DB: Database,
 {
