@@ -57,12 +57,14 @@ function startup_vlayer(){
 
 function startup_chain_services() {
     db_path="${VLAYER_TMP_DIR}/chain_db"
+
     startup_chain_worker ${db_path} 
     startup_chain_server ${db_path}
 }
 
 function startup_chain_worker() {
     db_path="$1"
+
     echo "Starting chain worker"
     pushd "${VLAYER_HOME}/rust"
 
@@ -85,6 +87,7 @@ function startup_chain_worker() {
 
 function startup_chain_server() {
     db_path="$1"
+
     echo "Starting chain server"
     pushd "${VLAYER_HOME}/rust"
 
@@ -96,8 +99,15 @@ function startup_chain_server() {
     CHAIN_SERVER=$!
     
     echo "Chain server started with PID ${CHAIN_SERVER}."
+    wait_for_port_and_pid 3001 "${CHAIN_SERVER}" 30m "chain server"
+    wait_for_chain_worker_sync
+
+    popd
+}
 
 
+wait_for_chain_worker_sync() {
+    
     echo "Waiting for chain worker sync..."
 
     for i in `seq 1 10` ; do
@@ -119,7 +129,7 @@ function startup_chain_server() {
             break
         fi
         echo "Syncing ..."
-        sleep 1
+        sleep 5
     done
 
     if [[ "${result}" != "true" ]] ; then
@@ -127,9 +137,6 @@ function startup_chain_server() {
         exit 1 
     fi
 
-
-
-    popd
 }
 
 
