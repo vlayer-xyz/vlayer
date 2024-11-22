@@ -7,10 +7,11 @@ use alloy_primitives::{BlockNumber, ChainId};
 use alloy_sol_types::SolValue;
 use bytes::Bytes;
 use call_engine::{
-    evm::env::{cached::CachedEvmEnv, location::ExecutionLocation},
-    travel_call_executor::{
-        Error as TravelCallExecutorError, SuccessfulExecutionResult, TravelCallExecutor,
+    evm::{
+        env::{cached::CachedEvmEnv, location::ExecutionLocation},
+        execution_result::SuccessfulExecutionResult,
     },
+    travel_call_executor::{Error as TravelCallExecutorError, TravelCallExecutor},
     verifier::{
         chain_proof,
         guest_input::{self, Verifier},

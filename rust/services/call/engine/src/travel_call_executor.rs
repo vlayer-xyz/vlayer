@@ -4,17 +4,19 @@ use derive_new::new;
 use revm::{
     db::WrapDatabaseRef,
     inspector_handle_register,
-    primitives::{EVMError, ExecutionResult, ResultAndState, SuccessReason},
+    primitives::{EVMError, ExecutionResult, ResultAndState},
     DatabaseRef, Evm, Handler,
 };
 use tracing::{debug, error};
 
 use crate::{
-    evm::env::{cached::CachedEvmEnv, location::ExecutionLocation, EvmEnv},
+    evm::{
+        env::{cached::CachedEvmEnv, location::ExecutionLocation, EvmEnv},
+        execution_result::{SuccessfulExecutionResult, TransactError},
+    },
     inspector::TravelInspector,
     io::Call,
     precompiles::VLAYER_PRECOMPILES,
-    utils::evm_call::format_failed_call_result,
 };
 
 #[derive(new)]
@@ -31,7 +33,7 @@ pub enum Error {
     TransactPreverifiedError(String),
 
     #[error("EVM transact error: {0}")]
-    TransactError(String),
+    TransactError(#[from] TransactError),
 
     #[error("Chain spec error: {0}")]
     ChainSpecError(String),
@@ -57,7 +59,7 @@ where
     }
 
     pub fn call(self, tx: &Call, location: ExecutionLocation) -> Result<SuccessfulExecutionResult> {
-        self.internal_call(tx, location)?.try_into()
+        Ok(self.internal_call(tx, location)?.try_into()?)
     }
 
     pub fn internal_call(
@@ -110,37 +112,8 @@ where
 impl<D: std::fmt::Debug> From<EVMError<D>> for Error {
     fn from(err: EVMError<D>) -> Self {
         match err {
-            EVMError::Precompile(err) => Error::TransactError(format_failed_call_result({
-                ExecutionResult::Revert {
-                    gas_used: 0,
-                    output: err.into_bytes().into(),
-                }
-            })),
+            EVMError::Precompile(err) => TransactError::Revert(err).into(),
             _ => Error::TransactPreverifiedError(format!("{err:?}")),
-        }
-    }
-}
-
-pub struct SuccessfulExecutionResult {
-    pub output: Vec<u8>,
-    pub gas_used: u64,
-}
-
-impl TryFrom<ExecutionResult> for SuccessfulExecutionResult {
-    type Error = Error;
-
-    fn try_from(execution_result: ExecutionResult) -> Result<Self> {
-        match execution_result {
-            ExecutionResult::Success {
-                reason: SuccessReason::Return,
-                output,
-                gas_used,
-                ..
-            } => Ok(Self {
-                output: output.into_data().into(),
-                gas_used,
-            }),
-            _ => Err(Error::TransactError(format_failed_call_result(execution_result))),
         }
     }
 }

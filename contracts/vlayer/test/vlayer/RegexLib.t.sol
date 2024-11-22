@@ -38,7 +38,7 @@ contract RegexTest is VTest {
         try regex.capture("hello world", "^goodbye world$") {
             revert("Did not revert as expected");
         } catch Error(string memory reason) {
-            assertEq(reason, "Engine(TransactError(\"No match found\"))");
+            assertEq(reason, "Engine(TransactError(Revert(\"No match found\")))");
         }
     }
 
@@ -60,7 +60,7 @@ contract RegexTest is VTest {
         } catch Error(string memory reason) {
             assertEq(
                 reason,
-                "Engine(TransactError(\"Regex must be surrounded by \\\"^\\\" and \\\"$\\\" pair to match the whole string\"))"
+                "Engine(TransactError(Revert(\"Regex must be surrounded by \\\"^\\\" and \\\"$\\\" pair to match the whole string\")))"
             );
         }
     }

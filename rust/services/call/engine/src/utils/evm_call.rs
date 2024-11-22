@@ -1,6 +1,5 @@
 use alloy_primitives::Bytes;
-use alloy_rlp::Buf;
-use alloy_sol_types::{decode_revert_reason, SolError, SolValue};
+use alloy_sol_types::{SolError, SolValue};
 use revm::{
     interpreter::{CallInputs, CallOutcome, Gas, InstructionResult, InterpreterResult},
     primitives::ExecutionResult,
@@ -56,14 +55,4 @@ pub fn create_revert_outcome(reason: &str) -> CallOutcome {
         ),
         usize::MAX..usize::MAX,
     )
-}
-
-pub fn format_failed_call_result(result: ExecutionResult) -> String {
-    match result {
-        ExecutionResult::Revert { output, .. } => {
-            let reason = decode_revert_reason(output.chunk());
-            reason.unwrap_or("revert: unknown reason".into())
-        }
-        _ => format!("{result:?}"),
-    }
 }

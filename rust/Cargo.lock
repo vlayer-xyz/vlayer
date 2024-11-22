@@ -1913,6 +1913,7 @@ dependencies = [
  "block_header",
  "block_trie",
  "bytemuck",
+ "bytes",
  "chain",
  "chain_client",
  "chain_common",

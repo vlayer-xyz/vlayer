@@ -37,7 +37,7 @@ contract WebProverTest is VTest {
         try wrapper.verify(webProof, "") returns (Web memory web) {
             revert("Expected error");
         } catch Error(string memory reason) {
-            assertEq(reason, "Engine(TransactError(\"revert: Incorrect URL\"))");
+            assertEq(reason, "Engine(TransactError(Revert(\"revert: Incorrect URL\")))");
         }
     }
 
@@ -51,7 +51,7 @@ contract WebProverTest is VTest {
         try wrapper.verify(webProof, DATA_URL) returns (Web memory web) {
             revert("Expected error");
         } catch Error(string memory reason) {
-            assertEq(reason, "Engine(TransactError(\"missing field `notary_pub_key` at line 1 column 2\"))");
+            assertEq(reason, "Engine(TransactError(Revert(\"missing field `notary_pub_key` at line 1 column 2\")))");
         }
     }
 
@@ -67,7 +67,7 @@ contract WebProverTest is VTest {
         } catch Error(string memory reason) {
             assertEq(
                 reason,
-                "Engine(TransactError(\"Verification error: Session proof error: session proof is missing notary signature\"))"
+                "Engine(TransactError(Revert(\"Verification error: Session proof error: session proof is missing notary signature\")))"
             );
         }
     }
@@ -84,7 +84,7 @@ contract WebProverTest is VTest {
         } catch Error(string memory reason) {
             assertEq(
                 reason,
-                "Engine(TransactError(\"unknown/unsupported algorithm OID: 1.2.840.10045.2.1 at line 8444 column 1\"))"
+                "Engine(TransactError(Revert(\"unknown/unsupported algorithm OID: 1.2.840.10045.2.1 at line 8444 column 1\")))"
             );
         }
     }
