@@ -3,7 +3,7 @@ use pkcs8::{DecodePublicKey, EncodePublicKey, LineEnding};
 use serde::{de::Deserializer, Deserialize, Serialize, Serializer};
 use thiserror::Error;
 use tlsn_core::{
-    presentation::{Presentation, PresentationOutput},
+    presentation::{Presentation, PresentationError, PresentationOutput},
     CryptoProvider,
 };
 
@@ -26,7 +26,7 @@ impl WebProof {
     ) -> Result<(RequestTranscript, ResponseTranscript), VerificationError> {
         let provider = CryptoProvider::default();
 
-        let PresentationOutput { transcript, .. } = self.presentation.verify(&provider).unwrap();
+        let PresentationOutput { transcript, .. } = self.presentation.verify(&provider)?;
 
         let transcript = transcript.unwrap();
 
@@ -52,9 +52,9 @@ impl WebProof {
 pub enum VerificationError {
     // #[error("Session proof error: {0}")]
     // SessionProof(#[from] SessionProofError),
+    #[error("Presentation error: {0}")]
+    Presentation(#[from] PresentationError),
 
-    // #[error("Substrings proof error: {0}")]
-    // SubstringsProof(#[from] SubstringsProofError),
     #[error("Notary public key serialization error: {0}")]
     PublicKeySerialization(#[from] pkcs8::spki::Error),
 }
@@ -88,6 +88,7 @@ mod tests {
             "./testdata/swapi_presentation_0.1.0-alpha.7.json",
             NOTARY_PUB_KEY_PEM_EXAMPLE,
         );
+
         let serialized = serde_json::to_string(&proof).unwrap();
         let deserialized: WebProof = serde_json::from_str(&serialized).unwrap();
 
@@ -96,17 +97,17 @@ mod tests {
         assert_eq!(proof.notary_pub_key, deserialized.notary_pub_key);
     }
 
-    // #[test]
-    // fn fail_verification_session_error() {
-    //     let invalid_proof = load_web_proof_fixture(
-    //         "./testdata/invalid_session_tls_proof.json",
-    //         NOTARY_PUB_KEY_PEM_EXAMPLE,
-    //     );
-    //     assert!(matches!(
-    //         invalid_proof.verify(),
-    //         Err(VerificationError::SessionProof(err)) if err.to_string() == "signature verification failed: signature error"
-    //     ));
-    // }
+    #[test]
+    fn fail_verification_session_error() {
+        let invalid_proof = load_web_proof_fixture(
+            "./testdata/swapi_presentation_0.1.0-alpha.7.invalid.json",
+            NOTARY_PUB_KEY_PEM_EXAMPLE,
+        );
+        assert!(matches!(
+            invalid_proof.verify(),
+            Err(VerificationError::Presentation(err)) if err.to_string() == "presentation error: attestation error caused by: attestation proof error: signature error caused by: signature verification failed: secp256k1 signature verification failed"
+        ));
+    }
 
     // #[test]
     // fn fail_verification_substrings_error() {
