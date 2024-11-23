@@ -65,7 +65,7 @@ contract EmailDomainProver is Prover {
 It can be convenient to use [Regular Expressions](./regex-and-json.md) to validate the content of the email.
 
 Email is passed to the Solidity contract as an `UnverifiedEmail` structure that can be created using the `preverifyEmail` function in the [SDK](../javascript/javascript.md).
-`preverifyEmail` should be called with the raw `.eml` file content as an argument. The email is also required to have "From" and ["DKIM-Signature"](https://datatracker.ietf.org/doc/html/rfc6376) headers.
+`preverifyEmail` should be called with the raw `.eml` file content as an argument ([learn how to get this file](/features/email.html#getting-eml-files)). The email is also required to have "From" and ["DKIM-Signature"](https://datatracker.ietf.org/doc/html/rfc6376) headers.
 
 ```solidity
 // Note: more fields will be added soon
@@ -264,6 +264,20 @@ And voilà, we just successfully used email in the context of an on-chain smart 
 
 > Keep in mind that this is a simplified version of a real MultiSig wallet, demonstrating how an email recovery function could operate.
 
+## Getting `.eml` Files
+Obtaining an `.eml` file can be helpful for development purposes, such as testing own email proofs. Below are instructions for retrieving `.eml` files from common email clients.
+
+### Gmail
+1. Open the email you want to save.
+2. Click the **three-dot menu** in the top-right corner of the email.
+3. Select **Download message**.
+
+![gmail screen instruction](/static/vlayer-eml-1.gif)
+
+### Outlook / Thunderbird
+1. Open the email you want to save.
+2. Click on the **File** menu.
+3. Select **"Save As"**.
 
 ## Security Assumptions
 Billions of users trust providers to deliver and store their emails. Inboxes often contain critical information, including work-related data, personal files, password recovery links, and more. Email providers also access customer emails for purposes like serving ads. Email proofs can only be as secure as the email itself, and the protocol relies on the trustworthiness of both sending and receiving servers.
