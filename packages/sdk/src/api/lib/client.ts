@@ -47,7 +47,14 @@ export const createVlayerClient = (
   >();
 
   return {
-    prove: async ({ address, functionName, chainId, proverAbi, args }) => {
+    prove: async ({
+      address,
+      functionName,
+      chainId,
+      gasLimit,
+      proverAbi,
+      args,
+    }) => {
       webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Proving);
       const response = prove(
         address,
@@ -55,6 +62,7 @@ export const createVlayerClient = (
         functionName,
         args,
         chainId,
+        gasLimit,
         url,
       )
         .catch((error) => {

@@ -40,6 +40,7 @@ And the response format below.
         "data": "0x<abi encoded calldata>",
     }, { // CallContext
         "chain_id": "<desired chain id>",
+        "gas_limit" "<maximum gas limit (default in SDK: 1_000_000)>",
     }]
 }
 ```

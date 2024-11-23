@@ -12,7 +12,7 @@ on:
 jobs:
   test-sdk-in-web:
     timeout-minutes: 60
-    runs-on: [aws-linux-small]
+    runs-on: [aws-linux-medium]
     steps:
       - uses: oven-sh/setup-bun@v2
         with:

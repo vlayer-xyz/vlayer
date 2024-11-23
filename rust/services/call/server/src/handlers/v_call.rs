@@ -18,6 +18,7 @@ pub struct Params {
 }
 
 pub async fn v_call(config: Arc<ServerConfig>, params: Params) -> Result<CallResult, AppError> {
+    info!("Incoming v_call => {params:#?}");
     let call: EngineCall = params.call.try_into()?;
     let host_config = config.get_host_config(params.context.chain_id);
     let host = Host::try_new(host_config)?;
