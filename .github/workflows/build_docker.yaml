@@ -11,7 +11,7 @@ on:
 jobs:
   build-nightly-docker:
     name: Build nightly docker image
-    runs-on: aws-linux-small
+    runs-on: aws-linux-medium
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4

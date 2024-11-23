@@ -1,4 +1,3 @@
-
 services:
   websockify:
     image: jwnmulder/websockify
@@ -20,7 +19,8 @@ services:
       - "8545:8545"
   vlayer:
     build:
-      dockerfile: ../vlayer/Dockerfile.nightly
+      context: ../../
+      dockerfile: ./docker/vlayer/Dockerfile.nightly
     command: "serve --proof fake --host 0.0.0.0 --rpc-url 31337:http://anvil:8545"
     ports:
       - "3000:3000"
