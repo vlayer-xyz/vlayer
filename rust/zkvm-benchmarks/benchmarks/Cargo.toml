@@ -7,7 +7,8 @@ edition = "2021"
 alloy-primitives = { workspace = true }
 alloy-sol-types = { workspace = true }
 call_precompiles = { workspace = true }
-derive-new = { workspace = true }
 risc0-zkvm = { workspace = true }
+thousands = { workspace = true }
 
 email_proof = { workspace = true }
+

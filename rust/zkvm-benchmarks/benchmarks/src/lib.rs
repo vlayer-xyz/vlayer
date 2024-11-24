@@ -1,8 +1,8 @@
 use std::fmt::Display;
 
-use benchmarks::precompiles::email;
-use derive_new::new;
+use benchmarks::{keccak, precompiles::email};
 use risc0_zkvm::guest::env;
+use thousands::Separable;
 mod benchmarks;
 
 pub struct BenchmarkRunner(Vec<Benchmark>);
@@ -18,19 +18,27 @@ struct BenchmarkResult {
 
 impl Display for BenchmarkResult {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "{}: {}/{}", self.name, self.used_cycles, self.limit_cycles)
+        write!(
+            f,
+            "{}: {} / {}",
+            self.name,
+            self.used_cycles.separate_with_underscores(),
+            self.limit_cycles.separate_with_underscores()
+        )
     }
 }
 
+const BENCHMARKS: &[Benchmark] = &[
+    Benchmark::new("keccak::empty", keccak::empty as Workload, 30_000),
+    Benchmark::new("keccak::one_block", keccak::one_block as Workload, 250_000),
+    Benchmark::new("keccak::one_kb", keccak::one_kb as Workload, 250_000),
+    Benchmark::new("keccak::eight_kb", keccak::eight_kb as Workload, 2_000_000),
+    Benchmark::new("email_verification", email::test_email_verification as Workload, 32_750_000),
+];
+
 impl BenchmarkRunner {
     pub fn new() -> Self {
-        let benchmarks = [Benchmark::new(
-            "email_verification",
-            email::test_email_verification as Workload,
-            32750000,
-        )];
-
-        Self(benchmarks.into())
+        Self(BENCHMARKS.into())
     }
 
     pub fn run_all(self) -> Result<(), u64> {
@@ -62,7 +70,7 @@ impl Default for BenchmarkRunner {
     }
 }
 
-#[derive(new)]
+#[derive(Debug, Clone)]
 pub struct Benchmark {
     name: &'static str,
     workload: Workload,
@@ -70,6 +78,14 @@ pub struct Benchmark {
 }
 
 impl Benchmark {
+    pub const fn new(name: &'static str, workload: Workload, total_cycles_limit: u64) -> Self {
+        Self {
+            name,
+            workload,
+            total_cycles_limit,
+        }
+    }
+
     fn run(self) -> Result<BenchmarkResult, ()> {
         let start = env::cycle_count();
         (self.workload)()?;
@@ -89,5 +105,20 @@ impl Benchmark {
             used_cycles: total_cycles,
             limit_cycles: self.total_cycles_limit,
         })
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn thousands_separated() {
+        let result = BenchmarkResult {
+            name: "test",
+            used_cycles: 1_000,
+            limit_cycles: 1_000_000,
+        };
+        assert_eq!(result.to_string(), "test: 1_000 / 1_000_000");
     }
 }
