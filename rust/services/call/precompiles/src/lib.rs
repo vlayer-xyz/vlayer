@@ -18,7 +18,7 @@ use crate::{
         JSON_GET_STRING_PRECOMPILE,
     },
     regex::{REGEX_CAPTURE_PRECOMPILE, REGEX_MATCH_PRECOMPILE},
-    url_pattern::URL_PATTERN_TEST,
+    url_pattern::URL_PATTERN_TEST_PRECOMPILE,
     verify_and_parse::VERIFY_AND_PARSE_PRECOMPILE,
     verify_and_parse_email::VERIFY_EMAIL_PRECOMPILE,
 };
@@ -32,7 +32,7 @@ pub const VLAYER_PRECOMPILES: [PrecompileWithAddress; 9] = [
     PrecompileWithAddress(u64_to_address(0x105), JSON_GET_ARRAY_LENGTH_PRECOMPILE),
     PrecompileWithAddress(u64_to_address(0x110), REGEX_MATCH_PRECOMPILE),
     PrecompileWithAddress(u64_to_address(0x111), REGEX_CAPTURE_PRECOMPILE),
-    PrecompileWithAddress(u64_to_address(0x120), URL_PATTERN_TEST),
+    PrecompileWithAddress(u64_to_address(0x120), URL_PATTERN_TEST_PRECOMPILE),
 ];
 
 #[allow(clippy::needless_pass_by_value)] // More convenient to use in map_err
