@@ -14,8 +14,8 @@ async fn start_chain_proof_server() -> ChainProofServerMock {
 
 pub(crate) async fn run_serve(serve_args: ServeArgs) -> Result<(), CLIError> {
     let chain_proof_server_mock = start_chain_proof_server().await;
-    let semver = version();
-    let server_config = serve_args.into_server_config(chain_proof_server_mock.url(), semver);
+    let api_version = version();
+    let server_config = serve_args.into_server_config(chain_proof_server_mock.url(), api_version);
 
     info!("Running vlayer serve...");
     if server_config.fake_proofs() {

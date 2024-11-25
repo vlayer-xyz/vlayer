@@ -63,10 +63,10 @@ impl TestHelper {
             chain_proof_server_mock.url(),
             call_guest_elf,
             chain_guest_elf,
+            "1.2.3".to_string(),
         )
         .with_rpc_mappings([(anvil.chain_id(), anvil.endpoint())])
         .with_proof_mode(ProofMode::Fake)
-        .with_semver("1.2.3".to_string())
         .with_gas_meter_config(GasMeterConfig {
             url: gas_meter_server_mock.url(),
             time_to_live: DEFAULT_GAS_METER_TTL,

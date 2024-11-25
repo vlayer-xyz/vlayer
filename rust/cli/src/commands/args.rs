@@ -37,19 +37,19 @@ pub(crate) struct ServeArgs {
 }
 
 impl ServeArgs {
-    pub fn into_server_config(self, chain_proof_url: impl ToString, semver: String) -> Config {
+    pub fn into_server_config(self, chain_proof_url: impl ToString, api_version: String) -> Config {
         let proof_mode = self.proof.unwrap_or_default().map();
         call_server::ConfigBuilder::new(
             chain_proof_url,
             CALL_GUEST_ELF.clone(),
             CHAIN_GUEST_ELF.clone(),
+            api_version,
         )
         .with_rpc_mappings(self.rpc_url)
         .with_proof_mode(proof_mode)
         .with_host(self.host)
         .with_port(self.port)
         .with_verify_chain_proofs(self.verify_chain_proofs)
-        .with_semver(semver)
         .build()
     }
 }

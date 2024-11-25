@@ -74,7 +74,7 @@ mod server_tests {
                     "result": {
                         "call_guest_id": "0x0000000000000000000000000000000000000000000000000000000000000000",
                         "chain_guest_id": "0x0100000001000000010000000100000001000000010000000100000001000000",
-                        "semver": "1.2.3"
+                        "api_version": "1.2.3"
                     }
                 }),
                 actual: body_to_json(response.into_body()).await,

@@ -20,7 +20,7 @@ export interface ProveOptions {
 async function preverifyVersions(url: string, shouldPreverify: boolean) {
   if (shouldPreverify) {
     const proverVersions = await v_versions(url);
-    checkVersionCompatibility(proverVersions.result.semver, sdkVersion);
+    checkVersionCompatibility(proverVersions.result.api_version, sdkVersion);
   }
 }
 

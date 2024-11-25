@@ -8,7 +8,7 @@ const v_versionsBody = {
 interface VVersionsResponseResult {
   call_guest_id: string;
   chain_guest_id: string;
-  semver: string;
+  api_version: string;
 }
 
 export interface VVersionsResponse {
@@ -55,7 +55,7 @@ function assertResponseObject(x: unknown): asserts x is VVersionsResponse {
   if (
     !isFieldAString(x.result, "call_guest_id") ||
     !isFieldAString(x.result, "chain_guest_id") ||
-    !isFieldAString(x.result, "semver")
+    !isFieldAString(x.result, "api_version")
   ) {
     throw new Error(
       `Unexpected \`v_versions\` response: ${JSON.stringify(x, null, 2)}`,
