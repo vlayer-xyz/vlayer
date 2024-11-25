@@ -1,5 +1,6 @@
 mod json;
 mod regex;
+mod url_pattern;
 mod verify_and_parse;
 pub mod verify_and_parse_email;
 
@@ -19,9 +20,10 @@ use crate::{
     regex::{REGEX_CAPTURE_PRECOMPILE, REGEX_MATCH_PRECOMPILE},
     verify_and_parse::VERIFY_AND_PARSE_PRECOMPILE,
     verify_and_parse_email::VERIFY_EMAIL_PRECOMPILE,
+    url_pattern::URL_PATTERN_TEST,
 };
 
-pub const VLAYER_PRECOMPILES: [PrecompileWithAddress; 8] = [
+pub const VLAYER_PRECOMPILES: [PrecompileWithAddress; 9] = [
     PrecompileWithAddress(u64_to_address(0x100), VERIFY_AND_PARSE_PRECOMPILE),
     PrecompileWithAddress(u64_to_address(0x101), VERIFY_EMAIL_PRECOMPILE),
     PrecompileWithAddress(u64_to_address(0x102), JSON_GET_STRING_PRECOMPILE),
@@ -30,6 +32,7 @@ pub const VLAYER_PRECOMPILES: [PrecompileWithAddress; 8] = [
     PrecompileWithAddress(u64_to_address(0x105), JSON_GET_ARRAY_LENGTH_PRECOMPILE),
     PrecompileWithAddress(u64_to_address(0x110), REGEX_MATCH_PRECOMPILE),
     PrecompileWithAddress(u64_to_address(0x111), REGEX_CAPTURE_PRECOMPILE),
+    PrecompileWithAddress(u64_to_address(0x120), URL_PATTERN_TEST)
 ];
 
 #[allow(clippy::needless_pass_by_value)] // More convenient to use in map_err
