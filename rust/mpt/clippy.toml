@@ -1,0 +1,4 @@
+disallowed-methods = [
+    # Don't import hash function directly but use mpt::hash wrapper module
+    { path = "alloy_primitives::keccak256", reason = "use mpt::hash wrapper" },
+]

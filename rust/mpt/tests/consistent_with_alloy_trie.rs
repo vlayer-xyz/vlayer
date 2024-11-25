@@ -1,9 +1,9 @@
 use std::collections::BTreeMap;
 
-use alloy_primitives::{keccak256, U256};
+use alloy_primitives::U256;
 use alloy_trie::HashBuilder;
 use common::Hashable;
-use mpt::{reorder_with_root_as_first, MerkleTrie};
+use mpt::{hash, reorder_with_root_as_first, MerkleTrie};
 use nybbles::Nibbles;
 
 #[test]
@@ -14,7 +14,7 @@ fn root_match() -> anyhow::Result<()> {
     let leaves: BTreeMap<_, _> = (0..NUM_LEAVES)
         .map(|i| {
             let key = U256::from(i);
-            (Nibbles::unpack(keccak256(key.to_be_bytes::<32>())), alloy_rlp::encode(key))
+            (Nibbles::unpack(hash(key.to_be_bytes::<32>())), alloy_rlp::encode(key))
         })
         .collect();
 
