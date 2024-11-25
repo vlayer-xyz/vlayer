@@ -28,7 +28,7 @@ import { createVlayerClient } from '@vlayer/sdk'
 const vlayer = createVlayerClient()
 ```
 
-We can configure a Web Proof provider which uses vlayer browser extension and enables configuring custom *Notary* server and custom WebSocket proxy (see section [WebSocket proxy](#role-of-websocket-proxy) below for more details). 
+We can configure a Web Proof provider which uses vlayer browser extension and enables configuring custom [*Notary*](/features/web.html#notary) server and custom WebSocket proxy (see section [WebSocket proxy](#role-of-websocket-proxy) below for more details). 
 
 ```ts
 import { createExtensionWebProofProvider } from '@vlayer/sdk/web_proof'
@@ -39,11 +39,17 @@ const webProofProvider = createExtensionWebProofProvider({
 })
 ```
 
-Both `notaryUrl` and `wsProxyUrl` have default values, so the provider can be initialized without any configuration as:
+Both `notaryUrl` and `wsProxyUrl` have default values:  
+- **`notaryUrl`**: `https://notary.pse.dev/v0.1.0-alpha.5/`  
+- **`wsProxyUrl`**: `wss://notary.pse.dev/proxy`  
+
+Because of these defaults, the provider can be initialized without any additional configuration as follows:
 
 ```ts
 const webProofProvider = createExtensionWebProofProvider();
 ```
+
+TLSNotary team hosts team hosts a [public notary server](https://docs.tlsnotary.org/developers/notary_server.html#pse-development-notary-server) for development, experimentation, and demonstration purposes. Notary server can be also self-hosted using [Docker](https://docs.tlsnotary.org/developers/notary_server.html#using-docker)
 
 In the future, vlayer is planning to provide additional Web Proof provider implementations, which can be e.g. ran server-side and don't require vlayer browser extension for the purpose of Web Proof generation.
 
