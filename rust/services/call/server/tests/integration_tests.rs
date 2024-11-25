@@ -180,7 +180,7 @@ mod server_tests {
             );
         }
 
-        #[skip]
+        #[ignore]
         #[tokio::test(flavor = "multi_thread")]
         async fn success_web_proof() {
             let helper = TestHelper::default().await;
