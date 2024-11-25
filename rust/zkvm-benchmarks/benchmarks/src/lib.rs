@@ -78,6 +78,13 @@ impl Benchmark {
         }
     }
 
+    pub fn nest(self, module: &str) -> Benchmark {
+        Benchmark {
+            name: format!("{}::{}", module, self.name),
+            ..self
+        }
+    }
+
     fn run(self) -> Result<BenchmarkResult, ()> {
         let start = env::cycle_count();
         (self.workload)()?;

@@ -13,13 +13,9 @@ pub fn merge<Benchmarks: IntoIterator<Item = Benchmark>>(
     benchmarks
         .into_iter()
         .flat_map(|(module, benchmarks)| {
-            benchmarks.into_iter().map(move |benchmark| {
-                Benchmark::new(
-                    format!("{}::{}", module, benchmark.name),
-                    benchmark.workload,
-                    benchmark.total_cycles_limit,
-                )
-            })
+            benchmarks
+                .into_iter()
+                .map(|benchmark| benchmark.nest(module))
         })
         .collect()
 }
