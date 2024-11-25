@@ -3,25 +3,25 @@ use lazy_static::lazy_static;
 
 use crate::{Benchmark, Workload, WorkloadResult};
 
-pub(crate) fn empty() -> WorkloadResult {
+fn empty() -> WorkloadResult {
     keccak256([]);
 
     Ok(())
 }
 
-pub(crate) fn one_block() -> WorkloadResult {
+fn one_block() -> WorkloadResult {
     keccak256([0; 32]);
 
     Ok(())
 }
 
-pub(crate) fn one_kb() -> WorkloadResult {
+fn one_kb() -> WorkloadResult {
     keccak256([0; 1_024]);
 
     Ok(())
 }
 
-pub(crate) fn eight_kb() -> WorkloadResult {
+fn eight_kb() -> WorkloadResult {
     keccak256([0; 8_192]);
 
     Ok(())

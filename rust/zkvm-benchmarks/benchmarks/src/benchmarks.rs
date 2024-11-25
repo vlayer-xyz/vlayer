@@ -2,10 +2,9 @@ use lazy_static::lazy_static;
 
 use crate::Benchmark;
 
-pub(crate) mod keccak;
-pub(crate) mod mpt;
-pub(crate) mod precompiles;
-pub(crate) mod sha2;
+mod hash;
+mod mpt;
+mod precompiles;
 
 pub fn merge<Benchmarks: IntoIterator<Item = Benchmark>>(
     benchmarks: impl IntoIterator<Item = (&'static str, Benchmarks)>,
@@ -23,8 +22,7 @@ pub fn merge<Benchmarks: IntoIterator<Item = Benchmark>>(
 lazy_static! {
     pub static ref BENCHMARKS: Vec<Benchmark> = {
         merge([
-            ("sha2", sha2::BENCHMARKS.clone()),
-            ("keccak", keccak::BENCHMARKS.clone()),
+            ("hash", hash::BENCHMARKS.clone()),
             ("mpt", mpt::BENCHMARKS.clone()),
             ("precompiles", precompiles::BENCHMARKS.clone()),
         ])
