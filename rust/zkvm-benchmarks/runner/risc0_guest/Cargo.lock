@@ -253,7 +253,7 @@ dependencies = [
  "blake2",
  "derivative",
  "digest 0.10.7",
- "sha2 0.10.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "sha2",
 ]
 
 [[package]]
@@ -1157,7 +1157,7 @@ dependencies = [
  "curve25519-dalek",
  "ed25519",
  "serde",
- "sha2 0.10.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "sha2",
  "subtle",
  "zeroize",
 ]
@@ -1752,7 +1752,7 @@ dependencies = [
  "ecdsa",
  "elliptic-curve",
  "once_cell",
- "sha2 0.10.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "sha2",
 ]
 
 [[package]]
@@ -1851,7 +1851,7 @@ dependencies = [
  "serde",
  "serde_json",
  "sha1",
- "sha2 0.10.8 (git+https://github.com/risc0/RustCrypto-hashes?tag=sha2-v0.10.8-risczero.0)",
+ "sha2",
 ]
 
 [[package]]
@@ -1961,7 +1961,7 @@ dependencies = [
  "regex",
  "serde",
  "serde_arrays",
- "sha2 0.10.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "sha2",
  "thiserror",
 ]
 
@@ -2152,7 +2152,7 @@ dependencies = [
  "elliptic-curve",
  "primeorder",
  "serdect",
- "sha2 0.10.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "sha2",
 ]
 
 [[package]]
@@ -2668,7 +2668,7 @@ dependencies = [
  "p256",
  "revm-primitives",
  "ripemd",
- "sha2 0.10.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "sha2",
  "substrate-bn",
 ]
 
@@ -2819,7 +2819,7 @@ dependencies = [
  "risc0-core",
  "risc0-zkvm-platform",
  "serde",
- "sha2 0.10.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "sha2",
  "tracing",
 ]
 
@@ -2848,7 +2848,7 @@ dependencies = [
  "rrs-lib",
  "semver 1.0.23",
  "serde",
- "sha2 0.10.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "sha2",
  "tempfile",
  "tracing",
 ]
@@ -2899,7 +2899,7 @@ version = "1.4.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "3b241d2e59b74ef9e98d94c78c47623d04c8392abaf82014dfd372a16041128f"
 dependencies = [
- "sha2 0.10.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "sha2",
 ]
 
 [[package]]
@@ -3200,17 +3200,6 @@ dependencies = [
 [[package]]
 name = "sha2"
 version = "0.10.8"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "793db75ad2bcafc3ffa7c68b215fee268f537982cd901d132f89c6343f3a3dc8"
-dependencies = [
- "cfg-if",
- "cpufeatures",
- "digest 0.10.7",
-]
-
-[[package]]
-name = "sha2"
-version = "0.10.8"
 source = "git+https://github.com/risc0/RustCrypto-hashes?tag=sha2-v0.10.8-risczero.0#244dc3b08788f7a4ccce14c66896ae3b4f24c166"
 dependencies = [
  "cfg-if",
@@ -3495,7 +3484,7 @@ dependencies = [
  "rustls-pemfile 1.0.4",
  "sct",
  "serde",
- "sha2 0.10.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "sha2",
  "thiserror",
  "tracing",
  "web-time",
@@ -4046,5 +4035,6 @@ dependencies = [
  "call_precompiles",
  "email_proof",
  "risc0-zkvm",
+ "sha2",
  "thousands",
 ]
