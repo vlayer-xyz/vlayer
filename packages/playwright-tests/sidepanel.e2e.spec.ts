@@ -25,6 +25,21 @@ test.describe("Full flow of webproof using extension", () => {
       expect(extension).toBeDefined();
     });
 
+    await test.step("It should stay ok after clinking request button multiple times", async () => {
+      await page.goto("/source-new-way");
+      const requestProofButton = page
+        .locator("body")
+        .getByTestId("request-webproof-button");
+      await requestProofButton.click();
+      await requestProofButton.click();
+      await requestProofButton.click();
+
+      const extension = await sidePanel(context);
+      expect(extension).toBeDefined();
+      const redirectButton = extension.getByTestId("start-page-button");
+      await expect(redirectButton).toBeVisible();
+    });
+
     await test.step("On 'redirect' click extension should open new browser tab for specified startPage url", async () => {
       const extension = await sidePanel(context);
 
