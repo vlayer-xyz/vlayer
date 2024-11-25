@@ -14,7 +14,6 @@ futures = { workspace = true }
 futures-retry = { workspace = true }
 risc0-zkp = { workspace = true }
 serde = { workspace = true }
-thiserror = { workspace = true }
 tokio = { workspace = true, features = ["time"] }
 typed-builder = { workspace = true }
 

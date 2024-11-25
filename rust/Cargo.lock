@@ -2712,7 +2712,6 @@ dependencies = [
  "futures-retry",
  "risc0-zkp",
  "serde",
- "thiserror",
  "tokio",
  "typed-builder",
 ]
