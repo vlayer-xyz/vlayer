@@ -3,6 +3,7 @@ use pkcs8::{DecodePublicKey, EncodePublicKey, LineEnding};
 use serde::{de::Deserializer, Deserialize, Serialize, Serializer};
 use thiserror::Error;
 use tlsn_core::{
+    connection::ServerName,
     presentation::{Presentation, PresentationError, PresentationOutput},
     CryptoProvider,
 };
@@ -23,25 +24,22 @@ pub struct WebProof {
 impl WebProof {
     pub(crate) fn verify(
         self,
-    ) -> Result<(RequestTranscript, ResponseTranscript), VerificationError> {
+    ) -> Result<(RequestTranscript, ResponseTranscript, ServerName), VerificationError> {
         let provider = CryptoProvider::default();
 
-        let PresentationOutput { transcript, .. } = self.presentation.verify(&provider)?;
+        let PresentationOutput {
+            transcript,
+            server_name,
+            ..
+        } = self.presentation.verify(&provider)?;
 
         let transcript = transcript.unwrap();
 
         Ok((
             RequestTranscript::new(transcript.sent_unsafe().to_vec()),
             ResponseTranscript::new(transcript.received_unsafe().to_vec()),
+            server_name.ok_or(VerificationError::NoServerName)?,
         ))
-    }
-
-    pub fn get_server_name(&self) -> Result<String, VerificationError> {
-        let provider = CryptoProvider::default();
-        let PresentationOutput { server_name, .. } = self.presentation.clone().verify(&provider)?;
-        Ok(server_name
-            .ok_or(VerificationError::NoServerName)?
-            .to_string())
     }
 
     pub fn get_notary_pub_key(&self) -> Result<String, pkcs8::spki::Error> {
@@ -129,7 +127,7 @@ mod tests {
             "./testdata/swapi_presentation_0.1.0-alpha.7.json",
             NOTARY_PUB_KEY_PEM_EXAMPLE,
         );
-        let (request, response) = proof.verify().unwrap();
+        let (request, response, _) = proof.verify().unwrap();
 
         assert_eq!(
             String::from_utf8(request.transcript).unwrap(),
@@ -147,7 +145,8 @@ mod tests {
             "./testdata/swapi_presentation_0.1.0-alpha.7.json",
             NOTARY_PUB_KEY_PEM_EXAMPLE,
         );
-        assert_eq!(proof.get_server_name().unwrap(), "swapi.dev");
+        let (_, _, server_name) = proof.verify().unwrap();
+        assert_eq!(server_name.as_str(), "swapi.dev");
     }
 
     #[test]

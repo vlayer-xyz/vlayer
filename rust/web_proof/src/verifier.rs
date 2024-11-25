@@ -26,20 +26,19 @@ pub enum WebProofError {
 }
 
 pub fn verify_and_parse(web_proof: WebProof) -> Result<Web, WebProofError> {
-    let server_name = web_proof.get_server_name()?;
     let notary_pub_key = web_proof
         .get_notary_pub_key()
         .map_err(VerificationError::PublicKeySerialization)?;
-    let (request, response) = web_proof.verify()?;
+    let (request, response, server_name) = web_proof.verify()?;
 
     let web = Web {
         url: request.parse_url()?,
-        server_name: server_name.clone(),
+        server_name: server_name.as_str().to_string(),
         body: response.parse_body()?,
         notary_pub_key,
     };
 
-    verify_server_name(&server_name, &web.url)?;
+    verify_server_name(server_name.as_str(), &web.url)?;
 
     Ok(web)
 }
