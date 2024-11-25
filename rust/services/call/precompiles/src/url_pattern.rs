@@ -20,7 +20,7 @@ fn url_pattern_test_run(input: &Bytes, gas_limit: u64) -> PrecompileResult {
     let pattern =
         <UrlPattern>::parse(url_pattern, UrlPatternOptions::default()).map_err(map_to_fatal)?;
 
-    let parsed_url = Url::parse(&source).map_err(map_to_fatal)?;
+    let parsed_url = Url::parse(&url_to_test).map_err(map_to_fatal)?;
     let result = pattern
         .test(UrlPatternMatchInput::Url(parsed_url))
         .map_err(map_to_fatal)?;
