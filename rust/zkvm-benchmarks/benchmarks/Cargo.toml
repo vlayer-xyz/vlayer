@@ -10,6 +10,7 @@ call_precompiles = { workspace = true }
 risc0-zkvm = { workspace = true }
 sha2 = { workspace = true }
 thousands = { workspace = true }
+common = { workspace = true }
 
 email_proof = { workspace = true }
-
+mpt = { workspace = true }

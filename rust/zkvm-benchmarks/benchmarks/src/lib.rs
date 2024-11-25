@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use benchmarks::{keccak, precompiles::email, sha2};
+use benchmarks::{keccak, mpt, precompiles::email, sha2};
 use risc0_zkvm::guest::env;
 use thousands::Separable;
 mod benchmarks;
@@ -29,7 +29,7 @@ impl Display for BenchmarkResult {
 }
 
 const BENCHMARKS: &[Benchmark] = &[
-    // Deterministic
+    // Hashes
     Benchmark::new("keccak::empty", keccak::empty as Workload, 26_005),
     Benchmark::new("keccak::one_block", keccak::one_block as Workload, 26_211),
     Benchmark::new("keccak::one_kb", keccak::one_kb as Workload, 211_176),
@@ -38,7 +38,19 @@ const BENCHMARKS: &[Benchmark] = &[
     Benchmark::new("sha2::one_block", sha2::one_block as Workload, 650),
     Benchmark::new("sha2::one_kb", sha2::one_kb as Workload, 2_640),
     Benchmark::new("sha2::eight_kb", sha2::eight_kb as Workload, 12_744),
-    // Other
+    // MPT
+    Benchmark::new("mpt::empty::trie", mpt::empty::trie as Workload, 47),
+    Benchmark::new("mpt::empty::hash", mpt::empty::hash as Workload, 122),
+    Benchmark::new("mpt::empty::insert", mpt::empty::insert as Workload, 1_200),
+    Benchmark::new("mpt::height_4::trie", mpt::height_4::trie as Workload, 23_200),
+    Benchmark::new("mpt::height_4::hash", mpt::height_4::hash as Workload, 1_900_000),
+    Benchmark::new(
+        "mpt::height_4::insert_shallow",
+        mpt::height_4::insert_shallow as Workload,
+        32_000,
+    ),
+    Benchmark::new("mpt::height_4::insert_deep", mpt::height_4::insert_deep as Workload, 40_000),
+    // E-Mail
     Benchmark::new("email_verification", email::test_email_verification as Workload, 32_750_000),
 ];
 
