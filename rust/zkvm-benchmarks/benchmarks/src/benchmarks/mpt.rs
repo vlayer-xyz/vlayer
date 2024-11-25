@@ -1,9 +1,11 @@
 use common::Hashable;
+use lazy_static::lazy_static;
 use mpt::MerkleTrie;
 
-use crate::WorkloadResult;
+use crate::{benchmarks::merge, Benchmark, Workload, WorkloadResult};
 
 pub(crate) mod empty {
+
     use super::*;
 
     pub(crate) fn trie() -> WorkloadResult {
@@ -24,6 +26,14 @@ pub(crate) mod empty {
         trie.insert([0], [0; 32]).unwrap();
 
         Ok(())
+    }
+
+    lazy_static! {
+        pub static ref BENCHMARKS: Vec<Benchmark> = vec![
+            Benchmark::new("trie", trie as Workload, 1_200),
+            Benchmark::new("hash", hash as Workload, 1_200),
+            Benchmark::new("insert", insert as Workload, 1_200),
+        ];
     }
 }
 
@@ -72,4 +82,19 @@ pub(crate) mod height_4 {
 
         Ok(())
     }
+
+    lazy_static! {
+        pub static ref BENCHMARKS: Vec<Benchmark> = vec![
+            Benchmark::new("trie", trie as Workload, 23_200),
+            Benchmark::new("hash", hash as Workload, 1_900_000),
+            Benchmark::new("insert_shallow", insert_shallow as Workload, 32_000),
+            Benchmark::new("insert_deep", insert_deep as Workload, 40_000),
+        ];
+    }
+}
+
+lazy_static! {
+    pub static ref BENCHMARKS: Vec<Benchmark> = {
+        merge([("empty", empty::BENCHMARKS.clone()), ("height_4", height_4::BENCHMARKS.clone())])
+    };
 }

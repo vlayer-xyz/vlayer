@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use benchmarks::{keccak, mpt, precompiles::email, sha2};
+use benchmarks::BENCHMARKS;
 use risc0_zkvm::guest::env;
 use thousands::Separable;
 mod benchmarks;
@@ -11,7 +11,7 @@ type WorkloadResult = Result<(), ()>;
 type Workload = fn() -> WorkloadResult;
 
 struct BenchmarkResult {
-    name: &'static str,
+    name: String,
     used_cycles: u64,
     limit_cycles: u64,
 }
@@ -28,35 +28,9 @@ impl Display for BenchmarkResult {
     }
 }
 
-const BENCHMARKS: &[Benchmark] = &[
-    // Hashes
-    Benchmark::new("keccak::empty", keccak::empty as Workload, 26_005),
-    Benchmark::new("keccak::one_block", keccak::one_block as Workload, 26_211),
-    Benchmark::new("keccak::one_kb", keccak::one_kb as Workload, 211_176),
-    Benchmark::new("keccak::eight_kb", keccak::eight_kb as Workload, 1_608_339),
-    Benchmark::new("sha2::empty", sha2::empty as Workload, 547),
-    Benchmark::new("sha2::one_block", sha2::one_block as Workload, 650),
-    Benchmark::new("sha2::one_kb", sha2::one_kb as Workload, 2_640),
-    Benchmark::new("sha2::eight_kb", sha2::eight_kb as Workload, 12_744),
-    // MPT
-    Benchmark::new("mpt::empty::trie", mpt::empty::trie as Workload, 47),
-    Benchmark::new("mpt::empty::hash", mpt::empty::hash as Workload, 122),
-    Benchmark::new("mpt::empty::insert", mpt::empty::insert as Workload, 1_200),
-    Benchmark::new("mpt::height_4::trie", mpt::height_4::trie as Workload, 23_200),
-    Benchmark::new("mpt::height_4::hash", mpt::height_4::hash as Workload, 1_900_000),
-    Benchmark::new(
-        "mpt::height_4::insert_shallow",
-        mpt::height_4::insert_shallow as Workload,
-        32_000,
-    ),
-    Benchmark::new("mpt::height_4::insert_deep", mpt::height_4::insert_deep as Workload, 40_000),
-    // E-Mail
-    Benchmark::new("email_verification", email::test_email_verification as Workload, 32_750_000),
-];
-
 impl BenchmarkRunner {
     pub fn new() -> Self {
-        Self(BENCHMARKS.into())
+        Self(BENCHMARKS.clone())
     }
 
     pub fn run_all(self) -> Result<(), u64> {
@@ -90,15 +64,15 @@ impl Default for BenchmarkRunner {
 
 #[derive(Debug, Clone)]
 pub struct Benchmark {
-    name: &'static str,
+    name: String,
     workload: Workload,
     total_cycles_limit: u64,
 }
 
 impl Benchmark {
-    pub const fn new(name: &'static str, workload: Workload, total_cycles_limit: u64) -> Self {
+    pub fn new(name: impl Into<String>, workload: Workload, total_cycles_limit: u64) -> Self {
         Self {
-            name,
+            name: name.into(),
             workload,
             total_cycles_limit,
         }
@@ -133,7 +107,7 @@ mod tests {
     #[test]
     fn thousands_separated() {
         let result = BenchmarkResult {
-            name: "test",
+            name: "test".to_string(),
             used_cycles: 1_000,
             limit_cycles: 1_000_000,
         };

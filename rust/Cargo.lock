@@ -11656,6 +11656,7 @@ dependencies = [
  "call_precompiles",
  "common",
  "email_proof",
+ "lazy_static",
  "mpt",
  "risc0-zkvm",
  "sha2 0.10.8 (registry+https://github.com/rust-lang/crates.io-index)",
