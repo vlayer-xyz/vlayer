@@ -40,27 +40,19 @@ jobs:
       - name: Install Playwright Browsers
         run: bunx playwright install --with-deps chromium
         working-directory: ./packages/browser-extension
+      - name: Install Rust prerequisites
+        uses: ./.github/actions/rust-prerequisites
+      - name: Install contracts prerequisites
+        uses: ./.github/actions/contracts-prerequisites
       - uses: hoverkraft-tech/compose-action@v2.0.2
         with:
           compose-file: docker/web-proof/docker-compose-release.yaml
           up-flags: "--build"
-      - name: Install contracts prerequisites
-        uses: ./.github/actions/contracts-prerequisites
-      - name: Mock ImageId.sol
-        run: ./bash/mock-imageid.sh
-      - name: Run Forge build vlayer
-        working-directory: ./contracts/vlayer
-        run: |
-          forge soldeer install
-          forge build --sizes
-      - name: Run Forge build fixtures
-        working-directory: ./contracts/fixtures
-        run: |
-          forge soldeer install
-          forge build --sizes
-      - name: Run Playwright tests
-        run: bun run test:headless
-        working-directory: ./packages
+          services: |
+            websockify
+            notary-server
+      - name: Run playwright tests
+        run: bash/playwright-test.sh
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
