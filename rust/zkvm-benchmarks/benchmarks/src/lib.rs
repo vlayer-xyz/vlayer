@@ -1,6 +1,6 @@
 use std::fmt::Display;
 
-use benchmarks::{keccak, precompiles::email};
+use benchmarks::{keccak, precompiles::email, sha2};
 use risc0_zkvm::guest::env;
 use thousands::Separable;
 mod benchmarks;
@@ -29,10 +29,16 @@ impl Display for BenchmarkResult {
 }
 
 const BENCHMARKS: &[Benchmark] = &[
-    Benchmark::new("keccak::empty", keccak::empty as Workload, 30_000),
-    Benchmark::new("keccak::one_block", keccak::one_block as Workload, 250_000),
-    Benchmark::new("keccak::one_kb", keccak::one_kb as Workload, 250_000),
-    Benchmark::new("keccak::eight_kb", keccak::eight_kb as Workload, 2_000_000),
+    // Deterministic
+    Benchmark::new("keccak::empty", keccak::empty as Workload, 26_005),
+    Benchmark::new("keccak::one_block", keccak::one_block as Workload, 26_211),
+    Benchmark::new("keccak::one_kb", keccak::one_kb as Workload, 211_176),
+    Benchmark::new("keccak::eight_kb", keccak::eight_kb as Workload, 1_608_339),
+    Benchmark::new("sha2::empty", sha2::empty as Workload, 547),
+    Benchmark::new("sha2::one_block", sha2::one_block as Workload, 650),
+    Benchmark::new("sha2::one_kb", sha2::one_kb as Workload, 2_640),
+    Benchmark::new("sha2::eight_kb", sha2::eight_kb as Workload, 12_744),
+    // Other
     Benchmark::new("email_verification", email::test_email_verification as Workload, 32_750_000),
 ];
 
