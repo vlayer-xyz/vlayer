@@ -36,11 +36,12 @@ impl WebProof {
         ))
     }
 
-    pub fn get_server_name(&self) -> String {
+    pub fn get_server_name(&self) -> Result<String, VerificationError> {
         let provider = CryptoProvider::default();
-        let PresentationOutput { server_name, .. } =
-            self.presentation.clone().verify(&provider).unwrap();
-        server_name.unwrap().to_string()
+        let PresentationOutput { server_name, .. } = self.presentation.clone().verify(&provider)?;
+        Ok(server_name
+            .ok_or(VerificationError::NoServerName)?
+            .to_string())
     }
 
     pub fn get_notary_pub_key(&self) -> Result<String, pkcs8::spki::Error> {
@@ -50,8 +51,9 @@ impl WebProof {
 
 #[derive(Error, Debug)]
 pub enum VerificationError {
-    // #[error("Session proof error: {0}")]
-    // SessionProof(#[from] SessionProofError),
+    #[error("No server name found in the presentation")]
+    NoServerName,
+
     #[error("Presentation error: {0}")]
     Presentation(#[from] PresentationError),
 
@@ -145,7 +147,7 @@ mod tests {
             "./testdata/swapi_presentation_0.1.0-alpha.7.json",
             NOTARY_PUB_KEY_PEM_EXAMPLE,
         );
-        assert_eq!(proof.get_server_name(), "swapi.dev");
+        assert_eq!(proof.get_server_name().unwrap(), "swapi.dev");
     }
 
     #[test]
