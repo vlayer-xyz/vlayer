@@ -18,23 +18,16 @@ echo "Saving artifacts to: ${VLAYER_TMP_DIR}"
 
 function cleanup() {
     echo "Cleaning up..."
-    
-    # Kill Anvil if running
-    if [[ -n "${ANVIL_PID:-}" ]] && ps -p "$ANVIL_PID" > /dev/null; then
-        echo "Killing anvil (PID $ANVIL_PID)..."
-        kill "$ANVIL_PID"
-    fi
 
-    # Kill vlayer server if running
-    if [[ -n "${VLAYER_SERVER_PID:-}" ]] && ps -p "$VLAYER_SERVER_PID" > /dev/null; then
-        echo "Killing vlayer server (PID $VLAYER_SERVER_PID)..."
-        kill "$VLAYER_SERVER_PID"
-    fi
+    for service in ANVIL CHAIN_WORKER CHAIN_SERVER VLAYER_SERVER ; do 
+        kill_service "${service}"
+    done
+   
 }
 
 function start_anvil(){
     echo "Starting Anvil "
-    startup_anvil "${LOGS_DIR}/anvil.out" 8545 ANVIL_PID
+    startup_anvil "${LOGS_DIR}/anvil.out" 8545 ANVIL
 }
 
 function startup_vlayer(){
@@ -54,13 +47,97 @@ function startup_vlayer(){
         ${external_urls[@]+"${external_urls[@]}"} \
         >"${LOGS_DIR}/vlayer_serve.out" &
 
-    VLAYER_SERVER_PID=$!
+    VLAYER_SERVER=$!
 
-    echo "vlayer server started with PID ${VLAYER_SERVER_PID}."
-    wait_for_port_and_pid 3000 ${VLAYER_SERVER_PID} 30m "vlayer server"
+    echo "vlayer server started with PID ${VLAYER_SERVER}."
+    wait_for_port_and_pid 3000 ${VLAYER_SERVER} 30m "vlayer server"
 
     popd
 }
+
+function startup_chain_services() {
+    db_path="${VLAYER_TMP_DIR}/chain_db"
+
+    startup_chain_worker ${db_path} 
+    startup_chain_server ${db_path}
+}
+
+function startup_chain_worker() {
+    db_path="$1"
+
+    echo "Starting chain worker"
+    pushd "${VLAYER_HOME}/rust"
+
+    RUST_LOG=${RUST_LOG:-info} \
+    cargo run --bin worker -- \
+        --db-path "${db_path}" \
+        --rpc-url "${CHAIN_WORKER_RPC_URL}" \
+        --confirmations "${CONFIRMATIONS:-0}" \
+        --max-head-blocks "${MAX_HEAD_BLOCKS:-10}" \
+        --max-back-propagation-blocks "${MAX_BACK_PROPAGATION_BLOCKS:-20}" \
+        >"${LOGS_DIR}/chain_worker.out" &
+
+    CHAIN_WORKER=$!
+
+    echo "Chain worker started with PID ${CHAIN_WORKER}."
+
+    popd
+}
+
+function startup_chain_server() {
+    db_path="$1"
+
+    echo "Starting chain server"
+    pushd "${VLAYER_HOME}/rust"
+
+    RUST_LOG=info \
+    cargo run --bin chain_server -- \
+        --db-path "${db_path}" \
+        >"${LOGS_DIR}/chain_server.out" &
+
+    CHAIN_SERVER=$!
+    
+    echo "Chain server started with PID ${CHAIN_SERVER}."
+    wait_for_port_and_pid 3001 "${CHAIN_SERVER}" 30m "chain server"
+    wait_for_chain_worker_sync
+
+    popd
+}
+
+
+wait_for_chain_worker_sync() {
+    
+    echo "Waiting for chain worker sync..."
+
+    for i in `seq 1 10` ; do
+        FIRST_BLOCK_MAX=${FIRST_BLOCK_MAX:-17915294} # default values for sepolia tests
+        LAST_BLOCK_MIN=${LAST_BLOCK_MIN:-17985294} 
+
+        result=$(curl -s -X POST 127.0.0.1:3001 \
+                  --retry-connrefused \
+                  --retry 5 \
+                  --retry-delay 0 \
+                  --retry-max-time 30 \
+                  -H "Content-Type: application/json" \
+                  --data '{"jsonrpc": "2.0","id": 0,"method": "v_sync_status","params": [1]}' \
+                  | jq "(.result.first_block <= ${FIRST_BLOCK_MAX}) and (.result.last_block >= ${LAST_BLOCK_MIN})"
+        )
+
+        if [[ "${result}" == "true" ]] ; then
+            echo "Worker synced"
+            break
+        fi
+        echo "Syncing ..."
+        sleep 5
+    done
+
+    if [[ "${result}" != "true" ]] ; then
+        echo "Failed to sync chain worker" >&2
+        exit 1 
+    fi
+
+}
+
 
 trap cleanup EXIT ERR INT
 
@@ -89,6 +166,7 @@ fi
 if [[ -z "${ALCHEMY_API_KEY:-}" ]] ; then
     echo ALCHEMY_API_KEY is not configured. Using only local rpc-urls. >&2
 else 
+    CHAIN_WORKER_RPC_URL="https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}"
 
     EXTERNAL_RPC_URLS=(
         "--rpc-url" "11155111:https://eth-sepolia.g.alchemy.com/v2/${ALCHEMY_API_KEY}"
@@ -118,6 +196,7 @@ echo
 echo "Starting services..."
 
 start_anvil
+if [[ "${RUN_CHAIN_SERVICES:-0}" == "1" ]] ; then startup_chain_services ; fi
 startup_vlayer "${SERVER_PROOF_ARG}" ${EXTERNAL_RPC_URLS[@]+"${EXTERNAL_RPC_URLS[@]}"}
 
 echo "Services has been succesfully started..."
