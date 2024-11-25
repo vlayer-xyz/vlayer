@@ -60,7 +60,7 @@ async fn time_travel() -> anyhow::Result<()> {
 
     let state = profile("op_sepolia", "simple_time_travel", location, &call)?;
 
-    assert_eq!(state.total_count(), 79);
+    assert_eq!(state.total_count(), 70);
     insta::with_settings!({sort_maps => true}, {
         insta::assert_yaml_snapshot!(state)
     });
