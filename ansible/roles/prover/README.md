@@ -12,4 +12,4 @@ Installs the vlayer Prover server.
 | `vlayer_proof_type` | Type of proof - `fake` or `groth16`. |
 | `vlayer_bonsai_api_url` | API url for Bonsai, required for real proofs. |
 | `vlayer_bonsai_api_key` | API key for Bonsai, required for real proofs. |
-| `vlayer_rust_log_level` | `RUST_LOG` level passed to the binary. Default is `debug`. |
+| `vlayer_rust_log` | An array of log levels for constructing [`RUST_LOG`](https://rust-lang-nursery.github.io/rust-cookbook/development_tools/debugging/config_log.html). |
