@@ -1,10 +1,10 @@
 use alloy_primitives::Bytes;
 use alloy_sol_types::SolType;
+use regex::Regex;
 use revm::precompile::{Precompile, PrecompileErrors, PrecompileOutput, PrecompileResult};
+use url::Url;
 use urlpattern::UrlPatternMatchInput;
 use urlpattern::UrlPatternOptions;
-use url::Url;
-use regex::Regex;
 
 use crate::{gas_used, map_to_fatal};
 
@@ -15,14 +15,15 @@ use alloy_sol_types::{sol_data, SolValue};
 pub(super) const URL_PATTERN_TEST: Precompile = Precompile::Standard(url_pattern_test_run);
 
 const BASE_COST: u64 = 10;
-const PER_WORD_COST: u64 = 1;type InputType = sol_data::FixedArray<sol_data::String, 2>;
+const PER_WORD_COST: u64 = 1;
+type InputType = sol_data::FixedArray<sol_data::String, 2>;
 
 fn url_pattern_test_run(input: &Bytes, gas_limit: u64) -> PrecompileResult {
     let gas_used = gas_used(input.len(), BASE_COST, PER_WORD_COST, gas_limit)?;
 
     let (source, url_pattern) = decode_url_pattern_args(input)?;
-    let pattern = <UrlPattern>::parse(url_pattern, UrlPatternOptions::default())
-        .map_err(map_to_fatal)?;
+    let pattern =
+        <UrlPattern>::parse(url_pattern, UrlPatternOptions::default()).map_err(map_to_fatal)?;
 
     let parsed_url = Url::parse(&source).map_err(map_to_fatal)?;
     let result = pattern
@@ -34,10 +35,11 @@ fn url_pattern_test_run(input: &Bytes, gas_limit: u64) -> PrecompileResult {
 
 fn decode_url_pattern_args(input: &Bytes) -> Result<(String, UrlPatternInit), PrecompileErrors> {
     let [source, pattern] = InputType::abi_decode(input, true).map_err(map_to_fatal)?;
-    let init: UrlPatternInit = UrlPatternInit::parse_constructor_string::<Regex>(pattern.as_str(), None).map_err(map_to_fatal)?;
+    let init: UrlPatternInit =
+        UrlPatternInit::parse_constructor_string::<Regex>(pattern.as_str(), None)
+            .map_err(map_to_fatal)?;
     Ok((source, init))
 }
-
 
 #[cfg(test)]
 mod test {
@@ -181,5 +183,4 @@ mod test {
 
         assert!(result);
     }
-
 }
