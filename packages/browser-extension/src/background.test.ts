@@ -39,4 +39,13 @@ describe("zk related messaging", () => {
     const storedStatus = await browser.storage.local.get("zkProvingStatus");
     expect(storedStatus.zkProvingStatus).toBe(ZkProvingStatus.Proving);
   });
+
+  it("should clear history on RequestWebProof message", async () => {
+    await browser.storage.local.set({ history: [{ id: "1" }] });
+    await browser.runtime.sendMessage({
+      action: ExtensionAction.RequestWebProof,
+    });
+    const storedHistory = await browser.storage.local.get("history");
+    expect(storedHistory.history).toEqual([]);
+  });
 });
