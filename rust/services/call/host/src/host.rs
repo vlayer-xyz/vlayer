@@ -17,7 +17,7 @@ use call_engine::{
         guest_input::{self, Verifier},
         zk_proof,
     },
-    Call, GuestOutput, HostOutput, Input, Seal,
+    Call, CallGuestId, GuestOutput, HostOutput, Input, Seal,
 };
 use common::GuestElf;
 pub use config::{Config, DEFAULT_MAX_CALLDATA_SIZE};
@@ -55,8 +55,16 @@ impl Host {
         Host::try_new_with_components(providers, block_number, chain_client, config)
     }
 
+    pub fn prover(&self) -> Prover {
+        self.prover.clone()
+    }
+
     pub const fn start_execution_location(&self) -> ExecutionLocation {
         self.start_execution_location
+    }
+
+    pub fn call_guest_id(&self) -> CallGuestId {
+        self.guest_elf.id.into()
     }
 }
 
@@ -151,13 +159,12 @@ impl Host {
         })
     }
 
-    pub async fn main(self, call: Call) -> Result<HostOutput, Error> {
-        let prover = self.prover.clone();
-        let call_guest_id = self.guest_elf.id.into();
-        let PreflightResult { host_output, input } = self.preflight(call).await?;
-
-        let (seal, raw_guest_output) = provably_execute(&prover, &input)?;
-
+    pub fn prove(
+        prover: &Prover,
+        call_guest_id: CallGuestId,
+        PreflightResult { host_output, input }: PreflightResult,
+    ) -> Result<HostOutput, Error> {
+        let (seal, raw_guest_output) = provably_execute(prover, &input)?;
         let proof_len = raw_guest_output.len();
         let guest_output = GuestOutput::from_outputs(&host_output, &raw_guest_output)?;
 
@@ -175,6 +182,13 @@ impl Host {
             proof_len,
             call_guest_id,
         })
+    }
+
+    pub async fn main(self, call: Call) -> Result<HostOutput, Error> {
+        let prover = self.prover();
+        let call_guest_id = self.call_guest_id();
+        let preflight_result = self.preflight(call).await?;
+        Host::prove(&prover, call_guest_id, preflight_result)
     }
 
     fn validate_calldata_size(&self, call: &Call) -> Result<(), Error> {

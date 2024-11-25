@@ -26,6 +26,11 @@ pub async fn v_call(config: Arc<ServerConfig>, params: Params) -> Result<CallRes
         .hash_slow()
         .into();
     info!("Calculated hash: {}", call_hash);
-    let host_output = host.main(call).await?;
+
+    let prover = host.prover();
+    let call_guest_id = host.call_guest_id();
+    let preflight_result = host.preflight(call).await?;
+    let host_output = Host::prove(&prover, call_guest_id, preflight_result)?;
+
     Ok(CallResult::try_new(call_hash, host_output)?)
 }
