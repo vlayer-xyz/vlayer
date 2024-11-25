@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use call_precompiles::VLAYER_PRECOMPILES;
+use call_precompiles::PRECOMPILES;
 use derive_new::new;
 use revm::{
     db::WrapDatabaseRef,
@@ -91,7 +91,7 @@ where
         let precompiles = handler.pre_execution.load_precompiles();
         handler.pre_execution.load_precompiles = Arc::new(move || {
             let mut precompiles = precompiles.clone();
-            precompiles.extend(VLAYER_PRECOMPILES);
+            precompiles.extend(PRECOMPILES);
             precompiles
         });
     };

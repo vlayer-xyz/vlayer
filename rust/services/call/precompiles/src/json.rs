@@ -7,11 +7,10 @@ use serde_json::Value;
 
 use crate::{gas_used, map_to_fatal};
 
-pub(super) const GET_STRING_PRECOMPILE: Precompile = Precompile::Standard(json_get_string_run);
-pub(super) const GET_INT_PRECOMPILE: Precompile = Precompile::Standard(json_get_int_run);
-pub(super) const GET_BOOL_PRECOMPILE: Precompile = Precompile::Standard(json_get_bool_run);
-pub(super) const GET_ARRAY_LENGTH_PRECOMPILE: Precompile =
-    Precompile::Standard(json_get_array_length);
+pub(super) const GET_STRING_PRECOMPILE: Precompile = Precompile::Standard(get_string);
+pub(super) const GET_INT_PRECOMPILE: Precompile = Precompile::Standard(get_int);
+pub(super) const GET_BOOL_PRECOMPILE: Precompile = Precompile::Standard(get_bool);
+pub(super) const GET_ARRAY_LENGTH_PRECOMPILE: Precompile = Precompile::Standard(get_array_length);
 
 /// The base cost of the operation.
 const BASE_COST: u64 = 10;
@@ -20,7 +19,7 @@ const PER_WORD_COST: u64 = 1;
 
 type InputType = sol_data::FixedArray<sol_data::String, 2>;
 
-fn json_get_string_run(input: &Bytes, gas_limit: u64) -> PrecompileResult {
+fn get_string(input: &Bytes, gas_limit: u64) -> PrecompileResult {
     let (value_by_path, json_path, gas_used) = process_input(input, gas_limit)?;
     match value_by_path {
         Value::String(result) => Ok(PrecompileOutput::new(gas_used, result.abi_encode().into())),
@@ -30,7 +29,7 @@ fn json_get_string_run(input: &Bytes, gas_limit: u64) -> PrecompileResult {
     }
 }
 
-fn json_get_int_run(input: &Bytes, gas_limit: u64) -> PrecompileResult {
+fn get_int(input: &Bytes, gas_limit: u64) -> PrecompileResult {
     let (value_by_path, json_path, gas_used) = process_input(input, gas_limit)?;
     match value_by_path {
         Value::Number(num) if num.is_i64() => {
@@ -43,7 +42,7 @@ fn json_get_int_run(input: &Bytes, gas_limit: u64) -> PrecompileResult {
     }
 }
 
-fn json_get_bool_run(input: &Bytes, gas_limit: u64) -> PrecompileResult {
+fn get_bool(input: &Bytes, gas_limit: u64) -> PrecompileResult {
     let (value_by_path, json_path, gas_used) = process_input(input, gas_limit)?;
     match value_by_path {
         Value::Bool(result) => Ok(PrecompileOutput::new(gas_used, result.abi_encode().into())),
@@ -53,7 +52,7 @@ fn json_get_bool_run(input: &Bytes, gas_limit: u64) -> PrecompileResult {
     }
 }
 
-fn json_get_array_length(input: &Bytes, gas_limit: u64) -> PrecompileResult {
+fn get_array_length(input: &Bytes, gas_limit: u64) -> PrecompileResult {
     let (len, gas_used) = process_input_arr(input, gas_limit)?;
     Ok(PrecompileOutput::new(gas_used, len.abi_encode().into()))
 }
@@ -147,8 +146,7 @@ mod tests {
         let abi_encoded_body_and_json_path =
             InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_number"]);
 
-        let precompile_output =
-            json_get_int_run(&abi_encoded_body_and_json_path.into(), u64::MAX).unwrap();
+        let precompile_output = get_int(&abi_encoded_body_and_json_path.into(), u64::MAX).unwrap();
 
         let result =
             sol_data::Int::<256>::abi_decode(precompile_output.bytes.as_ref(), false).unwrap();
@@ -162,8 +160,7 @@ mod tests {
         let abi_encoded_body_and_json_path =
             InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_boolean"]);
 
-        let precompile_output =
-            json_get_bool_run(&abi_encoded_body_and_json_path.into(), u64::MAX).unwrap();
+        let precompile_output = get_bool(&abi_encoded_body_and_json_path.into(), u64::MAX).unwrap();
 
         let result = sol_data::Bool::abi_decode(precompile_output.bytes.as_ref(), false).unwrap();
 
@@ -176,7 +173,7 @@ mod tests {
             InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_string"]);
 
         let precompile_output =
-            json_get_string_run(&abi_encoded_body_and_json_path.into(), u64::MAX).unwrap();
+            get_string(&abi_encoded_body_and_json_path.into(), u64::MAX).unwrap();
 
         assert_eq!(
             "field_string_value",
@@ -190,7 +187,7 @@ mod tests {
             InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_array[1]"]);
 
         let precompile_output =
-            json_get_string_run(&abi_encoded_body_and_json_path.into(), u64::MAX).unwrap();
+            get_string(&abi_encoded_body_and_json_path.into(), u64::MAX).unwrap();
 
         assert_eq!(
             "val2",
@@ -204,7 +201,7 @@ mod tests {
             InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_array_of_objects[1].key"]);
 
         let precompile_output =
-            json_get_string_run(&abi_encoded_body_and_json_path.into(), u64::MAX).unwrap();
+            get_string(&abi_encoded_body_and_json_path.into(), u64::MAX).unwrap();
 
         assert_eq!(
             "val02",
@@ -219,8 +216,7 @@ mod tests {
             "root.nested_level.field_array_of_objects_with_numbers[0].key",
         ]);
 
-        let precompile_output =
-            json_get_int_run(&abi_encoded_body_and_json_path.into(), u64::MAX).unwrap();
+        let precompile_output = get_int(&abi_encoded_body_and_json_path.into(), u64::MAX).unwrap();
 
         let result =
             sol_data::Int::<256>::abi_decode(precompile_output.bytes.as_ref(), false).unwrap();
@@ -233,8 +229,7 @@ mod tests {
         let abi_encoded_body_and_json_path =
             InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_array_of_numbers[1]"]);
 
-        let precompile_output =
-            json_get_int_run(&abi_encoded_body_and_json_path.into(), u64::MAX).unwrap();
+        let precompile_output = get_int(&abi_encoded_body_and_json_path.into(), u64::MAX).unwrap();
 
         let result =
             sol_data::Int::<256>::abi_decode(precompile_output.bytes.as_ref(), false).unwrap();
@@ -247,8 +242,7 @@ mod tests {
         let abi_encoded_body_and_json_path =
             InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_array_of_booleans[2]"]);
 
-        let precompile_output =
-            json_get_bool_run(&abi_encoded_body_and_json_path.into(), u64::MAX).unwrap();
+        let precompile_output = get_bool(&abi_encoded_body_and_json_path.into(), u64::MAX).unwrap();
 
         let result = sol_data::Bool::abi_decode(precompile_output.bytes.as_ref(), false).unwrap();
 
@@ -259,8 +253,7 @@ mod tests {
     fn success_number_in_top_level_array() {
         let abi_encoded_body_and_json_path = InputType::abi_encode(&[TEST_JSON_ARRAY, "[2].key"]);
 
-        let precompile_output =
-            json_get_int_run(&abi_encoded_body_and_json_path.into(), u64::MAX).unwrap();
+        let precompile_output = get_int(&abi_encoded_body_and_json_path.into(), u64::MAX).unwrap();
 
         let result =
             sol_data::Int::<256>::abi_decode(precompile_output.bytes.as_ref(), false).unwrap();
@@ -274,7 +267,7 @@ mod tests {
             InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_array"]);
 
         let precompile_output =
-            json_get_array_length(&abi_encoded_body_and_json_path.into(), u64::MAX).unwrap();
+            get_array_length(&abi_encoded_body_and_json_path.into(), u64::MAX).unwrap();
 
         let result =
             sol_data::Int::<256>::abi_decode(precompile_output.bytes.as_ref(), false).unwrap();
@@ -312,10 +305,8 @@ mod tests {
             let abi_encoded_body_and_json_path =
                 InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_number"]);
 
-            assert!(
-                matches!(json_get_string_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
-                Err(Fatal { msg: message }) if message == "Expected type 'String' at root.nested_level.field_number, but found Number(12)")
-            );
+            assert!(matches!(get_string(&abi_encoded_body_and_json_path.into(), u64::MAX),
+                Err(Fatal { msg: message }) if message == "Expected type 'String' at root.nested_level.field_number, but found Number(12)"));
         }
 
         #[test]
@@ -323,10 +314,8 @@ mod tests {
             let abi_encoded_body_and_json_path =
                 InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_boolean"]);
 
-            assert!(
-                matches!(json_get_string_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
-                Err(Fatal { msg: message }) if message == "Expected type 'String' at root.nested_level.field_boolean, but found Bool(true)")
-            );
+            assert!(matches!(get_string(&abi_encoded_body_and_json_path.into(), u64::MAX),
+                Err(Fatal { msg: message }) if message == "Expected type 'String' at root.nested_level.field_boolean, but found Bool(true)"));
         }
 
         #[test]
@@ -334,10 +323,8 @@ mod tests {
             let abi_encoded_body_and_json_path =
                 InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_object"]);
 
-            assert!(
-                matches!(json_get_string_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
-                Err(Fatal { msg: message }) if message == "Expected type 'String' at root.nested_level.field_object, but found Object {}")
-            );
+            assert!(matches!(get_string(&abi_encoded_body_and_json_path.into(), u64::MAX),
+                Err(Fatal { msg: message }) if message == "Expected type 'String' at root.nested_level.field_object, but found Object {}"));
         }
     }
 
@@ -348,7 +335,7 @@ mod tests {
             let abi_encoded_body_and_json_path =
                 InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_boolean"]);
 
-            assert!(matches!(json_get_int_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
+            assert!(matches!(get_int(&abi_encoded_body_and_json_path.into(), u64::MAX),
                 Err(Fatal { msg: message }) if message == "Expected type 'Number' at root.nested_level.field_boolean, but found Bool(true)"));
         }
 
@@ -357,7 +344,7 @@ mod tests {
             let abi_encoded_body_and_json_path =
                 InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_string"]);
 
-            assert!(matches!(json_get_int_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
+            assert!(matches!(get_int(&abi_encoded_body_and_json_path.into(), u64::MAX),
                 Err(Fatal { msg: message }) if message == "Expected type 'Number' at root.nested_level.field_string, but found String(\"field_string_value\")"));
         }
 
@@ -366,7 +353,7 @@ mod tests {
             let abi_encoded_body_and_json_path =
                 InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_object"]);
 
-            assert!(matches!(json_get_int_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
+            assert!(matches!(get_int(&abi_encoded_body_and_json_path.into(), u64::MAX),
                 Err(Fatal { msg: message }) if message == "Expected type 'Number' at root.nested_level.field_object, but found Object {}"));
         }
     }
@@ -378,7 +365,7 @@ mod tests {
             let abi_encoded_body_and_json_path =
                 InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_string"]);
 
-            assert!(matches!(json_get_bool_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
+            assert!(matches!(get_bool(&abi_encoded_body_and_json_path.into(), u64::MAX),
                 Err(Fatal { msg: message }) if message == "Expected type 'Bool' at root.nested_level.field_string, but found String(\"field_string_value\")"));
         }
         #[test]
@@ -386,7 +373,7 @@ mod tests {
             let abi_encoded_body_and_json_path =
                 InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_number"]);
 
-            assert!(matches!(json_get_bool_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
+            assert!(matches!(get_bool(&abi_encoded_body_and_json_path.into(), u64::MAX),
                 Err(Fatal { msg: message }) if message == "Expected type 'Bool' at root.nested_level.field_number, but found Number(12)"));
         }
 
@@ -395,7 +382,7 @@ mod tests {
             let abi_encoded_body_and_json_path =
                 InputType::abi_encode(&[TEST_JSON, "root.nested_level.field_object"]);
 
-            assert!(matches!(json_get_bool_run(&abi_encoded_body_and_json_path.into(), u64::MAX),
+            assert!(matches!(get_bool(&abi_encoded_body_and_json_path.into(), u64::MAX),
                 Err(Fatal { msg: message }) if message == "Expected type 'Bool' at root.nested_level.field_object, but found Object {}"));
         }
     }
