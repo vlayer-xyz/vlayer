@@ -25,7 +25,7 @@ test.describe("Full flow of webproof using extension", () => {
       expect(extension).toBeDefined();
     });
 
-    await test.step("It should stay ok after clinking request button multiple times", async () => {
+    await test.step("Extension should stay ok after clinking request button multiple times", async () => {
       await page.goto("/source-new-way");
       const requestProofButton = page
         .locator("body")
