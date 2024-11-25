@@ -90,15 +90,18 @@ foundry-evm = { git = "https://github.com/foundry-rs/foundry", rev = "e649e62f12
 foundry-evm-core = { git = "https://github.com/foundry-rs/foundry", rev = "e649e62f125244a3ef116be25dfdc81a2afbaf2a" }
 foundry-test-utils = { git = "https://github.com/foundry-rs/foundry", rev = "e649e62f125244a3ef116be25dfdc81a2afbaf2a" }
 futures = { version = "0.3.31", default-features = false }
+futures-retry = "0.6.0"
 hex = "0.4.3"
 http-body-util = "0.1.2"
 httparse = "1.9.5"
 hyper = "1.5.0"
 indicatif = "0.17.8"
 inferno = "0.11.21"
+insta = "1.41.1"
 itertools = { version = "0.13.0" }
 lazy_static = "1.5.0"
 libmdbx = "0.5.2"
+maplit = "1.0.2"
 mime = "0.3.17"
 mockito = "1.5.0"
 nybbles = "0.2.1"
@@ -127,10 +130,8 @@ strum = "0.26.3"
 tar = "0.4.42"
 tempfile = "3.13.0"
 thousands = "0.2.0"
-maplit = "1.0.2"
 test-log = "0.2.16"
 thiserror = "1.0.65"
-insta = "1.41.1"
 tlsn-core = { git = "https://github.com/tlsnotary/tlsn.git", tag = "v0.1.0-alpha.6" }
 tokio = { version = "1.41.0", default-features = false, features = ["rt-multi-thread"] }
 toml = "0.8.19"
@@ -139,6 +140,7 @@ tower-http = "0.6.1"
 tower-request-id = "0.3.0"
 tracing = { version = "0.1", default-features = false }
 tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt"], default-features = false }
+typed-builder = "0.20.0"
 quick-junit = "0.5.0"
 url = { version = "2.5", default-features = false }
 vergen-gitcl = { version = "1.0.1", default-features = false }
