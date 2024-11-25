@@ -20,7 +20,7 @@ services:
   vlayer:
     build:
       context: ../../
-      dockerfile: ./docker/vlayer/Dockerfile.nightly
+      dockerfile: ./docker/vlayer/Dockerfile.master
     command: "serve --proof fake --host 0.0.0.0 --rpc-url 31337:http://anvil:8545"
     ports:
       - "3000:3000"

@@ -1,36 +1,6 @@
 FROM --platform=linux/amd64 ubuntu:latest as vlayer-builder
 RUN apt-get update
-RUN apt-get install -y --no-install-recommends \
-    curl \
-    ca-certificates \
-    dumb-init \
-    git \
-    build-essential \
-    clang 
-# Configure git so that we always use HTTP/1.1. This is to avoid spurious network errors
-# when cloning large git repos. In particular, we will force cargo to use system-provided
-# git to avoid errors like the following:
-# #24 2.299     Updating crates.io index
-# #24 681.7 error: failed to get `anyhow` as a dependency of package `kissmp-bridge v0.5.0 (/build/KISS-multiplayer/kissmp-bridge)`
-# #24 681.7 
-# #24 681.7 Caused by:
-# #24 681.7   failed to load source for dependency `anyhow`
-# #24 681.7 
-# #24 681.7 Caused by:
-# #24 681.7   Unable to update registry `crates-io`
-# #24 681.7 
-# #24 681.7 Caused by:
-# #24 681.7   failed to fetch `https://github.com/rust-lang/crates.io-index`
-# #24 681.7 
-# #24 681.7 Caused by:
-# #24 681.7   network failure seems to have happened
-# #24 681.7   if a proxy or similar is necessary `net.git-fetch-with-cli` may help here
-# #24 681.7   https://doc.rust-lang.org/cargo/reference/config.html#netgit-fetch-with-cli
-# #24 681.7 
-# #24 681.7 Caused by:
-# #24 681.7   SSL error: unknown error; class=Ssl (16)
-# See https://stackoverflow.com/questions/73738004/how-can-i-fix-unable-to-update-registry-network-failure-seems-to-have-happened
-RUN git config --global http.version HTTP/1.1
+RUN apt-get install -y --no-install-recommends curl ca-certificates dumb-init
 
 RUN useradd -m -s /bin/bash -u 1001 vlayer
 USER vlayer
@@ -42,30 +12,7 @@ ENV PATH="/home/vlayer/.cargo/bin:${PATH}"
 RUN curl -L https://risczero.com/install | bash
 ENV PATH="/home/vlayer/.risc0/bin:${PATH}"
 RUN rzup install cargo-risczero v1.0.5
-RUN cargo risczero install
 
-RUN curl -L https://foundry.paradigm.xyz | bash
-ENV PATH="/home/vlayer/.foundry/bin:${PATH}"
-RUN foundryup
-
-FROM vlayer-builder as vlayer-build
-RUN mkdir /home/vlayer/vlayer
-ADD contracts /home/vlayer/vlayer/contracts
-ADD rust /home/vlayer/vlayer/rust
-USER root
-RUN chown -R vlayer:vlayer /home/vlayer/vlayer
-RUN chmod 755 /home/vlayer/vlayer
-
-USER vlayer
-WORKDIR /home/vlayer/vlayer/rust
-# Set the default compiler for building guest
-ENV CC_riscv32im_risc0_zkvm_elf=clang
-# Set required C flags; in particular, in guest, we don't want ring crate to use stdlib
-ENV CFLAGS_riscv32im_risc0_zkvm_elf="-march=rv32im -nostdlib -DRING_CORE_NOSTDLIBINC=1 -D__ILP32__=1"
-# CARGO_NET_GIT_FETCH_WITH_CLI=true will force cargo to use system-provided git instead of using
-# the baked-in libgit2. I have been experiencing spurious network errors when trying to fetch git+https
-# dependencies such as tlsn in Docker, and falling back to system git with forced HTTP1.1 version fixed
-# all issues for me.
-RUN CARGO_NET_GIT_FETCH_WITH_CLI=true cargo build --bin vlayer
-
-ENTRYPOINT ["/usr/bin/dumb-init", "--", "/home/vlayer/vlayer/rust/target/debug/vlayer"]
+RUN curl -L https://vlayer-releases.s3.eu-north-1.amazonaws.com/latest/nightly-linux-amd64.tar.gz -o nightly-linux-amd64.tar.gz
+RUN tar -xvf nightly-linux-amd64.tar.gz
+ENTRYPOINT ["/usr/bin/dumb-init", "--", "/home/vlayer/bin/vlayer"]
