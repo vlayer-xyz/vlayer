@@ -12,7 +12,7 @@ import "@openzeppelin-contracts-5.0.1/utils/Strings.sol";
  * In order to update the test fixture:
  * 1. Modify this contract below.
  * 2. cd contracts/fixtures && forge build
- * 3. cp out/ExampleProver.sol/ExampleProver.json ../rust/services/call/server/testdata
+ * 3. cp out/ExampleProver.sol/ExampleProver.json ../../rust/services/call/server/testdata
  */
 
 contract ExampleProver is Prover {
