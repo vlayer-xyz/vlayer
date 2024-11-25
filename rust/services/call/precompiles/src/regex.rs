@@ -6,27 +6,27 @@ use revm::precompile::{Precompile, PrecompileErrors, PrecompileOutput, Precompil
 
 use crate::{gas_used, map_to_fatal};
 
-pub(super) const REGEX_MATCH_PRECOMPILE: Precompile = Precompile::Standard(regex_match_run);
-pub(super) const REGEX_CAPTURE_PRECOMPILE: Precompile = Precompile::Standard(regex_capture_run);
+pub(super) const MATCH_PRECOMPILE: Precompile = Precompile::Standard(match_run);
+pub(super) const CAPTURE_PRECOMPILE: Precompile = Precompile::Standard(capture_run);
 
 const BASE_COST: u64 = 10;
 const PER_WORD_COST: u64 = 1;
 
 type InputType = sol_data::FixedArray<sol_data::String, 2>;
 
-fn regex_match_run(input: &Bytes, gas_limit: u64) -> PrecompileResult {
+fn match_run(input: &Bytes, gas_limit: u64) -> PrecompileResult {
     let gas_used = gas_used(input.len(), BASE_COST, PER_WORD_COST, gas_limit)?;
 
-    let (source, regex) = decode_regex_args(input)?;
+    let (source, regex) = decode_args(input)?;
     let is_match = regex.is_match(&source);
 
     Ok(PrecompileOutput::new(gas_used, is_match.abi_encode().into()))
 }
 
-fn regex_capture_run(input: &Bytes, gas_limit: u64) -> PrecompileResult {
+fn capture_run(input: &Bytes, gas_limit: u64) -> PrecompileResult {
     let gas_used = gas_used(input.len(), BASE_COST, PER_WORD_COST, gas_limit)?;
 
-    let (source, regex) = decode_regex_args(input)?;
+    let (source, regex) = decode_args(input)?;
     let captures = do_capture(&source, &regex).map_err(map_to_fatal)?;
 
     Ok(PrecompileOutput::new(gas_used, captures.abi_encode().into()))
@@ -51,7 +51,7 @@ fn match_into_string(maybe_match: Option<Match>) -> String {
     }
 }
 
-fn decode_regex_args(input: &Bytes) -> Result<(String, Regex), PrecompileErrors> {
+fn decode_args(input: &Bytes) -> Result<(String, Regex), PrecompileErrors> {
     let [source, pattern] = InputType::abi_decode(input, true).map_err(map_to_fatal)?;
     validate_regex(&pattern).map_err(map_to_fatal)?;
     let regex = Regex::new(&pattern).map_err(map_to_fatal)?;
@@ -79,7 +79,7 @@ mod test {
 
             let input = [source, regex].abi_encode();
 
-            let result = regex_match_run(&Bytes::from(input), 1000).unwrap();
+            let result = match_run(&Bytes::from(input), 1000).unwrap();
             let result = bool::abi_decode(&result.bytes, true).unwrap();
 
             assert!(result);
@@ -92,7 +92,7 @@ mod test {
 
             let input = [source, regex].abi_encode();
 
-            let result = regex_match_run(&Bytes::from(input), 1000).unwrap();
+            let result = match_run(&Bytes::from(input), 1000).unwrap();
             let result = bool::abi_decode(&result.bytes, true).unwrap();
 
             assert!(!result);
@@ -105,7 +105,7 @@ mod test {
 
             let input = [source, regex].abi_encode();
 
-            let result = regex_match_run(&Bytes::from(input), 1000);
+            let result = match_run(&Bytes::from(input), 1000);
             assert_eq!(
                 result,
                 Err(PrecompileErrors::Fatal {
@@ -121,7 +121,7 @@ mod test {
 
             let input = [source].abi_encode();
 
-            let result = regex_match_run(&Bytes::from(input), 1000);
+            let result = match_run(&Bytes::from(input), 1000);
             assert_eq!(
                 result,
                 Err(PrecompileErrors::Fatal {
@@ -134,7 +134,7 @@ mod test {
         fn returns_error_args_are_not_strings() {
             let input = [1, 2].abi_encode();
 
-            let result = regex_match_run(&Bytes::from(input), 1000);
+            let result = match_run(&Bytes::from(input), 1000);
             assert_eq!(
                 result,
                 Err(PrecompileErrors::Fatal {
@@ -184,7 +184,7 @@ mod test {
 
             let input = [source, regex].abi_encode();
 
-            let result = regex_capture_run(&Bytes::from(input), 1000);
+            let result = capture_run(&Bytes::from(input), 1000);
             assert_eq!(
                 result,
                 Err(PrecompileErrors::Fatal {
@@ -200,7 +200,7 @@ mod test {
 
             let input = [source].abi_encode();
 
-            let result = regex_capture_run(&Bytes::from(input), 1000);
+            let result = capture_run(&Bytes::from(input), 1000);
             assert_eq!(
                 result,
                 Err(PrecompileErrors::Fatal {
@@ -213,7 +213,7 @@ mod test {
         fn returns_error_args_are_not_strings() {
             let input = [1, 2].abi_encode();
 
-            let result = regex_capture_run(&Bytes::from(input), 1000);
+            let result = capture_run(&Bytes::from(input), 1000);
             assert_eq!(
                 result,
                 Err(PrecompileErrors::Fatal {

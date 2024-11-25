@@ -6,8 +6,7 @@ use web_proof::verifier::verify_and_parse;
 
 use crate::{gas_used, map_to_fatal};
 
-pub(super) const VERIFY_AND_PARSE_PRECOMPILE: Precompile =
-    Precompile::Standard(verify_and_parse_run);
+pub(super) const PRECOMPILE: Precompile = Precompile::Standard(verify_and_parse_run);
 
 /// The base cost.
 const VERIFY_AND_PARSE_BASE: u64 = 10;
