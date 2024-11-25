@@ -8,14 +8,18 @@ alloy-primitives = { workspace = true }
 anyhow = { workspace = true }
 auto_impl = { workspace = true }
 bytes = { workspace = true }
-derive-new = { workspace = true }
 derive_more = { workspace = true }
-futures = { workspace = true }
-futures-retry = { workspace = true }
 risc0-zkp = { workspace = true }
 serde = { workspace = true }
-tokio = { workspace = true, features = ["time"] }
-typed-builder = { workspace = true }
+
+derive-new = { workspace = true, optional = true }
+futures = { workspace = true, optional = true }
+futures-retry = { workspace = true, optional = true }
+tokio = { workspace = true, features = ["time"], optional = true }
+typed-builder = { workspace = true, optional = true }
+
+[features]
+timeout-retry = ["derive-new", "futures", "futures-retry", "tokio", "typed-builder"]
 
 [dev-dependencies]
 tokio = { workspace = true, features = ["macros", "rt", "test-util"] }
