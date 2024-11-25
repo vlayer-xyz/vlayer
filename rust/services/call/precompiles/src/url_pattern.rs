@@ -172,6 +172,7 @@ mod test {
         let result = url_pattern_test_run(&Bytes::from(input), 1000);
         assert!(result.is_err());
     }
+    
     #[test]
     fn test_protocol_alternative() {
         let source = "http://example.com/path";
