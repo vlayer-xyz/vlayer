@@ -11,6 +11,10 @@ import {WebProofProver} from "../../src/vlayer/WebProofProver.sol";
 contract WebProverTest is VTest {
     using Strings for string;
 
+    function test_to_avoid_no_tests_error() public {
+        // Remove this function once test_verifiesWebProofAndRetrievesScreenName and test_failedVerificationBecauseOfBadWebProofSignature are enabled
+    }
+
     function skip_test_verifiesWebProofAndRetrievesScreenName() public {
         WebProof memory webProof = WebProof(vm.readFile("testdata/web_proof.json"));
         WebProofProver prover = new WebProofProver();
