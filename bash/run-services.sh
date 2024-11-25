@@ -68,14 +68,13 @@ function startup_chain_worker() {
     echo "Starting chain worker"
     pushd "${VLAYER_HOME}/rust"
 
-    RUST_LOG=info \
-    CONFIRMATIONS=0 \
-    MAX_BACK_PROPAGATION_BLOCKS=20 \
-    MAX_HEAD_BLOCKS=10 \
-    RISC0_DEV_MODE=1 \
-    RPC_URL=${CHAIN_WORKER_RPC_URL} \
-    cargo run --bin worker \
+    RUST_LOG=${RUST_LOG:-info} \
+    cargo run --bin worker -- \
         --db-path "${db_path}" \
+        --rpc-url "${CHAIN_WORKER_RPC_URL}" \
+        --confirmations "${CONFIRMATIONS:-0}" \
+        --max-head-blocks "${MAX_HEAD_BLOCKS:-10}" \
+        --max-back-propagation-blocks "${MAX_BACK_PROPAGATION_BLOCKS:-20}" \
         >"${LOGS_DIR}/chain_worker.out" &
 
     CHAIN_WORKER=$!
@@ -92,7 +91,7 @@ function startup_chain_server() {
     pushd "${VLAYER_HOME}/rust"
 
     RUST_LOG=info \
-    cargo run --bin chain_server \
+    cargo run --bin chain_server -- \
         --db-path "${db_path}" \
         >"${LOGS_DIR}/chain_server.out" &
 
@@ -111,8 +110,8 @@ wait_for_chain_worker_sync() {
     echo "Waiting for chain worker sync..."
 
     for i in `seq 1 10` ; do
-        FIRST_BLOCK_MAX=17915294
-        LAST_BLOCK_MIN=17985294
+        FIRST_BLOCK_MAX=${FIRST_BLOCK_MAX:-17915294} # default values for sepolia tests
+        LAST_BLOCK_MIN=${LAST_BLOCK_MIN:-17985294} 
 
         result=$(curl -s -X POST 127.0.0.1:3001 \
                   --retry-connrefused \
