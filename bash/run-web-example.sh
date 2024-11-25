@@ -9,12 +9,12 @@ function run_services {
 }
 
 function deploy_contracts {
-    cd ${VLAYER_HOME}/examples/web_proof/vlayer
+    cd ${VLAYER_HOME}/examples/simple_web_proof/vlayer
     bun run deploy.ts 
 }
 
 function run_web_app {
-    cd ${VLAYER_HOME}/examples/web_proof/vlayer
+    cd ${VLAYER_HOME}/examples/simple_web_proof/vlayer
     bun run dev &
 }
 
@@ -25,7 +25,7 @@ function run_browser_extension {
 
 function install_deps {
     cd ${VLAYER_HOME}/packages && bun install --frozen-lockfile
-    cd ${VLAYER_HOME}/examples/web_proof/vlayer && bun install --frozen-lockfile
+    cd ${VLAYER_HOME}/examples/simple_web_proof/vlayer && bun install --frozen-lockfile
 }
 
 install_deps

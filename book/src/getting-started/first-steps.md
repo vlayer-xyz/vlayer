@@ -29,7 +29,7 @@ The following templates are available for quick project setup:
 - `simple-email`: Mint an NFT to the owner of an email address from a specific domain.
 - `simple-teleport`: Prove a cross-chain ERC20 token balance.
 - `simple-time-travel`: Prove the average ERC20 token balance across multiple block numbers.
-- `web-proof`: Mint an NFT to the owner of a specific X/Twitter handle using Web Proofs.
+- `simple-web-proof`: Mint an NFT to the owner of a specific X/Twitter handle using Web Proofs.
 
 ## Directory structure
 The vlayer directory structure resembles a typical Foundry project but with two additional folders: `src/vlayer` and `vlayer`.
