@@ -11,6 +11,13 @@ use crate::{
 };
 
 impl Encodable for Node {
+    fn length(&self) -> usize {
+        // Default alloy implementation uses `encode`` method and then discards it's result resulting in `2**N`` time complexity.
+        // This value is used to preallocate vector size.
+        // Ideally - library interface should be changed. It's already in progress: https://github.com/alloy-rs/rlp/pull/29
+        0
+    }
+
     fn encode(&self, out: &mut dyn BufMut) {
         match self {
             Node::Null => "".encode(out),
