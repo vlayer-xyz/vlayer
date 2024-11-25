@@ -6,10 +6,13 @@ export async function resolveDkimDns(domain: string, selector: string) {
 
   let record = address.flat().at(-1);
 
-  if (record?.startsWith("p=")){
+  if (!record) {
+    throw new Error("No DKIM DNS record found");
+  }
+
+  if (record?.startsWith("p=")) {
     record = ["v=DKIM1", "k=rsa", record].join("; ");
   }
-  
-  return record;
 
+  return record;
 }
