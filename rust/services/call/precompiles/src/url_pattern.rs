@@ -12,7 +12,7 @@ use urlpattern::UrlPattern;
 use urlpattern::UrlPatternInit;
 
 use alloy_sol_types::{sol_data, SolValue};
-pub(super) const URL_PATTERN_TEST: Precompile = Precompile::Standard(url_pattern_test_run);
+pub(super) const URL_PATTERN_TEST_PRECOMPILE: Precompile = Precompile::Standard(url_pattern_test_run);
 
 const BASE_COST: u64 = 10;
 const PER_WORD_COST: u64 = 1;
