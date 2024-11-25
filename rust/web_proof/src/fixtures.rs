@@ -22,8 +22,3 @@ pub fn load_web_proof_fixture(proof_path: &str, notary_pub_key_pem: &str) -> Web
         notary_pub_key: PublicKey::from_public_key_pem(notary_pub_key_pem).unwrap(),
     }
 }
-
-// pub fn tls_proof_example() -> TlsProof {
-//     serde_json::from_str(str::from_utf8(include_bytes!("../testdata/tls_proof.json")).unwrap())
-//         .unwrap()
-// }
