@@ -40,7 +40,7 @@ describe("zk related messaging", () => {
     expect(storedStatus.zkProvingStatus).toBe(ZkProvingStatus.Proving);
   });
 
-  it("should clear history", async () => {
+  it("should clear history on RequestWebProof message", async () => {
     await browser.storage.local.set({ history: [{ id: "1" }] });
     await browser.runtime.sendMessage({
       action: ExtensionAction.RequestWebProof,
