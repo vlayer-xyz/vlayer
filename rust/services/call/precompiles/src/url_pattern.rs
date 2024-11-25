@@ -10,6 +10,7 @@ pub(super) const PRECOMPILE: Precompile = Precompile::Standard(url_pattern_test_
 
 const BASE_COST: u64 = 10;
 const PER_WORD_COST: u64 = 1;
+
 type InputType = sol_data::FixedArray<sol_data::String, 2>;
 
 fn url_pattern_test_run(input: &Bytes, gas_limit: u64) -> PrecompileResult {
