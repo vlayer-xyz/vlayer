@@ -1,5 +1,5 @@
 {
-  "name": "simple-email",
+  "name": "simple-email-proof",
   "module": "prove.ts",
   "type": "module",
   "scripts": {

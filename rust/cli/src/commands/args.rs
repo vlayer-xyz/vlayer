@@ -83,7 +83,7 @@ impl fmt::Display for TemplateOption {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
         match self {
             TemplateOption::Simple => write!(f, "simple"),
-            TemplateOption::SimpleEmail => write!(f, "simple_email"),
+            TemplateOption::SimpleEmail => write!(f, "simple_email_proof"),
             TemplateOption::SimpleTeleport => write!(f, "simple_teleport"),
             TemplateOption::SimpleTimeTravel => write!(f, "simple_time_travel"),
             TemplateOption::WebProof => write!(f, "web_proof"),
