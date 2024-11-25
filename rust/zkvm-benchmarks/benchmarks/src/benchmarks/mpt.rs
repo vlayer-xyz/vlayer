@@ -4,24 +4,24 @@ use mpt::MerkleTrie;
 
 use crate::{benchmarks::merge, Benchmark, Workload, WorkloadResult};
 
-pub(crate) mod empty {
+mod empty {
 
     use super::*;
 
-    pub(crate) fn trie() -> WorkloadResult {
+    fn trie() -> WorkloadResult {
         MerkleTrie::new();
 
         Ok(())
     }
 
-    pub(crate) fn hash() -> WorkloadResult {
+    fn hash() -> WorkloadResult {
         let trie = MerkleTrie::new();
         trie.hash_slow();
 
         Ok(())
     }
 
-    pub(crate) fn insert() -> WorkloadResult {
+    fn insert() -> WorkloadResult {
         let mut trie = MerkleTrie::new();
         trie.insert([0], [0; 32]).unwrap();
 
@@ -37,7 +37,7 @@ pub(crate) mod empty {
     }
 }
 
-pub(crate) mod height_4 {
+mod height_4 {
     use std::iter;
 
     use super::*;
@@ -57,26 +57,26 @@ pub(crate) mod height_4 {
         trie
     }
 
-    pub(crate) fn trie() -> WorkloadResult {
+    fn trie() -> WorkloadResult {
         fixture();
 
         Ok(())
     }
 
-    pub(crate) fn hash() -> WorkloadResult {
+    fn hash() -> WorkloadResult {
         fixture().hash_slow();
 
         Ok(())
     }
 
-    pub(crate) fn insert_shallow() -> WorkloadResult {
+    fn insert_shallow() -> WorkloadResult {
         let mut trie = fixture();
         trie.insert([1], [0; 32]).unwrap();
 
         Ok(())
     }
 
-    pub(crate) fn insert_deep() -> WorkloadResult {
+    fn insert_deep() -> WorkloadResult {
         let mut trie = fixture();
         trie.insert(zeros(HEIGHT), [0; 32]).unwrap();
 
