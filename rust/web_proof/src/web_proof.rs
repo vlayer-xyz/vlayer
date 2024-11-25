@@ -100,7 +100,7 @@ mod tests {
     #[test]
     fn fail_verification_session_error() {
         let invalid_proof = load_web_proof_fixture(
-            "./testdata/swapi_presentation_0.1.0-alpha.7.invalid.json",
+            "./testdata/swapi_presentation_0.1.0-alpha.7.invalid_signature.json",
             NOTARY_PUB_KEY_PEM_EXAMPLE,
         );
         assert!(matches!(
@@ -109,17 +109,17 @@ mod tests {
         ));
     }
 
-    // #[test]
-    // fn fail_verification_substrings_error() {
-    //     let invalid_proof = load_web_proof_fixture(
-    //         "./testdata/invalid_substrings_tls_proof.json",
-    //         NOTARY_PUB_KEY_PEM_EXAMPLE,
-    //     );
-    //     assert!(matches!(
-    //         invalid_proof.verify(),
-    //         Err(VerificationError::SubstringsProof(err)) if err.to_string() == "invalid inclusion proof: Failed to verify a Merkle proof"
-    //     ));
-    // }
+    #[test]
+    fn fail_verification_invalid_merkl_prof() {
+        let invalid_proof = load_web_proof_fixture(
+            "./testdata/swapi_presentation_0.1.0-alpha.7.invalid_merkle_proof.json",
+            NOTARY_PUB_KEY_PEM_EXAMPLE,
+        );
+        assert!(matches!(
+            invalid_proof.verify(),
+            Err(VerificationError::Presentation(err)) if err.to_string() == "presentation error: attestation error caused by: attestation proof error: body proof error caused by: merkle error: invalid merkle proof"
+        ));
+    }
 
     #[test]
     fn success_verification() {
