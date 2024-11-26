@@ -47,6 +47,32 @@ impl WebProof {
     }
 }
 
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct PresentationJson {
+    pub version: String,
+    pub data: String,
+    pub meta: PresentationJsonMeta,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct PresentationJsonMeta {
+    #[serde(rename = "notaryUrl")]
+    pub(crate) notary_url: Option<String>,
+    #[serde(rename = "websocketProxyUrl")]
+    pub(crate) websocket_proxy_url: Option<String>,
+    #[serde(rename = "pluginUrl")]
+    pub(crate) plugin_url: Option<String>,
+}
+
+impl From<PresentationJson> for Presentation {
+    fn from(presentation_json: PresentationJson) -> Self {
+        let bytes = hex::decode(presentation_json.data).unwrap();
+        bincode::deserialize(&bytes).unwrap()
+    }
+}
+
 #[derive(Error, Debug)]
 pub enum VerificationError {
     #[error("No server name found in the presentation")]
@@ -79,6 +105,8 @@ where
 
 #[cfg(test)]
 mod tests {
+    use tlsn_core::signing::KeyAlgId;
+
     use super::*;
     use crate::fixtures::{load_web_proof_fixture, read_fixture, NOTARY_PUB_KEY_PEM_EXAMPLE};
 
@@ -156,5 +184,14 @@ mod tests {
             NOTARY_PUB_KEY_PEM_EXAMPLE,
         );
         assert_eq!(proof.get_notary_pub_key().unwrap(), NOTARY_PUB_KEY_PEM_EXAMPLE);
+    }
+
+    #[test]
+    fn deserialize_presentation() {
+        let presentation_json = read_fixture("./testdata/presentation_json.json");
+        let presentation_json: PresentationJson = serde_json::from_str(&presentation_json).unwrap();
+
+        let presentation: Presentation = presentation_json.into();
+        assert_eq!(presentation.verifying_key().alg, KeyAlgId::K256);
     }
 }
