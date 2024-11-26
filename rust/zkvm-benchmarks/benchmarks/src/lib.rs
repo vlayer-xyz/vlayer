@@ -1,10 +1,9 @@
-use std::fmt::Display;
-
 use benchmarks::BENCHMARKS;
 use risc0_zkvm::guest::env;
 use tabled::{Table, Tabled};
-use thousands::Separable;
+
 mod benchmarks;
+mod cycle;
 
 // Cycle count is non-deterministic so we ignore differences up to 10% when comparing.
 // 5% was tried and was not enough
@@ -15,37 +14,26 @@ pub struct Runner(Vec<Benchmark>);
 type WorkloadResult = Result<(), ()>;
 type Workload = fn() -> WorkloadResult;
 
-struct CycleCount(u64);
-
-impl Display for CycleCount {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.0.separate_with_underscores().fmt(f)
-    }
-}
-
-struct CycleDiff(i64);
-
-impl Display for CycleDiff {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        self.0.separate_with_underscores().fmt(f)
-    }
-}
-
 #[derive(Tabled)]
 struct BenchmarkResult {
     name: String,
-    actual_cycles: CycleCount,
-    snapshot_cycles: CycleCount,
-    diff: CycleDiff,
+    actual_cycles: cycle::Count,
+    snapshot_cycles: cycle::Count,
+    absolute_diff: cycle::Diff,
+    percentage_diff: cycle::PercentageDiff,
 }
 
 impl BenchmarkResult {
     fn new(name: String, actual_cycles: u64, snapshot_cycles: u64) -> Self {
+        let absolute_diff = actual_cycles as i64 - snapshot_cycles as i64;
+        let percentage_diff =
+            ((actual_cycles as f64 / snapshot_cycles as f64) * 100.0) as i64 - 100;
         Self {
             name,
-            actual_cycles: CycleCount(actual_cycles),
-            snapshot_cycles: CycleCount(snapshot_cycles),
-            diff: CycleDiff(actual_cycles as i64 - snapshot_cycles as i64),
+            actual_cycles: actual_cycles.into(),
+            snapshot_cycles: snapshot_cycles.into(),
+            absolute_diff: absolute_diff.into(),
+            percentage_diff: percentage_diff.into(),
         }
     }
 }
@@ -129,22 +117,21 @@ impl Benchmark {
 
 #[cfg(test)]
 mod tests {
+    use insta::assert_snapshot;
+
     use super::*;
 
     #[test]
     fn prints_results_table() {
         let results = vec![BenchmarkResult::new("test".to_string(), 1_010, 1_000)];
 
-        let table = format!("{}", Table::new(results));
-
-        assert_eq!(
-            table,
-            "+------+---------------+-----------------+------+
-| name | actual_cycles | snapshot_cycles | diff |
-+------+---------------+-----------------+------+
-| test | 1_010         | 1_000           | 10   |
-+------+---------------+-----------------+------+"
-        );
+        assert_snapshot!(Table::new(results), @r###"
+        +------+---------------+-----------------+---------------+-----------------+
+        | name | actual_cycles | snapshot_cycles | absolute_diff | percentage_diff |
+        +------+---------------+-----------------+---------------+-----------------+
+        | test | 1_010         | 1_000           | 10            | 1%              |
+        +------+---------------+-----------------+---------------+-----------------+
+        "###);
     }
 
     #[test]
