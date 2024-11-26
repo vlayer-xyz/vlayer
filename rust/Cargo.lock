@@ -2269,6 +2269,7 @@ dependencies = [
  "serde_json",
  "thiserror",
  "tokio",
+ "tower 0.5.1",
  "tracing",
  "u64_range",
  "url",
@@ -11590,10 +11591,14 @@ version = "0.1.0"
 dependencies = [
  "alloy-primitives",
  "anyhow",
+ "bincode",
  "chain_host",
  "clap",
+ "derive-new",
  "dotenvy",
  "tokio",
+ "tower 0.5.1",
+ "tracing",
  "tracing-subscriber 0.3.18",
 ]
 

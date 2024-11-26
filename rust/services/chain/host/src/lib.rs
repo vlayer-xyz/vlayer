@@ -1,4 +1,7 @@
 mod host;
 
-pub use host::{AppendStrategy, Host, HostConfig, HostError, PrependStrategy};
+pub use host::{
+    error::{BlockFetcherError, BlockTrieError, ChainDbError, HostError, ProverError},
+    AppendPrepend, AppendStrategy, Host, HostConfig, PrependStrategy,
+};
 pub use host_utils::ProofMode;

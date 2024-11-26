@@ -23,6 +23,7 @@ provider = { workspace = true }
 risc0-zkvm = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true, features = ["macros"] }
+tower = { workspace = true }
 tracing = { workspace = true }
 u64_range = { workspace = true }
 url = { workspace = true }

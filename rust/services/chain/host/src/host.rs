@@ -4,6 +4,8 @@ pub mod error;
 mod prover;
 mod strategy;
 
+use std::{future::Future, pin::Pin, sync::Arc, task::Poll};
+
 use alloy_primitives::ChainId;
 use block_fetcher::BlockFetcher;
 use block_trie::BlockTrie;
@@ -11,19 +13,20 @@ use chain_db::{ChainDb, ChainTrie, ChainUpdate, Mode};
 use chain_guest::Input;
 use chain_guest_wrapper::GUEST_ELF;
 pub use config::HostConfig;
-pub use error::HostError;
+use error::HostError;
 use ethers::{
     providers::{Http, JsonRpcClient},
     types::BlockNumber as BlockTag,
 };
 use prover::Prover;
 pub use strategy::{AppendStrategy, PrependStrategy};
+use tokio::sync::Mutex;
 use tracing::{info, instrument};
 use u64_range::NonEmptyRange;
 
 pub struct Host<P>
 where
-    P: JsonRpcClient,
+    P: JsonRpcClient + 'static,
 {
     db: ChainDb,
     prover: Prover,
@@ -52,7 +55,7 @@ impl Host<Http> {
 
 impl<P> Host<P>
 where
-    P: JsonRpcClient,
+    P: JsonRpcClient + 'static,
 {
     pub const fn from_parts(
         prover: Prover,
@@ -143,6 +146,30 @@ where
         let chain_update = ChainUpdate::from_two_tries(new_range, &old_trie, &trie, &receipt)?;
 
         Ok(chain_update)
+    }
+}
+
+#[derive(Clone, Copy)]
+pub struct AppendPrepend;
+
+impl<P: JsonRpcClient + 'static> tower::Service<AppendPrepend> for Arc<Mutex<Host<P>>> {
+    type Error = HostError;
+    type Future = Pin<Box<dyn Future<Output = Result<Self::Response, Self::Error>>>>;
+    type Response = ();
+
+    fn poll_ready(
+        &mut self,
+        _cx: &mut std::task::Context<'_>,
+    ) -> std::task::Poll<Result<(), Self::Error>> {
+        match self.try_lock() {
+            Ok(_) => Poll::Ready(Ok(())),
+            Err(_) => Poll::Pending,
+        }
+    }
+
+    fn call(&mut self, _req: AppendPrepend) -> Self::Future {
+        let this = self.clone();
+        Box::pin(async move { this.lock().await.poll_commit().await })
     }
 }
 

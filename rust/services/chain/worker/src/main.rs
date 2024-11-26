@@ -1,11 +1,14 @@
-use std::path::PathBuf;
+use std::{path::PathBuf, sync::Arc, time::Duration};
 
 use alloy_primitives::ChainId;
-use chain_host::{AppendStrategy, Host, HostConfig, PrependStrategy, ProofMode};
+use chain_host::{AppendPrepend, AppendStrategy, Host, HostConfig, PrependStrategy, ProofMode};
 use clap::Parser;
 use dotenvy::dotenv;
+use tokio::sync::Mutex;
+use tower::{Service, ServiceBuilder};
 use trace::init_tracing;
 
+mod retry;
 mod trace;
 
 #[derive(Parser)]
@@ -70,8 +73,15 @@ async fn main() -> anyhow::Result<()> {
 
     let config = Cli::parse().into();
 
-    let mut host = Host::try_new(config)?;
+    let host = Host::try_new(config)?;
+    let mut host_service = ServiceBuilder::new()
+        .retry(retry::Policy::new(5))
+        .timeout(Duration::from_secs(60))
+        .service(Arc::new(Mutex::new(host)));
     loop {
-        host.poll_commit().await?;
+        host_service
+            .call(AppendPrepend)
+            .await
+            .map_err(|e| anyhow::anyhow!(e))?;
     }
 }
