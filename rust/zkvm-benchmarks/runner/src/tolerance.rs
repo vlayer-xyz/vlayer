@@ -2,6 +2,11 @@
 // 5% was tried and was not enough
 const TOLERANCE: f64 = 1.1;
 
+#[allow(
+    clippy::cast_possible_truncation,
+    clippy::cast_precision_loss,
+    clippy::cast_sign_loss
+)]
 pub fn apply_tolerance(cycles: u64) -> u64 {
     (cycles as f64 * TOLERANCE) as u64
 }
