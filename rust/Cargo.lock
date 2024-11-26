@@ -11764,6 +11764,8 @@ name = "zkvm-benchmarks-runner"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "common",
+ "derivative",
  "derive_more 1.0.0",
  "host_utils",
  "insta",

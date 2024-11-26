@@ -6,11 +6,8 @@ mod row;
 mod runner;
 mod tolerance;
 
-use runner::Runner;
-
 fn main() {
-    let runner: Runner = Default::default();
-    let result = runner.run(());
+    let result = runner::run();
 
     if let Err(err) = result {
         eprintln!("❌ Failed to run benchmarks: {err}");

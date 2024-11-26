@@ -1,3 +1,5 @@
+use std::fmt::Display;
+
 use benchmarks::BENCHMARKS;
 use derive_new::new;
 use risc0_zkvm::guest::env;
@@ -31,11 +33,21 @@ impl Default for Runner {
     }
 }
 
-#[derive(Debug, Clone, new, Serialize, Deserialize)]
+#[derive(Debug, Clone, new, Serialize, Deserialize, Eq, PartialEq)]
 pub struct BenchmarkResult {
     pub name: String,
     pub actual_cycles: u64,
     pub snapshot_cycles: u64,
+}
+
+impl Display for BenchmarkResult {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "{}: {} cycles (snapshot: {} cycles)",
+            self.name, self.actual_cycles, self.snapshot_cycles
+        )
+    }
 }
 
 #[derive(Debug, Clone)]
