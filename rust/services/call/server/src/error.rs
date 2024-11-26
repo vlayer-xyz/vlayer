@@ -29,7 +29,6 @@ impl From<AppError> for JsonRpcError {
                 JsonRpcError::new(JsonRpcErrorReason::InternalError, error.to_string(), Value::Null)
             }
             AppError::RpcError(..) => {
-                // Consider adding impl From<..> for JsonRpcError
                 JsonRpcError::new(JsonRpcErrorReason::InternalError, error.to_string(), Value::Null)
             }
         }

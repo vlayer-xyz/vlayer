@@ -1,44 +1,3 @@
-//! This module is responsible for communicating with a gas metering service.
-//! Gas metering is optional in which case every computation (preflight and proving)
-//! will always be executed regardless of set gas limits by the user.
-//!
-//! The general diagram of communication happening between the Prover and the GasMeter can
-//! be summarised as follows:
-//!
-//! -------                    ------------           v_startGasMeter         -------------
-//! | SDK | ---- v_call ---->  |  Prover  |   ------- v_reportGasUsage --->   |  GasMeter |
-//! -------                    ------------                                   -------------
-//!
-//! Thus as you can see, GasMeter is completely transparent to the SDK and may or may not
-//! be used to schedule computations on the Prover.
-//!
-//! Communication is facilitated via JSON RPC using the following two methods:
-//!
-//! v_allocateGas:
-//! {
-//!   jsonrpc: 2.0,
-//!   method: "v_allocateGas",
-//!   id: number,
-//!   params: [{
-//!     hash: hex,
-//!     gas_limit: number,
-//!     time_to_live: number,
-//!   }],
-//! }
-//!
-//! v_refundUnusedGas:
-//! {
-//!   jsonrpc: 2.0,
-//!   method: "v_refundUnusedGas",
-//!   id: number,
-//!   params: [{
-//!     hash: hex,
-//!     computation_kind: [preflight|proving],
-//!     gas_used: number,
-//!   }],
-//! }
-//!
-
 use derive_more::Deref;
 use derive_new::new;
 use serde::{Deserialize, Serialize};
@@ -51,7 +10,6 @@ use crate::handlers::v_call::types::CallHash;
 struct AllocateGas {
     hash: CallHash,
     gas_limit: u64,
-    /// Time-to-live expressed in minutes.
     time_to_live: u64,
 }
 
@@ -74,7 +32,6 @@ struct RefundUnusedGas {
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Config {
     pub url: String,
-    /// Time-to-live expressed in minutes.
     pub time_to_live: u64,
 }
 

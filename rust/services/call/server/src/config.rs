@@ -19,8 +19,6 @@ pub struct Config {
     verify_chain_proofs: bool,
     call_guest_elf: GuestElf,
     chain_guest_elf: GuestElf,
-    /// Config of the gas metering service.
-    /// Defaults to 'None'.
     gas_meter_config: Option<GasMeterConfig>,
 }
 

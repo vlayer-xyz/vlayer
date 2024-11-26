@@ -32,7 +32,7 @@ abigen!(ExampleProver, "./testdata/ExampleProver.json",);
 type Client = Arc<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>>;
 type Contract = ExampleProver<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>>;
 
-const DEFAULT_GAS_METER_TTL: u64 = 3600; // 1h
+const DEFAULT_GAS_METER_TTL: u64 = 3600;
 
 pub(crate) struct TestHelper {
     server_config: Config,
