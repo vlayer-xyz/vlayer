@@ -139,9 +139,12 @@ And that's it!
 
 As you can see, Web Proofs can be a powerful tool for building decentralized applications by allowing trusted off-chain data to interact with smart contracts.
 
+## Notary 
+A *Notary* is a third-party server that participates in a two-sided Transport Layer Security (TLS) session between a client and a server. Its role is to attest that specific communication has occurred between the two parties.
+
 ## Security Considerations
 
-The Web Proof feature is based on the [TLSNotary](https://tlsnotary.org/) protocol. Web data is retrieved from an HTTP endpoint and it's integrity and authenticity during the HTTP session is verified using the Transport Layer Security (TLS) protocol (the "S" in HTTPS), which secures most modern encrypted connections on the Internet. Web Proofs ensure the integrity and authenticity of web data after the HTTPS session finishes by extending the TLS protocol. A designated server, called *Notary*, joins the HTTPS session between the client and the server and can cryptographically certify its contents.
+The Web Proof feature is based on the [TLSNotary](https://tlsnotary.org/) protocol. Web data is retrieved from an HTTP endpoint and it's integrity and authenticity during the HTTP session is verified using the TLS protocol (the "S" in HTTPS), which secures most modern encrypted connections on the Internet. Web Proofs ensure the integrity and authenticity of web data after the HTTPS session finishes by extending the TLS protocol. *Notary*, joins the HTTPS session between the client and the server and can cryptographically certify its contents.
 
 From privacy perspective, it is important to note that the *Notary* server never has access to the plaintext transcript of the connection and therefore, *Notary* can never steal client data and pretend to be client. Furthermore, the transcript can be redacted (i.e. certain parts can be removed) by the client, making these parts of the communication not accessible by `Prover` and vlayer infrastructure running the `Prover`.
 
