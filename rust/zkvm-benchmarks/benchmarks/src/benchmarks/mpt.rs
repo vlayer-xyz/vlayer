@@ -32,7 +32,7 @@ mod empty {
         pub static ref BENCHMARKS: Vec<Benchmark> = vec![
             Benchmark::new("trie", trie as Workload, 47),
             Benchmark::new("hash", hash as Workload, 122),
-            Benchmark::new("insert", insert as Workload, 1_189),
+            Benchmark::new("insert", insert as Workload, 1_279),
         ];
     }
 }

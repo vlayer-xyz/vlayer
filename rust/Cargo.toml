@@ -106,6 +106,7 @@ opener = "0.7.2"
 p256 = { version = "0.13.2", features = ["ecdsa"] }
 parking_lot = "0.12.3"
 pkcs8 = "0.10.2"
+tabled = "0.17.0"
 proptest = "1.5.0"
 rand = "0.8.5"
 rayon = "1.10.0"

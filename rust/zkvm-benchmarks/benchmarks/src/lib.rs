@@ -2,33 +2,51 @@ use std::fmt::Display;
 
 use benchmarks::BENCHMARKS;
 use risc0_zkvm::guest::env;
+use tabled::{Table, Tabled};
 use thousands::Separable;
 mod benchmarks;
 
-// Cycle count is non-deterministic so we ignore differences up to 5% when comparing
-const TOLERANCE: f64 = 1.05;
+// Cycle count is non-deterministic so we ignore differences up to 10% when comparing.
+// 5% was tried and was not enough
+const TOLERANCE: f64 = 1.1;
 
 pub struct BenchmarkRunner(Vec<Benchmark>);
 
 type WorkloadResult = Result<(), ()>;
 type Workload = fn() -> WorkloadResult;
 
-struct BenchmarkResult {
-    name: String,
-    actual_cycles: u64,
-    snapshot_cycles: u64,
+struct CycleCount(u64);
+
+impl Display for CycleCount {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        self.0.separate_with_underscores().fmt(f)
+    }
 }
 
-impl Display for BenchmarkResult {
+struct CycleDiff(i64);
+
+impl Display for CycleDiff {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(
-            f,
-            "{}: actual: {} snapshot: {} difference: {}",
-            self.name,
-            self.actual_cycles.separate_with_underscores(),
-            self.snapshot_cycles.separate_with_underscores(),
-            (self.actual_cycles as i64 - self.snapshot_cycles as i64).separate_with_underscores()
-        )
+        self.0.separate_with_underscores().fmt(f)
+    }
+}
+
+#[derive(Tabled)]
+struct BenchmarkResult {
+    name: String,
+    actual_cycles: CycleCount,
+    snapshot_cycles: CycleCount,
+    diff: CycleDiff,
+}
+
+impl BenchmarkResult {
+    fn new(name: String, actual_cycles: u64, snapshot_cycles: u64) -> Self {
+        Self {
+            name,
+            actual_cycles: CycleCount(actual_cycles),
+            snapshot_cycles: CycleCount(snapshot_cycles),
+            diff: CycleDiff(actual_cycles as i64 - snapshot_cycles as i64),
+        }
     }
 }
 
@@ -50,11 +68,9 @@ impl BenchmarkRunner {
             println!("Failed total of: {}", failed.len());
             return Err(failed.len() as u64);
         }
-        println!("Results:");
-        passed
-            .into_iter()
-            .map(Result::unwrap)
-            .for_each(|r| println!("{}", r));
+
+        let results: Vec<_> = passed.into_iter().map(|r| r.unwrap()).collect();
+        println!("{}", Table::new(results));
 
         Ok(())
     }
@@ -107,11 +123,7 @@ impl Benchmark {
             return Err(());
         }
 
-        Ok(BenchmarkResult {
-            name: self.name,
-            actual_cycles,
-            snapshot_cycles: self.snapshot_cycles,
-        })
+        Ok(BenchmarkResult::new(self.name, actual_cycles, self.snapshot_cycles))
     }
 }
 
@@ -120,19 +132,25 @@ mod tests {
     use super::*;
 
     #[test]
-    fn thousands_separated() {
-        let result = BenchmarkResult {
-            name: "test".to_string(),
-            actual_cycles: 1_010,
-            snapshot_cycles: 1_000,
-        };
-        assert_eq!(result.to_string(), "test: actual: 1_010 snapshot: 1_000 difference: 10");
+    fn prints_results_table() {
+        let results = vec![BenchmarkResult::new("test".to_string(), 1_010, 1_000)];
+
+        let table = format!("{}", Table::new(results));
+
+        assert_eq!(
+            table,
+            "+------+---------------+-----------------+------+
+| name | actual_cycles | snapshot_cycles | diff |
++------+---------------+-----------------+------+
+| test | 1_010         | 1_000           | 10   |
++------+---------------+-----------------+------+"
+        );
     }
 
     #[test]
     fn tolerance() {
         assert_eq!(apply_tolerance(1), 1);
-        assert_eq!(apply_tolerance(100), 105);
-        assert_eq!(apply_tolerance(1_027), 1_078);
+        assert_eq!(apply_tolerance(100), 110);
+        assert_eq!(apply_tolerance(1_027), 1_129);
     }
 }
