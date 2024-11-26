@@ -47,7 +47,10 @@ export enum ExtensionMessageType {
 export type PresentationJSON = TLSNPresentationJSON;
 
 export type ExtensionMessage =
-  | { type: ExtensionMessageType.ProofDone; payload: { proof: PresentationJSON } }
+  | {
+      type: ExtensionMessageType.ProofDone;
+      payload: { proof: PresentationJSON };
+    }
   | { type: ExtensionMessageType.ProofError; payload: { error: string } }
   | { type: ExtensionMessageType.RedirectBack }
   | { type: ExtensionMessageType.TabOpened; payload: { tabId: number } }

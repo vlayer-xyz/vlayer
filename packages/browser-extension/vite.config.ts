@@ -53,6 +53,7 @@ export default defineConfig({
       ],
     }),
     nodePolyfills({
+      // buffer is required by tlsn-js internals
       include: ['buffer']
     }),
   ],
