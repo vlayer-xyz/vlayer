@@ -69,6 +69,10 @@ export type WebProofStep =
   | WebProofStepExpectUrl
   | WebProofStepStartPage;
 
+export type UrlPattern = Branded<string, "UrlPattern">;
+
+export type Url = Branded<string, "Url">;
+
 export type WebProofStepNotarize = Branded<
   {
     url: UrlPattern;
@@ -96,10 +100,6 @@ export type WebProofStepExpectUrl = Branded<
   },
   "expectUrl"
 >;
-
-export type UrlPattern = Branded<string, "UrlPattern">;
-
-export type Url = Branded<string, "Url">;
 
 export enum StepValidationErrors {
   InvalidUrl = "InvalidUrl",
