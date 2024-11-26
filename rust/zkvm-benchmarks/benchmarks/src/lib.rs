@@ -9,6 +9,10 @@ mod cycle;
 // 5% was tried and was not enough
 const TOLERANCE: f64 = 1.1;
 
+fn apply_tolerance(cycles: u64) -> u64 {
+    (cycles as f64 * TOLERANCE) as u64
+}
+
 pub struct Runner(Vec<Benchmark>);
 
 type WorkloadResult = Result<(), ()>;
@@ -65,10 +69,6 @@ impl Default for Runner {
     fn default() -> Self {
         Self::new()
     }
-}
-
-fn apply_tolerance(cycles: u64) -> u64 {
-    (cycles as f64 * TOLERANCE) as u64
 }
 
 #[derive(Debug, Clone)]
