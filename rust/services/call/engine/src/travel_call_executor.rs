@@ -5,7 +5,7 @@ use derive_new::new;
 use revm::{
     db::WrapDatabaseRef,
     inspector_handle_register,
-    primitives::{EVMError, ExecutionResult, ResultAndState},
+    primitives::{EVMError, ExecutionResult, ResultAndState, TxEnv},
     DatabaseRef, Evm, Handler,
 };
 use tracing::{debug, error};
@@ -64,13 +64,13 @@ where
 
     pub fn internal_call(
         &'envs self,
-        tx: &Call,
+        call: &Call,
         location: ExecutionLocation,
     ) -> Result<ExecutionResult> {
         let env = self.get_env(location)?;
         let transaction_callback = |call: &_, location| self.internal_call(call, location);
         let inspector = TravelInspector::new(env.cfg_env.chain_id, transaction_callback);
-        let mut evm = build_evm(&env, tx, inspector)?;
+        let mut evm = build_evm(&env, call, inspector)?;
         let ResultAndState { result, .. } = evm.transact_preverified()?;
         debug!("EVM call result: {:?}", result);
 
@@ -80,7 +80,7 @@ where
 
 fn build_evm<'inspector, 'envs, D>(
     env: &'envs EvmEnv<D>,
-    tx: &Call,
+    call: &Call,
     inspector: TravelInspector<'inspector>,
 ) -> Result<Evm<'inspector, TravelInspector<'inspector>, WrapDatabaseRef<&'envs D>>>
 where
@@ -100,7 +100,7 @@ where
         .with_ref_db(&env.db)
         .with_external_context(inspector)
         .with_cfg_env_with_handler_cfg(env.cfg_env.clone())
-        .with_tx_env(tx.clone().into())
+        .with_tx_env(call.clone().into())
         .append_handler_register(precompiles_handle_register)
         .append_handler_register(inspector_handle_register)
         .modify_block_env(|blk_env| env.header.fill_block_env(blk_env))
