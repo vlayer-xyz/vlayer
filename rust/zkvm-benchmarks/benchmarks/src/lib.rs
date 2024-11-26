@@ -25,15 +25,12 @@ struct BenchmarkResult {
 
 impl BenchmarkResult {
     fn new(name: String, actual_cycles: u64, snapshot_cycles: u64) -> Self {
-        let absolute_diff = actual_cycles as i64 - snapshot_cycles as i64;
-        let percentage_diff =
-            ((actual_cycles as f64 / snapshot_cycles as f64) * 100.0) as i64 - 100;
         Self {
             name,
             actual_cycles: actual_cycles.into(),
             snapshot_cycles: snapshot_cycles.into(),
-            absolute_diff: absolute_diff.into(),
-            percentage_diff: percentage_diff.into(),
+            absolute_diff: cycle::Diff::new(actual_cycles, snapshot_cycles),
+            percentage_diff: cycle::PercentageDiff::new(actual_cycles, snapshot_cycles),
         }
     }
 }

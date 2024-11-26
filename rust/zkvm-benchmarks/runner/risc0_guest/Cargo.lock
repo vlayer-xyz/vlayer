@@ -4220,6 +4220,7 @@ dependencies = [
  "alloy-sol-types",
  "call_precompiles",
  "common",
+ "derive_more",
  "email_proof",
  "lazy_static",
  "mpt",
