@@ -8,13 +8,11 @@ alloy-primitives = { workspace = true }
 alloy-sol-types = { workspace = true }
 call_precompiles = { workspace = true }
 common = { workspace = true }
-derive_more = { workspace = true }
-insta = { workspace = true }
+derive-new = { workspace = true }
 lazy_static = { workspace = true }
 risc0-zkvm = { workspace = true }
+serde = { workspace = true }
 sha2 = { workspace = true }
-tabled = { workspace = true }
-thousands = { workspace = true }
 
 email_proof = { workspace = true }
 mpt = { workspace = true }

@@ -11750,15 +11750,13 @@ dependencies = [
  "alloy-sol-types",
  "call_precompiles",
  "common",
- "derive_more 1.0.0",
+ "derive-new",
  "email_proof",
- "insta",
  "lazy_static",
  "mpt",
  "risc0-zkvm",
+ "serde",
  "sha2 0.10.8 (registry+https://github.com/rust-lang/crates.io-index)",
- "tabled",
- "thousands",
 ]
 
 [[package]]
@@ -11766,9 +11764,15 @@ name = "zkvm-benchmarks-runner"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "derive_more 1.0.0",
  "host_utils",
+ "insta",
  "risc0-build",
  "risc0-zkvm",
+ "tabled",
+ "thiserror",
+ "thousands",
+ "zkvm-benchmarks",
 ]
 
 [[package]]

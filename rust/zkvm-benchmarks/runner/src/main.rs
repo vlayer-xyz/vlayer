@@ -1,6 +1,12 @@
 use std::process::exit;
 
-use zkvm_benchmarks_runner::Runner;
+mod cycle;
+mod guest;
+mod row;
+mod runner;
+mod tolerance;
+
+use runner::Runner;
 
 fn main() {
     let runner: Runner = Default::default();
