@@ -1,10 +1,13 @@
 use std::process::exit;
 
-use zkvm_benchmarks_runner::Runner;
+mod cycle;
+mod guest;
+mod row;
+mod runner;
+mod tolerance;
 
 fn main() {
-    let runner: Runner = Default::default();
-    let result = runner.run(());
+    let result = runner::run();
 
     if let Err(err) = result {
         eprintln!("❌ Failed to run benchmarks: {err}");

@@ -1,8 +1,13 @@
+use common::GuestElf;
+
 #[cfg(not(clippy))]
-include!(concat!(env!("OUT_DIR"), "/methods.rs"));
+#[allow(dead_code)]
+mod private {
+    include!(concat!(env!("OUT_DIR"), "/methods.rs"));
+}
 
+#[cfg(not(clippy))]
+pub static GUEST_ELF: GuestElf =
+    GuestElf::new(private::RISC0_BENCHMARK_GUEST_ID, private::RISC0_BENCHMARK_GUEST_ELF);
 #[cfg(clippy)]
-pub const RISC0_BENCHMARK_GUEST_ELF: &[u8] = &[];
-
-#[cfg(clippy)]
-pub const RISC0_BENCHMARK_GUEST_ID: [u32; 8] = [0; 8];
+pub static GUEST_ELF: GuestElf = GuestElf::default();

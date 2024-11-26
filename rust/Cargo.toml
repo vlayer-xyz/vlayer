@@ -33,7 +33,6 @@ members = [
     "test_runner",
     "web_proof",
     "zkvm-benchmarks/benchmarks",
-    "zkvm-benchmarks/common",
     "zkvm-benchmarks/runner",
 ]
 
@@ -107,6 +106,7 @@ opener = "0.7.2"
 p256 = { version = "0.13.2", features = ["ecdsa"] }
 parking_lot = "0.12.3"
 pkcs8 = "0.10.2"
+tabled = "0.17.0"
 proptest = "1.5.0"
 rand = "0.8.5"
 rayon = "1.10.0"
@@ -176,7 +176,6 @@ server_utils = { path = "server_utils" }
 test_runner = { path = "test_runner" }
 web_proof = { path = "web_proof" }
 zkvm-benchmarks = { path = "zkvm-benchmarks/benchmarks" }
-zkvm-benchmarks-common = { path = "zkvm-benchmarks/common" }
 
 [workspace.lints.clippy]
 as_ptr_cast_mut = "warn"

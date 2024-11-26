@@ -1818,6 +1818,12 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c3ac9f8b63eca6fd385229b3675f6cc0dc5c8a5c8a54a59d4f52ffd670d87b0c"
 
 [[package]]
+name = "bytecount"
+version = "0.6.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "5ce89b21cab1437276d2650d57e971f9d548a2d9037cc231abdc0562b97498ce"
+
+[[package]]
 name = "bytemuck"
 version = "1.19.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -7309,6 +7315,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "papergrid"
+version = "0.13.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d2b0f8def1f117e13c895f3eda65a7b5650688da29d6ad04635f61bc7b92eebd"
+dependencies = [
+ "bytecount",
+ "fnv",
+ "unicode-width 0.2.0",
+]
+
+[[package]]
 name = "parity-scale-codec"
 version = "3.6.12"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -9912,6 +9929,29 @@ dependencies = [
 ]
 
 [[package]]
+name = "tabled"
+version = "0.17.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c6709222f3973137427ce50559cd564dc187a95b9cfe01613d2f4e93610e510a"
+dependencies = [
+ "papergrid",
+ "tabled_derive",
+]
+
+[[package]]
+name = "tabled_derive"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "931be476627d4c54070a1f3a9739ccbfec9b36b39815106a20cce2243bbcefe1"
+dependencies = [
+ "heck 0.4.1",
+ "proc-macro-error2",
+ "proc-macro2",
+ "quote",
+ "syn 1.0.109",
+]
+
+[[package]]
 name = "tap"
 version = "1.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -11748,20 +11788,13 @@ dependencies = [
  "alloy-sol-types",
  "call_precompiles",
  "common",
+ "derive-new",
  "email_proof",
  "lazy_static",
  "mpt",
  "risc0-zkvm",
- "sha2 0.10.8 (registry+https://github.com/rust-lang/crates.io-index)",
- "thousands",
-]
-
-[[package]]
-name = "zkvm-benchmarks-common"
-version = "0.1.0"
-dependencies = [
- "bincode",
  "serde",
+ "sha2 0.10.8 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
 
 [[package]]
@@ -11769,9 +11802,17 @@ name = "zkvm-benchmarks-runner"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "common",
+ "derivative",
+ "derive_more 1.0.0",
  "host_utils",
+ "insta",
  "risc0-build",
  "risc0-zkvm",
+ "tabled",
+ "thiserror",
+ "thousands",
+ "zkvm-benchmarks",
 ]
 
 [[package]]

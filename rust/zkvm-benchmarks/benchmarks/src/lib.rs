@@ -1,64 +1,52 @@
 use std::fmt::Display;
 
 use benchmarks::BENCHMARKS;
+use derive_new::new;
 use risc0_zkvm::guest::env;
-use thousands::Separable;
+use serde::{Deserialize, Serialize};
+
 mod benchmarks;
 
-pub struct BenchmarkRunner(Vec<Benchmark>);
+pub struct Runner(Vec<Benchmark>);
 
 type WorkloadResult = Result<(), ()>;
 type Workload = fn() -> WorkloadResult;
 
-struct BenchmarkResult {
-    name: String,
-    used_cycles: u64,
-    limit_cycles: u64,
+impl Runner {
+    pub fn new() -> Self {
+        Self(BENCHMARKS.clone())
+    }
+
+    pub fn run(self) -> Vec<BenchmarkResult> {
+        let mut results = Vec::with_capacity(self.0.len());
+        for benchmark in self.0 {
+            let result = benchmark.run().expect("benchmark failed");
+            results.push(result);
+        }
+        results
+    }
+}
+
+impl Default for Runner {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
+#[derive(Debug, Clone, new, Serialize, Deserialize, Eq, PartialEq)]
+pub struct BenchmarkResult {
+    pub name: String,
+    pub actual_cycles: u64,
+    pub snapshot_cycles: u64,
 }
 
 impl Display for BenchmarkResult {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "{}: {} / {}",
-            self.name,
-            self.used_cycles.separate_with_underscores(),
-            self.limit_cycles.separate_with_underscores()
+            "{}: {} cycles (snapshot: {} cycles)",
+            self.name, self.actual_cycles, self.snapshot_cycles
         )
-    }
-}
-
-impl BenchmarkRunner {
-    pub fn new() -> Self {
-        Self(BENCHMARKS.clone())
-    }
-
-    pub fn run_all(self) -> Result<(), u64> {
-        let results: Vec<Result<BenchmarkResult, ()>> =
-            self.0.into_iter().map(Benchmark::run).collect();
-        println!("Run total of: {}", results.len());
-
-        let (passed, failed): (Vec<_>, Vec<_>) = results.into_iter().partition(|r| r.is_ok());
-
-        println!("Passed total of: {}", passed.len());
-
-        if !failed.is_empty() {
-            println!("Failed total of: {}", failed.len());
-            return Err(failed.len() as u64);
-        }
-        println!("Results:");
-        passed
-            .into_iter()
-            .map(Result::unwrap)
-            .for_each(|r| println!("{}", r));
-
-        Ok(())
-    }
-}
-
-impl Default for BenchmarkRunner {
-    fn default() -> Self {
-        Self::new()
     }
 }
 
@@ -66,15 +54,15 @@ impl Default for BenchmarkRunner {
 pub struct Benchmark {
     name: String,
     workload: Workload,
-    total_cycles_limit: u64,
+    snapshot_cycles: u64,
 }
 
 impl Benchmark {
-    pub fn new(name: impl Into<String>, workload: Workload, total_cycles_limit: u64) -> Self {
+    pub fn new(name: impl Into<String>, workload: Workload, snapshot_cycles: u64) -> Self {
         Self {
             name: name.into(),
             workload,
-            total_cycles_limit,
+            snapshot_cycles,
         }
     }
 
@@ -89,35 +77,8 @@ impl Benchmark {
         let start = env::cycle_count();
         (self.workload)()?;
         let end = env::cycle_count();
+        let cycles = end - start;
 
-        let total_cycles = end - start;
-        if total_cycles > self.total_cycles_limit {
-            eprintln!(
-                "Benchmark {} failed with result: {} > {}",
-                self.name, total_cycles, self.total_cycles_limit
-            );
-            return Err(());
-        }
-
-        Ok(BenchmarkResult {
-            name: self.name,
-            used_cycles: total_cycles,
-            limit_cycles: self.total_cycles_limit,
-        })
-    }
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn thousands_separated() {
-        let result = BenchmarkResult {
-            name: "test".to_string(),
-            used_cycles: 1_000,
-            limit_cycles: 1_000_000,
-        };
-        assert_eq!(result.to_string(), "test: 1_000 / 1_000_000");
+        Ok(BenchmarkResult::new(self.name, cycles, self.snapshot_cycles))
     }
 }
