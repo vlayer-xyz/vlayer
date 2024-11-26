@@ -20,6 +20,7 @@ forks = [
   { spec = "CANCUN", activation = { Timestamp = 1710338135 } }
 ]
 
+# https://github.com/ethereum/execution-specs/tree/5e8aeb3e5b4ba6d2ff2308b1ab9625ef0c38a4f6/network-upgrades/mainnet-upgrades
 [[chains]]
 name = "sepolia"
 id = 11155111
@@ -29,6 +30,7 @@ forks = [
   { spec = "CANCUN", activation = { Timestamp = 1706655072 } }
 ]
 
+# https://github.com/base-org/optimism/blob/f5221f4d1fae6f3da1bd4d1647e45f40e2b055c4/op-node/chaincfg/chains_test.go#L37
 [[chains]]
 name = "base"
 id = 8453
@@ -40,6 +42,7 @@ forks = [
   { spec = "FJORD", activation = { Timestamp = 1720627201 } },
 ]
 
+# https://github.com/base-org/op-geth/blob/78436b6ae2a45a9c8449a9b0c93b062a37bd20da/core/forkid/forkid_test.go#L103
 [[chains]]
 name = "base-sepolia"
 id = 84532
@@ -50,6 +53,7 @@ forks = [
   { spec = "FJORD", activation = { Timestamp = 1715961600 } },
 ]
 
+# https://docs.optimism.io/builders/node-operators/network-upgrades
 [[chains]]
 name = "optimism"
 id = 10
@@ -63,6 +67,7 @@ forks = [
   { spec = "GRANITE", activation = { Timestamp = 1726070401 } },
 ]
 
+# https://github.com/ethereum-optimism/optimism/blob/8e0b89c116d0e294d9fb6e8c60a4bc70421b57d7/op-node/chaincfg/chains_test.go#L74
 [[chains]]
 name = "optimism-sepolia"
 id = 11155420
@@ -76,6 +81,7 @@ forks = [
   { spec = "HOLOCENE", activation = { Timestamp = 1732633200 } },
 ]
 
+# https://github.com/maticnetwork/bor/blob/16268f6608d09d5b6d0cd0e43f5ec076c3b92616/internal/cli/server/chains/mainnet.go#L11
 [[chains]]
 name = "polygon"
 id = 137
@@ -89,6 +95,7 @@ forks = [
   { spec = "CANCUN", activation = { Block = 54876000 } },
 ]
 
+# https://github.com/maticnetwork/bor/blob/16268f6608d09d5b6d0cd0e43f5ec076c3b92616/internal/cli/server/chains/amoy.go#L11
 [[chains]]
 name = "polygon-amoy"
 id = 80002
@@ -97,6 +104,8 @@ forks = [
   { spec = "SHANGHAI", activation = { Block = 73100 } },
   { spec = "CANCUN", activation = { Block = 5423600 } },
 ]
+
+# Time travel is not supported for arbitrum and zksync chains
 
 [[chains]]
 name = "arbitrum-one"
@@ -133,6 +142,7 @@ forks = [
   { spec = "CANCUN", activation = { Timestamp = 1710338135 } }
 ]
 
+# https://github.com/Consensys/linea-monorepo/blob/0615fa37b9f7aa42681a54bfc881e43914d9c0a1/docker/linea-mainnet/genesis.json
 [[chains]]
 name = "linea"
 id = 59144
@@ -140,6 +150,7 @@ forks = [
   { spec = "LONDON", activation = { Block = 0 } }
 ]
 
+# https://github.com/Consensys/linea-monorepo/blob/0615fa37b9f7aa42681a54bfc881e43914d9c0a1/docker/linea-sepolia/genesis.json#L3
 [[chains]]
 name = "linea-sepolia"
 id = 59141
@@ -147,6 +158,7 @@ forks = [
   { spec = "LONDON", activation = { Block = 0 } }
 ]
 
+# unique chain id
 [[chains]]
 name = "local-testnet"
 id = 31337
