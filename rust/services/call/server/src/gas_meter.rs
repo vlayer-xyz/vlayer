@@ -14,10 +14,10 @@
 //!
 //! Communication is facilitated via JSON RPC using the following two methods:
 //!
-//! v_startGasMeter:
+//! v_allocateGas:
 //! {
 //!   jsonrpc: 2.0,
-//!   method: "v_startGasMeter",
+//!   method: "v_allocateGas",
 //!   id: number,
 //!   params: [{
 //!     hash: hex,
@@ -26,15 +26,15 @@
 //!   }],
 //! }
 //!
-//! v_reportGasUsage:
+//! v_refundUnusedGas:
 //! {
 //!   jsonrpc: 2.0,
-//!   method: "v_reportGasUsage",
+//!   method: "v_refundUnusedGas",
 //!   id: number,
 //!   params: [{
 //!     hash: hex,
 //!     computation_kind: [preflight|proving],
-//!     gas_amount: number,
+//!     gas_used: number,
 //!   }],
 //! }
 //!
@@ -48,7 +48,7 @@ use crate::handlers::v_call::types::CallHash;
 
 #[derive(new, Serialize, Debug)]
 #[serde(deny_unknown_fields)]
-struct StartGasMeter {
+struct AllocateGas {
     hash: CallHash,
     gas_limit: u64,
     /// Time-to-live expressed in minutes.
@@ -65,10 +65,10 @@ pub enum ComputationKind {
 #[derive(Serialize, Debug)]
 #[serde(deny_unknown_fields)]
 #[allow(unused)]
-struct ReportGasUsage {
+struct RefundUnusedGas {
     hash: CallHash,
     computation_kind: ComputationKind,
-    gas_amount: u64,
+    gas_used: u64,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -84,11 +84,11 @@ pub struct Client {
     time_to_live: u64,
 }
 
-const V_START_GAS_METER: &str = "v_startGasMeter";
+const V_ALLOCATE_GAS: &str = "v_allocateGas";
 
 impl Client {
     pub fn new(url: &str, hash: CallHash, time_to_live: u64) -> Self {
-        let client = RpcClient::new(url, V_START_GAS_METER);
+        let client = RpcClient::new(url, V_ALLOCATE_GAS);
         Self {
             client,
             hash,
@@ -97,7 +97,7 @@ impl Client {
     }
 
     pub async fn start_gas_meter(&self, gas_limit: u64) -> Result<(), RpcError> {
-        let req = StartGasMeter::new(self.hash, gas_limit, self.time_to_live);
+        let req = AllocateGas::new(self.hash, gas_limit, self.time_to_live);
         let _resp = self.client.call(&req).await?;
         // We need to validate response here.
         Ok(())
@@ -109,7 +109,7 @@ pub struct ServerMock(RpcServerMock);
 
 impl ServerMock {
     pub async fn start(params: impl Serialize, result: impl Serialize) -> ServerMock {
-        let mock_server = RpcServerMock::start(V_START_GAS_METER, true, params, result).await;
+        let mock_server = RpcServerMock::start(V_ALLOCATE_GAS, true, params, result).await;
         Self(mock_server)
     }
 }
