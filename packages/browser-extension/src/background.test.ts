@@ -44,6 +44,7 @@ describe("zk related messaging", () => {
     await browser.storage.local.set({ history: [{ id: "1" }] });
     await browser.runtime.sendMessage({
       action: ExtensionAction.RequestWebProof,
+      payload: { steps: [] },
     });
     const storedHistory = await browser.storage.local.get("history");
     expect(storedHistory.history).toEqual([]);

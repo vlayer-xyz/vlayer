@@ -1,3 +1,5 @@
+import { UrlPattern } from "src/web-proof-commons";
+
 export enum StepStatus {
   Completed = "completed",
   Current = "current",
@@ -8,6 +10,6 @@ export type Step = {
   status: StepStatus;
   label: string;
   kind: "expectUrl" | "notarize" | "startPage";
-  link?: string;
+  link?: string | UrlPattern;
   buttonText?: string;
 };

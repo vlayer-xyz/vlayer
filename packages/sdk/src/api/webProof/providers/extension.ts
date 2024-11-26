@@ -5,12 +5,16 @@ import {
 } from "../../lib/types/webProofProvider";
 
 import {
+  EXTENSION_STEP,
   ExtensionAction,
   type ExtensionMessage,
   ExtensionMessageType,
   type MessageToExtension,
   WebProof,
+  WebProofStep,
   ZkProvingStatus,
+  assertUrl,
+  assertUrlPattern,
 } from "../../../web-proof-commons";
 
 // Chrome runtime API types for browser context
@@ -103,6 +107,7 @@ class ExtensionWebProofProvider implements WebProofProvider {
   }
 
   public requestWebProof(webProofRequest: WebProofRequestInput) {
+    validateWebProofRequest(webProofRequest);
     this.connectToExtension().postMessage({
       action: ExtensionAction.RequestWebProof,
       payload: {
@@ -141,6 +146,22 @@ class ExtensionWebProofProvider implements WebProofProvider {
     });
   }
 }
+
+const validateSteps = (steps: WebProofStep[]) => {
+  steps.forEach(({ step, url }) => {
+    if (step === EXTENSION_STEP.startPage) {
+      assertUrl(url);
+    } else {
+      assertUrlPattern(url);
+    }
+  });
+};
+
+export const validateWebProofRequest = (
+  webProofRequest: WebProofRequestInput,
+) => {
+  validateSteps(webProofRequest.steps);
+};
 
 export const createExtensionWebProofProvider = ({
   notaryUrl = "https://notary.pse.dev/v0.1.0-alpha.5/",

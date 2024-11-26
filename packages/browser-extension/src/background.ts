@@ -1,6 +1,9 @@
 import browser from "webextension-polyfill";
 
 import {
+  assertUrl,
+  assertUrlPattern,
+  EXTENSION_STEP,
   ExtensionAction,
   ExtensionMessage,
   ExtensionMessageType,
@@ -84,10 +87,12 @@ const handleProofRequest = async (
   >,
   sender?: browser.Runtime.MessageSender,
 ) => {
+  validateMessage(message);
   if (chrome.sidePanel && sender?.tab?.windowId) {
     await chrome.sidePanel.open({ windowId: sender.tab?.windowId });
   }
   await browser.storage.local.set({ history: [] });
+
   await WebProverSessionContextManager.instance.setWebProverSessionConfig(
     message.payload,
   );
@@ -100,4 +105,24 @@ const handleProvingStatusNotification = async (
   >,
 ) => {
   await zkProvingStatusStore.setProvingStatus(message.payload);
+};
+
+const validateMessage = (
+  message: Extract<
+    MessageToExtension,
+    { action: ExtensionAction.RequestWebProof }
+  >,
+) => {
+  try {
+    message.payload.steps.forEach(({ step, url }) => {
+      if (step === EXTENSION_STEP.startPage) {
+        assertUrl(url);
+      } else {
+        assertUrlPattern(url);
+      }
+    });
+  } catch (e) {
+    console.error("Invalid message", e);
+    throw e;
+  }
 };
