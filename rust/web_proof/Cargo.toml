@@ -1,5 +1,3 @@
-#![feature(lazy_cell)]
-
 [package]
 name = "web_proof"
 version = "0.1.0"
