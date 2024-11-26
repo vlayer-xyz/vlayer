@@ -173,3 +173,48 @@ It returns two things:
     }
 }
 ```
+
+# Gas meter JSON-RPC API
+
+## v_allocateGas
+
+```json
+{
+  "method": "v_allocateGas",
+  "params": [
+      {
+          "hash": "0xdeadbeef",
+          "gas_limit": 1000000,
+          "time_to_live": 3600
+      }
+  ]
+}
+```
+
+## v_refundUnusedGas
+
+```json
+{
+  "method": "v_refundUnusedGas",
+  "params": [
+      {
+          "hash": "0xdeadbeef",
+          "gas_used": 1000000,
+          "computation_stage": "preflight"
+      }
+  ]
+}
+```
+
+```json
+{
+  "method": "v_refundUnusedGas",
+  "params": [
+      {
+          "hash": "0xdeadbeef",
+          "gas_used": 1000000,
+          "computation_stage": "proving"
+      }
+  ]
+}
+```
