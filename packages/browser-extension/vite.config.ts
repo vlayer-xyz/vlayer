@@ -3,6 +3,7 @@ import { defineConfig } from "vite";
 import webExtension, { readJsonFile } from "vite-plugin-web-extension";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 import tsconfigPaths from "vite-tsconfig-paths";
+import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
 function generateManifest() {
   const manifest = readJsonFile("src/manifest.json") as object;
@@ -42,14 +43,17 @@ export default defineConfig({
     viteStaticCopy({
       targets: [
         {
-          src: `${__dirname}/../node_modules/tlsn-js/build/284ddec2a9dac2774b1d.wasm`,
-          dest: "src/templates/sidepanel",
+          src: `${__dirname}/../node_modules/tlsn-js/build/54ec0a0a2728a8a41850.wasm`,
+          dest: "src/hooks/",
         },
         {
-          src: `${__dirname}/../node_modules/tlsn-js/build/760.js`,
-          dest: "src/templates/sidepanel",
+          src: `${__dirname}/../node_modules/tlsn-js/build/112.js`,
+          dest: "src/hooks/",
         },
       ],
+    }),
+    nodePolyfills({
+      include: ['buffer']
     }),
   ],
 });
