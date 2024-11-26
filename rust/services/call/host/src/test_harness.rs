@@ -51,7 +51,7 @@ pub async fn run(
     Ok(result)
 }
 
-pub async fn create_chain_proof_server(
+async fn create_chain_proof_server(
     multi_provider: &CachedMultiProvider,
     location: &ExecutionLocation,
 ) -> Result<ChainProofServerMock, Error> {
@@ -71,7 +71,7 @@ pub async fn create_chain_proof_server(
     Ok(chain_proof_server_mock)
 }
 
-pub fn create_host(
+fn create_host(
     multi_provider: CachedMultiProvider,
     location: &ExecutionLocation,
     chain_proof_server_url: impl AsRef<str>,
