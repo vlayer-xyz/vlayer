@@ -21,6 +21,27 @@ pub struct WebProof {
     pub presentation: Presentation,
 }
 
+#[derive(Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct WebProofV7 {
+    #[serde(
+        deserialize_with = "deserialize_public_key_from_pem_string",
+        serialize_with = "serialize_public_key_to_pem_string"
+    )]
+    pub notary_pub_key: PublicKey,
+    pub presentation_json: PresentationJson,
+}
+
+impl From<WebProofV7> for WebProof {
+    fn from(web_proof_v7: WebProofV7) -> Self {
+        let presentation = Presentation::from(web_proof_v7.presentation_json);
+        Self {
+            notary_pub_key: web_proof_v7.notary_pub_key,
+            presentation,
+        }
+    }
+}
+
 impl WebProof {
     pub(crate) fn verify(
         self,
