@@ -1,7 +1,6 @@
-use derive_more::Deref;
 use derive_new::new;
 use serde::{Deserialize, Serialize};
-use server_utils::{RpcClient, RpcError, RpcServerMock};
+use server_utils::{RpcClient, RpcError};
 
 use crate::handlers::v_call::types::CallHash;
 
@@ -41,7 +40,7 @@ pub struct Client {
     time_to_live: u64,
 }
 
-const V_ALLOCATE_GAS: &str = "v_allocateGas";
+pub const V_ALLOCATE_GAS: &str = "v_allocateGas";
 
 impl Client {
     pub fn new(url: &str, hash: CallHash, time_to_live: u64) -> Self {
@@ -56,17 +55,6 @@ impl Client {
     pub async fn allocate_gas(&self, gas_limit: u64) -> Result<(), RpcError> {
         let req = AllocateGas::new(self.hash, gas_limit, self.time_to_live);
         let _resp = self.client.call(&req).await?;
-        // We need to validate response here.
         Ok(())
-    }
-}
-
-#[derive(Deref)]
-pub struct ServerMock(RpcServerMock);
-
-impl ServerMock {
-    pub async fn start(params: impl Serialize, result: impl Serialize) -> ServerMock {
-        let mock_server = RpcServerMock::start(V_ALLOCATE_GAS, true, params, result).await;
-        Self(mock_server)
     }
 }

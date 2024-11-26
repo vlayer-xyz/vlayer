@@ -3,10 +3,7 @@ use std::{sync::Arc, time::Duration};
 use axum::{body::Body, http::Response};
 use block_header::EvmBlockHeader;
 use call_guest_wrapper::GUEST_ELF as CALL_GUEST_ELF;
-use call_server::{
-    gas_meter::{Config as GasMeterConfig, ServerMock as GasMeterServerMock},
-    server, Config, ProofMode,
-};
+use call_server::{gas_meter::Config as GasMeterConfig, server, Config, ProofMode};
 use chain_guest_wrapper::GUEST_ELF as CHAIN_GUEST_ELF;
 use common::GuestElf;
 use ethers::{
@@ -21,11 +18,14 @@ use ethers::{
     types::BlockNumber as BlockTag,
 };
 use example_prover::ExampleProver;
+use gas_meter::ServerMock as GasMeterServerMock;
 use mock_chain_server::{fake_proof_result, ChainProofServerMock};
 use provider::to_eth_block_header;
 use serde::Serialize;
 use serde_json::json;
 use server_utils::post;
+
+mod gas_meter;
 
 abigen!(ExampleProver, "./testdata/ExampleProver.json",);
 
