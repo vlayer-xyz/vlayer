@@ -5,6 +5,7 @@ use reqwest::Client;
 use serde::Serialize;
 use serde_json::{json, Value};
 use thiserror::Error;
+use tracing::info;
 
 pub struct RpcServerMock {
     server: ServerGuard,
@@ -98,6 +99,7 @@ impl RpcClient {
             "method": self.method,
             "params": params,
         });
+        info!("{} => {}", self.method, json!(&params));
 
         let response = self
             .client
@@ -110,7 +112,9 @@ impl RpcClient {
 
         let response_body = response.json::<Value>().await?;
 
-        parse_json_rpc_response(response_body)
+        let response_json = parse_json_rpc_response(response_body)?;
+        info!("  <= {response_json}");
+        Ok(response_json)
     }
 }
 

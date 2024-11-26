@@ -43,7 +43,6 @@ use derive_more::Deref;
 use derive_new::new;
 use serde::{Deserialize, Serialize};
 use server_utils::{RpcClient, RpcError, RpcServerMock};
-use tracing::info;
 
 use crate::handlers::v_call::types::CallHash;
 
@@ -99,9 +98,7 @@ impl Client {
 
     pub async fn start_gas_meter(&self, gas_limit: u64) -> Result<(), RpcError> {
         let req = StartGasMeter::new(self.hash, gas_limit, self.time_to_live);
-        info!("{V_START_GAS_METER} => {req:#?}");
-        let resp = self.client.call(&req).await?;
-        info!("  <= {resp:#?}");
+        let _resp = self.client.call(&req).await?;
         // We need to validate response here.
         Ok(())
     }
