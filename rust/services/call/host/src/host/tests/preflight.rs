@@ -19,6 +19,7 @@ mod usdt {
         let binance_8 = address!("F977814e90dA44bFA03b6295A0616a897441aceC");
         let call = Call::new(USDT, &balanceOfCall { account: binance_8 });
         let result = preflight::<balanceOfCall>("usdt_erc20_balance_of", call, &location).await?;
+
         assert_eq!(result._0, uint!(3_000_000_000_000_000_U256));
 
         Ok(())
@@ -78,6 +79,7 @@ mod view {
     async fn precompile() -> anyhow::Result<()> {
         let call = Call::new(VIEW_CALL, &testPrecompileCall {});
         let result = preflight::<testPrecompileCall>("view_precompile", call, &LOCATION).await?;
+
         assert_eq!(
             result._0,
             b256!("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")

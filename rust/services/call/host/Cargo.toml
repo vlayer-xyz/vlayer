@@ -21,7 +21,7 @@ host_utils = { workspace = true }
 lazy_static = { workspace = true }
 mpt = { workspace = true }
 provider = { workspace = true }
-revm = { workspace = true, features = ["serde", "std"] }
+revm = { workspace = true, features = ["optimism", "serde", "std"] }
 risc0-zkp = { workspace = true }
 risc0-zkvm = { workspace = true }
 seal = { workspace = true }

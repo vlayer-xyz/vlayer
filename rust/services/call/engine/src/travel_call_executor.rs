@@ -5,7 +5,7 @@ use derive_new::new;
 use revm::{
     db::WrapDatabaseRef,
     inspector_handle_register,
-    primitives::{EVMError, ExecutionResult, ResultAndState, TxEnv},
+    primitives::{EVMError, ExecutionResult, ResultAndState},
     DatabaseRef, Evm, Handler,
 };
 use tracing::{debug, error};

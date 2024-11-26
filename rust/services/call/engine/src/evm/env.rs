@@ -2,7 +2,7 @@ use block_header::EvmBlockHeader;
 use chain::ChainSpec;
 use location::ExecutionLocation;
 use revm::{
-    primitives::{CfgEnvWithHandlerCfg, SpecId},
+    primitives::{CfgEnvWithHandlerCfg, HandlerCfg, SpecId},
     DatabaseRef,
 };
 
@@ -37,9 +37,12 @@ impl<D> EvmEnv<D> {
         chain_spec: &ChainSpec,
     ) -> Result<Self, TravelCallExecutorError> {
         self.cfg_env.chain_id = chain_spec.id();
-        self.cfg_env.handler_cfg.spec_id = chain_spec
+        let spec_id = chain_spec
             .active_fork(self.header.number(), self.header.timestamp())
             .map_err(|err| TravelCallExecutorError::ChainSpecError(err.to_string()))?;
+        let handler_cfg = HandlerCfg::new_with_optimism(spec_id, chain_spec.is_optimism());
+        self.cfg_env.handler_cfg = handler_cfg;
+
         Ok(self)
     }
 
