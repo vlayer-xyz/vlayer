@@ -1924,6 +1924,7 @@ dependencies = [
  "itertools 0.13.0",
  "mpt",
  "once_cell",
+ "regex",
  "revm",
  "risc0-zkp",
  "risc0-zkvm",
