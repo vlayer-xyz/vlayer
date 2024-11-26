@@ -29,7 +29,7 @@ echo '::endgroup::'
 for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ; do
   example_name=$(basename "${example}")
 
-  if [[ "$example_name" == "web_proof" ]]; then
+  if [[ "$example_name" == "simple_web_proof" ]]; then
     echo "Skipping $example_name"
     continue
   fi
