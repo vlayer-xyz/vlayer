@@ -3,7 +3,10 @@ use std::{sync::Arc, time::Duration};
 use axum::{body::Body, http::Response};
 use block_header::EvmBlockHeader;
 use call_guest_wrapper::GUEST_ELF as CALL_GUEST_ELF;
-use call_server::{server, Config, GasMeterConfig, GasMeterServerMock, ProofMode};
+use call_server::{
+    gas_meter::{Config as GasMeterConfig, ServerMock as GasMeterServerMock},
+    server, Config, ProofMode,
+};
 use chain_guest_wrapper::GUEST_ELF as CHAIN_GUEST_ELF;
 use common::GuestElf;
 use ethers::{
@@ -29,7 +32,7 @@ abigen!(ExampleProver, "./testdata/ExampleProver.json",);
 type Client = Arc<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>>;
 type Contract = ExampleProver<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>>;
 
-const DEFAULT_GAS_METER_TTL: u64 = 3600;
+const DEFAULT_GAS_METER_TTL: u64 = 3600; // 1h
 
 pub(crate) struct TestHelper {
     server_config: Config,
@@ -39,7 +42,7 @@ pub(crate) struct TestHelper {
     anvil: AnvilInstance,
     #[allow(dead_code)] // Keeps chain proof server alive
     chain_proof_server_mock: ChainProofServerMock,
-    #[allow(dead_code)]
+    #[allow(dead_code)] // Keeps gas meter server alive
     gas_meter_server_mock: GasMeterServerMock,
 }
 

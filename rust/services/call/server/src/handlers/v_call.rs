@@ -7,7 +7,11 @@ use serde::{Deserialize, Serialize};
 use tracing::info;
 use types::{Call, CallContext, CallHashData, CallResult};
 
-use crate::{config::Config as ServerConfig, error::AppError, gas_meter_client::GasMeterClient};
+use crate::{
+    config::Config as ServerConfig,
+    error::AppError,
+    gas_meter::{Client, Config as GasMeterConfig},
+};
 
 pub mod types;
 
@@ -29,7 +33,7 @@ pub async fn v_call(config: Arc<ServerConfig>, params: Params) -> Result<CallRes
 
     let gas_meter_client = config
         .gas_meter_config()
-        .map(|gm_config| GasMeterClient::new(&gm_config.url, call_hash, gm_config.time_to_live));
+        .map(|GasMeterConfig { url, time_to_live }| Client::new(&url, call_hash, time_to_live));
     if let Some(client) = gas_meter_client.as_ref() {
         client.start_gas_meter(params.context.gas_limit).await?;
     }

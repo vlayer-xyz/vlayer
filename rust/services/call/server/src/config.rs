@@ -7,6 +7,8 @@ use common::GuestElf;
 use serde::{Deserialize, Serialize};
 use server_utils::ProofMode;
 
+use crate::gas_meter::Config as GasMeterConfig;
+
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Config {
     socket_addr: SocketAddr,
@@ -42,13 +44,6 @@ impl Config {
     pub fn gas_meter_config(&self) -> Option<GasMeterConfig> {
         self.gas_meter_config.clone()
     }
-}
-
-#[derive(Debug, Clone, Deserialize, Serialize)]
-pub struct GasMeterConfig {
-    pub url: String,
-    /// Time-to-live expressed in milliseconds.
-    pub time_to_live: u64,
 }
 
 pub struct ConfigBuilder {

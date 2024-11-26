@@ -39,20 +39,20 @@
 //! }
 //!
 
-use std::ops::Deref;
-
-use serde::Serialize;
+use derive_more::Deref;
+use derive_new::new;
+use serde::{Deserialize, Serialize};
 use server_utils::{RpcClient, RpcError, RpcServerMock};
 use tracing::info;
 
 use crate::handlers::v_call::types::CallHash;
 
-#[derive(Serialize, Debug)]
+#[derive(new, Serialize, Debug)]
 #[serde(deny_unknown_fields)]
 struct StartGasMeter {
     hash: CallHash,
     gas_limit: u64,
-    /// Time-to-live expressed in milliseconds.
+    /// Time-to-live expressed in minutes.
     time_to_live: u64,
 }
 
@@ -72,17 +72,24 @@ struct ReportGasUsage {
     gas_amount: u64,
 }
 
-pub struct GasMeterClient {
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct Config {
+    pub url: String,
+    /// Time-to-live expressed in minutes.
+    pub time_to_live: u64,
+}
+
+pub struct Client {
     client: RpcClient,
     hash: CallHash,
     time_to_live: u64,
 }
 
-const START_GAS_METER_METHOD: &str = "v_startGasMeter";
+const V_START_GAS_METER: &str = "v_startGasMeter";
 
-impl GasMeterClient {
+impl Client {
     pub fn new(url: &str, hash: CallHash, time_to_live: u64) -> Self {
-        let client = RpcClient::new(url, START_GAS_METER_METHOD);
+        let client = RpcClient::new(url, V_START_GAS_METER);
         Self {
             client,
             hash,
@@ -91,12 +98,8 @@ impl GasMeterClient {
     }
 
     pub async fn start_gas_meter(&self, gas_limit: u64) -> Result<(), RpcError> {
-        let req = StartGasMeter {
-            hash: self.hash,
-            gas_limit,
-            time_to_live: self.time_to_live,
-        };
-        info!("{START_GAS_METER_METHOD} => {req:#?}");
+        let req = StartGasMeter::new(self.hash, gas_limit, self.time_to_live);
+        info!("{V_START_GAS_METER} => {req:#?}");
         let resp = self.client.call(&req).await?;
         info!("  <= {resp:#?}");
         // We need to validate response here.
@@ -104,21 +107,12 @@ impl GasMeterClient {
     }
 }
 
-pub struct GasMeterServerMock {
-    mock_server: RpcServerMock,
-}
+#[derive(Deref)]
+pub struct ServerMock(RpcServerMock);
 
-impl GasMeterServerMock {
-    pub async fn start(params: impl Serialize, result: impl Serialize) -> GasMeterServerMock {
-        let mock_server = RpcServerMock::start(START_GAS_METER_METHOD, true, params, result).await;
-        Self { mock_server }
-    }
-}
-
-impl Deref for GasMeterServerMock {
-    type Target = RpcServerMock;
-
-    fn deref(&self) -> &Self::Target {
-        &self.mock_server
+impl ServerMock {
+    pub async fn start(params: impl Serialize, result: impl Serialize) -> ServerMock {
+        let mock_server = RpcServerMock::start(V_START_GAS_METER, true, params, result).await;
+        Self(mock_server)
     }
 }
