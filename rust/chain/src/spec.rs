@@ -10,6 +10,7 @@ pub struct ChainSpec {
     id: ChainId,
     name: String,
     forks: Box<[Fork]>,
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     is_optimism: bool,
 }
 

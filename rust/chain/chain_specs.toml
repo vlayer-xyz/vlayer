@@ -1,7 +1,6 @@
 [[chains]]
 name = "mainnet"
 id = 1
-is_optimism = false
 forks = [
   { spec = "FRONTIER", activation = { Block = 0 } },
   { spec = "HOMESTEAD", activation = { Block = 1150000 } },
@@ -24,7 +23,6 @@ forks = [
 [[chains]]
 name = "sepolia"
 id = 11155111
-is_optimism = false
 forks = [
   { spec = "MERGE", activation = { Block = 0 } },
   { spec = "SHANGHAI", activation = { Timestamp = 1677557088 } },
@@ -81,7 +79,6 @@ forks = [
 [[chains]]
 name = "polygon"
 id = 137
-is_optimism = false
 forks = [
   { spec = "PETERSBURG", activation = { Block = 0 } },
   { spec = "ISTANBUL", activation = { Block = 3395000 } },
@@ -95,7 +92,6 @@ forks = [
 [[chains]]
 name = "polygon-amoy"
 id = 80002
-is_optimism = false
 forks = [
   { spec = "BERLIN", activation = { Block = 0 } },
   { spec = "SHANGHAI", activation = { Block = 73100 } },
@@ -105,7 +101,6 @@ forks = [
 [[chains]]
 name = "arbitrum-one"
 id = 42161
-is_optimism = false
 forks = [
   { spec = "CANCUN", activation = { Timestamp = 1710338135 } }
 ]
@@ -113,7 +108,6 @@ forks = [
 [[chains]]
 name = "arbitrum-nova"
 id = 42170
-is_optimism = false
 forks = [
   { spec = "CANCUN", activation = { Timestamp = 1710338135 } }
 ]
@@ -121,7 +115,6 @@ forks = [
 [[chains]]
 name = "arbitrum-sepolia"
 id = 421614
-is_optimism = false
 forks = [
   { spec = "CANCUN", activation = { Timestamp = 1710338135 } }
 ]
@@ -129,7 +122,6 @@ forks = [
 [[chains]]
 name = "zksync"
 id = 324
-is_optimism = false
 forks = [
   { spec = "CANCUN", activation = { Timestamp = 1710338135 } }
 ]
@@ -137,7 +129,6 @@ forks = [
 [[chains]]
 name = "zksync-sepolia"
 id = 300
-is_optimism = false
 forks = [
   { spec = "CANCUN", activation = { Timestamp = 1710338135 } }
 ]
@@ -145,7 +136,6 @@ forks = [
 [[chains]]
 name = "linea"
 id = 59144
-is_optimism = false
 forks = [
   { spec = "LONDON", activation = { Block = 0 } }
 ]
@@ -153,7 +143,6 @@ forks = [
 [[chains]]
 name = "linea-sepolia"
 id = 59141
-is_optimism = false
 forks = [
   { spec = "LONDON", activation = { Block = 0 } }
 ]
@@ -161,7 +150,6 @@ forks = [
 [[chains]]
 name = "local-testnet"
 id = 31337
-is_optimism = false
 forks = [
   { spec = "CANCUN", activation = { Block = 0 } }
 ]
