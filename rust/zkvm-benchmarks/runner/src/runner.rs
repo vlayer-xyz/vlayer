@@ -29,8 +29,7 @@ pub fn run() -> Result<(), Error> {
         detect_regression(result)?;
     }
 
-    let rows: Vec<Row> = results.into_iter().map(Into::into).collect();
-    println!("{}", Table::new(rows));
+    println!("{}", Table::new(results.into_iter().map(Row::from)));
 
     Ok(())
 }
