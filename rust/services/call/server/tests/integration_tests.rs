@@ -88,7 +88,7 @@ mod server_tests {
             types::{Uint8, U256},
         };
         use server_utils::function_selector;
-        use web_proof::fixtures::{load_web_proof_fixture, NOTARY_PUB_KEY_PEM_EXAMPLE};
+        use web_proof::fixtures::{load_web_proof_v7_fixture, NOTARY_PUB_KEY_PEM_EXAMPLE};
 
         use super::*;
         use crate::test_helpers::WebProof;
@@ -186,8 +186,8 @@ mod server_tests {
             let call_data = helper
                 .contract
                 .web_proof(WebProof {
-                    web_proof_json: serde_json::to_string(&json!(load_web_proof_fixture(
-                        "../../../web_proof/testdata/swapi_presentation_0.1.0-alpha.7.json",
+                    web_proof_json: serde_json::to_string(&json!(load_web_proof_v7_fixture(
+                        "../../../web_proof/testdata/presentation_json.json",
                         NOTARY_PUB_KEY_PEM_EXAMPLE
                     )))
                     .unwrap(),

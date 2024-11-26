@@ -28,10 +28,10 @@ contract ExampleProver is Prover {
 
     function web_proof(WebProof calldata webProof) public view returns (bool) {
         Web memory web = webProof.verify(
-            "https://swapi.dev/api/people/1"
+            "https://api.x.com/1.1/account/settings.json"
         );
 
-        require(web.jsonGetString("name").equal("Luke Skywalker"), "Invalid name");
+        require(web.jsonGetString("screen_name").equal("wktr0"), "Invalid screen name");
 
         return true;
     }
