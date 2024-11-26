@@ -1,0 +1,7 @@
+GET https://swapi.dev/api/people/1 HTTP/1.1
+connection: close
+content-length: 25
+content-type: application/json
+host: swapi.dev
+
+{"hello":"world","one":1}

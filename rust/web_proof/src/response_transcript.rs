@@ -3,7 +3,6 @@ use std::io::Read;
 use chunked_transfer::Decoder;
 use derive_new::new;
 use httparse::{Response, Status, EMPTY_HEADER};
-use tlsn_core::RedactedTranscript;
 
 use crate::errors::ParsingError;
 
@@ -11,12 +10,12 @@ const MAX_HEADERS_NUMBER: usize = 40;
 
 #[derive(Debug, new)]
 pub(crate) struct ResponseTranscript {
-    pub(crate) transcript: RedactedTranscript,
+    pub(crate) transcript: Vec<u8>,
 }
 
 impl ResponseTranscript {
     pub(crate) fn parse_body(self) -> Result<String, ParsingError> {
-        let response_string = String::from_utf8(self.transcript.data().to_vec())?;
+        let response_string = String::from_utf8(self.transcript)?;
 
         let mut headers = [EMPTY_HEADER; MAX_HEADERS_NUMBER];
         let mut res = Response::new(&mut headers);
@@ -49,8 +48,6 @@ impl ResponseTranscript {
 
 #[cfg(test)]
 mod tests {
-    use tlsn_core::TranscriptSlice;
-
     use super::*;
     use crate::fixtures::read_fixture;
 
@@ -58,35 +55,11 @@ mod tests {
 
     #[test]
     fn parse_real_body_with_single_slice_transcript() {
-        let transcript = ResponseTranscript::new(RedactedTranscript::new(
-            2690,
-            vec![TranscriptSlice::new(
-                0..2690,
-                read_fixture("./testdata/received_response.txt")
-                    .as_bytes()
-                    .to_vec(),
-            )],
-        ));
-
-        assert_eq!(transcript.parse_body().unwrap(), RESPONSE_BODY.to_string());
-    }
-
-    #[test]
-    fn parse_real_body_with_multiple_slice_transcript() {
-        let transcript = ResponseTranscript::new(RedactedTranscript::new(
-            2690,
-            vec![
-                TranscriptSlice::new(
-                    0..2000,
-                    read_fixture("./testdata/received_response.txt").as_bytes()[0..2000].to_vec(),
-                ),
-                TranscriptSlice::new(
-                    2000..2690,
-                    read_fixture("./testdata/received_response.txt").as_bytes()[2000..2690]
-                        .to_vec(),
-                ),
-            ],
-        ));
+        let transcript = ResponseTranscript::new(
+            read_fixture("./testdata/received_response.txt")
+                .as_bytes()
+                .to_vec(),
+        );
 
         assert_eq!(transcript.parse_body().unwrap(), RESPONSE_BODY.to_string());
     }
@@ -95,17 +68,11 @@ mod tests {
 
     #[test]
     fn redacted_body() {
-        let transcript = ResponseTranscript {
-            transcript: RedactedTranscript::new(
-                2687,
-                vec![TranscriptSlice::new(
-                    0..2687,
-                    read_fixture("./testdata/redacted_received_response.txt")
-                        .as_bytes()
-                        .to_vec(),
-                )],
-            ),
-        };
+        let transcript = ResponseTranscript::new(
+            read_fixture("./testdata/redacted_received_response.txt")
+                .as_bytes()
+                .to_vec(),
+        );
 
         let body = transcript.parse_body();
         assert_eq!(body.unwrap(), REDACTED_RESPONSE_BODY.to_string());
@@ -113,26 +80,17 @@ mod tests {
 
     #[test]
     fn empty_response() {
-        let transcript = ResponseTranscript {
-            transcript: RedactedTranscript::new(0, vec![TranscriptSlice::new(0..0, vec![])]),
-        };
-
+        let transcript = ResponseTranscript::new(vec![]);
         assert!(matches!(transcript.parse_body(), Err(ParsingError::Partial)));
     }
 
     #[test]
     fn no_headers_response() {
-        let transcript = ResponseTranscript {
-            transcript: RedactedTranscript::new(
-                1432,
-                vec![TranscriptSlice::new(
-                    0..1432,
-                    read_fixture("./testdata/no_headers_response.txt")
-                        .as_bytes()
-                        .to_vec(),
-                )],
-            ),
-        };
+        let transcript = ResponseTranscript::new(
+            read_fixture("./testdata/no_headers_response.txt")
+                .as_bytes()
+                .to_vec(),
+        );
 
         assert!(matches!(
             transcript.parse_body(),
@@ -142,17 +100,11 @@ mod tests {
 
     #[test]
     fn no_body_response() {
-        let transcript = ResponseTranscript {
-            transcript: RedactedTranscript::new(
-                1258,
-                vec![TranscriptSlice::new(
-                    0..1258,
-                    read_fixture("./testdata/no_body_response.txt")
-                        .as_bytes()
-                        .to_vec(),
-                )],
-            ),
-        };
+        let transcript = ResponseTranscript::new(
+            read_fixture("./testdata/no_body_response.txt")
+                .as_bytes()
+                .to_vec(),
+        );
 
         let body = transcript.parse_body();
         assert_eq!(body.unwrap(), "".to_string());
@@ -160,9 +112,7 @@ mod tests {
 
     #[test]
     fn error_not_utf8_transcript() {
-        let transcript = ResponseTranscript {
-            transcript: RedactedTranscript::new(1, vec![TranscriptSlice::new(0..1, vec![128])]),
-        };
+        let transcript = ResponseTranscript::new(vec![128]);
 
         assert!(matches!(
             transcript.parse_body(),
@@ -172,15 +122,11 @@ mod tests {
 
     #[test]
     fn parse_chunked_response_body() {
-        let transcript = ResponseTranscript::new(RedactedTranscript::new(
-            981,
-            vec![TranscriptSlice::new(
-                0..981,
-                read_fixture("./testdata/chunked_response.txt")
-                    .as_bytes()
-                    .to_vec(),
-            )],
-        ));
+        let transcript = ResponseTranscript::new(
+            read_fixture("./testdata/chunked_response.txt")
+                .as_bytes()
+                .to_vec(),
+        );
 
         assert_eq!(
             transcript.parse_body().unwrap(),

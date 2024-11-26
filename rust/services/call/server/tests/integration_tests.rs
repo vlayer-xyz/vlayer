@@ -187,7 +187,7 @@ mod server_tests {
                 .contract
                 .web_proof(WebProof {
                     web_proof_json: serde_json::to_string(&json!(load_web_proof_fixture(
-                        "../../../web_proof/testdata/tls_proof.json",
+                        "../../../web_proof/testdata/swapi_presentation_0.1.0-alpha.7.json",
                         NOTARY_PUB_KEY_PEM_EXAMPLE
                     )))
                     .unwrap(),
