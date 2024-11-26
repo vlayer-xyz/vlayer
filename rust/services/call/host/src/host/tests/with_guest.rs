@@ -6,9 +6,10 @@ use alloy_sol_types::SolCall;
 
 use crate::{
     test_harness::{
-        contracts::{
+        contracts::usdt::{
+            BLOCK_NO,
             IERC20::{balanceOfCall, balanceOfReturn},
-            USDT, USDT_BLOCK_NO,
+            USDT,
         },
         run, ExecutionLocation,
     },
@@ -23,7 +24,7 @@ fn before_all() {
 
 #[tokio::test]
 async fn erc20_balance_of() -> anyhow::Result<()> {
-    let location: ExecutionLocation = (Chain::mainnet().id(), USDT_BLOCK_NO).into();
+    let location: ExecutionLocation = (Chain::mainnet().id(), BLOCK_NO).into();
     let binance_8 = address!("F977814e90dA44bFA03b6295A0616a897441aceC");
     let call = Call::new(USDT, &balanceOfCall { account: binance_8 });
     let result = run("usdt_erc20_balance_of", call, &location).await?;

@@ -12,7 +12,8 @@ use crate::{
     evm_env::factory::HostEvmEnvFactory,
     test_harness::{
         contracts::{
-            AVERAGE_BALANCE_OF_CALL, IERC20::balanceOfCall, SIMPLE_TIME_TRAVEL, USDT, USDT_BLOCK_NO,
+            time_travel::{AVERAGE_BALANCE_OF_CALL, SIMPLE_TIME_TRAVEL},
+            usdt::{BLOCK_NO, IERC20::balanceOfCall, USDT},
         },
         rpc_snapshot_file,
     },
@@ -39,7 +40,7 @@ fn profile(
 
 #[tokio::test]
 async fn usdt_erc20_balance_of() -> anyhow::Result<()> {
-    let location: ExecutionLocation = (USDT_BLOCK_NO, Mainnet).into();
+    let location: ExecutionLocation = (BLOCK_NO, Mainnet).into();
     let binance_8 = address!("F977814e90dA44bFA03b6295A0616a897441aceC");
     let call = Call::new(USDT, &balanceOfCall { account: binance_8 });
 

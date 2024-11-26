@@ -1,6 +1,5 @@
 use alloy_chains::{Chain, NamedChain::AnvilHardhat};
 use alloy_primitives::{address, b256, uint, Address};
-use alloy_sol_types::SolCall;
 use ethers_core::types::BlockNumber as BlockTag;
 
 use crate::{
@@ -10,22 +9,27 @@ use crate::{
 
 mod usdt {
     use super::*;
-    use crate::test_harness::contracts::{IERC20::balanceOfCall, USDT, USDT_BLOCK_NO};
+    use crate::test_harness::contracts::usdt::{BLOCK_NO, IERC20::balanceOfCall, USDT};
 
     #[tokio::test(flavor = "multi_thread")]
     async fn erc20_balance_of() -> anyhow::Result<()> {
-        let location: ExecutionLocation = (Chain::mainnet().id(), USDT_BLOCK_NO).into();
+        let location: ExecutionLocation = (Chain::mainnet().id(), BLOCK_NO).into();
         let binance_8 = address!("F977814e90dA44bFA03b6295A0616a897441aceC");
         let call = Call::new(USDT, &balanceOfCall { account: binance_8 });
         let result = preflight::<balanceOfCall>("usdt_erc20_balance_of", call, &location).await?;
         assert_eq!(result._0, uint!(3_000_000_000_000_000_U256));
         Ok(())
     }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn optimism_erc20_balance_of() -> anyhow::Result<()> {
+        Ok(())
+    }
 }
 
 mod uniswap {
     use super::*;
-    use crate::test_harness::contracts::{
+    use crate::test_harness::contracts::uniswap::{
         IUniswapV3Factory::{ownerCall, ownerReturn},
         UNISWAP,
     };
@@ -42,15 +46,16 @@ mod uniswap {
 }
 
 mod view {
+    use alloy_sol_types::SolCall;
     use lazy_static::lazy_static;
 
     use super::*;
-    use crate::test_harness::contracts::{
+    use crate::test_harness::contracts::view::{
         ViewCallTest::{
             testBlockhashCall, testChainidCall, testEoaAccountCall, testMuliContractCallsCall,
             testNonexistentAccountCall, testPrecompileCall,
         },
-        VIEW_CALL, VIEW_CALL_BLOCK_NO,
+        BLOCK_NO, VIEW_CALL,
     };
 
     lazy_static! {
@@ -96,7 +101,7 @@ mod view {
         let result = preflight::<testBlockhashCall>(
             "view_blockhash",
             call,
-            &(Chain::sepolia().id(), VIEW_CALL_BLOCK_NO).into(),
+            &(Chain::sepolia().id(), BLOCK_NO).into(),
         )
         .await?;
         assert_eq!(
@@ -139,7 +144,7 @@ mod view {
 // Generated using `simple_teleport` example
 mod teleport {
     use super::*;
-    use crate::test_harness::contracts::{
+    use crate::test_harness::contracts::teleport::{
         SimpleTravelProver::crossChainBalanceOfCall, BLOCK_NO, SIMPLE_TELEPORT,
     };
 
@@ -163,7 +168,7 @@ mod teleport {
 // Accesses 9 blocks in total
 mod time_travel {
     use super::*;
-    use crate::test_harness::contracts::{
+    use crate::test_harness::contracts::time_travel::{
         AverageBalance::{averageBalanceOfCall, averageBalanceOfReturn},
         AVERAGE_BALANCE_OF_CALL, SIMPLE_TIME_TRAVEL,
     };
