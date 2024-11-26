@@ -1,5 +1,6 @@
 mod json;
 mod regex;
+mod url_pattern;
 mod verify_and_parse;
 pub mod verify_and_parse_email;
 
@@ -11,25 +12,16 @@ use revm::{
     primitives::PrecompileErrors,
 };
 
-use crate::{
-    json::{
-        JSON_GET_ARRAY_LENGTH_PRECOMPILE, JSON_GET_BOOL_PRECOMPILE, JSON_GET_INT_PRECOMPILE,
-        JSON_GET_STRING_PRECOMPILE,
-    },
-    regex::{REGEX_CAPTURE_PRECOMPILE, REGEX_MATCH_PRECOMPILE},
-    verify_and_parse::VERIFY_AND_PARSE_PRECOMPILE,
-    verify_and_parse_email::VERIFY_EMAIL_PRECOMPILE,
-};
-
-pub const VLAYER_PRECOMPILES: [PrecompileWithAddress; 8] = [
-    PrecompileWithAddress(u64_to_address(0x100), VERIFY_AND_PARSE_PRECOMPILE),
-    PrecompileWithAddress(u64_to_address(0x101), VERIFY_EMAIL_PRECOMPILE),
-    PrecompileWithAddress(u64_to_address(0x102), JSON_GET_STRING_PRECOMPILE),
-    PrecompileWithAddress(u64_to_address(0x103), JSON_GET_INT_PRECOMPILE),
-    PrecompileWithAddress(u64_to_address(0x104), JSON_GET_BOOL_PRECOMPILE),
-    PrecompileWithAddress(u64_to_address(0x105), JSON_GET_ARRAY_LENGTH_PRECOMPILE),
-    PrecompileWithAddress(u64_to_address(0x110), REGEX_MATCH_PRECOMPILE),
-    PrecompileWithAddress(u64_to_address(0x111), REGEX_CAPTURE_PRECOMPILE),
+pub const PRECOMPILES: [PrecompileWithAddress; 9] = [
+    PrecompileWithAddress(u64_to_address(0x100), verify_and_parse::PRECOMPILE),
+    PrecompileWithAddress(u64_to_address(0x101), verify_and_parse_email::PRECOMPILE),
+    PrecompileWithAddress(u64_to_address(0x102), json::GET_STRING_PRECOMPILE),
+    PrecompileWithAddress(u64_to_address(0x103), json::GET_INT_PRECOMPILE),
+    PrecompileWithAddress(u64_to_address(0x104), json::GET_BOOL_PRECOMPILE),
+    PrecompileWithAddress(u64_to_address(0x105), json::GET_ARRAY_LENGTH_PRECOMPILE),
+    PrecompileWithAddress(u64_to_address(0x110), regex::MATCH_PRECOMPILE),
+    PrecompileWithAddress(u64_to_address(0x111), regex::CAPTURE_PRECOMPILE),
+    PrecompileWithAddress(u64_to_address(0x120), url_pattern::PRECOMPILE),
 ];
 
 #[allow(clippy::needless_pass_by_value)] // More convenient to use in map_err
