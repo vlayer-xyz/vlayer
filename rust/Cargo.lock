@@ -11679,6 +11679,7 @@ dependencies = [
  "clap",
  "derivative",
  "dotenvy",
+ "ethers",
  "tokio",
  "tower 0.5.1",
  "tracing",

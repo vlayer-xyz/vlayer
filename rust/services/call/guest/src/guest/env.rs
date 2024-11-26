@@ -29,10 +29,6 @@ pub async fn verify_input(
         .await
         .expect("invalid guest input");
 
-    assert_input_coherency(multi_evm_input)
-}
-
-pub fn assert_input_coherency(multi_evm_input: MultiEvmInput) -> VerifiedInput {
     multi_evm_input.assert_coherency();
     VerifiedInput(multi_evm_input)
 }

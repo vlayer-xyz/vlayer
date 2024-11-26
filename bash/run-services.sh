@@ -43,6 +43,7 @@ function startup_vlayer(){
     BONSAI_API_KEY="${BONSAI_API_KEY}" \
     cargo run --bin vlayer serve \
         --proof "${proof_arg}" \
+        --chain-proof-url http://localhost:3001 \
         --rpc-url 31337:http://localhost:8545 \
         ${external_urls[@]+"${external_urls[@]}"} \
         >"${LOGS_DIR}/vlayer_serve.out" &
@@ -67,15 +68,21 @@ function startup_chain_worker() {
 
     echo "Starting chain worker"
     pushd "${VLAYER_HOME}/rust"
+    
+    FIRST_BLOCK_MAX=${FIRST_BLOCK_MAX:-18000000} # default values for sepolia tests
+    LAST_BLOCK_MIN=${LAST_BLOCK_MIN:-18000500} 
+    START_BLOCK=$(( ($FIRST_BLOCK_MAX + $LAST_BLOCK_MIN) / 2 ))
 
     RUST_LOG=${RUST_LOG:-info} \
     cargo run --bin worker -- \
         --db-path "${db_path}" \
         --rpc-url "${CHAIN_WORKER_RPC_URL}" \
-        --confirmations "${CONFIRMATIONS:-0}" \
+        --chain-id "${CHAIN_ID:-1}" \
+        --confirmations "${CONFIRMATIONS:-1}" \
+        --start-block "${START_BLOCK}" \
         --max-head-blocks "${MAX_HEAD_BLOCKS:-10}" \
-        --max-back-propagation-blocks "${MAX_BACK_PROPAGATION_BLOCKS:-20}" \
-        >"${LOGS_DIR}/chain_worker.out" &
+        --max-back-propagation-blocks "${MAX_BACK_PROPAGATION_BLOCKS:-10}" \
+        >"${LOGS_DIR}/chain_worker.out" 2>&1 &
 
     CHAIN_WORKER=$!
 
@@ -106,32 +113,32 @@ function startup_chain_server() {
 
 
 wait_for_chain_worker_sync() {
+    FIRST_BLOCK_MAX=${FIRST_BLOCK_MAX:-18000000} # default values for sepolia tests
+    LAST_BLOCK_MIN=${LAST_BLOCK_MIN:-18000500}
     
-    echo "Waiting for chain worker sync..."
+    echo "Waiting for chain worker sync... FIRST_BLOCK=${FIRST_BLOCK_MAX} LAST_BLOCK=${LAST_BLOCK_MIN}"
 
     for i in `seq 1 10` ; do
-        FIRST_BLOCK_MAX=${FIRST_BLOCK_MAX:-17915294} # default values for sepolia tests
-        LAST_BLOCK_MIN=${LAST_BLOCK_MIN:-17985294} 
 
-        result=$(curl -s -X POST 127.0.0.1:3001 \
+        reply=$(curl -s -X POST 127.0.0.1:3001 \
                   --retry-connrefused \
                   --retry 5 \
                   --retry-delay 0 \
                   --retry-max-time 30 \
                   -H "Content-Type: application/json" \
-                  --data '{"jsonrpc": "2.0","id": 0,"method": "v_sync_status","params": [1]}' \
-                  | jq "(.result.first_block <= ${FIRST_BLOCK_MAX}) and (.result.last_block >= ${LAST_BLOCK_MIN})"
+                  --data '{"jsonrpc": "2.0","id": 0,"method": "v_sync_status","params": ['"${CHAIN_ID:-1}"']}'
         )
+        synced=$(echo "${reply}" | jq "(.result.first_block <= ${FIRST_BLOCK_MAX}) and (.result.last_block >= ${LAST_BLOCK_MIN})")
 
-        if [[ "${result}" == "true" ]] ; then
+        if [[ "${synced}" == "true" ]] ; then
             echo "Worker synced"
             break
         fi
-        echo "Syncing ..."
-        sleep 5
+        echo "Syncing ... ${reply}"
+        sleep 10
     done
 
-    if [[ "${result}" != "true" ]] ; then
+    if [[ "${synced}" != "true" ]] ; then
         echo "Failed to sync chain worker" >&2
         exit 1 
     fi
@@ -165,7 +172,7 @@ fi
 # set external rpc urls
 if [[ -z "${ALCHEMY_API_KEY:-}" ]] ; then
     echo ALCHEMY_API_KEY is not configured. Using only local rpc-urls. >&2
-else 
+else
     CHAIN_WORKER_RPC_URL="https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}"
 
     EXTERNAL_RPC_URLS=(
@@ -199,4 +206,4 @@ start_anvil
 if [[ "${RUN_CHAIN_SERVICES:-0}" == "1" ]] ; then startup_chain_services ; fi
 startup_vlayer "${SERVER_PROOF_ARG}" ${EXTERNAL_RPC_URLS[@]+"${EXTERNAL_RPC_URLS[@]}"}
 
-echo "Services has been succesfully started..."
+echo "Services have been successfully started"

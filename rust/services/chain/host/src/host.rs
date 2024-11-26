@@ -30,6 +30,7 @@ where
     fetcher: BlockFetcher<P>,
     chain_id: ChainId,
     elf: GuestElf,
+    start_block: BlockTag,
     prepend_strategy: PrependStrategy,
     append_strategy: AppendStrategy,
 }
@@ -46,6 +47,7 @@ impl Host<Http> {
             db,
             config.chain_id,
             config.elf,
+            config.start_block,
             config.prepend_strategy,
             config.append_strategy,
         ))
@@ -56,12 +58,14 @@ impl<P> Host<P>
 where
     P: JsonRpcClient,
 {
+    #[allow(clippy::too_many_arguments)]
     pub const fn from_parts(
         prover: Prover,
         block_fetcher: BlockFetcher<P>,
         db: ChainDb,
         chain_id: ChainId,
         elf: GuestElf,
+        start_block: BlockTag,
         prepend_strategy: PrependStrategy,
         append_strategy: AppendStrategy,
     ) -> Self {
@@ -71,6 +75,7 @@ where
             db,
             chain_id,
             elf,
+            start_block,
             prepend_strategy,
             append_strategy,
         }
@@ -95,17 +100,17 @@ where
     #[instrument(skip(self))]
     async fn initialize(&self) -> Result<ChainUpdate, HostError> {
         info!("Initializing chain");
-        let latest_block = self.fetcher.get_block(BlockTag::Latest).await?;
-        let latest_block_number = latest_block.number();
-        let trie = BlockTrie::init(&latest_block)?;
+        let start_block = self.fetcher.get_block(self.start_block).await?;
+        let start_block_number = start_block.number();
+        let trie = BlockTrie::init(&start_block)?;
 
         let input = Input::Initialize {
             elf_id: self.elf.id,
-            block: latest_block,
+            block: start_block,
         };
         let receipt = self.prover.prove(&input, None)?;
 
-        let range = NonEmptyRange::from_single_value(latest_block_number);
+        let range = NonEmptyRange::from_single_value(start_block_number);
         let chain_update = ChainUpdate::from_two_tries(range, vec![], &trie, &receipt)?;
 
         Ok(chain_update)
@@ -189,6 +194,7 @@ mod tests {
             db,
             1,
             GUEST_ELF.clone(),
+            BlockTag::Latest,
             PREPEND_STRATEGY.clone(),
             APPEND_STRATEGY.clone(),
         )

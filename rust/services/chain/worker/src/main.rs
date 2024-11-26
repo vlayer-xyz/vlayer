@@ -5,6 +5,7 @@ use chain_guest_wrapper::GUEST_ELF;
 use chain_host::{AppendStrategy, Host, HostConfig, PrependStrategy, ProofMode};
 use clap::Parser;
 use dotenvy::dotenv;
+use ethers::types::BlockNumber as BlockTag;
 use retry::HostErrorFilter;
 use tokio::sync::Mutex;
 use tower::{retry::budget::TpsBudget, Service, ServiceBuilder};
@@ -40,6 +41,14 @@ struct Cli {
     #[arg(
         long,
         env,
+        help = "Block from which synchronization will start if database is empty",
+        default_value_t = BlockTag::Latest
+    )]
+    start_block: BlockTag,
+
+    #[arg(
+        long,
+        env,
         help = "Maximum number of historical blocks prepended in a single batch"
     )]
     max_back_propagation_blocks: u64,
@@ -67,6 +76,7 @@ impl From<Cli> for HostConfig {
             proof_mode: cli.proof_mode,
             db_path: cli.db_path,
             elf: GUEST_ELF.clone(),
+            start_block: cli.start_block,
             prepend_strategy: PrependStrategy::new(cli.max_back_propagation_blocks),
             append_strategy: AppendStrategy::new(cli.max_head_blocks, cli.confirmations),
         }

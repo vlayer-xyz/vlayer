@@ -56,6 +56,8 @@ jobs:
           JSON_RPC_URL: "https://opt-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}"
           PROVER_URL: http://127.0.0.1:3000
           VLAYER_TMP_DIR: ./artifacts
+          RUN_CHAIN_SERVICES: 1
+          CONFIRMATIONS: 2
         run: bash/e2e-test.sh
 
       # Teardown

@@ -11,6 +11,7 @@ chain_host = { workspace = true }
 clap = { workspace = true, features = ["derive", "env"] }
 derivative = { workspace = true }
 dotenvy = { workspace = true }
+ethers = { workspace = true }
 tokio = { workspace = true }
 tower = { workspace = true, features = ["retry", "timeout"] }
 tracing = { workspace = true }

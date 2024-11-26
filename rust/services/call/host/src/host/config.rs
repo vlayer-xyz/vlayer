@@ -14,7 +14,6 @@ pub struct Config {
     pub max_calldata_size: usize,
     pub call_guest_elf: GuestElf,
     pub chain_guest_elf: GuestElf,
-    pub verify_chain_proofs: bool,
 }
 
 impl Default for Config {
@@ -27,7 +26,6 @@ impl Default for Config {
             max_calldata_size: DEFAULT_MAX_CALLDATA_SIZE,
             call_guest_elf: GuestElf::default(),
             chain_guest_elf: GuestElf::default(),
-            verify_chain_proofs: false,
         }
     }
 }
