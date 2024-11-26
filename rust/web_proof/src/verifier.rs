@@ -33,7 +33,7 @@ pub fn verify_and_parse(web_proof: WebProof) -> Result<Web, WebProofError> {
 
     let web = Web {
         url: request.parse_url()?,
-        server_name: server_name.as_str().to_string(),
+        server_name: server_name.to_string(),
         body: response.parse_body()?,
         notary_pub_key,
     };
