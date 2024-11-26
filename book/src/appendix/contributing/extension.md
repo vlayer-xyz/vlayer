@@ -26,17 +26,17 @@ forge clean
 forge build
 ```
 
-Web app's files are in `examples/web_proof/vlayer` folder.
+Web app's files are in `examples/simple_web_proof/vlayer` folder.
 
 ```sh
-cd examples/web_proof
+cd examples/simple_web_proof
 forge soldeer install
 forge clean
 forge build
 ```
 
 ```sh
-cd examples/web_proof/vlayer
+cd examples/simple_web_proof/vlayer
 bun install
 ```
 
@@ -65,7 +65,7 @@ cargo run --bin vlayer serve --proof fake
 Deploy `WebProofProver` and `WebProofVerifier` contracts on anvil:
 
 ```sh
-cd examples/web_proof/vlayer
+cd examples/simple_web_proof/vlayer
 bun run deploy.ts
 ```
 
@@ -74,7 +74,7 @@ bun run deploy.ts
 Start web app on localhost:
 
 ```sh
-cd examples/web_proof/vlayer
+cd examples/simple_web_proof/vlayer
 bun run dev
 ```
 

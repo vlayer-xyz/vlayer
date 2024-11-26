@@ -84,7 +84,7 @@ If there are no errors and the proof is valid, the data is ready for on-chain ve
 > To run the above example on your computer, type the following command in your terminal:
 > 
 > ```bash
-> vlayer init --template web-proof
+> vlayer init --template simple-web-proof
 > ```
 > 
 > This command will download all the necessary artifacts to your project.  
