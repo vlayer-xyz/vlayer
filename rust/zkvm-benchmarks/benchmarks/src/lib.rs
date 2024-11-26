@@ -10,7 +10,7 @@ mod benchmarks;
 // 5% was tried and was not enough
 const TOLERANCE: f64 = 1.1;
 
-pub struct BenchmarkRunner(Vec<Benchmark>);
+pub struct Runner(Vec<Benchmark>);
 
 type WorkloadResult = Result<(), ()>;
 type Workload = fn() -> WorkloadResult;
@@ -50,7 +50,7 @@ impl BenchmarkResult {
     }
 }
 
-impl BenchmarkRunner {
+impl Runner {
     pub fn new() -> Self {
         Self(BENCHMARKS.clone())
     }
@@ -76,7 +76,7 @@ impl BenchmarkRunner {
     }
 }
 
-impl Default for BenchmarkRunner {
+impl Default for Runner {
     fn default() -> Self {
         Self::new()
     }
