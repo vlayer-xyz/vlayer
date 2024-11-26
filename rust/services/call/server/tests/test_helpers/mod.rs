@@ -3,7 +3,7 @@ use std::{sync::Arc, time::Duration};
 use axum::{body::Body, http::Response};
 use block_header::EvmBlockHeader;
 use call_guest_wrapper::GUEST_ELF as CALL_GUEST_ELF;
-use call_server::{server, Config, ProofMode};
+use call_server::{server, Config, GasMeterConfig, GasMeterServerMock, ProofMode};
 use chain_guest_wrapper::GUEST_ELF as CHAIN_GUEST_ELF;
 use common::GuestElf;
 use ethers::{
@@ -29,6 +29,8 @@ abigen!(ExampleProver, "./testdata/ExampleProver.json",);
 type Client = Arc<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>>;
 type Contract = ExampleProver<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>>;
 
+const DEFAULT_GAS_METER_TTL: u64 = 3600;
+
 pub(crate) struct TestHelper {
     server_config: Config,
     pub(crate) contract: Contract,
@@ -37,6 +39,8 @@ pub(crate) struct TestHelper {
     anvil: AnvilInstance,
     #[allow(dead_code)] // Keeps chain proof server alive
     chain_proof_server_mock: ChainProofServerMock,
+    #[allow(dead_code)]
+    gas_meter_server_mock: GasMeterServerMock,
 }
 
 impl TestHelper {
@@ -50,6 +54,7 @@ impl TestHelper {
         let contract = deploy_test_contract(client.clone()).await;
         let latest_block_header = get_latest_block_header(&client).await;
         let chain_proof_server_mock = start_chain_proof_server(latest_block_header).await;
+        let gas_meter_server_mock = start_gas_meter_server().await;
 
         let server_config = call_server::ConfigBuilder::new(
             chain_proof_server_mock.url(),
@@ -58,6 +63,10 @@ impl TestHelper {
         )
         .with_rpc_mappings([(anvil.chain_id(), anvil.endpoint())])
         .with_proof_mode(ProofMode::Fake)
+        .with_gas_meter_config(GasMeterConfig {
+            url: gas_meter_server_mock.url(),
+            time_to_live: DEFAULT_GAS_METER_TTL,
+        })
         .build();
 
         Self {
@@ -66,6 +75,7 @@ impl TestHelper {
 
             anvil,
             chain_proof_server_mock,
+            gas_meter_server_mock,
         }
     }
 
@@ -73,6 +83,10 @@ impl TestHelper {
         let app = server(self.server_config.clone());
         post(app, url, body).await
     }
+}
+
+async fn start_gas_meter_server() -> GasMeterServerMock {
+    GasMeterServerMock::start(json!({}), json!({})).await
 }
 
 async fn start_chain_proof_server(

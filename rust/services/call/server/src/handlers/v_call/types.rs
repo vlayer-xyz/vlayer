@@ -98,7 +98,7 @@ impl CallResult {
     }
 }
 
-#[derive(Serialize, Deserialize, Debug, From)]
+#[derive(Serialize, Deserialize, Debug, From, Copy, Clone)]
 pub struct CallHash(B256);
 
 impl std::fmt::Display for CallHash {

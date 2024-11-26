@@ -17,6 +17,9 @@ pub struct Config {
     verify_chain_proofs: bool,
     call_guest_elf: GuestElf,
     chain_guest_elf: GuestElf,
+    /// Config of the gas metering service.
+    /// Defaults to 'None'.
+    gas_meter_config: Option<GasMeterConfig>,
 }
 
 impl Config {
@@ -35,6 +38,17 @@ impl Config {
     pub fn chain_guest_id(&self) -> String {
         self.chain_guest_elf.id.encode_hex_with_prefix()
     }
+
+    pub fn gas_meter_config(&self) -> Option<GasMeterConfig> {
+        self.gas_meter_config.clone()
+    }
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+pub struct GasMeterConfig {
+    pub url: String,
+    /// Time-to-live expressed in milliseconds.
+    pub time_to_live: u64,
 }
 
 pub struct ConfigBuilder {
@@ -57,6 +71,7 @@ impl ConfigBuilder {
                 proof_mode: ProofMode::Groth16,
                 max_request_size: DEFAULT_MAX_CALLDATA_SIZE,
                 verify_chain_proofs: false,
+                gas_meter_config: None,
             },
         }
     }
@@ -90,6 +105,11 @@ impl ConfigBuilder {
 
     pub fn with_verify_chain_proofs(mut self, verify: bool) -> Self {
         self.config.verify_chain_proofs = verify;
+        self
+    }
+
+    pub fn with_gas_meter_config(mut self, gas_meter_config: GasMeterConfig) -> Self {
+        self.config.gas_meter_config = Some(gas_meter_config);
         self
     }
 
