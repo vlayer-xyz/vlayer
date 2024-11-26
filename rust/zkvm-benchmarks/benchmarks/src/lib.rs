@@ -120,7 +120,7 @@ mod tests {
 
     #[test]
     fn prints_results_table() {
-        let results = vec![BenchmarkResult::new("test".to_string(), 1_010, 1_000)];
+        let results = [BenchmarkResult::new("test".to_string(), 1_010, 1_000)];
 
         assert_snapshot!(Table::new(results), @r###"
         +------+---------------+-----------------+---------------+-----------------+
