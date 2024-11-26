@@ -15,7 +15,7 @@ struct AllocateGas {
 
 #[derive(Serialize, Debug)]
 #[allow(unused)]
-pub enum ComputationKind {
+pub enum ComputationStage {
     Preflight,
     Proving,
 }
@@ -25,7 +25,7 @@ pub enum ComputationKind {
 #[allow(unused)]
 struct RefundUnusedGas {
     hash: CallHash,
-    computation_kind: ComputationKind,
+    computation_stage: ComputationStage,
     gas_used: u64,
 }
 
