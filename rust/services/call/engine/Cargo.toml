@@ -27,7 +27,7 @@ derive_more = { workspace = true }
 itertools = { workspace = true }
 mpt = { workspace = true }
 once_cell = { workspace = true }
-revm = { workspace = true, features = ["serde", "std"] }
+revm = { workspace = true, features = ["optimism", "serde", "std"] }
 risc0-zkp = { workspace = true }
 risc0-zkvm = { workspace = true }
 serde = { workspace = true }

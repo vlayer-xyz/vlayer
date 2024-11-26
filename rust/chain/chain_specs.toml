@@ -34,6 +34,7 @@ forks = [
 [[chains]]
 name = "base"
 id = 8453
+is_optimism = true
 forks = [
   { spec = "REGOLITH", activation = { Block = 0 } },
   { spec = "CANYON", activation = { Timestamp = 1704992401 } },
@@ -45,6 +46,7 @@ forks = [
 [[chains]]
 name = "base-sepolia"
 id = 84532
+is_optimism = true
 forks = [
   { spec = "CANYON", activation = { Block = 0 } },
   { spec = "ECOTONE", activation = { Timestamp = 1706634000 } },
@@ -55,6 +57,7 @@ forks = [
 [[chains]]
 name = "optimism"
 id = 10
+is_optimism = true
 forks = [
   { spec = "MERGE", activation = { Block = 0 } },
   { spec = "BEDROCK", activation = { Timestamp = 1686079703 } },
@@ -68,6 +71,7 @@ forks = [
 [[chains]]
 name = "optimism-sepolia"
 id = 11155420
+is_optimism = true
 forks = [
   { spec = "BEDROCK", activation = { Block = 0 } },
   { spec = "CANYON", activation = { Timestamp = 1699981200 } },
