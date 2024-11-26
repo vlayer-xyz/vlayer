@@ -26,6 +26,6 @@ lazy_static! {
     pub static ref BENCHMARKS: Vec<Benchmark> = vec![Benchmark::new(
         "email_validation",
         test_email_verification as Workload,
-        32_750_000
+        32_541_351
     )];
 }

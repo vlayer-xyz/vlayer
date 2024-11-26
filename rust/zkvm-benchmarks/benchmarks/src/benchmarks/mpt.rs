@@ -30,9 +30,9 @@ mod empty {
 
     lazy_static! {
         pub static ref BENCHMARKS: Vec<Benchmark> = vec![
-            Benchmark::new("trie", trie as Workload, 1_200),
-            Benchmark::new("hash", hash as Workload, 1_200),
-            Benchmark::new("insert", insert as Workload, 1_200),
+            Benchmark::new("trie", trie as Workload, 47),
+            Benchmark::new("hash", hash as Workload, 122),
+            Benchmark::new("insert", insert as Workload, 1_189),
         ];
     }
 }
@@ -85,10 +85,10 @@ mod height_20 {
 
     lazy_static! {
         pub static ref BENCHMARKS: Vec<Benchmark> = vec![
-            Benchmark::new("trie", trie as Workload, 1_300_000),
-            Benchmark::new("insert_shallow", insert_shallow as Workload, 1_300_000),
-            Benchmark::new("insert_deep", insert_deep as Workload, 1_500_000),
-            Benchmark::new("hash", hash as Workload, 2_500_000),
+            Benchmark::new("trie", trie as Workload, 1_264_090),
+            Benchmark::new("insert_shallow", insert_shallow as Workload, 1_289_310),
+            Benchmark::new("insert_deep", insert_deep as Workload, 1_435_893),
+            Benchmark::new("hash", hash as Workload, 2_319_286),
         ];
     }
 }

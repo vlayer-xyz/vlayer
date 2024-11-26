@@ -5,6 +5,9 @@ use risc0_zkvm::guest::env;
 use thousands::Separable;
 mod benchmarks;
 
+// Cycle count is non-deterministic so we ignore differences up to 5% when comparing
+const TOLERANCE: f64 = 1.05;
+
 pub struct BenchmarkRunner(Vec<Benchmark>);
 
 type WorkloadResult = Result<(), ()>;
@@ -12,18 +15,19 @@ type Workload = fn() -> WorkloadResult;
 
 struct BenchmarkResult {
     name: String,
-    used_cycles: u64,
-    limit_cycles: u64,
+    actual_cycles: u64,
+    snapshot_cycles: u64,
 }
 
 impl Display for BenchmarkResult {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "{}: {} / {}",
+            "{}: actual: {} snapshot: {} difference: {}",
             self.name,
-            self.used_cycles.separate_with_underscores(),
-            self.limit_cycles.separate_with_underscores()
+            self.actual_cycles.separate_with_underscores(),
+            self.snapshot_cycles.separate_with_underscores(),
+            (self.actual_cycles as i64 - self.snapshot_cycles as i64).separate_with_underscores()
         )
     }
 }
@@ -62,19 +66,23 @@ impl Default for BenchmarkRunner {
     }
 }
 
+fn apply_tolerance(cycles: u64) -> u64 {
+    (cycles as f64 * TOLERANCE) as u64
+}
+
 #[derive(Debug, Clone)]
 pub struct Benchmark {
     name: String,
     workload: Workload,
-    total_cycles_limit: u64,
+    snapshot_cycles: u64,
 }
 
 impl Benchmark {
-    pub fn new(name: impl Into<String>, workload: Workload, total_cycles_limit: u64) -> Self {
+    pub fn new(name: impl Into<String>, workload: Workload, snapshot_cycles: u64) -> Self {
         Self {
             name: name.into(),
             workload,
-            total_cycles_limit,
+            snapshot_cycles,
         }
     }
 
@@ -90,19 +98,19 @@ impl Benchmark {
         (self.workload)()?;
         let end = env::cycle_count();
 
-        let total_cycles = end - start;
-        if total_cycles > self.total_cycles_limit {
+        let actual_cycles = end - start;
+        if actual_cycles > apply_tolerance(self.snapshot_cycles) {
             eprintln!(
                 "Benchmark {} failed with result: {} > {}",
-                self.name, total_cycles, self.total_cycles_limit
+                self.name, actual_cycles, self.snapshot_cycles
             );
             return Err(());
         }
 
         Ok(BenchmarkResult {
             name: self.name,
-            used_cycles: total_cycles,
-            limit_cycles: self.total_cycles_limit,
+            actual_cycles,
+            snapshot_cycles: self.snapshot_cycles,
         })
     }
 }
@@ -115,9 +123,16 @@ mod tests {
     fn thousands_separated() {
         let result = BenchmarkResult {
             name: "test".to_string(),
-            used_cycles: 1_000,
-            limit_cycles: 1_000_000,
+            actual_cycles: 1_010,
+            snapshot_cycles: 1_000,
         };
-        assert_eq!(result.to_string(), "test: 1_000 / 1_000_000");
+        assert_eq!(result.to_string(), "test: actual: 1_010 snapshot: 1_000 difference: 10");
+    }
+
+    #[test]
+    fn tolerance() {
+        assert_eq!(apply_tolerance(1), 1);
+        assert_eq!(apply_tolerance(100), 105);
+        assert_eq!(apply_tolerance(1_027), 1_078);
     }
 }

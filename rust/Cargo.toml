@@ -33,7 +33,6 @@ members = [
     "test_runner",
     "web_proof",
     "zkvm-benchmarks/benchmarks",
-    "zkvm-benchmarks/common",
     "zkvm-benchmarks/runner",
 ]
 
@@ -176,7 +175,6 @@ server_utils = { path = "server_utils" }
 test_runner = { path = "test_runner" }
 web_proof = { path = "web_proof" }
 zkvm-benchmarks = { path = "zkvm-benchmarks/benchmarks" }
-zkvm-benchmarks-common = { path = "zkvm-benchmarks/common" }
 
 [workspace.lints.clippy]
 as_ptr_cast_mut = "warn"

@@ -11719,14 +11719,6 @@ dependencies = [
 ]
 
 [[package]]
-name = "zkvm-benchmarks-common"
-version = "0.1.0"
-dependencies = [
- "bincode",
- "serde",
-]
-
-[[package]]
 name = "zkvm-benchmarks-runner"
 version = "0.1.0"
 dependencies = [
