@@ -4546,8 +4546,10 @@ name = "web_proof"
 version = "0.1.0"
 dependencies = [
  "alloy-dyn-abi",
+ "bincode",
  "chunked_transfer",
  "derive-new",
+ "hex",
  "httparse",
  "p256",
  "pkcs8",
