@@ -6,6 +6,8 @@ pub mod usdt {
 
     pub const USDT: Address = address!("dAC17F958D2ee523a2206206994597C13D831ec7");
     pub const BLOCK_NO: u64 = 19_493_153;
+    pub const OPTIMISM_USDT: Address = address!("94b008aA00579c1307B0EF2c499aD98a8ce58e58");
+    pub const OPTIMISM_BLOCK_NO: u64 = 128_507_722;
     sol! {
         #[derive(Debug, PartialEq, Eq)]
         interface IERC20 {

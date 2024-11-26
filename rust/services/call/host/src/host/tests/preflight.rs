@@ -9,7 +9,9 @@ use crate::{
 
 mod usdt {
     use super::*;
-    use crate::test_harness::contracts::usdt::{BLOCK_NO, IERC20::balanceOfCall, USDT};
+    use crate::test_harness::contracts::usdt::{
+        BLOCK_NO, IERC20::balanceOfCall, OPTIMISM_BLOCK_NO, OPTIMISM_USDT, USDT,
+    };
 
     #[tokio::test(flavor = "multi_thread")]
     async fn erc20_balance_of() -> anyhow::Result<()> {
@@ -18,11 +20,20 @@ mod usdt {
         let call = Call::new(USDT, &balanceOfCall { account: binance_8 });
         let result = preflight::<balanceOfCall>("usdt_erc20_balance_of", call, &location).await?;
         assert_eq!(result._0, uint!(3_000_000_000_000_000_U256));
+
         Ok(())
     }
 
     #[tokio::test(flavor = "multi_thread")]
     async fn optimism_erc20_balance_of() -> anyhow::Result<()> {
+        let location: ExecutionLocation =
+            (Chain::optimism_mainnet().id(), OPTIMISM_BLOCK_NO).into();
+        let binance = address!("acD03D601e5bB1B275Bb94076fF46ED9D753435A");
+        let call = Call::new(OPTIMISM_USDT, &balanceOfCall { account: binance });
+        let result = preflight::<balanceOfCall>("usdt_erc20_balance_of", call, &location).await?;
+
+        assert_eq!(result._0, uint!(40_819_866_868_520_U256));
+
         Ok(())
     }
 }
@@ -41,6 +52,7 @@ mod uniswap {
         let ownerReturn { _0: owner } =
             preflight::<ownerCall>("uniswap_factory_owner", call, &location).await?;
         assert_eq!(owner, address!("1a9c8182c09f50c8318d769245bea52c32be35bc")); // UNI Timelock
+
         Ok(())
     }
 }
@@ -70,6 +82,7 @@ mod view {
             result._0,
             b256!("e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855")
         );
+
         Ok(())
     }
 
@@ -84,6 +97,7 @@ mod view {
             preflight::<testNonexistentAccountCall>("view_nonexistent_account", call, &LOCATION)
                 .await?;
         assert_eq!(result.size, uint!(0_U256));
+
         Ok(())
     }
 
@@ -92,6 +106,7 @@ mod view {
         let call = Call::new(VIEW_CALL, &testEoaAccountCall {});
         let result = preflight::<testEoaAccountCall>("view_eoa_account", call, &LOCATION).await?;
         assert_eq!(result.size, uint!(0_U256));
+
         Ok(())
     }
 
@@ -108,6 +123,7 @@ mod view {
             result._0,
             b256!("7703fe4a3d6031a579d52ce9e493e7907d376cfc3b41f9bc7710b0dae8c67f68")
         );
+
         Ok(())
     }
 
@@ -116,6 +132,7 @@ mod view {
         let call = Call::new(VIEW_CALL, &testChainidCall {});
         let result = preflight::<testChainidCall>("view_chainid", call, &LOCATION).await?;
         assert_eq!(result._0, uint!(11_155_111_U256));
+
         Ok(())
     }
 
@@ -126,6 +143,7 @@ mod view {
             preflight::<testMuliContractCallsCall>("view_multi_contract_calls", call, &LOCATION)
                 .await?;
         assert_eq!(result._0, uint!(84_U256));
+
         Ok(())
     }
 
