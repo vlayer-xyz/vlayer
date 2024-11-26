@@ -4,7 +4,7 @@ import { foundry } from "viem/chains";
 
 import {
   createVlayerClient,
-  type WebProof,
+  type PresentationJSON,
   type Proof,
   isDefined,
 } from "@vlayer/sdk";
@@ -22,7 +22,7 @@ import webProofVerifier from "../../out/WebProofVerifier.sol/WebProofVerifier";
 import { Hex } from "viem";
 
 const context: {
-  webProof: WebProof | undefined;
+  webProof: PresentationJSON | undefined;
   provingResult: [Proof, string, Hex] | undefined;
 } = { webProof: undefined, provingResult: undefined };
 
