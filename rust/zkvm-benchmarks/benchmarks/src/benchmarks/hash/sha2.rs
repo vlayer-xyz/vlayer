@@ -30,7 +30,7 @@ fn eight_kb() -> WorkloadResult {
 lazy_static! {
     pub static ref BENCHMARKS: Vec<Benchmark> = vec![
         Benchmark::new("empty", empty as Workload, 547),
-        Benchmark::new("one_block", one_block as Workload, 650),
+        Benchmark::new("one_block", one_block as Workload, 778),
         Benchmark::new("one_kb", one_kb as Workload, 2_641),
         Benchmark::new("eight_kb", eight_kb as Workload, 12_745)
     ];

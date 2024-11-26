@@ -23,10 +23,7 @@ pub enum Error {
 }
 
 pub fn run() -> Result<(), Error> {
-    let prover = Prover::new(ProofMode::Fake);
-    let env = ExecutorEnv::builder().build()?;
-    let result = prover.prove(env, &GUEST_ELF.elf.clone())?;
-    let results: Vec<BenchmarkResult> = result.receipt.journal.decode()?;
+    let results = run_guest()?;
 
     for result in &results {
         detect_regression(result)?;
@@ -36,6 +33,13 @@ pub fn run() -> Result<(), Error> {
     println!("{}", Table::new(rows));
 
     Ok(())
+}
+
+fn run_guest() -> Result<Vec<BenchmarkResult>, Error> {
+    let prover = Prover::new(ProofMode::Fake);
+    let env = ExecutorEnv::builder().build()?;
+    let result = prover.prove(env, &GUEST_ELF.elf.clone())?;
+    Ok(result.receipt.journal.decode()?)
 }
 
 fn detect_regression(result: &BenchmarkResult) -> Result<(), Error> {
