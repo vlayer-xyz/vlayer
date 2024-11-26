@@ -53,7 +53,7 @@ impl Client {
         }
     }
 
-    pub async fn start_gas_meter(&self, gas_limit: u64) -> Result<(), RpcError> {
+    pub async fn allocate_gas(&self, gas_limit: u64) -> Result<(), RpcError> {
         let req = AllocateGas::new(self.hash, gas_limit, self.time_to_live);
         let _resp = self.client.call(&req).await?;
         // We need to validate response here.

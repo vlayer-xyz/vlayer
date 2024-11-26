@@ -35,7 +35,7 @@ pub async fn v_call(config: Arc<ServerConfig>, params: Params) -> Result<CallRes
         .gas_meter_config()
         .map(|GasMeterConfig { url, time_to_live }| Client::new(&url, call_hash, time_to_live));
     if let Some(client) = gas_meter_client.as_ref() {
-        client.start_gas_meter(params.context.gas_limit).await?;
+        client.allocate_gas(params.context.gas_limit).await?;
     }
 
     let prover = host.prover();
