@@ -45,16 +45,24 @@ mod test {
         let result = bool::abi_decode(&result.bytes, true).unwrap();
         assert_eq!(result, expected);
     }
-
-    fn run_test_expect_err(source: &str, pattern: &str) {
+    fn run_test_expect_err(source: &str, pattern: &str, expected_msg: &str) {
         let input = [source, pattern].abi_encode();
-        let result = test(&Bytes::from(input), 1000);
-        assert!(result.is_err());
+        let result: Result<PrecompileOutput, PrecompileErrors> = test(&Bytes::from(input), 1000);
+        assert!(
+            matches!(
+                result,
+                Err(PrecompileErrors::Fatal { ref msg }) if msg == expected_msg
+            ),
+            "Expected Fatal error with message '{expected_msg}' but got {result:?}",
+        );
     }
-
     #[test]
     fn invalid_url_pattern() {
-        run_test_expect_err("https://example.com/path", "[invalid pattern]");
+        run_test_expect_err(
+            "https://example.com/path",
+            "[invalid pattern]",
+            "a relative input without a base URL is not valid",
+        );
     }
 
     #[test]

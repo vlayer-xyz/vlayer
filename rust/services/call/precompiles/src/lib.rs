@@ -1,6 +1,6 @@
 mod json;
 mod regex;
-mod url_pattern;
+pub mod url_pattern;
 mod verify_and_parse;
 pub mod verify_and_parse_email;
 
