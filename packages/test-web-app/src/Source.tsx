@@ -1,5 +1,5 @@
 import {
-  WebProof,
+  PresentationJSON,
   createVlayerClient,
   type VlayerClient,
   ExtensionMessageType,
@@ -27,7 +27,7 @@ const NOTARY_PUB_KEY =
   "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEBv36FI4ZFszJa0DQFJ3wWCXvVLFr\ncRzMG5kaTeHGoSzDu6cFqx3uEWYpFGo6C0EOUgf+mEgbktLrXocv5yHzKg==\n-----END PUBLIC KEY-----";
 
 function SourceNewWay() {
-  const [proof, setProof] = useState<WebProof | null>(null);
+  const [proof, setProof] = useState<PresentationJSON | null>(null);
 
   const webProofProvider = useMemo(() => {
     return createExtensionWebProofProvider({
@@ -81,7 +81,7 @@ function SourceNewWay() {
       args: [
         {
           webProofJson: JSON.stringify({
-            tls_proof: proof,
+            presentation: proof,
             notary_pub_key: NOTARY_PUB_KEY,
           }),
         },
@@ -126,7 +126,7 @@ function SourceNewWay() {
 }
 
 function Source() {
-  const [proof, setProof] = useState<WebProof>();
+  const [proof, setProof] = useState<PresentationJSON>();
   const vlayerClient = useRef<VlayerClient>();
 
   const requestWebProof = useCallback(async () => {
@@ -169,7 +169,7 @@ function Source() {
       args: [
         {
           webProofJson: JSON.stringify({
-            tls_proof: proof,
+            presentation: proof,
             notary_pub_key: NOTARY_PUB_KEY,
           }),
         },
