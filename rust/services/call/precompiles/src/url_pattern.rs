@@ -13,7 +13,7 @@ const PER_WORD_COST: u64 = 1;
 
 type InputType = sol_data::FixedArray<sol_data::String, 2>;
 
-fn test(input: &Bytes, gas_limit: u64) -> PrecompileResult {
+pub fn test(input: &Bytes, gas_limit: u64) -> PrecompileResult {
     let gas_used = gas_used(input.len(), BASE_COST, PER_WORD_COST, gas_limit)?;
 
     let (url_to_test, url_pattern_init) = decode_args(input)?;
