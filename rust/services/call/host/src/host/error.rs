@@ -46,9 +46,6 @@ pub enum Error {
     #[error("Abi encode error: {0}")]
     AbiEncode(String),
 
-    #[error("No rpc cache for chain: {0}")]
-    NoRpcCache(ChainId),
-
     #[error("Evm env factory error: {0}")]
     EvmEnvFactory(#[from] anyhow::Error),
 
