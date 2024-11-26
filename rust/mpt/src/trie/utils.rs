@@ -1,16 +1,16 @@
 use std::collections::HashMap;
 
-use alloy_primitives::{keccak256, B256};
+use alloy_primitives::B256;
 use alloy_rlp::Decodable;
 
 use super::ParseNodeError;
-use crate::node::Node;
+use crate::{hash, node::Node};
 
 /// Returns the decoded node and its RLP hash.
 pub(crate) fn parse_node(rlp: impl AsRef<[u8]>) -> Result<(Option<B256>, Node), ParseNodeError> {
     let node = Node::decode(&mut rlp.as_ref())?;
     // the hash is only needed for RLP length >= 32
-    Ok(((rlp.as_ref().len() >= 32).then(|| keccak256(rlp)), node))
+    Ok(((rlp.as_ref().len() >= 32).then(|| hash(rlp)), node))
 }
 
 pub(crate) fn resolve_trie(root: Node, nodes_by_hash: &HashMap<B256, Node>) -> Node {
@@ -76,11 +76,10 @@ mod parse_node {
 
 #[cfg(test)]
 mod resolve_trie {
-    use alloy_primitives::keccak256;
     use alloy_trie::HashMap;
 
     use super::resolve_trie;
-    use crate::{key_nibbles::KeyNibbles, node::Node};
+    use crate::{hash, key_nibbles::KeyNibbles, node::Node};
 
     #[test]
     fn null() {
@@ -102,7 +101,7 @@ mod resolve_trie {
     #[test]
     fn digest() {
         let null_node = Node::Null;
-        let digest = keccak256(null_node.rlp_encoded());
+        let digest = hash(null_node.rlp_encoded());
         let node = Node::Digest(digest);
         let nodes_by_hash = HashMap::new();
         let resolved_node = resolve_trie(node.clone(), &nodes_by_hash);
@@ -112,7 +111,7 @@ mod resolve_trie {
     #[test]
     fn digest_resolved() {
         let null_node = Node::Null;
-        let digest = keccak256(null_node.rlp_encoded());
+        let digest = hash(null_node.rlp_encoded());
         let node = Node::Digest(digest);
         let nodes_by_hash = HashMap::from_iter([(digest, null_node)]);
         let resolved_node = resolve_trie(node, &nodes_by_hash);
@@ -123,7 +122,7 @@ mod resolve_trie {
     fn extension() {
         let extension_nibbles: KeyNibbles = [0].into();
         let leaf = Node::Leaf([1].into(), [0].into());
-        let digest = keccak256(leaf.rlp_encoded());
+        let digest = hash(leaf.rlp_encoded());
         let extension = Node::Extension(extension_nibbles.clone(), Box::new(Node::Digest(digest)));
         let nodes_by_hash = HashMap::from([(digest, leaf.clone())]);
         let resolved_node = resolve_trie(extension, &nodes_by_hash);
@@ -133,7 +132,7 @@ mod resolve_trie {
     #[test]
     fn branch() {
         let leaf = Node::leaf([1], [0]);
-        let digest = keccak256(leaf.rlp_encoded());
+        let digest = hash(leaf.rlp_encoded());
         let branch = Node::branch_with_child(0, Node::Digest(digest));
         let nodes_by_hash = HashMap::from([(digest, leaf.clone())]);
         let resolved_node = resolve_trie(branch, &nodes_by_hash);

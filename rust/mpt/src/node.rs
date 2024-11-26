@@ -1,10 +1,10 @@
-use alloy_primitives::{keccak256, Bytes, B256};
+use alloy_primitives::{Bytes, B256};
 use alloy_trie::EMPTY_ROOT_HASH;
 use common::Hashable;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
-use crate::key_nibbles::KeyNibbles;
+use crate::{hash, key_nibbles::KeyNibbles};
 
 pub mod constructors;
 pub mod insert;
@@ -52,7 +52,7 @@ impl Hashable for Node {
         match self {
             Node::Null => EMPTY_ROOT_HASH,
             Node::Digest(digest) => *digest,
-            node => keccak256(node.rlp_encoded()),
+            node => hash(node.rlp_encoded()),
         }
     }
 }

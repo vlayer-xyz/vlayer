@@ -1,8 +1,9 @@
-use alloy_primitives::{keccak256, B256};
+use alloy_primitives::B256;
 use alloy_rlp::{BufMut, Encodable, EMPTY_STRING_CODE};
 use bytes::Bytes;
 
 use super::node::Node;
+use crate::hash;
 
 /// Represents the way in which a node is referenced from within another node.
 #[derive(Default, Clone)]
@@ -37,7 +38,7 @@ impl Encodable for NodeRef {
             NodeRef::Empty => out.put_u8(EMPTY_STRING_CODE),
             NodeRef::Digest(digest) => digest.encode(out),
             NodeRef::InlineNode(data) => out.put_slice(data),
-            NodeRef::Node(rlp) => keccak256(rlp).encode(out),
+            NodeRef::Node(rlp) => hash(rlp).encode(out),
         }
     }
 
@@ -96,7 +97,7 @@ mod encodable {
     #[test]
     fn hash_node() {
         let rlp = Bytes::from_static(&[0; 32]);
-        let hash = keccak256(&rlp);
+        let hash = hash(&rlp);
         let node = NodeRef::Node(rlp);
         let out = alloy_rlp::encode(&node);
 

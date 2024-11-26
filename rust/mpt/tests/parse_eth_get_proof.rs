@@ -38,6 +38,7 @@ fn existing() {
     let mpt = MerkleTrie::from_rlp_nodes(account_proof).unwrap();
 
     let address = address!("0000000000000000000000000000000000000004");
+    #[allow(clippy::disallowed_methods)]
     let account = mpt.get_rlp::<StateAccount>(keccak256(address)).unwrap();
     assert_eq!(
         account,
@@ -59,6 +60,7 @@ fn nonexisting() {
     let mpt = MerkleTrie::from_rlp_nodes(account_proof).unwrap();
 
     let address = address!("0010000000000000000000000000000000000000");
+    #[allow(clippy::disallowed_methods)]
     let account = mpt.get_rlp::<StateAccount>(keccak256(address)).unwrap();
     assert_eq!(account, None);
 }
