@@ -2,6 +2,7 @@
 src = "src"
 out = "out"
 fs_permissions = [{ access = "read", path = "./testdata"}]
+solc = "0.8.21"
 
 libs = ["dependencies"]
 
