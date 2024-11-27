@@ -51,7 +51,7 @@ describe("ExtensionWebProofProvider", () => {
     ).toThrow(StepValidationError);
   });
 
-  it("should properly validate all steps", () => {
+  it("successfully validates all steps", () => {
     const provider = createExtensionWebProofProvider();
     expect(() =>
       provider.requestWebProof({
