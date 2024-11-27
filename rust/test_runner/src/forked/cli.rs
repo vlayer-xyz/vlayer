@@ -298,6 +298,10 @@ impl TestArgs {
         // Modification:: call validate_chain_id
         Self::validate_chain_id(&mut evm_opts)?;
 
+        if self.evm_opts.fork_url.is_some() {
+            eyre::bail!("Forking is not yet supported in vlayer tests.");
+        }
+
         // Set number of max threads to execute tests.
         // If not specified then the number of threads determined by rayon will be used.
         if let Some(test_threads) = config.threads {
