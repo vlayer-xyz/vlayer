@@ -15,19 +15,19 @@ contract WebProverTest is VTest {
         // Remove this function once test_verifiesWebProofAndRetrievesScreenName and test_failedVerificationBecauseOfBadWebProofSignature are enabled
     }
 
-    function skip_test_verifiesWebProofAndRetrievesScreenName() public {
+    function test_verifiesWebProofAndRetrievesScreenName() public {
         WebProof memory webProof = WebProof(vm.readFile("testdata/web_proof.json"));
         WebProofProver prover = new WebProofProver();
         address account = vm.addr(1);
 
         callProver();
-        (Proof memory _proof, string memory screenName, address addr) = prover.main(webProof, account);
+        ( /*Proof memory _proof*/ , string memory screenName, address addr) = prover.main(webProof, account);
 
-        assert(screenName.equal("g_p_vlayer"));
+        assert(screenName.equal("wktr0"));
         assertEq(addr, account);
     }
 
-    function skip_test_failedVerificationBecauseOfBadWebProofSignature() public {
+    function test_failedVerificationBecauseOfBadWebProofSignature() public {
         // this web proof has some bytes modified to make the signature invalid
         WebProof memory webProof = WebProof(vm.readFile("testdata/bad_web_proof_signature.json"));
         WebProofProver prover = new WebProofProver();
@@ -39,7 +39,7 @@ contract WebProverTest is VTest {
         } catch Error(string memory reason) {
             assertEq(
                 reason,
-                "Engine(TransactError(Revert(\"Verification error: Session proof error: signature verification failed: signature error\")))"
+                "Engine(TransactError(Revert(\"Verification error: Presentation error: presentation error: server identity error caused by: server identity proof error: commitment: certificate opening does not match commitment\")))"
             );
         }
     }
