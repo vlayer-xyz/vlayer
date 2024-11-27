@@ -1,9 +1,12 @@
 use alloy_primitives::Address;
 use revm::db::CacheDB;
 
-use crate::config::{DEFAULT_CALLER, OPTIMISM_SEQUENCER_VAULT, XYZ, XYZ1, XYZ2};
+use crate::config::{
+    BASE_FEE_VAULT, DEFAULT_CALLER, L1_BLOCK, L1_FEE_VAULT, OPTIMISM_SEQUENCER_VAULT,
+};
 
-static EMPTY_ACCOUNTS: &[Address] = &[DEFAULT_CALLER, OPTIMISM_SEQUENCER_VAULT, XYZ, XYZ1, XYZ2];
+static EMPTY_ACCOUNTS: &[Address] =
+    &[DEFAULT_CALLER, OPTIMISM_SEQUENCER_VAULT, L1_BLOCK, BASE_FEE_VAULT, L1_FEE_VAULT];
 
 /// Preloads trusted data into the CacheDB to reduce preflight network requests.
 ///
