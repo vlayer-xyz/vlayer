@@ -1,39 +1,24 @@
 use common::Hashable;
-use lazy_static::lazy_static;
 use mpt::MerkleTrie;
 
-use crate::{benchmarks::merge, Benchmark, Workload, WorkloadResult};
+use crate::{benchmarks::merge, with_fixture, Benchmark};
 
 mod empty {
-
     use super::*;
 
-    fn trie() -> WorkloadResult {
-        MerkleTrie::new();
-
-        Ok(())
-    }
-
-    fn hash() -> WorkloadResult {
-        let trie = MerkleTrie::new();
+    fn hash(trie: MerkleTrie) {
         trie.hash_slow();
-
-        Ok(())
     }
 
-    fn insert() -> WorkloadResult {
-        let mut trie = MerkleTrie::new();
+    fn insert(mut trie: MerkleTrie) {
         trie.insert([0], [0; 32]).unwrap();
-
-        Ok(())
     }
 
-    lazy_static! {
-        pub static ref BENCHMARKS: Vec<Benchmark> = vec![
-            Benchmark::new("trie", trie as Workload, 47),
-            Benchmark::new("hash", hash as Workload, 122),
-            Benchmark::new("insert", insert as Workload, 1_279),
-        ];
+    pub fn benchmarks() -> Vec<Benchmark> {
+        vec![
+            Benchmark::new("hash", with_fixture!(MerkleTrie::new(), hash), 230),
+            Benchmark::new("insert", with_fixture!(MerkleTrie::new(), insert), 1_387),
+        ]
     }
 }
 
@@ -57,47 +42,27 @@ mod height_20 {
         trie
     }
 
-    fn trie() -> WorkloadResult {
-        fixture();
-
-        Ok(())
-    }
-
-    fn insert_shallow() -> WorkloadResult {
-        let mut trie = fixture();
+    fn insert_shallow(mut trie: MerkleTrie) {
         trie.insert([1], [0; 32]).unwrap();
-
-        Ok(())
     }
 
-    fn insert_deep() -> WorkloadResult {
-        let mut trie = fixture();
+    fn insert_deep(mut trie: MerkleTrie) {
         trie.insert(zeros(HEIGHT), [0; 32]).unwrap();
-
-        Ok(())
     }
 
-    fn hash() -> WorkloadResult {
-        fixture().hash_slow();
-
-        Ok(())
+    fn hash(trie: MerkleTrie) {
+        trie.hash_slow();
     }
 
-    lazy_static! {
-        pub static ref BENCHMARKS: Vec<Benchmark> = vec![
-            Benchmark::new("trie", trie as Workload, 1_264_090),
-            Benchmark::new("insert_shallow", insert_shallow as Workload, 1_289_310),
-            Benchmark::new("insert_deep", insert_deep as Workload, 1_435_893),
-            Benchmark::new("hash", hash as Workload, 2_319_286),
-        ];
+    pub fn benchmarks() -> Vec<Benchmark> {
+        vec![
+            Benchmark::new("insert_shallow", with_fixture!(fixture(), insert_shallow), 27_662),
+            Benchmark::new("insert_deep", with_fixture!(fixture(), insert_deep), 174_654),
+            Benchmark::new("hash", with_fixture!(fixture(), hash), 1_057_548),
+        ]
     }
 }
 
-lazy_static! {
-    pub static ref BENCHMARKS: Vec<Benchmark> = {
-        merge([
-            ("empty", empty::BENCHMARKS.clone()),
-            ("height_20", height_20::BENCHMARKS.clone()),
-        ])
-    };
+pub fn benchmarks() -> Vec<Benchmark> {
+    merge([("empty", empty::benchmarks()), ("height_20", height_20::benchmarks())])
 }

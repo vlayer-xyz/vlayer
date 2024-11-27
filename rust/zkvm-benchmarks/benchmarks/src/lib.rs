@@ -1,6 +1,7 @@
 use std::fmt::Display;
 
-use benchmarks::BENCHMARKS;
+use benchmarks::benchmarks;
+use derive_more::Debug;
 use derive_new::new;
 use risc0_zkvm::guest::env;
 use serde::{Deserialize, Serialize};
@@ -9,18 +10,15 @@ mod benchmarks;
 
 pub struct Runner(Vec<Benchmark>);
 
-type WorkloadResult = Result<(), ()>;
-type Workload = fn() -> WorkloadResult;
-
 impl Runner {
     pub fn new() -> Self {
-        Self(BENCHMARKS.clone())
+        Self(benchmarks())
     }
 
     pub fn run(self) -> Vec<BenchmarkResult> {
         let mut results = Vec::with_capacity(self.0.len());
         for benchmark in self.0 {
-            let result = benchmark.run().expect("benchmark failed");
+            let result = benchmark.run();
             results.push(result);
         }
         results
@@ -50,18 +48,23 @@ impl Display for BenchmarkResult {
     }
 }
 
-#[derive(Debug, Clone)]
-pub struct Benchmark {
+#[derive(Debug)]
+struct Benchmark {
     name: String,
-    workload: Workload,
+    #[debug(skip)]
+    workload: Box<dyn FnOnce()>,
     snapshot_cycles: u64,
 }
 
 impl Benchmark {
-    pub fn new(name: impl Into<String>, workload: Workload, snapshot_cycles: u64) -> Self {
+    fn new(
+        name: impl Into<String>,
+        workload: impl FnOnce() + 'static,
+        snapshot_cycles: u64,
+    ) -> Self {
         Self {
             name: name.into(),
-            workload,
+            workload: Box::new(workload),
             snapshot_cycles,
         }
     }
@@ -73,12 +76,12 @@ impl Benchmark {
         }
     }
 
-    fn run(self) -> Result<BenchmarkResult, ()> {
+    fn run(self) -> BenchmarkResult {
         let start = env::cycle_count();
-        (self.workload)()?;
+        (self.workload)();
         let end = env::cycle_count();
         let cycles = end - start;
 
-        Ok(BenchmarkResult::new(self.name, cycles, self.snapshot_cycles))
+        BenchmarkResult::new(self.name, cycles, self.snapshot_cycles)
     }
 }

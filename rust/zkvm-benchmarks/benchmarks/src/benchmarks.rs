@@ -1,10 +1,16 @@
-use lazy_static::lazy_static;
-
 use crate::Benchmark;
 
 mod hash;
 mod mpt;
 mod precompiles;
+
+#[macro_export]
+macro_rules! with_fixture {
+    ($fixture:expr, $callback:ident) => {{
+        let fixture = $fixture;
+        move || $callback(fixture)
+    }};
+}
 
 pub fn merge<Benchmarks: IntoIterator<Item = Benchmark>>(
     benchmarks: impl IntoIterator<Item = (&'static str, Benchmarks)>,
@@ -19,12 +25,10 @@ pub fn merge<Benchmarks: IntoIterator<Item = Benchmark>>(
         .collect()
 }
 
-lazy_static! {
-    pub static ref BENCHMARKS: Vec<Benchmark> = {
-        merge([
-            ("hash", hash::BENCHMARKS.clone()),
-            ("mpt", mpt::BENCHMARKS.clone()),
-            ("precompiles", precompiles::BENCHMARKS.clone()),
-        ])
-    };
+pub fn benchmarks() -> Vec<Benchmark> {
+    merge([
+        ("hash", hash::benchmarks()),
+        ("mpt", mpt::benchmarks()),
+        ("precompiles", precompiles::benchmarks()),
+    ])
 }

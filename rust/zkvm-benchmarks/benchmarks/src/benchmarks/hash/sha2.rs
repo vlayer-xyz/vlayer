@@ -1,37 +1,28 @@
-use lazy_static::lazy_static;
 use sha2::{Digest, Sha256};
 
-use crate::{Benchmark, Workload, WorkloadResult};
+use crate::Benchmark;
 
-fn empty() -> WorkloadResult {
+fn empty() {
     Sha256::digest([]);
-
-    Ok(())
 }
 
-fn one_block() -> WorkloadResult {
+fn one_block() {
     Sha256::digest([0; 32]);
-
-    Ok(())
 }
 
-fn one_kb() -> WorkloadResult {
+fn one_kb() {
     Sha256::digest([0; 1_024]);
-
-    Ok(())
 }
 
-fn eight_kb() -> WorkloadResult {
+fn eight_kb() {
     Sha256::digest([0; 8_192]);
-
-    Ok(())
 }
 
-lazy_static! {
-    pub static ref BENCHMARKS: Vec<Benchmark> = vec![
-        Benchmark::new("empty", empty as Workload, 547),
-        Benchmark::new("one_block", one_block as Workload, 778),
-        Benchmark::new("one_kb", one_kb as Workload, 2_641),
-        Benchmark::new("eight_kb", eight_kb as Workload, 12_745)
-    ];
+pub fn benchmarks() -> Vec<Benchmark> {
+    vec![
+        Benchmark::new("empty", empty, 782),
+        Benchmark::new("one_block", one_block, 778),
+        Benchmark::new("one_kb", one_kb, 2_641),
+        Benchmark::new("eight_kb", eight_kb, 12_745),
+    ]
 }

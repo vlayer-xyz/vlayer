@@ -1,37 +1,28 @@
 use alloy_primitives::keccak256;
-use lazy_static::lazy_static;
 
-use crate::{Benchmark, Workload, WorkloadResult};
+use crate::Benchmark;
 
-fn empty() -> WorkloadResult {
+fn empty() {
     keccak256([]);
-
-    Ok(())
 }
 
-fn one_block() -> WorkloadResult {
+fn one_block() {
     keccak256([0; 32]);
-
-    Ok(())
 }
 
-fn one_kb() -> WorkloadResult {
+fn one_kb() {
     keccak256([0; 1_024]);
-
-    Ok(())
 }
 
-fn eight_kb() -> WorkloadResult {
+fn eight_kb() {
     keccak256([0; 8_192]);
-
-    Ok(())
 }
 
-lazy_static! {
-    pub static ref BENCHMARKS: Vec<Benchmark> = vec![
-        Benchmark::new("empty", empty as Workload, 26_005),
-        Benchmark::new("one_block", one_block as Workload, 26_211),
-        Benchmark::new("one_kb", one_kb as Workload, 211_176),
-        Benchmark::new("eight_kb", eight_kb as Workload, 1_608_339)
-    ];
+pub fn benchmarks() -> Vec<Benchmark> {
+    vec![
+        Benchmark::new("empty", empty, 26_005),
+        Benchmark::new("one_block", one_block, 26_211),
+        Benchmark::new("one_kb", one_kb, 211_176),
+        Benchmark::new("eight_kb", eight_kb, 1_608_339),
+    ]
 }
