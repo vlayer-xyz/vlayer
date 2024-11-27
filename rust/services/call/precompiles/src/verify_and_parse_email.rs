@@ -5,7 +5,7 @@ use revm::precompile::{Precompile, PrecompileOutput, PrecompileResult};
 
 use crate::{gas_used, map_to_fatal};
 
-pub(super) const PRECOMPILE: Precompile = Precompile::Standard(verify_and_parse_run);
+pub(super) const VERIFY_AND_PARSE: Precompile = Precompile::Standard(verify_and_parse_run);
 
 /// The base cost of the operation.
 const VERIFY_EMAIL_BASE: u64 = 10;

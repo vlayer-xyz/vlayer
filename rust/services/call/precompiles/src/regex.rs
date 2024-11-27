@@ -6,8 +6,8 @@ use revm::precompile::{Precompile, PrecompileErrors, PrecompileOutput, Precompil
 
 use crate::{gas_used, map_to_fatal};
 
-pub(super) const MATCH_PRECOMPILE: Precompile = Precompile::Standard(match_run);
-pub(super) const CAPTURE_PRECOMPILE: Precompile = Precompile::Standard(capture_run);
+pub(super) const MATCH: Precompile = Precompile::Standard(match_run);
+pub(super) const CAPTURE: Precompile = Precompile::Standard(capture_run);
 
 const BASE_COST: u64 = 10;
 const PER_WORD_COST: u64 = 1;

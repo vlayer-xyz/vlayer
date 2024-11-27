@@ -20,7 +20,7 @@ struct VerifiedEmail {
 library EmailProofLib {
     function verify(UnverifiedEmail memory unverifiedEmail) internal view returns (VerifiedEmail memory) {
         (bool success, bytes memory returnData) =
-            Precompiles.VERIFY_EMAIL_PRECOMPILE.staticcall(abi.encode(unverifiedEmail));
+            Precompiles.VERIFY_EMAIL.staticcall(abi.encode(unverifiedEmail));
         Address.verifyCallResult(success, returnData);
 
         VerifiedEmail memory email = abi.decode(returnData, (VerifiedEmail));

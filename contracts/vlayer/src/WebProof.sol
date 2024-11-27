@@ -31,7 +31,7 @@ library WebProofLib {
 
     function recover(WebProof memory webProof, string memory dataUrl) internal view returns (Web memory) {
         (bool success, bytes memory returnData) =
-            Precompiles.VERIFY_AND_PARSE_PRECOMPILE.staticcall(bytes(webProof.webProofJson));
+            Precompiles.VERIFY_AND_PARSE.staticcall(bytes(webProof.webProofJson));
 
         Address.verifyCallResult(success, returnData);
 
@@ -44,16 +44,16 @@ library WebProofLib {
 }
 
 library WebLib {
-    address private constant JSON_GET_STRING_PRECOMPILE = address(0x102);
-    address private constant JSON_GET_INT_PRECOMPILE = address(0x103);
-    address private constant JSON_GET_BOOL_PRECOMPILE = address(0x104);
+    address private constant JSON_GET_STRING = address(0x102);
+    address private constant JSON_GET_INT = address(0x103);
+    address private constant JSON_GET_BOOL = address(0x104);
     address private constant JSON_GET_ARRAY_LENGTH = address(0x105);
 
     function jsonGetString(Web memory web, string memory jsonPath) internal view returns (string memory) {
         require(bytes(web.body).length > 0, "Body is empty");
 
         bytes memory encodedParams = abi.encode([web.body, jsonPath]);
-        (bool success, bytes memory returnData) = JSON_GET_STRING_PRECOMPILE.staticcall(encodedParams);
+        (bool success, bytes memory returnData) = JSON_GET_STRING.staticcall(encodedParams);
         Address.verifyCallResult(success, returnData);
 
         return abi.decode(returnData, (string));
@@ -63,7 +63,7 @@ library WebLib {
         require(bytes(web.body).length > 0, "Body is empty");
 
         bytes memory encodedParams = abi.encode([web.body, jsonPath]);
-        (bool success, bytes memory returnData) = JSON_GET_INT_PRECOMPILE.staticcall(encodedParams);
+        (bool success, bytes memory returnData) = JSON_GET_INT.staticcall(encodedParams);
         Address.verifyCallResult(success, returnData);
 
         return abi.decode(returnData, (int256));
@@ -73,7 +73,7 @@ library WebLib {
         require(bytes(web.body).length > 0, "Body is empty");
 
         bytes memory encodedParams = abi.encode([web.body, jsonPath]);
-        (bool success, bytes memory returnData) = JSON_GET_BOOL_PRECOMPILE.staticcall(encodedParams);
+        (bool success, bytes memory returnData) = JSON_GET_BOOL.staticcall(encodedParams);
         Address.verifyCallResult(success, returnData);
 
         return abi.decode(returnData, (bool));

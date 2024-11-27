@@ -7,10 +7,10 @@ use serde_json::Value;
 
 use crate::{gas_used, map_to_fatal};
 
-pub(super) const GET_STRING_PRECOMPILE: Precompile = Precompile::Standard(get_string);
-pub(super) const GET_INT_PRECOMPILE: Precompile = Precompile::Standard(get_int);
-pub(super) const GET_BOOL_PRECOMPILE: Precompile = Precompile::Standard(get_bool);
-pub(super) const GET_ARRAY_LENGTH_PRECOMPILE: Precompile = Precompile::Standard(get_array_length);
+pub(super) const GET_STRING: Precompile = Precompile::Standard(get_string);
+pub(super) const GET_INT: Precompile = Precompile::Standard(get_int);
+pub(super) const GET_BOOL: Precompile = Precompile::Standard(get_bool);
+pub(super) const GET_ARRAY_LENGTH: Precompile = Precompile::Standard(get_array_length);
 
 /// The base cost of the operation.
 const BASE_COST: u64 = 10;
