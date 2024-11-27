@@ -44,9 +44,9 @@ lazy_static! {
         },
         SoldeerDep {
             name: "risc0-ethereum".into(),
-            version: "1.0.0".into(),
-            url: Some("https://github.com/vlayer-xyz/risc0-ethereum/releases/download/v1.0.0-soldeer-no-remappings/contracts.zip".into()),
-            remapping: Some("risc0-ethereum-1.0.0".into()),
+            version: "1.1.4".into(),
+            url: Some("https://github.com/vlayer-xyz/risc0-ethereum/releases/download/v1.1.4-soldeer-no-remappings/contracts.zip".into()),
+            remapping: Some("risc0-ethereum-1.1.4".into()),
         },
         SoldeerDep {
             name: "vlayer".into(),
@@ -542,7 +542,7 @@ mod tests {
             openzeppelin-contracts/=dependencies/@openzeppelin-contracts-5.0.1/\n\
             forge-std/=dependencies/forge-std-1.9.2/src/\n\
             forge-std-1.9.2/src/=dependencies/forge-std-1.9.2/src/\n\
-            risc0-ethereum-1.0.0/=dependencies/risc0-ethereum-1.0.0/\n\
+            risc0-ethereum-1.1.4/=dependencies/risc0-ethereum-1.1.4/\n\
             vlayer-0.1.0/=dependencies/vlayer-{}/src/\n",
             version()
         );
@@ -566,7 +566,7 @@ mod tests {
             "openzeppelin-contracts/=dependencies/@openzeppelin-contracts-5.0.1/\n\
             forge-std/=dependencies/forge-std-1.9.2/src/\n\
             forge-std-1.9.2/src/=dependencies/forge-std-1.9.2/src/\n\
-            risc0-ethereum-1.0.0/=dependencies/risc0-ethereum-1.0.0/\n\
+            risc0-ethereum-1.1.4/=dependencies/risc0-ethereum-1.1.4/\n\
             vlayer-0.1.0/=dependencies/vlayer-{}/src/\n",
             version()
         );
