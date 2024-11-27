@@ -19,7 +19,7 @@ contract UrlPatternTest is VTest {
         assertTrue(isMatch);
     }
 
-    function test_reverts_when_no_match() public {
+    function test_returns_false_when_not_matching() public {
         UrlPatternWrapper urlPattern = new UrlPatternWrapper();
         callProver();
         bool isMatch = urlPattern.do_test("https://elpmaxe.com", "https://example.com/");
