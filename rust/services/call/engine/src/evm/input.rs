@@ -82,6 +82,10 @@ impl MultiEvmInput {
         Self { inputs }
     }
 
+    pub fn is_single_location(&self) -> bool {
+        self.inputs.len() == 1
+    }
+
     pub fn assert_coherency(&self) {
         self.inputs.values().for_each(EvmInput::assert_coherency);
     }

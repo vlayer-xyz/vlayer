@@ -9,7 +9,7 @@ use crate::{
 };
 
 async fn start_chain_proof_server() -> ChainProofServerMock {
-    ChainProofServerMock::start(json!({}), EMPTY_PROOF_RESPONSE.clone()).await
+    ChainProofServerMock::start(json!({}), EMPTY_PROOF_RESPONSE.clone(), 0).await
 }
 
 pub(crate) async fn run_serve(serve_args: ServeArgs) -> Result<(), CLIError> {

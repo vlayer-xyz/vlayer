@@ -76,8 +76,10 @@ impl Client for RecordingClient {
     async fn get_chain_proof(
         &self,
         chain_id: ChainId,
-        block_numbers: Vec<BlockNumber>,
+        mut block_numbers: Vec<BlockNumber>,
     ) -> Result<ChainProof, Error> {
+        // Block numbers should be sorted, because the vector is compared
+        block_numbers.sort();
         let proof = self
             .inner
             .get_chain_proof(chain_id, block_numbers.clone())
@@ -100,8 +102,9 @@ impl Client for CachedClient {
     async fn get_chain_proof(
         &self,
         chain_id: ChainId,
-        block_numbers: Vec<BlockNumber>,
+        mut block_numbers: Vec<BlockNumber>,
     ) -> Result<ChainProof, Error> {
+        block_numbers.sort();
         match self.cache.get(&chain_id) {
             Some((blocks, proof)) if blocks == &block_numbers => Ok(proof.clone()),
             _ => Err(Error::CacheMiss {
