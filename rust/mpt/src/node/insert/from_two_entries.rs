@@ -5,10 +5,10 @@
 use super::entry::Entry;
 use crate::node::{Node, NodeError};
 
-pub(crate) fn from_two_entries(
+pub(crate) fn from_two_entries<D>(
     lhs: impl Into<Entry>,
     rhs: impl Into<Entry>,
-) -> Result<Node, NodeError> {
+) -> Result<Node<D>, NodeError> {
     let lhs = lhs.into();
     let rhs = rhs.into();
 
@@ -24,7 +24,7 @@ fn order_entries(lhs: Entry, rhs: Entry) -> (Entry, Entry) {
     }
 }
 
-fn from_two_ordered_entries(shorter: Entry, longer: Entry) -> Result<Node, NodeError> {
+fn from_two_ordered_entries<D>(shorter: Entry, longer: Entry) -> Result<Node<D>, NodeError> {
     if shorter.key == longer.key {
         return Err(NodeError::DuplicateKey);
     }
@@ -55,12 +55,12 @@ fn from_two_ordered_entries(shorter: Entry, longer: Entry) -> Result<Node, NodeE
     Ok(result_node)
 }
 
-fn from_value_and_entry(value: impl AsRef<[u8]>, entry: Entry) -> Node {
+fn from_value_and_entry<D>(value: impl AsRef<[u8]>, entry: Entry) -> Node<D> {
     let (nibble, remaining) = entry.split_first_key_nibble();
     Node::branch_with_child_and_value(nibble, remaining, value)
 }
 
-fn prepend_nibble(nibble: u8, node: Node) -> Node {
+fn prepend_nibble<D>(nibble: u8, node: Node<D>) -> Node<D> {
     match node {
         Node::Branch(_, _) => Node::extension([nibble], node),
         Node::Extension(nibbles, child) => Node::Extension(nibbles.push_front(nibble), child),
@@ -72,12 +72,14 @@ fn prepend_nibble(nibble: u8, node: Node) -> Node {
 mod tests {
     use super::*;
 
+    type D = sha3::Keccak256;
+
     #[test]
     fn two_empty_keys() {
         let first_entry = ([], [42]);
         let second_entry = ([], [43]);
 
-        let result = from_two_entries(first_entry, second_entry);
+        let result = from_two_entries::<D>(first_entry, second_entry);
         assert_eq!(result.unwrap_err(), NodeError::DuplicateKey);
     }
 
@@ -85,7 +87,7 @@ mod tests {
     fn one_empty_key() -> anyhow::Result<()> {
         let first_entry = ([], [42]);
         let second_entry = ([0x0], [43]);
-        let node = from_two_entries(first_entry, second_entry)?;
+        let node = from_two_entries::<D>(first_entry, second_entry)?;
 
         let expected_node =
             Node::branch_with_child_and_value(0, Node::branch_with_value([43]), [42]);
@@ -98,7 +100,7 @@ mod tests {
     fn duplicate_key() {
         let old_entry = ([0], [42]);
         let entry = ([0], [43]);
-        let result = from_two_entries(old_entry, entry);
+        let result = from_two_entries::<D>(old_entry, entry);
         assert_eq!(result.unwrap_err(), NodeError::DuplicateKey);
     }
 
@@ -107,7 +109,7 @@ mod tests {
         let first_entry = ([0x0], [42]);
         let second_entry = ([0x1], [43]);
 
-        let node = from_two_entries(first_entry, second_entry)?;
+        let node = from_two_entries::<D>(first_entry, second_entry)?;
 
         let expected_node = Node::branch_with_two_children(
             0,
@@ -124,7 +126,7 @@ mod tests {
     fn no_common_prefix() -> anyhow::Result<()> {
         let first_entry = ([0x0, 0x0], [42]);
         let second_entry = ([0x1, 0x0], [43]);
-        let node = from_two_entries(first_entry, second_entry)?;
+        let node = from_two_entries::<D>(first_entry, second_entry)?;
 
         let expected_node =
             Node::branch_with_two_children(0, Node::leaf([0], [42]), 1, Node::leaf([0], [43]));
@@ -138,7 +140,7 @@ mod tests {
         let first_entry = ([0x0, 0x0], [42]);
         let second_entry = ([0x0, 0x1], [43]);
 
-        let node = from_two_entries(first_entry, second_entry)?;
+        let node = from_two_entries::<D>(first_entry, second_entry)?;
 
         let expected_child_node = Node::branch_with_two_children(
             0,
@@ -157,7 +159,7 @@ mod tests {
         let first_entry = ([0x0, 0x1, 0x0], [42]);
         let second_entry = ([0x0, 0x1, 0x1], [43]);
 
-        let node = from_two_entries(first_entry, second_entry)?;
+        let node = from_two_entries::<D>(first_entry, second_entry)?;
 
         let expected_child_node = Node::branch_with_two_children(
             0,
@@ -176,7 +178,7 @@ mod tests {
         let first_entry = ([0x0, 0x0, 0x1], [42]);
         let second_entry = ([0x0, 0x1, 0x0], [43]);
 
-        let node = from_two_entries(first_entry, second_entry)?;
+        let node = from_two_entries::<D>(first_entry, second_entry)?;
 
         let expected_child_node =
             Node::branch_with_two_children(0, Node::leaf([0x1], [42]), 1, Node::leaf([0x0], [43]));

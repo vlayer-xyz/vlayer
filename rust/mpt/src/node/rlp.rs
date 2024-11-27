@@ -1,16 +1,17 @@
 use alloy_primitives::B256;
 use alloy_rlp::{BufMut, Decodable, Encodable, Header};
 use bytes::Bytes;
+use digest::Digest;
 use rlp as legacy_rlp;
 
 use super::Node;
 use crate::{
-    node::constructors::EMPTY_CHILDREN,
+    node::constructors::empty_children,
     node_ref::NodeRef,
     path::{Path, PathKind},
 };
 
-impl Encodable for Node {
+impl<D: Digest> Encodable for Node<D> {
     fn length(&self) -> usize {
         // Default alloy implementation uses `encode`` method and then discards it's result resulting in `2**N`` time complexity.
         // This value is used to preallocate vector size.
@@ -29,13 +30,13 @@ impl Encodable for Node {
             }
             Node::Extension(prefix, child) => {
                 let path = prefix.encode_path_leaf(false);
-                let node_ref = NodeRef::from_node(child);
+                let node_ref = NodeRef::<D>::from_node(child);
                 encode_header(true, path.length() + node_ref.length(), out);
                 path.encode(out);
                 node_ref.encode(out);
             }
             Node::Branch(children, value) => {
-                let mut child_refs: [NodeRef; 16] = Default::default();
+                let mut child_refs: [NodeRef<D>; 16] = Default::default();
                 let mut payload_length = 0;
 
                 for (i, child) in children.iter().enumerate() {
@@ -62,11 +63,12 @@ impl Encodable for Node {
                 value.encode(out);
             }
             Node::Digest(digest) => digest.encode(out),
+            Node::Phantom(_) => unreachable!(),
         }
     }
 }
 
-impl Decodable for Node {
+impl<D> Decodable for Node<D> {
     fn decode(buf: &mut &[u8]) -> alloy_rlp::Result<Self> {
         let rlp = legacy_rlp::Rlp::new(buf);
         legacy_rlp::Decodable::decode(&rlp).map_err(map_rlp_error)
@@ -92,7 +94,7 @@ const fn map_rlp_error(err: legacy_rlp::DecoderError) -> alloy_rlp::Error {
 }
 
 // TODO: Remove `legacy_rlp` dependency and rewrite this with `alloy_rlp`
-impl legacy_rlp::Decodable for Node {
+impl<D> legacy_rlp::Decodable for Node<D> {
     fn decode(rlp: &legacy_rlp::Rlp) -> Result<Self, legacy_rlp::DecoderError> {
         use legacy_rlp::{Decodable, DecoderError, Prototype};
 
@@ -107,7 +109,7 @@ impl legacy_rlp::Decodable for Node {
                     }
                     PathKind::Extension => {
                         let node = Decodable::decode(&rlp.at(1)?)?;
-                        if node == Node::Null {
+                        if node == Node::<D>::Null {
                             return Err(DecoderError::Custom("extension node with null child"));
                         }
                         Ok(Node::Extension(nibbles, Box::new(node)))
@@ -115,7 +117,7 @@ impl legacy_rlp::Decodable for Node {
                 }
             }
             Prototype::List(17) => {
-                let mut children = EMPTY_CHILDREN.clone();
+                let mut children = empty_children();
                 for (i, node_rlp) in rlp.iter().enumerate().take(16) {
                     match node_rlp.prototype()? {
                         Prototype::Null | Prototype::Data(0) => {}
@@ -140,7 +142,7 @@ impl legacy_rlp::Decodable for Node {
     }
 }
 
-impl Node {
+impl<D: Digest> Node<D> {
     /// Returns the RLP encoding of the node.
     pub fn rlp_encoded(&self) -> Bytes {
         alloy_rlp::encode(self).into()
@@ -159,6 +161,7 @@ impl Node {
                 .collect(),
             Node::Extension(_, child) => child.to_rlp_nodes(),
             Node::Null | Node::Leaf(..) | Node::Digest(..) => vec![],
+            Node::Phantom(_) => unreachable!(),
         };
         nodes.append(&mut children);
         nodes

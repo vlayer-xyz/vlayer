@@ -1,6 +1,11 @@
-use alloy_primitives::{keccak256, B256};
+use alloy_primitives::B256;
+use digest::Digest;
 
-pub fn hash(data: impl AsRef<[u8]>) -> B256 {
-    #[allow(clippy::disallowed_methods)]
-    keccak256(data)
+pub fn hash<D: Digest>(data: impl AsRef<[u8]>) -> B256 {
+    let digest = D::digest(data.as_ref());
+    B256::from_slice(digest.as_slice())
+}
+
+pub fn keccak256(data: impl AsRef<[u8]>) -> B256 {
+    hash::<sha3::Keccak256>(data)
 }

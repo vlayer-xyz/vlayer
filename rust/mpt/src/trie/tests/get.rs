@@ -1,6 +1,6 @@
 use alloy_primitives::{b256, B256};
 
-use crate::{key_nibbles::KeyNibbles, node::Node, MerkleTrie};
+use crate::{key_nibbles::KeyNibbles, node::Node, KeccakMerkleTrie as MerkleTrie};
 
 #[test]
 pub fn null() {

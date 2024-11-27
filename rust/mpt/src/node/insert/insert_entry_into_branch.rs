@@ -1,11 +1,11 @@
 use super::entry::Entry;
 use crate::node::{Node, NodeError};
 
-impl Node {
+impl<D> Node<D> {
     pub(crate) fn insert_entry_into_branch(
         self,
         entry: impl Into<Entry>,
-    ) -> Result<Node, NodeError> {
+    ) -> Result<Node<D>, NodeError> {
         let Node::Branch(mut children, branch_value) = self else {
             unreachable!("insert_entry_into_branch is used only for Branch nodes");
         };
@@ -29,7 +29,10 @@ impl Node {
     }
 }
 
-fn insert_entry_into_child(child: Option<Box<Node>>, entry: Entry) -> Result<Node, NodeError> {
+fn insert_entry_into_child<D>(
+    child: Option<Box<Node<D>>>,
+    entry: Entry,
+) -> Result<Node<D>, NodeError> {
     // Depending on the child node, either insert the entry into the child node or create a new child node
     // ![Into existing child](../../../images/into_branch_1.png)
     // ![Into empty child](../../../images/into_branch_2.png)
@@ -42,9 +45,7 @@ fn insert_entry_into_child(child: Option<Box<Node>>, entry: Entry) -> Result<Nod
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::node::constructors::EMPTY_CHILD;
-
-    pub static EMPTY_BRANCH: Node = Node::Branch([EMPTY_CHILD; 16], None);
+    use crate::KeccakNode as Node;
 
     #[test]
     #[should_panic(expected = "insert_entry_into_branch is used only for Branch nodes")]
@@ -58,7 +59,7 @@ mod tests {
 
         #[test]
         fn branch_value_none() -> anyhow::Result<()> {
-            let branch = EMPTY_BRANCH.clone();
+            let branch = Node::empty_branch();
             let node = branch.insert_entry_into_branch(([], [42]))?;
 
             let expected_node = Node::branch_with_value([42]);
@@ -83,7 +84,7 @@ mod tests {
 
             #[test]
             fn no_nibble_remaining() -> anyhow::Result<()> {
-                let branch = EMPTY_BRANCH.clone();
+                let branch = Node::empty_branch();
                 let node = branch.insert_entry_into_branch(([0x0], [42]))?;
 
                 let expected_node = Node::branch_with_child(0, Node::branch_with_value([42]));
@@ -94,7 +95,7 @@ mod tests {
 
             #[test]
             fn nibble_remaining() -> anyhow::Result<()> {
-                let branch = EMPTY_BRANCH.clone();
+                let branch = Node::empty_branch();
                 let node = branch.insert_entry_into_branch(([0x0, 0x0], [42]))?;
 
                 let expected_node = Node::branch_with_child(0, Node::leaf([0x0], [42]));

@@ -3,35 +3,35 @@ use alloy_trie::EMPTY_ROOT_HASH;
 use common::Hashable;
 use lazy_static::lazy_static;
 
-use crate::{key_nibbles::KeyNibbles, node::Node, MerkleTrie};
+use crate::{key_nibbles::KeyNibbles, node::Node, KeccakMerkleTrie, MerkleTrie};
 
 lazy_static! {
-    static ref MPT_BRANCH_WITH_TWO_CHILDREN: MerkleTrie = {
+    static ref MPT_BRANCH_WITH_TWO_CHILDREN: KeccakMerkleTrie = {
         let branch = Node::branch_with_two_children(
             0,
             Node::leaf([0; 63], [0]),
             1,
             Node::leaf([1; 63], [1]),
         );
-        MerkleTrie(branch)
+        KeccakMerkleTrie(branch)
     };
 }
 
 #[test]
 fn null() {
-    let mpt = MerkleTrie(Node::Null);
+    let mpt = KeccakMerkleTrie(Node::Null);
     assert_eq!(mpt.hash_slow(), EMPTY_ROOT_HASH);
 }
 
 #[test]
 fn digest() {
-    let mpt = MerkleTrie(Node::Digest(B256::ZERO));
+    let mpt = KeccakMerkleTrie(Node::Digest(B256::ZERO));
     assert_eq!(mpt.hash_slow(), B256::ZERO);
 }
 
 #[test]
 fn leaf() {
-    let mpt = MerkleTrie(Node::Leaf(KeyNibbles::unpack(B256::ZERO), [0].into()));
+    let mpt = KeccakMerkleTrie(Node::Leaf(KeyNibbles::unpack(B256::ZERO), [0].into()));
     assert_eq!(
         mpt.hash_slow(),
         b256!("ebcd1aff3f48f44a89c8bceb54a7e73c44edda96852b9debc4447b5ac9be19a6")
@@ -41,7 +41,7 @@ fn leaf() {
 #[test]
 fn extension() {
     let leaf = Node::Leaf(KeyNibbles::unpack([1]), [0].into());
-    let mpt = MerkleTrie(Node::Extension([0; 1].into(), leaf.into()));
+    let mpt = KeccakMerkleTrie(Node::Extension([0; 1].into(), leaf.into()));
     assert_eq!(
         mpt.hash_slow(),
         b256!("36a045336263723ea10ae76482d278f4212fe858a6937204ecc747921e2bc8c1")

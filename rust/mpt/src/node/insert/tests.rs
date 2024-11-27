@@ -1,11 +1,11 @@
 #[cfg(test)]
 mod insert {
-    use crate::node::{insert::entry::Entry, Node, NodeError};
+    use crate::node::{insert::entry::Entry, KeccakNode as Node, NodeError};
 
     #[test]
     #[should_panic(expected = "Cannot insert into a digest node")]
     fn digest() {
-        let node = Node::Digest(Default::default());
+        let node = Node::digest(Default::default());
         node.insert([0x0], [42]).unwrap();
     }
 
@@ -14,28 +14,28 @@ mod insert {
 
         #[test]
         fn empty_key() -> anyhow::Result<()> {
-            let node = Node::Null;
+            let node = Node::null();
             assert_eq!(node.insert([], [42])?, Node::branch_with_value([42]));
             Ok(())
         }
 
         #[test]
         fn short_key() -> anyhow::Result<()> {
-            let node = Node::Null;
+            let node = Node::null();
             assert_eq!(node.insert([0x0], [42])?, Node::leaf([0x0], [42]));
             Ok(())
         }
 
         #[test]
         fn long_key() -> anyhow::Result<()> {
-            let node = Node::Null;
+            let node = Node::null();
             assert_eq!(node.insert([0x0, 0x0], [42])?, Node::leaf([0x0, 0x0], [42]));
             Ok(())
         }
 
         #[test]
         fn double_insert() -> anyhow::Result<()> {
-            let node = Node::Null;
+            let node = Node::null();
             let updated_node = node.insert([0x1, 0x0], [42])?.insert([0x2, 0x0], [43])?;
 
             let expected_branch = Node::branch_with_two_children(

@@ -8,12 +8,12 @@ mod insert_entry_into_extension;
 mod tests;
 mod utils;
 
-impl Node {
+impl<D> Node<D> {
     pub(crate) fn insert(
         self,
         key: impl AsRef<[u8]>,
         value: impl AsRef<[u8]>,
-    ) -> Result<Node, NodeError> {
+    ) -> Result<Node<D>, NodeError> {
         let key = key.as_ref();
         match self {
             Node::Null => Ok(Entry::from((key, value)).into()),
@@ -25,6 +25,7 @@ impl Node {
             }
             Node::Branch(_, _) => self.insert_entry_into_branch((key, value)),
             Node::Extension(_, _) => self.insert_entry_into_extension((key, value)),
+            Node::Phantom(_) => unreachable!(),
         }
     }
 }

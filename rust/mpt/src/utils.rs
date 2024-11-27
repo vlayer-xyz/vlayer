@@ -1,5 +1,6 @@
 use alloy_primitives::B256;
 use itertools::Itertools;
+use sha3::Keccak256;
 
 use crate::hash;
 
@@ -11,7 +12,7 @@ pub fn reorder_with_root_as_first<T: AsRef<[u8]>>(
     let mut nodes: Vec<T> = nodes.collect();
     let root_position = nodes
         .iter()
-        .find_position(|item| hash(item) == root_hash)
+        .find_position(|item| hash::<Keccak256>(item) == root_hash)
         .expect("No root node found")
         .0;
     nodes.swap(root_position, 0);

@@ -1,10 +1,6 @@
 use alloy_primitives::B256;
 
-use crate::{
-    key_nibbles::KeyNibbles,
-    node::{constructors::EMPTY_CHILDREN, Node},
-    MerkleTrie,
-};
+use crate::{key_nibbles::KeyNibbles, node::Node, KeccakMerkleTrie as MerkleTrie};
 
 #[test]
 fn null() {
@@ -21,7 +17,7 @@ fn leaf() {
 
 #[test]
 fn branch_empty() {
-    let mpt = MerkleTrie(Node::Branch(EMPTY_CHILDREN.clone(), None));
+    let mpt = MerkleTrie(Node::empty_branch());
 
     let decoded_mpt = MerkleTrie::from_rlp_nodes(&mpt).unwrap();
     assert_eq!(mpt, decoded_mpt);
