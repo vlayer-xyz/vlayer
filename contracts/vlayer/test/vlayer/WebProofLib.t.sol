@@ -40,6 +40,20 @@ contract WebProverTest is VTest {
         }
     }
 
+    function test_missingNotaryPubKey() public {
+        WebProof memory webProof = WebProof("{}");
+
+        callProver();
+
+        WebProofLibWrapper wrapper = new WebProofLibWrapper();
+
+        try wrapper.verify(webProof, DATA_URL) returns (Web memory) {
+            revert("Expected error");
+        } catch Error(string memory reason) {
+            assertEq(reason, "Engine(TransactError(Revert(\"missing field `notary_pub_key` at line 1 column 2\")))");
+        }
+    }
+
     function skip_test_missingSignature() public {
         WebProof memory webProof = WebProof(vm.readFile("testdata/web_proof_missing_signature.json"));
 
@@ -54,20 +68,6 @@ contract WebProverTest is VTest {
                 reason,
                 "Engine(TransactError(Revert(\"Verification error: Session proof error: session proof is missing notary signature\")))"
             );
-        }
-    }
-
-    function test_missingNotaryPubKey() public {
-        WebProof memory webProof = WebProof("{}");
-
-        callProver();
-
-        WebProofLibWrapper wrapper = new WebProofLibWrapper();
-
-        try wrapper.verify(webProof, DATA_URL) returns (Web memory) {
-            revert("Expected error");
-        } catch Error(string memory reason) {
-            assertEq(reason, "Engine(TransactError(Revert(\"missing field `notary_pub_key` at line 1 column 2\")))");
         }
     }
 
