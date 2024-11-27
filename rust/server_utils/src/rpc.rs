@@ -143,8 +143,9 @@ fn parse_json_rpc_response(response_body: Value) -> Result<Value, RpcError> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use derive_new::new;
 
-    #[derive(Serialize)]
+    #[derive(new, Serialize)]
     struct GetData {
         key: String,
     }
@@ -155,9 +156,7 @@ mod tests {
 
     #[tokio::test]
     async fn mock_with_params() -> anyhow::Result<()> {
-        let params = GetData {
-            key: "value".into(),
-        };
+        let params = GetData::new("value".into());
         let expected_response = json!({"data": "some data"});
         let mock =
             RpcServerMock::start(GetData::METHOD_NAME, false, &params, &expected_response).await;
@@ -182,9 +181,7 @@ mod tests {
 
     #[tokio::test]
     async fn call_without_mock_returns_error() {
-        let params = GetData {
-            key: "value".into(),
-        };
+        let params = GetData::new("value".into());
         let mock = RpcServerMock::start(GetData::METHOD_NAME, false, json!({}), json!({})).await;
         let rpc_client = RpcClient::new(&mock.url());
 
@@ -195,9 +192,7 @@ mod tests {
 
     #[tokio::test]
     async fn mock_partial_matches_full_body() -> anyhow::Result<()> {
-        let params = GetData {
-            key: "value".into(),
-        };
+        let params = GetData::new("value".into());
         let mock = RpcServerMock::start(
             GetData::METHOD_NAME,
             true,
@@ -218,9 +213,7 @@ mod tests {
 
     #[tokio::test]
     async fn mock_non_partial_doesnt_match_full_body() -> anyhow::Result<()> {
-        let params = GetData {
-            key: "value".into(),
-        };
+        let params = GetData::new("value".into());
         let mock = RpcServerMock::start(
             GetData::METHOD_NAME,
             false,

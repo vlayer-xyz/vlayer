@@ -9361,6 +9361,7 @@ dependencies = [
  "anyhow",
  "axum",
  "axum-jrpc",
+ "derive-new",
  "ethers",
  "futures",
  "hex",
