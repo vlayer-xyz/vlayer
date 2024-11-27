@@ -15,15 +15,15 @@ contract WebProverTest is VTest {
         // Remove this function once test_verifiesWebProofAndRetrievesScreenName and test_failedVerificationBecauseOfBadWebProofSignature are enabled
     }
 
-    function skip_test_verifiesWebProofAndRetrievesScreenName() public {
+    function test_verifiesWebProofAndRetrievesScreenName() public {
         WebProof memory webProof = WebProof(vm.readFile("testdata/web_proof.json"));
         WebProofProver prover = new WebProofProver();
         address account = vm.addr(1);
 
         callProver();
-        (Proof memory _proof, string memory screenName, address addr) = prover.main(webProof, account);
+        (, string memory screenName, address addr) = prover.main(webProof, account);
 
-        assert(screenName.equal("g_p_vlayer"));
+        assert(screenName.equal("wktr0"));
         assertEq(addr, account);
     }
 

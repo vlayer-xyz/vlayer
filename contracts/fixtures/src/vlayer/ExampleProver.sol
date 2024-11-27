@@ -27,9 +27,7 @@ contract ExampleProver is Prover {
     }
 
     function web_proof(WebProof calldata webProof) public view returns (bool) {
-        Web memory web = webProof.verify(
-            "https://api.x.com/1.1/account/settings.json"
-        );
+        Web memory web = webProof.verify("https://api.x.com/1.1/account/settings.json");
 
         require(web.jsonGetString("screen_name").equal("wktr0"), "Invalid screen name");
 
