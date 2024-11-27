@@ -37,12 +37,12 @@ where
     }
 }
 
-fn insert_account_storages<D>(db: &mut CacheDB<D>, address_to_storage: &HashMap<Address, Storage>)
+fn insert_account_storages<D>(db: &mut CacheDB<D>, account_to_storage: &HashMap<Address, Storage>)
 where
     D: DatabaseRef,
     <D as DatabaseRef>::Error: Debug,
 {
-    for (&account, storage) in address_to_storage {
+    for (&account, storage) in account_to_storage {
         for (&key, &value) in storage {
             db.insert_account_storage(account, key, value)
                 .expect("failed to insert account storage");
