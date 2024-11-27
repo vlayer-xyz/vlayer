@@ -71,13 +71,13 @@ pub struct RpcClient {
 }
 
 pub trait RpcMethod: Serialize {
-    const NAME: &str;
+    const METHOD_NAME: &str;
 
     fn request_body(&self) -> Value {
         json!({
             "id": 1,
             "jsonrpc": "2.0",
-            "method": Self::NAME,
+            "method": Self::METHOD_NAME,
             "params": self,
         })
     }
@@ -108,7 +108,7 @@ impl RpcClient {
         Method: RpcMethod,
     {
         let request_body = method.request_body();
-        info!("{} => {}", Method::NAME, request_body);
+        info!("{} => {}", Method::METHOD_NAME, request_body);
 
         let response = self
             .client
@@ -143,7 +143,6 @@ fn parse_json_rpc_response(response_body: Value) -> Result<Value, RpcError> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    const METHOD: &str = "get_data";
 
     #[derive(Serialize)]
     struct GetData {
@@ -151,7 +150,7 @@ mod tests {
     }
 
     impl RpcMethod for GetData {
-        const NAME: &str = METHOD;
+        const METHOD_NAME: &str = "get_data";
     }
 
     #[tokio::test]
@@ -160,7 +159,8 @@ mod tests {
             key: "value".into(),
         };
         let expected_response = json!({"data": "some data"});
-        let mock = RpcServerMock::start(METHOD, false, &params, &expected_response).await;
+        let mock =
+            RpcServerMock::start(GetData::METHOD_NAME, false, &params, &expected_response).await;
         let rpc_client = RpcClient::new(&mock.url());
 
         let response = rpc_client.call(params).await?;
@@ -175,7 +175,7 @@ mod tests {
     #[tokio::test]
     #[should_panic(expected = "wrong number of requests. expected 1")]
     async fn mock_not_called_panics() {
-        let mock = RpcServerMock::start(METHOD, false, json!({}), json!({})).await;
+        let mock = RpcServerMock::start(GetData::METHOD_NAME, false, json!({}), json!({})).await;
 
         mock.assert();
     }
@@ -185,7 +185,7 @@ mod tests {
         let params = GetData {
             key: "value".into(),
         };
-        let mock = RpcServerMock::start(METHOD, false, json!({}), json!({})).await;
+        let mock = RpcServerMock::start(GetData::METHOD_NAME, false, json!({}), json!({})).await;
         let rpc_client = RpcClient::new(&mock.url());
 
         let result = rpc_client.call(params).await;
@@ -198,8 +198,13 @@ mod tests {
         let params = GetData {
             key: "value".into(),
         };
-        let mock =
-            RpcServerMock::start(METHOD, true, json!({}), json!({"data": "some data"})).await;
+        let mock = RpcServerMock::start(
+            GetData::METHOD_NAME,
+            true,
+            json!({}),
+            json!({"data": "some data"}),
+        )
+        .await;
         let rpc_client = RpcClient::new(&mock.url());
 
         let result = rpc_client.call(params).await?;
@@ -216,8 +221,13 @@ mod tests {
         let params = GetData {
             key: "value".into(),
         };
-        let mock =
-            RpcServerMock::start(METHOD, false, json!({}), json!({"data": "some data"})).await;
+        let mock = RpcServerMock::start(
+            GetData::METHOD_NAME,
+            false,
+            json!({}),
+            json!({"data": "some data"}),
+        )
+        .await;
         let rpc_client = RpcClient::new(&mock.url());
 
         let result = rpc_client.call(params).await;

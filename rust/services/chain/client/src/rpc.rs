@@ -27,7 +27,7 @@ struct GetChainProof {
 }
 
 impl RpcMethod for GetChainProof {
-    const NAME: &str = "v_chain";
+    const METHOD_NAME: &str = "v_chain";
 }
 
 #[async_trait]
