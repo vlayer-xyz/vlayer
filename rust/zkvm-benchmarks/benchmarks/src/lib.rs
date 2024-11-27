@@ -8,22 +8,6 @@ use serde::{Deserialize, Serialize};
 
 mod benchmarks;
 
-type WorkloadResult = Result<(), ()>;
-
-trait Workload {
-    fn run(self: Box<Self>) -> WorkloadResult;
-}
-
-impl<F> Workload for F
-where
-    F: FnOnce(),
-{
-    fn run(self: Box<Self>) -> WorkloadResult {
-        (self)();
-        Ok(())
-    }
-}
-
 pub struct Runner(Vec<Benchmark>);
 
 impl Runner {
@@ -34,7 +18,7 @@ impl Runner {
     pub fn run(self) -> Vec<BenchmarkResult> {
         let mut results = Vec::with_capacity(self.0.len());
         for benchmark in self.0 {
-            let result = benchmark.run().expect("benchmark failed");
+            let result = benchmark.run();
             results.push(result);
         }
         results
@@ -68,14 +52,14 @@ impl Display for BenchmarkResult {
 struct Benchmark {
     name: String,
     #[debug(skip)]
-    workload: Box<dyn Workload>,
+    workload: Box<dyn FnOnce()>,
     snapshot_cycles: u64,
 }
 
 impl Benchmark {
     fn new(
         name: impl Into<String>,
-        workload: impl Workload + 'static,
+        workload: impl FnOnce() + 'static,
         snapshot_cycles: u64,
     ) -> Self {
         Self {
@@ -92,12 +76,12 @@ impl Benchmark {
         }
     }
 
-    fn run(self) -> Result<BenchmarkResult, ()> {
+    fn run(self) -> BenchmarkResult {
         let start = env::cycle_count();
-        self.workload.run()?;
+        (self.workload)();
         let end = env::cycle_count();
         let cycles = end - start;
 
-        Ok(BenchmarkResult::new(self.name, cycles, self.snapshot_cycles))
+        BenchmarkResult::new(self.name, cycles, self.snapshot_cycles)
     }
 }
