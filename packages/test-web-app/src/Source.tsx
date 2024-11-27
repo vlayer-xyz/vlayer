@@ -169,7 +169,7 @@ function Source() {
       args: [
         {
           webProofJson: JSON.stringify({
-            presentation: proof,
+            presentation_json: proof,
             notary_pub_key: NOTARY_PUB_KEY,
           }),
         },

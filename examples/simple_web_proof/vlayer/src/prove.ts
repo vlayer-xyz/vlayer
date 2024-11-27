@@ -70,7 +70,7 @@ export const setupVProverButton = (element: HTMLButtonElement) => {
       "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExpX/4R4z40gI6C/j9zAM39u58LJu\n3Cx5tXTuqhhu/tirnBi5GniMmspOTEsps4ANnPLpMmMSfhJ+IFHbc3qVOA==\n-----END PUBLIC KEY-----\n";
 
     const webProof = {
-      presentation: context.webProof,
+      presentation_json: context.webProof,
       notary_pub_key: notaryPubKey,
     };
     const vlayer = createVlayerClient({
