@@ -11264,8 +11264,10 @@ version = "0.1.0"
 dependencies = [
  "alloy-dyn-abi",
  "alloy-primitives",
+ "bincode",
  "chunked_transfer",
  "derive-new",
+ "hex",
  "httparse",
  "p256",
  "pkcs8",

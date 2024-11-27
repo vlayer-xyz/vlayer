@@ -5,8 +5,10 @@ edition = "2021"
 
 [dependencies]
 alloy-dyn-abi = { workspace = true }
+bincode = { workspace = true }
 chunked_transfer = { workspace = true }
 derive-new = { workspace = true }
+hex = { workspace = true }
 httparse = { workspace = true }
 p256 = { workspace = true }
 pkcs8 = { workspace = true }

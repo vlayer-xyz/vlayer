@@ -4,7 +4,7 @@ use url::{ParseError, Url};
 use crate::{
     errors::ParsingError,
     web::Web,
-    web_proof::{VerificationError, WebProof},
+    web_proof::{VerificationError, WebProof, WebProofV7},
 };
 
 #[derive(Error, Debug)]
@@ -23,6 +23,10 @@ pub enum WebProofError {
 
     #[error("Host name extracted from url: {0} is different from server name: {1}")]
     HostNameMismatch(String, String),
+}
+
+pub fn verify_and_parse_v7(web_proof: WebProofV7) -> Result<Web, WebProofError> {
+    verify_and_parse(web_proof.into())
 }
 
 pub fn verify_and_parse(web_proof: WebProof) -> Result<Web, WebProofError> {
@@ -67,6 +71,30 @@ mod tests {
     const X_TEST_URL: &str = "https://api.x.com/1.1/account/settings.json?include_ext_sharing_audiospaces_listening_data_with_followers=true&include_mention_filter=true&include_nsfw_user_flag=true&include_nsfw_admin_flag=true&include_ranked_timeline=true&include_alt_text_compose=true&ext=ssoConnections&include_country_code=true&include_ext_dm_nsfw_media_filter=true";
 
     const SWAPI_TEST_URL: &str = "https://swapi.dev/api/people/1";
+
+    mod verify_and_parse_v7 {
+        use p256::elliptic_curve::PublicKey;
+        use pkcs8::DecodePublicKey;
+
+        use super::*;
+        use crate::{fixtures::read_fixture, web_proof::PresentationJson};
+
+        #[test]
+        fn correct_url_extracted() {
+            let presentation_json = read_fixture("./testdata/presentation.json");
+            let presentation_json: PresentationJson =
+                serde_json::from_str(&presentation_json).unwrap();
+
+            let web_proof = WebProofV7 {
+                presentation_json,
+                notary_pub_key: PublicKey::from_public_key_pem(NOTARY_PUB_KEY_PEM_EXAMPLE).unwrap(),
+            };
+
+            let web = verify_and_parse_v7(web_proof).unwrap();
+
+            assert_eq!(web.url, "https://api.x.com/1.1/account/settings.json");
+        }
+    }
 
     mod verify_and_parse {
         use super::*;

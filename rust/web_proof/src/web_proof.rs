@@ -21,6 +21,27 @@ pub struct WebProof {
     pub presentation: Presentation,
 }
 
+#[derive(Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct WebProofV7 {
+    #[serde(
+        deserialize_with = "deserialize_public_key_from_pem_string",
+        serialize_with = "serialize_public_key_to_pem_string"
+    )]
+    pub notary_pub_key: PublicKey,
+    pub presentation_json: PresentationJson,
+}
+
+impl From<WebProofV7> for WebProof {
+    fn from(web_proof_v7: WebProofV7) -> Self {
+        let presentation = Presentation::from(web_proof_v7.presentation_json);
+        Self {
+            notary_pub_key: web_proof_v7.notary_pub_key,
+            presentation,
+        }
+    }
+}
+
 impl WebProof {
     pub(crate) fn verify(
         self,
@@ -44,6 +65,32 @@ impl WebProof {
 
     pub fn get_notary_pub_key(&self) -> Result<String, pkcs8::spki::Error> {
         self.notary_pub_key.to_public_key_pem(LineEnding::LF)
+    }
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct PresentationJson {
+    pub version: String,
+    pub data: String,
+    pub meta: PresentationJsonMeta,
+}
+
+#[derive(Debug, Clone, Deserialize, Serialize)]
+#[serde(deny_unknown_fields)]
+pub struct PresentationJsonMeta {
+    #[serde(rename = "notaryUrl")]
+    pub(crate) notary_url: Option<String>,
+    #[serde(rename = "websocketProxyUrl")]
+    pub(crate) websocket_proxy_url: Option<String>,
+    #[serde(rename = "pluginUrl")]
+    pub(crate) plugin_url: Option<String>,
+}
+
+impl From<PresentationJson> for Presentation {
+    fn from(presentation_json: PresentationJson) -> Self {
+        let bytes = hex::decode(presentation_json.data).unwrap();
+        bincode::deserialize(&bytes).unwrap()
     }
 }
 
@@ -79,6 +126,8 @@ where
 
 #[cfg(test)]
 mod tests {
+    use tlsn_core::signing::KeyAlgId;
+
     use super::*;
     use crate::fixtures::{load_web_proof_fixture, read_fixture, NOTARY_PUB_KEY_PEM_EXAMPLE};
 
@@ -156,5 +205,14 @@ mod tests {
             NOTARY_PUB_KEY_PEM_EXAMPLE,
         );
         assert_eq!(proof.get_notary_pub_key().unwrap(), NOTARY_PUB_KEY_PEM_EXAMPLE);
+    }
+
+    #[test]
+    fn deserialize_presentation() {
+        let presentation_json = read_fixture("./testdata/presentation.json");
+        let presentation_json: PresentationJson = serde_json::from_str(&presentation_json).unwrap();
+
+        let presentation: Presentation = presentation_json.into();
+        assert_eq!(presentation.verifying_key().alg, KeyAlgId::K256);
     }
 }
