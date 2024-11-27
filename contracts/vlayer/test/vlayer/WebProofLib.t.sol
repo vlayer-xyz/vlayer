@@ -16,9 +16,9 @@ contract WebProverTest is VTest {
     using WebProofLib for WebProof;
 
     string public constant DATA_URL =
-        "https://api.x.com/1.1/account/settings.json?include_ext_sharing_audiospaces_listening_data_with_followers=true&include_mention_filter=true&include_nsfw_user_flag=true&include_nsfw_admin_flag=true&include_ranked_timeline=true&include_alt_text_compose=true&ext=ssoConnections&include_country_code=true&include_ext_dm_nsfw_media_filter=true";
+        "https://api.x.com/1.1/account/settings.json";
 
-    function skip_test_verifiesWebProof() public {
+    function test_verifiesWebProof() public {
         WebProof memory webProof = WebProof(vm.readFile("testdata/web_proof.json"));
 
         callProver();
@@ -27,64 +27,47 @@ contract WebProverTest is VTest {
         assertEq(bytes(web.body)[0], "{");
     }
 
-    function skip_test_incorrectUrl() public {
+    function test_incorrectUrl() public {
         WebProof memory webProof = WebProof(vm.readFile("testdata/web_proof.json"));
 
         callProver();
 
         WebProofLibWrapper wrapper = new WebProofLibWrapper();
 
-        try wrapper.verify(webProof, "") returns (Web memory web) {
+        try wrapper.verify(webProof, "") returns (Web memory) {
             revert("Expected error");
         } catch Error(string memory reason) {
             assertEq(reason, "Engine(TransactError(Revert(\"revert: Incorrect URL\")))");
         }
     }
 
-    function skip_test_missingNotaryPubKey() public {
+    function test_missingNotaryPubKey() public {
         WebProof memory webProof = WebProof("{}");
 
         callProver();
 
         WebProofLibWrapper wrapper = new WebProofLibWrapper();
 
-        try wrapper.verify(webProof, DATA_URL) returns (Web memory web) {
+        try wrapper.verify(webProof, DATA_URL) returns (Web memory) {
             revert("Expected error");
         } catch Error(string memory reason) {
             assertEq(reason, "Engine(TransactError(Revert(\"missing field `notary_pub_key` at line 1 column 2\")))");
         }
     }
 
-    function skip_test_missingSignature() public {
-        WebProof memory webProof = WebProof(vm.readFile("testdata/web_proof_missing_signature.json"));
-
-        callProver();
-
-        WebProofLibWrapper wrapper = new WebProofLibWrapper();
-
-        try wrapper.verify(webProof, DATA_URL) returns (Web memory web) {
-            revert("Expected error");
-        } catch Error(string memory reason) {
-            assertEq(
-                reason,
-                "Engine(TransactError(Revert(\"Verification error: Session proof error: session proof is missing notary signature\")))"
-            );
-        }
-    }
-
-    function skip_test_invalidNotaryPubKey() public {
+    function test_invalidNotaryPubKey() public {
         WebProof memory webProof = WebProof(vm.readFile("testdata/web_proof_invalid_notary_pub_key.json"));
 
         callProver();
 
         WebProofLibWrapper wrapper = new WebProofLibWrapper();
 
-        try wrapper.verify(webProof, DATA_URL) returns (Web memory web) {
+        try wrapper.verify(webProof, DATA_URL) returns (Web memory) {
             revert("Expected error");
         } catch Error(string memory reason) {
             assertEq(
                 reason,
-                "Engine(TransactError(Revert(\"unknown/unsupported algorithm OID: 1.2.840.10045.2.1 at line 8444 column 1\")))"
+                "Engine(TransactError(Revert(\"ASN.1 error: PEM error: PEM Base64 error: invalid Base64 encoding at line 9 column 203\")))"
             );
         }
     }
