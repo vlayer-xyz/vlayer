@@ -10,7 +10,6 @@ call_precompiles = { workspace = true }
 common = { workspace = true }
 derive-new = { workspace = true }
 derive_more = { workspace = true }
-lazy_static = { workspace = true }
 risc0-zkvm = { workspace = true }
 serde = { workspace = true }
 sha2 = { workspace = true }

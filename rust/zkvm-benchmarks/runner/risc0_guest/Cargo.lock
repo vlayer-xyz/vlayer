@@ -4210,7 +4210,6 @@ dependencies = [
  "derive-new",
  "derive_more",
  "email_proof",
- "lazy_static",
  "mpt",
  "risc0-zkvm",
  "serde",
