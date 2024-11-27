@@ -1,19 +1,22 @@
 use derive_new::new;
 use serde::{Deserialize, Serialize};
-use server_utils::{RpcClient, RpcError};
+use server_utils::{RpcClient, RpcError, RpcMethod};
 
 use crate::handlers::v_call::types::CallHash;
 
 #[derive(new, Serialize, Debug)]
 #[serde(deny_unknown_fields)]
-struct AllocateGas {
+pub struct AllocateGas {
     hash: CallHash,
     gas_limit: u64,
     time_to_live: u64,
 }
 
+impl RpcMethod for AllocateGas {
+    const METHOD_NAME: &str = "v_allocateGas";
+}
+
 #[derive(Serialize, Debug)]
-#[allow(unused)]
 pub enum ComputationStage {
     Preflight,
     Proving,
@@ -21,11 +24,14 @@ pub enum ComputationStage {
 
 #[derive(Serialize, Debug)]
 #[serde(deny_unknown_fields)]
-#[allow(unused)]
-struct RefundUnusedGas {
+pub struct RefundUnusedGas {
     hash: CallHash,
     computation_stage: ComputationStage,
     gas_used: u64,
+}
+
+impl RpcMethod for RefundUnusedGas {
+    const METHOD_NAME: &str = "v_refundUnusedGas";
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
@@ -40,11 +46,9 @@ pub struct Client {
     time_to_live: u64,
 }
 
-pub const V_ALLOCATE_GAS: &str = "v_allocateGas";
-
 impl Client {
     pub fn new(url: &str, hash: CallHash, time_to_live: u64) -> Self {
-        let client = RpcClient::new(url, V_ALLOCATE_GAS);
+        let client = RpcClient::new(url);
         Self {
             client,
             hash,
@@ -54,7 +58,7 @@ impl Client {
 
     pub async fn allocate_gas(&self, gas_limit: u64) -> Result<(), RpcError> {
         let req = AllocateGas::new(self.hash, gas_limit, self.time_to_live);
-        let _resp = self.client.call(&req).await?;
+        let _resp = self.client.call(req).await?;
         Ok(())
     }
 }

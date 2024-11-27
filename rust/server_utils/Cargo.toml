@@ -8,6 +8,7 @@ alloy-primitives = { workspace = true }
 anyhow = { workspace = true }
 axum = { workspace = true, features = ["macros"] }
 axum-jrpc = { workspace = true }
+derive-new = { workspace = true }
 ethers = { workspace = true }
 futures = { workspace = true }
 hex = { workspace = true }
