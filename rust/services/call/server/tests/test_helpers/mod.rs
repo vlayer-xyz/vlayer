@@ -24,8 +24,6 @@ use serde::Serialize;
 use serde_json::json;
 use server_utils::post;
 
-pub(crate) mod gas_meter;
-
 abigen!(ExampleProver, "./testdata/ExampleProver.json",);
 
 type Client = Arc<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>>;

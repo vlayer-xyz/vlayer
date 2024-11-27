@@ -6,7 +6,6 @@ mod test_helpers;
 
 use call_server::gas_meter::Config as GasMeterConfig;
 use server_utils::{body_to_json, body_to_string};
-use test_helpers::gas_meter::ServerMock as GasMeterServerMock;
 
 mod server_tests {
 
@@ -86,11 +85,12 @@ mod server_tests {
 
     mod v_call {
         use assert_json_diff::assert_json_include;
+        use call_server::gas_meter::AllocateGas;
         use ethers::{
             abi::AbiEncode,
             types::{Uint8, U256},
         };
-        use server_utils::function_selector;
+        use server_utils::{function_selector, RpcMethod, RpcServerMock};
         use web_proof::fixtures::{load_web_proof_v7_fixture, NOTARY_PUB_KEY_PEM_EXAMPLE};
 
         use super::*;
@@ -187,12 +187,15 @@ mod server_tests {
 
         #[tokio::test(flavor = "multi_thread")]
         async fn simple_with_gasmeter() {
-            let gas_meter_server_mock = GasMeterServerMock::start(json!({}), json!({})).await;
+            let gas_meter_server_mock: RpcServerMock =
+                RpcServerMock::start(AllocateGas::METHOD_NAME, true, json!({}), json!({})).await;
+
             let mut helper = TestHelper::default().await;
             helper.server_config.set_gas_meter_config(GasMeterConfig {
                 url: gas_meter_server_mock.url(),
                 time_to_live: DEFAULT_GAS_METER_TTL,
             });
+
             let call_data = helper
                 .contract
                 .sum(U256::from(1), U256::from(2))
