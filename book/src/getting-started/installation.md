@@ -10,9 +10,9 @@ The easiest way to install vlayer is by using `vlayerup`, the vlayer toolchain i
 Before working with vlayer, ensure the following tools are installed:
 - [Git](https://git-scm.com/downloads)
 - [Foundry](https://book.getfoundry.sh/getting-started/installation)
-- [RISC Zero](https://dev.risczero.com/api/zkvm/install) in version 1.0.5
+- [RISC Zero](https://dev.risczero.com/api/zkvm/install) in version 1.1.3
   - `curl -L https://risczero.com/install | bash`
-  - `rzup install cargo-risczero v1.0.5`
+  - `rzup install cargo-risczero v1.1.3`
   - `cargo risczero install` 
 
 Additionally, you'll need [Bun](https://bun.sh/) to run examples. For more details, refer to the [Running Examples Locally](/getting-started/first-steps.html#running-examples-locally) section.
