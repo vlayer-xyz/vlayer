@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.21;
 
 library Precompiles {
     address public constant VERIFY_AND_PARSE = address(0x100);

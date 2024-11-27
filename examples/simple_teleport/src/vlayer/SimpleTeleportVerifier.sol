@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.23;
+pragma solidity ^0.8.21;
 
 import {SimpleTeleportProver} from "./SimpleTeleportProver.sol";
 import {WhaleBadgeNFT} from "./WhaleBadgeNFT.sol";

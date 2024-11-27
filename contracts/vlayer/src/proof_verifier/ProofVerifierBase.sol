@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.21;
 
 import {IRiscZeroVerifier} from "risc0-ethereum-1.1.4/src/IRiscZeroVerifier.sol";
 
