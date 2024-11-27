@@ -142,8 +142,9 @@ fn parse_json_rpc_response(response_body: Value) -> Result<Value, RpcError> {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
     use derive_new::new;
+
+    use super::*;
 
     #[derive(new, Serialize)]
     struct GetData {
