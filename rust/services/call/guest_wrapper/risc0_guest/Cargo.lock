@@ -850,6 +850,7 @@ dependencies = [
  "derive-new",
  "derive_more",
  "itertools 0.13.0",
+ "lazy_static",
  "mpt",
  "once_cell",
  "revm",
