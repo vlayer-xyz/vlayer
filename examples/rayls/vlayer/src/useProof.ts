@@ -1,114 +1,145 @@
-import { useMemo, useEffect, useState } from "react";
-import { BrandedHash, createVlayerClient } from "@vlayer/sdk";
+import { useMemo, useReducer, useState } from "react";
 
-import {
-  type Address,
-  type Abi,
-  ContractFunctionName,
-  ContractFunctionReturnType,
-  AbiStateMutability,
-  ContractFunctionArgs,
-} from "viem";
+import { createExtensionWebProofProvider } from "@vlayer/sdk/web_proof";
 
-import { createWebProofProvider, createContext } from "@vlayer/sdk"; 
+import { createContext } from "@vlayer/sdk/config";
 
+import { customTransport } from "@vlayer/sdk/config";
 
-export const useProof = () => {
-    const { ethClient: walletClient } = await createContext(
-        {
-          chainName: import.meta.env.VITE_CHAIN_NAME as string,
-          proverUrl: import.meta.env.VITE_PROVER_URL as string,
-          jsonRpcUrl: import.meta.env.VITE_JSON_RPC_URL as string,
-          privateKey: import.meta.env.VITE_PRIVATE_KEY as `0x${string}`,
-        },
-        import.meta.env.VITE_USE_WINDOW_ETHEREUM_TRANSPORT
-          ? customTransport(window.ethereum)
-          : undefined,
-      );
-    const webProofProvider = useMemo(() => createWebProofProvider(import.meta.env.VITE_PROVER_URL),
-    [import.meta.env.VITE_PROVER_URL]
+import { match } from "ts-pattern";
 
-)
-// interface UseProverParams<T extends Abi, F extends ContractFunctionName<T>> {
-//   addr: Address;
-//   abi: T;
-//   func: F;
-//   chainId: number;
-// }
-// interface UseProverReturn<T extends Abi, F extends ContractFunctionName<T>> {
-//   prove: (
-//     proverArgs: ContractFunctionArgs<T, AbiStateMutability, F>,
-//   ) => Promise<BrandedHash<T, F> | undefined>;
-//   provingError: string | null;
-//   proof: ContractFunctionReturnType<T, AbiStateMutability, F> | null;
-// }
+enum VlayerFlowStage {
+  INITIAL = "ready",
+  WEB_PROOF_REQUESTED = "web_proof_requested",
+  WEB_PROOF_RECEIVED = "web_proof_received",
+  ZK_PROOF_REQUESTED = "zk_proof_requested",
+  ZK_PROOF_RECEIVED = "zk_proof_received",
+  VERIFICATION_REQUESTED = "verification_requested",
+  VERIFICATION_RECEIVED = "verification_received",
+}
 
-// const useProver = <T extends Abi, F extends ContractFunctionName<T>>({
-//   addr,
-//   abi,
-//   func,
-//   chainId,
-// }: UseProverParams<T, F>): UseProverReturn<T, F> => {
-//   const [provingHash, setProvingHash] = useState<BrandedHash<T, F> | null>(
-//     null,
-//   );
-//   const [provingError, setProvingError] = useState<string | null>(null);
-//   const [proof, setProof] = useState<ContractFunctionReturnType<
-//     T,
-//     AbiStateMutability,
-//     F
-//   > | null>(null);
+enum VlayerFlowActionKind {
+  WEB_PROOF_REQUESTED = "web_proof_requested",
+  WEB_PROOF_RECEIVED = "web_proof_received",
+  ZK_PROOF_REQUESTED = "zk_proof_requested",
+  ZK_PROOF_RECEIVED = "zk_proof_received",
+  VERIFICATION_REQUESTED = "verification_requested",
+  VERIFICATION_RECEIVED = "verification_received",
+}
 
-//   const vlayer = useMemo(
-//     () =>
-//       createVlayerClient({
-//         url: import.meta.env.VITE_PROVER_URL,
-//       }),
-//     [import.meta.env.VITE_PROVER_URL],
-//   );
+type VlayerFlowAction =
+  | {
+      kind: VlayerFlowActionKind.WEB_PROOF_REQUESTED;
+      payload: never;
+    }
+  | {
+      kind: VlayerFlowActionKind.WEB_PROOF_RECEIVED;
+      payload: {
+        webproof: unknown;
+      };
+    }
+  | {
+      kind: VlayerFlowActionKind.ZK_PROOF_REQUESTED;
+      payload: never;
+    }
+  | {
+      kind: VlayerFlowActionKind.ZK_PROOF_RECEIVED;
+      payload: {
+        zkProof: unknown;
+      };
+    }
+  | {
+      kind: VlayerFlowActionKind.VERIFICATION_REQUESTED;
+      payload: never;
+    }
+  | {
+      kind: VlayerFlowActionKind.VERIFICATION_RECEIVED;
+      payload: {
+        verification: unknown;
+      };
+    };
 
-//   const prove = async (
-//     args: ContractFunctionArgs<T, AbiStateMutability, F>,
-//   ) => {
-//     try {
-//       const hash = await vlayer.prove({
-//         address: addr,
-//         proverAbi: abi,
-//         functionName: func,
-//         args,
-//         chainId,
-//       });
-
-//       setProvingHash(hash);
-
-//       return hash;
-//     } catch (err) {
-//       setProvingError("Cannot start proving, check logs");
-//       console.error(err);
-//     }
-//   };
-
-//   useEffect(() => {
-//     if (provingHash) {
-//       const waitForProof = async () => {
-//         console.log("Waiting for proving result: ", provingHash);
-//         const result = await vlayer.waitForProvingResult(provingHash);
-//         setProof(result);
-//         console.log("Proof ready:", result);
-//       };
-
-//       waitForProof().catch((err) => {
-//         setProvingError("Cannot finalize proving, check logs");
-//         console.error(err);
-//       });
-//     }
-//   }, [provingHash]);
-
-//   return {
-//     prove,
-//     provingError,
-//     proof,
-//   };
+type VlayerFlowState = {
+  stage: VlayerFlowStage;
+  zkProof: unknown;
+  webProof: unknown;
+  verification: unknown;
 };
 
-export default useProver;
+const vlayerFlowReducer = (prev: VlayerFlowState, action: VlayerFlowAction) => {
+  return match(action)
+    .with({ kind: VlayerFlowActionKind.WEB_PROOF_REQUESTED }, ({}) => {
+      return {
+        ...prev,
+        stage: VlayerFlowStage.WEB_PROOF_REQUESTED,
+      };
+    })
+    .with({ kind: VlayerFlowActionKind.WEB_PROOF_RECEIVED }, ({ payload }) => {
+      return {
+        ...prev,
+        stage: VlayerFlowStage.WEB_PROOF_RECEIVED,
+        webProof: payload.webproof,
+      };
+    })
+    .with({ kind: VlayerFlowActionKind.ZK_PROOF_REQUESTED }, () => {
+      return {
+        ...prev,
+        stage: VlayerFlowStage.ZK_PROOF_REQUESTED,
+      };
+    })
+    .with({ kind: VlayerFlowActionKind.ZK_PROOF_RECEIVED }, ({ payload }) => {
+      return {
+        ...prev,
+        stage: VlayerFlowStage.ZK_PROOF_RECEIVED,
+        zkProof: payload.zkProof,
+      };
+    })
+    .with({ kind: VlayerFlowActionKind.VERIFICATION_REQUESTED }, () => {
+      return {
+        ...prev,
+        stage: VlayerFlowStage.VERIFICATION_REQUESTED,
+      };
+    })
+    .with(
+      { kind: VlayerFlowActionKind.VERIFICATION_RECEIVED },
+      ({ payload }) => {
+        return {
+          ...prev,
+          stage: VlayerFlowStage.VERIFICATION_RECEIVED,
+          verification: payload.verification,
+        };
+      },
+    )
+    .exhaustive();
+};
+
+export const useVlayerFlow = () => {
+  const [stade, dispatch] = useReducer(
+    (prev: VlayerFlowStage, next: VlayerFlowStage) => next,
+    VlayerFlowStage.INITIAL,
+  );
+
+  const { ethClient: walletClient } = createContext(
+    {
+      chainName: import.meta.env.VITE_CHAIN_NAME as string,
+      proverUrl: import.meta.env.VITE_PROVER_URL as string,
+      jsonRpcUrl: import.meta.env.VITE_JSON_RPC_URL as string,
+      privateKey: import.meta.env.VITE_PRIVATE_KEY as `0x${string}`,
+    },
+    import.meta.env.VITE_USE_WINDOW_ETHEREUM_TRANSPORT
+      ? customTransport(window.ethereum)
+      : undefined,
+  );
+  const webProofProvider = useMemo(
+    () =>
+      createExtensionWebProofProvider({
+        notaryUrl: import.meta.env.VITE_NOTARY_URL,
+        wsProxyUrl: import.meta.env.VITE_WS_PROXY_URL,
+      }),
+    [],
+  );
+  return {
+    webProofProvider,
+    walletClient,
+  };
+};
