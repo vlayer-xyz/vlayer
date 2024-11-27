@@ -1,3 +1,4 @@
+pub mod gas_meter;
 pub mod server;
 
 mod config;
