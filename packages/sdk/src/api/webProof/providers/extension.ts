@@ -10,8 +10,8 @@ import {
   type ExtensionMessage,
   ExtensionMessageType,
   type MessageToExtension,
-  WebProof,
   WebProofStep,
+  type PresentationJSON,
   ZkProvingStatus,
   assertUrl,
   assertUrlPattern,
@@ -121,8 +121,8 @@ class ExtensionWebProofProvider implements WebProofProvider {
 
   public async getWebProof(
     webProofRequest: WebProofRequestInput,
-  ): Promise<WebProof> {
-    return new Promise<WebProof>((resolve, reject) => {
+  ): Promise<PresentationJSON> {
+    return new Promise<PresentationJSON>((resolve, reject) => {
       chrome.runtime.sendMessage(EXTENSION_ID, {
         action: ExtensionAction.RequestWebProof,
         payload: {
@@ -164,7 +164,7 @@ export const validateWebProofRequest = (
 };
 
 export const createExtensionWebProofProvider = ({
-  notaryUrl = "https://notary.pse.dev/v0.1.0-alpha.5/",
+  notaryUrl = "https://notary.pse.dev/v0.1.0-alpha.7",
   wsProxyUrl = "wss://notary.pse.dev/proxy",
 }: WebProofProviderSetup = {}): WebProofProvider => {
   return new ExtensionWebProofProvider(notaryUrl, wsProxyUrl);

@@ -1,7 +1,7 @@
 import type { Branded } from "../utils";
-import type { WebProof } from "./webProof";
 import { URLPattern } from "urlpattern-polyfill";
 import urlRegex from "url-regex";
+import type { PresentationJSON as TLSNPresentationJSON } from "tlsn-js/src/types";
 
 export const EXTENSION_STEP = {
   expectUrl: "expectUrl",
@@ -44,8 +44,13 @@ export enum ExtensionMessageType {
   ProofProcessing = "ProofProcessing",
 }
 
+export type PresentationJSON = TLSNPresentationJSON;
+
 export type ExtensionMessage =
-  | { type: ExtensionMessageType.ProofDone; payload: { proof: WebProof } }
+  | {
+      type: ExtensionMessageType.ProofDone;
+      payload: { proof: PresentationJSON };
+    }
   | { type: ExtensionMessageType.ProofError; payload: { error: string } }
   | { type: ExtensionMessageType.RedirectBack }
   | { type: ExtensionMessageType.TabOpened; payload: { tabId: number } }

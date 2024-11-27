@@ -3,6 +3,7 @@ import { defineConfig } from "vite";
 import webExtension, { readJsonFile } from "vite-plugin-web-extension";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 import tsconfigPaths from "vite-tsconfig-paths";
+import { nodePolyfills } from 'vite-plugin-node-polyfills';
 
 function generateManifest() {
   const manifest = readJsonFile("src/manifest.json") as object;
@@ -41,15 +42,29 @@ export default defineConfig({
     }),
     viteStaticCopy({
       targets: [
+        // copying to src/hooks is require to run in dev mode
         {
-          src: `${__dirname}/../node_modules/tlsn-js/build/284ddec2a9dac2774b1d.wasm`,
-          dest: "src/templates/sidepanel",
+          src: `${__dirname}/../node_modules/tlsn-js/build/54ec0a0a2728a8a41850.wasm`,
+          dest: "src/hooks/",
         },
         {
-          src: `${__dirname}/../node_modules/tlsn-js/build/760.js`,
-          dest: "src/templates/sidepanel",
+          src: `${__dirname}/../node_modules/tlsn-js/build/112.js`,
+          dest: "src/hooks/",
+        },
+        // copying to assets is required for prod build
+        {
+          src: `${__dirname}/../node_modules/tlsn-js/build/54ec0a0a2728a8a41850.wasm`,
+          dest: "assets/",
+        },
+        {
+          src: `${__dirname}/../node_modules/tlsn-js/build/112.js`,
+          dest: "assets/",
         },
       ],
+    }),
+    nodePolyfills({
+      // buffer is required by tlsn-js internals
+      include: ['buffer']
     }),
   ],
 });

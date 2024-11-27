@@ -4,7 +4,7 @@ import {
   Branded,
   ExtensionMessageType,
   ExtensionMessage,
-  WebProof,
+  type PresentationJSON,
   WebProofStep,
   ZkProvingStatus,
 } from "../../../web-proof-commons";
@@ -43,7 +43,7 @@ export type GetWebProofArgs<
 export type WebProofProvider = {
   getWebProof: <T extends Abi, F extends ContractFunctionName<T>>(
     args: GetWebProofArgs<T, F>,
-  ) => Promise<WebProof>;
+  ) => Promise<PresentationJSON>;
 
   requestWebProof: <T extends Abi, F extends ContractFunctionName<T>>(
     args: GetWebProofArgs<T, F>,

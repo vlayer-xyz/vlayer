@@ -35,15 +35,17 @@
     "@types/chrome": "^0.0.271",
     "@types/ramda": "^0.30.2",
     "@vlayer/extension-hooks": "file:../extension-hooks",
+    "comlink": "^4.4.1",
     "framer-motion": "^11.11.1",
     "playwright": "^1.48.0",
     "ramda": "^0.30.1",
     "react": "^18.3.1",
     "react-dom": "^18.3.1",
-    "tlsn-js": "v0.1.0-alpha.5.4",
+    "tlsn-js": "v0.1.0-alpha.7.1",
     "ts-mockito": "^2.6.1",
     "ts-pattern": "^5.4.0",
     "usehooks-ts": "^3.1.0",
+    "vite-plugin-node-polyfills": "^0.22.0",
     "vite-tsconfig-paths": "^5.0.1"
   }
 }
