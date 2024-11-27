@@ -11,17 +11,17 @@ services:
       - "7047:7047"
     volumes:
       - ./notary-config:/root/.notary-server/config
-  anvil:
-    build:
-      dockerfile: ../anvil/Dockerfile
-    platform: linux/amd64
-    ports:
-      - "8545:8545"
-  vlayer:
-    build:
-      context: ../../
-      dockerfile: ./docker/vlayer/Dockerfile.nightly
-    command: "serve --proof fake --host 0.0.0.0 --rpc-url 31337:http://anvil:8545"
-    ports:
-      - "3000:3000"
+  # anvil:
+  #   build:
+  #     dockerfile: ../anvil/Dockerfile
+  #   platform: linux/amd64
+  #   ports:
+  #     - "8545:8545"
+  # vlayer:
+  #   build:
+  #     context: ../../
+  #     dockerfile: ./docker/vlayer/Dockerfile.nightly
+  #   command: "serve --proof fake --host 0.0.0.0 --rpc-url 31337:http://anvil:8545"
+  #   ports:
+  #     - "3000:3000"
 
