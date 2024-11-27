@@ -32,7 +32,7 @@ contract RegexTest is VTest {
         assertEq(captures[2], "world");
     }
 
-    function test_capture_reverts_when_no_match() public {
+    function test_captureRevertsWhenNoMatch() public {
         RegexWrapper regex = new RegexWrapper();
         callProver();
         try regex.capture("hello world", "^goodbye world$") {
@@ -42,7 +42,7 @@ contract RegexTest is VTest {
         }
     }
 
-    function test_capture_returns_empty_string_when_no_match_for_group() public {
+    function test_captureReturnsEmptyStringWhenNoMatchForGroup() public {
         RegexWrapper regex = new RegexWrapper();
         callProver();
         string[] memory captures = regex.capture("hello world", "^hello(,)? (world)$");
@@ -52,7 +52,7 @@ contract RegexTest is VTest {
         assertEq(captures[2], "world");
     }
 
-    function test_reverts_when_regex_does_not_start_with_start_line_symbol() public {
+    function test_revertsWhenRegexDoesNotStartWithStartLineSymbol() public {
         RegexWrapper regex = new RegexWrapper();
         callProver();
         try regex.matches("hello world", "hello.+$") {
