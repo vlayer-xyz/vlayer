@@ -64,12 +64,7 @@ mod seed_cache_db_with_trusted_data {
 
         let l1_block_storage = db.accounts.get(&L1_BLOCK).unwrap().storage.clone();
 
-        assert_eq!(db
-            .accounts
-            .get(&BASE_FEE_VAULT)
-            .unwrap()
-            .info
-            .balance, U256::ZERO);
+        assert_eq!(db.accounts.get(&BASE_FEE_VAULT).unwrap().info.balance, U256::ZERO);
         assert_eq!(l1_block_storage.get(&U256::from(1)).unwrap(), &U256::ZERO);
     }
 }
