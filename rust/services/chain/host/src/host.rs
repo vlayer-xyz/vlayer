@@ -11,7 +11,7 @@ use chain_db::{ChainDb, ChainTrie, ChainUpdate, Mode};
 use chain_guest::Input;
 use chain_guest_wrapper::GUEST_ELF;
 pub use config::HostConfig;
-pub use error::HostError;
+use error::HostError;
 use ethers::{
     providers::{Http, JsonRpcClient},
     types::BlockNumber as BlockTag,

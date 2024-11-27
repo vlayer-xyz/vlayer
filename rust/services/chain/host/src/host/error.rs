@@ -1,9 +1,9 @@
-use block_trie::BlockTrieError;
-use chain_db::ChainDbError;
+pub use block_trie::BlockTrieError;
+pub use chain_db::ChainDbError;
 use derivative::Derivative;
 use thiserror::Error;
 
-use super::{block_fetcher::BlockFetcherError, prover::Error as ProverError};
+pub use super::{block_fetcher::BlockFetcherError, prover::Error as ProverError};
 
 #[derive(Error, Debug, Derivative)]
 #[derivative(PartialEq, Eq)]

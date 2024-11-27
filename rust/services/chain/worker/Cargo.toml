@@ -8,9 +8,17 @@ alloy-primitives = { workspace = true }
 anyhow = { workspace = true }
 chain_host = { workspace = true }
 clap = { workspace = true, features = ["derive", "env"] }
+derivative = { workspace = true }
+derive-new = { workspace = true }
 dotenvy = { workspace = true }
 tokio = { workspace = true }
+tower = { workspace = true, features = ["retry", "timeout"] }
+tracing = { workspace = true }
 tracing-subscriber = { workspace = true, features = ["ansi"] }
+
+[dev-dependencies]
+bincode = { workspace = true }
+tokio = { workspace = true, features = ["time", "test-util"] }
 
 [lints]
 workspace = true
