@@ -13,7 +13,7 @@ pub const BASE_FEE_VAULT: Address = address!("4200000000000000000000000000000000
 // Contract collecting L1 fees
 pub const L1_FEE_VAULT: Address = address!("420000000000000000000000000000000000001a");
 
-type Storage = HashMap<U256, U256>;
+pub type Storage = HashMap<U256, U256>;
 
 lazy_static! {
     static ref L1_BLOCK_STORAGE: Storage = {
@@ -28,7 +28,9 @@ lazy_static! {
             (U256::from(7), U256::from(0)),
         ])
     };
+    pub static ref ACCOUNT_TO_STORAGE: HashMap<Address, Storage> = {
+        HashMap::from([
+            (L1_BLOCK, L1_BLOCK_STORAGE.clone()),
+        ])
+    };
 }
-
-pub static ADDRESS_TO_STORAGE: LazyLock<HashMap<Address, Storage>> =
-    LazyLock::new(|| HashMap::from([(L1_BLOCK, L1_BLOCK_STORAGE.clone())]));
