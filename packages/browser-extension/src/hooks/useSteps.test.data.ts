@@ -9,12 +9,12 @@ export const steps = [
     step: "startPage",
   },
   {
-    url: "https://example.com/expect",
+    url: "https://example.com/*/expect",
     label: "Expect URL",
     step: "expectUrl",
   },
   {
-    url: "https://example.com/notarize",
+    url: "(https|http)://example.com/notarize",
     label: "Notarize",
     step: "notarize",
   },
@@ -64,7 +64,7 @@ export const testData = [
       isZkProvingDone: false,
       history: [
         { url: "https://example.com/start", ready: true },
-        { url: "https://example.com/expect", ready: true },
+        { url: "https://example.com/path/expect", ready: true },
       ] as HistoryItem[],
       id: "Expect page visited and start page visited ",
     },
@@ -75,7 +75,7 @@ export const testData = [
       isZkProvingDone: false,
       history: [
         { url: "https://example.com/start", ready: true },
-        { url: "https://example.com/expect", ready: false },
+        { url: "https://example.com/path/expect", ready: false },
       ] as HistoryItem[],
       id: "Expect page visited ( no cookies) and start page visited ",
     },
@@ -86,7 +86,7 @@ export const testData = [
       isZkProvingDone: false,
       history: [
         { url: "https://example.com/start", ready: true },
-        { url: "https://example.com/expect", ready: true },
+        { url: "https://example.com/htap/expect", ready: true },
         { url: "https://example.com/notarize", ready: true },
       ] as HistoryItem[],
       id: "All pages visited but no proof",
@@ -98,8 +98,8 @@ export const testData = [
       isZkProvingDone: true,
       history: [
         { url: "https://example.com/start", ready: true },
-        { url: "https://example.com/expect", ready: true },
-        { url: "https://example.com/notarize", ready: true },
+        { url: "https://example.com/htap/expect", ready: true },
+        { url: "http://example.com/notarize", ready: true },
       ] as HistoryItem[],
       id: "All data in place",
     },

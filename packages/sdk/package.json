@@ -38,6 +38,7 @@
     "dotenv-flow": "^4.1.0",
     "postal-mime": "^2.3.2",
     "tsc-alias": "^1.8.10",
+    "url-regex": "^5.0.0",
     "viem": "2.21.0",
     "vite-tsconfig-paths": "^5.0.1"
   },

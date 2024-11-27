@@ -1,5 +1,7 @@
 import type { Branded } from "../utils";
 import type { WebProof } from "./webProof";
+import { URLPattern } from "urlpattern-polyfill";
+import urlRegex from "url-regex";
 
 export const EXTENSION_STEP = {
   expectUrl: "expectUrl",
@@ -67,9 +69,13 @@ export type WebProofStep =
   | WebProofStepExpectUrl
   | WebProofStepStartPage;
 
+export type UrlPattern = Branded<string, "UrlPattern">;
+
+export type Url = Branded<UrlPattern, "Url">;
+
 export type WebProofStepNotarize = Branded<
   {
-    url: string;
+    url: UrlPattern;
     method: string;
     label: string;
     step: typeof EXTENSION_STEP.notarize;
@@ -77,20 +83,60 @@ export type WebProofStepNotarize = Branded<
   "notarize"
 >;
 
+export type WebProofStepStartPage = Branded<
+  {
+    url: Url;
+    label: string;
+    step: typeof EXTENSION_STEP.startPage;
+  },
+  "startPage"
+>;
+
 export type WebProofStepExpectUrl = Branded<
   {
-    url: string;
+    url: UrlPattern;
     label: string;
     step: typeof EXTENSION_STEP.expectUrl;
   },
   "expectUrl"
 >;
 
-export type WebProofStepStartPage = Branded<
-  {
-    url: string;
-    label: string;
-    step: typeof EXTENSION_STEP.startPage;
-  },
-  "startPage"
->;
+export enum StepValidationErrors {
+  InvalidUrl = "InvalidUrl",
+  InvalidUrlPattern = "InvalidUrlPattern",
+}
+
+export enum StepValidationErrorMessage {
+  InvalidUrl = "Wrong url",
+  InvalidUrlPattern = "Wrong url pattern",
+}
+
+export class StepValidationError extends Error {
+  constructor(message: string, name: StepValidationErrors) {
+    super(message);
+    this.name = name;
+  }
+}
+
+export function assertUrl(url: string): asserts url is Url {
+  const isUrl = urlRegex({ strict: true }).test(url);
+  if (!isUrl) {
+    throw new StepValidationError(
+      `${StepValidationErrorMessage.InvalidUrl}: ${url}`,
+      StepValidationErrors.InvalidUrl,
+    );
+  }
+}
+
+export function assertUrlPattern(
+  urlPattern: string,
+): asserts urlPattern is UrlPattern {
+  try {
+    new URLPattern(urlPattern);
+  } catch {
+    throw new StepValidationError(
+      `${StepValidationErrorMessage.InvalidUrlPattern}: ${urlPattern} `,
+      StepValidationErrors.InvalidUrlPattern,
+    );
+  }
+}

@@ -25,7 +25,6 @@
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
-
   "type": "module",
   "workspaces": [
     "browser-extension/",
@@ -38,6 +37,8 @@
     "viem"
   ],
   "dependencies": {
+    "url-regex": "^5.0.0",
+    "urlpattern-polyfill": "^10.0.0",
     "vitest": "^2.1.4"
   }
 }

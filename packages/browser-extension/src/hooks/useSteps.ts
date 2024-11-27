@@ -1,49 +1,36 @@
 import { HistoryItem } from "../state/history";
 import { Step, StepStatus } from "../constants";
-import { WebProofStep } from "../web-proof-commons";
+import { UrlPattern, WebProofStep } from "../web-proof-commons";
 import { useProvingSessionConfig } from "hooks/useProvingSessionConfig.ts";
 import { useBrowsingHistory } from "hooks/useBrowsingHistory.ts";
 import { useZkProvingState } from "./useZkProvingState";
+import { URLPattern } from "urlpattern-polyfill";
 
-const isStartPageStepCompleted = (
+const isStepVisited = (
   browsingHistory: HistoryItem[],
-  step: { url: string },
+  step: { url: UrlPattern },
 ): boolean => {
-  // REFACTOR:  i would rename top level history to browsing to avoid history.history
   return !!browsingHistory.find((item: HistoryItem) => {
-    return item.url.startsWith(step.url) && item.ready;
+    return new URLPattern(step.url as string).test(item.url) && item.ready;
   });
+};
+
+const hasProof = (
+  _browsingHistory: HistoryItem[],
+  _step: { url: UrlPattern },
+  isZkProvingDone: boolean,
+) => {
+  return isZkProvingDone;
 };
 
 const isStartPageStepReady = () => true;
-
-const isExpectUrlStepCompleted = (
-  browsingHistory: HistoryItem[],
-  step: { url: string },
-): boolean => {
-  return !!browsingHistory.find((item: HistoryItem) => {
-    return item.url.startsWith(step.url) && item.ready;
-  });
-};
+const isStartPageStepCompleted = isStepVisited;
 
 const isExpectUrlStepReady = () => true;
+const isExpectUrlStepCompleted = isStepVisited;
 
-const isNotarizeStepReady = (
-  browsingHistory: HistoryItem[],
-  step: { url: string },
-): boolean => {
-  return !!browsingHistory.find((item: HistoryItem) => {
-    return item.url.startsWith(step.url) && item.ready;
-  });
-};
-
-const isNotarizeStepCompleted = (
-  _browsingHistory: HistoryItem[],
-  _step: { url: string },
-  hasProof: boolean,
-) => {
-  return hasProof;
-};
+const isNotarizeStepReady = isStepVisited;
+const isNotarizeStepCompleted = hasProof;
 
 const checkStepCompletion = {
   startPage: isStartPageStepCompleted,
@@ -55,6 +42,33 @@ const checkStepReadiness = {
   startPage: isStartPageStepReady,
   expectUrl: isExpectUrlStepReady,
   notarize: isNotarizeStepReady,
+};
+
+const calculateStepStatus = ({
+  hasUncompletedStep,
+  step,
+  history,
+  isZkProvingDone,
+}: {
+  hasUncompletedStep: boolean;
+  step: WebProofStep;
+  history: HistoryItem[];
+  isZkProvingDone: boolean;
+}): StepStatus => {
+  //after uncompleted step all steps can only by further no need to calculate anything
+  if (hasUncompletedStep) {
+    return StepStatus.Further;
+  }
+  // check if step is completed
+  if (checkStepCompletion[step.step](history, step, isZkProvingDone)) {
+    return StepStatus.Completed;
+  }
+  // check if step is ready
+  if (checkStepReadiness[step.step](history, step)) {
+    return StepStatus.Current;
+  }
+
+  return StepStatus.Further;
 };
 
 export const calculateSteps = ({
@@ -70,22 +84,17 @@ export const calculateSteps = ({
     const hasUncompletedStep =
       accumulator.length > 0 &&
       accumulator[accumulator.length - 1]?.status !== StepStatus.Completed;
+
     const mappedStep = {
       label: currentStep.label,
       link: currentStep.url,
       kind: currentStep.step,
-      // all steps after first uncompleted are further
-      status: hasUncompletedStep
-        ? StepStatus.Further
-        : checkStepCompletion[currentStep.step](
-              history,
-              currentStep,
-              isZkProvingDone,
-            )
-          ? StepStatus.Completed
-          : checkStepReadiness[currentStep.step](history, currentStep)
-            ? StepStatus.Current
-            : StepStatus.Further,
+      status: calculateStepStatus({
+        hasUncompletedStep,
+        step: currentStep,
+        history,
+        isZkProvingDone,
+      }),
     };
     return [...accumulator, mappedStep];
   }, [] as Step[]);
