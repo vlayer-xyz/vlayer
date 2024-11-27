@@ -1,4 +1,4 @@
-use std::{collections::HashMap, sync::LazyLock};
+use std::collections::HashMap;
 
 use alloy_primitives::{address, Address, U256};
 use lazy_static::lazy_static;
