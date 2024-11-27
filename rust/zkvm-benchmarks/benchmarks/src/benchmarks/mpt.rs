@@ -1,8 +1,7 @@
 use common::Hashable;
-use lazy_static::lazy_static;
 use mpt::MerkleTrie;
 
-use crate::{benchmarks::merge, Benchmark, Workload, WorkloadResult};
+use crate::{benchmarks::merge, Benchmark, WorkloadResult};
 
 mod empty {
 
@@ -28,12 +27,12 @@ mod empty {
         Ok(())
     }
 
-    lazy_static! {
-        pub static ref BENCHMARKS: Vec<Benchmark> = vec![
-            Benchmark::new("trie", trie as Workload, 47),
-            Benchmark::new("hash", hash as Workload, 122),
-            Benchmark::new("insert", insert as Workload, 1_279),
-        ];
+    pub fn benchmarks() -> Vec<Benchmark> {
+        vec![
+            Benchmark::new("trie", trie, 47),
+            Benchmark::new("hash", hash, 122),
+            Benchmark::new("insert", insert, 1_279),
+        ]
     }
 }
 
@@ -83,21 +82,16 @@ mod height_20 {
         Ok(())
     }
 
-    lazy_static! {
-        pub static ref BENCHMARKS: Vec<Benchmark> = vec![
-            Benchmark::new("trie", trie as Workload, 1_264_090),
-            Benchmark::new("insert_shallow", insert_shallow as Workload, 1_289_310),
-            Benchmark::new("insert_deep", insert_deep as Workload, 1_435_893),
-            Benchmark::new("hash", hash as Workload, 2_319_286),
-        ];
+    pub fn benchmarks() -> Vec<Benchmark> {
+        vec![
+            Benchmark::new("trie", trie, 1_264_090),
+            Benchmark::new("insert_shallow", insert_shallow, 1_289_310),
+            Benchmark::new("insert_deep", insert_deep, 1_435_893),
+            Benchmark::new("hash", hash, 2_319_286),
+        ]
     }
 }
 
-lazy_static! {
-    pub static ref BENCHMARKS: Vec<Benchmark> = {
-        merge([
-            ("empty", empty::BENCHMARKS.clone()),
-            ("height_20", height_20::BENCHMARKS.clone()),
-        ])
-    };
+pub fn benchmarks() -> Vec<Benchmark> {
+    merge([("empty", empty::benchmarks()), ("height_20", height_20::benchmarks())])
 }

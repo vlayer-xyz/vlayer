@@ -1,5 +1,3 @@
-use lazy_static::lazy_static;
-
 use crate::Benchmark;
 
 mod hash;
@@ -19,12 +17,10 @@ pub fn merge<Benchmarks: IntoIterator<Item = Benchmark>>(
         .collect()
 }
 
-lazy_static! {
-    pub static ref BENCHMARKS: Vec<Benchmark> = {
-        merge([
-            ("hash", hash::BENCHMARKS.clone()),
-            ("mpt", mpt::BENCHMARKS.clone()),
-            ("precompiles", precompiles::BENCHMARKS.clone()),
-        ])
-    };
+pub fn benchmarks() -> Vec<Benchmark> {
+    merge([
+        ("hash", hash::benchmarks()),
+        ("mpt", mpt::benchmarks()),
+        ("precompiles", precompiles::benchmarks()),
+    ])
 }

@@ -4208,6 +4208,7 @@ dependencies = [
  "call_precompiles",
  "common",
  "derive-new",
+ "derive_more",
  "email_proof",
  "lazy_static",
  "mpt",

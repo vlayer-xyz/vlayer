@@ -1,7 +1,6 @@
 use alloy_primitives::Bytes;
 use alloy_sol_types::SolValue;
 use call_precompiles::url_pattern::test;
-use lazy_static::lazy_static;
 
 use crate::{Benchmark, WorkloadResult};
 
@@ -56,8 +55,8 @@ fn wildcard_path_and_query_regex() -> WorkloadResult {
     )
 }
 
-lazy_static! {
-    pub static ref BENCHMARKS: Vec<Benchmark> = vec![
+pub fn benchmarks() -> Vec<Benchmark> {
+    vec![
         Benchmark::new("exact_match", exact_match, 4_010_000),
         Benchmark::new("exact_match_long_url", exact_match_long_url, 4_840_000),
         Benchmark::new("fragment", fragment, 4_020_000),
@@ -65,5 +64,5 @@ lazy_static! {
         Benchmark::new("regex_pathname", regex_pathname, 5_337_000),
         Benchmark::new("regex_for_query_params", regex_for_query_params, 4_120_000),
         Benchmark::new("wildcard_path_and_query_regex", wildcard_path_and_query_regex, 6_160_000),
-    ];
+    ]
 }
