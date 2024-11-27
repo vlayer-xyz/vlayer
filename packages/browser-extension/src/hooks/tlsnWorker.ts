@@ -1,7 +1,7 @@
-import * as Comlink from "comlink";
+import { expose } from "comlink";
 import init, { Prover, Presentation } from "tlsn-js";
 
-Comlink.expose({
+expose({
   init,
   Prover,
   Presentation,

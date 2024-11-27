@@ -44,7 +44,7 @@ interface TLSNWorker {
 }
 
 // tlsn-wasm needs to run in a worker
-const worker = new Worker(new URL("./worker.ts", import.meta.url), {
+const worker = new Worker(new URL("./tlsnWorker.ts", import.meta.url), {
   type: "module",
 });
 const { init, Prover, Presentation } = Comlink.wrap(
