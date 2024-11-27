@@ -7,8 +7,7 @@ import {Precompiles} from "./PrecompilesAddresses.sol";
 
 library URLPatternLib {
     function test(string memory source, string memory pattern) internal view returns (bool) {
-        (bool success, bytes memory returnData) =
-            Precompiles.URL_PATTERN_TEST.staticcall(abi.encode([source, pattern]));
+        (bool success, bytes memory returnData) = Precompiles.URL_PATTERN_TEST.staticcall(abi.encode([source, pattern]));
         Address.verifyCallResult(success, returnData);
 
         bool isMatch = abi.decode(returnData, (bool));

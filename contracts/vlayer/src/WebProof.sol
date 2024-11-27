@@ -30,8 +30,7 @@ library WebProofLib {
     }
 
     function recover(WebProof memory webProof, string memory dataUrl) internal view returns (Web memory) {
-        (bool success, bytes memory returnData) =
-            Precompiles.VERIFY_AND_PARSE.staticcall(bytes(webProof.webProofJson));
+        (bool success, bytes memory returnData) = Precompiles.VERIFY_AND_PARSE.staticcall(bytes(webProof.webProofJson));
 
         Address.verifyCallResult(success, returnData);
 
