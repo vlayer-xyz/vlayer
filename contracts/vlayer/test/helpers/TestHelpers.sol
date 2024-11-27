@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 
 import {console} from "forge-std-1.9.2/src/console.sol";
 
-import {RiscZeroMockVerifier} from "risc0-ethereum-1.0.0/src/test/RiscZeroMockVerifier.sol";
+import {RiscZeroMockVerifier} from "risc0-ethereum-1.1.4/src/test/RiscZeroMockVerifier.sol";
 
 import {CallAssumptions} from "../../src/CallAssumptions.sol";
 import {Proof, ProofLib} from "../../src/Proof.sol";
