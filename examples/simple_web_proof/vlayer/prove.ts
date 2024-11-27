@@ -1,7 +1,7 @@
 import { createVlayerClient } from "@vlayer/sdk";
 import proverSpec from "../out/WebProofProver.sol/WebProofProver";
 import verifierSpec from "../out/WebProofVerifier.sol/WebProofVerifier";
-import tls_proof from "./tls_proof.json";
+import presentation_json from "./presentation.json";
 import * as assert from "assert";
 import { encodePacked, isAddress, keccak256 } from "viem";
 
@@ -40,7 +40,7 @@ await testFailedProving();
 async function testSuccessProvingAndVerification() {
   console.log("Proving...");
 
-  const webProof = { tls_proof: tls_proof, notary_pub_key: notaryPubKey };
+  const webProof = { presentation_json, notary_pub_key: notaryPubKey };
 
   const hash = await vlayer.prove({
     address: prover,
@@ -104,7 +104,7 @@ async function testSuccessProvingAndVerification() {
 async function testFailedProving() {
   console.log("Proving...");
 
-  const wrongWebProof = { tls_proof: tls_proof, notary_pub_key: "wrong" };
+  const wrongWebProof = { presentation_json, notary_pub_key: "wrong" };
 
   try {
     const hash = await vlayer.prove({
@@ -125,7 +125,7 @@ async function testFailedProving() {
     assert.ok(error instanceof Error, `Invalid error returned: ${error}`);
     assert.equal(
       error.message,
-      "Error response: Host error: TravelCallExecutor error: EVM transact error: ASN.1 error: PEM error: PEM preamble contains invalid data (NUL byte) at line 1 column 22883",
+      "Error response: Host error: TravelCallExecutor error: EVM transact error: ASN.1 error: PEM error: PEM preamble contains invalid data (NUL byte) at line 1 column 14984",
       `Error with wrong message returned: ${error.message}`,
     );
     console.log("Proving failed as expected with message:", error.message);
