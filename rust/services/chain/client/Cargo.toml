@@ -9,6 +9,7 @@ async-trait = { workspace = true }
 chain_common = { workspace = true }
 derive-new = { workspace = true }
 parking_lot = { workspace = true }
+serde = { workspace = true }
 thiserror = { workspace = true }
 
 # RPC dependencies (disabled for guest)

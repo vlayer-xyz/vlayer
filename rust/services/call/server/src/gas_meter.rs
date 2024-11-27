@@ -1,6 +1,6 @@
 use derive_new::new;
 use serde::{Deserialize, Serialize};
-use server_utils::{RpcClient, RpcError};
+use server_utils::{RpcClient, RpcError, RpcMethod};
 
 use crate::handlers::v_call::types::CallHash;
 
@@ -10,6 +10,10 @@ struct AllocateGas {
     hash: CallHash,
     gas_limit: u64,
     time_to_live: u64,
+}
+
+impl RpcMethod for AllocateGas {
+    const NAME: &str = V_ALLOCATE_GAS;
 }
 
 #[derive(Serialize, Debug)]
@@ -28,6 +32,10 @@ struct RefundUnusedGas {
     gas_used: u64,
 }
 
+impl RpcMethod for RefundUnusedGas {
+    const NAME: &str = V_REFUND_UNUSED_GAS;
+}
+
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Config {
     pub url: String,
@@ -41,10 +49,11 @@ pub struct Client {
 }
 
 pub const V_ALLOCATE_GAS: &str = "v_allocateGas";
+pub const V_REFUND_UNUSED_GAS: &str = "v_refundUnusedGas";
 
 impl Client {
     pub fn new(url: &str, hash: CallHash, time_to_live: u64) -> Self {
-        let client = RpcClient::new(url, V_ALLOCATE_GAS);
+        let client = RpcClient::new(url);
         Self {
             client,
             hash,
@@ -54,7 +63,7 @@ impl Client {
 
     pub async fn allocate_gas(&self, gas_limit: u64) -> Result<(), RpcError> {
         let req = AllocateGas::new(self.hash, gas_limit, self.time_to_live);
-        let _resp = self.client.call(&req).await?;
+        let _resp = self.client.call(req).await?;
         Ok(())
     }
 }

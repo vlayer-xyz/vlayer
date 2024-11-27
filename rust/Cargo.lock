@@ -2177,6 +2177,7 @@ dependencies = [
  "derive-new",
  "mpt",
  "parking_lot",
+ "serde",
  "serde_json",
  "server_utils",
  "thiserror",

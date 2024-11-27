@@ -1,8 +1,9 @@
 use alloy_primitives::{BlockNumber, ChainId};
 use async_trait::async_trait;
 use chain_common::{ChainProof, RpcChainProof};
-use serde_json::json;
-use server_utils::RpcClient as RawRpcClient;
+use derive_new::new;
+use serde::Serialize;
+use server_utils::{RpcClient as RawRpcClient, RpcMethod};
 use tracing::info;
 
 use crate::{Client, Error};
@@ -14,9 +15,19 @@ pub struct RpcClient {
 
 impl RpcClient {
     pub fn new(base_url: impl AsRef<str>) -> Self {
-        let rpc_client = RawRpcClient::new(base_url.as_ref(), "v_chain");
+        let rpc_client = RawRpcClient::new(base_url.as_ref());
         Self { rpc_client }
     }
+}
+
+#[derive(new, Serialize)]
+struct GetChainProof {
+    chain_id: ChainId,
+    block_numbers: Vec<BlockNumber>,
+}
+
+impl RpcMethod for GetChainProof {
+    const NAME: &str = "v_chain";
 }
 
 #[async_trait]
@@ -32,12 +43,8 @@ impl Client for RpcClient {
             block_numbers.len()
         );
 
-        let params = json!({
-            "chain_id": chain_id,
-            "block_numbers": block_numbers.clone(),
-        });
-
-        let result_value = self.rpc_client.call(&params).await.map_err(Error::from)?;
+        let params = GetChainProof::new(chain_id, block_numbers.clone());
+        let result_value = self.rpc_client.call(params).await.map_err(Error::from)?;
 
         let rpc_chain_proof: RpcChainProof = serde_json::from_value(result_value)?;
         let chain_proof = rpc_chain_proof.try_into()?;
