@@ -11,7 +11,6 @@ mod benchmarks;
 type WorkloadResult = Result<(), ()>;
 
 trait Workload {
-    fn setup(&mut self) {}
     fn run(self: Box<Self>) -> WorkloadResult;
 }
 
@@ -93,8 +92,7 @@ impl Benchmark {
         }
     }
 
-    fn run(mut self) -> Result<BenchmarkResult, ()> {
-        self.workload.setup();
+    fn run(self) -> Result<BenchmarkResult, ()> {
         let start = env::cycle_count();
         self.workload.run()?;
         let end = env::cycle_count();

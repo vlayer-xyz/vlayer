@@ -4,6 +4,14 @@ mod hash;
 mod mpt;
 mod precompiles;
 
+#[macro_export]
+macro_rules! with_fixture {
+    ($fixture:expr, $callback:ident) => {{
+        let fixture = $fixture;
+        move || $callback(fixture)
+    }};
+}
+
 pub fn merge<Benchmarks: IntoIterator<Item = Benchmark>>(
     benchmarks: impl IntoIterator<Item = (&'static str, Benchmarks)>,
 ) -> Vec<Benchmark> {

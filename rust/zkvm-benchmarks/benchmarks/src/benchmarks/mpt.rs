@@ -1,31 +1,23 @@
 use common::Hashable;
 use mpt::MerkleTrie;
 
-use crate::{benchmarks::merge, Benchmark};
+use crate::{benchmarks::merge, with_fixture, Benchmark};
 
 mod empty {
-
     use super::*;
 
-    fn trie() {
-        MerkleTrie::new();
-    }
-
-    fn hash() {
-        let trie = MerkleTrie::new();
+    fn hash(trie: MerkleTrie) {
         trie.hash_slow();
     }
 
-    fn insert() {
-        let mut trie = MerkleTrie::new();
+    fn insert(mut trie: MerkleTrie) {
         trie.insert([0], [0; 32]).unwrap();
     }
 
     pub fn benchmarks() -> Vec<Benchmark> {
         vec![
-            Benchmark::new("trie", trie, 47),
-            Benchmark::new("hash", hash, 122),
-            Benchmark::new("insert", insert, 1_279),
+            Benchmark::new("hash", with_fixture!(MerkleTrie::new(), hash), 230),
+            Benchmark::new("insert", with_fixture!(MerkleTrie::new(), insert), 1_387),
         ]
     }
 }
@@ -64,30 +56,9 @@ mod height_20 {
 
     pub fn benchmarks() -> Vec<Benchmark> {
         vec![
-            Benchmark::new(
-                "insert_shallow",
-                {
-                    let trie = fixture();
-                    move || insert_shallow(trie)
-                },
-                27_662,
-            ),
-            Benchmark::new(
-                "insert_deep",
-                {
-                    let trie = fixture();
-                    move || insert_deep(trie)
-                },
-                174_654,
-            ),
-            Benchmark::new(
-                "hash",
-                {
-                    let trie = fixture();
-                    move || hash(trie)
-                },
-                1_057_548,
-            ),
+            Benchmark::new("insert_shallow", with_fixture!(fixture(), insert_shallow), 27_662),
+            Benchmark::new("insert_deep", with_fixture!(fixture(), insert_deep), 174_654),
+            Benchmark::new("hash", with_fixture!(fixture(), hash), 1_057_548),
         ]
     }
 }
