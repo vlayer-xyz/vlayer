@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.21;
 
 library AddressParser {
     function parseAddress(string memory addr) internal pure returns (address) {

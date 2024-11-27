@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.21;
 
 import {Prover} from "vlayer/Prover.sol";
 import {Web, WebProof, WebProofLib, WebLib} from "vlayer/WebProof.sol";

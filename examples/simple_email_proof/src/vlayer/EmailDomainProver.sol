@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.21;
 
 import {Strings} from "@openzeppelin-contracts-5.0.1/utils/Strings.sol";
 import {Proof} from "vlayer-0.1.0/Proof.sol";
