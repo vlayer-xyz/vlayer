@@ -32,8 +32,8 @@ fn insert_accounts_info<D>(db: &mut CacheDB<D>, accounts: &[Address])
 where
     D: DatabaseRef,
 {
-    for address in accounts {
-        db.insert_account_info(*address, Default::default());
+    for account in accounts {
+        db.insert_account_info(*account, Default::default());
     }
 }
 
@@ -42,9 +42,9 @@ where
     D: DatabaseRef,
     <D as DatabaseRef>::Error: Debug,
 {
-    for (&address, storage) in address_to_storage {
+    for (&account, storage) in address_to_storage {
         for (&key, &value) in storage {
-            db.insert_account_storage(address, key, value)
+            db.insert_account_storage(account, key, value)
                 .expect("failed to insert account storage");
         }
     }
