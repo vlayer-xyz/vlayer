@@ -21,7 +21,7 @@ contract WebProverTest is VTest {
         address account = vm.addr(1);
 
         callProver();
-        ( /*Proof memory _proof*/ , string memory screenName, address addr) = prover.main(webProof, account);
+        (, string memory screenName, address addr) = prover.main(webProof, account);
 
         assert(screenName.equal("wktr0"));
         assertEq(addr, account);
