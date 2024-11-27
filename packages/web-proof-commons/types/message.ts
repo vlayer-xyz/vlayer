@@ -71,7 +71,7 @@ export type WebProofStep =
 
 export type UrlPattern = Branded<string, "UrlPattern">;
 
-export type Url = Branded<string, "Url">;
+export type Url = Branded<UrlPattern, "Url">;
 
 export type WebProofStepNotarize = Branded<
   {

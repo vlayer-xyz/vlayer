@@ -1,6 +1,6 @@
 import { HistoryItem } from "../state/history";
 import { Step, StepStatus } from "../constants";
-import { Url, UrlPattern, WebProofStep } from "../web-proof-commons";
+import { UrlPattern, WebProofStep } from "../web-proof-commons";
 import { useProvingSessionConfig } from "hooks/useProvingSessionConfig.ts";
 import { useBrowsingHistory } from "hooks/useBrowsingHistory.ts";
 import { useZkProvingState } from "./useZkProvingState";
@@ -8,7 +8,7 @@ import { URLPattern } from "urlpattern-polyfill";
 
 const isStepVisited = (
   browsingHistory: HistoryItem[],
-  step: { url: Url | UrlPattern },
+  step: { url: UrlPattern },
 ): boolean => {
   return !!browsingHistory.find((item: HistoryItem) => {
     return new URLPattern(step.url as string).test(item.url) && item.ready;
@@ -17,7 +17,7 @@ const isStepVisited = (
 
 const hasProof = (
   _browsingHistory: HistoryItem[],
-  _step: { url: string | UrlPattern },
+  _step: { url: UrlPattern },
   isZkProvingDone: boolean,
 ) => {
   return isZkProvingDone;
