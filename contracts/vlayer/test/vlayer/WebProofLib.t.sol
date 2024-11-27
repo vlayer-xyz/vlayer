@@ -15,8 +15,7 @@ contract WebProofLibWrapper {
 contract WebProverTest is VTest {
     using WebProofLib for WebProof;
 
-    string public constant DATA_URL =
-        "https://api.x.com/1.1/account/settings.json";
+    string public constant DATA_URL = "https://api.x.com/1.1/account/settings.json";
 
     function test_verifiesWebProof() public {
         WebProof memory webProof = WebProof(vm.readFile("testdata/web_proof.json"));
