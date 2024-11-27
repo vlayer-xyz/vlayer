@@ -25,7 +25,7 @@ where
     <D as DatabaseRef>::Error: Debug,
 {
     insert_accounts_info(db, EMPTY_ACCOUNTS);
-    insert_accounts_storage(db, &ACCOUNT_TO_STORAGE.clone());
+    insert_account_storages(db, &ACCOUNT_TO_STORAGE.clone());
 }
 
 fn insert_accounts_info<D>(db: &mut CacheDB<D>, accounts: &[Address])
@@ -37,7 +37,7 @@ where
     }
 }
 
-fn insert_accounts_storage<D>(db: &mut CacheDB<D>, address_to_storage: &HashMap<Address, Storage>)
+fn insert_account_storages<D>(db: &mut CacheDB<D>, address_to_storage: &HashMap<Address, Storage>)
 where
     D: DatabaseRef,
     <D as DatabaseRef>::Error: Debug,
