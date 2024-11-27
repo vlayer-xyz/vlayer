@@ -194,7 +194,7 @@ mod time_travel {
     #[tokio::test(flavor = "multi_thread")]
     #[ignore = "Fails due to chain proofs issue"]
     async fn time_travel() -> anyhow::Result<()> {
-        let location: ExecutionLocation = (Chain::optimism_sepolia().id(), BlockTag::Latest).into();
+        let location: ExecutionLocation = (Chain::optimism_sepolia().id(), 20_064_547_u64).into();
         let call = Call::new(SIMPLE_TIME_TRAVEL, &AVERAGE_BALANCE_OF_CALL);
 
         let averageBalanceOfReturn {
