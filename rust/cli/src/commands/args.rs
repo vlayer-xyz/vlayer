@@ -60,7 +60,7 @@ pub(crate) enum TemplateOption {
     SimpleEmail,
     SimpleTeleport,
     SimpleTimeTravel,
-    WebProof,
+    SimpleWebProof,
 }
 
 #[derive(Clone, Debug, ValueEnum, Default, PartialEq, Eq)]
@@ -86,7 +86,7 @@ impl fmt::Display for TemplateOption {
             TemplateOption::SimpleEmail => write!(f, "simple_email_proof"),
             TemplateOption::SimpleTeleport => write!(f, "simple_teleport"),
             TemplateOption::SimpleTimeTravel => write!(f, "simple_time_travel"),
-            TemplateOption::WebProof => write!(f, "simple_web_proof"),
+            TemplateOption::SimpleWebProof => write!(f, "simple_web_proof"),
         }
     }
 }
