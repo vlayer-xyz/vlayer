@@ -81,7 +81,7 @@ mod tests {
 
         #[test]
         fn correct_url_extracted() {
-            let presentation_json = read_fixture("./testdata/presentation_json.json");
+            let presentation_json = read_fixture("./testdata/presentation.json");
             let presentation_json: PresentationJson =
                 serde_json::from_str(&presentation_json).unwrap();
 

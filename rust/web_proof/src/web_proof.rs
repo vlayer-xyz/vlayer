@@ -209,7 +209,7 @@ mod tests {
 
     #[test]
     fn deserialize_presentation() {
-        let presentation_json = read_fixture("./testdata/presentation_json.json");
+        let presentation_json = read_fixture("./testdata/presentation.json");
         let presentation_json: PresentationJson = serde_json::from_str(&presentation_json).unwrap();
 
         let presentation: Presentation = presentation_json.into();
