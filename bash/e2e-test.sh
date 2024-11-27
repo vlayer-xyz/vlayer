@@ -29,11 +29,6 @@ echo '::endgroup::'
 for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ; do
   example_name=$(basename "${example}")
 
-  if [[ "$example_name" == "simple_web_proof" ]]; then
-    echo "Skipping $example_name"
-    continue
-  fi
-
   if [[ "${PROVING_MODE}" = "prod" ]] && [[ ! "${EXAMPLES_RUN_IN_PROD_MODE[@]}" =~ "${example_name}" ]]; then
     echo "Skipping: ${example} - not running it in prod mode."
     continue
