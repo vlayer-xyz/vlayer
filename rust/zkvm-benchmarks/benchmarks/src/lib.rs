@@ -12,15 +12,16 @@ type WorkloadResult = Result<(), ()>;
 
 trait Workload {
     fn setup(&mut self) {}
-    fn run(&mut self) -> WorkloadResult;
+    fn run(self: Box<Self>) -> WorkloadResult;
 }
 
 impl<F> Workload for F
 where
-    F: FnMut() -> WorkloadResult,
+    F: FnOnce(),
 {
-    fn run(&mut self) -> WorkloadResult {
-        (self)()
+    fn run(self: Box<Self>) -> WorkloadResult {
+        (self)();
+        Ok(())
     }
 }
 

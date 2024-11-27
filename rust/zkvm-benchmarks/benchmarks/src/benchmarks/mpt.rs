@@ -1,30 +1,24 @@
 use common::Hashable;
 use mpt::MerkleTrie;
 
-use crate::{benchmarks::merge, Benchmark, WorkloadResult};
+use crate::{benchmarks::merge, Benchmark};
 
 mod empty {
 
     use super::*;
 
-    fn trie() -> WorkloadResult {
+    fn trie() {
         MerkleTrie::new();
-
-        Ok(())
     }
 
-    fn hash() -> WorkloadResult {
+    fn hash() {
         let trie = MerkleTrie::new();
         trie.hash_slow();
-
-        Ok(())
     }
 
-    fn insert() -> WorkloadResult {
+    fn insert() {
         let mut trie = MerkleTrie::new();
         trie.insert([0], [0; 32]).unwrap();
-
-        Ok(())
     }
 
     pub fn benchmarks() -> Vec<Benchmark> {
@@ -56,38 +50,44 @@ mod height_20 {
         trie
     }
 
-    fn trie() -> WorkloadResult {
-        fixture();
-
-        Ok(())
-    }
-
-    fn insert_shallow() -> WorkloadResult {
-        let mut trie = fixture();
+    fn insert_shallow(mut trie: MerkleTrie) {
         trie.insert([1], [0; 32]).unwrap();
-
-        Ok(())
     }
 
-    fn insert_deep() -> WorkloadResult {
-        let mut trie = fixture();
+    fn insert_deep(mut trie: MerkleTrie) {
         trie.insert(zeros(HEIGHT), [0; 32]).unwrap();
-
-        Ok(())
     }
 
-    fn hash() -> WorkloadResult {
-        fixture().hash_slow();
-
-        Ok(())
+    fn hash(trie: MerkleTrie) {
+        trie.hash_slow();
     }
 
     pub fn benchmarks() -> Vec<Benchmark> {
         vec![
-            Benchmark::new("trie", trie, 1_264_090),
-            Benchmark::new("insert_shallow", insert_shallow, 1_289_310),
-            Benchmark::new("insert_deep", insert_deep, 1_435_893),
-            Benchmark::new("hash", hash, 2_319_286),
+            Benchmark::new(
+                "insert_shallow",
+                {
+                    let trie = fixture();
+                    move || insert_shallow(trie)
+                },
+                27_662,
+            ),
+            Benchmark::new(
+                "insert_deep",
+                {
+                    let trie = fixture();
+                    move || insert_deep(trie)
+                },
+                174_654,
+            ),
+            Benchmark::new(
+                "hash",
+                {
+                    let trie = fixture();
+                    move || hash(trie)
+                },
+                1_057_548,
+            ),
         ]
     }
 }

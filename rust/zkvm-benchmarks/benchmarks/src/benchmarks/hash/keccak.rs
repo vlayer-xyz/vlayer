@@ -1,29 +1,21 @@
 use alloy_primitives::keccak256;
 
-use crate::{Benchmark, WorkloadResult};
+use crate::Benchmark;
 
-fn empty() -> WorkloadResult {
+fn empty() {
     keccak256([]);
-
-    Ok(())
 }
 
-fn one_block() -> WorkloadResult {
+fn one_block() {
     keccak256([0; 32]);
-
-    Ok(())
 }
 
-fn one_kb() -> WorkloadResult {
+fn one_kb() {
     keccak256([0; 1_024]);
-
-    Ok(())
 }
 
-fn eight_kb() -> WorkloadResult {
+fn eight_kb() {
     keccak256([0; 8_192]);
-
-    Ok(())
 }
 
 pub fn benchmarks() -> Vec<Benchmark> {

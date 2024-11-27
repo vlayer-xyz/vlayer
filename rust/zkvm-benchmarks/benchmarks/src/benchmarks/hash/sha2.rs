@@ -1,29 +1,21 @@
 use sha2::{Digest, Sha256};
 
-use crate::{Benchmark, WorkloadResult};
+use crate::Benchmark;
 
-fn empty() -> WorkloadResult {
+fn empty() {
     Sha256::digest([]);
-
-    Ok(())
 }
 
-fn one_block() -> WorkloadResult {
+fn one_block() {
     Sha256::digest([0; 32]);
-
-    Ok(())
 }
 
-fn one_kb() -> WorkloadResult {
+fn one_kb() {
     Sha256::digest([0; 1_024]);
-
-    Ok(())
 }
 
-fn eight_kb() -> WorkloadResult {
+fn eight_kb() {
     Sha256::digest([0; 8_192]);
-
-    Ok(())
 }
 
 pub fn benchmarks() -> Vec<Benchmark> {

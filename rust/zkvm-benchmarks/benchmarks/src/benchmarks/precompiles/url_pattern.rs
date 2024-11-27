@@ -2,19 +2,18 @@ use alloy_primitives::Bytes;
 use alloy_sol_types::SolValue;
 use call_precompiles::url_pattern::test;
 
-use crate::{Benchmark, WorkloadResult};
+use crate::Benchmark;
 
-fn benchmark(source: &str, pattern: &str) -> WorkloadResult {
+fn benchmark(source: &str, pattern: &str) {
     let calldata: Bytes = [source, pattern].abi_encode().into();
     let _ = test(&calldata, 100_000_000).expect("Test failed");
-    Ok(())
 }
 
-fn exact_match() -> WorkloadResult {
+fn exact_match() {
     benchmark("https://example.com/", "https://example.com/")
 }
 
-fn exact_match_long_url() -> WorkloadResult {
+fn exact_match_long_url() {
     benchmark(
         "https://example.com/very/long/path/with/many/segments/and/a/really/long/query/string\
         ?param1=value1&param2=very_long_value_2&param3=another_long_value&param4=yet_another_value\
@@ -29,26 +28,26 @@ fn exact_match_long_url() -> WorkloadResult {
     )
 }
 
-fn fragment() -> WorkloadResult {
+fn fragment() {
     benchmark("https://example.com/path#section", "https://example.com/*#*")
 }
 
-fn protocol_alternative() -> WorkloadResult {
+fn protocol_alternative() {
     benchmark("http://example.com/path", "(http|https)://example.com/path")
 }
 
-fn regex_pathname() -> WorkloadResult {
+fn regex_pathname() {
     benchmark("https://example.com/foo/bar", "https://example.com/foo/([^\\/]+?)")
 }
 
-fn regex_for_query_params() -> WorkloadResult {
+fn regex_for_query_params() {
     benchmark(
         "https://example.com/path/test?key1=value1&key2=value2",
         "https://example.com/*/test?key1=value1&key2=value2",
     )
 }
 
-fn wildcard_path_and_query_regex() -> WorkloadResult {
+fn wildcard_path_and_query_regex() {
     benchmark(
         "https://example.com/path/test?key1=value1&key2=value2",
         "https://example.com/*/test?(.*key2=value\\d+.*)",
