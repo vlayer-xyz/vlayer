@@ -4,7 +4,9 @@ use test_helpers::TestHelper;
 
 mod test_helpers;
 
+use call_server::gas_meter::Config as GasMeterConfig;
 use server_utils::{body_to_json, body_to_string};
+use test_helpers::gas_meter::ServerMock as GasMeterServerMock;
 
 mod server_tests {
 
@@ -132,8 +134,65 @@ mod server_tests {
         }
 
         #[tokio::test(flavor = "multi_thread")]
-        async fn success_simple_contract_call() {
+        async fn simple_contract_call_success() {
             let helper = TestHelper::default().await;
+            let call_data = helper
+                .contract
+                .sum(U256::from(1), U256::from(2))
+                .calldata()
+                .unwrap();
+
+            let req = json!({
+            "method": "v_call",
+            "params": [
+                {
+                    "to": helper.contract.address(),
+                    "data": call_data,
+                },
+                {
+                    "chain_id": DEFAULT_CHAIN_ID ,
+                    "gas_limit": DEFAULT_GAS_LIMIT,
+                }
+                ],
+                "id": 1,
+                "jsonrpc": "2.0",
+            });
+            let response = helper.post("/", &req).await;
+
+            assert_eq!(StatusCode::OK, response.status());
+            assert_json_include!(
+                expected: json!({
+                    "jsonrpc": "2.0",
+                    "id": 1,
+                    "result": {
+                        "evm_call_result": U256::from(3).encode_hex(),
+                        "proof": {
+                            "length": 160,
+                            "seal": {
+                                "verifierSelector": "0xdeafbeef",
+                                "mode": 1,
+                            },
+                            "callAssumptions": {
+                                "functionSelector": function_selector(&call_data),
+                                "proverContractAddress": helper.contract.address(),
+                            }
+                        },
+                    }
+                }),
+                actual: body_to_json(response.into_body()).await,
+            );
+        }
+
+        const DEFAULT_GAS_METER_TTL: u64 = 3600;
+
+        #[tokio::test(flavor = "multi_thread")]
+        async fn simple_with_gasmeter() {
+            let gas_meter_server_mock = GasMeterServerMock::start(json!({}), json!({})).await;
+            let mut helper = TestHelper::default().await;
+            helper.server_config.set_gas_meter_config(GasMeterConfig {
+                url: gas_meter_server_mock.url(),
+                time_to_live: DEFAULT_GAS_METER_TTL,
+            });
             let call_data = helper
                 .contract
                 .sum(U256::from(1), U256::from(2))
@@ -156,29 +215,7 @@ mod server_tests {
                 "jsonrpc": "2.0",
             });
             let response = helper.post("/", &req).await;
-
             assert_eq!(StatusCode::OK, response.status());
-            assert_json_include!(
-                expected: json!({
-                        "jsonrpc": "2.0",
-                        "id": 1,
-                        "result": {
-                            "evm_call_result": U256::from(3).encode_hex(),
-                            "proof": {
-                                "length": 160,
-                                "seal": {
-                                    "verifierSelector": "0xdeafbeef",
-                                    "mode": 1,
-                                },
-                                "callAssumptions": {
-                                    "functionSelector": function_selector(&call_data),
-                                    "proverContractAddress": helper.contract.address(),
-                                }
-                            },
-                        }
-                    }),
-                actual: body_to_json(response.into_body()).await,
-            );
         }
 
         #[tokio::test(flavor = "multi_thread")]

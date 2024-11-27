@@ -47,6 +47,10 @@ impl Config {
     pub fn gas_meter_config(&self) -> Option<GasMeterConfig> {
         self.gas_meter_config.clone()
     }
+
+    pub fn set_gas_meter_config(&mut self, gas_meter_config: GasMeterConfig) {
+        self.gas_meter_config = Some(gas_meter_config);
+    }
 }
 
 pub struct ConfigBuilder {
