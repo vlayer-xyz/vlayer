@@ -118,7 +118,7 @@ mod tests {
 
     use alloy_primitives::{address, b256, hex, U160};
     use alloy_rlp::RlpDecodable;
-    use mpt::MerkleTrie;
+    use mpt::KeccakMerkleTrie as MerkleTrie;
     use serde_json::{from_str, from_value, Value};
 
     use super::*;
