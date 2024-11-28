@@ -34,7 +34,7 @@ impl RpcMethod for RefundUnusedGas {
     const METHOD_NAME: &str = "v_refundUnusedGas";
 }
 
-#[derive(Debug, Clone, Deserialize, Serialize)]
+#[derive(new, Debug, Clone, Deserialize, Serialize)]
 pub struct Config {
     pub url: String,
     pub time_to_live: u64,
