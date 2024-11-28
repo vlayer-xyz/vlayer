@@ -42,7 +42,11 @@ impl ChainProofServerMock {
     ) -> Self {
         let mut mock_server = RpcServerMock::start().await;
         mock_server
-            .add_mock("v_chain", params, result, true, expected_calls)
+            .mock_method("v_chain", true)
+            .with_params(params)
+            .with_result(result)
+            .with_expected_calls(expected_calls)
+            .add()
             .await;
         ChainProofServerMock { mock_server }
     }

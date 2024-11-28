@@ -19,47 +19,16 @@ impl RpcServerMock {
         Self::new(mockito::Server::new_async().await, Vec::new())
     }
 
-    pub async fn add_mock(
-        &mut self,
-        method: impl AsRef<str>,
-        params: impl Serialize,
-        result: impl Serialize,
-        is_partial: bool,
-        expected_calls: usize,
-    ) {
-        let request_body = json!({
-            "id": 1,
-            "jsonrpc": "2.0",
-            "method": method.as_ref(),
-            "params": params,
-        });
-
-        let response_body = json!({
-            "jsonrpc": "2.0",
-            "result": result,
-            "id": 1
-        });
-
-        let mut mock = self
+    pub fn mock_method<'a>(
+        &'a mut self,
+        method_name: &'a str,
+        is_partial_match: bool,
+    ) -> RpcMockBuilder<'a> {
+        let mock = self
             .server
             .mock("POST", "/")
             .match_header("Content-Type", "application/json");
-
-        mock = mock.match_body(if is_partial {
-            Matcher::PartialJson(request_body.clone())
-        } else {
-            Matcher::Json(request_body)
-        });
-
-        mock = mock
-            .with_status(200)
-            .with_header("Content-Type", "application/json")
-            .with_body(response_body.to_string())
-            .expect(expected_calls)
-            .create_async()
-            .await;
-
-        self.mocks.push(mock);
+        RpcMockBuilder::new(self, method_name, is_partial_match, mock)
     }
 
     pub fn url(&self) -> String {
@@ -67,9 +36,54 @@ impl RpcServerMock {
     }
 
     pub fn assert(&self) {
-        if !self.mocks.iter().all(Mock::matched) {
-            panic!("wrong number of requests. expected 1");
+        for mock in &self.mocks {
+            mock.assert();
         }
+    }
+}
+
+#[derive(new)]
+pub struct RpcMockBuilder<'a> {
+    server: &'a mut RpcServerMock,
+    method_name: &'a str,
+    is_partial_match: bool,
+    mock: Mock,
+}
+
+impl<'a> RpcMockBuilder<'a> {
+    pub fn with_params(mut self, params: impl Serialize) -> Self {
+        let request_body = json!({
+            "id": 1,
+            "jsonrpc": "2.0",
+            "method": self.method_name,
+            "params": params,
+        });
+        self.mock = self.mock.match_body(if self.is_partial_match {
+            Matcher::PartialJson(request_body)
+        } else {
+            Matcher::Json(request_body)
+        });
+        self
+    }
+
+    pub fn with_result(mut self, result: impl Serialize) -> Self {
+        let response_body = json!({
+            "jsonrpc": "2.0",
+            "result": result,
+            "id": 1
+        });
+        self.mock = self.mock.with_body(response_body.to_string());
+        self
+    }
+
+    pub fn with_expected_calls(mut self, expected_calls: usize) -> Self {
+        self.mock = self.mock.expect(expected_calls);
+        self
+    }
+
+    pub async fn add(self) {
+        let mock = self.mock.create_async().await;
+        self.server.mocks.push(mock);
     }
 }
 
@@ -170,7 +184,10 @@ mod tests {
     ) -> RpcServerMock {
         let mut server = RpcServerMock::start().await;
         server
-            .add_mock(GetData::METHOD_NAME, params, response, is_partial, 1)
+            .mock_method(GetData::METHOD_NAME, is_partial)
+            .with_params(params)
+            .with_result(response)
+            .add()
             .await;
         server
     }
@@ -192,7 +209,7 @@ mod tests {
     }
 
     #[tokio::test]
-    #[should_panic(expected = "wrong number of requests. expected 1")]
+    #[should_panic(expected = "Expected 1 request(s) to:")]
     async fn mock_not_called_panics() {
         server_start(false, json!({}), json!({})).await.assert();
     }
