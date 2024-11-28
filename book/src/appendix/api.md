@@ -75,7 +75,8 @@ and the response:
     "jsonrpc": "2.0",
     "result": {
         "call_guest_id": "0x8400c1983ee247ec835e565f924e13103b7a6557efd25f6b899bf9ed0c7ca491",
-        "chain_guest_id": "0x9b330c5fda07d640226342a91272a661b9e51ad6713427777720bc26489dbc75"
+        "chain_guest_id": "0x9b330c5fda07d640226342a91272a661b9e51ad6713427777720bc26489dbc75",
+        "semver": "1.2.3-dev-20241231-ae03fe73"
     }
 }
 ```

@@ -25,6 +25,7 @@
   "devDependencies": {
     "@changesets/cli": "^2.27.7",
     "@types/bun": "latest",
+    "@types/semver": "^7.5.8",
     "abitype": "^1.0.6",
     "vitest": "^2.1.1",
     "vitest-fetch-mock": "^0.4.1"
@@ -37,6 +38,7 @@
     "dns-over-http-resolver": "^3.0.3",
     "dotenv-flow": "^4.1.0",
     "postal-mime": "^2.3.2",
+    "semver": "^7.6.3",
     "tsc-alias": "^1.8.10",
     "url-regex": "^5.0.0",
     "viem": "2.21.0",

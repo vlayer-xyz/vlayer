@@ -19,6 +19,7 @@ pub struct Config {
     verify_chain_proofs: bool,
     call_guest_elf: GuestElf,
     chain_guest_elf: GuestElf,
+    api_version: String,
     gas_meter_config: Option<GasMeterConfig>,
 }
 
@@ -33,6 +34,10 @@ impl Config {
 
     pub fn call_guest_id(&self) -> String {
         self.call_guest_elf.id.encode_hex_with_prefix()
+    }
+
+    pub fn api_version(&self) -> String {
+        self.api_version.to_string()
     }
 
     pub fn chain_guest_id(&self) -> String {
@@ -53,6 +58,7 @@ impl ConfigBuilder {
         chain_proof_url: impl ToString,
         call_guest_elf: GuestElf,
         chain_guest_elf: GuestElf,
+        api_version: String,
     ) -> Self {
         Self {
             config: Config {
@@ -64,6 +70,7 @@ impl ConfigBuilder {
                 proof_mode: ProofMode::Groth16,
                 max_request_size: DEFAULT_MAX_CALLDATA_SIZE,
                 verify_chain_proofs: false,
+                api_version,
                 gas_meter_config: None,
             },
         }
@@ -101,6 +108,11 @@ impl ConfigBuilder {
         self
     }
 
+    pub fn with_semver(mut self, semver: String) -> Self {
+        self.config.api_version = semver;
+        self
+    }
+
     pub fn with_gas_meter_config(mut self, gas_meter_config: GasMeterConfig) -> Self {
         self.config.gas_meter_config = Some(gas_meter_config);
         self
@@ -132,18 +144,20 @@ mod tests {
 
     #[test]
     fn local_testnet_rpc_url_always_there() {
-        let config = ConfigBuilder::new("", Default::default(), Default::default())
-            .with_rpc_mappings(vec![])
-            .build();
+        let config =
+            ConfigBuilder::new("", Default::default(), Default::default(), Default::default())
+                .with_rpc_mappings(vec![])
+                .build();
 
         assert_eq!(config.rpc_urls.get(&TEST_CHAIN_ID).unwrap(), "http://localhost:8545");
     }
 
     #[test]
     fn local_testnet_rpc_url_can_be_overwritten() {
-        let config = ConfigBuilder::new("", Default::default(), Default::default())
-            .with_rpc_mappings(vec![(TEST_CHAIN_ID, "NEW".to_string())])
-            .build();
+        let config =
+            ConfigBuilder::new("", Default::default(), Default::default(), Default::default())
+                .with_rpc_mappings(vec![(TEST_CHAIN_ID, "NEW".to_string())])
+                .build();
 
         assert_eq!(config.rpc_urls.get(&TEST_CHAIN_ID).unwrap(), "NEW");
     }
@@ -152,7 +166,7 @@ mod tests {
     fn correctly_formats_guest_id() {
         let call_elf = GuestElf::new([0; 8], &[]);
         let chain_elf = GuestElf::new([1; 8], &[]);
-        let config = ConfigBuilder::new("", call_elf, chain_elf).build();
+        let config = ConfigBuilder::new("", call_elf, chain_elf, "1.2.3".into()).build();
 
         assert_eq!(
             config.call_guest_id(),
@@ -162,5 +176,6 @@ mod tests {
             config.chain_guest_id(),
             "0x0100000001000000010000000100000001000000010000000100000001000000"
         );
+        assert_eq!(config.api_version(), "1.2.3".to_string());
     }
 }
