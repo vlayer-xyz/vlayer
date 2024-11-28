@@ -62,13 +62,7 @@ mod seed_cache_db_with_trusted_data {
         let mut db = CacheDB::new(EmptyDB::default());
         seed_cache_db_with_trusted_data(&mut db);
 
-        let base_fee_vault_balance = db
-            .accounts
-            .get(&BASE_FEE_VAULT)
-            .unwrap()
-            .info
-            .balance
-            .clone();
+        let base_fee_vault_balance = db.accounts.get(&BASE_FEE_VAULT).unwrap().info.balance;
 
         let l1_block_storage = db.accounts.get(&L1_BLOCK).unwrap().storage.clone();
         let latest_l1_block = l1_block_storage.get(&U256::from(1)).unwrap();
