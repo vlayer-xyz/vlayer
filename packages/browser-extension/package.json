@@ -44,6 +44,7 @@
     "tlsn-js": "v0.1.0-alpha.7.1",
     "ts-mockito": "^2.6.1",
     "ts-pattern": "^5.4.0",
+    "urlpattern-polyfill": "^10.0.0",
     "usehooks-ts": "^3.1.0",
     "vite-plugin-node-polyfills": "^0.22.0",
     "vite-tsconfig-paths": "^5.0.1"
