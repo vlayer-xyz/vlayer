@@ -169,7 +169,7 @@ jobs:
         run: |
           NEW_PATH=$(realpath ./call_guest_replacement/risc0_call_guest)
           echo "Replacing the elf binary path to: ${NEW_PATH}"
-          sed -i "s|<ELF_PATH>|${NEW_PATH}|" ./call_guest_replacement/methods.rs
+          sed -i.bak "s|<ELF_PATH>|${NEW_PATH}|" ./call_guest_replacement/methods.rs
 
       - name: "Build binaries"
         env:
