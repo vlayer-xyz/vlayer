@@ -1,28 +1,10 @@
-mod config;
-mod error;
-mod handlers;
-mod server;
-mod trace;
-
 use std::{net::SocketAddr, path::PathBuf};
 
 use chain_db::{ChainDb, Mode};
+use chain_guest_wrapper::GUEST_ELF;
+use chain_server_lib::{init_tracing, serve, ServerConfig};
 use clap::Parser;
-use config::ServerConfig;
 use dotenvy::dotenv;
-use server::server;
-use tokio::net::TcpListener;
-use trace::init_tracing;
-use tracing::info;
-
-pub async fn serve(config: ServerConfig, db: ChainDb) -> anyhow::Result<()> {
-    let listener = TcpListener::bind(config.listen_addr).await?;
-
-    info!("Listening on {}", listener.local_addr()?);
-    axum::serve(listener, server(db)).await?;
-
-    Ok(())
-}
 
 #[derive(Parser)]
 #[command(version)]
@@ -53,7 +35,7 @@ async fn main() -> anyhow::Result<()> {
 
     let cli = Cli::parse();
     let config = ServerConfig::new(cli.listen_addr);
-    let db = ChainDb::mdbx(cli.db_path, Mode::ReadOnly)?;
+    let db = ChainDb::mdbx(cli.db_path, Mode::ReadOnly, GUEST_ELF.clone())?;
 
     serve(config, db).await?;
 

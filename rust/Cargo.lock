@@ -2215,7 +2215,6 @@ dependencies = [
  "block_trie",
  "bytes",
  "chain_common",
- "chain_guest_wrapper",
  "common",
  "derivative",
  "derive-new",
@@ -2265,6 +2264,7 @@ dependencies = [
  "chain_guest",
  "chain_guest_wrapper",
  "chain_test_utils",
+ "common",
  "derivative",
  "derive-new",
  "ethers",
@@ -2285,6 +2285,19 @@ dependencies = [
 name = "chain_server"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
+ "chain_db",
+ "chain_guest_wrapper",
+ "chain_server_lib",
+ "clap",
+ "dotenvy",
+ "tokio",
+]
+
+[[package]]
+name = "chain_server_lib"
+version = "0.1.0"
+dependencies = [
  "alloy-primitives",
  "anyhow",
  "axum",
@@ -2292,9 +2305,7 @@ dependencies = [
  "bincode",
  "chain_common",
  "chain_db",
- "clap",
  "common",
- "dotenvy",
  "lazy_static",
  "mpt",
  "parking_lot",
@@ -6801,7 +6812,6 @@ dependencies = [
  "bytemuck",
  "bytes",
  "chain_common",
- "chain_guest_wrapper",
  "common",
  "lazy_static",
  "risc0-zkvm",
@@ -11659,6 +11669,7 @@ dependencies = [
  "alloy-primitives",
  "anyhow",
  "bincode",
+ "chain_guest_wrapper",
  "chain_host",
  "clap",
  "derivative",

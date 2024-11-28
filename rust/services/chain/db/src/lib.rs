@@ -9,7 +9,7 @@ use alloy_primitives::{keccak256, BlockNumber, ChainId, B256};
 use alloy_rlp::{Decodable, RlpDecodable, RlpEncodable};
 use bytes::Bytes;
 use chain_common::ChainProofReceipt;
-use chain_trie::UnverifiedChainTrie;
+use chain_trie::{verify_chain_trie, UnverifiedChainTrie};
 use derive_more::Debug;
 use key_value::{Database, InMemoryDatabase, Mdbx, ReadTx, ReadWriteTx, WriteTx};
 use proof_builder::{mpt_from_proofs, MerkleProofBuilder, ProofResult};
@@ -22,7 +22,7 @@ mod proof_builder;
 mod tests;
 
 pub use chain_trie::ChainTrie;
-use common::Hashable;
+use common::{GuestElf, Hashable};
 pub use db_node::DbNode;
 pub use error::{ChainDbError, ChainDbResult};
 pub use proof_builder::MerkleProof;
@@ -122,28 +122,34 @@ pub enum Mode {
 pub struct ChainDb {
     db: DB,
     mode: Mode,
+    elf: GuestElf,
 }
 
 impl ChainDb {
-    pub fn in_memory() -> Self {
+    pub fn in_memory(elf: GuestElf) -> Self {
         let db = InMemoryDatabase::new();
         let mode = Mode::ReadWrite;
-        Self::new(db, mode)
+        Self::new(db, mode, elf)
     }
 
-    pub fn mdbx(path: impl AsRef<Path>, mode: Mode) -> ChainDbResult<Self> {
+    pub fn mdbx(path: impl AsRef<Path>, mode: Mode, elf: GuestElf) -> ChainDbResult<Self> {
         let mut db = Mdbx::open(path)?;
         let mut tx = db.begin_rw()?;
         tx.create_table(NODES)?;
         tx.create_table(CHAINS)?;
         Box::new(tx).commit()?;
-        Ok(Self::new(db, mode))
+        Ok(Self::new(db, mode, elf))
     }
 
-    fn new(db: impl for<'a> Database<'a> + Send + Sync + 'static, mode: Mode) -> Self {
+    fn new(
+        db: impl for<'a> Database<'a> + Send + Sync + 'static,
+        mode: Mode,
+        elf: GuestElf,
+    ) -> Self {
         Self {
             db: Box::new(db),
             mode,
+            elf,
         }
     }
 
@@ -199,7 +205,7 @@ impl ChainDb {
     pub fn get_chain_trie(&self, chain_id: ChainId) -> ChainDbResult<Option<ChainTrie>> {
         Ok(self
             .get_chain_trie_inner(chain_id)?
-            .map(TryFrom::try_from) // Verifies ZK proof
+            .map(|unverified| verify_chain_trie(unverified, &self.elf)) // Verifies ZK proof
             .transpose()?)
     }
 

@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 alloy-primitives = { workspace = true }
 anyhow = { workspace = true }
+chain_guest_wrapper = { workspace = true }
 chain_host = { workspace = true }
 clap = { workspace = true, features = ["derive", "env"] }
 derivative = { workspace = true }

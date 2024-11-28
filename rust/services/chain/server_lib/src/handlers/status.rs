@@ -43,6 +43,7 @@ pub async fn v_sync_status(
 mod tests {
 
     use chain_db::ChainUpdate;
+    use common::GuestElf;
     use u64_range::NonEmptyRange;
 
     use super::*;
@@ -50,7 +51,7 @@ mod tests {
     #[tokio::test]
     async fn empty_db() {
         let params = Params { chain_id: 1 };
-        let chain_db = Arc::new(RwLock::new(ChainDb::in_memory()));
+        let chain_db = Arc::new(RwLock::new(ChainDb::in_memory(GuestElf::default())));
         assert_eq!(
             v_sync_status(chain_db, params).await.unwrap_err(),
             AppError::UnsupportedChainId(1)
@@ -60,7 +61,7 @@ mod tests {
     #[tokio::test]
     async fn single_block() {
         let params = Params { chain_id: 1 };
-        let chain_db = Arc::new(RwLock::new(ChainDb::in_memory()));
+        let chain_db = Arc::new(RwLock::new(ChainDb::in_memory(GuestElf::default())));
         let chain_info = ChainInfo::new(
             NonEmptyRange::from_single_value(0),
             Default::default(),

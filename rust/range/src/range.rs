@@ -49,7 +49,7 @@ impl From<NonEmptyRange> for Range {
 
 impl PartialEq<RangeInclusive<u64>> for Range {
     fn eq(&self, other: &RangeInclusive<u64>) -> bool {
-        self.0.map_or(false, |range| range == other)
+        self.0.is_some_and(|range| range == other)
     }
 }
 

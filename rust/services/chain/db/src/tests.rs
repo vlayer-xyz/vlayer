@@ -9,7 +9,7 @@ use risc0_zkvm::{sha::Digest, FakeReceipt, InnerReceipt, MaybePruned, Receipt};
 use super::*;
 
 fn get_test_db() -> ChainDb {
-    ChainDb::in_memory()
+    ChainDb::in_memory(GuestElf::default())
 }
 
 fn insert_node(db: &mut ChainDb, node_rlp: &Bytes) {
@@ -68,7 +68,7 @@ fn fake_proof() -> Bytes {
 
 #[test]
 fn read_only_error_on_write() -> Result<()> {
-    let mut db = ChainDb::new(InMemoryDatabase::new(), Mode::ReadOnly);
+    let mut db = ChainDb::new(InMemoryDatabase::new(), Mode::ReadOnly, GuestElf::default());
     let res = db.begin_rw();
     // Not using .unwrap_err() because res is not Debug
     assert!(res.is_err_and(|e| e == ChainDbError::ReadOnly));

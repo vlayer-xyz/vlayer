@@ -2,7 +2,7 @@ use std::result;
 
 use chain_common::ChainProofReceipt;
 use chain_guest::Input;
-use chain_guest_wrapper::GUEST_ELF;
+use common::GuestElf;
 use host_utils::{ProofMode, Prover as Risc0Prover};
 use risc0_zkvm::{ExecutorEnv, ProveInfo};
 use thiserror::Error;
@@ -19,11 +19,17 @@ pub enum Error {
 type Result<T> = result::Result<T, Error>;
 
 #[derive(Debug, Clone, Default)]
-pub struct Prover(Risc0Prover);
+pub struct Prover {
+    inner: Risc0Prover,
+    elf: GuestElf,
+}
 
 impl Prover {
-    pub const fn new(proof_mode: ProofMode) -> Self {
-        Self(Risc0Prover::new(proof_mode))
+    pub const fn new(proof_mode: ProofMode, elf: GuestElf) -> Self {
+        Self {
+            inner: Risc0Prover::new(proof_mode),
+            elf,
+        }
     }
 
     /// Wrapper around Risc0Prover which specifies the chain guest ELF and accepts the previous proof
@@ -37,8 +43,8 @@ impl Prover {
             .map_err(|err| Error::ExecutorEnvBuilder(err.to_string()))?;
 
         let ProveInfo { receipt, .. } = self
-            .0
-            .prove(executor_env, &GUEST_ELF.elf)
+            .inner
+            .prove(executor_env, &self.elf.elf)
             .map_err(|err| Error::Prover(err.to_string()))?;
         Ok(receipt.into())
     }

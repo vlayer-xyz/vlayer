@@ -3,8 +3,7 @@ use block_header::EvmBlockHeader;
 use block_trie::BlockTrie;
 use bytes::Bytes;
 use chain_common::RpcChainProof;
-use chain_guest_wrapper::GUEST_ELF;
-use common::Hashable;
+use common::{GuestElf, Hashable};
 use lazy_static::lazy_static;
 use risc0_zkvm::{serde::to_vec, FakeReceipt, Receipt, ReceiptClaim};
 use serde::Serialize;
@@ -14,6 +13,8 @@ lazy_static! {
     pub static ref EMPTY_PROOF_RESPONSE: Value =
         serde_json::to_value(RpcChainProof::default()).unwrap();
 }
+
+const GUEST_ELF: GuestElf = GuestElf::default();
 
 pub fn fake_proof_result(block_header: Box<dyn EvmBlockHeader>) -> Value {
     let block_trie = BlockTrie::init(block_header).unwrap();

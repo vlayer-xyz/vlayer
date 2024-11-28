@@ -1,12 +1,13 @@
 use axum::http::StatusCode;
 use chain_db::ChainDb;
-use chain_server::server;
+use chain_server_lib::server;
+use common::GuestElf;
 use serde_json::json;
 use server_utils::{body_to_json, post};
 
 #[tokio::test]
 async fn http_not_found() {
-    let db = ChainDb::in_memory();
+    let db = ChainDb::in_memory(GuestElf::default());
     let app = server(db);
     let empty_body = json!({});
     let response = post(app, "/non-existent", &empty_body).await;
@@ -15,7 +16,7 @@ async fn http_not_found() {
 
 #[tokio::test]
 async fn method_not_found() {
-    let db = ChainDb::in_memory();
+    let db = ChainDb::in_memory(GuestElf::default());
     let app = server(db);
     let req = json!({
         "jsonrpc": "2.0",
@@ -42,7 +43,7 @@ async fn method_not_found() {
 
 #[tokio::test]
 async fn method_missing() {
-    let db = ChainDb::in_memory();
+    let db = ChainDb::in_memory(GuestElf::default());
     let app = server(db);
     let req = json!({
         "jsonrpc": "2.0",
@@ -72,7 +73,7 @@ mod v_chain {
     #[tokio::test]
     #[ignore]
     async fn success_dummy() {
-        let db = ChainDb::in_memory();
+        let db = ChainDb::in_memory(GuestElf::default());
         let app = server(db);
         let req = json!({
             "jsonrpc": "2.0",
@@ -101,7 +102,7 @@ mod v_chain {
 
     #[tokio::test]
     async fn no_block_numbers_error() {
-        let db = ChainDb::in_memory();
+        let db = ChainDb::in_memory(GuestElf::default());
         let app = server(db);
         let req = json!({
             "jsonrpc": "2.0",
@@ -131,7 +132,7 @@ mod v_chain {
 
     #[tokio::test]
     async fn field_validation_error() {
-        let db = ChainDb::in_memory();
+        let db = ChainDb::in_memory(GuestElf::default());
         let app = server(db);
 
         let valid_number = 42;

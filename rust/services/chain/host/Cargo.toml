@@ -11,8 +11,8 @@ block_trie = { workspace = true }
 chain_common = { workspace = true }
 chain_db = { workspace = true }
 chain_guest = { workspace = true }
-chain_guest_wrapper = { workspace = true }
 chain_test_utils = { workspace = true }
+common = { workspace = true }
 derivative = { workspace = true }
 derive-new ={ workspace = true }
 ethers = { workspace = true }
@@ -29,6 +29,7 @@ url = { workspace = true }
 
 [dev-dependencies]
 alloy-rlp = { workspace = true, features = ["arrayvec"] }
+chain_guest_wrapper = { workspace = true }
 serde_json = { workspace = true }
 
 [lints]
