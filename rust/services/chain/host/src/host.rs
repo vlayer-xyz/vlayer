@@ -153,9 +153,10 @@ where
 #[cfg(test)]
 mod tests {
     use alloy_primitives::BlockNumber;
+    use chain_guest_wrapper::GUEST_ELF;
     use chain_test_utils::mock_provider;
-    use common::GuestElf;
     use ethers::providers::{MockProvider, Provider};
+    use host_utils::ProofMode;
     use lazy_static::lazy_static;
 
     use super::*;
@@ -177,16 +178,16 @@ mod tests {
     }
 
     fn test_db() -> ChainDb {
-        ChainDb::in_memory(GuestElf::default())
+        ChainDb::in_memory(GUEST_ELF.clone())
     }
 
     fn create_host(db: ChainDb, provider: Provider<MockProvider>) -> Host<MockProvider> {
         Host::from_parts(
-            Prover::default(),
+            Prover::new(ProofMode::Fake, GUEST_ELF.clone()),
             BlockFetcher::from_provider(provider),
             db,
             1,
-            GuestElf::default(),
+            GUEST_ELF.clone(),
             PREPEND_STRATEGY.clone(),
             APPEND_STRATEGY.clone(),
         )

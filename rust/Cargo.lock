@@ -2262,6 +2262,7 @@ dependencies = [
  "chain_common",
  "chain_db",
  "chain_guest",
+ "chain_guest_wrapper",
  "chain_test_utils",
  "common",
  "derivative",

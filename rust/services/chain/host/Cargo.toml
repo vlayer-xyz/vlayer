@@ -30,6 +30,7 @@ url = { workspace = true }
 [dev-dependencies]
 alloy-rlp = { workspace = true, features = ["arrayvec"] }
 serde_json = { workspace = true }
+chain_guest_wrapper = { workspace = true }
 
 [lints]
 workspace = true
