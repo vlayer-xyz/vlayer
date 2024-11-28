@@ -3,7 +3,7 @@ use std::sync::{Arc, RwLock};
 use alloy_primitives::{Address, Bytes, B256, U256};
 use anyhow::Context;
 use block_header::EvmBlockHeader;
-use mpt::MerkleTrie;
+use mpt::KeccakMerkleTrie as MerkleTrie;
 use provider::{BlockingProvider, EIP1186Proof};
 use revm::{
     primitives::{AccountInfo, Bytecode, HashMap, HashSet},

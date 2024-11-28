@@ -1,7 +1,11 @@
+use std::marker::PhantomData;
+
 use alloy_primitives::{Bytes, B256};
 use alloy_trie::EMPTY_ROOT_HASH;
 use common::Hashable;
+use derivative::Derivative;
 use serde::{Deserialize, Serialize};
+use sha3::Digest;
 use thiserror::Error;
 
 use crate::{hash, key_nibbles::KeyNibbles};
@@ -11,17 +15,23 @@ pub mod insert;
 pub mod rlp;
 pub mod size;
 
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
-pub enum Node {
+#[derive(Debug, Default, Serialize, Deserialize, Derivative)]
+#[derivative(Clone(bound = ""), PartialEq(bound = ""), Eq(bound = ""))]
+#[serde(bound = "")]
+pub enum Node<D> {
     #[default]
     Null,
     Leaf(KeyNibbles, Bytes),
-    Extension(KeyNibbles, Box<Node>),
-    Branch([Option<Box<Node>>; 16], Option<Bytes>),
+    Extension(KeyNibbles, Box<Node<D>>),
+    Branch([Option<Box<Node<D>>>; 16], Option<Bytes>),
     Digest(B256),
+    _Phantom(PhantomData<D>),
 }
 
-impl Node {
+impl<D> Node<D>
+where
+    D: Digest,
+{
     /// Returns a reference to the value corresponding to the key.
     /// It panics when neither inclusion nor exclusion of the key can be shown in the sparse trie.
     pub(crate) fn get(&self, key_nibs: impl AsRef<[u8]>) -> Option<&[u8]> {
@@ -42,20 +52,26 @@ impl Node {
                 }
             }
             Node::Digest(_) => panic!("Attempted to access unresolved node"),
+            Node::_Phantom(_) => unreachable!(),
         }
     }
 }
 
-impl Hashable for Node {
+impl<D> Hashable for Node<D>
+where
+    D: Digest,
+{
     fn hash_slow(&self) -> B256 {
         // compute the keccak hash of the RLP encoded root node
         match self {
             Node::Null => EMPTY_ROOT_HASH,
             Node::Digest(digest) => *digest,
-            node => hash(node.rlp_encoded()),
+            node => hash::<D>(node.rlp_encoded()),
         }
     }
 }
+
+pub type KeccakNode = Node<sha3::Keccak256>;
 
 #[derive(Error, Debug, PartialEq)]
 pub enum NodeError {

@@ -1,4 +1,4 @@
-use mpt::MerkleTrie;
+use mpt::KeccakMerkleTrie as MerkleTrie;
 use rand::{rngs::StdRng, seq::SliceRandom, SeedableRng};
 
 use crate::utils::generate_entries_with_unique_keys;

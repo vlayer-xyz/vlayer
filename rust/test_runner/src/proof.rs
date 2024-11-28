@@ -5,7 +5,7 @@ use forge::revm::primitives::{
     alloy_primitives::private::{alloy_rlp, alloy_rlp::Encodable},
     Account, AccountInfo, EvmState, EvmStorageSlot,
 };
-use mpt::reorder_with_root_as_first;
+use mpt::reorder_with_root_as_first_using_keccak;
 use provider::StorageProof;
 
 fn to_nibbles<T: AsRef<[u8]>>(word: T) -> Nibbles {
@@ -30,7 +30,7 @@ fn build_proof(
 
 pub fn account_proof(address: Address, evm_state: &EvmState) -> Vec<Bytes> {
     let (root, proof_nodes) = build_proof(vec![to_nibbles(address)], trie_accounts(evm_state));
-    reorder_with_root_as_first(proof_nodes.values(), root)
+    reorder_with_root_as_first_using_keccak(proof_nodes.values(), root)
         .into_iter()
         .cloned()
         .collect::<Vec<_>>()
@@ -94,7 +94,7 @@ pub fn prove_storage(
             .iter()
             .filter(|(path, _)| proof_key.starts_with(path))
             .map(|(_, node)| node.clone());
-        proofs.push(reorder_with_root_as_first(matching_proof_nodes, root));
+        proofs.push(reorder_with_root_as_first_using_keccak(matching_proof_nodes, root));
     }
 
     storage_keys
@@ -118,7 +118,7 @@ mod tests {
 
     use alloy_primitives::{address, b256, hex, U160};
     use alloy_rlp::RlpDecodable;
-    use mpt::MerkleTrie;
+    use mpt::KeccakMerkleTrie as MerkleTrie;
     use serde_json::{from_str, from_value, Value};
 
     use super::*;

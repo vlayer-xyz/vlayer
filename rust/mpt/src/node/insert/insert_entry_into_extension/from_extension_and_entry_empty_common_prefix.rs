@@ -1,10 +1,10 @@
 use crate::node::{insert::entry::Entry, Node, NodeError};
 
 #[allow(unused)]
-pub(crate) fn from_extension_and_entry_empty_common_prefix(
-    extension: Node,
+pub(crate) fn from_extension_and_entry_empty_common_prefix<D>(
+    extension: Node<D>,
     entry: impl Into<Entry>,
-) -> Result<Node, NodeError> {
+) -> Result<Node<D>, NodeError> {
     let Node::Extension(key, child_node) = extension else {
         unreachable!("from_extension_and_entry_no_common_prefix is used only for Extension nodes");
     };
@@ -19,6 +19,7 @@ pub(crate) fn from_extension_and_entry_empty_common_prefix(
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::KeccakNode as Node;
 
     mod empty_entry_key {
         use super::*;

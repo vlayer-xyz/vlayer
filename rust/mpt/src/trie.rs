@@ -4,6 +4,8 @@ use alloy_primitives::B256;
 use alloy_rlp::Decodable;
 use bytes::Bytes;
 use common::Hashable;
+use derivative::Derivative;
+use digest::Digest;
 use nybbles::Nibbles;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
@@ -22,13 +24,18 @@ pub enum ParseNodeError {
 }
 
 /// A sparse Merkle Patricia trie storing byte values.
-#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize)]
-pub struct MerkleTrie(pub Node);
+#[derive(Debug, Clone, Default, Serialize, Deserialize, Derivative)]
+#[derivative(PartialEq(bound = ""), Eq(bound = ""))]
+#[serde(bound = "")]
+pub struct MerkleTrie<D>(pub Node<D>);
 
-impl MerkleTrie {
+impl<D> MerkleTrie<D>
+where
+    D: Digest,
+{
     /// Creates a new empty trie.
     pub const fn new() -> Self {
-        MerkleTrie(Node::Null)
+        MerkleTrie(Node::null())
     }
 
     /// Returns a reference to the byte value corresponding to the key.
@@ -85,18 +92,24 @@ impl MerkleTrie {
     pub fn from_rlp_nodes<T: AsRef<[u8]>>(
         nodes: impl IntoIterator<Item = T>,
     ) -> Result<Self, ParseNodeError> {
-        nodes.into_iter().map(parse_node).collect()
+        nodes.into_iter().map(parse_node::<D>).collect()
     }
 }
 
-impl Hashable for MerkleTrie {
+impl<D> Hashable for MerkleTrie<D>
+where
+    D: Digest,
+{
     /// Returns the hash of the trie's root node.
     fn hash_slow(&self) -> B256 {
         self.0.hash_slow()
     }
 }
 
-impl IntoIterator for &MerkleTrie {
+impl<D> IntoIterator for &MerkleTrie<D>
+where
+    D: Digest,
+{
     type IntoIter = std::vec::IntoIter<Bytes>;
     type Item = Bytes;
 
@@ -105,8 +118,11 @@ impl IntoIterator for &MerkleTrie {
     }
 }
 
-impl FromIterator<(Option<B256>, Node)> for MerkleTrie {
-    fn from_iter<T: IntoIterator<Item = (Option<B256>, Node)>>(iter: T) -> Self {
+impl<D> FromIterator<(Option<B256>, Node<D>)> for MerkleTrie<D>
+where
+    D: Digest,
+{
+    fn from_iter<T: IntoIterator<Item = (Option<B256>, Node<D>)>>(iter: T) -> Self {
         let mut iter = iter.into_iter();
         let (_, root_node) = iter.next().unwrap_or_default();
         let nodes_by_hash = iter
@@ -121,13 +137,14 @@ impl FromIterator<(Option<B256>, Node)> for MerkleTrie {
     }
 }
 
-impl<K, V> FromIterator<(K, V)> for MerkleTrie
+impl<K, V, D> FromIterator<(K, V)> for MerkleTrie<D>
 where
     K: AsRef<[u8]>,
     V: AsRef<[u8]>,
+    D: Digest,
 {
     fn from_iter<I: IntoIterator<Item = (K, V)>>(iter: I) -> Self {
-        let mut trie = MerkleTrie::new();
+        let mut trie = MerkleTrie::<D>::new();
         for (key, value) in iter {
             trie.insert(key, value).expect("Insert failed");
         }
@@ -141,6 +158,12 @@ pub enum MptError {
     DuplicateKey(Box<[u8]>),
     #[error("Cannot insert empty value")]
     EmptyValue,
+}
+
+pub type KeccakMerkleTrie = MerkleTrie<sha3::Keccak256>;
+#[allow(non_snake_case)]
+pub const fn KeccakMerkleTrie(node: Node<sha3::Keccak256>) -> KeccakMerkleTrie {
+    MerkleTrie::<sha3::Keccak256>(node)
 }
 
 #[cfg(test)]

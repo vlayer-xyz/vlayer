@@ -6,14 +6,15 @@ use crate::node::{
 
 mod from_extension_and_entry_empty_common_prefix;
 
-impl Node {
+impl<D> Node<D> {
     pub(crate) fn insert_entry_into_extension(
         self,
         entry: impl Into<Entry>,
-    ) -> Result<Node, NodeError> {
+    ) -> Result<Node<D>, NodeError> {
         let Node::Extension(key, child_node) = self.clone() else {
             unreachable!("insert_entry_into_extension is used only for Extension nodes");
         };
+
         let entry = entry.into();
 
         let (common_prefix, remaining_extension_key, remaining_entry_key) =
@@ -42,12 +43,12 @@ impl Node {
 
 #[cfg(test)]
 mod tests {
-    use super::*;
+    use crate::KeccakNode as Node;
 
     #[test]
     #[should_panic(expected = "insert_entry_into_extension is used only for Extension nodes")]
     fn unreachable() {
-        let null = Node::Null;
+        let null = Node::null();
         null.insert_entry_into_extension(([], [42])).unwrap();
     }
 

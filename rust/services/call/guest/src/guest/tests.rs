@@ -7,7 +7,7 @@ use call_engine::{
     },
     verifier::{chain_proof, guest_input, zk_proof},
 };
-use mpt::MerkleTrie;
+use mpt::KeccakMerkleTrie as MerkleTrie;
 
 use super::*;
 

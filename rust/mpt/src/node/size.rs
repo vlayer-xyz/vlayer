@@ -1,6 +1,6 @@
 use super::Node;
 
-impl Node {
+impl<D> Node<D> {
     /// Returns the number of full nodes in the trie.
     /// A full node is a node that needs to be fully encoded to compute the root hash.
     pub(crate) fn size(&self) -> usize {
@@ -15,6 +15,7 @@ impl Node {
                     .map(Node::size)
                     .sum::<usize>()
             }
+            Node::_Phantom(_) => unreachable!(),
         }
     }
 }
@@ -23,17 +24,17 @@ impl Node {
 mod node_size {
     use std::array::from_fn;
 
-    use crate::node::Node;
+    use crate::node::KeccakNode as Node;
 
     #[test]
     fn null() {
-        let node = Node::Null;
+        let node = Node::null();
         assert_eq!(node.size(), 0);
     }
 
     #[test]
     fn digest() {
-        let node = Node::Digest(Default::default());
+        let node = Node::digest(Default::default());
         assert_eq!(node.size(), 0);
     }
 

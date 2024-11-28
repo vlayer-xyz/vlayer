@@ -6845,7 +6845,9 @@ dependencies = [
  "anyhow",
  "bytes",
  "common",
+ "derivative",
  "derive_more 1.0.0",
+ "digest 0.10.7",
  "itertools 0.13.0",
  "lazy_static",
  "nybbles",
@@ -6853,6 +6855,7 @@ dependencies = [
  "rlp 0.6.1",
  "serde",
  "serde_json",
+ "sha3",
  "thiserror",
 ]
 

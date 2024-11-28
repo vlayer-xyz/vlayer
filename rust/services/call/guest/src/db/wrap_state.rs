@@ -2,7 +2,7 @@ use std::{cell::RefCell, collections::HashMap, convert::Infallible, rc::Rc};
 
 use alloy_primitives::{keccak256, Address, B256, U256};
 use call_engine::evm::input::EvmInput;
-use mpt::MerkleTrie;
+use mpt::KeccakMerkleTrie as MerkleTrie;
 use revm::{
     primitives::{AccountInfo, Bytecode},
     DatabaseRef,

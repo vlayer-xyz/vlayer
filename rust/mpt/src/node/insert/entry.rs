@@ -31,7 +31,7 @@ where
 
 // From<Entry> for Node implementation converts an Entry into a Node,
 // creating a Branch if the key is empty or a Leaf if it is not.
-impl From<Entry> for Node {
+impl<D> From<Entry> for Node<D> {
     fn from(Entry { key, value }: Entry) -> Self {
         if key.is_empty() {
             Node::branch_with_value(value)

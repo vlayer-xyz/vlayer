@@ -1,22 +1,28 @@
+use std::marker::PhantomData;
+
 use alloy_primitives::B256;
 use alloy_rlp::{BufMut, Encodable, EMPTY_STRING_CODE};
 use bytes::Bytes;
+use derivative::Derivative;
+use digest::Digest;
 
 use super::node::Node;
 use crate::hash;
 
 /// Represents the way in which a node is referenced from within another node.
-#[derive(Default, Clone)]
-pub enum NodeRef {
+#[derive(Debug, Default, Derivative)]
+#[derivative(Clone(bound = ""))]
+pub enum NodeRef<D> {
     #[default]
     Empty,
     Digest(B256),
     InlineNode(Bytes),
     Node(Bytes),
+    _Phantom(PhantomData<D>),
 }
 
-impl NodeRef {
-    pub fn from_node(node: &Node) -> NodeRef {
+impl<D: Digest> NodeRef<D> {
+    pub fn from_node(node: &Node<D>) -> NodeRef<D> {
         match node {
             Node::Null => NodeRef::Empty,
             Node::Digest(digest) => NodeRef::Digest(*digest),
@@ -30,19 +36,8 @@ impl NodeRef {
             }
         }
     }
-}
 
-impl Encodable for NodeRef {
-    fn encode(&self, out: &mut dyn BufMut) {
-        match self {
-            NodeRef::Empty => out.put_u8(EMPTY_STRING_CODE),
-            NodeRef::Digest(digest) => digest.encode(out),
-            NodeRef::InlineNode(data) => out.put_slice(data),
-            NodeRef::Node(rlp) => hash(rlp).encode(out),
-        }
-    }
-
-    fn length(&self) -> usize {
+    pub fn length(&self) -> usize {
         // hash length + 1 byte for the RLP header
         const DIGEST_LENGTH: usize = 1 + B256::len_bytes();
 
@@ -50,15 +45,34 @@ impl Encodable for NodeRef {
             NodeRef::Empty => 1,
             NodeRef::Digest(_) | NodeRef::Node(_) => DIGEST_LENGTH,
             NodeRef::InlineNode(rlp) => rlp.len(),
+            NodeRef::_Phantom(_) => unreachable!(),
         }
     }
 }
+
+impl<D> Encodable for NodeRef<D>
+where
+    D: Digest,
+{
+    fn encode(&self, out: &mut dyn BufMut) {
+        match self {
+            NodeRef::Empty => out.put_u8(EMPTY_STRING_CODE),
+            NodeRef::Digest(digest) => digest.encode(out),
+            NodeRef::InlineNode(data) => out.put_slice(data),
+            NodeRef::Node(rlp) => hash::<D>(rlp).encode(out),
+            NodeRef::_Phantom(_) => unreachable!(),
+        }
+    }
+}
+
+pub type KeccakNodeRef = NodeRef<sha3::Keccak256>;
 
 #[cfg(test)]
 mod encodable {
     use alloy_rlp::encode;
 
-    use super::*;
+    use super::{KeccakNodeRef as NodeRef, *};
+    use crate::keccak256 as hash;
 
     #[test]
     fn empty() {

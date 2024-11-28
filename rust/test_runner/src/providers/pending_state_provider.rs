@@ -126,7 +126,7 @@ mod test {
     use std::fs;
 
     use forge::revm::primitives::{address, b256};
-    use mpt::MerkleTrie;
+    use mpt::KeccakMerkleTrie as MerkleTrie;
     use serde_json::{from_str, from_value, Value};
 
     use super::*;

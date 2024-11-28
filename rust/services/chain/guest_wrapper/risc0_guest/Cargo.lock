@@ -1627,7 +1627,9 @@ dependencies = [
  "alloy-trie",
  "bytes",
  "common",
+ "derivative",
  "derive_more",
+ "digest 0.10.7",
  "itertools 0.13.0",
  "lazy_static",
  "nybbles",
@@ -1635,6 +1637,7 @@ dependencies = [
  "rlp 0.6.1",
  "serde",
  "serde_json",
+ "sha3",
  "thiserror",
 ]
 
