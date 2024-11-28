@@ -27,6 +27,7 @@ members = [
     "services/chain/guest_wrapper",
     "services/chain/host",
     "services/chain/mock_server",
+    "services/chain/server_lib",
     "services/chain/server",
     "services/chain/test_utils",
     "services/chain/worker",
@@ -163,6 +164,7 @@ chain_guest = { path = "services/chain/guest" }
 chain_guest_wrapper = { path = "services/chain/guest_wrapper" }
 chain_host = { path = "services/chain/host" }
 chain_server = { path = "services/chain/server" }
+chain_server_lib = { path = "services/chain/server_lib" }
 mock_chain_server = { path = "services/chain/mock_server" }
 chain_common = { path = "services/chain/common" }
 chain_test_utils = { path = "services/chain/test_utils" }

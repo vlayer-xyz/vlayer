@@ -5,8 +5,13 @@ use axum_jrpc::JsonRpcExtractor;
 use chain_db::ChainDb;
 use parking_lot::RwLock;
 use server_utils::{init_trace_layer, RequestIdLayer};
+use tokio::net::TcpListener;
+use tracing::info;
 
-use crate::handlers::{status::v_sync_status, v_chain::v_chain};
+use crate::{
+    handlers::{status::v_sync_status, v_chain::v_chain},
+    ServerConfig,
+};
 
 async fn handle_jrpc(
     State(router): State<server_utils::Router>,
@@ -36,4 +41,13 @@ pub fn server(chain_db: ChainDb) -> axum::Router {
         .layer(init_trace_layer())
         // NOTE: RequestIdLayer should be added after the Trace layer
         .layer(RequestIdLayer)
+}
+
+pub async fn serve(config: ServerConfig, db: ChainDb) -> anyhow::Result<()> {
+    let listener = TcpListener::bind(config.listen_addr).await?;
+
+    info!("Listening on {}", listener.local_addr()?);
+    axum::serve(listener, server(db)).await?;
+
+    Ok(())
 }

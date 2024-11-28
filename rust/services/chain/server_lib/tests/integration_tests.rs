@@ -1,6 +1,6 @@
 use axum::http::StatusCode;
 use chain_db::ChainDb;
-use chain_server::server;
+use chain_server_lib::server;
 use common::GuestElf;
 use serde_json::json;
 use server_utils::{body_to_json, post};

@@ -2284,6 +2284,19 @@ dependencies = [
 name = "chain_server"
 version = "0.1.0"
 dependencies = [
+ "anyhow",
+ "chain_db",
+ "chain_guest_wrapper",
+ "chain_server_lib",
+ "clap",
+ "dotenvy",
+ "tokio",
+]
+
+[[package]]
+name = "chain_server_lib"
+version = "0.1.0"
+dependencies = [
  "alloy-primitives",
  "anyhow",
  "axum",
@@ -2291,10 +2304,7 @@ dependencies = [
  "bincode",
  "chain_common",
  "chain_db",
- "chain_guest_wrapper",
- "clap",
  "common",
- "dotenvy",
  "lazy_static",
  "mpt",
  "parking_lot",
