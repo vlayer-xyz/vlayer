@@ -27,8 +27,12 @@ contract WebProverTest is VTest {
         assertEq(addr, account);
     }
 
-    function skip_test_failedVerificationBecauseOfBadWebProofSignature() public {
-        // this web proof has some bytes modified to make the signature invalid
+    function test_failedVerificationBecauseOfBadWebProofSignature() public {
+        /* bad_web_proof_signature.json is a valid web proof with a bad signature.
+        Signature was changed manually by replacing one character.
+        Signature's bytes can be found in the data field of the web proof by running verify method
+        on the correct Presentation, displaying the signature of the PresentationOutput, changing
+        it from decimal vector to hex and finding it in the web_proof fixture. */
         WebProof memory webProof = WebProof(vm.readFile("testdata/bad_web_proof_signature.json"));
         WebProofProver prover = new WebProofProver();
         address account = vm.addr(1);
@@ -39,7 +43,7 @@ contract WebProverTest is VTest {
         } catch Error(string memory reason) {
             assertEq(
                 reason,
-                "Engine(TransactError(Revert(\"Verification error: Session proof error: signature verification failed: signature error\")))"
+                "Engine(TransactError(Revert(\"Verification error: Presentation error: presentation error: attestation error caused by: attestation proof error: signature error caused by: signature verification failed: secp256k1 signature verification failed\")))"
             );
         }
     }
