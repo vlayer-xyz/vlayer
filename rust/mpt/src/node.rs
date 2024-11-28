@@ -3,6 +3,7 @@ use std::marker::PhantomData;
 use alloy_primitives::{Bytes, B256};
 use alloy_trie::EMPTY_ROOT_HASH;
 use common::Hashable;
+use derivative::Derivative;
 use serde::{Deserialize, Serialize};
 use sha3::Digest;
 use thiserror::Error;
@@ -14,7 +15,8 @@ pub mod insert;
 pub mod rlp;
 pub mod size;
 
-#[derive(Debug, Default, Serialize, Deserialize)]
+#[derive(Debug, Default, Serialize, Deserialize, Derivative)]
+#[derivative(Clone(bound = ""), PartialEq(bound = ""), Eq(bound = ""))]
 #[serde(bound = "")]
 pub enum Node<D> {
     #[default]
@@ -24,40 +26,6 @@ pub enum Node<D> {
     Branch([Option<Box<Node<D>>>; 16], Option<Bytes>),
     Digest(B256),
     Phantom(PhantomData<D>),
-}
-
-impl<D> PartialEq for Node<D> {
-    fn eq(&self, other: &Self) -> bool {
-        match (self, other) {
-            (Node::Null, Node::Null) | (Node::Phantom(_), Node::Phantom(_)) => true,
-            (Node::Leaf(key1, bytes1), Node::Leaf(key2, bytes2)) => {
-                key1 == key2 && bytes1 == bytes2
-            }
-            (Node::Extension(key1, node1), Node::Extension(key2, node2)) => {
-                key1 == key2 && node1 == node2
-            }
-            (Node::Branch(children1, value1), Node::Branch(children2, value2)) => {
-                children1
-                    .iter()
-                    .zip(children2.iter())
-                    .all(|(c1, c2)| c1 == c2)
-                    && value1 == value2
-            }
-            (Node::Digest(digest1), Node::Digest(digest2)) => digest1 == digest2,
-            _ => false,
-        }
-    }
-}
-
-impl<D> Eq for Node<D> {}
-
-impl<D> Clone for Node<D> {
-    fn clone(&self) -> Self {
-        match &self {
-            Node::Phantom(_) => Node::Phantom(PhantomData),
-            _ => self.clone(),
-        }
-    }
 }
 
 impl<D> Node<D>

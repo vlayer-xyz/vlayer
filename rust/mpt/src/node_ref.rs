@@ -3,13 +3,15 @@ use std::marker::PhantomData;
 use alloy_primitives::B256;
 use alloy_rlp::{BufMut, Encodable, EMPTY_STRING_CODE};
 use bytes::Bytes;
+use derivative::Derivative;
 use digest::Digest;
 
 use super::node::Node;
 use crate::hash;
 
 /// Represents the way in which a node is referenced from within another node.
-#[derive(Debug, Default)]
+#[derive(Debug, Default, Derivative)]
+#[derivative(Clone(bound = ""))]
 pub enum NodeRef<D> {
     #[default]
     Empty,
@@ -17,15 +19,6 @@ pub enum NodeRef<D> {
     InlineNode(Bytes),
     Node(Bytes),
     Phantom(PhantomData<D>),
-}
-
-impl<D> Clone for NodeRef<D> {
-    fn clone(&self) -> Self {
-        match self {
-            NodeRef::Phantom(_) => NodeRef::Phantom(PhantomData),
-            _ => self.clone(),
-        }
-    }
 }
 
 impl<D: Digest> NodeRef<D> {

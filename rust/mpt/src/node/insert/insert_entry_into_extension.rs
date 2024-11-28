@@ -43,7 +43,7 @@ impl<D> Node<D> {
 
 #[cfg(test)]
 mod tests {
-    use crate::{node::insert::entry::Entry, KeccakNode as Node};
+    use crate::KeccakNode as Node;
 
     #[test]
     #[should_panic(expected = "insert_entry_into_extension is used only for Extension nodes")]
