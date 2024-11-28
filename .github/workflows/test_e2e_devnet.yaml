@@ -8,7 +8,7 @@ on:
       - "examples/**"
       - "packages/**"
       - "bash/**"
-      - "test_e2e_devnet.yaml"
+      - ".github/workflows/test_e2e_devnet.yaml"
       - "contracts/**"
   merge_group:
   push:
