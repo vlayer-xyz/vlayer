@@ -1,9 +1,6 @@
 use axum::http::StatusCode;
 use serde_json::json;
-use test_helpers::{
-    default_call_guest_elf, default_chain_guest_elf, Context, DEFAULT_API_VERSION,
-    DEFAULT_GAS_METER_TTL,
-};
+use test_helpers::{call_guest_elf, chain_guest_elf, Context, API_VERSION, GAS_METER_TTL};
 
 mod test_helpers;
 
@@ -15,7 +12,7 @@ mod server_tests {
     #[tokio::test]
     async fn http_not_found() {
         let ctx = Context::default().await;
-        let app = ctx.server(default_call_guest_elf(), default_chain_guest_elf());
+        let app = ctx.server(call_guest_elf(), chain_guest_elf());
         let response = app.post("/non_existent_http_path", &()).await;
 
         assert_eq!(StatusCode::NOT_FOUND, response.status());
@@ -25,7 +22,7 @@ mod server_tests {
     #[tokio::test]
     async fn json_rpc_not_found() {
         let ctx = Context::default().await;
-        let app = ctx.server(default_call_guest_elf(), default_chain_guest_elf());
+        let app = ctx.server(call_guest_elf(), chain_guest_elf());
 
         let req = json!({
             "method": "non_existent_json_rpc_method",
@@ -79,7 +76,7 @@ mod server_tests {
                     "result": {
                         "call_guest_id": "0x0000000000000000000000000000000000000000000000000000000000000000",
                         "chain_guest_id": "0x0100000001000000010000000100000001000000010000000100000001000000",
-                        "api_version": DEFAULT_API_VERSION
+                        "api_version": API_VERSION
                     }
                 }),
                 actual: body_to_json(response.into_body()).await,
@@ -98,25 +95,29 @@ mod server_tests {
         use web_proof::fixtures::{load_web_proof_v7_fixture, NOTARY_PUB_KEY_PEM_EXAMPLE};
 
         use super::*;
-        use crate::test_helpers::WebProof;
+        use crate::test_helpers::mock::WebProof;
 
-        const DEFAULT_CHAIN_ID: u64 = 11155111;
-        const DEFAULT_GAS_LIMIT: u64 = 1_000_000;
+        const CHAIN_ID: u64 = 11155111;
+        const GAS_LIMIT: u64 = 1_000_000;
 
         #[tokio::test]
         async fn field_validation_error() {
             let ctx = Context::default().await;
-            let app = ctx.server(default_call_guest_elf(), default_chain_guest_elf());
+            let app = ctx.server(call_guest_elf(), chain_guest_elf());
             let contract = ctx.client.deploy_contract().await;
+            let call_data = contract
+                .sum(U256::from(1), U256::from(2))
+                .calldata()
+                .unwrap();
 
             let req = json!({
                 "method": "v_call",
                 "params": [
                     {
                         "to": "I am not a valid address!",
-                        "data": contract.sum(U256::from(1), U256::from(2)).calldata().unwrap(),
+                        "data": call_data,
                     }, {
-                        "gas_limit": DEFAULT_GAS_LIMIT,
+                        "gas_limit": GAS_LIMIT,
                     }
                     ],
                 "id": 1,
@@ -142,7 +143,7 @@ mod server_tests {
         #[tokio::test(flavor = "multi_thread")]
         async fn simple_contract_call_success() {
             let ctx = Context::default().await;
-            let app = ctx.server(default_call_guest_elf(), default_chain_guest_elf());
+            let app = ctx.server(call_guest_elf(), chain_guest_elf());
             let contract = ctx.client.deploy_contract().await;
             let call_data = contract
                 .sum(U256::from(1), U256::from(2))
@@ -157,8 +158,8 @@ mod server_tests {
                     "data": call_data,
                 },
                 {
-                    "chain_id": DEFAULT_CHAIN_ID ,
-                    "gas_limit": DEFAULT_GAS_LIMIT,
+                    "chain_id": CHAIN_ID ,
+                    "gas_limit": GAS_LIMIT,
                 }
                 ],
                 "id": 1,
@@ -198,16 +199,16 @@ mod server_tests {
                     AllocateGas::METHOD_NAME,
                     false,
                     json!({
-                        "gas_limit": DEFAULT_GAS_LIMIT,
+                        "gas_limit": GAS_LIMIT,
                         "hash": "0xf8d32367d8ec243e8e6fcac96dc769ed80287534d51c5d1e817173128f2b6218",
-                        "time_to_live": DEFAULT_GAS_METER_TTL
+                        "time_to_live": GAS_METER_TTL
                     }),
                     json!({}),
                     1,
                 )
                 .await,
             );
-            let app = ctx.server(default_call_guest_elf(), default_chain_guest_elf());
+            let app = ctx.server(call_guest_elf(), chain_guest_elf());
             let contract = ctx.client.deploy_contract().await;
 
             let call_data = contract
@@ -223,8 +224,8 @@ mod server_tests {
                         "data": call_data,
                     },
                     {
-                        "chain_id": DEFAULT_CHAIN_ID ,
-                        "gas_limit": DEFAULT_GAS_LIMIT,
+                        "chain_id": CHAIN_ID ,
+                        "gas_limit": GAS_LIMIT,
                     }
                     ],
                 "id": 1,
@@ -238,7 +239,7 @@ mod server_tests {
         #[tokio::test(flavor = "multi_thread")]
         async fn success_web_proof() {
             let ctx = Context::default().await;
-            let app = ctx.server(default_call_guest_elf(), default_chain_guest_elf());
+            let app = ctx.server(call_guest_elf(), chain_guest_elf());
             let contract = ctx.client.deploy_contract().await;
 
             let call_data = contract
@@ -260,8 +261,8 @@ mod server_tests {
                         "data": call_data,
                     },
                     {
-                        "chain_id": DEFAULT_CHAIN_ID,
-                        "gas_limit": DEFAULT_GAS_LIMIT,
+                        "chain_id": CHAIN_ID,
+                        "gas_limit": GAS_LIMIT,
                     }
                     ],
                 "id": 1,
