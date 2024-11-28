@@ -12,8 +12,8 @@ use crate::{
     evm_env::factory::HostEvmEnvFactory,
     test_harness::{
         contracts::{
-            time_travel::{AVERAGE_BALANCE_OF_CALL, SIMPLE_TIME_TRAVEL},
-            usdt::{BLOCK_NO, IERC20::balanceOfCall, USDT},
+            time_travel::{self, AVERAGE_BALANCE_OF_CALL, SIMPLE_TIME_TRAVEL},
+            usdt::{self, IERC20::balanceOfCall, USDT},
         },
         rpc_snapshot_file,
     },
@@ -40,7 +40,7 @@ fn profile(
 
 #[tokio::test]
 async fn usdt_erc20_balance_of() -> anyhow::Result<()> {
-    let location: ExecutionLocation = (BLOCK_NO, Mainnet).into();
+    let location: ExecutionLocation = (usdt::BLOCK_NO, Mainnet).into();
     let binance_8 = address!("F977814e90dA44bFA03b6295A0616a897441aceC");
     let call = Call::new(USDT, &balanceOfCall { account: binance_8 });
 
@@ -56,7 +56,7 @@ async fn usdt_erc20_balance_of() -> anyhow::Result<()> {
 
 #[tokio::test]
 async fn time_travel() -> anyhow::Result<()> {
-    let location: ExecutionLocation = (20_064_547_u64, OptimismSepolia).into();
+    let location: ExecutionLocation = (time_travel::BLOCK_NO, OptimismSepolia).into();
     let call = Call::new(SIMPLE_TIME_TRAVEL, &AVERAGE_BALANCE_OF_CALL);
 
     let state = profile("op_sepolia", "simple_time_travel", location, &call)?;

@@ -1,9 +1,12 @@
-use alloy_primitives::{Address, FixedBytes, TxKind};
+use alloy_primitives::{Address, Bytes, FixedBytes, TxKind};
 use alloy_rlp::RlpEncodable;
 use alloy_sol_types::{SolCall, SolValue};
 use chain_client::ChainProofCache;
 use derive_new::new;
-use revm::{interpreter::CallInputs, primitives::TxEnv};
+use revm::{
+    interpreter::CallInputs,
+    primitives::{OptimismFields, TxEnv},
+};
 use risc0_zkvm::sha::Digest;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
@@ -56,8 +59,16 @@ impl From<Call> for TxEnv {
                 to => TxKind::Call(to),
             },
             data: call.data.into(),
+            optimism: initialize_optimism_fields(),
             ..Default::default()
         }
+    }
+}
+
+fn initialize_optimism_fields() -> OptimismFields {
+    OptimismFields {
+        enveloped_tx: Some(Bytes::default()),
+        ..Default::default()
     }
 }
 

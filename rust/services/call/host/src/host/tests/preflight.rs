@@ -188,13 +188,13 @@ mod time_travel {
     use super::*;
     use crate::test_harness::contracts::time_travel::{
         AverageBalance::{averageBalanceOfCall, averageBalanceOfReturn},
-        AVERAGE_BALANCE_OF_CALL, SIMPLE_TIME_TRAVEL,
+        AVERAGE_BALANCE_OF_CALL, BLOCK_NO, SIMPLE_TIME_TRAVEL,
     };
 
     #[tokio::test(flavor = "multi_thread")]
     #[ignore = "Fails due to chain proofs issue"]
     async fn time_travel() -> anyhow::Result<()> {
-        let location: ExecutionLocation = (Chain::optimism_sepolia().id(), BlockTag::Latest).into();
+        let location: ExecutionLocation = (Chain::optimism_sepolia().id(), BLOCK_NO).into();
         let call = Call::new(SIMPLE_TIME_TRAVEL, &AVERAGE_BALANCE_OF_CALL);
 
         let averageBalanceOfReturn {
