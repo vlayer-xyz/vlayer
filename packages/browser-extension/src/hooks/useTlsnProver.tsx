@@ -118,14 +118,13 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
 
       const transcript = await prover.transcript();
 
+      console.log("recv", transcript.recv);
+      const range = getHttpResponseFragments(transcript.recv, 'userDataByProvider.0.accounts.0.accountNumber');
+      console.log("range", range);
+
       const commit = {
         sent: [transcript.ranges.sent.all],
-        recv: [
-          {
-            start: transcript.ranges.recv.all.start,
-            end: transcript.ranges.recv.all.end + 2,
-          },
-        ],
+        recv: range,
       };
 
       const notarizationOutputs = await prover.notarize(commit);
@@ -183,6 +182,41 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
     </TlsnProofContext.Provider>
   );
 };
+
+function getHttpResponseFragments(response: string, jsonPath: string) {
+  const headersEndIndex = response.indexOf('\r\n\r\n') + 4;
+  const jsonStartIndex = response.indexOf('{', headersEndIndex);
+  const jsonEndIndex = response.lastIndexOf('}');
+  const jsonBody = response.slice(jsonStartIndex, jsonEndIndex + 1);
+  const jsonObject = JSON.parse(jsonBody);
+  const getFieldPosition = (obj: any, path: string): { start: number, end: number } => {
+    const keys = path.split('.');
+    let value = obj;
+    for (const key of keys) {
+      value = value[key];
+    }
+    const fieldString = `"${keys[keys.length - 1]}":"${value}"`;
+    const fieldStartIndex = response.indexOf(fieldString, jsonStartIndex);
+    const fieldEndIndex = fieldStartIndex + fieldString.length;
+    return { start: fieldStartIndex, end: fieldEndIndex };
+  };
+  const fieldPosition = getFieldPosition(jsonObject, jsonPath);
+  return [
+    {
+      start: 0,
+      end: headersEndIndex,
+    },
+    {
+      start: jsonStartIndex,
+      end: jsonStartIndex + 1,
+    },
+    {
+      start: jsonEndIndex,
+      end: jsonEndIndex + 1,
+    },
+    fieldPosition,
+  ];
+}
 
 export const useTlsnProver = () => {
   return useContext(TlsnProofContext);

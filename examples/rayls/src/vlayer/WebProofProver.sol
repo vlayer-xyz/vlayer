@@ -22,7 +22,7 @@ contract WebProofProver is Prover {
     function main(WebProof calldata webProof)
         public
         view
-        returns (uint256 created)
+        returns (string memory created)
     {
         
         (bool success, bytes memory returnData) = Precompiles.VERIFY_AND_PARSE.staticcall(bytes(webProof.webProofJson));
@@ -33,7 +33,7 @@ contract WebProofProver is Prover {
         require(data[0].test(DATA_URL), "Invalid data");
 
         Web memory web = Web(data[2], data[3]);
-        string memory created = web.jsonGetString("created");
+        string memory created = web.jsonGetString("accountNumber");
 
         return created;
     }

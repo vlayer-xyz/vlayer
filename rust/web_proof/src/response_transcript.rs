@@ -15,7 +15,8 @@ pub(crate) struct ResponseTranscript {
 
 impl ResponseTranscript {
     pub(crate) fn parse_body(self) -> Result<String, ParsingError> {
-        let response_string = String::from_utf8(self.transcript)?;
+        let filtered_transcript: Vec<u8> = self.transcript.into_iter().filter(|&byte| byte != 0).collect();
+        let response_string = String::from_utf8(filtered_transcript)?;
 
         let mut headers = [EMPTY_HEADER; MAX_HEADERS_NUMBER];
         let mut res = Response::new(&mut headers);
