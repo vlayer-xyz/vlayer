@@ -43,12 +43,13 @@ impl TryFrom<ParsedMail<'_>> for Email {
 
 fn get_body(mail: &ParsedMail) -> Result<String, MailParseError> {
     mail.parts()
-        .filter(is_plain_text_mimetype)
+        .filter(|part| is_plain_text_mimetype(part))
         .map(ParsedMail::get_body)
         .collect::<Result<_, _>>()
         .and_then(validate_body_parts)
         .map(|parts| parts.join(""))
 }
+
 fn validate_body_parts(parts: Vec<String>) -> Result<Vec<String>, MailParseError> {
     if parts.is_empty() {
         Err(MailParseError::Generic("Plain text body not found in the email"))
@@ -57,7 +58,7 @@ fn validate_body_parts(parts: Vec<String>) -> Result<Vec<String>, MailParseError
     }
 }
 
-fn is_plain_text_mimetype(part: &&ParsedMail) -> bool {
+fn is_plain_text_mimetype(part: &ParsedMail) -> bool {
     part.ctype.mimetype == "text/plain"
 }
 
