@@ -25,10 +25,10 @@ use crate::{
 };
 
 const VLAYER_DIR_NAME: &str = "vlayer";
-const EXAMPLES_URL: &str =
-    "https://vlayer-releases.s3.eu-north-1.amazonaws.com/latest/examples.tar.gz";
 
 lazy_static! {
+    static ref EXAMPLES_URL: String = format!("https://vlayer-releases.s3.eu-north-1.amazonaws.com/{}/examples.tar.gz", version());
+
     static ref DEPENDENCIES: Vec<SoldeerDep> = vec![
         SoldeerDep {
             name: "@openzeppelin-contracts".into(),
@@ -406,7 +406,7 @@ async fn fetch_examples(
     testdata_dst: &Path,
     template: String,
 ) -> Result<(), CLIError> {
-    let response = get(EXAMPLES_URL)
+    let response = get(EXAMPLES_URL.as_str())
         .await
         .map_err(map_reqwest_error)?
         .bytes()
