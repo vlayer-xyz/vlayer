@@ -70,6 +70,7 @@ impl TravelCall {
 
 /// Take last 8 bytes from slice and interpret as big-endian encoded u64.
 /// Will trim larger numbers to u64 range, and panic if slice is smaller than 8 bytes.
+#[allow(clippy::missing_const_for_fn)] // Remove and add const when const Option::expect is stabilized
 fn u64_from_be_slice(slice: &[u8]) -> u64 {
     u64::from_be_bytes(*slice.last_chunk().expect("invalid u64 slice"))
 }

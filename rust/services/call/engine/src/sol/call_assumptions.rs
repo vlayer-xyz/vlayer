@@ -22,6 +22,7 @@ impl CallAssumptions {
         }
     }
 
+    #[allow(clippy::missing_const_for_fn)] // Remove and add const when const Option::expect is stabilized
     pub fn size() -> usize {
         Self::ENCODED_SIZE.expect("CallAssumptions compiletime size does not exist")
     }
