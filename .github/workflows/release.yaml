@@ -52,7 +52,7 @@ jobs:
       - name: "Build guest wrapper"
         run: cargo build --release --target x86_64-unknown-linux-gnu --package call_guest_wrapper
 
-      - name: "Save methods.rs"
+      - name: "Save methods.rs and ELF binary"
         run: |
           METHODS="$(find target -type f -name "methods.rs" -path '*/call_guest_wrapper-*/*')"
           if [ $(echo -e "$METHODS" | wc -l) = "1" ]; then
@@ -62,6 +62,10 @@ jobs:
             echo -e "$METHODS"
             exit 1
           fi
+
+          BINARY_PATH="$(grep GUEST_ELF ./target/assets/methods.rs | grep include_bytes | sed -n 's/.*include_bytes!("\(.*\)").*/\1/p')"
+          sed -i "s|${BINARY_PATH}|<ELF_PATH>|g" ./target/assets/methods.rs
+          cp "$BINARY_PATH" ./target/assets/
 
       - name: Push guest artifacts
         uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
@@ -160,6 +164,12 @@ jobs:
         with:
           name: guest-artifacts
           path: rust/call_guest_replacement
+
+      - name: "Update elf path in methods.rs"
+        run: |
+          NEW_PATH=$(realpath ./call_guest_replacement/risc0_call_guest)
+          echo "Replacing the elf binary path to: ${NEW_PATH}"
+          sed -i "s|<ELF_PATH>|${NEW_PATH}|" ./call_guest_replacement/methods.rs
 
       - name: "Build binaries"
         env:
@@ -324,7 +334,7 @@ jobs:
         with:
           path: ./dist
           merge-multiple: true
-      - run: rm ./dist/{ImageID.sol,Elf.sol,methods.rs} || true
+      - run: rm ./dist/{ImageID.sol,Elf.sol,methods.rs,risc0_call_guest} || true
 
       - name: Release tagged nightly
         uses: ncipollo/release-action@v1
@@ -353,7 +363,7 @@ jobs:
         with:
           path: ./dist/latest
           merge-multiple: true
-      - run: rm ./dist/latest/{ImageID.sol,Elf.sol,methods.rs} || true
+      - run: rm ./dist/latest/{ImageID.sol,Elf.sol,methods.rs,risc0_call_guest} || true
       - run: cp -r "./dist/latest" "./dist/${{ github.sha }}"
 
       - name: Push tagged binaries to AWS S3
