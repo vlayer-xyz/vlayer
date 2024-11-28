@@ -1,6 +1,9 @@
 use axum::http::StatusCode;
 use serde_json::json;
-use test_helpers::{default_call_guest_elf, default_chain_guest_elf, Context};
+use test_helpers::{
+    default_call_guest_elf, default_chain_guest_elf, Context, DEFAULT_API_VERSION,
+    DEFAULT_GAS_METER_TTL,
+};
 
 mod test_helpers;
 
@@ -76,7 +79,7 @@ mod server_tests {
                     "result": {
                         "call_guest_id": "0x0000000000000000000000000000000000000000000000000000000000000000",
                         "chain_guest_id": "0x0100000001000000010000000100000001000000010000000100000001000000",
-                        "api_version": "1.2.3"
+                        "api_version": DEFAULT_API_VERSION
                     }
                 }),
                 actual: body_to_json(response.into_body()).await,
@@ -195,9 +198,9 @@ mod server_tests {
                     AllocateGas::METHOD_NAME,
                     false,
                     json!({
-                        "gas_limit":1000000,
-                        "hash":"0xf8d32367d8ec243e8e6fcac96dc769ed80287534d51c5d1e817173128f2b6218",
-                        "time_to_live":3600
+                        "gas_limit": DEFAULT_GAS_LIMIT,
+                        "hash": "0xf8d32367d8ec243e8e6fcac96dc769ed80287534d51c5d1e817173128f2b6218",
+                        "time_to_live": DEFAULT_GAS_METER_TTL
                     }),
                     json!({}),
                     1,

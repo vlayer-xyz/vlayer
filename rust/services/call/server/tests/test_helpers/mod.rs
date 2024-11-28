@@ -37,8 +37,8 @@ pub(crate) fn default_chain_guest_elf() -> GuestElf {
     chain_guest_wrapper::GUEST_ELF.clone()
 }
 
-const DEFAULT_API_VERSION: &str = "1.2.3";
-const DEFAULT_GAS_METER_TTL: u64 = 3600;
+pub(crate) const DEFAULT_API_VERSION: &str = "1.2.3";
+pub(crate) const DEFAULT_GAS_METER_TTL: u64 = 3600;
 
 #[derive(new)]
 pub(crate) struct Context {
