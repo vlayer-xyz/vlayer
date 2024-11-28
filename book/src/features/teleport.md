@@ -25,24 +25,16 @@ The Ethereum ecosystem is fragmented, consisting of various EVM chains such as A
 The example below shows how to check USDC balances across three different chains:
 
 ```solidity
-contract CrossChainBalance is Prover {
-    struct Erc20Token {
-      address addr;
-      uint256 chainId;
-      uint256 blockNumber;
-    }
-    Erc20Token[] tokens = new Erc20Token[](3);
+contract SimpleTeleportProver is Prover {
+    Erc20Token[] public tokens;
 
     constructor() {
-        // Ethereum mainnet USDC
-        tokens[0] = Erc20Token(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48, 1, 20683110); 
-        // Base USDC
-        tokens[1] = Erc20Token(0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913, 8453, 19367633); 
-        // Arbitrum USDC
-        tokens[2] = Erc20Token(0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85, 10, 124962954); 
+        tokens.push(Erc20Token(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48, 1, 20683110)); // mainnet
+        tokens.push(Erc20Token(0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913, 8453, 19367633)); // base
+        tokens.push(Erc20Token(0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85, 10, 124962954)); // optimism
     }
 
-    function balanceOf(address _owner) public returns (Proof, address, uint256) {
+    function crossChainBalanceOf(address _owner) public returns (Proof memory, address, uint256) {
         uint256 balance = 0;
 
         for (uint256 i = 0; i < tokens.length; i++) {
@@ -50,7 +42,7 @@ contract CrossChainBalance is Prover {
             balance += IERC20(tokens[i].addr).balanceOf(_owner);
         }
 
-        return (proof(), _owner_, balance);
+        return (proof(), _owner, balance);
     }
 }
 ```
