@@ -45,7 +45,7 @@ lazy_static! {
         SoldeerDep {
             name: "risc0-ethereum".into(),
             version: "1.1.4".into(),
-            url: Some("https://github.com/vlayer-xyz/risc0-ethereum/releases/download/v1.1.4-soldeer-no-remappings/contracts.zip".into()),
+            url: Some("https://github.com/vlayer-xyz/risc0-ethereum/releases/download/v1.1.4-soldeer/contracts.zip".into()),
             remapping: Some("risc0-ethereum-1.1.4".into()),
         },
         SoldeerDep {
