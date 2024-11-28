@@ -2,9 +2,7 @@ use std::{sync::Arc, time::Duration};
 
 use axum::{body::Body, http::Response, Router};
 use block_header::EvmBlockHeader;
-pub(crate) use call_guest_wrapper::GUEST_ELF as CALL_GUEST_ELF;
 use call_server::{gas_meter::Config as GasMeterConfig, server, Config, ConfigBuilder, ProofMode};
-pub(crate) use chain_guest_wrapper::GUEST_ELF as CHAIN_GUEST_ELF;
 use common::GuestElf;
 use derive_more::Deref;
 use derive_new::new;
@@ -31,6 +29,14 @@ abigen!(ExampleProver, "./testdata/ExampleProver.json",);
 type Client = Arc<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>>;
 type Contract = ExampleProver<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>>;
 
+pub(crate) fn default_call_guest_elf() -> GuestElf {
+    call_guest_wrapper::GUEST_ELF.clone()
+}
+
+pub(crate) fn default_chain_guest_elf() -> GuestElf {
+    chain_guest_wrapper::GUEST_ELF.clone()
+}
+
 const DEFAULT_API_VERSION: &str = "1.2.3";
 const DEFAULT_GAS_METER_TTL: u64 = 3600;
 
@@ -52,15 +58,11 @@ impl Context {
         Self::new(client, anvil, chain_proof_server, None)
     }
 
-    pub(crate) fn server(
-        &self,
-        call_guest_elf: &GuestElf,
-        chain_guest_elf: &GuestElf,
-    ) -> ServerMock {
+    pub(crate) fn server(&self, call_guest_elf: GuestElf, chain_guest_elf: GuestElf) -> ServerMock {
         let mut config_builder = ConfigBuilder::new(
             self.chain_proof_server.url(),
-            call_guest_elf.clone(),
-            chain_guest_elf.clone(),
+            call_guest_elf,
+            chain_guest_elf,
             DEFAULT_API_VERSION.into(),
         )
         .with_rpc_mappings([(self.anvil.chain_id(), self.anvil.endpoint())])

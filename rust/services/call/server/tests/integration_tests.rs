@@ -1,6 +1,6 @@
 use axum::http::StatusCode;
 use serde_json::json;
-use test_helpers::{Context, CALL_GUEST_ELF, CHAIN_GUEST_ELF};
+use test_helpers::{default_call_guest_elf, default_chain_guest_elf, Context};
 
 mod test_helpers;
 
@@ -12,7 +12,7 @@ mod server_tests {
     #[tokio::test]
     async fn http_not_found() {
         let ctx = Context::default().await;
-        let app = ctx.server(&CALL_GUEST_ELF, &CHAIN_GUEST_ELF);
+        let app = ctx.server(default_call_guest_elf(), default_chain_guest_elf());
         let response = app.post("/non_existent_http_path", &()).await;
 
         assert_eq!(StatusCode::NOT_FOUND, response.status());
@@ -22,7 +22,7 @@ mod server_tests {
     #[tokio::test]
     async fn json_rpc_not_found() {
         let ctx = Context::default().await;
-        let app = ctx.server(&CALL_GUEST_ELF, &CHAIN_GUEST_ELF);
+        let app = ctx.server(default_call_guest_elf(), default_chain_guest_elf());
 
         let req = json!({
             "method": "non_existent_json_rpc_method",
@@ -58,7 +58,7 @@ mod server_tests {
             let call_elf = GuestElf::new([0; 8], &[]);
             let chain_elf = GuestElf::new([1; 8], &[]);
             let ctx = Context::default().await;
-            let app = ctx.server(&call_elf, &chain_elf);
+            let app = ctx.server(call_elf, chain_elf);
 
             let req = json!({
                 "method": "v_versions",
@@ -103,7 +103,7 @@ mod server_tests {
         #[tokio::test]
         async fn field_validation_error() {
             let ctx = Context::default().await;
-            let app = ctx.server(&CALL_GUEST_ELF, &CHAIN_GUEST_ELF);
+            let app = ctx.server(default_call_guest_elf(), default_chain_guest_elf());
             let contract = ctx.client.deploy_contract().await;
 
             let req = json!({
@@ -139,7 +139,7 @@ mod server_tests {
         #[tokio::test(flavor = "multi_thread")]
         async fn simple_contract_call_success() {
             let ctx = Context::default().await;
-            let app = ctx.server(&CALL_GUEST_ELF, &CHAIN_GUEST_ELF);
+            let app = ctx.server(default_call_guest_elf(), default_chain_guest_elf());
             let contract = ctx.client.deploy_contract().await;
             let call_data = contract
                 .sum(U256::from(1), U256::from(2))
@@ -204,7 +204,7 @@ mod server_tests {
                 )
                 .await,
             );
-            let app = ctx.server(&CALL_GUEST_ELF, &CHAIN_GUEST_ELF);
+            let app = ctx.server(default_call_guest_elf(), default_chain_guest_elf());
             let contract = ctx.client.deploy_contract().await;
 
             let call_data = contract
@@ -235,7 +235,7 @@ mod server_tests {
         #[tokio::test(flavor = "multi_thread")]
         async fn success_web_proof() {
             let ctx = Context::default().await;
-            let app = ctx.server(&CALL_GUEST_ELF, &CHAIN_GUEST_ELF);
+            let app = ctx.server(default_call_guest_elf(), default_chain_guest_elf());
             let contract = ctx.client.deploy_contract().await;
 
             let call_data = contract
