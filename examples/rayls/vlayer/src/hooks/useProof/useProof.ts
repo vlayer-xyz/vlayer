@@ -46,11 +46,13 @@ export const useVlayerFlow = ({
     webProof,
     verification,
     vlayerClient,
-    isZkProving: stage === VlayerFlowStage.VERIFICATION_REQUESTED,
+    isZkProving: stage === VlayerFlowStage.ZK_PROOF_REQUESTED,
     isWebProving: stage === VlayerFlowStage.WEB_PROOF_REQUESTED,
     isVerifying: stage === VlayerFlowStage.VERIFICATION_REQUESTED,
-    requestZkProof: () => {
-      vlayerClient.zkProve([
+    requestZkProof: async () => {
+      dispatch({ kind: VlayerFlowActionKind.ZK_PROOF_REQUESTED });
+
+      const zkProof = await vlayerClient.zkProve([
         {
           webProofJson: JSON.stringify({
             presentation_json: webProof,
@@ -58,7 +60,10 @@ export const useVlayerFlow = ({
           }),
         },
       ]);
-      dispatch({ kind: VlayerFlowActionKind.ZK_PROOF_REQUESTED });
+      dispatch({
+        kind: VlayerFlowActionKind.ZK_PROOF_RECEIVED,
+        payload: { zkProof },
+      });
     },
     requestWebProof: () => {
       webProofProvider.requestWebProof(webProofConfig);

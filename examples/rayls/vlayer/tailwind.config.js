@@ -16,11 +16,11 @@ export default {
     themes: [
       {
         vlayer: {
-          primary: "#915bf8",
+          primary: "#7235E5",
           secondary: "#3219d7",
           accent: "#00ffff",
-          neutral: "#3219d7",
-          "base-100": "#050610",
+          neutral: "white",
+          "base-100": "white",
           info: "#0000ff",
           success: "#00ff00",
           warning: "#00ff00",
