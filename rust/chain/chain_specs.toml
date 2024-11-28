@@ -187,3 +187,11 @@ forks = [
   { spec = "FJORD", activation = { Timestamp = 1721826000 } },
   { spec = "GRANITE", activation = { Timestamp = 1727780400 } },
 ]
+
+https://github.com/Uniswap/unichain-node/blob/main/chainconfig/sepolia/genesis-l2.json
+[[chains]]
+name = "unichain-sepolia"
+is_optimism = true
+forks = [
+  { spec = "GRANITE", activation = { Block = 0 } },
+]
