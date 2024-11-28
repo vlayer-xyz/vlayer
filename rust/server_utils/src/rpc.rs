@@ -169,10 +169,9 @@ pub mod mock {
 #[cfg(test)]
 mod tests {
     use derive_new::new;
+    use mock::Server;
 
     use super::*;
-
-    use mock::Server;
 
     #[derive(new, Serialize)]
     struct GetData {
