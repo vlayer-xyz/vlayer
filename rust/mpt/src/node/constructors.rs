@@ -3,12 +3,8 @@ use alloy_primitives::{Bytes, B256};
 use super::Node;
 use crate::key_nibbles::KeyNibbles;
 
-pub const fn empty_child<D>() -> std::option::Option<Box<Node<D>>> {
-    None
-}
-
 pub const fn empty_children<D>() -> [Option<Box<Node<D>>>; 16] {
-    [const { empty_child() }; 16]
+    [const { None }; 16]
 }
 
 impl<D> Node<D> {
@@ -22,7 +18,6 @@ impl<D> Node<D> {
         Node::Digest(digest)
     }
 
-    #[allow(unused)]
     pub(crate) fn leaf(key_nibs: impl AsRef<[u8]>, value: impl AsRef<[u8]>) -> Node<D> {
         assert!(!value.as_ref().is_empty(), "empty values are not allowed in MPT");
         Node::Leaf(key_nibs.into(), Bytes::copy_from_slice(value.as_ref()))

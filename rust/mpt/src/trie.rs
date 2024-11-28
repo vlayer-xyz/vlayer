@@ -4,6 +4,7 @@ use alloy_primitives::B256;
 use alloy_rlp::Decodable;
 use bytes::Bytes;
 use common::Hashable;
+use derivative::Derivative;
 use digest::Digest;
 use nybbles::Nibbles;
 use serde::{Deserialize, Serialize};
@@ -23,18 +24,10 @@ pub enum ParseNodeError {
 }
 
 /// A sparse Merkle Patricia trie storing byte values.
-#[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[derive(Debug, Clone, Default, Serialize, Deserialize, Derivative)]
+#[derivative(PartialEq(bound = ""), Eq(bound = ""))]
 #[serde(bound = "")]
 pub struct MerkleTrie<D>(pub Node<D>);
-
-// Does not require D: PartialEq
-impl<D> PartialEq for MerkleTrie<D> {
-    fn eq(&self, other: &Self) -> bool {
-        self.0 == other.0
-    }
-}
-
-impl<D> Eq for MerkleTrie<D> {}
 
 impl<D> MerkleTrie<D>
 where
@@ -42,7 +35,7 @@ where
 {
     /// Creates a new empty trie.
     pub const fn new() -> Self {
-        MerkleTrie(Node::<D>::Null)
+        MerkleTrie(Node::null())
     }
 
     /// Returns a reference to the byte value corresponding to the key.

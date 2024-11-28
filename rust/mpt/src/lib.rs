@@ -12,4 +12,4 @@ pub use key_nibbles::KeyNibbles;
 pub use node::{KeccakNode, Node};
 pub use node_ref::{KeccakNodeRef, NodeRef};
 pub use trie::{KeccakMerkleTrie, MerkleTrie, MptError, ParseNodeError};
-pub use utils::reorder_with_root_as_first;
+pub use utils::reorder_with_root_as_first_using_keccak;
