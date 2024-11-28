@@ -191,6 +191,7 @@ forks = [
 # https://github.com/Uniswap/unichain-node/blob/main/chainconfig/sepolia/genesis-l2.json
 [[chains]]
 name = "unichain-sepolia"
+id = 1301
 is_optimism = true
 forks = [
   { spec = "GRANITE", activation = { Block = 0 } },
