@@ -24,11 +24,11 @@ where
     D: DatabaseRef,
     <D as DatabaseRef>::Error: Debug,
 {
-    insert_accounts_info(db, EMPTY_ACCOUNTS);
-    insert_account_storages(db, &ACCOUNT_TO_STORAGE.clone());
+    seed_accounts_info(db, EMPTY_ACCOUNTS);
+    seed_storage(db, &ACCOUNT_TO_STORAGE.clone());
 }
 
-fn insert_accounts_info<D>(db: &mut CacheDB<D>, accounts: &[Address])
+fn seed_accounts_info<D>(db: &mut CacheDB<D>, accounts: &[Address])
 where
     D: DatabaseRef,
 {
@@ -37,7 +37,7 @@ where
     }
 }
 
-fn insert_account_storages<D>(db: &mut CacheDB<D>, account_to_storage: &HashMap<Address, Storage>)
+fn seed_storage<D>(db: &mut CacheDB<D>, account_to_storage: &HashMap<Address, Storage>)
 where
     D: DatabaseRef,
     <D as DatabaseRef>::Error: Debug,
