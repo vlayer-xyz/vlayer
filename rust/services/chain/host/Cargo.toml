@@ -11,7 +11,6 @@ block_trie = { workspace = true }
 chain_common = { workspace = true }
 chain_db = { workspace = true }
 chain_guest = { workspace = true }
-chain_guest_wrapper = { workspace = true }
 chain_test_utils = { workspace = true }
 derivative = { workspace = true }
 derive-new ={ workspace = true }
@@ -26,6 +25,7 @@ tokio = { workspace = true, features = ["macros"] }
 tracing = { workspace = true }
 u64_range = { workspace = true }
 url = { workspace = true }
+common = { workspace = true }
 
 [dev-dependencies]
 alloy-rlp = { workspace = true, features = ["arrayvec"] }

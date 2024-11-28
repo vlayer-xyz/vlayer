@@ -11,7 +11,6 @@ block_trie = { workspace = true }
 bytemuck = { workspace = true }
 bytes = { workspace = true }
 chain_common = { workspace = true }
-chain_guest_wrapper = { workspace = true }
 common = { workspace = true }
 lazy_static = { workspace = true }
 risc0-zkvm = { workspace = true }

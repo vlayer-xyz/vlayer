@@ -9,7 +9,7 @@ use block_fetcher::BlockFetcher;
 use block_trie::BlockTrie;
 use chain_db::{ChainDb, ChainTrie, ChainUpdate, Mode};
 use chain_guest::Input;
-use chain_guest_wrapper::GUEST_ELF;
+use common::GuestElf;
 pub use config::HostConfig;
 use error::HostError;
 use ethers::{
@@ -29,6 +29,7 @@ where
     prover: Prover,
     fetcher: BlockFetcher<P>,
     chain_id: ChainId,
+    elf: GuestElf,
     prepend_strategy: PrependStrategy,
     append_strategy: AppendStrategy,
 }
@@ -36,14 +37,15 @@ where
 impl Host<Http> {
     pub fn try_new(config: HostConfig) -> Result<Self, HostError> {
         let block_fetcher = BlockFetcher::<Http>::new(config.rpc_url)?;
-        let prover = Prover::new(config.proof_mode);
-        let db = ChainDb::mdbx(config.db_path, Mode::ReadWrite)?;
+        let prover = Prover::new(config.proof_mode, config.elf.clone());
+        let db = ChainDb::mdbx(config.db_path, Mode::ReadWrite, config.elf.clone())?;
 
         Ok(Host::from_parts(
             prover,
             block_fetcher,
             db,
             config.chain_id,
+            config.elf,
             config.prepend_strategy,
             config.append_strategy,
         ))
@@ -59,6 +61,7 @@ where
         block_fetcher: BlockFetcher<P>,
         db: ChainDb,
         chain_id: ChainId,
+        elf: GuestElf,
         prepend_strategy: PrependStrategy,
         append_strategy: AppendStrategy,
     ) -> Self {
@@ -67,6 +70,7 @@ where
             fetcher: block_fetcher,
             db,
             chain_id,
+            elf,
             prepend_strategy,
             append_strategy,
         }
@@ -95,7 +99,7 @@ where
         let trie = BlockTrie::init(&latest_block)?;
 
         let input = Input::Initialize {
-            elf_id: GUEST_ELF.id,
+            elf_id: self.elf.id,
             block: latest_block,
         };
         let receipt = self.prover.prove(&input, None)?;
@@ -133,7 +137,7 @@ where
         trie.append(append_blocks.iter())?;
 
         let input = Input::AppendPrepend {
-            elf_id: GUEST_ELF.id,
+            elf_id: self.elf.id,
             prepend_blocks,
             append_blocks,
             old_leftmost_block,
@@ -150,6 +154,7 @@ where
 mod tests {
     use alloy_primitives::BlockNumber;
     use chain_test_utils::mock_provider;
+    use common::GuestElf;
     use ethers::providers::{MockProvider, Provider};
     use lazy_static::lazy_static;
 
@@ -172,7 +177,7 @@ mod tests {
     }
 
     fn test_db() -> ChainDb {
-        ChainDb::in_memory()
+        ChainDb::in_memory(GuestElf::default())
     }
 
     fn create_host(db: ChainDb, provider: Provider<MockProvider>) -> Host<MockProvider> {
@@ -181,6 +186,7 @@ mod tests {
             BlockFetcher::from_provider(provider),
             db,
             1,
+            GuestElf::default(),
             PREPEND_STRATEGY.clone(),
             APPEND_STRATEGY.clone(),
         )

@@ -51,6 +51,7 @@ pub async fn v_chain(
 
 #[cfg(test)]
 mod tests {
+    use common::GuestElf;
     use lazy_static::lazy_static;
 
     use super::*;
@@ -61,7 +62,7 @@ mod tests {
             chain_id: 1,
             block_numbers: vec![],
         };
-        let chain_db = Arc::new(RwLock::new(ChainDb::in_memory()));
+        let chain_db = Arc::new(RwLock::new(ChainDb::in_memory(GuestElf::default())));
         assert_eq!(
             v_chain(chain_db, empty_block_hashes).await.unwrap_err(),
             AppError::NoBlockNumbers
@@ -86,7 +87,7 @@ mod tests {
             static ref db_trie: MerkleTrie =
                 MerkleTrie::from_iter([([1], *parent_hash), ([2], *child_hash)]);
             static ref chain_db: Arc<RwLock<ChainDb>> = {
-                let db = Arc::new(RwLock::new(ChainDb::in_memory()));
+                let db = Arc::new(RwLock::new(ChainDb::in_memory(GuestElf::default())));
                 let range = NonEmptyRange::try_from_range(1..=2).unwrap();
                 let chain_info = ChainInfo::new(range, db_trie.hash_slow(), Bytes::default());
                 db.write().update_chain(1, ChainUpdate::new(chain_info, &*db_trie, [])).expect("update_chain failed");

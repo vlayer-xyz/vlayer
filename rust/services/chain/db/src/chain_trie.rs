@@ -1,7 +1,6 @@
 use block_trie::BlockTrie;
 use chain_common::{ChainProofReceipt, ProofVerificationError};
-use chain_guest_wrapper::GUEST_ELF;
-use common::Hashable;
+use common::{GuestElf, Hashable};
 use derive_new::new;
 use mpt::KeccakMerkleTrie as MerkleTrie;
 use u64_range::NonEmptyRange;
@@ -34,18 +33,16 @@ impl ChainTrie {
     }
 }
 
-impl TryFrom<UnverifiedChainTrie> for ChainTrie {
-    type Error = ProofVerificationError;
-
-    fn try_from(
-        UnverifiedChainTrie {
-            block_range,
-            trie,
-            zk_proof,
-        }: UnverifiedChainTrie,
-    ) -> Result<Self, Self::Error> {
-        zk_proof.verify(trie.hash_slow(), GUEST_ELF.id)?;
-        let block_trie = BlockTrie::from_unchecked(trie);
-        Ok(ChainTrie::new(block_range, block_trie, zk_proof))
-    }
+pub fn verify_chain_trie(
+    unverified: UnverifiedChainTrie,
+    elf: &GuestElf,
+) -> Result<ChainTrie, ProofVerificationError> {
+    let UnverifiedChainTrie {
+        block_range,
+        trie,
+        zk_proof,
+    } = unverified;
+    zk_proof.verify(trie.hash_slow(), elf.id)?;
+    let block_trie = BlockTrie::from_unchecked(trie);
+    Ok(ChainTrie::new(block_range, block_trie, zk_proof))
 }

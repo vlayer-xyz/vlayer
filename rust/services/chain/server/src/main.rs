@@ -7,6 +7,7 @@ mod trace;
 use std::{net::SocketAddr, path::PathBuf};
 
 use chain_db::{ChainDb, Mode};
+use chain_guest_wrapper::GUEST_ELF;
 use clap::Parser;
 use config::ServerConfig;
 use dotenvy::dotenv;
@@ -53,7 +54,7 @@ async fn main() -> anyhow::Result<()> {
 
     let cli = Cli::parse();
     let config = ServerConfig::new(cli.listen_addr);
-    let db = ChainDb::mdbx(cli.db_path, Mode::ReadOnly)?;
+    let db = ChainDb::mdbx(cli.db_path, Mode::ReadOnly, GUEST_ELF.clone())?;
 
     serve(config, db).await?;
 

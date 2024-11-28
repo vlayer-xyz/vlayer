@@ -1,6 +1,7 @@
 use std::path::PathBuf;
 
 use alloy_primitives::ChainId;
+use common::GuestElf;
 use host_utils::ProofMode;
 
 use super::strategy::{AppendStrategy, PrependStrategy};
@@ -11,6 +12,7 @@ pub struct HostConfig {
     pub chain_id: ChainId,
     pub proof_mode: ProofMode,
     pub db_path: PathBuf,
+    pub elf: GuestElf,
     pub prepend_strategy: PrependStrategy,
     pub append_strategy: AppendStrategy,
 }
