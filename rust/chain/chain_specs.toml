@@ -165,3 +165,25 @@ id = 31337
 forks = [
   { spec = "CANCUN", activation = { Block = 0 } }
 ]
+
+# https://github.com/worldcoin/world-id-docs/blob/524b92581b06b46dde08d7a31fc1f0c99aea180c/src/pages/world-chain/reference/node-setup.mdx#running-world-chain-mainnet
+[[chains]]
+name = "worldchain"
+id = 480
+is_optimism = true
+forks = [
+  { spec = "ECOTONE", activation = { Block = 0 } },
+  { spec = "FJORD", activation = { Timestamp = 1721826000 } },
+  { spec = "GRANITE", activation = { Timestamp = 1727780400 } },
+]
+
+# https://github.com/worldcoin/world-id-docs/blob/524b92581b06b46dde08d7a31fc1f0c99aea180c/src/pages/world-chain/reference/node-setup.mdx#running-world-chain-sepolia
+[[chains]]
+name = "worldchain-sepolia"
+id = 4801
+is_optimism = true
+forks = [
+  { spec = "ECOTONE", activation = { Block = 0 } },
+  { spec = "FJORD", activation = { Timestamp = 1721826000 } },
+  { spec = "GRANITE", activation = { Timestamp = 1727780400 } },
+]
