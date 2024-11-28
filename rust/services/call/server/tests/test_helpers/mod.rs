@@ -4,7 +4,7 @@ use derive_new::new;
 use mock::{Anvil, Client, Server};
 use mock_chain_server::{fake_proof_result, ChainProofServerMock};
 use serde_json::json;
-use server_utils::RpcServerMock;
+use server_utils::rpc::mock::Server as RpcServerMock;
 
 pub(crate) fn call_guest_elf() -> GuestElf {
     call_guest_wrapper::GUEST_ELF.clone()

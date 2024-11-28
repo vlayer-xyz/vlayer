@@ -7,7 +7,7 @@ use common::{GuestElf, Hashable};
 use lazy_static::lazy_static;
 use risc0_zkvm::{serde::to_vec, FakeReceipt, Receipt, ReceiptClaim};
 use serde::Serialize;
-use server_utils::RpcServerMock;
+use server_utils::rpc::mock::Server as RpcServerMock;
 
 lazy_static! {
     pub static ref EMPTY_PROOF_RESPONSE: Value =

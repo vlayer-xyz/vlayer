@@ -3,7 +3,7 @@ use async_trait::async_trait;
 use chain_common::{ChainProof, RpcChainProof};
 use derive_new::new;
 use serde::Serialize;
-use server_utils::{RpcClient as RawRpcClient, RpcMethod};
+use server_utils::rpc::{Client as RawRpcClient, Method};
 use tracing::info;
 
 use crate::{Client, Error};
@@ -26,7 +26,7 @@ struct GetChainProof {
     block_numbers: Vec<BlockNumber>,
 }
 
-impl RpcMethod for GetChainProof {
+impl Method for GetChainProof {
     const METHOD_NAME: &str = "v_chain";
 }
 

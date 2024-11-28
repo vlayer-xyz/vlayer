@@ -3,7 +3,7 @@ use axum_jrpc::{
     Value,
 };
 use call_host::Error as HostError;
-use server_utils::{FieldValidationError, RpcError};
+use server_utils::{rpc::Error as RpcError, FieldValidationError};
 use thiserror::Error;
 use tokio::task::JoinError;
 

@@ -91,7 +91,10 @@ mod server_tests {
             abi::AbiEncode,
             types::{Uint8, U256},
         };
-        use server_utils::{function_selector, RpcMethod, RpcServerMock};
+        use server_utils::{
+            function_selector,
+            rpc::{mock::Server as RpcServerMock, Method},
+        };
         use web_proof::fixtures::{load_web_proof_v7_fixture, NOTARY_PUB_KEY_PEM_EXAMPLE};
 
         use super::*;
