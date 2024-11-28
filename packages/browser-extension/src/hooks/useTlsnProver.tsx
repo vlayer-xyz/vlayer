@@ -2,6 +2,7 @@ import {
   NotaryServer,
   Prover as TProver,
   Presentation as TPresentation,
+  Transcript,
 } from "tlsn-js";
 import { Reveal } from "tlsn-wasm";
 import React, {
@@ -14,7 +15,11 @@ import React, {
 } from "react";
 import * as Comlink from "comlink";
 import { formatTlsnHeaders } from "lib/formatTlsnHeaders";
-import { isDefined, ExtensionMessageType } from "../web-proof-commons";
+import {
+  isDefined,
+  ExtensionMessageType,
+  WebProofStepNotarize,
+} from "../web-proof-commons";
 import { useProvingSessionConfig } from "./useProvingSessionConfig";
 import { useProvenUrl } from "./useProvenUrl";
 import { useTrackHistory } from "hooks/useTrackHistory";
@@ -70,6 +75,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
   useTrackHistory();
   const [provingSessionConfig] = useProvingSessionConfig();
   const provenUrl = useProvenUrl();
+  const [config] = useProvingSessionConfig();
 
   useEffect(() => {
     setFormattedHeaders(
@@ -119,9 +125,19 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
       console.log("Received response", res);
 
       const transcript = await prover.transcript();
+
+      const notarizeStep = config.steps.find(
+        ({ step }) => step === "notarize",
+      ) as WebProofStepNotarize;
+
+      console.log("notarizeStep.jsonRevealPath", notarizeStep.jsonRevealPath);
+      const recv = notarizeStep.jsonRevealPath
+        ? [transcript.ranges.recv.json![notarizeStep.jsonRevealPath]]
+        : [transcript.ranges.recv.all];
+
       const commit = {
         sent: [transcript.ranges.sent.all],
-        recv: [transcript.ranges.recv.all],
+        recv,
       };
       const notarizationOutputs = await prover.notarize(commit);
 
@@ -132,6 +148,14 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
         websocketProxyUrl: notarizationOutputs.websocketProxyUrl,
         reveal: commit,
       });
+
+      const verifierOutput = await presentation.verify();
+      console.log("Presentation verifierOutput", verifierOutput);
+      const received = new Transcript({
+        sent: verifierOutput.transcript.sent,
+        recv: verifierOutput.transcript.recv,
+      }).recv();
+      console.log("Transcript recv", received);
 
       const tlsnProof = await presentation.json();
 
