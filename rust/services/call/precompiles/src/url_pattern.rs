@@ -6,7 +6,7 @@ use url::Url;
 use urlpattern::{UrlPattern, UrlPatternInit, UrlPatternMatchInput, UrlPatternOptions};
 
 use crate::{gas_used, map_to_fatal};
-pub(super) const PRECOMPILE: Precompile = Precompile::Standard(test);
+pub(super) const TEST: Precompile = Precompile::Standard(test);
 
 const BASE_COST: u64 = 10;
 const PER_WORD_COST: u64 = 1;
