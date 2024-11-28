@@ -12,9 +12,7 @@ use crate::{
     evm_env::factory::HostEvmEnvFactory,
     test_harness::{
         contracts::{
-            time_travel::{
-                self, AVERAGE_BALANCE_OF_CALL, SIMPLE_TIME_TRAVEL,
-            },
+            time_travel::{self, AVERAGE_BALANCE_OF_CALL, SIMPLE_TIME_TRAVEL},
             usdt::{self, IERC20::balanceOfCall, USDT},
         },
         rpc_snapshot_file,
