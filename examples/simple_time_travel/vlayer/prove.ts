@@ -1,4 +1,3 @@
-import { optimismSepolia } from "viem/chains";
 import { createVlayerClient } from "@vlayer/sdk";
 import proverSpec from "../out/AverageBalance.sol/AverageBalance";
 import verifierSpec from "../out/AverageBalanceVerifier.sol/AverageBalanceVerifier";
@@ -8,15 +7,32 @@ import {
   getConfig,
   waitForTransactionReceipt,
 } from "@vlayer/sdk/config";
-
-const tokenOwner = "0xE6b08c02Dbf3a0a4D3763136285B85A9B492E391"; // Owner of the USDC token at OP Sepolia
-const usdcTokenAddr = "0x5fd84259d66Cd46123540766Be93DFE6D43130D7"; // Test USDC at OP Sepolia
-const startBlock = 17915294n;
-const endBlock = 17985294n;
-const step = 9000n;
+import { $ } from "bun";
+import { type Address } from "viem";
 
 const config = getConfig();
 const { ethClient, account, proverUrl } = await createContext(config);
+
+let tokenOwner: Address;
+let usdcTokenAddr: Address;
+let startBlock: bigint;
+let endBlock: bigint;
+let step: bigint;
+
+if (process.env.VLAYER_ENV === "dev") {
+  await $`forge script --chain anvil scripts/AnvilSetup.s.sol:AnvilSetup --rpc-url ${config.jsonRpcUrl} --broadcast --private-key ${config.privateKey}`;
+  tokenOwner = "0xf39Fd6e51aad88F6F4ce6aB8827279cffFb92266"; // Owner of the USDC token at anvil
+  usdcTokenAddr = "0x5FbDB2315678afecb367f032d93F642f64180aa3"; // USDC at anvil
+  startBlock = 1n;
+  endBlock = 40n;
+  step = 10n;
+} else {
+  tokenOwner = "0xE6b08c02Dbf3a0a4D3763136285B85A9B492E391"; // Owner of the USDC token at OP Sepolia
+  usdcTokenAddr = "0x5fd84259d66Cd46123540766Be93DFE6D43130D7"; // Test USDC at OP Sepolia
+  startBlock = 17915294n;
+  endBlock = 17985294n;
+  step = 9000n;
+}
 
 const { prover, verifier } = await deployVlayerContracts({
   proverSpec,
@@ -34,7 +50,7 @@ const provingHash = await vlayer.prove({
   proverAbi: proverSpec.abi,
   functionName: "averageBalanceOf",
   args: [tokenOwner],
-  chainId: optimismSepolia.id,
+  chainId: ethClient.chain.id,
 });
 
 console.log("Waiting for proving result: ");
