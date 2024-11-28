@@ -15,8 +15,14 @@ function App() {
           vlayerFlow.requestWebProof();
         }}
       >
-        Request Web Proof
+        {vlayerFlow.isWebProving ? "Web Proofing..." : "Request Web Proof"}
       </Button>
+
+      {vlayerFlow.webProof ? (
+        <Button onClick={() => vlayerFlow.requestZkProof()}>
+          {vlayerFlow.isZkProving ? "ZK Proofing..." : "Request ZK Proof"}
+        </Button>
+      ) : null}
     </div>
   );
 }
