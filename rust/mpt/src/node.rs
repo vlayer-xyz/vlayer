@@ -15,6 +15,7 @@ pub mod rlp;
 pub mod size;
 
 #[derive(Debug, Default, Serialize, Deserialize)]
+#[serde(bound = "")]
 pub enum Node<D> {
     #[default]
     Null,

@@ -5,7 +5,7 @@ use block_header::{EvmBlockHeader, Hashable};
 use derive_more::{From, Into, IntoIterator};
 use derive_new::new;
 use itertools::Itertools;
-use mpt::MerkleTrie;
+use mpt::KeccakMerkleTrie as MerkleTrie;
 use serde::{Deserialize, Serialize};
 use tracing::debug;
 

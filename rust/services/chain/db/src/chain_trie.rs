@@ -3,7 +3,7 @@ use chain_common::{ChainProofReceipt, ProofVerificationError};
 use chain_guest_wrapper::GUEST_ELF;
 use common::Hashable;
 use derive_new::new;
-use mpt::MerkleTrie;
+use mpt::KeccakMerkleTrie as MerkleTrie;
 use u64_range::NonEmptyRange;
 
 #[derive(new)]

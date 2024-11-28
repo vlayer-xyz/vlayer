@@ -1,5 +1,5 @@
 use common::Hashable;
-use mpt::MerkleTrie;
+use mpt::KeccakMerkleTrie as MerkleTrie;
 
 use crate::{benchmarks::merge, with_fixture, Benchmark};
 

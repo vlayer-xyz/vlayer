@@ -1,5 +1,5 @@
 use alloy_primitives::{BlockNumber, B256};
-use mpt::{MerkleTrie, Node, NodeRef};
+use mpt::{KeccakMerkleTrie as MerkleTrie, KeccakNode as Node, KeccakNodeRef as NodeRef};
 use nybbles::Nibbles;
 
 use crate::{ChainDbError, ChainDbResult, DbNode};
@@ -87,6 +87,7 @@ impl<F: Fn(B256) -> ChainDbResult<DbNode>> MerkleProofBuilder<F> {
                 let node_hash = *node_hash;
                 self.visit_node_hash(node_hash)
             }
+            Node::Phantom(_) => unreachable!(),
         }
     }
 
@@ -98,6 +99,7 @@ impl<F: Fn(B256) -> ChainDbResult<DbNode>> MerkleProofBuilder<F> {
                 let node = DbNode::decode(None, node_rlp)?;
                 self.visit_node(node)
             }
+            NodeRef::Phantom(_) => unreachable!(),
         }
     }
 

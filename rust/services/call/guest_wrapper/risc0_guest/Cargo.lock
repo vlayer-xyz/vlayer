@@ -2365,6 +2365,7 @@ dependencies = [
  "alloy-trie",
  "bytes",
  "common",
+ "derivative",
  "derive_more",
  "digest 0.10.7",
  "itertools 0.13.0",

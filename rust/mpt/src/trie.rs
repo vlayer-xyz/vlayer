@@ -24,6 +24,7 @@ pub enum ParseNodeError {
 
 /// A sparse Merkle Patricia trie storing byte values.
 #[derive(Debug, Clone, Default, Serialize, Deserialize)]
+#[serde(bound = "")]
 pub struct MerkleTrie<D>(pub Node<D>);
 
 // Does not require D: PartialEq

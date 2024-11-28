@@ -3,7 +3,7 @@ use alloy_rlp::encode_fixed_size;
 use block_header::EvmBlockHeader;
 use bytes::Bytes;
 use common::Hashable;
-use mpt::{MerkleTrie, Node};
+use mpt::{KeccakMerkleTrie as MerkleTrie, KeccakNode as Node};
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 
