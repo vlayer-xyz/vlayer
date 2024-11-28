@@ -11,7 +11,7 @@ ENV PATH="/home/vlayer/.cargo/bin:${PATH}"
 
 RUN curl -L https://risczero.com/install | bash
 ENV PATH="/home/vlayer/.risc0/bin:${PATH}"
-RUN rzup install cargo-risczero v1.0.5
+RUN rzup install cargo-risczero v1.1.3
 
 RUN curl -L https://vlayer-releases.s3.eu-north-1.amazonaws.com/latest/nightly-linux-amd64.tar.gz -o nightly-linux-amd64.tar.gz
 RUN tar -xvf nightly-linux-amd64.tar.gz
