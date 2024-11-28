@@ -59,13 +59,13 @@ impl From<Call> for TxEnv {
                 to => TxKind::Call(to),
             },
             data: call.data.into(),
-            optimism: default_optimism_fields(),
+            optimism: initialize_optimism_fields(),
             ..Default::default()
         }
     }
 }
 
-fn default_optimism_fields() -> OptimismFields {
+fn initialize_optimism_fields() -> OptimismFields {
     OptimismFields {
         source_hash: None,
         mint: None,
