@@ -25,7 +25,7 @@ impl<D> Node<D> {
             }
             Node::Branch(_, _) => self.insert_entry_into_branch((key, value)),
             Node::Extension(_, _) => self.insert_entry_into_extension((key, value)),
-            Node::Phantom(_) => unreachable!(),
+            Node::_Phantom(_) => unreachable!(),
         }
     }
 }

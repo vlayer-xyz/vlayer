@@ -63,7 +63,7 @@ impl<D: Digest> Encodable for Node<D> {
                 value.encode(out);
             }
             Node::Digest(digest) => digest.encode(out),
-            Node::Phantom(_) => unreachable!(),
+            Node::_Phantom(_) => unreachable!(),
         }
     }
 }
@@ -161,7 +161,7 @@ impl<D: Digest> Node<D> {
                 .collect(),
             Node::Extension(_, child) => child.to_rlp_nodes(),
             Node::Null | Node::Leaf(..) | Node::Digest(..) => vec![],
-            Node::Phantom(_) => unreachable!(),
+            Node::_Phantom(_) => unreachable!(),
         };
         nodes.append(&mut children);
         nodes

@@ -87,7 +87,7 @@ impl<F: Fn(B256) -> ChainDbResult<DbNode>> MerkleProofBuilder<F> {
                 let node_hash = *node_hash;
                 self.visit_node_hash(node_hash)
             }
-            Node::Phantom(_) => unreachable!(),
+            Node::_Phantom(_) => unreachable!(),
         }
     }
 
@@ -99,7 +99,7 @@ impl<F: Fn(B256) -> ChainDbResult<DbNode>> MerkleProofBuilder<F> {
                 let node = DbNode::decode(None, node_rlp)?;
                 self.visit_node(node)
             }
-            NodeRef::Phantom(_) => unreachable!(),
+            NodeRef::_Phantom(_) => unreachable!(),
         }
     }
 

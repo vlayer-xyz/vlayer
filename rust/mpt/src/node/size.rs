@@ -15,7 +15,7 @@ impl<D> Node<D> {
                     .map(Node::size)
                     .sum::<usize>()
             }
-            Node::Phantom(_) => unreachable!(),
+            Node::_Phantom(_) => unreachable!(),
         }
     }
 }

@@ -35,7 +35,7 @@ pub(crate) fn resolve_trie<D>(root: Node<D>, nodes_by_hash: &HashMap<B256, Node<
             Some(node) => resolve_trie(node.clone(), nodes_by_hash),
             None => root,
         },
-        Node::Phantom(_) => unreachable!(),
+        Node::_Phantom(_) => unreachable!(),
     }
 }
 

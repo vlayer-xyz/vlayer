@@ -25,7 +25,7 @@ pub enum Node<D> {
     Extension(KeyNibbles, Box<Node<D>>),
     Branch([Option<Box<Node<D>>>; 16], Option<Bytes>),
     Digest(B256),
-    Phantom(PhantomData<D>),
+    _Phantom(PhantomData<D>),
 }
 
 impl<D> Node<D>
@@ -52,7 +52,7 @@ where
                 }
             }
             Node::Digest(_) => panic!("Attempted to access unresolved node"),
-            Node::Phantom(_) => unreachable!(),
+            Node::_Phantom(_) => unreachable!(),
         }
     }
 }

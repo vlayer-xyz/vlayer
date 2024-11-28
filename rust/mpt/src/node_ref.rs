@@ -18,7 +18,7 @@ pub enum NodeRef<D> {
     Digest(B256),
     InlineNode(Bytes),
     Node(Bytes),
-    Phantom(PhantomData<D>),
+    _Phantom(PhantomData<D>),
 }
 
 impl<D: Digest> NodeRef<D> {
@@ -45,7 +45,7 @@ impl<D: Digest> NodeRef<D> {
             NodeRef::Empty => 1,
             NodeRef::Digest(_) | NodeRef::Node(_) => DIGEST_LENGTH,
             NodeRef::InlineNode(rlp) => rlp.len(),
-            NodeRef::Phantom(_) => unreachable!(),
+            NodeRef::_Phantom(_) => unreachable!(),
         }
     }
 }
@@ -60,7 +60,7 @@ where
             NodeRef::Digest(digest) => digest.encode(out),
             NodeRef::InlineNode(data) => out.put_slice(data),
             NodeRef::Node(rlp) => hash::<D>(rlp).encode(out),
-            NodeRef::Phantom(_) => unreachable!(),
+            NodeRef::_Phantom(_) => unreachable!(),
         }
     }
 }
