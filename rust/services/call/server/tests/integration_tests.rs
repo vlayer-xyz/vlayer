@@ -187,8 +187,17 @@ mod server_tests {
 
         #[tokio::test(flavor = "multi_thread")]
         async fn simple_with_gasmeter() {
-            let gas_meter_server_mock: RpcServerMock =
-                RpcServerMock::start(AllocateGas::METHOD_NAME, true, json!({}), json!({})).await;
+            let gas_meter_server_mock: RpcServerMock = RpcServerMock::start(
+                AllocateGas::METHOD_NAME,
+                false,
+                json!({
+                    "gas_limit":1000000,
+                    "hash":"0xf8d32367d8ec243e8e6fcac96dc769ed80287534d51c5d1e817173128f2b6218",
+                    "time_to_live":3600
+                }),
+                json!({}),
+            )
+            .await;
 
             let mut helper = TestHelper::default().await;
             helper.server_config.set_gas_meter_config(GasMeterConfig {
@@ -219,6 +228,7 @@ mod server_tests {
             });
             let response = helper.post("/", &req).await;
             assert_eq!(StatusCode::OK, response.status());
+            gas_meter_server_mock.assert();
         }
 
         #[tokio::test(flavor = "multi_thread")]
