@@ -65,6 +65,7 @@ async fn create_chain_proof_server(
             "block_numbers": [block_number]
         }),
         result,
+        0,
     )
     .await;
 

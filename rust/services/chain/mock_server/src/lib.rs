@@ -34,8 +34,13 @@ pub struct ChainProofServerMock {
 }
 
 impl ChainProofServerMock {
-    pub async fn start(params: impl Serialize, result: impl Serialize) -> Self {
-        let mock_server = RpcServerMock::start("v_chain", true, params, result).await;
+    pub async fn start(
+        params: impl Serialize,
+        result: impl Serialize,
+        expected_calls: usize,
+    ) -> Self {
+        let mock_server =
+            RpcServerMock::start("v_chain", true, params, result, expected_calls).await;
 
         ChainProofServerMock { mock_server }
     }

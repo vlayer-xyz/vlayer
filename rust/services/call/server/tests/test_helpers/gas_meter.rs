@@ -9,7 +9,7 @@ pub struct ServerMock(RpcServerMock);
 impl ServerMock {
     pub async fn start(params: impl Serialize, result: impl Serialize) -> ServerMock {
         let mock_server =
-            RpcServerMock::start(AllocateGas::METHOD_NAME, true, params, result).await;
+            RpcServerMock::start(AllocateGas::METHOD_NAME, true, params, result, 1).await;
         Self(mock_server)
     }
 }

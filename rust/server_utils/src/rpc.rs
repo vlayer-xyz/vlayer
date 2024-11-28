@@ -18,6 +18,7 @@ impl RpcServerMock {
         is_partial: bool,
         params: impl Serialize,
         result: impl Serialize,
+        expected_calls: usize,
     ) -> Self {
         let mut server = mockito::Server::new_async().await;
 
@@ -48,6 +49,7 @@ impl RpcServerMock {
             .with_status(200)
             .with_header("Content-Type", "application/json")
             .with_body(response_body.to_string())
+            .expect(expected_calls)
             .create_async()
             .await;
 
@@ -160,7 +162,7 @@ mod tests {
         let params = GetData::new("value".into());
         let expected_response = json!({"data": "some data"});
         let mock =
-            RpcServerMock::start(GetData::METHOD_NAME, false, &params, &expected_response).await;
+            RpcServerMock::start(GetData::METHOD_NAME, false, &params, &expected_response, 1).await;
         let rpc_client = RpcClient::new(&mock.url());
 
         let response = rpc_client.call(params).await?;
@@ -175,7 +177,7 @@ mod tests {
     #[tokio::test]
     #[should_panic(expected = "wrong number of requests. expected 1")]
     async fn mock_not_called_panics() {
-        let mock = RpcServerMock::start(GetData::METHOD_NAME, false, json!({}), json!({})).await;
+        let mock = RpcServerMock::start(GetData::METHOD_NAME, false, json!({}), json!({}), 1).await;
 
         mock.assert();
     }
@@ -183,7 +185,7 @@ mod tests {
     #[tokio::test]
     async fn call_without_mock_returns_error() {
         let params = GetData::new("value".into());
-        let mock = RpcServerMock::start(GetData::METHOD_NAME, false, json!({}), json!({})).await;
+        let mock = RpcServerMock::start(GetData::METHOD_NAME, false, json!({}), json!({}), 1).await;
         let rpc_client = RpcClient::new(&mock.url());
 
         let result = rpc_client.call(params).await;
@@ -199,6 +201,7 @@ mod tests {
             true,
             json!({}),
             json!({"data": "some data"}),
+            1,
         )
         .await;
         let rpc_client = RpcClient::new(&mock.url());
@@ -220,6 +223,7 @@ mod tests {
             false,
             json!({}),
             json!({"data": "some data"}),
+            1,
         )
         .await;
         let rpc_client = RpcClient::new(&mock.url());

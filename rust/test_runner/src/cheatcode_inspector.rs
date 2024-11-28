@@ -124,7 +124,7 @@ impl CheatcodeInspector {
 }
 
 async fn start_chain_proof_server() -> ChainProofServerMock {
-    ChainProofServerMock::start(json!({}), EMPTY_PROOF_RESPONSE.clone()).await
+    ChainProofServerMock::start(json!({}), EMPTY_PROOF_RESPONSE.clone(), 1).await
 }
 
 fn create_host<DB: Database>(

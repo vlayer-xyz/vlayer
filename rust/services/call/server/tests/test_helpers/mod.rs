@@ -97,7 +97,7 @@ async fn start_chain_proof_server(
     latest_block_header: Box<dyn EvmBlockHeader>,
 ) -> ChainProofServerMock {
     let result = fake_proof_result(latest_block_header);
-    ChainProofServerMock::start(json!({}), result).await
+    ChainProofServerMock::start(json!({}), result, 1).await
 }
 
 async fn setup_anvil() -> AnvilInstance {
