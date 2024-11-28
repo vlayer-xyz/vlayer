@@ -83,6 +83,7 @@ export type WebProofStepNotarize = Branded<
     url: UrlPattern;
     method: string;
     label: string;
+    jsonRevealPath: string;
     step: typeof EXTENSION_STEP.notarize;
   },
   "notarize"

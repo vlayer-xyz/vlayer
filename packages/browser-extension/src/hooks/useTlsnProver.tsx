@@ -15,7 +15,11 @@ import React, {
 } from "react";
 import * as Comlink from "comlink";
 import { formatTlsnHeaders } from "lib/formatTlsnHeaders";
-import { isDefined, ExtensionMessageType } from "../web-proof-commons";
+import {
+  isDefined,
+  ExtensionMessageType,
+  WebProofStepNotarize,
+} from "../web-proof-commons";
 import { useProvingSessionConfig } from "./useProvingSessionConfig";
 import { useProvenUrl } from "./useProvenUrl";
 import { useTrackHistory } from "hooks/useTrackHistory";
@@ -70,6 +74,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
   useTrackHistory();
   const [provingSessionConfig] = useProvingSessionConfig();
   const provenUrl = useProvenUrl();
+  const [config] = useProvingSessionConfig();
 
   useEffect(() => {
     setFormattedHeaders(
@@ -119,7 +124,17 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
       const transcript = await prover.transcript();
 
       console.log("recv", transcript.recv);
-      const range = getHttpResponseFragments(transcript.recv, 'userDataByProvider.0.accounts.0.accountNumber');
+      
+      const notarizeStep = config.steps.find(
+        ({ step }) => step === "notarize",
+      ) as WebProofStepNotarize;
+
+      console.log("notarizeStep.jsonRevealPath", notarizeStep.jsonRevealPath);
+
+      const range = getHttpResponseFragments(
+        transcript.recv,
+        notarizeStep.jsonRevealPath,
+      );
       console.log("range", range);
 
       const commit = {

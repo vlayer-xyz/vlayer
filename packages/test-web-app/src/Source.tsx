@@ -67,7 +67,12 @@ function SourceNewWay() {
       steps: [
         startPage(loginUrl, "Go to login"),
         expectUrl(targetUrl, "Logged in and appear at target page"),
-        notarize("https://swapi.dev/api/people/1", "GET", "Prove"),
+        notarize(
+          "https://swapi.dev/api/people/1",
+          "GET",
+          "Prove",
+          "userDataByProvider.0.accounts.0.accountNumber",
+        ),
       ],
     });
   }, []);
@@ -153,7 +158,12 @@ function Source() {
       steps: [
         startPage(loginUrl, "Go to login"),
         expectUrl(targetUrl, "Logged in and appear at target page"),
-        notarize("https://swapi.dev/api/people/1", "GET", "Prove"),
+        notarize(
+          "https://swapi.dev/api/people/1",
+          "GET",
+          "Prove",
+          "userDataByProvider.0.accounts.0.accountNumber",
+        ),
       ],
     });
 
