@@ -10,12 +10,11 @@ build = "build.rs"
 
 [dependencies]
 alloy-primitives = { workspace = true, features = ["rlp"] }
+
+anyhow = { workspace = true }
 call_guest_wrapper = { workspace = true }
 call_server = { workspace = true }
 chain_guest_wrapper = { workspace = true }
-test_runner = { workspace = true }
-
-anyhow = { workspace = true }
 clap = { workspace = true, features = ["derive", "string"] }
 colored = { workspace = true }
 flate2 = { workspace = true }
@@ -26,6 +25,7 @@ reqwest = { workspace = true, features = ["json"] }
 serde_json = { workspace = true }
 tar = { workspace = true }
 tempfile = { workspace = true }
+test_runner = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
 toml = { workspace = true }
