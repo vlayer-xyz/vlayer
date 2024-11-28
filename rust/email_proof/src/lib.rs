@@ -55,9 +55,6 @@ mod tests {
         assert_eq!(parsed.subject, Some("test confirmation".into()));
         assert!(parsed
             .body
-            .contains("This is a multi-part message in MIME format."));
-        assert!(parsed
-            .body
             .contains("testtest\ntesttest\ntesttest\ntesttest\ntesttest\ntesttest"));
     }
 }

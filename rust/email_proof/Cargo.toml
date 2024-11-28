@@ -14,8 +14,8 @@ ring = "0.17.8"
 thiserror = { workspace = true }
 
 [dev-dependencies]
-hex-literal = "0.4.1"
 anyhow = { workspace = true }
+hex-literal = "0.4.1"
 lazy_static = { workspace = true }
 
 [lints]
