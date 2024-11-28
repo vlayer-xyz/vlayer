@@ -16,8 +16,8 @@ function run_services {
 # }
 
 function run_web_app {
-    cd ${VLAYER_HOME}/packages/test-web-app
-    bun run dev &
+    cd ${VLAYER_HOME}/examples/rayls/vlayer
+    bun run web:testnet &
 }
 
 function run_browser_extension {
@@ -27,7 +27,7 @@ function run_browser_extension {
 
 function install_deps {
     cd ${VLAYER_HOME}/packages && bun install --frozen-lockfile
-    cd ${VLAYER_HOME}/examples/simple_web_proof/vlayer && bun install --frozen-lockfile
+    cd ${VLAYER_HOME}/examples/rayls/vlayer && bun install --frozen-lockfile
 }
 
 install_deps

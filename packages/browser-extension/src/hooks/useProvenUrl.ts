@@ -9,8 +9,10 @@ export function useProvenUrl(): HistoryItem | null {
   const provenUrlAddress = steps.find(({ step }) => step === "notarize")?.url;
 
   return (
-    browsingHistory.find((item) =>
-      item.url.includes(provenUrlAddress as string),
-    ) ?? null
+    browsingHistory.find((item: HistoryItem) => {
+      return (
+        new URLPattern(provenUrlAddress as string).test(item.url) && item.ready
+      );
+    }) ?? null
   );
 }

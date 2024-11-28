@@ -14,8 +14,10 @@
     "@noble/hashes": "^1.4.0",
     "@vlayer/sdk": "file:../../../packages/sdk",
     "react": "^18.3.1",
+    "react-daisyui": "^5.0.5",
     "react-dom": "^18.3.1",
     "solhint": "^5.0.3",
+    "tlsn-js": "^0.1.0-alpha.7.1",
     "ts-pattern": "^5.5.0",
     "viem": "2.21.0"
   },

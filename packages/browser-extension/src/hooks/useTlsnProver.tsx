@@ -2,6 +2,7 @@ import {
   NotaryServer,
   Prover as TProver,
   Presentation as TPresentation,
+  Transcript,
 } from "tlsn-js";
 import { Reveal } from "tlsn-wasm";
 import React, {
@@ -18,7 +19,6 @@ import { isDefined, ExtensionMessageType } from "../web-proof-commons";
 import { useProvingSessionConfig } from "./useProvingSessionConfig";
 import { useProvenUrl } from "./useProvenUrl";
 import { useTrackHistory } from "hooks/useTrackHistory";
-import { removeQueryParams } from "lib/removeQueryParams";
 import sendMessageToServiceWorker from "lib/sendMessageToServiceWorker";
 
 type ProverConfig = {
@@ -107,7 +107,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
       const res = await prover.sendRequest(
         provingSessionConfig.wsProxyUrl + `?token=${hostname}`,
         {
-          url: removeQueryParams(provenUrl.url),
+          url: provenUrl.url,
           method: "GET",
           headers: {
             "Content-Type": "application/json",
@@ -119,10 +119,12 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
       console.log("Received response", res);
 
       const transcript = await prover.transcript();
+
       const commit = {
         sent: [transcript.ranges.sent.all],
-        recv: [transcript.ranges.recv.all],
+        recv: [{ start: 2, end: 28 }],
       };
+
       const notarizationOutputs = await prover.notarize(commit);
 
       const presentation = await new Presentation({
@@ -134,6 +136,22 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
       });
 
       const tlsnProof = await presentation.json();
+
+      // const beautyProof = await new Presentation(tlsnProof.data);
+      // // const proof = (await new Presentation(
+      // //   presentationJSON.data,
+      // // )) as TPresentation;
+      // // const notary = NotaryServer.from(`http://localhost:7047`);
+      // // const notaryKey = await notary.publicKey('hex');
+      const verifierOutput = await presentation.verify();
+
+      const beauty = new Transcript({
+        sent: verifierOutput?.transcript.sent,
+        recv: verifierOutput?.transcript.recv,
+      });
+      console.log("verifierOutput", tlsnProof);
+      console.log("beauty", beauty.recv());
+      console.log("beauty", beauty.sent());
 
       void sendMessageToServiceWorker({
         type: ExtensionMessageType.ProofDone,
