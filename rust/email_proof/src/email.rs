@@ -32,7 +32,7 @@ impl TryFrom<ParsedMail<'_>> for Email {
         let to = get_header("To").ok_or(MailParseError::Generic("\"To\" header is missing"))?;
         let subject = get_header("Subject");
 
-        let body = get_body_recursive(&mail)?;
+        let body = get_body(&mail)?;
 
         Ok(Email {
             from: from_email,
@@ -43,15 +43,26 @@ impl TryFrom<ParsedMail<'_>> for Email {
     }
 }
 
-fn get_body_recursive(mail: &ParsedMail) -> Result<String, MailParseError> {
-    if mail.ctype.mimetype.starts_with("multipart/") {
-        let x: Result<Vec<String>, MailParseError> =
-            mail.parts().skip(1).map(get_body_recursive).collect();
-
-        Ok(format!("{}{}", mail.get_body()?, x?.join("")))
-    } else {
-        mail.get_body()
+fn get_body(mail: &ParsedMail) -> Result<String, MailParseError> {
+    if is_plain_text_mimetype(&mail) {
+        return mail.get_body();
     }
+
+    let plain_text_bodies = mail
+        .parts()
+        .filter(is_plain_text_mimetype)
+        .map(|mail| mail.get_body())
+        .collect::<Result<Vec<String>, MailParseError>>()?;
+
+    if plain_text_bodies.is_empty() {
+        return Err(MailParseError::Generic("Plain text body not found in the email"));
+    }
+
+    Ok(plain_text_bodies.join(""))
+}
+
+fn is_plain_text_mimetype(part: &&ParsedMail) -> bool {
+    part.ctype.mimetype == "text/plain"
 }
 
 impl Email {
@@ -108,22 +119,100 @@ mod test {
         email
     }
 
+    fn read_file(file: &str) -> Vec<u8> {
+        use std::{fs::File, io::Read};
+
+        let mut f = File::open(file).unwrap();
+        let mut buffer = Vec::new();
+        f.read_to_end(&mut buffer).unwrap();
+
+        buffer
+    }
+
     fn parsed_email(headers: Vec<(&str, &str)>, body: &str) -> Result<Email, MailParseError> {
         let mime = build_mime_email(headers, body);
         mailparse::parse_mail(mime.as_bytes()).and_then(Email::try_from)
     }
 
+    mod get_body {
+        use super::*;
+
+        #[test]
+        fn returns_plain_text_for_raw_email_body() -> anyhow::Result<()> {
+            let email =
+                build_mime_email(vec![("Content-Type", "text/plain")], "This is a plain body");
+            let body = get_body(&mailparse::parse_mail(email.as_bytes())?)?;
+
+            assert_eq!(body, "This is a plain body");
+            Ok(())
+        }
+
+        #[test]
+        fn throws_when_no_plain_text_in_email() -> anyhow::Result<()> {
+            let email =
+                build_mime_email(vec![("Content-Type", "text/html")], "<div>This is html</div>");
+            let body = get_body(&mailparse::parse_mail(email.as_bytes())?);
+
+            assert_eq!(body.err().unwrap().to_string(), "Plain text body not found in the email");
+            Ok(())
+        }
+
+        #[test]
+        fn for_multipart_email_concats_all_plain_texts() -> anyhow::Result<()> {
+            let email = read_file("testdata/email.txt");
+            let body = get_body(&mailparse::parse_mail(&email)?)?;
+
+            assert_eq!(
+                body,
+                r"testtest
+testtest
+testtest
+testtest
+testtest
+testtest
+
+
+
+74c8f09dfa30eaccfb392b132314fc6b978f325a *flex-confirm-mail.1.10.0.xpi
+ccee4b4aa47f513abce342ce1e2ec2fd9600e31b *flex-confirm-mail.1.11.0.xpi
+071e9e378ad0179bfadb1bdc650a49454d204a83 *flex-confirm-mail.1.12.0.xpi
+9d7aa153418ea8fbc8be7ba6f54ce8a1cb7ee468 *flex-confirm-mail.1.9.9.xpi
+8168563cb276ea4f9a2b630b9a207d90fb11856e *flex-confirm-mail.xpi
+"
+            );
+
+            Ok(())
+        }
+
+        #[test]
+        fn throws_if_no_plain_text_among_multiparts() -> anyhow::Result<()> {
+            let email = build_mime_email(
+                vec![(
+                    "Content-Type",
+                    "multipart/alternative; boundary=\"0000000000002fe9ab0626ed1e27\"",
+                )],
+                r#"--0000000000002fe9ab0626ed1e27
+Content-Type: text/html; charset="UTF-8"
+
+Welcome to vlayer, 0x0E8e5015042BeF1ccF2D449652C7A457a163ECB9
+
+--0000000000002fe9ab0626ed1e27
+Content-Type: text/html; charset="UTF-8"
+
+<div dir="ltr">Welcome to vlayer, 0x0E8e5015042BeF1ccF2D449652C7A457a163ECB9</div>
+
+--0000000000002fe9ab0626ed1e27--"#,
+            );
+
+            let body = get_body(&mailparse::parse_mail(email.as_bytes())?);
+
+            assert_eq!(body.err().unwrap().to_string(), "Plain text body not found in the email");
+            Ok(())
+        }
+    }
+
     mod try_from {
         use super::*;
-        fn read_file(file: &str) -> Vec<u8> {
-            use std::{fs::File, io::Read};
-
-            let mut f = File::open(file).unwrap();
-            let mut buffer = Vec::new();
-            f.read_to_end(&mut buffer).unwrap();
-
-            buffer
-        }
 
         #[test]
         fn parses_email() {
@@ -145,11 +234,7 @@ mod test {
                 .unwrap()
                 .try_into()
                 .unwrap();
-            let expected_body = "Welcome to vlayer, 0x0E8e5015042BeF1ccF2D449652C7A457a163ECB9
-
-<div dir=\"ltr\">Welcome to vlayer, 0x0E8e5015042BeF1ccF2D449652C7A457a163ECB9</div>
-
-";
+            let expected_body = "Welcome to vlayer, 0x0E8e5015042BeF1ccF2D449652C7A457a163ECB9\n\n";
             assert_eq!(email.body, expected_body);
             assert_eq!(email.from, "grzegorz@vlayer.xyz");
             assert_eq!(email.to, "Grzegorz Pociejewski <grzegorz@vlayer.xyz>");
