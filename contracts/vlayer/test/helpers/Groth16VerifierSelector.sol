@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: UNLICENSED
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.21;
 
 library Groth16VerifierSelector {
     // value ensures that versions of risc0-ethereum and risc0-zkvm deps are compatible

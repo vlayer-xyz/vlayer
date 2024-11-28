@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: Apache-2.0
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.21;
 
 /// @notice A CallAssumptions struct representing a block number and its block hash.
 struct CallAssumptions {

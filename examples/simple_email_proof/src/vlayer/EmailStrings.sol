@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.13;
+pragma solidity ^0.8.21;
 
 library EmailStrings {
     function contains(string memory _string, string memory _substring) internal pure returns (bool) {
