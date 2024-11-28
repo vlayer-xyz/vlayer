@@ -17,7 +17,7 @@ function run_services {
 
 function run_web_app {
     cd ${VLAYER_HOME}/examples/rayls/vlayer
-    bun run web:testnet &
+    bun run web:dev &
 }
 
 function run_browser_extension {

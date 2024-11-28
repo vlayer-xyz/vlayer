@@ -104,7 +104,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
       const sessionUrl = await notary.sessionUrl();
       await prover.setup(sessionUrl);
 
-      const res = await prover.sendRequest(
+      await prover.sendRequest(
         provingSessionConfig.wsProxyUrl + `?token=${hostname}`,
         {
           url: provenUrl.url,
@@ -122,8 +122,8 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
         sent: [transcript.ranges.sent.all],
         recv: [
           {
-            start: transcript.ranges.recv.body?.start ?? 0,
-            end: transcript.ranges.recv.body?.end ?? 0,
+            start: transcript.ranges.recv.all.start,
+            end: transcript.ranges.recv.all.end + 2,
           },
         ],
       };
@@ -138,8 +138,8 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
         reveal: commit,
       });
 
-      const tlsnProof = await presentation.json();
-
+      const tlsnProof = (await presentation.json()) as unknown as string;
+      console.log("tlsnProof", tlsnProof.length);
       // const beautyProof = await new Presentation(tlsnProof.data);
       // // const proof = (await new Presentation(
       // //   presentationJSON.data,
