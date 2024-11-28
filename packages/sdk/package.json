@@ -41,6 +41,7 @@
     "semver": "^7.6.3",
     "tsc-alias": "^1.8.10",
     "url-regex": "^5.0.0",
+    "urlpattern-polyfill": "^10.0.0",
     "viem": "2.21.0",
     "vite-tsconfig-paths": "^5.0.1"
   },
