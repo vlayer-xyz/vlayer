@@ -193,21 +193,21 @@ mod server_tests {
 
         #[tokio::test(flavor = "multi_thread")]
         async fn simple_with_gasmeter() {
+            let mut gas_meter_server = RpcServerMock::start().await;
+            gas_meter_server.add_mock(
+                AllocateGas::METHOD_NAME,
+                json!({
+                    "gas_limit": GAS_LIMIT,
+                    "hash": "0xf8d32367d8ec243e8e6fcac96dc769ed80287534d51c5d1e817173128f2b6218",
+                    "time_to_live": GAS_METER_TTL
+                }),
+                json!({}),
+                false,
+                1,
+            ).await;
+
             let mut ctx = Context::default().await;
-            ctx.gas_meter_server = Some(
-                RpcServerMock::start(
-                    AllocateGas::METHOD_NAME,
-                    false,
-                    json!({
-                        "gas_limit": GAS_LIMIT,
-                        "hash": "0xf8d32367d8ec243e8e6fcac96dc769ed80287534d51c5d1e817173128f2b6218",
-                        "time_to_live": GAS_METER_TTL
-                    }),
-                    json!({}),
-                    1,
-                )
-                .await,
-            );
+            ctx.gas_meter_server = Some(gas_meter_server);
             let app = ctx.server(call_guest_elf(), chain_guest_elf());
             let contract = ctx.client.deploy_contract().await;
 

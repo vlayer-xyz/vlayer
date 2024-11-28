@@ -40,9 +40,10 @@ impl ChainProofServerMock {
         result: impl Serialize,
         expected_calls: usize,
     ) -> Self {
-        let mock_server =
-            RpcServerMock::start("v_chain", true, params, result, expected_calls).await;
-
+        let mut mock_server = RpcServerMock::start().await;
+        mock_server
+            .add_mock("v_chain", params, result, true, expected_calls)
+            .await;
         ChainProofServerMock { mock_server }
     }
 

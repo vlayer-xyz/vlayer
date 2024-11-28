@@ -1,5 +1,6 @@
 use std::mem::take;
 
+use derive_new::new;
 use mockito::{Matcher, Mock, ServerGuard};
 use reqwest::Client;
 use serde::Serialize;
@@ -7,21 +8,25 @@ use serde_json::{json, Value};
 use thiserror::Error;
 use tracing::info;
 
+#[derive(new)]
 pub struct RpcServerMock {
     server: ServerGuard,
-    mock: Mock,
+    mocks: Vec<Mock>,
 }
 
 impl RpcServerMock {
-    pub async fn start(
+    pub async fn start() -> Self {
+        Self::new(mockito::Server::new_async().await, Vec::new())
+    }
+
+    pub async fn add_mock(
+        &mut self,
         method: impl AsRef<str>,
-        is_partial: bool,
         params: impl Serialize,
         result: impl Serialize,
+        is_partial: bool,
         expected_calls: usize,
-    ) -> Self {
-        let mut server = mockito::Server::new_async().await;
-
+    ) {
         let request_body = json!({
             "id": 1,
             "jsonrpc": "2.0",
@@ -35,7 +40,8 @@ impl RpcServerMock {
             "id": 1
         });
 
-        let mut mock = server
+        let mut mock = self
+            .server
             .mock("POST", "/")
             .match_header("Content-Type", "application/json");
 
@@ -53,7 +59,7 @@ impl RpcServerMock {
             .create_async()
             .await;
 
-        RpcServerMock { server, mock }
+        self.mocks.push(mock);
     }
 
     pub fn url(&self) -> String {
@@ -61,7 +67,7 @@ impl RpcServerMock {
     }
 
     pub fn assert(&self) {
-        if !self.mock.matched() {
+        if !self.mocks.iter().all(Mock::matched) {
             panic!("wrong number of requests. expected 1");
         }
     }
@@ -157,12 +163,23 @@ mod tests {
         const METHOD_NAME: &str = "get_data";
     }
 
+    async fn server_start(
+        is_partial: bool,
+        params: impl Serialize,
+        response: impl Serialize,
+    ) -> RpcServerMock {
+        let mut server = RpcServerMock::start().await;
+        server
+            .add_mock(GetData::METHOD_NAME, params, response, is_partial, 1)
+            .await;
+        server
+    }
+
     #[tokio::test]
     async fn mock_with_params() -> anyhow::Result<()> {
         let params = GetData::new("value".into());
-        let expected_response = json!({"data": "some data"});
-        let mock =
-            RpcServerMock::start(GetData::METHOD_NAME, false, &params, &expected_response, 1).await;
+        let expected_response = json!({"data": "some_data"});
+        let mock = server_start(false, &params, &expected_response).await;
         let rpc_client = RpcClient::new(&mock.url());
 
         let response = rpc_client.call(params).await?;
@@ -177,15 +194,13 @@ mod tests {
     #[tokio::test]
     #[should_panic(expected = "wrong number of requests. expected 1")]
     async fn mock_not_called_panics() {
-        let mock = RpcServerMock::start(GetData::METHOD_NAME, false, json!({}), json!({}), 1).await;
-
-        mock.assert();
+        server_start(false, json!({}), json!({})).await.assert();
     }
 
     #[tokio::test]
     async fn call_without_mock_returns_error() {
         let params = GetData::new("value".into());
-        let mock = RpcServerMock::start(GetData::METHOD_NAME, false, json!({}), json!({}), 1).await;
+        let mock = server_start(false, json!({}), json!({})).await;
         let rpc_client = RpcClient::new(&mock.url());
 
         let result = rpc_client.call(params).await;
@@ -196,21 +211,14 @@ mod tests {
     #[tokio::test]
     async fn mock_partial_matches_full_body() -> anyhow::Result<()> {
         let params = GetData::new("value".into());
-        let mock = RpcServerMock::start(
-            GetData::METHOD_NAME,
-            true,
-            json!({}),
-            json!({"data": "some data"}),
-            1,
-        )
-        .await;
+        let mock = server_start(true, json!({}), json!({"data": "some_data"})).await;
         let rpc_client = RpcClient::new(&mock.url());
 
         let result = rpc_client.call(params).await?;
 
         mock.assert();
 
-        assert_eq!(result, json!({"data": "some data"}));
+        assert_eq!(result, json!({"data": "some_data"}));
 
         Ok(())
     }
@@ -218,14 +226,7 @@ mod tests {
     #[tokio::test]
     async fn mock_non_partial_doesnt_match_full_body() -> anyhow::Result<()> {
         let params = GetData::new("value".into());
-        let mock = RpcServerMock::start(
-            GetData::METHOD_NAME,
-            false,
-            json!({}),
-            json!({"data": "some data"}),
-            1,
-        )
-        .await;
+        let mock = server_start(false, json!({}), json!({"data": "some_data"})).await;
         let rpc_client = RpcClient::new(&mock.url());
 
         let result = rpc_client.call(params).await;
