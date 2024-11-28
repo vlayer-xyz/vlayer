@@ -27,13 +27,7 @@ mod tests {
     use super::*;
 
     fn read_file(file: &str) -> Vec<u8> {
-        use std::{fs::File, io::Read};
-
-        let mut f = File::open(file).unwrap();
-        let mut buffer = Vec::new();
-        f.read_to_end(&mut buffer).unwrap();
-
-        buffer
+        std::fs::read(file).unwrap()
     }
 
     fn email_fixture() -> Vec<u8> {
