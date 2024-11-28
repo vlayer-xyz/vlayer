@@ -70,7 +70,7 @@ impl TravelCall {
 
 /// Take last 8 bytes from slice and interpret as big-endian encoded u64.
 /// Will trim larger numbers to u64 range, and panic if slice is smaller than 8 bytes.
-fn u64_from_be_slice(slice: &[u8]) -> u64 {
+const fn u64_from_be_slice(slice: &[u8]) -> u64 {
     u64::from_be_bytes(*slice.last_chunk().expect("invalid u64 slice"))
 }
 
@@ -296,7 +296,7 @@ mod test {
 
     #[test]
     #[should_panic(expected = "invalid u64 slice")]
-    fn u64_from_invalid_slice() {
+    const fn u64_from_invalid_slice() {
         let slice = [0];
         _ = u64_from_be_slice(&slice);
     }

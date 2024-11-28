@@ -22,7 +22,7 @@ impl CallAssumptions {
         }
     }
 
-    pub fn size() -> usize {
+    pub const fn size() -> usize {
         Self::ENCODED_SIZE.expect("CallAssumptions compiletime size does not exist")
     }
 }
