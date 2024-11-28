@@ -6,8 +6,9 @@ function App() {
     webProofConfig: config,
   });
 
+  console.log("beauty", vlayerFlow.beauty);
   return (
-    <div className="flex justify-center mt-48">
+    <div className="flex flex-col items-center gap-4 mt-48">
       <Button
         color="primary"
         onClick={() => {
@@ -19,9 +20,23 @@ function App() {
       </Button>
 
       {vlayerFlow.webProof ? (
-        <Button onClick={() => vlayerFlow.requestZkProof()}>
-          {vlayerFlow.isZkProving ? "ZK Proofing..." : "Request ZK Proof"}
-        </Button>
+        <>
+          <Button color="secondary" onClick={() => vlayerFlow.requestZkProof()}>
+            {vlayerFlow.isZkProving ? "ZK Proofing..." : "Request ZK Proof"}
+          </Button>
+          {vlayerFlow.beauty && (
+            <pre className="max-w-screen-lg overflow-x-auto whitespace-pre-wrap break-words">
+              {(() => {
+                const beautyStr = JSON.stringify(vlayerFlow.beauty);
+                const firstBrace = beautyStr.indexOf("{");
+                const lastBrace = beautyStr.lastIndexOf("}");
+                const content = beautyStr.slice(firstBrace, lastBrace + 1);
+                console.log("content", content);
+                return content;
+              })()}
+            </pre>
+          )}
+        </>
       ) : null}
     </div>
   );

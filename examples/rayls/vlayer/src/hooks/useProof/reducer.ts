@@ -14,11 +14,12 @@ const handleWebProofRequested = (prev: VlayerFlowState) => ({
 
 const handleWebProofReceived = (
   prev: VlayerFlowState,
-  { webproof }: { webproof: unknown },
+  { webproof, beauty }: { webproof: unknown; beauty: unknown },
 ) => ({
   ...prev,
   stage: VlayerFlowStage.WEB_PROOF_RECEIVED,
   webProof: webproof,
+  beauty,
 });
 
 const handleZkProofRequested = (prev: VlayerFlowState) => ({

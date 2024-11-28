@@ -15,7 +15,12 @@ export const config = {
   steps: [
     startPage("https://demo.tink.com/", "Go to tink"),
     expectUrl("https://demo.tink.com/account-check", "Go to account check"),
-    notarize("https://demo.tink.com/api/report?*", "GET", "Prove"),
+    notarize(
+      "https://demo.tink.com/api/report?*",
+      "GET",
+      "Prove",
+      "userDataByProvider.0.accounts.0.accountNumber",
+    ),
   ],
 
   notaryPubKey:

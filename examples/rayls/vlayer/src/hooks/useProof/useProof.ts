@@ -12,7 +12,7 @@ export const useVlayerFlow = ({
 }: {
   webProofConfig: GetWebProofArgs<Abi, ContractFunctionName>;
 }) => {
-  const { stage, zkProof, webProof, verification, dispatch } =
+  const { stage, zkProof, webProof, verification, beauty, dispatch } =
     useVlayerFlowReducer();
 
   const webProofProvider = useWebProofProvider();
@@ -20,11 +20,12 @@ export const useVlayerFlow = ({
   useEffect(() => {
     webProofProvider.addEventListeners(
       ExtensionMessageType.ProofDone,
-      ({ payload: { proof } }) => {
+      ({ payload: { proof, beauty } }) => {
         dispatch({
           kind: VlayerFlowActionKind.WEB_PROOF_RECEIVED,
           payload: {
             webproof: proof,
+            beauty,
           },
         });
       },
@@ -37,6 +38,7 @@ export const useVlayerFlow = ({
     webProofConfig.proverCallCommitment.chainId,
   );
   return {
+    beauty,
     webProofProvider,
     walletClient,
     stage,
@@ -48,7 +50,6 @@ export const useVlayerFlow = ({
     isWebProving: stage === VlayerFlowStage.WEB_PROOF_REQUESTED,
     isVerifying: stage === VlayerFlowStage.VERIFICATION_REQUESTED,
     requestZkProof: () => {
-      console.log("Requesting zk proof with web proof", webProof);
       vlayerClient.zkProve([
         {
           webProofJson: JSON.stringify({

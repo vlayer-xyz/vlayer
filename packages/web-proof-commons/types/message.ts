@@ -49,7 +49,7 @@ export type PresentationJSON = TLSNPresentationJSON;
 export type ExtensionMessage =
   | {
       type: ExtensionMessageType.ProofDone;
-      payload: { proof: PresentationJSON };
+      payload: { proof: PresentationJSON; beauty: unknown };
     }
   | { type: ExtensionMessageType.ProofError; payload: { error: string } }
   | { type: ExtensionMessageType.RedirectBack }

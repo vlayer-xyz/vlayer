@@ -9,11 +9,6 @@ export const useVlayerClient = (proverAbi: Abi, chainId: number) => {
     });
     return {
       zkProve: async (args: unknown[]) => {
-        console.log("=====zkProve=====");
-        console.log("proverAddress", import.meta.env.VITE_PROVER_ADDRESS);
-        console.log("chainId", chainId);
-        console.log("args", args);
-        console.log("=====zkProve=====");
         const hash = await client.prove({
           address: import.meta.env.VITE_PROVER_ADDRESS,
           functionName: "main",

@@ -25,6 +25,7 @@ export type VlayerFlowAction =
       kind: VlayerFlowActionKind.WEB_PROOF_RECEIVED;
       payload: {
         webproof: unknown;
+        beauty: unknown;
       };
     }
   | {
@@ -51,4 +52,5 @@ export type VlayerFlowState = {
   zkProof: unknown;
   webProof: unknown;
   verification: unknown;
+  beauty: unknown;
 };

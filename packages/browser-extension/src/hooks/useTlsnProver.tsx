@@ -124,7 +124,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
       const transcript = await prover.transcript();
 
       console.log("recv", transcript.recv);
-      
+
       const notarizeStep = config.steps.find(
         ({ step }) => step === "notarize",
       ) as WebProofStepNotarize;
@@ -152,8 +152,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
         reveal: commit,
       });
 
-      const tlsnProof = (await presentation.json()) as unknown as string;
-      console.log("tlsnProof", tlsnProof.length);
+      const tlsnProof = await presentation.json();
       // const beautyProof = await new Presentation(tlsnProof.data);
       // // const proof = (await new Presentation(
       // //   presentationJSON.data,
@@ -174,6 +173,7 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
         type: ExtensionMessageType.ProofDone,
         payload: {
           proof: tlsnProof,
+          beauty: beauty.recv(),
         },
       });
 
@@ -199,13 +199,16 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
 };
 
 function getHttpResponseFragments(response: string, jsonPath: string) {
-  const headersEndIndex = response.indexOf('\r\n\r\n') + 4;
-  const jsonStartIndex = response.indexOf('{', headersEndIndex);
-  const jsonEndIndex = response.lastIndexOf('}');
+  const headersEndIndex = response.indexOf("\r\n\r\n") + 4;
+  const jsonStartIndex = response.indexOf("{", headersEndIndex);
+  const jsonEndIndex = response.lastIndexOf("}");
   const jsonBody = response.slice(jsonStartIndex, jsonEndIndex + 1);
   const jsonObject = JSON.parse(jsonBody);
-  const getFieldPosition = (obj: any, path: string): { start: number, end: number } => {
-    const keys = path.split('.');
+  const getFieldPosition = (
+    obj: any,
+    path: string,
+  ): { start: number; end: number } => {
+    const keys = path.split(".");
     let value = obj;
     for (const key of keys) {
       value = value[key];

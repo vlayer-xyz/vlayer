@@ -9,6 +9,7 @@ export const useVlayerFlowReducer = () => {
     zkProof: undefined,
     webProof: undefined,
     verification: undefined,
+    beauty: undefined,
   });
 
   return {
