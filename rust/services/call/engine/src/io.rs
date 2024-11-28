@@ -67,10 +67,8 @@ impl From<Call> for TxEnv {
 
 fn initialize_optimism_fields() -> OptimismFields {
     OptimismFields {
-        source_hash: None,
-        mint: None,
-        is_system_transaction: None,
         enveloped_tx: Some(Bytes::default()),
+        ..Default::default()
     }
 }
 
