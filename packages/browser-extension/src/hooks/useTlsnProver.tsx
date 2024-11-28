@@ -116,13 +116,16 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
         },
       );
 
-      console.log("Received response", res);
-
       const transcript = await prover.transcript();
 
       const commit = {
         sent: [transcript.ranges.sent.all],
-        recv: [{ start: 2, end: 28 }],
+        recv: [
+          {
+            start: transcript.ranges.recv.body?.start ?? 0,
+            end: transcript.ranges.recv.body?.end ?? 0,
+          },
+        ],
       };
 
       const notarizationOutputs = await prover.notarize(commit);
