@@ -13,9 +13,9 @@ use crate::{
     test_harness::{
         contracts::{
             time_travel::{
-                AVERAGE_BALANCE_OF_CALL, BLOCK_NO as TIME_TRAVEL_BLOCK_NO, SIMPLE_TIME_TRAVEL,
+                self, AVERAGE_BALANCE_OF_CALL, SIMPLE_TIME_TRAVEL,
             },
-            usdt::{BLOCK_NO as USDT_BLOCK_NO, IERC20::balanceOfCall, USDT},
+            usdt::{self, IERC20::balanceOfCall, USDT},
         },
         rpc_snapshot_file,
     },
@@ -42,7 +42,7 @@ fn profile(
 
 #[tokio::test]
 async fn usdt_erc20_balance_of() -> anyhow::Result<()> {
-    let location: ExecutionLocation = (USDT_BLOCK_NO, Mainnet).into();
+    let location: ExecutionLocation = (usdt::BLOCK_NO, Mainnet).into();
     let binance_8 = address!("F977814e90dA44bFA03b6295A0616a897441aceC");
     let call = Call::new(USDT, &balanceOfCall { account: binance_8 });
 
@@ -58,7 +58,7 @@ async fn usdt_erc20_balance_of() -> anyhow::Result<()> {
 
 #[tokio::test]
 async fn time_travel() -> anyhow::Result<()> {
-    let location: ExecutionLocation = (TIME_TRAVEL_BLOCK_NO, OptimismSepolia).into();
+    let location: ExecutionLocation = (time_travel::BLOCK_NO, OptimismSepolia).into();
     let call = Call::new(SIMPLE_TIME_TRAVEL, &AVERAGE_BALANCE_OF_CALL);
 
     let state = profile("op_sepolia", "simple_time_travel", location, &call)?;
