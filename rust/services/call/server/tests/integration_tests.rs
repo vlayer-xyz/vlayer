@@ -1,20 +1,19 @@
 use axum::http::StatusCode;
 use serde_json::json;
-use test_helpers::TestHelper;
+use test_helpers::{Context, CALL_GUEST_ELF, CHAIN_GUEST_ELF};
 
 mod test_helpers;
 
-use call_server::gas_meter::Config as GasMeterConfig;
 use server_utils::{body_to_json, body_to_string};
 
 mod server_tests {
-
     use super::*;
 
     #[tokio::test]
     async fn http_not_found() {
-        let helper = TestHelper::default().await;
-        let response = helper.post("/non_existent_http_path", &()).await;
+        let ctx = Context::default().await;
+        let app = ctx.server(&CALL_GUEST_ELF, &CHAIN_GUEST_ELF);
+        let response = app.post("/non_existent_http_path", &()).await;
 
         assert_eq!(StatusCode::NOT_FOUND, response.status());
         assert!(body_to_string(response.into_body()).await.is_empty());
@@ -22,7 +21,8 @@ mod server_tests {
 
     #[tokio::test]
     async fn json_rpc_not_found() {
-        let helper = TestHelper::default().await;
+        let ctx = Context::default().await;
+        let app = ctx.server(&CALL_GUEST_ELF, &CHAIN_GUEST_ELF);
 
         let req = json!({
             "method": "non_existent_json_rpc_method",
@@ -30,7 +30,7 @@ mod server_tests {
             "id": 1,
             "jsonrpc": "2.0",
         });
-        let response = helper.post("/", &req).await;
+        let response = app.post("/", &req).await;
 
         assert_eq!(StatusCode::OK, response.status());
         assert_eq!(
@@ -57,7 +57,8 @@ mod server_tests {
         async fn success() {
             let call_elf = GuestElf::new([0; 8], &[]);
             let chain_elf = GuestElf::new([1; 8], &[]);
-            let helper = TestHelper::new(call_elf, chain_elf).await;
+            let ctx = Context::default().await;
+            let app = ctx.server(&call_elf, &chain_elf);
 
             let req = json!({
                 "method": "v_versions",
@@ -65,7 +66,7 @@ mod server_tests {
                 "id": 1,
                 "jsonrpc": "2.0",
             });
-            let response = helper.post("/", &req).await;
+            let response = app.post("/", &req).await;
 
             assert_eq!(StatusCode::OK, response.status());
             assert_json_include!(
@@ -101,14 +102,16 @@ mod server_tests {
 
         #[tokio::test]
         async fn field_validation_error() {
-            let helper = TestHelper::default().await;
+            let ctx = Context::default().await;
+            let app = ctx.server(&CALL_GUEST_ELF, &CHAIN_GUEST_ELF);
+            let contract = ctx.client.deploy_contract().await;
 
             let req = json!({
                 "method": "v_call",
                 "params": [
                     {
                         "to": "I am not a valid address!",
-                        "data": helper.contract.sum(U256::from(1), U256::from(2)).calldata().unwrap(),
+                        "data": contract.sum(U256::from(1), U256::from(2)).calldata().unwrap(),
                     }, {
                         "gas_limit": DEFAULT_GAS_LIMIT,
                     }
@@ -116,7 +119,7 @@ mod server_tests {
                 "id": 1,
                 "jsonrpc": "2.0",
             });
-            let response = helper.post("/", &req).await;
+            let response = app.post("/", &req).await;
 
             assert_eq!(StatusCode::OK, response.status());
             assert_eq!(
@@ -135,9 +138,10 @@ mod server_tests {
 
         #[tokio::test(flavor = "multi_thread")]
         async fn simple_contract_call_success() {
-            let helper = TestHelper::default().await;
-            let call_data = helper
-                .contract
+            let ctx = Context::default().await;
+            let app = ctx.server(&CALL_GUEST_ELF, &CHAIN_GUEST_ELF);
+            let contract = ctx.client.deploy_contract().await;
+            let call_data = contract
                 .sum(U256::from(1), U256::from(2))
                 .calldata()
                 .unwrap();
@@ -146,7 +150,7 @@ mod server_tests {
             "method": "v_call",
             "params": [
                 {
-                    "to": helper.contract.address(),
+                    "to": contract.address(),
                     "data": call_data,
                 },
                 {
@@ -157,7 +161,7 @@ mod server_tests {
                 "id": 1,
                 "jsonrpc": "2.0",
             });
-            let response = helper.post("/", &req).await;
+            let response = app.post("/", &req).await;
 
             assert_eq!(StatusCode::OK, response.status());
             assert_json_include!(
@@ -174,7 +178,7 @@ mod server_tests {
                             },
                             "callAssumptions": {
                                 "functionSelector": function_selector(&call_data),
-                                "proverContractAddress": helper.contract.address(),
+                                "proverContractAddress": contract.address(),
                             }
                         },
                     }
@@ -183,30 +187,27 @@ mod server_tests {
             );
         }
 
-        const DEFAULT_GAS_METER_TTL: u64 = 3600;
-
         #[tokio::test(flavor = "multi_thread")]
         async fn simple_with_gasmeter() {
-            let gas_meter_server_mock: RpcServerMock = RpcServerMock::start(
-                AllocateGas::METHOD_NAME,
-                false,
-                json!({
-                    "gas_limit":1000000,
-                    "hash":"0xf8d32367d8ec243e8e6fcac96dc769ed80287534d51c5d1e817173128f2b6218",
-                    "time_to_live":3600
-                }),
-                json!({}),
-            )
-            .await;
+            let mut ctx = Context::default().await;
+            ctx.gas_meter_server = Some(
+                RpcServerMock::start(
+                    AllocateGas::METHOD_NAME,
+                    false,
+                    json!({
+                        "gas_limit":1000000,
+                        "hash":"0xf8d32367d8ec243e8e6fcac96dc769ed80287534d51c5d1e817173128f2b6218",
+                        "time_to_live":3600
+                    }),
+                    json!({}),
+                    1,
+                )
+                .await,
+            );
+            let app = ctx.server(&CALL_GUEST_ELF, &CHAIN_GUEST_ELF);
+            let contract = ctx.client.deploy_contract().await;
 
-            let mut helper = TestHelper::default().await;
-            helper.server_config.set_gas_meter_config(GasMeterConfig {
-                url: gas_meter_server_mock.url(),
-                time_to_live: DEFAULT_GAS_METER_TTL,
-            });
-
-            let call_data = helper
-                .contract
+            let call_data = contract
                 .sum(U256::from(1), U256::from(2))
                 .calldata()
                 .unwrap();
@@ -215,7 +216,7 @@ mod server_tests {
                 "method": "v_call",
                 "params": [
                     {
-                        "to": helper.contract.address(),
+                        "to": contract.address(),
                         "data": call_data,
                     },
                     {
@@ -226,16 +227,18 @@ mod server_tests {
                 "id": 1,
                 "jsonrpc": "2.0",
             });
-            let response = helper.post("/", &req).await;
+            let response = app.post("/", &req).await;
             assert_eq!(StatusCode::OK, response.status());
-            gas_meter_server_mock.assert();
+            ctx.gas_meter_server.unwrap().assert();
         }
 
         #[tokio::test(flavor = "multi_thread")]
         async fn success_web_proof() {
-            let helper = TestHelper::default().await;
-            let call_data = helper
-                .contract
+            let ctx = Context::default().await;
+            let app = ctx.server(&CALL_GUEST_ELF, &CHAIN_GUEST_ELF);
+            let contract = ctx.client.deploy_contract().await;
+
+            let call_data = contract
                 .web_proof(WebProof {
                     web_proof_json: serde_json::to_string(&json!(load_web_proof_v7_fixture(
                         "../../../web_proof/testdata/presentation.json",
@@ -250,7 +253,7 @@ mod server_tests {
                 "method": "v_call",
                 "params": [
                     {
-                        "to": helper.contract.address(),
+                        "to": contract.address(),
                         "data": call_data,
                     },
                     {
@@ -262,7 +265,7 @@ mod server_tests {
                 "jsonrpc": "2.0",
             });
 
-            let response = helper.post("/", &req).await;
+            let response = app.post("/", &req).await;
 
             assert_eq!(StatusCode::OK, response.status());
             assert_json_include!(
@@ -279,7 +282,7 @@ mod server_tests {
                                 },
                                 "callAssumptions": {
                                     "functionSelector": function_selector(&call_data),
-                                    "proverContractAddress": helper.contract.address(),
+                                    "proverContractAddress": contract.address(),
                                 }
                             },
                         }
