@@ -19,10 +19,10 @@ contract WebProofProver is Prover {
 
     string constant DATA_URL = "https://demo.tink.com/api/report?*";
 
-    function main(WebProof calldata webProof)
+    function main(WebProof calldata webProof, address account)
         public
         view
-        returns (Proof memory, string memory created)
+        returns (Proof memory, bytes32, address)
     {
         
         (bool success, bytes memory returnData) = Precompiles.VERIFY_AND_PARSE.staticcall(bytes(webProof.webProofJson));
@@ -35,6 +35,6 @@ contract WebProofProver is Prover {
         Web memory web = Web(data[2], data[3]);
         string memory accountNumber = web.jsonGetString("accountNumber");
 
-        return (proof(), accountNumber);
+        return (proof(), keccak256(abi.encodePacked(accountNumber)), account);
     }
 }

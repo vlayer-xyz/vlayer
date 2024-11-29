@@ -60,6 +60,7 @@ export const useVlayerFlow = ({
             notary_pub_key: webProofConfig.notaryPubKey,
           }),
         },
+        webProofConfig.account.address
       ]);
       console.log("zkProof", zkProof);
       dispatch({
