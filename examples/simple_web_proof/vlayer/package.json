@@ -13,7 +13,7 @@
     "prove:dev": "VLAYER_ENV=dev bun run prove.ts",
     "deploy:testnet": "VLAYER_ENV=testnet bun run deploy.ts",
     "deploy:dev": "VLAYER_ENV=dev bun run deploy.ts",
-        "web:dev": "VLAYER_ENV=dev bun run deploy.ts && vite",
+    "web:dev": "VLAYER_ENV=dev bun run deploy.ts && vite",
     "web:testnet": "VLAYER_ENV=testnet bun run deploy.ts && vite "
   },
   "dependencies": {

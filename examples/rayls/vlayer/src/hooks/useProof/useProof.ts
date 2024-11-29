@@ -73,6 +73,7 @@ export const useVlayerFlow = ({
       dispatch({ kind: VlayerFlowActionKind.WEB_PROOF_REQUESTED });
     },
     requestVerification: async () =>{
+      dispatch({ kind: VlayerFlowActionKind.VERIFICATION_REQUESTED })
 
       console.log("zkProof", zkProof);
 
@@ -101,7 +102,7 @@ export const useVlayerFlow = ({
       });
       console.log("Verified!", verification);
 
-      dispatch({ kind: VlayerFlowActionKind.VERIFICATION_REQUESTED })
+      dispatch({ kind: VlayerFlowActionKind.VERIFICATION_RECEIVED, payload: {verification} })
     },
     dispatch,
   };
