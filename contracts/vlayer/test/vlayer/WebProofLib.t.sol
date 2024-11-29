@@ -54,7 +54,7 @@ contract WebProverTest is VTest {
         }
     }
 
-    function test_missingPart() public {
+    function test_missingPartInSerializedWebProof() public {
         WebProof memory webProof = WebProof(vm.readFile("testdata/web_proof_missing_part.json"));
 
         callProver();
