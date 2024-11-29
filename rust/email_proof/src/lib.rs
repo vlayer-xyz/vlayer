@@ -27,13 +27,7 @@ mod tests {
     use super::*;
 
     fn read_file(file: &str) -> Vec<u8> {
-        use std::{fs::File, io::Read};
-
-        let mut f = File::open(file).unwrap();
-        let mut buffer = Vec::new();
-        f.read_to_end(&mut buffer).unwrap();
-
-        buffer
+        std::fs::read(file).unwrap()
     }
 
     fn email_fixture() -> Vec<u8> {
@@ -59,6 +53,8 @@ mod tests {
         assert_eq!(parsed.to, expected_to);
 
         assert_eq!(parsed.subject, Some("test confirmation".into()));
-        assert_eq!(parsed.body, "This is a multi-part message in MIME format.\n");
+        assert!(parsed
+            .body
+            .contains("testtest\ntesttest\ntesttest\ntesttest\ntesttest\ntesttest"));
     }
 }
