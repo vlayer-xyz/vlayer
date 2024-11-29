@@ -26,11 +26,20 @@
   args:
     executable: /bin/bash
     creates: ~/.cargo/bin/cargo-binstall
+- name: Check installed version of risc0
+  ansible.builtin.shell: |
+    set -ueo pipefail
+    ~/.cargo/bin/cargo install --list | grep -oP 'cargo-risczero v\d+\.\d+\.\d+' | grep -oP '\d+\.\d+\.\d+'
+  register: installed_risc0
+  changed_when: false
+  args:
+    executable: /bin/bash
 - name: Install risc0
   ansible.builtin.shell: |
     set -ueo pipefail
     ~/.cargo/bin/cargo binstall -y cargo-risczero@{{ vlayer_risc0_version }} --force
     ~/.cargo/bin/cargo risczero install
+  when: vlayer_risc0_version != installed_risc0.stdout
+  changed_when: vlayer_risc0_version != installed_risc0.stdout
   args:
     executable: /bin/bash
-    creates: ~/.cargo/bin/r0vm
