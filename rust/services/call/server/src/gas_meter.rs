@@ -1,6 +1,6 @@
 use derive_new::new;
 use serde::{Deserialize, Serialize};
-use server_utils::{RpcClient, RpcError, RpcMethod};
+use server_utils::rpc::{Client as RpcClient, Method, Result};
 
 use crate::handlers::v_call::types::CallHash;
 
@@ -12,7 +12,7 @@ pub struct AllocateGas {
     time_to_live: u64,
 }
 
-impl RpcMethod for AllocateGas {
+impl Method for AllocateGas {
     const METHOD_NAME: &str = "v_allocateGas";
 }
 
@@ -30,7 +30,7 @@ pub struct RefundUnusedGas {
     gas_used: u64,
 }
 
-impl RpcMethod for RefundUnusedGas {
+impl Method for RefundUnusedGas {
     const METHOD_NAME: &str = "v_refundUnusedGas";
 }
 
@@ -56,7 +56,7 @@ impl Client {
         }
     }
 
-    pub async fn allocate_gas(&self, gas_limit: u64) -> Result<(), RpcError> {
+    pub async fn allocate_gas(&self, gas_limit: u64) -> Result<()> {
         let req = AllocateGas::new(self.hash, gas_limit, self.time_to_live);
         let _resp = self.client.call(req).await?;
         Ok(())

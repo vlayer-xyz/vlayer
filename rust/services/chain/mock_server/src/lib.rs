@@ -7,7 +7,7 @@ use common::{GuestElf, Hashable};
 use lazy_static::lazy_static;
 use risc0_zkvm::{serde::to_vec, FakeReceipt, Receipt, ReceiptClaim};
 use serde::Serialize;
-use server_utils::RpcServerMock;
+use server_utils::rpc::mock::Server as RpcServerMock;
 
 lazy_static! {
     pub static ref EMPTY_PROOF_RESPONSE: Value =
@@ -40,9 +40,14 @@ impl ChainProofServerMock {
         result: impl Serialize,
         expected_calls: usize,
     ) -> Self {
-        let mock_server =
-            RpcServerMock::start("v_chain", true, params, result, expected_calls).await;
-
+        let mut mock_server = RpcServerMock::start().await;
+        mock_server
+            .mock_method("v_chain")
+            .with_params(params, true)
+            .with_result(result)
+            .with_expected_calls(expected_calls)
+            .add()
+            .await;
         ChainProofServerMock { mock_server }
     }
 

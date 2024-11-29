@@ -29,7 +29,7 @@ pub trait Client: Send + Sync + 'static {
 pub enum Error {
     #[cfg(feature = "rpc")]
     #[error("RPC error: {0}")]
-    Rpc(#[from] server_utils::RpcError),
+    Rpc(#[from] server_utils::rpc::Error),
     #[cfg(feature = "rpc")]
     #[error("JSON parse error: {0}")]
     Json(#[from] serde_json::Error),
