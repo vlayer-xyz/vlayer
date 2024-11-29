@@ -3,6 +3,7 @@ import { useVlayerContext } from "./useVlayerContext";
 import { useVlayerFlowReducer } from "./useVlayerFlowReducer";
 import { VlayerFlowActionKind, VlayerFlowStage } from "./types";
 import { ExtensionMessageType, GetWebProofArgs } from "@vlayer/sdk";
+import { createContext } from "@vlayer/sdk/config";
 import { Abi, ContractFunctionName } from "viem";
 import { useVlayerClient } from "./useVlayerClient";
 import { useEffect } from "react";
@@ -70,8 +71,37 @@ export const useVlayerFlow = ({
       webProofProvider.requestWebProof(webProofConfig);
       dispatch({ kind: VlayerFlowActionKind.WEB_PROOF_REQUESTED });
     },
-    requestVerification: () =>
-      dispatch({ kind: VlayerFlowActionKind.VERIFICATION_REQUESTED }),
+    requestVerification: async () =>{
+
+      console.log("zkProof", zkProof);
+
+      const { chain, ethClient, account, confirmations } =
+      await createContext({
+        chainName: import.meta.env.VITE_CHAIN_NAME,
+        proverUrl: import.meta.env.VITE_PROVER_URL,
+        jsonRpcUrl: import.meta.env.VITE_JSON_RPC_URL,
+        privateKey: import.meta.env.VITE_PRIVATE_KEY,
+      });
+
+      const txHash = await ethClient.writeContract({
+        address: import.meta.env.VITE_VERIFIER_ADDRESS,
+        abi: webProofConfig.verifierAbi,
+        functionName: "verify",
+        args: zkProof,
+        chain,
+        account: account,
+      });
+  
+      const verification = await ethClient.waitForTransactionReceipt({
+        hash: txHash,
+        confirmations,
+        retryCount: 60,
+        retryDelay: 1000,
+      });
+      console.log("Verified!", verification);
+
+      dispatch({ kind: VlayerFlowActionKind.VERIFICATION_REQUESTED })
+    },
     dispatch,
   };
 };

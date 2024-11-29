@@ -1,5 +1,6 @@
 const PROVER_ADDRESS = "0x5FbDB2315678afecb367f032d93F642f64180aa3";
 import proverSpec from "../../out/WebProofProver.sol/WebProofProver";
+import verifierSpec from "../../out/WebProofVerifier.sol/WebProofVerifier";
 import { expectUrl, notarize, startPage } from "@vlayer/sdk/web_proof";
 import * as chains from "viem/chains";
 
@@ -22,7 +23,7 @@ export const config = {
       "userDataByProvider.0.accounts.0.accountNumber",
     ),
   ],
-
+  verifierAbi: verifierSpec.abi,
   notaryPubKey:
     "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExpX/4R4z40gI6C/j9zAM39u58LJu\n3Cx5tXTuqhhu/tirnBi5GniMmspOTEsps4ANnPLpMmMSfhJ+IFHbc3qVOA==\n-----END PUBLIC KEY-----\n",
 };
