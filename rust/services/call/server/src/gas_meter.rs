@@ -17,12 +17,13 @@ impl Method for AllocateGas {
 }
 
 #[derive(Serialize, Debug)]
+#[serde(rename_all = "snake_case")]
 pub enum ComputationStage {
     Preflight,
     Proving,
 }
 
-#[derive(Serialize, Debug)]
+#[derive(new, Serialize, Debug)]
 #[serde(deny_unknown_fields)]
 pub struct RefundUnusedGas {
     hash: CallHash,
@@ -58,6 +59,12 @@ impl Client {
 
     pub async fn allocate_gas(&self, gas_limit: u64) -> Result<()> {
         let req = AllocateGas::new(self.hash, gas_limit, self.time_to_live);
+        let _resp = self.client.call(req).await?;
+        Ok(())
+    }
+
+    pub async fn refund_unused_gas(&self, stage: ComputationStage, gas_used: u64) -> Result<()> {
+        let req = RefundUnusedGas::new(self.hash, stage, gas_used);
         let _resp = self.client.call(req).await?;
         Ok(())
     }

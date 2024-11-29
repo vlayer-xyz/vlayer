@@ -98,7 +98,6 @@ mod server_tests {
 
         const CHAIN_ID: u64 = 11155111;
         const GAS_LIMIT: u64 = 1_000_000;
-        const GAS_USED: u64 = 1_000;
 
         #[tokio::test]
         async fn field_validation_error() {
@@ -209,7 +208,7 @@ mod server_tests {
                 .with_params(json!({
                     "hash": "0xf8d32367d8ec243e8e6fcac96dc769ed80287534d51c5d1e817173128f2b6218",
                     "computation_stage": "preflight",
-                    "gas_used": GAS_USED,
+                    "gas_used": 21728,
                 }), false)
                 .with_result(json!({}))
                 .add()
