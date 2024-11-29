@@ -34,6 +34,7 @@ pub async fn v_call(config: Arc<ServerConfig>, params: Params) -> Result<CallRes
     let gas_meter_client = config
         .gas_meter_config()
         .map(|GasMeterConfig { url, time_to_live }| Client::new(&url, call_hash, time_to_live));
+
     if let Some(client) = gas_meter_client.as_ref() {
         client.allocate_gas(params.context.gas_limit).await?;
     }
@@ -41,14 +42,21 @@ pub async fn v_call(config: Arc<ServerConfig>, params: Params) -> Result<CallRes
     let prover = host.prover();
     let call_guest_id = host.call_guest_id();
     let preflight_result = host.preflight(call).await?;
+    let gas_used = preflight_result.gas_used;
 
     if let Some(client) = gas_meter_client.as_ref() {
         client
-            .refund_unused_gas(ComputationStage::Preflight, preflight_result.gas_used)
+            .refund_unused_gas(ComputationStage::Preflight, gas_used)
             .await?;
     }
 
     let host_output = Host::prove(&prover, call_guest_id, preflight_result)?;
+
+    if let Some(client) = gas_meter_client {
+        client
+            .refund_unused_gas(ComputationStage::Proving, gas_used)
+            .await?;
+    }
 
     Ok(CallResult::try_new(call_hash, host_output)?)
 }

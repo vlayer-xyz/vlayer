@@ -225,11 +225,14 @@ mod server_tests {
                 .await;
             gas_meter_server
                 .mock_method("v_refundUnusedGas")
-                .with_params(json!({
-                    "hash": "0xf8d32367d8ec243e8e6fcac96dc769ed80287534d51c5d1e817173128f2b6218",
-                    "computation_stage": "proving",
-                    "gas_used": EXPECTED_GAS_USED,
-                }), false)
+                .with_params(
+                    json!({
+                        "hash": EXPECTED_HASH,
+                        "computation_stage": "proving",
+                        "gas_used": EXPECTED_GAS_USED,
+                    }),
+                    false,
+                )
                 .with_result(json!({}))
                 .add()
                 .await;
