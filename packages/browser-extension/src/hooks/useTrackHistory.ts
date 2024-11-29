@@ -77,10 +77,33 @@ export const useTrackCompleteness = () => {
   }, []);
 };
 
+export const useTrackTabUpdate = () => {
+  return useCallback(() => {
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    browser.tabs.onUpdated.addListener(async (tabId, changeInfo, tab) => {
+      if (changeInfo.status === "complete" && tab.url) {
+        const history =
+          (await historyContextManager.store.get("history")) || [];
+        const existingItem = history.find((item) => item.tabId === tabId);
+        if (existingItem) {
+          historyContextManager
+            .updateHistory({
+              url: tab.url,
+              tabId: tabId,
+              ready: true,
+            })
+            .catch(console.error);
+        }
+      }
+    });
+  }, []);
+};
+
 export const useTrackHistory = () => {
   const trackHeaders = useTrackHeaders();
   const trackCookies = useTrackCookies();
   const trackCompleteness = useTrackCompleteness();
+  const trackTabUpdate = useTrackTabUpdate();
   useEffect(() => {
     // Record headers of all interesting url
     historyContextManager
@@ -90,29 +113,8 @@ export const useTrackHistory = () => {
         trackHeaders(urls);
         trackCookies(urls);
         trackCompleteness(urls);
-        // eslint-disable-next-line @typescript-eslint/no-misused-promises
-        browser.tabs.onUpdated.addListener(trackTabUpdate);
+        trackTabUpdate();
       })
       .catch(console.error);
   }, []);
-};
-
-const trackTabUpdate = async (
-  tabId: number,
-  changeInfo: browser.Tabs.OnUpdatedChangeInfoType,
-  tab: browser.Tabs.Tab,
-) => {
-  if (changeInfo.status === "complete" && tab.url) {
-    const history = (await historyContextManager.store.get("history")) || [];
-    const existingItem = history.find((item) => item.tabId === tabId);
-    if (existingItem) {
-      historyContextManager
-        .updateHistory({
-          url: tab.url,
-          tabId: tabId,
-          ready: true,
-        })
-        .catch(console.error);
-    }
-  }
 };

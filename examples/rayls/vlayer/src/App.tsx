@@ -1,5 +1,5 @@
 import { Button, Card } from "react-daisyui";
-import { useVlayerFlow } from "./hooks/useProof";
+import { useVlayerFlow } from "./hooks/useVlayerFlor";
 import { config } from "./config";
 import { useCallback } from "react";
 
@@ -27,7 +27,7 @@ function WebProofButton({
   return (
     <Button
       loading={vlayerFlow.isWebProving}
-      color="primary"
+      color={vlayerFlow.webProof ? "success" : "primary"}
       onClick={() => {
         if (!vlayerFlow.webProof) {
           vlayerFlow.requestWebProof();
@@ -57,15 +57,18 @@ const BeautyCard = ({ beauty }: { beauty: unknown }) => {
   }
 
   return (
-    <Card
-      style={{
-        backgroundColor: "#262932",
-      }}
-      className="text-sm p-8 text-white font-mono max-w-screen-lg overflow-x-auto whitespace-pre-wrap break-words tracking-widest"
-    >
-      <div className="mb-4 text-lg">Redacted Data from tink</div>
-      {formatBeautyData(beauty)}
-    </Card>
+    <div className="w-full flex justify-center">
+      <Card
+        style={{
+          backgroundColor: "#262932",
+          width: "60vw",
+        }}
+        className="text-sm p-8 text-white font-mono overflow-x-auto whitespace-pre-wrap break-words tracking-widest"
+      >
+        <div className="mb-4 text-lg">Redacted Data from tink</div>
+        {formatBeautyData(beauty)}
+      </Card>
+    </div>
   );
 };
 function ZkProofButton({
@@ -76,16 +79,31 @@ function ZkProofButton({
   return (
     <Button
       loading={vlayerFlow.isZkProving}
-      color="primary"
+      color={vlayerFlow.zkProof ? "success" : "primary"}
       onClick={() => vlayerFlow.requestZkProof()}
       disabled={!vlayerFlow.webProof}
     >
       {vlayerFlow.zkProof ? <CheckIcon /> : null}
       {vlayerFlow.isZkProving
-        ? "ZK Proofing..."
+        ? "ZK Proving..."
         : vlayerFlow.zkProof
           ? "Zk proof ready"
           : "Request ZK Proof"}
+    </Button>
+  );
+}
+function VerificationButton({
+  vlayerFlow,
+}: {
+  vlayerFlow: ReturnType<typeof useVlayerFlow>;
+}) {
+  return (
+    <Button
+      onClick={() => vlayerFlow.requestVerification()}
+      disabled={!vlayerFlow.zkProof}
+      color={vlayerFlow.verification ? "success" : "primary"}
+    >
+      Verify
     </Button>
   );
 }
@@ -97,9 +115,14 @@ function App() {
 
   return (
     <div className="flex flex-col items-center gap-4 mt-48">
-      <WebProofButton vlayerFlow={vlayerFlow} />
-      <ZkProofButton vlayerFlow={vlayerFlow} />
-      <BeautyCard beauty={vlayerFlow.beauty} />
+      <div className="flex flex-col gap-4">
+        <BeautyCard beauty={vlayerFlow.beauty || {}} />
+        <div className="flex gap-4" style={{ width: "60vw" }}>
+          <WebProofButton vlayerFlow={vlayerFlow} />
+          <ZkProofButton vlayerFlow={vlayerFlow} />
+          <VerificationButton vlayerFlow={vlayerFlow} />
+        </div>
+      </div>
     </div>
   );
 }

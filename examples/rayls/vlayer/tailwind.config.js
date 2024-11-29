@@ -22,7 +22,7 @@ export default {
           neutral: "white",
           "base-100": "white",
           info: "#0000ff",
-          success: "#00ff00",
+          success: "#35E572",
           warning: "#00ff00",
           error: "#ff0000",
         },
