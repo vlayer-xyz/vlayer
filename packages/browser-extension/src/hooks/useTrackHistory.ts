@@ -19,10 +19,12 @@ export const useTrackHeaders = () => {
   return useCallback((urls: string[]) => {
     browser.webRequest.onBeforeSendHeaders.addListener(
       (details) => {
+        console.log("onBeforeSendHeaders", details);
         historyContextManager
           .updateHistory({
             url: details.url,
             headers: details.requestHeaders,
+            tabId: details.tabId,
           })
           .catch(console.error);
       },
@@ -45,6 +47,7 @@ export const useTrackCookies = () => {
               .updateHistory({
                 url: details.url,
                 cookies,
+                tabId: details.tabId,
               })
               .catch(console.error);
           })
@@ -63,6 +66,7 @@ export const useTrackCompleteness = () => {
           .updateHistory({
             url: details.url,
             ready: true,
+            tabId: details.tabId,
           })
           .catch(console.error);
       },
@@ -86,14 +90,29 @@ export const useTrackHistory = () => {
         trackHeaders(urls);
         trackCookies(urls);
         trackCompleteness(urls);
-        browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
-          // console.log("tabId");
-          // console.log(tabId, changeInfo, tab);
-          // if (changeInfo.status === "complete") {
-          //   trackCompleteness([tab.url]);
-          // }
-        });
+        // eslint-disable-next-line @typescript-eslint/no-misused-promises
+        browser.tabs.onUpdated.addListener(trackTabUpdate);
       })
       .catch(console.error);
   }, []);
+};
+
+const trackTabUpdate = async (
+  tabId: number,
+  changeInfo: browser.Tabs.OnUpdatedChangeInfoType,
+  tab: browser.Tabs.Tab,
+) => {
+  if (changeInfo.status === "complete" && tab.url) {
+    const history = (await historyContextManager.store.get("history")) || [];
+    const existingItem = history.find((item) => item.tabId === tabId);
+    if (existingItem) {
+      historyContextManager
+        .updateHistory({
+          url: tab.url,
+          tabId: tabId,
+          ready: true,
+        })
+        .catch(console.error);
+    }
+  }
 };

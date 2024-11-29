@@ -11,6 +11,15 @@ const isStepVisited = (
   step: { url: UrlPattern },
 ): boolean => {
   return !!browsingHistory.find((item: HistoryItem) => {
+    return new URLPattern(step.url as string).test(item.url);
+  });
+};
+
+const isStepReady = (
+  browsingHistory: HistoryItem[],
+  step: { url: UrlPattern },
+): boolean => {
+  return !!browsingHistory.find((item: HistoryItem) => {
     return new URLPattern(step.url as string).test(item.url) && item.ready;
   });
 };
@@ -29,7 +38,7 @@ const isStartPageStepCompleted = isStepVisited;
 const isExpectUrlStepReady = () => true;
 const isExpectUrlStepCompleted = isStepVisited;
 
-const isNotarizeStepReady = isStepVisited;
+const isNotarizeStepReady = isStepReady;
 const isNotarizeStepCompleted = hasProof;
 
 const checkStepCompletion = {
