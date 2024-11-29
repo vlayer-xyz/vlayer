@@ -198,12 +198,12 @@ mod server_tests {
         async fn simple_with_gasmeter() {
             let mut gas_meter_server = RpcServerMock::start().await;
             gas_meter_server
-                .mock_method(AllocateGas::METHOD_NAME, false)
+                .mock_method(AllocateGas::METHOD_NAME)
                 .with_params(json!({
                     "gas_limit": GAS_LIMIT,
                     "hash": "0xf8d32367d8ec243e8e6fcac96dc769ed80287534d51c5d1e817173128f2b6218",
                     "time_to_live": GAS_METER_TTL
-                }))
+                }), false)
                 .with_result(json!({}))
                 .add()
                 .await;

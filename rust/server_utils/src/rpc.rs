@@ -35,6 +35,8 @@ pub enum Error {
     InvalidResponse(Value),
 }
 
+pub type Result<T> = std::result::Result<T, Error>;
+
 impl Client {
     pub fn new(url: &str) -> Self {
         Self {
@@ -43,7 +45,7 @@ impl Client {
         }
     }
 
-    pub async fn call<M>(&self, method: M) -> Result<Value, Error>
+    pub async fn call<M>(&self, method: M) -> Result<Value>
     where
         M: Method,
     {
@@ -67,7 +69,7 @@ impl Client {
     }
 }
 
-fn parse_json_rpc_response(response_body: Value) -> Result<Value, Error> {
+fn parse_json_rpc_response(response_body: Value) -> Result<Value> {
     let mut response = response_body;
     let error = response.get_mut("error").map(take);
     let result = response.get_mut("result").map(take);
@@ -97,16 +99,13 @@ pub mod mock {
             Self::new(mockito::Server::new_async().await, Vec::new())
         }
 
-        pub fn mock_method<'a>(
-            &'a mut self,
-            method_name: &'a str,
-            is_partial_match: bool,
-        ) -> MockBuilder<'a> {
+        #[must_use]
+        pub fn mock_method<'a>(&'a mut self, method_name: &'a str) -> MockBuilder<'a> {
             let mock = self
                 .server
                 .mock("POST", "/")
                 .match_header("Content-Type", "application/json");
-            MockBuilder::new(self, method_name, is_partial_match, mock)
+            MockBuilder::new(self, method_name, mock)
         }
 
         pub fn url(&self) -> String {
@@ -124,19 +123,19 @@ pub mod mock {
     pub struct MockBuilder<'a> {
         server: &'a mut Server,
         method_name: &'a str,
-        is_partial_match: bool,
         mock: Mock,
     }
 
     impl<'a> MockBuilder<'a> {
-        pub fn with_params(mut self, params: impl Serialize) -> Self {
+        #[must_use]
+        pub fn with_params(mut self, params: impl Serialize, is_partial_match: bool) -> Self {
             let request_body = json!({
                 "id": 1,
                 "jsonrpc": "2.0",
                 "method": self.method_name,
                 "params": params,
             });
-            self.mock = self.mock.match_body(if self.is_partial_match {
+            self.mock = self.mock.match_body(if is_partial_match {
                 Matcher::PartialJson(request_body)
             } else {
                 Matcher::Json(request_body)
@@ -144,6 +143,7 @@ pub mod mock {
             self
         }
 
+        #[must_use]
         pub fn with_result(mut self, result: impl Serialize) -> Self {
             let response_body = json!({
                 "jsonrpc": "2.0",
@@ -154,6 +154,7 @@ pub mod mock {
             self
         }
 
+        #[must_use]
         pub fn with_expected_calls(mut self, expected_calls: usize) -> Self {
             self.mock = self.mock.expect(expected_calls);
             self
@@ -182,15 +183,15 @@ mod tests {
         const METHOD_NAME: &str = "get_data";
     }
 
-    async fn server_start(
+    async fn start_server(
         is_partial: bool,
         params: impl Serialize,
         response: impl Serialize,
     ) -> Server {
         let mut server = Server::start().await;
         server
-            .mock_method(GetData::METHOD_NAME, is_partial)
-            .with_params(params)
+            .mock_method(GetData::METHOD_NAME)
+            .with_params(params, is_partial)
             .with_result(response)
             .add()
             .await;
@@ -201,7 +202,7 @@ mod tests {
     async fn mock_with_params() -> anyhow::Result<()> {
         let params = GetData::new("value".into());
         let expected_response = json!({"data": "some_data"});
-        let mock = server_start(false, &params, &expected_response).await;
+        let mock = start_server(false, &params, &expected_response).await;
         let rpc_client = Client::new(&mock.url());
 
         let response = rpc_client.call(params).await?;
@@ -216,13 +217,13 @@ mod tests {
     #[tokio::test]
     #[should_panic(expected = "Expected 1 request(s) to:")]
     async fn mock_not_called_panics() {
-        server_start(false, json!({}), json!({})).await.assert();
+        start_server(false, json!({}), json!({})).await.assert();
     }
 
     #[tokio::test]
     async fn call_without_mock_returns_error() {
         let params = GetData::new("value".into());
-        let mock = server_start(false, json!({}), json!({})).await;
+        let mock = start_server(false, json!({}), json!({})).await;
         let rpc_client = Client::new(&mock.url());
 
         let result = rpc_client.call(params).await;
@@ -233,7 +234,7 @@ mod tests {
     #[tokio::test]
     async fn mock_partial_matches_full_body() -> anyhow::Result<()> {
         let params = GetData::new("value".into());
-        let mock = server_start(true, json!({}), json!({"data": "some_data"})).await;
+        let mock = start_server(true, json!({}), json!({"data": "some_data"})).await;
         let rpc_client = Client::new(&mock.url());
 
         let result = rpc_client.call(params).await?;
@@ -248,7 +249,7 @@ mod tests {
     #[tokio::test]
     async fn mock_non_partial_doesnt_match_full_body() -> anyhow::Result<()> {
         let params = GetData::new("value".into());
-        let mock = server_start(false, json!({}), json!({"data": "some_data"})).await;
+        let mock = start_server(false, json!({}), json!({"data": "some_data"})).await;
         let rpc_client = Client::new(&mock.url());
 
         let result = rpc_client.call(params).await;

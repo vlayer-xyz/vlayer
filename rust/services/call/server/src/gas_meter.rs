@@ -1,6 +1,6 @@
 use derive_new::new;
 use serde::{Deserialize, Serialize};
-use server_utils::rpc::{Client as RpcClient, Error, Method};
+use server_utils::rpc::{Client as RpcClient, Method, Result};
 
 use crate::handlers::v_call::types::CallHash;
 
@@ -56,7 +56,7 @@ impl Client {
         }
     }
 
-    pub async fn allocate_gas(&self, gas_limit: u64) -> Result<(), Error> {
+    pub async fn allocate_gas(&self, gas_limit: u64) -> Result<()> {
         let req = AllocateGas::new(self.hash, gas_limit, self.time_to_live);
         let _resp = self.client.call(req).await?;
         Ok(())
