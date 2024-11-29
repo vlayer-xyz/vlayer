@@ -62,4 +62,5 @@ jobs:
         run: cargo deny check bans
 
       - name: Detect unused dependencies
-        uses: bnjbvr/cargo-machete@main
+        working-directory: rust
+        run: cargo machete
