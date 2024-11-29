@@ -54,19 +54,19 @@ contract WebProverTest is VTest {
         }
     }
 
-    function skip_test_missingSignature() public {
-        WebProof memory webProof = WebProof(vm.readFile("testdata/web_proof_missing_signature.json"));
+    function test_missingPartInSerializedWebProof() public {
+        WebProof memory webProof = WebProof(vm.readFile("testdata/web_proof_missing_part.json"));
 
         callProver();
 
         WebProofLibWrapper wrapper = new WebProofLibWrapper();
 
-        try wrapper.verify(webProof, DATA_URL) returns (Web memory web) {
+        try wrapper.verify(webProof, DATA_URL) returns (Web memory) {
             revert("Expected error");
         } catch Error(string memory reason) {
             assertEq(
                 reason,
-                "Engine(TransactError(Revert(\"Verification error: Session proof error: session proof is missing notary signature\")))"
+                "Engine(Panic(\"called `Result::unwrap()` on an `Err` value: Custom(\\\"invalid length 64, expected an array at most 64 bytes long\\\")\"))"
             );
         }
     }
