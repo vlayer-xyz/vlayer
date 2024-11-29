@@ -76,6 +76,7 @@ class ExtensionWebProofProvider implements WebProofProvider {
 
   private connectToExtension() {
     if (!this.port) {
+      console.log("connectToExtension");
       this.port = chrome.runtime.connect(EXTENSION_ID);
       this.port.onMessage.addListener((message: ExtensionMessage) => {
         if (message.type === ExtensionMessageType.ProofDone) {
@@ -88,6 +89,13 @@ class ExtensionWebProofProvider implements WebProofProvider {
             cb(message);
           });
         }
+      });
+      //@ts-expect-error something with chrome typing
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+      this.port.onDisconnect.addListener(() => {
+        console.log("extension disconnected");
+        this.port = null;
+        this.connectToExtension();
       });
     }
     return this.port;
