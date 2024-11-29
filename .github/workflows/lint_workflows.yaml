@@ -1,4 +1,4 @@
-name: Check Workflows YAML Formatting
+name: Lint Workflows
 on:
   pull_request:
     paths:

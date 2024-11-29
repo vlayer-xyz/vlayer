@@ -1,4 +1,4 @@
-name: e2e test web flow
+name: E2E Web Flow Test
 on:
   pull_request:
     paths:
@@ -10,7 +10,7 @@ on:
     branches:
       - main
 jobs:
-  test-sdk-in-web:
+  test-e2e-web-flow:
     timeout-minutes: 60
     runs-on: [aws-linux-medium]
     steps:
