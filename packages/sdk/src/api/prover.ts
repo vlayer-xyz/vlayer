@@ -11,7 +11,8 @@ import { v_call } from "./v_call";
 import { foundry } from "viem/chains";
 import { v_versions } from "./v_versions";
 import { checkVersionCompatibility } from "./utils/versions";
-import { version as sdkVersion } from "../../package.json";
+import meta from "../../package.json" assert { type: "json" };
+const sdkVersion = meta.version;
 
 export interface ProveOptions {
   preverifyVersions?: boolean;
