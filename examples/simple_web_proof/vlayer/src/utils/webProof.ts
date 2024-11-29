@@ -38,14 +38,11 @@ const { chain, ethClient, account, proverUrl, confirmations } =
 const twitterUserAddress = account.address;
 
 export async function requestProve() {
-  console.log("requestProve");
-  console.log("prover", import.meta.env.VITE_PROVER_ADDRESS);
   const provider = createExtensionWebProofProvider();
-  console.log("provider", provider);
   const webProof = await provider.getWebProof({
     proverCallCommitment: {
       address: import.meta.env.VITE_PROVER_ADDRESS,
-      proverAbi: webProofProver.abi,
+      proverAbi: webProofProver.abi as Abi,
       chainId: foundry.id,
       functionName: "main",
       commitmentArgs: ["0x"],
@@ -66,55 +63,48 @@ export async function requestProve() {
   context.webProof = webProof;
 }
 
-export const setupVProverButton = (element: HTMLButtonElement) => {
-  element.addEventListener("click", async () => {
-    const notaryPubKey =
-      "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExpX/4R4z40gI6C/j9zAM39u58LJu\n3Cx5tXTuqhhu/tirnBi5GniMmspOTEsps4ANnPLpMmMSfhJ+IFHbc3qVOA==\n-----END PUBLIC KEY-----\n";
+export const callProver = async () => {
+  const notaryPubKey =
+    "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExpX/4R4z40gI6C/j9zAM39u58LJu\n3Cx5tXTuqhhu/tirnBi5GniMmspOTEsps4ANnPLpMmMSfhJ+IFHbc3qVOA==\n-----END PUBLIC KEY-----\n";
 
-    const webProof = {
-      presentation_json: context.webProof,
-      notary_pub_key: notaryPubKey,
-    };
-    const vlayer = createVlayerClient({
-      url: proverUrl,
-    });
-
-    console.log("Generating proof...");
-    const hash = await vlayer.prove({
-      address: import.meta.env.VITE_PROVER_ADDRESS,
-      functionName: "main",
-      proverAbi: webProofProver.abi as Abi,
-      args: [
-        JSON.stringify(webProof),
-        twitterUserAddress,
-      ],
-      chainId: chain.id,
-    });
-    const provingResult = await vlayer.waitForProvingResult(hash);
-    console.log("Proof generated!", provingResult);
-    context.provingResult = provingResult as [Proof, string, Hex];
+  const webProof = {
+    presentation_json: context.webProof,
+    notary_pub_key: notaryPubKey,
+  };
+  const vlayer = createVlayerClient({
+    url: proverUrl,
   });
+
+  console.log("Generating proof...");
+  const hash = await vlayer.prove({
+    address: import.meta.env.VITE_PROVER_ADDRESS,
+    functionName: "main",
+    proverAbi: webProofProver.abi as Abi,
+    args: [JSON.stringify(webProof), twitterUserAddress],
+    chainId: chain.id,
+  });
+  const provingResult = await vlayer.waitForProvingResult(hash);
+  console.log("Proof generated!", provingResult);
+  context.provingResult = provingResult as [Proof, string, Hex];
 };
 
-export const setupVerifyButton = (element: HTMLButtonElement) => {
-  element.addEventListener("click", async () => {
-    isDefined(context.provingResult, "Proving result is undefined");
+export const callVerifier = async () => {
+  isDefined(context.provingResult, "Proving result is undefined");
 
-    const txHash = await ethClient.writeContract({
-      address: import.meta.env.VITE_VERIFIER_ADDRESS,
-      abi: webProofVerifier.abi,
-      functionName: "verify",
-      args: context.provingResult,
-      chain,
-      account: account,
-    });
-
-    const verification = await ethClient.waitForTransactionReceipt({
-      hash: txHash,
-      confirmations,
-      retryCount: 60,
-      retryDelay: 1000,
-    });
-    console.log("Verified!", verification);
+  const txHash = await ethClient.writeContract({
+    address: import.meta.env.VITE_VERIFIER_ADDRESS,
+    abi: webProofVerifier.abi as Abi,
+    functionName: "verify",
+    args: context.provingResult,
+    chain,
+    account: account,
   });
+
+  const verification = await ethClient.waitForTransactionReceipt({
+    hash: txHash,
+    confirmations,
+    retryCount: 60,
+    retryDelay: 1000,
+  });
+  console.log("Verified!", verification);
 };

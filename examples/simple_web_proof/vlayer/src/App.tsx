@@ -1,9 +1,7 @@
 import Actions from "./containers/Actions";
 
 function App() {
-  return (
-    <Actions />
-  );
+  return <Actions />;
 }
 
 export default App;
