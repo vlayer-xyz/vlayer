@@ -22,7 +22,7 @@ contract WebProofProver is Prover {
     function main(WebProof calldata webProof)
         public
         view
-        returns (string memory created)
+        returns (Proof memory, string memory created)
     {
         
         (bool success, bytes memory returnData) = Precompiles.VERIFY_AND_PARSE.staticcall(bytes(webProof.webProofJson));
