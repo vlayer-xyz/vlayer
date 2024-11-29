@@ -86,6 +86,13 @@ export const useTrackHistory = () => {
         trackHeaders(urls);
         trackCookies(urls);
         trackCompleteness(urls);
+        browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+          // console.log("tabId");
+          // console.log(tabId, changeInfo, tab);
+          // if (changeInfo.status === "complete") {
+          //   trackCompleteness([tab.url]);
+          // }
+        });
       })
       .catch(console.error);
   }, []);

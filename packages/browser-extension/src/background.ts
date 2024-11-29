@@ -8,6 +8,7 @@ import {
   ExtensionMessage,
   ExtensionMessageType,
   MessageToExtension,
+  ZkProvingStatus,
 } from "./web-proof-commons";
 
 import { WebProverSessionContextManager } from "./state/webProverSessionContext";
@@ -91,7 +92,11 @@ const handleProofRequest = async (
   if (chrome.sidePanel && sender?.tab?.windowId) {
     await chrome.sidePanel.open({ windowId: sender.tab?.windowId });
   }
-  await browser.storage.local.set({ history: [] });
+  console.log("clearing history");
+  await browser.storage.local.set({
+    history: [],
+    zkProvingStatus: ZkProvingStatus.NotStarted,
+  });
 
   await WebProverSessionContextManager.instance.setWebProverSessionConfig(
     message.payload,
