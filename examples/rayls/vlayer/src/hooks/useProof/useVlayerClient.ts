@@ -16,7 +16,9 @@ export const useVlayerClient = (proverAbi: Abi, chainId: number) => {
           args: args,
           chainId: chainId,
         });
-        return await client.waitForProvingResult(hash);
+        const zkProof = await client.waitForProvingResult(hash);
+        console.log("zkProof", zkProof);
+        return zkProof;
       },
     };
   }, [proverAbi, chainId]);

@@ -60,6 +60,7 @@ export const useVlayerFlow = ({
           }),
         },
       ]);
+      console.log("zkProof", zkProof);
       dispatch({
         kind: VlayerFlowActionKind.ZK_PROOF_RECEIVED,
         payload: { zkProof },

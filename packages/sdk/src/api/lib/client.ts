@@ -106,7 +106,6 @@ export const createVlayerClient = (
           functionName,
         }),
       );
-
       return [proof, ...result] as ContractFunctionReturnType<
         T,
         AbiStateMutability,

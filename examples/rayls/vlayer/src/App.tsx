@@ -1,5 +1,5 @@
 import { Button, Card } from "react-daisyui";
-import { useVlayerFlow } from "./hooks/useVlayerFlor";
+import { useVlayerFlow } from "./hooks/useProof";
 import { config } from "./config";
 import { useCallback } from "react";
 
@@ -44,7 +44,13 @@ function WebProofButton({
   );
 }
 
-const BeautyCard = ({ beauty }: { beauty: unknown }) => {
+const BeautyCard = ({
+  beauty,
+  zkProof,
+}: {
+  beauty: unknown;
+  zkProof: unknown[];
+}) => {
   const formatBeautyData = useCallback((data: unknown) => {
     const beautyStr = JSON.stringify(data || {});
     const firstBrace = beautyStr.indexOf("{");
@@ -65,8 +71,19 @@ const BeautyCard = ({ beauty }: { beauty: unknown }) => {
         }}
         className="text-sm p-8 text-white font-mono overflow-x-auto whitespace-pre-wrap break-words tracking-widest"
       >
-        <div className="mb-4 text-lg">Redacted Data from tink</div>
-        {formatBeautyData(beauty)}
+        {beauty && (
+          <>
+            <div className="mb-4 text-lg">Redacted Data from tink</div>
+            {formatBeautyData(beauty)}
+          </>
+        )}
+
+        {zkProof && (
+          <>
+            <div className="mb-4 text-lg mt-4">Zk public output</div>
+            <div>{JSON.stringify(zkProof[1])}</div>
+          </>
+        )}
       </Card>
     </div>
   );
@@ -116,7 +133,10 @@ function App() {
   return (
     <div className="flex flex-col items-center gap-4 mt-48">
       <div className="flex flex-col gap-4">
-        <BeautyCard beauty={vlayerFlow.beauty || {}} />
+        <BeautyCard
+          beauty={vlayerFlow.beauty || ""}
+          zkProof={vlayerFlow.zkProof as unknown[]}
+        />
         <div className="flex gap-4" style={{ width: "60vw" }}>
           <WebProofButton vlayerFlow={vlayerFlow} />
           <ZkProofButton vlayerFlow={vlayerFlow} />

@@ -19,9 +19,10 @@ const isStepReady = (
   browsingHistory: HistoryItem[],
   step: { url: UrlPattern },
 ): boolean => {
-  return !!browsingHistory.find((item: HistoryItem) => {
+  const x = !!browsingHistory.find((item: HistoryItem) => {
     return new URLPattern(step.url as string).test(item.url) && item.ready;
   });
+  return x;
 };
 
 const hasProof = (

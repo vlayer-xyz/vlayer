@@ -12,7 +12,6 @@ import { getChainConfirmations } from "./getChainConfirmations";
 import * as chains from "viem/chains";
 
 const getChainSpecs = (chainName: string): Chain => {
-  console.log(chainName);
   try {
     return chains[chainName as keyof typeof chains] as Chain;
   } catch {
@@ -34,7 +33,6 @@ const createEthClient = (
 
 export const createContext = (config: Config, transport?: CustomTransport) => {
   const chain = getChainSpecs(config.chainName);
-  console.log("chain", chain);
   const jsonRpcUrl = config.jsonRpcUrl ?? chain.rpcUrls.default.http[0];
 
   return {
