@@ -16,17 +16,22 @@ source "${VLAYER_HOME}/bash/common.sh"
 mkdir -p "${LOGS_DIR}"
 echo "Saving artifacts to: ${VLAYER_TMP_DIR}"
 
+CHAIN_WORKERS=()
+
 function cleanup() {
     echo "Cleaning up..."
 
-    for service in ANVIL CHAIN_WORKER CHAIN_SERVER VLAYER_SERVER ; do 
+    for service in ANVIL CHAIN_SERVER VLAYER_SERVER ; do 
         kill_service "${service}"
     done
-   
+
+    for worker in "${CHAIN_WORKERS[@]}" ; do
+        kill_service "${worker}"
+    done  
 }
 
 function start_anvil(){
-    echo "Starting Anvil "
+    echo "Starting Anvil"
     startup_anvil "${LOGS_DIR}/anvil.out" 8545 ANVIL
 }
 
@@ -57,42 +62,51 @@ function startup_vlayer(){
 }
 
 function startup_chain_services() {
-    db_path="${VLAYER_TMP_DIR}/chain_db"
+    local db_path="${VLAYER_TMP_DIR}/chain_db"
 
-    startup_chain_worker ${db_path} 
+    for args in "$@"; do 
+        startup_chain_worker ${db_path} $args &
+    done
+
     startup_chain_server ${db_path}
+
+    for args in "$@"; do 
+        wait_for_chain_worker_sync $args &
+    done
 }
 
 function startup_chain_worker() {
-    db_path="$1"
+    local db_path="$1"
+    local rpc_url="$2"
+    local chain_id="$3"
+    local first_block="$4"
+    local last_block="$5"
 
-    echo "Starting chain worker"
+    echo "Starting chain worker with rpc_url=${rpc_url} chain_id=${chain_id}"
     pushd "${VLAYER_HOME}/rust"
     
-    FIRST_BLOCK_MAX=${FIRST_BLOCK_MAX:-18000000} # default values for sepolia tests
-    LAST_BLOCK_MIN=${LAST_BLOCK_MIN:-18000500} 
-    START_BLOCK=$(( ($FIRST_BLOCK_MAX + $LAST_BLOCK_MIN) / 2 ))
+    local start_block=$(( ($first_block + $last_block) / 2 ))
 
     RUST_LOG=${RUST_LOG:-info} \
     cargo run --bin worker -- \
         --db-path "${db_path}" \
-        --rpc-url "${CHAIN_WORKER_RPC_URL}" \
-        --chain-id "${CHAIN_ID:-1}" \
+        --rpc-url "${rpc_url}" \
+        --chain-id "${chain_id}" \
         --confirmations "${CONFIRMATIONS:-1}" \
-        --start-block "${START_BLOCK}" \
+        --start-block "${start_block}" \
         --max-head-blocks "${MAX_HEAD_BLOCKS:-10}" \
         --max-back-propagation-blocks "${MAX_BACK_PROPAGATION_BLOCKS:-10}" \
-        >"${LOGS_DIR}/chain_worker.out" 2>&1 &
+        >"${LOGS_DIR}/chain_worker_${chain_id}.out" 2>&1 &
 
-    CHAIN_WORKER=$!
-
-    echo "Chain worker started with PID ${CHAIN_WORKER}."
+    local worker_pid=$!
+    echo "Chain worker started with PID ${worker_pid}."
+    CHAIN_WORKERS+=($worker_pid)
 
     popd
 }
 
 function startup_chain_server() {
-    db_path="$1"
+    local db_path="$1"
 
     echo "Starting chain server"
     pushd "${VLAYER_HOME}/rust"
@@ -106,17 +120,17 @@ function startup_chain_server() {
     
     echo "Chain server started with PID ${CHAIN_SERVER}."
     wait_for_port_and_pid 3001 "${CHAIN_SERVER}" 30m "chain server"
-    wait_for_chain_worker_sync
 
     popd
 }
 
 
 wait_for_chain_worker_sync() {
-    FIRST_BLOCK_MAX=${FIRST_BLOCK_MAX:-18000000} # default values for sepolia tests
-    LAST_BLOCK_MIN=${LAST_BLOCK_MIN:-18000500}
-    
-    echo "Waiting for chain worker sync... FIRST_BLOCK=${FIRST_BLOCK_MAX} LAST_BLOCK=${LAST_BLOCK_MIN}"
+    local _rpc_url="$1"  # Ignored, only present for compatibility with CHAIN_WORKER_ARGS
+    local chain_id="$2"
+    local first_block="$3"
+    local last_block="$4"
+    echo "Waiting for chain worker sync... chain_id=${chain_id} first_block=${first_block} last_block=${last_block}"
 
     for i in `seq 1 10` ; do
 
@@ -126,12 +140,12 @@ wait_for_chain_worker_sync() {
                   --retry-delay 0 \
                   --retry-max-time 30 \
                   -H "Content-Type: application/json" \
-                  --data '{"jsonrpc": "2.0","id": 0,"method": "v_sync_status","params": ['"${CHAIN_ID:-1}"']}'
+                  --data '{"jsonrpc": "2.0","id": 0,"method": "v_sync_status","params": ['"${chain_id}"']}'
         )
-        synced=$(echo "${reply}" | jq "(.result.first_block <= ${FIRST_BLOCK_MAX}) and (.result.last_block >= ${LAST_BLOCK_MIN})")
+        synced=$(echo "${reply}" | jq "(.result.first_block <= ${first_block}) and (.result.last_block >= ${last_block})")
 
         if [[ "${synced}" == "true" ]] ; then
-            echo "Worker synced"
+            echo "Chain ${chain_id} worker synced"
             break
         fi
         echo "Syncing ... ${reply}"
@@ -139,7 +153,7 @@ wait_for_chain_worker_sync() {
     done
 
     if [[ "${synced}" != "true" ]] ; then
-        echo "Failed to sync chain worker" >&2
+        echo "Failed to sync chain ${chain_id} worker" >&2
         exit 1 
     fi
 
@@ -154,7 +168,7 @@ RISC0_DEV_MODE=""
 BONSAI_API_URL="${BONSAI_API_URL:-https://api.bonsai.xyz/}"
 BONSAI_API_KEY="${BONSAI_API_KEY:-}"
 SERVER_PROOF_ARG="fake"
-EXTERNAL_RPC_URLS=()     
+EXTERNAL_RPC_URLS=()
 
 # Set the SERVER_PROOF_MODE variable based on the mode
 if [[ "${PROVING_MODE}" == "dev" ]]; then
@@ -172,8 +186,16 @@ fi
 # set external rpc urls
 if [[ -z "${ALCHEMY_API_KEY:-}" ]] ; then
     echo ALCHEMY_API_KEY is not configured. Using only local rpc-urls. >&2
+    CHAIN_WORKER_ARGS=(
+        "http://localhost:8545 31337 18000000 18000500"
+    )
 else
-    CHAIN_WORKER_RPC_URL="https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}"
+    CHAIN_WORKER_ARGS=(
+        "http://localhost:8545 31337 latest latest"
+        "https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY} 1 20683110 20683110"
+        "https://base-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY} 8453 19367633 19367633"
+        "https://opt-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY} 10 124962954 124962954"
+    )
 
     EXTERNAL_RPC_URLS=(
         "--rpc-url" "11155111:https://eth-sepolia.g.alchemy.com/v2/${ALCHEMY_API_KEY}"
@@ -203,7 +225,9 @@ echo
 echo "Starting services..."
 
 start_anvil
-if [[ "${RUN_CHAIN_SERVICES:-0}" == "1" ]] ; then startup_chain_services ; fi
+if [[ "${RUN_CHAIN_SERVICES:-0}" == "1" ]] ; then 
+    startup_chain_services "${CHAIN_WORKER_ARGS[@]}"
+fi
 startup_vlayer "${SERVER_PROOF_ARG}" ${EXTERNAL_RPC_URLS[@]+"${EXTERNAL_RPC_URLS[@]}"}
 
 echo "Services have been successfully started"
