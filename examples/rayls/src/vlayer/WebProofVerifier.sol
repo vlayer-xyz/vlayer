@@ -15,13 +15,8 @@ contract WebProofVerifier is Verifier, ERC721 {
         prover = _prover;
     }
 
-    function verify(Proof calldata, string memory username, address account)
+    function verify(Proof calldata, string memory accountNumber)
         public
         onlyVerified(prover, WebProofProver.main.selector)
-    {
-        uint256 tokenId = uint256(keccak256(abi.encodePacked(username)));
-        require(_ownerOf(tokenId) == address(0), "User has already minted a TwitterNFT");
-
-        _safeMint(account, tokenId);
-    }
+    {}
 }

@@ -33,8 +33,8 @@ contract WebProofProver is Prover {
         require(data[0].test(DATA_URL), "Invalid data");
 
         Web memory web = Web(data[2], data[3]);
-        string memory created = web.jsonGetString("accountNumber");
+        string memory accountNumber = web.jsonGetString("accountNumber");
 
-        return created;
+        return (proof(), accountNumber);
     }
 }
