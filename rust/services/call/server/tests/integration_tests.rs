@@ -192,7 +192,7 @@ mod server_tests {
 
         #[tokio::test(flavor = "multi_thread")]
         async fn simple_with_gasmeter() {
-            const EXPECTED_GAS_USED: u64 = 21728;
+            const EXPECTED_GAS_USED: u64 = 21_728;
 
             let mut gas_meter_server = RpcServerMock::start().await;
             gas_meter_server
