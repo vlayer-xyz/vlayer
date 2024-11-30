@@ -21,6 +21,7 @@ use call_engine::{
 };
 use common::GuestElf;
 pub use config::{Config, DEFAULT_MAX_CALLDATA_SIZE};
+use derive_new::new;
 pub use error::Error;
 use ethers_core::types::BlockNumber as BlockTag;
 use prover::Prover;
@@ -90,10 +91,11 @@ pub fn get_block_header(
     Ok(block_header)
 }
 
-#[derive(Debug, Clone)]
+#[derive(new, Debug, Clone)]
 pub struct PreflightResult {
     pub host_output: Bytes,
     pub input: Input,
+    pub gas_used: u64,
 }
 
 impl Host {
@@ -153,16 +155,15 @@ impl Host {
             call,
         };
 
-        Ok(PreflightResult {
-            host_output: host_output.into(),
-            input,
-        })
+        Ok(PreflightResult::new(host_output.into(), input, gas_used))
     }
 
     pub fn prove(
         prover: &Prover,
         call_guest_id: CallGuestId,
-        PreflightResult { host_output, input }: PreflightResult,
+        PreflightResult {
+            host_output, input, ..
+        }: PreflightResult,
     ) -> Result<HostOutput, Error> {
         let (seal, raw_guest_output) = provably_execute(prover, &input)?;
         let proof_len = raw_guest_output.len();

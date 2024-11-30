@@ -86,15 +86,11 @@ mod server_tests {
 
     mod v_call {
         use assert_json_diff::assert_json_include;
-        use call_server::gas_meter::AllocateGas;
         use ethers::{
             abi::AbiEncode,
             types::{Uint8, U256},
         };
-        use server_utils::{
-            function_selector,
-            rpc::{mock::Server as RpcServerMock, Method},
-        };
+        use server_utils::{function_selector, rpc::mock::Server as RpcServerMock};
         use web_proof::fixtures::{load_web_proof_v7_fixture, NOTARY_PUB_KEY_PEM_EXAMPLE};
 
         use super::*;
@@ -196,14 +192,34 @@ mod server_tests {
 
         #[tokio::test(flavor = "multi_thread")]
         async fn simple_with_gasmeter() {
+            const EXPECTED_HASH: &str =
+                "0xf8d32367d8ec243e8e6fcac96dc769ed80287534d51c5d1e817173128f2b6218";
+            const EXPECTED_GAS_USED: u64 = 21_728;
+
             let mut gas_meter_server = RpcServerMock::start().await;
             gas_meter_server
-                .mock_method(AllocateGas::METHOD_NAME)
-                .with_params(json!({
-                    "gas_limit": GAS_LIMIT,
-                    "hash": "0xf8d32367d8ec243e8e6fcac96dc769ed80287534d51c5d1e817173128f2b6218",
-                    "time_to_live": GAS_METER_TTL
-                }), false)
+                .mock_method("v_allocateGas")
+                .with_params(
+                    json!({
+                        "gas_limit": GAS_LIMIT,
+                        "hash": EXPECTED_HASH,
+                        "time_to_live": GAS_METER_TTL
+                    }),
+                    false,
+                )
+                .with_result(json!({}))
+                .add()
+                .await;
+            gas_meter_server
+                .mock_method("v_refundUnusedGas")
+                .with_params(
+                    json!({
+                        "hash": EXPECTED_HASH,
+                        "computation_stage": "preflight",
+                        "gas_used": EXPECTED_GAS_USED,
+                    }),
+                    false,
+                )
                 .with_result(json!({}))
                 .add()
                 .await;

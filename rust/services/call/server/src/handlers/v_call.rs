@@ -10,7 +10,7 @@ use types::{Call, CallContext, CallHashData, CallResult};
 use crate::{
     config::Config as ServerConfig,
     error::AppError,
-    gas_meter::{Client, Config as GasMeterConfig},
+    gas_meter::{Client, ComputationStage, Config as GasMeterConfig},
 };
 
 pub mod types;
@@ -41,6 +41,13 @@ pub async fn v_call(config: Arc<ServerConfig>, params: Params) -> Result<CallRes
     let prover = host.prover();
     let call_guest_id = host.call_guest_id();
     let preflight_result = host.preflight(call).await?;
+
+    if let Some(client) = gas_meter_client.as_ref() {
+        client
+            .refund_unused_gas(ComputationStage::Preflight, preflight_result.gas_used)
+            .await?;
+    }
+
     let host_output = Host::prove(&prover, call_guest_id, preflight_result)?;
 
     Ok(CallResult::try_new(call_hash, host_output)?)
