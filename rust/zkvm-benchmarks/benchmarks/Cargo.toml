@@ -16,3 +16,6 @@ mpt = { workspace = true }
 risc0-zkvm = { workspace = true }
 serde = { workspace = true }
 sha2 = { workspace = true }
+
+[lints]
+workspace = true

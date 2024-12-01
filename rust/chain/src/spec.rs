@@ -50,7 +50,7 @@ impl ChainSpec {
         bail!("unsupported fork for block {}", block_number)
     }
 
-    pub fn id(&self) -> ChainId {
+    pub const fn id(&self) -> ChainId {
         self.id
     }
 
@@ -58,7 +58,7 @@ impl ChainSpec {
         &self.name
     }
 
-    pub fn is_optimism(&self) -> bool {
+    pub const fn is_optimism(&self) -> bool {
         self.is_optimism
     }
 }

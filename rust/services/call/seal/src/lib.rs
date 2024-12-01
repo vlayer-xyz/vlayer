@@ -314,7 +314,7 @@ mod test {
                     let receipt: EncodableReceipt = mock_fake_receipt().into();
                     let other_words = &receipt.seal_bytes().unwrap()[ETH_WORD_SIZE..];
 
-                    assert_eq!(&[0u8; SEAL_BYTES_SIZE - ETH_WORD_SIZE], other_words);
+                    assert_eq!(&[0_u8; SEAL_BYTES_SIZE - ETH_WORD_SIZE], other_words);
                 }
             }
             mod groth16_proof_receipt {

@@ -13,5 +13,6 @@ serde_json = { workspace = true }
 url = { workspace = true }
 urlpattern = { workspace = true }
 web_proof = { workspace = true }
+
 [lints]
 workspace = true

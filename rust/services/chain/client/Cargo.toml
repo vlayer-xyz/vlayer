@@ -25,3 +25,6 @@ tokio = { workspace = true, features = ["rt", "macros"] }
 
 [features]
 rpc = ["mpt", "serde_json", "server_utils", "tracing"]
+
+[lints]
+workspace = true

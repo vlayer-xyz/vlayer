@@ -33,7 +33,7 @@ impl TryFrom<Call> for HostCall {
     }
 }
 
-fn mainnet_chain_id() -> ChainId {
+const fn mainnet_chain_id() -> ChainId {
     Chain::mainnet().id()
 }
 
@@ -45,6 +45,7 @@ pub struct CallContext {
     pub gas_limit: u64,
 }
 
+#[allow(clippy::struct_field_names)]
 pub struct CallResult {
     hash: CallHash,
     proof: Proof,
@@ -63,7 +64,7 @@ impl CallResult {
 
         let proof = Proof {
             length: U256::from(proof_len),
-            seal: decode_seal(seal)?,
+            seal: decode_seal(&seal)?,
             callGuestId: call_guest_id.into(),
             // Intentionally set to 0. These fields will be updated with the correct values by the prover script, based on the verifier ABI.
             callAssumptions: guest_output.call_assumptions,
@@ -119,8 +120,8 @@ impl Hashable for CallHashData {
     }
 }
 
-fn decode_seal(seal: Vec<u8>) -> Result<Seal, seal::Error> {
-    Ok(Seal::abi_decode(&seal, true)?)
+fn decode_seal(seal: &[u8]) -> Result<Seal, seal::Error> {
+    Ok(Seal::abi_decode(seal, true)?)
 }
 
 fn u256_to_number(value: U256) -> u64 {

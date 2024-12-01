@@ -27,8 +27,8 @@ pub(crate) struct Context {
 
 impl Context {
     pub(crate) async fn default() -> Self {
-        let anvil = Anvil::start().await;
-        let client = anvil.setup_client().await;
+        let anvil = Anvil::start();
+        let client = anvil.setup_client();
         let block_header = client.get_latest_block_header().await;
         let chain_proof_server =
             ChainProofServerMock::start(json!({}), fake_proof_result(block_header), 1).await;
@@ -45,7 +45,7 @@ impl Context {
         .with_rpc_mappings([(self.anvil.chain_id(), self.anvil.endpoint())])
         .with_proof_mode(ProofMode::Fake);
 
-        if let Some(url) = self.gas_meter_server.as_ref().map(|x| x.url()) {
+        if let Some(url) = self.gas_meter_server.as_ref().map(RpcServerMock::url) {
             config_builder =
                 config_builder.with_gas_meter_config(GasMeterConfig::new(url, GAS_METER_TTL));
         }
@@ -98,15 +98,15 @@ pub(crate) mod mock {
     pub(crate) struct Anvil(AnvilInstance);
 
     impl Anvil {
-        pub(crate) async fn start() -> Self {
-            Self(utils::Anvil::new().chain_id(11155111u64).spawn())
+        pub(crate) fn start() -> Self {
+            Self(utils::Anvil::new().chain_id(11_155_111_u64).spawn())
         }
 
-        pub(crate) async fn setup_client(&self) -> Client {
+        pub(crate) fn setup_client(&self) -> Client {
             let wallet: LocalWallet = self.keys()[0].clone().into();
             let provider = Provider::<Http>::try_from(self.endpoint())
                 .unwrap()
-                .interval(Duration::from_millis(10u64));
+                .interval(Duration::from_millis(10_u64));
             Client::new(provider, wallet.with_chain_id(self.chain_id()))
         }
     }

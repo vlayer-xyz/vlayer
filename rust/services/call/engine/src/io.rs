@@ -140,7 +140,7 @@ impl From<Digest> for CallGuestId {
 
 impl From<CallGuestId> for FixedBytes<32> {
     fn from(value: CallGuestId) -> Self {
-        let mut bytes = [0u8; 32];
+        let mut bytes = [0_u8; 32];
         bytes.copy_from_slice(value.0.as_bytes());
 
         Self::new(bytes)
