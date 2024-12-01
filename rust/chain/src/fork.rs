@@ -15,7 +15,7 @@ pub struct Fork {
 }
 
 impl Fork {
-    pub fn active(&self, block_number: BlockNumber, timestamp: u64) -> bool {
+    pub const fn active(&self, block_number: BlockNumber, timestamp: u64) -> bool {
         self.activation.active(block_number, timestamp)
     }
 
@@ -74,7 +74,7 @@ enum ActivationCondition {
 }
 
 impl ActivationCondition {
-    pub fn active(&self, block_number: BlockNumber, timestamp: u64) -> bool {
+    pub const fn active(&self, block_number: BlockNumber, timestamp: u64) -> bool {
         match self {
             Block(block) => *block <= block_number,
             Timestamp(ts) => *ts <= timestamp,
