@@ -64,7 +64,7 @@ fn branch_with_value() {
     let MerkleTrie(Node::Branch(_, ref mut branch_value)) = mpt else {
         panic!("Expected a Branch node");
     };
-    *branch_value = Some([42u8].into());
+    *branch_value = Some([42_u8].into());
 
     assert_eq!(
         mpt.hash_slow(),
