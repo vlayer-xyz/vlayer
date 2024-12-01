@@ -11,3 +11,6 @@ bytes = { workspace = true }
 derive_more = { workspace = true }
 risc0-zkp = { workspace = true }
 serde = { workspace = true }
+
+[lints]
+workspace = true
