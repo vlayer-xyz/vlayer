@@ -39,3 +39,6 @@ mock_chain_server = { workspace = true }
 provider = { workspace = true }
 reqwest = { workspace = true }
 web_proof = { workspace = true, features = ["fixtures"] }
+
+[lints]
+workspace = true

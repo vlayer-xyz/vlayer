@@ -96,7 +96,7 @@ mod server_tests {
         use super::*;
         use crate::test_helpers::mock::WebProof;
 
-        const CHAIN_ID: u64 = 11155111;
+        const CHAIN_ID: u64 = 11_155_111;
         const GAS_LIMIT: u64 = 1_000_000;
 
         #[tokio::test]

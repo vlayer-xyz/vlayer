@@ -24,11 +24,11 @@ pub struct Config {
 }
 
 impl Config {
-    pub fn socket_addr(&self) -> SocketAddr {
+    pub const fn socket_addr(&self) -> SocketAddr {
         self.socket_addr
     }
 
-    pub fn fake_proofs(&self) -> bool {
+    pub const fn fake_proofs(&self) -> bool {
         matches!(self.proof_mode, ProofMode::Fake)
     }
 
@@ -55,14 +55,14 @@ pub struct ConfigBuilder {
 
 impl ConfigBuilder {
     pub fn new(
-        chain_proof_url: impl ToString,
+        chain_proof_url: impl Into<String>,
         call_guest_elf: GuestElf,
         chain_guest_elf: GuestElf,
         api_version: String,
     ) -> Self {
         Self {
             config: Config {
-                chain_proof_url: chain_proof_url.to_string(),
+                chain_proof_url: chain_proof_url.into(),
                 call_guest_elf,
                 chain_guest_elf,
                 socket_addr: "127.0.0.1:3000".parse().unwrap(),
@@ -84,7 +84,7 @@ impl ConfigBuilder {
         self
     }
 
-    pub fn with_proof_mode(mut self, proof_mode: ProofMode) -> Self {
+    pub const fn with_proof_mode(mut self, proof_mode: ProofMode) -> Self {
         self.config.proof_mode = proof_mode;
         self
     }
@@ -103,7 +103,7 @@ impl ConfigBuilder {
         self
     }
 
-    pub fn with_verify_chain_proofs(mut self, verify: bool) -> Self {
+    pub const fn with_verify_chain_proofs(mut self, verify: bool) -> Self {
         self.config.verify_chain_proofs = verify;
         self
     }

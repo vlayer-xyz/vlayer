@@ -37,7 +37,11 @@ pub(crate) struct ServeArgs {
 }
 
 impl ServeArgs {
-    pub fn into_server_config(self, chain_proof_url: impl ToString, api_version: String) -> Config {
+    pub fn into_server_config(
+        self,
+        chain_proof_url: impl Into<String>,
+        api_version: String,
+    ) -> Config {
         let proof_mode = self.proof.unwrap_or_default().map();
         call_server::ConfigBuilder::new(
             chain_proof_url,
