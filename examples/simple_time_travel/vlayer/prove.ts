@@ -12,13 +12,11 @@ import { type Address } from "viem";
 const config = getConfig();
 const { ethClient, account, proverUrl } = await createContext(config);
 
-const tokenOwner = process.env.TOKEN_OWNER as Address;
-const usdcTokenAddr = process.env.USDC_TOKEN_ADDR as Address;
-const startBlock = BigInt(process.env.START_BLOCK as string);
-const endBlock = BigInt(process.env.END_BLOCK as string);
-const step = BigInt(process.env.STEP as string);
-
-console.log({ tokenOwner, usdcTokenAddr, startBlock, endBlock, step });
+const tokenOwner = process.env.PROVER_ERC20_HOLDER_ADDR as Address;
+const usdcTokenAddr = process.env.PROVER_ERC20_CONTRACT_ADDR as Address;
+const startBlock = BigInt(process.env.PROVER_START_BLOCK as string);
+const endBlock = BigInt(process.env.PROVER_END_BLOCK as string);
+const step = BigInt(process.env.PROVER_STEP as string);
 
 const { prover, verifier } = await deployVlayerContracts({
   proverSpec,
