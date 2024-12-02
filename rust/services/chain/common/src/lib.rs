@@ -1,10 +1,10 @@
 use alloy_primitives::B256;
-use block_trie::BlockTrie;
+use block_trie::KeccakBlockTrie as BlockTrie;
 use bytes::Bytes;
 use derivative::Derivative;
 use derive_more::{AsRef, Deref, From, Into};
 use derive_new::new;
-use mpt::{MerkleTrie, ParseNodeError};
+use mpt::{KeccakMerkleTrie, ParseNodeError};
 use risc0_zkp::verify::VerificationError;
 use risc0_zkvm::{sha::Digest, AssumptionReceipt, Receipt};
 use serde::{Deserialize, Serialize};
@@ -112,7 +112,7 @@ impl TryFrom<RpcChainProof> for ChainProof {
 
     fn try_from(rpc_chain_proof: RpcChainProof) -> Result<Self, Self::Error> {
         let block_trie =
-            BlockTrie::from_unchecked(MerkleTrie::from_rlp_nodes(rpc_chain_proof.nodes)?);
+            BlockTrie::from_unchecked(KeccakMerkleTrie::from_rlp_nodes(rpc_chain_proof.nodes)?);
         Ok(Self {
             proof: rpc_chain_proof.proof,
             block_trie,

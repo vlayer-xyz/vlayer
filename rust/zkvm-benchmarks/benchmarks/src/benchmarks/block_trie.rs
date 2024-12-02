@@ -1,4 +1,4 @@
-use ::block_trie::BlockTrie;
+use ::block_trie::KeccakBlockTrie as BlockTrie;
 use block_header::{EthBlockHeader as Block, EvmBlockHeader};
 
 use crate::{with_fixture, Benchmark};

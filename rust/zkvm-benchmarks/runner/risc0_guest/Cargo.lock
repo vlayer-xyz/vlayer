@@ -696,8 +696,11 @@ dependencies = [
  "block_header",
  "bytes",
  "common",
+ "derivative",
+ "digest 0.10.7",
  "mpt",
  "serde",
+ "sha3",
  "thiserror",
 ]
 
@@ -4533,4 +4536,5 @@ dependencies = [
  "risc0-zkvm",
  "serde",
  "sha2",
+ "sha3",
 ]

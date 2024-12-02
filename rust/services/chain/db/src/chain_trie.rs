@@ -1,4 +1,4 @@
-use block_trie::BlockTrie;
+use block_trie::KeccakBlockTrie as BlockTrie;
 use chain_common::{ChainProofReceipt, ProofVerificationError};
 use common::{GuestElf, Hashable};
 use derive_new::new;
