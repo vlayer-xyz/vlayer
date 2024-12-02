@@ -10,6 +10,7 @@ use revm::{
 
 use super::state::StateDb;
 
+#[derive(Default)]
 pub struct WrapStateDb {
     inner: StateDb,
     account_storage: RefCell<HashMap<Address, Option<Rc<MerkleTrie>>>>,
@@ -96,29 +97,27 @@ impl From<EvmInput> for WrapStateDb {
 }
 
 #[cfg(test)]
-mod test {
+mod storage_ref {
     use super::*;
 
     #[test]
     #[should_panic(expected = "storage not found: 0x0000000000000000000000000000000000000000@0")]
-    fn storage_ref_panics_if_storage_not_found() {
-        let db = WrapStateDb::new(StateDb::default());
-        let address = Address::default();
+    fn panics_when_storage_not_found() {
+        let db = WrapStateDb::default();
         let index = U256::from(0);
-        let _ = db.storage_ref(address, index);
+        let _ = db.storage_ref(Address::default(), index);
     }
 
     #[test]
     #[should_panic(expected = "invalid storage value")]
-    fn panics_if_storage_value_invalid() {
-        let db = WrapStateDb::new(StateDb::default());
+    fn panics_when_storage_value_invalid() {
+        let db = WrapStateDb::default();
         let address = Address::default();
         let index = U256::from(0);
 
-        let mut storage = MerkleTrie::default();
-        let key = keccak256(index.to_be_bytes::<32>());
         let invalid_value = vec![0xc0];
-        let _ = storage.insert(key, invalid_value);
+        let storage =
+            MerkleTrie::from_iter(vec![(keccak256(index.to_be_bytes::<32>()), invalid_value)]);
 
         db.account_storage
             .borrow_mut()
