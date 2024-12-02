@@ -1,12 +1,11 @@
 import Menu from "../components/Menu";
-import { requestProve, callProver, callVerifier } from "../utils/webProof";
+import { config } from "../config";
+import { useVlayerFlow } from "../hooks/useProof";
 
 export default function Actions() {
-  return (
-    <Menu
-      requestProve={requestProve}
-      callProver={callProver}
-      callVerifier={callVerifier}
-    />
-  );
+  const vlayerFlow = useVlayerFlow({
+    webProofConfig: config,
+  });
+
+  return <Menu vlayerFlow={vlayerFlow} />;
 }

@@ -1,35 +1,59 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 
 function Menu({
-  requestProve,
-  callProver,
-  callVerifier,
+  vlayerFlow,
 }: {
-  requestProve: () => Promise<void>;
-  callProver: () => Promise<void>;
-  callVerifier: () => Promise<void>;
+  vlayerFlow: ReturnType<typeof useVlayerFlow>;
 }) {
-  const [currentStep, setCurrentStep] = useState<string>("Generating Web Proof...");
   const [isLoading, setIsLoading] = useState(false);
-  const [isSuccess, setIsSuccess] = useState(false);
 
   const handleRequestProve = async () => {
     try {
-      setIsSuccess(false);
       setIsLoading(true);
-      await requestProve();
-      setCurrentStep("Generating ZK Proof...");
-      await callProver();
-      setCurrentStep("Verifying on-chain...");
-      await callVerifier();
-      setIsLoading(false);
-      setIsSuccess(true);
+      vlayerFlow.requestWebProof();
     } catch (error) {
       console.error(error);
-    } finally {
-      setIsLoading(false);
     }
   };
+
+  const currentStep = () => {
+    switch (true) {
+      case vlayerFlow.isWebProving:
+        return "Generating Web Proof (1/3)";
+      case vlayerFlow.isZkProving:
+        return "Generating ZK Proof (2/3)";
+      case vlayerFlow.isVerifying:
+        return "Verifying on-chain (3/3)";
+      case vlayerFlow.completed:
+        return "🎉 Proof verified successfully!";
+      default:
+        return "Generate Proof of Twitter Handle";
+    }
+  };
+
+  useEffect(() => {
+    if (vlayerFlow.webProof) {
+      vlayerFlow.requestZkProof();
+    }
+  }, [vlayerFlow.webProof]);
+
+  useEffect(() => {
+    if (vlayerFlow.zkProof) {
+      vlayerFlow.requestVerification();
+    }
+  }, [vlayerFlow.zkProof]);
+
+  useEffect(() => {
+    if (vlayerFlow.completed) {
+      setIsLoading(false);
+    }
+  }, [vlayerFlow.completed]);
+
+  useEffect(() => {
+    if (vlayerFlow.isError) {
+      throw new Error("Check console for details");
+    }
+  }, [vlayerFlow.isError]);
 
   return (
     <div className="min-h-screen flex flex-col items-center justify-center p-4">
@@ -47,16 +71,18 @@ function Menu({
               className="btn btn-primary w-full mb-2 text-white"
               onClick={handleRequestProve}
             >
-              {isLoading ? (
-                <>
-                  <span className="loading loading-spinner"></span>
-                  {currentStep}
-                </>
-              ) : (
-                "Generate Proof of Twitter"
-              )}
+              <>
+                {isLoading && <span className="loading loading-spinner"></span>}
+                {currentStep()}
+              </>
             </button>
           </div>
+          {vlayerFlow.completed && (
+            <div className="text-block w-full mt-5">
+              Verification hash: <br />
+              {`${vlayerFlow.verification.transactionHash.slice(0, 6)}...${vlayerFlow.verification.transactionHash.slice(-4)}`}
+            </div>
+          )}
         </div>
       </div>
     </div>

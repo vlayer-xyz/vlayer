@@ -1,7 +1,12 @@
 import Actions from "./containers/Actions";
+import ErrorBoundary from "./components/ErrorBoundry";
 
 function App() {
-  return <Actions />;
+  return (
+    <ErrorBoundary>
+      <Actions />
+    </ErrorBoundary>
+  );
 }
 
 export default App;
