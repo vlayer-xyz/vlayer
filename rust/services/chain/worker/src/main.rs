@@ -77,7 +77,7 @@ async fn main() -> anyhow::Result<()> {
     let config = Cli::parse().into();
 
     let host = Arc::new(Mutex::new(Host::try_new(config)?));
-    let budget = TpsBudget::new(Duration::from_secs(1), 3, 0.01);
+    let budget = TpsBudget::new(Duration::from_secs(60), 3, 0.01);
     let mut host_service = ServiceBuilder::new()
         .retry(RetryPolicy::<HostErrorFilter>::new(budget))
         .timeout(Duration::from_secs(60))
