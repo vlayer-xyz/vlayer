@@ -9,7 +9,7 @@ use tower::{
     },
     timeout::error::Elapsed,
 };
-use tracing::{debug, error};
+use tracing::error;
 
 #[derive(Derivative)]
 #[derivative(Clone)]
@@ -45,7 +45,7 @@ impl<Req: Clone, EF: ErrorFilter> retry::Policy<Req, (), Error> for Policy<EF> {
             Err(err) if EF::is_retriable(err) => {
                 let withdraw = self.budget.withdraw();
                 if !withdraw {
-                    debug!("retry budget exhausted");
+                    error!("retry budget exhausted");
                     return None;
                 }
                 error!("retrying after error: {:?}", err);
@@ -152,7 +152,7 @@ mod tests {
         }
 
         async fn test_call<EF: ErrorFilter, Func, Fut>(
-            tps: u32,
+            min_retries_per_second: u32,
             expected_attempts: u32,
             service_fn: Func,
         ) -> Result<(), Error>
@@ -161,7 +161,7 @@ mod tests {
             Fut: Future<Output = Result<(), Error>>,
         {
             let attempts = AtomicU32::new(0);
-            let budget = TpsBudget::new(Duration::from_secs(1), tps, 0.0);
+            let budget = TpsBudget::new(Duration::from_secs(1), min_retries_per_second, 0.0);
             let mut service = ServiceBuilder::new()
                 .retry(Policy::<EF>::new(budget))
                 .service_fn(|req| {
