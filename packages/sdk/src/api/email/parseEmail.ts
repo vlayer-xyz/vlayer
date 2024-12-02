@@ -1,4 +1,4 @@
-import PostalMime, {Email, Header} from "postal-mime";
+import PostalMime, { Email, Header } from "postal-mime";
 
 export class DkimParsingError extends Error {
   constructor(message: string) {
