@@ -37,12 +37,14 @@ const fn proof_invalid(_: &Receipt, _: Digest) -> zk_proof::Result {
 }
 
 #[test]
-fn ok() {
+fn ok() -> anyhow::Result<()> {
     let verifier = ZkVerifier::new(CHAIN_GUEST_ID, proof_ok);
     let block_trie = mock_block_trie(0..=1);
     let journal = mock_journal(block_trie.hash_slow(), CHAIN_GUEST_ID);
     let proof = mock_chain_proof(block_trie, journal);
-    verifier.verify(&proof).expect("verfication should succeed");
+    verifier.verify(&proof)?;
+
+    Ok(())
 }
 
 #[test]
