@@ -50,12 +50,12 @@ mod prepend_single {
     }
 }
 
-mod append_10 {
+mod append_batch {
     use super::*;
 
-    pub fn fixture() -> (BlockTrie, Vec<Box<dyn EvmBlockHeader>>) {
+    pub fn fixture(size: u64) -> (BlockTrie, Vec<Box<dyn EvmBlockHeader>>) {
         let trie = BlockTrie::init(block(0)).unwrap();
-        let blocks = (1..=10).map(block_with_correct_parent_hash).collect();
+        let blocks = (1..=size).map(block_with_correct_parent_hash).collect();
         (trie, blocks)
     }
 
@@ -64,13 +64,15 @@ mod append_10 {
     }
 }
 
-mod prepend_10 {
+mod prepend_batch {
     use super::*;
 
-    pub fn fixture() -> (BlockTrie, Vec<Box<dyn EvmBlockHeader>>, Box<dyn EvmBlockHeader>) {
-        let old_leftmost = block_with_correct_parent_hash(10);
+    pub fn fixture(
+        size: u64,
+    ) -> (BlockTrie, Vec<Box<dyn EvmBlockHeader>>, Box<dyn EvmBlockHeader>) {
+        let old_leftmost = block_with_correct_parent_hash(size);
         let trie = BlockTrie::init(&old_leftmost).unwrap();
-        let blocks = (0..10).map(block_with_correct_parent_hash).collect();
+        let blocks = (0..size).map(block_with_correct_parent_hash).collect();
         (trie, blocks, old_leftmost)
     }
 
@@ -90,18 +92,27 @@ pub fn benchmarks() -> Vec<Benchmark> {
         Benchmark::new(
             "append_single",
             with_fixture!(append_single::fixture(), append_single::run),
-            113_000,
+            113_026,
         ),
         Benchmark::new(
             "prepend_single",
             with_fixture!(prepend_single::fixture(), prepend_single::run),
-            113_000,
+            112_947,
         ),
-        Benchmark::new("append_10", with_fixture!(append_10::fixture(), append_10::run), 1_145_000),
+        Benchmark::new(
+            "append_10",
+            with_fixture!(append_batch::fixture(10), append_batch::run),
+            1_145_303,
+        ),
         Benchmark::new(
             "prepend_10",
-            with_fixture!(prepend_10::fixture(), prepend_10::run),
-            1_160_000,
+            with_fixture!(prepend_batch::fixture(10), prepend_batch::run),
+            1_159_542,
+        ),
+        Benchmark::new(
+            "prepend_20",
+            with_fixture!(prepend_batch::fixture(20), prepend_batch::run),
+            2_325_021,
         ),
     ]
 }
