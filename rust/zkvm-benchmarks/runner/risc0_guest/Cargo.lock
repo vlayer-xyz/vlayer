@@ -4536,5 +4536,4 @@ dependencies = [
  "risc0-zkvm",
  "serde",
  "sha2",
- "sha3",
 ]
