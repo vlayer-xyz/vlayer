@@ -5,7 +5,7 @@ use chain_guest_wrapper::GUEST_ELF;
 use chain_host::{AppendStrategy, Host, HostConfig, PrependStrategy, ProofMode};
 use clap::Parser;
 use dotenvy::dotenv;
-use retry::{HostErrorFilter, RetryPolicy};
+use retry::HostErrorFilter;
 use tokio::sync::Mutex;
 use tower::{retry::budget::TpsBudget, Service, ServiceBuilder};
 use trace::init_tracing;
@@ -79,7 +79,7 @@ async fn main() -> anyhow::Result<()> {
     let host = Arc::new(Mutex::new(Host::try_new(config)?));
     let budget = TpsBudget::new(Duration::from_secs(60), 3, 0.01);
     let mut host_service = ServiceBuilder::new()
-        .retry(RetryPolicy::<HostErrorFilter>::new(budget))
+        .retry(retry::Policy::<HostErrorFilter>::new(budget))
         .timeout(Duration::from_secs(60))
         .service_fn(|_| {
             let host = host.clone();

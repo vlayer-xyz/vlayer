@@ -13,12 +13,12 @@ use tracing::{debug, error};
 
 #[derive(Derivative)]
 #[derivative(Clone)]
-pub struct RetryPolicy<EF: ErrorFilter> {
+pub struct Policy<EF: ErrorFilter> {
     pub budget: Arc<TpsBudget>,
     _phantom: PhantomData<EF>,
 }
 
-impl<EF: ErrorFilter> RetryPolicy<EF> {
+impl<EF: ErrorFilter> Policy<EF> {
     pub fn new(budget: TpsBudget) -> Self {
         Self {
             budget: Arc::new(budget),
@@ -33,7 +33,7 @@ pub trait ErrorFilter {
     fn is_retriable(err: &Error) -> bool;
 }
 
-impl<Req: Clone, EF: ErrorFilter> retry::Policy<Req, (), Error> for RetryPolicy<EF> {
+impl<Req: Clone, EF: ErrorFilter> retry::Policy<Req, (), Error> for Policy<EF> {
     type Future = future::Ready<()>;
 
     fn retry(&mut self, _req: &mut Req, result: &mut Result<(), Error>) -> Option<Self::Future> {
@@ -163,7 +163,7 @@ mod tests {
             let attempts = AtomicU32::new(0);
             let budget = TpsBudget::new(Duration::from_secs(1), tps, 0.0);
             let mut service = ServiceBuilder::new()
-                .retry(RetryPolicy::<EF>::new(budget))
+                .retry(Policy::<EF>::new(budget))
                 .service_fn(|req| {
                     attempts.fetch_add(1, Ordering::SeqCst);
                     service_fn(req)
