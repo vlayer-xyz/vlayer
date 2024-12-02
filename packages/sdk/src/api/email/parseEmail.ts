@@ -1,10 +1,15 @@
-import PostalMime, { Email, Header } from "postal-mime";
+import PostalMime, {Email, Header} from "postal-mime";
 
 export class DkimParsingError extends Error {
   constructor(message: string) {
     super(message);
     this.name = "DkimParsingError";
   }
+}
+
+export interface DkimDnsLocation {
+  domain: string;
+  selector: string;
 }
 
 export async function parseEmail(mime: string) {
@@ -30,9 +35,7 @@ export function parseParams(str: string) {
   ) as Record<string, string>;
 }
 
-export type DkimDnsLocation = ReturnType<typeof parseHeader>;
-
-function parseHeader(header: Header) {
+function parseHeader(header: Header): DkimDnsLocation {
   const params = parseParams(header.value);
   if (!params) {
     throw new DkimParsingError(`Invalid DKIM header ${header.value}`);
