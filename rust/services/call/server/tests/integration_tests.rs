@@ -223,6 +223,19 @@ mod server_tests {
                 .with_result(json!({}))
                 .add()
                 .await;
+            gas_meter_server
+                .mock_method("v_refundUnusedGas")
+                .with_params(
+                    json!({
+                        "hash": EXPECTED_HASH,
+                        "computation_stage": "proving",
+                        "gas_used": EXPECTED_GAS_USED,
+                    }),
+                    false,
+                )
+                .with_result(json!({}))
+                .add()
+                .await;
 
             let mut ctx = Context::default().await;
             ctx.gas_meter_server = Some(gas_meter_server);
