@@ -1,6 +1,6 @@
 use alloy_primitives::B256;
 use block_header::Hashable;
-use chain_common::ChainProof;
+use chain_common::{ChainProof, ChainProofReceipt};
 use risc0_zkp::verify::VerificationError;
 use risc0_zkvm::sha::Digest;
 use static_assertions::assert_obj_safe;
@@ -57,7 +57,7 @@ impl ZkVerifier {
 impl seal::Sealed for ZkVerifier {}
 impl Verifier for ZkVerifier {
     fn verify(&self, proof: &ChainProof) -> Result {
-        let receipt = bincode::deserialize(&proof.proof)?;
+        let receipt: ChainProofReceipt = (&proof.proof).try_into()?;
         self.zk_verifier.verify(&receipt, self.chain_guest_id)?;
         let (proven_root, elf_id) = receipt.journal.decode()?;
         let root_hash = proof.block_trie.hash_slow();

@@ -183,6 +183,10 @@ impl ChainDb {
         self.begin_ro()?.get_chain_proof(chain_id, block_numbers)
     }
 
+    pub fn get_zk_proof(&self, chain_id: ChainId) -> ChainDbResult<Bytes> {
+        self.begin_ro()?.get_zk_proof(chain_id)
+    }
+
     // Does not verify ZK proof
     fn get_chain_trie_inner(
         &self,
@@ -261,6 +265,13 @@ impl<TX: ReadTx + ?Sized> ChainDbTx<TX> {
     pub fn get_merkle_proof(&self, root_hash: B256, block_num: BlockNumber) -> ProofResult {
         MerkleProofBuilder::new(|node_hash| self.get_node(node_hash))
             .build_proof(root_hash, block_num)
+    }
+
+    pub fn get_zk_proof(&self, chain_id: ChainId) -> ChainDbResult<Bytes> {
+        let chain_info = self
+            .get_chain_info(chain_id)?
+            .ok_or(ChainDbError::ChainNotFound(chain_id))?;
+        Ok(chain_info.zk_proof)
     }
 
     pub fn get_chain_proof(

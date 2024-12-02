@@ -2306,6 +2306,7 @@ dependencies = [
  "axum",
  "axum-jrpc",
  "bincode",
+ "bytes",
  "chain_common",
  "chain_db",
  "common",
