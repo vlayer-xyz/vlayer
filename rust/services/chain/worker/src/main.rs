@@ -13,6 +13,10 @@ use trace::init_tracing;
 mod retry;
 mod trace;
 
+const DEPOSIT_TIME_TO_LIVE: Duration = Duration::from_secs(60);
+const MIN_RETRIES_PER_SECOND: u32 = 3;
+const RETRY_PERCENT: f32 = 0.01;
+
 #[derive(Parser)]
 #[command(version)]
 struct Cli {
@@ -77,7 +81,7 @@ async fn main() -> anyhow::Result<()> {
     let config = Cli::parse().into();
 
     let host = Arc::new(Mutex::new(Host::try_new(config)?));
-    let budget = TpsBudget::new(Duration::from_secs(60), 3, 0.01);
+    let budget = TpsBudget::new(DEPOSIT_TIME_TO_LIVE, MIN_RETRIES_PER_SECOND, RETRY_PERCENT);
     let mut host_service = ServiceBuilder::new()
         .retry(retry::Policy::<HostErrorFilter>::new(budget))
         .timeout(Duration::from_secs(60))
