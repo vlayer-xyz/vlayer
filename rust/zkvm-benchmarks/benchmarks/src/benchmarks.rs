@@ -1,12 +1,13 @@
 use crate::Benchmark;
 
+mod block_trie;
 mod hash;
 mod mpt;
 mod precompiles;
 
 #[macro_export]
 macro_rules! with_fixture {
-    ($fixture:expr, $callback:ident) => {{
+    ($fixture:expr, $callback:expr) => {{
         let fixture = $fixture;
         move || $callback(fixture)
     }};
@@ -29,6 +30,7 @@ pub fn benchmarks() -> Vec<Benchmark> {
     merge([
         ("hash", hash::benchmarks()),
         ("mpt", mpt::benchmarks()),
+        ("block_trie", block_trie::benchmarks()),
         ("precompiles", precompiles::benchmarks()),
     ])
 }

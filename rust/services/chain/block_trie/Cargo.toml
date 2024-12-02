@@ -9,8 +9,11 @@ alloy-rlp = { workspace = true, features = ["arrayvec"] }
 block_header = { workspace = true }
 bytes = { workspace = true }
 common = { workspace = true }
+derivative = { workspace = true }
+digest = { workspace = true }
 mpt = { workspace = true }
 serde = { workspace = true }
+sha3 = { workspace = true }
 thiserror = { workspace = true }
 
 [dev-dependencies]

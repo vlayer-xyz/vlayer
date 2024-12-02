@@ -790,9 +790,9 @@ dependencies = [
 
 [[package]]
 name = "anyhow"
-version = "1.0.93"
+version = "1.0.91"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "4c95c10ba0b00a02636238b814946408b1322d5ac4760326e6fb8ec956d85775"
+checksum = "c042108f3ed77fd83760a5fd79b53be043192bb3b9dba91d8c574c0ada7850c8"
 
 [[package]]
 name = "arbitrary"
@@ -1700,8 +1700,11 @@ dependencies = [
  "bytes",
  "chain_test_utils",
  "common",
+ "derivative",
+ "digest 0.10.7",
  "mpt",
  "serde",
+ "sha3",
  "thiserror",
 ]
 
@@ -11830,6 +11833,8 @@ version = "0.1.0"
 dependencies = [
  "alloy-primitives",
  "alloy-sol-types",
+ "block_header",
+ "block_trie",
  "call_precompiles",
  "common",
  "derive-new",

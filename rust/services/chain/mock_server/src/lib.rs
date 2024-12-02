@@ -1,6 +1,6 @@
 use axum_jrpc::Value;
 use block_header::EvmBlockHeader;
-use block_trie::BlockTrie;
+use block_trie::KeccakBlockTrie as BlockTrie;
 use bytes::Bytes;
 use chain_common::RpcChainProof;
 use common::{GuestElf, Hashable};
