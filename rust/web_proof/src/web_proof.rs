@@ -110,12 +110,12 @@ mod tests {
     use tlsn_core::signing::KeyAlgId;
 
     use super::*;
-    use crate::fixtures::{load_web_proof_v7_fixture, read_fixture, NOTARY_PUB_KEY_PEM_EXAMPLE};
+    use crate::fixtures::{load_web_proof_fixture, read_fixture, NOTARY_PUB_KEY_PEM_EXAMPLE};
 
     #[test]
     fn serialize_deserialize_web_proof() {
         let proof =
-            load_web_proof_v7_fixture("./testdata/presentation.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
+            load_web_proof_fixture("./testdata/presentation.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
 
         let serialized = serde_json::to_string(&proof).unwrap();
         let deserialized: WebProof = serde_json::from_str(&serialized).unwrap();
@@ -128,7 +128,7 @@ mod tests {
     #[ignore]
     #[test]
     fn fail_verification_session_error() {
-        let invalid_proof = load_web_proof_v7_fixture(
+        let invalid_proof = load_web_proof_fixture(
             "./testdata/swapi_presentation_0.1.0-alpha.7.invalid_signature.json",
             NOTARY_PUB_KEY_PEM_EXAMPLE,
         );
@@ -141,7 +141,7 @@ mod tests {
     #[ignore]
     #[test]
     fn fail_verification_invalid_merkl_prof() {
-        let invalid_proof = load_web_proof_v7_fixture(
+        let invalid_proof = load_web_proof_fixture(
             "./testdata/swapi_presentation_0.1.0-alpha.7.invalid_merkle_proof.json",
             NOTARY_PUB_KEY_PEM_EXAMPLE,
         );
@@ -154,7 +154,7 @@ mod tests {
     #[test]
     fn success_verification() {
         let proof =
-            load_web_proof_v7_fixture("./testdata/presentation.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
+            load_web_proof_fixture("./testdata/presentation.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
         let (request, response, _) = proof.verify().unwrap();
 
         assert_eq!(
@@ -170,7 +170,7 @@ mod tests {
     #[test]
     fn success_get_server_name() {
         let proof =
-            load_web_proof_v7_fixture("./testdata/presentation.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
+            load_web_proof_fixture("./testdata/presentation.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
         let (_, _, server_name) = proof.verify().unwrap();
         assert_eq!(server_name.as_str(), "api.x.com");
     }
@@ -178,7 +178,7 @@ mod tests {
     #[test]
     fn success_get_notary_pub_key() {
         let proof =
-            load_web_proof_v7_fixture("./testdata/presentation.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
+            load_web_proof_fixture("./testdata/presentation.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
         assert_eq!(proof.get_notary_pub_key().unwrap(), NOTARY_PUB_KEY_PEM_EXAMPLE);
     }
 
