@@ -4,7 +4,9 @@ use test_helpers::{call_guest_elf, chain_guest_elf, Context, API_VERSION, GAS_ME
 
 mod test_helpers;
 
-use server_utils::{assert_jrpc_err, assert_jrpc_ok, body_to_string};
+use server_utils::{
+    assert_jrpc_err, assert_jrpc_ok, body_to_json, body_to_string, function_selector,
+};
 
 mod server_tests {
     use super::*;
@@ -69,11 +71,8 @@ mod server_tests {
     }
 
     mod v_call {
-        use ethers::{
-            abi::AbiEncode,
-            types::{Uint8, U256},
-        };
-        use server_utils::{function_selector, rpc::mock::Server as RpcServerMock};
+        use ethers::types::U256;
+        use server_utils::rpc::mock::Server as RpcServerMock;
         use web_proof::fixtures::{load_web_proof_fixture, NOTARY_PUB_KEY_PEM_EXAMPLE};
 
         use super::*;
@@ -118,6 +117,9 @@ mod server_tests {
 
         #[tokio::test(flavor = "multi_thread")]
         async fn simple_contract_call_success() {
+            const EXPECTED_HASH: &str =
+                "0xf8d32367d8ec243e8e6fcac96dc769ed80287534d51c5d1e817173128f2b6218";
+
             let ctx = Context::default().await;
             let app = ctx.server(call_guest_elf(), chain_guest_elf());
             let contract = ctx.client.deploy_contract().await;
@@ -147,18 +149,7 @@ mod server_tests {
             assert_jrpc_ok(
                 response,
                 json!({
-                    "evm_call_result": U256::from(3).encode_hex(),
-                    "proof": {
-                        "length": 160,
-                        "seal": {
-                            "verifierSelector": "0xdeafbeef",
-                            "mode": 1,
-                        },
-                        "callAssumptions": {
-                            "functionSelector": function_selector(&call_data),
-                            "proverContractAddress": contract.address(),
-                        }
-                    },
+                    "hash": EXPECTED_HASH,
                 }),
             )
             .await;
@@ -242,7 +233,10 @@ mod server_tests {
         }
 
         #[tokio::test(flavor = "multi_thread")]
-        async fn success_web_proof() {
+        async fn web_proof_success() {
+            const EXPECTED_HASH: &str =
+                "0x7ab853c0fc5a10565fc34fa8443e0a293584651bedc39c48b9d982db00b02a22";
+
             let ctx = Context::default().await;
             let app = ctx.server(call_guest_elf(), chain_guest_elf());
             let contract = ctx.client.deploy_contract().await;
@@ -276,6 +270,123 @@ mod server_tests {
 
             let response = app.post("/", &req).await;
 
+            assert_eq!(StatusCode::OK, response.status());
+            assert_jrpc_ok(
+                response,
+                json!({
+                    "hash": EXPECTED_HASH,
+                }),
+            )
+            .await;
+        }
+    }
+
+    #[allow(non_snake_case)]
+    mod v_getProofReceipt {
+        use ethers::{
+            abi::AbiEncode,
+            types::{Bytes, Uint8, U256},
+        };
+        use web_proof::fixtures::{load_web_proof_v7_fixture, NOTARY_PUB_KEY_PEM_EXAMPLE};
+
+        use super::*;
+        use crate::test_helpers::mock::{Contract, Server, WebProof};
+
+        const CHAIN_ID: u64 = 11_155_111;
+        const GAS_LIMIT: u64 = 1_000_000;
+
+        async fn get_hash(
+            app: &Server,
+            contract: &Contract,
+            call_data: &Bytes,
+        ) -> call_server::v_call::CallHash {
+            let request = json!({
+                "method": "v_call",
+                "params": [
+                    {
+                        "to": contract.address(),
+                        "data": call_data,
+                    },
+                    {
+                        "chain_id": CHAIN_ID ,
+                        "gas_limit": GAS_LIMIT,
+                    }
+                ],
+                "id": 1,
+                "jsonrpc": "2.0",
+            });
+            let response = app.post("/", &request).await;
+            assert_eq!(StatusCode::OK, response.status());
+            let as_json = body_to_json(response.into_body()).await;
+            serde_json::from_value(as_json["result"]["hash"].clone())
+                .expect("valid returned hash value of the call params")
+        }
+
+        #[tokio::test(flavor = "multi_thread")]
+        async fn simple_contract_call_success() {
+            let ctx = Context::default().await;
+            let app = ctx.server(call_guest_elf(), chain_guest_elf());
+            let contract = ctx.client.deploy_contract().await;
+            let call_data = contract
+                .sum(U256::from(1), U256::from(2))
+                .calldata()
+                .unwrap();
+
+            let hash = get_hash(&app, &contract, &call_data).await;
+
+            let request = json!({
+                "method": "v_getProvingReceipt",
+                "params": [{"hash": hash}],
+                "id": 1,
+                "jsonrpc": "2.0",
+            });
+            let response = app.post("/", &request).await;
+            assert_eq!(StatusCode::OK, response.status());
+            assert_jrpc_ok(
+                response,
+                json!({
+                    "evm_call_result": U256::from(3).encode_hex(),
+                    "proof": {
+                        "length": 160,
+                        "seal": {
+                            "verifierSelector": "0xdeafbeef",
+                            "mode": 1,
+                        },
+                        "callAssumptions": {
+                            "functionSelector": function_selector(&call_data),
+                            "proverContractAddress": contract.address(),
+                        }
+                    },
+                }),
+            )
+            .await;
+        }
+
+        #[tokio::test(flavor = "multi_thread")]
+        async fn web_proof_success() {
+            let ctx = Context::default().await;
+            let app = ctx.server(call_guest_elf(), chain_guest_elf());
+            let contract = ctx.client.deploy_contract().await;
+            let call_data = contract
+                .web_proof(WebProof {
+                    web_proof_json: serde_json::to_string(&json!(load_web_proof_v7_fixture(
+                        "../../../web_proof/testdata/presentation.json",
+                        NOTARY_PUB_KEY_PEM_EXAMPLE
+                    )))
+                    .unwrap(),
+                })
+                .calldata()
+                .unwrap();
+
+            let hash = get_hash(&app, &contract, &call_data).await;
+
+            let request = json!({
+                "method": "v_getProvingReceipt",
+                "params": [{"hash": hash}],
+                "id": 1,
+                "jsonrpc": "2.0",
+            });
+            let response = app.post("/", &request).await;
             assert_eq!(StatusCode::OK, response.status());
             assert_jrpc_ok(
                 response,

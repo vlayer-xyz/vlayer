@@ -18,8 +18,8 @@ use crate::error::AppError;
 #[derive(Deserialize, Serialize, Debug)]
 #[serde(deny_unknown_fields)]
 pub struct Call {
-    to: String,
-    data: String,
+    pub to: String,
+    pub data: String,
 }
 
 impl TryFrom<Call> for HostCall {
@@ -47,9 +47,9 @@ pub struct CallContext {
 
 #[allow(clippy::struct_field_names)]
 pub struct CallResult {
-    hash: CallHash,
-    proof: Proof,
-    evm_call_result: Vec<u8>,
+    pub hash: CallHash,
+    pub proof: Proof,
+    pub evm_call_result: Vec<u8>,
 }
 
 impl CallResult {
