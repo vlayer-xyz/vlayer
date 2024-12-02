@@ -1,10 +1,11 @@
 import { describe, expect, test } from "vitest";
 import { readFile } from "testHelpers/readFile";
-import { preverifyEmail } from "./preverify";
+import { findIndicesOfMatchingDomains, preverifyEmail } from "./preverify";
+
+const rawEmail = readFile("./src/api/email/testdata/test_email.txt");
 
 describe("Preverify email: integration", () => {
   test("adds dns record to email mime", async () => {
-    const rawEmail = readFile("./src/api/email/testdata/test_email.txt");
     const preverifiedEmail = await preverifyEmail(rawEmail);
     expect(preverifiedEmail).toMatchObject({
       email: rawEmail,
@@ -28,30 +29,23 @@ describe("Preverify email: integration", () => {
 
   describe("multiple DKIM headers", () => {
     function addDkimWithDomain(domain: string, email: string) {
-      return `DKIM-Signature: v=1; a=rsa-sha256; d=${domain}; s=selector; c=relaxed/relaxed; q=dns/txt; bh=; h=From:Subject:Date:To; b=\n${email}`;
+      return `DKIM-Signature: v=1; a=rsa-sha256; d=${domain};
+ s=selector; c=relaxed/relaxed; q=dns/txt; bh=; h=From:Subject:Date:To; b=
+${email}`;
     }
 
     test("looks for DKIM header with the domain matching the sender and removes all other DKIM headers", async () => {
-      const emailWithOneDkimHeader = readFile(
-        "./src/api/email/testdata/test_email.txt",
-      );
-      const emailWithAddedHeaders = addDkimWithDomain(
-        "example.com",
-        emailWithOneDkimHeader,
-      );
+      const emailWithAddedHeaders = addDkimWithDomain("example.com", rawEmail);
       const email = await preverifyEmail(emailWithAddedHeaders);
 
-      expect(email.email).toMatch(/^DKIM-Signature.*\nx-DKIM-Signature/);
+      expect(email.email).toMatch(/^DKIM-Signature(.|\n)*X-DKIM-Signature/);
       expect(email.dnsRecords).toStrictEqual(["v=DKIM1; p="]);
     });
 
     test("throws error if no DNS record domain matches the sender", async () => {
-      const emailWithOneDkimHeader = readFile(
-        "./src/api/email/testdata/test_email.txt",
-      );
       const emailWithAddedHeaders = addDkimWithDomain(
         "otherdomain.com",
-        emailWithOneDkimHeader,
+        rawEmail,
       );
       await expect(preverifyEmail(emailWithAddedHeaders)).rejects.toThrow(
         "Found 0 DKIM headers matching the sender domain",
@@ -59,13 +53,7 @@ describe("Preverify email: integration", () => {
     });
 
     test("throws error if multiple DNS record domains match the sender", async () => {
-      const emailWithOneDkimHeader = readFile(
-        "./src/api/email/testdata/test_email.txt",
-      );
-      let emailWithAddedHeaders = addDkimWithDomain(
-        "example.com",
-        emailWithOneDkimHeader,
-      );
+      let emailWithAddedHeaders = addDkimWithDomain("example.com", rawEmail);
       emailWithAddedHeaders = addDkimWithDomain(
         "example.com",
         emailWithAddedHeaders,
@@ -74,5 +62,28 @@ describe("Preverify email: integration", () => {
         "Found 2 DKIM headers matching the sender domain",
       );
     });
+  });
+});
+
+describe("findIndicesOfMatchingDomains", () => {
+  test("returns indices of matching domains", () => {
+    const signers = [
+      { domain: "example.com", selector: "selector" },
+      { domain: "example.org", selector: "selector" },
+      { domain: "example.com", selector: "selector" },
+    ];
+    expect(findIndicesOfMatchingDomains(signers, "example.com")).toStrictEqual([
+      0, 2,
+    ]);
+  });
+
+  test("returns empty array if no matching domains", () => {
+    const signers = [
+      { domain: "example.com", selector: "selector" },
+      { domain: "example.org", selector: "selector" },
+    ];
+    expect(findIndicesOfMatchingDomains(signers, "example.net")).toStrictEqual(
+      [],
+    );
   });
 });

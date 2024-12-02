@@ -1,16 +1,23 @@
-import { parseEmail, getDkimSigners, DkimDnsLocation } from "./parseEmail";
+import { DkimDnsLocation, getDkimSigners, parseEmail } from "./parseEmail";
 import { resolveDkimDns } from "./dnsResolver";
 import { prefixAllButNthSubstring } from "../utils/prefixAllButNthSubstring";
 
-function requireSameOrigin(
-  mimeEmail: string,
-  signers: { domain: string; selector: string }[],
-  fromAddress: string,
+export function findIndicesOfMatchingDomains(
+  signers: DkimDnsLocation[],
+  expectedOrigin: string,
 ) {
-  const matchingIndices = signers
-    .map(({ domain }) => fromAddress.endsWith(domain))
+  return signers
+    .map(({ domain }) => expectedOrigin.endsWith(domain))
     .map((isMatch, index) => (isMatch ? index : -1))
     .filter((index) => index !== -1);
+}
+
+function requireSameOrigin(
+  mimeEmail: string,
+  signers: DkimDnsLocation[],
+  fromAddress: string,
+) {
+  const matchingIndices = findIndicesOfMatchingDomains(signers, fromAddress);
 
   if (matchingIndices.length != 1) {
     throw new Error(

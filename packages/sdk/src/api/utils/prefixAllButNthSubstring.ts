@@ -5,6 +5,6 @@ export function prefixAllButNthSubstring(
 ) {
   let occurrence = 0;
   return str.replace(new RegExp(substr, "gi"), (match) => {
-    return occurrence++ === n ? match : `x-${match}`;
+    return occurrence++ === n ? match : `X-${match}`;
   });
 }
