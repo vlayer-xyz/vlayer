@@ -53,9 +53,7 @@ export async function preverifyEmail(mimeEmail: string) {
   if (signers.length === 0) {
     throw new Error("No DKIM header found");
   }
-  if (signers.length > 1) {
-    [mimeEmail, signers] = requireSameOrigin(mimeEmail, signers, fromAddress);
-  }
+  [mimeEmail, signers] = requireSameOrigin(mimeEmail, signers, fromAddress);
 
   const [{ domain, selector }] = signers;
   const dnsRecord = await resolveDkimDns(domain, selector);

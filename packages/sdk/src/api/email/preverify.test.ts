@@ -70,13 +70,13 @@ X-DKIM-Signature: a=rsa-sha256; bh=2jUSOH9NhtVGCQWNr9BrIAPreKQjO6Sn7XIkfJVOzv8=;
     });
 
     test("throws error if multiple DNS record domains match the sender", async () => {
-      let emailWithAddedHeaders = addDkimWithDomain("example.com", rawEmail);
+      let emailWithAddedHeaders = addDkimWithDomain("google.com", rawEmail);
       emailWithAddedHeaders = addDkimWithDomain(
-        "example.com",
+        "google.com",
         emailWithAddedHeaders,
       );
       await expect(preverifyEmail(emailWithAddedHeaders)).rejects.toThrow(
-        "Found 2 DKIM headers matching the sender domain",
+        "Found 3 DKIM headers matching the sender domain",
       );
     });
 
