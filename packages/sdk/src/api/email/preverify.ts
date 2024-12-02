@@ -1,4 +1,4 @@
-import { parseEmail, getDkimSigners } from "./parseEmail";
+import { parseEmail, getDkimSigners, DkimDnsLocation } from "./parseEmail";
 import { resolveDkimDns } from "./dnsResolver";
 import { prefixAllButNthSubstring } from "../utils/prefixAllButNthSubstring";
 
@@ -22,7 +22,7 @@ function requireSameOrigin(
 
   return [
     prefixAllButNthSubstring(mimeEmail, "dkim-signature", matchingIndex),
-    [signers[matchingIndex]] as any[],
+    [signers[matchingIndex]] as DkimDnsLocation[],
   ] as const;
 }
 
