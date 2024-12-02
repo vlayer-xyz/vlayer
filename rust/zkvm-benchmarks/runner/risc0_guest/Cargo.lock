@@ -4531,7 +4531,6 @@ dependencies = [
  "common",
  "derive-new",
  "derive_more",
- "digest 0.10.7",
  "email_proof",
  "mpt",
  "risc0-zkvm",
