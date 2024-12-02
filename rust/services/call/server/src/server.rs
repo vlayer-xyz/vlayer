@@ -9,7 +9,7 @@ use tracing::info;
 
 use crate::{
     config::Config,
-    handlers::{v_call::v_call, v_versions::v_versions},
+    handlers::{v_call::v_call, v_get_proof_receipt::v_get_proof_receipt, v_versions::v_versions},
 };
 
 pub async fn serve(config: Config) -> anyhow::Result<()> {
@@ -35,7 +35,18 @@ pub fn server(cfg: Config) -> Router {
         let config = config.clone();
         move |params| -> Pin<Box<dyn Future<Output = _> + Send>> {
             let config = config.clone();
-            Box::pin(async move { v_call(config, params).await.map(|x| x.to_json()) })
+            Box::pin(v_call(config, params))
+        }
+    });
+    jrpc_router.add_handler("v_getProofReceipt", {
+        let config = config.clone();
+        move |params| -> Pin<Box<dyn Future<Output = _> + Send>> {
+            let config = config.clone();
+            Box::pin(async move {
+                v_get_proof_receipt(config, params)
+                    .await
+                    .map(|x| x.to_json())
+            })
         }
     });
     jrpc_router.add_handler(

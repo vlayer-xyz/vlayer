@@ -146,13 +146,7 @@ mod server_tests {
             let response = app.post("/", &req).await;
 
             assert_eq!(StatusCode::OK, response.status());
-            assert_jrpc_ok(
-                response,
-                json!({
-                    "hash": EXPECTED_HASH,
-                }),
-            )
-            .await;
+            assert_jrpc_ok(response, json!({ "hash": EXPECTED_HASH })).await;
         }
 
         #[tokio::test(flavor = "multi_thread")]
@@ -271,13 +265,7 @@ mod server_tests {
             let response = app.post("/", &req).await;
 
             assert_eq!(StatusCode::OK, response.status());
-            assert_jrpc_ok(
-                response,
-                json!({
-                    "hash": EXPECTED_HASH,
-                }),
-            )
-            .await;
+            assert_jrpc_ok(response, json!({ "hash": EXPECTED_HASH })).await;
         }
     }
 
@@ -318,7 +306,7 @@ mod server_tests {
             let response = app.post("/", &request).await;
             assert_eq!(StatusCode::OK, response.status());
             let as_json = body_to_json(response.into_body()).await;
-            serde_json::from_value(as_json["result"]["hash"].clone())
+            serde_json::from_value(as_json["result"].clone())
                 .expect("valid returned hash value of the call params")
         }
 

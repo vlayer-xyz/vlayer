@@ -17,6 +17,8 @@ pub enum AppError {
     Join(#[from] JoinError),
     #[error("RPC error: {0}")]
     RpcError(#[from] RpcError),
+    #[error("Unimplemented: {0}")]
+    Unimplemented(String),
 }
 
 impl From<AppError> for JsonRpcError {
@@ -25,7 +27,10 @@ impl From<AppError> for JsonRpcError {
             AppError::FieldValidation(..) => {
                 JsonRpcError::new(JsonRpcErrorReason::InvalidParams, error.to_string(), Value::Null)
             }
-            AppError::Host(..) | AppError::Join(..) | AppError::RpcError(..) => {
+            AppError::Host(..)
+            | AppError::Join(..)
+            | AppError::RpcError(..)
+            | AppError::Unimplemented(..) => {
                 JsonRpcError::new(JsonRpcErrorReason::InternalError, error.to_string(), Value::Null)
             }
         }
