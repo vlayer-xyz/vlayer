@@ -104,8 +104,7 @@ mod storage_ref {
     #[should_panic(expected = "storage not found: 0x0000000000000000000000000000000000000000@0")]
     fn panics_when_storage_not_found() {
         let db = WrapStateDb::default();
-        let index = U256::from(0);
-        let _ = db.storage_ref(Address::default(), index);
+        let _ = db.storage_ref(Address::default(), U256::from(0));
     }
 
     #[test]
