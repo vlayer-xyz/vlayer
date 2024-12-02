@@ -152,7 +152,7 @@ mod tests {
         }
 
         async fn test_call<EF: ErrorFilter, Func, Fut>(
-            budget: TpsBudget,
+            tps: u32,
             expected_attempts: u32,
             service_fn: Func,
         ) -> Result<(), Error>
@@ -161,6 +161,7 @@ mod tests {
             Fut: Future<Output = Result<(), Error>>,
         {
             let attempts = AtomicU32::new(0);
+            let budget = TpsBudget::new(Duration::from_secs(1), tps, 0.0);
             let mut service = ServiceBuilder::new()
                 .retry(RetryPolicy::<EF>::new(budget))
                 .service_fn(|req| {
@@ -174,29 +175,25 @@ mod tests {
 
         #[tokio::test]
         async fn ok() {
-            let budget = TpsBudget::new(Duration::from_secs(1), 1, 0.0);
-            let res = test_call::<RetryAll, _, _>(budget, 1, ok_handler).await;
+            let res = test_call::<RetryAll, _, _>(1, 1, ok_handler).await;
             assert!(res.is_ok());
         }
 
         #[tokio::test]
         async fn no_more_attempts() {
-            let budget = TpsBudget::new(Duration::from_secs(1), 0, 0.0);
-            let res = test_call::<RetryAll, _, _>(budget, 1, err_handler).await;
+            let res = test_call::<RetryAll, _, _>(0, 1, err_handler).await;
             assert!(res.is_err());
         }
 
         #[tokio::test]
         async fn retriable() {
-            let budget = TpsBudget::new(Duration::from_secs(1), 1, 0.0);
-            let res = test_call::<RetryAll, _, _>(budget, 2, err_handler).await;
+            let res = test_call::<RetryAll, _, _>(1, 2, err_handler).await;
             assert!(res.is_err());
         }
 
         #[tokio::test]
         async fn non_retriable() {
-            let budget = TpsBudget::new(Duration::from_secs(1), 1, 0.0);
-            let res = test_call::<RetryNone, _, _>(budget, 1, err_handler).await;
+            let res = test_call::<RetryNone, _, _>(1, 1, err_handler).await;
             assert!(res.is_err());
         }
     }
