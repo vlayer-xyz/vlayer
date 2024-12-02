@@ -43,8 +43,8 @@ impl<Req: Clone, EF: ErrorFilter> retry::Policy<Req, (), Error> for RetryPolicy<
                 None
             }
             Err(err) if EF::is_retriable(err) => {
-                let withdrew = self.budget.withdraw();
-                if !withdrew {
+                let withdraw = self.budget.withdraw();
+                if !withdraw {
                     debug!("retry budget exhausted");
                     return None;
                 }
