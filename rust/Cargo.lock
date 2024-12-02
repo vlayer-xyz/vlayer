@@ -11674,7 +11674,6 @@ dependencies = [
  "chain_host",
  "clap",
  "derivative",
- "derive-new",
  "dotenvy",
  "tokio",
  "tower 0.5.1",

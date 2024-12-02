@@ -1,16 +1,30 @@
-use std::{error, future, marker::PhantomData};
+use std::{error, future, marker::PhantomData, sync::Arc};
 
 use chain_host::HostError;
 use derivative::Derivative;
-use derive_new::new;
-use tower::{retry, timeout::error::Elapsed};
+use tower::{
+    retry::{
+        self,
+        budget::{Budget, TpsBudget},
+    },
+    timeout::error::Elapsed,
+};
 use tracing::{debug, error};
 
-#[derive(Derivative, new)]
+#[derive(Derivative)]
 #[derivative(Clone)]
-pub struct Policy<EF: ErrorFilter> {
-    remaining_attempts: usize,
+pub struct RetryPolicy<EF: ErrorFilter> {
+    pub budget: Arc<TpsBudget>,
     _phantom: PhantomData<EF>,
+}
+
+impl<EF: ErrorFilter> RetryPolicy<EF> {
+    pub fn new(budget: TpsBudget) -> Self {
+        Self {
+            budget: Arc::new(budget),
+            _phantom: PhantomData,
+        }
+    }
 }
 
 type Error = Box<dyn error::Error + Send + Sync>;
@@ -19,21 +33,25 @@ pub trait ErrorFilter {
     fn is_retriable(err: &Error) -> bool;
 }
 
-impl<Req: Clone, EF: ErrorFilter> retry::Policy<Req, (), Error> for Policy<EF> {
+impl<Req: Clone, EF: ErrorFilter> retry::Policy<Req, (), Error> for RetryPolicy<EF> {
     type Future = future::Ready<()>;
 
     fn retry(&mut self, _req: &mut Req, result: &mut Result<(), Error>) -> Option<Self::Future> {
-        if self.remaining_attempts == 0 {
-            debug!("No more retry attempts");
-            return None;
-        }
         match result {
+            Ok(_) => {
+                self.budget.deposit();
+                None
+            }
             Err(err) if EF::is_retriable(err) => {
-                self.remaining_attempts -= 1;
-                error!("Host error: {err} Remaining attempts: {}", self.remaining_attempts);
+                let withdrew = self.budget.withdraw();
+                if !withdrew {
+                    debug!("retry budget exhausted");
+                    return None;
+                }
+                error!("retrying after error: {:?}", err);
                 Some(future::ready(()))
             }
-            Err(_) | Ok(_) => None,
+            Err(_) => None,
         }
     }
 
@@ -99,7 +117,10 @@ mod tests {
     }
 
     mod policy {
-        use std::sync::atomic::{AtomicU32, Ordering};
+        use std::{
+            sync::atomic::{AtomicU32, Ordering},
+            time::Duration,
+        };
 
         use future::Future;
         use tower::{Service, ServiceBuilder};
@@ -131,7 +152,7 @@ mod tests {
         }
 
         async fn test_call<EF: ErrorFilter, Func, Fut>(
-            max_retries: usize,
+            budget: TpsBudget,
             expected_attempts: u32,
             service_fn: Func,
         ) -> Result<(), Error>
@@ -141,7 +162,7 @@ mod tests {
         {
             let attempts = AtomicU32::new(0);
             let mut service = ServiceBuilder::new()
-                .retry(Policy::<EF>::new(max_retries))
+                .retry(RetryPolicy::<EF>::new(budget))
                 .service_fn(|req| {
                     attempts.fetch_add(1, Ordering::SeqCst);
                     service_fn(req)
@@ -153,25 +174,29 @@ mod tests {
 
         #[tokio::test]
         async fn ok() {
-            let res = test_call::<RetryAll, _, _>(1, 1, ok_handler).await;
+            let budget = TpsBudget::new(Duration::from_secs(1), 1, 0.0);
+            let res = test_call::<RetryAll, _, _>(budget, 1, ok_handler).await;
             assert!(res.is_ok());
         }
 
         #[tokio::test]
         async fn no_more_attempts() {
-            let res = test_call::<RetryAll, _, _>(0, 1, err_handler).await;
+            let budget = TpsBudget::new(Duration::from_secs(1), 0, 0.0);
+            let res = test_call::<RetryAll, _, _>(budget, 1, err_handler).await;
             assert!(res.is_err());
         }
 
         #[tokio::test]
         async fn retriable() {
-            let res = test_call::<RetryAll, _, _>(1, 2, err_handler).await;
+            let budget = TpsBudget::new(Duration::from_secs(1), 1, 0.0);
+            let res = test_call::<RetryAll, _, _>(budget, 2, err_handler).await;
             assert!(res.is_err());
         }
 
         #[tokio::test]
         async fn non_retriable() {
-            let res = test_call::<RetryNone, _, _>(1, 1, err_handler).await;
+            let budget = TpsBudget::new(Duration::from_secs(1), 1, 0.0);
+            let res = test_call::<RetryNone, _, _>(budget, 1, err_handler).await;
             assert!(res.is_err());
         }
     }
