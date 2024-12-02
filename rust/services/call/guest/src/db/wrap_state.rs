@@ -107,4 +107,23 @@ mod test {
         let index = U256::from(0);
         let _ = db.storage_ref(address, index);
     }
+
+    #[test]
+    #[should_panic(expected = "invalid storage value")]
+    fn panics_if_storage_value_invalid() {
+        let db = WrapStateDb::new(StateDb::default());
+        let address = Address::default();
+        let index = U256::from(0);
+
+        let mut storage = MerkleTrie::default();
+        let key = keccak256(index.to_be_bytes::<32>());
+        let invalid_value = vec![0xc0];
+        let _ = storage.insert(key, invalid_value);
+
+        db.account_storage
+            .borrow_mut()
+            .insert(address, Some(Rc::new(storage)));
+
+        db.storage_ref(address, index).unwrap();
+    }
 }
