@@ -12,7 +12,7 @@ contract MockERC20 is ERC20 {
     }
 }
 
-contract AnvilSetup is Script {
+contract LoadFixtures is Script {
     function run() external {
         uint256 deployerPrivateKey = vm.envUint("EXAMPLES_TEST_PRIVATE_KEY");
         vm.startBroadcast(deployerPrivateKey);
