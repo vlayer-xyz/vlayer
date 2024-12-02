@@ -44,10 +44,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: cargo risczero install
 
-      - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
-        with:
-          version: nightly-bcacf39e43812e50a124e3ba60d1becd9866534d # 2024-10-11
+      - name: Install contracts prerequisites
+        uses: ./.github/actions/contracts-prerequisites
 
       - name: "Build guest wrapper"
         run: cargo build --release --target x86_64-unknown-linux-gnu --package call_guest_wrapper
@@ -132,10 +130,8 @@ jobs:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: cargo risczero install
 
-      - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
-        with:
-          version: nightly-bcacf39e43812e50a124e3ba60d1becd9866534d # 2024-10-11
+      - name: Install contracts prerequisites
+        uses: ./.github/actions/contracts-prerequisites
 
       - name: Install LLVM and Clang
         uses: KyleMayes/install-llvm-action@v2.0.4
@@ -279,16 +275,14 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Install Foundry
-        uses: foundry-rs/foundry-toolchain@v1
-        with:
-          version: nightly-bcacf39e43812e50a124e3ba60d1becd9866534d # 2024-10-11
+      - name: Install contracts prerequisites
+        uses: ./.github/actions/contracts-prerequisites
 
       - name: Set up Soldeer login
         env:
           SOLDEER_LOGIN_FILE: "${{ runner.temp }}/.soldeer_login"
         run: |
-          echo -n "${{ secrets.SOLDEER_API_KEY }}" > "${SOLDEER_LOGIN_FILE}"
+          forge soldeer login --email "${{ secrets.SOLDEER_ADMIN_LOGIN }}" --password "${{ secrets.SOLDEER_ADMIN_PASSWORD }}"
 
       - name: Download guest artifacts
         uses: actions/download-artifact@v4
