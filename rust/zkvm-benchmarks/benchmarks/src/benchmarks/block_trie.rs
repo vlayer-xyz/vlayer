@@ -3,7 +3,7 @@ use block_header::{EthBlockHeader as Block, EvmBlockHeader};
 
 use crate::{with_fixture, Benchmark};
 
-fn block(n: u64) -> Box<dyn EvmBlockHeader> {
+fn dummy_block(n: u64) -> Box<dyn EvmBlockHeader> {
     let block = Block {
         number: n,
         ..Default::default()
@@ -11,13 +11,13 @@ fn block(n: u64) -> Box<dyn EvmBlockHeader> {
     Box::new(block)
 }
 
-fn block_with_correct_parent_hash(n: u64) -> Box<dyn EvmBlockHeader> {
+fn dummy_block_with_correct_parent_hash(n: u64) -> Box<dyn EvmBlockHeader> {
     if n == 0 {
-        return block(0);
+        return dummy_block(0);
     }
     let block = Block {
         number: n,
-        parent_hash: block_with_correct_parent_hash(n - 1).hash_slow(),
+        parent_hash: dummy_block_with_correct_parent_hash(n - 1).hash_slow(),
         ..Default::default()
     };
     Box::new(block)
@@ -27,7 +27,10 @@ mod append_single {
     use super::*;
 
     pub fn fixture() -> (BlockTrie, Box<dyn EvmBlockHeader>) {
-        (BlockTrie::init(block(0)).unwrap(), block_with_correct_parent_hash(1))
+        (
+            BlockTrie::init(dummy_block(0)).unwrap(),
+            dummy_block_with_correct_parent_hash(1),
+        )
     }
 
     pub fn run((mut trie, block_one): (BlockTrie, Box<dyn EvmBlockHeader>)) {
@@ -40,8 +43,8 @@ mod prepend_single {
 
     pub fn fixture() -> (BlockTrie, Box<dyn EvmBlockHeader>) {
         (
-            BlockTrie::init(block_with_correct_parent_hash(1)).unwrap(),
-            block_with_correct_parent_hash(1),
+            BlockTrie::init(dummy_block_with_correct_parent_hash(1)).unwrap(),
+            dummy_block_with_correct_parent_hash(1),
         )
     }
 
@@ -54,8 +57,10 @@ mod append_batch {
     use super::*;
 
     pub fn fixture(size: u64) -> (BlockTrie, Vec<Box<dyn EvmBlockHeader>>) {
-        let trie = BlockTrie::init(block(0)).unwrap();
-        let blocks = (1..=size).map(block_with_correct_parent_hash).collect();
+        let trie = BlockTrie::init(dummy_block(0)).unwrap();
+        let blocks = (1..=size)
+            .map(dummy_block_with_correct_parent_hash)
+            .collect();
         (trie, blocks)
     }
 
@@ -70,9 +75,11 @@ mod prepend_batch {
     pub fn fixture(
         size: u64,
     ) -> (BlockTrie, Vec<Box<dyn EvmBlockHeader>>, Box<dyn EvmBlockHeader>) {
-        let old_leftmost = block_with_correct_parent_hash(size);
+        let old_leftmost = dummy_block_with_correct_parent_hash(size);
         let trie = BlockTrie::init(&old_leftmost).unwrap();
-        let blocks = (0..size).map(block_with_correct_parent_hash).collect();
+        let blocks = (0..size)
+            .map(dummy_block_with_correct_parent_hash)
+            .collect();
         (trie, blocks, old_leftmost)
     }
 
