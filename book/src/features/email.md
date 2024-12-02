@@ -32,8 +32,9 @@ Below is an example of such proof generation:
 
 ```solidity
 import {Strings} from "@openzeppelin-contracts-5.0.1/utils/Strings.sol";
-import {Prover} from "vlayer-0.1.0/src/Prover.sol";
-import {VerifiedEmail, UnverifiedEmail, EmailProofLib} from "vlayer-0.1.0/src/EmailProof.sol";
+import {Proof} from "vlayer-0.1.0/Proof.sol";
+import {Prover} from "vlayer-0.1.0/Prover.sol";
+import {VerifiedEmail, UnverifiedEmail, EmailProofLib} from "vlayer-0.1.0/EmailProof.sol";
 import {EmailStrings} from "./EmailStrings.sol";
 
 contract EmailDomainProver is Prover {
@@ -50,7 +51,7 @@ contract EmailDomainProver is Prover {
     function main(UnverifiedEmail calldata unverifiedEmail, address targetWallet)
         public
         view
-        returns (Proof, bytes32, address)
+        returns (Proof memory, bytes32, address)
     {
         VerifiedEmail memory email = unverifiedEmail.verify();
 
@@ -62,13 +63,12 @@ contract EmailDomainProver is Prover {
 }
 ```
 
-It can be convenient to use [Regular Expressions](./regex-and-json.md) to validate the content of the email.
+It can be convenient to use [Regular Expressions](/features/json-and-regex.md) to validate the content of the email.
 
 Email is passed to the Solidity contract as an `UnverifiedEmail` structure that can be created using the `preverifyEmail` function in the [SDK](../javascript/javascript.md).
-`preverifyEmail` should be called with the raw `.eml` file content as an argument ([learn how to get this file](/features/email.html#getting-eml-files)). The email is also required to have "From" and ["DKIM-Signature"](https://datatracker.ietf.org/doc/html/rfc6376) headers.
+`preverifyEmail` should be called with the raw `.eml` file content as an argument ([learn how to get this file](/features/email.html#getting-eml-files)). The email is also required to have [`From` and `DKIM-Signature`](https://datatracker.ietf.org/doc/html/rfc6376) headers.
 
 ```solidity
-// Note: more fields will be added soon
 struct UnverifiedEmail {
   string email;
   string[] dnsRecords;
@@ -76,8 +76,6 @@ struct UnverifiedEmail {
 ```
 
 First, we verify the integrity of the email with the `verify()` function. Then we have a series of assertions (*regular Solidity `require()`*) that check the email details. 
-
-String comparison is handled by our `StringUtils` library (*described in more [details below](/features/email.html#stringutils)*). Date values are formatted in the [Unix time](https://en.wikipedia.org/wiki/Unix_time) notation, which allows them to be compared as integers.
 
 > If one of the string comparisons fails, require will revert the execution, and as a result, proof generation will fail.
 
@@ -92,29 +90,24 @@ String comparison is handled by our `StringUtils` library (*described in more [d
 > This command will download create and initialise a new project with sample email proof contracts.
 
 ## Email structure
-The `email` structure of type `VerifiedEmail` is injected into the `Prover` and can be used in a `main()` function.
+The `email` structure of type `VerifiedEmail` is a result of the `UnverifiedEmail.verify()` function.
+Since the `verify` function actually verifies the passed email, `VerifiedEmail`'s fields can be trusted from this point.    
 
 ```solidity
 struct VerifiedEmail {
-  string subject;
-  string body;
   string from;
   string to;
+  string subject;
+  string body;
 }
 ```
-An `VerifiedEmail` consists of the following fields
-- `subject` - a string with the subject of the email
-- `body` - a string consisting of the entire body of the email
-- `from` - a string consisting of the sender's email address (*no name is available*) 
-- `to` - a string consisting of the intended recipient's email address (*no name is available*)
+An `VerifiedEmail` consists of the following fields:
+- `from` - a string consisting of the sender's email address (*no name is available*);
+- `to` - a string consisting of the intended recipient's email address (*no name is available*);
+- `subject` - a string with the subject of the email;
+- `body` - a string consisting of the entire body of the email.
 
 By inspecting and parsing the email payload elements, we can generate a claim to be used on-chain.
-
-## StringUtils
-For convenient manipulation of strings, vlayer provides `StringUtils` library, which consists of functions like:
-* `toAddress` - converts a string to an address if properly formatted, reverts otherwise
-* `match` - matches RegExp pattern groups and returns them as a string
-* `equal` - checks the contents of two strings for equality. Returns true if both are equal, false otherwise.
 
 ## Getting `.eml` Files
 Obtaining an `.eml` file can be helpful for development purposes, such as testing own email proofs. Below are instructions for retrieving `.eml` files from common email clients.

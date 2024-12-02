@@ -18,24 +18,25 @@ To support these needs, we provide helpers for parsing text using [regular expre
 
 ## JSON Parsing
 
-We provide three functions to extract data from JSON based on the field type:
-- `jsonGetInt`: Extracts an integer value and returns `int256`.
-- `jsonGetBool`: Extracts a boolean value and returns `bool`.
-- `jsonGetString`: Extracts a string value and returns `string memory`.
+We provide four functions to extract data from JSON based on the field type:
+- `jsonGetInt`: Extracts an integer value and returns `int256`;
+- `jsonGetBool`: Extracts a boolean value and returns `bool`;
+- `jsonGetString`: Extracts a string value and returns `string memory`;
+- `jsonGetArrayLength`: Returns length of an array under provided `jsonPath`, returns `uint256`. 
 
 ```solidity
 import {Prover} from "vlayer/Prover.sol";
-import {WebLib} from "vlayer/WebProof.sol";
+import {Web, WebLib} from "vlayer/WebProof.sol";
 
 contract JSONContainsFieldProof is Prover {
-    using WebLib for string;
+    using WebLib for Web;
 
-    function main(string calldata json) public returns (Proof memory, string memory) {
-        require(json.jsonGetInt("deep.nested.field") == 42, "deep nested field is not 42");
+    function main(Web memory web) public returns (Proof memory, string memory) {
+        require(web.jsonGetInt("deep.nested.field") == 42, "deep nested field is not 42");
         
         // If we return the provided JSON back, we will be able to pass it to verifier
         // Together with a proof that it contains the field
-        return (proof(), json);
+        return (proof(), web.body);
     }
 }
 ```
@@ -59,8 +60,9 @@ Currently, accessing fields inside arrays is not supported.
 ## Regular Expressions
 Regular expressions are a powerful tool for finding patterns in text.
 
-We provide a function to match a regular expression against a string:
-- `matches` checks if a string matches a regular expression and returns `true` if a match is found.
+We provide functions to match and capture a substring using regular expressions:
+- `matches` checks if a string matches a regular expression and returns `true` if a match is found;
+- `capture` checks if a string matched a regular expression and returns all found captures.
 
 ```solidity
 import {Prover} from "vlayer/Prover.sol";
@@ -78,5 +80,3 @@ contract RegexMatchProof is Prover {
     }
 }
 ```
-
- 
