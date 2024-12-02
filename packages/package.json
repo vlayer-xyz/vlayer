@@ -2,8 +2,8 @@
   "name": "vlayer",
   "module": "index.ts",
   "scripts": {
-    "deploy_unconditional_prover": "cd ../contracts/fixtures && forge create src/vlayer/UnconditionalProver.sol:UnconditionalProver --private-key=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
-    "deploy_email_prover": "cd ../contracts/fixtures && forge create src/vlayer/EmailProver.sol:EmailProver --private-key=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80",
+    "deploy_unconditional_prover": "cd ../contracts/fixtures && forge create src/vlayer/UnconditionalProver.sol:UnconditionalProver --private-key=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --broadcast",
+    "deploy_email_prover": "cd ../contracts/fixtures && forge create src/vlayer/EmailProver.sol:EmailProver --private-key=0xac0974bec39a17e36ba4a6b4d238ff944bacb478cbed5efcae784d7bf4f2ff80 --broadcast",
     "deploy_test_contracts": "bun run deploy_unconditional_prover && bun run deploy_email_prover",
     "test:headed": "bun run deploy_test_contracts && TEST_MODE=headed bunx playwright test --ui",
     "test:headless": "bun run deploy_test_contracts && TEST_MODE=headless bunx playwright test",
