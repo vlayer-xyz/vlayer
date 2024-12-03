@@ -22,6 +22,7 @@ chain = { workspace = true }
 chain_client = { workspace = true }
 chain_common = { workspace = true }
 common = { workspace = true }
+derivative = { workspace = true }
 derive-new = { workspace = true }
 derive_more = { workspace = true }
 itertools = { workspace = true }
