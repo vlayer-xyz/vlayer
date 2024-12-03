@@ -3,7 +3,7 @@ import proverSpec from "../../../contracts/fixtures/out/EmailProver.sol/EmailPro
 import React, { useCallback, ChangeEvent } from "react";
 import { foundry } from "viem/chains";
 
-const PROVER_ADDRESS = "0xe7f1725E7734CE288F8367e1Bb143E90bb3F0512";
+const PROVER_ADDRESS = import.meta.env.VITE_EMAIL_PROVER_ADDRESS;
 const getStrFromFile = (file: File): Promise<string> => {
   const reader = new FileReader();
 

@@ -40,6 +40,28 @@ export const waitForTransactionReceipt = async ({
   });
 };
 
+export const deployProver = async ({
+  proverSpec,
+  proverArgs,
+}: {
+  proverSpec: ContractSpec;
+  proverArgs?: ContractArg[];
+}) => {
+  const config = getConfig();
+  const { ethClient, account, chain } = createContext(config);
+
+  const proverHash = await ethClient.deployContract({
+    chain,
+    account,
+    args: proverArgs,
+    abi: proverSpec.abi,
+    bytecode: proverSpec.bytecode.object,
+  });
+  console.log(proverHash);
+  const prover = await waitForContractDeploy({ hash: proverHash });
+  return prover;
+};
+
 export const deployVlayerContracts = async ({
   proverSpec,
   verifierSpec,
