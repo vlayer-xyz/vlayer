@@ -37,7 +37,7 @@ pub async fn post<T: Serialize>(app: Router, url: &str, body: &T) -> Response<Bo
     app.oneshot(request).await.unwrap()
 }
 
-pub async fn assert_jrpc_ok(response: axum::response::Response, expected: Value) {
+pub async fn assert_jrpc_ok(response: axum::response::Response, expected: impl Serialize) {
     let response_json = body_to_json(response.into_body()).await;
     if let Some(error) = response_json.get("error") {
         panic!("expected .result but found .error: {error}");
