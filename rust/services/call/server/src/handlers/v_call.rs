@@ -63,7 +63,7 @@ pub async fn v_call(
             .await?;
     }
 
-    state.lock().hashes.insert(call_hash, host_output);
+    state.write().insert(call_hash, host_output);
 
     Ok(call_hash)
 }

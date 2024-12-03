@@ -19,7 +19,7 @@ pub async fn v_get_proof_receipt(
     params: Params,
 ) -> Result<CallResult, AppError> {
     info!("v_get_proof_receipt => {params:#?}");
-    match state.lock().hashes.get(&params.hash) {
+    match state.read().get(&params.hash) {
         Some(host_output) => Ok(CallResult::try_new(host_output.clone())?),
         None => Err(AppError::HashNotFound(params.hash.to_string())),
     }
