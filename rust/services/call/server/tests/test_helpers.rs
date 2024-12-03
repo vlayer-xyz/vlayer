@@ -6,27 +6,27 @@ use mock_chain_server::{fake_proof_result, ChainProofServerMock};
 use serde_json::json;
 use server_utils::rpc::mock::Server as RpcServerMock;
 
-pub(crate) fn call_guest_elf() -> GuestElf {
+pub fn call_guest_elf() -> GuestElf {
     call_guest_wrapper::GUEST_ELF.clone()
 }
 
-pub(crate) fn chain_guest_elf() -> GuestElf {
+pub fn chain_guest_elf() -> GuestElf {
     chain_guest_wrapper::GUEST_ELF.clone()
 }
 
-pub(crate) const API_VERSION: &str = "1.2.3";
-pub(crate) const GAS_METER_TTL: u64 = 3600;
+pub const API_VERSION: &str = "1.2.3";
+pub const GAS_METER_TTL: u64 = 3600;
 
 #[derive(new)]
-pub(crate) struct Context {
-    pub(crate) client: Client,
-    pub(crate) anvil: Anvil,
-    pub(crate) chain_proof_server: ChainProofServerMock,
-    pub(crate) gas_meter_server: Option<RpcServerMock>,
+pub struct Context {
+    pub client: Client,
+    pub anvil: Anvil,
+    pub chain_proof_server: ChainProofServerMock,
+    pub gas_meter_server: Option<RpcServerMock>,
 }
 
 impl Context {
-    pub(crate) async fn default() -> Self {
+    pub async fn default() -> Self {
         let anvil = Anvil::start();
         let client = anvil.setup_client();
         let block_header = client.get_latest_block_header().await;
@@ -35,7 +35,7 @@ impl Context {
         Self::new(client, anvil, chain_proof_server, None)
     }
 
-    pub(crate) fn server(&self, call_guest_elf: GuestElf, chain_guest_elf: GuestElf) -> Server {
+    pub fn server(&self, call_guest_elf: GuestElf, chain_guest_elf: GuestElf) -> Server {
         let mut config_builder = ConfigBuilder::new(
             self.chain_proof_server.url(),
             call_guest_elf,
@@ -55,7 +55,7 @@ impl Context {
     }
 }
 
-pub(crate) mod mock {
+pub mod mock {
     use std::{sync::Arc, time::Duration};
 
     use axum::{body::Body, http::Response, Router};
@@ -73,7 +73,6 @@ pub(crate) mod mock {
         signers::{LocalWallet, Signer, Wallet},
         types::BlockNumber as BlockTag,
     };
-    use example_prover::ExampleProver;
     use provider::to_eth_block_header;
     use serde::Serialize;
     use server_utils::post;
@@ -82,27 +81,27 @@ pub(crate) mod mock {
 
     type Contract = ExampleProver<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>>;
 
-    pub(crate) struct Server(Router);
+    pub struct Server(Router);
 
     impl Server {
-        pub(crate) fn new(config: Config) -> Self {
+        pub fn new(config: Config) -> Self {
             Self(server(config))
         }
 
-        pub(crate) async fn post(&self, url: &str, body: impl Serialize) -> Response<Body> {
+        pub async fn post(&self, url: &str, body: impl Serialize) -> Response<Body> {
             post(self.0.clone(), url, &body).await
         }
     }
 
     #[derive(Deref)]
-    pub(crate) struct Anvil(AnvilInstance);
+    pub struct Anvil(AnvilInstance);
 
     impl Anvil {
-        pub(crate) fn start() -> Self {
+        pub fn start() -> Self {
             Self(utils::Anvil::new().chain_id(11_155_111_u64).spawn())
         }
 
-        pub(crate) fn setup_client(&self) -> Client {
+        pub fn setup_client(&self) -> Client {
             let wallet: LocalWallet = self.keys()[0].clone().into();
             let provider = Provider::<Http>::try_from(self.endpoint())
                 .unwrap()
@@ -112,14 +111,14 @@ pub(crate) mod mock {
     }
 
     #[derive(Deref)]
-    pub(crate) struct Client(Arc<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>>);
+    pub struct Client(Arc<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>>);
 
     impl Client {
-        pub(crate) fn new(provider: Provider<Http>, wallet: Wallet<ecdsa::SigningKey>) -> Self {
+        pub fn new(provider: Provider<Http>, wallet: Wallet<ecdsa::SigningKey>) -> Self {
             Client(Arc::new(SignerMiddleware::new(provider, wallet)))
         }
 
-        pub(crate) async fn deploy_contract(self) -> Contract {
+        pub async fn deploy_contract(self) -> Contract {
             ExampleProver::deploy(self.0, ())
                 .unwrap()
                 .send()
@@ -127,7 +126,7 @@ pub(crate) mod mock {
                 .unwrap()
         }
 
-        pub(crate) async fn get_latest_block_header(&self) -> Box<dyn EvmBlockHeader> {
+        pub async fn get_latest_block_header(&self) -> Box<dyn EvmBlockHeader> {
             let latest_block = self
                 .as_ref()
                 .get_block(BlockTag::Latest)
