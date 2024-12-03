@@ -193,7 +193,7 @@ mod server_tests {
         #[tokio::test(flavor = "multi_thread")]
         async fn simple_with_gasmeter() {
             const EXPECTED_HASH: &str =
-                "0xf8d32367d8ec243e8e6fcac96dc769ed80287534d51c5d1e817173128f2b6218";
+                "0x126257b312be17f869dacc198adc28424148f5408751f52c50050a01eeef8ebf";
             const EXPECTED_GAS_USED: u64 = 21_728;
 
             let mut gas_meter_server = RpcServerMock::start().await;

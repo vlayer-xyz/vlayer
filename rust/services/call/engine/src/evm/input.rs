@@ -1,7 +1,8 @@
 use std::{collections::HashMap, iter::once};
 
 use alloy_primitives::{BlockHash, BlockNumber, Bytes, ChainId, B256};
-use block_header::{EvmBlockHeader, Hashable};
+use block_header::{EthBlockHeader, EvmBlockHeader, Hashable};
+use derivative::Derivative;
 use derive_more::{From, Into, IntoIterator};
 use derive_new::new;
 use itertools::Itertools;
@@ -12,8 +13,10 @@ use tracing::debug;
 use super::env::location::ExecutionLocation;
 
 /// The serializable input to derive and validate a [EvmEnv].
-#[derive(Debug, Serialize, Deserialize, Clone)]
+#[derive(Debug, Serialize, Derivative, Deserialize, Clone)]
+#[derivative(Default)]
 pub struct EvmInput {
+    #[derivative(Default(value = "Box::new(EthBlockHeader::default())"))]
     pub header: Box<dyn EvmBlockHeader>,
     pub state_trie: MerkleTrie,
     pub storage_tries: Vec<MerkleTrie>,
@@ -119,28 +122,16 @@ impl FromIterator<(ExecutionLocation, EvmInput)> for MultiEvmInput {
 #[cfg(test)]
 mod test {
     use block_header::{EthBlockHeader, Hashable};
-    use mpt::{MerkleTrie, EMPTY_ROOT_HASH};
+    use mpt::EMPTY_ROOT_HASH;
 
     use super::EvmInput;
-
-    impl Default for EvmInput {
-        fn default() -> Self {
-            Self {
-                header: Box::new(EthBlockHeader::default()),
-                ancestors: vec![],
-                state_trie: MerkleTrie::default(),
-                storage_tries: Vec::default(),
-                contracts: Vec::default(),
-            }
-        }
-    }
 
     mod block_hashes {
         use super::*;
 
         #[test]
         fn success() {
-            let ancestor: EthBlockHeader = EthBlockHeader::default();
+            let ancestor = EthBlockHeader::default();
             let input = EvmInput {
                 ancestors: vec![Default::default()],
                 header: Box::new(EthBlockHeader {
@@ -187,7 +178,7 @@ mod test {
 
         #[test]
         fn success() {
-            let ancestor: EthBlockHeader = Default::default();
+            let ancestor = EthBlockHeader::default();
             let input = EvmInput {
                 ancestors: vec![Default::default()],
                 header: Box::new(EthBlockHeader {

@@ -10,6 +10,7 @@ use revm::{
 
 use super::state::StateDb;
 
+#[derive(Default)]
 pub struct WrapStateDb {
     inner: StateDb,
     account_storage: RefCell<HashMap<Address, Option<Rc<MerkleTrie>>>>,
@@ -92,5 +93,68 @@ impl From<EvmInput> for WrapStateDb {
             StateDb::new(input.state_trie, input.storage_tries, input.contracts, block_hashes);
 
         WrapStateDb::new(state_db)
+    }
+}
+
+#[cfg(test)]
+mod storage_ref {
+    use super::*;
+
+    #[test]
+    #[should_panic(expected = "storage not found: 0x0000000000000000000000000000000000000000@0")]
+    fn panics_when_storage_not_found() {
+        let db = WrapStateDb::default();
+        let _ = db.storage_ref(Address::default(), U256::from(0));
+    }
+
+    #[test]
+    #[should_panic(expected = "invalid storage value")]
+    fn panics_when_storage_value_invalid() {
+        let db = WrapStateDb::default();
+        let address = Address::default();
+        let index = U256::from(0);
+
+        let invalid_value = vec![0xc0];
+        let storage =
+            MerkleTrie::from_iter(vec![(keccak256(index.to_be_bytes::<32>()), invalid_value)]);
+
+        db.account_storage
+            .borrow_mut()
+            .insert(address, Some(Rc::new(storage)));
+
+        db.storage_ref(address, index).unwrap();
+    }
+
+    #[test]
+    fn returns_zero_when_storage_not_found() {
+        let db = WrapStateDb::default();
+        let address = Address::default();
+        let index = U256::from(0);
+
+        db.account_storage.borrow_mut().insert(address, None);
+
+        let value = db.storage_ref(address, index).unwrap();
+
+        assert_eq!(value, U256::ZERO);
+    }
+
+    #[test]
+    fn success() {
+        let db = WrapStateDb::default();
+        let address = Address::default();
+        let index = U256::from(0);
+
+        let mut storage = MerkleTrie::default();
+        storage
+            .insert(keccak256(index.to_be_bytes::<32>()), [42])
+            .unwrap();
+
+        db.account_storage
+            .borrow_mut()
+            .insert(address, Some(Rc::new(storage)));
+
+        let value = db.storage_ref(address, index).unwrap();
+
+        assert_eq!(value, U256::from(42));
     }
 }

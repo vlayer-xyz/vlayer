@@ -1927,6 +1927,7 @@ dependencies = [
  "chain_client",
  "chain_common",
  "common",
+ "derivative",
  "derive-new",
  "derive_more 1.0.0",
  "itertools 0.13.0",
