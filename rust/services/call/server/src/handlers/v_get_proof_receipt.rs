@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use alloy_primitives::{hex::ToHexExt, U256};
 use alloy_sol_types::SolValue;
 use call_engine::{HostOutput, Proof, Seal};
@@ -8,7 +6,9 @@ use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use tracing::info;
 
-use crate::{config::Config as ServerConfig, error::AppError, v_call::CallHash};
+use crate::{error::AppError, v_call::CallHash};
+
+use super::SharedState;
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Params {
@@ -16,11 +16,14 @@ pub struct Params {
 }
 
 pub async fn v_get_proof_receipt(
-    _config: Arc<ServerConfig>,
+    state: SharedState,
     params: Params,
 ) -> Result<CallResult, AppError> {
     info!("v_get_proof_receipt => {params:#?}");
-    Err(AppError::Unimplemented("v_getProofReceipt not implemented yet".into()))
+    match state.lock().hashes.get(&params.hash) {
+        Some(host_output) => Ok(CallResult::try_new(host_output.clone())?),
+        None => Err(AppError::HashNotFound(params.hash.to_string())),
+    }
 }
 
 #[allow(clippy::struct_field_names)]

@@ -9,7 +9,10 @@ use tracing::info;
 
 use crate::{
     config::Config,
-    handlers::{v_call::v_call, v_get_proof_receipt::v_get_proof_receipt, v_versions::v_versions},
+    handlers::{
+        v_call::v_call, v_get_proof_receipt::v_get_proof_receipt, v_versions::v_versions,
+        SharedState,
+    },
 };
 
 pub async fn serve(config: Config) -> anyhow::Result<()> {
@@ -30,20 +33,22 @@ async fn handle_jrpc(
 
 pub fn server(cfg: Config) -> Router {
     let config = Arc::new(cfg);
+    let state = SharedState::default();
     let mut jrpc_router = server_utils::Router::default();
     jrpc_router.add_handler("v_call", {
         let config = config.clone();
+        let state = state.clone();
         move |params| -> Pin<Box<dyn Future<Output = _> + Send>> {
             let config = config.clone();
-            Box::pin(v_call(config, params))
+            let state = state.clone();
+            Box::pin(v_call(config, state, params))
         }
     });
     jrpc_router.add_handler("v_getProofReceipt", {
-        let config = config.clone();
         move |params| -> Pin<Box<dyn Future<Output = _> + Send>> {
-            let config = config.clone();
+            let state = state.clone();
             Box::pin(async move {
-                v_get_proof_receipt(config, params)
+                v_get_proof_receipt(state, params)
                     .await
                     .map(|x| x.to_json())
             })

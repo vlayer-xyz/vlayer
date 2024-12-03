@@ -17,8 +17,8 @@ pub enum AppError {
     Join(#[from] JoinError),
     #[error("RPC error: {0}")]
     RpcError(#[from] RpcError),
-    #[error("Unimplemented: {0}")]
-    Unimplemented(String),
+    #[error("Hash not found: {0}")]
+    HashNotFound(String),
 }
 
 impl From<AppError> for JsonRpcError {
@@ -30,7 +30,7 @@ impl From<AppError> for JsonRpcError {
             AppError::Host(..)
             | AppError::Join(..)
             | AppError::RpcError(..)
-            | AppError::Unimplemented(..) => {
+            | AppError::HashNotFound(..) => {
                 JsonRpcError::new(JsonRpcErrorReason::InternalError, error.to_string(), Value::Null)
             }
         }

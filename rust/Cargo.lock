@@ -2051,6 +2051,7 @@ dependencies = [
  "hex",
  "lazy_static",
  "mock_chain_server",
+ "parking_lot",
  "provider",
  "reqwest 0.12.8",
  "seal",

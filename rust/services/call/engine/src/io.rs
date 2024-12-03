@@ -97,7 +97,7 @@ pub enum GuestOutputError {
     CannotDecodeCallAssumptions(String),
 }
 
-#[derive(Debug, new)]
+#[derive(Clone, Debug, new)]
 pub struct GuestOutput {
     pub call_assumptions: CallAssumptions,
     pub evm_call_result: Vec<u8>,
@@ -120,7 +120,7 @@ impl GuestOutput {
     }
 }
 
-#[derive(Debug)]
+#[derive(Clone, Debug)]
 pub struct HostOutput {
     pub raw_abi: Vec<u8>,
     pub seal: Vec<u8>,

@@ -41,7 +41,7 @@ pub struct CallContext {
     pub gas_limit: u64,
 }
 
-#[derive(Serialize, Deserialize, Debug, From, Copy, Clone)]
+#[derive(Serialize, Deserialize, Debug, From, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct CallHash(B256);
 
 impl std::fmt::Display for CallHash {

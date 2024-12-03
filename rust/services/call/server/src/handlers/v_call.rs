@@ -13,6 +13,8 @@ use crate::{
     gas_meter::{Client, ComputationStage, Config as GasMeterConfig},
 };
 
+use super::SharedState;
+
 pub mod types;
 
 #[derive(Deserialize, Serialize, Debug)]
@@ -21,7 +23,11 @@ pub struct Params {
     context: CallContext,
 }
 
-pub async fn v_call(config: Arc<ServerConfig>, params: Params) -> Result<CallHash, AppError> {
+pub async fn v_call(
+    config: Arc<ServerConfig>,
+    state: SharedState,
+    params: Params,
+) -> Result<CallHash, AppError> {
     info!("v_call => {params:#?}");
     let call: EngineCall = params.call.try_into()?;
     let host_config = config.get_host_config(params.context.chain_id);
@@ -57,6 +63,8 @@ pub async fn v_call(config: Arc<ServerConfig>, params: Params) -> Result<CallHas
             .refund_unused_gas(ComputationStage::Proving, gas_used)
             .await?;
     }
+
+    state.lock().hashes.insert(call_hash, host_output);
 
     Ok(call_hash)
 }
