@@ -133,9 +133,9 @@ X-DKIM-Signature: a=rsa-sha256; bh=2jUSOH9NhtVGCQWNr9BrIAPreKQjO6Sn7XIkfJVOzv8=;
 describe("findIndicesOfMatchingDomains", () => {
   test("returns indices of matching domains", () => {
     const signers = [
-      { domain: "example.com", selector: "selector" },
-      { domain: "example.org", selector: "selector" },
-      { domain: "example.com", selector: "selector" },
+      { domain: "example.com", selector: "selector1" },
+      { domain: "other.other", selector: "selector2" },
+      { domain: "example.com", selector: "selector3" },
     ];
     expect(findIndicesOfMatchingDomains(signers, "example.com")).toStrictEqual([
       0, 2,
@@ -144,10 +144,10 @@ describe("findIndicesOfMatchingDomains", () => {
 
   test("returns empty array if no matching domains", () => {
     const signers = [
-      { domain: "example.com", selector: "selector" },
-      { domain: "example.org", selector: "selector" },
+      { domain: "example.com", selector: "selector1" },
+      { domain: "example.org", selector: "selector2" },
     ];
-    expect(findIndicesOfMatchingDomains(signers, "example.net")).toStrictEqual(
+    expect(findIndicesOfMatchingDomains(signers, "other.other")).toStrictEqual(
       [],
     );
   });
