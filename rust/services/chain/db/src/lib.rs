@@ -179,7 +179,7 @@ impl ChainDb {
         &self,
         chain_id: ChainId,
         block_numbers: impl IntoIterator<Item = BlockNumber>,
-    ) -> ProofResult {
+    ) -> ChainDbResult<(MerkleProof, Bytes)> {
         self.begin_ro()?.get_chain_proof(chain_id, block_numbers)
     }
 
@@ -267,12 +267,13 @@ impl<TX: ReadTx + ?Sized> ChainDbTx<TX> {
         &self,
         chain_id: ChainId,
         block_numbers: impl IntoIterator<Item = BlockNumber>,
-    ) -> ProofResult {
+    ) -> ChainDbResult<(MerkleProof, Bytes)> {
         let chain_info = self
             .get_chain_info(chain_id)?
             .ok_or(ChainDbError::ChainNotFound(chain_id))?;
-        let root_hash = chain_info.root_hash;
         let block_range = chain_info.block_range();
+        let zk_proof = chain_info.zk_proof;
+        let root_hash = chain_info.root_hash;
 
         let mut nodes = HashSet::new();
         for block_num in block_numbers {
@@ -285,7 +286,8 @@ impl<TX: ReadTx + ?Sized> ChainDbTx<TX> {
             let merkle_proof = self.get_merkle_proof(root_hash, block_num)?;
             nodes.extend(merkle_proof.into_iter())
         }
-        Ok(MerkleProof(nodes.into_iter().collect()))
+        let merkle_proof = MerkleProof(nodes.into_iter().collect());
+        Ok((merkle_proof, zk_proof))
     }
 }
 
