@@ -107,7 +107,7 @@ mod create_env {
 
     #[test]
     fn success() {
-        let location = ExecutionLocation::new(0, 1);
+        let location = ExecutionLocation::new(1, 0);
         let input = EvmInput::default();
         let env = create_env(location, input);
 

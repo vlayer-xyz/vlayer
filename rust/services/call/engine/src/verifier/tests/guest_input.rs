@@ -46,7 +46,7 @@ fn mock_multi_evm_input(blocks: RangeInclusive<BlockNumber>) -> MultiEvmInput {
     let headers = mock_block_headers(blocks);
     let inputs = headers
         .into_iter()
-        .map(|header| (ExecutionLocation::new(header.number(), CHAIN_ID), mock_evm_input(header)))
+        .map(|header| (ExecutionLocation::new(CHAIN_ID, header.number()), mock_evm_input(header)))
         .collect();
     MultiEvmInput { inputs }
 }
