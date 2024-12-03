@@ -11,8 +11,7 @@
   "scripts": {
     "lint:solidity": "solhint '../src/**/*.sol'", 
     "prove:testnet": "VLAYER_ENV=testnet bun run prove.ts",
-    "prove:dev": "VLAYER_ENV=dev bun run prove.ts",
-    "loadFixtures": "VLAYER_ENV=dev bun run loadFixtures.ts"
+    "prove:dev": "VLAYER_ENV=dev bun run loadFixtures.ts && bun run prove.ts"
   },
   "peerDependencies": {
     "typescript": "^5.5.4"
