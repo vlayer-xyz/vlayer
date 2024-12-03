@@ -1,7 +1,7 @@
 use std::{collections::HashMap, iter::once};
 
 use alloy_primitives::{BlockHash, BlockNumber, Bytes, ChainId, B256};
-use block_header::{EvmBlockHeader, Hashable};
+use block_header::{EthBlockHeader, EvmBlockHeader, Hashable};
 use derive_more::{From, Into, IntoIterator};
 use derive_new::new;
 use itertools::Itertools;
@@ -32,6 +32,19 @@ impl EvmInput {
         debug!("blocks: {}", self.ancestors.len());
     }
 }
+
+impl Default for EvmInput {
+    fn default() -> Self {
+        Self {
+            header: Box::new(EthBlockHeader::default()),
+            ancestors: vec![],
+            state_trie: MerkleTrie::default(),
+            storage_tries: Vec::default(),
+            contracts: Vec::default(),
+        }
+    }
+}
+
 
 impl EvmInput {
     pub fn block_hashes(&self) -> HashMap<u64, B256> {
@@ -122,18 +135,6 @@ mod test {
     use mpt::{MerkleTrie, EMPTY_ROOT_HASH};
 
     use super::EvmInput;
-
-    impl Default for EvmInput {
-        fn default() -> Self {
-            Self {
-                header: Box::new(EthBlockHeader::default()),
-                ancestors: vec![],
-                state_trie: MerkleTrie::default(),
-                storage_tries: Vec::default(),
-                contracts: Vec::default(),
-            }
-        }
-    }
 
     mod block_hashes {
         use super::*;
