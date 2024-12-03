@@ -70,7 +70,7 @@ where
         let env = self.get_env(location)?;
         let transaction_callback = |call: &_, location| self.internal_call(call, location);
         let inspector = TravelInspector::new(env.cfg_env.chain_id, transaction_callback);
-        let mut evm = build_evm(&env, tx, inspector)?;
+        let mut evm = build_evm(&env, tx, inspector);
         let ResultAndState { result, .. } = evm.transact_preverified()?;
         debug!("EVM call result: {:?}", result);
 
@@ -82,7 +82,7 @@ fn build_evm<'inspector, 'envs, D>(
     env: &'envs EvmEnv<D>,
     tx: &Call,
     inspector: TravelInspector<'inspector>,
-) -> Result<Evm<'inspector, TravelInspector<'inspector>, WrapDatabaseRef<&'envs D>>>
+) -> Evm<'inspector, TravelInspector<'inspector>, WrapDatabaseRef<&'envs D>>
 where
     D: DatabaseRef,
     D::Error: std::fmt::Debug,
@@ -96,7 +96,7 @@ where
         });
     };
 
-    let evm = Evm::builder()
+    Evm::builder()
         .with_ref_db(&env.db)
         .with_external_context(inspector)
         .with_cfg_env_with_handler_cfg(env.cfg_env.clone())
@@ -104,9 +104,7 @@ where
         .append_handler_register(precompiles_handle_register)
         .append_handler_register(inspector_handle_register)
         .modify_block_env(|blk_env| env.header.fill_block_env(blk_env))
-        .build();
-
-    Ok(evm)
+        .build()
 }
 
 impl<D: std::fmt::Debug> From<EVMError<D>> for Error {
