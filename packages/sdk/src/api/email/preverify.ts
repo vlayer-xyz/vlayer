@@ -1,9 +1,9 @@
-import { DkimDnsLocation, getDkimSigners, parseEmail } from "./parseEmail";
+import { DkimDomainSelector, getDkimSigners, parseEmail } from "./parseEmail";
 import { resolveDkimDns } from "./dnsResolver";
 import { prefixAllButNthSubstring } from "../utils/prefixAllButNthSubstring";
 
 export function findIndicesOfMatchingDomains(
-  signers: DkimDnsLocation[],
+  signers: DkimDomainSelector[],
   expectedOrigin: string,
 ) {
   return signers
@@ -14,7 +14,7 @@ export function findIndicesOfMatchingDomains(
 
 function requireSameOrigin(
   mimeEmail: string,
-  signers: DkimDnsLocation[],
+  signers: DkimDomainSelector[],
   fromAddress: string,
 ) {
   const matchingIndices = findIndicesOfMatchingDomains(signers, fromAddress);
@@ -28,8 +28,13 @@ function requireSameOrigin(
   const [matchingIndex] = matchingIndices;
 
   return [
-    prefixAllButNthSubstring(mimeEmail, "dkim-signature", matchingIndex),
-    [signers[matchingIndex]] as DkimDnsLocation[],
+    prefixAllButNthSubstring(
+      mimeEmail,
+      /^\s*dkim-signature/gim,
+      signers.length,
+      matchingIndex,
+    ),
+    [signers[matchingIndex]] as DkimDomainSelector[],
   ] as const;
 }
 

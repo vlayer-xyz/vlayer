@@ -1,10 +1,13 @@
 export function prefixAllButNthSubstring(
   str: string,
-  substr: string,
-  n: number,
+  pattern: RegExp,
+  substringsCount: number,
+  skippedIndex: number,
 ) {
   let occurrence = 0;
-  return str.replace(new RegExp(substr, "gi"), (match) => {
-    return occurrence++ === n ? match : `X-${match}`;
+  return str.replace(pattern, (match) => {
+    return occurrence++ === skippedIndex || occurrence > substringsCount
+      ? match
+      : `X-${match}`;
   });
 }
