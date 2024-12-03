@@ -1,16 +1,10 @@
-use axum::{http::StatusCode, response::Response};
+use axum::http::StatusCode;
 use serde_json::json;
-use test_helpers::{
-    call_guest_elf, chain_guest_elf, Context, JsonResponseValidator, API_VERSION, GAS_METER_TTL,
-};
+use test_helpers::{call_guest_elf, chain_guest_elf, Context, API_VERSION, GAS_METER_TTL};
 
 mod test_helpers;
 
-use server_utils::{body_to_json, body_to_string};
-
-async fn json_response_validator(response: Response) -> JsonResponseValidator {
-    body_to_json(response.into_body()).await.into()
-}
+use server_utils::{assert_jrpc_err, assert_jrpc_ok, body_to_string};
 
 mod server_tests {
     use super::*;
@@ -39,11 +33,7 @@ mod server_tests {
         let response = app.post("/", &req).await;
 
         assert_eq!(StatusCode::OK, response.status());
-        json_response_validator(response).await.assert_error(json!({
-            "code": -32601,
-            "message": "Method `non_existent_json_rpc_method` not found",
-            "data": null
-        }));
+        assert_jrpc_err(response, -32601, "Method `non_existent_json_rpc_method` not found").await;
     }
 
     mod v_versions {
@@ -67,11 +57,14 @@ mod server_tests {
             let response = app.post("/", &req).await;
 
             assert_eq!(StatusCode::OK, response.status());
-            json_response_validator(response).await.assert_ok(json!({
-                "call_guest_id": "0x0000000000000000000000000000000000000000000000000000000000000000",
-                "chain_guest_id": "0x0100000001000000010000000100000001000000010000000100000001000000",
-                "api_version": API_VERSION
-            }));
+            assert_jrpc_ok(
+                response,
+                json!({
+                    "call_guest_id": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                    "chain_guest_id": "0x0100000001000000010000000100000001000000010000000100000001000000",
+                    "api_version": API_VERSION
+                }),
+            ).await;
         }
     }
 
@@ -115,11 +108,12 @@ mod server_tests {
             let response = app.post("/", &req).await;
 
             assert_eq!(StatusCode::OK, response.status());
-            json_response_validator(response).await.assert_error(json!({
-                 "code": -32602,
-                 "message": "Invalid field: `to` Odd number of digits `I am not a valid address!`",
-                 "data": null,
-            }));
+            assert_jrpc_err(
+                response,
+                -32602,
+                "Invalid field: `to` Odd number of digits `I am not a valid address!`",
+            )
+            .await;
         }
 
         #[tokio::test(flavor = "multi_thread")]
@@ -150,20 +144,24 @@ mod server_tests {
             let response = app.post("/", &req).await;
 
             assert_eq!(StatusCode::OK, response.status());
-            json_response_validator(response).await.assert_ok(json!({
-                "evm_call_result": U256::from(3).encode_hex(),
-                "proof": {
-                    "length": 160,
-                    "seal": {
-                        "verifierSelector": "0xdeafbeef",
-                        "mode": 1,
+            assert_jrpc_ok(
+                response,
+                json!({
+                    "evm_call_result": U256::from(3).encode_hex(),
+                    "proof": {
+                        "length": 160,
+                        "seal": {
+                            "verifierSelector": "0xdeafbeef",
+                            "mode": 1,
+                        },
+                        "callAssumptions": {
+                            "functionSelector": function_selector(&call_data),
+                            "proverContractAddress": contract.address(),
+                        }
                     },
-                    "callAssumptions": {
-                        "functionSelector": function_selector(&call_data),
-                        "proverContractAddress": contract.address(),
-                    }
-                },
-            }));
+                }),
+            )
+            .await;
         }
 
         #[tokio::test(flavor = "multi_thread")]
@@ -279,20 +277,24 @@ mod server_tests {
             let response = app.post("/", &req).await;
 
             assert_eq!(StatusCode::OK, response.status());
-            json_response_validator(response).await.assert_ok(json!({
-                "evm_call_result": Uint8::from(1).encode_hex(),
-                "proof": {
-                    "length": 160,
-                    "seal": {
-                        "verifierSelector": "0xdeafbeef",
-                        "mode": 1,
+            assert_jrpc_ok(
+                response,
+                json!({
+                    "evm_call_result": Uint8::from(1).encode_hex(),
+                    "proof": {
+                        "length": 160,
+                        "seal": {
+                            "verifierSelector": "0xdeafbeef",
+                            "mode": 1,
+                        },
+                        "callAssumptions": {
+                            "functionSelector": function_selector(&call_data),
+                            "proverContractAddress": contract.address(),
+                        }
                     },
-                    "callAssumptions": {
-                        "functionSelector": function_selector(&call_data),
-                        "proverContractAddress": contract.address(),
-                    }
-                },
-            }));
+                }),
+            )
+            .await;
         }
     }
 }

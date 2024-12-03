@@ -1,11 +1,9 @@
-use assert_json_diff::assert_json_include;
 use call_server::{gas_meter::Config as GasMeterConfig, ConfigBuilder, ProofMode};
 use common::GuestElf;
-use derive_more::From;
 use derive_new::new;
 use mock::{Anvil, Client, Server};
 use mock_chain_server::{fake_proof_result, ChainProofServerMock};
-use serde_json::{json, Value};
+use serde_json::json;
 use server_utils::rpc::mock::Server as RpcServerMock;
 
 pub(crate) fn call_guest_elf() -> GuestElf {
@@ -54,37 +52,6 @@ impl Context {
 
         let config = config_builder.build();
         Server::new(config)
-    }
-}
-
-#[derive(From)]
-pub(crate) struct JsonResponseValidator(Value);
-
-impl JsonResponseValidator {
-    fn get_error(&self) -> Option<&Value> {
-        self.0.get("error")
-    }
-
-    fn get_result(&self) -> Option<&Value> {
-        self.0.get("result")
-    }
-
-    pub(crate) fn assert_ok(self, value: Value) {
-        if let Some(error) = self.get_error() {
-            panic!("expected .result but found .error: {error}");
-        }
-        let result = self
-            .get_result()
-            .expect(".result not found in response body");
-        assert_json_include!(expected: value, actual: result);
-    }
-
-    pub(crate) fn assert_error(self, value: Value) {
-        if let Some(result) = self.get_result() {
-            panic!("expected .error but found .result: {result}");
-        }
-        let error = self.get_error().expect(".error not found in response body");
-        assert_json_include!(expected: value, actual: error);
     }
 }
 

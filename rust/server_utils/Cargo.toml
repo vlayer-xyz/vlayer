@@ -6,6 +6,7 @@ edition = "2021"
 [dependencies]
 alloy-primitives = { workspace = true }
 anyhow = { workspace = true }
+assert-json-diff = { workspace = true }
 axum = { workspace = true, features = ["macros"] }
 axum-jrpc = { workspace = true }
 derive-new = { workspace = true }
