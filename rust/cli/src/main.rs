@@ -44,7 +44,7 @@ async fn main() {
     // In order to view logs, run `RUST_LOG=info cargo run`
     let filter = EnvFilter::try_from_env("RUST_LOG").unwrap_or_else(|_| EnvFilter::new("info"));
 
-    if Cli::parse().global_args.log_format == Some(LogFormatArg::JSON) {
+    if Cli::parse().global_args.log_format == Some(LogFormatArg::Json) {
         tracing_subscriber::fmt()
             .json()
             .with_env_filter(filter)

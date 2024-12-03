@@ -10,7 +10,7 @@ use clap::{ArgAction, Parser, ValueEnum};
 pub(crate) enum LogFormatArg {
     #[default]
     Plain,
-    JSON,
+    Json,
 }
 
 #[derive(Clone, Debug, Parser)]

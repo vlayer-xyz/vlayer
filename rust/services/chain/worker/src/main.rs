@@ -21,7 +21,7 @@ const RETRY_PERCENT: f32 = 0.01;
 enum LogFormatArg {
     #[default]
     Plain,
-    JSON,
+    Json,
 }
 
 #[derive(Parser)]
@@ -94,7 +94,7 @@ impl From<Cli> for HostConfig {
 async fn main() -> anyhow::Result<()> {
     dotenv().ok();
     let cli = Cli::parse();
-    init_tracing(cli.log_format == Some(LogFormatArg::JSON));
+    init_tracing(cli.log_format == Some(LogFormatArg::Json));
 
     let config = cli.into();
 

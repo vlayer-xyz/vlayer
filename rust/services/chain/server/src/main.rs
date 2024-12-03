@@ -10,7 +10,7 @@ use dotenvy::dotenv;
 enum LogFormatArg {
     #[default]
     Plain,
-    JSON,
+    Json,
 }
 
 #[derive(Parser)]
@@ -49,7 +49,7 @@ struct Cli {
 async fn main() -> anyhow::Result<()> {
     dotenv().ok();
     let cli = Cli::parse();
-    init_tracing(cli.log_format == Some(LogFormatArg::JSON));
+    init_tracing(cli.log_format == Some(LogFormatArg::Json));
 
     let config = ServerConfig::new(cli.listen_addr);
     let db = ChainDb::mdbx(cli.db_path, Mode::ReadOnly, GUEST_ELF.clone())?;
