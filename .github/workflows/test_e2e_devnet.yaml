@@ -48,7 +48,7 @@ jobs:
         env:
           PROVING_MODE: "dev"
           VLAYER_TMP_DIR: ./artifacts
-        run: bash/e2e-test.sh
+        run: bash/e2e-test-devnet.sh
 
       # Teardown
       - name: Display Logs
