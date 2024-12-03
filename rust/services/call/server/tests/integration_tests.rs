@@ -146,7 +146,7 @@ mod server_tests {
             let response = app.post("/", &req).await;
 
             assert_eq!(StatusCode::OK, response.status());
-            assert_jrpc_ok(response, json!({ "hash": EXPECTED_HASH })).await;
+            assert_jrpc_ok(response, EXPECTED_HASH).await;
         }
 
         #[tokio::test(flavor = "multi_thread")]
@@ -265,7 +265,7 @@ mod server_tests {
             let response = app.post("/", &req).await;
 
             assert_eq!(StatusCode::OK, response.status());
-            assert_jrpc_ok(response, json!({ "hash": EXPECTED_HASH })).await;
+            assert_jrpc_ok(response, EXPECTED_HASH).await;
         }
     }
 
@@ -323,8 +323,8 @@ mod server_tests {
             let hash = get_hash(&app, &contract, &call_data).await;
 
             let request = json!({
-                "method": "v_getProvingReceipt",
-                "params": [{"hash": hash}],
+                "method": "v_getProofReceipt",
+                "params": { "hash": hash },
                 "id": 1,
                 "jsonrpc": "2.0",
             });
@@ -369,8 +369,8 @@ mod server_tests {
             let hash = get_hash(&app, &contract, &call_data).await;
 
             let request = json!({
-                "method": "v_getProvingReceipt",
-                "params": [{"hash": hash}],
+                "method": "v_getProofReceipt",
+                "params": { "hash": hash },
                 "id": 1,
                 "jsonrpc": "2.0",
             });
