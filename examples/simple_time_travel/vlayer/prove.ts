@@ -18,14 +18,6 @@ const startBlock = BigInt(process.env.PROVER_START_BLOCK as string);
 const endBlock = BigInt(process.env.PROVER_END_BLOCK as string);
 const step = BigInt(process.env.PROVER_STEP as string);
 
-console.log({
-  tokenOwner,
-  usdcTokenAddr,
-  startBlock,
-  endBlock,
-  step,
-});
-
 const { prover, verifier } = await deployVlayerContracts({
   proverSpec,
   verifierSpec,
