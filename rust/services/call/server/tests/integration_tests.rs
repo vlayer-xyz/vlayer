@@ -118,7 +118,7 @@ mod server_tests {
         #[tokio::test(flavor = "multi_thread")]
         async fn simple_contract_call_success() {
             const EXPECTED_HASH: &str =
-                "0xf8d32367d8ec243e8e6fcac96dc769ed80287534d51c5d1e817173128f2b6218";
+                "0x126257b312be17f869dacc198adc28424148f5408751f52c50050a01eeef8ebf";
 
             let ctx = Context::default().await;
             let app = ctx.server(call_guest_elf(), chain_guest_elf());
@@ -229,7 +229,7 @@ mod server_tests {
         #[tokio::test(flavor = "multi_thread")]
         async fn web_proof_success() {
             const EXPECTED_HASH: &str =
-                "0x7ab853c0fc5a10565fc34fa8443e0a293584651bedc39c48b9d982db00b02a22";
+                "0x6a7ef4881bdb500aa57be618a4594af28f7d812ac11088b29912442e986a8853";
 
             let ctx = Context::default().await;
             let app = ctx.server(call_guest_elf(), chain_guest_elf());
