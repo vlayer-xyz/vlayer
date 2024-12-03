@@ -103,18 +103,17 @@ mod tests {
             assert_eq!(web.url, "https://api.x.com/1.1/account/settings.json");
         }
 
-        #[ignore]
         #[test]
         fn invalid_server_name() {
             // "wrong_server_name_tls_proof.json" is a real tls_proof, but with tampered server name, which the notary did not sign
             let web_proof = load_web_proof_fixture(
-                "./testdata/swapi_presentation_0.1.0-alpha.7.invalid_cert.json",
+                "./testdata/presentation_invalid_server_name.json",
                 NOTARY_PUB_KEY_PEM_EXAMPLE,
             );
 
             assert!(matches!(
                 verify_and_parse(web_proof).err().unwrap(),
-                WebProofError::Verification(VerificationError::Presentation(err)) if err.to_string() == "presentation error: server identity error caused by: server identity proof error: commitment: certificate opening does not match commitment"
+                WebProofError::Verification(VerificationError::Presentation(err)) if err.to_string() == "presentation error: server identity error caused by: server identity proof error: certificate: invalid server certificate"
             ));
         }
 
