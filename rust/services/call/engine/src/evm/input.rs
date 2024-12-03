@@ -140,7 +140,7 @@ mod test {
 
         #[test]
         fn success() {
-            let ancestor: EthBlockHeader = EthBlockHeader::default();
+            let ancestor = EthBlockHeader::default();
             let input = EvmInput {
                 ancestors: vec![Default::default()],
                 header: Box::new(EthBlockHeader {
@@ -187,7 +187,7 @@ mod test {
 
         #[test]
         fn success() {
-            let ancestor: EthBlockHeader = Default::default();
+            let ancestor = EthBlockHeader::default();
             let input = EvmInput {
                 ancestors: vec![Default::default()],
                 header: Box::new(EthBlockHeader {
