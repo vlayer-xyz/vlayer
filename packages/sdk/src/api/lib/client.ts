@@ -1,7 +1,7 @@
 import { VCallResponse, VlayerClient, BrandedHash } from "types/vlayer";
 import { WebProofProvider } from "types/webProofProvider";
 
-import { prove } from "../prover";
+import { prove, getProofReceipt } from "../prover";
 import { createExtensionWebProofProvider } from "../webProof";
 import {
   type Abi,
@@ -22,11 +22,9 @@ function dropEmptyProofFromArgs(args: unknown) {
   return [];
 }
 
-async function getHash(
-  vcall_response: Promise<VCallResponse>,
-): Promise<[Hex, VCallResponse]> {
+async function getHash(vcall_response: Promise<VCallResponse>): Promise<Hex> {
   const result = await vcall_response;
-  return [result.result.hash, result];
+  return result.result;
 }
 
 export const createVlayerClient = (
@@ -41,10 +39,7 @@ export const createVlayerClient = (
     webProofProvider: createExtensionWebProofProvider(),
   },
 ): VlayerClient => {
-  const resultHashMap = new Map<
-    string,
-    [Promise<VCallResponse>, Abi, string]
-  >();
+  const resultHashMap = new Map<string, [Abi, string]>();
 
   return {
     prove: async ({
@@ -73,12 +68,8 @@ export const createVlayerClient = (
           webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Done);
           return result;
         });
-      const [hash, result_promise] = await getHash(response);
-      resultHashMap.set(hash, [
-        Promise.resolve(result_promise),
-        proverAbi,
-        functionName,
-      ]);
+      const hash = await getHash(response);
+      resultHashMap.set(hash, [proverAbi, functionName]);
       return { hash } as BrandedHash<typeof proverAbi, typeof functionName>;
     },
 
@@ -90,14 +81,17 @@ export const createVlayerClient = (
     }: BrandedHash<T, F>): Promise<
       ContractFunctionReturnType<T, AbiStateMutability, F>
     > => {
+      const {
+        result: { proof, evm_call_result },
+      } = await getProofReceipt(
+        { hash } as BrandedHash<typeof proverAbi, typeof functionName>,
+        url,
+      );
       const savedProvingData = resultHashMap.get(hash);
       if (!savedProvingData) {
         throw new Error("No result found for hash " + hash);
       }
-      const [result_promise, proverAbi, functionName] = savedProvingData;
-      const {
-        result: { proof, evm_call_result },
-      } = await result_promise;
+      const [proverAbi, functionName] = savedProvingData;
 
       const result = dropEmptyProofFromArgs(
         decodeFunctionResult({
