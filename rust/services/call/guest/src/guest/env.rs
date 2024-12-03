@@ -95,8 +95,6 @@ impl VerifiedEnv {
 
 #[cfg(test)]
 mod create_env {
-    use block_header::{EthBlockHeader, Hashable};
-
     use super::*;
 
     #[test]
@@ -109,19 +107,10 @@ mod create_env {
 
     #[test]
     fn success() {
-        let location = ExecutionLocation::new(1, 1);
-        let ancestor = EthBlockHeader::default();
-        let input = EvmInput {
-            ancestors: vec![Default::default()],
-            header: Box::new(EthBlockHeader {
-                number: 1,
-                parent_hash: ancestor.hash_slow(),
-                ..Default::default()
-            }),
-            ..Default::default()
-        };
+        let location = ExecutionLocation::new(0, 1);
+        let input = EvmInput::default();
         let env = create_env(location, input);
 
-        assert_eq!(env.header().number(), 1);
+        assert_eq!(env.header().number(), 0);
     }
 }
