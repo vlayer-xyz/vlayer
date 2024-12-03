@@ -1,4 +1,5 @@
 use alloy_primitives::hex::ToHexExt;
+use assert_json_diff::assert_json_include;
 use axum::{
     body::Body,
     http::{header::CONTENT_TYPE, Request, Response},
@@ -34,4 +35,26 @@ pub async fn post<T: Serialize>(app: Router, url: &str, body: &T) -> Response<Bo
         .body(Body::from(to_string(body).unwrap()))
         .unwrap();
     app.oneshot(request).await.unwrap()
+}
+
+pub async fn assert_jrpc_ok(response: axum::response::Response, expected: Value) {
+    let response_json = body_to_json(response.into_body()).await;
+    if let Some(error) = response_json.get("error") {
+        panic!("expected .result but found .error: {error}");
+    }
+    let result = response_json
+        .get("result")
+        .expect(".result not found in response body");
+    assert_json_include!(expected: expected, actual: result);
+}
+
+pub async fn assert_jrpc_err(response: axum::response::Response, code: i32, msg: &str) {
+    let response_json = body_to_json(response.into_body()).await;
+    if let Some(result) = response_json.get("result") {
+        panic!("expected .error but found .result: {result}");
+    }
+    let error = response_json
+        .get("error")
+        .expect(".error not found in response body");
+    assert_json_include!(expected: serde_json::json!({"code": code, "message": msg}), actual: error);
 }
