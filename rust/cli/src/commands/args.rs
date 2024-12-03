@@ -7,7 +7,7 @@ use chain_guest_wrapper::GUEST_ELF as CHAIN_GUEST_ELF;
 use clap::{ArgAction, Parser, ValueEnum};
 
 #[derive(Clone, Debug, ValueEnum, Default, PartialEq, Eq)]
-pub(crate) enum LogFormatArg {
+pub(crate) enum LogFormat {
     #[default]
     Plain,
     Json,
@@ -23,7 +23,7 @@ pub(crate) struct GlobalArgs {
         env = "VLAYER_LOG_FORMAT",
         default_value = "plain"
     )]
-    pub(crate) log_format: Option<LogFormatArg>,
+    pub(crate) log_format: Option<LogFormat>,
 }
 
 #[derive(Clone, Debug, Parser)]

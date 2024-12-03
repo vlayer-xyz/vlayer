@@ -18,7 +18,7 @@ const MIN_RETRIES_PER_SECOND: u32 = 3;
 const RETRY_PERCENT: f32 = 0.01;
 
 #[derive(Clone, Debug, ValueEnum, Default, PartialEq, Eq)]
-enum LogFormatArg {
+enum LogFormat {
     #[default]
     Plain,
     Json,
@@ -73,7 +73,7 @@ struct Cli {
         env = "VLAYER_LOG_FORMAT",
         default_value = "plain"
     )]
-    log_format: Option<LogFormatArg>,
+    log_format: Option<LogFormat>,
 }
 
 impl From<Cli> for HostConfig {
@@ -94,7 +94,7 @@ impl From<Cli> for HostConfig {
 async fn main() -> anyhow::Result<()> {
     dotenv().ok();
     let cli = Cli::parse();
-    init_tracing(cli.log_format == Some(LogFormatArg::Json));
+    init_tracing(cli.log_format == Some(LogFormat::Json));
 
     let config = cli.into();
 

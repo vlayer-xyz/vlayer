@@ -1,6 +1,6 @@
 use clap::{Parser, Subcommand};
 use commands::{
-    args::{GlobalArgs, InitArgs, LogFormatArg, ServeArgs},
+    args::{GlobalArgs, InitArgs, LogFormat, ServeArgs},
     init::run_init,
     serve::run_serve,
     version::Version,
@@ -44,7 +44,7 @@ async fn main() {
     // In order to view logs, run `RUST_LOG=info cargo run`
     let filter = EnvFilter::try_from_env("RUST_LOG").unwrap_or_else(|_| EnvFilter::new("info"));
 
-    if Cli::parse().global_args.log_format == Some(LogFormatArg::Json) {
+    if Cli::parse().global_args.log_format == Some(LogFormat::Json) {
         tracing_subscriber::fmt()
             .json()
             .with_env_filter(filter)

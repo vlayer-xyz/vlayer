@@ -7,7 +7,7 @@ use clap::{Parser, ValueEnum};
 use dotenvy::dotenv;
 
 #[derive(Clone, Debug, ValueEnum, Default, PartialEq, Eq)]
-enum LogFormatArg {
+enum LogFormat {
     #[default]
     Plain,
     Json,
@@ -42,14 +42,14 @@ struct Cli {
         env = "VLAYER_LOG_FORMAT",
         default_value = "plain"
     )]
-    log_format: Option<LogFormatArg>,
+    log_format: Option<LogFormat>,
 }
 
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     dotenv().ok();
     let cli = Cli::parse();
-    init_tracing(cli.log_format == Some(LogFormatArg::Json));
+    init_tracing(cli.log_format == Some(LogFormat::Json));
 
     let config = ServerConfig::new(cli.listen_addr);
     let db = ChainDb::mdbx(cli.db_path, Mode::ReadOnly, GUEST_ELF.clone())?;
