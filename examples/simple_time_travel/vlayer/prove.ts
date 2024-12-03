@@ -1,4 +1,3 @@
-import { optimismSepolia } from "viem/chains";
 import { createVlayerClient } from "@vlayer/sdk";
 import proverSpec from "../out/AverageBalance.sol/AverageBalance";
 import verifierSpec from "../out/AverageBalanceVerifier.sol/AverageBalanceVerifier";
@@ -8,15 +7,16 @@ import {
   getConfig,
   waitForTransactionReceipt,
 } from "@vlayer/sdk/config";
-
-const tokenOwner = "0xE6b08c02Dbf3a0a4D3763136285B85A9B492E391"; // Owner of the USDC token at OP Sepolia
-const usdcTokenAddr = "0x5fd84259d66Cd46123540766Be93DFE6D43130D7"; // Test USDC at OP Sepolia
-const startBlock = 17915294n;
-const endBlock = 17985294n;
-const step = 9000n;
+import { type Address } from "viem";
 
 const config = getConfig();
 const { ethClient, account, proverUrl } = await createContext(config);
+
+const tokenOwner = process.env.PROVER_ERC20_HOLDER_ADDR as Address;
+const usdcTokenAddr = process.env.PROVER_ERC20_CONTRACT_ADDR as Address;
+const startBlock = BigInt(process.env.PROVER_START_BLOCK as string);
+const endBlock = BigInt(process.env.PROVER_END_BLOCK as string);
+const step = BigInt(process.env.PROVER_STEP as string);
 
 const { prover, verifier } = await deployVlayerContracts({
   proverSpec,
@@ -34,7 +34,7 @@ const provingHash = await vlayer.prove({
   proverAbi: proverSpec.abi,
   functionName: "averageBalanceOf",
   args: [tokenOwner],
-  chainId: optimismSepolia.id,
+  chainId: ethClient.chain.id,
 });
 
 console.log("Waiting for proving result: ");
