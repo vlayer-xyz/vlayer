@@ -15,7 +15,7 @@ source ${VLAYER_HOME}/bash/run-services.sh
 echo Setting up SDK 
 cd ${VLAYER_HOME}/packages/sdk && bun install --frozen-lockfile
 
-EXAMPLES_REQUIRING_ALCHEMY=("simple_time_travel" "simple_teleport")
+EXAMPLES_REQUIRING_QUICKNODE=("simple_teleport")
 EXAMPLES_REQUIRING_PRIV_KEY=("simple_time_travel")
 # Only run limited selection of examples in prod mode,
 # because they use real Bonsai resources.
@@ -34,8 +34,8 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
     continue
   fi
 
-  if [[ "${EXAMPLES_REQUIRING_ALCHEMY[@]}" =~ "${example_name}" ]] && [[ -z "${ALCHEMY_API_KEY:-}" ]]; then
-    echo "Skipping: ${example} (configure ALCHEMY_API_KEY to run it)"
+  if [[ "${EXAMPLES_REQUIRING_QUICKNODE[@]}" =~ "${example_name}" ]] && [[ -z "${QUICKNODE_API_KEY:-}" ]]; then
+    echo "Skipping: ${example} (configure QUICKNODE_API_KEY to run it)"
     continue
   fi
 
@@ -52,7 +52,14 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
 
   cd vlayer
   bun install --frozen-lockfile
-  bun run prove.ts
+
+  if [[ "${example_name}" == "simple_time_travel" ]]; then
+    VLAYER_ENV=dev bun run loadFixtures.ts
+    VLAYER_ENV=dev bun run prove.ts
+  else
+    bun run prove.ts
+  fi
+
   echo '::endgroup::'
 done
 

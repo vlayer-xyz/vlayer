@@ -8,6 +8,6 @@ services:
   vlayer:
     image: ghcr.io/vlayer-xyz/vlayer:latest
     pull_policy: always
-    command: "serve --proof fake --host 0.0.0.0 --rpc-url 31337:http://anvil:8545 --rpc-url 1:https://eth-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY} --rpc-url 31337:http://anvil:8545 --rpc-url 8453:https://base-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY} --rpc-url 10:https://opt-mainnet.g.alchemy.com/v2/${ALCHEMY_API_KEY}"
+    command: "serve --proof fake --host 0.0.0.0 --rpc-url 31337:http://anvil:8545 --rpc-url 1:https://thrumming-burned-butterfly.quiknode.pro/${QUICKNODE_API_KEY} --rpc-url 31337:http://anvil:8545 --rpc-url 8453:https://thrumming-burned-butterfly.base-mainnet.quiknode.pro/${QUICKNODE_API_KEY} --rpc-url 10:https://thrumming-burned-butterfly.optimism.quiknode.pro/${QUICKNODE_API_KEY}"
     ports:
       - "3000:3000"

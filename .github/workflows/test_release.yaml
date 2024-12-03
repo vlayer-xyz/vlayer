@@ -24,7 +24,7 @@ jobs:
           submodules: recursive
       - uses: hoverkraft-tech/compose-action@v2.0.2
         env:
-          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
+          QUICKNODE_API_KEY: ${{ secrets.QUICKNODE_API_KEY }}
         with:
           compose-file: docker/web-proof/docker-compose-test-release.yaml
       - name: Test release
@@ -44,7 +44,7 @@ jobs:
         env:
           VLAYER_ENV: testnet
           EXAMPLES_TEST_PRIVATE_KEY: ${{ secrets.EXAMPLES_TEST_PRIVATE_KEY }}
-          JSON_RPC_URL: "https://opt-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}"
+          JSON_RPC_URL: "https://dry-alpha-tab.optimism-sepolia.quiknode.pro/${{ secrets.QUICKNODE_API_KEY }}"
         run: bash/test-release.sh
   test-release-js-sdk:
     name: Test JS SDK release
