@@ -26,10 +26,28 @@ const whaleBadgeNFTAddress = await waitForContractDeploy({
   hash: deployWhaleBadgeHash,
 });
 
+const tokensToCheck = [];
+
+try {
+  const parsedTokens = JSON.parse(process.env.ERC20_TOKENS_TO_CHECK);
+  tokensToCheck.push(
+    ...parsedTokens.map(
+      (token: { address: string; chainId: number; blockNumber: string }) => [
+        token.address,
+        token.chainId,
+        BigInt(token.blockNumber),
+      ],
+    ),
+  );
+} catch (error) {
+  console.error("Failed to parse TOKENS_CONFIG:", error);
+  process.exit(1);
+}
+
 const { prover, verifier } = await deployVlayerContracts({
   proverSpec,
   verifierSpec,
-  proverArgs: [],
+  proverArgs: [tokensToCheck],
   verifierArgs: [whaleBadgeNFTAddress],
 });
 
