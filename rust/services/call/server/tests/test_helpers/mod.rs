@@ -8,27 +8,27 @@ use mock_chain_server::{fake_proof_result, ChainProofServerMock};
 use serde_json::{json, Value};
 use server_utils::rpc::mock::Server as RpcServerMock;
 
-pub fn call_guest_elf() -> GuestElf {
+pub(crate) fn call_guest_elf() -> GuestElf {
     call_guest_wrapper::GUEST_ELF.clone()
 }
 
-pub fn chain_guest_elf() -> GuestElf {
+pub(crate) fn chain_guest_elf() -> GuestElf {
     chain_guest_wrapper::GUEST_ELF.clone()
 }
 
-pub const API_VERSION: &str = "1.2.3";
-pub const GAS_METER_TTL: u64 = 3600;
+pub(crate) const API_VERSION: &str = "1.2.3";
+pub(crate) const GAS_METER_TTL: u64 = 3600;
 
 #[derive(new)]
-pub struct Context {
-    pub client: Client,
-    pub anvil: Anvil,
-    pub chain_proof_server: ChainProofServerMock,
-    pub gas_meter_server: Option<RpcServerMock>,
+pub(crate) struct Context {
+    pub(crate) client: Client,
+    pub(crate) anvil: Anvil,
+    pub(crate) chain_proof_server: ChainProofServerMock,
+    pub(crate) gas_meter_server: Option<RpcServerMock>,
 }
 
 impl Context {
-    pub async fn default() -> Self {
+    pub(crate) async fn default() -> Self {
         let anvil = Anvil::start();
         let client = anvil.setup_client();
         let block_header = client.get_latest_block_header().await;
@@ -37,7 +37,7 @@ impl Context {
         Self::new(client, anvil, chain_proof_server, None)
     }
 
-    pub fn server(&self, call_guest_elf: GuestElf, chain_guest_elf: GuestElf) -> Server {
+    pub(crate) fn server(&self, call_guest_elf: GuestElf, chain_guest_elf: GuestElf) -> Server {
         let mut config_builder = ConfigBuilder::new(
             self.chain_proof_server.url(),
             call_guest_elf,
@@ -58,7 +58,7 @@ impl Context {
 }
 
 #[derive(From)]
-pub struct JsonResponseValidator(Value);
+pub(crate) struct JsonResponseValidator(Value);
 
 impl JsonResponseValidator {
     fn get_error(&self) -> Option<&Value> {
@@ -69,7 +69,7 @@ impl JsonResponseValidator {
         self.0.get("result")
     }
 
-    pub fn assert_ok(self, value: Value) {
+    pub(crate) fn assert_ok(self, value: Value) {
         if let Some(error) = self.get_error() {
             panic!("expected .result but found .error: {error}");
         }
@@ -79,7 +79,7 @@ impl JsonResponseValidator {
         assert_json_include!(expected: value, actual: result);
     }
 
-    pub fn assert_error(self, value: Value) {
+    pub(crate) fn assert_error(self, value: Value) {
         if let Some(result) = self.get_result() {
             panic!("expected .error but found .result: {result}");
         }
@@ -88,7 +88,7 @@ impl JsonResponseValidator {
     }
 }
 
-pub mod mock {
+pub(crate) mod mock {
     use std::{sync::Arc, time::Duration};
 
     use axum::{body::Body, http::Response, Router};
@@ -114,27 +114,27 @@ pub mod mock {
 
     type Contract = ExampleProver<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>>;
 
-    pub struct Server(Router);
+    pub(crate) struct Server(Router);
 
     impl Server {
-        pub fn new(config: Config) -> Self {
+        pub(crate) fn new(config: Config) -> Self {
             Self(server(config))
         }
 
-        pub async fn post(&self, url: &str, body: impl Serialize) -> Response<Body> {
+        pub(crate) async fn post(&self, url: &str, body: impl Serialize) -> Response<Body> {
             post(self.0.clone(), url, &body).await
         }
     }
 
     #[derive(Deref)]
-    pub struct Anvil(AnvilInstance);
+    pub(crate) struct Anvil(AnvilInstance);
 
     impl Anvil {
-        pub fn start() -> Self {
+        pub(crate) fn start() -> Self {
             Self(utils::Anvil::new().chain_id(11_155_111_u64).spawn())
         }
 
-        pub fn setup_client(&self) -> Client {
+        pub(crate) fn setup_client(&self) -> Client {
             let wallet: LocalWallet = self.keys()[0].clone().into();
             let provider = Provider::<Http>::try_from(self.endpoint())
                 .unwrap()
@@ -144,14 +144,14 @@ pub mod mock {
     }
 
     #[derive(Deref)]
-    pub struct Client(Arc<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>>);
+    pub(crate) struct Client(Arc<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>>);
 
     impl Client {
-        pub fn new(provider: Provider<Http>, wallet: Wallet<ecdsa::SigningKey>) -> Self {
+        pub(crate) fn new(provider: Provider<Http>, wallet: Wallet<ecdsa::SigningKey>) -> Self {
             Client(Arc::new(SignerMiddleware::new(provider, wallet)))
         }
 
-        pub async fn deploy_contract(self) -> Contract {
+        pub(crate) async fn deploy_contract(self) -> Contract {
             ExampleProver::deploy(self.0, ())
                 .unwrap()
                 .send()
@@ -159,7 +159,7 @@ pub mod mock {
                 .unwrap()
         }
 
-        pub async fn get_latest_block_header(&self) -> Box<dyn EvmBlockHeader> {
+        pub(crate) async fn get_latest_block_header(&self) -> Box<dyn EvmBlockHeader> {
             let latest_block = self
                 .as_ref()
                 .get_block(BlockTag::Latest)
