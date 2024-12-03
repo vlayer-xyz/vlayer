@@ -137,11 +137,10 @@ mod tests {
         ));
     }
 
-    #[ignore]
     #[test]
-    fn fail_verification_invalid_merkl_prof() {
+    fn fail_verification_invalid_merkle_proof() {
         let invalid_proof = load_web_proof_fixture(
-            "./testdata/swapi_presentation_0.1.0-alpha.7.invalid_merkle_proof.json",
+            "testdata/presentation_invalid_merkle_proof.json",
             NOTARY_PUB_KEY_PEM_EXAMPLE,
         );
         assert!(matches!(
