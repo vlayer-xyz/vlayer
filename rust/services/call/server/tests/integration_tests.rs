@@ -1,10 +1,16 @@
-use axum::http::StatusCode;
+use axum::{http::StatusCode, response::Response};
 use serde_json::json;
-use test_helpers::{call_guest_elf, chain_guest_elf, Context, API_VERSION, GAS_METER_TTL};
+use test_helpers::{
+    call_guest_elf, chain_guest_elf, Context, JsonResponseValidator, API_VERSION, GAS_METER_TTL,
+};
 
 mod test_helpers;
 
 use server_utils::{body_to_json, body_to_string};
+
+async fn json_response_validator(response: Response) -> JsonResponseValidator {
+    body_to_json(response.into_body()).await.into()
+}
 
 mod server_tests {
     use super::*;
@@ -33,22 +39,14 @@ mod server_tests {
         let response = app.post("/", &req).await;
 
         assert_eq!(StatusCode::OK, response.status());
-        assert_eq!(
-            json!({
-                "jsonrpc": "2.0",
-                "id": 1,
-                "error": {
-                    "code": -32601,
-                    "message": "Method `non_existent_json_rpc_method` not found",
-                    "data": null
-                }
-            }),
-            body_to_json(response.into_body()).await
-        );
+        json_response_validator(response).await.assert_error(json!({
+            "code": -32601,
+            "message": "Method `non_existent_json_rpc_method` not found",
+            "data": null
+        }));
     }
 
     mod v_versions {
-        use assert_json_diff::assert_json_include;
         use common::GuestElf;
 
         use super::*;
@@ -69,23 +67,15 @@ mod server_tests {
             let response = app.post("/", &req).await;
 
             assert_eq!(StatusCode::OK, response.status());
-            assert_json_include!(
-                expected: json!({
-                    "jsonrpc": "2.0",
-                    "id": 1,
-                    "result": {
-                        "call_guest_id": "0x0000000000000000000000000000000000000000000000000000000000000000",
-                        "chain_guest_id": "0x0100000001000000010000000100000001000000010000000100000001000000",
-                        "api_version": API_VERSION
-                    }
-                }),
-                actual: body_to_json(response.into_body()).await,
-            );
+            json_response_validator(response).await.assert_ok(json!({
+                "call_guest_id": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                "chain_guest_id": "0x0100000001000000010000000100000001000000010000000100000001000000",
+                "api_version": API_VERSION
+            }));
         }
     }
 
     mod v_call {
-        use assert_json_diff::assert_json_include;
         use ethers::{
             abi::AbiEncode,
             types::{Uint8, U256},
@@ -125,18 +115,11 @@ mod server_tests {
             let response = app.post("/", &req).await;
 
             assert_eq!(StatusCode::OK, response.status());
-            assert_eq!(
-                json!({
-                    "jsonrpc": "2.0",
-                    "id": 1,
-                    "error": {
-                        "code": -32602,
-                        "message": "Invalid field: `to` Odd number of digits `I am not a valid address!`",
-                        "data": null,
-                    }
-                }),
-                body_to_json(response.into_body()).await
-            );
+            json_response_validator(response).await.assert_error(json!({
+                 "code": -32602,
+                 "message": "Invalid field: `to` Odd number of digits `I am not a valid address!`",
+                 "data": null,
+            }));
         }
 
         #[tokio::test(flavor = "multi_thread")]
@@ -167,27 +150,20 @@ mod server_tests {
             let response = app.post("/", &req).await;
 
             assert_eq!(StatusCode::OK, response.status());
-            assert_json_include!(
-                expected: json!({
-                    "jsonrpc": "2.0",
-                    "id": 1,
-                    "result": {
-                        "evm_call_result": U256::from(3).encode_hex(),
-                        "proof": {
-                            "length": 160,
-                            "seal": {
-                                "verifierSelector": "0xdeafbeef",
-                                "mode": 1,
-                            },
-                            "callAssumptions": {
-                                "functionSelector": function_selector(&call_data),
-                                "proverContractAddress": contract.address(),
-                            }
-                        },
+            json_response_validator(response).await.assert_ok(json!({
+                "evm_call_result": U256::from(3).encode_hex(),
+                "proof": {
+                    "length": 160,
+                    "seal": {
+                        "verifierSelector": "0xdeafbeef",
+                        "mode": 1,
+                    },
+                    "callAssumptions": {
+                        "functionSelector": function_selector(&call_data),
+                        "proverContractAddress": contract.address(),
                     }
-                }),
-                actual: body_to_json(response.into_body()).await,
-            );
+                },
+            }));
         }
 
         #[tokio::test(flavor = "multi_thread")]
@@ -303,27 +279,20 @@ mod server_tests {
             let response = app.post("/", &req).await;
 
             assert_eq!(StatusCode::OK, response.status());
-            assert_json_include!(
-                expected: json!({
-                        "jsonrpc": "2.0",
-                        "id": 1,
-                        "result": {
-                            "evm_call_result": Uint8::from(1).encode_hex(),
-                            "proof": {
-                                "length": 160,
-                                "seal": {
-                                    "verifierSelector": "0xdeafbeef",
-                                    "mode": 1,
-                                },
-                                "callAssumptions": {
-                                    "functionSelector": function_selector(&call_data),
-                                    "proverContractAddress": contract.address(),
-                                }
-                            },
-                        }
-                    }),
-                actual: body_to_json(response.into_body()).await,
-            );
+            json_response_validator(response).await.assert_ok(json!({
+                "evm_call_result": Uint8::from(1).encode_hex(),
+                "proof": {
+                    "length": 160,
+                    "seal": {
+                        "verifierSelector": "0xdeafbeef",
+                        "mode": 1,
+                    },
+                    "callAssumptions": {
+                        "functionSelector": function_selector(&call_data),
+                        "proverContractAddress": contract.address(),
+                    }
+                },
+            }));
         }
     }
 }
