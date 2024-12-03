@@ -3,25 +3,57 @@ services:
     image: jwnmulder/websockify
     platform: linux/amd64
     ports:
-      - "55688:80"
-    command: "80 swapi.dev:443"
+      - "55688:80" 
+    command: "80 lotr-api.online:3011"
+    extra_hosts:
+      - "lotr-api.online:178.18.0.3"
+      
   notary-server:
     image: ghcr.io/tlsnotary/tlsn/notary-server:v0.1.0-alpha.7
     ports:
       - "7047:7047"
     volumes:
       - ./notary-config:/root/.notary-server/config
-  anvil:
-    build:
-      dockerfile: ../anvil/Dockerfile
-    platform: linux/amd64
-    ports:
-      - "8545:8545"
-  vlayer:
+  json-server:
     build:
       context: ../../
-      dockerfile: ./docker/vlayer/Dockerfile.nightly
-    command: "serve --proof fake --host 0.0.0.0 --rpc-url 31337:http://anvil:8545"
+      dockerfile: ./docker/json-server/Dockerfile
     ports:
-      - "3000:3000"
+      - "3011:3011"
+    expose: 
+      - "3011" 
+
+# hard to say why this is not working below 
+# services:
+#   websockify:
+#     image: jwnmulder/websockify
+#     platform: linux/amd64
+#     ports:
+#       - "55688:55688" 
+#     command: "55688 lotr-api.online:3011"
+#     network_mode: "host"
+#   notary-server:
+#     image: ghcr.io/tlsnotary/tlsn/notary-server:v0.1.0-alpha.7
+#     volumes:
+#       - ./notary-config:/root/.notary-server/config
+#     network_mode: "host"
+#   json-server:
+#     build:
+#       context: ../../
+#       dockerfile: ./docker/json-server/Dockerfile
+#     network_mode: "host"
+
+  # anvil:
+  #   build:
+  #     dockerfile: ../anvil/Dockerfile
+  #   platform: linux/amd64
+  #   ports:
+  #     - "8545:8545"
+  # vlayer:
+  #   build:
+  #     context: ../../
+  #     dockerfile: ./docker/vlayer/Dockerfile.nightly
+  #   command: "serve --proof fake --host 0.0.0.0 --rpc-url 31337:http://anvil:8545"
+  #   ports:
+  #     - "3000:3000"
 

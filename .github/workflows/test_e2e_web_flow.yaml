@@ -51,6 +51,7 @@ jobs:
           services: |
             websockify
             notary-server
+            json-server
       - name: Run playwright tests
         run: bash/playwright-test.sh
       - uses: actions/upload-artifact@v4
