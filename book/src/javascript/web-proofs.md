@@ -49,7 +49,7 @@ Because of these defaults, the provider can be initialized without any additiona
 const webProofProvider = createExtensionWebProofProvider();
 ```
 
-TLSNotary team hosts team hosts a [public notary server](https://docs.tlsnotary.org/developers/notary_server.html#pse-development-notary-server) for development, experimentation, and demonstration purposes. Notary server can be also self-hosted using [Docker](https://docs.tlsnotary.org/developers/notary_server.html#using-docker)
+TLSNotary team hosts a [public notary server](https://docs.tlsnotary.org/developers/notary_server.html#pse-development-notary-server) for development, experimentation, and demonstration purposes. Notary server can be also self-hosted using [Docker](https://docs.tlsnotary.org/developers/notary_server.html#using-docker)
 
 In the future, vlayer is planning to provide additional Web Proof provider implementations, which can be e.g. ran server-side and don't require vlayer browser extension for the purpose of Web Proof generation.
 
