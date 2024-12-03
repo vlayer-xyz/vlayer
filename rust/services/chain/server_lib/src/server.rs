@@ -22,16 +22,18 @@ async fn handle_jrpc(
 
 pub fn server(chain_db: ChainDb) -> axum::Router {
     let chain_db = Arc::new(RwLock::new(chain_db));
-    let chain_db_ = chain_db.clone();
     let mut jrpc_router = server_utils::Router::default();
-    jrpc_router.add_handler("v_chain", move |params| -> Pin<Box<dyn Future<Output = _> + Send>> {
+    jrpc_router.add_handler("v_chain", {
         let chain_db = chain_db.clone();
-        Box::pin(v_chain(chain_db, params))
+        move |params| -> Pin<Box<dyn Future<Output = _> + Send>> {
+            let chain_db = chain_db.clone();
+            Box::pin(v_chain(chain_db, params))
+        }
     });
     jrpc_router.add_handler(
         "v_sync_status",
         move |params| -> Pin<Box<dyn Future<Output = _> + Send>> {
-            let chain_db = chain_db_.clone();
+            let chain_db = chain_db.clone();
             Box::pin(v_sync_status(chain_db, params))
         },
     );
