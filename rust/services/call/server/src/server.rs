@@ -30,16 +30,18 @@ async fn handle_jrpc(
 
 pub fn server(cfg: Config) -> Router {
     let config = Arc::new(cfg);
-    let config_ = config.clone();
     let mut jrpc_router = server_utils::Router::default();
-    jrpc_router.add_handler("v_call", move |params| -> Pin<Box<dyn Future<Output = _> + Send>> {
+    jrpc_router.add_handler("v_call", {
         let config = config.clone();
-        Box::pin(async move { v_call(config, params).await.map(|x| x.to_json()) })
+        move |params| -> Pin<Box<dyn Future<Output = _> + Send>> {
+            let config = config.clone();
+            Box::pin(async move { v_call(config, params).await.map(|x| x.to_json()) })
+        }
     });
     jrpc_router.add_handler(
         "v_versions",
         move |params| -> Pin<Box<dyn Future<Output = _> + Send>> {
-            let config = config_.clone();
+            let config = config.clone();
             Box::pin(v_versions(config, params))
         },
     );
