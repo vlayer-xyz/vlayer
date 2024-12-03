@@ -61,11 +61,11 @@ pub struct PresentationJson {
 #[serde(deny_unknown_fields)]
 pub struct PresentationJsonMeta {
     #[serde(rename = "notaryUrl")]
-    pub(crate) notary_url: Option<String>,
+    pub notary_url: Option<String>,
     #[serde(rename = "websocketProxyUrl")]
-    pub(crate) websocket_proxy_url: Option<String>,
+    pub websocket_proxy_url: Option<String>,
     #[serde(rename = "pluginUrl")]
-    pub(crate) plugin_url: Option<String>,
+    pub plugin_url: Option<String>,
 }
 
 impl From<PresentationJson> for Presentation {
@@ -125,16 +125,15 @@ mod tests {
         assert_eq!(proof.notary_pub_key, deserialized.notary_pub_key);
     }
 
-    #[ignore]
     #[test]
     fn fail_verification_session_error() {
         let invalid_proof = load_web_proof_fixture(
-            "./testdata/swapi_presentation_0.1.0-alpha.7.invalid_signature.json",
+            "testdata/presentation_invalid_signature.json",
             NOTARY_PUB_KEY_PEM_EXAMPLE,
         );
         assert!(matches!(
             invalid_proof.verify(),
-            Err(VerificationError::Presentation(err)) if err.to_string() == "presentation error: attestation error caused by: attestation proof error: signature error caused by: signature verification failed: secp256k1 signature verification failed"
+            Err(VerificationError::Presentation(err)) if err.to_string() == "presentation error: attestation error caused by: attestation proof error: signature error caused by: signature verification failed: invalid secp256k1 signature"
         ));
     }
 
