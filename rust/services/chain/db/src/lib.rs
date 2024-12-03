@@ -8,10 +8,12 @@ use std::{
 use alloy_primitives::{keccak256, BlockNumber, ChainId, B256};
 use alloy_rlp::{Decodable, RlpDecodable, RlpEncodable};
 use bytes::Bytes;
-use chain_common::ChainProofReceipt;
+use chain_common::{ChainProofReceipt, RpcChainProof};
 use chain_trie::{verify_chain_trie, UnverifiedChainTrie};
 use derive_more::Debug;
+use derive_new::new;
 use key_value::{Database, InMemoryDatabase, Mdbx, ReadTx, ReadWriteTx, WriteTx};
+use mpt::reorder_with_root_as_first_using_keccak;
 use proof_builder::{mpt_from_proofs, MerkleProofBuilder, ProofResult};
 
 mod chain_trie;
@@ -119,6 +121,22 @@ pub enum Mode {
     ReadWrite,
 }
 
+#[derive(Debug, Clone, PartialEq, Eq, new)]
+pub struct ChainProof {
+    merkle_proof: MerkleProof,
+    zk_proof: Bytes,
+    root_hash: B256,
+}
+
+impl From<ChainProof> for RpcChainProof {
+    fn from(proof: ChainProof) -> Self {
+        let nodes = proof.merkle_proof.into_iter().map(|db_node| db_node.rlp);
+        let nodes = reorder_with_root_as_first_using_keccak(nodes, proof.root_hash);
+        let proof = proof.zk_proof;
+        RpcChainProof { proof, nodes }
+    }
+}
+
 pub struct ChainDb {
     db: DB,
     mode: Mode,
@@ -179,7 +197,7 @@ impl ChainDb {
         &self,
         chain_id: ChainId,
         block_numbers: impl IntoIterator<Item = BlockNumber>,
-    ) -> ChainDbResult<(MerkleProof, Bytes)> {
+    ) -> ChainDbResult<ChainProof> {
         self.begin_ro()?.get_chain_proof(chain_id, block_numbers)
     }
 
@@ -267,7 +285,7 @@ impl<TX: ReadTx + ?Sized> ChainDbTx<TX> {
         &self,
         chain_id: ChainId,
         block_numbers: impl IntoIterator<Item = BlockNumber>,
-    ) -> ChainDbResult<(MerkleProof, Bytes)> {
+    ) -> ChainDbResult<ChainProof> {
         let chain_info = self
             .get_chain_info(chain_id)?
             .ok_or(ChainDbError::ChainNotFound(chain_id))?;
@@ -287,7 +305,7 @@ impl<TX: ReadTx + ?Sized> ChainDbTx<TX> {
             nodes.extend(merkle_proof.into_iter())
         }
         let merkle_proof = MerkleProof(nodes.into_iter().collect());
-        Ok((merkle_proof, zk_proof))
+        Ok(ChainProof::new(merkle_proof, zk_proof, root_hash))
     }
 }
 

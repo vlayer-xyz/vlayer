@@ -87,6 +87,7 @@ where
     #[instrument(skip(self))]
     pub async fn poll_commit(&mut self) -> Result<(), HostError> {
         let chain_update = self.poll().await?;
+        info!("Chain update: {chain_update:?}");
         self.db.update_chain(self.chain_id, chain_update)?;
         Ok(())
     }
