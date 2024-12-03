@@ -45,7 +45,6 @@ impl Default for EvmInput {
     }
 }
 
-
 impl EvmInput {
     pub fn block_hashes(&self) -> HashMap<u64, B256> {
         self.ancestors
@@ -132,7 +131,7 @@ impl FromIterator<(ExecutionLocation, EvmInput)> for MultiEvmInput {
 #[cfg(test)]
 mod test {
     use block_header::{EthBlockHeader, Hashable};
-    use mpt::{MerkleTrie, EMPTY_ROOT_HASH};
+    use mpt::EMPTY_ROOT_HASH;
 
     use super::EvmInput;
 
