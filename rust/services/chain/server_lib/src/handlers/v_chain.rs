@@ -31,8 +31,7 @@ pub async fn v_chain(
         return Err(AppError::NoBlockNumbers);
     };
 
-    let zk_proof = chain_db.read().get_zk_proof(chain_id)?;
-    let merkle_proof = chain_db.read().get_chain_proof(chain_id, block_numbers)?;
+    let (merkle_proof, zk_proof) = chain_db.read().get_chain_proof(chain_id, block_numbers)?;
     let nodes = merkle_proof
         .into_iter()
         .map(|db_node| db_node.rlp)
