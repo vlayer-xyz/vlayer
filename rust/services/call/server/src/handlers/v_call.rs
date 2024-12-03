@@ -7,13 +7,12 @@ use serde::{Deserialize, Serialize};
 use tracing::info;
 use types::{Call, CallContext, CallHash, CallHashData};
 
+use super::SharedState;
 use crate::{
     config::Config as ServerConfig,
     error::AppError,
     gas_meter::{Client, ComputationStage, Config as GasMeterConfig},
 };
-
-use super::SharedState;
 
 pub mod types;
 
