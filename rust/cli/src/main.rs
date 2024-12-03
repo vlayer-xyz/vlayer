@@ -1,6 +1,6 @@
 use clap::{Parser, Subcommand};
 use commands::{
-    args::{InitArgs, ServeArgs},
+    args::{GlobalArgs, InitArgs, LogFormatArg, ServeArgs},
     init::run_init,
     serve::run_serve,
     version::Version,
@@ -27,6 +27,8 @@ mod test_utils;
 struct Cli {
     #[command(subcommand)]
     command: Commands,
+    #[clap(flatten)]
+    global_args: GlobalArgs,
 }
 
 #[derive(Subcommand, Debug)]
@@ -39,10 +41,17 @@ enum Commands {
 
 #[tokio::main]
 async fn main() {
+    // In order to view logs, run `RUST_LOG=info cargo run`
     let filter = EnvFilter::try_from_env("RUST_LOG").unwrap_or_else(|_| EnvFilter::new("info"));
 
-    // In order to view logs, run `RUST_LOG=info cargo run`
-    tracing_subscriber::fmt().with_env_filter(filter).init();
+    if Cli::parse().global_args.log_format == Some(LogFormatArg::JSON) {
+        tracing_subscriber::fmt()
+            .json()
+            .with_env_filter(filter)
+            .init();
+    } else {
+        tracing_subscriber::fmt().with_env_filter(filter).init();
+    }
 
     match Box::pin(run()).await {
         Ok(_) => (),

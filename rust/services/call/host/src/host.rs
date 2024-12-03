@@ -135,7 +135,7 @@ impl Host {
         })
         .map_err(wrap_engine_panic)??;
 
-        info!("Gas used in preflight: {}", gas_used);
+        info!(gas_used_preflight = gas_used, "Gas used in preflight: {}", gas_used);
 
         let multi_evm_input =
             into_multi_input(self.envs).map_err(|err| Error::CreatingInput(err.to_string()))?;

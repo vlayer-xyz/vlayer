@@ -6,6 +6,26 @@ use call_server::{Config, ProofMode};
 use chain_guest_wrapper::GUEST_ELF as CHAIN_GUEST_ELF;
 use clap::{ArgAction, Parser, ValueEnum};
 
+#[derive(Clone, Debug, ValueEnum, Default, PartialEq, Eq)]
+pub(crate) enum LogFormatArg {
+    #[default]
+    Plain,
+    JSON,
+}
+
+#[derive(Clone, Debug, Parser)]
+pub(crate) struct GlobalArgs {
+    /// A format for printing logs.
+    #[arg(
+        long,
+        global = true,
+        value_enum,
+        env = "VLAYER_LOG_FORMAT",
+        default_value = "plain"
+    )]
+    pub(crate) log_format: Option<LogFormatArg>,
+}
+
 #[derive(Clone, Debug, Parser)]
 pub(crate) struct InitArgs {
     #[arg(long, value_enum)]

@@ -4,8 +4,14 @@ use tracing_subscriber::{
 
 const DEFAULT_RUST_LOG: &str = "info";
 
-pub(crate) fn init_tracing() {
+pub(crate) fn init_tracing(use_json: bool) {
     let env_filter = EnvFilter::try_from_default_env().unwrap_or(DEFAULT_RUST_LOG.into());
-    let formatting_layer = layer().with_ansi(true);
-    registry().with(env_filter).with(formatting_layer).init();
+    let registry = registry().with(env_filter);
+    if use_json {
+        let formatting_layer = layer().json();
+        registry.with(formatting_layer).init();
+    } else {
+        let formatting_layer = layer().with_ansi(true);
+        registry.with(formatting_layer).init();
+    }
 }

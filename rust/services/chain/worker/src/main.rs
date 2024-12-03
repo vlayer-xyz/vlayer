@@ -3,7 +3,7 @@ use std::{path::PathBuf, sync::Arc, time::Duration};
 use alloy_primitives::ChainId;
 use chain_guest_wrapper::GUEST_ELF;
 use chain_host::{AppendStrategy, Host, HostConfig, PrependStrategy, ProofMode};
-use clap::Parser;
+use clap::{Parser, ValueEnum};
 use dotenvy::dotenv;
 use retry::HostErrorFilter;
 use tokio::sync::Mutex;
@@ -16,6 +16,13 @@ mod trace;
 const DEPOSIT_TIME_TO_LIVE: Duration = Duration::from_secs(60);
 const MIN_RETRIES_PER_SECOND: u32 = 3;
 const RETRY_PERCENT: f32 = 0.01;
+
+#[derive(Clone, Debug, ValueEnum, Default, PartialEq, Eq)]
+enum LogFormatArg {
+    #[default]
+    Plain,
+    JSON,
+}
 
 #[derive(Parser)]
 #[command(version)]
@@ -57,6 +64,16 @@ struct Cli {
         help = "Minimum number of confirmations required for a block to be appended"
     )]
     confirmations: u64,
+
+    /// A format for printing logs.
+    #[arg(
+        long,
+        global = true,
+        value_enum,
+        env = "VLAYER_LOG_FORMAT",
+        default_value = "plain"
+    )]
+    log_format: Option<LogFormatArg>,
 }
 
 impl From<Cli> for HostConfig {
@@ -76,9 +93,10 @@ impl From<Cli> for HostConfig {
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     dotenv().ok();
-    init_tracing();
+    let cli = Cli::parse();
+    init_tracing(cli.log_format == Some(LogFormatArg::JSON));
 
-    let config = Cli::parse().into();
+    let config = cli.into();
 
     let host = Arc::new(Mutex::new(Host::try_new(config)?));
     let budget = TpsBudget::new(DEPOSIT_TIME_TO_LIVE, MIN_RETRIES_PER_SECOND, RETRY_PERCENT);
