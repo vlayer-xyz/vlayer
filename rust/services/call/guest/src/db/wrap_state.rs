@@ -124,4 +124,37 @@ mod storage_ref {
 
         db.storage_ref(address, index).unwrap();
     }
+
+    #[test]
+    fn returns_zero_when_storage_not_found() {
+        let db = WrapStateDb::default();
+        let address = Address::default();
+        let index = U256::from(0);
+
+        db.account_storage.borrow_mut().insert(address, None);
+
+        let value = db.storage_ref(address, index).unwrap();
+
+        assert_eq!(value, U256::ZERO);
+    }
+
+    #[test]
+    fn success() {
+        let db = WrapStateDb::default();
+        let address = Address::default();
+        let index = U256::from(0);
+
+        let mut storage = MerkleTrie::default();
+        storage
+            .insert(keccak256(index.to_be_bytes::<32>()), [42])
+            .unwrap();
+
+        db.account_storage
+            .borrow_mut()
+            .insert(address, Some(Rc::new(storage)));
+
+        let value = db.storage_ref(address, index).unwrap();
+
+        assert_eq!(value, U256::from(42));
+    }
 }
