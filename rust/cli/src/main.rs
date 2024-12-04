@@ -45,13 +45,16 @@ async fn main() {
     // In order to view logs, run `RUST_LOG=info cargo run`
     let filter = EnvFilter::try_from_env("RUST_LOG").unwrap_or_else(|_| EnvFilter::new("info"));
 
-    if Cli::parse().global_args.log_format == Some(LogFormat::Json) {
-        tracing_subscriber::fmt()
-            .json()
-            .with_env_filter(filter)
-            .init();
-    } else {
-        tracing_subscriber::fmt().with_env_filter(filter).init();
+    match Cli::parse().global_args.log_format.unwrap_or(LogFormat::Plain) {
+        LogFormat::Json => {
+            tracing_subscriber::fmt()
+                  .json()
+                  .with_env_filter(filter)
+                  .init();
+        }
+        LogFormat::Plain => {
+            tracing_subscriber::fmt().with_env_filter(filter).init();
+        }
     }
 
     match Box::pin(run()).await {

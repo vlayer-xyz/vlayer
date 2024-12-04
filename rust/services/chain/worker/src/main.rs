@@ -81,7 +81,7 @@ impl From<Cli> for HostConfig {
 async fn main() -> anyhow::Result<()> {
     dotenv().ok();
     let cli = Cli::parse();
-    init_tracing(cli.global_args.log_format);
+    init_tracing(cli.global_args.log_format.unwrap_or(LogFormat::Plain));
 
     let config = cli.into();
 
