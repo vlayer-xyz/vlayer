@@ -44,7 +44,7 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
     fi
 
     echo "Restarting anvil"
-    docker compose -f /docker/web-proof/docker-compose-release.yaml restart anvil
+    docker compose -f ${VLAYER_HOME}/docker/web-proof/docker-compose-release.yaml restart anvil
 
     echo "::group::Initializing vlayer template: ${example_name}"
     VLAYER_TEMP_DIR=$(mktemp -d -t vlayer-test-release-XXXXXX-)
@@ -59,14 +59,6 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
     echo '::endgroup::'
 
     echo "::group::vlayer run prove.ts: ${example_name}"
-    # temp solution to test on CI
-    if [[ "${example_name}" = "simple-time-travel" ]] && [[ "${VLAYER_ENV}" = "dev" ]] ; then
-        echo "Running loadFixtures.ts (dev)"
-        VLAYER_ENV=dev bun run loadFixtures.ts
-        echo "Running prove.ts (dev)" 
-        VLAYER_ENV=dev bun run prove.ts
-    else
-        bun run prove:"${VLAYER_ENV}"
-    fi
+    bun run prove:"${VLAYER_ENV}"
     echo '::endgroup::'
 done
