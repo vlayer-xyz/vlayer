@@ -160,16 +160,15 @@ wait_for_chain_worker_sync() {
         local result=$(echo "${reply}" | jq ".result")
 
         if [[ "${result}" != "null" ]] ; then
-            if [[ "${first_block}" == "latest" ]] ; then
-                local first_block_synced="true"
-            else
-                local first_block_synced=$(echo "${result}" | jq "(.first_block <= ${first_block})")
+            local first_block_synced="true"
+            local last_block_synced="true"
+            
+            if [[ "${first_block}" != "latest" ]] ; then
+                first_block_synced=$(echo "${result}" | jq "(.first_block <= ${first_block})")
             fi
 
-            if [[ "${last_block}" == "latest" ]] ; then
-                local last_block_synced="true"
-            else
-                local last_block_synced=$(echo "${result}" | jq "(.last_block >= ${last_block})")
+            if [[ "${last_block}" != "latest" ]] ; then
+                last_block_synced=$(echo "${result}" | jq "(.last_block >= ${last_block})")
             fi
 
             if [[ "${first_block_synced}" == "true" && "${last_block_synced}" == "true" ]] ; then
