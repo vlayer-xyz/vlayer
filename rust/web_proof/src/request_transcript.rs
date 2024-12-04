@@ -36,7 +36,7 @@ mod tests {
     fn parse_real_url_with_single_slice_transcript() {
         let transcript = create_transcript("./testdata/sent_request.txt");
         let url = transcript.parse_url().unwrap();
-        assert_eq!(url, "https://api.x.com/1.1/account/settings.json?include_ext_sharing_audiospaces_listening_data_with_followers=true&include_mention_filter=true&include_nsfw_user_flag=true&include_nsfw_admin_flag=true&include_ranked_timeline=true&include_alt_text_compose=true&ext=ssoConnections&include_country_code=true&include_ext_dm_nsfw_media_filter=true");
+        assert_eq!(url, "https://api.x.com/1.1/account/settings.json");
     }
 
     #[test]

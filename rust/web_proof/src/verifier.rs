@@ -4,7 +4,7 @@ use url::{ParseError, Url};
 use crate::{
     errors::ParsingError,
     web::Web,
-    web_proof::{VerificationError, WebProof, WebProofV7},
+    web_proof::{VerificationError, WebProof},
 };
 
 #[derive(Error, Debug)]
@@ -23,10 +23,6 @@ pub enum WebProofError {
 
     #[error("Host name extracted from url: {0} is different from server name: {1}")]
     HostNameMismatch(String, String),
-}
-
-pub fn verify_and_parse_v7(web_proof: WebProofV7) -> Result<Web, WebProofError> {
-    verify_and_parse(web_proof.into())
 }
 
 pub fn verify_and_parse(web_proof: WebProof) -> Result<Web, WebProofError> {
@@ -70,8 +66,6 @@ mod tests {
 
     const X_TEST_URL: &str = "https://api.x.com/1.1/account/settings.json?include_ext_sharing_audiospaces_listening_data_with_followers=true&include_mention_filter=true&include_nsfw_user_flag=true&include_nsfw_admin_flag=true&include_ranked_timeline=true&include_alt_text_compose=true&ext=ssoConnections&include_country_code=true&include_ext_dm_nsfw_media_filter=true";
 
-    const SWAPI_TEST_URL: &str = "https://swapi.dev/api/people/1";
-
     mod verify_and_parse_v7 {
         use p256::elliptic_curve::PublicKey;
         use pkcs8::DecodePublicKey;
@@ -85,12 +79,12 @@ mod tests {
             let presentation_json: PresentationJson =
                 serde_json::from_str(&presentation_json).unwrap();
 
-            let web_proof = WebProofV7 {
+            let web_proof = WebProof {
                 presentation_json,
                 notary_pub_key: PublicKey::from_public_key_pem(NOTARY_PUB_KEY_PEM_EXAMPLE).unwrap(),
             };
 
-            let web = verify_and_parse_v7(web_proof).unwrap();
+            let web = verify_and_parse(web_proof).unwrap();
 
             assert_eq!(web.url, "https://api.x.com/1.1/account/settings.json");
         }
@@ -101,60 +95,52 @@ mod tests {
 
         #[test]
         fn correct_url_extracted() {
-            let web_proof = load_web_proof_fixture(
-                "./testdata/swapi_presentation_0.1.0-alpha.7.json",
-                NOTARY_PUB_KEY_PEM_EXAMPLE,
-            );
+            let web_proof =
+                load_web_proof_fixture("./testdata/presentation.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
 
             let web = verify_and_parse(web_proof).unwrap();
 
-            assert_eq!(web.url, SWAPI_TEST_URL);
+            assert_eq!(web.url, "https://api.x.com/1.1/account/settings.json");
         }
 
         #[test]
         fn invalid_server_name() {
             // "wrong_server_name_tls_proof.json" is a real tls_proof, but with tampered server name, which the notary did not sign
             let web_proof = load_web_proof_fixture(
-                "./testdata/swapi_presentation_0.1.0-alpha.7.invalid_cert.json",
+                "./testdata/presentation_invalid_server_name.json",
                 NOTARY_PUB_KEY_PEM_EXAMPLE,
             );
 
             assert!(matches!(
                 verify_and_parse(web_proof).err().unwrap(),
-                WebProofError::Verification(VerificationError::Presentation(err)) if err.to_string() == "presentation error: server identity error caused by: server identity proof error: commitment: certificate opening does not match commitment"
+                WebProofError::Verification(VerificationError::Presentation(err)) if err.to_string() == "presentation error: server identity error caused by: server identity proof error: certificate: invalid server certificate"
             ));
         }
 
         #[test]
         fn correct_server_name_extracted() {
-            let web_proof = load_web_proof_fixture(
-                "./testdata/swapi_presentation_0.1.0-alpha.7.json",
-                NOTARY_PUB_KEY_PEM_EXAMPLE,
-            );
+            let web_proof =
+                load_web_proof_fixture("./testdata/presentation.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
 
             let web = verify_and_parse(web_proof).unwrap();
 
-            assert_eq!(web.server_name, "swapi.dev");
+            assert_eq!(web.server_name, "api.x.com");
         }
 
         #[test]
         fn correct_body_extracted() {
-            let web_proof = load_web_proof_fixture(
-                "./testdata/swapi_presentation_0.1.0-alpha.7.json",
-                NOTARY_PUB_KEY_PEM_EXAMPLE,
-            );
+            let web_proof =
+                load_web_proof_fixture("./testdata/presentation.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
 
             let web = verify_and_parse(web_proof).unwrap();
 
-            assert_eq!(web.body, "{\"name\":\"Luke Skywalker\",\"height\":\"172\",\"mass\":\"77\",\"hair_color\":\"blond\",\"skin_color\":\"fair\",\"eye_color\":\"blue\",\"birth_year\":\"19BBY\",\"gender\":\"male\",\"homeworld\":\"https://swapi.dev/api/planets/1/\",\"films\":[\"https://swapi.dev/api/films/1/\",\"https://swapi.dev/api/films/2/\",\"https://swapi.dev/api/films/3/\",\"https://swapi.dev/api/films/6/\"],\"species\":[],\"vehicles\":[\"https://swapi.dev/api/vehicles/14/\",\"https://swapi.dev/api/vehicles/30/\"],\"starships\":[\"https://swapi.dev/api/starships/12/\",\"https://swapi.dev/api/starships/22/\"],\"created\":\"2014-12-09T13:50:51.644000Z\",\"edited\":\"2014-12-20T21:17:56.891000Z\",\"url\":\"https://swapi.dev/api/people/1/\"}");
+            assert_eq!(web.body, "{\"protected\":false,\"screen_name\":\"wktr0\",\"always_use_https\":true,\"use_cookie_personalization\":false,\"sleep_time\":{\"enabled\":false,\"end_time\":null,\"start_time\":null},\"geo_enabled\":false,\"language\":\"en\",\"discoverable_by_email\":false,\"discoverable_by_mobile_phone\":false,\"display_sensitive_media\":false,\"personalized_trends\":true,\"allow_media_tagging\":\"all\",\"allow_contributor_request\":\"none\",\"allow_ads_personalization\":false,\"allow_logged_out_device_personalization\":false,\"allow_location_history_personalization\":false,\"allow_sharing_data_for_third_party_personalization\":false,\"allow_dms_from\":\"following\",\"always_allow_dms_from_subscribers\":null,\"allow_dm_groups_from\":\"following\",\"translator_type\":\"none\",\"country_code\":\"pl\",\"address_book_live_sync_enabled\":false,\"universal_quality_filtering_enabled\":\"enabled\",\"dm_receipt_setting\":\"all_enabled\",\"allow_authenticated_periscope_requests\":true,\"protect_password_reset\":false,\"require_password_login\":false,\"requires_login_verification\":false,\"dm_quality_filter\":\"enabled\",\"autoplay_disabled\":false,\"settings_metadata\":{\"is_eu\":\"true\"}}");
         }
 
         #[test]
         fn correct_notary_pub_key() {
-            let web_proof = load_web_proof_fixture(
-                "./testdata/swapi_presentation_0.1.0-alpha.7.json",
-                NOTARY_PUB_KEY_PEM_EXAMPLE,
-            );
+            let web_proof =
+                load_web_proof_fixture("./testdata/presentation.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
             let web = verify_and_parse(web_proof).unwrap();
 
             assert_eq!(web.notary_pub_key, NOTARY_PUB_KEY_PEM_EXAMPLE);

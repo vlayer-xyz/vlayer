@@ -74,7 +74,7 @@ mod server_tests {
             types::{Uint8, U256},
         };
         use server_utils::{function_selector, rpc::mock::Server as RpcServerMock};
-        use web_proof::fixtures::{load_web_proof_v7_fixture, NOTARY_PUB_KEY_PEM_EXAMPLE};
+        use web_proof::fixtures::{load_web_proof_fixture, NOTARY_PUB_KEY_PEM_EXAMPLE};
 
         use super::*;
         use crate::test_helpers::mock::WebProof;
@@ -249,7 +249,7 @@ mod server_tests {
 
             let call_data = contract
                 .web_proof(WebProof {
-                    web_proof_json: serde_json::to_string(&json!(load_web_proof_v7_fixture(
+                    web_proof_json: serde_json::to_string(&json!(load_web_proof_fixture(
                         "../../../web_proof/testdata/presentation.json",
                         NOTARY_PUB_KEY_PEM_EXAMPLE
                     )))
