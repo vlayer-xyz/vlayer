@@ -3,7 +3,8 @@ use std::{path::PathBuf, sync::Arc, time::Duration};
 use alloy_primitives::ChainId;
 use chain_guest_wrapper::GUEST_ELF;
 use chain_host::{AppendStrategy, Host, HostConfig, PrependStrategy, ProofMode};
-use clap::{Parser, ValueEnum};
+use clap::Parser;
+use common::GlobalArgs;
 use dotenvy::dotenv;
 use retry::HostErrorFilter;
 use tokio::sync::Mutex;
@@ -16,13 +17,6 @@ mod trace;
 const DEPOSIT_TIME_TO_LIVE: Duration = Duration::from_secs(60);
 const MIN_RETRIES_PER_SECOND: u32 = 3;
 const RETRY_PERCENT: f32 = 0.01;
-
-#[derive(Clone, Debug, ValueEnum, Default, PartialEq, Eq)]
-enum LogFormat {
-    #[default]
-    Plain,
-    Json,
-}
 
 #[derive(Parser)]
 #[command(version)]
@@ -65,15 +59,8 @@ struct Cli {
     )]
     confirmations: u64,
 
-    /// A format for printing logs.
-    #[arg(
-        long,
-        global = true,
-        value_enum,
-        env = "VLAYER_LOG_FORMAT",
-        default_value = "plain"
-    )]
-    log_format: Option<LogFormat>,
+    #[clap(flatten)]
+    global_args: GlobalArgs,
 }
 
 impl From<Cli> for HostConfig {
@@ -94,7 +81,7 @@ impl From<Cli> for HostConfig {
 async fn main() -> anyhow::Result<()> {
     dotenv().ok();
     let cli = Cli::parse();
-    init_tracing(cli.log_format == Some(LogFormat::Json));
+    init_tracing(cli.global_args.log_format);
 
     let config = cli.into();
 

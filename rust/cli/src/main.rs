@@ -1,10 +1,11 @@
 use clap::{Parser, Subcommand};
 use commands::{
-    args::{GlobalArgs, InitArgs, LogFormat, ServeArgs},
+    args::{InitArgs, ServeArgs},
     init::run_init,
     serve::run_serve,
     version::Version,
 };
+use common::{GlobalArgs, LogFormat};
 use test_runner::cli::TestArgs;
 use tracing::error;
 use tracing_subscriber::EnvFilter;
