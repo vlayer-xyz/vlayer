@@ -19,7 +19,9 @@ export type ContractArg =
   | string[]
   | boolean[]
   | bigint[]
-  | Address[];
+  | Address[]
+  | (string | bigint)[]
+  | (string | bigint)[][];
 
 export type EthereumAddress = Branded<Hex, "EthereumAddress">;
 export type EthereumTxHash = Branded<Hex, "EthereumTxHash">;
