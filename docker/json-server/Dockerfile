@@ -2,7 +2,7 @@ FROM oven/bun:latest
 
 WORKDIR /app
 
-COPY ../../../../packages/json-server /app
+COPY ../../../../packages/test-json-server /app
 
 RUN bun install
 
