@@ -4,7 +4,7 @@ use chain_db::{ChainDb, Mode};
 use chain_guest_wrapper::GUEST_ELF;
 use chain_server_lib::{init_tracing, serve, ServerConfig};
 use clap::Parser;
-use common::GlobalArgs;
+use common::{GlobalArgs, LogFormat};
 use dotenvy::dotenv;
 
 #[derive(Parser)]
@@ -36,7 +36,7 @@ struct Cli {
 async fn main() -> anyhow::Result<()> {
     dotenv().ok();
     let cli = Cli::parse();
-    init_tracing(cli.global_args.log_format);
+    init_tracing(cli.global_args.log_format.unwrap_or(LogFormat::Plain));
 
     let config = ServerConfig::new(cli.listen_addr);
     let db = ChainDb::mdbx(cli.db_path, Mode::ReadOnly, GUEST_ELF.clone())?;

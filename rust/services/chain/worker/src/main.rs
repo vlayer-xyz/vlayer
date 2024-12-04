@@ -4,7 +4,7 @@ use alloy_primitives::ChainId;
 use chain_guest_wrapper::GUEST_ELF;
 use chain_host::{AppendStrategy, Host, HostConfig, PrependStrategy, ProofMode};
 use clap::Parser;
-use common::GlobalArgs;
+use common::{GlobalArgs, LogFormat};
 use dotenvy::dotenv;
 use retry::HostErrorFilter;
 use tokio::sync::Mutex;
