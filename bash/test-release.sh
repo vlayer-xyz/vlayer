@@ -56,6 +56,10 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
     echo '::endgroup::'
 
     echo "::group::vlayer run prove.ts: ${example_name}"
-    bun run prove.ts
+    if [[ "${VLAYER_ENV}" = "dev" ]]; then
+        bun run prove:dev
+    else
+        bun run prove:testnet
+    fi
     echo '::endgroup::'
 done
