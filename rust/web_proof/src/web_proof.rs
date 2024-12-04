@@ -52,9 +52,9 @@ impl WebProof {
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct PresentationJson {
-    pub version: String,
-    pub data: String,
-    pub meta: PresentationJsonMeta,
+    pub(crate) version: String,
+    pub(crate) data: String,
+    pub(crate) meta: PresentationJsonMeta,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
