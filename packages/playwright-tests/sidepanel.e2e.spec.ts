@@ -81,7 +81,7 @@ test.describe("Full flow of webproof using extension", () => {
     await test.step("Prove button should appear after request to external api", async () => {
       const extension = await sidePanel(context);
       const proveButton = extension.getByTestId("prove-button");
-      expect(proveButton).toBeDefined();
+      await expect(proveButton).toHaveText("Generate proof");
     });
 
     await test.step("Click button should generate webproof", async () => {
