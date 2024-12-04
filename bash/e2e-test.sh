@@ -16,7 +16,6 @@ echo Setting up SDK
 cd ${VLAYER_HOME}/packages/sdk && bun install --frozen-lockfile
 
 EXAMPLES_REQUIRING_QUICKNODE=("simple_teleport")
-EXAMPLES_REQUIRING_PRIV_KEY=("simple_time_travel")
 # Only run limited selection of examples in prod mode,
 # because they use real Bonsai resources.
 EXAMPLES_RUN_IN_PROD_MODE=("simple")
@@ -34,13 +33,8 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
     continue
   fi
 
-  if [[ "${EXAMPLES_REQUIRING_QUICKNODE[@]}" =~ "${example_name}" ]] && [[ -z "${QUICKNODE_API_KEY:-}" ]]; then
-    echo "Skipping: ${example} (configure QUICKNODE_API_KEY to run it)"
-    continue
-  fi
-
-  if [[ "${EXAMPLES_REQUIRING_PRIV_KEY[@]}" =~ "${example_name}" ]] && [[ -z "${EXAMPLES_TEST_PRIVATE_KEY:-}" ]]; then
-    echo "Skipping: ${example} (configure EXAMPLES_TEST_PRIVATE_KEY to run it)"
+  if [[ "${EXAMPLES_REQUIRING_QUICKNODE[@]}" =~ "${example_name}" ]] && [[ -z "${ALCHEMY_API_KEY:-}" ]]; then
+    echo "Skipping: ${example} (configure ALCHEMY_API_KEY to run it)"
     continue
   fi
 
@@ -54,11 +48,11 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
   bun install --frozen-lockfile
 
   if [[ "${example_name}" == "simple_time_travel" ]]; then
-    VLAYER_ENV=dev bun run loadFixtures.ts
+    VLAYER_ENV="${VLAYER_ENV:-dev}" bun run loadFixtures.ts
     if [[ "${RUN_CHAIN_SERVICES:-0}" == "1" ]] ; then
-      wait_for_chain_worker_sync 31337 1 40
+      wait_for_chain_worker_sync 31337 1 43
     fi
-    VLAYER_ENV=dev bun run prove.ts
+    VLAYER_ENV="${VLAYER_ENV:-dev}" bun run prove.ts
   elif [[ "${example_name}" == "simple_time_travel" ]]; then
     if [[ "${RUN_CHAIN_SERVICES:-0}" == "1" ]] ; then
       wait_for_chain_worker_sync 31337 1 3

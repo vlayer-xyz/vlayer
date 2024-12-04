@@ -172,7 +172,7 @@ wait_for_chain_worker_sync() {
             fi
         fi
 
-        echo "Syncing ..."
+        echo "Syncing ... ${result}"
         sleep 10
     done
 

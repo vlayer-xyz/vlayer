@@ -38,6 +38,7 @@ impl Default for StateAccount {
 ///
 /// It is backed by a single [MerkleTrie] for the accounts and one [MerkleTrie] each for the
 /// accounts' storages. It panics when data is queried that is not contained in the tries.
+#[derive(Default)]
 pub struct StateDb {
     state_trie: MerkleTrie,
     storage_tries: HashMap<B256, Rc<MerkleTrie>>,

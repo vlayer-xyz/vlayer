@@ -13,7 +13,7 @@ use super::*;
 
 const CHAIN_ID: ChainId = 1;
 const BLOCK_NUM: BlockNumber = 0;
-const EXEC_LOCATION: ExecutionLocation = ExecutionLocation::new(BLOCK_NUM, CHAIN_ID);
+const EXEC_LOCATION: ExecutionLocation = ExecutionLocation::new(CHAIN_ID, BLOCK_NUM);
 
 const fn input_ok(_: &MultiEvmInput) -> guest_input::Result {
     Ok(())

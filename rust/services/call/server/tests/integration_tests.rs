@@ -4,7 +4,7 @@ use test_helpers::{call_guest_elf, chain_guest_elf, Context, API_VERSION, GAS_ME
 
 mod test_helpers;
 
-use server_utils::{body_to_json, body_to_string};
+use server_utils::{assert_jrpc_err, assert_jrpc_ok, body_to_string};
 
 mod server_tests {
     use super::*;
@@ -33,22 +33,10 @@ mod server_tests {
         let response = app.post("/", &req).await;
 
         assert_eq!(StatusCode::OK, response.status());
-        assert_eq!(
-            json!({
-                "jsonrpc": "2.0",
-                "id": 1,
-                "error": {
-                    "code": -32601,
-                    "message": "Method `non_existent_json_rpc_method` not found",
-                    "data": null
-                }
-            }),
-            body_to_json(response.into_body()).await
-        );
+        assert_jrpc_err(response, -32601, "Method `non_existent_json_rpc_method` not found").await;
     }
 
     mod v_versions {
-        use assert_json_diff::assert_json_include;
         use common::GuestElf;
 
         use super::*;
@@ -69,29 +57,24 @@ mod server_tests {
             let response = app.post("/", &req).await;
 
             assert_eq!(StatusCode::OK, response.status());
-            assert_json_include!(
-                expected: json!({
-                    "jsonrpc": "2.0",
-                    "id": 1,
-                    "result": {
-                        "call_guest_id": "0x0000000000000000000000000000000000000000000000000000000000000000",
-                        "chain_guest_id": "0x0100000001000000010000000100000001000000010000000100000001000000",
-                        "api_version": API_VERSION
-                    }
+            assert_jrpc_ok(
+                response,
+                json!({
+                    "call_guest_id": "0x0000000000000000000000000000000000000000000000000000000000000000",
+                    "chain_guest_id": "0x0100000001000000010000000100000001000000010000000100000001000000",
+                    "api_version": API_VERSION
                 }),
-                actual: body_to_json(response.into_body()).await,
-            );
+            ).await;
         }
     }
 
     mod v_call {
-        use assert_json_diff::assert_json_include;
         use ethers::{
             abi::AbiEncode,
             types::{Uint8, U256},
         };
         use server_utils::{function_selector, rpc::mock::Server as RpcServerMock};
-        use web_proof::fixtures::{load_web_proof_v7_fixture, NOTARY_PUB_KEY_PEM_EXAMPLE};
+        use web_proof::fixtures::{load_web_proof_fixture, NOTARY_PUB_KEY_PEM_EXAMPLE};
 
         use super::*;
         use crate::test_helpers::mock::WebProof;
@@ -125,18 +108,12 @@ mod server_tests {
             let response = app.post("/", &req).await;
 
             assert_eq!(StatusCode::OK, response.status());
-            assert_eq!(
-                json!({
-                    "jsonrpc": "2.0",
-                    "id": 1,
-                    "error": {
-                        "code": -32602,
-                        "message": "Invalid field: `to` Odd number of digits `I am not a valid address!`",
-                        "data": null,
-                    }
-                }),
-                body_to_json(response.into_body()).await
-            );
+            assert_jrpc_err(
+                response,
+                -32602,
+                "Invalid field: `to` Odd number of digits `I am not a valid address!`",
+            )
+            .await;
         }
 
         #[tokio::test(flavor = "multi_thread")]
@@ -167,33 +144,30 @@ mod server_tests {
             let response = app.post("/", &req).await;
 
             assert_eq!(StatusCode::OK, response.status());
-            assert_json_include!(
-                expected: json!({
-                    "jsonrpc": "2.0",
-                    "id": 1,
-                    "result": {
-                        "evm_call_result": U256::from(3).encode_hex(),
-                        "proof": {
-                            "length": 160,
-                            "seal": {
-                                "verifierSelector": "0xdeafbeef",
-                                "mode": 1,
-                            },
-                            "callAssumptions": {
-                                "functionSelector": function_selector(&call_data),
-                                "proverContractAddress": contract.address(),
-                            }
+            assert_jrpc_ok(
+                response,
+                json!({
+                    "evm_call_result": U256::from(3).encode_hex(),
+                    "proof": {
+                        "length": 160,
+                        "seal": {
+                            "verifierSelector": "0xdeafbeef",
+                            "mode": 1,
                         },
-                    }
+                        "callAssumptions": {
+                            "functionSelector": function_selector(&call_data),
+                            "proverContractAddress": contract.address(),
+                        }
+                    },
                 }),
-                actual: body_to_json(response.into_body()).await,
-            );
+            )
+            .await;
         }
 
         #[tokio::test(flavor = "multi_thread")]
         async fn simple_with_gasmeter() {
             const EXPECTED_HASH: &str =
-                "0xf8d32367d8ec243e8e6fcac96dc769ed80287534d51c5d1e817173128f2b6218";
+                "0x126257b312be17f869dacc198adc28424148f5408751f52c50050a01eeef8ebf";
             const EXPECTED_GAS_USED: u64 = 21_728;
 
             let mut gas_meter_server = RpcServerMock::start().await;
@@ -275,7 +249,7 @@ mod server_tests {
 
             let call_data = contract
                 .web_proof(WebProof {
-                    web_proof_json: serde_json::to_string(&json!(load_web_proof_v7_fixture(
+                    web_proof_json: serde_json::to_string(&json!(load_web_proof_fixture(
                         "../../../web_proof/testdata/presentation.json",
                         NOTARY_PUB_KEY_PEM_EXAMPLE
                     )))
@@ -303,27 +277,24 @@ mod server_tests {
             let response = app.post("/", &req).await;
 
             assert_eq!(StatusCode::OK, response.status());
-            assert_json_include!(
-                expected: json!({
-                        "jsonrpc": "2.0",
-                        "id": 1,
-                        "result": {
-                            "evm_call_result": Uint8::from(1).encode_hex(),
-                            "proof": {
-                                "length": 160,
-                                "seal": {
-                                    "verifierSelector": "0xdeafbeef",
-                                    "mode": 1,
-                                },
-                                "callAssumptions": {
-                                    "functionSelector": function_selector(&call_data),
-                                    "proverContractAddress": contract.address(),
-                                }
-                            },
+            assert_jrpc_ok(
+                response,
+                json!({
+                    "evm_call_result": Uint8::from(1).encode_hex(),
+                    "proof": {
+                        "length": 160,
+                        "seal": {
+                            "verifierSelector": "0xdeafbeef",
+                            "mode": 1,
+                        },
+                        "callAssumptions": {
+                            "functionSelector": function_selector(&call_data),
+                            "proverContractAddress": contract.address(),
                         }
-                    }),
-                actual: body_to_json(response.into_body()).await,
-            );
+                    },
+                }),
+            )
+            .await;
         }
     }
 }

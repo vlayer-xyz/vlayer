@@ -88,3 +88,25 @@ impl VerifiedEnv {
         GuestOutput::new(call_assumptions, evm_call_result)
     }
 }
+
+#[cfg(test)]
+mod create_env {
+    use super::*;
+
+    #[test]
+    #[should_panic(expected = "cannot get chain spec: UnsupportedChainId(0)")]
+    fn panics_with_invalid_chain_spec() {
+        let location = ExecutionLocation::default();
+        let input = EvmInput::default();
+        create_env(location, input);
+    }
+
+    #[test]
+    fn success() {
+        let location = ExecutionLocation::new(1, 0);
+        let input = EvmInput::default();
+        let env = create_env(location, input);
+
+        assert_eq!(env.header().number(), 0);
+    }
+}

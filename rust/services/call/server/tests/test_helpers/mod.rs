@@ -73,7 +73,6 @@ pub(crate) mod mock {
         signers::{LocalWallet, Signer, Wallet},
         types::BlockNumber as BlockTag,
     };
-    use example_prover::ExampleProver;
     use provider::to_eth_block_header;
     use serde::Serialize;
     use server_utils::post;

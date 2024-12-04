@@ -1927,6 +1927,7 @@ dependencies = [
  "chain_client",
  "chain_common",
  "common",
+ "derivative",
  "derive-new",
  "derive_more 1.0.0",
  "itertools 0.13.0",
@@ -2035,7 +2036,6 @@ dependencies = [
  "alloy-rlp",
  "alloy-sol-types",
  "anyhow",
- "assert-json-diff",
  "axum",
  "axum-jrpc",
  "block_header",
@@ -9398,6 +9398,7 @@ version = "0.1.0"
 dependencies = [
  "alloy-primitives",
  "anyhow",
+ "assert-json-diff",
  "axum",
  "axum-jrpc",
  "derive-new",

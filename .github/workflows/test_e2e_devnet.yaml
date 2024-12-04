@@ -50,6 +50,7 @@ jobs:
           QUICKNODE_API_KEY: ${{ secrets.QUICKNODE_API_KEY }}
           QUICKNODE_ENDPOINT: "dry-alpha-tab"
           CHAIN_ID: 31337
+          VLAYER_ENV: dev
           VLAYER_TMP_DIR: ./artifacts
           RUN_CHAIN_SERVICES: 1
         run: bash/e2e-test.sh

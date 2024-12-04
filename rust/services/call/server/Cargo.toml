@@ -29,7 +29,6 @@ tracing = { workspace = true }
 web_proof = { workspace = true }
 
 [dev-dependencies]
-assert-json-diff = "2.0.2"
 block_header = { workspace = true }
 call_guest_wrapper = { workspace = true }
 chain_guest_wrapper = { workspace = true }

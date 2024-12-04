@@ -6,16 +6,16 @@ use serde::{Deserialize, Serialize};
     Debug, Default, Clone, Copy, PartialEq, Eq, Hash, Serialize, Deserialize, RlpEncodable,
 )]
 pub struct ExecutionLocation {
-    pub block_number: BlockNumber,
     pub chain_id: ChainId,
+    pub block_number: BlockNumber,
 }
 
 impl ExecutionLocation {
     #[must_use]
-    pub const fn new(block_number: BlockNumber, chain_id: ChainId) -> Self {
+    pub const fn new(chain_id: ChainId, block_number: BlockNumber) -> Self {
         Self {
-            block_number,
             chain_id,
+            block_number,
         }
     }
 }

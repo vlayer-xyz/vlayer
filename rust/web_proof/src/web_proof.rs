@@ -18,28 +18,7 @@ pub struct WebProof {
         serialize_with = "serialize_public_key_to_pem_string"
     )]
     pub notary_pub_key: PublicKey,
-    pub presentation: Presentation,
-}
-
-#[derive(Deserialize, Serialize)]
-#[serde(deny_unknown_fields)]
-pub struct WebProofV7 {
-    #[serde(
-        deserialize_with = "deserialize_public_key_from_pem_string",
-        serialize_with = "serialize_public_key_to_pem_string"
-    )]
-    pub notary_pub_key: PublicKey,
     pub presentation_json: PresentationJson,
-}
-
-impl From<WebProofV7> for WebProof {
-    fn from(web_proof_v7: WebProofV7) -> Self {
-        let presentation = Presentation::from(web_proof_v7.presentation_json);
-        Self {
-            notary_pub_key: web_proof_v7.notary_pub_key,
-            presentation,
-        }
-    }
 }
 
 impl WebProof {
@@ -48,11 +27,13 @@ impl WebProof {
     ) -> Result<(RequestTranscript, ResponseTranscript, ServerName), VerificationError> {
         let provider = CryptoProvider::default();
 
+        let presentation = Presentation::from(self.presentation_json);
+
         let PresentationOutput {
             transcript,
             server_name,
             ..
-        } = self.presentation.verify(&provider)?;
+        } = presentation.verify(&provider)?;
 
         let transcript = transcript.unwrap();
 
@@ -71,20 +52,20 @@ impl WebProof {
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct PresentationJson {
-    pub version: String,
-    pub data: String,
-    pub meta: PresentationJsonMeta,
+    pub(crate) version: String,
+    pub(crate) data: String,
+    pub(crate) meta: PresentationJsonMeta,
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct PresentationJsonMeta {
     #[serde(rename = "notaryUrl")]
-    pub(crate) notary_url: Option<String>,
+    pub notary_url: Option<String>,
     #[serde(rename = "websocketProxyUrl")]
-    pub(crate) websocket_proxy_url: Option<String>,
+    pub websocket_proxy_url: Option<String>,
     #[serde(rename = "pluginUrl")]
-    pub(crate) plugin_url: Option<String>,
+    pub plugin_url: Option<String>,
 }
 
 impl From<PresentationJson> for Presentation {
@@ -133,10 +114,8 @@ mod tests {
 
     #[test]
     fn serialize_deserialize_web_proof() {
-        let proof = load_web_proof_fixture(
-            "./testdata/swapi_presentation_0.1.0-alpha.7.json",
-            NOTARY_PUB_KEY_PEM_EXAMPLE,
-        );
+        let proof =
+            load_web_proof_fixture("./testdata/presentation.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
 
         let serialized = serde_json::to_string(&proof).unwrap();
         let deserialized: WebProof = serde_json::from_str(&serialized).unwrap();
@@ -149,19 +128,19 @@ mod tests {
     #[test]
     fn fail_verification_session_error() {
         let invalid_proof = load_web_proof_fixture(
-            "./testdata/swapi_presentation_0.1.0-alpha.7.invalid_signature.json",
+            "testdata/presentation_invalid_signature.json",
             NOTARY_PUB_KEY_PEM_EXAMPLE,
         );
         assert!(matches!(
             invalid_proof.verify(),
-            Err(VerificationError::Presentation(err)) if err.to_string() == "presentation error: attestation error caused by: attestation proof error: signature error caused by: signature verification failed: secp256k1 signature verification failed"
+            Err(VerificationError::Presentation(err)) if err.to_string() == "presentation error: attestation error caused by: attestation proof error: signature error caused by: signature verification failed: invalid secp256k1 signature"
         ));
     }
 
     #[test]
-    fn fail_verification_invalid_merkl_prof() {
+    fn fail_verification_invalid_merkle_proof() {
         let invalid_proof = load_web_proof_fixture(
-            "./testdata/swapi_presentation_0.1.0-alpha.7.invalid_merkle_proof.json",
+            "testdata/presentation_invalid_merkle_proof.json",
             NOTARY_PUB_KEY_PEM_EXAMPLE,
         );
         assert!(matches!(
@@ -172,38 +151,32 @@ mod tests {
 
     #[test]
     fn success_verification() {
-        let proof = load_web_proof_fixture(
-            "./testdata/swapi_presentation_0.1.0-alpha.7.json",
-            NOTARY_PUB_KEY_PEM_EXAMPLE,
-        );
+        let proof =
+            load_web_proof_fixture("./testdata/presentation.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
         let (request, response, _) = proof.verify().unwrap();
 
         assert_eq!(
             String::from_utf8(request.transcript).unwrap(),
-            read_fixture("./testdata/swapi_request.txt")
+            read_fixture("./testdata/sent_request.txt")
         );
         assert_eq!(
             String::from_utf8(response.transcript).unwrap(),
-            read_fixture("./testdata/swapi_response.txt")
+            read_fixture("./testdata/received_response.txt")
         );
     }
 
     #[test]
     fn success_get_server_name() {
-        let proof = load_web_proof_fixture(
-            "./testdata/swapi_presentation_0.1.0-alpha.7.json",
-            NOTARY_PUB_KEY_PEM_EXAMPLE,
-        );
+        let proof =
+            load_web_proof_fixture("./testdata/presentation.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
         let (_, _, server_name) = proof.verify().unwrap();
-        assert_eq!(server_name.as_str(), "swapi.dev");
+        assert_eq!(server_name.as_str(), "api.x.com");
     }
 
     #[test]
     fn success_get_notary_pub_key() {
-        let proof = load_web_proof_fixture(
-            "./testdata/swapi_presentation_0.1.0-alpha.7.json",
-            NOTARY_PUB_KEY_PEM_EXAMPLE,
-        );
+        let proof =
+            load_web_proof_fixture("./testdata/presentation.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
         assert_eq!(proof.get_notary_pub_key().unwrap(), NOTARY_PUB_KEY_PEM_EXAMPLE);
     }
 
