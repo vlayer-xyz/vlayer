@@ -12,21 +12,17 @@ import {
 const parseTokensEnv = () => {
   try {
     const tokensToCheck = [];
-    const parsedTokens = JSON.parse(process.env.ERC20_TOKENS_TO_CHECK || "[]");
-    tokensToCheck.push(
-      ...parsedTokens.map(
-        (token: { address: string; chainId: number; blockNumber: string }) => [
-          token.address,
-          token.chainId,
-          BigInt(token.blockNumber),
-        ],
-      ),
-    );
+    const addresses = process.env.PROVER_ERC20_ADDRESSES?.split(",") || [];
+    const chainIds = process.env.PROVER_ERC20_CHAIN_IDS?.split(",") || [];
+    const blockNumbers = process.env.PROVER_ERC20_BLOCK_NUMBERS?.split(",") || [];
+
+    for (let i = 0; i < addresses.length; i++) {
+      tokensToCheck.push([addresses[i], chainIds[i], BigInt(blockNumbers[i])]);
+    }
 
     return tokensToCheck;
   } catch (error) {
     console.error("Failed to parse ERC20_TOKENS_TO_CHECK:", error);
-    process.exit(1);
   }
 };
 
