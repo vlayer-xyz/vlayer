@@ -14,7 +14,8 @@ const parseTokensEnv = () => {
     const tokensToCheck = [];
     const addresses = process.env.PROVER_ERC20_ADDRESSES?.split(",") || [];
     const chainIds = process.env.PROVER_ERC20_CHAIN_IDS?.split(",") || [];
-    const blockNumbers = process.env.PROVER_ERC20_BLOCK_NUMBERS?.split(",") || [];
+    const blockNumbers =
+      process.env.PROVER_ERC20_BLOCK_NUMBERS?.split(",") || [];
 
     for (let i = 0; i < addresses.length; i++) {
       tokensToCheck.push([addresses[i], chainIds[i], BigInt(blockNumbers[i])]);
