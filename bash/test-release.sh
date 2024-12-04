@@ -56,10 +56,14 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
     echo '::endgroup::'
 
     echo "::group::vlayer run prove.ts: ${example_name}"
-    if [[ "${VLAYER_ENV}" = "dev" ]]; then
-        bun run prove:dev
+    # temp solution to test on CI
+    if [[ "${example_name}" = "simple-time-travel" ]] && [[ "${VLAYER_ENV}" = "dev" ]] ; then
+        echo "Running loadFixtures.ts (dev)"
+        VLAYER_ENV=dev bun run loadFixtures.ts
+        echo "Running prove.ts (dev)" 
+        VLAYER_ENV=dev bun run prove.ts
     else
-        bun run prove:testnet
+        bun run prove:"${VLAYER_ENV}"
     fi
     echo '::endgroup::'
 done
