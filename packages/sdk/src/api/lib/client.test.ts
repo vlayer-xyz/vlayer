@@ -1,7 +1,16 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import {
+  describe,
+  expect,
+  it,
+  vi,
+  beforeEach,
+  beforeAll,
+  MockInstance,
+} from "vitest";
 
 import { createExtensionWebProofProvider } from "../webProof";
 import { createVlayerClient } from "./client";
+import { BrandedHash, VlayerClient } from "types/vlayer";
 import { ZkProvingStatus } from "src/web-proof-commons";
 import createFetchMock from "vitest-fetch-mock";
 
@@ -37,38 +46,51 @@ function generateRandomHash() {
 }
 
 describe("Success zk-proving", () => {
-  beforeEach(() => {
-    fetchMocker.mockResponseOnce((req) => {
-      if (req.url === "http://127.0.0.1:3000/") {
-        return {
-          body: JSON.stringify({
-            result: {
-              hash: generateRandomHash(),
-              proof: {},
-            },
-          }),
-        };
-      }
-      return {};
-    });
-  });
-  it("should send message to extension that zkproving started and then that is done", async () => {
+  let hash: string;
+  let zkProvingSpy: MockInstance<(status: ZkProvingStatus) => void>;
+  let vlayer: VlayerClient;
+
+  beforeAll(() => {
+    hash = generateRandomHash();
     const webProofProvider = createExtensionWebProofProvider();
+    zkProvingSpy = vi.spyOn(webProofProvider, "notifyZkProvingStatus");
+    vlayer = createVlayerClient({ webProofProvider });
+  });
+  it("should send message to extension that zkproving started", async () => {
+    fetchMocker.mockResponseOnce(() => {
+      return {
+        body: JSON.stringify({
+          result: hash,
+        }),
+      };
+    });
 
-    const zkProvingSpy = vi.spyOn(webProofProvider, "notifyZkProvingStatus");
-
-    const vlayer = createVlayerClient({ webProofProvider });
-    const hash = await vlayer.prove({
+    const result = await vlayer.prove({
       address: `0x${"a".repeat(40)}`,
       functionName: "main",
       proverAbi: [],
       args: [],
       chainId: 42,
     });
-    await vlayer.waitForProvingResult(hash);
 
+    expect(result.hash).toBe(hash);
     expect(zkProvingSpy).toBeCalledTimes(2);
     expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Proving);
+  });
+  it("should send message to extension that zkproving is done", async () => {
+    fetchMocker.mockResponseOnce(() => {
+      return {
+        body: JSON.stringify({
+          result: {
+            proof: {},
+          },
+        }),
+      };
+    });
+
+    await vlayer.waitForProvingResult({ hash } as BrandedHash<[], string>);
+
+    expect(zkProvingSpy).toBeCalledTimes(2);
     expect(zkProvingSpy).toHaveBeenNthCalledWith(2, ZkProvingStatus.Done);
   });
 });
