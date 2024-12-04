@@ -34,6 +34,7 @@ Our workflows fall into the following categories, grouped by a common prefix:
 | [Build SDK](/.github/workflows/build_sdk.yaml) | Verifies that the SDK builds. |
 | [Deploy book](/.github/workflows/deploy_book.yaml) | Deploys the Book to Vercel. |
 | [Deploy provers](/.github/workflows/deploy_provers.yaml) | Deploys prover servers. |
+| [Deploy chain services](/.github/workflows/deploy_chain_services.yaml) | Deploys chain workers and chain servers. |
 | [Lint Ansible](/.github/workflows/lint_ansible.yaml) | Lint Ansible code. |
 | [Lint Contracts](/.github/workflows/lint_contracts.yaml) | Lint Smart Contracts. |
 | [Lint Rust](/.github/workflows/lint_rust.yaml) | Lint Rust code. |

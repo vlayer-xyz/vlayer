@@ -1,6 +1,7 @@
 ---
-- name: Install prerequisites
-  ansible.builtin.import_tasks: prerequisites.yml
+- name: Install risc0 prerequisite
+  ansible.builtin.import_role:
+    name: risc0
 
 - name: Install vlayerup
   ansible.builtin.shell: |
