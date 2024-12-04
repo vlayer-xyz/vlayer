@@ -9,12 +9,12 @@ use tlsn_core::{
     signing::{Signature, VerifyingKey},
 };
 use tlsn_core_types::{
-    BodyProof, ServerIdentityProof, TestAttestationProof, TestBody, TestPresentation,
+    Body, BodyProof, ServerIdentityProof, TestAttestationProof, TestPresentation,
 };
 
 use crate::web_proof::{PresentationJson, PresentationJsonMeta, WebProof};
 
-pub mod tlsn_core_types;
+pub(crate) mod tlsn_core_types;
 
 pub const NOTARY_PUB_KEY_PEM_EXAMPLE: &str = "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExpX/4R4z40gI6C/j9zAM39u58LJu\n3Cx5tXTuqhhu/tirnBi5GniMmspOTEsps4ANnPLpMmMSfhJ+IFHbc3qVOA==\n-----END PUBLIC KEY-----\n";
 const PRESENTATION_FIXTURE: &str = include_str!(".././testdata/presentation.json");
@@ -30,7 +30,7 @@ pub fn load_web_proof_fixture() -> WebProof {
     load_web_proof_fixture_and_modify(std::clone::Clone::clone)
 }
 
-pub fn load_web_proof_fixture_and_modify<F>(modify: F) -> WebProof
+pub(crate) fn load_web_proof_fixture_and_modify<F>(modify: F) -> WebProof
 where
     F: FnOnce(&TestPresentation) -> TestPresentation,
 {
@@ -56,7 +56,7 @@ where
     }
 }
 
-pub fn corrupt_signature(test_presentation: &TestPresentation) -> TestPresentation {
+pub(crate) fn corrupt_signature(test_presentation: &TestPresentation) -> TestPresentation {
     TestPresentation {
         attestation: TestAttestationProof {
             signature: Signature {
@@ -69,7 +69,7 @@ pub fn corrupt_signature(test_presentation: &TestPresentation) -> TestPresentati
     }
 }
 
-pub fn change_server_name(test_presentation: &TestPresentation) -> TestPresentation {
+pub(crate) fn change_server_name(test_presentation: &TestPresentation) -> TestPresentation {
     TestPresentation {
         identity: Some(ServerIdentityProof {
             name: ServerName::new("api.y.com".to_string()),
@@ -79,11 +79,11 @@ pub fn change_server_name(test_presentation: &TestPresentation) -> TestPresentat
     }
 }
 
-pub fn corrupt_verifying_key(test_presentation: &TestPresentation) -> TestPresentation {
+pub(crate) fn corrupt_verifying_key(test_presentation: &TestPresentation) -> TestPresentation {
     TestPresentation {
         attestation: TestAttestationProof {
             body: BodyProof {
-                body: TestBody {
+                body: Body {
                     verifying_key: Field {
                         data: VerifyingKey {
                             alg: test_presentation

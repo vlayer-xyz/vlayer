@@ -13,55 +13,54 @@ use tlsn_core::{
     transcript::{Direction, Idx, TranscriptProof},
 };
 
-#[derive(Debug, Clone, PartialEq, Eq, Hash)]
-pub struct FilePath(&'static str);
-
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct TestPresentation {
-    pub attestation: TestAttestationProof,
-    pub identity: Option<ServerIdentityProof>,
-    pub transcript: Option<TranscriptProof>,
+pub(crate) struct TestPresentation {
+    pub(crate) attestation: TestAttestationProof,
+    pub(crate) identity: Option<ServerIdentityProof>,
+    pub(crate) transcript: Option<TranscriptProof>,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct ServerIdentityProof {
-    pub name: ServerName,
-    pub opening: ServerCertOpening,
+pub(crate) struct ServerIdentityProof {
+    pub(crate) name: ServerName,
+    pub(crate) opening: ServerCertOpening,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct TestAttestationProof {
-    pub signature: Signature,
-    pub header: Header,
-    pub body: BodyProof,
+pub(crate) struct TestAttestationProof {
+    pub(crate) signature: Signature,
+    pub(crate) header: Header,
+    pub(crate) body: BodyProof,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct BodyProof {
-    pub body: TestBody,
-    pub proof: MerkleProof,
+pub(crate) struct BodyProof {
+    pub(crate) body: Body,
+    pub(crate) proof: MerkleProof,
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub struct TestBody {
-    pub verifying_key: Field<VerifyingKey>,
-    pub connection_info: Field<ConnectionInfo>,
-    pub server_ephemeral_key: Field<ServerEphemKey>,
-    pub cert_commitment: Field<ServerCertCommitment>,
-    pub encoding_commitment: Option<Field<EncodingCommitment>>,
-    pub plaintext_hashes: Index<Field<PlaintextHash>>,
+pub(crate) struct Body {
+    pub(crate) verifying_key: Field<VerifyingKey>,
+    pub(crate) connection_info: Field<ConnectionInfo>,
+    pub(crate) server_ephemeral_key: Field<ServerEphemKey>,
+    pub(crate) cert_commitment: Field<ServerCertCommitment>,
+    pub(crate) encoding_commitment: Option<Field<EncodingCommitment>>,
+    pub(crate) plaintext_hashes: Index<Field<PlaintextHash>>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-pub struct EncodingCommitment {
-    pub root: TypedHash,
-    pub seed: Vec<u8>,
+pub(crate) struct EncodingCommitment {
+    pub(crate) root: TypedHash,
+    pub(crate) seed: Vec<u8>,
 }
 
 #[derive(Debug, Clone)]
 pub(crate) struct Index<T> {
     items: Vec<T>,
+    #[allow(dead_code)]
     field_ids: HashMap<FieldId, usize>,
+    #[allow(dead_code)]
     transcript_idxs: HashMap<Idx, usize>,
 }
 
@@ -120,23 +119,23 @@ impl From<Vec<Field<PlaintextHash>>> for Index<Field<PlaintextHash>> {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 pub(crate) struct PlaintextHash {
-    pub direction: Direction,
-    pub idx: Idx,
-    pub hash: TypedHash,
+    pub(crate) direction: Direction,
+    pub(crate) idx: Idx,
+    pub(crate) hash: TypedHash,
 }
 
 #[derive(Clone, Serialize, Deserialize, Debug)]
 #[serde(deny_unknown_fields)]
-pub struct MerkleProof {
-    pub alg: HashAlgId,
-    pub tree_len: usize,
-    pub proof: rs_merkle::MerkleProof<Hash>,
+pub(crate) struct MerkleProof {
+    pub(crate) alg: HashAlgId,
+    pub(crate) tree_len: usize,
+    pub(crate) proof: rs_merkle::MerkleProof<Hash>,
 }
 mod rs_merkle {
     use serde::{Deserialize, Serialize};
 
     #[derive(Debug, Clone, Serialize, Deserialize)]
-    pub struct MerkleProof<H> {
-        pub proof_hashes: Vec<H>,
+    pub(crate) struct MerkleProof<H> {
+        pub(crate) proof_hashes: Vec<H>,
     }
 }
