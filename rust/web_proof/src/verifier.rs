@@ -69,7 +69,8 @@ mod tests {
     mod verify_and_parse {
         use super::*;
         use crate::fixtures::{
-            change_server_name, load_web_proof_fixture_and_modify, NOTARY_PUB_KEY_PEM_EXAMPLE,
+            utils::{change_server_name, load_web_proof_fixture_and_modify},
+            NOTARY_PUB_KEY_PEM_EXAMPLE,
         };
 
         #[test]

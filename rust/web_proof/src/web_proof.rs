@@ -111,8 +111,9 @@ mod tests {
 
     use super::*;
     use crate::fixtures::{
-        corrupt_signature, corrupt_verifying_key, load_web_proof_fixture,
-        load_web_proof_fixture_and_modify, read_fixture, NOTARY_PUB_KEY_PEM_EXAMPLE,
+        load_web_proof_fixture, read_fixture,
+        utils::{corrupt_signature, corrupt_verifying_key, load_web_proof_fixture_and_modify},
+        NOTARY_PUB_KEY_PEM_EXAMPLE,
     };
 
     #[test]
