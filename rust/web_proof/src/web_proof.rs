@@ -110,12 +110,14 @@ mod tests {
     use tlsn_core::signing::KeyAlgId;
 
     use super::*;
-    use crate::fixtures::{load_web_proof_fixture, read_fixture, NOTARY_PUB_KEY_PEM_EXAMPLE};
+    use crate::fixtures::{
+        corrupt_signature, corrupt_verifying_key, load_web_proof_fixture,
+        load_web_proof_fixture_and_modify, read_fixture, NOTARY_PUB_KEY_PEM_EXAMPLE,
+    };
 
     #[test]
     fn serialize_deserialize_web_proof() {
-        let proof =
-            load_web_proof_fixture("./testdata/presentation.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
+        let proof = load_web_proof_fixture();
 
         let serialized = serde_json::to_string(&proof).unwrap();
         let deserialized: WebProof = serde_json::from_str(&serialized).unwrap();
@@ -127,10 +129,8 @@ mod tests {
 
     #[test]
     fn fail_verification_session_error() {
-        let invalid_proof = load_web_proof_fixture(
-            "testdata/presentation_invalid_signature.json",
-            NOTARY_PUB_KEY_PEM_EXAMPLE,
-        );
+        let invalid_proof = load_web_proof_fixture_and_modify(corrupt_signature);
+
         assert!(matches!(
             invalid_proof.verify(),
             Err(VerificationError::Presentation(err)) if err.to_string() == "presentation error: attestation error caused by: attestation proof error: signature error caused by: signature verification failed: invalid secp256k1 signature"
@@ -139,10 +139,7 @@ mod tests {
 
     #[test]
     fn fail_verification_invalid_merkle_proof() {
-        let invalid_proof = load_web_proof_fixture(
-            "testdata/presentation_invalid_merkle_proof.json",
-            NOTARY_PUB_KEY_PEM_EXAMPLE,
-        );
+        let invalid_proof = load_web_proof_fixture_and_modify(corrupt_verifying_key);
         assert!(matches!(
             invalid_proof.verify(),
             Err(VerificationError::Presentation(err)) if err.to_string() == "presentation error: attestation error caused by: attestation proof error: body proof error caused by: merkle error: invalid merkle proof"
@@ -151,8 +148,7 @@ mod tests {
 
     #[test]
     fn success_verification() {
-        let proof =
-            load_web_proof_fixture("./testdata/presentation.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
+        let proof = load_web_proof_fixture();
         let (request, response, _) = proof.verify().unwrap();
 
         assert_eq!(
@@ -167,16 +163,14 @@ mod tests {
 
     #[test]
     fn success_get_server_name() {
-        let proof =
-            load_web_proof_fixture("./testdata/presentation.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
+        let proof = load_web_proof_fixture();
         let (_, _, server_name) = proof.verify().unwrap();
         assert_eq!(server_name.as_str(), "api.x.com");
     }
 
     #[test]
     fn success_get_notary_pub_key() {
-        let proof =
-            load_web_proof_fixture("./testdata/presentation.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
+        let proof = load_web_proof_fixture();
         assert_eq!(proof.get_notary_pub_key().unwrap(), NOTARY_PUB_KEY_PEM_EXAMPLE);
     }
 
