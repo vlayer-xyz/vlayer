@@ -43,6 +43,9 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
         continue
     fi
 
+    echo "Restarting anvil"
+    docker compose -f /docker/web-proof/docker-compose-release.yaml restart anvil
+
     echo "::group::Initializing vlayer template: ${example_name}"
     VLAYER_TEMP_DIR=$(mktemp -d -t vlayer-test-release-XXXXXX-)
     cd ${VLAYER_TEMP_DIR}
