@@ -80,10 +80,6 @@ function startup_chain_services() {
     done
 
     startup_chain_server ${db_path}
-
-    for args in "$@"; do 
-        wait_for_chain_worker_sync $args
-    done
 }
 
 function startup_chain_worker() {
@@ -141,10 +137,9 @@ function startup_chain_server() {
 
 
 wait_for_chain_worker_sync() {
-    local _rpc_url="$1"  # Ignored, only present for compatibility with CHAIN_WORKER_ARGS
-    local chain_id="$2"
-    local first_block="$3"
-    local last_block="$4"
+    local chain_id="$1"
+    local first_block="$2"
+    local last_block="$3"
     echo "Waiting for chain worker sync... chain_id=${chain_id} first_block=${first_block} last_block=${last_block}"
 
     for i in `seq 1 10` ; do

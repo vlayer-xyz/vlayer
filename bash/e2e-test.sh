@@ -55,7 +55,18 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
 
   if [[ "${example_name}" == "simple_time_travel" ]]; then
     VLAYER_ENV=dev bun run loadFixtures.ts
+    if [[ "${RUN_CHAIN_SERVICES:-0}" == "1" ]] ; then
+      wait_for_chain_worker_sync 31337 1 40
+    fi
     VLAYER_ENV=dev bun run prove.ts
+  elif [[ "${example_name}" == "simple_time_travel" ]]; then
+    if [[ "${RUN_CHAIN_SERVICES:-0}" == "1" ]] ; then
+      wait_for_chain_worker_sync 31337 1 3
+      wait_for_chain_worker_sync 1 20683110 20683110
+      wait_for_chain_worker_sync 8453 19367633 19367633
+      wait_for_chain_worker_sync 10 124962954 124962954
+    fi
+    bun run prove.ts
   else
     bun run prove.ts
   fi
