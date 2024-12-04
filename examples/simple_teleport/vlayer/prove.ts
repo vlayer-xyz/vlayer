@@ -47,7 +47,7 @@ const whaleBadgeNFTAddress = await waitForContractDeploy({
 const { prover, verifier } = await deployVlayerContracts({
   proverSpec,
   verifierSpec,
-  proverArgs: [parseTokensEnv()],
+  proverArgs: [parseTokensEnv() ?? []],
   verifierArgs: [whaleBadgeNFTAddress],
 });
 
