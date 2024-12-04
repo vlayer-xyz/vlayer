@@ -37,20 +37,18 @@ pub(crate) mod utils {
     };
 
     use super::{
-        tlsn_core_types::{
-            Body, BodyProof, ServerIdentityProof, TestAttestationProof, TestPresentation,
-        },
+        tlsn_core_types::{AttestationProof, Body, BodyProof, Presentation, ServerIdentityProof},
         NOTARY_PUB_KEY_PEM_EXAMPLE, PRESENTATION_FIXTURE,
     };
     use crate::web_proof::{PresentationJson, PresentationJsonMeta, WebProof};
 
     pub(crate) fn load_web_proof_fixture_and_modify<F>(modify: F) -> WebProof
     where
-        F: FnOnce(&TestPresentation) -> TestPresentation,
+        F: FnOnce(&Presentation) -> Presentation,
     {
         let presentation_json: PresentationJson =
             serde_json::from_str(PRESENTATION_FIXTURE).unwrap();
-        let test_presentation: TestPresentation =
+        let test_presentation: Presentation =
             bincode::deserialize(&hex::decode(presentation_json.data).unwrap()).unwrap();
 
         let modified_presentation = modify(&test_presentation);
@@ -71,9 +69,9 @@ pub(crate) mod utils {
         }
     }
 
-    pub(crate) fn corrupt_signature(test_presentation: &TestPresentation) -> TestPresentation {
-        TestPresentation {
-            attestation: TestAttestationProof {
+    pub(crate) fn corrupt_signature(test_presentation: &Presentation) -> Presentation {
+        Presentation {
+            attestation: AttestationProof {
                 signature: Signature {
                     alg: test_presentation.attestation.signature.alg,
                     data: vec![0; test_presentation.attestation.signature.data.len()],
@@ -84,8 +82,8 @@ pub(crate) mod utils {
         }
     }
 
-    pub(crate) fn change_server_name(test_presentation: &TestPresentation) -> TestPresentation {
-        TestPresentation {
+    pub(crate) fn change_server_name(test_presentation: &Presentation) -> Presentation {
+        Presentation {
             identity: Some(ServerIdentityProof {
                 name: ServerName::new("api.y.com".to_string()),
                 ..test_presentation.identity.clone().unwrap()
@@ -94,9 +92,9 @@ pub(crate) mod utils {
         }
     }
 
-    pub(crate) fn corrupt_verifying_key(test_presentation: &TestPresentation) -> TestPresentation {
-        TestPresentation {
-            attestation: TestAttestationProof {
+    pub(crate) fn corrupt_verifying_key(test_presentation: &Presentation) -> Presentation {
+        Presentation {
+            attestation: AttestationProof {
                 body: BodyProof {
                     body: Body {
                         verifying_key: Field {

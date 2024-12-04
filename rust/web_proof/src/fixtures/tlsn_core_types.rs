@@ -14,8 +14,8 @@ use tlsn_core::{
 };
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub(crate) struct TestPresentation {
-    pub(crate) attestation: TestAttestationProof,
+pub(crate) struct Presentation {
+    pub(crate) attestation: AttestationProof,
     pub(crate) identity: Option<ServerIdentityProof>,
     pub(crate) transcript: Option<TranscriptProof>,
 }
@@ -27,7 +27,7 @@ pub(crate) struct ServerIdentityProof {
 }
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
-pub(crate) struct TestAttestationProof {
+pub(crate) struct AttestationProof {
     pub(crate) signature: Signature,
     pub(crate) header: Header,
     pub(crate) body: BodyProof,
