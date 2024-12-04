@@ -9,7 +9,6 @@ new Elysia({
     },
   },
 })
-  .use(cors())
   .get("/regular_json", () => {
     return { name: "Gandalf" };
   })
@@ -33,4 +32,5 @@ new Elysia({
     // TODO check if url match known snapshot url and if so
     // return snapshot data
   })
+  .use(cors())
   .listen(3011);
