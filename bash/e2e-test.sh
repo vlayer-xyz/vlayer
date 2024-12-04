@@ -52,7 +52,7 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
 
   cd vlayer
   bun install --frozen-lockfile
-  bun run prove.ts
+  bun run prove:"${VLAYER_ENV}"
   echo '::endgroup::'
 done
 
