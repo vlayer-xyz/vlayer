@@ -5,6 +5,7 @@
     "outDir": "./dist",
     "moduleResolution": "nodenext",
     "module": "NodeNext",
+    "baseUrl": "./",
   },
   "include": [
     "src",
