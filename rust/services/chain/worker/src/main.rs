@@ -4,6 +4,7 @@ use alloy_primitives::ChainId;
 use chain_guest_wrapper::GUEST_ELF;
 use chain_host::{AppendStrategy, Host, HostConfig, PrependStrategy, ProofMode};
 use clap::Parser;
+use common::{GlobalArgs, LogFormat};
 use dotenvy::dotenv;
 use retry::HostErrorFilter;
 use tokio::sync::Mutex;
@@ -57,6 +58,9 @@ struct Cli {
         help = "Minimum number of confirmations required for a block to be appended"
     )]
     confirmations: u64,
+
+    #[clap(flatten)]
+    global_args: GlobalArgs,
 }
 
 impl From<Cli> for HostConfig {
@@ -76,9 +80,10 @@ impl From<Cli> for HostConfig {
 #[tokio::main]
 async fn main() -> anyhow::Result<()> {
     dotenv().ok();
-    init_tracing();
+    let cli = Cli::parse();
+    init_tracing(cli.global_args.log_format.unwrap_or(LogFormat::Plain));
 
-    let config = Cli::parse().into();
+    let config = cli.into();
 
     let host = Arc::new(Mutex::new(Host::try_new(config)?));
     let budget = TpsBudget::new(DEPOSIT_TIME_TO_LIVE, MIN_RETRIES_PER_SECOND, RETRY_PERCENT);

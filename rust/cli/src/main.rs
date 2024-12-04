@@ -5,6 +5,7 @@ use commands::{
     serve::run_serve,
     version::Version,
 };
+use common::{GlobalArgs, LogFormat};
 use test_runner::cli::TestArgs;
 use tracing::error;
 use tracing_subscriber::EnvFilter;
@@ -27,6 +28,8 @@ mod test_utils;
 struct Cli {
     #[command(subcommand)]
     command: Commands,
+    #[clap(flatten)]
+    global_args: GlobalArgs,
 }
 
 #[derive(Subcommand, Debug)]
@@ -39,10 +42,24 @@ enum Commands {
 
 #[tokio::main]
 async fn main() {
+    // In order to view logs, run `RUST_LOG=info cargo run`
     let filter = EnvFilter::try_from_env("RUST_LOG").unwrap_or_else(|_| EnvFilter::new("info"));
 
-    // In order to view logs, run `RUST_LOG=info cargo run`
-    tracing_subscriber::fmt().with_env_filter(filter).init();
+    match Cli::parse()
+        .global_args
+        .log_format
+        .unwrap_or(LogFormat::Plain)
+    {
+        LogFormat::Json => {
+            tracing_subscriber::fmt()
+                .json()
+                .with_env_filter(filter)
+                .init();
+        }
+        LogFormat::Plain => {
+            tracing_subscriber::fmt().with_env_filter(filter).init();
+        }
+    }
 
     match Box::pin(run()).await {
         Ok(_) => (),
