@@ -35,6 +35,7 @@ export const test = base.extend<{
               `--headless=new`,
               `--disable-extensions-except=${pathToExtension}`,
               `--load-extension=${pathToExtension}`,
+              "--host-resolver-rules=MAP lotr-api.online 127.0.0.1",
             ],
           },
     );
