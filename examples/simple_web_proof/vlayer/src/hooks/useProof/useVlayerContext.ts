@@ -1,6 +1,13 @@
 import { customTransport } from "@vlayer/sdk/config";
 import { createContext } from "@vlayer/sdk/config";
 import { useMemo } from "react";
+import { type EIP1193Provider } from "viem";
+
+declare global {
+  interface Window {
+    ethereum?: EIP1193Provider;
+  }
+}
 
 export const useVlayerContext = () => {
   const { ethClient: walletClient } = useMemo(
@@ -13,7 +20,7 @@ export const useVlayerContext = () => {
           privateKey: import.meta.env.VITE_PRIVATE_KEY,
         },
         import.meta.env.VITE_USE_WINDOW_ETHEREUM_TRANSPORT
-          ? customTransport(window.ethereum)
+          ? customTransport(window.ethereum as EIP1193Provider)
           : undefined,
       ),
     [],

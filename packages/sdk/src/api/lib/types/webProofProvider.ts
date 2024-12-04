@@ -1,4 +1,4 @@
-import { Hex, Abi, ContractFunctionName } from "viem";
+import { Hex, Abi, ContractFunctionName, Account } from "viem";
 import type { ContractFunctionArgsWithout } from "./viem";
 import {
   Branded,
@@ -13,6 +13,8 @@ export type WebProofRequestInput = {
   logoUrl: string;
   steps: WebProofStep[];
   notaryPubKey?: string;
+  verifierAbi?: Abi;
+  account?: Account
 };
 
 export type WebProofRequest = Branded<

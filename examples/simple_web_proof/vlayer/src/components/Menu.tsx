@@ -18,6 +18,10 @@ function Menu({
   };
 
   const currentStep = () => {
+    if (vlayerFlow.completed) {
+      return "🎉 Proof verified successfully!";
+    }
+
     switch (vlayerFlow.stage) {
       case "web_proof_requested":
         return "Generating Web Proof (1/3)";
@@ -25,8 +29,6 @@ function Menu({
         return "Generating ZK Proof (2/3)";
       case "verification_requested":
         return "Verifying on-chain (3/3)";
-      case vlayerFlow.completed:
-        return "🎉 Proof verified successfully!";
       default:
         return "Generate Proof of Twitter Handle";
     }
@@ -81,7 +83,7 @@ function Menu({
           {vlayerFlow.completed && (
             <div className="text-block w-full mt-5">
               Verification hash: <br />
-              {`${vlayerFlow.verification.transactionHash.slice(0, 6)}...${vlayerFlow.verification.transactionHash.slice(-4)}`}
+              {`${vlayerFlow.verification?.transactionHash?.slice(0, 6)}...${vlayerFlow.verification?.transactionHash?.slice(-4)}`}
             </div>
           )}
         </div>

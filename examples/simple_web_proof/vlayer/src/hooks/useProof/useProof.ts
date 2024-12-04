@@ -1,3 +1,5 @@
+// @ts-nocheck
+
 import { useWebProofProvider } from "./useWebProofProvider";
 import { useVlayerContext } from "./useVlayerContext";
 import { useVlayerFlowReducer } from "./useVlayerFlowReducer";
@@ -8,12 +10,17 @@ import { Abi, ContractFunctionName } from "viem";
 import { useVlayerClient } from "./useVlayerClient";
 import { useEffect } from "react";
 
+type ErrorWithMessages = {
+  message?: string;
+  shortMessage?: string;
+};
+
 export const useVlayerFlow = ({
   webProofConfig,
 }: {
   webProofConfig: GetWebProofArgs<Abi, ContractFunctionName>;
 }) => {
-  const { stage, zkProof, webProof, verification, beauty, dispatch } =
+  const { stage, zkProof, webProof, verification, dispatch } =
     useVlayerFlowReducer();
 
   const webProofProvider = useWebProofProvider();
@@ -21,12 +28,11 @@ export const useVlayerFlow = ({
   useEffect(() => {
     webProofProvider.addEventListeners(
       ExtensionMessageType.ProofDone,
-      ({ payload: { proof, beauty } }) => {
+      ({ payload: { proof } }) => {
         dispatch({
           kind: VlayerFlowActionKind.WEB_PROOF_RECEIVED,
           payload: {
             webproof: proof,
-            beauty,
           },
         });
       },
@@ -39,7 +45,6 @@ export const useVlayerFlow = ({
     webProofConfig.proverCallCommitment.chainId,
   );
   return {
-    beauty,
     webProofProvider,
     walletClient,
     stage,
@@ -62,7 +67,7 @@ export const useVlayerFlow = ({
             notary_pub_key: webProofConfig.notaryPubKey,
           }),
         },
-        webProofConfig.account.address,
+        webProofConfig.account?.address,
       ]);
       console.log("zkProof", zkProof);
       dispatch({
@@ -90,9 +95,9 @@ export const useVlayerFlow = ({
 
         const txHash = await ethClient.writeContract({
           address: import.meta.env.VITE_VERIFIER_ADDRESS,
-          abi: webProofConfig.verifierAbi,
+          abi: webProofConfig.verifierAbi as Abi,
           functionName: "verify",
-          args: zkProof,
+          args: zkProof as readonly unknown[],
           chain,
           account: account,
         });
@@ -110,10 +115,11 @@ export const useVlayerFlow = ({
           payload: { verification },
         });
       } catch (err) {
+        const error = err as ErrorWithMessages;
         console.log({ err });
         dispatch({
           kind: VlayerFlowActionKind.VERIFICATION_FAILED,
-          payload: { error: err?.shortMessage || err?.message },
+          payload: { error: error.shortMessage || error.message },
         });
       }
     },

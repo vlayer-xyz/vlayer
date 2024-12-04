@@ -1,3 +1,5 @@
+import { Transaction } from "viem";
+
 export enum VlayerFlowStage {
   INITIAL = "ready",
   WEB_PROOF_REQUESTED = "web_proof_requested",
@@ -27,7 +29,6 @@ export type VlayerFlowAction =
       kind: VlayerFlowActionKind.WEB_PROOF_RECEIVED;
       payload: {
         webproof: unknown;
-        beauty: unknown;
       };
     }
   | {
@@ -51,7 +52,7 @@ export type VlayerFlowAction =
   | {
       kind: VlayerFlowActionKind.VERIFICATION_FAILED;
       payload: {
-        error: string;
+        error: string | undefined;
       };
     };
 
@@ -59,6 +60,5 @@ export type VlayerFlowState = {
   stage: VlayerFlowStage;
   zkProof: unknown;
   webProof: unknown;
-  verification: unknown;
-  beauty: unknown;
+  verification: Transaction;
 };

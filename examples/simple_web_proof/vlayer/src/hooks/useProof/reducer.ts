@@ -13,12 +13,11 @@ const handleWebProofRequested = (prev: VlayerFlowState) => ({
 
 const handleWebProofReceived = (
   prev: VlayerFlowState,
-  { webproof, beauty }: { webproof: unknown; beauty: unknown },
+  { webproof }: { webproof: unknown },
 ) => ({
   ...prev,
   stage: VlayerFlowStage.WEB_PROOF_RECEIVED,
   webProof: webproof,
-  beauty,
 });
 
 const handleZkProofRequested = (prev: VlayerFlowState) => ({
@@ -38,6 +37,15 @@ const handleZkProofReceived = (
 const handleVerificationRequested = (prev: VlayerFlowState) => ({
   ...prev,
   stage: VlayerFlowStage.VERIFICATION_REQUESTED,
+});
+
+const handleVerificationFailed = (
+  prev: VlayerFlowState,
+  { error }: { error: string | undefined },
+) => ({
+  ...prev,
+  stage: VlayerFlowStage.VERIFICATION_FAILED,
+  error,
 });
 
 const handleVerificationReceived = (
@@ -71,5 +79,8 @@ export const vlayerFlowReducer = (
     )
     .with({ kind: VlayerFlowActionKind.VERIFICATION_RECEIVED }, ({ payload }) =>
       handleVerificationReceived(prev, payload),
+    )
+    .with({ kind: VlayerFlowActionKind.VERIFICATION_FAILED }, ({ payload }) =>
+      handleVerificationFailed(prev, payload),
     )
     .exhaustive();
