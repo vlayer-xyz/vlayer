@@ -7,11 +7,16 @@ export class DkimParsingError extends Error {
   }
 }
 
+export interface DkimDomainSelector {
+  domain: string;
+  selector: string;
+}
+
 export async function parseEmail(mime: string) {
   return await PostalMime.parse(mime.trim());
 }
 
-export function getDkimSigners(mail: Email) {
+export function getDkimSigners(mail: Email): DkimDomainSelector[] {
   const dkimHeader = mail.headers.filter((h) => h.key === "dkim-signature");
   if (dkimHeader.length === 0) {
     throw new DkimParsingError("No DKIM header found");
@@ -30,7 +35,7 @@ export function parseParams(str: string) {
   ) as Record<string, string>;
 }
 
-function parseHeader(header: Header) {
+function parseHeader(header: Header): DkimDomainSelector {
   const params = parseParams(header.value);
   if (!params) {
     throw new DkimParsingError(`Invalid DKIM header ${header.value}`);
