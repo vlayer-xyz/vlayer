@@ -1,9 +1,9 @@
 {
   "name": "app",
-  "version": "0.0.1",
+  "version": "0.0.0-test",
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1",
-    "dev": "bun run --watch src/index.ts",
+    "dev": "bun run --watch src/index.ts"
   },
   "dependencies": {
     "@elysiajs/cors": "^1.1.1",
