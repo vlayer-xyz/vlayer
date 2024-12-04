@@ -1,6 +1,14 @@
 import React, { ErrorInfo } from "react";
 
-class ErrorBoundary extends React.Component<{ children: React.ReactNode }> {
+interface ErrorState {
+  hasError: boolean;
+  hint: string;
+}
+
+class ErrorBoundary extends React.Component<
+  { children: React.ReactNode },
+  ErrorState
+> {
   constructor(props: { children: React.ReactNode }) {
     super(props);
     this.state = { hasError: false, hint: "" };

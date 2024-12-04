@@ -3,6 +3,7 @@ import verifierSpec from "../../out/WebProofVerifier.sol/WebProofVerifier.json";
 import { expectUrl, notarize, startPage } from "@vlayer/sdk/web_proof";
 import { createContext } from "@vlayer/sdk/config";
 import * as chains from "viem/chains";
+import { type Abi, type Hex } from "viem";
 
 const { account } = await createContext({
   chainName: import.meta.env.VITE_CHAIN_NAME,
@@ -13,7 +14,7 @@ const { account } = await createContext({
 
 export const config = {
   proverCallCommitment: {
-    address: import.meta.env.VITE_PROVER_ADDRESS,
+    address: import.meta.env.VITE_PROVER_ADDRESS as Hex,
     proverAbi: proverSpec.abi as Abi,
     chainId: chains[import.meta.env.VITE_CHAIN_NAME as keyof typeof chains].id,
     functionName: "main",

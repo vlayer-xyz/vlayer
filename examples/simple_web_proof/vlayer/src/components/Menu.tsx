@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { useVlayerFlow } from "../hooks/useProof";
 
 function Menu({
   vlayerFlow,
@@ -17,12 +18,12 @@ function Menu({
   };
 
   const currentStep = () => {
-    switch (true) {
-      case vlayerFlow.isWebProving:
+    switch (vlayerFlow.stage) {
+      case "web_proof_requested":
         return "Generating Web Proof (1/3)";
-      case vlayerFlow.isZkProving:
+      case "zk_proof_requested":
         return "Generating ZK Proof (2/3)";
-      case vlayerFlow.isVerifying:
+      case "verification_requested":
         return "Verifying on-chain (3/3)";
       case vlayerFlow.completed:
         return "🎉 Proof verified successfully!";
