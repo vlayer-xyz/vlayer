@@ -9,6 +9,11 @@ const config = {
 
 const VLAYER_SERVER_URL = "http://127.0.0.1:3000";
 
+const checkIsValidHash = (x: string) => {
+  expect(x.length).toBe(64 + 2);
+  expect(x.startsWith("0x")).toBeTruthy();
+};
+
 test.describe("Full flow of webproof using extension", () => {
   test("Full flow from opening sidepanel to redirection", async ({
     page,
@@ -105,7 +110,8 @@ test.describe("Full flow of webproof using extension", () => {
       expect(response.ok()).toBeTruthy();
 
       const response_json = (await response.json()) as object;
-      expect(response_json).toHaveProperty("result.proof");
+      expect(response_json).toHaveProperty("result");
+      checkIsValidHash((response_json as { result: string }).result);
     });
   });
 
@@ -188,7 +194,8 @@ test.describe("Full flow of webproof using extension", () => {
       expect(response.ok()).toBeTruthy();
 
       const response_json = (await response.json()) as object;
-      expect(response_json).toHaveProperty("result.proof");
+      expect(response_json).toHaveProperty("result");
+      checkIsValidHash((response_json as { result: string }).result);
     });
   });
 });

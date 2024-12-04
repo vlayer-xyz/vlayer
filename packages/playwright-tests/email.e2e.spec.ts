@@ -6,6 +6,11 @@ const VLAYER_SERVER_URL = "http://127.0.0.1:3000";
 
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
+const checkIsValidHash = (x: string) => {
+  expect(x.length).toBe(64 + 2);
+  expect(x.startsWith("0x")).toBeTruthy();
+};
+
 test("Success email proof flow", async ({ page }) => {
   await page.goto("/email");
   await expect(page.locator("h1")).toHaveText("Email");
@@ -18,5 +23,6 @@ test("Success email proof flow", async ({ page }) => {
   expect(response.ok()).toBeTruthy();
 
   const response_json = (await response.json()) as object;
-  expect(response_json).toHaveProperty("result.proof");
+  expect(response_json).toHaveProperty("result");
+  checkIsValidHash((response_json as { result: string }).result);
 });
