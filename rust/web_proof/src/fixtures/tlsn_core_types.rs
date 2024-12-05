@@ -1,4 +1,5 @@
-// All types are copied from tlsn_core crate, so we can use them in our tests.
+// These types are copied from the `tlsn_core` crate to be used in our tests.
+// The only change is that all fields have increased visibility, with the `pub(crate)` modifier applied throughout.
 
 use std::collections::HashMap;
 
