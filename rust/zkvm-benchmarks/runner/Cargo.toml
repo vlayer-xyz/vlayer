@@ -16,6 +16,9 @@ thiserror = { workspace = true }
 thousands = { workspace = true }
 zkvm-benchmarks = { workspace = true }
 
+frost-ed25519 = {version = "^2.0.0"}
+rand = "0.8.5"
+
 [build-dependencies]
 anyhow = { workspace = true }
 risc0-build = { workspace = true }
