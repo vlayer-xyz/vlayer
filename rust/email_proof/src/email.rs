@@ -1,6 +1,5 @@
 use alloy_sol_types::SolValue;
 use mailparse::{headers::Headers, MailHeaderMap, MailParseError, ParsedMail};
-use regex::Regex;
 
 pub(crate) mod sol;
 
@@ -90,9 +89,38 @@ impl Email {
         Ok(email.to_string())
     }
 
+    fn is_character_not_allowed_in_email_address(c: char) -> bool {
+        !(c.is_ascii_alphanumeric() || c == '.' || c == '-')
+    }
+
     fn is_email_valid(email: &str) -> bool {
-        let email_regex = Regex::new(r"^[\w\-.]+@([\w-]+\.)+[\w-]{2,4}$").unwrap();
-        email_regex.is_match(email)
+        let (username, domainname) = match email.split_once('@') {
+            Some((host, domain)) => (host, domain),
+            None => return false,
+        };
+        if username.is_empty() || domainname.is_empty() {
+            return false;
+        }
+        if username.contains(Self::is_character_not_allowed_in_email_address) {
+            return false;
+        }
+        if domainname.contains(Self::is_character_not_allowed_in_email_address) {
+            return false;
+        }
+        if username.starts_with('.') || username.ends_with('.') {
+            return false;
+        }
+        if domainname.starts_with('.') || domainname.contains("..") {
+            return false;
+        }
+        if let Some((_, domain)) = domainname.rsplit_once('.') {
+            if domain.len() < 2 {
+                return false;
+            }
+        } else {
+            return false;
+        }
+        true
     }
 }
 
