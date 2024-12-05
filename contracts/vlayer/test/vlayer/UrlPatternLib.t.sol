@@ -3,7 +3,7 @@ pragma solidity ^0.8.13;
 
 import "../../src/testing/VTest.sol";
 
-import {URLPatternLib} from "../../src/UrlPattern.sol";
+import {URLPatternLib} from "../../src/URLPattern.sol";
 
 contract UrlPatternWrapper {
     function do_test(string memory source, string memory pattern) public view returns (bool) {
