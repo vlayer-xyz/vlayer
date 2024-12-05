@@ -36,6 +36,8 @@ echo '::endgroup::'
 
 echo "::group::vlayer run deploy:testnet: ${example_name}"
 bun run deploy:testnet
+rm deploy.ts
+rm prove.ts
 echo '::endgroup::'
 
 echo "::group::vlayer install vercel"
