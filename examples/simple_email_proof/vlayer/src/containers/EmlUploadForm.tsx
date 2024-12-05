@@ -19,19 +19,8 @@ function getChainByName(name: string) {
   }
 }
 
-const { ethClient: walletClient } = await createContext(
-  {
-    chainName: import.meta.env.VITE_CHAIN_NAME as string,
-    proverUrl: import.meta.env.VITE_PROVER_URL as string,
-    jsonRpcUrl: import.meta.env.VITE_JSON_RPC_URL as string,
-    privateKey: import.meta.env.VITE_PRIVATE_KEY as `0x${string}`,
-  },
-  import.meta.env.VITE_USE_WINDOW_ETHEREUM_TRANSPORT
-    ? customTransport(window.ethereum)
-    : undefined,
-);
-
 const EmlUploadForm = () => {
+  const [walletClient, setWalletClient] = useState();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentStep, setCurrentStep] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
@@ -39,6 +28,25 @@ const EmlUploadForm = () => {
   const [claimerAddr, setClaimerAddr] = useState<Address>("0x");
   const chain = getChainByName(import.meta.env.VITE_CHAIN_NAME as string);
 
+  useEffect(() => {
+    const getWallet = async () => {
+      const { ethClient } = await createContext(
+        {
+          chainName: import.meta.env.VITE_CHAIN_NAME as string,
+          proverUrl: import.meta.env.VITE_PROVER_URL as string,
+          jsonRpcUrl: import.meta.env.VITE_JSON_RPC_URL as string,
+          privateKey: import.meta.env.VITE_PRIVATE_KEY as `0x${string}`,
+        },
+        import.meta.env.VITE_USE_WINDOW_ETHEREUM_TRANSPORT
+          ? customTransport(window.ethereum)
+          : undefined,
+      );
+
+      setWalletClient(ethClient);
+    };
+
+    getWallet();
+  }, []);
   const { prove, proof, provingError } = useProver({
     addr: import.meta.env.VITE_PROVER_ADDRESS,
     abi: proverSpec.abi,
@@ -64,7 +72,7 @@ const EmlUploadForm = () => {
     console.log({ err });
     setIsSubmitting(false);
     if (err instanceof Error) {
-      setErrorMsg(err.message);
+      setErrorMsg(err?.shortMessage ?? err.message);
     } else {
       setErrorMsg("Something went wrong, check logs");
     }
