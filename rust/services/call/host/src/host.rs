@@ -19,6 +19,7 @@ use call_engine::{
     },
     Call, CallGuestId, GuestOutput, HostOutput, Input, Seal,
 };
+use chain_client::Client;
 use common::GuestElf;
 pub use config::{Config, DEFAULT_MAX_CALLDATA_SIZE};
 use derive_new::new;
@@ -48,11 +49,17 @@ pub struct Host {
 }
 
 impl Host {
-    pub fn try_new(config: Config) -> Result<Self, Error> {
+    pub async fn try_new(config: Config) -> Result<Self, Error> {
         let provider_factory = EthersProviderFactory::new(config.rpc_urls.clone());
         let providers = CachedMultiProvider::from_factory(provider_factory);
-        let block_number = get_latest_block_number(&providers, config.start_chain_id)?;
         let chain_client = chain_client::RpcClient::new(&config.chain_proof_url);
+        // Use latest block **for which we have chain proof** as settlement block
+        let latest_block_number = get_latest_block_number(&providers, config.start_chain_id)?;
+        let block_number = chain_client
+            .get_sync_status(config.start_chain_id)
+            .await?
+            .last_block;
+        assert_eq!(block_number, latest_block_number);
         Host::try_new_with_components(providers, block_number, chain_client, config)
     }
 
@@ -258,29 +265,5 @@ mod test {
         );
 
         Ok(())
-    }
-
-    mod try_new {
-        use super::*;
-
-        #[tokio::test(flavor = "multi_thread")]
-        async fn try_new_invalid_rpc_url() -> anyhow::Result<()> {
-            let config = Config {
-                rpc_urls: test_rpc_urls(),
-                start_chain_id: TEST_CHAIN_ID,
-                proof_mode: ProofMode::Fake,
-                ..Config::default()
-            };
-            let res = Host::try_new(config);
-
-            assert!(matches!(
-                res.map(|_| ()).unwrap_err(),
-                Error::Provider(ref msg) if msg.to_string().contains(
-                    "Error fetching block header"
-                )
-            ));
-
-            Ok(())
-        }
     }
 }

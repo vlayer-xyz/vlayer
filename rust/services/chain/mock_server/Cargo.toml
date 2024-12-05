@@ -4,6 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+alloy-primitives = { workspace = true }
 axum-jrpc = { workspace = true }
 bincode = { workspace = true }
 block_header = { workspace = true }

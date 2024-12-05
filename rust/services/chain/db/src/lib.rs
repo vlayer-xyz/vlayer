@@ -8,7 +8,7 @@ use std::{
 use alloy_primitives::{keccak256, BlockNumber, ChainId, B256};
 use alloy_rlp::{Decodable, RlpDecodable, RlpEncodable};
 use bytes::Bytes;
-use chain_common::{ChainProofReceipt, RpcChainProof};
+use chain_common::{ChainProofReceipt, RpcChainProof, SyncStatus};
 use chain_trie::{verify_chain_trie, UnverifiedChainTrie};
 use derive_more::Debug;
 use derive_new::new;
@@ -62,6 +62,16 @@ impl ChainInfo {
     pub fn block_range(&self) -> NonEmptyRange {
         // SAFETY: was created from `NonEmptyRange`
         NonEmptyRange::try_from_range(self.first_block..=self.last_block).unwrap()
+    }
+}
+
+impl From<ChainInfo> for SyncStatus {
+    fn from(chain_info: ChainInfo) -> Self {
+        let block_range = chain_info.block_range();
+        Self {
+            first_block: block_range.start(),
+            last_block: block_range.end(),
+        }
     }
 }
 

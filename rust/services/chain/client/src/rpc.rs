@@ -1,9 +1,7 @@
 use alloy_primitives::{BlockNumber, ChainId};
 use async_trait::async_trait;
-use chain_common::{ChainProof, RpcChainProof};
-use derive_new::new;
-use serde::Serialize;
-use server_utils::rpc::{Client as RawRpcClient, Method};
+use chain_common::{ChainProof, GetChainProof, GetSyncStatus, RpcChainProof, SyncStatus};
+use server_utils::rpc::Client as RawRpcClient;
 use tracing::info;
 
 use crate::{Client, Error};
@@ -20,16 +18,6 @@ impl RpcClient {
     }
 }
 
-#[derive(new, Serialize)]
-struct GetChainProof {
-    chain_id: ChainId,
-    block_numbers: Vec<BlockNumber>,
-}
-
-impl Method for GetChainProof {
-    const METHOD_NAME: &str = "v_chain";
-}
-
 #[async_trait]
 impl Client for RpcClient {
     async fn get_chain_proof(
@@ -38,8 +26,7 @@ impl Client for RpcClient {
         block_numbers: Vec<BlockNumber>,
     ) -> Result<ChainProof, Error> {
         info!(
-            "Fetching chain proof for chain_id: {}, block_numbers.len(): {}",
-            chain_id,
+            "Fetching chain proof for chain_id: {chain_id}, block_numbers.len(): {}",
             block_numbers.len()
         );
 
@@ -50,5 +37,15 @@ impl Client for RpcClient {
         let chain_proof = rpc_chain_proof.try_into()?;
 
         Ok(chain_proof)
+    }
+
+    async fn get_sync_status(&self, chain_id: ChainId) -> Result<SyncStatus, Error> {
+        info!("Getting sync status for chain_id: {chain_id}");
+
+        let params = GetSyncStatus::new(chain_id);
+        let result_value = self.rpc_client.call(params).await.map_err(Error::from)?;
+        let sync_status: SyncStatus = serde_json::from_value(result_value)?;
+
+        Ok(sync_status)
     }
 }

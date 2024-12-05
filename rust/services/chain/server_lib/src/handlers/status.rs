@@ -1,37 +1,15 @@
 use std::sync::Arc;
 
-use alloy_primitives::{BlockNumber, ChainId};
-use chain_db::{ChainDb, ChainInfo};
+use chain_common::{GetSyncStatus, SyncStatus};
+use chain_db::ChainDb;
 use parking_lot::RwLock;
-use serde::{Deserialize, Serialize};
 
 use crate::error::AppError;
 
-#[derive(Deserialize, Serialize, Clone, Debug)]
-pub struct Params {
-    chain_id: ChainId,
-}
-
-#[derive(Deserialize, Serialize, Clone, Debug, PartialEq, Eq)]
-pub struct ChainStatus {
-    first_block: BlockNumber,
-    last_block: BlockNumber,
-}
-
-impl From<ChainInfo> for ChainStatus {
-    fn from(chain_info: ChainInfo) -> Self {
-        let block_range = chain_info.block_range();
-        Self {
-            first_block: block_range.start(),
-            last_block: block_range.end(),
-        }
-    }
-}
-
 pub async fn v_sync_status(
     chain_db: Arc<RwLock<ChainDb>>,
-    Params { chain_id }: Params,
-) -> Result<ChainStatus, AppError> {
+    GetSyncStatus { chain_id }: GetSyncStatus,
+) -> Result<SyncStatus, AppError> {
     chain_db
         .read()
         .get_chain_info(chain_id)?
@@ -42,7 +20,7 @@ pub async fn v_sync_status(
 #[cfg(test)]
 mod tests {
 
-    use chain_db::ChainUpdate;
+    use chain_db::{ChainInfo, ChainUpdate};
     use common::GuestElf;
     use u64_range::NonEmptyRange;
 
@@ -50,7 +28,7 @@ mod tests {
 
     #[tokio::test]
     async fn empty_db() {
-        let params = Params { chain_id: 1 };
+        let params = GetSyncStatus { chain_id: 1 };
         let chain_db = Arc::new(RwLock::new(ChainDb::in_memory(GuestElf::default())));
         assert_eq!(
             v_sync_status(chain_db, params).await.unwrap_err(),
@@ -60,7 +38,7 @@ mod tests {
 
     #[tokio::test]
     async fn single_block() {
-        let params = Params { chain_id: 1 };
+        let params = GetSyncStatus { chain_id: 1 };
         let chain_db = Arc::new(RwLock::new(ChainDb::in_memory(GuestElf::default())));
         let chain_info = ChainInfo::new(
             NonEmptyRange::from_single_value(0),
@@ -73,7 +51,7 @@ mod tests {
             .expect("update_chain failed");
         assert_eq!(
             v_sync_status(chain_db, params).await.unwrap(),
-            ChainStatus {
+            SyncStatus {
                 first_block: 0,
                 last_block: 0
             }

@@ -17,7 +17,6 @@ use foundry_evm::revm::{
 };
 use mock_chain_server::{ChainProofServerMock, EMPTY_PROOF_RESPONSE};
 use provider::CachedMultiProvider;
-use serde_json::json;
 
 use crate::{
     cheatcodes::{callProverCall, getProofCall, CHEATCODE_CALL_ADDR},
@@ -124,7 +123,13 @@ impl CheatcodeInspector {
 }
 
 async fn start_chain_proof_server() -> ChainProofServerMock {
-    ChainProofServerMock::start(json!({}), EMPTY_PROOF_RESPONSE.clone(), 1).await
+    let mut chain_proof_server = ChainProofServerMock::start().await;
+    chain_proof_server
+        .mock_chain_proof()
+        .with_result(EMPTY_PROOF_RESPONSE.clone())
+        .add()
+        .await;
+    chain_proof_server
 }
 
 fn create_host<DB: Database>(
