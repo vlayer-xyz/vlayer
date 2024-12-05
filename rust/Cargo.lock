@@ -2504,7 +2504,6 @@ dependencies = [
  "flate2",
  "hex",
  "lazy_static",
- "mock_chain_server",
  "regex",
  "reqwest 0.12.8",
  "serde_json",

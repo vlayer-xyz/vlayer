@@ -25,10 +25,11 @@ pub use config::{Config, DEFAULT_MAX_CALLDATA_SIZE};
 use derive_new::new;
 pub use error::Error;
 use ethers_core::types::BlockNumber as BlockTag;
+use mock_chain_server::ChainProofServerMock;
 use prover::Prover;
 use provider::{CachedMultiProvider, EthersProviderFactory, EvmBlockHeader};
 use seal::EncodableReceipt;
-use tracing::info;
+use tracing::{info, warn};
 
 use crate::{evm_env::factory::HostEvmEnvFactory, into_input::into_multi_input, HostDb};
 
@@ -48,18 +49,46 @@ pub struct Host {
     guest_elf: GuestElf,
 }
 
+async fn start_chain_proof_server(
+    chain_id: ChainId,
+    block_header: Box<dyn EvmBlockHeader>,
+) -> String {
+    warn!("Chain proof sever URL not provided. Running with mock server");
+    let mut chain_proof_server = ChainProofServerMock::start().await;
+    chain_proof_server
+        .mock_single_block(chain_id, block_header)
+        .await;
+    chain_proof_server.url()
+}
+
 impl Host {
     pub async fn try_new(config: Config) -> Result<Self, Error> {
         let provider_factory = EthersProviderFactory::new(config.rpc_urls.clone());
         let providers = CachedMultiProvider::from_factory(provider_factory);
-        let chain_client = chain_client::RpcClient::new(&config.chain_proof_url);
-        // Use latest block **for which we have chain proof** as settlement block
-        let latest_block_number = get_latest_block_number(&providers, config.start_chain_id)?;
-        let block_number = chain_client
-            .get_sync_status(config.start_chain_id)
-            .await?
-            .last_block;
-        assert_eq!(block_number, latest_block_number);
+
+        let (block_number, chain_client) = match config.chain_proof_url.as_ref() {
+            Some(url) => {
+                let chain_client = chain_client::RpcClient::new(url);
+                // If a chain server is running, use latest block **for which we have chain proof**
+                // as the settlement block. For newer block getting chain proof would fail.
+                let block_number = chain_client
+                    .get_sync_status(config.start_chain_id)
+                    .await?
+                    .last_block;
+                (block_number, chain_client)
+            }
+            None => {
+                let latest_block = providers
+                    .get(config.start_chain_id)?
+                    .get_block_header(BlockTag::Latest)?
+                    .expect("latest block not found");
+                let block_number = latest_block.number();
+                let url = start_chain_proof_server(config.start_chain_id, latest_block).await;
+                let chain_client = chain_client::RpcClient::new(url);
+                (block_number, chain_client)
+            }
+        };
+
         Host::try_new_with_components(providers, block_number, chain_client, config)
     }
 

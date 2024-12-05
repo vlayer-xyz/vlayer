@@ -146,13 +146,13 @@ fn create_host<DB: Database>(
     let providers = CachedMultiProvider::from_factory(provider_factory);
     let config = HostConfig {
         start_chain_id: TEST_CHAIN_ID,
-        chain_proof_url,
+        chain_proof_url: Some(chain_proof_url.clone()),
         call_guest_elf: GUEST_ELF.clone(),
         ..Default::default()
     };
     let block_number = get_latest_block_number(&providers, config.start_chain_id)
         .expect("failed to get block number");
-    let chain_proof_client = RpcChainProofClient::new(config.chain_proof_url.clone());
+    let chain_proof_client = RpcChainProofClient::new(chain_proof_url);
 
     Host::try_new_with_components(providers, block_number, chain_proof_client, config)
         .expect("failed to create host")
