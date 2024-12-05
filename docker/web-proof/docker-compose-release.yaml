@@ -3,25 +3,24 @@ services:
     image: jwnmulder/websockify
     platform: linux/amd64
     ports:
-      - "55688:80"
-    command: "80 swapi.dev:443"
+      - "55688:80" 
+    command: "80 lotr-api.online:3011"
+      
   notary-server:
     image: ghcr.io/tlsnotary/tlsn/notary-server:v0.1.0-alpha.7
     ports:
       - "7047:7047"
     volumes:
       - ./notary-config:/root/.notary-server/config
-  anvil:
-    build:
-      dockerfile: ../anvil/Dockerfile
-    platform: linux/amd64
-    ports:
-      - "8545:8545"
-  vlayer:
+  json-server:
     build:
       context: ../../
-      dockerfile: ./docker/vlayer/Dockerfile.nightly
-    command: "serve --proof fake --host 0.0.0.0 --rpc-url 31337:http://anvil:8545"
+      dockerfile: ./docker/json-server/Dockerfile
     ports:
-      - "3000:3000"
+      - "3011:3011"
+    networks:
+      default:
+        aliases:
+          - lotr-api.online
+
 

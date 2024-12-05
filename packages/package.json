@@ -29,7 +29,8 @@
     "sdk/",
     "web-components/",
     "extension-hooks/",
-    "test-web-app/"
+    "test-web-app/",
+    "test-json-server/"
   ],
   "trustedDependencies": [
     "viem"
