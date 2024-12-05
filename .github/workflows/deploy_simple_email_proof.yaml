@@ -1,0 +1,42 @@
+name: Deploy simple-email-proof example
+on:
+  pull_request:
+    paths:
+      - "examples/simple_email_proof/**"
+      - ".github/workflows/deploy_simple_email_proof.yaml"
+  push:
+    paths:
+      - "examples/simple_email_proof/**"
+      - ".github/workflows/deploy_simple_email_proof.yaml"
+    branches:
+      - main
+
+jobs:
+  deploy-simple-email-proof:
+    name: Deploy simple-email-proof example
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Deploy to Vercel
+        if: github.ref == 'refs/heads/main'
+        env:
+          VERCEL_ENV: production
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT_ID: prj_lZyng5MaLLgPzLah9EMYIoH3t74s
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: bash/deploy-simple-email-proof.sh
+
+      - name: Deploy to Vercel (PR Preview)
+        if: github.event_name == 'pull_request'
+        env:
+          VERCEL_ENV: preview
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT_ID: prj_lZyng5MaLLgPzLah9EMYIoH3t74s
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.number }}
+        run: bash/deploy-simple-email-proof.sh
