@@ -39,6 +39,7 @@ bun run deploy:testnet
 echo '::endgroup::'
 
 echo "::group::vlayer install vercel"
+cd ..
 npm install -g vercel
 echo '::endgroup::'
 
@@ -47,13 +48,13 @@ mkdir -p .vercel
 echo "{\"projectId\":\"${VERCEL_PROJECT_ID}\",\"orgId\":\"${VERCEL_ORG_ID}\"}" > .vercel/project.json
 
 if [ "$VERCEL_ENV" == "production" ]; then
-  vercel env pull .env.testnet --token "$VERCEL_TOKEN" --prod
-  vercel env pull .env.testnet.local --token "$VERCEL_TOKEN"
+  vercel env pull ./vlayer/.env.testnet --token "$VERCEL_TOKEN" --prod
+  vercel env pull ./vlayer/.env.testnet.local --token "$VERCEL_TOKEN"
   vercel --token "$VERCEL_TOKEN" --prod --yes --cwd ./ --scope "$VERCEL_ORG_ID" | tail -1
   # echo "Book production deployment available at: $DEPLOYMENT_URL"
 else
-  vercel env pull .env.testnet --token "$VERCEL_TOKEN"
-  vercel env pull .env.testnet.local --token "$VERCEL_TOKEN"
+  vercel env pull ./vlayer/.env.testnet --token "$VERCEL_TOKEN"
+  vercel env pull ./vlayer/.env.testnet.local --token "$VERCEL_TOKEN"
   vercel --token "$VERCEL_TOKEN" --yes --cwd ./ --scope "$VERCEL_ORG_ID" | tail -1
   # DEPLOYMENT_URL=$(vercel --token $VERCEL_TOKEN --yes --cwd ./book --scope $VERCEL_ORG_ID | tail -1)
   # COMMENT_BODY="The preview of the simple-email-proof example app is available at: $DEPLOYMENT_URL"
