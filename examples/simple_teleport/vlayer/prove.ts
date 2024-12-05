@@ -8,24 +8,7 @@ import {
   getConfig,
   waitForContractDeploy,
 } from "@vlayer/sdk/config";
-
-const parseTokensEnv = () => {
-  try {
-    const tokensToCheck = [];
-    const addresses = process.env.PROVER_ERC20_ADDRESSES?.split(",") || [];
-    const chainIds = process.env.PROVER_ERC20_CHAIN_IDS?.split(",") || [];
-    const blockNumbers =
-      process.env.PROVER_ERC20_BLOCK_NUMBERS?.split(",") || [];
-
-    for (let i = 0; i < addresses.length; i++) {
-      tokensToCheck.push([addresses[i], chainIds[i], BigInt(blockNumbers[i])]);
-    }
-
-    return tokensToCheck;
-  } catch (error) {
-    console.error("Failed to parse ERC20_TOKENS_TO_CHECK:", error);
-  }
-};
+import { type Address } from "viem";
 
 const config = getConfig();
 const { chain, ethClient, account, proverUrl, confirmations } =
@@ -44,10 +27,18 @@ const whaleBadgeNFTAddress = await waitForContractDeploy({
   hash: deployWhaleBadgeHash,
 });
 
+const tokensToCheck: [Address, bigint, bigint][] = (
+  process.env.PROVER_ERC20_ADDRESSES?.split(",") || []
+).map((addr, i) => [
+  addr as Address,
+  BigInt(process.env.PROVER_ERC20_CHAIN_IDS?.split(",")[i]),
+  BigInt(process.env.PROVER_ERC20_BLOCK_NUMBERS?.split(",")[i]),
+]);
+
 const { prover, verifier } = await deployVlayerContracts({
   proverSpec,
   verifierSpec,
-  proverArgs: [parseTokensEnv() ?? []],
+  proverArgs: [tokensToCheck],
   verifierArgs: [whaleBadgeNFTAddress],
 });
 
