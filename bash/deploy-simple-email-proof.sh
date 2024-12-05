@@ -38,23 +38,28 @@ echo "::group::vlayer run deploy:testnet: ${example_name}"
 bun run deploy:testnet
 echo '::endgroup::'
 
-echo "::group::vlayer deploy to vercel: ${example_name}"
+echo "::group::vlayer install vercel"
 npm install -g vercel
+echo '::endgroup::'
 
+echo "::group::vlayer deploy to vercel: ${example_name}"
 mkdir -p .vercel
 echo "{\"projectId\":\"${VERCEL_PROJECT_ID}\",\"orgId\":\"${VERCEL_ORG_ID}\"}" > .vercel/project.json
-vercel env pull .env.testnet
-vercel env pull .env.testnet.local
 
 if [ "$VERCEL_ENV" == "production" ]; then
-  DEPLOYMENT_URL=$(vercel --token $VERCEL_TOKEN --prod --yes --cwd ./ --scope $VERCEL_ORG_ID | tail -1)
-  echo "Book production deployment available at: $DEPLOYMENT_URL"
+  vercel env pull .env.testnet --token "$VERCEL_TOKEN" --prod
+  vercel env pull .env.testnet.local --token "$VERCEL_TOKEN"
+  vercel --token "$VERCEL_TOKEN" --prod --yes --cwd ./ --scope "$VERCEL_ORG_ID" | tail -1
+  # echo "Book production deployment available at: $DEPLOYMENT_URL"
 else
-  DEPLOYMENT_URL=$(vercel --token $VERCEL_TOKEN --yes --cwd ./book --scope $VERCEL_ORG_ID | tail -1)
-  COMMENT_BODY="The preview of the simple-email-proof example app is available at: $DEPLOYMENT_URL"
-  curl -s -H "Authorization: token $GITHUB_TOKEN" \
-    -X POST \
-    -d "{\"body\":\"$COMMENT_BODY\"}" \
-    "https://api.github.com/repos/${{ github.repository }}/issues/$PR_NUMBER/comments"
+  vercel env pull .env.testnet --token "$VERCEL_TOKEN"
+  vercel env pull .env.testnet.local --token "$VERCEL_TOKEN"
+  vercel --token "$VERCEL_TOKEN" --yes --cwd ./ --scope "$VERCEL_ORG_ID" | tail -1
+  # DEPLOYMENT_URL=$(vercel --token $VERCEL_TOKEN --yes --cwd ./book --scope $VERCEL_ORG_ID | tail -1)
+  # COMMENT_BODY="The preview of the simple-email-proof example app is available at: $DEPLOYMENT_URL"
+  # curl -s -H "Authorization: token $GITHUB_TOKEN" \
+  #   -X POST \
+  #   -d "{\"body\":\"$COMMENT_BODY\"}" \
+  #   "https://api.github.com/repos/${{ github.repository }}/issues/$PR_NUMBER/comments"
 fi
 echo '::endgroup::'
