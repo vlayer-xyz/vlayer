@@ -8,4 +8,6 @@ pub enum Error {
     Calldata(alloy_sol_types::Error),
     #[error("Error verifying DKIM: {0}")]
     DkimVerification(mail_auth::Error),
+    #[error("Error: {0}")]
+    Generic(String),
 }

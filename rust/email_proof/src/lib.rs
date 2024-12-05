@@ -1,12 +1,19 @@
+#[cfg(not(feature = "cloudflare"))]
 extern crate mail_auth as extern_mail_auth;
 
+#[cfg(feature = "cloudflare")]
+mod cloudflare_dkim;
+#[cfg(not(feature = "cloudflare"))]
 mod dkim;
 mod email;
 mod errors;
+#[cfg(not(feature = "cloudflare"))]
 mod mail_auth;
 
+#[cfg(not(feature = "cloudflare"))]
 use dkim::verify;
 pub use email::sol::UnverifiedEmail;
+#[cfg(not(feature = "cloudflare"))]
 use mailparse::MailParseError;
 
 pub use crate::{email::Email, errors::Error};
@@ -14,10 +21,21 @@ pub use crate::{email::Email, errors::Error};
 pub fn parse_and_verify(calldata: &[u8]) -> Result<Email, Error> {
     let (raw_email, dns_records) =
         UnverifiedEmail::parse_calldata(calldata).map_err(Error::Calldata)?;
-    verify::verify_dkim(&raw_email, &dns_records).map_err(Error::DkimVerification)?;
-    parse_mime(&raw_email).map_err(Error::EmailParse)
+    #[cfg(not(feature = "cloudflare"))]
+    {
+        verify::verify_dkim(&raw_email, &dns_records).map_err(Error::DkimVerification)?;
+        parse_mime(&raw_email).map_err(Error::EmailParse)
+    }
+    #[cfg(feature = "cloudflare")]
+    {
+        let x = cloudflare_dkim::verify_email(&raw_email, &dns_records)
+            .map_err(|_| Error::Generic("Dupa".into()))?;
+
+        x.try_into().map_err(Error::EmailParse)
+    }
 }
 
+#[cfg(not(feature = "cloudflare"))]
 fn parse_mime(email: &[u8]) -> Result<Email, MailParseError> {
     mailparse::parse_mail(email)?.try_into()
 }
