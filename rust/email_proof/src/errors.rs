@@ -7,7 +7,9 @@ pub enum Error {
     #[error("Invalid UnverifiedEmail calldata: {0}")]
     Calldata(alloy_sol_types::Error),
     #[error("Error verifying DKIM: {0}")]
-    DkimVerification(mail_auth::Error),
-    #[error("Error: {0}")]
-    Generic(String),
+    DkimVerification(cfdkim::DKIMError),
+    #[error("Invalid DKIM public key record: {0}")]
+    InvalidDkimRecord(String),
+    #[error("Invalid From header: {0}")]
+    InvalidFromHeader(String),
 }

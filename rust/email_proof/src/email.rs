@@ -104,29 +104,9 @@ fn header_getter(headers: Headers) -> impl Fn(&str) -> Option<String> + '_ {
 mod test {
     use super::*;
 
-    fn build_mime_email(headers: Vec<(&str, &str)>, body: &str) -> String {
-        let mut email = String::new();
-        for (key, value) in headers {
-            email.push_str(&format!("{key}: {value}\n"));
-        }
-        if !body.is_empty() {
-            email.push('\n');
-            email.push_str(body);
-        }
-        email
-    }
-
-    fn read_file(file: &str) -> Vec<u8> {
-        std::fs::read(file).unwrap()
-    }
-
-    fn parsed_email(headers: Vec<(&str, &str)>, body: &str) -> Result<Email, MailParseError> {
-        let mime = build_mime_email(headers, body);
-        mailparse::parse_mail(mime.as_bytes()).and_then(Email::try_from)
-    }
-
     mod get_body {
         use super::*;
+        use crate::test_utils::{build_mime_email, read_file};
 
         #[test]
         fn returns_whole_body_for_plain_text_body_content_type() -> anyhow::Result<()> {
@@ -213,6 +193,7 @@ Content-Type: text/html; charset="UTF-8"
 
     mod try_from {
         use super::*;
+        use crate::test_utils::{parsed_email, read_file};
 
         #[test]
         fn parses_email() {
@@ -279,6 +260,7 @@ Content-Type: text/html; charset="UTF-8"
 
     mod abi_encode {
         use super::*;
+        use crate::test_utils::parsed_email;
 
         #[test]
         fn encodes_email_to_sol_type() {
