@@ -62,41 +62,20 @@ fn extract_host(url: &str) -> Result<String, WebProofError> {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::fixtures::{load_web_proof_fixture, NOTARY_PUB_KEY_PEM_EXAMPLE};
+    use crate::fixtures::load_web_proof_fixture;
 
     const X_TEST_URL: &str = "https://api.x.com/1.1/account/settings.json?include_ext_sharing_audiospaces_listening_data_with_followers=true&include_mention_filter=true&include_nsfw_user_flag=true&include_nsfw_admin_flag=true&include_ranked_timeline=true&include_alt_text_compose=true&ext=ssoConnections&include_country_code=true&include_ext_dm_nsfw_media_filter=true";
 
-    mod verify_and_parse_v7 {
-        use p256::elliptic_curve::PublicKey;
-        use pkcs8::DecodePublicKey;
-
-        use super::*;
-        use crate::{fixtures::read_fixture, web_proof::PresentationJson};
-
-        #[test]
-        fn correct_url_extracted() {
-            let presentation_json = read_fixture("./testdata/presentation.json");
-            let presentation_json: PresentationJson =
-                serde_json::from_str(&presentation_json).unwrap();
-
-            let web_proof = WebProof {
-                presentation_json,
-                notary_pub_key: PublicKey::from_public_key_pem(NOTARY_PUB_KEY_PEM_EXAMPLE).unwrap(),
-            };
-
-            let web = verify_and_parse(web_proof).unwrap();
-
-            assert_eq!(web.url, "https://api.x.com/1.1/account/settings.json");
-        }
-    }
-
     mod verify_and_parse {
         use super::*;
+        use crate::fixtures::{
+            utils::{change_server_name, load_web_proof_fixture_and_modify},
+            NOTARY_PUB_KEY_PEM_EXAMPLE,
+        };
 
         #[test]
         fn correct_url_extracted() {
-            let web_proof =
-                load_web_proof_fixture("./testdata/presentation.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
+            let web_proof = load_web_proof_fixture();
 
             let web = verify_and_parse(web_proof).unwrap();
 
@@ -105,11 +84,7 @@ mod tests {
 
         #[test]
         fn invalid_server_name() {
-            // "wrong_server_name_tls_proof.json" is a real tls_proof, but with tampered server name, which the notary did not sign
-            let web_proof = load_web_proof_fixture(
-                "./testdata/presentation_invalid_server_name.json",
-                NOTARY_PUB_KEY_PEM_EXAMPLE,
-            );
+            let web_proof = load_web_proof_fixture_and_modify(change_server_name);
 
             assert!(matches!(
                 verify_and_parse(web_proof).err().unwrap(),
@@ -119,8 +94,7 @@ mod tests {
 
         #[test]
         fn correct_server_name_extracted() {
-            let web_proof =
-                load_web_proof_fixture("./testdata/presentation.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
+            let web_proof = load_web_proof_fixture();
 
             let web = verify_and_parse(web_proof).unwrap();
 
@@ -129,8 +103,7 @@ mod tests {
 
         #[test]
         fn correct_body_extracted() {
-            let web_proof =
-                load_web_proof_fixture("./testdata/presentation.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
+            let web_proof = load_web_proof_fixture();
 
             let web = verify_and_parse(web_proof).unwrap();
 
@@ -139,8 +112,7 @@ mod tests {
 
         #[test]
         fn correct_notary_pub_key() {
-            let web_proof =
-                load_web_proof_fixture("./testdata/presentation.json", NOTARY_PUB_KEY_PEM_EXAMPLE);
+            let web_proof = load_web_proof_fixture();
             let web = verify_and_parse(web_proof).unwrap();
 
             assert_eq!(web.notary_pub_key, NOTARY_PUB_KEY_PEM_EXAMPLE);
