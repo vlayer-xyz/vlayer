@@ -11,7 +11,7 @@ To start working with [this repository](https://github.com/vlayer-xyz/vlayer), y
   cargo risczero install
   ```
 - [Foundry](https://book.getfoundry.sh/getting-started/installation)
-- [Bun](https://bun.sh)
+- [Bun](https://bun.sh) and [nodejs](https://nodejs.org)
 - [LLVM Clang](https://clang.llvm.org/) compiler version which supports [RISC-V build target](https://llvm.org/docs/RISCVUsage.html) available on the `PATH`
 - `timeout` terminal command (`brew install coreutils` on macOS)
 
@@ -123,3 +123,16 @@ xcode-select --install
 ```
 Then, install updates by "Software Update" in System Settings and finally restart your computer.
 
+### Hanging SDK tests
+
+If you see the following when trying to run SDK unit tests
+
+```sh
+$ cd packages/sdk
+$ bun run test:unit
+ vitest --run
+
+ RUN  v2.1.4 /Users/kubkon/dev/vlayer/vlayer/packages/sdk
+```
+
+and nothing happening for a longer while, make sure you have [nodejs](https://nodejs.org) installed.
