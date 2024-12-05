@@ -18,7 +18,7 @@ contract UnconditionalProver is Prover {
     constructor() {}
 
     function web_proof(WebProof calldata webProof) public view returns (bool) {
-        Web memory web = WebProofLib.recover(webProof, DATA_URL);
+        Web memory web = WebProofLib.recover(webProof);
 
         require(NOTARY_PUB_KEY.equal(web.notaryPubKey), "Incorrect notary public key");
 
