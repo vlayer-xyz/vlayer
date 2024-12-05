@@ -105,7 +105,10 @@ test.describe("Full flow of webproof using extension", () => {
       expect(response.ok()).toBeTruthy();
 
       const response_json = (await response.json()) as object;
-      expect(response_json).toHaveProperty("result.proof");
+      expect(response_json).toHaveProperty("result");
+
+      const hash = (response_json as { result: string }).result;
+      expect(hash).toBeValidHash();
     });
   });
 
@@ -188,7 +191,10 @@ test.describe("Full flow of webproof using extension", () => {
       expect(response.ok()).toBeTruthy();
 
       const response_json = (await response.json()) as object;
-      expect(response_json).toHaveProperty("result.proof");
+      expect(response_json).toHaveProperty("result");
+
+      const hash = (response_json as { result: string }).result;
+      expect(hash).toBeValidHash();
     });
   });
 });

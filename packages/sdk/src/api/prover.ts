@@ -5,9 +5,16 @@ import {
   ContractFunctionArgs,
   ContractFunctionName,
   encodeFunctionData,
+  Hex,
 } from "viem";
-import { type CallContext, type CallParams } from "types/vlayer";
+import {
+  type CallContext,
+  type CallParams,
+  type BrandedHash,
+  type VGetProofReceiptParams,
+} from "types/vlayer";
 import { v_call } from "./v_call";
+import { v_getProofReceipt } from "./v_getProofReceipt";
 import { foundry } from "viem/chains";
 import { v_versions } from "./v_versions";
 import { checkVersionCompatibility } from "./utils/versions";
@@ -47,4 +54,14 @@ export async function prove<T extends Abi, F extends ContractFunctionName<T>>(
     gas_limit: gasLimit,
   };
   return v_call(call, context, url);
+}
+
+export async function getProofReceipt<
+  T extends Abi,
+  F extends ContractFunctionName<T>,
+>(hash: BrandedHash<T, F>, url: string = "http://127.0.0.1:3000") {
+  const params: VGetProofReceiptParams = {
+    hash: hash.hash as Hex,
+  };
+  return v_getProofReceipt(params, url);
 }

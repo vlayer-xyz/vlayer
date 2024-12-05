@@ -41,15 +41,26 @@ export type Proof = {
   };
 };
 
-export interface VCallResult {
-  hash: Hex;
-  evm_call_result: Hex;
-  proof: Proof;
-}
+export type VCallResult = Hex;
 
 export interface VCallResponse {
   jsonrpc: string;
   result: VCallResult;
+  id: number;
+}
+
+export type VGetProofReceiptParams = {
+  hash: Hex;
+};
+
+export interface VGetProofReceiptResult {
+  evm_call_result: Hex;
+  proof: Proof;
+}
+
+export interface VGetProofReceiptResponse {
+  jsonrpc: string;
+  result: VGetProofReceiptResult;
   id: number;
 }
 

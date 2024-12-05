@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./config";
 import path from "path";
 
 import { fileURLToPath } from "url";
@@ -18,5 +18,8 @@ test("Success email proof flow", async ({ page }) => {
   expect(response.ok()).toBeTruthy();
 
   const response_json = (await response.json()) as object;
-  expect(response_json).toHaveProperty("result.proof");
+  expect(response_json).toHaveProperty("result");
+
+  const hash = (response_json as { result: string }).result;
+  expect(hash).toBeValidHash();
 });

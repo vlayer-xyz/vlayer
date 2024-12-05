@@ -79,7 +79,8 @@ pub(crate) mod mock {
 
     abigen!(ExampleProver, "./testdata/ExampleProver.json");
 
-    type Contract = ExampleProver<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>>;
+    pub(crate) type Contract =
+        ExampleProver<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>>;
 
     pub(crate) struct Server(Router);
 
