@@ -14,16 +14,16 @@ pub fn parse_dns_record(record: &str) -> Result<DkimPublicKey, Error> {
 
     match tags.get("k") {
         Some(&"rsa") | None => Ok(()),
-        Some(v) => Err(Error::InvalidDkimRecord(format!("Invalid k tag value: {}", v))),
+        Some(v) => Err(Error::InvalidDkimRecord(format!("Invalid k tag value: {v}"))),
     }?;
 
     let public_key = tags
         .get("p")
         .ok_or(Error::InvalidDkimRecord("p tag missing".into()))?;
 
-    let public_key_bytes = general_purpose::STANDARD.decode(&public_key).map_err(|e| {
-        Error::InvalidDkimRecord(format!("Public key decoding error: {}", e.to_string()))
-    })?;
+    let public_key_bytes = general_purpose::STANDARD
+        .decode(public_key)
+        .map_err(|e| Error::InvalidDkimRecord(format!("Public key decoding error: {e}")))?;
 
     Ok(DkimPublicKey::Rsa(
         rsa::pkcs8::DecodePublicKey::from_public_key_der(&public_key_bytes)
