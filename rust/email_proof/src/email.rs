@@ -89,14 +89,13 @@ impl Email {
         Ok(email.to_string())
     }
 
-    fn is_character_not_allowed_in_email_address(c: char) -> bool {
+    const fn is_character_not_allowed_in_email_address(c: char) -> bool {
         !(c.is_ascii_alphanumeric() || c == '.' || c == '-')
     }
 
     fn is_email_valid(email: &str) -> bool {
-        let (username, domainname) = match email.split_once('@') {
-            Some((host, domain)) => (host, domain),
-            None => return false,
+        let Some((username, domainname)) = email.split_once('@') else {
+            return false;
         };
         if username.is_empty() || domainname.is_empty() {
             return false;
