@@ -88,3 +88,83 @@ impl ChainProofServerMock {
         self.mock_server.assert();
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use alloy_primitives::B256;
+    use block_header::mock_block_header;
+    use chain_client::{Client, RpcClient};
+    use chain_common::SyncStatus;
+
+    use super::*;
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn no_methods() {
+        let chain_server = ChainProofServerMock::start().await;
+        let client = RpcClient::new(chain_server.url());
+
+        let chain_proof_result = client.get_chain_proof(1, vec![1]).await;
+        assert!(matches!(
+            chain_proof_result.unwrap_err(),
+            chain_client::Error::Rpc(server_utils::rpc::Error::Http(_))
+        ));
+
+        let sync_status_result = client.get_sync_status(1).await;
+        assert!(matches!(
+            sync_status_result.unwrap_err(),
+            chain_client::Error::Rpc(server_utils::rpc::Error::Http(_))
+        ))
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn chain_proof() {
+        let mut chain_server = ChainProofServerMock::start().await;
+        let rpc_chain_proof = RpcChainProof::new(Default::default(), vec![]);
+        chain_server
+            .mock_chain_proof()
+            .with_params(GetChainProof::new(1, vec![1]), true)
+            .with_result(rpc_chain_proof.clone())
+            .with_expected_calls(1)
+            .add()
+            .await;
+        let client = RpcClient::new(chain_server.url());
+
+        let chain_proof_result = client.get_chain_proof(1, vec![1]).await;
+        let expected_result = rpc_chain_proof.try_into().unwrap();
+        assert_eq!(chain_proof_result.unwrap(), expected_result);
+        chain_server.assert();
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn sync_status() {
+        let mut chain_server = ChainProofServerMock::start().await;
+        let sync_status = SyncStatus::new(1, 1);
+        chain_server
+            .mock_sync_status()
+            .with_params(GetSyncStatus::new(1), true)
+            .with_result(sync_status.clone())
+            .with_expected_calls(1)
+            .add()
+            .await;
+        let client = RpcClient::new(chain_server.url());
+
+        let sync_status_result = client.get_sync_status(1).await;
+        assert_eq!(sync_status_result.unwrap(), sync_status);
+        chain_server.assert();
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    async fn single_block() {
+        let mut chain_server = ChainProofServerMock::start().await;
+        let block_header = mock_block_header(1, B256::default());
+        chain_server.mock_single_block(1, block_header).await;
+        let client = RpcClient::new(chain_server.url());
+
+        let chain_proof_result = client.get_chain_proof(1, vec![1]).await;
+        let block_trie = chain_proof_result.unwrap().block_trie;
+        assert!(block_trie.get(1).is_some());
+
+        let sync_status_result = client.get_sync_status(1).await;
+        assert_eq!(sync_status_result.unwrap(), SyncStatus::new(1, 1));
+    }
+}

@@ -19,5 +19,9 @@ serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 server_utils = { workspace = true }
 
+[dev-dependencies]
+chain_client = { workspace = true, features = ["rpc"] }
+tokio = { workspace = true, features = ["rt-multi-thread"] }
+
 [lints]
 workspace = true

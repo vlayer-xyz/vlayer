@@ -6820,6 +6820,7 @@ dependencies = [
  "block_trie",
  "bytemuck",
  "bytes",
+ "chain_client",
  "chain_common",
  "common",
  "lazy_static",
@@ -6827,6 +6828,7 @@ dependencies = [
  "serde",
  "serde_json",
  "server_utils",
+ "tokio",
 ]
 
 [[package]]

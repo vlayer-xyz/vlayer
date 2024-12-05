@@ -110,7 +110,7 @@ impl TryFrom<&ChainProof> for ChainProofReceipt {
 }
 
 #[serde_as]
-#[derive(Serialize, Default, Deserialize, Debug, PartialEq, new)]
+#[derive(Default, Clone, Debug, PartialEq, Serialize, Deserialize, new)]
 pub struct RpcChainProof {
     #[serde_as(as = "Hex")]
     pub proof: Bytes,
