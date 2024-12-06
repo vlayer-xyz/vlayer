@@ -1,13 +1,12 @@
 import { expect, test } from "./config";
 import { sidePanel } from "./helpers";
+import { Response } from '@playwright/test';
 
 const config = {
   startPage: "/login",
   expectUrl: "/target",
   notarizeUrl: "https://swapi.dev/api/people/1",
 };
-
-const VLAYER_SERVER_URL = "http://127.0.0.1:3000";
 
 test.describe("Full flow of webproof using extension", () => {
   test("Full flow from opening sidepanel to redirection", async ({
@@ -99,16 +98,33 @@ test.describe("Full flow of webproof using extension", () => {
 
     await test.step("Proving request has succeeded", async () => {
       const proveButton = page.locator("body").getByTestId("zk-prove-button");
+
+      const vlayerResponses: Promise<Response | null>[] = [];
+      page.on('requestfinished', req => {
+        console.log(req.url());
+        vlayerResponses.push(req.response());
+    });
+
       await proveButton.click();
 
-      const response = await page.waitForResponse(VLAYER_SERVER_URL);
-      expect(response.ok()).toBeTruthy();
+      await page.waitForSelector('h1[data-testid="has-zkproof"]');
 
-      const response_json = (await response.json()) as object;
-      expect(response_json).toHaveProperty("result");
+      expect(vlayerResponses).toHaveLength(2);
 
-      const hash = (response_json as { result: string }).result;
+      const proveResponse = (await vlayerResponses[0])!;
+      expect(proveResponse.ok()).toBeTruthy();
+
+      const proveJson = (await proveResponse.json())! as object;
+      expect(proveJson).toHaveProperty("result");
+
+      const hash = (proveJson as { result: string }).result;
       expect(hash).toBeValidHash();
+
+      const waitForProvingResultResponse = (await vlayerResponses[1])!;
+      expect(waitForProvingResultResponse.ok()).toBeTruthy();
+
+      const proofJson = (await waitForProvingResultResponse.json()!) as object;
+      expect(proofJson).toHaveProperty("result.evm_call_result");
     });
   });
 
@@ -185,16 +201,33 @@ test.describe("Full flow of webproof using extension", () => {
 
     await test.step("Proving request has succeeded", async () => {
       const proveButton = page.locator("body").getByTestId("zk-prove-button");
+
+      const vlayerResponses: Promise<Response | null>[] = [];
+      page.on('requestfinished', req => {
+        console.log(req.url());
+        vlayerResponses.push(req.response());
+    });
+
       await proveButton.click();
 
-      const response = await page.waitForResponse(VLAYER_SERVER_URL);
-      expect(response.ok()).toBeTruthy();
+      await page.waitForSelector('h1[data-testid="has-zkproof"]');
 
-      const response_json = (await response.json()) as object;
-      expect(response_json).toHaveProperty("result");
+      expect(vlayerResponses).toHaveLength(2);
 
-      const hash = (response_json as { result: string }).result;
+      const proveResponse = (await vlayerResponses[0])!;
+      expect(proveResponse.ok()).toBeTruthy();
+
+      const proveJson = (await proveResponse.json())! as object;
+      expect(proveJson).toHaveProperty("result");
+
+      const hash = (proveJson as { result: string }).result;
       expect(hash).toBeValidHash();
+
+      const waitForProvingResultResponse = (await vlayerResponses[1])!;
+      expect(waitForProvingResultResponse.ok()).toBeTruthy();
+
+      const proofJson = (await waitForProvingResultResponse.json()!) as object;
+      expect(proofJson).toHaveProperty("result.evm_call_result");
     });
   });
 });
