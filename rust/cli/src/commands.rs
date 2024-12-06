@@ -4,3 +4,5 @@ pub(crate) mod serve;
 pub(crate) mod test;
 pub(crate) mod update;
 pub(crate) mod version;
+
+mod common;
