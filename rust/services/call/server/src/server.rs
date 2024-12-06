@@ -47,11 +47,7 @@ pub fn server(cfg: Config) -> Router {
     jrpc_router.add_handler("v_getProofReceipt", {
         move |params| -> Pin<Box<dyn Future<Output = _> + Send>> {
             let state = state.clone();
-            Box::pin(async move {
-                v_get_proof_receipt(state, params)
-                    .await
-                    .map(|x| x.to_json())
-            })
+            Box::pin(v_get_proof_receipt(state, params))
         }
     });
     jrpc_router.add_handler(

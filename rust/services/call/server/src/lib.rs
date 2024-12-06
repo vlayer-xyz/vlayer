@@ -4,6 +4,7 @@ pub mod server;
 mod config;
 mod error;
 mod handlers;
+mod ser;
 
 pub use config::{Config, ConfigBuilder};
 pub use handlers::v_call::types as v_call;
