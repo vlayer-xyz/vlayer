@@ -181,12 +181,11 @@ mod tests {
         let proof = load_web_proof_fixture();
 
         let verifying_key = proof.get_notary_verifying_key();
-        let notary_public_key_sec1_bytes =
-            PublicKey::from_public_key_pem(NOTARY_PUB_KEY_PEM_EXAMPLE)
-                .unwrap()
-                .to_sec1_bytes();
+        let public_key = PublicKey::from_public_key_pem(NOTARY_PUB_KEY_PEM_EXAMPLE).unwrap();
+        let notary_public_key_sec1_bytes = public_key.to_sec1_bytes();
 
         assert_eq!(verifying_key.data, notary_public_key_sec1_bytes.as_ref());
+        assert_eq!(verifying_key.alg, KeyAlgId::K256);
     }
 
     #[test]
