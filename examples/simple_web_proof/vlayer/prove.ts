@@ -2,6 +2,7 @@ import { createVlayerClient } from "@vlayer/sdk";
 import proverSpec from "../out/WebProofProver.sol/WebProofProver";
 import verifierSpec from "../out/WebProofVerifier.sol/WebProofVerifier";
 import presentation_json from "./presentation.json";
+import presentation_invalid_signature from "./presentation_invalid_signature.json";
 import * as assert from "assert";
 import { encodePacked, isAddress, keccak256 } from "viem";
 
@@ -32,8 +33,7 @@ const vlayer = createVlayerClient({
 });
 
 await testSuccessProvingAndVerification();
-// TODO: enable
-// await testFailedProving();
+await testFailedProving();
 
 async function testSuccessProvingAndVerification() {
   console.log("Proving...");
@@ -102,7 +102,7 @@ async function testSuccessProvingAndVerification() {
 async function testFailedProving() {
   console.log("Proving...");
 
-  const wrongWebProof = { presentation_json };
+  const wrongWebProof = { presentation_json: presentation_invalid_signature};
 
   try {
     const hash = await vlayer.prove({
