@@ -8,12 +8,11 @@ pub mod ser {
     use alloy_primitives::{FixedBytes, U256};
     use serde::{Serialize, Serializer};
 
+    use super::Proof;
     use crate::{
         sol::{call_assumptions::ser::CallAssumptionsDef, seal::ser::SealDef},
         CallAssumptions, Seal,
     };
-
-    use super::Proof;
 
     fn ser_length<S>(length: &U256, state: S) -> Result<S::Ok, S::Error>
     where
