@@ -38,26 +38,26 @@ mod test {
                 (
                     r#""John Doe" <user@example.com>, "Jane Smith" <jane@example.com>"#,
                     Err(Error::EmailParse(mailparse::MailParseError::Generic(
-                        "Unexpected \"From\" format".into(),
+                        "Unexpected \"From\" format",
                     ))),
                 ),
                 (r#"John Doe <"user.name"@example.com>"#, Ok("example.com")),
                 (
                     r#"John Doe <"user@name"@example.com>"#,
                     Err(Error::EmailParse(mailparse::MailParseError::Generic(
-                        "Unexpected \"From\" format".into(),
+                        "Unexpected \"From\" format",
                     ))),
                 ),
                 (
                     "@routing:user@example.com",
                     Err(Error::EmailParse(mailparse::MailParseError::Generic(
-                        "Unexpected \"From\" format".into(),
+                        "Unexpected \"From\" format",
                     ))),
                 ),
                 (
                     "Recipients: John Doe <john@example.com>, Jane Smith <jane@example.com>;",
                     Err(Error::EmailParse(mailparse::MailParseError::Generic(
-                        "Unexpected \"From\" format".into(),
+                        "Unexpected \"From\" format",
                     ))),
                 ),
                 ("=?UTF-8?B?SsO2cmc=?= <joerg@example.com>", Ok("example.com")),
