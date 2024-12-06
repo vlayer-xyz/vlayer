@@ -11,7 +11,7 @@
 - name: Create log file
   become: true
   ansible.builtin.file:
-    path: /var/log/vlayer/vlayer.log
+    path: /var/log/vlayer/vlayer-chain-server.log
     state: touch
     owner: syslog
     group: adm
@@ -21,7 +21,7 @@
   become: true
   ansible.builtin.copy:
     src: vlayer-rsyslog.conf
-    dest: /etc/rsyslog.d/10-vlayer.conf
+    dest: /etc/rsyslog.d/10-vlayer-chain-server.conf
     mode: '644'
   notify: "Restart rsyslog"
 
@@ -29,5 +29,5 @@
   become: true
   ansible.builtin.copy:
     src: vlayer-logrotate.conf
-    dest: /etc/logrotate.d/vlayer
+    dest: /etc/logrotate.d/vlayer-chain-server
     mode: '644'

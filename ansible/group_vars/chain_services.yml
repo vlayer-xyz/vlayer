@@ -1,0 +1,7 @@
+---
+chain_server_port: 3001
+chain_worker_rust_log:
+  - info
+chain_server_rust_log:
+  - info
+chain_services_db_path: "/data/chain_db"
