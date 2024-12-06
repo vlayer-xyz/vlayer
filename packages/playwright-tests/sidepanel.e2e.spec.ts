@@ -100,10 +100,7 @@ test.describe("Full flow of webproof using extension", () => {
       const proveButton = page.locator("body").getByTestId("zk-prove-button");
 
       const vlayerResponses: Promise<Response | null>[] = [];
-      page.on('requestfinished', req => {
-        console.log(req.url());
-        vlayerResponses.push(req.response());
-    });
+      page.on('requestfinished', req => vlayerResponses.push(req.response()));
 
       await proveButton.click();
 
