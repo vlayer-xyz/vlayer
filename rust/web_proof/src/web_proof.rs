@@ -179,6 +179,15 @@ mod tests {
     #[test]
     fn success_get_notary_pub_key() {
         let proof = load_web_proof_fixture();
+        assert_eq!(
+            PublicKey::from_public_key_pem(&proof.get_notary_pub_key().unwrap()),
+            PublicKey::from_public_key_pem(NOTARY_PUB_KEY_PEM_EXAMPLE)
+        );
+    }
+
+    #[test]
+    fn success_get_notary_verifying_key() {
+        let proof = load_web_proof_fixture();
 
         let verifying_key = proof.get_notary_verifying_key();
         let public_key = PublicKey::from_public_key_pem(NOTARY_PUB_KEY_PEM_EXAMPLE).unwrap();
