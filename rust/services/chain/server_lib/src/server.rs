@@ -10,7 +10,7 @@ use tokio::net::TcpListener;
 use tracing::info;
 
 use crate::{
-    handlers::{status::v_sync_status, v_chain::v_chain},
+    handlers::{chain_proof::v_get_chain_proof, status::v_sync_status},
     ServerConfig,
 };
 
@@ -28,7 +28,7 @@ pub fn server(chain_db: ChainDb) -> axum::Router {
         let chain_db = chain_db.clone();
         move |params| -> Pin<Box<dyn Future<Output = _> + Send>> {
             let chain_db = chain_db.clone();
-            Box::pin(v_chain(chain_db, params))
+            Box::pin(v_get_chain_proof(chain_db, params))
         }
     });
     jrpc_router.add_handler(

@@ -19,7 +19,7 @@ pub struct GetChainProof {
 }
 
 impl Method for GetChainProof {
-    const METHOD_NAME: &str = "v_chain";
+    const METHOD_NAME: &str = "v_getChainProof";
 }
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, AsRef)]

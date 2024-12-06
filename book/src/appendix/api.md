@@ -134,7 +134,7 @@ There are three possible results: `pending`, `success` and `error`.
 }
 ```
 
-## v_proveChain
+## v_getChainProof
 
 ### Query
 
@@ -144,7 +144,7 @@ An example call could look like this:
 
 ```json
 {
-  "method": "v_chain",
+  "method": "v_getChainProof",
   "params": {
     "chain_id": 1,
     "block_numbers": [

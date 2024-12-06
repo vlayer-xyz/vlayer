@@ -12,7 +12,7 @@ const SOME_RISC0_CHAIN_GUEST_ID: [u32; 8] = [
     2663174293, 2024089015, 3465834372, 887420448, 2606376422, 1669533029, 1010997213, 2366700158,
 ];
 
-pub async fn v_chain(
+pub async fn v_get_chain_proof(
     chain_db: Arc<RwLock<ChainDb>>,
     GetChainProof {
         chain_id,
@@ -42,7 +42,9 @@ mod tests {
         };
         let chain_db = Arc::new(RwLock::new(ChainDb::in_memory(GuestElf::default())));
         assert_eq!(
-            v_chain(chain_db, empty_block_hashes).await.unwrap_err(),
+            v_get_chain_proof(chain_db, empty_block_hashes)
+                .await
+                .unwrap_err(),
             AppError::NoBlockNumbers
         );
     }
@@ -82,7 +84,7 @@ mod tests {
         #[ignore = "MPT hashes changed because of RLP encoding fix"]
         #[tokio::test]
         async fn trie_contains_proofs() -> Result<()> {
-            let response = v_chain(chain_db.clone(), params.clone()).await?;
+            let response = v_get_chain_proof(chain_db.clone(), params.clone()).await?;
 
             let RpcChainProof { nodes, .. } = response;
             let trie = MerkleTrie::from_rlp_nodes(nodes)?;
@@ -99,7 +101,8 @@ mod tests {
 
         #[tokio::test]
         async fn zk_proof_read_from_db() -> Result<()> {
-            let RpcChainProof { proof, .. } = v_chain(chain_db.clone(), params.clone()).await?;
+            let RpcChainProof { proof, .. } =
+                v_get_chain_proof(chain_db.clone(), params.clone()).await?;
             assert_eq!(proof, *zk_proof);
             Ok(())
         }
@@ -107,7 +110,7 @@ mod tests {
         #[ignore = "MPT hashes changed because of RLP encoding fix"]
         #[tokio::test]
         async fn proof_does_verify() -> Result<()> {
-            let response = v_chain(chain_db.clone(), params.clone()).await?;
+            let response = v_get_chain_proof(chain_db.clone(), params.clone()).await?;
 
             let RpcChainProof { proof, nodes } = response;
             let trie = MerkleTrie::from_rlp_nodes(nodes)?;
@@ -121,7 +124,7 @@ mod tests {
 
         #[tokio::test]
         async fn proof_does_not_verify_with_invalid_elf_id() -> Result<()> {
-            let response = v_chain(chain_db.clone(), params.clone()).await?;
+            let response = v_get_chain_proof(chain_db.clone(), params.clone()).await?;
 
             let RpcChainProof { proof, nodes } = response;
             let trie = MerkleTrie::from_rlp_nodes(nodes)?;

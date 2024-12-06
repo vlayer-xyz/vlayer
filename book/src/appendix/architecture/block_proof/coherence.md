@@ -157,7 +157,7 @@ fn append_prepend(
 
 ### Prove Chain server
 
-Block Proof Cache structure is stored in a distinct type of vlayer node, specifically a JSON-RPC server. It consists of a single call `v_chain(chain_id: number, block_numbers: number[])`. 
+Block Proof Cache structure is stored in a distinct type of vlayer node, specifically a JSON-RPC server. It consists of a single call `v_getChainProof(chain_id: number, block_numbers: number[])`. 
 
 
 [Detailed JSON-RPC API docs](../../api.md)
@@ -229,7 +229,7 @@ classDiagram
 
     class Server {
         // E2E tests
-        v_chain(id, [block_num]) [ZkProof, SparseMerkleTrie]
+        v_getChainProof(id, [block_num]) [ZkProof, SparseMerkleTrie]
     }
 
     namespace Providers {
