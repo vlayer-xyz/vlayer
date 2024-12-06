@@ -1,9 +1,6 @@
 use core::str;
 use std::fs;
 
-use k256::PublicKey;
-use pkcs8::DecodePublicKey;
-
 use crate::web_proof::WebProof;
 
 #[cfg(test)]
@@ -22,14 +19,11 @@ pub fn read_fixture(path: &str) -> String {
 pub fn load_web_proof_fixture() -> WebProof {
     WebProof {
         presentation_json: serde_json::from_str(PRESENTATION_FIXTURE).unwrap(),
-        notary_pub_key: PublicKey::from_public_key_pem(NOTARY_PUB_KEY_PEM_EXAMPLE).unwrap(),
     }
 }
 
 #[cfg(test)]
 pub(crate) mod utils {
-    use k256::PublicKey;
-    use pkcs8::DecodePublicKey;
     use tlsn_core::{
         attestation::Field,
         connection::ServerName,
@@ -38,7 +32,7 @@ pub(crate) mod utils {
 
     use super::{
         tlsn_core_types::{AttestationProof, Body, BodyProof, Presentation, ServerIdentityProof},
-        NOTARY_PUB_KEY_PEM_EXAMPLE, PRESENTATION_FIXTURE,
+        PRESENTATION_FIXTURE,
     };
     use crate::web_proof::{PresentationJson, PresentationJsonMeta, WebProof};
 
@@ -60,12 +54,11 @@ pub(crate) mod utils {
                 version: "0.1.0-alpha.7".to_string(),
                 data,
                 meta: PresentationJsonMeta {
-                notary_url: Some("wss://notary.pse.dev/v0.1.0-alpha.7/notarize?sessionId=47a8a400-a25f-4571-9825-714b6e4a6689".to_string()),
-                websocket_proxy_url: Some("ws://localhost:55688".to_string()),
-                plugin_url: None
-            }
+                    notary_url: Some("wss://notary.pse.dev/v0.1.0-alpha.7/notarize?sessionId=47a8a400-a25f-4571-9825-714b6e4a6689".to_string()),
+                    websocket_proxy_url: Some("ws://localhost:55688".to_string()),
+                    plugin_url: None
+                }
             },
-            notary_pub_key: PublicKey::from_public_key_pem(NOTARY_PUB_KEY_PEM_EXAMPLE).unwrap(),
         }
     }
 
