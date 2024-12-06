@@ -25,7 +25,7 @@ import unconditionalProver from "../../../contracts/fixtures/out/UnconditionalPr
 const PROVER_ADDRESS = import.meta.env.VITE_UNCONDITIONAL_PROVER_ADDRESS;
 console.log(PROVER_ADDRESS);
 const NOTARY_PUB_KEY =
-  "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAEBv36FI4ZFszJa0DQFJ3wWCXvVLFr\ncRzMG5kaTeHGoSzDu6cFqx3uEWYpFGo6C0EOUgf+mEgbktLrXocv5yHzKg==\n-----END PUBLIC KEY-----";
+  "-----BEGIN PUBLIC KEY-----\nMDYwEAYHKoZIzj0CAQYFK4EEAAoDIgADe0jxnBObaIj7Xjg6TXLCM1GG/VhY5650\nOrS/jgcbBuc=\n-----END PUBLIC KEY-----\n";
 
 function SourceNewWay() {
   const [proof, setProof] = useState<PresentationJSON | null>(null);
