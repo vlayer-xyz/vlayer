@@ -43,7 +43,7 @@ jobs:
       - name: Test release
         env:
           VLAYER_ENV: testnet
-          EXAMPLES_TEST_PRIVATE_KEY: ${{ secrets.EXAMPLES_TEST_PRIVATE_KEY }}
+          EXAMPLES_TEST_PRIVATE_KEY: ${{ secrets.EXAMPLES_TEST_RELEASE_PRIVATE_KEY }}
           JSON_RPC_URL: "https://opt-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}"
         run: bash/test-release.sh
   test-release-js-sdk:

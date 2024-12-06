@@ -43,9 +43,11 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
         continue
     fi
 
-    echo "Restarting anvil"
-    # We're restarting anvil because some examples rely on a clean chain state.
-    docker compose -f ${VLAYER_HOME}/docker/web-proof/docker-compose-release.yaml restart anvil
+    if [ "$VLAYER_ENV" = "dev" ]; then
+      # We're restarting anvil because some examples rely on a clean chain state.
+      echo "Restarting anvil"
+      docker compose -f ${VLAYER_HOME}/docker/web-proof/docker-compose-test-release.yaml restart 
+    fi
 
     echo "::group::Initializing vlayer template: ${example_name}"
     VLAYER_TEMP_DIR=$(mktemp -d -t vlayer-test-release-XXXXXX-)
