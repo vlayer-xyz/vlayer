@@ -82,20 +82,36 @@ const useProvingStatus = () => {
   };
 };
 
+const useRedirectCallout = () => {
+  const { isProving: isWebProving } = useTlsnProver();
+
+  const [isRedirectCalloutVisible, setIsRedirectCalloutVisible] =
+    useState(false);
+
+  useEffect(() => {
+    if (isWebProving) {
+      setIsRedirectCalloutVisible(true);
+    }
+  }, [isWebProving]);
+
+  return {
+    isRedirectCalloutVisible,
+  };
+};
+
 const useNotarizeStepActions = (props: NotarizeStepActionProps) => {
   const { onButtonClick, isButtonVisible } = useProveButton();
   const { isFinishCalloutVisible } = useFinishCallout();
   const { isProvingProgressVisible } = useProgress();
-  const { isProving: isWebProving } = useTlsnProver();
   const { provingStatus } = useProvingStatus();
-
+  const { isRedirectCalloutVisible } = useRedirectCallout();
   return {
     provingStatus,
     onButtonClick,
     isButtonVisible,
     isFinishCalloutVisible,
     isProvingProgressVisible,
-    isRedirectCalloutVisible: isWebProving,
+    isRedirectCalloutVisible,
     isVisible: !props.isVisited && props.status === StepStatus.Current,
   };
 };
