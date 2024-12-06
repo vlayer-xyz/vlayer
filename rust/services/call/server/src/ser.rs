@@ -2,19 +2,6 @@ use alloy_primitives::{Address, Selector, B256, U256};
 use call_engine::{CallAssumptions, Proof, ProofMode, Seal};
 use serde::{Serialize, Serializer};
 
-#[allow(clippy::trivially_copy_pass_by_ref)]
-fn ser_proof_mode<S>(mode: &ProofMode, state: S) -> Result<S::Ok, S::Error>
-where
-    S: Serializer,
-{
-    let as_u8: u8 = match mode {
-        ProofMode::GROTH16 => 0,
-        ProofMode::FAKE => 1,
-        _ => panic!("unexpected enum variant for ProofMode"),
-    };
-    state.serialize_u8(as_u8)
-}
-
 #[derive(Serialize)]
 #[serde(remote = "Seal")]
 #[allow(non_snake_case)]
@@ -23,6 +10,16 @@ pub struct SealDTO {
     seal: [B256; 8],
     #[serde(serialize_with = "ser_proof_mode")]
     mode: ProofMode,
+}
+
+#[derive(Serialize)]
+#[serde(remote = "CallAssumptions")]
+#[allow(non_snake_case)]
+pub struct CallAssumptionsDTO {
+    proverContractAddress: Address,
+    functionSelector: Selector,
+    settleBlockNumber: U256,
+    settleBlockHash: B256,
 }
 
 #[derive(Serialize)]
@@ -38,6 +35,19 @@ pub struct ProofDTO {
     callAssumptions: CallAssumptions,
 }
 
+#[allow(clippy::trivially_copy_pass_by_ref)]
+fn ser_proof_mode<S>(mode: &ProofMode, state: S) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    let as_u8: u8 = match mode {
+        ProofMode::GROTH16 => 0,
+        ProofMode::FAKE => 1,
+        _ => panic!("unexpected enum variant for ProofMode"),
+    };
+    state.serialize_u8(as_u8)
+}
+
 fn ser_length<S>(length: &U256, state: S) -> Result<S::Ok, S::Error>
 where
     S: Serializer,
@@ -46,14 +56,4 @@ where
         u64::try_from(length)
             .expect("failed to serialize length field of Proof. Value must fit into u64"),
     )
-}
-
-#[derive(Serialize)]
-#[serde(remote = "CallAssumptions")]
-#[allow(non_snake_case)]
-pub struct CallAssumptionsDTO {
-    proverContractAddress: Address,
-    functionSelector: Selector,
-    settleBlockNumber: U256,
-    settleBlockHash: B256,
 }
