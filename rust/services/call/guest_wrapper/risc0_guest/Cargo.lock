@@ -4700,7 +4700,6 @@ dependencies = [
  "hex",
  "httparse",
  "k256",
- "p256",
  "pkcs8",
  "serde",
  "serde_json",
