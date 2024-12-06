@@ -12,7 +12,7 @@ pub fn extract_from_domain(p0: &ParsedMail) -> Result<String, Error> {
 
     let (_, domain) = email
         .rsplit_once('@')
-        .ok_or(Error::InvalidFromHeader(from_header.clone()))?;
+        .ok_or(Error::InvalidFromHeader(from_header))?;
 
     Ok(domain.into())
 }
