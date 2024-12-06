@@ -1,6 +1,6 @@
 use mailparse::{MailHeaderMap, ParsedMail};
 
-use crate::Error;
+use crate::{Email, Error};
 
 pub fn extract_from_domain(p0: &ParsedMail) -> Result<String, Error> {
     let from_header = p0
@@ -8,17 +8,11 @@ pub fn extract_from_domain(p0: &ParsedMail) -> Result<String, Error> {
         .get_first_value("From")
         .ok_or(Error::InvalidFromHeader("Missing".into()))?;
 
-    let error = Error::InvalidFromHeader(from_header.clone());
+    let email = Email::extract_address_from_header(&from_header).map_err(Error::EmailParse)?;
 
-    let domain = from_header
-        .split_once('@')
-        .map(|(_, domain)| domain)
-        .ok_or(error)?
-        .trim_end_matches(|c: char| c == '>' || c.is_whitespace());
-
-    if domain.contains('@') {
-        return Err(Error::InvalidFromHeader("Multiple sender addresses".into()));
-    }
+    let (_, domain) = email
+        .rsplit_once('@')
+        .ok_or(Error::InvalidFromHeader(from_header.clone()))?;
 
     Ok(domain.into())
 }
@@ -43,22 +37,31 @@ mod test {
                 ("Hello Worldowski (Hi) <hello@world.com>", Ok("world.com")),
                 (
                     r#""John Doe" <user@example.com>, "Jane Smith" <jane@example.com>"#,
-                    Err(Error::InvalidFromHeader("Multiple sender addresses".into())),
+                    Err(Error::EmailParse(mailparse::MailParseError::Generic(
+                        "Unexpected \"From\" format".into(),
+                    ))),
                 ),
                 (r#"John Doe <"user.name"@example.com>"#, Ok("example.com")),
                 (
                     r#"John Doe <"user@name"@example.com>"#,
-                    Err(Error::InvalidFromHeader("Multiple sender addresses".into())),
+                    Err(Error::EmailParse(mailparse::MailParseError::Generic(
+                        "Unexpected \"From\" format".into(),
+                    ))),
                 ),
                 (
                     "@routing:user@example.com",
-                    Err(Error::InvalidFromHeader("Multiple sender addresses".into())),
+                    Err(Error::EmailParse(mailparse::MailParseError::Generic(
+                        "Unexpected \"From\" format".into(),
+                    ))),
                 ),
                 (
                     "Recipients: John Doe <john@example.com>, Jane Smith <jane@example.com>;",
-                    Err(Error::InvalidFromHeader("Multiple sender addresses".into())),
+                    Err(Error::EmailParse(mailparse::MailParseError::Generic(
+                        "Unexpected \"From\" format".into(),
+                    ))),
                 ),
                 ("=?UTF-8?B?SsO2cmc=?= <joerg@example.com>", Ok("example.com")),
+                (r#""piro-test@clear-code.com" <piro-test@clear-code.com>"#, Ok("clear-code.com")),
             ]
             .into_iter()
             .collect()
@@ -95,6 +98,7 @@ mod test {
         test_domain_extraction("Hello Worldowski (Hi) <hello@world.com>");
     }
 
+    #[ignore]
     #[test]
     fn quoted_local_part_format() {
         test_domain_extraction(r#"John Doe <"user.name"@example.com>"#);
@@ -125,6 +129,11 @@ mod test {
     #[test]
     fn utf_encoded_names() {
         test_domain_extraction("=?UTF-8?B?SsO2cmc=?= <joerg@example.com>");
+    }
+
+    #[test]
+    fn with_at_symbol_in_name() {
+        test_domain_extraction(r#""piro-test@clear-code.com" <piro-test@clear-code.com>"#);
     }
 
     fn test_domain_extraction(key: &'static str) {

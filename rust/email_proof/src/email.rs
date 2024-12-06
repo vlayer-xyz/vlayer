@@ -4,7 +4,7 @@ use regex::Regex;
 
 pub(crate) mod sol;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Email {
     pub from: String,
     pub to: String,
@@ -63,7 +63,7 @@ fn is_plain_text_mimetype(part: &ParsedMail) -> bool {
 }
 
 impl Email {
-    fn extract_address_from_header(header: &str) -> Result<String, MailParseError> {
+    pub fn extract_address_from_header(header: &str) -> Result<String, MailParseError> {
         let Some(start) = header.find('<') else {
             return Self::validate_email(header);
         };
@@ -103,10 +103,10 @@ fn header_getter(headers: Headers) -> impl Fn(&str) -> Option<String> + '_ {
 #[cfg(test)]
 mod test {
     use super::*;
+    use crate::test_utils::{build_mime_email, parsed_email, read_file};
 
     mod get_body {
         use super::*;
-        use crate::test_utils::{build_mime_email, read_file};
 
         #[test]
         fn returns_whole_body_for_plain_text_body_content_type() -> anyhow::Result<()> {
@@ -193,7 +193,6 @@ Content-Type: text/html; charset="UTF-8"
 
     mod try_from {
         use super::*;
-        use crate::test_utils::{parsed_email, read_file};
 
         #[test]
         fn parses_email() {
@@ -260,7 +259,6 @@ Content-Type: text/html; charset="UTF-8"
 
     mod abi_encode {
         use super::*;
-        use crate::test_utils::parsed_email;
 
         #[test]
         fn encodes_email_to_sol_type() {
