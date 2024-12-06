@@ -4368,6 +4368,7 @@ dependencies = [
  "derive-new",
  "hex",
  "httparse",
+ "k256",
  "p256",
  "pkcs8",
  "serde",
