@@ -13,7 +13,7 @@ contract UnconditionalProver is Prover {
 
     string private constant DATA_URL = "https://lotr-api.online:3011/regular_json";
     string private constant NOTARY_PUB_KEY =
-        "-----BEGIN PUBLIC KEY-----\nMDYwEAYHKoZIzj0CAQYFK4EEAAoDIgADe0jxnBObaIj7Xjg6TXLCM1GG/VhY5650\nOrS/jgcbBuc=\n-----END PUBLIC KEY-----\n";
+        "-----BEGIN PUBLIC KEY-----\nMFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEe0jxnBObaIj7Xjg6TXLCM1GG/VhY5650\nOrS/jgcbBufo/QDfFvL/irzIv1JSmhGiVcsCHCwolhDXWcge7v2IsQ==\n-----END PUBLIC KEY-----\n";
 
     constructor() {}
 
