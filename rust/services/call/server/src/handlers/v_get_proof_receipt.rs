@@ -1,12 +1,12 @@
 use alloy_primitives::{hex::ToHexExt, U256};
 use alloy_sol_types::SolValue;
-use call_engine::{sol::proof::ser::ProofDef, HostOutput, Proof, Seal};
+use call_engine::{HostOutput, Proof, Seal};
 use call_host::Error as HostError;
 use serde::{Deserialize, Serialize, Serializer};
 use tracing::info;
 
 use super::SharedState;
-use crate::{error::AppError, v_call::CallHash};
+use crate::{error::AppError, ser::ProofDTO, v_call::CallHash};
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Params {
@@ -27,7 +27,7 @@ pub async fn v_get_proof_receipt(
 #[derive(Serialize)]
 #[allow(clippy::struct_field_names)]
 pub struct CallResult {
-    #[serde(with = "ProofDef")]
+    #[serde(with = "ProofDTO")]
     pub proof: Proof,
     #[serde(serialize_with = "ser_evm_call_result")]
     pub evm_call_result: Vec<u8>,
