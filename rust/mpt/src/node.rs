@@ -72,6 +72,7 @@ where
 }
 
 pub type KeccakNode = Node<sha3::Keccak256>;
+pub type Sha2Node = Node<sha2::Sha256>;
 
 #[derive(Error, Debug, PartialEq)]
 pub enum NodeError {

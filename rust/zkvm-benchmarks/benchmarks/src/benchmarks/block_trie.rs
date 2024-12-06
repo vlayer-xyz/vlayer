@@ -1,4 +1,4 @@
-use ::block_trie::KeccakBlockTrie as BlockTrie;
+use ::block_trie::BlockTrie;
 use block_header::{test_utils::mock_block_headers, EvmBlockHeader};
 
 use crate::{with_fixture, Benchmark};
@@ -111,10 +111,6 @@ pub fn benchmarks() -> Vec<Benchmark> {
             with_fixture!(prepend_batch::fixture(20), prepend_batch::run),
             2_325_021,
         ),
-        Benchmark::new(
-            "hash_100",
-            with_fixture!(hash_slow::fixture(100), hash_slow::run),
-            3_596_715,
-        ),
+        Benchmark::new("hash_100", with_fixture!(hash_slow::fixture(100), hash_slow::run), 348_705),
     ]
 }

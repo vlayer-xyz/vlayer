@@ -4,7 +4,7 @@ use alloy_primitives::B256;
 use alloy_rlp::Decodable;
 use bytes::Bytes;
 use derive_more::derive::AsRef;
-use mpt::KeccakNode as Node;
+use mpt::Sha2Node as Node;
 use serde::{Deserialize, Serialize};
 
 use crate::ChainDbResult;

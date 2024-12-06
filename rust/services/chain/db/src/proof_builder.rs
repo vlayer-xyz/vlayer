@@ -1,5 +1,5 @@
 use alloy_primitives::{BlockNumber, B256};
-use mpt::{KeccakMerkleTrie as MerkleTrie, KeccakNode as Node, KeccakNodeRef as NodeRef};
+use mpt::{Sha2Node as Node, Sha2NodeRef as NodeRef, Sha2Trie as MerkleTrie};
 use nybbles::Nibbles;
 
 use crate::{ChainDbError, ChainDbResult, DbNode};

@@ -1,8 +1,8 @@
-use block_trie::KeccakBlockTrie as BlockTrie;
+use block_trie::BlockTrie;
 use chain_common::{ChainProofReceipt, ProofVerificationError};
 use common::{GuestElf, Hashable};
 use derive_new::new;
-use mpt::KeccakMerkleTrie as MerkleTrie;
+use mpt::Sha2Trie as MerkleTrie;
 use u64_range::NonEmptyRange;
 
 #[derive(new)]

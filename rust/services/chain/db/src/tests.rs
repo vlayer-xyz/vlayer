@@ -1,8 +1,8 @@
 use alloy_primitives::BlockNumber;
 use anyhow::Result;
-use block_trie::KeccakBlockTrie as BlockTrie;
+use block_trie::BlockTrie;
 use key_value::InMemoryDatabase;
-use mpt::{KeccakMerkleTrie as MerkleTrie, KeccakNode as Node, EMPTY_ROOT_HASH};
+use mpt::{Sha2Node as Node, Sha2Trie as MerkleTrie, EMPTY_ROOT_HASH};
 use rand::{rngs::StdRng, RngCore, SeedableRng};
 use risc0_zkvm::{sha::Digest, FakeReceipt, InnerReceipt, MaybePruned, Receipt};
 

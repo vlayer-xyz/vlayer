@@ -166,5 +166,11 @@ pub const fn KeccakMerkleTrie(node: Node<sha3::Keccak256>) -> KeccakMerkleTrie {
     MerkleTrie::<sha3::Keccak256>(node)
 }
 
+pub type Sha2Trie = MerkleTrie<sha2::Sha256>;
+#[allow(non_snake_case)]
+pub const fn Sha2Trie(node: Node<sha2::Sha256>) -> Sha2Trie {
+    MerkleTrie::<sha2::Sha256>(node)
+}
+
 #[cfg(test)]
 mod tests;

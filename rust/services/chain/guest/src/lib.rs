@@ -1,6 +1,6 @@
 use alloy_primitives::B256;
 use block_header::EvmBlockHeader;
-use block_trie::KeccakBlockTrie as BlockTrie;
+use block_trie::BlockTrie;
 use common::Hashable;
 use risc0_zkp::core::digest::Digest;
 use risc0_zkvm::{guest::env, serde::to_vec};

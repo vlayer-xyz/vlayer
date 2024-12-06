@@ -66,6 +66,7 @@ where
 }
 
 pub type KeccakNodeRef = NodeRef<sha3::Keccak256>;
+pub type Sha2NodeRef = NodeRef<sha2::Sha256>;
 
 #[cfg(test)]
 mod encodable {
