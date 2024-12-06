@@ -12,9 +12,6 @@ import {
   writeEnvVariables,
 } from "@vlayer/sdk/config";
 
-const notaryPubKey =
-  "-----BEGIN PUBLIC KEY-----\nMFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEZT9nJiwhGESLjwQNnZ2MsZ1xwjGzvmhF\nxFi8Vjzanlidbsc1ngM+s1nzlRkZI5UK9BngzmC27BO0qXxPSepIwQ==\n-----END PUBLIC KEY-----\n";
-
 const { prover, verifier } = await deployVlayerContracts({
   proverSpec,
   verifierSpec,
@@ -40,7 +37,7 @@ await testFailedProving();
 async function testSuccessProvingAndVerification() {
   console.log("Proving...");
 
-  const webProof = { presentation_json, notary_pub_key: notaryPubKey };
+  const webProof = { presentation_json };
 
   const hash = await vlayer.prove({
     address: prover,
@@ -104,7 +101,7 @@ async function testSuccessProvingAndVerification() {
 async function testFailedProving() {
   console.log("Proving...");
 
-  const wrongWebProof = { presentation_json, notary_pub_key: "wrong" };
+  const wrongWebProof = { presentation_json };
 
   try {
     const hash = await vlayer.prove({

@@ -12,7 +12,6 @@ import {
 export type WebProofRequestInput = {
   logoUrl: string;
   steps: WebProofStep[];
-  notaryPubKey?: string;
 };
 
 export type WebProofRequest = Branded<

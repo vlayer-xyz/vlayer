@@ -66,12 +66,8 @@ export async function setupRequestProveButton(element: HTMLButtonElement) {
 
 export const setupVProverButton = (element: HTMLButtonElement) => {
   element.addEventListener("click", async () => {
-    const notaryPubKey =
-      "-----BEGIN PUBLIC KEY-----\nMFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEZT9nJiwhGESLjwQNnZ2MsZ1xwjGzvmhF\nxFi8Vjzanlidbsc1ngM+s1nzlRkZI5UK9BngzmC27BO0qXxPSepIwQ==\n-----END PUBLIC KEY-----\n";
-
     const webProof = {
       presentation_json: context.webProof,
-      notary_pub_key: notaryPubKey,
     };
     const vlayer = createVlayerClient({
       url: proverUrl,
