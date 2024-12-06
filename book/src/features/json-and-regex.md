@@ -62,7 +62,7 @@ Regular expressions are a powerful tool for finding patterns in text.
 
 We provide functions to match and capture a substring using regular expressions:
 - `matches` checks if a string matches a regular expression and returns `true` if a match is found;
-- `capture` checks if a string matched a regular expression and returns all found captures.
+- `capture` checks if a string matched a regular expression and returns an array of strings. First string is the whole matched text, followed by the captures.
 
 ```solidity
 import {Prover} from "vlayer/Prover.sol";
