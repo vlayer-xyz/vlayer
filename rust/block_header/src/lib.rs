@@ -2,7 +2,7 @@ mod casting_utils;
 mod eth;
 mod forge;
 
-use std::{fmt::Debug, ops::RangeInclusive};
+use std::fmt::Debug;
 
 use alloy_primitives::{BlockNumber, B256};
 use alloy_rlp::Encodable;
@@ -88,24 +88,30 @@ impl<'de> Deserialize<'de> for Box<dyn EvmBlockHeader> {
     }
 }
 
+#[cfg(feature = "test-utils")]
+pub mod test_utils {
+    use std::ops::RangeInclusive;
 
-pub fn mock_block_header(number: BlockNumber, parent_hash: B256) -> Box<dyn EvmBlockHeader> {
-    Box::new(EthBlockHeader {
-        number,
-        parent_hash,
-        ..Default::default()
-    })
-}
+    use super::*;
 
-pub fn mock_block_headers(blocks: RangeInclusive<BlockNumber>) -> Vec<Box<dyn EvmBlockHeader>> {
-    let mut headers = vec![];
-    let mut parent_hash = B256::default();
-    for number in blocks {
-        let header = mock_block_header(number, parent_hash);
-        parent_hash = header.hash_slow();
-        headers.push(header);
+    pub fn mock_block_header(number: BlockNumber, parent_hash: B256) -> Box<dyn EvmBlockHeader> {
+        Box::new(EthBlockHeader {
+            number,
+            parent_hash,
+            ..Default::default()
+        })
     }
-    headers
+
+    pub fn mock_block_headers(blocks: RangeInclusive<BlockNumber>) -> Vec<Box<dyn EvmBlockHeader>> {
+        let mut headers = vec![];
+        let mut parent_hash = B256::default();
+        for number in blocks {
+            let header = mock_block_header(number, parent_hash);
+            parent_hash = header.hash_slow();
+            headers.push(header);
+        }
+        headers
+    }
 }
 
 #[cfg(test)]

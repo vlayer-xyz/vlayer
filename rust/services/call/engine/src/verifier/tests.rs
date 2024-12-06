@@ -1,7 +1,7 @@
 use std::ops::RangeInclusive;
 
 use alloy_primitives::{BlockNumber, B256};
-use block_header::{mock_block_headers, EthBlockHeader, EvmBlockHeader};
+use block_header::{test_utils::mock_block_headers, EvmBlockHeader};
 use block_trie::KeccakBlockTrie as BlockTrie;
 use common::Hashable;
 use risc0_zkvm::{serde::to_vec, sha::Digest, FakeReceipt, InnerReceipt, ReceiptClaim};

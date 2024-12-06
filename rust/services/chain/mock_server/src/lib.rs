@@ -92,7 +92,7 @@ impl ChainProofServerMock {
 #[cfg(test)]
 mod tests {
     use alloy_primitives::B256;
-    use block_header::mock_block_header;
+    use block_header::test_utils::mock_block_header;
     use chain_client::{Client, RpcClient};
     use chain_common::SyncStatus;
 

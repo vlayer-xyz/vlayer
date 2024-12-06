@@ -49,16 +49,21 @@ pub struct Host {
     guest_elf: GuestElf,
 }
 
-async fn start_chain_proof_server(
+async fn mock_chain_client(
+    providers: &CachedMultiProvider,
     chain_id: ChainId,
-    block_header: Box<dyn EvmBlockHeader>,
-) -> String {
-    warn!("Chain proof sever URL not provided. Running with mock server");
+) -> Result<(BlockNumber, chain_client::RpcClient), Error> {
+    let latest_block = providers
+        .get(chain_id)?
+        .get_block_header(BlockTag::Latest)?
+        .ok_or_else(|| Error::Provider("latest block not found".to_string()))?;
+    let block_number = latest_block.number();
     let mut chain_proof_server = ChainProofServerMock::start().await;
     chain_proof_server
-        .mock_single_block(chain_id, block_header)
+        .mock_single_block(chain_id, latest_block)
         .await;
-    chain_proof_server.url()
+    let chain_client = chain_client::RpcClient::new(chain_proof_server.url());
+    Ok((block_number, chain_client))
 }
 
 impl Host {
@@ -78,14 +83,8 @@ impl Host {
                 (block_number, chain_client)
             }
             None => {
-                let latest_block = providers
-                    .get(config.start_chain_id)?
-                    .get_block_header(BlockTag::Latest)?
-                    .expect("latest block not found");
-                let block_number = latest_block.number();
-                let url = start_chain_proof_server(config.start_chain_id, latest_block).await;
-                let chain_client = chain_client::RpcClient::new(url);
-                (block_number, chain_client)
+                warn!("Chain proof sever URL not provided. Running with mock server");
+                mock_chain_client(&providers, config.start_chain_id).await?
             }
         };
 
