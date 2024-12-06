@@ -88,6 +88,32 @@ impl<'de> Deserialize<'de> for Box<dyn EvmBlockHeader> {
     }
 }
 
+#[cfg(feature = "test-utils")]
+pub mod test_utils {
+    use std::ops::RangeInclusive;
+
+    use super::*;
+
+    pub fn mock_block_header(number: BlockNumber, parent_hash: B256) -> Box<dyn EvmBlockHeader> {
+        Box::new(EthBlockHeader {
+            number,
+            parent_hash,
+            ..Default::default()
+        })
+    }
+
+    pub fn mock_block_headers(blocks: RangeInclusive<BlockNumber>) -> Vec<Box<dyn EvmBlockHeader>> {
+        let mut headers = vec![];
+        let mut parent_hash = B256::default();
+        for number in blocks {
+            let header = mock_block_header(number, parent_hash);
+            parent_hash = header.hash_slow();
+            headers.push(header);
+        }
+        headers
+    }
+}
+
 #[cfg(test)]
 mod header_to_dyn_header {
     use as_any::Downcast;

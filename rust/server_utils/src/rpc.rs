@@ -1,26 +1,13 @@
 use std::mem::take;
 
+pub use common::Method;
 use reqwest::Client as RawClient;
-use serde::Serialize;
-use serde_json::{json, Value};
+use serde_json::Value;
 use tracing::info;
 
 pub struct Client {
     url: String,
     client: RawClient,
-}
-
-pub trait Method: Serialize {
-    const METHOD_NAME: &str;
-
-    fn request_body(&self) -> Value {
-        json!({
-            "id": 1,
-            "jsonrpc": "2.0",
-            "method": Self::METHOD_NAME,
-            "params": self,
-        })
-    }
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -171,6 +158,8 @@ pub mod mock {
 mod tests {
     use derive_new::new;
     use mock::Server;
+    use serde::Serialize;
+    use serde_json::json;
 
     use super::*;
 

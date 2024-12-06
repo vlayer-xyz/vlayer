@@ -1,6 +1,7 @@
-use alloy_primitives::B256;
+use alloy_primitives::{BlockNumber, ChainId, B256};
 use block_trie::KeccakBlockTrie as BlockTrie;
 use bytes::Bytes;
+use common::Method;
 use derivative::Derivative;
 use derive_more::{AsRef, Deref, From, Into};
 use derive_new::new;
@@ -10,6 +11,16 @@ use risc0_zkvm::{sha::Digest, AssumptionReceipt, Receipt};
 use serde::{Deserialize, Serialize};
 use serde_with::{hex::Hex, serde_as};
 use thiserror::Error;
+
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, new)]
+pub struct GetChainProof {
+    pub chain_id: ChainId,
+    pub block_numbers: Vec<BlockNumber>,
+}
+
+impl Method for GetChainProof {
+    const METHOD_NAME: &str = "v_chain";
+}
 
 #[derive(Clone, Debug, Default, PartialEq, Eq, Serialize, Deserialize, AsRef)]
 pub struct ChainProof {
@@ -99,7 +110,7 @@ impl TryFrom<&ChainProof> for ChainProofReceipt {
 }
 
 #[serde_as]
-#[derive(Serialize, Default, Deserialize, Debug, PartialEq, new)]
+#[derive(Default, Clone, Debug, PartialEq, Serialize, Deserialize, new)]
 pub struct RpcChainProof {
     #[serde_as(as = "Hex")]
     pub proof: Bytes,
@@ -118,4 +129,19 @@ impl TryFrom<RpcChainProof> for ChainProof {
             block_trie,
         })
     }
+}
+
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, new)]
+pub struct GetSyncStatus {
+    pub chain_id: ChainId,
+}
+
+impl Method for GetSyncStatus {
+    const METHOD_NAME: &str = "v_sync_status";
+}
+
+#[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, new)]
+pub struct SyncStatus {
+    pub first_block: BlockNumber,
+    pub last_block: BlockNumber,
 }

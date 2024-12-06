@@ -19,13 +19,13 @@ derive-new = { workspace = true }
 ethers-core = { workspace = true }
 host_utils = { workspace = true }
 lazy_static = { workspace = true }
+mock_chain_server = { workspace = true }
 mpt = { workspace = true }
 provider = { workspace = true }
 revm = { workspace = true, features = ["serde", "std"] }
 risc0-zkp = { workspace = true }
 risc0-zkvm = { workspace = true }
 seal = { workspace = true }
-serde_json = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true, features = ["macros"] }
 tracing = { workspace = true }

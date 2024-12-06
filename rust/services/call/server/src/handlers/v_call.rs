@@ -30,7 +30,7 @@ pub async fn v_call(
     info!("v_call => {params:#?}");
     let call: EngineCall = params.call.try_into()?;
     let host_config = config.get_host_config(params.context.chain_id);
-    let host = Host::try_new(host_config)?;
+    let host = Host::try_new(host_config).await?;
     let call_hash = CallHashData::new(host.start_execution_location(), call.clone())
         .hash_slow()
         .into();

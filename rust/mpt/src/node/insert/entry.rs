@@ -70,7 +70,8 @@ mod split_first_key_nibble {
         let (first, rest_entry) = entry.split_first_key_nibble();
 
         assert_eq!(first, 0x0);
-        assert_eq!(**rest_entry.value, []);
+        let value: &[u8] = &rest_entry.value;
+        assert_eq!(value, [] as [u8; 0]);
     }
 
     #[test]
@@ -80,7 +81,9 @@ mod split_first_key_nibble {
         let (first, rest_entry) = entry.split_first_key_nibble();
 
         assert_eq!(first, 0x0);
-        assert_eq!(*rest_entry.key, [0x1]);
-        assert_eq!(**rest_entry.value, []);
+        let key: &[u8] = &rest_entry.key;
+        let value: &[u8] = &rest_entry.value;
+        assert_eq!(key, [0x1]);
+        assert_eq!(value, [] as [u8; 0]);
     }
 }

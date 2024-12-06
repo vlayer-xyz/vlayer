@@ -21,7 +21,6 @@ common = { workspace = true }
 flate2 = { workspace = true }
 hex = { workspace = true }
 lazy_static = { workspace = true }
-mock_chain_server = { workspace = true }
 reqwest = { workspace = true, features = ["json"] }
 serde_json = { workspace = true }
 tar = { workspace = true }
