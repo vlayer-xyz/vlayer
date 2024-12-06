@@ -102,7 +102,7 @@ async function testSuccessProvingAndVerification() {
 async function testFailedProving() {
   console.log("Proving...");
 
-  const wrongWebProof = { presentation_json: presentation_invalid_signature};
+  const wrongWebProof = { presentation_json: presentation_invalid_signature };
 
   try {
     const hash = await vlayer.prove({
@@ -123,7 +123,7 @@ async function testFailedProving() {
     assert.ok(error instanceof Error, `Invalid error returned: ${error}`);
     assert.equal(
       error.message,
-      "Error response: Host error: TravelCallExecutor error: EVM transact error: ASN.1 error: PEM error: PEM preamble contains invalid data (NUL byte) at line 1 column 14984",
+      "Error response: Host error: TravelCallExecutor error: EVM transact error: Verification error: Presentation error: presentation error: attestation error caused by: attestation proof error: signature error caused by: signature verification failed: invalid secp256k1 signature",
       `Error with wrong message returned: ${error.message}`,
     );
     console.log("Proving failed as expected with message:", error.message);
