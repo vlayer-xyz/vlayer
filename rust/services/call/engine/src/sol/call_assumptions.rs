@@ -3,6 +3,23 @@ mod private {
     alloy_sol_types::sol!(#![sol(all_derives)] "../../../../contracts/vlayer/src/CallAssumptions.sol");
 }
 
+pub mod ser {
+    use alloy_primitives::{Address, FixedBytes, U256};
+    use serde::Serialize;
+
+    use super::CallAssumptions;
+
+    #[derive(Serialize)]
+    #[serde(remote = "CallAssumptions")]
+    #[allow(non_snake_case)]
+    pub struct CallAssumptionsDef {
+        proverContractAddress: Address,
+        functionSelector: FixedBytes<4>,
+        settleBlockNumber: U256,
+        settleBlockHash: FixedBytes<32>,
+    }
+}
+
 use alloy_primitives::{Address, U256};
 use alloy_sol_types::SolType;
 use block_header::EvmBlockHeader;

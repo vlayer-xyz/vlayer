@@ -1,9 +1,8 @@
 use alloy_primitives::{hex::ToHexExt, U256};
 use alloy_sol_types::SolValue;
-use call_engine::{HostOutput, Proof, Seal};
+use call_engine::{sol::proof::ser::ProofDef, HostOutput, Proof, Seal};
 use call_host::Error as HostError;
-use serde::{Deserialize, Serialize};
-use serde_json::{json, Value};
+use serde::{Deserialize, Serialize, Serializer};
 use tracing::info;
 
 use super::SharedState;
@@ -25,10 +24,20 @@ pub async fn v_get_proof_receipt(
     }
 }
 
+#[derive(Serialize)]
 #[allow(clippy::struct_field_names)]
 pub struct CallResult {
+    #[serde(with = "ProofDef")]
     pub proof: Proof,
+    #[serde(serialize_with = "ser_evm_call_result")]
     pub evm_call_result: Vec<u8>,
+}
+
+fn ser_evm_call_result<S>(evm_call_result: &[u8], state: S) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    state.serialize_str(&evm_call_result.encode_hex_with_prefix())
 }
 
 impl CallResult {
@@ -53,33 +62,8 @@ impl CallResult {
             evm_call_result: guest_output.evm_call_result,
         })
     }
-
-    pub fn to_json(&self) -> Value {
-        json!({
-            "evm_call_result": self.evm_call_result.encode_hex_with_prefix(),
-            "proof": {
-                "seal": {
-                    "verifierSelector": self.proof.seal.verifierSelector,
-                    "seal": self.proof.seal.seal,
-                    "mode": Into::<u8>::into(self.proof.seal.mode),
-                },
-                "callGuestId": self.proof.callGuestId.encode_hex_with_prefix(),
-                "length": u256_to_number(self.proof.length),
-                "callAssumptions": {
-                    "functionSelector": self.proof.callAssumptions.functionSelector,
-                    "proverContractAddress": self.proof.callAssumptions.proverContractAddress,
-                    "settleBlockNumber": u256_to_number(self.proof.callAssumptions.settleBlockNumber),
-                    "settleBlockHash": self.proof.callAssumptions.settleBlockHash,
-                }
-            },
-        })
-    }
 }
 
 fn decode_seal(seal: &[u8]) -> Result<Seal, seal::Error> {
     Ok(Seal::abi_decode(seal, true)?)
-}
-
-fn u256_to_number(value: U256) -> u64 {
-    u64::try_from(value).expect("Expected value to fit into u64")
 }
