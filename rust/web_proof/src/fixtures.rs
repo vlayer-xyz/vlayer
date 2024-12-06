@@ -1,7 +1,7 @@
 use core::str;
 use std::fs;
 
-use p256::PublicKey;
+use k256::PublicKey;
 use pkcs8::DecodePublicKey;
 
 use crate::web_proof::WebProof;
@@ -9,7 +9,7 @@ use crate::web_proof::WebProof;
 #[cfg(test)]
 pub(crate) mod tlsn_core_types;
 
-pub const NOTARY_PUB_KEY_PEM_EXAMPLE: &str = "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExpX/4R4z40gI6C/j9zAM39u58LJu\n3Cx5tXTuqhhu/tirnBi5GniMmspOTEsps4ANnPLpMmMSfhJ+IFHbc3qVOA==\n-----END PUBLIC KEY-----\n";
+pub const NOTARY_PUB_KEY_PEM_EXAMPLE: &str = "-----BEGIN PUBLIC KEY-----\nMDYwEAYHKoZIzj0CAQYFK4EEAAoDIgADZT9nJiwhGESLjwQNnZ2MsZ1xwjGzvmhF\nxFi8Vjzanlg=\n-----END PUBLIC KEY-----";
 const PRESENTATION_FIXTURE: &str = include_str!(".././testdata/presentation.json");
 
 pub fn read_fixture(path: &str) -> String {
@@ -28,7 +28,7 @@ pub fn load_web_proof_fixture() -> WebProof {
 
 #[cfg(test)]
 pub(crate) mod utils {
-    use p256::PublicKey;
+    use k256::PublicKey;
     use pkcs8::DecodePublicKey;
     use tlsn_core::{
         attestation::Field,
