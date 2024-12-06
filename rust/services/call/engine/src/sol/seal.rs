@@ -6,7 +6,7 @@ mod private {
 }
 
 pub mod ser {
-    use alloy_primitives::FixedBytes;
+    use alloy_primitives::{Selector, B256};
     use serde::{Serialize, Serializer};
 
     use super::{ProofMode, Seal};
@@ -27,9 +27,9 @@ pub mod ser {
     #[derive(Serialize)]
     #[serde(remote = "Seal")]
     #[allow(non_snake_case)]
-    pub struct SealDef {
-        verifierSelector: FixedBytes<4>,
-        seal: [FixedBytes<32>; 8_usize],
+    pub struct SealDTO {
+        verifierSelector: Selector,
+        seal: [B256; 8],
         #[serde(serialize_with = "ser_proof_mode")]
         mode: ProofMode,
     }

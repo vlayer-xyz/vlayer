@@ -5,33 +5,36 @@ mod private {
 }
 
 pub mod ser {
-    use alloy_primitives::{FixedBytes, U256};
+    use alloy_primitives::{B256, U256};
     use serde::{Serialize, Serializer};
 
     use super::Proof;
     use crate::{
-        sol::{call_assumptions::ser::CallAssumptionsDef, seal::ser::SealDef},
+        sol::{call_assumptions::ser::CallAssumptionsDTO, seal::ser::SealDTO},
         CallAssumptions, Seal,
     };
-
-    fn ser_length<S>(length: &U256, state: S) -> Result<S::Ok, S::Error>
-    where
-        S: Serializer,
-    {
-        state.serialize_u64(u64::try_from(length).expect("value to fit into u64"))
-    }
 
     #[derive(Serialize)]
     #[serde(remote = "Proof")]
     #[allow(non_snake_case)]
     pub struct ProofDef {
-        #[serde(with = "SealDef")]
+        #[serde(with = "SealDTO")]
         seal: Seal,
-        callGuestId: FixedBytes<32>,
+        callGuestId: B256,
         #[serde(serialize_with = "ser_length")]
         length: U256,
-        #[serde(with = "CallAssumptionsDef")]
+        #[serde(with = "CallAssumptionsDTO")]
         callAssumptions: CallAssumptions,
+    }
+
+    fn ser_length<S>(length: &U256, state: S) -> Result<S::Ok, S::Error>
+    where
+        S: Serializer,
+    {
+        state.serialize_u64(
+            u64::try_from(length)
+                .expect("failed to serialize length field of Proof. Value must fit into u64"),
+        )
     }
 }
 

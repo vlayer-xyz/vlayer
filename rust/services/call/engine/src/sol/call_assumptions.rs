@@ -4,7 +4,7 @@ mod private {
 }
 
 pub mod ser {
-    use alloy_primitives::{Address, FixedBytes, U256};
+    use alloy_primitives::{Address, Selector, B256, U256};
     use serde::Serialize;
 
     use super::CallAssumptions;
@@ -12,11 +12,11 @@ pub mod ser {
     #[derive(Serialize)]
     #[serde(remote = "CallAssumptions")]
     #[allow(non_snake_case)]
-    pub struct CallAssumptionsDef {
+    pub struct CallAssumptionsDTO {
         proverContractAddress: Address,
-        functionSelector: FixedBytes<4>,
+        functionSelector: Selector,
         settleBlockNumber: U256,
-        settleBlockHash: FixedBytes<32>,
+        settleBlockHash: B256,
     }
 }
 
