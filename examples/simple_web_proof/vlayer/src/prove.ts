@@ -11,6 +11,7 @@ import {
 
 import {
   createExtensionWebProofProvider,
+  createWebProofRequest,
   expectUrl,
   notarize,
   startPage,
@@ -20,6 +21,7 @@ import { createContext } from "@vlayer/sdk/config";
 
 import webProofVerifier from "../../out/WebProofVerifier.sol/WebProofVerifier";
 import { Hex } from "viem";
+import { create } from "domain";
 
 const context: {
   webProof: PresentationJSON | undefined;
@@ -84,6 +86,40 @@ export const setupVProverButton = (element: HTMLButtonElement) => {
       chainId: chain.id,
     });
     const provingResult = await vlayer.waitForProvingResult({ hash });
+    console.log("Proof generated!", provingResult);
+    context.provingResult = provingResult as [Proof, string, Hex];
+  });
+};
+
+export const setupProveWebButton = (element: HTMLButtonElement) => {
+  element.addEventListener("click", async () => {
+    const vlayer = createVlayerClient({
+      url: proverUrl,
+    });
+
+    const webProofRequest = createWebProofRequest({
+      logoUrl: "http://twitterswap.com/logo.png",
+      steps: [
+        startPage("https://x.com/i/flow/login", "Go to x.com login page"),
+        expectUrl("https://x.com/home", "Log in"),
+        notarize(
+          "https://api.x.com/1.1/account/settings.json",
+          "GET",
+          "Generate Proof of Twitter profile",
+        ),
+      ],
+      notaryPubKey: "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExpX/4R4z40gI6C/j9zAM39u58LJu\n3Cx5tXTuqhhu/tirnBi5GniMmspOTEsps4ANnPLpMmMSfhJ+IFHbc3qVOA==\n-----END PUBLIC KEY-----\n";
+    });
+
+    const hash = await vlayer.proveWeb({
+      address: import.meta.env.VITE_PROVER_ADDRESS,
+      proverAbi: webProofProver.abi,
+      chainId: foundry.id,
+      functionName: "main",
+      args: [webProofRequest, twitterUserAddress],
+    });
+
+    const provingResult = await vlayer.waitForProvingResult(hash);
     console.log("Proof generated!", provingResult);
     context.provingResult = provingResult as [Proof, string, Hex];
   });
