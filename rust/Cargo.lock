@@ -2047,13 +2047,11 @@ dependencies = [
  "parking_lot",
  "seal",
  "serde",
- "serde_json",
  "server_utils",
  "thiserror",
  "tokio",
  "tower-http 0.6.1",
  "tracing",
- "web_proof",
 ]
 
 [[package]]
