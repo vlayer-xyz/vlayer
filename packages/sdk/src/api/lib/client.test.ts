@@ -46,12 +46,12 @@ function generateRandomHash() {
 }
 
 describe("Success zk-proving", () => {
-  let hash: string;
+  let hashStr: string;
   let zkProvingSpy: MockInstance<(status: ZkProvingStatus) => void>;
   let vlayer: VlayerClient;
 
   beforeAll(() => {
-    hash = generateRandomHash();
+    hashStr = generateRandomHash();
     const webProofProvider = createExtensionWebProofProvider();
     zkProvingSpy = vi.spyOn(webProofProvider, "notifyZkProvingStatus");
     vlayer = createVlayerClient({ webProofProvider });
@@ -60,7 +60,7 @@ describe("Success zk-proving", () => {
     fetchMocker.mockResponseOnce(() => {
       return {
         body: JSON.stringify({
-          result: hash,
+          result: hashStr,
         }),
       };
     });
@@ -73,7 +73,7 @@ describe("Success zk-proving", () => {
       chainId: 42,
     });
 
-    expect(result.hash).toBe(hash);
+    expect(result.hash).toBe(hashStr);
     expect(zkProvingSpy).toBeCalledTimes(2);
     expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Proving);
   });
@@ -82,13 +82,15 @@ describe("Success zk-proving", () => {
       return {
         body: JSON.stringify({
           result: {
-            proof: {},
+            status: "done",
+            data: {},
           },
         }),
       };
     });
 
-    await vlayer.waitForProvingResult({ hash } as BrandedHash<[], string>);
+    const hash = { hash: hashStr } as BrandedHash<[], string>;
+    await vlayer.waitForProvingResult({ hash });
 
     expect(zkProvingSpy).toBeCalledTimes(2);
     expect(zkProvingSpy).toHaveBeenNthCalledWith(2, ZkProvingStatus.Done);
@@ -120,7 +122,7 @@ describe("Failed zk-proving", () => {
         args: [],
         chainId: 42,
       });
-      await vlayer.waitForProvingResult(hash);
+      await vlayer.waitForProvingResult({ hash });
     } catch (e) {
       console.log("Error waiting for proving result", e);
     }

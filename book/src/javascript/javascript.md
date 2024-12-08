@@ -91,7 +91,7 @@ const hash = await vlayer.prove({
 Wait for the proving to be finished, and then retrieve the result along with Proof.
 
 ```ts
-const result = await vlayer.waitForProvingResult(hash);
+const result = await vlayer.waitForProvingResult({ hash });
 ```
 
 ## Verification

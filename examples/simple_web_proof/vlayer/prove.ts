@@ -52,7 +52,7 @@ async function testSuccessProvingAndVerification() {
     ],
     chainId: chain.id,
   });
-  const result = await vlayer.waitForProvingResult(hash);
+  const result = await vlayer.waitForProvingResult({ hash });
   const [proof, twitterHandle, address] = result;
   console.log("Has Proof");
 
@@ -117,7 +117,7 @@ async function testFailedProving() {
       ],
       chainId: chain.id,
     });
-    await vlayer.waitForProvingResult(hash);
+    await vlayer.waitForProvingResult({ hash });
     throw new Error("Proving should have failed!");
   } catch (error) {
     assert.ok(error instanceof Error, `Invalid error returned: ${error}`);
