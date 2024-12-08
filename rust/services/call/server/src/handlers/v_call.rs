@@ -44,10 +44,15 @@ pub async fn v_call(
         client.allocate_gas(params.context.gas_limit).await?;
     }
 
-    tokio::spawn(async move {
+    let handle = tokio::spawn(async move {
         let res = generate_proof(call, host, gas_meter_client).await;
         state.write().insert(call_hash, res);
     });
+
+    #[cfg(feature = "testing")]
+    handle.await.unwrap();
+    #[cfg(not(feature = "testing"))]
+    drop(handle);
 
     Ok(call_hash)
 }

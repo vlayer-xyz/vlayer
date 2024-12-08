@@ -331,17 +331,20 @@ mod server_tests {
             assert_jrpc_ok(
                 response,
                 json!({
-                    "evm_call_result": U256::from(3).encode_hex(),
-                    "proof": {
-                        "length": 160,
-                        "seal": {
-                            "verifierSelector": "0xdeafbeef",
-                            "mode": 1,
+                    "status": "done",
+                    "data": {
+                        "evm_call_result": U256::from(3).encode_hex(),
+                        "proof": {
+                            "length": 160,
+                            "seal": {
+                                "verifierSelector": "0xdeafbeef",
+                                "mode": 1,
+                            },
+                            "callAssumptions": {
+                                "functionSelector": function_selector(&call_data),
+                                "proverContractAddress": contract.address(),
+                            }
                         },
-                        "callAssumptions": {
-                            "functionSelector": function_selector(&call_data),
-                            "proverContractAddress": contract.address(),
-                        }
                     },
                 }),
             )
@@ -374,17 +377,20 @@ mod server_tests {
             assert_jrpc_ok(
                 response,
                 json!({
-                    "evm_call_result": Uint8::from(1).encode_hex(),
-                    "proof": {
-                        "length": 160,
-                        "seal": {
-                            "verifierSelector": "0xdeafbeef",
-                            "mode": 1,
+                    "status": "done",
+                    "data": {
+                        "evm_call_result": Uint8::from(1).encode_hex(),
+                        "proof": {
+                            "length": 160,
+                            "seal": {
+                                "verifierSelector": "0xdeafbeef",
+                                "mode": 1,
+                            },
+                            "callAssumptions": {
+                                "functionSelector": function_selector(&call_data),
+                                "proverContractAddress": contract.address(),
+                            }
                         },
-                        "callAssumptions": {
-                            "functionSelector": function_selector(&call_data),
-                            "proverContractAddress": contract.address(),
-                        }
                     },
                 }),
             )

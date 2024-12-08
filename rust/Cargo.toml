@@ -19,6 +19,7 @@ members = [
     "services/call/precompiles",
     "services/call/seal",
     "services/call/server",
+    "services/call/server_tests",
     "services/chain/block_trie",
     "services/chain/client",
     "services/chain/common",

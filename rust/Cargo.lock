@@ -2037,22 +2037,14 @@ dependencies = [
  "anyhow",
  "axum",
  "axum-jrpc",
- "block_header",
  "call_engine",
- "call_guest_wrapper",
  "call_host",
  "chain",
- "chain_guest_wrapper",
  "common",
  "derive-new",
  "derive_more 1.0.0",
- "ethers",
  "hex",
- "lazy_static",
- "mock_chain_server",
  "parking_lot",
- "provider",
- "reqwest 0.12.8",
  "seal",
  "serde",
  "serde_json",
@@ -2061,6 +2053,30 @@ dependencies = [
  "tokio",
  "tower-http 0.6.1",
  "tracing",
+ "web_proof",
+]
+
+[[package]]
+name = "call_server_tests"
+version = "0.1.0"
+dependencies = [
+ "axum",
+ "block_header",
+ "call_guest_wrapper",
+ "call_server",
+ "chain_guest_wrapper",
+ "common",
+ "derive-new",
+ "derive_more 1.0.0",
+ "ethers",
+ "lazy_static",
+ "mock_chain_server",
+ "provider",
+ "reqwest 0.12.8",
+ "serde",
+ "serde_json",
+ "server_utils",
+ "tokio",
  "web_proof",
 ]
 
