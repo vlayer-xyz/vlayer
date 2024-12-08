@@ -87,7 +87,7 @@ export const createVlayerClient = (
       F extends ContractFunctionName<T>,
     >({
       hash,
-      number_of_retries = 10,
+      number_of_retries = 120,
       sleep_duration = 1000,
     }: {
       hash: BrandedHash<T, F>;
