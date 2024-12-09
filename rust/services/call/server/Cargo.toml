@@ -27,8 +27,24 @@ tokio = { workspace = true }
 tower-http = { workspace = true, features = ["cors"] }
 tracing = { workspace = true }
 
-[features]
-testing = []
+[dev-dependencies]
+axum = { workspace = true }
+block_header = { workspace = true }
+call_guest_wrapper = { workspace = true }
+chain_guest_wrapper = { workspace = true }
+common = { workspace = true }
+derive-new = { workspace = true }
+derive_more = { workspace = true }
+ethers = { workspace = true }
+lazy_static = { workspace = true }
+mock_chain_server = { workspace = true }
+provider = { workspace = true }
+reqwest = { workspace = true }
+serde = { workspace = true }
+serde_json = { workspace = true }
+server_utils = { workspace = true }
+tokio = { workspace = true }
+web_proof = { workspace = true, features = ["fixtures"] }
 
 [lints]
 workspace = true
