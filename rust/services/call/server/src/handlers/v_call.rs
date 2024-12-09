@@ -11,7 +11,7 @@ use super::SharedState;
 use crate::{
     config::Config as ServerConfig,
     error::AppError,
-    gas_meter::{Client as GasMeterClient, ComputationStage},
+    gas_meter::{self, Client as GasMeterClient, ComputationStage},
 };
 
 pub mod types;
@@ -36,13 +36,16 @@ pub async fn v_call(
         .into();
     info!("Calculated hash: {}", call_hash);
 
-    let gas_meter_client: Box<dyn GasMeterClient> = config.as_ref().into();
-    gas_meter_client
-        .allocate(call_hash, params.context.gas_limit)
-        .await?;
+    let gas_meter_client: Box<dyn GasMeterClient> = config
+        .gas_meter_config()
+        .map_or(Box::new(gas_meter::NoOpClient), |config| {
+            Box::new(gas_meter::RpcClient::new(config, call_hash))
+        });
+
+    gas_meter_client.allocate(params.context.gas_limit).await?;
 
     tokio::spawn(async move {
-        let res = generate_proof(call_hash, call, host, gas_meter_client).await;
+        let res = generate_proof(call, host, gas_meter_client).await;
         state.insert(call_hash, res);
     });
 
@@ -50,7 +53,6 @@ pub async fn v_call(
 }
 
 async fn generate_proof(
-    hash: CallHash,
     call: EngineCall,
     host: Host,
     gas_meter_client: Box<dyn GasMeterClient>,
@@ -61,13 +63,13 @@ async fn generate_proof(
     let gas_used = preflight_result.gas_used;
 
     gas_meter_client
-        .refund(hash, ComputationStage::Preflight, gas_used)
+        .refund(ComputationStage::Preflight, gas_used)
         .await?;
 
     let host_output = Host::prove(&prover, call_guest_id, preflight_result)?;
 
     gas_meter_client
-        .refund(hash, ComputationStage::Proving, gas_used)
+        .refund(ComputationStage::Proving, gas_used)
         .await?;
 
     Ok(host_output)
