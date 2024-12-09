@@ -50,7 +50,7 @@ const proofHash = await vlayer.prove({
   args: [account.address],
   chainId: chain.id,
 });
-const result = await vlayer.waitForProvingResult(proofHash);
+const result = await vlayer.waitForProvingResult({ hash: proofHash });
 console.log("Proof:", result[0]);
 console.log("Verifying...");
 

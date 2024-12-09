@@ -86,7 +86,7 @@ export const setupVProverButton = (element: HTMLButtonElement) => {
       ],
       chainId: chain.id,
     });
-    const provingResult = await vlayer.waitForProvingResult(hash);
+    const provingResult = await vlayer.waitForProvingResult({ hash });
     console.log("Proof generated!", provingResult);
     context.provingResult = provingResult as [Proof, string, Hex];
   });

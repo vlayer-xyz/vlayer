@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use call_engine::Call as EngineCall;
+use call_engine::{Call as EngineCall, HostOutput};
 use call_host::Host;
 use common::Hashable;
 use serde::{Deserialize, Serialize};
@@ -44,6 +44,19 @@ pub async fn v_call(
         client.allocate_gas(params.context.gas_limit).await?;
     }
 
+    tokio::spawn(async move {
+        let res = generate_proof(call, host, gas_meter_client).await;
+        state.insert(call_hash, res);
+    });
+
+    Ok(call_hash)
+}
+
+async fn generate_proof(
+    call: EngineCall,
+    host: Host,
+    gas_meter_client: Option<Client>,
+) -> Result<HostOutput, AppError> {
     let prover = host.prover();
     let call_guest_id = host.call_guest_id();
     let preflight_result = host.preflight(call).await?;
@@ -63,7 +76,5 @@ pub async fn v_call(
             .await?;
     }
 
-    state.write().insert(call_hash, host_output);
-
-    Ok(call_hash)
+    Ok(host_output)
 }

@@ -87,7 +87,7 @@ function SourceNewWay() {
         },
       ],
     });
-    const zkProof = await vlayerClient.waitForProvingResult(hash);
+    const zkProof = await vlayerClient.waitForProvingResult({ hash });
     console.log("ZK proof", zkProof);
     setZkProof(zkProof);
   }, [webProof]);
@@ -184,7 +184,7 @@ function Source() {
         },
       ],
     });
-    const zkProof = await vlayerClient.current?.waitForProvingResult(hash);
+    const zkProof = await vlayerClient.current?.waitForProvingResult({ hash });
     console.log("ZK proof", zkProof);
     setZkProof(zkProof);
   }, [webProof]);

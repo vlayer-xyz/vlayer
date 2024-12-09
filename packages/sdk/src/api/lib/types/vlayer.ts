@@ -53,9 +53,17 @@ export type VGetProofReceiptParams = {
   hash: Hex;
 };
 
+export enum VGetProofReceiptStatus {
+  pending = "pending",
+  done = "done",
+}
+
 export interface VGetProofReceiptResult {
-  evm_call_result: Hex;
-  proof: Proof;
+  status: VGetProofReceiptStatus;
+  data?: {
+    evm_call_result: Hex;
+    proof: Proof;
+  };
 }
 
 export interface VGetProofReceiptResponse {
@@ -74,9 +82,14 @@ export type VlayerClient = {
     args: ContractFunctionArgs<T, AbiStateMutability, F>;
   }) => Promise<BrandedHash<T, F>>;
 
-  waitForProvingResult: <T extends Abi, F extends ContractFunctionName<T>>(
-    hash: BrandedHash<T, F>,
-  ) => Promise<ContractFunctionReturnType<T, AbiStateMutability, F>>;
+  waitForProvingResult: <
+    T extends Abi,
+    F extends ContractFunctionName<T>,
+  >(args: {
+    hash: BrandedHash<T, F>;
+    numberOfRetries?: number;
+    sleepDuration?: number;
+  }) => Promise<ContractFunctionReturnType<T, AbiStateMutability, F>>;
 
   proveWeb: <T extends Abi, F extends ContractFunctionName<T>>(args: {
     address: Hex;

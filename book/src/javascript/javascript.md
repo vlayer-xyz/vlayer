@@ -91,7 +91,20 @@ const hash = await vlayer.prove({
 Wait for the proving to be finished, and then retrieve the result along with Proof.
 
 ```ts
-const result = await vlayer.waitForProvingResult(hash);
+const result = await vlayer.waitForProvingResult({ hash });
+```
+
+By default, the `waitForProvingResult` function polls the server for a proof for 2 minutes. This is achieved through 120 retries with a polling interval of 1 second.
+You can customize this behavior by specifying the following optional parameters:
+- `numberOfRetries`: The total number of polling attempts.
+- `sleepDuration`: The delay (in ms) between each polling attempt.
+For example, if you want to extend the polling duration to 180 seconds with a 2-second delay between attempts, you can configure it as follows:
+
+```ts
+const provingResult = await vlayer.waitForProvingResult({
+  numberOfRetries: 90,  // Total retries (180s / 2)
+  sleepDuration: 2000,  // 2s interval between retries
+});
 ```
 
 ## Verification

@@ -1,4 +1,9 @@
-import { VCallResponse, VlayerClient, BrandedHash } from "types/vlayer";
+import {
+  VCallResponse,
+  VlayerClient,
+  BrandedHash,
+  VGetProofReceiptStatus,
+} from "types/vlayer";
 import { WebProofProvider } from "types/webProofProvider";
 
 import { prove, getProofReceipt } from "../prover";
@@ -25,6 +30,10 @@ function dropEmptyProofFromArgs(args: unknown) {
 async function getHash(vcall_response: Promise<VCallResponse>): Promise<Hex> {
   const result = await vcall_response;
   return result.result;
+}
+
+async function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export const createVlayerClient = (
@@ -78,30 +87,46 @@ export const createVlayerClient = (
       F extends ContractFunctionName<T>,
     >({
       hash,
-    }: BrandedHash<T, F>): Promise<
-      ContractFunctionReturnType<T, AbiStateMutability, F>
-    > => {
-      const {
-        result: { proof, evm_call_result },
-      } = await getProofReceipt(
-        { hash } as BrandedHash<typeof proverAbi, typeof functionName>,
-        url,
-      );
-      const savedProvingData = resultHashMap.get(hash);
+      numberOfRetries = 120,
+      sleepDuration = 1000,
+    }: {
+      hash: BrandedHash<T, F>;
+      numberOfRetries?: number;
+      sleepDuration?: number;
+    }): Promise<ContractFunctionReturnType<T, AbiStateMutability, F>> => {
+      const getProof = async () => {
+        for (let retry = 0; retry < numberOfRetries; retry++) {
+          const resp = await getProofReceipt(hash, url);
+          if (resp.result.status === VGetProofReceiptStatus.done) {
+            if (resp.result.data === undefined) {
+              throw new Error(
+                "No ZK proof returned from server for hash " + hash.hash,
+              );
+            }
+            return resp.result.data;
+          }
+          await sleep(sleepDuration);
+        }
+        throw new Error(
+          `Timed out waiting for ZK proof generation after {numberOfRetries * sleepDuration}ms. Consider increasing numberOfRetries in waitForProvingResult`,
+        );
+      };
+      const data = await getProof();
+      const savedProvingData = resultHashMap.get(hash.hash);
       if (!savedProvingData) {
-        throw new Error("No result found for hash " + hash);
+        throw new Error("No result found for hash " + hash.hash);
       }
       const [proverAbi, functionName] = savedProvingData;
 
       const result = dropEmptyProofFromArgs(
         decodeFunctionResult({
           abi: proverAbi,
-          data: evm_call_result,
+          data: data?.evm_call_result,
           functionName,
         }),
       );
 
-      return [proof, ...result] as ContractFunctionReturnType<
+      return [data?.proof, ...result] as ContractFunctionReturnType<
         T,
         AbiStateMutability,
         F

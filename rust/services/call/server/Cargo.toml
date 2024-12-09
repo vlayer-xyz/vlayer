@@ -15,21 +15,20 @@ call_engine = { workspace = true }
 call_host = { workspace = true }
 chain = { workspace = true }
 common = { workspace = true }
+dashmap = { workspace = true }
 derive-new = { workspace = true }
 derive_more = { workspace = true }
 hex = { workspace = true }
-parking_lot = { workspace = true }
 seal = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
-serde_json = { workspace = true }
 server_utils = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
 tower-http = { workspace = true, features = ["cors"] }
 tracing = { workspace = true }
-web_proof = { workspace = true }
 
 [dev-dependencies]
+assert-json-diff = { workspace = true }
 block_header = { workspace = true }
 call_guest_wrapper = { workspace = true }
 chain_guest_wrapper = { workspace = true }
@@ -38,6 +37,7 @@ lazy_static = { workspace = true }
 mock_chain_server = { workspace = true }
 provider = { workspace = true }
 reqwest = { workspace = true }
+serde_json = { workspace = true }
 web_proof = { workspace = true, features = ["fixtures"] }
 
 [lints]

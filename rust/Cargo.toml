@@ -70,6 +70,7 @@ comfy-table = "7.1.1"
 digest = "0.10.7"
 criterion = "0.5.1"
 ctor = "0.2.8"
+dashmap = "6.1.0"
 delegate = "0.13.1"
 derive_more = { version = "1.0.0", features = ["debug", "into", "from", "into_iterator", "deref"] }
 derive-new = "0.7.0"

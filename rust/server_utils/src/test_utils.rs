@@ -37,7 +37,7 @@ pub async fn post<T: Serialize>(app: Router, url: &str, body: &T) -> Response<Bo
     app.oneshot(request).await.unwrap()
 }
 
-pub async fn assert_jrpc_ok(response: axum::response::Response, expected: impl Serialize) {
+pub async fn assert_jrpc_ok(response: axum::response::Response, expected: impl Serialize) -> Value {
     let response_json = body_to_json(response.into_body()).await;
     if let Some(error) = response_json.get("error") {
         panic!("expected .result but found .error: {error}");
@@ -46,9 +46,10 @@ pub async fn assert_jrpc_ok(response: axum::response::Response, expected: impl S
         .get("result")
         .expect(".result not found in response body");
     assert_json_include!(expected: expected, actual: result);
+    response_json
 }
 
-pub async fn assert_jrpc_err(response: axum::response::Response, code: i32, msg: &str) {
+pub async fn assert_jrpc_err(response: axum::response::Response, code: i32, msg: &str) -> Value {
     let response_json = body_to_json(response.into_body()).await;
     if let Some(result) = response_json.get("result") {
         panic!("expected .error but found .result: {result}");
@@ -57,4 +58,5 @@ pub async fn assert_jrpc_err(response: axum::response::Response, code: i32, msg:
         .get("error")
         .expect(".error not found in response body");
     assert_json_include!(expected: serde_json::json!({"code": code, "message": msg}), actual: error);
+    response_json
 }
