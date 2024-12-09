@@ -143,7 +143,6 @@ export const createVlayerClient = (
           {
             webProofJson: JSON.stringify({
               tls_proof: webProof,
-              notary_pub_key: webProofPlaceholder.notaryPubKey,
             }),
           },
           ...commitmentArgs,

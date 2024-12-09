@@ -6,6 +6,5 @@
       "notaryUrl": "wss://notary.pse.dev/v0.1.0-alpha.7/notarize?sessionId=47a8a400-a25f-4571-9825-714b6e4a6689",
       "websocketProxyUrl": "ws://localhost:55688"
     }
-  },
-  "notary_pub_key": "-----BEGIN PUBLIC KEY-----\nMFYwEAYHKoZIzj0CAQYFK4EEAAoDgAEZT9nJiwhGESLjwQNnZ2MsZ1xwjGzvmhF\nxFi8Vjzanlidbsc1ngM+s1nzlRkZI5UK9BngzmC27BO0qXxPSepIwQ==\n-----END PUBLIC KEY-----\n"
+  }
 }

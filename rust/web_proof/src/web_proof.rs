@@ -1,6 +1,6 @@
 use k256::PublicKey;
-use pkcs8::{DecodePublicKey, EncodePublicKey, LineEnding};
-use serde::{de::Deserializer, Deserialize, Serialize, Serializer};
+use pkcs8::{EncodePublicKey, LineEnding};
+use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use tlsn_core::{
     connection::ServerName,
@@ -14,11 +14,6 @@ use crate::{request_transcript::RequestTranscript, response_transcript::Response
 #[derive(Deserialize, Serialize)]
 #[serde(deny_unknown_fields)]
 pub struct WebProof {
-    #[serde(
-        deserialize_with = "deserialize_public_key_from_pem_string",
-        serialize_with = "serialize_public_key_to_pem_string"
-    )]
-    pub notary_pub_key: PublicKey,
     pub presentation_json: PresentationJson,
 }
 
@@ -46,7 +41,9 @@ impl WebProof {
     }
 
     pub fn get_notary_pub_key(&self) -> Result<String, pkcs8::spki::Error> {
-        self.notary_pub_key.to_public_key_pem(LineEnding::LF)
+        PublicKey::from_sec1_bytes(self.get_notary_verifying_key().data.as_ref())
+            .unwrap()
+            .to_public_key_pem(LineEnding::LF)
     }
 
     pub fn get_notary_verifying_key(&self) -> VerifyingKey {
@@ -94,26 +91,9 @@ pub enum VerificationError {
     PublicKeySerialization(#[from] pkcs8::spki::Error),
 }
 
-fn deserialize_public_key_from_pem_string<'de, D>(deserializer: D) -> Result<PublicKey, D::Error>
-where
-    D: Deserializer<'de>,
-{
-    let key_pem = String::deserialize(deserializer)?;
-    PublicKey::from_public_key_pem(&key_pem).map_err(serde::de::Error::custom)
-}
-
-fn serialize_public_key_to_pem_string<S>(key: &PublicKey, serializer: S) -> Result<S::Ok, S::Error>
-where
-    S: Serializer,
-{
-    let key_pem = key
-        .to_public_key_pem(LineEnding::LF)
-        .map_err(serde::ser::Error::custom)?;
-    serializer.serialize_str(&key_pem)
-}
-
 #[cfg(test)]
 mod tests {
+    use pkcs8::DecodePublicKey;
     use tlsn_core::signing::KeyAlgId;
 
     use super::*;
@@ -132,7 +112,7 @@ mod tests {
 
         // TlsProofs don't derive Eq, so we compare only notary_pub_key from WebProof structure
         // Comparing notary_pub_key is more important because its (de)serialization is custom
-        assert_eq!(proof.notary_pub_key, deserialized.notary_pub_key);
+        assert_eq!(proof.get_notary_pub_key(), deserialized.get_notary_pub_key());
     }
 
     #[test]

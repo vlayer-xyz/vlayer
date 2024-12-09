@@ -25,8 +25,6 @@ import unconditionalProver from "../../../contracts/fixtures/out/UnconditionalPr
 
 const PROVER_ADDRESS = import.meta.env.VITE_UNCONDITIONAL_PROVER_ADDRESS;
 console.log(PROVER_ADDRESS);
-const NOTARY_PUB_KEY =
-  "-----BEGIN PUBLIC KEY-----\nMDYwEAYHKoZIzj0CAQYFK4EEAAoDIgADe0jxnBObaIj7Xjg6TXLCM1GG/VhY5650\nOrS/jgcbBuc=\n-----END PUBLIC KEY-----\n";
 
 function SourceNewWay() {
   const [webProof, setWebProof] = useState<PresentationJSON | null>(null);
@@ -85,7 +83,6 @@ function SourceNewWay() {
         {
           webProofJson: JSON.stringify({
             presentation_json: webProof,
-            notary_pub_key: NOTARY_PUB_KEY,
           }),
         },
       ],
@@ -183,7 +180,6 @@ function Source() {
         {
           webProofJson: JSON.stringify({
             presentation_json: webProof,
-            notary_pub_key: NOTARY_PUB_KEY,
           }),
         },
       ],
