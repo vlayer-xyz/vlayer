@@ -25,7 +25,7 @@ Under the hood, we verify mail server signatures to ensure the authenticity and 
 
 ## Email Safety Requirements
 
-Not every email that is considered valid by an email server will be considered valid by vlayer. 
+Not all emails that are considered valid by email servers will meet the validity requirements for vlayer
 Email servers use various rules based on [DMARC](https://dmarc.org/), [DKIM](https://datatracker.ietf.org/doc/html/rfc6376), and [SPF](https://datatracker.ietf.org/doc/html/rfc7208) to determine if an email is valid.
 When creating an Email Proof, we can only use DKIM signatures to prove the authenticity of the email, so the following additional preconditions must be met:
 
