@@ -1,9 +1,10 @@
 use crate::Benchmark;
 
-mod block_trie;
-mod hash;
-mod mpt;
-mod precompiles;
+// mod block_trie;
+// mod hash;
+// mod mpt;
+// mod precompiles;
+mod threshold_signatures;
 
 #[macro_export]
 macro_rules! with_fixture {
@@ -11,6 +12,23 @@ macro_rules! with_fixture {
         let fixture = $fixture;
         move || $callback(fixture)
     }};
+}
+
+#[macro_export]
+macro_rules! benchmarks_mod {
+    ($mod:ident) => {{
+        (stringify!($mod), $mod::benchmarks())
+    }};
+}
+
+#[macro_export]
+macro_rules! benchmarks_fn {
+    ($($benchmark_mod:expr),*) => {
+        pub(crate) fn benchmarks() -> Vec<Benchmark> {
+            use crate::benchmarks::merge;
+            merge(vec![$($benchmark_mod),*])
+        }
+    };
 }
 
 pub fn merge<Benchmarks: IntoIterator<Item = Benchmark>>(
@@ -26,11 +44,12 @@ pub fn merge<Benchmarks: IntoIterator<Item = Benchmark>>(
         .collect()
 }
 
-pub fn benchmarks() -> Vec<Benchmark> {
+pub fn benchmarks_() -> Vec<Benchmark> {
     merge([
-        ("hash", hash::benchmarks()),
-        ("mpt", mpt::benchmarks()),
-        ("block_trie", block_trie::benchmarks()),
-        ("precompiles", precompiles::benchmarks()),
+        // benchmarks_mod!(hash),
+        // benchmarks_mod!(mpt),
+        // benchmarks_mod!(block_trie),
+        // benchmarks_mod!(precompiles),
+        benchmarks_mod!(threshold_signatures),
     ])
 }

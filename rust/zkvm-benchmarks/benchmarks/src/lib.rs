@@ -2,7 +2,7 @@
 
 use std::fmt::Display;
 
-use benchmarks::benchmarks;
+use benchmarks::benchmarks_ as benchmarks;
 use derive_more::Debug;
 use derive_new::new;
 use risc0_zkvm::guest::env;
