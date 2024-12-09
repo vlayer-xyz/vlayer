@@ -11,7 +11,7 @@ use super::SharedState;
 use crate::{
     config::Config as ServerConfig,
     error::AppError,
-    gas_meter::{Client, ComputationStage, Config as GasMeterConfig},
+    gas_meter::{Client, ComputationStage},
 };
 
 pub mod types;
@@ -36,16 +36,13 @@ pub async fn v_call(
         .into();
     info!("Calculated hash: {}", call_hash);
 
-    let gas_meter_client = config
-        .gas_meter_config()
-        .map(|GasMeterConfig { url, time_to_live }| Client::new(&url, call_hash, time_to_live));
-
-    if let Some(client) = gas_meter_client.as_ref() {
-        client.allocate_gas(params.context.gas_limit).await?;
-    }
+    let gas_meter_client: Box<dyn Client> = config.as_ref().into();
+    gas_meter_client
+        .allocate(call_hash, params.context.gas_limit)
+        .await?;
 
     tokio::spawn(async move {
-        let res = generate_proof(call, host, gas_meter_client).await;
+        let res = generate_proof(call_hash, call, host, gas_meter_client).await;
         state.insert(call_hash, res);
     });
 
@@ -53,28 +50,25 @@ pub async fn v_call(
 }
 
 async fn generate_proof(
+    hash: CallHash,
     call: EngineCall,
     host: Host,
-    gas_meter_client: Option<Client>,
+    gas_meter_client: Box<dyn Client>,
 ) -> Result<HostOutput, AppError> {
     let prover = host.prover();
     let call_guest_id = host.call_guest_id();
     let preflight_result = host.preflight(call).await?;
     let gas_used = preflight_result.gas_used;
 
-    if let Some(client) = gas_meter_client.as_ref() {
-        client
-            .refund_unused_gas(ComputationStage::Preflight, gas_used)
-            .await?;
-    }
+    gas_meter_client
+        .refund(hash, ComputationStage::Preflight, gas_used)
+        .await?;
 
     let host_output = Host::prove(&prover, call_guest_id, preflight_result)?;
 
-    if let Some(client) = gas_meter_client {
-        client
-            .refund_unused_gas(ComputationStage::Proving, gas_used)
-            .await?;
-    }
+    gas_meter_client
+        .refund(hash, ComputationStage::Proving, gas_used)
+        .await?;
 
     Ok(host_output)
 }
