@@ -19,7 +19,6 @@ dashmap = { workspace = true }
 derive-new = { workspace = true }
 derive_more = { workspace = true }
 hex = { workspace = true }
-parking_lot = { workspace = true }
 seal = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 server_utils = { workspace = true }
