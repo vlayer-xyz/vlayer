@@ -87,22 +87,24 @@ export const createVlayerClient = (
       F extends ContractFunctionName<T>,
     >({
       hash,
-      number_of_retries = 120,
-      sleep_duration = 1000,
+      numberOfRetries = 120,
+      sleepDuration = 1000,
     }: {
       hash: BrandedHash<T, F>;
-      number_of_retries?: number;
-      sleep_duration?: number;
+      numberOfRetries?: number;
+      sleepDuration?: number;
     }): Promise<ContractFunctionReturnType<T, AbiStateMutability, F>> => {
       const getProof = async () => {
-        for (let retry = 0; retry < number_of_retries; retry++) {
+        for (let retry = 0; retry < numberOfRetries; retry++) {
           const resp = await getProofReceipt(hash, url);
           if (resp.result.status === VGetProofReceiptStatus.done) {
             return resp.result.data;
           }
-          await sleep(sleep_duration);
+          await sleep(sleepDuration);
         }
-        throw new Error("No result received from the server");
+        throw new Error(
+          `Timed out waiting for ZK proof generation after {numberOfRetries * sleepDuration}ms. Consider increasing numberOfRetries in waitForProvingResult`,
+        );
       };
       const data = await getProof();
       const savedProvingData = resultHashMap.get(hash.hash);

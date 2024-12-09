@@ -94,6 +94,14 @@ Wait for the proving to be finished, and then retrieve the result along with Pro
 const result = await vlayer.waitForProvingResult({ hash });
 ```
 
+By default, `waitForProvingResult` will poll the server for the proof for `2` minutes (`120` retries every second). This can be controlled however by
+specifying `numberOfRetries?: number` and `sleepDuration?: number` parameters to `waitForProvingResult`. Let's say we would like to extend the
+polling duration to `180` seconds with sleep duration of `2` seconds instead of `1`. We could then achieve like so
+
+```ts
+const result = await vlayer.waitForProvingResult({ hash, numberOfRetries: 90, sleepDuration: 2000 })
+```
+
 ## Verification
 
 Once we have obtained proving result, we can call verifier contract (below example demonstrates how to use `createAnvilClient` function  for that purpose).
