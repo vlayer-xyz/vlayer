@@ -11,7 +11,7 @@ use super::SharedState;
 use crate::{
     config::Config as ServerConfig,
     error::AppError,
-    gas_meter::{Client, ComputationStage},
+    gas_meter::{Client as GasMeterClient, ComputationStage},
 };
 
 pub mod types;
@@ -36,7 +36,7 @@ pub async fn v_call(
         .into();
     info!("Calculated hash: {}", call_hash);
 
-    let gas_meter_client: Box<dyn Client> = config.as_ref().into();
+    let gas_meter_client: Box<dyn GasMeterClient> = config.as_ref().into();
     gas_meter_client
         .allocate(call_hash, params.context.gas_limit)
         .await?;
@@ -53,7 +53,7 @@ async fn generate_proof(
     hash: CallHash,
     call: EngineCall,
     host: Host,
-    gas_meter_client: Box<dyn Client>,
+    gas_meter_client: Box<dyn GasMeterClient>,
 ) -> Result<HostOutput, AppError> {
     let prover = host.prover();
     let call_guest_id = host.call_guest_id();

@@ -3,7 +3,7 @@ use std::convert::From;
 use async_trait::async_trait;
 use derive_new::new;
 use serde::{Deserialize, Serialize};
-use server_utils::rpc::{Client as RpcClient, Method, Result};
+use server_utils::rpc::{Client as RawRpcClient, Method, Result};
 
 use crate::{config::Config as ServerConfig, handlers::v_call::types::CallHash};
 
@@ -47,7 +47,7 @@ pub struct Config {
 impl From<&ServerConfig> for Box<dyn Client> {
     fn from(value: &ServerConfig) -> Self {
         match value.gas_meter_config() {
-            Some(Config { url, time_to_live }) => Box::new(DefaultClient::new(&url, time_to_live)),
+            Some(Config { url, time_to_live }) => Box::new(RpcClient::new(&url, time_to_live)),
             None => Box::new(NoOpClient),
         }
     }
@@ -59,14 +59,14 @@ pub trait Client: Send {
     async fn refund(&self, hash: CallHash, stage: ComputationStage, gas_used: u64) -> Result<()>;
 }
 
-pub struct DefaultClient {
-    client: RpcClient,
+pub struct RpcClient {
+    client: RawRpcClient,
     time_to_live: u64,
 }
 
-impl DefaultClient {
+impl RpcClient {
     pub fn new(url: &str, time_to_live: u64) -> Self {
-        let client = RpcClient::new(url);
+        let client = RawRpcClient::new(url);
         Self {
             client,
             time_to_live,
@@ -75,7 +75,7 @@ impl DefaultClient {
 }
 
 #[async_trait]
-impl Client for DefaultClient {
+impl Client for RpcClient {
     async fn allocate(&self, hash: CallHash, gas_limit: u64) -> Result<()> {
         let req = AllocateGas::new(hash, gas_limit, self.time_to_live);
         let _resp = self.client.call(req).await?;
