@@ -48,7 +48,7 @@ Another potential issue is the use of subdomains.
 For example, if the email is sent from `alice@subdomain.example.com` and the `d` tag in the DKIM signature is `example.com`, the email will not be considered valid.
 Similarly, if the email is sent from `alice@example.com` and the `d` tag is `subdomain.example.com`, the email will also be invalid.
 
-DKIM will also be invalid if the email body has been modified by a proxy server. The body hash is part of the email signature and cannot be altered.
+DKIM validation will fail if the email body has been modified by a proxy server. The body hash included in the DKIM signature ensures the integrity of the email’s content. Any alteration to the body will invalidate the signature.
 
 ## Example
 Let's say someone wants to prove they are part of company or organization. One way to do this is to take a screenshot and send it to the verifier. However, this is not very reliable because screenshot images can be easily manipulated, and obviously such an image cannot be verified on-chain. 
