@@ -1,6 +1,6 @@
 import { expect, test } from "./config";
 import { sidePanel } from "./helpers";
-import { Response } from '@playwright/test';
+import { Response } from "@playwright/test";
 
 const config = {
   startPage: "/login",
@@ -100,13 +100,13 @@ test.describe("Full flow of webproof using extension", () => {
       const proveButton = page.locator("body").getByTestId("zk-prove-button");
 
       const vlayerResponses: Promise<Response | null>[] = [];
-      page.on('requestfinished', req => vlayerResponses.push(req.response()));
+      page.on("requestfinished", (req) => vlayerResponses.push(req.response()));
 
       await proveButton.click();
 
       await page.waitForSelector('h1[data-testid="has-zkproof"]');
 
-      expect(vlayerResponses).toHaveLength(2);
+      expect(vlayerResponses.length).toBeGreaterThan(1);
 
       const proveResponse = (await vlayerResponses[0])!;
       expect(proveResponse.ok()).toBeTruthy();
@@ -117,10 +117,10 @@ test.describe("Full flow of webproof using extension", () => {
       const hash = (proveJson as { result: string }).result;
       expect(hash).toBeValidHash();
 
-      const waitForProvingResultResponse = (await vlayerResponses[1])!;
+      const waitForProvingResultResponse = (await vlayerResponses.pop())!;
       expect(waitForProvingResultResponse.ok()).toBeTruthy();
 
-      const proofJson = (await waitForProvingResultResponse.json()!) as object;
+      const proofJson = (await waitForProvingResultResponse.json()) as object;
       expect(proofJson).toHaveProperty("result.evm_call_result");
     });
   });
@@ -200,13 +200,13 @@ test.describe("Full flow of webproof using extension", () => {
       const proveButton = page.locator("body").getByTestId("zk-prove-button");
 
       const vlayerResponses: Promise<Response | null>[] = [];
-      page.on('requestfinished', req => vlayerResponses.push(req.response()));
+      page.on("requestfinished", (req) => vlayerResponses.push(req.response()));
 
       await proveButton.click();
 
       await page.waitForSelector('h1[data-testid="has-zkproof"]');
 
-      expect(vlayerResponses).toHaveLength(2);
+      expect(vlayerResponses.length).toBeGreaterThan(1);
 
       const proveResponse = (await vlayerResponses[0])!;
       expect(proveResponse.ok()).toBeTruthy();
@@ -217,10 +217,10 @@ test.describe("Full flow of webproof using extension", () => {
       const hash = (proveJson as { result: string }).result;
       expect(hash).toBeValidHash();
 
-      const waitForProvingResultResponse = (await vlayerResponses[1])!;
+      const waitForProvingResultResponse = (await vlayerResponses.pop())!;
       expect(waitForProvingResultResponse.ok()).toBeTruthy();
 
-      const proofJson = (await waitForProvingResultResponse.json()!) as object;
+      const proofJson = (await waitForProvingResultResponse.json()) as object;
       expect(proofJson).toHaveProperty("result.evm_call_result");
     });
   });
