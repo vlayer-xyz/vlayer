@@ -28,6 +28,7 @@ tower-http = { workspace = true, features = ["cors"] }
 tracing = { workspace = true }
 
 [dev-dependencies]
+assert-json-diff = { workspace = true }
 axum = { workspace = true }
 block_header = { workspace = true }
 call_guest_wrapper = { workspace = true }
