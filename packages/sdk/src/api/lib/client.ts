@@ -94,7 +94,7 @@ export const createVlayerClient = (
       number_of_retries?: number;
       sleep_duration?: number;
     }): Promise<ContractFunctionReturnType<T, AbiStateMutability, F>> => {
-      const promise = async () => {
+      const getProof = async () => {
         for (let retry = 0; retry < number_of_retries; retry++) {
           const resp = await getProofReceipt(hash, url);
           if (resp.result.status === VGetProofReceiptStatus.done) {
@@ -104,7 +104,7 @@ export const createVlayerClient = (
         }
         throw new Error("No result received from the server");
       };
-      const data = await promise();
+      const data = await getProof();
       const savedProvingData = resultHashMap.get(hash.hash);
       if (!savedProvingData) {
         throw new Error("No result found for hash " + hash.hash);
