@@ -6,12 +6,21 @@ import { useBrowsingHistory } from "hooks/useBrowsingHistory.ts";
 import { useZkProvingState } from "./useZkProvingState";
 import { URLPattern } from "urlpattern-polyfill";
 
-const isStepVisited = (
+const isUrlRequestCompleted = (
   browsingHistory: HistoryItem[],
   step: { url: UrlPattern },
 ): boolean => {
   return !!browsingHistory.find((item: HistoryItem) => {
     return new URLPattern(step.url as string).test(item.url) && item.ready;
+  });
+};
+
+const isUrlVisited = (
+  browsingHistory: HistoryItem[],
+  step: { url: UrlPattern },
+): boolean => {
+  return !!browsingHistory.find((item: HistoryItem) => {
+    return new URLPattern(step.url as string).test(item.url);
   });
 };
 
@@ -24,12 +33,12 @@ const hasProof = (
 };
 
 const isStartPageStepReady = () => true;
-const isStartPageStepCompleted = isStepVisited;
+const isStartPageStepCompleted = isUrlVisited;
 
 const isExpectUrlStepReady = () => true;
-const isExpectUrlStepCompleted = isStepVisited;
+const isExpectUrlStepCompleted = isUrlVisited;
 
-const isNotarizeStepReady = isStepVisited;
+const isNotarizeStepReady = isUrlRequestCompleted;
 const isNotarizeStepCompleted = hasProof;
 
 const checkStepCompletion = {

@@ -124,7 +124,8 @@ export class StepValidationError extends Error {
 }
 
 export function assertUrl(url: string): asserts url is Url {
-  const isUrl = urlRegex({ strict: true }).test(url);
+  const regex = urlRegex({ strict: true });
+  const isUrl = regex.test(url);
   if (!isUrl) {
     throw new StepValidationError(
       `${StepValidationErrorMessage.InvalidUrl}: ${url}`,

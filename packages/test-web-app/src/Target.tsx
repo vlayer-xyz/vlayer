@@ -13,4 +13,20 @@ function Target() {
   );
 }
 
-export default Target;
+function MiddleTarget() {
+  return (
+    <div className="container">
+      <h1> Middle Target </h1>
+      <button
+        data-testid="go-to-target-button"
+        onClick={() => {
+          window.location.href = "/target";
+        }}
+      >
+        Login
+      </button>
+    </div>
+  );
+}
+
+export { Target, MiddleTarget };
