@@ -89,7 +89,6 @@ export const useTrackTabUpdate = () => {
 };
 
 export const useTrackHistory = () => {
-  console.log("Tracking history");
   const trackHeaders = useTrackHeaders();
   const trackCookies = useTrackCookies();
   const trackCompleteness = useTrackCompleteness();
