@@ -51,12 +51,6 @@ impl WebProof {
             .verifying_key()
             .clone()
     }
-
-    pub fn get_notary_verifying_key(&self) -> VerifyingKey {
-        Presentation::from(self.presentation_json.clone())
-            .verifying_key()
-            .clone()
-    }
 }
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
