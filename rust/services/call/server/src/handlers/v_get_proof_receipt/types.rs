@@ -1,3 +1,5 @@
+use std::convert::TryFrom;
+
 use alloy_primitives::{hex::ToHexExt, U256};
 use alloy_sol_types::SolValue;
 use call_engine::{HostOutput, Proof, Seal};
@@ -5,7 +7,7 @@ use call_host::Error as HostError;
 use derive_new::new;
 use serde::{Deserialize, Serialize, Serializer};
 
-use crate::ser::ProofDTO;
+use crate::{error::AppError, ser::ProofDTO};
 
 #[derive(Serialize, Deserialize, Debug)]
 #[serde(rename_all = "snake_case")]
@@ -29,15 +31,17 @@ where
     state.serialize_str(&evm_call_result.encode_hex_with_prefix())
 }
 
-impl RawData {
-    pub fn try_new(host_output: HostOutput) -> Result<Self, HostError> {
+impl TryFrom<HostOutput> for RawData {
+    type Error = HostError;
+
+    fn try_from(value: HostOutput) -> Result<Self, Self::Error> {
         let HostOutput {
             guest_output,
             seal,
             proof_len,
             call_guest_id,
             ..
-        } = host_output;
+        } = value;
 
         let proof = Proof {
             length: U256::from(proof_len),
@@ -60,12 +64,11 @@ pub struct CallResult {
 }
 
 impl CallResult {
-    pub fn pending() -> Self {
-        Self::new(Status::Pending, None)
-    }
-
-    pub fn done(data: RawData) -> Self {
-        Self::new(Status::Done, Some(data))
+    pub fn from_maybe_output(output: Option<HostOutput>) -> Result<Self, AppError> {
+        match output {
+            None => Ok(Self::new(Status::Pending, None)),
+            Some(output) => Ok(Self::new(Status::Done, Some(output.try_into()?))),
+        }
     }
 }
 
