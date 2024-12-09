@@ -1,12 +1,11 @@
-import { useState, useEffect } from "react";
-import { Address, type PublicActions, type WalletActions } from "viem";
+import { useState, useEffect, FormEvent } from "react";
+import { Address } from "viem";
 import * as chains from "viem/chains";
 import useProver from "../hooks/useProver";
 import { preverifyEmail } from "@vlayer/sdk";
 import { getStrFromFile } from "../lib/utils";
 import proverSpec from "../../../out/EmailDomainProver.sol/EmailDomainProver";
 import verifierSpec from "../../../out/EmailProofVerifier.sol/EmailDomainVerifier";
-
 import EmlForm from "../components/EmlForm";
 import { createContext, customTransport, type Chain } from "@vlayer/sdk/config";
 
@@ -20,9 +19,8 @@ function getChainByName(name: string) {
 }
 
 const EmlUploadForm = () => {
-  const [walletClient, setWalletClient] = useState<
-    PublicActions & WalletActions
-  >();
+  const [walletClient, setWalletClient] =
+    useState<ReturnType<typeof createContext>["ethClient"]>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentStep, setCurrentStep] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
@@ -66,7 +64,10 @@ const EmlUploadForm = () => {
     }
 
     if (chain.name !== chains.anvil.name) {
-      await walletClient.switchChain({ id: chain.id });
+      await walletClient?.switchChain({ id: chain.id });
+    }
+    if (!walletClient) {
+      throw new Error("no_wallet_client");
     }
     const [addr] = await walletClient.requestAddresses();
 
@@ -75,9 +76,11 @@ const EmlUploadForm = () => {
   };
 
   const handleError = (err: unknown) => {
-    console.log({ err });
     setIsSubmitting(false);
     if (err instanceof Error) {
+      if ("shortMessage" in err) {
+        setErrorMsg(err.shortMessage as string);
+      }
       setErrorMsg(err.message);
     } else {
       setErrorMsg("Something went wrong, check logs");
@@ -132,7 +135,7 @@ const EmlUploadForm = () => {
     setCurrentStep("Waiting for proof...");
   };
 
-  const submit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const submit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
     setErrorMsg("");
@@ -149,7 +152,7 @@ const EmlUploadForm = () => {
     setCurrentStep("Waiting for proof...");
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     submit(e).catch((err) => {
       handleError(err);
     });
