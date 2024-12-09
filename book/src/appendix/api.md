@@ -95,7 +95,7 @@ To get result of `v_call` query `v_getProofReceipt`.
 }
 ```
 
-There are two possible results: `pending`, and `success`.
+There are two possible results: `pending`, and `done`.
 
 ### Pending
 
