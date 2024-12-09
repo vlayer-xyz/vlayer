@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, FormEvent } from "react";
 import { Address } from "viem";
 import * as chains from "viem/chains";
 import useProver from "../hooks/useProver";
@@ -6,7 +6,6 @@ import { preverifyEmail } from "@vlayer/sdk";
 import { getStrFromFile } from "../lib/utils";
 import proverSpec from "../../../out/EmailDomainProver.sol/EmailDomainProver";
 import verifierSpec from "../../../out/EmailProofVerifier.sol/EmailDomainVerifier";
-
 import EmlForm from "../components/EmlForm";
 import { createContext, customTransport, type Chain } from "@vlayer/sdk/config";
 
@@ -19,19 +18,9 @@ function getChainByName(name: string) {
   }
 }
 
-const { ethClient: walletClient } = await createContext(
-  {
-    chainName: import.meta.env.VITE_CHAIN_NAME as string,
-    proverUrl: import.meta.env.VITE_PROVER_URL as string,
-    jsonRpcUrl: import.meta.env.VITE_JSON_RPC_URL as string,
-    privateKey: import.meta.env.VITE_PRIVATE_KEY as `0x${string}`,
-  },
-  import.meta.env.VITE_USE_WINDOW_ETHEREUM_TRANSPORT
-    ? customTransport(window.ethereum)
-    : undefined,
-);
-
 const EmlUploadForm = () => {
+  const [walletClient, setWalletClient] =
+    useState<ReturnType<typeof createContext>["ethClient"]>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentStep, setCurrentStep] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
@@ -39,6 +28,25 @@ const EmlUploadForm = () => {
   const [claimerAddr, setClaimerAddr] = useState<Address>("0x");
   const chain = getChainByName(import.meta.env.VITE_CHAIN_NAME as string);
 
+  useEffect(() => {
+    const getWallet = async () => {
+      const { ethClient } = await createContext(
+        {
+          chainName: import.meta.env.VITE_CHAIN_NAME as string,
+          proverUrl: import.meta.env.VITE_PROVER_URL as string,
+          jsonRpcUrl: import.meta.env.VITE_JSON_RPC_URL as string,
+          privateKey: import.meta.env.VITE_PRIVATE_KEY as `0x${string}`,
+        },
+        import.meta.env.VITE_USE_WINDOW_ETHEREUM_TRANSPORT
+          ? customTransport(window.ethereum)
+          : undefined,
+      );
+
+      setWalletClient(ethClient);
+    };
+
+    getWallet();
+  }, []);
   const { prove, proof, provingError } = useProver({
     addr: import.meta.env.VITE_PROVER_ADDRESS,
     abi: proverSpec.abi,
@@ -51,8 +59,15 @@ const EmlUploadForm = () => {
       throw new Error("no_wallet_detected");
     }
 
+    if (!walletClient) {
+      throw new Error("no_wallet_client");
+    }
+
     if (chain.name !== chains.anvil.name) {
-      await walletClient.switchChain({ id: chain.id });
+      await walletClient?.switchChain({ id: chain.id });
+    }
+    if (!walletClient) {
+      throw new Error("no_wallet_client");
     }
     const [addr] = await walletClient.requestAddresses();
 
@@ -61,9 +76,11 @@ const EmlUploadForm = () => {
   };
 
   const handleError = (err: unknown) => {
-    console.log({ err });
     setIsSubmitting(false);
     if (err instanceof Error) {
+      if ("shortMessage" in err) {
+        setErrorMsg(err.shortMessage as string);
+      }
       setErrorMsg(err.message);
     } else {
       setErrorMsg("Something went wrong, check logs");
@@ -76,6 +93,10 @@ const EmlUploadForm = () => {
 
       if (proof == null) {
         throw new Error("no_proof_to_verify");
+      }
+
+      if (!walletClient) {
+        throw new Error("no_wallet_client");
       }
 
       const txHash = await walletClient.writeContract({
@@ -114,7 +135,7 @@ const EmlUploadForm = () => {
     setCurrentStep("Waiting for proof...");
   };
 
-  const submit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const submit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
     setErrorMsg("");
@@ -131,7 +152,7 @@ const EmlUploadForm = () => {
     setCurrentStep("Waiting for proof...");
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     submit(e).catch((err) => {
       handleError(err);
     });
