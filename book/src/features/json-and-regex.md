@@ -75,6 +75,7 @@ contract RegexMatchProof is Prover {
         // The regex pattern is passed as a string
         require(text.matches("^[a-zA-Z0-9]*$"), "text must be alphanumeric only");
 
+        // Example for "hello world" string 
         string[] memory captures = hello_world.capture("^hello(,)? (world)$");
         assertEq(captures.length, 3);
         assertEq(captures[0], "hello world");
