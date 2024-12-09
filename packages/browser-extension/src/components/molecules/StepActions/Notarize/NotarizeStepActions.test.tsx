@@ -1,9 +1,10 @@
-import { render, screen, cleanup } from "@testing-library/react";
+import { render, screen, cleanup, renderHook } from "@testing-library/react";
 import { vi, describe, it, expect, beforeEach, afterEach } from "vitest";
 import { NotarizeStepActions } from "./NotarizeStepActions";
 import { StepStatus } from "constants/step";
 
 import React from "react";
+import { useNotarizeStepActions } from "./NotarizeStepActions.hooks";
 
 const mocks = vi.hoisted(() => {
   return {
@@ -186,13 +187,92 @@ describe("NotarizeStepActions", () => {
       />,
     );
     const finishCallout = screen.getByTestId("finish-callout");
+    expect(finishCallout).not.toBeVisible();
+
     expect(finishCallout).toBeInTheDocument();
     expect(finishCallout).toHaveTextContent(
       "Generating proof has been finished",
     );
-    // act(() => {
-    //   vi.advanceTimersByTime(3000);
-    // });
+
     expect(finishCallout).not.toBeVisible();
+  });
+  it("should not render redirect callout when web proving is not started", () => {
+    mocks.useTlsnProver.mockReturnValue({
+      isProving: false,
+    });
+    render(
+      <NotarizeStepActions
+        buttonText={"click me "}
+        link={"https://example.com"}
+        isVisited={false}
+        status={StepStatus.Current}
+      />,
+    );
+    const redirectCallout = screen.queryByText(
+      /You will be redirected back in/i,
+    );
+    expect(redirectCallout).not.toBeInTheDocument();
+  });
+
+  it("should render redirect callout when web proving is started", () => {
+    mocks.useTlsnProver.mockReturnValue({
+      isProving: true,
+    });
+
+    const { result } = renderHook(() =>
+      useNotarizeStepActions({
+        isVisited: false,
+        status: StepStatus.Current,
+        buttonText: "click me ",
+        link: "https://example.com",
+      }),
+    );
+
+    render(
+      <NotarizeStepActions
+        buttonText={"click me "}
+        link={"https://example.com"}
+        isVisited={false}
+        status={StepStatus.Current}
+      />,
+    );
+
+    const redirectCallout = screen.getByText(/You will be redirected back in/i);
+
+    expect(result.current.isRedirectCalloutVisible).toBe(true);
+    expect(redirectCallout).toBeInTheDocument();
+  });
+
+  it("once rerender, redirect callout should stay visible after web proving finished", () => {
+    mocks.useTlsnProver.mockReturnValue({
+      isProving: true,
+    });
+
+    const { result, rerender } = renderHook(() =>
+      useNotarizeStepActions({
+        isVisited: false,
+        status: StepStatus.Current,
+        buttonText: "click me ",
+        link: "https://example.com",
+      }),
+    );
+    expect(result.current.isRedirectCalloutVisible).toBe(true);
+
+    render(
+      <NotarizeStepActions
+        buttonText={"click me "}
+        link={"https://example.com"}
+        isVisited={false}
+        status={StepStatus.Current}
+      />,
+    );
+    mocks.useTlsnProver.mockReturnValue({
+      isProving: false,
+    });
+    rerender();
+    expect(result.current.isRedirectCalloutVisible).toBe(true);
+
+    const redirectCallout = screen.getByText(/You will be redirected back in/i);
+    expect(redirectCallout).toBeInTheDocument();
   });
 });

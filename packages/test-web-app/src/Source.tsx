@@ -1,5 +1,6 @@
 import {
-  PresentationJSON,
+  type PresentationJSON,
+  type VGetProofReceiptResult,
   createVlayerClient,
   type VlayerClient,
   ExtensionMessageType,
@@ -26,7 +27,8 @@ const PROVER_ADDRESS = import.meta.env.VITE_UNCONDITIONAL_PROVER_ADDRESS;
 console.log(PROVER_ADDRESS);
 
 function SourceNewWay() {
-  const [proof, setProof] = useState<PresentationJSON | null>(null);
+  const [webProof, setWebProof] = useState<PresentationJSON | null>(null);
+  const [zkProof, setZkProof] = useState<VGetProofReceiptResult | null>(null);
 
   const webProofProvider = useMemo(() => {
     return createExtensionWebProofProvider({
@@ -45,7 +47,7 @@ function SourceNewWay() {
     webProofProvider.addEventListeners(
       ExtensionMessageType.ProofDone,
       ({ payload: { proof } }) => {
-        setProof(proof);
+        setWebProof(proof);
       },
     );
   }, []);
@@ -72,7 +74,7 @@ function SourceNewWay() {
   }, []);
 
   const requestZkProof = useCallback(async () => {
-    const zkProof = await vlayerClient.prove({
+    const hash = await vlayerClient.prove({
       address: PROVER_ADDRESS,
       proverAbi: unconditionalProver.abi,
       functionName: "web_proof",
@@ -80,13 +82,15 @@ function SourceNewWay() {
       args: [
         {
           webProofJson: JSON.stringify({
-            presentation_json: proof,
+            presentation_json: webProof,
           }),
         },
       ],
     });
+    const zkProof = await vlayerClient.waitForProvingResult(hash);
     console.log("ZK proof", zkProof);
-  }, [proof]);
+    setZkProof(zkProof);
+  }, [webProof]);
 
   const handleWebProofRequestClick = () => {
     requestWebProof();
@@ -107,7 +111,7 @@ function SourceNewWay() {
         >
           Request web proof
         </button>
-        {proof ? (
+        {webProof ? (
           <>
             <h1 data-testid="has-webproof">Has web proof</h1>
             <button
@@ -119,12 +123,20 @@ function SourceNewWay() {
           <h1> No web proof </h1>
         )}
       </div>
+      <div>
+        {zkProof ? (
+          <h1 data-testid="has-zkproof">Has zk proof</h1>
+        ) : (
+          <h1> No zk proof </h1>
+        )}
+      </div>
     </div>
   );
 }
 
 function Source() {
-  const [proof, setProof] = useState<PresentationJSON>();
+  const [webProof, setWebProof] = useState<PresentationJSON>();
+  const [zkProof, setZkProof] = useState<VGetProofReceiptResult>();
   const vlayerClient = useRef<VlayerClient>();
 
   const requestWebProof = useCallback(async () => {
@@ -155,11 +167,11 @@ function Source() {
       ],
     });
 
-    setProof(webproof);
+    setWebProof(webproof);
   }, []);
 
   const requestZkProof = useCallback(async () => {
-    const zkProof = await vlayerClient.current?.prove({
+    const hash = await vlayerClient.current?.prove({
       address: PROVER_ADDRESS,
       proverAbi: unconditionalProver.abi,
       functionName: "web_proof",
@@ -167,13 +179,15 @@ function Source() {
       args: [
         {
           webProofJson: JSON.stringify({
-            presentation_json: proof,
+            presentation_json: webProof,
           }),
         },
       ],
     });
+    const zkProof = await vlayerClient.current?.waitForProvingResult(hash);
     console.log("ZK proof", zkProof);
-  }, [proof]);
+    setZkProof(zkProof);
+  }, [webProof]);
 
   const handleWebProofRequestClick = () => {
     requestWebProof().catch((error) => {
@@ -196,7 +210,7 @@ function Source() {
         >
           Request web proof
         </button>
-        {proof ? (
+        {webProof ? (
           <>
             <h1 data-testid="has-webproof">Has web proof</h1>
             <button
@@ -206,6 +220,13 @@ function Source() {
           </>
         ) : (
           <h1> No web proof </h1>
+        )}
+      </div>
+      <div>
+        {zkProof ? (
+          <h1 data-testid="has-zkproof">Has zk proof</h1>
+        ) : (
+          <h1> No zk proof </h1>
         )}
       </div>
     </div>

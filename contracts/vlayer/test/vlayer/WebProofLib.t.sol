@@ -15,14 +15,14 @@ contract WebProofLibWrapper {
 contract WebProverTest is VTest {
     using WebProofLib for WebProof;
 
-    string public constant DATA_URL = "https://api.x.com/1.1/account/settings.json";
+    string public constant DATA_URL = "https://api.x.com/1.1/*/settings.json";
 
     function test_verifiesWebProof() public {
         WebProof memory webProof = WebProof(vm.readFile("testdata/web_proof.json"));
 
         callProver();
-        Web memory web = webProof.verify(DATA_URL);
-
+        WebProofLibWrapper wrapper = new WebProofLibWrapper();
+        Web memory web = wrapper.verify(webProof, DATA_URL);
         assertEq(bytes(web.body)[0], "{");
     }
 
@@ -33,7 +33,7 @@ contract WebProverTest is VTest {
 
         WebProofLibWrapper wrapper = new WebProofLibWrapper();
 
-        try wrapper.verify(webProof, "") returns (Web memory) {
+        try wrapper.verify(webProof, "https://bad_api.x.com/1.1/account/settings.json") returns (Web memory) {
             revert("Expected error");
         } catch Error(string memory reason) {
             assertEq(reason, "Engine(TransactError(Revert(\"revert: Incorrect URL\")))");

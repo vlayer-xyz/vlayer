@@ -28,6 +28,6 @@
 - name: Install logrotate configuration
   become: true
   ansible.builtin.copy:
-    src: vlayer-rsyslog.conf
+    src: vlayer-logrotate.conf
     dest: /etc/logrotate.d/vlayer
     mode: '644'

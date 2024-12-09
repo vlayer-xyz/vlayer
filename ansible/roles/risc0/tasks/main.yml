@@ -29,6 +29,9 @@
 - name: Check installed version of risc0
   ansible.builtin.shell: |
     set -ueo pipefail
+    # Exit early if risc0 not installed at all
+    ~/.cargo/bin/cargo install --list | grep -q cargo-risczero || exit 0
+    # Capture installed version
     ~/.cargo/bin/cargo install --list | grep -oP 'cargo-risczero v\d+\.\d+\.\d+' | grep -oP '\d+\.\d+\.\d+'
   register: installed_risc0
   changed_when: false

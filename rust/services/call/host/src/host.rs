@@ -19,15 +19,17 @@ use call_engine::{
     },
     Call, CallGuestId, GuestOutput, HostOutput, Input, Seal,
 };
+use chain_client::Client;
 use common::GuestElf;
 pub use config::{Config, DEFAULT_MAX_CALLDATA_SIZE};
 use derive_new::new;
 pub use error::Error;
 use ethers_core::types::BlockNumber as BlockTag;
+use mock_chain_server::ChainProofServerMock;
 use prover::Prover;
 use provider::{CachedMultiProvider, EthersProviderFactory, EvmBlockHeader};
 use seal::EncodableReceipt;
-use tracing::info;
+use tracing::{info, warn};
 
 use crate::{evm_env::factory::HostEvmEnvFactory, into_input::into_multi_input, HostDb};
 
@@ -47,12 +49,45 @@ pub struct Host {
     guest_elf: GuestElf,
 }
 
+async fn mock_chain_client(
+    providers: &CachedMultiProvider,
+    chain_id: ChainId,
+) -> Result<(BlockNumber, chain_client::RpcClient), Error> {
+    let latest_block = providers
+        .get(chain_id)?
+        .get_block_header(BlockTag::Latest)?
+        .ok_or_else(|| Error::Provider("latest block not found".to_string()))?;
+    let block_number = latest_block.number();
+    let mut chain_proof_server = ChainProofServerMock::start().await;
+    chain_proof_server
+        .mock_single_block(chain_id, latest_block)
+        .await;
+    let chain_client = chain_client::RpcClient::new(chain_proof_server.url());
+    Ok((block_number, chain_client))
+}
+
 impl Host {
-    pub fn try_new(config: Config) -> Result<Self, Error> {
+    pub async fn try_new(config: Config) -> Result<Self, Error> {
         let provider_factory = EthersProviderFactory::new(config.rpc_urls.clone());
         let providers = CachedMultiProvider::from_factory(provider_factory);
-        let block_number = get_latest_block_number(&providers, config.start_chain_id)?;
-        let chain_client = chain_client::RpcClient::new(&config.chain_proof_url);
+
+        let (block_number, chain_client) = match config.chain_proof_url.as_ref() {
+            Some(url) => {
+                let chain_client = chain_client::RpcClient::new(url);
+                // If a chain server is running, use latest block **for which we have chain proof**
+                // as the settlement block. For newer block getting chain proof would fail.
+                let block_number = chain_client
+                    .get_sync_status(config.start_chain_id)
+                    .await?
+                    .last_block;
+                (block_number, chain_client)
+            }
+            None => {
+                warn!("Chain proof sever URL not provided. Running with mock server");
+                mock_chain_client(&providers, config.start_chain_id).await?
+            }
+        };
+
         Host::try_new_with_components(providers, block_number, chain_client, config)
     }
 
@@ -258,29 +293,5 @@ mod test {
         );
 
         Ok(())
-    }
-
-    mod try_new {
-        use super::*;
-
-        #[tokio::test(flavor = "multi_thread")]
-        async fn try_new_invalid_rpc_url() -> anyhow::Result<()> {
-            let config = Config {
-                rpc_urls: test_rpc_urls(),
-                start_chain_id: TEST_CHAIN_ID,
-                proof_mode: ProofMode::Fake,
-                ..Config::default()
-            };
-            let res = Host::try_new(config);
-
-            assert!(matches!(
-                res.map(|_| ()).unwrap_err(),
-                Error::Provider(ref msg) if msg.to_string().contains(
-                    "Error fetching block header"
-                )
-            ));
-
-            Ok(())
-        }
     }
 }

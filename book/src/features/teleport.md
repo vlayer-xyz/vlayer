@@ -22,16 +22,24 @@ The Ethereum ecosystem is fragmented, consisting of various EVM chains such as A
 
 ## Example 
 ### Prover
-The example below shows how to check USDC balances across three different chains:
+The example below shows how to check USDC balances across three different chains.
+Following tokens are passed to the constructor: 
+```solidity
+Erc20Token[] memory tokens = [
+    Erc20Token(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48, 1, 20683110), // mainnet
+    Erc20Token(0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913, 8453, 19367633), // base
+    Erc20Token(0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85, 10, 124962954) // optimism
+];
+```
 
 ```solidity
 contract SimpleTeleportProver is Prover {
     Erc20Token[] public tokens;
 
-    constructor() {
-        tokens.push(Erc20Token(0xA0b86991c6218b36c1d19D4a2e9Eb0cE3606eB48, 1, 20683110)); // mainnet
-        tokens.push(Erc20Token(0x833589fCD6eDb6E08f4c7C32D4f71b54bdA02913, 8453, 19367633)); // base
-        tokens.push(Erc20Token(0x0b2C639c533813f4Aa9D7837CAf62653d097Ff85, 10, 124962954)); // optimism
+    constructor(Erc20Token[] memory _tokens) {
+        for (uint256 i = 0; i < _tokens.length; i++) {
+            tokens.push(_tokens[i]);
+        }
     }
 
     function crossChainBalanceOf(address _owner) public returns (Proof memory, address, uint256) {

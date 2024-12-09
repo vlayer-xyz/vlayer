@@ -1,2 +1,2 @@
+pub mod chain_proof;
 pub mod status;
-pub mod v_chain;

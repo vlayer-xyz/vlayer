@@ -2004,7 +2004,6 @@ dependencies = [
  "risc0-zkp",
  "risc0-zkvm",
  "seal",
- "serde_json",
  "test-log",
  "thiserror",
  "tokio",
@@ -2181,7 +2180,6 @@ dependencies = [
  "derive-new",
  "mpt",
  "parking_lot",
- "serde",
  "serde_json",
  "server_utils",
  "thiserror",
@@ -2197,6 +2195,7 @@ dependencies = [
  "bincode",
  "block_trie",
  "bytes",
+ "common",
  "derivative",
  "derive-new",
  "derive_more 1.0.0",
@@ -2505,7 +2504,6 @@ dependencies = [
  "flate2",
  "hex",
  "lazy_static",
- "mock_chain_server",
  "regex",
  "reqwest 0.12.8",
  "serde_json",
@@ -2737,6 +2735,7 @@ dependencies = [
  "derive_more 1.0.0",
  "risc0-zkp",
  "serde",
+ "serde_json",
 ]
 
 [[package]]
@@ -6814,12 +6813,14 @@ dependencies = [
 name = "mock_chain_server"
 version = "0.1.0"
 dependencies = [
+ "alloy-primitives",
  "axum-jrpc",
  "bincode",
  "block_header",
  "block_trie",
  "bytemuck",
  "bytes",
+ "chain_client",
  "chain_common",
  "common",
  "lazy_static",
@@ -6827,6 +6828,7 @@ dependencies = [
  "serde",
  "serde_json",
  "server_utils",
+ "tokio",
 ]
 
 [[package]]
@@ -9405,6 +9407,7 @@ dependencies = [
  "assert-json-diff",
  "axum",
  "axum-jrpc",
+ "common",
  "derive-new",
  "ethers",
  "futures",

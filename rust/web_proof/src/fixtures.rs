@@ -1,6 +1,5 @@
 use core::str;
 use std::fs;
-
 use crate::web_proof::WebProof;
 
 #[cfg(test)]

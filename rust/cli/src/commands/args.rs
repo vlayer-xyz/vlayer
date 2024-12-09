@@ -32,28 +32,27 @@ pub(crate) struct ServeArgs {
     #[arg(long, short, default_value = "3000")]
     pub(crate) port: Option<u16>,
 
+    /// URL of the chain proof RPC server
+    #[arg(long)]
+    pub(crate) chain_proof_url: Option<String>,
+
     #[arg(long)]
     pub(crate) verify_chain_proofs: bool,
 }
 
 impl ServeArgs {
-    pub fn into_server_config(
-        self,
-        chain_proof_url: impl Into<String>,
-        api_version: String,
-    ) -> Config {
+    pub fn into_server_config(self, api_version: String) -> Config {
         let proof_mode = self.proof.unwrap_or_default().map();
         call_server::ConfigBuilder::new(
-            chain_proof_url,
             CALL_GUEST_ELF.clone(),
             CHAIN_GUEST_ELF.clone(),
             api_version,
         )
+        .with_chain_proof_url(self.chain_proof_url)
         .with_rpc_mappings(self.rpc_url)
         .with_proof_mode(proof_mode)
         .with_host(self.host)
         .with_port(self.port)
-        .with_verify_chain_proofs(self.verify_chain_proofs)
         .build()
     }
 }

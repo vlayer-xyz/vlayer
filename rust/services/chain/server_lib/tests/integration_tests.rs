@@ -67,7 +67,7 @@ async fn method_missing() {
     );
 }
 
-mod v_chain {
+mod chain_proof {
     use super::*;
 
     #[tokio::test]
@@ -78,7 +78,7 @@ mod v_chain {
         let req = json!({
             "jsonrpc": "2.0",
             "id": 1,
-            "method": "v_chain",
+            "method": "v_getChainProof",
             "params": {
                 "chain_id": 1,
                 "block_numbers": [1]
@@ -107,7 +107,7 @@ mod v_chain {
         let req = json!({
             "jsonrpc": "2.0",
             "id": 1,
-            "method": "v_chain",
+            "method": "v_getChainProof",
             "params": {
                 "chain_id": 1,
                 "block_numbers": []
@@ -140,7 +140,7 @@ mod v_chain {
         let req = json!({
             "jsonrpc": "2.0",
             "id": 1,
-            "method": "v_chain",
+            "method": "v_getChainProof",
             "params": {
                 "chain_id": 1,
                 "block_numbers": [valid_number, invalid_number]

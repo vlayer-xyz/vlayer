@@ -83,9 +83,9 @@ mod server_tests {
 
         #[tokio::test]
         async fn field_validation_error() {
-            let ctx = Context::default().await;
+            let mut ctx = Context::default().await;
             let app = ctx.server(call_guest_elf(), chain_guest_elf());
-            let contract = ctx.client.deploy_contract().await;
+            let contract = ctx.deploy_contract().await;
             let call_data = contract
                 .sum(U256::from(1), U256::from(2))
                 .calldata()
@@ -120,9 +120,9 @@ mod server_tests {
             const EXPECTED_HASH: &str =
                 "0x126257b312be17f869dacc198adc28424148f5408751f52c50050a01eeef8ebf";
 
-            let ctx = Context::default().await;
+            let mut ctx = Context::default().await;
             let app = ctx.server(call_guest_elf(), chain_guest_elf());
-            let contract = ctx.client.deploy_contract().await;
+            let contract = ctx.deploy_contract().await;
             let call_data = contract
                 .sum(U256::from(1), U256::from(2))
                 .calldata()
@@ -196,10 +196,11 @@ mod server_tests {
                 .add()
                 .await;
 
-            let mut ctx = Context::default().await;
-            ctx.gas_meter_server = Some(gas_meter_server);
+            let mut ctx = Context::default()
+                .await
+                .with_gas_meter_server(gas_meter_server);
             let app = ctx.server(call_guest_elf(), chain_guest_elf());
-            let contract = ctx.client.deploy_contract().await;
+            let contract = ctx.deploy_contract().await;
 
             let call_data = contract
                 .sum(U256::from(1), U256::from(2))
@@ -223,7 +224,7 @@ mod server_tests {
             });
             let response = app.post("/", &req).await;
             assert_eq!(StatusCode::OK, response.status());
-            ctx.gas_meter_server.unwrap().assert();
+            ctx.assert_gas_meter();
         }
 
         #[tokio::test(flavor = "multi_thread")]
@@ -231,9 +232,9 @@ mod server_tests {
             const EXPECTED_HASH: &str =
                 "0xbd61557ad7071208e9b36a0a63731c6d720b8c22359e2058fd7dc4f9936a66da";
 
-            let ctx = Context::default().await;
+            let mut ctx = Context::default().await;
             let app = ctx.server(call_guest_elf(), chain_guest_elf());
-            let contract = ctx.client.deploy_contract().await;
+            let contract = ctx.deploy_contract().await;
 
             let call_data = contract
                 .web_proof(WebProof {
@@ -309,9 +310,9 @@ mod server_tests {
 
         #[tokio::test(flavor = "multi_thread")]
         async fn simple_contract_call_success() {
-            let ctx = Context::default().await;
+            let mut ctx = Context::default().await;
             let app = ctx.server(call_guest_elf(), chain_guest_elf());
-            let contract = ctx.client.deploy_contract().await;
+            let contract = ctx.deploy_contract().await;
             let call_data = contract
                 .sum(U256::from(1), U256::from(2))
                 .calldata()
@@ -349,9 +350,9 @@ mod server_tests {
 
         #[tokio::test(flavor = "multi_thread")]
         async fn web_proof_success() {
-            let ctx = Context::default().await;
+            let mut ctx = Context::default().await;
             let app = ctx.server(call_guest_elf(), chain_guest_elf());
-            let contract = ctx.client.deploy_contract().await;
+            let contract = ctx.deploy_contract().await;
             let call_data = contract
                 .web_proof(WebProof {
                     web_proof_json: serde_json::to_string(&json!(load_web_proof_fixture()))
