@@ -1,0 +1,9 @@
+{
+    "extends": "./tsconfig.build.json",
+    "compilerOptions": {
+        "target": "ES2021",
+        "moduleResolution": "bundler",
+        "outDir": "../dist/esm",
+        "module": "ESNext",
+    }
+}
