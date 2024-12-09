@@ -179,22 +179,37 @@ test.describe("Full flow of webproof using extension", () => {
       expect(status).toEqual("completed");
     });
 
-    await test.step("Side panel UI should indicate that  expectUrl step is completed after redirection", async () => {
+    await test.step("Side panel UI shoud indicate that expectUrl step is completed after history.pushState redirect", async () => {
       const startPage = context.pages().find((page) => {
         return page.url().includes("start-page");
       });
       if (!startPage) {
         throw new Error("No login page");
       }
-      const loginButton = startPage.getByTestId("go-to-target-button");
+      const loginButton = startPage.getByTestId("go-to-middle-target-button");
       await loginButton.click();
-      await startPage.waitForURL(config.expectUrl);
       const extension = await sidePanel(context);
-      const startPageStep = extension.getByTestId("step-expectUrl");
+      const startPageStep = extension.getByTestId("step-expectUrl").nth(0);
       const status = await startPageStep.getAttribute("data-status");
+
       expect(status).toEqual("completed");
     });
 
+    await test.step("Side panel UI should indicate that expectUrl step is completed after redirection", async () => {
+      const middlewarePage = context.pages().find((page) => {
+        return page.url().includes("middle-target");
+      });
+      if (!middlewarePage) {
+        throw new Error("No login page");
+      }
+      const loginButton = middlewarePage.getByTestId("go-to-target-button");
+      await loginButton.click();
+      await middlewarePage.waitForURL(config.expectUrl);
+      const extension = await sidePanel(context);
+      const startPageStep = extension.getByTestId("step-expectUrl").nth(1);
+      const status = await startPageStep.getAttribute("data-status");
+      expect(status).toEqual("completed");
+    });
     await test.step("Prove button should appear after request to external api", async () => {
       const extension = await sidePanel(context);
       const proveButton = extension.getByTestId("prove-button");
@@ -208,7 +223,7 @@ test.describe("Full flow of webproof using extension", () => {
       await page.waitForSelector('h1[data-testid="has-webproof"]');
     });
 
-    await test.step("Zk prove button should appear after receiving webProof", async () => {
+    await test.step("Zk prove button should appear after receiving webProof", () => {
       const proveButton = page.locator("body").getByTestId("zk-prove-button");
       void expect(proveButton).toBeVisible();
     });
