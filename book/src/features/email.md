@@ -35,7 +35,7 @@ When creating an Email Proof, only DKIM (DomainKeys Identified Mail) signatures 
 - The email must have a signed `From` header containing a single email address.
 
 If the email doesn't have a DKIM signature with matching signer and sender domains, it may indicate that the sender's email server is misconfigured.
-Emails from domains registered on providers like Gmail or Outlook often have a DKIM signature that looks like this:
+Emails from domains hosted on providers like Gmail or Outlook often have a DKIM signature resembling the following:
 ```
 DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
         d=***.gappssmtp.com; s=20230601; dara=google.com;
