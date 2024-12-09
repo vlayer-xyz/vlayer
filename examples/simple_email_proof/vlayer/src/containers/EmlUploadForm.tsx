@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { Address } from "viem";
+import { Address, type PublicActions, type WalletActions } from "viem";
 import * as chains from "viem/chains";
 import useProver from "../hooks/useProver";
 import { preverifyEmail } from "@vlayer/sdk";
@@ -20,7 +20,9 @@ function getChainByName(name: string) {
 }
 
 const EmlUploadForm = () => {
-  const [walletClient, setWalletClient] = useState();
+  const [walletClient, setWalletClient] = useState<
+    PublicActions & WalletActions
+  >();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentStep, setCurrentStep] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
@@ -59,6 +61,10 @@ const EmlUploadForm = () => {
       throw new Error("no_wallet_detected");
     }
 
+    if (!walletClient) {
+      throw new Error("no_wallet_client");
+    }
+
     if (chain.name !== chains.anvil.name) {
       await walletClient.switchChain({ id: chain.id });
     }
@@ -72,7 +78,7 @@ const EmlUploadForm = () => {
     console.log({ err });
     setIsSubmitting(false);
     if (err instanceof Error) {
-      setErrorMsg(err?.shortMessage ?? err.message);
+      setErrorMsg(err.message);
     } else {
       setErrorMsg("Something went wrong, check logs");
     }
@@ -84,6 +90,10 @@ const EmlUploadForm = () => {
 
       if (proof == null) {
         throw new Error("no_proof_to_verify");
+      }
+
+      if (!walletClient) {
+        throw new Error("no_wallet_client");
       }
 
       const txHash = await walletClient.writeContract({
