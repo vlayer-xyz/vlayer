@@ -23,6 +23,33 @@ You do this by writing a Solidity smart contract (`Prover`) that has access to t
 
 Under the hood, we verify mail server signatures to ensure the authenticity and integrity of the content.
 
+## Email Safety Requirements
+
+Not every email that is considered valid by an email server, will be considered valid by vlayer. 
+Email servers use a variety of rules based on [DMARC](https://dmarc.org/), [DKIM](https://datatracker.ietf.org/doc/html/rfc6376), and [SPF](https://datatracker.ietf.org/doc/html/rfc7208) to determine if an email is valid.
+When creating an Email Proof, we can only use DKIM signatures to prove the authenticity of the email, so following precondition must be met:
+
+- The email must be signed with DKIM-Signature header.
+- The email must be sent from a domain that has a valid DKIM record.
+- The email must have exactly one DKIM signature with a [`d`](https://datatracker.ietf.org/doc/html/rfc6376#section-3.5) tag that matches the domain of the `From` header.
+- The email must have a signed `From` header containing the single email address.
+
+If the email doesn't have a DKIM signature with matching signer and sender's domain, it may indicate that the sender email server is misconfigured.
+It is often the case that emails from domains registered on email providers like Gmail or outlook will have a dkim signature looking like this:
+
+```
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=***.gappssmtp.com; s=20230601; dara=google.com;
+        h=...;
+        bh=...;
+        b=...
+```
+
+Another possible issue is using subdomains. For examble, if the email is sent from `alice@subdomain.example.com` and the `d` tag in the DKIM signature is `example.com`, the email will not be considered valid.
+Similarly, if the email is sent from `alice@example.com` and `d=subdomain.example.com`, the email will not be considered valid as well.
+
+DKIM will also be in valid if the email body has been modified by some proxy server. The body hash is part of the email signature and therefore cannot be modified.
+
 ## Example
 Let's say someone wants to prove they are part of company or organization. One way to do this is to take a screenshot and send it to the verifier. However, this is not very reliable because screenshot images can be easily manipulated, and obviously such an image cannot be verified on-chain. 
 
