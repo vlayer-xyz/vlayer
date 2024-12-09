@@ -1,31 +1,15 @@
 {
-  "extends": "../tsconfig.base.json",
+  "extends": "./tsconfig.base.json",
   "compilerOptions": {
-    "rootDir": "./src",
-    "outDir": "./dist",
-    "lib": [
-      "ESNext"
-    ],
     "moduleResolution": "bundler",
-    "moduleDetection": "force",
-    "downlevelIteration": true,
-    "jsx": "preserve",
-    "noEmit": false,
-    "forceConsistentCasingInFileNames": true,
-    "allowJs": true,
-    "types": [
-      "bun"
-    ],
-    "baseUrl": "./",
-    "paths": {
-      "types/*": ["./src/api/lib/types/*"],
-      "testHelpers/*": ["./src/testHelpers/*"],
-    },
-  }, 
-  "include": [
-    "src",
-  ],
+    "module": "ESNext",
+    "target": "ES2021",
+  },
   "tsc-alias" : {
     "resolveFullPaths": true,
-  }
+  },
+  "include": [
+    "src",
+    "eslint.config.ts"
+  ],
 }

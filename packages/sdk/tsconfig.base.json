@@ -1,0 +1,28 @@
+{
+    "extends": "../tsconfig.base.json",
+    "compilerOptions": {
+      "outDir": "./dist",
+      "rootDir": "./src",
+      "lib": [
+        "ES2021"
+      ],
+      "paths": {
+        "types/*": ["./src/api/lib/types/*"],
+        "testHelpers/*": ["./src/testHelpers/*"],
+      },
+      "moduleDetection": "force",
+      "downlevelIteration": true,
+      "resolveJsonModule": true,
+      "esModuleInterop": true,
+      "forceConsistentCasingInFileNames": true,
+      // skip node_modules type checking
+      "skipLibCheck": true,
+    }, 
+    "include": [
+        "package.json"
+        
+    ]
+  }
+  
+
+  

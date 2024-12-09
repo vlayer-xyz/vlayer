@@ -1,23 +1,25 @@
 {
   "name": "@vlayer/sdk",
-  "type": "module",
   "exports": {
     ".": {
-      "import": "./dist/index.js",
-      "types": "./dist/index.d.ts"
+      "import": "./dist/esm/index.js",
+      "types": "./dist/types/index.d.ts"
     },
     "./web_proof": {
-      "import": "./dist/api/webProof/index.js",
-      "types": "./dist/api/webProof/index.d.ts"
+      "import": "./dist/esm/api/webProof/index.js",
+      "types": "./dist/types/api/webProof/index.d.ts"
     },
     "./config": {
-      "import": "./dist/config/index.js",
-      "types": "./dist/config/index.d.ts"
-    }
+      "import": "./dist/esm/config/index.js",
+      "types": "./dist/types/config/index.d.ts"
+    } 
   },
   "version": "0.1.0",
   "scripts": {
-    "build": "bun tsc && bun tsc-alias",
+    "copy:package": "jq '{version}' package.json > dist/esm/package.json",
+    "build:esm": "bun tsc --project ./buildconfig/tsconfig.build.esm.json &&  bun tsc-alias && bun copy:package" ,
+    "build:types": "bun tsc --project ./buildconfig/tsconfig.build.types.json ",
+    "build": "bun build:esm && bun build:types",
     "test:unit": "vitest --run",
     "gen:types": "sh ../../bash/build_ts_types.sh",
     "replaceCommonsSymlink": "mv ./src/web-proof-commons ./src/web-proof-commons.bak && cp -r $(readlink -f ./src/web-proof-commons.bak) src/web-proof-commons && rm ./src/web-proof-commons.bak"

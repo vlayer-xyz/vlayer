@@ -18,8 +18,10 @@ import { v_getProofReceipt } from "./v_getProofReceipt";
 import { foundry } from "viem/chains";
 import { v_versions } from "./v_versions";
 import { checkVersionCompatibility } from "./utils/versions";
-import meta from "../../package.json" assert { type: "json" };
-const sdkVersion = meta.version;
+import * as meta from "../../../package.json";
+
+//@ts-expect-error cheat for build
+const sdkVersion = (meta as { version: string }).version;
 
 export interface ProveOptions {
   preverifyVersions?: boolean;

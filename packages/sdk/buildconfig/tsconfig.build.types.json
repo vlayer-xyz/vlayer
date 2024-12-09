@@ -1,0 +1,10 @@
+{   
+    "extends": "./tsconfig.build.json",
+    "compilerOptions": {
+        "moduleResolution": "bundler",
+        "emitDeclarationOnly": true,
+        "declaration": true,
+        "declarationMap": true,
+        "declarationDir": "../dist/types"
+    }
+}
