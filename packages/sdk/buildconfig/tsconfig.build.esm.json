@@ -5,6 +5,5 @@
         "moduleResolution": "bundler",
         "outDir": "../dist/esm",
         "module": "ESNext",
-        "declaration": false
     }
 }
