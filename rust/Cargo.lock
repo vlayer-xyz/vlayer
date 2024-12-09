@@ -3082,9 +3082,10 @@ dependencies = [
  "cpufeatures",
  "curve25519-dalek-derive",
  "digest 0.10.7",
- "fiat-crypto",
+ "fiat-crypto 0.2.9",
  "rand_core",
  "rustc_version 0.4.0",
+ "serde",
  "subtle",
  "zeroize",
 ]
@@ -3607,6 +3608,18 @@ dependencies = [
  "sha2",
  "subtle",
  "zeroize",
+]
+
+[[package]]
+name = "ed448-goldilocks"
+version = "0.9.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "88322282bccdc6fa7ab65b0c30cb877fba541547653436d08bb775fa4a4307b4"
+dependencies = [
+ "fiat-crypto 0.1.20",
+ "hex",
+ "rand_core",
+ "subtle",
 ]
 
 [[package]]
@@ -4187,6 +4200,12 @@ dependencies = [
  "rand_core",
  "subtle",
 ]
+
+[[package]]
+name = "fiat-crypto"
+version = "0.1.20"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e825f6987101665dea6ec934c09ec6d721de7bc1bf92248e1d5810c8cd636b77"
 
 [[package]]
 name = "fiat-crypto"
@@ -5142,7 +5161,35 @@ dependencies = [
  "frost-core",
  "frost-rerandomized",
  "rand_core",
- "sha2 0.10.8 (registry+https://github.com/rust-lang/crates.io-index)",
+ "sha2",
+]
+
+[[package]]
+name = "frost-ed448"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "e8c4dffab2dc334fc1b864cf1ce930aafc29e05e4ab9281c81858e92752c1410"
+dependencies = [
+ "document-features",
+ "ed448-goldilocks",
+ "frost-core",
+ "frost-rerandomized",
+ "rand_core",
+ "sha3",
+]
+
+[[package]]
+name = "frost-p256"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "235c7f29e912d63953881fc9ee942922c0f63e97ce011e3af8772ced55db4fa6"
+dependencies = [
+ "document-features",
+ "frost-core",
+ "frost-rerandomized",
+ "p256",
+ "rand_core",
+ "sha2",
 ]
 
 [[package]]
@@ -5156,6 +5203,34 @@ dependencies = [
  "frost-core",
  "hex",
  "rand_core",
+]
+
+[[package]]
+name = "frost-ristretto255"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "eb3f0e065fb99f6abb96b58bd63fd7a6255efe37ee9672d97a7404ac644e54a7"
+dependencies = [
+ "curve25519-dalek",
+ "document-features",
+ "frost-core",
+ "frost-rerandomized",
+ "rand_core",
+ "sha2",
+]
+
+[[package]]
+name = "frost-secp256k1"
+version = "2.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "52edea5a88d11135b2bf069f03e756d405d39c5a1c9c9f4d6147505948d7fff7"
+dependencies = [
+ "document-features",
+ "frost-core",
+ "frost-rerandomized",
+ "k256",
+ "rand_core",
+ "sha2",
 ]
 
 [[package]]
@@ -12065,7 +12140,14 @@ dependencies = [
  "derive-new",
  "derive_more 1.0.0",
  "email_proof",
+ "frost-core",
+ "frost-ed25519",
+ "frost-ed448",
+ "frost-p256",
+ "frost-ristretto255",
+ "frost-secp256k1",
  "mpt",
+ "rand",
  "risc0-zkvm",
  "serde",
  "sha2",
@@ -12079,10 +12161,8 @@ dependencies = [
  "common",
  "derivative",
  "derive_more 1.0.0",
- "frost-ed25519",
  "host_utils",
  "insta",
- "rand",
  "risc0-build",
  "risc0-zkvm",
  "tabled",
