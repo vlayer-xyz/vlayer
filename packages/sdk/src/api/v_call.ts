@@ -1,4 +1,8 @@
-import { CallContext, CallParams, VCallResponse } from "types/vlayer";
+import {
+  type CallContext,
+  type CallParams,
+  type VCallResponse,
+} from "types/vlayer";
 import { parseVCallResponseError } from "./lib/errors";
 
 function v_callBody(call: CallParams, context: CallContext) {

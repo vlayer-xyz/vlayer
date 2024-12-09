@@ -1,24 +1,24 @@
 import {
-  VCallResponse,
-  VlayerClient,
-  BrandedHash,
+  type VCallResponse,
+  type VlayerClient,
+  type BrandedHash,
   VGetProofReceiptStatus,
 } from "types/vlayer";
-import { WebProofProvider } from "types/webProofProvider";
+import { type WebProofProvider } from "types/webProofProvider";
 
 import { prove, getProofReceipt } from "../prover";
 import { createExtensionWebProofProvider } from "../webProof";
 import {
   type Abi,
-  AbiStateMutability,
-  ContractFunctionArgs,
-  ContractFunctionName,
-  ContractFunctionReturnType,
+  type AbiStateMutability,
+  type ContractFunctionArgs,
+  type ContractFunctionName,
+  type ContractFunctionReturnType,
   decodeFunctionResult,
-  Hex,
+  type Hex,
 } from "viem";
 import { ZkProvingStatus } from "../../web-proof-commons";
-import { ContractFunctionArgsWithout } from "types/viem";
+import { type ContractFunctionArgsWithout } from "types/viem";
 
 function dropEmptyProofFromArgs(args: unknown) {
   if (Array.isArray(args)) {

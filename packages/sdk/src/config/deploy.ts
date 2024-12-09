@@ -1,7 +1,7 @@
 import { getConfig } from "./getConfig";
 import { createContext } from "./createContext";
-import { ContractArg, ContractSpec } from "types/ethereum";
-import { Address } from "viem";
+import { type ContractArg, type ContractSpec } from "types/ethereum";
+import { type Address } from "viem";
 import { getChainConfirmations } from "./getChainConfirmations";
 
 export const waitForContractDeploy = async ({

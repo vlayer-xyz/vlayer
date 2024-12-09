@@ -6,7 +6,7 @@ import {
   type CustomTransport,
   custom,
 } from "viem";
-import { Config } from "./getConfig";
+import { type Config } from "./getConfig";
 import { privateKeyToAccount } from "viem/accounts";
 import { getChainConfirmations } from "./getChainConfirmations";
 import * as chains from "viem/chains";
@@ -20,7 +20,7 @@ const getChainSpecs = (chainName: string): Chain => {
 };
 
 export const customTransport = custom;
-export { Chain };
+export type { Chain };
 const createEthClient = (
   chain: Chain,
   jsonRpcUrl: string,

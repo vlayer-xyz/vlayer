@@ -1,15 +1,15 @@
-import { Branded } from "../../../web-proof-commons/utils";
+import { type Branded } from "../../../web-proof-commons/utils";
 import {
-  Abi,
-  AbiStateMutability,
-  Address,
-  ContractFunctionArgs,
-  ContractFunctionName,
-  ContractFunctionReturnType,
-  Hex,
+  type Abi,
+  type AbiStateMutability,
+  type Address,
+  type ContractFunctionArgs,
+  type ContractFunctionName,
+  type ContractFunctionReturnType,
+  type Hex,
 } from "viem";
-import { WebProofRequest } from "./webProofProvider";
-import { ContractFunctionArgsWithout } from "./viem";
+import { type WebProofRequest } from "./webProofProvider";
+import { type ContractFunctionArgsWithout } from "./viem";
 
 type Calldata = string;
 

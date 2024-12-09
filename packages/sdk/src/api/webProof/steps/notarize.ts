@@ -1,6 +1,6 @@
 import {
   EXTENSION_STEP,
-  WebProofStepNotarize,
+  type WebProofStepNotarize,
 } from "../../../web-proof-commons";
 
 export const notarize = (

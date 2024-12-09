@@ -1,4 +1,7 @@
-import { VGetProofReceiptParams, VGetProofReceiptResponse } from "types/vlayer";
+import {
+  type VGetProofReceiptParams,
+  type VGetProofReceiptResponse,
+} from "types/vlayer";
 import { parseVCallResponseError } from "./lib/errors";
 
 function v_getProofReceiptBody(params: VGetProofReceiptParams) {
