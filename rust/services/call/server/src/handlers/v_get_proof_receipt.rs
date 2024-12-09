@@ -1,6 +1,6 @@
 use serde::{Deserialize, Serialize};
 use tracing::info;
-use types::{CallResult, RawData, Status};
+use types::{CallResult, RawData};
 
 use super::SharedState;
 use crate::{error::AppError, v_call::CallHash};
@@ -17,14 +17,9 @@ pub async fn v_get_proof_receipt(
     params: Params,
 ) -> Result<CallResult, AppError> {
     info!("v_get_proof_receipt => {params:#?}");
-    if !state.read().contains_key(&params.hash) {
-        return Ok(CallResult::new(Status::Pending, None));
-    }
     state
-        .write()
         .remove(&params.hash)
-        .expect("hash must exist")
-        .and_then(|host_output| {
-            Ok(CallResult::new(Status::Done, Some(RawData::try_new(host_output)?)))
+        .map_or(Ok(CallResult::pending()), |(_, res)| {
+            res.and_then(|host_output| Ok(CallResult::done(RawData::try_new(host_output)?)))
         })
 }

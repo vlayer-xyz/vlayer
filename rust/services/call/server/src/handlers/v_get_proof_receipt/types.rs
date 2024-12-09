@@ -59,6 +59,16 @@ pub struct CallResult {
     pub data: Option<RawData>,
 }
 
+impl CallResult {
+    pub fn pending() -> Self {
+        Self::new(Status::Pending, None)
+    }
+
+    pub fn done(data: RawData) -> Self {
+        Self::new(Status::Done, Some(data))
+    }
+}
+
 fn decode_seal(seal: &[u8]) -> Result<Seal, seal::Error> {
     Ok(Seal::abi_decode(seal, true)?)
 }

@@ -15,6 +15,7 @@ call_engine = { workspace = true }
 call_host = { workspace = true }
 chain = { workspace = true }
 common = { workspace = true }
+dashmap = { workspace = true }
 derive-new = { workspace = true }
 derive_more = { workspace = true }
 hex = { workspace = true }

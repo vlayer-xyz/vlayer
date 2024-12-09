@@ -2045,6 +2045,7 @@ dependencies = [
  "chain",
  "chain_guest_wrapper",
  "common",
+ "dashmap",
  "derive-new",
  "derive_more 1.0.0",
  "ethers",
