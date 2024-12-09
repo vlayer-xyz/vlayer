@@ -1,6 +1,8 @@
 use alloy_sol_types::SolValue;
 use mailparse::{headers::Headers, MailHeaderMap, MailParseError, ParsedMail};
 
+use crate::email_address::EmailAddress;
+
 pub(crate) mod sol;
 
 #[derive(Debug, PartialEq)]
@@ -82,79 +84,11 @@ impl Email {
     fn validate_email(email: &str) -> Result<String, MailParseError> {
         let email = email.trim();
 
-        if !Self::is_email_valid(email) {
+        if !EmailAddress::is_valid(email) {
             return Err(Self::invalid_from_header());
         }
 
         Ok(email.to_string())
-    }
-
-    const fn is_character_not_allowed_in_email_address(c: char) -> bool {
-        !(c.is_ascii_alphanumeric() || c == '.' || c == '-' || c == '+' || c == '_')
-    }
-
-    const fn is_character_not_allowed_in_email_address_edges(c: char) -> bool {
-        !(c.is_ascii_alphanumeric() || c == '_')
-    }
-
-    fn remove_parts_inside_parentheses(str: &str) -> String {
-        let mut inside_parentheses = false;
-        str.chars()
-            .filter_map(|c| {
-                if c == '"' {
-                    inside_parentheses = !inside_parentheses;
-                    Some('_')
-                } else {
-                    if inside_parentheses {
-                        None
-                    } else {
-                        Some(c)
-                    }
-                }
-            })
-            .collect()
-    }
-
-    fn is_email_valid(email: &str) -> bool {
-        let Some((username, domainname)) = email.rsplit_once('@') else {
-            return false;
-        };
-        if username.is_empty() || domainname.is_empty() {
-            return false;
-        }
-
-        let username = Self::remove_parts_inside_parentheses(username);
-
-        if username.contains(Self::is_character_not_allowed_in_email_address) {
-            return false;
-        }
-        if domainname.contains(Self::is_character_not_allowed_in_email_address) {
-            return false;
-        }
-
-        if username.starts_with(Self::is_character_not_allowed_in_email_address_edges)
-            || username.ends_with(Self::is_character_not_allowed_in_email_address_edges)
-        {
-            return false;
-        }
-        if domainname.starts_with(Self::is_character_not_allowed_in_email_address_edges)
-            || domainname.ends_with(Self::is_character_not_allowed_in_email_address_edges)
-        {
-            return false;
-        }
-
-        if domainname.contains("..") || username.contains("..") {
-            return false;
-        }
-
-        if let Some((_, domain)) = domainname.rsplit_once('.') {
-            if domain.len() < 2 {
-                return false;
-            }
-        } else {
-            return false;
-        }
-        true
     }
 }
 
@@ -345,71 +279,6 @@ Content-Type: text/html; charset="UTF-8"
             assert_eq!(decoded.to, "you".to_string());
             assert_eq!(decoded.subject, "".to_string());
             assert_eq!(decoded.body, "body".to_string());
-        }
-    }
-
-    mod is_email_valid {
-        use super::*;
-
-        const VALID_EMAILS: [&str; 16] = [
-            r#"email@example.com"#,
-            r#"firstname.lastname@example.com"#,
-            r#"email@subdomain.example.com"#,
-            r#"firstname+lastname@example.com"#,
-            r#""email"@example.com"#,
-            r#"1234567890@example.com"#,
-            r#"email@example-one.com"#,
-            r#"_______@example.com"#,
-            r#"email@example.name"#,
-            r#"email@example.museum"#,
-            r#"email@example.co.jp"#,
-            r#"firstname-lastname@example.com"#,
-            r#"much."more\ unusual"@example.com"#,
-            r#"very.unusual."@".unusual.com@example.com"#,
-            r#"very."(),:;<>[]".VERY."very@\\ "very".unusual@strange.example.com"#,
-            r#"email@123.123.123.123"#,
-        ];
-
-        #[test]
-        fn valid_emails() {
-            for address in VALID_EMAILS {
-                assert!(
-                    Email::is_email_valid(address),
-                    "{}",
-                    format!("Expected {address} to be valid")
-                );
-            }
-        }
-
-        const INVALID_EMAILS: [&str; 17] = [
-            r#"plainaddress"#,
-            r#"#@%^%#$@#$@#.com"#,
-            r#"@example.com"#,
-            r#"Joe Smith <email@example.com>"#,
-            r#"<email@example.com>"#,
-            r#"email.example.com"#,
-            r#"email@example@example.com"#,
-            r#".email@example.com"#,
-            r#"email.@example.com"#,
-            r#"email..email@example.com"#,
-            r#"あいうえお@example.com"#,
-            r#"email@example.com (Joe Smith)"#,
-            r#"email@example"#,
-            r#"email@-example.com"#,
-            r#"email@[123.123.123.123]"#,
-            r#"email@example..com"#,
-            r#"Abc..123@example.com"#,
-        ];
-
-        #[test]
-        fn invalid_emails() {
-            for address in INVALID_EMAILS {
-                assert!(
-                    !Email::is_email_valid(address),
-                    "{}",
-                    format!("Expected {address} to be invalid")
-                );
-            }
         }
     }
 
