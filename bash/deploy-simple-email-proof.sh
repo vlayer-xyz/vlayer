@@ -53,16 +53,16 @@ if [ "$VERCEL_ENV" == "production" ]; then
   vercel env pull ./vlayer/.env.testnet --token "$VERCEL_TOKEN" --prod
   vercel env pull ./vlayer/.env.testnet.local --token "$VERCEL_TOKEN"
   vercel --token "$VERCEL_TOKEN" --prod --yes --cwd ./ --scope "$VERCEL_ORG_ID" | tail -1
-  # echo "Book production deployment available at: $DEPLOYMENT_URL"
+  echo "simple-email-proof production deployment available at: $DEPLOYMENT_URL"
 else
   vercel env pull ./vlayer/.env.testnet --token "$VERCEL_TOKEN"
   vercel env pull ./vlayer/.env.testnet.local --token "$VERCEL_TOKEN"
   vercel --token "$VERCEL_TOKEN" --yes --cwd ./ --scope "$VERCEL_ORG_ID" | tail -1
-  # DEPLOYMENT_URL=$(vercel --token $VERCEL_TOKEN --yes --cwd ./book --scope $VERCEL_ORG_ID | tail -1)
-  # COMMENT_BODY="The preview of the simple-email-proof example app is available at: $DEPLOYMENT_URL"
-  # curl -s -H "Authorization: token $GITHUB_TOKEN" \
-  #   -X POST \
-  #   -d "{\"body\":\"$COMMENT_BODY\"}" \
-  #   "https://api.github.com/repos/${{ github.repository }}/issues/$PR_NUMBER/comments"
+  DEPLOYMENT_URL=$(vercel --token $VERCEL_TOKEN --yes --cwd ./ --scope $VERCEL_ORG_ID | tail -1)
+  COMMENT_BODY="The preview of the simple-email-proof example app is available at: $DEPLOYMENT_URL"
+  curl -s -H "Authorization: token $GITHUB_TOKEN" \
+    -X POST \
+    -d "{\"body\":\"$COMMENT_BODY\"}" \
+    "https://api.github.com/repos/${GITHUB_REPOSITORY}/issues/${PR_NUMBER}/comments"
 fi
 echo '::endgroup::'
