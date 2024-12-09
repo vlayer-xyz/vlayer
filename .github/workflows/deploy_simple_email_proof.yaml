@@ -35,7 +35,7 @@ jobs:
           VLAYER_ENV: testnet
           EXAMPLES_TEST_PRIVATE_KEY: ${{ secrets.EXAMPLES_TEST_PRIVATE_KEY }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_PROJECT_ID: prj_lZyng5MaLLgPzLah9EMYIoH3t74s
+          VERCEL_PROJECT_ID: {{ secrets.VERCEL_SIMPLE_EMAIL_PROOF_PROJECT_ID }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
           GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
           PR_NUMBER: "${{ github.event.number }}"
