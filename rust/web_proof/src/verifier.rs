@@ -67,6 +67,9 @@ mod tests {
     const X_TEST_URL: &str = "https://api.x.com/1.1/account/settings.json?include_ext_sharing_audiospaces_listening_data_with_followers=true&include_mention_filter=true&include_nsfw_user_flag=true&include_nsfw_admin_flag=true&include_ranked_timeline=true&include_alt_text_compose=true&ext=ssoConnections&include_country_code=true&include_ext_dm_nsfw_media_filter=true";
 
     mod verify_and_parse {
+        use k256::PublicKey;
+        use pkcs8::DecodePublicKey;
+
         use super::*;
         use crate::fixtures::{
             utils::{change_server_name, load_web_proof_fixture_and_modify},
@@ -115,7 +118,10 @@ mod tests {
             let web_proof = load_web_proof_fixture();
             let web = verify_and_parse(web_proof).unwrap();
 
-            assert_eq!(web.notary_pub_key, NOTARY_PUB_KEY_PEM_EXAMPLE);
+            assert_eq!(
+                PublicKey::from_public_key_pem(&web.notary_pub_key).unwrap(),
+                PublicKey::from_public_key_pem(NOTARY_PUB_KEY_PEM_EXAMPLE).unwrap()
+            );
         }
     }
 

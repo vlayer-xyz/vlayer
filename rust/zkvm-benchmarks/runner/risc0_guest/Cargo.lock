@@ -4369,7 +4369,7 @@ dependencies = [
  "derive-new",
  "hex",
  "httparse",
- "p256",
+ "k256",
  "pkcs8",
  "serde",
  "serde_json",

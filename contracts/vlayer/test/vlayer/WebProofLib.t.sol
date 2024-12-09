@@ -83,7 +83,7 @@ contract WebProverTest is VTest {
         } catch Error(string memory reason) {
             assertEq(
                 reason,
-                "Engine(TransactError(Revert(\"ASN.1 error: PEM error: PEM Base64 error: invalid Base64 encoding at line 9 column 203\")))"
+                "Engine(TransactError(Revert(\"ASN.1 error: PEM error: PEM Base64 error: invalid Base64 encoding at line 11 column 1\")))"
             );
         }
     }

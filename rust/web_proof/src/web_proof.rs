@@ -1,10 +1,11 @@
-use p256::PublicKey;
+use k256::PublicKey;
 use pkcs8::{DecodePublicKey, EncodePublicKey, LineEnding};
 use serde::{de::Deserializer, Deserialize, Serialize, Serializer};
 use thiserror::Error;
 use tlsn_core::{
     connection::ServerName,
     presentation::{Presentation, PresentationError, PresentationOutput},
+    signing::VerifyingKey,
     CryptoProvider,
 };
 
@@ -46,6 +47,12 @@ impl WebProof {
 
     pub fn get_notary_pub_key(&self) -> Result<String, pkcs8::spki::Error> {
         self.notary_pub_key.to_public_key_pem(LineEnding::LF)
+    }
+
+    pub fn get_notary_verifying_key(&self) -> VerifyingKey {
+        Presentation::from(self.presentation_json.clone())
+            .verifying_key()
+            .clone()
     }
 }
 
@@ -172,7 +179,22 @@ mod tests {
     #[test]
     fn success_get_notary_pub_key() {
         let proof = load_web_proof_fixture();
-        assert_eq!(proof.get_notary_pub_key().unwrap(), NOTARY_PUB_KEY_PEM_EXAMPLE);
+        assert_eq!(
+            PublicKey::from_public_key_pem(&proof.get_notary_pub_key().unwrap()),
+            PublicKey::from_public_key_pem(NOTARY_PUB_KEY_PEM_EXAMPLE)
+        );
+    }
+
+    #[test]
+    fn success_get_notary_verifying_key() {
+        let proof = load_web_proof_fixture();
+
+        let verifying_key = proof.get_notary_verifying_key();
+        let public_key = PublicKey::from_public_key_pem(NOTARY_PUB_KEY_PEM_EXAMPLE).unwrap();
+        let notary_public_key_sec1_bytes = public_key.to_sec1_bytes();
+
+        assert_eq!(verifying_key.data, notary_public_key_sec1_bytes.as_ref());
+        assert_eq!(verifying_key.alg, KeyAlgId::K256);
     }
 
     #[test]

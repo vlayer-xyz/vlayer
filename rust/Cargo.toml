@@ -107,7 +107,7 @@ mockito = "1.5.0"
 nybbles = "0.2.1"
 once_cell = "1.20"
 opener = "0.7.2"
-p256 = { version = "0.13.2", features = ["ecdsa"] }
+k256 = { version = "0.13.4", features = ["ecdsa"] }
 parking_lot = "0.12.3"
 pkcs8 = "0.10.2"
 tabled = "0.17.0"
