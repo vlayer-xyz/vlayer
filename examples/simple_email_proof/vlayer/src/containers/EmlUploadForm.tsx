@@ -21,6 +21,8 @@ function getChainByName(name: string) {
 const EmlUploadForm = () => {
   const [walletClient, setWalletClient] =
     useState<ReturnType<typeof createContext>["ethClient"]>();
+  const [account, setAccount] =
+    useState<ReturnType<typeof createContext>["account"]>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentStep, setCurrentStep] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
@@ -30,7 +32,7 @@ const EmlUploadForm = () => {
 
   useEffect(() => {
     const getWallet = async () => {
-      const { ethClient } = await createContext(
+      const { ethClient, account: ethAccount } = await createContext(
         {
           chainName: import.meta.env.VITE_CHAIN_NAME as string,
           proverUrl: import.meta.env.VITE_PROVER_URL as string,
@@ -43,6 +45,7 @@ const EmlUploadForm = () => {
       );
 
       setWalletClient(ethClient);
+      setAccount(ethAccount);
     };
 
     getWallet();
@@ -55,33 +58,45 @@ const EmlUploadForm = () => {
   });
 
   const getClaimerAddr = async () => {
-    if (typeof window !== "undefined" && !window.ethereum) {
-      throw new Error("no_wallet_detected");
-    }
+    if (!account) {
+      if (typeof window !== "undefined" && !window.ethereum) {
+        throw new Error("no_wallet_detected");
+      }
 
-    if (!walletClient) {
-      throw new Error("no_wallet_client");
-    }
+      if (!walletClient) {
+        throw new Error("no_wallet_client");
+      }
 
-    if (chain.name !== chains.anvil.name) {
-      await walletClient?.switchChain({ id: chain.id });
-    }
-    if (!walletClient) {
-      throw new Error("no_wallet_client");
-    }
-    const [addr] = await walletClient.requestAddresses();
+      if (chain.name !== chains.anvil.name) {
+        await walletClient?.switchChain({ id: chain.id });
+      }
+      if (!walletClient) {
+        throw new Error("no_wallet_client");
+      }
+      const [addr] = await walletClient.requestAddresses();
 
-    setClaimerAddr(addr);
-    return addr;
+      setClaimerAddr(addr);
+      return addr;
+    }
+    setClaimerAddr(account.address);
+    return account.address;
   };
 
   const handleError = (err: unknown) => {
     setIsSubmitting(false);
+    setSuccessMsg("");
+    console.log("err", err);
     if (err instanceof Error) {
       if ("shortMessage" in err) {
         setErrorMsg(err.shortMessage as string);
       }
-      setErrorMsg(err.message);
+      if (err?.message?.includes("email taken")) {
+        setErrorMsg(
+          "Email already used. Try a different one or redeploy contracts",
+        );
+      } else {
+        setErrorMsg(err.message);
+      }
     } else {
       setErrorMsg("Something went wrong, check logs");
     }
@@ -105,7 +120,7 @@ const EmlUploadForm = () => {
         functionName: "verify",
         args: proof,
         chain,
-        account: claimerAddr,
+        account: account ? account : claimerAddr,
       });
 
       const receipt = await walletClient.waitForTransactionReceipt({
@@ -114,12 +129,14 @@ const EmlUploadForm = () => {
       console.log("receipt", receipt);
       setCurrentStep("Success!");
       setIsSubmitting(false);
+      setSuccessMsg("test");
       if (chain.blockExplorers && receipt.status === "success") {
         window.open(`${chain.blockExplorers?.default.url}/tx/${txHash}`);
-      } else if (receipt.status === "reverted") {
-        setErrorMsg("Transaction reverted. Is email already used?");
+        setSuccessMsg(
+          `Verified: <a href='${chain.blockExplorers?.default.url}/tx/${txHash}'>${txHash.slice(0, 4)}...${txHash.slice(-4)}</a>`,
+        );
       } else {
-        setSuccessMsg("Verified successfully.");
+        setSuccessMsg(`Verified: ${txHash.slice(0, 4)}...${txHash.slice(-4)}`);
       }
     } catch (err) {
       handleError(err);
