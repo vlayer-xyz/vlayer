@@ -286,6 +286,11 @@ impl TestArgs {
         Ok(())
     }
 
+    // MODIFICATION: Fix forge bug and enable verbosity
+    fn add_shell_opts_to_evm_opts(&self, evm_opts: &mut EvmOpts) {
+        evm_opts.verbosity = self.shell.verbosity;
+    }
+
     /// Executes all the tests in the project.
     ///
     /// This will trigger the build process first. On success all test contracts that match the
@@ -295,6 +300,9 @@ impl TestArgs {
     pub async fn execute_tests(mut self) -> Result<TestOutcome> {
         // Merge all configs.
         let (mut config, mut evm_opts) = self.load_config_and_evm_opts_emit_warnings()?;
+        // MODIFICATION: Fix forge bug and enable verbosity
+        self.add_shell_opts_to_evm_opts(&mut evm_opts);
+
         // Modification:: call validate_chain_id
         Self::validate_chain_id(&mut evm_opts)?;
 
