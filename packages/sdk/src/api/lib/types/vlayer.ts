@@ -60,7 +60,7 @@ export enum VGetProofReceiptStatus {
 
 export interface VGetProofReceiptResult {
   status: VGetProofReceiptStatus;
-  data: {
+  data?: {
     evm_call_result: Hex;
     proof: Proof;
   };

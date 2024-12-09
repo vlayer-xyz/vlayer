@@ -98,6 +98,11 @@ export const createVlayerClient = (
         for (let retry = 0; retry < numberOfRetries; retry++) {
           const resp = await getProofReceipt(hash, url);
           if (resp.result.status === VGetProofReceiptStatus.done) {
+            if (resp.result.data === undefined) {
+              throw new Error(
+                "No ZK proof returned from server for hash " + hash.hash,
+              );
+            }
             return resp.result.data;
           }
           await sleep(sleepDuration);
@@ -116,12 +121,12 @@ export const createVlayerClient = (
       const result = dropEmptyProofFromArgs(
         decodeFunctionResult({
           abi: proverAbi,
-          data: data.evm_call_result,
+          data: data?.evm_call_result,
           functionName,
         }),
       );
 
-      return [data.proof, ...result] as ContractFunctionReturnType<
+      return [data?.proof, ...result] as ContractFunctionReturnType<
         T,
         AbiStateMutability,
         F
