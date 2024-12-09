@@ -2,9 +2,8 @@ pub struct EmailAddress {}
 
 impl EmailAddress {
     pub fn is_valid(email_address: &str) -> bool {
-        let (username, domainname) = match email_address.rsplit_once('@') {
-            Some((u, d)) if !u.is_empty() && !d.is_empty() => (u, d),
-            _ => return false,
+        let Some((username, domainname)) = Self::split_email(email_address) else {
+            return false;
         };
 
         let Some(unquoted_username) = Self::remove_parts_inside_quotes(username) else {
@@ -18,6 +17,15 @@ impl EmailAddress {
         }
 
         matches!(domainname.rsplit_once('.'), Some((_, domain)) if domain.len() >= 2)
+    }
+
+    fn split_email(email_address: &str) -> Option<(&str, &str)> {
+        match email_address.rsplit_once('@') {
+            Some((username, domainname)) if !username.is_empty() && !domainname.is_empty() => {
+                Some((username, domainname))
+            }
+            _ => None,
+        }
     }
 
     fn remove_parts_inside_quotes(email_part: &str) -> Option<String> {
@@ -186,6 +194,37 @@ mod test {
         fn returns_false_for_strings_with_no_invalid_characters() {
             let input = r#"_abcxyzABCxyz12314123+-.asd_"#;
             assert!(!EmailAddress::contains_invalid_characters(input));
+        }
+    }
+
+    mod split_email {
+        use super::*;
+
+        #[test]
+        fn returns_none_for_empty_string() {
+            assert_eq!(EmailAddress::split_email(""), None);
+        }
+
+        #[test]
+        fn returns_none_for_missing_at_symbol() {
+            assert_eq!(EmailAddress::split_email("email.com"), None);
+        }
+
+        #[test]
+        fn returns_none_for_empty_username() {
+            assert_eq!(EmailAddress::split_email("@example.com"), None);
+        }
+
+        #[test]
+        fn returns_none_for_empty_domainname() {
+            assert_eq!(EmailAddress::split_email("email@"), None);
+        }
+
+        #[test]
+        fn returns_username_and_domainname() {
+            let input = "username@example.com";
+            let expected = ("username", "example.com");
+            assert_eq!(EmailAddress::split_email(input).unwrap(), expected);
         }
     }
 }
