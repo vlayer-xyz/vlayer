@@ -1,40 +1,18 @@
 use ::block_trie::KeccakBlockTrie as BlockTrie;
-use block_header::{EthBlockHeader as Block, EvmBlockHeader};
+use block_header::{test_utils::mock_block_headers, EvmBlockHeader};
 
 use crate::{with_fixture, Benchmark};
-
-fn dummy_block(n: u64) -> Box<dyn EvmBlockHeader> {
-    let block = Block {
-        number: n,
-        ..Default::default()
-    };
-    Box::new(block)
-}
-
-fn dummy_block_with_correct_parent_hash(n: u64) -> Box<dyn EvmBlockHeader> {
-    if n == 0 {
-        return dummy_block(0);
-    }
-    let block = Block {
-        number: n,
-        parent_hash: dummy_block_with_correct_parent_hash(n - 1).hash_slow(),
-        ..Default::default()
-    };
-    Box::new(block)
-}
 
 mod append_single {
     use super::*;
 
     pub fn fixture() -> (BlockTrie, Box<dyn EvmBlockHeader>) {
-        (
-            BlockTrie::init(dummy_block(0)).unwrap(),
-            dummy_block_with_correct_parent_hash(1),
-        )
+        let [block0, block1] = mock_block_headers(0..=1).try_into().unwrap();
+        (BlockTrie::init(block0).unwrap(), block1)
     }
 
-    pub fn run((mut trie, block_one): (BlockTrie, Box<dyn EvmBlockHeader>)) {
-        trie.append_single(&block_one).unwrap();
+    pub fn run((mut trie, block1): (BlockTrie, Box<dyn EvmBlockHeader>)) {
+        trie.append_single(&block1).unwrap();
     }
 }
 
@@ -42,14 +20,12 @@ mod prepend_single {
     use super::*;
 
     pub fn fixture() -> (BlockTrie, Box<dyn EvmBlockHeader>) {
-        (
-            BlockTrie::init(dummy_block_with_correct_parent_hash(1)).unwrap(),
-            dummy_block_with_correct_parent_hash(1),
-        )
+        let [_, block1] = mock_block_headers(0..=1).try_into().unwrap();
+        (BlockTrie::init(&block1).unwrap(), block1)
     }
 
-    pub fn run((mut trie, block_one): (BlockTrie, Box<dyn EvmBlockHeader>)) {
-        trie.prepend_single(&block_one).unwrap();
+    pub fn run((mut trie, block1): (BlockTrie, Box<dyn EvmBlockHeader>)) {
+        trie.prepend_single(&block1).unwrap();
     }
 }
 
@@ -57,10 +33,8 @@ mod append_batch {
     use super::*;
 
     pub fn fixture(size: u64) -> (BlockTrie, Vec<Box<dyn EvmBlockHeader>>) {
-        let trie = BlockTrie::init(dummy_block(0)).unwrap();
-        let blocks = (1..=size)
-            .map(dummy_block_with_correct_parent_hash)
-            .collect();
+        let mut blocks = mock_block_headers(0..=size);
+        let trie = BlockTrie::init(blocks.remove(0)).unwrap();
         (trie, blocks)
     }
 
@@ -75,11 +49,10 @@ mod prepend_batch {
     pub fn fixture(
         size: u64,
     ) -> (BlockTrie, Vec<Box<dyn EvmBlockHeader>>, Box<dyn EvmBlockHeader>) {
-        let old_leftmost = dummy_block_with_correct_parent_hash(size);
+        let mut blocks = mock_block_headers(0..=size);
+        #[allow(clippy::cast_possible_truncation)]
+        let old_leftmost = blocks.remove(size as usize);
         let trie = BlockTrie::init(&old_leftmost).unwrap();
-        let blocks = (0..size)
-            .map(dummy_block_with_correct_parent_hash)
-            .collect();
         (trie, blocks, old_leftmost)
     }
 
@@ -91,6 +64,23 @@ mod prepend_batch {
         ),
     ) {
         trie.prepend(blocks.into_iter(), old_leftmost).unwrap()
+    }
+}
+
+mod hash_slow {
+    use common::Hashable;
+
+    use super::*;
+
+    pub fn fixture(size: u64) -> BlockTrie {
+        let mut blocks = mock_block_headers(0..=size);
+        let mut block_trie = BlockTrie::init(blocks.remove(0)).unwrap();
+        block_trie.append(blocks.into_iter()).unwrap();
+        block_trie
+    }
+
+    pub fn run(trie: BlockTrie) {
+        _ = trie.hash_slow();
     }
 }
 
@@ -120,6 +110,11 @@ pub fn benchmarks() -> Vec<Benchmark> {
             "prepend_20",
             with_fixture!(prepend_batch::fixture(20), prepend_batch::run),
             2_325_021,
+        ),
+        Benchmark::new(
+            "hash_100",
+            with_fixture!(hash_slow::fixture(100), hash_slow::run),
+            3_596_715,
         ),
     ]
 }

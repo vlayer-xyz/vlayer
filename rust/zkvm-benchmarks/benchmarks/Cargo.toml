@@ -6,7 +6,7 @@ edition = "2021"
 [dependencies]
 alloy-primitives = { workspace = true }
 alloy-sol-types = { workspace = true }
-block_header = { workspace = true }
+block_header = { workspace = true, features = ["test-utils"] }
 block_trie = { workspace = true }
 call_precompiles = { workspace = true }
 common = { workspace = true }
