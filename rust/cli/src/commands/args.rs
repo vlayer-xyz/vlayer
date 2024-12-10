@@ -2,7 +2,7 @@ use std::fmt;
 
 use alloy_primitives::ChainId;
 use call_guest_wrapper::GUEST_ELF as CALL_GUEST_ELF;
-use call_server::{Config, ProofMode};
+use call_server::{gas_meter::Config as GasMeterConfig, Config, ProofMode};
 use chain_guest_wrapper::GUEST_ELF as CHAIN_GUEST_ELF;
 use clap::{ArgAction, Parser, ValueEnum};
 
@@ -38,17 +38,30 @@ pub(crate) struct ServeArgs {
 
     #[arg(long)]
     pub(crate) verify_chain_proofs: bool,
+
+    /// URL of the gas meter RPC server
+    #[arg(long, group = "gas_meter")]
+    pub(crate) gas_meter_url: Option<String>,
+
+    /// Time-to-live for the gas meter messages
+    #[arg(long, requires = "gas_meter", default_value = "3600")]
+    pub(crate) gas_meter_ttl: Option<u64>,
 }
 
 impl ServeArgs {
     pub fn into_server_config(self, api_version: String) -> Config {
         let proof_mode = self.proof.unwrap_or_default().map();
+        let gas_meter_config = self
+            .gas_meter_url
+            .zip(Some(self.gas_meter_ttl.unwrap_or_default()))
+            .map(|(url, ttl)| GasMeterConfig::new(url, ttl));
         call_server::ConfigBuilder::new(
             CALL_GUEST_ELF.clone(),
             CHAIN_GUEST_ELF.clone(),
             api_version,
         )
         .with_chain_proof_url(self.chain_proof_url)
+        .with_gas_meter_config(gas_meter_config)
         .with_rpc_mappings(self.rpc_url)
         .with_proof_mode(proof_mode)
         .with_host(self.host)

@@ -62,18 +62,17 @@ impl Context {
     }
 
     pub(crate) fn server(&self, call_guest_elf: GuestElf, chain_guest_elf: GuestElf) -> Server {
-        let mut config_builder =
-            ConfigBuilder::new(call_guest_elf, chain_guest_elf, API_VERSION.into())
-                .with_chain_proof_url(self.chain_proof_server.url())
-                .with_rpc_mappings([(self.anvil.chain_id(), self.anvil.endpoint())])
-                .with_proof_mode(ProofMode::Fake);
-
-        if let Some(url) = self.gas_meter_server.as_ref().map(RpcServerMock::url) {
-            config_builder =
-                config_builder.with_gas_meter_config(GasMeterConfig::new(url, GAS_METER_TTL));
-        }
-
-        let config = config_builder.build();
+        let gas_meter_config = self
+            .gas_meter_server
+            .as_ref()
+            .map(RpcServerMock::url)
+            .map(|url| GasMeterConfig::new(url, GAS_METER_TTL));
+        let config = ConfigBuilder::new(call_guest_elf, chain_guest_elf, API_VERSION.into())
+            .with_chain_proof_url(self.chain_proof_server.url())
+            .with_rpc_mappings([(self.anvil.chain_id(), self.anvil.endpoint())])
+            .with_proof_mode(ProofMode::Fake)
+            .with_gas_meter_config(gas_meter_config)
+            .build();
         Server::new(config)
     }
 }
