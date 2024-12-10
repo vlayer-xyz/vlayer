@@ -10,7 +10,7 @@ mkdir -p .vercel
 echo "{\"projectId\":\"${VERCEL_PROJECT_ID}\",\"orgId\":\"${VERCEL_ORG_ID}\"}" > .vercel/project.json
 
 if [ "$VERCEL_ENV" == "production" ]; then
-  vercel --token "$VERCEL_TOKEN" --prod --yes --cwd ./vlayer/dist --scope "$VERCEL_ORG_ID" | tail -1
+  DEPLOYMENT_URL=$(vercel --token "$VERCEL_TOKEN" --prod --yes --cwd ./vlayer/dist --scope "$VERCEL_ORG_ID" | tail -1)
   echo "simple-email-proof production deployment available at: $DEPLOYMENT_URL"
 else
   DEPLOYMENT_URL=$(vercel --token $VERCEL_TOKEN --yes --cwd ./vlayer/dist --scope $VERCEL_ORG_ID | tail -1)
