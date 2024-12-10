@@ -25,6 +25,8 @@ frost-ristretto255 = {version = "^2.0.0"}
 frost-ed448 = {version = "^2.0.0"}
 frost-p256 = {version = "^2.0.0"}
 frost-secp256k1 = {version = "^2.0.0"}
+bls-signatures = "0.15.0"
+
 rand = "0.8.5"
 
 [lints]
