@@ -32,27 +32,42 @@ impl Client {
         }
     }
 
-    pub async fn call<M>(&self, method: M) -> Result<Value>
+    pub async fn call_with_headers<'a, M>(
+        &self,
+        headers: impl Iterator<Item = &'a (&'a str, &'a str)>,
+        method: M,
+    ) -> Result<Value>
     where
         M: Method,
     {
         let request_body = method.request_body();
         info!("{} => {}", M::METHOD_NAME, request_body);
 
-        let response = self
+        let mut req_builder = self
             .client
             .post(&self.url)
             .header("Content-Type", "application/json")
-            .json(&request_body)
-            .send()
-            .await?
-            .error_for_status()?;
+            .json(&request_body);
+
+        for (key, value) in headers {
+            req_builder = req_builder.header(*key, *value);
+        }
+
+        let response = req_builder.send().await?.error_for_status()?;
 
         let response_body = response.json::<Value>().await?;
 
         let response_json = parse_json_rpc_response(response_body)?;
         info!("  <= {response_json}");
         Ok(response_json)
+    }
+
+    pub async fn call<M>(&self, method: M) -> Result<Value>
+    where
+        M: Method,
+    {
+        self.call_with_headers((&[] as &[(&str, &str)]).iter(), method)
+            .await
     }
 }
 

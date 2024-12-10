@@ -55,12 +55,17 @@ pub struct RpcClient {
     client: RawRpcClient,
     hash: CallHash,
     time_to_live: u64,
+    api_key: Option<String>,
 }
 
 impl RpcClient {
+    const API_KEY_HEADER_NAME: &str = "x-api-prover-key";
+
     pub fn new(
         Config {
-            url, time_to_live, ..
+            url,
+            time_to_live,
+            api_key,
         }: Config,
         hash: CallHash,
     ) -> Self {
@@ -69,7 +74,20 @@ impl RpcClient {
             client,
             hash,
             time_to_live,
+            api_key,
         }
+    }
+
+    async fn call(&self, req: impl Method) -> Result<()> {
+        let _resp = match &self.api_key {
+            Some(api_key) => {
+                self.client
+                    .call_with_headers([(Self::API_KEY_HEADER_NAME, api_key.as_str())].iter(), req)
+                    .await?
+            }
+            None => self.client.call(req).await?,
+        };
+        Ok(())
     }
 }
 
@@ -77,14 +95,12 @@ impl RpcClient {
 impl Client for RpcClient {
     async fn allocate(&self, gas_limit: u64) -> Result<()> {
         let req = AllocateGas::new(self.hash, gas_limit, self.time_to_live);
-        let _resp = self.client.call(req).await?;
-        Ok(())
+        self.call(req).await
     }
 
     async fn refund(&self, stage: ComputationStage, gas_used: u64) -> Result<()> {
         let req = RefundUnusedGas::new(self.hash, stage, gas_used);
-        let _resp = self.client.call(req).await?;
-        Ok(())
+        self.call(req).await
     }
 }
 
