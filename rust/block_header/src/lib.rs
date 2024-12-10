@@ -105,6 +105,11 @@ pub mod test_utils {
     pub fn mock_block_headers(blocks: RangeInclusive<BlockNumber>) -> Vec<Box<dyn EvmBlockHeader>> {
         let mut headers = vec![];
         let mut parent_hash = B256::default();
+
+        for number in 0..*blocks.start() {
+            parent_hash = mock_block_header(number, parent_hash).hash_slow();
+        }
+
         for number in blocks {
             let header = mock_block_header(number, parent_hash);
             parent_hash = header.hash_slow();
