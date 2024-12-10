@@ -68,7 +68,7 @@ jobs:
           VLAYER_RELEASE: "nightly"
         run: |
           export RISC0_EXISTING_CALL_GUEST="$(pwd)/call_guest_replacement"
-          cargo build --release --target ${{ env.target }} --package cli
+          cargo build --release --target ${{ env.target }} -p cli -p worker -p chain_server
 
       - name: "Print build version"
         id: vlayer_build
@@ -127,7 +127,7 @@ jobs:
           VLAYER_RELEASE: "nightly"
         run: |
           export RISC0_EXISTING_CALL_GUEST="$(pwd)/call_guest_replacement"
-          nix develop ../.github/nix/. --command bash -c "cargo build --release -p cli"
+          nix develop ../.github/nix/. --command bash -c "cargo build --release -p cli -p worker -p chain_server"
 
       - name: "Print build version"
         id: vlayer_build
@@ -188,7 +188,7 @@ jobs:
           VLAYER_RELEASE: "nightly"
         run: |
           export RISC0_EXISTING_CALL_GUEST="$(pwd)/call_guest_replacement"
-          cargo build --release --target ${{ env.target }} --package cli
+          cargo build --release --target ${{ env.target }} -p cli -p worker -p chain_server
 
       - name: "Print build version"
         id: vlayer_build
