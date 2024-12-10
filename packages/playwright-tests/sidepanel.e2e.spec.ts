@@ -3,9 +3,9 @@ import { sidePanel } from "./helpers";
 import { Response } from "@playwright/test";
 
 const config = {
-  startPage: "/start-page",
-  expectUrl: "/target",
-  notarizeUrl: "https://swapi.dev/api/people/1",
+  loginUrl: "/login",
+  profileUrl: "/profile",
+  dashboardUrl: "/dashboard",
 };
 
 test.describe("Full flow of webproof using extension", () => {
@@ -14,7 +14,7 @@ test.describe("Full flow of webproof using extension", () => {
     context,
   }) => {
     await test.step("Web-app should open sidepanel via SDK call", async () => {
-      await page.goto("/source-new-way");
+      await page.goto("/dapp-new-way");
       const requestProofButton = page
         .locator("body")
         .getByTestId("request-webproof-button");
@@ -25,7 +25,7 @@ test.describe("Full flow of webproof using extension", () => {
     });
 
     await test.step("Extension should stay ok after clinking request button multiple times", async () => {
-      await page.goto("/source-new-way");
+      await page.goto("/dapp-new-way");
       const requestProofButton = page
         .locator("body")
         .getByTestId("request-webproof-button");
@@ -51,7 +51,7 @@ test.describe("Full flow of webproof using extension", () => {
         redirectButton.click(),
       ]);
 
-      await newPage.waitForURL(config.startPage);
+      await newPage.waitForURL(config.loginUrl);
     });
 
     await test.step("Side panel UI should indicate that startPage step is completed", async () => {
@@ -63,12 +63,12 @@ test.describe("Full flow of webproof using extension", () => {
 
     await test.step("Side panel UI should indicate that expectUrl step is completed after history.pushState redirect", async () => {
       const startPage = context.pages().find((page) => {
-        return page.url().includes("start-page");
+        return page.url().includes(config.loginUrl);
       });
       if (!startPage) {
         throw new Error("No login page");
       }
-      const loginButton = startPage.getByTestId("go-to-middle-target-button");
+      const loginButton = startPage.getByTestId("login-button");
       await loginButton.click();
       const extension = await sidePanel(context);
       const startPageStep = extension.getByTestId("step-expectUrl").nth(0);
@@ -78,15 +78,15 @@ test.describe("Full flow of webproof using extension", () => {
     });
 
     await test.step("Side panel UI should indicate that expectUrl step is completed after redirection", async () => {
-      const middlewarePage = context.pages().find((page) => {
-        return page.url().includes("middle-target");
+      const dashboardPage = context.pages().find((page) => {
+        return page.url().includes(config.dashboardUrl);
       });
-      if (!middlewarePage) {
-        throw new Error("No login page");
+      if (!dashboardPage) {
+        throw new Error("No dashboard page");
       }
-      const loginButton = middlewarePage.getByTestId("go-to-target-button");
-      await loginButton.click();
-      await middlewarePage.waitForURL(config.expectUrl);
+      const profileButton = dashboardPage.getByTestId("go-to-profile-button");
+      await profileButton.click();
+      await dashboardPage.waitForURL(config.profileUrl);
       const extension = await sidePanel(context);
       const startPageStep = extension.getByTestId("step-expectUrl").nth(1);
       const status = await startPageStep.getAttribute("data-status");
@@ -147,7 +147,7 @@ test.describe("Full flow of webproof using extension", () => {
     context,
   }) => {
     await test.step("Web-app should open sidepanel via SDK call", async () => {
-      await page.goto("/source");
+      await page.goto("/dapp");
       const requestProofButton = page
         .locator("body")
         .getByTestId("request-webproof-button");
@@ -169,7 +169,7 @@ test.describe("Full flow of webproof using extension", () => {
         redirectButton.click(),
       ]);
 
-      await newPage.waitForURL(config.startPage);
+      await newPage.waitForURL(config.loginUrl);
     });
 
     await test.step("Side panel UI should indicate that startPage step is completed", async () => {
@@ -181,12 +181,12 @@ test.describe("Full flow of webproof using extension", () => {
 
     await test.step("Side panel UI shoud indicate that expectUrl step is completed after history.pushState redirect", async () => {
       const startPage = context.pages().find((page) => {
-        return page.url().includes("start-page");
+        return page.url().includes(config.loginUrl);
       });
       if (!startPage) {
         throw new Error("No login page");
       }
-      const loginButton = startPage.getByTestId("go-to-middle-target-button");
+      const loginButton = startPage.getByTestId("login-button");
       await loginButton.click();
       const extension = await sidePanel(context);
       const startPageStep = extension.getByTestId("step-expectUrl").nth(0);
@@ -196,15 +196,15 @@ test.describe("Full flow of webproof using extension", () => {
     });
 
     await test.step("Side panel UI should indicate that expectUrl step is completed after redirection", async () => {
-      const middlewarePage = context.pages().find((page) => {
-        return page.url().includes("middle-target");
+      const dashboardPage = context.pages().find((page) => {
+        return page.url().includes(config.dashboardUrl);
       });
-      if (!middlewarePage) {
-        throw new Error("No login page");
+      if (!dashboardPage) {
+        throw new Error("No dashboard page");
       }
-      const loginButton = middlewarePage.getByTestId("go-to-target-button");
-      await loginButton.click();
-      await middlewarePage.waitForURL(config.expectUrl);
+      const profileButton = dashboardPage.getByTestId("go-to-profile-button");
+      await profileButton.click();
+      await dashboardPage.waitForURL(config.profileUrl);
       const extension = await sidePanel(context);
       const startPageStep = extension.getByTestId("step-expectUrl").nth(1);
       const status = await startPageStep.getAttribute("data-status");

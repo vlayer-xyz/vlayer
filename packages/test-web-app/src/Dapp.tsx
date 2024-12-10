@@ -1,6 +1,5 @@
 import {
   type PresentationJSON,
-  type VGetProofReceiptResult,
   createVlayerClient,
   type VlayerClient,
   ExtensionMessageType,
@@ -23,12 +22,13 @@ import React, {
 } from "react";
 import unconditionalProver from "../../../contracts/fixtures/out/UnconditionalProver.sol/UnconditionalProver";
 
-const PROVER_ADDRESS = import.meta.env.VITE_UNCONDITIONAL_PROVER_ADDRESS;
+const PROVER_ADDRESS = import.meta.env
+  .VITE_UNCONDITIONAL_PROVER_ADDRESS as `0x${string}`;
 console.log(PROVER_ADDRESS);
 
-function SourceNewWay() {
-  const [webProof, setWebProof] = useState<PresentationJSON | null>(null);
-  const [zkProof, setZkProof] = useState<VGetProofReceiptResult | null>(null);
+function DappNewWay() {
+  const [webProof, setWebProof] = useState<PresentationJSON>();
+  const [zkProof, setZkProof] = useState<boolean>();
 
   const webProofProvider = useMemo(() => {
     return createExtensionWebProofProvider({
@@ -53,9 +53,9 @@ function SourceNewWay() {
   }, []);
 
   const requestWebProof = useCallback(() => {
-    const loginUrl = `${window.location.origin}${import.meta.env.BASE_URL}start-page`;
-    const targetUrl = `${window.location.origin}${import.meta.env.BASE_URL}target`;
-    const targetNoRequestUrl = `${window.location.origin}${import.meta.env.BASE_URL}middle-target`;
+    const loginUrl = `${window.location.origin}${import.meta.env.BASE_URL}login`;
+    const profileUrl = `${window.location.origin}${import.meta.env.BASE_URL}profile`;
+    const dashboardUrl = `${window.location.origin}${import.meta.env.BASE_URL}dashboard`;
     webProofProvider.requestWebProof({
       proverCallCommitment: {
         address: PROVER_ADDRESS,
@@ -67,8 +67,8 @@ function SourceNewWay() {
       logoUrl: "",
       steps: [
         startPage(loginUrl, "Go to login"),
-        expectUrl(targetNoRequestUrl, "Logged in and appear at target page"),
-        expectUrl(targetUrl, "Logged in and appear at target page"),
+        expectUrl(dashboardUrl, "At dashboard page"),
+        expectUrl(profileUrl, "At profile page"),
         notarize("https://lotr-api.online:3011/regular_json", "GET", "Prove"),
       ],
     });
@@ -89,7 +89,6 @@ function SourceNewWay() {
       ],
     });
     const zkProof = await vlayerClient.waitForProvingResult({ hash });
-    console.log("ZK proof", zkProof);
     setZkProof(zkProof);
   }, [webProof]);
 
@@ -105,13 +104,14 @@ function SourceNewWay() {
 
   return (
     <div className="container">
+      <button
+        data-testid="request-webproof-button"
+        onClick={handleWebProofRequestClick}
+      >
+        Request proof of beeing a wizard
+      </button>
+
       <div>
-        <button
-          data-testid="request-webproof-button"
-          onClick={handleWebProofRequestClick}
-        >
-          Request web proof
-        </button>
         {webProof ? (
           <>
             <h1 data-testid="has-webproof">Has web proof</h1>
@@ -135,19 +135,18 @@ function SourceNewWay() {
   );
 }
 
-function Source() {
+function Dapp() {
   const [webProof, setWebProof] = useState<PresentationJSON>();
-  const [zkProof, setZkProof] = useState<VGetProofReceiptResult>();
+  const [zkProof, setZkProof] = useState<boolean>();
   const vlayerClient = useRef<VlayerClient>();
-
   const requestWebProof = useCallback(async () => {
     const provider = createExtensionWebProofProvider({
       notaryUrl: "http://localhost:7047",
       wsProxyUrl: "ws://localhost:55688",
     });
-    const loginUrl = `${window.location.origin}${import.meta.env.BASE_URL}start-page`;
-    const targetUrl = `${window.location.origin}${import.meta.env.BASE_URL}target`;
-    const targetNoRequestUrl = `${window.location.origin}${import.meta.env.BASE_URL}middle-target`;
+    const loginUrl = `${window.location.origin}${import.meta.env.BASE_URL}login`;
+    const profileUrl = `${window.location.origin}${import.meta.env.BASE_URL}profile`;
+    const dashboardUrl = `${window.location.origin}${import.meta.env.BASE_URL}dashboard`;
     vlayerClient.current = createVlayerClient({
       webProofProvider: provider,
     });
@@ -163,8 +162,8 @@ function Source() {
       logoUrl: "",
       steps: [
         startPage(loginUrl, "Go to login"),
-        expectUrl(targetNoRequestUrl, "Logged in and appear at target page"),
-        expectUrl(targetUrl, "Logged in and appear at target page"),
+        expectUrl(dashboardUrl, "At dashboard page"),
+        expectUrl(profileUrl, "At profile page"),
         notarize("https://lotr-api.online:3011/regular_json", "GET", "Prove"),
       ],
     });
@@ -205,13 +204,14 @@ function Source() {
 
   return (
     <div className="container">
+      <button
+        data-testid="request-webproof-button"
+        onClick={handleWebProofRequestClick}
+      >
+        Request proof of beeing a wizard
+      </button>
+
       <div>
-        <button
-          data-testid="request-webproof-button"
-          onClick={handleWebProofRequestClick}
-        >
-          Request web proof
-        </button>
         {webProof ? (
           <>
             <h1 data-testid="has-webproof">Has web proof</h1>
@@ -235,4 +235,4 @@ function Source() {
   );
 }
 
-export { Source, SourceNewWay };
+export { Dapp, DappNewWay };

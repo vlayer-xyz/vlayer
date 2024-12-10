@@ -1,33 +1,43 @@
 import React, { StrictMode } from "react";
 import { createRoot } from "react-dom/client";
-import { Source, SourceNewWay } from "./Source";
+import { Dapp, DappNewWay } from "./Dapp";
 
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import { Target, MiddleTarget } from "./Target";
-import { StartPage } from "./StartPage";
+import { Profile } from "./Profile";
+import { Dashboard } from "./Dashboard";
+import { Login } from "./Login";
 import "./main.css";
 import Email from "./Email";
+
+console.log("Dapp", Dapp);
+
 const router = createBrowserRouter([
+  // dapp is the app developer used and launched using the sdk
   {
-    path: "/source",
-    element: <Source />,
+    path: "/dapp",
+    element: <Dapp />,
   },
   {
-    path: "/source-new-way",
-    element: <SourceNewWay />,
+    path: "/dapp-new-way",
+    element: <DappNewWay />,
   },
+  // profile is route representing place where user is authenticated
+  // and therefore has access to data we gonna prove
   {
-    path: "/target",
-    element: <Target />,
+    path: "/profile",
+    element: <Profile />,
   },
+  // dashbord is where user is redirected after successful login
   {
-    path: "/middle-target",
-    element: <MiddleTarget />,
+    path: "/dashboard",
+    element: <Dashboard />,
   },
+  // login is route where user is redirected from dapp (via click on redirect button in extension )
   {
-    path: "/start-page",
-    element: <StartPage />,
+    path: "/login",
+    element: <Login />,
   },
+  // this is not part of store, we test here zk proving email
   {
     path: "/email",
     element: <Email />,
