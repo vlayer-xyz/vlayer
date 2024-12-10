@@ -49,7 +49,7 @@ mod prepend_batch {
     pub fn fixture(
         size: u64,
     ) -> (BlockTrie, Vec<Box<dyn EvmBlockHeader>>, Box<dyn EvmBlockHeader>) {
-        let mut blocks = mock_block_headers(0..=(size));
+        let mut blocks = mock_block_headers(0..=size);
         #[allow(clippy::cast_possible_truncation)]
         let old_leftmost = blocks.remove(size as usize);
         let trie = BlockTrie::init(&old_leftmost).unwrap();
@@ -64,6 +64,23 @@ mod prepend_batch {
         ),
     ) {
         trie.prepend(blocks.into_iter(), old_leftmost).unwrap()
+    }
+}
+
+mod hash_slow {
+    use common::Hashable;
+
+    use super::*;
+
+    pub fn fixture(size: u64) -> BlockTrie {
+        let mut blocks = mock_block_headers(0..=size);
+        let mut block_trie = BlockTrie::init(blocks.remove(0)).unwrap();
+        block_trie.append(blocks.into_iter()).unwrap();
+        block_trie
+    }
+
+    pub fn run(trie: BlockTrie) {
+        _ = trie.hash_slow();
     }
 }
 
@@ -93,6 +110,11 @@ pub fn benchmarks() -> Vec<Benchmark> {
             "prepend_20",
             with_fixture!(prepend_batch::fixture(20), prepend_batch::run),
             2_325_021,
+        ),
+        Benchmark::new(
+            "hash_100",
+            with_fixture!(hash_slow::fixture(100), hash_slow::run),
+            3_596_715,
         ),
     ]
 }
