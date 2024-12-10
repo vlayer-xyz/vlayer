@@ -3,4 +3,10 @@ description: Installs TypeScript prerequisites.
 runs:
   using: "composite"
   steps:
-    - uses: oven-sh/setup-bun@v2
+    - name: Install Bun
+      uses: oven-sh/setup-bun@v2
+    - name: Install Node
+      uses: actions/setup-node@v4
+      with:
+        node-version: "20.x"
+        registry-url: "https://registry.npmjs.org"
