@@ -1,9 +1,8 @@
-use call_server::{gas_meter::Config as GasMeterConfig, ConfigBuilder, ProofMode};
+use call_server::{ConfigBuilder, ProofMode};
 use common::GuestElf;
 use derive_new::new;
-use mock::{Anvil, Client, Contract, Server};
+use mock::{Anvil, Client, Contract, GasMeterServer, Server};
 use mock_chain_server::ChainProofServerMock;
-use server_utils::rpc::mock::Server as RpcServerMock;
 
 pub(crate) fn call_guest_elf() -> GuestElf {
     call_guest_wrapper::GUEST_ELF.clone()
@@ -14,14 +13,13 @@ pub(crate) fn chain_guest_elf() -> GuestElf {
 }
 
 pub(crate) const API_VERSION: &str = "1.2.3";
-pub(crate) const GAS_METER_TTL: u64 = 3600;
 
 #[derive(new)]
 pub(crate) struct Context {
     client: Client,
     anvil: Anvil,
     chain_proof_server: ChainProofServerMock,
-    gas_meter_server: Option<RpcServerMock>,
+    gas_meter_server: Option<GasMeterServer>,
 }
 
 impl Context {
@@ -34,7 +32,7 @@ impl Context {
         ctx
     }
 
-    pub(crate) fn with_gas_meter_server(mut self, gas_meter_server: RpcServerMock) -> Self {
+    pub(crate) fn with_gas_meter_server(mut self, gas_meter_server: GasMeterServer) -> Self {
         self.gas_meter_server = Some(gas_meter_server);
         self
     }
@@ -65,8 +63,7 @@ impl Context {
         let gas_meter_config = self
             .gas_meter_server
             .as_ref()
-            .map(RpcServerMock::url)
-            .map(|url| GasMeterConfig::new(url, GAS_METER_TTL, None));
+            .map(GasMeterServer::as_gas_meter_config);
         let config = ConfigBuilder::new(call_guest_elf, chain_guest_elf, API_VERSION.into())
             .with_chain_proof_url(self.chain_proof_server.url())
             .with_rpc_mappings([(self.anvil.chain_id(), self.anvil.endpoint())])
@@ -82,8 +79,8 @@ pub(crate) mod mock {
 
     use axum::{body::Body, http::Response, Router};
     use block_header::EvmBlockHeader;
-    use call_server::{server, Config};
-    use derive_more::Deref;
+    use call_server::{gas_meter::Config as GasMeterConfig, server, Config};
+    use derive_more::{Deref, DerefMut};
     use ethers::{
         contract::abigen,
         core::{
@@ -97,7 +94,7 @@ pub(crate) mod mock {
     };
     use provider::to_eth_block_header;
     use serde::Serialize;
-    use server_utils::post;
+    use server_utils::{post, rpc::mock::Server as RpcServerMock};
 
     abigen!(ExampleProver, "./testdata/ExampleProver.json");
 
@@ -158,6 +155,30 @@ pub(crate) mod mock {
                 .unwrap();
             let block_header = to_eth_block_header(latest_block).unwrap();
             Box::new(block_header)
+        }
+    }
+
+    #[derive(Deref, DerefMut)]
+    pub(crate) struct GasMeterServer {
+        #[deref]
+        #[deref_mut]
+        mock: RpcServerMock,
+        time_to_live: u64,
+        api_key: Option<String>,
+    }
+
+    impl GasMeterServer {
+        pub(crate) async fn start(time_to_live: u64, api_key: Option<String>) -> Self {
+            let mock = RpcServerMock::start().await;
+            Self {
+                mock,
+                time_to_live,
+                api_key,
+            }
+        }
+
+        pub(crate) fn as_gas_meter_config(&self) -> GasMeterConfig {
+            GasMeterConfig::new(self.url(), self.time_to_live, self.api_key.clone())
         }
     }
 }
