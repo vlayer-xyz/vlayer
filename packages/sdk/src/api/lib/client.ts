@@ -68,15 +68,11 @@ export const createVlayerClient = (
         chainId,
         gasLimit,
         url,
-      )
-        .catch((error) => {
-          webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Error);
-          throw error;
-        })
-        .then((result) => {
-          webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Done);
-          return result;
-        });
+      ).catch((e) => {
+        webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Error);
+        throw e;
+      });
+
       const hash = await getHash(response);
       resultHashMap.set(hash, [proverAbi, functionName]);
       return { hash } as BrandedHash<typeof proverAbi, typeof functionName>;
@@ -111,26 +107,33 @@ export const createVlayerClient = (
           `Timed out waiting for ZK proof generation after {numberOfRetries * sleepDuration}ms. Consider increasing numberOfRetries in waitForProvingResult`,
         );
       };
-      const data = await getProof();
-      const savedProvingData = resultHashMap.get(hash.hash);
-      if (!savedProvingData) {
-        throw new Error("No result found for hash " + hash.hash);
+      try {
+        const data = await getProof();
+        const savedProvingData = resultHashMap.get(hash.hash);
+        if (!savedProvingData) {
+          throw new Error("No result found for hash " + hash.hash);
+        }
+        const [proverAbi, functionName] = savedProvingData;
+
+        const result = dropEmptyProofFromArgs(
+          decodeFunctionResult({
+            abi: proverAbi,
+            data: data?.evm_call_result,
+            functionName,
+          }),
+        );
+
+        webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Done);
+
+        return [data?.proof, ...result] as ContractFunctionReturnType<
+          T,
+          AbiStateMutability,
+          F
+        >;
+      } catch (e) {
+        webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Error);
+        throw e;
       }
-      const [proverAbi, functionName] = savedProvingData;
-
-      const result = dropEmptyProofFromArgs(
-        decodeFunctionResult({
-          abi: proverAbi,
-          data: data?.evm_call_result,
-          functionName,
-        }),
-      );
-
-      return [data?.proof, ...result] as ContractFunctionReturnType<
-        T,
-        AbiStateMutability,
-        F
-      >;
     },
 
     proveWeb: async function ({

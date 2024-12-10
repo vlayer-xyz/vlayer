@@ -14,6 +14,9 @@ function v_callBody(call: CallParams, context: CallContext) {
   };
 }
 
+const log = (...args: unknown[]) => {
+  console.log("v_call: ", ...args);
+};
 export async function v_call(
   call: CallParams,
   context: CallContext,
@@ -24,12 +27,12 @@ export async function v_call(
     body: JSON.stringify(v_callBody(call, context)),
     headers: { "Content-Type": "application/json" },
   });
-  console.log("response", response);
+  log("response", response);
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
   const response_json = await response.json();
-  console.log("response_json", response_json);
+  log("response_json", response_json);
   assertObject(response_json);
   if ("error" in response_json) {
     throw parseVCallResponseError(

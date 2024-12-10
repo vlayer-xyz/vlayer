@@ -13,6 +13,10 @@ function v_getProofReceiptBody(params: VGetProofReceiptParams) {
   };
 }
 
+const log = (...args: unknown[]) => {
+  console.log("v_getProofReceipt: ", ...args);
+};
+
 export async function v_getProofReceipt(
   params: VGetProofReceiptParams,
   url: string = "http://127.0.0.1:3000",
@@ -22,12 +26,12 @@ export async function v_getProofReceipt(
     body: JSON.stringify(v_getProofReceiptBody(params)),
     headers: { "Content-Type": "application/json" },
   });
-  console.log("response", response);
+  log("response", response);
   if (!response.ok) {
     throw new Error(`HTTP error! status: ${response.status}`);
   }
   const response_json = await response.json();
-  console.log("response_json", response_json);
+  log("response_json", response_json);
   assertObject(response_json);
   if ("error" in response_json) {
     throw parseVCallResponseError(
