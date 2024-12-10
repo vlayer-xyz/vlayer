@@ -113,8 +113,11 @@ impl ConfigBuilder {
         self
     }
 
-    pub fn with_gas_meter_config(mut self, gas_meter_config: GasMeterConfig) -> Self {
-        self.config.gas_meter_config = Some(gas_meter_config);
+    pub fn with_gas_meter_config(
+        mut self,
+        gas_meter_config: impl Into<Option<GasMeterConfig>>,
+    ) -> Self {
+        self.config.gas_meter_config = gas_meter_config.into();
         self
     }
 
