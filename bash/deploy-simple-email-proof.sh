@@ -28,7 +28,11 @@ example_name="simple-email-proof"
 echo "::group::Initializing vlayer template: ${example_name}"
 VLAYER_TEMP_DIR=$(mktemp -d -t vlayer-test-release-XXXXXX-)
 cd ${VLAYER_TEMP_DIR}
-vlayer init --template "${example_name}"
+mkdir -p ${example_name}
+mkdir -p sdk
+cp -r ${VLAYER_HOME}/packages/sdk sdk
+cp -r ${VLAYER_HOME}/examples/${example_name} ${example_name}
+cd ${example_name}
 forge build
 cd vlayer
 bun install
