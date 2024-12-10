@@ -61,7 +61,7 @@ test.describe("Full flow of webproof using extension", () => {
       expect(status).toEqual("completed");
     });
 
-    await test.step("Side panel UI shoud indicate that expectUrl step is completed after history.pushState redirect", async () => {
+    await test.step("Side panel UI should indicate that expectUrl step is completed after history.pushState redirect", async () => {
       const startPage = context.pages().find((page) => {
         return page.url().includes("start-page");
       });
