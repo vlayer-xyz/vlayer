@@ -3658,9 +3658,9 @@ dependencies = [
 
 [[package]]
 name = "rsa"
-version = "0.9.6"
+version = "0.9.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "5d0e5124fcb30e76a7e79bfee683a2746db83784b86289f6251b54b7950a0dfc"
+checksum = "47c75d7c5c6b673e58bf54d8544a9f432e3a925b0e80f7cd3602ab5c50c55519"
 dependencies = [
  "const-oid",
  "digest 0.10.7",
@@ -3670,6 +3670,7 @@ dependencies = [
  "pkcs1",
  "pkcs8",
  "rand_core",
+ "sha2 0.10.8",
  "signature",
  "spki",
  "subtle",
@@ -5025,6 +5026,7 @@ dependencies = [
  "mpt",
  "rand",
  "risc0-zkvm",
+ "rsa",
  "serde",
  "sha2 0.10.8",
 ]
