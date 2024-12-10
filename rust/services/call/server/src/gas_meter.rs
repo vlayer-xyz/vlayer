@@ -78,15 +78,12 @@ impl RpcClient {
         }
     }
 
-    async fn call(&self, req: impl Method) -> Result<()> {
-        let _resp = match &self.api_key {
-            Some(api_key) => {
-                self.client
-                    .call_with_headers([(Self::API_KEY_HEADER_NAME, api_key.as_str())].iter(), req)
-                    .await?
-            }
-            None => self.client.call(req).await?,
-        };
+    async fn call(&self, method: impl Method) -> Result<()> {
+        let mut req = self.client.request(method);
+        if let Some(api_key) = &self.api_key {
+            req = req.with_header(Self::API_KEY_HEADER_NAME, api_key);
+        }
+        let _resp = req.send().await?;
         Ok(())
     }
 }

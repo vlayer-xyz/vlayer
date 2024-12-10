@@ -24,6 +24,24 @@ pub enum Error {
 
 pub type Result<T> = std::result::Result<T, Error>;
 
+pub struct RequestBuilder(reqwest::RequestBuilder);
+
+impl RequestBuilder {
+    #[must_use]
+    pub fn with_header(mut self, name: &str, value: &str) -> Self {
+        self.0 = self.0.header(name, value);
+        self
+    }
+
+    pub async fn send(self) -> Result<Value> {
+        let response = self.0.send().await?.error_for_status()?;
+        let response_body = response.json::<Value>().await?;
+        let response_json = parse_json_rpc_response(response_body)?;
+        info!("  <= {response_json}");
+        Ok(response_json)
+    }
+}
+
 impl Client {
     pub fn new(url: &str) -> Self {
         Self {
@@ -32,42 +50,23 @@ impl Client {
         }
     }
 
-    pub async fn call_with_headers<'a, M>(
-        &self,
-        headers: impl Iterator<Item = &'a (&'a str, &'a str)>,
-        method: M,
-    ) -> Result<Value>
+    #[allow(clippy::needless_pass_by_value)]
+    pub fn request<M>(&self, method: M) -> RequestBuilder
     where
         M: Method,
     {
         let request_body = method.request_body();
         info!("{} => {}", M::METHOD_NAME, request_body);
-
-        let mut req_builder = self
+        let builder = self
             .client
             .post(&self.url)
             .header("Content-Type", "application/json")
             .json(&request_body);
-
-        for (key, value) in headers {
-            req_builder = req_builder.header(*key, *value);
-        }
-
-        let response = req_builder.send().await?.error_for_status()?;
-
-        let response_body = response.json::<Value>().await?;
-
-        let response_json = parse_json_rpc_response(response_body)?;
-        info!("  <= {response_json}");
-        Ok(response_json)
+        RequestBuilder(builder)
     }
 
-    pub async fn call<M>(&self, method: M) -> Result<Value>
-    where
-        M: Method,
-    {
-        self.call_with_headers((&[] as &[(&str, &str)]).iter(), method)
-            .await
+    pub async fn call(&self, method: impl Method) -> Result<Value> {
+        self.request(method).send().await
     }
 }
 
