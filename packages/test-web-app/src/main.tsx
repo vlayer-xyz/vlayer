@@ -27,7 +27,7 @@ const router = createBrowserRouter([
     path: "/profile",
     element: <Profile />,
   },
-  // dashbord uis where user is redirected after successful login
+  // dashbord is where user is redirected after successful login
   {
     path: "/dashboard",
     element: <Dashboard />,
