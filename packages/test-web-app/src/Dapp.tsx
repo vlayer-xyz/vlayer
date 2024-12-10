@@ -1,6 +1,5 @@
 import {
   type PresentationJSON,
-  type VGetProofReceiptResult,
   createVlayerClient,
   type VlayerClient,
   ExtensionMessageType,
