@@ -38,6 +38,9 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
     continue
   fi
 
+  echo "make snapshot of anvil"
+  ANVIL_SNAPSHOT_ID=$(cast rpc evm_snapshot)
+
   echo "::group::Running tests of: ${example}"
   cd "${example}"
   forge soldeer install
@@ -47,6 +50,8 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
   cd vlayer
   bun install --frozen-lockfile
   bun run prove:"${VLAYER_ENV}"
+  echo "revert anvil to initial state"
+  cast rpc evm_revert "${ANVIL_SNAPSHOT_ID}"
   echo '::endgroup::'
 done
 
