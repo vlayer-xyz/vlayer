@@ -126,10 +126,8 @@ const EmlUploadForm = () => {
       const receipt = await walletClient.waitForTransactionReceipt({
         hash: txHash,
       });
-      console.log("receipt", receipt);
       setCurrentStep("Success!");
       setIsSubmitting(false);
-      setSuccessMsg("test");
       if (chain.blockExplorers && receipt.status === "success") {
         window.open(`${chain.blockExplorers?.default.url}/tx/${txHash}`);
         setSuccessMsg(
