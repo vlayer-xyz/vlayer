@@ -16,6 +16,8 @@ thiserror = { workspace = true }
 thousands = { workspace = true }
 zkvm-benchmarks = { workspace = true }
 
+rsa = { workspace = true, features = [ "sha2" ] }
+rand = "0.8.5"
 
 [build-dependencies]
 anyhow = { workspace = true }
