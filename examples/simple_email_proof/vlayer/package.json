@@ -9,7 +9,7 @@
     "prove:dev" : "VLAYER_ENV=dev bun run prove.ts",
     "prove:testnet" : "VLAYER_ENV=testnet bun run prove.ts", 
     "web:dev" : "VLAYER_ENV=dev bun run deploy.ts && vite",
-    "web:testnet" : "VLAYER_ENV=testnet bun run deploy.ts && vite "
+    "web:testnet" : "VLAYER_ENV=testnet bun run deploy.ts && vite"
   },
   "dependencies": {
     "@noble/hashes": "^1.4.0",

@@ -1,0 +1,68 @@
+name: Deploy simple-email-proof example
+on:
+  pull_request:
+    paths:
+      - examples/simple_email_proof/**
+      - .github/workflows/deploy_simple_email_proof.yaml
+  push:
+    paths:
+      - examples/simple_email_proof/**
+      - .github/workflows/deploy_simple_email_proof.yaml
+    branches:
+      - main
+jobs:
+  deploy-simple-email-proof:
+    name: Deploy simple-email-proof example
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install contracts prerequisites
+        uses: ./.github/actions/contracts-prerequisites
+      - uses: oven-sh/setup-bun@v2
+        with:
+          node-version: lts/*
+      - name: Mock ImageId.sol
+        run: ./bash/mock-imageid.sh
+      - name: Install contracts' dependencies
+        working-directory: ./contracts/vlayer
+        run: forge soldeer install
+      - name: Build vlayer sdk
+        run: bun install && bun run build
+        working-directory: ./packages/sdk
+      - name: Build contracts
+        run: forge soldeer install && forge clean && forge build
+        working-directory: ./examples/simple_email_proof
+      - name: Install example dependencies
+        run: bun install
+        working-directory: ./examples/simple_email_proof/vlayer
+      - name: Deploy contracts
+        run: bun run deploy:testnet
+        env:
+          VLAYER_ENV: testnet
+          EXAMPLES_TEST_PRIVATE_KEY: ${{ secrets.EXAMPLES_TEST_PRIVATE_KEY }}
+        working-directory: ./examples/simple_email_proof/vlayer
+      - name: Build vite
+        run: bun run vite build
+        working-directory: ./examples/simple_email_proof/vlayer
+      - name: Install Vercel
+        run: npm install -g vercel
+      - name: Deploy to Vercel
+        if: github.ref == 'refs/heads/main'
+        env:
+          VERCEL_ENV: production
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_SIMPLE_EMAIL_PROOF_PROJECT_ID }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+        run: bash/deploy-simple-email-proof.sh
+      - name: Deploy to Vercel (PR Preview)
+        if: github.event_name == 'pull_request'
+        env:
+          VERCEL_ENV: preview
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_SIMPLE_EMAIL_PROOF_PROJECT_ID }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          PR_NUMBER: "${{ github.event.number }}"
+        run: bash/deploy-simple-email-proof.sh
