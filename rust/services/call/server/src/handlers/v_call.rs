@@ -11,7 +11,7 @@ use super::SharedState;
 use crate::{
     config::Config as ServerConfig,
     error::AppError,
-    gas_meter::{Client, ComputationStage, Config as GasMeterConfig},
+    gas_meter::{self, Client as GasMeterClient, ComputationStage},
 };
 
 pub mod types;
@@ -36,13 +36,13 @@ pub async fn v_call(
         .into();
     info!("Calculated hash: {}", call_hash);
 
-    let gas_meter_client = config
+    let gas_meter_client: Box<dyn GasMeterClient> = config
         .gas_meter_config()
-        .map(|GasMeterConfig { url, time_to_live }| Client::new(&url, call_hash, time_to_live));
+        .map_or(Box::new(gas_meter::NoOpClient), |config| {
+            Box::new(gas_meter::RpcClient::new(config, call_hash))
+        });
 
-    if let Some(client) = gas_meter_client.as_ref() {
-        client.allocate_gas(params.context.gas_limit).await?;
-    }
+    gas_meter_client.allocate(params.context.gas_limit).await?;
 
     tokio::spawn(async move {
         let res = generate_proof(call, host, gas_meter_client).await;
@@ -55,26 +55,22 @@ pub async fn v_call(
 async fn generate_proof(
     call: EngineCall,
     host: Host,
-    gas_meter_client: Option<Client>,
+    gas_meter_client: impl GasMeterClient,
 ) -> Result<HostOutput, AppError> {
     let prover = host.prover();
     let call_guest_id = host.call_guest_id();
     let preflight_result = host.preflight(call).await?;
     let gas_used = preflight_result.gas_used;
 
-    if let Some(client) = gas_meter_client.as_ref() {
-        client
-            .refund_unused_gas(ComputationStage::Preflight, gas_used)
-            .await?;
-    }
+    gas_meter_client
+        .refund(ComputationStage::Preflight, gas_used)
+        .await?;
 
     let host_output = Host::prove(&prover, call_guest_id, preflight_result)?;
 
-    if let Some(client) = gas_meter_client {
-        client
-            .refund_unused_gas(ComputationStage::Proving, gas_used)
-            .await?;
-    }
+    gas_meter_client
+        .refund(ComputationStage::Proving, gas_used)
+        .await?;
 
     Ok(host_output)
 }

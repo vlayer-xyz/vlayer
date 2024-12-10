@@ -1,6 +1,8 @@
+use async_trait::async_trait;
+use auto_impl::auto_impl;
 use derive_new::new;
 use serde::{Deserialize, Serialize};
-use server_utils::rpc::{Client as RpcClient, Method, Result};
+use server_utils::rpc::{Client as RawRpcClient, Method, Result};
 
 use crate::handlers::v_call::types::CallHash;
 
@@ -41,31 +43,54 @@ pub struct Config {
     pub time_to_live: u64,
 }
 
-pub struct Client {
-    client: RpcClient,
+#[async_trait]
+#[auto_impl(Box)]
+pub trait Client: Send + Sync {
+    async fn allocate(&self, gas_limit: u64) -> Result<()>;
+    async fn refund(&self, stage: ComputationStage, gas_used: u64) -> Result<()>;
+}
+
+pub struct RpcClient {
+    client: RawRpcClient,
     hash: CallHash,
     time_to_live: u64,
 }
 
-impl Client {
-    pub fn new(url: &str, hash: CallHash, time_to_live: u64) -> Self {
-        let client = RpcClient::new(url);
+impl RpcClient {
+    pub fn new(Config { url, time_to_live }: Config, hash: CallHash) -> Self {
+        let client = RawRpcClient::new(&url);
         Self {
             client,
             hash,
             time_to_live,
         }
     }
+}
 
-    pub async fn allocate_gas(&self, gas_limit: u64) -> Result<()> {
+#[async_trait]
+impl Client for RpcClient {
+    async fn allocate(&self, gas_limit: u64) -> Result<()> {
         let req = AllocateGas::new(self.hash, gas_limit, self.time_to_live);
         let _resp = self.client.call(req).await?;
         Ok(())
     }
 
-    pub async fn refund_unused_gas(&self, stage: ComputationStage, gas_used: u64) -> Result<()> {
+    async fn refund(&self, stage: ComputationStage, gas_used: u64) -> Result<()> {
         let req = RefundUnusedGas::new(self.hash, stage, gas_used);
         let _resp = self.client.call(req).await?;
+        Ok(())
+    }
+}
+
+pub struct NoOpClient;
+
+#[async_trait]
+impl Client for NoOpClient {
+    async fn allocate(&self, _gas_limit: u64) -> Result<()> {
+        Ok(())
+    }
+
+    async fn refund(&self, _stage: ComputationStage, _gas_used: u64) -> Result<()> {
         Ok(())
     }
 }

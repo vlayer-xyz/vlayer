@@ -2036,6 +2036,8 @@ dependencies = [
  "alloy-sol-types",
  "anyhow",
  "assert-json-diff",
+ "async-trait",
+ "auto_impl",
  "axum",
  "axum-jrpc",
  "block_header",
