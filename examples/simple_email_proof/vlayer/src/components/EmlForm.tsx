@@ -48,7 +48,7 @@ const EmlForm: React.FC<EmlFormProps> = ({
 
           {errorMsg && (
             <p className="text-block text-center text-red-400 mt-5">
-              Error:{errorMsg}
+              Error: {errorMsg}
             </p>
           )}
           {successMsg && (

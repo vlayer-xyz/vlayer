@@ -15,5 +15,7 @@ test("raises error for invalid eml file", async ({ page }) => {
     .getByLabel("EML File Upload")
     .setInputFiles("./testdata/incorrect_vlayer.eml");
   await page.getByRole("button", { name: "Connect & Claim NFT" }).click();
-  await expect(page.getByText("Error:")).toBeVisible();
+  await expect(
+    page.getByText("Error: Cannot finalize proving, check logs"),
+  ).toBeVisible();
 });
