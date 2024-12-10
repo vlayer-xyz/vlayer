@@ -41,6 +41,7 @@ impl Method for RefundUnusedGas {
 pub struct Config {
     pub url: String,
     pub time_to_live: u64,
+    pub api_key: Option<String>,
 }
 
 #[async_trait]
@@ -57,7 +58,12 @@ pub struct RpcClient {
 }
 
 impl RpcClient {
-    pub fn new(Config { url, time_to_live }: Config, hash: CallHash) -> Self {
+    pub fn new(
+        Config {
+            url, time_to_live, ..
+        }: Config,
+        hash: CallHash,
+    ) -> Self {
         let client = RawRpcClient::new(&url);
         Self {
             client,

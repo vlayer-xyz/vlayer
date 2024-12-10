@@ -66,7 +66,7 @@ impl Context {
             .gas_meter_server
             .as_ref()
             .map(RpcServerMock::url)
-            .map(|url| GasMeterConfig::new(url, GAS_METER_TTL));
+            .map(|url| GasMeterConfig::new(url, GAS_METER_TTL, None));
         let config = ConfigBuilder::new(call_guest_elf, chain_guest_elf, API_VERSION.into())
             .with_chain_proof_url(self.chain_proof_server.url())
             .with_rpc_mappings([(self.anvil.chain_id(), self.anvil.endpoint())])

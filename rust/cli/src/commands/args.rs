@@ -46,6 +46,10 @@ pub(crate) struct ServeArgs {
     /// Time-to-live for the gas meter messages
     #[arg(long, requires = "gas_meter", default_value = "3600")]
     pub(crate) gas_meter_ttl: Option<u64>,
+
+    /// API key for the gas meter server
+    #[arg(long, requires = "gas_meter", env)]
+    pub(crate) gas_meter_api_key: Option<String>,
 }
 
 impl ServeArgs {
@@ -54,7 +58,7 @@ impl ServeArgs {
         let gas_meter_config = self
             .gas_meter_url
             .zip(Some(self.gas_meter_ttl.unwrap_or_default()))
-            .map(|(url, ttl)| GasMeterConfig::new(url, ttl));
+            .map(|(url, ttl)| GasMeterConfig::new(url, ttl, self.gas_meter_api_key));
         call_server::ConfigBuilder::new(
             CALL_GUEST_ELF.clone(),
             CHAIN_GUEST_ELF.clone(),
