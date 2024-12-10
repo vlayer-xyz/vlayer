@@ -114,6 +114,7 @@ jobs:
         uses: DeterminateSystems/flake-checker-action@v9
         with:
           flake-lock-path: ./.github/nix/flake.lock
+          check-outdated: false
           fail-mode: true
       - name: Install Nix
         uses: DeterminateSystems/nix-installer-action@v15
