@@ -2,7 +2,7 @@ use alloy_primitives::BlockNumber;
 use anyhow::Result;
 use block_trie::BlockTrie;
 use key_value::InMemoryDatabase;
-use mpt::{Sha2Node as Node, Sha2Trie as MerkleTrie, EMPTY_ROOT_HASH};
+use mpt::{keccak256, Sha2Node as Node, Sha2Trie as MerkleTrie};
 use rand::{rngs::StdRng, RngCore, SeedableRng};
 use risc0_zkvm::{sha::Digest, FakeReceipt, InnerReceipt, MaybePruned, Receipt};
 
@@ -101,7 +101,7 @@ fn node_get_insert_delete() -> Result<()> {
     let mut db = get_test_db();
     let node = Node::Null;
     let node_rlp = node.rlp_encoded();
-    let node_hash = keccak256(&node_rlp);
+    let node_hash = sha2(&node_rlp);
 
     assert_eq!(db.begin_ro()?.get_node(node_hash).unwrap_err(), ChainDbError::NodeNotFound);
 
@@ -134,7 +134,7 @@ fn proof_empty_root() -> Result<()> {
     let mut db = get_test_db();
     insert_node(&mut db, &Node::Null.rlp_encoded());
     assert_eq!(
-        db.get_merkle_proof(EMPTY_ROOT_HASH, 0).unwrap_err(),
+        db.get_merkle_proof(Node::Null.hash_slow(), 0).unwrap_err(),
         ChainDbError::BlockNotFound
     );
     Ok(())
@@ -230,10 +230,7 @@ fn update_chain() -> Result<()> {
 
     assert!(!removed_nodes.is_empty());
     for node in removed_nodes {
-        assert_eq!(
-            db.begin_ro()?.get_node(keccak256(node)).unwrap_err(),
-            ChainDbError::NodeNotFound
-        );
+        assert_eq!(db.begin_ro()?.get_node(sha2(node)).unwrap_err(), ChainDbError::NodeNotFound);
     }
 
     Ok(())

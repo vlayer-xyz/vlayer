@@ -591,10 +591,8 @@ dependencies = [
  "bytes",
  "common",
  "derivative",
- "digest 0.10.7",
  "mpt",
  "serde",
- "sha3",
  "thiserror",
 ]
 

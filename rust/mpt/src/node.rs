@@ -1,7 +1,6 @@
 use std::marker::PhantomData;
 
 use alloy_primitives::{Bytes, B256};
-use alloy_trie::EMPTY_ROOT_HASH;
 use common::Hashable;
 use derivative::Derivative;
 use serde::{Deserialize, Serialize};
@@ -62,9 +61,8 @@ where
     D: Digest,
 {
     fn hash_slow(&self) -> B256 {
-        // compute the keccak hash of the RLP encoded root node
         match self {
-            Node::Null => EMPTY_ROOT_HASH,
+            // Node::Null => EMPTY_ROOT_HASH, FIXME: doesn't work with Digest other than keccak
             Node::Digest(digest) => *digest,
             node => hash::<D>(node.rlp_encoded()),
         }
