@@ -1,5 +1,12 @@
 name: Rust prerequisites
 description: Installs Rust compilation prerequisites.
+inputs:
+  target:
+    description: 'Additional target support to install.'
+    required: false
+  include_risc0:
+    description: Whether to include risc0 installation
+    default: 'true'
 runs:
   using: "composite"
   steps:
@@ -9,6 +16,7 @@ runs:
         toolchain: nightly,stable
         components: clippy,rustfmt
         cache: false
+        target: ${{ inputs.target }}
 
     - name: Setup Rust Caching
       uses: Swatinem/rust-cache@82a92a6e8fbeee089604da2575dc567ae9ddeaab # v2.7.5
@@ -41,10 +49,12 @@ runs:
         tool: cargo-machete@0.7.0
 
     - name: Install risc0 toolchain
+      if: ${{ inputs.include_risc0 == 'true' }}
       uses: taiki-e/cache-cargo-install-action@caa6f48d18d42462f9c30df89e2b4f71a42b7c2c # v2.0.1
       with:
         tool: cargo-risczero@1.1.3
 
     - name: Initialize risc0 toolchain
+      if: ${{ inputs.include_risc0 == 'true' }}
       shell: bash
       run: rustup toolchain list -v | grep -q 'risc0' || cargo risczero install

@@ -3,6 +3,8 @@ on:
   pull_request:
     paths:
       - "packages/**"
+      - ".github/workflows/build_extension.yaml"
+      - ".github/actions/build-extension/action.yml"
   merge_group:
   push:
     branches:
@@ -14,24 +16,7 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Install TypeScript prerequisites
-        uses: ./.github/actions/ts-prerequisites
-      - uses: actions/setup-node@v4
+      - name: Build extension
+        uses: ./.github/actions/build-extension
         with:
-          node-version: "20.x"
-          registry-url: "https://registry.npmjs.org"
-
-      - name: Install dependencies
-        working-directory: packages/browser-extension
-        run: bun install --frozen-lockfile
-      - name: Update extension version
-        working-directory: packages/browser-extension
-        env:
-          VLAYER_BUILD: "0.0.0-test"
-        run: npm version "${VLAYER_BUILD}" --no-workspaces-update
-      - name: Build and compress
-        working-directory: packages/browser-extension
-        run: |
-          bun run build
-          mv dist browser-extension
-          tar -czvf browser-extension.tar.gz browser-extension
+          version_name: 0.0.0-test

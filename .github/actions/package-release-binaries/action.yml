@@ -1,0 +1,36 @@
+name: Package release binaries
+description: Packages a list of binaries for release
+inputs:
+  output_file_suffix:
+    description: 'Suffix for the binary file, e.g. "linux-amd64.tar.gz".'
+    required: true
+  target:
+    description: 'Compilation target, and name of the uploaded artifact'
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Package release
+      id: package-release
+      run: |
+        bins=(vlayer)
+        mkdir -p target/${{ inputs.target }}/bin
+        cd target/${{ inputs.target }}
+
+        for name in "${bins[@]}" ; do
+          mv "release/${name}" bin/
+        done
+
+        tar -czvf "nightly-${{ inputs.output_file_suffix }}" bin
+        echo "output_file=rust/target/${{ inputs.target }}/nightly-${{ inputs.output_file_suffix }}" >> $GITHUB_OUTPUT
+        echo "output_file_suffix=${{ inputs.output_file_suffix }}" >> $GITHUB_OUTPUT
+      shell: bash
+      working-directory: rust
+
+    - name: Push artifact
+      uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
+      with:
+        name: ${{ inputs.target }}
+        path: ${{ steps.package-release.outputs.output_file }}
+        if-no-files-found: error
+        retention-days: 3
