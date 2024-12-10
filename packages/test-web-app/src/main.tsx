@@ -37,7 +37,7 @@ const router = createBrowserRouter([
     path: "/login",
     element: <Login />,
   },
-  // this is not part of store, we test here zk prooving email
+  // this is not part of store, we test here zk proving email
   {
     path: "/email",
     element: <Email />,
