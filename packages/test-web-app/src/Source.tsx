@@ -53,9 +53,9 @@ function SourceNewWay() {
   }, []);
 
   const requestWebProof = useCallback(() => {
-    const loginUrl = `${window.location.origin}${import.meta.env.BASE_URL}login`;
+    const loginUrl = `${window.location.origin}${import.meta.env.BASE_URL}start-page`;
     const targetUrl = `${window.location.origin}${import.meta.env.BASE_URL}target`;
-
+    const targetNoRequestUrl = `${window.location.origin}${import.meta.env.BASE_URL}middle-target`;
     webProofProvider.requestWebProof({
       proverCallCommitment: {
         address: PROVER_ADDRESS,
@@ -67,6 +67,7 @@ function SourceNewWay() {
       logoUrl: "",
       steps: [
         startPage(loginUrl, "Go to login"),
+        expectUrl(targetNoRequestUrl, "Logged in and appear at target page"),
         expectUrl(targetUrl, "Logged in and appear at target page"),
         notarize("https://lotr-api.online:3011/regular_json", "GET", "Prove"),
       ],
@@ -144,9 +145,9 @@ function Source() {
       notaryUrl: "http://localhost:7047",
       wsProxyUrl: "ws://localhost:55688",
     });
-    const loginUrl = `${window.location.origin}${import.meta.env.BASE_URL}login`;
+    const loginUrl = `${window.location.origin}${import.meta.env.BASE_URL}start-page`;
     const targetUrl = `${window.location.origin}${import.meta.env.BASE_URL}target`;
-
+    const targetNoRequestUrl = `${window.location.origin}${import.meta.env.BASE_URL}middle-target`;
     vlayerClient.current = createVlayerClient({
       webProofProvider: provider,
     });
@@ -162,6 +163,7 @@ function Source() {
       logoUrl: "",
       steps: [
         startPage(loginUrl, "Go to login"),
+        expectUrl(targetNoRequestUrl, "Logged in and appear at target page"),
         expectUrl(targetUrl, "Logged in and appear at target page"),
         notarize("https://lotr-api.online:3011/regular_json", "GET", "Prove"),
       ],

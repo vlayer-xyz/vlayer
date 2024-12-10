@@ -3,7 +3,7 @@ import { sidePanel } from "./helpers";
 import { Response } from "@playwright/test";
 
 const config = {
-  startPage: "/login",
+  startPage: "/start-page",
   expectUrl: "/target",
   notarizeUrl: "https://swapi.dev/api/people/1",
 };
@@ -61,18 +61,34 @@ test.describe("Full flow of webproof using extension", () => {
       expect(status).toEqual("completed");
     });
 
-    await test.step("Side panel UI should indicate that  expectUrl step is completed after redirection", async () => {
-      const loginPage = context.pages().find((page) => {
-        return page.url().includes("login");
+    await test.step("Side panel UI should indicate that expectUrl step is completed after history.pushState redirect", async () => {
+      const startPage = context.pages().find((page) => {
+        return page.url().includes("start-page");
       });
-      if (!loginPage) {
+      if (!startPage) {
         throw new Error("No login page");
       }
-      const loginButton = loginPage.getByTestId("login-button");
+      const loginButton = startPage.getByTestId("go-to-middle-target-button");
       await loginButton.click();
-      await loginPage.waitForURL(config.expectUrl);
       const extension = await sidePanel(context);
-      const startPageStep = extension.getByTestId("step-expectUrl");
+      const startPageStep = extension.getByTestId("step-expectUrl").nth(0);
+      const status = await startPageStep.getAttribute("data-status");
+
+      expect(status).toEqual("completed");
+    });
+
+    await test.step("Side panel UI should indicate that expectUrl step is completed after redirection", async () => {
+      const middlewarePage = context.pages().find((page) => {
+        return page.url().includes("middle-target");
+      });
+      if (!middlewarePage) {
+        throw new Error("No login page");
+      }
+      const loginButton = middlewarePage.getByTestId("go-to-target-button");
+      await loginButton.click();
+      await middlewarePage.waitForURL(config.expectUrl);
+      const extension = await sidePanel(context);
+      const startPageStep = extension.getByTestId("step-expectUrl").nth(1);
       const status = await startPageStep.getAttribute("data-status");
       expect(status).toEqual("completed");
     });
@@ -163,22 +179,37 @@ test.describe("Full flow of webproof using extension", () => {
       expect(status).toEqual("completed");
     });
 
-    await test.step("Side panel UI should indicate that  expectUrl step is completed after redirection", async () => {
-      const loginPage = context.pages().find((page) => {
-        return page.url().includes("login");
+    await test.step("Side panel UI shoud indicate that expectUrl step is completed after history.pushState redirect", async () => {
+      const startPage = context.pages().find((page) => {
+        return page.url().includes("start-page");
       });
-      if (!loginPage) {
+      if (!startPage) {
         throw new Error("No login page");
       }
-      const loginButton = loginPage.getByTestId("login-button");
+      const loginButton = startPage.getByTestId("go-to-middle-target-button");
       await loginButton.click();
-      await loginPage.waitForURL(config.expectUrl);
       const extension = await sidePanel(context);
-      const startPageStep = extension.getByTestId("step-expectUrl");
+      const startPageStep = extension.getByTestId("step-expectUrl").nth(0);
       const status = await startPageStep.getAttribute("data-status");
+
       expect(status).toEqual("completed");
     });
 
+    await test.step("Side panel UI should indicate that expectUrl step is completed after redirection", async () => {
+      const middlewarePage = context.pages().find((page) => {
+        return page.url().includes("middle-target");
+      });
+      if (!middlewarePage) {
+        throw new Error("No login page");
+      }
+      const loginButton = middlewarePage.getByTestId("go-to-target-button");
+      await loginButton.click();
+      await middlewarePage.waitForURL(config.expectUrl);
+      const extension = await sidePanel(context);
+      const startPageStep = extension.getByTestId("step-expectUrl").nth(1);
+      const status = await startPageStep.getAttribute("data-status");
+      expect(status).toEqual("completed");
+    });
     await test.step("Prove button should appear after request to external api", async () => {
       const extension = await sidePanel(context);
       const proveButton = extension.getByTestId("prove-button");
@@ -192,7 +223,7 @@ test.describe("Full flow of webproof using extension", () => {
       await page.waitForSelector('h1[data-testid="has-webproof"]');
     });
 
-    await test.step("Zk prove button should appear after receiving webProof", async () => {
+    await test.step("Zk prove button should appear after receiving webProof", () => {
       const proveButton = page.locator("body").getByTestId("zk-prove-button");
       void expect(proveButton).toBeVisible();
     });

@@ -3,9 +3,8 @@ import { createRoot } from "react-dom/client";
 import { Source, SourceNewWay } from "./Source";
 
 import { createBrowserRouter, RouterProvider } from "react-router-dom";
-import Target from "./Target";
-import { LoginMock } from "./LoginMock";
-
+import { Target, MiddleTarget } from "./Target";
+import { StartPage } from "./StartPage";
 import "./main.css";
 import Email from "./Email";
 const router = createBrowserRouter([
@@ -22,8 +21,12 @@ const router = createBrowserRouter([
     element: <Target />,
   },
   {
-    path: "/login",
-    element: <LoginMock />,
+    path: "/middle-target",
+    element: <MiddleTarget />,
+  },
+  {
+    path: "/start-page",
+    element: <StartPage />,
   },
   {
     path: "/email",

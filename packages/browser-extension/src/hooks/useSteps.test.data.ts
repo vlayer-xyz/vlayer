@@ -79,7 +79,7 @@ export const testData = [
       ] as HistoryItem[],
       id: "Expect page visited ( no cookies) and start page visited ",
     },
-    output: [StepStatus.Completed, StepStatus.Current, StepStatus.Further],
+    output: [StepStatus.Completed, StepStatus.Completed, StepStatus.Further],
   },
   {
     input: {

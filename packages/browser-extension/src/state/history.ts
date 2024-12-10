@@ -7,6 +7,7 @@ export type HistoryItem = {
   headers?: browser.WebRequest.HttpHeadersItemType[];
   cookies?: browser.Cookies.Cookie[];
   ready?: boolean;
+  tabId?: number;
 };
 
 export type History = {

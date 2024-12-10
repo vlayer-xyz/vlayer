@@ -73,10 +73,26 @@ export const useTrackCompleteness = () => {
   }, []);
 };
 
+export const useTrackTabUpdate = () => {
+  return useCallback(() => {
+    browser.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
+      if (changeInfo.status === "complete" && tab.url) {
+        historyContextManager
+          .updateHistory({
+            url: tab.url,
+            tabId: tabId,
+          })
+          .catch(console.error);
+      }
+    });
+  }, []);
+};
+
 export const useTrackHistory = () => {
   const trackHeaders = useTrackHeaders();
   const trackCookies = useTrackCookies();
   const trackCompleteness = useTrackCompleteness();
+  const trackTabUpdate = useTrackTabUpdate();
   useEffect(() => {
     // Record headers of all interesting url
     historyContextManager
@@ -86,6 +102,7 @@ export const useTrackHistory = () => {
         trackHeaders(urls);
         trackCookies(urls);
         trackCompleteness(urls);
+        trackTabUpdate();
       })
       .catch(console.error);
   }, []);
