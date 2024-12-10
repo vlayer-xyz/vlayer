@@ -6,7 +6,7 @@ inputs:
     # whereas version is constructed separately in vite.config.ts.
     description: 'The vlayer version name.'
     required: true
-    default: '0.0.0-test'
+    default: '0.1.0'
 runs:
   using: "composite"
   steps:
