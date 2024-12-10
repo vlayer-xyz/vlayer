@@ -108,7 +108,7 @@ function DappNewWay() {
         data-testid="request-webproof-button"
         onClick={handleWebProofRequestClick}
       >
-        Request proof of beeing wizzard
+        Request proof of beeing a wizard
       </button>
 
       <div>
