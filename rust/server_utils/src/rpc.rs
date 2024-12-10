@@ -161,6 +161,12 @@ pub mod mock {
             self
         }
 
+        #[must_use]
+        pub fn with_expected_header(mut self, key: &str, value: &str) -> Self {
+            self.mock = self.mock.match_header(key, value);
+            self
+        }
+
         pub async fn add(self) {
             let mock = self.mock.create_async().await;
             self.server.mocks.push(mock);
@@ -260,5 +266,44 @@ mod tests {
         assert!(result.is_err());
 
         Ok(())
+    }
+
+    #[tokio::test]
+    async fn mock_asserts_custom_header() {
+        let params = GetData::new("value".into());
+        let mut mock = Server::start().await;
+        mock.mock_method(GetData::METHOD_NAME)
+            .with_params(&params, false)
+            .with_result(json!({}))
+            .with_expected_header("x-my-header", "dummy")
+            .add()
+            .await;
+        let rpc_client = Client::new(&mock.url());
+
+        let result = rpc_client
+            .request(&params)
+            .with_header("x-my-header", "dummy")
+            .send()
+            .await;
+
+        mock.assert();
+
+        assert!(result.is_ok());
+
+        let result = rpc_client.request(params).send().await;
+
+        mock.assert();
+
+        assert!(result.is_err());
+        assert_eq!(
+            result
+                .err()
+                .and_then(|err| match err {
+                    Error::Http(err) => err.status(),
+                    _ => None,
+                })
+                .unwrap(),
+            reqwest::StatusCode::NOT_IMPLEMENTED
+        );
     }
 }

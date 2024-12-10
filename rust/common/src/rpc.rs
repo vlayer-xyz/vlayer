@@ -1,8 +1,10 @@
+use auto_impl::auto_impl;
 use serde::Serialize;
 use serde_json::{json, Value};
 
+#[auto_impl(&)]
 pub trait Method: Serialize {
-    const METHOD_NAME: &str;
+    const METHOD_NAME: &'static str;
 
     fn request_body(&self) -> Value {
         json!({
