@@ -9,7 +9,7 @@ import {
   ExtensionAction,
   type ExtensionMessage,
   ExtensionMessageType,
-  WebProofStep,
+  type WebProofStep,
   type PresentationJSON,
   ZkProvingStatus,
   assertUrl,

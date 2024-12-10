@@ -1,5 +1,5 @@
-import { Abi, Address, Hex } from "viem";
-import { Branded } from "../../../web-proof-commons";
+import { type Abi, type Address, type Hex } from "viem";
+import { type Branded } from "../../../web-proof-commons";
 
 export type Bytecode = {
   object: Hex;

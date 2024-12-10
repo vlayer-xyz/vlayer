@@ -1,12 +1,12 @@
-import { Hex, Abi, ContractFunctionName } from "viem";
+import { type Hex, type Abi, type ContractFunctionName } from "viem";
 import type { ContractFunctionArgsWithout } from "./viem";
 import {
-  Branded,
-  ExtensionMessageType,
-  ExtensionMessage,
+  type Branded,
+  type ExtensionMessageType,
+  type ExtensionMessage,
   type PresentationJSON,
-  WebProofStep,
-  ZkProvingStatus,
+  type WebProofStep,
+  type ZkProvingStatus,
 } from "../../../web-proof-commons";
 
 export type WebProofRequestInput = {

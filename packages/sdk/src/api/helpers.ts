@@ -1,6 +1,6 @@
 import {
   type Abi,
-  Account,
+  type Account,
   type Address,
   type Chain,
   type ContractFunctionArgs,
@@ -8,11 +8,11 @@ import {
   createTestClient,
   type Hex,
   http,
-  HttpTransport,
+  type HttpTransport,
   publicActions,
-  PublicClient,
+  type PublicClient,
   walletActions,
-  WriteContractParameters,
+  type WriteContractParameters,
 } from "viem";
 
 import { privateKeyToAccount, generatePrivateKey } from "viem/accounts";

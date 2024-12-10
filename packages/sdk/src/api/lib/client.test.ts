@@ -5,12 +5,12 @@ import {
   vi,
   beforeEach,
   beforeAll,
-  MockInstance,
+  type MockInstance,
 } from "vitest";
 
 import { createExtensionWebProofProvider } from "../webProof";
 import { createVlayerClient } from "./client";
-import { BrandedHash, VlayerClient } from "types/vlayer";
+import { type BrandedHash, type VlayerClient } from "types/vlayer";
 import { ZkProvingStatus } from "src/web-proof-commons";
 import createFetchMock from "vitest-fetch-mock";
 

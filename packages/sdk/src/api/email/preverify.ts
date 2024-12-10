@@ -1,4 +1,8 @@
-import { DkimDomainSelector, getDkimSigners, parseEmail } from "./parseEmail";
+import {
+  type DkimDomainSelector,
+  getDkimSigners,
+  parseEmail,
+} from "./parseEmail";
 import { resolveDkimDns } from "./dnsResolver";
 import { prefixAllButNthSubstring } from "../utils/prefixAllButNthSubstring";
 
