@@ -10,6 +10,7 @@ alloy-rlp = { workspace = true }
 alloy-sol-types = { workspace = true }
 anyhow = { workspace = true }
 async-trait = { workspace = true }
+auto_impl = { workspace = true }
 axum = { workspace = true, features = ["macros"] }
 axum-jrpc = { workspace = true }
 call_engine = { workspace = true }

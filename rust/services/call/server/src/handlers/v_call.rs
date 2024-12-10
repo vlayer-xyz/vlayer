@@ -55,7 +55,7 @@ pub async fn v_call(
 async fn generate_proof(
     call: EngineCall,
     host: Host,
-    gas_meter_client: Box<dyn GasMeterClient>,
+    gas_meter_client: impl GasMeterClient,
 ) -> Result<HostOutput, AppError> {
     let prover = host.prover();
     let call_guest_id = host.call_guest_id();

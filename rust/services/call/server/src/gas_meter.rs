@@ -1,4 +1,5 @@
 use async_trait::async_trait;
+use auto_impl::auto_impl;
 use derive_new::new;
 use serde::{Deserialize, Serialize};
 use server_utils::rpc::{Client as RawRpcClient, Method, Result};
@@ -43,7 +44,8 @@ pub struct Config {
 }
 
 #[async_trait]
-pub trait Client: Send {
+#[auto_impl(Box)]
+pub trait Client: Send + Sync {
     async fn allocate(&self, gas_limit: u64) -> Result<()>;
     async fn refund(&self, stage: ComputationStage, gas_used: u64) -> Result<()>;
 }
