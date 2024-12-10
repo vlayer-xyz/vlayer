@@ -208,6 +208,9 @@ jobs:
     name: Push docker image to github registry
     needs: [build-release, push-artifacts-to-s3]
     runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        docker_image: ["vlayer", "chain_service", "chain_worker"]
     permissions:
       contents: read
       packages: write
@@ -215,7 +218,7 @@ jobs:
       id-token: write
     env:
       REGISTRY: ghcr.io
-      IMAGE_NAME: ${{ github.repository }}
+      IMAGE_NAME: "vlayer-xyz/${{ matrix.docker_image }}"
       VLAYER_BUILD: ${{ needs.build-release.outputs.vlayer_build }}
     steps:
       - name: Checkout repository
@@ -231,7 +234,7 @@ jobs:
         uses: docker/build-push-action@f2a1d5e99d037542a71f64918e516c093c6f3fc4
         with:
           context: .
-          file: docker/vlayer/Dockerfile.nightly
+          file: "docker/${{ matrix.docker_image }}/Dockerfile.nightly"
           push: true
           tags: "${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:latest,${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}:${{ env.VLAYER_BUILD }}"
       - name: Generate artifact attestation
