@@ -7,7 +7,7 @@ use crate::web_proof::WebProof;
 pub(crate) mod tlsn_core_types;
 
 pub const NOTARY_PUB_KEY_PEM_EXAMPLE: &str = "-----BEGIN PUBLIC KEY-----\nMDYwEAYHKoZIzj0CAQYFK4EEAAoDIgADZT9nJiwhGESLjwQNnZ2MsZ1xwjGzvmhF\nxFi8Vjzanlg=\n-----END PUBLIC KEY-----";
-const WEB_PROOF_FIXTURE: &str = include_str!(".././testdata/presentation.json");
+const WEB_PROOF_FIXTURE: &str = include_str!(".././testdata/web_proof.json");
 
 pub fn read_fixture(path: &str) -> String {
     str::from_utf8(&fs::read(path).unwrap())

@@ -153,7 +153,7 @@ mod tests {
 
     #[test]
     fn deserialize_presentation() {
-        let web_proof = read_fixture("./testdata/presentation.json");
+        let web_proof = read_fixture("./testdata/web_proof.json");
         let web_proof: WebProof = serde_json::from_str(&web_proof).unwrap();
 
         let presentation: Presentation = web_proof.into();
