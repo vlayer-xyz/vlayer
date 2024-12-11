@@ -70,7 +70,6 @@ fn create_host(
     chain_proof_server_url: impl AsRef<str>,
 ) -> Result<Host, Error> {
     let config = Config {
-        start_chain_id: location.chain_id,
         call_guest_elf: CALL_GUEST_ELF.clone(),
         chain_guest_elf: CHAIN_GUEST_ELF.clone(),
         verify_chain_proofs: true,
@@ -79,5 +78,6 @@ fn create_host(
     let block_number =
         block_tag_to_block_number(&multi_provider, location.chain_id, location.block_tag)?;
     let chain_proof_client = Box::new(RpcChainProofClient::new(chain_proof_server_url));
-    Host::try_new_with_components(multi_provider, block_number, chain_proof_client, config)
+    let start_exec_location = (location.chain_id, block_number).into();
+    Ok(Host::new(multi_provider, start_exec_location, chain_proof_client, config))
 }

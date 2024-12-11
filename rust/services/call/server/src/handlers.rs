@@ -14,4 +14,13 @@ pub mod v_versions;
 pub type SharedState = Arc<State>;
 
 #[derive(Deref, DerefMut, Default, Debug)]
-pub struct State(DashMap<CallHash, Result<HostOutput, AppError>>);
+pub struct State(DashMap<CallHash, ProofStatus>);
+
+#[allow(dead_code)] // To be used in the future
+#[derive(Debug)]
+pub enum ProofStatus {
+    WaitingForChainProof,
+    Preflight,
+    Proving,
+    Ready(Result<HostOutput, AppError>),
+}

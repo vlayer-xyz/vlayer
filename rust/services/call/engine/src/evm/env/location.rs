@@ -20,12 +20,12 @@ impl ExecutionLocation {
     }
 }
 
-impl<B, C> From<(B, C)> for ExecutionLocation
+impl<C, B> From<(C, B)> for ExecutionLocation
 where
-    B: Into<BlockNumber>,
     C: Into<ChainId>,
+    B: Into<BlockNumber>,
 {
-    fn from((block_number, chain_id): (B, C)) -> Self {
+    fn from((chain_id, block_number): (C, B)) -> Self {
         ExecutionLocation {
             chain_id: chain_id.into(),
             block_number: block_number.into(),

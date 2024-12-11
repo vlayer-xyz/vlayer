@@ -3,7 +3,7 @@ use tracing::info;
 use types::CallResult;
 
 use super::SharedState;
-use crate::{error::AppError, v_call::CallHash};
+use crate::{error::AppError, handlers::ProofStatus, v_call::CallHash};
 
 pub mod types;
 
@@ -19,7 +19,10 @@ pub async fn v_get_proof_receipt(
     info!("v_get_proof_receipt => {params:#?}");
     state
         .remove(&params.hash)
-        .map(|(_, res)| res)
+        .and_then(|(_, status)| match status {
+            ProofStatus::Ready(res) => Some(res),
+            _ => None,
+        })
         .transpose()
         .and_then(CallResult::from_maybe_output)
 }

@@ -60,4 +60,7 @@ pub enum Error {
 
     #[error("Guest input verification error: {0}")]
     GuestInput(#[from] guest_input::Error),
+
+    #[error("Prover contract not deployed")]
+    ProverContractNotDeployed,
 }
