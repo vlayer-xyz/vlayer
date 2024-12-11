@@ -1,12 +1,14 @@
+import { FormEvent, FC } from "react";
+
 interface EmlFormProps {
   isSubmitting: boolean;
   currentStep: string;
   errorMsg: string;
   successMsg: string;
-  handleSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
+  handleSubmit: (e: FormEvent<HTMLFormElement>) => Promise<void> | void;
 }
 
-const EmlForm: React.FC<EmlFormProps> = ({
+const EmlForm: FC<EmlFormProps> = ({
   isSubmitting,
   currentStep,
   errorMsg,
@@ -46,10 +48,16 @@ const EmlForm: React.FC<EmlFormProps> = ({
             </button>
           </div>
 
-          <p className="text-block text-center text-red-400 mt-5">{errorMsg}</p>
-          <p className="text-block text-center text-green-400 mt-5">
-            {successMsg}
-          </p>
+          {errorMsg && (
+            <p className="text-block text-center text-red-400 mt-5">
+              Error: {errorMsg}
+            </p>
+          )}
+          {successMsg && (
+            <p className="text-block text-center text-green-400 mt-5">
+              {successMsg}
+            </p>
+          )}
         </form>
       </div>
     </div>
