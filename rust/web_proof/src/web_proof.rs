@@ -149,7 +149,7 @@ mod tests {
         let proof = load_web_proof_fixture();
         let (_, _, _, verifying_key) = proof.verify().unwrap();
         assert_eq!(
-            PublicKey::from_sec1_bytes(&verifying_key.data.as_ref()).unwrap(),
+            PublicKey::from_sec1_bytes(verifying_key.data.as_ref()).unwrap(),
             PublicKey::from_public_key_pem(NOTARY_PUB_KEY_PEM_EXAMPLE).unwrap()
         );
     }
