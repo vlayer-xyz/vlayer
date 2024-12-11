@@ -8,7 +8,7 @@ libs = [
 ]
 
 [dependencies]
-forge-std = "1.9.2"
+forge-std = "1.9.4"
 
 [soldeer]
 # whether soldeer manages remappings
