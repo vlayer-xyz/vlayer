@@ -55,7 +55,7 @@ mod tests {
         use anyhow::Result;
         use bytes::Bytes;
         use common::Hashable;
-        use mpt::KeccakMerkleTrie as MerkleTrie;
+        use mpt::Sha2Trie as MerkleTrie;
         use risc0_zkp::verify::VerificationError;
         use risc0_zkvm::{InnerReceipt, Receipt};
         use u64_range::NonEmptyRange;

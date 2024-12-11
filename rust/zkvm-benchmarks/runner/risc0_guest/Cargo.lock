@@ -745,10 +745,8 @@ dependencies = [
  "bytes",
  "common",
  "derivative",
- "digest 0.10.7",
  "mpt",
  "serde",
- "sha3",
  "thiserror",
 ]
 
@@ -2261,6 +2259,7 @@ dependencies = [
  "rlp 0.6.1",
  "serde",
  "serde_json",
+ "sha2",
  "sha3",
  "thiserror",
 ]

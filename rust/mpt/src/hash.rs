@@ -9,3 +9,7 @@ pub fn hash<D: Digest>(data: impl AsRef<[u8]>) -> B256 {
 pub fn keccak256(data: impl AsRef<[u8]>) -> B256 {
     hash::<sha3::Keccak256>(data)
 }
+
+pub fn sha2(data: impl AsRef<[u8]>) -> B256 {
+    hash::<sha2::Sha256>(data)
+}

@@ -1,7 +1,7 @@
 use alloy_primitives::ChainId;
 use axum_jrpc::Value;
 use block_header::EvmBlockHeader;
-use block_trie::KeccakBlockTrie as BlockTrie;
+use block_trie::BlockTrie;
 use bytes::Bytes;
 use chain_common::{GetChainProof, GetSyncStatus, RpcChainProof};
 use common::{GuestElf, Hashable, Method};

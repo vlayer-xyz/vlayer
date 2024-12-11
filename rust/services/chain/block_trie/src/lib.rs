@@ -4,10 +4,8 @@ use block_header::EvmBlockHeader;
 use bytes::Bytes;
 use common::Hashable;
 use derivative::Derivative;
-use digest::Digest;
-use mpt::{MerkleTrie, Node};
+use mpt::{Sha2Node, Sha2Trie};
 use serde::{Deserialize, Serialize};
-use sha3::Keccak256;
 use thiserror::Error;
 
 #[derive(Debug, Error, PartialEq)]
@@ -22,15 +20,13 @@ pub enum BlockTrieError {
 
 pub type BlockTrieResult<T> = Result<T, BlockTrieError>;
 
-#[derive(Debug, Clone, Default, Derivative, Serialize, Deserialize)]
-#[derivative(PartialEq(bound = ""), Eq(bound = ""))]
-#[serde(bound = "")]
-pub struct BlockTrie<D>(MerkleTrie<D>);
+#[derive(Debug, Clone, Default, Derivative, Serialize, Deserialize, PartialEq, Eq)]
+pub struct BlockTrie(Sha2Trie);
 
-impl<D: Digest> BlockTrie<D> {
+impl BlockTrie {
     pub fn init(block: impl AsRef<dyn EvmBlockHeader>) -> BlockTrieResult<Self> {
         let block = block.as_ref();
-        let mut trie = Self(MerkleTrie::<D>::new());
+        let mut trie = Self(Sha2Trie::new());
         trie.insert_unchecked(block.number(), &block.hash_slow())?;
         Ok(trie)
     }
@@ -102,7 +98,7 @@ impl<D: Digest> BlockTrie<D> {
         Ok(())
     }
 
-    pub const fn from_unchecked(mpt: MerkleTrie<D>) -> Self {
+    pub const fn from_unchecked(mpt: Sha2Trie) -> Self {
         Self(mpt)
     }
 
@@ -125,18 +121,18 @@ impl<D: Digest> BlockTrie<D> {
         encode_fixed_size(&block_number)
     }
 
-    pub fn into_root(self) -> Node<D> {
+    pub fn into_root(self) -> Sha2Node {
         self.0 .0
     }
 }
 
-impl<D: Digest> Hashable for BlockTrie<D> {
+impl Hashable for BlockTrie {
     fn hash_slow(&self) -> B256 {
         self.0.hash_slow()
     }
 }
 
-impl<D: Digest> IntoIterator for &BlockTrie<D> {
+impl IntoIterator for &BlockTrie {
     type IntoIter = std::vec::IntoIter<Bytes>;
     type Item = Bytes;
 
@@ -144,8 +140,6 @@ impl<D: Digest> IntoIterator for &BlockTrie<D> {
         self.0.into_iter()
     }
 }
-
-pub type KeccakBlockTrie = BlockTrie<Keccak256>;
 
 #[cfg(test)]
 mod tests {
@@ -155,7 +149,7 @@ mod tests {
         fake_block_with_incorrect_parent_hash as block_with_incorrect_hash,
     };
 
-    use super::{BlockTrieError, KeccakBlockTrie as BlockTrie};
+    use super::{BlockTrie, BlockTrieError};
 
     mod append_single {
         use super::*;
