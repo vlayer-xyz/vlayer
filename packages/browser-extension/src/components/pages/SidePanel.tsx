@@ -1,6 +1,4 @@
-// import { Steps } from "components/organisms";
 import { TlsnProofContextProvider } from "hooks/useTlsnProver";
-// import { HelpSection } from "components/organisms";
 import { Grid, Theme } from "@radix-ui/themes";
 import React, { FC } from "react";
 import { SidePanelContent } from "./SidePanelContent";
