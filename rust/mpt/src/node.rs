@@ -4,10 +4,9 @@ use alloy_primitives::{Bytes, B256};
 use common::Hashable;
 use derivative::Derivative;
 use serde::{Deserialize, Serialize};
-use sha3::Digest;
 use thiserror::Error;
 
-use crate::{hash, key_nibbles::KeyNibbles};
+use crate::{hash, key_nibbles::KeyNibbles, Digest};
 
 pub mod constructors;
 pub mod insert;
@@ -62,7 +61,7 @@ where
 {
     fn hash_slow(&self) -> B256 {
         match self {
-            // Node::Null => EMPTY_ROOT_HASH, FIXME: doesn't work with Digest other than keccak
+            Node::Null => D::EMPTY_ROOT_HASH,
             Node::Digest(digest) => *digest,
             node => hash::<D>(node.rlp_encoded()),
         }

@@ -1,7 +1,6 @@
 use alloy_primitives::B256;
 use alloy_rlp::{BufMut, Decodable, Encodable, Header};
 use bytes::Bytes;
-use digest::Digest;
 use rlp as legacy_rlp;
 
 use super::Node;
@@ -9,6 +8,7 @@ use crate::{
     node::constructors::empty_children,
     node_ref::NodeRef,
     path::{Path, PathKind},
+    Digest,
 };
 
 impl<D: Digest> Encodable for Node<D> {
