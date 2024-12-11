@@ -66,7 +66,6 @@ export async function setupRequestProveButton(element: HTMLButtonElement) {
 
 export const setupVProverButton = (element: HTMLButtonElement) => {
   element.addEventListener("click", async () => {
-    const webProof = context.webProof;
     const vlayer = createVlayerClient({
       url: proverUrl,
     });
@@ -78,7 +77,7 @@ export const setupVProverButton = (element: HTMLButtonElement) => {
       proverAbi: webProofProver.abi,
       args: [
         {
-          webProofJson: JSON.stringify(webProof),
+          webProofJson: JSON.stringify(context.webProof),
         },
         twitterUserAddress,
       ],
