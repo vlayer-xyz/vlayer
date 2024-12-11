@@ -3,13 +3,13 @@
   "module": "prove.ts",
   "type": "module",
   "scripts": {
-    "lint:solidity": "solhint '../src/**/*.sol'", 
-    "deploy:dev" : "VLAYER_ENV=dev bun run deploy.ts",
-    "deploy:testnet" : "VLAYER_ENV=testnet bun run deploy.ts", 
-    "prove:dev" : "VLAYER_ENV=dev bun run prove.ts",
-    "prove:testnet" : "VLAYER_ENV=testnet bun run prove.ts", 
-    "web:dev" : "VLAYER_ENV=dev bun run deploy.ts && vite",
-    "web:testnet" : "VLAYER_ENV=testnet bun run deploy.ts && vite",
+    "lint:solidity": "solhint '../src/**/*.sol'",
+    "deploy:dev": "VLAYER_ENV=dev bun run deploy.ts",
+    "deploy:testnet": "VLAYER_ENV=testnet bun run deploy.ts",
+    "prove:dev": "VLAYER_ENV=dev bun run prove.ts",
+    "prove:testnet": "VLAYER_ENV=testnet bun run prove.ts",
+    "web:dev": "VLAYER_ENV=dev bun run deploy.ts && vite",
+    "web:testnet": "VLAYER_ENV=testnet bun run deploy.ts && vite",
     "test:dev": "VLAYER_ENV=dev bun run playwright test --trace on"
   },
   "dependencies": {

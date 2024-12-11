@@ -1,12 +1,14 @@
+import { FormEvent, FC } from "react";
+
 interface EmlFormProps {
   isSubmitting: boolean;
   currentStep: string;
   errorMsg: string;
   successMsg: string;
-  handleSubmit: (event: React.FormEvent<HTMLFormElement>) => void;
+  handleSubmit: (e: FormEvent<HTMLFormElement>) => Promise<void> | void;
 }
 
-const EmlForm: React.FC<EmlFormProps> = ({
+const EmlForm: FC<EmlFormProps> = ({
   isSubmitting,
   currentStep,
   errorMsg,
