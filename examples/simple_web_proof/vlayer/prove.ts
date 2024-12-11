@@ -1,8 +1,8 @@
 import { createVlayerClient } from "@vlayer/sdk";
 import proverSpec from "../out/WebProofProver.sol/WebProofProver";
 import verifierSpec from "../out/WebProofVerifier.sol/WebProofVerifier";
-import presentation_json from "./presentation.json";
-import presentation_invalid_signature from "./presentation_invalid_signature.json";
+import web_proof from "./presentation.json";
+import web_proof_invalid_signature from "./presentation_invalid_signature.json";
 import * as assert from "assert";
 import { encodePacked, isAddress, keccak256 } from "viem";
 
@@ -38,15 +38,13 @@ await testFailedProving();
 async function testSuccessProvingAndVerification() {
   console.log("Proving...");
 
-  const webProof = { presentation_json };
-
   const hash = await vlayer.prove({
     address: prover,
     functionName: "main",
     proverAbi: proverSpec.abi,
     args: [
       {
-        webProofJson: JSON.stringify(webProof),
+        webProofJson: JSON.stringify(web_proof),
       },
       twitterUserAddress,
     ],
@@ -102,8 +100,6 @@ async function testSuccessProvingAndVerification() {
 async function testFailedProving() {
   console.log("Proving...");
 
-  const wrongWebProof = { presentation_json: presentation_invalid_signature };
-
   try {
     const hash = await vlayer.prove({
       address: prover,
@@ -111,7 +107,7 @@ async function testFailedProving() {
       proverAbi: proverSpec.abi,
       args: [
         {
-          webProofJson: JSON.stringify(wrongWebProof),
+          webProofJson: JSON.stringify(web_proof_invalid_signature),
         },
         twitterUserAddress,
       ],

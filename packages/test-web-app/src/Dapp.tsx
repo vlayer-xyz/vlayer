@@ -82,9 +82,7 @@ function DappNewWay() {
       chainId: foundry.id,
       args: [
         {
-          webProofJson: JSON.stringify({
-            presentation_json: webProof,
-          }),
+          webProofJson: JSON.stringify(webProof),
         },
       ],
     });
@@ -179,9 +177,7 @@ function Dapp() {
       chainId: foundry.id,
       args: [
         {
-          webProofJson: JSON.stringify({
-            presentation_json: webProof,
-          }),
+          webProofJson: JSON.stringify(webProof),
         },
       ],
     });

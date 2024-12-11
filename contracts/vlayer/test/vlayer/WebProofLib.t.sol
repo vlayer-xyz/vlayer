@@ -50,7 +50,7 @@ contract WebProverTest is VTest {
         try wrapper.verify(webProof, DATA_URL) returns (Web memory) {
             revert("Expected error");
         } catch Error(string memory reason) {
-            assertEq(reason, "Engine(TransactError(Revert(\"missing field `presentation_json` at line 1 column 2\")))");
+            assertEq(reason, "Engine(TransactError(Revert(\"missing field `version` at line 1 column 2\")))");
         }
     }
 

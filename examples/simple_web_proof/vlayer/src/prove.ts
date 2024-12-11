@@ -66,9 +66,7 @@ export async function setupRequestProveButton(element: HTMLButtonElement) {
 
 export const setupVProverButton = (element: HTMLButtonElement) => {
   element.addEventListener("click", async () => {
-    const webProof = {
-      presentation_json: context.webProof,
-    };
+    const webProof = context.webProof;
     const vlayer = createVlayerClient({
       url: proverUrl,
     });
