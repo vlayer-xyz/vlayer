@@ -3,7 +3,6 @@ use std::mem::take;
 pub use common::Method;
 use reqwest::Client as RawClient;
 use serde_json::Value;
-use tracing::debug;
 
 pub struct Client {
     url: String,
@@ -43,7 +42,6 @@ impl RequestBuilder {
         let response = self.0.send().await?.error_for_status()?;
         let response_body = response.json::<Value>().await?;
         let response_json = parse_json_rpc_response(response_body)?;
-        debug!("  <= {response_json}");
         Ok(response_json)
     }
 }
@@ -62,7 +60,6 @@ impl Client {
         M: Method,
     {
         let request_body = method.request_body();
-        debug!("{} => {}", M::METHOD_NAME, request_body);
         let builder = self.client.post(&self.url).json(&request_body);
         RequestBuilder(builder)
     }

@@ -3,6 +3,7 @@ use auto_impl::auto_impl;
 use derive_new::new;
 use serde::{Deserialize, Serialize};
 use server_utils::rpc::{Client as RawRpcClient, Method, Result};
+use tracing::{debug, info};
 
 use crate::handlers::v_call::types::CallHash;
 
@@ -60,7 +61,7 @@ pub struct RpcClient {
 }
 
 impl RpcClient {
-    const API_KEY_HEADER_NAME: &str = "x-api-prover-key";
+    const API_KEY_HEADER_NAME: &str = "x-prover-api-key";
     const USER_KEY_QUERY_KEY: &str = "key";
 
     pub fn new(
@@ -86,9 +87,11 @@ impl RpcClient {
         let mut req = self.client.request(method);
         if let Some(api_key) = &self.api_key {
             req = req.with_header(Self::API_KEY_HEADER_NAME, api_key);
+            debug!("Request has custom header: ({},{api_key})", Self::API_KEY_HEADER_NAME);
         }
         if let Some(user_key) = &self.user_key {
             req = req.with_query(Self::USER_KEY_QUERY_KEY, user_key);
+            debug!("Request has path query: ?{}={user_key}", Self::USER_KEY_QUERY_KEY);
         }
         let _resp = req.send().await?;
         Ok(())
@@ -99,11 +102,13 @@ impl RpcClient {
 impl Client for RpcClient {
     async fn allocate(&self, gas_limit: u64) -> Result<()> {
         let req = AllocateGas::new(self.hash, gas_limit, self.time_to_live);
+        info!("v_allocateGas => {req:#?}");
         self.call(req).await
     }
 
     async fn refund(&self, stage: ComputationStage, gas_used: u64) -> Result<()> {
         let req = RefundUnusedGas::new(self.hash, stage, gas_used);
+        info!("v_refundUnusedGas => {req:#?}");
         self.call(req).await
     }
 }

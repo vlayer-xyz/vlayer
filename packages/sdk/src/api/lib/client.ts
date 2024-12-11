@@ -51,13 +51,22 @@ export const createVlayerClient = (
   const resultHashMap = new Map<string, [Abi, string]>();
 
   return {
-    prove: async ({
+    prove: async <T extends Abi, F extends ContractFunctionName<T>>({
       address,
+      proverAbi,
       functionName,
       chainId,
       gasLimit,
-      proverAbi,
+      gasMeterUserKey,
       args,
+    }: {
+      address: Hex;
+      proverAbi: T;
+      functionName: F;
+      chainId?: number;
+      gasLimit?: number;
+      gasMeterUserKey?: string;
+      args: ContractFunctionArgs<T, AbiStateMutability, F>;
     }) => {
       webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Proving);
       const response = prove(
@@ -67,6 +76,7 @@ export const createVlayerClient = (
         args,
         chainId,
         gasLimit,
+        gasMeterUserKey,
         url,
       ).catch((e) => {
         webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Error);

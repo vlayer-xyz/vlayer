@@ -65,7 +65,7 @@ async fn generate_proof(
     let prover = host.prover();
     let call_guest_id = host.call_guest_id();
     let preflight_result = host.preflight(call).await?;
-    let gas_used = preflight_result.gas_used;
+    let gas_used = preflight_result.gas_used / 1_000_000;
 
     gas_meter_client
         .refund(ComputationStage::Preflight, gas_used)

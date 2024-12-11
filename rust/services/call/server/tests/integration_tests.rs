@@ -193,7 +193,7 @@ mod server_tests {
         async fn gasmeter_with_api_key() {
             const EXPECTED_HASH: &str =
                 "0x126257b312be17f869dacc198adc28424148f5408751f52c50050a01eeef8ebf";
-            const API_KEY_HEADER_NAME: &str = "x-api-prover-key";
+            const API_KEY_HEADER_NAME: &str = "x-prover-api-key";
             const API_KEY: &str = "secret-deadbeef";
 
             let mut gas_meter_server =

@@ -39,6 +39,7 @@ export async function prove<T extends Abi, F extends ContractFunctionName<T>>(
   args: ContractFunctionArgs<T, AbiStateMutability, F>,
   chainId: number = foundry.id,
   gasLimit: number = 1_000_000,
+  gasMeterUserKey?: string,
   url: string = "http://127.0.0.1:3000",
   options: ProveOptions = { preverifyVersions: false },
 ) {
@@ -52,6 +53,7 @@ export async function prove<T extends Abi, F extends ContractFunctionName<T>>(
   const context: CallContext = {
     chain_id: chainId,
     gas_limit: gasLimit,
+    gas_meter_user_key: gasMeterUserKey,
   };
   return v_call(call, context, url);
 }

@@ -21,6 +21,7 @@ export type CallParams = {
 export type CallContext = {
   chain_id: number;
   gas_limit: number;
+  gas_meter_user_key?: string;
 };
 
 export type BrandedHash<T, F> = Branded<{ hash: string }, [T, F]>;
@@ -79,6 +80,7 @@ export type VlayerClient = {
     functionName: F;
     chainId?: number;
     gasLimit?: number;
+    gasMeterUserKey?: string;
     args: ContractFunctionArgs<T, AbiStateMutability, F>;
   }) => Promise<BrandedHash<T, F>>;
 

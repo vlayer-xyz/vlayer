@@ -54,9 +54,12 @@ const { prover, verifier } = await deployVlayerContracts({
   verifierArgs: [nftContractAddress],
 });
 
+const gasMeterUserKey = process.env["GAS_METER_USER_KEY"];
+
 console.log("Proving...");
 const vlayer = createVlayerClient({
   url: proverUrl,
+  // gasMeterUserKey: "...",
 });
 
 const hash = await vlayer.prove({
@@ -65,6 +68,7 @@ const hash = await vlayer.prove({
   functionName: "balance",
   args: [john.address],
   chainId: chain.id,
+  gasMeterUserKey,
 });
 const result = await vlayer.waitForProvingResult({ hash });
 const [proof, owner, balance] = result;
