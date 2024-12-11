@@ -12,21 +12,13 @@ contract EmailDomainProver is Prover {
     using EmailStrings for string;
     using EmailProofLib for UnverifiedEmail;
 
-    string targetDomain;
-
-    constructor(string memory _targetDomain) {
-        targetDomain = _targetDomain;
-    }
-
     function main(UnverifiedEmail calldata unverifiedEmail, address targetWallet)
         public
         view
         returns (Proof memory, bytes32, address)
     {
         VerifiedEmail memory email = unverifiedEmail.verify();
-
-        require(email.from.contains(targetDomain), "incorrect sender domain");
-        require(email.subject.equal("Verify me for company NFT"), "incorrect subject");
+        require(email.subject.equal("Verify me for Email NFT"), "incorrect subject");
 
         return (proof(), sha256(abi.encodePacked(email.from)), targetWallet);
     }

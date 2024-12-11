@@ -10,8 +10,8 @@ import {
 const { prover, verifier } = await deployVlayerContracts({
   proverSpec,
   verifierSpec,
-  proverArgs: ["@vlayer.xyz"],
-  verifierArgs: ["vlayer badge", "VL"],
+  proverArgs: [],
+  verifierArgs: [],
 });
 
 const config = getConfig();
