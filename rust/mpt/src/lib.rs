@@ -7,7 +7,7 @@ mod trie;
 mod utils;
 
 pub use alloy_trie::EMPTY_ROOT_HASH;
-pub use hash::{hash, keccak256, sha2};
+pub use hash::{hash, keccak256, sha2, Digest};
 pub use key_nibbles::KeyNibbles;
 pub use node::{KeccakNode, Node, Sha2Node};
 pub use node_ref::{KeccakNodeRef, NodeRef, Sha2NodeRef};

@@ -2,10 +2,9 @@ use std::collections::HashMap;
 
 use alloy_primitives::B256;
 use alloy_rlp::Decodable;
-use digest::Digest;
 
 use super::ParseNodeError;
-use crate::{hash, node::Node};
+use crate::{hash, node::Node, Digest};
 
 /// Returns the decoded node and its RLP hash.
 pub(crate) fn parse_node<D: Digest>(

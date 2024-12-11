@@ -5,13 +5,15 @@ use alloy_rlp::Decodable;
 use bytes::Bytes;
 use common::Hashable;
 use derivative::Derivative;
-use digest::Digest;
 use nybbles::Nibbles;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use utils::{parse_node, resolve_trie};
 
-use crate::node::{Node, NodeError};
+use crate::{
+    node::{Node, NodeError},
+    Digest,
+};
 
 mod utils;
 
