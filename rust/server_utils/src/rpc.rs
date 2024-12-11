@@ -3,7 +3,7 @@ use std::mem::take;
 pub use common::Method;
 use reqwest::Client as RawClient;
 use serde_json::Value;
-use tracing::info;
+use tracing::debug;
 
 pub struct Client {
     url: String,
@@ -37,7 +37,7 @@ impl RequestBuilder {
         let response = self.0.send().await?.error_for_status()?;
         let response_body = response.json::<Value>().await?;
         let response_json = parse_json_rpc_response(response_body)?;
-        info!("  <= {response_json}");
+        debug!("  <= {response_json}");
         Ok(response_json)
     }
 }
@@ -56,12 +56,8 @@ impl Client {
         M: Method,
     {
         let request_body = method.request_body();
-        info!("{} => {}", M::METHOD_NAME, request_body);
-        let builder = self
-            .client
-            .post(&self.url)
-            .header("Content-Type", "application/json")
-            .json(&request_body);
+        debug!("{} => {}", M::METHOD_NAME, request_body);
+        let builder = self.client.post(&self.url).json(&request_body);
         RequestBuilder(builder)
     }
 
@@ -268,16 +264,29 @@ mod tests {
         Ok(())
     }
 
+    async fn start_server_with_expected_header(
+        is_partial: bool,
+        params: impl Serialize,
+        response: impl Serialize,
+        header: (&str, &str),
+    ) -> Server {
+        let mut server = Server::start().await;
+        server
+            .mock_method(GetData::METHOD_NAME)
+            .with_params(params, is_partial)
+            .with_result(response)
+            .with_expected_header(header.0, header.1)
+            .add()
+            .await;
+        server
+    }
+
     #[tokio::test]
     async fn mock_asserts_custom_header() {
         let params = GetData::new("value".into());
-        let mut mock = Server::start().await;
-        mock.mock_method(GetData::METHOD_NAME)
-            .with_params(&params, false)
-            .with_result(json!({}))
-            .with_expected_header("x-my-header", "dummy")
-            .add()
-            .await;
+        let mock =
+            start_server_with_expected_header(false, &params, json!({}), ("x-my-header", "dummy"))
+                .await;
         let rpc_client = Client::new(&mock.url());
 
         let result = rpc_client
@@ -289,10 +298,17 @@ mod tests {
         mock.assert();
 
         assert!(result.is_ok());
+    }
+
+    #[tokio::test]
+    async fn mock_asserts_custom_header_missing() {
+        let params = GetData::new("value".into());
+        let mock =
+            start_server_with_expected_header(false, &params, json!({}), ("x-my-header", "dummy"))
+                .await;
+        let rpc_client = Client::new(&mock.url());
 
         let result = rpc_client.request(params).send().await;
-
-        mock.assert();
 
         assert!(result.is_err());
         assert_eq!(
