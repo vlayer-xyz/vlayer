@@ -80,7 +80,7 @@ export type VlayerClient = {
     functionName: F;
     chainId?: number;
     gasLimit?: number;
-    gasMeterUserKey?: string;
+    token?: string;
     args: ContractFunctionArgs<T, AbiStateMutability, F>;
   }) => Promise<BrandedHash<T, F>>;
 

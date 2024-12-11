@@ -57,7 +57,7 @@ export const createVlayerClient = (
       functionName,
       chainId,
       gasLimit,
-      gasMeterUserKey,
+      token,
       args,
     }: {
       address: Hex;
@@ -65,7 +65,7 @@ export const createVlayerClient = (
       functionName: F;
       chainId?: number;
       gasLimit?: number;
-      gasMeterUserKey?: string;
+      token?: string;
       args: ContractFunctionArgs<T, AbiStateMutability, F>;
     }) => {
       webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Proving);
@@ -76,7 +76,7 @@ export const createVlayerClient = (
         args,
         chainId,
         gasLimit,
-        gasMeterUserKey,
+        token,
         url,
       ).catch((e) => {
         webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Error);
