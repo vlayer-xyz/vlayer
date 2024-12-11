@@ -32,13 +32,14 @@ jobs:
 
       - name: Extract nightly contracts
         run: |
-          mkdir -p dist
-          unzip vlayer.zip -d ./dist
+          mkdir -p nightly-contracts
+          unzip vlayer.zip -d ./nightly-contracts
 
-      - name: Copy ImageID to contracts
+      - name: Copy nightly ImageID to contracts
         run: |
           rm contracts/vlayer/src/ImageID.sol
-          cp ./dist/src/ImageID.sol contracts/vlayer/src/ImageID.sol
+          cp ./nightly-contracts/src/ImageID.sol contracts/vlayer/src/ImageID.sol
+          rm -rf ./nightly-contracts
 
       - name: Install contracts' dependencies
         working-directory: ./contracts/vlayer
@@ -65,7 +66,7 @@ jobs:
       - name: Install Vercel
         run: npm install -g vercel
       - name: Deploy to Vercel
-        if: github.ref == 'refs/heads/main'
+        if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
         env:
           VERCEL_ENV: production
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
