@@ -35,8 +35,6 @@ export function parseParams(str: string) {
   ) as Record<string, string>;
 }
 
-export type DkimDnsLocation = ReturnType<typeof parseHeader>;
-
 function parseHeader(header: Header): DkimDomainSelector {
   const params = parseParams(header.value);
   if (!params) {
