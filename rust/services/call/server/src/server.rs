@@ -2,10 +2,11 @@ use std::sync::Arc;
 
 use axum::{
     extract::{Query, State},
+    response::IntoResponse,
     routing::post,
     Router,
 };
-use axum_jrpc::{error::JsonRpcError, Id, JrpcResult, JsonRpcExtractor, JsonRpcResponse};
+use axum_jrpc::{error::JsonRpcError, Id, JsonRpcExtractor, JsonRpcResponse};
 use serde::Serialize;
 use server_utils::{init_trace_layer, RequestIdLayer};
 use tokio::net::TcpListener;
@@ -31,15 +32,15 @@ pub async fn serve(config: Config) -> anyhow::Result<()> {
     Ok(())
 }
 
-fn to_jrpc_result<R, E>(req_id: Id, result: Result<R, E>) -> JrpcResult
+fn to_jrpc_response<R, E>(req_id: Id, result: Result<R, E>) -> JsonRpcResponse
 where
     R: Serialize,
     E: Into<JsonRpcError>,
 {
-    Ok(match result {
+    match result {
         Ok(result) => JsonRpcResponse::success(req_id, result),
         Err(err) => JsonRpcResponse::error(req_id, err.into()),
-    })
+    }
 }
 
 async fn handle(
@@ -47,26 +48,35 @@ async fn handle(
     State(state): State<SharedState>,
     req: JsonRpcExtractor,
     config: Arc<Config>,
-) -> JrpcResult {
+) -> impl IntoResponse {
     let req_id = req.get_answer_id();
     let method = req.method();
     match method {
         "v_call" => {
-            let params: v_call::Params = req.parse_params()?;
+            let params: v_call::Params = match req.parse_params() {
+                Ok(params) => params,
+                Err(e) => return e,
+            };
             let res = v_call(config, state, query, params).await;
-            to_jrpc_result(req_id, res)
+            to_jrpc_response(req_id, res)
         }
         "v_getProofReceipt" => {
-            let params: v_get_proof_receipt::Params = req.parse_params()?;
+            let params: v_get_proof_receipt::Params = match req.parse_params() {
+                Ok(params) => params,
+                Err(e) => return e,
+            };
             let res = v_get_proof_receipt(state, params).await;
-            to_jrpc_result(req_id, res)
+            to_jrpc_response(req_id, res)
         }
         "v_versions" => {
-            let params: v_versions::Params = req.parse_params()?;
+            let params: v_versions::Params = match req.parse_params() {
+                Ok(params) => params,
+                Err(e) => return e,
+            };
             let res = v_versions(config, params).await;
-            to_jrpc_result(req_id, res)
+            to_jrpc_response(req_id, res)
         }
-        _ => Ok(req.method_not_found(method)),
+        _ => req.method_not_found(method),
     }
 }
 
