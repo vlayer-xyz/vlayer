@@ -28,10 +28,10 @@ pub enum WebProofError {
     HostNameMismatch(String, String),
 
     #[error("Public key conversion from sec1 format error: {0}")]
-    ConversionFromSec1Format(#[from] pkcs8::spki::Error),
+    ConversionFromSec1Format(#[from] k256::elliptic_curve::Error),
 
     #[error("Public key conversion to pem format error: {0}")]
-    ConversionToPemFormat(#[from] k256::elliptic_curve::Error),
+    ConversionToPemFormat(#[from] pkcs8::spki::Error),
 }
 
 pub fn verify_and_parse(web_proof: WebProof) -> Result<Web, WebProofError> {
@@ -190,6 +190,19 @@ mod tests {
                 xFi8Vjzanlidbsc1ngM+s1nzlRkZI5UK9BngzmC27BO0qXxPSepIwQ==\n\
                 -----END PUBLIC KEY-----\n";
             assert_eq!(pem, expected_pem);
+        }
+
+        #[test]
+        fn fail() {
+            let verifying_key = VerifyingKey {
+                alg: KeyAlgId::K256,
+                data: vec![],
+            };
+
+            assert!(matches!(
+                to_pem_format(&verifying_key).unwrap_err(),
+                WebProofError::ConversionFromSec1Format(k256::elliptic_curve::Error)
+            ));
         }
     }
 }
