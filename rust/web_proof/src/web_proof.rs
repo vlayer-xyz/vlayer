@@ -9,10 +9,12 @@ use tlsn_core::{
 
 use crate::{request_transcript::RequestTranscript, response_transcript::ResponseTranscript};
 
-#[derive(Deserialize, Serialize, PartialEq, Debug)]
+#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
 #[serde(deny_unknown_fields)]
 pub struct WebProof {
-    pub presentation_json: PresentationJson,
+    pub(crate) version: String,
+    pub(crate) data: String,
+    pub(crate) meta: PresentationJsonMeta,
 }
 
 impl WebProof {
@@ -22,7 +24,7 @@ impl WebProof {
     {
         let provider = CryptoProvider::default();
 
-        let presentation = Presentation::from(self.presentation_json);
+        let presentation = Presentation::from(self);
         let verifying_key = presentation.verifying_key().clone();
 
         let PresentationOutput {
@@ -44,14 +46,6 @@ impl WebProof {
 
 #[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
 #[serde(deny_unknown_fields)]
-pub struct PresentationJson {
-    pub(crate) version: String,
-    pub(crate) data: String,
-    pub(crate) meta: PresentationJsonMeta,
-}
-
-#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
-#[serde(deny_unknown_fields)]
 pub struct PresentationJsonMeta {
     #[serde(rename = "notaryUrl")]
     pub notary_url: Option<String>,
@@ -61,9 +55,9 @@ pub struct PresentationJsonMeta {
     pub plugin_url: Option<String>,
 }
 
-impl From<PresentationJson> for Presentation {
-    fn from(presentation_json: PresentationJson) -> Self {
-        let bytes = hex::decode(presentation_json.data).unwrap();
+impl From<WebProof> for Presentation {
+    fn from(web_proof: WebProof) -> Self {
+        let bytes = hex::decode(web_proof.data).unwrap();
         bincode::deserialize(&bytes).unwrap()
     }
 }
@@ -159,10 +153,10 @@ mod tests {
 
     #[test]
     fn deserialize_presentation() {
-        let presentation_json = read_fixture("./testdata/presentation.json");
-        let presentation_json: PresentationJson = serde_json::from_str(&presentation_json).unwrap();
+        let web_proof = read_fixture("./testdata/presentation.json");
+        let web_proof: WebProof = serde_json::from_str(&web_proof).unwrap();
 
-        let presentation: Presentation = presentation_json.into();
+        let presentation: Presentation = web_proof.into();
         assert_eq!(presentation.verifying_key().alg, KeyAlgId::K256);
     }
 }
