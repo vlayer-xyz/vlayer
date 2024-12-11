@@ -1,4 +1,7 @@
+use k256::PublicKey;
+use pkcs8::{EncodePublicKey, LineEnding};
 use thiserror::Error;
+use tlsn_core::signing::VerifyingKey;
 use url::{ParseError, Url};
 
 use crate::{
@@ -23,19 +26,22 @@ pub enum WebProofError {
 
     #[error("Host name extracted from url: {0} is different from server name: {1}")]
     HostNameMismatch(String, String),
+
+    #[error("Public key conversion from sec1 format error: {0}")]
+    ConversionFromSec1Format(#[from] k256::elliptic_curve::Error),
+
+    #[error("Public key conversion to pem format error: {0}")]
+    ConversionToPemFormat(#[from] pkcs8::spki::Error),
 }
 
 pub fn verify_and_parse(web_proof: WebProof) -> Result<Web, WebProofError> {
-    let notary_pub_key = web_proof
-        .get_notary_pub_key()
-        .map_err(VerificationError::PublicKeySerialization)?;
-    let (request, response, server_name) = web_proof.verify()?;
+    let (request, response, server_name, notary_pub_key) = web_proof.verify()?;
 
     let web = Web {
         url: request.parse_url()?,
         server_name: server_name.to_string(),
         body: response.parse_body()?,
-        notary_pub_key,
+        notary_pub_key: to_pem_format(&notary_pub_key)?,
     };
 
     verify_server_name(server_name.as_str(), &web.url)?;
@@ -59,8 +65,15 @@ fn extract_host(url: &str) -> Result<String, WebProofError> {
         .map(ToString::to_string)
 }
 
+fn to_pem_format(verifying_key: &VerifyingKey) -> Result<String, WebProofError> {
+    Ok(PublicKey::from_sec1_bytes(verifying_key.data.as_ref())?
+        .to_public_key_pem(LineEnding::LF)?)
+}
+
 #[cfg(test)]
 mod tests {
+    use tlsn_core::signing::KeyAlgId;
+
     use super::*;
     use crate::fixtures::load_web_proof_fixture;
 
@@ -154,6 +167,40 @@ mod tests {
             assert!(matches!(
                 verify_server_name("", "unix:/a").unwrap_err(),
                 WebProofError::NoHostFoundInUrl
+            ));
+        }
+    }
+
+    mod to_pem_format {
+        use pkcs8::DecodePublicKey;
+
+        use super::*;
+        use crate::fixtures::NOTARY_PUB_KEY_PEM_EXAMPLE;
+
+        #[test]
+        fn success() {
+            let (_, _, _, verifying_key) = load_web_proof_fixture().verify().unwrap();
+
+            let pem = to_pem_format(&verifying_key).unwrap();
+
+            let expected_pem = PublicKey::from_public_key_pem(NOTARY_PUB_KEY_PEM_EXAMPLE)
+                .unwrap()
+                .to_public_key_pem(LineEnding::LF)
+                .unwrap();
+
+            assert_eq!(pem, expected_pem);
+        }
+
+        #[test]
+        fn fail() {
+            let verifying_key = VerifyingKey {
+                alg: KeyAlgId::K256,
+                data: vec![],
+            };
+
+            assert!(matches!(
+                to_pem_format(&verifying_key).unwrap_err(),
+                WebProofError::ConversionFromSec1Format(k256::elliptic_curve::Error)
             ));
         }
     }
