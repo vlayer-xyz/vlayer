@@ -1,4 +1,7 @@
+use k256::PublicKey;
+use pkcs8::{EncodePublicKey, LineEnding};
 use thiserror::Error;
+use tlsn_core::signing::VerifyingKey;
 use url::{ParseError, Url};
 
 use crate::{
@@ -23,19 +26,22 @@ pub enum WebProofError {
 
     #[error("Host name extracted from url: {0} is different from server name: {1}")]
     HostNameMismatch(String, String),
+
+    #[error("Public key conversion from sec1 format error: {0}")]
+    ConversionFromSec1Format(#[from] pkcs8::spki::Error),
+
+    #[error("Public key conversion to pem format error: {0}")]
+    ConversionToPemFormat(#[from] k256::elliptic_curve::Error),
 }
 
 pub fn verify_and_parse(web_proof: WebProof) -> Result<Web, WebProofError> {
-    let notary_pub_key = web_proof
-        .get_notary_pub_key()
-        .map_err(VerificationError::PublicKeySerialization)?;
-    let (request, response, server_name) = web_proof.verify()?;
+    let (request, response, server_name, notary_pub_key) = web_proof.verify()?;
 
     let web = Web {
         url: request.parse_url()?,
         server_name: server_name.to_string(),
         body: response.parse_body()?,
-        notary_pub_key,
+        notary_pub_key: to_public_key_pem(&notary_pub_key)?,
     };
 
     verify_server_name(server_name.as_str(), &web.url)?;
@@ -57,6 +63,11 @@ fn extract_host(url: &str) -> Result<String, WebProofError> {
         .host_str()
         .ok_or(WebProofError::NoHostFoundInUrl)
         .map(ToString::to_string)
+}
+
+fn to_public_key_pem(verifying_key: &VerifyingKey) -> Result<String, WebProofError> {
+    Ok(PublicKey::from_sec1_bytes(verifying_key.data.as_ref())?
+        .to_public_key_pem(LineEnding::LF)?)
 }
 
 #[cfg(test)]
