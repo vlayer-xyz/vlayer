@@ -172,23 +172,22 @@ mod tests {
     }
 
     mod to_pem_format {
+        use pkcs8::DecodePublicKey;
+
         use super::*;
+        use crate::fixtures::NOTARY_PUB_KEY_PEM_EXAMPLE;
 
         #[test]
         fn success() {
-            let verifying_key = VerifyingKey {
-                alg: KeyAlgId::K256,
-                data: vec![
-                    3, 101, 63, 103, 38, 44, 33, 24, 68, 139, 143, 4, 13, 157, 157, 140, 177, 157,
-                    113, 194, 49, 179, 190, 104, 69, 196, 88, 188, 86, 60, 218, 158, 88,
-                ],
-            };
+            let (_, _, _, verifying_key) = load_web_proof_fixture().verify().unwrap();
 
             let pem = to_pem_format(&verifying_key).unwrap();
-            let expected_pem = "-----BEGIN PUBLIC KEY-----\n\
-                MFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEZT9nJiwhGESLjwQNnZ2MsZ1xwjGzvmhF\n\
-                xFi8Vjzanlidbsc1ngM+s1nzlRkZI5UK9BngzmC27BO0qXxPSepIwQ==\n\
-                -----END PUBLIC KEY-----\n";
+
+            let expected_pem = PublicKey::from_public_key_pem(NOTARY_PUB_KEY_PEM_EXAMPLE)
+                .unwrap()
+                .to_public_key_pem(LineEnding::LF)
+                .unwrap();
+
             assert_eq!(pem, expected_pem);
         }
 
