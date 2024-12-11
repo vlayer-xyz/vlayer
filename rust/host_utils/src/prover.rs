@@ -33,6 +33,7 @@ fn log_stats(stats: &SessionStats) {
         total_cycles,
         user_cycles,
         segments,
+        ..
     } = stats;
     info!("Prover stats. Segments: {segments}, cycles: {total_cycles}, user cycles: {user_cycles}");
 }
