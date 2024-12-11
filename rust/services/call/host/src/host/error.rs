@@ -10,7 +10,7 @@ use super::prover;
 
 #[derive(Error, Debug)]
 pub enum Error {
-    #[error("Invalid input")]
+    #[error("Invalid input: {0}")]
     CreatingInput(String),
 
     #[error("TravelCallExecutor error: {0}")]
