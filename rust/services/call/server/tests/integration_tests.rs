@@ -1,7 +1,7 @@
 use assert_json_diff::assert_json_include;
 use axum::http::StatusCode;
 use serde_json::json;
-use test_helpers::{call_guest_elf, chain_guest_elf, Context, API_VERSION, GAS_METER_TTL};
+use test_helpers::{call_guest_elf, chain_guest_elf, mock::GasMeterServer, Context, API_VERSION};
 
 mod test_helpers;
 
@@ -80,6 +80,7 @@ mod server_tests {
 
         const CHAIN_ID: u64 = 11_155_111;
         const GAS_LIMIT: u64 = 1_000_000;
+        const GAS_METER_TTL: u64 = 3600;
 
         #[tokio::test]
         async fn field_validation_error() {
@@ -187,6 +188,64 @@ mod server_tests {
             assert_eq!(StatusCode::OK, response.status());
             assert_jrpc_ok(response, EXPECTED_HASH).await;
         }
+
+        #[tokio::test(flavor = "multi_thread")]
+        async fn gasmeter_with_api_key() {
+            const EXPECTED_HASH: &str =
+                "0x126257b312be17f869dacc198adc28424148f5408751f52c50050a01eeef8ebf";
+            const API_KEY_HEADER_NAME: &str = "x-api-prover-key";
+            const API_KEY: &str = "secret-deadbeef";
+
+            let mut gas_meter_server =
+                GasMeterServer::start(GAS_METER_TTL, Some(API_KEY.into())).await;
+            gas_meter_server
+                .mock_method("v_allocateGas")
+                .with_params(
+                    json!({
+                        "gas_limit": GAS_LIMIT,
+                        "hash": EXPECTED_HASH,
+                        "time_to_live": GAS_METER_TTL
+                    }),
+                    false,
+                )
+                .with_result(json!({}))
+                .with_expected_header(API_KEY_HEADER_NAME, API_KEY)
+                .add()
+                .await;
+
+            let mut ctx = Context::default()
+                .await
+                .with_gas_meter_server(gas_meter_server);
+            let app = ctx.server(call_guest_elf(), chain_guest_elf());
+            let contract = ctx.deploy_contract().await;
+            let call_data = contract
+                .sum(U256::from(1), U256::from(2))
+                .calldata()
+                .unwrap();
+
+            let req = json!({
+                "method": "v_call",
+                "params": [
+                    {
+                        "to": contract.address(),
+                        "data": call_data,
+                    },
+                    {
+                        "chain_id": CHAIN_ID,
+                        "gas_limit": GAS_LIMIT,
+                    }
+                    ],
+                "id": 1,
+                "jsonrpc": "2.0",
+            });
+
+            let response = app.post("/", &req).await;
+
+            assert_eq!(StatusCode::OK, response.status());
+            assert_jrpc_ok(response, EXPECTED_HASH).await;
+
+            ctx.assert_gas_meter();
+        }
     }
 
     #[allow(non_snake_case)]
@@ -196,7 +255,6 @@ mod server_tests {
             abi::AbiEncode,
             types::{Bytes, Uint8, U256},
         };
-        use server_utils::rpc::mock::Server as RpcServerMock;
         use tokio::time::{sleep, timeout, Duration};
         use web_proof::fixtures::load_web_proof_fixture;
 
@@ -205,6 +263,7 @@ mod server_tests {
 
         const CHAIN_ID: u64 = 11_155_111;
         const GAS_LIMIT: u64 = 1_000_000;
+        const GAS_METER_TTL: u64 = 3600;
         const MAX_POLLING_TIME: Duration = Duration::from_secs(60);
 
         async fn get_hash(
@@ -340,7 +399,7 @@ mod server_tests {
                 "0x126257b312be17f869dacc198adc28424148f5408751f52c50050a01eeef8ebf";
             const EXPECTED_GAS_USED: u64 = 21_728;
 
-            let mut gas_meter_server = RpcServerMock::start().await;
+            let mut gas_meter_server = GasMeterServer::start(GAS_METER_TTL, None).await;
             gas_meter_server
                 .mock_method("v_allocateGas")
                 .with_params(
