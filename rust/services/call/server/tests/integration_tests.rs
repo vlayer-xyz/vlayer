@@ -290,16 +290,13 @@ mod server_tests {
                     {
                         "chain_id": CHAIN_ID,
                         "gas_limit": GAS_LIMIT,
-                        "gas_meter_user_key": USER_KEY,
                     }
                     ],
                 "id": 1,
                 "jsonrpc": "2.0",
             });
 
-            let mut path = String::from("/?");
-            path.push_str(USER_KEY_QUERY_KEY);
-            path.push('=');
+            let mut path = String::from("/?token=");
             path.push_str(USER_KEY);
 
             let response = app.post(&path, &req).await;

@@ -7,7 +7,7 @@ use serde::{Deserialize, Serialize};
 use tracing::info;
 use types::{Call, CallContext, CallHash, CallHashData};
 
-use super::SharedState;
+use super::{QueryParams, SharedState};
 use crate::{
     config::Config as ServerConfig,
     error::AppError,
@@ -25,6 +25,7 @@ pub struct Params {
 pub async fn v_call(
     config: Arc<ServerConfig>,
     state: SharedState,
+    query: QueryParams,
     params: Params,
 ) -> Result<CallHash, AppError> {
     info!("v_call => {params:#?}");
@@ -36,16 +37,11 @@ pub async fn v_call(
         .into();
     info!("Calculated hash: {}", call_hash);
 
-    let gas_meter_client: Box<dyn GasMeterClient> =
-        config
-            .gas_meter_config()
-            .map_or(Box::new(gas_meter::NoOpClient), |config| {
-                Box::new(gas_meter::RpcClient::new(
-                    config,
-                    call_hash,
-                    params.context.gas_meter_user_key,
-                ))
-            });
+    let gas_meter_client: Box<dyn GasMeterClient> = config
+        .gas_meter_config()
+        .map_or(Box::new(gas_meter::NoOpClient), |config| {
+            Box::new(gas_meter::RpcClient::new(config, call_hash, query.token))
+        });
 
     gas_meter_client.allocate(params.context.gas_limit).await?;
 
@@ -65,7 +61,7 @@ async fn generate_proof(
     let prover = host.prover();
     let call_guest_id = host.call_guest_id();
     let preflight_result = host.preflight(call).await?;
-    let gas_used = preflight_result.gas_used / 1_000_000;
+    let gas_used = preflight_result.gas_used;
 
     gas_meter_client
         .refund(ComputationStage::Preflight, gas_used)
