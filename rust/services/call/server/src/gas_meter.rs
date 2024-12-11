@@ -56,10 +56,12 @@ pub struct RpcClient {
     hash: CallHash,
     time_to_live: u64,
     api_key: Option<String>,
+    user_key: Option<String>,
 }
 
 impl RpcClient {
     const API_KEY_HEADER_NAME: &str = "x-api-prover-key";
+    const USER_KEY_QUERY_KEY: &str = "key";
 
     pub fn new(
         Config {
@@ -68,6 +70,7 @@ impl RpcClient {
             api_key,
         }: Config,
         hash: CallHash,
+        user_key: Option<String>,
     ) -> Self {
         let client = RawRpcClient::new(&url);
         Self {
@@ -75,6 +78,7 @@ impl RpcClient {
             hash,
             time_to_live,
             api_key,
+            user_key,
         }
     }
 
@@ -82,6 +86,9 @@ impl RpcClient {
         let mut req = self.client.request(method);
         if let Some(api_key) = &self.api_key {
             req = req.with_header(Self::API_KEY_HEADER_NAME, api_key);
+        }
+        if let Some(user_key) = &self.user_key {
+            req = req.with_query(Self::USER_KEY_QUERY_KEY, user_key);
         }
         let _resp = req.send().await?;
         Ok(())

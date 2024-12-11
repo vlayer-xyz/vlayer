@@ -28,6 +28,12 @@ pub struct RequestBuilder(reqwest::RequestBuilder);
 
 impl RequestBuilder {
     #[must_use]
+    pub fn with_query(mut self, key: &str, value: &str) -> Self {
+        self.0 = self.0.query(&[(key, value)]);
+        self
+    }
+
+    #[must_use]
     pub fn with_header(mut self, name: &str, value: &str) -> Self {
         self.0 = self.0.header(name, value);
         self

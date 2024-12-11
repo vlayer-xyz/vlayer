@@ -39,7 +39,7 @@ pub async fn v_call(
     let gas_meter_client: Box<dyn GasMeterClient> = config
         .gas_meter_config()
         .map_or(Box::new(gas_meter::NoOpClient), |config| {
-            Box::new(gas_meter::RpcClient::new(config, call_hash))
+            Box::new(gas_meter::RpcClient::new(config, call_hash, None))
         });
 
     gas_meter_client.allocate(params.context.gas_limit).await?;
