@@ -114,7 +114,7 @@ export const useSteps = (): Step[] => {
   const [history] = useBrowsingHistory();
   const { isDone: isZkProvingDone } = useZkProvingState();
   return calculateSteps({
-    stepsSetup: config.steps,
+    stepsSetup: config !== "loading" ? config.steps : [],
     history,
     isZkProvingDone,
   });

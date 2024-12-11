@@ -1,4 +1,4 @@
-import { LOADING, useLocalStorage } from "@vlayer/extension-hooks";
+import { useSessionStorage } from "@vlayer/extension-hooks";
 import { WebProverSessionConfig } from "../web-proof-commons";
 
 export const useProvingSessionConfig = () => {
@@ -8,9 +8,9 @@ export const useProvingSessionConfig = () => {
     wsProxyUrl: null,
     logoUrl: null,
   };
-  const [config] = useLocalStorage<WebProverSessionConfig>(
+  const [config] = useSessionStorage<WebProverSessionConfig>(
     "webProverSessionConfig",
     initialValue,
   );
-  return [config === LOADING ? initialValue : config];
+  return [config];
 };

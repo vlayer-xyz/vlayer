@@ -1,8 +1,9 @@
-import { Steps } from "components/organisms";
+// import { Steps } from "components/organisms";
 import { TlsnProofContextProvider } from "hooks/useTlsnProver";
-import { HelpSection } from "components/organisms";
+// import { HelpSection } from "components/organisms";
 import { Grid, Theme } from "@radix-ui/themes";
 import React, { FC } from "react";
+import { SidePanelContent } from "./SidePanelContent";
 export const SidePanel: FC = () => {
   return (
     <TlsnProofContextProvider>
@@ -11,11 +12,17 @@ export const SidePanel: FC = () => {
           columns="10"
           gapY="4"
           top="16"
-          style={{ marginTop: "80px", marginLeft: "10px" }}
+          style={{ paddingTop: "80px", height: "100vh" }}
+          className="h-screen"
         >
-          <div style={{ gridColumn: "span 9", fontFamily: "Sora" }}>
-            <Steps />
-            <HelpSection />
+          <div
+            className="h-screen"
+            style={{
+              gridColumn: "span 10",
+              fontFamily: "Sora",
+            }}
+          >
+            <SidePanelContent />
           </div>
         </Grid>
       </Theme>

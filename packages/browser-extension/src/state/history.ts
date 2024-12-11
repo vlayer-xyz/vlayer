@@ -20,7 +20,7 @@ export class HistoryContextManager {
   store: Store<History>;
 
   constructor() {
-    this.store = new Store<History>(browser.storage.local);
+    this.store = new Store<History>(browser.storage.session);
   }
 
   public static get instance(): HistoryContextManager {
@@ -33,7 +33,7 @@ export class HistoryContextManager {
   async getUrls(): Promise<string[]> {
     const config =
       await webProverSessionContextManager.getWebProverSessionConfig();
-    return config.steps.map((step: { url: string }) => step.url);
+    return config?.steps.map((step: { url: string }) => step.url) || [];
   }
 
   async updateHistory(item: HistoryItem): Promise<void> {

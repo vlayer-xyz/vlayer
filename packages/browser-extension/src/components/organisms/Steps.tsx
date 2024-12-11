@@ -4,7 +4,7 @@ import React from "react";
 export const Steps = () => {
   const steps = useSteps();
   return (
-    <>
+    <div data-testid="steps">
       {steps.map((step, index) => [
         <Step
           {...step}
@@ -14,6 +14,6 @@ export const Steps = () => {
           link={step.link}
         />,
       ])}
-    </>
+    </div>
   );
 };
