@@ -31,7 +31,7 @@ impl WebProof {
             ..
         } = presentation.verify(&provider)?;
 
-        let transcript = transcript.unwrap();
+        let transcript = transcript.ok_or(VerificationError::EmptyTranscript)?;
 
         Ok((
             RequestTranscript::new(transcript.sent_unsafe().to_vec()),
@@ -78,6 +78,9 @@ pub enum VerificationError {
 
     #[error("Notary public key serialization error: {0}")]
     PublicKeySerialization(#[from] pkcs8::spki::Error),
+
+    #[error("Empty transcript")]
+    EmptyTranscript,
 }
 
 #[cfg(test)]
