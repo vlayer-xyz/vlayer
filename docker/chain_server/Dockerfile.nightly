@@ -2,10 +2,8 @@ FROM --platform=linux/amd64 ubuntu:24.04 AS vlayer-builder
 RUN apt-get update
 RUN apt-get install -y --no-install-recommends curl ca-certificates dumb-init
 
-RUN useradd -m -s /bin/bash -u 1001 vlayer
-USER vlayer
-WORKDIR /home/vlayer
+WORKDIR /root
 
 RUN curl -L https://vlayer-releases.s3.eu-north-1.amazonaws.com/latest/nightly-linux-amd64.tar.gz -o nightly-linux-amd64.tar.gz
 RUN tar -xvf nightly-linux-amd64.tar.gz
-ENTRYPOINT ["/usr/bin/dumb-init", "--", "/home/vlayer/bin/chain_server"]
+ENTRYPOINT ["/usr/bin/dumb-init", "--", "/root/bin/chain_server"]
