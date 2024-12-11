@@ -27,7 +27,7 @@ echo '::endgroup::'
 echo '::group::risczero installation'
 curl -L https://risczero.com/install | bash
 export PATH="$PATH:~/.risc0/bin"
-rzup install cargo-risczero v1.1.3
+rzup install cargo-risczero v1.2.0
 echo '::endgroup::'
 
 git config --global user.email "test@example.com"
