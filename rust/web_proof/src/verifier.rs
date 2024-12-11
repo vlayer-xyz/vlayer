@@ -41,7 +41,7 @@ pub fn verify_and_parse(web_proof: WebProof) -> Result<Web, WebProofError> {
         url: request.parse_url()?,
         server_name: server_name.to_string(),
         body: response.parse_body()?,
-        notary_pub_key: to_public_key_pem(&notary_pub_key)?,
+        notary_pub_key: to_pem_format(&notary_pub_key)?,
     };
 
     verify_server_name(server_name.as_str(), &web.url)?;
@@ -65,13 +65,15 @@ fn extract_host(url: &str) -> Result<String, WebProofError> {
         .map(ToString::to_string)
 }
 
-fn to_public_key_pem(verifying_key: &VerifyingKey) -> Result<String, WebProofError> {
+fn to_pem_format(verifying_key: &VerifyingKey) -> Result<String, WebProofError> {
     Ok(PublicKey::from_sec1_bytes(verifying_key.data.as_ref())?
         .to_public_key_pem(LineEnding::LF)?)
 }
 
 #[cfg(test)]
 mod tests {
+    use tlsn_core::signing::KeyAlgId;
+
     use super::*;
     use crate::fixtures::load_web_proof_fixture;
 
@@ -166,6 +168,28 @@ mod tests {
                 verify_server_name("", "unix:/a").unwrap_err(),
                 WebProofError::NoHostFoundInUrl
             ));
+        }
+    }
+
+    mod to_pem_format {
+        use super::*;
+
+        #[test]
+        fn success() {
+            let verifying_key = VerifyingKey {
+                alg: KeyAlgId::K256,
+                data: vec![
+                    3, 101, 63, 103, 38, 44, 33, 24, 68, 139, 143, 4, 13, 157, 157, 140, 177, 157,
+                    113, 194, 49, 179, 190, 104, 69, 196, 88, 188, 86, 60, 218, 158, 88,
+                ],
+            };
+
+            let pem = to_pem_format(&verifying_key).unwrap();
+            let expected_pem = "-----BEGIN PUBLIC KEY-----\n\
+                MFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEZT9nJiwhGESLjwQNnZ2MsZ1xwjGzvmhF\n\
+                xFi8Vjzanlidbsc1ngM+s1nzlRkZI5UK9BngzmC27BO0qXxPSepIwQ==\n\
+                -----END PUBLIC KEY-----\n";
+            assert_eq!(pem, expected_pem);
         }
     }
 }
