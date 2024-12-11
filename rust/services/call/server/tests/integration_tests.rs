@@ -246,6 +246,68 @@ mod server_tests {
 
             ctx.assert_gas_meter();
         }
+
+        #[tokio::test(flavor = "multi_thread")]
+        async fn gasmeter_with_user_key() {
+            const EXPECTED_HASH: &str =
+                "0x126257b312be17f869dacc198adc28424148f5408751f52c50050a01eeef8ebf";
+            const USER_KEY_QUERY_KEY: &str = "key";
+            const USER_KEY: &str = "sk_1234567890";
+
+            let mut gas_meter_server = GasMeterServer::start(GAS_METER_TTL, None).await;
+            gas_meter_server
+                .mock_method("v_allocateGas")
+                .with_query(USER_KEY_QUERY_KEY, USER_KEY)
+                .with_params(
+                    json!({
+                        "gas_limit": GAS_LIMIT,
+                        "hash": EXPECTED_HASH,
+                        "time_to_live": GAS_METER_TTL
+                    }),
+                    false,
+                )
+                .with_result(json!({}))
+                .add()
+                .await;
+
+            let mut ctx = Context::default()
+                .await
+                .with_gas_meter_server(gas_meter_server);
+            let app = ctx.server(call_guest_elf(), chain_guest_elf());
+            let contract = ctx.deploy_contract().await;
+            let call_data = contract
+                .sum(U256::from(1), U256::from(2))
+                .calldata()
+                .unwrap();
+
+            let req = json!({
+                "method": "v_call",
+                "params": [
+                    {
+                        "to": contract.address(),
+                        "data": call_data,
+                    },
+                    {
+                        "chain_id": CHAIN_ID,
+                        "gas_limit": GAS_LIMIT,
+                    }
+                    ],
+                "id": 1,
+                "jsonrpc": "2.0",
+            });
+
+            let mut path = String::from("/?");
+            path.push_str(USER_KEY_QUERY_KEY);
+            path.push('=');
+            path.push_str(USER_KEY);
+
+            let response = app.post(&path, &req).await;
+
+            assert_eq!(StatusCode::OK, response.status());
+            assert_jrpc_ok(response, EXPECTED_HASH).await;
+
+            ctx.assert_gas_meter();
+        }
     }
 
     #[allow(non_snake_case)]

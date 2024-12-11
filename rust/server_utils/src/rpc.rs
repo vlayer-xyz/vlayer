@@ -125,6 +125,14 @@ pub mod mock {
 
     impl<'a> MockBuilder<'a> {
         #[must_use]
+        pub fn with_query(mut self, key: impl Into<String>, value: impl Into<String>) -> Self {
+            self.mock = self
+                .mock
+                .match_query(Matcher::UrlEncoded(key.into(), value.into()));
+            self
+        }
+
+        #[must_use]
         pub fn with_params(mut self, params: impl Serialize, is_partial_match: bool) -> Self {
             let request_body = json!({
                 "id": 1,
