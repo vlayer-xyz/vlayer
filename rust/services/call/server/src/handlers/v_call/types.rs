@@ -39,6 +39,7 @@ pub struct CallContext {
     #[serde(default = "mainnet_chain_id")]
     pub chain_id: ChainId,
     pub gas_limit: u64,
+    pub gas_meter_user_key: Option<String>,
 }
 
 #[derive(Serialize, Deserialize, Debug, From, Copy, Clone, Hash, PartialEq, Eq)]

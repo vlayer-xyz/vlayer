@@ -290,6 +290,7 @@ mod server_tests {
                     {
                         "chain_id": CHAIN_ID,
                         "gas_limit": GAS_LIMIT,
+                        "gas_meter_user_key": USER_KEY,
                     }
                     ],
                 "id": 1,
