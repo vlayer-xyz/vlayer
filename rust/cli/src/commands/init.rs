@@ -346,9 +346,9 @@ mod tests {
         let expected_remappings = format!(
             "some initial remappings\n\
             openzeppelin-contracts/=dependencies/@openzeppelin-contracts-5.0.1/\n\
-            forge-std/=dependencies/forge-std-1.9.2/src/\n\
-            forge-std-1.9.2/src/=dependencies/forge-std-1.9.2/src/\n\
-            risc0-ethereum-1.1.4/=dependencies/risc0-ethereum-1.1.4/\n\
+            forge-std/=dependencies/forge-std-1.9.4/src/\n\
+            forge-std-1.9.4/src/=dependencies/forge-std-1.9.4/src/\n\
+            risc0-ethereum-1.2.0/=dependencies/risc0-ethereum-1.2.0/\n\
             vlayer-0.1.0/=dependencies/vlayer-{}/src/\n",
             version()
         );
@@ -370,9 +370,9 @@ mod tests {
 
         let expected_remappings = format!(
             "openzeppelin-contracts/=dependencies/@openzeppelin-contracts-5.0.1/\n\
-            forge-std/=dependencies/forge-std-1.9.2/src/\n\
-            forge-std-1.9.2/src/=dependencies/forge-std-1.9.2/src/\n\
-            risc0-ethereum-1.1.4/=dependencies/risc0-ethereum-1.1.4/\n\
+            forge-std/=dependencies/forge-std-1.9.4/src/\n\
+            forge-std-1.9.4/src/=dependencies/forge-std-1.9.4/src/\n\
+            risc0-ethereum-1.2.0/=dependencies/risc0-ethereum-1.2.0/\n\
             vlayer-0.1.0/=dependencies/vlayer-{}/src/\n",
             version()
         );
