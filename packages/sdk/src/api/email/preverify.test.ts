@@ -44,7 +44,6 @@ ${email}`;
         rawEmail,
       );
       const email = await preverifyEmail(emailWithAddedHeaders);
-      console.log(email.email);
       expect(
         email.email
           .startsWith(`X-DKIM-Signature: v=1; a=rsa-sha256; d=hello.kitty;
