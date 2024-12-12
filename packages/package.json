@@ -30,7 +30,8 @@
     "web-components/",
     "extension-hooks/",
     "test-web-app/",
-    "test-json-server/"
+    "test-json-server/",
+    "react-sdk/"
   ],
   "trustedDependencies": [
     "viem"
