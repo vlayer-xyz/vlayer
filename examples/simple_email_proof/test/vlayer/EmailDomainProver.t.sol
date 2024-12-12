@@ -17,8 +17,8 @@ contract EmailProofLibWrapper {
 }
 
 contract EmailDomainProverTest is VTest {
-    string constant HARDCODED_DNS_RECORD =
-        "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA3gWcOhCm99qzN+h7/2+LeP3CLsJkQQ4EP/2mrceXle5pKq8uZmBl1U4d2Vxn4w+pWFANDLmcHolLboESLFqEL5N6ae7u9b236dW4zn9AFkXAGenTzQEeif9VUFtLAZ0Qh2eV7OQgz/vPj5IaNqJ7h9hpM9gO031fe4v+J0DLCE8Rgo7hXbNgJavctc0983DaCDQaznHZ44LZ6TtZv9TBs+QFvsy4+UCTfsuOtHzoEqOOuXsVXZKLP6B882XbEnBpXEF8QzV4J26HiAJFUbO3mAqZL2UeKC0hhzoIZqZXNG0BfuzOF0VLpDa18GYMUiu+LhEJPJO9D8zhzvQIHNrpGwIDAQAB";
+
+    string constant HARDCODED_DNS_RECORD = "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEAoDLLSKLb3eyflXzeHwBz8qqg9mfpmMY+f1tp+HpwlEOeN5iHO0s4sCd2QbG2i/DJRzryritRnjnc4i2NJ/IJfU8XZdjthotcFUY6rrlFld20a13q8RYBBsETSJhYnBu+DMdIF9q3YxDtXRFNpFCpI1uIeA/x+4qQJm3KTZQWdqi/BVnbsBA6ZryQCOOJC3Ae0oodvz80yfEJUAi9hAGZWqRn+Mprlyu749uQ91pTOYCDCbAn+cqhw8/mY5WMXFqrw9AdfWrk+MwXHPVDWBs8/Hm8xkWxHOqYs9W51oZ/Je3WWeeggyYCZI9V+Czv7eF8BD/yF9UxU/3ZWZPM8EWKKQIDAQAB";
 
     function getTestEmail(string memory path) public view returns (UnverifiedEmail memory) {
         string memory mime = vm.readFile(path);
@@ -32,6 +32,7 @@ contract EmailDomainProverTest is VTest {
         address johnDoe = vm.addr(1);
         EmailDomainProver prover = new EmailDomainProver();
         UnverifiedEmail memory email = getTestEmail("./vlayer/testdata/verify_vlayer.eml");
+        callProver();
         VerifiedEmail memory verifiedEmail = wrapper.verify(email);
         callProver();
         (, bytes32 emailHash, address registeredWallet, string memory emailDomain) = prover.main(email, johnDoe);
