@@ -46,7 +46,7 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
     if [ "$VLAYER_ENV" = "dev" ]; then
       # We're restarting anvil because some examples rely on a clean chain state.
       echo "Restarting anvil"
-      docker compose -f ${VLAYER_HOME}/docker/web-proof/docker-compose-test-release.yaml restart 
+      docker compose -f ${VLAYER_HOME}/docker/docker-compose.devnet.yaml restart anvil-a
     fi
 
     echo "::group::Initializing vlayer template: ${example_name}"
