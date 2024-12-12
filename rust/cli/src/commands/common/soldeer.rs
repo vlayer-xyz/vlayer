@@ -19,15 +19,15 @@ lazy_static! {
         },
         SoldeerDep {
             name: "forge-std".into(),
-            version: "1.9.2".into(),
+            version: "1.9.4".into(),
             url: None,
-            remapping: Some((["forge-std", "forge-std-1.9.2/src"].as_slice(), "src").into()),
+            remapping: Some((["forge-std", "forge-std-1.9.4/src"].as_slice(), "src").into()),
         },
         SoldeerDep {
             name: "risc0-ethereum".into(),
-            version: "1.1.4".into(),
-            url: Some("https://github.com/vlayer-xyz/risc0-ethereum/releases/download/v1.1.4-soldeer/contracts.zip".into()),
-            remapping: Some("risc0-ethereum-1.1.4".into()),
+            version: "1.2.0".into(),
+            url: Some("https://github.com/vlayer-xyz/risc0-ethereum/releases/download/v1.2.0-soldeer/contracts.zip".into()),
+            remapping: Some("risc0-ethereum-1.2.0".into()),
         },
         SoldeerDep {
             name: "vlayer".into(),

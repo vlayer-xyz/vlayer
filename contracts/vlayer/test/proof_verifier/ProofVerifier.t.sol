@@ -1,10 +1,10 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.21;
 
-import {Test, console} from "forge-std-1.9.2/src/Test.sol";
+import {Test, console} from "forge-std-1.9.4/src/Test.sol";
 
-import {IRiscZeroVerifier, Receipt, VerificationFailed} from "risc0-ethereum-1.1.4/src/IRiscZeroVerifier.sol";
-import {RiscZeroMockVerifier} from "risc0-ethereum-1.1.4/src/test/RiscZeroMockVerifier.sol";
+import {IRiscZeroVerifier, Receipt, VerificationFailed} from "risc0-ethereum-1.2.0/src/IRiscZeroVerifier.sol";
+import {RiscZeroMockVerifier} from "risc0-ethereum-1.2.0/src/test/RiscZeroMockVerifier.sol";
 
 import {ProofVerifierBase} from "../../src/proof_verifier/ProofVerifierBase.sol";
 import {CallAssumptions} from "../../src/CallAssumptions.sol";
