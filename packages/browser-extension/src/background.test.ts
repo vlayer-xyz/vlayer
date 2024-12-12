@@ -41,8 +41,8 @@ describe("zk related messaging", () => {
   });
 
   it("should clear history and zkProvingStatus on RequestWebProof message", async () => {
-    await browser.storage.local.set({ history: [{ id: "1" }] });
-    await browser.storage.local.set({
+    await browser.storage.session.set({ browsingHistory: [{ id: "1" }] });
+    await browser.storage.session.set({
       zkProvingStatus: ZkProvingStatus.Proving,
     });
     await browser.runtime.sendMessage({
