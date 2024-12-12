@@ -10,6 +10,7 @@
   },
   "devDependencies": {
     "@playwright/test": "^1.48.0",
+    "@testing-library/react": "^16.1.0",
     "@types/bun": "latest",
     "@types/eslint__js": "^8.42.3",
     "@vitest/coverage-v8": "2.1.4",
@@ -39,6 +40,6 @@
   "dependencies": {
     "url-regex": "^5.0.0",
     "urlpattern-polyfill": "^10.0.0",
-    "vitest": "^2.1.4"
+    "vitest": "^2.1.8"
   }
 }
