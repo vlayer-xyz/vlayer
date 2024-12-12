@@ -12,7 +12,7 @@ use chain_common::{ChainProofReceipt, RpcChainProof, SyncStatus};
 use chain_trie::{verify_chain_trie, UnverifiedChainTrie};
 use derive_more::Debug;
 use derive_new::new;
-use key_value::{Database, InMemoryDatabase, Mdbx, ReadTx, ReadWriteTx, WriteTx};
+use key_value::{Database, DbError, InMemoryDatabase, Mdbx, ReadTx, ReadWriteTx, WriteTx};
 use mpt::{reorder_root_first, sha2, Sha256};
 use proof_builder::{mpt_from_proofs, MerkleProofBuilder, ProofResult};
 
@@ -28,6 +28,7 @@ use common::{GuestElf, Hashable};
 pub use db_node::DbNode;
 pub use error::{ChainDbError, ChainDbResult};
 pub use proof_builder::MerkleProof;
+use tracing::warn;
 use u64_range::NonEmptyRange;
 
 /// Merkle trie nodes table. Holds `node_hash -> rlp_node` mapping
@@ -333,7 +334,17 @@ impl<TX: WriteTx + ?Sized> ChainDbTx<TX> {
 
     pub fn insert_node(&mut self, node_rlp: &Bytes) -> ChainDbResult<()> {
         let node_hash = sha2(node_rlp);
-        self.tx.insert(NODES, &node_hash[..], &node_rlp[..])?;
+        self.tx
+            .insert(NODES, &node_hash[..], &node_rlp[..])
+            .or_else(|err| match err {
+                DbError::DuplicateKey { .. } => {
+                    // Duplicate keys are possible in test environments when two anvil instances mine the
+                    // same blocks. It is safe to ignore, because the corresponding values are also the same.
+                    warn!("{err:?}");
+                    Ok(())
+                }
+                err => Err(err),
+            })?;
         Ok(())
     }
 

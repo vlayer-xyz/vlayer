@@ -120,6 +120,16 @@ fn node_get_insert_delete() -> Result<()> {
 }
 
 #[test]
+fn insert_same_node_twice() -> Result<()> {
+    let mut db = get_test_db();
+    let node_rlp = Node::Null.rlp_encoded();
+    // Inserting the same node twice should not raise any error
+    insert_node(&mut db, &node_rlp);
+    insert_node(&mut db, &node_rlp);
+    Ok(())
+}
+
+#[test]
 fn proof_empty_db() -> Result<()> {
     let db = get_test_db();
     assert_eq!(

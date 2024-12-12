@@ -21,6 +21,7 @@ nybbles = { workspace = true }
 risc0-zkvm = { workspace = true }
 serde = { workspace = true }
 thiserror = { workspace = true }
+tracing = { workspace = true }
 u64_range = { workspace = true }
 
 [dev-dependencies]
