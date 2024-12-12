@@ -1,6 +1,6 @@
 {
 
-  "name": "@vlayer/react",
+  "name": "@vlayer/react-sdk",
   "exports": {
     ".": "./src/index.ts" 
   },
