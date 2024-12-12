@@ -31,7 +31,11 @@
     "extension-hooks/",
     "test-web-app/",
     "test-json-server/",
+<<<<<<< HEAD
     "sdk-hooks/"
+=======
+    "react-sdk/"
+>>>>>>> 2b4e9942 (Scaffold react-hooks library)
   ],
   "trustedDependencies": [
     "viem"
