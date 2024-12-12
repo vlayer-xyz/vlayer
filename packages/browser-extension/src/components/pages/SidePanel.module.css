@@ -6,4 +6,5 @@
 
 .container {
   height: 100vh;
+  grid-column: span 10;
 }
