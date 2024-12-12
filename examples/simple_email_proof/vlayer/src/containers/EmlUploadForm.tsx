@@ -123,8 +123,8 @@ const EmlUploadForm = () => {
         args: proof,
         chain,
         account: import.meta.env.VITE_USE_WINDOW_ETHEREUM_TRANSPORT
-          ? (account as Account)
-          : (claimerAddr as Address),
+          ? (claimerAddr as Address)
+          : (account as Account),
       });
 
       const receipt = await walletClient.waitForTransactionReceipt({

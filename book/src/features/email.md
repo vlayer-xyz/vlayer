@@ -53,7 +53,7 @@ DKIM validation will fail if the email body has been modified by a proxy server.
 ## Example
 Let's say someone wants to prove they are part of company or organization. One way to do this is to take a screenshot and send it to the verifier. However, this is not very reliable because screenshot images can be easily manipulated, and obviously such an image cannot be verified on-chain. 
 
-A better option is to prove that one can send email from it's organization domain. Below is a sample `Prover` contract that verifies that the sender sent email from a specific domain.
+A better option is to prove that one can send email from it's organization domain. Below is a sample `Prover` contract that verifies from which domain sender sent email.
 
 Below is an example of such proof generation:
 
@@ -61,31 +61,27 @@ Below is an example of such proof generation:
 import {Strings} from "@openzeppelin-contracts-5.0.1/utils/Strings.sol";
 import {Proof} from "vlayer-0.1.0/Proof.sol";
 import {Prover} from "vlayer-0.1.0/Prover.sol";
+import {RegexLib} from "vlayer-0.1.0/Regex.sol";
 import {VerifiedEmail, UnverifiedEmail, EmailProofLib} from "vlayer-0.1.0/EmailProof.sol";
-import {EmailStrings} from "./EmailStrings.sol";
 
 contract EmailDomainProver is Prover {
+    using RegexLib for string;
     using Strings for string;
-    using EmailStrings for string;
     using EmailProofLib for UnverifiedEmail;
-
-    string targetDomain;
-
-    constructor(string memory _targetDomain) {
-        targetDomain = _targetDomain;
-    }
 
     function main(UnverifiedEmail calldata unverifiedEmail, address targetWallet)
         public
         view
-        returns (Proof memory, bytes32, address)
+        returns (Proof memory, bytes32, address, string memory)
     {
         VerifiedEmail memory email = unverifiedEmail.verify();
+        require(email.subject.equal("Verify me for Email NFT"), "incorrect subject");
+        // Extract domain from email address
+        string[] memory captures = email.from.capture("^[^@]+@([^@]+)$");
+        require(captures.length == 2, "invalid email domain");
+        require(bytes(captures[1]).length > 0, "invalid email domain");
 
-        require(email.from.contains(targetDomain), "incorrect sender domain");
-        require(email.subject.equal("Verify me for company NFT"), "incorrect subject");
-
-        return (proof(), sha256(abi.encodePacked(email.from)), targetWallet);
+        return (proof(), sha256(abi.encodePacked(email.from)), targetWallet, captures[1]);
     }
 }
 ```
