@@ -1,4 +1,4 @@
-import { HistoryItem } from "../state/history.ts";
+import { BrowsingHistoryItem } from "../state/history.ts";
 import { StepStatus } from "constants/step.ts";
 import { expect } from "vitest";
 import { calculateSteps } from "./useSteps";
@@ -11,7 +11,7 @@ export const expectedStatuses = ({
 }: {
   input: {
     isZkProvingDone: boolean;
-    history: HistoryItem[];
+    history: BrowsingHistoryItem[];
   };
   output: StepStatus[];
 }) => {
