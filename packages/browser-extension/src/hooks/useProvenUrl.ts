@@ -1,9 +1,9 @@
 import { useBrowsingHistory } from "./useBrowsingHistory";
 import { useProvingSessionConfig } from "./useProvingSessionConfig";
-import { HistoryItem } from "../state/history";
+import { BrowsingHistoryItem } from "../state/history";
 import { LOADING } from "@vlayer/extension-hooks";
 
-export function useProvenUrl(): HistoryItem | null {
+export function useProvenUrl(): BrowsingHistoryItem | null {
   const [config] = useProvingSessionConfig();
   const [browsingHistory] = useBrowsingHistory();
 

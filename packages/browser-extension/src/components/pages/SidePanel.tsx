@@ -2,24 +2,13 @@ import { TlsnProofContextProvider } from "hooks/useTlsnProver";
 import { Grid, Theme } from "@radix-ui/themes";
 import React, { FC } from "react";
 import { SidePanelContent } from "./SidePanelContent";
+import styles from "./SidePanel.module.css";
 export const SidePanel: FC = () => {
   return (
     <TlsnProofContextProvider>
       <Theme accentColor="violet">
-        <Grid
-          columns="10"
-          gapY="4"
-          top="16"
-          style={{ paddingTop: "80px", height: "100vh" }}
-          className="h-screen"
-        >
-          <div
-            className="h-screen"
-            style={{
-              gridColumn: "span 10",
-              fontFamily: "Sora",
-            }}
-          >
+        <Grid columns="10" gapY="4" top="16" className={styles.grid}>
+          <div className={styles.container}>
             <SidePanelContent />
           </div>
         </Grid>

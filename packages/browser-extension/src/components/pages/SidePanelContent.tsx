@@ -8,18 +8,19 @@ import { HelpSection } from "components/organisms";
 import { Steps } from "components/organisms";
 export const SidePanelContent = () => {
   const [config] = useProvingSessionConfig();
+
+  if (config === LOADING) {
+    return <div>Loading...</div>;
+  }
+
+  if (isEmptyWebProverSessionConfig(config)) {
+    return <EmptyFlowCard />;
+  }
+
   return (
     <>
-      {config === LOADING ? (
-        <div>Loading...</div>
-      ) : isEmptyWebProverSessionConfig(config) ? (
-        <EmptyFlowCard />
-      ) : (
-        <>
-          <Steps />
-          <HelpSection />
-        </>
-      )}
+      <Steps />
+      <HelpSection />
     </>
   );
 };
