@@ -2248,6 +2248,7 @@ dependencies = [
  "risc0-zkvm",
  "serde",
  "thiserror",
+ "tracing",
  "u64_range",
 ]
 
