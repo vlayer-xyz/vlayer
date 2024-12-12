@@ -2,7 +2,7 @@ import { Store } from "./store";
 import browser from "webextension-polyfill";
 import { webProverSessionContextManager } from "./webProverSessionContext";
 
-export type HistoryItem = {
+export type BrowsingHistoryItem = {
   url: string;
   headers?: browser.WebRequest.HttpHeadersItemType[];
   cookies?: browser.Cookies.Cookie[];
@@ -12,7 +12,7 @@ export type HistoryItem = {
 
 export type History = {
   currentUrl: string;
-  history: HistoryItem[];
+  browsingHistory: BrowsingHistoryItem[];
 };
 
 export class HistoryContextManager {
@@ -36,9 +36,10 @@ export class HistoryContextManager {
     return config?.steps.map((step: { url: string }) => step.url) || [];
   }
 
-  async updateHistory(item: HistoryItem): Promise<void> {
+  async updateHistory(item: BrowsingHistoryItem): Promise<void> {
     let newItem = item;
-    let history = (await historyContextManager.store.get("history")) || [];
+    let history =
+      (await historyContextManager.store.get("browsingHistory")) || [];
     const existingItemIndex = history.findIndex((i) => i.url === item.url);
 
     // Add cookies and headers and mark eventually as ready
@@ -56,7 +57,7 @@ export class HistoryContextManager {
     } else {
       history = [...history, newItem];
     }
-    return historyContextManager.store.set("history", history);
+    return historyContextManager.store.set("browsingHistory", history);
   }
 }
 

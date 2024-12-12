@@ -49,7 +49,7 @@ describe("zk related messaging", () => {
       action: ExtensionAction.RequestWebProof,
       payload: { steps: [] },
     });
-    const storedHistory = await browser.storage.session.get("history");
+    const storedHistory = await browser.storage.session.get("browsingHistory");
     expect(storedHistory.history).toEqual([]);
     const storedStatus = await browser.storage.session.get("zkProvingStatus");
     expect(storedStatus.zkProvingStatus).toEqual(ZkProvingStatus.NotStarted);
