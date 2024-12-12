@@ -16,7 +16,7 @@ export class WebProverSessionContextManager extends Store<WebProverSessionContex
   public static get instance(): WebProverSessionContextManager {
     if (!this.#instance) {
       this.#instance = new WebProverSessionContextManager(
-        browser.storage.local,
+        browser.storage.session,
       );
     }
     return this.#instance;

@@ -20,6 +20,7 @@ import { useProvenUrl } from "./useProvenUrl";
 import { useTrackHistory } from "hooks/useTrackHistory";
 import { removeQueryParams } from "lib/removeQueryParams";
 import sendMessageToServiceWorker from "lib/sendMessageToServiceWorker";
+import { LOADING } from "@vlayer/extension-hooks";
 
 type ProverConfig = {
   serverDns: string;
@@ -94,7 +95,11 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
       const hostname = new URL(provenUrl.url).hostname;
 
       await init({ loggingLevel: "Debug" });
-      const notary = NotaryServer.from(provingSessionConfig.notaryUrl || "");
+      const notary = NotaryServer.from(
+        provingSessionConfig !== LOADING
+          ? provingSessionConfig.notaryUrl || ""
+          : "",
+      );
       const prover = await new Prover({
         serverDns: hostname,
         maxSentData: 4096,
@@ -105,7 +110,9 @@ export const TlsnProofContextProvider = ({ children }: PropsWithChildren) => {
       await prover.setup(sessionUrl);
 
       const res = await prover.sendRequest(
-        provingSessionConfig.wsProxyUrl + `?token=${hostname}`,
+        provingSessionConfig !== LOADING
+          ? provingSessionConfig.wsProxyUrl + `?token=${hostname}`
+          : "",
         {
           url: removeQueryParams(provenUrl.url),
           method: "GET",

@@ -1,4 +1,4 @@
-import { HistoryItem } from "../state/history";
+import { BrowsingHistoryItem } from "../state/history";
 import { Step, StepStatus } from "../constants";
 import { UrlPattern, WebProofStep } from "../web-proof-commons";
 import { useProvingSessionConfig } from "hooks/useProvingSessionConfig.ts";
@@ -7,25 +7,25 @@ import { useZkProvingState } from "./useZkProvingState";
 import { URLPattern } from "urlpattern-polyfill";
 
 const isUrlRequestCompleted = (
-  browsingHistory: HistoryItem[],
+  browsingHistory: BrowsingHistoryItem[],
   step: { url: UrlPattern },
 ): boolean => {
-  return !!browsingHistory.find((item: HistoryItem) => {
+  return !!browsingHistory.find((item: BrowsingHistoryItem) => {
     return new URLPattern(step.url as string).test(item.url) && item.ready;
   });
 };
 
 const isUrlVisited = (
-  browsingHistory: HistoryItem[],
+  browsingHistory: BrowsingHistoryItem[],
   step: { url: UrlPattern },
 ): boolean => {
-  return !!browsingHistory.find((item: HistoryItem) => {
+  return !!browsingHistory.find((item: BrowsingHistoryItem) => {
     return new URLPattern(step.url as string).test(item.url);
   });
 };
 
 const hasProof = (
-  _browsingHistory: HistoryItem[],
+  _browsingHistory: BrowsingHistoryItem[],
   _step: { url: UrlPattern },
   isZkProvingDone: boolean,
 ) => {
@@ -61,7 +61,7 @@ const calculateStepStatus = ({
 }: {
   hasUncompletedStep: boolean;
   step: WebProofStep;
-  history: HistoryItem[];
+  history: BrowsingHistoryItem[];
   isZkProvingDone: boolean;
 }): StepStatus => {
   //after uncompleted step all steps can only by further no need to calculate anything
@@ -86,7 +86,7 @@ export const calculateSteps = ({
   isZkProvingDone,
 }: {
   stepsSetup: WebProofStep[];
-  history: HistoryItem[];
+  history: BrowsingHistoryItem[];
   isZkProvingDone: boolean;
 }) => {
   return stepsSetup.reduce((accumulator, currentStep) => {
@@ -112,9 +112,10 @@ export const calculateSteps = ({
 export const useSteps = (): Step[] => {
   const [config] = useProvingSessionConfig();
   const [history] = useBrowsingHistory();
+  console.log("history", history);
   const { isDone: isZkProvingDone } = useZkProvingState();
   return calculateSteps({
-    stepsSetup: config.steps,
+    stepsSetup: config !== "loading" ? config.steps : [],
     history,
     isZkProvingDone,
   });

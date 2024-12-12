@@ -1,4 +1,4 @@
-import { HistoryItem } from "../state/history.ts";
+import { BrowsingHistoryItem } from "../state/history.ts";
 import { StepStatus } from "constants/step.ts";
 import { WebProofStep } from "../web-proof-commons";
 
@@ -24,7 +24,7 @@ export const testData = [
   {
     input: {
       isZkProvingDone: false,
-      history: [] as HistoryItem[],
+      history: [] as BrowsingHistoryItem[],
       id: "Empty history",
     },
     output: [StepStatus.Current, StepStatus.Further, StepStatus.Further],
@@ -34,7 +34,7 @@ export const testData = [
       isZkProvingDone: false,
       history: [
         { url: "https://example.com/start", ready: true },
-      ] as HistoryItem[],
+      ] as BrowsingHistoryItem[],
       id: "Start page visited ",
     },
     output: [StepStatus.Completed, StepStatus.Current, StepStatus.Further],
@@ -44,7 +44,7 @@ export const testData = [
       isZkProvingDone: false,
       history: [
         { url: "https://example.com/expect", ready: true },
-      ] as HistoryItem[],
+      ] as BrowsingHistoryItem[],
       id: "Expect page visited without visiting start page ",
     },
     output: [StepStatus.Current, StepStatus.Further, StepStatus.Further],
@@ -54,7 +54,7 @@ export const testData = [
       isZkProvingDone: true,
       history: [
         { url: "https://example.com/notarize", ready: true },
-      ] as HistoryItem[],
+      ] as BrowsingHistoryItem[],
       id: "Notarize page visited and proof is in place but without visiting start page ",
     },
     output: [StepStatus.Current, StepStatus.Further, StepStatus.Further],
@@ -65,7 +65,7 @@ export const testData = [
       history: [
         { url: "https://example.com/start", ready: true },
         { url: "https://example.com/path/expect", ready: true },
-      ] as HistoryItem[],
+      ] as BrowsingHistoryItem[],
       id: "Expect page visited and start page visited ",
     },
     output: [StepStatus.Completed, StepStatus.Completed, StepStatus.Further],
@@ -76,7 +76,7 @@ export const testData = [
       history: [
         { url: "https://example.com/start", ready: true },
         { url: "https://example.com/path/expect", ready: false },
-      ] as HistoryItem[],
+      ] as BrowsingHistoryItem[],
       id: "Expect page visited ( no cookies) and start page visited ",
     },
     output: [StepStatus.Completed, StepStatus.Completed, StepStatus.Further],
@@ -88,7 +88,7 @@ export const testData = [
         { url: "https://example.com/start", ready: true },
         { url: "https://example.com/htap/expect", ready: true },
         { url: "https://example.com/notarize", ready: true },
-      ] as HistoryItem[],
+      ] as BrowsingHistoryItem[],
       id: "All pages visited but no proof",
     },
     output: [StepStatus.Completed, StepStatus.Completed, StepStatus.Current],
@@ -100,7 +100,7 @@ export const testData = [
         { url: "https://example.com/start", ready: true },
         { url: "https://example.com/htap/expect", ready: true },
         { url: "http://example.com/notarize", ready: true },
-      ] as HistoryItem[],
+      ] as BrowsingHistoryItem[],
       id: "All data in place",
     },
     output: [StepStatus.Completed, StepStatus.Completed, StepStatus.Completed],

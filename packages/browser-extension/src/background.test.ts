@@ -36,22 +36,22 @@ describe("zk related messaging", () => {
     expect(zkProvingSpy).toHaveBeenCalledWith({
       status: ZkProvingStatus.Proving,
     });
-    const storedStatus = await browser.storage.local.get("zkProvingStatus");
+    const storedStatus = await browser.storage.session.get("zkProvingStatus");
     expect(storedStatus.zkProvingStatus).toBe(ZkProvingStatus.Proving);
   });
 
   it("should clear history and zkProvingStatus on RequestWebProof message", async () => {
-    await browser.storage.local.set({ history: [{ id: "1" }] });
-    await browser.storage.local.set({
+    await browser.storage.session.set({ browsingHistory: [{ id: "1" }] });
+    await browser.storage.session.set({
       zkProvingStatus: ZkProvingStatus.Proving,
     });
     await browser.runtime.sendMessage({
       action: ExtensionAction.RequestWebProof,
       payload: { steps: [] },
     });
-    const storedHistory = await browser.storage.local.get("history");
-    expect(storedHistory.history).toEqual([]);
-    const storedStatus = await browser.storage.local.get("zkProvingStatus");
+    const storedHistory = await browser.storage.session.get("browsingHistory");
+    expect(storedHistory.browsingHistory).toEqual([]);
+    const storedStatus = await browser.storage.session.get("zkProvingStatus");
     expect(storedStatus.zkProvingStatus).toEqual(ZkProvingStatus.NotStarted);
   });
 });
