@@ -50,7 +50,7 @@ describe("zk related messaging", () => {
       payload: { steps: [] },
     });
     const storedHistory = await browser.storage.session.get("browsingHistory");
-    expect(storedHistory.history).toEqual([]);
+    expect(storedHistory.browsingHistory).toEqual([]);
     const storedStatus = await browser.storage.session.get("zkProvingStatus");
     expect(storedStatus.zkProvingStatus).toEqual(ZkProvingStatus.NotStarted);
   });

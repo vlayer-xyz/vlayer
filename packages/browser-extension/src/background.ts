@@ -93,7 +93,7 @@ const handleProofRequest = async (
     await chrome.sidePanel.open({ windowId: sender.tab?.windowId });
   }
   await browser.storage.session.set({
-    history: [],
+    browsingHistory: [],
     zkProvingStatus: ZkProvingStatus.NotStarted,
   });
 
