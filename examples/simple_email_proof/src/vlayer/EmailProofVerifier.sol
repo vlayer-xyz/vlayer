@@ -15,16 +15,11 @@ contract EmailDomainVerifier is Verifier, ERC721 {
     mapping(bytes32 => bool) public takenEmailHashes;
     mapping(uint256 => string) public emailDomains;
 
-    constructor(address _prover) ERC721("EmailNFT", "EML"){
+    constructor(address _prover) ERC721("EmailNFT", "EML") {
         prover = _prover;
     }
 
-    function verify(
-        Proof calldata, 
-        bytes32 _emailHash, 
-        address _targetWallet, 
-        string memory _emailDomain
-    )
+    function verify(Proof calldata, bytes32 _emailHash, address _targetWallet, string memory _emailDomain)
         public
         onlyVerified(prover, EmailDomainProver.main.selector)
     {
@@ -36,4 +31,3 @@ contract EmailDomainVerifier is Verifier, ERC721 {
         _safeMint(_targetWallet, tokenId);
     }
 }
-
