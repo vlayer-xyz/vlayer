@@ -9,7 +9,7 @@ use tlsn_core::{
 
 use crate::{request_transcript::RequestTranscript, response_transcript::ResponseTranscript};
 
-#[derive(Debug, Clone, Deserialize, Serialize, PartialEq)]
+#[derive(Deserialize, Serialize, PartialEq, Debug)]
 #[serde(deny_unknown_fields)]
 pub struct WebProof {
     pub(crate) version: String,
