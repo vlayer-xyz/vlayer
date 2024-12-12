@@ -1,9 +1,10 @@
-use alloy_primitives::ChainId;
+use alloy_primitives::{BlockNumber, ChainId};
+use async_trait::async_trait;
 use axum_jrpc::Value;
 use block_header::EvmBlockHeader;
 use block_trie::BlockTrie;
 use bytes::Bytes;
-use chain_common::{GetChainProof, GetSyncStatus, RpcChainProof};
+use chain_common::{ChainProof, GetChainProof, GetSyncStatus, RpcChainProof, SyncStatus};
 use common::{GuestElf, Hashable, Method};
 use lazy_static::lazy_static;
 use risc0_zkvm::{serde::to_vec, FakeReceipt, Receipt, ReceiptClaim};
@@ -86,6 +87,35 @@ impl ChainProofServerMock {
 
     pub fn assert(&self) {
         self.mock_server.assert();
+    }
+
+    pub fn into_client(self) -> MockServerClient {
+        let client = chain_client::RpcClient::new(self.url());
+        MockServerClient {
+            _server: self,
+            client,
+        }
+    }
+}
+
+/// This struct exists to prevent dropping server mock
+pub struct MockServerClient {
+    _server: ChainProofServerMock,
+    client: chain_client::RpcClient,
+}
+
+#[async_trait]
+impl chain_client::Client for MockServerClient {
+    async fn get_chain_proof(
+        &self,
+        chain_id: ChainId,
+        block_numbers: Vec<BlockNumber>,
+    ) -> Result<ChainProof, chain_client::Error> {
+        self.client.get_chain_proof(chain_id, block_numbers).await
+    }
+
+    async fn get_sync_status(&self, chain_id: ChainId) -> Result<SyncStatus, chain_client::Error> {
+        self.client.get_sync_status(chain_id).await
     }
 }
 
