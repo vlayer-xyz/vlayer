@@ -1,4 +1,8 @@
-use std::{env, fs, io, io::Write, path::PathBuf, process::Command};
+use std::{
+    env, fs, io,
+    io::{Read, Write},
+    path::PathBuf,
+};
 
 use rustyline::{error::ReadlineError, DefaultEditor};
 
@@ -10,17 +14,19 @@ const BASH: &str = r#"vladcd () {
 }
 "#;
 
-fn vladcd_exists() -> bool {
-    which::which("vladcd").is_ok()
+fn vladcd_exists(path: &PathBuf) -> bool {
+    fs::read_to_string(path).unwrap().contains("vladcd")
 }
 
 fn update_zhrc() -> Result<(), io::Error> {
-    if vladcd_exists() {
+    let mut shell_rc_path = env::home_dir().unwrap();
+    shell_rc_path.push(".zshrc");
+
+    if vladcd_exists(&shell_rc_path) {
         println!("Skipping .zshrc update");
         return Ok(());
     }
-    let mut shell_rc_path = env::home_dir().unwrap();
-    shell_rc_path.push(".zshrc");
+
     let mut shell_rc = fs::OpenOptions::new().append(true).open(shell_rc_path)?;
 
     println!("Run `source ~/.zshrc` to update your shell");
