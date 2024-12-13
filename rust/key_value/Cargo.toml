@@ -21,3 +21,6 @@ workspace = true
 [[bench]]
 name = "mdbx_insert"
 harness = false
+
+[lib]
+doctest = false

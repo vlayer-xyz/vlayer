@@ -21,3 +21,6 @@ sha2 = { workspace = true }
 
 [lints]
 workspace = true
+
+[lib]
+doctest = false

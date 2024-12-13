@@ -23,3 +23,6 @@ workspace = true
 
 [package.metadata.cargo-machete]
 ignored = ["alloy-rlp"]
+
+[lib]
+doctest = false

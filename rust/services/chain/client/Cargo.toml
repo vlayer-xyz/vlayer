@@ -27,3 +27,6 @@ rpc = ["mpt", "serde_json", "server_utils", "tracing"]
 
 [lints]
 workspace = true
+
+[lib]
+doctest = false

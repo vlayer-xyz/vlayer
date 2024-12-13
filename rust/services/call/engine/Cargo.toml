@@ -53,3 +53,6 @@ testing = []
 [lints]
 workspace = true
 
+
+[lib]
+doctest = false

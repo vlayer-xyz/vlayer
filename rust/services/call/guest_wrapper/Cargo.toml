@@ -16,3 +16,6 @@ methods = ["risc0_guest"]
 
 [lints]
 workspace = true
+
+[lib]
+doctest = false

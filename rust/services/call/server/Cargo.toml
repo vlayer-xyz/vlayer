@@ -44,3 +44,6 @@ web_proof = { workspace = true, features = ["fixtures"] }
 
 [lints]
 workspace = true
+
+[lib]
+doctest = false
