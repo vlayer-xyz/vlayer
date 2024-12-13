@@ -7,7 +7,7 @@ on:
   pull_request:
     paths:
       - ".github/workflows/test_release.yaml"
-      - "docker/web-proof/docker-compose-test-release.yaml"
+      - "docker/docker-compose.devnet.yaml"
       - "bash/test-release.sh"
 concurrency:
   group: ${{ github.workflow }}
@@ -23,10 +23,10 @@ jobs:
         with:
           submodules: recursive
       - uses: hoverkraft-tech/compose-action@v2.0.2
-        env:
-          ALCHEMY_API_KEY: ${{ secrets.ALCHEMY_API_KEY }}
         with:
-          compose-file: docker/web-proof/docker-compose-test-release.yaml
+          compose-file: docker/docker-compose.devnet.yaml
+          services: |
+            vlayer
       - name: Test release
         env:
           VLAYER_ENV: dev
@@ -57,6 +57,8 @@ jobs:
           submodules: recursive
       - uses: hoverkraft-tech/compose-action@v2.0.2
         with:
-          compose-file: docker/web-proof/docker-compose-test-release.yaml
+          compose-file: docker/docker-compose.devnet.yaml
+          services: |
+            vlayer
       - name: Test js sdk release
         run: bash/test-js-sdk-release.sh
