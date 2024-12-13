@@ -1,6 +1,6 @@
 FROM --platform=linux/amd64 ubuntu:latest AS vlayer-base
-RUN apt-get update
-RUN apt-get install -y --no-install-recommends \
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
     curl \
     ca-certificates \
     git \
