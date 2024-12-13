@@ -32,6 +32,14 @@ services:
     container_name: notary-server
     ports:
       - "127.0.0.1:7047:7047"
+  contracts:
+    build:
+      context: ..
+      dockerfile: docker/Dockerfile
+      target: vlayer-contracts
+    volumes:
+      - ../contracts:/src:rw
+    command: ["-c", "cp -r /home/vlayer/contracts/vlayer /src"]
   vlayer:
     depends_on:
       - anvil-a
