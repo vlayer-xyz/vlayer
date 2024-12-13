@@ -51,7 +51,7 @@ services:
     container_name: vlayer
     environment:
       RUST_LOG: "info,call_engine=debug"
-    command: "serve --proof fake --host 0.0.0.0 --rpc-url 31337:http://anvil-a:8545 --rpc-url 31338:http://anvil-b:8545 --rpc-url 31339:http://anvil-c:8545"
+    command: "/home/vlayer/vlayer serve --proof fake --host 0.0.0.0 --rpc-url 31337:http://anvil-a:8545 --rpc-url 31338:http://anvil-b:8545 --rpc-url 31339:http://anvil-c:8545"
     ports:
       - "127.0.0.1:3000:3000"
   vlayer-chain-worker-a:
