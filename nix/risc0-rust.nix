@@ -38,8 +38,8 @@ let
   };
 in
 rec {
-  risc0-rust-toolchain = {
-    default = risc0-rust-toolchain."1.81.0";
+  risc0-rust = {
+    default = risc0-rust."1.81.0";
     inherit (package "1.81.0") "1.81.0";
   };
 }

@@ -36,11 +36,11 @@
         risc0-version = "1.2.0";
         risc0 = (import ./nix/risc0.nix { inherit system pkgs; }).risc0.${risc0-version};
 
-        risc0-rust-toolchain-version = "1.81.0";
-        risc0-rust-toolchain = (import ./nix/risc0-rust-toolchain.nix { inherit system pkgs; }).risc0-rust-toolchain.${risc0-rust-toolchain-version};
+        risc0-rust-version = "1.81.0";
+        risc0-rust = (import ./nix/risc0-rust.nix { inherit system pkgs; }).risc0-rust.${risc0-rust-version};
 
         commonBuildInputs = with pkgs; [
-          risc0-rust-toolchain
+          risc0-rust.toolchain
           foundry-bin
           libiconv
         ];
@@ -111,7 +111,7 @@
           CC_riscv32im_risc0_zkvm_elf = CC_riscv32im_risc0_zkvm_elf;
           CFLAGS_riscv32im_risc0_zkvm_elf = CFLAGS_riscv32im_risc0_zkvm_elf;
 
-          RISC0_TOOLCHAIN_PATH = "${risc0-rust-toolchain.out}";
+          RISC0_TOOLCHAIN_PATH = "${risc0-rust.toolchain.out}";
         });
       }
     );
