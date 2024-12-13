@@ -14,13 +14,15 @@ mod private {
     include!(concat!(env!("OUT_DIR"), "/directories.rs"));
 }
 
+pub use private::Examples as PrivateExamples;
+
 #[derive(Subcommand)]
 pub enum Commands {
     Init,
     #[clap(alias = "e")]
     Examples {
         #[command(subcommand)]
-        command: ExampleCommands,
+        command: private::Examples,
     },
     #[clap(alias = "r")]
     Rust {
@@ -65,17 +67,9 @@ pub enum InfraServices {
     Vlayer,
 }
 
-#[derive(Subcommand)]
+#[derive(Subcommand, Debug)]
 pub enum ExampleCommands {
-    Run {
-        #[command(subcommand)]
-        command: ExampleServices,
-    },
-}
-
-#[derive(Subcommand)]
-pub enum ExampleServices {
-    WebProof,
+    Run,
 }
 
 #[derive(Subcommand)]

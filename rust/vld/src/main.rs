@@ -9,7 +9,9 @@ use std::{
 };
 
 use clap::Parser;
-use cli::{Cli, Commands, ContractCommands, ExampleCommands, ExampleServices, InfraCommands, InfraServices};
+use cli::{Cli, Commands, ContractCommands, ExampleCommands, InfraCommands, InfraServices};
+
+use crate::cli::PrivateExamples;
 
 fn print_dir(path: &str, dir: &str) {
     let vlayer_path = config::get_vlayer_path();
@@ -35,42 +37,48 @@ fn main() {
         }
         Commands::Examples { command } => {
             let vlayer_path = config::get_vlayer_path();
+
+            let path = &command.to_string();
+
+            let command = match command {
+                PrivateExamples::SimpleWebProof { command } => command,
+                PrivateExamples::SimpleTimeTravel { command } => command,
+                PrivateExamples::Simple { command } => command,
+                PrivateExamples::SimpleEmailProof { command } => command,
+                PrivateExamples::SimpleTeleport { command } => command,
+            };
             match &command {
-                ExampleCommands::Run {
-                    command: example_command,
-                } => {
-                    let service = &example_command;
-                    match service {
-                        ExampleServices::WebProof => {
-                            let web_proof_docker = run_web_proof_docker(&vlayer_path);
-                            child_processes.push(web_proof_docker);
+                Some(ExampleCommands::Run) => {
+                    let web_proof_docker = run_web_proof_docker(&vlayer_path);
+                    child_processes.push(web_proof_docker);
 
-                            let mut attempts = 0;
-                            while attempts < 30 {
-                                if let Ok(socket) = std::net::TcpStream::connect("127.0.0.1:8545") {
-                                    drop(socket);
-                                    break;
-                                }
-                                std::thread::sleep(std::time::Duration::from_secs(1));
-                                attempts += 1;
-                            }
-                            if attempts == 30 {
-                                eprintln!("Timeout waiting for anvil services to be ready");
-                                std::process::exit(1);
-                            }
-                            println!("Anvil services are ready");
-                            deploy_contracts(&vlayer_path);
-
-                            let vlayer = run_vlayer_bash(&vlayer_path);
-                            child_processes.push(vlayer);
-
-                            let web_app = run_web_app(&vlayer_path);
-                            child_processes.push(web_app);
-
-                            let extension = run_browser_extension(&vlayer_path);
-                            child_processes.push(extension);
+                    let mut attempts = 0;
+                    while attempts < 30 {
+                        if let Ok(socket) = std::net::TcpStream::connect("127.0.0.1:8545") {
+                            drop(socket);
+                            break;
                         }
+                        std::thread::sleep(std::time::Duration::from_secs(1));
+                        attempts += 1;
                     }
+                    if attempts == 30 {
+                        eprintln!("Timeout waiting for anvil services to be ready");
+                        std::process::exit(1);
+                    }
+                    println!("Anvil services are ready");
+                    deploy_contracts(&vlayer_path);
+
+                    let vlayer = run_vlayer_bash(&vlayer_path);
+                    child_processes.push(vlayer);
+
+                    let web_app = run_web_app(&vlayer_path);
+                    child_processes.push(web_app);
+
+                    let extension = run_browser_extension(&vlayer_path);
+                    child_processes.push(extension);
+                }
+                None => {
+                    print_dir("examples", path);
                 }
             }
         }

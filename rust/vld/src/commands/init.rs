@@ -1,8 +1,4 @@
-use std::{
-    env, fs, io,
-    io::{Read, Write},
-    path::PathBuf,
-};
+use std::{env, fs, io, io::Write, path::PathBuf};
 
 use rustyline::{error::ReadlineError, DefaultEditor};
 

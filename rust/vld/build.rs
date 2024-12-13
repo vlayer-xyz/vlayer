@@ -12,9 +12,9 @@ fn main() {
 
     _remove_file_if_exists(&dest_path).unwrap();
     let mut f = fs::File::create(dest_path).unwrap();
-    writeln!(f, "use clap::Subcommand;\n").unwrap();
+    writeln!(f, "use clap::Subcommand;\nuse crate::cli::ExampleCommands;\n").unwrap();
 
-    _add_enum(&mut f, "Examples", _get_dir_list("../../examples"));
+    _add_examples(&mut f, "Examples", _get_dir_list("../../examples"));
     _add_enum(&mut f, "Rust", _get_dir_list("../"));
     _add_enum(&mut f, "JS", _get_dir_list("../../packages"));
 }
@@ -64,6 +64,54 @@ pub enum {name} {{"
         .map(|dir| {
             format!(
                 "{name}::{camel} => \"{dir}\".into(),",
+                name = name,
+                camel = _camel_case(dir),
+                dir = dir
+            )
+        })
+        .collect::<Vec<String>>()
+        .join("\n\t\t\t");
+
+    writeln!(
+        file,
+        "impl ToString for {name} {{
+    fn to_string(&self) -> String {{
+        match self {{
+            {formats}
+        }}
+    }}
+}}
+"
+    )
+    .unwrap()
+}
+
+fn _add_examples(file: &mut File, name: &str, commands: Vec<String>) {
+    writeln!(
+        file,
+        "#[derive(Subcommand, Debug)]
+pub enum {name} {{"
+    )
+    .unwrap();
+
+    commands.iter().for_each(|dir| {
+        writeln!(
+            file,
+            "\t{} {{
+        #[command(subcommand)]
+        command: Option<ExampleCommands>,
+    }},",
+            _camel_case(dir)
+        )
+        .unwrap();
+    });
+    writeln!(file, "}}\n").unwrap();
+
+    let formats = commands
+        .iter()
+        .map(|dir| {
+            format!(
+                "{name}::{camel} {{..}} => \"{dir}\".into(),",
                 name = name,
                 camel = _camel_case(dir),
                 dir = dir
