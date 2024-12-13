@@ -47,7 +47,7 @@ jobs:
       - uses: hoverkraft-tech/compose-action@v2.0.2
         with:
           compose-file: docker/docker-compose.yaml
-        up-flags: "--build"
+          up-flags: "--build"
 
       - name: Run e2e test
         env:
