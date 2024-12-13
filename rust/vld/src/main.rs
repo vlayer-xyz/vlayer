@@ -1,7 +1,64 @@
+use clap::{Parser, Subcommand};
+
+/// Vlad CLI Tool
+#[derive(Parser)]
+#[command(name = "vlad")]
+#[command(about = "Vlayer internal CLI ", long_about = None)]
+struct Cli {
+    #[command(subcommand)]
+    command: Commands,
+}
+
+#[derive(Subcommand)]
+enum Commands {
+    Examples {
+        #[arg(short, long)]
+        name: String,
+    },
+    Contracts { 
+        #[arg(short, long)]
+        action: String,
+    },
+    Infra {
+        #[command(subcommand)]
+        command: InfraCommands,
+    },
+    Version,
+}
+
+#[derive(Subcommand)]
+enum InfraCommands {
+    Run {
+        #[arg(short, long)]
+        name: String,
+    },
+}
+
 fn main() {
     let vlayer_path = get_vlayer_path();
     println!("vlayer_path: {}", vlayer_path);
+    let cli = Cli::parse();
+
+    match &cli.command {
+        Commands::Examples { name } => {
+            println!("Performing examples action: {}", name);
+        }
+        Commands::Infra { command } => {
+            match &command {
+                InfraCommands::Run { name } => {
+                    println!("Performing infra action: {}", name);
+                }
+            }
+        }
+        Commands::Contracts { action } => {
+            println!("Performing contracts action: {}", action);
+        }
+        Commands::Version => {
+            println!("Vlad CLI Tool v1.0.0");
+        }
+    }
 }
+
 
 fn get_vlayer_path() -> String {
     let home_dir = std::env::var("HOME").expect("Failed to get home directory");

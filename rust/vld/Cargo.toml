@@ -9,6 +9,7 @@ edition = "2021"
 
 [dependencies]
 clap = { workspace = true, features = ["derive", "env", "string"] }
+clap_autocomplete = "0.4.2"
 
 [lints]
 workspace = true
