@@ -1,0 +1,25 @@
+name: Auto Assign Reviewers
+
+on:
+  pull_request:
+    types: [opened, reopened, synchronize]
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  assign-reviewers:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Auto Assign Reviewers
+        id: auto-assign-reviewers
+        run: |
+          cd .github/scripts && npm install && node assign-reviewers.js
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_PULL_REQUEST_NUMBER: ${{ github.event.number }}
