@@ -80,7 +80,7 @@ contract EmailDomainProver is Prover {
         string[] memory captures = email.from.capture("^[^@]+@([^@]+)$");
         require(captures.length == 2, "invalid email domain");
         require(bytes(captures[1]).length > 0, "invalid email domain");
-
+        // TODO: add more checks
         return (proof(), sha256(abi.encodePacked(email.from)), targetWallet, captures[1]);
     }
 }

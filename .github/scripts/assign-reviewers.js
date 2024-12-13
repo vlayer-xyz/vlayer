@@ -49,16 +49,16 @@ async function main() {
     };
 
     files.forEach((file) => {
-      const matchingPath = Object.keys(PATH_TO_TEAMS).find(path => 
+      const matchingPaths = Object.keys(PATH_TO_TEAMS).filter(path => 
         file.filename.startsWith(path)
       );
-      
-      if (matchingPath) {
-        PATH_TO_TEAMS[matchingPath].forEach(team => addTeam(team, reviewers));
-      }
+
+      matchingPaths.forEach(path => {
+        PATH_TO_TEAMS[path].forEach(team => addTeam(team, reviewers));
+      });
     });
 
-    // Output reviewers for the next step in the workflow
+    reviewers.delete(process.env.PR_AUTHOR.replace("@", ""));
     const reviewersList = Array.from(reviewers);
     console.log({ reviewersList });
     await octokit.request('POST /repos/{owner}/{repo}/pulls/{pull_number}/requested_reviewers', {
