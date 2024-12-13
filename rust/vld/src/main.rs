@@ -230,7 +230,7 @@ fn check_and_kill_port(port: u16) -> io::Result<()> {
 }
 
 fn deploy_contracts(vlayer_path: &str) -> std::process::Child {
-    let contracts_path = format!("{vlayer_path}/examples/test-web-app");
+    let contracts_path = format!("{vlayer_path}/packages/test-web-app");
     std::process::Command::new("bun")
         .args(["run", "deploy.ts"])
         .current_dir(&contracts_path)
