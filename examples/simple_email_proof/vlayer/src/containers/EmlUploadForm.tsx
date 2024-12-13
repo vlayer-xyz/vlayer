@@ -1,5 +1,5 @@
 import { useState, useEffect, FormEvent } from "react";
-import { Address } from "viem";
+import { Address, Account } from "viem";
 import * as chains from "viem/chains";
 import useProver from "../hooks/useProver";
 import { preverifyEmail } from "@vlayer/sdk";
@@ -58,7 +58,7 @@ const EmlUploadForm = () => {
   });
 
   const getClaimerAddr = async () => {
-    if (!account) {
+    if (import.meta.env.VITE_USE_WINDOW_ETHEREUM_TRANSPORT) {
       if (typeof window !== "undefined" && !window.ethereum) {
         throw new Error("no_wallet_detected");
       }
@@ -74,12 +74,14 @@ const EmlUploadForm = () => {
         throw new Error("no_wallet_client");
       }
       const [addr] = await walletClient.requestAddresses();
-
       setClaimerAddr(addr);
       return addr;
     }
-    setClaimerAddr(account.address);
-    return account.address;
+
+    if (account) {
+      setClaimerAddr(account.address);
+      return account.address;
+    }
   };
 
   const handleError = (err: unknown) => {
@@ -120,7 +122,9 @@ const EmlUploadForm = () => {
         functionName: "verify",
         args: proof,
         chain,
-        account: account ? account : claimerAddr,
+        account: import.meta.env.VITE_USE_WINDOW_ETHEREUM_TRANSPORT
+          ? (claimerAddr as Address)
+          : (account as Account),
       });
 
       const receipt = await walletClient.waitForTransactionReceipt({
@@ -129,7 +133,6 @@ const EmlUploadForm = () => {
       setCurrentStep("Success!");
       setIsSubmitting(false);
       if (chain.blockExplorers && receipt.status === "success") {
-        window.open(`${chain.blockExplorers?.default.url}/tx/${txHash}`);
         setSuccessMsg(
           `Verified: <a href='${chain.blockExplorers?.default.url}/tx/${txHash}'>${txHash.slice(0, 4)}...${txHash.slice(-4)}</a>`,
         );
@@ -163,7 +166,7 @@ const EmlUploadForm = () => {
 
     setCurrentStep("Connecting to wallet...");
     const addr = await getClaimerAddr();
-    await startProving(emlFile, addr);
+    await startProving(emlFile, addr as Address);
     setCurrentStep("Waiting for proof...");
   };
 

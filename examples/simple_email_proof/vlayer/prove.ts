@@ -23,8 +23,8 @@ const {
 const { prover, verifier } = await deployVlayerContracts({
   proverSpec,
   verifierSpec,
-  proverArgs: ["@vlayer.xyz"],
-  verifierArgs: ["vlayer badge", "VL"],
+  proverArgs: [],
+  verifierArgs: [],
 });
 
 console.log("Proving...");
@@ -39,7 +39,6 @@ const hash = await vlayer.prove({
   args: [await preverifyEmail(mimeEmail), john.address],
 });
 const result = await vlayer.waitForProvingResult({ hash });
-console.log("Proof:", result[0]);
 
 console.log("Verifying...");
 
