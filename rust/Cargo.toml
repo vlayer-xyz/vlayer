@@ -32,6 +32,7 @@ members = [
     "services/chain/test_utils",
     "services/chain/worker",
     "test_runner",
+    "vld",
     "web_proof",
     "zkvm-benchmarks/benchmarks",
     "zkvm-benchmarks/runner",
