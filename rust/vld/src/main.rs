@@ -8,7 +8,8 @@ use std::{
     process::Command,
 };
 
-use clap::Parser;
+use clap::{CommandFactory, Parser};
+use clap_complete::generate;
 use cli::{Cli, Commands, ContractCommands, ExampleCommands, InfraCommands, InfraServices};
 
 use crate::cli::PrivateExamples;
@@ -28,6 +29,9 @@ fn main() {
     match &cli.command {
         Commands::Init => {
             commands::init::init();
+        }
+        Commands::Complete => {
+            generate(clap_complete::Shell::Bash, &mut Cli::command(), "vlad", &mut io::stdout());
         }
         Commands::Examples { command } => {
             let ports = [3000, 8545, 5173, 5175, 3011];

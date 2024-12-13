@@ -45,6 +45,7 @@ pub enum Commands {
     },
     #[clap(alias = "v")]
     Version,
+    Complete,
 }
 
 #[derive(Subcommand)]
@@ -74,5 +75,5 @@ pub enum ExampleCommands {
 
 #[derive(Subcommand)]
 pub enum ContractCommands {
-    Rebuild
+    Rebuild,
 }
