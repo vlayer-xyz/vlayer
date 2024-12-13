@@ -9,7 +9,7 @@ use std::{
 };
 
 use clap::Parser;
-use cli::{Cli, Commands, ExampleCommands, ExampleServices, InfraCommands, InfraServices};
+use cli::{Cli, Commands, ContractCommands, ExampleCommands, ExampleServices, InfraCommands, InfraServices};
 
 fn print_dir(path: &str, dir: &str) {
     let vlayer_path = config::get_vlayer_path();
@@ -143,17 +143,13 @@ fn main() {
                 }
             }
         }
-        Commands::Contracts { action } => {
-            println!("Performing contracts action: {action}");
-            match action.as_str() {
-                "rebuild" => {
+        Commands::Contracts { command } => {
+            match &command {
+                ContractCommands::Rebuild => {
                     let vlayer_path = config::get_vlayer_path();
                     let contracts_path = format!("{vlayer_path}/contracts");
                     commands::rebuild_contracts::rebuild_contracts(&contracts_path)
                         .expect("Failed to rebuild contracts");
-                }
-                _ => {
-                    println!("Unknown action: {action}");
                 }
             }
         }

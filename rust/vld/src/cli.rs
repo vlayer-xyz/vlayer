@@ -33,8 +33,8 @@ pub enum Commands {
     },
     #[clap(alias = "c")]
     Contracts {
-        #[arg(short, long)]
-        action: String,
+        #[command(subcommand)]
+        command: ContractCommands,
     },
     #[clap(alias = "i")]
     Infra {
@@ -76,4 +76,9 @@ pub enum ExampleCommands {
 #[derive(Subcommand)]
 pub enum ExampleServices {
     WebProof,
+}
+
+#[derive(Subcommand)]
+pub enum ContractCommands {
+    Rebuild
 }
