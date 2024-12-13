@@ -2,7 +2,8 @@ use std::{env, fs, io, io::Write, path::PathBuf};
 
 use rustyline::{error::ReadlineError, DefaultEditor};
 
-const BASH: &str = r#"vladcd () {
+const BASH: &str = r#"
+vladcd () {
     local result=$(vlad "$@")
     if [ $? -eq 0 ]; then
         cd "$result"
@@ -14,7 +15,8 @@ fn vladcd_exists(path: &PathBuf) -> bool {
     fs::read_to_string(path).unwrap().contains("vladcd")
 }
 
-fn update_zhrc() -> Result<(), io::Error> {
+fn update_zhrc(path: String) -> Result<(), io::Error> {
+    println!("{}", env!("OUT_DIR"));
     let mut shell_rc_path = env::home_dir().unwrap();
     shell_rc_path.push(".zshrc");
 
@@ -26,6 +28,7 @@ fn update_zhrc() -> Result<(), io::Error> {
     let mut shell_rc = fs::OpenOptions::new().append(true).open(shell_rc_path)?;
 
     println!("Run `source ~/.zshrc` to update your shell");
+    writeln!(shell_rc, "alias vlad=\"{}/rust/target/debug/vld\"", path)?;
     writeln!(shell_rc, "{BASH}")
 }
 
@@ -55,7 +58,7 @@ fn write_config_file(path: &str) -> Result<(), io::Error> {
     writeln!(file, "VLAYER_PATH={path}")
 }
 
-fn try_find_vlayer_dir() {
+fn try_find_vlayer_dir() -> Option<String> {
     let default_value = find_file_up_tree("LICENSE", "Copyright (c) 2024 vlayer").unwrap();
     let mut rl = DefaultEditor::new().unwrap();
     loop {
@@ -65,22 +68,22 @@ fn try_find_vlayer_dir() {
         ) {
             Ok(path) if fs::exists(&path).unwrap_or(false) => {
                 write_config_file(&path).unwrap();
-                return;
+                return Some(path);
             }
             Ok(path) => {
                 println!("{path} doesn't exist");
             }
             Err(ReadlineError::Interrupted) => {
-                break;
+                return None;
             }
             Err(ReadlineError::Eof) => {
-                break;
+                return None;
             }
             _ => {}
         }
     }
 }
 pub fn init() {
-    update_zhrc().unwrap();
-    try_find_vlayer_dir();
+    let vlayer_dir = try_find_vlayer_dir();
+    update_zhrc(vlayer_dir.unwrap()).unwrap();
 }
