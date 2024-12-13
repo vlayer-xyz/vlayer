@@ -1,80 +1,54 @@
-use clap::{Parser, Subcommand};
-
-/// Vlad CLI Tool
-#[derive(Parser)]
-#[command(name = "vlad")]
-#[command(about = "Vlayer internal CLI ", long_about = None)]
-struct Cli {
-    #[command(subcommand)]
-    command: Commands,
-}
-
-#[derive(Subcommand)]
-enum Commands {
-    Examples {
-        #[arg(short, long)]
-        name: String,
-    },
-    Contracts { 
-        #[arg(short, long)]
-        action: String,
-    },
-    Infra {
-        #[command(subcommand)]
-        command: InfraCommands,
-    },
-    Version,
-}
-
-#[derive(Subcommand)]
-enum InfraCommands {
-    Run {
-        #[arg(short, long)]
-        name: String,
-    },
-}
-
+mod cli;
+mod config;
+use clap::Parser;
+use cli::{Cli, Commands, InfraCommands, InfraServices};
 fn main() {
-    let vlayer_path = get_vlayer_path();
-    println!("vlayer_path: {}", vlayer_path);
+    let vlayer_path = config::get_vlayer_path();
+    println!("vlayer_path: {vlayer_path}");
     let cli = Cli::parse();
 
     match &cli.command {
         Commands::Examples { name } => {
-            println!("Performing examples action: {}", name);
+            println!("Performing examples action: {name}");
         }
-        Commands::Infra { command } => {
-            match &command {
-                InfraCommands::Run { name } => {
-                    println!("Performing infra action: {}", name);
+        Commands::Infra { command } => match &command {
+            InfraCommands::Run { command } => {
+                let service = &command;
+                {
+                    match service {
+                        InfraServices::WebProof => {
+                            let docker_path = format!("{vlayer_path}/docker/web-proof");
+                            println!("Running docker compose in: {docker_path}");
+                            std::process::Command::new("docker-compose")
+                                .args(["-f", "docker-compose-release.yaml", "up"])
+                                .current_dir(&docker_path)
+                                .spawn()
+                                .expect("Failed to start docker-compose");
+                        }
+                        _ => {
+                            let service_name = match service {
+                                InfraServices::ChainServer => "chain_server",
+                                InfraServices::ChainWorker => "chain_worker",
+                                InfraServices::Vlayer => "vlayer",
+                                _ => unreachable!(),
+                            };
+                            let docker_path = format!("{vlayer_path}/docker/{service_name}");
+                            println!("Running docker run --build in: {docker_path}");
+                            std::process::Command::new("docker")
+                                .args(["run", "--build", "-f", "Dockerfile.nightly", "."])
+                                .current_dir(&docker_path)
+                                .spawn()
+                                .expect("Failed to start docker run");
+                        }
+                    }
                 }
             }
-        }
+        },
         Commands::Contracts { action } => {
-            println!("Performing contracts action: {}", action);
+            println!("Performing contracts action: {action}");
         }
         Commands::Version => {
             println!("Vlad CLI Tool v1.0.0");
         }
     }
 }
-
-
-fn get_vlayer_path() -> String {
-    let home_dir = std::env::var("HOME").expect("Failed to get home directory");
-    let vld_path = std::path::Path::new(&home_dir).join(".vld");
-    let content = std::fs::read_to_string(vld_path)
-        .expect("Failed to read ~/.vld");
-    
-    let vlayer_path = content
-        .lines()
-        .find(|line| line.starts_with("VLAYER_PATH="))
-        .map(|line| line.trim_start_matches("VLAYER_PATH=").trim().to_string())
-        .expect("Could not find VLAYER_PATH in ~/.vld");
-
-    if vlayer_path.is_empty() {
-        panic!("VLAYER_PATH value in ~/.vld is empty");
-    }
-    vlayer_path
-}
-
