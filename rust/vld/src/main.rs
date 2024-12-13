@@ -1,13 +1,14 @@
 mod cli;
+mod commands;
 mod config;
 use clap::Parser;
 use cli::{Cli, Commands, InfraCommands, InfraServices};
+
 fn main() {
-    let vlayer_path = config::get_vlayer_path();
-    println!("vlayer_path: {vlayer_path}");
     let cli = Cli::parse();
 
     match &cli.command {
+        Commands::Init => commands::init::init(),
         Commands::Examples { name } => {
             println!("Performing examples action: {name}");
         }
@@ -15,6 +16,8 @@ fn main() {
             InfraCommands::Run { command } => {
                 let service = &command;
                 {
+                    let vlayer_path = config::get_vlayer_path();
+
                     match service {
                         InfraServices::WebProof => {
                             let docker_path = format!("{vlayer_path}/docker/web-proof");

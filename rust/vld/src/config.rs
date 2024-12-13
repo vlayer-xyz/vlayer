@@ -1,7 +1,7 @@
 pub fn get_vlayer_path() -> String {
     let home_dir = std::env::var("HOME").expect("Failed to get home directory");
-    let vld_path = std::path::Path::new(&home_dir).join(".vld");
-    let content = std::fs::read_to_string(vld_path).expect("Failed to read ~/.vld");
+    let vld_path = std::path::Path::new(&home_dir).join(".vlad");
+    let content = std::fs::read_to_string(vld_path).expect("Failed to read ~/.vlad. Run vlad init");
 
     let vlayer_path = content
         .lines()
@@ -10,7 +10,7 @@ pub fn get_vlayer_path() -> String {
         .expect("Could not find VLAYER_PATH in ~/.vld");
 
     if vlayer_path.is_empty() {
-        panic!("VLAYER_PATH value in ~/.vld is empty");
+        panic!("VLAYER_PATH value in ~/.vlad is empty");
     }
     vlayer_path
 }

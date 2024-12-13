@@ -1,7 +1,5 @@
 use clap::{Parser, Subcommand};
 
-use crate::config;
-
 #[derive(Parser)]
 #[command(name = "vlad")]
 #[command(about = "Vlayer internal CLI ", long_about = None)]
@@ -12,6 +10,7 @@ pub struct Cli {
 
 #[derive(Subcommand)]
 pub enum Commands {
+    Init,
     Examples {
         #[arg(short, long)]
         name: String,
