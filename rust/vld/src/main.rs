@@ -20,13 +20,7 @@ fn print_dir(path: &str, dir: &str) {
 }
 fn main() {
     // Check all required ports
-    let ports = [3000, 8545, 5173, 5175, 3011];
-    for port in ports {
-        if let Err(e) = check_and_kill_port(port) {
-            eprintln!("Error checking port {port}: {e}");
-            std::process::exit(1);
-        }
-    }
+
     let cli = Cli::parse();
 
     let mut child_processes: Vec<std::process::Child> = Vec::new();
@@ -36,6 +30,15 @@ fn main() {
             commands::init::init();
         }
         Commands::Examples { command } => {
+            let ports = [3000, 8545, 5173, 5175, 3011];
+
+            for port in ports {
+                if let Err(e) = check_and_kill_port(port) {
+                    eprintln!("Error checking port {port}: {e}");
+                    std::process::exit(1);
+                }
+            }
+
             let vlayer_path = config::get_vlayer_path();
 
             let path = &command.to_string();
@@ -151,37 +154,35 @@ fn main() {
                 }
             }
         }
-        Commands::Contracts { command } => {
-            match &command {
-                ContractCommands::Rebuild => {
-                    let vlayer_path = config::get_vlayer_path();
-                    let contracts_path = format!("{vlayer_path}/contracts");
-                    commands::rebuild_contracts::rebuild_contracts(&contracts_path)
-                        .expect("Failed to rebuild contracts");
-                }
+        Commands::Contracts { command } => match &command {
+            ContractCommands::Rebuild => {
+                let vlayer_path = config::get_vlayer_path();
+                let contracts_path = format!("{vlayer_path}/contracts");
+                commands::rebuild_contracts::rebuild_contracts(&contracts_path)
+                    .expect("Failed to rebuild contracts");
             }
-        }
+        },
         Commands::Version => {
             println!("Vlad CLI Tool v1.0.0");
         }
     }
 
-    // Only set up Ctrl+C handler and keep main thread alive if we have child processes
-    if !child_processes.is_empty() {
-        ctrlc::set_handler(move || {
-            println!("\nReceived Ctrl+C, shutting down...");
-            for child in &mut child_processes {
-                let _ = child.kill();
-            }
-            std::process::exit(0);
-        })
-        .expect("Error setting Ctrl+C handler");
+    // // Only set up Ctrl+C handler and keep main thread alive if we have child processes
+    // if !child_processes.is_empty() {
+    //     ctrlc::set_handler(move || {
+    //         println!("\nReceived Ctrl+C, shutting down...");
+    //         for child in &mut child_processes {
+    //             let _ = child.kill();
+    //         }
+    //         std::process::exit(0);
+    //     })
+    //     .expect("Error setting Ctrl+C handler");
 
-        // Keep the main thread alive
-        loop {
-            std::thread::sleep(std::time::Duration::from_secs(1));
-        }
-    }
+    //     // Keep the main thread alive
+    //     loop {
+    //         std::thread::sleep(std::time::Duration::from_secs(1));
+    //     }
+    // }
 }
 
 fn run_web_proof_docker(vlayer_path: &str) -> std::process::Child {

@@ -37,7 +37,7 @@ export default defineConfig({
       manifest: generateManifest,
       watchFilePaths: ["package.json", "manifest.json"],
       webExtConfig: {
-        startUrl: "http://localhost:5175",
+        startUrl: "http://localhost:5175/dapp-new-way",
       },
     }),
     viteStaticCopy({
