@@ -12,8 +12,8 @@ pub struct Cli {
 pub enum Commands {
     Init,
     Examples {
-        #[arg(short, long)]
-        name: String,
+        #[command(subcommand)]
+        command: ExampleCommands,
     },
     Contracts {
         #[arg(short, long)]
@@ -32,6 +32,10 @@ pub enum InfraCommands {
         #[command(subcommand)]
         command: InfraServices,
     },
+    Stop {
+        #[command(subcommand)]
+        command: InfraServices,
+    },
 }
 
 #[derive(Subcommand)]
@@ -40,4 +44,17 @@ pub enum InfraServices {
     ChainWorker,
     WebProof,
     Vlayer,
+}
+
+#[derive(Subcommand)]
+pub enum ExampleCommands {
+    Run {
+        #[command(subcommand)]
+        command: ExampleServices,
+    },
+}
+
+#[derive(Subcommand)]
+pub enum ExampleServices {
+    WebProof,
 }

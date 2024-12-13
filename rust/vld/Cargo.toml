@@ -13,6 +13,7 @@ clap_autocomplete = "0.4.2"
 glob = "0.3.1"
 rustyline = "15.0.0"
 thiserror.workspace = true
+ctrlc = "3.4.5"
 
 [lints]
 workspace = true

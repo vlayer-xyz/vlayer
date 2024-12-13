@@ -22,5 +22,11 @@ services:
       default:
         aliases:
           - lotr-api.online
+  anvil:
+    image: ghcr.io/foundry-rs/foundry
+    platform: linux/amd64
+    command: anvil
+    ports:
+      - "8545:8545"
 
 

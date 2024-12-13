@@ -3,7 +3,7 @@ import { defineConfig } from "vite";
 import webExtension, { readJsonFile } from "vite-plugin-web-extension";
 import { viteStaticCopy } from "vite-plugin-static-copy";
 import tsconfigPaths from "vite-tsconfig-paths";
-import { nodePolyfills } from 'vite-plugin-node-polyfills';
+import { nodePolyfills } from "vite-plugin-node-polyfills";
 
 function generateManifest() {
   const manifest = readJsonFile("src/manifest.json") as object;
@@ -37,7 +37,7 @@ export default defineConfig({
       manifest: generateManifest,
       watchFilePaths: ["package.json", "manifest.json"],
       webExtConfig: {
-        startUrl: "http://localhost:5174",
+        startUrl: "http://localhost:5175",
       },
     }),
     viteStaticCopy({
@@ -64,7 +64,7 @@ export default defineConfig({
     }),
     nodePolyfills({
       // buffer is required by tlsn-js internals
-      include: ['buffer']
+      include: ["buffer"],
     }),
   ],
 });
