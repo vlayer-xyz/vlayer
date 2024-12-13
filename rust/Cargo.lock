@@ -2517,7 +2517,7 @@ dependencies = [
  "nix 0.28.0",
  "terminfo",
  "thiserror",
- "which",
+ "which 6.0.1",
  "winapi",
 ]
 
@@ -11184,6 +11184,7 @@ dependencies = [
  "glob",
  "rustyline",
  "thiserror",
+ "which 7.0.0",
 ]
 
 [[package]]
@@ -11482,6 +11483,18 @@ name = "which"
 version = "6.0.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8211e4f58a2b2805adfbefbc07bab82958fc91e3836339b1ab7ae32465dce0d7"
+dependencies = [
+ "either",
+ "home",
+ "rustix",
+ "winsafe",
+]
+
+[[package]]
+name = "which"
+version = "7.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c9cad3279ade7346b96e38731a641d7343dd6a53d55083dd54eadfa5a1b38c6b"
 dependencies = [
  "either",
  "home",

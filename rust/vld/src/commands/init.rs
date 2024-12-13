@@ -2,25 +2,16 @@ use std::{env, fs, io, io::Write, path::PathBuf, process::Command};
 
 use rustyline::{error::ReadlineError, DefaultEditor};
 
-const BASH: &str = r#"
-vladcd() {
-    local result
-    result="$(vlad "$@")"
-    if [ $? -eq 0 ] && [ -n "$result" ] && [ -d "$result" ]; then
+const BASH: &str = r#"vladcd () {
+    local result=$(vlad "$@")
+    if [ $? -eq 0 ]; then
         cd "$result"
-    else
-        echo "Navigation failed"
-        return 1
     fi
 }
 "#;
 
 fn vladcd_exists() -> bool {
-    if let Ok(output) = Command::new("which").arg("vladcd").output() {
-        output.status.success()
-    } else {
-        false
-    }
+    which::which("vladcd").is_ok()
 }
 
 fn update_zhrc() -> Result<(), io::Error> {
@@ -32,6 +23,7 @@ fn update_zhrc() -> Result<(), io::Error> {
     shell_rc_path.push(".zshrc");
     let mut shell_rc = fs::OpenOptions::new().append(true).open(shell_rc_path)?;
 
+    println!("Run `source ~/.zshrc` to update your shell");
     writeln!(shell_rc, "{BASH}")
 }
 
@@ -55,7 +47,7 @@ fn write_config_file(path: &str) -> Result<(), io::Error> {
     config_path.push(".vlad");
 
     let mut file = fs::OpenOptions::new()
-        .create_new(true)
+        .truncate(true)
         .write(true)
         .open(config_path)?;
     writeln!(file, "VLAYER_PATH={path}")

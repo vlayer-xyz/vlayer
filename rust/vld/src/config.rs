@@ -7,7 +7,7 @@ pub fn get_vlayer_path() -> String {
         .lines()
         .find(|line| line.starts_with("VLAYER_PATH="))
         .map(|line| line.trim_start_matches("VLAYER_PATH=").trim().to_string())
-        .expect("Could not find VLAYER_PATH in ~/.vld");
+        .expect("Could not find VLAYER_PATH in ~/.vlad");
 
     if vlayer_path.is_empty() {
         panic!("VLAYER_PATH value in ~/.vlad is empty");

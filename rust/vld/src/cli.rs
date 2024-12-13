@@ -8,21 +8,40 @@ pub struct Cli {
     pub command: Commands,
 }
 
+#[cfg(not(clippy))]
+#[allow(dead_code)]
+mod private {
+    include!(concat!(env!("OUT_DIR"), "/directories.rs"));
+}
+
 #[derive(Subcommand)]
 pub enum Commands {
     Init,
+    #[clap(alias = "e")]
     Examples {
         #[command(subcommand)]
         command: ExampleCommands,
     },
+    #[clap(alias = "r")]
+    Rust {
+        #[command(subcommand)]
+        dir: private::Rust,
+    },
+    Js {
+        #[command(subcommand)]
+        dir: private::JS,
+    },
+    #[clap(alias = "c")]
     Contracts {
         #[arg(short, long)]
         action: String,
     },
+    #[clap(alias = "i")]
     Infra {
         #[command(subcommand)]
         command: InfraCommands,
     },
+    #[clap(alias = "v")]
     Version,
 }
 

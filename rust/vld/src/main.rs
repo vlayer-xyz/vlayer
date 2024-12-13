@@ -1,13 +1,21 @@
 mod cli;
 mod commands;
 mod config;
+
 use std::{
     io::{self, Write},
+    path::Path,
     process::Command,
 };
 
 use clap::Parser;
 use cli::{Cli, Commands, ExampleCommands, ExampleServices, InfraCommands, InfraServices};
+
+fn print_dir(path: &str, dir: &str) {
+    let vlayer_path = config::get_vlayer_path();
+    let path = Path::new(&vlayer_path).join(path).join(dir);
+    println!("{}", path.to_str().unwrap());
+}
 fn main() {
     // Check all required ports
     let ports = [3000, 8545, 5173, 5175, 3011];
@@ -17,8 +25,6 @@ fn main() {
             std::process::exit(1);
         }
     }
-    let vlayer_path = config::get_vlayer_path();
-    println!("vlayer_path: {vlayer_path}");
     let cli = Cli::parse();
 
     let mut child_processes: Vec<std::process::Child> = Vec::new();
@@ -27,104 +33,116 @@ fn main() {
         Commands::Init => {
             commands::init::init();
         }
-        Commands::Examples { command } => match &command {
-            ExampleCommands::Run {
-                command: example_command,
-            } => {
-                let service = &example_command;
-                match service {
-                    ExampleServices::WebProof => {
-                        let web_proof_docker = run_web_proof_docker(&vlayer_path);
-                        child_processes.push(web_proof_docker);
+        Commands::Examples { command } => {
+            let vlayer_path = config::get_vlayer_path();
+            match &command {
+                ExampleCommands::Run {
+                    command: example_command,
+                } => {
+                    let service = &example_command;
+                    match service {
+                        ExampleServices::WebProof => {
+                            let web_proof_docker = run_web_proof_docker(&vlayer_path);
+                            child_processes.push(web_proof_docker);
 
-                        let mut attempts = 0;
-                        while attempts < 30 {
-                            if let Ok(socket) = std::net::TcpStream::connect("127.0.0.1:8545") {
-                                drop(socket);
-                                break;
+                            let mut attempts = 0;
+                            while attempts < 30 {
+                                if let Ok(socket) = std::net::TcpStream::connect("127.0.0.1:8545") {
+                                    drop(socket);
+                                    break;
+                                }
+                                std::thread::sleep(std::time::Duration::from_secs(1));
+                                attempts += 1;
                             }
-                            std::thread::sleep(std::time::Duration::from_secs(1));
-                            attempts += 1;
+                            if attempts == 30 {
+                                eprintln!("Timeout waiting for anvil services to be ready");
+                                std::process::exit(1);
+                            }
+                            println!("Anvil services are ready");
+                            deploy_contracts(&vlayer_path);
+
+                            let vlayer = run_vlayer_bash(&vlayer_path);
+                            child_processes.push(vlayer);
+
+                            let web_app = run_web_app(&vlayer_path);
+                            child_processes.push(web_app);
+
+                            let extension = run_browser_extension(&vlayer_path);
+                            child_processes.push(extension);
                         }
-                        if attempts == 30 {
-                            eprintln!("Timeout waiting for anvil services to be ready");
-                            std::process::exit(1);
+                    }
+                }
+            }
+        }
+        Commands::Rust { dir } => {
+            print_dir("rust", &dir.to_string());
+        }
+        Commands::Js { dir } => {
+            print_dir("packages", &dir.to_string());
+        }
+        Commands::Infra { command } => {
+            let vlayer_path = config::get_vlayer_path();
+            match &command {
+                InfraCommands::Run { command } => {
+                    let service = &command;
+                    match service {
+                        InfraServices::WebProof => {
+                            let web_proof = run_web_proof_docker(&vlayer_path);
+                            child_processes.push(web_proof);
+                            let vlayer = run_vlayer_bash(&vlayer_path);
+                            child_processes.push(vlayer);
                         }
-                        println!("Anvil services are ready");
-                        deploy_contracts(&vlayer_path);
-
-                        let vlayer = run_vlayer_bash(&vlayer_path);
-                        child_processes.push(vlayer);
-
-                        let web_app = run_web_app(&vlayer_path);
-                        child_processes.push(web_app);
-
-                        let extension = run_browser_extension(&vlayer_path);
-                        child_processes.push(extension);
+                        InfraServices::Vlayer => {
+                            let vlayer = run_vlayer_bash(&vlayer_path);
+                            child_processes.push(vlayer);
+                        }
+                        _ => {
+                            let service_name = match service {
+                                InfraServices::ChainServer => "chain_server",
+                                InfraServices::ChainWorker => "chain_worker",
+                                _ => unreachable!(),
+                            };
+                            let docker_path = format!("{vlayer_path}/docker/{service_name}");
+                            println!("Running docker run --build in: {docker_path}");
+                            let child = std::process::Command::new("docker")
+                                .args(["run", "--build", "-f", "Dockerfile.nightly", "."])
+                                .current_dir(&docker_path)
+                                .spawn()
+                                .expect("Failed to start docker run");
+                            child_processes.push(child);
+                        }
+                    }
+                }
+                InfraCommands::Stop { command } => {
+                    let service = &command;
+                    match service {
+                        InfraServices::WebProof => {
+                            let docker_path = format!("{vlayer_path}/docker/web-proof");
+                            println!("Stopping docker compose in: {docker_path}");
+                            std::process::Command::new("docker-compose")
+                                .args(["-f", "docker-compose-release.yaml", "down"])
+                                .current_dir(&docker_path)
+                                .spawn()
+                                .expect("Failed to stop docker-compose");
+                        }
+                        _ => {
+                            let service_name = match service {
+                                InfraServices::ChainServer => "chain_server",
+                                InfraServices::ChainWorker => "chain_worker",
+                                InfraServices::Vlayer => "vlayer",
+                                _ => unreachable!(),
+                            };
+                            let docker_path = format!("{vlayer_path}/docker/{service_name}");
+                            println!("Stopping docker service in: {docker_path}");
+                            std::process::Command::new("docker")
+                                .args(["stop", service_name])
+                                .spawn()
+                                .expect("Failed to stop docker service");
+                        }
                     }
                 }
             }
-        },
-        Commands::Infra { command } => match &command {
-            InfraCommands::Run { command } => {
-                let service = &command;
-                match service {
-                    InfraServices::WebProof => {
-                        let web_proof = run_web_proof_docker(&vlayer_path);
-                        child_processes.push(web_proof);
-                        let vlayer = run_vlayer_bash(&vlayer_path);
-                        child_processes.push(vlayer);
-                    }
-                    InfraServices::Vlayer => {
-                        let vlayer = run_vlayer_bash(&vlayer_path);
-                        child_processes.push(vlayer);
-                    }
-                    _ => {
-                        let service_name = match service {
-                            InfraServices::ChainServer => "chain_server",
-                            InfraServices::ChainWorker => "chain_worker",
-                            _ => unreachable!(),
-                        };
-                        let docker_path = format!("{vlayer_path}/docker/{service_name}");
-                        println!("Running docker run --build in: {docker_path}");
-                        let child = std::process::Command::new("docker")
-                            .args(["run", "--build", "-f", "Dockerfile.nightly", "."])
-                            .current_dir(&docker_path)
-                            .spawn()
-                            .expect("Failed to start docker run");
-                        child_processes.push(child);
-                    }
-                }
-            }
-            InfraCommands::Stop { command } => {
-                let service = &command;
-                match service {
-                    InfraServices::WebProof => {
-                        let docker_path = format!("{vlayer_path}/docker/web-proof");
-                        println!("Stopping docker compose in: {docker_path}");
-                        std::process::Command::new("docker-compose")
-                            .args(["-f", "docker-compose-release.yaml", "down"])
-                            .current_dir(&docker_path)
-                            .spawn()
-                            .expect("Failed to stop docker-compose");
-                    }
-                    _ => {
-                        let service_name = match service {
-                            InfraServices::ChainServer => "chain_server",
-                            InfraServices::ChainWorker => "chain_worker",
-                            InfraServices::Vlayer => "vlayer",
-                            _ => unreachable!(),
-                        };
-                        let docker_path = format!("{vlayer_path}/docker/{service_name}");
-                        println!("Stopping docker service in: {docker_path}");
-                        std::process::Command::new("docker")
-                            .args(["stop", service_name])
-                            .spawn()
-                            .expect("Failed to stop docker service");
-                    }
-                }
-            }
-        },
+        }
         Commands::Contracts { action } => {
             println!("Performing contracts action: {action}");
             match action.as_str() {
