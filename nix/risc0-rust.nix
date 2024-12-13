@@ -5,7 +5,7 @@ let
     "1.81.0" = {
       ${system} = {
         arch = "aarch64-apple-darwin";
-        hash = pkgs.lib.fakeHash;
+        hash = "sha256-RhxNjLd1SSs5DqjKk/p/Onr5wpw7MLC2exgffFswEuo=";
       };
     };
   };
@@ -25,9 +25,9 @@ let
     sourceRoot = ".";
     installPhase = ''
       mkdir -p $out/bin
-      cp -r ./bin $out/bin/
       mkdir -p $out/lib
-      cp -r ./lib $out/lib/
+      cp -r ./bin $out
+      cp -r ./lib $out
     '';
   };
   package = version: {
