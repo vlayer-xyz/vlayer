@@ -1,11 +1,12 @@
-FROM --platform=linux/amd64 ubuntu:latest AS vlayer-builder
+FROM --platform=linux/amd64 ubuntu:latest AS vlayer-base
 RUN apt-get update
 RUN apt-get install -y --no-install-recommends \
     curl \
     ca-certificates \
     git \
     build-essential \
-    clang 
+    clang \
+    dumb-init
 
 RUN git config --global http.version HTTP/1.1
 
@@ -29,22 +30,23 @@ ENV CFLAGS_riscv32im_risc0_zkvm_elf="-march=rv32im -nostdlib -DRING_CORE_NOSTDLI
 ENV CARGO_NET_GIT_FETCH_WITH_CLI=true
 
 #################################################################
-FROM --platform=linux/amd64 vlayer-builder AS vlayer-prepare
+FROM --platform=linux/amd64 vlayer-base AS vlayer-prepare
 
 WORKDIR /home/vlayer/rust
 COPY rust .
 RUN cargo chef prepare --recipe-path recipe.json
 
 #################################################################
-FROM --platform=linux/amd64 vlayer-builder AS vlayer-cook
-ARG cargo_profile
+FROM --platform=linux/amd64 vlayer-base AS vlayer-cook
+ARG cargo_profile=debug
 
 WORKDIR /home/vlayer/rust
 COPY --from=vlayer-prepare /home/vlayer/rust/recipe.json recipe.json
 RUN --mount=type=cache,target=/usr/local/cargo/registry,uid=1001,gid=1001 \
     --mount=type=cache,target=/home/vlayer/rust/target,uid=1001,gid=1001 \
-    cargo chef cook ${cargo_profile} --recipe-path recipe.json
- 
+    export build_flag=$([ "$cargo_profile" == "release" ] && echo "--release" || echo "") && \
+    cargo chef cook ${build_flag} --recipe-path recipe.json
+
 RUN curl -L https://foundry.paradigm.xyz | bash
 ENV PATH="/home/vlayer/.foundry/bin:${PATH}"
 RUN foundryup
@@ -53,27 +55,28 @@ COPY rust .
 ADD contracts /home/vlayer/contracts
 RUN --mount=type=cache,target=/usr/local/cargo/registry,uid=1001,gid=1001 \
     --mount=type=cache,target=/home/vlayer/rust/target,uid=1001,gid=1001 \
-    cargo build ${cargo_profile} --workspace
+    export build_flag=$([ "$cargo_profile" == "release" ] && echo "--release" || echo "") && \
+    cargo build ${build_flag} --workspace && \
+    mkdir bin && \
+    cp target/${cargo_profile}/chain_server bin && \
+    cp target/${cargo_profile}/vlayer bin && \
+    cp target/${cargo_profile}/worker bin && \
+    cp -r target/assets assets
 
+#################################################################
+FROM --platform=linux/amd64 ghcr.io/foundry-rs/foundry:latest AS vlayer-contracts
 
-# FROM vlayer-builder as vlayer-build
-# RUN mkdir /home/vlayer/vlayer
-# ADD contracts /home/vlayer/vlayer/contracts
-# ADD rust /home/vlayer/vlayer/rust
-# USER root
-# RUN chown -R vlayer:vlayer /home/vlayer/vlayer
-# RUN chmod 755 /home/vlayer/vlayer
+COPY --from=vlayer-cook /home/vlayer/contracts /home/vlayer/contracts
+COPY --from=vlayer-cook /home/vlayer/rust/assets/ /home/vlayer/contracts/vlayer/src/
 
-# USER vlayer
-# WORKDIR /home/vlayer/vlayer/rust
-# # Set the default compiler for building guest
-# ENV CC_riscv32im_risc0_zkvm_elf=clang
-# # Set required C flags; in particular, in guest, we don't want ring crate to use stdlib
-# ENV CFLAGS_riscv32im_risc0_zkvm_elf="-march=rv32im -nostdlib -DRING_CORE_NOSTDLIBINC=1 -D__ILP32__=1"
-# # CARGO_NET_GIT_FETCH_WITH_CLI=true will force cargo to use system-provided git instead of using
-# # the baked-in libgit2. I have been experiencing spurious network errors when trying to fetch git+https
-# # dependencies such as tlsn in Docker, and falling back to system git with forced HTTP1.1 version fixed
-# # all issues for me.
-# RUN CARGO_NET_GIT_FETCH_WITH_CLI=true cargo build --bin vlayer
+WORKDIR /home/vlayer/contracts/vlayer
+RUN forge soldeer install
+RUN forge build
 
-# ENTRYPOINT ["/usr/bin/dumb-init", "--", "/home/vlayer/vlayer/rust/target/debug/vlayer"]
+#################################################################
+FROM --platform=linux/amd64 vlayer-base AS vlayer-bin
+
+COPY --from=vlayer-cook /home/vlayer/rust/bin/ /home/vlayer/
+WORKDIR /home/vlayer
+
+ENTRYPOINT ["/usr/bin/dumb-init", "--"]
