@@ -77,6 +77,21 @@ mod test {
     }
 
     #[test]
+    fn fails_for_mismatching_body() -> anyhow::Result<()> {
+        let email = String::from_utf8(read_file("./testdata/signed_email_modified_body.txt"))?;
+        let calldata = UnverifiedEmail {
+            email,
+            dnsRecords: DNS_FIXTURE.to_vec(),
+        }
+        .abi_encode();
+        assert_eq!(
+            parse_and_verify(&calldata).unwrap_err().to_string(),
+            "Error verifying DKIM: body hash did not verify".to_string()
+        );
+        Ok(())
+    }
+
+    #[test]
     fn fails_for_missing_public_key() -> anyhow::Result<()> {
         let email = String::from_utf8(signed_email_fixture())?;
         let calldata = UnverifiedEmail {
@@ -106,6 +121,40 @@ mod test {
             parse_and_verify(&calldata).unwrap_err().to_string(),
             "Error verifying DKIM: signature did not verify".to_string()
         );
+        Ok(())
+    }
+
+    #[test]
+    fn fails_when_from_address_is_from_subdomain() -> anyhow::Result<()> {
+        let email = String::from_utf8(read_file("./testdata/signed_email_from_subdomain.txt"))?;
+        let calldata = UnverifiedEmail {
+            email,
+            dnsRecords: DNS_FIXTURE.to_vec(),
+        }
+        .abi_encode();
+
+        assert_eq!(
+            parse_and_verify(&calldata).unwrap_err().to_string(),
+            "Error verifying DKIM: signature did not verify".to_string()
+        );
+
+        Ok(())
+    }
+
+    #[test]
+    fn fails_when_dkim_signer_address_is_from_subdomain() -> anyhow::Result<()> {
+        let email = String::from_utf8(read_file("./testdata/signed_email_from_subdomain.txt"))?;
+        let calldata = UnverifiedEmail {
+            email,
+            dnsRecords: DNS_FIXTURE.to_vec(),
+        }
+        .abi_encode();
+
+        assert_eq!(
+            parse_and_verify(&calldata).unwrap_err().to_string(),
+            "Error verifying DKIM: signature did not verify".to_string()
+        );
+
         Ok(())
     }
 }
