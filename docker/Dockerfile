@@ -43,6 +43,7 @@ ARG cargo_profile=debug
 WORKDIR /home/vlayer/rust
 COPY --from=vlayer-prepare /home/vlayer/rust/recipe.json recipe.json
 RUN --mount=type=cache,target=/usr/local/cargo/registry,uid=1001,gid=1001 \
+    --mount=type=cache,target=/usr/local/cargo/git,uid=1001,gid=1001 \
     --mount=type=cache,target=/home/vlayer/rust/target,uid=1001,gid=1001 \
     export build_flag=$(if [ "$cargo_profile" = "release" ]; then echo "--release"; else echo ""; fi) && \
     cargo chef cook ${build_flag} --recipe-path recipe.json
@@ -54,6 +55,7 @@ RUN foundryup
 COPY rust .
 ADD contracts /home/vlayer/contracts
 RUN --mount=type=cache,target=/usr/local/cargo/registry,uid=1001,gid=1001 \
+    --mount=type=cache,target=/usr/local/cargo/git,uid=1001,gid=1001 \
     --mount=type=cache,target=/home/vlayer/rust/target,uid=1001,gid=1001 \
     export build_flag=$(if [ "$cargo_profile" = "release" ]; then echo "--release"; else echo ""; fi) && \
     cargo build ${build_flag} --workspace && \
