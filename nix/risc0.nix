@@ -3,13 +3,13 @@
 let
   releases = {
     "1.2.0" = {
-      ${system} = {
+      "aarch64-darwin" = {
         arch = "aarch64-apple-darwin";
         hash = "sha256-0MTqpRoEDVg0O4Iz6wlkTVs7YsvUUmpR0ba3dmzjkhI=";
       };
     };
   };
-  artefacts = system: version:
+  artifacts = system: version:
     let
       inherit (releases.${version}.${system}) arch hash;
     in
@@ -19,9 +19,9 @@ let
     };
 
   toolchain = version: pkgs.stdenv.mkDerivation {
-    name = "cargo-risczero";
+    name = "cargo-risczero-v${version}";
     version = version;
-    src = artefacts system version;
+    src = artifacts system version;
     sourceRoot = ".";
     installPhase = ''
       mkdir -p $out/bin
@@ -29,9 +29,9 @@ let
     '';
   };
   r0vm = version: pkgs.stdenv.mkDerivation {
-    name = "risc0-r0vm";
+    name = "risc0-r0vm-v${version}";
     version = version;
-    src = artefacts system version;
+    src = artifacts system version;
     sourceRoot = ".";
     installPhase = ''
       mkdir -p $out/bin
