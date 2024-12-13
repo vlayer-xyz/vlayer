@@ -74,6 +74,7 @@
           CARGO_NET_GIT_FETCH_WITH_CLI = "true";
 
           RUST_BACKTRACE = 1;
+          LIBUSB_STATIC = 1;
         };
       }
     );
