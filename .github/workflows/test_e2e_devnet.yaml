@@ -44,6 +44,10 @@ jobs:
         working-directory: ./contracts/vlayer
         run: forge soldeer install
 
+      - uses: hoverkraft-tech/compose-action@v2.0.2
+        with:
+          compose-file: docker/docker-compose.yaml
+
       - name: Run e2e test
         env:
           PROVING_MODE: "dev"

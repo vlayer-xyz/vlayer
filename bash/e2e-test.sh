@@ -9,8 +9,8 @@ PROVING_MODE=${PROVING_MODE:-dev}
 echo Generating typescript bidings ...
 ${VLAYER_HOME}/bash/build-ts-types.sh >/dev/null
 
-echo Running services...
-source ${VLAYER_HOME}/bash/run-services.sh
+# echo Running services...
+# source ${VLAYER_HOME}/bash/run-services.sh
 
 echo Setting up SDK 
 cd ${VLAYER_HOME}/packages/sdk && bun install --frozen-lockfile
