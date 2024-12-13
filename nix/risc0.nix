@@ -24,7 +24,7 @@ let
       url = "https://github.com/risc0/risc0/releases/download/v${version}/cargo-risczero-${arch}.tgz";
     };
 
-  toolchain = version: pkgs.stdenv.mkDerivation {
+  cargo-risczero = version: pkgs.stdenv.mkDerivation {
     name = "cargo-risczero-v${version}";
     version = version;
     src = artefacts system version;
@@ -47,7 +47,7 @@ let
   package = version: {
     ${version} =
       {
-        toolchain = toolchain version;
+        cargo-risczero = cargo-risczero version;
         r0vm = r0vm version;
       };
   };
