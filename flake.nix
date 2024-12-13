@@ -5,7 +5,6 @@
     nixpkgs-unstable.url = "github:NixOS/nixpkgs?ref=nixos-unstable";
     flake-utils.url = "github:numtide/flake-utils";
     foundry.url = "github:shazow/foundry.nix";
-    risc0.url = "github:kubkon/risc0-flake";
     rust-overlay.url = "github:oxalica/rust-overlay";
     crane.url = "github:ipetkov/crane";
   };
@@ -15,16 +14,11 @@
     nixpkgs, 
     nixpkgs-unstable,
     foundry, 
-    risc0,
     rust-overlay,
     crane,
     ... 
   } @ inputs: let
-    overlays = [ foundry.overlay ] ++ [
-      (final: prev: {
-        risc0pkgs = risc0.packages.${prev.system};
-      })
-    ] ++ [(import rust-overlay)];
+    overlays = [ foundry.overlay ] ++ [(import rust-overlay)];
     systems = [ "aarch64-darwin" ];
   in 
     flake-utils.lib.eachSystem systems (
@@ -39,14 +33,17 @@
         toolchain = (pkgs.rust-bin.fromRustupToolchainFile ./rust-toolchain.toml);
         craneLib = (crane.mkLib pkgs).overrideToolchain toolchain;
 
+        risc0-version = "1.2.0";
+        risc0 = (import ./nix/risc0.nix { inherit system pkgs; }).risc0.${risc0-version};
+
         commonBuildInputs = with pkgs; [
-          rustup
           foundry-bin
           libiconv
+          risc0.toolchain
         ];
 
         buildInputs = commonBuildInputs ++ (with pkgs; [
-          risc0pkgs.rzup
+          rustup
           pkgsUnstable.bun
           nodejs
           darwin.apple_sdk.frameworks.AppKit # these would not be required if we used rust-overlay... just saying!
@@ -70,7 +67,7 @@
         packages.guest-wrappers = craneLib.buildPackage (with pkgs; {
           pname = "guest-wrappers";
           version = "0.0.0";
-          src = craneLib.cleanCargoSource ./.;
+          src = ./.;
 
           buildInputs = commonBuildInputs ++ [
             pkg-config
@@ -91,13 +88,14 @@
           # '';
 
           cargoVendorDir = craneLib.vendorCargoDeps {
-            src = craneLib.cleanCargoSource ./rust;
+            src = ./.;
+            cargoLock = ./rust/Cargo.lock;
 
             overrideVendorCargoPackage = p: drv:
               if p.name == "risc0-build" then
                 drv.overrideAttrs (_old: {
                   patches = [
-                    ./nix-patches/0001-patch-risc0-build.patch
+                    ./nix/patches/0001-patch-risc0-build.patch
                   ];
                 })
               else
@@ -109,7 +107,7 @@
           CC_riscv32im_risc0_zkvm_elf = CC_riscv32im_risc0_zkvm_elf;
           CFLAGS_riscv32im_risc0_zkvm_elf = CFLAGS_riscv32im_risc0_zkvm_elf;
 
-          RISC0_TOOLCHAIN_PATH = "$HOME/.risc0/toolchains/rust_aarch64-apple-darwin_r0.1.81.0";
+          RISC0_TOOLCHAIN_PATH = "${risc0.toolchain.out}";
         });
       }
     );
