@@ -11170,7 +11170,9 @@ version = "0.1.0"
 dependencies = [
  "clap",
  "clap_autocomplete",
+ "glob",
  "rustyline",
+ "thiserror",
 ]
 
 [[package]]
