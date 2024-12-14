@@ -24,6 +24,7 @@ hex = { workspace = true }
 jsonrpsee = { workspace = true, features = ["macros", "server-core"] }
 seal = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
+serde_json = { workspace = true }
 server_utils = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }

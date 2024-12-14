@@ -4,6 +4,7 @@ use async_trait::async_trait;
 use call_engine::HostOutput;
 use dashmap::DashMap;
 use derive_more::{Deref, DerefMut};
+use derive_new::new;
 use jsonrpsee::proc_macros::rpc;
 use v_call::types::{Call, CallContext, CallHash};
 use v_get_proof_receipt::types::CallResult;
@@ -33,6 +34,7 @@ pub trait Rpc {
     async fn v_versions(&self) -> Result<Versions, AppError>;
 }
 
+#[derive(new, Clone)]
 pub struct State2 {
     config: Arc<Config>,
     proofs: SharedState,
