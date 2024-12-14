@@ -4,7 +4,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{config::Config as ServerConfig, error::AppError};
 
-#[derive(Deserialize, Serialize, Debug)]
+#[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct Versions {
     call_guest_id: String,
     chain_guest_id: String,

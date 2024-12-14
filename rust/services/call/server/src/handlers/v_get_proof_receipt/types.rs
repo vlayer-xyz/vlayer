@@ -9,14 +9,14 @@ use serde::{Deserialize, Serialize, Serializer};
 
 use crate::{error::AppError, ser::ProofDTO};
 
-#[derive(Serialize, Deserialize, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "snake_case")]
 pub enum Status {
     Pending,
     Done,
 }
 
-#[derive(Serialize)]
+#[derive(Serialize, Clone)]
 pub struct RawData {
     #[serde(with = "ProofDTO")]
     pub proof: Proof,
@@ -57,7 +57,7 @@ impl TryFrom<HostOutput> for RawData {
     }
 }
 
-#[derive(new, Serialize)]
+#[derive(new, Clone, Serialize)]
 pub struct CallResult {
     pub status: Status,
     pub data: Option<RawData>,

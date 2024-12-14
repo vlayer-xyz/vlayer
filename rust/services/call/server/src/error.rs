@@ -3,6 +3,7 @@ use axum_jrpc::{
     Value,
 };
 use call_host::Error as HostError;
+use jsonrpsee::types::error::{self as jrpcerror, ErrorObjectOwned};
 use server_utils::{rpc::Error as RpcError, FieldValidationError};
 use thiserror::Error;
 use tokio::task::JoinError;
@@ -33,6 +34,26 @@ impl From<AppError> for JsonRpcError {
             | AppError::HashNotFound(..) => {
                 JsonRpcError::new(JsonRpcErrorReason::InternalError, error.to_string(), Value::Null)
             }
+        }
+    }
+}
+
+impl From<AppError> for ErrorObjectOwned {
+    fn from(error: AppError) -> Self {
+        match error {
+            AppError::FieldValidation(..) => ErrorObjectOwned::owned::<()>(
+                jrpcerror::INVALID_PARAMS_CODE,
+                error.to_string(),
+                None,
+            ),
+            AppError::Host(..)
+            | AppError::Join(..)
+            | AppError::RpcError(..)
+            | AppError::HashNotFound(..) => ErrorObjectOwned::owned::<()>(
+                jrpcerror::INTERNAL_ERROR_CODE,
+                error.to_string(),
+                None,
+            ),
         }
     }
 }

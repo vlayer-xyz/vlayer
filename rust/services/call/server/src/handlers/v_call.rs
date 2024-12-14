@@ -18,8 +18,8 @@ pub mod types;
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Params {
-    call: Call,
-    context: CallContext,
+    pub call: Call,
+    pub context: CallContext,
 }
 
 pub async fn v_call(

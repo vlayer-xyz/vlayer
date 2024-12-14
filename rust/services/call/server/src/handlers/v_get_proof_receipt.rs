@@ -9,7 +9,7 @@ pub mod types;
 
 #[derive(Deserialize, Serialize, Debug)]
 pub struct Params {
-    hash: CallHash,
+    pub hash: CallHash,
 }
 
 pub async fn v_get_proof_receipt(
