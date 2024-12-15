@@ -11,6 +11,7 @@ use jsonrpsee::{
     },
     ConnectionId, MethodCallback, MethodResponse, RpcModule,
 };
+use mime::APPLICATION_JSON;
 
 #[derive(new, Clone)]
 pub struct Router<T: Send + Sync + Clone + 'static>(RpcModule<T>);
@@ -23,7 +24,11 @@ where
         match serde_json::from_slice::<Request>(&body) {
             Ok(request) => {
                 let response = self.handle_request_inner(request).await;
-                (StatusCode::OK, [(CONTENT_TYPE, "appication/json")], response.to_result())
+                (
+                    StatusCode::OK,
+                    [(CONTENT_TYPE, APPLICATION_JSON.to_string())],
+                    response.to_result(),
+                )
                     .into_response()
             }
             Err(..) => StatusCode::BAD_REQUEST.into_response(),
