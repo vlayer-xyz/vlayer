@@ -16,8 +16,6 @@ pub enum AppError {
     RpcError(#[from] RpcError),
     #[error("Hash not found: {0}")]
     HashNotFound(String),
-    #[error("Method `{0}` not found")]
-    MethodNotFound(String),
 }
 
 impl From<AppError> for ErrorObjectOwned {
@@ -33,11 +31,6 @@ impl From<AppError> for ErrorObjectOwned {
             | AppError::RpcError(..)
             | AppError::HashNotFound(..) => ErrorObjectOwned::owned::<()>(
                 jrpcerror::INTERNAL_ERROR_CODE,
-                error.to_string(),
-                None,
-            ),
-            AppError::MethodNotFound(..) => ErrorObjectOwned::owned::<()>(
-                jrpcerror::METHOD_NOT_FOUND_CODE,
                 error.to_string(),
                 None,
             ),

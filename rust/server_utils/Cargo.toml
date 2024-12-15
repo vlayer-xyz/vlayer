@@ -16,6 +16,7 @@ futures = { workspace = true }
 hex = { workspace = true }
 host_utils = { workspace = true }
 http-body-util = { workspace = true }
+jsonrpsee = { workspace = true, features = ["server-core"] }
 mime = { workspace = true }
 mockito = { workspace = true }
 parking_lot = { workspace = true }

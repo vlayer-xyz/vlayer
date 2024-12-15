@@ -9470,6 +9470,7 @@ dependencies = [
  "hex",
  "host_utils",
  "http-body-util",
+ "jsonrpsee",
  "mime",
  "mockito",
  "parking_lot",

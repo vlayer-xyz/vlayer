@@ -1,12 +1,12 @@
 use axum::{body::Bytes, extract::State, response::IntoResponse, routing::post, Router};
-use server_utils::{init_trace_layer, RequestIdLayer};
+use server_utils::{init_trace_layer, RequestIdLayer, Router2 as JrpcRouter};
 use tokio::net::TcpListener;
 use tower_http::cors::CorsLayer;
 use tracing::info;
 
 use crate::{
     config::Config,
-    handlers::{Router as JrpcRouter, RpcServer, State as AppState},
+    handlers::{RpcServer, State as AppState},
 };
 
 pub async fn serve(config: Config) -> anyhow::Result<()> {
