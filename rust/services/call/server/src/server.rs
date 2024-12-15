@@ -1,12 +1,4 @@
-use axum::{
-    body::Bytes,
-    extract::State,
-    http::{header::CONTENT_TYPE, status::StatusCode},
-    response::IntoResponse,
-    routing::post,
-    Router,
-};
-use jsonrpsee::{types::Request, ConnectionId, MethodCallback, MethodResponse, RpcModule};
+use axum::{body::Bytes, extract::State, response::IntoResponse, routing::post, Router};
 use server_utils::{init_trace_layer, RequestIdLayer};
 use tokio::net::TcpListener;
 use tower_http::cors::CorsLayer;
@@ -14,8 +6,7 @@ use tracing::info;
 
 use crate::{
     config::Config,
-    error::AppError,
-    handlers::{RpcServer, State as AppState},
+    handlers::{Router as JrpcRouter, RpcServer, State as AppState},
 };
 
 pub async fn serve(config: Config) -> anyhow::Result<()> {
@@ -27,41 +18,18 @@ pub async fn serve(config: Config) -> anyhow::Result<()> {
     Ok(())
 }
 
-async fn handle_request(mut state: RpcModule<AppState>, request: Request<'_>) -> MethodResponse {
-    let id = request.id().into_owned();
-    let params = request.params().into_owned();
-    let exts = state.extensions().clone();
-    let conn_id = ConnectionId(0);
-    if let Some(method) = state.method(request.method_name()) {
-        match method {
-            MethodCallback::Async(cb) => cb(id, params, conn_id, usize::MAX, exts).await,
-            _ => todo!("implement other method types in handler"),
-        }
-    } else {
-        let err = AppError::MethodNotFound(request.method_name().to_string());
-        MethodResponse::error(id, err)
-    }
-}
-
-async fn handle(State(state): State<RpcModule<AppState>>, body: Bytes) -> impl IntoResponse {
-    match serde_json::from_slice::<Request>(&body) {
-        Ok(request) => {
-            let response = handle_request(state, request).await;
-            (StatusCode::OK, [(CONTENT_TYPE, "appication/json")], response.to_result())
-                .into_response()
-        }
-        Err(..) => StatusCode::BAD_REQUEST.into_response(),
-    }
+async fn handle(State(router): State<JrpcRouter<AppState>>, body: Bytes) -> impl IntoResponse {
+    router.handle_request(body).await
 }
 
 pub fn server(cfg: Config) -> Router {
-    let state = AppState::new(cfg).into_rpc();
+    let router = JrpcRouter::new(AppState::new(cfg).into_rpc());
 
     //TODO: Lets decide do we need strict CORS policy or not and update this eventually
     let cors = CorsLayer::permissive();
     Router::new()
         .route("/", post(handle))
-        .with_state(state)
+        .with_state(router)
         .layer(cors)
         .layer(init_trace_layer())
         // NOTE: RequestIdLayer should be added after the Trace layer
