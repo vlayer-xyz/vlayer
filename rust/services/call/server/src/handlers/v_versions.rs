@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use serde::{Deserialize, Serialize};
 
 use crate::{config::Config as ServerConfig, error::AppError};
@@ -11,10 +9,7 @@ pub struct Versions {
     api_version: String,
 }
 
-#[derive(Deserialize, Serialize, Debug)]
-pub struct Params {}
-
-pub async fn v_versions(config: Arc<ServerConfig>, _: Params) -> Result<Versions, AppError> {
+pub fn v_versions(config: &ServerConfig) -> Result<Versions, AppError> {
     Ok(Versions {
         call_guest_id: config.call_guest_id(),
         chain_guest_id: config.chain_guest_id(),

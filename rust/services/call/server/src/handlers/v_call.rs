@@ -3,7 +3,6 @@ use std::sync::Arc;
 use call_engine::{Call as EngineCall, HostOutput};
 use call_host::Host;
 use common::Hashable;
-use serde::{Deserialize, Serialize};
 use tracing::info;
 use types::{Call, CallContext, CallHash, CallHashData};
 
@@ -16,20 +15,15 @@ use crate::{
 
 pub mod types;
 
-#[derive(Deserialize, Serialize, Debug)]
-pub struct Params {
-    pub call: Call,
-    pub context: CallContext,
-}
-
 pub async fn v_call(
     config: Arc<ServerConfig>,
     state: SharedState,
-    params: Params,
+    call: Call,
+    context: CallContext,
 ) -> Result<CallHash, AppError> {
-    info!("v_call => {params:#?}");
-    let call: EngineCall = params.call.try_into()?;
-    let host_config = config.get_host_config(params.context.chain_id);
+    info!("v_call => {call:#?} {context:#?}");
+    let call: EngineCall = call.try_into()?;
+    let host_config = config.get_host_config(context.chain_id);
     let host = Host::try_new(host_config).await?;
     let call_hash = CallHashData::new(host.start_execution_location(), call.clone())
         .hash_slow()
@@ -42,7 +36,7 @@ pub async fn v_call(
             Box::new(gas_meter::RpcClient::new(config, call_hash))
         });
 
-    gas_meter_client.allocate(params.context.gas_limit).await?;
+    gas_meter_client.allocate(context.gas_limit).await?;
 
     tokio::spawn(async move {
         let res = generate_proof(call, host, gas_meter_client).await;

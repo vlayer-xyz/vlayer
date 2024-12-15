@@ -43,23 +43,14 @@ pub struct State2 {
 #[async_trait]
 impl RpcServer for State2 {
     async fn v_call(&self, call: Call, ctx: CallContext) -> Result<CallHash, AppError> {
-        v_call::v_call(
-            self.config.clone(),
-            self.proofs.clone(),
-            v_call::Params { call, context: ctx },
-        )
-        .await
+        v_call::v_call(self.config.clone(), self.proofs.clone(), call, ctx).await
     }
 
     async fn v_get_proof_receipt(&self, hash: CallHash) -> Result<CallResult, AppError> {
-        v_get_proof_receipt::v_get_proof_receipt(
-            self.proofs.clone(),
-            v_get_proof_receipt::Params { hash },
-        )
-        .await
+        v_get_proof_receipt::v_get_proof_receipt(&self.proofs, hash)
     }
 
     async fn v_versions(&self) -> Result<Versions, AppError> {
-        v_versions::v_versions(self.config.clone(), v_versions::Params {}).await
+        v_versions::v_versions(&self.config)
     }
 }
