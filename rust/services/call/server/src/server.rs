@@ -1,5 +1,3 @@
-use std::sync::Arc;
-
 use axum::{
     body::Bytes,
     extract::State,
@@ -17,7 +15,7 @@ use tracing::info;
 use crate::{
     config::Config,
     error::AppError,
-    handlers::{RpcServer, SharedState, State2},
+    handlers::{RpcServer, State as AppState},
 };
 
 pub async fn serve(config: Config) -> anyhow::Result<()> {
@@ -29,7 +27,7 @@ pub async fn serve(config: Config) -> anyhow::Result<()> {
     Ok(())
 }
 
-async fn handle_request(mut state: RpcModule<State2>, request: Request<'_>) -> MethodResponse {
+async fn handle_request(mut state: RpcModule<AppState>, request: Request<'_>) -> MethodResponse {
     let id = request.id().into_owned();
     let params = request.params().into_owned();
     let exts = state.extensions().clone();
@@ -45,7 +43,7 @@ async fn handle_request(mut state: RpcModule<State2>, request: Request<'_>) -> M
     }
 }
 
-async fn handle(State(state): State<RpcModule<State2>>, body: Bytes) -> impl IntoResponse {
+async fn handle(State(state): State<RpcModule<AppState>>, body: Bytes) -> impl IntoResponse {
     match serde_json::from_slice::<Request>(&body) {
         Ok(request) => {
             let response = handle_request(state, request).await;
@@ -57,15 +55,13 @@ async fn handle(State(state): State<RpcModule<State2>>, body: Bytes) -> impl Int
 }
 
 pub fn server(cfg: Config) -> Router {
-    let config = Arc::new(cfg);
-    let state = SharedState::default();
-    let full_state = State2::new(config, state).into_rpc();
+    let state = AppState::new(cfg).into_rpc();
 
     //TODO: Lets decide do we need strict CORS policy or not and update this eventually
     let cors = CorsLayer::permissive();
     Router::new()
         .route("/", post(handle))
-        .with_state(full_state)
+        .with_state(state)
         .layer(cors)
         .layer(init_trace_layer())
         // NOTE: RequestIdLayer should be added after the Trace layer

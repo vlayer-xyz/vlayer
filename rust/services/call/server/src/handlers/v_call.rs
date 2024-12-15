@@ -1,14 +1,11 @@
-use std::sync::Arc;
-
 use call_engine::{Call as EngineCall, HostOutput};
 use call_host::Host;
 use common::Hashable;
 use tracing::info;
 use types::{Call, CallContext, CallHash, CallHashData};
 
-use super::SharedState;
+use super::{SharedConfig, SharedProofs};
 use crate::{
-    config::Config as ServerConfig,
     error::AppError,
     gas_meter::{self, Client as GasMeterClient, ComputationStage},
 };
@@ -16,8 +13,8 @@ use crate::{
 pub mod types;
 
 pub async fn v_call(
-    config: Arc<ServerConfig>,
-    state: SharedState,
+    config: SharedConfig,
+    state: SharedProofs,
     call: Call,
     context: CallContext,
 ) -> Result<CallHash, AppError> {

@@ -1,6 +1,7 @@
 use serde::{Deserialize, Serialize};
 
-use crate::{config::Config as ServerConfig, error::AppError};
+use super::SharedConfig;
+use crate::error::AppError;
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct Versions {
@@ -9,7 +10,7 @@ pub struct Versions {
     api_version: String,
 }
 
-pub fn v_versions(config: &ServerConfig) -> Result<Versions, AppError> {
+pub fn v_versions(config: &SharedConfig) -> Result<Versions, AppError> {
     Ok(Versions {
         call_guest_id: config.call_guest_id(),
         chain_guest_id: config.chain_guest_id(),

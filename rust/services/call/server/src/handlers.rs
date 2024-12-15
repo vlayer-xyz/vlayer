@@ -4,7 +4,6 @@ use async_trait::async_trait;
 use call_engine::HostOutput;
 use dashmap::DashMap;
 use derive_more::{Deref, DerefMut};
-use derive_new::new;
 use jsonrpsee::proc_macros::rpc;
 use v_call::types::{Call, CallContext, CallHash};
 use v_get_proof_receipt::types::CallResult;
@@ -15,11 +14,6 @@ use crate::{config::Config, error::AppError};
 pub mod v_call;
 pub mod v_get_proof_receipt;
 pub mod v_versions;
-
-pub type SharedState = Arc<State>;
-
-#[derive(Deref, DerefMut, Default, Debug)]
-pub struct State(DashMap<CallHash, Result<HostOutput, AppError>>);
 
 #[rpc(server)]
 #[async_trait]
@@ -34,14 +28,28 @@ pub trait Rpc {
     async fn v_versions(&self) -> Result<Versions, AppError>;
 }
 
-#[derive(new, Clone)]
-pub struct State2 {
+#[derive(Deref, DerefMut, Default, Debug)]
+pub struct Proofs(DashMap<CallHash, Result<HostOutput, AppError>>);
+
+pub type SharedConfig = Arc<Config>;
+pub type SharedProofs = Arc<Proofs>;
+
+#[derive(Clone)]
+pub struct State {
     config: Arc<Config>,
-    proofs: SharedState,
+    proofs: Arc<Proofs>,
+}
+
+impl State {
+    pub fn new(cfg: Config) -> Self {
+        let config = Arc::new(cfg);
+        let proofs = Arc::new(Proofs::default());
+        Self { config, proofs }
+    }
 }
 
 #[async_trait]
-impl RpcServer for State2 {
+impl RpcServer for State {
     async fn v_call(&self, call: Call, ctx: CallContext) -> Result<CallHash, AppError> {
         v_call::v_call(self.config.clone(), self.proofs.clone(), call, ctx).await
     }
