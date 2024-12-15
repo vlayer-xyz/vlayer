@@ -2325,6 +2325,7 @@ version = "0.1.0"
 dependencies = [
  "alloy-primitives",
  "anyhow",
+ "async-trait",
  "axum",
  "axum-jrpc",
  "bincode",
@@ -2332,6 +2333,7 @@ dependencies = [
  "chain_common",
  "chain_db",
  "common",
+ "jsonrpsee",
  "lazy_static",
  "mpt",
  "parking_lot",

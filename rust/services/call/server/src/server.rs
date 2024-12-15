@@ -1,5 +1,5 @@
 use axum::{body::Bytes, extract::State, response::IntoResponse, routing::post, Router};
-use server_utils::{init_trace_layer, RequestIdLayer, Router2 as JrpcRouter};
+use server_utils::{init_trace_layer, RequestIdLayer, Router as JrpcRouter};
 use tokio::net::TcpListener;
 use tower_http::cors::CorsLayer;
 use tracing::info;
