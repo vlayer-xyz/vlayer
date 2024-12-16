@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest";
-import * as hooks from "./index";
+import { hooks } from "./index";
 
 describe("interface", () => {
   it("should export all must have hooks", () => {
