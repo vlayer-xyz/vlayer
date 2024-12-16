@@ -12,7 +12,7 @@ test("Success email proof flow", async ({ page }) => {
   const fileChooserPromise = page.waitForEvent("filechooser");
   await page.locator('input[name="file"]').click();
   const fileChooser = await fileChooserPromise;
-  await fileChooser.setFiles(__dirname + "/fixtures/vlayer_welcome.eml");
+  await fileChooser.setFiles(__dirname + "/fixtures/verify_vlayer.eml");
 
   const response = await page.waitForResponse(VLAYER_SERVER_URL);
   expect(response.ok()).toBeTruthy();
