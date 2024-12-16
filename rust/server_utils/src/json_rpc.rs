@@ -24,7 +24,7 @@ where
         let response = match serde_json::from_slice::<Request>(&body) {
             Ok(request) => self.handle_request_inner(request).await,
             Err(err) => {
-                let err = Error::InvalidJson(err);
+                let err = Error::InvalidRequest(err);
                 MethodResponse::error(Id::Null, err)
             }
         };
@@ -33,7 +33,6 @@ where
             [(CONTENT_TYPE, APPLICATION_JSON.to_string())],
             response.to_result(),
         )
-            .into_response()
     }
 
     async fn handle_request_inner(mut self, request: Request<'_>) -> MethodResponse {
@@ -58,7 +57,7 @@ enum Error {
     #[error("Method `{0}` not found")]
     MethodNotFound(String),
     #[error("{0}")]
-    InvalidJson(#[from] serde_json::error::Error),
+    InvalidRequest(#[from] serde_json::error::Error),
 }
 
 impl From<Error> for ErrorObjectOwned {
@@ -69,7 +68,7 @@ impl From<Error> for ErrorObjectOwned {
                 error.to_string(),
                 None,
             ),
-            Error::InvalidJson(..) => ErrorObjectOwned::owned::<()>(
+            Error::InvalidRequest(..) => ErrorObjectOwned::owned::<()>(
                 jrpcerror::INVALID_REQUEST_CODE,
                 error.to_string(),
                 None,
