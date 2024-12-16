@@ -8,7 +8,7 @@ import {
   getConfig,
 } from "@vlayer/sdk/config";
 
-const mimeEmail = fs.readFileSync("./testdata/verify_vlayer.eml").toString();
+const mimeEmail = fs.readFileSync("../testdata/verify_vlayer.eml").toString();
 
 const config = getConfig();
 
