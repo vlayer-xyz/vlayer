@@ -25,7 +25,7 @@ test.describe("Full flow of webproof using extension", () => {
       expect(extension).toBeDefined();
     });
 
-    await test.step("Extension should stay ok after clinking request button multiple times", async () => {
+    await test.step("Extension should stay ok after clicking request button multiple times", async () => {
       await page.goto("/source-new-way");
       const requestProofButton = page
         .locator("body")
@@ -62,7 +62,7 @@ test.describe("Full flow of webproof using extension", () => {
       expect(status).toEqual("completed");
     });
 
-    await test.step("Side panel UI should indicate that  expectUrl step is completed after redirection", async () => {
+    await test.step("Side panel UI should indicate that expectUrl step is completed after redirection", async () => {
       const loginPage = context.pages().find((page) => {
         return page.url().includes("login");
       });
