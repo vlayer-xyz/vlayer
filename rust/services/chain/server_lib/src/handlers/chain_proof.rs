@@ -81,8 +81,7 @@ mod tests {
         #[tokio::test]
         async fn trie_contains_proofs() -> Result<()> {
             let response =
-                v_get_chain_proof(chain_db.clone(), chain_id.clone(), block_numbers.clone())
-                    .await?;
+                v_get_chain_proof(chain_db.clone(), *chain_id, block_numbers.clone()).await?;
 
             let RpcChainProof { nodes, .. } = response;
             let trie = MerkleTrie::from_rlp_nodes(nodes)?;
@@ -100,8 +99,7 @@ mod tests {
         #[tokio::test]
         async fn zk_proof_read_from_db() -> Result<()> {
             let RpcChainProof { proof, .. } =
-                v_get_chain_proof(chain_db.clone(), chain_id.clone(), block_numbers.clone())
-                    .await?;
+                v_get_chain_proof(chain_db.clone(), *chain_id, block_numbers.clone()).await?;
             assert_eq!(proof, *zk_proof);
             Ok(())
         }
@@ -110,8 +108,7 @@ mod tests {
         #[tokio::test]
         async fn proof_does_verify() -> Result<()> {
             let response =
-                v_get_chain_proof(chain_db.clone(), chain_id.clone(), block_numbers.clone())
-                    .await?;
+                v_get_chain_proof(chain_db.clone(), *chain_id, block_numbers.clone()).await?;
 
             let RpcChainProof { proof, nodes } = response;
             let trie = MerkleTrie::from_rlp_nodes(nodes)?;
@@ -126,8 +123,7 @@ mod tests {
         #[tokio::test]
         async fn proof_does_not_verify_with_invalid_elf_id() -> Result<()> {
             let response =
-                v_get_chain_proof(chain_db.clone(), chain_id.clone(), block_numbers.clone())
-                    .await?;
+                v_get_chain_proof(chain_db.clone(), *chain_id, block_numbers.clone()).await?;
 
             let RpcChainProof { proof, nodes } = response;
             let trie = MerkleTrie::from_rlp_nodes(nodes)?;
