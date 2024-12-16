@@ -27,68 +27,14 @@ const context: {
   provingResult: [Proof, string, Hex] | undefined;
 } = { webProof: undefined, provingResult: undefined };
 
-const { chain, ethClient, account, proverUrl, confirmations } =
-  await createContext({
-    chainName: import.meta.env.VITE_CHAIN_NAME,
-    proverUrl: import.meta.env.VITE_PROVER_URL,
-    jsonRpcUrl: import.meta.env.VITE_JSON_RPC_URL,
-    privateKey: import.meta.env.VITE_PRIVATE_KEY,
-  });
+const { chain, ethClient, account, proverUrl, confirmations } = createContext({
+  chainName: import.meta.env.VITE_CHAIN_NAME,
+  proverUrl: import.meta.env.VITE_PROVER_URL,
+  jsonRpcUrl: import.meta.env.VITE_JSON_RPC_URL,
+  privateKey: import.meta.env.VITE_PRIVATE_KEY,
+});
 
 const twitterUserAddress = account.address;
-
-export async function setupRequestProveButton(element: HTMLButtonElement) {
-  element.addEventListener("click", async () => {
-    const provider = createExtensionWebProofProvider();
-    const webProof = await provider.getWebProof({
-      proverCallCommitment: {
-        address: import.meta.env.VITE_PROVER_ADDRESS,
-        proverAbi: webProofProver.abi,
-        chainId: foundry.id,
-        functionName: "main",
-        commitmentArgs: ["0x"],
-      },
-      logoUrl: "http://twitterswap.com/logo.png",
-      steps: [
-        startPage("https://x.com/i/flow/login", "Go to x.com login page"),
-        expectUrl("https://x.com/home", "Log in"),
-        notarize(
-          "https://api.x.com/1.1/account/settings.json",
-          "GET",
-          "Generate Proof of Twitter profile",
-        ),
-      ],
-    });
-
-    console.log("WebProof generated!", webProof);
-    context.webProof = webProof;
-  });
-}
-
-export const setupVProverButton = (element: HTMLButtonElement) => {
-  element.addEventListener("click", async () => {
-    const vlayer = createVlayerClient({
-      url: proverUrl,
-    });
-
-    console.log("Generating proof...");
-    const hash = await vlayer.prove({
-      address: import.meta.env.VITE_PROVER_ADDRESS,
-      functionName: "main",
-      proverAbi: webProofProver.abi,
-      args: [
-        {
-          webProofJson: JSON.stringify(context.webProof),
-        },
-        twitterUserAddress,
-      ],
-      chainId: chain.id,
-    });
-    const provingResult = await vlayer.waitForProvingResult({ hash });
-    console.log("Proof generated!", provingResult);
-    context.provingResult = provingResult as [Proof, string, Hex];
-  });
-};
 
 export const setupProveWebButton = (element: HTMLButtonElement) => {
   element.addEventListener("click", async () => {
