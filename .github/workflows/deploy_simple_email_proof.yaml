@@ -18,10 +18,23 @@ jobs:
     name: Deploy simple-email-proof example
     runs-on: ubuntu-24.04
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
       - name: Install & build example prerequisites
         uses: ./.github/actions/example-prerequisites
         with:
           EXAMPLE_NAME: simple_email_proof
+      - name: Deploy contracts
+        shell: bash
+        run: bun run deploy:testnet
+        env:
+          VLAYER_ENV: testnet
+          EXAMPLES_TEST_PRIVATE_KEY: ${{ secrets.EXAMPLES_TEST_PRIVATE_KEY }}
+        working-directory: ./examples/simple_email_proof/vlayer
+      - name: Build vite
+        shell: bash
+        run: bun run vite build
+        working-directory: ./examples/simple_email_proof/vlayer
       - name: Deploy to Vercel
         if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
         env:
