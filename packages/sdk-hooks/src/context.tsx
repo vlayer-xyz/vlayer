@@ -1,59 +1,65 @@
-/* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { createVlayerClient } from "@vlayer/sdk";
 import { type VlayerContextType } from "./types";
-import { createContext, type PropsWithChildren } from "react";
-import {
-  createContext as createVlayerChainContext,
-  customTransport,
-} from "@vlayer/sdk/config";
+import { createContext, useCallback, type PropsWithChildren } from "react";
 import { createExtensionWebProofProvider } from "@vlayer/sdk/web_proof";
 import "viem/window";
-import { anvil } from "viem/chains";
-import { type Config } from "@vlayer/sdk/config";
-
+import { ErrorBoundary } from "react-error-boundary";
+import { WagmiProviderNotFoundError } from "wagmi";
 export const VlayerContext = createContext<VlayerContextType | null>(null);
+
+const NO_WAGMI_PROVIDER_ERROR_MESSAGE =
+  "Wagmi provider is required but not found. Please make sure you have connected a Wagmi provider.";
 
 export const VlayerProvider = ({
   config,
   children,
 }: PropsWithChildren<{
-  config: Config & {
+  config: {
     notaryUrl?: string;
     wsProxyUrl?: string;
+    proverUrl: string;
   };
 }>) => {
-  const useWindowEthereumTransport = config.chainName !== anvil.name;
   const webProofProvider = createExtensionWebProofProvider({
     notaryUrl: config.notaryUrl,
     wsProxyUrl: config.wsProxyUrl,
   });
-
-  const chainContext = createVlayerChainContext(
-    {
-      chainName: config.chainName,
-      proverUrl: config.proverUrl,
-      jsonRpcUrl: config.jsonRpcUrl,
-      privateKey: config.privateKey,
-    },
-    useWindowEthereumTransport && window.ethereum
-      ? customTransport(window.ethereum)
-      : undefined,
-  );
 
   const vlayerClient = createVlayerClient({
     url: config.proverUrl,
     webProofProvider,
   });
 
+  const handleError = useCallback((error: Error) => {
+    if (error instanceof WagmiProviderNotFoundError) {
+      console.error(`@vlayer/react: ${NO_WAGMI_PROVIDER_ERROR_MESSAGE}`);
+    }
+  }, []);
   return (
-    <VlayerContext.Provider
-      value={{
-        vlayerClient,
-        webProofProvider,
-        chainContext,
-      }}
+    <ErrorBoundary
+      FallbackComponent={VlayerErrorFallback}
+      onError={handleError}
     >
-      {children}
-    </VlayerContext.Provider>
+      <VlayerContext.Provider
+        value={{
+          vlayerClient,
+          webProofProvider,
+        }}
+      >
+        {children}
+      </VlayerContext.Provider>
+    </ErrorBoundary>
   );
 };
+
+function VlayerErrorFallback({ error }: { error: Error }) {
+  if (error instanceof WagmiProviderNotFoundError) {
+    return (
+      <div style={{ textAlign: "center", fontSize: "1.2rem" }}>
+        {NO_WAGMI_PROVIDER_ERROR_MESSAGE}
+      </div>
+    );
+  }
+
+  return <div>Vlayer Error: {error.message}</div>;
+}
