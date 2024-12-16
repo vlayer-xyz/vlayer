@@ -10,7 +10,6 @@ import {
 } from "@vlayer/sdk";
 
 import {
-  createExtensionWebProofProvider,
   createWebProofRequest,
   expectUrl,
   notarize,
