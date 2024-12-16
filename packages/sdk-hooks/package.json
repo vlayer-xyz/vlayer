@@ -15,5 +15,9 @@
   },
   "dependencies": {
       "@vlayer/sdk": "workspace:*"
-  }
+  }, 
+  "workspaces": [ 
+    "examples/*",
+    "*"
+  ]
 }
