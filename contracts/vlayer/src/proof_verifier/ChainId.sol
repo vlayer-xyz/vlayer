@@ -5,7 +5,8 @@ error InvalidChainId();
 
 library ChainIdLibrary {
     function is_devnet() internal view returns (bool) {
-        return block.chainid == 31337; // Anvil local network
+        return block.chainid == 3_1337 // Anvil local network
+            || block.chainid == 30_1337; // vlayer test
     }
 
     function is_testnet() internal view returns (bool) {
