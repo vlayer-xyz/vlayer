@@ -1,7 +1,7 @@
 use axum::{body::Bytes, extract::State, response::IntoResponse, routing::post, Router};
 use server_utils::{init_trace_layer, RequestIdLayer, Router as JrpcRouter};
 use tokio::net::TcpListener;
-use tower_http::cors::CorsLayer;
+use tower_http::{cors::CorsLayer, validate_request::ValidateRequestHeaderLayer};
 use tracing::info;
 
 use crate::{
@@ -30,6 +30,7 @@ pub fn server(cfg: Config) -> Router {
     Router::new()
         .route("/", post(handle))
         .with_state(router)
+        .layer(ValidateRequestHeaderLayer::accept(mime::APPLICATION_JSON.as_ref()))
         .layer(cors)
         .layer(init_trace_layer())
         // NOTE: RequestIdLayer should be added after the Trace layer

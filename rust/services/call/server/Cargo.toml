@@ -22,13 +22,14 @@ derive-new = { workspace = true }
 derive_more = { workspace = true }
 hex = { workspace = true }
 jsonrpsee = { workspace = true, features = ["macros"] }
+mime = { workspace = true }
 seal = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
 server_utils = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true }
-tower-http = { workspace = true, features = ["cors"] }
+tower-http = { workspace = true, features = ["cors", "validate-request"] }
 tracing = { workspace = true }
 
 [dev-dependencies]

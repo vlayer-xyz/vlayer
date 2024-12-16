@@ -1,6 +1,7 @@
 use std::sync::Arc;
 
-use chain_common::{GetChainProof, RpcChainProof};
+use alloy_primitives::{BlockNumber, ChainId};
+use chain_common::RpcChainProof;
 use chain_db::ChainDb;
 use parking_lot::RwLock;
 
@@ -12,12 +13,11 @@ const SOME_RISC0_CHAIN_GUEST_ID: [u32; 8] = [
     2663174293, 2024089015, 3465834372, 887420448, 2606376422, 1669533029, 1010997213, 2366700158,
 ];
 
+#[allow(clippy::unused_async)]
 pub async fn v_get_chain_proof(
     chain_db: Arc<RwLock<ChainDb>>,
-    GetChainProof {
-        chain_id,
-        block_numbers,
-    }: GetChainProof,
+    chain_id: ChainId,
+    block_numbers: Vec<BlockNumber>,
 ) -> Result<RpcChainProof, AppError> {
     if block_numbers.is_empty() {
         return Err(AppError::NoBlockNumbers);
@@ -36,13 +36,11 @@ mod tests {
 
     #[tokio::test]
     async fn empty_block_hashes() {
-        let empty_block_hashes = GetChainProof {
-            chain_id: 1,
-            block_numbers: vec![],
-        };
+        let chain_id: ChainId = 1;
+        let block_numbers: Vec<BlockNumber> = vec![];
         let chain_db = Arc::new(RwLock::new(ChainDb::in_memory(GuestElf::default())));
         assert_eq!(
-            v_get_chain_proof(chain_db, empty_block_hashes)
+            v_get_chain_proof(chain_db, chain_id, block_numbers)
                 .await
                 .unwrap_err(),
             AppError::NoBlockNumbers
@@ -75,16 +73,16 @@ mod tests {
                 db.write().update_chain(1, ChainUpdate::new(chain_info, &*db_trie, [])).expect("update_chain failed");
                 db
             };
-            static ref params: GetChainProof = GetChainProof {
-                chain_id: 1,
-                block_numbers: vec![1, 2],
-            };
+            static ref chain_id: ChainId = 1;
+            static ref block_numbers: Vec<BlockNumber> = vec![1, 2];
         }
 
         #[ignore = "MPT hashes changed because of RLP encoding fix"]
         #[tokio::test]
         async fn trie_contains_proofs() -> Result<()> {
-            let response = v_get_chain_proof(chain_db.clone(), params.clone()).await?;
+            let response =
+                v_get_chain_proof(chain_db.clone(), chain_id.clone(), block_numbers.clone())
+                    .await?;
 
             let RpcChainProof { nodes, .. } = response;
             let trie = MerkleTrie::from_rlp_nodes(nodes)?;
@@ -102,7 +100,8 @@ mod tests {
         #[tokio::test]
         async fn zk_proof_read_from_db() -> Result<()> {
             let RpcChainProof { proof, .. } =
-                v_get_chain_proof(chain_db.clone(), params.clone()).await?;
+                v_get_chain_proof(chain_db.clone(), chain_id.clone(), block_numbers.clone())
+                    .await?;
             assert_eq!(proof, *zk_proof);
             Ok(())
         }
@@ -110,7 +109,9 @@ mod tests {
         #[ignore = "MPT hashes changed because of RLP encoding fix"]
         #[tokio::test]
         async fn proof_does_verify() -> Result<()> {
-            let response = v_get_chain_proof(chain_db.clone(), params.clone()).await?;
+            let response =
+                v_get_chain_proof(chain_db.clone(), chain_id.clone(), block_numbers.clone())
+                    .await?;
 
             let RpcChainProof { proof, nodes } = response;
             let trie = MerkleTrie::from_rlp_nodes(nodes)?;
@@ -124,7 +125,9 @@ mod tests {
 
         #[tokio::test]
         async fn proof_does_not_verify_with_invalid_elf_id() -> Result<()> {
-            let response = v_get_chain_proof(chain_db.clone(), params.clone()).await?;
+            let response =
+                v_get_chain_proof(chain_db.clone(), chain_id.clone(), block_numbers.clone())
+                    .await?;
 
             let RpcChainProof { proof, nodes } = response;
             let trie = MerkleTrie::from_rlp_nodes(nodes)?;

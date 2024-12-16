@@ -7,7 +7,7 @@ use derive_new::new;
 use jsonrpsee::{
     types::{
         error::{self as jrpcerror, ErrorObjectOwned},
-        Request,
+        Id, Request,
     },
     ConnectionId, MethodCallback, MethodResponse, RpcModule,
 };
@@ -21,18 +21,19 @@ where
     T: Send + Sync + Clone + 'static,
 {
     pub async fn handle_request(self, body: Bytes) -> impl IntoResponse {
-        match serde_json::from_slice::<Request>(&body) {
-            Ok(request) => {
-                let response = self.handle_request_inner(request).await;
-                (
-                    StatusCode::OK,
-                    [(CONTENT_TYPE, APPLICATION_JSON.to_string())],
-                    response.to_result(),
-                )
-                    .into_response()
+        let response = match serde_json::from_slice::<Request>(&body) {
+            Ok(request) => self.handle_request_inner(request).await,
+            Err(err) => {
+                let err = Error::InvalidJson(err);
+                MethodResponse::error(Id::Null, err)
             }
-            Err(..) => StatusCode::BAD_REQUEST.into_response(),
-        }
+        };
+        (
+            StatusCode::OK,
+            [(CONTENT_TYPE, APPLICATION_JSON.to_string())],
+            response.to_result(),
+        )
+            .into_response()
     }
 
     async fn handle_request_inner(mut self, request: Request<'_>) -> MethodResponse {
@@ -56,6 +57,8 @@ where
 enum Error {
     #[error("Method `{0}` not found")]
     MethodNotFound(String),
+    #[error("{0}")]
+    InvalidJson(#[from] serde_json::error::Error),
 }
 
 impl From<Error> for ErrorObjectOwned {
@@ -63,6 +66,11 @@ impl From<Error> for ErrorObjectOwned {
         match error {
             Error::MethodNotFound(..) => ErrorObjectOwned::owned::<()>(
                 jrpcerror::METHOD_NOT_FOUND_CODE,
+                error.to_string(),
+                None,
+            ),
+            Error::InvalidJson(..) => ErrorObjectOwned::owned::<()>(
+                jrpcerror::INVALID_REQUEST_CODE,
                 error.to_string(),
                 None,
             ),

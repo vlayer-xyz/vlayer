@@ -2,6 +2,7 @@ use axum::{body::Bytes, extract::State, response::IntoResponse, routing::post};
 use chain_db::ChainDb;
 use server_utils::{init_trace_layer, RequestIdLayer, Router as JrpcRouter};
 use tokio::net::TcpListener;
+use tower_http::validate_request::ValidateRequestHeaderLayer;
 use tracing::info;
 
 use crate::{
@@ -18,6 +19,7 @@ pub fn server(chain_db: ChainDb) -> axum::Router {
     axum::Router::new()
         .route("/", post(handle_jrpc))
         .with_state(router)
+        .layer(ValidateRequestHeaderLayer::accept(mime::APPLICATION_JSON.as_ref()))
         .layer(init_trace_layer())
         // NOTE: RequestIdLayer should be added after the Trace layer
         .layer(RequestIdLayer)

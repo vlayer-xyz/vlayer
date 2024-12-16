@@ -34,7 +34,6 @@ async fn method_not_found() {
             "error": {
                 "code": -32601,
                 "message": "Method `random_gibberish` not found",
-                "data": null
             }
         }),
         body_to_json(response.into_body()).await
@@ -60,7 +59,6 @@ async fn method_missing() {
             "error": {
                 "code": -32600,
                 "message": "missing field `method` at line 1 column 36",
-                "data": null
             }
         }),
         body_to_json(response.into_body()).await
@@ -123,7 +121,6 @@ mod chain_proof {
                 "error": {
                     "code": -32602,
                     "message": "Invalid params: empty list of block numbers provided - nothing to prove",
-                    "data": null
                 }
             }),
             body_to_json(response.into_body()).await
