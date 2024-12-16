@@ -152,8 +152,8 @@ mod chain_proof {
                 "id": 1,
                 "error": {
                     "code": -32602,
-                    "message": "invalid type: string \"\", expected u64",
-                    "data": null
+                    "message": "Invalid params",
+                    "data": "invalid type: string \"\", expected u64 at line 1 column 36",
                 }
             }),
             body_to_json(response.into_body()).await
