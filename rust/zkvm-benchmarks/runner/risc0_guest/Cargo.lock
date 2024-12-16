@@ -1498,7 +1498,6 @@ dependencies = [
  "base64 0.21.7",
  "cfdkim",
  "mailparse",
- "regex",
  "rsa",
  "slog",
  "thiserror",
