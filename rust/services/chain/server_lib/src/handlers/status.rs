@@ -1,14 +1,16 @@
 use std::sync::Arc;
 
-use chain_common::{GetSyncStatus, SyncStatus};
+use alloy_primitives::ChainId;
+use chain_common::SyncStatus;
 use chain_db::ChainDb;
 use parking_lot::RwLock;
 
 use crate::error::AppError;
 
+#[allow(clippy::unused_async)]
 pub async fn v_sync_status(
     chain_db: Arc<RwLock<ChainDb>>,
-    GetSyncStatus { chain_id }: GetSyncStatus,
+    chain_id: ChainId,
 ) -> Result<SyncStatus, AppError> {
     chain_db
         .read()
@@ -28,17 +30,17 @@ mod tests {
 
     #[tokio::test]
     async fn empty_db() {
-        let params = GetSyncStatus { chain_id: 1 };
+        let chain_id: ChainId = 1;
         let chain_db = Arc::new(RwLock::new(ChainDb::in_memory(GuestElf::default())));
         assert_eq!(
-            v_sync_status(chain_db, params).await.unwrap_err(),
+            v_sync_status(chain_db, chain_id).await.unwrap_err(),
             AppError::UnsupportedChainId(1)
         );
     }
 
     #[tokio::test]
     async fn single_block() {
-        let params = GetSyncStatus { chain_id: 1 };
+        let chain_id: ChainId = 1;
         let chain_db = Arc::new(RwLock::new(ChainDb::in_memory(GuestElf::default())));
         let chain_info = ChainInfo::new(
             NonEmptyRange::from_single_value(0),
@@ -50,7 +52,7 @@ mod tests {
             .update_chain(1, ChainUpdate::new(chain_info, [], []))
             .expect("update_chain failed");
         assert_eq!(
-            v_sync_status(chain_db, params).await.unwrap(),
+            v_sync_status(chain_db, chain_id).await.unwrap(),
             SyncStatus {
                 first_block: 0,
                 last_block: 0
