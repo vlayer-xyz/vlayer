@@ -21,7 +21,6 @@ import { createContext } from "@vlayer/sdk/config";
 
 import webProofVerifier from "../../out/WebProofVerifier.sol/WebProofVerifier";
 import { Hex } from "viem";
-import { create } from "domain";
 
 const context: {
   webProof: PresentationJSON | undefined;
@@ -108,7 +107,8 @@ export const setupProveWebButton = (element: HTMLButtonElement) => {
           "Generate Proof of Twitter profile",
         ),
       ],
-      notaryPubKey: "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExpX/4R4z40gI6C/j9zAM39u58LJu\n3Cx5tXTuqhhu/tirnBi5GniMmspOTEsps4ANnPLpMmMSfhJ+IFHbc3qVOA==\n-----END PUBLIC KEY-----\n";
+      notaryPubKey:
+        "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExpX/4R4z40gI6C/j9zAM39u58LJu\n3Cx5tXTuqhhu/tirnBi5GniMmspOTEsps4ANnPLpMmMSfhJ+IFHbc3qVOA==\n-----END PUBLIC KEY-----\n",
     });
 
     const hash = await vlayer.proveWeb({
