@@ -6,7 +6,7 @@ on:
       - "rust-toolchain.toml"
       - "rust/**"
       - "examples/**"
-      - ".github/workflows/rust_test.yaml"
+      - ".github/workflows/test_rust.yaml"
   merge_group:
   push:
     branches:
