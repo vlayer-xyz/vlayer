@@ -40,6 +40,7 @@ export async function prove<T extends Abi, F extends ContractFunctionName<T>>(
   chainId: number = foundry.id,
   gasLimit: number = 1_000_000,
   url: string = "http://127.0.0.1:3000",
+  userToken?: string,
   options: ProveOptions = { preverifyVersions: false },
 ) {
   await preverifyVersions(url, !!options.preverifyVersions);
@@ -53,7 +54,10 @@ export async function prove<T extends Abi, F extends ContractFunctionName<T>>(
     chain_id: chainId,
     gas_limit: gasLimit,
   };
-  return v_call(call, context, url);
+  const fullUrl = url.concat(
+    userToken !== undefined ? "/?token=" + userToken : "",
+  );
+  return v_call(call, context, fullUrl);
 }
 
 export async function getProofReceipt<

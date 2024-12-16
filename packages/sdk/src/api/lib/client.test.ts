@@ -125,6 +125,32 @@ describe("Success zk-proving", () => {
     expect(zkProvingSpy).toBeCalledTimes(1);
     expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Error);
   });
+  it("should pass user token if present", async () => {
+    const userToken = "deadbeef";
+
+    fetchMocker.mockResponseOnce((req) => {
+      if (req.url === "http://127.0.0.1:3000/?token=" + userToken) {
+        return {
+          body: JSON.stringify({
+            result: hashStr,
+          }),
+        };
+      }
+      return { status: 501 };
+    });
+
+    const result = await vlayer.prove({
+      address: `0x${"a".repeat(40)}`,
+      functionName: "main",
+      proverAbi: [],
+      args: [],
+      chainId: 42,
+      userToken: "deadbeef",
+    });
+    expect(result.hash).toBe(hashStr);
+    expect(zkProvingSpy).toBeCalledTimes(1);
+    expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Proving);
+  });
 });
 
 describe("Failed zk-proving", () => {
