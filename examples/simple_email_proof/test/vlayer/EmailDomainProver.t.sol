@@ -31,7 +31,7 @@ contract EmailDomainProverTest is VTest {
         EmailProofLibWrapper wrapper = new EmailProofLibWrapper();
         address johnDoe = vm.addr(1);
         EmailDomainProver prover = new EmailDomainProver();
-        UnverifiedEmail memory email = getTestEmail("./vlayer/testdata/verify_vlayer.eml");
+        UnverifiedEmail memory email = getTestEmail("testdata/verify_vlayer.eml");
         callProver();
         VerifiedEmail memory verifiedEmail = wrapper.verify(email);
         callProver();
