@@ -57,9 +57,9 @@ pub struct RecordingClient {
 
 impl RecordingClient {
     #[must_use]
-    pub fn new(inner: impl Client) -> Self {
+    pub fn new(inner: Box<dyn Client>) -> Self {
         Self {
-            inner: Box::new(inner),
+            inner,
             cache: RwLock::new(Default::default()),
         }
     }

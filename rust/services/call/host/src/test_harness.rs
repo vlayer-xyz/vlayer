@@ -78,6 +78,6 @@ fn create_host(
     };
     let block_number =
         block_tag_to_block_number(&multi_provider, location.chain_id, location.block_tag)?;
-    let chain_proof_client = RpcChainProofClient::new(chain_proof_server_url);
+    let chain_proof_client = Box::new(RpcChainProofClient::new(chain_proof_server_url));
     Host::try_new_with_components(multi_provider, block_number, chain_proof_client, config)
 }

@@ -6804,6 +6804,7 @@ name = "mock_chain_server"
 version = "0.1.0"
 dependencies = [
  "alloy-primitives",
+ "async-trait",
  "axum-jrpc",
  "bincode",
  "block_header",

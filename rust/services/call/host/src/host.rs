@@ -52,7 +52,7 @@ pub struct Host {
 async fn mock_chain_client(
     providers: &CachedMultiProvider,
     chain_id: ChainId,
-) -> Result<(BlockNumber, chain_client::RpcClient), Error> {
+) -> Result<(BlockNumber, Box<dyn chain_client::Client>), Error> {
     let latest_block = providers
         .get(chain_id)?
         .get_block_header(BlockTag::Latest)?
@@ -62,7 +62,7 @@ async fn mock_chain_client(
     chain_proof_server
         .mock_single_block(chain_id, latest_block)
         .await;
-    let chain_client = chain_client::RpcClient::new(chain_proof_server.url());
+    let chain_client = Box::new(chain_proof_server.into_client());
     Ok((block_number, chain_client))
 }
 
@@ -80,7 +80,7 @@ impl Host {
                     .get_sync_status(config.start_chain_id)
                     .await?
                     .last_block;
-                (block_number, chain_client)
+                (block_number, Box::new(chain_client) as Box<dyn Client>)
             }
             None => {
                 warn!("Chain proof sever URL not provided. Running with mock server");
@@ -137,7 +137,7 @@ impl Host {
     pub fn try_new_with_components(
         providers: CachedMultiProvider,
         block_number: u64,
-        chain_client: impl chain_client::Client,
+        chain_client: Box<dyn chain_client::Client>,
         config: Config,
     ) -> Result<Self, Error> {
         let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
@@ -279,7 +279,7 @@ mod test {
         let host = Host::try_new_with_components(
             CachedMultiProvider::from_factory(EthersProviderFactory::new(test_rpc_urls())),
             0,
-            chain_client::RpcClient::new(""),
+            Box::new(chain_client::RpcClient::new("")),
             config,
         )?;
         let call = Call {
