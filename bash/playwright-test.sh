@@ -26,7 +26,9 @@ forge build --sizes
 popd
 
 echo Run playwright tests
-pushd ${VLAYER_HOME}/packages && bun run test:headless && popd
+pushd ${VLAYER_HOME}/packages
+bun run test:headless
+popd
 
 echo "revert anvil to initial state"
 cast rpc evm_revert "${ANVIL_SNAPSHOT_ID}"
