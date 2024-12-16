@@ -32,7 +32,6 @@ contract EmailDomainProverTest is VTest {
         address johnDoe = vm.addr(1);
         EmailDomainProver prover = new EmailDomainProver();
         UnverifiedEmail memory email = getTestEmail("testdata/verify_vlayer.eml");
-        callProver();
         VerifiedEmail memory verifiedEmail = wrapper.verify(email);
         callProver();
         (, bytes32 emailHash, address registeredWallet, string memory emailDomain) = prover.main(email, johnDoe);

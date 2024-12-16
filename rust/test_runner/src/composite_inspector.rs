@@ -2,7 +2,10 @@ use alloy_sol_types::private::{Address, U256};
 use delegate::delegate;
 use derive_new::new;
 use forge::revm::{
-    interpreter::{CallInputs, CallOutcome, CreateInputs, CreateOutcome, Interpreter},
+    interpreter::{
+        CallInputs, CallOutcome, CreateInputs, CreateOutcome, Gas, InstructionResult, Interpreter,
+        InterpreterResult,
+    },
     precompile::Log,
     Database, EvmContext, Inspector,
 };
@@ -43,8 +46,34 @@ where
         if let Some(call_outcome) = self.cheatcode_inspector.call(context, inputs) {
             return Some(call_outcome);
         }
+        if let Some(value) = call_precompiles(context, &inputs) {
+            return Some(value);
+        }
         inspector_stack_outcome
     }
+}
+
+fn call_precompiles<DB: Database + DatabaseExt>(
+    context: &mut EvmContext<DB>,
+    inputs: &&mut CallInputs,
+) -> Option<CallOutcome> {
+    for precompile in call_precompiles::PRECOMPILES.iter() {
+        if let Ok(precompile_outcome) =
+            precompile
+                .precompile()
+                .call_ref(&inputs.input, u64::MAX, context.env.as_ref())
+        {
+            return Some(CallOutcome::new(
+                InterpreterResult::new(
+                    InstructionResult::Return,
+                    precompile_outcome.bytes,
+                    Gas::new(inputs.gas_limit),
+                ),
+                inputs.return_memory_offset.clone(),
+            ));
+        }
+    }
+    None
 }
 
 impl InspectorExt for CompositeInspector {}

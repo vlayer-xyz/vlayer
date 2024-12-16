@@ -15,6 +15,7 @@ block_header = { workspace = true }
 call_engine = { workspace = true }
 call_guest_wrapper = { workspace = true }
 call_host = { workspace = true }
+call_precompiles = { workspace = true }
 chain = { workspace = true }
 chain_client = { workspace = true }
 chrono = { workspace = true }
