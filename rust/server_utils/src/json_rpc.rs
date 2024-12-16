@@ -9,7 +9,7 @@ use jsonrpsee::{
         error::{self as jrpcerror, ErrorObjectOwned},
         Id, Request,
     },
-    ConnectionId, MethodCallback, MethodResponse, RpcModule,
+    ConnectionId, Extensions, MethodCallback, MethodResponse, RpcModule,
 };
 use mime::APPLICATION_JSON;
 
@@ -20,13 +20,28 @@ impl<T> Router<T>
 where
     T: Send + Sync + Clone + 'static,
 {
-    pub async fn handle_request(self, body: Bytes) -> impl IntoResponse {
+    pub async fn handle_request(mut self, body: Bytes) -> impl IntoResponse {
+        let extensions = self.0.extensions().clone();
+        self.handle(body, extensions).await
+    }
+
+    pub async fn handle_request_with_params<Params>(
+        mut self,
+        body: Bytes,
+        params: Params,
+    ) -> impl IntoResponse
+    where
+        Params: Clone + Send + Sync + 'static,
+    {
+        let mut extensions = self.0.extensions().clone();
+        extensions.insert(params);
+        self.handle(body, extensions).await
+    }
+
+    async fn handle(self, body: Bytes, extensions: Extensions) -> impl IntoResponse {
         let response = match serde_json::from_slice::<Request>(&body) {
-            Ok(request) => self.handle_request_inner(request).await,
-            Err(err) => {
-                let err = Error::InvalidRequest(err);
-                MethodResponse::error(Id::Null, err)
-            }
+            Ok(request) => self.handle_inner(request, extensions).await,
+            Err(err) => MethodResponse::error(Id::Null, Error::InvalidRequest(err)),
         };
         (
             StatusCode::OK,
@@ -35,19 +50,16 @@ where
         )
     }
 
-    async fn handle_request_inner(mut self, request: Request<'_>) -> MethodResponse {
+    async fn handle_inner(self, request: Request<'_>, extensions: Extensions) -> MethodResponse {
         let id = request.id().into_owned();
         let params = request.params().into_owned();
-        let exts = self.0.extensions().clone();
         let conn_id = ConnectionId(0);
-        if let Some(method) = self.0.method(request.method_name()) {
-            match method {
-                MethodCallback::Async(cb) => cb(id, params, conn_id, usize::MAX, exts).await,
+        match self.0.method(request.method_name()) {
+            Some(method) => match method {
+                MethodCallback::Async(cb) => cb(id, params, conn_id, usize::MAX, extensions).await,
                 _ => todo!("implement other method types in handler"),
-            }
-        } else {
-            let err = Error::MethodNotFound(request.method_name().to_string());
-            MethodResponse::error(id, err)
+            },
+            None => MethodResponse::error(id, Error::MethodNotFound(request.method_name().into())),
         }
     }
 }
