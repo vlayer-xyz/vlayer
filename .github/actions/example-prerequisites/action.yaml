@@ -1,0 +1,53 @@
+name: Example deploy prerequisites
+description: Installs & builds example prerequisites.
+runs:
+  using: "composite"
+  steps:
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Install contracts prerequisites
+        uses: ./.github/actions/contracts-prerequisites
+      - uses: oven-sh/setup-bun@v2
+        with:
+          node-version: lts/*
+
+      - name: Download nightly contracts
+        run: |
+          curl https://vlayer-releases.s3.eu-north-1.amazonaws.com/latest/vlayer.zip -o vlayer.zip
+
+      - name: Extract nightly contracts
+        run: |
+          mkdir -p nightly-contracts
+          unzip vlayer.zip -d ./nightly-contracts
+
+      - name: Copy nightly ImageID to contracts
+        run: |
+          rm contracts/vlayer/src/ImageID.sol
+          cp ./nightly-contracts/src/ImageID.sol contracts/vlayer/src/ImageID.sol
+          rm -rf ./nightly-contracts
+
+      - name: Install contracts' dependencies
+        working-directory: ./contracts/vlayer
+        run: forge soldeer install && forge build
+
+      - name: Build vlayer sdk
+        run: bun install && bun run build
+        working-directory: ./packages/sdk
+      - name: Build example contracts
+        run: forge soldeer install && forge clean && forge build
+        working-directory: ./examples/${{ inputs.EXAMPLE_NAME }}
+      - name: Install example dependencies
+        run: bun install
+        working-directory: ./examples/${{ inputs.EXAMPLE_NAME }}/vlayer
+      - name: Deploy contracts
+        run: bun run deploy:testnet
+        env:
+          VLAYER_ENV: testnet
+          EXAMPLES_TEST_PRIVATE_KEY: ${{ secrets.EXAMPLES_TEST_PRIVATE_KEY }}
+        working-directory: ./examples/${{ inputs.EXAMPLE_NAME }}/vlayer
+      - name: Build vite
+        run: bun run vite build
+        working-directory: ./examples/${{ inputs.EXAMPLE_NAME }}/vlayer
+      - name: Install Vercel
+        run: npm install -g vercel
