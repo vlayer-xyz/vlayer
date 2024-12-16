@@ -4,7 +4,7 @@ use derive_new::new;
 use serde::{Deserialize, Serialize};
 use server_utils::rpc::{Client as RawRpcClient, Method, Result};
 
-use crate::handlers::v_call::types::CallHash;
+use crate::handlers::{v_call::types::CallHash, UserToken};
 
 #[derive(new, Serialize, Debug)]
 #[serde(deny_unknown_fields)]
@@ -56,10 +56,12 @@ pub struct RpcClient {
     hash: CallHash,
     time_to_live: u64,
     api_key: Option<String>,
+    user_token: Option<UserToken>,
 }
 
 impl RpcClient {
-    const API_KEY_HEADER_NAME: &str = "x-api-prover-key";
+    const API_KEY_HEADER_NAME: &str = "x-prover-api-key";
+    const USER_TOKEN_QUERY_KEY: &str = "key";
 
     pub fn new(
         Config {
@@ -68,6 +70,7 @@ impl RpcClient {
             api_key,
         }: Config,
         hash: CallHash,
+        user_token: Option<UserToken>,
     ) -> Self {
         let client = RawRpcClient::new(&url);
         Self {
@@ -75,6 +78,7 @@ impl RpcClient {
             hash,
             time_to_live,
             api_key,
+            user_token,
         }
     }
 
@@ -82,6 +86,9 @@ impl RpcClient {
         let mut req = self.client.request(method);
         if let Some(api_key) = &self.api_key {
             req = req.with_header(Self::API_KEY_HEADER_NAME, api_key);
+        }
+        if let Some(user_token) = &self.user_token {
+            req = req.with_query(Self::USER_TOKEN_QUERY_KEY, user_token);
         }
         let _resp = req.send().await?;
         Ok(())

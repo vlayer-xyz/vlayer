@@ -16,12 +16,7 @@ pub fn verify_email<'a>(
     let result = verify_email_with_key(&logger, from_domain, &email, dkim_public_key)?;
 
     match result {
-        result
-            if result.with_detail().starts_with("pass")
-                || result.with_detail().starts_with("neutral") =>
-        {
-            Ok(email)
-        }
+        result if result.with_detail().starts_with("pass") => Ok(email),
         result if result.error().is_some() => Err(result.error().unwrap()),
         _ => Err(DKIMError::SignatureDidNotVerify),
     }

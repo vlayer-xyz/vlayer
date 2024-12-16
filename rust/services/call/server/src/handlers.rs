@@ -4,7 +4,8 @@ use async_trait::async_trait;
 use call_engine::HostOutput;
 use dashmap::DashMap;
 use derive_more::{Deref, DerefMut};
-use jsonrpsee::proc_macros::rpc;
+use jsonrpsee::{proc_macros::rpc, Extensions};
+use serde::Deserialize;
 use v_call::types::{Call, CallContext, CallHash};
 use v_get_proof_receipt::types::CallResult;
 use v_versions::Versions;
@@ -15,10 +16,17 @@ pub mod v_call;
 pub mod v_get_proof_receipt;
 pub mod v_versions;
 
+pub type UserToken = String;
+
+#[derive(Clone, Debug, Deserialize)]
+pub struct QueryParams {
+    token: Option<UserToken>,
+}
+
 #[rpc(server)]
 #[async_trait]
 pub trait Rpc {
-    #[method(name = "v_call")]
+    #[method(name = "v_call", with_extensions)]
     async fn v_call(&self, call: Call, ctx: CallContext) -> Result<CallHash, AppError>;
 
     #[method(name = "v_getProofReceipt")]
@@ -59,8 +67,16 @@ impl State {
 
 #[async_trait]
 impl RpcServer for State {
-    async fn v_call(&self, call: Call, ctx: CallContext) -> Result<CallHash, AppError> {
-        v_call::v_call(self.config.clone(), self.proofs.clone(), call, ctx).await
+    async fn v_call(
+        &self,
+        extensions: &Extensions,
+        call: Call,
+        ctx: CallContext,
+    ) -> Result<CallHash, AppError> {
+        let params = extensions
+            .get::<QueryParams>()
+            .expect("query params should be extracted in the handler");
+        v_call::v_call(self.config.clone(), self.proofs.clone(), params.clone(), call, ctx).await
     }
 
     async fn v_get_proof_receipt(&self, hash: CallHash) -> Result<CallResult, AppError> {
