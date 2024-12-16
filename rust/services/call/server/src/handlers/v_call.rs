@@ -1,15 +1,11 @@
-use std::sync::Arc;
-
 use call_engine::{Call as EngineCall, HostOutput};
 use call_host::Host;
 use common::Hashable;
-use serde::{Deserialize, Serialize};
 use tracing::info;
 use types::{Call, CallContext, CallHash, CallHashData};
 
-use super::SharedState;
+use super::{SharedConfig, SharedProofs};
 use crate::{
-    config::Config as ServerConfig,
     error::AppError,
     gas_meter::{self, Client as GasMeterClient, ComputationStage},
     handlers::ProofStatus,
@@ -17,23 +13,18 @@ use crate::{
 
 pub mod types;
 
-#[derive(Deserialize, Serialize, Debug)]
-pub struct Params {
+pub async fn v_call(
+    config: SharedConfig,
+    state: SharedProofs,
     call: Call,
     context: CallContext,
-}
-
-pub async fn v_call(
-    config: Arc<ServerConfig>,
-    state: SharedState,
-    params: Params,
 ) -> Result<CallHash, AppError> {
-    info!("v_call => {params:#?}");
-    let call: EngineCall = params.call.try_into()?;
+    info!("v_call => {call:#?} {context:#?}");
+    let call: EngineCall = call.try_into()?;
 
     let host = Host::builder()
         .with_rpc_urls(config.rpc_urls())
-        .with_start_chain_id(params.context.chain_id)?
+        .with_start_chain_id(context.chain_id)?
         .with_chain_proof_url(config.chain_proof_url())
         .await?
         .with_prover_contract_addr(call.to)
@@ -50,7 +41,7 @@ pub async fn v_call(
             Box::new(gas_meter::RpcClient::new(config, call_hash))
         });
 
-    gas_meter_client.allocate(params.context.gas_limit).await?;
+    gas_meter_client.allocate(context.gas_limit).await?;
 
     tokio::spawn(async move {
         let res = generate_proof(call, host, gas_meter_client).await;

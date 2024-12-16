@@ -1,46 +1,25 @@
-use std::{future::Future, pin::Pin, sync::Arc};
-
-use axum::{extract::State, response::IntoResponse, routing::post};
-use axum_jrpc::JsonRpcExtractor;
-use chain_common::{GetChainProof, GetSyncStatus};
+use axum::{body::Bytes, extract::State, response::IntoResponse, routing::post};
 use chain_db::ChainDb;
-use parking_lot::RwLock;
-use server_utils::{init_trace_layer, rpc::Method, RequestIdLayer};
+use server_utils::{init_trace_layer, RequestIdLayer, Router as JrpcRouter};
 use tokio::net::TcpListener;
+use tower_http::validate_request::ValidateRequestHeaderLayer;
 use tracing::info;
 
 use crate::{
-    handlers::{chain_proof::v_get_chain_proof, status::v_sync_status},
+    handlers::{RpcServer, State as AppState},
     ServerConfig,
 };
 
-async fn handle_jrpc(
-    State(router): State<server_utils::Router>,
-    request: JsonRpcExtractor,
-) -> impl IntoResponse {
-    router.handle_request(request).await
+async fn handle_jrpc(State(router): State<JrpcRouter<AppState>>, body: Bytes) -> impl IntoResponse {
+    router.handle_request(body).await
 }
 
 pub fn server(chain_db: ChainDb) -> axum::Router {
-    let chain_db = Arc::new(RwLock::new(chain_db));
-    let mut jrpc_router = server_utils::Router::default();
-    jrpc_router.add_handler(GetChainProof::METHOD_NAME, {
-        let chain_db = chain_db.clone();
-        move |params| -> Pin<Box<dyn Future<Output = _> + Send>> {
-            let chain_db = chain_db.clone();
-            Box::pin(v_get_chain_proof(chain_db, params))
-        }
-    });
-    jrpc_router.add_handler(
-        GetSyncStatus::METHOD_NAME,
-        move |params| -> Pin<Box<dyn Future<Output = _> + Send>> {
-            let chain_db = chain_db.clone();
-            Box::pin(v_sync_status(chain_db, params))
-        },
-    );
+    let router = JrpcRouter::new(AppState::new(chain_db).into_rpc());
     axum::Router::new()
         .route("/", post(handle_jrpc))
-        .with_state(jrpc_router)
+        .with_state(router)
+        .layer(ValidateRequestHeaderLayer::accept(mime::APPLICATION_JSON.as_ref()))
         .layer(init_trace_layer())
         // NOTE: RequestIdLayer should be added after the Trace layer
         .layer(RequestIdLayer)
