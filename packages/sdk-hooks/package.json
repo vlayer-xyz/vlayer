@@ -1,8 +1,4 @@
 {
-<<<<<<< HEAD
-=======
-
->>>>>>> 916b4880 (Add example usage of provider)
   "name": "@vlayer/react",
   "exports": {
     ".": "./src/index.ts"
