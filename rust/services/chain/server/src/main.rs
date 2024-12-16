@@ -2,9 +2,9 @@ use std::{net::SocketAddr, path::PathBuf};
 
 use chain_db::{ChainDb, Mode};
 use chain_guest_wrapper::GUEST_ELF;
-use chain_server_lib::{init_tracing, serve, ServerConfig};
+use chain_server_lib::{serve, ServerConfig};
 use clap::Parser;
-use common::{GlobalArgs, LogFormat};
+use common::{GlobalArgs, LogFormat, init_tracing};
 use dotenvy::dotenv;
 
 #[derive(Parser)]

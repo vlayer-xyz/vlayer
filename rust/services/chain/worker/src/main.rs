@@ -4,15 +4,13 @@ use alloy_primitives::ChainId;
 use chain_guest_wrapper::GUEST_ELF;
 use chain_host::{AppendStrategy, Host, HostConfig, PrependStrategy, ProofMode};
 use clap::Parser;
-use common::{GlobalArgs, LogFormat};
+use common::{init_tracing, GlobalArgs, LogFormat};
 use dotenvy::dotenv;
 use retry::HostErrorFilter;
 use tokio::sync::Mutex;
 use tower::{retry::budget::TpsBudget, Service, ServiceBuilder};
-use trace::init_tracing;
 
 mod retry;
-mod trace;
 
 const DEPOSIT_TIME_TO_LIVE: Duration = Duration::from_secs(60);
 const MIN_RETRIES_PER_SECOND: u32 = 3;
