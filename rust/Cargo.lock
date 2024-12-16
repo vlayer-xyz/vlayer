@@ -1991,6 +1991,7 @@ dependencies = [
  "derive-new",
  "dotenvy",
  "ethers-core",
+ "ethers-providers",
  "host_utils",
  "insta",
  "lazy_static",

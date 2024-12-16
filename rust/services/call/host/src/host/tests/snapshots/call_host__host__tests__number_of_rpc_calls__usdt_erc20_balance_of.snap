@@ -2,6 +2,7 @@
 source: services/call/host/src/host/tests/number_of_rpc_calls.rs
 expression: state
 ---
+latest_block: 0
 header:
   "0x1297121": 1
 balance: {}

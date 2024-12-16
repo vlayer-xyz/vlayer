@@ -151,4 +151,8 @@ impl BlockingProvider for CachedProvider {
             }
         }
     }
+
+    fn get_latest_block_number(&self) -> Result<BlockNumber> {
+        todo!()
+    }
 }

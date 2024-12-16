@@ -33,4 +33,8 @@ impl BlockingProvider for DefaultProvider {
     fn get_proof(&self, _: Address, _: Vec<StorageKey>, _: BlockNumber) -> Result<EIP1186Proof> {
         Ok(Default::default())
     }
+
+    fn get_latest_block_number(&self) -> Result<BlockNumber> {
+        Ok(Default::default())
+    }
 }
