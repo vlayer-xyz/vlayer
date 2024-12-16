@@ -32,8 +32,7 @@
     "extension-hooks/",
     "test-web-app/",
     "test-json-server/",
-    "sdk-hooks/",
-    "sdk-hooks/examples/*"
+    "sdk-hooks/"
   ],
   "trustedDependencies": [
     "viem"

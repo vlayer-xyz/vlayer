@@ -10,23 +10,31 @@ export const VlayerContext = createContext<VlayerContextType | null>(null);
 const NO_WAGMI_PROVIDER_ERROR_MESSAGE =
   "Wagmi provider is required but not found. Please make sure you have connected a Wagmi provider.";
 
+const DEFAULT_PROVER_URL = "https://test-prover.vlayer.xyz";
+const DEFAULT_NOTARY_URL = "https://test-notary.vlayer.xyz";
+const DEFAULT_WS_PROXY_URL = "wss://test-wsproxy.vlayer.xyz";
+
+const DEFAULT_CONFIG = {
+  proverUrl: DEFAULT_PROVER_URL,
+  notaryUrl: DEFAULT_NOTARY_URL,
+  wsProxyUrl: DEFAULT_WS_PROXY_URL,
+};
+
 export const VlayerProvider = ({
   config,
   children,
 }: PropsWithChildren<{
-  config: {
-    notaryUrl?: string;
-    wsProxyUrl?: string;
-    proverUrl: string;
-  };
+  config: Partial<typeof DEFAULT_CONFIG>;
 }>) => {
+  const { proverUrl, notaryUrl, wsProxyUrl } = { ...DEFAULT_CONFIG, ...config };
+
   const webProofProvider = createExtensionWebProofProvider({
-    notaryUrl: config.notaryUrl,
-    wsProxyUrl: config.wsProxyUrl,
+    notaryUrl: notaryUrl,
+    wsProxyUrl: wsProxyUrl,
   });
 
   const vlayerClient = createVlayerClient({
-    url: config.proverUrl,
+    url: proverUrl,
     webProofProvider,
   });
 
