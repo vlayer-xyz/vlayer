@@ -1,6 +1,9 @@
-import React from "react";
 import { createVlayerClient } from "@vlayer/sdk";
-import { createContext, type PropsWithChildren } from "react";
+import React, {
+  createContext,
+  useContext,
+  type PropsWithChildren,
+} from "react";
 import { createExtensionWebProofProvider } from "@vlayer/sdk/web_proof";
 import { type VlayerContextType } from "./types";
 export const VlayerContext = createContext<VlayerContextType | null>(null);
@@ -15,7 +18,7 @@ export const VlayerProvider = ({
   config,
   children,
 }: PropsWithChildren<{
-  config: Partial<typeof DEFAULT_CONFIG>;
+  config?: Partial<typeof DEFAULT_CONFIG>;
 }>) => {
   const { proverUrl, notaryUrl, wsProxyUrl } = { ...DEFAULT_CONFIG, ...config };
 
@@ -39,4 +42,12 @@ export const VlayerProvider = ({
       {children}
     </VlayerContext.Provider>
   );
+};
+
+export const useVlayerContext = () => {
+  const context = useContext(VlayerContext);
+  if (!context) {
+    throw new Error("useVlayerContext must be used within a VlayerProvider");
+  }
+  return context;
 };

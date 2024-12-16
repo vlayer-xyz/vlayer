@@ -1,3 +1,8 @@
-export const hooks = {};
-
-export * from "./context";
+export const hooks = {
+  useWebProof: "useWebProof",
+  useProveWeb: "useProveWeb",
+  useProve: "useProve",
+  useVerify: "useVerify",
+  useProveVerifyWeb: "useProveVerifyWeb",
+  useProveVerify: "useProveVerify",
+};
