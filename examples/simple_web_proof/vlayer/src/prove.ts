@@ -107,8 +107,6 @@ export const setupProveWebButton = (element: HTMLButtonElement) => {
           "Generate Proof of Twitter profile",
         ),
       ],
-      notaryPubKey:
-        "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExpX/4R4z40gI6C/j9zAM39u58LJu\n3Cx5tXTuqhhu/tirnBi5GniMmspOTEsps4ANnPLpMmMSfhJ+IFHbc3qVOA==\n-----END PUBLIC KEY-----\n",
     });
 
     const hash = await vlayer.proveWeb({
@@ -119,7 +117,7 @@ export const setupProveWebButton = (element: HTMLButtonElement) => {
       args: [webProofRequest, twitterUserAddress],
     });
 
-    const provingResult = await vlayer.waitForProvingResult(hash);
+    const provingResult = await vlayer.waitForProvingResult({ hash });
     console.log("Proof generated!", provingResult);
     context.provingResult = provingResult as [Proof, string, Hex];
   });
