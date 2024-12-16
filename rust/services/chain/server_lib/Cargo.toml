@@ -12,7 +12,7 @@ bincode = "1.3.3"
 chain_common = { workspace = true }
 chain_db = { workspace = true }
 common = { workspace = true }
-jsonrpsee = { workspace = true, features = ["server-core"] }
+jsonrpsee = { workspace = true }
 lazy_static = { workspace = true }
 mime = { workspace = true }
 mpt = { workspace = true }
