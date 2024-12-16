@@ -40,7 +40,7 @@ pub(crate) struct ServeArgs {
     pub(crate) verify_chain_proofs: bool,
 
     /// URL of the gas meter RPC server
-    #[arg(long, group = "gas_meter")]
+    #[arg(long, group = "gas_meter", env)]
     pub(crate) gas_meter_url: Option<String>,
 
     /// Time-to-live for the gas meter messages

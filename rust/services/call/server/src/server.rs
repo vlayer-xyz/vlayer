@@ -1,4 +1,10 @@
-use axum::{body::Bytes, extract::State, response::IntoResponse, routing::post, Router};
+use axum::{
+    body::Bytes,
+    extract::{Query, State},
+    response::IntoResponse,
+    routing::post,
+    Router,
+};
 use server_utils::{init_trace_layer, RequestIdLayer, Router as JrpcRouter};
 use tokio::net::TcpListener;
 use tower_http::{cors::CorsLayer, validate_request::ValidateRequestHeaderLayer};
@@ -6,7 +12,7 @@ use tracing::info;
 
 use crate::{
     config::Config,
-    handlers::{RpcServer, State as AppState},
+    handlers::{QueryParams, RpcServer, State as AppState},
 };
 
 pub async fn serve(config: Config) -> anyhow::Result<()> {
@@ -18,8 +24,12 @@ pub async fn serve(config: Config) -> anyhow::Result<()> {
     Ok(())
 }
 
-async fn handle(State(router): State<JrpcRouter<AppState>>, body: Bytes) -> impl IntoResponse {
-    router.handle_request(body).await
+async fn handle(
+    Query(params): Query<QueryParams>,
+    State(router): State<JrpcRouter<AppState>>,
+    body: Bytes,
+) -> impl IntoResponse {
+    router.handle_request_with_params(body, params).await
 }
 
 pub fn server(cfg: Config) -> Router {
