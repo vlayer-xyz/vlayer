@@ -71,6 +71,29 @@ DKIM-Signature: a=rsa-sha256; bh=2jUSOH9NhtVGCQWNr9BrIAPreKQjO6Sn7XIkfJVOzv8=;\r
       );
     });
 
+    test("removes signatures from subdomain signers", async () => {
+      const email = await preverifyEmail(
+        addDkimWithDomain("subdomain.google.com", rawEmail),
+      );
+      expect(
+        email.email
+          .startsWith(`X-DKIM-Signature: v=1; a=rsa-sha256; d=subdomain.google.com;
+ s=selector; c=relaxed/relaxed; q=dns/txt; bh=; h=From:Subject:Date:To; b=
+DKIM-Signature: a=rsa-sha256; bh=2jUSOH9NhtVGCQWNr9BrIAPreKQjO6Sn7XIkfJVOzv8=;\r
+ c=simple/simple; d=google.com;`),
+      ).toBeTruthy();
+    });
+
+    test("removes signatures with mismatching subdomains", async () => {
+      const emailWithAddedHeaders = addDkimWithDomain(
+        "subdomain.google.com",
+        readFile("./src/api/email/testdata/test_email_subdomain.txt"),
+      );
+      await expect(preverifyEmail(emailWithAddedHeaders)).rejects.toThrow(
+        "Found 0 DKIM headers matching the sender domain",
+      );
+    });
+
     test("throws error if multiple DNS record domains match the sender", async () => {
       let emailWithAddedHeaders = addDkimWithDomain("google.com", rawEmail);
       emailWithAddedHeaders = addDkimWithDomain(
