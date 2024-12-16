@@ -296,9 +296,7 @@ mod server_tests {
                 "jsonrpc": "2.0",
             });
 
-            let mut path = String::from("/?token=");
-            path.push_str(USER_TOKEN);
-
+            let path = format!("/?token={USER_TOKEN}");
             let response = app.post(&path, &req).await;
 
             assert_eq!(StatusCode::OK, response.status());
