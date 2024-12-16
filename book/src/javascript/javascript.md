@@ -44,24 +44,35 @@ bun i @vlayer/sdk
 
 ## vlayer client
 
-A vlayer client is an interface to vlayer JSON-RPC API methods to trigger and follow the status of proving. It also provides convenient access to specific vlayer features such as [Web Proofs](./web-proofs.md) and [Email Proofs](./email-proofs.md).
+The **vlayer client** provides an interface to interact with the vlayer JSON-RPC API. It allows you to trigger and monitor the status of proofs and provides convenient access to features like [Web Proofs](./web-proofs.md) and [Email Proofs](./email-proofs.md).
 
-Initialize a client with default prover.
+### Initializing
 
-```ts
-import { createVlayerClient } from '@vlayer/sdk'
- 
-const vlayer = createVlayerClient();
-```
-
-Initialize a client with prover with specific url.
+You can initialize a client with the default configuration and deploy prover and verifier contracts as shown below:
 
 ```ts
-import { createVlayerClient } from '@vlayer/sdk'
- 
+import { createVlayerClient } from "@vlayer/sdk";
+import proverSpec from "../out/WebProofProver.sol/WebProofProver";
+import verifierSpec from "../out/WebProofVerifier.sol/WebProofVerifier";
+
+import {
+  getConfig,
+  createContext,
+  deployVlayerContracts,
+  writeEnvVariables,
+} from "@vlayer/sdk/config";
+
+const config = getConfig();
+const { chain, ethClient, account, proverUrl, confirmations } = await createContext(config);
+
 const vlayer = createVlayerClient({
-  proverUrl: 'http://localhost:3000',
-})
+  url: proverUrl,
+});
+
+const { proverAddr, verifierAddr } = await deployVlayerContracts({
+  proverSpec,
+  verifierSpec,
+});
 ```
 
 ## Proving
@@ -74,16 +85,13 @@ In order to start proving, we will need to provide:
 - `chainId` - id of the chain in whose context the prover contract call shall be executed
 
 ```ts
-import { foundry } from 'viem/chains'
-import { proverAbi } from './proverAbi'
-
 const hash = await vlayer.prove({
-    address: '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
-    proverAbi,
-    functionName: 'main',
-    args: ['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', 123],
-    chainId: foundry,
-})
+  address: '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
+  proverAbi: proverSpec.abi,
+  functionName: 'main',
+  args: ['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', 123],
+  chain: chain.id,
+});
 ```
 
 ### Waiting for result
@@ -107,19 +115,17 @@ const provingResult = await vlayer.waitForProvingResult({
 });
 ```
 
-## Verification
+## On-Chain verification
 
-Once we have obtained proving result, we can call verifier contract (below example demonstrates how to use `createAnvilClient` function  for that purpose).
+Once the proving result is obtained, one may call the verifier contract to validate the proof. Below is an example using the [viem](https://viem.sh/docs/contracts/write-contract/) library's `writeContract` function:
 
 ```ts
-import { verifierAbi } from './verifierAbi'
-import { testHelpers } from '@vlayer/sdk'
-
-testHelpers.createAnvilClient().writeContract({
-    abi: verifierAbi,
-    address,
-    account,
-    functionName: 'verify',
-    args: result,
-})
+const txHash = await ethClient.writeContract({
+  address: verifierAddr,
+  abi: verifierSpec.abi,
+  functionName: "verify",
+  args: provingResult,
+  chain,
+  account,
+});
 ```
