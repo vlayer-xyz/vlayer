@@ -1,5 +1,9 @@
 name: Example deploy prerequisites
 description: Installs & builds example prerequisites.
+inputs:
+  EXAMPLE_NAME:
+    description: 'Name of the example to deploy'
+    required: true
 runs:
   using: "composite"
   steps:
