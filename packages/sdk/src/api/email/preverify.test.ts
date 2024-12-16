@@ -162,9 +162,9 @@ describe("findIndicesOfMatchingDomains", () => {
       { domain: "other.other", selector: "selector2" },
       { domain: "example.com", selector: "selector3" },
     ];
-    expect(findIndicesOfMatchingDomains(signers, "example.com")).toStrictEqual([
-      0, 2,
-    ]);
+    expect(
+      findIndicesOfMatchingDomains(signers, "some@example.com"),
+    ).toStrictEqual([0, 2]);
   });
 
   test("returns empty array if no matching domains", () => {
