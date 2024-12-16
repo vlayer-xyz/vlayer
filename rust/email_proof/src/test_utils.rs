@@ -19,7 +19,7 @@ pub fn read_file(file: &str) -> Vec<u8> {
 }
 
 pub fn signed_email_fixture() -> Vec<u8> {
-    read_file("./testdata/signed_email.txt")
+    read_file("./testdata/signed_email.eml")
 }
 
 pub fn unsigned_email_fixture() -> Vec<u8> {
