@@ -14,4 +14,3 @@ contract VTestIntegration is Test {
         new VTest();
     }
 }
-
