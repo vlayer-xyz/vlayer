@@ -65,10 +65,4 @@ export function createContext(
     ethClient: createEthClient(chain, jsonRpcUrl, transport),
     confirmations: getChainConfirmations(config.chainName),
   };
-<<<<<<< HEAD
 }
-=======
-};
-
-export type VlayerChainContext = ReturnType<typeof createContext>;
->>>>>>> 916b4880 (Add example usage of provider)
