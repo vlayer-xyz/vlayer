@@ -17,27 +17,40 @@ export const VlayerProvider = ({
   config,
   children,
 }: PropsWithChildren<{
-  config: Config;
+  config: Config & {
+    notaryUrl?: string;
+    wsProxyUrl?: string;
+  };
 }>) => {
   const useWindowEthereumTransport = config.chainName !== anvil.name;
+  const webProofProvider = createExtensionWebProofProvider({
+    notaryUrl: config.notaryUrl,
+    wsProxyUrl: config.wsProxyUrl,
+  });
+
+  const chainContext = createVlayerChainContext(
+    {
+      chainName: config.chainName,
+      proverUrl: config.proverUrl,
+      jsonRpcUrl: config.jsonRpcUrl,
+      privateKey: config.privateKey,
+    },
+    useWindowEthereumTransport && window.ethereum
+      ? customTransport(window.ethereum)
+      : undefined,
+  );
+
+  const vlayerClient = createVlayerClient({
+    url: config.proverUrl,
+    webProofProvider,
+  });
+
   return (
     <VlayerContext.Provider
       value={{
-        vlayerClient: createVlayerClient({
-          url: config.proverUrl,
-        }),
-        webProofProvider: createExtensionWebProofProvider(),
-        chainContext: createVlayerChainContext(
-          {
-            chainName: config.chainName,
-            proverUrl: config.proverUrl,
-            jsonRpcUrl: config.jsonRpcUrl,
-            privateKey: config.privateKey,
-          },
-          useWindowEthereumTransport && window.ethereum
-            ? customTransport(window.ethereum)
-            : undefined,
-        ),
+        vlayerClient,
+        webProofProvider,
+        chainContext,
       }}
     >
       {children}
