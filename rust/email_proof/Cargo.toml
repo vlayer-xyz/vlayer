@@ -4,7 +4,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-addr = { version = "0.15.6", default-features = false }
 alloy-sol-types = { workspace = true }
 base64 = "0.21.7"
 cfdkim = { git = "https://github.com/risc0-labs/dkim", rev = "3213315e41f426c307b8feb8fb329330a47e326c", default-features = false }
