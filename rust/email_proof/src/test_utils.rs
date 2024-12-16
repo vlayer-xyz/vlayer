@@ -18,8 +18,11 @@ pub fn read_file(file: &str) -> Vec<u8> {
     std::fs::read(file).unwrap()
 }
 
+fn add_crlf(s: &str) -> String {
+    s.replace("\r\n", "\n").replace("\n", "\r\n")
+}
 pub fn signed_email_fixture() -> Vec<u8> {
-    read_file("./testdata/signed_email.txt")
+    add_crlf(&String::from_utf8(read_file("./testdata/signed_email.eml")).unwrap()).into_bytes()
 }
 
 pub fn unsigned_email_fixture() -> Vec<u8> {

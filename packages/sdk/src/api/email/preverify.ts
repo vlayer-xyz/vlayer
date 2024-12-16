@@ -11,7 +11,7 @@ export function findIndicesOfMatchingDomains(
   expectedOrigin: string,
 ) {
   return signers
-    .map(({ domain }) => expectedOrigin.endsWith(domain))
+    .map(({ domain }) => expectedOrigin.endsWith(`@${domain}`))
     .map((isMatch, index) => (isMatch ? index : -1))
     .filter((index) => index !== -1);
 }
