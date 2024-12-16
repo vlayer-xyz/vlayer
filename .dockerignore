@@ -13,3 +13,6 @@ packages
 .gitignore
 LICENSE
 README.md
+contracts/**/out
+contracts/**/dependencies
+contracts/**/cache
