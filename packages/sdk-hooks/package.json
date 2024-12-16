@@ -1,6 +1,6 @@
 {
 
-  "name": "@vlayer/react-sdk",
+  "name": "@vlayer/react",
   "exports": {
     ".": "./src/index.ts" 
   },
@@ -14,10 +14,6 @@
       "react": "^18 || ^19"
   },
   "dependencies": {
-      "@vlayer/sdk": "workspace:*"
-  }, 
-  "workspaces": [ 
-    "examples/*",
-    "*"
-  ]
+    "@vlayer/sdk": "workspace:*"
+  }
 }

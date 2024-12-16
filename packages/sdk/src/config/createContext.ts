@@ -44,3 +44,5 @@ export const createContext = (config: Config, transport?: CustomTransport) => {
     confirmations: getChainConfirmations(config.chainName),
   };
 };
+
+export type VlayerChainContext = ReturnType<typeof createContext>;

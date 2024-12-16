@@ -8,6 +8,7 @@ import {
 } from "@vlayer/sdk/config";
 import { createExtensionWebProofProvider } from "@vlayer/sdk/web_proof";
 import "viem/window";
+import { anvil } from "viem/chains";
 import { type Config } from "@vlayer/sdk/config";
 
 export const VlayerContext = createContext<VlayerContextType | null>(null);
@@ -16,8 +17,9 @@ export const VlayerProvider = ({
   config,
   children,
 }: PropsWithChildren<{
-  config: Config & { useWindowEthereumTransport: boolean };
+  config: Config;
 }>) => {
+  const useWindowEthereumTransport = config.chainName !== anvil.name;
   return (
     <VlayerContext.Provider
       value={{
@@ -32,7 +34,7 @@ export const VlayerProvider = ({
             jsonRpcUrl: config.jsonRpcUrl,
             privateKey: config.privateKey,
           },
-          config.useWindowEthereumTransport && window.ethereum
+          useWindowEthereumTransport && window.ethereum
             ? customTransport(window.ethereum)
             : undefined,
         ),
