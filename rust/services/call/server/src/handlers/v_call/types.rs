@@ -50,13 +50,21 @@ impl std::fmt::Display for CallHash {
     }
 }
 
-#[derive(new, RlpEncodable)]
-pub struct CallHashData {
-    execution_location: ExecutionLocation,
-    call: EngineCall,
+impl From<(&ExecutionLocation, &EngineCall)> for CallHash {
+    fn from((execution_location, call): (&ExecutionLocation, &EngineCall)) -> Self {
+        CallHashData::new(execution_location, call)
+            .hash_slow()
+            .into()
+    }
 }
 
-impl Hashable for CallHashData {
+#[derive(new, RlpEncodable)]
+pub struct CallHashData<'a> {
+    execution_location: &'a ExecutionLocation,
+    call: &'a EngineCall,
+}
+
+impl Hashable for CallHashData<'_> {
     fn hash_slow(&self) -> B256 {
         keccak256(alloy_rlp::encode(self))
     }
