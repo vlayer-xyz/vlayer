@@ -231,7 +231,7 @@ mod test {
     }
 
     #[tokio::test(flavor = "multi_thread")]
-    async fn host_does_not_accept_calls_longer_than_limit() -> anyhow::Result<()> {
+    async fn host_does_not_accept_calls_longer_than_limit() {
         let config = Config {
             proof_mode: ProofMode::Fake,
             ..Config::default()
@@ -252,7 +252,5 @@ mod test {
             host.preflight(call).await.unwrap_err().to_string(),
             format!("Calldata too large: {} bytes", max_call_data_size + 1)
         );
-
-        Ok(())
     }
 }
