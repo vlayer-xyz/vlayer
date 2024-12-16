@@ -1,0 +1,45 @@
+name: Deploy simple-email-proof example
+on:
+  workflow_run:
+    workflows: ["Deploy Provers"]
+    types: [completed]
+  pull_request:
+    paths:
+      - examples/simple_web_proof/**
+      - .github/workflows/deploy_simple_web_proof.yaml
+  push:
+    paths:
+      - examples/simple_web_proof/**
+      - .github/workflows/deploy_simple_web_proof.yaml
+    branches:
+      - main
+jobs:
+  deploy-simple-web-proof:
+    name: Deploy simple-web-proof example
+    runs-on: ubuntu-24.04
+    steps:
+      - name: Install & build example prerequisites
+        uses: ./.github/actions/example-prerequisites
+        with:
+          EXAMPLE_NAME: simple_web_proof
+      - name: Deploy to Vercel
+        if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+        env:
+          VERCEL_ENV: production
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_SIMPLE_WEB_PROOF_PROJECT_ID }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          EXAMPLE_NAME: simple_web_proof
+        run: bash/deploy-to-vercel.sh
+      - name: Deploy to Vercel (PR Preview)
+        if: github.event_name == 'pull_request'
+        env:
+          VERCEL_ENV: preview
+          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
+          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_SIMPLE_WEB_PROOF_PROJECT_ID }}
+          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
+          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
+          PR_NUMBER: "${{ github.event.number }}"
+          EXAMPLE_NAME: simple_web_proof
+        run: bash/deploy-to-vercel.sh
