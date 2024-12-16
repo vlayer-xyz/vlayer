@@ -1,6 +1,6 @@
+import React from "react";
 import { createVlayerClient } from "@vlayer/sdk";
 import { createContext, type PropsWithChildren } from "react";
-import React from "react";
 import { createExtensionWebProofProvider } from "@vlayer/sdk/web_proof";
 import { type VlayerContextType } from "./types";
 export const VlayerContext = createContext<VlayerContextType | null>(null);
