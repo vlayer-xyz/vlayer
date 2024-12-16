@@ -46,7 +46,7 @@ where
         if let Some(call_outcome) = self.cheatcode_inspector.call(context, inputs) {
             return Some(call_outcome);
         }
-        if let Some(value) = call_precompiles(context, &inputs) {
+        if let Some(value) = call_precompiles(context, inputs) {
             return Some(value);
         }
         inspector_stack_outcome
@@ -54,10 +54,10 @@ where
 }
 
 fn call_precompiles<DB: Database + DatabaseExt>(
-    context: &mut EvmContext<DB>,
-    inputs: &&mut CallInputs,
+    context: &EvmContext<DB>,
+    inputs: &CallInputs,
 ) -> Option<CallOutcome> {
-    for precompile in call_precompiles::PRECOMPILES.iter() {
+    for precompile in &call_precompiles::PRECOMPILES {
         if let Ok(precompile_outcome) =
             precompile
                 .precompile()
