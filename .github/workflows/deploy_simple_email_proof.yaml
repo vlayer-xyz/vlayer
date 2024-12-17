@@ -13,6 +13,9 @@ on:
       - .github/workflows/deploy_simple_email_proof.yaml
     branches:
       - main
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
 jobs:
   deploy-simple-email-proof:
     name: Deploy simple-email-proof example

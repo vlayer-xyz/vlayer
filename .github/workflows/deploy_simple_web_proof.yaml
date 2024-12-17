@@ -13,6 +13,9 @@ on:
       - .github/workflows/deploy_simple_web_proof.yaml
     branches:
       - main
+concurrency:
+  group: ${{ github.workflow }}
+  cancel-in-progress: false
 jobs:
   deploy-simple-web-proof:
     name: Deploy simple-web-proof example
