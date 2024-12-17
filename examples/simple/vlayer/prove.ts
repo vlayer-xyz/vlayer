@@ -66,7 +66,7 @@ const hash = await vlayer.prove({
   args: [john.address],
   chainId: chain.id,
 });
-const result = await vlayer.waitForProvingResult(hash);
+const result = await vlayer.waitForProvingResult({ hash });
 const [proof, owner, balance] = result;
 
 if (!isAddress(owner)) {

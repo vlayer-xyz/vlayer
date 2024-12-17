@@ -6,7 +6,7 @@ mod strategy;
 
 use alloy_primitives::ChainId;
 use block_fetcher::BlockFetcher;
-use block_trie::KeccakBlockTrie as BlockTrie;
+use block_trie::BlockTrie;
 use chain_db::{ChainDb, ChainTrie, ChainUpdate, Mode};
 use chain_guest::Input;
 use common::GuestElf;

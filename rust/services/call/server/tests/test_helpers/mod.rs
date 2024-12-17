@@ -1,10 +1,8 @@
-use call_server::{gas_meter::Config as GasMeterConfig, ConfigBuilder, ProofMode};
+use call_server::{ConfigBuilder, ProofMode};
 use common::GuestElf;
 use derive_new::new;
-use mock::{Anvil, Client, Server};
-use mock_chain_server::{fake_proof_result, ChainProofServerMock};
-use serde_json::json;
-use server_utils::rpc::mock::Server as RpcServerMock;
+use mock::{Anvil, Client, Contract, GasMeterServer, Server};
+use mock_chain_server::ChainProofServerMock;
 
 pub(crate) fn call_guest_elf() -> GuestElf {
     call_guest_wrapper::GUEST_ELF.clone()
@@ -15,42 +13,63 @@ pub(crate) fn chain_guest_elf() -> GuestElf {
 }
 
 pub(crate) const API_VERSION: &str = "1.2.3";
-pub(crate) const GAS_METER_TTL: u64 = 3600;
 
 #[derive(new)]
 pub(crate) struct Context {
-    pub(crate) client: Client,
-    pub(crate) anvil: Anvil,
-    pub(crate) chain_proof_server: ChainProofServerMock,
-    pub(crate) gas_meter_server: Option<RpcServerMock>,
+    client: Client,
+    anvil: Anvil,
+    chain_proof_server: ChainProofServerMock,
+    gas_meter_server: Option<GasMeterServer>,
 }
 
 impl Context {
     pub(crate) async fn default() -> Self {
         let anvil = Anvil::start();
         let client = anvil.setup_client();
-        let block_header = client.get_latest_block_header().await;
-        let chain_proof_server =
-            ChainProofServerMock::start(json!({}), fake_proof_result(block_header), 1).await;
-        Self::new(client, anvil, chain_proof_server, None)
+        let chain_proof_server = ChainProofServerMock::start().await;
+        let mut ctx = Self::new(client, anvil, chain_proof_server, None);
+        ctx.mock_latest_block().await;
+        ctx
+    }
+
+    pub(crate) fn with_gas_meter_server(mut self, gas_meter_server: GasMeterServer) -> Self {
+        self.gas_meter_server = Some(gas_meter_server);
+        self
+    }
+
+    pub(crate) fn assert_gas_meter(&self) {
+        self.gas_meter_server
+            .as_ref()
+            .expect("gas meter server not set up")
+            .assert();
+    }
+
+    async fn mock_latest_block(&mut self) {
+        let block_header = self.client.get_latest_block_header().await;
+        self.chain_proof_server
+            .mock_single_block(self.anvil.chain_id(), block_header)
+            .await;
+    }
+
+    pub(crate) async fn deploy_contract(&mut self) -> Contract {
+        let contract = self.client.deploy_contract().await;
+        // Latest block must be updated in chain proof server, because otherwise host
+        // would get a start execution location on block 0 without contract deployed
+        self.mock_latest_block().await;
+        contract
     }
 
     pub(crate) fn server(&self, call_guest_elf: GuestElf, chain_guest_elf: GuestElf) -> Server {
-        let mut config_builder = ConfigBuilder::new(
-            self.chain_proof_server.url(),
-            call_guest_elf,
-            chain_guest_elf,
-            API_VERSION.into(),
-        )
-        .with_rpc_mappings([(self.anvil.chain_id(), self.anvil.endpoint())])
-        .with_proof_mode(ProofMode::Fake);
-
-        if let Some(url) = self.gas_meter_server.as_ref().map(RpcServerMock::url) {
-            config_builder =
-                config_builder.with_gas_meter_config(GasMeterConfig::new(url, GAS_METER_TTL));
-        }
-
-        let config = config_builder.build();
+        let gas_meter_config = self
+            .gas_meter_server
+            .as_ref()
+            .map(GasMeterServer::as_gas_meter_config);
+        let config = ConfigBuilder::new(call_guest_elf, chain_guest_elf, API_VERSION.into())
+            .with_chain_proof_url(self.chain_proof_server.url())
+            .with_rpc_mappings([(self.anvil.chain_id(), self.anvil.endpoint())])
+            .with_proof_mode(ProofMode::Fake)
+            .with_gas_meter_config(gas_meter_config)
+            .build();
         Server::new(config)
     }
 }
@@ -60,8 +79,8 @@ pub(crate) mod mock {
 
     use axum::{body::Body, http::Response, Router};
     use block_header::EvmBlockHeader;
-    use call_server::{server, Config};
-    use derive_more::Deref;
+    use call_server::{gas_meter::Config as GasMeterConfig, server, Config};
+    use derive_more::{Deref, DerefMut};
     use ethers::{
         contract::abigen,
         core::{
@@ -75,11 +94,12 @@ pub(crate) mod mock {
     };
     use provider::to_eth_block_header;
     use serde::Serialize;
-    use server_utils::post;
+    use server_utils::{post, rpc::mock::Server as RpcServerMock};
 
     abigen!(ExampleProver, "./testdata/ExampleProver.json");
 
-    type Contract = ExampleProver<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>>;
+    pub(crate) type Contract =
+        ExampleProver<SignerMiddleware<Provider<Http>, Wallet<ecdsa::SigningKey>>>;
 
     pub(crate) struct Server(Router);
 
@@ -118,8 +138,8 @@ pub(crate) mod mock {
             Client(Arc::new(SignerMiddleware::new(provider, wallet)))
         }
 
-        pub(crate) async fn deploy_contract(self) -> Contract {
-            ExampleProver::deploy(self.0, ())
+        pub(crate) async fn deploy_contract(&self) -> Contract {
+            ExampleProver::deploy(self.0.clone(), ())
                 .unwrap()
                 .send()
                 .await
@@ -135,6 +155,30 @@ pub(crate) mod mock {
                 .unwrap();
             let block_header = to_eth_block_header(latest_block).unwrap();
             Box::new(block_header)
+        }
+    }
+
+    #[derive(Deref, DerefMut)]
+    pub(crate) struct GasMeterServer {
+        #[deref]
+        #[deref_mut]
+        mock: RpcServerMock,
+        time_to_live: u64,
+        api_key: Option<String>,
+    }
+
+    impl GasMeterServer {
+        pub(crate) async fn start(time_to_live: u64, api_key: Option<String>) -> Self {
+            let mock = RpcServerMock::start().await;
+            Self {
+                mock,
+                time_to_live,
+                api_key,
+            }
+        }
+
+        pub(crate) fn as_gas_meter_config(&self) -> GasMeterConfig {
+            GasMeterConfig::new(self.url(), self.time_to_live, self.api_key.clone())
         }
     }
 }

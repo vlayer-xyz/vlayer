@@ -37,7 +37,7 @@ const hash = await vlayer.prove({
   args: [unverifiedEmail],
   chainId: foundry,
 });
-const result = await vlayer.waitForProvingResult(hash);
+const result = await vlayer.waitForProvingResult({ hash });
 ```
 
 The `email.eml` file should be a valid email. Usually it can be exported from your email client.

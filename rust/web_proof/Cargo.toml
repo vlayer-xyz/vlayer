@@ -10,7 +10,7 @@ chunked_transfer = { workspace = true }
 derive-new = { workspace = true }
 hex = { workspace = true }
 httparse = { workspace = true }
-p256 = { workspace = true }
+k256 = { workspace = true }
 pkcs8 = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }

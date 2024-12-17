@@ -1,5 +1,5 @@
-import { Abi, Address, Hex } from "viem";
-import { Branded } from "../../../web-proof-commons";
+import { type Abi, type Address, type Hex } from "viem";
+import { type Branded } from "../../../web-proof-commons";
 
 export type Bytecode = {
   object: Hex;
@@ -19,7 +19,9 @@ export type ContractArg =
   | string[]
   | boolean[]
   | bigint[]
-  | Address[];
+  | Address[]
+  | (string | bigint)[]
+  | (string | bigint)[][];
 
 export type EthereumAddress = Branded<Hex, "EthereumAddress">;
 export type EthereumTxHash = Branded<Hex, "EthereumTxHash">;

@@ -35,7 +35,7 @@ function cleanup() {
 }
 
 function start_anvil(){
-    echo "Starting Anvil"
+    echo "Starting anvil"
     startup_anvil "${LOGS_DIR}/anvil.out" 8545 ANVIL
 }
 

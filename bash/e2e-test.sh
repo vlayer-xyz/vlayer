@@ -15,11 +15,6 @@ source ${VLAYER_HOME}/bash/run-services.sh
 echo Setting up SDK 
 cd ${VLAYER_HOME}/packages/sdk && bun install --frozen-lockfile
 
-EXAMPLES_REQUIRING_QUICKNODE=("simple_teleport")
-# Only run limited selection of examples in prod mode,
-# because they use real Bonsai resources.
-EXAMPLES_RUN_IN_PROD_MODE=("simple")
-
 echo "::group::Building sdk"
 cd "${VLAYER_HOME}/packages/sdk"
 bun run build
@@ -28,15 +23,8 @@ echo '::endgroup::'
 for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ; do
   example_name=$(basename "${example}")
 
-  if [[ "${PROVING_MODE}" = "prod" ]] && [[ ! "${EXAMPLES_RUN_IN_PROD_MODE[@]}" =~ "${example_name}" ]]; then
-    echo "Skipping: ${example} - not running it in prod mode."
-    continue
-  fi
-
-  if [[ "${EXAMPLES_REQUIRING_QUICKNODE[@]}" =~ "${example_name}" ]] && [[ -z "${ALCHEMY_API_KEY:-}" ]]; then
-    echo "Skipping: ${example} (configure ALCHEMY_API_KEY to run it)"
-    continue
-  fi
+  echo "make snapshot of anvil"
+  ANVIL_SNAPSHOT_ID=$(cast rpc evm_snapshot)
 
   echo "::group::Running tests of: ${example}"
   cd "${example}"
@@ -46,25 +34,9 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
 
   cd vlayer
   bun install --frozen-lockfile
-
-  if [[ "${example_name}" == "simple_time_travel" ]]; then
-    VLAYER_ENV="${VLAYER_ENV:-dev}" bun run loadFixtures.ts
-    if [[ "${RUN_CHAIN_SERVICES:-0}" == "1" ]] ; then
-      wait_for_chain_worker_sync 31337 1 43
-    fi
-    VLAYER_ENV="${VLAYER_ENV:-dev}" bun run prove.ts
-  elif [[ "${example_name}" == "simple_time_travel" ]]; then
-    if [[ "${RUN_CHAIN_SERVICES:-0}" == "1" ]] ; then
-      wait_for_chain_worker_sync 31337 1 3
-      wait_for_chain_worker_sync 1 20683110 20683110
-      wait_for_chain_worker_sync 8453 19367633 19367633
-      wait_for_chain_worker_sync 10 124962954 124962954
-    fi
-    bun run prove.ts
-  else
-    bun run prove.ts
-  fi
-
+  bun run prove:"${VLAYER_ENV}"
+  echo "revert anvil to initial state"
+  cast rpc evm_revert "${ANVIL_SNAPSHOT_ID}"
   echo '::endgroup::'
 done
 

@@ -1,5 +1,8 @@
-import { Abi, ContractFunctionName } from "viem";
-import { AbiParametersToPrimitiveTypes, ExtractAbiFunction } from "abitype";
+import { type Abi, type ContractFunctionName } from "viem";
+import {
+  type AbiParametersToPrimitiveTypes,
+  type ExtractAbiFunction,
+} from "abitype";
 
 type Without<T extends readonly unknown[], P> = T extends readonly [
   infer F,

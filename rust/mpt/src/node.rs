@@ -1,14 +1,12 @@
 use std::marker::PhantomData;
 
 use alloy_primitives::{Bytes, B256};
-use alloy_trie::EMPTY_ROOT_HASH;
 use common::Hashable;
 use derivative::Derivative;
 use serde::{Deserialize, Serialize};
-use sha3::Digest;
 use thiserror::Error;
 
-use crate::{hash, key_nibbles::KeyNibbles};
+use crate::{hash, key_nibbles::KeyNibbles, Digest};
 
 pub mod constructors;
 pub mod insert;
@@ -62,9 +60,8 @@ where
     D: Digest,
 {
     fn hash_slow(&self) -> B256 {
-        // compute the keccak hash of the RLP encoded root node
         match self {
-            Node::Null => EMPTY_ROOT_HASH,
+            Node::Null => D::EMPTY_ROOT_HASH,
             Node::Digest(digest) => *digest,
             node => hash::<D>(node.rlp_encoded()),
         }
@@ -72,6 +69,7 @@ where
 }
 
 pub type KeccakNode = Node<sha3::Keccak256>;
+pub type Sha2Node = Node<sha2::Sha256>;
 
 #[derive(Error, Debug, PartialEq)]
 pub enum NodeError {

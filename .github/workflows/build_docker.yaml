@@ -9,11 +9,27 @@ on:
     branches:
       - main
 jobs:
-  build-nightly-docker:
-    name: Build nightly docker image
+  build-cli-nightly-docker:
+    name: Build nightly docker image of CLI
     runs-on: aws-linux-medium
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Build the nightly docker image
         run: docker build -f docker/vlayer/Dockerfile.nightly .
+  build-chain-worker-nightly-docker:
+    name: Build nightly docker image of chain worker
+    runs-on: aws-linux-medium
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Build the nightly docker image
+        run: docker build -f docker/chain_worker/Dockerfile.nightly .
+  build-chain-server-nightly-docker:
+    name: Build nightly docker image of chain worker
+    runs-on: aws-linux-medium
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+      - name: Build the nightly docker image
+        run: docker build -f docker/chain_server/Dockerfile.nightly .

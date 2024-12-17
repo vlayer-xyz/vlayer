@@ -35,4 +35,8 @@ impl BlockingProvider for NeverProvider {
     fn get_proof(&self, _: Address, _: Vec<StorageKey>, _: BlockNumber) -> Result<EIP1186Proof> {
         panic!("Unexpected provider call")
     }
+
+    fn get_latest_block_number(&self) -> Result<BlockNumber> {
+        panic!("Unexpected provider call")
+    }
 }

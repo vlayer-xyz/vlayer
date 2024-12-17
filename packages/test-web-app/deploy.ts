@@ -2,7 +2,6 @@ import unconditionalProverSpec from "../../contracts/fixtures/out/UnconditionalP
 import emailProverSpec from "../../contracts/fixtures/out/EmailProver.sol/EmailProver";
 
 import {
-  deployVlayerContracts,
   writeEnvVariables,
   getConfig,
   deployProver,
@@ -15,8 +14,6 @@ const unconditionalProver = await deployProver({
 const emailProver = await deployProver({
   proverSpec: emailProverSpec,
 });
-
-const config = getConfig();
 
 writeEnvVariables(".env", {
   VITE_UNCONDITIONAL_PROVER_ADDRESS: unconditionalProver,

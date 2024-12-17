@@ -4,7 +4,7 @@ use regex::Regex;
 
 pub(crate) mod sol;
 
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 pub struct Email {
     pub from: String,
     pub to: String,
@@ -63,7 +63,7 @@ fn is_plain_text_mimetype(part: &ParsedMail) -> bool {
 }
 
 impl Email {
-    fn extract_address_from_header(header: &str) -> Result<String, MailParseError> {
+    pub fn extract_address_from_header(header: &str) -> Result<String, MailParseError> {
         let Some(start) = header.find('<') else {
             return Self::validate_email(header);
         };
@@ -103,27 +103,7 @@ fn header_getter(headers: Headers) -> impl Fn(&str) -> Option<String> + '_ {
 #[cfg(test)]
 mod test {
     use super::*;
-
-    fn build_mime_email(headers: Vec<(&str, &str)>, body: &str) -> String {
-        let mut email = String::new();
-        for (key, value) in headers {
-            email.push_str(&format!("{key}: {value}\n"));
-        }
-        if !body.is_empty() {
-            email.push('\n');
-            email.push_str(body);
-        }
-        email
-    }
-
-    fn read_file(file: &str) -> Vec<u8> {
-        std::fs::read(file).unwrap()
-    }
-
-    fn parsed_email(headers: Vec<(&str, &str)>, body: &str) -> Result<Email, MailParseError> {
-        let mime = build_mime_email(headers, body);
-        mailparse::parse_mail(mime.as_bytes()).and_then(Email::try_from)
-    }
+    use crate::test_utils::{build_mime_email, parsed_email, read_file};
 
     mod get_body {
         use super::*;

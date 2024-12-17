@@ -17,7 +17,6 @@ use foundry_evm::revm::{
 };
 use mock_chain_server::{ChainProofServerMock, EMPTY_PROOF_RESPONSE};
 use provider::CachedMultiProvider;
-use serde_json::json;
 
 use crate::{
     cheatcodes::{callProverCall, getProofCall, CHEATCODE_CALL_ADDR},
@@ -124,7 +123,13 @@ impl CheatcodeInspector {
 }
 
 async fn start_chain_proof_server() -> ChainProofServerMock {
-    ChainProofServerMock::start(json!({}), EMPTY_PROOF_RESPONSE.clone(), 1).await
+    let mut chain_proof_server = ChainProofServerMock::start().await;
+    chain_proof_server
+        .mock_chain_proof()
+        .with_result(EMPTY_PROOF_RESPONSE.clone())
+        .add()
+        .await;
+    chain_proof_server
 }
 
 fn create_host<DB: Database>(
@@ -140,15 +145,13 @@ fn create_host<DB: Database>(
         TestProviderFactory::new(pending_state_provider_factory, rpc_endpoints.clone());
     let providers = CachedMultiProvider::from_factory(provider_factory);
     let config = HostConfig {
-        start_chain_id: TEST_CHAIN_ID,
-        chain_proof_url,
         call_guest_elf: GUEST_ELF.clone(),
         ..Default::default()
     };
-    let block_number = get_latest_block_number(&providers, config.start_chain_id)
-        .expect("failed to get block number");
-    let chain_proof_client = RpcChainProofClient::new(config.chain_proof_url.clone());
+    let block_number =
+        get_latest_block_number(&providers, TEST_CHAIN_ID).expect("failed to get block number");
+    let start_exec_location = (TEST_CHAIN_ID, block_number).into();
+    let chain_proof_client = Box::new(RpcChainProofClient::new(chain_proof_url));
 
-    Host::try_new_with_components(providers, block_number, chain_proof_client, config)
-        .expect("failed to create host")
+    Host::new(providers, start_exec_location, chain_proof_client, config)
 }

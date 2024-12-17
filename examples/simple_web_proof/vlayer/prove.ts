@@ -1,7 +1,8 @@
 import { createVlayerClient } from "@vlayer/sdk";
 import proverSpec from "../out/WebProofProver.sol/WebProofProver";
 import verifierSpec from "../out/WebProofVerifier.sol/WebProofVerifier";
-import presentation_json from "./presentation.json";
+import web_proof from "./web_proof.json";
+import web_proof_invalid_signature from "./web_proof_invalid_signature.json";
 import * as assert from "assert";
 import { encodePacked, isAddress, keccak256 } from "viem";
 
@@ -11,9 +12,6 @@ import {
   deployVlayerContracts,
   writeEnvVariables,
 } from "@vlayer/sdk/config";
-
-const notaryPubKey =
-  "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExpX/4R4z40gI6C/j9zAM39u58LJu\n3Cx5tXTuqhhu/tirnBi5GniMmspOTEsps4ANnPLpMmMSfhJ+IFHbc3qVOA==\n-----END PUBLIC KEY-----\n";
 
 const { prover, verifier } = await deployVlayerContracts({
   proverSpec,
@@ -40,21 +38,19 @@ await testFailedProving();
 async function testSuccessProvingAndVerification() {
   console.log("Proving...");
 
-  const webProof = { presentation_json, notary_pub_key: notaryPubKey };
-
   const hash = await vlayer.prove({
     address: prover,
     functionName: "main",
     proverAbi: proverSpec.abi,
     args: [
       {
-        webProofJson: JSON.stringify(webProof),
+        webProofJson: JSON.stringify(web_proof),
       },
       twitterUserAddress,
     ],
     chainId: chain.id,
   });
-  const result = await vlayer.waitForProvingResult(hash);
+  const result = await vlayer.waitForProvingResult({ hash });
   const [proof, twitterHandle, address] = result;
   console.log("Has Proof");
 
@@ -104,8 +100,6 @@ async function testSuccessProvingAndVerification() {
 async function testFailedProving() {
   console.log("Proving...");
 
-  const wrongWebProof = { presentation_json, notary_pub_key: "wrong" };
-
   try {
     const hash = await vlayer.prove({
       address: prover,
@@ -113,19 +107,19 @@ async function testFailedProving() {
       proverAbi: proverSpec.abi,
       args: [
         {
-          webProofJson: JSON.stringify(wrongWebProof),
+          webProofJson: JSON.stringify(web_proof_invalid_signature),
         },
         twitterUserAddress,
       ],
       chainId: chain.id,
     });
-    await vlayer.waitForProvingResult(hash);
+    await vlayer.waitForProvingResult({ hash });
     throw new Error("Proving should have failed!");
   } catch (error) {
     assert.ok(error instanceof Error, `Invalid error returned: ${error}`);
     assert.equal(
       error.message,
-      "Error response: Host error: TravelCallExecutor error: EVM transact error: ASN.1 error: PEM error: PEM preamble contains invalid data (NUL byte) at line 1 column 14984",
+      "Error response: Host error: TravelCallExecutor error: EVM transact error: Verification error: Presentation error: presentation error: attestation error caused by: attestation proof error: signature error caused by: signature verification failed: invalid secp256k1 signature",
       `Error with wrong message returned: ${error.message}`,
     );
     console.log("Proving failed as expected with message:", error.message);

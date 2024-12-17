@@ -1,62 +1,115 @@
-use std::sync::Arc;
+use std::time::Duration;
 
-use call_engine::Call as EngineCall;
+use alloy_primitives::ChainId;
+use call_engine::{Call as EngineCall, HostOutput};
 use call_host::Host;
-use common::Hashable;
-use serde::{Deserialize, Serialize};
+use provider::Address;
 use tracing::info;
-use types::{Call, CallContext, CallHashData, CallResult};
+use types::{Call, CallContext, CallHash};
 
+use super::{QueryParams, SharedConfig, SharedProofs, UserToken};
 use crate::{
-    config::Config as ServerConfig,
     error::AppError,
-    gas_meter::{Client, ComputationStage, Config as GasMeterConfig},
+    gas_meter::{self, Client as GasMeterClient, ComputationStage},
+    handlers::ProofStatus,
+    Config,
 };
 
 pub mod types;
 
-#[derive(Deserialize, Serialize, Debug)]
-pub struct Params {
+const CHAIN_PROOF_POLL_INTERVAL: Duration = Duration::from_secs(1);
+const CHAIN_PROOF_TIMEOUT: Duration = Duration::from_secs(60);
+
+pub async fn v_call(
+    config: SharedConfig,
+    state: SharedProofs,
+    params: QueryParams,
     call: Call,
     context: CallContext,
+) -> Result<CallHash, AppError> {
+    info!("v_call => {call:#?} {context:#?}");
+    let call: EngineCall = call.try_into()?;
+
+    let host = build_host(&config, context.chain_id, call.to).await?;
+    let call_hash = (&host.start_execution_location(), &call).into();
+    info!("Calculated hash: {}", call_hash);
+    let gas_meter_client =
+        init_gas_meter(&config, call_hash, params.token, context.gas_limit).await?;
+    state.insert(call_hash, ProofStatus::Pending);
+
+    tokio::spawn(async move {
+        let res = generate_proof(call, host, gas_meter_client, state.clone(), call_hash).await;
+        state.insert(call_hash, ProofStatus::Ready(res));
+    });
+
+    Ok(call_hash)
 }
 
-pub async fn v_call(config: Arc<ServerConfig>, params: Params) -> Result<CallResult, AppError> {
-    info!("v_call => {params:#?}");
-    let call: EngineCall = params.call.try_into()?;
-    let host_config = config.get_host_config(params.context.chain_id);
-    let host = Host::try_new(host_config)?;
-    let call_hash = CallHashData::new(host.start_execution_location(), call.clone())
-        .hash_slow()
-        .into();
-    info!("Calculated hash: {}", call_hash);
+async fn build_host(
+    config: &Config,
+    chain_id: ChainId,
+    prover_contract_addr: Address,
+) -> Result<Host, AppError> {
+    let host = Host::builder()
+        .with_rpc_urls(config.rpc_urls())
+        .with_start_chain_id(chain_id)?
+        .with_chain_proof_url(config.chain_proof_url())
+        .await?
+        .with_prover_contract_addr(prover_contract_addr)
+        .await?
+        .build(config.into());
+    Ok(host)
+}
 
-    let gas_meter_client = config
+async fn init_gas_meter(
+    config: &Config,
+    call_hash: CallHash,
+    user_token: Option<UserToken>,
+    gas_limit: u64,
+) -> Result<Box<dyn GasMeterClient>, AppError> {
+    let gas_meter_client: Box<dyn GasMeterClient> = config
         .gas_meter_config()
-        .map(|GasMeterConfig { url, time_to_live }| Client::new(&url, call_hash, time_to_live));
+        .map_or(Box::new(gas_meter::NoOpClient), |config| {
+            Box::new(gas_meter::RpcClient::new(config, call_hash, user_token))
+        });
 
-    if let Some(client) = gas_meter_client.as_ref() {
-        client.allocate_gas(params.context.gas_limit).await?;
+    gas_meter_client.allocate(gas_limit).await?;
+    Ok(gas_meter_client)
+}
+
+async fn generate_proof(
+    call: EngineCall,
+    host: Host,
+    gas_meter_client: impl GasMeterClient,
+    state: SharedProofs,
+    call_hash: CallHash,
+) -> Result<HostOutput, AppError> {
+    // Wait for chain proof if necessary
+    let start = tokio::time::Instant::now();
+    while !host.chain_proof_ready().await? {
+        state.insert(call_hash, ProofStatus::WaitingForChainProof);
+        tokio::time::sleep(CHAIN_PROOF_POLL_INTERVAL).await;
+        if start.elapsed() > CHAIN_PROOF_TIMEOUT {
+            return Err(AppError::ChainProofTimeout);
+        }
     }
 
+    state.insert(call_hash, ProofStatus::Preflight);
     let prover = host.prover();
     let call_guest_id = host.call_guest_id();
     let preflight_result = host.preflight(call).await?;
     let gas_used = preflight_result.gas_used;
 
-    if let Some(client) = gas_meter_client.as_ref() {
-        client
-            .refund_unused_gas(ComputationStage::Preflight, gas_used)
-            .await?;
-    }
+    gas_meter_client
+        .refund(ComputationStage::Preflight, gas_used)
+        .await?;
 
+    state.insert(call_hash, ProofStatus::Proving);
     let host_output = Host::prove(&prover, call_guest_id, preflight_result)?;
 
-    if let Some(client) = gas_meter_client {
-        client
-            .refund_unused_gas(ComputationStage::Proving, gas_used)
-            .await?;
-    }
+    gas_meter_client
+        .refund(ComputationStage::Proving, gas_used)
+        .await?;
 
-    Ok(CallResult::try_new(call_hash, host_output)?)
+    Ok(host_output)
 }

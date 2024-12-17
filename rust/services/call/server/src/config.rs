@@ -14,7 +14,7 @@ pub struct Config {
     socket_addr: SocketAddr,
     rpc_urls: HashMap<ChainId, String>,
     proof_mode: ProofMode,
-    chain_proof_url: String,
+    chain_proof_url: Option<String>,
     max_request_size: usize,
     call_guest_elf: GuestElf,
     chain_guest_elf: GuestElf,
@@ -25,6 +25,14 @@ pub struct Config {
 impl Config {
     pub const fn socket_addr(&self) -> SocketAddr {
         self.socket_addr
+    }
+
+    pub fn rpc_urls(&self) -> HashMap<ChainId, String> {
+        self.rpc_urls.clone()
+    }
+
+    pub const fn chain_proof_url(&self) -> &Option<String> {
+        &self.chain_proof_url
     }
 
     pub const fn fake_proofs(&self) -> bool {
@@ -53,15 +61,10 @@ pub struct ConfigBuilder {
 }
 
 impl ConfigBuilder {
-    pub fn new(
-        chain_proof_url: impl Into<String>,
-        call_guest_elf: GuestElf,
-        chain_guest_elf: GuestElf,
-        api_version: String,
-    ) -> Self {
+    pub fn new(call_guest_elf: GuestElf, chain_guest_elf: GuestElf, api_version: String) -> Self {
         Self {
             config: Config {
-                chain_proof_url: chain_proof_url.into(),
+                chain_proof_url: None,
                 call_guest_elf,
                 chain_guest_elf,
                 socket_addr: "127.0.0.1:3000".parse().unwrap(),
@@ -72,6 +75,11 @@ impl ConfigBuilder {
                 gas_meter_config: None,
             },
         }
+    }
+
+    pub fn with_chain_proof_url(mut self, chain_proof_url: impl Into<Option<String>>) -> Self {
+        self.config.chain_proof_url = chain_proof_url.into();
+        self
     }
 
     pub fn with_rpc_mappings(
@@ -106,8 +114,11 @@ impl ConfigBuilder {
         self
     }
 
-    pub fn with_gas_meter_config(mut self, gas_meter_config: GasMeterConfig) -> Self {
-        self.config.gas_meter_config = Some(gas_meter_config);
+    pub fn with_gas_meter_config(
+        mut self,
+        gas_meter_config: impl Into<Option<GasMeterConfig>>,
+    ) -> Self {
+        self.config.gas_meter_config = gas_meter_config.into();
         self
     }
 
@@ -116,16 +127,13 @@ impl ConfigBuilder {
     }
 }
 
-impl Config {
-    pub fn get_host_config(&self, start_chain_id: ChainId) -> HostConfig {
+impl From<&Config> for HostConfig {
+    fn from(config: &Config) -> HostConfig {
         HostConfig {
-            rpc_urls: self.rpc_urls.clone(),
-            start_chain_id,
-            proof_mode: self.proof_mode.into(),
-            chain_proof_url: self.chain_proof_url.clone(),
-            max_calldata_size: self.max_request_size,
-            call_guest_elf: self.call_guest_elf.clone(),
-            chain_guest_elf: self.chain_guest_elf.clone(),
+            proof_mode: config.proof_mode.into(),
+            max_calldata_size: config.max_request_size,
+            call_guest_elf: config.call_guest_elf.clone(),
+            chain_guest_elf: config.chain_guest_elf.clone(),
         }
     }
 }
@@ -136,20 +144,18 @@ mod tests {
 
     #[test]
     fn local_testnet_rpc_url_always_there() {
-        let config =
-            ConfigBuilder::new("", Default::default(), Default::default(), Default::default())
-                .with_rpc_mappings(vec![])
-                .build();
+        let config = ConfigBuilder::new(Default::default(), Default::default(), Default::default())
+            .with_rpc_mappings(vec![])
+            .build();
 
         assert_eq!(config.rpc_urls.get(&TEST_CHAIN_ID).unwrap(), "http://localhost:8545");
     }
 
     #[test]
     fn local_testnet_rpc_url_can_be_overwritten() {
-        let config =
-            ConfigBuilder::new("", Default::default(), Default::default(), Default::default())
-                .with_rpc_mappings(vec![(TEST_CHAIN_ID, "NEW".to_string())])
-                .build();
+        let config = ConfigBuilder::new(Default::default(), Default::default(), Default::default())
+            .with_rpc_mappings(vec![(TEST_CHAIN_ID, "NEW".to_string())])
+            .build();
 
         assert_eq!(config.rpc_urls.get(&TEST_CHAIN_ID).unwrap(), "NEW");
     }
@@ -158,7 +164,7 @@ mod tests {
     fn correctly_formats_guest_id() {
         let call_elf = GuestElf::new([0; 8], &[]);
         let chain_elf = GuestElf::new([1; 8], &[]);
-        let config = ConfigBuilder::new("", call_elf, chain_elf, "1.2.3".into()).build();
+        let config = ConfigBuilder::new(call_elf, chain_elf, "1.2.3".into()).build();
 
         assert_eq!(
             config.call_guest_id(),

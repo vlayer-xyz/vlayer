@@ -3,7 +3,7 @@ pragma solidity ^0.8.21;
 
 import {Strings} from "@openzeppelin-contracts-5.0.1/utils/Strings.sol";
 import {Address} from "@openzeppelin-contracts-5.0.1/utils/Address.sol";
-
+import {URLPatternLib} from "./URLPattern.sol";
 import {Precompiles} from "./PrecompilesAddresses.sol";
 
 struct WebProof {
@@ -13,32 +13,31 @@ struct WebProof {
 struct Web {
     string body;
     string notaryPubKey;
+    string url;
 }
 
 library WebProofLib {
     using Strings for string;
+    using URLPatternLib for string;
 
     string private constant NOTARY_PUB_KEY =
-        "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExpX/4R4z40gI6C/j9zAM39u58LJu\n3Cx5tXTuqhhu/tirnBi5GniMmspOTEsps4ANnPLpMmMSfhJ+IFHbc3qVOA==\n-----END PUBLIC KEY-----\n";
+        "-----BEGIN PUBLIC KEY-----\nMFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEZT9nJiwhGESLjwQNnZ2MsZ1xwjGzvmhF\nxFi8Vjzanlidbsc1ngM+s1nzlRkZI5UK9BngzmC27BO0qXxPSepIwQ==\n-----END PUBLIC KEY-----\n";
 
     function verify(WebProof memory webProof, string memory dataUrl) internal view returns (Web memory) {
-        Web memory web = recover(webProof, dataUrl);
-
+        Web memory web = recover(webProof);
         require(NOTARY_PUB_KEY.equal(web.notaryPubKey), "Incorrect notary public key");
-
+        require(web.url.test(dataUrl), "Incorrect URL");
         return web;
     }
 
-    function recover(WebProof memory webProof, string memory dataUrl) internal view returns (Web memory) {
+    function recover(WebProof memory webProof) internal view returns (Web memory) {
         (bool success, bytes memory returnData) = Precompiles.VERIFY_AND_PARSE.staticcall(bytes(webProof.webProofJson));
 
         Address.verifyCallResult(success, returnData);
 
         string[4] memory data = abi.decode(returnData, (string[4]));
 
-        require(dataUrl.equal(data[0]), "Incorrect URL");
-
-        return Web(data[2], data[3]);
+        return Web(data[2], data[3], data[0]);
     }
 }
 

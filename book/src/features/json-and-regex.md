@@ -62,7 +62,7 @@ Regular expressions are a powerful tool for finding patterns in text.
 
 We provide functions to match and capture a substring using regular expressions:
 - `matches` checks if a string matches a regular expression and returns `true` if a match is found;
-- `capture` checks if a string matched a regular expression and returns all found captures.
+- `capture` checks if a string matched a regular expression and returns an array of strings. First string is the whole matched text, followed by the captures.
 
 ```solidity
 import {Prover} from "vlayer/Prover.sol";
@@ -71,9 +71,16 @@ import {RegexLib} from "vlayer/Regex.sol";
 contract RegexMatchProof is Prover {
     using RegexLib for string;
 
-    function main(string calldata text) public returns (Proof memory, string memory) {
+    function main(string calldata text, string calldata hello_world) public returns (Proof memory, string memory) {
         // The regex pattern is passed as a string
         require(text.matches("^[a-zA-Z0-9]*$"), "text must be alphanumeric only");
+
+        // Example for "hello world" string 
+        string[] memory captures = hello_world.capture("^hello(,)? (world)$");
+        assertEq(captures.length, 3);
+        assertEq(captures[0], "hello world");
+        assertEq(captures[1], "");
+        assertEq(captures[2], "world");
 
         // Return proof and provided text if it matches the pattern
         return (proof(), text);

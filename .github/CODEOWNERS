@@ -1,0 +1,19 @@
+.github @vlayer-xyz/devops
+docker @vlayer-xyz/devops
+ansible @vlayer-xyz/devops
+book @vlayer-xyz/devex 
+examples @vlayer-xyz/devex
+examples/simple_web_proof @vlayer-xyz/web-proof @vlayer-xyz/devex
+examples/simple_email_proof @vlayer-xyz/email-proof @vlayer-xyz/devex
+examples/simple_time_travel @vlayer-xyz/storage-proof @vlayer-xyz/devex
+examples/simple_teleport @vlayer-xyz/storage-proof @vlayer-xyz/devex
+packages/browser-extension @vlayer-xyz/web-proof
+packages/sdk @pociej @vlayer-xyz/devex
+packages/sdk-hooks @pociej @vlayer-xyz/devex
+*.ts @pociej
+rust/chain @vlayer-xyz/storage-proof
+rust/services @vlayer-xyz/storage-proof
+rust/mpt @vlayer-xyz/storage-proof
+rust/key_value @vlayer-xyz/storage-proof
+rust/email_proof @vlayer-xyz/email-proof
+rust/web_proof @vlayer-xyz/web-proof

@@ -6,10 +6,10 @@ import {
   type CustomTransport,
   custom,
 } from "viem";
-import { Config } from "./getConfig";
 import { privateKeyToAccount } from "viem/accounts";
 import { getChainConfirmations } from "./getChainConfirmations";
 import * as chains from "viem/chains";
+import type { EnvConfig, VlayerContextConfig } from "./types";
 
 const getChainSpecs = (chainName: string): Chain => {
   try {
@@ -20,7 +20,7 @@ const getChainSpecs = (chainName: string): Chain => {
 };
 
 export const customTransport = custom;
-export { Chain };
+export type { Chain };
 const createEthClient = (
   chain: Chain,
   jsonRpcUrl: string,
@@ -31,16 +31,38 @@ const createEthClient = (
     transport: transport || http(jsonRpcUrl),
   }).extend(publicActions);
 
-export const createContext = (config: Config, transport?: CustomTransport) => {
+export function createContext(config: EnvConfig): {
+  chain: Chain;
+  account: ReturnType<typeof privateKeyToAccount>;
+  jsonRpcUrl: string;
+  ethClient: ReturnType<typeof createEthClient>;
+  confirmations: number;
+} & EnvConfig;
+
+export function createContext(
+  config: VlayerContextConfig,
+  transport?: CustomTransport,
+): {
+  chain: Chain;
+  jsonRpcUrl: string;
+  account: ReturnType<typeof privateKeyToAccount>;
+  ethClient: ReturnType<typeof createEthClient>;
+  confirmations: number;
+} & VlayerContextConfig;
+
+export function createContext(
+  config: VlayerContextConfig | EnvConfig,
+  transport?: CustomTransport,
+) {
   const chain = getChainSpecs(config.chainName);
   const jsonRpcUrl = config.jsonRpcUrl ?? chain.rpcUrls.default.http[0];
 
   return {
     ...config,
     chain,
-    account: privateKeyToAccount(config.privateKey),
+    account: config.privateKey && privateKeyToAccount(config.privateKey),
     jsonRpcUrl,
     ethClient: createEthClient(chain, jsonRpcUrl, transport),
     confirmations: getChainConfirmations(config.chainName),
   };
-};
+}

@@ -7,6 +7,7 @@ libs = ["lib", "src", "../vlayer/src"]
 
 [dependencies]
 "@openzeppelin-contracts" = "5.0.1"
+forge-std = "1.9.4"
 
 [soldeer]
 # whether soldeer manages remappings

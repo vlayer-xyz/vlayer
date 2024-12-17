@@ -9,15 +9,15 @@ anyhow = { workspace = true }
 assert-json-diff = { workspace = true }
 axum = { workspace = true, features = ["macros"] }
 axum-jrpc = { workspace = true }
+common = { workspace = true }
 derive-new = { workspace = true }
 ethers = { workspace = true }
-futures = { workspace = true }
 hex = { workspace = true }
 host_utils = { workspace = true }
 http-body-util = { workspace = true }
+jsonrpsee = { workspace = true }
 mime = { workspace = true }
 mockito = { workspace = true }
-parking_lot = { workspace = true }
 reqwest = { workspace = true }
 serde = { workspace = true }
 serde_json = { workspace = true }

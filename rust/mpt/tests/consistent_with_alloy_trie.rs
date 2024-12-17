@@ -3,7 +3,7 @@ use std::collections::BTreeMap;
 use alloy_primitives::U256;
 use alloy_trie::HashBuilder;
 use common::Hashable;
-use mpt::{hash, reorder_with_root_as_first_using_keccak, KeccakMerkleTrie as MerkleTrie};
+use mpt::{hash, reorder_root_first, KeccakMerkleTrie as MerkleTrie};
 use nybbles::Nibbles;
 
 type D = sha3::Keccak256;
@@ -28,7 +28,7 @@ fn root_match() -> anyhow::Result<()> {
     }
     let root = hash_builder.root();
     let proofs = hash_builder.take_proof_nodes().into_inner();
-    let nodes = reorder_with_root_as_first_using_keccak(proofs.values(), root);
+    let nodes = reorder_root_first::<_, D>(proofs.values(), root);
 
     // reconstruct the trie from the RLP encoded proofs and verify the root hash
     let mpt = MerkleTrie::from_rlp_nodes(nodes)?;

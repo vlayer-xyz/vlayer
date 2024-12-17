@@ -2,7 +2,7 @@ use std::collections::HashMap;
 
 use alloy_primitives::{BlockNumber, ChainId};
 use async_trait::async_trait;
-use chain_common::ChainProof;
+use chain_common::{ChainProof, SyncStatus};
 use derive_new::new;
 use parking_lot::RwLock;
 use thiserror::Error;
@@ -23,6 +23,8 @@ pub trait Client: Send + Sync + 'static {
         chain_id: ChainId,
         block_numbers: Vec<BlockNumber>,
     ) -> Result<ChainProof, Error>;
+
+    async fn get_sync_status(&self, chain_id: ChainId) -> Result<SyncStatus, Error>;
 }
 
 #[derive(Debug, Error)]
@@ -55,9 +57,9 @@ pub struct RecordingClient {
 
 impl RecordingClient {
     #[must_use]
-    pub fn new(inner: impl Client) -> Self {
+    pub fn new(inner: Box<dyn Client>) -> Self {
         Self {
-            inner: Box::new(inner),
+            inner,
             cache: RwLock::new(Default::default()),
         }
     }
@@ -89,6 +91,11 @@ impl Client for RecordingClient {
             .insert(chain_id, (block_numbers, proof.clone()));
         Ok(proof)
     }
+
+    async fn get_sync_status(&self, chain_id: ChainId) -> Result<SyncStatus, Error> {
+        // sync status requests are not cached, as they won't be used in guest code
+        self.inner.get_sync_status(chain_id).await
+    }
 }
 
 /// `Client` implementation which only reads proofs from cache.
@@ -111,6 +118,15 @@ impl Client for CachedClient {
                 chain_id,
                 block_numbers,
             }),
+        }
+    }
+
+    async fn get_sync_status(&self, chain_id: ChainId) -> Result<SyncStatus, Error> {
+        match self.cache.get(&chain_id) {
+            Some((blocks, _)) if !blocks.is_empty() => {
+                Ok(SyncStatus::new(*blocks.first().unwrap(), *blocks.last().unwrap()))
+            }
+            _ => Ok(SyncStatus::default()),
         }
     }
 }

@@ -1,8 +1,16 @@
-import { describe, expect, it, vi, beforeEach } from "vitest";
+import {
+  describe,
+  expect,
+  it,
+  vi,
+  beforeEach,
+  type MockInstance,
+} from "vitest";
 
 import { createExtensionWebProofProvider } from "../webProof";
 import { createVlayerClient } from "./client";
-import { ZkProvingStatus } from "src/web-proof-commons";
+import { type BrandedHash, type VlayerClient } from "types/vlayer";
+import { ZkProvingStatus } from "../../web-proof-commons";
 import createFetchMock from "vitest-fetch-mock";
 
 declare const global: {
@@ -37,39 +45,111 @@ function generateRandomHash() {
 }
 
 describe("Success zk-proving", () => {
+  let hashStr: string;
+  let zkProvingSpy: MockInstance<(status: ZkProvingStatus) => void>;
+  let vlayer: VlayerClient;
+
   beforeEach(() => {
-    fetchMocker.mockResponseOnce((req) => {
-      if (req.url === "http://127.0.0.1:3000/") {
-        return {
-          body: JSON.stringify({
-            result: {
-              hash: generateRandomHash(),
-              proof: {},
-            },
-          }),
-        };
-      }
-      return {};
-    });
-  });
-  it("should send message to extension that zkproving started and then that is done", async () => {
+    hashStr = generateRandomHash();
     const webProofProvider = createExtensionWebProofProvider();
+    zkProvingSpy = vi.spyOn(webProofProvider, "notifyZkProvingStatus");
+    vlayer = createVlayerClient({ webProofProvider });
+  });
+  it("should send message to extension that zkproving started", async () => {
+    fetchMocker.mockResponseOnce(() => {
+      return {
+        body: JSON.stringify({
+          result: hashStr,
+        }),
+      };
+    });
 
-    const zkProvingSpy = vi.spyOn(webProofProvider, "notifyZkProvingStatus");
-
-    const vlayer = createVlayerClient({ webProofProvider });
-    const hash = await vlayer.prove({
+    const result = await vlayer.prove({
       address: `0x${"a".repeat(40)}`,
       functionName: "main",
       proverAbi: [],
       args: [],
       chainId: 42,
     });
-    await vlayer.waitForProvingResult(hash);
+
+    expect(result.hash).toBe(hashStr);
+    expect(zkProvingSpy).toBeCalledTimes(1);
+    expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Proving);
+  });
+  it("should send message to extension that zkproving is done", async () => {
+    fetchMocker.mockResponseOnce(() => {
+      return {
+        body: JSON.stringify({
+          result: hashStr,
+        }),
+      };
+    });
+
+    await vlayer.prove({
+      address: `0x${"a".repeat(40)}`,
+      functionName: "main",
+      proverAbi: [],
+      args: [],
+      chainId: 42,
+    });
+
+    fetchMocker.mockResponseOnce(() => {
+      return {
+        body: JSON.stringify({
+          result: {
+            status: "done",
+            data: {},
+          },
+        }),
+      };
+    });
+
+    const hash = { hash: hashStr } as BrandedHash<[], string>;
+    await vlayer.waitForProvingResult({ hash });
 
     expect(zkProvingSpy).toBeCalledTimes(2);
-    expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Proving);
     expect(zkProvingSpy).toHaveBeenNthCalledWith(2, ZkProvingStatus.Done);
+  });
+  it("should notify that zk-proving failed", async () => {
+    fetchMocker.mockResponseOnce(() => {
+      throw new Error("test");
+    });
+
+    const hash = { hash: hashStr } as BrandedHash<[], string>;
+    try {
+      await vlayer.waitForProvingResult({ hash });
+    } catch (e) {
+      console.log("Error waiting for proving result", e);
+    }
+
+    expect(zkProvingSpy).toBeCalledTimes(1);
+    expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Error);
+  });
+  it("should pass user token if present", async () => {
+    const userToken = "deadbeef";
+
+    fetchMocker.mockResponseOnce((req) => {
+      if (req.url === "http://127.0.0.1:3000/?token=" + userToken) {
+        return {
+          body: JSON.stringify({
+            result: hashStr,
+          }),
+        };
+      }
+      return { status: 501 };
+    });
+
+    const result = await vlayer.prove({
+      address: `0x${"a".repeat(40)}`,
+      functionName: "main",
+      proverAbi: [],
+      args: [],
+      chainId: 42,
+      userToken,
+    });
+    expect(result.hash).toBe(hashStr);
+    expect(zkProvingSpy).toBeCalledTimes(1);
+    expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Proving);
   });
 });
 
@@ -98,7 +178,7 @@ describe("Failed zk-proving", () => {
         args: [],
         chainId: 42,
       });
-      await vlayer.waitForProvingResult(hash);
+      await vlayer.waitForProvingResult({ hash });
     } catch (e) {
       console.log("Error waiting for proving result", e);
     }

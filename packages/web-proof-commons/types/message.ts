@@ -62,12 +62,32 @@ export type ExtensionMessage =
       };
     };
 
-export type WebProverSessionConfig = {
-  notaryUrl: string | null;
-  wsProxyUrl: string | null;
-  logoUrl: string | null;
-  steps: WebProofStep[];
+export type EmptyWebProverSessionConfig = {
+  notaryUrl: null;
+  wsProxyUrl: null;
+  logoUrl: null;
+  steps: never[];
 };
+
+export type WebProverSessionConfig =
+  | {
+      notaryUrl: string;
+      wsProxyUrl: string;
+      logoUrl: string;
+      steps: WebProofStep[];
+    }
+  | EmptyWebProverSessionConfig;
+
+export function isEmptyWebProverSessionConfig(
+  config: WebProverSessionConfig,
+): config is EmptyWebProverSessionConfig {
+  return (
+    config.notaryUrl === null &&
+    config.wsProxyUrl === null &&
+    config.logoUrl === null &&
+    config.steps.length === 0
+  );
+}
 
 export type WebProofStep =
   | WebProofStepNotarize
@@ -124,7 +144,8 @@ export class StepValidationError extends Error {
 }
 
 export function assertUrl(url: string): asserts url is Url {
-  const isUrl = urlRegex({ strict: true }).test(url);
+  const regex = urlRegex({ strict: true });
+  const isUrl = regex.test(url);
   if (!isUrl) {
     throw new StepValidationError(
       `${StepValidationErrorMessage.InvalidUrl}: ${url}`,

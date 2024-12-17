@@ -5,6 +5,7 @@ on:
       - "packages/**"
       - ".github/workflows/test_e2e_web_flow.yaml"
       - "docker/**"
+      - "bash/playwright-test.sh"
   merge_group:
   push:
     branches:
@@ -14,13 +15,8 @@ jobs:
     timeout-minutes: 60
     runs-on: [aws-linux-medium]
     steps:
-      - uses: oven-sh/setup-bun@v2
-        with:
-          node-version: lts/*
-      - uses: actions/setup-node@v4
-        with:
-          node-version: "20.x"
-          registry-url: "https://registry.npmjs.org"
+      - name: Install TypeScript prerequisites
+        uses: ./.github/actions/ts-prerequisites
       - name: Checkout repository
         uses: actions/checkout@v4
         with:
@@ -51,11 +47,12 @@ jobs:
           services: |
             websockify
             notary-server
+            json-server
       - name: Run playwright tests
         run: bash/playwright-test.sh
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
           name: playwright-report
-          path: ./packages/browser-extension/playwright-report/
+          path: ./packages/playwright-report/
           retention-days: 30

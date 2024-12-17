@@ -26,6 +26,7 @@ export const test = base.extend<{
             args: [
               `--disable-extensions-except=${pathToExtension}`,
               `--load-extension=${pathToExtension}`,
+              "--host-resolver-rules=MAP lotr-api.online 127.0.0.1",
             ],
           }
         : {
@@ -34,6 +35,7 @@ export const test = base.extend<{
               `--headless=new`,
               `--disable-extensions-except=${pathToExtension}`,
               `--load-extension=${pathToExtension}`,
+              "--host-resolver-rules=MAP lotr-api.online 127.0.0.1",
             ],
           },
     );
@@ -43,4 +45,16 @@ export const test = base.extend<{
   },
 });
 
-export const expect = test.expect;
+export const expect = test.expect.extend({
+  toBeValidHash: (hash: string) => {
+    const PREFIX = "0x";
+    const HASH_LENGTH = 32;
+    const pass =
+      hash.startsWith(PREFIX) &&
+      hash.slice(PREFIX.length).length === HASH_LENGTH * 2;
+    return {
+      pass,
+      message: () => `expected ${hash} to be a valid hash`,
+    };
+  },
+});

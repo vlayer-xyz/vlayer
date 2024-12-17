@@ -15,14 +15,14 @@ contract WebProofLibWrapper {
 contract WebProverTest is VTest {
     using WebProofLib for WebProof;
 
-    string public constant DATA_URL = "https://api.x.com/1.1/account/settings.json";
+    string public constant DATA_URL = "https://api.x.com/1.1/*/settings.json";
 
     function test_verifiesWebProof() public {
         WebProof memory webProof = WebProof(vm.readFile("testdata/web_proof.json"));
 
         callProver();
-        Web memory web = webProof.verify(DATA_URL);
-
+        WebProofLibWrapper wrapper = new WebProofLibWrapper();
+        Web memory web = wrapper.verify(webProof, DATA_URL);
         assertEq(bytes(web.body)[0], "{");
     }
 
@@ -33,14 +33,14 @@ contract WebProverTest is VTest {
 
         WebProofLibWrapper wrapper = new WebProofLibWrapper();
 
-        try wrapper.verify(webProof, "") returns (Web memory) {
+        try wrapper.verify(webProof, "https://bad_api.x.com/1.1/account/settings.json") returns (Web memory) {
             revert("Expected error");
         } catch Error(string memory reason) {
             assertEq(reason, "Engine(TransactError(Revert(\"revert: Incorrect URL\")))");
         }
     }
 
-    function test_missingNotaryPubKey() public {
+    function test_missingPresentationJson() public {
         WebProof memory webProof = WebProof("{}");
 
         callProver();
@@ -50,7 +50,7 @@ contract WebProverTest is VTest {
         try wrapper.verify(webProof, DATA_URL) returns (Web memory) {
             revert("Expected error");
         } catch Error(string memory reason) {
-            assertEq(reason, "Engine(TransactError(Revert(\"missing field `notary_pub_key` at line 1 column 2\")))");
+            assertEq(reason, "Engine(TransactError(Revert(\"missing field `version` at line 1 column 2\")))");
         }
     }
 
@@ -67,23 +67,6 @@ contract WebProverTest is VTest {
             assertEq(
                 reason,
                 "Engine(Panic(\"called `Result::unwrap()` on an `Err` value: Custom(\\\"invalid length 64, expected an array at most 64 bytes long\\\")\"))"
-            );
-        }
-    }
-
-    function test_invalidNotaryPubKey() public {
-        WebProof memory webProof = WebProof(vm.readFile("testdata/web_proof_invalid_notary_pub_key.json"));
-
-        callProver();
-
-        WebProofLibWrapper wrapper = new WebProofLibWrapper();
-
-        try wrapper.verify(webProof, DATA_URL) returns (Web memory) {
-            revert("Expected error");
-        } catch Error(string memory reason) {
-            assertEq(
-                reason,
-                "Engine(TransactError(Revert(\"ASN.1 error: PEM error: PEM Base64 error: invalid Base64 encoding at line 9 column 203\")))"
             );
         }
     }

@@ -1,9 +1,6 @@
 use alloy_primitives::{BlockNumber, ChainId};
-use axum_jrpc::{
-    error::{JsonRpcError, JsonRpcErrorReason},
-    Value,
-};
 use chain_db::ChainDbError;
+use jsonrpsee::types::error::{self as jrpcerror, ErrorObjectOwned};
 use mpt::MptError;
 use server_utils::FieldValidationError;
 use thiserror::Error;
@@ -44,18 +41,22 @@ impl From<ChainDbError> for AppError {
     }
 }
 
-impl From<AppError> for JsonRpcError {
+impl From<AppError> for ErrorObjectOwned {
     fn from(error: AppError) -> Self {
         match error {
             AppError::NoBlockNumbers
             | AppError::BlockNumberOutsideRange { .. }
             | AppError::UnsupportedChainId(..)
-            | AppError::FieldValidation(..) => {
-                JsonRpcError::new(JsonRpcErrorReason::InvalidParams, error.to_string(), Value::Null)
-            }
-            AppError::Mpt(..) | AppError::ChainDb(..) => {
-                JsonRpcError::new(JsonRpcErrorReason::InternalError, error.to_string(), Value::Null)
-            }
+            | AppError::FieldValidation(..) => ErrorObjectOwned::owned::<()>(
+                jrpcerror::INVALID_PARAMS_CODE,
+                error.to_string(),
+                None,
+            ),
+            AppError::Mpt(..) | AppError::ChainDb(..) => ErrorObjectOwned::owned::<()>(
+                jrpcerror::INTERNAL_ERROR_CODE,
+                error.to_string(),
+                None,
+            ),
         }
     }
 }

@@ -5,15 +5,15 @@ use std::{
     path::Path,
 };
 
-use alloy_primitives::{keccak256, BlockNumber, ChainId, B256};
+use alloy_primitives::{BlockNumber, ChainId, B256};
 use alloy_rlp::{Decodable, RlpDecodable, RlpEncodable};
 use bytes::Bytes;
-use chain_common::{ChainProofReceipt, RpcChainProof};
+use chain_common::{ChainProofReceipt, RpcChainProof, SyncStatus};
 use chain_trie::{verify_chain_trie, UnverifiedChainTrie};
 use derive_more::Debug;
 use derive_new::new;
-use key_value::{Database, InMemoryDatabase, Mdbx, ReadTx, ReadWriteTx, WriteTx};
-use mpt::reorder_with_root_as_first_using_keccak;
+use key_value::{Database, DbError, InMemoryDatabase, Mdbx, ReadTx, ReadWriteTx, WriteTx};
+use mpt::{reorder_root_first, sha2, Sha256};
 use proof_builder::{mpt_from_proofs, MerkleProofBuilder, ProofResult};
 
 mod chain_trie;
@@ -28,6 +28,7 @@ use common::{GuestElf, Hashable};
 pub use db_node::DbNode;
 pub use error::{ChainDbError, ChainDbResult};
 pub use proof_builder::MerkleProof;
+use tracing::warn;
 use u64_range::NonEmptyRange;
 
 /// Merkle trie nodes table. Holds `node_hash -> rlp_node` mapping
@@ -62,6 +63,16 @@ impl ChainInfo {
     pub fn block_range(&self) -> NonEmptyRange {
         // SAFETY: was created from `NonEmptyRange`
         NonEmptyRange::try_from_range(self.first_block..=self.last_block).unwrap()
+    }
+}
+
+impl From<ChainInfo> for SyncStatus {
+    fn from(chain_info: ChainInfo) -> Self {
+        let block_range = chain_info.block_range();
+        Self {
+            first_block: block_range.start(),
+            last_block: block_range.end(),
+        }
     }
 }
 
@@ -131,7 +142,7 @@ pub struct ChainProof {
 impl From<ChainProof> for RpcChainProof {
     fn from(proof: ChainProof) -> Self {
         let nodes = proof.merkle_proof.into_iter().map(|db_node| db_node.rlp);
-        let nodes = reorder_with_root_as_first_using_keccak(nodes, proof.root_hash);
+        let nodes = reorder_root_first::<_, Sha256>(nodes, proof.root_hash);
         let proof = proof.zk_proof;
         RpcChainProof { proof, nodes }
     }
@@ -241,7 +252,7 @@ impl ChainDb {
         tx.upsert_chain_info(chain_id, &chain_info)?;
 
         for node in removed_nodes {
-            tx.delete_node(keccak256(node))?;
+            tx.delete_node(sha2(node))?;
         }
 
         for node in added_nodes {
@@ -322,8 +333,18 @@ impl<TX: WriteTx + ?Sized> ChainDbTx<TX> {
     }
 
     pub fn insert_node(&mut self, node_rlp: &Bytes) -> ChainDbResult<()> {
-        let node_hash = keccak256(node_rlp);
-        self.tx.insert(NODES, &node_hash[..], &node_rlp[..])?;
+        let node_hash = sha2(node_rlp);
+        self.tx
+            .insert(NODES, &node_hash[..], &node_rlp[..])
+            .or_else(|err| match err {
+                DbError::DuplicateKey { .. } => {
+                    // Duplicate keys are possible in test environments when two anvil instances mine the
+                    // same blocks. It is safe to ignore, because the corresponding values are also the same.
+                    warn!("{err:?}");
+                    Ok(())
+                }
+                err => Err(err),
+            })?;
         Ok(())
     }
 

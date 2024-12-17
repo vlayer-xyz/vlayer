@@ -2,16 +2,17 @@ import { Store } from "./store";
 import browser from "webextension-polyfill";
 import { webProverSessionContextManager } from "./webProverSessionContext";
 
-export type HistoryItem = {
+export type BrowsingHistoryItem = {
   url: string;
   headers?: browser.WebRequest.HttpHeadersItemType[];
   cookies?: browser.Cookies.Cookie[];
   ready?: boolean;
+  tabId?: number;
 };
 
 export type History = {
   currentUrl: string;
-  history: HistoryItem[];
+  browsingHistory: BrowsingHistoryItem[];
 };
 
 export class HistoryContextManager {
@@ -19,7 +20,7 @@ export class HistoryContextManager {
   store: Store<History>;
 
   constructor() {
-    this.store = new Store<History>(browser.storage.local);
+    this.store = new Store<History>(browser.storage.session);
   }
 
   public static get instance(): HistoryContextManager {
@@ -32,12 +33,13 @@ export class HistoryContextManager {
   async getUrls(): Promise<string[]> {
     const config =
       await webProverSessionContextManager.getWebProverSessionConfig();
-    return config.steps.map((step: { url: string }) => step.url);
+    return config?.steps.map((step: { url: string }) => step.url) || [];
   }
 
-  async updateHistory(item: HistoryItem): Promise<void> {
+  async updateHistory(item: BrowsingHistoryItem): Promise<void> {
     let newItem = item;
-    let history = (await historyContextManager.store.get("history")) || [];
+    let history =
+      (await historyContextManager.store.get("browsingHistory")) || [];
     const existingItemIndex = history.findIndex((i) => i.url === item.url);
 
     // Add cookies and headers and mark eventually as ready
@@ -55,7 +57,7 @@ export class HistoryContextManager {
     } else {
       history = [...history, newItem];
     }
-    return historyContextManager.store.set("history", history);
+    return historyContextManager.store.set("browsingHistory", history);
   }
 }
 

@@ -1,0 +1,23 @@
+# Guest artifacts are built separately and passed across jobs,
+# because we have not achieved deterministic guest ID builds yet.
+#
+# This replaces the binary path in `methods.rs` with real ELF path.
+# Depends on `build-guest-artifacts` action.
+
+name: Replace guest artifacts
+description: Replace guest artifacts - methods.rs and ELF binary.
+runs:
+  using: "composite"
+  steps:
+    - uses: actions/download-artifact@v4
+      with:
+        name: guest-artifacts
+        path: rust/call_guest_replacement
+
+    - name: "Update elf path in methods.rs"
+      run: |
+        NEW_PATH=$(realpath ./call_guest_replacement/risc0_call_guest)
+        echo "Replacing the elf binary path to: ${NEW_PATH}"
+        sed -i.bak "s|<ELF_PATH>|${NEW_PATH}|" ./call_guest_replacement/methods.rs
+      shell: bash
+      working-directory: rust

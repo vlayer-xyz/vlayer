@@ -34,7 +34,6 @@ async fn method_not_found() {
             "error": {
                 "code": -32601,
                 "message": "Method `random_gibberish` not found",
-                "data": null
             }
         }),
         body_to_json(response.into_body()).await
@@ -60,14 +59,13 @@ async fn method_missing() {
             "error": {
                 "code": -32600,
                 "message": "missing field `method` at line 1 column 36",
-                "data": null
             }
         }),
         body_to_json(response.into_body()).await
     );
 }
 
-mod v_chain {
+mod chain_proof {
     use super::*;
 
     #[tokio::test]
@@ -78,7 +76,7 @@ mod v_chain {
         let req = json!({
             "jsonrpc": "2.0",
             "id": 1,
-            "method": "v_chain",
+            "method": "v_getChainProof",
             "params": {
                 "chain_id": 1,
                 "block_numbers": [1]
@@ -107,7 +105,7 @@ mod v_chain {
         let req = json!({
             "jsonrpc": "2.0",
             "id": 1,
-            "method": "v_chain",
+            "method": "v_getChainProof",
             "params": {
                 "chain_id": 1,
                 "block_numbers": []
@@ -123,7 +121,6 @@ mod v_chain {
                 "error": {
                     "code": -32602,
                     "message": "Invalid params: empty list of block numbers provided - nothing to prove",
-                    "data": null
                 }
             }),
             body_to_json(response.into_body()).await
@@ -140,7 +137,7 @@ mod v_chain {
         let req = json!({
             "jsonrpc": "2.0",
             "id": 1,
-            "method": "v_chain",
+            "method": "v_getChainProof",
             "params": {
                 "chain_id": 1,
                 "block_numbers": [valid_number, invalid_number]
@@ -155,8 +152,8 @@ mod v_chain {
                 "id": 1,
                 "error": {
                     "code": -32602,
-                    "message": "invalid type: string \"\", expected u64",
-                    "data": null
+                    "message": "Invalid params",
+                    "data": "invalid type: string \"\", expected u64 at line 1 column 36",
                 }
             }),
             body_to_json(response.into_body()).await

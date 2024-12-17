@@ -71,7 +71,7 @@ mod caching_client {
     #[tokio::test]
     async fn calls_cached() -> anyhow::Result<()> {
         let mock_client = get_cached_client([(1, vec![1])]);
-        let client = RecordingClient::new(mock_client);
+        let client = RecordingClient::new(Box::new(mock_client));
         let proof = client.get_chain_proof(1, vec![1]).await?;
         assert_eq!(proof, mock_chain_proof(&[1]));
         let mut cache = client.into_cache();

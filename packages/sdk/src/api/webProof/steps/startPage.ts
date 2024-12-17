@@ -1,6 +1,6 @@
 import {
   EXTENSION_STEP,
-  WebProofStepStartPage,
+  type WebProofStepStartPage,
 } from "../../../web-proof-commons";
 
 export const startPage = (url: string, label: string) => {

@@ -1,4 +1,4 @@
-import { expect, test } from "@playwright/test";
+import { expect, test } from "./config";
 import path from "path";
 
 import { fileURLToPath } from "url";
@@ -12,11 +12,14 @@ test("Success email proof flow", async ({ page }) => {
   const fileChooserPromise = page.waitForEvent("filechooser");
   await page.locator('input[name="file"]').click();
   const fileChooser = await fileChooserPromise;
-  await fileChooser.setFiles(__dirname + "/fixtures/vlayer_welcome.eml");
+  await fileChooser.setFiles(__dirname + "/fixtures/verify_vlayer.eml");
 
   const response = await page.waitForResponse(VLAYER_SERVER_URL);
   expect(response.ok()).toBeTruthy();
 
   const response_json = (await response.json()) as object;
-  expect(response_json).toHaveProperty("result.proof");
+  expect(response_json).toHaveProperty("result");
+
+  const hash = (response_json as { result: string }).result;
+  expect(hash).toBeValidHash();
 });

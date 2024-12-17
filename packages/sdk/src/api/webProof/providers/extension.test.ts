@@ -1,7 +1,31 @@
 import { createExtensionWebProofProvider } from "./extension";
-import { describe, it, expect } from "vitest";
+import { describe, it, expect, vi } from "vitest";
 import { expectUrl, startPage, notarize } from "../steps";
 import { StepValidationError } from "../../../web-proof-commons";
+
+const chrome = {
+  runtime: {
+    disconnectCallbacks: [] as (() => void)[],
+    connect: vi.fn().mockImplementation(() => ({
+      postMessage: vi.fn().mockImplementation(() => {}),
+      onMessage: {
+        addListener: vi.fn().mockImplementation(() => {}),
+      },
+      onDisconnect: {
+        addListener: vi.fn().mockImplementation((callback: () => void) => {
+          chrome.runtime.disconnectCallbacks.push(callback);
+        }),
+      },
+    })),
+    disconnect: vi.fn().mockImplementation(() => {
+      chrome.runtime.disconnectCallbacks.forEach((callback) => {
+        callback();
+      });
+    }),
+  },
+};
+
+vi.stubGlobal("chrome", chrome);
 
 const defaults = {
   logoUrl: "https://example.com/logo.png",
@@ -67,6 +91,7 @@ describe("ExtensionWebProofProvider", () => {
 
   it("should properly work backward compatible way with only urls used", () => {
     const provider = createExtensionWebProofProvider();
+
     expect(() =>
       provider.requestWebProof({
         ...defaults,
@@ -77,6 +102,21 @@ describe("ExtensionWebProofProvider", () => {
           notarize(validUrl, "GET", label),
         ],
       }),
-    ).not.toThrow(StepValidationError);
+    ).not.toThrow();
+  });
+
+  it("should reconnect extension on disconnect", () => {
+    const provider = createExtensionWebProofProvider();
+    provider.requestWebProof({
+      ...defaults,
+      steps: [
+        startPage(validUrl, label),
+        expectUrl(validUrlPattern, label),
+        notarize(validUrlPattern, "GET", label),
+      ],
+    });
+    chrome.runtime.connect.mockClear();
+    chrome.runtime.disconnect();
+    expect(chrome.runtime.connect).toHaveBeenCalled();
   });
 });

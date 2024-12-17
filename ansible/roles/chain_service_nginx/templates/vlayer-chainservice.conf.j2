@@ -1,0 +1,11 @@
+limit_req_zone $binary_remote_addr zone=requestlimit:10m rate={{- chain_service_nginx_ip_rate_limit_per_minute }}r/m;
+
+server {
+  listen 443 ssl;
+  ssl_certificate /etc/ssl/certs/chainservice.vlayer.xyz.pem;
+  ssl_certificate_key /etc/ssl/private/chainservice.vlayer.xyz.key;
+  location / {
+    limit_req zone=requestlimit burst={{- chain_service_nginx_ip_rate_limit_burst }} nodelay;
+    proxy_pass http://127.0.0.1:{{- chain_server_port if chain_server_port is defined else '3001' }};
+  }
+}

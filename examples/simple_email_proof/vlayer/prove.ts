@@ -8,7 +8,7 @@ import {
   getConfig,
 } from "@vlayer/sdk/config";
 
-const mimeEmail = fs.readFileSync("./testdata/verify_vlayer.eml").toString();
+const mimeEmail = fs.readFileSync("../testdata/verify_vlayer.eml").toString();
 
 const config = getConfig();
 
@@ -23,8 +23,8 @@ const {
 const { prover, verifier } = await deployVlayerContracts({
   proverSpec,
   verifierSpec,
-  proverArgs: ["@vlayer.xyz"],
-  verifierArgs: ["vlayer badge", "VL"],
+  proverArgs: [],
+  verifierArgs: [],
 });
 
 console.log("Proving...");
@@ -38,8 +38,7 @@ const hash = await vlayer.prove({
   chainId: chain.id,
   args: [await preverifyEmail(mimeEmail), john.address],
 });
-const result = await vlayer.waitForProvingResult(hash);
-console.log("Proof:", result[0]);
+const result = await vlayer.waitForProvingResult({ hash });
 
 console.log("Verifying...");
 

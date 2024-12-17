@@ -19,18 +19,20 @@ use call_engine::{
     },
     Call, CallGuestId, GuestOutput, HostOutput, Input, Seal,
 };
+use chain_client::Client as ChainClient;
 use common::GuestElf;
 pub use config::{Config, DEFAULT_MAX_CALLDATA_SIZE};
 use derive_new::new;
 pub use error::Error;
 use ethers_core::types::BlockNumber as BlockTag;
 use prover::Prover;
-use provider::{CachedMultiProvider, EthersProviderFactory, EvmBlockHeader};
+use provider::{CachedMultiProvider, EvmBlockHeader};
 use seal::EncodableReceipt;
 use tracing::info;
 
 use crate::{evm_env::factory::HostEvmEnvFactory, into_input::into_multi_input, HostDb};
 
+mod builder;
 mod config;
 mod error;
 mod prover;
@@ -41,18 +43,16 @@ pub struct Host {
     start_execution_location: ExecutionLocation,
     envs: CachedEvmEnv<HostDb>,
     prover: Prover,
-    verifier: guest_input::ZkVerifier<chain_client::RecordingClient, chain_proof::ZkVerifier>,
+    chain_client: chain_client::RecordingClient,
+    chain_proof_verifier: chain_proof::ZkVerifier,
     max_calldata_size: usize,
     guest_elf: GuestElf,
 }
 
 impl Host {
-    pub fn try_new(config: Config) -> Result<Self, Error> {
-        let provider_factory = EthersProviderFactory::new(config.rpc_urls.clone());
-        let providers = CachedMultiProvider::from_factory(provider_factory);
-        let block_number = get_latest_block_number(&providers, config.start_chain_id)?;
-        let chain_client = chain_client::RpcClient::new(&config.chain_proof_url);
-        Host::try_new_with_components(providers, block_number, chain_client, config)
+    #[must_use]
+    pub const fn builder() -> builder::New {
+        builder::New
     }
 
     pub fn prover(&self) -> Prover {
@@ -98,28 +98,36 @@ pub struct PreflightResult {
 }
 
 impl Host {
-    pub fn try_new_with_components(
+    pub fn new(
         providers: CachedMultiProvider,
-        block_number: u64,
-        chain_client: impl chain_client::Client,
+        start_execution_location: ExecutionLocation,
+        chain_client: Box<dyn chain_client::Client>,
         config: Config,
-    ) -> Result<Self, Error> {
+    ) -> Self {
         let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
-        let start_execution_location = (block_number, config.start_chain_id).into();
         let prover = Prover::new(config.proof_mode, &config.call_guest_elf);
-        let chain_client = chain_client::RecordingClient::new(chain_client);
         let chain_proof_verifier =
             chain_proof::ZkVerifier::new(config.chain_guest_elf.id, zk_proof::HostVerifier);
-        let verifier = guest_input::ZkVerifier::new(chain_client, chain_proof_verifier);
+        let chain_client = chain_client::RecordingClient::new(chain_client);
 
-        Ok(Host {
+        Host {
             envs,
             start_execution_location,
             prover,
-            verifier,
+            chain_client,
+            chain_proof_verifier,
             max_calldata_size: config.max_calldata_size,
             guest_elf: config.call_guest_elf,
-        })
+        }
+    }
+
+    pub async fn chain_proof_ready(&self) -> Result<bool, Error> {
+        let latest_indexed_block = self
+            .chain_client
+            .get_sync_status(self.start_execution_location.chain_id)
+            .await?
+            .last_block;
+        Ok(latest_indexed_block >= self.start_execution_location.block_number)
     }
 
     pub async fn preflight(self, call: Call) -> Result<PreflightResult, Error> {
@@ -133,13 +141,14 @@ impl Host {
         })
         .map_err(wrap_engine_panic)??;
 
-        info!("Gas used in preflight: {}", gas_used);
+        info!(gas_used_preflight = gas_used, "Gas used in preflight: {}", gas_used);
 
         let multi_evm_input =
             into_multi_input(self.envs).map_err(|err| Error::CreatingInput(err.to_string()))?;
 
-        self.verifier.verify(&multi_evm_input).await?;
-        let (chain_proof_client, _) = self.verifier.into_parts();
+        let verifier = guest_input::ZkVerifier::new(self.chain_client, self.chain_proof_verifier);
+        verifier.verify(&multi_evm_input).await?;
+        let (chain_proof_client, _) = verifier.into_parts();
         let chain_proofs = chain_proof_client.into_cache();
 
         let input = Input {
@@ -217,6 +226,7 @@ mod test {
 
     use chain::TEST_CHAIN_ID;
     use host_utils::ProofMode;
+    use provider::EthersProviderFactory;
 
     use super::*;
 
@@ -227,20 +237,18 @@ mod test {
     }
 
     #[tokio::test(flavor = "multi_thread")]
-    async fn host_does_not_accept_calls_longer_than_limit() -> anyhow::Result<()> {
+    async fn host_does_not_accept_calls_longer_than_limit() {
         let config = Config {
-            rpc_urls: test_rpc_urls(),
-            start_chain_id: TEST_CHAIN_ID,
             proof_mode: ProofMode::Fake,
             ..Config::default()
         };
         let max_call_data_size = config.max_calldata_size;
-        let host = Host::try_new_with_components(
+        let host = Host::new(
             CachedMultiProvider::from_factory(EthersProviderFactory::new(test_rpc_urls())),
-            0,
-            chain_client::RpcClient::new(""),
+            (TEST_CHAIN_ID, 0_u64).into(),
+            Box::new(chain_client::RpcClient::new("")),
             config,
-        )?;
+        );
         let call = Call {
             to: Default::default(),
             data: vec![0; max_call_data_size + 1],
@@ -250,31 +258,5 @@ mod test {
             host.preflight(call).await.unwrap_err().to_string(),
             format!("Calldata too large: {} bytes", max_call_data_size + 1)
         );
-
-        Ok(())
-    }
-
-    mod try_new {
-        use super::*;
-
-        #[tokio::test(flavor = "multi_thread")]
-        async fn try_new_invalid_rpc_url() -> anyhow::Result<()> {
-            let config = Config {
-                rpc_urls: test_rpc_urls(),
-                start_chain_id: TEST_CHAIN_ID,
-                proof_mode: ProofMode::Fake,
-                ..Config::default()
-            };
-            let res = Host::try_new(config);
-
-            assert!(matches!(
-                res.map(|_| ()).unwrap_err(),
-                Error::Provider(ref msg) if msg.to_string().contains(
-                    "Error fetching block header"
-                )
-            ));
-
-            Ok(())
-        }
     }
 }

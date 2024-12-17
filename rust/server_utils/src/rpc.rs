@@ -1,26 +1,13 @@
 use std::mem::take;
 
+pub use common::Method;
 use reqwest::Client as RawClient;
-use serde::Serialize;
-use serde_json::{json, Value};
-use tracing::info;
+use serde_json::Value;
+use tracing::debug;
 
 pub struct Client {
     url: String,
     client: RawClient,
-}
-
-pub trait Method: Serialize {
-    const METHOD_NAME: &str;
-
-    fn request_body(&self) -> Value {
-        json!({
-            "id": 1,
-            "jsonrpc": "2.0",
-            "method": Self::METHOD_NAME,
-            "params": self,
-        })
-    }
 }
 
 #[derive(Debug, thiserror::Error)]
@@ -37,6 +24,30 @@ pub enum Error {
 
 pub type Result<T> = std::result::Result<T, Error>;
 
+pub struct RequestBuilder(reqwest::RequestBuilder);
+
+impl RequestBuilder {
+    #[must_use]
+    pub fn with_query(mut self, key: &str, value: &str) -> Self {
+        self.0 = self.0.query(&[(key, value)]);
+        self
+    }
+
+    #[must_use]
+    pub fn with_header(mut self, name: &str, value: &str) -> Self {
+        self.0 = self.0.header(name, value);
+        self
+    }
+
+    pub async fn send(self) -> Result<Value> {
+        let response = self.0.send().await?.error_for_status()?;
+        let response_body = response.json::<Value>().await?;
+        let response_json = parse_json_rpc_response(response_body)?;
+        debug!("  <= {response_json}");
+        Ok(response_json)
+    }
+}
+
 impl Client {
     pub fn new(url: &str) -> Self {
         Self {
@@ -45,27 +56,19 @@ impl Client {
         }
     }
 
-    pub async fn call<M>(&self, method: M) -> Result<Value>
+    #[allow(clippy::needless_pass_by_value)]
+    pub fn request<M>(&self, method: M) -> RequestBuilder
     where
         M: Method,
     {
         let request_body = method.request_body();
-        info!("{} => {}", M::METHOD_NAME, request_body);
+        debug!("{} => {}", M::METHOD_NAME, request_body);
+        let builder = self.client.post(&self.url).json(&request_body);
+        RequestBuilder(builder)
+    }
 
-        let response = self
-            .client
-            .post(&self.url)
-            .header("Content-Type", "application/json")
-            .json(&request_body)
-            .send()
-            .await?
-            .error_for_status()?;
-
-        let response_body = response.json::<Value>().await?;
-
-        let response_json = parse_json_rpc_response(response_body)?;
-        info!("  <= {response_json}");
-        Ok(response_json)
+    pub async fn call(&self, method: impl Method) -> Result<Value> {
+        self.request(method).send().await
     }
 }
 
@@ -128,6 +131,14 @@ pub mod mock {
 
     impl<'a> MockBuilder<'a> {
         #[must_use]
+        pub fn with_query(mut self, key: impl Into<String>, value: impl Into<String>) -> Self {
+            self.mock = self
+                .mock
+                .match_query(Matcher::UrlEncoded(key.into(), value.into()));
+            self
+        }
+
+        #[must_use]
         pub fn with_params(mut self, params: impl Serialize, is_partial_match: bool) -> Self {
             let request_body = json!({
                 "id": 1,
@@ -160,6 +171,12 @@ pub mod mock {
             self
         }
 
+        #[must_use]
+        pub fn with_expected_header(mut self, key: &str, value: &str) -> Self {
+            self.mock = self.mock.match_header(key, value);
+            self
+        }
+
         pub async fn add(self) {
             let mock = self.mock.create_async().await;
             self.server.mocks.push(mock);
@@ -171,6 +188,8 @@ pub mod mock {
 mod tests {
     use derive_new::new;
     use mock::Server;
+    use serde::Serialize;
+    use serde_json::json;
 
     use super::*;
 
@@ -257,5 +276,64 @@ mod tests {
         assert!(result.is_err());
 
         Ok(())
+    }
+
+    async fn start_server_with_expected_header(
+        is_partial: bool,
+        params: impl Serialize,
+        response: impl Serialize,
+        header: (&str, &str),
+    ) -> Server {
+        let mut server = Server::start().await;
+        server
+            .mock_method(GetData::METHOD_NAME)
+            .with_params(params, is_partial)
+            .with_result(response)
+            .with_expected_header(header.0, header.1)
+            .add()
+            .await;
+        server
+    }
+
+    #[tokio::test]
+    async fn mock_asserts_custom_header() {
+        let params = GetData::new("value".into());
+        let mock =
+            start_server_with_expected_header(false, &params, json!({}), ("x-my-header", "dummy"))
+                .await;
+        let rpc_client = Client::new(&mock.url());
+
+        let result = rpc_client
+            .request(&params)
+            .with_header("x-my-header", "dummy")
+            .send()
+            .await;
+
+        mock.assert();
+
+        assert!(result.is_ok());
+    }
+
+    #[tokio::test]
+    async fn mock_asserts_custom_header_missing() {
+        let params = GetData::new("value".into());
+        let mock =
+            start_server_with_expected_header(false, &params, json!({}), ("x-my-header", "dummy"))
+                .await;
+        let rpc_client = Client::new(&mock.url());
+
+        let result = rpc_client.request(params).send().await;
+
+        assert!(result.is_err());
+        assert_eq!(
+            result
+                .err()
+                .and_then(|err| match err {
+                    Error::Http(err) => err.status(),
+                    _ => None,
+                })
+                .unwrap(),
+            reqwest::StatusCode::NOT_IMPLEMENTED
+        );
     }
 }

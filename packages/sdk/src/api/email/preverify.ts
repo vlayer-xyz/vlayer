@@ -1,4 +1,8 @@
-import { DkimDomainSelector, getDkimSigners, parseEmail } from "./parseEmail";
+import {
+  type DkimDomainSelector,
+  getDkimSigners,
+  parseEmail,
+} from "./parseEmail";
 import { resolveDkimDns } from "./dnsResolver";
 import { prefixAllButNthSubstring } from "../utils/prefixAllButNthSubstring";
 
@@ -7,7 +11,7 @@ export function findIndicesOfMatchingDomains(
   expectedOrigin: string,
 ) {
   return signers
-    .map(({ domain }) => expectedOrigin.endsWith(domain))
+    .map(({ domain }) => expectedOrigin.endsWith(`@${domain}`))
     .map((isMatch, index) => (isMatch ? index : -1))
     .filter((index) => index !== -1);
 }
@@ -49,9 +53,7 @@ export async function preverifyEmail(mimeEmail: string) {
   if (signers.length === 0) {
     throw new Error("No DKIM header found");
   }
-  if (signers.length > 1) {
-    [mimeEmail, signers] = requireSameOrigin(mimeEmail, signers, fromAddress);
-  }
+  [mimeEmail, signers] = requireSameOrigin(mimeEmail, signers, fromAddress);
 
   const [{ domain, selector }] = signers;
   const dnsRecord = await resolveDkimDns(domain, selector);

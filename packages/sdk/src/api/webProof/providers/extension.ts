@@ -9,16 +9,18 @@ import {
   ExtensionAction,
   type ExtensionMessage,
   ExtensionMessageType,
-  type MessageToExtension,
-  WebProofStep,
+  type WebProofStep,
   type PresentationJSON,
   ZkProvingStatus,
   assertUrl,
   assertUrlPattern,
 } from "../../../web-proof-commons";
 
-// Chrome runtime API types for browser context
-declare const chrome: {
+const EXTENSION_ID = "jbchhcgphfokabmfacnkafoeeeppjmpl";
+
+import { type MessageToExtension } from "../../../web-proof-commons";
+
+declare let chrome: {
   runtime: {
     sendMessage: (
       extensionId: string | undefined,
@@ -29,11 +31,12 @@ declare const chrome: {
         addListener: (message: unknown) => void;
       };
       postMessage: (message: MessageToExtension) => void;
+      onDisconnect: {
+        addListener: (callback: () => void) => void;
+      };
     };
   };
 };
-
-const EXTENSION_ID = "jbchhcgphfokabmfacnkafoeeeppjmpl";
 
 class ExtensionWebProofProvider implements WebProofProvider {
   private port: ReturnType<typeof chrome.runtime.connect> | null = null;
@@ -77,6 +80,10 @@ class ExtensionWebProofProvider implements WebProofProvider {
   private connectToExtension() {
     if (!this.port) {
       this.port = chrome.runtime.connect(EXTENSION_ID);
+      this.port.onDisconnect.addListener(() => {
+        this.port = null;
+        this.connectToExtension();
+      });
       this.port.onMessage.addListener((message: ExtensionMessage) => {
         if (message.type === ExtensionMessageType.ProofDone) {
           this.listeners[ExtensionMessageType.ProofDone]?.forEach((cb) => {

@@ -33,11 +33,10 @@ function createStorageHook(storage: browser.Storage.StorageArea) {
       }) => {
         Object.entries(changes).forEach(([key, change]) => {
           if (key === storageKey) {
-            setStoredValue(change.newValue as T);
+            setStoredValue((change.newValue || initialValue) as T);
           }
         });
       };
-
       storage.onChanged.addListener(handleStorageChange);
 
       return () => {

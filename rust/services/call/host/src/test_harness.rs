@@ -3,12 +3,11 @@ use call_engine::HostOutput;
 use call_guest_wrapper::GUEST_ELF as CALL_GUEST_ELF;
 use chain_client::RpcClient as RpcChainProofClient;
 use chain_guest_wrapper::GUEST_ELF as CHAIN_GUEST_ELF;
-use mock_chain_server::{fake_proof_result, ChainProofServerMock};
+use mock_chain_server::ChainProofServerMock;
 use provider::CachedMultiProvider;
 pub use rpc::{
     block_tag_to_block_number, create_multi_provider, rpc_snapshot_file, rpc_snapshot_files,
 };
-use serde_json::json;
 pub use types::ExecutionLocation;
 
 use crate::{get_block_header, Call, Config, Error, Host, PreflightResult};
@@ -56,20 +55,13 @@ async fn create_chain_proof_server(
     location: &ExecutionLocation,
 ) -> Result<ChainProofServerMock, Error> {
     let block_header = get_block_header(multi_provider, location.chain_id, location.block_tag)?;
-    let block_number = block_header.number();
-    let result = fake_proof_result(block_header);
 
-    let chain_proof_server_mock = ChainProofServerMock::start(
-        json!({
-            "chain_id": location.chain_id,
-            "block_numbers": [block_number]
-        }),
-        result,
-        0,
-    )
-    .await;
+    let mut chain_proof_server = ChainProofServerMock::start().await;
+    chain_proof_server
+        .mock_single_block(location.chain_id, block_header)
+        .await;
 
-    Ok(chain_proof_server_mock)
+    Ok(chain_proof_server)
 }
 
 fn create_host(
@@ -78,13 +70,13 @@ fn create_host(
     chain_proof_server_url: impl AsRef<str>,
 ) -> Result<Host, Error> {
     let config = Config {
-        start_chain_id: location.chain_id,
         call_guest_elf: CALL_GUEST_ELF.clone(),
         chain_guest_elf: CHAIN_GUEST_ELF.clone(),
         ..Default::default()
     };
     let block_number =
         block_tag_to_block_number(&multi_provider, location.chain_id, location.block_tag)?;
-    let chain_proof_client = RpcChainProofClient::new(chain_proof_server_url);
-    Host::try_new_with_components(multi_provider, block_number, chain_proof_client, config)
+    let chain_proof_client = Box::new(RpcChainProofClient::new(chain_proof_server_url));
+    let start_exec_location = (location.chain_id, block_number).into();
+    Ok(Host::new(multi_provider, start_exec_location, chain_proof_client, config))
 }

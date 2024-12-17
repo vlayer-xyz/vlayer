@@ -4,6 +4,9 @@ on:
     paths:
       - "examples/**"
       - "packages/**"
+      - ".github/workflows/build_examples.yaml"
+      - "bash/tsc-examples.sh"
+      - "bash/pack-examples.sh"
   merge_group:
   push:
     branches:
@@ -39,3 +42,14 @@ jobs:
 
       - name: Run tsc
         run: bash/tsc-examples.sh
+  pack-examples:
+    name: Pack examples
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Package examples
+        run: ./bash/pack-examples.sh

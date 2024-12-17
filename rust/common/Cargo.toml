@@ -8,9 +8,11 @@ alloy-primitives = { workspace = true }
 anyhow = { workspace = true }
 auto_impl = { workspace = true }
 bytes = { workspace = true }
+clap = { workspace = true, features = ["derive", "env"] }
 derive_more = { workspace = true }
 risc0-zkp = { workspace = true }
 serde = { workspace = true }
+serde_json = { workspace = true }
 
 [lints]
 workspace = true

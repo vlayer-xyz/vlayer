@@ -10,6 +10,7 @@ use super::{BlockingProvider, EIP1186Proof};
 
 #[derive(Debug, Default, Clone, Eq, PartialEq, Serialize, Deserialize)]
 pub struct State {
+    pub latest_block: u64,
     pub header: HashMap<BlockTag, u64>,
     pub balance: HashMap<BlockNumber, HashMap<Address, u64>>,
     pub code: HashMap<BlockNumber, HashMap<Address, u64>>,
@@ -40,7 +41,8 @@ impl State {
             .chain(flatten2(&self.nonce))
             .chain(flatten2(&self.proof))
             .chain(flatten3(&self.storage))
-            .sum()
+            .sum::<u64>()
+            + self.latest_block
     }
 }
 
@@ -113,6 +115,11 @@ impl BlockingProvider for Provider {
         inc!(self.state, nonce, block, address);
         self.inner.get_transaction_count(address, block)
     }
+
+    fn get_latest_block_number(&self) -> Result<BlockNumber> {
+        self.state.write().expect("poisoned lock").latest_block += 1;
+        self.inner.get_latest_block_number()
+    }
 }
 
 #[cfg(test)]
@@ -126,6 +133,7 @@ mod tests {
     fn test_profiling() -> Result<()> {
         let provider = Provider::new(DefaultProvider);
 
+        provider.get_latest_block_number()?;
         provider.get_balance(Default::default(), Default::default())?;
         provider.get_block_header(Default::default())?;
         provider.get_code(Default::default(), Default::default())?;
@@ -134,6 +142,7 @@ mod tests {
         provider.get_transaction_count(Default::default(), Default::default())?;
 
         let expected_state = State {
+            latest_block: 1,
             header: m! { BlockTag::Latest => 1 },
             balance: m! { 0 => m! { Address::ZERO => 1 } },
             code: m! { 0 => m! { Address::ZERO => 1 } },

@@ -23,10 +23,37 @@ You do this by writing a Solidity smart contract (`Prover`) that has access to t
 
 Under the hood, we verify mail server signatures to ensure the authenticity and integrity of the content.
 
+## Email Safety Requirements
+
+Not all emails that are considered valid by email servers will meet the validity requirements for vlayer.
+Email servers use various rules based on [DMARC](https://dmarc.org/), [DKIM](https://datatracker.ietf.org/doc/html/rfc6376), and [SPF](https://datatracker.ietf.org/doc/html/rfc7208) to determine if an email is valid.
+When creating an Email Proof, only DKIM (DomainKeys Identified Mail) signatures are used to prove the authenticity of an email. Therefore, the following additional preconditions must be met:
+
+- The email must be signed with a DKIM-Signature header.
+- The email must be sent from a domain that has a valid DKIM record.
+- The email must have exactly one DKIM signature with a [`d`](https://datatracker.ietf.org/doc/html/rfc6376#section-3.5) tag that matches the domain of the `From` header.
+- The email must have a signed `From` header containing a single email address.
+
+If the email doesn't have a DKIM signature with matching signer and sender domains, it may indicate that the sender's email server is misconfigured.
+Emails from domains hosted on providers like Google Workspaces or Outlook often have a DKIM signature resembling the following:
+```
+DKIM-Signature: v=1; a=rsa-sha256; c=relaxed/relaxed;
+        d=***.gappssmtp.com; s=20230601; dara=google.com;
+        h=...;
+        bh=...;
+        b=...
+```
+
+Another potential issue is the use of subdomains. 
+For example, if the email is sent from `alice@subdomain.example.com` and the `d` tag in the DKIM signature is `example.com`, the email will not be considered valid.
+Similarly, if the email is sent from `alice@example.com` and the `d` tag is `subdomain.example.com`, the email will also be invalid.
+
+DKIM validation will fail if the email body has been modified by a proxy server. The body hash included in the DKIM signature ensures the integrity of the email’s content. Any alteration to the body will invalidate the signature.
+
 ## Example
 Let's say someone wants to prove they are part of company or organization. One way to do this is to take a screenshot and send it to the verifier. However, this is not very reliable because screenshot images can be easily manipulated, and obviously such an image cannot be verified on-chain. 
 
-A better option is to prove that one can send email from it's organization domain. Below is a sample `Prover` contract that verifies that the sender sent email from a specific domain.
+A better option is to prove that one can send email from it's organization domain. Below is a sample `Prover` contract that verifies from which domain an email has been sent.
 
 Below is an example of such proof generation:
 
@@ -34,31 +61,27 @@ Below is an example of such proof generation:
 import {Strings} from "@openzeppelin-contracts-5.0.1/utils/Strings.sol";
 import {Proof} from "vlayer-0.1.0/Proof.sol";
 import {Prover} from "vlayer-0.1.0/Prover.sol";
+import {RegexLib} from "vlayer-0.1.0/Regex.sol";
 import {VerifiedEmail, UnverifiedEmail, EmailProofLib} from "vlayer-0.1.0/EmailProof.sol";
-import {EmailStrings} from "./EmailStrings.sol";
 
 contract EmailDomainProver is Prover {
+    using RegexLib for string;
     using Strings for string;
-    using EmailStrings for string;
     using EmailProofLib for UnverifiedEmail;
-
-    string targetDomain;
-
-    constructor(string memory _targetDomain) {
-        targetDomain = _targetDomain;
-    }
 
     function main(UnverifiedEmail calldata unverifiedEmail, address targetWallet)
         public
         view
-        returns (Proof memory, bytes32, address)
+        returns (Proof memory, bytes32, address, string memory)
     {
         VerifiedEmail memory email = unverifiedEmail.verify();
+        require(email.subject.equal("Verify me for Email NFT"), "incorrect subject");
+        // Extract domain from email address
+        string[] memory captures = email.from.capture("^[^@]+@([^@]+)$");
+        require(captures.length == 2, "invalid email domain");
+        require(bytes(captures[1]).length > 0, "invalid email domain");
 
-        require(email.from.contains(targetDomain), "incorrect sender domain");
-        require(email.subject.equal("Verify me for company NFT"), "incorrect subject");
-
-        return (proof(), sha256(abi.encodePacked(email.from)), targetWallet);
+        return (proof(), sha256(abi.encodePacked(email.from)), targetWallet, captures[1]);
     }
 }
 ```

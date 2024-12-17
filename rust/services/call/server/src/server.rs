@@ -1,15 +1,18 @@
-use std::{future::Future, pin::Pin, sync::Arc};
-
-use axum::{extract::State, response::IntoResponse, routing::post, Router};
-use axum_jrpc::JsonRpcExtractor;
-use server_utils::{init_trace_layer, RequestIdLayer};
+use axum::{
+    body::Bytes,
+    extract::{Query, State},
+    response::IntoResponse,
+    routing::post,
+    Router,
+};
+use server_utils::{init_trace_layer, RequestIdLayer, Router as JrpcRouter};
 use tokio::net::TcpListener;
-use tower_http::cors::CorsLayer;
+use tower_http::{cors::CorsLayer, validate_request::ValidateRequestHeaderLayer};
 use tracing::info;
 
 use crate::{
     config::Config,
-    handlers::{v_call::v_call, v_versions::v_versions},
+    handlers::{QueryParams, RpcServer, State as AppState},
 };
 
 pub async fn serve(config: Config) -> anyhow::Result<()> {
@@ -21,36 +24,23 @@ pub async fn serve(config: Config) -> anyhow::Result<()> {
     Ok(())
 }
 
-async fn handle_jrpc(
-    State(router): State<server_utils::Router>,
-    request: JsonRpcExtractor,
+async fn handle(
+    Query(params): Query<QueryParams>,
+    State(router): State<JrpcRouter<AppState>>,
+    body: Bytes,
 ) -> impl IntoResponse {
-    router.handle_request(request).await
+    router.handle_request_with_params(body, params).await
 }
 
 pub fn server(cfg: Config) -> Router {
-    let config = Arc::new(cfg);
-    let mut jrpc_router = server_utils::Router::default();
-    jrpc_router.add_handler("v_call", {
-        let config = config.clone();
-        move |params| -> Pin<Box<dyn Future<Output = _> + Send>> {
-            let config = config.clone();
-            Box::pin(async move { v_call(config, params).await.map(|x| x.to_json()) })
-        }
-    });
-    jrpc_router.add_handler(
-        "v_versions",
-        move |params| -> Pin<Box<dyn Future<Output = _> + Send>> {
-            let config = config.clone();
-            Box::pin(v_versions(config, params))
-        },
-    );
+    let router = JrpcRouter::new(AppState::new(cfg).into_rpc());
 
     //TODO: Lets decide do we need strict CORS policy or not and update this eventually
     let cors = CorsLayer::permissive();
     Router::new()
-        .route("/", post(handle_jrpc))
-        .with_state(jrpc_router)
+        .route("/", post(handle))
+        .with_state(router)
+        .layer(ValidateRequestHeaderLayer::accept(mime::APPLICATION_JSON.as_ref()))
         .layer(cors)
         .layer(init_trace_layer())
         // NOTE: RequestIdLayer should be added after the Trace layer

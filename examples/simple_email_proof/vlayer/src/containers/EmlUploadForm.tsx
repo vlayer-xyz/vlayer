@@ -1,12 +1,11 @@
-import { useState, useEffect } from "react";
-import { Address } from "viem";
+import { useState, useEffect, FormEvent } from "react";
+import { Address, Account } from "viem";
 import * as chains from "viem/chains";
 import useProver from "../hooks/useProver";
 import { preverifyEmail } from "@vlayer/sdk";
 import { getStrFromFile } from "../lib/utils";
 import proverSpec from "../../../out/EmailDomainProver.sol/EmailDomainProver";
 import verifierSpec from "../../../out/EmailProofVerifier.sol/EmailDomainVerifier";
-
 import EmlForm from "../components/EmlForm";
 import { createContext, customTransport, type Chain } from "@vlayer/sdk/config";
 
@@ -19,19 +18,11 @@ function getChainByName(name: string) {
   }
 }
 
-const { ethClient: walletClient } = await createContext(
-  {
-    chainName: import.meta.env.VITE_CHAIN_NAME as string,
-    proverUrl: import.meta.env.VITE_PROVER_URL as string,
-    jsonRpcUrl: import.meta.env.VITE_JSON_RPC_URL as string,
-    privateKey: import.meta.env.VITE_PRIVATE_KEY as `0x${string}`,
-  },
-  import.meta.env.VITE_USE_WINDOW_ETHEREUM_TRANSPORT
-    ? customTransport(window.ethereum)
-    : undefined,
-);
-
 const EmlUploadForm = () => {
+  const [walletClient, setWalletClient] =
+    useState<ReturnType<typeof createContext>["ethClient"]>();
+  const [account, setAccount] =
+    useState<ReturnType<typeof createContext>["account"]>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentStep, setCurrentStep] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
@@ -39,6 +30,26 @@ const EmlUploadForm = () => {
   const [claimerAddr, setClaimerAddr] = useState<Address>("0x");
   const chain = getChainByName(import.meta.env.VITE_CHAIN_NAME as string);
 
+  useEffect(() => {
+    const getWallet = async () => {
+      const { ethClient, account: ethAccount } = await createContext(
+        {
+          chainName: import.meta.env.VITE_CHAIN_NAME as string,
+          proverUrl: import.meta.env.VITE_PROVER_URL as string,
+          jsonRpcUrl: import.meta.env.VITE_JSON_RPC_URL as string,
+          privateKey: import.meta.env.VITE_PRIVATE_KEY as `0x${string}`,
+        },
+        import.meta.env.VITE_USE_WINDOW_ETHEREUM_TRANSPORT
+          ? customTransport(window.ethereum)
+          : undefined,
+      );
+
+      setWalletClient(ethClient);
+      setAccount(ethAccount);
+    };
+
+    getWallet();
+  }, []);
   const { prove, proof, provingError } = useProver({
     addr: import.meta.env.VITE_PROVER_ADDRESS,
     abi: proverSpec.abi,
@@ -47,24 +58,47 @@ const EmlUploadForm = () => {
   });
 
   const getClaimerAddr = async () => {
-    if (typeof window !== "undefined" && !window.ethereum) {
-      throw new Error("no_wallet_detected");
+    if (import.meta.env.VITE_USE_WINDOW_ETHEREUM_TRANSPORT) {
+      if (typeof window !== "undefined" && !window.ethereum) {
+        throw new Error("no_wallet_detected");
+      }
+
+      if (!walletClient) {
+        throw new Error("no_wallet_client");
+      }
+
+      if (chain.name !== chains.anvil.name) {
+        await walletClient?.switchChain({ id: chain.id });
+      }
+      if (!walletClient) {
+        throw new Error("no_wallet_client");
+      }
+      const [addr] = await walletClient.requestAddresses();
+      setClaimerAddr(addr);
+      return addr;
     }
 
-    if (chain.name !== chains.anvil.name) {
-      await walletClient.switchChain({ id: chain.id });
+    if (account) {
+      setClaimerAddr(account.address);
+      return account.address;
     }
-    const [addr] = await walletClient.requestAddresses();
-
-    setClaimerAddr(addr);
-    return addr;
   };
 
   const handleError = (err: unknown) => {
-    console.log({ err });
     setIsSubmitting(false);
+    setSuccessMsg("");
+    console.log("err", err);
     if (err instanceof Error) {
-      setErrorMsg(err.message);
+      if ("shortMessage" in err) {
+        setErrorMsg(err.shortMessage as string);
+      }
+      if (err?.message?.includes("email taken")) {
+        setErrorMsg(
+          "Email already used. Try a different one or redeploy contracts",
+        );
+      } else {
+        setErrorMsg(err.message);
+      }
     } else {
       setErrorMsg("Something went wrong, check logs");
     }
@@ -78,27 +112,32 @@ const EmlUploadForm = () => {
         throw new Error("no_proof_to_verify");
       }
 
+      if (!walletClient) {
+        throw new Error("no_wallet_client");
+      }
+
       const txHash = await walletClient.writeContract({
         address: import.meta.env.VITE_VERIFIER_ADDRESS,
         abi: verifierSpec.abi,
         functionName: "verify",
         args: proof,
         chain,
-        account: claimerAddr,
+        account: import.meta.env.VITE_USE_WINDOW_ETHEREUM_TRANSPORT
+          ? (claimerAddr as Address)
+          : (account as Account),
       });
 
       const receipt = await walletClient.waitForTransactionReceipt({
         hash: txHash,
       });
-      console.log("receipt", receipt);
       setCurrentStep("Success!");
       setIsSubmitting(false);
       if (chain.blockExplorers && receipt.status === "success") {
-        window.open(`${chain.blockExplorers?.default.url}/tx/${txHash}`);
-      } else if (receipt.status === "reverted") {
-        setErrorMsg("Transaction reverted. Is email already used?");
+        setSuccessMsg(
+          `Verified: <a href='${chain.blockExplorers?.default.url}/tx/${txHash}'>${txHash.slice(0, 4)}...${txHash.slice(-4)}</a>`,
+        );
       } else {
-        setSuccessMsg("Verified successfully.");
+        setSuccessMsg(`Verified: ${txHash.slice(0, 4)}...${txHash.slice(-4)}`);
       }
     } catch (err) {
       handleError(err);
@@ -114,7 +153,7 @@ const EmlUploadForm = () => {
     setCurrentStep("Waiting for proof...");
   };
 
-  const submit = async (e: React.FormEvent<HTMLFormElement>) => {
+  const submit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
     setErrorMsg("");
@@ -127,11 +166,11 @@ const EmlUploadForm = () => {
 
     setCurrentStep("Connecting to wallet...");
     const addr = await getClaimerAddr();
-    await startProving(emlFile, addr);
+    await startProving(emlFile, addr as Address);
     setCurrentStep("Waiting for proof...");
   };
 
-  const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
+  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
     submit(e).catch((err) => {
       handleError(err);
     });

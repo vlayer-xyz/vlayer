@@ -72,7 +72,7 @@ const useProver = <T extends Abi, F extends ContractFunctionName<T>>({
     if (provingHash) {
       const waitForProof = async () => {
         console.log("Waiting for proving result: ", provingHash);
-        const result = await vlayer.waitForProvingResult(provingHash);
+        const result = await vlayer.waitForProvingResult({ hash: provingHash });
         setProof(result);
         console.log("Proof ready:", result);
       };

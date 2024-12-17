@@ -5,13 +5,15 @@ use alloy_rlp::Decodable;
 use bytes::Bytes;
 use common::Hashable;
 use derivative::Derivative;
-use digest::Digest;
 use nybbles::Nibbles;
 use serde::{Deserialize, Serialize};
 use thiserror::Error;
 use utils::{parse_node, resolve_trie};
 
-use crate::node::{Node, NodeError};
+use crate::{
+    node::{Node, NodeError},
+    Digest,
+};
 
 mod utils;
 
@@ -164,6 +166,12 @@ pub type KeccakMerkleTrie = MerkleTrie<sha3::Keccak256>;
 #[allow(non_snake_case)]
 pub const fn KeccakMerkleTrie(node: Node<sha3::Keccak256>) -> KeccakMerkleTrie {
     MerkleTrie::<sha3::Keccak256>(node)
+}
+
+pub type Sha2Trie = MerkleTrie<sha2::Sha256>;
+#[allow(non_snake_case)]
+pub const fn Sha2Trie(node: Node<sha2::Sha256>) -> Sha2Trie {
+    MerkleTrie::<sha2::Sha256>(node)
 }
 
 #[cfg(test)]

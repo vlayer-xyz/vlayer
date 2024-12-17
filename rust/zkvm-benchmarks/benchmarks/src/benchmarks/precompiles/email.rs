@@ -25,6 +25,6 @@ pub fn benchmarks() -> Vec<Benchmark> {
     vec![Benchmark::new(
         "email_validation",
         with_fixture!(fixture(), test_email_verification),
-        32_541_351,
+        44_578_000,
     )]
 }

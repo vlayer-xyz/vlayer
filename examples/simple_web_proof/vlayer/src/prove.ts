@@ -66,13 +66,6 @@ export async function setupRequestProveButton(element: HTMLButtonElement) {
 
 export const setupVProverButton = (element: HTMLButtonElement) => {
   element.addEventListener("click", async () => {
-    const notaryPubKey =
-      "-----BEGIN PUBLIC KEY-----\nMFkwEwYHKoZIzj0CAQYIKoZIzj0DAQcDQgAExpX/4R4z40gI6C/j9zAM39u58LJu\n3Cx5tXTuqhhu/tirnBi5GniMmspOTEsps4ANnPLpMmMSfhJ+IFHbc3qVOA==\n-----END PUBLIC KEY-----\n";
-
-    const webProof = {
-      presentation_json: context.webProof,
-      notary_pub_key: notaryPubKey,
-    };
     const vlayer = createVlayerClient({
       url: proverUrl,
     });
@@ -84,13 +77,13 @@ export const setupVProverButton = (element: HTMLButtonElement) => {
       proverAbi: webProofProver.abi,
       args: [
         {
-          webProofJson: JSON.stringify(webProof),
+          webProofJson: JSON.stringify(context.webProof),
         },
         twitterUserAddress,
       ],
       chainId: chain.id,
     });
-    const provingResult = await vlayer.waitForProvingResult(hash);
+    const provingResult = await vlayer.waitForProvingResult({ hash });
     console.log("Proof generated!", provingResult);
     context.provingResult = provingResult as [Proof, string, Hex];
   });

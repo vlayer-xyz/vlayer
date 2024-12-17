@@ -13,7 +13,7 @@ export class ZkProvingStatusStore extends Store<{
 
   public static get instance(): ZkProvingStatusStore {
     if (!this.#instance) {
-      this.#instance = new ZkProvingStatusStore(browser.storage.local);
+      this.#instance = new ZkProvingStatusStore(browser.storage.session);
     }
     return this.#instance;
   }

@@ -4,10 +4,9 @@ use alloy_primitives::B256;
 use alloy_rlp::{BufMut, Encodable, EMPTY_STRING_CODE};
 use bytes::Bytes;
 use derivative::Derivative;
-use digest::Digest;
 
 use super::node::Node;
-use crate::hash;
+use crate::{hash, Digest};
 
 /// Represents the way in which a node is referenced from within another node.
 #[derive(Debug, Default, Derivative)]
@@ -66,6 +65,7 @@ where
 }
 
 pub type KeccakNodeRef = NodeRef<sha3::Keccak256>;
+pub type Sha2NodeRef = NodeRef<sha2::Sha256>;
 
 #[cfg(test)]
 mod encodable {

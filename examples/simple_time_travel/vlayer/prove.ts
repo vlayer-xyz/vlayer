@@ -39,7 +39,7 @@ const provingHash = await vlayer.prove({
 
 console.log("Waiting for proving result: ");
 
-const result = await vlayer.waitForProvingResult(provingHash);
+const result = await vlayer.waitForProvingResult({ hash: provingHash });
 
 console.log("Proof:", result[0]);
 console.log("Verifying...");

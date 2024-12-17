@@ -1,19 +1,24 @@
-import { VCallResponse, VlayerClient, BrandedHash } from "types/vlayer";
-import { WebProofProvider } from "types/webProofProvider";
+import {
+  type VCallResponse,
+  type VlayerClient,
+  type BrandedHash,
+  VGetProofReceiptStatus,
+} from "types/vlayer";
+import { type WebProofProvider } from "types/webProofProvider";
 
-import { prove } from "../prover";
+import { prove, getProofReceipt } from "../prover";
 import { createExtensionWebProofProvider } from "../webProof";
 import {
   type Abi,
-  AbiStateMutability,
-  ContractFunctionArgs,
-  ContractFunctionName,
-  ContractFunctionReturnType,
+  type AbiStateMutability,
+  type ContractFunctionArgs,
+  type ContractFunctionName,
+  type ContractFunctionReturnType,
   decodeFunctionResult,
-  Hex,
+  type Hex,
 } from "viem";
 import { ZkProvingStatus } from "../../web-proof-commons";
-import { ContractFunctionArgsWithout } from "types/viem";
+import { type ContractFunctionArgsWithout } from "types/viem";
 
 function dropEmptyProofFromArgs(args: unknown) {
   if (Array.isArray(args)) {
@@ -22,11 +27,13 @@ function dropEmptyProofFromArgs(args: unknown) {
   return [];
 }
 
-async function getHash(
-  vcall_response: Promise<VCallResponse>,
-): Promise<[Hex, VCallResponse]> {
+async function getHash(vcall_response: Promise<VCallResponse>): Promise<Hex> {
   const result = await vcall_response;
-  return [result.result.hash, result];
+  return result.result;
+}
+
+async function sleep(ms: number): Promise<void> {
+  return new Promise((resolve) => setTimeout(resolve, ms));
 }
 
 export const createVlayerClient = (
@@ -41,19 +48,25 @@ export const createVlayerClient = (
     webProofProvider: createExtensionWebProofProvider(),
   },
 ): VlayerClient => {
-  const resultHashMap = new Map<
-    string,
-    [Promise<VCallResponse>, Abi, string]
-  >();
+  const resultHashMap = new Map<string, [Abi, string]>();
 
   return {
-    prove: async ({
+    prove: async <T extends Abi, F extends ContractFunctionName<T>>({
       address,
+      proverAbi,
       functionName,
       chainId,
       gasLimit,
-      proverAbi,
+      userToken,
       args,
+    }: {
+      address: Hex;
+      proverAbi: T;
+      functionName: F;
+      chainId?: number;
+      gasLimit?: number;
+      userToken?: string;
+      args: ContractFunctionArgs<T, AbiStateMutability, F>;
     }) => {
       webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Proving);
       const response = prove(
@@ -64,21 +77,14 @@ export const createVlayerClient = (
         chainId,
         gasLimit,
         url,
-      )
-        .catch((error) => {
-          webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Error);
-          throw error;
-        })
-        .then((result) => {
-          webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Done);
-          return result;
-        });
-      const [hash, result_promise] = await getHash(response);
-      resultHashMap.set(hash, [
-        Promise.resolve(result_promise),
-        proverAbi,
-        functionName,
-      ]);
+        userToken,
+      ).catch((e) => {
+        webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Error);
+        throw e;
+      });
+
+      const hash = await getHash(response);
+      resultHashMap.set(hash, [proverAbi, functionName]);
       return { hash } as BrandedHash<typeof proverAbi, typeof functionName>;
     },
 
@@ -87,31 +93,57 @@ export const createVlayerClient = (
       F extends ContractFunctionName<T>,
     >({
       hash,
-    }: BrandedHash<T, F>): Promise<
-      ContractFunctionReturnType<T, AbiStateMutability, F>
-    > => {
-      const savedProvingData = resultHashMap.get(hash);
-      if (!savedProvingData) {
-        throw new Error("No result found for hash " + hash);
+      numberOfRetries = 240,
+      sleepDuration = 1000,
+    }: {
+      hash: BrandedHash<T, F>;
+      numberOfRetries?: number;
+      sleepDuration?: number;
+    }): Promise<ContractFunctionReturnType<T, AbiStateMutability, F>> => {
+      const getProof = async () => {
+        for (let retry = 0; retry < numberOfRetries; retry++) {
+          const resp = await getProofReceipt(hash, url);
+          if (resp.result.status === VGetProofReceiptStatus.done) {
+            if (resp.result.data === undefined) {
+              throw new Error(
+                "No ZK proof returned from server for hash " + hash.hash,
+              );
+            }
+            return resp.result.data;
+          }
+          await sleep(sleepDuration);
+        }
+        throw new Error(
+          `Timed out waiting for ZK proof generation after ${numberOfRetries * sleepDuration}ms. Consider increasing numberOfRetries in waitForProvingResult`,
+        );
+      };
+      try {
+        const data = await getProof();
+        const savedProvingData = resultHashMap.get(hash.hash);
+        if (!savedProvingData) {
+          throw new Error("No result found for hash " + hash.hash);
+        }
+        const [proverAbi, functionName] = savedProvingData;
+
+        const result = dropEmptyProofFromArgs(
+          decodeFunctionResult({
+            abi: proverAbi,
+            data: data?.evm_call_result,
+            functionName,
+          }),
+        );
+
+        webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Done);
+
+        return [data?.proof, ...result] as ContractFunctionReturnType<
+          T,
+          AbiStateMutability,
+          F
+        >;
+      } catch (e) {
+        webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Error);
+        throw e;
       }
-      const [result_promise, proverAbi, functionName] = savedProvingData;
-      const {
-        result: { proof, evm_call_result },
-      } = await result_promise;
-
-      const result = dropEmptyProofFromArgs(
-        decodeFunctionResult({
-          abi: proverAbi,
-          data: evm_call_result,
-          functionName,
-        }),
-      );
-
-      return [proof, ...result] as ContractFunctionReturnType<
-        T,
-        AbiStateMutability,
-        F
-      >;
     },
 
     proveWeb: async function ({
@@ -149,7 +181,6 @@ export const createVlayerClient = (
           {
             webProofJson: JSON.stringify({
               tls_proof: webProof,
-              notary_pub_key: webProofPlaceholder.notaryPubKey,
             }),
           },
           ...commitmentArgs,

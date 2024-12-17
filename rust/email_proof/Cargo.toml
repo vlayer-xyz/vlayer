@@ -5,12 +5,12 @@ edition = "2021"
 
 [dependencies]
 alloy-sol-types = { workspace = true }
-derive-new = { workspace = true }
-futures = "0.3.31"
-mail-auth = { git = "https://github.com/vlayer-xyz/mail-auth", rev = "800b8bc6c6ccca1f2e0d3a594a445ebdaae3198e", default-features = false, features = ["rust-crypto", "rustls-pemfile"] }
-mailparse = "0.15.0"
+base64 = "0.21.7"
+cfdkim = { git = "https://github.com/risc0-labs/dkim", rev = "3213315e41f426c307b8feb8fb329330a47e326c", default-features = false }
+mailparse = "0.14.1"
 regex = { workspace = true }
-ring = "0.17.8"
+rsa = { workspace = true }
+slog = "2.7.0"
 thiserror = { workspace = true }
 
 [dev-dependencies]

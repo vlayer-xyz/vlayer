@@ -8,6 +8,7 @@ import {
   getConfig,
   waitForContractDeploy,
 } from "@vlayer/sdk/config";
+import { type Address } from "viem";
 
 const config = getConfig();
 const { chain, ethClient, account, proverUrl, confirmations } =
@@ -26,10 +27,18 @@ const whaleBadgeNFTAddress = await waitForContractDeploy({
   hash: deployWhaleBadgeHash,
 });
 
+const tokensToCheck: [Address, bigint, bigint][] = (
+  process.env.PROVER_ERC20_ADDRESSES?.split(",") || []
+).map((addr, i) => [
+  addr as Address,
+  BigInt(process.env.PROVER_ERC20_CHAIN_IDS?.split(",")[i]),
+  BigInt(process.env.PROVER_ERC20_BLOCK_NUMBERS?.split(",")[i]),
+]);
+
 const { prover, verifier } = await deployVlayerContracts({
   proverSpec,
   verifierSpec,
-  proverArgs: [],
+  proverArgs: [tokensToCheck],
   verifierArgs: [whaleBadgeNFTAddress],
 });
 
@@ -41,7 +50,7 @@ const proofHash = await vlayer.prove({
   args: [account.address],
   chainId: chain.id,
 });
-const result = await vlayer.waitForProvingResult(proofHash);
+const result = await vlayer.waitForProvingResult({ hash: proofHash });
 console.log("Proof:", result[0]);
 console.log("Verifying...");
 

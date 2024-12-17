@@ -1,16 +1,12 @@
 use alloy_chains::Chain;
-use alloy_primitives::{hex::ToHexExt, keccak256, ChainId, B256, U256};
+use alloy_primitives::{hex::ToHexExt, keccak256, ChainId, B256};
 use alloy_rlp::RlpEncodable;
-use alloy_sol_types::SolValue;
-use call_engine::{
-    evm::env::location::ExecutionLocation, Call as EngineCall, HostOutput, Proof, Seal,
-};
-use call_host::{Call as HostCall, Error as HostError};
+use call_engine::{evm::env::location::ExecutionLocation, Call as EngineCall};
+use call_host::Call as HostCall;
 use common::Hashable;
 use derive_more::From;
 use derive_new::new;
 use serde::{Deserialize, Serialize};
-use serde_json::{json, Value};
 use server_utils::{parse_address_field, parse_hex_field};
 
 use crate::error::AppError;
@@ -18,8 +14,8 @@ use crate::error::AppError;
 #[derive(Deserialize, Serialize, Debug)]
 #[serde(deny_unknown_fields)]
 pub struct Call {
-    to: String,
-    data: String,
+    pub to: String,
+    pub data: String,
 }
 
 impl TryFrom<Call> for HostCall {
@@ -45,61 +41,7 @@ pub struct CallContext {
     pub gas_limit: u64,
 }
 
-#[allow(clippy::struct_field_names)]
-pub struct CallResult {
-    hash: CallHash,
-    proof: Proof,
-    evm_call_result: Vec<u8>,
-}
-
-impl CallResult {
-    pub fn try_new(hash: CallHash, host_output: HostOutput) -> Result<Self, HostError> {
-        let HostOutput {
-            guest_output,
-            seal,
-            proof_len,
-            call_guest_id,
-            ..
-        } = host_output;
-
-        let proof = Proof {
-            length: U256::from(proof_len),
-            seal: decode_seal(&seal)?,
-            callGuestId: call_guest_id.into(),
-            // Intentionally set to 0. These fields will be updated with the correct values by the prover script, based on the verifier ABI.
-            callAssumptions: guest_output.call_assumptions,
-        };
-        Ok(Self {
-            hash,
-            proof,
-            evm_call_result: guest_output.evm_call_result,
-        })
-    }
-
-    pub fn to_json(&self) -> Value {
-        json!({
-            "hash": self.hash,
-            "evm_call_result": self.evm_call_result.encode_hex_with_prefix(),
-            "proof": {
-                "seal": {
-                    "verifierSelector": self.proof.seal.verifierSelector,
-                    "seal": self.proof.seal.seal,
-                    "mode": Into::<u8>::into(self.proof.seal.mode),
-                },
-                "callGuestId": self.proof.callGuestId.encode_hex_with_prefix(),
-                "length": u256_to_number(self.proof.length),
-                "callAssumptions": {
-                    "functionSelector": self.proof.callAssumptions.functionSelector,
-                    "proverContractAddress": self.proof.callAssumptions.proverContractAddress,
-                    "settleBlockNumber": u256_to_number(self.proof.callAssumptions.settleBlockNumber),
-                    "settleBlockHash": self.proof.callAssumptions.settleBlockHash,
-                }
-            },
-        })
-    }
-}
-
-#[derive(Serialize, Deserialize, Debug, From, Copy, Clone)]
+#[derive(Serialize, Deserialize, Debug, From, Copy, Clone, Hash, PartialEq, Eq)]
 pub struct CallHash(B256);
 
 impl std::fmt::Display for CallHash {
@@ -108,24 +50,24 @@ impl std::fmt::Display for CallHash {
     }
 }
 
-#[derive(new, RlpEncodable)]
-pub struct CallHashData {
-    execution_location: ExecutionLocation,
-    call: EngineCall,
-}
-
-impl Hashable for CallHashData {
-    fn hash_slow(&self) -> B256 {
-        keccak256(alloy_rlp::encode(self))
+impl From<(&ExecutionLocation, &EngineCall)> for CallHash {
+    fn from((execution_location, call): (&ExecutionLocation, &EngineCall)) -> Self {
+        CallHashData::new(execution_location, call)
+            .hash_slow()
+            .into()
     }
 }
 
-fn decode_seal(seal: &[u8]) -> Result<Seal, seal::Error> {
-    Ok(Seal::abi_decode(seal, true)?)
+#[derive(new, RlpEncodable)]
+pub struct CallHashData<'a> {
+    execution_location: &'a ExecutionLocation,
+    call: &'a EngineCall,
 }
 
-fn u256_to_number(value: U256) -> u64 {
-    u64::try_from(value).expect("Expected value to fit into u64")
+impl Hashable for CallHashData<'_> {
+    fn hash_slow(&self) -> B256 {
+        keccak256(alloy_rlp::encode(self))
+    }
 }
 
 #[cfg(test)]

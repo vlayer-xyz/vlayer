@@ -1,15 +1,15 @@
-import { Branded } from "../../../web-proof-commons/utils";
+import { type Branded } from "../../../web-proof-commons/utils";
 import {
-  Abi,
-  AbiStateMutability,
-  Address,
-  ContractFunctionArgs,
-  ContractFunctionName,
-  ContractFunctionReturnType,
-  Hex,
+  type Abi,
+  type AbiStateMutability,
+  type Address,
+  type ContractFunctionArgs,
+  type ContractFunctionName,
+  type ContractFunctionReturnType,
+  type Hex,
 } from "viem";
-import { WebProofRequest } from "./webProofProvider";
-import { ContractFunctionArgsWithout } from "./viem";
+import { type WebProofRequest } from "./webProofProvider";
+import { type ContractFunctionArgsWithout } from "./viem";
 
 type Calldata = string;
 
@@ -41,15 +41,34 @@ export type Proof = {
   };
 };
 
-export interface VCallResult {
-  hash: Hex;
-  evm_call_result: Hex;
-  proof: Proof;
-}
+export type VCallResult = Hex;
 
 export interface VCallResponse {
   jsonrpc: string;
   result: VCallResult;
+  id: number;
+}
+
+export type VGetProofReceiptParams = {
+  hash: Hex;
+};
+
+export enum VGetProofReceiptStatus {
+  pending = "pending",
+  done = "done",
+}
+
+export interface VGetProofReceiptResult {
+  status: VGetProofReceiptStatus;
+  data?: {
+    evm_call_result: Hex;
+    proof: Proof;
+  };
+}
+
+export interface VGetProofReceiptResponse {
+  jsonrpc: string;
+  result: VGetProofReceiptResult;
   id: number;
 }
 
@@ -60,12 +79,18 @@ export type VlayerClient = {
     functionName: F;
     chainId?: number;
     gasLimit?: number;
+    userToken?: string;
     args: ContractFunctionArgs<T, AbiStateMutability, F>;
   }) => Promise<BrandedHash<T, F>>;
 
-  waitForProvingResult: <T extends Abi, F extends ContractFunctionName<T>>(
-    hash: BrandedHash<T, F>,
-  ) => Promise<ContractFunctionReturnType<T, AbiStateMutability, F>>;
+  waitForProvingResult: <
+    T extends Abi,
+    F extends ContractFunctionName<T>,
+  >(args: {
+    hash: BrandedHash<T, F>;
+    numberOfRetries?: number;
+    sleepDuration?: number;
+  }) => Promise<ContractFunctionReturnType<T, AbiStateMutability, F>>;
 
   proveWeb: <T extends Abi, F extends ContractFunctionName<T>>(args: {
     address: Hex;

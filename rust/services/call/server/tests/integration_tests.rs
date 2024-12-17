@@ -1,10 +1,13 @@
+use assert_json_diff::assert_json_include;
 use axum::http::StatusCode;
 use serde_json::json;
-use test_helpers::{call_guest_elf, chain_guest_elf, Context, API_VERSION, GAS_METER_TTL};
+use test_helpers::{call_guest_elf, chain_guest_elf, mock::GasMeterServer, Context, API_VERSION};
 
 mod test_helpers;
 
-use server_utils::{assert_jrpc_err, assert_jrpc_ok, body_to_string};
+use server_utils::{
+    assert_jrpc_err, assert_jrpc_ok, body_to_json, body_to_string, function_selector,
+};
 
 mod server_tests {
     use super::*;
@@ -69,24 +72,21 @@ mod server_tests {
     }
 
     mod v_call {
-        use ethers::{
-            abi::AbiEncode,
-            types::{Uint8, U256},
-        };
-        use server_utils::{function_selector, rpc::mock::Server as RpcServerMock};
-        use web_proof::fixtures::{load_web_proof_fixture, NOTARY_PUB_KEY_PEM_EXAMPLE};
+        use ethers::types::U256;
+        use web_proof::fixtures::load_web_proof_fixture;
 
         use super::*;
         use crate::test_helpers::mock::WebProof;
 
         const CHAIN_ID: u64 = 11_155_111;
         const GAS_LIMIT: u64 = 1_000_000;
+        const GAS_METER_TTL: u64 = 3600;
 
         #[tokio::test]
         async fn field_validation_error() {
-            let ctx = Context::default().await;
+            let mut ctx = Context::default().await;
             let app = ctx.server(call_guest_elf(), chain_guest_elf());
-            let contract = ctx.client.deploy_contract().await;
+            let contract = ctx.deploy_contract().await;
             let call_data = contract
                 .sum(U256::from(1), U256::from(2))
                 .calldata()
@@ -118,9 +118,12 @@ mod server_tests {
 
         #[tokio::test(flavor = "multi_thread")]
         async fn simple_contract_call_success() {
-            let ctx = Context::default().await;
+            const EXPECTED_HASH: &str =
+                "0x126257b312be17f869dacc198adc28424148f5408751f52c50050a01eeef8ebf";
+
+            let mut ctx = Context::default().await;
             let app = ctx.server(call_guest_elf(), chain_guest_elf());
-            let contract = ctx.client.deploy_contract().await;
+            let contract = ctx.deploy_contract().await;
             let call_data = contract
                 .sum(U256::from(1), U256::from(2))
                 .calldata()
@@ -144,24 +147,308 @@ mod server_tests {
             let response = app.post("/", &req).await;
 
             assert_eq!(StatusCode::OK, response.status());
-            assert_jrpc_ok(
-                response,
-                json!({
-                    "evm_call_result": U256::from(3).encode_hex(),
-                    "proof": {
-                        "length": 160,
-                        "seal": {
-                            "verifierSelector": "0xdeafbeef",
-                            "mode": 1,
-                        },
-                        "callAssumptions": {
-                            "functionSelector": function_selector(&call_data),
-                            "proverContractAddress": contract.address(),
+            assert_jrpc_ok(response, EXPECTED_HASH).await;
+        }
+
+        #[tokio::test(flavor = "multi_thread")]
+        async fn web_proof_success() {
+            const EXPECTED_HASH: &str =
+                "0xcd82229ed80ea5c12771bf33906c63320ab8ffa384515173fefd6f09226ea4f6";
+
+            let mut ctx = Context::default().await;
+            let app = ctx.server(call_guest_elf(), chain_guest_elf());
+            let contract = ctx.deploy_contract().await;
+
+            let call_data = contract
+                .web_proof(WebProof {
+                    web_proof_json: serde_json::to_string(&json!(load_web_proof_fixture()))
+                        .unwrap(),
+                })
+                .calldata()
+                .unwrap();
+
+            let req = json!({
+                "method": "v_call",
+                "params": [
+                    {
+                        "to": contract.address(),
+                        "data": call_data,
+                    },
+                    {
+                        "chain_id": CHAIN_ID,
+                        "gas_limit": GAS_LIMIT,
+                    }
+                    ],
+                "id": 1,
+                "jsonrpc": "2.0",
+            });
+
+            let response = app.post("/", &req).await;
+
+            assert_eq!(StatusCode::OK, response.status());
+            assert_jrpc_ok(response, EXPECTED_HASH).await;
+        }
+
+        #[tokio::test(flavor = "multi_thread")]
+        async fn gasmeter_with_api_key() {
+            const EXPECTED_HASH: &str =
+                "0x126257b312be17f869dacc198adc28424148f5408751f52c50050a01eeef8ebf";
+            const API_KEY_HEADER_NAME: &str = "x-prover-api-key";
+            const API_KEY: &str = "secret-deadbeef";
+
+            let mut gas_meter_server =
+                GasMeterServer::start(GAS_METER_TTL, Some(API_KEY.into())).await;
+            gas_meter_server
+                .mock_method("v_allocateGas")
+                .with_params(
+                    json!({
+                        "gas_limit": GAS_LIMIT,
+                        "hash": EXPECTED_HASH,
+                        "time_to_live": GAS_METER_TTL
+                    }),
+                    false,
+                )
+                .with_result(json!({}))
+                .with_expected_header(API_KEY_HEADER_NAME, API_KEY)
+                .add()
+                .await;
+
+            let mut ctx = Context::default()
+                .await
+                .with_gas_meter_server(gas_meter_server);
+            let app = ctx.server(call_guest_elf(), chain_guest_elf());
+            let contract = ctx.deploy_contract().await;
+            let call_data = contract
+                .sum(U256::from(1), U256::from(2))
+                .calldata()
+                .unwrap();
+
+            let req = json!({
+                "method": "v_call",
+                "params": [
+                    {
+                        "to": contract.address(),
+                        "data": call_data,
+                    },
+                    {
+                        "chain_id": CHAIN_ID,
+                        "gas_limit": GAS_LIMIT,
+                    }
+                    ],
+                "id": 1,
+                "jsonrpc": "2.0",
+            });
+
+            let response = app.post("/", &req).await;
+
+            assert_eq!(StatusCode::OK, response.status());
+            assert_jrpc_ok(response, EXPECTED_HASH).await;
+
+            ctx.assert_gas_meter();
+        }
+
+        #[tokio::test(flavor = "multi_thread")]
+        async fn gasmeter_with_user_token() {
+            const EXPECTED_HASH: &str =
+                "0x126257b312be17f869dacc198adc28424148f5408751f52c50050a01eeef8ebf";
+            const USER_TOKEN_QUERY_KEY: &str = "key";
+            const USER_TOKEN: &str = "sk_1234567890";
+
+            let mut gas_meter_server = GasMeterServer::start(GAS_METER_TTL, None).await;
+            gas_meter_server
+                .mock_method("v_allocateGas")
+                .with_query(USER_TOKEN_QUERY_KEY, USER_TOKEN)
+                .with_params(
+                    json!({
+                        "gas_limit": GAS_LIMIT,
+                        "hash": EXPECTED_HASH,
+                        "time_to_live": GAS_METER_TTL
+                    }),
+                    false,
+                )
+                .with_result(json!({}))
+                .add()
+                .await;
+
+            let mut ctx = Context::default()
+                .await
+                .with_gas_meter_server(gas_meter_server);
+            let app = ctx.server(call_guest_elf(), chain_guest_elf());
+            let contract = ctx.deploy_contract().await;
+            let call_data = contract
+                .sum(U256::from(1), U256::from(2))
+                .calldata()
+                .unwrap();
+
+            let req = json!({
+                "method": "v_call",
+                "params": [
+                    {
+                        "to": contract.address(),
+                        "data": call_data,
+                    },
+                    {
+                        "chain_id": CHAIN_ID,
+                        "gas_limit": GAS_LIMIT,
+                    }
+                    ],
+                "id": 1,
+                "jsonrpc": "2.0",
+            });
+
+            let path = format!("/?token={USER_TOKEN}");
+            let response = app.post(&path, &req).await;
+
+            assert_eq!(StatusCode::OK, response.status());
+            assert_jrpc_ok(response, EXPECTED_HASH).await;
+
+            ctx.assert_gas_meter();
+        }
+    }
+
+    #[allow(non_snake_case)]
+    mod v_getProofReceipt {
+        use call_server::{v_call::CallHash, v_get_proof_receipt::Status};
+        use ethers::{
+            abi::AbiEncode,
+            types::{Bytes, Uint8, U256},
+        };
+        use tokio::time::{sleep, timeout, Duration};
+        use web_proof::fixtures::load_web_proof_fixture;
+
+        use super::*;
+        use crate::test_helpers::mock::{Contract, Server, WebProof};
+
+        const CHAIN_ID: u64 = 11_155_111;
+        const GAS_LIMIT: u64 = 1_000_000;
+        const GAS_METER_TTL: u64 = 3600;
+        const MAX_POLLING_TIME: Duration = Duration::from_secs(60);
+
+        async fn get_hash(
+            app: &Server,
+            contract: &Contract,
+            call_data: &Bytes,
+        ) -> call_server::v_call::CallHash {
+            let request = json!({
+                "method": "v_call",
+                "params": [
+                    {
+                        "to": contract.address(),
+                        "data": call_data,
+                    },
+                    {
+                        "chain_id": CHAIN_ID ,
+                        "gas_limit": GAS_LIMIT,
+                    }
+                ],
+                "id": 1,
+                "jsonrpc": "2.0",
+            });
+            let response = app.post("/", &request).await;
+            assert_eq!(StatusCode::OK, response.status());
+            let as_json = body_to_json(response.into_body()).await;
+            serde_json::from_value(as_json["result"].clone())
+                .expect("valid returned hash value of the call params")
+        }
+
+        async fn get_proof_result(app: &Server, hash: CallHash) -> serde_json::Value {
+            let request = json!({
+                "method": "v_getProofReceipt",
+                "params": { "hash": hash },
+                "id": 1,
+                "jsonrpc": "2.0",
+            });
+
+            timeout(MAX_POLLING_TIME, async move {
+                loop {
+                    let response = app.post("/", &request).await;
+                    assert_eq!(StatusCode::OK, response.status());
+                    let result = assert_jrpc_ok(response, json!({})).await;
+                    let status: Status = serde_json::from_value(result["result"]["status"].clone())
+                        .expect("status should be a valid enum variant");
+                    match status {
+                        Status::Pending => {
+                            sleep(Duration::from_millis(100)).await;
                         }
+                        Status::Done => {
+                            return result["result"].clone();
+                        }
+                    }
+                }
+            })
+            .await
+            .expect("server should return a proof result within the specified time frame")
+        }
+
+        #[tokio::test(flavor = "multi_thread")]
+        async fn simple_contract_call_success() {
+            let mut ctx = Context::default().await;
+            let app = ctx.server(call_guest_elf(), chain_guest_elf());
+            let contract = ctx.deploy_contract().await;
+            let call_data = contract
+                .sum(U256::from(1), U256::from(2))
+                .calldata()
+                .unwrap();
+
+            let hash = get_hash(&app, &contract, &call_data).await;
+            let result = get_proof_result(&app, hash).await;
+            assert_json_include!(
+                actual: result,
+                expected: json!({
+                    "status": "done",
+                    "data": {
+                        "evm_call_result": U256::from(3).encode_hex(),
+                        "proof": {
+                            "length": 160,
+                            "seal": {
+                                "verifierSelector": "0xdeafbeef",
+                                "mode": 1,
+                            },
+                            "callAssumptions": {
+                                "functionSelector": function_selector(&call_data),
+                                "proverContractAddress": contract.address(),
+                            }
+                        },
                     },
                 }),
-            )
-            .await;
+            );
+        }
+
+        #[tokio::test(flavor = "multi_thread")]
+        async fn web_proof_success() {
+            let mut ctx = Context::default().await;
+            let app = ctx.server(call_guest_elf(), chain_guest_elf());
+            let contract = ctx.deploy_contract().await;
+            let call_data = contract
+                .web_proof(WebProof {
+                    web_proof_json: serde_json::to_string(&json!(load_web_proof_fixture()))
+                        .unwrap(),
+                })
+                .calldata()
+                .unwrap();
+
+            let hash = get_hash(&app, &contract, &call_data).await;
+            let result = get_proof_result(&app, hash).await;
+            assert_json_include!(
+                actual: result,
+                expected: json!({
+                    "status": "done",
+                    "data": {
+                        "evm_call_result": Uint8::from(1).encode_hex(),
+                        "proof": {
+                            "length": 160,
+                            "seal": {
+                                "verifierSelector": "0xdeafbeef",
+                                "mode": 1,
+                            },
+                            "callAssumptions": {
+                                "functionSelector": function_selector(&call_data),
+                                "proverContractAddress": contract.address(),
+                            }
+                        },
+                    },
+                }),
+            );
         }
 
         #[tokio::test(flavor = "multi_thread")]
@@ -170,7 +457,7 @@ mod server_tests {
                 "0x126257b312be17f869dacc198adc28424148f5408751f52c50050a01eeef8ebf";
             const EXPECTED_GAS_USED: u64 = 21_728;
 
-            let mut gas_meter_server = RpcServerMock::start().await;
+            let mut gas_meter_server = GasMeterServer::start(GAS_METER_TTL, None).await;
             gas_meter_server
                 .mock_method("v_allocateGas")
                 .with_params(
@@ -211,90 +498,20 @@ mod server_tests {
                 .add()
                 .await;
 
-            let mut ctx = Context::default().await;
-            ctx.gas_meter_server = Some(gas_meter_server);
+            let mut ctx = Context::default()
+                .await
+                .with_gas_meter_server(gas_meter_server);
             let app = ctx.server(call_guest_elf(), chain_guest_elf());
-            let contract = ctx.client.deploy_contract().await;
-
+            let contract = ctx.deploy_contract().await;
             let call_data = contract
                 .sum(U256::from(1), U256::from(2))
                 .calldata()
                 .unwrap();
 
-            let req = json!({
-                "method": "v_call",
-                "params": [
-                    {
-                        "to": contract.address(),
-                        "data": call_data,
-                    },
-                    {
-                        "chain_id": CHAIN_ID ,
-                        "gas_limit": GAS_LIMIT,
-                    }
-                    ],
-                "id": 1,
-                "jsonrpc": "2.0",
-            });
-            let response = app.post("/", &req).await;
-            assert_eq!(StatusCode::OK, response.status());
-            ctx.gas_meter_server.unwrap().assert();
-        }
+            let hash = get_hash(&app, &contract, &call_data).await;
+            get_proof_result(&app, hash).await;
 
-        #[tokio::test(flavor = "multi_thread")]
-        async fn success_web_proof() {
-            let ctx = Context::default().await;
-            let app = ctx.server(call_guest_elf(), chain_guest_elf());
-            let contract = ctx.client.deploy_contract().await;
-
-            let call_data = contract
-                .web_proof(WebProof {
-                    web_proof_json: serde_json::to_string(&json!(load_web_proof_fixture(
-                        "../../../web_proof/testdata/presentation.json",
-                        NOTARY_PUB_KEY_PEM_EXAMPLE
-                    )))
-                    .unwrap(),
-                })
-                .calldata()
-                .unwrap();
-
-            let req = json!({
-                "method": "v_call",
-                "params": [
-                    {
-                        "to": contract.address(),
-                        "data": call_data,
-                    },
-                    {
-                        "chain_id": CHAIN_ID,
-                        "gas_limit": GAS_LIMIT,
-                    }
-                    ],
-                "id": 1,
-                "jsonrpc": "2.0",
-            });
-
-            let response = app.post("/", &req).await;
-
-            assert_eq!(StatusCode::OK, response.status());
-            assert_jrpc_ok(
-                response,
-                json!({
-                    "evm_call_result": Uint8::from(1).encode_hex(),
-                    "proof": {
-                        "length": 160,
-                        "seal": {
-                            "verifierSelector": "0xdeafbeef",
-                            "mode": 1,
-                        },
-                        "callAssumptions": {
-                            "functionSelector": function_selector(&call_data),
-                            "proverContractAddress": contract.address(),
-                        }
-                    },
-                }),
-            )
-            .await;
+            ctx.assert_gas_meter();
         }
     }
 }

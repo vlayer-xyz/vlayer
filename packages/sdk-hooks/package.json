@@ -1,0 +1,19 @@
+{
+  "name": "@vlayer/react",
+  "exports": {
+    ".": "./src/index.ts"
+  },
+  "type": "module",
+  "devDependencies": {
+    "@types/bun": "latest",
+    "eslint-plugin-react": "^7.37.2"
+  },
+  "peerDependencies": {
+    "typescript": "^5.0.0",
+    "react": "^18 || ^19",
+    "wagmi": "^2.14.1"
+  },
+  "dependencies": {
+    "@vlayer/sdk": "workspace:*"
+  }
+}

@@ -1,8 +1,10 @@
+use async_trait::async_trait;
+use auto_impl::auto_impl;
 use derive_new::new;
 use serde::{Deserialize, Serialize};
-use server_utils::rpc::{Client as RpcClient, Method, Result};
+use server_utils::rpc::{Client as RawRpcClient, Method, Result};
 
-use crate::handlers::v_call::types::CallHash;
+use crate::handlers::{v_call::types::CallHash, UserToken};
 
 #[derive(new, Serialize, Debug)]
 #[serde(deny_unknown_fields)]
@@ -39,33 +41,82 @@ impl Method for RefundUnusedGas {
 pub struct Config {
     pub url: String,
     pub time_to_live: u64,
+    pub api_key: Option<String>,
 }
 
-pub struct Client {
-    client: RpcClient,
+#[async_trait]
+#[auto_impl(Box)]
+pub trait Client: Send + Sync {
+    async fn allocate(&self, gas_limit: u64) -> Result<()>;
+    async fn refund(&self, stage: ComputationStage, gas_used: u64) -> Result<()>;
+}
+
+pub struct RpcClient {
+    client: RawRpcClient,
     hash: CallHash,
     time_to_live: u64,
+    api_key: Option<String>,
+    user_token: Option<UserToken>,
 }
 
-impl Client {
-    pub fn new(url: &str, hash: CallHash, time_to_live: u64) -> Self {
-        let client = RpcClient::new(url);
+impl RpcClient {
+    const API_KEY_HEADER_NAME: &str = "x-prover-api-key";
+    const USER_TOKEN_QUERY_KEY: &str = "key";
+
+    pub fn new(
+        Config {
+            url,
+            time_to_live,
+            api_key,
+        }: Config,
+        hash: CallHash,
+        user_token: Option<UserToken>,
+    ) -> Self {
+        let client = RawRpcClient::new(&url);
         Self {
             client,
             hash,
             time_to_live,
+            api_key,
+            user_token,
         }
     }
 
-    pub async fn allocate_gas(&self, gas_limit: u64) -> Result<()> {
+    async fn call(&self, method: impl Method) -> Result<()> {
+        let mut req = self.client.request(method);
+        if let Some(api_key) = &self.api_key {
+            req = req.with_header(Self::API_KEY_HEADER_NAME, api_key);
+        }
+        if let Some(user_token) = &self.user_token {
+            req = req.with_query(Self::USER_TOKEN_QUERY_KEY, user_token);
+        }
+        let _resp = req.send().await?;
+        Ok(())
+    }
+}
+
+#[async_trait]
+impl Client for RpcClient {
+    async fn allocate(&self, gas_limit: u64) -> Result<()> {
         let req = AllocateGas::new(self.hash, gas_limit, self.time_to_live);
-        let _resp = self.client.call(req).await?;
+        self.call(req).await
+    }
+
+    async fn refund(&self, stage: ComputationStage, gas_used: u64) -> Result<()> {
+        let req = RefundUnusedGas::new(self.hash, stage, gas_used);
+        self.call(req).await
+    }
+}
+
+pub struct NoOpClient;
+
+#[async_trait]
+impl Client for NoOpClient {
+    async fn allocate(&self, _gas_limit: u64) -> Result<()> {
         Ok(())
     }
 
-    pub async fn refund_unused_gas(&self, stage: ComputationStage, gas_used: u64) -> Result<()> {
-        let req = RefundUnusedGas::new(self.hash, stage, gas_used);
-        let _resp = self.client.call(req).await?;
+    async fn refund(&self, _stage: ComputationStage, _gas_used: u64) -> Result<()> {
         Ok(())
     }
 }
