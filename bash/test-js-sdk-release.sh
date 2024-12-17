@@ -30,7 +30,7 @@ try {
     await vlayerClient.waitForProvingResult({ hash });
     throw Error('Exception expected');
 } catch (error) {
-    assert.equal(error.message, 'Error response: missing field \`to\`');
+    assert.equal(error.message, 'Error response: Invalid params');
     console.log('Vlayer server called');
 }
 " >> index.js

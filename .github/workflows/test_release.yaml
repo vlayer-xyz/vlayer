@@ -9,6 +9,7 @@ on:
       - ".github/workflows/test_release.yaml"
       - "docker/docker-compose.devnet.yaml"
       - "bash/test-release.sh"
+      - "bash/test-js-sdk-release.sh"
 concurrency:
   group: ${{ github.workflow }}
   cancel-in-progress: false
