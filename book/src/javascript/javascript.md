@@ -48,30 +48,47 @@ The **vlayer client** provides an interface to interact with the vlayer JSON-RPC
 
 ### Initializing
 
-You can initialize a client with the default configuration and deploy prover and verifier contracts as shown below:
+You can initialize a client as shown below:
 
 ```ts
 import { createVlayerClient } from "@vlayer/sdk";
+
+const vlayer = createVlayerClient({
+  url: "http://127.0.0.1:3000", // local or remote prover url
+});
+```
+
+### Deploying contracts
+Before proving, you must deploy the Prover and Verifier contracts. You can use the provided function helper or custom deployment scripts.
+
+Example using the ``deployVlayerContracts` helper:
+```ts
 import proverSpec from "../out/WebProofProver.sol/WebProofProver";
 import verifierSpec from "../out/WebProofVerifier.sol/WebProofVerifier";
 
-import {
-  getConfig,
-  createContext,
-  deployVlayerContracts,
-  writeEnvVariables,
-} from "@vlayer/sdk/config";
-
-const config = getConfig();
-const { chain, ethClient, account, proverUrl, confirmations } = await createContext(config);
-
-const vlayer = createVlayerClient({
-  url: proverUrl,
-});
+import { deployVlayerContracts } from "@vlayer/sdk/config";
 
 const { proverAddr, verifierAddr } = await deployVlayerContracts({
   proverSpec,
   verifierSpec,
+});
+```
+
+### Client configuration
+vlayer examples use `.env` files for configuration and you may set following parameters:
+- `CHAIN_NAME` name of the chain (viem compatible) on which the prover and verifier contracts are deployed
+- `PROVER_URL` url of the prover to connect to (more info [here](/advanced/dev-and-production.html))
+- `JSON_RPC_URL` url of the JSON-RPC provider used for verifying proofs (optional, by default json-rpc url of the selected chain is used)
+
+```ts
+import { getConfig, createContext } from "@vlayer/sdk/config";
+
+const config = getConfig();
+
+const { chain, ethClient, account, proverUrl, confirmations } = await createContext(config);
+
+const vlayer = createVlayerClient({
+  url: proverUrl,
 });
 ```
 
