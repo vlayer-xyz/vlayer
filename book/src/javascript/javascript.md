@@ -101,9 +101,10 @@ const provingResult = await vlayer.waitForProvingResult({
 Once the proving result is obtained, one may call the verifier contract to validate the proof. Below is an example using the [viem](https://viem.sh/docs/contract/writeContract.html) library's `writeContract` function:
 
 ```ts
-// viem client setup
+// Create client, see docs here: https://viem.sh/docs/clients/wallet
+// const client = createWalletClient({...}); 
 
-const txHash = await walletClient.writeContract({
+const txHash = await client.writeContract({
   address: verifierAddr,
   abi: verifierSpec.abi,
   functionName: "verify",
