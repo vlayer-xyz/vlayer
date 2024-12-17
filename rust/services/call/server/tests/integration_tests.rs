@@ -511,9 +511,9 @@ mod server_tests {
                 .unwrap();
 
             let hash = get_hash(&app, &contract, &call_data).await;
-            // get_proof_result(&app, hash).await;
+            get_proof_result(&app, hash).await;
 
-            // ctx.assert_gas_meter();
+            ctx.assert_gas_meter();
         }
     }
 }
