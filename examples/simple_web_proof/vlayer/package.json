@@ -3,7 +3,6 @@
   "type": "module",
   "scripts": {
     "lint:solidity": "solhint '../src/**/*.sol'",
-    "dev": "vite --port 5174",
     "test": "VLAYER_ENV=test bun run prove.ts",
     "build": "tsc -b && vite build",
     "lint": "eslint .",
@@ -13,7 +12,9 @@
     "prove:dev": "VLAYER_ENV=dev bun run prove.ts",
     "deploy:testnet": "VLAYER_ENV=testnet bun run deploy.ts",
     "deploy:dev": "VLAYER_ENV=dev bun run deploy.ts",
-    "test:dev": "echo \"No tests specified yet\""
+    "test:dev": "echo \"No tests specified yet\"",
+    "web:dev": "VLAYER_ENV=dev bun run deploy.ts && vite",
+    "web:testnet": "VLAYER_ENV=testnet bun run deploy.ts && vite"
   },
   "dependencies": {
     "@noble/hashes": "^1.4.0",
