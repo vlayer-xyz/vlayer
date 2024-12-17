@@ -179,9 +179,7 @@ export const createVlayerClient = (
         proverAbi,
         args: [
           {
-            webProofJson: JSON.stringify({
-              tls_proof: webProof,
-            }),
+            webProofJson: JSON.stringify(webProof),
           },
           ...commitmentArgs,
         ] as ContractFunctionArgs<

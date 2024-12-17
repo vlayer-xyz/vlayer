@@ -20,8 +20,9 @@ library WebProofLib {
     using Strings for string;
     using URLPatternLib for string;
 
+    // Generated using command `curl -s https://notary.pse.dev/v0.1.0-alpha.7/info | jq -r '.publicKey' | openssl ec -pubin -inform PEM -pubout -conv_form uncompressed`
     string private constant NOTARY_PUB_KEY =
-        "-----BEGIN PUBLIC KEY-----\nMFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEZT9nJiwhGESLjwQNnZ2MsZ1xwjGzvmhF\nxFi8Vjzanlidbsc1ngM+s1nzlRkZI5UK9BngzmC27BO0qXxPSepIwQ==\n-----END PUBLIC KEY-----\n";
+        "-----BEGIN PUBLIC KEY-----\nMFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEe0jxnBObaIj7Xjg6TXLCM1GG/VhY5650\nOrS/jgcbBufo/QDfFvL/irzIv1JSmhGiVcsCHCwolhDXWcge7v2IsQ==\n-----END PUBLIC KEY-----\n";
 
     function verify(WebProof memory webProof, string memory dataUrl) internal view returns (Web memory) {
         Web memory web = recover(webProof);
