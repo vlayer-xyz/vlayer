@@ -32,8 +32,7 @@
     "extension-hooks/",
     "test-web-app/",
     "test-json-server/",
-    "sdk-hooks/",
-    "sdk-hooks/examples/*"
+    "sdk-hooks/"
   ],
   "trustedDependencies": [
     "viem"
@@ -41,7 +40,6 @@
   "dependencies": {
     "url-regex": "^5.0.0",
     "urlpattern-polyfill": "^10.0.0",
-    "vitest": "^2.1.8",
-    "vlayer": "."
+    "vitest": "^2.1.8"
   }
 }
