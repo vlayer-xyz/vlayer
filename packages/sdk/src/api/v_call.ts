@@ -20,7 +20,7 @@ const log = (...args: unknown[]) => {
 export async function v_call(
   call: CallParams,
   context: CallContext,
-  url: string = "http://127.0.0.1:3000",
+  url: string = "https://test-prover.vlayer.xyz",
 ): Promise<VCallResponse> {
   const response = await fetch(url, {
     method: "POST",

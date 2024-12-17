@@ -18,7 +18,7 @@ export interface VVersionsResponse {
 }
 
 export async function v_versions(
-  url: string = "http://127.0.0.1:3000",
+  url: string = "https://test-prover.vlayer.xyz",
 ): Promise<VVersionsResponse> {
   const response = await fetch(url, {
     method: "POST",

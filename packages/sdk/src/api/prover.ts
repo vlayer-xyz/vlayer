@@ -60,7 +60,7 @@ export async function prove<T extends Abi, F extends ContractFunctionName<T>>(
 export async function getProofReceipt<
   T extends Abi,
   F extends ContractFunctionName<T>,
->(hash: BrandedHash<T, F>, url: string = "http://127.0.0.1:3000") {
+>(hash: BrandedHash<T, F>, url: string = "https://test-prover.vlayer.xyz") {
   const params: VGetProofReceiptParams = {
     hash: hash.hash as Hex,
   };
