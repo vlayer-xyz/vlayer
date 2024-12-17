@@ -347,11 +347,11 @@ mod server_tests {
                     let status: Status = serde_json::from_value(result["result"]["status"].clone())
                         .expect("status should be a valid enum variant");
                     match status {
-                        Status::Pending => {
-                            sleep(Duration::from_millis(100)).await;
-                        }
-                        Status::Done => {
+                        Status::Ready => {
                             return result["result"].clone();
+                        }
+                        _ => {
+                            sleep(Duration::from_millis(100)).await;
                         }
                     }
                 }
@@ -375,7 +375,7 @@ mod server_tests {
             assert_json_include!(
                 actual: result,
                 expected: json!({
-                    "status": "done",
+                    "status": "ready",
                     "data": {
                         "evm_call_result": U256::from(3).encode_hex(),
                         "proof": {
@@ -412,7 +412,7 @@ mod server_tests {
             assert_json_include!(
                 actual: result,
                 expected: json!({
-                    "status": "done",
+                    "status": "ready",
                     "data": {
                         "evm_call_result": Uint8::from(1).encode_hex(),
                         "proof": {
