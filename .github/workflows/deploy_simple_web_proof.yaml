@@ -30,7 +30,7 @@ jobs:
         run: bun run deploy:testnet
         env:
           VLAYER_ENV: testnet
-          EXAMPLES_TEST_PRIVATE_KEY: ${{ secrets.EXAMPLES_TEST_PRIVATE_KEY }}
+          EXAMPLES_TEST_PRIVATE_KEY: ${{ secrets.EXAMPLES_DEPLOY_PRIVATE_KEY }}
         working-directory: ./examples/simple_web_proof/vlayer
       - name: Build vite
         shell: bash
