@@ -41,7 +41,7 @@ export async function prove<T extends Abi, F extends ContractFunctionName<T>>(
   gasLimit: number = 1_000_000,
   url: string = "http://127.0.0.1:3000",
   userToken?: string,
-  options: ProveOptions = { preverifyVersions: false, }
+  options: ProveOptions = { preverifyVersions: false},
 ) {
   await preverifyVersions(url, !!options.preverifyVersions);
   const calldata = encodeFunctionData({
