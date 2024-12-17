@@ -87,10 +87,6 @@
           cargoToml = ./rust/Cargo.toml;
           cargoLock = ./rust/Cargo.lock;
 
-          # preBuild = ''
-          # expo
-          # '';
-
           cargoVendorDir = craneLib.vendorCargoDeps {
             src = ./.;
             cargoLock = ./rust/Cargo.lock;
