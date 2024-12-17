@@ -1,4 +1,5 @@
 import { useState, useEffect, FormEvent } from "react";
+import { Address, Account } from "viem";
 import * as chains from "viem/chains";
 import useProver from "../hooks/useProver";
 import { preverifyEmail } from "@vlayer/sdk";
@@ -6,13 +7,7 @@ import { getStrFromFile } from "../lib/utils";
 import proverSpec from "../../../out/EmailDomainProver.sol/EmailDomainProver";
 import verifierSpec from "../../../out/EmailProofVerifier.sol/EmailDomainVerifier";
 import EmlForm from "../components/EmlForm";
-import {
-  createContext,
-  customTransport,
-  type Chain,
-  type Address,
-  type Account,
-} from "@vlayer/sdk/config";
+import { createContext, customTransport, type Chain } from "@vlayer/sdk/config";
 
 function getChainByName(name: string) {
   const chain = (chains as Record<string, Chain>)[name];
