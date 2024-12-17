@@ -1,13 +1,15 @@
 # Dev & Production Modes
 
-The vlayer node is an HTTP server that acts as a prover and supports two proving modes:
-- **FAKE**: Used for development and testing. It executes code and verifies the correctness of execution but does not perform actual proving. In this mode, the `Verifier` contract can confirm computations, but a malicious `Prover` could exploit the system.
-- **GROTH16**: Intended for production and final testing, this mode performs real proving.
+The vlayer node is an HTTP server that acts as a prover. 
 
-By default, the vlayer client SDK communicates with `http://127.0.0.1:3000`.
+## Public Test Prover 
+By default, the vlayer client SDK communicates with `https://test-prover.vlayer.xyz` prover. It is a test server for development purposes.
 
-## Running prover
-Assuming vlayer is [installed](/getting-started/installation.html), you can start it in development mode with the following command:
+## Running Prover locally
+There are two ways to run your own prover server. You can either use vlayer CLI or Docker.
+
+### vlayer CLI
+Assuming vlayer is [installed](/getting-started/installation.html), you can start it with the following command:
 ```sh
 vlayer serve
 ```
@@ -26,7 +28,16 @@ vlayer serve \
 
 > Note: By default, no RPC node providers are configured. You will need to specify them manually using the --rpc-url parameter to run the vlayer prover.
 
-## FAKE Mode
+### Docker
+
+add here info about docker usage 
+
+## Prover modes
+Prover server supports two proving modes:
+- **FAKE**: Used for development and testing. It executes code and verifies the correctness of execution but does not perform actual proving. In this mode, the `Verifier` contract can confirm computations, but a malicious `Prover` could exploit the system.
+- **GROTH16**: Intended for production and final testing, this mode performs real proving.
+
+### FAKE Mode
 
 By default, it listens for JSON-RPC client requests on port `3000` in `FAKE` mode. You can also specify the `--proof` argument explicitly:
 ```sh
@@ -34,7 +45,7 @@ vlayer serve --proof fake
 ```
 > Note: FAKE mode is limited to test and dev chains to prevent accidental errors.
 
-## GROTH16 Mode
+### GROTH16 Mode
 `GROTH16` mode is slower than `FAKE` mode and requires significant computational resources. 
 
 To speed up proof generation, vlayer supports the use of infrastructure like the [Bonsai](https://www.bonsai.xyz/) (and eventually [Boundless](https://beboundless.xyz/)) to offload heavy computations to high-performance machines.
