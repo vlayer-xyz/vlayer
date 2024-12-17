@@ -53,43 +53,7 @@ You can initialize a client as shown below:
 ```ts
 import { createVlayerClient } from "@vlayer/sdk";
 
-const vlayer = createVlayerClient({
-  url: "http://127.0.0.1:3000", // local or remote prover url
-});
-```
-
-### Deploying contracts
-Before proving, you must deploy the Prover and Verifier contracts. You can use the provided function helper or custom deployment scripts.
-
-Example using the ``deployVlayerContracts` helper:
-```ts
-import proverSpec from "../out/WebProofProver.sol/WebProofProver";
-import verifierSpec from "../out/WebProofVerifier.sol/WebProofVerifier";
-
-import { deployVlayerContracts } from "@vlayer/sdk/config";
-
-const { proverAddr, verifierAddr } = await deployVlayerContracts({
-  proverSpec,
-  verifierSpec,
-});
-```
-
-### Client configuration
-vlayer examples use `.env` files for configuration and you may set following parameters:
-- `CHAIN_NAME` name of the chain (viem compatible) on which the prover and verifier contracts are deployed
-- `PROVER_URL` url of the prover to connect to (more info [here](/advanced/dev-and-production.html))
-- `JSON_RPC_URL` url of the JSON-RPC provider used for verifying proofs (optional, by default json-rpc url of the selected chain is used)
-
-```ts
-import { getConfig, createContext } from "@vlayer/sdk/config";
-
-const config = getConfig();
-
-const { chain, ethClient, account, proverUrl, confirmations } = await createContext(config);
-
-const vlayer = createVlayerClient({
-  url: proverUrl,
-});
+const vlayer = createVlayerClient();
 ```
 
 ## Proving
@@ -107,7 +71,7 @@ const hash = await vlayer.prove({
   proverAbi: proverSpec.abi,
   functionName: 'main',
   args: ['0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045', 123],
-  chain: chain.id,
+  chainId: chain.id,
 });
 ```
 
@@ -137,7 +101,9 @@ const provingResult = await vlayer.waitForProvingResult({
 Once the proving result is obtained, one may call the verifier contract to validate the proof. Below is an example using the [viem](https://viem.sh/docs/contracts/write-contract/) library's `writeContract` function:
 
 ```ts
-const txHash = await ethClient.writeContract({
+// viem client setup
+
+const txHash = await walletClient.writeContract({
   address: verifierAddr,
   abi: verifierSpec.abi,
   functionName: "verify",
