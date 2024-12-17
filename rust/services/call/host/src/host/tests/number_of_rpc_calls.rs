@@ -56,9 +56,8 @@ async fn usdt_erc20_balance_of() -> anyhow::Result<()> {
 
 #[tokio::test]
 async fn time_travel() -> anyhow::Result<()> {
-    let location: ExecutionLocation = (time_travel::BLOCK_NO, OptimismSepolia).into();
-    let call = Call::new(SIMPLE_TIME_TRAVEL, &AVERAGE_BALANCE_OF_CALL, 0);
-
+    let location: ExecutionLocation = (OptimismSepolia, time_travel::BLOCK_NO).into();
+    let call = Call::new(SIMPLE_TIME_TRAVEL, &AVERAGE_BALANCE_OF_CALL, 1000000);
     let state = profile("op_sepolia", "simple_time_travel", location, &call)?;
 
     assert_eq!(state.total_count(), 70);
