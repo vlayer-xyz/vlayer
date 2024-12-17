@@ -72,7 +72,9 @@ mod server_tests {
     }
 
     mod v_call {
-        use ethers::types::U256;
+        use ethers::types::{Bytes, U256};
+        use serde_json::Value;
+        use test_helpers::mock::Contract;
         use web_proof::fixtures::load_web_proof_fixture;
 
         use super::*;
@@ -81,6 +83,24 @@ mod server_tests {
         const CHAIN_ID: u64 = 11_155_111;
         const GAS_LIMIT: u64 = 1_000_000;
         const GAS_METER_TTL: u64 = 3600;
+
+        fn json_rpc_request(contract: &Contract, call_data: &Bytes) -> Value {
+            json!({
+                "method": "v_call",
+                "params": [
+                    {
+                        "to": contract.address(),
+                        "data": call_data,
+                        "gas_limit": GAS_LIMIT,
+                    },
+                    {
+                        "chain_id": CHAIN_ID,
+                    }
+                    ],
+                "id": 1,
+                "jsonrpc": "2.0",
+            })
+        }
 
         #[tokio::test]
         async fn field_validation_error() {
@@ -131,21 +151,7 @@ mod server_tests {
                 .calldata()
                 .unwrap();
 
-            let req = json!({
-            "method": "v_call",
-            "params": [
-                {
-                    "to": contract.address(),
-                    "data": call_data,
-                    "gas_limit": GAS_LIMIT,
-                },
-                {
-                    "chain_id": CHAIN_ID,
-                }
-                ],
-                "id": 1,
-                "jsonrpc": "2.0",
-            });
+            let req = json_rpc_request(&contract, &call_data);
             let response = app.post("/", &req).await;
 
             assert_eq!(StatusCode::OK, response.status());
@@ -169,21 +175,7 @@ mod server_tests {
                 .calldata()
                 .unwrap();
 
-            let req = json!({
-                "method": "v_call",
-                "params": [
-                    {
-                        "to": contract.address(),
-                        "data": call_data,
-                        "gas_limit": GAS_LIMIT,
-                    },
-                    {
-                        "chain_id": CHAIN_ID,
-                    }
-                    ],
-                "id": 1,
-                "jsonrpc": "2.0",
-            });
+            let req = json_rpc_request(&contract, &call_data);
 
             let response = app.post("/", &req).await;
 
@@ -225,21 +217,7 @@ mod server_tests {
                 .calldata()
                 .unwrap();
 
-            let req = json!({
-                "method": "v_call",
-                "params": [
-                    {
-                        "to": contract.address(),
-                        "data": call_data,
-                        "gas_limit": GAS_LIMIT,
-                    },
-                    {
-                        "chain_id": CHAIN_ID,
-                    }
-                    ],
-                "id": 1,
-                "jsonrpc": "2.0",
-            });
+            let req = json_rpc_request(&contract, &call_data);
 
             let response = app.post("/", &req).await;
 
