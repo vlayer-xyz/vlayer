@@ -58,13 +58,13 @@ bun install
 ```
 
 ### Run on a local devnet
-Our recommended way to start local environment for development is by using [vlayer Docker Compose](/advanced/dev-and-production.html#docker-compose) file: 
+Our recommended way to start local environment for development is by using [Docker](/advanced/dev-and-production.html#docker-compose): 
 
 ```bash
-$ docker compose --file docker-compose.devnet.yaml up -d 
+$ bun run server:dev
 ```
 
-Above command starts all required services: local vlayer prover, anvil nodes, notary server, and chain service in the background.
+Above command starts all required services in the background: local vlayer prover, anvil nodes, notary server, and chain server.
 
 To run the example within the `vlayer` directory, use:
 
@@ -73,7 +73,7 @@ bun run prove:dev
 ```
 
 ### Run on a testnet
-To use a testnet, first provide a private key in the `vlayer/.env.testnet.local` file:
+Running examples on testnets doesn't require to run prover or anvil devnets locally. To use a testnet, first provide a private key in the `vlayer/.env.testnet.local` file:
 
 ```sh
 EXAMPLES_TEST_PRIVATE_KEY=0x....

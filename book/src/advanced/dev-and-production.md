@@ -7,7 +7,7 @@ By default, client SDK communicates with test prover deployed by vlayer for deve
 Test server is available at `https://test-prover.vlayer.xyz`.
 
 ## Running Prover locally
-There are two ways to run your own prover server. You can either use vlayer CLI or Docker.
+There are two ways to run prover server: vlayer CLI and Docker.
 
 ### vlayer CLI
 Assuming vlayer is [installed](/getting-started/installation.html), you can start it with the following command:
@@ -16,23 +16,16 @@ vlayer serve
 ```
 
 ### Docker
+Save the [vlayer `docker-compose-devnet.yaml`](/static/docker-compose.devnet.yaml) in your working directory (vlayer example apps already have it).
 
-#### Install Docker and Docker Compose
-Ensure Docker and Docker Compose are installed on your system.
-
-If not installed, refer to the official [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) installation guides.
-
-#### Save the vlayer compose file
-Save the [vlayer `docker-compose-devnet.yaml`](/static/docker-compose.devnet.yaml) in your working directory.
+> Ensure [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) are installed on your system.
 
 #### Start the services
-Run the following command to pull the required images and start the containers:
+Pull the required images and start the containers in the background:
 
 ```bash
 docker compose --file docker-compose-devnet.yaml up -d
 ```
-
-The `-d` flag starts the containers in detached mode (in the background). Docker Compose will automatically create the required network and dependencies between the services.
 
 #### Access to services
 - **anvil devnets** (useful for time travel / teleport testing) 
