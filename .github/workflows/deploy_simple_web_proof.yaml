@@ -23,40 +23,15 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Install & build example prerequisites
-        uses: ./.github/actions/example-prerequisites
+      - name: Install, build and deploy example
+        uses: ./.github/actions/example-deploy
         with:
-          EXAMPLE_NAME: simple_web_proof
-
-      - name: Deploy contracts
-        shell: bash
-        run: bun run deploy:testnet
-        env:
-          VLAYER_ENV: testnet
+          EXAMPLE_NAME: simple_web_prooff
           EXAMPLES_TEST_PRIVATE_KEY: ${{ secrets.EXAMPLES_DEPLOY_PRIVATE_KEY }}
-        working-directory: ./examples/simple_web_proof/vlayer
-      - name: Build vite
-        shell: bash
-        run: bun run vite build
-        working-directory: ./examples/simple_web_proof/vlayer
-      - name: Deploy to Vercel
-        if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
-        env:
-          VERCEL_ENV: production
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_SIMPLE_WEB_PROOF_PROJECT_ID }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-          EXAMPLE_NAME: simple_web_proof
-        run: bash/deploy-to-vercel.sh
-      - name: Deploy to Vercel (PR Preview)
-        if: github.event_name == 'pull_request'
-        env:
-          VERCEL_ENV: preview
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_SIMPLE_WEB_PROOF_PROJECT_ID }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-          PR_NUMBER: "${{ github.event.number }}"
-          EXAMPLE_NAME: simple_web_proof
-        run: bash/deploy-to-vercel.sh
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_REF: ${{ github.ref }}
+          GITHUB_EVENT_NAME: ${{ github.event_name }}
+          GITHUB_EVENT_CONCLUSION: ${{ github.event.workflow_run.conclusion }}

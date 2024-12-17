@@ -55,3 +55,40 @@ runs:
     - name: Install Vercel
       shell: bash
       run: npm install -g vercel
+
+    - name: Deploy contracts
+      shell: bash
+      run: bun run deploy:testnet
+      env:
+        VLAYER_ENV: testnet
+        EXAMPLES_TEST_PRIVATE_KEY: ${{ inputs.EXAMPLES_TEST_PRIVATE_KEY }}
+      working-directory: ./examples/${{ inputs.EXAMPLE_NAME }}/vlayer
+
+    - name: Build vite
+      shell: bash
+      run: bun run vite build
+      working-directory: ./examples/${{ inputs.EXAMPLE_NAME }}/vlayer
+
+    - name: Deploy to Vercel
+      if: (${{ inputs.GITHUB_REF }} == 'refs/heads/main' || (${{ inputs.GITHUB_EVENT_NAME }} == 'workflow_run' && ${{ inputs.GITHUB_EVENT_CONCLUSION }} == 'success'))
+      shell: bash
+      env:
+        VERCEL_ENV: production
+        VERCEL_TOKEN: ${{ inputs.VERCEL_TOKEN }}
+        VERCEL_PROJECT_ID: ${{ inputs.VERCEL_PROJECT_ID }}
+        VERCEL_ORG_ID: ${{ inputs.VERCEL_ORG_ID }}
+        GITHUB_TOKEN: "${{ inputs.GITHUB_TOKEN }}"
+        EXAMPLE_NAME: ${{ inputs.EXAMPLE_NAME }}
+      run: bash/deploy-to-vercel.sh
+    - name: Deploy to Vercel (PR Preview)
+      if: github.event_name == 'pull_request'
+      shell: bash
+      env:
+        VERCEL_ENV: preview
+        VERCEL_TOKEN: ${{ inputs.VERCEL_TOKEN }}
+        VERCEL_PROJECT_ID: ${{ inputs.VERCEL_PROJECT_ID }}
+        VERCEL_ORG_ID: ${{ inputs.VERCEL_ORG_ID }}
+        GITHUB_TOKEN: "${{ inputs.GITHUB_TOKEN }}"
+        PR_NUMBER: "${{ github.event.number }}"
+        EXAMPLE_NAME: ${{ inputs.EXAMPLE_NAME }}
+      run: bash/deploy-to-vercel.sh
