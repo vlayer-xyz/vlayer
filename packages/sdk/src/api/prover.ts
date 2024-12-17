@@ -41,7 +41,7 @@ export async function prove<T extends Abi, F extends ContractFunctionName<T>>(
   gasLimit: number = 1_000_000,
   url: string = "http://127.0.0.1:3000",
   userToken?: string,
-  options: ProveOptions = { preverifyVersions: false },
+  options: ProveOptions = { preverifyVersions: false }
 ) {
   await preverifyVersions(url, !!options.preverifyVersions);
   const calldata = encodeFunctionData({
@@ -49,12 +49,12 @@ export async function prove<T extends Abi, F extends ContractFunctionName<T>>(
     functionName: functionName as string,
     args: args as readonly unknown[],
   });
-  const call: CallParams = { to: prover, data: calldata, gas_limit: gasLimit, };
+  const call: CallParams = { to: prover, data: calldata, gas_limit: gasLimit };
   const context: CallContext = {
-    chain_id: chainId
+    chain_id: chainId,
   };
   const fullUrl = url.concat(
-    userToken !== undefined ? "/?token=" + userToken : "",
+    userToken !== undefined ? "/?token=" + userToken : ""
   );
   return v_call(call, context, fullUrl);
 }
