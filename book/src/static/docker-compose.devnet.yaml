@@ -1,0 +1,116 @@
+services:
+  anvil-a:
+    image: ghcr.io/foundry-rs/foundry:latest
+    container_name: anvil-a
+    platform: linux/amd64
+    command: ["anvil --host 0.0.0.0 --chain-id 31337"]
+    ports:
+      - "127.0.0.1:8545:8545"
+  anvil-b:
+    image: ghcr.io/foundry-rs/foundry:latest
+    container_name: anvil-b
+    platform: linux/amd64
+    command: ["anvil --host 0.0.0.0 --chain-id 31338"]
+    ports:
+      - "127.0.0.1:8546:8545"
+  anvil-c:
+    image: ghcr.io/foundry-rs/foundry:latest
+    container_name: anvil-c
+    platform: linux/amd64
+    command: ["anvil --host 0.0.0.0 --chain-id 31339"]
+    ports:
+      - "127.0.0.1:8547:8545"
+  wsproxy:
+    image: jwnmulder/websockify:0.12
+    container_name: wsproxy
+    platform: linux/amd64
+    ports:
+      - "127.0.0.1:55688:80" 
+    command: "80 api.x.com:443"
+  notary-server:
+    image: ghcr.io/tlsnotary/tlsn/notary-server:v0.1.0-alpha.7
+    container_name: notary-server
+    ports:
+      - "127.0.0.1:7047:7047"
+  vlayer:
+    depends_on:
+      - anvil-a
+      - anvil-b
+      - anvil-c
+    image: ghcr.io/vlayer-xyz/vlayer:latest
+    container_name: vlayer
+    pull_policy: always
+    environment:
+      RUST_LOG: "info,call_engine=debug"
+    command: "serve --proof fake --host 0.0.0.0 --rpc-url 31337:http://anvil-a:8545 --rpc-url 31338:http://anvil-b:8545 --rpc-url 31339:http://anvil-c:8545"
+    ports:
+      - "127.0.0.1:3000:3000"
+  vlayer-chain-worker-a:
+    depends_on:
+      - anvil-a
+    image: ghcr.io/vlayer-xyz/chain_worker:latest
+    container_name: vlayer-chain-worker-a
+    pull_policy: always
+    volumes:
+      - ./chain_db:/chain_db
+    pid: "host"
+    environment:
+      RUST_LOG: "info"
+      DB_PATH: /chain_db
+      RPC_URL: http://anvil-a:8545
+      CHAIN_ID: 31337
+      PROOF_MODE: fake
+      RISC0_DEV_MODE: 1
+      MAX_BACK_PROPAGATION_BLOCKS: 10
+      MAX_HEAD_BLOCKS: 10
+      CONFIRMATIONS: 1
+  vlayer-chain-worker-b:
+    depends_on:
+      - anvil-b
+    image: ghcr.io/vlayer-xyz/chain_worker:latest
+    container_name: vlayer-chain-worker-b
+    pull_policy: always
+    volumes:
+      - ./chain_db:/chain_db
+    pid: "host"
+    environment:
+      RUST_LOG: "info"
+      DB_PATH: /chain_db
+      RPC_URL: http://anvil-b:8545
+      CHAIN_ID: 31338
+      PROOF_MODE: fake
+      RISC0_DEV_MODE: 1
+      MAX_BACK_PROPAGATION_BLOCKS: 10
+      MAX_HEAD_BLOCKS: 10
+      CONFIRMATIONS: 1
+  vlayer-chain-worker-c:
+    depends_on:
+      - anvil-c
+    image: ghcr.io/vlayer-xyz/chain_worker:latest
+    container_name: vlayer-chain-worker-c
+    pull_policy: always
+    volumes:
+      - ./chain_db:/chain_db
+    pid: "host"
+    environment:
+      RUST_LOG: "info"
+      DB_PATH: /chain_db
+      RPC_URL: http://anvil-c:8545
+      CHAIN_ID: 31339
+      PROOF_MODE: fake
+      RISC0_DEV_MODE: 1
+      MAX_BACK_PROPAGATION_BLOCKS: 10
+      MAX_HEAD_BLOCKS: 10
+      CONFIRMATIONS: 1
+  vlayer-chain-server:
+    image: ghcr.io/vlayer-xyz/chain_server:latest
+    container_name: vlayer-chain-server
+    pull_policy: always
+    ports:
+      - "127.0.0.1:3001:3001"
+    volumes:
+      - ./chain_db:/chain_db
+    pid: "host"
+    environment:
+      RUST_LOG: "info"
+      DB_PATH: /chain_db

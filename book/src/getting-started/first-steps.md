@@ -58,28 +58,13 @@ bun install
 ```
 
 ### Run on a local devnet
-To set up a local development environment, first launch a local Ethereum node:
+Our recommended way to start local environment for development is by using [vlayer Docker Compose](/advanced/dev-and-production.html#docker-compose) file: 
 
 ```bash
-$ anvil 
+$ docker compose --file docker-compose.devnet.yaml up -d 
 ```
 
-Then, in a separate terminal, start the [Prover server](/advanced/prover.html#prover-server):
-
-```bash
-vlayer serve
-```
-
-If you're using Prover features like teleport or time travel, configure the appropriate JSON-RPC URLs for each chain. You can use Alchemy or other providers to supply these URLs:
-
-```bash
-vlayer serve \
-  --rpc-url '31337:http://localhost:8545' \
-  --rpc-url '11155111:https://eth-sepolia.g.alchemy.com/v2/{ALCHEMY_KEY}' \
-  --rpc-url '1:https://eth-mainnet.g.alchemy.com/v2/{ALCHEMY_KEY}' \
-  --rpc-url '8453:https://base-mainnet.g.alchemy.com/v2/{ALCHEMY_KEY}' \
-  --rpc-url '10:https://opt-mainnet.g.alchemy.com/v2/{ALCHEMY_KEY}'
-```
+Above command starts all required services: local vlayer prover, anvil nodes, notary server, and chain service in the background.
 
 To run the example within the `vlayer` directory, use:
 
