@@ -39,13 +39,24 @@ pub trait Rpc {
 #[derive(Deref, DerefMut, Default, Debug)]
 pub struct Proofs(DashMap<CallHash, ProofStatus>);
 
-#[allow(dead_code)] // To be used in the future
 #[derive(Debug)]
 pub enum ProofStatus {
+    /// Proof task has just been started
+    Pending,
+    /// Waiting for chain service to generate proof for the start execution location
     WaitingForChainProof,
+    /// Preflight computation in progress
     Preflight,
+    /// Proof is being generated
     Proving,
+    /// Proof generation finished
     Ready(Result<HostOutput, AppError>),
+}
+
+impl Default for ProofStatus {
+    fn default() -> Self {
+        Self::Pending
+    }
 }
 
 pub type SharedConfig = Arc<Config>;

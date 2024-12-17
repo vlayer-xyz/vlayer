@@ -16,6 +16,8 @@ pub enum AppError {
     RpcError(#[from] RpcError),
     #[error("Hash not found: {0}")]
     HashNotFound(String),
+    #[error("Waiting for chain proof timed out")]
+    ChainProofTimeout,
 }
 
 impl From<AppError> for ErrorObjectOwned {
@@ -29,7 +31,8 @@ impl From<AppError> for ErrorObjectOwned {
             AppError::Host(..)
             | AppError::Join(..)
             | AppError::RpcError(..)
-            | AppError::HashNotFound(..) => ErrorObjectOwned::owned::<()>(
+            | AppError::HashNotFound(..)
+            | AppError::ChainProofTimeout => ErrorObjectOwned::owned::<()>(
                 jrpcerror::INTERNAL_ERROR_CODE,
                 error.to_string(),
                 None,

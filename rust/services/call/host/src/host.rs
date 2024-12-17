@@ -19,6 +19,7 @@ use call_engine::{
     },
     Call, CallGuestId, GuestOutput, HostOutput, Input, Seal,
 };
+use chain_client::Client as ChainClient;
 use common::GuestElf;
 pub use config::{Config, DEFAULT_MAX_CALLDATA_SIZE};
 use derive_new::new;
@@ -42,7 +43,8 @@ pub struct Host {
     start_execution_location: ExecutionLocation,
     envs: CachedEvmEnv<HostDb>,
     prover: Prover,
-    verifier: guest_input::ZkVerifier<chain_client::RecordingClient, chain_proof::ZkVerifier>,
+    chain_client: chain_client::RecordingClient,
+    chain_proof_verifier: chain_proof::ZkVerifier,
     max_calldata_size: usize,
     verify_chain_proofs: bool,
     guest_elf: GuestElf,
@@ -105,20 +107,29 @@ impl Host {
     ) -> Self {
         let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
         let prover = Prover::new(config.proof_mode, &config.call_guest_elf);
-        let chain_client = chain_client::RecordingClient::new(chain_client);
         let chain_proof_verifier =
             chain_proof::ZkVerifier::new(config.chain_guest_elf.id, zk_proof::HostVerifier);
-        let verifier = guest_input::ZkVerifier::new(chain_client, chain_proof_verifier);
+        let chain_client = chain_client::RecordingClient::new(chain_client);
 
         Host {
             envs,
             start_execution_location,
             prover,
-            verifier,
+            chain_client,
+            chain_proof_verifier,
             max_calldata_size: config.max_calldata_size,
             verify_chain_proofs: config.verify_chain_proofs,
             guest_elf: config.call_guest_elf,
         }
+    }
+
+    pub async fn chain_proof_ready(&self) -> Result<bool, Error> {
+        let latest_indexed_block = self
+            .chain_client
+            .get_sync_status(self.start_execution_location.chain_id)
+            .await?
+            .last_block;
+        Ok(latest_indexed_block >= self.start_execution_location.block_number)
     }
 
     pub async fn preflight(self, call: Call) -> Result<PreflightResult, Error> {
@@ -138,8 +149,10 @@ impl Host {
             into_multi_input(self.envs).map_err(|err| Error::CreatingInput(err.to_string()))?;
 
         let chain_proofs = if self.verify_chain_proofs {
-            self.verifier.verify(&multi_evm_input).await?;
-            let (chain_proof_client, _) = self.verifier.into_parts();
+            let verifier =
+                guest_input::ZkVerifier::new(self.chain_client, self.chain_proof_verifier);
+            verifier.verify(&multi_evm_input).await?;
+            let (chain_proof_client, _) = verifier.into_parts();
             Some(chain_proof_client.into_cache())
         } else {
             None
