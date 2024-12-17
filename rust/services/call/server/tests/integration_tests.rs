@@ -288,9 +288,13 @@ mod server_tests {
 
     #[allow(non_snake_case)]
     mod v_getProofReceipt {
-        use std::sync::{Arc, RwLock};
+        use std::{
+            future::Future,
+            sync::atomic::{AtomicU8, Ordering},
+        };
 
         use call_server::{v_call::CallHash, v_get_proof_receipt::Status};
+        use derive_more::TryFrom;
         use ethers::{
             abi::AbiEncode,
             types::{Bytes, Uint8, U256},
@@ -305,6 +309,23 @@ mod server_tests {
         const GAS_LIMIT: u64 = 1_000_000;
         const GAS_METER_TTL: u64 = 3600;
         const MAX_POLLING_TIME: Duration = Duration::from_secs(60);
+
+        async fn loop_with_timeout<F, Fut, Ret>(func: F) -> Ret
+        where
+            F: Fn() -> Fut,
+            Fut: Future<Output = Option<Ret>>,
+        {
+            timeout(MAX_POLLING_TIME, async {
+                loop {
+                    tokio::task::yield_now().await;
+                    if let Some(x) = func().await {
+                        return x;
+                    }
+                }
+            })
+            .await
+            .expect("server should return a proof result within the specified time frame")
+        }
 
         async fn get_hash(
             app: &Server,
@@ -341,25 +362,21 @@ mod server_tests {
                 "jsonrpc": "2.0",
             });
 
-            timeout(MAX_POLLING_TIME, async move {
-                loop {
-                    let response = app.post("/", &request).await;
-                    assert_eq!(StatusCode::OK, response.status());
-                    let result = assert_jrpc_ok(response, json!({})).await;
-                    let status: Status = serde_json::from_value(result["result"]["status"].clone())
-                        .expect("status should be a valid enum variant");
-                    match status {
-                        Status::Ready => {
-                            return result["result"].clone();
-                        }
-                        _ => {
-                            sleep(Duration::from_millis(100)).await;
-                        }
+            loop_with_timeout(|| async {
+                let response = app.post("/", &request).await;
+                assert_eq!(StatusCode::OK, response.status());
+                let result = assert_jrpc_ok(response, json!({})).await;
+                let status: Status = serde_json::from_value(result["result"]["status"].clone())
+                    .expect("status should be a valid enum variant");
+                match status {
+                    Status::Ready => Some(result["result"].clone()),
+                    _ => {
+                        sleep(Duration::from_millis(100)).await;
+                        None
                     }
                 }
             })
             .await
-            .expect("server should return a proof result within the specified time frame")
         }
 
         #[tokio::test(flavor = "multi_thread")]
@@ -374,9 +391,11 @@ mod server_tests {
 
             let hash = get_hash(&app, &contract, &call_data).await;
 
-            #[derive(Copy, Clone, Debug, PartialEq, Eq)]
+            #[derive(Copy, Clone, Debug, PartialEq, Eq, TryFrom)]
+            #[try_from(repr)]
+            #[repr(u8)]
             enum State {
-                Pending,
+                Pending = 0,
                 Preflight,
                 Proving,
                 Ready,
@@ -398,22 +417,23 @@ mod server_tests {
                 "jsonrpc": "2.0",
             });
 
-            let state = Arc::new(RwLock::new(State::Pending));
-            timeout(MAX_POLLING_TIME, async {
-                while state.read().unwrap().ne(&State::Done) {
-                    let response = app.post("/", &request).await;
-                    assert_eq!(StatusCode::OK, response.status());
-                    let result = assert_jrpc_ok(response, json!({})).await;
-                    let status: Status = serde_json::from_value(result["result"]["status"].clone())
-                        .expect("status should be a valid enum variant");
-                    let prev = *state.read().unwrap();
-                    let next = next_state(status, prev);
-                    *state.write().unwrap() = next;
+            let state = AtomicU8::new(State::Pending as u8);
+            loop_with_timeout(|| async {
+                let prev = state.load(Ordering::Acquire).try_into().unwrap();
+                if prev == State::Done {
+                    return Some(());
                 }
+                let response = app.post("/", &request).await;
+                assert_eq!(StatusCode::OK, response.status());
+                let result = assert_jrpc_ok(response, json!({})).await;
+                let status: Status = serde_json::from_value(result["result"]["status"].clone())
+                    .expect("status should be a valid enum variant");
+                let next = next_state(status, prev);
+                state.store(next as u8, Ordering::Release);
+                None
             })
-            .await
-            .expect("server should return a proof result within the specified time frame");
-            assert_eq!(Arc::into_inner(state).unwrap().into_inner().unwrap(), State::Done);
+            .await;
+            assert_eq!(State::Done, state.into_inner().try_into().unwrap());
         }
 
         #[tokio::test(flavor = "multi_thread")]

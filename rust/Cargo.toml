@@ -72,7 +72,7 @@ criterion = "0.5.1"
 ctor = "0.2.8"
 dashmap = "6.1.0"
 delegate = "0.13.1"
-derive_more = { version = "1.0.0", features = ["debug", "into", "from", "into_iterator", "deref"] }
+derive_more = { version = "1.0.0", features = ["debug", "into", "from", "into_iterator", "deref", "try_from"] }
 derive-new = "0.7.0"
 derivative = "2.2.0"
 dotenvy = "0.15.7"
