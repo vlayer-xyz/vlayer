@@ -49,10 +49,9 @@ export async function prove<T extends Abi, F extends ContractFunctionName<T>>(
     functionName: functionName as string,
     args: args as readonly unknown[],
   });
-  const call: CallParams = { to: prover, data: calldata };
+  const call: CallParams = { to: prover, data: calldata, gas_limit: gasLimit, };
   const context: CallContext = {
-    chain_id: chainId,
-    gas_limit: gasLimit,
+    chain_id: chainId
   };
   const fullUrl = url.concat(
     userToken !== undefined ? "/?token=" + userToken : "",

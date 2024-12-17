@@ -16,11 +16,11 @@ type Calldata = string;
 export type CallParams = {
   to: Address;
   data: Calldata;
+  gas_limit: number;
 };
 
 export type CallContext = {
   chain_id: number;
-  gas_limit: number;
 };
 
 export type BrandedHash<T, F> = Branded<{ hash: string }, [T, F]>;
