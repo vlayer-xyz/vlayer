@@ -1,11 +1,5 @@
 import dotenvflow from "dotenv-flow";
-
-export type Config = {
-  chainName: string;
-  proverUrl: string;
-  jsonRpcUrl: string;
-  privateKey: `0x${string}`;
-};
+import { type EnvConfig } from "./types";
 
 const ensureEnvVariable = (envVar: string) => {
   if (!process.env[envVar]) {
@@ -64,5 +58,5 @@ export const getConfig = () => {
       ...config,
       [envVar.to ?? toCamelCase(envVar.var)]: ensureEnvVariable(envVar.var),
     };
-  }, {} as Config);
+  }, {} as EnvConfig);
 };

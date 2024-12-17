@@ -1,18 +1,14 @@
+import React from "react";
 import { createVlayerClient } from "@vlayer/sdk";
-import { type VlayerContextType } from "./types";
 import { createContext, type PropsWithChildren } from "react";
 import { createExtensionWebProofProvider } from "@vlayer/sdk/web_proof";
-import "viem/window";
+import { type VlayerContextType } from "./types";
 export const VlayerContext = createContext<VlayerContextType | null>(null);
 
-const DEFAULT_PROVER_URL = "https://test-prover.vlayer.xyz";
-const DEFAULT_NOTARY_URL = "https://test-notary.vlayer.xyz";
-const DEFAULT_WS_PROXY_URL = "wss://test-wsproxy.vlayer.xyz";
-
 const DEFAULT_CONFIG = {
-  proverUrl: DEFAULT_PROVER_URL,
-  notaryUrl: DEFAULT_NOTARY_URL,
-  wsProxyUrl: DEFAULT_WS_PROXY_URL,
+  proverUrl: "https://test-prover.vlayer.xyz",
+  notaryUrl: "https://test-notary.vlayer.xyz",
+  wsProxyUrl: "wss://test-wsproxy.vlayer.xyz",
 };
 
 export const VlayerProvider = ({

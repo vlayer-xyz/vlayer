@@ -14,7 +14,6 @@
     "wagmi": "^2.14.1"
   },
   "dependencies": {
-    "@vlayer/sdk": "workspace:*",
-    "react-error-boundary": "^4.1.2"
+    "@vlayer/sdk": "workspace:*"
   }
 }
