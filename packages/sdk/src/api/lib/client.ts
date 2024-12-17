@@ -93,7 +93,7 @@ export const createVlayerClient = (
       F extends ContractFunctionName<T>,
     >({
       hash,
-      numberOfRetries = 120,
+      numberOfRetries = 240,
       sleepDuration = 1000,
     }: {
       hash: BrandedHash<T, F>;
@@ -114,7 +114,7 @@ export const createVlayerClient = (
           await sleep(sleepDuration);
         }
         throw new Error(
-          `Timed out waiting for ZK proof generation after {numberOfRetries * sleepDuration}ms. Consider increasing numberOfRetries in waitForProvingResult`,
+          `Timed out waiting for ZK proof generation after ${numberOfRetries * sleepDuration}ms. Consider increasing numberOfRetries in waitForProvingResult`,
         );
       };
       try {
