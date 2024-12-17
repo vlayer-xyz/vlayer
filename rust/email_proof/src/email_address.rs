@@ -39,20 +39,24 @@ impl EmailAddress {
         let mut inside_quotes = false;
         let result: String = email_part
             .chars()
-            .filter_map(|c| match c {
-                '"' => {
-                    inside_quotes = !inside_quotes;
-                    Some('_')
-                }
-                _ if inside_quotes => None,
-                _ => Some(c),
-            })
+            .filter_map(|c| Self::handle_quotes(c, &mut inside_quotes))
             .collect();
 
         if inside_quotes {
             None
         } else {
             Some(result)
+        }
+    }
+
+    fn handle_quotes(c: char, inside_quotes: &mut bool) -> Option<char> {
+        match c {
+            '"' => {
+                *inside_quotes = !*inside_quotes;
+                Some('_')
+            }
+            _ if *inside_quotes => None,
+            _ => Some(c),
         }
     }
 
@@ -106,10 +110,11 @@ mod test {
         }
     }
 
-    const INVALID_EMAILS: [&str; 21] = [
+    const INVALID_EMAILS: [&str; 22] = [
         r#"plainaddress"#,
         r#"#@%^%#$@#$@#.com"#,
         r#"@example.com"#,
+        r#"email@example.com (comment)"#,
         r#"Joe Smith <email@example.com>"#,
         r#"<email@example.com>"#,
         r#"email.example.com"#,
