@@ -145,7 +145,7 @@ describe("Success zk-proving", () => {
       proverAbi: [],
       args: [],
       chainId: 42,
-      userToken: "deadbeef",
+      userToken,
     });
     expect(result.hash).toBe(hashStr);
     expect(zkProvingSpy).toBeCalledTimes(1);
