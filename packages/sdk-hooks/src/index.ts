@@ -1,3 +1,3 @@
-import { useWebProof } from "./useWebproof/useWProof";
+import { useWebProof } from "./useWebproof/useWebProof";
 
 export { useWebProof };

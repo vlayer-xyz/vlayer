@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 import { it, expect, describe, vi, beforeEach } from "vitest";
-import { useWebProof } from "./useWProof";
+import { useWebProof } from "./useWebProof";
 import { VlayerProvider } from "../context";
 import { MockExtensionWebProofProvider } from "./extension.mock";
 import { WebProofRequestStatus } from "../types";

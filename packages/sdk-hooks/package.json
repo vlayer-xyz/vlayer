@@ -7,10 +7,10 @@
   "devDependencies": {
     "@types/bun": "latest",
     "eslint-plugin-react": "^7.37.2",
-    "vitest": "^2.1.8",
     "@testing-library/dom": "^10.4.0",
     "@testing-library/jest-dom": "^6.6.3",
-    "@testing-library/react": "^16.1.0"
+    "@testing-library/react": "^16.1.0",
+    "vitest": "^2.1.8"
   },
   "peerDependencies": {
     "typescript": "^5.0.0",
