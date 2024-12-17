@@ -4,23 +4,20 @@ name: E2E test against testnet
 # because it uses external API resources.
 
 on:
-  pull_request:
-    paths:
-      - "rust-toolchain.toml"
-      - "rust/**"
-      - "examples/**"
-      - "packages/**"
-      - "bash/**"
-      - ".github/workflows/test_e2e_devnet.yaml"
-      - "contracts/**"
-  merge_group:
   push:
     branches:
       - main
+    # If any path names do not match patterns in paths-ignore,
+    # even if some path names match the patterns,
+    # the workflow will run.
+    paths-ignore:
+      - "README.md"
+      - "LICENSE"
+      - "book/**"
+  workflow_dispatch:
 concurrency:
-  # Do not cancel jobs on main by forcing a unique group name.
-  group: ${{ github.workflow }}-${{ github.ref_name == 'main' && github.run_id || github.ref_name }}
-  cancel-in-progress: true
+  group: ${{ github.workflow }}-main
+  cancel-in-progress: false
 
 jobs:
   test-e2e-testnet:
