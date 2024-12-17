@@ -9,7 +9,7 @@
     "lint:fix": "eslint ./*/src/** --fix"
   },
   "devDependencies": {
-    "@playwright/test": "^1.48.0",
+    "@playwright/test": "1.48.0",
     "@testing-library/react": "^16.1.0",
     "@types/bun": "latest",
     "@types/eslint__js": "^8.42.3",
