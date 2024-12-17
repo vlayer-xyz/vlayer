@@ -1,5 +1,4 @@
 import { useState, useEffect, FormEvent } from "react";
-import { Address, Account } from "viem";
 import * as chains from "viem/chains";
 import useProver from "../hooks/useProver";
 import { preverifyEmail } from "@vlayer/sdk";
@@ -7,7 +6,13 @@ import { getStrFromFile } from "../lib/utils";
 import proverSpec from "../../../out/EmailDomainProver.sol/EmailDomainProver";
 import verifierSpec from "../../../out/EmailProofVerifier.sol/EmailDomainVerifier";
 import EmlForm from "../components/EmlForm";
-import { createContext, customTransport, type Chain } from "@vlayer/sdk/config";
+import {
+  createContext,
+  customTransport,
+  type Chain,
+  type PrivateKeyAccount,
+  type Address,
+} from "@vlayer/sdk/config";
 
 function getChainByName(name: string) {
   const chain = (chains as Record<string, Chain>)[name];
@@ -21,13 +26,13 @@ function getChainByName(name: string) {
 const EmlUploadForm = () => {
   const [walletClient, setWalletClient] =
     useState<ReturnType<typeof createContext>["ethClient"]>();
-  const [account, setAccount] =
-    useState<ReturnType<typeof createContext>["account"]>();
+  const [privateKeyAccount, setPrivateKeyAccount] =
+    useState<PrivateKeyAccount>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentStep, setCurrentStep] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
-  const [claimerAddr, setClaimerAddr] = useState<Address>("0x");
+  const [claimerAddr, setClaimerAddr] = useState<`0x${string}`>("0x");
   const chain = getChainByName(import.meta.env.VITE_CHAIN_NAME as string);
 
   useEffect(() => {
@@ -45,7 +50,7 @@ const EmlUploadForm = () => {
       );
 
       setWalletClient(ethClient);
-      setAccount(ethAccount);
+      setPrivateKeyAccount(ethAccount);
     };
 
     getWallet();
@@ -78,9 +83,9 @@ const EmlUploadForm = () => {
       return addr;
     }
 
-    if (account) {
-      setClaimerAddr(account.address);
-      return account.address;
+    if (privateKeyAccount) {
+      setClaimerAddr(privateKeyAccount.address);
+      return privateKeyAccount.address;
     }
   };
 
@@ -116,15 +121,21 @@ const EmlUploadForm = () => {
         throw new Error("no_wallet_client");
       }
 
+      const account = import.meta.env.VITE_USE_WINDOW_ETHEREUM_TRANSPORT
+        ? claimerAddr
+        : privateKeyAccount;
+
+      if (!account) {
+        throw new Error("no_account");
+      }
+
       const txHash = await walletClient.writeContract({
         address: import.meta.env.VITE_VERIFIER_ADDRESS,
         abi: verifierSpec.abi,
         functionName: "verify",
         args: proof,
         chain,
-        account: import.meta.env.VITE_USE_WINDOW_ETHEREUM_TRANSPORT
-          ? (claimerAddr as Address)
-          : (account as Account),
+        account,
       });
 
       const receipt = await walletClient.waitForTransactionReceipt({
