@@ -288,6 +288,8 @@ mod server_tests {
 
     #[allow(non_snake_case)]
     mod v_getProofReceipt {
+        use std::sync::{Arc, RwLock};
+
         use call_server::{v_call::CallHash, v_get_proof_receipt::Status};
         use ethers::{
             abi::AbiEncode,
@@ -358,6 +360,60 @@ mod server_tests {
             })
             .await
             .expect("server should return a proof result within the specified time frame")
+        }
+
+        #[tokio::test(flavor = "multi_thread")]
+        async fn server_generates_all_status_codes_when_proving() {
+            let mut ctx = Context::default().await;
+            let app = ctx.server(call_guest_elf(), chain_guest_elf());
+            let contract = ctx.deploy_contract().await;
+            let call_data = contract
+                .sum(U256::from(1), U256::from(2))
+                .calldata()
+                .unwrap();
+
+            let hash = get_hash(&app, &contract, &call_data).await;
+
+            #[derive(Copy, Clone, Debug, PartialEq, Eq)]
+            enum State {
+                Pending,
+                Preflight,
+                Proving,
+                Ready,
+                Done,
+            }
+
+            let next_state = |status, state| match (status, state) {
+                (Status::Pending, State::Pending) => State::Preflight,
+                (Status::Preflight, State::Preflight) => State::Proving,
+                (Status::Proving, State::Proving) => State::Ready,
+                (Status::Ready, State::Ready) => State::Done,
+                (_, x) => x,
+            };
+
+            let request = json!({
+                "method": "v_getProofReceipt",
+                "params": { "hash": hash },
+                "id": 1,
+                "jsonrpc": "2.0",
+            });
+
+            let state = Arc::new(RwLock::new(State::Pending));
+            timeout(MAX_POLLING_TIME, async {
+                while state.read().unwrap().ne(&State::Done) {
+                    let response = app.post("/", &request).await;
+                    assert_eq!(StatusCode::OK, response.status());
+                    let result = assert_jrpc_ok(response, json!({})).await;
+                    let status: Status = serde_json::from_value(result["result"]["status"].clone())
+                        .expect("status should be a valid enum variant");
+                    let prev = *state.read().unwrap();
+                    let next = next_state(status, prev);
+                    *state.write().unwrap() = next;
+                }
+            })
+            .await
+            .expect("server should return a proof result within the specified time frame");
+            assert_eq!(Arc::into_inner(state).unwrap().into_inner().unwrap(), State::Done);
         }
 
         #[tokio::test(flavor = "multi_thread")]
