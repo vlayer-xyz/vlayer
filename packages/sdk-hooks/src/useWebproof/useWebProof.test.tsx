@@ -72,7 +72,7 @@ describe("useWebproof", () => {
       isSuccess: false,
       isPending: false,
       error: null,
-      request: expect.any(Function) as () => void,
+      requestWebProof: expect.any(Function) as () => void,
     });
   });
 
@@ -88,7 +88,7 @@ describe("useWebproof", () => {
       isSuccess: false,
       isPending: true,
       error: null,
-      request: expect.any(Function) as () => void,
+      requestWebProof: expect.any(Function) as () => void,
     });
   });
 
@@ -111,7 +111,7 @@ describe("useWebproof", () => {
       isError: false,
       isSuccess: true,
       error: null,
-      request: expect.any(Function) as () => void,
+      requestWebProof: expect.any(Function) as () => void,
     });
   });
 
@@ -134,7 +134,7 @@ describe("useWebproof", () => {
       isError: true,
       isSuccess: false,
       error: new Error("Mock error occurred"),
-      request: expect.any(Function) as () => void,
+      requestWebProof: expect.any(Function) as () => void,
     });
   });
 });
