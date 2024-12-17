@@ -259,6 +259,7 @@ mod test {
         let call = Call {
             to: Default::default(),
             data: vec![0; max_call_data_size + 1],
+            gas_limit: 0,
         };
 
         assert_eq!(

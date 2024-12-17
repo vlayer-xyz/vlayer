@@ -42,7 +42,7 @@ fn profile(
 async fn usdt_erc20_balance_of() -> anyhow::Result<()> {
     let location: ExecutionLocation = (Mainnet, usdt::BLOCK_NO).into();
     let binance_8 = address!("F977814e90dA44bFA03b6295A0616a897441aceC");
-    let call = Call::new(USDT, &balanceOfCall { account: binance_8 });
+    let call = Call::new(USDT, &balanceOfCall { account: binance_8 }, 0);
 
     let state = profile("mainnet", "usdt_erc20_balance_of", location, &call)?;
 
@@ -56,8 +56,8 @@ async fn usdt_erc20_balance_of() -> anyhow::Result<()> {
 
 #[tokio::test]
 async fn time_travel() -> anyhow::Result<()> {
-    let location: ExecutionLocation = (OptimismSepolia, time_travel::BLOCK_NO).into();
-    let call = Call::new(SIMPLE_TIME_TRAVEL, &AVERAGE_BALANCE_OF_CALL);
+    let location: ExecutionLocation = (time_travel::BLOCK_NO, OptimismSepolia).into();
+    let call = Call::new(SIMPLE_TIME_TRAVEL, &AVERAGE_BALANCE_OF_CALL, 0);
 
     let state = profile("op_sepolia", "simple_time_travel", location, &call)?;
 

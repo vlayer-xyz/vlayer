@@ -36,6 +36,7 @@ impl TryFrom<Call> for HostCall {
         Ok(Self {
             to: parse_address_field("to", value.to)?,
             data: parse_hex_field("data", value.data)?,
+            gas_limit: value.gas_limit,
         })
     }
 }
@@ -49,7 +50,6 @@ const fn mainnet_chain_id() -> ChainId {
 pub struct CallContext {
     #[serde(default = "mainnet_chain_id")]
     pub chain_id: ChainId,
-    pub gas_limit: u64,
 }
 
 #[derive(Serialize, Deserialize, Debug, From, Copy, Clone, Hash, PartialEq, Eq)]

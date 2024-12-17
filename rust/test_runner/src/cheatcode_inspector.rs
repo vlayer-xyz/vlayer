@@ -93,6 +93,7 @@ impl CheatcodeInspector {
             .main(Call {
                 to: inputs.target_address,
                 data: inputs.input.clone().into(),
+                gas_limit: inputs.gas_limit,
             })
             .await;
 

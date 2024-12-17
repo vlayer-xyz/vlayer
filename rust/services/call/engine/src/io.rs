@@ -30,13 +30,15 @@ pub struct Input {
 pub struct Call {
     pub to: Address,
     pub data: Vec<u8>,
+    pub gas_limit: u64,
 }
 
 impl Call {
-    pub fn new(to: Address, call: &impl SolCall) -> Self {
+    pub fn new(to: Address, call: &impl SolCall, gas_limit: u64) -> Self {
         Self {
             to,
             data: call.abi_encode(),
+            gas_limit,
         }
     }
 }
@@ -46,6 +48,7 @@ impl Default for Call {
         Self {
             to: Address::ZERO,
             data: vec![],
+            gas_limit: 0,
         }
     }
 }
@@ -77,6 +80,7 @@ impl From<&CallInputs> for Call {
         Self {
             to: inputs.bytecode_address,
             data: inputs.input.clone().into(),
+            gas_limit: inputs.gas_limit,
         }
     }
 }
