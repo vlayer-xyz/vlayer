@@ -9,7 +9,7 @@ use toml::from_str;
 use crate::spec::ChainSpec;
 
 // Some unique chain ids for testing
-pub const TEST_CHAIN_ID: ChainId = 31_337;
+pub const TEST_CHAIN_ID: ChainId = 30_1337;
 
 // https://etherscan.io/block/15537394
 pub const MAINNET_MERGE_BLOCK_NUMBER: u64 = 15_537_394;
