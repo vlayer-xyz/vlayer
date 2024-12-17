@@ -44,7 +44,7 @@ bun i @vlayer/sdk
 
 ## vlayer client
 
-The **vlayer client** provides an interface for interacting with the vlayer JSON-RPC API. It enables you to trigger and monitor proof statuses while offering convenient access to features such as [Web Proofs](https://github.com/vlayer-xyz/vlayer/pull/web-proofs.md) and [Email Proofs](https://github.com/vlayer-xyz/vlayer/pull/email-proofs.md).
+The **vlayer client** provides an interface for interacting with the vlayer JSON-RPC API. It enables you to trigger and monitor proof statuses while offering convenient access to features such as [Web Proofs](/features/web.html) and [Email Proofs](/features/email.html).
 
 ### Initializing
 
