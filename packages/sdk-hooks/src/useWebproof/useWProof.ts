@@ -8,7 +8,7 @@ import {
   type PresentationJSON,
 } from "@vlayer/sdk";
 
-export const useWebproof = (
+export const useWebProof = (
   webProofRequest: GetWebProofArgs<Abi, ContractFunctionName>,
 ) => {
   const { webProofProvider } = useVlayerContext();
@@ -45,7 +45,7 @@ export const useWebproof = (
     isPending: status === WebProofRequestStatus.pending,
     isError: status === WebProofRequestStatus.error,
     isSuccess: status === WebProofRequestStatus.success,
-    request: () => {
+    requestWebProof: () => {
       setStatus(WebProofRequestStatus.pending);
       webProofProvider.requestWebProof(webProofRequest);
     },

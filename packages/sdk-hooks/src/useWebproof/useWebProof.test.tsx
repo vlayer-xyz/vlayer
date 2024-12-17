@@ -1,6 +1,6 @@
 import { act, renderHook } from "@testing-library/react";
 import { it, expect, describe, vi, beforeEach } from "vitest";
-import { useWebproof } from "./useWebproof";
+import { useWebProof } from "./useWProof";
 import { VlayerProvider } from "../context";
 import { MockExtensionWebProofProvider } from "./extension.mock";
 import { WebProofRequestStatus } from "../types";
@@ -43,7 +43,7 @@ describe("useWebproof", () => {
   );
 
   const renderWebproofHook = () =>
-    renderHook(() => useWebproof(stubWebProofRequest), {
+    renderHook(() => useWebProof(stubWebProofRequest), {
       wrapper: VlayerMockContext,
     });
 
@@ -55,7 +55,7 @@ describe("useWebproof", () => {
   };
 
   it("should throw error if called outside of VlayerProvider", () => {
-    expect(() => renderHook(() => useWebproof(stubWebProofRequest))).toThrow(
+    expect(() => renderHook(() => useWebProof(stubWebProofRequest))).toThrow(
       "useVlayerContext must be used within a VlayerProvider",
     );
   });
@@ -78,7 +78,7 @@ describe("useWebproof", () => {
 
   it("should request the web proof", () => {
     const { result } = renderWebproofHook();
-    act(() => result.current.request());
+    act(() => result.current.requestWebProof());
 
     expect(result.current).toEqual({
       webProof: null,
@@ -99,7 +99,7 @@ describe("useWebproof", () => {
     });
     const { result, rerender } = renderWebproofHook();
 
-    act(() => result.current.request());
+    act(() => result.current.requestWebProof());
     vi.advanceTimersByTime(1000);
     rerender();
 
@@ -122,7 +122,7 @@ describe("useWebproof", () => {
     });
     const { result, rerender } = renderWebproofHook();
 
-    act(() => result.current.request());
+    act(() => result.current.requestWebProof());
     vi.advanceTimersByTime(1000);
     rerender();
 
