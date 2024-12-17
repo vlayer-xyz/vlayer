@@ -46,4 +46,5 @@ pub trait BlockingProvider: Debug + Send + Sync {
         block: BlockNumber,
     ) -> Result<StorageValue>;
     fn get_transaction_count(&self, address: Address, block: BlockNumber) -> Result<TxNumber>;
+    fn get_latest_block_number(&self) -> Result<BlockNumber>;
 }

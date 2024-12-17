@@ -28,6 +28,14 @@ impl Config {
         self.socket_addr
     }
 
+    pub fn rpc_urls(&self) -> HashMap<ChainId, String> {
+        self.rpc_urls.clone()
+    }
+
+    pub const fn chain_proof_url(&self) -> &Option<String> {
+        &self.chain_proof_url
+    }
+
     pub const fn fake_proofs(&self) -> bool {
         matches!(self.proof_mode, ProofMode::Fake)
     }
@@ -126,17 +134,14 @@ impl ConfigBuilder {
     }
 }
 
-impl Config {
-    pub fn get_host_config(&self, start_chain_id: ChainId) -> HostConfig {
+impl From<&Config> for HostConfig {
+    fn from(config: &Config) -> HostConfig {
         HostConfig {
-            rpc_urls: self.rpc_urls.clone(),
-            start_chain_id,
-            proof_mode: self.proof_mode.into(),
-            chain_proof_url: self.chain_proof_url.clone(),
-            max_calldata_size: self.max_request_size,
-            verify_chain_proofs: self.verify_chain_proofs,
-            call_guest_elf: self.call_guest_elf.clone(),
-            chain_guest_elf: self.chain_guest_elf.clone(),
+            proof_mode: config.proof_mode.into(),
+            max_calldata_size: config.max_request_size,
+            verify_chain_proofs: config.verify_chain_proofs,
+            call_guest_elf: config.call_guest_elf.clone(),
+            chain_guest_elf: config.chain_guest_elf.clone(),
         }
     }
 }

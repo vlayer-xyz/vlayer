@@ -8,6 +8,7 @@ use super::{QueryParams, SharedConfig, SharedProofs};
 use crate::{
     error::AppError,
     gas_meter::{self, Client as GasMeterClient, ComputationStage},
+    handlers::ProofStatus,
 };
 
 pub mod types;
@@ -21,8 +22,15 @@ pub async fn v_call(
 ) -> Result<CallHash, AppError> {
     info!("v_call => {call:#?} {context:#?}");
     let call: EngineCall = call.try_into()?;
-    let host_config = config.get_host_config(context.chain_id);
-    let host = Host::try_new(host_config).await?;
+
+    let host = Host::builder()
+        .with_rpc_urls(config.rpc_urls())
+        .with_start_chain_id(context.chain_id)?
+        .with_chain_proof_url(config.chain_proof_url())
+        .await?
+        .with_prover_contract_addr(call.to)
+        .await?
+        .build(config.as_ref().into());
     let call_hash = CallHashData::new(host.start_execution_location(), call.clone())
         .hash_slow()
         .into();
@@ -38,7 +46,7 @@ pub async fn v_call(
 
     tokio::spawn(async move {
         let res = generate_proof(call, host, gas_meter_client).await;
-        state.insert(call_hash, res);
+        state.insert(call_hash, ProofStatus::Ready(res));
     });
 
     Ok(call_hash)

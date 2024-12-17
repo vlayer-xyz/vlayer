@@ -101,6 +101,10 @@ impl BlockingProvider for PendingStateProvider {
     ) -> Result<TxNumber, Error> {
         Ok(self.account(address).info.nonce)
     }
+
+    fn get_latest_block_number(&self) -> Result<BlockNumber, Error> {
+        Ok(self.block_number)
+    }
 }
 
 #[derive(Debug)]

@@ -19,20 +19,19 @@ use call_engine::{
     },
     Call, CallGuestId, GuestOutput, HostOutput, Input, Seal,
 };
-use chain_client::Client;
 use common::GuestElf;
 pub use config::{Config, DEFAULT_MAX_CALLDATA_SIZE};
 use derive_new::new;
 pub use error::Error;
 use ethers_core::types::BlockNumber as BlockTag;
-use mock_chain_server::ChainProofServerMock;
 use prover::Prover;
-use provider::{CachedMultiProvider, EthersProviderFactory, EvmBlockHeader};
+use provider::{CachedMultiProvider, EvmBlockHeader};
 use seal::EncodableReceipt;
-use tracing::{info, warn};
+use tracing::info;
 
 use crate::{evm_env::factory::HostEvmEnvFactory, into_input::into_multi_input, HostDb};
 
+mod builder;
 mod config;
 mod error;
 mod prover;
@@ -49,46 +48,10 @@ pub struct Host {
     guest_elf: GuestElf,
 }
 
-async fn mock_chain_client(
-    providers: &CachedMultiProvider,
-    chain_id: ChainId,
-) -> Result<(BlockNumber, Box<dyn chain_client::Client>), Error> {
-    let latest_block = providers
-        .get(chain_id)?
-        .get_block_header(BlockTag::Latest)?
-        .ok_or_else(|| Error::Provider("latest block not found".to_string()))?;
-    let block_number = latest_block.number();
-    let mut chain_proof_server = ChainProofServerMock::start().await;
-    chain_proof_server
-        .mock_single_block(chain_id, latest_block)
-        .await;
-    let chain_client = Box::new(chain_proof_server.into_client());
-    Ok((block_number, chain_client))
-}
-
 impl Host {
-    pub async fn try_new(config: Config) -> Result<Self, Error> {
-        let provider_factory = EthersProviderFactory::new(config.rpc_urls.clone());
-        let providers = CachedMultiProvider::from_factory(provider_factory);
-
-        let (block_number, chain_client) = match config.chain_proof_url.as_ref() {
-            Some(url) => {
-                let chain_client = chain_client::RpcClient::new(url);
-                // If a chain server is running, use latest block **for which we have chain proof**
-                // as the settlement block. For newer block getting chain proof would fail.
-                let block_number = chain_client
-                    .get_sync_status(config.start_chain_id)
-                    .await?
-                    .last_block;
-                (block_number, Box::new(chain_client) as Box<dyn Client>)
-            }
-            None => {
-                warn!("Chain proof sever URL not provided. Running with mock server");
-                mock_chain_client(&providers, config.start_chain_id).await?
-            }
-        };
-
-        Host::try_new_with_components(providers, block_number, chain_client, config)
+    #[must_use]
+    pub const fn builder() -> builder::New {
+        builder::New
     }
 
     pub fn prover(&self) -> Prover {
@@ -134,21 +97,20 @@ pub struct PreflightResult {
 }
 
 impl Host {
-    pub fn try_new_with_components(
+    pub fn new(
         providers: CachedMultiProvider,
-        block_number: u64,
+        start_execution_location: ExecutionLocation,
         chain_client: Box<dyn chain_client::Client>,
         config: Config,
-    ) -> Result<Self, Error> {
+    ) -> Self {
         let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
-        let start_execution_location = (block_number, config.start_chain_id).into();
         let prover = Prover::new(config.proof_mode, &config.call_guest_elf);
         let chain_client = chain_client::RecordingClient::new(chain_client);
         let chain_proof_verifier =
             chain_proof::ZkVerifier::new(config.chain_guest_elf.id, zk_proof::HostVerifier);
         let verifier = guest_input::ZkVerifier::new(chain_client, chain_proof_verifier);
 
-        Ok(Host {
+        Host {
             envs,
             start_execution_location,
             prover,
@@ -156,7 +118,7 @@ impl Host {
             max_calldata_size: config.max_calldata_size,
             verify_chain_proofs: config.verify_chain_proofs,
             guest_elf: config.call_guest_elf,
-        })
+        }
     }
 
     pub async fn preflight(self, call: Call) -> Result<PreflightResult, Error> {
@@ -258,6 +220,7 @@ mod test {
 
     use chain::TEST_CHAIN_ID;
     use host_utils::ProofMode;
+    use provider::EthersProviderFactory;
 
     use super::*;
 
@@ -268,20 +231,18 @@ mod test {
     }
 
     #[tokio::test(flavor = "multi_thread")]
-    async fn host_does_not_accept_calls_longer_than_limit() -> anyhow::Result<()> {
+    async fn host_does_not_accept_calls_longer_than_limit() {
         let config = Config {
-            rpc_urls: test_rpc_urls(),
-            start_chain_id: TEST_CHAIN_ID,
             proof_mode: ProofMode::Fake,
             ..Config::default()
         };
         let max_call_data_size = config.max_calldata_size;
-        let host = Host::try_new_with_components(
+        let host = Host::new(
             CachedMultiProvider::from_factory(EthersProviderFactory::new(test_rpc_urls())),
-            0,
+            (TEST_CHAIN_ID, 0_u64).into(),
             Box::new(chain_client::RpcClient::new("")),
             config,
-        )?;
+        );
         let call = Call {
             to: Default::default(),
             data: vec![0; max_call_data_size + 1],
@@ -291,7 +252,5 @@ mod test {
             host.preflight(call).await.unwrap_err().to_string(),
             format!("Calldata too large: {} bytes", max_call_data_size + 1)
         );
-
-        Ok(())
     }
 }

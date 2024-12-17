@@ -102,7 +102,7 @@ impl<'a> TravelInspector<'a> {
             "Travel contract called with function: setBlock and block number: {:?}! Chain id remains {:?}.",
             block_number, chain_id
         );
-        self.location = Some((block_number, chain_id).into());
+        self.location = Some((chain_id, block_number).into());
     }
 
     fn set_chain(&mut self, chain_id: ChainId, block_number: u64) {
@@ -110,7 +110,7 @@ impl<'a> TravelInspector<'a> {
             "Travel contract called with function: setChain, with chain id: {:?} block number: {:?}!",
             chain_id, block_number
         );
-        self.location = Some((block_number, chain_id).into());
+        self.location = Some((chain_id, block_number).into());
     }
 
     fn on_call(&self, inputs: &CallInputs) -> Option<CallOutcome> {
@@ -224,9 +224,9 @@ mod test {
     #[test]
     fn set_block_sets_chain_id_to_latest_not_start() {
         let locations: Vec<ExecutionLocation> = vec![
-            (MAINNET_BLOCK, MAINNET_ID).into(),
-            (SEPOLIA_BLOCK, SEPOLIA_ID).into(),
-            (SEPOLIA_BLOCK - 1, SEPOLIA_ID).into(),
+            (MAINNET_ID, MAINNET_BLOCK).into(),
+            (SEPOLIA_ID, SEPOLIA_BLOCK).into(),
+            (SEPOLIA_ID, SEPOLIA_BLOCK - 1).into(),
         ];
 
         let mut inspector = TravelInspector::new(locations[0].chain_id, |call, location| {

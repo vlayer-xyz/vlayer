@@ -37,7 +37,16 @@ pub trait Rpc {
 }
 
 #[derive(Deref, DerefMut, Default, Debug)]
-pub struct Proofs(DashMap<CallHash, Result<HostOutput, AppError>>);
+pub struct Proofs(DashMap<CallHash, ProofStatus>);
+
+#[allow(dead_code)] // To be used in the future
+#[derive(Debug)]
+pub enum ProofStatus {
+    WaitingForChainProof,
+    Preflight,
+    Proving,
+    Ready(Result<HostOutput, AppError>),
+}
 
 pub type SharedConfig = Arc<Config>;
 pub type SharedProofs = Arc<Proofs>;

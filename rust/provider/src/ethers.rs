@@ -5,18 +5,16 @@ use anyhow::{anyhow, Context, Result};
 use block_header::{EthBlockHeader, EvmBlockHeader};
 use derive_new::new;
 use ethers_core::types::{Block, BlockNumber as BlockTag};
-use ethers_providers::{Http, Middleware, RetryClient};
+use ethers_providers::{JsonRpcClient, Middleware};
 use tokio::runtime::Handle;
 use tracing::instrument;
 
 use super::{BlockingProvider, EIP1186Proof};
 
-pub type EthersClient = ethers_providers::Provider<RetryClient<Http>>;
-
 /// A provider that fetches data from an Ethereum node using the ethers crate.
 #[derive(Debug, new)]
-pub struct EthersProvider {
-    client: EthersClient,
+pub struct EthersProvider<T: JsonRpcClient> {
+    client: ethers_providers::Provider<T>,
 }
 
 // Blocks current runtime to execute the future. Panics if called outside of the runtime
@@ -25,7 +23,7 @@ fn block_on<F: Future>(f: F) -> F::Output {
     tokio::task::block_in_place(|| handle.block_on(f))
 }
 
-impl BlockingProvider for EthersProvider {
+impl<T: JsonRpcClient> BlockingProvider for EthersProvider<T> {
     #[instrument(skip(self))]
     fn get_block_header(&self, block: BlockTag) -> Result<Option<Box<dyn EvmBlockHeader>>> {
         let block = block_on(self.client.get_block(block))?;
@@ -116,6 +114,10 @@ impl BlockingProvider for EthersProvider {
                 .collect(),
             storage_proof: proof.storage_proof.into_iter().map(Into::into).collect(),
         })
+    }
+
+    fn get_latest_block_number(&self) -> Result<BlockNumber> {
+        Ok(block_on(self.client.get_block_number())?.as_u64())
     }
 }
 

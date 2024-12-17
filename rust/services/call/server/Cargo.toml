@@ -22,6 +22,7 @@ derive_more = { workspace = true }
 hex = { workspace = true }
 jsonrpsee = { workspace = true }
 mime = { workspace = true }
+provider = { workspace = true }
 seal = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
