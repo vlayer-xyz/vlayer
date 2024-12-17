@@ -19,7 +19,7 @@ const log = (...args: unknown[]) => {
 
 export async function v_getProofReceipt(
   params: VGetProofReceiptParams,
-  url: string = "https://test-prover.vlayer.xyz",
+  url: string = "http://127.0.0.1:3000",
 ): Promise<VGetProofReceiptResponse> {
   const response = await fetch(url, {
     method: "POST",

@@ -3,8 +3,7 @@
 The vlayer node is an HTTP server that acts as a prover. 
 
 ## Public Test Prover 
-By default, client SDK communicates with test prover deployed by vlayer for development purposes. 
-Test server is available at `https://test-prover.vlayer.xyz`.
+By default, client SDK communicates with test prover deployed by vlayer at `https://test-prover.vlayer.xyz`.
 
 ## Running Prover locally
 There are two ways to run prover server: vlayer CLI and Docker.
