@@ -104,7 +104,7 @@ export const createVlayerClient = (
           await sleep(sleepDuration);
         }
         throw new Error(
-          `Timed out waiting for ZK proof generation after {numberOfRetries * sleepDuration}ms. Consider increasing numberOfRetries in waitForProvingResult`,
+          `Timed out waiting for ZK proof generation after ${numberOfRetries * sleepDuration}ms. Consider increasing numberOfRetries in waitForProvingResult`,
         );
       };
       try {
