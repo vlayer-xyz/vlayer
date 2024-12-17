@@ -44,19 +44,27 @@ export const toCamelCase = (str: string) =>
       group.toUpperCase().replace("-", "").replace("_", ""),
     );
 
-const requiredEnvVars = [
+const envVars = [
   { var: "CHAIN_NAME" },
   { var: "PROVER_URL" },
   { var: "JSON_RPC_URL" },
   { var: "EXAMPLES_TEST_PRIVATE_KEY", to: "privateKey" },
+  { var: "VLAYER_TOKEN", to: "userToken", optional: true },
 ];
 
 export const getConfig = () => {
   dotEnvFlowConfig();
-  return requiredEnvVars.reduce((config, envVar) => {
-    return {
-      ...config,
-      [envVar.to ?? toCamelCase(envVar.var)]: ensureEnvVariable(envVar.var),
-    };
+  return envVars.reduce((config, envVar) => {
+    try {
+      return {
+        ...config,
+        [envVar.to ?? toCamelCase(envVar.var)]: ensureEnvVariable(envVar.var),
+      };
+    } catch (e) {
+      if (envVar.optional) {
+        return { ...config };
+      }
+      throw e;
+    }
   }, {} as EnvConfig);
 };

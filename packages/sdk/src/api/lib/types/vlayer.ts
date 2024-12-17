@@ -97,6 +97,7 @@ export type VlayerClient = {
     proverAbi: T;
     functionName: F;
     chainId: number;
+    userToken?: string;
     args: [
       WebProofRequest,
       ...ContractFunctionArgsWithout<T, F, { name: "webProof" }>,

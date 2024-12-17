@@ -59,6 +59,7 @@ export const setupProveWebButton = (element: HTMLButtonElement) => {
       proverAbi: webProofProver.abi,
       chainId: foundry.id,
       functionName: "main",
+      userToken: config.userToken,
       args: [webProofRequest, twitterUserAddress],
     });
 

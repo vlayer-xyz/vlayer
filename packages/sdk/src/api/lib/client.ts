@@ -151,6 +151,7 @@ export const createVlayerClient = (
       proverAbi,
       functionName,
       chainId,
+      userToken,
       args,
     }) {
       const webProofPlaceholder = args[0];
@@ -177,6 +178,7 @@ export const createVlayerClient = (
         functionName,
         chainId,
         proverAbi,
+        userToken,
         args: [
           {
             webProofJson: JSON.stringify(webProof),

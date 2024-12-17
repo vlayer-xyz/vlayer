@@ -49,6 +49,7 @@ const proofHash = await vlayer.prove({
   functionName: "crossChainBalanceOf",
   args: [account.address],
   chainId: chain.id,
+  userToken: config.userToken,
 });
 const result = await vlayer.waitForProvingResult({ hash: proofHash });
 console.log("Proof:", result[0]);
