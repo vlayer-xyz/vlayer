@@ -43,7 +43,6 @@ export async function tlsnProve(
     secretHeaders: string[];
   },
 ): Promise<PresentationJSON> {
-    
   await init({ loggingLevel: "Debug" });
   const notary = NotaryServer.from(notaryUrl);
   const prover = await new Prover({
