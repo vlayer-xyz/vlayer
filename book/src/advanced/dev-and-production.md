@@ -77,7 +77,7 @@ Testnet and devnet provers are running in `FAKE` mode by default. Fake mode can 
 ```sh
 serve --proof fake
 ```
-> Note: FAKE mode is limited to test and dev chains to prevent accidental errors.
+> Note: FAKE mode is limited to dev and test chains to prevent accidental errors.
 
 ### GROTH16 Mode
 `GROTH16` mode is slower than `FAKE` mode and requires significant computational resources. 
