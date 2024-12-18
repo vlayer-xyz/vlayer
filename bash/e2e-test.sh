@@ -23,7 +23,6 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
   example_name=$(basename "${example}")
 
   echo Running services...
-  unset VLAYER_TMP_DIR
   source ${VLAYER_HOME}/bash/run-services.sh
 
   echo "::group::Running tests of: ${example}"
@@ -38,6 +37,7 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
 
   echo Stopping services...
   cleanup
+  rm -rf "${VLAYER_TMP_DIR}/chain_db"
   echo '::endgroup::'
 done
 
