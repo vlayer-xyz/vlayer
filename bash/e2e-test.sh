@@ -9,8 +9,7 @@ PROVING_MODE=${PROVING_MODE:-dev}
 echo Generating typescript bidings ...
 ${VLAYER_HOME}/bash/build-ts-types.sh >/dev/null
 
-echo Running services...
-source ${VLAYER_HOME}/bash/run-services.sh
+
 
 echo Setting up SDK 
 cd ${VLAYER_HOME}/packages/sdk && bun install --frozen-lockfile
@@ -23,8 +22,9 @@ echo '::endgroup::'
 for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ; do
   example_name=$(basename "${example}")
 
-  echo "make snapshot of anvil"
-  ANVIL_SNAPSHOT_ID=$(cast rpc evm_snapshot)
+  echo Running services...
+  unset VLAYER_TMP_DIR
+  source ${VLAYER_HOME}/bash/run-services.sh
 
   echo "::group::Running tests of: ${example}"
   cd "${example}"
@@ -35,8 +35,9 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
   cd vlayer
   bun install --frozen-lockfile
   bun run prove:"${VLAYER_ENV}"
-  echo "revert anvil to initial state"
-  cast rpc evm_revert "${ANVIL_SNAPSHOT_ID}"
+
+  echo Stopping services...
+  cleanup
   echo '::endgroup::'
 done
 
