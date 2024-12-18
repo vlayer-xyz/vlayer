@@ -16,18 +16,6 @@ inputs:
   VERCEL_ORG_ID:
     description: 'Vercel organization ID'
     required: true
-  GITHUB_TOKEN:
-    description: 'GitHub token'
-    required: true
-  GITHUB_REF:
-    description: 'GitHub ref'
-    required: true
-  GITHUB_EVENT_NAME:
-    description: 'GitHub event name'
-    required: true
-  GITHUB_EVENT_CONCLUSION:
-    description: 'GitHub event conclusion'
-    required: true
 runs:
   using: "composite"
   steps:
@@ -92,14 +80,14 @@ runs:
       working-directory: ./examples/${{ inputs.EXAMPLE_NAME }}/vlayer
 
     - name: Deploy to Vercel
-      if: inputs.GITHUB_REF == 'refs/heads/main' || (inputs.GITHUB_EVENT_NAME == 'workflow_run' && inputs.GITHUB_EVENT_CONCLUSION == 'success')
+      if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
       shell: bash
       env:
         VERCEL_ENV: production
         VERCEL_TOKEN: ${{ inputs.VERCEL_TOKEN }}
         VERCEL_PROJECT_ID: ${{ inputs.VERCEL_PROJECT_ID }}
         VERCEL_ORG_ID: ${{ inputs.VERCEL_ORG_ID }}
-        GITHUB_TOKEN: "${{ inputs.GITHUB_TOKEN }}"
+        GITHUB_TOKEN: "${{ github.token }}"
         EXAMPLE_NAME: ${{ inputs.EXAMPLE_NAME }}
       run: bash/deploy-to-vercel.sh
     - name: Deploy to Vercel (PR Preview)
@@ -110,7 +98,7 @@ runs:
         VERCEL_TOKEN: ${{ inputs.VERCEL_TOKEN }}
         VERCEL_PROJECT_ID: ${{ inputs.VERCEL_PROJECT_ID }}
         VERCEL_ORG_ID: ${{ inputs.VERCEL_ORG_ID }}
-        GITHUB_TOKEN: "${{ inputs.GITHUB_TOKEN }}"
+        GITHUB_TOKEN: "${{ github.token }}"
         PR_NUMBER: "${{ github.event.number }}"
         EXAMPLE_NAME: ${{ inputs.EXAMPLE_NAME }}
       run: bash/deploy-to-vercel.sh
