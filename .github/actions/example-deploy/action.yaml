@@ -92,7 +92,7 @@ runs:
       working-directory: ./examples/${{ inputs.EXAMPLE_NAME }}/vlayer
 
     - name: Deploy to Vercel
-      if: (${{ inputs.GITHUB_REF }} == 'refs/heads/main' || (${{ inputs.GITHUB_EVENT_NAME }} == 'workflow_run' && ${{ inputs.GITHUB_EVENT_CONCLUSION }} == 'success'))
+      if: inputs.GITHUB_REF == 'refs/heads/main' || (inputs.GITHUB_EVENT_NAME == 'workflow_run' && inputs.GITHUB_EVENT_CONCLUSION == 'success')
       shell: bash
       env:
         VERCEL_ENV: production
