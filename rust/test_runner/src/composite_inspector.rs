@@ -6,10 +6,11 @@ use forge::revm::{
         CallInputs, CallOutcome, CreateInputs, CreateOutcome, Gas, InstructionResult, Interpreter,
         InterpreterResult,
     },
-    precompile::Log,
+    precompile::{Log, PrecompileWithAddress},
+    primitives::Env,
     Database, EvmContext, Inspector,
 };
-use foundry_evm::inspectors::InspectorStack;
+use foundry_evm::{inspectors::InspectorStack, revm::primitives::PrecompileOutput};
 use foundry_evm_core::{backend::DatabaseExt, InspectorExt};
 
 use crate::cheatcode_inspector::CheatcodeInspector;
@@ -43,37 +44,47 @@ where
         inputs: &mut CallInputs,
     ) -> Option<CallOutcome> {
         let inspector_stack_outcome = self.inspector_stack.call(context, inputs);
+        if let Some(value) = find_and_call_precompiles(context, inputs) {
+            return Some(value);
+        }
         if let Some(call_outcome) = self.cheatcode_inspector.call(context, inputs) {
             return Some(call_outcome);
-        }
-        if let Some(value) = call_precompiles(context, inputs) {
-            return Some(value);
         }
         inspector_stack_outcome
     }
 }
 
-fn call_precompiles<DB: Database + DatabaseExt>(
+fn find_and_call_precompiles<DB: Database + DatabaseExt>(
     context: &EvmContext<DB>,
     inputs: &CallInputs,
 ) -> Option<CallOutcome> {
-    for precompile in &call_precompiles::PRECOMPILES {
-        if let Ok(precompile_outcome) =
-            precompile
-                .precompile()
-                .call_ref(&inputs.input, u64::MAX, context.env.as_ref())
-        {
-            return Some(CallOutcome::new(
-                InterpreterResult::new(
-                    InstructionResult::Return,
-                    precompile_outcome.bytes,
-                    Gas::new(inputs.gas_limit),
-                ),
-                inputs.return_memory_offset.clone(),
-            ));
-        }
-    }
-    None
+    call_precompiles::PRECOMPILES
+        .iter()
+        .find(|precompile| precompile.address() == &inputs.target_address)
+        .and_then(|precompile| call_precompile(precompile, inputs, &context.env))
+}
+
+fn call_precompile(
+    precompile: &PrecompileWithAddress,
+    inputs: &CallInputs,
+    env: &Env,
+) -> Option<CallOutcome> {
+    precompile
+        .precompile()
+        .call_ref(&inputs.input, u64::MAX, env)
+        .map(|outcome| to_call_outcome(outcome, inputs))
+        .ok()
+}
+
+fn to_call_outcome(precompile_outcome: PrecompileOutput, inputs: &CallInputs) -> CallOutcome {
+    CallOutcome::new(
+        InterpreterResult::new(
+            InstructionResult::Return,
+            precompile_outcome.bytes,
+            Gas::new(inputs.gas_limit),
+        ),
+        inputs.return_memory_offset.clone(),
+    )
 }
 
 impl InspectorExt for CompositeInspector {}
