@@ -103,13 +103,21 @@ export const createVlayerClient = (
       const getProof = async () => {
         for (let retry = 0; retry < numberOfRetries; retry++) {
           const resp = await getProofReceipt(hash, url);
-          if (resp.result.status === VGetProofReceiptStatus.Ready) {
-            if (resp.result.data === undefined) {
+          const { status, data } = resp.result;
+          if (status === VGetProofReceiptStatus.Ready) {
+            if (data === undefined) {
               throw new Error(
                 "No ZK proof returned from server for hash " + hash.hash,
               );
             }
-            return resp.result.data;
+            return data;
+          } else if (
+            status === VGetProofReceiptStatus.Queued ||
+            status === VGetProofReceiptStatus.WaitingForChainProof ||
+            status === VGetProofReceiptStatus.Preflight ||
+            status === VGetProofReceiptStatus.Proving
+          ) {
+            webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Proving);
           }
           await sleep(sleepDuration);
         }
