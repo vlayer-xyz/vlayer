@@ -5,14 +5,16 @@ use alloy_primitives::{address, uint};
 use alloy_sol_types::SolCall;
 
 use crate::{
-    host::tests::GAS_LIMIT, test_harness::{
+    host::tests::GAS_LIMIT,
+    test_harness::{
         contracts::usdt::{
             BLOCK_NO,
             IERC20::{balanceOfCall, balanceOfReturn},
             USDT,
         },
         run, ExecutionLocation,
-    }, Call
+    },
+    Call,
 };
 
 #[cfg(test)]
