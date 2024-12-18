@@ -84,7 +84,7 @@ mod server_tests {
         const GAS_LIMIT: u64 = 1_000_000;
         const GAS_METER_TTL: u64 = 3600;
 
-        fn json_rpc_request(contract: &Contract, call_data: &Bytes) -> Value {
+        fn v_call_body(contract: &Contract, call_data: &Bytes) -> Value {
             json!({
                 "method": "v_call",
                 "params": [
@@ -151,7 +151,7 @@ mod server_tests {
                 .calldata()
                 .unwrap();
 
-            let req = json_rpc_request(&contract, &call_data);
+            let req = v_call_body(&contract, &call_data);
             let response = app.post("/", &req).await;
 
             assert_eq!(StatusCode::OK, response.status());
@@ -175,7 +175,7 @@ mod server_tests {
                 .calldata()
                 .unwrap();
 
-            let req = json_rpc_request(&contract, &call_data);
+            let req = v_call_body(&contract, &call_data);
 
             let response = app.post("/", &req).await;
 
@@ -217,7 +217,7 @@ mod server_tests {
                 .calldata()
                 .unwrap();
 
-            let req = json_rpc_request(&contract, &call_data);
+            let req = v_call_body(&contract, &call_data);
 
             let response = app.post("/", &req).await;
 
