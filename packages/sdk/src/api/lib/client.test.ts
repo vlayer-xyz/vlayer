@@ -13,8 +13,6 @@ import { type BrandedHash, type VlayerClient } from "types/vlayer";
 import { ZkProvingStatus } from "../../web-proof-commons";
 import createFetchMock from "vitest-fetch-mock";
 
-const PROVER_URL = "http://127.0.0.1:3000";
-
 declare const global: {
   chrome: object;
 };
@@ -55,7 +53,7 @@ describe("Success zk-proving", () => {
     hashStr = generateRandomHash();
     const webProofProvider = createExtensionWebProofProvider();
     zkProvingSpy = vi.spyOn(webProofProvider, "notifyZkProvingStatus");
-    vlayer = createVlayerClient({ url: PROVER_URL, webProofProvider });
+    vlayer = createVlayerClient({ webProofProvider });
   });
   it("should send message to extension that zkproving started", async () => {
     fetchMocker.mockResponseOnce(() => {
@@ -171,7 +169,7 @@ describe("Failed zk-proving", () => {
 
     const zkProvingSpy = vi.spyOn(webProofProvider, "notifyZkProvingStatus");
 
-    const vlayer = createVlayerClient({ url: PROVER_URL, webProofProvider });
+    const vlayer = createVlayerClient({ webProofProvider });
     try {
       const hash = await vlayer.prove({
         address: `0x${"a".repeat(40)}`,

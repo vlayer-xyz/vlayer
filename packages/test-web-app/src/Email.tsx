@@ -20,9 +20,7 @@ const useEmailFileUpload = () => {
     if (!file) {
       return;
     }
-    const vlayer = createVlayerClient({
-      url: "http://localhost:3000",
-    });
+    const vlayer = createVlayerClient();
     const str = await getStrFromFile(file);
     const unverifiedEmail = await preverifyEmail(str);
     const x = await vlayer.prove({

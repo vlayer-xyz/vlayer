@@ -38,13 +38,13 @@ async function sleep(ms: number): Promise<void> {
 
 export const createVlayerClient = (
   {
-    url = "https://test-prover.vlayer.xyz",
+    url = "http://127.0.0.1:3000",
     webProofProvider = createExtensionWebProofProvider(),
   }: {
     url?: string;
     webProofProvider?: WebProofProvider;
   } = {
-    url: "https://test-prover.vlayer.xyz",
+    url: "http://127.0.0.1:3000",
     webProofProvider: createExtensionWebProofProvider(),
   },
 ): VlayerClient => {

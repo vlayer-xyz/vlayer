@@ -39,7 +39,6 @@ function DappNewWay() {
 
   const vlayerClient = useMemo(() => {
     return createVlayerClient({
-      url: "http://localhost:3000",
       webProofProvider,
     });
   }, [webProofProvider]);
@@ -151,7 +150,6 @@ function Dapp() {
     const profileUrl = `${window.location.origin}${import.meta.env.BASE_URL}profile`;
     const dashboardUrl = `${window.location.origin}${import.meta.env.BASE_URL}dashboard`;
     vlayerClient.current = createVlayerClient({
-      url: "http://localhost:3000",
       webProofProvider: provider,
     });
 
