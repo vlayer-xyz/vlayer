@@ -216,7 +216,7 @@ if [[ -z "${QUICKNODE_API_KEY:-}" || -z "${QUICKNODE_ENDPOINT:-}" ]] ; then
     )
 else
     CHAIN_WORKER_ARGS=(
-        "http://localhost:8545 31337 latest latest"
+        "https://${QUICKNODE_ENDPOINT}.optimism-sepolia.quiknode.pro/${QUICKNODE_API_KEY} 11155420 latest latest"
         "https://${QUICKNODE_ENDPOINT}.quiknode.pro/${QUICKNODE_API_KEY} 1 20683110 20683110"
         "https://${QUICKNODE_ENDPOINT}.base-mainnet.quiknode.pro/${QUICKNODE_API_KEY} 8453 19367633 19367633"
         "https://${QUICKNODE_ENDPOINT}.optimism.quiknode.pro/${QUICKNODE_API_KEY} 10 124962954 124962954"
