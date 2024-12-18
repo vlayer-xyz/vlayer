@@ -61,6 +61,7 @@ impl From<Call> for TxEnv {
                 Address::ZERO => TxKind::Create,
                 to => TxKind::Call(to),
             },
+            gas_limit: call.gas_limit,
             data: call.data.into(),
             optimism: initialize_optimism_fields(),
             ..Default::default()
