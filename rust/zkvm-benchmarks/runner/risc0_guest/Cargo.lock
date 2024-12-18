@@ -920,7 +920,7 @@ dependencies = [
 [[package]]
 name = "cfdkim"
 version = "0.3.0"
-source = "git+https://github.com/risc0-labs/dkim?rev=3213315e41f426c307b8feb8fb329330a47e326c#3213315e41f426c307b8feb8fb329330a47e326c"
+source = "git+https://github.com/vanruch/dkim?rev=67cd8e004f061d546f76b05888806eb1a7cd35d8#67cd8e004f061d546f76b05888806eb1a7cd35d8"
 dependencies = [
  "base64 0.21.7",
  "ed25519-dalek",
@@ -929,7 +929,7 @@ dependencies = [
  "mailparse",
  "nom",
  "quick-error 2.0.1",
- "rsa",
+ "rsa 0.9.6",
  "sha-1",
  "sha2",
  "slog",
@@ -1498,7 +1498,7 @@ dependencies = [
  "base64 0.21.7",
  "cfdkim",
  "mailparse",
- "rsa",
+ "rsa 0.9.7",
  "slog",
  "thiserror",
 ]
@@ -1972,6 +1972,12 @@ dependencies = [
  "quote",
  "syn 1.0.109",
 ]
+
+[[package]]
+name = "include_bytes_aligned"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4ee796ad498c8d9a1d68e477df8f754ed784ef875de1414ebdaf169f70a6a784"
 
 [[package]]
 name = "indexmap"
@@ -3061,6 +3067,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-bigint2"
+version = "1.2.0-alpha.1"
+source = "git+https://github.com/risc0/risc0?rev=8fc8437633f08a66e0fbacce947f41d01b074774#8fc8437633f08a66e0fbacce947f41d01b074774"
+dependencies = [
+ "include_bytes_aligned",
+ "num-bigint-dig",
+]
+
+[[package]]
 name = "risc0-binfmt"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3271,6 +3286,26 @@ source = "git+https://github.com/tlsnotary/rs-merkle.git?rev=85f3e82#85f3e827451
 dependencies = [
  "serde",
  "sha2",
+]
+
+[[package]]
+name = "rsa"
+version = "0.9.6"
+source = "git+https://github.com/risc0/RustCrypto-RSA?tag=v0.9.7-risczero.0#fa372e9f5008350bd61289340019ce2222425a7c"
+dependencies = [
+ "const-oid",
+ "digest 0.10.7",
+ "num-bigint-dig",
+ "num-integer",
+ "num-traits",
+ "pkcs1",
+ "pkcs8",
+ "rand_core",
+ "risc0-bigint2",
+ "signature",
+ "spki",
+ "subtle",
+ "zeroize",
 ]
 
 [[package]]
