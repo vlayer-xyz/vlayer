@@ -1,4 +1,3 @@
-import { removeQueryParams } from "lib/removeQueryParams";
 import { NotaryServer } from "tlsn-js";
 import { wrap } from "comlink";
 import { Prover as TProver, Presentation as TPresentation } from "tlsn-js";
@@ -55,7 +54,7 @@ export async function tlsnProve(
   await prover.setup(sessionUrl);
 
   const res = await prover.sendRequest(wsProxyUrl, {
-    url: removeQueryParams(notarizeRequestUrl),
+    url: notarizeRequestUrl,
     method: "GET",
     headers: {
       "Content-Type": "application/json",

@@ -8,14 +8,21 @@ new Elysia({
     },
   },
 })
-  .get("/regular_json", () => {
-    return { name: "Gandalf" };
+  .get("/regular_json", (req) => {
+    const queryParams = new URLSearchParams(req.url.split("?")[1]);
+    if (queryParams.get("are_you_sure") !== "yes") {
+      return {
+        success: false,
+        error_message: "Missing or incorrect query parameter 'are_you_sure'",
+      };
+    }
+    return { success: true, name: "Gandalf" };
   })
   .get("/json_two_bytes_char", () => {
-    return { place: "Barad-dûr" };
+    return { success: true, place: "Barad-dûr" };
   })
   .get("/json_three_bytes_char", () => {
-    return { name: "عبد الله" };
+    return { success: true, name: "عبد الله" };
   })
   .use(cors())
   .listen(3011);
