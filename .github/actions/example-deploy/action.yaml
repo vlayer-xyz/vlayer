@@ -1,0 +1,111 @@
+name: Example deploy prerequisites
+description: Installs & builds example prerequisites.
+inputs:
+  EXAMPLE_NAME:
+    description: 'Name of the example to deploy'
+    required: true
+  EXAMPLES_TEST_PRIVATE_KEY:
+    description: 'Private key for the example'
+    required: true
+  VERCEL_TOKEN:
+    description: 'Vercel token'
+    required: true
+  VERCEL_PROJECT_ID:
+    description: 'Vercel project ID'
+    required: true
+  VERCEL_ORG_ID:
+    description: 'Vercel organization ID'
+    required: true
+  GITHUB_TOKEN:
+    description: 'Github token'
+    required: true
+  JSON_RPC_URL:
+    description: 'JSON RPC URL'
+    required: true
+runs:
+  using: "composite"
+  steps:
+    - name: Install contracts prerequisites
+      uses: ./.github/actions/contracts-prerequisites
+
+    - uses: oven-sh/setup-bun@v2
+
+    - name: Download nightly contracts
+      shell: bash
+      run: |
+        curl https://vlayer-releases.s3.eu-north-1.amazonaws.com/latest/vlayer.zip -o vlayer.zip
+
+    - name: Extract nightly contracts
+      shell: bash
+      run: |
+        mkdir -p nightly-contracts
+        unzip vlayer.zip -d ./nightly-contracts
+
+    - name: Copy nightly ImageID to contracts
+      shell: bash
+      run: |
+        rm contracts/vlayer/src/ImageID.sol
+        cp ./nightly-contracts/src/ImageID.sol contracts/vlayer/src/ImageID.sol
+        rm -rf ./nightly-contracts
+
+    - name: Install contracts' dependencies
+      shell: bash
+      working-directory: ./contracts/vlayer
+      run: forge soldeer install && forge build
+
+    - name: Build vlayer sdk
+      shell: bash
+      run: bun install && bun run build
+      working-directory: ./packages/sdk
+
+    - name: Build example contracts
+      shell: bash
+      run: forge soldeer install && forge clean && forge build
+      working-directory: ./examples/${{ inputs.EXAMPLE_NAME }}
+
+    - name: Install example dependencies
+      shell: bash
+      run: bun install
+      working-directory: ./examples/${{ inputs.EXAMPLE_NAME }}/vlayer
+
+    - name: Install Vercel
+      shell: bash
+      run: npm install -g vercel
+
+    - name: Deploy contracts
+      shell: bash
+      run: bun run deploy:testnet
+      env:
+        VLAYER_ENV: testnet
+        JSON_RPC_URL: ${{ inputs.JSON_RPC_URL }}
+        EXAMPLES_TEST_PRIVATE_KEY: ${{ inputs.EXAMPLES_TEST_PRIVATE_KEY }}
+      working-directory: ./examples/${{ inputs.EXAMPLE_NAME }}/vlayer
+
+    - name: Build vite
+      shell: bash
+      run: bun run vite build
+      working-directory: ./examples/${{ inputs.EXAMPLE_NAME }}/vlayer
+
+    - name: Deploy to Vercel
+      if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
+      shell: bash
+      env:
+        VERCEL_ENV: production
+        VERCEL_TOKEN: ${{ inputs.VERCEL_TOKEN }}
+        VERCEL_PROJECT_ID: ${{ inputs.VERCEL_PROJECT_ID }}
+        VERCEL_ORG_ID: ${{ inputs.VERCEL_ORG_ID }}
+        GITHUB_TOKEN: "${{ inputs.GITHUB_TOKEN }}"
+        EXAMPLE_NAME: ${{ inputs.EXAMPLE_NAME }}
+      run: bash/deploy-to-vercel.sh
+    - name: Deploy to Vercel (PR Preview)
+      if: github.event_name == 'pull_request'
+      shell: bash
+      env:
+        VERCEL_ENV: preview
+        VERCEL_TOKEN: ${{ inputs.VERCEL_TOKEN }}
+        VERCEL_PROJECT_ID: ${{ inputs.VERCEL_PROJECT_ID }}
+        VERCEL_ORG_ID: ${{ inputs.VERCEL_ORG_ID }}
+        GITHUB_TOKEN: "${{ inputs.GITHUB_TOKEN }}"
+        PR_NUMBER: "${{ github.event.number }}"
+        EXAMPLE_NAME: ${{ inputs.EXAMPLE_NAME }}
+      run: bash/deploy-to-vercel.sh
