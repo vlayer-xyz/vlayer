@@ -56,8 +56,8 @@ export const useProofContext = () => {
     throw new Error("useProofContext must be used within a ProofProvider");
   }
   return {
-    webProofContext,
-    proverContext,
+    ...webProofContext,
+    ...proverContext,
     config: { ...webProofContext.config, ...proverContext.config },
   };
 };

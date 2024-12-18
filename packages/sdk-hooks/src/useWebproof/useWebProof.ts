@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { type Abi, type ContractFunctionName } from "viem";
-import { useVlayerContext } from "../context";
+import { useProofContext } from "../context";
 import { WebProofRequestStatus } from "../types";
 import {
   ExtensionMessageType,
@@ -11,7 +11,7 @@ import {
 export const useWebProof = (
   webProofRequest: GetWebProofArgs<Abi, ContractFunctionName>,
 ) => {
-  const { webProofProvider } = useVlayerContext();
+  const { webProofProvider } = useProofContext();
   const [webProof, setWebProof] = useState<PresentationJSON | null>(null);
   const [error, setError] = useState<Error | null>(null);
   const [status, setStatus] = useState<WebProofRequestStatus>(

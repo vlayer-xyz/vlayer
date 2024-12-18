@@ -1,7 +1,7 @@
 import { act, renderHook } from "@testing-library/react";
 import { it, expect, describe, vi, beforeEach } from "vitest";
 import { useWebProof } from "./useWebProof";
-import { VlayerProvider } from "../context";
+import { ProofProvider } from "../context";
 import { MockExtensionWebProofProvider } from "./extension.mock";
 import { WebProofRequestStatus } from "../types";
 
@@ -39,7 +39,7 @@ describe("useWebproof", () => {
   });
 
   const VlayerMockContext = ({ children }: { children: React.ReactNode }) => (
-    <VlayerProvider>{children}</VlayerProvider>
+    <ProofProvider>{children}</ProofProvider>
   );
 
   const renderWebproofHook = () =>
@@ -54,9 +54,9 @@ describe("useWebproof", () => {
     vi.runAllTimers();
   };
 
-  it("should throw error if called outside of VlayerProvider", () => {
+  it("should throw error if called outside of ProofProvider", () => {
     expect(() => renderHook(() => useWebProof(stubWebProofRequest))).toThrow(
-      "useVlayerContext must be used within a VlayerProvider",
+      "useProofContext must be used within a ProofProvider",
     );
   });
 

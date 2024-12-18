@@ -17,18 +17,21 @@ describe("Context Providers and Hooks", () => {
         renderHook(() => useProofContext());
       }).toThrow("useProofContext must be used within a ProofProvider");
     });
+
     it("should provide both WebProof and Prover contexts", () => {
       const config = {
         proverUrl: "test-prover-url",
         notaryUrl: "test-notary-url",
         wsProxyUrl: "test-ws-url",
       };
+
       const wrapper = ({ children }: PropsWithChildren) => (
         <ProofProvider config={config}>{children}</ProofProvider>
       );
+
       const { result } = renderHook(() => useProofContext(), { wrapper });
-      expect(result.current.webProofContext).toBeDefined();
-      expect(result.current.proverContext).toBeDefined();
+      expect(result.current.webProofProvider).toBeDefined();
+      expect(result.current.vlayerClient).toBeDefined();
       expect(result.current.config).toEqual(config);
     });
 
@@ -37,9 +40,11 @@ describe("Context Providers and Hooks", () => {
         env: ProofEnv.TESTNET,
         wsProxyUrl: "test-ws-url",
       };
+
       const wrapper = ({ children }: PropsWithChildren) => (
         <ProofProvider config={config}>{children}</ProofProvider>
       );
+
       const { result } = renderHook(() => useProofContext(), { wrapper });
       expect(result.current.config).toEqual({
         ...DEFAULT_CONFIG[ProofEnv.TESTNET],
@@ -51,9 +56,11 @@ describe("Context Providers and Hooks", () => {
       const config = {
         proverUrl: "custom-url",
       };
+
       const wrapper = ({ children }: PropsWithChildren) => (
         <ProofProvider config={config}>{children}</ProofProvider>
       );
+
       const { result } = renderHook(() => useProofContext(), { wrapper });
       expect(result.current.config).toEqual({
         ...DEFAULT_CONFIG[DEFAULT_CONFIG_ENV],
@@ -73,6 +80,7 @@ describe("Context Providers and Hooks", () => {
       const wrapper = ({ children }: PropsWithChildren) => (
         <ProofProvider>{children}</ProofProvider>
       );
+
       const { result } = renderHook(() => useWebProofContext(), { wrapper });
       expect(result.current.webProofProvider).toBeDefined();
     });
@@ -89,6 +97,7 @@ describe("Context Providers and Hooks", () => {
       const wrapper = ({ children }: PropsWithChildren) => (
         <ProofProvider>{children}</ProofProvider>
       );
+
       const { result } = renderHook(() => useProverContext(), { wrapper });
       expect(result.current.vlayerClient).toBeDefined();
     });
