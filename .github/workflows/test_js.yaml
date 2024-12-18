@@ -25,6 +25,12 @@ jobs:
       - name: Install packages
         working-directory: packages
         run: bun install --frozen-lockfile
+      - name: Build sdk
+        working-directory: packages/sdk
+        run: bun run build
+      - name: install sdk
+        working-directory: packages/sdk-hooks
+        run: bun install
       - name: Run JS tests
         working-directory: packages
         run: "bun --filter '*' test:unit"
