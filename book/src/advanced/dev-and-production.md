@@ -2,7 +2,7 @@
 
 The vlayer network consists of services nodes: provers, indexers, notaries and proxies. This nodes are necessary for execution of vlayer smart contracts features like [time travel](/features/time-travel.html), [teleport](/features/teleport.html), [email](/features/email.html) / [web](/features/web.html) proofs.
 
-There are two environments supported:
+Currently, there are two environments supported:
 - **testnet** - predeployed public environment supporting multiple testnets, running in FAKE mode for quick development and testing
 - **devnet** - local environment that runs with Docker Compose, providing all necessary services for development
 
