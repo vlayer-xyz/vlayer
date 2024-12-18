@@ -15,15 +15,16 @@ Test Prover operates in [`FAKE` mode](/advanced/dev-and-production.html#prover-m
 
 | chain | time travel | teleport | email/web |
 |---------|-------------|----------|-----------|
-| sepolia | ✅         | ✅      | ✅         |
+| sepolia | 🚧         | ✅      | ✅         |
 | optimismSepolia | ✅         | ✅      | ✅         |
-| baseSepolia | ✅         | ✅      | ✅         |
-| polygonAmoy | ✅         | ✅      | ✅         |
-| arbitrumSepolia | ✅         | ✅      | ✅         |
-| lineaSepolia | ✅         | ✅      | ✅         |
-| worldchainSepolia | ✅         | ✅      | ✅         |
-| zksyncSepoliaTestnet | ✅         | ✅      | ✅         |
+| baseSepolia | 🚧        | ✅      | ✅         |
+| polygonAmoy |          |       | ✅         |
+| arbitrumSepolia |          |       | ✅         |
+| lineaSepolia |          |       | ✅         |
+| worldchainSepolia |          |       | ✅         |
+| zksyncSepoliaTestnet |          |       | ✅         |
 
+✅ supported, 🚧 in progress
 ## Devnet
 Docker Compose allows running the full stack locally, including anvil devnets and all required vlayer nodes.
 
