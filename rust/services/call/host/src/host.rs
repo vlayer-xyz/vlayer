@@ -257,8 +257,8 @@ mod test {
             config,
         );
         let call = Call {
-            to: Default::default(),
             data: vec![0; max_call_data_size + 1],
+            ..Default::default()
         };
 
         assert_eq!(
