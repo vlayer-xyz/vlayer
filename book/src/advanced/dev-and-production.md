@@ -35,21 +35,22 @@ Test Prover operates in [`FAKE` mode](/advanced/dev-and-production.html#prover-m
 | websocket proxy       | `https://test-wsproxy.vlayer.xyz`| Proxying websocket connections for TLS Notary           |
 
 ## Devnet
-Docker Compose allows running the full stack locally, including anvil devnets and all required vlayer nodes.
+Devnet allows running the full stack locally, including anvil and all required vlayer nodes.
 
-### Prerequisites
+### Starting devnet
+#### Prerequisites
 - [Docker](https://docs.docker.com/get-docker/)
 - [Docker Compose](https://docs.docker.com/compose/install/)
 
-### Starting devnet
 #### From vlayer project
-Navigate to the `${project}/vlayer` directory and start services in the background:
+Navigate to the vlayer project directory and start services in the background:
 ```bash
 cd ${project}/vlayer
 bun run devnet
 ```
+
 #### Outside of vlayer project
-Use vlayer [Docker Compose file](https://install.vlayer.xyz/devnet) to start services:
+Download and run vlayer [Docker Compose](https://install.vlayer.xyz/devnet) to start services:
 ```sh
 docker compose -f <(curl -L https://install.vlayer.xyz/devnet) up -d
 ```
