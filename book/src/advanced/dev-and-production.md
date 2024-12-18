@@ -28,18 +28,19 @@ Test Prover operates in [`FAKE` mode](/advanced/dev-and-production.html#prover-m
 ## Devnet
 Docker Compose allows running the full stack locally, including anvil devnets and all required vlayer nodes.
 
+### Prerequisites
+- [Docker](https://docs.docker.com/get-docker/)
+- [Docker Compose](https://docs.docker.com/compose/install/)
+
 ### Starting devnet
-1. Ensure [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) are installed on your system. 
-2. Navigate to the `${project}/vlayer` directory
+#### From vlayer project
+Navigate to the `${project}/vlayer` directory and start services in the background:
 ```bash
 cd ${project}/vlayer
-```
-3. Start services
-```bash
 bun run devnet
 ```
-
-Optionally, one may run devnet locally outside of the vlayer project directory using vlayer [Docker Compose file](https://install.vlayer.xyz/devnet):
+#### Outside of vlayer project
+Use vlayer [Docker Compose file](https://install.vlayer.xyz/devnet) to start services:
 ```sh
 docker compose -f <(curl -L https://install.vlayer.xyz/devnet) up -d
 ```
@@ -55,17 +56,16 @@ docker compose -f <(curl -L https://install.vlayer.xyz/devnet) up -d
 | notary   | `http://127.0.0.1:7047` | TLS Notary server               |
 | websocket proxy       | `http://127.0.0.1:55688`| Proxying websocket connections            |
  
-#### Stopping devnet
-1. Stop all running services:
-   ```bash
-   docker compose down
-   ```
-2. Data persistence:
-   - Data stored in `./chain_db` is preserved.
-   - To delete all data, remove the `./chain_db` directory:
-     ```bash
-     rm -rf ./chain_db
-     ```
+### Stopping devnet
+Stop all running services:
+```bash
+docker compose down
+```
+### Clear cache
+Cached proofs for time-travel and teleport are stored in `./chain_db` and can be deleted manually:
+```bash
+rm -rf ./chain_db
+```
 
 ## Prover modes
 Prover server supports two proving modes:
@@ -74,10 +74,7 @@ Prover server supports two proving modes:
 
 ### FAKE Mode
 
-Testnet and devnet provers are running in `FAKE` mode by default. Fake mode can be enabled explicitly by using the `--proof` argument:
-```sh
-serve --proof fake
-```
+Testnet and devnet provers are running in `FAKE` mode by default.
 > Note: FAKE mode is limited to dev and test chains to prevent accidental errors.
 
 ### GROTH16 Mode
@@ -85,7 +82,7 @@ serve --proof fake
 
 To speed up proof generation, vlayer supports the use of infrastructure like the [Bonsai](https://www.bonsai.xyz/) (and eventually [Boundless](https://beboundless.xyz/)) to offload heavy computations to high-performance machines.
 
-To run prover node in production mode, modify `docker-compose.devnet.yaml`:
+To run prover node in production mode, download and modify `docker-compose.devnet.yaml`:
 
 ```yaml
 # rest of config

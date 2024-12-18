@@ -91,7 +91,7 @@ bun run prove:testnet
 ```
 
 ### Run on a local devnet
-Recommended way to start local environment for development is by using [Docker](/advanced/dev-and-production.html#devnet): 
+If you want to run on local environment, use [Docker](/advanced/dev-and-production.html#devnet): 
 
 ```bash
 $ bun run devnet
@@ -99,7 +99,7 @@ $ bun run devnet
 
 Above command starts all required services in the background.
 
-Once vlayer devnet is up, run the example within the `vlayer` directory:
+Once the devnet is up, run the example within the `vlayer` directory:
 
 ```sh
 bun run prove:dev
