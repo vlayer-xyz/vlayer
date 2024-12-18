@@ -3,6 +3,7 @@ use alloy_primitives::{address, b256, uint, Address};
 use ethers_core::types::BlockNumber as BlockTag;
 
 use crate::{
+    host::tests::GAS_LIMIT,
     test_harness::{preflight, ExecutionLocation},
     Call,
 };
@@ -17,7 +18,7 @@ mod usdt {
     async fn erc20_balance_of() -> anyhow::Result<()> {
         let location: ExecutionLocation = (Chain::mainnet().id(), BLOCK_NO).into();
         let binance_8 = address!("F977814e90dA44bFA03b6295A0616a897441aceC");
-        let call = Call::new(USDT, &balanceOfCall { account: binance_8 }, 0);
+        let call = Call::new(USDT, &balanceOfCall { account: binance_8 }, GAS_LIMIT);
         let result = preflight::<balanceOfCall>("usdt_erc20_balance_of", call, &location).await?;
         assert_eq!(result._0, uint!(3_000_000_000_000_000_U256));
 
@@ -29,7 +30,7 @@ mod usdt {
         let location: ExecutionLocation =
             (Chain::optimism_mainnet().id(), OPTIMISM_BLOCK_NO).into();
         let binance = address!("acD03D601e5bB1B275Bb94076fF46ED9D753435A");
-        let call = Call::new(OPTIMISM_USDT, &balanceOfCall { account: binance }, 0);
+        let call = Call::new(OPTIMISM_USDT, &balanceOfCall { account: binance }, GAS_LIMIT);
         let result = preflight::<balanceOfCall>("usdt_erc20_balance_of", call, &location).await?;
 
         assert_eq!(result._0, uint!(40_819_866_868_520_U256));
@@ -48,7 +49,7 @@ mod uniswap {
     #[tokio::test(flavor = "multi_thread")]
     async fn factory_owner() -> anyhow::Result<()> {
         let location: ExecutionLocation = (Chain::mainnet().id(), BlockTag::Latest).into();
-        let call = Call::new(UNISWAP, &ownerCall {}, 0);
+        let call = Call::new(UNISWAP, &ownerCall {}, GAS_LIMIT);
         let ownerReturn { _0: owner } =
             preflight::<ownerCall>("uniswap_factory_owner", call, &location).await?;
         assert_eq!(owner, address!("1a9c8182c09f50c8318d769245bea52c32be35bc")); // UNI Timelock
@@ -75,7 +76,7 @@ mod view {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn precompile() -> anyhow::Result<()> {
-        let call = Call::new(VIEW_CALL, &testPrecompileCall {}, 0);
+        let call = Call::new(VIEW_CALL, &testPrecompileCall {}, GAS_LIMIT);
         let result = preflight::<testPrecompileCall>("view_precompile", call, &LOCATION).await?;
         assert_eq!(
             result._0,
@@ -88,7 +89,7 @@ mod view {
     #[tokio::test(flavor = "multi_thread")]
     async fn nonexistent_account() -> anyhow::Result<()> {
         let sol_call = testNonexistentAccountCall {};
-        let call = Call::new(VIEW_CALL, &sol_call, 0);
+        let call = Call::new(VIEW_CALL, &sol_call, GAS_LIMIT);
         let result =
             preflight::<testNonexistentAccountCall>("view_nonexistent_account", call, &LOCATION)
                 .await?;
@@ -99,7 +100,7 @@ mod view {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn eoa_account() -> anyhow::Result<()> {
-        let call = Call::new(VIEW_CALL, &testEoaAccountCall {}, 0);
+        let call = Call::new(VIEW_CALL, &testEoaAccountCall {}, GAS_LIMIT);
         let result = preflight::<testEoaAccountCall>("view_eoa_account", call, &LOCATION).await?;
         assert_eq!(result.size, uint!(0_U256));
 
@@ -108,7 +109,7 @@ mod view {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn blockhash() -> anyhow::Result<()> {
-        let call = Call::new(VIEW_CALL, &testBlockhashCall {}, 0);
+        let call = Call::new(VIEW_CALL, &testBlockhashCall {}, GAS_LIMIT);
         let result = preflight::<testBlockhashCall>(
             "view_blockhash",
             call,
@@ -125,7 +126,7 @@ mod view {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn chainid() -> anyhow::Result<()> {
-        let call = Call::new(VIEW_CALL, &testChainidCall {}, 0);
+        let call = Call::new(VIEW_CALL, &testChainidCall {}, GAS_LIMIT);
         let result = preflight::<testChainidCall>("view_chainid", call, &LOCATION).await?;
         assert_eq!(result._0, uint!(11_155_111_U256));
 
@@ -134,7 +135,7 @@ mod view {
 
     #[tokio::test(flavor = "multi_thread")]
     async fn multi_contract_calls() -> anyhow::Result<()> {
-        let call = Call::new(VIEW_CALL, &testMuliContractCallsCall {}, 0);
+        let call = Call::new(VIEW_CALL, &testMuliContractCallsCall {}, GAS_LIMIT);
         let result =
             preflight::<testMuliContractCallsCall>("view_multi_contract_calls", call, &LOCATION)
                 .await?;
@@ -146,7 +147,7 @@ mod view {
     #[tokio::test(flavor = "multi_thread")]
     async fn call_eoa() -> anyhow::Result<()> {
         let vitalik = address!("d8dA6BF26964aF9D7eEd9e03E53415D37aA96045");
-        let call = Call::new(vitalik, &testEoaAccountCall {}, 0);
+        let call = Call::new(vitalik, &testEoaAccountCall {}, GAS_LIMIT);
         preflight::<testEoaAccountCall>("view_call_eoa", call, &LOCATION)
             .await
             .expect_err("calling an EOA should fail");
@@ -166,7 +167,7 @@ mod teleport {
     async fn teleport_to_unknown_chain_returns_an_error_but_does_not_panic() -> anyhow::Result<()> {
         let location: ExecutionLocation = (AnvilHardhat, BLOCK_NO).into();
         let owner = Address::ZERO;
-        let call = Call::new(SIMPLE_TELEPORT, &crossChainBalanceOfCall { owner }, 0);
+        let call = Call::new(SIMPLE_TELEPORT, &crossChainBalanceOfCall { owner }, GAS_LIMIT);
         let result = preflight::<crossChainBalanceOfCall>("simple_teleport", call, &location).await;
         assert_eq!(
             result.unwrap_err().to_string(),
