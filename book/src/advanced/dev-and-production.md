@@ -26,7 +26,7 @@ Test Prover operates in [`FAKE` mode](/advanced/dev-and-production.html#prover-m
 
 ✅ supported, 🚧 in progress
 
-### Testnet services
+### Public testnet services
 | Service                  | Endpoint                 | Description                               |
 |--------------------------|--------------------------|-------------------------------------------|
 | prover         | `https://test-prover.vlayer.xyz` | zkEVM prover for vlayer contracts             |
