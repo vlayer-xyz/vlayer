@@ -6,12 +6,13 @@ import {Web, WebProof, WebProofLib, WebLib} from "vlayer/WebProof.sol";
 
 import "@openzeppelin-contracts-5.0.1/utils/Strings.sol";
 
-contract UnconditionalProver is Prover {
+// this prover contract is used in playwright e2e tests
+contract LotrApiProver is Prover {
     using Strings for string;
     using WebProofLib for WebProof;
     using WebLib for Web;
 
-    string private constant DATA_URL = "https://lotr-api.online:3011/regular_json";
+    string private constant DATA_URL = "https://lotr-api.online:3011/regular_json?are_you_sure=yes";
     string private constant NOTARY_PUB_KEY =
         "-----BEGIN PUBLIC KEY-----\nMFYwEAYHKoZIzj0CAQYFK4EEAAoDQgAEe0jxnBObaIj7Xjg6TXLCM1GG/VhY5650\nOrS/jgcbBufo/QDfFvL/irzIv1JSmhGiVcsCHCwolhDXWcge7v2IsQ==\n-----END PUBLIC KEY-----\n";
 
@@ -21,6 +22,8 @@ contract UnconditionalProver is Prover {
         Web memory web = WebProofLib.recover(webProof);
 
         require(NOTARY_PUB_KEY.equal(web.notaryPubKey), "Incorrect notary public key");
+
+        require(web.jsonGetBool("success"), "Got unsuccessful response in WebProof");
 
         return true;
     }

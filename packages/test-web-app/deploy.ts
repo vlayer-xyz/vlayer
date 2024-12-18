@@ -1,14 +1,13 @@
-import unconditionalProverSpec from "../../contracts/fixtures/out/UnconditionalProver.sol/UnconditionalProver";
+import lotrApiProverSpec from "../../contracts/fixtures/out/LotrApiProver.sol/LotrApiProver";
 import emailProverSpec from "../../contracts/fixtures/out/EmailProver.sol/EmailProver";
 
 import {
   writeEnvVariables,
-  getConfig,
   deployProver,
 } from "@vlayer/sdk/config";
 
 const unconditionalProver = await deployProver({
-  proverSpec: unconditionalProverSpec,
+  proverSpec: lotrApiProverSpec,
 });
 
 const emailProver = await deployProver({
@@ -16,6 +15,6 @@ const emailProver = await deployProver({
 });
 
 writeEnvVariables(".env", {
-  VITE_UNCONDITIONAL_PROVER_ADDRESS: unconditionalProver,
+  VITE_LOTR_API_PROVER_ADDRESS: unconditionalProver,
   VITE_EMAIL_PROVER_ADDRESS: emailProver,
 });
