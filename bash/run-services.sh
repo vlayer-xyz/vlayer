@@ -103,6 +103,7 @@ function startup_chain_worker() {
         --db-path "${db_path}" \
         --rpc-url "${rpc_url}" \
         --chain-id "${chain_id}" \
+        --proof-mode "${SERVER_PROOF_ARG}" \
         --confirmations "${CONFIRMATIONS:-1}" \
         --start-block "${start_block}" \
         --max-head-blocks "${MAX_HEAD_BLOCKS:-10}" \
