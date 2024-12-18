@@ -55,7 +55,10 @@ export type VGetProofReceiptParams = {
 
 export enum VGetProofReceiptStatus {
   pending = "pending",
-  done = "done",
+  waiting_for_chain_proof = "waiting_for_chain_proof",
+  preflight = "preflight",
+  proving = "proving",
+  ready = "ready",
 }
 
 export interface VGetProofReceiptResult {

@@ -9,7 +9,11 @@ import {
 
 import { createExtensionWebProofProvider } from "../webProof";
 import { createVlayerClient } from "./client";
-import { type BrandedHash, type VlayerClient } from "types/vlayer";
+import {
+  VGetProofReceiptStatus,
+  type BrandedHash,
+  type VlayerClient,
+} from "types/vlayer";
 import { ZkProvingStatus } from "../../web-proof-commons";
 import createFetchMock from "vitest-fetch-mock";
 
@@ -93,12 +97,31 @@ describe("Success zk-proving", () => {
       chainId: 42,
     });
 
-    fetchMocker.mockResponseOnce(() => {
+    let state = VGetProofReceiptStatus.pending;
+    fetchMocker.mockResponse(() => {
+      switch (state) {
+        case VGetProofReceiptStatus.pending:
+          state = VGetProofReceiptStatus.waiting_for_chain_proof;
+          break;
+        case VGetProofReceiptStatus.waiting_for_chain_proof:
+          state = VGetProofReceiptStatus.preflight;
+          break;
+        case VGetProofReceiptStatus.preflight:
+          state = VGetProofReceiptStatus.proving;
+          break;
+        case VGetProofReceiptStatus.proving:
+          state = VGetProofReceiptStatus.ready;
+          break;
+        default:
+          state = VGetProofReceiptStatus.pending;
+          break;
+      }
+
       return {
         body: JSON.stringify({
           result: {
-            status: "done",
-            data: {},
+            status: state as string,
+            data: state === VGetProofReceiptStatus.ready ? {} : undefined,
           },
         }),
       };
@@ -108,6 +131,7 @@ describe("Success zk-proving", () => {
     await vlayer.waitForProvingResult({ hash });
 
     expect(zkProvingSpy).toBeCalledTimes(2);
+    expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Proving);
     expect(zkProvingSpy).toHaveBeenNthCalledWith(2, ZkProvingStatus.Done);
   });
   it("should notify that zk-proving failed", async () => {
