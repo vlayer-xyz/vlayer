@@ -132,6 +132,7 @@ pub struct HostOutput {
     pub guest_output: GuestOutput,
     pub proof_len: usize,
     pub call_guest_id: CallGuestId,
+    pub cycles_used: u64,
 }
 
 #[derive(Debug, Clone)]
