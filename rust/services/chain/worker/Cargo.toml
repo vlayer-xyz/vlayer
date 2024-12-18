@@ -12,6 +12,7 @@ clap = { workspace = true, features = ["derive", "env"] }
 common = { workspace = true }
 derivative = { workspace = true }
 dotenvy = { workspace = true }
+ethers = { workspace = true }
 tokio = { workspace = true }
 tower = { workspace = true, features = ["retry", "timeout"] }
 tracing = { workspace = true }

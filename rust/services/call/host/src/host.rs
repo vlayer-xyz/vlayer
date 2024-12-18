@@ -46,7 +46,6 @@ pub struct Host {
     chain_client: chain_client::RecordingClient,
     chain_proof_verifier: chain_proof::ZkVerifier,
     max_calldata_size: usize,
-    verify_chain_proofs: bool,
     guest_elf: GuestElf,
 }
 
@@ -118,7 +117,6 @@ impl Host {
             chain_client,
             chain_proof_verifier,
             max_calldata_size: config.max_calldata_size,
-            verify_chain_proofs: config.verify_chain_proofs,
             guest_elf: config.call_guest_elf,
         }
     }
@@ -148,15 +146,10 @@ impl Host {
         let multi_evm_input =
             into_multi_input(self.envs).map_err(|err| Error::CreatingInput(err.to_string()))?;
 
-        let chain_proofs = if self.verify_chain_proofs {
-            let verifier =
-                guest_input::ZkVerifier::new(self.chain_client, self.chain_proof_verifier);
-            verifier.verify(&multi_evm_input).await?;
-            let (chain_proof_client, _) = verifier.into_parts();
-            Some(chain_proof_client.into_cache())
-        } else {
-            None
-        };
+        let verifier = guest_input::ZkVerifier::new(self.chain_client, self.chain_proof_verifier);
+        verifier.verify(&multi_evm_input).await?;
+        let (chain_proof_client, _) = verifier.into_parts();
+        let chain_proofs = chain_proof_client.into_cache();
 
         let input = Input {
             multi_evm_input,

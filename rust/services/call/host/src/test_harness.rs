@@ -72,7 +72,6 @@ fn create_host(
     let config = Config {
         call_guest_elf: CALL_GUEST_ELF.clone(),
         chain_guest_elf: CHAIN_GUEST_ELF.clone(),
-        verify_chain_proofs: true,
         ..Default::default()
     };
     let block_number =

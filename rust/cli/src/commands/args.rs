@@ -36,9 +36,6 @@ pub(crate) struct ServeArgs {
     #[arg(long)]
     pub(crate) chain_proof_url: Option<String>,
 
-    #[arg(long)]
-    pub(crate) verify_chain_proofs: bool,
-
     /// URL of the gas meter RPC server
     #[arg(long, group = "gas_meter", env)]
     pub(crate) gas_meter_url: Option<String>,

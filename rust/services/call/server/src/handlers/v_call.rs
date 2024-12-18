@@ -17,8 +17,8 @@ use crate::{
 
 pub mod types;
 
-const CHAIN_PROOF_POLL_INTERVAL: Duration = Duration::from_secs(1);
-const CHAIN_PROOF_TIMEOUT: Duration = Duration::from_secs(60);
+const CHAIN_PROOF_POLL_INTERVAL: Duration = Duration::from_secs(5);
+const CHAIN_PROOF_TIMEOUT: Duration = Duration::from_secs(120);
 
 pub async fn v_call(
     config: SharedConfig,
@@ -32,7 +32,10 @@ pub async fn v_call(
 
     let host = build_host(&config, context.chain_id, call.to).await?;
     let call_hash = (&host.start_execution_location(), &call).into();
-    info!("Calculated hash: {}", call_hash);
+    info!(
+        "Start execution location: {:?} call hash: {call_hash}",
+        host.start_execution_location()
+    );
     let gas_meter_client = init_gas_meter(&config, call_hash, params.token, call.gas_limit).await?;
     state.insert(call_hash, ProofStatus::Pending);
 
@@ -83,9 +86,15 @@ async fn generate_proof(
     state: SharedProofs,
     call_hash: CallHash,
 ) -> Result<HostOutput, AppError> {
+    info!("Processing call {call_hash}");
+
     // Wait for chain proof if necessary
     let start = tokio::time::Instant::now();
     while !host.chain_proof_ready().await? {
+        info!(
+            "Location {:?} not indexed. Waiting for chain proof",
+            host.start_execution_location()
+        );
         state.insert(call_hash, ProofStatus::WaitingForChainProof);
         tokio::time::sleep(CHAIN_PROOF_POLL_INTERVAL).await;
         if start.elapsed() > CHAIN_PROOF_TIMEOUT {
@@ -93,6 +102,7 @@ async fn generate_proof(
         }
     }
 
+    info!("Executing preflight for call {call_hash}");
     state.insert(call_hash, ProofStatus::Preflight);
     let prover = host.prover();
     let call_guest_id = host.call_guest_id();
@@ -103,6 +113,7 @@ async fn generate_proof(
         .refund(ComputationStage::Preflight, gas_used)
         .await?;
 
+    info!("Generating proof for call {call_hash}");
     state.insert(call_hash, ProofStatus::Proving);
     let host_output = Host::prove(&prover, call_guest_id, preflight_result)?;
 

@@ -137,7 +137,7 @@ pub struct GetSyncStatus {
 }
 
 impl Method for GetSyncStatus {
-    const METHOD_NAME: &str = "v_sync_status";
+    const METHOD_NAME: &str = "v_getSyncStatus";
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, new)]

@@ -1,6 +1,6 @@
 use ethers::{
     providers::{MockProvider, Provider},
-    types::Block,
+    types::{Block, U64},
 };
 use provider::{to_eth_block_header, to_ethers_h256, BlockNumber, EvmBlockHeader};
 use serde_json::{from_value, json};
@@ -61,6 +61,7 @@ pub fn fake_block_with_incorrect_parent_hash(number: BlockNumber) -> Box<dyn Evm
 
 pub fn mock_provider(
     block_numbers: impl IntoIterator<Item = BlockNumber>,
+    latest_block_number: Option<BlockNumber>,
 ) -> Provider<MockProvider> {
     let (provider, mock) = Provider::mocked();
     // Mock provider is a stack (LIFO). Therefore we need to push the mock values in reverse order
@@ -68,6 +69,11 @@ pub fn mock_provider(
     for block_number in reverse_block_numbers {
         mock.push(fake_rpc_block_with_correct_parent_hash(block_number))
             .expect("could not push block");
+    }
+
+    if let Some(block_number) = latest_block_number {
+        mock.push(U64::from(block_number))
+            .expect("could not push latest block number");
     }
     provider
 }

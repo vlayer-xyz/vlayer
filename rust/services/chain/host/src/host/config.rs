@@ -2,6 +2,7 @@ use std::path::PathBuf;
 
 use alloy_primitives::ChainId;
 use common::GuestElf;
+use ethers::types::BlockNumber as BlockTag;
 use host_utils::ProofMode;
 
 use super::strategy::{AppendStrategy, PrependStrategy};
@@ -13,6 +14,7 @@ pub struct HostConfig {
     pub proof_mode: ProofMode,
     pub db_path: PathBuf,
     pub elf: GuestElf,
+    pub start_block: BlockTag,
     pub prepend_strategy: PrependStrategy,
     pub append_strategy: AppendStrategy,
 }

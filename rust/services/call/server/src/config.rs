@@ -16,7 +16,6 @@ pub struct Config {
     proof_mode: ProofMode,
     chain_proof_url: Option<String>,
     max_request_size: usize,
-    verify_chain_proofs: bool,
     call_guest_elf: GuestElf,
     chain_guest_elf: GuestElf,
     api_version: String,
@@ -72,7 +71,6 @@ impl ConfigBuilder {
                 rpc_urls: HashMap::from([(TEST_CHAIN_ID, "http://localhost:8545".to_string())]),
                 proof_mode: ProofMode::Groth16,
                 max_request_size: DEFAULT_MAX_CALLDATA_SIZE,
-                verify_chain_proofs: false,
                 api_version,
                 gas_meter_config: None,
             },
@@ -111,11 +109,6 @@ impl ConfigBuilder {
         self
     }
 
-    pub const fn with_verify_chain_proofs(mut self, verify: bool) -> Self {
-        self.config.verify_chain_proofs = verify;
-        self
-    }
-
     pub fn with_semver(mut self, semver: String) -> Self {
         self.config.api_version = semver;
         self
@@ -139,7 +132,6 @@ impl From<&Config> for HostConfig {
         HostConfig {
             proof_mode: config.proof_mode.into(),
             max_calldata_size: config.max_request_size,
-            verify_chain_proofs: config.verify_chain_proofs,
             call_guest_elf: config.call_guest_elf.clone(),
             chain_guest_elf: config.chain_guest_elf.clone(),
         }

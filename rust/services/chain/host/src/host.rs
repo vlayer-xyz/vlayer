@@ -30,6 +30,7 @@ where
     fetcher: BlockFetcher<P>,
     chain_id: ChainId,
     elf: GuestElf,
+    start_block: BlockTag,
     prepend_strategy: PrependStrategy,
     append_strategy: AppendStrategy,
 }
@@ -46,6 +47,7 @@ impl Host<Http> {
             db,
             config.chain_id,
             config.elf,
+            config.start_block,
             config.prepend_strategy,
             config.append_strategy,
         ))
@@ -56,12 +58,14 @@ impl<P> Host<P>
 where
     P: JsonRpcClient,
 {
+    #[allow(clippy::too_many_arguments)]
     pub const fn from_parts(
         prover: Prover,
         block_fetcher: BlockFetcher<P>,
         db: ChainDb,
         chain_id: ChainId,
         elf: GuestElf,
+        start_block: BlockTag,
         prepend_strategy: PrependStrategy,
         append_strategy: AppendStrategy,
     ) -> Self {
@@ -71,6 +75,7 @@ where
             db,
             chain_id,
             elf,
+            start_block,
             prepend_strategy,
             append_strategy,
         }
@@ -95,17 +100,17 @@ where
     #[instrument(skip(self))]
     async fn initialize(&self) -> Result<ChainUpdate, HostError> {
         info!("Initializing chain");
-        let latest_block = self.fetcher.get_block(BlockTag::Latest).await?;
-        let latest_block_number = latest_block.number();
-        let trie = BlockTrie::init(&latest_block)?;
+        let start_block = self.fetcher.get_block(self.start_block).await?;
+        let start_block_number = start_block.number();
+        let trie = BlockTrie::init(&start_block)?;
 
         let input = Input::Initialize {
             elf_id: self.elf.id,
-            block: latest_block,
+            block: start_block,
         };
         let receipt = self.prover.prove(&input, None)?;
 
-        let range = NonEmptyRange::from_single_value(latest_block_number);
+        let range = NonEmptyRange::from_single_value(start_block_number);
         let chain_update = ChainUpdate::from_two_tries(range, vec![], &trie, &receipt)?;
 
         Ok(chain_update)
@@ -124,12 +129,12 @@ where
             .expect("chain trie not found");
         let mut trie = old_trie.clone();
 
-        let latest_block = self.fetcher.get_block(BlockTag::Latest).await?;
+        let latest_block_number = self.fetcher.get_latest_block_number().await?;
 
         let (new_range, prepend) = self.prepend_strategy.compute_prepend_range(old_range);
         let (new_range, append) = self
             .append_strategy
-            .compute_append_range(new_range, latest_block.number());
+            .compute_append_range(new_range, latest_block_number);
         let prepend_blocks = self.fetcher.get_blocks_range(prepend).await?;
         let append_blocks = self.fetcher.get_blocks_range(append).await?;
         let old_leftmost_block = self.fetcher.get_block(old_range.start().into()).await?;
@@ -189,6 +194,7 @@ mod tests {
             db,
             1,
             GUEST_ELF.clone(),
+            BlockTag::Latest,
             PREPEND_STRATEGY.clone(),
             APPEND_STRATEGY.clone(),
         )
@@ -196,7 +202,7 @@ mod tests {
 
     #[tokio::test]
     async fn initialize() -> anyhow::Result<()> {
-        let host = create_host(test_db(), mock_provider([LATEST]));
+        let host = create_host(test_db(), mock_provider([LATEST], None));
 
         let chain_update = host.poll().await?;
         let Host { mut db, .. } = host;
@@ -212,7 +218,7 @@ mod tests {
         use super::*;
 
         async fn db_after_initialize() -> Result<ChainDb, HostError> {
-            let host = create_host(test_db(), mock_provider([GENESIS]));
+            let host = create_host(test_db(), mock_provider([GENESIS], None));
 
             let init_chain_update = host.poll().await?;
             let Host { mut db, .. } = host;
@@ -223,7 +229,8 @@ mod tests {
 
         #[tokio::test]
         async fn no_new_head_blocks_back_propagation_finished() -> anyhow::Result<()> {
-            let host = create_host(db_after_initialize().await?, mock_provider([GENESIS, GENESIS]));
+            let host =
+                create_host(db_after_initialize().await?, mock_provider([GENESIS], Some(GENESIS)));
 
             let chain_update = host.poll().await?;
             let Host { mut db, .. } = host;
@@ -241,7 +248,7 @@ mod tests {
             let new_confirmed_block = latest - CONFIRMATIONS + 1;
             let host = create_host(
                 db_after_initialize().await?,
-                mock_provider([latest, new_confirmed_block, GENESIS]),
+                mock_provider([new_confirmed_block, GENESIS], Some(latest)),
             );
 
             let chain_update = host.poll().await?;
