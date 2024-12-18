@@ -192,7 +192,7 @@ mod time_travel {
     #[ignore = "Fails due to chain proofs issue"]
     async fn time_travel() -> anyhow::Result<()> {
         let location: ExecutionLocation = (Chain::optimism_sepolia().id(), BLOCK_NO).into();
-        let call = Call::new(SIMPLE_TIME_TRAVEL, &AVERAGE_BALANCE_OF_CALL, 0);
+        let call = Call::new(SIMPLE_TIME_TRAVEL, &AVERAGE_BALANCE_OF_CALL, GAS_LIMIT);
 
         let averageBalanceOfReturn {
             _2: average_balance,
