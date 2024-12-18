@@ -17,8 +17,8 @@ use crate::{
 
 pub mod types;
 
-const CHAIN_PROOF_POLL_INTERVAL: Duration = Duration::from_secs(1);
-const CHAIN_PROOF_TIMEOUT: Duration = Duration::from_secs(60);
+const CHAIN_PROOF_POLL_INTERVAL: Duration = Duration::from_secs(5);
+const CHAIN_PROOF_TIMEOUT: Duration = Duration::from_secs(120);
 
 pub async fn v_call(
     config: SharedConfig,

@@ -2,7 +2,7 @@
 
 set -ueo pipefail
 
-VLAYER_HOME=$(git rev-parse --show-toplevel)
+export VLAYER_HOME=$(git rev-parse --show-toplevel)
 
 PROVING_MODE=${PROVING_MODE:-dev}
 
@@ -20,12 +20,12 @@ bun run build
 echo '::endgroup::'
 
 for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ; do
-  example_name=$(basename "${example}")
+  export EXAMPLE_NAME=$(basename "${example}")
 
   echo Running services...
   source ${VLAYER_HOME}/bash/run-services.sh
 
-  echo "::group::Running tests of: ${example}"
+  echo "::group::Running tests of: ${EXAMPLE_NAME}"
   cd "${example}"
   forge soldeer install
   forge clean

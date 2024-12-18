@@ -32,6 +32,8 @@ function cleanup() {
             kill "${worker_pid}"
         fi
     done < "${CHAIN_WORKER_PIDS}"
+
+    echo "Cleanup done. Artifacts saved to: ${VLAYER_TMP_DIR}"
 }
 
 function start_anvil(){
@@ -62,7 +64,7 @@ function startup_vlayer(){
     cargo run --bin vlayer serve \
         ${args[@]} \
         ${external_urls[@]+"${external_urls[@]}"} \
-        >"${LOGS_DIR}/vlayer_serve.out" &
+        >>"${LOGS_DIR}/vlayer_serve.out" &
 
     VLAYER_SERVER=$!
 
@@ -80,6 +82,21 @@ function startup_chain_services() {
     done
 
     startup_chain_server ${db_path}
+
+    for args in "$@"; do
+        wait_for_chain_worker_sync $args
+    done
+}
+
+function get_latest_block() {
+    local rpc_url=$1
+    local block_hex=$(curl -s ${rpc_url} \
+        -X POST \
+        -H "Content-Type: application/json" \
+        --data '{"method":"eth_blockNumber","params":[],"id":1,"jsonrpc":"2.0"}' \
+        | jq -r ".result"
+    )
+    printf "%d\n" "${block_hex}"
 }
 
 function startup_chain_worker() {
@@ -88,12 +105,8 @@ function startup_chain_worker() {
     local chain_id="$3"
     local first_block="$4"
     local last_block="$5"
-    
-    if [[ "${first_block}" == "latest" || "${last_block}" == "latest" ]]; then
-        local start_block="latest"
-    else
-        local start_block=$(( ($first_block + $last_block) / 2 ))
-    fi
+   
+    local start_block=$(( ($first_block + $last_block) / 2 ))
 
     echo "Starting chain worker with rpc_url=${rpc_url} chain_id=${chain_id} start_block=${start_block}"
     pushd "${VLAYER_HOME}/rust"
@@ -103,12 +116,12 @@ function startup_chain_worker() {
         --db-path "${db_path}" \
         --rpc-url "${rpc_url}" \
         --chain-id "${chain_id}" \
-        --proof-mode "${SERVER_PROOF_ARG}" \
+        --proof-mode "${WORKER_PROOF_ARG}" \
         --confirmations "${CONFIRMATIONS:-1}" \
         --start-block "${start_block}" \
         --max-head-blocks "${MAX_HEAD_BLOCKS:-10}" \
         --max-back-propagation-blocks "${MAX_BACK_PROPAGATION_BLOCKS:-10}" \
-        >"${LOGS_DIR}/chain_worker_${chain_id}.out" 2>&1 &
+        >>"${LOGS_DIR}/chain_worker_${chain_id}.out" 2>&1 &
 
     local worker_pid=$!
     echo "Chain worker started with PID ${worker_pid}."
@@ -126,7 +139,7 @@ function startup_chain_server() {
     RUST_LOG=info \
     cargo run --bin chain_server -- \
         --db-path "${db_path}" \
-        >"${LOGS_DIR}/chain_server.out" &
+        >>"${LOGS_DIR}/chain_server.out" &
 
     CHAIN_SERVER=$!
     
@@ -136,21 +149,22 @@ function startup_chain_server() {
     popd
 }
 
-
 wait_for_chain_worker_sync() {
-    local chain_id="$1"
-    local first_block="$2"
-    local last_block="$3"
+    local rpc_url="$1"
+    local chain_id="$2"
+    local first_block="$3"
+    local last_block="$4"
+
     echo "Waiting for chain worker sync... chain_id=${chain_id} first_block=${first_block} last_block=${last_block}"
 
-    for i in `seq 1 10` ; do
+    for i in `seq 1 20` ; do
         local reply=$(curl -s -X POST 127.0.0.1:3001 \
                   --retry-connrefused \
                   --retry 5 \
                   --retry-delay 0 \
                   --retry-max-time 30 \
                   -H "Content-Type: application/json" \
-                  --data '{"jsonrpc": "2.0","id": 0,"method": "v_sync_status","params": ['"${chain_id}"']}'
+                  --data '{"jsonrpc": "2.0","id": 0,"method": "v_getSyncStatus","params": ['"${chain_id}"']}'
         )
 
         local result=$(echo "${reply}" | jq ".result")
@@ -184,6 +198,33 @@ wait_for_chain_worker_sync() {
 
 }
 
+fix_time_travel_values() {
+    local prover_start_block=$1
+    local prover_end_block=$2
+    local prover_step=$3
+
+    local env_path="${VLAYER_HOME}/examples/simple_time_travel/vlayer/.env.testnet"
+    echo $env_path
+    if [[ ! -f "${env_path}" ]]; then
+        echo "Error: testnet env not found in ${env_path}."
+        exit 1
+    fi
+    
+    if [[ "$OSTYPE" == "darwin"* ]]; then
+        # sed -i expects an argument on macOS, but not on Linux
+        sed -i "" \
+            -e "s/^PROVER_START_BLOCK=.*/PROVER_START_BLOCK=${prover_start_block}/" \
+            -e "s/^PROVER_END_BLOCK=.*/PROVER_END_BLOCK=${prover_end_block}/" \
+            -e "s/^PROVER_STEP=.*/PROVER_STEP=${prover_step}/" \
+            "${env_path}"
+    else
+        sed -i \
+            -e "s/^PROVER_START_BLOCK=.*/PROVER_START_BLOCK=${prover_start_block}/" \
+            -e "s/^PROVER_END_BLOCK=.*/PROVER_END_BLOCK=${prover_end_block}/" \
+            -e "s/^PROVER_STEP=.*/PROVER_STEP=${prover_step}/" \
+            "${env_path}"
+    fi
+}
 
 trap cleanup EXIT ERR INT
 
@@ -198,9 +239,11 @@ EXTERNAL_RPC_URLS=()
 # Set the SERVER_PROOF_MODE variable based on the mode
 if [[ "${PROVING_MODE}" == "dev" ]]; then
     SERVER_PROOF_ARG="fake"
+    WORKER_PROOF_ARG="fake"
     RISC0_DEV_MODE=1
 elif [[ "${PROVING_MODE}" == "prod" ]]; then
     SERVER_PROOF_ARG="groth16"
+    WORKER_PROOF_ARG="succinct"
 
     # Check that BONSAI_API_URL and BONSAI_API_KEY are not empty in prod mode
     if [[ -z "$BONSAI_API_URL" || -z "$BONSAI_API_KEY" ]]; then
@@ -212,16 +255,33 @@ fi
 # set external rpc urls
 if [[ -z "${QUICKNODE_API_KEY:-}" || -z "${QUICKNODE_ENDPOINT:-}" ]] ; then
     echo QUICKNODE_API_KEY is not configured. Using only local rpc-urls. >&2
+    latest_anvil_block=$(get_latest_block "http://localhost:8545")
     CHAIN_WORKER_ARGS=(
-        "http://localhost:8545 31337 latest latest"
+        "http://localhost:8545 31337 ${latest_anvil_block} ${latest_anvil_block}"
     )
 else
-    CHAIN_WORKER_ARGS=(
-        "https://${QUICKNODE_ENDPOINT}.optimism-sepolia.quiknode.pro/${QUICKNODE_API_KEY} 11155420 latest latest"
-        "https://${QUICKNODE_ENDPOINT}.quiknode.pro/${QUICKNODE_API_KEY} 1 20683110 20683110"
-        "https://${QUICKNODE_ENDPOINT}.base-mainnet.quiknode.pro/${QUICKNODE_API_KEY} 8453 19367633 19367633"
-        "https://${QUICKNODE_ENDPOINT}.optimism.quiknode.pro/${QUICKNODE_API_KEY} 10 124962954 124962954"
-    )
+    latest_op_sepolia_block=$(get_latest_block "https://${QUICKNODE_ENDPOINT}.optimism-sepolia.quiknode.pro/${QUICKNODE_API_KEY}")
+
+    if [[ "${EXAMPLE_NAME:-}" == "simple_time_travel" ]]; then
+        # Blocks for time travel should be recent to be able to sync the chain worker within reasonable time
+        start_op_sepolia_block=$(( $latest_op_sepolia_block - 10 ))
+        fix_time_travel_values $start_op_sepolia_block $latest_op_sepolia_block 2
+    else
+        start_op_sepolia_block=$latest_op_sepolia_block
+    fi
+
+    if [[ "${EXAMPLE_NAME:-}" == "simple_teleport" ]]; then
+        CHAIN_WORKER_ARGS=(
+            "https://${QUICKNODE_ENDPOINT}.optimism-sepolia.quiknode.pro/${QUICKNODE_API_KEY} 11155420 ${start_op_sepolia_block} ${latest_op_sepolia_block}"
+            "https://${QUICKNODE_ENDPOINT}.quiknode.pro/${QUICKNODE_API_KEY} 1 20683110 20683110"
+            "https://${QUICKNODE_ENDPOINT}.base-mainnet.quiknode.pro/${QUICKNODE_API_KEY} 8453 19367633 19367633"
+            "https://${QUICKNODE_ENDPOINT}.optimism.quiknode.pro/${QUICKNODE_API_KEY} 10 124962954 124962954"
+        )
+    else
+        CHAIN_WORKER_ARGS=(
+            "https://${QUICKNODE_ENDPOINT}.optimism-sepolia.quiknode.pro/${QUICKNODE_API_KEY} 11155420 ${start_op_sepolia_block} ${latest_op_sepolia_block}"
+        )
+    fi
 
     EXTERNAL_RPC_URLS=(
         "--rpc-url" "1:https://${QUICKNODE_ENDPOINT}.quiknode.pro/${QUICKNODE_API_KEY}"
