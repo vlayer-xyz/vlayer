@@ -9,7 +9,8 @@ new Elysia({
   },
 })
   .get("/regular_json", (req) => {
-    const queryParams = new URLSearchParams(req.url.split("?")[1]);
+    const url = req.url as string;
+    const queryParams = new URLSearchParams(url.split("?")[1]);
     if (queryParams.get("are_you_sure") !== "yes") {
       return {
         success: false,
