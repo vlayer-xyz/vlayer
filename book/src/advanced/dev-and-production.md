@@ -25,7 +25,7 @@ Test Prover operates in [`FAKE` mode](/advanced/dev-and-production.html#prover-m
 ## Devnet
 Docker Compose allows running the full stack locally, including anvil devnets and all required vlayer nodes.
 
-### Setting up devnet
+### Starting devnet
 1. Ensure [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) are installed on your system. 
 2. Navigate to the `${project}/vlayer` directory
 ```bash
@@ -52,7 +52,7 @@ docker compose -f <(curl -L https://install.vlayer.xyz/devnet) up -d
 | notary   | `http://127.0.0.1:7047` | TLS Notary server               |
 | websocket proxy       | `http://127.0.0.1:55688`| Proxying websocket connections            |
  
-#### **Stopping Devnet**
+#### Stopping devnet
 1. Stop all running services:
    ```bash
    docker compose down
@@ -82,7 +82,7 @@ serve --proof fake
 
 To speed up proof generation, vlayer supports the use of infrastructure like the [Bonsai](https://www.bonsai.xyz/) (and eventually [Boundless](https://beboundless.xyz/)) to offload heavy computations to high-performance machines.
 
-To run prover in production mode, modify `docker-compose.devnet.yaml`:
+To run prover node in production mode, modify `docker-compose.devnet.yaml`:
 
 ```yaml
 # rest of config

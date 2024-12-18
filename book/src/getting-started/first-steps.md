@@ -68,19 +68,19 @@ This private key is used for deploying example contracts and sending transaction
 
 By default, `optimismSepolia` is configured in the `vlayer/.env.testnet` file. However, you can override this setting to use other testnets. Below is a list of available testnets and their respective JSON-RPC URLs:
 
-| Chain        | RPC                                 | Time travel | Teleport | Email / Web |
-|--------------|-------------------------------------|-------------|----------|-------------|
-| sepolia      | https://rpc.sepolia.org | ✅         | ✅      | ✅         |
-| optimismSepolia | https://sepolia.optimism.io | ✅         | ✅      | ✅         |
-| baseSepolia     | https://sepolia.base.org          | ✅         | ✅      | ✅         |
-| polygonAmoy     | https://rpc-amoy.polygon.technology | ✅         | ✅      | ✅         |
-| arbitrumSepolia   | https://sepolia-rollup.arbitrum.io/rpc        | ✅         | ✅      | ✅         |
-| zksyncSepoliaTestnet | https://sepolia.era.zksync.dev            | ✅         | ✅      | ✅         |
-| flowTestnet       | https://testnet.evm.nodes.onflow.org          | ✅         | ✅      | ✅         |
-| scrollSepolia     | https://sepolia-rpc.scroll.io                 | ✅         | ✅      | ✅         |
-| lineaSepolia      | https://rpc.sepolia.linea.build               | ✅         | ✅      | ✅         |
-| bitkubTestnet     | https://rpc-testnet.bitkubchain.io            | ✅         | ✅      | ✅    | ✅  |
-| zircuitTestnet    | https://zircuit1.p2pify.com                   | ✅         | ✅      | ✅         |
+| CHAIN_NAME        | JSON_RPC_URL                                  |
+|-------------------|-----------------------------------------------|
+| sepolia           | https://rpc.sepolia.org                       |
+| optimismSepolia   | https://sepolia.optimism.io                   |
+| baseSepolia       | https://sepolia.base.org                      |
+| polygonAmoy       | https://rpc-amoy.polygon.technology           |
+| arbitrumSepolia   | https://sepolia-rollup.arbitrum.io/rpc        |
+| zksyncSepoliaTestnet | https://sepolia.era.zksync.dev            |
+| flowTestnet       | https://testnet.evm.nodes.onflow.org          |
+| scrollSepolia     | https://sepolia-rpc.scroll.io                 |
+| lineaSepolia      | https://rpc.sepolia.linea.build               |
+| bitkubTestnet     | https://rpc-testnet.bitkubchain.io            |
+| zircuitTestnet    | https://zircuit1.p2pify.com                   |
 
 To change the desired network, set the `CHAIN_NAME` and `JSON_RPC_URL` environment variables in `vlayer/.env.testnet.local`.
 
