@@ -57,7 +57,7 @@ export const createVlayerClient = (
       functionName,
       chainId,
       gasLimit,
-      userToken,
+      token,
       args,
     }: {
       address: Hex;
@@ -65,7 +65,7 @@ export const createVlayerClient = (
       functionName: F;
       chainId?: number;
       gasLimit?: number;
-      userToken?: string;
+      token?: string;
       args: ContractFunctionArgs<T, AbiStateMutability, F>;
     }) => {
       webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Proving);
@@ -77,7 +77,7 @@ export const createVlayerClient = (
         chainId,
         gasLimit,
         url,
-        userToken,
+        token,
       ).catch((e) => {
         webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Error);
         throw e;
@@ -151,7 +151,7 @@ export const createVlayerClient = (
       proverAbi,
       functionName,
       chainId,
-      userToken,
+      token,
       args,
     }) {
       const webProofPlaceholder = args[0];
@@ -178,7 +178,7 @@ export const createVlayerClient = (
         functionName,
         chainId,
         proverAbi,
-        userToken,
+        token,
         args: [
           {
             webProofJson: JSON.stringify(webProof),

@@ -79,7 +79,7 @@ export type VlayerClient = {
     functionName: F;
     chainId?: number;
     gasLimit?: number;
-    userToken?: string;
+    token?: string;
     args: ContractFunctionArgs<T, AbiStateMutability, F>;
   }) => Promise<BrandedHash<T, F>>;
 
@@ -97,7 +97,7 @@ export type VlayerClient = {
     proverAbi: T;
     functionName: F;
     chainId: number;
-    userToken?: string;
+    token?: string;
     args: [
       WebProofRequest,
       ...ContractFunctionArgsWithout<T, F, { name: "webProof" }>,

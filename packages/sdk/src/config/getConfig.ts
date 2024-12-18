@@ -49,7 +49,7 @@ const envVars = [
   { var: "PROVER_URL" },
   { var: "JSON_RPC_URL" },
   { var: "EXAMPLES_TEST_PRIVATE_KEY", to: "privateKey" },
-  { var: "VLAYER_TOKEN", to: "userToken", optional: true },
+  { var: "VLAYER_API_TOKEN", to: "token", optional: true },
 ];
 
 export const getConfig = () => {

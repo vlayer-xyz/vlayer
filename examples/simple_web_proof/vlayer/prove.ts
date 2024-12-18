@@ -49,7 +49,7 @@ async function testSuccessProvingAndVerification() {
       twitterUserAddress,
     ],
     chainId: chain.id,
-    userToken: config.userToken,
+    token: config.token,
   });
   const result = await vlayer.waitForProvingResult({ hash });
   const [proof, twitterHandle, address] = result;
