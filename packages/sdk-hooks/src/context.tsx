@@ -12,6 +12,7 @@ import {
   type ProverContextType,
 } from "./types";
 import { DEFAULT_CONFIG, DEFAULT_CONFIG_ENV } from "./defaults";
+
 export const ProofContext = createContext<ProofContextType | null>(null);
 export const WebProofContext = createContext<WebProofContextType | null>(null);
 export const ProverContext = createContext<ProverContextType | null>(null);
