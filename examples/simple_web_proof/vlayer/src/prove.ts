@@ -10,7 +10,7 @@ import {
 } from "@vlayer/sdk";
 
 import {
-  createExtensionWebProofProvider,
+  createWebProofRequest,
   expectUrl,
   notarize,
   startPage,
@@ -26,27 +26,22 @@ const context: {
   provingResult: [Proof, string, Hex] | undefined;
 } = { webProof: undefined, provingResult: undefined };
 
-const { chain, ethClient, account, proverUrl, confirmations } =
-  await createContext({
-    chainName: import.meta.env.VITE_CHAIN_NAME,
-    proverUrl: import.meta.env.VITE_PROVER_URL,
-    jsonRpcUrl: import.meta.env.VITE_JSON_RPC_URL,
-    privateKey: import.meta.env.VITE_PRIVATE_KEY,
-  });
+const { chain, ethClient, account, proverUrl, confirmations } = createContext({
+  chainName: import.meta.env.VITE_CHAIN_NAME,
+  proverUrl: import.meta.env.VITE_PROVER_URL,
+  jsonRpcUrl: import.meta.env.VITE_JSON_RPC_URL,
+  privateKey: import.meta.env.VITE_PRIVATE_KEY,
+});
 
 const twitterUserAddress = account.address;
 
-export async function setupRequestProveButton(element: HTMLButtonElement) {
+export const setupProveWebButton = (element: HTMLButtonElement) => {
   element.addEventListener("click", async () => {
-    const provider = createExtensionWebProofProvider();
-    const webProof = await provider.getWebProof({
-      proverCallCommitment: {
-        address: import.meta.env.VITE_PROVER_ADDRESS,
-        proverAbi: webProofProver.abi,
-        chainId: foundry.id,
-        functionName: "main",
-        commitmentArgs: ["0x"],
-      },
+    const vlayer = createVlayerClient({
+      url: proverUrl,
+    });
+
+    const webProofRequest = createWebProofRequest({
       logoUrl: "http://twitterswap.com/logo.png",
       steps: [
         startPage("https://x.com/i/flow/login", "Go to x.com login page"),
@@ -59,30 +54,15 @@ export async function setupRequestProveButton(element: HTMLButtonElement) {
       ],
     });
 
-    console.log("WebProof generated!", webProof);
-    context.webProof = webProof;
-  });
-}
-
-export const setupVProverButton = (element: HTMLButtonElement) => {
-  element.addEventListener("click", async () => {
-    const vlayer = createVlayerClient({
-      url: proverUrl,
-    });
-
-    console.log("Generating proof...");
-    const hash = await vlayer.prove({
+    const hash = await vlayer.proveWeb({
       address: import.meta.env.VITE_PROVER_ADDRESS,
-      functionName: "main",
       proverAbi: webProofProver.abi,
-      args: [
-        {
-          webProofJson: JSON.stringify(context.webProof),
-        },
-        twitterUserAddress,
-      ],
-      chainId: chain.id,
+      chainId: foundry.id,
+      functionName: "main",
+      token: import.meta.env.VITE_VLAYER_API_TOKEN,
+      args: [webProofRequest, twitterUserAddress],
     });
+
     const provingResult = await vlayer.waitForProvingResult({ hash });
     console.log("Proof generated!", provingResult);
     context.provingResult = provingResult as [Proof, string, Hex];

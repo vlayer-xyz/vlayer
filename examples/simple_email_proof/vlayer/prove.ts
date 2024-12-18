@@ -37,6 +37,7 @@ const hash = await vlayer.prove({
   functionName: "main",
   chainId: chain.id,
   args: [await preverifyEmail(mimeEmail), john.address],
+  token: config.token,
 });
 const result = await vlayer.waitForProvingResult({ hash });
 

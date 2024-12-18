@@ -13,6 +13,10 @@ on:
       - .github/workflows/deploy_simple_email_proof.yaml
     branches:
       - main
+concurrency:
+  # Same group for all jobs using EXAMPLES_DEPLOY_PRIVATE_KEY key.
+  group: examples-deployment
+  cancel-in-progress: false
 jobs:
   deploy-simple-email-proof:
     name: Deploy simple-email-proof example
@@ -20,67 +24,13 @@ jobs:
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
-      - name: Install contracts prerequisites
-        uses: ./.github/actions/contracts-prerequisites
-      - uses: oven-sh/setup-bun@v2
+      - name: Install, build and deploy example
+        uses: ./.github/actions/example-deploy
         with:
-          node-version: lts/*
-
-      - name: Download nightly contracts
-        run: |
-          curl https://vlayer-releases.s3.eu-north-1.amazonaws.com/latest/vlayer.zip -o vlayer.zip
-
-      - name: Extract nightly contracts
-        run: |
-          mkdir -p nightly-contracts
-          unzip vlayer.zip -d ./nightly-contracts
-
-      - name: Copy nightly ImageID to contracts
-        run: |
-          rm contracts/vlayer/src/ImageID.sol
-          cp ./nightly-contracts/src/ImageID.sol contracts/vlayer/src/ImageID.sol
-          rm -rf ./nightly-contracts
-
-      - name: Install contracts' dependencies
-        working-directory: ./contracts/vlayer
-        run: forge soldeer install && forge build
-
-      - name: Build vlayer sdk
-        run: bun install && bun run build
-        working-directory: ./packages/sdk
-      - name: Build example contracts
-        run: forge soldeer install && forge clean && forge build
-        working-directory: ./examples/simple_email_proof
-      - name: Install example dependencies
-        run: bun install
-        working-directory: ./examples/simple_email_proof/vlayer
-      - name: Deploy contracts
-        run: bun run deploy:testnet
-        env:
-          VLAYER_ENV: testnet
-          EXAMPLES_TEST_PRIVATE_KEY: ${{ secrets.EXAMPLES_TEST_PRIVATE_KEY }}
-        working-directory: ./examples/simple_email_proof/vlayer
-      - name: Build vite
-        run: bun run vite build
-        working-directory: ./examples/simple_email_proof/vlayer
-      - name: Install Vercel
-        run: npm install -g vercel
-      - name: Deploy to Vercel
-        if: github.ref == 'refs/heads/main' || (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success')
-        env:
-          VERCEL_ENV: production
+          EXAMPLE_NAME: simple_email_proof
+          EXAMPLES_TEST_PRIVATE_KEY: ${{ secrets.EXAMPLES_DEPLOY_PRIVATE_KEY }}
           VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_SIMPLE_EMAIL_PROOF_PROJECT_ID }}
           VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-        run: bash/deploy-simple-email-proof.sh
-      - name: Deploy to Vercel (PR Preview)
-        if: github.event_name == 'pull_request'
-        env:
-          VERCEL_ENV: preview
-          VERCEL_TOKEN: ${{ secrets.VERCEL_TOKEN }}
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_SIMPLE_EMAIL_PROOF_PROJECT_ID }}
-          VERCEL_ORG_ID: ${{ secrets.VERCEL_ORG_ID }}
-          GITHUB_TOKEN: "${{ secrets.GITHUB_TOKEN }}"
-          PR_NUMBER: "${{ github.event.number }}"
-        run: bash/deploy-simple-email-proof.sh
+          GITHUB_TOKEN: ${{ github.token }}
+          JSON_RPC_URL: "https://opt-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}"

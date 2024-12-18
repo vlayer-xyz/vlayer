@@ -36,8 +36,7 @@ pub async fn v_call(
         "Start execution location: {:?} call hash: {call_hash}",
         host.start_execution_location()
     );
-    let gas_meter_client =
-        init_gas_meter(&config, call_hash, params.token, context.gas_limit).await?;
+    let gas_meter_client = init_gas_meter(&config, call_hash, params.token, call.gas_limit).await?;
     state.insert(call_hash, ProofStatus::Pending);
 
     tokio::spawn(async move {

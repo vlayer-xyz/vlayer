@@ -16,6 +16,17 @@ use crate::error::AppError;
 pub struct Call {
     pub to: String,
     pub data: String,
+    pub gas_limit: u64,
+}
+
+impl Call {
+    pub fn new(to: impl Into<String>, data: impl Into<String>, gas_limit: u64) -> Self {
+        Self {
+            to: to.into(),
+            data: data.into(),
+            gas_limit,
+        }
+    }
 }
 
 impl TryFrom<Call> for HostCall {
@@ -25,6 +36,7 @@ impl TryFrom<Call> for HostCall {
         Ok(Self {
             to: parse_address_field("to", value.to)?,
             data: parse_hex_field("data", value.data)?,
+            gas_limit: value.gas_limit,
         })
     }
 }
@@ -38,7 +50,6 @@ const fn mainnet_chain_id() -> ChainId {
 pub struct CallContext {
     #[serde(default = "mainnet_chain_id")]
     pub chain_id: ChainId,
-    pub gas_limit: u64,
 }
 
 #[derive(Serialize, Deserialize, Debug, From, Copy, Clone, Hash, PartialEq, Eq)]
@@ -83,10 +94,7 @@ mod test {
 
     #[tokio::test]
     async fn invalid_to_address() -> anyhow::Result<()> {
-        let call = Call {
-            to: INVALID_ADDRESS.to_string(),
-            data: DATA.to_string(),
-        };
+        let call = Call::new(INVALID_ADDRESS, DATA, 0);
         let actual_result: Result<HostCall, AppError> = call.try_into();
 
         assert!(matches!(
@@ -100,10 +108,7 @@ mod test {
     #[tokio::test]
     async fn invalid_data() -> anyhow::Result<()> {
         const INVALID_DATA: &str = "xx";
-        let call = Call {
-            to: TO.to_string(),
-            data: INVALID_DATA.to_string(),
-        };
+        let call = Call::new(TO, INVALID_DATA, 0);
         let actual_result: Result<HostCall, AppError> = call.try_into();
 
         assert!(matches!(

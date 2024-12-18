@@ -57,38 +57,8 @@ cd vlayer
 bun install
 ```
 
-### Run on a local devnet
-To set up a local development environment, first launch a local Ethereum node:
-
-```bash
-$ anvil 
-```
-
-Then, in a separate terminal, start the [Prover server](/advanced/prover.html#prover-server):
-
-```bash
-vlayer serve
-```
-
-If you're using Prover features like teleport or time travel, configure the appropriate JSON-RPC URLs for each chain. You can use Alchemy or other providers to supply these URLs:
-
-```bash
-vlayer serve \
-  --rpc-url '31337:http://localhost:8545' \
-  --rpc-url '11155111:https://eth-sepolia.g.alchemy.com/v2/{ALCHEMY_KEY}' \
-  --rpc-url '1:https://eth-mainnet.g.alchemy.com/v2/{ALCHEMY_KEY}' \
-  --rpc-url '8453:https://base-mainnet.g.alchemy.com/v2/{ALCHEMY_KEY}' \
-  --rpc-url '10:https://opt-mainnet.g.alchemy.com/v2/{ALCHEMY_KEY}'
-```
-
-To run the example within the `vlayer` directory, use:
-
-```sh
-bun run prove:dev
-```
-
 ### Run on a testnet
-To use a testnet, first provide a private key in the `vlayer/.env.testnet.local` file:
+Running examples on testnets doesn't require to run prover or anvil devnets locally. To use a testnet, first provide a private key in the `vlayer/.env.testnet.local` file:
 
 ```sh
 EXAMPLES_TEST_PRIVATE_KEY=0x....
@@ -96,21 +66,7 @@ EXAMPLES_TEST_PRIVATE_KEY=0x....
 
 This private key is used for deploying example contracts and sending transactions to the verifier.
 
-By default, `optimismSepolia` is configured in the `vlayer/.env.testnet` file. However, you can override this setting to use other testnets. Below is a list of available testnets and their respective JSON-RPC URLs:
-
-| CHAIN_NAME        | JSON_RPC_URL                                  |
-|-------------------|-----------------------------------------------|
-| sepolia           | https://rpc.sepolia.org                       |
-| optimismSepolia   | https://sepolia.optimism.io                   |
-| baseSepolia       | https://sepolia.base.org                      |
-| polygonAmoy       | https://rpc-amoy.polygon.technology           |
-| arbitrumSepolia   | https://sepolia-rollup.arbitrum.io/rpc        |
-| zksyncSepoliaTestnet | https://sepolia.era.zksync.dev            |
-| flowTestnet       | https://testnet.evm.nodes.onflow.org          |
-| scrollSepolia     | https://sepolia-rpc.scroll.io                 |
-| lineaSepolia      | https://rpc.sepolia.linea.build               |
-| bitkubTestnet     | https://rpc-testnet.bitkubchain.io            |
-| zircuitTestnet    | https://zircuit1.p2pify.com                   |
+By default, `optimismSepolia` is configured in the `vlayer/.env.testnet` file. However, you can override this setting to use [other testnets](/advanced/dev-and-production.html#testnet).
 
 To change the desired network, set the `CHAIN_NAME` and `JSON_RPC_URL` environment variables in `vlayer/.env.testnet.local`.
 
@@ -118,6 +74,21 @@ Once configured, run the example from within the `vlayer` directory using:
 
 ```sh
 bun run prove:testnet
+```
+
+### Run on a local devnet
+If you want to run on local environment, use [Docker](/advanced/dev-and-production.html#devnet): 
+
+```bash
+$ bun run devnet
+```
+
+Above command starts all required services in the background.
+
+Once the devnet is up, run the example within the `vlayer` directory:
+
+```sh
+bun run prove:dev
 ```
 
 ### Web Proof example

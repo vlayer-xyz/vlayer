@@ -35,7 +35,7 @@ jobs:
         working-directory: ./packages/browser-extension
       - name: Install Playwright Browsers
         run: bunx playwright install --with-deps chromium
-        working-directory: ./packages/browser-extension
+        working-directory: ./packages
       - name: Install Rust prerequisites
         uses: ./.github/actions/rust-prerequisites
       - name: Install contracts prerequisites

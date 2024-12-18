@@ -1,6 +1,7 @@
 use alloy_sol_types::SolValue;
 use mailparse::{headers::Headers, MailHeaderMap, MailParseError, ParsedMail};
-use regex::Regex;
+
+use crate::email_address::EmailAddress;
 
 pub(crate) mod sol;
 
@@ -83,16 +84,11 @@ impl Email {
     fn validate_email(email: &str) -> Result<String, MailParseError> {
         let email = email.trim();
 
-        if !Self::is_email_valid(email) {
+        if !EmailAddress::is_valid(email) {
             return Err(Self::invalid_from_header());
         }
 
         Ok(email.to_string())
-    }
-
-    fn is_email_valid(email: &str) -> bool {
-        let email_regex = Regex::new(r"^[\w\-.]+@([\w-]+\.)+[\w-]{2,4}$").unwrap();
-        email_regex.is_match(email)
     }
 }
 
@@ -283,28 +279,6 @@ Content-Type: text/html; charset="UTF-8"
             assert_eq!(decoded.to, "you".to_string());
             assert_eq!(decoded.subject, "".to_string());
             assert_eq!(decoded.body, "body".to_string());
-        }
-    }
-
-    mod is_email_valid {
-        use super::*;
-
-        #[test]
-        fn valid_email() {
-            assert!(Email::is_email_valid("hello@aa.aa"));
-            assert!(Email::is_email_valid("this.is-valid...e-mail@aa.aa"));
-        }
-
-        #[test]
-        fn invalid_email() {
-            assert!(!Email::is_email_valid("hello@aa"));
-            assert!(!Email::is_email_valid("hel@lo@aa.aa"));
-            assert!(!Email::is_email_valid("hello@aa..aa"));
-            assert!(!Email::is_email_valid("hello@aa.a"));
-            assert!(!Email::is_email_valid("hello@.aa"));
-            assert!(!Email::is_email_valid("hello.aa"));
-            assert!(!Email::is_email_valid("email with.whitespace@aa.aa"));
-            assert!(!Email::is_email_valid("email<with>brackets@aa.aa"));
         }
     }
 

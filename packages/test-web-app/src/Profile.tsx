@@ -6,7 +6,9 @@ function Profile() {
   useEffect(() => {
     const getGandalf = async () => {
       setIsLoading(true);
-      const response = await fetch("https://lotr-api.online:3011/regular_json");
+      const response = await fetch(
+        "https://lotr-api.online:3011/regular_json?are_you_sure=yes",
+      );
       const data = (await response.json()) as { name: string };
       setGandalf(data);
       setIsLoading(false);

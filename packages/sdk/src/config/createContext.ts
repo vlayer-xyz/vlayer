@@ -5,6 +5,8 @@ import {
   publicActions,
   type CustomTransport,
   custom,
+  type PrivateKeyAccount,
+  type Address,
 } from "viem";
 import { privateKeyToAccount } from "viem/accounts";
 import { getChainConfirmations } from "./getChainConfirmations";
@@ -20,7 +22,7 @@ const getChainSpecs = (chainName: string): Chain => {
 };
 
 export const customTransport = custom;
-export type { Chain };
+export type { Chain, PrivateKeyAccount, Address };
 const createEthClient = (
   chain: Chain,
   jsonRpcUrl: string,
@@ -45,7 +47,7 @@ export function createContext(
 ): {
   chain: Chain;
   jsonRpcUrl: string;
-  account: ReturnType<typeof privateKeyToAccount>;
+  account: PrivateKeyAccount;
   ethClient: ReturnType<typeof createEthClient>;
   confirmations: number;
 } & VlayerContextConfig;

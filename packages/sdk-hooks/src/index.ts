@@ -1,3 +1,3 @@
-export const hooks = {};
+import { useWebProof } from "./useWebproof/useWebProof";
 
-export * from "./context";
+export { useWebProof };

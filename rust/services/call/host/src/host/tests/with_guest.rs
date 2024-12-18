@@ -5,6 +5,7 @@ use alloy_primitives::{address, uint};
 use alloy_sol_types::SolCall;
 
 use crate::{
+    host::tests::call,
     test_harness::{
         contracts::usdt::{
             BLOCK_NO,
@@ -13,7 +14,6 @@ use crate::{
         },
         run, ExecutionLocation,
     },
-    Call,
 };
 
 #[cfg(test)]
@@ -26,7 +26,7 @@ fn before_all() {
 async fn erc20_balance_of() -> anyhow::Result<()> {
     let location: ExecutionLocation = (Chain::mainnet().id(), BLOCK_NO).into();
     let binance_8 = address!("F977814e90dA44bFA03b6295A0616a897441aceC");
-    let call = Call::new(USDT, &balanceOfCall { account: binance_8 });
+    let call = call(USDT, &balanceOfCall { account: binance_8 });
     let result = run("usdt_erc20_balance_of", call, &location).await?;
     let raw_call_result = result.guest_output.evm_call_result;
     let balanceOfReturn { _0: balance } =

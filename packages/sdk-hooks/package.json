@@ -6,7 +6,11 @@
   "type": "module",
   "devDependencies": {
     "@types/bun": "latest",
-    "eslint-plugin-react": "^7.37.2"
+    "eslint-plugin-react": "^7.37.2",
+    "@testing-library/dom": "^10.4.0",
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.1.0",
+    "vitest": "^2.1.8"
   },
   "peerDependencies": {
     "typescript": "^5.0.0",
@@ -14,6 +18,9 @@
     "wagmi": "^2.14.1"
   },
   "dependencies": {
-    "@vlayer/sdk": "workspace:*"
+    "@vlayer/sdk": "file:../sdk"
+  },
+  "scripts": {
+    "test:unit": "vitest --run"
   }
 }

@@ -3628,7 +3628,6 @@ dependencies = [
  "hex-literal",
  "lazy_static",
  "mailparse",
- "regex",
  "rsa",
  "slog",
  "thiserror",

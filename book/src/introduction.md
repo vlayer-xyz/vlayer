@@ -25,3 +25,4 @@ Learn in-depth how:
  * [Prover](/advanced/prover.html) and [Verifier](/advanced/verifier.html) contracts are working.
  * [Global Variables](./advanced/prover-global-variables.md) are set.
  * [Tests](/advanced/tests.html) are run.
+ * [Devnet and Testnet](/advanced/dev-and-production.md)

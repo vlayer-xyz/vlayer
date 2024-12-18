@@ -18,7 +18,7 @@ import { v_getProofReceipt } from "./v_getProofReceipt";
 import { foundry } from "viem/chains";
 import { v_versions } from "./v_versions";
 import { checkVersionCompatibility } from "./utils/versions";
-import meta from "../../package.json" assert { type: "json" };
+import meta from "../../package.json" with { type: "json" };
 const sdkVersion = meta.version;
 
 export interface ProveOptions {
@@ -38,9 +38,9 @@ export async function prove<T extends Abi, F extends ContractFunctionName<T>>(
   functionName: F,
   args: ContractFunctionArgs<T, AbiStateMutability, F>,
   chainId: number = foundry.id,
-  gasLimit: number = 1_000_000,
+  gasLimit: number = 100_000_000_000_000,
   url: string = "http://127.0.0.1:3000",
-  userToken?: string,
+  token?: string,
   options: ProveOptions = { preverifyVersions: false },
 ) {
   await preverifyVersions(url, !!options.preverifyVersions);
@@ -49,14 +49,11 @@ export async function prove<T extends Abi, F extends ContractFunctionName<T>>(
     functionName: functionName as string,
     args: args as readonly unknown[],
   });
-  const call: CallParams = { to: prover, data: calldata };
+  const call: CallParams = { to: prover, data: calldata, gas_limit: gasLimit };
   const context: CallContext = {
     chain_id: chainId,
-    gas_limit: gasLimit,
   };
-  const fullUrl = url.concat(
-    userToken !== undefined ? "/?token=" + userToken : "",
-  );
+  const fullUrl = url.concat(token !== undefined ? "/?token=" + token : "");
   return v_call(call, context, fullUrl);
 }
 

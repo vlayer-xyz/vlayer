@@ -20,10 +20,10 @@ import React, {
   useState,
   useCallback,
 } from "react";
-import unconditionalProver from "../../../contracts/fixtures/out/UnconditionalProver.sol/UnconditionalProver";
+import lotrApiProver from "../../../contracts/fixtures/out/LotrApiProver.sol/LotrApiProver";
 
 const PROVER_ADDRESS = import.meta.env
-  .VITE_UNCONDITIONAL_PROVER_ADDRESS as `0x${string}`;
+  .VITE_LOTR_API_PROVER_ADDRESS as `0x${string}`;
 console.log(PROVER_ADDRESS);
 
 function DappNewWay() {
@@ -59,7 +59,7 @@ function DappNewWay() {
     webProofProvider.requestWebProof({
       proverCallCommitment: {
         address: PROVER_ADDRESS,
-        proverAbi: unconditionalProver.abi,
+        proverAbi: lotrApiProver.abi,
         chainId: foundry.id,
         functionName: "web_proof",
         commitmentArgs: [],
@@ -69,7 +69,11 @@ function DappNewWay() {
         startPage(loginUrl, "Go to login"),
         expectUrl(dashboardUrl, "At dashboard page"),
         expectUrl(profileUrl, "At profile page"),
-        notarize("https://lotr-api.online:3011/regular_json", "GET", "Prove"),
+        notarize(
+          "https://lotr-api.online:3011/regular_json?are_you_sure=yes",
+          "GET",
+          "Prove",
+        ),
       ],
     });
   }, []);
@@ -77,7 +81,7 @@ function DappNewWay() {
   const requestZkProof = useCallback(async () => {
     const hash = await vlayerClient.prove({
       address: PROVER_ADDRESS,
-      proverAbi: unconditionalProver.abi,
+      proverAbi: lotrApiProver.abi,
       functionName: "web_proof",
       chainId: foundry.id,
       args: [
@@ -152,7 +156,7 @@ function Dapp() {
     const webproof = await provider.getWebProof({
       proverCallCommitment: {
         address: PROVER_ADDRESS,
-        proverAbi: unconditionalProver.abi,
+        proverAbi: lotrApiProver.abi,
         chainId: foundry.id,
         functionName: "web_proof",
         commitmentArgs: [],
@@ -162,7 +166,11 @@ function Dapp() {
         startPage(loginUrl, "Go to login"),
         expectUrl(dashboardUrl, "At dashboard page"),
         expectUrl(profileUrl, "At profile page"),
-        notarize("https://lotr-api.online:3011/regular_json", "GET", "Prove"),
+        notarize(
+          "https://lotr-api.online:3011/regular_json?are_you_sure=yes",
+          "GET",
+          "Prove",
+        ),
       ],
     });
 
@@ -172,7 +180,7 @@ function Dapp() {
   const requestZkProof = useCallback(async () => {
     const hash = await vlayerClient.current?.prove({
       address: PROVER_ADDRESS,
-      proverAbi: unconditionalProver.abi,
+      proverAbi: lotrApiProver.abi,
       functionName: "web_proof",
       chainId: foundry.id,
       args: [

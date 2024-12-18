@@ -35,6 +35,7 @@ mod test {
                 ("Hello Worldowski <hello@world.com>", Ok("world.com")),
                 ("Hello Worldowski <hello@world.com  \t>  \t ", Ok("world.com")),
                 ("Hello Worldowski (Hi) <hello@world.com>", Ok("world.com")),
+                (r#"John Doe <"user@name"@example.com>"#, Ok("example.com")),
                 (
                     r#""John Doe" <user@example.com>, "Jane Smith" <jane@example.com>"#,
                     Err(Error::EmailParse(mailparse::MailParseError::Generic(
@@ -42,12 +43,6 @@ mod test {
                     ))),
                 ),
                 (r#"John Doe <"user.name"@example.com>"#, Ok("example.com")),
-                (
-                    r#"John Doe <"user@name"@example.com>"#,
-                    Err(Error::EmailParse(mailparse::MailParseError::Generic(
-                        "Unexpected \"From\" format",
-                    ))),
-                ),
                 (
                     "@routing:user@example.com",
                     Err(Error::EmailParse(mailparse::MailParseError::Generic(
@@ -98,7 +93,6 @@ mod test {
         test_domain_extraction("Hello Worldowski (Hi) <hello@world.com>");
     }
 
-    #[ignore]
     #[test]
     fn quoted_local_part_format() {
         test_domain_extraction(r#"John Doe <"user.name"@example.com>"#);
@@ -110,7 +104,7 @@ mod test {
     }
 
     #[test]
-    fn fails_for_quoted_local_part_with_at_symbol() {
+    fn works_for_quoted_local_part_with_at_symbol() {
         test_domain_extraction(r#"John Doe <"user@name"@example.com>"#);
     }
 

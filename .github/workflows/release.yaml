@@ -93,15 +93,18 @@ jobs:
 
   create-release:
     name: Create GH releases
-    runs-on: aws-linux-small
+    runs-on: ubuntu-latest
     needs: [build-examples, build-extension, push-contracts]
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
       - run: mkdir -p dist
       - uses: actions/download-artifact@v4
         with:
           path: ./dist
           merge-multiple: true
       - run: rm ./dist/{ImageID.sol,Elf.sol,methods.rs,risc0_call_guest} || true
+      - run: cp ./docker/docker-compose.devnet.yaml ./dist/
 
       - name: Release tagged nightly
         uses: ncipollo/release-action@v1
@@ -131,6 +134,7 @@ jobs:
           path: ./dist/latest
           merge-multiple: true
       - run: rm ./dist/latest/{ImageID.sol,Elf.sol,methods.rs,risc0_call_guest} || true
+      - run: cp ./docker/docker-compose.devnet.yaml ./dist/latest/
       - env:
           VLAYER_BUILD: ${{ needs.build-release.outputs.vlayer_build }}
         run: cp -r "./dist/latest" "./dist/${VLAYER_BUILD}"

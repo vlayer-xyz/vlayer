@@ -35,6 +35,7 @@ const provingHash = await vlayer.prove({
   functionName: "averageBalanceOf",
   args: [tokenOwner],
   chainId: ethClient.chain.id,
+  token: config.token,
 });
 
 console.log("Waiting for proving result: ");
