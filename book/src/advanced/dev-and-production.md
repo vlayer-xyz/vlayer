@@ -25,6 +25,15 @@ Test Prover operates in [`FAKE` mode](/advanced/dev-and-production.html#prover-m
 | zksyncSepoliaTestnet |          |       | ✅         |
 
 ✅ supported, 🚧 in progress
+
+### Testnet services
+| Service                  | Endpoint                 | Description                               |
+|--------------------------|--------------------------|-------------------------------------------|
+| prover         | `https://test-prover.vlayer.xyz` | zkEVM prover for vlayer contracts             |
+| indexer   | `https://test-chainservice.vlayer.xyz` | Storage proof indexer               |
+| notary   | `https://test-notary.vlayer.xyz` | TLS Notary server               |
+| websocket proxy       | `https://test-wsproxy.vlayer.xyz`| Proxying websocket connections for TLS Notary           |
+
 ## Devnet
 Docker Compose allows running the full stack locally, including anvil devnets and all required vlayer nodes.
 
