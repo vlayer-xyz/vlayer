@@ -48,7 +48,7 @@ impl Default for Call {
         Self {
             to: Address::ZERO,
             data: vec![],
-            gas_limit: 0,
+            gas_limit: 30_000_000,
         }
     }
 }
