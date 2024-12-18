@@ -103,7 +103,7 @@ export const createVlayerClient = (
       const getProof = async () => {
         for (let retry = 0; retry < numberOfRetries; retry++) {
           const resp = await getProofReceipt(hash, url);
-          if (resp.result.status === VGetProofReceiptStatus.ready) {
+          if (resp.result.status === VGetProofReceiptStatus.Ready) {
             if (resp.result.data === undefined) {
               throw new Error(
                 "No ZK proof returned from server for hash " + hash.hash,

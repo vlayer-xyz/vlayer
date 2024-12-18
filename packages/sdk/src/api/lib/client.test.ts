@@ -97,31 +97,12 @@ describe("Success zk-proving", () => {
       chainId: 42,
     });
 
-    let state = VGetProofReceiptStatus.pending;
-    fetchMocker.mockResponse(() => {
-      switch (state) {
-        case VGetProofReceiptStatus.pending:
-          state = VGetProofReceiptStatus.waiting_for_chain_proof;
-          break;
-        case VGetProofReceiptStatus.waiting_for_chain_proof:
-          state = VGetProofReceiptStatus.preflight;
-          break;
-        case VGetProofReceiptStatus.preflight:
-          state = VGetProofReceiptStatus.proving;
-          break;
-        case VGetProofReceiptStatus.proving:
-          state = VGetProofReceiptStatus.ready;
-          break;
-        default:
-          state = VGetProofReceiptStatus.pending;
-          break;
-      }
-
+    fetchMocker.mockResponseOnce(() => {
       return {
         body: JSON.stringify({
           result: {
-            status: state as string,
-            data: state === VGetProofReceiptStatus.ready ? {} : undefined,
+            status: "ready",
+            data: {},
           },
         }),
       };
