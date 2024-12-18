@@ -5,22 +5,28 @@ import React, {
   type PropsWithChildren,
 } from "react";
 import { createExtensionWebProofProvider } from "@vlayer/sdk/web_proof";
-import { type VlayerContextType } from "./types";
-export const VlayerContext = createContext<VlayerContextType | null>(null);
+import {
+  type ProofContextType,
+  type ProofConfig,
+  type WebProofContextType,
+  type ProverContextType,
+} from "./types";
+import { DEFAULT_CONFIG, DEFAULT_CONFIG_ENV } from "./defaults";
 
-const DEFAULT_CONFIG = {
-  proverUrl: "https://test-prover.vlayer.xyz",
-  notaryUrl: "https://test-notary.vlayer.xyz",
-  wsProxyUrl: "wss://test-wsproxy.vlayer.xyz",
-};
+export const ProofContext = createContext<ProofContextType | null>(null);
+export const WebProofContext = createContext<WebProofContextType | null>(null);
+export const ProverContext = createContext<ProverContextType | null>(null);
 
-export const VlayerProvider = ({
+export const ProofProvider = ({
   config,
   children,
 }: PropsWithChildren<{
-  config?: Partial<typeof DEFAULT_CONFIG>;
+  config?: Partial<ProofConfig>;
 }>) => {
-  const { proverUrl, notaryUrl, wsProxyUrl } = { ...DEFAULT_CONFIG, ...config };
+  const { proverUrl, notaryUrl, wsProxyUrl } = {
+    ...DEFAULT_CONFIG[config?.env ?? DEFAULT_CONFIG_ENV],
+    ...config,
+  };
 
   const webProofProvider = createExtensionWebProofProvider({
     notaryUrl: notaryUrl,
@@ -33,21 +39,44 @@ export const VlayerProvider = ({
   });
 
   return (
-    <VlayerContext.Provider
-      value={{
-        vlayerClient,
-        webProofProvider,
-      }}
+    <WebProofContext.Provider
+      value={{ webProofProvider, config: { notaryUrl, wsProxyUrl } }}
     >
-      {children}
-    </VlayerContext.Provider>
+      <ProverContext.Provider value={{ vlayerClient, config: { proverUrl } }}>
+        {children}
+      </ProverContext.Provider>
+    </WebProofContext.Provider>
   );
 };
 
-export const useVlayerContext = () => {
-  const context = useContext(VlayerContext);
-  if (!context) {
-    throw new Error("useVlayerContext must be used within a VlayerProvider");
+export const useProofContext = () => {
+  const webProofContext = useContext(WebProofContext);
+  const proverContext = useContext(ProverContext);
+
+  if (!webProofContext || !proverContext) {
+    throw new Error("useProofContext must be used within a ProofProvider");
   }
-  return context;
+  return {
+    ...webProofContext,
+    ...proverContext,
+    config: { ...webProofContext.config, ...proverContext.config },
+  };
+};
+
+export const useWebProofContext = () => {
+  const webProofContext = useContext(WebProofContext);
+  if (!webProofContext) {
+    throw new Error(
+      "useWebProofContext must be used within a WebProofProvider",
+    );
+  }
+  return webProofContext;
+};
+
+export const useProverContext = () => {
+  const proverContext = useContext(ProverContext);
+  if (!proverContext) {
+    throw new Error("useProverContext must be used within a ProverProvider");
+  }
+  return proverContext;
 };
