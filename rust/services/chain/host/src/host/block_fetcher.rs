@@ -1,5 +1,6 @@
 use std::result;
 
+use common::Hashable;
 use derivative::Derivative;
 use ethers::{
     middleware::Middleware,
@@ -7,9 +8,9 @@ use ethers::{
     types::BlockNumber as BlockTag,
 };
 use futures::future::join_all;
-use provider::{to_eth_block_header, EvmBlockHeader};
+use provider::{to_eth_block_header, BlockNumber, EvmBlockHeader};
 use thiserror::Error;
-use tracing::{info, instrument};
+use tracing::{debug, instrument};
 use u64_range::Range;
 use url::ParseError;
 
@@ -58,7 +59,7 @@ where
 
     #[instrument(skip(self))]
     pub async fn get_block(&self, number: BlockTag) -> Result<Box<dyn EvmBlockHeader>> {
-        info!("Fetching block {}", number);
+        debug!("Fetching block {number}");
         let ethers_block = self
             .provider
             .get_block(number)
@@ -67,7 +68,20 @@ where
             .ok_or(BlockFetcherError::BlockNotFound(number))?;
         let block = to_eth_block_header(ethers_block)
             .map_err(|e| BlockFetcherError::BlockConversion(e.to_string()))?;
-        info!("Fetched block {}", block.number());
+        debug!("Fetched block {} with hash {}", block.number(), block.hash_slow());
         Ok(Box::new(block))
+    }
+
+    #[instrument(skip(self))]
+    pub async fn get_latest_block_number(&self) -> Result<BlockNumber> {
+        debug!("Getting latest block number");
+        self.provider
+            .get_block_number()
+            .await
+            .map_err(|e| BlockFetcherError::Provider(e.to_string()))
+            .map(|block_num| {
+                debug!("Latest block number: {block_num}");
+                block_num.as_u64()
+            })
     }
 }

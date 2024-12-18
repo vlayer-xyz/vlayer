@@ -129,12 +129,12 @@ where
             .expect("chain trie not found");
         let mut trie = old_trie.clone();
 
-        let latest_block = self.fetcher.get_block(BlockTag::Latest).await?;
+        let latest_block_number = self.fetcher.get_latest_block_number().await?;
 
         let (new_range, prepend) = self.prepend_strategy.compute_prepend_range(old_range);
         let (new_range, append) = self
             .append_strategy
-            .compute_append_range(new_range, latest_block.number());
+            .compute_append_range(new_range, latest_block_number);
         let prepend_blocks = self.fetcher.get_blocks_range(prepend).await?;
         let append_blocks = self.fetcher.get_blocks_range(append).await?;
         let old_leftmost_block = self.fetcher.get_block(old_range.start().into()).await?;
@@ -202,7 +202,7 @@ mod tests {
 
     #[tokio::test]
     async fn initialize() -> anyhow::Result<()> {
-        let host = create_host(test_db(), mock_provider([LATEST]));
+        let host = create_host(test_db(), mock_provider([LATEST], None));
 
         let chain_update = host.poll().await?;
         let Host { mut db, .. } = host;
@@ -218,7 +218,7 @@ mod tests {
         use super::*;
 
         async fn db_after_initialize() -> Result<ChainDb, HostError> {
-            let host = create_host(test_db(), mock_provider([GENESIS]));
+            let host = create_host(test_db(), mock_provider([GENESIS], None));
 
             let init_chain_update = host.poll().await?;
             let Host { mut db, .. } = host;
@@ -229,7 +229,8 @@ mod tests {
 
         #[tokio::test]
         async fn no_new_head_blocks_back_propagation_finished() -> anyhow::Result<()> {
-            let host = create_host(db_after_initialize().await?, mock_provider([GENESIS, GENESIS]));
+            let host =
+                create_host(db_after_initialize().await?, mock_provider([GENESIS], Some(GENESIS)));
 
             let chain_update = host.poll().await?;
             let Host { mut db, .. } = host;
@@ -247,7 +248,7 @@ mod tests {
             let new_confirmed_block = latest - CONFIRMATIONS + 1;
             let host = create_host(
                 db_after_initialize().await?,
-                mock_provider([latest, new_confirmed_block, GENESIS]),
+                mock_provider([new_confirmed_block, GENESIS], Some(latest)),
             );
 
             let chain_update = host.poll().await?;
