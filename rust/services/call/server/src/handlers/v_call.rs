@@ -34,7 +34,7 @@ pub async fn v_call(
     let call_hash = (&host.start_execution_location(), &call).into();
     info!("Calculated hash: {}", call_hash);
     let gas_meter_client = init_gas_meter(&config, call_hash, params.token, call.gas_limit).await?;
-    state.insert(call_hash, ProofStatus::Pending);
+    state.insert(call_hash, ProofStatus::Queued);
 
     tokio::spawn(async move {
         let res = generate_proof(call, host, gas_meter_client, state.clone(), call_hash).await;

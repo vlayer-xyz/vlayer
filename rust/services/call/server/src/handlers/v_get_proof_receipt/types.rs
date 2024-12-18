@@ -12,7 +12,7 @@ use crate::{error::AppError, handlers::ProofStatus, ser::ProofDTO};
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "snake_case")]
 pub enum Status {
-    Pending,
+    Queued,
     WaitingForChainProof,
     Preflight,
     Proving,
@@ -21,14 +21,14 @@ pub enum Status {
 
 impl Default for Status {
     fn default() -> Self {
-        Self::Pending
+        Self::Queued
     }
 }
 
 impl From<&ProofStatus> for Status {
     fn from(value: &ProofStatus) -> Self {
         match value {
-            ProofStatus::Pending => Self::Pending,
+            ProofStatus::Queued => Self::Queued,
             ProofStatus::WaitingForChainProof => Self::WaitingForChainProof,
             ProofStatus::Preflight => Self::Preflight,
             ProofStatus::Proving => Self::Proving,
