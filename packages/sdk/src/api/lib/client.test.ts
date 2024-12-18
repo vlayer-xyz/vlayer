@@ -125,11 +125,11 @@ describe("Success zk-proving", () => {
     expect(zkProvingSpy).toBeCalledTimes(1);
     expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Error);
   });
-  it("should pass user token if present", async () => {
-    const userToken = "deadbeef";
+  it("should pass token if present", async () => {
+    const token = "deadbeef";
 
     fetchMocker.mockResponseOnce((req) => {
-      if (req.url === "http://127.0.0.1:3000/?token=" + userToken) {
+      if (req.url === "http://127.0.0.1:3000/?token=" + token) {
         return {
           body: JSON.stringify({
             result: hashStr,
@@ -145,7 +145,7 @@ describe("Success zk-proving", () => {
       proverAbi: [],
       args: [],
       chainId: 42,
-      userToken,
+      token,
     });
     expect(result.hash).toBe(hashStr);
     expect(zkProvingSpy).toBeCalledTimes(1);

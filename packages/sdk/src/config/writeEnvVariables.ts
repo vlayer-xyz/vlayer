@@ -3,7 +3,7 @@ import dotenv from "dotenv";
 
 export const writeEnvVariables = async (
   envPath: string,
-  overrides: { [key: string]: string },
+  overrides: { [key: string]: string | undefined },
 ) => {
   fs.appendFileSync(envPath, "");
   const envFile = Bun.file(envPath);

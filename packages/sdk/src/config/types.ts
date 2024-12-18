@@ -7,6 +7,7 @@ export type EnvConfig = {
   proverUrl: string;
   jsonRpcUrl: string;
   privateKey: `0x${string}`;
+  token?: string;
 };
 
 // represents what is needed by client to properly

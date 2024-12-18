@@ -59,6 +59,7 @@ export const setupProveWebButton = (element: HTMLButtonElement) => {
       proverAbi: webProofProver.abi,
       chainId: foundry.id,
       functionName: "main",
+      token: import.meta.env.VITE_VLAYER_API_TOKEN,
       args: [webProofRequest, twitterUserAddress],
     });
 
