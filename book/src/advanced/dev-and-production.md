@@ -3,11 +3,13 @@
 The vlayer network consists of services nodes: provers, indexers, notaries and proxies. This nodes are necessary for execution of vlayer smart contracts features like [time travel](/features/time-travel.html), [teleport](/features/teleport.html), [email](/features/email.html) / [web](/features/web.html) proofs.
 
 There are two environments supported:
-- **testnet** - default, predeployed and ready to use environment with public testnet support
-- **devnet** - Docker Compose environment with local vlayer services and anvil devnet
+- **testnet** - predeployed public environment supporting multiple testnets, running in FAKE mode for quick development and testing
+- **devnet** - local environment that runs with Docker Compose, providing all necessary services for development
 
 ## Testnet
-Default vlayer prover is available at `https://test-prover.vlayer.xyz`. Prover operates in [`FAKE` mode](/advanced/dev-and-production.html#prover-modes) and works with following testnets:
+Public testnet vlayer prover is available at `https://test-prover.vlayer.xyz`. vlayer CLI and example apps are using it by default and developers don't need to configure it. 
+
+Test Prover operates in [`FAKE` mode](/advanced/dev-and-production.html#prover-modes) and works with following testnets:
 
 | chain | time travel | teleport | email/web |
 |---------|-------------|----------|-----------|
@@ -21,15 +23,16 @@ Default vlayer prover is available at `https://test-prover.vlayer.xyz`. Prover o
 | zksyncSepoliaTestnet | ✅         | ✅      | ✅         |
 
 ## Devnet
-Every vlayer project has `docker-compose.devnet.yaml` in the `${project}/vlayer` directory. This file contains all necessary services for local environment.
+Docker Compose allows running the full stack locally, including anvil devnets and all required vlayer nodes.
 
-> Ensure [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) are installed on your system.
-
-### Start devnet
-To pull the required images and start the containers in the background use this command:
-
+### Setting up devnet
+1. Ensure [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) are installed on your system. 
+2. Navigate to the `${project}/vlayer` directory
 ```bash
 cd ${project}/vlayer
+```
+3. Start services
+```bash
 bun run devnet
 ```
 
@@ -38,22 +41,28 @@ Optionally, one may run devnet locally outside of the vlayer project directory u
 docker compose -f <(curl -L https://install.vlayer.xyz/devnet) up -d
 ```
 
-### Access to services
-- **anvil devnets** (useful for time travel / teleport testing) 
-  - `anvil-a` is accessible at `http://127.0.0.1:8545`.
-  - `anvil-b` is accessible at `http://127.0.0.1:8546`.
-  - `anvil-c` is accessible at `http://127.0.0.1:8547`.
-- **vlayer Prover** listens on `http://127.0.0.1:3000`.
-- **vlayer Chain Server** is available at `http://127.0.0.1:3001`.
-- **Websocket Proxy** accessible via `http://127.0.0.1:55688`.
+### Available services
+| Service                  | Endpoint                 | Description                               |
+|--------------------------|--------------------------|-------------------------------------------|
+| anvil-A      | `http://127.0.0.1:8545` | Local devnet        |
+| anvil-B      | `http://127.0.0.1:8546` | Secondary devnet (for time travel/teleport testing)                          |
+| anvil-C      | `http://127.0.0.1:8547` | Tertiary devnet (for time travel/teleport testing)                           |
+| prover         | `http://127.0.0.1:3000` | zkEVM prover for vlayer contracts             |
+| indexer   | `http://127.0.0.1:3001` | Storage proof indexer               |
+| notary   | `http://127.0.0.1:7047` | TLS Notary server               |
+| websocket proxy       | `http://127.0.0.1:55688`| Proxying websocket connections            |
  
-### Stop and clean up
-To stop all running services:
-```bash
-docker compose down
-```
-
-This will stop and remove all containers but preserve data in `./chain_db`. If you want to remove the data as well, delete the `./chain_db` directory.
+#### **Stopping Devnet**
+1. Stop all running services:
+   ```bash
+   docker compose down
+   ```
+2. Data persistence:
+   - Data stored in `./chain_db` is preserved.
+   - To delete all data, remove the `./chain_db` directory:
+     ```bash
+     rm -rf ./chain_db
+     ```
 
 ## Prover modes
 Prover server supports two proving modes:
