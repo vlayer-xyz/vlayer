@@ -46,6 +46,7 @@ impl Client for RpcClient {
         let result_value = self.rpc_client.call(params).await.map_err(Error::from)?;
         let sync_status: SyncStatus = serde_json::from_value(result_value)?;
 
+        info!("Sync status for chain {chain_id}: {sync_status:?}");
         Ok(sync_status)
     }
 }
