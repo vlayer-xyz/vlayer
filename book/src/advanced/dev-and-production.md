@@ -68,7 +68,7 @@ docker compose -f <(curl -L https://install.vlayer.xyz/devnet) up -d
 
 ## Prover modes
 Prover server supports two proving modes:
-- **FAKE**: Used for development and testing. It executes code and verifies the correctness of execution but does not perform actual proving. In this mode, the `Verifier` contract can confirm computations, but a malicious `Prover` could exploit the system.
+- **FAKE**: Designed for development and testing purposes, this mode executes code and verifies its correctness without performing actual proving. While the Verifier contract can confirm computations in this mode, it is susceptible to exploitation by a malicious Prover.```
 - **GROTH16**: Intended for production and final testing, this mode performs real proving.
 
 ### FAKE Mode
