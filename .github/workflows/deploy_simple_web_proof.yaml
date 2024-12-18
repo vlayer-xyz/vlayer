@@ -14,7 +14,8 @@ on:
     branches:
       - main
 concurrency:
-  group: ${{ github.workflow }}
+  # Same group for all jobs using EXAMPLES_DEPLOY_PRIVATE_KEY key.
+  group: examples-deployment
   cancel-in-progress: false
 jobs:
   deploy-simple-web-proof:
