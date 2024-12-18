@@ -1,6 +1,6 @@
 # Environments: Devnet & Testnet
 
-The vlayer network consists of services nodes: provers, indexers, notaries and proxies. This nodes are necessary for execution of vlayer smart contracts features like [time travel](/features/time-travel.html), [teleport](/features/teleport.html), [email](/features/email.html) / [web](/features/web.html) proofs.
+The vlayer network consists of service nodes: provers, indexers, notaries and proxies. This nodes are necessary for execution of vlayer smart contracts features like [time travel](/features/time-travel.html), [teleport](/features/teleport.html), [email](/features/email.html) and [web](/features/web.html) proofs.
 
 Currently, there are two environments supported:
 - **testnet** - predeployed public environment supporting multiple testnets, running in FAKE mode for quick development and testing
