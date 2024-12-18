@@ -1,6 +1,6 @@
 # Environments: Devnet & Testnet
 
-The vlayer network consists of several types of nodes: provers, indexers, notaries, and proxies. These nodes are critical for executing vlayer smart contract features, including [Time Travel](/features/time-travel.html), [Teleport](/features/teleport.html), [Rmail](/features/email.html) and [Web](/features/web.html).
+The vlayer network consists of several types of nodes: provers, indexers, notaries, and proxies. These nodes are critical for executing vlayer smart contract features, including Time Travel, Teleport, and proofs for Email and Web.
 
 Currently, there are two environments supported:
 - **testnet** - public environment supporting multiple L1 and L2 testnets
