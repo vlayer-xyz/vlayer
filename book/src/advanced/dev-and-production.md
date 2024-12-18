@@ -1,32 +1,44 @@
-# Dev & Production Modes
+# Environments: Devnet & Testnet
 
-The vlayer node is an HTTP server that acts as a prover. 
+The vlayer network consists of services nodes: provers, indexers, notaries and proxies. This nodes are necessary for execution of vlayer smart contracts features like [time travel](/features/time-travel.html), [teleport](/features/teleport.html), [email](/features/email.html) / [web](/features/web.html) proofs.
 
-## Public Test Prover 
-By default, client SDK communicates with test prover deployed by vlayer at `https://test-prover.vlayer.xyz`.
+There are two environments supported:
+- **testnet** - default, predeployed and ready to use environment with public testnet support
+- **devnet** - Docker Compose environment with local vlayer services and anvil devnet
 
-## Running Prover locally
-There are two ways to run prover server: vlayer CLI and Docker.
+## Testnet
+Default vlayer prover is available at `https://test-prover.vlayer.xyz`. Prover operates in [`FAKE` mode](/advanced/dev-and-production.html#prover-modes) and works with following testnets:
 
-### vlayer CLI
-Assuming vlayer is [installed](/getting-started/installation.html), you can start it with the following command:
-```sh
-vlayer serve
-```
+| chain | time travel | teleport | email/web |
+|---------|-------------|----------|-----------|
+| sepolia | ✅         | ✅      | ✅         |
+| optimismSepolia | ✅         | ✅      | ✅         |
+| baseSepolia | ✅         | ✅      | ✅         |
+| polygonAmoy | ✅         | ✅      | ✅         |
+| arbitrumSepolia | ✅         | ✅      | ✅         |
+| lineaSepolia | ✅         | ✅      | ✅         |
+| worldchainSepolia | ✅         | ✅      | ✅         |
+| zksyncSepoliaTestnet | ✅         | ✅      | ✅         |
 
-### Docker
-Save the [vlayer `docker-compose-devnet.yaml`](/static/docker-compose.devnet.yaml) in your working directory (vlayer example apps already have it).
+## Devnet
+Every vlayer project has `docker-compose.devnet.yaml` in the `${project}/vlayer` directory. This file contains all necessary services for local environment.
 
 > Ensure [Docker](https://docs.docker.com/get-docker/) and [Docker Compose](https://docs.docker.com/compose/install/) are installed on your system.
 
-#### Start the services
-Pull the required images and start the containers in the background:
+### Start devnet
+To pull the required images and start the containers in the background use this command:
 
 ```bash
-docker compose --file docker-compose-devnet.yaml up -d
+cd ${project}/vlayer
+bun run devnet
 ```
 
-#### Access to services
+Optionally, one may run devnet locally outside of the vlayer project directory using vlayer [Docker Compose file](https://install.vlayer.xyz/devnet):
+```sh
+docker compose -f <(curl -L https://install.vlayer.xyz/devnet) up -d
+```
+
+### Access to services
 - **anvil devnets** (useful for time travel / teleport testing) 
   - `anvil-a` is accessible at `http://127.0.0.1:8545`.
   - `anvil-b` is accessible at `http://127.0.0.1:8546`.
@@ -35,30 +47,13 @@ docker compose --file docker-compose-devnet.yaml up -d
 - **vlayer Chain Server** is available at `http://127.0.0.1:3001`.
 - **Websocket Proxy** accessible via `http://127.0.0.1:55688`.
  
-#### Stop and clean up
+### Stop and clean up
 To stop all running services:
 ```bash
 docker compose down
 ```
 
 This will stop and remove all containers but preserve data in `./chain_db`. If you want to remove the data as well, delete the `./chain_db` directory.
-
-## Configuring JSON-RPC URLs
-The vlayer prover server require urls of RPC node providers to query blockchain data. Node providers are required for [teleport](/features/teleport.html) or [time travel](/features/time-travel.html). Provide specific RPC URLs for each chain using the `--rpc-url` parameter:
-```sh
-vlayer serve --rpc-url <chain-id>:<url>
-```
-
-To configure multiple RPC URLs use `--rpc-url` parameter many times:
-```sh
-vlayer serve \
-  --rpc-url 1:https://eth-mainnet.alchemyapi.io/v2/<alchemy_api_key> \
-  --rpc-url 10:https://opt-mainnet.g.alchemy.com/v2/<optimism_api_key> 
-```
-
-For Docker Compose, just add `--rpc-url` parameter(s) to the `docker-compose.devnet.yaml` file.
-
-> Note: By default, no RPC node providers are configured. You will need to specify them manually using the --rpc-url parameter to run the vlayer prover.
 
 ## Prover modes
 Prover server supports two proving modes:
@@ -67,9 +62,9 @@ Prover server supports two proving modes:
 
 ### FAKE Mode
 
-By default, it listens for JSON-RPC client requests on port `3000` in `FAKE` mode. You can also specify the `--proof` argument explicitly:
+Testnet and devnet provers are running in `FAKE` mode by default. Fake mode can be enabled explicitly by using the `--proof` argument:
 ```sh
-vlayer serve --proof fake
+serve --proof fake
 ```
 > Note: FAKE mode is limited to test and dev chains to prevent accidental errors.
 
@@ -78,15 +73,18 @@ vlayer serve --proof fake
 
 To speed up proof generation, vlayer supports the use of infrastructure like the [Bonsai](https://www.bonsai.xyz/) (and eventually [Boundless](https://beboundless.xyz/)) to offload heavy computations to high-performance machines.
 
-To run a vlayer node in production mode, use this command:
+To run prover in production mode, modify `docker-compose.devnet.yaml`:
 
-```sh
-BONSAI_API_URL=https://api.bonsai.xyz/ \
-BONSAI_API_KEY={api_key_goes_here} \
-vlayer serve --proof groth16
+```yaml
+# rest of config
+vlayer:
+    # existing vlayer config
+    environment:
+      # other envs...
+      BONSAI_API_URL: https://api.bonsai.xyz
+      BONSAI_API_KEY: api_key_goes_here
+    command: "serve --proof groth16 ...other_args"
 ```
-
-In case of Docker Compose, just change `--proof fake` to `--proof groth16` in the `docker-compose.devnet.yaml` file.
 
 You can request a `BONSAI_API_KEY` [here](https://docs.google.com/forms/d/e/1FAIpQLSf9mu18V65862GS4PLYd7tFTEKrl90J5GTyzw_d14ASxrruFQ/viewform).
 

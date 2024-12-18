@@ -57,21 +57,6 @@ cd vlayer
 bun install
 ```
 
-### Run on a local devnet
-Our recommended way to start local environment for development is by using [Docker](/advanced/dev-and-production.html#docker-compose): 
-
-```bash
-$ bun run server:dev
-```
-
-Above command starts all required services in the background: local vlayer prover, anvil nodes, notary server, and chain server.
-
-To run the example within the `vlayer` directory, use:
-
-```sh
-bun run prove:dev
-```
-
 ### Run on a testnet
 Running examples on testnets doesn't require to run prover or anvil devnets locally. To use a testnet, first provide a private key in the `vlayer/.env.testnet.local` file:
 
@@ -83,19 +68,19 @@ This private key is used for deploying example contracts and sending transaction
 
 By default, `optimismSepolia` is configured in the `vlayer/.env.testnet` file. However, you can override this setting to use other testnets. Below is a list of available testnets and their respective JSON-RPC URLs:
 
-| CHAIN_NAME        | JSON_RPC_URL                                  |
-|-------------------|-----------------------------------------------|
-| sepolia           | https://rpc.sepolia.org                       |
-| optimismSepolia   | https://sepolia.optimism.io                   |
-| baseSepolia       | https://sepolia.base.org                      |
-| polygonAmoy       | https://rpc-amoy.polygon.technology           |
-| arbitrumSepolia   | https://sepolia-rollup.arbitrum.io/rpc        |
-| zksyncSepoliaTestnet | https://sepolia.era.zksync.dev            |
-| flowTestnet       | https://testnet.evm.nodes.onflow.org          |
-| scrollSepolia     | https://sepolia-rpc.scroll.io                 |
-| lineaSepolia      | https://rpc.sepolia.linea.build               |
-| bitkubTestnet     | https://rpc-testnet.bitkubchain.io            |
-| zircuitTestnet    | https://zircuit1.p2pify.com                   |
+| Chain        | RPC                                 | Time travel | Teleport | Email / Web |
+|--------------|-------------------------------------|-------------|----------|-------------|
+| sepolia      | https://rpc.sepolia.org | ✅         | ✅      | ✅         |
+| optimismSepolia | https://sepolia.optimism.io | ✅         | ✅      | ✅         |
+| baseSepolia     | https://sepolia.base.org          | ✅         | ✅      | ✅         |
+| polygonAmoy     | https://rpc-amoy.polygon.technology | ✅         | ✅      | ✅         |
+| arbitrumSepolia   | https://sepolia-rollup.arbitrum.io/rpc        | ✅         | ✅      | ✅         |
+| zksyncSepoliaTestnet | https://sepolia.era.zksync.dev            | ✅         | ✅      | ✅         |
+| flowTestnet       | https://testnet.evm.nodes.onflow.org          | ✅         | ✅      | ✅         |
+| scrollSepolia     | https://sepolia-rpc.scroll.io                 | ✅         | ✅      | ✅         |
+| lineaSepolia      | https://rpc.sepolia.linea.build               | ✅         | ✅      | ✅         |
+| bitkubTestnet     | https://rpc-testnet.bitkubchain.io            | ✅         | ✅      | ✅    | ✅  |
+| zircuitTestnet    | https://zircuit1.p2pify.com                   | ✅         | ✅      | ✅         |
 
 To change the desired network, set the `CHAIN_NAME` and `JSON_RPC_URL` environment variables in `vlayer/.env.testnet.local`.
 
@@ -103,6 +88,21 @@ Once configured, run the example from within the `vlayer` directory using:
 
 ```sh
 bun run prove:testnet
+```
+
+### Run on a local devnet
+Recommended way to start local environment for development is by using [Docker](/advanced/dev-and-production.html#devnet): 
+
+```bash
+$ bun run devnet
+```
+
+Above command starts all required services in the background.
+
+Once vlayer devnet is up, run the example within the `vlayer` directory:
+
+```sh
+bun run prove:dev
 ```
 
 ### Web Proof example
