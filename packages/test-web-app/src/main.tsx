@@ -8,6 +8,7 @@ import { Dashboard } from "./Dashboard";
 import { Login } from "./Login";
 import "./main.css";
 import Email from "./Email";
+import { DappProveWeb } from "./DappProveWeb";
 
 console.log("Dapp", Dapp);
 
@@ -20,6 +21,10 @@ const router = createBrowserRouter([
   {
     path: "/dapp-new-way",
     element: <DappNewWay />,
+  },
+  {
+    path: "/dapp-prove-web",
+    element: <DappProveWeb />,
   },
   // profile is route representing place where user is authenticated
   // and therefore has access to data we gonna prove
