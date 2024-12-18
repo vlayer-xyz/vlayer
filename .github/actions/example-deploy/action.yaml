@@ -16,6 +16,12 @@ inputs:
   VERCEL_ORG_ID:
     description: 'Vercel organization ID'
     required: true
+  GITHUB_TOKEN:
+    description: 'Github token'
+    required: true
+  JSON_RPC_URL:
+    description: 'JSON RPC URL'
+    required: true
 runs:
   using: "composite"
   steps:
@@ -71,7 +77,7 @@ runs:
       run: bun run deploy:testnet
       env:
         VLAYER_ENV: testnet
-        JSON_RPC_URL: "https://opt-sepolia.g.alchemy.com/v2/${{ secrets.ALCHEMY_API_KEY }}"
+        JSON_RPC_URL: ${{ inputs.JSON_RPC_URL }}
         EXAMPLES_TEST_PRIVATE_KEY: ${{ inputs.EXAMPLES_TEST_PRIVATE_KEY }}
       working-directory: ./examples/${{ inputs.EXAMPLE_NAME }}/vlayer
 
@@ -88,7 +94,7 @@ runs:
         VERCEL_TOKEN: ${{ inputs.VERCEL_TOKEN }}
         VERCEL_PROJECT_ID: ${{ inputs.VERCEL_PROJECT_ID }}
         VERCEL_ORG_ID: ${{ inputs.VERCEL_ORG_ID }}
-        GITHUB_TOKEN: "${{ github.token }}"
+        GITHUB_TOKEN: "${{ inputs.GITHUB_TOKEN }}"
         EXAMPLE_NAME: ${{ inputs.EXAMPLE_NAME }}
       run: bash/deploy-to-vercel.sh
     - name: Deploy to Vercel (PR Preview)
@@ -99,7 +105,7 @@ runs:
         VERCEL_TOKEN: ${{ inputs.VERCEL_TOKEN }}
         VERCEL_PROJECT_ID: ${{ inputs.VERCEL_PROJECT_ID }}
         VERCEL_ORG_ID: ${{ inputs.VERCEL_ORG_ID }}
-        GITHUB_TOKEN: "${{ github.token }}"
+        GITHUB_TOKEN: "${{ inputs.GITHUB_TOKEN }}"
         PR_NUMBER: "${{ github.event.number }}"
         EXAMPLE_NAME: ${{ inputs.EXAMPLE_NAME }}
       run: bash/deploy-to-vercel.sh
