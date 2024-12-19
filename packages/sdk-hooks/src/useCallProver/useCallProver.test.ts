@@ -1,5 +1,5 @@
 import { renderHook, act } from "@testing-library/react";
-import { describe, it, expect, vi, beforeEach } from "vitest";
+import { describe, test, expect, vi, beforeEach } from "vitest";
 import { useCallProver, ProverStatus } from "./useCallProver";
 import type { Abi } from "viem";
 import type { ProveArgs } from "@vlayer/sdk";
@@ -9,6 +9,8 @@ const mockVlayerClient = vi.hoisted(() => ({
 }));
 
 const mockChainId = 1;
+const anotherChainId = 2;
+
 describe("useCallProver", () => {
   beforeEach(() => {
     vi.mock("../context", () => ({
@@ -24,19 +26,21 @@ describe("useCallProver", () => {
     mockVlayerClient.prove.mockReset();
   });
 
-  it("should initialize properly", () => {
+  test("initial state", () => {
     const { result } = renderHook(() => useCallProver());
 
-    expect(result.current.status).toBe(ProverStatus.Idle);
-    expect(result.current.error).toBeNull();
-    expect(result.current.data.hash).toBe("");
-    expect(result.current.isIdle).toBe(true);
-    expect(result.current.isPending).toBe(false);
-    expect(result.current.isReady).toBe(false);
-    expect(result.current.isError).toBe(false);
+    expect(result.current).toMatchObject({
+      status: ProverStatus.Idle,
+      error: null,
+      data: { hash: "" },
+      isIdle: true,
+      isPending: false,
+      isReady: false,
+      isError: false,
+    });
   });
 
-  it("should handle successful prover call", async () => {
+  test("success", async () => {
     const mockHash = "0x123";
     mockVlayerClient.prove.mockResolvedValueOnce({ hash: mockHash });
 
@@ -48,16 +52,20 @@ describe("useCallProver", () => {
         proverAbi: [] as Abi,
         functionName: "test",
         args: [],
+        chainId: mockChainId,
       });
     });
 
-    expect(result.current.status).toBe(ProverStatus.Ready);
-    expect(result.current.data.hash).toBe(mockHash);
-    expect(result.current.isReady).toBe(true);
-    expect(result.current.error).toBeNull();
+    expect(result.current).toMatchObject({
+      status: ProverStatus.Ready,
+      data: { hash: mockHash },
+      isReady: true,
+      error: null,
+      isError: false,
+    });
   });
 
-  it("should handle prover call errors", async () => {
+  test("error on prove failure", async () => {
     const mockError = new Error("Proving failed");
     mockVlayerClient.prove.mockRejectedValueOnce(mockError);
 
@@ -72,19 +80,26 @@ describe("useCallProver", () => {
       });
     });
 
-    expect(result.current.status).toBe(ProverStatus.Error);
-    expect(result.current.error).toBe(mockError);
-    expect(result.current.isError).toBe(true);
+    expect(result.current).toMatchObject({
+      status: ProverStatus.Error,
+      error: mockError,
+      isError: true,
+    });
   });
 
-  it("should pass chainId to vlayerClient.prove", async () => {
+  test("success with another chainId", async () => {
     const { result } = renderHook(() => useCallProver());
+
+    vi.mock("wagmi", () => ({
+      useChainId: () => anotherChainId,
+    }));
 
     const proverCallArgs: ProveArgs<Abi, string> = {
       address: "0x456",
       proverAbi: [] as Abi,
       functionName: "test",
       args: [],
+      chainId: mockChainId,
     };
 
     await act(async () => {
@@ -93,7 +108,7 @@ describe("useCallProver", () => {
 
     expect(mockVlayerClient.prove).toHaveBeenCalledWith({
       ...proverCallArgs,
-      chainId: mockChainId,
+      chainId: anotherChainId,
     });
   });
 });
