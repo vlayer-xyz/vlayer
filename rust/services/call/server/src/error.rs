@@ -4,6 +4,8 @@ use server_utils::{rpc::Error as RpcError, FieldValidationError};
 use thiserror::Error;
 use tokio::task::JoinError;
 
+use crate::v_call::CallHash;
+
 #[derive(Debug, Error)]
 pub enum AppError {
     #[error("Invalid field: {0}")]
@@ -15,7 +17,7 @@ pub enum AppError {
     #[error("RPC error: {0}")]
     RpcError(#[from] RpcError),
     #[error("Hash not found: {0}")]
-    HashNotFound(String),
+    HashNotFound(CallHash),
     #[error("Waiting for chain proof timed out")]
     ChainProofTimeout,
 }
