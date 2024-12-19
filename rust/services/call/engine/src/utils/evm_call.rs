@@ -22,10 +22,14 @@ pub fn execution_result_to_call_outcome(
     result: &ExecutionResult,
     inputs: &CallInputs,
 ) -> CallOutcome {
+    let mut gas = Gas::new(inputs.gas_limit);
+    if !gas.record_cost(result.gas_used()) {
+        panic!("gas limit exceeded");
+    }
     let interpreter_result = InterpreterResult {
         result: execution_result_to_instruction_result(result),
         output: result.output().cloned().unwrap_or_default(),
-        gas: Gas::new(result.gas_used()),
+        gas,
     };
 
     CallOutcome {
