@@ -38,7 +38,7 @@ export async function prove<T extends Abi, F extends ContractFunctionName<T>>(
   functionName: F,
   args: ContractFunctionArgs<T, AbiStateMutability, F>,
   chainId: number = foundry.id,
-  gasLimit: number = 100_000_000_000_000,
+  gasLimit: number = 1_000_000,
   url: string = "http://127.0.0.1:3000",
   token?: string,
   options: ProveOptions = { preverifyVersions: false },

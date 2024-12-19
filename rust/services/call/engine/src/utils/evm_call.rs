@@ -25,13 +25,21 @@ pub fn execution_result_to_call_outcome(
     let interpreter_result = InterpreterResult {
         result: execution_result_to_instruction_result(result),
         output: result.output().cloned().unwrap_or_default(),
-        gas: Gas::new(result.gas_used()),
+        gas: gas_left(inputs.gas_limit, result.gas_used()),
     };
 
     CallOutcome {
         result: interpreter_result,
         memory_offset: inputs.return_memory_offset.clone(),
     }
+}
+
+fn gas_left(gas_limit: u64, gas_used: u64) -> Gas {
+    let mut gas = Gas::new(gas_limit);
+    if !gas.record_cost(gas_used) {
+        unreachable!("gas_used cannot be higher than gas_limit");
+    }
+    gas
 }
 
 fn execution_result_to_instruction_result(result: &ExecutionResult) -> InstructionResult {
@@ -46,12 +54,12 @@ pub fn create_encoded_return_outcome<T: SolValue>(value: &T, inputs: &CallInputs
     create_return_outcome(value.abi_encode(), inputs)
 }
 
-pub fn create_revert_outcome(reason: &str) -> CallOutcome {
+pub fn create_revert_outcome(reason: &str, gas_limit: u64) -> CallOutcome {
     CallOutcome::new(
         InterpreterResult::new(
             InstructionResult::Revert,
             alloy_sol_types::Revert::from(reason).abi_encode().into(),
-            Gas::new(0),
+            Gas::new_spent(gas_limit),
         ),
         usize::MAX..usize::MAX,
     )

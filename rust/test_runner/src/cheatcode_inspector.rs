@@ -62,10 +62,13 @@ impl<DB: Database> Inspector<DB> for CheatcodeInspector {
                     if let Some(proof) = self.previous_proof.take() {
                         Some(create_encoded_return_outcome(&proof, inputs))
                     } else {
-                        Some(create_revert_outcome("No proof available"))
+                        Some(create_revert_outcome("No proof available", inputs.gas_limit))
                     }
                 }
-                _ => Some(create_revert_outcome("Unexpected vlayer cheatcode call")),
+                _ => Some(create_revert_outcome(
+                    "Unexpected vlayer cheatcode call",
+                    inputs.gas_limit,
+                )),
             };
         }
         None
@@ -102,7 +105,7 @@ impl CheatcodeInspector {
                 self.previous_proof = Some(Self::host_output_into_proof(&host_output));
                 create_return_outcome(host_output.guest_output.evm_call_result, inputs)
             }
-            Err(error) => create_revert_outcome(&format!("{error:?}")),
+            Err(error) => create_revert_outcome(&format!("{error:?}"), inputs.gas_limit),
         }
     }
 
