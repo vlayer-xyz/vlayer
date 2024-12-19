@@ -1,6 +1,7 @@
-use alloy_primitives::{Address, Bytes, FixedBytes, TxKind};
+use alloy_primitives::{Address, Bytes as RlpBytes, FixedBytes, TxKind};
 use alloy_rlp::RlpEncodable;
 use alloy_sol_types::{SolCall, SolValue};
+use bytes::Bytes;
 use chain_client::ChainProofCache;
 use derive_new::new;
 use revm::{
@@ -70,7 +71,7 @@ impl From<Call> for TxEnv {
 
 fn initialize_optimism_fields() -> OptimismFields {
     OptimismFields {
-        enveloped_tx: Some(Bytes::default()),
+        enveloped_tx: Some(RlpBytes::default()),
         ..Default::default()
     }
 }
@@ -126,11 +127,12 @@ impl GuestOutput {
 
 #[derive(Clone, Debug)]
 pub struct HostOutput {
-    pub raw_abi: Vec<u8>,
-    pub seal: Vec<u8>,
+    pub raw_abi: Bytes,
+    pub seal: Bytes,
     pub guest_output: GuestOutput,
     pub proof_len: usize,
     pub call_guest_id: CallGuestId,
+    pub cycles_used: u64,
 }
 
 #[derive(Debug, Clone)]

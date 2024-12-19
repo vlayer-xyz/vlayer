@@ -27,6 +27,7 @@ pub use error::Error;
 use ethers_core::types::BlockNumber as BlockTag;
 use prover::Prover;
 use provider::{CachedMultiProvider, EvmBlockHeader};
+use risc0_zkvm::{ProveInfo, SessionStats};
 use seal::EncodableReceipt;
 use tracing::info;
 
@@ -168,9 +169,14 @@ impl Host {
             host_output, input, ..
         }: PreflightResult,
     ) -> Result<HostOutput, Error> {
-        let (seal, raw_guest_output) = provably_execute(prover, &input)?;
+        let EncodedProofWithStats {
+            seal,
+            raw_guest_output,
+            stats,
+        } = provably_execute(prover, &input)?;
         let proof_len = raw_guest_output.len();
         let guest_output = GuestOutput::from_outputs(&host_output, &raw_guest_output)?;
+        let cycles_used = stats.total_cycles;
 
         if guest_output.evm_call_result != host_output {
             return Err(Error::HostGuestOutputMismatch(
@@ -179,12 +185,15 @@ impl Host {
             ));
         }
 
+        info!(cycles_used_proving = cycles_used, "Cycles used during proving: {}", cycles_used);
+
         Ok(HostOutput {
             guest_output,
             seal,
             raw_abi: raw_guest_output,
             proof_len,
             call_guest_id,
+            cycles_used,
         })
     }
 
@@ -212,12 +221,21 @@ fn wrap_engine_panic(err: Box<dyn Any + Send>) -> TravelCallExecutorError {
     TravelCallExecutorError::Panic(panic_msg)
 }
 
-fn provably_execute(prover: &Prover, input: &Input) -> Result<(Vec<u8>, Vec<u8>), Error> {
-    let receipt = prover.prove(input)?;
+#[derive(new)]
+struct EncodedProofWithStats {
+    seal: Bytes,
+    raw_guest_output: Bytes,
+    stats: SessionStats,
+}
+
+fn provably_execute(prover: &Prover, input: &Input) -> Result<EncodedProofWithStats, Error> {
+    let ProveInfo { receipt, stats } = prover.prove(input)?;
 
     let seal: Seal = EncodableReceipt::from(receipt.clone()).try_into()?;
+    let seal: Bytes = seal.abi_encode().into();
+    let raw_guest_output: Bytes = receipt.journal.bytes.into();
 
-    Ok((seal.abi_encode(), receipt.journal.bytes))
+    Ok(EncodedProofWithStats::new(seal, raw_guest_output, stats))
 }
 
 #[cfg(test)]
