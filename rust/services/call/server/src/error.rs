@@ -23,15 +23,16 @@ pub enum AppError {
 impl From<AppError> for ErrorObjectOwned {
     fn from(error: AppError) -> Self {
         match error {
-            AppError::FieldValidation(..) => ErrorObjectOwned::owned::<()>(
-                jrpcerror::INVALID_PARAMS_CODE,
-                error.to_string(),
-                None,
-            ),
+            AppError::FieldValidation(..) | AppError::HashNotFound(..) => {
+                ErrorObjectOwned::owned::<()>(
+                    jrpcerror::INVALID_PARAMS_CODE,
+                    error.to_string(),
+                    None,
+                )
+            }
             AppError::Host(..)
             | AppError::Join(..)
             | AppError::RpcError(..)
-            | AppError::HashNotFound(..)
             | AppError::ChainProofTimeout => ErrorObjectOwned::owned::<()>(
                 jrpcerror::INTERNAL_ERROR_CODE,
                 error.to_string(),

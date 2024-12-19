@@ -288,11 +288,13 @@ mod server_tests {
 
     #[allow(non_snake_case)]
     mod v_getProofReceipt {
+        use alloy_primitives::B256;
         use call_server::{v_call::CallHash, v_get_proof_receipt::Status};
         use ethers::{
             abi::AbiEncode,
             types::{Bytes, Uint8, U256},
         };
+        use serde_json::Value;
         use tower::{ServiceBuilder, ServiceExt};
         use web_proof::fixtures::load_web_proof_fixture;
 
@@ -306,8 +308,8 @@ mod server_tests {
         const RETRY_SLEEP_DURATION: tokio::time::Duration = tokio::time::Duration::from_millis(100);
         const MAX_POLLING_TIME: std::time::Duration = std::time::Duration::from_secs(60);
 
-        type Req = serde_json::Value;
-        type Resp = (Status, serde_json::Value);
+        type Req = Value;
+        type Resp = (Status, Value);
 
         #[derive(Clone)]
         struct RetryRequest;
@@ -358,7 +360,16 @@ mod server_tests {
                 .expect("valid returned hash value of the call params")
         }
 
-        async fn get_proof_result(app: &Server, hash: CallHash) -> serde_json::Value {
+        fn v_get_proof_receipt_body(hash: CallHash) -> Value {
+            json!({
+                    "method": "v_getProofReceipt",
+                    "params": { "hash": hash },
+                    "id": 1,
+                    "jsonrpc": "2.0",
+            })
+        }
+
+        async fn get_proof_result(app: &Server, hash: CallHash) -> Value {
             let svc = ServiceBuilder::new()
                 .layer(tower::timeout::TimeoutLayer::new(MAX_POLLING_TIME))
                 .layer(tower::retry::RetryLayer::new(RetryRequest))
@@ -370,16 +381,17 @@ mod server_tests {
                         .expect("status should be a valid enum variant");
                     Ok((status, result["result"].clone())) as Result<(_, _), String>
                 });
-            let (_, result) = svc
-                .oneshot(json!({
-                    "method": "v_getProofReceipt",
-                    "params": { "hash": hash },
-                    "id": 1,
-                    "jsonrpc": "2.0",
-                }))
-                .await
-                .unwrap();
+            let (_, result) = svc.oneshot(v_get_proof_receipt_body(hash)).await.unwrap();
             result
+        }
+
+        #[tokio::test(flavor = "multi_thread")]
+        async fn nonexistent_hash_failure() {
+            let ctx = Context::default().await;
+            let app = ctx.server(call_guest_elf(), chain_guest_elf());
+            let fake_hash = CallHash::from(B256::repeat_byte(0xaa));
+            let response = app.post("/", v_get_proof_receipt_body(fake_hash)).await;
+            assert_jrpc_err(response, -32602, &format!("Hash not found: {fake_hash}")).await;
         }
 
         #[tokio::test(flavor = "multi_thread")]
