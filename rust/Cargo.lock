@@ -10179,6 +10179,7 @@ dependencies = [
  "call_engine",
  "call_guest_wrapper",
  "call_host",
+ "call_precompiles",
  "chain",
  "chain_client",
  "chrono",
