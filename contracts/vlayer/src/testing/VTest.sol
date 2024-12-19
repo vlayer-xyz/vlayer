@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.21;
 
+import "../EmailProof.sol";
 import "forge-std-1.9.4/src/Test.sol";
 import {Proof} from "../Proof.sol";
 
@@ -11,6 +12,7 @@ uint256 constant VTEST_CHAIN_ID = 30_1337;
 interface ICheatCodes {
     function callProver() external returns (bool);
     function getProof() external returns (Proof memory);
+    function preverifyEmail(string memory email) external view returns (UnverifiedEmail memory);
 }
 
 contract VTest is Test {
@@ -29,5 +31,9 @@ contract VTest is Test {
     function getProof() internal returns (Proof memory) {
         vm.roll(block.number + 1);
         return ICheatCodes(CHEATCODES).getProof();
+    }
+
+    function preverifyEmail(string memory email) internal view returns (UnverifiedEmail memory) {
+        return ICheatCodes(CHEATCODES).preverifyEmail(email);
     }
 }

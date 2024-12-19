@@ -23,7 +23,13 @@ sol!(
         CallAssumptions call_assumptions;
     }
 
+    #[derive(Default, Debug)]
+    struct UnverifiedEmail {
+        string email;
+        string[] dnsRecords;
+    }
 
     function callProver() external returns (bool);
     function getProof() external returns (Proof memory);
+    function preverifyEmail(string memory email) external returns (UnverifiedEmail memory);
 );

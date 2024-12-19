@@ -23,6 +23,7 @@ color-eyre = { workspace = true }
 comfy-table = { workspace = true }
 delegate = { workspace = true }
 derive-new = { workspace = true }
+hickory-resolver = "0.24.2"
 ethers-core = { workspace = true }
 eyre = { workspace = true }
 forge = { workspace = true }
@@ -36,6 +37,7 @@ foundry-evm-core = { workspace = true }
 indicatif = { workspace = true }
 inferno = { workspace = true }
 itertools = { workspace = true }
+mailparse = "0.14.1"
 mock_chain_server = { workspace = true }
 mpt = { workspace = true }
 opener = { workspace = true }
@@ -50,6 +52,7 @@ serde_json = { workspace = true }
 tokio = { workspace = true }
 tracing = { workspace = true }
 yansi = { workspace = true }
+thiserror = "1.0.65"
 
 [dev-dependencies]
 foundry-test-utils = { workspace = true }
