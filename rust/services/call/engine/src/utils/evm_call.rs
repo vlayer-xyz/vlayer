@@ -22,20 +22,24 @@ pub fn execution_result_to_call_outcome(
     result: &ExecutionResult,
     inputs: &CallInputs,
 ) -> CallOutcome {
-    let mut gas = Gas::new(inputs.gas_limit);
-    if !gas.record_cost(result.gas_used()) {
-        panic!("gas limit exceeded");
-    }
     let interpreter_result = InterpreterResult {
         result: execution_result_to_instruction_result(result),
         output: result.output().cloned().unwrap_or_default(),
-        gas,
+        gas: gas_left(inputs.gas_limit, result.gas_used()),
     };
 
     CallOutcome {
         result: interpreter_result,
         memory_offset: inputs.return_memory_offset.clone(),
     }
+}
+
+fn gas_left(gas_limit: u64, gas_used: u64) -> Gas {
+    let mut gas = Gas::new(gas_limit);
+    if !gas.record_cost(gas_used) {
+        panic!("gas limit exceeded");
+    }
+    gas
 }
 
 fn execution_result_to_instruction_result(result: &ExecutionResult) -> InstructionResult {
