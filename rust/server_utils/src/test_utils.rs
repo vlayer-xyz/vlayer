@@ -2,7 +2,7 @@ use alloy_primitives::hex::ToHexExt;
 use assert_json_diff::assert_json_include;
 use axum::{
     body::Body,
-    http::{header::CONTENT_TYPE, Request, Response},
+    http::{header::CONTENT_TYPE, HeaderName, Request, Response},
     Router,
 };
 use axum_jrpc::Value;
@@ -34,6 +34,27 @@ pub async fn post<T: Serialize>(app: Router, url: &str, body: &T) -> Response<Bo
         .header(CONTENT_TYPE, APPLICATION_JSON.as_ref())
         .body(Body::from(to_string(body).unwrap()))
         .unwrap();
+    app.oneshot(request).await.unwrap()
+}
+
+pub async fn get(
+    app: Router,
+    url: &str,
+    headers: &[(&HeaderName, &str)],
+    params: &[(&str, &str)],
+) -> Response<Body> {
+    let params = params
+        .iter()
+        .map(|param| format!("{}={}", param.0, param.1))
+        .reduce(|acc, param| format!("{}&{}", acc, param))
+        .unwrap();
+
+    let request = Request::get(format!("{}?{}", url, params));
+    let request = headers
+        .into_iter()
+        .fold(request, |request, h| request.header(h.0, h.1));
+    let request = request.body("".to_string()).unwrap();
+
     app.oneshot(request).await.unwrap()
 }
 
