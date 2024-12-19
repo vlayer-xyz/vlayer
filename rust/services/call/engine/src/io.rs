@@ -127,8 +127,8 @@ impl GuestOutput {
 
 #[derive(Clone, Debug)]
 pub struct HostOutput {
-    pub raw_abi: Vec<u8>,
-    pub seal: Vec<u8>,
+    pub raw_abi: bytes::Bytes,
+    pub seal: bytes::Bytes,
     pub guest_output: GuestOutput,
     pub proof_len: usize,
     pub call_guest_id: CallGuestId,

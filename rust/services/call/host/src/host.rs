@@ -228,9 +228,10 @@ fn wrap_engine_panic(err: Box<dyn Any + Send>) -> TravelCallExecutorError {
     TravelCallExecutorError::Panic(panic_msg)
 }
 
+#[derive(new)]
 struct EncodedProofWithStats {
-    seal: Vec<u8>,
-    raw_guest_output: Vec<u8>,
+    seal: Bytes,
+    raw_guest_output: Bytes,
     stats: SessionStats,
 }
 
@@ -238,14 +239,10 @@ fn provably_execute(prover: &Prover, input: &Input) -> Result<EncodedProofWithSt
     let ProveInfo { receipt, stats } = prover.prove(input)?;
 
     let seal: Seal = EncodableReceipt::from(receipt.clone()).try_into()?;
-    let seal = seal.abi_encode();
-    let raw_guest_output = receipt.journal.bytes;
+    let seal: Bytes = seal.abi_encode().into();
+    let raw_guest_output: Bytes = receipt.journal.bytes.into();
 
-    Ok(EncodedProofWithStats {
-        seal,
-        raw_guest_output,
-        stats,
-    })
+    Ok(EncodedProofWithStats::new(seal, raw_guest_output, stats))
 }
 
 #[cfg(test)]
