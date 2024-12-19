@@ -37,7 +37,7 @@ pub fn execution_result_to_call_outcome(
 fn gas_left(gas_limit: u64, gas_used: u64) -> Gas {
     let mut gas = Gas::new(gas_limit);
     if !gas.record_cost(gas_used) {
-        panic!("gas limit exceeded");
+        unreachable!("gas_used cannot be higher than gas_limit");
     }
     gas
 }
