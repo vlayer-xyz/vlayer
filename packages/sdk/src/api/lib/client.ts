@@ -152,6 +152,7 @@ export const createVlayerClient = (
       proverAbi,
       functionName,
       chainId,
+      gasLimit,
       token,
       args,
     }) {
@@ -178,6 +179,7 @@ export const createVlayerClient = (
         address,
         functionName,
         chainId,
+        gasLimit,
         proverAbi,
         token,
         args: [
