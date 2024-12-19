@@ -25,13 +25,16 @@ pub enum AppError {
 impl From<AppError> for ErrorObjectOwned {
     fn from(error: AppError) -> Self {
         match error {
-            AppError::FieldValidation(..) | AppError::HashNotFound(..) => {
-                ErrorObjectOwned::owned::<()>(
-                    jrpcerror::INVALID_PARAMS_CODE,
-                    error.to_string(),
-                    None,
-                )
-            }
+            AppError::FieldValidation(..) => ErrorObjectOwned::owned::<()>(
+                jrpcerror::INVALID_PARAMS_CODE,
+                error.to_string(),
+                None,
+            ),
+            AppError::HashNotFound(..) => ErrorObjectOwned::owned::<()>(
+                jrpcerror::INVALID_REQUEST_CODE,
+                error.to_string(),
+                None,
+            ),
             AppError::Host(..)
             | AppError::Join(..)
             | AppError::RpcError(..)

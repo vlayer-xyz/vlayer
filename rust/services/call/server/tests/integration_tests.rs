@@ -391,7 +391,7 @@ mod server_tests {
             let app = ctx.server(call_guest_elf(), chain_guest_elf());
             let fake_hash = CallHash::from(B256::repeat_byte(0xaa));
             let response = app.post("/", v_get_proof_receipt_body(fake_hash)).await;
-            assert_jrpc_err(response, -32602, &format!("Hash not found: {fake_hash}")).await;
+            assert_jrpc_err(response, -32600, &format!("Hash not found: {fake_hash}")).await;
         }
 
         #[tokio::test(flavor = "multi_thread")]
