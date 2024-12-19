@@ -7,13 +7,34 @@ use call_host::Error as HostError;
 use derive_new::new;
 use serde::{Deserialize, Serialize, Serializer};
 
-use crate::{error::AppError, ser::ProofDTO};
+use crate::{error::AppError, handlers::ProofStatus, ser::ProofDTO};
 
 #[derive(Serialize, Deserialize, Clone, Debug)]
 #[serde(rename_all = "snake_case")]
 pub enum Status {
-    Pending,
-    Done,
+    Queued,
+    WaitingForChainProof,
+    Preflight,
+    Proving,
+    Ready,
+}
+
+impl Default for Status {
+    fn default() -> Self {
+        Self::Queued
+    }
+}
+
+impl From<&ProofStatus> for Status {
+    fn from(value: &ProofStatus) -> Self {
+        match value {
+            ProofStatus::Queued => Self::Queued,
+            ProofStatus::WaitingForChainProof => Self::WaitingForChainProof,
+            ProofStatus::Preflight => Self::Preflight,
+            ProofStatus::Proving => Self::Proving,
+            ProofStatus::Ready(..) => Self::Ready,
+        }
+    }
 }
 
 #[derive(Serialize, Clone)]
@@ -57,18 +78,22 @@ impl TryFrom<HostOutput> for RawData {
     }
 }
 
-#[derive(new, Clone, Serialize)]
+#[derive(new, Clone, Serialize, Default)]
 pub struct CallResult {
     pub status: Status,
     pub data: Option<RawData>,
 }
 
-impl CallResult {
-    pub fn from_maybe_output(output: Option<HostOutput>) -> Result<Self, AppError> {
-        match output {
-            None => Ok(Self::new(Status::Pending, None)),
-            Some(output) => Ok(Self::new(Status::Done, Some(output.try_into()?))),
-        }
+impl TryFrom<ProofStatus> for CallResult {
+    type Error = AppError;
+
+    fn try_from(value: ProofStatus) -> Result<Self, Self::Error> {
+        let status: Status = (&value).into();
+        let data: Option<RawData> = match value {
+            ProofStatus::Ready(output) => Some(output?.try_into()?),
+            _ => None,
+        };
+        Ok(Self { status, data })
     }
 }
 

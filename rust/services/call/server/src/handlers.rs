@@ -41,8 +41,8 @@ pub struct Proofs(DashMap<CallHash, ProofStatus>);
 
 #[derive(Debug)]
 pub enum ProofStatus {
-    /// Proof task has just been started
-    Pending,
+    /// Proof task has just been queued
+    Queued,
     /// Waiting for chain service to generate proof for the start execution location
     WaitingForChainProof,
     /// Preflight computation in progress
@@ -55,7 +55,7 @@ pub enum ProofStatus {
 
 impl Default for ProofStatus {
     fn default() -> Self {
-        Self::Pending
+        Self::Queued
     }
 }
 

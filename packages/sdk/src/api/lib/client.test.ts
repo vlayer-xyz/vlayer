@@ -97,7 +97,7 @@ describe("Success zk-proving", () => {
       return {
         body: JSON.stringify({
           result: {
-            status: "done",
+            status: "ready",
             data: {},
           },
         }),
@@ -108,6 +108,7 @@ describe("Success zk-proving", () => {
     await vlayer.waitForProvingResult({ hash });
 
     expect(zkProvingSpy).toBeCalledTimes(2);
+    expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Proving);
     expect(zkProvingSpy).toHaveBeenNthCalledWith(2, ZkProvingStatus.Done);
   });
   it("should notify that zk-proving failed", async () => {

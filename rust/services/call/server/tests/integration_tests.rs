@@ -293,7 +293,7 @@ mod server_tests {
             abi::AbiEncode,
             types::{Bytes, Uint8, U256},
         };
-        use tokio::time::{sleep, timeout, Duration};
+        use tower::{ServiceBuilder, ServiceExt};
         use web_proof::fixtures::load_web_proof_fixture;
 
         use super::*;
@@ -302,7 +302,34 @@ mod server_tests {
         const CHAIN_ID: u64 = 11_155_111;
         const GAS_LIMIT: u64 = 1_000_000;
         const GAS_METER_TTL: u64 = 3600;
-        const MAX_POLLING_TIME: Duration = Duration::from_secs(60);
+
+        const RETRY_SLEEP_DURATION: tokio::time::Duration = tokio::time::Duration::from_millis(100);
+        const MAX_POLLING_TIME: std::time::Duration = std::time::Duration::from_secs(60);
+
+        type Req = serde_json::Value;
+        type Resp = (Status, serde_json::Value);
+
+        #[derive(Clone)]
+        struct RetryRequest;
+
+        impl tower::retry::Policy<Req, Resp, String> for RetryRequest {
+            type Future = tokio::time::Sleep;
+
+            fn retry(
+                &mut self,
+                _req: &mut Req,
+                result: &mut Result<Resp, String>,
+            ) -> Option<Self::Future> {
+                result.as_ref().ok().and_then(|(status, _)| match status {
+                    Status::Ready => None,
+                    _ => Some(tokio::time::sleep(RETRY_SLEEP_DURATION)),
+                })
+            }
+
+            fn clone_request(&mut self, req: &Req) -> Option<Req> {
+                Some(req.clone())
+            }
+        }
 
         async fn get_hash(
             app: &Server,
@@ -332,32 +359,27 @@ mod server_tests {
         }
 
         async fn get_proof_result(app: &Server, hash: CallHash) -> serde_json::Value {
-            let request = json!({
-                "method": "v_getProofReceipt",
-                "params": { "hash": hash },
-                "id": 1,
-                "jsonrpc": "2.0",
-            });
-
-            timeout(MAX_POLLING_TIME, async move {
-                loop {
+            let svc = ServiceBuilder::new()
+                .layer(tower::timeout::TimeoutLayer::new(MAX_POLLING_TIME))
+                .layer(tower::retry::RetryLayer::new(RetryRequest))
+                .service_fn(|request| async move {
                     let response = app.post("/", &request).await;
                     assert_eq!(StatusCode::OK, response.status());
                     let result = assert_jrpc_ok(response, json!({})).await;
                     let status: Status = serde_json::from_value(result["result"]["status"].clone())
                         .expect("status should be a valid enum variant");
-                    match status {
-                        Status::Pending => {
-                            sleep(Duration::from_millis(100)).await;
-                        }
-                        Status::Done => {
-                            return result["result"].clone();
-                        }
-                    }
-                }
-            })
-            .await
-            .expect("server should return a proof result within the specified time frame")
+                    Ok((status, result["result"].clone())) as Result<(_, _), String>
+                });
+            let (_, result) = svc
+                .oneshot(json!({
+                    "method": "v_getProofReceipt",
+                    "params": { "hash": hash },
+                    "id": 1,
+                    "jsonrpc": "2.0",
+                }))
+                .await
+                .unwrap();
+            result
         }
 
         #[tokio::test(flavor = "multi_thread")]
@@ -375,7 +397,7 @@ mod server_tests {
             assert_json_include!(
                 actual: result,
                 expected: json!({
-                    "status": "done",
+                    "status": "ready",
                     "data": {
                         "evm_call_result": U256::from(3).encode_hex(),
                         "proof": {
@@ -412,7 +434,7 @@ mod server_tests {
             assert_json_include!(
                 actual: result,
                 expected: json!({
-                    "status": "done",
+                    "status": "ready",
                     "data": {
                         "evm_call_result": Uint8::from(1).encode_hex(),
                         "proof": {
