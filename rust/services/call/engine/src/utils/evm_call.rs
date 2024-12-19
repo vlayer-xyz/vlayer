@@ -46,12 +46,12 @@ pub fn create_encoded_return_outcome<T: SolValue>(value: &T, inputs: &CallInputs
     create_return_outcome(value.abi_encode(), inputs)
 }
 
-pub fn create_revert_outcome(reason: &str) -> CallOutcome {
+pub fn create_revert_outcome(reason: &str, gas_limit: u64) -> CallOutcome {
     CallOutcome::new(
         InterpreterResult::new(
             InstructionResult::Revert,
             alloy_sol_types::Revert::from(reason).abi_encode().into(),
-            Gas::new(0),
+            Gas::new_spent(gas_limit),
         ),
         usize::MAX..usize::MAX,
     )
