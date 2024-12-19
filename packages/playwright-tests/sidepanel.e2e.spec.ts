@@ -9,7 +9,7 @@ const config = {
 };
 
 test.describe("Full flow of webproof using extension", () => {
-  test("Full flow from opening sidepanel to redirection using proveWeb", async ({
+  test.only("Full flow from opening sidepanel to redirection using proveWeb", async ({
     page,
     context,
   }) => {
@@ -91,6 +91,7 @@ test.describe("Full flow of webproof using extension", () => {
       const extension = await sidePanel(context);
       const proveButton = extension.getByTestId("prove-button");
       await proveButton.click();
+      await page.reload();
       await page.waitForSelector('h1[data-testid="has-zkproof"]');
 
       expect(vlayerResponses.length).toBeGreaterThan(1);
