@@ -19,7 +19,7 @@ import {
 } from "viem";
 import { ZkProvingStatus } from "../../web-proof-commons";
 import { type ContractFunctionArgsWithout } from "types/viem";
-
+import { type ProveArgs } from "types/vlayer";
 function dropEmptyProofFromArgs(args: unknown) {
   if (Array.isArray(args)) {
     return args.slice(1) as unknown[];
@@ -59,16 +59,9 @@ export const createVlayerClient = (
       gasLimit,
       token,
       args,
-    }: {
-      address: Hex;
-      proverAbi: T;
-      functionName: F;
-      chainId?: number;
-      gasLimit?: number;
-      token?: string;
-      args: ContractFunctionArgs<T, AbiStateMutability, F>;
-    }) => {
+    }: ProveArgs<T, F>) => {
       webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Proving);
+
       const response = prove(
         address,
         proverAbi,

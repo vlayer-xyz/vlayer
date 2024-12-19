@@ -15,10 +15,12 @@
   "peerDependencies": {
     "typescript": "^5.0.0",
     "react": "^18 || ^19",
-    "wagmi": "^2.14.1"
+    "wagmi": "^2.14.3"
   },
   "dependencies": {
-    "@vlayer/sdk": "file:../sdk"
+    "@vlayer/sdk": "file:../sdk",
+    "viem": "^2.21.55",
+    "vitest-fetch-mock": "^0.4.2"
   },
   "scripts": {
     "test:unit": "vitest --run"

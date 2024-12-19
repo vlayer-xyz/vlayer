@@ -72,16 +72,20 @@ export interface VGetProofReceiptResponse {
   id: number;
 }
 
+export type ProveArgs<T extends Abi, F extends ContractFunctionName<T>> = {
+  address: Hex;
+  proverAbi: T;
+  functionName: F;
+  chainId?: number;
+  gasLimit?: number;
+  token?: string;
+  args: ContractFunctionArgs<T, AbiStateMutability, F>;
+};
+
 export type VlayerClient = {
-  prove: <T extends Abi, F extends ContractFunctionName<T>>(args: {
-    address: Hex;
-    proverAbi: T;
-    functionName: F;
-    chainId?: number;
-    gasLimit?: number;
-    token?: string;
-    args: ContractFunctionArgs<T, AbiStateMutability, F>;
-  }) => Promise<BrandedHash<T, F>>;
+  prove: <T extends Abi, F extends ContractFunctionName<T>>(
+    args: ProveArgs<T, F>,
+  ) => Promise<BrandedHash<T, F>>;
 
   waitForProvingResult: <
     T extends Abi,
