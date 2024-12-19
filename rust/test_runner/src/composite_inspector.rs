@@ -44,11 +44,11 @@ where
         inputs: &mut CallInputs,
     ) -> Option<CallOutcome> {
         let inspector_stack_outcome = self.inspector_stack.call(context, inputs);
-        if let Some(value) = find_and_call_precompiles(context, inputs) {
-            return Some(value);
-        }
         if let Some(call_outcome) = self.cheatcode_inspector.call(context, inputs) {
             return Some(call_outcome);
+        }
+        if let Some(value) = find_and_call_precompiles(context, inputs) {
+            return Some(value);
         }
         inspector_stack_outcome
     }
