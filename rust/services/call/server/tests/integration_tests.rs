@@ -127,7 +127,7 @@ mod server_tests {
         #[tokio::test(flavor = "multi_thread")]
         async fn web_proof_success() {
             const EXPECTED_HASH: &str =
-                "0xc695364072d6d284921f01326db4a895d7b5c27c7ed372c2155da32707658862";
+                "0xf110f36ff1cc02a29553c9a64cb52d47376a566b3db47aa40821804bebf1527d";
 
             let mut ctx = Context::default().await;
             let app = ctx.server(call_guest_elf(), chain_guest_elf());
