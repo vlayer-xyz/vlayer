@@ -9,7 +9,7 @@ use serde_json::{json, Value};
 use server_utils::function_selector;
 
 pub const GAS_LIMIT: u64 = 1_000_000;
-pub const SEPOLIA_ID: u64 = 11_155_111;
+pub const ETHEREUM_SEPOLIA_ID: u64 = 11_155_111;
 pub const GAS_METER_TTL: u64 = 3600;
 
 pub fn allocate_gas_body(expected_hash: &str) -> Value {
@@ -28,7 +28,7 @@ pub fn v_call_body(contract_address: H160, call_data: &Bytes) -> Value {
             "gas_limit": GAS_LIMIT,
         },
         {
-            "chain_id": SEPOLIA_ID,
+            "chain_id": ETHEREUM_SEPOLIA_ID,
         }
     ]);
 

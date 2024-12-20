@@ -6,7 +6,7 @@ mod test_helpers;
 
 use server_utils::{assert_jrpc_err, assert_jrpc_ok, body_to_json, body_to_string};
 use test_helpers::{
-    allocate_gas_body, rpc_body, v_call_body, GAS_LIMIT, GAS_METER_TTL, SEPOLIA_ID,
+    allocate_gas_body, rpc_body, v_call_body, ETHEREUM_SEPOLIA_ID, GAS_LIMIT, GAS_METER_TTL,
 };
 
 mod server_tests {
@@ -87,7 +87,7 @@ mod server_tests {
                         "gas_limit": GAS_LIMIT,
                     },
                     {
-                        "chain_id": SEPOLIA_ID,
+                        "chain_id": ETHEREUM_SEPOLIA_ID,
                     }
                     ],
                 "id": 1,
