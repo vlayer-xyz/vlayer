@@ -34,13 +34,13 @@ Next, we can define how the vlayer extension should generate the Web Proof. We d
 
 ```ts
 import {
-  createWebProof,
+  createWebProofRequest,
   startPage,
   expectUrl,
   notarize,
 } from '@vlayer/sdk/web_proof'
 
-const webProof = createWebProof({
+const webProofRequest = createWebProofRequest({
   logoUrl: 'http://twitterswap.com/logo.png',
   steps: [
     startPage('https://x.com/i/flow/login', 'Go to x.com login page'),
@@ -67,7 +67,7 @@ const hash = await vlayer.proveWeb({
     address: '0x70997970c51812dc3a010c7d01b50e0d17dc79c8',
     proverAbi,
     functionName: 'main',
-    args: [webProof, '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'],
+    args: [webProofRequest, '0xd8dA6BF26964aF9D7eEd9e03E53415D37aA96045'],
     chainId: sepolia,
 })
 ```
