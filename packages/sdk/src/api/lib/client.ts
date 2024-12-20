@@ -17,7 +17,11 @@ import {
   decodeFunctionResult,
   type Hex,
 } from "viem";
-import { ZkProvingStatus } from "../../web-proof-commons";
+import {
+  ExtensionMessageType,
+  ZkProvingStatus,
+  type PresentationJSON,
+} from "../../web-proof-commons";
 import { type ContractFunctionArgsWithout } from "types/viem";
 import { type ProveArgs } from "types/vlayer";
 function dropEmptyProofFromArgs(args: unknown) {
@@ -163,7 +167,25 @@ export const createVlayerClient = (
         { name: "webProof" }
       >;
 
-      const webProof = await webProofProvider.getWebProof({
+      const webProofPromise: Promise<PresentationJSON> = new Promise(
+        (resolve, reject) => {
+          webProofProvider.addEventListeners(
+            ExtensionMessageType.ProofDone,
+            ({ payload: { proof } }) => {
+              resolve(proof);
+            },
+          );
+
+          webProofProvider.addEventListeners(
+            ExtensionMessageType.ProofError,
+            ({ payload: { error } }) => {
+              reject(new Error(error));
+            },
+          );
+        },
+      );
+
+      webProofProvider.requestWebProof({
         proverCallCommitment: {
           address,
           proverAbi,
@@ -174,6 +196,8 @@ export const createVlayerClient = (
         logoUrl: webProofPlaceholder.logoUrl,
         steps: webProofPlaceholder.steps,
       });
+
+      const webProof = await webProofPromise;
 
       const hash = await this.prove({
         address,
