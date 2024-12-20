@@ -5,11 +5,12 @@ use alloy_sol_types::SolValue;
 use call_engine::{HostOutput, Proof, Seal};
 use call_host::Error as HostError;
 use derive_new::new;
+use jsonrpsee::types::error::ErrorObjectOwned;
 use serde::{Deserialize, Serialize, Serializer};
 
-use crate::{handlers::ProofStatus, ser::ProofDTO};
+use crate::{error::AppError, handlers::ProofStatus, ser::ProofDTO};
 
-#[derive(Serialize, Deserialize, Clone, Debug)]
+#[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 #[serde(rename_all = "snake_case")]
 pub enum Status {
     Queued,
@@ -82,6 +83,22 @@ impl TryFrom<HostOutput> for RawData {
 pub struct CallResult {
     pub status: Status,
     pub data: Option<RawData>,
+}
+
+impl TryFrom<&ProofStatus> for CallResult {
+    type Error = ErrorObjectOwned;
+
+    fn try_from(value: &ProofStatus) -> Result<Self, Self::Error> {
+        let status: Status = value.into();
+        let data: Option<RawData> = match value {
+            ProofStatus::Ready(Ok(output)) => {
+                Some(output.clone().try_into().map_err(AppError::from)?)
+            }
+            ProofStatus::Ready(Err(err)) => return Err(err.into()),
+            _ => None,
+        };
+        Ok(Self { status, data })
+    }
 }
 
 fn decode_seal(seal: &[u8]) -> Result<Seal, seal::Error> {

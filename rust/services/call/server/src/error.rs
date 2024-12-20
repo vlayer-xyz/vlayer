@@ -24,6 +24,12 @@ pub enum AppError {
 
 impl From<AppError> for ErrorObjectOwned {
     fn from(error: AppError) -> Self {
+        (&error).into()
+    }
+}
+
+impl From<&AppError> for ErrorObjectOwned {
+    fn from(error: &AppError) -> Self {
         match error {
             AppError::FieldValidation(..) => ErrorObjectOwned::owned::<()>(
                 jrpcerror::INVALID_PARAMS_CODE,

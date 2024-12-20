@@ -4,7 +4,7 @@ use async_trait::async_trait;
 use call_engine::HostOutput;
 use dashmap::DashMap;
 use derive_more::{Deref, DerefMut};
-use jsonrpsee::{proc_macros::rpc, Extensions};
+use jsonrpsee::{proc_macros::rpc, types::error::ErrorObjectOwned, Extensions};
 use serde::Deserialize;
 use v_call::types::{Call, CallContext, CallHash};
 use v_get_proof_receipt::types::CallResult;
@@ -30,7 +30,7 @@ pub trait Rpc {
     async fn v_call(&self, call: Call, ctx: CallContext) -> Result<CallHash, AppError>;
 
     #[method(name = "v_getProofReceipt")]
-    async fn v_get_proof_receipt(&self, hash: CallHash) -> Result<CallResult, AppError>;
+    async fn v_get_proof_receipt(&self, hash: CallHash) -> Result<CallResult, ErrorObjectOwned>;
 
     #[method(name = "v_versions")]
     async fn v_versions(&self) -> Result<Versions, AppError>;
@@ -51,15 +51,6 @@ pub enum ProofStatus {
     Proving,
     /// Proof generation finished
     Ready(Result<HostOutput, AppError>),
-}
-
-impl ProofStatus {
-    pub fn into_ready(self) -> Option<Result<HostOutput, AppError>> {
-        match self {
-            Self::Ready(result) => Some(result),
-            _ => None,
-        }
-    }
 }
 
 pub type SharedConfig = Arc<Config>;
@@ -93,7 +84,7 @@ impl RpcServer for State {
         v_call::v_call(self.config.clone(), self.proofs.clone(), params.clone(), call, ctx).await
     }
 
-    async fn v_get_proof_receipt(&self, hash: CallHash) -> Result<CallResult, AppError> {
+    async fn v_get_proof_receipt(&self, hash: CallHash) -> Result<CallResult, ErrorObjectOwned> {
         v_get_proof_receipt::v_get_proof_receipt(&self.proofs, hash)
     }
 

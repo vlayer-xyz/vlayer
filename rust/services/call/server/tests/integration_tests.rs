@@ -369,17 +369,21 @@ mod server_tests {
             })
         }
 
+        async fn v_get_proof_receipt_result(app: &Server, request: Req) -> (Status, Value) {
+            let response = app.post("/", &request).await;
+            assert_eq!(StatusCode::OK, response.status());
+            let result = assert_jrpc_ok(response, json!({})).await;
+            let status: Status = serde_json::from_value(result["result"]["status"].clone())
+                .expect("status should be a valid enum variant");
+            (status, result["result"].clone())
+        }
+
         async fn get_proof_result(app: &Server, hash: CallHash) -> Value {
             let svc = ServiceBuilder::new()
                 .layer(tower::timeout::TimeoutLayer::new(MAX_POLLING_TIME))
                 .layer(tower::retry::RetryLayer::new(RetryRequest))
                 .service_fn(|request| async move {
-                    let response = app.post("/", &request).await;
-                    assert_eq!(StatusCode::OK, response.status());
-                    let result = assert_jrpc_ok(response, json!({})).await;
-                    let status: Status = serde_json::from_value(result["result"]["status"].clone())
-                        .expect("status should be a valid enum variant");
-                    Ok((status, result["result"].clone())) as Result<(_, _), String>
+                    Ok(v_get_proof_receipt_result(app, request).await) as Result<(_, _), String>
                 });
             let (_, result) = svc.oneshot(v_get_proof_receipt_body(hash)).await.unwrap();
             result
@@ -395,7 +399,7 @@ mod server_tests {
         }
 
         #[tokio::test(flavor = "multi_thread")]
-        async fn two_subsequent_calls_when_ready_failure() {
+        async fn two_subsequent_calls_when_ready_success() {
             let mut ctx = Context::default().await;
             let app = ctx.server(call_guest_elf(), chain_guest_elf());
             let contract = ctx.deploy_contract().await;
@@ -406,29 +410,32 @@ mod server_tests {
 
             let hash = get_hash(&app, &contract, &call_data).await;
             let result = get_proof_result(&app, hash).await;
-            assert_json_include!(
-                actual: result,
-                expected: json!({
-                    "status": "ready",
-                    "data": {
-                        "evm_call_result": U256::from(3).encode_hex(),
-                        "proof": {
-                            "length": 160,
-                            "seal": {
-                                "verifierSelector": "0xdeafbeef",
-                                "mode": 1,
-                            },
-                            "callAssumptions": {
-                                "functionSelector": function_selector(&call_data),
-                                "proverContractAddress": contract.address(),
-                            }
-                        },
-                    },
-                }),
-            );
 
-            let response = app.post("/", v_get_proof_receipt_body(hash)).await;
-            assert_jrpc_err(response, -32600, &format!("Hash not found: {hash}")).await;
+            let expected = json!({
+                "status": "ready",
+                "data": {
+                    "evm_call_result": U256::from(3).encode_hex(),
+                    "proof": {
+                        "length": 160,
+                        "seal": {
+                            "verifierSelector": "0xdeafbeef",
+                            "mode": 1,
+                        },
+                        "callAssumptions": {
+                            "functionSelector": function_selector(&call_data),
+                            "proverContractAddress": contract.address(),
+                        }
+                    },
+                },
+            });
+
+            assert_json_include!(actual: result, expected: expected);
+
+            let (status, result) =
+                v_get_proof_receipt_result(&app, v_get_proof_receipt_body(hash)).await;
+
+            assert_eq!(status, Status::Ready);
+            assert_json_include!(actual: result, expected: expected);
         }
 
         #[tokio::test(flavor = "multi_thread")]
