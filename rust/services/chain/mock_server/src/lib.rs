@@ -18,8 +18,15 @@ lazy_static! {
 
 const GUEST_ELF: GuestElf = GuestElf::default();
 
-fn fake_proof_result(block_header: Box<dyn EvmBlockHeader>) -> Value {
-    let block_trie = BlockTrie::init(block_header).unwrap();
+pub fn fake_proof_result(
+    block_headers: impl IntoIterator<Item = Box<dyn EvmBlockHeader>>,
+) -> RpcChainProof {
+    let mut block_trie = BlockTrie::default();
+    for header in block_headers {
+        block_trie
+            .insert_unchecked(header.number(), &header.hash_slow())
+            .expect("insert block failed");
+    }
     let root_hash = block_trie.hash_slow();
     let proof_output = to_vec(&(root_hash, GUEST_ELF.id)).unwrap();
     let journal: Vec<u8> = bytemuck::cast_slice(&proof_output).into();
@@ -29,7 +36,7 @@ fn fake_proof_result(block_header: Box<dyn EvmBlockHeader>) -> Value {
     let encoded_proof = bincode::serialize(&receipt).unwrap().into();
     let nodes: Vec<Bytes> = block_trie.into_iter().collect();
 
-    serde_json::to_value(RpcChainProof::new(encoded_proof, nodes)).unwrap()
+    RpcChainProof::new(encoded_proof, nodes)
 }
 
 pub struct ChainProofServerMock {
@@ -75,7 +82,7 @@ impl ChainProofServerMock {
                 }),
                 true,
             )
-            .with_result(fake_proof_result(block_header))
+            .with_result(fake_proof_result(vec![block_header]))
             .with_expected_calls(0)
             .add()
             .await;

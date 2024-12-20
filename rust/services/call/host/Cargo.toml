@@ -8,6 +8,7 @@ alloy-chains = { workspace = true }
 alloy-primitives = { workspace = true, features = ["rlp", "serde"] }
 alloy-sol-types = { workspace = true }
 anyhow = { workspace = true }
+async-trait = { workspace = true }
 block_header = { workspace = true }
 bytes = { workspace = true }
 call_engine = { workspace = true }
@@ -17,6 +18,7 @@ chain_common = { workspace = true }
 common = { workspace = true }
 derive-new = { workspace = true }
 ethers-core = { workspace = true }
+futures = { workspace = true }
 host_utils = { workspace = true }
 lazy_static = { workspace = true }
 mock_chain_server = { workspace = true }

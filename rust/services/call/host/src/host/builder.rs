@@ -5,13 +5,13 @@
 //!  ║ `with_rpc_urls` - create `CachedMultiProvider` from URLs
 //!  ║
 //!  ╚>`WithProviders`
-//!     ║ `with_start_chain_id` - get provider for the starting chain
+//!     ║ `with_chain_proof_url` - create chain proof client from the given URL
+//!     ║ or mock it using RPC providers
 //!     ║
-//!     ╚>`WithStartChainProvider`
-//!        ║ `with_chain_proof_url` - create chain proof client from the given URL
-//!        ║ or mock it using RPC provider for the starting chain
+//!     ╚>`WithChainClient`
+//!        ║ `with_start_chain_id` - get provider for the starting chain
 //!        ║
-//!        ╚>`WithChainClient`
+//!        ╚>`WithStartChainProvider`   
 //!           ║ `with_prover_contract_addr` - calculate start execution location,
 //!           ║ (ensuring that the prover contract is deployed on that location)
 //!           ║
@@ -23,8 +23,12 @@
 use std::{collections::HashMap, sync::Arc};
 
 use alloy_primitives::ChainId;
+use async_trait::async_trait;
 use call_engine::evm::env::location::ExecutionLocation;
-use mock_chain_server::ChainProofServerMock;
+use chain_common::{ChainProof, SyncStatus};
+use derive_new::new;
+use ethers_core::types::U64;
+use mock_chain_server::fake_proof_result;
 use provider::{
     Address, BlockNumber, BlockTag, BlockingProvider, CachedMultiProvider, EthersProviderFactory,
 };
@@ -35,16 +39,16 @@ use super::{Config, Error, Host};
 pub struct New;
 
 pub struct WithProviders {
-    providers: CachedMultiProvider,
-}
-
-pub struct WithStartChainProvider {
-    start_chain_provider: Arc<dyn BlockingProvider>,
-    start_chain_id: ChainId,
+    rpc_urls: HashMap<ChainId, String>,
     providers: CachedMultiProvider,
 }
 
 pub struct WithChainClient {
+    chain_client: Box<dyn chain_client::Client>,
+    providers: CachedMultiProvider,
+}
+
+pub struct WithStartChainProvider {
     start_chain_provider: Arc<dyn BlockingProvider>,
     start_chain_id: ChainId,
     chain_client: Box<dyn chain_client::Client>,
@@ -61,47 +65,34 @@ impl New {
     #[allow(clippy::unused_self)]
     #[must_use]
     pub fn with_rpc_urls(self, rpc_urls: HashMap<ChainId, String>) -> WithProviders {
-        let provider_factory = EthersProviderFactory::new(rpc_urls);
+        let provider_factory = EthersProviderFactory::new(rpc_urls.clone());
         let providers = CachedMultiProvider::from_factory(provider_factory);
-        WithProviders { providers }
+        WithProviders {
+            rpc_urls,
+            providers,
+        }
     }
 }
 
 impl WithProviders {
-    pub fn with_start_chain_id(
-        self,
-        start_chain_id: ChainId,
-    ) -> Result<WithStartChainProvider, Error> {
-        let providers = self.providers;
-        let start_chain_provider = providers.get(start_chain_id)?;
-        Ok(WithStartChainProvider {
-            start_chain_provider,
-            start_chain_id,
-            providers,
-        })
-    }
-}
-
-impl WithStartChainProvider {
-    pub async fn with_chain_proof_url(
+    pub fn with_chain_proof_url(
         self,
         chain_proof_url: &Option<String>,
     ) -> Result<WithChainClient, Error> {
-        let WithStartChainProvider {
-            start_chain_provider,
-            start_chain_id,
+        let WithProviders {
+            rpc_urls,
             providers,
         } = self;
-        let chain_client = match chain_proof_url.as_ref() {
+        let chain_client: Box<dyn chain_client::Client> = match chain_proof_url.as_ref() {
             Some(url) => Box::new(chain_client::RpcClient::new(url)),
             None => {
                 warn!("Chain proof sever URL not provided. Running with mock server");
-                mock_chain_client(&start_chain_provider, start_chain_id).await?
+                let provider_factory = EthersProviderFactory::new(rpc_urls);
+                let providers = CachedMultiProvider::from_factory(provider_factory);
+                Box::new(FakeChainClient::new(providers))
             }
         };
         Ok(WithChainClient {
-            start_chain_provider,
-            start_chain_id,
             chain_client,
             providers,
         })
@@ -109,6 +100,25 @@ impl WithStartChainProvider {
 }
 
 impl WithChainClient {
+    pub fn with_start_chain_id(
+        self,
+        start_chain_id: ChainId,
+    ) -> Result<WithStartChainProvider, Error> {
+        let WithChainClient {
+            chain_client,
+            providers,
+        } = self;
+        let start_chain_provider = providers.get(start_chain_id)?;
+        Ok(WithStartChainProvider {
+            start_chain_provider,
+            start_chain_id,
+            providers,
+            chain_client,
+        })
+    }
+}
+
+impl WithStartChainProvider {
     /// Calculate the start execution location based on:
     ///   a) prover contract address,
     ///   b) latest block from RPC provider,
@@ -125,10 +135,10 @@ impl WithChainClient {
         self,
         prover_contract_addr: Address,
     ) -> Result<WithStartExecLocation, Error> {
-        let WithChainClient {
+        let WithStartChainProvider {
             start_chain_provider,
-            chain_client,
             start_chain_id,
+            chain_client,
             providers,
         } = self;
 
@@ -171,26 +181,59 @@ impl WithStartExecLocation {
     }
 }
 
-async fn mock_chain_client(
-    start_chain_provider: &Arc<dyn BlockingProvider>,
-    chain_id: ChainId,
-) -> Result<Box<dyn chain_client::Client>, Error> {
-    let latest_block = start_chain_provider
-        .get_block_header(BlockTag::Latest)?
-        .ok_or_else(|| Error::Provider("latest block not found".to_string()))?;
-    let mut chain_proof_server = ChainProofServerMock::start().await;
-    chain_proof_server
-        .mock_single_block(chain_id, latest_block)
-        .await;
-    let chain_client = Box::new(chain_proof_server.into_client());
-    Ok(chain_client)
-}
-
 fn check_prover_contract(
     provider: &Arc<dyn BlockingProvider>,
     address: Address,
 ) -> impl Fn(BlockNumber) -> Result<bool, Error> + '_ {
     move |block_num| Ok(!provider.get_code(address, block_num)?.is_empty())
+}
+
+/// Chain client which doesn't connect to any server at all, but generates fake proofs on demand
+#[derive(new)]
+struct FakeChainClient {
+    providers: CachedMultiProvider,
+}
+
+#[async_trait]
+impl chain_client::Client for FakeChainClient {
+    async fn get_chain_proof(
+        &self,
+        chain_id: ChainId,
+        block_numbers: Vec<BlockNumber>,
+    ) -> Result<ChainProof, chain_client::Error> {
+        let provider = self
+            .providers
+            .get(chain_id)
+            .map_err(|_| chain_client::Error::UnsupportedChain(chain_id))?;
+        let block_headers = futures::future::join_all(block_numbers.into_iter().map(|block_num| {
+            let provider = provider.clone();
+            async move {
+                tokio::task::spawn_blocking(move || {
+                    provider.get_block_header(BlockTag::Number(U64::from(block_num)))
+                })
+                .await
+                .expect("join error")
+                .expect("provider error")
+                .expect("block not found") // FIXME: Add error handling
+            }
+        }))
+        .await;
+        let rpc_chain_proof = fake_proof_result(block_headers);
+        Ok(rpc_chain_proof.try_into()?)
+    }
+
+    async fn get_sync_status(&self, chain_id: ChainId) -> Result<SyncStatus, chain_client::Error> {
+        let last_block = self
+            .providers
+            .get(chain_id)
+            .map_err(|_| chain_client::Error::UnsupportedChain(chain_id))?
+            .get_latest_block_number()
+            .expect("cannot get latest block number"); // FIXME: Add error handling
+        Ok(SyncStatus {
+            first_block: 0,
+            last_block,
+        })
+    }
 }
 
 #[cfg(test)]
@@ -236,11 +279,11 @@ mod tests {
             Box::new(chain_server.into_client())
         }
 
-        async fn builder(prover_contract_code_results: &[&'static [u8]]) -> WithChainClient {
+        async fn builder(prover_contract_code_results: &[&'static [u8]]) -> WithStartChainProvider {
             let start_chain_provider = mock_provider(prover_contract_code_results);
             let chain_client = mock_chain_client().await;
             let providers = CachedMultiProvider::from_factory(NullProviderFactory);
-            WithChainClient {
+            WithStartChainProvider {
                 start_chain_provider,
                 start_chain_id: CHAIN_ID,
                 chain_client,

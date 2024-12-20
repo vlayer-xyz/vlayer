@@ -43,6 +43,8 @@ pub enum Error {
         chain_id: ChainId,
         block_numbers: Vec<BlockNumber>,
     },
+    #[error("Chain {0} not supported")]
+    UnsupportedChain(ChainId),
 }
 
 pub type ChainProofCache = HashMap<ChainId, (Vec<BlockNumber>, ChainProof)>;
