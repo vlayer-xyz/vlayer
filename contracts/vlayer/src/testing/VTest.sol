@@ -1,8 +1,8 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.21;
 
-import "../EmailProof.sol";
 import "forge-std-1.9.4/src/Test.sol";
+import {UnverifiedEmail} from "../EmailProof.sol";
 import {Proof} from "../Proof.sol";
 
 // 0xe5F6E4A8da66436561059673919648CdEa4e486B
