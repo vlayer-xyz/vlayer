@@ -26,7 +26,7 @@ jobs:
       - name: Build the nightly docker image
         run: docker build --no-cache -f docker/chain_worker/Dockerfile.nightly .
   build-chain-server-nightly-docker:
-    name: Build nightly docker image of chain worker
+    name: Build nightly docker image of chain server
     runs-on: aws-linux-medium
     steps:
       - name: Checkout repository
