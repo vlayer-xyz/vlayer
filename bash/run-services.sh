@@ -198,34 +198,6 @@ wait_for_chain_worker_sync() {
 
 }
 
-fix_time_travel_values() {
-    local prover_start_block=$1
-    local prover_end_block=$2
-    local prover_step=$3
-
-    local env_path="${VLAYER_HOME}/examples/simple_time_travel/vlayer/.env.testnet"
-    echo $env_path
-    if [[ ! -f "${env_path}" ]]; then
-        echo "Error: testnet env not found in ${env_path}."
-        exit 1
-    fi
-    
-    if [[ "$OSTYPE" == "darwin"* ]]; then
-        # sed -i expects an argument on macOS, but not on Linux
-        sed -i "" \
-            -e "s/^PROVER_START_BLOCK=.*/PROVER_START_BLOCK=${prover_start_block}/" \
-            -e "s/^PROVER_END_BLOCK=.*/PROVER_END_BLOCK=${prover_end_block}/" \
-            -e "s/^PROVER_STEP=.*/PROVER_STEP=${prover_step}/" \
-            "${env_path}"
-    else
-        sed -i \
-            -e "s/^PROVER_START_BLOCK=.*/PROVER_START_BLOCK=${prover_start_block}/" \
-            -e "s/^PROVER_END_BLOCK=.*/PROVER_END_BLOCK=${prover_end_block}/" \
-            -e "s/^PROVER_STEP=.*/PROVER_STEP=${prover_step}/" \
-            "${env_path}"
-    fi
-}
-
 trap cleanup EXIT ERR INT
 
 # Default values
@@ -263,9 +235,8 @@ else
     latest_op_sepolia_block=$(get_latest_block "https://${QUICKNODE_ENDPOINT}.optimism-sepolia.quiknode.pro/${QUICKNODE_API_KEY}")
 
     if [[ "${EXAMPLE_NAME:-}" == "simple_time_travel" ]]; then
-        # Blocks for time travel should be recent to be able to sync the chain worker within reasonable time
+        # Time travel example needs to travel 10 block back
         start_op_sepolia_block=$(( $latest_op_sepolia_block - 10 ))
-        fix_time_travel_values $start_op_sepolia_block $latest_op_sepolia_block 2
     else
         start_op_sepolia_block=$latest_op_sepolia_block
     fi
