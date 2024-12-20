@@ -4,6 +4,8 @@ use server_utils::{rpc::Error as RpcError, FieldValidationError};
 use thiserror::Error;
 use tokio::task::JoinError;
 
+use crate::v_call::CallHash;
+
 #[derive(Debug, Error)]
 pub enum AppError {
     #[error("Invalid field: {0}")]
@@ -15,23 +17,33 @@ pub enum AppError {
     #[error("RPC error: {0}")]
     RpcError(#[from] RpcError),
     #[error("Hash not found: {0}")]
-    HashNotFound(String),
+    HashNotFound(CallHash),
     #[error("Waiting for chain proof timed out")]
     ChainProofTimeout,
 }
 
 impl From<AppError> for ErrorObjectOwned {
     fn from(error: AppError) -> Self {
+        (&error).into()
+    }
+}
+
+impl From<&AppError> for ErrorObjectOwned {
+    fn from(error: &AppError) -> Self {
         match error {
             AppError::FieldValidation(..) => ErrorObjectOwned::owned::<()>(
                 jrpcerror::INVALID_PARAMS_CODE,
                 error.to_string(),
                 None,
             ),
+            AppError::HashNotFound(..) => ErrorObjectOwned::owned::<()>(
+                jrpcerror::INVALID_REQUEST_CODE,
+                error.to_string(),
+                None,
+            ),
             AppError::Host(..)
             | AppError::Join(..)
             | AppError::RpcError(..)
-            | AppError::HashNotFound(..)
             | AppError::ChainProofTimeout => ErrorObjectOwned::owned::<()>(
                 jrpcerror::INTERNAL_ERROR_CODE,
                 error.to_string(),
