@@ -23,7 +23,6 @@ color-eyre = { workspace = true }
 comfy-table = { workspace = true }
 delegate = { workspace = true }
 derive-new = { workspace = true }
-hickory-resolver = { workspace = true }
 ethers-core = { workspace = true }
 eyre = { workspace = true }
 forge = { workspace = true }
@@ -34,6 +33,7 @@ foundry-config = { workspace = true }
 foundry-debugger = { workspace = true }
 foundry-evm = { workspace = true }
 foundry-evm-core = { workspace = true }
+hickory-resolver = { workspace = true }
 indicatif = { workspace = true }
 inferno = { workspace = true }
 itertools = { workspace = true }
