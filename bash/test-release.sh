@@ -25,9 +25,9 @@ export PATH="$PATH:~/.bun/bin"
 echo '::endgroup::'
 
 echo '::group::risczero installation'
-curl -L https://risczero.com/install | bash
-export PATH="$PATH:~/.risc0/bin"
-rzup install cargo-risczero v1.2.0
+curl -L --proto '=https' --tlsv1.2 -sSf https://raw.githubusercontent.com/cargo-bins/cargo-binstall/main/install-from-binstall-release.sh | bash
+cargo binstall -y cargo-risczero@1.2.0
+cargo risczero install
 echo '::endgroup::'
 
 git config --global user.email "test@example.com"
