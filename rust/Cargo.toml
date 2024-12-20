@@ -95,6 +95,7 @@ foundry-evm-core = { git = "https://github.com/foundry-rs/foundry", rev = "6cb41
 foundry-test-utils = { git = "https://github.com/foundry-rs/foundry", rev = "6cb41febfc989cbf7dc13c43ec6c3ce5fba1ea04" }
 futures = { version = "0.3.31", default-features = false }
 hex = "0.4.3"
+hickory-resolver = "0.24.2"
 http-body-util = "0.1.2"
 httparse = "1.9.5"
 hyper = "1.5.2"
@@ -104,6 +105,7 @@ itertools = { version = "0.13.0" }
 jsonrpsee = { version = "0.24.7", features = ["server-core", "macros"] }
 lazy_static = "1.5.0"
 libmdbx = "0.5.2"
+mailparse = "0.14.1"
 mime = "0.3.17"
 mockito = "1.5.0"
 nybbles = "0.2.1"

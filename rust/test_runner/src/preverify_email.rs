@@ -12,15 +12,15 @@ use crate::cheatcodes::{preverifyEmailCall, UnverifiedEmail};
 #[derive(Error, Debug)]
 pub enum EnhanceEmailError {
     #[error("Failed to decode input: {0}, {1}")]
-    DecodeInputError(Bytes, alloy_sol_types::Error),
+    DecodeInput(Bytes, alloy_sol_types::Error),
     #[error("Failed to parse email: {0}")]
-    ParseEmailError(String),
+    ParseEmail(String),
     #[error("Failed to resolve DNS: {0}")]
-    ResolveDnsError(String),
+    ResolveDns(String),
     #[error("No DKIM-Signature header found")]
-    NoDkimHeaderError,
+    NoDkimHeader,
     #[error("No DNS record found")]
-    NoDnsRecordError,
+    NoDnsRecord,
 }
 
 pub fn preverify_email(input: &Bytes) -> Result<UnverifiedEmail, EnhanceEmailError> {
@@ -37,28 +37,28 @@ pub fn preverify_email(input: &Bytes) -> Result<UnverifiedEmail, EnhanceEmailErr
 
 fn decode_input(input: &Bytes) -> Result<String, EnhanceEmailError> {
     let input = preverifyEmailCall::abi_decode(input, true)
-        .map_err(|e| EnhanceEmailError::DecodeInputError(input.clone(), e))?;
+        .map_err(|e| EnhanceEmailError::DecodeInput(input.clone(), e))?;
     Ok(input.email)
 }
 
 fn get_dkim_header(email: &str) -> Result<String, EnhanceEmailError> {
     let parsed = mailparse::parse_mail(email.as_bytes())
-        .map_err(|e| EnhanceEmailError::ParseEmailError(format!("{e:?}")))?;
+        .map_err(|e| EnhanceEmailError::ParseEmail(format!("{e:?}")))?;
 
     let dkim_header = parsed
         .get_headers()
         .get_first_value("DKIM-Signature")
-        .ok_or(EnhanceEmailError::NoDkimHeaderError)?;
+        .ok_or(EnhanceEmailError::NoDkimHeader)?;
 
     Ok(dkim_header)
 }
 
 fn parse_dkim_header(header: &str) -> Result<(&str, &str), EnhanceEmailError> {
     let selector = extract_from_header('s', header)
-        .ok_or(EnhanceEmailError::ParseEmailError("Missing selector in DKIM-Signature".into()))?;
+        .ok_or(EnhanceEmailError::ParseEmail("Missing selector in DKIM-Signature".into()))?;
 
     let domain = extract_from_header('d', header)
-        .ok_or(EnhanceEmailError::ParseEmailError("Missing domain in DKIM-Signature".into()))?;
+        .ok_or(EnhanceEmailError::ParseEmail("Missing domain in DKIM-Signature".into()))?;
 
     Ok((selector, domain))
 }
@@ -75,13 +75,13 @@ fn resolve_dkim_dns(selector: &str, domain: &str) -> Result<String, EnhanceEmail
     let resolver = Resolver::new(ResolverConfig::default(), ResolverOpts::default()).unwrap();
 
     let response = resolver
-        .txt_lookup(&format!("{}._domainkey.{}", selector, domain))
-        .map_err(|e| EnhanceEmailError::ResolveDnsError(format!("{e:?}")))?;
+        .txt_lookup(format!("{selector}._domainkey.{domain}"))
+        .map_err(|e| EnhanceEmailError::ResolveDns(format!("{e:?}")))?;
 
     let record = response
         .iter()
         .last()
-        .ok_or(EnhanceEmailError::NoDnsRecordError)?
+        .ok_or(EnhanceEmailError::NoDnsRecord)?
         .to_string();
 
     if record.starts_with("p=") {
