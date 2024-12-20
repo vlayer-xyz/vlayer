@@ -104,6 +104,7 @@ export type VlayerClient = {
     proverAbi: T;
     functionName: F;
     chainId: number;
+    gasLimit?: number;
     token?: string;
     args: [
       WebProofRequest,
