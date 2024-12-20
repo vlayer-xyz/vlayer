@@ -1,8 +1,47 @@
-import DnsResolver from "dns-over-http-resolver";
+interface DnsResponse {
+  Status: number;
+  TC: boolean;
+  RD: boolean;
+  RA: boolean;
+  AD: boolean;
+  CD: boolean;
+  Question: {
+    name: string;
+    type: number;
+  }[];
+  Answer: {
+    name: string;
+    type: number;
+    TTL: number;
+    data: string;
+  }[];
+}
 
-export async function resolveDkimDns(domain: string, selector: string) {
-  const resolver = new DnsResolver();
-  const address = await resolver.resolveTxt(`${selector}._domainkey.${domain}`);
+export class DnsResolver {
+  constructor(private host = "https://dns.google/resolve") {}
+
+  async resolveDkimDns(selector: string, domain: string) {
+    const response = (await (
+      await fetch(
+        `${this.host}?name=${selector}._domainkey.${domain}&type=TXT`,
+        {
+          headers: {
+            accept: "application/dns-json",
+          },
+        },
+      )
+    ).json()) as DnsResponse;
+
+    return response.Answer.map((answer) => answer.data);
+  }
+}
+
+export async function resolveDkimDns(
+  resolver: DnsResolver,
+  domain: string,
+  selector: string,
+) {
+  const address = await resolver.resolveDkimDns(selector, domain);
 
   let record = address.flat().at(-1);
 

@@ -5,6 +5,7 @@ import {
   vi,
   beforeEach,
   type MockInstance,
+  afterEach,
 } from "vitest";
 
 import { createExtensionWebProofProvider } from "../webProof";
@@ -18,9 +19,9 @@ declare const global: {
 };
 
 const fetchMocker = createFetchMock(vi);
-fetchMocker.enableMocks();
 
 beforeEach(() => {
+  fetchMocker.enableMocks();
   global.chrome = {
     runtime: {
       sendMessage: vi.fn(),
@@ -34,6 +35,10 @@ beforeEach(() => {
       }),
     },
   };
+});
+
+afterEach(() => {
+  fetchMocker.disableMocks();
 });
 
 function generateRandomHash() {

@@ -1,9 +1,12 @@
 import { describe, expect, test } from "vitest";
-import { resolveDkimDns } from "./dnsResolver";
+import { DnsResolver, resolveDkimDns } from "./dnsResolver";
+
+const resolver = new DnsResolver();
 
 describe("resolveDkimDns Integration", () => {
-  test("resolves VLayer DNS", async () => {
+  test("resolves vlayer DNS", async () => {
     const resolved = await resolveDkimDns(
+      resolver,
       "vlayer-xyz.20230601.gappssmtp.com",
       "20230601",
     );
@@ -14,6 +17,7 @@ describe("resolveDkimDns Integration", () => {
 
   test("resolves delegated dns", async () => {
     const resolved = await resolveDkimDns(
+      resolver,
       "bolt.eu",
       "el7njvpsjxbr7wk7l7dss5ejzvijzoeu",
     );
@@ -23,6 +27,8 @@ describe("resolveDkimDns Integration", () => {
   });
 
   test("throws error if dns not found", async () => {
-    await expect(resolveDkimDns("not-a-domain.com", "abcd")).rejects.toThrow();
+    await expect(
+      resolveDkimDns(resolver, "not-a-domain.com", "abcd"),
+    ).rejects.toThrow();
   });
 });
