@@ -27,11 +27,11 @@ pub fn preverify_email(input: &Bytes) -> Result<UnverifiedEmail, EnhanceEmailErr
     let email = decode_input(input)?;
     let dkim_header = get_dkim_header(&email)?;
     let (selector, domain) = parse_dkim_header(&dkim_header)?;
-    let dns = resolve_dns(selector, domain)?;
+    let dns_record = resolve_dkim_dns(selector, domain)?;
 
     Ok(UnverifiedEmail {
         email,
-        dnsRecords: vec![dns],
+        dnsRecords: vec![dns_record],
     })
 }
 
@@ -54,24 +54,24 @@ fn get_dkim_header(email: &str) -> Result<String, EnhanceEmailError> {
 }
 
 fn parse_dkim_header(header: &str) -> Result<(&str, &str), EnhanceEmailError> {
-    let selector = regex::Regex::new(r#"s=([^;]+)"#)
-        .expect("Invalid regex")
-        .captures(header)
-        .and_then(|c| c.get(1))
-        .map(|c| c.as_str().trim())
+    let selector = extract_from_header('s', header)
         .ok_or(EnhanceEmailError::ParseEmailError("Missing selector in DKIM-Signature".into()))?;
 
-    let domain = regex::Regex::new(r#"d=([^;]+)"#)
-        .expect("Invalid regex")
-        .captures(header)
-        .and_then(|c| c.get(1))
-        .map(|c| c.as_str().trim())
+    let domain = extract_from_header('d', header)
         .ok_or(EnhanceEmailError::ParseEmailError("Missing domain in DKIM-Signature".into()))?;
 
     Ok((selector, domain))
 }
 
-fn resolve_dns(selector: &str, domain: &str) -> Result<String, EnhanceEmailError> {
+fn extract_from_header(tag: char, header: &str) -> Option<&str> {
+    let regex = regex::Regex::new(&format!("{tag}=([^;]+)")).expect("Invalid regex");
+    regex
+        .captures(header)
+        .and_then(|c| c.get(1))
+        .map(|c| c.as_str().trim())
+}
+
+fn resolve_dkim_dns(selector: &str, domain: &str) -> Result<String, EnhanceEmailError> {
     let resolver = Resolver::new(ResolverConfig::default(), ResolverOpts::default()).unwrap();
 
     let response = resolver
