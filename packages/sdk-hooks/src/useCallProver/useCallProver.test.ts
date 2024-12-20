@@ -27,7 +27,13 @@ describe("useCallProver", () => {
   });
 
   test("initial state", () => {
-    const { result } = renderHook(() => useCallProver());
+    const { result } = renderHook(() =>
+      useCallProver({
+        address: "0x456",
+        proverAbi: [] as Abi,
+        functionName: "test",
+      }),
+    );
 
     expect(result.current).toMatchObject({
       status: ProverStatus.Idle,
@@ -44,16 +50,16 @@ describe("useCallProver", () => {
     const mockHash = "0x123";
     mockVlayerClient.prove.mockResolvedValueOnce({ hash: mockHash });
 
-    const { result } = renderHook(() => useCallProver());
-
-    await act(async () => {
-      await result.current.callProver({
+    const { result } = renderHook(() =>
+      useCallProver({
         address: "0x456",
         proverAbi: [] as Abi,
         functionName: "test",
-        args: [],
-        chainId: mockChainId,
-      });
+      }),
+    );
+
+    await act(async () => {
+      await result.current.callProver([]);
     });
 
     expect(result.current).toMatchObject({
@@ -69,15 +75,16 @@ describe("useCallProver", () => {
     const mockError = new Error("Proving failed");
     mockVlayerClient.prove.mockRejectedValueOnce(mockError);
 
-    const { result } = renderHook(() => useCallProver());
-
-    await act(async () => {
-      await result.current.callProver({
+    const { result } = renderHook(() =>
+      useCallProver({
         address: "0x456",
         proverAbi: {} as Abi,
         functionName: "test",
-        args: [],
-      });
+      }),
+    );
+
+    await act(async () => {
+      await result.current.callProver([]);
     });
 
     expect(result.current).toMatchObject({
@@ -88,7 +95,13 @@ describe("useCallProver", () => {
   });
 
   test("success with another chainId", async () => {
-    const { result } = renderHook(() => useCallProver());
+    const { result } = renderHook(() =>
+      useCallProver({
+        address: "0x456",
+        proverAbi: [] as Abi,
+        functionName: "test",
+      }),
+    );
 
     vi.mock("wagmi", () => ({
       useChainId: () => anotherChainId,
@@ -99,11 +112,10 @@ describe("useCallProver", () => {
       proverAbi: [] as Abi,
       functionName: "test",
       args: [],
-      chainId: mockChainId,
     };
 
     await act(async () => {
-      await result.current.callProver(proverCallArgs);
+      await result.current.callProver([]);
     });
 
     expect(mockVlayerClient.prove).toHaveBeenCalledWith({

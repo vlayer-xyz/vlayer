@@ -1,4 +1,4 @@
-import { renderHook, act } from "@testing-library/react";
+import { renderHook, waitFor } from "@testing-library/react";
 import { describe, it, expect, vi, beforeEach } from "vitest";
 import {
   useWaitForProvingResult,
@@ -7,77 +7,74 @@ import {
 import type { BrandedHash } from "@vlayer/sdk";
 import type { Abi } from "viem";
 
+const mockResult = { success: true };
+const mockError = new Error("Test error");
+const mockHash = "0x123";
+
 const mockVlayerClient = vi.hoisted(() => ({
-  waitForProvingResult: vi.fn(),
+  waitForProvingResult: vi.fn().mockResolvedValue({ success: true }),
+}));
+vi.mock("../context", () => ({
+  useProofContext: () => ({
+    vlayerClient: mockVlayerClient,
+  }),
 }));
 
 describe("useWaitForProvingResult", () => {
-  const mockHash = "0x123" as unknown as BrandedHash<Abi, string>;
-  const mockResult = { success: true };
-  const mockError = new Error("Test error");
-
-  vi.mock("../context", () => ({
-    useProofContext: () => ({
-      vlayerClient: mockVlayerClient,
-    }),
-  }));
-
-  beforeEach(() => {
-    vi.clearAllMocks();
-  });
-
   it("should initialize properly", () => {
-    const { result } = renderHook(() => useWaitForProvingResult(mockHash));
+    const { result } = renderHook(() => useWaitForProvingResult(null));
 
-    expect(result.current.status).toBe(WaitForProvingResultStatus.Idle);
-    expect(result.current.isIdle).toBe(true);
-    expect(result.current.error).toBeNull();
+    expect(result.current).toMatchObject({
+      status: WaitForProvingResultStatus.Idle,
+      isIdle: true,
+      error: null,
+    });
   });
 
   it("should handle successful proving result", async () => {
-    mockVlayerClient.waitForProvingResult.mockResolvedValueOnce(mockResult);
+    const { result } = renderHook(() =>
+      useWaitForProvingResult({ hash: "0x1234" } as BrandedHash<Abi, string>),
+    );
 
-    const { result } = renderHook(() => useWaitForProvingResult(mockHash));
-
-    await act(async () => {
-      await result.current.waitForProvingResult();
-    });
-    expect(result.current.data).toEqual(mockResult);
-    expect(result.current.status).toBe(WaitForProvingResultStatus.Ready);
-    expect(result.current.isReady).toBe(true);
-    expect(result.current.error).toBeNull();
-    expect(mockVlayerClient.waitForProvingResult).toHaveBeenCalledWith({
-      hash: mockHash,
+    await waitFor(() => {
+      expect(result.current).toMatchObject({
+        data: mockResult,
+        status: WaitForProvingResultStatus.Ready,
+        isReady: true,
+        error: null,
+      });
     });
   });
-
   it("should handle proving error", async () => {
     mockVlayerClient.waitForProvingResult.mockRejectedValueOnce(mockError);
 
-    const { result } = renderHook(() => useWaitForProvingResult(mockHash));
+    const { result } = renderHook(() =>
+      useWaitForProvingResult({ hash: mockHash } as BrandedHash<Abi, string>),
+    );
 
-    await act(async () => {
-      await result.current.waitForProvingResult();
+    await waitFor(() => {
+      expect(result.current).toMatchObject({
+        status: WaitForProvingResultStatus.Error,
+        isError: true,
+        error: mockError,
+      });
     });
-
-    expect(result.current.status).toBe(WaitForProvingResultStatus.Error);
-    expect(result.current.isError).toBe(true);
-    expect(result.current.error).toBe(mockError);
   });
 
-  it("should set pending status while waiting for result", () => {
+  it("should set pending status while waiting for result", async () => {
     mockVlayerClient.waitForProvingResult.mockImplementation(
       () =>
         new Promise((resolve) => setTimeout(() => resolve(mockResult), 100)),
     );
 
-    const { result } = renderHook(() => useWaitForProvingResult(mockHash));
-
-    act(() => {
-      void result.current.waitForProvingResult();
+    const { result } = renderHook(() =>
+      useWaitForProvingResult({ hash: mockHash } as BrandedHash<Abi, string>),
+    );
+    await waitFor(() => {
+      expect(result.current).toMatchObject({
+        status: WaitForProvingResultStatus.Pending,
+        isPending: true,
+      });
     });
-
-    expect(result.current.status).toBe(WaitForProvingResultStatus.Pending);
-    expect(result.current.isPending).toBe(true);
   });
 });
