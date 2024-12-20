@@ -73,12 +73,8 @@ impl<DB: Database> Inspector<DB> for CheatcodeInspector {
                         |err| create_revert_outcome(&err.to_string(), inputs.gas_limit),
                         |email| create_encoded_return_outcome(&email, inputs),
                     ),
-
-                _ => create_revert_outcome(
-                    "Unexpected vlayer cheatcode call",
-                    inputs.gas_limit,
-                )
-            })
+                _ => create_revert_outcome("Unexpected vlayer cheatcode call", inputs.gas_limit),
+            });
         }
         None
     }
