@@ -16,7 +16,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Build the nightly docker image
-        run: docker build -f docker/vlayer/Dockerfile.nightly .
+        run: docker build --no-cache -f docker/vlayer/Dockerfile.nightly .
   build-chain-worker-nightly-docker:
     name: Build nightly docker image of chain worker
     runs-on: aws-linux-medium
@@ -24,7 +24,7 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Build the nightly docker image
-        run: docker build -f docker/chain_worker/Dockerfile.nightly .
+        run: docker build --no-cache -f docker/chain_worker/Dockerfile.nightly .
   build-chain-server-nightly-docker:
     name: Build nightly docker image of chain worker
     runs-on: aws-linux-medium
@@ -32,4 +32,4 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
       - name: Build the nightly docker image
-        run: docker build -f docker/chain_server/Dockerfile.nightly .
+        run: docker build --no-cache -f docker/chain_server/Dockerfile.nightly .
