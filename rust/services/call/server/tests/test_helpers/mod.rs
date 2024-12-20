@@ -1,8 +1,76 @@
+use assert_json_diff::assert_json_include;
 use call_server::{ConfigBuilder, ProofMode};
 use common::GuestElf;
 use derive_new::new;
+use ethers::types::{Bytes, H160};
 use mock::{Anvil, Client, Contract, GasMeterServer, Server};
 use mock_chain_server::ChainProofServerMock;
+use serde_json::{json, Value};
+use server_utils::function_selector;
+
+pub const GAS_LIMIT: u64 = 1_000_000;
+pub const SEPOLIA_ID: u64 = 11_155_111;
+pub const GAS_METER_TTL: u64 = 3600;
+
+pub fn allocate_gas_body(expected_hash: &str) -> Value {
+    json!({
+        "gas_limit": GAS_LIMIT,
+        "hash": expected_hash,
+        "time_to_live": GAS_METER_TTL
+    })
+}
+
+pub fn v_call_body(contract_address: H160, call_data: &Bytes) -> Value {
+    let params = json!([
+        {
+            "to": contract_address,
+            "data": call_data,
+            "gas_limit": GAS_LIMIT,
+        },
+        {
+            "chain_id": SEPOLIA_ID,
+        }
+    ]);
+
+    rpc_body("v_call", &params)
+}
+
+pub fn rpc_body(method: &str, params: &Value) -> Value {
+    json!({
+        "method": method,
+        "params": params,
+        "id": 1,
+        "jsonrpc": "2.0",
+    })
+}
+
+pub fn assert_proof_result(
+    result: &Value,
+    evm_call_result: impl Into<Value>,
+    call_data: &Bytes,
+    contract_address: H160,
+) {
+    assert_json_include!(
+        actual: result,
+        expected: json!({
+            "status": "ready",
+            "data": {
+                "evm_call_result": evm_call_result.into(),
+                "proof": {
+                    "length": 160,
+                    "seal": {
+                        "verifierSelector": "0xdeafbeef",
+                        "mode": 1,
+                    },
+                    "callAssumptions": {
+                        "functionSelector": function_selector(call_data),
+                        "proverContractAddress": contract_address,
+                    }
+                },
+            },
+        }),
+    );
+}
 
 pub(crate) fn call_guest_elf() -> GuestElf {
     call_guest_wrapper::GUEST_ELF.clone()
