@@ -231,11 +231,10 @@ mod server_tests {
         use call_server::{v_call::CallHash, v_get_proof_receipt::Status};
         use ethers::{
             abi::AbiEncode,
-            types::{Bytes, Uint8, U256},
+            types::{Bytes, Uint8, H160, U256},
         };
         use serde_json::Value;
         use server_utils::function_selector;
-        use test_helpers::assert_proof_result;
         use tower::{ServiceBuilder, ServiceExt};
         use web_proof::fixtures::load_web_proof_fixture;
 
@@ -312,6 +311,34 @@ mod server_tests {
             result
         }
 
+        fn assert_proof_result(
+            result: &Value,
+            evm_call_result: impl Into<Value>,
+            call_data: &Bytes,
+            contract_address: H160,
+        ) {
+            assert_json_include!(
+                actual: result,
+                expected: json!({
+                    "status": "ready",
+                    "data": {
+                        "evm_call_result": evm_call_result.into(),
+                        "proof": {
+                            "length": 160,
+                            "seal": {
+                                "verifierSelector": "0xdeafbeef",
+                                "mode": 1,
+                            },
+                            "callAssumptions": {
+                                "functionSelector": function_selector(call_data),
+                                "proverContractAddress": contract_address,
+                            }
+                        },
+                    },
+                }),
+            );
+        }
+
         #[tokio::test(flavor = "multi_thread")]
         async fn nonexistent_hash_failure() {
             let ctx = Context::default().await;
@@ -334,31 +361,23 @@ mod server_tests {
             let hash = get_hash(&app, &contract, &call_data).await;
             let result = get_proof_result(&app, hash).await;
 
-            let expected = json!({
-                "status": "ready",
-                "data": {
-                    "evm_call_result": U256::from(3).encode_hex(),
-                    "proof": {
-                        "length": 160,
-                        "seal": {
-                            "verifierSelector": "0xdeafbeef",
-                            "mode": 1,
-                        },
-                        "callAssumptions": {
-                            "functionSelector": function_selector(&call_data),
-                            "proverContractAddress": contract.address(),
-                        }
-                    },
-                },
-            });
-
-            assert_json_include!(actual: result, expected: expected);
+            assert_proof_result(
+                &result,
+                U256::from(3).encode_hex(),
+                &call_data,
+                contract.address(),
+            );
 
             let (status, result) =
                 v_get_proof_receipt_result(&app, v_get_proof_receipt_body(hash)).await;
 
             assert_eq!(status, Status::Ready);
-            assert_json_include!(actual: result, expected: expected);
+            assert_proof_result(
+                &result,
+                U256::from(3).encode_hex(),
+                &call_data,
+                contract.address(),
+            );
         }
 
         #[tokio::test(flavor = "multi_thread")]
