@@ -395,6 +395,43 @@ mod server_tests {
         }
 
         #[tokio::test(flavor = "multi_thread")]
+        async fn two_subsequent_calls_when_ready_failure() {
+            let mut ctx = Context::default().await;
+            let app = ctx.server(call_guest_elf(), chain_guest_elf());
+            let contract = ctx.deploy_contract().await;
+            let call_data = contract
+                .sum(U256::from(1), U256::from(2))
+                .calldata()
+                .unwrap();
+
+            let hash = get_hash(&app, &contract, &call_data).await;
+            let result = get_proof_result(&app, hash).await;
+            assert_json_include!(
+                actual: result,
+                expected: json!({
+                    "status": "ready",
+                    "data": {
+                        "evm_call_result": U256::from(3).encode_hex(),
+                        "proof": {
+                            "length": 160,
+                            "seal": {
+                                "verifierSelector": "0xdeafbeef",
+                                "mode": 1,
+                            },
+                            "callAssumptions": {
+                                "functionSelector": function_selector(&call_data),
+                                "proverContractAddress": contract.address(),
+                            }
+                        },
+                    },
+                }),
+            );
+
+            let response = app.post("/", v_get_proof_receipt_body(hash)).await;
+            assert_jrpc_err(response, -32600, &format!("Hash not found: {hash}")).await;
+        }
+
+        #[tokio::test(flavor = "multi_thread")]
         async fn simple_contract_call_success() {
             let mut ctx = Context::default().await;
             let app = ctx.server(call_guest_elf(), chain_guest_elf());

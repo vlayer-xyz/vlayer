@@ -1,3 +1,4 @@
+use dashmap::Entry;
 use tracing::info;
 use types::{CallResult, RawData, Status};
 
@@ -9,17 +10,24 @@ pub mod types;
 pub fn v_get_proof_receipt(proofs: &SharedProofs, hash: CallHash) -> Result<CallResult, AppError> {
     info!("v_get_proof_receipt => {hash:#?}");
 
-    let status: Status = proofs
-        .get(&hash)
-        .map(|entry| entry.value().into())
-        .ok_or(AppError::HashNotFound(hash))?;
-
-    let data: Option<RawData> = proofs
-        .remove_if(&hash, |_, value| value.is_ready())
-        .and_then(|(_, status)| status.into_ready())
-        .transpose()?
-        .map(TryInto::try_into)
-        .transpose()?;
+    let entry = proofs.entry(hash);
+    let inner = match entry {
+        Entry::Occupied(inner) => inner,
+        Entry::Vacant(..) => {
+            info!("Hash not found: {hash}");
+            return Err(AppError::HashNotFound(hash));
+        }
+    };
+    let status: Status = inner.get().into();
+    let data: Option<RawData> = match status {
+        Status::Ready => inner
+            .remove()
+            .into_ready()
+            .transpose()?
+            .map(TryInto::try_into)
+            .transpose()?,
+        _ => None,
+    };
 
     info!("Current status {:?}", status);
     Ok(CallResult::new(status, data))

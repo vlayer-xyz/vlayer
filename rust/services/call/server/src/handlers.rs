@@ -54,10 +54,6 @@ pub enum ProofStatus {
 }
 
 impl ProofStatus {
-    pub const fn is_ready(&self) -> bool {
-        matches!(self, Self::Ready(..))
-    }
-
     pub fn into_ready(self) -> Option<Result<HostOutput, AppError>> {
         match self {
             Self::Ready(result) => Some(result),
