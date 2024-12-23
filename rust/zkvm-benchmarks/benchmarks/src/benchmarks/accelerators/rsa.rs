@@ -25,13 +25,12 @@ impl RsaBenchmarkInputs {
     fn new(private_key_pem: &str, msg: &[u8]) -> Self {
         let private_key = RsaPrivateKey::from_pkcs8_pem(private_key_pem).unwrap();
         let signing_key = pkcs1v15::SigningKey::<Sha256>::new(private_key);
-        let signature_bytes = signing_key.sign(msg);
+        let signature = signing_key.sign(msg);
         let verifying_key = signing_key.verifying_key();
-        let signature = pkcs1v15::Signature::try_from(signature_bytes).unwrap();
 
         Self {
-            verifying_key,
             msg: msg.into(),
+            verifying_key,
             signature,
         }
     }
