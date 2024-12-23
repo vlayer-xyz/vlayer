@@ -1,4 +1,3 @@
-export * as testHelpers from "./api/helpers";
 export { preverifyEmail } from "./api/email/preverify";
 export { createVlayerClient } from "./api/lib/client";
 
