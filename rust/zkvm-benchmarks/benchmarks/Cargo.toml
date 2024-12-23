@@ -18,6 +18,10 @@ mpt = { workspace = true }
 risc0-zkvm = { workspace = true }
 serde = { workspace = true }
 sha2 = { workspace = true }
+rsa = { workspace = true }
+num-traits = "0.2.19"
+base64ct = "1.6.0"
+rand = "0.8.5"
 
 [lints]
 workspace = true
