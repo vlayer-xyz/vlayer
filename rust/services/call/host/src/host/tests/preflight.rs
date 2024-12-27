@@ -8,6 +8,8 @@ use crate::{
 };
 
 mod usdt {
+    use call_engine::Call;
+
     use super::*;
     use crate::test_harness::contracts::usdt::{
         BLOCK_NO, IERC20::balanceOfCall, OPTIMISM_BLOCK_NO, OPTIMISM_USDT, USDT,
@@ -35,6 +37,20 @@ mod usdt {
         assert_eq!(result._0, uint!(40_819_866_868_520_U256));
 
         Ok(())
+    }
+
+    #[tokio::test(flavor = "multi_thread")]
+    #[should_panic(
+        expected = "called `Result::unwrap()` on an `Err` value: TravelCallExecutor error: EVM transact preverified error: Transaction(CallGasCostMoreThanGasLimit)"
+    )]
+    async fn fails_when_no_gas() {
+        let location: ExecutionLocation = (Chain::mainnet().id(), BLOCK_NO).into();
+        let binance_8 = address!("F977814e90dA44bFA03b6295A0616a897441aceC");
+        let call = Call::new(USDT, &balanceOfCall { account: binance_8 }, 0);
+
+        preflight::<balanceOfCall>("usdt_erc20_balance_of", call, &location)
+            .await
+            .unwrap();
     }
 }
 

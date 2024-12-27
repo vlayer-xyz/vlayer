@@ -1,8 +1,46 @@
 use call_server::{ConfigBuilder, ProofMode};
 use common::GuestElf;
 use derive_new::new;
+use ethers::types::{Bytes, H160};
 use mock::{Anvil, Client, Contract, GasMeterServer, Server};
 use mock_chain_server::ChainProofServerMock;
+use serde_json::{json, Value};
+
+pub const GAS_LIMIT: u64 = 1_000_000;
+pub const ETHEREUM_SEPOLIA_ID: u64 = 11_155_111;
+pub const GAS_METER_TTL: u64 = 3600;
+
+pub fn allocate_gas_body(expected_hash: &str) -> Value {
+    json!({
+        "gas_limit": GAS_LIMIT,
+        "hash": expected_hash,
+        "time_to_live": GAS_METER_TTL
+    })
+}
+
+pub fn v_call_body(contract_address: H160, call_data: &Bytes) -> Value {
+    let params = json!([
+        {
+            "to": contract_address,
+            "data": call_data,
+            "gas_limit": GAS_LIMIT,
+        },
+        {
+            "chain_id": ETHEREUM_SEPOLIA_ID,
+        }
+    ]);
+
+    rpc_body("v_call", &params)
+}
+
+pub fn rpc_body(method: &str, params: &Value) -> Value {
+    json!({
+        "method": method,
+        "params": params,
+        "id": 1,
+        "jsonrpc": "2.0",
+    })
+}
 
 pub(crate) fn call_guest_elf() -> GuestElf {
     call_guest_wrapper::GUEST_ELF.clone()

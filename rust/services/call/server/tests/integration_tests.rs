@@ -1,12 +1,12 @@
-use assert_json_diff::assert_json_include;
 use axum::http::StatusCode;
 use serde_json::json;
 use test_helpers::{call_guest_elf, chain_guest_elf, mock::GasMeterServer, Context, API_VERSION};
 
 mod test_helpers;
 
-use server_utils::{
-    assert_jrpc_err, assert_jrpc_ok, body_to_json, body_to_string, function_selector,
+use server_utils::{assert_jrpc_err, assert_jrpc_ok, body_to_json, body_to_string};
+use test_helpers::{
+    allocate_gas_body, rpc_body, v_call_body, ETHEREUM_SEPOLIA_ID, GAS_LIMIT, GAS_METER_TTL,
 };
 
 mod server_tests {
@@ -27,16 +27,11 @@ mod server_tests {
         let ctx = Context::default().await;
         let app = ctx.server(call_guest_elf(), chain_guest_elf());
 
-        let req = json!({
-            "method": "non_existent_json_rpc_method",
-            "params": [],
-            "id": 1,
-            "jsonrpc": "2.0",
-        });
+        let req = rpc_body("non_existent_method", &json!([]));
         let response = app.post("/", &req).await;
 
         assert_eq!(StatusCode::OK, response.status());
-        assert_jrpc_err(response, -32601, "Method `non_existent_json_rpc_method` not found").await;
+        assert_jrpc_err(response, -32601, "Method `non_existent_method` not found").await;
     }
 
     mod v_versions {
@@ -51,12 +46,7 @@ mod server_tests {
             let ctx = Context::default().await;
             let app = ctx.server(call_elf, chain_elf);
 
-            let req = json!({
-                "method": "v_versions",
-                "params": [],
-                "id": 1,
-                "jsonrpc": "2.0",
-            });
+            let req = rpc_body("v_versions", &json!([]));
             let response = app.post("/", &req).await;
 
             assert_eq!(StatusCode::OK, response.status());
@@ -72,35 +62,11 @@ mod server_tests {
     }
 
     mod v_call {
-        use ethers::types::{Bytes, U256};
-        use serde_json::Value;
-        use test_helpers::mock::Contract;
+        use ethers::types::U256;
         use web_proof::fixtures::load_web_proof_fixture;
 
         use super::*;
         use crate::test_helpers::mock::WebProof;
-
-        const CHAIN_ID: u64 = 11_155_111;
-        const GAS_LIMIT: u64 = 1_000_000;
-        const GAS_METER_TTL: u64 = 3600;
-
-        fn v_call_body(contract: &Contract, call_data: &Bytes) -> Value {
-            json!({
-                "method": "v_call",
-                "params": [
-                    {
-                        "to": contract.address(),
-                        "data": call_data,
-                        "gas_limit": GAS_LIMIT,
-                    },
-                    {
-                        "chain_id": CHAIN_ID,
-                    }
-                    ],
-                "id": 1,
-                "jsonrpc": "2.0",
-            })
-        }
 
         #[tokio::test]
         async fn field_validation_error() {
@@ -121,7 +87,7 @@ mod server_tests {
                         "gas_limit": GAS_LIMIT,
                     },
                     {
-                        "chain_id": CHAIN_ID,
+                        "chain_id": ETHEREUM_SEPOLIA_ID,
                     }
                     ],
                 "id": 1,
@@ -151,7 +117,7 @@ mod server_tests {
                 .calldata()
                 .unwrap();
 
-            let req = v_call_body(&contract, &call_data);
+            let req = v_call_body(contract.address(), &call_data);
             let response = app.post("/", &req).await;
 
             assert_eq!(StatusCode::OK, response.status());
@@ -175,7 +141,7 @@ mod server_tests {
                 .calldata()
                 .unwrap();
 
-            let req = v_call_body(&contract, &call_data);
+            let req = v_call_body(contract.address(), &call_data);
 
             let response = app.post("/", &req).await;
 
@@ -194,14 +160,7 @@ mod server_tests {
                 GasMeterServer::start(GAS_METER_TTL, Some(API_KEY.into())).await;
             gas_meter_server
                 .mock_method("v_allocateGas")
-                .with_params(
-                    json!({
-                        "gas_limit": GAS_LIMIT,
-                        "hash": EXPECTED_HASH,
-                        "time_to_live": GAS_METER_TTL
-                    }),
-                    false,
-                )
+                .with_params(allocate_gas_body(EXPECTED_HASH), false)
                 .with_result(json!({}))
                 .with_expected_header(API_KEY_HEADER_NAME, API_KEY)
                 .add()
@@ -217,7 +176,7 @@ mod server_tests {
                 .calldata()
                 .unwrap();
 
-            let req = v_call_body(&contract, &call_data);
+            let req = v_call_body(contract.address(), &call_data);
 
             let response = app.post("/", &req).await;
 
@@ -238,14 +197,7 @@ mod server_tests {
             gas_meter_server
                 .mock_method("v_allocateGas")
                 .with_query(USER_TOKEN_QUERY_KEY, USER_TOKEN)
-                .with_params(
-                    json!({
-                        "gas_limit": GAS_LIMIT,
-                        "hash": EXPECTED_HASH,
-                        "time_to_live": GAS_METER_TTL
-                    }),
-                    false,
-                )
+                .with_params(allocate_gas_body(EXPECTED_HASH), false)
                 .with_result(json!({}))
                 .add()
                 .await;
@@ -260,21 +212,7 @@ mod server_tests {
                 .calldata()
                 .unwrap();
 
-            let req = json!({
-                "method": "v_call",
-                "params": [
-                    {
-                        "to": contract.address(),
-                        "data": call_data,
-                        "gas_limit": GAS_LIMIT,
-                    },
-                    {
-                        "chain_id": CHAIN_ID,
-                    }
-                    ],
-                "id": 1,
-                "jsonrpc": "2.0",
-            });
+            let req = v_call_body(contract.address(), &call_data);
 
             let path = format!("/?token={USER_TOKEN}");
             let response = app.post(&path, &req).await;
@@ -289,21 +227,19 @@ mod server_tests {
     #[allow(non_snake_case)]
     mod v_getProofReceipt {
         use alloy_primitives::B256;
+        use assert_json_diff::assert_json_include;
         use call_server::{v_call::CallHash, v_get_proof_receipt::Status};
         use ethers::{
             abi::AbiEncode,
-            types::{Bytes, Uint8, U256},
+            types::{Bytes, Uint8, H160, U256},
         };
         use serde_json::Value;
+        use server_utils::function_selector;
         use tower::{ServiceBuilder, ServiceExt};
         use web_proof::fixtures::load_web_proof_fixture;
 
         use super::*;
         use crate::test_helpers::mock::{Contract, Server, WebProof};
-
-        const CHAIN_ID: u64 = 11_155_111;
-        const GAS_LIMIT: u64 = 1_000_000;
-        const GAS_METER_TTL: u64 = 3600;
 
         const RETRY_SLEEP_DURATION: tokio::time::Duration = tokio::time::Duration::from_millis(100);
         const MAX_POLLING_TIME: std::time::Duration = std::time::Duration::from_secs(60);
@@ -338,21 +274,7 @@ mod server_tests {
             contract: &Contract,
             call_data: &Bytes,
         ) -> call_server::v_call::CallHash {
-            let request = json!({
-                "method": "v_call",
-                "params": [
-                    {
-                        "to": contract.address(),
-                        "data": call_data,
-                        "gas_limit": GAS_LIMIT,
-                    },
-                    {
-                        "chain_id": CHAIN_ID,
-                    }
-                ],
-                "id": 1,
-                "jsonrpc": "2.0",
-            });
+            let request = v_call_body(contract.address(), call_data);
             let response = app.post("/", &request).await;
             assert_eq!(StatusCode::OK, response.status());
             let as_json = body_to_json(response.into_body()).await;
@@ -389,6 +311,34 @@ mod server_tests {
             result
         }
 
+        fn assert_proof_result(
+            result: &Value,
+            evm_call_result: impl Into<Value>,
+            call_data: &Bytes,
+            contract_address: H160,
+        ) {
+            assert_json_include!(
+                actual: result,
+                expected: json!({
+                    "status": "ready",
+                    "data": {
+                        "evm_call_result": evm_call_result.into(),
+                        "proof": {
+                            "length": 160,
+                            "seal": {
+                                "verifierSelector": "0xdeafbeef",
+                                "mode": 1,
+                            },
+                            "callAssumptions": {
+                                "functionSelector": function_selector(call_data),
+                                "proverContractAddress": contract_address,
+                            }
+                        },
+                    },
+                }),
+            );
+        }
+
         #[tokio::test(flavor = "multi_thread")]
         async fn nonexistent_hash_failure() {
             let ctx = Context::default().await;
@@ -411,31 +361,23 @@ mod server_tests {
             let hash = get_hash(&app, &contract, &call_data).await;
             let result = get_proof_result(&app, hash).await;
 
-            let expected = json!({
-                "status": "ready",
-                "data": {
-                    "evm_call_result": U256::from(3).encode_hex(),
-                    "proof": {
-                        "length": 160,
-                        "seal": {
-                            "verifierSelector": "0xdeafbeef",
-                            "mode": 1,
-                        },
-                        "callAssumptions": {
-                            "functionSelector": function_selector(&call_data),
-                            "proverContractAddress": contract.address(),
-                        }
-                    },
-                },
-            });
-
-            assert_json_include!(actual: result, expected: expected);
+            assert_proof_result(
+                &result,
+                U256::from(3).encode_hex(),
+                &call_data,
+                contract.address(),
+            );
 
             let (status, result) =
                 v_get_proof_receipt_result(&app, v_get_proof_receipt_body(hash)).await;
 
             assert_eq!(status, Status::Ready);
-            assert_json_include!(actual: result, expected: expected);
+            assert_proof_result(
+                &result,
+                U256::from(3).encode_hex(),
+                &call_data,
+                contract.address(),
+            );
         }
 
         #[tokio::test(flavor = "multi_thread")]
@@ -450,25 +392,11 @@ mod server_tests {
 
             let hash = get_hash(&app, &contract, &call_data).await;
             let result = get_proof_result(&app, hash).await;
-            assert_json_include!(
-                actual: result,
-                expected: json!({
-                    "status": "ready",
-                    "data": {
-                        "evm_call_result": U256::from(3).encode_hex(),
-                        "proof": {
-                            "length": 160,
-                            "seal": {
-                                "verifierSelector": "0xdeafbeef",
-                                "mode": 1,
-                            },
-                            "callAssumptions": {
-                                "functionSelector": function_selector(&call_data),
-                                "proverContractAddress": contract.address(),
-                            }
-                        },
-                    },
-                }),
+            assert_proof_result(
+                &result,
+                U256::from(3).encode_hex(),
+                &call_data,
+                contract.address(),
             );
         }
 
@@ -487,25 +415,11 @@ mod server_tests {
 
             let hash = get_hash(&app, &contract, &call_data).await;
             let result = get_proof_result(&app, hash).await;
-            assert_json_include!(
-                actual: result,
-                expected: json!({
-                    "status": "ready",
-                    "data": {
-                        "evm_call_result": Uint8::from(1).encode_hex(),
-                        "proof": {
-                            "length": 160,
-                            "seal": {
-                                "verifierSelector": "0xdeafbeef",
-                                "mode": 1,
-                            },
-                            "callAssumptions": {
-                                "functionSelector": function_selector(&call_data),
-                                "proverContractAddress": contract.address(),
-                            }
-                        },
-                    },
-                }),
+            assert_proof_result(
+                &result,
+                Uint8::from(1).encode_hex(),
+                &call_data,
+                contract.address(),
             );
         }
 
@@ -518,14 +432,7 @@ mod server_tests {
             let mut gas_meter_server = GasMeterServer::start(GAS_METER_TTL, None).await;
             gas_meter_server
                 .mock_method("v_allocateGas")
-                .with_params(
-                    json!({
-                        "gas_limit": GAS_LIMIT,
-                        "hash": EXPECTED_HASH,
-                        "time_to_live": GAS_METER_TTL
-                    }),
-                    false,
-                )
+                .with_params(allocate_gas_body(EXPECTED_HASH), false)
                 .with_result(json!({}))
                 .add()
                 .await;
