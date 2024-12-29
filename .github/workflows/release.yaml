@@ -110,6 +110,7 @@ jobs:
         uses: ncipollo/release-action@v1
         with:
           tag: nightly-${{ github.sha }}
+          allowUpdates: true
           artifacts: "./dist/*"
 
       - name: Release nightly-latest
