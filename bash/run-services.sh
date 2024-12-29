@@ -10,6 +10,7 @@ fi
 
 LOGS_DIR="${VLAYER_TMP_DIR}/logs"
 VLAYER_HOME=$(git rev-parse --show-toplevel)
+BUILD_BINARIES=${BUILD_BINARIES:-1}
 
 source "${VLAYER_HOME}/bash/common.sh"
 
@@ -61,7 +62,7 @@ function startup_vlayer(){
     RISC0_DEV_MODE="${RISC0_DEV_MODE}" \
     BONSAI_API_URL="${BONSAI_API_URL}" \
     BONSAI_API_KEY="${BONSAI_API_KEY}" \
-    cargo run --bin vlayer serve \
+    ./target/debug/vlayer serve \
         ${args[@]} \
         ${external_urls[@]+"${external_urls[@]}"} \
         >>"${LOGS_DIR}/vlayer_serve.out" &
@@ -112,7 +113,7 @@ function startup_chain_worker() {
     pushd "${VLAYER_HOME}/rust"
 
     RUST_LOG=${RUST_LOG:-info} \
-    cargo run --bin worker -- \
+    ./target/debug/worker \
         --db-path "${db_path}" \
         --rpc-url "${rpc_url}" \
         --chain-id "${chain_id}" \
@@ -137,7 +138,7 @@ function startup_chain_server() {
     pushd "${VLAYER_HOME}/rust"
 
     RUST_LOG=info \
-    cargo run --bin chain_server -- \
+    ./target/debug/chain_server \
         --db-path "${db_path}" \
         >>"${LOGS_DIR}/chain_server.out" &
 
@@ -271,6 +272,15 @@ echo "BONSAI_API_URL: ${BONSAI_API_URL}"
 echo "SERVER_PROOF_ARG: ${SERVER_PROOF_ARG}"
 echo "EXTERNAL_RPC_URLS: ${EXTERNAL_RPC_URLS[@]+"${EXTERNAL_RPC_URLS[@]}"}"
 echo
+
+if [[ "${BUILD_BINARIES}" == "1" ]] ; then 
+    echo "Building binaries..."
+    pushd "${VLAYER_HOME}/rust"
+    cargo build --bin vlayer --bin chain_server --bin worker
+    popd
+    echo
+fi
+
 echo "Starting services..."
 
 start_anvil
