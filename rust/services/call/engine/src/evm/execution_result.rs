@@ -1,3 +1,4 @@
+use alloy_primitives::Bytes;
 use alloy_rlp::Buf;
 use alloy_sol_types::decode_revert_reason;
 use revm::primitives::{ExecutionResult, HaltReason, SuccessReason};
@@ -15,6 +16,8 @@ pub enum TransactError {
     Stop(SuccessReason),
     #[error("{0}")]
     Revert(String),
+    #[error("{0}")]
+    NonUtf8Revert(Bytes),
     #[error("contract execution halted: {0:?}")]
     Halt(HaltReason),
 }
@@ -41,10 +44,11 @@ impl TryFrom<ExecutionResult> for SuccessfulExecutionResult {
                 ..
             } => Err(TransactError::Stop(reason)),
             ExecutionResult::Revert { output, .. } => {
-                let reason = decode_revert_reason(output.chunk());
-                Err(TransactError::Revert(
-                    reason.unwrap_or("revert: Non UTF-8 revert reason".into()),
-                ))
+                if let Some(reason) = decode_revert_reason(output.chunk()) {
+                    Err(TransactError::Revert(reason))
+                } else {
+                    Err(TransactError::NonUtf8Revert(output))
+                }
             }
             ExecutionResult::Halt { reason, .. } => Err(TransactError::Halt(reason)),
         }
@@ -127,7 +131,7 @@ mod successful_execution_result_try_from {
                 .unwrap_err()
                 .to_string();
 
-            assert_eq!(error, "revert: Non UTF-8 revert reason");
+            assert_eq!(error, "0xff");
         }
     }
 
