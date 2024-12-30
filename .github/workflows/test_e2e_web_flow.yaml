@@ -6,6 +6,7 @@ on:
       - ".github/workflows/test_e2e_web_flow.yaml"
       - "docker/**"
       - "bash/playwright-test.sh"
+      - "bash/run-services.sh"
   merge_group:
   push:
     branches:
