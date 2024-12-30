@@ -31,6 +31,8 @@ jobs:
           submodules: recursive
       - name: Install Rust prerequisites
         uses: ./.github/actions/rust-prerequisites
+      - name: Configure sccache wrapper
+        run: echo "RUSTC_WRAPPER=$(which sccache)" >> $GITHUB_ENV
       - name: Install contracts prerequisites
         uses: ./.github/actions/contracts-prerequisites
       - name: Install TypeScript prerequisites

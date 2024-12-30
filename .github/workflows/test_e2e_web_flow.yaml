@@ -39,6 +39,8 @@ jobs:
         working-directory: ./packages
       - name: Install Rust prerequisites
         uses: ./.github/actions/rust-prerequisites
+      - name: Configure sccache wrapper
+        run: echo "RUSTC_WRAPPER=$(which sccache)" >> $GITHUB_ENV
       - name: Install contracts prerequisites
         uses: ./.github/actions/contracts-prerequisites
       - uses: hoverkraft-tech/compose-action@v2.0.2
