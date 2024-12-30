@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt::Display};
 
 use alloy_primitives::{BlockNumber, ChainId};
 use async_trait::async_trait;
@@ -7,9 +7,13 @@ use derive_new::new;
 use parking_lot::RwLock;
 use thiserror::Error;
 
+#[cfg(feature = "fake")]
+mod fake;
 #[cfg(feature = "rpc")]
 mod rpc;
 
+#[cfg(feature = "fake")]
+pub use fake::FakeClient;
 #[cfg(feature = "rpc")]
 pub use rpc::RpcClient;
 
@@ -43,6 +47,16 @@ pub enum Error {
         chain_id: ChainId,
         block_numbers: Vec<BlockNumber>,
     },
+    #[error("Chain {0} not supported")]
+    UnsupportedChain(ChainId),
+    #[error("{0}")]
+    Other(String),
+}
+
+impl Error {
+    pub fn other(msg: impl Display) -> Self {
+        Self::Other(msg.to_string())
+    }
 }
 
 pub type ChainProofCache = HashMap<ChainId, (Vec<BlockNumber>, ChainProof)>;

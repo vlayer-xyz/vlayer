@@ -12,7 +12,7 @@ block_header = { workspace = true }
 bytes = { workspace = true }
 call_engine = { workspace = true }
 chain = { workspace = true }
-chain_client = { workspace = true, features = ["rpc"] }
+chain_client = { workspace = true, features = ["fake", "rpc"] }
 chain_common = { workspace = true }
 common = { workspace = true }
 derive-new = { workspace = true }

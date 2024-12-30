@@ -9,7 +9,11 @@ async-trait = { workspace = true }
 chain_common = { workspace = true }
 derive-new = { workspace = true }
 
-# RPC dependencies (disabled for guest)
+# Fake client dependencies (disabled for guest)
+provider = { workspace = true, optional = true }
+risc0-zkp = { workspace = true, optional = true }
+
+# RPC client dependencies (disabled for guest)
 mpt = { workspace = true, optional = true }
 parking_lot = { workspace = true }
 serde_json = { workspace = true, optional = true }
@@ -23,6 +27,7 @@ block_trie = { workspace = true }
 tokio = { workspace = true, features = ["rt", "macros"] }
 
 [features]
+fake = ["provider", "risc0-zkp"]
 rpc = ["mpt", "serde_json", "server_utils", "tracing"]
 
 [lints]

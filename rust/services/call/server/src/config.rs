@@ -4,6 +4,7 @@ use alloy_primitives::{hex::ToHexExt, ChainId};
 use call_host::{Config as HostConfig, DEFAULT_MAX_CALLDATA_SIZE};
 use chain::TEST_CHAIN_ID;
 use common::GuestElf;
+use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Serialize};
 use server_utils::ProofMode;
 
@@ -39,16 +40,20 @@ impl Config {
         matches!(self.proof_mode, ProofMode::Fake)
     }
 
-    pub fn call_guest_id(&self) -> String {
+    pub fn call_guest_id_hex(&self) -> String {
         self.call_guest_elf.id.encode_hex_with_prefix()
+    }
+
+    pub const fn chain_guest_id(&self) -> Digest {
+        self.chain_guest_elf.id
+    }
+
+    pub fn chain_guest_id_hex(&self) -> String {
+        self.chain_guest_elf.id.encode_hex_with_prefix()
     }
 
     pub fn api_version(&self) -> String {
         self.api_version.to_string()
-    }
-
-    pub fn chain_guest_id(&self) -> String {
-        self.chain_guest_elf.id.encode_hex_with_prefix()
     }
 
     pub fn gas_meter_config(&self) -> Option<GasMeterConfig> {
@@ -167,11 +172,11 @@ mod tests {
         let config = ConfigBuilder::new(call_elf, chain_elf, "1.2.3".into()).build();
 
         assert_eq!(
-            config.call_guest_id(),
+            config.call_guest_id_hex(),
             "0x0000000000000000000000000000000000000000000000000000000000000000"
         );
         assert_eq!(
-            config.chain_guest_id(),
+            config.chain_guest_id_hex(),
             "0x0100000001000000010000000100000001000000010000000100000001000000"
         );
         assert_eq!(config.api_version(), "1.2.3".to_string());
