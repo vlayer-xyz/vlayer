@@ -4341,7 +4341,7 @@ dependencies = [
  "humantime-serde",
  "hyper 1.5.2",
  "indicatif",
- "inferno",
+ "inferno 0.11.21",
  "itertools 0.13.0",
  "opener",
  "parking_lot",
@@ -6265,18 +6265,34 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "232929e1d75fe899576a3d5c7416ad0d88dbfbb3c3d6aa00873a7408a50ddb88"
 dependencies = [
  "ahash",
- "clap",
- "crossbeam-channel",
- "crossbeam-utils",
- "dashmap",
- "env_logger",
- "indexmap 2.7.0",
  "is-terminal",
  "itoa",
  "log",
  "num-format",
  "once_cell",
  "quick-xml 0.26.0",
+ "rgb",
+ "str_stack",
+]
+
+[[package]]
+name = "inferno"
+version = "0.12.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "75a5d75fee4d36809e6b021e4b96b686e763d365ffdb03af2bd00786353f84fe"
+dependencies = [
+ "ahash",
+ "clap",
+ "crossbeam-channel",
+ "crossbeam-utils",
+ "dashmap",
+ "env_logger",
+ "indexmap 2.7.0",
+ "itoa",
+ "log",
+ "num-format",
+ "once_cell",
+ "quick-xml 0.37.2",
  "rgb",
  "str_stack",
 ]
@@ -10446,7 +10462,7 @@ dependencies = [
  "foundry-evm-core",
  "foundry-test-utils",
  "indicatif",
- "inferno",
+ "inferno 0.12.0",
  "itertools 0.13.0",
  "mock_chain_server",
  "mpt",

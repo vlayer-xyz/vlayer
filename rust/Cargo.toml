@@ -98,9 +98,9 @@ futures = { version = "0.3.31", default-features = false }
 hex = "0.4.3"
 http-body-util = "0.1.2"
 httparse = "1.9.5"
-hyper = "1.5.0"
+hyper = "1.5.2"
 indicatif = "0.17.8"
-inferno = "0.11.21"
+inferno = "0.12.0"
 itertools = { version = "0.13.0" }
 jsonrpsee = { version = "0.24.7", features = ["server-core", "macros"] }
 lazy_static = "1.5.0"
@@ -118,7 +118,7 @@ proptest = "1.5.0"
 rand = "0.8.5"
 rayon = "1.10.0"
 regex = "1.11.1"
-reqwest = { version = "0.12.8", default-features = false }
+reqwest = { version = "0.12.11", default-features = false }
 revm = { version = "=17.1.0", default-features = false, features = ["optimism"] }
 risc0-build = "1.2.0"
 risc0-build-ethereum = "1.2.0"
@@ -126,7 +126,7 @@ risc0-zkp = { version = "1.2.0", default-features = false }
 risc0-zkvm = "1.2.0"
 rlp = "0.6.1"
 rsa = "0.9.7"
-semver = "1.0.23"
+semver = "1.0.24"
 serde = { version = "1.0.213", features = ["derive"] }
 serde_json = "1.0.132"
 serde_with = { version = "3.9.0", default-features = false }
@@ -142,8 +142,8 @@ insta = "1.41.1"
 tlsn-core = { git = "https://github.com/tlsnotary/tlsn.git", tag = "v0.1.0-alpha.7" }
 tokio = { version = "1.41.0", default-features = false, features = ["rt-multi-thread"] }
 toml = "0.8.19"
-tower = "0.5.1"
-tower-http = "0.6.1"
+tower = "0.5.2"
+tower-http = "0.6.2"
 tower-request-id = "0.3.0"
 tracing = { version = "0.1", default-features = false }
 tracing-subscriber = { version = "0.3", features = ["env-filter", "fmt", "json"], default-features = false }
