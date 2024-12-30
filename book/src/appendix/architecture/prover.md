@@ -1,22 +1,20 @@
-# Prover architecture
+# Call prover architecture
 
 On the high level, vlayer runs zkEVM that produces a proof of proper execution of `Prover` smart contract. Under the hood, vlayer is written in Rust that is compiled to zero knowledge proofs. Currently, Rust is compiled with [RISC Zero](https://www.risczero.com/), but we aim to build vendor-lock free solutions working on multiple zk stacks, like [sp-1](https://github.com/succinctlabs/sp1) or [Jolt](https://github.com/a16z/jolt). Inside rust [revm](https://github.com/bluealloy/revm) is executed.
 
-Our architecture is inspired by RISC Zero [steel](https://github.com/risc0/risc0-ethereum/tree/main/steel), with two main components that can be found in `rust/` directory:
+Our architecture is inspired by RISC Zero [steel](https://github.com/risc0/risc0-ethereum/tree/main/steel), with two main components that can be found in `rust/services/call` directory:
 
-- **Host** - (in `host`) - accepts the request, runs a preflight, during which it collects all data required by the guest. Then, guest proving is triggered.
+- **Host** - (in `host`) - runs a preflight, during which it collects all data required by the guest. Then, guest proving is triggered.
 - **Guest** - performs execution of the code inside zkEVM. Consists of three crates:
     * guest - (in `guest`) - Library that contains code for EVM execution and input validation
     * risc0_guest - (in `guest_wrapper/risc0_guest`) - Thin wrapper that uses RISC Zero ZKVM IO and delegates work to `guest`
-    * guest_wrapper - (in `guest_wrapper`) - Compiles the `risc0_guest` to [RISC Zero](https://doc.rust-lang.org/rustc/platform-support/riscv32im-risc0-zkvm-elf.html) target and makes it available to be run inside the host. It can be considered Rust equivalent of a code generation script.
+    * guest_wrapper - (in `guest_wrapper`) - Compiles `risc0_guest` (using cargo build scripts) to a binary format (ELF) using [RISC Zero](https://doc.rust-lang.org/rustc/platform-support/riscv32im-risc0-zkvm-elf.html) target.
 
-In addition, there are several other crates in the `rust/` directory:
-- **engine**: Main execution shared by Guest and Host, used in both Host's preflight and Guest's zk proving.
-- **cli**: vlayer command line interface used to start the server, run tests, and more.
+there are several other crates in the `rust/services/call` directory:
+- **engine**: EVM Call execution shared by Guest and Host, used in both Host's preflight and Guest's zk proving;
+- **precompiles**: Vlayer precompiles that extend the EVM capabilities with Email and Web Proof utils;
+- **seal**: Utils for encoding Risc0 receipt into a Seal. Seal can be read and verified by the Verifier smart contract;
 - **server**: Server routines accepting vlayer JSON RPC calls.
-- **mpt**: Sparse Merkle Patricia tries used to pass the database from host to guest.
-- **test_runner**: Fork of the forge test runner used to run vlayer tests.
-- **web_proof**: Web proofs data structures and verification routines.
 
 ## Execution and proving
 
