@@ -1,10 +1,10 @@
 # Proving Canonicity
 
-It is essential to be able to verify the latest block hash on-chain.
+It is essential to be able to verify the canonicity of the latest block hash on-chain.
 
-Without that - an attacker would be able to:
-* Execute code on a made-up chain with prepared, malicious data;
-* Execute code on a non-canonical fork.
+Without that - an attacker would be able to successfully sumit the proof generated on:
+* a made-up chain with prepared, malicious data;
+* a non-canonical fork.
 
 ## blockhash
 
