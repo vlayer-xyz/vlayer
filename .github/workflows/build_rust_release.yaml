@@ -149,7 +149,7 @@ jobs:
         working-directory: rust
     name: Build release for aarch64-apple-darwin
     needs: [build-guest-wrapper]
-    runs-on: macos-14
+    runs-on: macos-14-xlarge
     outputs:
       vlayer_build: ${{ steps.vlayer_build.outputs.vlayer_build }}
     env:
