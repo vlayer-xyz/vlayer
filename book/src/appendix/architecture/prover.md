@@ -1,22 +1,20 @@
-# Prover architecture
+# Call prover architecture
 
 On the high level, vlayer runs zkEVM that produces a proof of proper execution of `Prover` smart contract. Under the hood, vlayer is written in Rust that is compiled to zero knowledge proofs. Currently, Rust is compiled with [RISC Zero](https://www.risczero.com/), but we aim to build vendor-lock free solutions working on multiple zk stacks, like [sp-1](https://github.com/succinctlabs/sp1) or [Jolt](https://github.com/a16z/jolt). Inside rust [revm](https://github.com/bluealloy/revm) is executed.
 
-Our architecture is inspired by RISC Zero [steel](https://github.com/risc0/risc0-ethereum/tree/main/steel), with two main components that can be found in `rust/` directory:
+Our architecture is inspired by RISC Zero [steel](https://github.com/risc0/risc0-ethereum/tree/main/steel), with two main components that can be found in `rust/services/call` directory:
 
-- **Host** - (in `host`) - accepts the request, runs a preflight, during which it collects all data required by the guest. Then, guest proving is triggered.
+- **Host** - (in `host`) - runs a preflight, during which it collects all data required by the guest. Then, guest proving is triggered.
 - **Guest** - performs execution of the code inside zkEVM. Consists of three crates:
     * guest - (in `guest`) - Library that contains code for EVM execution and input validation
     * risc0_guest - (in `guest_wrapper/risc0_guest`) - Thin wrapper that uses RISC Zero ZKVM IO and delegates work to `guest`
-    * guest_wrapper - (in `guest_wrapper`) - Compiles the `risc0_guest` to [RISC Zero](https://doc.rust-lang.org/rustc/platform-support/riscv32im-risc0-zkvm-elf.html) target and makes it available to be run inside the host. It can be considered Rust equivalent of a code generation script.
+    * guest_wrapper - (in `guest_wrapper`) - Compiles `risc0_guest` (using cargo build scripts) to a binary format (ELF) using [RISC Zero](https://doc.rust-lang.org/rustc/platform-support/riscv32im-risc0-zkvm-elf.html) target.
 
-In addition, there are several other crates in the `rust/` directory:
-- **engine**: Main execution shared by Guest and Host, used in both Host's preflight and Guest's zk proving.
-- **cli**: vlayer command line interface used to start the server, run tests, and more.
+there are several other crates in the `rust/services/call` directory:
+- **engine**: EVM Call execution shared by Guest and Host, used in both Host's preflight and Guest's zk proving;
+- **precompiles**: Vlayer precompiles that extend the EVM capabilities with Email and Web Proof utils;
+- **seal**: Utils for encoding Risc0 receipt into a Seal. Seal can be read and verified by the Verifier smart contract;
 - **server**: Server routines accepting vlayer JSON RPC calls.
-- **mpt**: Sparse Merkle Patricia tries used to pass the database from host to guest.
-- **test_runner**: Fork of the forge test runner used to run vlayer tests.
-- **web_proof**: Web proofs data structures and verification routines.
 
 ## Execution and proving
 
@@ -34,10 +32,10 @@ However, all input should be considered insecure. Therefore, validity of all the
 
 To deliver all necessary proofs, the following steps are performed:
 
-- In preflight, we execute Solidity code on the host. Each time the db is called, the value is fetched via Ethereum JSON RPC. Then, the proof is stored in the local database called ProofDb.
-- The serialized content of ProofDb is passed via stdin to the guest.
-- The guest deserializes content into a local database StateDb.
-- Solidity code is executed inside revm using a local copy of StateDb.
+- In preflight, we execute Solidity code on the host. Each time the db is called, the value is fetched via Ethereum JSON RPC. Then, the proof is stored in the local database called `ProofDb`;
+- serialized content of `ProofDb` is passed via stdin to the `guest`;
+- `guest` deserializes content into a `StateDb`;
+- Solidity code is executed inside `revm` using `StateDb`.
 
 Since that Solidity execution is deterministic, database in the guest has exactly the data it requires.
 
@@ -45,23 +43,86 @@ Since that Solidity execution is deterministic, database in the guest has exactl
 
 ### Databases
 
-We have two different databases run in two different places. Each is a composite database:
+`revm` requires us to provide a DB which implements `DatabaseRef` trait (i.e. can be asked about accounts, storage, block hashes).
 
-- **Host** - runs `ProofDb`, which proxies queries to `ProviderDb`. In turn, `ProviderDb` forwards the call to Ethereum RPC provider. Finally, `ProofDb` stores information about what proofs will need to be generated for the guest.
-- **Guest** - runs `WrapStateDb`, which proxies calls to `StateDb`.
-  - `StateDb` consists of state passed from the host and has only the content required to be used by deterministic execution of the Solidity code in the guest. Data in the `StateDb` is stored as sparse Ethereum Merkle Patricia Tries, hence access to accounts and storage serves as verification of state and storage proofs.
-  -  `WrapStateDb` is an [adapter](https://en.wikipedia.org/wiki/Adapter_pattern) for `StateDb` that implements `Database` trait. It additionally does caching of the accounts, for querying storage, so that the account is only fetched once for multiple storage queries.
+It's a common pattern to compose databases to orthogonalize the implementation.
 
+We have **Host** and **Guest** databases
+
+- **Host** - runs `CacheDB<ProofDb<ProviderDb>>`:
+    * `ProviderDb`- queries Ethereum RPC Provider (i.e. Alchemy, Infura, Anvil);
+    * `ProofDb` - records all queries aggregates them and collects EIP1186 (`eth_getProof`) proofs;
+    * `CacheDB` - stores trusted seed data to minimize the amount of RPC requests. We seed caller account and some Optimism system accounts.
+- **Guest** - runs `CacheDB<WrapStateDb<StateDb>>`:
+    * `StateDb` consists of state passed from the host and has only the content required to be used by deterministic execution of the Solidity code in the guest. Data in the `StateDb` is stored as sparse Ethereum Merkle Patricia Tries, hence access to accounts and storage serves as verification of state and storage proofs;
+    * `WrapStateDb` is an [adapter](https://en.wikipedia.org/wiki/Adapter_pattern) for `StateDb` that implements `Database` trait. It additionally does caching of the accounts, for querying storage, so that the account is only fetched once for multiple storage queries;
+    * `CacheDB` - has the same seed data as it's Host version.
+
+#### DatabaseRef trait
 ```mermaid
 %%{init: {'theme':'dark'}}%%
 classDiagram
 
-class Database {
-    basic(address): AccountInfo?
+class AccountInfo {
+    balance: U256
+    nonce: u64
+    code_hash: B256
+    code: Bytecode?
+}
+
+class DatabaseRef {
+    basic(address) AccountInfo?
     code_by_hash(code_hash) Bytecode?
     storage(address, index) U256?
     block_hash(number) B256?
 }
+<<Trait>> DatabaseRef
+
+DatabaseRef..AccountInfo
+```
+
+
+#### Host
+```mermaid
+%%{init: {'theme':'dark'}}%%
+classDiagram
+
+class DatabaseRef
+<<Trait>> DatabaseRef
+
+class ProviderDb {
+    provider
+}
+
+class ProofDb {
+    accounts: HashMap
+    contracts: HashMap
+    block_hash_numbers: HashSet
+    providerDb
+}
+
+DatabaseRef <|-- ProviderDb
+DatabaseRef <|-- ProofDb
+DatabaseRef <|-- CacheDB
+ProviderDb *-- Provider
+ProofDb *-- ProviderDb
+CacheDB *-- ProofDb
+```
+
+#### Guest
+```mermaid
+%%{init: {'theme':'dark'}}%%
+classDiagram
+
+class StateAccount {
+    balance: U256
+    nonce: TxNumber
+    code_hash: B256
+    storage_root: B256
+}
+
+class DatabaseRef
+<<Trait>> DatabaseRef
 
 class StateDb {
     state_trie: MerkleTrie
@@ -74,64 +135,56 @@ class StateDb {
     storage_trie(root: &B256) MerkleTrie?
 }
 
-class ProviderDb {
-    provider
-}
-
 class WrapStateDb {
     stateDb
 }
 
-class ProofDb {
-    accounts: HashMap
-    contracts: HashMap
-    block_hash_numbers: HashSet
-    providerDb
-}
-
-Database <|-- WrapStateDb
-Database <|-- ProviderDb
-Database <|-- ProofDb
+DatabaseRef <|-- WrapStateDb
+DatabaseRef <|-- CacheDB
+CacheDB *-- WrapStateDb
 WrapStateDb *-- StateDb
-ProviderDb *-- Provider
-ProofDb *-- ProviderDb
-Database..AccountInfo
 StateDb..StateAccount
-
-class AccountInfo {
-    balance: U256
-    nonce: u64
-    code_hash: B256
-    code: Bytecode?
-}
-
-class StateAccount {
-    balance: U256
-    nonce: TxNumber
-    code_hash: B256
-    storage_root: B256
-}
 ```
 
 ### Environments
 
-The environment in which the execution will take place is stored in the generic type `EvmEnv<D, H>`, where `D` is a connected database and `H` represents the type of the block header. The database connected to Engine varies between the Guest, Host and testing environment.
+The environment in which the execution will take place is stored in the generic type `EvmEnv<D>`, where `D` is a database type.
 
-#### Block header
+```mermaid
+%%{init: {'theme':'dark'}}%%
+classDiagram
 
-The block header type may vary between sidechains and L2s.
+class EvmEnv {
+    db: D
+    cfg_env: CfgEnvWithHandlerCfg
+    header: dyn EvmBlockHeader
+}
 
-#### Life cycle
+class EvmBlockHeader {
+    parent_hash(&self) B256
+    number(&self) BlockNumber
+    timestamp(&self) u64
+    state_root(&self) &B256
+    fill_block_env(&self, blk_env: &mut BlockEnv)
+}
+<<Trait>> EvmBlockHeader
+```
 
-The environment is created in the host and converted into `EvmInput` and serialized. The data is then sent over standard input to the guest and deserialized in the guest. `EthEvmInput` is an `EvmInput` specialized by `EthBlockHeader`.
+The block header type varies between sidechains and L2s. `EvmBlockHeader` trait allows us to access header data in a homogenous way and use dynamic dispatch.
 
-`EvmInput` stores state and storage trees as sparse Ethereum Merkle Patricia Trie implemented by `MPT` structures, which is a wrapped Node. The sparse tree is very similar to the standard MPT in that it includes four standard node types. However, it only keeps data necessary to execution and in place of unused nodes it uses a special node called `Digest`.
+`cgf_env` is revm type that contains EVM configuration (chain_id, hard fork).
+
+#### Lifecycle
+
+The environment is created in the Host and converted into `EvmInput` and serialized. The data is then sent over standard input to the guest and deserialized in the guest.
+
+`EvmInput` stores state and storage trees as sparse Ethereum Merkle Patricia Trie. The sparse tree is very similar to the standard MPT in that it includes four standard node types. However, it only keeps data necessary to execution and in place of unused nodes it uses a special node called `Digest`.
 
 The data is serialized by host with the `EVMInput.into_env()` function. Additionally, this method verifies header hashes (current and ancestors). `StateDb::new` calculates bytecodes hashes and storage roots.
 
 ### Verification of input data
 
-The guest is required to verify all data provided by the host. Validation of data correctness is split between multiple functions:
+Guest is required to verify all data provided by the Host. Validation of data correctness is split between multiple functions:
 - `EVMInput.into_env` verifies:
     - equality of subsequent ancestor block hashes
     - equality of `header.state_root` and actual `state_root`
@@ -156,23 +209,8 @@ class EvmInput {
     into_env(): EvmEnv<StateDb, H>
 }
 
-class EvmEnv {
-    db: D,
-    cfg_env: CfgEnvWithHandlerCfg
-    header: Sealed<H>
-}
-
-EvmEnv <|-- EthEvmEnv
-EvmEnv *-- CfgEnvWithHandlerCfg
-
-EvmInput <|-- EthEvmInput
 EvmInput -- MPT
 MPT -- Node
-
-class CfgEnvWithHandlerCfg {
-    pub cfg_env: CfgEnv
-    pub handler_cfg: HandlerCfg
-}
 
 class Node {
     <<enumeration>>
@@ -185,65 +223,9 @@ class Node {
 
 ```
 
-### Components
-There are two main entry crates to the system: `risk_host` and `risk_guest`. Each of them should be a few simple lines of code and they should implement no logic. They depend on `Host` and `Guest` crates respectively.
-The part of code shared between the host and guest is stored in a separate component - `Engine`.
-In the future, there might be more entry points i.e. `Sp1Host` and `Sp1Guest`.
-
-Below is a short description of the components:
-
-- The `Host` is an http server. The `Host`'s main purpose is to parse an http request and execute logic and convert the result to an http response.
-
-- The `Guest` is a program which communicates via reading input and writing to output. For simplicity, all input is deserialized into `GuestInput` and all output is serialized into `GuestOutput`. The `Guest`'s main purpose is to parse input and run logic from `Engine`.
-
-- The `Engine` consists of shared logic between the `Host` and the `Guest`. In the `Host`, it is used to run preflight and in the `Guest` it is used to perform proving. It mainly does two things:
-    - runs Rust preprocessing of a call (e.g. email signature verification)
-    - runs Solidity contracts inside revm
-
-```mermaid
-%%{init: {'theme':'dark'}}%%
-classDiagram
-
-Risc0Guest --> Guest
-Sp1Guest --> Guest
-JoltGuest --> Guest
-Cli --> Host
-Cli --> Server
-Server --> Host
-Guest --> Engine
-Host --> Engine
-
-class Engine {
-    revm
-    rust_hooks
-    new(db)
-    run(call)
-}
-
-class Host {
-    new(out)
-    run(call)
-}
-
-class Guest {
-    new(in, out)
-    call(Call)
-}
-
-class Risc0Guest {
-    main()
-}
-
-class Server {
-    host
-    call(host)
-}
-
-```
-
-
 ### Error handling
-Error handling is done via custom semantic `HostError` enum type, which is converted into http code and a human-readable string by the server.
+
+Error handling is done via `HostError` enum type, which is converted into http code and a human-readable string by the server.
 
 Instead of returning a result, to handle errors, `Guest` panics. It does need to panic with a human-readable error, which should be converted on `Host` to a semantic `HostError` type. As execution on `Guest` is deterministic and should never fail after a successful preflight, the panic message should be informative for developers.
 

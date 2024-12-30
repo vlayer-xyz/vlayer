@@ -13,6 +13,9 @@ pub const BASE_FEE_VAULT: Address = address!("4200000000000000000000000000000000
 // Contract collecting L1 fees
 pub const L1_FEE_VAULT: Address = address!("420000000000000000000000000000000000001a");
 
+pub static EMPTY_ACCOUNTS: &[Address] =
+    &[DEFAULT_CALLER, OPTIMISM_SEQUENCER_VAULT, L1_BLOCK, BASE_FEE_VAULT, L1_FEE_VAULT];
+
 pub type Storage = HashMap<U256, U256>;
 
 lazy_static! {
