@@ -45,14 +45,15 @@ pub async fn get(
 ) -> Response<Body> {
     let params = params
         .iter()
-        .map(|param| format!("{}={}", param.0, param.1))
-        .reduce(|acc, param| format!("{}&{}", acc, param))
-        .unwrap();
+        .map(|(k, v)| format!("{k}={v}"))
+        .collect::<Vec<_>>()
+        .join("&");
 
-    let request = Request::get(format!("{}?{}", url, params));
+    let request = Request::get(format!("{url}?{params}"));
     let request = headers
-        .into_iter()
-        .fold(request, |request, h| request.header(h.0, h.1));
+        .iter()
+        .fold(request, |request, &(name, value)| request.header(name, value));
+
     let request = request.body("".to_string()).unwrap();
 
     app.oneshot(request).await.unwrap()

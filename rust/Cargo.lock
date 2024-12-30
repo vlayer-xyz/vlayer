@@ -2346,7 +2346,6 @@ dependencies = [
  "tokio",
  "tower-http 0.6.1",
  "tracing",
- "tracing-subscriber 0.3.18",
  "u64_range",
 ]
 
@@ -11785,7 +11784,6 @@ dependencies = [
  "tokio",
  "tower 0.5.1",
  "tracing",
- "tracing-subscriber 0.3.18",
 ]
 
 [[package]]
