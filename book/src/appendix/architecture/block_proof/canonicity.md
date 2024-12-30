@@ -2,7 +2,7 @@
 
 It is essential to be able to verify the canonicity of the latest block hash on-chain.
 
-Without that - an attacker would be able to successfully sumit the proof generated on:
+Without that - an attacker would be able to successfully submit the proof generated on:
 * a made-up chain with prepared, malicious data;
 * a non-canonical fork.
 
