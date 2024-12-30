@@ -7,9 +7,13 @@ use derive_new::new;
 use parking_lot::RwLock;
 use thiserror::Error;
 
+#[cfg(feature = "fake")]
+mod fake;
 #[cfg(feature = "rpc")]
 mod rpc;
 
+#[cfg(feature = "fake")]
+pub use fake::FakeClient;
 #[cfg(feature = "rpc")]
 pub use rpc::RpcClient;
 

@@ -6,6 +6,7 @@ mod multi;
 mod never;
 pub mod profiling;
 mod proof;
+mod provider_ext;
 
 use std::fmt::Debug;
 
@@ -23,6 +24,7 @@ pub use factory::{
 };
 pub use multi::CachedMultiProvider;
 pub use proof::{EIP1186Proof, StorageProof};
+pub use provider_ext::BlockingProviderExt;
 
 /// The Ethers client type.
 pub type EthersClient = ethers_providers::Provider<RetryClient<Http>>;

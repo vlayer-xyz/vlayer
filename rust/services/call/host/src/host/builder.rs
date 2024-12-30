@@ -26,15 +26,9 @@
 use std::{collections::HashMap, sync::Arc};
 
 use alloy_primitives::ChainId;
-use async_trait::async_trait;
 use call_engine::evm::env::location::ExecutionLocation;
-use chain_common::{ChainProof, SyncStatus};
-use derive_new::new;
-use ethers_core::types::U64;
-use futures::{stream::FuturesOrdered, TryStreamExt};
-use mock_chain_server::fake_proof_result;
 use provider::{
-    Address, BlockNumber, BlockTag, BlockingProvider, CachedMultiProvider, EthersProviderFactory,
+    Address, BlockNumber, BlockingProvider, CachedMultiProvider, EthersProviderFactory,
 };
 use risc0_zkvm::sha::Digest;
 use tracing::warn;
@@ -111,7 +105,7 @@ impl WithChainGuestId {
                 warn!("Chain proof sever URL not provided. Running with mock server");
                 let provider_factory = EthersProviderFactory::new(rpc_urls);
                 let providers = CachedMultiProvider::from_factory(provider_factory);
-                Box::new(FakeChainClient::new(providers, chain_guest_id))
+                Box::new(chain_client::FakeClient::new(providers, chain_guest_id))
             }
         };
         Ok(WithChainClient {
@@ -210,100 +204,13 @@ fn check_prover_contract(
     move |block_num| Ok(!provider.get_code(address, block_num)?.is_empty())
 }
 
-/// Chain client which doesn't connect to any server at all, but generates fake proofs on demand
-#[derive(new)]
-struct FakeChainClient {
-    providers: CachedMultiProvider,
-    guest_id: Digest,
-}
-
-#[async_trait]
-impl chain_client::Client for FakeChainClient {
-    async fn get_chain_proof(
-        &self,
-        chain_id: ChainId,
-        block_numbers: Vec<BlockNumber>,
-    ) -> Result<ChainProof, chain_client::Error> {
-        let provider = self
-            .providers
-            .get(chain_id)
-            .map_err(|_| chain_client::Error::UnsupportedChain(chain_id))?;
-        let block_headers = block_numbers
-            .into_iter()
-            .map(|block_num| {
-                let provider = provider.clone();
-                async move {
-                    let header = tokio::task::spawn_blocking(move || {
-                        provider.get_block_header(BlockTag::Number(U64::from(block_num)))
-                    })
-                    .await
-                    .map_err(|_| chain_client::Error::other("task join error"))?
-                    .map_err(chain_client::Error::other)?
-                    .ok_or_else(|| {
-                        chain_client::Error::other(format!("Block {block_num} not found"))
-                    })?;
-
-                    Ok::<_, chain_client::Error>(header)
-                }
-            })
-            .collect::<FuturesOrdered<_>>()
-            .try_collect::<Vec<_>>()
-            .await?;
-        let rpc_chain_proof = fake_proof_result(self.guest_id, block_headers);
-        Ok(rpc_chain_proof.try_into()?)
-    }
-
-    async fn get_sync_status(&self, chain_id: ChainId) -> Result<SyncStatus, chain_client::Error> {
-        let last_block = self
-            .providers
-            .get(chain_id)
-            .map_err(|_| chain_client::Error::UnsupportedChain(chain_id))?
-            .get_latest_block_number()
-            .map_err(chain_client::Error::other)?;
-        Ok(SyncStatus {
-            first_block: 0,
-            last_block,
-        })
-    }
-}
-
 #[cfg(test)]
 mod tests {
     use super::*;
 
-    mod fake_chain_client {
-        use std::path::PathBuf;
-
-        use call_engine::verifier::{
-            chain_proof::{self, Verifier},
-            zk_proof,
-        };
-        use chain_client::Client;
-        use provider::CachedProvider;
-
-        use super::*;
-
-        #[tokio::test(flavor = "multi_thread")]
-        async fn fake_proof_verifies() -> anyhow::Result<()> {
-            let path_buf = PathBuf::from("test_data/two_mainnet_blocks_rpc_cache.json");
-            let provider = Arc::new(CachedProvider::from_file(&path_buf)?);
-            let providers = CachedMultiProvider::from_provider(1, provider);
-            let guest_id = Digest::default();
-            let client = FakeChainClient::new(providers, guest_id);
-
-            let proof = client
-                .get_chain_proof(1, vec![21_515_063, 21_515_064])
-                .await?;
-            let verifier = chain_proof::ZkVerifier::new(guest_id, zk_proof::HostVerifier);
-            verifier.verify(&proof)?;
-
-            Ok(())
-        }
-    }
-
     mod start_exec_location {
-        use chain_common::GetSyncStatus;
-        use ethers_core::types::Bytes;
+        use chain_common::{GetSyncStatus, SyncStatus};
+        use ethers_core::types::{Bytes, U64};
         use ethers_providers::MockProvider;
         use mock_chain_server::ChainProofServerMock;
         use provider::{EthersProvider, NullProviderFactory};

@@ -1,13 +1,16 @@
 use alloy_primitives::{BlockNumber, ChainId, B256};
+use block_header::EvmBlockHeader;
 use block_trie::BlockTrie;
 use bytes::Bytes;
-use common::Method;
+use common::{Hashable, Method};
 use derivative::Derivative;
 use derive_more::{AsRef, Deref, From, Into};
 use derive_new::new;
 use mpt::{ParseNodeError, Sha2Trie};
 use risc0_zkp::verify::VerificationError;
-use risc0_zkvm::{sha::Digest, AssumptionReceipt, Receipt};
+use risc0_zkvm::{
+    serde::to_vec, sha::Digest, AssumptionReceipt, FakeReceipt, Receipt, ReceiptClaim,
+};
 use serde::{Deserialize, Serialize};
 use serde_with::{hex::Hex, serde_as};
 use thiserror::Error;
@@ -129,6 +132,28 @@ impl TryFrom<RpcChainProof> for ChainProof {
             block_trie,
         })
     }
+}
+
+pub fn fake_proof_result(
+    guest_id: Digest,
+    block_headers: impl IntoIterator<Item = Box<dyn EvmBlockHeader>>,
+) -> RpcChainProof {
+    let mut block_trie = BlockTrie::default();
+    for header in block_headers {
+        block_trie
+            .insert_unchecked(header.number(), &header.hash_slow())
+            .expect("insert block failed");
+    }
+    let root_hash = block_trie.hash_slow();
+    let proof_output = to_vec(&(root_hash, guest_id)).unwrap();
+    let journal: Vec<u8> = bytemuck::cast_slice(&proof_output).into();
+    let inner: FakeReceipt<ReceiptClaim> =
+        FakeReceipt::<ReceiptClaim>::new(ReceiptClaim::ok(guest_id, journal.clone()));
+    let receipt = Receipt::new(risc0_zkvm::InnerReceipt::Fake(inner), journal);
+    let encoded_proof = bincode::serialize(&receipt).unwrap().into();
+    let nodes: Vec<Bytes> = block_trie.into_iter().collect();
+
+    RpcChainProof::new(encoded_proof, nodes)
 }
 
 #[derive(Debug, Clone, Default, PartialEq, Eq, Serialize, Deserialize, new)]
