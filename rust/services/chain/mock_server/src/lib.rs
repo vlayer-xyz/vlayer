@@ -7,7 +7,7 @@ use bytes::Bytes;
 use chain_common::{ChainProof, GetChainProof, GetSyncStatus, RpcChainProof, SyncStatus};
 use common::{GuestElf, Hashable, Method};
 use lazy_static::lazy_static;
-use risc0_zkvm::{serde::to_vec, FakeReceipt, Receipt, ReceiptClaim};
+use risc0_zkvm::{serde::to_vec, sha::Digest, FakeReceipt, Receipt, ReceiptClaim};
 use serde_json::json;
 use server_utils::rpc::mock::{MockBuilder, Server as RpcServerMock};
 
@@ -19,6 +19,7 @@ lazy_static! {
 const GUEST_ELF: GuestElf = GuestElf::default();
 
 pub fn fake_proof_result(
+    guest_id: Digest,
     block_headers: impl IntoIterator<Item = Box<dyn EvmBlockHeader>>,
 ) -> RpcChainProof {
     let mut block_trie = BlockTrie::default();
@@ -28,10 +29,10 @@ pub fn fake_proof_result(
             .expect("insert block failed");
     }
     let root_hash = block_trie.hash_slow();
-    let proof_output = to_vec(&(root_hash, GUEST_ELF.id)).unwrap();
+    let proof_output = to_vec(&(root_hash, guest_id)).unwrap();
     let journal: Vec<u8> = bytemuck::cast_slice(&proof_output).into();
     let inner: FakeReceipt<ReceiptClaim> =
-        FakeReceipt::<ReceiptClaim>::new(ReceiptClaim::ok(GUEST_ELF.id, journal.clone()));
+        FakeReceipt::<ReceiptClaim>::new(ReceiptClaim::ok(guest_id, journal.clone()));
     let receipt = Receipt::new(risc0_zkvm::InnerReceipt::Fake(inner), journal);
     let encoded_proof = bincode::serialize(&receipt).unwrap().into();
     let nodes: Vec<Bytes> = block_trie.into_iter().collect();
@@ -82,7 +83,7 @@ impl ChainProofServerMock {
                 }),
                 true,
             )
-            .with_result(fake_proof_result(vec![block_header]))
+            .with_result(fake_proof_result(GUEST_ELF.id, vec![block_header]))
             .with_expected_calls(0)
             .add()
             .await;

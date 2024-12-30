@@ -2058,6 +2058,7 @@ dependencies = [
  "mock_chain_server",
  "provider",
  "reqwest 0.12.8",
+ "risc0-zkp",
  "seal",
  "serde",
  "serde_json",

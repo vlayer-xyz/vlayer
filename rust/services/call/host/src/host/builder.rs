@@ -5,20 +5,23 @@
 //!  ║ `with_rpc_urls` - create `CachedMultiProvider` from URLs
 //!  ║
 //!  ╚>`WithProviders`
-//!     ║ `with_chain_proof_url` - create chain proof client from the given URL
-//!     ║ or mock it using RPC providers
+//!     ║ `with_chain_guest_id` – add chain guest ELF ID to context
 //!     ║
-//!     ╚>`WithChainClient`
-//!        ║ `with_start_chain_id` - get provider for the starting chain
-//!        ║
-//!        ╚>`WithStartChainProvider`   
-//!           ║ `with_prover_contract_addr` - calculate start execution location,
-//!           ║ (ensuring that the prover contract is deployed on that location)
-//!           ║
-//!           ╚>`WithStartExecLocation`
-//!              ║ `build`
-//!              ║
-//!              ╚══>`Host`
+//!     ╚> `WithChainGuestId`
+//!         ║ `with_chain_proof_url` - create chain proof client from the given URL
+//!         ║ or mock it using RPC providers abd chain guest ELF ID
+//!         ║
+//!         ╚>`WithChainClient`
+//!            ║ `with_start_chain_id` - get provider for the starting chain
+//!            ║
+//!            ╚>`WithStartChainProvider`   
+//!               ║ `with_prover_contract_addr` - calculate start execution location,
+//!               ║ (ensuring that the prover contract is deployed on that location)
+//!               ║
+//!               ╚>`WithStartExecLocation`
+//!                  ║ `build`
+//!                  ║
+//!                  ╚══>`Host`
 
 use std::{collections::HashMap, sync::Arc};
 
@@ -32,6 +35,7 @@ use mock_chain_server::fake_proof_result;
 use provider::{
     Address, BlockNumber, BlockTag, BlockingProvider, CachedMultiProvider, EthersProviderFactory,
 };
+use risc0_zkvm::sha::Digest;
 use tracing::warn;
 
 use super::{Config, Error, Host};
@@ -41,6 +45,12 @@ pub struct New;
 pub struct WithProviders {
     rpc_urls: HashMap<ChainId, String>,
     providers: CachedMultiProvider,
+}
+
+pub struct WithChainGuestId {
+    rpc_urls: HashMap<ChainId, String>,
+    providers: CachedMultiProvider,
+    chain_guest_id: Digest,
 }
 
 pub struct WithChainClient {
@@ -75,13 +85,24 @@ impl New {
 }
 
 impl WithProviders {
+    pub fn with_chain_guest_id(self, chain_guest_id: Digest) -> WithChainGuestId {
+        WithChainGuestId {
+            rpc_urls: self.rpc_urls,
+            providers: self.providers,
+            chain_guest_id,
+        }
+    }
+}
+
+impl WithChainGuestId {
     pub fn with_chain_proof_url(
         self,
         chain_proof_url: &Option<String>,
     ) -> Result<WithChainClient, Error> {
-        let WithProviders {
+        let WithChainGuestId {
             rpc_urls,
             providers,
+            chain_guest_id,
         } = self;
         let chain_client: Box<dyn chain_client::Client> = match chain_proof_url.as_ref() {
             Some(url) => Box::new(chain_client::RpcClient::new(url)),
@@ -89,7 +110,7 @@ impl WithProviders {
                 warn!("Chain proof sever URL not provided. Running with mock server");
                 let provider_factory = EthersProviderFactory::new(rpc_urls);
                 let providers = CachedMultiProvider::from_factory(provider_factory);
-                Box::new(FakeChainClient::new(providers))
+                Box::new(FakeChainClient::new(providers, chain_guest_id))
             }
         };
         Ok(WithChainClient {
@@ -192,6 +213,7 @@ fn check_prover_contract(
 #[derive(new)]
 struct FakeChainClient {
     providers: CachedMultiProvider,
+    guest_id: Digest,
 }
 
 #[async_trait]
@@ -218,7 +240,7 @@ impl chain_client::Client for FakeChainClient {
             }
         }))
         .await;
-        let rpc_chain_proof = fake_proof_result(block_headers);
+        let rpc_chain_proof = fake_proof_result(self.guest_id, block_headers);
         Ok(rpc_chain_proof.try_into()?)
     }
 
@@ -239,13 +261,43 @@ impl chain_client::Client for FakeChainClient {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    mod fake_chain_client {
+        use std::path::PathBuf;
+
+        use call_engine::verifier::{
+            chain_proof::{self, Verifier},
+            zk_proof,
+        };
+        use chain_client::Client;
+        use provider::CachedProvider;
+
+        use super::*;
+
+        #[tokio::test(flavor = "multi_thread")]
+        async fn fake_proof_verifies() -> anyhow::Result<()> {
+            let path_buf = PathBuf::from("test_data/two_mainnet_blocks_rpc_cache.json");
+            let provider = Arc::new(CachedProvider::from_file(&path_buf)?);
+            let providers = CachedMultiProvider::from_provider(1, provider);
+            let guest_id = Digest::default();
+            let client = FakeChainClient::new(providers, guest_id);
+
+            let proof = client
+                .get_chain_proof(1, vec![21_515_063, 21_515_064])
+                .await?;
+            let verifier = chain_proof::ZkVerifier::new(guest_id, zk_proof::HostVerifier);
+            verifier.verify(&proof)?;
+
+            Ok(())
+        }
+    }
+
     mod start_exec_location {
-        use alloy_primitives::{ChainId, U64};
-        use chain_common::{GetSyncStatus, SyncStatus};
+        use chain_common::GetSyncStatus;
         use ethers_core::types::Bytes;
         use ethers_providers::MockProvider;
         use mock_chain_server::ChainProofServerMock;
-        use provider::{Address, CachedMultiProvider, EthersProvider, NullProviderFactory};
+        use provider::{EthersProvider, NullProviderFactory};
 
         use super::*;
 

@@ -23,6 +23,7 @@ hex = { workspace = true }
 jsonrpsee = { workspace = true }
 mime = { workspace = true }
 provider = { workspace = true }
+risc0-zkp = { workspace = true }
 seal = { workspace = true }
 serde = { workspace = true, features = ["derive"] }
 serde_json = { workspace = true }
