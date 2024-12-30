@@ -1,11 +1,13 @@
-use std::{net::SocketAddr, path::PathBuf};
+mod config;
+mod server;
 
-use chain_db::{ChainDb, Mode};
-use chain_guest_wrapper::GUEST_ELF;
-use chain_server_lib::{serve, ServerConfig};
+use std::net::SocketAddr;
+
 use clap::Parser;
 use common::{init_tracing, GlobalArgs, LogFormat};
+use config::Config;
 use dotenvy::dotenv;
+use server::serve;
 
 #[derive(Parser)]
 #[command(version)]
@@ -15,18 +17,9 @@ struct Cli {
         short,
         env,
         help = "Socket address to listen on",
-        default_value = "0.0.0.0:3001"
+        default_value = "127.0.0.1:3002"
     )]
     listen_addr: SocketAddr,
-
-    #[arg(
-        long,
-        short,
-        env,
-        help = "Path to chain database directory",
-        default_value = "chain_db"
-    )]
-    db_path: PathBuf,
 
     #[clap(flatten)]
     global_args: GlobalArgs,
@@ -38,10 +31,9 @@ async fn main() -> anyhow::Result<()> {
     let cli = Cli::parse();
     init_tracing(cli.global_args.log_format.unwrap_or(LogFormat::Plain));
 
-    let config = ServerConfig::new(cli.listen_addr);
-    let db = ChainDb::mdbx(cli.db_path, Mode::ReadOnly, GUEST_ELF.clone())?;
+    let config = Config::new(cli.listen_addr);
 
-    serve(config, db).await?;
+    serve(config).await?;
 
     Ok(())
 }

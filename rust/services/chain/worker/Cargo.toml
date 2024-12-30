@@ -16,7 +16,6 @@ ethers = { workspace = true }
 tokio = { workspace = true }
 tower = { workspace = true, features = ["retry", "timeout"] }
 tracing = { workspace = true }
-tracing-subscriber = { workspace = true, features = ["ansi"] }
 
 [dev-dependencies]
 bincode = { workspace = true }

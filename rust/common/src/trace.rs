@@ -1,11 +1,12 @@
-use common::LogFormat;
 use tracing_subscriber::{
     fmt::layer, layer::SubscriberExt, registry, util::SubscriberInitExt, EnvFilter,
 };
 
+use crate::LogFormat;
+
 const DEFAULT_RUST_LOG: &str = "info";
 
-pub(crate) fn init_tracing(log_format: LogFormat) {
+pub fn init_tracing(log_format: LogFormat) {
     let env_filter = EnvFilter::try_from_default_env().unwrap_or(DEFAULT_RUST_LOG.into());
     let registry = registry().with(env_filter);
     match log_format {
