@@ -1,4 +1,4 @@
-use std::collections::HashMap;
+use std::{collections::HashMap, fmt::Display};
 
 use alloy_primitives::{BlockNumber, ChainId};
 use async_trait::async_trait;
@@ -45,6 +45,14 @@ pub enum Error {
     },
     #[error("Chain {0} not supported")]
     UnsupportedChain(ChainId),
+    #[error("{0}")]
+    Other(String),
+}
+
+impl Error {
+    pub fn other(msg: impl Display) -> Self {
+        Self::Other(msg.to_string())
+    }
 }
 
 pub type ChainProofCache = HashMap<ChainId, (Vec<BlockNumber>, ChainProof)>;

@@ -31,6 +31,7 @@ use call_engine::evm::env::location::ExecutionLocation;
 use chain_common::{ChainProof, SyncStatus};
 use derive_new::new;
 use ethers_core::types::U64;
+use futures::{stream::FuturesOrdered, TryStreamExt};
 use mock_chain_server::fake_proof_result;
 use provider::{
     Address, BlockNumber, BlockTag, BlockingProvider, CachedMultiProvider, EthersProviderFactory,
@@ -227,19 +228,27 @@ impl chain_client::Client for FakeChainClient {
             .providers
             .get(chain_id)
             .map_err(|_| chain_client::Error::UnsupportedChain(chain_id))?;
-        let block_headers = futures::future::join_all(block_numbers.into_iter().map(|block_num| {
-            let provider = provider.clone();
-            async move {
-                tokio::task::spawn_blocking(move || {
-                    provider.get_block_header(BlockTag::Number(U64::from(block_num)))
-                })
-                .await
-                .expect("join error")
-                .expect("provider error")
-                .expect("block not found") // FIXME: Add error handling
-            }
-        }))
-        .await;
+        let block_headers = block_numbers
+            .into_iter()
+            .map(|block_num| {
+                let provider = provider.clone();
+                async move {
+                    let header = tokio::task::spawn_blocking(move || {
+                        provider.get_block_header(BlockTag::Number(U64::from(block_num)))
+                    })
+                    .await
+                    .map_err(|_| chain_client::Error::other("task join error"))?
+                    .map_err(chain_client::Error::other)?
+                    .ok_or_else(|| {
+                        chain_client::Error::other(format!("Block {block_num} not found"))
+                    })?;
+
+                    Ok::<_, chain_client::Error>(header)
+                }
+            })
+            .collect::<FuturesOrdered<_>>()
+            .try_collect::<Vec<_>>()
+            .await?;
         let rpc_chain_proof = fake_proof_result(self.guest_id, block_headers);
         Ok(rpc_chain_proof.try_into()?)
     }
@@ -250,7 +259,7 @@ impl chain_client::Client for FakeChainClient {
             .get(chain_id)
             .map_err(|_| chain_client::Error::UnsupportedChain(chain_id))?
             .get_latest_block_number()
-            .expect("cannot get latest block number"); // FIXME: Add error handling
+            .map_err(chain_client::Error::other)?;
         Ok(SyncStatus {
             first_block: 0,
             last_block,
