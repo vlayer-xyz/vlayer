@@ -3,13 +3,7 @@ use std::{collections::HashMap, fmt::Debug};
 use alloy_primitives::Address;
 use revm::{db::CacheDB, DatabaseRef};
 
-use crate::config::{
-    Storage, ACCOUNT_TO_STORAGE, BASE_FEE_VAULT, DEFAULT_CALLER, L1_BLOCK, L1_FEE_VAULT,
-    OPTIMISM_SEQUENCER_VAULT,
-};
-
-static EMPTY_ACCOUNTS: &[Address] =
-    &[DEFAULT_CALLER, OPTIMISM_SEQUENCER_VAULT, L1_BLOCK, BASE_FEE_VAULT, L1_FEE_VAULT];
+use crate::config::{Storage, ACCOUNT_TO_STORAGE, EMPTY_ACCOUNTS};
 
 /// Preloads trusted data into the CacheDB to reduce preflight network requests.
 ///
@@ -56,6 +50,7 @@ mod seed_cache_db_with_trusted_data {
     use revm::db::EmptyDB;
 
     use super::*;
+    use crate::config::{BASE_FEE_VAULT, L1_BLOCK};
 
     #[test]
     fn success() {
