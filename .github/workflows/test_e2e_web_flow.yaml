@@ -38,9 +38,8 @@ jobs:
         run: bunx playwright install --with-deps chromium
         working-directory: ./packages
       - name: Install Rust prerequisites
+        id: rust_pre
         uses: ./.github/actions/rust-prerequisites
-      - name: Configure sccache wrapper
-        run: echo "RUSTC_WRAPPER=$(which sccache)" >> $GITHUB_ENV
       - name: Install contracts prerequisites
         uses: ./.github/actions/contracts-prerequisites
       - uses: hoverkraft-tech/compose-action@v2.0.2
@@ -52,6 +51,8 @@ jobs:
             notary-server
             json-server
       - name: Run playwright tests
+        env:
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
         run: bash/playwright-test.sh
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}

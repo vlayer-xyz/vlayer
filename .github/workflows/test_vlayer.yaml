@@ -29,9 +29,8 @@ jobs:
         with:
           submodules: recursive
       - name: Install Rust prerequisites
+        id: rust_pre
         uses: ./.github/actions/rust-prerequisites
-      - name: Configure sccache wrapper
-        run: echo "RUSTC_WRAPPER=$(which sccache)" >> $GITHUB_ENV
       - name: Install contracts prerequisites
         uses: ./.github/actions/contracts-prerequisites
 
@@ -42,6 +41,8 @@ jobs:
 
       - name: Run vlayer tests for contracts
         working-directory: ./contracts/vlayer
+        env:
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
         run: |
           # vlayer test
           cargo run --locked --manifest-path ../../rust/Cargo.toml --package cli -- test -vvv

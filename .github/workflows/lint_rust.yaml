@@ -26,15 +26,15 @@ jobs:
         with:
           submodules: recursive
       - name: Install Rust prerequisites
+        id: rust_pre
         uses: ./.github/actions/rust-prerequisites
-      - name: Configure sccache wrapper
-        run: echo "RUSTC_WRAPPER=$(which sccache)" >> $GITHUB_ENV
       - name: Install contracts prerequisites
         uses: ./.github/actions/contracts-prerequisites
 
       - name: Run Host lints
         working-directory: rust
         env:
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
           RUSTFLAGS: "-Dwarnings"
         run: |
           cargo +nightly fmt --check
@@ -44,6 +44,7 @@ jobs:
       - name: Run Risc0 Call Guest lints
         working-directory: rust/services/call/guest_wrapper/risc0_guest
         env:
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
           RUSTFLAGS: "-Dwarnings"
         run: |
           cargo +nightly fmt --check
@@ -53,6 +54,7 @@ jobs:
       - name: Run Risc0 Chain Guest lints
         working-directory: rust/services/chain/guest_wrapper/risc0_guest
         env:
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
           RUSTFLAGS: "-Dwarnings"
         run: |
           cargo +nightly fmt --check
@@ -61,8 +63,12 @@ jobs:
 
       - name: Run cargo deny
         working-directory: rust/cli
+        env:
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
         run: cargo deny check bans
 
       - name: Detect unused dependencies
         working-directory: rust
+        env:
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
         run: cargo machete

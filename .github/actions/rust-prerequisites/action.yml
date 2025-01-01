@@ -33,8 +33,12 @@ runs:
       with:
         tool: sccache@0.9.0
 
+    # Configure env for the remaining steps of this composite action,
+    # and an output for workflows to use.
     - name: Configure sccache wrapper
-      run: echo "RUSTC_WRAPPER=$(which sccache)" >> $GITHUB_OUTPUT
+      run: |
+        echo "RUSTC_WRAPPER=$(which sccache)" >> $GITHUB_ENV
+        echo "RUSTC_WRAPPER=$(which sccache)" >> $GITHUB_OUTPUT
       shell: bash
 
     - name: Install cargo binstall

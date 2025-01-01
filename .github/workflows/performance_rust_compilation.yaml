@@ -29,14 +29,15 @@ jobs:
         with:
           submodules: recursive
       - name: Install Rust prerequisites
+        id: rust_pre
         uses: ./.github/actions/rust-prerequisites
-      - name: Configure sccache wrapper
-        run: echo "RUSTC_WRAPPER=$(which sccache)" >> $GITHUB_ENV
       - name: Install contracts prerequisites
         uses: ./.github/actions/contracts-prerequisites
 
       - name: Compilation
         working-directory: rust
+        env:
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
         run: |
           cargo build
 

@@ -57,9 +57,8 @@ jobs:
         with:
           submodules: recursive
       - name: Install Rust prerequisites
+        id: rust_pre
         uses: ./.github/actions/rust-prerequisites
-      - name: Configure sccache wrapper
-        run: echo "RUSTC_WRAPPER=$(which sccache)" >> $GITHUB_ENV
       - name: Install contracts prerequisites
         uses: ./.github/actions/contracts-prerequisites
       - name: Replace guest artifacts
@@ -67,6 +66,7 @@ jobs:
 
       - name: "Build binaries"
         env:
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
           VLAYER_RELEASE: "nightly"
         run: |
           export RISC0_EXISTING_CALL_GUEST="$(pwd)/call_guest_replacement"

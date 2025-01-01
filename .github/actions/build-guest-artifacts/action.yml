@@ -13,6 +13,8 @@ runs:
       uses: ./.github/actions/contracts-prerequisites
 
     - name: "Build guest wrapper"
+      env:
+        RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
       run: cargo build --release --target x86_64-unknown-linux-gnu --package call_guest_wrapper
       shell: bash
       working-directory: rust
