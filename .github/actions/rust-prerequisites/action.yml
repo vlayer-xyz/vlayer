@@ -7,6 +7,10 @@ inputs:
   include_risc0:
     description: Whether to include risc0 installation
     default: 'true'
+outputs:
+  RUSTC_WRAPPER:
+    description: "A rustc wrapper using sccache for optimalization"
+    value: ${{ steps.configure_sccache_wrapper.outputs.RUSTC_WRAPPER }}
 runs:
   using: "composite"
   steps:
@@ -36,6 +40,7 @@ runs:
     # Configure env for the remaining steps of this composite action,
     # and an output for workflows to use.
     - name: Configure sccache wrapper
+      id: configure_sccache_wrapper
       run: |
         echo "RUSTC_WRAPPER=$(which sccache)" >> $GITHUB_ENV
         echo "RUSTC_WRAPPER=$(which sccache)" >> $GITHUB_OUTPUT

@@ -37,11 +37,10 @@ jobs:
         run: bash/check-llvm-clang.sh
 
       - name: Run workspace rust tests
-        env:
-          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
         working-directory: rust
         run: |
           cargo test --workspace --locked
         env:
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
           RUST_LOG: info
           RISC0_DEV_MODE: 1
