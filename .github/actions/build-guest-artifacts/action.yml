@@ -7,10 +7,8 @@ runs:
   using: "composite"
   steps:
     - name: Install Rust prerequisites
+      id: rust_pre
       uses: ./.github/actions/rust-prerequisites
-    - name: Configure sccache wrapper
-      run: echo "RUSTC_WRAPPER=$(which sccache)" >> $GITHUB_ENV
-      shell: bash
     - name: Install contracts prerequisites
       uses: ./.github/actions/contracts-prerequisites
 
