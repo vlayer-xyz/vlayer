@@ -22,9 +22,6 @@ pub enum Error {
 
     #[error("Proving: {0}")]
     Proving(#[from] ProvingError),
-
-    #[error("Proving: {0}")]
-    Proving(#[from] ProvingError),
 }
 
 #[derive(Error, Debug)]
@@ -52,15 +49,12 @@ pub enum BuilderError {
 }
 
 #[derive(Error, Debug)]
-<<<<<<< HEAD
 pub enum AwaitingChainProofError {
     #[error("Chain Proof Client error: {0}")]
     ChainProofClient(#[from] chain_client::Error),
 }
 
 #[derive(Error, Debug)]
-=======
->>>>>>> a782bb2e (Extract ProvingError)
 pub enum ProvingError {
     #[error("Proving error: {0}")]
     Proving(#[from] proving::Error),
