@@ -186,7 +186,7 @@ mod teleport {
         let result = preflight::<crossChainBalanceOfCall>("simple_teleport", call, &location).await;
         assert_eq!(
             result.unwrap_err().to_string(),
-            "TravelCallExecutor error: Panic: Intercepted call failed: EvmEnv(\"No rpc cache for chain: 8453\")"
+            "TravelCallExecutor error: Panic: Intercepted call failed: EvmEnv(\"Provider factory error: No rpc cache for chain: 8453\")"
         );
 
         Ok(())

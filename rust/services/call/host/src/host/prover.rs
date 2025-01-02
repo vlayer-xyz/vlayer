@@ -52,7 +52,7 @@ mod tests {
 
         assert_eq!(
             res.map(|_| ()).unwrap_err().to_string(),
-            "Guest panicked: travel call execution failed: EvmEnv(\"NullEvmEnvFactory cannot create EvmEnv\")"
+            "Prover: Guest panicked: travel call execution failed: EvmEnv(\"NullEvmEnvFactory cannot create EvmEnv\")"
         );
     }
 }
