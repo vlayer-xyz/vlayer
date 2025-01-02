@@ -1,6 +1,5 @@
 use eyre::Result;
-use foundry_cli::{handler, utils};
-use foundry_cli::opts::GlobalOpts;
+use foundry_cli::{handler, opts::GlobalOpts, utils};
 
 pub fn init_global(global: &GlobalOpts) -> Result<()> {
     handler::install();

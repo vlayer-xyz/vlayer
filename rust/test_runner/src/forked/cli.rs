@@ -23,7 +23,7 @@ use forge::{
     },
     MultiContractRunner, MultiContractRunnerBuilder, TestFilter,
 };
-use foundry_cli::{handler, opts::{CoreBuildArgs, GlobalOpts}, utils::{self, LoadConfig}};
+use foundry_cli::{opts::{CoreBuildArgs, GlobalOpts}, utils::{self, LoadConfig}};
 use foundry_common::{compile::ProjectCompiler, evm::EvmArgs, fs, sh_eprintln, sh_err, sh_print, sh_println, sh_warn, shell, TestFunctionExt};
 use foundry_compilers::{
     artifacts::output_selection::OutputSelection,
