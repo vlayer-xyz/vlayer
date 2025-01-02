@@ -13,6 +13,7 @@ This is a collection of vlayer ansible scripts and roles.
 | Role | Purpose |
 | --- | --- |
 | prover | Installs a vlayer Prover server. [Readme](./roles/prover/) |
+| verifiable_dns | Installs a vlayer verifiable dns service. [Readme](./roles/verifiable_dns/) |
 
 ## Variable Secrets
 
