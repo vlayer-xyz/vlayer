@@ -32,7 +32,9 @@ contract UrlPatternTest is VTest {
         try urlPattern.do_test("https://example.com", "[invalid pattern]") {
             revert("Did not revert as expected");
         } catch Error(string memory reason) {
-            assertEq(reason, "Engine(TransactError(Revert(\"a relative input without a base URL is not valid\")))");
+            assertEq(
+                reason, "Preflight(Engine(TransactError(Revert(\"a relative input without a base URL is not valid\"))))"
+            );
         }
     }
 
@@ -42,7 +44,7 @@ contract UrlPatternTest is VTest {
         try urlPattern.do_test("invalid url", "https://example.com/") {
             revert("Did not revert as expected");
         } catch Error(string memory reason) {
-            assertEq(reason, "Engine(TransactError(Revert(\"relative URL without a base\")))");
+            assertEq(reason, "Preflight(Engine(TransactError(Revert(\"relative URL without a base\"))))");
         }
     }
 }

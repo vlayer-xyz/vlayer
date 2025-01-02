@@ -121,7 +121,7 @@ async function testFailedProving() {
     assert.ok(error instanceof Error, `Invalid error returned: ${error}`);
     assert.equal(
       error.message,
-      "Error response: Host error: TravelCallExecutor error: EVM transact error: Verification error: Presentation error: presentation error: attestation error caused by: attestation proof error: signature error caused by: signature verification failed: invalid secp256k1 signature",
+      "Error response: Host error: Preflight: TravelCallExecutor error: EVM transact error: Verification error: Presentation error: presentation error: attestation error caused by: attestation proof error: signature error caused by: signature verification failed: invalid secp256k1 signature",
       `Error with wrong message returned: ${error.message}`,
     );
     console.log("Proving failed as expected with message:", error.message);
