@@ -42,7 +42,7 @@ pub enum Error {
     NoRpcUrl(ChainId),
 
     #[error("Chain error: {0}")]
-    Chain(#[from] chain::ChainError),
+    Chain(#[from] chain::Error),
 
     #[error("Verification error: {0}")]
     Verification(#[from] VerificationError),
