@@ -19,12 +19,9 @@ pub enum Error {
 
     #[error("Preflight: {0}")]
     Preflight(#[from] PreflightError),
-<<<<<<< HEAD
-=======
 
-    #[error("TravelCallExecutor error: {0}")]
-    Engine(#[from] TravelCallExecutorError), // TODO Remove
->>>>>>> 69828ec7 (Split out PreflightError)
+    #[error("Proving: {0}")]
+    Proving(#[from] ProvingError),
 
     #[error("Proving: {0}")]
     Proving(#[from] ProvingError),
@@ -44,12 +41,6 @@ pub enum BuilderError {
     #[error("Chain error: {0}")]
     Chain(#[from] chain::Error),
 
-<<<<<<< HEAD
-=======
-    #[error("Abi encode error: {0}")]
-    AbiEncode(String),
-
->>>>>>> 69828ec7 (Split out PreflightError)
     #[error("Evm env factory error: {0}")]
     EvmEnvFactory(#[from] EvmEnvFactoryError),
 
@@ -61,12 +52,15 @@ pub enum BuilderError {
 }
 
 #[derive(Error, Debug)]
+<<<<<<< HEAD
 pub enum AwaitingChainProofError {
     #[error("Chain Proof Client error: {0}")]
     ChainProofClient(#[from] chain_client::Error),
 }
 
 #[derive(Error, Debug)]
+=======
+>>>>>>> a782bb2e (Extract ProvingError)
 pub enum ProvingError {
     #[error("Proving error: {0}")]
     Proving(#[from] proving::Error),
