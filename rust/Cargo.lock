@@ -10638,7 +10638,6 @@ dependencies = [
  "ethers-core",
  "eyre",
  "forge",
- "foundry-cheatcodes",
  "foundry-cli",
  "foundry-common",
  "foundry-compilers",
