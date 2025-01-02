@@ -41,6 +41,9 @@ pub enum Error {
     #[error("No rpc url for chain: {0}")]
     NoRpcUrl(ChainId),
 
+    #[error("Chain error: {0}")]
+    Chain(#[from] chain::ChainError),
+
     #[error("Verification error: {0}")]
     Verification(#[from] VerificationError),
 

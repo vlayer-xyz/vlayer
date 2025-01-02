@@ -3,11 +3,14 @@ use std::{
     sync::{Arc, Mutex, RwLock},
 };
 
-use anyhow::bail;
 use common::InteriorMutabilityCache;
 use revm::DatabaseRef;
 
-use super::{location::ExecutionLocation, EvmEnv, EvmEnvFactory};
+use super::{
+    factory::{Error, EvmEnvFactory, Result},
+    location::ExecutionLocation,
+    EvmEnv,
+};
 
 pub struct NullEvmEnvFactory;
 
@@ -15,8 +18,8 @@ impl<D> EvmEnvFactory<D> for NullEvmEnvFactory
 where
     D: DatabaseRef,
 {
-    fn create(&self, _location: ExecutionLocation) -> anyhow::Result<EvmEnv<D>> {
-        bail!("NullEvmEnvFactory cannot create EvmEnv")
+    fn create(&self, _location: ExecutionLocation) -> Result<EvmEnv<D>> {
+        Err(Error::NullEvmEnvFactory)
     }
 }
 
@@ -49,7 +52,7 @@ where
         }
     }
 
-    pub fn get(&self, location: ExecutionLocation) -> anyhow::Result<Arc<EvmEnv<D>>> {
+    pub fn get(&self, location: ExecutionLocation) -> Result<Arc<EvmEnv<D>>> {
         self.cache.try_get_or_insert(location, || {
             self.factory.lock().expect("poisoned lock").create(location)
         })

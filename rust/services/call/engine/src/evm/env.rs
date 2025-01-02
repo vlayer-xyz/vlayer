@@ -1,14 +1,11 @@
 use block_header::EvmBlockHeader;
 use chain::ChainSpec;
-use location::ExecutionLocation;
-use revm::{
-    primitives::{CfgEnvWithHandlerCfg, HandlerCfg, SpecId},
-    DatabaseRef,
-};
+use revm::primitives::{CfgEnvWithHandlerCfg, HandlerCfg, SpecId};
 
 use crate::travel_call_executor::Error as TravelCallExecutorError;
 
 pub mod cached;
+pub mod factory;
 pub mod location;
 
 /// The environment to execute the contract calls in.
@@ -50,11 +47,4 @@ impl<D> EvmEnv<D> {
     pub fn header(&self) -> &dyn EvmBlockHeader {
         self.header.as_ref()
     }
-}
-
-pub trait EvmEnvFactory<D>: Send + Sync
-where
-    D: DatabaseRef,
-{
-    fn create(&self, location: ExecutionLocation) -> anyhow::Result<EvmEnv<D>>;
 }
