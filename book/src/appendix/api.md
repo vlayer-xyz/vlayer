@@ -95,7 +95,14 @@ To get result of `v_call` query `v_getProofReceipt`.
 }
 ```
 
-There are 5 possible `status` values: `queued`, `waiting_for_chain_proof`, `preflight`, `proving` and `ready`. If `status` is `ready`, the server will respond with a proof receipt.
+There are 5 possible `status` values:
+* `queued`
+* `waiting_for_chain_proof`
+* `preflight`
+* `proving`
+* `ready`
+
+If `status` is `ready`, the server will respond with a proof receipt.
 
 ### Queued, WaitingForChainProof, Preflight, Proving
 
