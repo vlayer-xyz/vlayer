@@ -13,6 +13,12 @@ use thiserror::Error;
 pub enum Error {
     #[error("Preflight: {0}")]
     Preflight(#[from] PreflightError),
+<<<<<<< HEAD
+=======
+
+    #[error("TravelCallExecutor error: {0}")]
+    Engine(#[from] TravelCallExecutorError), // TODO Remove
+>>>>>>> 69828ec7 (Split out PreflightError)
 
     #[error("Provider factory error: {0}")]
     ProviderFactory(#[from] ProviderFactoryError),
@@ -35,6 +41,12 @@ pub enum Error {
     #[error("Chain error: {0}")]
     Chain(#[from] chain::Error),
 
+<<<<<<< HEAD
+=======
+    #[error("Abi encode error: {0}")]
+    AbiEncode(String),
+
+>>>>>>> 69828ec7 (Split out PreflightError)
     #[error("Evm env factory error: {0}")]
     EvmEnvFactory(#[from] EvmEnvFactoryError),
 

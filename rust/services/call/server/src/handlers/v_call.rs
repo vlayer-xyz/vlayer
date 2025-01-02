@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use alloy_primitives::ChainId;
-use call_engine::Call as EngineCall;
+use call_engine::{Call as EngineCall, HostOutput};
 use call_host::{Error as HostError, Host};
 use provider::Address;
 use tracing::info;

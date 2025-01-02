@@ -24,7 +24,12 @@ use chain_client::Client as ChainClient;
 use common::GuestElf;
 pub use config::{Config, DEFAULT_MAX_CALLDATA_SIZE};
 use derive_new::new;
+<<<<<<< HEAD
 pub use error::{Error, PreflightError};
+=======
+pub use error::Error;
+use error::PreflightError;
+>>>>>>> 69828ec7 (Split out PreflightError)
 use ethers_core::types::BlockNumber as BlockTag;
 use prover::Prover;
 use provider::{CachedMultiProvider, EvmBlockHeader};
