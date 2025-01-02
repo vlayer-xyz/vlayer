@@ -108,8 +108,8 @@ test.describe("Full flow of webproof using extension", () => {
       expect(waitForProvingResultResponse.ok()).toBeTruthy();
 
       const proofJson = (await waitForProvingResultResponse.json()) as object;
-      expect(proofJson).toHaveProperty("result.data");
-      expect(proofJson).toHaveProperty("result.data.evm_call_result");
+      expect(proofJson).toHaveProperty("result.receipt.data");
+      expect(proofJson).toHaveProperty("result.receipt.data.evm_call_result");
     });
   });
 
@@ -241,8 +241,8 @@ test.describe("Full flow of webproof using extension", () => {
       expect(waitForProvingResultResponse.ok()).toBeTruthy();
 
       const proofJson = (await waitForProvingResultResponse.json()) as object;
-      expect(proofJson).toHaveProperty("result.data");
-      expect(proofJson).toHaveProperty("result.data.evm_call_result");
+      expect(proofJson).toHaveProperty("result.receipt.data");
+      expect(proofJson).toHaveProperty("result.receipt.data.evm_call_result");
     });
   });
 
@@ -357,8 +357,8 @@ test.describe("Full flow of webproof using extension", () => {
       expect(waitForProvingResultResponse.ok()).toBeTruthy();
 
       const proofJson = (await waitForProvingResultResponse.json()) as object;
-      expect(proofJson).toHaveProperty("result.data");
-      expect(proofJson).toHaveProperty("result.data.evm_call_result");
+      expect(proofJson).toHaveProperty("result.receipt.data");
+      expect(proofJson).toHaveProperty("result.receipt.data.evm_call_result");
     });
   });
 });
