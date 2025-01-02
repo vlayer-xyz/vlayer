@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use alloy_primitives::{Address, Bytes as RlpBytes, FixedBytes, TxKind};
 use alloy_rlp::RlpEncodable;
 use alloy_sol_types::{SolCall, SolValue};
@@ -133,6 +135,7 @@ pub struct HostOutput {
     pub proof_len: usize,
     pub call_guest_id: CallGuestId,
     pub cycles_used: u64,
+    pub elapsed_time: Duration,
 }
 
 #[derive(Debug, Clone)]

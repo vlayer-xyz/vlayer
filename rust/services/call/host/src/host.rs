@@ -1,6 +1,7 @@
 use std::{
     any::Any,
     panic::{self},
+    time::{Duration, Instant},
 };
 
 use alloy_primitives::{BlockNumber, ChainId};
@@ -29,7 +30,7 @@ use prover::Prover;
 use provider::{CachedMultiProvider, EvmBlockHeader};
 use risc0_zkvm::{ProveInfo, SessionStats};
 use seal::EncodableReceipt;
-use tracing::info;
+use tracing::{info, instrument};
 
 use crate::{evm_env::factory::HostEvmEnvFactory, into_input::into_multi_input, HostDb};
 
@@ -96,6 +97,7 @@ pub struct PreflightResult {
     pub host_output: Bytes,
     pub input: Input,
     pub gas_used: u64,
+    pub elapsed_time: Duration,
 }
 
 impl Host {
@@ -131,9 +133,11 @@ impl Host {
         Ok(latest_indexed_block >= self.start_execution_location.block_number)
     }
 
+    #[instrument(skip_all)]
     pub async fn preflight(self, call: Call) -> Result<PreflightResult, Error> {
         self.validate_calldata_size(&call)?;
 
+        let now = Instant::now();
         let SuccessfulExecutionResult {
             output: host_output,
             gas_used,
@@ -141,8 +145,13 @@ impl Host {
             TravelCallExecutor::new(&self.envs).call(&call, self.start_execution_location)
         })
         .map_err(wrap_engine_panic)??;
+        let elapsed_time = now.elapsed();
 
-        info!(gas_used_preflight = gas_used, "Gas used in preflight: {}", gas_used);
+        info!(
+            gas_used = gas_used,
+            elapsed_time = elapsed_time.as_millis(),
+            "preflight finished",
+        );
 
         let multi_evm_input =
             into_multi_input(self.envs).map_err(|err| Error::CreatingInput(err.to_string()))?;
@@ -159,9 +168,10 @@ impl Host {
             call,
         };
 
-        Ok(PreflightResult::new(host_output.into(), input, gas_used))
+        Ok(PreflightResult::new(host_output.into(), input, gas_used, elapsed_time))
     }
 
+    #[instrument(skip_all)]
     pub fn prove(
         prover: &Prover,
         call_guest_id: CallGuestId,
@@ -173,6 +183,7 @@ impl Host {
             seal,
             raw_guest_output,
             stats,
+            elapsed_time,
         } = provably_execute(prover, &input)?;
         let proof_len = raw_guest_output.len();
         let guest_output = GuestOutput::from_outputs(&host_output, &raw_guest_output)?;
@@ -185,7 +196,11 @@ impl Host {
             ));
         }
 
-        info!(cycles_used_proving = cycles_used, "Cycles used during proving: {}", cycles_used);
+        info!(
+            cycles_used = cycles_used,
+            elapsed_time = elapsed_time.as_millis(),
+            "proving finished"
+        );
 
         Ok(HostOutput {
             guest_output,
@@ -194,6 +209,7 @@ impl Host {
             proof_len,
             call_guest_id,
             cycles_used,
+            elapsed_time,
         })
     }
 
@@ -226,16 +242,20 @@ struct EncodedProofWithStats {
     seal: Bytes,
     raw_guest_output: Bytes,
     stats: SessionStats,
+    elapsed_time: Duration,
 }
 
+#[instrument(skip_all)]
 fn provably_execute(prover: &Prover, input: &Input) -> Result<EncodedProofWithStats, Error> {
+    let now = Instant::now();
     let ProveInfo { receipt, stats } = prover.prove(input)?;
+    let elapsed_time = now.elapsed();
 
     let seal: Seal = EncodableReceipt::from(receipt.clone()).try_into()?;
     let seal: Bytes = seal.abi_encode().into();
     let raw_guest_output: Bytes = receipt.journal.bytes.into();
 
-    Ok(EncodedProofWithStats::new(seal, raw_guest_output, stats))
+    Ok(EncodedProofWithStats::new(seal, raw_guest_output, stats, elapsed_time))
 }
 
 #[cfg(test)]
