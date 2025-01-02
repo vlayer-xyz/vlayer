@@ -1,6 +1,8 @@
 use alloy_primitives::ChainId;
 use call_engine::{
-    travel_call_executor::Error as TravelCallExecutorError, verifier::guest_input, GuestOutputError,
+    evm::env::factory::Error as EvmEnvFactoryError,
+    travel_call_executor::Error as TravelCallExecutorError, verifier::guest_input,
+    GuestOutputError,
 };
 use ethers_core::types::BlockNumber as BlockTag;
 use provider::ProviderFactoryError;
@@ -51,7 +53,7 @@ pub enum Error {
     AbiEncode(String),
 
     #[error("Evm env factory error: {0}")]
-    EvmEnvFactory(#[from] anyhow::Error),
+    EvmEnvFactory(#[from] EvmEnvFactoryError),
 
     #[error("Seal encoding error: {0}")]
     SealEncodingError(#[from] seal::Error),
