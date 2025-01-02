@@ -5,11 +5,10 @@ use call_engine::{
     GuestOutputError,
 };
 use ethers_core::types::BlockNumber as BlockTag;
+use host_utils::proving;
 use provider::ProviderFactoryError;
 use risc0_zkp::verify::VerificationError;
 use thiserror::Error;
-
-use super::prover;
 
 #[derive(Error, Debug)]
 pub enum Error {
@@ -31,8 +30,8 @@ pub enum Error {
     #[error("Error creating client: {0}")]
     NewClient(#[from] url::ParseError),
 
-    #[error("Prover error: {0}")]
-    Prover(#[from] prover::Error),
+    #[error("Proving error: {0}")]
+    Proving(#[from] proving::Error),
 
     #[error("Guest output error: {0}")]
     GuestOutput(#[from] GuestOutputError),

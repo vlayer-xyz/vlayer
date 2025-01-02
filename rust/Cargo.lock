@@ -2029,6 +2029,7 @@ dependencies = [
  "chain_guest_wrapper",
  "common",
  "ctor",
+ "derivative",
  "derive-new",
  "dotenvy",
  "ethers-core",
@@ -5761,8 +5762,10 @@ name = "host_utils"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "derivative",
  "risc0-zkvm",
  "strum",
+ "thiserror 1.0.69",
  "tokio",
  "tracing",
 ]
