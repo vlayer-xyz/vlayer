@@ -1,5 +1,5 @@
 /**
- * This file is in large part copied from https://github.com/foundry-rs/foundry/blob/e649e62f125244a3ef116be25dfdc81a2afbaf2a/crates/forge/bin/cmd/test/mod.rs
+ * This file is in large part copied from https://github.com/foundry-rs/foundry/blob/6cb41febfc989cbf7dc13c43ec6c3ce5fba1ea04/crates/forge/bin/cmd/test/mod.rs
  * The original file is licensed under the Apache License, Version 2.0.
  * The original file was modified for the purpose of this project.
  * All relevant modifications are commented with "MODIFICATION" comments.
@@ -23,11 +23,8 @@ use forge::{
     },
     MultiContractRunner, MultiContractRunnerBuilder, TestFilter,
 };
-use foundry_cli::{
-    opts::{CoreBuildArgs, GlobalOpts},
-    utils::{self, LoadConfig},
-};
-use foundry_common::{compile::ProjectCompiler, evm::EvmArgs, fs, shell, TestFunctionExt, sh_eprintln, sh_err, sh_print, sh_println, sh_warn};
+use foundry_cli::{handler, opts::{CoreBuildArgs, GlobalOpts}, utils::{self, LoadConfig}};
+use foundry_common::{compile::ProjectCompiler, evm::EvmArgs, fs, sh_eprintln, sh_err, sh_print, sh_println, sh_warn, shell, TestFunctionExt};
 use foundry_compilers::{
     artifacts::output_selection::OutputSelection,
     compilers::{multi::MultiCompilerLanguage, Language},
@@ -62,7 +59,6 @@ use yansi::Paint;
 
 use summary::print_invariant_metrics;
 use tracing::trace;
-
 use crate::forked::{
     filter::{FilterArgs, ProjectPathsAwareFilter},
     install,
@@ -70,6 +66,7 @@ use crate::forked::{
     summary,
     summary::TestSummaryReport,
 };
+use crate::init_global::init_global;
 
 // Loads project's figment and merges the build cli arguments into it
 foundry_config::merge_impl_figment_convert!(TestArgs, opts, evm_args);
@@ -205,6 +202,8 @@ impl TestArgs {
 
     pub async fn run(self) -> Result<TestOutcome> {
         trace!(target: "forge::test", "executing test command");
+        // MODIFICATION: init global shell opts
+        init_global(&self.global)?;
         self.execute_tests().await
     }
 
@@ -1001,12 +1000,6 @@ mod tests {
     use super::*;
     use foundry_config::{Chain, InvariantConfig};
     use foundry_test_utils::forgetest_async;
-
-    #[test]
-    fn watch_parse() {
-        let args: TestArgs = TestArgs::parse_from(["foundry-cli", "-vw"]);
-        assert!(args.watch.watch.is_some());
-    }
 
     #[test]
     fn fuzz_seed() {
