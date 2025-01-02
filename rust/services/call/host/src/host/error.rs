@@ -15,9 +15,6 @@ pub enum Error {
     #[error("Preflight: {0}")]
     Preflight(#[from] PreflightError),
 
-    #[error("TravelCallExecutor error: {0}")]
-    Engine(#[from] TravelCallExecutorError), // TODO Remove
-
     #[error("Provider factory error: {0}")]
     ProviderFactory(#[from] ProviderFactoryError),
 
