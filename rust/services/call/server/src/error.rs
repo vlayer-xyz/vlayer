@@ -14,6 +14,8 @@ pub enum AppError {
     FieldValidation(#[from] FieldValidationError),
     #[error("Host error: {0}")]
     Host(#[from] HostError),
+    #[error("Seal error: {0}")]
+    Seal(#[from] seal::Error),
     #[error("Join error: {0}")]
     Join(#[from] JoinError),
     #[error("RPC error: {0}")]
@@ -46,6 +48,7 @@ impl From<&AppError> for ErrorObjectOwned {
                 None,
             ),
             AppError::Host(..)
+            | AppError::Seal(..)
             | AppError::Join(..)
             | AppError::RpcError(..)
             | AppError::ChainProofTimeout

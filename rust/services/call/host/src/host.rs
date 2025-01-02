@@ -24,12 +24,7 @@ use chain_client::Client as ChainClient;
 use common::GuestElf;
 pub use config::{Config, DEFAULT_MAX_CALLDATA_SIZE};
 use derive_new::new;
-<<<<<<< HEAD
-pub use error::{Error, PreflightError};
-=======
-pub use error::Error;
-use error::PreflightError;
->>>>>>> 69828ec7 (Split out PreflightError)
+pub use error::{Error, PreflightError, ProvingError};
 use ethers_core::types::BlockNumber as BlockTag;
 use prover::Prover;
 use provider::{CachedMultiProvider, EvmBlockHeader};
@@ -182,7 +177,7 @@ impl Host {
         PreflightResult {
             host_output, input, ..
         }: PreflightResult,
-    ) -> Result<HostOutput, Error> {
+    ) -> Result<HostOutput, ProvingError> {
         let EncodedProofWithStats {
             seal,
             raw_guest_output,
@@ -194,7 +189,7 @@ impl Host {
         let cycles_used = stats.total_cycles;
 
         if guest_output.evm_call_result != host_output {
-            return Err(Error::HostGuestOutputMismatch(
+            return Err(ProvingError::HostGuestOutputMismatch(
                 host_output.into(),
                 guest_output.evm_call_result,
             ));
@@ -221,7 +216,7 @@ impl Host {
         let prover = self.prover();
         let call_guest_id = self.call_guest_id();
         let preflight_result = self.preflight(call).await?;
-        Host::prove(&prover, call_guest_id, preflight_result)
+        Ok(Host::prove(&prover, call_guest_id, preflight_result)?)
     }
 
     fn validate_calldata_size(&self, call: &Call) -> Result<(), PreflightError> {
@@ -250,7 +245,7 @@ struct EncodedProofWithStats {
 }
 
 #[instrument(skip_all)]
-fn provably_execute(prover: &Prover, input: &Input) -> Result<EncodedProofWithStats, Error> {
+fn provably_execute(prover: &Prover, input: &Input) -> Result<EncodedProofWithStats, ProvingError> {
     let now = Instant::now();
     let ProveInfo { receipt, stats } = prover.prove(input)?;
     let elapsed_time = now.elapsed();

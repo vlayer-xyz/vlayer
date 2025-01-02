@@ -4,7 +4,6 @@ use alloy_primitives::{hex::ToHexExt, U256};
 use alloy_sol_types::SolValue;
 use async_trait::async_trait;
 use call_engine::{HostOutput, Proof, Seal};
-use call_host::Error as HostError;
 use dashmap::DashMap;
 use derive_more::{Deref, DerefMut};
 use derive_new::new;
@@ -91,7 +90,7 @@ where
 }
 
 impl TryFrom<HostOutput> for RawData {
-    type Error = HostError;
+    type Error = seal::Error;
 
     fn try_from(value: HostOutput) -> Result<Self, Self::Error> {
         let HostOutput {

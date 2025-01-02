@@ -13,12 +13,9 @@ use thiserror::Error;
 pub enum Error {
     #[error("Preflight: {0}")]
     Preflight(#[from] PreflightError),
-<<<<<<< HEAD
-=======
 
-    #[error("TravelCallExecutor error: {0}")]
-    Engine(#[from] TravelCallExecutorError), // TODO Remove
->>>>>>> 69828ec7 (Split out PreflightError)
+    #[error("Proving: {0}")]
+    Proving(#[from] ProvingError),
 
     #[error("Provider factory error: {0}")]
     ProviderFactory(#[from] ProviderFactoryError),
@@ -29,35 +26,32 @@ pub enum Error {
     #[error("Block not found: {0}")]
     BlockNotFound(BlockTag),
 
-    #[error("Proving error: {0}")]
-    Proving(#[from] proving::Error),
-
-    #[error("Guest output error: {0}")]
-    GuestOutput(#[from] GuestOutputError),
-
-    #[error("Host output does not match guest output: {0:?} {1:?}")]
-    HostGuestOutputMismatch(Vec<u8>, Vec<u8>),
-
     #[error("Chain error: {0}")]
     Chain(#[from] chain::Error),
 
-<<<<<<< HEAD
-=======
-    #[error("Abi encode error: {0}")]
-    AbiEncode(String),
-
->>>>>>> 69828ec7 (Split out PreflightError)
     #[error("Evm env factory error: {0}")]
     EvmEnvFactory(#[from] EvmEnvFactoryError),
-
-    #[error("Seal encoding error: {0}")]
-    SealEncodingError(#[from] seal::Error),
 
     #[error("Chain Proof Client error: {0}")]
     ChainProofClient(#[from] chain_client::Error),
 
     #[error("Prover contract not deployed")]
     ProverContractNotDeployed,
+}
+
+#[derive(Error, Debug)]
+pub enum ProvingError {
+    #[error("Proving error: {0}")]
+    Proving(#[from] proving::Error),
+
+    #[error("Host output does not match guest output: {0:?} {1:?}")]
+    HostGuestOutputMismatch(Vec<u8>, Vec<u8>),
+
+    #[error("Guest output error: {0}")]
+    GuestOutput(#[from] GuestOutputError),
+
+    #[error("Seal encoding error: {0}")]
+    SealEncodingError(#[from] seal::Error),
 }
 
 #[derive(Error, Debug)]

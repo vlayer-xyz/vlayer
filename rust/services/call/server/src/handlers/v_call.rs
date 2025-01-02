@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use alloy_primitives::ChainId;
-use call_engine::{Call as EngineCall, HostOutput};
+use call_engine::Call as EngineCall;
 use call_host::{Error as HostError, Host};
 use provider::Address;
 use tracing::info;
@@ -123,7 +123,8 @@ async fn generate_proof(
 
     info!("Generating proof for call {call_hash}");
     state.insert(call_hash, ProofStatus::Proving);
-    let host_output = Host::prove(&prover, call_guest_id, preflight_result)?;
+    let host_output =
+        Host::prove(&prover, call_guest_id, preflight_result).map_err(HostError::Proving)?;
     let cycles_used = host_output.cycles_used;
     let proving_time = host_output.elapsed_time.as_millis().try_into()?;
     let raw_data: RawData = host_output.try_into()?;
