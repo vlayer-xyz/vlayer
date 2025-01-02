@@ -72,7 +72,7 @@ pub struct Metrics {
 #[derive(new, Clone, Serialize)]
 pub struct Times {
     preflight: u64,
-    proving: u64
+    proving: u64,
 }
 
 #[derive(Serialize, Clone)]
