@@ -31,9 +31,9 @@ pub type EthersClient = ethers_providers::Provider<RetryClient<Http>>;
 
 #[derive(Debug, Error)]
 pub enum Error {
-    #[error(transparent)]
+    #[error("Provider: {0}")]
     Opaque(#[from] anyhow::Error),
-    #[error(transparent)]
+    #[error("Ethers provider: {0}")]
     Ethers(#[from] ethers_providers::ProviderError),
 }
 pub type Result<T> = std::result::Result<T, Error>;
