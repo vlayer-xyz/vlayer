@@ -1,0 +1,26 @@
+[Unit]
+Description=vlayer verifiable dns service
+After=network.target
+StartLimitIntervalSec=10
+
+[Service]
+Type=simple
+Restart=on-failure
+RestartSec=10
+User=ubuntu
+
+StandardOutput=syslog
+StandardError=inherit
+SyslogIdentifier=verifiable-dns-serivce
+SyslogFacility=local0
+
+Environment=RUST_LOG={{ verifiable_dns_rust_log | join(',') }}
+Environment=VLAYER_LOG_FORMAT=json
+Environment=PATH=/home/ubuntu/.cargo/bin/:$PATH
+{% endif %}
+ExecStart=/home/{{ ansible_user }}/.vlayer/bin/verifiable-dns
+{{- ' --host ' ~ verifiable_dns_host if verifiable_dns_host is defined else '' }}
+{{- ' --port ' ~ verifiable_dns_port if verifiable_dns_port is defined else '' }}
+
+[Install]
+WantedBy=multi-user.target

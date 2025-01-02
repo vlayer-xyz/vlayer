@@ -1,0 +1,33 @@
+---
+- name: Create log directory
+  become: true
+  ansible.builtin.file:
+    path: /var/log/vlayer
+    state: directory
+    owner: syslog
+    group: adm
+    mode: '755'
+
+- name: Create log file
+  become: true
+  ansible.builtin.file:
+    path: /var/log/vlayer/verifiable_dns.log
+    state: touch
+    owner: syslog
+    group: adm
+    mode: '644'
+
+- name: Install rsyslog configuration
+  become: true
+  ansible.builtin.copy:
+    src: verifiable_dns-rsyslog.conf
+    dest: /etc/rsyslog.d/10-vlayer.conf
+    mode: '644'
+  notify: "Restart rsyslog"
+
+- name: Install logrotate configuration
+  become: true
+  ansible.builtin.copy:
+    src: verifiable_dns-logrotate.conf
+    dest: /etc/logrotate.d/vlayer
+    mode: '644'
