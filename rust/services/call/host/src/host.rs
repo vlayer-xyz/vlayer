@@ -187,7 +187,6 @@ impl Host {
         let proof_len = raw_guest_output.len();
         let guest_output = GuestOutput::from_outputs(&host_output, &raw_guest_output)?;
         let cycles_used = stats.total_cycles;
-        let elapsed_time = elapsed_time.as_secs();
 
         if guest_output.evm_call_result != host_output {
             return Err(Error::HostGuestOutputMismatch(
