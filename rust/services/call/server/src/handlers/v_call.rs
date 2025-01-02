@@ -113,7 +113,7 @@ async fn generate_proof(
     state.insert(call_hash, ProofStatus::Preflight);
     let prover = host.prover();
     let call_guest_id = host.call_guest_id();
-    let preflight_result = host.preflight(call).await?;
+    let preflight_result = host.preflight(call).await.map_err(HostError::Preflight)?;
     let gas_used = preflight_result.gas_used;
     let preflight_time = preflight_result.elapsed_time.as_millis().try_into()?;
 

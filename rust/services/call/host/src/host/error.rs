@@ -12,11 +12,11 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum Error {
-    #[error("Invalid input: {0}")]
-    CreatingInput(String),
+    #[error("Preflight: {0}")]
+    Preflight(#[from] PreflightError),
 
     #[error("TravelCallExecutor error: {0}")]
-    Engine(#[from] TravelCallExecutorError),
+    Engine(#[from] TravelCallExecutorError), // TODO Remove
 
     #[error("Provider factory error: {0}")]
     ProviderFactory(#[from] ProviderFactoryError),
@@ -45,9 +45,6 @@ pub enum Error {
     #[error("Chain error: {0}")]
     Chain(#[from] chain::Error),
 
-    #[error("Verification error: {0}")]
-    Verification(#[from] VerificationError),
-
     #[error("Abi encode error: {0}")]
     AbiEncode(String),
 
@@ -60,12 +57,24 @@ pub enum Error {
     #[error("Chain Proof Client error: {0}")]
     ChainProofClient(#[from] chain_client::Error),
 
+    #[error("Prover contract not deployed")]
+    ProverContractNotDeployed,
+}
+
+#[derive(Error, Debug)]
+pub enum PreflightError {
     #[error("Calldata too large: {0} bytes")]
     CalldataTooLargeError(usize),
 
+    #[error("TravelCallExecutor error: {0}")]
+    Engine(#[from] TravelCallExecutorError),
+
+    #[error("Verification error: {0}")]
+    Verification(#[from] VerificationError),
+
+    #[error("Invalid input: {0}")]
+    CreatingInput(String),
+
     #[error("Guest input verification error: {0}")]
     GuestInput(#[from] guest_input::Error),
-
-    #[error("Prover contract not deployed")]
-    ProverContractNotDeployed,
 }
