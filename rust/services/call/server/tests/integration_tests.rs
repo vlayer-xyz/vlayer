@@ -339,10 +339,10 @@ mod server_tests {
                     }
                 }),
             );
-            assert!(result["receipt"]["gas_used"].is_u64());
-            assert!(result["receipt"]["cycles_used"].is_u64());
-            assert!(result["receipt"]["preflight_time"].is_u64());
-            assert!(result["receipt"]["proving_time"].is_u64());
+            assert!(result["receipt"]["metrics"]["gas"].is_u64());
+            assert!(result["receipt"]["metrics"]["cycles"].is_u64());
+            assert!(result["receipt"]["metrics"]["times"]["preflight"].is_u64());
+            assert!(result["receipt"]["metrics"]["times"]["proving"].is_u64());
         }
 
         #[tokio::test(flavor = "multi_thread")]

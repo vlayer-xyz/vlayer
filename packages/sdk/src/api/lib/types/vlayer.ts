@@ -66,10 +66,16 @@ export type ProofReceipt = {
     evm_call_result: Hex;
     proof: Proof;
   };
-  gas_used: number;
-  cycles_used: number;
-  preflight_time: number;
-  proving_time: number;
+  metrics: Metrics;
+};
+
+export type Metrics = {
+  gas: number;
+  cycles: number;
+  times: {
+    preflight: number;
+    proving: number;
+  };
 };
 
 export interface ProofReceiptResult {

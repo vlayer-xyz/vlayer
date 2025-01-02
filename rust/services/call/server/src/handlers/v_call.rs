@@ -11,7 +11,7 @@ use super::{QueryParams, SharedConfig, SharedProofs, UserToken};
 use crate::{
     error::AppError,
     gas_meter::{self, Client as GasMeterClient, ComputationStage},
-    handlers::{ProofReceipt, ProofStatus, RawData},
+    handlers::{Metrics, ProofReceipt, ProofStatus, RawData, Times},
     Config,
 };
 
@@ -132,5 +132,7 @@ async fn generate_proof(
         .refund(ComputationStage::Proving, gas_used)
         .await?;
 
-    Ok(ProofReceipt::new(raw_data, gas_used, preflight_time, cycles_used, proving_time))
+    let times = Times::new(preflight_time, proving_time);
+    let metrics = Metrics::new(gas_used, cycles_used, times);
+    Ok(ProofReceipt::new(raw_data, metrics))
 }

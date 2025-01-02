@@ -120,10 +120,14 @@ There are 5 possible `status` values: `queued`, `waiting_for_chain_proof`, `pref
                 "proof": "<calldata encoded Proof structure>",
                 "evm_call_result": "<calldata encoded result of execution>",
             },
-            "gas_used": 0,
-            "cycles_used": 0,
-            "preflight_time": 0,
-            "proving_time": 0,
+            "metrics": {
+                "gas": 0,
+                "cycles": 0,
+                "times": {
+                    "preflight": 0,
+                    "proving": 0,
+                },
+            },
         }
     }
 }

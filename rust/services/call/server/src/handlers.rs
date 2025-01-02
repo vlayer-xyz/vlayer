@@ -59,10 +59,20 @@ pub enum ProofStatus {
 #[derive(new, Clone, Serialize)]
 pub struct ProofReceipt {
     data: RawData,
-    gas_used: u64,
-    cycles_used: u64,
-    preflight_time: u64,
-    proving_time: u64,
+    metrics: Metrics,
+}
+
+#[derive(new, Clone, Serialize)]
+pub struct Metrics {
+    gas: u64,
+    cycles: u64,
+    times: Times,
+}
+
+#[derive(new, Clone, Serialize)]
+pub struct Times {
+    preflight: u64,
+    proving: u64
 }
 
 #[derive(Serialize, Clone)]
