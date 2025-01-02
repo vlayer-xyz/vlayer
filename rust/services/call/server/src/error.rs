@@ -1,3 +1,5 @@
+use std::num::TryFromIntError;
+
 use call_host::Error as HostError;
 use jsonrpsee::types::error::{self as jrpcerror, ErrorObjectOwned};
 use server_utils::{rpc::Error as RpcError, FieldValidationError};
@@ -20,6 +22,8 @@ pub enum AppError {
     HashNotFound(CallHash),
     #[error("Waiting for chain proof timed out")]
     ChainProofTimeout,
+    #[error("Int conversion error: {0}")]
+    TryFromInt(#[from] TryFromIntError),
 }
 
 impl From<AppError> for ErrorObjectOwned {
@@ -44,7 +48,8 @@ impl From<&AppError> for ErrorObjectOwned {
             AppError::Host(..)
             | AppError::Join(..)
             | AppError::RpcError(..)
-            | AppError::ChainProofTimeout => ErrorObjectOwned::owned::<()>(
+            | AppError::ChainProofTimeout
+            | AppError::TryFromInt(..) => ErrorObjectOwned::owned::<()>(
                 jrpcerror::INTERNAL_ERROR_CODE,
                 error.to_string(),
                 None,

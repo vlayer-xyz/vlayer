@@ -1,16 +1,20 @@
 use std::sync::Arc;
 
+use alloy_primitives::{hex::ToHexExt, U256};
+use alloy_sol_types::SolValue;
 use async_trait::async_trait;
-use call_engine::HostOutput;
+use call_engine::{HostOutput, Proof, Seal};
+use call_host::Error as HostError;
 use dashmap::DashMap;
 use derive_more::{Deref, DerefMut};
+use derive_new::new;
 use jsonrpsee::{proc_macros::rpc, types::error::ErrorObjectOwned, Extensions};
-use serde::Deserialize;
+use serde::{Deserialize, Serialize, Serializer};
 use v_call::types::{Call, CallContext, CallHash};
 use v_get_proof_receipt::types::CallResult;
 use v_versions::Versions;
 
-use crate::{config::Config, error::AppError};
+use crate::{config::Config, error::AppError, ser::ProofDTO};
 
 pub mod v_call;
 pub mod v_get_proof_receipt;
@@ -36,10 +40,9 @@ pub trait Rpc {
     async fn v_versions(&self) -> Result<Versions, AppError>;
 }
 
-#[derive(Deref, DerefMut, Default, Debug)]
+#[derive(Deref, DerefMut, Default)]
 pub struct Proofs(DashMap<CallHash, ProofStatus>);
 
-#[derive(Debug)]
 pub enum ProofStatus {
     /// Proof task has just been queued
     Queued,
@@ -50,7 +53,61 @@ pub enum ProofStatus {
     /// Proof is being generated
     Proving,
     /// Proof generation finished
-    Ready(Result<HostOutput, AppError>),
+    Ready(Result<ProofReceipt, AppError>),
+}
+
+#[derive(new, Clone, Serialize)]
+pub struct ProofReceipt {
+    data: RawData,
+    gas_used: u64,
+    cycles_used: u64,
+    preflight_time: u64,
+    proving_time: u64,
+}
+
+#[derive(Serialize, Clone)]
+pub struct RawData {
+    #[serde(with = "ProofDTO")]
+    proof: Proof,
+    #[serde(serialize_with = "ser_evm_call_result")]
+    evm_call_result: Vec<u8>,
+}
+
+fn ser_evm_call_result<S>(evm_call_result: &[u8], state: S) -> Result<S::Ok, S::Error>
+where
+    S: Serializer,
+{
+    state.serialize_str(&evm_call_result.encode_hex_with_prefix())
+}
+
+impl TryFrom<HostOutput> for RawData {
+    type Error = HostError;
+
+    fn try_from(value: HostOutput) -> Result<Self, Self::Error> {
+        let HostOutput {
+            guest_output,
+            seal,
+            proof_len,
+            call_guest_id,
+            ..
+        } = value;
+
+        let proof = Proof {
+            length: U256::from(proof_len),
+            seal: decode_seal(&seal)?,
+            callGuestId: call_guest_id.into(),
+            // Intentionally set to 0. These fields will be updated with the correct values by the prover script, based on the verifier ABI.
+            callAssumptions: guest_output.call_assumptions,
+        };
+        Ok(Self {
+            proof,
+            evm_call_result: guest_output.evm_call_result,
+        })
+    }
+}
+
+fn decode_seal(seal: &[u8]) -> Result<Seal, seal::Error> {
+    Ok(Seal::abi_decode(seal, true)?)
 }
 
 pub type SharedConfig = Arc<Config>;

@@ -1,7 +1,7 @@
 use std::time::Duration;
 
 use alloy_primitives::ChainId;
-use call_engine::{Call as EngineCall, HostOutput};
+use call_engine::Call as EngineCall;
 use call_host::Host;
 use provider::Address;
 use tracing::info;
@@ -11,7 +11,7 @@ use super::{QueryParams, SharedConfig, SharedProofs, UserToken};
 use crate::{
     error::AppError,
     gas_meter::{self, Client as GasMeterClient, ComputationStage},
-    handlers::ProofStatus,
+    handlers::{ProofReceipt, ProofStatus, RawData},
     Config,
 };
 
@@ -92,7 +92,7 @@ async fn generate_proof(
     gas_meter_client: impl GasMeterClient,
     state: SharedProofs,
     call_hash: CallHash,
-) -> Result<HostOutput, AppError> {
+) -> Result<ProofReceipt, AppError> {
     info!("Processing call {call_hash}");
 
     // Wait for chain proof if necessary
@@ -115,6 +115,7 @@ async fn generate_proof(
     let call_guest_id = host.call_guest_id();
     let preflight_result = host.preflight(call).await?;
     let gas_used = preflight_result.gas_used;
+    let preflight_time = preflight_result.elapsed_time.as_millis().try_into()?;
 
     gas_meter_client
         .refund(ComputationStage::Preflight, gas_used)
@@ -123,10 +124,13 @@ async fn generate_proof(
     info!("Generating proof for call {call_hash}");
     state.insert(call_hash, ProofStatus::Proving);
     let host_output = Host::prove(&prover, call_guest_id, preflight_result)?;
+    let cycles_used = host_output.cycles_used;
+    let proving_time = host_output.elapsed_time.as_millis().try_into()?;
+    let raw_data: RawData = host_output.try_into()?;
 
     gas_meter_client
         .refund(ComputationStage::Proving, gas_used)
         .await?;
 
-    Ok(host_output)
+    Ok(ProofReceipt::new(raw_data, gas_used, preflight_time, cycles_used, proving_time))
 }

@@ -321,20 +321,22 @@ mod server_tests {
                 actual: result,
                 expected: json!({
                     "status": "ready",
-                    "data": {
-                        "evm_call_result": evm_call_result.into(),
-                        "proof": {
-                            "length": 160,
-                            "seal": {
-                                "verifierSelector": "0xdeafbeef",
-                                "mode": 1,
-                            },
-                            "callAssumptions": {
-                                "functionSelector": function_selector(call_data),
-                                "proverContractAddress": contract_address,
+                    "receipt": {
+                        "data": {
+                            "evm_call_result": evm_call_result.into(),
+                            "proof": {
+                                "length": 160,
+                                "seal": {
+                                    "verifierSelector": "0xdeafbeef",
+                                    "mode": 1,
+                                },
+                                "callAssumptions": {
+                                    "functionSelector": function_selector(call_data),
+                                    "proverContractAddress": contract_address,
+                                }
                             }
-                        },
-                    },
+                        }
+                    }
                 }),
             );
         }
