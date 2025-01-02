@@ -11,12 +11,21 @@ use thiserror::Error;
 
 #[derive(Error, Debug)]
 pub enum Error {
+    #[error("Builder: {0}")]
+    Builder(#[from] BuilderError),
+
+    #[error("Proving: {0}")]
+    AwaitingChainProof(#[from] AwaitingChainProofError),
+
     #[error("Preflight: {0}")]
     Preflight(#[from] PreflightError),
 
     #[error("Proving: {0}")]
     Proving(#[from] ProvingError),
+}
 
+#[derive(Error, Debug)]
+pub enum BuilderError {
     #[error("Provider factory error: {0}")]
     ProviderFactory(#[from] ProviderFactoryError),
 
@@ -37,6 +46,12 @@ pub enum Error {
 
     #[error("Prover contract not deployed")]
     ProverContractNotDeployed,
+}
+
+#[derive(Error, Debug)]
+pub enum AwaitingChainProofError {
+    #[error("Chain Proof Client error: {0}")]
+    ChainProofClient(#[from] chain_client::Error),
 }
 
 #[derive(Error, Debug)]

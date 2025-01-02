@@ -24,7 +24,7 @@ use chain_client::Client as ChainClient;
 use common::GuestElf;
 pub use config::{Config, DEFAULT_MAX_CALLDATA_SIZE};
 use derive_new::new;
-pub use error::{Error, PreflightError, ProvingError};
+pub use error::{AwaitingChainProofError, BuilderError, Error, PreflightError, ProvingError};
 use ethers_core::types::BlockNumber as BlockTag;
 use prover::Prover;
 use provider::{CachedMultiProvider, EvmBlockHeader};
@@ -73,7 +73,7 @@ impl Host {
 pub fn get_latest_block_number(
     providers: &CachedMultiProvider,
     chain_id: ChainId,
-) -> Result<BlockNumber, Error> {
+) -> Result<BlockNumber, BuilderError> {
     get_block_header(providers, chain_id, BlockTag::Latest).map(|header| header.number())
 }
 
@@ -81,12 +81,12 @@ pub fn get_block_header(
     providers: &CachedMultiProvider,
     chain_id: ChainId,
     block_num: BlockTag,
-) -> Result<Box<dyn EvmBlockHeader>, Error> {
+) -> Result<Box<dyn EvmBlockHeader>, BuilderError> {
     let provider = providers.get(chain_id)?;
 
     let block_header = provider
         .get_block_header(block_num)?
-        .ok_or(Error::BlockNotFound(block_num))?;
+        .ok_or(BuilderError::BlockNotFound(block_num))?;
 
     Ok(block_header)
 }
@@ -123,7 +123,7 @@ impl Host {
         }
     }
 
-    pub async fn chain_proof_ready(&self) -> Result<bool, Error> {
+    pub async fn chain_proof_ready(&self) -> Result<bool, AwaitingChainProofError> {
         let latest_indexed_block = self
             .chain_client
             .get_sync_status(self.start_execution_location.chain_id)

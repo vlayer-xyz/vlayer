@@ -58,14 +58,15 @@ async fn build_host(
     config: &Config,
     chain_id: ChainId,
     prover_contract_addr: Address,
-) -> Result<Host, AppError> {
+) -> Result<Host, HostError> {
     let host = Host::builder()
         .with_rpc_urls(config.rpc_urls())
         .with_chain_guest_id(config.chain_guest_id())
         .with_chain_proof_url(config.chain_proof_url())?
         .with_start_chain_id(chain_id)?
         .with_prover_contract_addr(prover_contract_addr)
-        .await?
+        .await
+        .map_err(HostError::Builder)?
         .build(config.into());
     Ok(host)
 }
@@ -97,7 +98,11 @@ async fn generate_proof(
 
     // Wait for chain proof if necessary
     let start = tokio::time::Instant::now();
-    while !host.chain_proof_ready().await? {
+    while !host
+        .chain_proof_ready()
+        .await
+        .map_err(HostError::AwaitingChainProof)?
+    {
         info!(
             "Location {:?} not indexed. Waiting for chain proof",
             host.start_execution_location()
