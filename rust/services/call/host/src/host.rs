@@ -30,7 +30,7 @@ use prover::Prover;
 use provider::{CachedMultiProvider, EvmBlockHeader};
 use risc0_zkvm::{ProveInfo, SessionStats};
 use seal::EncodableReceipt;
-use tracing::info;
+use tracing::{info, instrument};
 
 use crate::{evm_env::factory::HostEvmEnvFactory, into_input::into_multi_input, HostDb};
 
@@ -97,7 +97,7 @@ pub struct PreflightResult {
     pub host_output: Bytes,
     pub input: Input,
     pub gas_used: u64,
-    pub elapsed_time: u64,
+    pub elapsed_time: Duration,
 }
 
 impl Host {
@@ -133,6 +133,7 @@ impl Host {
         Ok(latest_indexed_block >= self.start_execution_location.block_number)
     }
 
+    #[instrument(skip_all)]
     pub async fn preflight(self, call: Call) -> Result<PreflightResult, Error> {
         self.validate_calldata_size(&call)?;
 
@@ -144,12 +145,12 @@ impl Host {
             TravelCallExecutor::new(&self.envs).call(&call, self.start_execution_location)
         })
         .map_err(wrap_engine_panic)??;
-        let elapsed_time = now.elapsed().as_secs();
+        let elapsed_time = now.elapsed();
 
-        info!(gas_used_preflight = gas_used, "Gas used in preflight: {gas_used}");
         info!(
-            elapsed_time_preflight = elapsed_time,
-            "Time elapsed for preflight: {elapsed_time}"
+            gas_used = gas_used,
+            elapsed_time = elapsed_time.as_millis(),
+            "preflight finished",
         );
 
         let multi_evm_input =
@@ -170,6 +171,7 @@ impl Host {
         Ok(PreflightResult::new(host_output.into(), input, gas_used, elapsed_time))
     }
 
+    #[instrument(skip_all)]
     pub fn prove(
         prover: &Prover,
         call_guest_id: CallGuestId,
@@ -186,7 +188,6 @@ impl Host {
         let proof_len = raw_guest_output.len();
         let guest_output = GuestOutput::from_outputs(&host_output, &raw_guest_output)?;
         let cycles_used = stats.total_cycles;
-        let elapsed_time = elapsed_time.as_secs();
 
         if guest_output.evm_call_result != host_output {
             return Err(Error::HostGuestOutputMismatch(
@@ -195,8 +196,11 @@ impl Host {
             ));
         }
 
-        info!(cycles_used_proving = cycles_used, "Cycles used during proving: {cycles_used}");
-        info!(elapsed_time_proving = elapsed_time, "Time elapsed for proving: {elapsed_time}");
+        info!(
+            cycles_used = cycles_used,
+            elapsed_time = elapsed_time.as_millis(),
+            "proving finished"
+        );
 
         Ok(HostOutput {
             guest_output,
@@ -241,6 +245,7 @@ struct EncodedProofWithStats {
     elapsed_time: Duration,
 }
 
+#[instrument(skip_all)]
 fn provably_execute(prover: &Prover, input: &Input) -> Result<EncodedProofWithStats, Error> {
     let now = Instant::now();
     let ProveInfo { receipt, stats } = prover.prove(input)?;
