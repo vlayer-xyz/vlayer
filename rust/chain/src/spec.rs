@@ -16,7 +16,7 @@ pub struct ChainSpec {
 
 #[derive(Debug, Error)]
 pub enum Error {
-    #[error("unsupported fork for block {0}")]
+    #[error("Unsupported fork for block {0}")]
     UnsupportedForkForBlock(BlockNumber),
     #[error("Unsupported chain id: {0}")]
     UnsupportedChainId(ChainId),
