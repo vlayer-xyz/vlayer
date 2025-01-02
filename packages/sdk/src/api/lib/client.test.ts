@@ -103,7 +103,9 @@ describe("Success zk-proving", () => {
         body: JSON.stringify({
           result: {
             status: "ready",
-            data: {},
+            receipt: {
+              data: {},
+            },
           },
         }),
       };
