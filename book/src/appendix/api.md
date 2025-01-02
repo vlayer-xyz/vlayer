@@ -135,9 +135,7 @@ There are 5 possible `status` values: `queued`, `waiting_for_chain_proof`, `pref
 
 `evm_call_result` is an ABI encoded result of the function execution and `proof` is a Solidity `Proof` structure to prepend in verifier function. Note that settlement block is only available in receipt, as we don't want to make assumption on when the the settlement block is assigned.
 
-`gas_used` corresponds to gas used in the preflight step, while `cycles_used` is the number of CPU cycles utilized during proving.
-
-`preflight_time` and `proving_time` are both expressed in milliseconds.
+`metrics` contains aggregated statistics gathered during proof generation. `gas` corresponds to gas used in the preflight step, while `cycles` is the number of CPU cycles utilized during proving. Additionally, `times.preflight` and `times.proving` are both expressed in milliseconds.
 
 ### Error
 
