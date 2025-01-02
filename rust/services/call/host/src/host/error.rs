@@ -2,6 +2,7 @@ use alloy_primitives::ChainId;
 use call_engine::{
     travel_call_executor::Error as TravelCallExecutorError, verifier::guest_input, GuestOutputError,
 };
+use ethers_core::types::BlockNumber as BlockTag;
 use provider::ProviderFactoryError;
 use risc0_zkp::verify::VerificationError;
 use thiserror::Error;
@@ -20,10 +21,10 @@ pub enum Error {
     ProviderFactory(#[from] ProviderFactoryError),
 
     #[error("Provider error: {0}")]
-    Provider(String),
+    Provider(#[from] provider::Error),
 
     #[error("Block not found: {0}")]
-    BlockNotFound(u64),
+    BlockNotFound(BlockTag),
 
     #[error("Error creating client: {0}")]
     NewClient(#[from] url::ParseError),

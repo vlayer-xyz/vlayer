@@ -34,7 +34,11 @@ type Result<T> = result::Result<T, BlockFetcherError>;
 #[derivative(PartialEq, Eq)]
 pub enum BlockFetcherError {
     #[error("Provider: {0}")]
-    Provider(String),
+    Provider(
+        #[from]
+        #[derivative(PartialEq = "ignore")]
+        ethers::providers::ProviderError,
+    ),
     #[error("BlockNotFound: {0}")]
     BlockNotFound(BlockTag),
     #[error("Block conversion error: {0}")]
@@ -63,8 +67,7 @@ where
         let ethers_block = self
             .provider
             .get_block(number)
-            .await
-            .map_err(|err| BlockFetcherError::Provider(err.to_string()))?
+            .await?
             .ok_or(BlockFetcherError::BlockNotFound(number))?;
         let block = to_eth_block_header(ethers_block)
             .map_err(|e| BlockFetcherError::BlockConversion(e.to_string()))?;
@@ -75,13 +78,9 @@ where
     #[instrument(skip(self))]
     pub async fn get_latest_block_number(&self) -> Result<BlockNumber> {
         debug!("Getting latest block number");
-        self.provider
-            .get_block_number()
-            .await
-            .map_err(|e| BlockFetcherError::Provider(e.to_string()))
-            .map(|block_num| {
-                debug!("Latest block number: {block_num}");
-                block_num.as_u64()
-            })
+        Ok(self.provider.get_block_number().await.map(|block_num| {
+            debug!("Latest block number: {block_num}");
+            block_num.as_u64()
+        })?)
     }
 }

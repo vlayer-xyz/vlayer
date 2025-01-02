@@ -85,9 +85,8 @@ pub fn get_block_header(
     let provider = providers.get(chain_id)?;
 
     let block_header = provider
-        .get_block_header(block_num)
-        .map_err(|e| Error::Provider(format!("Error fetching block header: {e:?}")))?
-        .ok_or_else(|| Error::Provider(String::from("Block header not found")))?;
+        .get_block_header(block_num)?
+        .ok_or(Error::BlockNotFound(block_num))?;
 
     Ok(block_header)
 }

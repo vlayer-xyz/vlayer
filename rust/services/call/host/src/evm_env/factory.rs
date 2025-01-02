@@ -23,11 +23,11 @@ impl EvmEnvFactory<HostDb> for HostEvmEnvFactory {
             chain_id,
         }: ExecutionLocation,
     ) -> anyhow::Result<EvmEnv<HostDb>> {
+        let block_tag = block_number.into();
         let provider = self.providers.get(chain_id)?;
         let header = provider
-            .get_block_header(block_number.into())
-            .map_err(|err| Error::Provider(err.to_string()))?
-            .ok_or(Error::BlockNotFound(block_number))?;
+            .get_block_header(block_tag)?
+            .ok_or(Error::BlockNotFound(block_tag))?;
 
         let proof_db = ProofDb::new(Arc::clone(&provider), block_number);
         let mut db = CacheDB::new(proof_db);

@@ -11,7 +11,6 @@ mod provider_ext;
 use std::fmt::Debug;
 
 pub use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256};
-use anyhow::Result;
 use auto_impl::auto_impl;
 pub use block_header::EvmBlockHeader;
 pub use cache::CachedProvider;
@@ -25,9 +24,19 @@ pub use factory::{
 pub use multi::CachedMultiProvider;
 pub use proof::{EIP1186Proof, StorageProof};
 pub use provider_ext::BlockingProviderExt;
+use thiserror::Error;
 
 /// The Ethers client type.
 pub type EthersClient = ethers_providers::Provider<RetryClient<Http>>;
+
+#[derive(Debug, Error)]
+pub enum Error {
+    #[error(transparent)]
+    Opaque(#[from] anyhow::Error),
+    #[error(transparent)]
+    Ethers(#[from] ethers_providers::ProviderError),
+}
+pub type Result<T> = std::result::Result<T, Error>;
 
 /// A trait for providers that fetch data from the Ethereum blockchain.
 #[auto_impl(Rc, Box)]

@@ -1,11 +1,10 @@
 use std::marker::PhantomData;
 
 use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256};
-use anyhow::Result;
 use block_header::EvmBlockHeader;
 use ethers_core::types::BlockNumber as BlockTag;
 
-use super::{BlockingProvider, EIP1186Proof};
+use super::{BlockingProvider, EIP1186Proof, Result};
 
 /// A simple provider that panics on all queries.
 #[derive(Debug, PartialEq)]

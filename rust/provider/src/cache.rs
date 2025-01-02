@@ -1,12 +1,12 @@
 use std::{collections::hash_map::Entry, marker::PhantomData, path::PathBuf, sync::RwLock};
 
 use alloy_primitives::{Address, BlockNumber, Bytes, StorageKey, StorageValue, TxNumber, U256};
-use anyhow::{bail, Result};
+use anyhow::anyhow;
 use block_header::EvmBlockHeader;
 use ethers_core::types::BlockNumber as BlockTag;
 use json::{AccountQuery, BlockQuery, JsonCache, ProofQuery, StorageQuery};
 
-use super::{BlockingProvider, EIP1186Proof};
+use super::{BlockingProvider, EIP1186Proof, Result};
 use crate::never::NeverProvider;
 
 pub(crate) mod json;
@@ -29,14 +29,18 @@ impl CachedProvider {
         // Sanity checks.
         if let Some(parent) = cache_path.parent() {
             if !parent.exists() {
-                bail!("Cache files directory '{}' does not exist.", parent.display());
+                return Err(anyhow!(
+                    "Cache files directory '{}' does not exist.",
+                    parent.display()
+                )
+                .into());
             }
         }
         if cache_path.exists() {
-            bail!(
+            return Err(anyhow!(
                 "Cache file {} already exists. Are you trying to create two test files with the same name?",
                 cache_path.display()
-            );
+            ).into());
         }
 
         let cache = JsonCache::empty(cache_path);
