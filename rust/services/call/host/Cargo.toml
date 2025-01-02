@@ -15,7 +15,6 @@ chain = { workspace = true }
 chain_client = { workspace = true, features = ["fake", "rpc"] }
 chain_common = { workspace = true }
 common = { workspace = true }
-derivative = { workspace = true }
 derive-new = { workspace = true }
 ethers-core = { workspace = true }
 host_utils = { workspace = true }
@@ -30,7 +29,6 @@ seal = { workspace = true }
 thiserror = { workspace = true }
 tokio = { workspace = true, features = ["macros"] }
 tracing = { workspace = true }
-url = { workspace = true }
 
 [dev-dependencies]
 alloy-sol-types = { workspace = true }

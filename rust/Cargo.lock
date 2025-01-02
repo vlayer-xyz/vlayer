@@ -2029,7 +2029,6 @@ dependencies = [
  "chain_guest_wrapper",
  "common",
  "ctor",
- "derivative",
  "derive-new",
  "dotenvy",
  "ethers-core",
@@ -2049,7 +2048,6 @@ dependencies = [
  "thiserror 1.0.69",
  "tokio",
  "tracing",
- "url",
 ]
 
 [[package]]
@@ -10438,7 +10436,6 @@ dependencies = [
  "alloy-rlp",
  "alloy-sol-types",
  "alloy-trie",
- "anyhow",
  "block_header",
  "call_engine",
  "call_guest_wrapper",

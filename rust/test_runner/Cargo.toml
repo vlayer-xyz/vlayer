@@ -10,7 +10,6 @@ alloy-primitives = { workspace = true }
 alloy-rlp = { workspace = true }
 alloy-sol-types = { workspace = true, features = ["json"] }
 alloy-trie = { workspace = true }
-anyhow = { workspace = true }
 block_header = { workspace = true }
 call_engine = { workspace = true }
 call_guest_wrapper = { workspace = true }
