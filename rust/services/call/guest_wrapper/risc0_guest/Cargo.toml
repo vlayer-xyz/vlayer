@@ -6,7 +6,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-alloy-sol-types = { version = "=0.8.12", default-features = false }
+alloy-sol-types = { version = "=0.8.16", default-features = false }
 call_guest = { path = "../../guest" }
 chain_guest_wrapper = { path = "../../../chain/guest_wrapper" }
 risc0-zkvm = { version = "1.2.0", default-features = false, features = ["std"] }

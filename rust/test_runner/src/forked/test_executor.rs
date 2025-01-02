@@ -14,7 +14,6 @@ use alloy_json_abi::Function;
 use alloy_sol_types::private::{Address, Bytes, U256};
 use color_eyre::eyre;
 use forge::{
-    revm,
     revm::{
         interpreter::{return_ok, InstructionResult},
         primitives::{
@@ -156,13 +155,14 @@ fn convert_executed_result(
             (reason.into(), 0_u64, gas_used, None, vec![])
         }
     };
-    let stipend = revm::interpreter::gas::validate_initial_tx_gas(
-        env.spec_id(),
-        &env.tx.data,
-        env.tx.transact_to.is_create(),
-        &env.tx.access_list,
-        0,
-    );
+    let stipend = 0;
+    // let stipend = revm::interpreter::gas::validate_initial_tx_gas(
+    //     env.spec_id(),
+    //     &env.tx.data,
+    //     env.tx.transact_to.is_create(),
+    //     &env.tx.access_list,
+    //     0,
+    // );
 
     let result = match &out {
         Some(Output::Call(data)) => data.clone(),

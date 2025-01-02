@@ -7,15 +7,13 @@
  */
 
 use std::{
-    sync::{mpsc, Arc},
+    sync::mpsc,
     time::Instant,
 };
 use alloy_json_abi::Function;
 use forge::{multi_runner::TestContract, result::SuiteResult, MultiContractRunner};
-use foundry_cheatcodes::CheatsConfig;
 use foundry_common::{get_contract_name, TestFilter, TestFunctionExt};
 use foundry_compilers::ArtifactId;
-use foundry_evm::{executors::ExecutorBuilder, traces::TraceMode};
 use foundry_evm_core::backend::Backend;
 use progress::TestsProgress;
 use rayon::prelude::*;
@@ -69,7 +67,7 @@ pub fn test(
                     &runner,
                     id,
                     contract,
-                    db.clone(),
+                    &db,
                     filter,
                     &tokio_handle,
                     Some(&tests_progress),
@@ -93,8 +91,7 @@ pub fn test(
         contracts.par_iter().for_each(|&(id, contract)| {
             let _guard = tokio_handle.enter();
             // MODIFICATION: self replaced with runner
-            let result =
-                run_test_suite(&runner, id, contract, db.clone(), filter, &tokio_handle, None);
+            let result = run_test_suite(&runner, id, contract, &db, filter, &tokio_handle, None);
             let _ = tx.send((id.identifier(), result));
         })
     }
@@ -105,43 +102,13 @@ fn run_test_suite(
     runner: &MultiContractRunner,
     artifact_id: &ArtifactId,
     contract: &TestContract,
-    db: Backend,
+    db: &Backend,
     filter: &dyn TestFilter,
     tokio_handle: &tokio::runtime::Handle,
     progress: Option<&TestsProgress>,
 ) -> SuiteResult {
     let identifier = artifact_id.identifier();
     let mut span_name = identifier.as_str();
-
-    let cheats_config = CheatsConfig::new(
-        // MODIFICATION: self replaced with runner
-        &runner.config,
-        runner.evm_opts.clone(),
-        Some(runner.known_contracts.clone()),
-        Some(artifact_id.name.clone()),
-        Some(artifact_id.version.clone()),
-    );
-
-    // MODIFICATION: self replaced with runner
-    let trace_mode = TraceMode::default()
-        .with_debug(runner.debug)
-        .with_decode_internal(runner.decode_internal)
-        .with_verbosity(runner.evm_opts.verbosity);
-
-    // MODIFICATION: self replaced with runner
-    let executor = ExecutorBuilder::new()
-        .inspectors(|stack| {
-            stack
-                .cheatcodes(Arc::new(cheats_config))
-                .trace_mode(trace_mode)
-                .coverage(runner.coverage)
-                .enable_isolation(runner.isolation)
-                .alphanet(runner.alphanet)
-        })
-        .spec(runner.evm_spec)
-        .gas_limit(runner.evm_opts.gas_limit())
-        .legacy_assertions(runner.config.legacy_assertions)
-        .build(runner.env.clone(), db);
 
     if !enabled!(tracing::Level::TRACE) {
         span_name = get_contract_name(&identifier);
@@ -152,22 +119,17 @@ fn run_test_suite(
 
     debug!("start executing all tests in contract");
 
-    // MODIFICATION: use our forked ContractRunner
-    let contract_runner = ContractRunner {
-        name: &identifier,
+    let runner = ContractRunner::new(
+        &identifier,
         contract,
-        libs_to_deploy: &runner.libs_to_deploy,
         // MODIFICATION: Executor replaced with TestExecutor
-        executor: TestExecutor::new(executor, &runner.config.rpc_endpoints),
-        revert_decoder: &runner.revert_decoder,
-        initial_balance: runner.evm_opts.initial_balance,
-        sender: runner.sender.unwrap_or_default(),
+        TestExecutor::new(runner.tcfg.executor(runner.known_contracts.clone(), artifact_id, db.clone()), &runner.config.rpc_endpoints),
         progress,
         tokio_handle,
         span,
-    };
-    // MODIFICATION: self replaced with runner
-     let r = contract_runner.run_tests(filter, &runner.test_options, runner.known_contracts.clone());
+        runner,
+    );
+    let r = runner.run_tests(filter);
 
     debug!(duration=?r.duration, "executed all tests in contract");
 
