@@ -35,9 +35,6 @@ pub enum Error {
     #[error("EVM transact error: {0}")]
     TransactError(#[from] TransactError),
 
-    #[error("Chain spec error: {0}")]
-    ChainSpecError(String),
-
     #[error("Failed to get EvmEnv: {0}")]
     EvmEnv(String),
 

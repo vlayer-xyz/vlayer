@@ -1,5 +1,5 @@
 /**
- * This file is in large part copied from https://github.com/foundry-rs/foundry/blob/e649e62f125244a3ef116be25dfdc81a2afbaf2a/crates/evm/evm/src/executors/mod.rs
+ * This file is in large part copied from https://github.com/foundry-rs/foundry/blob/6cb41febfc989cbf7dc13c43ec6c3ce5fba1ea04/crates/evm/evm/src/executors/mod.rs
  * Only copied functions are: Executor::call and all it uses, and convert_executed_result
  * The original file is licensed under the Apache License, Version 2.0.
  * The original file was modified for the purpose of this project.
@@ -156,7 +156,7 @@ fn convert_executed_result(
             (reason.into(), 0_u64, gas_used, None, vec![])
         }
     };
-    let stipend = revm::interpreter::gas::validate_initial_tx_gas(
+    let gas = revm::interpreter::gas::calculate_initial_tx_gas(
         env.spec_id(),
         &env.tx.data,
         env.tx.transact_to.is_create(),
@@ -188,7 +188,7 @@ fn convert_executed_result(
         result,
         gas_used,
         gas_refunded,
-        stipend,
+        stipend: gas.initial_gas,
         logs,
         labels,
         traces,

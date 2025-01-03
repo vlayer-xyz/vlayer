@@ -95,7 +95,9 @@ mod tests {
         fn retriable() {
             for err in [
                 wrap_err(HostError::Prover(ProverError::Prover("error".to_string()))),
-                wrap_err(HostError::BlockFetcher(BlockFetcherError::Provider("error".to_string()))),
+                wrap_err(HostError::BlockFetcher(BlockFetcherError::Provider(
+                    ethers::providers::ProviderError::UnsupportedRPC,
+                ))),
                 Box::new(Elapsed::new()),
             ] {
                 assert!(HostErrorFilter::is_retriable(&err));

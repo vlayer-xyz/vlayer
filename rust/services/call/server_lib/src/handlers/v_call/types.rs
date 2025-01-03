@@ -7,7 +7,7 @@ use common::Hashable;
 use derive_more::From;
 use derive_new::new;
 use serde::{Deserialize, Serialize};
-use server_utils::{parse_address_field, parse_hex_field};
+use server_utils::{parse_address_field, parse_hex_field, FieldValidationError};
 
 use crate::error::AppError;
 
@@ -27,17 +27,24 @@ impl Call {
             gas_limit,
         }
     }
-}
 
-impl TryFrom<Call> for HostCall {
-    type Error = AppError;
+    pub fn parse_and_validate(self, max_calldata_size: usize) -> Result<HostCall, AppError> {
+        let call = HostCall {
+            to: parse_address_field("to", self.to)?,
+            data: parse_hex_field("data", self.data)?,
+            gas_limit: self.gas_limit,
+        };
 
-    fn try_from(value: Call) -> Result<Self, Self::Error> {
-        Ok(Self {
-            to: parse_address_field("to", value.to)?,
-            data: parse_hex_field("data", value.data)?,
-            gas_limit: value.gas_limit,
-        })
+        if call.data.len() > max_calldata_size {
+            return Err(FieldValidationError::LengthLimit {
+                field: "data".to_string(),
+                length: call.data.len(),
+                limit: max_calldata_size,
+            }
+            .into());
+        }
+
+        Ok(call)
     }
 }
 
@@ -83,19 +90,18 @@ impl Hashable for CallHashData<'_> {
 
 #[cfg(test)]
 mod test {
-    use call_host::Call as HostCall;
-
     use super::Call;
     use crate::error::AppError;
 
     const TO: &str = "0x7Ad53bbA1004e46dd456316912D55dBc5D311a03";
     const DATA: &str = "0x0000";
     const INVALID_ADDRESS: &str = "0x";
+    const MAX_CALLDATA_SIZE: usize = 2;
 
     #[tokio::test]
     async fn invalid_to_address() -> anyhow::Result<()> {
         let call = Call::new(INVALID_ADDRESS, DATA, 0);
-        let actual_result: Result<HostCall, AppError> = call.try_into();
+        let actual_result = call.parse_and_validate(MAX_CALLDATA_SIZE);
 
         assert!(matches!(
             actual_result,
@@ -109,11 +115,25 @@ mod test {
     async fn invalid_data() -> anyhow::Result<()> {
         const INVALID_DATA: &str = "xx";
         let call = Call::new(TO, INVALID_DATA, 0);
-        let actual_result: Result<HostCall, AppError> = call.try_into();
+        let actual_result = call.parse_and_validate(MAX_CALLDATA_SIZE);
 
         assert!(matches!(
             actual_result,
             Err(AppError::FieldValidation(err)) if err.to_string() == "`data` Invalid hex prefix `xx`"
+        ));
+
+        Ok(())
+    }
+
+    #[tokio::test]
+    async fn calldata_length_limit() -> anyhow::Result<()> {
+        const LONG_DATA: &str = "0x00";
+        let call = Call::new(TO, LONG_DATA, 0);
+        let actual_result = call.parse_and_validate(0);
+
+        assert!(matches!(
+            actual_result,
+            Err(AppError::FieldValidation(err)) if err.to_string() == "`data` Is too long `1` > `0`"
         ));
 
         Ok(())

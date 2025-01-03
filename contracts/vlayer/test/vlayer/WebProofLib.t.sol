@@ -36,7 +36,7 @@ contract WebProverTest is VTest {
         try wrapper.verify(webProof, "https://bad_api.x.com/1.1/account/settings.json") returns (Web memory) {
             revert("Expected error");
         } catch Error(string memory reason) {
-            assertEq(reason, "Engine(TransactError(Revert(\"revert: Incorrect URL\")))");
+            assertEq(reason, "Preflight(Engine(TransactError(Revert(\"revert: Incorrect URL\"))))");
         }
     }
 
@@ -50,7 +50,7 @@ contract WebProverTest is VTest {
         try wrapper.verify(webProof, DATA_URL) returns (Web memory) {
             revert("Expected error");
         } catch Error(string memory reason) {
-            assertEq(reason, "Engine(TransactError(Revert(\"missing field `version` at line 1 column 2\")))");
+            assertEq(reason, "Preflight(Engine(TransactError(Revert(\"missing field `version` at line 1 column 2\"))))");
         }
     }
 
@@ -66,7 +66,7 @@ contract WebProverTest is VTest {
         } catch Error(string memory reason) {
             assertEq(
                 reason,
-                "Engine(Panic(\"called `Result::unwrap()` on an `Err` value: Custom(\\\"invalid length 64, expected an array at most 64 bytes long\\\")\"))"
+                "Preflight(Engine(Panic(\"called `Result::unwrap()` on an `Err` value: Custom(\\\"invalid length 64, expected an array at most 64 bytes long\\\")\")))"
             );
         }
     }

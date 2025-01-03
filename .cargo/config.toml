@@ -6,6 +6,7 @@ zkvm-bench = "run --bin zkvm-benchmarks-runner"
 # Should be in sync with ./vscode/settings.json "rust-analyzer.server.extraEnv" section to avoid recompilation of guest_wrapper
 CC_riscv32im_risc0_zkvm_elf = "clang"
 CFLAGS_riscv32im_risc0_zkvm_elf = "-nostdlibinc -DRING_CORE_NOSTDLIBINC=1 -target riscv32-unknown-elf -march=rv32im"
+RISC0_FEATURE_bigint2 = "1"
 
 # link libusb statically to avoid runtime linking issues
 LIBUSB_STATIC = "1"

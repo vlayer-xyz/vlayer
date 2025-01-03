@@ -1,22 +1,9 @@
-use std::result;
-
 use bytes::Bytes;
 use call_engine::Input;
 use chain_common::ChainProofReceipt;
-use host_utils::{ProofMode, Prover as Risc0Prover};
+use host_utils::{proving, ProofMode, Prover as Risc0Prover};
 use risc0_zkvm::{ExecutorEnv, ProveInfo};
-use thiserror::Error;
 use tracing::instrument;
-
-#[derive(Debug, Error, PartialEq, Eq)]
-pub enum Error {
-    #[error("Prover: {0}")]
-    Prover(String),
-    #[error("ExecutorEnvBuilder: {0}")]
-    ExecutorEnvBuilder(String),
-}
-
-type Result<T> = result::Result<T, Error>;
 
 #[derive(Debug, Clone, Default)]
 pub struct Prover {
@@ -34,13 +21,9 @@ impl Prover {
 
     /// Wrapper around Risc0Prover which specifies the call guest ELF
     #[instrument(skip_all)]
-    pub fn prove(&self, input: &Input) -> Result<ProveInfo> {
-        let executor_env =
-            build_executor_env(input).map_err(|err| Error::ExecutorEnvBuilder(err.to_string()))?;
-
-        self.prover
-            .prove(executor_env, &self.guest_elf)
-            .map_err(|err| Error::Prover(err.to_string()))
+    pub fn prove(&self, input: &Input) -> proving::Result<ProveInfo> {
+        let executor_env = build_executor_env(input)?;
+        Ok(self.prover.prove(executor_env, &self.guest_elf)?)
     }
 }
 
@@ -67,9 +50,9 @@ mod tests {
     fn invalid_input() {
         let res = Prover::new(ProofMode::Fake, &GUEST_ELF).prove(&Input::default());
 
-        assert!(matches!(
-            res.map(|_| ()).unwrap_err(),
-            Error::Prover(ref msg) if msg == "Guest panicked: travel call execution failed: EvmEnv(\"NullEvmEnvFactory cannot create EvmEnv\")"
-        ));
+        assert_eq!(
+            res.map(|_| ()).unwrap_err().to_string(),
+            "Prover: Guest panicked: travel call execution failed: EvmEnv(\"NullEvmEnvFactory cannot create EvmEnv\")"
+        );
     }
 }

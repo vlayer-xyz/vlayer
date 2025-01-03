@@ -2,7 +2,7 @@ use std::time::Duration;
 
 use alloy_primitives::ChainId;
 use call_engine::Call as EngineCall;
-use call_host::Host;
+use call_host::{Error as HostError, Host};
 use provider::Address;
 use tracing::info;
 use types::{Call, CallContext, CallHash};
@@ -28,7 +28,7 @@ pub async fn v_call(
     context: CallContext,
 ) -> Result<CallHash, AppError> {
     info!("v_call => {call:#?} {context:#?}");
-    let call: EngineCall = call.try_into()?;
+    let call = call.parse_and_validate(config.max_calldata_size())?;
 
     let host = build_host(&config, context.chain_id, call.to).await?;
     let call_hash = (&host.start_execution_location(), &call).into();
@@ -58,14 +58,15 @@ async fn build_host(
     config: &Config,
     chain_id: ChainId,
     prover_contract_addr: Address,
-) -> Result<Host, AppError> {
+) -> Result<Host, HostError> {
     let host = Host::builder()
         .with_rpc_urls(config.rpc_urls())
         .with_chain_guest_id(config.chain_guest_id())
         .with_chain_proof_url(config.chain_proof_url())?
         .with_start_chain_id(chain_id)?
         .with_prover_contract_addr(prover_contract_addr)
-        .await?
+        .await
+        .map_err(HostError::Builder)?
         .build(config.into());
     Ok(host)
 }
@@ -97,7 +98,11 @@ async fn generate_proof(
 
     // Wait for chain proof if necessary
     let start = tokio::time::Instant::now();
-    while !host.chain_proof_ready().await? {
+    while !host
+        .chain_proof_ready()
+        .await
+        .map_err(HostError::AwaitingChainProof)?
+    {
         info!(
             "Location {:?} not indexed. Waiting for chain proof",
             host.start_execution_location()
@@ -113,7 +118,7 @@ async fn generate_proof(
     state.insert(call_hash, ProofStatus::Preflight);
     let prover = host.prover();
     let call_guest_id = host.call_guest_id();
-    let preflight_result = host.preflight(call).await?;
+    let preflight_result = host.preflight(call).await.map_err(HostError::Preflight)?;
     let gas_used = preflight_result.gas_used;
     let preflight_time = preflight_result.elapsed_time.as_millis().try_into()?;
 
@@ -123,7 +128,8 @@ async fn generate_proof(
 
     info!("Generating proof for call {call_hash}");
     state.insert(call_hash, ProofStatus::Proving);
-    let host_output = Host::prove(&prover, call_guest_id, preflight_result)?;
+    let host_output =
+        Host::prove(&prover, call_guest_id, preflight_result).map_err(HostError::Proving)?;
     let cycles_used = host_output.cycles_used;
     let proving_time = host_output.elapsed_time.as_millis().try_into()?;
     let raw_data: RawData = host_output.try_into()?;

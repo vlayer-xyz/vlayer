@@ -9,7 +9,7 @@ use call_engine::{
     Call, HostOutput, Proof, Seal,
 };
 use call_guest_wrapper::GUEST_ELF;
-use call_host::{get_latest_block_number, Config as HostConfig, Error, Host};
+use call_host::{get_latest_block_number, Config as HostConfig, Error, Host, PreflightError};
 use chain::TEST_CHAIN_ID;
 use chain_client::RpcClient as RpcChainProofClient;
 use foundry_config::RpcEndpoints;
@@ -21,7 +21,8 @@ use mock_chain_server::{ChainProofServerMock, EMPTY_PROOF_RESPONSE};
 use provider::CachedMultiProvider;
 
 use crate::{
-    cheatcodes::{callProverCall, getProofCall, CHEATCODE_CALL_ADDR},
+    cheatcodes::{callProverCall, getProofCall, preverifyEmailCall, CHEATCODE_CALL_ADDR},
+    preverify_email,
     providers::{
         pending_state_provider::PendingStateProviderFactory, test_provider::TestProviderFactory,
     },
@@ -55,23 +56,25 @@ impl<DB: Database> Inspector<DB> for CheatcodeInspector {
         }
         if inputs.target_address == CHEATCODE_CALL_ADDR {
             let (selector, _) = split_calldata(inputs);
-            return match selector.try_into() {
+            return Some(match selector.try_into() {
                 Ok(callProverCall::SELECTOR) => {
                     self.should_start_proving = true;
-                    Some(create_encoded_return_outcome(&true, inputs))
+                    create_encoded_return_outcome(&true, inputs)
                 }
                 Ok(getProofCall::SELECTOR) => {
                     if let Some(proof) = self.previous_proof.take() {
-                        Some(create_encoded_return_outcome(&proof, inputs))
+                        create_encoded_return_outcome(&proof, inputs)
                     } else {
-                        Some(create_revert_outcome("No proof available", inputs.gas_limit))
+                        create_revert_outcome("No proof available", inputs.gas_limit)
                     }
                 }
-                _ => Some(create_revert_outcome(
-                    "Unexpected vlayer cheatcode call",
-                    inputs.gas_limit,
-                )),
-            };
+                Ok(preverifyEmailCall::SELECTOR) => preverify_email::preverify_email(&inputs.input)
+                    .map_or_else(
+                        |err| create_revert_outcome(&err.to_string(), inputs.gas_limit),
+                        |email| create_encoded_return_outcome(&email, inputs),
+                    ),
+                _ => create_revert_outcome("Unexpected vlayer cheatcode call", inputs.gas_limit),
+            });
         }
         None
     }
@@ -137,9 +140,9 @@ fn revert_outcome(error: &Error, inputs: &CallInputs) -> CallOutcome {
 }
 
 const fn is_custom_error(error: &Error) -> Option<&Bytes> {
-    if let Error::Engine(travel_call_executor::Error::TransactError(
+    if let Error::Preflight(PreflightError::Engine(travel_call_executor::Error::TransactError(
         call_engine::evm::execution_result::TransactError::NonUtf8Revert(bytes),
-    )) = error
+    ))) = error
     {
         Some(bytes)
     } else {

@@ -1,14 +1,9 @@
 use block_header::EvmBlockHeader;
-use chain::ChainSpec;
-use location::ExecutionLocation;
-use revm::{
-    primitives::{CfgEnvWithHandlerCfg, HandlerCfg, SpecId},
-    DatabaseRef,
-};
-
-use crate::travel_call_executor::Error as TravelCallExecutorError;
+use chain::{ChainSpec, Error};
+use revm::primitives::{CfgEnvWithHandlerCfg, HandlerCfg, SpecId};
 
 pub mod cached;
+pub mod factory;
 pub mod location;
 
 /// The environment to execute the contract calls in.
@@ -32,14 +27,9 @@ impl<D> EvmEnv<D> {
     }
 
     /// Sets the chain ID and specification ID from the given chain spec.
-    pub fn with_chain_spec(
-        mut self,
-        chain_spec: &ChainSpec,
-    ) -> Result<Self, TravelCallExecutorError> {
+    pub fn with_chain_spec(mut self, chain_spec: &ChainSpec) -> Result<Self, Error> {
         self.cfg_env.chain_id = chain_spec.id();
-        let spec_id = chain_spec
-            .active_fork(self.header.number(), self.header.timestamp())
-            .map_err(|err| TravelCallExecutorError::ChainSpecError(err.to_string()))?;
+        let spec_id = chain_spec.active_fork(self.header.number(), self.header.timestamp())?;
         let handler_cfg = HandlerCfg::new_with_optimism(spec_id, chain_spec.is_optimism());
         self.cfg_env.handler_cfg = handler_cfg;
 
@@ -50,11 +40,4 @@ impl<D> EvmEnv<D> {
     pub fn header(&self) -> &dyn EvmBlockHeader {
         self.header.as_ref()
     }
-}
-
-pub trait EvmEnvFactory<D>: Send + Sync
-where
-    D: DatabaseRef,
-{
-    fn create(&self, location: ExecutionLocation) -> anyhow::Result<EvmEnv<D>>;
 }
