@@ -12,6 +12,8 @@ dotenvy = { workspace = true }
 tokio = { workspace = true }
 tracing = { workspace = true }
 
+server_utils = { workspace = true }
+
 [dev-dependencies]
 
 [lints]

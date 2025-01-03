@@ -1,3 +1,7 @@
+mod handlers;
+
+use axum::Router;
+use server_utils::{init_trace_layer, RequestIdLayer};
 use tokio::net::TcpListener;
 use tracing::info;
 
@@ -12,5 +16,9 @@ pub async fn serve(config: Config) -> anyhow::Result<()> {
     Ok(())
 }
 pub fn server() -> axum::Router {
-    todo!()
+    handlers::handlers()
+        .into_iter()
+        .fold(Router::new(), |router, (path, handler)| router.route(path, handler))
+        .layer(init_trace_layer())
+        .layer(RequestIdLayer)
 }
