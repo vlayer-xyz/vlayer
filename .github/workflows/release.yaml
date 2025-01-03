@@ -215,7 +215,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        docker_image: ["vlayer", "chain_server", "chain_worker"]
+        docker_image: ["vlayer", "call_server", "chain_server", "chain_worker"]
     permissions:
       contents: read
       packages: write
