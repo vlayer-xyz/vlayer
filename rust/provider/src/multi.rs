@@ -3,12 +3,13 @@ use std::{
     sync::{Arc, RwLock},
 };
 
-use alloy_primitives::ChainId;
+use alloy_primitives::{Address, BlockNumber, Bytes, ChainId};
+use block_header::EvmBlockHeader;
 use common::InteriorMutabilityCache;
+use ethers_core::types::BlockNumber as BlockTag;
+use thiserror::Error;
 
-use crate::{
-    factory::ProviderFactoryError, BlockingProvider, NullProviderFactory, ProviderFactory,
-};
+use crate::{factory, BlockingProvider, NullProviderFactory, ProviderFactory};
 
 type MultiProvider = HashMap<ChainId, Arc<dyn BlockingProvider>>;
 
@@ -16,6 +17,17 @@ pub struct CachedMultiProvider {
     cache: RwLock<MultiProvider>,
     factory: Box<dyn ProviderFactory>,
 }
+
+#[derive(Debug, Error)]
+pub enum Error {
+    #[error("Provider: {0}")]
+    Provider(#[from] crate::Error),
+    #[error("Provider factory: {0}")]
+    ProviderFactory(#[from] factory::Error),
+    #[error("Block not found: {0}")]
+    BlockNotFound(BlockTag),
+}
+pub type Result<T> = std::result::Result<T, Error>;
 
 impl CachedMultiProvider {
     pub fn new(
@@ -42,12 +54,39 @@ impl CachedMultiProvider {
         CachedMultiProvider::from_providers([(chain_id, provider)])
     }
 
-    pub fn get(
+    pub fn get(&self, chain_id: ChainId) -> Result<Arc<dyn BlockingProvider>> {
+        Ok(self
+            .cache
+            .try_get_or_insert(chain_id, || self.factory.create(chain_id))?)
+    }
+
+    pub fn get_latest_block_number(&self, chain_id: ChainId) -> Result<BlockNumber> {
+        let provider = self.get(chain_id)?;
+        Ok(provider.get_latest_block_number()?)
+    }
+
+    pub fn get_block_header(
         &self,
         chain_id: ChainId,
-    ) -> Result<Arc<dyn BlockingProvider>, ProviderFactoryError> {
-        self.cache
-            .try_get_or_insert(chain_id, || self.factory.create(chain_id))
+        block_num: BlockTag,
+    ) -> Result<Box<dyn EvmBlockHeader>> {
+        let provider = self.get(chain_id)?;
+
+        let block_header = provider
+            .get_block_header(block_num)?
+            .ok_or(Error::BlockNotFound(block_num))?;
+
+        Ok(block_header)
+    }
+
+    pub fn get_code(
+        &self,
+        chain_id: ChainId,
+        address: Address,
+        block_num: BlockNumber,
+    ) -> Result<Bytes> {
+        let provider = self.get(chain_id)?;
+        Ok(provider.get_code(address, block_num)?)
     }
 }
 

@@ -3,11 +3,11 @@ use call_engine::{
     travel_call_executor::Error as TravelCallExecutorError, verifier::guest_input,
     GuestOutputError,
 };
-use ethers_core::types::BlockNumber as BlockTag;
 use host_utils::proving;
-use provider::ProviderFactoryError;
 use risc0_zkp::verify::VerificationError;
 use thiserror::Error;
+
+use crate::into_input;
 
 #[derive(Error, Debug)]
 pub enum Error {
@@ -26,14 +26,8 @@ pub enum Error {
 
 #[derive(Error, Debug)]
 pub enum BuilderError {
-    #[error("Provider factory error: {0}")]
-    ProviderFactory(#[from] ProviderFactoryError),
-
-    #[error("Provider error: {0}")]
-    Provider(#[from] provider::Error),
-
-    #[error("Block not found: {0}")]
-    BlockNotFound(BlockTag),
+    #[error("Multi provider error: {0}")]
+    MultiProvider(#[from] provider::multi::Error),
 
     #[error("Chain error: {0}")]
     Chain(#[from] chain::Error),
@@ -80,8 +74,8 @@ pub enum PreflightError {
     #[error("Verification error: {0}")]
     Verification(#[from] VerificationError),
 
-    #[error("Invalid input: {0}")]
-    CreatingInput(String),
+    #[error("Creating input: {0}")]
+    CreatingInput(#[from] into_input::Error),
 
     #[error("Guest input verification error: {0}")]
     GuestInput(#[from] guest_input::Error),

@@ -133,7 +133,7 @@ mod test {
 
         assert!(matches!(
             actual_result,
-            Err(AppError::FieldValidation(err)) if err.to_string() == "`data` Is too long `1` > `0`"
+            Err(AppError::FieldValidation(err)) if err.to_string() == "`data` is too long `1` > `0`"
         ));
 
         Ok(())

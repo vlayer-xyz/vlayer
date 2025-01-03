@@ -96,23 +96,7 @@ async fn generate_proof(
 ) -> Result<ProofReceipt, AppError> {
     info!("Processing call {call_hash}");
 
-    // Wait for chain proof if necessary
-    let start = tokio::time::Instant::now();
-    while !host
-        .chain_proof_ready()
-        .await
-        .map_err(HostError::AwaitingChainProof)?
-    {
-        info!(
-            "Location {:?} not indexed. Waiting for chain proof",
-            host.start_execution_location()
-        );
-        state.insert(call_hash, ProofStatus::WaitingForChainProof);
-        tokio::time::sleep(CHAIN_PROOF_POLL_INTERVAL).await;
-        if start.elapsed() > CHAIN_PROOF_TIMEOUT {
-            return Err(AppError::ChainProofTimeout);
-        }
-    }
+    await_chain_proof_ready(&host, &state, call_hash).await?;
 
     info!("Executing preflight for call {call_hash}");
     state.insert(call_hash, ProofStatus::Preflight);
@@ -141,4 +125,29 @@ async fn generate_proof(
     let times = Times::new(preflight_time, proving_time);
     let metrics = Metrics::new(gas_used, cycles_used, times);
     Ok(ProofReceipt::new(raw_data, metrics))
+}
+
+async fn await_chain_proof_ready(
+    host: &Host,
+    state: &SharedProofs,
+    call_hash: CallHash,
+) -> Result<(), AppError> {
+    // Wait for chain proof if necessary
+    let start = tokio::time::Instant::now();
+    while !host
+        .chain_proof_ready()
+        .await
+        .map_err(HostError::AwaitingChainProof)?
+    {
+        info!(
+            "Location {:?} not indexed. Waiting for chain proof",
+            host.start_execution_location()
+        );
+        state.insert(call_hash, ProofStatus::WaitingForChainProof);
+        tokio::time::sleep(CHAIN_PROOF_POLL_INTERVAL).await;
+        if start.elapsed() > CHAIN_PROOF_TIMEOUT {
+            return Err(AppError::ChainProofTimeout);
+        }
+    }
+    Ok(())
 }

@@ -1,16 +1,16 @@
 use std::sync::{Arc, RwLock};
 
-use alloy_primitives::{Address, Bytes, B256, U256};
-use anyhow::Context;
+use alloy_primitives::{Address, BlockNumber, Bytes, B256, U256};
 use block_header::EvmBlockHeader;
-use mpt::KeccakMerkleTrie as MerkleTrie;
+use mpt::{KeccakMerkleTrie as MerkleTrie, ParseNodeError};
 use provider::{BlockingProvider, EIP1186Proof};
 use revm::{
     primitives::{AccountInfo, Bytecode, HashMap, HashSet},
     DatabaseRef,
 };
+use thiserror::Error;
 
-use super::provider::{ProviderDb, ProviderDbError};
+use super::provider::ProviderDb;
 
 #[derive(Default, Debug)]
 struct State {
@@ -27,7 +27,7 @@ pub struct ProofDb {
 }
 
 impl DatabaseRef for ProofDb {
-    type Error = ProviderDbError;
+    type Error = super::provider::Error;
 
     fn basic_ref(&self, address: Address) -> Result<Option<AccountInfo>, Self::Error> {
         let basic = self.db.basic_ref(address)?;
@@ -62,6 +62,18 @@ impl DatabaseRef for ProofDb {
     }
 }
 
+#[derive(Debug, Error)]
+pub enum Error {
+    #[error("Invalid state proof: {0}")]
+    InvalidStateProof(ParseNodeError),
+    #[error("Invalid storage proof: {0}")]
+    InvalidStorageProof(ParseNodeError),
+    #[error("Provider error: {0}")]
+    Provider(#[from] provider::Error),
+    #[error("Block not found: {0}")]
+    BlockNotFound(BlockNumber),
+}
+
 impl ProofDb {
     pub(crate) fn new(provider: Arc<dyn BlockingProvider>, block_number: u64) -> Self {
         let state = RwLock::new(State::default());
@@ -76,7 +88,7 @@ impl ProofDb {
         state.contracts.values().cloned().collect()
     }
 
-    pub(crate) fn fetch_ancestors(&self) -> anyhow::Result<Vec<Box<dyn EvmBlockHeader>>> {
+    pub(crate) fn fetch_ancestors(&self) -> Result<Vec<Box<dyn EvmBlockHeader>>, Error> {
         let state = self.state.read().expect("poisoned lock");
         let provider = &self.db.provider;
         let mut ancestors = Vec::new();
@@ -84,7 +96,7 @@ impl ProofDb {
             for number in (*block_hash_min_number..self.db.block_number).rev() {
                 let header = provider
                     .get_block_header(number.into())?
-                    .with_context(|| format!("block {number} not found"))?;
+                    .ok_or(Error::BlockNotFound(number))?;
                 ancestors.push(header);
             }
         }
@@ -93,14 +105,14 @@ impl ProofDb {
 
     pub(crate) fn prepare_state_storage_tries(
         &self,
-    ) -> anyhow::Result<(MerkleTrie, Vec<MerkleTrie>)> {
+    ) -> Result<(MerkleTrie, Vec<MerkleTrie>), Error> {
         let proofs = self.fetch_proofs()?;
         let state_trie = Self::state_trie(&proofs)?;
         let storage_tries = Self::storage_tries(&proofs)?;
         Ok((state_trie, storage_tries))
     }
 
-    fn fetch_proofs(&self) -> anyhow::Result<Vec<EIP1186Proof>> {
+    fn fetch_proofs(&self) -> Result<Vec<EIP1186Proof>, Error> {
         let state = self.state.read().expect("poisoned lock");
         let mut proofs = Vec::new();
         for (address, storage_keys) in &state.accounts {
@@ -114,20 +126,20 @@ impl ProofDb {
         Ok(proofs)
     }
 
-    pub fn state_trie(proofs: &[EIP1186Proof]) -> anyhow::Result<MerkleTrie> {
+    pub fn state_trie(proofs: &[EIP1186Proof]) -> Result<MerkleTrie, Error> {
         let state_nodes = proofs.iter().flat_map(|p| p.account_proof.iter());
         let state_trie =
-            MerkleTrie::from_rlp_nodes(state_nodes).context("invalid account proof")?;
+            MerkleTrie::from_rlp_nodes(state_nodes).map_err(Error::InvalidStateProof)?;
         Ok(state_trie)
     }
 
-    fn storage_tries(proofs: &[EIP1186Proof]) -> anyhow::Result<Vec<MerkleTrie>> {
+    fn storage_tries(proofs: &[EIP1186Proof]) -> Result<Vec<MerkleTrie>, Error> {
         proofs
             .iter()
             .filter(|proof| !(proof.storage_proof.is_empty() || proof.storage_hash.is_zero()))
             .map(|proof| {
                 let storage_nodes = proof.storage_proof.iter().flat_map(|p| p.proof.iter());
-                MerkleTrie::from_rlp_nodes(storage_nodes).context("invalid storage proof")
+                MerkleTrie::from_rlp_nodes(storage_nodes).map_err(Error::InvalidStorageProof)
             })
             .collect()
     }

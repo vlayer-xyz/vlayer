@@ -12,9 +12,9 @@
 //!         ║ or mock it using RPC providers abd chain guest ELF ID
 //!         ║
 //!         ╚>`WithChainClient`
-//!            ║ `with_start_chain_id` - get provider for the starting chain
+//!            ║ `with_start_chain_id` - sets the chain ID where the execution starts
 //!            ║
-//!            ╚>`WithStartChainProvider`   
+//!            ╚>`WithStartChainId`
 //!               ║ `with_prover_contract_addr` - calculate start execution location,
 //!               ║ (ensuring that the prover contract is deployed on that location)
 //!               ║
@@ -23,13 +23,11 @@
 //!                  ║
 //!                  ╚══>`Host`
 
-use std::{collections::HashMap, sync::Arc};
+use std::collections::HashMap;
 
 use alloy_primitives::ChainId;
 use call_engine::evm::env::location::ExecutionLocation;
-use provider::{
-    Address, BlockNumber, BlockingProvider, CachedMultiProvider, EthersProviderFactory,
-};
+use provider::{Address, BlockNumber, CachedMultiProvider, EthersProviderFactory};
 use risc0_zkvm::sha::Digest;
 use tracing::warn;
 
@@ -53,8 +51,7 @@ pub struct WithChainClient {
     providers: CachedMultiProvider,
 }
 
-pub struct WithStartChainProvider {
-    start_chain_provider: Arc<dyn BlockingProvider>,
+pub struct WithStartChainId {
     start_chain_id: ChainId,
     chain_client: Box<dyn chain_client::Client>,
     providers: CachedMultiProvider,
@@ -116,17 +113,12 @@ impl WithChainGuestId {
 }
 
 impl WithChainClient {
-    pub fn with_start_chain_id(
-        self,
-        start_chain_id: ChainId,
-    ) -> Result<WithStartChainProvider, Error> {
+    pub fn with_start_chain_id(self, start_chain_id: ChainId) -> Result<WithStartChainId, Error> {
         let WithChainClient {
             chain_client,
             providers,
         } = self;
-        let start_chain_provider = providers.get(start_chain_id)?;
-        Ok(WithStartChainProvider {
-            start_chain_provider,
+        Ok(WithStartChainId {
             start_chain_id,
             providers,
             chain_client,
@@ -134,7 +126,7 @@ impl WithChainClient {
     }
 }
 
-impl WithStartChainProvider {
+impl WithStartChainId {
     /// Calculate the start execution location based on:
     ///   a) prover contract address,
     ///   b) latest block from RPC provider,
@@ -151,17 +143,16 @@ impl WithStartChainProvider {
         self,
         prover_contract_addr: Address,
     ) -> Result<WithStartExecLocation, Error> {
-        let WithStartChainProvider {
-            start_chain_provider,
+        let WithStartChainId {
             start_chain_id,
             chain_client,
             providers,
         } = self;
 
         let prover_contract_deployed =
-            check_prover_contract(&start_chain_provider, prover_contract_addr);
+            check_prover_contract(&providers, start_chain_id, prover_contract_addr);
 
-        let latest_rpc_block = start_chain_provider.get_latest_block_number()?;
+        let latest_rpc_block = providers.get_latest_block_number(start_chain_id)?;
         if !prover_contract_deployed(latest_rpc_block)? {
             return Err(Error::ProverContractNotDeployed);
         }
@@ -176,6 +167,7 @@ impl WithStartChainProvider {
             latest_rpc_block
         };
         let start_exec_location = (start_chain_id, start_block_number).into();
+        drop(prover_contract_deployed);
 
         Ok(WithStartExecLocation {
             chain_client,
@@ -198,10 +190,11 @@ impl WithStartExecLocation {
 }
 
 fn check_prover_contract(
-    provider: &Arc<dyn BlockingProvider>,
+    provider: &CachedMultiProvider,
+    chain_id: ChainId,
     address: Address,
 ) -> impl Fn(BlockNumber) -> Result<bool, Error> + '_ {
-    move |block_num| Ok(!provider.get_code(address, block_num)?.is_empty())
+    move |block_num| Ok(!provider.get_code(chain_id, address, block_num)?.is_empty())
 }
 
 #[cfg(test)]
@@ -209,11 +202,13 @@ mod tests {
     use super::*;
 
     mod start_exec_location {
+        use std::sync::Arc;
+
         use chain_common::{GetSyncStatus, SyncStatus};
         use ethers_core::types::{Bytes, U64};
         use ethers_providers::MockProvider;
         use mock_chain_server::ChainProofServerMock;
-        use provider::{EthersProvider, NullProviderFactory};
+        use provider::{BlockingProvider, EthersProvider};
 
         use super::*;
 
@@ -247,12 +242,11 @@ mod tests {
             Box::new(chain_server.into_client())
         }
 
-        async fn builder(prover_contract_code_results: &[&'static [u8]]) -> WithStartChainProvider {
+        async fn builder(prover_contract_code_results: &[&'static [u8]]) -> WithStartChainId {
             let start_chain_provider = mock_provider(prover_contract_code_results);
             let chain_client = mock_chain_client().await;
-            let providers = CachedMultiProvider::from_factory(NullProviderFactory);
-            WithStartChainProvider {
-                start_chain_provider,
+            let providers = CachedMultiProvider::from_provider(CHAIN_ID, start_chain_provider);
+            WithStartChainId {
                 start_chain_id: CHAIN_ID,
                 chain_client,
                 providers,

@@ -4,7 +4,7 @@ use alloy_primitives::ChainId;
 use chain::{CHAIN_NAME_TO_CHAIN_ID, TEST_CHAIN_ID};
 use derive_new::new;
 use foundry_config::RpcEndpoints;
-use provider::{BlockingProvider, EthersProviderFactory, ProviderFactory, ProviderFactoryError};
+use provider::{BlockingProvider, EthersProviderFactory, ProviderFactory};
 
 use crate::providers::pending_state_provider::PendingStateProviderFactory;
 
@@ -26,7 +26,7 @@ impl TestProviderFactory {
 }
 
 impl ProviderFactory for TestProviderFactory {
-    fn create(&self, chain_id: ChainId) -> Result<Box<dyn BlockingProvider>, ProviderFactoryError> {
+    fn create(&self, chain_id: ChainId) -> provider::factory::Result<Box<dyn BlockingProvider>> {
         let provider = if chain_id == TEST_CHAIN_ID {
             self.pending_state_provider_factory.create(chain_id)?
         } else {

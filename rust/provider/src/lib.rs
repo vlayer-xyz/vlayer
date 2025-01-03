@@ -1,8 +1,8 @@
 mod cache;
 mod default;
 mod ethers;
-mod factory;
-mod multi;
+pub mod factory;
+pub mod multi;
 mod never;
 pub mod profiling;
 mod proof;
@@ -19,7 +19,6 @@ pub use ethers_core::types::BlockNumber as BlockTag;
 use ethers_providers::{Http, RetryClient};
 pub use factory::{
     CachedProviderFactory, EthersProviderFactory, NullProviderFactory, ProviderFactory,
-    ProviderFactoryError,
 };
 pub use multi::CachedMultiProvider;
 pub use proof::{EIP1186Proof, StorageProof};
