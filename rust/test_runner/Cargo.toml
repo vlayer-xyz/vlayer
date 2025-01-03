@@ -27,7 +27,6 @@ derive-new = { workspace = true }
 ethers-core = { workspace = true }
 eyre = { workspace = true }
 forge = { workspace = true }
-foundry-cheatcodes = { workspace = true }
 foundry-cli = { workspace = true }
 foundry-common = { workspace = true }
 foundry-compilers = { workspace = true }

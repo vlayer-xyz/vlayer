@@ -10,6 +10,9 @@
 #![allow(clippy::needless_pass_by_ref_mut)]
 #![allow(clippy::cast_lossless)]
 #![allow(clippy::large_futures)]
+#![allow(clippy::trivially_copy_pass_by_ref)]
+#![allow(clippy::map_unwrap_or)]
+#![allow(clippy::unused_self)]
 
 #[rustfmt::skip]
 pub mod cli;

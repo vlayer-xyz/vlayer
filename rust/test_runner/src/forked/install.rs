@@ -1,5 +1,5 @@
 /**
- * This file was copied from https://github.com/foundry-rs/foundry/blob/e649e62f125244a3ef116be25dfdc81a2afbaf2a/crates/forge/bin/cmd/install.rs
+ * This file was copied from https://github.com/foundry-rs/foundry/blob/6cb41febfc989cbf7dc13c43ec6c3ce5fba1ea04/crates/forge/bin/cmd/install.rs
  * The original file is licensed under the Apache License, Version 2.0.
  * It wasn't modified, but it wasn't exported from foundry lib
  */
@@ -117,7 +117,6 @@ impl DependencyInstallOpts {
     pub fn install(self, config: &mut Config, dependencies: Vec<Dependency>) -> Result<()> {
         let Self { no_git, no_commit, .. } = self;
 
-
         let git = self.git(config);
 
         let install_lib_dir = config.install_lib_dir();
@@ -172,7 +171,7 @@ impl DependencyInstallOpts {
                 // Pin branch to submodule if branch is used
                 if let Some(branch) = &installed_tag {
                     // First, check if this tag has a branch
-                    if git.has_branch(branch)? {
+                    if git.has_branch(branch, &path)? {
                         // always work with relative paths when directly modifying submodules
                         git.cmd()
                             .args(["submodule", "set-branch", "-b", branch])

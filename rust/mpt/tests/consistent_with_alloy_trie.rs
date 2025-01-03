@@ -1,10 +1,9 @@
 use std::collections::BTreeMap;
 
 use alloy_primitives::U256;
-use alloy_trie::HashBuilder;
+use alloy_trie::{HashBuilder, Nibbles};
 use common::Hashable;
 use mpt::{hash, reorder_root_first, KeccakMerkleTrie as MerkleTrie};
-use nybbles::Nibbles;
 
 type D = sha3::Keccak256;
 
