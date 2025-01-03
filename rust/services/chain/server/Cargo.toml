@@ -12,6 +12,10 @@ clap = { workspace = true, features = ["derive", "env"] }
 common = { workspace = true }
 dotenvy = { workspace = true }
 tokio = { workspace = true }
+version = { workspace = true }
+
+[build-dependencies]
+version = { workspace = true }
 
 [lints]
 workspace = true

@@ -8,7 +8,7 @@ use common::{init_tracing, GlobalArgs, LogFormat};
 use dotenvy::dotenv;
 
 #[derive(Parser)]
-#[command(version)]
+#[command(version = version::version())]
 struct Cli {
     #[arg(
         long,
