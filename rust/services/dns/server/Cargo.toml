@@ -9,7 +9,9 @@ axum = { workspace = true }
 clap = { workspace = true, features = ["derive", "env"] }
 common = { workspace = true }
 dotenvy = { workspace = true }
+serde = { workspace = true }
 tokio = { workspace = true }
+tower-http = { workspace = true, features = ["validate-request"] }
 tracing = { workspace = true }
 
 server_utils = { workspace = true }

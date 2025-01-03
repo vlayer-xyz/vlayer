@@ -11,7 +11,7 @@ use crate::config::Config;
 struct AppState;
 
 impl AppState {
-    fn new() -> Self {
+    const fn new() -> Self {
         Self
     }
 }

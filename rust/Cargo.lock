@@ -3560,8 +3560,10 @@ dependencies = [
  "clap",
  "common",
  "dotenvy",
+ "serde",
  "server_utils",
  "tokio",
+ "tower-http 0.6.2",
  "tracing",
 ]
 
