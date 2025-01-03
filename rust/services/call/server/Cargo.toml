@@ -4,6 +4,23 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
+alloy-primitives = { workspace = true }
+anyhow = { workspace = true }
+call_guest_wrapper = { workspace = true }
+call_server_lib = { workspace = true }
+chain_guest_wrapper = { workspace = true }
+clap = { workspace = true, features = ["derive", "env"] }
+common = { workspace = true }
+hex = { workspace = true }
+tokio = { workspace = true }
+tracing = { workspace = true }
+
+[dev-dependencies]
+regex = { workspace = true }
+
+[build-dependencies]
+anyhow = { workspace = true }
+vergen-gitcl = { workspace = true, features = ["build", "cargo", "si", "rustc"] }
 
 [lints]
 workspace = true
