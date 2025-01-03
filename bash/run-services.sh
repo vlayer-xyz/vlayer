@@ -62,7 +62,7 @@ function startup_vlayer(){
     RISC0_DEV_MODE="${RISC0_DEV_MODE}" \
     BONSAI_API_URL="${BONSAI_API_URL}" \
     BONSAI_API_KEY="${BONSAI_API_KEY}" \
-    ./target/debug/vlayer serve \
+    ./target/debug/call_server \
         ${args[@]} \
         ${external_urls[@]+"${external_urls[@]}"} \
         >>"${LOGS_DIR}/vlayer_serve.out" &
@@ -276,7 +276,7 @@ echo
 if [[ "${BUILD_BINARIES}" == "1" ]] ; then 
     echo "Building binaries..."
     pushd "${VLAYER_HOME}/rust"
-    cargo build --bin vlayer --bin chain_server --bin worker
+    cargo build --bin call_server --bin chain_server --bin worker
     popd
     echo
 fi
