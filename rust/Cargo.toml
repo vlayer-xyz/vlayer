@@ -18,6 +18,7 @@ members = [
     "services/call/host",
     "services/call/precompiles",
     "services/call/seal",
+    "services/call/server",
     "services/call/server_lib",
     "services/chain/block_trie",
     "services/chain/client",
@@ -161,6 +162,7 @@ call_engine = { path = "services/call/engine" }
 call_guest = { path = "services/call/guest" }
 call_guest_wrapper = { path = "services/call/guest_wrapper" }
 call_host = { path = "services/call/host" }
+call_server = { path = "services/call/server" }
 call_server_lib = { path = "services/call/server_lib" }
 chain = { path = "chain" }
 chain_client = { path = "services/chain/client" }
