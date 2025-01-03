@@ -1,5 +1,5 @@
 use clap::{Parser, Subcommand};
-use commands::{args::InitArgs, init::run_init, version::Version};
+use commands::{args::InitArgs, init::run_init};
 use test_runner::cli::TestArgs;
 use tracing::error;
 use tracing_subscriber::EnvFilter;
@@ -17,7 +17,7 @@ mod utils;
 mod test_utils;
 
 #[derive(Parser)]
-#[command(name = "vlayer", version = Version, about, long_about = None)]
+#[command(name = "vlayer", version = version::version(), about, long_about = None)]
 #[command(propagate_version = true)]
 struct Cli {
     #[command(subcommand)]
