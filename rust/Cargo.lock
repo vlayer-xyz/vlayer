@@ -2067,7 +2067,7 @@ dependencies = [
 ]
 
 [[package]]
-name = "call_server"
+name = "call_server_lib"
 version = "0.1.0"
 dependencies = [
  "alloy-chains",
@@ -2582,7 +2582,7 @@ dependencies = [
  "alloy-primitives",
  "anyhow",
  "call_guest_wrapper",
- "call_server",
+ "call_server_lib",
  "chain_guest_wrapper",
  "clap",
  "colored",

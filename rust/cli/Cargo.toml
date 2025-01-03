@@ -13,7 +13,7 @@ alloy-primitives = { workspace = true, features = ["rlp"] }
 
 anyhow = { workspace = true }
 call_guest_wrapper = { workspace = true }
-call_server = { workspace = true }
+call_server_lib = { workspace = true }
 chain_guest_wrapper = { workspace = true }
 clap = { workspace = true, features = ["derive", "env", "string"] }
 colored = { workspace = true }

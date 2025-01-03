@@ -1,4 +1,4 @@
-use call_server::serve;
+use call_server_lib::serve;
 use tracing::{info, warn};
 
 use crate::{

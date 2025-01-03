@@ -2,7 +2,7 @@ use std::fmt;
 
 use alloy_primitives::ChainId;
 use call_guest_wrapper::GUEST_ELF as CALL_GUEST_ELF;
-use call_server::{gas_meter::Config as GasMeterConfig, Config, ProofMode};
+use call_server_lib::{gas_meter::Config as GasMeterConfig, Config, ProofMode};
 use chain_guest_wrapper::GUEST_ELF as CHAIN_GUEST_ELF;
 use clap::{ArgAction, Parser, ValueEnum};
 
@@ -56,7 +56,7 @@ impl ServeArgs {
             .gas_meter_url
             .zip(Some(self.gas_meter_ttl.unwrap_or_default()))
             .map(|(url, ttl)| GasMeterConfig::new(url, ttl, self.gas_meter_api_key));
-        call_server::ConfigBuilder::new(
+        call_server_lib::ConfigBuilder::new(
             CALL_GUEST_ELF.clone(),
             CHAIN_GUEST_ELF.clone(),
             api_version,
