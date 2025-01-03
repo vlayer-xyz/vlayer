@@ -2626,7 +2626,6 @@ dependencies = [
  "colored",
  "flate2",
  "lazy_static",
- "regex",
  "reqwest 0.12.11",
  "serde_json",
  "tar",
@@ -11738,6 +11737,7 @@ name = "version"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "regex",
  "vergen-gitcl",
 ]
 

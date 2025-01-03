@@ -6,10 +6,7 @@ use chain_server_lib::{serve, ServerConfig};
 use clap::Parser;
 use common::{init_tracing, GlobalArgs, LogFormat};
 use dotenvy::dotenv;
-
-pub fn version() -> String {
-    version::version!()
-}
+use version::version;
 
 #[derive(Parser)]
 #[command(version = version())]

@@ -3,6 +3,7 @@ use commands::{args::InitArgs, init::run_init};
 use test_runner::cli::TestArgs;
 use tracing::error;
 use tracing_subscriber::EnvFilter;
+use version::version;
 
 use crate::{
     commands::{test::run_test, update::run_update},
@@ -15,10 +16,6 @@ mod utils;
 
 #[cfg(test)]
 mod test_utils;
-
-pub fn version() -> String {
-    version::version!()
-}
 
 #[derive(Parser)]
 #[command(name = "vlayer", version = version(), about, long_about = None)]

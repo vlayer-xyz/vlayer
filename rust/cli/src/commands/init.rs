@@ -10,6 +10,7 @@ use reqwest::get;
 use serde_json::{Map, Value};
 use tar::Archive;
 use tracing::{error, info};
+use version::version;
 
 use crate::{
     commands::{
@@ -21,7 +22,6 @@ use crate::{
         parse_toml::{add_deps_to_foundry_toml, get_src_from_str},
         path::{copy_dir_to, find_foundry_root},
     },
-    version,
 };
 
 const VLAYER_DIR_NAME: &str = "vlayer";

@@ -19,8 +19,5 @@ version = { workspace = true }
 [dev-dependencies]
 regex = { workspace = true }
 
-[build-dependencies]
-version = { workspace = true }
-
 [lints]
 workspace = true

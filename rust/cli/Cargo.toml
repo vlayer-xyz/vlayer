@@ -6,7 +6,6 @@ path = "src/main.rs"
 name = "cli"
 version = "0.1.0"
 edition = "2021"
-build = "build.rs"
 
 [dependencies]
 anyhow = { workspace = true }
@@ -24,12 +23,6 @@ tokio = { workspace = true }
 toml = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
-version = { workspace = true }
-
-[dev-dependencies]
-regex = { workspace = true }
-
-[build-dependencies]
 version = { workspace = true }
 
 [lints]

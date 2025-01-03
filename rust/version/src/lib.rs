@@ -1,41 +1,56 @@
-use std::env;
+pub fn version() -> String {
+    let build_date = env!("VERGEN_BUILD_DATE").replace("-", "");
+    [
+        env!("CARGO_PKG_VERSION"),
+        env!("VLAYER_RELEASE"),
+        build_date.as_str(),
+        env!("VERGEN_GIT_SHA"),
+    ]
+    .join("-")
+}
 
-use vergen_gitcl::{
-    BuildBuilder, CargoBuilder, Emitter, GitclBuilder, RustcBuilder, SysinfoBuilder,
-};
+#[cfg(test)]
+mod tests {
+    use regex::Regex;
 
-pub fn emit_version_from_git_sha() {
-    if env::var("VLAYER_RELEASE").is_err() {
-        println!("cargo:rustc-env=VLAYER_RELEASE=dev");
+    use super::*;
+
+    #[test]
+    fn has_pkg_version() {
+        let version = version();
+        let pkg_version = version.split('-').next().unwrap();
+
+        assert_eq!(env!("CARGO_PKG_VERSION"), pkg_version);
     }
 
-    emit_version_from_git_sha_inner()
-        .expect("unexpected I/O error when emitting version from git sha");
-}
+    #[test]
+    fn has_build_mode() {
+        let version = version();
+        let build_mode = version.split('-').nth(1).unwrap();
 
-fn emit_version_from_git_sha_inner() -> anyhow::Result<()> {
-    let mut git_cl_builder = GitclBuilder::default();
-    git_cl_builder.all().sha(true);
+        assert_eq!("dev", env!("VLAYER_RELEASE"));
+        assert_eq!(env!("VLAYER_RELEASE"), build_mode);
+    }
 
-    Emitter::default()
-        .add_instructions(&BuildBuilder::all_build()?)?
-        .add_instructions(&CargoBuilder::all_cargo()?)?
-        .add_instructions(&git_cl_builder.build()?)?
-        .add_instructions(&RustcBuilder::all_rustc()?)?
-        .add_instructions(&SysinfoBuilder::all_sysinfo()?)?
-        .emit()
-}
+    #[test]
+    fn has_build_date() {
+        // "yyyymmdd"
+        let date_regex = Regex::new(r"[0-9]{4}[0-1][0-9][0-3][0-9]").unwrap();
 
-#[macro_export]
-macro_rules! version {
-    () => {{
-        let build_date = env!("VERGEN_BUILD_DATE").replace("-", "");
-        [
-            env!("CARGO_PKG_VERSION"),
-            env!("VLAYER_RELEASE"),
-            build_date.as_str(),
-            env!("VERGEN_GIT_SHA"),
-        ]
-        .join("-")
-    }};
+        let version = version();
+        let build_date = version.split('-').nth(2).unwrap();
+
+        assert!(date_regex.is_match(build_date));
+    }
+
+    #[test]
+    fn has_build_commit() {
+        // ex "14d8bb4" - default result of `git rev-parse --short` has length of 7
+        let commit_regex = Regex::new(r"[0-9a-f]{7}").unwrap();
+
+        let version = version();
+        let build_commit = version.split('-').nth(3).unwrap();
+
+        assert!(commit_regex.is_match(build_commit));
+    }
 }
