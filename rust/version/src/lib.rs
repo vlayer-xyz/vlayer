@@ -26,28 +26,21 @@ fn emit_version_from_git_sha_inner() -> anyhow::Result<()> {
         .emit()
 }
 
-pub fn version() -> String {
-    let build_date = env::var("VERGEN_BUILD_DATE").expect(
-        "VERGEN_BUILD_DATE is not defined!
-Did you forget to call version::emit_version_from_git_sha() in your build.rs script?",
-    );
-    let build_date_without_dashes = build_date.replace('-', "");
+macro_rules! env_var {
+    ($env_var:literal) => {
+        env::var($env_var)
+            .expect(concat!($env_var, "is not defined!\nDid you forget to call version::emit_version_from_git_sha() in your build.rs script?"))
+            .as_str()
+    };
+}
 
+pub fn version() -> String {
+    let build_date = env_var!("VERGEN_BUILD_DATE").replace("-", "");
     [
         env!("CARGO_PKG_VERSION"),
-        env::var("VLAYER_RELEASE")
-            .expect(
-                "VLAYER_RELEASE is not defined!
-Did you forget to call version::emit_version_from_git_sha() in your build.rs script?",
-            )
-            .as_str(),
-        build_date_without_dashes.as_str(),
-        env::var("VERGEN_GIT_SHA")
-            .expect(
-                "VERGEN_GIT_SHA is not defined!
-Did you forget to call version::emit_version_from_git_sha() in your build.rs script?",
-            )
-            .as_str(),
+        env_var!("VLAYER_RELEASE"),
+        build_date.as_str(),
+        env_var!("VERGEN_GIT_SHA"),
     ]
     .join("-")
 }
