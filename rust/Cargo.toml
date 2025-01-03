@@ -126,7 +126,7 @@ risc0-build-ethereum = "1.2.0"
 risc0-zkp = { version = "1.2.0", default-features = false }
 risc0-zkvm = "1.2.0"
 rlp = "0.6.1"
-rsa = "0.9.7"
+rsa = "=0.9.6"
 semver = "1.0.24"
 serde = { version = "1.0.213", features = ["derive"] }
 serde_json = "1.0.132"

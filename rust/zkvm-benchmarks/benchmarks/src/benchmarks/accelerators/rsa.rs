@@ -11,7 +11,7 @@ use crate::Benchmark;
 
 const RSA_2048_PRIV_PEM: &str = include_str!("../../../assets/rsa2048-priv.pem");
 const RSA_3072_PRIV_PEM: &str = include_str!("../../../assets/rsa3072-priv.pem");
-const RSA_3072_PUB_PEM: &str = include_str!("../../../assets/rsa3072-pub.pem");
+const RSA_2048_PUB_PEM: &str = include_str!("../../../assets/rsa2048-pub.pem");
 
 const EMAIL: &str = include_str!("../../../assets/email.eml");
 
@@ -55,9 +55,9 @@ pub fn benchmarks() -> Vec<Benchmark> {
         Benchmark::new("rsa_2048_verification", move || rsa_verification(bench_2048), 9_971_442),
         Benchmark::new("rsa_3072_verification", move || rsa_verification(bench_3072), 21_917_991),
         Benchmark::new(
-            "rsa_3072_public_key",
-            move || rsa_public_key_from_string(RSA_3072_PUB_PEM),
-            72_504,
+            "rsa_2048_public_key",
+            move || rsa_public_key_from_string(RSA_2048_PUB_PEM),
+            53_576,
         ),
     ]
 }
