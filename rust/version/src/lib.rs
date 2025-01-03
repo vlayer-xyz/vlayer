@@ -26,21 +26,16 @@ fn emit_version_from_git_sha_inner() -> anyhow::Result<()> {
         .emit()
 }
 
-macro_rules! env_var {
-    ($env_var:literal) => {
-        env::var($env_var)
-            .expect(concat!($env_var, "is not defined!\nDid you forget to call version::emit_version_from_git_sha() in your build.rs script?"))
-            .as_str()
-    };
-}
-
-pub fn version() -> String {
-    let build_date = env_var!("VERGEN_BUILD_DATE").replace("-", "");
-    [
-        env!("CARGO_PKG_VERSION"),
-        env_var!("VLAYER_RELEASE"),
-        build_date.as_str(),
-        env_var!("VERGEN_GIT_SHA"),
-    ]
-    .join("-")
+#[macro_export]
+macro_rules! version {
+    () => {{
+        let build_date = env!("VERGEN_BUILD_DATE").replace("-", "");
+        [
+            env!("CARGO_PKG_VERSION"),
+            env!("VLAYER_RELEASE"),
+            build_date.as_str(),
+            env!("VERGEN_GIT_SHA"),
+        ]
+        .join("-")
+    }};
 }

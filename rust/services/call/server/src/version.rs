@@ -1,6 +1,5 @@
 use call_guest_wrapper::GUEST_ELF;
 use clap::builder::{IntoResettable, Resettable, Str};
-pub use version::version;
 
 pub struct Version;
 
@@ -8,6 +7,10 @@ impl IntoResettable<Str> for Version {
     fn into_resettable(self) -> Resettable<Str> {
         version_msg().into_resettable()
     }
+}
+
+pub fn version() -> String {
+    version::version!()
 }
 
 fn version_msg() -> String {

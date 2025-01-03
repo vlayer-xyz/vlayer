@@ -16,8 +16,12 @@ mod utils;
 #[cfg(test)]
 mod test_utils;
 
+pub fn version() -> String {
+    version::version!()
+}
+
 #[derive(Parser)]
-#[command(name = "vlayer", version = version::version(), about, long_about = None)]
+#[command(name = "vlayer", version = version(), about, long_about = None)]
 #[command(propagate_version = true)]
 struct Cli {
     #[command(subcommand)]
