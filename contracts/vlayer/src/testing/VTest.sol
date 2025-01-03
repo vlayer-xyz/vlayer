@@ -4,7 +4,7 @@ pragma solidity ^0.8.21;
 import "forge-std-1.9.4/src/Test.sol";
 import {UnverifiedEmail} from "../EmailProof.sol";
 import {Proof} from "../Proof.sol";
-import {EmailTestUtils} from "./libraries/Email.sol";
+import {EmailTestUtils} from "./libraries/EmailTestUtils.sol";
 
 // 0xe5F6E4A8da66436561059673919648CdEa4e486B
 address constant CHEATCODES = address(uint160(uint256(keccak256("vlayer.cheatcodes"))));
