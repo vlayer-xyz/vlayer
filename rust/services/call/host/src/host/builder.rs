@@ -33,7 +33,7 @@ use provider::{
 use risc0_zkvm::sha::Digest;
 use tracing::warn;
 
-use super::{Config, Error, Host};
+use super::{BuilderError as Error, Config, Host};
 
 pub struct New;
 

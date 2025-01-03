@@ -13,7 +13,7 @@ use derive_new::new;
 use provider::CachedMultiProvider;
 use revm::db::CacheDB;
 
-use crate::{Error as HostError, HostDb, ProofDb};
+use crate::{host::BuilderError, HostDb, ProofDb};
 
 #[derive(new)]
 pub(crate) struct HostEvmEnvFactory {
@@ -32,12 +32,12 @@ fn create(
         block_number,
         chain_id,
     }: ExecutionLocation,
-) -> std::result::Result<EvmEnv<HostDb>, HostError> {
+) -> std::result::Result<EvmEnv<HostDb>, BuilderError> {
     let block_tag = block_number.into();
     let provider = providers.get(chain_id)?;
     let header = provider
         .get_block_header(block_tag)?
-        .ok_or(HostError::BlockNotFound(block_tag))?;
+        .ok_or(BuilderError::BlockNotFound(block_tag))?;
 
     let proof_db = ProofDb::new(Arc::clone(&provider), block_number);
     let mut db = CacheDB::new(proof_db);

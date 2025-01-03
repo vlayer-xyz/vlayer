@@ -24,7 +24,7 @@ use chain_client::Client as ChainClient;
 use common::GuestElf;
 pub use config::{Config, DEFAULT_MAX_CALLDATA_SIZE};
 use derive_new::new;
-pub use error::{Error, PreflightError};
+pub use error::{AwaitingChainProofError, BuilderError, Error, PreflightError, ProvingError};
 use ethers_core::types::BlockNumber as BlockTag;
 use prover::Prover;
 use provider::{CachedMultiProvider, EvmBlockHeader};
@@ -73,7 +73,7 @@ impl Host {
 pub fn get_latest_block_number(
     providers: &CachedMultiProvider,
     chain_id: ChainId,
-) -> Result<BlockNumber, Error> {
+) -> Result<BlockNumber, BuilderError> {
     get_block_header(providers, chain_id, BlockTag::Latest).map(|header| header.number())
 }
 
@@ -81,12 +81,12 @@ pub fn get_block_header(
     providers: &CachedMultiProvider,
     chain_id: ChainId,
     block_num: BlockTag,
-) -> Result<Box<dyn EvmBlockHeader>, Error> {
+) -> Result<Box<dyn EvmBlockHeader>, BuilderError> {
     let provider = providers.get(chain_id)?;
 
     let block_header = provider
         .get_block_header(block_num)?
-        .ok_or(Error::BlockNotFound(block_num))?;
+        .ok_or(BuilderError::BlockNotFound(block_num))?;
 
     Ok(block_header)
 }
@@ -123,7 +123,7 @@ impl Host {
         }
     }
 
-    pub async fn chain_proof_ready(&self) -> Result<bool, Error> {
+    pub async fn chain_proof_ready(&self) -> Result<bool, AwaitingChainProofError> {
         let latest_indexed_block = self
             .chain_client
             .get_sync_status(self.start_execution_location.chain_id)
@@ -177,7 +177,7 @@ impl Host {
         PreflightResult {
             host_output, input, ..
         }: PreflightResult,
-    ) -> Result<HostOutput, Error> {
+    ) -> Result<HostOutput, ProvingError> {
         let EncodedProofWithStats {
             seal,
             raw_guest_output,
@@ -189,7 +189,7 @@ impl Host {
         let cycles_used = stats.total_cycles;
 
         if guest_output.evm_call_result != host_output {
-            return Err(Error::HostGuestOutputMismatch(
+            return Err(ProvingError::HostGuestOutputMismatch(
                 host_output.into(),
                 guest_output.evm_call_result,
             ));
@@ -216,7 +216,7 @@ impl Host {
         let prover = self.prover();
         let call_guest_id = self.call_guest_id();
         let preflight_result = self.preflight(call).await?;
-        Host::prove(&prover, call_guest_id, preflight_result)
+        Ok(Host::prove(&prover, call_guest_id, preflight_result)?)
     }
 
     fn validate_calldata_size(&self, call: &Call) -> Result<(), PreflightError> {
@@ -245,7 +245,7 @@ struct EncodedProofWithStats {
 }
 
 #[instrument(skip_all)]
-fn provably_execute(prover: &Prover, input: &Input) -> Result<EncodedProofWithStats, Error> {
+fn provably_execute(prover: &Prover, input: &Input) -> Result<EncodedProofWithStats, ProvingError> {
     let now = Instant::now();
     let ProveInfo { receipt, stats } = prover.prove(input)?;
     let elapsed_time = now.elapsed();
