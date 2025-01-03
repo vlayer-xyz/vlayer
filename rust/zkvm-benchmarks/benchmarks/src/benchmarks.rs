@@ -1,7 +1,7 @@
 use crate::Benchmark;
 
+mod accelerators;
 mod block_trie;
-mod hash;
 mod mpt;
 mod precompiles;
 
@@ -28,7 +28,7 @@ pub fn merge<Benchmarks: IntoIterator<Item = Benchmark>>(
 
 pub fn benchmarks() -> Vec<Benchmark> {
     merge([
-        ("hash", hash::benchmarks()),
+        ("accelerators", accelerators::benchmarks()),
         ("mpt", mpt::benchmarks()),
         ("block_trie", block_trie::benchmarks()),
         ("precompiles", precompiles::benchmarks()),

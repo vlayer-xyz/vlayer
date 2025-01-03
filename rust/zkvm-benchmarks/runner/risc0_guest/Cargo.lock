@@ -1975,6 +1975,12 @@ dependencies = [
 ]
 
 [[package]]
+name = "include_bytes_aligned"
+version = "0.1.4"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4ee796ad498c8d9a1d68e477df8f754ed784ef875de1414ebdaf169f70a6a784"
+
+[[package]]
 name = "indexmap"
 version = "1.9.3"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3116,6 +3122,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "risc0-bigint2"
+version = "1.2.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "4f4c185a3bfaee681eed5bfac1440128184bf0b6544c345fb4d7bd4317c909fb"
+dependencies = [
+ "include_bytes_aligned",
+ "num-bigint-dig",
+ "stability",
+]
+
+[[package]]
 name = "risc0-binfmt"
 version = "1.2.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
@@ -3330,9 +3347,8 @@ dependencies = [
 
 [[package]]
 name = "rsa"
-version = "0.9.7"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "47c75d7c5c6b673e58bf54d8544a9f432e3a925b0e80f7cd3602ab5c50c55519"
+version = "0.9.6"
+source = "git+https://github.com/risc0/RustCrypto-RSA?tag=v0.9.6-risczero.0#cb42fd295c096c6dddd8386cd57b122add8d0cbc"
 dependencies = [
  "const-oid",
  "digest 0.10.7",
@@ -3342,6 +3358,7 @@ dependencies = [
  "pkcs1",
  "pkcs8",
  "rand_core",
+ "risc0-bigint2",
  "signature",
  "spki",
  "subtle",
@@ -4706,6 +4723,7 @@ dependencies = [
  "email_proof",
  "mpt",
  "risc0-zkvm",
+ "rsa",
  "serde",
  "sha2",
 ]
