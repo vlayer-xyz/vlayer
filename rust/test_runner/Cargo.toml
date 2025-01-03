@@ -33,9 +33,11 @@ foundry-config = { workspace = true }
 foundry-debugger = { workspace = true }
 foundry-evm = { workspace = true }
 foundry-evm-core = { workspace = true }
+hickory-resolver = { workspace = true }
 indicatif = { workspace = true }
 inferno = { workspace = true }
 itertools = { workspace = true }
+mailparse = { workspace = true }
 mock_chain_server = { workspace = true }
 mpt = { workspace = true }
 opener = { workspace = true }
@@ -47,6 +49,7 @@ rayon = { workspace = true }
 regex = { workspace = true }
 semver = { workspace = true }
 serde_json = { workspace = true }
+thiserror = { workspace = true }
 tokio = { workspace = true }
 tracing = { workspace = true }
 yansi = { workspace = true }

@@ -91,6 +91,8 @@ It can be convenient to use [Regular Expressions](/features/json-and-regex.md) t
 Email is passed to the Solidity contract as an `UnverifiedEmail` structure that can be created using the `preverifyEmail` function in the [SDK](../javascript/javascript.md).
 `preverifyEmail` should be called with the raw `.eml` file content as an argument ([learn how to get this file](/features/email.html#getting-eml-files)). The email is also required to have [`From` and `DKIM-Signature`](https://datatracker.ietf.org/doc/html/rfc6376) headers.
 
+You can also use `preverifyEmail` function inside the [Solidity tests](../advanced/tests.md)
+
 ```solidity
 struct UnverifiedEmail {
   string email;

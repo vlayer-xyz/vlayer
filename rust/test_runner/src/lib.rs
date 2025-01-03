@@ -3,6 +3,7 @@ mod cheatcodes;
 pub(crate) mod composite_inspector;
 pub(crate) mod forked;
 mod init_global;
+mod preverify_email;
 mod proof;
 mod providers;
 

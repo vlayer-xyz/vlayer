@@ -25,6 +25,7 @@ To manipulate the blockchain state and test for specific reverts and events, For
 vlayer introduces additional cheatcodes:
 - `callProver()`: Executes the next call within the vlayer zkEVM environment, generating a proof of computation accessible via `getProof`.
 - `getProof()`: Retrieves the proof from the last call after using `callProver`.
+- `preverifyEmail(string memory email) returns (UnverifiedEmail memory)`: Fetches the DNS for the RSA public key used to sign the email. 
 
 ### Example Usage
 
