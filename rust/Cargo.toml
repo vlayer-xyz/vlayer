@@ -34,6 +34,7 @@ members = [
     "services/chain/worker",
     "services/dns/server",
     "test_runner",
+    "version",
     "web_proof",
     "zkvm-benchmarks/benchmarks",
     "zkvm-benchmarks/runner",
@@ -185,6 +186,7 @@ provider = { path = "provider" }
 u64_range = { path = "range" }
 server_utils = { path = "server_utils" }
 test_runner = { path = "test_runner" }
+version = { path = "version" }
 web_proof = { path = "web_proof" }
 zkvm-benchmarks = { path = "zkvm-benchmarks/benchmarks" }
 

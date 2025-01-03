@@ -9,18 +9,18 @@ anyhow = { workspace = true }
 call_guest_wrapper = { workspace = true }
 call_server_lib = { workspace = true }
 chain_guest_wrapper = { workspace = true }
-clap = { workspace = true, features = ["derive", "env"] }
+clap = { workspace = true, features = ["derive", "env", "string"] }
 common = { workspace = true }
 hex = { workspace = true }
 tokio = { workspace = true }
 tracing = { workspace = true }
+version = { workspace = true }
 
 [dev-dependencies]
 regex = { workspace = true }
 
 [build-dependencies]
-anyhow = { workspace = true }
-vergen-gitcl = { workspace = true, features = ["build", "cargo", "si", "rustc"] }
+version = { workspace = true }
 
 [lints]
 workspace = true

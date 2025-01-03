@@ -24,13 +24,13 @@ tokio = { workspace = true }
 toml = { workspace = true }
 tracing = { workspace = true }
 tracing-subscriber = { workspace = true }
+version = { workspace = true }
 
 [dev-dependencies]
 regex = { workspace = true }
 
 [build-dependencies]
-anyhow = { workspace = true }
-vergen-gitcl = { workspace = true, features = ["build", "cargo", "si", "rustc"] }
+version = { workspace = true }
 
 [lints]
 workspace = true

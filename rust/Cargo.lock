@@ -2081,7 +2081,7 @@ dependencies = [
  "regex",
  "tokio",
  "tracing",
- "vergen-gitcl",
+ "version",
 ]
 
 [[package]]
@@ -2613,7 +2613,7 @@ dependencies = [
  "toml 0.8.19",
  "tracing",
  "tracing-subscriber 0.3.19",
- "vergen-gitcl",
+ "version",
 ]
 
 [[package]]
@@ -11436,6 +11436,14 @@ dependencies = [
  "anyhow",
  "derive_builder 0.20.2",
  "rustversion",
+]
+
+[[package]]
+name = "version"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "vergen-gitcl",
 ]
 
 [[package]]
