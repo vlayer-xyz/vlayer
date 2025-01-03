@@ -22,7 +22,7 @@ use call_engine::{
 };
 use chain_client::Client as ChainClient;
 use common::GuestElf;
-pub use config::{Config, DEFAULT_MAX_CALLDATA_SIZE};
+pub use config::Config;
 use derive_new::new;
 pub use error::{AwaitingChainProofError, BuilderError, Error, PreflightError, ProvingError};
 use ethers_core::types::BlockNumber as BlockTag;
@@ -47,7 +47,6 @@ pub struct Host {
     prover: Prover,
     chain_client: chain_client::RecordingClient,
     chain_proof_verifier: chain_proof::ZkVerifier,
-    max_calldata_size: usize,
     guest_elf: GuestElf,
 }
 
@@ -118,7 +117,6 @@ impl Host {
             prover,
             chain_client,
             chain_proof_verifier,
-            max_calldata_size: config.max_calldata_size,
             guest_elf: config.call_guest_elf,
         }
     }
@@ -134,8 +132,6 @@ impl Host {
 
     #[instrument(skip_all)]
     pub async fn preflight(self, call: Call) -> Result<PreflightResult, PreflightError> {
-        self.validate_calldata_size(&call)?;
-
         let now = Instant::now();
         let SuccessfulExecutionResult {
             output: host_output,
@@ -218,14 +214,6 @@ impl Host {
         let preflight_result = self.preflight(call).await?;
         Ok(Host::prove(&prover, call_guest_id, preflight_result)?)
     }
-
-    fn validate_calldata_size(&self, call: &Call) -> Result<(), PreflightError> {
-        if call.data.len() > self.max_calldata_size {
-            return Err(PreflightError::CalldataTooLargeError(call.data.len()));
-        }
-
-        Ok(())
-    }
 }
 
 fn wrap_engine_panic(err: Box<dyn Any + Send>) -> TravelCallExecutorError {
@@ -255,45 +243,4 @@ fn provably_execute(prover: &Prover, input: &Input) -> Result<EncodedProofWithSt
     let raw_guest_output: Bytes = receipt.journal.bytes.into();
 
     Ok(EncodedProofWithStats::new(seal, raw_guest_output, stats, elapsed_time))
-}
-
-#[cfg(test)]
-mod test {
-    use std::collections::HashMap;
-
-    use chain::TEST_CHAIN_ID;
-    use host_utils::ProofMode;
-    use provider::EthersProviderFactory;
-
-    use super::*;
-
-    fn test_rpc_urls() -> HashMap<ChainId, String> {
-        [(TEST_CHAIN_ID, "http://localhost:123/".to_string())]
-            .into_iter()
-            .collect()
-    }
-
-    #[tokio::test(flavor = "multi_thread")]
-    async fn host_does_not_accept_calls_longer_than_limit() {
-        let config = Config {
-            proof_mode: ProofMode::Fake,
-            ..Config::default()
-        };
-        let max_call_data_size = config.max_calldata_size;
-        let host = Host::new(
-            CachedMultiProvider::from_factory(EthersProviderFactory::new(test_rpc_urls())),
-            (TEST_CHAIN_ID, 0_u64).into(),
-            Box::new(chain_client::RpcClient::new("")),
-            config,
-        );
-        let call = Call {
-            data: vec![0; max_call_data_size + 1],
-            ..Default::default()
-        };
-
-        assert_eq!(
-            host.preflight(call).await.unwrap_err().to_string(),
-            format!("Calldata too large: {} bytes", max_call_data_size + 1)
-        );
-    }
 }

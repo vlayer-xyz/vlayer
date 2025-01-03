@@ -1,7 +1,7 @@
 use std::{collections::HashMap, net::SocketAddr};
 
 use alloy_primitives::{hex::ToHexExt, ChainId};
-use call_host::{Config as HostConfig, DEFAULT_MAX_CALLDATA_SIZE};
+use call_host::Config as HostConfig;
 use chain::TEST_CHAIN_ID;
 use common::GuestElf;
 use risc0_zkp::core::digest::Digest;
@@ -16,7 +16,7 @@ pub struct Config {
     rpc_urls: HashMap<ChainId, String>,
     proof_mode: ProofMode,
     chain_proof_url: Option<String>,
-    max_request_size: usize,
+    max_calldata_size: usize,
     call_guest_elf: GuestElf,
     chain_guest_elf: GuestElf,
     api_version: String,
@@ -59,6 +59,10 @@ impl Config {
     pub fn gas_meter_config(&self) -> Option<GasMeterConfig> {
         self.gas_meter_config.clone()
     }
+
+    pub const fn max_calldata_size(&self) -> usize {
+        self.max_calldata_size
+    }
 }
 
 pub struct ConfigBuilder {
@@ -75,7 +79,7 @@ impl ConfigBuilder {
                 socket_addr: "127.0.0.1:3000".parse().unwrap(),
                 rpc_urls: HashMap::from([(TEST_CHAIN_ID, "http://localhost:8545".to_string())]),
                 proof_mode: ProofMode::Groth16,
-                max_request_size: DEFAULT_MAX_CALLDATA_SIZE,
+                max_calldata_size: 5 * 1024 * 1024, // 5 MB
                 api_version,
                 gas_meter_config: None,
             },
@@ -136,7 +140,6 @@ impl From<&Config> for HostConfig {
     fn from(config: &Config) -> HostConfig {
         HostConfig {
             proof_mode: config.proof_mode.into(),
-            max_calldata_size: config.max_request_size,
             call_guest_elf: config.call_guest_elf.clone(),
             chain_guest_elf: config.chain_guest_elf.clone(),
         }
