@@ -24,7 +24,7 @@ use chain_client::Client as ChainClient;
 use common::GuestElf;
 pub use config::{Config, DEFAULT_MAX_CALLDATA_SIZE};
 use derive_new::new;
-pub use error::Error;
+pub use error::{Error, PreflightError};
 use ethers_core::types::BlockNumber as BlockTag;
 use prover::Prover;
 use provider::{CachedMultiProvider, EvmBlockHeader};
@@ -85,9 +85,8 @@ pub fn get_block_header(
     let provider = providers.get(chain_id)?;
 
     let block_header = provider
-        .get_block_header(block_num)
-        .map_err(|e| Error::Provider(format!("Error fetching block header: {e:?}")))?
-        .ok_or_else(|| Error::Provider(String::from("Block header not found")))?;
+        .get_block_header(block_num)?
+        .ok_or(Error::BlockNotFound(block_num))?;
 
     Ok(block_header)
 }
@@ -134,7 +133,7 @@ impl Host {
     }
 
     #[instrument(skip_all)]
-    pub async fn preflight(self, call: Call) -> Result<PreflightResult, Error> {
+    pub async fn preflight(self, call: Call) -> Result<PreflightResult, PreflightError> {
         self.validate_calldata_size(&call)?;
 
         let now = Instant::now();
@@ -153,8 +152,8 @@ impl Host {
             "preflight finished",
         );
 
-        let multi_evm_input =
-            into_multi_input(self.envs).map_err(|err| Error::CreatingInput(err.to_string()))?;
+        let multi_evm_input = into_multi_input(self.envs)
+            .map_err(|err| PreflightError::CreatingInput(err.to_string()))?;
 
         let verifier = guest_input::ZkVerifier::new(self.chain_client, self.chain_proof_verifier);
         verifier.verify(&multi_evm_input).await?;
@@ -220,9 +219,9 @@ impl Host {
         Host::prove(&prover, call_guest_id, preflight_result)
     }
 
-    fn validate_calldata_size(&self, call: &Call) -> Result<(), Error> {
+    fn validate_calldata_size(&self, call: &Call) -> Result<(), PreflightError> {
         if call.data.len() > self.max_calldata_size {
-            return Err(Error::CalldataTooLargeError(call.data.len()));
+            return Err(PreflightError::CalldataTooLargeError(call.data.len()));
         }
 
         Ok(())

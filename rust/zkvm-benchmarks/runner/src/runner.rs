@@ -1,6 +1,6 @@
 use derivative::Derivative;
-use host_utils::{ProofMode, Prover};
-use risc0_zkvm::{serde, ExecutorEnv};
+use host_utils::{proving, ProofMode, Prover};
+use risc0_zkvm::{serde, ExecutorEnv, ProveInfo};
 use tabled::Table;
 use thiserror::Error;
 use zkvm_benchmarks::BenchmarkResult;
@@ -12,12 +12,8 @@ use crate::{guest::GUEST_ELF, row::Row, tolerance::apply_tolerance};
 pub enum Error {
     #[error("Regression: {0}")]
     Regression(BenchmarkResult),
-    #[error("Risc0 error: {0}")]
-    Risc0(
-        #[from]
-        #[derivative(PartialEq = "ignore")]
-        anyhow::Error,
-    ),
+    #[error("Proving error: {0}")]
+    Proving(#[from] proving::Error),
     #[error("Serialization error: {0}")]
     Serde(#[from] serde::Error),
 }
@@ -35,10 +31,14 @@ pub fn run() -> Result<(), Error> {
 }
 
 fn run_guest() -> Result<Vec<BenchmarkResult>, Error> {
+    let result = prove()?;
+    Ok(result.receipt.journal.decode()?)
+}
+
+fn prove() -> proving::Result<ProveInfo> {
     let prover = Prover::new(ProofMode::Fake);
     let env = ExecutorEnv::builder().build()?;
-    let result = prover.prove(env, &GUEST_ELF.elf.clone())?;
-    Ok(result.receipt.journal.decode()?)
+    Ok(prover.prove(env, &GUEST_ELF.elf.clone())?)
 }
 
 fn detect_regression(result: &BenchmarkResult) -> Result<(), Error> {

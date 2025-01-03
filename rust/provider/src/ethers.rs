@@ -1,7 +1,7 @@
 use core::future::Future;
 
 use alloy_primitives::{BlockNumber, B256, U256};
-use anyhow::{anyhow, Context, Result};
+use anyhow::{anyhow, Context};
 use block_header::{EthBlockHeader, EvmBlockHeader};
 use derive_new::new;
 use ethers_core::types::{Block, BlockNumber as BlockTag};
@@ -9,7 +9,7 @@ use ethers_providers::{JsonRpcClient, Middleware};
 use tokio::runtime::Handle;
 use tracing::instrument;
 
-use super::{BlockingProvider, EIP1186Proof};
+use super::{BlockingProvider, EIP1186Proof, Result};
 
 /// A provider that fetches data from an Ethereum node using the ethers crate.
 #[derive(Debug, new)]

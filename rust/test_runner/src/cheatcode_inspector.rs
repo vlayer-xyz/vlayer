@@ -9,7 +9,7 @@ use call_engine::{
     Call, HostOutput, Proof, Seal,
 };
 use call_guest_wrapper::GUEST_ELF;
-use call_host::{get_latest_block_number, Config as HostConfig, Error, Host};
+use call_host::{get_latest_block_number, Config as HostConfig, Error, Host, PreflightError};
 use chain::TEST_CHAIN_ID;
 use chain_client::RpcClient as RpcChainProofClient;
 use foundry_config::RpcEndpoints;
@@ -137,9 +137,9 @@ fn revert_outcome(error: &Error, inputs: &CallInputs) -> CallOutcome {
 }
 
 const fn is_custom_error(error: &Error) -> Option<&Bytes> {
-    if let Error::Engine(travel_call_executor::Error::TransactError(
+    if let Error::Preflight(PreflightError::Engine(travel_call_executor::Error::TransactError(
         call_engine::evm::execution_result::TransactError::NonUtf8Revert(bytes),
-    )) = error
+    ))) = error
     {
         Some(bytes)
     } else {

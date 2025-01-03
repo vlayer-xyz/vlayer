@@ -2072,7 +2072,6 @@ dependencies = [
  "thiserror 1.0.69",
  "tokio",
  "tracing",
- "url",
 ]
 
 [[package]]
@@ -5801,8 +5800,10 @@ name = "host_utils"
 version = "0.1.0"
 dependencies = [
  "anyhow",
+ "derivative",
  "risc0-zkvm",
  "strum",
+ "thiserror 1.0.69",
  "tokio",
  "tracing",
 ]
@@ -10621,7 +10622,6 @@ dependencies = [
  "alloy-rlp",
  "alloy-sol-types",
  "alloy-trie",
- "anyhow",
  "block_header",
  "call_engine",
  "call_guest_wrapper",
