@@ -2600,7 +2600,6 @@ dependencies = [
  "anyhow",
  "clap",
  "colored",
- "common",
  "flate2",
  "lazy_static",
  "regex",
