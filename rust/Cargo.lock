@@ -2597,16 +2597,11 @@ dependencies = [
 name = "cli"
 version = "0.1.0"
 dependencies = [
- "alloy-primitives",
  "anyhow",
- "call_guest_wrapper",
- "call_server_lib",
- "chain_guest_wrapper",
  "clap",
  "colored",
  "common",
  "flate2",
- "hex",
  "lazy_static",
  "regex",
  "reqwest 0.12.11",

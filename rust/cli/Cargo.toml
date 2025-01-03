@@ -9,17 +9,11 @@ edition = "2021"
 build = "build.rs"
 
 [dependencies]
-alloy-primitives = { workspace = true, features = ["rlp"] }
-
 anyhow = { workspace = true }
-call_guest_wrapper = { workspace = true }
-call_server_lib = { workspace = true }
-chain_guest_wrapper = { workspace = true }
 clap = { workspace = true, features = ["derive", "env", "string"] }
 colored = { workspace = true }
 common = { workspace = true }
 flate2 = { workspace = true }
-hex = { workspace = true }
 lazy_static = { workspace = true }
 reqwest = { workspace = true, features = ["json"] }
 serde_json = { workspace = true }

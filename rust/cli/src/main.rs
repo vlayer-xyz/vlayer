@@ -1,10 +1,5 @@
 use clap::{Parser, Subcommand};
-use commands::{
-    args::{InitArgs, ServeArgs},
-    init::run_init,
-    serve::run_serve,
-    version::Version,
-};
+use commands::{args::InitArgs, init::run_init, version::Version};
 use common::{GlobalArgs, LogFormat};
 use test_runner::cli::TestArgs;
 use tracing::error;
@@ -35,7 +30,6 @@ struct Cli {
 #[derive(Subcommand, Debug)]
 enum Commands {
     Init(InitArgs),
-    Serve(ServeArgs),
     Test(Box<TestArgs>),
     Update,
 }
@@ -72,7 +66,6 @@ async fn main() {
 
 async fn run() -> Result<(), CLIError> {
     match Cli::parse().command {
-        Commands::Serve(args) => run_serve(args).await,
         Commands::Init(args) => run_init(args).await,
         Commands::Test(args) => Box::pin(run_test(args)).await,
         Commands::Update => run_update(),
