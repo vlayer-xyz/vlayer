@@ -28,7 +28,7 @@ pub async fn v_call(
     context: CallContext,
 ) -> Result<CallHash, AppError> {
     info!("v_call => {call:#?} {context:#?}");
-    let call: EngineCall = call.try_into()?;
+    let call = call.parse_and_validate(config.max_calldata_size())?;
 
     let host = build_host(&config, context.chain_id, call.to).await?;
     let call_hash = (&host.start_execution_location(), &call).into();
