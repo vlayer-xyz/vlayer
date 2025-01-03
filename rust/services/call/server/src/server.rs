@@ -5,9 +5,9 @@ use axum::{
     routing::post,
     Router,
 };
-use server_utils::{init_trace_layer, RequestIdLayer, Router as JrpcRouter};
+use server_utils::{cors, init_trace_layer, RequestIdLayer, Router as JrpcRouter};
 use tokio::net::TcpListener;
-use tower_http::{cors::CorsLayer, validate_request::ValidateRequestHeaderLayer};
+use tower_http::validate_request::ValidateRequestHeaderLayer;
 use tracing::info;
 
 use crate::{
@@ -35,13 +35,11 @@ async fn handle(
 pub fn server(cfg: Config) -> Router {
     let router = JrpcRouter::new(AppState::new(cfg).into_rpc());
 
-    //TODO: Lets decide do we need strict CORS policy or not and update this eventually
-    let cors = CorsLayer::permissive();
     Router::new()
         .route("/", post(handle))
         .with_state(router)
+        .layer(cors())
         .layer(ValidateRequestHeaderLayer::accept(mime::APPLICATION_JSON.as_ref()))
-        .layer(cors)
         .layer(init_trace_layer())
         // NOTE: RequestIdLayer should be added after the Trace layer
         .layer(RequestIdLayer)
