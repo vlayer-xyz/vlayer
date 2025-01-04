@@ -1,6 +1,6 @@
 ---
 - name: Install verifiable dns service
-  hosts: verifiable_dns
+  hosts: verifiable_dns_services
   # First, we skip gathering facts because on CI we need to
   # Save all the known ssh hosts before initiating connections.
   # Facts are gathered right after that.
@@ -30,8 +30,3 @@
     - role: verifiable_dns
     - role: verifiable_dns_nginx
       become: true
-
-  tasks:
-    - name: Verifiable DNS
-      ansible.builtin.include_role:
-        name: verifiable_dns

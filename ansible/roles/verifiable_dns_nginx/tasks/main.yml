@@ -28,7 +28,7 @@
 
 - name: Install vlayer verifiable dns nginx configuration
   ansible.builtin.template:
-    src: verifiable_dns.conf.j2
-    dest: /etc/nginx/conf.d/verifiable_dns.conf
+    src: verifiable-dns.conf.j2
+    dest: /etc/nginx/conf.d/vlayer-verifiable-dns.conf
     mode: '644'
   notify: "Reload nginx"

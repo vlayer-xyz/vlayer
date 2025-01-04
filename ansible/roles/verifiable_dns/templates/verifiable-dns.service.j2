@@ -11,16 +11,17 @@ User=ubuntu
 
 StandardOutput=syslog
 StandardError=inherit
-SyslogIdentifier=verifiable-dns-serivce
+SyslogIdentifier=vlayer-verifiable-dns-service
 SyslogFacility=local0
 
 Environment=RUST_LOG={{ verifiable_dns_rust_log | join(',') }}
 Environment=VLAYER_LOG_FORMAT=json
 Environment=PATH=/home/ubuntu/.cargo/bin/:$PATH
-{% endif %}
-ExecStart=/home/{{ ansible_user }}/.vlayer/bin/verifiable-dns
-{{- ' --host ' ~ verifiable_dns_host if verifiable_dns_host is defined else '' }}
-{{- ' --port ' ~ verifiable_dns_port if verifiable_dns_port is defined else '' }}
+ExecStart=/home/{{ ansible_user }}/.vlayer/bin/dns_server
+{{- ' --listen-addr ' }}
+{{- verifiable_dns_host if verifiable_dns_host is defined else '127.0.0.1' }}
+{{- ':' }}
+{{- verifiable_dns_port if verifiable_dns_port is defined else '3002' }}
 
 [Install]
 WantedBy=multi-user.target

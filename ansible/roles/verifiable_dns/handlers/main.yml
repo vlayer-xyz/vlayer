@@ -2,7 +2,7 @@
 - name: Restart verifiable dns
   become: true
   ansible.builtin.systemd_service:
-    name: verifiable_dns
+    name: vlayer-verifiable-dns
     state: restarted
     daemon_reload: true
 

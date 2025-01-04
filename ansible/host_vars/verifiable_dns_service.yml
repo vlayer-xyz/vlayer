@@ -1,5 +1,4 @@
 ---
-ansible_host: x.xx.xxx.xxx
-ansible_host_public_key: ssh-ed25519 xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx
+ansible_host: 3.137.164.169
+ansible_host_public_key: ssh-ed25519 AAAAC3NzaC1lZDI1NTE5AAAAIPLpmTicLE36Vm1yXLnOsmnt7S1DOppU7Ew/EN5vmb6j
 ansible_user: ubuntu
-verifiable_dns_services:
