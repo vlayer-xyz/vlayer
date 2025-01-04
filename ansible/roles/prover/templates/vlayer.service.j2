@@ -23,7 +23,7 @@ Environment='BONSAI_API_URL={{ vlayer_bonsai_api_url }}'
 {% if vlayer_bonsai_api_key is defined %}
 Environment='BONSAI_API_KEY={{ vlayer_bonsai_api_key }}'
 {% endif %}
-ExecStart=/home/{{ ansible_user }}/.vlayer/bin/vlayer serve
+ExecStart=/home/{{ ansible_user }}/.vlayer/bin/call_server
 {{- ' --host ' ~ vlayer_prover_host if vlayer_prover_host is defined else '' }}
 {{- ' --port ' ~ vlayer_prover_port if vlayer_prover_port is defined else '' }}
 {{- ' --proof ' ~ vlayer_proof_type if vlayer_proof_type is defined else '' }}
