@@ -1,4 +1,4 @@
-use call_server::{ConfigBuilder, ProofMode};
+use call_server_lib::{ConfigBuilder, ProofMode};
 use common::GuestElf;
 use derive_new::new;
 use ethers::types::{Bytes, H160};
@@ -117,7 +117,7 @@ pub(crate) mod mock {
 
     use axum::{body::Body, http::Response, Router};
     use block_header::EvmBlockHeader;
-    use call_server::{gas_meter::Config as GasMeterConfig, server, Config};
+    use call_server_lib::{gas_meter::Config as GasMeterConfig, server, Config};
     use derive_more::{Deref, DerefMut};
     use ethers::{
         contract::abigen,

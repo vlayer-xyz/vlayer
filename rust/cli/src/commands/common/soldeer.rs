@@ -6,8 +6,9 @@ use std::{
 };
 
 use lazy_static::lazy_static;
+use version::version;
 
-use crate::{commands::version::version, errors::CLIError};
+use crate::errors::CLIError;
 
 lazy_static! {
     pub(crate) static ref DEPENDENCIES: Vec<SoldeerDep> = vec![

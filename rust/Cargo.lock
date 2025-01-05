@@ -2093,6 +2093,24 @@ dependencies = [
 name = "call_server"
 version = "0.1.0"
 dependencies = [
+ "alloy-primitives",
+ "anyhow",
+ "call_guest_wrapper",
+ "call_server_lib",
+ "chain_guest_wrapper",
+ "clap",
+ "common",
+ "hex",
+ "regex",
+ "tokio",
+ "tracing",
+ "version",
+]
+
+[[package]]
+name = "call_server_lib"
+version = "0.1.0"
+dependencies = [
  "alloy-chains",
  "alloy-primitives",
  "alloy-rlp",
@@ -2403,6 +2421,7 @@ dependencies = [
  "common",
  "dotenvy",
  "tokio",
+ "version",
 ]
 
 [[package]]
@@ -2602,18 +2621,11 @@ dependencies = [
 name = "cli"
 version = "0.1.0"
 dependencies = [
- "alloy-primitives",
  "anyhow",
- "call_guest_wrapper",
- "call_server",
- "chain_guest_wrapper",
  "clap",
  "colored",
- "common",
  "flate2",
- "hex",
  "lazy_static",
- "regex",
  "reqwest 0.12.11",
  "serde_json",
  "tar",
@@ -2624,7 +2636,7 @@ dependencies = [
  "toml 0.8.19",
  "tracing",
  "tracing-subscriber 0.3.19",
- "vergen-gitcl",
+ "version",
 ]
 
 [[package]]
@@ -11718,6 +11730,15 @@ dependencies = [
  "anyhow",
  "derive_builder 0.20.2",
  "rustversion",
+]
+
+[[package]]
+name = "version"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "regex",
+ "vergen-gitcl",
 ]
 
 [[package]]

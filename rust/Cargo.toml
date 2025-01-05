@@ -19,6 +19,7 @@ members = [
     "services/call/precompiles",
     "services/call/seal",
     "services/call/server",
+    "services/call/server_lib",
     "services/chain/block_trie",
     "services/chain/client",
     "services/chain/common",
@@ -33,6 +34,7 @@ members = [
     "services/chain/worker",
     "services/dns/server",
     "test_runner",
+    "version",
     "web_proof",
     "zkvm-benchmarks/benchmarks",
     "zkvm-benchmarks/runner",
@@ -163,6 +165,7 @@ call_guest = { path = "services/call/guest" }
 call_guest_wrapper = { path = "services/call/guest_wrapper" }
 call_host = { path = "services/call/host" }
 call_server = { path = "services/call/server" }
+call_server_lib = { path = "services/call/server_lib" }
 chain = { path = "chain" }
 chain_client = { path = "services/chain/client" }
 chain_db = { path = "services/chain/db" }
@@ -184,6 +187,7 @@ provider = { path = "provider" }
 u64_range = { path = "range" }
 server_utils = { path = "server_utils" }
 test_runner = { path = "test_runner" }
+version = { path = "version" }
 web_proof = { path = "web_proof" }
 zkvm-benchmarks = { path = "zkvm-benchmarks/benchmarks" }
 

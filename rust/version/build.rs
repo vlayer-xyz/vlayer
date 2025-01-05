@@ -4,11 +4,15 @@ use vergen_gitcl::{
     BuildBuilder, CargoBuilder, Emitter, GitclBuilder, RustcBuilder, SysinfoBuilder,
 };
 
-fn main() -> anyhow::Result<()> {
+fn main() {
     if env::var("VLAYER_RELEASE").is_err() {
         println!("cargo:rustc-env=VLAYER_RELEASE=dev");
     }
 
+    emit_version_from_git_sha().expect("unexpected I/O error when emitting version from git sha");
+}
+
+fn emit_version_from_git_sha() -> anyhow::Result<()> {
     let mut git_cl_builder = GitclBuilder::default();
     git_cl_builder.all().sha(true);
 
@@ -19,7 +23,4 @@ fn main() -> anyhow::Result<()> {
         .add_instructions(&RustcBuilder::all_rustc()?)?
         .add_instructions(&SysinfoBuilder::all_sysinfo()?)?
         .emit()
-        .unwrap();
-
-    Ok(())
 }

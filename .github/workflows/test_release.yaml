@@ -27,7 +27,7 @@ jobs:
         with:
           compose-file: docker/docker-compose.devnet.yaml
           services: |
-            vlayer
+            vlayer-call-server
       - name: Test release
         env:
           VLAYER_ENV: dev
@@ -60,6 +60,6 @@ jobs:
         with:
           compose-file: docker/docker-compose.devnet.yaml
           services: |
-            vlayer
+            vlayer-call-server
       - name: Test js sdk release
         run: bash/test-js-sdk-release.sh

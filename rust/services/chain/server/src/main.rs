@@ -6,9 +6,10 @@ use chain_server_lib::{serve, ServerConfig};
 use clap::Parser;
 use common::{init_tracing, GlobalArgs, LogFormat};
 use dotenvy::dotenv;
+use version::version;
 
 #[derive(Parser)]
-#[command(version)]
+#[command(version = version())]
 struct Cli {
     #[arg(
         long,

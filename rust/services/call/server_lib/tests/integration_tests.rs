@@ -228,7 +228,7 @@ mod server_tests {
     mod v_getProofReceipt {
         use alloy_primitives::B256;
         use assert_json_diff::assert_json_include;
-        use call_server::{v_call::CallHash, v_get_proof_receipt::Status};
+        use call_server_lib::{v_call::CallHash, v_get_proof_receipt::Status};
         use ethers::{
             abi::AbiEncode,
             types::{Bytes, Uint8, H160, U256},
@@ -273,7 +273,7 @@ mod server_tests {
             app: &Server,
             contract: &Contract,
             call_data: &Bytes,
-        ) -> call_server::v_call::CallHash {
+        ) -> call_server_lib::v_call::CallHash {
             let request = v_call_body(contract.address(), call_data);
             let response = app.post("/", &request).await;
             assert_eq!(StatusCode::OK, response.status());
