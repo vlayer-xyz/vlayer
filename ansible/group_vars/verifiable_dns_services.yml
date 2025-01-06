@@ -1,0 +1,4 @@
+---
+verifiable_dns_port: 3002
+verifiable_dns_rust_log:
+  - info
