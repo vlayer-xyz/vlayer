@@ -1,3 +1,5 @@
+use super::record::Response;
+
 #[derive(Clone)]
 pub(crate) struct Resolver {}
 
@@ -6,8 +8,8 @@ impl Resolver {
         Self {}
     }
 
-    pub fn resolve(&self, _query: &str) -> Option<String> {
-        Some("hello".to_string())
+    pub fn resolve(&self, _query: &str) -> Option<Response> {
+        Some(Default::default())
     }
 }
 

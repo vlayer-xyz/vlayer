@@ -1,4 +1,4 @@
-// mod record;
+pub(crate) mod record;
 mod resolver;
 
 pub(crate) use resolver::Resolver;
