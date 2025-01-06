@@ -3574,6 +3574,7 @@ dependencies = [
  "dotenvy",
  "serde",
  "serde_json",
+ "serde_repr",
  "server_utils",
  "tokio",
  "tower-http 0.6.2",

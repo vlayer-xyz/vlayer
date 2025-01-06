@@ -75,6 +75,7 @@ mod tests {
         use axum::http::header::CONTENT_TYPE;
 
         use super::*;
+
         #[tokio::test]
         async fn response_is_of_application_dns_json_mime_type() {
             let response = dns_query().await;

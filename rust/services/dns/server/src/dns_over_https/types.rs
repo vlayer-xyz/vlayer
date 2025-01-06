@@ -1,4 +1,5 @@
 use serde::Serialize;
+use serde_repr::{Deserialize_repr, Serialize_repr};
 
 #[derive(Serialize, Clone, Default, PartialEq, Debug)]
 pub(crate) struct Query {
@@ -7,10 +8,12 @@ pub(crate) struct Query {
     record_type: RecordType,
 }
 
-#[derive(Serialize, Clone, Default, PartialEq, Debug)]
+#[derive(Serialize_repr, Deserialize_repr, Clone, Default, PartialEq, Debug)]
+#[repr(u8)]
 pub(crate) enum RecordType {
     #[default]
-    TXT,
+    #[allow(clippy::upper_case_acronyms)]
+    TXT = 16,
 }
 
 #[derive(Serialize, Default, PartialEq, Debug)]
@@ -34,6 +37,17 @@ pub(crate) struct Response {
     pub(crate) comment: String,
 }
 
+#[derive(Serialize, Default, PartialEq, Debug)]
+pub(crate) struct Record {
+    pub name: String,
+    #[serde(rename = "type")]
+    #[allow(clippy::struct_field_names)]
+    pub record_type: u8,
+    #[serde(rename = "TTL")]
+    pub ttl: u32,
+    pub data: String,
+}
+
 impl Response {
     pub fn with_flags(tc: bool, rd: bool, ra: bool, ad: bool, cd: bool) -> Self {
         Self {
@@ -47,19 +61,12 @@ impl Response {
     }
 }
 
-#[derive(Serialize, Default, PartialEq, Debug)]
-pub(crate) struct Record {
-    pub name: String,
-    #[serde(rename = "type")]
-    pub record_type: u8,
-    #[serde(rename = "TTL")]
-    pub ttl: u32,
-    pub data: String,
-}
-
 impl From<String> for Query {
     fn from(value: String) -> Self {
-        Self { name: value }
+        Self {
+            name: value,
+            record_type: RecordType::TXT,
+        }
     }
 }
 
@@ -67,6 +74,31 @@ impl From<&str> for Query {
     fn from(value: &str) -> Self {
         Self {
             name: value.to_string(),
+            record_type: RecordType::TXT,
+        }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+
+    use super::*;
+
+    mod record_type {
+        use serde_json::json;
+
+        use super::*;
+
+        #[test]
+        fn encodes_into_int() {
+            assert_eq!(serde_json::to_value(&RecordType::TXT).unwrap(), json!(16));
+            assert_eq!(&serde_json::to_string(&RecordType::TXT).unwrap(), "16");
+        }
+
+        #[test]
+        fn decodes_from_int() {
+            let decoded: RecordType = serde_json::from_str("16").unwrap();
+            assert_eq!(decoded, RecordType::TXT);
         }
     }
 }
