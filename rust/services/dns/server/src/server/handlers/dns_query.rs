@@ -19,10 +19,10 @@ pub fn handler() -> MethodRouter<AppState> {
 
 async fn dns_query_handler(
     State(state): State<AppState>,
-    Query(query): Query<Params>,
+    Query(params): Query<Params>,
 ) -> impl IntoResponse {
-    debug!("Querying for {:?}", &query);
-    let result = state.vdns_resolver.resolve(query.name.as_str()).unwrap();
+    debug!("Querying for {:?}", &params);
+    let result = state.vdns_resolver.resolve(&params.into()).unwrap();
     debug!("Responding with: {:?}", &result);
     result
 }

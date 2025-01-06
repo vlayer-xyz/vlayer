@@ -5,7 +5,7 @@ use axum::{
 use serde::Deserialize;
 
 use super::MIME_DNS_JSON_CONTENT_TYPE;
-use crate::verifiable_dns::record::Response;
+use crate::dns_over_https::{Query, Response};
 
 #[derive(Deserialize, Debug)]
 pub(super) struct Params {
@@ -13,6 +13,12 @@ pub(super) struct Params {
     pub name: String,
     #[serde(rename(deserialize = "type"))]
     _query_type: DNSQueryType,
+}
+
+impl From<Params> for Query {
+    fn from(val: Params) -> Self {
+        val.name.into()
+    }
 }
 
 #[derive(Deserialize, Debug)]

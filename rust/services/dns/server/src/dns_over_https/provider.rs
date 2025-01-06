@@ -1,5 +1,5 @@
-use crate::verifiable_dns::record::Response;
+use super::{Query, Response};
 
 pub trait Provider {
-    fn resolve(&self, query: &str) -> Option<Response>;
+    fn resolve(&self, query: &Query) -> Option<Response>;
 }
