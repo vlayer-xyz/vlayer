@@ -3,7 +3,7 @@ use serde::Deserialize;
 #[derive(Deserialize, Debug)]
 pub(super) struct Params {
     #[serde(rename(deserialize = "name"))]
-    _name: String,
+    pub name: String,
     #[serde(rename(deserialize = "type"))]
     _query_type: DNSQueryType,
 }

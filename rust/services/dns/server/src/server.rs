@@ -5,14 +5,18 @@ use server_utils::{cors, init_trace_layer, RequestIdLayer};
 use tokio::net::TcpListener;
 use tracing::info;
 
-use crate::config::Config;
+use crate::{config::Config, verifiable_dns::Resolver as VerifiableDNSResolver};
 
 #[derive(Clone)]
-struct AppState;
+struct AppState {
+    vdns_resolver: VerifiableDNSResolver,
+}
 
 impl AppState {
     const fn new() -> Self {
-        Self
+        Self {
+            vdns_resolver: VerifiableDNSResolver::new(),
+        }
     }
 }
 
