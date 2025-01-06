@@ -10,8 +10,11 @@ impl Resolver {
 }
 
 impl DoHProvider for Resolver {
-    fn resolve(&self, _query: &Query) -> Option<Response> {
-        Some(Default::default())
+    fn resolve(&self, query: &Query) -> Option<Response> {
+        let mut response: Response = Response::with_flags(false, true, true, false, false);
+        response.question = query.clone();
+        response.status = 0;
+        Some(response)
     }
 }
 
@@ -24,5 +27,36 @@ mod tests {
         let resolver = Resolver::new();
         let result = resolver.resolve(&"google._domainkey.vlayer.xyz".into());
         assert!(result.is_some());
+    }
+
+    #[test]
+    fn question_field_equals_to_question() {
+        let resolver = Resolver::new();
+        let query = "google._domainkey.vlayer.xyz".into();
+        let result = resolver.resolve(&query).unwrap();
+
+        assert_eq!(result.question, query);
+    }
+
+    #[test]
+    fn status_code_is_successful() {
+        let resolver = Resolver::new();
+        let query = "google._domainkey.vlayer.xyz".into();
+        let result = resolver.resolve(&query).unwrap();
+
+        assert_eq!(result.status, 0);
+    }
+
+    #[test]
+    fn flags_are_set() {
+        let resolver = Resolver::new();
+        let query = "google._domainkey.vlayer.xyz".into();
+        let result = resolver.resolve(&query).unwrap();
+
+        // Default values by CF
+        assert!(!result.truncated);
+        assert!(result.recursive_desired);
+        assert!(result.recursion_available);
+        assert!(!result.verified_with_dnssec);
     }
 }
