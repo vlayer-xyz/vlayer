@@ -9,7 +9,7 @@ use tower_http::validate_request::ValidateRequestHeaderLayer;
 use tracing::debug;
 use types::Params;
 
-use crate::server::AppState;
+use crate::{dns_over_https::Provider, server::AppState};
 
 const MIME_DNS_JSON_CONTENT_TYPE: &str = "application/dns-json";
 pub fn handler() -> MethodRouter<AppState> {
