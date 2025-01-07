@@ -1,7 +1,12 @@
 import { useState } from "react";
 import { useChainId } from "wagmi";
-import { type Abi, type ContractFunctionName } from "viem";
-import { type ProveArgs } from "@vlayer/sdk";
+import {
+  type Abi,
+  type AbiStateMutability,
+  type ContractFunctionArgs,
+  type ContractFunctionName,
+} from "viem";
+import { type BrandedHash, type ProveArgs } from "@vlayer/sdk";
 import { useProofContext } from "../context";
 
 export enum ProverStatus {
@@ -11,7 +16,12 @@ export enum ProverStatus {
   Error = "Error",
 }
 
-export const useCallProver = () => {
+export const useCallProver = (
+  proveArgs: Omit<
+    ProveArgs<Abi, ContractFunctionName<Abi>>,
+    "chainId" | "args"
+  >,
+) => {
   // read vlayer client from context
   const { vlayerClient } = useProofContext();
   // read chainId from wagmi
@@ -20,15 +30,18 @@ export const useCallProver = () => {
   // state
   const [status, setStatus] = useState<ProverStatus>(ProverStatus.Idle);
   const [error, setError] = useState<Error | null>(null);
-  const [hash, setHash] = useState<string>("");
+  const [hash, setHash] = useState<BrandedHash<Abi, string>>({
+    hash: "",
+  } as BrandedHash<Abi, string>);
 
   const callProver = async (
-    proveArgs: ProveArgs<Abi, ContractFunctionName<Abi>>,
+    args: ContractFunctionArgs<Abi, AbiStateMutability, string>,
   ) => {
     setStatus(ProverStatus.Pending);
     try {
-      const { hash } = await vlayerClient.prove({
+      const hash = await vlayerClient.prove({
         ...proveArgs,
+        args,
         chainId,
       });
       setHash(hash);
@@ -43,7 +56,7 @@ export const useCallProver = () => {
     callProver,
     status,
     error,
-    data: { hash },
+    data: hash,
     isIdle: status === ProverStatus.Idle,
     isPending: status === ProverStatus.Pending,
     isReady: status === ProverStatus.Ready,

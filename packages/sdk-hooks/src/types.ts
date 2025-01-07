@@ -1,4 +1,6 @@
 import { type VlayerClient, type WebProofProvider } from "@vlayer/sdk";
+import { expectUrl, notarize, startPage } from "@vlayer/sdk/web_proof";
+import { type WebProofRequestInput, type GetWebProofArgs } from "@vlayer/sdk";
 
 export type ProofContextType = {
   vlayerClient: VlayerClient;
@@ -35,3 +37,11 @@ export enum WebProofRequestStatus {
   error = "error",
   success = "success",
 }
+
+export {
+  expectUrl,
+  notarize,
+  startPage,
+  type WebProofRequestInput,
+  type GetWebProofArgs,
+};
