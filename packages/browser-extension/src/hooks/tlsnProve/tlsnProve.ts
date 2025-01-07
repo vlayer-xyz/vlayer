@@ -81,3 +81,19 @@ export async function tlsnProve(
 
   return await presentation.json();
 }
+
+type Transcript = {
+  sent: string;
+  recv: string;
+  ranges: {
+    recv: ParsedTranscriptData;
+    sent: ParsedTranscriptData;
+  };
+}
+
+function redact(transcript: Transcript, _redactionConfig: RedactionConfig): Commit {
+  return {
+    sent: [transcript.ranges.sent.all],
+    recv: [transcript.ranges.recv.all],
+  };
+}
