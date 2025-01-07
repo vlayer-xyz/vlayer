@@ -8,7 +8,7 @@ on:
       - "rust-toolchain.toml"
       - "rust/**"
       - "examples/**"
-      - ".github/workflows/vlayer_test.yaml"
+      - ".github/workflows/test_vlayer.yaml"
   merge_group:
   push:
     branches:
@@ -29,6 +29,7 @@ jobs:
         with:
           submodules: recursive
       - name: Install Rust prerequisites
+        id: rust_pre
         uses: ./.github/actions/rust-prerequisites
       - name: Install contracts prerequisites
         uses: ./.github/actions/contracts-prerequisites
@@ -40,6 +41,8 @@ jobs:
 
       - name: Run vlayer tests for contracts
         working-directory: ./contracts/vlayer
+        env:
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
         run: |
           # vlayer test
           cargo run --locked --manifest-path ../../rust/Cargo.toml --package cli -- test -vvv

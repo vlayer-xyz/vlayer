@@ -30,6 +30,7 @@ jobs:
         with:
           submodules: recursive
       - name: Install Rust prerequisites
+        id: rust_pre
         uses: ./.github/actions/rust-prerequisites
       - name: Install contracts prerequisites
         uses: ./.github/actions/contracts-prerequisites
@@ -53,6 +54,7 @@ jobs:
 
       - name: Run e2e test
         env:
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
           PROVING_MODE: "dev"
           VLAYER_ENV: dev
           VLAYER_TMP_DIR: ./artifacts

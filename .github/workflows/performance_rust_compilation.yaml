@@ -5,7 +5,7 @@ on:
     paths:
       - "rust-toolchain.toml"
       - "rust/**"
-      - ".github/workflows/incremental_compilation_time.yaml"
+      - ".github/workflows/performance_rust_compilation.yaml"
   merge_group:
   push:
     branches:
@@ -29,12 +29,15 @@ jobs:
         with:
           submodules: recursive
       - name: Install Rust prerequisites
+        id: rust_pre
         uses: ./.github/actions/rust-prerequisites
       - name: Install contracts prerequisites
         uses: ./.github/actions/contracts-prerequisites
 
       - name: Compilation
         working-directory: rust
+        env:
+          RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
         run: |
           cargo build
 

@@ -7,6 +7,10 @@ inputs:
   include_risc0:
     description: Whether to include risc0 installation
     default: 'true'
+outputs:
+  RUSTC_WRAPPER:
+    description: "A rustc wrapper using sccache for optimalization"
+    value: ${{ steps.configure_sccache_wrapper.outputs.RUSTC_WRAPPER }}
 runs:
   using: "composite"
   steps:
@@ -27,6 +31,20 @@ runs:
           rust/services/chain/guest_wrapper/risc0_guest
         cache-on-failure: false
         save-if: ${{ github.ref == 'refs/heads/main' }}
+
+    - name: Install sccache
+      uses: taiki-e/cache-cargo-install-action@caa6f48d18d42462f9c30df89e2b4f71a42b7c2c # v2.0.1
+      with:
+        tool: sccache@0.9.0
+
+    # Configure env for the remaining steps of this composite action,
+    # and an output for workflows to use.
+    - name: Configure sccache wrapper
+      id: configure_sccache_wrapper
+      run: |
+        echo "RUSTC_WRAPPER=$(which sccache)" >> $GITHUB_ENV
+        echo "RUSTC_WRAPPER=$(which sccache)" >> $GITHUB_OUTPUT
+      shell: bash
 
     - name: Install cargo binstall
       uses: taiki-e/cache-cargo-install-action@caa6f48d18d42462f9c30df89e2b4f71a42b7c2c # v2.0.1
