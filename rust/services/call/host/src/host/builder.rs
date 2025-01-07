@@ -89,7 +89,7 @@ impl WithProviders {
 impl WithChainGuestId {
     pub fn with_chain_proof_url(
         self,
-        chain_proof_url: &Option<String>,
+        chain_proof_url: Option<&str>,
     ) -> Result<WithChainClient, Error> {
         let WithChainGuestId {
             rpc_urls,

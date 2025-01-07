@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use async_trait::async_trait;
 use auto_impl::auto_impl;
 use derive_new::new;
@@ -41,7 +43,7 @@ impl Method for RefundUnusedGas {
 #[derive(new, Debug, Clone, Deserialize, Serialize)]
 pub struct Config {
     pub url: String,
-    pub time_to_live: u64,
+    pub time_to_live: Duration,
     pub api_key: Option<String>,
 }
 
@@ -55,7 +57,7 @@ pub trait Client: Send + Sync {
 pub struct RpcClient {
     client: RawRpcClient,
     hash: CallHash,
-    time_to_live: u64,
+    time_to_live: Duration,
     api_key: Option<String>,
     user_token: Option<UserToken>,
 }
@@ -99,7 +101,7 @@ impl RpcClient {
 #[async_trait]
 impl Client for RpcClient {
     async fn allocate(&self, gas_limit: u64) -> Result<()> {
-        let req = AllocateGas::new(self.hash, gas_limit, self.time_to_live);
+        let req = AllocateGas::new(self.hash, gas_limit, self.time_to_live.as_secs());
         info!("v_allocateGas => {req:#?}");
         self.call(req).await
     }

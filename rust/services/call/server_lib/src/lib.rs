@@ -6,7 +6,7 @@ mod error;
 mod handlers;
 mod ser;
 
-pub use config::{Config, ConfigBuilder};
+pub use config::{ChainProofConfig, Config, ConfigBuilder};
 pub use handlers::{v_call::types as v_call, v_get_proof_receipt::types as v_get_proof_receipt};
 pub use server::{serve, server};
 pub use server_utils::ProofMode;
