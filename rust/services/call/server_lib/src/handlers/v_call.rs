@@ -12,7 +12,7 @@ use crate::{
     error::AppError,
     gas_meter::{self, Client as GasMeterClient, ComputationStage},
     handlers::{Metrics, ProofReceipt, ProofStatus, RawData, Times},
-    ChainProofConfig as RpcChainProofConfig, Config,
+    ChainProofConfig, Config,
 };
 
 pub mod types;
@@ -49,7 +49,7 @@ pub async fn v_call(
                 gas_meter_client,
                 state.clone(),
                 call_hash,
-                config.chain_proof_config().into(),
+                config.chain_proof_config(),
             )
             .await;
             state.insert(call_hash, ProofStatus::Ready(res));
@@ -67,7 +67,7 @@ async fn build_host(
     let host = Host::builder()
         .with_rpc_urls(config.rpc_urls())
         .with_chain_guest_id(config.chain_guest_id())
-        .with_chain_proof_url(&config.chain_proof_config().map(|x| x.url))?
+        .with_chain_proof_url(config.chain_proof_url())?
         .with_start_chain_id(chain_id)?
         .with_prover_contract_addr(prover_contract_addr)
         .await
@@ -98,7 +98,7 @@ async fn generate_proof(
     gas_meter_client: impl GasMeterClient,
     state: SharedProofs,
     call_hash: CallHash,
-    chain_proof_config: ChainProofConfig,
+    chain_proof_config: Option<ChainProofConfig>,
 ) -> Result<ProofReceipt, AppError> {
     info!("Processing call {call_hash}");
 
@@ -134,54 +134,36 @@ async fn generate_proof(
     Ok(ProofReceipt::new(raw_data, metrics))
 }
 
-#[derive(Debug)]
-pub enum ChainProofConfig {
-    Rpc(RpcChainProofConfig),
-    Mock,
-}
-
-impl From<Option<RpcChainProofConfig>> for ChainProofConfig {
-    fn from(value: Option<RpcChainProofConfig>) -> Self {
-        match value {
-            Some(config) => Self::Rpc(config),
-            None => Self::Mock,
-        }
-    }
-}
-
 async fn await_chain_proof_ready(
     host: &Host,
     state: &SharedProofs,
     call_hash: CallHash,
-    config: ChainProofConfig,
+    config: Option<ChainProofConfig>,
 ) -> Result<(), AppError> {
-    match config {
-        ChainProofConfig::Rpc(config) => {
-            let poll_interval = Duration::from_secs(config.poll_interval);
-            let timeout = Duration::from_secs(config.timeout);
-            // Wait for chain proof if necessary
-            let start = tokio::time::Instant::now();
-            while !host
-                .chain_proof_ready()
-                .await
-                .map_err(HostError::AwaitingChainProof)?
-            {
-                info!(
-                    "Location {:?} not indexed. Waiting for chain proof",
-                    host.start_execution_location()
-                );
-                state.insert(call_hash, ProofStatus::WaitingForChainProof);
-                tokio::time::sleep(poll_interval).await;
-                if start.elapsed() > timeout {
-                    return Err(AppError::ChainProofTimeout);
-                }
+    if let Some(ChainProofConfig {
+        poll_interval,
+        timeout,
+        ..
+    }) = config
+    {
+        let poll_interval = Duration::from_secs(poll_interval);
+        let timeout = Duration::from_secs(timeout);
+        // Wait for chain proof if necessary
+        let start = tokio::time::Instant::now();
+        while !host
+            .chain_proof_ready()
+            .await
+            .map_err(HostError::AwaitingChainProof)?
+        {
+            info!(
+                "Location {:?} not indexed. Waiting for chain proof",
+                host.start_execution_location()
+            );
+            state.insert(call_hash, ProofStatus::WaitingForChainProof);
+            tokio::time::sleep(poll_interval).await;
+            if start.elapsed() > timeout {
+                return Err(AppError::ChainProofTimeout);
             }
-        }
-        ChainProofConfig::Mock => {
-            _ = host
-                .chain_proof_ready()
-                .await
-                .map_err(HostError::AwaitingChainProof)?
         }
     }
     Ok(())

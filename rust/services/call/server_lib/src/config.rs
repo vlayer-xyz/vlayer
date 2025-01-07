@@ -37,6 +37,10 @@ impl Config {
         self.chain_proof_config.clone()
     }
 
+    pub fn chain_proof_url(&self) -> Option<&str> {
+        self.chain_proof_config.as_ref().map(|x| x.url.as_str())
+    }
+
     pub const fn fake_proofs(&self) -> bool {
         matches!(self.proof_mode, ProofMode::Fake)
     }
