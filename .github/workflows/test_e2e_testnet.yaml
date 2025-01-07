@@ -46,7 +46,7 @@ jobs:
 
       - name: Build binaries
         working-directory: ./rust
-        run: cargo build --bin vlayer --bin chain_server --bin worker
+        run: cargo build --bin vlayer --bin call_server --bin chain_server --bin worker
       - name: Run e2e test in prod mode
         env:
           PROVING_MODE: "prod"
