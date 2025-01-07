@@ -1,6 +1,6 @@
 import { useState, useEffect, FormEvent } from "react";
 import * as chains from "viem/chains";
-import useProver from "../hooks/useProver";
+import { useCallProver, useWaitForProvingResult } from "@vlayer/react";
 import { preverifyEmail } from "@vlayer/sdk";
 import { getStrFromFile } from "../lib/utils";
 import proverSpec from "../../../out/EmailDomainProver.sol/EmailDomainProver";
@@ -56,12 +56,14 @@ const EmlUploadForm = () => {
 
     getWallet();
   }, []);
-  const { prove, proof, provingError } = useProver({
-    addr: import.meta.env.VITE_PROVER_ADDRESS,
-    abi: proverSpec.abi,
-    func: "main",
-    chainId: chain.id,
+
+  const { callProver, data: proofHash } = useCallProver({
+    address: import.meta.env.VITE_PROVER_ADDRESS,
+    proverAbi: proverSpec.abi,
+    functionName: "main",
   });
+
+  // const { data: proof } = useWaitForProvingResult(proofHash);
 
   const getClaimerAddr = async () => {
     if (import.meta.env.VITE_USE_WINDOW_ETHEREUM_TRANSPORT) {
@@ -161,7 +163,8 @@ const EmlUploadForm = () => {
 
     const eml = await getStrFromFile(uploadedEmlFile);
     const email = await preverifyEmail(eml);
-    await prove([email, claimerAddr]);
+    console.log("startProving", [email, claimerAddr]);
+    await callProver([email, claimerAddr]);
     setCurrentStep("Waiting for proof...");
   };
 
@@ -188,20 +191,13 @@ const EmlUploadForm = () => {
     });
   };
 
-  useEffect(() => {
-    if (proof) {
-      verifyProof().catch((err) => {
-        handleError(err);
-      });
-    }
-  }, [proof]);
 
-  useEffect(() => {
-    if (provingError) {
-      setErrorMsg(provingError);
-      setIsSubmitting(false);
-    }
-  }, [provingError]);
+  // useEffect(() => {
+  //   if (provingError) {
+  //     setErrorMsg(provingError);
+  //     setIsSubmitting(false);
+  //   }
+  // }, [provingError]);
 
   return (
     <EmlForm
