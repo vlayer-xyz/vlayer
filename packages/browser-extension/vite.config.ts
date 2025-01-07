@@ -42,7 +42,7 @@ export default defineConfig({
     }),
     viteStaticCopy({
       targets: [
-        // copying to src/hooks is require to run in dev mode
+        // copying to src/hooks/tlsnProve is require to run in dev mode
         {
           src: `${__dirname}/../node_modules/tlsn-js/build/54ec0a0a2728a8a41850.wasm`,
           dest: "src/hooks/tlsnProve/",
