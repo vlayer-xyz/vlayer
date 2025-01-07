@@ -90,9 +90,16 @@ type Transcript = {
     recv: ParsedTranscriptData;
     sent: ParsedTranscriptData;
   };
-}
+};
 
-function redact(transcript: Transcript, _redactionConfig: RedactionConfig): Commit {
+function redact(
+  transcript: Transcript,
+  redactionConfig: RedactionConfig,
+): Commit {
+  if (redactionConfig.length !== 0) {
+    console.log("Redacting");
+  }
+
   return {
     sent: [transcript.ranges.sent.all],
     recv: [transcript.ranges.recv.all],

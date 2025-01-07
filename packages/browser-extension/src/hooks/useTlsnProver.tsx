@@ -7,7 +7,11 @@ import React, {
   useState,
 } from "react";
 import { formatTlsnHeaders } from "lib/formatTlsnHeaders";
-import { isDefined, ExtensionMessageType, getRedactionConfig } from "../web-proof-commons";
+import {
+  isDefined,
+  ExtensionMessageType,
+  getRedactionConfig,
+} from "../web-proof-commons";
 import { useProvingSessionConfig } from "./useProvingSessionConfig";
 import { useProvenUrl } from "./useProvenUrl";
 import { useTrackHistory } from "hooks/useTrackHistory";

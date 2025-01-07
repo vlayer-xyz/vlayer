@@ -89,13 +89,17 @@ export function isEmptyWebProverSessionConfig(
   );
 }
 
-export function getRedactionConfig(provingSessionConfig: WebProverSessionConfig): RedactionConfig {
-  const notarizeStep = provingSessionConfig.steps.find((step): step is WebProofStepNotarize => step.step === "notarize")
+export function getRedactionConfig(
+  provingSessionConfig: WebProverSessionConfig,
+): RedactionConfig {
+  const notarizeStep = provingSessionConfig.steps.find(
+    (step): step is WebProofStepNotarize => step.step === "notarize",
+  );
   const redactionConfig =
     notarizeStep !== undefined
       ? (notarizeStep as WebProofStepNotarize).redact
       : [];
-  return redactionConfig
+  return redactionConfig;
 }
 
 export type WebProofStep =
@@ -107,7 +111,7 @@ export type UrlPattern = Branded<string, "UrlPattern">;
 
 export type Url = Branded<UrlPattern, "Url">;
 
-type RedactFunction = ((args: string[]) => void);
+type RedactFunction = (args: string[]) => void;
 export type RedactionConfig = RedactFunction[];
 
 export type WebProofStepNotarize = Branded<
