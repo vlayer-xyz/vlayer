@@ -45,11 +45,11 @@ export default defineConfig({
         // copying to src/hooks is require to run in dev mode
         {
           src: `${__dirname}/../node_modules/tlsn-js/build/54ec0a0a2728a8a41850.wasm`,
-          dest: "src/hooks/",
+          dest: "src/hooks/tlsnProve/",
         },
         {
           src: `${__dirname}/../node_modules/tlsn-js/build/112.js`,
-          dest: "src/hooks/",
+          dest: "src/hooks/tlsnProve/",
         },
         // copying to assets is required for prod build
         {
