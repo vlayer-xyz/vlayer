@@ -102,9 +102,9 @@ async fn generate_proof(
 ) -> Result<ProofReceipt, AppError> {
     info!("Processing call {call_hash}");
 
-    // Wait for chain proof if necessary
-    info!("Executing preflight for call {call_hash}");
     await_chain_proof_ready(&host, &state, call_hash, chain_proof_config).await?;
+
+    info!("Executing preflight for call {call_hash}");
 
     state.insert(call_hash, ProofStatus::Preflight);
     let prover = host.prover();
