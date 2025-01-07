@@ -13,7 +13,7 @@ struct AppState {
 }
 
 impl AppState {
-    const fn new() -> Self {
+    fn new() -> Self {
         Self {
             vdns_resolver: VerifiableDNSResolver::new(),
         }

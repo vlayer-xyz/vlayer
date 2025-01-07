@@ -1,9 +1,11 @@
 use serde::Serialize;
 use serde_repr::{Deserialize_repr, Serialize_repr};
 
+use crate::verifiable_dns::Signature;
+
 #[derive(Serialize, Clone, Default, PartialEq, Debug)]
 pub(crate) struct Query {
-    name: String,
+    pub name: String,
     #[serde(rename = "type")]
     record_type: RecordType,
 }
@@ -35,6 +37,7 @@ pub(crate) struct Response {
     pub(crate) question: Query,
     pub(crate) answer: Vec<Record>,
     pub(crate) comment: String,
+    pub(crate) signature: Option<Signature>,
 }
 
 #[derive(Serialize, Default, PartialEq, Debug)]

@@ -1,11 +1,16 @@
+use super::signer::Signer;
 use crate::dns_over_https::{Provider as DoHProvider, Query, Response};
 
 #[derive(Clone)]
-pub(crate) struct Resolver {}
+pub(crate) struct Resolver {
+    signer: Signer,
+}
 
 impl Resolver {
-    pub const fn new() -> Self {
-        Self {}
+    pub fn new() -> Self {
+        Self {
+            signer: Signer::new(),
+        }
     }
 }
 
@@ -14,6 +19,9 @@ impl DoHProvider for Resolver {
         let mut response: Response = Response::with_flags(false, true, true, false, false);
         response.question = query.clone();
         response.status = 0;
+
+        response.signature = Some(self.signer.sign(&query.name.as_str()));
+
         Some(response)
     }
 }
