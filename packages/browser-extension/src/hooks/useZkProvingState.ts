@@ -1,4 +1,4 @@
-import { useLocalStorage, LOADING } from "@vlayer/extension-hooks";
+import { useSessionStorage, LOADING } from "@vlayer/extension-hooks";
 import { ZkProvingStatus } from "../web-proof-commons";
 
 export function isValidZkProvingStatus(
@@ -19,7 +19,7 @@ export const useZkProvingState = (): {
   isProving: boolean;
   isDone: boolean;
 } => {
-  const [state] = useLocalStorage<ZkProvingStatus>(
+  const [state] = useSessionStorage<ZkProvingStatus>(
     "zkProvingStatus",
     ZkProvingStatus.NotStarted,
   );
