@@ -4,6 +4,7 @@ use alloy_primitives::{hex::ToHexExt, ChainId};
 use call_host::Config as HostConfig;
 use chain::TEST_CHAIN_ID;
 use common::GuestElf;
+use derive_new::new;
 use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Serialize};
 use server_utils::ProofMode;
@@ -15,7 +16,7 @@ pub struct Config {
     socket_addr: SocketAddr,
     rpc_urls: HashMap<ChainId, String>,
     proof_mode: ProofMode,
-    chain_proof_url: Option<String>,
+    chain_proof_config: Option<ChainProofConfig>,
     max_calldata_size: usize,
     call_guest_elf: GuestElf,
     chain_guest_elf: GuestElf,
@@ -32,8 +33,8 @@ impl Config {
         self.rpc_urls.clone()
     }
 
-    pub const fn chain_proof_url(&self) -> &Option<String> {
-        &self.chain_proof_url
+    pub fn chain_proof_config(&self) -> Option<ChainProofConfig> {
+        self.chain_proof_config.clone()
     }
 
     pub const fn fake_proofs(&self) -> bool {
@@ -65,6 +66,13 @@ impl Config {
     }
 }
 
+#[derive(new, Serialize, Deserialize, Clone, Debug)]
+pub struct ChainProofConfig {
+    pub url: String,
+    pub poll_interval: u64,
+    pub timeout: u64,
+}
+
 pub struct ConfigBuilder {
     config: Config,
 }
@@ -73,7 +81,7 @@ impl ConfigBuilder {
     pub fn new(call_guest_elf: GuestElf, chain_guest_elf: GuestElf, api_version: String) -> Self {
         Self {
             config: Config {
-                chain_proof_url: None,
+                chain_proof_config: None,
                 call_guest_elf,
                 chain_guest_elf,
                 socket_addr: "127.0.0.1:3000".parse().unwrap(),
@@ -86,8 +94,11 @@ impl ConfigBuilder {
         }
     }
 
-    pub fn with_chain_proof_url(mut self, chain_proof_url: impl Into<Option<String>>) -> Self {
-        self.config.chain_proof_url = chain_proof_url.into();
+    pub fn with_chain_proof_config(
+        mut self,
+        chain_proof_config: impl Into<Option<ChainProofConfig>>,
+    ) -> Self {
+        self.config.chain_proof_config = chain_proof_config.into();
         self
     }
 

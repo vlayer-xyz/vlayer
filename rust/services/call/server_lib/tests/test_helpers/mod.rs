@@ -2,13 +2,14 @@ use call_server_lib::{ConfigBuilder, ProofMode};
 use common::GuestElf;
 use derive_new::new;
 use ethers::types::{Bytes, H160};
-use mock::{Anvil, Client, Contract, GasMeterServer, Server};
-use mock_chain_server::ChainProofServerMock;
+use mock::{Anvil, ChainProofServer, Client, Contract, GasMeterServer, Server};
 use serde_json::{json, Value};
 
 pub const GAS_LIMIT: u64 = 1_000_000;
 pub const ETHEREUM_SEPOLIA_ID: u64 = 11_155_111;
 pub const GAS_METER_TTL: u64 = 3600;
+pub const CHAIN_PROOF_POLL_INTERVAL: u64 = 5;
+pub const CHAIN_PROOF_TIMEOUT: u64 = 120;
 
 pub fn allocate_gas_body(expected_hash: &str) -> Value {
     json!({
@@ -56,7 +57,7 @@ pub(crate) const API_VERSION: &str = "1.2.3";
 pub(crate) struct Context {
     client: Client,
     anvil: Anvil,
-    chain_proof_server: ChainProofServerMock,
+    chain_proof_server: ChainProofServer,
     gas_meter_server: Option<GasMeterServer>,
 }
 
@@ -64,7 +65,8 @@ impl Context {
     pub(crate) async fn default() -> Self {
         let anvil = Anvil::start();
         let client = anvil.setup_client();
-        let chain_proof_server = ChainProofServerMock::start().await;
+        let chain_proof_server =
+            ChainProofServer::start(CHAIN_PROOF_POLL_INTERVAL, CHAIN_PROOF_TIMEOUT).await;
         let mut ctx = Self::new(client, anvil, chain_proof_server, None);
         ctx.mock_latest_block().await;
         ctx
@@ -102,8 +104,9 @@ impl Context {
             .gas_meter_server
             .as_ref()
             .map(GasMeterServer::as_gas_meter_config);
+        let chain_proof_config = self.chain_proof_server.as_chain_proof_config();
         let config = ConfigBuilder::new(call_guest_elf, chain_guest_elf, API_VERSION.into())
-            .with_chain_proof_url(self.chain_proof_server.url())
+            .with_chain_proof_config(chain_proof_config)
             .with_rpc_mappings([(self.anvil.chain_id(), self.anvil.endpoint())])
             .with_proof_mode(ProofMode::Fake)
             .with_gas_meter_config(gas_meter_config)
@@ -117,7 +120,7 @@ pub(crate) mod mock {
 
     use axum::{body::Body, http::Response, Router};
     use block_header::EvmBlockHeader;
-    use call_server_lib::{gas_meter::Config as GasMeterConfig, server, Config};
+    use call_server_lib::{gas_meter::Config as GasMeterConfig, server, ChainProofConfig, Config};
     use derive_more::{Deref, DerefMut};
     use ethers::{
         contract::abigen,
@@ -130,6 +133,7 @@ pub(crate) mod mock {
         signers::{LocalWallet, Signer, Wallet},
         types::BlockNumber as BlockTag,
     };
+    use mock_chain_server::ChainProofServerMock;
     use provider::to_eth_block_header;
     use serde::Serialize;
     use server_utils::{post, rpc::mock::Server as RpcServerMock};
@@ -217,6 +221,30 @@ pub(crate) mod mock {
 
         pub(crate) fn as_gas_meter_config(&self) -> GasMeterConfig {
             GasMeterConfig::new(self.url(), self.time_to_live, self.api_key.clone())
+        }
+    }
+
+    #[derive(Deref, DerefMut)]
+    pub(crate) struct ChainProofServer {
+        #[deref]
+        #[deref_mut]
+        mock: ChainProofServerMock,
+        poll_interval: u64,
+        timeout: u64,
+    }
+
+    impl ChainProofServer {
+        pub(crate) async fn start(poll_interval: u64, timeout: u64) -> Self {
+            let mock = ChainProofServerMock::start().await;
+            Self {
+                mock,
+                poll_interval,
+                timeout,
+            }
+        }
+
+        pub(crate) fn as_chain_proof_config(&self) -> ChainProofConfig {
+            ChainProofConfig::new(self.url(), self.poll_interval, self.timeout)
         }
     }
 }
