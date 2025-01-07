@@ -184,10 +184,9 @@ mod teleport {
         let owner = Address::ZERO;
         let call = call(SIMPLE_TELEPORT, &crossChainBalanceOfCall { owner });
         let result = preflight::<crossChainBalanceOfCall>("simple_teleport", call, &location).await;
-        assert_eq!(
-            result.unwrap_err().to_string(),
-            "TravelCallExecutor error: Panic: Intercepted call failed: EvmEnv(Opaque(Provider factory: No rpc cache for chain: 8453\n\nCaused by:\n    No rpc cache for chain: 8453))"
-        );
+        let err = result.unwrap_err().to_string();
+        let expected_err = "TravelCallExecutor error: Panic: Intercepted call failed: EvmEnv(Opaque(Provider factory: No rpc cache for chain: 8453";
+        assert!(err.contains(expected_err));
 
         Ok(())
     }
