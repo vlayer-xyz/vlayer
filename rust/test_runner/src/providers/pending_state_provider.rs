@@ -1,11 +1,11 @@
 use block_header::{EvmBlockHeader, ForgeBlockHeader, Hashable};
-use call_host::ProofDb;
+use call_host::db::proof::ProofDb;
 use ethers_core::types::BlockNumber as BlockTag;
 use forge::revm::primitives::{
     alloy_primitives::{BlockNumber, ChainId, StorageKey, StorageValue, TxNumber},
     Account, Address, Bytes, EvmState, B256, U256,
 };
-use provider::{BlockingProvider, EIP1186Proof, ProviderFactory, ProviderFactoryError, Result};
+use provider::{BlockingProvider, EIP1186Proof, ProviderFactory, Result};
 
 use crate::proof::{account_proof, prove_storage, storage_root};
 
@@ -109,10 +109,7 @@ pub struct PendingStateProviderFactory {
 }
 
 impl ProviderFactory for PendingStateProviderFactory {
-    fn create(
-        &self,
-        _chain_id: ChainId,
-    ) -> std::result::Result<Box<dyn BlockingProvider>, ProviderFactoryError> {
+    fn create(&self, _chain_id: ChainId) -> provider::factory::Result<Box<dyn BlockingProvider>> {
         Ok(Box::new(PendingStateProvider {
             state: self.state.clone(),
             block_number: self.block_number,

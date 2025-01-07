@@ -1,10 +1,5 @@
-use std::{
-    any::Any,
-    panic::{self},
-    time::{Duration, Instant},
-};
+use std::time::{Duration, Instant};
 
-use alloy_primitives::{BlockNumber, ChainId};
 use alloy_sol_types::SolValue;
 use bytes::Bytes;
 use call_engine::{
@@ -12,7 +7,7 @@ use call_engine::{
         env::{cached::CachedEvmEnv, location::ExecutionLocation},
         execution_result::SuccessfulExecutionResult,
     },
-    travel_call_executor::{Error as TravelCallExecutorError, TravelCallExecutor},
+    travel_call_executor::TravelCallExecutor,
     verifier::{
         chain_proof,
         guest_input::{self, Verifier},
@@ -25,14 +20,13 @@ use common::GuestElf;
 pub use config::Config;
 use derive_new::new;
 pub use error::{AwaitingChainProofError, BuilderError, Error, PreflightError, ProvingError};
-use ethers_core::types::BlockNumber as BlockTag;
 use prover::Prover;
-use provider::{CachedMultiProvider, EvmBlockHeader};
+use provider::CachedMultiProvider;
 use risc0_zkvm::{ProveInfo, SessionStats};
 use seal::EncodableReceipt;
 use tracing::{info, instrument};
 
-use crate::{evm_env::factory::HostEvmEnvFactory, into_input::into_multi_input, HostDb};
+use crate::{db::HostDb, evm_env::factory::HostEvmEnvFactory, into_input::into_multi_input};
 
 mod builder;
 mod config;
@@ -67,27 +61,6 @@ impl Host {
     pub fn call_guest_id(&self) -> CallGuestId {
         self.guest_elf.id.into()
     }
-}
-
-pub fn get_latest_block_number(
-    providers: &CachedMultiProvider,
-    chain_id: ChainId,
-) -> Result<BlockNumber, BuilderError> {
-    get_block_header(providers, chain_id, BlockTag::Latest).map(|header| header.number())
-}
-
-pub fn get_block_header(
-    providers: &CachedMultiProvider,
-    chain_id: ChainId,
-    block_num: BlockTag,
-) -> Result<Box<dyn EvmBlockHeader>, BuilderError> {
-    let provider = providers.get(chain_id)?;
-
-    let block_header = provider
-        .get_block_header(block_num)?
-        .ok_or(BuilderError::BlockNotFound(block_num))?;
-
-    Ok(block_header)
 }
 
 #[derive(new, Debug, Clone)]
@@ -136,10 +109,7 @@ impl Host {
         let SuccessfulExecutionResult {
             output: host_output,
             gas_used,
-        } = panic::catch_unwind(|| {
-            TravelCallExecutor::new(&self.envs).call(&call, self.start_execution_location)
-        })
-        .map_err(wrap_engine_panic)??;
+        } = TravelCallExecutor::new(&self.envs).call(&call, self.start_execution_location)?;
         let elapsed_time = now.elapsed();
 
         info!(
@@ -148,8 +118,7 @@ impl Host {
             "preflight finished",
         );
 
-        let multi_evm_input = into_multi_input(self.envs)
-            .map_err(|err| PreflightError::CreatingInput(err.to_string()))?;
+        let multi_evm_input = into_multi_input(self.envs)?;
 
         let verifier = guest_input::ZkVerifier::new(self.chain_client, self.chain_proof_verifier);
         verifier.verify(&multi_evm_input).await?;
@@ -214,14 +183,6 @@ impl Host {
         let preflight_result = self.preflight(call).await?;
         Ok(Host::prove(&prover, call_guest_id, preflight_result)?)
     }
-}
-
-fn wrap_engine_panic(err: Box<dyn Any + Send>) -> TravelCallExecutorError {
-    let panic_msg = err
-        .downcast::<String>()
-        .map(|x| *x)
-        .unwrap_or("Panic occurred".to_string());
-    TravelCallExecutorError::Panic(panic_msg)
 }
 
 #[derive(new)]

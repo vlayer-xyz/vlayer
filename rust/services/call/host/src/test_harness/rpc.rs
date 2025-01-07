@@ -11,7 +11,7 @@ use ethers_core::types::BlockNumber as BlockTag;
 use lazy_static::lazy_static;
 use provider::{BlockNumber, CachedMultiProvider, CachedProviderFactory};
 
-use crate::{get_block_header, Error};
+use crate::BuilderError;
 
 // To activate recording, set UPDATE_SNAPSHOTS to true.
 // Recording creates new test data directory and writes return data from Alchemy into files in that directory.
@@ -74,11 +74,11 @@ pub fn block_tag_to_block_number(
     multi_provider: &CachedMultiProvider,
     chain_id: ChainId,
     block_tag: BlockTag,
-) -> Result<BlockNumber, Error> {
+) -> Result<BlockNumber, BuilderError> {
     match block_tag {
-        BlockTag::Latest => {
-            Ok(get_block_header(multi_provider, chain_id, BlockTag::Latest)?.number())
-        }
+        BlockTag::Latest => Ok(multi_provider
+            .get_block_header(chain_id, BlockTag::Latest)?
+            .number()),
         BlockTag::Number(block_no) => Ok(block_no.as_u64()),
         _ => panic!("Only Latest and specific block numbers are supported, got {block_tag:?}"),
     }

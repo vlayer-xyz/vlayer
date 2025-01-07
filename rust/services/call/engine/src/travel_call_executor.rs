@@ -1,4 +1,4 @@
-use std::sync::Arc;
+use std::{any::Any, panic, sync::Arc};
 
 use call_precompiles::PRECOMPILES;
 use derive_new::new;
@@ -36,7 +36,7 @@ pub enum Error {
     TransactError(#[from] TransactError),
 
     #[error("Failed to get EvmEnv: {0}")]
-    EvmEnv(String),
+    EvmEnv(#[from] crate::evm::env::factory::Error),
 
     #[error("Panic: {0}")]
     Panic(String),
@@ -49,14 +49,10 @@ where
     D: DatabaseRef,
     D::Error: std::fmt::Debug,
 {
-    fn get_env(&self, location: ExecutionLocation) -> Result<Arc<EvmEnv<D>>> {
-        self.envs
-            .get(location)
-            .map_err(|err| Error::EvmEnv(err.to_string()))
-    }
-
     pub fn call(self, tx: &Call, location: ExecutionLocation) -> Result<SuccessfulExecutionResult> {
-        Ok(self.internal_call(tx, location)?.try_into()?)
+        let result =
+            panic::catch_unwind(|| self.internal_call(tx, location)).map_err(wrap_panic)??;
+        Ok(result.try_into()?)
     }
 
     pub fn internal_call(
@@ -64,15 +60,24 @@ where
         tx: &Call,
         location: ExecutionLocation,
     ) -> Result<ExecutionResult> {
-        let env = self.get_env(location)?;
+        let env = self.envs.get(location)?;
         let transaction_callback = |call: &_, location| self.internal_call(call, location);
         let inspector = TravelInspector::new(env.cfg_env.chain_id, transaction_callback);
         let mut evm = build_evm(&env, tx, inspector);
+        // Can panic because EVM is unable to propagate errors on intercepted calls
         let ResultAndState { result, .. } = evm.transact_preverified()?;
         debug!("EVM call result: {:?}", result);
 
         Ok(result)
     }
+}
+
+fn wrap_panic(err: Box<dyn Any + Send>) -> Error {
+    let panic_msg = err
+        .downcast::<String>()
+        .map(|x| *x)
+        .unwrap_or("Panic occurred".to_string());
+    Error::Panic(panic_msg)
 }
 
 fn build_evm<'inspector, 'envs, D>(

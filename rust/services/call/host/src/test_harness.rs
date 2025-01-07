@@ -10,7 +10,7 @@ pub use rpc::{
 };
 pub use types::ExecutionLocation;
 
-use crate::{get_block_header, Call, Config, Error, Host, PreflightResult};
+use crate::{BuilderError, Call, Config, Error, Host, PreflightResult};
 
 pub mod contracts;
 mod rpc;
@@ -53,8 +53,8 @@ pub async fn run(
 async fn create_chain_proof_server(
     multi_provider: &CachedMultiProvider,
     location: &ExecutionLocation,
-) -> Result<ChainProofServerMock, Error> {
-    let block_header = get_block_header(multi_provider, location.chain_id, location.block_tag)?;
+) -> Result<ChainProofServerMock, BuilderError> {
+    let block_header = multi_provider.get_block_header(location.chain_id, location.block_tag)?;
 
     let mut chain_proof_server = ChainProofServerMock::start().await;
     chain_proof_server
@@ -68,7 +68,7 @@ fn create_host(
     multi_provider: CachedMultiProvider,
     location: &ExecutionLocation,
     chain_proof_server_url: impl AsRef<str>,
-) -> Result<Host, Error> {
+) -> Result<Host, BuilderError> {
     let config = Config {
         call_guest_elf: CALL_GUEST_ELF.clone(),
         chain_guest_elf: CHAIN_GUEST_ELF.clone(),

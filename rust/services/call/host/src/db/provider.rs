@@ -14,14 +14,13 @@ use thiserror::Error;
 
 /// Error type for the [ProviderDb].
 #[derive(Error, Debug)]
-pub enum ProviderDbError {
+pub enum Error {
     #[error("provider error: {0}")]
     Provider(#[from] provider::Error),
     #[error("invalid block number: {0}")]
     InvalidBlockNumber(u64),
-    #[error("hash missing for block: {0}")]
-    BlockHashMissing(U256),
 }
+pub type Result<T> = std::result::Result<T, Error>;
 
 /// A revm [Database] backed by a [Provider].
 pub(crate) struct ProviderDb {
@@ -44,9 +43,9 @@ impl ProviderDb {
 }
 
 impl DatabaseRef for ProviderDb {
-    type Error = ProviderDbError;
+    type Error = Error;
 
-    fn basic_ref(&self, address: Address) -> Result<Option<AccountInfo>, Self::Error> {
+    fn basic_ref(&self, address: Address) -> Result<Option<AccountInfo>> {
         // use `eth_getProof` to get all the account info with a single call
         let proof = self
             .provider
@@ -70,7 +69,7 @@ impl DatabaseRef for ProviderDb {
         }))
     }
 
-    fn code_by_hash_ref(&self, code_hash: B256) -> Result<Bytecode, Self::Error> {
+    fn code_by_hash_ref(&self, code_hash: B256) -> Result<Bytecode> {
         // avoid querying the RPC if the code hash is empty
         if code_hash == KECCAK_EMPTY {
             return Ok(Bytecode::new());
@@ -90,7 +89,7 @@ impl DatabaseRef for ProviderDb {
         Ok(Bytecode::new_raw(code.0.into()))
     }
 
-    fn storage_ref(&self, address: Address, index: U256) -> Result<U256, Self::Error> {
+    fn storage_ref(&self, address: Address, index: U256) -> Result<U256> {
         let storage = self
             .provider
             .get_storage_at(address, index.into(), self.block_number)?;
@@ -98,11 +97,11 @@ impl DatabaseRef for ProviderDb {
         Ok(storage)
     }
 
-    fn block_hash_ref(&self, number: u64) -> Result<B256, Self::Error> {
+    fn block_hash_ref(&self, number: u64) -> Result<B256> {
         let header = self
             .provider
             .get_block_header(number.into())?
-            .ok_or(ProviderDbError::InvalidBlockNumber(number))?;
+            .ok_or(Error::InvalidBlockNumber(number))?;
 
         Ok(header.hash_slow())
     }

@@ -9,7 +9,7 @@ use call_engine::{
     Call, HostOutput, Proof, Seal,
 };
 use call_guest_wrapper::GUEST_ELF;
-use call_host::{get_latest_block_number, Config as HostConfig, Error, Host, PreflightError};
+use call_host::{Config as HostConfig, Error, Host, PreflightError};
 use chain::TEST_CHAIN_ID;
 use chain_client::RpcClient as RpcChainProofClient;
 use foundry_config::RpcEndpoints;
@@ -176,8 +176,9 @@ fn create_host<DB: Database>(
         call_guest_elf: GUEST_ELF.clone(),
         ..Default::default()
     };
-    let block_number =
-        get_latest_block_number(&providers, TEST_CHAIN_ID).expect("failed to get block number");
+    let block_number = providers
+        .get_latest_block_number(TEST_CHAIN_ID)
+        .expect("failed to get block number");
     let start_exec_location = (TEST_CHAIN_ID, block_number).into();
     let chain_proof_client = Box::new(RpcChainProofClient::new(chain_proof_url));
 

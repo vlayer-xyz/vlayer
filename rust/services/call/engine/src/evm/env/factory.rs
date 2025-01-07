@@ -1,12 +1,18 @@
+use derivative::Derivative;
 use revm::DatabaseRef;
 use thiserror::Error;
 
 use super::{location::ExecutionLocation, EvmEnv};
 
-#[derive(Debug, Error)]
+#[derive(Debug, Error, Derivative)]
+#[derivative(PartialEq, Eq)]
 pub enum Error {
     #[error(transparent)]
-    Opaque(#[from] anyhow::Error),
+    Opaque(
+        #[from]
+        #[derivative(PartialEq = "ignore")]
+        anyhow::Error,
+    ),
     #[error("NullEvmEnvFactory cannot create EvmEnv")]
     NullEvmEnvFactory,
 }
