@@ -98,6 +98,9 @@ export type UrlPattern = Branded<string, "UrlPattern">;
 
 export type Url = Branded<UrlPattern, "Url">;
 
+type RedactFunction = ((args: string[]) => void);
+export type RedactionConfig = RedactFunction[];
+
 export type WebProofStepNotarize = Branded<
   {
     url: UrlPattern;
