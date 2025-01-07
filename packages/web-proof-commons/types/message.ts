@@ -89,6 +89,15 @@ export function isEmptyWebProverSessionConfig(
   );
 }
 
+export function getRedactionConfig(provingSessionConfig: WebProverSessionConfig): RedactionConfig {
+  const notarizeStep = provingSessionConfig.steps.find((step): step is WebProofStepNotarize => step.step === "notarize")
+  const redactionConfig =
+    notarizeStep !== undefined
+      ? (notarizeStep as WebProofStepNotarize).redact
+      : [];
+  return redactionConfig
+}
+
 export type WebProofStep =
   | WebProofStepNotarize
   | WebProofStepExpectUrl
