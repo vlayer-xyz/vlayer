@@ -41,15 +41,15 @@ pub async fn get(
     app: Router,
     url: &str,
     headers: &[(&HeaderName, &str)],
-    params: &[(&str, &str)],
+    query: &[(&str, &str)],
 ) -> Response<Body> {
-    let params = params
+    let query = query
         .iter()
         .map(|(k, v)| format!("{k}={v}"))
         .collect::<Vec<_>>()
         .join("&");
 
-    let request = Request::get(format!("{url}?{params}"));
+    let request = Request::get(format!("{url}?{query}"));
     let request = headers
         .iter()
         .fold(request, |request, &(name, value)| request.header(name, value));

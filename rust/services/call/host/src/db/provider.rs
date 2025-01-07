@@ -15,8 +15,8 @@ use thiserror::Error;
 /// Error type for the [ProviderDb].
 #[derive(Error, Debug)]
 pub enum ProviderDbError {
-    #[error("provider error")]
-    Provider(#[from] anyhow::Error),
+    #[error("provider error: {0}")]
+    Provider(#[from] provider::Error),
     #[error("invalid block number: {0}")]
     InvalidBlockNumber(u64),
     #[error("hash missing for block: {0}")]
@@ -85,8 +85,7 @@ impl DatabaseRef for ProviderDb {
             .expect("`basic` must be called first for the corresponding account");
         let code = self
             .provider
-            .get_code(contract_address, self.block_number)
-            .map_err(ProviderDbError::Provider)?;
+            .get_code(contract_address, self.block_number)?;
 
         Ok(Bytecode::new_raw(code.0.into()))
     }
@@ -94,8 +93,7 @@ impl DatabaseRef for ProviderDb {
     fn storage_ref(&self, address: Address, index: U256) -> Result<U256, Self::Error> {
         let storage = self
             .provider
-            .get_storage_at(address, index.into(), self.block_number)
-            .map_err(ProviderDbError::Provider)?;
+            .get_storage_at(address, index.into(), self.block_number)?;
 
         Ok(storage)
     }

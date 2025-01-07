@@ -95,35 +95,54 @@ To get result of `v_call` query `v_getProofReceipt`.
 }
 ```
 
-There are two possible results: `pending`, and `done`.
+There are 5 possible `status` values:
+* `queued`
+* `waiting_for_chain_proof`
+* `preflight`
+* `proving`
+* `ready`
 
-### Pending
+If `status` is `ready`, the server will respond with a proof receipt.
+
+### Queued, WaitingForChainProof, Preflight, Proving
 
 ```json
 {
     "jsonrpc": "2.0",
     "result": {
-        "status": "pending",
+        "status": "queued" | "waiting_for_chain_proof" | "preflight" | "proving",
     }
 }
 ```
 
-### Done
+### Ready
 
 ```json
 {
     "jsonrpc": "2.0",
     "result": {        
-        "status": "done",
-        "data": {
-            "proof": "<calldata encoded Proof structure>",
-            "evm_call_result": "<calldata encoded result of execution>",
+        "status": "ready",
+        "receipt": {
+            "data": {
+                "proof": "<calldata encoded Proof structure>",
+                "evm_call_result": "<calldata encoded result of execution>",
+            },
+            "metrics": {
+                "gas": 0,
+                "cycles": 0,
+                "times": {
+                    "preflight": 0,
+                    "proving": 0,
+                },
+            },
         }
     }
 }
 ```
 
 `evm_call_result` is an ABI encoded result of the function execution and `proof` is a Solidity `Proof` structure to prepend in verifier function. Note that settlement block is only available in receipt, as we don't want to make assumption on when the the settlement block is assigned.
+
+`metrics` contains aggregated statistics gathered during proof generation. `gas` corresponds to gas used in the preflight step, while `cycles` is the number of CPU cycles utilized during proving. Additionally, `times.preflight` and `times.proving` are both expressed in milliseconds.
 
 ### Error
 

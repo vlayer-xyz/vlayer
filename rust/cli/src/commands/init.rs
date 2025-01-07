@@ -10,12 +10,12 @@ use reqwest::get;
 use serde_json::{Map, Value};
 use tar::Archive;
 use tracing::{error, info};
+use version::version;
 
 use crate::{
     commands::{
         args::{InitArgs, TemplateOption},
         common::soldeer::{add_remappings, DEPENDENCIES},
-        version::version,
     },
     errors::CLIError,
     utils::{

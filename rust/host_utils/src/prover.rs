@@ -1,8 +1,9 @@
-use anyhow::Result;
+use derivative::Derivative;
 use risc0_zkvm::{
     BonsaiProver, ExecutorEnv, ExternalProver, ProveInfo, Prover as ProverTrait, ProverOpts,
     SessionStats,
 };
+use thiserror::Error;
 use tracing::info;
 
 use crate::ProofMode;
@@ -11,6 +12,16 @@ use crate::ProofMode;
 pub struct Prover {
     mode: ProofMode,
 }
+
+#[derive(Debug, Error, Derivative)]
+#[derivative(PartialEq, Eq)]
+#[error(transparent)]
+pub struct Error(
+    #[from]
+    #[derivative(PartialEq = "ignore")]
+    anyhow::Error,
+);
+pub type Result<T> = std::result::Result<T, Error>;
 
 impl Prover {
     pub const fn new(mode: ProofMode) -> Self {
@@ -43,9 +54,9 @@ fn prove_bonsai(env: ExecutorEnv<'_>, elf: &[u8], opts: &ProverOpts) -> Result<P
     let bonsai_prover = BonsaiProver::new("vlayer: bonsai");
     // block_in_place is used to avoid tokio runtime panic, since bonsai_prover.prove_with_opts is blocking.
     // https://github.com/risc0/risc0/issues/2049
-    let prove_info = tokio::task::block_in_place(|| bonsai_prover.prove_with_opts(env, elf, opts));
+    let prove_info = tokio::task::block_in_place(|| bonsai_prover.prove_with_opts(env, elf, opts))?;
     info!("Proving with Bonsai done");
-    prove_info
+    Ok(prove_info)
 }
 
 fn prove_fake(env: ExecutorEnv<'_>, elf: &[u8]) -> Result<ProveInfo> {
@@ -56,5 +67,5 @@ fn prove_fake(env: ExecutorEnv<'_>, elf: &[u8]) -> Result<ProveInfo> {
         std::env::set_var("RISC0_DEV_MODE", "1");
     }
 
-    ExternalProver::new("vlayer: ipc", "r0vm").prove(env, elf)
+    Ok(ExternalProver::new("vlayer: ipc", "r0vm").prove(env, elf)?)
 }

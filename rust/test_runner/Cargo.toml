@@ -10,7 +10,6 @@ alloy-primitives = { workspace = true }
 alloy-rlp = { workspace = true }
 alloy-sol-types = { workspace = true, features = ["json"] }
 alloy-trie = { workspace = true }
-anyhow = { workspace = true }
 block_header = { workspace = true }
 call_engine = { workspace = true }
 call_guest_wrapper = { workspace = true }
@@ -27,7 +26,6 @@ derive-new = { workspace = true }
 ethers-core = { workspace = true }
 eyre = { workspace = true }
 forge = { workspace = true }
-foundry-cheatcodes = { workspace = true }
 foundry-cli = { workspace = true }
 foundry-common = { workspace = true }
 foundry-compilers = { workspace = true }
@@ -35,9 +33,11 @@ foundry-config = { workspace = true }
 foundry-debugger = { workspace = true }
 foundry-evm = { workspace = true }
 foundry-evm-core = { workspace = true }
+hickory-resolver = { workspace = true }
 indicatif = { workspace = true }
 inferno = { workspace = true }
 itertools = { workspace = true }
+mailparse = { workspace = true }
 mock_chain_server = { workspace = true }
 mpt = { workspace = true }
 opener = { workspace = true }
@@ -49,6 +49,7 @@ rayon = { workspace = true }
 regex = { workspace = true }
 semver = { workspace = true }
 serde_json = { workspace = true }
+thiserror = { workspace = true }
 tokio = { workspace = true }
 tracing = { workspace = true }
 yansi = { workspace = true }

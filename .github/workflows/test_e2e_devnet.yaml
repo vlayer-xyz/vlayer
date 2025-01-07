@@ -49,7 +49,7 @@ jobs:
         working-directory: ./rust
         env:
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
-        run: cargo build --bin vlayer --bin chain_server --bin worker
+        run: cargo build --bin vlayer --bin call_server --bin chain_server --bin worker
       - name: Run e2e test
         env:
           PROVING_MODE: "dev"

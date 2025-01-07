@@ -1,0 +1,17 @@
+[package]
+name = "version"
+version = "0.1.0"
+edition = "2021"
+build = "build.rs"
+
+[dependencies]
+
+[dev-dependencies]
+regex = { workspace = true }
+
+[build-dependencies]
+anyhow = { workspace = true }
+vergen-gitcl = { workspace = true, features = ["build", "cargo", "si", "rustc"] }
+
+[lints]
+workspace = true

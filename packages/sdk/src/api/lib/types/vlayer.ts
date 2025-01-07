@@ -53,7 +53,7 @@ export type VGetProofReceiptParams = {
   hash: Hex;
 };
 
-export enum VGetProofReceiptStatus {
+export enum ProofReceiptStatus {
   Queued = "queued",
   WaitingForChainProof = "waiting_for_chain_proof",
   Preflight = "preflight",
@@ -61,17 +61,31 @@ export enum VGetProofReceiptStatus {
   Ready = "ready",
 }
 
-export interface VGetProofReceiptResult {
-  status: VGetProofReceiptStatus;
-  data?: {
+export type ProofReceipt = {
+  data: {
     evm_call_result: Hex;
     proof: Proof;
   };
+  metrics: Metrics;
+};
+
+export type Metrics = {
+  gas: number;
+  cycles: number;
+  times: {
+    preflight: number;
+    proving: number;
+  };
+};
+
+export interface ProofReceiptResult {
+  status: ProofReceiptStatus;
+  receipt?: ProofReceipt;
 }
 
 export interface VGetProofReceiptResponse {
   jsonrpc: string;
-  result: VGetProofReceiptResult;
+  result: ProofReceiptResult;
   id: number;
 }
 

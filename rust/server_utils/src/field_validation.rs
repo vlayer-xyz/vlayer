@@ -12,6 +12,12 @@ pub enum FieldValidationError {
     },
     #[error("`{field}` Invalid hex prefix `{value}`")]
     InvalidHexPrefix { field: String, value: String },
+    #[error("`{field}` Is too long `{length}` > `{limit}`")]
+    LengthLimit {
+        field: String,
+        length: usize,
+        limit: usize,
+    },
 }
 
 pub fn parse_address_field(

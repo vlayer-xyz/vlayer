@@ -1,9 +1,9 @@
 use alloy_primitives::{BlockNumber, ChainId};
-use anyhow::bail;
 use revm::primitives::SpecId;
 use serde::{Deserialize, Serialize};
+use thiserror::Error;
 
-use crate::{config::CHAIN_ID_TO_CHAIN_SPEC, error::ChainError, fork::Fork};
+use crate::{config::CHAIN_ID_TO_CHAIN_SPEC, fork::Fork};
 
 #[derive(Debug, Clone, Serialize, Deserialize)]
 pub struct ChainSpec {
@@ -12,6 +12,14 @@ pub struct ChainSpec {
     forks: Box<[Fork]>,
     #[serde(default, skip_serializing_if = "std::ops::Not::not")]
     is_optimism: bool,
+}
+
+#[derive(Debug, Error)]
+pub enum Error {
+    #[error("Unsupported fork for block {0}")]
+    UnsupportedForkForBlock(BlockNumber),
+    #[error("Unsupported chain id: {0}")]
+    UnsupportedChainId(ChainId),
 }
 
 impl ChainSpec {
@@ -41,13 +49,13 @@ impl ChainSpec {
     }
 
     /// Returns the [SpecId] for a given block number and timestamp or an error if not supported.
-    pub fn active_fork(&self, block_number: BlockNumber, timestamp: u64) -> anyhow::Result<SpecId> {
+    pub fn active_fork(&self, block_number: BlockNumber, timestamp: u64) -> Result<SpecId, Error> {
         for fork in self.forks.iter().rev() {
             if fork.active(block_number, timestamp) {
                 return Ok(**fork);
             }
         }
-        bail!("unsupported fork for block {}", block_number)
+        Err(Error::UnsupportedForkForBlock(block_number))
     }
 
     pub const fn id(&self) -> ChainId {
@@ -64,12 +72,12 @@ impl ChainSpec {
 }
 
 impl TryFrom<ChainId> for ChainSpec {
-    type Error = ChainError;
+    type Error = Error;
 
     fn try_from(chain_id: ChainId) -> Result<Self, Self::Error> {
         let chain_spec = CHAIN_ID_TO_CHAIN_SPEC
             .get(&chain_id)
-            .ok_or(ChainError::UnsupportedChainId(chain_id))?;
+            .ok_or(Error::UnsupportedChainId(chain_id))?;
         Ok((*chain_spec).clone())
     }
 }

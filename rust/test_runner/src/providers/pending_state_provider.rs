@@ -1,4 +1,3 @@
-use anyhow::Error;
 use block_header::{EvmBlockHeader, ForgeBlockHeader, Hashable};
 use call_host::ProofDb;
 use ethers_core::types::BlockNumber as BlockTag;
@@ -6,7 +5,7 @@ use forge::revm::primitives::{
     alloy_primitives::{BlockNumber, ChainId, StorageKey, StorageValue, TxNumber},
     Account, Address, Bytes, EvmState, B256, U256,
 };
-use provider::{BlockingProvider, EIP1186Proof, ProviderFactory, ProviderFactoryError};
+use provider::{BlockingProvider, EIP1186Proof, ProviderFactory, ProviderFactoryError, Result};
 
 use crate::proof::{account_proof, prove_storage, storage_root};
 
@@ -39,11 +38,11 @@ impl PendingStateProvider {
 }
 
 impl BlockingProvider for PendingStateProvider {
-    fn get_balance(&self, address: Address, _block: BlockNumber) -> Result<U256, Error> {
+    fn get_balance(&self, address: Address, _block: BlockNumber) -> Result<U256> {
         Ok(self.account(address).info.balance)
     }
 
-    fn get_block_header(&self, block: BlockTag) -> Result<Option<Box<dyn EvmBlockHeader>>, Error> {
+    fn get_block_header(&self, block: BlockTag) -> Result<Option<Box<dyn EvmBlockHeader>>> {
         let block_number: u64 = match block {
             BlockTag::Number(n) => n.as_u64(),
             _ => self.block_number,
@@ -51,7 +50,7 @@ impl BlockingProvider for PendingStateProvider {
         Ok(Some(Box::new(ForgeBlockHeader::new(block_number, self.get_state_root()))))
     }
 
-    fn get_code(&self, address: Address, _block: BlockNumber) -> Result<Bytes, Error> {
+    fn get_code(&self, address: Address, _block: BlockNumber) -> Result<Bytes> {
         Ok(self
             .account(address)
             .info
@@ -64,7 +63,7 @@ impl BlockingProvider for PendingStateProvider {
         address: Address,
         storage_keys: Vec<StorageKey>,
         _block: BlockNumber,
-    ) -> Result<EIP1186Proof, Error> {
+    ) -> Result<EIP1186Proof> {
         let account = self.account(address);
 
         let account_proof = EIP1186Proof {
@@ -85,7 +84,7 @@ impl BlockingProvider for PendingStateProvider {
         address: Address,
         key: StorageKey,
         _block: BlockNumber,
-    ) -> Result<StorageValue, Error> {
+    ) -> Result<StorageValue> {
         let storage_value = self
             .account(address)
             .storage
@@ -94,15 +93,11 @@ impl BlockingProvider for PendingStateProvider {
         Ok(storage_value)
     }
 
-    fn get_transaction_count(
-        &self,
-        address: Address,
-        _block: BlockNumber,
-    ) -> Result<TxNumber, Error> {
+    fn get_transaction_count(&self, address: Address, _block: BlockNumber) -> Result<TxNumber> {
         Ok(self.account(address).info.nonce)
     }
 
-    fn get_latest_block_number(&self) -> Result<BlockNumber, Error> {
+    fn get_latest_block_number(&self) -> Result<BlockNumber> {
         Ok(self.block_number)
     }
 }
@@ -117,7 +112,7 @@ impl ProviderFactory for PendingStateProviderFactory {
     fn create(
         &self,
         _chain_id: ChainId,
-    ) -> Result<Box<dyn BlockingProvider>, ProviderFactoryError> {
+    ) -> std::result::Result<Box<dyn BlockingProvider>, ProviderFactoryError> {
         Ok(Box::new(PendingStateProvider {
             state: self.state.clone(),
             block_number: self.block_number,

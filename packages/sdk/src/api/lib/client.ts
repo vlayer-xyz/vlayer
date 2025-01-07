@@ -2,7 +2,7 @@ import {
   type VCallResponse,
   type VlayerClient,
   type BrandedHash,
-  VGetProofReceiptStatus,
+  ProofReceiptStatus,
 } from "types/vlayer";
 import { type WebProofProvider } from "types/webProofProvider";
 
@@ -100,19 +100,19 @@ export const createVlayerClient = (
       const getProof = async () => {
         for (let retry = 0; retry < numberOfRetries; retry++) {
           const resp = await getProofReceipt(hash, url);
-          const { status, data } = resp.result;
-          if (status === VGetProofReceiptStatus.Ready) {
-            if (data === undefined) {
+          const { status, receipt } = resp.result;
+          if (status === ProofReceiptStatus.Ready) {
+            if (receipt === undefined) {
               throw new Error(
                 "No ZK proof returned from server for hash " + hash.hash,
               );
             }
-            return data;
+            return receipt;
           } else if (
-            status === VGetProofReceiptStatus.Queued ||
-            status === VGetProofReceiptStatus.WaitingForChainProof ||
-            status === VGetProofReceiptStatus.Preflight ||
-            status === VGetProofReceiptStatus.Proving
+            status === ProofReceiptStatus.Queued ||
+            status === ProofReceiptStatus.WaitingForChainProof ||
+            status === ProofReceiptStatus.Preflight ||
+            status === ProofReceiptStatus.Proving
           ) {
             webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Proving);
           }
@@ -123,7 +123,7 @@ export const createVlayerClient = (
         );
       };
       try {
-        const data = await getProof();
+        const receipt = await getProof();
         const savedProvingData = resultHashMap.get(hash.hash);
         if (!savedProvingData) {
           throw new Error("No result found for hash " + hash.hash);
@@ -133,14 +133,14 @@ export const createVlayerClient = (
         const result = dropEmptyProofFromArgs(
           decodeFunctionResult({
             abi: proverAbi,
-            data: data?.evm_call_result,
+            data: receipt?.data.evm_call_result,
             functionName,
           }),
         );
 
         webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Done);
 
-        return [data?.proof, ...result] as ContractFunctionReturnType<
+        return [receipt?.data.proof, ...result] as ContractFunctionReturnType<
           T,
           AbiStateMutability,
           F

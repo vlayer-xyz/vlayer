@@ -1,66 +1,88 @@
-use alloy_primitives::ChainId;
 use call_engine::{
-    travel_call_executor::Error as TravelCallExecutorError, verifier::guest_input, GuestOutputError,
+    evm::env::factory::Error as EvmEnvFactoryError,
+    travel_call_executor::Error as TravelCallExecutorError, verifier::guest_input,
+    GuestOutputError,
 };
+use ethers_core::types::BlockNumber as BlockTag;
+use host_utils::proving;
 use provider::ProviderFactoryError;
 use risc0_zkp::verify::VerificationError;
 use thiserror::Error;
 
-use super::prover;
-
 #[derive(Error, Debug)]
 pub enum Error {
-    #[error("Invalid input: {0}")]
-    CreatingInput(String),
+    #[error("Builder: {0}")]
+    Builder(#[from] BuilderError),
 
-    #[error("TravelCallExecutor error: {0}")]
-    Engine(#[from] TravelCallExecutorError),
+    #[error("Proving: {0}")]
+    AwaitingChainProof(#[from] AwaitingChainProofError),
 
+    #[error("Preflight: {0}")]
+    Preflight(#[from] PreflightError),
+
+    #[error("Proving: {0}")]
+    Proving(#[from] ProvingError),
+}
+
+#[derive(Error, Debug)]
+pub enum BuilderError {
     #[error("Provider factory error: {0}")]
     ProviderFactory(#[from] ProviderFactoryError),
 
     #[error("Provider error: {0}")]
-    Provider(String),
+    Provider(#[from] provider::Error),
 
     #[error("Block not found: {0}")]
-    BlockNotFound(u64),
+    BlockNotFound(BlockTag),
 
-    #[error("Error creating client: {0}")]
-    NewClient(#[from] url::ParseError),
-
-    #[error("Prover error: {0}")]
-    Prover(#[from] prover::Error),
-
-    #[error("Guest output error: {0}")]
-    GuestOutput(#[from] GuestOutputError),
-
-    #[error("Host output does not match guest output: {0:?} {1:?}")]
-    HostGuestOutputMismatch(Vec<u8>, Vec<u8>),
-
-    #[error("No rpc url for chain: {0}")]
-    NoRpcUrl(ChainId),
-
-    #[error("Verification error: {0}")]
-    Verification(#[from] VerificationError),
-
-    #[error("Abi encode error: {0}")]
-    AbiEncode(String),
+    #[error("Chain error: {0}")]
+    Chain(#[from] chain::Error),
 
     #[error("Evm env factory error: {0}")]
-    EvmEnvFactory(#[from] anyhow::Error),
-
-    #[error("Seal encoding error: {0}")]
-    SealEncodingError(#[from] seal::Error),
+    EvmEnvFactory(#[from] EvmEnvFactoryError),
 
     #[error("Chain Proof Client error: {0}")]
     ChainProofClient(#[from] chain_client::Error),
 
+    #[error("Prover contract not deployed")]
+    ProverContractNotDeployed,
+}
+
+#[derive(Error, Debug)]
+pub enum AwaitingChainProofError {
+    #[error("Chain Proof Client error: {0}")]
+    ChainProofClient(#[from] chain_client::Error),
+}
+
+#[derive(Error, Debug)]
+pub enum ProvingError {
+    #[error("Proving error: {0}")]
+    Proving(#[from] proving::Error),
+
+    #[error("Host output does not match guest output: {0:?} {1:?}")]
+    HostGuestOutputMismatch(Vec<u8>, Vec<u8>),
+
+    #[error("Guest output error: {0}")]
+    GuestOutput(#[from] GuestOutputError),
+
+    #[error("Seal encoding error: {0}")]
+    SealEncodingError(#[from] seal::Error),
+}
+
+#[derive(Error, Debug)]
+pub enum PreflightError {
     #[error("Calldata too large: {0} bytes")]
     CalldataTooLargeError(usize),
 
+    #[error("TravelCallExecutor error: {0}")]
+    Engine(#[from] TravelCallExecutorError),
+
+    #[error("Verification error: {0}")]
+    Verification(#[from] VerificationError),
+
+    #[error("Invalid input: {0}")]
+    CreatingInput(String),
+
     #[error("Guest input verification error: {0}")]
     GuestInput(#[from] guest_input::Error),
-
-    #[error("Prover contract not deployed")]
-    ProverContractNotDeployed,
 }
