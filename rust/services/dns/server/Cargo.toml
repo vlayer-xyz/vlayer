@@ -9,7 +9,12 @@ axum = { workspace = true }
 clap = { workspace = true, features = ["derive", "env"] }
 common = { workspace = true }
 dotenvy = { workspace = true }
+rand = { workspace = true }
+rsa = { workspace = true, features = ["sha2"] }
 serde = { workspace = true }
+serde_json = { workspace = true }
+serde_repr = { version = "=0.1.19" }
+serde_with = { version = "3.11.0", features = ["base64"] }
 tokio = { workspace = true }
 tower-http = { workspace = true, features = ["validate-request"] }
 tracing = { workspace = true }

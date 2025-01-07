@@ -3300,6 +3300,7 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b42b6fa04a440b495c8b04d0e71b707c585f83cb9cb28cf8cd0d976c315e31b4"
 dependencies = [
  "powerfmt",
+ "serde",
 ]
 
 [[package]]
@@ -3572,7 +3573,12 @@ dependencies = [
  "clap",
  "common",
  "dotenvy",
+ "rand",
+ "rsa",
  "serde",
+ "serde_json",
+ "serde_repr",
+ "serde_with",
  "server_utils",
  "tokio",
  "tower-http 0.6.2",
@@ -6355,6 +6361,7 @@ checksum = "bd070e393353796e801d209ad339e89596eb4c8d430d18ede6a1cced8fafbd99"
 dependencies = [
  "autocfg",
  "hashbrown 0.12.3",
+ "serde",
 ]
 
 [[package]]
@@ -9291,6 +9298,7 @@ dependencies = [
  "pkcs1",
  "pkcs8",
  "rand_core",
+ "sha2",
  "signature",
  "spki",
  "subtle",
@@ -9884,6 +9892,8 @@ dependencies = [
  "base64 0.22.1",
  "chrono",
  "hex",
+ "indexmap 1.9.3",
+ "indexmap 2.7.0",
  "serde",
  "serde_derive",
  "serde_json",
