@@ -1,5 +1,7 @@
 mod version;
 
+use std::time::Duration;
+
 use alloy_primitives::ChainId;
 use call_guest_wrapper::GUEST_ELF as CALL_GUEST_ELF;
 use call_server_lib::{
@@ -28,20 +30,17 @@ struct Cli {
     #[arg(long, group = "chain_proof")]
     chain_proof_url: Option<String>,
 
-    /// Polling interval value expressed in seconds.
-    #[arg(long, requires = "chain_proof", default_value = "5")]
-    chain_proof_poll_interval: Option<u64>,
+    #[arg(long, requires = "chain_proof", value_parser = humantime::parse_duration, default_value = "5s")]
+    chain_proof_poll_interval: Option<Duration>,
 
-    /// Timeout value expressed in seconds.
-    #[arg(long, requires = "chain_proof", default_value = "120")]
-    chain_proof_timeout: Option<u64>,
+    #[arg(long, requires = "chain_proof", value_parser = humantime::parse_duration, default_value = "120s")]
+    chain_proof_timeout: Option<Duration>,
 
     #[arg(long, group = "gas_meter", env)]
     gas_meter_url: Option<String>,
 
-    /// Time-to-live value expressed in seconds.
-    #[arg(long, requires = "gas_meter", default_value = "3600")]
-    gas_meter_ttl: Option<u64>,
+    #[arg(long, requires = "gas_meter", value_parser = humantime::parse_duration, default_value = "1h")]
+    gas_meter_ttl: Option<Duration>,
 
     #[arg(long, requires = "gas_meter", env)]
     gas_meter_api_key: Option<String>,

@@ -1,4 +1,4 @@
-use std::{collections::HashMap, net::SocketAddr};
+use std::{collections::HashMap, net::SocketAddr, time::Duration};
 
 use alloy_primitives::{hex::ToHexExt, ChainId};
 use call_host::Config as HostConfig;
@@ -73,8 +73,8 @@ impl Config {
 #[derive(new, Serialize, Deserialize, Clone, Debug)]
 pub struct ChainProofConfig {
     pub url: String,
-    pub poll_interval: u64,
-    pub timeout: u64,
+    pub poll_interval: Duration,
+    pub timeout: Duration,
 }
 
 pub struct ConfigBuilder {

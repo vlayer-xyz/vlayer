@@ -12,6 +12,7 @@ chain_guest_wrapper = { workspace = true }
 clap = { workspace = true, features = ["derive", "env", "string"] }
 common = { workspace = true }
 hex = { workspace = true }
+humantime = { workspace = true }
 tokio = { workspace = true }
 tracing = { workspace = true }
 version = { workspace = true }

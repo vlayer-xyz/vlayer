@@ -1,5 +1,3 @@
-use std::time::Duration;
-
 use alloy_primitives::ChainId;
 use call_engine::Call as EngineCall;
 use call_host::{Error as HostError, Host};
@@ -146,8 +144,6 @@ async fn await_chain_proof_ready(
         ..
     }) = config
     {
-        let poll_interval = Duration::from_secs(poll_interval);
-        let timeout = Duration::from_secs(timeout);
         // Wait for chain proof if necessary
         let start = tokio::time::Instant::now();
         while !host

@@ -1,3 +1,5 @@
+use std::time::Duration;
+
 use call_server_lib::{ConfigBuilder, ProofMode};
 use common::GuestElf;
 use derive_new::new;
@@ -7,15 +9,15 @@ use serde_json::{json, Value};
 
 pub const GAS_LIMIT: u64 = 1_000_000;
 pub const ETHEREUM_SEPOLIA_ID: u64 = 11_155_111;
-pub const GAS_METER_TTL: u64 = 3600;
-pub const CHAIN_PROOF_POLL_INTERVAL: u64 = 5;
-pub const CHAIN_PROOF_TIMEOUT: u64 = 120;
+pub const GAS_METER_TTL: Duration = Duration::from_secs(3600);
+pub const CHAIN_PROOF_POLL_INTERVAL: Duration = Duration::from_secs(5);
+pub const CHAIN_PROOF_TIMEOUT: Duration = Duration::from_secs(120);
 
 pub fn allocate_gas_body(expected_hash: &str) -> Value {
     json!({
         "gas_limit": GAS_LIMIT,
         "hash": expected_hash,
-        "time_to_live": GAS_METER_TTL
+        "time_to_live": GAS_METER_TTL.as_secs(),
     })
 }
 
@@ -205,12 +207,12 @@ pub(crate) mod mock {
         #[deref]
         #[deref_mut]
         mock: RpcServerMock,
-        time_to_live: u64,
+        time_to_live: Duration,
         api_key: Option<String>,
     }
 
     impl GasMeterServer {
-        pub(crate) async fn start(time_to_live: u64, api_key: Option<String>) -> Self {
+        pub(crate) async fn start(time_to_live: Duration, api_key: Option<String>) -> Self {
             let mock = RpcServerMock::start().await;
             Self {
                 mock,
@@ -229,12 +231,12 @@ pub(crate) mod mock {
         #[deref]
         #[deref_mut]
         mock: ChainProofServerMock,
-        poll_interval: u64,
-        timeout: u64,
+        poll_interval: Duration,
+        timeout: Duration,
     }
 
     impl ChainProofServer {
-        pub(crate) async fn start(poll_interval: u64, timeout: u64) -> Self {
+        pub(crate) async fn start(poll_interval: Duration, timeout: Duration) -> Self {
             let mock = ChainProofServerMock::start().await;
             Self {
                 mock,
