@@ -6,6 +6,7 @@ members = [
     "cli",
     "common",
     "email_proof",
+    "guest_wrapper",
     "host_utils",
     "key_value",
     "mpt",
@@ -175,19 +176,20 @@ chain_guest_wrapper = { path = "services/chain/guest_wrapper" }
 chain_host = { path = "services/chain/host" }
 chain_server = { path = "services/chain/server" }
 chain_server_lib = { path = "services/chain/server_lib" }
-mock_chain_server = { path = "services/chain/mock_server" }
 chain_common = { path = "services/chain/common" }
 chain_test_utils = { path = "services/chain/test_utils" }
 chain_worker = { path = "services/chain/worker" }
 common = { path = "common" }
 email_proof = { path = "email_proof" }
+guest_wrapper = { path = "guest_wrapper" }
 host_utils = { path = "host_utils" }
 key_value = { path = "key_value" }
+mock_chain_server = { path = "services/chain/mock_server" }
 mpt = { path = "mpt" }
 provider = { path = "provider" }
-u64_range = { path = "range" }
 server_utils = { path = "server_utils" }
 test_runner = { path = "test_runner" }
+u64_range = { path = "range" }
 version = { path = "version" }
 web_proof = { path = "web_proof" }
 zkvm-benchmarks = { path = "zkvm-benchmarks/benchmarks" }

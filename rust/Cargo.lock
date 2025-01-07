@@ -5652,6 +5652,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "guest_wrapper"
+version = "0.1.0"
+dependencies = [
+ "anyhow",
+ "common",
+ "risc0-build",
+ "risc0-build-ethereum",
+]
+
+[[package]]
 name = "h2"
 version = "0.3.26"
 source = "registry+https://github.com/rust-lang/crates.io-index"
