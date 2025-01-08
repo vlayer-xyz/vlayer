@@ -1,3 +1,5 @@
+use common::GuestElf;
+
 #[cfg(not(clippy))]
 #[allow(dead_code)]
 mod private {
