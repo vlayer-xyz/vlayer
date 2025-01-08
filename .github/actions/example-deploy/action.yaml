@@ -58,6 +58,11 @@ runs:
       run: bun install && bun run build
       working-directory: ./packages/sdk
 
+    - name: Build vlayer react hooks
+      shell: bash
+      run: bun install && bun run build
+      working-directory: ./packages/sdk-hooks
+
     - name: Build example contracts
       shell: bash
       run: forge soldeer install && forge clean && forge build
