@@ -5,7 +5,7 @@ use provider::Address;
 use tracing::info;
 use types::{Call, CallContext, CallHash};
 
-use super::{QueryParams, SharedConfig, SharedProofs, UserToken};
+use super::{QueryParams, SharedConfig, SharedProofs};
 use crate::{
     chain_proof::{self, Config as ChainProofConfig},
     error::{AppError, MetricsError, PreflightError, ProvingError},
@@ -32,7 +32,8 @@ pub async fn v_call(
         "Start execution location: {:?} call hash: {call_hash}",
         host.start_execution_location()
     );
-    let gas_meter_client = init_gas_meter(&config, call_hash, params.token, call.gas_limit).await?;
+    let gas_meter_client =
+        gas_meter::init(config.gas_meter_config(), call_hash, params.token, call.gas_limit).await?;
 
     let mut found_existing = true;
     state.entry(call_hash).or_insert_with(|| {
@@ -73,22 +74,6 @@ async fn build_host(
         .map_err(HostError::Builder)?
         .build(config.into());
     Ok(host)
-}
-
-async fn init_gas_meter(
-    config: &Config,
-    call_hash: CallHash,
-    user_token: Option<UserToken>,
-    gas_limit: u64,
-) -> Result<Box<dyn GasMeterClient>, AppError> {
-    let gas_meter_client: Box<dyn GasMeterClient> = config
-        .gas_meter_config()
-        .map_or(Box::new(gas_meter::NoOpClient), |config| {
-            Box::new(gas_meter::RpcClient::new(config, call_hash, user_token))
-        });
-
-    gas_meter_client.allocate(gas_limit).await?;
-    Ok(gas_meter_client)
 }
 
 async fn generate_proof(

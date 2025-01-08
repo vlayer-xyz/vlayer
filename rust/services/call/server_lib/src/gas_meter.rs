@@ -133,3 +133,16 @@ impl Client for NoOpClient {
         Ok(())
     }
 }
+
+pub async fn init(
+    config: Option<Config>,
+    call_hash: CallHash,
+    user_token: Option<UserToken>,
+    gas_limit: u64,
+) -> Result<Box<dyn Client>> {
+    let client: Box<dyn Client> = config.map_or(Box::new(NoOpClient), |config| {
+        Box::new(RpcClient::new(config, call_hash, user_token))
+    });
+    client.allocate(gas_limit).await?;
+    Ok(client)
+}
