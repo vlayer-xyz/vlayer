@@ -22,10 +22,21 @@ pub enum GasMeterError {
     Rpc(#[from] RpcError),
 }
 
-// #[derive(Debug, Error)]
-// pub enum PreflightError {
-//     Host
-// }
+#[derive(Debug, Error)]
+pub enum MetricsError {
+    #[error("Int conversion error: {0}")]
+    TryFromInt(#[from] TryFromIntError),
+}
+
+#[derive(Debug, Error)]
+pub enum PreflightError {
+    #[error("Host error: {0}")]
+    Host(#[from] HostError),
+    #[error("Gas meter error: {0}")]
+    GasMeter(#[from] GasMeterError),
+    #[error("Metrics error: {0}")]
+    Metrics(#[from] MetricsError),
+}
 
 #[derive(Debug, Error)]
 pub enum AppError {
@@ -41,12 +52,14 @@ pub enum AppError {
     RpcError(#[from] RpcError),
     #[error("Hash not found: {0}")]
     HashNotFound(CallHash),
-    #[error("Chain proof error: {0}")]
-    ChainProof(#[from] ChainProofError),
     #[error("Int conversion error: {0}")]
     TryFromInt(#[from] TryFromIntError),
     #[error("Gas meter error: {0}")]
     GasMeter(#[from] GasMeterError),
+    #[error("Chain proof error: {0}")]
+    ChainProof(#[from] ChainProofError),
+    #[error("Preflight error: {0}")]
+    Preflight(#[from] PreflightError),
 }
 
 impl From<AppError> for ErrorObjectOwned {
@@ -74,7 +87,8 @@ impl From<&AppError> for ErrorObjectOwned {
             | AppError::RpcError(..)
             | AppError::ChainProof(..)
             | AppError::TryFromInt(..)
-            | AppError::GasMeter(..) => ErrorObjectOwned::owned::<()>(
+            | AppError::GasMeter(..)
+            | AppError::Preflight(..) => ErrorObjectOwned::owned::<()>(
                 jrpcerror::INTERNAL_ERROR_CODE,
                 error.to_string(),
                 None,

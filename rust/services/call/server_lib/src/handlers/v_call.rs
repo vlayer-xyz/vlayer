@@ -7,7 +7,7 @@ use types::{Call, CallContext, CallHash};
 
 use super::{QueryParams, SharedConfig, SharedProofs, UserToken};
 use crate::{
-    error::{AppError, ChainProofError},
+    error::{AppError, ChainProofError, MetricsError, PreflightError},
     gas_meter::{self, Client as GasMeterClient, ComputationStage},
     handlers::{Metrics, ProofReceipt, ProofStatus, RawData},
     ChainProofConfig, Config,
@@ -169,11 +169,15 @@ async fn await_preflight(
     call_hash: CallHash,
     gas_meter_client: &impl GasMeterClient,
     metrics: &mut Metrics,
-) -> Result<PreflightResult, AppError> {
+) -> Result<PreflightResult, PreflightError> {
     state.insert(call_hash, ProofStatus::Preflight);
     let result = host.preflight(call).await.map_err(HostError::Preflight)?;
     let gas_used = result.gas_used;
-    let elapsed_time = result.elapsed_time.as_millis().try_into()?;
+    let elapsed_time = result
+        .elapsed_time
+        .as_millis()
+        .try_into()
+        .map_err(MetricsError::TryFromInt)?;
 
     gas_meter_client
         .refund(ComputationStage::Preflight, gas_used)
