@@ -89,6 +89,19 @@ export function isEmptyWebProverSessionConfig(
   );
 }
 
+export function getRedactionConfig(
+  provingSessionConfig: WebProverSessionConfig,
+): RedactionConfig {
+  const notarizeStep = provingSessionConfig.steps.find(
+    (step): step is WebProofStepNotarize => step.step === "notarize",
+  );
+  const redactionConfig =
+    notarizeStep !== undefined
+      ? (notarizeStep as WebProofStepNotarize).redact
+      : [];
+  return redactionConfig;
+}
+
 export type WebProofStep =
   | WebProofStepNotarize
   | WebProofStepExpectUrl
@@ -98,11 +111,72 @@ export type UrlPattern = Branded<string, "UrlPattern">;
 
 export type Url = Branded<UrlPattern, "Url">;
 
+type RedactRequestHeaders = {
+  request: {
+    headers: string[];
+  };
+};
+
+type RedactRequestHeadersExcept = {
+  request: {
+    headers_except: string[];
+  };
+};
+
+type RedactRequestUrlQuery = {
+  request: {
+    url_query: string[];
+  };
+};
+
+type RedactRequestUrlQueryExcept = {
+  request: {
+    url_query_except: string[];
+  };
+};
+
+type RedactResponseHeaders = {
+  response: {
+    headers: string[];
+  };
+};
+
+type RedactResponseHeadersExcept = {
+  response: {
+    headers_except: string[];
+  };
+};
+
+type RedactResponseJsonBody = {
+  response: {
+    json_body: string[];
+  };
+};
+
+type RedactResponseJsonBodyExcept = {
+  response: {
+    json_body_except: string[];
+  };
+};
+
+export type RedactionItem =
+  | RedactRequestHeaders
+  | RedactRequestHeadersExcept
+  | RedactRequestUrlQuery
+  | RedactRequestUrlQueryExcept
+  | RedactResponseHeaders
+  | RedactResponseHeadersExcept
+  | RedactResponseJsonBody
+  | RedactResponseJsonBodyExcept;
+
+export type RedactionConfig = RedactionItem[];
+
 export type WebProofStepNotarize = Branded<
   {
     url: UrlPattern;
     method: string;
     label: string;
+    redact: RedactionConfig;
     step: typeof EXTENSION_STEP.notarize;
   },
   "notarize"
