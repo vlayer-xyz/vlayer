@@ -63,7 +63,7 @@ const EmlUploadForm = () => {
     functionName: "main",
   });
 
-  // const { data: proof } = useWaitForProvingResult(proofHash);
+  const { data: proof } = useWaitForProvingResult(proofHash);
 
   const getClaimerAddr = async () => {
     if (import.meta.env.VITE_USE_WINDOW_ETHEREUM_TRANSPORT) {
