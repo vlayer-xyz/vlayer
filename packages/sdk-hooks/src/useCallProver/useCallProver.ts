@@ -30,9 +30,7 @@ export const useCallProver = (
   // state
   const [status, setStatus] = useState<ProverStatus>(ProverStatus.Idle);
   const [error, setError] = useState<Error | null>(null);
-  const [hash, setHash] = useState<BrandedHash<Abi, string>>({
-    hash: "",
-  } as BrandedHash<Abi, string>);
+  const [hash, setHash] = useState<BrandedHash<Abi, string> | null>(null);
 
   const callProver = async (
     args: ContractFunctionArgs<Abi, AbiStateMutability, string>,

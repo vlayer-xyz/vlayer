@@ -38,7 +38,7 @@ describe("useCallProver", () => {
     expect(result.current).toMatchObject({
       status: ProverStatus.Idle,
       error: null,
-      data: { hash: "" },
+      data: null,
       isIdle: true,
       isPending: false,
       isReady: false,
