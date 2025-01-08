@@ -10,7 +10,7 @@ function silent_unless_fails() {
     # This prevents risc0-build from printing directly to tty even if we redirect stdout and stderr
     export RISC0_GUEST_LOGFILE="$tmp_file"
 
-    function cleanup() {
+    function silent_unless_fails_cleanup() {
         unset RISC0_GUEST_LOGFILE
         rm -f "$tmp_file"
     }
@@ -19,9 +19,9 @@ function silent_unless_fails() {
     if ! "$@" >"$tmp_file" 2>&1; then
         echo "Command failed: $@"
         cat "$tmp_file" 
-        cleanup
+        silent_unless_fails_cleanup
         return 1
     fi
 
-    cleanup
+    silent_unless_fails_cleanup
 }
