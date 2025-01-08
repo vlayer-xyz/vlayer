@@ -1,3 +1,5 @@
+# Silcences stderr and stdout unless the command fails
+# Should not be used for long-running commands as it does not print any progress
 function silent_unless_fails() {
     echo "Running: $@"
 
@@ -5,6 +7,7 @@ function silent_unless_fails() {
     local tmp_file
     tmp_file=$(mktemp)
 
+    # This prevents risc0-build from printing directly to tty even if we redirect stdout and stderr
     export RISC0_GUEST_LOGFILE="$tmp_file"
 
     function cleanup() {
