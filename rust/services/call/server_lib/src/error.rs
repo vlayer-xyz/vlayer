@@ -39,6 +39,18 @@ pub enum PreflightError {
 }
 
 #[derive(Debug, Error)]
+pub enum ProvingError {
+    #[error("Host error: {0}")]
+    Host(#[from] HostError),
+    #[error("Gas meter error: {0}")]
+    GasMeter(#[from] GasMeterError),
+    #[error("Metrics error: {0}")]
+    Metrics(#[from] MetricsError),
+    #[error("Seal error: {0}")]
+    Seal(#[from] seal::Error),
+}
+
+#[derive(Debug, Error)]
 pub enum AppError {
     #[error("Invalid field: {0}")]
     FieldValidation(#[from] FieldValidationError),
@@ -60,6 +72,8 @@ pub enum AppError {
     ChainProof(#[from] ChainProofError),
     #[error("Preflight error: {0}")]
     Preflight(#[from] PreflightError),
+    #[error("Proving error: {0}")]
+    Proving(#[from] ProvingError),
 }
 
 impl From<AppError> for ErrorObjectOwned {
@@ -88,7 +102,8 @@ impl From<&AppError> for ErrorObjectOwned {
             | AppError::ChainProof(..)
             | AppError::TryFromInt(..)
             | AppError::GasMeter(..)
-            | AppError::Preflight(..) => ErrorObjectOwned::owned::<()>(
+            | AppError::Preflight(..)
+            | AppError::Proving(..) => ErrorObjectOwned::owned::<()>(
                 jrpcerror::INTERNAL_ERROR_CODE,
                 error.to_string(),
                 None,

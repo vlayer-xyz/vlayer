@@ -7,7 +7,7 @@ use types::{Call, CallContext, CallHash};
 
 use super::{QueryParams, SharedConfig, SharedProofs, UserToken};
 use crate::{
-    error::{AppError, ChainProofError, MetricsError, PreflightError},
+    error::{AppError, ChainProofError, MetricsError, PreflightError, ProvingError},
     gas_meter::{self, Client as GasMeterClient, ComputationStage},
     handlers::{Metrics, ProofReceipt, ProofStatus, RawData},
     ChainProofConfig, Config,
@@ -196,12 +196,16 @@ async fn await_proving(
     preflight_result: PreflightResult,
     gas_meter_client: &impl GasMeterClient,
     metrics: &mut Metrics,
-) -> Result<RawData, AppError> {
+) -> Result<RawData, ProvingError> {
     state.insert(call_hash, ProofStatus::Proving);
     let host_output =
         Host::prove(prover, call_guest_id, preflight_result).map_err(HostError::Proving)?;
     let cycles_used = host_output.cycles_used;
-    let proving_time = host_output.elapsed_time.as_millis().try_into()?;
+    let proving_time = host_output
+        .elapsed_time
+        .as_millis()
+        .try_into()
+        .map_err(MetricsError::TryFromInt)?;
     let raw_data: RawData = host_output.try_into()?;
     metrics.cycles = cycles_used;
     metrics.times.proving = proving_time;
