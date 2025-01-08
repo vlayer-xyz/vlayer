@@ -1,7 +1,6 @@
 use alloy_primitives::{hex::ToHexExt, U256};
 use alloy_sol_types::SolValue;
-use call_engine::CallGuestId;
-use call_engine::{HostOutput, Proof, Seal};
+use call_engine::{CallGuestId, HostOutput, Proof, Seal};
 use call_host::{Error as HostError, Host, PreflightResult, Prover};
 use serde::{Serialize, Serializer};
 use tracing::info;
