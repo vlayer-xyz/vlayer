@@ -11,6 +11,7 @@ use crate::{
     metrics::{self, Error as MetricsError, Metrics},
     ser::ProofDTO,
     v_call::CallHash,
+    v_get_proof_receipt::Status,
 };
 
 #[derive(Debug, thiserror::Error)]
@@ -41,9 +42,10 @@ pub async fn await_proving(
     let elapsed_time = host_output.elapsed_time;
 
     info!(
+        state = tracing::field::debug(Status::Proving),
         cycles_used = cycles_used,
         elapsed_time = elapsed_time.as_millis(),
-        "proving finished"
+        "Finished stage"
     );
 
     let raw_data: RawData = host_output.try_into()?;

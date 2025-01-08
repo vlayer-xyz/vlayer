@@ -7,6 +7,7 @@ use crate::{
     handlers::{ProofStatus, SharedProofs},
     metrics::{self, Error as MetricsError, Metrics},
     v_call::CallHash,
+    v_get_proof_receipt::Status,
 };
 
 #[derive(Debug, thiserror::Error)]
@@ -33,9 +34,10 @@ pub async fn await_preflight(
     let elapsed_time = result.elapsed_time;
 
     info!(
+        state = tracing::field::debug(Status::Preflight),
         gas_used = gas_used,
         elapsed_time = elapsed_time.as_millis(),
-        "preflight finished",
+        "Finished stage",
     );
 
     gas_meter_client

@@ -58,7 +58,7 @@ pub async fn generate(
     let prover = host.prover();
     let call_guest_id = host.call_guest_id();
 
-    info!("Processing call {call_hash}");
+    info!("Generating proof for {call_hash}");
 
     chain_proof::await_ready(&host, &state, call_hash, chain_proof_config).await?;
 
