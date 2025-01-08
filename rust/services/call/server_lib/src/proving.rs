@@ -3,9 +3,9 @@ use call_host::{Error as HostError, Host, PreflightResult, Prover};
 use tracing::info;
 
 use crate::{
-    error::MetricsError,
     gas_meter::{Client as GasMeterClient, ComputationStage, Error as GasMeterError},
-    handlers::{Metrics, ProofStatus, RawData, SharedProofs},
+    handlers::{ProofStatus, RawData, SharedProofs},
+    metrics::{self, Error as MetricsError, Metrics},
     v_call::CallHash,
 };
 
@@ -44,10 +44,7 @@ pub async fn await_proving(
 
     let raw_data: RawData = host_output.try_into()?;
     metrics.cycles = cycles_used;
-    metrics.times.proving = elapsed_time
-        .as_millis()
-        .try_into()
-        .map_err(MetricsError::TryFromInt)?;
+    metrics.times.proving = metrics::elapsed_time_as_millis_u64(elapsed_time)?;
 
     gas_meter_client
         .refund(ComputationStage::Proving, 0)

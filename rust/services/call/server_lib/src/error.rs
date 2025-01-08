@@ -1,5 +1,3 @@
-use std::num::TryFromIntError;
-
 use call_host::Error as HostError;
 use jsonrpsee::types::error::{self as jrpcerror, ErrorObjectOwned};
 use server_utils::{rpc::Error as RpcError, FieldValidationError};
@@ -10,12 +8,6 @@ use crate::{
     chain_proof::Error as ChainProofError, gas_meter::Error as GasMeterError,
     preflight::Error as PreflightError, proving::Error as ProvingError, v_call::CallHash,
 };
-
-#[derive(Debug, Error)]
-pub enum MetricsError {
-    #[error("Int conversion error: {0}")]
-    TryFromInt(#[from] TryFromIntError),
-}
 
 #[derive(Debug, Error)]
 pub enum AppError {

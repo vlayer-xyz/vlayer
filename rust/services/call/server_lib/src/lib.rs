@@ -5,6 +5,7 @@ pub mod server;
 mod config;
 mod error;
 mod handlers;
+mod metrics;
 mod preflight;
 mod proving;
 mod ser;

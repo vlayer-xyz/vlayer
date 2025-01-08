@@ -3,9 +3,9 @@ use call_host::{Error as HostError, Host, PreflightResult};
 use tracing::info;
 
 use crate::{
-    error::MetricsError,
     gas_meter::{Client as GasMeterClient, ComputationStage, Error as GasMeterError},
-    handlers::{Metrics, ProofStatus, SharedProofs},
+    handlers::{ProofStatus, SharedProofs},
+    metrics::{self, Error as MetricsError, Metrics},
     v_call::CallHash,
 };
 
@@ -43,10 +43,7 @@ pub async fn await_preflight(
         .await?;
 
     metrics.gas = gas_used;
-    metrics.times.preflight = elapsed_time
-        .as_millis()
-        .try_into()
-        .map_err(MetricsError::TryFromInt)?;
+    metrics.times.preflight = metrics::elapsed_time_as_millis_u64(elapsed_time)?;
 
     Ok(result)
 }

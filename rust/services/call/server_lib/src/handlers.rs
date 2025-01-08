@@ -13,7 +13,7 @@ use v_call::types::{Call, CallContext, CallHash};
 use v_get_proof_receipt::types::CallResult;
 use v_versions::Versions;
 
-use crate::{config::Config, error::AppError, ser::ProofDTO};
+use crate::{config::Config, error::AppError, metrics::Metrics, ser::ProofDTO};
 
 pub mod v_call;
 pub mod v_get_proof_receipt;
@@ -59,19 +59,6 @@ pub enum ProofStatus {
 pub struct ProofReceipt {
     data: RawData,
     metrics: Metrics,
-}
-
-#[derive(Clone, Serialize, Default)]
-pub struct Metrics {
-    pub gas: u64,
-    pub cycles: u64,
-    pub times: Times,
-}
-
-#[derive(Clone, Serialize, Default)]
-pub struct Times {
-    pub preflight: u64,
-    pub proving: u64,
 }
 
 #[derive(Serialize, Clone)]
