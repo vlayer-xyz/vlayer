@@ -94,10 +94,9 @@ type Transcript = {
 
 function redact(
   transcript: Transcript,
-  //@ts-expect-error
+  //@ts-expect-error This is not implemented yet
   redactionConfig: RedactionConfig,
 ): Commit {
-  //not implemented yet
   return {
     sent: [transcript.ranges.sent.all],
     recv: [transcript.ranges.recv.all],
