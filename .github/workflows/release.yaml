@@ -211,7 +211,7 @@ jobs:
 
   publish-react-hooks-to-npm:
     name: Publish React hooks to NPM
-    needs: [publish-sdk-to-npm]
+    needs: [build-release, publish-sdk-to-npm]
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
