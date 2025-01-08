@@ -16,10 +16,7 @@ export enum ProverStatus {
 }
 
 export const useCallProver = (
-  proveArgs: Omit<
-    ProveArgs<Abi, ContractFunctionName<Abi>>,
-    "args"
-  >,
+  proveArgs: Omit<ProveArgs<Abi, ContractFunctionName<Abi>>, "args">,
 ) => {
   // read vlayer client from context
   const { vlayerClient } = useProofContext();
