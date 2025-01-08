@@ -1,20 +1,24 @@
-use super::{record::Record, signer::Signer, Signature};
+use std::marker::PhantomData;
+
+use super::{record::Record, signer::Signer, time::Now, VerificationData};
 use crate::dns_over_https::{types::Record as DNSRecord, Provider as DoHProvider, Query, Response};
 
 #[derive(Clone)]
-pub(crate) struct Resolver {
+pub(crate) struct Resolver<C: Now> {
     signer: Signer,
+    clock: PhantomData<C>,
 }
 
-impl Resolver {
+impl<C: Now> Resolver<C> {
     pub fn new() -> Self {
         Self {
             signer: Signer::new(),
+            clock: PhantomData,
         }
     }
 
-    fn sign_record(&self, record: &DNSRecord) -> Signature {
-        let now = 0;
+    fn sign_record(&self, record: &DNSRecord) -> VerificationData {
+        let now = C::now();
         let valid_until = now + record.ttl;
         let signature = self.signer.sign(&Record::new(record, valid_until));
 
@@ -26,7 +30,7 @@ impl Resolver {
     }
 }
 
-impl DoHProvider for Resolver {
+impl<C: Now> DoHProvider for Resolver<C> {
     fn resolve(&self, query: &Query) -> Option<Response> {
         let mut response: Response = Response::with_flags(false, true, true, false, false);
         response.question = query.clone();
