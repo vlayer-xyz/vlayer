@@ -7,11 +7,12 @@ import { metaMask } from "wagmi/connectors";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 
 const wagmiConfig = createConfig({
-  chains: [optimismSepolia, foundry],
+  chains:
+    import.meta.env.VITE_CHAIN_NAME === "anvil" ? [foundry] : [optimismSepolia],
   connectors: [metaMask()],
   transports: {
-    [optimismSepolia.id]: http(),
     [foundry.id]: http(),
+    [optimismSepolia.id]: http(),
   },
 });
 
