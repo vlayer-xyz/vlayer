@@ -209,6 +209,38 @@ jobs:
           PACKAGE_NAME=$(npm pack)
           npm publish --access public ${PACKAGE_NAME}
 
+  publish-react-hooks-to-npm:
+    name: Publish React hooks to NPM
+    needs: [build-release, publish-sdk-to-npm]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install TypeScript prerequisites
+        uses: ./.github/actions/ts-prerequisites
+      - name: Update React hooks version
+        working-directory: packages/sdk-hooks
+        env:
+          VLAYER_BUILD: ${{ needs.build-release.outputs.vlayer_build }}
+        run: npm version "${VLAYER_BUILD}" --no-workspaces-update
+      - name: Install dependencies
+        working-directory: packages/sdk-hooks
+        run: bun install --frozen-lockfile
+      - name: Change SDK to released version
+        working-directory: packages/sdk-hooks
+        env:
+          VLAYER_BUILD: ${{ needs.build-release.outputs.vlayer_build }}
+        run: bun add @vlayer/sdk@"${VLAYER_BUILD}"
+      - name: Build
+        working-directory: packages/sdk-hooks
+        run: bun run build
+      - name: Publish to NPM
+        working-directory: packages/sdk-hooks
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: |
+          PACKAGE_NAME=$(npm pack)
+          npm publish --access public ${PACKAGE_NAME}
+
   push-docker-image:
     name: Push docker image to github registry
     needs: [build-release, push-artifacts-to-s3]
