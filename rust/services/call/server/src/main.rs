@@ -5,7 +5,8 @@ use std::time::Duration;
 use alloy_primitives::ChainId;
 use call_guest_wrapper::GUEST_ELF as CALL_GUEST_ELF;
 use call_server_lib::{
-    gas_meter::Config as GasMeterConfig, serve, ChainProofConfig, Config, ConfigBuilder, ProofMode,
+    chain_proof::Config as ChainProofConfig, gas_meter::Config as GasMeterConfig, serve, Config,
+    ConfigBuilder, ProofMode,
 };
 use chain_guest_wrapper::GUEST_ELF as CHAIN_GUEST_ELF;
 use clap::{ArgAction, Parser, ValueEnum};

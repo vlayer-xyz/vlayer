@@ -1,15 +1,14 @@
-use std::{collections::HashMap, net::SocketAddr, time::Duration};
+use std::{collections::HashMap, net::SocketAddr};
 
 use alloy_primitives::{hex::ToHexExt, ChainId};
 use call_host::Config as HostConfig;
 use chain::TEST_CHAIN_ID;
 use common::GuestElf;
-use derive_new::new;
 use risc0_zkp::core::digest::Digest;
 use serde::{Deserialize, Serialize};
 use server_utils::ProofMode;
 
-use crate::gas_meter::Config as GasMeterConfig;
+use crate::{chain_proof::Config as ChainProofConfig, gas_meter::Config as GasMeterConfig};
 
 #[derive(Debug, Clone, Deserialize, Serialize)]
 pub struct Config {
@@ -68,13 +67,6 @@ impl Config {
     pub const fn max_calldata_size(&self) -> usize {
         self.max_calldata_size
     }
-}
-
-#[derive(new, Serialize, Deserialize, Clone, Debug)]
-pub struct ChainProofConfig {
-    pub url: String,
-    pub poll_interval: Duration,
-    pub timeout: Duration,
 }
 
 pub struct ConfigBuilder {

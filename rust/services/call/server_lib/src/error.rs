@@ -6,15 +6,9 @@ use server_utils::{rpc::Error as RpcError, FieldValidationError};
 use thiserror::Error;
 use tokio::task::JoinError;
 
-use crate::{gas_meter::Error as GasMeterError, v_call::CallHash};
-
-#[derive(Debug, Error)]
-pub enum ChainProofError {
-    #[error("Waiting for chain proof timed out")]
-    Timeout,
-    #[error("Host error: {0}")]
-    Host(#[from] HostError),
-}
+use crate::{
+    chain_proof::Error as ChainProofError, gas_meter::Error as GasMeterError, v_call::CallHash,
+};
 
 #[derive(Debug, Error)]
 pub enum MetricsError {

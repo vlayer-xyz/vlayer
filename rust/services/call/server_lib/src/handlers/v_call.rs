@@ -7,10 +7,11 @@ use types::{Call, CallContext, CallHash};
 
 use super::{QueryParams, SharedConfig, SharedProofs, UserToken};
 use crate::{
-    error::{AppError, ChainProofError, MetricsError, PreflightError, ProvingError},
+    chain_proof::{self, Config as ChainProofConfig},
+    error::{AppError, MetricsError, PreflightError, ProvingError},
     gas_meter::{self, Client as GasMeterClient, ComputationStage},
     handlers::{Metrics, ProofReceipt, ProofStatus, RawData},
-    ChainProofConfig, Config,
+    Config,
 };
 
 pub mod types;
@@ -105,7 +106,7 @@ async fn generate_proof(
 
     info!("Processing call {call_hash}");
 
-    await_chain_proof_ready(&host, &state, call_hash, chain_proof_config).await?;
+    chain_proof::await_ready(&host, &state, call_hash, chain_proof_config).await?;
 
     let preflight_result =
         await_preflight(host, &state, call, call_hash, &gas_meter_client, &mut metrics).await?;
@@ -122,39 +123,6 @@ async fn generate_proof(
     .await?;
 
     Ok(ProofReceipt::new(raw_data, metrics))
-}
-
-async fn await_chain_proof_ready(
-    host: &Host,
-    state: &SharedProofs,
-    call_hash: CallHash,
-    config: Option<ChainProofConfig>,
-) -> Result<(), ChainProofError> {
-    if let Some(ChainProofConfig {
-        poll_interval,
-        timeout,
-        ..
-    }) = config
-    {
-        // Wait for chain proof if necessary
-        let start = tokio::time::Instant::now();
-        while !host
-            .chain_proof_ready()
-            .await
-            .map_err(HostError::AwaitingChainProof)?
-        {
-            info!(
-                "Location {:?} not indexed. Waiting for chain proof",
-                host.start_execution_location()
-            );
-            state.insert(call_hash, ProofStatus::WaitingForChainProof);
-            tokio::time::sleep(poll_interval).await;
-            if start.elapsed() > timeout {
-                return Err(ChainProofError::Timeout);
-            }
-        }
-    }
-    Ok(())
 }
 
 async fn await_preflight(
