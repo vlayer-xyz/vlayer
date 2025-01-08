@@ -1,3 +1,5 @@
+use chrono::prelude::Utc;
+
 pub(crate) type Timestamp = u64;
 
 pub(crate) trait Now {
@@ -8,8 +10,13 @@ pub(crate) trait Now {
 pub(crate) struct RTClock;
 
 impl Now for RTClock {
+    #[allow(clippy::cast_sign_loss)]
     fn now() -> Timestamp {
-        0
+        let now = Utc::now();
+        if now.timestamp() < 0 {
+            panic!("Timestamp < 0");
+        }
+        now.timestamp() as Timestamp
     }
 }
 
