@@ -1,8 +1,8 @@
 use rsa::{
-    pkcs1v15::SigningKey,
-    pkcs8::DecodePrivateKey,
+    pkcs1v15::{self, SigningKey},
+    pkcs8::{DecodePrivateKey, DecodePublicKey, EncodePublicKey},
     sha2::Sha256,
-    signature::{RandomizedSigner, SignatureEncoding},
+    signature::{Keypair, RandomizedSigner, SignatureEncoding},
     RsaPrivateKey,
 };
 use serde::Serialize;
@@ -37,7 +37,13 @@ impl Signer {
     }
 
     pub fn public_key(&self) -> PublicKey {
-        PublicKey(vec![])
+        let pub_key = self
+            .key
+            .verifying_key()
+            .to_public_key_der()
+            .expect("Failed to encode public key");
+
+        PublicKey(pub_key.into_vec())
     }
 }
 
@@ -54,6 +60,12 @@ impl<T: Serialize> ToSignablePayload for T {
             .expect("Failed to serialize signable struct");
 
         buf
+    }
+}
+
+impl From<PublicKey> for pkcs1v15::VerifyingKey<Sha256> {
+    fn from(value: PublicKey) -> Self {
+        Self::from_public_key_der(&value.0).expect("Failed to decode public key")
     }
 }
 
@@ -76,6 +88,18 @@ mod tests {
 
         let pub_key = pub_key();
         let signature = rsa::pkcs1v15::Signature::try_from(signature.0.as_slice()).unwrap();
+        let verification_result = pub_key.verify(br#""alamakota""#, &signature);
+
+        assert!(verification_result.is_ok())
+    }
+
+    #[test]
+    fn pub_key_can_verify_signature() {
+        let signer = Signer::new();
+        let signature = signer.sign(&"alamakota");
+        let signature = rsa::pkcs1v15::Signature::try_from(signature.0.as_slice()).unwrap();
+
+        let pub_key: VerifyingKey<Sha256> = signer.public_key().into();
         let verification_result = pub_key.verify(br#""alamakota""#, &signature);
 
         assert!(verification_result.is_ok())
