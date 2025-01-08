@@ -56,16 +56,12 @@ pub enum AppError {
     FieldValidation(#[from] FieldValidationError),
     #[error("Host error: {0}")]
     Host(#[from] HostError),
-    #[error("Seal error: {0}")]
-    Seal(#[from] seal::Error),
     #[error("Join error: {0}")]
     Join(#[from] JoinError),
     #[error("RPC error: {0}")]
     RpcError(#[from] RpcError),
     #[error("Hash not found: {0}")]
     HashNotFound(CallHash),
-    #[error("Int conversion error: {0}")]
-    TryFromInt(#[from] TryFromIntError),
     #[error("Gas meter error: {0}")]
     GasMeter(#[from] GasMeterError),
     #[error("Chain proof error: {0}")]
@@ -96,11 +92,9 @@ impl From<&AppError> for ErrorObjectOwned {
                 None,
             ),
             AppError::Host(..)
-            | AppError::Seal(..)
             | AppError::Join(..)
             | AppError::RpcError(..)
             | AppError::ChainProof(..)
-            | AppError::TryFromInt(..)
             | AppError::GasMeter(..)
             | AppError::Preflight(..)
             | AppError::Proving(..) => ErrorObjectOwned::owned::<()>(
