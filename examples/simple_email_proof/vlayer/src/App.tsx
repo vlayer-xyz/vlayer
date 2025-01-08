@@ -22,7 +22,11 @@ function App() {
   return (
     <WagmiProvider config={wagmiConfig}>
       <QueryClientProvider client={queryClient}>
-        <ProofProvider>
+        <ProofProvider
+          config={{
+            proverUrl: import.meta.env.VITE_PROVER_URL,
+          }}
+        >
           <EmlUploadForm />
         </ProofProvider>
       </QueryClientProvider>
