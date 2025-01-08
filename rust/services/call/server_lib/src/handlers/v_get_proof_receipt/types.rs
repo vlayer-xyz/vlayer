@@ -1,9 +1,15 @@
 use std::convert::TryFrom;
 
-use jsonrpsee::types::error::ErrorObjectOwned;
+use jsonrpsee::types::error::{self as jrpcerror, ErrorObjectOwned};
 use serde::{Deserialize, Serialize};
 
-use crate::handlers::{ProofReceipt, ProofStatus};
+use crate::{
+    chain_proof::Error as ChainProofError,
+    handlers::{ProofReceipt, ProofStatus},
+    preflight::Error as PreflightError,
+    proving::Error as ProvingError,
+    v_call::CallHash,
+};
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 #[serde(rename_all = "snake_case")]
@@ -13,6 +19,45 @@ pub enum Status {
     Preflight,
     Proving,
     Ready,
+}
+
+pub type Result<T> = std::result::Result<T, Error>;
+
+#[derive(Debug, thiserror::Error)]
+pub enum Error {
+    #[error("Hash not found: {0}")]
+    HashNotFound(CallHash),
+    #[error("Chain proof error: {0}")]
+    ChainProof(#[from] ChainProofError),
+    #[error("Preflight error: {0}")]
+    Preflight(#[from] PreflightError),
+    #[error("Proving error: {0}")]
+    Proving(#[from] ProvingError),
+}
+
+impl From<Error> for ErrorObjectOwned {
+    fn from(error: Error) -> Self {
+        (&error).into()
+    }
+}
+
+impl From<&Error> for ErrorObjectOwned {
+    fn from(error: &Error) -> Self {
+        match error {
+            Error::HashNotFound(..) => ErrorObjectOwned::owned::<()>(
+                jrpcerror::INVALID_REQUEST_CODE,
+                error.to_string(),
+                None,
+            ),
+            Error::ChainProof(..) | Error::Preflight(..) | Error::Proving(..) => {
+                ErrorObjectOwned::owned::<()>(
+                    jrpcerror::INTERNAL_ERROR_CODE,
+                    error.to_string(),
+                    None,
+                )
+            }
+        }
+    }
 }
 
 impl Default for Status {
@@ -42,7 +87,7 @@ pub struct CallResult {
 impl TryFrom<&ProofStatus> for CallResult {
     type Error = ErrorObjectOwned;
 
-    fn try_from(value: &ProofStatus) -> Result<Self, Self::Error> {
+    fn try_from(value: &ProofStatus) -> std::result::Result<Self, Self::Error> {
         let status: Status = value.into();
         let receipt: Option<ProofReceipt> = match value {
             ProofStatus::Ready(Ok(receipt)) => Some(receipt.clone()),

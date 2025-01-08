@@ -3,15 +3,16 @@ use call_engine::Call as EngineCall;
 use call_host::{Error as HostError, Host};
 use provider::Address;
 use tracing::info;
-use types::{Call, CallContext, CallHash, Result};
+use types::{Call, CallContext, CallHash, Result as VCallResult};
 
 use super::{QueryParams, SharedConfig, SharedProofs};
 use crate::{
     chain_proof::{self, Config as ChainProofConfig},
-    error::AppError,
     gas_meter::{self, Client as GasMeterClient},
     handlers::{Metrics, ProofReceipt, ProofStatus},
-    preflight, proving, Config,
+    preflight, proving,
+    v_get_proof_receipt::Result as VGetProofReceiptResult,
+    Config,
 };
 
 pub mod types;
@@ -22,7 +23,7 @@ pub async fn v_call(
     params: QueryParams,
     call: Call,
     context: CallContext,
-) -> Result<CallHash> {
+) -> VCallResult<CallHash> {
     info!("v_call => {call:#?} {context:#?}");
     let call = call.parse_and_validate(config.max_calldata_size())?;
 
@@ -83,7 +84,7 @@ async fn generate_proof(
     state: SharedProofs,
     call_hash: CallHash,
     chain_proof_config: Option<ChainProofConfig>,
-) -> std::result::Result<ProofReceipt, AppError> {
+) -> VGetProofReceiptResult<ProofReceipt> {
     let mut metrics = Metrics::default();
 
     let prover = host.prover();

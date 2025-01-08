@@ -7,10 +7,10 @@ use derive_new::new;
 use jsonrpsee::{proc_macros::rpc, types::error::ErrorObjectOwned, Extensions};
 use serde::{Deserialize, Serialize};
 use v_call::types::{Call, CallContext, CallHash, Error as VCallError};
-use v_get_proof_receipt::types::CallResult;
+use v_get_proof_receipt::types::{CallResult, Error as VGetProofReceiptError};
 use v_versions::Versions;
 
-use crate::{config::Config, error::AppError, metrics::Metrics, proving::RawData};
+use crate::{config::Config, metrics::Metrics, proving::RawData};
 
 pub mod v_call;
 pub mod v_get_proof_receipt;
@@ -49,7 +49,7 @@ pub enum ProofStatus {
     /// Proof is being generated
     Proving,
     /// Proof generation finished
-    Ready(Result<ProofReceipt, AppError>),
+    Ready(Result<ProofReceipt, VGetProofReceiptError>),
 }
 
 #[derive(new, Clone, Serialize)]
