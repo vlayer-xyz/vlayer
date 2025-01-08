@@ -20,7 +20,7 @@ use common::GuestElf;
 pub use config::Config;
 use derive_new::new;
 pub use error::{AwaitingChainProofError, BuilderError, Error, PreflightError, ProvingError};
-use prover::Prover;
+pub use prover::Prover;
 use provider::CachedMultiProvider;
 use risc0_zkvm::{ProveInfo, SessionStats};
 use seal::EncodableReceipt;
