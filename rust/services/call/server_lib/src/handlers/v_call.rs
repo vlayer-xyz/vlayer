@@ -7,7 +7,7 @@ use types::{Call, CallContext, CallHash};
 
 use super::{QueryParams, SharedConfig, SharedProofs, UserToken};
 use crate::{
-    error::AppError,
+    error::{AppError, ChainProofError},
     gas_meter::{self, Client as GasMeterClient, ComputationStage},
     handlers::{Metrics, ProofReceipt, ProofStatus, RawData, Times},
     ChainProofConfig, Config,
@@ -137,7 +137,7 @@ async fn await_chain_proof_ready(
     state: &SharedProofs,
     call_hash: CallHash,
     config: Option<ChainProofConfig>,
-) -> Result<(), AppError> {
+) -> Result<(), ChainProofError> {
     if let Some(ChainProofConfig {
         poll_interval,
         timeout,
@@ -158,7 +158,7 @@ async fn await_chain_proof_ready(
             state.insert(call_hash, ProofStatus::WaitingForChainProof);
             tokio::time::sleep(poll_interval).await;
             if start.elapsed() > timeout {
-                return Err(AppError::ChainProofTimeout);
+                return Err(ChainProofError::Timeout);
             }
         }
     }

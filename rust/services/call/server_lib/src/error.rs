@@ -9,6 +9,14 @@ use tokio::task::JoinError;
 use crate::v_call::CallHash;
 
 #[derive(Debug, Error)]
+pub enum ChainProofError {
+    #[error("Waiting for chain proof timed out")]
+    Timeout,
+    #[error("Host error: {0}")]
+    Host(#[from] HostError),
+}
+
+#[derive(Debug, Error)]
 pub enum AppError {
     #[error("Invalid field: {0}")]
     FieldValidation(#[from] FieldValidationError),
@@ -22,8 +30,8 @@ pub enum AppError {
     RpcError(#[from] RpcError),
     #[error("Hash not found: {0}")]
     HashNotFound(CallHash),
-    #[error("Waiting for chain proof timed out")]
-    ChainProofTimeout,
+    #[error("Chain proof error: {0}")]
+    ChainProof(#[from] ChainProofError),
     #[error("Int conversion error: {0}")]
     TryFromInt(#[from] TryFromIntError),
 }
@@ -51,7 +59,7 @@ impl From<&AppError> for ErrorObjectOwned {
             | AppError::Seal(..)
             | AppError::Join(..)
             | AppError::RpcError(..)
-            | AppError::ChainProofTimeout
+            | AppError::ChainProof(..)
             | AppError::TryFromInt(..) => ErrorObjectOwned::owned::<()>(
                 jrpcerror::INTERNAL_ERROR_CODE,
                 error.to_string(),
