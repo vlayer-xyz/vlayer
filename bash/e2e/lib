@@ -9,8 +9,8 @@ function generate_ts_bindings() {
 function build_sdk() {
   echo "::group::Building sdk"
   pushd "${VLAYER_HOME}/packages/sdk"
-    silent_unless_fails bun run build
     silent_unless_fails bun install --frozen-lockfile
+    silent_unless_fails bun run build
   popd
   echo '::endgroup::Building sdk'
 }
