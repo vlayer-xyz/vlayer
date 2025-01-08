@@ -12,11 +12,14 @@ ${VLAYER_HOME}/bash/build-ts-types.sh >/dev/null
 
 
 echo Setting up SDK 
-cd ${VLAYER_HOME}/packages/sdk && bun install --frozen-lockfile
+pushd ${VLAYER_HOME}/packages/sdk
+bun install --frozen-lockfile
+popd
 
 echo "::group::Building sdk"
-cd "${VLAYER_HOME}/packages/sdk"
+pushd "${VLAYER_HOME}/packages/sdk"
 bun run build
+popd
 echo '::endgroup::'
 
 for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ; do
@@ -26,14 +29,18 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
   source ${VLAYER_HOME}/bash/run-services.sh
 
   echo "::group::Running tests of: ${EXAMPLE_NAME}"
-  cd "${example}"
-  forge soldeer install
-  forge clean
-  forge build
+  pushd "${example}"
 
-  cd vlayer
-  bun install --frozen-lockfile
-  bun run prove:"${VLAYER_ENV}"
+    forge soldeer install
+    forge clean
+    forge build
+
+    pushd vlayer
+      bun install --frozen-lockfile
+      bun run prove:"${VLAYER_ENV}"
+    popd
+
+  popd
 
   echo Stopping services...
   cleanup

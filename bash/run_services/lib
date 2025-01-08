@@ -1,0 +1,119 @@
+source "$(dirname "${BASH_SOURCE[0]}")/../common.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/chain_worker"
+
+function setup_tmp_dir() {
+    if [[ -z "${VLAYER_TMP_DIR:-}" ]] ; then
+        VLAYER_TMP_DIR=$(mktemp -d -t vlayer-$(basename $0).XXXXX)
+    else
+        VLAYER_TMP_DIR=$(realpath "${VLAYER_TMP_DIR}")
+    fi
+}
+
+function get_latest_block() {
+    local rpc_url=$1
+    local block_hex=$(curl -s ${rpc_url} \
+        -X POST \
+        -H "Content-Type: application/json" \
+        --data '{"method":"eth_blockNumber","params":[],"id":1,"jsonrpc":"2.0"}' \
+        | jq -r ".result"
+    )
+    printf "%d\n" "${block_hex}"
+}
+
+function startup_chain_server() {
+    local db_path="$1"
+
+    echo "Starting chain server"
+    pushd "${VLAYER_HOME}/rust"
+
+    RUST_LOG=info \
+    ./target/debug/chain_server \
+        --db-path "${db_path}" \
+        >>"${LOGS_DIR}/chain_server.out" &
+
+    CHAIN_SERVER=$!
+    
+    echo "Chain server started with PID ${CHAIN_SERVER}."
+    wait_for_port_and_pid 3001 "${CHAIN_SERVER}" 30m "chain server"
+
+    popd
+}
+
+function startup_chain_services() {
+    local db_path="${VLAYER_TMP_DIR}/chain_db"
+
+    for args in "$@"; do 
+        startup_chain_worker ${db_path} $args &
+    done
+
+    startup_chain_server ${db_path}
+
+    for args in "$@"; do
+        wait_for_chain_worker_sync $args
+    done
+}
+
+function start_anvil() {
+    echo "Starting anvil"
+    startup_anvil "${LOGS_DIR}/anvil.out" 8545 ANVIL
+}
+
+function startup_vlayer() {
+    local proof_arg=$1
+    shift # shift input params, since the second (and last) arg is an array of external_urls 
+    local external_urls=("$@")
+
+    echo "Starting vlayer REST server"
+    pushd "${VLAYER_HOME}/rust"
+
+    local args=(
+        "--proof" "${proof_arg}"
+        "--rpc-url" "31337:http://localhost:8545"
+    ) 
+    if [[ "${RUN_CHAIN_SERVICES:-0}" == "1" ]] ; then 
+        args+=("--chain-proof-url" "http://localhost:3001")
+    fi
+
+    RUST_LOG=info \
+    RISC0_DEV_MODE="${RISC0_DEV_MODE}" \
+    BONSAI_API_URL="${BONSAI_API_URL}" \
+    BONSAI_API_KEY="${BONSAI_API_KEY}" \
+    ./target/debug/call_server \
+        ${args[@]} \
+        ${external_urls[@]+"${external_urls[@]}"} \
+        >>"${LOGS_DIR}/vlayer_serve.out" &
+
+    VLAYER_SERVER=$!
+
+    echo "vlayer server started with PID ${VLAYER_SERVER}."
+    wait_for_port_and_pid 3000 ${VLAYER_SERVER} 30m "vlayer server"
+
+    popd
+}
+
+function ensure_binaries_built() {
+    if [[ "${BUILD_BINARIES}" == "1" ]] ; then
+        echo "Building binaries..."
+        pushd "${VLAYER_HOME}/rust"
+        cargo build --bin call_server --bin chain_server --bin worker
+        popd
+        echo
+    fi
+}
+
+function cleanup() {
+    echo "Cleaning up..."
+
+    for service in ANVIL CHAIN_SERVER VLAYER_SERVER ; do 
+        kill_service "${service}"
+    done
+
+    while read worker_pid; do
+        if ps -p "${worker_pid}" >/dev/null; then
+            echo "Killing worker ${worker_pid}"
+            kill "${worker_pid}"
+        fi
+    done < "${CHAIN_WORKER_PIDS}"
+
+    echo "Cleanup done. Artifacts saved to: ${VLAYER_TMP_DIR}"
+}
