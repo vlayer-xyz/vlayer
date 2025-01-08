@@ -9,7 +9,7 @@ use super::{QueryParams, SharedConfig, SharedProofs, UserToken};
 use crate::{
     error::{AppError, ChainProofError},
     gas_meter::{self, Client as GasMeterClient, ComputationStage},
-    handlers::{Metrics, ProofReceipt, ProofStatus, RawData, Times},
+    handlers::{Metrics, ProofReceipt, ProofStatus, RawData},
     ChainProofConfig, Config,
 };
 
@@ -98,6 +98,8 @@ async fn generate_proof(
     call_hash: CallHash,
     chain_proof_config: Option<ChainProofConfig>,
 ) -> Result<ProofReceipt, AppError> {
+    let mut metrics = Metrics::default();
+
     let prover = host.prover();
     let call_guest_id = host.call_guest_id();
 
@@ -108,9 +110,7 @@ async fn generate_proof(
     info!("Executing preflight for call {call_hash}");
 
     let preflight_result =
-        await_preflight(host, &state, call, call_hash, &gas_meter_client).await?;
-    let gas_used = preflight_result.gas_used;
-    let preflight_time = preflight_result.elapsed_time.as_millis().try_into()?;
+        await_preflight(host, &state, call, call_hash, &gas_meter_client, &mut metrics).await?;
 
     info!("Generating proof for call {call_hash}");
     state.insert(call_hash, ProofStatus::Proving);
@@ -119,13 +119,13 @@ async fn generate_proof(
     let cycles_used = host_output.cycles_used;
     let proving_time = host_output.elapsed_time.as_millis().try_into()?;
     let raw_data: RawData = host_output.try_into()?;
+    metrics.cycles = cycles_used;
+    metrics.times.proving = proving_time;
 
     gas_meter_client
-        .refund(ComputationStage::Proving, gas_used)
+        .refund(ComputationStage::Proving, 0)
         .await?;
 
-    let times = Times::new(preflight_time, proving_time);
-    let metrics = Metrics::new(gas_used, cycles_used, times);
     Ok(ProofReceipt::new(raw_data, metrics))
 }
 
@@ -168,13 +168,19 @@ async fn await_preflight(
     call: EngineCall,
     call_hash: CallHash,
     gas_meter_client: &impl GasMeterClient,
+    metrics: &mut Metrics,
 ) -> Result<PreflightResult, AppError> {
     state.insert(call_hash, ProofStatus::Preflight);
     let result = host.preflight(call).await.map_err(HostError::Preflight)?;
+    let gas_used = result.gas_used;
+    let elapsed_time = result.elapsed_time.as_millis().try_into()?;
 
     gas_meter_client
-        .refund(ComputationStage::Preflight, result.gas_used)
+        .refund(ComputationStage::Preflight, gas_used)
         .await?;
+
+    metrics.gas = gas_used;
+    metrics.times.preflight = elapsed_time;
 
     Ok(result)
 }

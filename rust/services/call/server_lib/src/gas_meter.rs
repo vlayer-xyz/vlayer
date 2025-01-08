@@ -4,10 +4,15 @@ use async_trait::async_trait;
 use auto_impl::auto_impl;
 use derive_new::new;
 use serde::{Deserialize, Serialize};
-use server_utils::rpc::{Client as RawRpcClient, Method, Result};
+use server_utils::rpc::{Client as RawRpcClient, Method};
 use tracing::info;
 
-use crate::handlers::{v_call::types::CallHash, UserToken};
+use crate::{
+    error::GasMeterError,
+    handlers::{v_call::types::CallHash, UserToken},
+};
+
+type Result<T> = std::result::Result<T, GasMeterError>;
 
 #[derive(new, Serialize, Debug)]
 #[serde(deny_unknown_fields)]

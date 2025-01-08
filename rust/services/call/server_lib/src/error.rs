@@ -17,6 +17,17 @@ pub enum ChainProofError {
 }
 
 #[derive(Debug, Error)]
+pub enum GasMeterError {
+    #[error("RPC error: {0}")]
+    Rpc(#[from] RpcError),
+}
+
+// #[derive(Debug, Error)]
+// pub enum PreflightError {
+//     Host
+// }
+
+#[derive(Debug, Error)]
 pub enum AppError {
     #[error("Invalid field: {0}")]
     FieldValidation(#[from] FieldValidationError),
@@ -34,6 +45,8 @@ pub enum AppError {
     ChainProof(#[from] ChainProofError),
     #[error("Int conversion error: {0}")]
     TryFromInt(#[from] TryFromIntError),
+    #[error("Gas meter error: {0}")]
+    GasMeter(#[from] GasMeterError),
 }
 
 impl From<AppError> for ErrorObjectOwned {
@@ -60,7 +73,8 @@ impl From<&AppError> for ErrorObjectOwned {
             | AppError::Join(..)
             | AppError::RpcError(..)
             | AppError::ChainProof(..)
-            | AppError::TryFromInt(..) => ErrorObjectOwned::owned::<()>(
+            | AppError::TryFromInt(..)
+            | AppError::GasMeter(..) => ErrorObjectOwned::owned::<()>(
                 jrpcerror::INTERNAL_ERROR_CODE,
                 error.to_string(),
                 None,

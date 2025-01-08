@@ -61,17 +61,17 @@ pub struct ProofReceipt {
     metrics: Metrics,
 }
 
-#[derive(new, Clone, Serialize)]
+#[derive(Clone, Serialize, Default)]
 pub struct Metrics {
-    gas: u64,
-    cycles: u64,
-    times: Times,
+    pub gas: u64,
+    pub cycles: u64,
+    pub times: Times,
 }
 
-#[derive(new, Clone, Serialize)]
+#[derive(Clone, Serialize, Default)]
 pub struct Times {
-    preflight: u64,
-    proving: u64,
+    pub preflight: u64,
+    pub proving: u64,
 }
 
 #[derive(Serialize, Clone)]
