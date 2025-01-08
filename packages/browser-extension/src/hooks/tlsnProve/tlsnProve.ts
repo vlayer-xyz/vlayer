@@ -94,12 +94,10 @@ type Transcript = {
 
 function redact(
   transcript: Transcript,
+  //@ts-expect-error
   redactionConfig: RedactionConfig,
 ): Commit {
-  if (redactionConfig.length !== 0) {
-    console.log("Redacting");
-  }
-
+  //not implemented yet
   return {
     sent: [transcript.ranges.sent.all],
     recv: [transcript.ranges.recv.all],
