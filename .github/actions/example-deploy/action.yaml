@@ -82,6 +82,7 @@ runs:
       run: bun run deploy:testnet
       env:
         VLAYER_ENV: testnet
+        USE_WINDOW_ETHEREUM_TRANSPORT: true
         JSON_RPC_URL: ${{ inputs.JSON_RPC_URL }}
         EXAMPLES_TEST_PRIVATE_KEY: ${{ inputs.EXAMPLES_TEST_PRIVATE_KEY }}
       working-directory: ./examples/${{ inputs.EXAMPLE_NAME }}/vlayer
