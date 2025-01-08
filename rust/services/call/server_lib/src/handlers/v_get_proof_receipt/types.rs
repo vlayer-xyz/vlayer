@@ -4,10 +4,7 @@ use jsonrpsee::types::error::{self as jrpcerror, ErrorObjectOwned};
 use serde::{Deserialize, Serialize};
 
 use crate::{
-    chain_proof::Error as ChainProofError,
     handlers::{ProofReceipt, ProofStatus},
-    preflight::Error as PreflightError,
-    proving::Error as ProvingError,
     v_call::CallHash,
 };
 
@@ -27,35 +24,16 @@ pub type Result<T> = std::result::Result<T, Error>;
 pub enum Error {
     #[error("Hash not found: {0}")]
     HashNotFound(CallHash),
-    #[error("Chain proof error: {0}")]
-    ChainProof(#[from] ChainProofError),
-    #[error("Preflight error: {0}")]
-    Preflight(#[from] PreflightError),
-    #[error("Proving error: {0}")]
-    Proving(#[from] ProvingError),
 }
 
 impl From<Error> for ErrorObjectOwned {
     fn from(error: Error) -> Self {
-        (&error).into()
-    }
-}
-
-impl From<&Error> for ErrorObjectOwned {
-    fn from(error: &Error) -> Self {
         match error {
             Error::HashNotFound(..) => ErrorObjectOwned::owned::<()>(
                 jrpcerror::INVALID_REQUEST_CODE,
                 error.to_string(),
                 None,
             ),
-            Error::ChainProof(..) | Error::Preflight(..) | Error::Proving(..) => {
-                ErrorObjectOwned::owned::<()>(
-                    jrpcerror::INTERNAL_ERROR_CODE,
-                    error.to_string(),
-                    None,
-                )
-            }
         }
     }
 }

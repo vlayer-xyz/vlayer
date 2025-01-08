@@ -6,6 +6,7 @@ mod config;
 mod handlers;
 mod metrics;
 mod preflight;
+mod proof;
 mod proving;
 mod ser;
 

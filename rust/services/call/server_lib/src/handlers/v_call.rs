@@ -1,19 +1,11 @@
 use alloy_primitives::ChainId;
-use call_engine::Call as EngineCall;
 use call_host::{Error as HostError, Host};
 use provider::Address;
 use tracing::info;
 use types::{Call, CallContext, CallHash, Result as VCallResult};
 
 use super::{QueryParams, SharedConfig, SharedProofs};
-use crate::{
-    chain_proof::{self, Config as ChainProofConfig},
-    gas_meter::{self, Client as GasMeterClient},
-    handlers::{Metrics, ProofReceipt, ProofStatus},
-    preflight, proving,
-    v_get_proof_receipt::Result as VGetProofReceiptResult,
-    Config,
-};
+use crate::{gas_meter, handlers::ProofStatus, proof, Config};
 
 pub mod types;
 
@@ -44,7 +36,7 @@ pub async fn v_call(
 
     if !found_existing {
         tokio::spawn(async move {
-            let res = generate_proof(
+            let res = proof::generate(
                 call,
                 host,
                 gas_meter_client,
@@ -75,39 +67,4 @@ async fn build_host(
         .map_err(HostError::Builder)?
         .build(config.into());
     Ok(host)
-}
-
-async fn generate_proof(
-    call: EngineCall,
-    host: Host,
-    gas_meter_client: impl GasMeterClient,
-    state: SharedProofs,
-    call_hash: CallHash,
-    chain_proof_config: Option<ChainProofConfig>,
-) -> VGetProofReceiptResult<ProofReceipt> {
-    let mut metrics = Metrics::default();
-
-    let prover = host.prover();
-    let call_guest_id = host.call_guest_id();
-
-    info!("Processing call {call_hash}");
-
-    chain_proof::await_ready(&host, &state, call_hash, chain_proof_config).await?;
-
-    let preflight_result =
-        preflight::await_preflight(host, &state, call, call_hash, &gas_meter_client, &mut metrics)
-            .await?;
-
-    let raw_data = proving::await_proving(
-        &prover,
-        &state,
-        call_hash,
-        call_guest_id,
-        preflight_result,
-        &gas_meter_client,
-        &mut metrics,
-    )
-    .await?;
-
-    Ok(ProofReceipt::new(raw_data, metrics))
 }
