@@ -321,28 +321,24 @@ mod server_tests {
                 actual: result,
                 expected: json!({
                     "status": "ready",
-                    "receipt": {
-                        "data": {
-                            "evm_call_result": evm_call_result.into(),
-                            "proof": {
-                                "length": 160,
-                                "seal": {
-                                    "verifierSelector": "0xdeafbeef",
-                                    "mode": 1,
-                                },
-                                "callAssumptions": {
-                                    "functionSelector": function_selector(call_data),
-                                    "proverContractAddress": contract_address,
-                                }
+                    "success": 1,
+                    "data": {
+                        "evm_call_result": evm_call_result.into(),
+                        "proof": {
+                            "length": 160,
+                            "seal": {
+                                "verifierSelector": "0xdeafbeef",
+                                "mode": 1,
+                            },
+                            "callAssumptions": {
+                                "functionSelector": function_selector(call_data),
+                                "proverContractAddress": contract_address,
                             }
                         }
-                    }
+                    },
+                    "metrics": {},
                 }),
             );
-            assert!(result["receipt"]["metrics"]["gas"].is_u64());
-            assert!(result["receipt"]["metrics"]["cycles"].is_u64());
-            assert!(result["receipt"]["metrics"]["times"]["preflight"].is_u64());
-            assert!(result["receipt"]["metrics"]["times"]["proving"].is_u64());
         }
 
         #[tokio::test(flavor = "multi_thread")]
@@ -352,6 +348,24 @@ mod server_tests {
             let fake_hash = CallHash::from(B256::repeat_byte(0xaa));
             let response = app.post("/", v_get_proof_receipt_body(fake_hash)).await;
             assert_jrpc_err(response, -32600, &format!("Hash not found: {fake_hash}")).await;
+        }
+
+        #[tokio::test(flavor = "multi_thread")]
+        async fn invalid_contract_preflight_error() {
+            let mut ctx = Context::default().await;
+            let app = ctx.server(call_guest_elf(), chain_guest_elf());
+            let contract = ctx.deploy_contract().await;
+            let call_data = Bytes::from_static(b"Hello world");
+
+            let hash = get_hash(&app, &contract, &call_data).await;
+            let result = get_proof_result(&app, hash).await;
+
+            assert_json_include!(actual: result, expected: json!({
+                "status": "preflight",
+                "error": "TravelCallExecutor error: EVM transact error: ",
+                "success": 0,
+                "metrics": {},
+            }));
         }
 
         #[tokio::test(flavor = "multi_thread")]
