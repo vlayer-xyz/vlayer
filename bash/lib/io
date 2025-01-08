@@ -1,0 +1,24 @@
+function silent_unless_fails() {
+    echo "Running: $@"
+
+    # Create a temporary file for capturing output
+    local tmp_file
+    tmp_file=$(mktemp)
+
+    export RISC0_GUEST_LOGFILE="$tmp_file"
+
+    function cleanup() {
+        unset RISC0_GUEST_LOGFILE
+        rm -f "$tmp_file"
+    }
+
+    # Execute the command and redirect both stdout and stderr to the temporary file
+    if ! "$@" >"$tmp_file" 2>&1; then
+        echo "Command failed: $@"
+        cat "$tmp_file" 
+        cleanup
+        return 1
+    fi
+
+    cleanup
+}
