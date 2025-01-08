@@ -11,7 +11,7 @@ import proverSpec from "../../../out/EmailDomainProver.sol/EmailDomainProver";
 import verifierSpec from "../../../out/EmailProofVerifier.sol/EmailDomainVerifier";
 import EmlForm from "../components/EmlForm";
 import { privateKeyToAccount } from "viem/accounts";
-import { type Address } from "viem";
+import { AbiStateMutability, ContractFunctionArgs, type Address } from "viem";
 
 const usePrivateKey =
   !import.meta.env.VITE_USE_WINDOW_ETHEREUM_TRANSPORT ||
@@ -72,17 +72,27 @@ const EmlUploadForm = () => {
         throw new Error("no_proof_to_verify");
       }
 
-      const account = usePrivateKey
-        ? privateKeyToAccount(import.meta.env.VITE_PRIVATE_KEY as `0x${string}`)
-        : address;
-
-      writeContract({
+      const contractArgs: Parameters<typeof writeContract>[0] = {
         address: import.meta.env.VITE_VERIFIER_ADDRESS,
         abi: verifierSpec.abi,
         functionName: "verify",
-        args: proof,
-        account,
-      });
+        args: proof as unknown as ContractFunctionArgs<
+          typeof verifierSpec.abi,
+          AbiStateMutability,
+          "verify"
+        >,
+      };
+
+      if (usePrivateKey) {
+        writeContract({
+          ...contractArgs,
+          account: privateKeyToAccount(
+            import.meta.env.VITE_PRIVATE_KEY as `0x${string}`,
+          ),
+        });
+      } else {
+        writeContract(contractArgs);
+      }
     } catch (err) {
       handleError(err);
     }
