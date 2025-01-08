@@ -95,6 +95,7 @@ type Transcript = {
 function redact(
   transcript: Transcript,
   //@ts-expect-error This is not implemented yet
+  //eslint-disable-next-line @typescript-eslint/no-unused-vars
   redactionConfig: RedactionConfig,
 ): Commit {
   return {

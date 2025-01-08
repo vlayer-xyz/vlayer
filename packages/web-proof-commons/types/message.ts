@@ -113,51 +113,51 @@ export type Url = Branded<UrlPattern, "Url">;
 
 type RedactRequestHeaders = {
   request: {
-    headers: string[]
-  }
-}
+    headers: string[];
+  };
+};
 
 type RedactRequestHeadersExcept = {
   request: {
-    headers_except: string[]
-  }
-}
+    headers_except: string[];
+  };
+};
 
 type RedactRequestUrlQuery = {
   request: {
-    url_query: string[]
-  }
-}
+    url_query: string[];
+  };
+};
 
 type RedactRequestUrlQueryExcept = {
   request: {
-    url_query_except: string[]
-  }
-}
+    url_query_except: string[];
+  };
+};
 
 type RedactResponseHeaders = {
   response: {
-    headers: string[]
-  }
-}
+    headers: string[];
+  };
+};
 
 type RedactResponseHeadersExcept = {
   response: {
-    headers_except: string[]
-  }
-}
+    headers_except: string[];
+  };
+};
 
 type RedactResponseJsonBody = {
   response: {
-    json_body: string[]
-  }
-}
+    json_body: string[];
+  };
+};
 
 type RedactResponseJsonBodyExcept = {
   response: {
-    json_body_except: string[]
-  }
-}
+    json_body_except: string[];
+  };
+};
 
 export type RedactionItem =
   | RedactRequestHeaders
