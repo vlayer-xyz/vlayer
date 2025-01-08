@@ -107,12 +107,8 @@ async fn generate_proof(
 
     await_chain_proof_ready(&host, &state, call_hash, chain_proof_config).await?;
 
-    info!("Executing preflight for call {call_hash}");
-
     let preflight_result =
         await_preflight(host, &state, call, call_hash, &gas_meter_client, &mut metrics).await?;
-
-    info!("Generating proof for call {call_hash}");
 
     let raw_data = await_proving(
         &prover,
@@ -172,18 +168,23 @@ async fn await_preflight(
     state.insert(call_hash, ProofStatus::Preflight);
     let result = host.preflight(call).await.map_err(HostError::Preflight)?;
     let gas_used = result.gas_used;
-    let elapsed_time = result
-        .elapsed_time
-        .as_millis()
-        .try_into()
-        .map_err(MetricsError::TryFromInt)?;
+    let elapsed_time = result.elapsed_time;
+
+    info!(
+        gas_used = gas_used,
+        elapsed_time = elapsed_time.as_millis(),
+        "preflight finished",
+    );
 
     gas_meter_client
         .refund(ComputationStage::Preflight, gas_used)
         .await?;
 
     metrics.gas = gas_used;
-    metrics.times.preflight = elapsed_time;
+    metrics.times.preflight = elapsed_time
+        .as_millis()
+        .try_into()
+        .map_err(MetricsError::TryFromInt)?;
 
     Ok(result)
 }
@@ -201,14 +202,20 @@ async fn await_proving(
     let host_output =
         Host::prove(prover, call_guest_id, preflight_result).map_err(HostError::Proving)?;
     let cycles_used = host_output.cycles_used;
-    let proving_time = host_output
-        .elapsed_time
+    let elapsed_time = host_output.elapsed_time;
+
+    info!(
+        cycles_used = cycles_used,
+        elapsed_time = elapsed_time.as_millis(),
+        "proving finished"
+    );
+
+    let raw_data: RawData = host_output.try_into()?;
+    metrics.cycles = cycles_used;
+    metrics.times.proving = elapsed_time
         .as_millis()
         .try_into()
         .map_err(MetricsError::TryFromInt)?;
-    let raw_data: RawData = host_output.try_into()?;
-    metrics.cycles = cycles_used;
-    metrics.times.proving = proving_time;
 
     gas_meter_client
         .refund(ComputationStage::Proving, 0)
