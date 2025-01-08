@@ -1,19 +1,16 @@
 use std::sync::Arc;
 
-use alloy_primitives::{hex::ToHexExt, U256};
-use alloy_sol_types::SolValue;
 use async_trait::async_trait;
-use call_engine::{HostOutput, Proof, Seal};
 use dashmap::DashMap;
 use derive_more::{Deref, DerefMut};
 use derive_new::new;
 use jsonrpsee::{proc_macros::rpc, types::error::ErrorObjectOwned, Extensions};
-use serde::{Deserialize, Serialize, Serializer};
+use serde::{Deserialize, Serialize};
 use v_call::types::{Call, CallContext, CallHash};
 use v_get_proof_receipt::types::CallResult;
 use v_versions::Versions;
 
-use crate::{config::Config, error::AppError, metrics::Metrics, ser::ProofDTO};
+use crate::{config::Config, error::AppError, metrics::Metrics, proving::RawData};
 
 pub mod v_call;
 pub mod v_get_proof_receipt;
@@ -59,51 +56,6 @@ pub enum ProofStatus {
 pub struct ProofReceipt {
     data: RawData,
     metrics: Metrics,
-}
-
-#[derive(Serialize, Clone)]
-pub struct RawData {
-    #[serde(with = "ProofDTO")]
-    proof: Proof,
-    #[serde(serialize_with = "ser_evm_call_result")]
-    evm_call_result: Vec<u8>,
-}
-
-fn ser_evm_call_result<S>(evm_call_result: &[u8], state: S) -> Result<S::Ok, S::Error>
-where
-    S: Serializer,
-{
-    state.serialize_str(&evm_call_result.encode_hex_with_prefix())
-}
-
-impl TryFrom<HostOutput> for RawData {
-    type Error = seal::Error;
-
-    fn try_from(value: HostOutput) -> Result<Self, Self::Error> {
-        let HostOutput {
-            guest_output,
-            seal,
-            proof_len,
-            call_guest_id,
-            ..
-        } = value;
-
-        let proof = Proof {
-            length: U256::from(proof_len),
-            seal: decode_seal(&seal)?,
-            callGuestId: call_guest_id.into(),
-            // Intentionally set to 0. These fields will be updated with the correct values by the prover script, based on the verifier ABI.
-            callAssumptions: guest_output.call_assumptions,
-        };
-        Ok(Self {
-            proof,
-            evm_call_result: guest_output.evm_call_result,
-        })
-    }
-}
-
-fn decode_seal(seal: &[u8]) -> Result<Seal, seal::Error> {
-    Ok(Seal::abi_decode(seal, true)?)
 }
 
 pub type SharedConfig = Arc<Config>;
