@@ -3,7 +3,7 @@ use call_engine::Call as EngineCall;
 use call_host::{Error as HostError, Host};
 use provider::Address;
 use tracing::info;
-use types::{Call, CallContext, CallHash};
+use types::{Call, CallContext, CallHash, Result};
 
 use super::{QueryParams, SharedConfig, SharedProofs};
 use crate::{
@@ -22,7 +22,7 @@ pub async fn v_call(
     params: QueryParams,
     call: Call,
     context: CallContext,
-) -> Result<CallHash, AppError> {
+) -> Result<CallHash> {
     info!("v_call => {call:#?} {context:#?}");
     let call = call.parse_and_validate(config.max_calldata_size())?;
 
@@ -63,7 +63,7 @@ async fn build_host(
     config: &Config,
     chain_id: ChainId,
     prover_contract_addr: Address,
-) -> Result<Host, HostError> {
+) -> std::result::Result<Host, HostError> {
     let host = Host::builder()
         .with_rpc_urls(config.rpc_urls())
         .with_chain_guest_id(config.chain_guest_id())
@@ -83,7 +83,7 @@ async fn generate_proof(
     state: SharedProofs,
     call_hash: CallHash,
     chain_proof_config: Option<ChainProofConfig>,
-) -> Result<ProofReceipt, AppError> {
+) -> std::result::Result<ProofReceipt, AppError> {
     let mut metrics = Metrics::default();
 
     let prover = host.prover();

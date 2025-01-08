@@ -1,18 +1,16 @@
 use call_host::Error as HostError;
 use jsonrpsee::types::error::{self as jrpcerror, ErrorObjectOwned};
-use server_utils::{rpc::Error as RpcError, FieldValidationError};
+use server_utils::rpc::Error as RpcError;
 use thiserror::Error;
 use tokio::task::JoinError;
 
 use crate::{
-    chain_proof::Error as ChainProofError, gas_meter::Error as GasMeterError,
-    preflight::Error as PreflightError, proving::Error as ProvingError, v_call::CallHash,
+    chain_proof::Error as ChainProofError, preflight::Error as PreflightError,
+    proving::Error as ProvingError, v_call::CallHash,
 };
 
 #[derive(Debug, Error)]
 pub enum AppError {
-    #[error("Invalid field: {0}")]
-    FieldValidation(#[from] FieldValidationError),
     #[error("Host error: {0}")]
     Host(#[from] HostError),
     #[error("Join error: {0}")]
@@ -21,8 +19,6 @@ pub enum AppError {
     RpcError(#[from] RpcError),
     #[error("Hash not found: {0}")]
     HashNotFound(CallHash),
-    #[error("Gas meter error: {0}")]
-    GasMeter(#[from] GasMeterError),
     #[error("Chain proof error: {0}")]
     ChainProof(#[from] ChainProofError),
     #[error("Preflight error: {0}")]
@@ -40,11 +36,6 @@ impl From<AppError> for ErrorObjectOwned {
 impl From<&AppError> for ErrorObjectOwned {
     fn from(error: &AppError) -> Self {
         match error {
-            AppError::FieldValidation(..) => ErrorObjectOwned::owned::<()>(
-                jrpcerror::INVALID_PARAMS_CODE,
-                error.to_string(),
-                None,
-            ),
             AppError::HashNotFound(..) => ErrorObjectOwned::owned::<()>(
                 jrpcerror::INVALID_REQUEST_CODE,
                 error.to_string(),
@@ -54,7 +45,6 @@ impl From<&AppError> for ErrorObjectOwned {
             | AppError::Join(..)
             | AppError::RpcError(..)
             | AppError::ChainProof(..)
-            | AppError::GasMeter(..)
             | AppError::Preflight(..)
             | AppError::Proving(..) => ErrorObjectOwned::owned::<()>(
                 jrpcerror::INTERNAL_ERROR_CODE,
