@@ -3,6 +3,7 @@ import {
   useWriteContract,
   useWaitForTransactionReceipt,
   useAccount,
+  useChainId,
 } from "wagmi";
 import { useCallProver, useWaitForProvingResult } from "@vlayer/react";
 import { preverifyEmail } from "@vlayer/sdk";
@@ -24,6 +25,7 @@ const EmlUploadForm = () => {
   const [successMsg, setSuccessMsg] = useState("");
 
   const { address } = useAccount();
+  const chainId = useChainId();
 
   const {
     writeContract,
@@ -39,6 +41,7 @@ const EmlUploadForm = () => {
     address: import.meta.env.VITE_PROVER_ADDRESS,
     proverAbi: proverSpec.abi,
     functionName: "main",
+    chainId,
   });
 
   const { data: proof, error: provingError } =

@@ -1,5 +1,4 @@
 import { useState } from "react";
-import { useChainId } from "wagmi";
 import {
   type Abi,
   type AbiStateMutability,
@@ -19,13 +18,11 @@ export enum ProverStatus {
 export const useCallProver = (
   proveArgs: Omit<
     ProveArgs<Abi, ContractFunctionName<Abi>>,
-    "chainId" | "args"
+    "args"
   >,
 ) => {
   // read vlayer client from context
   const { vlayerClient } = useProofContext();
-  // read chainId from wagmi
-  const chainId = useChainId();
 
   // state
   const [status, setStatus] = useState<ProverStatus>(ProverStatus.Idle);
@@ -40,7 +37,6 @@ export const useCallProver = (
       const hash = await vlayerClient.prove({
         ...proveArgs,
         args,
-        chainId,
       });
       setHash(hash);
       setStatus(ProverStatus.Ready);
