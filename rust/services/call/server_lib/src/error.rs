@@ -6,7 +6,7 @@ use server_utils::{rpc::Error as RpcError, FieldValidationError};
 use thiserror::Error;
 use tokio::task::JoinError;
 
-use crate::v_call::CallHash;
+use crate::{gas_meter::Error as GasMeterError, v_call::CallHash};
 
 #[derive(Debug, Error)]
 pub enum ChainProofError {
@@ -14,12 +14,6 @@ pub enum ChainProofError {
     Timeout,
     #[error("Host error: {0}")]
     Host(#[from] HostError),
-}
-
-#[derive(Debug, Error)]
-pub enum GasMeterError {
-    #[error("RPC error: {0}")]
-    Rpc(#[from] RpcError),
 }
 
 #[derive(Debug, Error)]
