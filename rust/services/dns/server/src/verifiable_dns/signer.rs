@@ -12,7 +12,10 @@ const PRIV_KEY: &str = include_str!("../../assets/private_key.pem");
 
 #[serde_as]
 #[derive(Serialize, Debug, PartialEq)]
-pub struct Signature(#[serde_as(as = "Base64")] pub Vec<u8>);
+pub struct Signature(#[serde_as(as = "Base64")] Vec<u8>);
+#[serde_as]
+#[derive(Serialize, Debug, PartialEq)]
+pub struct PublicKey(#[serde_as(as = "Base64")] Vec<u8>);
 
 #[derive(Clone)]
 pub(super) struct Signer {
@@ -31,6 +34,10 @@ impl Signer {
         let mut rng = rand::thread_rng();
         let signature = self.key.sign_with_rng(&mut rng, &payload.to_payload());
         Signature(signature.to_bytes().into_vec())
+    }
+
+    pub fn public_key(&self) -> PublicKey {
+        PublicKey(vec![])
     }
 }
 
