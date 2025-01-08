@@ -111,8 +111,65 @@ export type UrlPattern = Branded<string, "UrlPattern">;
 
 export type Url = Branded<UrlPattern, "Url">;
 
-type RedactionFunction = (args: string[]) => void;
-export type RedactionConfig = RedactionFunction[];
+type RedactRequestHeaders = {
+  request: {
+    headers: string[]
+  }
+}
+
+type RedactRequestHeadersExcept = {
+  request: {
+    headers_except: string[]
+  }
+}
+
+type RedactRequestUrlQuery = {
+  request: {
+    url_query: string[]
+  }
+}
+
+type RedactRequestUrlQueryExcept = {
+  request: {
+    url_query_except: string[]
+  }
+}
+
+type RedactResponseHeaders = {
+  response: {
+    headers: string[]
+  }
+}
+
+type RedactResponseHeadersExcept = {
+  response: {
+    headers_except: string[]
+  }
+}
+
+type RedactResponseJsonBody = {
+  response: {
+    json_body: string[]
+  }
+}
+
+type RedactResponseJsonBodyExcept = {
+  response: {
+    json_body_except: string[]
+  }
+}
+
+export type RedactionItem =
+  | RedactRequestHeaders
+  | RedactRequestHeadersExcept
+  | RedactRequestUrlQuery
+  | RedactRequestUrlQueryExcept
+  | RedactResponseHeaders
+  | RedactResponseHeadersExcept
+  | RedactResponseJsonBody
+  | RedactResponseJsonBodyExcept;
+
+export type RedactionConfig = RedactionItem[];
 
 export type WebProofStepNotarize = Branded<
   {
