@@ -1,61 +1,39 @@
 import { useState, useEffect, FormEvent } from "react";
-import * as chains from "viem/chains";
+import {
+  useWriteContract,
+  useWaitForTransactionReceipt,
+  useAccount,
+} from "wagmi";
 import { useCallProver, useWaitForProvingResult } from "@vlayer/react";
 import { preverifyEmail } from "@vlayer/sdk";
 import { getStrFromFile } from "../lib/utils";
 import proverSpec from "../../../out/EmailDomainProver.sol/EmailDomainProver";
 import verifierSpec from "../../../out/EmailProofVerifier.sol/EmailDomainVerifier";
 import EmlForm from "../components/EmlForm";
-import { createContext } from "@vlayer/sdk/config";
+import { privateKeyToAccount } from "viem/accounts";
+import { type Address } from "viem";
 
-import {
-  type PrivateKeyAccount,
-  type Address,
-  type Chain,
-  custom as customTransport,
-} from "viem";
-
-function getChainByName(name: string) {
-  const chain = (chains as Record<string, Chain>)[name];
-  if (chain) {
-    return chain;
-  } else {
-    throw new Error("Chain does not exist");
-  }
-}
+const usePrivateKey =
+  !import.meta.env.VITE_USE_WINDOW_ETHEREUM_TRANSPORT ||
+  Boolean(import.meta.env.VITE_PRIVATE_KEY);
 
 const EmlUploadForm = () => {
-  const [walletClient, setWalletClient] =
-    useState<ReturnType<typeof createContext>["ethClient"]>();
-  const [privateKeyAccount, setPrivateKeyAccount] =
-    useState<PrivateKeyAccount>();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [currentStep, setCurrentStep] = useState("");
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
-  const [claimerAddr, setClaimerAddr] = useState<`0x${string}`>("0x");
-  const chain = getChainByName(import.meta.env.VITE_CHAIN_NAME as string);
 
-  useEffect(() => {
-    const getWallet = async () => {
-      const { ethClient, account: ethAccount } = await createContext(
-        {
-          chainName: import.meta.env.VITE_CHAIN_NAME as string,
-          proverUrl: import.meta.env.VITE_PROVER_URL as string,
-          jsonRpcUrl: import.meta.env.VITE_JSON_RPC_URL as string,
-          privateKey: import.meta.env.VITE_PRIVATE_KEY as `0x${string}`,
-        },
-        import.meta.env.VITE_USE_WINDOW_ETHEREUM_TRANSPORT
-          ? customTransport(window.ethereum)
-          : undefined,
-      );
+  const { address } = useAccount();
 
-      setWalletClient(ethClient);
-      setPrivateKeyAccount(ethAccount);
-    };
+  const {
+    writeContract,
+    data: txHash,
+    error: verificationError,
+  } = useWriteContract();
 
-    getWallet();
-  }, []);
+  const { status: onChainVerificationStatus } = useWaitForTransactionReceipt({
+    hash: txHash,
+  });
 
   const { callProver, data: proofHash } = useCallProver({
     address: import.meta.env.VITE_PROVER_ADDRESS,
@@ -63,34 +41,8 @@ const EmlUploadForm = () => {
     functionName: "main",
   });
 
-  const { data: proof } = useWaitForProvingResult(proofHash);
-
-  const getClaimerAddr = async () => {
-    if (import.meta.env.VITE_USE_WINDOW_ETHEREUM_TRANSPORT) {
-      if (typeof window !== "undefined" && !window.ethereum) {
-        throw new Error("no_wallet_detected");
-      }
-
-      if (!walletClient) {
-        throw new Error("no_wallet_client");
-      }
-
-      if (chain.name !== chains.anvil.name) {
-        await walletClient?.switchChain({ id: chain.id });
-      }
-      if (!walletClient) {
-        throw new Error("no_wallet_client");
-      }
-      const [addr] = await walletClient.requestAddresses();
-      setClaimerAddr(addr);
-      return addr;
-    }
-
-    if (privateKeyAccount) {
-      setClaimerAddr(privateKeyAccount.address);
-      return privateKeyAccount.address;
-    }
-  };
+  const { data: proof, error: provingError } =
+    useWaitForProvingResult(proofHash);
 
   const handleError = (err: unknown) => {
     setIsSubmitting(false);
@@ -112,7 +64,7 @@ const EmlUploadForm = () => {
     }
   };
 
-  const verifyProof = async () => {
+  const verifyProofOnChain = async () => {
     try {
       setCurrentStep("Verifying on-chain...");
 
@@ -120,41 +72,27 @@ const EmlUploadForm = () => {
         throw new Error("no_proof_to_verify");
       }
 
-      if (!walletClient) {
-        throw new Error("no_wallet_client");
-      }
+      const account = usePrivateKey
+        ? privateKeyToAccount(import.meta.env.VITE_PRIVATE_KEY as `0x${string}`)
+        : address;
 
-      const account = import.meta.env.VITE_USE_WINDOW_ETHEREUM_TRANSPORT
-        ? claimerAddr
-        : privateKeyAccount;
-
-      if (!account) {
-        throw new Error("no_account");
-      }
-
-      const txHash = await walletClient.writeContract({
+      writeContract({
         address: import.meta.env.VITE_VERIFIER_ADDRESS,
         abi: verifierSpec.abi,
         functionName: "verify",
         args: proof,
-        chain,
         account,
       });
-
-      const receipt = await walletClient.waitForTransactionReceipt({
-        hash: txHash,
-      });
-      setCurrentStep("Success!");
-      setIsSubmitting(false);
-      if (chain.blockExplorers && receipt.status === "success") {
-        setSuccessMsg(
-          `Verified: <a href='${chain.blockExplorers?.default.url}/tx/${txHash}'>${txHash.slice(0, 4)}...${txHash.slice(-4)}</a>`,
-        );
-      } else {
-        setSuccessMsg(`Verified: ${txHash.slice(0, 4)}...${txHash.slice(-4)}`);
-      }
     } catch (err) {
       handleError(err);
+    }
+  };
+
+  const finishProving = async () => {
+    setCurrentStep("Success!");
+    setIsSubmitting(false);
+    if (txHash) {
+      setSuccessMsg(`Verified: ${txHash.slice(0, 4)}...${txHash.slice(-4)}`);
     }
   };
 
@@ -168,7 +106,17 @@ const EmlUploadForm = () => {
     setCurrentStep("Waiting for proof...");
   };
 
-  const submit = async (e: FormEvent<HTMLFormElement>) => {
+  const claimerAddr = () => {
+    if (usePrivateKey) {
+      return privateKeyToAccount(
+        import.meta.env.VITE_PRIVATE_KEY as `0x${string}`,
+      ).address;
+    }
+
+    return address as Address;
+  };
+
+  const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsSubmitting(true);
     setErrorMsg("");
@@ -180,24 +128,35 @@ const EmlUploadForm = () => {
     }
 
     setCurrentStep("Connecting to wallet...");
-    const addr = await getClaimerAddr();
-    await startProving(emlFile, addr as Address);
+
+    await startProving(emlFile, claimerAddr());
     setCurrentStep("Waiting for proof...");
   };
 
-  const handleSubmit = (e: FormEvent<HTMLFormElement>) => {
-    submit(e).catch((err) => {
-      handleError(err);
-    });
-  };
+  useEffect(() => {
+    if (proof) {
+      verifyProofOnChain();
+    }
+  }, [proof]);
 
+  useEffect(() => {
+    if (onChainVerificationStatus === "success") {
+      finishProving();
+    }
+  }, [onChainVerificationStatus]);
 
-  // useEffect(() => {
-  //   if (provingError) {
-  //     setErrorMsg(provingError);
-  //     setIsSubmitting(false);
-  //   }
-  // }, [provingError]);
+  useEffect(() => {
+    if (verificationError) {
+      handleError(verificationError);
+    }
+  }, [verificationError]);
+
+  useEffect(() => {
+    if (provingError) {
+      console.log({ provingError });
+      handleError("Cannot finalize proving, check logs");
+    }
+  }, [provingError]);
 
   return (
     <EmlForm
