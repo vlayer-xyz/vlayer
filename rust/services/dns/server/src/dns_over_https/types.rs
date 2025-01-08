@@ -45,9 +45,9 @@ pub(crate) struct Record {
     pub name: String,
     #[serde(rename = "type")]
     #[allow(clippy::struct_field_names)]
-    pub record_type: u8,
+    pub record_type: RecordType,
     #[serde(rename = "TTL")]
-    pub ttl: u32,
+    pub ttl: u64,
     pub data: String,
 }
 

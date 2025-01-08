@@ -1,3 +1,4 @@
+mod record;
 mod resolver;
 mod signer;
 

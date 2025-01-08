@@ -1,5 +1,5 @@
-use super::signer::Signer;
-use crate::dns_over_https::{Provider as DoHProvider, Query, Response};
+use super::{record::Record, signer::Signer, Signature};
+use crate::dns_over_https::{types::Record as DNSRecord, Provider as DoHProvider, Query, Response};
 
 #[derive(Clone)]
 pub(crate) struct Resolver {
@@ -12,6 +12,14 @@ impl Resolver {
             signer: Signer::new(),
         }
     }
+
+    fn sign_record(&self, record: &DNSRecord) -> Signature {
+        let now = 0;
+        let valid_until = now + record.ttl;
+        let signature = self.signer.sign(&Record::new(record, valid_until));
+
+        signature
+    }
 }
 
 impl DoHProvider for Resolver {
@@ -20,7 +28,10 @@ impl DoHProvider for Resolver {
         response.question = query.clone();
         response.status = 0;
 
-        response.signature = Some(self.signer.sign(&query.name.as_str()));
+        response.signature = response
+            .answer
+            .first()
+            .map(|record| self.sign_record(record));
 
         Some(response)
     }

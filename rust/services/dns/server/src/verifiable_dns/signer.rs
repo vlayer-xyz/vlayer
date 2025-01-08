@@ -6,15 +6,10 @@ use rsa::{
     RsaPrivateKey,
 };
 use serde::Serialize;
-use serde_with::serde_as;
+use serde_with::{base64::Base64, serde_as};
 
 const PRIV_KEY: &str = include_str!("../../assets/private_key.pem");
 
-pub(super) trait IntoSigningPayload {
-    fn into_payload(self, now: u64) -> Vec<u8>;
-}
-
-use serde_with::base64::Base64;
 #[serde_as]
 #[derive(Serialize, Debug, PartialEq)]
 pub struct Signature(#[serde_as(as = "Base64")] pub Vec<u8>);
@@ -32,18 +27,26 @@ impl Signer {
         Self { key }
     }
 
-    pub fn sign<T: IntoSigningPayload + Clone>(&self, payload: &T) -> Signature {
+    pub fn sign<P: ToSignablePayload>(&self, payload: &P) -> Signature {
         let mut rng = rand::thread_rng();
-        let payload = payload.clone().into_payload(0);
-        let signature = self.key.sign_with_rng(&mut rng, &payload);
+        let signature = self.key.sign_with_rng(&mut rng, &payload.to_payload());
         Signature(signature.to_bytes().into_vec())
     }
 }
 
-// TODO: move under cfg(test)
-impl IntoSigningPayload for &str {
-    fn into_payload(self, now: u64) -> Vec<u8> {
-        format!("{now},{self}").into_bytes()
+pub(super) trait ToSignablePayload {
+    fn to_payload(&self) -> Vec<u8>;
+}
+
+impl<T: Serialize> ToSignablePayload for T {
+    fn to_payload(&self) -> Vec<u8> {
+        let mut buf = Vec::new();
+        let formattter = olpc_cjson::CanonicalFormatter::new();
+        let mut serializer = serde_json::Serializer::with_formatter(&mut buf, formattter);
+        self.serialize(&mut serializer)
+            .expect("Failed to serialize signable struct");
+
+        buf
     }
 }
 
@@ -66,7 +69,7 @@ mod tests {
 
         let pub_key = pub_key();
         let signature = rsa::pkcs1v15::Signature::try_from(signature.0.as_slice()).unwrap();
-        let verification_result = pub_key.verify(b"0,alamakota", &signature);
+        let verification_result = pub_key.verify(br#""alamakota""#, &signature);
 
         assert!(verification_result.is_ok())
     }
