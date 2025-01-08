@@ -33,6 +33,7 @@ touch "${CHAIN_WORKER_PIDS}"
 
 set_proof_mode
 set_external_rpc_urls
+set_chain_worker_args
 
 # Display the parsed parameters
 echo "PROVING_MODE: ${PROVING_MODE}"
