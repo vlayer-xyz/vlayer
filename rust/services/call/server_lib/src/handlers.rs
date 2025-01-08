@@ -33,7 +33,7 @@ pub trait Rpc {
     async fn v_get_proof_receipt(&self, hash: CallHash) -> Result<CallResult, ErrorObjectOwned>;
 
     #[method(name = "v_versions")]
-    async fn v_versions(&self) -> Result<Versions, AppError>;
+    async fn v_versions(&self) -> Versions;
 }
 
 #[derive(Deref, DerefMut, Default)]
@@ -96,7 +96,7 @@ impl RpcServer for State {
         v_get_proof_receipt::v_get_proof_receipt(&self.proofs, hash)
     }
 
-    async fn v_versions(&self) -> Result<Versions, AppError> {
+    async fn v_versions(&self) -> Versions {
         v_versions::v_versions(&self.config)
     }
 }
