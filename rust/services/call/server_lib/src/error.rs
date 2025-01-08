@@ -7,23 +7,14 @@ use thiserror::Error;
 use tokio::task::JoinError;
 
 use crate::{
-    chain_proof::Error as ChainProofError, gas_meter::Error as GasMeterError, v_call::CallHash,
+    chain_proof::Error as ChainProofError, gas_meter::Error as GasMeterError,
+    preflight::Error as PreflightError, v_call::CallHash,
 };
 
 #[derive(Debug, Error)]
 pub enum MetricsError {
     #[error("Int conversion error: {0}")]
     TryFromInt(#[from] TryFromIntError),
-}
-
-#[derive(Debug, Error)]
-pub enum PreflightError {
-    #[error("Host error: {0}")]
-    Host(#[from] HostError),
-    #[error("Gas meter error: {0}")]
-    GasMeter(#[from] GasMeterError),
-    #[error("Metrics error: {0}")]
-    Metrics(#[from] MetricsError),
 }
 
 #[derive(Debug, Error)]

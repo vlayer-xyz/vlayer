@@ -8,10 +8,10 @@ use types::{Call, CallContext, CallHash};
 use super::{QueryParams, SharedConfig, SharedProofs};
 use crate::{
     chain_proof::{self, Config as ChainProofConfig},
-    error::{AppError, MetricsError, PreflightError, ProvingError},
+    error::{AppError, MetricsError, ProvingError},
     gas_meter::{self, Client as GasMeterClient, ComputationStage},
     handlers::{Metrics, ProofReceipt, ProofStatus, RawData},
-    Config,
+    preflight, Config,
 };
 
 pub mod types;
@@ -94,7 +94,8 @@ async fn generate_proof(
     chain_proof::await_ready(&host, &state, call_hash, chain_proof_config).await?;
 
     let preflight_result =
-        await_preflight(host, &state, call, call_hash, &gas_meter_client, &mut metrics).await?;
+        preflight::await_ready(host, &state, call, call_hash, &gas_meter_client, &mut metrics)
+            .await?;
 
     let raw_data = await_proving(
         &prover,
@@ -108,38 +109,6 @@ async fn generate_proof(
     .await?;
 
     Ok(ProofReceipt::new(raw_data, metrics))
-}
-
-async fn await_preflight(
-    host: Host,
-    state: &SharedProofs,
-    call: EngineCall,
-    call_hash: CallHash,
-    gas_meter_client: &impl GasMeterClient,
-    metrics: &mut Metrics,
-) -> Result<PreflightResult, PreflightError> {
-    state.insert(call_hash, ProofStatus::Preflight);
-    let result = host.preflight(call).await.map_err(HostError::Preflight)?;
-    let gas_used = result.gas_used;
-    let elapsed_time = result.elapsed_time;
-
-    info!(
-        gas_used = gas_used,
-        elapsed_time = elapsed_time.as_millis(),
-        "preflight finished",
-    );
-
-    gas_meter_client
-        .refund(ComputationStage::Preflight, gas_used)
-        .await?;
-
-    metrics.gas = gas_used;
-    metrics.times.preflight = elapsed_time
-        .as_millis()
-        .try_into()
-        .map_err(MetricsError::TryFromInt)?;
-
-    Ok(result)
 }
 
 async fn await_proving(
