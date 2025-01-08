@@ -1,6 +1,6 @@
 use alloy_primitives::ChainId;
-use call_engine::{Call as EngineCall, CallGuestId};
-use call_host::{Error as HostError, Host, PreflightResult, Prover};
+use call_engine::Call as EngineCall;
+use call_host::{Error as HostError, Host};
 use provider::Address;
 use tracing::info;
 use types::{Call, CallContext, CallHash};
@@ -8,10 +8,10 @@ use types::{Call, CallContext, CallHash};
 use super::{QueryParams, SharedConfig, SharedProofs};
 use crate::{
     chain_proof::{self, Config as ChainProofConfig},
-    error::{AppError, MetricsError, ProvingError},
-    gas_meter::{self, Client as GasMeterClient, ComputationStage},
-    handlers::{Metrics, ProofReceipt, ProofStatus, RawData},
-    preflight, Config,
+    error::AppError,
+    gas_meter::{self, Client as GasMeterClient},
+    handlers::{Metrics, ProofReceipt, ProofStatus},
+    preflight, proving, Config,
 };
 
 pub mod types;
@@ -94,10 +94,10 @@ async fn generate_proof(
     chain_proof::await_ready(&host, &state, call_hash, chain_proof_config).await?;
 
     let preflight_result =
-        preflight::await_ready(host, &state, call, call_hash, &gas_meter_client, &mut metrics)
+        preflight::await_preflight(host, &state, call, call_hash, &gas_meter_client, &mut metrics)
             .await?;
 
-    let raw_data = await_proving(
+    let raw_data = proving::await_proving(
         &prover,
         &state,
         call_hash,
@@ -109,39 +109,4 @@ async fn generate_proof(
     .await?;
 
     Ok(ProofReceipt::new(raw_data, metrics))
-}
-
-async fn await_proving(
-    prover: &Prover,
-    state: &SharedProofs,
-    call_hash: CallHash,
-    call_guest_id: CallGuestId,
-    preflight_result: PreflightResult,
-    gas_meter_client: &impl GasMeterClient,
-    metrics: &mut Metrics,
-) -> Result<RawData, ProvingError> {
-    state.insert(call_hash, ProofStatus::Proving);
-    let host_output =
-        Host::prove(prover, call_guest_id, preflight_result).map_err(HostError::Proving)?;
-    let cycles_used = host_output.cycles_used;
-    let elapsed_time = host_output.elapsed_time;
-
-    info!(
-        cycles_used = cycles_used,
-        elapsed_time = elapsed_time.as_millis(),
-        "proving finished"
-    );
-
-    let raw_data: RawData = host_output.try_into()?;
-    metrics.cycles = cycles_used;
-    metrics.times.proving = elapsed_time
-        .as_millis()
-        .try_into()
-        .map_err(MetricsError::TryFromInt)?;
-
-    gas_meter_client
-        .refund(ComputationStage::Proving, 0)
-        .await?;
-
-    Ok(raw_data)
 }

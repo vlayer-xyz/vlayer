@@ -6,6 +6,7 @@ mod config;
 mod error;
 mod handlers;
 mod preflight;
+mod proving;
 mod ser;
 
 pub use config::{Config, ConfigBuilder};
