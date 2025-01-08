@@ -33,11 +33,10 @@ tracing = { workspace = true }
 [dev-dependencies]
 alloy-sol-types = { workspace = true }
 anyhow = { workspace = true }
-call_guest_wrapper = { workspace = true }
-chain_guest_wrapper = { workspace = true }
 ctor = { workspace = true }
 dotenvy = { workspace = true }
 ethers-providers = { workspace = true }
+guest_wrapper = { workspace = true }
 insta = { workspace = true, features = ["yaml"] }
 maplit = { workspace = true }
 mock_chain_server = { workspace = true }

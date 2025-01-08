@@ -1,7 +1,7 @@
 use std::{path::PathBuf, sync::Arc, time::Duration};
 
 use alloy_primitives::ChainId;
-use chain_guest_wrapper::GUEST_ELF;
+use guest_wrapper::CHAIN_GUEST_ELF;
 use chain_host::{AppendStrategy, Host, HostConfig, PrependStrategy, ProofMode};
 use clap::Parser;
 use common::{init_tracing, GlobalArgs, LogFormat};
@@ -77,7 +77,7 @@ impl From<Cli> for HostConfig {
             chain_id: cli.chain_id,
             proof_mode: cli.proof_mode,
             db_path: cli.db_path,
-            elf: GUEST_ELF.clone(),
+            elf: CHAIN_GUEST_ELF.clone(),
             start_block: cli.start_block,
             prepend_strategy: PrependStrategy::new(cli.max_back_propagation_blocks),
             append_strategy: AppendStrategy::new(cli.max_head_blocks, cli.confirmations),

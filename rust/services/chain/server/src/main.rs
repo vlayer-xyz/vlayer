@@ -1,7 +1,7 @@
 use std::{net::SocketAddr, path::PathBuf};
 
 use chain_db::{ChainDb, Mode};
-use chain_guest_wrapper::GUEST_ELF;
+use guest_wrapper::CHAIN_GUEST_ELF;
 use chain_server_lib::{serve, ServerConfig};
 use clap::Parser;
 use common::{init_tracing, GlobalArgs, LogFormat};
@@ -40,7 +40,7 @@ async fn main() -> anyhow::Result<()> {
     init_tracing(cli.global_args.log_format.unwrap_or(LogFormat::Plain));
 
     let config = ServerConfig::new(cli.listen_addr);
-    let db = ChainDb::mdbx(cli.db_path, Mode::ReadOnly, GUEST_ELF.clone())?;
+    let db = ChainDb::mdbx(cli.db_path, Mode::ReadOnly, CHAIN_GUEST_ELF.clone())?;
 
     serve(config, db).await?;
 

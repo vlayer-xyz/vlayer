@@ -1,0 +1,12 @@
+.github
+.vscode
+ansible
+bash
+book
+docker
+examples
+packages
+
+**/target
+**/node_modules
+**/dependencies
