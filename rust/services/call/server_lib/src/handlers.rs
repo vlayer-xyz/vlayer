@@ -7,7 +7,7 @@ use derive_new::new;
 use jsonrpsee::{proc_macros::rpc, types::error::ErrorObjectOwned, Extensions};
 use serde::{Deserialize, Serialize};
 use v_call::types::{Call, CallContext, CallHash, Result as VCallResult};
-use v_get_proof_receipt::types::{CallResult, Error as VGetProofReceiptError};
+use v_get_proof_receipt::types::{CallResult, Result as VGetProofReceiptResult};
 use v_versions::Versions;
 
 use crate::{config::Config, metrics::Metrics, proving::RawData};
@@ -49,7 +49,7 @@ pub enum ProofStatus {
     /// Proof is being generated
     Proving,
     /// Proof generation finished
-    Ready(Result<ProofReceipt, VGetProofReceiptError>),
+    Ready(VGetProofReceiptResult<ProofReceipt>),
 }
 
 #[derive(new, Clone, Serialize)]
@@ -86,10 +86,7 @@ impl RpcServer for State {
         let params = extensions
             .get::<QueryParams>()
             .expect("query params should be extracted in the handler");
-        let call_hash =
-            v_call::v_call(self.config.clone(), self.proofs.clone(), params.clone(), call, ctx)
-                .await?;
-        Ok(call_hash)
+        v_call::v_call(self.config.clone(), self.proofs.clone(), params.clone(), call, ctx).await
     }
 
     async fn v_get_proof_receipt(&self, hash: CallHash) -> Result<CallResult, ErrorObjectOwned> {
