@@ -1,3 +1,4 @@
+use bytes::Bytes;
 use rsa::{
     pkcs1v15::{self, SigningKey},
     pkcs8::{DecodePrivateKey, DecodePublicKey, EncodePublicKey},
@@ -12,10 +13,11 @@ const PRIV_KEY: &str = include_str!("../../assets/private_key.pem");
 
 #[serde_as]
 #[derive(Serialize, Debug, PartialEq)]
-pub struct Signature(#[serde_as(as = "Base64")] Vec<u8>);
+pub struct Signature(#[serde_as(as = "Base64")] Bytes);
+
 #[serde_as]
 #[derive(Serialize, Debug, PartialEq)]
-pub struct PublicKey(#[serde_as(as = "Base64")] Vec<u8>);
+pub struct PublicKey(#[serde_as(as = "Base64")] Bytes);
 
 #[derive(Clone)]
 pub(super) struct Signer {
@@ -33,7 +35,7 @@ impl Signer {
     pub fn sign<P: ToSignablePayload>(&self, payload: &P) -> Signature {
         let mut rng = rand::thread_rng();
         let signature = self.key.sign_with_rng(&mut rng, &payload.to_payload());
-        Signature(signature.to_bytes().into_vec())
+        Signature(signature.to_bytes().into())
     }
 
     pub fn public_key(&self) -> PublicKey {
@@ -42,8 +44,7 @@ impl Signer {
             .verifying_key()
             .to_public_key_der()
             .expect("Failed to encode public key");
-
-        PublicKey(pub_key.into_vec())
+        PublicKey(pub_key.into_vec().into())
     }
 }
 
@@ -87,7 +88,7 @@ mod tests {
         let signature = signer.sign(&"alamakota");
 
         let pub_key = pub_key();
-        let signature = rsa::pkcs1v15::Signature::try_from(signature.0.as_slice()).unwrap();
+        let signature = rsa::pkcs1v15::Signature::try_from(signature.0.as_ref()).unwrap();
         let verification_result = pub_key.verify(br#""alamakota""#, &signature);
 
         assert!(verification_result.is_ok())
@@ -97,7 +98,7 @@ mod tests {
     fn pub_key_can_verify_signature() {
         let signer = Signer::new();
         let signature = signer.sign(&"alamakota");
-        let signature = rsa::pkcs1v15::Signature::try_from(signature.0.as_slice()).unwrap();
+        let signature = rsa::pkcs1v15::Signature::try_from(signature.0.as_ref()).unwrap();
 
         let pub_key: VerifyingKey<Sha256> = signer.public_key().into();
         let verification_result = pub_key.verify(br#""alamakota""#, &signature);
