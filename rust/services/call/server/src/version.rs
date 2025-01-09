@@ -1,5 +1,5 @@
-use guest_wrapper::CALL_GUEST_ELF;
 use clap::builder::{IntoResettable, Resettable, Str};
+use guest_wrapper::CALL_GUEST_ELF;
 pub use version::version;
 
 pub struct Version;

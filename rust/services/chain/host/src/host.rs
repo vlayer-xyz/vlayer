@@ -159,9 +159,9 @@ where
 #[cfg(test)]
 mod tests {
     use alloy_primitives::BlockNumber;
-    use guest_wrapper::CHAIN_GUEST_ELF;
     use chain_test_utils::mock_provider;
     use ethers::providers::{MockProvider, Provider};
+    use guest_wrapper::CHAIN_GUEST_ELF;
     use host_utils::ProofMode;
     use lazy_static::lazy_static;
 

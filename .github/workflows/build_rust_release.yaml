@@ -7,8 +7,6 @@ on:
         value: ${{ jobs.build-x86_64-unknown-linux-gnu-release.outputs.vlayer_build }}
   pull_request:
     paths:
-      - ".github/actions/build-guest-artifacts/action.yml"
-      - ".github/actions/replace-guest-artifacts/action.yml"
       - ".github/workflows/build_rust_release.yaml"
   merge_group:
   push:
@@ -18,8 +16,6 @@ on:
     # This workflow however is resource-heavy (includes a macOS build),
     # so we narrow it down.
     paths:
-      - ".github/actions/build-guest-artifacts/action.yml"
-      - ".github/actions/replace-guest-artifacts/action.yml"
       - ".github/workflows/build_rust_release.yaml"
 concurrency:
   # Do not cancel jobs on main by forcing a unique group name.
@@ -27,17 +23,6 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  build-guest-wrapper:
-    name: Build guest wrapper and save guest replacements for later use
-    runs-on: aws-linux-medium
-
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
-        with:
-          submodules: recursive
-      - name: Build guest artifacts
-        uses: ./.github/actions/build-guest-artifacts
 
   build-x86_64-unknown-linux-gnu-release:
     defaults:
@@ -61,15 +46,13 @@ jobs:
         uses: ./.github/actions/rust-prerequisites
       - name: Install contracts prerequisites
         uses: ./.github/actions/contracts-prerequisites
-      - name: Replace guest artifacts
-        uses: ./.github/actions/replace-guest-artifacts
 
       - name: "Build binaries"
         env:
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
           VLAYER_RELEASE: "nightly"
         run: |
-          export RISC0_EXISTING_GUESTS="$(pwd)/call_guest_replacement"
+          export RISC0_USE_DOCKER=1
           cargo build --release --target ${{ env.target }} -p cli -p call_server -p worker -p chain_server
 
       - name: "Print build version"
@@ -109,8 +92,6 @@ jobs:
           target: x86_64-unknown-linux-musl
       - name: Install contracts prerequisites
         uses: ./.github/actions/contracts-prerequisites
-      - name: Replace guest artifacts
-        uses: ./.github/actions/replace-guest-artifacts
 
       - name: Check nixpkgs inputs
         uses: DeterminateSystems/flake-checker-action@v9
@@ -129,7 +110,7 @@ jobs:
         env:
           VLAYER_RELEASE: "nightly"
         run: |
-          export RISC0_EXISTING_GUESTS="$(pwd)/call_guest_replacement"
+          export RISC0_USE_DOCKER=1
           nix develop ../.github/nix/. --command bash -c "cargo build --release -p cli -p call_server -p worker -p chain_server"
 
       - name: "Print build version"
@@ -183,14 +164,12 @@ jobs:
 
       - name: Install contracts prerequisites
         uses: ./.github/actions/contracts-prerequisites
-      - name: Replace guest artifacts
-        uses: ./.github/actions/replace-guest-artifacts
 
       - name: "Build binaries"
         env:
           VLAYER_RELEASE: "nightly"
         run: |
-          export RISC0_EXISTING_GUESTS="$(pwd)/call_guest_replacement"
+          export RISC0_USE_DOCKER=1
           cargo build --release --target ${{ env.target }} -p cli -p call_server -p worker -p chain_server
 
       - name: "Print build version"

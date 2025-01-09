@@ -1,6 +1,12 @@
 #[cfg(not(clippy))]
 pub fn main() -> anyhow::Result<()> {
-    use std::{collections::HashMap, env, fs::{self, File}, io::{self, Write}, path::{Path, PathBuf}};
+    use std::{
+        collections::HashMap,
+        env,
+        fs::{self, File},
+        io::{self, Write},
+        path::{Path, PathBuf},
+    };
 
     use risc0_build::{embed_methods_with_options, DockerOptions, GuestOptions};
     use risc0_build_ethereum::{generate_solidity_files, Options};
@@ -28,22 +34,6 @@ pub fn main() -> anyhow::Result<()> {
     _remove_file_if_exists(&image_id_sol_output_path)?;
     _remove_file_if_exists(&elf_sol_output_path)?;
 
-    println!("cargo:rerun-if-env-changed=RISC0_EXISTING_GUESTS");
-    if let Ok(guest_artifacts_path) = env::var("RISC0_EXISTING_GUESTS") {
-        println!("cargo::warning=Using existing guests from {}", &guest_artifacts_path);
-        let guest_artifacts_path = Path::new(&guest_artifacts_path);
-        let out_dir = env::var("OUT_DIR").expect("`OUT_DIR` is not set");
-        let out_dir_path = Path::new(&out_dir);
-
-        let methods_rs_path = guest_artifacts_path.join("methods.rs");
-        let image_id_path = guest_artifacts_path.join("ImageID.sol");
-
-        fs::copy(methods_rs_path, out_dir_path.join("methods.rs"))?;
-        fs::copy(image_id_path, image_id_sol_output_path)?;
-
-        return Ok(());
-    }
-
     // Configure docker build
     println!("cargo:rerun-if-env-changed=RISC0_USE_DOCKER");
     let use_docker = env::var("RISC0_USE_DOCKER").ok().map(|_| DockerOptions {
@@ -55,7 +45,6 @@ pub fn main() -> anyhow::Result<()> {
                 "-nostdlibinc -DRING_CORE_NOSTDLIBINC=1 -target riscv32-unknown-elf -march=rv32im -D__ILP32__=1".to_string()
             ),
         ],
-        
     });
     let guest_options = GuestOptions {
         use_docker,
@@ -68,7 +57,7 @@ pub fn main() -> anyhow::Result<()> {
         ("risc0_chain_guest", guest_options),
     ]));
 
-     // Generate or verify guest elf id
+    // Generate or verify guest elf id
     if env::var("RISC0_USE_DOCKER").is_ok() {
         let chain_guest_entry = guests
             .iter()

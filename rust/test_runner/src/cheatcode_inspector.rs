@@ -8,7 +8,6 @@ use call_engine::{
     },
     Call, HostOutput, Proof, Seal,
 };
-use guest_wrapper::CALL_GUEST_ELF;
 use call_host::{Config as HostConfig, Error, Host, PreflightError};
 use chain::TEST_CHAIN_ID;
 use chain_client::RpcClient as RpcChainProofClient;
@@ -17,6 +16,7 @@ use foundry_evm::revm::{
     interpreter::{CallInputs, CallOutcome},
     Database, EvmContext, Inspector,
 };
+use guest_wrapper::CALL_GUEST_ELF;
 use mock_chain_server::{ChainProofServerMock, EMPTY_PROOF_RESPONSE};
 use provider::CachedMultiProvider;
 

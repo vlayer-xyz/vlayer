@@ -1,12 +1,12 @@
 use std::{path::PathBuf, sync::Arc, time::Duration};
 
 use alloy_primitives::ChainId;
-use guest_wrapper::CHAIN_GUEST_ELF;
 use chain_host::{AppendStrategy, Host, HostConfig, PrependStrategy, ProofMode};
 use clap::Parser;
 use common::{init_tracing, GlobalArgs, LogFormat};
 use dotenvy::dotenv;
 use ethers::types::BlockNumber as BlockTag;
+use guest_wrapper::CHAIN_GUEST_ELF;
 use retry::HostErrorFilter;
 use tokio::sync::Mutex;
 use tower::{retry::budget::TpsBudget, Service, ServiceBuilder};

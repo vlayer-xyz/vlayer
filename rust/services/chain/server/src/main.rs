@@ -1,11 +1,11 @@
 use std::{net::SocketAddr, path::PathBuf};
 
 use chain_db::{ChainDb, Mode};
-use guest_wrapper::CHAIN_GUEST_ELF;
 use chain_server_lib::{serve, ServerConfig};
 use clap::Parser;
 use common::{init_tracing, GlobalArgs, LogFormat};
 use dotenvy::dotenv;
+use guest_wrapper::CHAIN_GUEST_ELF;
 use version::version;
 
 #[derive(Parser)]
