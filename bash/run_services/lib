@@ -1,3 +1,4 @@
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/io"
 source "$(dirname "${BASH_SOURCE[0]}")/../common.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/chain_worker"
 
@@ -93,11 +94,9 @@ function startup_vlayer() {
 
 function ensure_binaries_built() {
     if [[ "${BUILD_BINARIES}" == "1" ]] ; then
-        echo "Building binaries..."
         pushd "${VLAYER_HOME}/rust"
-        cargo build --bin call_server --bin chain_server --bin worker
+        silent_unless_fails cargo build --bin call_server --bin chain_server --bin worker
         popd
-        echo
     fi
 }
 
