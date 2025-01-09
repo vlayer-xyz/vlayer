@@ -30,6 +30,10 @@ cargo binstall -y cargo-risczero@1.2.0
 cargo risczero install
 echo '::endgroup::'
 
+echo '::group::Playwright browser installation'
+bunx playwright install --with-deps chromium
+echo '::endgroup::'
+
 git config --global user.email "test@example.com"
 git config --global user.name "Github Runner"
 
@@ -58,5 +62,9 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
 
     echo "::group::vlayer run prove.ts: ${example_name}"
     bun run prove:"${VLAYER_ENV}"
+    echo '::endgroup::'
+
+    echo "::group::vlayer run Playwright test: ${example_name}"
+    bun run test:"${VLAYER_ENV}"
     echo '::endgroup::'
 done
