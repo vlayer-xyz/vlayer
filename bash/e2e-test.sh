@@ -16,18 +16,18 @@ build_sdk
 
 echo "::group::Running examples"
 for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ; do
-export EXAMPLE_NAME=$(basename "${example}")
+  export EXAMPLE_NAME=$(basename "${example}")
+    
+  echo Running services...
+  source ${VLAYER_HOME}/bash/run-services.sh
 
-echo Running services...
-source ${VLAYER_HOME}/bash/run-services.sh
-
-pushd "${example}"
+  pushd "${example}"
   echo "::group::Running tests of: ${example}"
   silent_unless_fails build_contracts
   run_prover_script
-popd
+  popd
 
-cleanup
-rm -rf "${VLAYER_TMP_DIR}/chain_db"
+  cleanup
+  rm -rf "${VLAYER_TMP_DIR}/chain_db"
 done
 echo '::endgroup::Running examples'
