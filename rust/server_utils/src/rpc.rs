@@ -129,7 +129,7 @@ pub mod mock {
         mock: Mock,
     }
 
-    impl<'a> MockBuilder<'a> {
+    impl MockBuilder<'_> {
         #[must_use]
         pub fn with_query(mut self, key: impl Into<String>, value: impl Into<String>) -> Self {
             self.mock = self
