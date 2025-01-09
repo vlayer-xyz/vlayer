@@ -9,11 +9,7 @@ use v_call::types::{Call, CallContext, CallHash, Result as VCallResult};
 use v_get_proof_receipt::types::{CallResult, Result as VGetProofReceiptResult};
 use v_versions::Versions;
 
-use crate::{
-    config::Config,
-    metrics::Metrics,
-    proof::{Error as ProofError, RawData},
-};
+use crate::{config::Config, proof::ProofStatus};
 
 pub mod v_call;
 pub mod v_get_proof_receipt;
@@ -41,56 +37,6 @@ pub trait Rpc {
 
 #[derive(Deref, DerefMut, Default)]
 pub struct Proofs(DashMap<CallHash, ProofStatus>);
-
-pub enum ProofStatus {
-    /// Proof task has just been queued
-    Queued,
-    /// Waiting for chain service to generate proof for the start execution location
-    ChainProof,
-    ChainProofError(ProofError),
-    /// Preflight computation in progress
-    Preflight,
-    PreflightError((Metrics, ProofError)),
-    /// Proof is being generated
-    Proving,
-    ProvingError((Metrics, ProofError)),
-    /// Proof generation finished
-    Done((Metrics, RawData)),
-}
-
-impl ProofStatus {
-    pub fn is_err(&self) -> bool {
-        match self {
-            Self::ChainProofError(..) | Self::PreflightError(..) | Self::ProvingError(..) => true,
-            _ => false,
-        }
-    }
-
-    pub fn metrics(&self) -> Metrics {
-        match self {
-            Self::PreflightError((metrics, ..))
-            | Self::ProvingError((metrics, ..))
-            | Self::Done((metrics, ..)) => *metrics,
-            _ => Metrics::default(),
-        }
-    }
-
-    pub fn data(&self) -> Option<RawData> {
-        match self {
-            Self::Done((_, data)) => Some(data.clone()),
-            _ => None,
-        }
-    }
-
-    pub fn err(&self) -> Option<&ProofError> {
-        match self {
-            Self::ChainProofError(err)
-            | Self::PreflightError((_, err))
-            | Self::ProvingError((_, err)) => Some(err),
-            _ => None,
-        }
-    }
-}
 
 pub type SharedConfig = Arc<Config>;
 pub type SharedProofs = Arc<Proofs>;
