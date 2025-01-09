@@ -24,9 +24,17 @@ sol!(
     }
 
     #[derive(Default, Debug)]
+    struct VerificationData {
+        uint64 valid_until;
+        string signature;
+        string pubKey;
+    }
+
+    #[derive(Default, Debug)]
     struct UnverifiedEmail {
         string email;
         string[] dnsRecords;
+        VerificationData[] verificationData;
     }
 
     function callProver() external returns (bool);

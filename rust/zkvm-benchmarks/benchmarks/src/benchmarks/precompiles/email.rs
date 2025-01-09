@@ -12,6 +12,7 @@ fn fixture() -> Bytes {
     let email: UnverifiedEmail = UnverifiedEmail {
         email: SMALL_EMAIL.to_string(),
         dnsRecords: vec![DNS_RECORD.to_string()],
+        verificationData: vec![],
     };
 
     email.abi_encode().into()

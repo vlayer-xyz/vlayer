@@ -5,9 +5,16 @@ import {Address} from "@openzeppelin-contracts-5.0.1/utils/Address.sol";
 
 import {Precompiles} from "./PrecompilesAddresses.sol";
 
+struct VerificationData {
+    uint64 valid_until;
+    string signature;
+    string pubKey;
+}
+
 struct UnverifiedEmail {
     string email;
     string[] dnsRecords;
+    VerificationData[] verificationData;
 }
 
 struct VerifiedEmail {
