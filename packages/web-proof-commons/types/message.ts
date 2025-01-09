@@ -111,49 +111,49 @@ export type UrlPattern = Branded<string, "UrlPattern">;
 
 export type Url = Branded<UrlPattern, "Url">;
 
-type RedactRequestHeaders = {
+export type RedactRequestHeaders = {
   request: {
     headers: string[];
   };
 };
 
-type RedactRequestHeadersExcept = {
+export type RedactRequestHeadersExcept = {
   request: {
     headers_except: string[];
   };
 };
 
-type RedactRequestUrlQuery = {
+export type RedactRequestUrlQuery = {
   request: {
     url_query: string[];
   };
 };
 
-type RedactRequestUrlQueryExcept = {
+export type RedactRequestUrlQueryExcept = {
   request: {
     url_query_except: string[];
   };
 };
 
-type RedactResponseHeaders = {
+export type RedactResponseHeaders = {
   response: {
     headers: string[];
   };
 };
 
-type RedactResponseHeadersExcept = {
+export type RedactResponseHeadersExcept = {
   response: {
     headers_except: string[];
   };
 };
 
-type RedactResponseJsonBody = {
+export type RedactResponseJsonBody = {
   response: {
     json_body: string[];
   };
 };
 
-type RedactResponseJsonBodyExcept = {
+export type RedactResponseJsonBodyExcept = {
   response: {
     json_body_except: string[];
   };
