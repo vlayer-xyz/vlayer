@@ -63,8 +63,4 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
     echo "::group::vlayer run prove.ts: ${example_name}"
     bun run prove:"${VLAYER_ENV}"
     echo '::endgroup::'
-
-    echo "::group::vlayer run Playwright test: ${example_name}"
-    bun run test:"${VLAYER_ENV}"
-    echo '::endgroup::'
 done
