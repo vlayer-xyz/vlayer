@@ -228,7 +228,7 @@ mod server_tests {
     mod v_getProofReceipt {
         use alloy_primitives::B256;
         use assert_json_diff::assert_json_include;
-        use call_server_lib::{v_call::CallHash, v_get_proof_receipt::Status};
+        use call_server_lib::{v_call::CallHash, v_get_proof_receipt::State};
         use ethers::{
             abi::AbiEncode,
             types::{Bytes, Uint8, H160, U256},
@@ -245,7 +245,7 @@ mod server_tests {
         const MAX_POLLING_TIME: std::time::Duration = std::time::Duration::from_secs(60);
 
         type Req = Value;
-        type Resp = (Status, Value);
+        type Resp = (State, Value);
 
         #[derive(Clone)]
         struct RetryRequest;
@@ -259,7 +259,10 @@ mod server_tests {
                 result: &mut Result<Resp, String>,
             ) -> Option<Self::Future> {
                 result.as_ref().ok().and_then(|(status, _)| match status {
-                    Status::Ready => None,
+                    State::ChainProofError
+                    | State::PreflightError
+                    | State::ProvingError
+                    | State::Done => None,
                     _ => Some(tokio::time::sleep(RETRY_SLEEP_DURATION)),
                 })
             }
@@ -291,11 +294,11 @@ mod server_tests {
             })
         }
 
-        async fn v_get_proof_receipt_result(app: &Server, request: Req) -> (Status, Value) {
+        async fn v_get_proof_receipt_result(app: &Server, request: Req) -> (State, Value) {
             let response = app.post("/", &request).await;
             assert_eq!(StatusCode::OK, response.status());
             let result = assert_jrpc_ok(response, json!({})).await;
-            let status: Status = serde_json::from_value(result["result"]["status"].clone())
+            let status: State = serde_json::from_value(result["result"]["state"].clone())
                 .expect("status should be a valid enum variant");
             (status, result["result"].clone())
         }
@@ -320,8 +323,8 @@ mod server_tests {
             assert_json_include!(
                 actual: result,
                 expected: json!({
-                    "status": "ready",
-                    "success": 1,
+                    "state": "done",
+                    "status": 1,
                     "data": {
                         "evm_call_result": evm_call_result.into(),
                         "proof": {
@@ -361,9 +364,9 @@ mod server_tests {
             let result = get_proof_result(&app, hash).await;
 
             assert_json_include!(actual: result, expected: json!({
-                "status": "preflight",
-                "error": "TravelCallExecutor error: EVM transact error: ",
-                "success": 0,
+                "state": "preflight_error",
+                "error": "Preflight error: TravelCallExecutor error: EVM transact error: ",
+                "status": 0,
                 "metrics": {},
             }));
         }
@@ -391,7 +394,7 @@ mod server_tests {
             let (status, result) =
                 v_get_proof_receipt_result(&app, v_get_proof_receipt_body(hash)).await;
 
-            assert_eq!(status, Status::Ready);
+            assert_eq!(status, State::Done);
             assert_proof_result(
                 &result,
                 U256::from(3).encode_hex(),
