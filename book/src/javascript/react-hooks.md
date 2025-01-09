@@ -49,9 +49,8 @@ bun add @vlayer/react
 {{#endtabs }}
 
 ## Context Providers
-Wrap the application with the required React Context Providers and configure the desired connectors and chains to enable `@vlayer/react` hooks.
+Wrap the application with the required [React Context Providers](https://react.dev/learn/passing-data-deeply-with-context) and configure the desired connectors and chains to enable `@vlayer/react` hooks.
 
-### Example
 ```javascript
 import { WagmiProvider, http, createConfig } from "wagmi";
 import { optimismSepolia, foundry } from "wagmi/chains";
@@ -86,6 +85,33 @@ export default App;
 ```
 
 Context providers facilitate the sharing of application state (e.g., connected wallet, selected chain) across components. Once the setup is complete, components wrapped within the `WagmiProvider`, `QueryClientProvider`, and `ProofProvider` can use the vlayer hooks.
+
+## `ProofProvider`
+vlayer `ProofProvider` allows to manipulate `proverUrl`, `notaryUrl` and `wsProxyUrl` via `config` prop:
+
+```javascript
+<ProofProvider
+  config={{
+    proverUrl: "https://test-prover.vlayer.xyz",
+    notaryUrl: "https://test-notary.vlayer.xyz",
+    wsProxyUrl: "wss://test-ws-proxy.vlayer.xyz",
+  }}
+>
+    {/* Application components go here */}
+</ProofProvider>
+```
+
+It is also possible to pass `env` prop. It will set default values for `proverUrl`, `notaryUrl` and `wsProxyUrl` for the selected environment:
+
+```javascript
+<ProofProvider
+  config={{
+    env: "dev|testnet|prod",
+  }}
+>
+    {/* Application components go here */}
+<ProofProvider>
+```
 
 ## `useCallProver`
 The `useCallProver` hook is used to interact with the vlayer prover by initiating a proving process with specified inputs.
