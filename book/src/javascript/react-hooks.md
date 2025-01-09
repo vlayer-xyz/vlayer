@@ -96,7 +96,7 @@ import { useCallProver } from "@vlayer/react";
 ```
 
 ### Usage
-The `callProver` function starts the proving process. Proving is an asynchronous operation, and the result (`data`) contains a hash that can be used to track the status or retrieve the final proof.
+The `callProver` function starts the proving process. Proving is an asynchronous operation, and the result (`data`) contains a hash that can be used to track the status or [retrieve the final proof](/javascript/react-hooks.html#usewaitforprovingresult).
 
 ```javascript
 const { 
