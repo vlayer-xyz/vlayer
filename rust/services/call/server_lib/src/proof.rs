@@ -28,13 +28,13 @@ pub enum ProofStatus {
     /// Proof task has just been queued
     Queued,
     /// Waiting for chain service to generate proof for the start execution location
-    ChainProof,
+    ChainProofPending,
     ChainProofError(Box<ProofError>),
     /// Preflight computation in progress
-    Preflight,
+    PreflightPending,
     PreflightError(Box<ProofError>),
     /// Proof is being generated
-    Proving,
+    ProvingPending,
     ProvingError(Box<ProofError>),
     /// Proof generation finished
     Done(Box<ProofResult>),
@@ -105,13 +105,13 @@ pub async fn generate(
 
     info!("Generating proof for {call_hash}");
 
-    update_state(ProofStatus::ChainProof);
+    update_state(ProofStatus::ChainProofPending);
 
     match chain_proof::await_ready(&host, chain_proof_config)
         .await
         .map_err(Error::ChainProof)
     {
-        Ok(()) => update_state(ProofStatus::Preflight),
+        Ok(()) => update_state(ProofStatus::PreflightPending),
         Err(err) => {
             update_state(ProofStatus::ChainProofError(Box::new(ProofError::new(metrics, err))));
             return;
@@ -124,7 +124,7 @@ pub async fn generate(
             .map_err(Error::Preflight)
         {
             Ok(res) => {
-                update_state(ProofStatus::Proving);
+                update_state(ProofStatus::ProvingPending);
                 res
             }
             Err(err) => {

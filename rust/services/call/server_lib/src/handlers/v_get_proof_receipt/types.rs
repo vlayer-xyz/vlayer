@@ -1,7 +1,12 @@
 use jsonrpsee::types::error::{self as jrpcerror, ErrorObjectOwned};
 use serde::{Deserialize, Serialize};
 
-use crate::{handlers::ProofStatus, metrics::Metrics, proof, proving::RawData, v_call::CallHash};
+use crate::{
+    metrics::Metrics,
+    proof::{self, ProofStatus},
+    proving::RawData,
+    v_call::CallHash,
+};
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 #[serde(rename_all = "snake_case")]
@@ -43,9 +48,9 @@ impl From<&ProofStatus> for State {
     fn from(value: &ProofStatus) -> Self {
         match value {
             ProofStatus::Queued => Self::Queued,
-            ProofStatus::ChainProof | ProofStatus::ChainProofError(..) => Self::ChainProof,
-            ProofStatus::Preflight | ProofStatus::PreflightError(..) => Self::Preflight,
-            ProofStatus::Proving | ProofStatus::ProvingError(..) => Self::Proving,
+            ProofStatus::ChainProofPending | ProofStatus::ChainProofError(..) => Self::ChainProof,
+            ProofStatus::PreflightPending | ProofStatus::PreflightError(..) => Self::Preflight,
+            ProofStatus::ProvingPending | ProofStatus::ProvingError(..) => Self::Proving,
             ProofStatus::Done(..) => Self::Done,
         }
     }
