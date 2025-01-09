@@ -3,14 +3,17 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use dashmap::DashMap;
 use derive_more::{Deref, DerefMut};
-use derive_new::new;
-use jsonrpsee::{proc_macros::rpc, types::error::ErrorObjectOwned, Extensions};
-use serde::{Deserialize, Serialize};
+use jsonrpsee::{proc_macros::rpc, Extensions};
+use serde::Deserialize;
 use v_call::types::{Call, CallContext, CallHash, Result as VCallResult};
-use v_get_proof_receipt::types::CallResult;
+use v_get_proof_receipt::types::{CallResult, Result as VGetProofReceiptResult};
 use v_versions::Versions;
 
-use crate::{config::Config, metrics::Metrics, proof::Result as ProofResult, proving::RawData};
+use crate::{
+    config::Config,
+    metrics::Metrics,
+    proof::{Error as ProofError, RawData},
+};
 
 pub mod v_call;
 pub mod v_get_proof_receipt;
@@ -30,7 +33,7 @@ pub trait Rpc {
     async fn v_call(&self, call: Call, ctx: CallContext) -> VCallResult<CallHash>;
 
     #[method(name = "v_getProofReceipt")]
-    async fn v_get_proof_receipt(&self, hash: CallHash) -> Result<CallResult, ErrorObjectOwned>;
+    async fn v_get_proof_receipt(&self, hash: CallHash) -> VGetProofReceiptResult<CallResult>;
 
     #[method(name = "v_versions")]
     async fn v_versions(&self) -> Versions;
@@ -43,19 +46,50 @@ pub enum ProofStatus {
     /// Proof task has just been queued
     Queued,
     /// Waiting for chain service to generate proof for the start execution location
-    WaitingForChainProof,
+    ChainProof,
+    ChainProofError(ProofError),
     /// Preflight computation in progress
     Preflight,
+    PreflightError((Metrics, ProofError)),
     /// Proof is being generated
     Proving,
+    ProvingError((Metrics, ProofError)),
     /// Proof generation finished
-    Ready(ProofResult<ProofReceipt>),
+    Done((Metrics, RawData)),
 }
 
-#[derive(new, Clone, Serialize)]
-pub struct ProofReceipt {
-    data: RawData,
-    metrics: Metrics,
+impl ProofStatus {
+    pub fn is_err(&self) -> bool {
+        match self {
+            Self::ChainProofError(..) | Self::PreflightError(..) | Self::ProvingError(..) => true,
+            _ => false,
+        }
+    }
+
+    pub fn metrics(&self) -> Metrics {
+        match self {
+            Self::PreflightError((metrics, ..))
+            | Self::ProvingError((metrics, ..))
+            | Self::Done((metrics, ..)) => *metrics,
+            _ => Metrics::default(),
+        }
+    }
+
+    pub fn data(&self) -> Option<RawData> {
+        match self {
+            Self::Done((_, data)) => Some(data.clone()),
+            _ => None,
+        }
+    }
+
+    pub fn err(&self) -> Option<&ProofError> {
+        match self {
+            Self::ChainProofError(err)
+            | Self::PreflightError((_, err))
+            | Self::ProvingError((_, err)) => Some(err),
+            _ => None,
+        }
+    }
 }
 
 pub type SharedConfig = Arc<Config>;
@@ -89,7 +123,7 @@ impl RpcServer for State {
         v_call::v_call(self.config.clone(), self.proofs.clone(), params.clone(), call, ctx).await
     }
 
-    async fn v_get_proof_receipt(&self, hash: CallHash) -> Result<CallResult, ErrorObjectOwned> {
+    async fn v_get_proof_receipt(&self, hash: CallHash) -> VGetProofReceiptResult<CallResult> {
         v_get_proof_receipt::v_get_proof_receipt(&self.proofs, hash)
     }
 

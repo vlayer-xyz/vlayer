@@ -1,21 +1,19 @@
-use std::convert::TryFrom;
-
 use jsonrpsee::types::error::{self as jrpcerror, ErrorObjectOwned};
 use serde::{Deserialize, Serialize};
 
-use crate::{
-    handlers::{ProofReceipt, ProofStatus},
-    v_call::CallHash,
-};
+use crate::{handlers::ProofStatus, metrics::Metrics, proof, proving::RawData, v_call::CallHash};
 
 #[derive(Serialize, Deserialize, Clone, Debug, PartialEq)]
 #[serde(rename_all = "snake_case")]
-pub enum Status {
+pub enum State {
     Queued,
-    WaitingForChainProof,
+    ChainProof,
+    ChainProofError,
     Preflight,
+    PreflightError,
     Proving,
-    Ready,
+    ProvingError,
+    Done,
 }
 
 pub type Result<T> = std::result::Result<T, Error>;
@@ -38,40 +36,49 @@ impl From<Error> for ErrorObjectOwned {
     }
 }
 
-impl Default for Status {
+impl Default for State {
     fn default() -> Self {
         Self::Queued
     }
 }
 
-impl From<&ProofStatus> for Status {
+impl From<&ProofStatus> for State {
     fn from(value: &ProofStatus) -> Self {
         match value {
             ProofStatus::Queued => Self::Queued,
-            ProofStatus::WaitingForChainProof => Self::WaitingForChainProof,
+            ProofStatus::ChainProof => Self::ChainProof,
+            ProofStatus::ChainProofError(..) => Self::ChainProofError,
             ProofStatus::Preflight => Self::Preflight,
+            ProofStatus::PreflightError(..) => Self::PreflightError,
             ProofStatus::Proving => Self::Proving,
-            ProofStatus::Ready(..) => Self::Ready,
+            ProofStatus::ProvingError(..) => Self::ProvingError,
+            ProofStatus::Done(..) => Self::Done,
         }
     }
 }
 
 #[derive(Clone, Serialize, Default)]
 pub struct CallResult {
-    pub status: Status,
-    pub receipt: Option<ProofReceipt>,
+    pub state: State,
+    pub status: u8,
+    pub metrics: Metrics,
+    pub data: Option<RawData>,
+    pub error: Option<String>,
 }
 
-impl TryFrom<&ProofStatus> for CallResult {
-    type Error = ErrorObjectOwned;
-
-    fn try_from(value: &ProofStatus) -> std::result::Result<Self, Self::Error> {
-        let status: Status = value.into();
-        let receipt: Option<ProofReceipt> = match value {
-            ProofStatus::Ready(Ok(receipt)) => Some(receipt.clone()),
-            ProofStatus::Ready(Err(err)) => return Err(err.into()),
-            _ => None,
-        };
-        Ok(Self { status, receipt })
+impl From<&ProofStatus> for CallResult {
+    fn from(value: &ProofStatus) -> Self {
+        let state: State = value.into();
+        let status = if value.is_err() { 0 } else { 1 };
+        let data = value.data();
+        let error = value.err().map(proof::Error::to_string);
+        let metrics = value.metrics();
+        Self {
+            state,
+            status,
+            metrics,
+            data,
+            error,
+        }
     }
 }

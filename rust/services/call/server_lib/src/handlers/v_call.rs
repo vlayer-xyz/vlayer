@@ -35,18 +35,14 @@ pub async fn v_call(
     });
 
     if !found_existing {
-        tokio::spawn(async move {
-            let res = proof::generate(
-                call,
-                host,
-                gas_meter_client,
-                state.clone(),
-                call_hash,
-                config.chain_proof_config(),
-            )
-            .await;
-            state.insert(call_hash, ProofStatus::Ready(res));
-        });
+        tokio::spawn(proof::generate(
+            call,
+            host,
+            gas_meter_client,
+            state.clone(),
+            call_hash,
+            config.chain_proof_config(),
+        ));
     }
 
     Ok(call_hash)

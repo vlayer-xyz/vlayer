@@ -5,11 +5,6 @@ use derive_new::new;
 use serde::{Deserialize, Serialize};
 use tracing::info;
 
-use crate::{
-    handlers::{ProofStatus, SharedProofs},
-    v_call::CallHash,
-};
-
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
     #[error("Waiting for chain proof timed out")]
@@ -18,12 +13,7 @@ pub enum Error {
     AwaitingChainProof(#[from] AwaitingChainProofError),
 }
 
-pub async fn await_ready(
-    host: &Host,
-    state: &SharedProofs,
-    call_hash: CallHash,
-    config: Option<Config>,
-) -> Result<(), Error> {
+pub async fn await_ready(host: &Host, config: Option<Config>) -> Result<(), Error> {
     if let Some(Config {
         poll_interval,
         timeout,
@@ -37,7 +27,6 @@ pub async fn await_ready(
                 "Location {:?} not indexed. Waiting for chain proof",
                 host.start_execution_location()
             );
-            state.insert(call_hash, ProofStatus::WaitingForChainProof);
             tokio::time::sleep(poll_interval).await;
             if start.elapsed() > timeout {
                 return Err(Error::Timeout);
