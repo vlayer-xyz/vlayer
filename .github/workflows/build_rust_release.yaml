@@ -25,9 +25,6 @@ concurrency:
 jobs:
 
   build-x86_64-unknown-linux-gnu-release:
-    defaults:
-      run:
-        working-directory: rust
     name: Build release for x86_64-unknown-linux-gnu
     needs: [build-guest-wrapper]
     runs-on: aws-linux-medium
@@ -69,9 +66,6 @@ jobs:
           target: "${{ env.target }}"
 
   build-x86_64-unknown-linux-musl-release:
-    defaults:
-      run:
-        working-directory: rust
     name: Build release for x86_64-unknown-linux-musl
     needs: [build-guest-wrapper]
     runs-on: aws-linux-medium
@@ -127,9 +121,6 @@ jobs:
           target: "${{ env.target }}"
 
   build-darwin-arm64-release:
-    defaults:
-      run:
-        working-directory: rust
     name: Build release for aarch64-apple-darwin
     needs: [build-guest-wrapper]
     runs-on: macos-14-xlarge

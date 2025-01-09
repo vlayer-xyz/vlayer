@@ -17,7 +17,7 @@
 - name: Copy chain worker binary
   become: true
   ansible.builtin.copy:
-    src: ../rust/target/release/worker
+    src: ../target/release/worker
     dest: /opt/vlayer/chain_worker
     mode: '755'
   notify: "Restart vlayer"

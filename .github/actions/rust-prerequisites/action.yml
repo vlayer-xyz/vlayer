@@ -27,8 +27,8 @@ runs:
       with:
         workspaces: |
           rust
-          rust/services/call/guest_wrapper/risc0_guest
-          rust/services/chain/guest_wrapper/risc0_guest
+          rust/services/guest_wrapper/risc0_call_guest
+          rust/services/guest_wrapper/risc0_chain_guest
         cache-on-failure: false
         save-if: ${{ github.ref == 'refs/heads/main' }}
 

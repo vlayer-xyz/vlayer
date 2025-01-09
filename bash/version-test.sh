@@ -38,7 +38,7 @@ echo "contract deployed with address ${ADDRESS}"
 GUEST_ID_SOL=$(cast call ${ADDRESS} "guest_id()(bytes32)" --rpc-url 127.0.0.1:${ANVIL_PORT})
 check_exit_status "Error: Failed to call contract method"
 
-GUEST_ID="0x$(./rust/target/release/vlayer --version | awk '/CALL_GUEST_ID:/ {print $2}')"
+GUEST_ID="0x$(./target/release/vlayer --version | awk '/CALL_GUEST_ID:/ {print $2}')"
 
 if [[ ${GUEST_ID_SOL} == ${GUEST_ID} ]]; then
     echo "OK: GUEST_ID matches"
