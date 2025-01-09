@@ -1,10 +1,9 @@
-pub use crate::proving::RawData;
-
 use call_engine::Call as EngineCall;
 use call_host::Host;
 use derive_new::new;
 use tracing::info;
 
+pub use crate::proving::RawData;
 use crate::{
     chain_proof::{self, Config as ChainProofConfig, Error as ChainProofError},
     gas_meter::Client as GasMeterClient,
