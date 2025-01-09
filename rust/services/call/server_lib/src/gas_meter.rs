@@ -4,10 +4,18 @@ use async_trait::async_trait;
 use auto_impl::auto_impl;
 use derive_new::new;
 use serde::{Deserialize, Serialize};
-use server_utils::rpc::{Client as RawRpcClient, Method, Result};
+use server_utils::rpc::{Client as RawRpcClient, Error as RpcError, Method};
 use tracing::info;
 
 use crate::handlers::{v_call::types::CallHash, UserToken};
+
+type Result<T> = std::result::Result<T, Error>;
+
+#[derive(Debug, thiserror::Error)]
+pub enum Error {
+    #[error("RPC error: {0}")]
+    Rpc(#[from] RpcError),
+}
 
 #[derive(new, Serialize, Debug)]
 #[serde(deny_unknown_fields)]
@@ -124,4 +132,17 @@ impl Client for NoOpClient {
     async fn refund(&self, _stage: ComputationStage, _gas_used: u64) -> Result<()> {
         Ok(())
     }
+}
+
+pub async fn init(
+    config: Option<Config>,
+    call_hash: CallHash,
+    user_token: Option<UserToken>,
+    gas_limit: u64,
+) -> Result<Box<dyn Client>> {
+    let client: Box<dyn Client> = config.map_or(Box::new(NoOpClient), |config| {
+        Box::new(RpcClient::new(config, call_hash, user_token))
+    });
+    client.allocate(gas_limit).await?;
+    Ok(client)
 }

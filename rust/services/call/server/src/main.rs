@@ -4,7 +4,8 @@ use std::time::Duration;
 
 use alloy_primitives::ChainId;
 use call_server_lib::{
-    gas_meter::Config as GasMeterConfig, serve, ChainProofConfig, Config, ConfigBuilder, ProofMode,
+    chain_proof::Config as ChainProofConfig, gas_meter::Config as GasMeterConfig, serve, Config,
+    ConfigBuilder, ProofMode,
 };
 use clap::{ArgAction, Parser, ValueEnum};
 use common::{init_tracing, GlobalArgs, LogFormat};

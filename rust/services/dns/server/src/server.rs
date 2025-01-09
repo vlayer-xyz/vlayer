@@ -5,7 +5,7 @@ use server_utils::{cors, init_trace_layer, RequestIdLayer};
 use tokio::net::TcpListener;
 use tracing::info;
 
-use crate::{config::Config, verifiable_dns::Resolver as VerifiableDNSResolver};
+use crate::{config::Config, verifiable_dns::VerifiableDNSResolver};
 
 #[derive(Clone)]
 struct AppState {

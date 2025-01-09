@@ -1,23 +1,23 @@
+use bytes::Bytes;
 use rsa::{
-    pkcs1v15::SigningKey,
-    pkcs8::DecodePrivateKey,
+    pkcs1v15::{self, SigningKey},
+    pkcs8::{DecodePrivateKey, DecodePublicKey, EncodePublicKey},
     sha2::Sha256,
-    signature::{RandomizedSigner, SignatureEncoding},
+    signature::{Keypair, RandomizedSigner, SignatureEncoding},
     RsaPrivateKey,
 };
 use serde::Serialize;
-use serde_with::serde_as;
+use serde_with::{base64::Base64, serde_as};
 
 const PRIV_KEY: &str = include_str!("../../assets/private_key.pem");
 
-pub(super) trait IntoSigningPayload {
-    fn into_payload(self, now: u64) -> Vec<u8>;
-}
-
-use serde_with::base64::Base64;
 #[serde_as]
 #[derive(Serialize, Debug, PartialEq)]
-pub struct Signature(#[serde_as(as = "Base64")] pub Vec<u8>);
+pub struct Signature(#[serde_as(as = "Base64")] Bytes);
+
+#[serde_as]
+#[derive(Serialize, Debug, PartialEq)]
+pub struct PublicKey(#[serde_as(as = "Base64")] Bytes);
 
 #[derive(Clone)]
 pub(super) struct Signer {
@@ -32,18 +32,41 @@ impl Signer {
         Self { key }
     }
 
-    pub fn sign<T: IntoSigningPayload + Clone>(&self, payload: &T) -> Signature {
+    pub fn sign<P: ToSignablePayload>(&self, payload: &P) -> Signature {
         let mut rng = rand::thread_rng();
-        let payload = payload.clone().into_payload(0);
-        let signature = self.key.sign_with_rng(&mut rng, &payload);
-        Signature(signature.to_bytes().into_vec())
+        let signature = self.key.sign_with_rng(&mut rng, &payload.to_payload());
+        Signature(signature.to_bytes().into())
+    }
+
+    pub fn public_key(&self) -> PublicKey {
+        let pub_key = self
+            .key
+            .verifying_key()
+            .to_public_key_der()
+            .expect("Failed to encode public key");
+        PublicKey(pub_key.into_vec().into())
     }
 }
 
-// TODO: move under cfg(test)
-impl IntoSigningPayload for &str {
-    fn into_payload(self, now: u64) -> Vec<u8> {
-        format!("{now},{self}").into_bytes()
+pub(super) trait ToSignablePayload {
+    fn to_payload(&self) -> Vec<u8>;
+}
+
+impl<T: Serialize> ToSignablePayload for T {
+    fn to_payload(&self) -> Vec<u8> {
+        let mut buf = Vec::new();
+        let formattter = olpc_cjson::CanonicalFormatter::new();
+        let mut serializer = serde_json::Serializer::with_formatter(&mut buf, formattter);
+        self.serialize(&mut serializer)
+            .expect("Failed to serialize signable struct");
+
+        buf
+    }
+}
+
+impl From<PublicKey> for pkcs1v15::VerifyingKey<Sha256> {
+    fn from(value: PublicKey) -> Self {
+        Self::from_public_key_der(&value.0).expect("Failed to decode public key")
     }
 }
 
@@ -65,8 +88,20 @@ mod tests {
         let signature = signer.sign(&"alamakota");
 
         let pub_key = pub_key();
-        let signature = rsa::pkcs1v15::Signature::try_from(signature.0.as_slice()).unwrap();
-        let verification_result = pub_key.verify(b"0,alamakota", &signature);
+        let signature = rsa::pkcs1v15::Signature::try_from(signature.0.as_ref()).unwrap();
+        let verification_result = pub_key.verify(br#""alamakota""#, &signature);
+
+        assert!(verification_result.is_ok())
+    }
+
+    #[test]
+    fn pub_key_can_verify_signature() {
+        let signer = Signer::new();
+        let signature = signer.sign(&"alamakota");
+        let signature = rsa::pkcs1v15::Signature::try_from(signature.0.as_ref()).unwrap();
+
+        let pub_key: VerifyingKey<Sha256> = signer.public_key().into();
+        let verification_result = pub_key.verify(br#""alamakota""#, &signature);
 
         assert!(verification_result.is_ok())
     }

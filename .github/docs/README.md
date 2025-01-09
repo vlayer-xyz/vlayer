@@ -43,6 +43,7 @@ Our workflows fall into the following categories, grouped by a common prefix:
 | [Lint Contracts](/.github/workflows/lint_contracts.yaml) | Lint Smart Contracts. |
 | [Lint Rust](/.github/workflows/lint_rust.yaml) | Lint Rust code. |
 | [Lint TS](/.github/workflows/lint_ts.yaml) | Lint TypeScript code. |
+| [Lint Bash](/.github/workflows/lint_bash.yaml) | Lint Bash code. |
 | [Lint Workflows](/.github/workflows/lint_workflows.yaml) | Lint GitHub Actions workflows. |
 | [Rust compilation performance](/.github/workflows/performance_rust_compilation.yaml) | Checks Rust incremental compilation performance. |
 | [PR team labeler](/.github/workflows/pr_team_labeler.yaml) | Adds team labels to PRs. |

@@ -4,6 +4,18 @@ set -ueo pipefail
 
 VLAYER_HOME=$(git rev-parse --show-toplevel)
 
+function install_deps {
+    cd ${VLAYER_HOME}/packages
+    bun install --frozen-lockfile
+
+    cd ${VLAYER_HOME}/packages/sdk
+    bun run build
+    
+    cd ${VLAYER_HOME}/examples/simple_web_proof/vlayer
+    rm -rf node_modules
+    bun install --frozen-lockfile
+}
+
 function run_services {
     source ${VLAYER_HOME}/bash/run-services.sh 
 }
@@ -16,11 +28,6 @@ function run_web_app {
 function run_browser_extension {
     cd ${VLAYER_HOME}/packages/browser-extension
     bun run dev 
-}
-
-function install_deps {
-    cd ${VLAYER_HOME}/packages && bun install --frozen-lockfile
-    cd ${VLAYER_HOME}/examples/simple_web_proof/vlayer && bun install --frozen-lockfile
 }
 
 install_deps

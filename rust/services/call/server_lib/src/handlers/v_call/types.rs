@@ -2,14 +2,44 @@ use alloy_chains::Chain;
 use alloy_primitives::{hex::ToHexExt, keccak256, ChainId, B256};
 use alloy_rlp::RlpEncodable;
 use call_engine::{evm::env::location::ExecutionLocation, Call as EngineCall};
-use call_host::Call as HostCall;
+use call_host::{Call as HostCall, Error as HostError};
 use common::Hashable;
 use derive_more::From;
 use derive_new::new;
+use jsonrpsee::types::error::{self as jrpcerror, ErrorObjectOwned};
 use serde::{Deserialize, Serialize};
 use server_utils::{parse_address_field, parse_hex_field, FieldValidationError};
 
-use crate::error::AppError;
+use crate::gas_meter::Error as GasMeterError;
+
+pub type Result<T> = std::result::Result<T, Error>;
+
+#[derive(Debug, thiserror::Error)]
+pub enum Error {
+    #[error("Invalid field: {0}")]
+    FieldValidation(#[from] FieldValidationError),
+    #[error("Gas meter error: {0}")]
+    GasMeter(#[from] GasMeterError),
+    #[error("Host error: {0}")]
+    Host(#[from] HostError),
+}
+
+impl From<Error> for ErrorObjectOwned {
+    fn from(error: Error) -> Self {
+        match error {
+            Error::FieldValidation(..) => ErrorObjectOwned::owned::<()>(
+                jrpcerror::INVALID_PARAMS_CODE,
+                error.to_string(),
+                None,
+            ),
+            Error::Host(..) | Error::GasMeter(..) => ErrorObjectOwned::owned::<()>(
+                jrpcerror::INTERNAL_ERROR_CODE,
+                error.to_string(),
+                None,
+            ),
+        }
+    }
+}
 
 #[derive(Deserialize, Serialize, Debug)]
 #[serde(deny_unknown_fields)]
@@ -28,7 +58,7 @@ impl Call {
         }
     }
 
-    pub fn parse_and_validate(self, max_calldata_size: usize) -> Result<HostCall, AppError> {
+    pub fn parse_and_validate(self, max_calldata_size: usize) -> Result<HostCall> {
         let call = HostCall {
             to: parse_address_field("to", self.to)?,
             data: parse_hex_field("data", self.data)?,
@@ -90,8 +120,7 @@ impl Hashable for CallHashData<'_> {
 
 #[cfg(test)]
 mod test {
-    use super::Call;
-    use crate::error::AppError;
+    use super::*;
 
     const TO: &str = "0x7Ad53bbA1004e46dd456316912D55dBc5D311a03";
     const DATA: &str = "0x0000";
@@ -105,7 +134,7 @@ mod test {
 
         assert!(matches!(
             actual_result,
-            Err(AppError::FieldValidation(err)) if err.to_string() == "`to` Invalid string length `0x`"
+            Err(Error::FieldValidation(err)) if err.to_string() == "`to` Invalid string length `0x`"
         ));
 
         Ok(())
@@ -119,7 +148,7 @@ mod test {
 
         assert!(matches!(
             actual_result,
-            Err(AppError::FieldValidation(err)) if err.to_string() == "`data` Invalid hex prefix `xx`"
+            Err(Error::FieldValidation(err)) if err.to_string() == "`data` Invalid hex prefix `xx`"
         ));
 
         Ok(())
@@ -133,7 +162,7 @@ mod test {
 
         assert!(matches!(
             actual_result,
-            Err(AppError::FieldValidation(err)) if err.to_string() == "`data` is too long `1` > `0`"
+            Err(Error::FieldValidation(err)) if err.to_string() == "`data` is too long `1` > `0`"
         ));
 
         Ok(())
