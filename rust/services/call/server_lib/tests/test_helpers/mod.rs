@@ -122,7 +122,10 @@ pub(crate) mod mock {
 
     use axum::{body::Body, http::Response, Router};
     use block_header::EvmBlockHeader;
-    use call_server_lib::{gas_meter::Config as GasMeterConfig, server, ChainProofConfig, Config};
+    use call_server_lib::{
+        chain_proof::Config as ChainProofConfig, gas_meter::Config as GasMeterConfig, server,
+        Config,
+    };
     use derive_more::{Deref, DerefMut};
     use ethers::{
         contract::abigen,

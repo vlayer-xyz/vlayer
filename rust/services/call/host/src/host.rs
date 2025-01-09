@@ -20,11 +20,11 @@ use common::GuestElf;
 pub use config::Config;
 use derive_new::new;
 pub use error::{AwaitingChainProofError, BuilderError, Error, PreflightError, ProvingError};
-use prover::Prover;
+pub use prover::Prover;
 use provider::CachedMultiProvider;
 use risc0_zkvm::{ProveInfo, SessionStats};
 use seal::EncodableReceipt;
-use tracing::{info, instrument};
+use tracing::instrument;
 
 use crate::{db::HostDb, evm_env::factory::HostEvmEnvFactory, into_input::into_multi_input};
 
@@ -112,12 +112,6 @@ impl Host {
         } = TravelCallExecutor::new(&self.envs).call(&call, self.start_execution_location)?;
         let elapsed_time = now.elapsed();
 
-        info!(
-            gas_used = gas_used,
-            elapsed_time = elapsed_time.as_millis(),
-            "preflight finished",
-        );
-
         let multi_evm_input = into_multi_input(self.envs)?;
 
         let verifier = guest_input::ZkVerifier::new(self.chain_client, self.chain_proof_verifier);
@@ -159,12 +153,6 @@ impl Host {
                 guest_output.evm_call_result,
             ));
         }
-
-        info!(
-            cycles_used = cycles_used,
-            elapsed_time = elapsed_time.as_millis(),
-            "proving finished"
-        );
 
         Ok(HostOutput {
             guest_output,

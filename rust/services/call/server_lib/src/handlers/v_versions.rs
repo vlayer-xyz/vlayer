@@ -1,7 +1,7 @@
+use jsonrpsee::{IntoResponse, ResponsePayload};
 use serde::{Deserialize, Serialize};
 
 use super::SharedConfig;
-use crate::error::AppError;
 
 #[derive(Deserialize, Serialize, Clone, Debug)]
 pub struct Versions {
@@ -10,10 +10,18 @@ pub struct Versions {
     api_version: String,
 }
 
-pub fn v_versions(config: &SharedConfig) -> Result<Versions, AppError> {
-    Ok(Versions {
+impl IntoResponse for Versions {
+    type Output = Versions;
+
+    fn into_response(self) -> ResponsePayload<'static, Self::Output> {
+        ResponsePayload::success(self)
+    }
+}
+
+pub fn v_versions(config: &SharedConfig) -> Versions {
+    Versions {
         call_guest_id: config.call_guest_id_hex(),
         chain_guest_id: config.chain_guest_id_hex(),
         api_version: config.api_version(),
-    })
+    }
 }
