@@ -8,11 +8,8 @@ use crate::{handlers::ProofStatus, metrics::Metrics, proof, proving::RawData, v_
 pub enum State {
     Queued,
     ChainProof,
-    ChainProofError,
     Preflight,
-    PreflightError,
     Proving,
-    ProvingError,
     Done,
 }
 
@@ -46,12 +43,9 @@ impl From<&ProofStatus> for State {
     fn from(value: &ProofStatus) -> Self {
         match value {
             ProofStatus::Queued => Self::Queued,
-            ProofStatus::ChainProof => Self::ChainProof,
-            ProofStatus::ChainProofError(..) => Self::ChainProofError,
-            ProofStatus::Preflight => Self::Preflight,
-            ProofStatus::PreflightError(..) => Self::PreflightError,
-            ProofStatus::Proving => Self::Proving,
-            ProofStatus::ProvingError(..) => Self::ProvingError,
+            ProofStatus::ChainProof | ProofStatus::ChainProofError(..) => Self::ChainProof,
+            ProofStatus::Preflight | ProofStatus::PreflightError(..) => Self::Preflight,
+            ProofStatus::Proving | ProofStatus::ProvingError(..) => Self::Proving,
             ProofStatus::Done(..) => Self::Done,
         }
     }

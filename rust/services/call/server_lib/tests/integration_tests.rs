@@ -245,7 +245,7 @@ mod server_tests {
         const MAX_POLLING_TIME: std::time::Duration = std::time::Duration::from_secs(60);
 
         type Req = Value;
-        type Resp = (State, Value);
+        type Resp = (State, bool, Value);
 
         #[derive(Clone)]
         struct RetryRequest;
@@ -258,13 +258,20 @@ mod server_tests {
                 _req: &mut Req,
                 result: &mut Result<Resp, String>,
             ) -> Option<Self::Future> {
-                result.as_ref().ok().and_then(|(status, _)| match status {
-                    State::ChainProofError
-                    | State::PreflightError
-                    | State::ProvingError
-                    | State::Done => None,
-                    _ => Some(tokio::time::sleep(RETRY_SLEEP_DURATION)),
-                })
+                result
+                    .as_ref()
+                    .ok()
+                    .and_then(|(state, success, _)| match state {
+                        State::ChainProof | State::Preflight | State::Proving => {
+                            if !success {
+                                None
+                            } else {
+                                Some(tokio::time::sleep(RETRY_SLEEP_DURATION))
+                            }
+                        }
+                        State::Done => None,
+                        _ => Some(tokio::time::sleep(RETRY_SLEEP_DURATION)),
+                    })
             }
 
             fn clone_request(&mut self, req: &Req) -> Option<Req> {
@@ -294,13 +301,15 @@ mod server_tests {
             })
         }
 
-        async fn v_get_proof_receipt_result(app: &Server, request: Req) -> (State, Value) {
+        async fn v_get_proof_receipt_result(app: &Server, request: Req) -> (State, bool, Value) {
             let response = app.post("/", &request).await;
             assert_eq!(StatusCode::OK, response.status());
             let result = assert_jrpc_ok(response, json!({})).await;
-            let status: State = serde_json::from_value(result["result"]["state"].clone())
-                .expect("status should be a valid enum variant");
-            (status, result["result"].clone())
+            let state: State = serde_json::from_value(result["result"]["state"].clone())
+                .expect("state should be a valid enum variant");
+            let status: u8 = serde_json::from_value(result["result"]["status"].clone())
+                .expect("status should be a valid u8 value");
+            (state, status == 1, result["result"].clone())
         }
 
         async fn get_proof_result(app: &Server, hash: CallHash) -> Value {
@@ -308,9 +317,9 @@ mod server_tests {
                 .layer(tower::timeout::TimeoutLayer::new(MAX_POLLING_TIME))
                 .layer(tower::retry::RetryLayer::new(RetryRequest))
                 .service_fn(|request| async move {
-                    Ok(v_get_proof_receipt_result(app, request).await) as Result<(_, _), String>
+                    Ok(v_get_proof_receipt_result(app, request).await) as Result<(_, _, _), String>
                 });
-            let (_, result) = svc.oneshot(v_get_proof_receipt_body(hash)).await.unwrap();
+            let (_, _, result) = svc.oneshot(v_get_proof_receipt_body(hash)).await.unwrap();
             result
         }
 
@@ -364,7 +373,7 @@ mod server_tests {
             let result = get_proof_result(&app, hash).await;
 
             assert_json_include!(actual: result, expected: json!({
-                "state": "preflight_error",
+                "state": "preflight",
                 "error": "Preflight error: TravelCallExecutor error: EVM transact error: ",
                 "status": 0,
                 "metrics": {},
@@ -391,10 +400,11 @@ mod server_tests {
                 contract.address(),
             );
 
-            let (status, result) =
+            let (state, status, result) =
                 v_get_proof_receipt_result(&app, v_get_proof_receipt_body(hash)).await;
 
-            assert_eq!(status, State::Done);
+            assert_eq!(state, State::Done);
+            assert!(status);
             assert_proof_result(
                 &result,
                 U256::from(3).encode_hex(),
