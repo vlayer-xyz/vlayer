@@ -19,6 +19,7 @@ members = [
     "rust/services/call/precompiles",
     "rust/services/call/seal",
     "rust/services/call/server",
+    "rust/services/call/server_lib",
     "rust/services/chain/block_trie",
     "rust/services/chain/client",
     "rust/services/chain/common",
@@ -32,6 +33,7 @@ members = [
     "rust/services/chain/worker",
     "rust/services/dns/server",
     "rust/test_runner",
+    "rust/version",
     "rust/web_proof",
     "rust/zkvm-benchmarks/benchmarks",
     "rust/zkvm-benchmarks/runner",
@@ -43,13 +45,13 @@ lto = true
 
 [workspace.dependencies]
 alloy-chains = "0.1.42"
-alloy-dyn-abi = "=0.8.12"
-alloy-json-abi = "=0.8.12"
-alloy-primitives = { version = "=0.8.12", default-features = false, features = ["serde"] }
+alloy-dyn-abi = "=0.8.16"
+alloy-json-abi = "=0.8.16"
+alloy-primitives = { version = "=0.8.16", default-features = false, features = ["serde"] }
 alloy-rlp = { version = "0.3.9", default-features = false }
 alloy-rlp-derive = { version = "0.3.9", default-features = false }
-alloy-sol-types = "=0.8.12"
-alloy-trie = "=0.7.2"
+alloy-sol-types = "=0.8.16"
+alloy-trie = "=0.7.8"
 anyhow = "1.0.91"
 as-any = "0.3.1"
 assert-json-diff = "2.0.2"
@@ -83,18 +85,19 @@ ethers-providers = "2.0"
 eyre = "0.6.12"
 sha2 = "0.10.8"
 flate2 = "1.0.34"
-forge = { git = "https://github.com/foundry-rs/foundry", rev = "e649e62f125244a3ef116be25dfdc81a2afbaf2a", default-features = false }
-foundry-cheatcodes = { git = "https://github.com/foundry-rs/foundry", rev = "e649e62f125244a3ef116be25dfdc81a2afbaf2a" }
-foundry-cli = { git = "https://github.com/foundry-rs/foundry", rev = "e649e62f125244a3ef116be25dfdc81a2afbaf2a", default-features = false }
-foundry-common = { git = "https://github.com/foundry-rs/foundry", rev = "e649e62f125244a3ef116be25dfdc81a2afbaf2a" }
-foundry-compilers = { version = "0.11.6", default-features = false }
-foundry-config = { git = "https://github.com/foundry-rs/foundry", rev = "e649e62f125244a3ef116be25dfdc81a2afbaf2a", default-features = false }
-foundry-debugger = { git = "https://github.com/foundry-rs/foundry", rev = "e649e62f125244a3ef116be25dfdc81a2afbaf2a" }
-foundry-evm = { git = "https://github.com/foundry-rs/foundry", rev = "e649e62f125244a3ef116be25dfdc81a2afbaf2a" }
-foundry-evm-core = { git = "https://github.com/foundry-rs/foundry", rev = "e649e62f125244a3ef116be25dfdc81a2afbaf2a" }
-foundry-test-utils = { git = "https://github.com/foundry-rs/foundry", rev = "e649e62f125244a3ef116be25dfdc81a2afbaf2a" }
+forge = { git = "https://github.com/foundry-rs/foundry", rev = "6cb41febfc989cbf7dc13c43ec6c3ce5fba1ea04", default-features = false }
+foundry-cli = { git = "https://github.com/foundry-rs/foundry", rev = "6cb41febfc989cbf7dc13c43ec6c3ce5fba1ea04", default-features = false }
+foundry-common = { git = "https://github.com/foundry-rs/foundry", rev = "6cb41febfc989cbf7dc13c43ec6c3ce5fba1ea04" }
+foundry-compilers = { version = "0.12.8", default-features = false }
+foundry-config = { git = "https://github.com/foundry-rs/foundry", rev = "6cb41febfc989cbf7dc13c43ec6c3ce5fba1ea04", default-features = false }
+foundry-debugger = { git = "https://github.com/foundry-rs/foundry", rev = "6cb41febfc989cbf7dc13c43ec6c3ce5fba1ea04" }
+foundry-evm = { git = "https://github.com/foundry-rs/foundry", rev = "6cb41febfc989cbf7dc13c43ec6c3ce5fba1ea04" }
+foundry-evm-core = { git = "https://github.com/foundry-rs/foundry", rev = "6cb41febfc989cbf7dc13c43ec6c3ce5fba1ea04" }
+foundry-test-utils = { git = "https://github.com/foundry-rs/foundry", rev = "6cb41febfc989cbf7dc13c43ec6c3ce5fba1ea04" }
 futures = { version = "0.3.31", default-features = false }
 hex = "0.4.3"
+hickory-resolver = "0.24.2"
+humantime = "2.1.0"
 http-body-util = "0.1.2"
 httparse = "1.9.5"
 hyper = "1.5.2"
@@ -104,6 +107,7 @@ itertools = { version = "0.13.0" }
 jsonrpsee = { version = "0.24.7", features = ["server-core", "macros"] }
 lazy_static = "1.5.0"
 libmdbx = "0.5.2"
+mailparse = "0.14.1"
 mime = "0.3.17"
 mockito = "1.5.0"
 nybbles = "0.2.1"
@@ -118,13 +122,13 @@ rand = "0.8.5"
 rayon = "1.10.0"
 regex = "1.11.1"
 reqwest = { version = "0.12.11", default-features = false }
-revm = { version = "=17.1.0", default-features = false, features = ["optimism"] }
+revm = { version = "19.0.0", default-features = false, features = ["optimism"] }
 risc0-build = { git = "https://github.com/Wiezzel/risc0.git", rev = "f5b992dea75104f5f3bc23945f3db11a0c8ebd47" }
 risc0-build-ethereum = { git = "https://github.com/Wiezzel/risc0-ethereum.git", rev = "465cbcba59146bba34f380b588d932c571b1713e" }
 risc0-zkp = { version = "1.2.0", default-features = false }
 risc0-zkvm = "1.2.0"
 rlp = "0.6.1"
-rsa = "0.9.7"
+rsa = "=0.9.6"
 semver = "1.0.24"
 serde = { version = "1.0.213", features = ["derive"] }
 serde_json = "1.0.132"
@@ -160,6 +164,7 @@ call_engine = { path = "rust/services/call/engine" }
 call_guest = { path = "rust/services/call/guest" }
 call_host = { path = "rust/services/call/host" }
 call_server = { path = "rust/services/call/server" }
+call_server_lib = { path = "rust/services/call/server_lib" }
 chain = { path = "rust/chain" }
 chain_client = { path = "rust/services/chain/client" }
 chain_db = { path = "rust/services/chain/db" }
@@ -181,6 +186,7 @@ provider = { path = "rust/provider" }
 server_utils = { path = "rust/server_utils" }
 test_runner = { path = "rust/test_runner" }
 u64_range = { path = "rust/range" }
+version = { path = "rust/version" }
 web_proof = { path = "rust/web_proof" }
 zkvm-benchmarks = { path = "rust/zkvm-benchmarks/benchmarks" }
 

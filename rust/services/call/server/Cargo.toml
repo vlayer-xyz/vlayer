@@ -6,11 +6,10 @@ edition = "2021"
 [dependencies]
 alloy-primitives = { workspace = true }
 anyhow = { workspace = true }
-call_guest_wrapper = { workspace = true }
 call_server_lib = { workspace = true }
-chain_guest_wrapper = { workspace = true }
 clap = { workspace = true, features = ["derive", "env", "string"] }
 common = { workspace = true }
+guest_wrapper = { workspace = true }
 hex = { workspace = true }
 humantime = { workspace = true }
 tokio = { workspace = true }
