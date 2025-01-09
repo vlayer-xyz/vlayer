@@ -27,28 +27,3 @@ function build_contracts() {
   forge clean
   forge build
 }
-
-function run_example() {
-  local name="$1"
-  echo "::group::Running tests of: ${name}"
-  silent_unless_fails build_contracts
-  run_prover_script
-}
-
-function run_examples() {
-  echo "::group::Running examples"
-  for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ; do
-    export EXAMPLE_NAME=$(basename "${example}")
-
-    echo Running services...
-    source ${VLAYER_HOME}/bash/run-services.sh
-
-    pushd "${example}"
-      run_example "$example"
-    popd
-
-    cleanup
-    rm -rf "${VLAYER_TMP_DIR}/chain_db"
-  done
-  echo '::endgroup::Running examples'
-}
