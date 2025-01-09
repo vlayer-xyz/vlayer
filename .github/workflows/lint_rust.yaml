@@ -41,7 +41,7 @@ jobs:
           cargo clippy --all-targets --all-features --locked
 
       - name: Run Risc0 Call Guest lints
-        working-directory: rust/services/guest_wrapper/risc0_call_guest
+        working-directory: rust/guest_wrapper/risc0_call_guest
         env:
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
           RUSTFLAGS: "-Dwarnings"
@@ -51,7 +51,7 @@ jobs:
           cargo clippy --all-targets --all-features --locked
 
       - name: Run Risc0 Chain Guest lints
-        working-directory: rust/services/guest_wrapper/risc0_chain_guest
+        working-directory: rust/guest_wrapper/risc0_chain_guest
         env:
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
           RUSTFLAGS: "-Dwarnings"

@@ -11,7 +11,6 @@ Contains [composite actions](https://docs.github.com/en/actions/sharing-automati
 | Action | Purpose |
 | --- | --- |
 | [Build extension](/.github/actions/build-extension/action.yml) | Builds the browser extension. |
-| [Build guest artifacts](/.github/actions/build-guest-artifacts/action.yml) | Compiles and uploads guest artifacts. |
 | [Contracts prerequisites](/.github/actions/contracts-prerequisites/action.yml) | Installs Foundry for contracts compilation. |
 | [Darwin prerequisites](/.github/actions/darwin-prerequisites/action.yml) | Contains steps specific to Darwin machines. |
 | [Package release binaries](/.github/actions/package-release-binaries/action.yml) | Zips the Rust release binaries. |
