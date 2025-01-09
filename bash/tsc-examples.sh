@@ -4,8 +4,8 @@ set -ueo pipefail
 
 VLAYER_HOME=$(git rev-parse --show-toplevel)
 
-echo "::group::Running bun install for: $VLAYER_HOME/packages"
-cd "${VLAYER_HOME}/packages"
+echo "::group::Installing npm dependencies"
+cd "${VLAYER_HOME}"
 bun install --frozen-lockfile
 echo '::endgroup::'
 
