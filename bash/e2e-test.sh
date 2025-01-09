@@ -9,6 +9,7 @@ source "$(dirname "${BASH_SOURCE[0]}")/e2e/lib"
 
 # Defaults
 PROVING_MODE=${PROVING_MODE:-dev}
+VLAYER_ENV=${VLAYER_ENV:-dev}
 
 generate_ts_bindings
 build_sdk
