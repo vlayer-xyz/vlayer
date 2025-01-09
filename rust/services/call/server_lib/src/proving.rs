@@ -16,7 +16,7 @@ use crate::{
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    #[error("Proving error: {0}")]
+    #[error(transparent)]
     Proving(#[from] ProvingError),
     #[error("Gas meter error: {0}")]
     GasMeter(#[from] GasMeterError),
