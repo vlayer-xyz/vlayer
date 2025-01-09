@@ -1,5 +1,5 @@
 use call_engine::Call as EngineCall;
-use call_host::{Error as HostError, Host, PreflightResult};
+use call_host::{Host, PreflightError, PreflightResult};
 use tracing::info;
 
 use crate::{
@@ -12,8 +12,8 @@ use crate::{
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    #[error("Host error: {0}")]
-    Host(#[from] HostError),
+    #[error(transparent)]
+    Preflight(#[from] PreflightError),
     #[error("Gas meter error: {0}")]
     GasMeter(#[from] GasMeterError),
     #[error("Metrics error: {0}")]
@@ -29,7 +29,7 @@ pub async fn await_preflight(
     metrics: &mut Metrics,
 ) -> Result<PreflightResult, Error> {
     state.insert(call_hash, ProofStatus::Preflight);
-    let result = host.preflight(call).await.map_err(HostError::Preflight)?;
+    let result = host.preflight(call).await?;
     let gas_used = result.gas_used;
     let elapsed_time = result.elapsed_time;
 

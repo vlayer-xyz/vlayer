@@ -19,7 +19,7 @@ pub enum Error {
     ChainProof(#[from] ChainProofError),
     #[error("Preflight error: {0}")]
     Preflight(#[from] PreflightError),
-    #[error("Proving error: {0}")]
+    #[error(transparent)]
     Proving(#[from] ProvingError),
 }
 

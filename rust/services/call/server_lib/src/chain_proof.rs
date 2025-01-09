@@ -1,6 +1,6 @@
 use std::time::Duration;
 
-use call_host::{Error as HostError, Host};
+use call_host::{AwaitingChainProofError, Host};
 use derive_new::new;
 use serde::{Deserialize, Serialize};
 use tracing::info;
@@ -14,8 +14,8 @@ use crate::{
 pub enum Error {
     #[error("Waiting for chain proof timed out")]
     Timeout,
-    #[error("Host error: {0}")]
-    Host(#[from] HostError),
+    #[error(transparent)]
+    AwaitingChainProof(#[from] AwaitingChainProofError),
 }
 
 pub async fn await_ready(
@@ -32,11 +32,7 @@ pub async fn await_ready(
     {
         // Wait for chain proof if necessary
         let start = tokio::time::Instant::now();
-        while !host
-            .chain_proof_ready()
-            .await
-            .map_err(HostError::AwaitingChainProof)?
-        {
+        while !host.chain_proof_ready().await? {
             info!(
                 "Location {:?} not indexed. Waiting for chain proof",
                 host.start_execution_location()

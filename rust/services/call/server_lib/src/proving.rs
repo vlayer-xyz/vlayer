@@ -1,7 +1,7 @@
 use alloy_primitives::{hex::ToHexExt, U256};
 use alloy_sol_types::SolValue;
 use call_engine::{CallGuestId, HostOutput, Proof, Seal};
-use call_host::{Error as HostError, Host, PreflightResult, Prover};
+use call_host::{Host, PreflightResult, Prover, ProvingError};
 use serde::{Serialize, Serializer};
 use tracing::info;
 
@@ -16,8 +16,8 @@ use crate::{
 
 #[derive(Debug, thiserror::Error)]
 pub enum Error {
-    #[error("Host error: {0}")]
-    Host(#[from] HostError),
+    #[error("Proving error: {0}")]
+    Proving(#[from] ProvingError),
     #[error("Gas meter error: {0}")]
     GasMeter(#[from] GasMeterError),
     #[error("Metrics error: {0}")]
@@ -36,8 +36,7 @@ pub async fn await_proving(
     metrics: &mut Metrics,
 ) -> Result<RawData, Error> {
     state.insert(call_hash, ProofStatus::Proving);
-    let host_output =
-        Host::prove(prover, call_guest_id, preflight_result).map_err(HostError::Proving)?;
+    let host_output = Host::prove(prover, call_guest_id, preflight_result)?;
     let cycles_used = host_output.cycles_used;
     let elapsed_time = host_output.elapsed_time;
 
