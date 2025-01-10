@@ -6,6 +6,9 @@ use crate::errors::ParsingError;
 const MAX_HEADERS_NUMBER: usize = 40;
 
 const REDACTED_CHAR: char = '\0';
+
+// '@' is invalid in header names but valid in header values. Replacing redacted bytes ('\0')
+// with '@' ensures header name validation fails while still allowing redacted values.
 const REDACTED_CHAR_REPLACEMENT: &str = "@";
 
 #[derive(Debug, new)]
@@ -15,22 +18,30 @@ pub(crate) struct RequestTranscript {
 
 impl RequestTranscript {
     pub(crate) fn parse_url(self) -> Result<String, ParsingError> {
-        let request_string = String::from_utf8(self.transcript)?;
+        let request = String::from_utf8(self.transcript)?;
 
-        parse_url_from_request_string(&request_string)
+        extract_path_and_check_proper_headers_redaction(&request)
     }
 }
 
-fn parse_url_from_request_string(request_string: &str) -> Result<String, ParsingError> {
-    let request_string = request_string.replace(REDACTED_CHAR, REDACTED_CHAR_REPLACEMENT);
+fn parse_request(request: &str) -> Result<(String, [Header; MAX_HEADERS_NUMBER]), ParsingError> {
+    let mut headers = [EMPTY_HEADER; MAX_HEADERS_NUMBER];
+    let mut req = Request::new(&mut headers);
+    req.parse(request.as_bytes())?;
 
-    let mut headers: [Header; MAX_HEADERS_NUMBER] = [EMPTY_HEADER; MAX_HEADERS_NUMBER];
-    let mut req: Request = Request::new(&mut headers);
-    req.parse(request_string.as_bytes())?;
+    let path = req.path.ok_or(ParsingError::NoPathInRequest)?.to_string();
 
-    let url = req.path.ok_or(ParsingError::NoPathInRequest)?.to_string();
-    Ok(url)
+    Ok((path, headers))
 }
+
+fn extract_path_and_check_proper_headers_redaction(request: &str) -> Result<String, ParsingError> {
+    // Replace redacted characters to ensure the request parses correctly and to detect redacted header names during parsing.
+    let request_string = request.replace(REDACTED_CHAR, REDACTED_CHAR_REPLACEMENT);
+    let (path, _headers) = parse_request(&request_string)?;
+
+    Ok(path)
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -56,21 +67,22 @@ mod tests {
             #[test]
             fn no_header_redaction() {
                 let request = "GET https://example.com/test.json HTTP/1.1\r\ncontent-type: application/json\r\n\r\n";
-                let url = parse_url_from_request_string(request).unwrap();
+                let url = extract_path_and_check_proper_headers_redaction(request).unwrap();
                 assert_eq!(url, "https://example.com/test.json");
             }
 
             #[test]
             fn request_header_value_with_replacement_character() {
                 let request = format!("GET https://example.com/test.json HTTP/1.1\r\ncontent-type: application/json{REDACTED_CHAR_REPLACEMENT}\r\n\r\n");
-                let url = parse_url_from_request_string(request.as_str()).unwrap();
+                let url =
+                    extract_path_and_check_proper_headers_redaction(request.as_str()).unwrap();
                 assert_eq!(url, "https://example.com/test.json");
             }
 
             #[test]
             fn fully_redacted_request_header_value() {
                 let request = "GET https://example.com/test.json HTTP/1.1\r\ncontent-type: \0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\r\n\r\n";
-                let url = parse_url_from_request_string(request).unwrap();
+                let url = extract_path_and_check_proper_headers_redaction(request).unwrap();
                 assert_eq!(url, "https://example.com/test.json");
             }
         }
@@ -81,21 +93,21 @@ mod tests {
             #[test]
             fn partially_redacted_request_header_name() {
                 let request = "GET https://example.com/test.json HTTP/1.1\r\ncontent-typ\0: application/json\r\n\r\n";
-                let err = parse_url_from_request_string(request).unwrap_err();
+                let err = extract_path_and_check_proper_headers_redaction(request).unwrap_err();
                 assert!(matches!(err, ParsingError::Httparse(httparse::Error::HeaderName)));
             }
 
             #[test]
             fn fully_redacted_request_header_name() {
                 let request = "GET https://example.com/test.json HTTP/1.1\r\n\0\0\0\0\0\0\0\0\0\0\0\0: application/json\r\n\r\n";
-                let err = parse_url_from_request_string(request).unwrap_err();
+                let err = extract_path_and_check_proper_headers_redaction(request).unwrap_err();
                 assert!(matches!(err, ParsingError::Httparse(httparse::Error::HeaderName)));
             }
 
             #[test]
             fn fully_redacted_request_header_name_and_value() {
                 let request = "GET https://example.com/test.json HTTP/1.1\r\n\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\r\n\r\n";
-                let err = parse_url_from_request_string(request).unwrap_err();
+                let err = extract_path_and_check_proper_headers_redaction(request).unwrap_err();
                 assert!(matches!(err, ParsingError::Httparse(httparse::Error::HeaderName)));
             }
         }
