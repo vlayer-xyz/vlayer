@@ -23,7 +23,6 @@ jobs:
       - name: Install TypeScript prerequisites
         uses: ./.github/actions/ts-prerequisites
       - name: Install packages
-        working-directory: ./
         run: bun install --frozen-lockfile
       - name: Build sdk
         working-directory: packages/sdk
