@@ -68,12 +68,12 @@ pub struct CallResult {
 
 impl From<&ProofStatus> for CallResult {
     fn from(value: &ProofStatus) -> Self {
-Self {
-    state: (&value.state).into(),
-    status: if value.state.is_err() { 0 } else { 1 },
-    metrics: value.metrics,
-    data: value.state.data().cloned(),
-    error: value.state.err().map(ProofError::to_string),
-}
+        Self {
+            state: (&value.state).into(),
+            status: if value.state.is_err() { 0 } else { 1 },
+            metrics: value.metrics,
+            data: value.state.data().cloned(),
+            error: value.state.err().map(ProofError::to_string),
+        }
     }
 }

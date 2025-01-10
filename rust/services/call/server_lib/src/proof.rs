@@ -1,5 +1,6 @@
 use call_engine::Call as EngineCall;
 use call_host::Host;
+use dashmap::Entry;
 use tracing::info;
 
 pub use crate::proving::RawData;
@@ -67,11 +68,26 @@ pub struct Status {
     pub metrics: Metrics,
 }
 
+fn set_state(
+    proofs: &SharedProofs,
+    call_hash: CallHash,
+    state: State,
+) -> Entry<'_, CallHash, Status> {
+    proofs.entry(call_hash).and_modify(|res| res.state = state)
+}
+
+fn set_metrics(
+    entry: Entry<'_, CallHash, Status>,
+    metrics: Metrics,
+) -> Entry<'_, CallHash, Status> {
+    entry.and_modify(|res| res.metrics = metrics)
+}
+
 pub async fn generate(
     call: EngineCall,
     host: Host,
     gas_meter_client: impl GasMeterClient,
-    state: SharedProofs,
+    proofs: SharedProofs,
     call_hash: CallHash,
     chain_proof_config: Option<ChainProofConfig>,
 ) {
@@ -81,23 +97,17 @@ pub async fn generate(
 
     info!("Generating proof for {call_hash}");
 
-    state
-        .entry(call_hash)
-        .and_modify(|res| res.state = State::ChainProofPending);
+    set_state(&proofs, call_hash, State::ChainProofPending);
 
     match chain_proof::await_ready(&host, chain_proof_config)
         .await
         .map_err(Error::ChainProof)
     {
         Ok(()) => {
-            state
-                .entry(call_hash)
-                .and_modify(|res| res.state = State::PreflightPending);
+            set_state(&proofs, call_hash, State::PreflightPending);
         }
         Err(err) => {
-            state.entry(call_hash).and_modify(|res| {
-                res.state = State::ChainProofError(err.into());
-            });
+            set_state(&proofs, call_hash, State::ChainProofError(err.into()));
             return;
         }
     }
@@ -108,17 +118,13 @@ pub async fn generate(
             .map_err(Error::Preflight)
         {
             Ok(res) => {
-                state.entry(call_hash).and_modify(|res| {
-                    res.state = State::ProvingPending;
-                    res.metrics = metrics;
-                });
+                let entry = set_state(&proofs, call_hash, State::ProvingPending);
+                set_metrics(entry, metrics);
                 res
             }
             Err(err) => {
-                state.entry(call_hash).and_modify(|res| {
-                    res.state = State::PreflightError(err.into());
-                    res.metrics = metrics;
-                });
+                let entry = set_state(&proofs, call_hash, State::PreflightError(err.into()));
+                set_metrics(entry, metrics);
                 return;
             }
         };
@@ -133,13 +139,13 @@ pub async fn generate(
     .await
     .map_err(Error::Proving)
     {
-        Ok(raw_data) => state.entry(call_hash).and_modify(|res| {
-            res.state = State::Done(raw_data.into());
-            res.metrics = metrics;
-        }),
-        Err(err) => state.entry(call_hash).and_modify(|res| {
-            res.state = State::ProvingError(err.into());
-            res.metrics = metrics;
-        }),
+        Ok(raw_data) => {
+            let entry = set_state(&proofs, call_hash, State::Done(raw_data.into()));
+            set_metrics(entry, metrics);
+        }
+        Err(err) => {
+            let entry = set_state(&proofs, call_hash, State::ProvingError(err.into()));
+            set_metrics(entry, metrics);
+        }
     };
 }
