@@ -108,8 +108,17 @@ test.describe("Full flow of webproof using extension", () => {
       expect(waitForProvingResultResponse.ok()).toBeTruthy();
 
       const proofJson = (await waitForProvingResultResponse.json()) as object;
-      expect(proofJson).toHaveProperty("result.receipt.data");
-      expect(proofJson).toHaveProperty("result.receipt.data.evm_call_result");
+      expect(proofJson).toMatchObject({
+        result: {
+          state: "done",
+          status: 1,
+          metrics: test.expect.any({}),
+          data: {
+            evm_call_result: test.expect.any({}),
+            proof: test.expect.any({}),
+          },
+        },
+      });
     });
   });
 
@@ -241,8 +250,17 @@ test.describe("Full flow of webproof using extension", () => {
       expect(waitForProvingResultResponse.ok()).toBeTruthy();
 
       const proofJson = (await waitForProvingResultResponse.json()) as object;
-      expect(proofJson).toHaveProperty("result.receipt.data");
-      expect(proofJson).toHaveProperty("result.receipt.data.evm_call_result");
+      expect(proofJson).toMatchObject({
+        result: {
+          state: "done",
+          status: 1,
+          metrics: test.expect.any({}),
+          data: {
+            evm_call_result: test.expect.any({}),
+            proof: test.expect.any({}),
+          },
+        },
+      });
     });
   });
 
@@ -357,8 +375,17 @@ test.describe("Full flow of webproof using extension", () => {
       expect(waitForProvingResultResponse.ok()).toBeTruthy();
 
       const proofJson = (await waitForProvingResultResponse.json()) as object;
-      expect(proofJson).toHaveProperty("result.receipt.data");
-      expect(proofJson).toHaveProperty("result.receipt.data.evm_call_result");
+      expect(proofJson).toMatchObject({
+        result: {
+          state: "done",
+          status: 1,
+          metrics: test.expect.any({}),
+          data: {
+            evm_call_result: test.expect.any({}),
+            proof: test.expect.any({}),
+          },
+        },
+      });
     });
   });
 });
