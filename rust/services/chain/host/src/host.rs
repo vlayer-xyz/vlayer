@@ -4,6 +4,8 @@ pub mod error;
 mod prover;
 mod strategy;
 
+use std::time::Duration;
+
 use alloy_primitives::ChainId;
 use block_fetcher::BlockFetcher;
 use block_trie::BlockTrie;
@@ -18,8 +20,11 @@ use ethers::{
 };
 use prover::Prover;
 pub use strategy::{AppendStrategy, PrependStrategy};
+use tokio::time::sleep;
 use tracing::{info, instrument};
 use u64_range::NonEmptyRange;
+
+const SLEEP_IF_FULLY_SYNCED: Duration = Duration::from_secs(1);
 
 pub struct Host<P>
 where
@@ -82,18 +87,21 @@ where
     }
 
     #[instrument(skip(self))]
-    async fn poll(&self) -> Result<ChainUpdate, HostError> {
+    async fn poll(&self) -> Result<Option<ChainUpdate>, HostError> {
         match self.db.get_chain_info(self.chain_id)? {
-            None => self.initialize().await,
-            Some(_) => self.append_prepend().await,
+            None => Ok(Some(self.initialize().await?)),
+            Some(_) => Ok(self.append_prepend().await?),
         }
     }
 
     #[instrument(skip(self))]
     pub async fn poll_commit(&mut self) -> Result<(), HostError> {
-        let chain_update = self.poll().await?;
-        info!("Chain update: {chain_update:?}");
-        self.db.update_chain(self.chain_id, chain_update)?;
+        if let Some(chain_update) = self.poll().await? {
+            info!("Chain update: {chain_update:?}");
+            self.db.update_chain(self.chain_id, chain_update)?;
+        } else {
+            sleep(SLEEP_IF_FULLY_SYNCED).await;
+        };
         Ok(())
     }
 
@@ -117,8 +125,7 @@ where
     }
 
     #[instrument(skip(self))]
-    async fn append_prepend(&self) -> Result<ChainUpdate, HostError> {
-        info!("Appending and prepending blocks");
+    async fn append_prepend(&self) -> Result<Option<ChainUpdate>, HostError> {
         let ChainTrie {
             block_range: old_range,
             trie: old_trie,
@@ -135,6 +142,13 @@ where
         let (new_range, append) = self
             .append_strategy
             .compute_append_range(new_range, latest_block_number);
+
+        if new_range == old_range {
+            info!("No new blocks to append or prepend");
+            return Ok(None);
+        }
+        info!("Appending and prepending blocks");
+
         let prepend_blocks = self.fetcher.get_blocks_range(prepend).await?;
         let append_blocks = self.fetcher.get_blocks_range(append).await?;
         let old_leftmost_block = self.fetcher.get_block(old_range.start().into()).await?;
@@ -152,7 +166,7 @@ where
         let receipt = self.prover.prove(&input, Some(old_zk_proof))?;
         let chain_update = ChainUpdate::from_two_tries(new_range, &old_trie, &trie, &receipt)?;
 
-        Ok(chain_update)
+        Ok(Some(chain_update))
     }
 }
 
@@ -204,7 +218,7 @@ mod tests {
     async fn initialize() -> anyhow::Result<()> {
         let host = create_host(test_db(), mock_provider([LATEST], None));
 
-        let chain_update = host.poll().await?;
+        let chain_update = host.initialize().await?;
         let Host { mut db, .. } = host;
         db.update_chain(1, chain_update)?;
 
@@ -218,23 +232,21 @@ mod tests {
         use super::*;
 
         async fn db_after_initialize() -> Result<ChainDb, HostError> {
-            let host = create_host(test_db(), mock_provider([GENESIS], None));
+            let mut host = create_host(test_db(), mock_provider([GENESIS], None));
 
-            let init_chain_update = host.poll().await?;
-            let Host { mut db, .. } = host;
-            db.update_chain(1, init_chain_update).unwrap();
+            host.poll_commit().await?;
+            let Host { db, .. } = host;
 
             Ok(db)
         }
 
         #[tokio::test]
         async fn no_new_head_blocks_back_propagation_finished() -> anyhow::Result<()> {
-            let host =
+            let mut host =
                 create_host(db_after_initialize().await?, mock_provider([GENESIS], Some(GENESIS)));
 
-            let chain_update = host.poll().await?;
-            let Host { mut db, .. } = host;
-            db.update_chain(1, chain_update)?;
+            host.poll_commit().await?;
+            let Host { db, .. } = host;
 
             let chain_trie = db.get_chain_trie(1)?.unwrap();
             assert_eq!(chain_trie.block_range, GENESIS..=GENESIS);
@@ -246,14 +258,13 @@ mod tests {
         async fn new_confirmed_head_blocks_back_propagation_finished() -> anyhow::Result<()> {
             let latest = GENESIS + CONFIRMATIONS;
             let new_confirmed_block = latest - CONFIRMATIONS + 1;
-            let host = create_host(
+            let mut host = create_host(
                 db_after_initialize().await?,
                 mock_provider([new_confirmed_block, GENESIS], Some(latest)),
             );
 
-            let chain_update = host.poll().await?;
-            let Host { mut db, .. } = host;
-            db.update_chain(1, chain_update)?;
+            host.poll_commit().await?;
+            let Host { db, .. } = host;
 
             let chain_trie = db.get_chain_trie(1)?.unwrap();
             assert_eq!(chain_trie.block_range, GENESIS..=new_confirmed_block);
