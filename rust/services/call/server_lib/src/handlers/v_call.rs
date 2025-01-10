@@ -5,7 +5,11 @@ use tracing::info;
 use types::{Call, CallContext, CallHash, Result as VCallResult};
 
 use super::{QueryParams, SharedConfig, SharedProofs};
-use crate::{gas_meter, handlers::ProofStatus, proof, Config};
+use crate::{
+    gas_meter,
+    proof::{self, Status as ProofStatus},
+    Config,
+};
 
 pub mod types;
 
@@ -31,7 +35,7 @@ pub async fn v_call(
     let mut found_existing = true;
     state.entry(call_hash).or_insert_with(|| {
         found_existing = false;
-        ProofStatus::Queued
+        ProofStatus::default()
     });
 
     if !found_existing {

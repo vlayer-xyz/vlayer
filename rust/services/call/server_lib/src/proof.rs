@@ -1,6 +1,5 @@
 use call_engine::Call as EngineCall;
 use call_host::Host;
-use derive_new::new;
 use tracing::info;
 
 pub use crate::proving::RawData;
@@ -24,67 +23,48 @@ pub enum Error {
     Proving(#[from] ProvingError),
 }
 
-pub enum ProofStatus {
-    /// Proof task has just been queued
+#[derive(Default)]
+pub enum State {
+    #[default]
     Queued,
-    /// Waiting for chain service to generate proof for the start execution location
     ChainProofPending,
-    ChainProofError(Box<ProofError>),
-    /// Preflight computation in progress
+    ChainProofError(Box<Error>),
     PreflightPending,
-    PreflightError(Box<ProofError>),
-    /// Proof is being generated
+    PreflightError(Box<Error>),
     ProvingPending,
-    ProvingError(Box<ProofError>),
-    /// Proof generation finished
-    Done(Box<ProofResult>),
+    ProvingError(Box<Error>),
+    Done(Box<RawData>),
 }
 
-impl ProofStatus {
+impl State {
     pub const fn is_err(&self) -> bool {
         matches!(
             self,
-            Self::ChainProofError(..) | Self::PreflightError(..) | Self::ProvingError(..)
+            State::ChainProofError(..) | State::PreflightError(..) | State::ProvingError(..)
         )
     }
 
-    pub fn metrics(&self) -> Metrics {
+    pub fn data(&self) -> Option<&RawData> {
         match self {
-            Self::ChainProofError(error)
-            | Self::PreflightError(error)
-            | Self::ProvingError(error) => error.metrics,
-            Self::Done(result) => result.metrics,
-            _ => Metrics::default(),
-        }
-    }
-
-    pub fn data(&self) -> Option<RawData> {
-        match self {
-            Self::Done(result) => Some(result.data.clone()),
+            State::Done(data) => Some(&data),
             _ => None,
         }
     }
 
-    pub const fn err(&self) -> Option<&Error> {
+    pub fn err(&self) -> Option<&Error> {
         match self {
-            Self::ChainProofError(err) | Self::PreflightError(err) | Self::ProvingError(err) => {
-                Some(&err.error)
+            State::ChainProofError(err) | State::PreflightError(err) | State::ProvingError(err) => {
+                Some(&err)
             }
             _ => None,
         }
     }
 }
 
-#[derive(new)]
-pub struct ProofError {
-    metrics: Metrics,
-    error: Error,
-}
-
-#[derive(new)]
-pub struct ProofResult {
-    metrics: Metrics,
-    data: RawData,
+#[derive(Default)]
+pub struct Status {
+    pub state: State,
+    pub metrics: Metrics,
 }
 
 pub async fn generate(
@@ -99,21 +79,25 @@ pub async fn generate(
     let call_guest_id = host.call_guest_id();
     let mut metrics = Metrics::default();
 
-    let update_state = |status| {
-        state.insert(call_hash, status);
-    };
-
     info!("Generating proof for {call_hash}");
 
-    update_state(ProofStatus::ChainProofPending);
+    state
+        .entry(call_hash)
+        .and_modify(|res| res.state = State::ChainProofPending);
 
     match chain_proof::await_ready(&host, chain_proof_config)
         .await
         .map_err(Error::ChainProof)
     {
-        Ok(()) => update_state(ProofStatus::PreflightPending),
+        Ok(()) => {
+            state
+                .entry(call_hash)
+                .and_modify(|res| res.state = State::PreflightPending);
+        }
         Err(err) => {
-            update_state(ProofStatus::ChainProofError(Box::new(ProofError::new(metrics, err))));
+            state.entry(call_hash).and_modify(|res| {
+                res.state = State::ChainProofError(err.into());
+            });
             return;
         }
     }
@@ -124,11 +108,17 @@ pub async fn generate(
             .map_err(Error::Preflight)
         {
             Ok(res) => {
-                update_state(ProofStatus::ProvingPending);
+                state.entry(call_hash).and_modify(|res| {
+                    res.state = State::ProvingPending;
+                    res.metrics = metrics;
+                });
                 res
             }
             Err(err) => {
-                update_state(ProofStatus::PreflightError(Box::new(ProofError::new(metrics, err))));
+                state.entry(call_hash).and_modify(|res| {
+                    res.state = State::PreflightError(err.into());
+                    res.metrics = metrics;
+                });
                 return;
             }
         };
@@ -143,11 +133,13 @@ pub async fn generate(
     .await
     .map_err(Error::Proving)
     {
-        Ok(raw_data) => {
-            update_state(ProofStatus::Done(Box::new(ProofResult::new(metrics, raw_data))))
-        }
-        Err(err) => {
-            update_state(ProofStatus::ProvingError(Box::new(ProofError::new(metrics, err))))
-        }
-    }
+        Ok(raw_data) => state.entry(call_hash).and_modify(|res| {
+            res.state = State::Done(raw_data.into());
+            res.metrics = metrics;
+        }),
+        Err(err) => state.entry(call_hash).and_modify(|res| {
+            res.state = State::ProvingError(err.into());
+            res.metrics = metrics;
+        }),
+    };
 }

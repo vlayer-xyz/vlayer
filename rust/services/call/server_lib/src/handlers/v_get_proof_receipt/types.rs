@@ -3,7 +3,7 @@ use serde::{Deserialize, Serialize};
 
 use crate::{
     metrics::Metrics,
-    proof::{self, ProofStatus},
+    proof::{Error as ProofError, State as ProofState, Status as ProofStatus},
     proving::RawData,
     v_call::CallHash,
 };
@@ -44,14 +44,14 @@ impl Default for State {
     }
 }
 
-impl From<&ProofStatus> for State {
-    fn from(value: &ProofStatus) -> Self {
+impl From<&ProofState> for State {
+    fn from(value: &ProofState) -> Self {
         match value {
-            ProofStatus::Queued => Self::Queued,
-            ProofStatus::ChainProofPending | ProofStatus::ChainProofError(..) => Self::ChainProof,
-            ProofStatus::PreflightPending | ProofStatus::PreflightError(..) => Self::Preflight,
-            ProofStatus::ProvingPending | ProofStatus::ProvingError(..) => Self::Proving,
-            ProofStatus::Done(..) => Self::Done,
+            ProofState::Queued => Self::Queued,
+            ProofState::ChainProofPending | ProofState::ChainProofError(..) => Self::ChainProof,
+            ProofState::PreflightPending | ProofState::PreflightError(..) => Self::Preflight,
+            ProofState::ProvingPending | ProofState::ProvingError(..) => Self::Proving,
+            ProofState::Done(..) => Self::Done,
         }
     }
 }
@@ -67,11 +67,11 @@ pub struct CallResult {
 
 impl From<&ProofStatus> for CallResult {
     fn from(value: &ProofStatus) -> Self {
-        let state: State = value.into();
-        let status = if value.is_err() { 0 } else { 1 };
-        let data = value.data();
-        let error = value.err().map(proof::Error::to_string);
-        let metrics = value.metrics();
+        let state: State = (&value.state).into();
+        let status = if value.state.is_err() { 0 } else { 1 };
+        let data = value.state.data().cloned();
+        let error = value.state.err().map(ProofError::to_string);
+        let metrics = value.metrics;
         Self {
             state,
             status,

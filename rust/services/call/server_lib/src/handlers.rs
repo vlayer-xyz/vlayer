@@ -9,7 +9,7 @@ use v_call::types::{Call, CallContext, CallHash, Result as VCallResult};
 use v_get_proof_receipt::types::{CallResult, Result as VGetProofReceiptResult};
 use v_versions::Versions;
 
-use crate::{config::Config, proof::ProofStatus};
+use crate::{config::Config, proof::Status as ProofStatus};
 
 pub mod v_call;
 pub mod v_get_proof_receipt;
