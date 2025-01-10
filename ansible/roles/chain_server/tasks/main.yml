@@ -13,7 +13,7 @@
 - name: Copy chain server binary
   become: true
   ansible.builtin.copy:
-    src: ../rust/target/release/chain_server
+    src: ../target/release/chain_server
     dest: /opt/vlayer/chain_server
     mode: '755'
   notify: "Restart vlayer"

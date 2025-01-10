@@ -35,7 +35,7 @@ mdbook build
 
 Rust allows you to set granular log levels for different crates using [RUST_LOG](https://rust-lang-nursery.github.io/rust-cookbook/development_tools/debugging/config_log.html). To debug a specific crate, you can set its log level to `debug`. For example:
 ```sh
-RUST_LOG=info,call_engine=debug ./rust/target/debug/call_server
+RUST_LOG=info,call_engine=debug ./target/debug/call_server
 ```
 
 The static HTML output will be generated in the `book/book` directory. You can use this output to preview the book locally or deploy it to a static site hosting service.

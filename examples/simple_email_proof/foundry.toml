@@ -4,7 +4,7 @@ out = "out"
 libs = [
     "../../contracts/vlayer/src",
     "../../contracts/vlayer/dependencies",
-    "../../rust/target",
+    "../../target",
 ]
 
 fs_permissions = [{ access = "read", path = "./testdata" }]

@@ -32,7 +32,6 @@ jobs:
         uses: ./.github/actions/contracts-prerequisites
 
       - name: Run Host lints
-        working-directory: rust
         env:
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
           RUSTFLAGS: "-Dwarnings"
@@ -68,7 +67,6 @@ jobs:
         run: cargo deny check bans
 
       - name: Detect unused dependencies
-        working-directory: rust
         env:
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
         run: cargo machete

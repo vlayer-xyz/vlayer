@@ -3,7 +3,7 @@ function startup_chain_worker() {
     local start_block="$last_block"
 
     echo "Starting chain worker with rpc_url=${rpc_url} chain_id=${chain_id} start_block=${start_block}"
-    pushd "${VLAYER_HOME}/rust" > /dev/null
+    pushd "${VLAYER_HOME}" > /dev/null
 
     RUST_LOG=${RUST_LOG:-info} ./target/debug/worker \
         --db-path "${db_path}" \
