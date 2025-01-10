@@ -56,6 +56,7 @@ impl From<&ProofState> for State {
     }
 }
 
+#[serde_with::skip_serializing_none]
 #[derive(Clone, Serialize, Default)]
 pub struct CallResult {
     pub state: State,
