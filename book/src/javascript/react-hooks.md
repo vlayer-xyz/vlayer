@@ -142,40 +142,41 @@ It is also possible to pass `env` prop. It will set [default values](/advanced/d
 ## `useCallProver`
 The `useCallProver` hook is used to interact with the vlayer prover by initiating a proving process with specified inputs.
 
-### Import
-```javascript
-import { useCallProver } from "@vlayer/react";
-```
 
-### Usage
+### Example usage
 The `callProver` function starts the proving process. Proving is an asynchronous operation, and the result (`data`) contains a hash that can be used to track the status or [retrieve the final proof](/javascript/react-hooks.html#usewaitforprovingresult).
 
 ```javascript
-const { 
-  callProver, 
-  data, 
-  status, 
-  error, 
-  isIdle, 
-  isPending, 
-  isReady, 
-  isError 
-} = useCallProver({
-  address: proverAddress,     // Address of the prover contract
-  proverAbi: proverSpec.abi,  // ABI of the prover
-  functionName: "main",       // Function to invoke in the prover
-});
+import { useCallProver } from "@vlayer/react";
+
+const ExampleComponent = () => {
+  const { 
+    callProver, 
+    data, 
+    status, 
+    error, 
+    isIdle, 
+    isPending, 
+    isReady, 
+    isError 
+  } = useCallProver({
+    address: proverAddress,     // Address of the prover contract
+    proverAbi: proverSpec.abi,  // ABI of the prover
+    functionName: "main",       // Function to invoke in the prover
+  });
+
+  return (
+    <button onClick={() => callProver([...args])}>
+      Prove
+    </button>
+  );
+}
 ```
 
-The `callProver` function has to be invoked with the required arguments by the prover contract function:
+The `callProver` function has to be invoked with the required arguments by the prover contract function.
 
-```javascript
-<button onClick={() => callProver([...args])}>
-  Prove
-</button>
-```
 
-The hook returns variables to monitor the request and update the UI:
+Besides proof hash, the hook returns variables to monitor the request and update the UI:
 - `status`: Overall status of the proving process (`idle`, `pending`, `ready`, or `error`).
 - `isIdle`: Indicates no proving request has been initiated.
 - `isPending`: Indicates the proving process is ongoing.
@@ -185,24 +186,36 @@ The hook returns variables to monitor the request and update the UI:
 ## `useWaitForProvingResult`
 The `useWaitForProvingResult` hook waits for a proving process to complete and retrieves the resulting proof.
 
-### Import
-```javascript
-import { useWaitForProvingResult } from "@vlayer/react";
-```
-
-### Usage
+### Example usage
 Pass the proof hash to the hook to monitor the proving process and retrieve the proof (`data`) when it is ready. If no hash (`null`) is provided, no request is sent to the prover.
 
 ```javascript
-const { 
-  data, 
-  error, 
-  status, 
-  isIdle, 
-  isPending, 
-  isReady, 
-  isError 
-} = useWaitForProvingResult(proofHash);
+import { useWaitForProvingResult, useCallProver } from "@vlayer/react";
+
+const ExampleComponent = () => {
+  const { callProver, data: proofHash } = useCallProver({
+    address: proverAddress,     // Address of the prover contract
+    proverAbi: proverSpec.abi,  // ABI of the prover
+    functionName: "main",       // Function to invoke in the prover
+  });
+
+  const { 
+    data, 
+    error, 
+    status, 
+    isIdle, 
+    isPending, 
+    isReady, 
+    isError 
+  } = useWaitForProvingResult(proofHash);
+
+  return (
+    <button onClick={() => callProver([...args])}>
+      Prove
+    </button>
+  );
+}
+
 ```
 
 The hook provides additional properties for tracking progress and managing UI updates:
