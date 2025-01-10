@@ -102,10 +102,10 @@ describe("Success zk-proving", () => {
       return {
         body: JSON.stringify({
           result: {
-            status: "ready",
-            receipt: {
-              data: {},
-            },
+            state: "done",
+            status: 1,
+            metrics: {},
+            data: {},
           },
         }),
       };
@@ -162,7 +162,17 @@ describe("Success zk-proving", () => {
 });
 
 describe("Failed zk-proving", () => {
+  let zkProvingSpy: MockInstance<(status: ZkProvingStatus) => void>;
+  let vlayer: VlayerClient;
+  let hashStr: string;
+
   beforeEach(() => {
+    hashStr = generateRandomHash();
+    const webProofProvider = createExtensionWebProofProvider();
+    zkProvingSpy = vi.spyOn(webProofProvider, "notifyZkProvingStatus");
+    vlayer = createVlayerClient({ webProofProvider });
+  });
+  it("should send message to extension that zkproving started and then that failed when server error 500", async () => {
     fetchMocker.mockResponseOnce((req) => {
       if (req.url === "http://127.0.0.1:3000/") {
         return {
@@ -171,13 +181,7 @@ describe("Failed zk-proving", () => {
       }
       return {};
     });
-  });
-  it("should send message to extension that zkproving started and then that failed ", async () => {
-    const webProofProvider = createExtensionWebProofProvider();
 
-    const zkProvingSpy = vi.spyOn(webProofProvider, "notifyZkProvingStatus");
-
-    const vlayer = createVlayerClient({ webProofProvider });
     try {
       const hash = await vlayer.prove({
         address: `0x${"a".repeat(40)}`,
@@ -189,6 +193,48 @@ describe("Failed zk-proving", () => {
       await vlayer.waitForProvingResult({ hash });
     } catch (e) {
       console.log("Error waiting for proving result", e);
+    }
+
+    expect(zkProvingSpy).toBeCalledTimes(2);
+    expect(zkProvingSpy).toHaveBeenNthCalledWith(1, ZkProvingStatus.Proving);
+    expect(zkProvingSpy).toHaveBeenNthCalledWith(2, ZkProvingStatus.Error);
+  });
+  it("should send message to extension that zkproving started and then that failed when computation failed at any stage", async () => {
+    fetchMocker.mockResponseOnce(() => {
+      return {
+        body: JSON.stringify({
+          result: hashStr,
+        }),
+      };
+    });
+
+    const hash = await vlayer.prove({
+      address: `0x${"a".repeat(40)}`,
+      functionName: "main",
+      proverAbi: [],
+      args: [],
+      chainId: 42,
+    });
+
+    fetchMocker.mockResponseOnce(() => {
+      return {
+        body: JSON.stringify({
+          result: {
+            state: "preflight",
+            status: 0,
+            metrics: {},
+            error: "Preflight error: ...",
+          },
+        }),
+      };
+    });
+
+    try {
+      await vlayer.waitForProvingResult({ hash });
+    } catch (e) {
+      expect((e as Error).message).toMatch(
+        "Preflight failed with error: Preflight error: ...",
+      );
     }
 
     expect(zkProvingSpy).toBeCalledTimes(2);
