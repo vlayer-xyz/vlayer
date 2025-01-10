@@ -20,7 +20,7 @@
   },
   "dependencies": {
     "@vlayer/sdk": "file:../sdk",
-    "viem": "^2.21.55",
+    "viem": "2.21.0",
     "vitest-fetch-mock": "^0.4.2"
   },
   "scripts": {

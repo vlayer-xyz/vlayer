@@ -46,7 +46,6 @@ jobs:
         run: forge soldeer install
 
       - name: Build binaries
-        working-directory: ./rust
         env:
           RISC0_USE_DOCKER: 1
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
