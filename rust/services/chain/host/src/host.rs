@@ -96,12 +96,12 @@ where
 
     #[instrument(skip(self))]
     pub async fn poll_commit(&mut self) -> Result<(), HostError> {
-        let Some(chain_update) = self.poll().await? else {
+        let Some(chain_update) = self.poll().await? {
+            info!("Chain update: {chain_update:?}");
+            self.db.update_chain(self.chain_id, chain_update)?;
+        else {
             sleep(SLEEP_IF_FULLY_SYNCED).await;
-            return Ok(());
         };
-        info!("Chain update: {chain_update:?}");
-        self.db.update_chain(self.chain_id, chain_update)?;
         Ok(())
     }
 
