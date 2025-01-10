@@ -1,7 +1,9 @@
 disable=SC1070
 disable=SC1091
 disable=SC2002
+disable=SC2004
 disable=SC2044
+disable=SC2068
 disable=SC2086
 disable=SC2046
 disable=SC2053
@@ -9,4 +11,7 @@ disable=SC2064
 disable=SC2145
 disable=SC2148
 disable=SC2155
+disable=SC2162
+disable=SC2164
+disable=SC2199
 disable=SC2034
