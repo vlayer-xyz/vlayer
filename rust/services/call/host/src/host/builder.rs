@@ -185,12 +185,11 @@ fn compute_start_block_number(
     prover_contract_deployed: impl Fn(BlockNumber) -> Result<bool, Error>,
     sync_status: &chain_common::SyncStatus,
 ) -> Result<BlockNumber, Error> {
-    let start_block_number = if prover_contract_deployed(sync_status.last_block)? {
-        sync_status.last_block
+    if prover_contract_deployed(sync_status.last_block)? {
+        Ok(sync_status.last_block)
     } else {
-        latest_rpc_block
-    };
-    Ok(start_block_number)
+        Ok(latest_rpc_block)
+    }
 }
 
 impl WithStartExecLocation {
