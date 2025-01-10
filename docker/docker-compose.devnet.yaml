@@ -27,6 +27,7 @@ services:
     ports:
       - "127.0.0.1:55688:80" 
     command: "80 api.x.com:443"
+
   notary-server:
     image: ghcr.io/tlsnotary/tlsn/notary-server:v0.1.0-alpha.7
     container_name: notary-server
@@ -37,14 +38,17 @@ services:
       - anvil-a
       - anvil-b
       - anvil-c
-    image: ghcr.io/vlayer-xyz/call_server:latest
+
+    image: ghcr.io/vlayer-xyz/call_server:latest  
     container_name: vlayer-call-server
     pull_policy: always
     environment:
       RUST_LOG: "info,call_engine=debug"
-    command: "--proof fake --host 0.0.0.0 --rpc-url 31337:http://anvil-a:8545 --rpc-url 31338:http://anvil-b:8545 --rpc-url 31339:http://anvil-c:8545"
+      RISC0_DEV_MODE: 1
+    command: "--proof fake --host 0.0.0.0 --rpc-url 31337:http://anvil-a:8545 --rpc-url 31338:http://anvil-b:8545 --rpc-url 31339:http://anvil-c:8545 --chain-proof-url http://vlayer-chain-server:3001"
     ports:
       - "127.0.0.1:3000:3000"
+
   vlayer-chain-worker-a:
     depends_on:
       - anvil-a
@@ -64,6 +68,7 @@ services:
       MAX_BACK_PROPAGATION_BLOCKS: 10
       MAX_HEAD_BLOCKS: 10
       CONFIRMATIONS: 1
+
   vlayer-chain-worker-b:
     depends_on:
       - anvil-b
@@ -83,6 +88,7 @@ services:
       MAX_BACK_PROPAGATION_BLOCKS: 10
       MAX_HEAD_BLOCKS: 10
       CONFIRMATIONS: 1
+
   vlayer-chain-worker-c:
     depends_on:
       - anvil-c
@@ -102,6 +108,7 @@ services:
       MAX_BACK_PROPAGATION_BLOCKS: 10
       MAX_HEAD_BLOCKS: 10
       CONFIRMATIONS: 1
+
   vlayer-chain-server:
     image: ghcr.io/vlayer-xyz/chain_server:latest
     container_name: vlayer-chain-server
