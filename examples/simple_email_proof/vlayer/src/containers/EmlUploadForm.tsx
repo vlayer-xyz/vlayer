@@ -6,13 +6,14 @@ import { getStrFromFile } from "../lib/utils";
 import proverSpec from "../../../out/EmailDomainProver.sol/EmailDomainProver";
 import verifierSpec from "../../../out/EmailProofVerifier.sol/EmailDomainVerifier";
 import EmlForm from "../components/EmlForm";
+import { createContext } from "@vlayer/sdk/config";
+
 import {
-  createContext,
-  customTransport,
-  type Chain,
   type PrivateKeyAccount,
   type Address,
-} from "@vlayer/sdk/config";
+  type Chain,
+  custom as customTransport,
+} from "viem";
 
 function getChainByName(name: string) {
   const chain = (chains as Record<string, Chain>)[name];
