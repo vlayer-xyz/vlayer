@@ -30,6 +30,10 @@ cargo binstall -y cargo-risczero@1.2.0
 cargo risczero install
 echo '::endgroup::'
 
+echo '::group::Playwright browser installation'
+bunx playwright install --with-deps chromium
+echo '::endgroup::'
+
 git config --global user.email "test@example.com"
 git config --global user.name "Github Runner"
 

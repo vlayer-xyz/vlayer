@@ -25,14 +25,13 @@ jobs:
       # Needed until we have those binaries released.
       - name: Build chain service binaries
         run: cargo build --release -p worker -p chain_server
-        working-directory: rust
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
         with:
           name: chain-service-binaries
           path: |
-            rust/target/release/worker
-            rust/target/release/chain_server
+            target/release/worker
+            target/release/chain_server
           retention-days: 2
 
       - name: Install ansible galaxy collections

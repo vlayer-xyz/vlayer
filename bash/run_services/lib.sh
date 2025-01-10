@@ -25,7 +25,7 @@ function startup_chain_server() {
     local db_path="$1"
 
     echo "Starting chain server"
-    pushd "${VLAYER_HOME}/rust"
+    pushd "${VLAYER_HOME}"
 
     RUST_LOG=info \
     ./target/debug/chain_server \
@@ -69,7 +69,7 @@ function startup_vlayer() {
     local external_urls=("$@")
 
     echo "Starting vlayer REST server"
-    pushd "${VLAYER_HOME}/rust"
+    pushd "${VLAYER_HOME}"
 
     local args=(
         "--proof" "${proof_arg}"
@@ -98,7 +98,7 @@ function startup_vlayer() {
 
 function ensure_binaries_built() {
     if [[ "${BUILD_BINARIES}" == "1" ]] ; then
-        pushd "${VLAYER_HOME}/rust"
+        pushd "${VLAYER_HOME}"
         silent_unless_fails cargo build --bin call_server --bin chain_server --bin worker
         popd
     fi

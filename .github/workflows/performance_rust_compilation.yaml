@@ -35,14 +35,12 @@ jobs:
         uses: ./.github/actions/contracts-prerequisites
 
       - name: Compilation
-        working-directory: rust
         env:
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
         run: |
           cargo build
 
       - name: Incremental compilation
-        working-directory: rust
         run: |
           /usr/bin/time -f %E -o incremental_compilation_time cargo build --timings
           echo "INCREMENTAL_COMPILATION_TIME=$(cat incremental_compilation_time)" >> $GITHUB_ENV
@@ -51,7 +49,7 @@ jobs:
         uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
         with:
           name: timings-report.html
-          path: rust/target/cargo-timings/cargo-timing.html
+          path: target/cargo-timings/cargo-timing.html
           retention-days: 7
 
       - uses: marocchino/sticky-pull-request-comment@v2

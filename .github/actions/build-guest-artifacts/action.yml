@@ -17,7 +17,6 @@ runs:
         RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
       run: cargo build --release --target x86_64-unknown-linux-gnu --package call_guest_wrapper
       shell: bash
-      working-directory: rust
 
     - name: "Save methods.rs and ELF binary"
       run: |
@@ -34,12 +33,11 @@ runs:
         sed -i "s|${BINARY_PATH}|<ELF_PATH>|g" ./target/assets/methods.rs
         cp "$BINARY_PATH" ./target/assets/
       shell: bash
-      working-directory: rust
 
     - name: Push guest artifacts
       uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
       with:
         name: guest-artifacts
-        path: rust/target/assets
+        path: target/assets
         if-no-files-found: error
         retention-days: 3
