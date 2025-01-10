@@ -56,7 +56,10 @@ fn change_sdk_dependency_to_npm(foundry_root: &Path) -> Result<(), CLIError> {
 
     if let Some(dependencies) = json.get_mut("dependencies") {
         if let Some(dependencies_map) = dependencies.as_object_mut() {
-            dependencies_map.insert("@vlayer/sdk".to_string(), Value::String(version));
+            dependencies_map.insert("@vlayer/sdk".to_string(), Value::String(version.clone()));
+            if dependencies_map.contains_key("@vlayer/react") {
+                dependencies_map.insert("@vlayer/react".to_string(), Value::String(version));
+            }
         }
     } else {
         let mut dependencies_map = Map::new();

@@ -5,7 +5,7 @@ set -ueo pipefail
 VLAYER_HOME=$(git rev-parse --show-toplevel)
 
 function install_deps {
-    cd ${VLAYER_HOME}/packages
+    cd ${VLAYER_HOME}
     bun install --frozen-lockfile
 
     cd ${VLAYER_HOME}/packages/sdk

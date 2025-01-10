@@ -21,7 +21,8 @@
   "dependencies": {
     "@noble/hashes": "^1.4.0",
     "@types/node": "^22.5.4",
-    "@vlayer/sdk": "file:../../../packages/sdk",
+    "@vlayer/sdk": "workspace:*",
+    "@vlayer/react": "workspace:*",
     "chalk": "^5.3.0",
     "debug": "^4.3.7",
     "dotenv": "^16.4.5",
