@@ -13,7 +13,7 @@
 
 [@vlayer/react](https://www.npmjs.com/package/@vlayer/react) is a library of React hooks for interacting with the vlayer.
 
-These hooks provide functions that help manage state and side effects in React components, aligning with React's functional programming paradigm.
+These hooks provide functions that help manage state and side effects in React components, aligning with React's functional programming paradigm and style of [wagmi](https://wagmi.sh/docs/getting-started) hooks.
 
 ## Prerequisites
 The following libraries are required to use `@vlayer/react`:
@@ -174,7 +174,6 @@ const ExampleComponent = () => {
 ```
 
 The `callProver` function has to be invoked with the required arguments by the prover contract function.
-
 
 Besides proof hash, the hook returns variables to monitor the request and update the UI:
 - `status`: Overall status of the proving process (`idle`, `pending`, `ready`, or `error`).
