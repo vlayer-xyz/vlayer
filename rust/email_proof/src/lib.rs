@@ -47,6 +47,7 @@ mod test {
         let calldata = UnverifiedEmail {
             email,
             dnsRecords: DNS_FIXTURE.to_vec(),
+            verificationData: vec![],
         }
         .abi_encode();
 
@@ -68,6 +69,7 @@ mod test {
         let calldata = UnverifiedEmail {
             email,
             dnsRecords: DNS_FIXTURE.to_vec(),
+            verificationData: vec![],
         }
         .abi_encode();
         assert_eq!(
@@ -83,6 +85,7 @@ mod test {
         let calldata = UnverifiedEmail {
             email,
             dnsRecords: DNS_FIXTURE.to_vec(),
+            verificationData: vec![],
         }
         .abi_encode();
         assert_eq!(
@@ -98,6 +101,7 @@ mod test {
         let calldata = UnverifiedEmail {
             email,
             dnsRecords: vec![],
+            verificationData: vec![],
         }
         .abi_encode();
         assert_eq!(
@@ -115,6 +119,7 @@ mod test {
             dnsRecords: vec![
                 "v=DKIM1; k=rsa; p=MIIBIjANBgkqhkiG9w0BAQEFAAOCAQ8AMIIBCgKCAQEA3gWcOhCm99qzN+h7/2+LeP3CLsJkQQ4EP/2mrceXle5pKq8uZmBl1U4d2Vxn4w+pWFANDLmcHolLboESLFqEL5N6ae7u9b236dW4zn9AFkXAGenTzQEeif9VUFtLAZ0Qh2eV7OQgz/vPj5IaNqJ7h9hpM9gO031fe4v+J0DLCE8Rgo7hXbNgJavctc0983DaCDQaznHZ44LZ6TtZv9TBs+QFvsy4+UCTfsuOtHzoEqOOuXsVXZKLP6B882XbEnBpXEF8QzV4J26HiAJFUbO3mAqZL2UeKC0hhzoIZqZXNG0BfuzOF0VLpDa18GYMUiu+LhEJPJO9D8zhzvQIHNrpGwIDAQAB".into()
             ],
+            verificationData: vec![],
         }
         .abi_encode();
 
@@ -131,6 +136,7 @@ mod test {
         let calldata = UnverifiedEmail {
             email,
             dnsRecords: DNS_FIXTURE.to_vec(),
+            verificationData: vec![],
         }
         .abi_encode();
 
@@ -148,6 +154,7 @@ mod test {
         let calldata = UnverifiedEmail {
             email,
             dnsRecords: DNS_FIXTURE.to_vec(),
+            verificationData: vec![],
         }
         .abi_encode();
 

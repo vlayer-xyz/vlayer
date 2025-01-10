@@ -6,7 +6,7 @@ import {Address} from "@openzeppelin-contracts-5.0.1/utils/Address.sol";
 import {Precompiles} from "./PrecompilesAddresses.sol";
 
 struct VerificationData {
-    uint64 valid_until;
+    uint64 validUntil;
     string signature;
     string pubKey;
 }

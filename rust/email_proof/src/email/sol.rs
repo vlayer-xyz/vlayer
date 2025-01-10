@@ -42,6 +42,7 @@ mod test {
             let input_email = UnverifiedEmail {
                 email: "email".into(),
                 dnsRecords: vec!["dns".into()],
+                verificationData: vec![],
             };
             let bytecode = UnverifiedEmail::abi_encode(&input_email);
 
