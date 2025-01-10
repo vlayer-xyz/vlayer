@@ -7,6 +7,7 @@ import {
 } from "viem";
 import { type BrandedHash, type ProveArgs } from "@vlayer/sdk";
 import { useProofContext } from "../context";
+import { useChainId } from "wagmi";
 
 export enum ProverStatus {
   Idle = "Idle",
@@ -20,6 +21,8 @@ export const useCallProver = (
 ) => {
   // read vlayer client from context
   const { vlayerClient } = useProofContext();
+  // read chainId from wagmi
+  const chainId = useChainId();
 
   // state
   const [status, setStatus] = useState<ProverStatus>(ProverStatus.Idle);
@@ -34,6 +37,7 @@ export const useCallProver = (
       const hash = await vlayerClient.prove({
         ...proveArgs,
         args,
+        chainId,
       });
       setHash(hash);
       setStatus(ProverStatus.Ready);

@@ -19,6 +19,10 @@ describe("useCallProver", () => {
       }),
     }));
 
+    vi.mock("wagmi", () => ({
+      useChainId: () => mockChainId,
+    }));
+
     mockVlayerClient.prove.mockReset();
   });
 
@@ -28,7 +32,6 @@ describe("useCallProver", () => {
         address: "0x456",
         proverAbi: [] as Abi,
         functionName: "test",
-        chainId: mockChainId,
       }),
     );
 
@@ -52,7 +55,6 @@ describe("useCallProver", () => {
         address: "0x456",
         proverAbi: [] as Abi,
         functionName: "test",
-        chainId: mockChainId,
       }),
     );
 
@@ -78,7 +80,6 @@ describe("useCallProver", () => {
         address: "0x456",
         proverAbi: {} as Abi,
         functionName: "test",
-        chainId: mockChainId,
       }),
     );
 
@@ -99,16 +100,18 @@ describe("useCallProver", () => {
         address: "0x456",
         proverAbi: [] as Abi,
         functionName: "test",
-        chainId: anotherChainId,
       }),
     );
+
+    vi.mock("wagmi", () => ({
+      useChainId: () => anotherChainId,
+    }));
 
     const proverCallArgs: ProveArgs<Abi, string> = {
       address: "0x456",
       proverAbi: [] as Abi,
       functionName: "test",
       args: [],
-      chainId: anotherChainId,
     };
 
     await act(async () => {
