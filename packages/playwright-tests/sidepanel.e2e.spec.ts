@@ -112,10 +112,10 @@ test.describe("Full flow of webproof using extension", () => {
         result: {
           state: "done",
           status: 1,
-          metrics: test.expect.any({}),
+          metrics: {},
           data: {
-            evm_call_result: test.expect.any({}),
-            proof: test.expect.any({}),
+            evm_call_result: {},
+            proof: {},
           },
         },
       });
@@ -254,10 +254,10 @@ test.describe("Full flow of webproof using extension", () => {
         result: {
           state: "done",
           status: 1,
-          metrics: test.expect.any({}),
+          metrics: {},
           data: {
-            evm_call_result: test.expect.any({}),
-            proof: test.expect.any({}),
+            evm_call_result: {},
+            proof: {},
           },
         },
       });
@@ -379,10 +379,10 @@ test.describe("Full flow of webproof using extension", () => {
         result: {
           state: "done",
           status: 1,
-          metrics: test.expect.any({}),
+          metrics: {},
           data: {
-            evm_call_result: test.expect.any({}),
-            proof: test.expect.any({}),
+            evm_call_result: {},
+            proof: {},
           },
         },
       });
