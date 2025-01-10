@@ -41,7 +41,7 @@ pub struct Host {
     start_execution_location: ExecutionLocation,
     envs: CachedEvmEnv<HostDb>,
     prover: Prover,
-    // None means that chain client is not available. Therefore Host runs in degrated mode. Time travel and teleport are not available
+    // None means that chain service is not available. Therefore Host runs in degrated mode. Time travel and teleport are not available
     chain_client: Option<chain_client::RecordingClient>,
     chain_proof_verifier: chain_proof::ZkVerifier,
     guest_elf: GuestElf,
@@ -99,7 +99,7 @@ impl Host {
 
     pub async fn chain_proof_ready(&self) -> Result<bool, AwaitingChainProofError> {
         let Some(ref chain_client) = self.chain_client else {
-            return Ok(true); // No chain client, so no chain proof to wait for
+            return Ok(true); // No chain service, so no chain proof to wait for
         };
         let latest_indexed_block = chain_client
             .get_sync_status(self.start_execution_location.chain_id)

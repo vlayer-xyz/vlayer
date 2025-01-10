@@ -182,5 +182,5 @@ fn create_host<DB: Database>(
     let start_exec_location = (TEST_CHAIN_ID, block_number).into();
     let chain_proof_client = Box::new(RpcChainProofClient::new(chain_proof_url));
 
-    Host::new(providers, start_exec_location, chain_proof_client, config)
+    Host::new(providers, start_exec_location, Some(chain_proof_client), config)
 }

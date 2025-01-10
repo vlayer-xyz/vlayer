@@ -159,7 +159,7 @@ impl WithStartChainId {
 
         let sync_status = chain_client.get_sync_status(start_chain_id).await;
         let Ok(sync_status) = sync_status else {
-            // If chain client is not available, we fallback to a degraded mode (no teleport or time travel)
+            // If chain service is not available, we fallback to a degraded mode (no teleport or time travel)
             drop(prover_contract_deployed);
             return Ok(WithStartExecLocation {
                 chain_client: None,
