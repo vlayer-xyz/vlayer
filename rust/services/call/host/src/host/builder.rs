@@ -58,7 +58,7 @@ pub struct WithStartChainId {
 }
 
 pub struct WithStartExecLocation {
-    chain_client: Box<dyn chain_client::Client>,
+    chain_client: Option<Box<dyn chain_client::Client>>,
     start_exec_location: ExecutionLocation,
     providers: CachedMultiProvider,
 }
@@ -157,24 +157,40 @@ impl WithStartChainId {
             return Err(Error::ProverContractNotDeployed);
         }
 
-        let latest_indexed_block = chain_client
-            .get_sync_status(start_chain_id)
-            .await?
-            .last_block;
-        let start_block_number = if prover_contract_deployed(latest_indexed_block)? {
-            latest_indexed_block
-        } else {
-            latest_rpc_block
+        let sync_status = chain_client.get_sync_status(start_chain_id).await;
+        let Ok(sync_status) = sync_status else {
+            // If chain client is not available, we fallback to a degraded mode (no teleport or time travel)
+            drop(prover_contract_deployed);
+            return Ok(WithStartExecLocation {
+                chain_client: None,
+                start_exec_location: (start_chain_id, latest_rpc_block).into(),
+                providers,
+            });
         };
+
+        let start_block_number =
+            compute_start_block_number(latest_rpc_block, prover_contract_deployed, &sync_status)?;
         let start_exec_location = (start_chain_id, start_block_number).into();
-        drop(prover_contract_deployed);
 
         Ok(WithStartExecLocation {
-            chain_client,
+            chain_client: Some(chain_client),
             start_exec_location,
             providers,
         })
     }
+}
+
+fn compute_start_block_number(
+    latest_rpc_block: BlockNumber,
+    prover_contract_deployed: impl Fn(BlockNumber) -> Result<bool, Error>,
+    sync_status: &chain_common::SyncStatus,
+) -> Result<BlockNumber, Error> {
+    let start_block_number = if prover_contract_deployed(sync_status.last_block)? {
+        sync_status.last_block
+    } else {
+        latest_rpc_block
+    };
+    Ok(start_block_number)
 }
 
 impl WithStartExecLocation {

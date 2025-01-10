@@ -6,6 +6,7 @@ use call_engine::{
     evm::{
         env::{cached::CachedEvmEnv, location::ExecutionLocation},
         execution_result::SuccessfulExecutionResult,
+        input::MultiEvmInput,
     },
     travel_call_executor::TravelCallExecutor,
     verifier::{
@@ -15,13 +16,14 @@ use call_engine::{
     },
     Call, CallGuestId, GuestOutput, HostOutput, Input, Seal,
 };
-use chain_client::Client as ChainClient;
+use chain_client::{ChainProofCache, Client as ChainClient};
 use common::GuestElf;
 pub use config::Config;
 use derive_new::new;
 pub use error::{AwaitingChainProofError, BuilderError, Error, PreflightError, ProvingError};
 pub use prover::Prover;
 use provider::CachedMultiProvider;
+use revm::primitives::HashMap;
 use risc0_zkvm::{ProveInfo, SessionStats};
 use seal::EncodableReceipt;
 use tracing::instrument;
@@ -39,7 +41,8 @@ pub struct Host {
     start_execution_location: ExecutionLocation,
     envs: CachedEvmEnv<HostDb>,
     prover: Prover,
-    chain_client: chain_client::RecordingClient,
+    // None means that chain client is not available. Therefore Host runs in degrated mode. Time travel and teleport are not available
+    chain_client: Option<chain_client::RecordingClient>,
     chain_proof_verifier: chain_proof::ZkVerifier,
     guest_elf: GuestElf,
 }
@@ -75,14 +78,14 @@ impl Host {
     pub fn new(
         providers: CachedMultiProvider,
         start_execution_location: ExecutionLocation,
-        chain_client: Box<dyn chain_client::Client>,
+        chain_client: Option<Box<dyn chain_client::Client>>,
         config: Config,
     ) -> Self {
         let envs = CachedEvmEnv::from_factory(HostEvmEnvFactory::new(providers));
         let prover = Prover::new(config.proof_mode, &config.call_guest_elf);
         let chain_proof_verifier =
             chain_proof::ZkVerifier::new(config.chain_guest_elf.id, zk_proof::HostVerifier);
-        let chain_client = chain_client::RecordingClient::new(chain_client);
+        let chain_client = chain_client.map(chain_client::RecordingClient::new);
 
         Host {
             envs,
@@ -95,8 +98,10 @@ impl Host {
     }
 
     pub async fn chain_proof_ready(&self) -> Result<bool, AwaitingChainProofError> {
-        let latest_indexed_block = self
-            .chain_client
+        let Some(ref chain_client) = self.chain_client else {
+            return Ok(true); // No chain client, so no chain proof to wait for
+        };
+        let latest_indexed_block = chain_client
             .get_sync_status(self.start_execution_location.chain_id)
             .await?
             .last_block;
@@ -114,10 +119,9 @@ impl Host {
 
         let multi_evm_input = into_multi_input(self.envs)?;
 
-        let verifier = guest_input::ZkVerifier::new(self.chain_client, self.chain_proof_verifier);
-        verifier.verify(&multi_evm_input).await?;
-        let (chain_proof_client, _) = verifier.into_parts();
-        let chain_proofs = chain_proof_client.into_cache();
+        let chain_proofs =
+            get_chain_proofs(&multi_evm_input, self.chain_client, self.chain_proof_verifier)
+                .await?;
 
         let input = Input {
             multi_evm_input,
@@ -192,4 +196,22 @@ fn provably_execute(prover: &Prover, input: &Input) -> Result<EncodedProofWithSt
     let raw_guest_output: Bytes = receipt.journal.bytes.into();
 
     Ok(EncodedProofWithStats::new(seal, raw_guest_output, stats, elapsed_time))
+}
+
+async fn get_chain_proofs(
+    multi_evm_input: &MultiEvmInput,
+    client: Option<chain_client::RecordingClient>,
+    verifier: chain_proof::ZkVerifier,
+) -> Result<ChainProofCache, PreflightError> {
+    if multi_evm_input.is_single_location() {
+        Ok(HashMap::new())
+    } else {
+        let Some(client) = client else {
+            return Err(PreflightError::ChainClientNotAvailable);
+        };
+        let verifier = guest_input::ZkVerifier::new(client, verifier);
+        verifier.verify(multi_evm_input).await?;
+        let (chain_proof_client, _) = verifier.into_parts();
+        Ok(chain_proof_client.into_cache())
+    }
 }

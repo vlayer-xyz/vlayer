@@ -52,6 +52,10 @@ where
         }
     }
 
+    pub fn len(&self) -> usize {
+        self.cache.read().expect("poisoned lock").len()
+    }
+
     pub fn get(&self, location: ExecutionLocation) -> Result<Arc<EvmEnv<D>>> {
         self.cache.try_get_or_insert(location, || {
             self.factory.lock().expect("poisoned lock").create(location)
