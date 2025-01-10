@@ -207,7 +207,7 @@ async fn get_chain_proofs(
         Ok(HashMap::new())
     } else {
         let Some(client) = client else {
-            return Err(PreflightError::ChainClientNotAvailable);
+            return Err(PreflightError::ChainServiceNotAvailable);
         };
         let verifier = guest_input::ZkVerifier::new(client, verifier);
         verifier.verify(multi_evm_input).await?;

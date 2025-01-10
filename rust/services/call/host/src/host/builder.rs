@@ -159,8 +159,10 @@ impl WithStartChainId {
 
         let sync_status = chain_client.get_sync_status(start_chain_id).await;
         let Ok(sync_status) = sync_status else {
-            // If chain service is not available, we fallback to a degraded mode (no teleport or time travel)
+            // `prover_contract_deployed`` borrows `providers`` and borrow checker only works on code blocks level and not on lines level
+            // Therefore we need to drop manually before we can return providers
             drop(prover_contract_deployed);
+            // If chain service is not available, we fallback to a degraded mode (no teleport or time travel)
             return Ok(WithStartExecLocation {
                 chain_client: None,
                 start_exec_location: (start_chain_id, latest_rpc_block).into(),
