@@ -49,7 +49,7 @@ echo "Starting services..."
 
 start_anvil
 if [[ "${RUN_CHAIN_SERVICES:-0}" == "1" ]] ; then 
-    startup_chain_services ""${CHAIN_WORKER_ARGS[@]+"${CHAIN_WORKER_ARGS[@]}"}""
+    startup_chain_services "${CHAIN_WORKER_ARGS[@]+"${CHAIN_WORKER_ARGS[@]}"}"
 fi
 startup_vlayer "${SERVER_PROOF_ARG}" ${EXTERNAL_RPC_URLS[@]+"${EXTERNAL_RPC_URLS[@]}"}
 
