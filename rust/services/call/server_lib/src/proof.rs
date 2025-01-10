@@ -44,17 +44,17 @@ impl State {
         )
     }
 
-    pub fn data(&self) -> Option<&RawData> {
+    pub const fn data(&self) -> Option<&RawData> {
         match self {
-            State::Done(data) => Some(&data),
+            State::Done(data) => Some(data),
             _ => None,
         }
     }
 
-    pub fn err(&self) -> Option<&Error> {
+    pub const fn err(&self) -> Option<&Error> {
         match self {
             State::ChainProofError(err) | State::PreflightError(err) | State::ProvingError(err) => {
-                Some(&err)
+                Some(err)
             }
             _ => None,
         }
