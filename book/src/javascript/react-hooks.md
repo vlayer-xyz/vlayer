@@ -22,6 +22,30 @@ The following libraries are required to use `@vlayer/react`:
 - [Wagmi](https://wagmi.sh/docs/getting-started): A library of React hooks for Ethereum.
 - [TanStack Query](https://tanstack.com/query/latest): A library for efficient data fetching and caching.
 
+Add them to your project if they are not already present: 
+{{#tabs }}
+{{#tab name="yarn" }}
+```sh
+yarn add react react-dom viem wagmi @tanstack/react-query
+```
+{{#endtab }}
+{{#tab name="npm" }}
+```sh
+npm install react react-dom viem wagmi @tanstack/react-query
+```
+{{#endtab }}
+{{#tab name="pnpm" }}
+```sh
+pnpm install react react-dom viem wagmi @tanstack/react-query
+```
+{{#endtab }}
+{{#tab name="bun" }}
+```sh
+bun add react react-dom viem wagmi @tanstack/react-query
+```
+{{#endtab }}
+{{#endtabs }}
+
 ## Installation
 Install the `@vlayer/react` library using preferred package manager:
 
@@ -53,17 +77,19 @@ Wrap the application with the required [React Context Providers](https://react.d
 
 ```javascript
 import { WagmiProvider, http, createConfig } from "wagmi";
-import { optimismSepolia, foundry } from "wagmi/chains";
+import { sepolia, baseSepolia,optimismSepolia, foundry } from "wagmi/chains";
 import { metaMask } from "wagmi/connectors";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { ProofProvider } from "@vlayer/react";
 
 const wagmiConfig = createConfig({
-  chains: [foundry, optimismSepolia],
+  chains: [sepolia, baseSepolia, optimismSepolia, foundry],
   connectors: [metaMask()],
   transports: {
-    [foundry.id]: http(),
+    [sepolia.id]: http(),
+    [baseSepolia.id]: http(),
     [optimismSepolia.id]: http(),
+    [foundry.id]: http(),
   },
 });
 
@@ -87,7 +113,7 @@ export default App;
 Context providers facilitate the sharing of application state (e.g., connected wallet, selected chain) across components. Once the setup is complete, components wrapped within the `WagmiProvider`, `QueryClientProvider`, and `ProofProvider` can use the vlayer hooks.
 
 ## `ProofProvider`
-vlayer `ProofProvider` allows to manipulate `proverUrl`, `notaryUrl` and `wsProxyUrl` via `config` prop:
+vlayer `ProofProvider` allows to configure custom `proverUrl`, `notaryUrl` and `wsProxyUrl` via `config` prop:
 
 ```javascript
 <ProofProvider
@@ -141,7 +167,7 @@ const {
 });
 ```
 
-The `callProver` function has to be invoked with the required arguments:
+The `callProver` function has to be invoked with the required arguments by the prover contract function:
 
 ```javascript
 <button onClick={() => callProver([...args])}>
@@ -149,8 +175,8 @@ The `callProver` function has to be invoked with the required arguments:
 </button>
 ```
 
-The hook returns properties to monitor the request and update the UI:
-- `status`: Overall status of the request (`idle`, `pending`, `ready`, or `error`).
+The hook returns variables to monitor the request and update the UI:
+- `status`: Overall status of the proving process (`idle`, `pending`, `ready`, or `error`).
 - `isIdle`: Indicates no proving request has been initiated.
 - `isPending`: Indicates the proving process is ongoing.
 - `isReady`: Indicates the proving process is complete.
