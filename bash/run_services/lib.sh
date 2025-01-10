@@ -1,6 +1,6 @@
-source "$(dirname "${BASH_SOURCE[0]}")/../lib/io"
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/io.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/../common.sh"
-source "$(dirname "${BASH_SOURCE[0]}")/chain_worker"
+source "$(dirname "${BASH_SOURCE[0]}")/chain_worker.sh"
 
 function setup_tmp_dir() {
     if [[ -z "${VLAYER_TMP_DIR:-}" ]] ; then

@@ -5,8 +5,8 @@ set -ueo pipefail
 # Imports
 VLAYER_HOME=$(git rev-parse --show-toplevel)
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
-source "$(dirname "${BASH_SOURCE[0]}")/run_services/lib"
-source "$(dirname "${BASH_SOURCE[0]}")/run_services/config"
+source "$(dirname "${BASH_SOURCE[0]}")/run_services/lib.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/run_services/config.sh"
 
 # Cleanup setup
 trap cleanup EXIT ERR INT
