@@ -12,7 +12,7 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
   forge build
 
   if [ -d "test" ]; then
-    cargo run --manifest-path ../../rust/Cargo.toml --package cli -- test
+    cargo run --manifest-path ../../Cargo.toml --package cli -- test
   else
     echo "Skipping vlayer test as test directory does not exist in ${example}"
   fi

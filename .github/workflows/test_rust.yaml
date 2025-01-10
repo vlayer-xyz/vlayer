@@ -37,7 +37,6 @@ jobs:
         run: bash/check-llvm-clang.sh
 
       - name: Run workspace rust tests
-        working-directory: rust
         run: |
           cargo test --workspace --locked
         env:

@@ -15,7 +15,7 @@ fn main() -> Result<()> {
 
         let out_dir = env::var("OUT_DIR").expect("'OUT_DIR' is not set");
         let out_dir_path = Path::new(&out_dir);
-        let assets_dir = Path::new("../../../target/assets");
+        let assets_dir = Path::new("../../../../target/assets");
 
         let image_id_sol_output_path = assets_dir.join("ImageID.sol");
         let elf_sol_output_path = assets_dir.join("Elf.sol");

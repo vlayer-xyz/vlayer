@@ -40,9 +40,6 @@ jobs:
         uses: ./.github/actions/build-guest-artifacts
 
   build-x86_64-unknown-linux-gnu-release:
-    defaults:
-      run:
-        working-directory: rust
     name: Build release for x86_64-unknown-linux-gnu
     needs: [build-guest-wrapper]
     runs-on: aws-linux-medium
@@ -86,9 +83,6 @@ jobs:
           target: "${{ env.target }}"
 
   build-x86_64-unknown-linux-musl-release:
-    defaults:
-      run:
-        working-directory: rust
     name: Build release for x86_64-unknown-linux-musl
     needs: [build-guest-wrapper]
     runs-on: aws-linux-medium
@@ -130,7 +124,7 @@ jobs:
           VLAYER_RELEASE: "nightly"
         run: |
           export RISC0_EXISTING_CALL_GUEST="$(pwd)/call_guest_replacement"
-          nix develop ../.github/nix/. --command bash -c "cargo build --release -p cli -p call_server -p worker -p chain_server"
+          nix develop .github/nix/. --command bash -c "cargo build --release -p cli -p call_server -p worker -p chain_server"
 
       - name: "Print build version"
         id: vlayer_build
@@ -146,9 +140,6 @@ jobs:
           target: "${{ env.target }}"
 
   build-darwin-arm64-release:
-    defaults:
-      run:
-        working-directory: rust
     name: Build release for aarch64-apple-darwin
     needs: [build-guest-wrapper]
     runs-on: macos-14-xlarge
