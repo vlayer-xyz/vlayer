@@ -68,17 +68,12 @@ pub struct CallResult {
 
 impl From<&ProofStatus> for CallResult {
     fn from(value: &ProofStatus) -> Self {
-        let state: State = (&value.state).into();
-        let status = if value.state.is_err() { 0 } else { 1 };
-        let data = value.state.data().cloned();
-        let error = value.state.err().map(ProofError::to_string);
-        let metrics = value.metrics;
-        Self {
-            state,
-            status,
-            metrics,
-            data,
-            error,
-        }
+Self {
+    state: (&value.state).into(),
+    status: if value.state.is_err() { 0 } else { 1 },
+    metrics: value.metrics,
+    data: value.state.data().cloned(),
+    error: value.state.err().map(ProofError::to_string),
+}
     }
 }
