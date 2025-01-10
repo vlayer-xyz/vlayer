@@ -47,6 +47,7 @@ jobs:
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
           VLAYER_RELEASE: "nightly"
           RISC0_USE_DOCKER: 1
+          CARGO_TARGET_DIR: ${{ github.workspace }}/target
         run: |
           cargo build --release --target ${{ env.target }} -p cli -p call_server -p worker -p chain_server
 
@@ -101,6 +102,7 @@ jobs:
         env:
           VLAYER_RELEASE: "nightly"
           RISC0_USE_DOCKER: 1
+          CARGO_TARGET_DIR: ${{ github.workspace }}/target
         run: |
           nix develop .github/nix/. --command bash -c "cargo build --release -p cli -p call_server -p worker -p chain_server"
 
@@ -170,6 +172,7 @@ jobs:
         env:
           VLAYER_RELEASE: "nightly"
           RISC0_USE_DOCKER: 1
+          CARGO_TARGET_DIR: ${{ github.workspace }}/target
         run: |
           cargo build --release --target ${{ env.target }} -p cli -p call_server -p worker -p chain_server
 
