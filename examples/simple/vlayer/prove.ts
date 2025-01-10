@@ -45,12 +45,10 @@ const nftContractAddress = await waitForContractDeploy({
   hash: nftDeployTransactionHash,
 });
 
-const currentBlockNumber = await ethClient.getBlockNumber();
-
 const { prover, verifier } = await deployVlayerContracts({
   proverSpec,
   verifierSpec,
-  proverArgs: [tokenAddress, currentBlockNumber],
+  proverArgs: [tokenAddress],
   verifierArgs: [nftContractAddress],
 });
 

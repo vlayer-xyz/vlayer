@@ -5,8 +5,8 @@ set -ueo pipefail
 # Imports
 VLAYER_HOME=$(git rev-parse --show-toplevel)
 source "$(dirname "${BASH_SOURCE[0]}")/common.sh"
-source "$(dirname "${BASH_SOURCE[0]}")/run_services/lib"
-source "$(dirname "${BASH_SOURCE[0]}")/run_services/config"
+source "$(dirname "${BASH_SOURCE[0]}")/run_services/lib.sh"
+source "$(dirname "${BASH_SOURCE[0]}")/run_services/config.sh"
 
 # Cleanup setup
 trap cleanup EXIT ERR INT
@@ -39,6 +39,7 @@ set_chain_worker_args
 echo "PROVING_MODE: ${PROVING_MODE}"
 echo "BONSAI_API_URL: ${BONSAI_API_URL}"
 echo "SERVER_PROOF_ARG: ${SERVER_PROOF_ARG}"
+echo "CHAIN_WORKER_ARGS: ${CHAIN_WORKER_ARGS[@]+"${CHAIN_WORKER_ARGS[@]}"}"
 echo "EXTERNAL_RPC_URLS: ${EXTERNAL_RPC_URLS[@]+"${EXTERNAL_RPC_URLS[@]}"}"
 echo
 
@@ -48,7 +49,7 @@ echo "Starting services..."
 
 start_anvil
 if [[ "${RUN_CHAIN_SERVICES:-0}" == "1" ]] ; then 
-    startup_chain_services "${CHAIN_WORKER_ARGS[@]}"
+    startup_chain_services "${CHAIN_WORKER_ARGS[@]+"${CHAIN_WORKER_ARGS[@]}"}"
 fi
 startup_vlayer "${SERVER_PROOF_ARG}" ${EXTERNAL_RPC_URLS[@]+"${EXTERNAL_RPC_URLS[@]}"}
 

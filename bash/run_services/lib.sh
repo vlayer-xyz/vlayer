@@ -1,6 +1,6 @@
-source "$(dirname "${BASH_SOURCE[0]}")/../lib/io"
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/io.sh"
 source "$(dirname "${BASH_SOURCE[0]}")/../common.sh"
-source "$(dirname "${BASH_SOURCE[0]}")/chain_worker"
+source "$(dirname "${BASH_SOURCE[0]}")/chain_worker.sh"
 
 function setup_tmp_dir() {
     if [[ -z "${VLAYER_TMP_DIR:-}" ]] ; then
@@ -41,6 +41,10 @@ function startup_chain_server() {
 }
 
 function startup_chain_services() {
+    if [[ -z "$@" ]] ; then
+        return 0
+    fi
+
     local db_path="${VLAYER_TMP_DIR}/chain_db"
 
     for args in "$@"; do 
