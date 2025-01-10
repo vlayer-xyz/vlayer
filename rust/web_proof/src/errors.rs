@@ -21,4 +21,7 @@ pub enum ParsingError {
 
     #[error("IO error: {0}")]
     StdIoError(#[from] std::io::Error),
+
+    #[error("Header name contains redacted characters")]
+    HeaderNameContainsRedactedCharacters,
 }
