@@ -1,5 +1,11 @@
 import type {
   RedactRequestHeaders,
+  RedactRequestHeadersExcept,
+  RedactRequestUrlQuery,
+  RedactRequestUrlQueryExcept,
+  RedactResponseHeaders,
+  RedactResponseHeadersExcept,
+  RedactResponseJsonBody,
   RedactResponseJsonBodyExcept,
 } from "src/web-proof-commons";
 import { describe, expect, expectTypeOf, it } from "vitest";
@@ -12,6 +18,66 @@ describe("redactionFunctions", () => {
     expect(redacted).toEqual({
       request: {
         headers: ["Authorization"],
+      },
+    });
+  });
+
+  it("should redact all request headers except", () => {
+    const redacted = request.headers.redactAllExcept(["Authorization"]);
+    expectTypeOf(redacted).toEqualTypeOf<RedactRequestHeadersExcept>();
+    expect(redacted).toEqual({
+      request: {
+        headers_except: ["Authorization"],
+      },
+    });
+  });
+
+  it("should redact request url query params", () => {
+    const redacted = request.url.redactQueryParams(["token"]);
+    expectTypeOf(redacted).toEqualTypeOf<RedactRequestUrlQuery>();
+    expect(redacted).toEqual({
+      request: {
+        url_query: ["token"],
+      },
+    });
+  });
+
+  it("should redact all request url query params except", () => {
+    const redacted = request.url.redactAllQueryParamsExcept(["token"]);
+    expectTypeOf(redacted).toEqualTypeOf<RedactRequestUrlQueryExcept>();
+    expect(redacted).toEqual({
+      request: {
+        url_query_except: ["token"],
+      },
+    });
+  });
+
+  it("should redact response headers", () => {
+    const redacted = response.headers.redact(["Authorization"]);
+    expectTypeOf(redacted).toEqualTypeOf<RedactResponseHeaders>();
+    expect(redacted).toEqual({
+      response: {
+        headers: ["Authorization"],
+      },
+    });
+  });
+
+  it("should redact all response headers except", () => {
+    const redacted = response.headers.redactAllExcept(["Authorization"]);
+    expectTypeOf(redacted).toEqualTypeOf<RedactResponseHeadersExcept>();
+    expect(redacted).toEqual({
+      response: {
+        headers_except: ["Authorization"],
+      },
+    });
+  });
+
+  it("should redact response jsonBody fields", () => {
+    const redacted = response.jsonBody.redact(["screen_name"]);
+    expectTypeOf(redacted).toEqualTypeOf<RedactResponseJsonBody>();
+    expect(redacted).toEqual({
+      response: {
+        json_body: ["screen_name"],
       },
     });
   });
