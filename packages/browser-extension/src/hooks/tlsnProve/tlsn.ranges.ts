@@ -2,8 +2,6 @@ import { ParsedTranscriptData } from "tlsn-js";
 import {
   RedactResponseHeaders,
   RedactResponseHeadersExcept,
-  RedactResponseJsonBody,
-  RedactResponseJsonBodyExcept,
   RedactRequestHeadersExcept,
   RedactRequestHeaders,
   RedactRequestUrlQuery,
@@ -14,11 +12,9 @@ import { match, P } from "ts-pattern";
 const stepAfterColon = 1;
 
 function calculateResponseRanges(
-  redactionItem:
-    | RedactResponseHeaders
-    | RedactResponseHeadersExcept
-    | RedactResponseJsonBody
-    | RedactResponseJsonBodyExcept,
+  redactionItem: RedactResponseHeaders | RedactResponseHeadersExcept,
+  // | RedactResponseJsonBody
+  // | RedactResponseJsonBodyExcept,
   raw: string,
   transcriptRanges: ParsedTranscriptData,
 ): CommitData[] {
@@ -48,15 +44,7 @@ function calculateResponseRanges(
         };
       });
     })
-    .otherwise(() => {
-      console.log(
-        "Its not implemented yet",
-        redactionItem,
-        raw,
-        transcriptRanges,
-      );
-      return [];
-    });
+    .exhaustive();
 }
 function calculateRequestRanges(
   redactionItem:
