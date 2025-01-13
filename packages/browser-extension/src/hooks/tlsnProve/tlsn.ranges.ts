@@ -4,8 +4,6 @@ import {
   RedactResponseHeadersExcept,
   RedactRequestHeadersExcept,
   RedactRequestHeaders,
-  RedactRequestUrlQuery,
-  RedactRequestUrlQueryExcept,
 } from "../../web-proof-commons/types/message";
 import { CommitData } from "tlsn-js/src/types";
 import { match, P } from "ts-pattern";
@@ -46,12 +44,11 @@ function calculateResponseRanges(
     })
     .exhaustive();
 }
+
 function calculateRequestRanges(
-  redactionItem:
-    | RedactRequestHeadersExcept
-    | RedactRequestHeaders
-    | RedactRequestUrlQueryExcept
-    | RedactRequestUrlQuery,
+  redactionItem: RedactRequestHeadersExcept | RedactRequestHeaders,
+  // | RedactRequestUrlQueryExcept
+  // | RedactRequestUrlQuery,
   raw: string,
   transcriptRanges: ParsedTranscriptData,
 ): CommitData[] {
@@ -82,10 +79,7 @@ function calculateRequestRanges(
         };
       });
     })
-  return {
-    start: 0,
-    end: 0,
-  };
+    .exhaustive();
 }
 
 export { calculateResponseRanges, calculateRequestRanges };

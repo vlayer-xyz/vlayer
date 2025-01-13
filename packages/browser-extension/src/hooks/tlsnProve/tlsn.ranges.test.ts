@@ -1,4 +1,4 @@
-import { describe, it, expect, test } from "vitest";
+import { describe, expect, test } from "vitest";
 import { calculateResponseRanges, calculateRequestRanges } from "./tlsn.ranges";
 import {
   RedactResponseHeaders,
@@ -99,10 +99,12 @@ describe("request headers", () => {
       fixtureTranscript.ranges.sent,
     );
 
-    expect(result).toEqual([{
-      start: 489,
-      end: 498,
-    }]);
+    expect(result).toEqual([
+      {
+        start: 489,
+        end: 498,
+      },
+    ]);
   });
 
   test("multiple headers", () => {
@@ -134,7 +136,8 @@ describe("request headers", () => {
     const redactionItem = {
       request: {
         headers_except: fixtureAllRequestHeaders.filter(
-          (header) => !["x-client-transaction-id", "connection"].includes(header),
+          (header) =>
+            !["x-client-transaction-id", "connection"].includes(header),
         ),
       },
     };
