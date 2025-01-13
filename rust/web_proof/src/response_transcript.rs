@@ -2,6 +2,7 @@ use std::io::Read;
 
 use chunked_transfer::Decoder;
 use derive_new::new;
+use httparse::Header;
 
 use crate::{errors::ParsingError, http_transaction_parser::parse_response};
 
@@ -18,23 +19,30 @@ impl ResponseTranscript {
 
         let body = &response_string[body_index..];
 
-        let transfer_encoding_header = headers
-            .iter()
-            .find(|header| header.name.eq_ignore_ascii_case("Transfer-Encoding"));
+        handle_chunked_transfer_encoding(&headers, body)
+    }
+}
 
-        match transfer_encoding_header {
-            Some(header) if header.value.eq_ignore_ascii_case(b"chunked") => {
-                let mut decoder = Decoder::new(body.as_bytes());
-                let mut decoded_body = String::new();
-                decoder.read_to_string(&mut decoded_body)?;
-                Ok(decoded_body)
-            }
-            Some(header) if header.value.eq_ignore_ascii_case(b"identity") => Ok(body.to_string()),
-            Some(header) => Err(ParsingError::UnsupportedTransferEncoding(
-                String::from_utf8_lossy(header.value).to_string(),
-            )),
-            None => Ok(body.to_string()),
+fn handle_chunked_transfer_encoding(
+    headers: &[Header],
+    body: &str,
+) -> Result<String, ParsingError> {
+    let transfer_encoding_header = headers
+        .iter()
+        .find(|header| header.name.eq_ignore_ascii_case("Transfer-Encoding"));
+
+    match transfer_encoding_header {
+        Some(header) if header.value.eq_ignore_ascii_case(b"chunked") => {
+            let mut decoder = Decoder::new(body.as_bytes());
+            let mut decoded_body = String::new();
+            decoder.read_to_string(&mut decoded_body)?;
+            Ok(decoded_body)
         }
+        Some(header) if header.value.eq_ignore_ascii_case(b"identity") => Ok(body.to_string()),
+        Some(header) => Err(ParsingError::UnsupportedTransferEncoding(
+            String::from_utf8_lossy(header.value).to_string(),
+        )),
+        None => Ok(body.to_string()),
     }
 }
 
