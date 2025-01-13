@@ -47,7 +47,8 @@ ensure_binaries_built
 
 echo "Starting services..."
 
-start_anvil
+start_anvils
+
 if [[ "${RUN_CHAIN_SERVICES:-0}" == "1" ]] ; then 
     startup_chain_services "${CHAIN_WORKER_ARGS[@]+"${CHAIN_WORKER_ARGS[@]}"}"
 fi

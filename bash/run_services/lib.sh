@@ -58,9 +58,12 @@ function startup_chain_services() {
     done
 }
 
-function start_anvil() {
-    echo "Starting anvil"
-    startup_anvil "${LOGS_DIR}/anvil.out" 8545 ANVIL
+function start_anvils() {
+    echo "Starting L1 anvil"
+    startup_anvil "${LOGS_DIR}/l1-anvil.out" 8545 L1_ANVIL
+
+    echo "Starting L2 Optimism anvil"
+    startup_anvil "${LOGS_DIR}/l2-op-anvil.out" 8546 L2_OP_ANVIL
 }
 
 function startup_vlayer() {
@@ -73,8 +76,9 @@ function startup_vlayer() {
 
     local args=(
         "--proof" "${proof_arg}"
-        "--rpc-url" "31337:http://localhost:8545"
-    ) 
+        "--rpc-url" "31337:http://localhost:8545" # L1
+        "--rpc-url" "31338:http://localhost:8546" # L2 OP
+    )
     if [[ "${RUN_CHAIN_SERVICES:-0}" == "1" ]] ; then 
         args+=("--chain-proof-url" "http://localhost:3001")
     fi
@@ -107,7 +111,7 @@ function ensure_binaries_built() {
 function cleanup() {
     echo "Cleaning up..."
 
-    for service in ANVIL CHAIN_SERVER VLAYER_SERVER ; do 
+    for service in L1_ANVIL L2_OP_ANVIL CHAIN_SERVER VLAYER_SERVER ; do 
         kill_service "${service}"
     done
 
