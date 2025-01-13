@@ -2,9 +2,11 @@ use std::io::Read;
 
 use chunked_transfer::Decoder;
 use derive_new::new;
-use httparse::Header;
 
-use crate::{errors::ParsingError, http_transaction_parser::parse_response};
+use crate::{
+    errors::ParsingError,
+    http_transaction_parser::{parse_response_and_validate_redaction, HttpHeader},
+};
 
 #[derive(Debug, new)]
 pub(crate) struct ResponseTranscript {
@@ -15,7 +17,7 @@ impl ResponseTranscript {
     pub(crate) fn parse_body(self) -> Result<String, ParsingError> {
         let response_string = String::from_utf8(self.transcript)?;
 
-        let (body_index, headers) = parse_response(&response_string)?;
+        let (body_index, headers) = parse_response_and_validate_redaction(&response_string)?;
 
         let body = &response_string[body_index..];
 
@@ -24,7 +26,7 @@ impl ResponseTranscript {
 }
 
 fn handle_chunked_transfer_encoding(
-    headers: &[Header],
+    headers: &[HttpHeader],
     body: &str,
 ) -> Result<String, ParsingError> {
     let transfer_encoding_header = headers
@@ -40,7 +42,7 @@ fn handle_chunked_transfer_encoding(
         }
         Some(header) if header.value.eq_ignore_ascii_case(b"identity") => Ok(body.to_string()),
         Some(header) => Err(ParsingError::UnsupportedTransferEncoding(
-            String::from_utf8_lossy(header.value).to_string(),
+            String::from_utf8_lossy(header.value.as_ref()).to_string(),
         )),
         None => Ok(body.to_string()),
     }

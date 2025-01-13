@@ -1,4 +1,4 @@
-use std::iter::zip;
+use std::{convert::Into, iter::zip};
 
 use httparse::{Header, Request, Response, Status, EMPTY_HEADER};
 
@@ -13,6 +13,21 @@ const REDACTED_CHAR: char = '\0';
 // of redacted content via diffs.
 const HEADER_NAME_REPLACEMENT_CHAR_1: char = '-';
 const HEADER_NAME_REPLACEMENT_CHAR_2: char = '+';
+
+#[derive(Clone)]
+pub(crate) struct HttpHeader {
+    pub(crate) name: String,
+    pub(crate) value: Vec<u8>,
+}
+
+impl From<Header<'_>> for HttpHeader {
+    fn from(header: Header) -> Self {
+        HttpHeader {
+            name: header.name.to_string(),
+            value: header.value.to_vec(),
+        }
+    }
+}
 
 pub(crate) fn extract_path_and_check_proper_headers_redaction(
     request: &str,
@@ -38,6 +53,22 @@ fn parse_request(request: &str) -> Result<(String, [Header; MAX_HEADERS_NUMBER])
     let path = req.path.ok_or(ParsingError::NoPathInRequest)?.to_string();
 
     Ok((path, headers))
+}
+
+pub(crate) fn parse_response_and_validate_redaction(
+    response: &str,
+) -> Result<(usize, Vec<HttpHeader>), ParsingError> {
+    let response_string =
+        response.replace(REDACTED_CHAR, HEADER_NAME_REPLACEMENT_CHAR_1.to_string().as_str());
+    let (body_index, headers_with_replacement_1) = parse_response(&response_string)?;
+
+    let response_string =
+        response.replace(REDACTED_CHAR, HEADER_NAME_REPLACEMENT_CHAR_2.to_string().as_str());
+    let (_, headers_with_replacement_2) = parse_response(&response_string)?;
+
+    validate_headers_redaction(&headers_with_replacement_1, &headers_with_replacement_2)?;
+
+    Ok((body_index, headers_with_replacement_1.map(Into::into).to_vec()))
 }
 
 pub(crate) fn parse_response(
