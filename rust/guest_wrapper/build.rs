@@ -34,6 +34,20 @@ pub fn main() -> anyhow::Result<()> {
     _remove_file_if_exists(&image_id_sol_output_path)?;
     _remove_file_if_exists(&elf_sol_output_path)?;
 
+    println!("cargo:rerun-if-env-changed=RISC0_EXISTING_CALL_GUEST");
+    if let Ok(guest_artifacts_path) = env::var("RISC0_EXISTING_CALL_GUEST") {
+        println!("cargo::warning=Using existing call_guest from {}", &guest_artifacts_path);
+        let guest_artifacts_path = Path::new(&guest_artifacts_path);
+
+        let methods_rs_path = guest_artifacts_path.join("methods.rs");
+        let image_id_path = guest_artifacts_path.join("ImageID.sol");
+
+        copy(methods_rs_path, out_dir_path.join("methods.rs"))?;
+        copy(image_id_path, image_id_sol_output_path)?;
+
+        return Ok(());
+    }
+
     // Configure docker build
     println!("cargo:rerun-if-env-changed=RISC0_USE_DOCKER");
     let use_docker = env::var("RISC0_USE_DOCKER").ok().map(|_| DockerOptions {
