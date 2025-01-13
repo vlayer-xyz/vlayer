@@ -68,6 +68,8 @@ export async function tlsnProve(
 
   const transcript = await prover.transcript();
 
+  console.log("Transcript", transcript);
+
   const commit = redact(transcript, redactionConfig);
 
   const notarizationOutputs = await prover.notarize(commit);
