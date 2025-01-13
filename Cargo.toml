@@ -33,6 +33,7 @@ members = [
     "rust/services/chain/worker",
     "rust/services/dns/server",
     "rust/test_runner",
+    "rust/verifiable_dns",
     "rust/version",
     "rust/web_proof",
     "rust/zkvm-benchmarks/benchmarks",
