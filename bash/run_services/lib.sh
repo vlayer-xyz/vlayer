@@ -58,14 +58,6 @@ function startup_chain_services() {
     done
 }
 
-function start_anvils() {
-    echo "Starting L1 anvil"
-    startup_anvil "${LOGS_DIR}/l1-anvil.out" 8545 L1_ANVIL
-
-    echo "Starting L2 Optimism anvil"
-    startup_anvil "${LOGS_DIR}/l2-op-anvil.out" 8546 L2_OP_ANVIL
-}
-
 function startup_vlayer() {
     local proof_arg=$1
     shift # shift input params, since the second (and last) arg is an array of external_urls 
@@ -111,7 +103,7 @@ function ensure_binaries_built() {
 function cleanup() {
     echo "Cleaning up..."
 
-    for service in L1_ANVIL L2_OP_ANVIL CHAIN_SERVER VLAYER_SERVER ; do 
+    for service in CHAIN_SERVER VLAYER_SERVER ; do 
         kill_service "${service}"
     done
 
@@ -121,6 +113,8 @@ function cleanup() {
             kill "${worker_pid}"
         fi
     done < "${CHAIN_WORKER_PIDS}"
+
+    docker compose -f $DOCKER_COMPOSE_FILE down anvil-L1 anvil-L2-OP
 
     echo "Cleanup done. Artifacts saved to: ${VLAYER_TMP_DIR}"
 }

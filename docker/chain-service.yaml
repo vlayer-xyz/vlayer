@@ -1,6 +1,6 @@
 include:
   - anvil.yaml
-service:
+services:
   vlayer-chain-worker-L1:
     depends_on:
       - anvil-L1
