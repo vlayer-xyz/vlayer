@@ -154,20 +154,6 @@ jobs:
       - name: Install contracts prerequisites
         uses: ./.github/actions/contracts-prerequisites
 
-      - name: Install & run colima (docker emulator)
-        run: |
-          brew update
-          brew install qemu
-          brew install docker
-          brew install docker-buildx
-          mkdir -p ~/.docker/cli-plugins
-          ln -sfn $(which docker-buildx) ~/.docker/cli-plugins/docker-buildx
-          docker buildx install
-          brew install colima
-          LIMACTL_PATH=$(brew --prefix)/bin/limactl
-          sudo curl -L -o $LIMACTL_PATH https://github.com/mikekazakov/lima-nohvf/raw/master/limactl && sudo chmod +x $LIMACTL_PATH
-          colima start --network-address --arch arm64 --vm-type=qemu
-
       - name: "Build binaries"
         env:
           VLAYER_RELEASE: "nightly"
