@@ -2,11 +2,8 @@ use std::io::Read;
 
 use chunked_transfer::Decoder;
 use derive_new::new;
-use httparse::{Response, Status, EMPTY_HEADER};
 
-use crate::errors::ParsingError;
-
-const MAX_HEADERS_NUMBER: usize = 40;
+use crate::{errors::ParsingError, http_transaction_parser::parse_response};
 
 #[derive(Debug, new)]
 pub(crate) struct ResponseTranscript {
@@ -17,12 +14,7 @@ impl ResponseTranscript {
     pub(crate) fn parse_body(self) -> Result<String, ParsingError> {
         let response_string = String::from_utf8(self.transcript)?;
 
-        let mut headers = [EMPTY_HEADER; MAX_HEADERS_NUMBER];
-        let mut res = Response::new(&mut headers);
-        let body_index = match res.parse(response_string.as_bytes())? {
-            Status::Complete(t) => t,
-            Status::Partial => return Err(ParsingError::Partial),
-        };
+        let (body_index, headers) = parse_response(&response_string)?;
 
         let body = &response_string[body_index..];
 

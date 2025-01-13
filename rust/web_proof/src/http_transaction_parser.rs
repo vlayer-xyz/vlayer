@@ -1,6 +1,6 @@
 use std::iter::zip;
 
-use httparse::{Header, Request, EMPTY_HEADER};
+use httparse::{Header, Request, Response, Status, EMPTY_HEADER};
 
 use crate::errors::ParsingError;
 
@@ -38,6 +38,19 @@ fn parse_request(request: &str) -> Result<(String, [Header; MAX_HEADERS_NUMBER])
     let path = req.path.ok_or(ParsingError::NoPathInRequest)?.to_string();
 
     Ok((path, headers))
+}
+
+pub(crate) fn parse_response(
+    response: &str,
+) -> Result<(usize, [Header; MAX_HEADERS_NUMBER]), ParsingError> {
+    let mut headers = [EMPTY_HEADER; MAX_HEADERS_NUMBER];
+    let mut res = Response::new(&mut headers);
+    let body_index = match res.parse(response.as_bytes())? {
+        Status::Complete(t) => t,
+        Status::Partial => return Err(ParsingError::Partial),
+    };
+
+    Ok((body_index, headers))
 }
 
 fn validate_headers_redaction(
