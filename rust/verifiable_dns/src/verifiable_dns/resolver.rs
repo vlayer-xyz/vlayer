@@ -4,19 +4,21 @@ use super::{record::Record, signer::Signer, time::Now, VerificationData};
 use crate::dns_over_https::{types::Record as DNSRecord, Provider as DoHProvider, Query, Response};
 
 #[derive(Clone)]
-pub(crate) struct Resolver<C: Now> {
+pub struct Resolver<C: Now> {
     signer: Signer,
     clock: PhantomData<C>,
 }
 
-impl<C: Now> Resolver<C> {
-    pub fn new() -> Self {
+impl<C: Now> Default for Resolver<C> {
+    fn default() -> Self {
         Self {
             signer: Signer::new(),
             clock: PhantomData,
         }
     }
+}
 
+impl<C: Now> Resolver<C> {
     fn sign_record(&self, record: &DNSRecord) -> VerificationData {
         let now = C::now();
         let valid_until = now + record.ttl;
@@ -58,14 +60,14 @@ mod tests {
             use super::*;
             #[test]
             fn resolves_vlayer_default_dkim_selector() {
-                let resolver = R::new();
+                let resolver = R::default();
                 let result = resolver.resolve(&"google._domainkey.vlayer.xyz".into());
                 assert!(result.is_some());
             }
 
             #[test]
             fn question_field_equals_to_question() {
-                let resolver = R::new();
+                let resolver = R::default();
                 let query = "google._domainkey.vlayer.xyz".into();
                 let result = resolver.resolve(&query).unwrap();
 
@@ -74,7 +76,7 @@ mod tests {
 
             #[test]
             fn status_code_is_successful() {
-                let resolver = R::new();
+                let resolver = R::default();
                 let query = "google._domainkey.vlayer.xyz".into();
                 let result = resolver.resolve(&query).unwrap();
 
@@ -83,7 +85,7 @@ mod tests {
 
             #[test]
             fn flags_are_set() {
-                let resolver = R::new();
+                let resolver = R::default();
                 let query = "google._domainkey.vlayer.xyz".into();
                 let result = resolver.resolve(&query).unwrap();
 
@@ -102,7 +104,7 @@ mod tests {
 
             #[test]
             fn valid_until_is_ttl_seconds_from_now() {
-                let resolver = R::new();
+                let resolver = R::default();
                 let record = DNSRecord {
                     name: "google._domainkey.vlayer.xyz".into(),
                     record_type: RecordType::TXT,
@@ -113,7 +115,7 @@ mod tests {
                 let result = resolver.sign_record(&record);
                 assert_eq!(result.valid_until, 364);
 
-                let result = Resolver::<MockClock<11>>::new().sign_record(&record);
+                let result = Resolver::<MockClock<11>>::default().sign_record(&record);
                 assert_eq!(result.valid_until, 311);
             }
         }

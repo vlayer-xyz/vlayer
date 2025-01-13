@@ -188,6 +188,7 @@ provider = { path = "rust/provider" }
 server_utils = { path = "rust/server_utils" }
 test_runner = { path = "rust/test_runner" }
 u64_range = { path = "rust/range" }
+verifiable_dns = { path = "verifiable_dns" }
 version = { path = "rust/version" }
 web_proof = { path = "rust/web_proof" }
 zkvm-benchmarks = { path = "rust/zkvm-benchmarks/benchmarks" }

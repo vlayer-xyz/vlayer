@@ -1,16 +1,11 @@
 [package]
-name = "dns_server"
+name = "verifiable_dns"
 version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-anyhow = { workspace = true }
-axum = { workspace = true }
 bytes = { workspace = true }
 chrono = { workspace = true, features = ["now"] }
-clap = { workspace = true, features = ["derive", "env"] }
-common = { workspace = true }
-dotenvy = { workspace = true }
 olpc-cjson = { workspace = true }
 rand = { workspace = true }
 rsa = { workspace = true, features = ["sha2"] }
@@ -18,14 +13,6 @@ serde = { workspace = true }
 serde_json = { workspace = true }
 serde_repr = { workspace = true }
 serde_with = { workspace = true, features = ["base64", "macros"] }
-tokio = { workspace = true }
-tower-http = { workspace = true, features = ["validate-request"] }
-tracing = { workspace = true }
-
-server_utils = { workspace = true }
-verifiable_dns = { workspace = true }
-
-[dev-dependencies]
 
 [lints]
 workspace = true

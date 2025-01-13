@@ -2,10 +2,10 @@ use axum::{
     http::{header::CONTENT_TYPE, HeaderValue},
     response::IntoResponse,
 };
-use serde::Deserialize;
+use serde::{Deserialize, Serialize};
+use verifiable_dns::{Query, Response};
 
 use super::MIME_DNS_JSON_CONTENT_TYPE;
-use crate::dns_over_https::{Query, Response};
 
 #[derive(Deserialize, Debug)]
 pub(super) struct Params {
@@ -28,7 +28,10 @@ pub(super) enum DNSQueryType {
     TXT,
 }
 
-impl IntoResponse for Response {
+#[derive(Serialize, Debug)]
+pub(super) struct ServerResponse(pub(super) Response);
+
+impl IntoResponse for ServerResponse {
     fn into_response(self) -> axum::response::Response {
         let mut response = serde_json::to_string(&self)
             .expect("Failed to serialize DNS response")

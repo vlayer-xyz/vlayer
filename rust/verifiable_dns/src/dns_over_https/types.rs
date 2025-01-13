@@ -4,7 +4,7 @@ use serde_repr::{Deserialize_repr, Serialize_repr};
 use crate::verifiable_dns::VerificationData;
 
 #[derive(Serialize, Clone, Default, PartialEq, Debug)]
-pub(crate) struct Query {
+pub struct Query {
     pub name: String,
     #[serde(rename = "type")]
     record_type: RecordType,
@@ -20,7 +20,7 @@ pub(crate) enum RecordType {
 
 #[derive(Serialize, Default, PartialEq, Debug)]
 #[serde(rename_all = "PascalCase")]
-pub(crate) struct Response {
+pub struct Response {
     // of the following fields can be found here: https://developers.cloudflare.com/1.1.1.1/encryption/dns-over-https/make-api-requests/dns-json/#successful-response
     #[serde(rename = "TC")]
     pub(crate) truncated: bool,
