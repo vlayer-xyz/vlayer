@@ -3611,22 +3611,16 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "axum 0.8.1",
- "bytes",
- "chrono",
  "clap",
  "common",
  "dotenvy",
- "olpc-cjson",
- "rand",
- "rsa",
  "serde",
  "serde_json",
- "serde_repr",
- "serde_with",
  "server_utils",
  "tokio",
  "tower-http 0.6.2",
  "tracing",
+ "verifiable_dns",
 ]
 
 [[package]]
@@ -11896,6 +11890,21 @@ dependencies = [
  "anyhow",
  "derive_builder 0.20.2",
  "rustversion",
+]
+
+[[package]]
+name = "verifiable_dns"
+version = "0.1.0"
+dependencies = [
+ "bytes",
+ "chrono",
+ "olpc-cjson",
+ "rand",
+ "rsa",
+ "serde",
+ "serde_json",
+ "serde_repr",
+ "serde_with",
 ]
 
 [[package]]
