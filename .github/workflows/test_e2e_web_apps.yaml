@@ -52,17 +52,6 @@ jobs:
           EXPECTED_LLVM_VERSION: "18.1"
         run: bash/check-llvm-clang.sh
 
-<<<<<<< HEAD
-=======
-      - name: Setup vlayer SDK
-        working-directory: ./packages/sdk
-        run: bun install --frozen-lockfile && bun run build
-
-      - name: Setup vlayer react hooks
-        working-directory: ./packages/sdk-hooks
-        run: bun install --frozen-lockfile && bun run build
-
->>>>>>> 4a5438cb (build sdk-hooks in CI)
       - name: Install contracts' dependencies
         working-directory: ./contracts/vlayer
         run: forge soldeer install
