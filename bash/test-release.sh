@@ -65,6 +65,6 @@ for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ;
     echo '::endgroup::'
 
     echo "::group::vlayer run Playwright test: ${example_name}"
-    bun run test:"${VLAYER_ENV}"
+    WEB_SERVER_COMMAND="PATH=$PATH:~/.bun/bin bun run web:dev" bun run test:"${VLAYER_ENV}"
     echo '::endgroup::'
 done
