@@ -1,7 +1,7 @@
 use derive_new::new;
 
 use crate::{
-    errors::ParsingError, http_transaction_parser::extract_path_and_check_proper_headers_redaction,
+    errors::ParsingError, transcript_parser::extract_path_and_check_proper_headers_redaction,
 };
 
 #[derive(Debug, new)]

@@ -5,7 +5,7 @@ use derive_new::new;
 
 use crate::{
     errors::ParsingError,
-    http_transaction_parser::{parse_response_and_validate_redaction, HttpHeader},
+    transcript_parser::{parse_response_and_validate_redaction, HttpHeader},
 };
 
 #[derive(Debug, new)]
