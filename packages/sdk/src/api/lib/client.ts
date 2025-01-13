@@ -2,8 +2,9 @@ import {
   type VCallResponse,
   type VlayerClient,
   type BrandedHash,
-  ProofState,
   type ProofData,
+  type ProofReceipt,
+  ProofState,
 } from "types/vlayer";
 import { type WebProofProvider } from "types/webProofProvider";
 
@@ -213,17 +214,9 @@ async function getProof<T extends Abi, F extends ContractFunctionName<T>>(
 ): Promise<ProofData> {
   for (let retry = 0; retry < numberOfRetries; retry++) {
     const resp = await getProofReceipt(hash, url);
+    validateProofReceipt(resp.result);
     const { state, status, data, error } = resp.result;
     if (status === 0) {
-      assert(error !== undefined, "error should be defined");
-      assert(typeof error === "string", "error should be a string");
-      assert(data === undefined, "data should be undefined");
-      assert(
-        state === ProofState.ChainProof ||
-          state === ProofState.Preflight ||
-          state === ProofState.Proving,
-        "state should be ChainProof or Preflight or Proving",
-      );
       if (state === ProofState.ChainProof) {
         throw new Error("Waiting for chain proof failed with error: " + error);
       } else if (state === ProofState.Preflight) {
@@ -232,10 +225,7 @@ async function getProof<T extends Abi, F extends ContractFunctionName<T>>(
         throw new Error("Proving failed with error: " + error);
       }
     } else {
-      assert(error === undefined, "error should be undefined");
       if (state === ProofState.Done) {
-        assert(status === 1, "status should be 1");
-        assert(data !== undefined, "data should be defined");
         return data as ProofData;
       }
       webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Proving);
@@ -245,6 +235,27 @@ async function getProof<T extends Abi, F extends ContractFunctionName<T>>(
   throw new Error(
     `Timed out waiting for ZK proof generation after ${numberOfRetries * sleepDuration}ms. Consider increasing numberOfRetries in waitForProvingResult`,
   );
+}
+
+function validateProofReceipt(receipt: ProofReceipt) {
+  const { status, state, error, data } = receipt;
+  if (status === 0) {
+    assert(error !== undefined, "error should be defined");
+    assert(typeof error === "string", "error should be a string");
+    assert(data === undefined, "data should be undefined");
+    assert(
+      state === ProofState.ChainProof ||
+        state === ProofState.Preflight ||
+        state === ProofState.Proving,
+      "state should be ChainProof or Preflight or Proving",
+    );
+  } else {
+    assert(error === undefined, "error should be undefined");
+    if (state === ProofState.Done) {
+      assert(status === 1, "status should be 1");
+      assert(data !== undefined, "data should be defined");
+    }
+  }
 }
 
 function assert(x: boolean, msg: string) {
