@@ -6,8 +6,14 @@ import {
 } from "src/web-proof-commons/types/message";
 
 import { ParsedTranscriptData } from "tlsn-js";
-import { BodyRangeNotFoundError, PathNotFoundError } from "./tlsn.ranges.error";
+import {
+  BodyRangeNotFoundError,
+  InvalidJsonError,
+  PathNotFoundError,
+} from "./tlsn.ranges.error";
 import { InvalidPathError, NonStringValueError } from "./tlsn.ranges.error";
+import { validPathRegex } from "./tlsn.response.body.ranges";
+import { paths } from "./tlsn.ranges.test.fixtures";
 
 describe("calculateResponseRanges", () => {
   describe("json_body redaction", () => {
@@ -35,7 +41,10 @@ describe("calculateResponseRanges", () => {
       expect(result).toEqual([
         {
           start: headers.length + raw.slice(headers.length).indexOf("John"),
-          end: headers.length + raw.slice(headers.length).indexOf("John") + 4,
+          end:
+            headers.length +
+            raw.slice(headers.length).indexOf("John") +
+            name.length,
         },
       ]);
     });
@@ -64,7 +73,10 @@ describe("calculateResponseRanges", () => {
       expect(result).toEqual([
         {
           start: headers.length + raw.slice(headers.length).indexOf("John"),
-          end: headers.length + raw.slice(headers.length).indexOf("John") + 4,
+          end:
+            headers.length +
+            raw.slice(headers.length).indexOf("John") +
+            "John".length,
         },
         {
           start:
@@ -73,7 +85,7 @@ describe("calculateResponseRanges", () => {
           end:
             headers.length +
             raw.slice(headers.length).indexOf("john@example.com") +
-            16,
+            "john@example.com".length,
         },
       ]);
     });
@@ -115,8 +127,103 @@ describe("calculateResponseRanges", () => {
         transcriptRanges,
       );
       expect(result).toEqual([
-        { start: raw.indexOf("Jane"), end: raw.indexOf("Jane") + 4 },
-      ]); // "Jane" position
+        {
+          start: raw.indexOf("Jane"),
+          end: raw.indexOf("Jane") + "Jane".length,
+        },
+      ]);
+    });
+
+    test("simple array of strings and numbers", () => {
+      const raw = '["apple", "banana", "orange",1,"pear"]';
+      const transcriptRanges = {
+        body: { start: 0, end: raw.length },
+        headers: {},
+      } as ParsedTranscriptData;
+
+      const redactionItem = {
+        response: {
+          json_body: ["[0]"],
+        },
+      } as RedactResponseJsonBody;
+
+      const result = calculateResponseRanges(
+        redactionItem,
+        raw,
+        transcriptRanges,
+      );
+      expect(result).toEqual([
+        {
+          start: raw.indexOf("apple"),
+          end: raw.indexOf("apple") + "apple".length,
+        },
+      ]);
+    });
+
+    test("simple array of strings and numbers with number at path", () => {
+      const raw = '["apple", "banana", "orange",1,"pear"]';
+      const transcriptRanges = {
+        body: { start: 0, end: raw.length },
+        headers: {},
+      } as ParsedTranscriptData;
+
+      const redactionItem = {
+        response: {
+          json_body: ["[3]"],
+        },
+      } as RedactResponseJsonBody;
+
+      expect(() =>
+        calculateResponseRanges(redactionItem, raw, transcriptRanges),
+      ).toThrow(NonStringValueError);
+    });
+
+    test("fails on deeply nested boolean value in path", () => {
+      const idValue = "IdValue";
+      const raw = `{"data": [{"users": [{"settings": [{"config": {"features": [{"enabled": true, "id": "${idValue}"}]}}]}]}]}`;
+      const transcriptRanges = {
+        body: { start: 0, end: raw.length },
+        headers: {},
+      } as ParsedTranscriptData;
+
+      const redactionItem = {
+        response: {
+          json_body: ["data[0].users[0].settings[0].config.features[0].id"],
+        },
+      } as RedactResponseJsonBody;
+
+      const result = calculateResponseRanges(
+        redactionItem,
+        raw,
+        transcriptRanges,
+      );
+      expect(result).toEqual([
+        {
+          start: raw.indexOf(idValue),
+          end: raw.indexOf(idValue) + idValue.length,
+        },
+      ]);
+    });
+
+    test("fails on deeply nested boolean value in path", () => {
+      const raw =
+        '{"data": [{"users": [{"settings": [{"config": {"features": [{"enabled": true, "id": "s"}]}}]}]}]}';
+      const transcriptRanges = {
+        body: { start: 0, end: raw.length },
+        headers: {},
+      } as ParsedTranscriptData;
+
+      const redactionItem = {
+        response: {
+          json_body: [
+            "data[0].users[0].settings[0].config.features[0].enabled",
+          ],
+        },
+      } as RedactResponseJsonBody;
+
+      expect(() =>
+        calculateResponseRanges(redactionItem, raw, transcriptRanges),
+      ).toThrow(NonStringValueError);
     });
 
     test("throws for invalid paths", () => {
@@ -155,7 +262,26 @@ describe("calculateResponseRanges", () => {
     });
 
     test("throws for invalid JSON", () => {
-      const raw = "{ a: 12, b: 13 }";
+      const raw = "{a: 12, b: 13}";
+      const somePath = "some.path[1]";
+      const transcriptRanges = {
+        body: { start: 0, end: raw.length },
+        headers: {},
+      } as ParsedTranscriptData;
+
+      const redactionItem = {
+        response: {
+          json_body: [somePath],
+        },
+      } as RedactResponseJsonBody;
+
+      expect(() =>
+        calculateResponseRanges(redactionItem, raw, transcriptRanges),
+      ).toThrow(new InvalidJsonError());
+    });
+
+    test("throws for invalid path", () => {
+      const raw = '{"name": "John"}';
       const somePath = "some.path[1";
       const transcriptRanges = {
         body: { start: 0, end: raw.length },
@@ -259,5 +385,17 @@ describe("calculateResponseRanges", () => {
         { start: raw.indexOf(name2), end: raw.indexOf(name2) + name2.length },
       ]);
     });
+  });
+});
+
+describe("validPathRegex", () => {
+  test("valid paths", () => {
+    expect(paths.valid.every((path) => validPathRegex.test(path))).toBe(true);
+  });
+
+  test("invalid paths", () => {
+    expect(paths.invalid.every((path) => !validPathRegex.test(path))).toBe(
+      true,
+    );
   });
 });

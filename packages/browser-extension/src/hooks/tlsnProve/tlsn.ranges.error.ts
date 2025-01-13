@@ -32,3 +32,10 @@ export class InvalidPathError extends RedactionError {
     this.name = "InvalidPathError";
   }
 }
+
+export class InvalidJsonError extends RedactionError {
+  constructor() {
+    super("Invalid JSON");
+    this.name = "InvalidJsonError";
+  }
+}

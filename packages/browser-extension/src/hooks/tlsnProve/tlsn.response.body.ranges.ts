@@ -1,10 +1,13 @@
 import { ParsedTranscriptData } from "tlsn-js";
 import {
   BodyRangeNotFoundError,
+  InvalidJsonError,
   InvalidPathError,
   NonStringValueError,
   PathNotFoundError,
 } from "./tlsn.ranges.error";
+
+export const validPathRegex = /^(\[\d+\]|[a-zA-Z_]\w*)(\.\w+|\[\d+\])*$/;
 
 const filterExceptPaths = (except: string[], paths: string[]) => {
   return paths.filter((path) => !except.includes(path));
@@ -19,87 +22,72 @@ const calculateJsonBodyRanges = (
     if (!transcriptRanges.body) {
       throw new BodyRangeNotFoundError();
     }
-    const pathSegments = path.split(/[.[\]]/).filter(Boolean);
-    let bodyJson;
+    //parse body json
+    const bodyJson = getBodyJson(raw, transcriptRanges);
+    // Validate path and get path segments
+    const pathSegments = getPathSegments(path);
 
-    try {
-      bodyJson = JSON.parse(
-        raw.slice(transcriptRanges.body.start, transcriptRanges.body.end),
-      ) as Record<string, unknown>;
-    } catch {
-      throw new InvalidPathError(path);
-    }
-
-    let currentObj: unknown = bodyJson;
+    // Initialize helper variables
+    let currentObj = bodyJson;
     let currentPath = "";
     let valueStart = transcriptRanges.body.start;
     let valueEnd = transcriptRanges.body.end;
     let searchStartPos = valueStart;
 
-    for (let i = 0; i < pathSegments.length; i++) {
-      const segment = pathSegments[i];
-      if (currentObj === undefined || currentObj === null) {
-        throw new PathNotFoundError(path);
-      }
+    pathSegments.forEach((segment, i) => {
+      //check if currentObj is undefined or null
+      currentPath = getCurrentPath(
+        currentObj,
+        currentPath,
+        segment.value,
+        path,
+      );
 
-      if (typeof currentObj === "object") {
-        currentPath = currentPath ? `${currentPath}.${segment}` : segment;
+      // initialize keyPos
+      let keyPos = 0;
 
-        // Handle array indices differently
-        const isArrayIndex = !isNaN(Number(segment));
-        let keyPos;
-
-        if (isArrayIndex) {
-          // For array indices, we need to find the nth occurrence of an array element
-          const arrayIndex = parseInt(segment);
-          let foundIndex = -1;
-          let pos = searchStartPos;
-
-          while (foundIndex < arrayIndex) {
-            pos = raw.indexOf("{", pos + 1);
-            if (pos === -1) {
-              throw new PathNotFoundError(path);
-            }
-            foundIndex++;
-          }
-          keyPos = pos;
-
-          // If this is not the last segment, we want to start searching from this position
-          if (i < pathSegments.length - 1) {
-            searchStartPos = keyPos;
-          }
-        } else {
-          keyPos = raw.indexOf(`"${segment}"`, searchStartPos);
-          if (keyPos === -1) {
-            throw new PathNotFoundError(path);
-          }
-        }
-
-        currentObj = isArrayIndex
-          ? (currentObj as unknown[])[parseInt(segment)]
-          : (currentObj as Record<string, unknown>)[segment];
-
-        if (i === pathSegments.length - 1) {
-          // Make sure the value is a string
-          if (typeof currentObj !== "object") {
-            if (typeof currentObj !== "string") {
-              throw new NonStringValueError(typeof currentObj);
-            }
-          }
-          // Only set final value position for the last segment
-          const valueStr = JSON.stringify(currentObj).replace(/"/g, "");
-
-          if (isArrayIndex) {
-            valueStart = keyPos + 1;
-          } else {
-            valueStart = raw.indexOf(valueStr, keyPos + segment.length + 1);
-          }
-          valueEnd = valueStart + valueStr.length;
+      searchStartPos = raw.indexOf(JSON.stringify(currentObj));
+      const isArrayIndex = segment.type === PathSegmentType.ArrayIndex;
+      if (isArrayIndex) {
+        let foundIndex = -1;
+        while (foundIndex < parseInt(segment.value)) {
+          keyPos = raw.indexOf(
+            JSON.stringify((currentObj as object[])[foundIndex + 1]),
+            searchStartPos + 1,
+          );
+          foundIndex++;
         }
       } else {
-        throw new PathNotFoundError(path);
+        keyPos = raw.indexOf(`"${segment.value}"`, searchStartPos);
+        if (keyPos === -1) {
+          throw new PathNotFoundError(path);
+        }
       }
-    }
+
+      currentObj = isArrayIndex
+        ? (currentObj as object[])[parseInt(segment.value)]
+        : (currentObj as Record<string, object>)[segment.value];
+
+      // this is the last segment of the path
+      if (i === pathSegments.length - 1) {
+        // Make sure the value is a string
+        if (typeof currentObj !== "object") {
+          if (typeof currentObj !== "string") {
+            throw new NonStringValueError(typeof currentObj);
+          }
+        }
+        // Only set final value position for the last segment
+        const valueStr = JSON.stringify(currentObj).replace(/"/g, "");
+
+        // set valueStart and valueEnd for the last segment
+        if (isArrayIndex) {
+          valueStart = keyPos + 1;
+        } else {
+          valueStart = raw.indexOf(valueStr, keyPos + segment.value.length + 1);
+        }
+        valueEnd = valueStart + valueStr.length;
+      }
+    });
 
     return {
       start: valueStart,
@@ -109,3 +97,56 @@ const calculateJsonBodyRanges = (
 };
 
 export { calculateJsonBodyRanges, filterExceptPaths };
+
+enum PathSegmentType {
+  ArrayIndex = "arrayIndex",
+  Key = "key",
+}
+
+const getBodyJson = (raw: string, transcriptRanges: ParsedTranscriptData) => {
+  if (!transcriptRanges.body) {
+    throw new BodyRangeNotFoundError();
+  }
+  let bodyJson;
+  try {
+    bodyJson = JSON.parse(
+      raw.slice(transcriptRanges.body.start, transcriptRanges.body.end),
+    ) as object;
+  } catch {
+    throw new InvalidJsonError();
+  }
+  return bodyJson;
+};
+
+const getPathSegments = (path: string) => {
+  if (!validPathRegex.test(path)) {
+    throw new InvalidPathError(path);
+  }
+  //split path into segments and filter out empty strings
+  const pathSegments = path.split(/[.[\]]/).filter(Boolean);
+  return pathSegments.map((segment) => {
+    return {
+      value: segment,
+      type: isNaN(Number(segment))
+        ? PathSegmentType.Key
+        : PathSegmentType.ArrayIndex,
+    };
+  });
+};
+
+const getCurrentPath = (
+  currentObj: object,
+  currentPath: string,
+  segment: string,
+  path: string,
+) => {
+  if (
+    currentObj === undefined ||
+    currentObj === null ||
+    typeof currentObj !== "object"
+  ) {
+    throw new PathNotFoundError(path);
+  }
+
+  return currentPath ? `${currentPath}.${segment}` : segment;
+};
