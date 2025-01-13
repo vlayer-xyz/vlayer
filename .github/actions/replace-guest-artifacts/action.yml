@@ -1,43 +1,22 @@
 # Guest artifacts are built separately and passed across jobs,
 # because we have not achieved deterministic guest ID builds yet.
+#
+# This replaces the binary path in `methods.rs` with real ELF path.
+# Depends on `build-guest-artifacts` action.
 
-name: Build guest artifacts
-description: Builds guest artifacts - methods.rs and ELF binary.
+name: Replace guest artifacts
+description: Replace guest artifacts - methods.rs and ELF binary.
 runs:
   using: "composite"
   steps:
-    - name: Install Rust prerequisites
-      id: rust_pre
-      uses: ./.github/actions/rust-prerequisites
-    - name: Install contracts prerequisites
-      uses: ./.github/actions/contracts-prerequisites
-
-    - name: "Build guest wrapper"
-      env:
-        RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
-      run: cargo build --release --target x86_64-unknown-linux-gnu --package call_guest_wrapper
-      shell: bash
-
-    - name: "Save methods.rs and ELF binary"
-      run: |
-        METHODS="$(find target -type f -name "methods.rs" -path '*/call_guest_wrapper-*/*')"
-        if [ $(echo -e "$METHODS" | wc -l) = "1" ]; then
-          cp "$METHODS" ./target/assets/
-        else
-          echo "More than 1 methods.rs found! The search needs to be narrowed down. Found:"
-          echo -e "$METHODS"
-          exit 1
-        fi
-
-        BINARY_PATH="$(grep GUEST_ELF ./target/assets/methods.rs | grep include_bytes | sed -n 's/.*include_bytes!("\(.*\)").*/\1/p')"
-        sed -i "s|${BINARY_PATH}|<ELF_PATH>|g" ./target/assets/methods.rs
-        cp "$BINARY_PATH" ./target/assets/
-      shell: bash
-
-    - name: Push guest artifacts
-      uses: actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874 # v4.4.0
+    - uses: actions/download-artifact@v4
       with:
         name: guest-artifacts
-        path: target/assets
-        if-no-files-found: error
-        retention-days: 3
+        path: call_guest_replacement
+
+    - name: "Update elf path in methods.rs"
+      run: |
+        NEW_PATH=$(realpath ./call_guest_replacement/risc0_call_guest)
+        echo "Replacing the elf binary path to: ${NEW_PATH}"
+        sed -i.bak "s|<ELF_PATH>|${NEW_PATH}|" ./call_guest_replacement/methods.rs
+      shell: bash

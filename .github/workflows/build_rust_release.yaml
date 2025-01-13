@@ -7,8 +7,8 @@ on:
         value: ${{ jobs.build-x86_64-unknown-linux-gnu-release.outputs.vlayer_build }}
   pull_request:
     paths:
-      - ".github/workflows/build-guest-artifacts/action.yaml"
-      - ".github/workflows/replace-guest-artifacts/action.yaml"
+      - ".github/actions/build-guest-artifacts/action.yml"
+      - ".github/actions/replace-guest-artifacts/action.yml"
       - ".github/workflows/build_rust_release.yaml"
   merge_group:
   push:
@@ -18,8 +18,8 @@ on:
     # This workflow however is resource-heavy (includes a macOS build),
     # so we narrow it down.
     paths:
-      - ".github/workflows/build-guest-artifacts/action.yaml"
-      - ".github/workflows/replace-guest-artifacts/action.yaml"
+      - ".github/actions/build-guest-artifacts/action.yml"
+      - ".github/actions/replace-guest-artifacts/action.yml"
       - ".github/workflows/build_rust_release.yaml"
 concurrency:
   # Do not cancel jobs on main by forcing a unique group name.
