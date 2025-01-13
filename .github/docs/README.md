@@ -11,6 +11,7 @@ Contains [composite actions](https://docs.github.com/en/actions/sharing-automati
 | Action | Purpose |
 | --- | --- |
 | [Build extension](/.github/actions/build-extension/action.yml) | Builds the browser extension. |
+| [Build guest artifacts](/.github/actions/build-guest-artifacts/action.yml) | Compiles and uploads guest artifacts. |
 | [Contracts prerequisites](/.github/actions/contracts-prerequisites/action.yml) | Installs Foundry for contracts compilation. |
 | [Darwin prerequisites](/.github/actions/darwin-prerequisites/action.yml) | Contains steps specific to Darwin machines. |
 | [Package release binaries](/.github/actions/package-release-binaries/action.yml) | Zips the Rust release binaries. |
@@ -34,6 +35,7 @@ Our workflows fall into the following categories, grouped by a common prefix:
 | [Build docker](/.github/workflows/build_docker.yaml) | Verifies that the docker images build. |
 | [Build examples](/.github/workflows/build_examples.yaml) | Verifies that the examples build. |
 | [Build extension](/.github/workflows/build_extension.yaml) | Verifies that the browser extension builds. |
+| [Build guest artifacts](/.github/workflows/build_guest_artifacts.yaml) | Verifies that the guest artifacts build. |
 | [Build SDK](/.github/workflows/build_sdk.yaml) | Verifies that the SDK builds. |
 | [Deploy book](/.github/workflows/deploy_book.yaml) | Deploys the Book to Vercel. |
 | [Deploy provers](/.github/workflows/deploy_provers.yaml) | Deploys prover servers. |
