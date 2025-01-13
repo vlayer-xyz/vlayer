@@ -99,11 +99,14 @@ function calculateRequestRanges(
     .exhaustive();
 }
 
-function count_url_query(raw: string, query: string,): CommitData {
+function count_url_query(raw: string, query: string): CommitData {
   const stepOverFirstAmpersand = 1;
   const start = raw.indexOf("&" + query + "=") + stepOverFirstAmpersand;
   const secondAmpersandPosition = raw.indexOf("&", start);
-  const end = secondAmpersandPosition !== -1 ? secondAmpersandPosition : raw.indexOf(" ", start);
+  const end =
+    secondAmpersandPosition !== -1
+      ? secondAmpersandPosition
+      : raw.indexOf(" ", start);
   return {
     start,
     end,

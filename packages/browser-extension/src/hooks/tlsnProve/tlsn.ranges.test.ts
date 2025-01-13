@@ -8,7 +8,7 @@ import {
   fixtureTranscript,
   fixtureAllResponseHeaders,
   fixtureAllRequestHeaders,
-  fixtureAllUrlQueries
+  fixtureAllUrlQueries,
 } from "./tlsn.ranges.test.fixtures";
 
 describe("response headers", () => {
@@ -100,10 +100,12 @@ describe("request headers", () => {
       fixtureTranscript.ranges.sent,
     );
 
-    expect(result).toEqual([{
-      start: 489,
-      end: 498,
-    }]);
+    expect(result).toEqual([
+      {
+        start: 489,
+        end: 498,
+      },
+    ]);
   });
 
   test("multiple headers", () => {
@@ -135,7 +137,8 @@ describe("request headers", () => {
     const redactionItem = {
       request: {
         headers_except: fixtureAllRequestHeaders.filter(
-          (header) => !["x-client-transaction-id", "connection"].includes(header),
+          (header) =>
+            !["x-client-transaction-id", "connection"].includes(header),
         ),
       },
     };
@@ -241,13 +244,17 @@ describe("request url query", () => {
         end: 341,
       },
     ]);
-  })
+  });
 
   test("url_query_except", () => {
     const redactionItem = {
       request: {
         url_query_except: fixtureAllUrlQueries.filter(
-          (query) => !["include_mention_filter", "include_ext_dm_nsfw_media_filter"].includes(query),
+          (query) =>
+            ![
+              "include_mention_filter",
+              "include_ext_dm_nsfw_media_filter",
+            ].includes(query),
         ),
       },
     };
