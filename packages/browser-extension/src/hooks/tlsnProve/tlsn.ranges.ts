@@ -82,10 +82,37 @@ function calculateRequestRanges(
         };
       });
     })
+    .with({ url_query: P.array(P.string) }, ({ url_query }) => {
+      return url_query.map((query) => {
+        return count_url_query(raw, query);
+      });
+    })
+    .with({ url_query_except: P.array(P.string) }, ({ url_query_except }) => {
+      const queries_to_redact = find_all_url_queries(raw).filter(
+        (query) => !url_query_except.includes(query),
+      );
+
+      return queries_to_redact.map((query) => {
+        return count_url_query(raw, query);
+      });
+    })
+    .exhaustive();
+}
+
+function count_url_query(raw: string, query: string,): CommitData {
+  const stepOverFirstAmpersand = 1;
+  const start = raw.indexOf("&" + query + "=") + stepOverFirstAmpersand;
+  const secondAmpersandPosition = raw.indexOf("&", start);
+  const end = secondAmpersandPosition !== -1 ? secondAmpersandPosition : raw.indexOf(" ", start);
   return {
-    start: 0,
-    end: 0,
+    start,
+    end,
   };
+}
+
+function find_all_url_queries(raw: string): string[] {
+  const url_queries = raw.match(/&\w+=/g);
+  return url_queries ? url_queries.map((query) => query.slice(1, -1)) : [];
 }
 
 export { calculateResponseRanges, calculateRequestRanges };
