@@ -1,30 +1,8 @@
+include:
+  - chain-service.yaml
+  - anvil.yaml
+  - web.yaml
 services:
-  anvil-L1:
-    image: ghcr.io/foundry-rs/foundry:latest
-    container_name: anvil-L1
-    platform: linux/amd64
-    command: ["anvil --host 0.0.0.0 --chain-id 31337"]
-    ports:
-      - "127.0.0.1:8545:8545"
-  anvil-L2-OP:
-    image: ghcr.io/foundry-rs/foundry:latest
-    container_name: anvil-L2-OP
-    platform: linux/amd64
-    command: ["anvil --host 0.0.0.0 --chain-id 31338"]
-    ports:
-      - "127.0.0.1:8546:8545"
-  wsproxy:
-    image: jwnmulder/websockify:0.12
-    container_name: wsproxy
-    platform: linux/amd64
-    ports:
-      - "127.0.0.1:55688:80" 
-    command: "80 api.x.com:443"
-  notary-server:
-    image: ghcr.io/tlsnotary/tlsn/notary-server:v0.1.0-alpha.7
-    container_name: notary-server
-    ports:
-      - "127.0.0.1:7047:7047"
   vlayer-call-server:
     depends_on:
       - anvil-L1
@@ -37,53 +15,3 @@ services:
     command: "--proof fake --host 0.0.0.0 --rpc-url 31337:http://anvil-L1:8545 --rpc-url 31338:http://anvil-L2-OP:8545"
     ports:
       - "127.0.0.1:3000:3000"
-  vlayer-chain-worker-L1:
-    depends_on:
-      - anvil-L1
-    image: ghcr.io/vlayer-xyz/chain_worker:latest
-    container_name: vlayer-chain-worker-L1
-    pull_policy: always
-    volumes:
-      - ./chain_db:/chain_db
-    pid: "host"
-    environment:
-      RUST_LOG: "info"
-      DB_PATH: /chain_db
-      RPC_URL: http://anvil-L1:8545
-      CHAIN_ID: 31337
-      PROOF_MODE: fake
-      RISC0_DEV_MODE: 1
-      MAX_BACK_PROPAGATION_BLOCKS: 10
-      MAX_HEAD_BLOCKS: 10
-      CONFIRMATIONS: 1
-  vlayer-chain-worker-L1-OP:
-    depends_on:
-      - anvil-L2-OP
-    image: ghcr.io/vlayer-xyz/chain_worker:latest
-    container_name: vlayer-chain-worker-L2-OP
-    pull_policy: always
-    volumes:
-      - ./chain_db:/chain_db
-    pid: "host"
-    environment:
-      RUST_LOG: "info"
-      DB_PATH: /chain_db
-      RPC_URL: http://anvil-L2-OP:8545
-      CHAIN_ID: 31338
-      PROOF_MODE: fake
-      RISC0_DEV_MODE: 1
-      MAX_BACK_PROPAGATION_BLOCKS: 10
-      MAX_HEAD_BLOCKS: 10
-      CONFIRMATIONS: 1
-  vlayer-chain-server:
-    image: ghcr.io/vlayer-xyz/chain_server:latest
-    container_name: vlayer-chain-server
-    pull_policy: always
-    ports:
-      - "127.0.0.1:3001:3001"
-    volumes:
-      - ./chain_db:/chain_db
-    pid: "host"
-    environment:
-      RUST_LOG: "info"
-      DB_PATH: /chain_db
