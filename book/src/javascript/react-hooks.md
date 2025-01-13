@@ -112,7 +112,7 @@ export default App;
 
 Context providers facilitate the sharing of application state (e.g., connected wallet, selected chain) across components. Once the setup is complete, components wrapped within the `WagmiProvider`, `QueryClientProvider`, and `ProofProvider` can use the vlayer hooks.
 
-## `ProofProvider`
+## Configuring`ProofProvider`
 vlayer `ProofProvider` allows to configure custom urls for [vlayer network services](/advanced/dev-and-production.html) such as `proverUrl`, `notaryUrl` and `wsProxyUrl` via `config` prop:
 
 ```javascript
