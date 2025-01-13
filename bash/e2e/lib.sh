@@ -1,4 +1,4 @@
-source "$(dirname "${BASH_SOURCE[0]}")/../lib/io"
+source "$(dirname "${BASH_SOURCE[0]}")/../lib/io.sh"
 
 function generate_ts_bindings() {
   echo "::group::Generating typescript bidings"

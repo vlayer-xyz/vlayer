@@ -77,5 +77,5 @@ fn create_host(
         block_tag_to_block_number(&multi_provider, location.chain_id, location.block_tag)?;
     let chain_proof_client = Box::new(RpcChainProofClient::new(chain_proof_server_url));
     let start_exec_location = (location.chain_id, block_number).into();
-    Ok(Host::new(multi_provider, start_exec_location, chain_proof_client, config))
+    Ok(Host::new(multi_provider, start_exec_location, Some(chain_proof_client), config))
 }
