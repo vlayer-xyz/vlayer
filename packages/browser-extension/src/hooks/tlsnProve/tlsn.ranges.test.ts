@@ -7,7 +7,9 @@ import {
 import {
   fixtureTranscript,
   fixtureAllResponseHeaders,
+  fixtureAllRequestHeaders,
 } from "./tlsn.ranges.test.fixtures";
+
 describe("response headers", () => {
   test("single header", () => {
     const redactionItem: RedactResponseHeaders = {
@@ -29,6 +31,7 @@ describe("response headers", () => {
       },
     ]);
   });
+
   test("multiple headers", () => {
     const redactionItem: RedactResponseHeaders = {
       response: {
@@ -82,8 +85,91 @@ describe("response headers", () => {
   });
 });
 
-describe("calculateRequestRanges", () => {
-  it("should be defined", () => {
-    expect(calculateRequestRanges).toBeDefined();
+describe("request headers", () => {
+  test("single header", () => {
+    const redactionItem = {
+      request: {
+        headers: ["accept-encoding"],
+      },
+    };
+
+    const result = calculateRequestRanges(
+      redactionItem,
+      fixtureTranscript.sent,
+      fixtureTranscript.ranges.sent,
+    );
+
+    expect(result).toEqual([{
+      start: 489,
+      end: 498,
+    }]);
+  });
+
+  test("multiple headers", () => {
+    const redactionItem = {
+      request: {
+        headers: ["authorization", "cookie"],
+      },
+    };
+
+    const result = calculateRequestRanges(
+      redactionItem,
+      fixtureTranscript.sent,
+      fixtureTranscript.ranges.sent,
+    );
+
+    expect(result).toEqual([
+      {
+        start: 624,
+        end: 736,
+      },
+      {
+        start: 864,
+        end: 1481,
+      },
+    ]);
+  });
+
+  test("headers_except", () => {
+    const redactionItem = {
+      request: {
+        headers_except: fixtureAllRequestHeaders.filter(
+          (header) => !["x-client-transaction-id", "connection"].includes(header),
+        ),
+      },
+    };
+
+    const result = calculateRequestRanges(
+      redactionItem,
+      fixtureTranscript.sent,
+      fixtureTranscript.ranges.sent,
+    );
+
+    expect(result).toEqual([
+      {
+        start: 376,
+        end: 471,
+      },
+      {
+        start: 1699,
+        end: 1705,
+      },
+    ]);
+  });
+
+  test("headers_except with all headers", () => {
+    const redactionItem = {
+      request: {
+        headers_except: fixtureAllRequestHeaders,
+      },
+    };
+
+    const result = calculateRequestRanges(
+      redactionItem,
+      fixtureTranscript.sent,
+      fixtureTranscript.ranges.sent,
+    );
+
+    expect(result).toEqual([]);
   });
 });

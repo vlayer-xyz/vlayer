@@ -54,8 +54,34 @@ function calculateRequestRanges(
     | RedactRequestUrlQuery,
   raw: string,
   transcriptRanges: ParsedTranscriptData,
-): CommitData {
-  console.log("Its not implemented yet", redactionItem, raw, transcriptRanges);
+): CommitData[] {
+  const headers_ranges = transcriptRanges.headers;
+
+  return match(redactionItem.request)
+    .with({ headers: P.array(P.string) }, ({ headers }) => {
+      return headers.map((header) => {
+        const header_range = headers_ranges[header];
+        const new_start = raw.indexOf(":", header_range.start) + stepAfterColon;
+        return {
+          start: new_start,
+          end: header_range.end,
+        };
+      });
+    })
+    .with({ headers_except: P.array(P.string) }, ({ headers_except }) => {
+      const headers_to_redact = Object.keys(transcriptRanges.headers).filter(
+        (header) => !headers_except.includes(header),
+      );
+
+      return headers_to_redact.map((header) => {
+        const header_range = headers_ranges[header];
+        const new_start = raw.indexOf(":", header_range.start) + stepAfterColon;
+        return {
+          start: new_start,
+          end: header_range.end,
+        };
+      });
+    })
   return {
     start: 0,
     end: 0,
