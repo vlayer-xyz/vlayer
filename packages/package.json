@@ -25,15 +25,6 @@
     "typescript": "^5.0.0"
   },
   "type": "module",
-  "workspaces": [
-    "browser-extension/",
-    "sdk/",
-    "web-components/",
-    "extension-hooks/",
-    "test-web-app/",
-    "test-json-server/",
-    "sdk-hooks/"
-  ],
   "trustedDependencies": [
     "viem"
   ],

@@ -56,7 +56,10 @@ fn change_sdk_dependency_to_npm(foundry_root: &Path) -> Result<(), CLIError> {
 
     if let Some(dependencies) = json.get_mut("dependencies") {
         if let Some(dependencies_map) = dependencies.as_object_mut() {
-            dependencies_map.insert("@vlayer/sdk".to_string(), Value::String(version));
+            dependencies_map.insert("@vlayer/sdk".to_string(), Value::String(version.clone()));
+            if dependencies_map.contains_key("@vlayer/react") {
+                dependencies_map.insert("@vlayer/react".to_string(), Value::String(version));
+            }
         }
     } else {
         let mut dependencies_map = Map::new();
@@ -379,9 +382,44 @@ mod tests {
 
         assert_eq!(contents, expected_remappings);
     }
-
     #[test]
-    fn test_change_sdk_dependency_to_npm() {
+    fn test_dont_add_react_sdk_dependency_to_package_json_if_not_already_present() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let root_path = temp_dir.path().to_path_buf();
+
+        let vlayer_dir = root_path.join("vlayer");
+        std::fs::create_dir(&vlayer_dir).unwrap();
+
+        let package_json = vlayer_dir.join("package.json");
+        let contents = r#"{"dependencies": {}}"#;
+        std::fs::write(&package_json, contents).unwrap();
+
+        change_sdk_dependency_to_npm(&root_path).unwrap();
+
+        let new_contents = fs::read_to_string(package_json).unwrap();
+        let expected_sdk_dependency = format!("\"@vlayer/react\": \"{}\"", version());
+        assert!(!new_contents.contains(&expected_sdk_dependency));
+    }
+    #[test]
+    fn test_change_workspace_react_sdk_dependency_to_npm() {
+        let temp_dir = tempfile::tempdir().unwrap();
+        let root_path = temp_dir.path().to_path_buf();
+
+        let vlayer_dir = root_path.join("vlayer");
+        std::fs::create_dir(&vlayer_dir).unwrap();
+
+        let package_json = vlayer_dir.join("package.json");
+        let contents = r#"{"dependencies": {"@vlayer/react": "workspace:*"}}"#;
+        std::fs::write(&package_json, contents).unwrap();
+
+        change_sdk_dependency_to_npm(&root_path).unwrap();
+
+        let new_contents = fs::read_to_string(package_json).unwrap();
+        let expected_sdk_dependency = format!("\"@vlayer/react\": \"{}\"", version());
+        assert!(new_contents.contains(&expected_sdk_dependency));
+    }
+    #[test]
+    fn test_add_sdk_dependency_to_package_json() {
         let temp_dir = tempfile::tempdir().unwrap();
         let root_path = temp_dir.path().to_path_buf();
 
@@ -400,7 +438,7 @@ mod tests {
     }
 
     #[test]
-    fn test_change_sdk_dependency_to_npm_with_existing_dependency() {
+    fn test_change_workspace_sdk_dependency_to_npm() {
         let temp_dir = tempfile::tempdir().unwrap();
         let root_path = temp_dir.path().to_path_buf();
 
@@ -408,7 +446,7 @@ mod tests {
         std::fs::create_dir(&vlayer_dir).unwrap();
 
         let package_json = vlayer_dir.join("package.json");
-        let contents = r#"{"dependencies": {"@vlayer/sdk": "file:../../../packages/sdk"}}"#;
+        let contents = r#"{"dependencies": {"@vlayer/sdk": "workspace:*"}}"#;
         std::fs::write(&package_json, contents).unwrap();
 
         change_sdk_dependency_to_npm(&root_path).unwrap();
