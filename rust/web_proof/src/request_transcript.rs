@@ -141,6 +141,14 @@ mod tests {
             }
 
             #[test]
+            fn request_header_value_with_multi_byte_utf8_character() {
+                let request =
+                    "GET https://example.com/test.json HTTP/1.1\r\nHeader-Name: Hello 😊\r\n\r\n";
+                let url = extract_path_and_check_proper_headers_redaction(request).unwrap();
+                assert_eq!(url, "https://example.com/test.json");
+            }
+
+            #[test]
             fn fully_redacted_request_header_value() {
                 let request = "GET https://example.com/test.json HTTP/1.1\r\ncontent-type: \0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\r\n\r\n";
                 let url = extract_path_and_check_proper_headers_redaction(request).unwrap();
