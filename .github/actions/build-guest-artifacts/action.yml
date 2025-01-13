@@ -31,9 +31,14 @@ runs:
           exit 1
         fi
 
-        BINARY_PATH="$(grep GUEST_ELF ./target/assets/methods.rs | grep include_bytes | sed -n 's/.*include_bytes!("\(.*\)").*/\1/p')"
-        sed -i "s|${BINARY_PATH}|<ELF_PATH>|g" ./target/assets/methods.rs
-        cp "$BINARY_PATH" ./target/assets/
+        save_elf_binary() {
+          local binary_path="$(grep $1 ./target/assets/methods.rs | grep include_bytes | sed -n 's/.*include_bytes!("\(.*\)").*/\1/p')"
+          sed -i "s|${binary_path}|<$1>|g" ./target/assets/methods.rs
+          cp "$binary_path" ./target/assets/
+        }
+
+        save_elf_binary "RISC0_CALL_GUEST_ELF"
+        save_elf_binary "RISC0_CHAIN_GUEST_ELF"
       shell: bash
 
     - name: Push guest artifacts

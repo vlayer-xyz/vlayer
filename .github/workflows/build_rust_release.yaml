@@ -65,7 +65,7 @@ jobs:
         env:
           RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
           VLAYER_RELEASE: "nightly"
-          RISC0_EXISTING_CALL_GUEST: ${{ github.workspace }}/call_guest_replacement
+          RISC0_EXISTING_GUEST: ${{ github.workspace }}/guest_replacement
         run: |
           cargo build --release --target ${{ env.target }} -p cli -p call_server -p worker -p chain_server
 
@@ -122,7 +122,7 @@ jobs:
       - name: "Build binaries"
         env:
           VLAYER_RELEASE: "nightly"
-          RISC0_EXISTING_CALL_GUEST: ${{ github.workspace }}/call_guest_replacement
+          RISC0_EXISTING_GUEST: ${{ github.workspace }}/guest_replacement
         run: |
           nix develop .github/nix/. --command bash -c "cargo build --release -p cli -p call_server -p worker -p chain_server"
 
@@ -180,7 +180,7 @@ jobs:
       - name: "Build binaries"
         env:
           VLAYER_RELEASE: "nightly"
-          RISC0_EXISTING_CALL_GUEST: ${{ github.workspace }}/call_guest_replacement
+          RISC0_EXISTING_GUEST: ${{ github.workspace }}/guest_replacement
         run: |
           cargo build --release --target ${{ env.target }} -p cli -p call_server -p worker -p chain_server
 

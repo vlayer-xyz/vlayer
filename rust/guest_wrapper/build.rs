@@ -37,6 +37,8 @@ pub fn main() -> anyhow::Result<()> {
     println!("cargo:rerun-if-env-changed=RISC0_EXISTING_GUEST");
     if let Ok(guest_artifacts_path) = env::var("RISC0_EXISTING_GUEST") {
         println!("cargo::warning=Using existing guest artifacts from {}", &guest_artifacts_path);
+        let out_dir = env::var("OUT_DIR").expect("'OUT_DIR' is not set");
+        let out_dir_path = Path::new(&out_dir);
         let guest_artifacts_path = Path::new(&guest_artifacts_path);
 
         let methods_rs_path = guest_artifacts_path.join("methods.rs");
