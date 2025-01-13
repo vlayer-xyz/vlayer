@@ -5638,7 +5638,7 @@ version = "0.1.0"
 dependencies = [
  "anyhow",
  "common",
- "risc0-build 1.2.0 (git+https://github.com/Wiezzel/risc0.git?rev=f5b992dea75104f5f3bc23945f3db11a0c8ebd47)",
+ "risc0-build 1.2.0 (git+https://github.com/Wiezzel/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a)",
  "risc0-build-ethereum",
  "risc0-zkp 1.2.0 (registry+https://github.com/rust-lang/crates.io-index)",
 ]
@@ -9065,13 +9065,13 @@ dependencies = [
 [[package]]
 name = "risc0-binfmt"
 version = "1.2.0"
-source = "git+https://github.com/Wiezzel/risc0.git?rev=f5b992dea75104f5f3bc23945f3db11a0c8ebd47#f5b992dea75104f5f3bc23945f3db11a0c8ebd47"
+source = "git+https://github.com/Wiezzel/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a#45465177d126f38ccb0096682de164af8520951a"
 dependencies = [
  "anyhow",
  "borsh",
  "elf",
- "risc0-zkp 1.2.0 (git+https://github.com/Wiezzel/risc0.git?rev=f5b992dea75104f5f3bc23945f3db11a0c8ebd47)",
- "risc0-zkvm-platform 1.2.0 (git+https://github.com/Wiezzel/risc0.git?rev=f5b992dea75104f5f3bc23945f3db11a0c8ebd47)",
+ "risc0-zkp 1.2.0 (git+https://github.com/Wiezzel/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a)",
+ "risc0-zkvm-platform 1.2.0 (git+https://github.com/Wiezzel/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a)",
  "serde",
  "tracing",
 ]
@@ -9098,16 +9098,16 @@ dependencies = [
 [[package]]
 name = "risc0-build"
 version = "1.2.0"
-source = "git+https://github.com/Wiezzel/risc0.git?rev=f5b992dea75104f5f3bc23945f3db11a0c8ebd47#f5b992dea75104f5f3bc23945f3db11a0c8ebd47"
+source = "git+https://github.com/Wiezzel/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a#45465177d126f38ccb0096682de164af8520951a"
 dependencies = [
  "anyhow",
  "cargo_metadata 0.18.1",
  "dirs 5.0.1",
  "docker-generate",
  "hex",
- "risc0-binfmt 1.2.0 (git+https://github.com/Wiezzel/risc0.git?rev=f5b992dea75104f5f3bc23945f3db11a0c8ebd47)",
- "risc0-zkp 1.2.0 (git+https://github.com/Wiezzel/risc0.git?rev=f5b992dea75104f5f3bc23945f3db11a0c8ebd47)",
- "risc0-zkvm-platform 1.2.0 (git+https://github.com/Wiezzel/risc0.git?rev=f5b992dea75104f5f3bc23945f3db11a0c8ebd47)",
+ "risc0-binfmt 1.2.0 (git+https://github.com/Wiezzel/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a)",
+ "risc0-zkp 1.2.0 (git+https://github.com/Wiezzel/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a)",
+ "risc0-zkvm-platform 1.2.0 (git+https://github.com/Wiezzel/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a)",
  "serde",
  "serde_json",
  "tempfile",
@@ -9116,12 +9116,12 @@ dependencies = [
 [[package]]
 name = "risc0-build-ethereum"
 version = "1.2.0"
-source = "git+https://github.com/Wiezzel/risc0-ethereum.git?rev=465cbcba59146bba34f380b588d932c571b1713e#465cbcba59146bba34f380b588d932c571b1713e"
+source = "git+https://github.com/Wiezzel/risc0-ethereum.git?rev=4d3cc153a3e36ccb657edf1575986b26e9c754c6#4d3cc153a3e36ccb657edf1575986b26e9c754c6"
 dependencies = [
  "anyhow",
  "hex",
- "risc0-build 1.2.0 (git+https://github.com/Wiezzel/risc0.git?rev=f5b992dea75104f5f3bc23945f3db11a0c8ebd47)",
- "risc0-zkp 1.2.0 (git+https://github.com/Wiezzel/risc0.git?rev=f5b992dea75104f5f3bc23945f3db11a0c8ebd47)",
+ "risc0-build 1.2.0 (git+https://github.com/Wiezzel/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a)",
+ "risc0-zkp 1.2.0 (git+https://github.com/Wiezzel/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a)",
 ]
 
 [[package]]
@@ -9168,7 +9168,7 @@ dependencies = [
 [[package]]
 name = "risc0-core"
 version = "1.2.0"
-source = "git+https://github.com/Wiezzel/risc0.git?rev=f5b992dea75104f5f3bc23945f3db11a0c8ebd47#f5b992dea75104f5f3bc23945f3db11a0c8ebd47"
+source = "git+https://github.com/Wiezzel/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a#45465177d126f38ccb0096682de164af8520951a"
 dependencies = [
  "bytemuck",
  "rand_core",
@@ -9222,7 +9222,7 @@ dependencies = [
 [[package]]
 name = "risc0-zkp"
 version = "1.2.0"
-source = "git+https://github.com/Wiezzel/risc0.git?rev=f5b992dea75104f5f3bc23945f3db11a0c8ebd47#f5b992dea75104f5f3bc23945f3db11a0c8ebd47"
+source = "git+https://github.com/Wiezzel/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a#45465177d126f38ccb0096682de164af8520951a"
 dependencies = [
  "anyhow",
  "blake2",
@@ -9235,8 +9235,8 @@ dependencies = [
  "metal",
  "paste",
  "rand_core",
- "risc0-core 1.2.0 (git+https://github.com/Wiezzel/risc0.git?rev=f5b992dea75104f5f3bc23945f3db11a0c8ebd47)",
- "risc0-zkvm-platform 1.2.0 (git+https://github.com/Wiezzel/risc0.git?rev=f5b992dea75104f5f3bc23945f3db11a0c8ebd47)",
+ "risc0-core 1.2.0 (git+https://github.com/Wiezzel/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a)",
+ "risc0-zkvm-platform 1.2.0 (git+https://github.com/Wiezzel/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a)",
  "serde",
  "sha2",
  "tracing",
@@ -9291,7 +9291,7 @@ dependencies = [
 [[package]]
 name = "risc0-zkvm-platform"
 version = "1.2.0"
-source = "git+https://github.com/Wiezzel/risc0.git?rev=f5b992dea75104f5f3bc23945f3db11a0c8ebd47#f5b992dea75104f5f3bc23945f3db11a0c8ebd47"
+source = "git+https://github.com/Wiezzel/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a#45465177d126f38ccb0096682de164af8520951a"
 dependencies = [
  "stability",
 ]
@@ -12753,7 +12753,7 @@ dependencies = [
  "derive_more",
  "host_utils",
  "insta",
- "risc0-build 1.2.0 (git+https://github.com/Wiezzel/risc0.git?rev=f5b992dea75104f5f3bc23945f3db11a0c8ebd47)",
+ "risc0-build 1.2.0 (git+https://github.com/Wiezzel/risc0.git?rev=45465177d126f38ccb0096682de164af8520951a)",
  "risc0-zkvm",
  "tabled",
  "thiserror 1.0.69",
