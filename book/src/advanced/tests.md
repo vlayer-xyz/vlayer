@@ -30,9 +30,9 @@ vlayer introduces additional cheatcodes:
 <div class="warning">
 
 Similar to some other Forge cheatcodes, like [`prank`](https://book.getfoundry.sh/cheatcodes/prank) or [`expectEmit`](https://book.getfoundry.sh/cheatcodes/expect-emit), `callProver()`
-must be used before the call of the prover function.
+must be used before the call to the prover function.
 
-Also note, that the majority of the cheatcodes are performing a call under the hood. This means, that if you use a cheatcode, like `console.log` between `callProver()` and the prover function call, the `console.log` the prove will be
+Also note, that majority of the cheatcodes are performing a call under the hood. This means, that if you use a cheatcode, like `console.log` between `callProver()` and the prover function call,  the proof will be
 generated for the `console.log` call, not for the prover function call.
 
 ```solidity
@@ -43,7 +43,7 @@ generated for the `console.log` call, not for the prover function call.
 ```
 
 Another effect of the `callProver()` is that it effectively disables all the testing specific functions in the next call.
-In general, `callProver()` should only be **used if you want to generate a proof** for the validation call, as it brings a noticeable overhead to the test.
+In general, `callProver()` **should only be used if you want to generate a proof** for the validation call, as it brings a noticeable overhead to the test.
 
 </div>
 
