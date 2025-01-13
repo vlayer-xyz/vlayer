@@ -14,13 +14,15 @@ runs:
 
     - name: "Build guest wrapper"
       env:
+        RISC0_USE_DOCKER: 1
+        CARGO_TARGET_DIR: ${{ github.workspace }}/target
         RUSTC_WRAPPER: ${{ steps.rust_pre.outputs.RUSTC_WRAPPER }}
-      run: cargo build --release --target x86_64-unknown-linux-gnu --package call_guest_wrapper
+      run: cargo build --release --target x86_64-unknown-linux-gnu --package guest_wrapper
       shell: bash
 
     - name: "Save methods.rs and ELF binary"
       run: |
-        METHODS="$(find target -type f -name "methods.rs" -path '*/call_guest_wrapper-*/*')"
+        METHODS="$(find target -type f -name "methods.rs" -path '*/guest_wrapper-*/*')"
         if [ $(echo -e "$METHODS" | wc -l) = "1" ]; then
           cp "$METHODS" ./target/assets/
         else
@@ -29,9 +31,14 @@ runs:
           exit 1
         fi
 
-        BINARY_PATH="$(grep GUEST_ELF ./target/assets/methods.rs | grep include_bytes | sed -n 's/.*include_bytes!("\(.*\)").*/\1/p')"
-        sed -i "s|${BINARY_PATH}|<ELF_PATH>|g" ./target/assets/methods.rs
-        cp "$BINARY_PATH" ./target/assets/
+        save_elf_binary() {
+          local binary_path="$(grep $1 ./target/assets/methods.rs | grep include_bytes | sed -n 's/.*include_bytes!("\(.*\)").*/\1/p')"
+          sed -i "s|${binary_path}|<$1>|g" ./target/assets/methods.rs
+          cp "$binary_path" ./target/assets/
+        }
+
+        save_elf_binary "RISC0_CALL_GUEST_ELF"
+        save_elf_binary "RISC0_CHAIN_GUEST_ELF"
       shell: bash
 
     - name: Push guest artifacts

@@ -3,14 +3,13 @@ mod version;
 use std::time::Duration;
 
 use alloy_primitives::ChainId;
-use call_guest_wrapper::GUEST_ELF as CALL_GUEST_ELF;
 use call_server_lib::{
     chain_proof::Config as ChainProofConfig, gas_meter::Config as GasMeterConfig, serve, Config,
     ConfigBuilder, ProofMode,
 };
-use chain_guest_wrapper::GUEST_ELF as CHAIN_GUEST_ELF;
 use clap::{ArgAction, Parser, ValueEnum};
 use common::{init_tracing, GlobalArgs, LogFormat};
+use guest_wrapper::{CALL_GUEST_ELF, CHAIN_GUEST_ELF};
 use tracing::{info, warn};
 
 #[derive(Parser)]

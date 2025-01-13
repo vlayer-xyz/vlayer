@@ -46,6 +46,8 @@ jobs:
         run: forge soldeer install
 
       - name: Build binaries
+        env:
+          RISC0_USE_DOCKER: 1
         run: cargo build --bin vlayer --bin call_server --bin chain_server --bin worker
       - name: Run e2e test in prod mode
         env:

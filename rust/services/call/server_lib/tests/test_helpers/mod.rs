@@ -46,11 +46,11 @@ pub fn rpc_body(method: &str, params: &Value) -> Value {
 }
 
 pub(crate) fn call_guest_elf() -> GuestElf {
-    call_guest_wrapper::GUEST_ELF.clone()
+    guest_wrapper::CALL_GUEST_ELF.clone()
 }
 
 pub(crate) fn chain_guest_elf() -> GuestElf {
-    chain_guest_wrapper::GUEST_ELF.clone()
+    guest_wrapper::CHAIN_GUEST_ELF.clone()
 }
 
 pub(crate) const API_VERSION: &str = "1.2.3";

@@ -8,7 +8,6 @@ use call_engine::{
     },
     Call, HostOutput, Proof, Seal,
 };
-use call_guest_wrapper::GUEST_ELF;
 use call_host::{Config as HostConfig, Error, Host, PreflightError};
 use chain::TEST_CHAIN_ID;
 use chain_client::RpcClient as RpcChainProofClient;
@@ -17,6 +16,7 @@ use foundry_evm::revm::{
     interpreter::{CallInputs, CallOutcome},
     Database, EvmContext, Inspector,
 };
+use guest_wrapper::CALL_GUEST_ELF;
 use mock_chain_server::{ChainProofServerMock, EMPTY_PROOF_RESPONSE};
 use provider::CachedMultiProvider;
 
@@ -173,7 +173,7 @@ fn create_host<DB: Database>(
         TestProviderFactory::new(pending_state_provider_factory, rpc_endpoints.clone());
     let providers = CachedMultiProvider::from_factory(provider_factory);
     let config = HostConfig {
-        call_guest_elf: GUEST_ELF.clone(),
+        call_guest_elf: CALL_GUEST_ELF.clone(),
         ..Default::default()
     };
     let block_number = providers

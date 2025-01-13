@@ -12,7 +12,6 @@ alloy-sol-types = { workspace = true, features = ["json"] }
 alloy-trie = { workspace = true }
 block_header = { workspace = true }
 call_engine = { workspace = true }
-call_guest_wrapper = { workspace = true }
 call_host = { workspace = true }
 call_precompiles = { workspace = true }
 chain = { workspace = true }
@@ -33,6 +32,7 @@ foundry-config = { workspace = true }
 foundry-debugger = { workspace = true }
 foundry-evm = { workspace = true }
 foundry-evm-core = { workspace = true }
+guest_wrapper = { workspace = true }
 hickory-resolver = { workspace = true }
 indicatif = { workspace = true }
 inferno = { workspace = true }

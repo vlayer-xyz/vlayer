@@ -1,8 +1,7 @@
 use alloy_sol_types::SolCall;
 use call_engine::HostOutput;
-use call_guest_wrapper::GUEST_ELF as CALL_GUEST_ELF;
 use chain_client::RpcClient as RpcChainProofClient;
-use chain_guest_wrapper::GUEST_ELF as CHAIN_GUEST_ELF;
+use guest_wrapper::{CALL_GUEST_ELF, CHAIN_GUEST_ELF};
 use mock_chain_server::ChainProofServerMock;
 use provider::CachedMultiProvider;
 pub use rpc::{

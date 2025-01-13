@@ -42,13 +42,13 @@ fn build_executor_env(input: &Input) -> anyhow::Result<ExecutorEnv<'static>> {
 
 #[cfg(test)]
 mod tests {
-    use call_guest_wrapper::GUEST_ELF;
+    use guest_wrapper::CALL_GUEST_ELF;
 
     use super::*;
 
     #[test]
     fn invalid_input() {
-        let res = Prover::new(ProofMode::Fake, &GUEST_ELF).prove(&Input::default());
+        let res = Prover::new(ProofMode::Fake, &CALL_GUEST_ELF).prove(&Input::default());
 
         assert_eq!(
             res.map(|_| ()).unwrap_err().to_string(),

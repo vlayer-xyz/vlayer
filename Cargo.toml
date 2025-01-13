@@ -6,6 +6,7 @@ members = [
     "rust/cli",
     "rust/common",
     "rust/email_proof",
+    "rust/guest_wrapper",
     "rust/host_utils",
     "rust/key_value",
     "rust/mpt",
@@ -14,7 +15,6 @@ members = [
     "rust/server_utils",
     "rust/services/call/engine",
     "rust/services/call/guest",
-    "rust/services/call/guest_wrapper",
     "rust/services/call/host",
     "rust/services/call/precompiles",
     "rust/services/call/seal",
@@ -25,7 +25,6 @@ members = [
     "rust/services/chain/common",
     "rust/services/chain/db",
     "rust/services/chain/guest",
-    "rust/services/chain/guest_wrapper",
     "rust/services/chain/host",
     "rust/services/chain/mock_server",
     "rust/services/chain/server",
@@ -125,8 +124,8 @@ rayon = "1.10.0"
 regex = "1.11.1"
 reqwest = { version = "0.12.12", default-features = false }
 revm = { version = "19.0.0", default-features = false, features = ["optimism"] }
-risc0-build = "1.2.0"
-risc0-build-ethereum = "1.2.0"
+risc0-build = { git = "https://github.com/Wiezzel/risc0.git", rev = "45465177d126f38ccb0096682de164af8520951a" }
+risc0-build-ethereum = { git = "https://github.com/Wiezzel/risc0-ethereum.git", rev = "4d3cc153a3e36ccb657edf1575986b26e9c754c6" }
 risc0-zkp = { version = "1.2.0", default-features = false }
 risc0-zkvm = "1.2.0"
 rlp = "0.6.1"
@@ -165,7 +164,6 @@ seal = { path = "rust/services/call/seal" }
 call_precompiles = { path = "rust/services/call/precompiles" }
 call_engine = { path = "rust/services/call/engine" }
 call_guest = { path = "rust/services/call/guest" }
-call_guest_wrapper = { path = "rust/services/call/guest_wrapper" }
 call_host = { path = "rust/services/call/host" }
 call_server = { path = "rust/services/call/server" }
 call_server_lib = { path = "rust/services/call/server_lib" }
@@ -173,23 +171,23 @@ chain = { path = "rust/chain" }
 chain_client = { path = "rust/services/chain/client" }
 chain_db = { path = "rust/services/chain/db" }
 chain_guest = { path = "rust/services/chain/guest" }
-chain_guest_wrapper = { path = "rust/services/chain/guest_wrapper" }
 chain_host = { path = "rust/services/chain/host" }
 chain_server = { path = "rust/services/chain/server" }
 chain_server_lib = { path = "rust/services/chain/server_lib" }
-mock_chain_server = { path = "rust/services/chain/mock_server" }
 chain_common = { path = "rust/services/chain/common" }
 chain_test_utils = { path = "rust/services/chain/test_utils" }
 chain_worker = { path = "rust/services/chain/worker" }
 common = { path = "rust/common" }
 email_proof = { path = "rust/email_proof" }
+guest_wrapper = { path = "rust/guest_wrapper" }
 host_utils = { path = "rust/host_utils" }
 key_value = { path = "rust/key_value" }
+mock_chain_server = { path = "rust/services/chain/mock_server" }
 mpt = { path = "rust/mpt" }
 provider = { path = "rust/provider" }
-u64_range = { path = "rust/range" }
 server_utils = { path = "rust/server_utils" }
 test_runner = { path = "rust/test_runner" }
+u64_range = { path = "rust/range" }
 version = { path = "rust/version" }
 web_proof = { path = "rust/web_proof" }
 zkvm-benchmarks = { path = "rust/zkvm-benchmarks/benchmarks" }
@@ -203,6 +201,7 @@ cast_possible_wrap = "warn"
 cast_precision_loss = "warn"
 cast_sign_loss = "warn"
 dbg_macro = "warn"
+enum_variant_size_threshold = "warn"
 explicit_deref_methods = "warn"
 explicit_into_iter_loop = "warn"
 explicit_iter_loop = "warn"
@@ -214,7 +213,6 @@ implicit_clone = "warn"
 inefficient_to_string = "warn"
 iter_filter_is_some = "warn"
 large_digit_groups = "warn"
-large_enum_variant = "warn"
 large_futures = "warn"
 large_stack_arrays = "warn"
 large_types_passed_by_value = "warn"

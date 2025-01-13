@@ -1,5 +1,5 @@
 [package]
-name = "chain_guest_wrapper"
+name = "guest_wrapper"
 version = "0.1.0"
 edition = "2021"
 
@@ -7,10 +7,13 @@ edition = "2021"
 common = { workspace = true }
 
 [build-dependencies]
+anyhow = { workspace = true }
 risc0-build = { workspace = true }
+risc0-build-ethereum = { workspace = true }
+risc0-zkp = { workspace = true }
 
 [package.metadata.risc0]
-methods = ["risc0_guest"]
+methods = ["risc0_call_guest", "risc0_chain_guest"]
 
 [lints]
 workspace = true

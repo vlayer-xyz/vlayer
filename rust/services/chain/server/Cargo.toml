@@ -6,11 +6,11 @@ edition = "2021"
 [dependencies]
 anyhow = { workspace = true }
 chain_db = { workspace = true }
-chain_guest_wrapper = { workspace = true }
 chain_server_lib = { workspace = true }
 clap = { workspace = true, features = ["derive", "env"] }
 common = { workspace = true }
 dotenvy = { workspace = true }
+guest_wrapper = { workspace = true }
 tokio = { workspace = true }
 version = { workspace = true }
 

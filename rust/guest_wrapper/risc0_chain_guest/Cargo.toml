@@ -6,6 +6,6 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-chain_guest = { path = "../../guest" }
+chain_guest = { path = "../../services/chain/guest" }
 risc0-zkvm = { version = "1.2.0", default-features = false, features = ["std"] }
 tokio = { version = "1.41.0", features = ["rt", "macros"] }
