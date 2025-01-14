@@ -18,7 +18,7 @@ pub(crate) enum RecordType {
     TXT = 16,
 }
 
-#[derive(Serialize, Deserialize, Clone, Default, PartialEq, Debug)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct Response {
     // of the following fields can be found here: https://developers.cloudflare.com/1.1.1.1/encryption/dns-over-https/make-api-requests/dns-json/#successful-response
@@ -41,6 +41,23 @@ pub struct Response {
     pub(crate) comment: Option<String>,
     #[serde(skip_serializing_if = "Option::is_none")]
     pub(crate) verification_data: Option<VerificationData>,
+}
+
+impl Default for Response {
+    fn default() -> Self {
+        Response {
+            truncated: false,
+            recursive_desired: true,
+            recursion_available: true,
+            verified_with_dnssec: false,
+            dnssec_validation_disabled: false,
+            status: 0,
+            question: Default::default(),
+            answer: Default::default(),
+            comment: Default::default(),
+            verification_data: Default::default(),
+        }
+    }
 }
 
 #[derive(Serialize, Deserialize, Clone, Default, PartialEq, Debug)]

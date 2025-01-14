@@ -39,14 +39,39 @@ impl<C: Now> Resolver<C> {
     }
 }
 
-impl<C: Now, P: DoHProvider> DoHProvider for Resolver<C, P, 1> {
+fn validate_responses(responses: &[Option<Response>]) -> Option<()> {
+    if responses.iter().any(|r| r.is_none()) {
+        return None;
+    }
+
+    let responses: Vec<_> = responses.iter().map(|r| r.as_ref().unwrap()).collect();
+
+    if responses.iter().any(|r| !validate_response(r)) {
+        return None;
+    }
+
+    let first_response: &Response = responses.get(0)?;
+
+    if responses
+        .iter()
+        .skip(1)
+        .any(|r| !responses_match(first_response, *r))
+    {
+        return None;
+    }
+
+    Some(())
+}
+
+impl<C: Now, P: DoHProvider, const Q: usize> DoHProvider for Resolver<C, P, Q> {
     async fn resolve(&self, query: &Query) -> Option<Response> {
         let jobs: Vec<_> = self.providers.iter().map(|p| p.resolve(query)).collect();
         let responses = join_all(jobs).await;
+        validate_responses(&responses)?;
+
+        let provider_response = responses.get(0)?.as_ref()?.clone();
 
         let mut response = Response {
-            status: provider_response.status,
-            question: provider_response.question,
             status: 0,
             question: vec![query.clone()],
             answer: provider_response.answer,
@@ -67,6 +92,76 @@ impl<C: Now, P: DoHProvider> DoHProvider for Resolver<C, P, 1> {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::dns_over_https::types::RecordType;
+
+    fn response() -> Response {
+        let record = DNSRecord {
+            name: "vlayer.xyz".into(),
+            record_type: RecordType::TXT,
+            data: "some data".into(),
+            ttl: 300,
+        };
+
+        Response {
+            status: 0,
+            question: Default::default(),
+            answer: Some(vec![record]),
+            comment: Some("Some boring comment".to_string()),
+            verification_data: None,
+            ..Response::with_flags(false, true, true, false, false)
+        }
+    }
+
+    mod validate_responses {
+        use super::*;
+
+        fn responses_to_validate_responses_args<const SIZE: usize>(
+            responses: [Response; SIZE],
+        ) -> [Option<Response>; SIZE] {
+            let mut result: [Option<Response>; SIZE] = [const { None }; SIZE];
+            for (i, response) in responses.iter().enumerate() {
+                result[i] = Some(response.clone());
+            }
+            result
+        }
+
+        #[test]
+        fn all_responses_must_not_be_none() {
+            let responses =
+                responses_to_validate_responses_args([response(), response(), response()]);
+            assert!(validate_responses(&responses).is_some());
+        }
+
+        #[test]
+        fn passes_for_equal_results() {
+            let responses =
+                responses_to_validate_responses_args([response(), response(), response()]);
+            assert!(validate_responses(&responses).is_some());
+        }
+
+        #[test]
+        fn fails_for_non_matching_responses() {
+            let mut responses = [response(), response(), response()];
+            responses[1].answer = Some(vec![]);
+
+            assert!(validate_responses(&responses_to_validate_responses_args(responses)).is_none());
+        }
+
+        #[test]
+        fn all_responses_must_be_successful() {
+            let passing_responses = responses_to_validate_responses_args([response(), response()]);
+            let failing_responses = responses_to_validate_responses_args([
+                Response {
+                    status: 1,
+                    ..response()
+                },
+                response(),
+            ]);
+
+            assert!(validate_responses(&passing_responses).is_some());
+            assert!(validate_responses(&failing_responses).is_none());
+        }
+    }
 
     mod resolver {
         use super::*;
@@ -76,16 +171,6 @@ mod tests {
         };
 
         type R = Resolver<MockClock<64>, MockProvider, 1>;
-        fn response() -> Response {
-            Response {
-                status: 0,
-                question: Default::default(),
-                answer: Default::default(),
-                comment: Some("Some boring comment".to_string()),
-                verification_data: None,
-                ..Response::with_flags(false, true, true, false, false)
-            }
-        }
         fn resolver() -> R {
             R::new([MockProvider::new(response())])
         }
