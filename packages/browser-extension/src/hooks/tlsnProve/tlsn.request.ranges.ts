@@ -41,7 +41,7 @@ function calculateRequestRanges(
       return calculateRequestQueriesRanges(url_query, url, url_offset);
     })
     .with({ url_query_except: P.array(P.string) }, ({ url_query_except }) => {
-      const queriesToRedact = findAllUrlQueries(raw).filter(
+      const queriesToRedact = findAllUrlQueries(url).filter(
         (query) => !url_query_except.includes(query)
       );
 
@@ -55,6 +55,15 @@ function findUrlInRequest(raw: string, request_range: CommitData): string {
   const url = request.split(" ")[1]; // METHOD PATH PROTOCOL_VERSION
   return url;
 }
+
+function findAllUrlQueries(path: string): string[] {
+  const url = new URL(path);
+
+  let params: string[] = [];
+  url.searchParams.forEach((_, key) => {
+    params.push(key);
+  });
+  return params;
 }
 
 export { calculateRequestRanges };
