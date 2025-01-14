@@ -1,8 +1,8 @@
 import {
   RedactRequestHeaders,
   RedactRequestHeadersExcept,
-  RedactRequestUrlQuery,
-  RedactRequestUrlQueryExcept,
+  RedactRequestUrlQueryParam,
+  RedactRequestUrlQueryParamExcept,
 } from "src/web-proof-commons/types/message";
 import { ParsedTranscriptData } from "tlsn-js";
 import { CommitData } from "tlsn-js/src/types";
@@ -14,8 +14,8 @@ function calculateRequestRanges(
   redactionItem:
     | RedactRequestHeadersExcept
     | RedactRequestHeaders
-    | RedactRequestUrlQueryExcept
-    | RedactRequestUrlQuery,
+    | RedactRequestUrlQueryParamExcept
+    | RedactRequestUrlQueryParam,
   raw: string,
   transcriptRanges: ParsedTranscriptData
 ): CommitData[] {

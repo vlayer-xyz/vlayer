@@ -1,8 +1,8 @@
 import {
   type RedactRequestHeaders,
   type RedactRequestHeadersExcept,
-  type RedactRequestUrlQuery,
-  type RedactRequestUrlQueryExcept,
+  type RedactRequestUrlQueryParam,
+  type RedactRequestUrlQueryParamExcept,
   type RedactResponseHeaders,
   type RedactResponseHeadersExcept,
   type RedactResponseJsonBody,
@@ -32,14 +32,14 @@ export const request = {
         request: {
           url_query: params,
         },
-      } as RedactRequestUrlQuery;
+      } as RedactRequestUrlQueryParam;
     },
     redactAllQueryParamsExcept: (params: string[]) => {
       return {
         request: {
           url_query_except: params,
         },
-      } as RedactRequestUrlQueryExcept;
+      } as RedactRequestUrlQueryParamExcept;
     },
   },
 };

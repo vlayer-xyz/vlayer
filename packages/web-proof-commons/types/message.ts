@@ -123,13 +123,13 @@ export type RedactRequestHeadersExcept = {
   };
 };
 
-export type RedactRequestUrlQuery = {
+export type RedactRequestUrlQueryParam = {
   request: {
     url_query: string[];
   };
 };
 
-export type RedactRequestUrlQueryExcept = {
+export type RedactRequestUrlQueryParamExcept = {
   request: {
     url_query_except: string[];
   };
@@ -162,8 +162,8 @@ export type RedactResponseJsonBodyExcept = {
 export type RedactionItem =
   | RedactRequestHeaders
   | RedactRequestHeadersExcept
-  | RedactRequestUrlQuery
-  | RedactRequestUrlQueryExcept
+  | RedactRequestUrlQueryParam
+  | RedactRequestUrlQueryParamExcept
   | RedactResponseHeaders
   | RedactResponseHeadersExcept
   | RedactResponseJsonBody
