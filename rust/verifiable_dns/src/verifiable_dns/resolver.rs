@@ -6,7 +6,10 @@ use futures::future::join_all;
 use responses_validation::{responses_match, validate_response};
 
 use super::{record::Record, signer::Signer, time::Now, VerificationData};
-use crate::dns_over_https::{types::Record as DNSRecord, Provider as DoHProvider, Query, Response};
+use crate::dns_over_https::{
+    types::{Record as DNSRecord, RecordType},
+    Provider as DoHProvider, Query, Response,
+};
 
 #[derive(Clone)]
 pub struct Resolver<C: Now, P: DoHProvider, const Q: usize> {
@@ -80,7 +83,11 @@ impl<C: Now, P: DoHProvider, const Q: usize> DoHProvider for Resolver<C, P, Q> {
         };
 
         response.verification_data = if let Some(ref answer) = response.answer {
-            answer.first().map(|record| self.sign_record(record))
+            answer
+                .iter()
+                .filter(|r| r.record_type == RecordType::TXT)
+                .last()
+                .map(|record| self.sign_record(record))
         } else {
             None
         };

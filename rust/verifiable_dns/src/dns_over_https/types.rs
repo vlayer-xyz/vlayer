@@ -13,6 +13,8 @@ pub struct Query {
 #[derive(Serialize_repr, Deserialize_repr, Clone, Default, PartialEq, Debug)]
 #[repr(u8)]
 pub(crate) enum RecordType {
+    #[allow(clippy::upper_case_acronyms)]
+    CNAME = 5,
     #[default]
     #[allow(clippy::upper_case_acronyms)]
     TXT = 16,
