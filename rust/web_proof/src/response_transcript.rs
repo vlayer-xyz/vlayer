@@ -2,11 +2,11 @@ use std::io::Read;
 
 use chunked_transfer::Decoder;
 use derive_new::new;
-use httparse::{Response, Status, EMPTY_HEADER};
 
-use crate::errors::ParsingError;
-
-const MAX_HEADERS_NUMBER: usize = 40;
+use crate::{
+    errors::ParsingError,
+    transcript_parser::{parse_response_and_validate_redaction, HttpHeader},
+};
 
 #[derive(Debug, new)]
 pub(crate) struct ResponseTranscript {
@@ -17,32 +17,32 @@ impl ResponseTranscript {
     pub(crate) fn parse_body(self) -> Result<String, ParsingError> {
         let response_string = String::from_utf8(self.transcript)?;
 
-        let mut headers = [EMPTY_HEADER; MAX_HEADERS_NUMBER];
-        let mut res = Response::new(&mut headers);
-        let body_index = match res.parse(response_string.as_bytes())? {
-            Status::Complete(t) => t,
-            Status::Partial => return Err(ParsingError::Partial),
-        };
+        let (body, headers) = parse_response_and_validate_redaction(&response_string)?;
 
-        let body = &response_string[body_index..];
+        handle_chunked_transfer_encoding(&headers, &body)
+    }
+}
 
-        let transfer_encoding_header = headers
-            .iter()
-            .find(|header| header.name.eq_ignore_ascii_case("Transfer-Encoding"));
+fn handle_chunked_transfer_encoding(
+    headers: &[HttpHeader],
+    body: &str,
+) -> Result<String, ParsingError> {
+    let transfer_encoding_header = headers
+        .iter()
+        .find(|header| header.name.eq_ignore_ascii_case("Transfer-Encoding"));
 
-        match transfer_encoding_header {
-            Some(header) if header.value.eq_ignore_ascii_case(b"chunked") => {
-                let mut decoder = Decoder::new(body.as_bytes());
-                let mut decoded_body = String::new();
-                decoder.read_to_string(&mut decoded_body)?;
-                Ok(decoded_body)
-            }
-            Some(header) if header.value.eq_ignore_ascii_case(b"identity") => Ok(body.to_string()),
-            Some(header) => Err(ParsingError::UnsupportedTransferEncoding(
-                String::from_utf8_lossy(header.value).to_string(),
-            )),
-            None => Ok(body.to_string()),
+    match transfer_encoding_header {
+        Some(header) if header.value.eq_ignore_ascii_case(b"chunked") => {
+            let mut decoder = Decoder::new(body.as_bytes());
+            let mut decoded_body = String::new();
+            decoder.read_to_string(&mut decoded_body)?;
+            Ok(decoded_body)
         }
+        Some(header) if header.value.eq_ignore_ascii_case(b"identity") => Ok(body.to_string()),
+        Some(header) => Err(ParsingError::UnsupportedTransferEncoding(
+            String::from_utf8_lossy(header.value.as_ref()).to_string(),
+        )),
+        None => Ok(body.to_string()),
     }
 }
 

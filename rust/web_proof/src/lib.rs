@@ -7,4 +7,5 @@ pub mod fixtures;
 mod errors;
 mod request_transcript;
 mod response_transcript;
+mod transcript_parser;
 mod web;
