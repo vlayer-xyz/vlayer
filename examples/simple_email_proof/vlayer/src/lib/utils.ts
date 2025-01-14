@@ -7,3 +7,7 @@ export const getStrFromFile = (file: File): Promise<string> => {
     reader.readAsText(file);
   });
 };
+
+export const usePrivateKey =
+  !import.meta.env.VITE_USE_WINDOW_ETHEREUM_TRANSPORT ||
+  Boolean(import.meta.env.VITE_PRIVATE_KEY);
