@@ -158,7 +158,7 @@ The `useCallProver` hook is used to interact with the vlayer prover by initiatin
 
 
 ### Example usage
-The `callProver` function starts the proving process. Proving is an asynchronous operation, and the result (`data`) contains a hash that can be used to track the status or [retrieve the final proof](/javascript/react-hooks.html#usewaitforprovingresult).
+The `callProver` function initiates the proving process. Proving is an asynchronous operation, and the result (`data`) contains a hash that can be used to track the status or [retrieve the final proof](/javascript/react-hooks.html#usewaitforprovingresult).
 
 ```javascript
 import { useCallProver } from "@vlayer/react";
@@ -190,11 +190,12 @@ const ExampleComponent = () => {
 The `callProver` function has to be invoked with the required arguments by the prover contract function.
 
 Besides proof hash, the hook returns variables to monitor the request and update the UI:
-- `status`: Overall status of the proving process (`idle`, `pending`, `ready`, or `error`).
-- `isIdle`: Indicates no proving request has been initiated.
-- `isPending`: Indicates the proving process is ongoing.
-- `isReady`: Indicates the proving process is complete.
+- `status`: Overall status of the initial call to the prover (`idle`, `pending`, `ready`, or `error`).
+- `isIdle`: Indicates that no prover call has been initiated.
+- `isPending`: Indicates the waiting for proving hash is ongoing.
+- `isReady`: Indicates the proving hash is available.
 - `isError`: Indicates an error occurred.
+- `error`: Contains the error message if an error occurred.
 
 ## `useWaitForProvingResult`
 The `useWaitForProvingResult` hook waits for a proving process to complete and retrieves the resulting proof.
@@ -233,11 +234,11 @@ const ExampleComponent = () => {
 
 The hook provides additional properties for tracking progress and managing UI updates:
 - `status`: Indicates the status of the proving result (`idle`, `pending`, `ready`, or `error`).
-- `isIdle`: Indicates the hook is waiting for a hash to monitor.
-- `isPending`: Indicates the proof generation is ongoing.
-- `isReady`: Indicates the proof is available.
-- `isError`: Indicates an error occurred during proof retrieval.
-
+- `isIdle`: Indicates the hook is not triggered.
+- `isPending`: Indicates the proof computation is ongoing.
+- `isReady`: Indicates the final proof is available.
+- `isError`: Indicates an error occurred during proving.
+- `error`: Contains the error message returned by the prover
 > 💡 **Try it Now**
 > 
 > To see vlayer React hooks in action, run the following command in your terminal:
