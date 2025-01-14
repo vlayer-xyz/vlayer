@@ -23,8 +23,8 @@ pub enum ParsingError {
     StdIoError(#[from] std::io::Error),
 
     #[error("Header name is redacted")]
-    RedactedHeaderName,
+    RedactedName,
 
     #[error("Header value is partially redacted")]
-    PartiallyRedactedHeaderValue,
+    PartiallyRedactedValue,
 }

@@ -15,14 +15,14 @@ const HEADER_NAME_REPLACEMENT_CHAR_1: char = '-';
 const HEADER_NAME_REPLACEMENT_CHAR_2: char = '+';
 
 #[derive(Clone, Debug)]
-pub(crate) struct HttpHeader {
+pub(crate) struct NameValue {
     pub(crate) name: String,
     pub(crate) value: Vec<u8>,
 }
 
-impl From<Header<'_>> for HttpHeader {
-    fn from(header: Header) -> Self {
-        HttpHeader {
+impl From<&Header<'_>> for NameValue {
+    fn from(header: &Header) -> Self {
+        NameValue {
             name: header.name.to_string(),
             value: header.value.to_vec(),
         }
@@ -38,7 +38,10 @@ pub(crate) fn parse_request_and_validate_redaction(request: &str) -> Result<Stri
         request.replace(REDACTED_CHAR, HEADER_NAME_REPLACEMENT_CHAR_2.to_string().as_str());
     let (_, headers_with_replacement_2) = parse_request(&request_string)?;
 
-    validate_headers_redaction(&headers_with_replacement_1, &headers_with_replacement_2)?;
+    validate_name_value_redaction(
+        &convert_headers(&headers_with_replacement_1),
+        &convert_headers(&headers_with_replacement_2),
+    )?;
 
     Ok(path)
 }
@@ -55,7 +58,7 @@ fn parse_request(request: &str) -> Result<(String, [Header; MAX_HEADERS_NUMBER])
 
 pub(crate) fn parse_response_and_validate_redaction(
     response: &str,
-) -> Result<(String, Vec<HttpHeader>), ParsingError> {
+) -> Result<(String, Vec<NameValue>), ParsingError> {
     let response_string =
         response.replace(REDACTED_CHAR, HEADER_NAME_REPLACEMENT_CHAR_1.to_string().as_str());
     let (body_index, headers_with_replacement_1) = parse_response(&response_string)?;
@@ -64,11 +67,19 @@ pub(crate) fn parse_response_and_validate_redaction(
         response.replace(REDACTED_CHAR, HEADER_NAME_REPLACEMENT_CHAR_2.to_string().as_str());
     let (_, headers_with_replacement_2) = parse_response(&response_string)?;
 
-    validate_headers_redaction(&headers_with_replacement_1, &headers_with_replacement_2)?;
+    validate_name_value_redaction(
+        &convert_headers(&headers_with_replacement_1),
+        &convert_headers(&headers_with_replacement_2),
+    )?;
 
     let body = &response_string[body_index..];
 
-    Ok((body.to_string(), headers_with_replacement_1.map(Into::into).to_vec()))
+    Ok((
+        body.to_string(),
+        headers_with_replacement_1
+            .map(|header| NameValue::from(&header))
+            .to_vec(),
+    ))
 }
 
 fn parse_response(response: &str) -> Result<(usize, [Header; MAX_HEADERS_NUMBER]), ParsingError> {
@@ -82,24 +93,25 @@ fn parse_response(response: &str) -> Result<(usize, [Header; MAX_HEADERS_NUMBER]
     Ok((body_index, headers))
 }
 
-fn validate_headers_redaction(
-    headers_with_replacement_1: &[Header; MAX_HEADERS_NUMBER],
-    headers_with_replacement_2: &[Header; MAX_HEADERS_NUMBER],
+fn validate_name_value_redaction(
+    name_values_with_replacement_1: &[NameValue],
+    name_values_with_replacement_2: &[NameValue],
 ) -> Result<(), ParsingError> {
-    let header_pairs = zip(headers_with_replacement_1.iter(), headers_with_replacement_2.iter());
+    let zipped_pairs =
+        zip(name_values_with_replacement_1.iter(), name_values_with_replacement_2.iter());
 
-    let some_header_name_is_redacted = header_pairs.clone().any(|(l, r)| l.name != r.name);
+    let some_name_is_redacted = zipped_pairs.clone().any(|(l, r)| l.name != r.name);
 
-    if some_header_name_is_redacted {
-        return Err(ParsingError::RedactedHeaderName);
+    if some_name_is_redacted {
+        return Err(ParsingError::RedactedName);
     }
 
-    let some_header_value_is_partially_redacted = header_pairs.clone().any(|(l, r)| {
-        !fully_redacted(l.value, HEADER_NAME_REPLACEMENT_CHAR_1) && l.value != r.value
+    let some_value_is_partially_redacted = zipped_pairs.clone().any(|(l, r)| {
+        !fully_redacted(&l.value, HEADER_NAME_REPLACEMENT_CHAR_1) && l.value != r.value
     });
 
-    if some_header_value_is_partially_redacted {
-        return Err(ParsingError::PartiallyRedactedHeaderValue);
+    if some_value_is_partially_redacted {
+        return Err(ParsingError::PartiallyRedactedValue);
     }
 
     Ok(())
@@ -107,6 +119,10 @@ fn validate_headers_redaction(
 
 fn fully_redacted(input: &[u8], redacted_char: char) -> bool {
     input.iter().all(|&c| c == redacted_char as u8)
+}
+
+fn convert_headers(headers: &[Header]) -> Vec<NameValue> {
+    headers.iter().map(Into::into).collect()
 }
 
 #[cfg(test)]
@@ -210,21 +226,21 @@ mod tests {
                 fn partially_redacted_header_value() {
                     let request = "GET https://example.com/test.json HTTP/1.1\r\ncontent-type: application/jso\0\r\n\r\n";
                     let err = parse_request_and_validate_redaction(request).unwrap_err();
-                    assert!(matches!(err, ParsingError::PartiallyRedactedHeaderValue));
+                    assert!(matches!(err, ParsingError::PartiallyRedactedValue));
                 }
 
                 #[test]
                 fn partially_redacted_header_name() {
                     let request = "GET https://example.com/test.json HTTP/1.1\r\ncontent-typ\0: application/json\r\n\r\n";
                     let err = parse_request_and_validate_redaction(request).unwrap_err();
-                    assert!(matches!(err, ParsingError::RedactedHeaderName));
+                    assert!(matches!(err, ParsingError::RedactedName));
                 }
 
                 #[test]
                 fn fully_redacted_header_name() {
                     let request = "GET https://example.com/test.json HTTP/1.1\r\n\0\0\0\0\0\0\0\0\0\0\0\0: application/json\r\n\r\n";
                     let err = parse_request_and_validate_redaction(request).unwrap_err();
-                    assert!(matches!(err, ParsingError::RedactedHeaderName));
+                    assert!(matches!(err, ParsingError::RedactedName));
                 }
 
                 #[test]
@@ -242,7 +258,7 @@ mod tests {
                     let response =
                         "HTTP/1.1 200 OK\r\nContent-Type: text/plai\0\r\n\r\nHello, world!";
                     let err = parse_response_and_validate_redaction(response).unwrap_err();
-                    assert!(matches!(err, ParsingError::PartiallyRedactedHeaderValue));
+                    assert!(matches!(err, ParsingError::PartiallyRedactedValue));
                 }
 
                 #[test]
@@ -250,7 +266,7 @@ mod tests {
                     let response =
                         "HTTP/1.1 200 OK\r\nContent-Typ\0: text/plain\r\n\r\nHello, world!";
                     let err = parse_response_and_validate_redaction(response).unwrap_err();
-                    assert!(matches!(err, ParsingError::RedactedHeaderName));
+                    assert!(matches!(err, ParsingError::RedactedName));
                 }
 
                 #[test]
@@ -258,7 +274,7 @@ mod tests {
                     let response =
                         "HTTP/1.1 200 OK\r\n\0\0\0\0\0\0\0\0\0\0\0\0: text/plain\r\n\r\nHello, world!";
                     let err = parse_response_and_validate_redaction(response).unwrap_err();
-                    assert!(matches!(err, ParsingError::RedactedHeaderName));
+                    assert!(matches!(err, ParsingError::RedactedName));
                 }
 
                 #[test]
