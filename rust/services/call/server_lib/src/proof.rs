@@ -1,12 +1,13 @@
 use call_engine::Call as EngineCall;
 use call_host::Host;
-use jsonrpsee::types::error::{self as jrpcerror, ErrorObjectOwned};
+use dashmap::Entry;
 use tracing::info;
 
+pub use crate::proving::RawData;
 use crate::{
     chain_proof::{self, Config as ChainProofConfig, Error as ChainProofError},
     gas_meter::Client as GasMeterClient,
-    handlers::{ProofReceipt, SharedProofs},
+    handlers::SharedProofs,
     metrics::Metrics,
     preflight::{self, Error as PreflightError},
     proving::{self, Error as ProvingError},
@@ -23,59 +24,128 @@ pub enum Error {
     Proving(#[from] ProvingError),
 }
 
-impl From<Error> for ErrorObjectOwned {
-    fn from(value: Error) -> Self {
-        (&value).into()
-    }
+#[derive(Default)]
+pub enum State {
+    #[default]
+    Queued,
+    ChainProofPending,
+    ChainProofError(Box<Error>),
+    PreflightPending,
+    PreflightError(Box<Error>),
+    ProvingPending,
+    ProvingError(Box<Error>),
+    Done(Box<RawData>),
 }
 
-impl From<&Error> for ErrorObjectOwned {
-    fn from(error: &Error) -> Self {
-        match error {
-            Error::ChainProof(..) | Error::Preflight(..) | Error::Proving(..) => {
-                ErrorObjectOwned::owned::<()>(
-                    jrpcerror::INTERNAL_ERROR_CODE,
-                    error.to_string(),
-                    None,
-                )
+impl State {
+    pub const fn is_err(&self) -> bool {
+        matches!(
+            self,
+            State::ChainProofError(..) | State::PreflightError(..) | State::ProvingError(..)
+        )
+    }
+
+    pub const fn data(&self) -> Option<&RawData> {
+        match self {
+            State::Done(data) => Some(data),
+            _ => None,
+        }
+    }
+
+    pub const fn err(&self) -> Option<&Error> {
+        match self {
+            State::ChainProofError(err) | State::PreflightError(err) | State::ProvingError(err) => {
+                Some(err)
             }
+            _ => None,
         }
     }
 }
 
-pub type Result<T> = std::result::Result<T, Error>;
+#[derive(Default)]
+pub struct Status {
+    pub state: State,
+    pub metrics: Metrics,
+}
+
+fn set_state(
+    proofs: &SharedProofs,
+    call_hash: CallHash,
+    state: State,
+) -> Entry<'_, CallHash, Status> {
+    proofs.entry(call_hash).and_modify(|res| res.state = state)
+}
+
+fn set_metrics(
+    entry: Entry<'_, CallHash, Status>,
+    metrics: Metrics,
+) -> Entry<'_, CallHash, Status> {
+    entry.and_modify(|res| res.metrics = metrics)
+}
 
 pub async fn generate(
     call: EngineCall,
     host: Host,
     gas_meter_client: impl GasMeterClient,
-    state: SharedProofs,
+    proofs: SharedProofs,
     call_hash: CallHash,
     chain_proof_config: Option<ChainProofConfig>,
-) -> Result<ProofReceipt> {
-    let mut metrics = Metrics::default();
-
+) {
     let prover = host.prover();
     let call_guest_id = host.call_guest_id();
+    let mut metrics = Metrics::default();
 
     info!("Generating proof for {call_hash}");
 
-    chain_proof::await_ready(&host, &state, call_hash, chain_proof_config).await?;
+    set_state(&proofs, call_hash, State::ChainProofPending);
+
+    match chain_proof::await_ready(&host, chain_proof_config)
+        .await
+        .map_err(Error::ChainProof)
+    {
+        Ok(()) => {
+            set_state(&proofs, call_hash, State::PreflightPending);
+        }
+        Err(err) => {
+            set_state(&proofs, call_hash, State::ChainProofError(err.into()));
+            return;
+        }
+    }
 
     let preflight_result =
-        preflight::await_preflight(host, &state, call, call_hash, &gas_meter_client, &mut metrics)
-            .await?;
+        match preflight::await_preflight(host, call, &gas_meter_client, &mut metrics)
+            .await
+            .map_err(Error::Preflight)
+        {
+            Ok(res) => {
+                let entry = set_state(&proofs, call_hash, State::ProvingPending);
+                set_metrics(entry, metrics);
+                res
+            }
+            Err(err) => {
+                let entry = set_state(&proofs, call_hash, State::PreflightError(err.into()));
+                set_metrics(entry, metrics);
+                return;
+            }
+        };
 
-    let raw_data = proving::await_proving(
+    match proving::await_proving(
         &prover,
-        &state,
-        call_hash,
         call_guest_id,
         preflight_result,
         &gas_meter_client,
         &mut metrics,
     )
-    .await?;
-
-    Ok(ProofReceipt::new(raw_data, metrics))
+    .await
+    .map_err(Error::Proving)
+    {
+        Ok(raw_data) => {
+            let entry = set_state(&proofs, call_hash, State::Done(raw_data.into()));
+            set_metrics(entry, metrics);
+        }
+        Err(err) => {
+            let entry = set_state(&proofs, call_hash, State::ProvingError(err.into()));
+            set_metrics(entry, metrics);
+        }
+    };
 }

@@ -8,14 +8,14 @@ pub enum Error {
     TryFromInt(#[from] TryFromIntError),
 }
 
-#[derive(Clone, Serialize, Default)]
+#[derive(Copy, Clone, Serialize, Default)]
 pub struct Metrics {
     pub gas: u64,
     pub cycles: u64,
     pub times: Times,
 }
 
-#[derive(Clone, Serialize, Default)]
+#[derive(Copy, Clone, Serialize, Default)]
 pub struct Times {
     pub preflight: u64,
     pub proving: u64,

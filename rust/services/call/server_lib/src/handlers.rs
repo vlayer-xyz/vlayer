@@ -3,14 +3,13 @@ use std::sync::Arc;
 use async_trait::async_trait;
 use dashmap::DashMap;
 use derive_more::{Deref, DerefMut};
-use derive_new::new;
-use jsonrpsee::{proc_macros::rpc, types::error::ErrorObjectOwned, Extensions};
-use serde::{Deserialize, Serialize};
+use jsonrpsee::{proc_macros::rpc, Extensions};
+use serde::Deserialize;
 use v_call::types::{Call, CallContext, CallHash, Result as VCallResult};
-use v_get_proof_receipt::types::CallResult;
+use v_get_proof_receipt::types::{CallResult, Result as VGetProofReceiptResult};
 use v_versions::Versions;
 
-use crate::{config::Config, metrics::Metrics, proof::Result as ProofResult, proving::RawData};
+use crate::{config::Config, proof::Status as ProofStatus};
 
 pub mod v_call;
 pub mod v_get_proof_receipt;
@@ -30,7 +29,7 @@ pub trait Rpc {
     async fn v_call(&self, call: Call, ctx: CallContext) -> VCallResult<CallHash>;
 
     #[method(name = "v_getProofReceipt")]
-    async fn v_get_proof_receipt(&self, hash: CallHash) -> Result<CallResult, ErrorObjectOwned>;
+    async fn v_get_proof_receipt(&self, hash: CallHash) -> VGetProofReceiptResult<CallResult>;
 
     #[method(name = "v_versions")]
     async fn v_versions(&self) -> Versions;
@@ -38,25 +37,6 @@ pub trait Rpc {
 
 #[derive(Deref, DerefMut, Default)]
 pub struct Proofs(DashMap<CallHash, ProofStatus>);
-
-pub enum ProofStatus {
-    /// Proof task has just been queued
-    Queued,
-    /// Waiting for chain service to generate proof for the start execution location
-    WaitingForChainProof,
-    /// Preflight computation in progress
-    Preflight,
-    /// Proof is being generated
-    Proving,
-    /// Proof generation finished
-    Ready(ProofResult<ProofReceipt>),
-}
-
-#[derive(new, Clone, Serialize)]
-pub struct ProofReceipt {
-    data: RawData,
-    metrics: Metrics,
-}
 
 pub type SharedConfig = Arc<Config>;
 pub type SharedProofs = Arc<Proofs>;
@@ -89,7 +69,7 @@ impl RpcServer for State {
         v_call::v_call(self.config.clone(), self.proofs.clone(), params.clone(), call, ctx).await
     }
 
-    async fn v_get_proof_receipt(&self, hash: CallHash) -> Result<CallResult, ErrorObjectOwned> {
+    async fn v_get_proof_receipt(&self, hash: CallHash) -> VGetProofReceiptResult<CallResult> {
         v_get_proof_receipt::v_get_proof_receipt(&self.proofs, hash)
     }
 

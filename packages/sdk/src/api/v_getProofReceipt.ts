@@ -3,6 +3,7 @@ import {
   type VGetProofReceiptResponse,
 } from "types/vlayer";
 import { parseVCallResponseError } from "./lib/errors";
+import { vGetProofReceiptSchema } from "./lib/types/vlayer";
 
 function v_getProofReceiptBody(params: VGetProofReceiptParams) {
   return {
@@ -38,7 +39,7 @@ export async function v_getProofReceipt(
       response_json.error as { message: string | undefined },
     );
   }
-  return response_json as Promise<VGetProofReceiptResponse>;
+  return vGetProofReceiptSchema.parse(response_json);
 }
 
 function assertObject(x: unknown): asserts x is object {

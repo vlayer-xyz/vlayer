@@ -10,6 +10,7 @@ import {
 } from "viem";
 import { type WebProofRequest } from "./webProofProvider";
 import { type ContractFunctionArgsWithout } from "./viem";
+import { z } from "zod";
 
 type Calldata = string;
 
@@ -53,20 +54,17 @@ export type VGetProofReceiptParams = {
   hash: Hex;
 };
 
-export enum ProofReceiptStatus {
+export enum ProofState {
   Queued = "queued",
-  WaitingForChainProof = "waiting_for_chain_proof",
+  ChainProof = "chain_proof",
   Preflight = "preflight",
   Proving = "proving",
-  Ready = "ready",
+  Done = "done",
 }
 
-export type ProofReceipt = {
-  data: {
-    evm_call_result: Hex;
-    proof: Proof;
-  };
-  metrics: Metrics;
+export type ProofData = {
+  evm_call_result: Hex;
+  proof: Proof;
 };
 
 export type Metrics = {
@@ -77,17 +75,6 @@ export type Metrics = {
     proving: number;
   };
 };
-
-export interface ProofReceiptResult {
-  status: ProofReceiptStatus;
-  receipt?: ProofReceipt;
-}
-
-export interface VGetProofReceiptResponse {
-  jsonrpc: string;
-  result: ProofReceiptResult;
-  id: number;
-}
 
 export type ProveArgs<T extends Abi, F extends ContractFunctionName<T>> = {
   address: Hex;
@@ -126,3 +113,39 @@ export type VlayerClient = {
     ];
   }) => Promise<BrandedHash<T, F>>;
 };
+
+export const proofReceiptSchema = z.discriminatedUnion("status", [
+  z.object({
+    status: z.literal(0),
+    error: z.string(),
+    data: z.undefined(),
+    state: z.enum([
+      ProofState.ChainProof,
+      ProofState.Preflight,
+      ProofState.Proving,
+    ]),
+  }),
+  z.object({
+    status: z.literal(1),
+    error: z.undefined(),
+    state: z
+      .enum([
+        ProofState.Done,
+        ProofState.ChainProof,
+        ProofState.Preflight,
+        ProofState.Proving,
+        ProofState.Queued,
+      ])
+      .optional(),
+    data: z.custom<ProofData>(),
+  }),
+]);
+
+export const vGetProofReceiptSchema = z.object({
+  jsonrpc: z.string(),
+  result: proofReceiptSchema,
+  id: z.number(),
+});
+
+export type ProofReceipt = z.infer<typeof proofReceiptSchema>;
+export type VGetProofReceiptResponse = z.infer<typeof vGetProofReceiptSchema>;

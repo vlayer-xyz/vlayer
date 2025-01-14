@@ -5,7 +5,11 @@ use tracing::info;
 use types::{Call, CallContext, CallHash, Result as VCallResult};
 
 use super::{QueryParams, SharedConfig, SharedProofs};
-use crate::{gas_meter, handlers::ProofStatus, proof, Config};
+use crate::{
+    gas_meter,
+    proof::{self, Status as ProofStatus},
+    Config,
+};
 
 pub mod types;
 
@@ -31,22 +35,18 @@ pub async fn v_call(
     let mut found_existing = true;
     state.entry(call_hash).or_insert_with(|| {
         found_existing = false;
-        ProofStatus::Queued
+        ProofStatus::default()
     });
 
     if !found_existing {
-        tokio::spawn(async move {
-            let res = proof::generate(
-                call,
-                host,
-                gas_meter_client,
-                state.clone(),
-                call_hash,
-                config.chain_proof_config(),
-            )
-            .await;
-            state.insert(call_hash, ProofStatus::Ready(res));
-        });
+        tokio::spawn(proof::generate(
+            call,
+            host,
+            gas_meter_client,
+            state.clone(),
+            call_hash,
+            config.chain_proof_config(),
+        ));
     }
 
     Ok(call_hash)
