@@ -1,18 +1,24 @@
 import { getConfig } from "@vlayer/sdk/config";
-import { Chain, createTestClient, http, publicActions, walletActions } from "viem";
+import {
+  Chain,
+  createTestClient,
+  http,
+  publicActions,
+  walletActions,
+} from "viem";
 import { foundry } from "viem/chains";
 import MockERC20 from "../out/MockERC20.sol/MockERC20";
 import { privateKeyToAccount } from "viem/accounts";
 
-let l1 = {
+const l1 = {
   ...foundry,
   id: 31_337,
 };
 
-let opL2 = {
+const opL2 = {
   ...foundry,
   id: 31_338,
-}
+};
 
 const config = getConfig();
 
