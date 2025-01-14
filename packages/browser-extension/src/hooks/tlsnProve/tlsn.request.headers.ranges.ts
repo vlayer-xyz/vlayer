@@ -8,11 +8,11 @@ const calculateRequestHeadersRanges = (
   headers: string[],
 ) => {
   return headers.map((header) => {
-    const header_range = transcriptRanges.headers[header];
-    const new_start = raw.indexOf(":", header_range.start) + stepAfterColon;
+    const headerRange = transcriptRanges.headers[header];
+    const newStart = raw.indexOf(":", headerRange.start) + stepAfterColon;
     return {
-      start: new_start,
-      end: header_range.end,
+      start: newStart,
+      end: headerRange.end,
     };
   });
 };
