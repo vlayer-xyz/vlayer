@@ -4,7 +4,7 @@ version = "0.1.0"
 edition = "2021"
 
 [dependencies]
-alloy-primitives = { workspace = true }
+alloy-primitives = { workspace = true, features = ["tiny-keccak"] }
 alloy-sol-types = { workspace = true }
 block_header = { workspace = true, features = ["test-utils"] }
 block_trie = { workspace = true }
