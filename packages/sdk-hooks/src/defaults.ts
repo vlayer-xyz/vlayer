@@ -19,4 +19,4 @@ export const DEFAULT_CONFIG = {
   },
 };
 
-export const DEFAULT_CONFIG_ENV = ProofEnv.DEV;
+export const DEFAULT_CONFIG_ENV = ProofEnv.TESTNET;
