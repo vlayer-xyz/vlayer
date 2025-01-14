@@ -12,11 +12,11 @@ use serde_with::{base64::Base64, serde_as};
 const PRIV_KEY: &str = include_str!("../../assets/private_key.pem");
 
 #[serde_as]
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub struct Signature(#[serde_as(as = "Base64")] Bytes);
 
 #[serde_as]
-#[derive(Serialize, Deserialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub struct PublicKey(#[serde_as(as = "Base64")] Bytes);
 
 #[derive(Clone)]

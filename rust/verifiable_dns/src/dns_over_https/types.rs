@@ -18,7 +18,7 @@ pub(crate) enum RecordType {
     TXT = 16,
 }
 
-#[derive(Serialize, Deserialize, Default, PartialEq, Debug)]
+#[derive(Serialize, Deserialize, Clone, Default, PartialEq, Debug)]
 #[serde(rename_all = "PascalCase")]
 pub struct Response {
     // of the following fields can be found here: https://developers.cloudflare.com/1.1.1.1/encryption/dns-over-https/make-api-requests/dns-json/#successful-response

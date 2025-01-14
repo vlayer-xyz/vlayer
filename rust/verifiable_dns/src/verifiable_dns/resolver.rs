@@ -5,7 +5,7 @@ use crate::dns_over_https::{types::Record as DNSRecord, Provider as DoHProvider,
 
 #[derive(Clone)]
 pub struct Resolver<C: Now, P: DoHProvider> {
-    _provider: P,
+    provider: P,
     signer: Signer,
     clock: PhantomData<C>,
 }
@@ -13,7 +13,7 @@ pub struct Resolver<C: Now, P: DoHProvider> {
 impl<C: Now, P: DoHProvider> Default for Resolver<C, P> {
     fn default(provider: P) -> Self {
         Self {
-            _provider: provider,
+            provider,
             signer: Signer::new(),
             clock: PhantomData,
         }
@@ -36,9 +36,15 @@ impl<C: Now> Resolver<C> {
 
 impl<C: Now, P: DoHProvider> DoHProvider for Resolver<C, P> {
     async fn resolve(&self, query: &Query) -> Option<Response> {
-        let mut response: Response = Response::with_flags(false, true, true, false, false);
-        response.question = vec![query.clone()];
-        response.status = 0;
+        let provider_response = self.provider.resolve(query).await?;
+
+        let mut response = Response {
+            status: provider_response.status,
+            question: provider_response.question,
+            answer: provider_response.answer,
+            comment: provider_response.comment,
+            ..Response::with_flags(false, true, true, false, false)
+        };
 
         response.verification_data = if let Some(ref answer) = response.answer {
             answer.first().map(|record| self.sign_record(record))
@@ -57,16 +63,27 @@ mod tests {
     mod resolver {
         use super::*;
         use crate::{
-            dns_over_https::provider::ExternalProvider,
+            dns_over_https::provider::test_utils::MockProvider,
             verifiable_dns::time::tests_utils::MockClock,
         };
 
-        type R = Resolver<MockClock<64>, ExternalProvider>;
+        type R = Resolver<MockClock<64>, MockProvider>;
+        fn response() -> Response {
+            Response {
+                status: 0,
+                question: Default::default(),
+                answer: Default::default(),
+                comment: Some("Some boring comment".to_string()),
+                verification_data: None,
+                ..Response::with_flags(false, true, true, false, false)
+            }
+        }
         fn resolver() -> R {
-            R::new(ExternalProvider::new())
+            R::new(MockProvider::new(response()))
         }
         mod resolve {
             use super::*;
+
             #[tokio::test]
             async fn resolves_vlayer_default_dkim_selector() {
                 let resolver = R::default();
@@ -112,7 +129,7 @@ mod tests {
         mod sign_record {
 
             use super::*;
-            use crate::dns_over_https::{provider::ExternalProvider, types::RecordType};
+            use crate::dns_over_https::{provider::test_utils::MockProvider, types::RecordType};
 
             #[test]
             fn valid_until_is_ttl_seconds_from_now() {
@@ -127,8 +144,8 @@ mod tests {
                 let result = resolver.sign_record(&record);
                 assert_eq!(result.valid_until, 364);
 
-                let result =
-                    Resolver::<MockClock<11>, _>::new(ExternalProvider::default()).sign_record(&record);
+                let result = Resolver::<MockClock<11>, _>::new(MockProvider::default(response()))
+                    .sign_record(&record);
                 assert_eq!(result.valid_until, 311);
             }
         }

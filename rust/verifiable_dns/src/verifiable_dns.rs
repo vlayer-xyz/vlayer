@@ -14,7 +14,7 @@ pub type VerifiableDNSResolver = Resolver<RTClock, ExternalProvider>;
 
 type Timestamp = u64;
 
-#[derive(Serialize, Deserialize, PartialEq, Debug)]
+#[derive(Serialize, Deserialize, Clone, PartialEq, Debug)]
 pub(crate) struct VerificationData {
     pub(crate) valid_until: Timestamp,
     pub(crate) signature: Signature,
