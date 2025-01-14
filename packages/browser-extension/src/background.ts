@@ -88,7 +88,7 @@ const handleProofRequest = async (
   >,
   sender?: browser.Runtime.MessageSender,
 ) => {
-  validateMessage(message);
+  validateProofRequest(message);
   if (chrome.sidePanel && sender?.tab?.windowId) {
     await chrome.sidePanel.open({ windowId: sender.tab?.windowId });
   }
@@ -111,7 +111,7 @@ const handleProvingStatusNotification = async (
   await zkProvingStatusStore.setProvingStatus(message.payload);
 };
 
-const validateMessage = (
+const validateProofRequest = (
   message: Extract<
     MessageToExtension,
     { action: ExtensionAction.RequestWebProof }
@@ -119,11 +119,15 @@ const validateMessage = (
 ) => {
   try {
     message.payload.steps.forEach(({ step, url }) => {
-      if (step === EXTENSION_STEP.startPage) {
-        assertUrl(url);
-      } else {
-        assertUrlPattern(url);
-      }
+      match({ step, url })
+        .with({ step: EXTENSION_STEP.startPage }, ({ url }) => assertUrl(url))
+        .with(
+          {
+            step: P.union(EXTENSION_STEP.notarize, EXTENSION_STEP.expectUrl),
+          },
+          ({ url }) => assertUrlPattern(url),
+        )
+        .exhaustive();
     });
   } catch (e) {
     console.error("Invalid message", e);
