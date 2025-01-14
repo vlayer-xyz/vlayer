@@ -581,3 +581,29 @@ export const fixtureTranscript = {
     },
   },
 };
+
+export const paths = {
+  valid: [
+    "[2]",
+    "key1",
+    "key1.key2",
+    "key1[3]",
+    "[2].key1[5]",
+    "key1[1].key2[2].key3",
+    "key1.key2[0].key3",
+    "key_with_underscore[42].nested_key",
+    "_key123[4].key",
+  ],
+  invalid: [
+    "key1..key2", // Double dots not allowed
+    "key1[abc]", // Array indices must be numeric
+    "key1[key2]", // Nested keys in brackets are not allowed
+    ".key1", // Cannot start with a dot
+    "1key", // Keys cannot start with a digit
+    "[key]", // Array indices cannot contain letters
+    "key1.[2]", // Misplaced dot before an array index
+    "key1.key2[]", // Empty array index
+    "[123abc]", // Invalid array index with letters
+    "key1..[3]", // Double dots with an index
+  ],
+};
