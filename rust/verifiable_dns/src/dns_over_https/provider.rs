@@ -9,13 +9,17 @@ pub trait Provider {
     async fn resolve(&self, query: &Query) -> Option<Response>;
 }
 
+const GOOGLE_BASE_URL: &str = "https://8.8.8.8/resolve";
+
 #[derive(Clone)]
-pub struct ExternalProvider {}
+pub struct ExternalProvider {
+    base_url: &'static str,
+}
 
 impl Provider for ExternalProvider {
     async fn resolve(&self, query: &Query) -> Option<Response> {
         let response = Client::new()
-            .get("https://8.8.8.8/resolve")
+            .get(self.base_url)
             .header(ACCEPT, MIME_DNS_JSON_CONTENT_TYPE)
             .query(&query)
             .timeout(Duration::from_secs(2))
@@ -31,8 +35,10 @@ impl Provider for ExternalProvider {
 }
 
 impl ExternalProvider {
-    pub const fn new() -> Self {
-        Self {}
+    pub const fn google_provider() -> Self {
+        Self {
+            base_url: GOOGLE_BASE_URL,
+        }
     }
 }
 
@@ -66,7 +72,7 @@ mod tests {
 
     #[tokio::test]
     async fn fetches_record_from_google_doh() {
-        let provider = ExternalProvider::new();
+        let provider = ExternalProvider::google_provider();
         let query = "vlayer.xyz".into();
 
         let result = provider.resolve(&query).await.unwrap();
