@@ -1,8 +1,6 @@
 use derive_new::new;
 
-use crate::{
-    errors::ParsingError, transcript_parser::extract_path_and_check_proper_headers_redaction,
-};
+use crate::{errors::ParsingError, transcript_parser::parse_request_and_validate_redaction};
 
 #[derive(Debug, new)]
 pub(crate) struct RequestTranscript {
@@ -13,7 +11,7 @@ impl RequestTranscript {
     pub(crate) fn parse_url(self) -> Result<String, ParsingError> {
         let request = String::from_utf8(self.transcript)?;
 
-        extract_path_and_check_proper_headers_redaction(&request)
+        parse_request_and_validate_redaction(&request)
     }
 }
 
