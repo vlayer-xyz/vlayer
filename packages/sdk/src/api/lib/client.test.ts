@@ -107,6 +107,8 @@ describe("Success zk-proving", () => {
             metrics: {},
             data: {},
           },
+          jsonrpc: "2.0",
+          id: 1,
         }),
       };
     });
@@ -225,6 +227,8 @@ describe("Failed zk-proving", () => {
             metrics: {},
             error: "Preflight error: ...",
           },
+          jsonrpc: "2.0",
+          id: 1,
         }),
       };
     });

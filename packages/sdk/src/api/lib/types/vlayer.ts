@@ -10,6 +10,7 @@ import {
 } from "viem";
 import { type WebProofRequest } from "./webProofProvider";
 import { type ContractFunctionArgsWithout } from "./viem";
+import { z } from "zod";
 
 type Calldata = string;
 
@@ -75,20 +76,6 @@ export type Metrics = {
   };
 };
 
-export interface ProofReceipt {
-  state: ProofState;
-  status: number;
-  metrics: Metrics;
-  data?: ProofData;
-  error?: string;
-}
-
-export interface VGetProofReceiptResponse {
-  jsonrpc: string;
-  result: ProofReceipt;
-  id: number;
-}
-
 export type ProveArgs<T extends Abi, F extends ContractFunctionName<T>> = {
   address: Hex;
   proverAbi: T;
@@ -126,3 +113,39 @@ export type VlayerClient = {
     ];
   }) => Promise<BrandedHash<T, F>>;
 };
+
+export const proofReceiptSchema = z.discriminatedUnion("status", [
+  z.object({
+    status: z.literal(0),
+    error: z.string(),
+    data: z.undefined(),
+    state: z.enum([
+      ProofState.ChainProof,
+      ProofState.Preflight,
+      ProofState.Proving,
+    ]),
+  }),
+  z.object({
+    status: z.literal(1),
+    error: z.undefined(),
+    state: z
+      .enum([
+        ProofState.Done,
+        ProofState.ChainProof,
+        ProofState.Preflight,
+        ProofState.Proving,
+        ProofState.Queued,
+      ])
+      .optional(),
+    data: z.custom<ProofData>(),
+  }),
+]);
+
+export const vGetProofReceiptSchema = z.object({
+  jsonrpc: z.string(),
+  result: proofReceiptSchema,
+  id: z.number(),
+});
+
+export type ProofReceipt = z.infer<typeof proofReceiptSchema>;
+export type VGetProofReceiptResponse = z.infer<typeof vGetProofReceiptSchema>;

@@ -3,11 +3,11 @@ import {
   type VlayerClient,
   type BrandedHash,
   type ProofData,
-  type ProofReceipt,
   ProofState,
+  type VGetProofReceiptResponse,
 } from "types/vlayer";
 import { type WebProofProvider } from "types/webProofProvider";
-
+import { match } from "ts-pattern";
 import { prove, getProofReceipt } from "../prover";
 import { createExtensionWebProofProvider } from "../webProof";
 import {
@@ -26,6 +26,7 @@ import {
 } from "../../web-proof-commons";
 import { type ContractFunctionArgsWithout } from "types/viem";
 import { type ProveArgs } from "types/vlayer";
+
 function dropEmptyProofFromArgs(args: unknown) {
   if (Array.isArray(args)) {
     return args.slice(1) as unknown[];
@@ -214,22 +215,13 @@ async function getProof<T extends Abi, F extends ContractFunctionName<T>>(
 ): Promise<ProofData> {
   for (let retry = 0; retry < numberOfRetries; retry++) {
     const resp = await getProofReceipt(hash, url);
-    validateProofReceipt(resp.result);
-    const { state, status, data, error } = resp.result;
-    if (status === 0) {
-      if (state === ProofState.ChainProof) {
-        throw new Error("Waiting for chain proof failed with error: " + error);
-      } else if (state === ProofState.Preflight) {
-        throw new Error("Preflight failed with error: " + error);
-      } else if (state === ProofState.Proving) {
-        throw new Error("Proving failed with error: " + error);
-      }
-    } else {
-      if (state === ProofState.Done) {
-        return data as ProofData;
-      }
-      webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Proving);
+    handleErrors(resp);
+    const { state, data } = resp.result;
+    if (state === ProofState.Done) {
+      return data;
     }
+    webProofProvider.notifyZkProvingStatus(ZkProvingStatus.Proving);
+
     await sleep(sleepDuration);
   }
   throw new Error(
@@ -237,29 +229,19 @@ async function getProof<T extends Abi, F extends ContractFunctionName<T>>(
   );
 }
 
-function validateProofReceipt(receipt: ProofReceipt) {
-  const { status, state, error, data } = receipt;
+const handleErrors = (resp: VGetProofReceiptResponse) => {
+  const { status, state, error } = resp.result;
   if (status === 0) {
-    assert(error !== undefined, "error should be defined");
-    assert(typeof error === "string", "error should be a string");
-    assert(data === undefined, "data should be undefined");
-    assert(
-      state === ProofState.ChainProof ||
-        state === ProofState.Preflight ||
-        state === ProofState.Proving,
-      "state should be ChainProof or Preflight or Proving",
-    );
-  } else {
-    assert(error === undefined, "error should be undefined");
-    if (state === ProofState.Done) {
-      assert(status === 1, "status should be 1");
-      assert(data !== undefined, "data should be defined");
-    }
+    match(state)
+      .with(ProofState.ChainProof, () => {
+        throw new Error("Waiting for chain proof failed with error: " + error);
+      })
+      .with(ProofState.Preflight, () => {
+        throw new Error("Preflight failed with error: " + error);
+      })
+      .with(ProofState.Proving, () => {
+        throw new Error("Proving failed with error: " + error);
+      })
+      .exhaustive();
   }
-}
-
-function assert(x: boolean, msg: string) {
-  if (!x) {
-    throw new Error(msg || "Assertion failed");
-  }
-}
+};
