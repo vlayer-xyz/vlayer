@@ -6,17 +6,17 @@ use rsa::{
     signature::{Keypair, RandomizedSigner, SignatureEncoding},
     RsaPrivateKey,
 };
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 use serde_with::{base64::Base64, serde_as};
 
 const PRIV_KEY: &str = include_str!("../../assets/private_key.pem");
 
 #[serde_as]
-#[derive(Serialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct Signature(#[serde_as(as = "Base64")] Bytes);
 
 #[serde_as]
-#[derive(Serialize, Debug, PartialEq)]
+#[derive(Serialize, Deserialize, Debug, PartialEq)]
 pub struct PublicKey(#[serde_as(as = "Base64")] Bytes);
 
 #[derive(Clone)]

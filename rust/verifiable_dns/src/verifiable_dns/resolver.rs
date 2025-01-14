@@ -33,15 +33,16 @@ impl<C: Now> Resolver<C> {
 }
 
 impl<C: Now> DoHProvider for Resolver<C> {
-    fn resolve(&self, query: &Query) -> Option<Response> {
+    async fn resolve(&self, query: &Query) -> Option<Response> {
         let mut response: Response = Response::with_flags(false, true, true, false, false);
-        response.question = query.clone();
+        response.question = vec![query.clone()];
         response.status = 0;
 
-        response.verification_data = response
-            .answer
-            .first()
-            .map(|record| self.sign_record(record));
+        response.verification_data = if let Some(ref answer) = response.answer {
+            answer.first().map(|record| self.sign_record(record))
+        } else {
+            None
+        };
 
         Some(response)
     }
@@ -71,7 +72,8 @@ mod tests {
                 let query = "google._domainkey.vlayer.xyz".into();
                 let result = resolver.resolve(&query).unwrap();
 
-                assert_eq!(result.question, query);
+                assert_eq!(result.question.len(), 1);
+                assert_eq!(result.question[0], query);
             }
 
             #[test]
