@@ -17,11 +17,9 @@ impl ResponseTranscript {
     pub(crate) fn parse_body(self) -> Result<String, ParsingError> {
         let response_string = String::from_utf8(self.transcript)?;
 
-        let (body_index, headers) = parse_response_and_validate_redaction(&response_string)?;
+        let (body, headers) = parse_response_and_validate_redaction(&response_string)?;
 
-        let body = &response_string[body_index..];
-
-        handle_chunked_transfer_encoding(&headers, body)
+        handle_chunked_transfer_encoding(&headers, &body)
     }
 }
 

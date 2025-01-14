@@ -14,7 +14,7 @@ const REDACTED_CHAR: char = '\0';
 const HEADER_NAME_REPLACEMENT_CHAR_1: char = '-';
 const HEADER_NAME_REPLACEMENT_CHAR_2: char = '+';
 
-#[derive(Clone)]
+#[derive(Clone, Debug)]
 pub(crate) struct HttpHeader {
     pub(crate) name: String,
     pub(crate) value: Vec<u8>,
@@ -55,7 +55,7 @@ fn parse_request(request: &str) -> Result<(String, [Header; MAX_HEADERS_NUMBER])
 
 pub(crate) fn parse_response_and_validate_redaction(
     response: &str,
-) -> Result<(usize, Vec<HttpHeader>), ParsingError> {
+) -> Result<(String, Vec<HttpHeader>), ParsingError> {
     let response_string =
         response.replace(REDACTED_CHAR, HEADER_NAME_REPLACEMENT_CHAR_1.to_string().as_str());
     let (body_index, headers_with_replacement_1) = parse_response(&response_string)?;
@@ -66,7 +66,9 @@ pub(crate) fn parse_response_and_validate_redaction(
 
     validate_headers_redaction(&headers_with_replacement_1, &headers_with_replacement_2)?;
 
-    Ok((body_index, headers_with_replacement_1.map(Into::into).to_vec()))
+    let body = &response_string[body_index..];
+
+    Ok((body.to_string(), headers_with_replacement_1.map(Into::into).to_vec()))
 }
 
 fn parse_response(response: &str) -> Result<(usize, [Header; MAX_HEADERS_NUMBER]), ParsingError> {
@@ -161,14 +163,14 @@ mod tests {
             }
 
             #[test]
-            fn fully_redacted_request_header_value() {
+            fn request_fully_redacted_header_value() {
                 let request = "GET https://example.com/test.json HTTP/1.1\r\ncontent-type: \0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\r\n\r\n";
                 let url = parse_request_and_validate_redaction(request).unwrap();
                 assert_eq!(url, "https://example.com/test.json");
             }
 
             #[test]
-            fn fully_redacted_request_header_value_no_space_before_value() {
+            fn request_fully_redacted_header_value_no_space_before_value() {
                 let request = "GET https://example.com/test.json HTTP/1.1\r\ncontent-type:\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\r\n\r\n";
                 let url = parse_request_and_validate_redaction(request).unwrap();
                 assert_eq!(url, "https://example.com/test.json");
@@ -176,41 +178,87 @@ mod tests {
 
             #[test]
             fn response_no_header_redaction() {
-                let request =
-                    "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nHello, world!\r\n";
-                parse_response_and_validate_redaction(request).unwrap();
+                let response = "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nHello, world!";
+                let body = parse_response_and_validate_redaction(response).unwrap().0;
+                assert_eq!(body, "Hello, world!");
+            }
+
+            #[test]
+            fn response_fully_redacted_header_value() {
+                let response =
+                    "HTTP/1.1 200 OK\r\nContent-Type: \0\0\0\0\0\0\0\0\0\0\r\n\r\nHello, world!";
+                let body = parse_response_and_validate_redaction(response).unwrap().0;
+                assert_eq!(body, "Hello, world!");
             }
         }
 
         mod fail {
             use super::*;
 
-            #[test]
-            fn partially_redacted_request_header_value() {
-                let request = "GET https://example.com/test.json HTTP/1.1\r\ncontent-type: application/jso\0\r\n\r\n";
-                let err = parse_request_and_validate_redaction(request).unwrap_err();
-                assert!(matches!(err, ParsingError::PartiallyRedactedHeaderValue));
+            mod request {
+                use super::*;
+                #[test]
+                fn partially_redacted_header_value() {
+                    let request = "GET https://example.com/test.json HTTP/1.1\r\ncontent-type: application/jso\0\r\n\r\n";
+                    let err = parse_request_and_validate_redaction(request).unwrap_err();
+                    assert!(matches!(err, ParsingError::PartiallyRedactedHeaderValue));
+                }
+
+                #[test]
+                fn partially_redacted_header_name() {
+                    let request = "GET https://example.com/test.json HTTP/1.1\r\ncontent-typ\0: application/json\r\n\r\n";
+                    let err = parse_request_and_validate_redaction(request).unwrap_err();
+                    assert!(matches!(err, ParsingError::RedactedHeaderName));
+                }
+
+                #[test]
+                fn fully_redacted_header_name() {
+                    let request = "GET https://example.com/test.json HTTP/1.1\r\n\0\0\0\0\0\0\0\0\0\0\0\0: application/json\r\n\r\n";
+                    let err = parse_request_and_validate_redaction(request).unwrap_err();
+                    assert!(matches!(err, ParsingError::RedactedHeaderName));
+                }
+
+                #[test]
+                fn fully_redacted_header_name_and_value() {
+                    let request = "GET https://example.com/test.json HTTP/1.1\r\n\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\r\n\r\n";
+                    let err = parse_request_and_validate_redaction(request).unwrap_err();
+                    assert!(matches!(err, ParsingError::Httparse(httparse::Error::HeaderName)));
+                }
             }
 
-            #[test]
-            fn partially_redacted_request_header_name() {
-                let request = "GET https://example.com/test.json HTTP/1.1\r\ncontent-typ\0: application/json\r\n\r\n";
-                let err = parse_request_and_validate_redaction(request).unwrap_err();
-                assert!(matches!(err, ParsingError::RedactedHeaderName));
-            }
+            mod response {
+                use super::*;
+                #[test]
+                fn partially_redacted_header_value() {
+                    let response =
+                        "HTTP/1.1 200 OK\r\nContent-Type: text/plai\0\r\n\r\nHello, world!";
+                    let err = parse_response_and_validate_redaction(response).unwrap_err();
+                    assert!(matches!(err, ParsingError::PartiallyRedactedHeaderValue));
+                }
 
-            #[test]
-            fn fully_redacted_request_header_name() {
-                let request = "GET https://example.com/test.json HTTP/1.1\r\n\0\0\0\0\0\0\0\0\0\0\0\0: application/json\r\n\r\n";
-                let err = parse_request_and_validate_redaction(request).unwrap_err();
-                assert!(matches!(err, ParsingError::RedactedHeaderName));
-            }
+                #[test]
+                fn partially_redacted_header_name() {
+                    let response =
+                        "HTTP/1.1 200 OK\r\nContent-Typ\0: text/plain\r\n\r\nHello, world!";
+                    let err = parse_response_and_validate_redaction(response).unwrap_err();
+                    assert!(matches!(err, ParsingError::RedactedHeaderName));
+                }
 
-            #[test]
-            fn fully_redacted_request_header_name_and_value() {
-                let request = "GET https://example.com/test.json HTTP/1.1\r\n\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\r\n\r\n";
-                let err = parse_request_and_validate_redaction(request).unwrap_err();
-                assert!(matches!(err, ParsingError::Httparse(httparse::Error::HeaderName)));
+                #[test]
+                fn fully_redacted_header_name() {
+                    let response =
+                        "HTTP/1.1 200 OK\r\n\0\0\0\0\0\0\0\0\0\0\0\0: text/plain\r\n\r\nHello, world!";
+                    let err = parse_response_and_validate_redaction(response).unwrap_err();
+                    assert!(matches!(err, ParsingError::RedactedHeaderName));
+                }
+
+                #[test]
+                fn fully_redacted_header_name_and_value() {
+                    let response =
+                        "HTTP/1.1 200 OK\r\n\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\r\n\r\nHello, world!";
+                    let err = parse_response_and_validate_redaction(response).unwrap_err();
+                    assert!(matches!(err, ParsingError::Httparse(httparse::Error::HeaderName)));
+                }
             }
         }
     }
