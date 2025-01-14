@@ -12,7 +12,6 @@ use verifiable_dns::Provider;
 
 use crate::server::AppState;
 
-const MIME_DNS_JSON_CONTENT_TYPE: &str = "application/dns-json";
 pub fn handler() -> MethodRouter<AppState> {
     get(dns_query_handler)
         .route_layer(ValidateRequestHeaderLayer::accept(MIME_DNS_JSON_CONTENT_TYPE))
