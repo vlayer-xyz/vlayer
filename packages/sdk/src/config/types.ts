@@ -6,6 +6,7 @@ export type EnvConfig = {
   chainName: string;
   proverUrl: string;
   jsonRpcUrl: string;
+  l2JsonRpcUrl?: string
   privateKey: `0x${string}`;
   token?: string;
 };
