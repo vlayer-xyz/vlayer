@@ -2,6 +2,7 @@ mod responses_validation;
 
 use std::marker::PhantomData;
 
+use futures::future::join_all;
 use responses_validation::{responses_match, validate_response};
 
 use super::{record::Record, signer::Signer, time::Now, VerificationData};
@@ -40,11 +41,14 @@ impl<C: Now> Resolver<C> {
 
 impl<C: Now, P: DoHProvider> DoHProvider for Resolver<C, P, 1> {
     async fn resolve(&self, query: &Query) -> Option<Response> {
-        let provider_response = self.providers[0].resolve(query).await?;
+        let jobs: Vec<_> = self.providers.iter().map(|p| p.resolve(query)).collect();
+        let responses = join_all(jobs).await;
 
         let mut response = Response {
             status: provider_response.status,
             question: provider_response.question,
+            status: 0,
+            question: vec![query.clone()],
             answer: provider_response.answer,
             comment: provider_response.comment,
             ..Response::with_flags(false, true, true, false, false)
