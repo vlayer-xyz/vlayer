@@ -6,16 +6,12 @@ import {
 } from "wagmi";
 import { useCallProver, useWaitForProvingResult } from "@vlayer/react";
 import { preverifyEmail } from "@vlayer/sdk";
-import { getStrFromFile } from "../lib/utils";
+import { usePrivateKey, getStrFromFile } from "../lib/utils";
 import proverSpec from "../../../out/EmailDomainProver.sol/EmailDomainProver";
 import verifierSpec from "../../../out/EmailProofVerifier.sol/EmailDomainVerifier";
 import EmlForm from "../components/EmlForm";
 import { privateKeyToAccount } from "viem/accounts";
 import { AbiStateMutability, ContractFunctionArgs, type Address } from "viem";
-
-const usePrivateKey =
-  !import.meta.env.VITE_USE_WINDOW_ETHEREUM_TRANSPORT ||
-  Boolean(import.meta.env.VITE_PRIVATE_KEY);
 
 const EmlUploadForm = () => {
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -23,7 +19,7 @@ const EmlUploadForm = () => {
   const [errorMsg, setErrorMsg] = useState("");
   const [successMsg, setSuccessMsg] = useState("");
 
-  const { address } = useAccount();
+  const { address: connectedAddr } = useAccount();
 
   const {
     writeContract,
@@ -97,7 +93,7 @@ const EmlUploadForm = () => {
     }
   };
 
-  const finishProving = async () => {
+  const finishProving = () => {
     setCurrentStep("Success!");
     setIsSubmitting(false);
     if (txHash) {
@@ -121,7 +117,7 @@ const EmlUploadForm = () => {
       ).address;
     }
 
-    return address as Address;
+    return connectedAddr as Address;
   };
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
