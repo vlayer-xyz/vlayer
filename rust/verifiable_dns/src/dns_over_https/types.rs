@@ -68,7 +68,11 @@ impl Response {
 }
 
 impl From<String> for Query {
-    fn from(value: String) -> Self {
+    fn from(mut value: String) -> Self {
+        if !value.ends_with(".") {
+            value.push('.')
+        }
+
         Self {
             name: value,
             record_type: RecordType::TXT,
@@ -78,10 +82,7 @@ impl From<String> for Query {
 
 impl From<&str> for Query {
     fn from(value: &str) -> Self {
-        Self {
-            name: value.to_string(),
-            record_type: RecordType::TXT,
-        }
+        value.to_string().into()
     }
 }
 
@@ -167,13 +168,24 @@ mod tests {
 
         use super::*;
 
+        mod from_string {
+            use super::*;
+            #[test]
+            fn query_ends_with_dot() {
+                let query: Query = "subdomain.vlayer.xyz".into();
+
+                assert!(query.name.ends_with("."));
+                assert_eq!(query, "subdomain.vlayer.xyz.".into())
+            }
+        }
+
         #[test]
         fn encodes_into_url_query() {
             let query: Query = "subdomain.vlayer.xyz".into();
 
             assert_eq!(
                 serde_urlencoded::to_string(&query).unwrap(),
-                "name=subdomain.vlayer.xyz&type=16"
+                "name=subdomain.vlayer.xyz.&type=16"
             );
         }
 
@@ -183,7 +195,7 @@ mod tests {
 
             assert_eq!(
                 serde_urlencoded::to_string(&query).unwrap(),
-                "name=%F0%9F%91%8D%C4%85%C4%87%C5%BA%C5%BC&type=16"
+                "name=%F0%9F%91%8D%C4%85%C4%87%C5%BA%C5%BC.&type=16"
             );
         }
     }
