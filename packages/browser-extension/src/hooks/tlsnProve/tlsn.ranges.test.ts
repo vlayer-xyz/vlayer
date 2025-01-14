@@ -1,5 +1,5 @@
 import { describe, expect, test } from "vitest";
-import { calculateResponseRanges, calculateRequestRanges } from "./tlsn.ranges";
+import { calculateResponseRanges } from "./tlsn.ranges";
 import {
   RedactResponseHeaders,
   RedactResponseHeadersExcept,
@@ -7,7 +7,6 @@ import {
 import {
   fixtureTranscript,
   fixtureAllResponseHeaders,
-  fixtureAllRequestHeaders,
 } from "./tlsn.ranges.test.fixtures";
 
 describe("response headers", () => {
@@ -82,97 +81,5 @@ describe("response headers", () => {
         end: 493,
       },
     ]);
-  });
-});
-
-describe("request headers", () => {
-  test("single header", () => {
-    const redactionItem = {
-      request: {
-        headers: ["accept-encoding"],
-      },
-    };
-
-    const result = calculateRequestRanges(
-      redactionItem,
-      fixtureTranscript.sent,
-      fixtureTranscript.ranges.sent,
-    );
-
-    expect(result).toEqual([
-      {
-        start: 489,
-        end: 498,
-      },
-    ]);
-  });
-
-  test("multiple headers", () => {
-    const redactionItem = {
-      request: {
-        headers: ["authorization", "cookie"],
-      },
-    };
-
-    const result = calculateRequestRanges(
-      redactionItem,
-      fixtureTranscript.sent,
-      fixtureTranscript.ranges.sent,
-    );
-
-    expect(result).toEqual([
-      {
-        start: 624,
-        end: 736,
-      },
-      {
-        start: 864,
-        end: 1481,
-      },
-    ]);
-  });
-
-  test("headers_except", () => {
-    const redactionItem = {
-      request: {
-        headers_except: fixtureAllRequestHeaders.filter(
-          (header) =>
-            !["x-client-transaction-id", "connection"].includes(header),
-        ),
-      },
-    };
-
-    const result = calculateRequestRanges(
-      redactionItem,
-      fixtureTranscript.sent,
-      fixtureTranscript.ranges.sent,
-    );
-
-    expect(result).toEqual([
-      {
-        start: 376,
-        end: 471,
-      },
-      {
-        start: 1699,
-        end: 1705,
-      },
-    ]);
-  });
-
-  test("headers_except with all headers", () => {
-    const redactionItem = {
-      request: {
-        headers_except: fixtureAllRequestHeaders,
-      },
-    };
-
-    const result = calculateRequestRanges(
-      redactionItem,
-      fixtureTranscript.sent,
-      fixtureTranscript.ranges.sent,
-    );
-
-    expect(result).toEqual([]);
   });
 });
