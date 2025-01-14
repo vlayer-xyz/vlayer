@@ -17,7 +17,7 @@ function calculateRequestRanges(
     | RedactRequestUrlQueryParamExcept
     | RedactRequestUrlQueryParam,
   raw: string,
-  transcriptRanges: ParsedTranscriptData
+  transcriptRanges: ParsedTranscriptData,
 ): CommitData[] {
   const url = findUrlInRequest(raw, transcriptRanges.info);
   const url_offset = raw.indexOf(url);
@@ -28,13 +28,13 @@ function calculateRequestRanges(
     })
     .with({ headers_except: P.array(P.string) }, ({ headers_except }) => {
       const headersToRedact = Object.keys(transcriptRanges.headers).filter(
-        (header) => !headers_except.includes(header)
+        (header) => !headers_except.includes(header),
       );
 
       return calculateRequestHeadersRanges(
         raw,
         transcriptRanges,
-        headersToRedact
+        headersToRedact,
       );
     })
     .with({ url_query: P.array(P.string) }, ({ url_query }) => {
@@ -42,7 +42,7 @@ function calculateRequestRanges(
     })
     .with({ url_query_except: P.array(P.string) }, ({ url_query_except }) => {
       const queriesToRedact = findAllUrlQueries(url).filter(
-        (query) => !url_query_except.includes(query)
+        (query) => !url_query_except.includes(query),
       );
 
       return calculateRequestQueriesRanges(queriesToRedact, url, url_offset);
@@ -59,7 +59,7 @@ function findUrlInRequest(raw: string, request_range: CommitData): string {
 function findAllUrlQueries(path: string): string[] {
   const url = new URL(path);
 
-  let params: string[] = [];
+  const params: string[] = [];
   url.searchParams.forEach((_, key) => {
     params.push(key);
   });

@@ -1,7 +1,7 @@
 const calculateRequestQueriesRanges = (
   urlQueries: string[],
   url: string,
-  offset: number
+  offset: number,
 ) => {
   return urlQueries.map((query) => {
     const stepOverFirstAmpersand = 1;
