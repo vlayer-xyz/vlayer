@@ -118,7 +118,7 @@ mod tests {
             use super::*;
 
             #[test]
-            fn no_header_redaction() {
+            fn request_no_header_redaction() {
                 let request = "GET https://example.com/test.json HTTP/1.1\r\ncontent-type: application/json\r\n\r\n";
                 let url = parse_request_and_validate_redaction(request).unwrap();
                 assert_eq!(url, "https://example.com/test.json");
@@ -172,6 +172,13 @@ mod tests {
                 let request = "GET https://example.com/test.json HTTP/1.1\r\ncontent-type:\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\0\r\n\r\n";
                 let url = parse_request_and_validate_redaction(request).unwrap();
                 assert_eq!(url, "https://example.com/test.json");
+            }
+
+            #[test]
+            fn response_no_header_redaction() {
+                let request =
+                    "HTTP/1.1 200 OK\r\nContent-Type: text/plain\r\n\r\nHello, world!\r\n";
+                parse_response_and_validate_redaction(request).unwrap();
             }
         }
 
