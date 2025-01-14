@@ -18,8 +18,5 @@ tracing = { workspace = true }
 server_utils = { workspace = true }
 verifiable_dns = { workspace = true }
 
-[dev-dependencies]
-serde_urlencoded = { workspace = true }
-
 [lints]
 workspace = true
