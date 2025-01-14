@@ -4,16 +4,16 @@ use super::{record::Record, signer::Signer, time::Now, VerificationData};
 use crate::dns_over_https::{types::Record as DNSRecord, Provider as DoHProvider, Query, Response};
 
 #[derive(Clone)]
-pub struct Resolver<C: Now, P: DoHProvider> {
-    provider: P,
+pub struct Resolver<C: Now, P: DoHProvider, const Q: usize> {
+    providers: [P; Q],
     signer: Signer,
     clock: PhantomData<C>,
 }
 
-impl<C: Now, P: DoHProvider> Default for Resolver<C, P> {
-    fn default(provider: P) -> Self {
+impl<C: Now, P: DoHProvider, const Q: usize> Default for Resolver<C, P, Q> {
+    fn default(providers: [P; Q]) -> Self {
         Self {
-            provider,
+            providers,
             signer: Signer::new(),
             clock: PhantomData,
         }
@@ -34,9 +34,9 @@ impl<C: Now> Resolver<C> {
     }
 }
 
-impl<C: Now, P: DoHProvider> DoHProvider for Resolver<C, P> {
+impl<C: Now, P: DoHProvider> DoHProvider for Resolver<C, P, 1> {
     async fn resolve(&self, query: &Query) -> Option<Response> {
-        let provider_response = self.provider.resolve(query).await?;
+        let provider_response = self.providers[0].resolve(query).await?;
 
         let mut response = Response {
             status: provider_response.status,
@@ -67,7 +67,7 @@ mod tests {
             verifiable_dns::time::tests_utils::MockClock,
         };
 
-        type R = Resolver<MockClock<64>, MockProvider>;
+        type R = Resolver<MockClock<64>, MockProvider, 1>;
         fn response() -> Response {
             Response {
                 status: 0,
@@ -79,7 +79,7 @@ mod tests {
             }
         }
         fn resolver() -> R {
-            R::new(MockProvider::new(response()))
+            R::new([MockProvider::new(response())])
         }
         mod resolve {
             use super::*;
@@ -144,7 +144,7 @@ mod tests {
                 let result = resolver.sign_record(&record);
                 assert_eq!(result.valid_until, 364);
 
-                let result = Resolver::<MockClock<11>, _>::new(MockProvider::default(response()))
+                let result = Resolver::<MockClock<11>, _, 1>::new([MockProvider::default(response())])
                     .sign_record(&record);
                 assert_eq!(result.valid_until, 311);
             }
