@@ -1,12 +1,18 @@
-const calculateRequestQueriesRanges = (urlQueries: string[], raw: string) => {
+const calculateRequestQueriesRanges = (
+  urlQueries: string[],
+  url: string,
+  offset: number
+) => {
   return urlQueries.map((query) => {
     const stepOverFirstAmpersand = 1;
-    const start = raw.indexOf("&" + query + "=") + stepOverFirstAmpersand;
-    const secondAmpersandPosition = raw.indexOf("&", start);
+    const start =
+      offset + url.indexOf("&" + query + "=") + stepOverFirstAmpersand;
+
+    const secondAmpersandPosition = url.indexOf("&", start);
     const end =
       secondAmpersandPosition !== -1
-        ? secondAmpersandPosition
-        : raw.indexOf(" ", start);
+        ? offset + secondAmpersandPosition
+        : offset + url.length;
     return {
       start,
       end,
