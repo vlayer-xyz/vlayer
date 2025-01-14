@@ -10,7 +10,7 @@ use time::RTClock;
 
 use crate::dns_over_https::provider::ExternalProvider;
 
-pub type VerifiableDNSResolver = Resolver<RTClock, ExternalProvider, 1>;
+pub type VerifiableDNSResolver = Resolver<RTClock, ExternalProvider, 2>;
 
 type Timestamp = u64;
 
