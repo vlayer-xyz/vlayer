@@ -18,17 +18,15 @@ pub struct Resolver<C: Now, P: DoHProvider, const Q: usize> {
     clock: PhantomData<C>,
 }
 
-impl<C: Now, P: DoHProvider, const Q: usize> Default for Resolver<C, P, Q> {
-    fn default(providers: [P; Q]) -> Self {
+impl<C: Now, P: DoHProvider, const Q: usize> Resolver<C, P, Q> {
+    pub fn new(providers: [P; Q]) -> Self {
         Self {
             providers,
             signer: Signer::new(),
             clock: PhantomData,
         }
     }
-}
 
-impl<C: Now> Resolver<C> {
     fn sign_record(&self, record: &DNSRecord) -> VerificationData {
         let now = C::now();
         let valid_until = now + record.ttl;
@@ -43,7 +41,7 @@ impl<C: Now> Resolver<C> {
 }
 
 fn validate_responses(responses: &[Option<Response>]) -> Option<()> {
-    if responses.iter().any(std::option::Option::is_none) {
+    if responses.iter().any(Option::is_none) {
         return None;
     }
 
@@ -66,7 +64,7 @@ fn validate_responses(responses: &[Option<Response>]) -> Option<()> {
     Some(())
 }
 
-impl<C: Now, P: DoHProvider, const Q: usize> DoHProvider for Resolver<C, P, Q> {
+impl<C: Now + Sync, P: DoHProvider + Sync, const Q: usize> DoHProvider for Resolver<C, P, Q> {
     async fn resolve(&self, query: &Query) -> Option<Response> {
         let jobs: Vec<_> = self.providers.iter().map(|p| p.resolve(query)).collect();
         let responses = join_all(jobs).await;
@@ -186,7 +184,7 @@ mod tests {
 
             #[tokio::test]
             async fn resolves_vlayer_default_dkim_selector() {
-                let resolver = R::default();
+                let resolver = resolver();
                 let result = resolver
                     .resolve(&"google._domainkey.vlayer.xyz".into())
                     .await;
@@ -195,7 +193,7 @@ mod tests {
 
             #[tokio::test]
             async fn question_field_equals_to_question() {
-                let resolver = R::default();
+                let resolver = resolver();
                 let query = "google._domainkey.vlayer.xyz".into();
                 let result = resolver.resolve(&query).await.unwrap();
 
@@ -205,7 +203,7 @@ mod tests {
 
             #[tokio::test]
             async fn status_code_is_successful() {
-                let resolver = R::default();
+                let resolver = resolver();
                 let query = "google._domainkey.vlayer.xyz".into();
                 let result = resolver.resolve(&query).await.unwrap();
 
@@ -214,7 +212,7 @@ mod tests {
 
             #[tokio::test]
             async fn flags_are_set() {
-                let resolver = R::default();
+                let resolver = resolver();
                 let query = "google._domainkey.vlayer.xyz".into();
                 let result = resolver.resolve(&query).await.unwrap();
 
@@ -233,7 +231,7 @@ mod tests {
 
             #[test]
             fn valid_until_is_ttl_seconds_from_now() {
-                let resolver = R::default();
+                let resolver = resolver();
                 let record = DNSRecord {
                     name: "google._domainkey.vlayer.xyz".into(),
                     record_type: RecordType::TXT,
@@ -244,7 +242,7 @@ mod tests {
                 let result = resolver.sign_record(&record);
                 assert_eq!(result.valid_until, 364);
 
-                let result = Resolver::<MockClock<11>, _, 1>::new([MockProvider::default(response())])
+                let result = Resolver::<MockClock<11>, _, 1>::new([MockProvider::new(response())])
                     .sign_record(&record);
                 assert_eq!(result.valid_until, 311);
             }

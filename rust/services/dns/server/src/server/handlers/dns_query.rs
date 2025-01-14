@@ -8,7 +8,7 @@ use axum::{
 use tower_http::validate_request::ValidateRequestHeaderLayer;
 use tracing::debug;
 use types::{Params, ServerResponse};
-use verifiable_dns::Provider;
+use verifiable_dns::{Provider, MIME_DNS_JSON_CONTENT_TYPE};
 
 use crate::server::AppState;
 

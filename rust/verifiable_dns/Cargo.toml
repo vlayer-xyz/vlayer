@@ -6,13 +6,17 @@ edition = "2021"
 [dependencies]
 bytes = { workspace = true }
 chrono = { workspace = true, features = ["now"] }
+futures = { workspace = true }
 olpc-cjson = { workspace = true }
 rand = { workspace = true }
+reqwest = { workspace = true }
 rsa = { workspace = true, features = ["sha2"] }
 serde = { workspace = true }
 serde_json = { workspace = true }
 serde_repr = { workspace = true }
+serde_urlencoded = { workspace = true }
 serde_with = { workspace = true, features = ["base64", "macros"] }
+tokio = { workspace = true }
 
 [lints]
 workspace = true

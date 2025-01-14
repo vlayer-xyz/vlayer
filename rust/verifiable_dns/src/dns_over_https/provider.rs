@@ -2,11 +2,10 @@ use std::time::Duration;
 
 use reqwest::{header::ACCEPT, Client};
 
-use super::{Query, Response};
-use crate::dns_over_https::MIME_DNS_JSON_CONTENT_TYPE;
+use super::{Query, Response, MIME_DNS_JSON_CONTENT_TYPE};
 
 pub trait Provider {
-    async fn resolve(&self, query: &Query) -> Option<Response>;
+    fn resolve(&self, query: &Query) -> impl std::future::Future<Output = Option<Response>> + Send;
 }
 
 const GOOGLE_BASE_URL: &str = "https://8.8.8.8/resolve";
