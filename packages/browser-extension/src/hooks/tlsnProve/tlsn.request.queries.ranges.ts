@@ -1,5 +1,5 @@
-const calculateRequestQueriesRanges = (url_query: string[], raw: string) => {
-  return url_query.map((query) => {
+const calculateRequestQueriesRanges = (urlQueries: string[], raw: string) => {
+  return urlQueries.map((query) => {
     const stepOverFirstAmpersand = 1;
     const start = raw.indexOf("&" + query + "=") + stepOverFirstAmpersand;
     const secondAmpersandPosition = raw.indexOf("&", start);
