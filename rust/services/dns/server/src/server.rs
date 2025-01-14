@@ -15,8 +15,9 @@ struct AppState {
 
 impl AppState {
     fn new() -> Self {
+        let provider = ExternalProvider::new();
         Self {
-            vdns_resolver: VerifiableDNSResolver::default(),
+            vdns_resolver: VerifiableDNSResolver::default(provider),
         }
     }
 }

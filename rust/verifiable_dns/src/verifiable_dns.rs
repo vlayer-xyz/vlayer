@@ -8,7 +8,9 @@ use serde::{Deserialize, Serialize};
 use signer::{PublicKey, Signature};
 use time::RTClock;
 
-pub type VerifiableDNSResolver = Resolver<RTClock>;
+use crate::dns_over_https::provider::ExternalProvider;
+
+pub type VerifiableDNSResolver = Resolver<RTClock, ExternalProvider>;
 
 type Timestamp = u64;
 

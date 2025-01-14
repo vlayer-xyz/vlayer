@@ -4,14 +4,16 @@ use super::{record::Record, signer::Signer, time::Now, VerificationData};
 use crate::dns_over_https::{types::Record as DNSRecord, Provider as DoHProvider, Query, Response};
 
 #[derive(Clone)]
-pub struct Resolver<C: Now> {
+pub struct Resolver<C: Now, P: DoHProvider> {
+    _provider: P,
     signer: Signer,
     clock: PhantomData<C>,
 }
 
-impl<C: Now> Default for Resolver<C> {
-    fn default() -> Self {
+impl<C: Now, P: DoHProvider> Default for Resolver<C, P> {
+    fn default(provider: P) -> Self {
         Self {
+            _provider: provider,
             signer: Signer::new(),
             clock: PhantomData,
         }
@@ -32,7 +34,7 @@ impl<C: Now> Resolver<C> {
     }
 }
 
-impl<C: Now> DoHProvider for Resolver<C> {
+impl<C: Now, P: DoHProvider> DoHProvider for Resolver<C, P> {
     async fn resolve(&self, query: &Query) -> Option<Response> {
         let mut response: Response = Response::with_flags(false, true, true, false, false);
         response.question = vec![query.clone()];
@@ -54,9 +56,15 @@ mod tests {
 
     mod resolver {
         use super::*;
-        use crate::verifiable_dns::time::tests_utils::MockClock;
+        use crate::{
+            dns_over_https::provider::ExternalProvider,
+            verifiable_dns::time::tests_utils::MockClock,
+        };
 
-        type R = Resolver<MockClock<64>>;
+        type R = Resolver<MockClock<64>, ExternalProvider>;
+        fn resolver() -> R {
+            R::new(ExternalProvider::new())
+        }
         mod resolve {
             use super::*;
             #[tokio::test]
@@ -104,7 +112,7 @@ mod tests {
         mod sign_record {
 
             use super::*;
-            use crate::dns_over_https::types::RecordType;
+            use crate::dns_over_https::{provider::ExternalProvider, types::RecordType};
 
             #[test]
             fn valid_until_is_ttl_seconds_from_now() {
@@ -119,7 +127,8 @@ mod tests {
                 let result = resolver.sign_record(&record);
                 assert_eq!(result.valid_until, 364);
 
-                let result = Resolver::<MockClock<11>>::default().sign_record(&record);
+                let result =
+                    Resolver::<MockClock<11>, _>::new(ExternalProvider::default()).sign_record(&record);
                 assert_eq!(result.valid_until, 311);
             }
         }
