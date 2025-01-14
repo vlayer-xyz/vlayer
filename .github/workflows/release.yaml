@@ -225,8 +225,7 @@ jobs:
       - name: Install dependencies
         working-directory: packages/sdk-hooks
         run: bun install --frozen-lockfile
-      - name: Change SDK to released version
-        working-directory: packages/sdk-hooks
+      - name: Install released SDK version
         env:
           VLAYER_BUILD: ${{ needs.build-release.outputs.vlayer_build }}
         run: bun add @vlayer/sdk@"${VLAYER_BUILD}"
