@@ -47,7 +47,6 @@ const EmlUploadForm = () => {
   const handleError = (err: unknown) => {
     setIsSubmitting(false);
     setSuccessMsg("");
-    console.log("err", err);
     if (err instanceof Error) {
       if ("shortMessage" in err) {
         setErrorMsg(err.shortMessage as string);
@@ -111,7 +110,6 @@ const EmlUploadForm = () => {
 
     const eml = await getStrFromFile(uploadedEmlFile);
     const email = await preverifyEmail(eml);
-    console.log("startProving", [email, claimerAddr]);
     await callProver([email, claimerAddr]);
     setCurrentStep("Waiting for proof...");
   };
@@ -163,7 +161,6 @@ const EmlUploadForm = () => {
 
   useEffect(() => {
     if (provingError) {
-      console.log({ provingError });
       handleError("Cannot finalize proving, check logs");
     }
   }, [provingError]);
