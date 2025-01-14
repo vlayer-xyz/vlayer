@@ -59,37 +59,39 @@ mod tests {
         type R = Resolver<MockClock<64>>;
         mod resolve {
             use super::*;
-            #[test]
-            fn resolves_vlayer_default_dkim_selector() {
+            #[tokio::test]
+            async fn resolves_vlayer_default_dkim_selector() {
                 let resolver = R::default();
-                let result = resolver.resolve(&"google._domainkey.vlayer.xyz".into());
+                let result = resolver
+                    .resolve(&"google._domainkey.vlayer.xyz".into())
+                    .await;
                 assert!(result.is_some());
             }
 
-            #[test]
-            fn question_field_equals_to_question() {
+            #[tokio::test]
+            async fn question_field_equals_to_question() {
                 let resolver = R::default();
                 let query = "google._domainkey.vlayer.xyz".into();
-                let result = resolver.resolve(&query).unwrap();
+                let result = resolver.resolve(&query).await.unwrap();
 
                 assert_eq!(result.question.len(), 1);
                 assert_eq!(result.question[0], query);
             }
 
-            #[test]
-            fn status_code_is_successful() {
+            #[tokio::test]
+            async fn status_code_is_successful() {
                 let resolver = R::default();
                 let query = "google._domainkey.vlayer.xyz".into();
-                let result = resolver.resolve(&query).unwrap();
+                let result = resolver.resolve(&query).await.unwrap();
 
                 assert_eq!(result.status, 0);
             }
 
-            #[test]
-            fn flags_are_set() {
+            #[tokio::test]
+            async fn flags_are_set() {
                 let resolver = R::default();
                 let query = "google._domainkey.vlayer.xyz".into();
-                let result = resolver.resolve(&query).unwrap();
+                let result = resolver.resolve(&query).await.unwrap();
 
                 // Default values by CF
                 assert!(!result.truncated);

@@ -23,7 +23,7 @@ async fn dns_query_handler(
     Query(params): Query<Params>,
 ) -> impl IntoResponse {
     debug!("Querying for {:?}", &params);
-    let result = ServerResponse(state.vdns_resolver.resolve(&params.into()).unwrap());
+    let result = ServerResponse(state.vdns_resolver.resolve(&params.into()).await.unwrap());
     debug!("Responding with: {:?}", &result);
     result
 }
