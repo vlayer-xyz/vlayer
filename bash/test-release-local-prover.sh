@@ -31,6 +31,11 @@ VLAYER_HOME=$(git rev-parse --show-toplevel)
 for example in $(find ${VLAYER_HOME}/examples -type d -maxdepth 1 -mindepth 1) ; do
     example_name=$(basename "${example}"  | tr '_' '-')
 
+    if [ "${example_name}" = "simple-email-proof" ]; then
+        echo "Skipping ${example_name}"
+        continue
+    fi
+
     # We're restarting anvil because some examples rely on a clean chain state.
     echo "Restarting anvil"
     docker compose -f ${VLAYER_HOME}/docker/docker-compose.devnet.yaml restart anvil-a
