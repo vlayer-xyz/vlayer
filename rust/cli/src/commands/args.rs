@@ -24,12 +24,10 @@ pub(crate) enum TemplateOption {
 
 impl fmt::Display for TemplateOption {
     fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
-        match self {
-            TemplateOption::Simple => write!(f, "simple"),
-            TemplateOption::SimpleEmailProof => write!(f, "simple_email_proof"),
-            TemplateOption::SimpleTeleport => write!(f, "simple_teleport"),
-            TemplateOption::SimpleTimeTravel => write!(f, "simple_time_travel"),
-            TemplateOption::SimpleWebProof => write!(f, "simple_web_proof"),
-        }
+        let as_value = self
+            .to_possible_value()
+            .expect("no TemplateOption variant should be skipped");
+        let name = as_value.get_name();
+        write!(f, "{name}")
     }
 }
