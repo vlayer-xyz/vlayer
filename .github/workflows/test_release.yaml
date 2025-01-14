@@ -26,10 +26,12 @@ jobs:
       - name: Install foundry
         run: |
           export PATH="$PATH:$HOME/.config/.foundry/bin"
+          curl -L https://foundry.paradigm.xyz | bash
           foundryup
       - name: Install vlayerup
         run: |
           export PATH="$PATH:$HOME/.config/.vlayer/bin"
+          curl -SL https://install.vlayer.xyz | bash
           vlayerup
       - uses: hoverkraft-tech/compose-action@v2.0.2
         with:
