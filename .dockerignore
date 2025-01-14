@@ -5,7 +5,6 @@ bash
 book
 docker
 examples
-packages
 
 **/target
 **/node_modules
