@@ -17,6 +17,14 @@ echo '::endgroup::'
 echo '::group::bun installation'
 curl -fsSL https://bun.sh/install | bash
 export PATH="$PATH:~/.bun/bin"
+# Sadly, bun's manifest caching is so unstable, it causes random `bun install` freezes.
+# To circumvent that for the time being, we disable all caching.
+# https://github.com/oven-sh/bun/issues/5831
+cat > $HOME/.bunfig.toml <<EOF
+[install.cache]
+disable = true
+disableManifest = true
+EOF
 echo '::endgroup::'
 
 echo '::group::risczero installation'
