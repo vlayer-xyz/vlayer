@@ -23,16 +23,8 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: recursive
-      - name: Install foundry
-        run: |
-          export PATH="$PATH:$HOME/.config/.foundry/bin"
-          curl -L https://foundry.paradigm.xyz | bash
-          foundryup
-      - name: Install vlayerup
-        run: |
-          export PATH="$PATH:$HOME/.config/.vlayer/bin"
-          curl -SL https://install.vlayer.xyz | bash
-          vlayerup
+      - name: Install contracts prerequisites
+        uses: ./.github/actions/contracts-prerequisites
       - uses: hoverkraft-tech/compose-action@v2.0.2
         with:
           compose-file: docker/docker-compose.devnet.yaml
