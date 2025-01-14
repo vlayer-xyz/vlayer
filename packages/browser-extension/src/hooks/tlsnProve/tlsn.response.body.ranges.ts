@@ -110,7 +110,7 @@ const getBodyJson = (raw: string, transcriptRanges: ParsedTranscriptData) => {
   let bodyJson;
   try {
     bodyJson = JSON.parse(
-      raw.slice(transcriptRanges.body.start, transcriptRanges.body.end),
+      raw.slice(transcriptRanges.body.start, transcriptRanges.body.end + 1),
     ) as object;
   } catch {
     throw new InvalidJsonError();

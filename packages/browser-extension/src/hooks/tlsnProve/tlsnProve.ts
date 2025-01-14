@@ -1,9 +1,10 @@
-import { NotaryServer, ParsedTranscriptData } from "tlsn-js";
+import { NotaryServer } from "tlsn-js";
 import { wrap } from "comlink";
 import { Prover as TProver, Presentation as TPresentation } from "tlsn-js";
 import type { PresentationJSON } from "tlsn-js/src/types";
-import { Reveal, Commit } from "tlsn-wasm";
+import { Reveal } from "tlsn-wasm";
 import { type RedactionConfig } from "../../web-proof-commons";
+import { redact } from "./redact";
 
 type ProverConfig = {
   serverDns: string;
@@ -83,25 +84,4 @@ export async function tlsnProve(
   });
 
   return await presentation.json();
-}
-
-type Transcript = {
-  sent: string;
-  recv: string;
-  ranges: {
-    recv: ParsedTranscriptData;
-    sent: ParsedTranscriptData;
-  };
-};
-
-function redact(
-  transcript: Transcript,
-  //@ts-expect-error This is not implemented yet
-  //eslint-disable-next-line @typescript-eslint/no-unused-vars
-  redactionConfig: RedactionConfig,
-): Commit {
-  return {
-    sent: [transcript.ranges.sent.all],
-    recv: [transcript.ranges.recv.all],
-  };
 }
