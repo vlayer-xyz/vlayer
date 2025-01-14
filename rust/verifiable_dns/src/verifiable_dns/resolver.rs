@@ -43,7 +43,7 @@ impl<C: Now> Resolver<C> {
 }
 
 fn validate_responses(responses: &[Option<Response>]) -> Option<()> {
-    if responses.iter().any(|r| r.is_none()) {
+    if responses.iter().any(std::option::Option::is_none) {
         return None;
     }
 
@@ -53,12 +53,12 @@ fn validate_responses(responses: &[Option<Response>]) -> Option<()> {
         return None;
     }
 
-    let first_response: &Response = responses.get(0)?;
+    let first_response: &Response = responses.first()?;
 
     if responses
         .iter()
         .skip(1)
-        .any(|r| !responses_match(first_response, *r))
+        .any(|r| !responses_match(first_response, r))
     {
         return None;
     }
@@ -72,7 +72,7 @@ impl<C: Now, P: DoHProvider, const Q: usize> DoHProvider for Resolver<C, P, Q> {
         let responses = join_all(jobs).await;
         validate_responses(&responses)?;
 
-        let provider_response = responses.get(0)?.as_ref()?.clone();
+        let provider_response = responses.first()?.as_ref()?.clone();
 
         let mut response = Response {
             status: 0,
@@ -123,7 +123,7 @@ mod tests {
         use super::*;
 
         fn responses_to_validate_responses_args<const SIZE: usize>(
-            responses: [Response; SIZE],
+            responses: &[Response; SIZE],
         ) -> [Option<Response>; SIZE] {
             let mut result: [Option<Response>; SIZE] = [const { None }; SIZE];
             for (i, response) in responses.iter().enumerate() {
@@ -135,14 +135,14 @@ mod tests {
         #[test]
         fn all_responses_must_not_be_none() {
             let responses =
-                responses_to_validate_responses_args([response(), response(), response()]);
+                responses_to_validate_responses_args(&[response(), response(), response()]);
             assert!(validate_responses(&responses).is_some());
         }
 
         #[test]
         fn passes_for_equal_results() {
             let responses =
-                responses_to_validate_responses_args([response(), response(), response()]);
+                responses_to_validate_responses_args(&[response(), response(), response()]);
             assert!(validate_responses(&responses).is_some());
         }
 
@@ -151,13 +151,13 @@ mod tests {
             let mut responses = [response(), response(), response()];
             responses[1].answer = Some(vec![]);
 
-            assert!(validate_responses(&responses_to_validate_responses_args(responses)).is_none());
+            assert!(validate_responses(&responses_to_validate_responses_args(&responses)).is_none());
         }
 
         #[test]
         fn all_responses_must_be_successful() {
-            let passing_responses = responses_to_validate_responses_args([response(), response()]);
-            let failing_responses = responses_to_validate_responses_args([
+            let passing_responses = responses_to_validate_responses_args(&[response(), response()]);
+            let failing_responses = responses_to_validate_responses_args(&[
                 Response {
                     status: 1,
                     ..response()

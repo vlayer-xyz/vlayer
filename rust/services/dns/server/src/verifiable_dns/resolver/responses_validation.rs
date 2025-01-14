@@ -39,8 +39,8 @@ fn compare_records(l: &Record, r: &Record) -> bool {
     canonize_data(&l.data) == canonize_data(&r.data)
 }
 
-fn canonize_data(data: &String) -> String {
-    data.clone().replace(r#"" ""#, "").replace("\"", "")
+fn canonize_data(data: &str) -> String {
+    data.replace(r#"" ""#, "").replace("\"", "")
 }
 
 #[cfg(test)]
@@ -218,7 +218,7 @@ mod tests {
 
                 r.answer = Some(vec![Record {
                     data: "".to_string(),
-                    ..records.get(0).unwrap().clone()
+                    ..records.first().unwrap().clone()
                 }]);
                 assert!(!responses_match(&l, &r));
             }
@@ -228,7 +228,7 @@ mod tests {
                 let l = mock_response();
                 let mut r = mock_response();
                 let mut records = r.answer.take().unwrap();
-                records.push(records.get(0).unwrap().clone());
+                records.push(records.first().unwrap().clone());
                 r.answer = Some(records);
 
                 assert!(!responses_match(&l, &r));
@@ -272,7 +272,7 @@ mod tests {
                 let records = r.answer.take().unwrap();
                 r.answer = Some(vec![Record {
                     ttl: 111,
-                    ..records.get(0).unwrap().clone()
+                    ..records.first().unwrap().clone()
                 }]);
                 assert!(responses_match(&l, &r));
             }
@@ -301,8 +301,8 @@ mod tests {
 
                 #[test]
                 fn can_canonize_data() {
-                    assert_eq!(&canonize_data(&r#""hello""world""#.to_string()), "helloworld");
-                    assert_eq!(&canonize_data(&r#""hello" "world""#.to_string()), "helloworld");
+                    assert_eq!(&canonize_data(r#""hello""world""#), "helloworld");
+                    assert_eq!(&canonize_data(r#""hello" "world""#), "helloworld");
                 }
             }
         }

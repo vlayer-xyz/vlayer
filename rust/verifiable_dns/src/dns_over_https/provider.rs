@@ -57,7 +57,7 @@ pub(crate) mod test_utils {
     pub struct MockProvider(Option<Response>);
 
     impl MockProvider {
-        pub fn new(response: Response) -> Self {
+        pub const fn new(response: Response) -> Self {
             Self(Some(response))
         }
     }
