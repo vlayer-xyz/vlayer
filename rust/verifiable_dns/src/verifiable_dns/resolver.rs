@@ -1,4 +1,8 @@
+mod responses_validation;
+
 use std::marker::PhantomData;
+
+use responses_validation::{responses_match, validate_response};
 
 use super::{record::Record, signer::Signer, time::Now, VerificationData};
 use crate::dns_over_https::{types::Record as DNSRecord, Provider as DoHProvider, Query, Response};
