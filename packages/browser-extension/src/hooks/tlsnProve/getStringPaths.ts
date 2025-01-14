@@ -13,12 +13,9 @@ export function getStringPaths(jsonString: string): string[] {
     }
   }
 
-  try {
-    const parsed = JSON.parse(jsonString) as Record<string, unknown>;
-    traverse(parsed);
-  } catch (e) {
-    console.error("Invalid JSON string", e);
-  }
+  const parsed = JSON.parse(jsonString) as Record<string, unknown>;
+
+  traverse(parsed);
 
   return paths;
 }

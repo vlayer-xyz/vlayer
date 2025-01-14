@@ -385,6 +385,40 @@ describe("calculateResponseRanges", () => {
         { start: raw.indexOf(name2), end: raw.indexOf(name2) + name2.length },
       ]);
     });
+
+    test("arrays with except paths", () => {
+      const raw =
+        '{"users": [{"name": "John", "email": "john@example.com"}, {"name": "Jane", "email": "jane@example.com"}]}';
+
+      const name1 = "John";
+      const name2 = "Jane";
+      const transcriptRanges = {
+        body: { start: 0, end: raw.length },
+        headers: {},
+      } as ParsedTranscriptData;
+
+      const redactionItem = {
+        response: {
+          json_body_except: ["users.0.email", "users.1.email"],
+        },
+      } as RedactResponseJsonBodyExcept;
+
+      const result = calculateResponseRanges(
+        redactionItem,
+        raw,
+        transcriptRanges,
+      );
+      expect(result).toEqual([
+        {
+          start: raw.indexOf(name1),
+          end: raw.indexOf(name1) + name1.length,
+        },
+        {
+          start: raw.indexOf(name2),
+          end: raw.indexOf(name2) + name2.length,
+        },
+      ]);
+    });
   });
 });
 
